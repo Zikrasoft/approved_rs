@@ -2,6 +2,7 @@ import { ExecArgs } from '@medusajs/framework/types';
 
 import { PART_MODULE } from '../modules/part';
 import PartModuleService from '../modules/part/service';
+import { seedCashAtPickupCommerceDefaults } from '../lib/commerce-defaults';
 
 const OEM_IDENTIFIER = {
   type: 'oem' as const,
@@ -17,6 +18,9 @@ const MANUFACTURER_IDENTIFIER = {
 
 export default async function seed({ container }: ExecArgs) {
   const logger = container.resolve('logger');
+
+  await seedCashAtPickupCommerceDefaults(container);
+
   const partModuleService: PartModuleService = container.resolve(PART_MODULE);
 
   const [existing] =

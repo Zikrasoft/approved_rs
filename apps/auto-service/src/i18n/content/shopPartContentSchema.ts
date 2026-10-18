@@ -27,6 +27,8 @@ export const shopPartContentSchema = z
     notFoundHeading: z.string(),
     notFoundBody: z.string(),
     notFoundCta: z.string(),
+    buyButtonLabel: z.string(),
+    buyErrorLabel: z.string(),
   })
   .strict();
 

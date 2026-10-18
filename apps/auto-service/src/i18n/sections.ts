@@ -6,6 +6,7 @@ import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
+import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -56,5 +57,12 @@ export const SECTIONS = [
     schema: shopPartContentSchema,
     promptSubject:
       'part-detail page copy for a car parts shop (brand/supplier table column labels, stock and lead-time wording, a not-found state)',
+  },
+  {
+    key: 'shopCart',
+    path: 'src/content/i18n/shopCart.yaml',
+    schema: shopCartContentSchema,
+    promptSubject:
+      'cart and checkout page copy for a car parts shop, cash-at-pickup only (empty-cart state, total, a stale-price notice asking to refresh before confirming, an order-placed confirmation)',
   },
 ] as const satisfies readonly RegistryEntry[];
