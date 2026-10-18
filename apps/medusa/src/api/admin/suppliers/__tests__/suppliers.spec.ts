@@ -1,10 +1,6 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { Modules } from '@medusajs/framework/utils';
-import type {
-  IAuthModuleService,
-  IUserModuleService,
-} from '@medusajs/framework/types';
 
+import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { PART_MODULE } from '../../../../modules/part';
 import type PartModuleService from '../../../../modules/part/service';
 
@@ -22,31 +18,12 @@ medusaIntegrationTestRunner({
 
       beforeAll(async () => {
         partModuleService = getContainer().resolve(PART_MODULE);
-        const authModuleService: IAuthModuleService = getContainer().resolve(
-          Modules.AUTH,
+        adminHeaders = await createAdminAuth(
+          getContainer(),
+          api,
+          ADMIN_EMAIL,
+          ADMIN_PASSWORD,
         );
-        const userModuleService: IUserModuleService = getContainer().resolve(
-          Modules.USER,
-        );
-
-        const { authIdentity } = await authModuleService.register('emailpass', {
-          body: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-        });
-        const user = await userModuleService.createUsers({
-          email: ADMIN_EMAIL,
-        });
-        await authModuleService.updateAuthIdentities({
-          id: authIdentity!.id,
-          app_metadata: { user_id: user.id },
-        });
-
-        const loginResponse = await api.post('/auth/user/emailpass', {
-          email: ADMIN_EMAIL,
-          password: ADMIN_PASSWORD,
-        });
-        adminHeaders = {
-          headers: { authorization: `Bearer ${loginResponse.data.token}` },
-        };
 
         const supplier = await partModuleService.createSuppliers({
           name: 'Admin-test supplier',
