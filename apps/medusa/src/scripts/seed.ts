@@ -17,6 +17,9 @@ const MANUFACTURER_IDENTIFIER = {
   value: 'HU 816 x',
 };
 
+const INTERCARS = { name: 'Intercars', markup_percentage: 20 };
+const CARLAB_WAREHOUSE = { name: 'CarLab warehouse', markup_percentage: 15 };
+
 async function seedB47OilFilterPart(
   partModuleService: PartModuleService,
   logger: { info: (message: string) => void },
@@ -27,6 +30,11 @@ async function seedB47OilFilterPart(
     logger.info('B47 oil filter fixture already seeded, skipping.');
     return existing.part_id;
   }
+
+  const [intercars, carlabWarehouse] = await partModuleService.createSuppliers([
+    INTERCARS,
+    CARLAB_WAREHOUSE,
+  ]);
 
   const part = await partModuleService.createParts({
     name: 'Oil filter, BMW B47/B48 engines',
@@ -45,25 +53,25 @@ async function seedB47OilFilterPart(
   await partModuleService.createSupplierOffers([
     {
       identifier_id: oemIdentifier.id,
-      supplier: 'Intercars',
+      supplier_id: intercars.id,
       supplier_article_id: 'IC-11428575211',
-      price: 1850,
+      cost_price: 1542,
       stock_quantity: 12,
       lead_time: 'in_stock',
     },
     {
       identifier_id: mannIdentifier.id,
-      supplier: 'Intercars',
+      supplier_id: intercars.id,
       supplier_article_id: 'IC-HU816X',
-      price: 1200,
+      cost_price: 1000,
       stock_quantity: 30,
       lead_time: 'in_stock',
     },
     {
       identifier_id: mannIdentifier.id,
-      supplier: 'CarLab warehouse',
+      supplier_id: carlabWarehouse.id,
       supplier_article_id: 'WH-HU816X',
-      price: 1150,
+      cost_price: 1000,
       stock_quantity: 4,
       lead_time: '3_days',
     },
