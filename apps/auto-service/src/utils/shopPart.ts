@@ -51,10 +51,15 @@ export async function fetchShopSearch(
   {
     backendUrl,
     publishableKey,
-  }: { backendUrl: string; publishableKey: string },
+    vehicleId,
+  }: { backendUrl: string; publishableKey: string; vehicleId?: string },
 ): Promise<ShopPart | null> {
+  const vehicleParam = vehicleId
+    ? `&vehicle_id=${encodeURIComponent(vehicleId)}`
+    : '';
+
   const response = await fetch(
-    `${backendUrl}/store/search?q=${encodeURIComponent(q)}`,
+    `${backendUrl}/store/search?q=${encodeURIComponent(q)}${vehicleParam}`,
     { headers: { 'x-publishable-api-key': publishableKey } },
   );
 

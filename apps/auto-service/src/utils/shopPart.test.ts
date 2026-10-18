@@ -115,6 +115,25 @@ describe('fetchShopSearch', () => {
 
     expect(part).toBeNull();
   });
+
+  it('appends vehicle_id when a Vehicle is selected', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => PART_BODY,
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchShopSearch('HU 816 x', {
+      backendUrl: BACKEND_URL,
+      publishableKey: PUBLISHABLE_KEY,
+      vehicleId: 'vehicle_1',
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BACKEND_URL}/store/search?q=HU%20816%20x&vehicle_id=vehicle_1`,
+      { headers: { 'x-publishable-api-key': PUBLISHABLE_KEY } },
+    );
+  });
 });
 
 describe('formatLeadTime', () => {
