@@ -32,4 +32,75 @@ vin:
   orDivider: или укажите вручную
   invalid: Проверьте VIN — должно быть 17 символов (буквы и цифры, без I, O и Q).
   notFound: Не удалось определить автомобиль по этому VIN. Выберите марку, модель и двигатель вручную ниже.
-translatedFrom: pending
+translatedFrom: acb273c17c44f730
+translations:
+  sr:
+    metaTitle: Odabir delova po automobilu
+    metaDescription: Izaberite marku, model i motor — prikažemo delove koji odgovaraju vašem automobilu.
+    eyebrow: Odabir po automobilu
+    heading: Koji imate automobil?
+    lead: Unesite marku, model i motor — ispod će se pojaviti lista odgovarajućih delova iz kataloga CarLab.
+    makeLabel: Marka
+    modelLabel: Model
+    engineLabel: Motor
+    placeholderOption: — izaberite —
+    submitLabel: Prikaži delove
+    resultsHeading: Odgovarajući delovi
+    emptyResults: Za ovaj automobil trenutno nema delova u katalogu. Javite nam — pomoći ćemo vam da pronađete potrebnu komponentu.
+    viewPartCta: Pogledajte opcije i cene
+    ambiguous:
+      heading: Potvrdite varijantu
+      body: Za ovaj automobil postoji više varijanti dela — razlikuju se po volanu ili menjaču. Precizirajte koja odgovara vašem automobilu.
+      steeringLabel: Volan
+      gearboxLabel: Menjač
+      steeringLeft: levi
+      steeringRight: desni
+      steeringUnknown: bilo koji
+      gearboxManual: mehanički
+      gearboxAutomatic: automatski
+      gearboxUnknown: bilo koji
+    vehicleNotFound: Ova kombinacija marke, modela i motora nije dostupna u katalogu.
+    vin:
+      heading: Znate VIN?
+      lead: Unesite VIN — automatski ćemo odrediti automobil, bez izbora marke i modela.
+      label: VIN
+      placeholder: Na primer, WBA3B1C50GL123456
+      submitLabel: Pronađi po VIN-u
+      orDivider: ili navedite ručno
+      invalid: Proverite VIN — treba da ima 17 karaktera (slova i brojevi, bez I, O i Q).
+      notFound: Nije moguće odrediti automobil prema ovom VIN-u. Izaberite marku, model i motor ručno ispod.
+  en:
+    metaTitle: Car Parts Selection by Vehicle
+    metaDescription: Select the make, model, and engine — we’ll show parts that fit your vehicle.
+    eyebrow: Vehicle Selection
+    heading: What is your vehicle?
+    lead: Please provide the make, model, and engine — a list of suitable parts from the CarLab catalog will appear below.
+    makeLabel: Make
+    modelLabel: Model
+    engineLabel: Engine
+    placeholderOption: — select —
+    submitLabel: Show Parts
+    resultsHeading: Suitable Parts
+    emptyResults: There are currently no parts available for this vehicle in the catalog. Contact us — we’ll help you find the right part.
+    viewPartCta: View options and prices
+    ambiguous:
+      heading: Confirm Your Variant
+      body: There are several part options for this vehicle — they differ by steering or gearbox. Please specify which one is suitable for your vehicle.
+      steeringLabel: Steering
+      gearboxLabel: Gearbox
+      steeringLeft: left
+      steeringRight: right
+      steeringUnknown: any
+      gearboxManual: manual
+      gearboxAutomatic: automatic
+      gearboxUnknown: any
+    vehicleNotFound: This combination of make, model, and engine is not in the catalog.
+    vin:
+      heading: Do you know the VIN?
+      lead: Enter the VIN — we will automatically identify the vehicle without selecting the make and model.
+      label: VIN
+      placeholder: For example, WBA3B1C50GL123456
+      submitLabel: Find by VIN
+      orDivider: or specify manually
+      invalid: Check the VIN — it must be 17 characters (letters and numbers, without I, O, and Q).
+      notFound: Could not identify the vehicle with this VIN. Please select the make, model, and engine manually below.

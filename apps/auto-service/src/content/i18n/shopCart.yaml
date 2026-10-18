@@ -16,4 +16,43 @@ repriceButtonLabel: Обновить цену
 orderPlacedHeading: Заказ принят
 orderPlacedBody: Мы ждем вас на СТО — оплата наличными при получении.
 errorLabel: Не удалось оформить заказ. Попробуйте еще раз.
-translatedFrom: pending
+translatedFrom: 793810a9080b7cf2
+translations:
+  sr:
+    cartMetaTitle: Korpa — CarLab
+    checkoutMetaTitle: Oformljenje narudžbine — CarLab
+    cartEyebrow: Korpa
+    checkoutEyebrow: Oformljenje narudžbine
+    emptyHeading: Korpa je prazna
+    emptyBody: Dodajte deo iz kataloga da biste kreirali narudžbinu.
+    emptyCta: U katalog delova
+    totalLabel: Ukupno
+    currencyLabel: RSD
+    goToCheckoutLabel: Oformiti narudžbinu
+    pickupNotice: Plaćanje gotovinom prilikom preuzimanja na našoj SSV-u u Beogradu.
+    completeButtonLabel: Potvrdi narudžbinu
+    staleHeading: Cena se promenila
+    staleBody: Dok ste obavljali narudžbinu, dobavljač je ažurirao cenu. Osvežite korpu i ponovo potvrdite narudžbinu.
+    repriceButtonLabel: Osveži cenu
+    orderPlacedHeading: Narudžbina prihvaćena
+    orderPlacedBody: Očekujemo vas na SSV-u — plaćanje gotovinom prilikom preuzimanja.
+    errorLabel: Nije moguće obaviti narudžbinu. Pokušajte ponovo.
+  en:
+    cartMetaTitle: Cart — CarLab
+    checkoutMetaTitle: Checkout — CarLab
+    cartEyebrow: Cart
+    checkoutEyebrow: Checkout
+    emptyHeading: Your cart is empty
+    emptyBody: Add a part from the catalog to place an order.
+    emptyCta: Go to parts catalog
+    totalLabel: Total
+    currencyLabel: RSD
+    goToCheckoutLabel: Place Order
+    pickupNotice: Cash payment upon pickup at our service center in Belgrade.
+    completeButtonLabel: Confirm Order
+    staleHeading: Price has changed
+    staleBody: While you were checking out, the supplier updated the price. Please refresh the cart and confirm your order again.
+    repriceButtonLabel: Refresh Price
+    orderPlacedHeading: Order Confirmed
+    orderPlacedBody: We look forward to seeing you at the service center — cash payment upon pickup.
+    errorLabel: Failed to place the order. Please try again.

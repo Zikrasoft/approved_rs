@@ -7,4 +7,25 @@ submitLabel: Найти
 notFoundHeading: Ничего не найдено
 notFoundBody: Проверьте номер или напишите нам, поможем подобрать деталь.
 notFoundCta: Написать нам
-translatedFrom: pending
+translatedFrom: cdbeeb413892fb60
+translations:
+  sr:
+    metaTitleSuffix: CarLab
+    metaDescription: Pronađite deo po OEM broju, artiklu brenda ili barkodu u katalogu CarLab.
+    eyebrow: Pretraga delova
+    heading: Pretraga dela po broju
+    placeholder: Na primer, 11 42 8575211 ili HU 816 x
+    submitLabel: Pronađi
+    notFoundHeading: Nema rezultata
+    notFoundBody: Proverite broj ili nam pišite, pomoći ćemo vam da pronađete deo.
+    notFoundCta: Pišite nam
+  en:
+    metaTitleSuffix: CarLab
+    metaDescription: Find parts by OEM number, brand code, or barcode at CarLab.
+    eyebrow: Parts Search
+    heading: Search for a Part by Number
+    placeholder: For example, 11 42 8575211 or HU 816 x
+    submitLabel: Search
+    notFoundHeading: No Results Found
+    notFoundBody: Check the number or contact us for assistance in finding the part.
+    notFoundCta: Contact Us
