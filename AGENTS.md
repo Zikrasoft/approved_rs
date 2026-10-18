@@ -33,7 +33,9 @@ depth on case and work pages), `data-contact-channel` /
 `data-contact-cta` (in-flow contact regions the floating CTA's `watch`
 selector hides behind — stamp it with `contactRegion`, `contactCta` and
 `CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
-literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+literal) and `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
+`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal).
+`packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
