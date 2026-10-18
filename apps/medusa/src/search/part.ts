@@ -6,13 +6,14 @@ import {
 } from '@medusajs/framework/utils';
 
 import { compactValue } from '../modules/search-typesense/mapping';
+import { sellPrice } from '../modules/part/store-response';
 import { PART_CHANGED_EVENT } from './part-changed-event';
 
 type OfferRow = {
   id: string;
-  supplier: string;
+  supplier: { name: string; markup_percentage: number };
   supplier_article_id: string;
-  price: number;
+  cost_price: number;
   stock_quantity: number;
   lead_time: string;
 };
@@ -40,9 +41,10 @@ const source = {
     'identifiers.brand',
     'identifiers.value',
     'identifiers.offers.id',
-    'identifiers.offers.supplier',
+    'identifiers.offers.supplier.name',
+    'identifiers.offers.supplier.markup_percentage',
     'identifiers.offers.supplier_article_id',
-    'identifiers.offers.price',
+    'identifiers.offers.cost_price',
     'identifiers.offers.stock_quantity',
     'identifiers.offers.lead_time',
   ],
@@ -58,9 +60,9 @@ const source = {
         value_compact: compactValue(identifier.value),
         offers: (identifier.offers ?? []).map((offer) => ({
           id: offer.id,
-          supplier: offer.supplier,
+          supplier: offer.supplier.name,
           supplier_article_id: offer.supplier_article_id,
-          price: offer.price,
+          price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
           stock_quantity: offer.stock_quantity,
           lead_time: offer.lead_time,
         })),

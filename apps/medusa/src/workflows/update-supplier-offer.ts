@@ -12,10 +12,10 @@ import { PART_CHANGED_EVENT } from '../search/part-changed-event';
 
 export type UpdateSupplierOfferWorkflowInput = {
   id: string;
-  price?: number;
+  cost_price?: number;
   stock_quantity?: number;
   lead_time?: string;
-  supplier?: string;
+  supplier_id?: string;
   supplier_article_id?: string;
 };
 
@@ -37,10 +37,10 @@ const updateSupplierOfferStep = createStep(
     const partModuleService: PartModuleService = container.resolve(PART_MODULE);
     await partModuleService.updateSupplierOffers({
       id: previous.id,
-      price: previous.price,
+      cost_price: previous.cost_price,
       stock_quantity: previous.stock_quantity,
       lead_time: previous.lead_time,
-      supplier: previous.supplier,
+      supplier_id: previous.supplier.id,
       supplier_article_id: previous.supplier_article_id,
     });
   },

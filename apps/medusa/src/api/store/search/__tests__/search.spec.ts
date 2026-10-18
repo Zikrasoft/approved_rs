@@ -30,6 +30,10 @@ medusaIntegrationTestRunner({
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
 
+        const [intercars] = await partModuleService.createSuppliers([
+          { name: 'Intercars', markup_percentage: 20 },
+        ]);
+
         const part = await partModuleService.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
@@ -52,17 +56,17 @@ medusaIntegrationTestRunner({
         const [oemOffer] = await partModuleService.createSupplierOffers([
           {
             identifier_id: oemIdentifier.id,
-            supplier: 'Intercars',
+            supplier_id: intercars.id,
             supplier_article_id: 'IC-11428575211',
-            price: 1850,
+            cost_price: 1542,
             stock_quantity: 12,
             lead_time: 'in_stock',
           },
           {
             identifier_id: mannIdentifier.id,
-            supplier: 'Intercars',
+            supplier_id: intercars.id,
             supplier_article_id: 'IC-HU816X',
-            price: 1200,
+            cost_price: 1000,
             stock_quantity: 30,
             lead_time: 'in_stock',
           },
@@ -112,7 +116,7 @@ medusaIntegrationTestRunner({
         const container = getContainer();
 
         await updateSupplierOfferWorkflow(container).run({
-          input: { id: oemOfferId, price: 2200 },
+          input: { id: oemOfferId, cost_price: 2000 },
         });
 
         const response = await api.get(
@@ -127,7 +131,7 @@ medusaIntegrationTestRunner({
           (candidate: { id: string }) => candidate.id === oemOfferId,
         );
 
-        expect(offer.price).toBe(2200);
+        expect(offer.price).toBe(2400);
       });
 
       it('never duplicates a Part per brand-variant identifier', async () => {
