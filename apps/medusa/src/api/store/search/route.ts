@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import type { SearchFilters } from '@medusajs/framework/types';
 import { z } from 'zod';
 
 import {
@@ -36,7 +37,7 @@ export async function GET(
 ): Promise<void> {
   const { q, vehicle_id } = querySchema.parse(req.query);
 
-  const filters: Record<string, unknown> = { q };
+  const filters: SearchFilters = { q };
 
   if (vehicle_id) {
     const vehicleModuleService: VehicleModuleService =
