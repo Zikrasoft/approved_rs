@@ -1,0 +1,61 @@
+{
+  "menu": {
+    "fitments": "Fitments",
+    "suppliers": "Suppliers"
+  },
+  "fitments": {
+    "heading": "Fitment curation",
+    "step1Label": "1. Find or create the Part",
+    "identifierCount": "{{name}} ({{count}} identifier)",
+    "identifierCount_other": "{{name}} ({{count}} identifiers)",
+    "change": "Change",
+    "searchPlaceholder": "OEM / manufacturer number or brand",
+    "search": "Search",
+    "useThisPart": "Use this Part",
+    "noMatch": "No matching Part. Create a new one:",
+    "partNamePlaceholder": "Part name",
+    "identifierTypePlaceholder": "Identifier type",
+    "brandPlaceholder": "Brand",
+    "numberPlaceholder": "Number",
+    "createPart": "Create Part",
+    "step2Label": "2. Pick the Vehicle (catalogue only)",
+    "vehiclePlaceholder": "Select a Vehicle",
+    "step3Label": "3. Narrowing criteria (optional)",
+    "steeringPlaceholder": "Steering",
+    "gearboxPlaceholder": "Gearbox",
+    "createFitment": "Create Fitment (manual, active)",
+    "existingRows": "Existing Fitment rows for this Part/Vehicle",
+    "columns": {
+      "source": "Source",
+      "status": "Status",
+      "steering": "Steering",
+      "gearbox": "Gearbox"
+    },
+    "reject": "Reject",
+    "identifierTypes": {
+      "oem": "OEM",
+      "manufacturer-number": "Manufacturer number",
+      "ean": "EAN barcode"
+    },
+    "steeringOptions": {
+      "left": "Left",
+      "right": "Right"
+    },
+    "gearboxOptions": {
+      "manual": "Manual",
+      "automatic": "Automatic"
+    },
+    "statusValues": {
+      "active": "Active",
+      "rejected": "Rejected"
+    }
+  },
+  "suppliers": {
+    "heading": "Suppliers",
+    "columns": {
+      "name": "Name",
+      "markup": "Markup %"
+    },
+    "save": "Save"
+  }
+}

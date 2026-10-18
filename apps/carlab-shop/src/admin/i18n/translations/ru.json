@@ -1,0 +1,63 @@
+{
+  "menu": {
+    "fitments": "Соответствия",
+    "suppliers": "Поставщики"
+  },
+  "fitments": {
+    "heading": "Подбор соответствий",
+    "step1Label": "1. Найдите или создайте деталь",
+    "identifierCount_one": "{{name}} ({{count}} номер)",
+    "identifierCount_few": "{{name}} ({{count}} номера)",
+    "identifierCount_many": "{{name}} ({{count}} номеров)",
+    "identifierCount_other": "{{name}} ({{count}} номера)",
+    "change": "Изменить",
+    "searchPlaceholder": "OEM-номер, номер производителя или бренд",
+    "search": "Найти",
+    "useThisPart": "Выбрать деталь",
+    "noMatch": "Деталь не найдена. Создайте новую:",
+    "partNamePlaceholder": "Название детали",
+    "identifierTypePlaceholder": "Тип номера",
+    "brandPlaceholder": "Бренд",
+    "numberPlaceholder": "Номер",
+    "createPart": "Создать деталь",
+    "step2Label": "2. Выберите автомобиль (только из каталога)",
+    "vehiclePlaceholder": "Выберите автомобиль",
+    "step3Label": "3. Уточняющие критерии (необязательно)",
+    "steeringPlaceholder": "Руль",
+    "gearboxPlaceholder": "Коробка передач",
+    "createFitment": "Создать соответствие (вручную, активное)",
+    "existingRows": "Существующие соответствия для этой детали и автомобиля",
+    "columns": {
+      "source": "Источник",
+      "status": "Статус",
+      "steering": "Руль",
+      "gearbox": "Коробка передач"
+    },
+    "reject": "Отклонить",
+    "identifierTypes": {
+      "oem": "OEM",
+      "manufacturer-number": "Номер производителя",
+      "ean": "Штрихкод EAN"
+    },
+    "steeringOptions": {
+      "left": "Левый",
+      "right": "Правый"
+    },
+    "gearboxOptions": {
+      "manual": "Механическая",
+      "automatic": "Автоматическая"
+    },
+    "statusValues": {
+      "active": "Активно",
+      "rejected": "Отклонено"
+    }
+  },
+  "suppliers": {
+    "heading": "Поставщики",
+    "columns": {
+      "name": "Название",
+      "markup": "Наценка, %"
+    },
+    "save": "Сохранить"
+  }
+}

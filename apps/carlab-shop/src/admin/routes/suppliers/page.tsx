@@ -1,6 +1,7 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { Button, Container, Heading, Input, Table } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Supplier = {
   id: string;
@@ -9,6 +10,8 @@ type Supplier = {
 };
 
 const SuppliersPage = () => {
+  const { t } = useTranslation('carlabAdmin');
+
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -44,12 +47,12 @@ const SuppliersPage = () => {
 
   return (
     <Container>
-      <Heading level="h1">Suppliers</Heading>
+      <Heading level="h1">{t('suppliers.heading')}</Heading>
       <Table>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>Name</Table.HeaderCell>
-            <Table.HeaderCell>Markup %</Table.HeaderCell>
+            <Table.HeaderCell>{t('suppliers.columns.name')}</Table.HeaderCell>
+            <Table.HeaderCell>{t('suppliers.columns.markup')}</Table.HeaderCell>
             <Table.HeaderCell />
           </Table.Row>
         </Table.Header>
@@ -77,7 +80,7 @@ const SuppliersPage = () => {
                   isLoading={savingId === supplier.id}
                   onClick={() => save(supplier.id)}
                 >
-                  Save
+                  {t('suppliers.save')}
                 </Button>
               </Table.Cell>
             </Table.Row>
@@ -89,7 +92,8 @@ const SuppliersPage = () => {
 };
 
 export const config = defineRouteConfig({
-  label: 'Suppliers',
+  label: 'menu.suppliers',
+  translationNs: 'carlabAdmin',
 });
 
 export default SuppliersPage;
