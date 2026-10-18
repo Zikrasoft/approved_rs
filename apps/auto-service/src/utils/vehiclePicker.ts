@@ -23,6 +23,11 @@ const vehiclePartSchema = z.object({
   candidates: z.array(candidateSchema),
 });
 
+const vinLookupSchema = z.object({
+  resolved: z.boolean(),
+  vehicle: vehicleSchema.nullable(),
+});
+
 export type Vehicle = z.infer<typeof vehicleSchema>;
 export type VehicleFitmentCandidate = z.infer<typeof candidateSchema>;
 export type VehiclePart = z.infer<typeof vehiclePartSchema>;
@@ -60,6 +65,27 @@ export async function fetchVehicleParts(
 
   const body = await response.json();
   return z.array(vehiclePartSchema).parse(body.parts);
+}
+
+export async function resolveVin(
+  vin: string,
+  { backendUrl, publishableKey }: BackendConfig,
+): Promise<Vehicle | null> {
+  const response = await fetch(`${backendUrl}/store/vin-lookups`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-publishable-api-key': publishableKey,
+    },
+    body: JSON.stringify({ vin }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const body = vinLookupSchema.parse(await response.json());
+  return body.resolved ? body.vehicle : null;
 }
 
 const uniqueSorted = (values: string[]): string[] =>

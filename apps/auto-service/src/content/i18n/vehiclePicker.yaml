@@ -23,4 +23,13 @@ ambiguous:
   gearboxAutomatic: автоматическая
   gearboxUnknown: любая
 vehicleNotFound: Такой комбинации марки, модели и двигателя нет в каталоге.
+vin:
+  heading: Знаете VIN?
+  lead: Введите VIN — определим автомобиль автоматически, без выбора марки и модели.
+  label: VIN
+  placeholder: Например, WBA3B1C50GL123456
+  submitLabel: Найти по VIN
+  orDivider: или укажите вручную
+  invalid: Проверьте VIN — должно быть 17 символов (буквы и цифры, без I, O и Q).
+  notFound: Не удалось определить автомобиль по этому VIN. Выберите марку, модель и двигатель вручную ниже.
 translatedFrom: pending
