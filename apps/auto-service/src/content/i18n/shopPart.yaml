@@ -1,0 +1,20 @@
+metaTitleSuffix: CarLab
+metaDescription: Бренды, поставщики, цены и сроки поставки для этой запчасти в каталоге CarLab.
+eyebrow: Запчасть
+variantsHeading: Варианты и предложения поставщиков
+currencyLabel: RSD
+columns:
+  brand: Бренд
+  number: Номер
+  supplier: Поставщик
+  supplierArticle: Артикул поставщика
+  price: Цена
+  stock: В наличии
+  leadTime: Срок поставки
+leadTime:
+  inStock: В наличии
+  daysTemplate: '{days} дн.'
+notFoundHeading: Запчасть не найдена
+notFoundBody: Возможно, ссылка устарела или запчасть убрали из каталога. Напишите нам, поможем найти нужную деталь.
+notFoundCta: Написать нам
+translatedFrom: pending

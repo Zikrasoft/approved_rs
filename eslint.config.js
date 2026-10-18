@@ -39,6 +39,10 @@ export default defineConfig(
     rules: { '@typescript-eslint/triple-slash-reference': 'off' },
   },
   {
+    files: ['apps/medusa/**/*.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     files: ['packages/site-kit/src/analytics.ts'],
     rules: { 'prefer-rest-params': 'off' },
   },

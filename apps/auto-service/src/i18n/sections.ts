@@ -5,6 +5,7 @@ import { homeContentSchema } from './content/homeContentSchema.ts';
 import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
+import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -48,5 +49,12 @@ export const SECTIONS = [
     schema: promoBannersContentSchema,
     promptSubject:
       'short promo banners shown on a car service work write-up, inviting the reader to book the same kind of job at our shop in the Zvezdara district of Belgrade, keep {placeholders} if any and markdown bold spans intact',
+  },
+  {
+    key: 'shopPart',
+    path: 'src/content/i18n/shopPart.yaml',
+    schema: shopPartContentSchema,
+    promptSubject:
+      'part-detail page copy for a car parts shop (brand/supplier table column labels, stock and lead-time wording, a not-found state)',
   },
 ] as const satisfies readonly RegistryEntry[];

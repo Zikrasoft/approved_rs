@@ -1,0 +1,48 @@
+{
+  "name": "@podbor/medusa",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "medusa build",
+    "start": "cd .medusa/server && medusa start",
+    "develop": "medusa develop",
+    "db:migrate": "medusa db:migrate",
+    "typecheck": "tsc --noEmit",
+    "seed": "medusa exec ./src/scripts/seed.ts",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests"
+  },
+  "dependencies": {
+    "@medusajs/admin-sdk": "2.21.2",
+    "@medusajs/admin-shared": "2.21.2",
+    "@medusajs/caching": "2.21.2",
+    "@medusajs/cli": "2.21.2",
+    "@medusajs/dashboard": "2.21.2",
+    "@medusajs/draft-order": "2.21.2",
+    "@medusajs/framework": "2.21.2",
+    "@medusajs/medusa": "2.21.2",
+    "@medusajs/ui": "4.2.6",
+    "@tanstack/react-query": "5.64.2",
+    "react-i18next": "13.5.0",
+    "react-router-dom": "7.18.2",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@medusajs/test-utils": "2.21.2",
+    "@swc/core": "1.16.18",
+    "@swc/jest": "0.2.39",
+    "@types/jest": "29.5.14",
+    "@types/node": "24.19.2",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "jest": "29.7.0",
+    "prop-types": "15.8.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  }
+}
