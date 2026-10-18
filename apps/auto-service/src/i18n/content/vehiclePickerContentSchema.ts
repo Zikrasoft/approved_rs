@@ -30,6 +30,18 @@ export const vehiclePickerContentSchema = z
       })
       .strict(),
     vehicleNotFound: z.string(),
+    vin: z
+      .object({
+        heading: z.string(),
+        lead: z.string(),
+        label: z.string(),
+        placeholder: z.string(),
+        submitLabel: z.string(),
+        orDivider: z.string(),
+        invalid: z.string(),
+        notFound: z.string(),
+      })
+      .strict(),
   })
   .strict();
 
