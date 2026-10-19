@@ -163,6 +163,21 @@ translations:
       waitLabel: While you wait
       waitCasesLink: Real deals →
       waitSourcingLink: Turnkey car sourcing →
+    about:
+      metaTitle: About approved.rs
+      metaDescription: What approved.rs offers, sourcing cases, ownership, and how to contact us.
+      heading: The approved.rs Website
+      lead: Here you will find everything about how we source, inspect, buy back, and deliver cars. Services, real deals, and ways to get in touch.
+      sitemapHeading: Website Overview
+      casesCountLabel: Real Deals
+      countriesCountLabel: Countries We Operate In
+      contentHeading: Source of Materials
+      contentText: Each case on the site describes a real car we worked on for a client. Our team writes the texts in Russian, and they are automatically translated into English, Serbian, Spanish, and German.
+      ownerHeading: Website Ownership
+      ownerText: The site is owned by the approved.rs service. Our data handling practices are outlined in the
+      contactsHeading: Contacts
+      contactsText: You can find messaging apps and contact methods on the
+      developerCredit: The site was designed and developed by Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Real car sourcing deals - vehicles, prices, and timelines
       metaDescription: Actual deals on car sourcing, delivery, buyback, and inspections from Germany, Spain, Serbia, and Switzerland. Vehicle, price, and process details.
@@ -248,6 +263,21 @@ translations:
       waitLabel: Dok čekate
       waitCasesLink: Stvarne transakcije →
       waitSourcingLink: Autopodbor po meri →
+    about:
+      metaTitle: O projektu approved.rs
+      metaDescription: Šta je na sajtu Approved.rs, odakle slučajevi, ko je vlasnik sajta i kako nas kontaktirati.
+      heading: Sajt Approved.rs
+      lead: Ovde je sve o tome kako biramo, proveravamo, otkupljujemo i dovožimo automobile. Usluge, stvarne transakcije i načini kontaktiranja.
+      sitemapHeading: Šta je na sajtu
+      casesCountLabel: Stvarnih transakcija
+      countriesCountLabel: Zemalja u kojima radimo
+      contentHeading: Odakle materijali
+      contentText: Svaki slučaj na sajtu opisuje stvarni auto sa kojim smo radili za klijenta. Tekstove piše naš tim na ruskom, a oni se automatski prevode na engleski, srpski, španski i nemački.
+      ownerHeading: Komu pripada sajt
+      ownerText: Sajt pripada servisu Approved.rs. Kako postupamo sa podacima posetilaca, opisano je u delu
+      contactsHeading: Kontakti
+      contactsText: Međuzvani i načini kontaktiranja su sakupljeni na stranici
+      developerCredit: Sajt je projektovan i razvijen u studiju Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Stvarne transakcije u autopodboru — automobili, cene i rokovi
       metaDescription: Stvarne transakcije u autopodboru, isporuci, otkupu i provere automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
@@ -333,6 +363,21 @@ translations:
       waitLabel: Mientras esperas
       waitCasesLink: Transacciones reales →
       waitSourcingLink: Selección completa →
+    about:
+      metaTitle: Sobre el proyecto approved.rs
+      metaDescription: Qué hay en el sitio Approved.rs, de dónde vienen los casos, a quién pertenece el sitio y cómo contactarnos.
+      heading: Sitio Approved.rs
+      lead: Aquí encontrarás todo sobre cómo seleccionamos, inspeccionamos, compramos y traemos automóviles. Servicios, transacciones reales y formas de contacto.
+      sitemapHeading: Qué hay en el sitio
+      casesCountLabel: Transacciones reales
+      countriesCountLabel: Países en los que trabajamos
+      contentHeading: De dónde provienen los materiales
+      contentText: Cada caso en el sitio describe un coche real con el que hemos trabajado para un cliente. Los textos son redactados por nuestro equipo en ruso y son traducidos automáticamente al inglés, serbio, español y alemán.
+      ownerHeading: A quién pertenece el sitio
+      ownerText: El sitio pertenece al servicio Approved.rs. Cómo manejamos los datos de los visitantes se detalla en la sección
+      contactsHeading: Contactos
+      contactsText: Los mensajeros y formas de contacto están reunidos en la página
+      developerCredit: El sitio fue diseñado y desarrollado en el estudio Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Transacciones reales de selección de vehículos — coches, precios y plazos
       metaDescription: Transacciones reales de selección, importación, recompra y verificación de coches de Alemania, España, Serbia y Suiza. Coche, precio y cómo todo ocurrió.
@@ -418,6 +463,21 @@ translations:
       waitLabel: Während Sie warten
       waitCasesLink: Reale Transaktionen →
       waitSourcingLink: Schlüsselfertiges Sourcing →
+    about:
+      metaTitle: Über das Projekt approved.rs
+      metaDescription: Was gibt es auf der Seite Approved.rs, woher die Fälle kommen, wem die Seite gehört und wie man uns kontaktieren kann.
+      heading: Die Seite Approved.rs
+      lead: Hier finden Sie alles, wie wir Autos auswählen, prüfen, ankaufen und importieren. Dienstleistungen, reale Transaktionen und Kontaktmöglichkeiten.
+      sitemapHeading: Was gibt es auf der Seite
+      casesCountLabel: Reale Transaktionen
+      countriesCountLabel: D Länder, in denen wir arbeiten
+      contentHeading: Woher stammen die Materialien
+      contentText: Jeder Fall auf der Seite beschreibt ein reales Auto, mit dem wir für den Kunden gearbeitet haben. Die Texte werden von unserem Team auf Russisch verfasst und ins Englische, Serbische, Spanische und Deutsche automatisch übersetzt.
+      ownerHeading: Wem gehört die Seite
+      ownerText: Die Seite gehört dem Dienstleistungsunternehmen Approved.rs. Wie wir mit den Daten der Besucher umgehen, ist im Abschnitt beschrieben
+      contactsHeading: Kontakte
+      contactsText: Messenger und Kontaktmöglichkeiten sind auf der Seite gesammelt
+      developerCredit: Die Seite wurde von der Agentur Zikrasoft entworfen und entwickelt.
     casesVehicleSourcing:
       metaTitle: Reale Transaktionen im Auto-Sourcing — Fahrzeuge, Preise und Fristen
       metaDescription: Reale Transaktionen im Auto-Sourcing, Import, Ankauf und Prüfung von Fahrzeugen aus Deutschland, Spanien, Serbien und der Schweiz. Fahrzeug, Preis und wie alles ablief.
@@ -443,4 +503,4 @@ translations:
       closingLine2: was Sie suchen —
       closingLine3: wir finden auch für Sie
       closingText: Es reicht, wenn Sie Marke, Budget und ein paar zusätzliche Wünsche angeben. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: 845141e1eaee917e
+translatedFrom: eafdcdbf8e586132

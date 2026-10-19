@@ -105,8 +105,9 @@ translations:
       hoursHeading: Radno vreme
       hours: Pon–Sub, 09:00–19:00
       privacyLabel: Politika privatnosti
+      aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt je napravljen u Zikrasoft
+      developerCredit: Sajt je napravljen u studiju Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Pređi na sadržaj
@@ -185,8 +186,9 @@ translations:
       hoursHeading: Working Hours
       hours: Mon–Sat, 09:00–19:00
       privacyLabel: Privacy Policy
+      aboutLabel: About Us
       rightsSuffix: All rights reserved.
-      developerCredit: Website by Zikrasoft
+      developerCredit: Website developed by Zikrasoft
     common:
       homeLabel: Home
       skipToContent: Skip to Content
@@ -240,4 +242,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 4160cc502dc34d18
+translatedFrom: cba46a597c9dae72

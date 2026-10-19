@@ -134,6 +134,21 @@ translations:
           text: Možete zatražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nam pišete u bilo kojem od messengera ili pozovete.
       contactTitle: Pitanja o podacima
       contactBefore: Pišite ili pozovite nas, kontakti su na stranici
+    about:
+      metaTitle: O projektu details.rs, sajt studija detaljinga Details
+      metaDescription: Šta se nalazi na sajtu studija detaljinga Details u Beogradu, odakle su fotografije radova, ko je vlasnik sajta i kako nas kontaktirati.
+      heading: Sajt studije Details
+      lead: Ovde je okupljeno sve o studiji detaljinga Details u Beogradu. Usluge, naši radovi, adresa i načini za zakazivanje.
+      sitemapHeading: Šta se nalazi na sajtu
+      worksCountLabel: Radova u portfoliju
+      servicesCountLabel: Usluga u katalogu
+      contentHeading: Odakle materijali
+      contentText: Svaki rad na sajtu je snimljen u našem boksu, nakon obavljenog posla, bez stock fotografija. Tekstove piše tim studije na ruskom, na srpski i engleski se automatski prevode.
+      ownerHeading: Ko je vlasnik sajta
+      ownerText: Sajt pripada studiji detaljinga Details. Kako obrađujemo podatke posetilaca, opisano je u delu
+      contactsHeading: Kontakti
+      contactsText: Telefon i mesendžeri su prikupljeni na stranici
+      developerCredit: Sajt je projektovan i razvijen u studiji Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena — Details
       heading: Ova stranica ne postoji
@@ -197,9 +212,24 @@ translations:
           text: You can request a copy of your data, corrections, or deletion. Just message us on any of the messengers or call.
       contactTitle: Data Questions
       contactBefore: Write or call us, contact details are on the page.
+    about:
+      metaTitle: About details.rs, the Details detailing studio site
+      metaDescription: Discover the Details detailing studio site in Belgrade, our work photos, site ownership, and how to contact us.
+      heading: Details Studio Website
+      lead: This is all about the Details detailing studio in Belgrade. Services, our work, address, and booking methods.
+      sitemapHeading: What's on the Site
+      worksCountLabel: Projects in Portfolio
+      servicesCountLabel: Services in Catalog
+      contentHeading: Where the Materials Come From
+      contentText: Every project on the site was captured in our detail bay after completion, without stock images. Texts are written by our team in Russian and automatically translated into Serbian and English.
+      ownerHeading: Who Owns the Site
+      ownerText: The site belongs to the Details detailing studio. How we handle visitor data is described in the section
+      contactsHeading: Contact Us
+      contactsText: Phone and messengers are collected on the page
+      developerCredit: The site was designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page Not Found — Details
       heading: This Page Doesn’t Exist
       body: The link may be outdated or there may be a typo in the address. Check the homepage or view our work.
       cta: Back to Home
-translatedFrom: 4452196958bbb205
+translatedFrom: 488bb2564a1ef897
