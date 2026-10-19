@@ -91,7 +91,8 @@ translations:
       copyrightSuffix: Vehicle sourcing, inspection, and delivery from Europe
       cookieSettingsLabel: Cookie Settings
       channelLinkLabel: Our Channel
-      developerCredit: Website created by Zikrasoft
+      developerCredit: Site created by Zikrasoft
+      aboutLabel: About the project
     common:
       otherServicesLabel: 'Other Services:'
       alsoWorkingInLabel: 'Also operating in:'
@@ -146,7 +147,8 @@ translations:
       copyrightSuffix: Autopodbor, provera i dostava automobila iz Evrope
       cookieSettingsLabel: Postavke kolačića
       channelLinkLabel: Naš kanal
-      developerCredit: Sajt napravio Zikrasoft
+      developerCredit: Sajt je napravila agencija Zikrasoft
+      aboutLabel: O projektu
     common:
       otherServicesLabel: 'Ostale usluge:'
       alsoWorkingInLabel: 'Takođe radimo u:'
@@ -201,7 +203,8 @@ translations:
       copyrightSuffix: Selección, verificación y entrega de coches de Europa
       cookieSettingsLabel: Configuración de cookies
       channelLinkLabel: Nuestro canal
-      developerCredit: Sitio creado por Zikrasoft
+      developerCredit: Sitio creado en el estudio Zikrasoft
+      aboutLabel: Acerca del proyecto
     common:
       otherServicesLabel: 'Otros servicios:'
       alsoWorkingInLabel: 'También trabajamos en:'
@@ -256,7 +259,8 @@ translations:
       copyrightSuffix: Fahrzeugauswahl, Inspektion und Lieferung von Autos aus Europa
       cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
-      developerCredit: Die Website wurde von Zikrasoft erstellt
+      developerCredit: Die Seite wurde von Zikrasoft erstellt
+      aboutLabel: Über das Projekt
     common:
       otherServicesLabel: 'Weitere Dienstleistungen:'
       alsoWorkingInLabel: 'Wir arbeiten auch in:'
@@ -275,4 +279,4 @@ translations:
         morePhotos: Mehr Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 231a69ca52194631
+translatedFrom: 5dc45f3e8a409a37
