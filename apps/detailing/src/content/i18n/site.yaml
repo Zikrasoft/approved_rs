@@ -105,6 +105,7 @@ translations:
       hours: Pon–Sub, 09:00–19:00
       privacyLabel: Politika privatnosti
       rightsSuffix: Sva prava zadržana.
+      developerCredit: Sajt je napravljen u Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Pređi na sadržaj
@@ -184,6 +185,7 @@ translations:
       hours: Mon–Sat, 09:00–19:00
       privacyLabel: Privacy Policy
       rightsSuffix: All rights reserved.
+      developerCredit: Website by Zikrasoft
     common:
       homeLabel: Home
       skipToContent: Skip to Content
@@ -237,4 +239,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 2d4b72577b30c106
+translatedFrom: 4160cc502dc34d18
