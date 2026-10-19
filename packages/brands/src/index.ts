@@ -7,6 +7,7 @@ export {
   WORKSHOP_ADDRESS,
   brandLocale,
   developerCreditUrl,
+  splitDeveloperCredit,
   isBrandLocale,
 } from './brands.ts';
 export type { Brand, BrandKey, BrandLocale } from './brands.ts';

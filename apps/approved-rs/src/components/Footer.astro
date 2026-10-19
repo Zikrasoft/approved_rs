@@ -7,7 +7,11 @@ import { localeFrom } from '@/i18n/config';
 import { servicesView } from '@/i18n/content/services';
 import ContactControl from './ContactControl.astro';
 import { BRAND, SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
-import { developerCreditUrl } from '@podbor/brands';
+import {
+  DEVELOPER,
+  developerCreditUrl,
+  splitDeveloperCredit,
+} from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
@@ -17,6 +21,7 @@ const year = new Date().getFullYear();
 const locale = localeFrom(Astro.url.pathname);
 const t = getI18n(locale);
 const cc = servicesView(locale).caseChrome;
+const credit = splitDeveloperCredit(t.footer.developerCredit);
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
@@ -119,20 +124,9 @@ const coverageLine = getActiveCountries()
     <div
       class="pt-6 border-t border-default flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
     >
-      <div class="flex flex-col gap-1.5">
-        <p class="text-xs text-muted">
-          {`© ${year} ${SITE_NAME} — ${t.footer.copyrightSuffix}`}
-        </p>
-        <a
-          href={developerCreditUrl(BRAND)}
-          target="_blank"
-          rel="nofollow noopener"
-          {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
-          class="w-fit py-1 text-xs no-underline text-muted hover:underline"
-        >
-          {t.footer.developerCredit}
-        </a>
-      </div>
+      <p class="text-xs text-muted">
+        {`© ${year} ${SITE_NAME} — ${t.footer.copyrightSuffix}`}
+      </p>
       <a
         href={`https://www.threads.com/@${THREADS_CHANNEL}`}
         target="_blank"
@@ -144,6 +138,22 @@ const coverageLine = getActiveCountries()
           class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200"
           >→</span
         >
+      </a>
+    </div>
+    <div class="mt-4 flex sm:justify-end">
+      <a
+        href={developerCreditUrl(BRAND)}
+        target="_blank"
+        rel="nofollow noopener"
+        {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
+        class="group w-fit py-1 text-xs no-underline text-muted"
+      >
+        {credit.before}
+        <span
+          class="font-medium text-accent group-hover:underline group-focus-visible:underline"
+          >{DEVELOPER.name}</span
+        >
+        {credit.after}
       </a>
     </div>
   </div>

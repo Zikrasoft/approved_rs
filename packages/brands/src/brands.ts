@@ -51,6 +51,18 @@ export function developerCreditUrl(brand: Pick<Brand, 'domain'>): string {
   return url.href;
 }
 
+export function splitDeveloperCredit(label: string): {
+  before: string;
+  after: string;
+} {
+  const at = label.indexOf(DEVELOPER.name);
+  if (at === -1) return { before: '', after: '' };
+  return {
+    before: label.slice(0, at),
+    after: label.slice(at + DEVELOPER.name.length),
+  };
+}
+
 // TODO: postalCode is left out until the owner confirms it — Zvezdara spans several.
 export const WORKSHOP_ADDRESS = {
   street: 'Jovana Ćirilova 23a',

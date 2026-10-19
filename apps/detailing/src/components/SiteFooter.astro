@@ -6,7 +6,11 @@ import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { BRAND, INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
-import { developerCreditUrl } from '@podbor/brands';
+import {
+  DEVELOPER,
+  developerCreditUrl,
+  splitDeveloperCredit,
+} from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
@@ -15,6 +19,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
 const year = new Date().getFullYear();
+const credit = splitDeveloperCredit(site.footer.developerCredit);
 
 const columnHeading = 'font-display text-xs font-medium text-mute';
 
@@ -143,9 +148,14 @@ const messengers = [
         target="_blank"
         rel="nofollow noopener"
         {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
-        class="w-fit py-1 hover:underline"
+        class="group w-fit py-1 text-xs no-underline text-mute-2"
       >
-        {site.footer.developerCredit}
+        {credit.before}
+        <span
+          class="font-medium text-champagne group-hover:underline group-focus-visible:underline"
+          >{DEVELOPER.name}</span
+        >
+        {credit.after}
       </a>
     </div>
   </div>

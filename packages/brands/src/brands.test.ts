@@ -3,6 +3,7 @@ import {
   BRAND_LOCALES,
   brandLocale,
   developerCreditUrl,
+  splitDeveloperCredit,
   isBrandLocale,
   WORKSHOP_ADDRESS,
   type BrandKey,
@@ -83,5 +84,25 @@ describe('developerCreditUrl', () => {
     expect(developerCreditUrl({ domain: 'carlab.rs' })).toBe(
       'https://zikrasoft.com/?utm_source=carlab.rs&utm_medium=referral&utm_campaign=footer_credit',
     );
+  });
+});
+
+describe('splitDeveloperCredit', () => {
+  it('splits the label around the studio name', () => {
+    expect(splitDeveloperCredit('Сайт сделан в Zikrasoft')).toEqual({
+      before: 'Сайт сделан в ',
+      after: '',
+    });
+    expect(splitDeveloperCredit('Zikrasoft がつくりました')).toEqual({
+      before: '',
+      after: ' がつくりました',
+    });
+  });
+
+  it('drops a label that lost the studio name in translation', () => {
+    expect(splitDeveloperCredit('Сайт сделан в Зикрасофт')).toEqual({
+      before: '',
+      after: '',
+    });
   });
 });
