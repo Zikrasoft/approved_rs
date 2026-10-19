@@ -30,7 +30,7 @@ export function getStaticPaths() {
 const HERO_SIZES = '(min-width: 1024px) 35vw, 100vw';
 const heroPicture = await getImage({
   src: heroImage,
-  widths: [480, 960],
+  widths: [480, 720, 960],
   sizes: HERO_SIZES,
   format: 'webp',
 });

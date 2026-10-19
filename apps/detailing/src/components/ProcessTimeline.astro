@@ -12,11 +12,10 @@ const { steps } = Astro.props;
         <div class="core relative flex h-full flex-col gap-5 p-7">
           <div class="flex items-center gap-4">
             <span
-              class="font-display text-5xl leading-none text-white/10"
+              class="font-display text-5xl leading-none text-white/10 before:content-[attr(data-step)]"
+              data-step={String(i + 1).padStart(2, '0')}
               aria-hidden="true"
-            >
-              {String(i + 1).padStart(2, '0')}
-            </span>
+            />
             <span class="h-px flex-1 bg-line" aria-hidden="true" />
           </div>
           <h3 class="text-lg font-display tracking-tight">{step.title}</h3>

@@ -16,7 +16,7 @@ import { articleSchema, serviceSchema } from '@podbor/site-kit';
 import type { Country, City } from './geo';
 import { localeConfig, type Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
-import { SITE_NAME } from './constants';
+import { SITE_NAME, SITE_URL } from './constants';
 import { getMetaTemplates } from '@/i18n/content/meta';
 
 export const ogImageFor = (
@@ -70,7 +70,11 @@ export function generateMeta(
   };
 }
 
-const ORGANIZATION = { '@type': 'Organization', name: SITE_NAME };
+const ORGANIZATION = {
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: `${SITE_URL}/`,
+};
 
 export const generateServiceSchema =
   (name: string, areaServed: string | string[]) => (url: string) =>

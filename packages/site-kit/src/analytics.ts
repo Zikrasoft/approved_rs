@@ -107,8 +107,7 @@ function startGoogleTag(googleAdsId?: string, gaMeasurementId?: string): void {
   if (!id) return;
   stubGtag();
   window.gtag?.('js', new Date());
-  if (googleAdsId) window.gtag?.('config', googleAdsId);
-  if (gaMeasurementId) window.gtag?.('config', gaMeasurementId);
+  window.gtag?.('config', id);
   whenIdle(() => loadOnce(`${GOOGLE_TAG_SRC}${id}`));
 }
 

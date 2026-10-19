@@ -332,14 +332,14 @@ describe('defineAnalytics with Google Ads', () => {
     expect(window.fbq).toBeUndefined();
   });
 
-  it('configures both the Ads id and the GA4 id on the one shared tag', () => {
+  it('configures only the Ads id, whose tag carries GA4 as a destination', () => {
     defineAnalytics({ googleAdsId: AW, gaMeasurementId: GA });
     expect(
       dataLayer().some((call) => call[0] === 'config' && call[1] === AW),
     ).toBe(true);
     expect(
       dataLayer().some((call) => call[0] === 'config' && call[1] === GA),
-    ).toBe(true);
+    ).toBe(false);
     runIdle();
     expect(srcs()).toEqual([GTAG_SRC(AW)]);
   });
