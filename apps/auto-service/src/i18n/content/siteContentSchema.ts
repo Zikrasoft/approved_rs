@@ -43,6 +43,7 @@ export const siteContentSchema = z
         hoursHeading: z.string(),
         hours: z.string(),
         privacyLabel: z.string(),
+        aboutLabel: z.string(),
         rightsSuffix: z.string(),
         developerCredit: z.string(),
       })

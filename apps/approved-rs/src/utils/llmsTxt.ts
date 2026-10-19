@@ -119,6 +119,10 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
             `${SITE_URL}${PathBuilder.home(locale)}`,
           ),
           llmsLink(nav.contacts, `${SITE_URL}${PathBuilder.contacts(locale)}`),
+          llmsLink(
+            t.footer.aboutLabel,
+            `${SITE_URL}${PathBuilder.about(locale)}`,
+          ),
         ],
       },
       {

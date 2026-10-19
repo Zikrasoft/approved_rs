@@ -55,6 +55,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
+      { label: site.footer.aboutLabel, href: url(PathBuilder.about(locale)) },
       {
         label: site.footer.privacyLabel,
         href: url(PathBuilder.privacy(locale)),

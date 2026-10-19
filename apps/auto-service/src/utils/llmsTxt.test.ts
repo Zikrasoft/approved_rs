@@ -78,4 +78,16 @@ describe('generateLlmsTxt', () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
   });
+
+  it('links the about page', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[О проекте](https://carlab.rs/ru/about/)',
+    );
+  });
+
+  it('ends with the studio credit, without tracking parameters', async () => {
+    expect((await generateLlmsTxt('ru')).trimEnd()).toMatch(
+      /\nСайт сделан в студии Zikrasoft: https:\/\/zikrasoft\.com\/$/,
+    );
+  });
 });

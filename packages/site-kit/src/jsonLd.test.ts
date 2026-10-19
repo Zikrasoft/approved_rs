@@ -4,6 +4,7 @@ import {
   citySchema,
   faqPageSchema,
   websiteSchema,
+  aboutPageSchema,
   jsonLdText,
   localBusinessSchema,
   pageSchema,
@@ -252,6 +253,37 @@ describe('websiteSchema', () => {
         '@type': 'Organization',
         name: 'Zikrasoft',
         url: 'https://zikrasoft.com/',
+      },
+    });
+  });
+});
+
+describe('aboutPageSchema', () => {
+  it('describes the site it is about and credits its studio', () => {
+    expect(
+      aboutPageSchema({
+        name: 'О проекте',
+        url: 'https://details.rs/ru/about/',
+        website: {
+          name: 'Details',
+          url: 'https://details.rs',
+          creator: { name: 'Zikrasoft', url: 'https://zikrasoft.com/' },
+        },
+      }),
+    ).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      name: 'О проекте',
+      url: 'https://details.rs/ru/about/',
+      about: {
+        '@type': 'WebSite',
+        name: 'Details',
+        url: 'https://details.rs',
+        creator: {
+          '@type': 'Organization',
+          name: 'Zikrasoft',
+          url: 'https://zikrasoft.com/',
+        },
       },
     });
   });

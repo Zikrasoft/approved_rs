@@ -74,6 +74,24 @@ export const pagesContentSchema = z
         contactBefore: z.string(),
       })
       .strict(),
+    about: z
+      .object({
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        sitemapHeading: z.string(),
+        worksCountLabel: z.string(),
+        servicesCountLabel: z.string(),
+        contentHeading: z.string(),
+        contentText: z.string(),
+        ownerHeading: z.string(),
+        ownerText: z.string(),
+        contactsHeading: z.string(),
+        contactsText: z.string(),
+        developerCredit: z.string(),
+      })
+      .strict(),
     notFound: z
       .object({
         metaTitle: z.string(),

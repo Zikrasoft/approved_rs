@@ -27,6 +27,7 @@ describe('PathBuilder', () => {
     );
     expect(PathBuilder.contacts('en')).toBe('/en/contacts/');
     expect(PathBuilder.privacy('en')).toBe('/en/privacy/');
+    expect(PathBuilder.about('de')).toBe('/de/about/');
     expect(PathBuilder.thanks('sr')).toBe('/sr/thanks/');
   });
 

@@ -14,6 +14,7 @@ export {
   faqPageSchema,
   pageSchema,
   websiteSchema,
+  aboutPageSchema,
 } from './jsonLd.ts';
 export type {
   SchemaRef,

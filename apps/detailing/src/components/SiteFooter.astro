@@ -85,6 +85,11 @@ const messengers = [
           >{site.nav.contact}</a
         >
         <a
+          href={PathBuilder.about(locale)}
+          class="text-sm text-mute transition-colors duration-400 hover:text-chalk"
+          >{site.footer.aboutLabel}</a
+        >
+        <a
           href={PathBuilder.privacy(locale)}
           class="text-sm text-mute transition-colors duration-400 hover:text-chalk"
           >{site.footer.privacyLabel}</a

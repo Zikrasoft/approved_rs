@@ -1,0 +1,138 @@
+---
+import { getCollection } from 'astro:content';
+import { DEVELOPER, splitDeveloperCredit } from '@podbor/brands';
+import { aboutPageSchema } from '@podbor/site-kit';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder, localePaths } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { publishedWorks } from '@/utils/works';
+import { GARAGE_ADDRESS, SITE_NAME, SITE_URL } from '@/utils/constants';
+
+export function getStaticPaths() {
+  return localePaths();
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const about = content(locale).pages.about;
+const site = content(locale).site;
+const works = publishedWorks(await getCollection('works'));
+const credit = splitDeveloperCredit(about.developerCredit);
+
+const stats = [
+  { value: works.length, label: about.worksCountLabel },
+  { value: SERVICE_SLUGS.length, label: about.servicesCountLabel },
+];
+
+const sections = [
+  { href: PathBuilder.services(locale), label: site.nav.services },
+  { href: PathBuilder.parts(locale), label: site.nav.parts },
+  { href: PathBuilder.works(locale), label: site.nav.works },
+  { href: PathBuilder.contact(locale), label: site.nav.contact },
+  { href: PathBuilder.privacy(locale), label: site.footer.privacyLabel },
+];
+
+const schema = (canonical: string) =>
+  aboutPageSchema({
+    name: about.heading,
+    url: canonical,
+    website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
+  });
+
+const link = 'text-signal-ink underline underline-offset-2';
+---
+
+<Shell
+  title={about.metaTitle}
+  description={about.metaDescription}
+  jsonLd={[schema]}
+>
+  <PageHero
+    eyebrow={site.footer.aboutLabel}
+    heading={about.heading}
+    lead={about.lead}
+    crumbs={[
+      { href: PathBuilder.about(locale), label: site.footer.aboutLabel },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <div class="max-w-3xl divide-y divide-line border-y border-line">
+      <div class="flex flex-col gap-5 py-6">
+        <h2 class="text-base font-semibold text-ink">{about.sitemapHeading}</h2>
+        <dl class="grid grid-cols-2 gap-6">
+          {
+            stats.map((stat) => (
+              <div class="flex flex-col-reverse gap-1">
+                <dt class="text-sm text-muted">{stat.label}</dt>
+                <dd class="text-4xl font-medium tracking-tight text-signal-ink sm:text-5xl">
+                  {stat.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+        <ul class="flex flex-col">
+          {
+            sections.map((section) => (
+              <li>
+                <a
+                  href={section.href}
+                  class="flex min-h-11 items-center text-sm text-ink transition-colors duration-150 hover:text-signal-ink sm:text-base"
+                >
+                  {section.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="flex flex-col gap-2 py-6">
+        <h2 class="text-base font-semibold text-ink">{about.contentHeading}</h2>
+        <p class="text-sm leading-relaxed text-muted sm:text-base">
+          {about.contentText}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2 py-6">
+        <h2 class="text-base font-semibold text-ink">{about.ownerHeading}</h2>
+        <p class="text-sm leading-relaxed text-muted sm:text-base">
+          {about.ownerText}{' '}
+          <a href={PathBuilder.privacy(locale)} class={link}
+            >{site.footer.privacyLabel}</a
+          >.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2 py-6">
+        <h2 class="text-base font-semibold text-ink">
+          {about.contactsHeading}
+        </h2>
+        <address
+          class="text-sm not-italic leading-relaxed text-muted sm:text-base"
+        >
+          {
+            `${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
+          }
+        </address>
+        <p class="text-sm leading-relaxed text-muted sm:text-base">
+          {about.contactsText}{' '}
+          <a href={PathBuilder.contact(locale)} class={link}
+            >{site.nav.contact}</a
+          >.
+        </p>
+      </div>
+
+      <div class="py-6">
+        <p class="text-sm leading-relaxed text-muted sm:text-base">
+          {credit.before}<a href={DEVELOPER.url} class={link}
+            >{DEVELOPER.name}</a
+          >{credit.after}
+        </p>
+      </div>
+    </div>
+  </section>
+</Shell>

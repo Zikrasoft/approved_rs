@@ -42,6 +42,7 @@ export const PathBuilder = {
   casesVehicleImport: (locale: Locale) => `/${locale}/cases/vehicle-import/`,
   contacts: (locale: Locale) => `/${locale}/contacts/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
+  about: (locale: Locale) => `/${locale}/about/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
 };
 

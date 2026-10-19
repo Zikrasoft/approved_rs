@@ -55,6 +55,7 @@ export const dictionaryContentSchema = z
         cookieSettingsLabel: z.string(),
         channelLinkLabel: z.string(),
         developerCredit: z.string(),
+        aboutLabel: z.string(),
       })
       .strict(),
     common: z

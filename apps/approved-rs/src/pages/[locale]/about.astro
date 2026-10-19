@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import { DEVELOPER, splitDeveloperCredit } from '@podbor/brands';
+import { aboutPageSchema } from '@podbor/site-kit';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
+import { pagesView } from '@/i18n/content/pages';
+import { getI18n } from '@/i18n/getI18n';
+import { getNavItems } from '@/utils/labels';
+import { getActiveCountries } from '@/utils/geo';
+import { PathBuilder, withLocales } from '@/utils/paths';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
+
+const { locale } = Astro.params;
+const about = pagesView(locale).about;
+const t = getI18n(locale);
+const cases = await getCollection('cases', (c) => c.data.published);
+const credit = splitDeveloperCredit(about.developerCredit);
+
+const stats = [
+  { value: cases.length, label: about.casesCountLabel },
+  { value: getActiveCountries().length, label: about.countriesCountLabel },
+];
+
+const sections = [
+  ...getNavItems(locale),
+  { href: PathBuilder.casesVehicleSourcing(locale), label: t.nav.cases },
+  { href: PathBuilder.contacts(locale), label: t.nav.contacts },
+  { href: PathBuilder.privacy(locale), label: t.footer.privacyLabel },
+];
+
+const schema = (canonical: string) =>
+  aboutPageSchema({
+    name: about.heading,
+    url: canonical,
+    website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
+  });
+
+const link = 'underline transition-colors text-accent';
+---
+
+<BaseLayout
+  title={`${about.metaTitle} | ${SITE_NAME}`}
+  description={about.metaDescription}
+  schema={schema}
+>
+  <section class="border-b border-default">
+    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
+      <Breadcrumbs items={[{ label: t.footer.aboutLabel }]} />
+      <span class="accent-line"></span>
+      <h1 class="font-display text-[clamp(1.95rem,5vw,3.7rem)] font-bold mb-3">
+        {about.heading}
+      </h1>
+      <p class="max-w-2xl text-base leading-relaxed text-muted">
+        {about.lead}
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-6 py-band md:py-band-lg">
+    <div class="space-y-10">
+      <div class="pb-10 border-b border-default">
+        <h2 class="font-display text-2xl font-bold mb-6">
+          {about.sitemapHeading}
+        </h2>
+        <dl class="grid grid-cols-2 gap-6 mb-6">
+          {
+            stats.map((stat) => (
+              <div class="flex flex-col-reverse gap-1">
+                <dt class="text-sm text-muted">{stat.label}</dt>
+                <dd class="font-display text-4xl font-bold text-accent sm:text-5xl">
+                  {stat.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+        <ul class="flex flex-col text-secondary">
+          {
+            sections.map((section) => (
+              <li>
+                <a
+                  href={section.href}
+                  class="flex min-h-11 items-center text-base no-underline transition-colors hover:text-accent"
+                >
+                  {section.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="pb-10 border-b border-default">
+        <h2 class="font-display text-2xl font-bold mb-4">
+          {about.contentHeading}
+        </h2>
+        <p class="text-base leading-relaxed text-muted">{about.contentText}</p>
+      </div>
+
+      <div class="pb-10 border-b border-default">
+        <h2 class="font-display text-2xl font-bold mb-4">
+          {about.ownerHeading}
+        </h2>
+        <p class="text-base leading-relaxed text-muted">
+          {about.ownerText}{' '}
+          <a href={PathBuilder.privacy(locale)} class={link}
+            >{t.footer.privacyLabel}</a
+          >.
+        </p>
+      </div>
+
+      <div class="pb-10 border-b border-default">
+        <h2 class="font-display text-2xl font-bold mb-4">
+          {about.contactsHeading}
+        </h2>
+        <p class="text-base leading-relaxed text-muted">
+          {about.contactsText}{' '}
+          <a href={PathBuilder.contacts(locale)} class={link}
+            >{t.nav.contacts}</a
+          >.
+        </p>
+      </div>
+
+      <p class="text-base leading-relaxed text-muted">
+        {credit.before}<a href={DEVELOPER.url} class={link}>{DEVELOPER.name}</a
+        >{credit.after}
+      </p>
+    </div>
+  </section>
+</BaseLayout>

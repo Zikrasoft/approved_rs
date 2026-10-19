@@ -69,4 +69,16 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid));
     expect(body).toContain(content('sr').site.footer.hours);
   });
+
+  it('links the about page', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[О проекте](https://details.rs/ru/about/)',
+    );
+  });
+
+  it('ends with the studio credit, without tracking parameters', async () => {
+    expect((await generateLlmsTxt('ru')).trimEnd()).toMatch(
+      /\nСайт сделан в студии Zikrasoft: https:\/\/zikrasoft\.com\/$/,
+    );
+  });
 });
