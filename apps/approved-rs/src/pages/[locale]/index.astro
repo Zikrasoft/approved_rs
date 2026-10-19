@@ -1,6 +1,8 @@
 ---
 export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { DEVELOPER } from '@podbor/brands';
+import { websiteSchema } from '@podbor/site-kit';
 import ServiceQuickLinks from '@/components/ServiceQuickLinks.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
 import PartnerBrands from '@/components/PartnerBrands.astro';
@@ -54,6 +56,12 @@ const schema = generateOrganizationSchema({
   contactUrl: TELEGRAM_BOT_URL,
 });
 
+const website = websiteSchema({
+  name: SITE_NAME,
+  url: SITE_URL,
+  creator: DEVELOPER,
+});
+
 const journey = [
   {
     href: PathBuilder.vehicleSourcingHub(locale),
@@ -100,7 +108,7 @@ const geoCells = countries.map((country) => ({
 }));
 ---
 
-<BaseLayout {...meta} schema={schema} preloadImage={hero}>
+<BaseLayout {...meta} schema={[schema, website]} preloadImage={hero}>
   <section class="hidden lg:block xl:hidden border-b border-default">
     <div class="max-w-6xl mx-auto px-6 py-3">
       <ServiceQuickLinks variant="strip" />

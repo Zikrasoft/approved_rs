@@ -4,7 +4,9 @@ import Wordmark from './Wordmark.astro';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
+import { BRAND, GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
+import { developerCreditUrl } from '@podbor/brands';
+import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
@@ -106,8 +108,19 @@ const channels = [
   </div>
 
   <div class="border-t border-line">
-    <p class="wrap py-5 text-xs text-muted">
-      {`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}
-    </p>
+    <div
+      class="wrap py-5 flex flex-col gap-1.5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>{`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}</p>
+      <a
+        href={developerCreditUrl(BRAND)}
+        target="_blank"
+        rel="nofollow noopener"
+        {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
+        class="w-fit py-1 hover:underline"
+      >
+        {site.footer.developerCredit}
+      </a>
+    </div>
   </div>
 </footer>

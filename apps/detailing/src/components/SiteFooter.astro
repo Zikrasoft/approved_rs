@@ -5,7 +5,9 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import { BRAND, INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import { developerCreditUrl } from '@podbor/brands';
+import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 
@@ -132,8 +134,19 @@ const messengers = [
 
     <div class="hairline mt-14"></div>
 
-    <p class="mt-6 text-xs text-mute-2">
-      {`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}
-    </p>
+    <div
+      class="mt-6 flex flex-col gap-1.5 text-xs text-mute-2 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>{`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}</p>
+      <a
+        href={developerCreditUrl(BRAND)}
+        target="_blank"
+        rel="nofollow noopener"
+        {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
+        class="w-fit py-1 hover:underline"
+      >
+        {site.footer.developerCredit}
+      </a>
+    </div>
   </div>
 </footer>

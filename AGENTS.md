@@ -27,8 +27,8 @@ jobs rather than files. What an `ls` will not tell you is which **markup
 contracts** a package owns, and an app that breaks one fails silently:
 `packages/site-kit` owns `data-contact-order` / `data-channel` /
 `data-primary-contact` / `data-primary-channel` (preferred contact channel),
-`data-lead-form` / `data-brand-link` / `data-field` / `aria-invalid` (funnel
-tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
+`data-lead-form` / `data-brand-link` / `data-developer-credit` /
+`data-field` / `aria-invalid` (funnel tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
 depth on case and work pages), `data-contact-channel` /
 `data-contact-placement` (contact clicks, whose placement half
 `.github/scripts/contact-placement.ts` enforces against the built HTML) and

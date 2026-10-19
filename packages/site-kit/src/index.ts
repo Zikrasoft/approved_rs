@@ -13,6 +13,7 @@ export {
   productSchema,
   faqPageSchema,
   pageSchema,
+  websiteSchema,
 } from './jsonLd.ts';
 export type {
   SchemaRef,

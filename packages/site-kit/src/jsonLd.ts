@@ -20,6 +20,20 @@ export function pageSchema(schema: PageSchema, canonical: string): object {
   return typeof schema === 'function' ? schema(canonical) : schema;
 }
 
+export function websiteSchema(options: {
+  name: string;
+  url: string;
+  creator: { name: string; url: string };
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: options.name,
+    url: options.url,
+    creator: { '@type': 'Organization', ...options.creator },
+  };
+}
+
 export type SchemaRef = Record<string, unknown>;
 
 export function citySchema(name: string) {

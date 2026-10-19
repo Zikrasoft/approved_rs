@@ -8,6 +8,7 @@ export const GOALS = {
   contactClick: 'contact_click',
   leadModalOpen: 'lead_modal_open',
   brandLinkClick: 'brand_link_click',
+  developerCreditClick: 'developer_credit_click',
   langOfferShown: 'lang_offer_shown',
   langOfferTaken: 'lang_offer_taken',
   langOfferDismissed: 'lang_offer_dismissed',
