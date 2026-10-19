@@ -287,18 +287,18 @@ translations:
       contactBefore: Nazovite ili napišite, kontakti su na stranici
     about:
       metaTitle: O projektu carlab.rs, sajt autoservisa CarLab
-      metaDescription: Šta se nalazi na sajtu autoservisa CarLab u Beogradu, primjeri radova, kome pripada sajt i kako da nas kontaktirate.
+      metaDescription: Šta se nalazi na sajtu autoservisa CarLab u Beogradu, primere radova, ko poseduje sajt i kako da nas kontaktirate.
       heading: Sajt autoservisa CarLab
-      lead: Ovdje je okupljeno sve o autoservisu CarLab u Beogradu. Usluge, izbor delova, primjeri radova, adresa i načini za zakazivanje.
+      lead: Ovde je sve o autoservisu CarLab u Beogradu. Usluge, izbor delova, primeri radova, adresa i načini kako da se prijavite.
       sitemapHeading: Šta se nalazi na sajtu
-      worksCountLabel: Primjera radova
+      worksCountLabel: Primera radova
       servicesCountLabel: Usluga u katalogu
       contentHeading: Odakle materijali
-      contentText: Primjeri radova prikazuju stvarne automobile koji su dolazili kod nas u servis. Tekstove piše tim servisa na ruskom, a na srpski i engleski se automatski prevode.
-      ownerHeading: Kome pripada sajt
-      ownerText: Sajt pripada autoservisu CarLab. Kako obradjujemo podatke posetilaca, opisano je u odeljku
+      contentText: Primeri radova se bave stvarnim automobilima koji su dolazili u naš servis. Tekstove piše tim servisa, a na srpski i engleski se automatski prevode.
+      ownerHeading: Ko poseduje sajt
+      ownerText: Sajt pripada autoservisu CarLab. Kako se ophodimo prema podacima posetilaca, opisano je u delu
       contactsHeading: Kontakti
-      contactsText: Telefon i mesendžeri su okupljeni na stranici
+      contactsText: Telefon i poruke su prikupljeni na stranici
       developerCredit: Sajt je projektovan i razvijen u studiju Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena - CarLab
@@ -506,19 +506,19 @@ translations:
       contactTitle: Data Questions
       contactBefore: Call or message us, the contact details are on the page
     about:
-      metaTitle: About carlab.rs, CarLab Car Service Site
-      metaDescription: Information about CarLab in Belgrade, examples of work, ownership, and contact details.
-      heading: CarLab Car Service Website
-      lead: All you need to know about CarLab in Belgrade. Services, parts selection, work examples, address, and booking options.
-      sitemapHeading: What you will find on the site
-      worksCountLabel: Examples of work
+      metaTitle: About carlab.rs, CarLab's auto service site
+      metaDescription: Explore the CarLab auto service site in Belgrade, with work examples, ownership details, and contact information.
+      heading: CarLab Auto Service Website
+      lead: Here you will find everything about CarLab auto service in Belgrade. Services, parts selection, work examples, address, and how to book an appointment.
+      sitemapHeading: What's on the site
+      worksCountLabel: Work examples
       servicesCountLabel: Services in the catalog
-      contentHeading: Source of materials
-      contentText: Work examples feature real cars that have come to our service. The texts are written by our team in Russian and are automatically translated into Serbian and English.
-      ownerHeading: Site ownership
-      ownerText: The site belongs to CarLab Car Service. Our data handling practices are outlined in the
+      contentHeading: Where the materials come from
+      contentText: The work examples showcase real cars that came to our service. The texts are written by our service team in Russian and automatically translated into Serbian and English.
+      ownerHeading: Who owns the site
+      ownerText: The site belongs to CarLab auto service. How we handle visitor data is described in the section
       contactsHeading: Contact
-      contactsText: Phone numbers and messaging options are on the
+      contactsText: Phone and messaging options are available on the page
       developerCredit: The site was designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page Not Found — CarLab
