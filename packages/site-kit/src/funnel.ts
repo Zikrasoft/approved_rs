@@ -9,6 +9,7 @@ import { GOALS, reachGoal } from './goals.ts';
 
 export const LEAD_FORM_ATTRIBUTE = 'data-lead-form';
 export const BRAND_LINK_ATTRIBUTE = 'data-brand-link';
+export const DEVELOPER_CREDIT_ATTRIBUTE = 'data-developer-credit';
 
 const SCROLL_MARKS = [
   [50, GOALS.scroll50],
@@ -116,13 +117,14 @@ function trackForms(signal: AbortSignal): void {
   );
 }
 
-function trackBrandLinks(signal: AbortSignal): void {
+function trackOutboundLinks(signal: AbortSignal): void {
   document.addEventListener(
     'click',
     (event) => {
-      const link = (event.target as Element | null)?.closest<HTMLElement>(
-        `[${BRAND_LINK_ATTRIBUTE}]`,
-      );
+      const target = event.target as Element | null;
+      if (target?.closest(`[${DEVELOPER_CREDIT_ATTRIBUTE}]`))
+        reachGoal(GOALS.developerCreditClick);
+      const link = target?.closest<HTMLElement>(`[${BRAND_LINK_ATTRIBUTE}]`);
       if (!link) return;
       reachGoal(GOALS.brandLinkClick, {
         brand: link.getAttribute(BRAND_LINK_ATTRIBUTE),
@@ -144,5 +146,5 @@ export function defineFunnelTracking(
   });
   trackScroll(signal);
   trackForms(signal);
-  trackBrandLinks(signal);
+  trackOutboundLinks(signal);
 }

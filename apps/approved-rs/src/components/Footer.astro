@@ -6,7 +6,13 @@ import { getI18n } from '@/i18n/getI18n';
 import { localeFrom } from '@/i18n/config';
 import { servicesView } from '@/i18n/content/services';
 import ContactControl from './ContactControl.astro';
-import { SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
+import { BRAND, SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
+import {
+  DEVELOPER,
+  developerCreditUrl,
+  splitDeveloperCredit,
+} from '@podbor/brands';
+import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import { getActiveCountries } from '@/utils/geo';
 import { PathBuilder } from '@/utils/paths';
 import { contactRegion } from '@podbor/site-kit/contact-control';
@@ -15,6 +21,7 @@ const year = new Date().getFullYear();
 const locale = localeFrom(Astro.url.pathname);
 const t = getI18n(locale);
 const cc = servicesView(locale).caseChrome;
+const credit = splitDeveloperCredit(t.footer.developerCredit);
 const coverageLine = getActiveCountries()
   .map((c) => c[locale].name)
   .join(' · ');
@@ -131,6 +138,22 @@ const coverageLine = getActiveCountries()
           class="footer-channel-arrow inline-block text-[0.85em] transition-transform duration-200"
           >→</span
         >
+      </a>
+    </div>
+    <div class="mt-4 flex sm:justify-end">
+      <a
+        href={developerCreditUrl(BRAND)}
+        target="_blank"
+        rel="nofollow noopener"
+        {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
+        class="group w-fit py-1 text-xs no-underline text-muted"
+      >
+        {credit.before}
+        <span
+          class="font-medium text-accent group-hover:underline group-focus-visible:underline"
+          >{DEVELOPER.name}</span
+        >
+        {credit.after}
       </a>
     </div>
   </div>

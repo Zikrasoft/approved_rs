@@ -35,6 +35,7 @@ export interface BrandLlmsInput<L extends string> {
   other: LlmsEntry[];
   locales: readonly L[];
   locale: L;
+  credit?: string;
 }
 
 const escapeLabel = (label: string): string => label.replace(/[[\]]/g, '\\$&');
@@ -61,12 +62,14 @@ export function renderLlmsTxt(
   title: string,
   summary: string,
   sections: LlmsSection[],
+  credit?: string,
 ): string {
   const lines = [`# ${title}`, '', `> ${summary}`];
   for (const section of sections) {
     if (section.items.length === 0) continue;
     lines.push('', `## ${section.heading}`, '', ...section.items);
   }
+  if (credit) lines.push('', credit);
   return lines.join('\n') + '\n';
 }
 
@@ -74,16 +77,21 @@ export function renderBrandLlmsTxt<L extends string>(
   input: BrandLlmsInput<L>,
 ): string {
   const { site, headings, locales, locale } = input;
-  return renderLlmsTxt(site.name, site.summary, [
-    { heading: headings.keyFacts, items: input.facts },
-    ...input.lists.map((list) => ({
-      heading: list.heading,
-      items: [list.index, ...list.entries].map(entryLine),
-    })),
-    { heading: headings.other, items: input.other.map(entryLine) },
-    {
-      heading: headings.languages,
-      items: llmsLanguageLinks(site.url, locales, locale),
-    },
-  ]);
+  return renderLlmsTxt(
+    site.name,
+    site.summary,
+    [
+      { heading: headings.keyFacts, items: input.facts },
+      ...input.lists.map((list) => ({
+        heading: list.heading,
+        items: [list.index, ...list.entries].map(entryLine),
+      })),
+      { heading: headings.other, items: input.other.map(entryLine) },
+      {
+        heading: headings.languages,
+        items: llmsLanguageLinks(site.url, locales, locale),
+      },
+    ],
+    input.credit,
+  );
 }

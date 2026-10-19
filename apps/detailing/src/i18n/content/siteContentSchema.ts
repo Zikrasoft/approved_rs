@@ -31,6 +31,7 @@ const footerSchema = z
     hours: z.string(),
     privacyLabel: z.string(),
     rightsSuffix: z.string(),
+    developerCredit: z.string(),
   })
   .strict();
 

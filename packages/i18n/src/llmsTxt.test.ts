@@ -162,4 +162,13 @@ describe('renderBrandLlmsTxt', () => {
     });
     expect(body).toContain('## Works\n\n- [All works](https://x.rs/sr/works/)');
   });
+
+  it('closes with the studio credit when one is given', () => {
+    expect(
+      renderBrandLlmsTxt({
+        ...input,
+        credit: 'Site by Zikrasoft: https://zikrasoft.com/',
+      }),
+    ).toMatch(/\n\nSite by Zikrasoft: https:\/\/zikrasoft\.com\/\n$/);
+  });
 });

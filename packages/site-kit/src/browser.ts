@@ -6,6 +6,7 @@ export {
   DEPTH_SLUG_ATTRIBUTE,
 } from './browsingDepth.ts';
 export { markFieldValidity } from './fieldValidity.ts';
+export { DEVELOPER_CREDIT_ATTRIBUTE } from './funnel.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';

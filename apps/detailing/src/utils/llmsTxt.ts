@@ -1,3 +1,4 @@
+import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
@@ -60,6 +61,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       },
     ],
     locales: SUPPORTED_LOCALES,
+    credit: `${site.footer.developerCredit}: ${DEVELOPER.url}`,
     locale,
   });
 }

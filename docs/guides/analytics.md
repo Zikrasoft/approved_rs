@@ -43,6 +43,7 @@ Variants go into parameters, not into new names.
 | `brand_link_click`                                               | left for a partner site (approved.rs only)      | `brand`: `details`, `carlab`                      |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
 | `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
+| `developer_credit_click`                                         | clicked the Zikrasoft credit in the footer      | —                                                 |
 
 `scroll_50`, `form_view` and `form_start` fire once per page rather than once per
 form: the approved.rs homepage has three forms, and counting them separately would
@@ -64,6 +65,7 @@ itself, so on focus the goal would fire on every opening, duplicating
 | `data-contact-channel`   | phone and messenger controls   | `contact_click` and a server lead |
 | `data-contact-placement` | the region the control sits in | `placement` in `contact_click`    |
 | `data-brand-link`        | links to partner sites         | `brand_link_click`                |
+| `data-developer-credit`  | the Zikrasoft footer credit    | `developer_credit_click`          |
 | `aria-invalid="true"`    | a field that failed validation | the field name in `form_error`    |
 
 `data-contact-placement` names where on the page the control sits, never which
@@ -146,7 +148,9 @@ Marked as key events by hand in all three GA4 properties: the four form steps, t
 two reading events, `contact_click`, the three language-banner events, a URL-based
 key event on `/thanks/`. On approved.rs there are additionally `lead_modal_open`,
 `brand_link_click` and the URL key event "Interest — a service page or a case
-study". The funnel exploration itself is a saved report, not a key event, and is
+study". `developer_credit_click` is deliberately **not** a key event anywhere: it
+is a click to the studio that built the site, not a step toward a lead, and
+counting it would inflate conversions. The funnel exploration itself is a saved report, not a key event, and is
 rebuilt by hand per property.
 
 GA4's Enhanced Measurement (automatic `scroll`, `click`, `page_view`, …) is left on

@@ -18,7 +18,7 @@ import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-norma
 import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
-  schema?: PageSchema;
+  schema?: PageSchema | PageSchema[];
   preloadImage?: HeroImageAttrs;
   ogImageWidth?: number;
   ogImageHeight?: number;
@@ -102,12 +102,14 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <meta name="twitter:image" content={ogImage} />
 
     {
-      schema && (
-        <script
-          type="application/ld+json"
-          set:html={jsonLdText(pageSchema(schema, canonical))}
-        />
-      )
+      [schema ?? []]
+        .flat()
+        .map((entry) => (
+          <script
+            type="application/ld+json"
+            set:html={jsonLdText(pageSchema(entry, canonical))}
+          />
+        ))
     }
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

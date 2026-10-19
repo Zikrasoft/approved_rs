@@ -1,7 +1,9 @@
 ---
 import { contactCta } from '@podbor/site-kit/contact-control';
 import { getCollection } from 'astro:content';
-import { faqPageSchema } from '@podbor/site-kit';
+import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
+import { DEVELOPER } from '@podbor/brands';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
 import Shell from '@/layouts/Shell.astro';
 import Hero from '@/components/Hero.astro';
 import Marquee from '@/components/Marquee.astro';
@@ -36,12 +38,17 @@ const featured = works.slice(0, 3);
 const comparable = works.find((w) => w.data.beforeImage);
 
 const faqSchema = faqPageSchema(home.faq);
+const website = websiteSchema({
+  name: SITE_NAME,
+  url: SITE_URL,
+  creator: DEVELOPER,
+});
 ---
 
 <Shell
   title={home.meta.title}
   description={home.meta.description}
-  jsonLd={[faqSchema]}
+  jsonLd={[faqSchema, website]}
   preloadImage={{
     src: heroPicture.src,
     srcset: heroPicture.srcSet.attribute,

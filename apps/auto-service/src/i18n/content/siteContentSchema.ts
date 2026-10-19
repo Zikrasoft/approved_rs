@@ -44,6 +44,7 @@ export const siteContentSchema = z
         hours: z.string(),
         privacyLabel: z.string(),
         rightsSuffix: z.string(),
+        developerCredit: z.string(),
       })
       .strict(),
     common: z

@@ -288,6 +288,14 @@ describe('defineFunnelTracking', () => {
     ]);
   });
 
+  it('reports a click on the studio credit', () => {
+    document.body.innerHTML = `
+      <a data-developer-credit href="https://zikrasoft.com/"><span>Zikrasoft</span></a>`;
+    start();
+    document.querySelector('span')!.click();
+    expect(goals()).toContainEqual([GOALS.developerCreditClick, undefined]);
+  });
+
   it('ignores an ordinary link', () => {
     document.body.innerHTML = `<a href="/ru/">Home</a>`;
     start();

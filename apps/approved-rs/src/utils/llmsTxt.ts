@@ -1,3 +1,4 @@
+import { DEVELOPER } from '@podbor/brands';
 import { llmsLanguageLinks, llmsLink, renderLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME } from '@/utils/constants';
 import { SERVICES } from '@/utils/labels';
@@ -51,72 +52,80 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const cc = CASE_COUNT_LABELS[locale];
   const paymentFaq = content(locale).faq.general[0];
 
-  return renderLlmsTxt(SITE_NAME, h.metaDescription, [
-    {
-      heading: s.keyFacts,
-      items: [
-        `- ${h.statClients.value} ${h.statClients.label}, ${countries.length} ${h.statCountries.label}, ${h.statYears.value} ${h.statYears.label}.`,
-        ...(paymentFaq ? [`- ${paymentFaq.a}`] : []),
-        `- ${h.ctaSubtext}`,
-      ],
-    },
-    {
-      heading: s.countries,
-      items: countries.flatMap((country) =>
-        SERVICES.map((service) =>
-          llmsLink(
-            `${nav[service.slug]} ${buildLocation(locale, country)}`,
-            `${SITE_URL}${PathBuilder.service(locale, service.slug, country.code)}`,
+  return renderLlmsTxt(
+    SITE_NAME,
+    h.metaDescription,
+    [
+      {
+        heading: s.keyFacts,
+        items: [
+          `- ${h.statClients.value} ${h.statClients.label}, ${countries.length} ${h.statCountries.label}, ${h.statYears.value} ${h.statYears.label}.`,
+          ...(paymentFaq ? [`- ${paymentFaq.a}`] : []),
+          `- ${h.ctaSubtext}`,
+        ],
+      },
+      {
+        heading: s.countries,
+        items: countries.flatMap((country) =>
+          SERVICES.map((service) =>
+            llmsLink(
+              `${nav[service.slug]} ${buildLocation(locale, country)}`,
+              `${SITE_URL}${PathBuilder.service(locale, service.slug, country.code)}`,
+            ),
           ),
         ),
-      ),
-    },
-    {
-      heading: s.cities,
-      items: countries.flatMap((country) =>
-        getCitiesForCountry(country.code).map((city) =>
-          llmsLink(
-            `${nav['vehicle-sourcing']} ${buildLocation(locale, undefined, city)}`,
-            `${SITE_URL}${PathBuilder.vehicleSourcingCity(locale, country.code, city.slug)}`,
+      },
+      {
+        heading: s.cities,
+        items: countries.flatMap((country) =>
+          getCitiesForCountry(country.code).map((city) =>
+            llmsLink(
+              `${nav['vehicle-sourcing']} ${buildLocation(locale, undefined, city)}`,
+              `${SITE_URL}${PathBuilder.vehicleSourcingCity(locale, country.code, city.slug)}`,
+            ),
           ),
         ),
-      ),
-    },
-    {
-      heading: s.vehicleImport,
-      items: [
-        llmsLink(
-          sc['vehicle-import'].hub.title,
-          `${SITE_URL}${PathBuilder.vehicleImportHub(locale)}`,
-        ),
-        ...IMPORT_SPOKES.map((spoke) =>
+      },
+      {
+        heading: s.vehicleImport,
+        items: [
           llmsLink(
-            sc['vehicle-import'][spoke].title,
-            `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, spoke)}`,
+            sc['vehicle-import'].hub.title,
+            `${SITE_URL}${PathBuilder.vehicleImportHub(locale)}`,
           ),
-        ),
-      ],
-    },
-    {
-      heading: nav.cases,
-      items: [
-        llmsLink(
-          nav.cases,
-          `${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}`,
-          cc['vehicle-sourcing'](cases.length),
-        ),
-      ],
-    },
-    {
-      heading: s.other,
-      items: [
-        llmsLink(t.common.homeLabel, `${SITE_URL}${PathBuilder.home(locale)}`),
-        llmsLink(nav.contacts, `${SITE_URL}${PathBuilder.contacts(locale)}`),
-      ],
-    },
-    {
-      heading: s.languages,
-      items: llmsLanguageLinks(SITE_URL, SUPPORTED_LOCALES, locale),
-    },
-  ]);
+          ...IMPORT_SPOKES.map((spoke) =>
+            llmsLink(
+              sc['vehicle-import'][spoke].title,
+              `${SITE_URL}${PathBuilder.vehicleImportSpoke(locale, spoke)}`,
+            ),
+          ),
+        ],
+      },
+      {
+        heading: nav.cases,
+        items: [
+          llmsLink(
+            nav.cases,
+            `${SITE_URL}${PathBuilder.casesVehicleSourcing(locale)}`,
+            cc['vehicle-sourcing'](cases.length),
+          ),
+        ],
+      },
+      {
+        heading: s.other,
+        items: [
+          llmsLink(
+            t.common.homeLabel,
+            `${SITE_URL}${PathBuilder.home(locale)}`,
+          ),
+          llmsLink(nav.contacts, `${SITE_URL}${PathBuilder.contacts(locale)}`),
+        ],
+      },
+      {
+        heading: s.languages,
+        items: llmsLanguageLinks(SITE_URL, SUPPORTED_LOCALES, locale),
+      },
+    ],
+    `${t.footer.developerCredit}: ${DEVELOPER.url}`,
+  );
 }

@@ -36,6 +36,33 @@ export const DETAILS = {
   captureBot: 'DetailsRsBot',
 } as const satisfies Brand;
 
+export const DEVELOPER = {
+  name: 'Zikrasoft',
+  url: 'https://zikrasoft.com/',
+} as const;
+
+export function developerCreditUrl(brand: Pick<Brand, 'domain'>): string {
+  const url = new URL(DEVELOPER.url);
+  url.search = new URLSearchParams({
+    utm_source: brand.domain,
+    utm_medium: 'referral',
+    utm_campaign: 'footer_credit',
+  }).toString();
+  return url.href;
+}
+
+export function splitDeveloperCredit(label: string): {
+  before: string;
+  after: string;
+} {
+  const at = label.indexOf(DEVELOPER.name);
+  if (at === -1) return { before: '', after: '' };
+  return {
+    before: label.slice(0, at),
+    after: label.slice(at + DEVELOPER.name.length),
+  };
+}
+
 // TODO: postalCode is left out until the owner confirms it — Zvezdara spans several.
 export const WORKSHOP_ADDRESS = {
   street: 'Jovana Ćirilova 23a',
