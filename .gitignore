@@ -44,4 +44,5 @@ graphify-out/
 coverage/
 
 # Local, never committed: identifiers of real people (see docs/guides/analytics-exclusions.md)
-.local/
+.local*/
+test-results
