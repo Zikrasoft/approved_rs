@@ -141,9 +141,9 @@ translations:
     telegramChoice:
       heading: Kako je lakše pisati?
       bot: Preko bota
-      botHint: Recite šta je sa automobilom, majstor će odgovoriti u istom chatu
-      manager: Direktno majstoru
-      managerHint: Lični chat sa majstorom na Telegramu
+      botHint: Recite šta je s automobilom, menadžer će odgovoriti u istom čatu
+      manager: Direktno menadžeru
+      managerHint: Lični chat s menadžerom na Telegramu
     form:
       heading: Zakazivanje konsultacije
       subheading: Pogledaćemo automobil, iskreno reći šta mu stvarno treba i navesti tačnu cenu.
@@ -228,9 +228,9 @@ translations:
     telegramChoice:
       heading: How would you prefer to reach out?
       bot: Via the bot
-      botHint: Share your car issue, the technician will reply in the same chat
-      manager: Directly to the technician
-      managerHint: Personal chat with the technician on Telegram
+      botHint: Tell us what’s wrong with your car, the manager will respond in this chat
+      manager: Directly to the manager
+      managerHint: Personal chat with the manager on Telegram
     form:
       heading: Book a Consultation
       subheading: We'll check your car, give honest feedback on its needs, and provide an exact price.
@@ -260,4 +260,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 10f1d09c53e3ecfd
+translatedFrom: cb78964604e64ea0

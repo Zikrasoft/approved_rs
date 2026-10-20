@@ -133,9 +133,9 @@ translations:
     telegramChoice:
       heading: Kako je bolje da pišete?
       bot: Kroz bota
-      botHint: Recite šta nije u redu sa autom, majstor će odgovoriti u istom čatu
-      manager: Direktno majstoru
-      managerHint: Lični čat sa majstorom na Telegramu
+      botHint: Ispričajte šta je sa vozilom, menadžer će odgovoriti u istom čatu
+      manager: Direktno menadžeru
+      managerHint: Lični chat sa menadžerom u Telegramu
     form:
       heading: Zakaži servis
       subheading: Opišite problem sa automobilom. Javićemo se sa detaljima, vremenom i cenom.
@@ -216,9 +216,9 @@ translations:
     telegramChoice:
       heading: What's the easiest way to reach us?
       bot: Through the bot
-      botHint: Tell us what's wrong with your car, the mechanic will respond in the same chat
-      manager: Directly to the mechanic
-      managerHint: Personal chat with the mechanic on Telegram
+      botHint: Tell us what's wrong with your car, and the manager will reply in the same chat
+      manager: Directly to the manager
+      managerHint: Personal chat with the manager on Telegram
     form:
       heading: Book a Service
       subheading: Describe what’s wrong with your car. We’ll call you back to clarify details and provide time and cost.
@@ -248,4 +248,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: e6bed777b3a2c1ee
+translatedFrom: c28e23b13d0f329b
