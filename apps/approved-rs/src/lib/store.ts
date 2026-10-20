@@ -28,6 +28,7 @@ export const {
   deleteLead,
   searchLeads,
   claimDigest,
+  recordDigestMessage,
   releaseDigest,
   expireGhostLeads,
   findIdleTopics,
@@ -52,6 +53,7 @@ export type {
   LedgerOperation,
   OperationType,
   PendingPrompt,
+  PostedDigest,
   PromptKey,
   StoredLead,
 } from '@podbor/lead-crm';

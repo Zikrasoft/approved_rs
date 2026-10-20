@@ -9,6 +9,7 @@ export const {
   touchLeadTopic,
   closeLeadTopic,
   afterStatusChange,
+  dropFromDigest,
   notifyLead,
   client,
   formatter,

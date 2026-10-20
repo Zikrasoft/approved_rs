@@ -29,7 +29,7 @@ import {
   buildDeleteConfirm,
   buildRemindPicker,
   editLeadDetailMessage,
-  redrawDigest,
+  dropFromDigest,
   OWNER_IDS,
   ADMIN_IDS,
   GROUP_ID,
@@ -214,17 +214,6 @@ async function afterStatusChangeOn(
   });
 }
 
-async function redrawDigestOn(ctx: Ctx, id: number): Promise<void> {
-  const redrawn = redrawDigest(ctx.message, await readLeads(), id);
-  if (redrawn)
-    await safeEditMessage(
-      ctx.chatId,
-      ctx.messageId,
-      redrawn.text,
-      redrawn.reply_markup,
-    );
-}
-
 async function startPrompt(
   ctx: Ctx,
   id: number,
@@ -261,7 +250,6 @@ async function changeStatus(
     await (fromDetail
       ? afterStatusChangeOn(ctx, updated)
       : afterStatusChange(updated, { author: authorOf(ctx) }));
-  if (!fromDetail) await redrawDigestOn(ctx, id);
   await answerCallback(
     ctx.cbId,
     updated ? LEAD_ACTION_COPY.statusUpdated : LEAD_ACTION_COPY.closed,
@@ -273,7 +261,7 @@ async function markInWork(ctx: Ctx, id: number): Promise<void> {
   if (lead?.status !== 'in_progress')
     return changeStatus(ctx, id, 'in_progress', false);
   await touchLead(id);
-  await redrawDigestOn(ctx, id);
+  await dropFromDigest(id);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
@@ -333,6 +321,7 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
 
 async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await deleteLead(id);
+  await dropFromDigest(id);
   await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });
