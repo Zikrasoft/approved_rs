@@ -99,6 +99,12 @@ translations:
       channelLinkLabel: Our Channel
       developerCredit: Site created by Zikrasoft
       aboutLabel: About the project
+    telegramChoice:
+      heading: What's the easiest way to reach out?
+      bot: Through the bot
+      botHint: Tell us what kind of car you need, the manager will respond in the same chat
+      manager: Directly to the manager
+      managerHint: Personal chat with the manager on Telegram
     common:
       otherServicesLabel: 'Other Services:'
       alsoWorkingInLabel: 'Also operating in:'
@@ -155,6 +161,12 @@ translations:
       channelLinkLabel: Naš kanal
       developerCredit: Sajt je napravila agencija Zikrasoft
       aboutLabel: O projektu
+    telegramChoice:
+      heading: Kako je bolje kontaktirati?
+      bot: Kroz bota
+      botHint: Recite koja vam kola trebaju, menadžer će odgovoriti u istom čatu
+      manager: Direktno menadžeru
+      managerHint: Lični čat sa menadžerom na Telegramu
     common:
       otherServicesLabel: 'Ostale usluge:'
       alsoWorkingInLabel: 'Takođe radimo u:'
@@ -211,6 +223,12 @@ translations:
       channelLinkLabel: Nuestro canal
       developerCredit: Sitio creado en el estudio Zikrasoft
       aboutLabel: Acerca del proyecto
+    telegramChoice:
+      heading: ¿Cómo prefieres escribir?
+      bot: A través del bot
+      botHint: Cuéntanos qué coche necesitas, el gerente responderá en el mismo chat
+      manager: Directamente al gerente
+      managerHint: Chat personal con el gerente en Telegram
     common:
       otherServicesLabel: 'Otros servicios:'
       alsoWorkingInLabel: 'También trabajamos en:'
@@ -267,6 +285,12 @@ translations:
       channelLinkLabel: Unser Kanal
       developerCredit: Die Seite wurde von Zikrasoft erstellt
       aboutLabel: Über das Projekt
+    telegramChoice:
+      heading: Wie möchten Sie uns am besten kontaktieren?
+      bot: Über den Bot
+      botHint: Erzählen Sie, welches Auto Sie benötigen, der Manager antwortet im selben Chat
+      manager: Direkt zum Manager
+      managerHint: Persönlicher Chat mit dem Manager über Telegram
     common:
       otherServicesLabel: 'Weitere Dienstleistungen:'
       alsoWorkingInLabel: 'Wir arbeiten auch in:'
@@ -285,4 +309,4 @@ translations:
         morePhotos: Mehr Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 5dc45f3e8a409a37
+translatedFrom: 726f7c9c392aae79
