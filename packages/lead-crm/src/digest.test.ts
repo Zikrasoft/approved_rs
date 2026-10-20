@@ -160,6 +160,58 @@ describe('claimDigest', () => {
   });
 });
 
+describe('the posted digest', () => {
+  const posted = { messageId: 77, due: [1], stale: [2, 3], hidden: 4 };
+
+  beforeEach(async () => {
+    storage.seed([storedLead(1), storedLead(2), storedLead(3)]);
+    await store.claimDigest(new Date(at(9)));
+    await store.recordDigestMessage(new Date(at(9)), posted);
+  });
+
+  it('takes a Lead out of the last posted digest and returns what is left', async () => {
+    expect(await store.takeFromDigest(2)).toEqual({
+      messageId: 77,
+      due: [1],
+      stale: [3],
+      hidden: 4,
+    });
+    expect(await store.takeFromDigest(1)).toEqual({
+      messageId: 77,
+      due: [],
+      stale: [3],
+      hidden: 4,
+    });
+  });
+
+  it('leaves the digest alone for a Lead it does not show', async () => {
+    expect(await store.takeFromDigest(9)).toBeUndefined();
+    expect(await store.takeFromDigest(2)).toMatchObject({ stale: [3] });
+  });
+
+  it('only ever edits the latest digest', async () => {
+    await store.claimDigest(new Date(at(17)));
+    await store.recordDigestMessage(new Date(at(17)), {
+      messageId: 88,
+      due: [],
+      stale: [1],
+      hidden: 0,
+    });
+
+    expect(await store.takeFromDigest(2)).toBeUndefined();
+    expect(await store.takeFromDigest(1)).toMatchObject({ messageId: 88 });
+  });
+
+  it('records nothing when the day was never claimed', async () => {
+    await store.recordDigestMessage(new Date(at(20)), {
+      ...posted,
+      messageId: 99,
+    });
+
+    expect(await store.takeFromDigest(2)).toMatchObject({ messageId: 77 });
+  });
+});
+
 describe('every action on a Lead resets its clock', () => {
   beforeEach(() => {
     storage.seed([storedLead(1, { status: 'lost' })]);

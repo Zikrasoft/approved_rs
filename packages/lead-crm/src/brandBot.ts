@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   createAfterStatusChange,
+  createDropFromDigest,
   createCloseLeadTopic,
   createEnsureLeadCard,
   createEnsureLeadTopic,
@@ -66,6 +67,7 @@ export function createBrandBot({
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });
   const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });
   const closeLeadTopic = createCloseLeadTopic({ store, notifier });
+  const dropFromDigest = createDropFromDigest({ store, notifier });
   return {
     notifier,
     ensureLeadCard,
@@ -77,7 +79,9 @@ export function createBrandBot({
       ensureLeadTopic,
       closeLeadTopic,
       notifier,
+      dropFromDigest,
     }),
+    dropFromDigest,
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,

@@ -14,7 +14,7 @@ import {
   type Keyboard,
   type Role,
 } from './markup.ts';
-import { digestMessage, redrawDigest } from './digest.ts';
+import { digestMessage, renderDigest } from './digest.ts';
 import { OPERATION_AUTHORS } from './ledger.ts';
 import { buildHelp } from './menu.ts';
 
@@ -400,8 +400,8 @@ export function createFormatter({
 
     digestMessage: (digest: Digest) => digestMessage(digest, botUsername),
 
-    redrawDigest: (message: unknown, leads: StoredLead[], actedOn: number) =>
-      redrawDigest(message, leads, actedOn, botUsername),
+    redrawDigest: (digest: Digest, hidden: number) =>
+      renderDigest(digest, botUsername, hidden),
 
     buildHelp,
 

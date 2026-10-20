@@ -58,10 +58,19 @@ export interface Digest {
   due: StoredLead[];
 }
 
+const postedDigestSchema = z.object({
+  messageId: z.number().int(),
+  due: z.array(z.number().int()),
+  stale: z.array(z.number().int()),
+  hidden: z.number().int(),
+});
+export type PostedDigest = z.infer<typeof postedDigestSchema>;
+
 const digestMarkSchema = z.object({
   type: z.literal('digest'),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   createdAt: z.string(),
+  posted: postedDigestSchema.optional(),
 });
 type DigestMark = z.infer<typeof digestMarkSchema>;
 
@@ -727,6 +736,34 @@ export function createLeadStore({
         return { digests: [mark] };
       });
       return claimed;
+    },
+
+    async recordDigestMessage(now: Date, posted: PostedDigest): Promise<void> {
+      const day = businessDay(now);
+      await updateRecords(({ digests }) => ({
+        digests: digests.map((d) => (d.day === day ? { ...d, posted } : d)),
+      }));
+    },
+
+    async takeFromDigest(leadId: number): Promise<PostedDigest | undefined> {
+      let left: PostedDigest | undefined;
+      await updateRecords(({ digests }) => {
+        left = undefined;
+        const latest = digests.at(-1);
+        const posted = latest?.posted;
+        if (!posted || ![...posted.due, ...posted.stale].includes(leadId))
+          return {};
+        const without = (ids: number[]) => ids.filter((id) => id !== leadId);
+        left = {
+          ...posted,
+          due: without(posted.due),
+          stale: without(posted.stale),
+        };
+        return {
+          digests: [...digests.slice(0, -1), { ...latest, posted: left }],
+        };
+      });
+      return left;
     },
 
     async releaseDigest(now: Date): Promise<void> {

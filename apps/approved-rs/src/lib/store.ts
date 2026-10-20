@@ -28,6 +28,7 @@ export const {
   deleteLead,
   searchLeads,
   claimDigest,
+  recordDigestMessage,
   releaseDigest,
   expireGhostLeads,
   findIdleTopics,

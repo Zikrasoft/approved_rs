@@ -62,6 +62,7 @@ const {
   sendFieldChange,
   sendNoteNotice,
   sendDigest,
+  editDigest,
   sendPostponeReminder,
   editLeadDetailMessage,
   openLeadTopic,
@@ -570,17 +571,17 @@ describe('sendDigest', () => {
   const empty = { stale: [], due: [] };
 
   it('posts nothing when no Lead needs a decision', async () => {
-    expect(await sendDigest(empty)).toBe(false);
+    expect(await sendDigest(empty)).toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('posts one message to the group, a section per reason and a ✅ ❌ 🔵 row per Lead', async () => {
+  it('posts one message to the group, a section per reason, no buttons', async () => {
     const sent = await sendDigest({
       stale: [makeLead({ id: 3, name: '<Пётр>' })],
       due: [makeLead({ id: 5, status: 'postponed', name: '' })],
     });
 
-    expect(sent).toBe(true);
+    expect(sent).toEqual({ messageId: 999, due: [5], stale: [3], hidden: 0 });
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('-1009876543210');
@@ -594,31 +595,57 @@ describe('sendDigest', () => {
       '<b>🕐 Без движения 7 дней</b>',
       '<a href="https://t.me/approved_test_bot?start=lead_3">#3</a> &lt;Пётр&gt; · Approved.rs',
     ]);
-    expect(body.reply_markup.inline_keyboard).toEqual(
-      [5, 3].map((id) => [
-        { text: `✅ Сделка #${id}`, callback_data: `won:${id}` },
-        { text: `❌ Отказ #${id}`, callback_data: `lost:${id}` },
-        { text: `🔵 В работе #${id}`, callback_data: `work:${id}` },
-      ]),
-    );
+    expect(body.reply_markup).toBeUndefined();
   });
 
-  it('caps the rows inside the keyboard and length limits and counts the rest', async () => {
+  it('caps the Leads inside the length limit and counts the rest', async () => {
     const many = (from: number, n: number) =>
       Array.from({ length: n }, (_, i) =>
         makeLead({ id: from + i, name: 'Я'.repeat(500) }),
       );
 
-    await sendDigest({
+    const sent = await sendDigest({
       due: many(1, 15),
       stale: many(200, 15),
     });
 
+    expect(sent).toMatchObject({
+      stale: [200, 201, 202, 203, 204],
+      hidden: 10,
+    });
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(body.reply_markup.inline_keyboard).toHaveLength(20);
+    expect(body.text.match(/start=lead_/g)).toHaveLength(20);
     expect(body.text).toContain('Без движения');
     expect(body.text.endsWith('+10 ещё')).toBe(true);
     expect(body.text.length).toBeLessThan(4096);
+  });
+
+  it('redraws a posted digest with what is left, keeping the hidden count', async () => {
+    api.reset();
+    mockFetch.mockImplementation(api.fetch);
+
+    await editDigest(77, { due: [], stale: [makeLead({ id: 4 })] }, 2);
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toMatchObject({ chat_id: '-1009876543210', message_id: 77 });
+    expect(body.text.split('\n')).toEqual([
+      '<b>📋 Заявки ждут решения</b>',
+      '',
+      '<b>🕐 Без движения 7 дней</b>',
+      '<a href="https://t.me/approved_test_bot?start=lead_4">#4</a> Иван · Approved.rs',
+      '',
+      '+2 ещё',
+    ]);
+  });
+
+  it('says so once nothing is left', async () => {
+    api.reset();
+    mockFetch.mockImplementation(api.fetch);
+
+    await editDigest(77, empty, 0);
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.text).toBe('<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано');
   });
 
   it('lets a failed send reach the cron', async () => {
@@ -630,92 +657,6 @@ describe('sendDigest', () => {
     await expect(
       sendDigest({ ...empty, stale: [makeLead()] }),
     ).rejects.toThrow();
-  });
-});
-
-describe('redrawDigest', () => {
-  const posted = async (digest: { due: StoredLead[]; stale: StoredLead[] }) => {
-    mockFetchOk();
-    await sendDigest(digest);
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    mockFetch.mockReset();
-    return {
-      text: (body.text as string).replace(/<[^>]+>/g, ''),
-      reply_markup: body.reply_markup,
-    };
-  };
-  const lines = (view: { text: string } | null) => view?.text.split('\n');
-
-  it('drops the tapped Lead and keeps the rest in their sections with their status', async () => {
-    const message = await posted({
-      due: [makeLead({ id: 5, status: 'postponed' })],
-      stale: [makeLead({ id: 3 }), makeLead({ id: 4 })],
-    });
-    const leads = [
-      makeLead({ id: 5, status: 'in_progress' }),
-      makeLead({ id: 3, status: 'won' }),
-      makeLead({ id: 4, status: 'negotiations' }),
-    ];
-
-    const redrawn = formatter.redrawDigest(message, leads, 3);
-
-    expect(lines(redrawn)).toEqual([
-      '<b>📋 Заявки ждут решения</b>',
-      '',
-      '<b>⏰ Пора вернуться</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_5">#5</a> Иван · Approved.rs · 🔵 В работе',
-      '',
-      '<b>🕐 Без движения 7 дней</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_4">#4</a> Иван · Approved.rs · 🗣 Переговоры',
-    ]);
-    expect(
-      redrawn?.reply_markup.inline_keyboard.map(([b]) => b!.callback_data),
-    ).toEqual(['won:5', 'won:4']);
-  });
-
-  it('drops Leads that closed or vanished elsewhere and says when nothing is left', async () => {
-    const message = await posted({
-      due: [],
-      stale: [makeLead({ id: 3 }), makeLead({ id: 4 })],
-    });
-
-    const redrawn = formatter.redrawDigest(
-      message,
-      [makeLead({ id: 4, status: 'lost' })],
-      9,
-    );
-
-    expect(redrawn).toEqual({
-      text: '<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано',
-      reply_markup: { inline_keyboard: [] },
-    });
-  });
-
-  it('keeps the count of Leads the message never showed', async () => {
-    const many = Array.from({ length: 21 }, (_, i) => makeLead({ id: i + 1 }));
-    const message = await posted({ due: [], stale: many });
-
-    const redrawn = formatter.redrawDigest(message, many, 1);
-
-    expect(redrawn?.reply_markup.inline_keyboard).toHaveLength(19);
-    expect(redrawn?.text.endsWith('\n\n+1 ещё')).toBe(true);
-  });
-
-  it.each([
-    ['a group card', formatter.deepLinkKeyboard(makeLead())],
-    [
-      'a lead detail',
-      formatter.buildLeadDetail(makeLead(), 'owner').reply_markup,
-    ],
-    ['an empty keyboard', { inline_keyboard: [] }],
-  ])('leaves %s alone', (_, reply_markup) => {
-    expect(
-      formatter.redrawDigest({ text: 'x', reply_markup }, [makeLead()], 5),
-    ).toBeNull();
-  });
-
-  it('leaves a message without a keyboard alone', () => {
-    expect(formatter.redrawDigest({ text: 'x' }, [], 5)).toBeNull();
   });
 });
 
