@@ -106,10 +106,8 @@ to approved.rs itself.
 **A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
-`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once
-(`@podbor/i18n`, `@podbor/brands` and `@podbor/shop-catalog` also mark
-`apps/medusa` stale; its `deploy-medusa` job ships it in the same run, before
-all three sites, and a failed medusa deploy holds all three back). All
+`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once.
+CI no longer builds, tests or deploys `apps/medusa`. All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in

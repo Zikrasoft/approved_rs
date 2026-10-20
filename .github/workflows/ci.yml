@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  MEDUSA_IMAGE: ghcr.io/zikrasoft/podbor-medusa
   ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12
 
 jobs:
@@ -34,9 +33,6 @@ jobs:
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
 
-      # The two sites that prerender without a backend, so the markup contracts
-      # site-kit owns are checked against real HTML rather than a grep. CarLab
-      # needs a live Medusa to prerender and is left to its deploy build.
       - env:
           PUBLIC_PHONE_NUMBER: '381000000000'
           PUBLIC_WHATSAPP_NUMBER: '381000000000'
@@ -50,39 +46,10 @@ jobs:
           apps/approved-rs/dist/client apps/detailing/dist/client
 
       - run: sh .github/scripts/catalog-stale.test.sh
-      - run: sh infra/medusa/test/scripts.test.sh
-      - run: sh infra/medusa/test/compose.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
-          .github/scripts/*.sh infra/medusa/*.sh infra/medusa/test/*.sh
+          .github/scripts/*.sh
       - run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
-
-  medusa-integration:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    services:
-      postgres:
-        image: public.ecr.aws/docker/library/postgres:16.15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: medusa
-        ports: ['55432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 2s
-          --health-timeout 5s --health-retries 30
-      redis:
-        image: public.ecr.aws/docker/library/redis:7.4.9-alpine
-        ports: ['56379:6379']
-        options: >-
-          --health-cmd "redis-cli ping" --health-interval 2s
-          --health-timeout 5s --health-retries 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm turbo run build --filter=@podbor/medusa^...
-      - run: pnpm --filter @podbor/medusa test:integration:http
 
   translate:
     needs: check
@@ -185,8 +152,6 @@ jobs:
                  .npmrc .node-version .pnpmfile.cjs \
                  .github/actions/setup-pnpm/action.yml; then
               reason='root build config changed'
-            elif [ "$app" = medusa ] && ! git diff --quiet "$base" HEAD -- infra/medusa; then
-              reason='infra/medusa changed'
             elif app_changed "$app" "$base"; then
               reason="changed since $base"
             elif [ "$app" = auto-service ] && ! catalog=$(.github/scripts/catalog-stale.sh); then
@@ -200,183 +165,11 @@ jobs:
           done
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
 
-  medusa-image:
-    needs: [translate, verify, medusa-integration]
-    if: >-
-      needs.verify.result == 'success' &&
-      needs.medusa-integration.result == 'success' &&
-      (github.ref != 'refs/heads/main' ||
-       contains(fromJSON(needs.verify.outputs.changed), 'medusa'))
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    services:
-      postgres:
-        image: public.ecr.aws/docker/library/postgres:16.15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: medusa
-        ports: ['55432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 2s
-          --health-timeout 5s --health-retries 30
-      redis:
-        image: public.ecr.aws/docker/library/redis:7.4.9-alpine
-        ports: ['56379:6379']
-        options: >-
-          --health-cmd "redis-cli ping" --health-interval 2s
-          --health-timeout 5s --health-retries 30
-    env:
-      SHA: ${{ needs.translate.outputs.sha }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.translate.outputs.sha }}
-          persist-credentials: false
-
-      - name: Build
-        run: |
-          docker buildx build --load \
-            --file infra/medusa/Dockerfile \
-            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-            --tag "$MEDUSA_IMAGE:$SHA" \
-            .
-          docker image inspect "$MEDUSA_IMAGE:$SHA" --format 'image size: {{.Size}} bytes'
-
-      - name: Migrate a blank database and boot to healthy
-        run: |
-          {
-            echo "DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/medusa"
-            echo "REDIS_URL=redis://127.0.0.1:56379"
-            echo "JWT_SECRET=$(openssl rand -hex 32)"
-            echo "COOKIE_SECRET=$(openssl rand -hex 32)"
-            echo "MEDUSA_BACKEND_URL=https://api.carlab.test"
-          } >"$RUNNER_TEMP/medusa.env"
-          docker run --rm --network host --env-file "$RUNNER_TEMP/medusa.env" "$MEDUSA_IMAGE:$SHA" \
-            node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
-          docker run -d --name medusa --network host --env-file "$RUNNER_TEMP/medusa.env" "$MEDUSA_IMAGE:$SHA"
-          for _ in $(seq 60); do
-            status=$(docker inspect --format '{{.State.Health.Status}}' medusa)
-            case "$status" in
-              healthy | unhealthy) break ;;
-            esac
-            [ "$(docker inspect --format '{{.State.Running}}' medusa)" = true ] || break
-            sleep 3
-          done
-          docker logs medusa 2>&1 | tail -40
-          [ "$status" = healthy ]
-
-      - name: Push
-        if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VPS_HOST: ${{ secrets.MEDUSA_VPS_HOST }}
-          VPS_USER: ${{ secrets.MEDUSA_VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.MEDUSA_VPS_SSH_KEY }}
-          VPS_KNOWN_HOSTS: ${{ secrets.MEDUSA_VPS_KNOWN_HOSTS }}
-        run: |
-          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
-            echo "MEDUSA_VPS_* secrets are not set — nothing will deploy the image, so it is not pushed."
-            exit 0
-          fi
-          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          docker push "$MEDUSA_IMAGE:$SHA"
-
-  deploy-medusa:
-    needs: [translate, verify, medusa-image]
-    # TODO: paused pending the shop rebuild, see docs/adr/0034-pause-medusa-deploy-pending-shop-rebuild.md.
-    # Remove the `false &&` once the new shop ships.
-    if: >-
-      false &&
-      needs.medusa-image.result == 'success' &&
-      github.ref == 'refs/heads/main' &&
-      contains(fromJSON(needs.verify.outputs.changed), 'medusa')
-    runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      contents: read
-      packages: read
-    outputs:
-      deployed: ${{ steps.result.outputs.deployed }}
-    env:
-      SHA: ${{ needs.translate.outputs.sha }}
-      VPS_HOST: ${{ secrets.MEDUSA_VPS_HOST }}
-      VPS_USER: ${{ secrets.MEDUSA_VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.MEDUSA_VPS_SSH_KEY }}
-      VPS_KNOWN_HOSTS: ${{ secrets.MEDUSA_VPS_KNOWN_HOSTS }}
-    steps:
-      - id: guard
-        run: |
-          if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "MEDUSA_VPS_* secrets are not set — skipping the medusa deploy."
-          else
-            echo "deploy=true" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/checkout@v4
-        if: steps.guard.outputs.deploy == 'true'
-        with:
-          ref: ${{ needs.translate.outputs.sha }}
-          persist-credentials: false
-      - name: SSH identity
-        if: steps.guard.outputs.deploy == 'true'
-        run: |
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "$VPS_SSH_KEY" >~/.ssh/id_ed25519
-          printf '%s\n' "$VPS_KNOWN_HOSTS" >~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
-          echo "TARGET=$VPS_USER@$VPS_HOST" >>"$GITHUB_ENV"
-      - name: Ship the stack files
-        if: steps.guard.outputs.deploy == 'true'
-        run: |
-          tar -C infra/medusa -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh \
-            | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
-      - name: Deploy
-        if: steps.guard.outputs.deploy == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "$GH_TOKEN" | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" \
-            "docker login ghcr.io -u '$GITHUB_ACTOR' --password-stdin"
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" "/srv/carlab/deploy.sh $SHA"
-      - name: Log the host out of GHCR
-        if: always() && steps.guard.outputs.deploy == 'true'
-        run: ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'docker logout ghcr.io' || true
-      - id: result
-        if: steps.guard.outputs.deploy == 'true'
-        run: echo "deployed=true" >> "$GITHUB_OUTPUT"
-
-  record-medusa:
-    needs: [translate, deploy-medusa]
-    if: needs.deploy-medusa.outputs.deployed == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      SHA: ${{ needs.translate.outputs.sha }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.translate.outputs.sha }}
-          persist-credentials: false
-      - name: Record what is live
-        env:
-          GH_TOKEN: ${{ github.token }}
-          APP: medusa
-        run: |
-          gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
-              -f sha="$SHA" -F force=true \
-            || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
-              -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
-
   deploy:
-    needs: [translate, verify, deploy-medusa]
+    needs: [translate, verify]
     if: >-
       !cancelled() &&
       needs.verify.result == 'success' &&
-      needs.deploy-medusa.result != 'failure' &&
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(needs.verify.outputs.changed), 'approved-rs')
     runs-on: ubuntu-latest
@@ -411,11 +204,10 @@ jobs:
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
   deploy-brand-site:
-    needs: [translate, verify, deploy-medusa]
+    needs: [translate, verify]
     if: >-
       !cancelled() &&
       needs.verify.result == 'success' &&
-      needs.deploy-medusa.result != 'failure' &&
       github.ref == 'refs/heads/main' &&
       needs.verify.outputs.changed != '[]'
     runs-on: ubuntu-latest
