@@ -84,14 +84,10 @@ already fixed in each app's `vercel.json`:
 ### Job order
 
 `check` (lint/prettier/typecheck/test, the shell tests for the scripts,
-shellcheck, actionlint) → `translate` → `verify`; in parallel with them
-`medusa-integration` (Medusa's HTTP tests against postgres and redis from
-`services:`), which only `medusa-image` waits for. Then `medusa-image` →
-`deploy-medusa` → `record-medusa` (which moves the tag), `deploy` (approved.rs) and
-`deploy-brand-site`: both site deploys wait for `deploy-medusa` and are held back
-only if it _failed_ (a skipped `deploy-medusa` does not hold them) — otherwise a
-broken VPS would ship approved.rs without the other two sites and split the lead
-schema in `data/leads.json`. The `deploy*` jobs only run on `main`, each only if
+shellcheck, actionlint) → `translate` → `verify` → `deploy` (approved.rs) and
+`deploy-brand-site`. CI has no Medusa jobs: the Medusa build, its integration
+tests and its VPS deploy were removed, so the sections below about the Medusa
+stack describe a manual setup, not a CI step. The `deploy*` jobs only run on `main`, each only if
 the previous one passed. The workflow fires on a push to any **branch** and never
 on a tag: a tag filter without a branch filter would switch branches off entirely,
 and on a tag checkout `translate` would find itself on a detached HEAD, unable to
@@ -548,30 +544,20 @@ set) — and the workflow is green.
 
 ### Job permissions
 
-`GITHUB_TOKEN` is granted per job rather than for the whole file. Four jobs hold
+`GITHUB_TOKEN` is granted per job rather than for the whole file. Three jobs hold
 `contents: write`, for two different reasons:
 
-| Job                  | `permissions`                       | Why exactly that much                                                                      |
-| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------ |
-| `check`              | `contents: read`                    | checkout only                                                                              |
-| `translate`          | `contents: write`                   | commits and pushes translations into the same branch                                       |
-| `verify`             | `contents: read`                    | a checkout with `fetch-depth: 0` — the `deployed/*` tags arrive with the history           |
-| `medusa-integration` | `contents: read`                    | checkout only                                                                              |
-| `medusa-image`       | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-medusa:<sha>` to GHCR                                     |
-| `deploy-medusa`      | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo   |
-| `record-medusa`      | `contents: write`                   | moves `deployed/medusa` after a successful `deploy-medusa` — a separate job, only for that |
-| `deploy`             | `contents: write`                   | moves `refs/tags/deployed/approved-rs` after a successful deploy                           |
-| `deploy-brand-site`  | `contents: write`                   | the same for `deployed/detailing` and `deployed/auto-service`                              |
+| Job                 | `permissions`     | Why exactly that much                                                            |
+| ------------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `check`             | `contents: read`  | checkout only                                                                    |
+| `translate`         | `contents: write` | commits and pushes translations into the same branch                             |
+| `verify`            | `contents: read`  | a checkout with `fetch-depth: 0` — the `deployed/*` tags arrive with the history |
+| `deploy`            | `contents: write` | moves `refs/tags/deployed/approved-rs` after a successful deploy                 |
+| `deploy-brand-site` | `contents: write` | the same for `deployed/detailing` and `deployed/auto-service`                    |
 
 Write access for `translate` and write access for the deploy jobs are different
 things: the first changes a branch's contents, the second touches only housekeeping
-tags. Moving `deployed/medusa` was split into its own `record-medusa` job on
-purpose: `deploy-medusa` sends its `GITHUB_TOKEN` to the server (a one-shot GHCR
-login), and a token that can write to the repository has no business being there —
-what travels to the VPS is a token that can only read packages. An accepted risk:
-that same token also carries `contents: read`, so while the job is alive the private
-repository can be read from the server. Beyond `contents`, the workflow asks only
-for `packages`, and only in the two Medusa jobs.
+tags. The workflow asks for nothing beyond `contents`.
 
 Both deploy jobs check out with `persist-credentials: false`. They need the token
 only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
@@ -1063,9 +1049,11 @@ sees) and once per locale the site serves. The texts are the `profile` group of
 that app's `captureBot.yaml` — written in Russian, translated by the CI
 `translate` job like the rest of the capture copy. Run it by hand, from inside
 the app, after a change to that group has been translated and merged; until
-then a locale without a translation gets the Russian text. It is not a CI step,
-and a missing `TELEGRAM_CAPTURE_BOT_TOKEN` exits non-zero without calling
-Telegram:
+then a locale without a translation gets the Russian text. A `{manager}` in
+either description becomes `@` plus the app's `PUBLIC_TG_MANAGER`, so a visitor
+who will not press Start still sees whom to write to. It is not a CI step, and
+a missing `TELEGRAM_CAPTURE_BOT_TOKEN` or `PUBLIC_TG_MANAGER` exits non-zero
+without calling Telegram:
 
 ```bash
 cd apps/approved-rs && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts

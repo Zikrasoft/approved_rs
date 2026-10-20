@@ -73,6 +73,15 @@ export const siteContentSchema = z
         telegram: z.string(),
       })
       .strict(),
+    telegramChoice: z
+      .object({
+        heading: z.string(),
+        bot: z.string(),
+        botHint: z.string(),
+        manager: z.string(),
+        managerHint: z.string(),
+      })
+      .strict(),
     form: z
       .object({
         heading: z.string(),

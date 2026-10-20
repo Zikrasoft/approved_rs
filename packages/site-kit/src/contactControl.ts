@@ -35,6 +35,10 @@ export type ContactControl = {
 
 const MESSENGER_ATTRS = { target: '_blank', rel: 'noopener' };
 
+export const TELEGRAM_CHOICE_ATTRIBUTE = 'data-telegram-choice';
+
+export const TELEGRAM_CHOICE_SELECTOR = `[${TELEGRAM_CHOICE_ATTRIBUTE}]`;
+
 export const createContactControls =
   (brand: BrandContacts) =>
   ({
@@ -54,20 +58,24 @@ export const createContactControls =
         ...(onThanks && region === 'contacts' && { plainNumber: brand.phone }),
       };
 
-    const href = {
-      whatsapp: () =>
-        whatsappLink(brand.whatsapp, brand.prefill?.(locale, service)),
-      viber: () => viberLink(brand.viber),
-      telegram: () =>
-        (onThanks || manager) && brand.humanTelegram
-          ? telegramLink(brand.humanTelegram)
-          : captureBotLink(brand.captureBot, locale, service),
-    }[channel]();
-    return {
-      href,
-      attrs: { ...channelAttr, ...MESSENGER_ATTRS },
-      pointer: 'any',
-    };
+    const attrs = { ...channelAttr, ...MESSENGER_ATTRS };
+    const pointer = 'any';
+    if (channel === 'telegram') {
+      const bot = captureBotLink(brand.captureBot, locale, service);
+      if (!brand.humanTelegram) return { href: bot, attrs, pointer };
+      const human = telegramLink(brand.humanTelegram);
+      if (onThanks || manager) return { href: human, attrs, pointer };
+      return {
+        href: bot,
+        attrs: { ...attrs, [TELEGRAM_CHOICE_ATTRIBUTE]: human },
+        pointer,
+      };
+    }
+    const href =
+      channel === 'whatsapp'
+        ? whatsappLink(brand.whatsapp, brand.prefill?.(locale, service))
+        : viberLink(brand.viber);
+    return { href, attrs, pointer };
   };
 
 const IN_FLOW_PLACEMENTS: readonly ContactPlacement[] = [

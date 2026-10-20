@@ -58,6 +58,15 @@ export const dictionaryContentSchema = z
         aboutLabel: z.string(),
       })
       .strict(),
+    telegramChoice: z
+      .object({
+        heading: z.string(),
+        bot: z.string(),
+        botHint: z.string(),
+        manager: z.string(),
+        managerHint: z.string(),
+      })
+      .strict(),
     common: z
       .object({
         otherServicesLabel: z.string(),

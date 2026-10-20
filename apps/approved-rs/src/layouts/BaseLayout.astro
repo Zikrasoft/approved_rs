@@ -8,6 +8,7 @@ import IconSprite from '@/components/icons/IconSprite.astro';
 import Footer from '@/components/Footer.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
+import TelegramChoice from '@/components/TelegramChoice.astro';
 import '../styles/global.css';
 import { SITE_NAME } from '@/utils/constants';
 import { localeFrom } from '@/i18n/config';
@@ -144,6 +145,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     </main>
     <Footer />
     <FloatingContactWidget />
+    <TelegramChoice />
     <CookieConsent />
     <script is:inline>
       setTimeout(function () {
