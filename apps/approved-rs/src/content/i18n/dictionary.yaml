@@ -54,6 +54,12 @@ common:
     morePhotos: Больше фото
     prev: Предыдущее фото
     next: Следующее фото
+telegramChoice:
+  heading: Как удобнее написать?
+  bot: Через бота
+  botHint: Расскажите, какая машина нужна, менеджер ответит в том же чате
+  manager: Менеджеру напрямую
+  managerHint: Личный чат с менеджером в Telegram
 translations:
   en:
     llms:

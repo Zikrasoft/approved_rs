@@ -1063,9 +1063,11 @@ sees) and once per locale the site serves. The texts are the `profile` group of
 that app's `captureBot.yaml` — written in Russian, translated by the CI
 `translate` job like the rest of the capture copy. Run it by hand, from inside
 the app, after a change to that group has been translated and merged; until
-then a locale without a translation gets the Russian text. It is not a CI step,
-and a missing `TELEGRAM_CAPTURE_BOT_TOKEN` exits non-zero without calling
-Telegram:
+then a locale without a translation gets the Russian text. A `{manager}` in
+either description becomes `@` plus the app's `PUBLIC_TG_MANAGER`, so a visitor
+who will not press Start still sees whom to write to. It is not a CI step, and
+a missing `TELEGRAM_CAPTURE_BOT_TOKEN` or `PUBLIC_TG_MANAGER` exits non-zero
+without calling Telegram:
 
 ```bash
 cd apps/approved-rs && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts

@@ -7,6 +7,7 @@ export const GOALS = {
   formSubmit: 'form_submit',
   contactClick: 'contact_click',
   leadModalOpen: 'lead_modal_open',
+  telegramChoice: 'telegram_choice',
   brandLinkClick: 'brand_link_click',
   developerCreditClick: 'developer_credit_click',
   langOfferShown: 'lang_offer_shown',

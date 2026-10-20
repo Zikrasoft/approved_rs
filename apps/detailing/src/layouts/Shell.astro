@@ -16,6 +16,7 @@ import bodyCyrillicUrl from '@fontsource-variable/manrope/files/manrope-cyrillic
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
+import TelegramChoice from '@/components/TelegramChoice.astro';
 import FloatingCta from '@/components/FloatingCta.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
@@ -176,6 +177,7 @@ const businessSchema = localBusinessSchema({
     </main>
     <SiteFooter />
     <LeadModal />
+    <TelegramChoice />
     <FloatingCta />
     <CookieConsent />
 

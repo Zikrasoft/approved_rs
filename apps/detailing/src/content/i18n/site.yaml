@@ -79,6 +79,12 @@ cookie:
   decline: Отклонить
   settings: Настройки cookie
 
+telegramChoice:
+  heading: Как удобнее написать?
+  bot: Через бота
+  botHint: Расскажите, что с машиной, мастер ответит в том же чате
+  manager: Мастеру напрямую
+  managerHint: Личный чат с мастером в Telegram
 translations:
   sr:
     nav:

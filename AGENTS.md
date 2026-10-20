@@ -276,7 +276,9 @@ Both new apps follow the same shape, and a third should too:
   CRO audit priced the detour (issue #56,
   `docs/adr/0015-lead-form-asks-only-for-a-contact.md`); do not re-add it. The
   form keeps its own doors there: the header CTA, the callback control, the
-  partner block and the inline form in the same fold.
+  partner block and the inline form in the same fold. The one step allowed
+  before Telegram is the bot-or-manager choice below, because both of its
+  options still open Telegram.
 - **A `tel:` control only exists where a dialer does**, on all three sites.
   `createContactControls` in `@podbor/site-kit/contact-control` encodes the
   contract — the phone is `coarse-only`, the plain-number twin exists only on
@@ -344,8 +346,8 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat. **approved.rs has two human-account
-  carve-outs.** The first is `/thanks/`: the visitor there has just sent the
+  second, unmergeable card in the chat. **Every site has a `/thanks/`
+  human-account carve-out, and approved.rs a second one.** The first is `/thanks/`: the visitor there has just sent the
   form, so its Telegram tile opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
   never a `packages/brands` field, because it is a staff account rather than
   brand identity) through `telegramLink`, with no `?start=`, and falls back to
@@ -355,7 +357,18 @@ Both new apps follow the same shape, and a third should too:
   second is the footer's «Написать менеджеру» control and its icon twin: the
   label promises the manager, so the call site passes `manager`, which names
   the control rather than the page, and `createContactControls` picks the same
-  `humanTelegram` on any page. Each capture bot's «Написать менеджеру» menu
+  `humanTelegram` on any page. **Every other tile that opens the bot asks
+  first** ([ADR-0042](docs/adr/0042-telegram-tap-offers-bot-or-manager.md)):
+  when `humanTelegram` is set, `createContactControls` stamps the manager's
+  link on it as `data-telegram-choice`, and each app's `TelegramChoice.astro`,
+  mounted once in the layout, is a `defineTelegramChoice` dialog that opens on
+  that attribute and copies the tapped tile's stamped bot href into its bot
+  option. One dialog per page, in the layout, not one per tile: a dialog inside
+  the mobile menu goes inert when the menu closes on the tap. The tile keeps
+  its own `data-contact-channel`, so the tap beacons exactly as before, and the
+  two options carry none, so a choice is never counted twice. The capture
+  bot's profile names the manager as well: `{manager}` in the `profile` copy
+  of `captureBot.yaml` becomes `@` plus `PUBLIC_TG_MANAGER`. Each capture bot's «Написать менеджеру» menu
   button follows the same rule: `humanTelegram` in the app's
   `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
   hand-off: the button stays a callback so the tap can first stamp
