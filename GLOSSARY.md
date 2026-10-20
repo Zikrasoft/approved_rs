@@ -16,18 +16,66 @@ _Avoid_: part number (ambiguous about whose number), supplier SKU (that's Suppli
 One supplier's or warehouse's sellable line for a specific `PartIdentifier` (brand-variant) of a Part: their own article id, price, stock quantity, and lead-time tier (in-stock / N-days / etc, broken out per physical warehouse where the supplier's own stock feed does that). A supplier selling both the Mann-Filter and the Bosch version of the same Part creates two SupplierOffers — one per `PartIdentifier` — each its own purchasable line and its own price; the storefront never hides which brand-variant it's selling behind one generic "buy" button. Our own warehouse is a supplier like any other for this purpose.
 _Avoid_: Listing, Offer (bare) — always qualify with "supplier" or "warehouse"
 
+**Category**:
+A customer-facing group of Parts that do the same job (oil filter, cabin filter, spark plugs). Every Part belongs to exactly one Category. Staff maintain the list and its descriptive text, and a Vehicle's Parts are browsed per Category.
+_Avoid_: Group, Hauptgruppe (that is BMW's own catalogue structure, which this shop does not reproduce)
+
+**Make**:
+A vehicle manufacturer whose cars the shop covers (BMW, Mercedes-Benz). Its VINs are recognised by their first three characters.
+_Avoid_: Brand (that word is taken by a PartIdentifier's brand)
+
+**Series**:
+A make's model line as customers name it (BMW 3 Series, Mercedes C-Class), spanning several generations.
+_Avoid_: Range, family
+
+**Chassis**:
+One generation and body style of a Series under the manufacturer's own code (F30 sedan, F31 touring, W205 sedan, S205 estate).
+_Avoid_: Platform, generation (bare), body code
+
+**Model**:
+A named variant on one Chassis as customers search for it (F30 320d, W205 C 220 d). It groups the Vehicles that share that name across engines and years, and it is the unit a model page is built for.
+_Avoid_: Trim, type (a type code identifies a Vehicle, not a Model)
+
+**Engine**:
+One engine as its manufacturer codes it (B47D20O0, OM654), belonging to an engine family (B47, OM654) that parts are often matched by.
+_Avoid_: Motor, power unit
+
 **Vehicle**:
-The canonical internal entity for one vehicle _configuration_ — not one physical car. Thousands of BMW 320ds with identical engine/trim/body share a single Vehicle; their owners' individual VINs do not multiply it. Mirrors `Part`'s shape: licensed external catalogues (TecDoc, BMW's own EPC) are the source of truth for what configurations exist, never a hand-maintained dictionary — that's exactly what [ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-required.md) correctly rejected for free-text data, and this is not that.
-_Avoid_: Car, Vin — a Vehicle is a configuration, not a specific physical car and not a VIN (see `VinLookup`)
+One manufacturer configuration: a Model with one Engine, drive and market, as the manufacturer's own code identifies it (a BMW type code, a Mercedes Baumuster). Not one physical car: thousands of cars and VINs share one Vehicle. Staff create Vehicles by hand, as demand reaches a new code (see [ADR-0040](docs/adr/0040-one-catalog-module-vehicle-reference-tables.md)).
+_Avoid_: Car, Vin, Model (a Model spans several Vehicles)
 
 **VehicleIdentifier**:
-One typed reference from a Vehicle to an external catalogue's own vehicle-variant id: `type` is `ktype` (TecDoc's KType: brand/model/type/years) or `oem-type-code` (the manufacturer's own EPC type code, e.g. BMW's). Mirrors `PartIdentifier` — a Vehicle can carry more than one, since TecDoc's and an OEM catalogue's vehicle vocabularies don't line up 1:1.
-_Avoid_: KType (bare) — always through a VehicleIdentifier row, never assumed to be the only vocabulary in play
+One code a vehicle vocabulary uses for a Vehicle, typed by that vocabulary (`bmw-type-code`, `mercedes-baumuster`, later others). A Vehicle may carry codes from several vocabularies; a VIN resolves through them.
+_Avoid_: KType (bare), type code stored anywhere but here
 
 **Fitment**:
-The join between one `Part` and one `Vehicle` for one position, carrying the criteria that further narrow it: a production-date range, steering side, gearbox type — because a single Vehicle (even one TecDoc KType) can still need different Parts at the same position depending on these. Criteria live on the Fitment row, not on Vehicle — splitting Vehicle itself per date/steering/gearbox combination would multiply it into near-duplicates without resolving KType's own coarseness. **Ambiguity is not a stored flag**: it emerges when a customer's actual car doesn't carry enough resolved detail (date, steering, gearbox) to pick a single matching Fitment row from several candidates — the storefront must show this as "confirm your variant," never silently guess one. Every row carries `source` (`manual` or `auto:<vendor>`) and `status` (`active` or `rejected`) — a licensed source's sync never touches or recreates a row staff have already set, in either direction: it skips existing `manual` rows outright, and it skips re-adding a `rejected` row it previously supplied itself. Staff curation and an automatic feed are equally-weighted inputs into the same table, not one a fallback for the other (see [ADR-0038](docs/adr/0038-manual-fitment-curation-never-overwritten-by-sync.md)).
-_Avoid_: "fits" (as a boolean) — a Fitment row's applicability is conditional, not flat; deleting a bad automatic row instead of rejecting it — the next sync just recreates it
+The statement that one Part fits one Vehicle, with a quantity and, where it matters, a Position, optionally narrowed by a production-date range, steering side or gearbox, or qualified by a free-text note. Every Fitment is entered by staff. **Ambiguity** is not stored: it is what a customer sees when one Vehicle has several Parts in the same Category and Position, or a Fitment with a note, and it is shown as "confirm your variant", never resolved by a guess.
+_Avoid_: "fits" (as a flat boolean), rejecting a row (a wrong Fitment is deleted)
+
+**Position**:
+Where on the Vehicle a fitted Part goes: axle (front or rear) and side (left or right), each only when it matters.
+_Avoid_: location, slot, callout (that is a diagram number in a manufacturer catalogue)
+
+**Category field**:
+One characteristic a Category's Parts are described by (wiper length in mm, oil viscosity, oil approvals), with an immutable key, a type and, for selects, a fixed list of options. A Part's values are checked against its Category's fields.
+_Avoid_: attribute (bare), property, spec, custom field
+
+**Requirement**:
+What an Engine, Chassis or Vehicle demands of a Part in one Category, stated on a Category field (allowed options or a numeric range) with a quantity, e.g. "B47: engine oil with approval BMW LL-04, 5.2 l". Universal Parts reach a Vehicle through Requirements instead of Fitments.
+_Avoid_: spec (bare), recommendation, fitment (a Requirement names no Part)
+
+**Supersession**:
+A manufacturer replacing one part number with another. When both fit either way, the old number stays an identifier of the same Part, marked superseded; when the replacement is one-way, the old Part is "replaced by" the new one.
+_Avoid_: substitute, alternative, cross-reference (that is an aftermarket equivalent, a PartIdentifier)
+
+**Maintenance kit**:
+Everything a Vehicle needs for a routine service, assembled on the fly from its Fitments and Requirements in the Categories marked for it. It is never stored.
+_Avoid_: bundle, set, package
 
 **VinLookup**:
-A cached resolution of one customer-typed VIN string to the `Vehicle` it decodes to (plus the decode's own metadata and timestamp). **Not** a `VehicleIdentifier` — a VIN identifies one physical car, not a configuration, so storing it as a Vehicle-level identifier would make one Vehicle accumulate thousands of unrelated VIN strings from unrelated customers. VinLookup is where a raw VIN belongs instead: on a cart/order for staff reference, and later as the attach point for a customer's saved vehicle ("my garage"), once accounts exist — see the accounts ticket, not decided here.
-_Avoid_: storing a VIN directly on Vehicle, or treating VinLookup itself as the canonical vehicle record
+A record of one customer-typed VIN, the Vehicle it resolved to (if any) and what the VIN revealed about that physical car, such as steering side, with the resolving decoder's name and version. It logs which cars customers look for, so unresolved codes show staff which Vehicles to add next. **Not** a VehicleIdentifier: a VIN is one physical car, not a configuration.
+_Avoid_: storing a VIN on Vehicle, treating VinLookup as the canonical vehicle record
+
+**Parts inquiry**:
+A customer's request for the Parts they picked (with their contact and, when known, VIN and Vehicle) sent to staff as a Lead, because those Parts have no price yet. Staff answer it with a price by hand. It is not an Order: an Order exists only once Parts carry SupplierOffer prices.
+_Avoid_: Order, quote, price request

@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, its licensed-catalogue premise superseded by ADR-0039
 ---
 
 # Vehicle/fitment: a canonical Vehicle keyed to external catalogues, a conditional Fitment join
