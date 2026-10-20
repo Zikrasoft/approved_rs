@@ -79,6 +79,12 @@ cookie:
   decline: Отклонить
   settings: Настройки cookie
 
+telegramChoice:
+  heading: Как удобнее написать?
+  bot: Через бота
+  botHint: Расскажите, что с машиной, мастер ответит в том же чате
+  manager: Мастеру напрямую
+  managerHint: Личный чат с мастером в Telegram
 translations:
   sr:
     nav:
@@ -132,6 +138,12 @@ translations:
       viber: Pisatite na Viber
       telegram: Pisatite na Telegram
       instagram: Instagram
+    telegramChoice:
+      heading: Kako je lakše pisati?
+      bot: Preko bota
+      botHint: Recite šta je sa automobilom, majstor će odgovoriti u istom chatu
+      manager: Direktno majstoru
+      managerHint: Lični chat sa majstorom na Telegramu
     form:
       heading: Zakazivanje konsultacije
       subheading: Pogledaćemo automobil, iskreno reći šta mu stvarno treba i navesti tačnu cenu.
@@ -213,6 +225,12 @@ translations:
       viber: Message on Viber
       telegram: Message on Telegram
       instagram: Instagram
+    telegramChoice:
+      heading: How would you prefer to reach out?
+      bot: Via the bot
+      botHint: Share your car issue, the technician will reply in the same chat
+      manager: Directly to the technician
+      managerHint: Personal chat with the technician on Telegram
     form:
       heading: Book a Consultation
       subheading: We'll check your car, give honest feedback on its needs, and provide an exact price.
@@ -242,4 +260,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: cba46a597c9dae72
+translatedFrom: 10f1d09c53e3ecfd

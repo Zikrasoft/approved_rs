@@ -40,6 +40,7 @@ Variants go into parameters, not into new names.
 | `form_submit`                                                    | the server took the lead                        | `service`                                         |
 | `contact_click`                                                  | clicked a phone number or a messenger           | `channel`, `placement`                            |
 | `lead_modal_open`                                                | opened the form in the modal (approved.rs only) | `tab`, `service`                                  |
+| `telegram_choice`                                                | picked bot or manager after a Telegram tap      | `option`: `bot`, `manager`                        |
 | `brand_link_click`                                               | left for a partner site (approved.rs only)      | `brand`: `details`, `carlab`                      |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
 | `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
@@ -334,6 +335,7 @@ would lie. What is already broken:
 | 2026-10-06 (this PR)   | `brand_link_click` on approved.rs           | the partner destination moved from the parameter `to` to `brand`, so it no longer shares a key with the language banner's locale codes (issue #115). The goal itself is unchanged; a report crossing the date sees `to=details` / `to=carlab` before it and `brand=details` / `brand=carlab` after           |
 | 2026-10-06 (this PR)   | `contact_click` on carlab.rs                | the homepage and service-page heroes gained a call / Telegram / WhatsApp row under a new `hero` placement, next to the booking door (issue #123). The series steps up from the zero baseline recorded on #123; `form_submit` and the `/thanks/` goal are compared against that same baseline two weeks later |
 | 2026-10-14             | every goal, all three sites                 | Yandex Metrika replaced with GA4 ([ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md)). Every series restarts from zero in the new properties — there is no automated history import. `order_placed` is renamed `purchase` and gains GA4's standard `items[]` shape                        |
+| 2026-10-20             | `telegram_choice`, all three sites          | a Telegram tile that opens the bot now asks bot or manager first ([ADR-0042](../adr/0042-telegram-tap-offers-bot-or-manager.md)); `contact_click` still fires on the tap itself, so taps minus picks is the share that closed the dialog                                                                     |
 
 ### Final Metrika snapshot before cutover
 

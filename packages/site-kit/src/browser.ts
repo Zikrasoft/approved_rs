@@ -11,6 +11,7 @@ export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
+export { defineTelegramChoice } from './telegramChoice.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { defineChipFilter } from './chipFilter.ts';
 export { defineZoneMap } from './zoneMap.ts';

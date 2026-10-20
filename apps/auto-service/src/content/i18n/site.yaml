@@ -75,6 +75,12 @@ cookie:
   decline: Отклонить
   settings: Настройки cookie
 
+telegramChoice:
+  heading: Как удобнее написать?
+  bot: Через бота
+  botHint: Расскажите, что с машиной, мастер ответит в том же чате
+  manager: Мастеру напрямую
+  managerHint: Личный чат с мастером в Telegram
 translations:
   sr:
     nav:
@@ -124,6 +130,12 @@ translations:
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
+    telegramChoice:
+      heading: Kako je bolje da pišete?
+      bot: Kroz bota
+      botHint: Recite šta nije u redu sa autom, majstor će odgovoriti u istom čatu
+      manager: Direktno majstoru
+      managerHint: Lični čat sa majstorom na Telegramu
     form:
       heading: Zakaži servis
       subheading: Opišite problem sa automobilom. Javićemo se sa detaljima, vremenom i cenom.
@@ -201,6 +213,12 @@ translations:
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
+    telegramChoice:
+      heading: What's the easiest way to reach us?
+      bot: Through the bot
+      botHint: Tell us what's wrong with your car, the mechanic will respond in the same chat
+      manager: Directly to the mechanic
+      managerHint: Personal chat with the mechanic on Telegram
     form:
       heading: Book a Service
       subheading: Describe what’s wrong with your car. We’ll call you back to clarify details and provide time and cost.
@@ -230,4 +248,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 309aeb360e3d79a0
+translatedFrom: e6bed777b3a2c1ee

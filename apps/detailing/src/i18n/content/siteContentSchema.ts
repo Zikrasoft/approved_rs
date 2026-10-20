@@ -58,6 +58,16 @@ const commonSchema = z
   })
   .strict();
 
+const telegramChoiceSchema = z
+  .object({
+    heading: z.string(),
+    bot: z.string(),
+    botHint: z.string(),
+    manager: z.string(),
+    managerHint: z.string(),
+  })
+  .strict();
+
 const channelsSchema = z
   .object({
     call: z.string(),
@@ -113,6 +123,7 @@ export const siteContentSchema = z
     footer: footerSchema,
     common: commonSchema,
     channels: channelsSchema,
+    telegramChoice: telegramChoiceSchema,
     form: formSchema,
     cookie: cookieSchema,
   })

@@ -35,8 +35,8 @@ language:
   button: 🌐 Язык
   text: Выберите язык, на котором вам удобнее общаться.
 profile:
-  description: Детейлинг-студия в Белграде — оклейка плёнкой, полировка, керамика. Нажмите «Старт» — расскажите, что хотите сделать с машиной, и мастер ответит здесь же.
-  shortDescription: Детейлинг-студия в Белграде — плёнка, полировка, керамика
+  description: 'Детейлинг-студия в Белграде: оклейка пленкой, полировка, керамика. Нажмите «Старт» и расскажите, что хотите сделать с машиной, мастер ответит здесь же. Удобнее без бота? Напишите мастеру напрямую: {manager}'
+  shortDescription: 'Детейлинг-студия в Белграде: пленка, полировка, керамика. Мастер: {manager}'
   menuCommand: Главное меню
   langCommand: Сменить язык
 translations:
@@ -78,8 +78,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik na kome vam je lakše da komunicirate.
     profile:
-      description: Detaljerska studija u Beogradu — foliranje, poliranje, keramika. Kliknite «Start» — recite šta želite da uradite sa autom, a majstor će odgovoriti ovde.
-      shortDescription: Detaljerska studija u Beogradu — folija, poliranje, keramika
+      description: 'Detaljing studio u Beogradu: folije, poliranje, keramika. Kliknite na „Start“ i recite šta želite da uradite sa autom, majstor će ovde odgovoriti. Udobnije je bez bota? Pišite majstoru direktno: {manager}'
+      shortDescription: 'Detaljing studio u Beogradu: folije, poliranje, keramika. Majstor: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeni jezik
   en:
@@ -120,8 +120,8 @@ translations:
       button: 🌐 Language
       text: Choose the language you're most comfortable communicating in.
     profile:
-      description: Detailing studio in Belgrade — paint protection film, polishing, ceramic coating. Click 'Start' — tell us what you want to do with your car, and the technician will respond here.
-      shortDescription: Detailing studio in Belgrade — film, polishing, ceramic coating
+      description: 'A detailing studio in Belgrade: film wraps, polishing, ceramic coating. Click “Start” and tell us what you want to do with your car, the expert will respond here. Prefer to skip the bot? Message the expert directly: {manager}'
+      shortDescription: 'A detailing studio in Belgrade: film, polishing, ceramic. Expert: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 37dfc94dfc5f26a0
+translatedFrom: f9f14a9eebac2426

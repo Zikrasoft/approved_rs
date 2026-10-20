@@ -12,6 +12,7 @@ import cyrillicFontUrl from '@fontsource-variable/onest/files/onest-cyrillic-wgh
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import LeadModal from '@/components/LeadModal.astro';
+import TelegramChoice from '@/components/TelegramChoice.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
@@ -184,6 +185,7 @@ const businessSchema = localBusinessSchema({
     <SiteFooter />
     {stickyContact && <StickyContactBar service={service} />}
     <LeadModal />
+    <TelegramChoice />
     <CookieConsent />
 
     <script>

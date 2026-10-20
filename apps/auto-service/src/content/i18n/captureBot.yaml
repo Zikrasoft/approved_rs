@@ -35,8 +35,8 @@ language:
   button: 🌐 Язык
   text: Выберите язык, на котором вам удобнее общаться.
 profile:
-  description: Автосервис в Белграде — диагностика, ремонт и обслуживание. Нажмите «Старт» — расскажите, что с машиной, и мастер ответит здесь же.
-  shortDescription: Автосервис в Белграде — диагностика, ремонт, обслуживание
+  description: 'Автосервис в Белграде: диагностика, ремонт и обслуживание. Нажмите «Старт» и расскажите, что с машиной, мастер ответит здесь же. Удобнее без бота? Напишите мастеру напрямую: {manager}'
+  shortDescription: 'Автосервис в Белграде: диагностика, ремонт, обслуживание. Мастер: {manager}'
   menuCommand: Главное меню
   langCommand: Сменить язык
 translations:
@@ -78,8 +78,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam više odgovara.
     profile:
-      description: Autoservis u Beogradu — dijagnostika, popravka i servisiranje. Kliknite na „Start“ — ispričajte šta je sa mašinom i majstor će ovde odgovoriti.
-      shortDescription: Autoservis u Beogradu — dijagnostika, popravka, servisiranje
+      description: 'Autoservis u Beogradu: dijagnostika, popravka i servisiranje. Kliknite „Start“ i recite šta je sa vašim vozilom, majstor će odgovoriti ovde. Da li vam je lakše bez bota? Pišite majstoru direktno: {manager}'
+      shortDescription: 'Autoservis u Beogradu: dijagnostika, popravka, servisiranje. Majstor: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeniti jezik
   en:
@@ -120,8 +120,8 @@ translations:
       button: 🌐 Language
       text: Choose the language you prefer to communicate in.
     profile:
-      description: Car service in Belgrade — diagnostics, repairs, and servicing. Click 'Start' — tell us what's wrong with your car, and the mechanic will respond here.
-      shortDescription: Car service in Belgrade — diagnostics, repairs, servicing
+      description: "Car service in Belgrade: diagnostics, repair, and servicing. Click 'Start' and let us know what's wrong with your car, the mechanic will reply right here. Prefer to skip the bot? Message the mechanic directly: {manager}"
+      shortDescription: 'Car service in Belgrade: diagnostics, repair, servicing. Mechanic: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: e894bd7a77f929d2
+translatedFrom: 0c32d6eb37651cb5

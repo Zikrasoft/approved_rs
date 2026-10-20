@@ -1,0 +1,82 @@
+---
+import Icon from './Icon.astro';
+import {
+  TELEGRAM_CHOICE_ATTRIBUTE,
+  TELEGRAM_CHOICE_SELECTOR,
+} from '@podbor/site-kit/contact-control';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { contactControl } from '@/utils/contactLinks';
+
+const locale = localeFrom(Astro.url.pathname);
+const { common, telegramChoice: copy } = content(locale).site;
+const tile = contactControl({ channel: 'telegram', onThanks: false, locale });
+const managerHref = tile.attrs[TELEGRAM_CHOICE_ATTRIBUTE];
+const options = [
+  {
+    attribute: 'data-telegram-choice-bot',
+    href: tile.href,
+    title: copy.bot,
+    hint: copy.botHint,
+    tone: 'border-signal/40 bg-signal/5',
+  },
+  {
+    attribute: 'data-telegram-choice-manager',
+    href: managerHref,
+    title: copy.manager,
+    hint: copy.managerHint,
+    tone: 'border-line',
+  },
+];
+---
+
+{
+  managerHref && (
+    <telegram-choice trigger={TELEGRAM_CHOICE_SELECTOR}>
+      <dialog
+        aria-labelledby="telegram-choice-heading"
+        class="m-0 mt-auto w-full max-w-none rounded-t-block border-0 border-t border-line bg-card p-0 pb-[env(safe-area-inset-bottom)] text-ink backdrop:bg-ink/50 sm:m-auto sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-block sm:border"
+      >
+        <div class="flex items-start justify-between gap-4 p-5 pb-3">
+          <h2 id="telegram-choice-heading" class="text-block font-semibold">
+            {copy.heading}
+          </h2>
+          <button
+            type="button"
+            data-modal-close
+            aria-label={common.closeLabel}
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink sm:h-9 sm:w-9"
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+        <ul class="flex flex-col gap-2 p-5 pt-2">
+          {options.map(({ attribute, href, title, hint, tone }) => (
+            <li>
+              <a
+                {...{ [attribute]: '' }}
+                href={href}
+                target="_blank"
+                rel="noopener"
+                data-modal-close
+                class:list={[
+                  tone,
+                  'flex min-h-11 flex-col gap-1 rounded-field border px-4 py-3 transition-colors duration-150 hover:border-ink focus-visible:border-ink',
+                ]}
+              >
+                <span class="font-medium">{title}</span>
+                <span class="text-sm leading-snug text-muted">{hint}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </dialog>
+    </telegram-choice>
+  )
+}
+
+<script>
+  import { defineTelegramChoice } from '@podbor/site-kit/browser';
+
+  defineTelegramChoice();
+</script>
