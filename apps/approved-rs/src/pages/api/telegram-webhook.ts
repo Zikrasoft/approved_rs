@@ -321,6 +321,7 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
 
 async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
   await deleteLead(id);
+  await dropFromDigest(id);
   await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });

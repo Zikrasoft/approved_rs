@@ -1,6 +1,6 @@
 import type { LedgerOperation } from '../ledgerStore.ts';
 import { isClosed, type StoredLead } from '../schema.ts';
-import type { Digest, PostedDigest } from '../store.ts';
+import type { Digest, OpenDigest, PostedDigest } from '../store.ts';
 import {
   isMessageGone,
   type SendExtra,
@@ -254,15 +254,11 @@ export function createNotifier({
       return { messageId: sent.message_id, ...shown };
     },
 
-    async editDigest(
-      messageId: number,
-      digest: Digest,
-      hidden: number,
-    ): Promise<void> {
+    async editDigest({ messageId, digest, hidden }: OpenDigest): Promise<void> {
       await client.api.editMessageText(
         groupId,
         messageId,
-        formatter.redrawDigest(digest, hidden).text,
+        formatter.renderDigest(digest, hidden).text,
         { parse_mode: 'HTML' },
       );
     },

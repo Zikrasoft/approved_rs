@@ -1080,8 +1080,8 @@ owner) and new, negotiating or in-progress leads with no action for 7 days, each
 a `#N` link that opens the Lead in the bot. It carries no buttons. Once per day,
 however often the cron runs. The day's digest record remembers the message and
 the Leads it lists, so when staff change one of them from its card or detail,
-or tap «🔵 В работе», the message is redrawn without it, and «✅ Всё разобрано»
-replaces the last one. Nothing is posted when the list is empty.
+tap «🔵 В работе» or delete it, the message is redrawn without it (and without
+Leads closed meanwhile), and «✅ Всё разобрано» replaces the last one. Nothing is posted when the list is empty.
 There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.

@@ -9,6 +9,7 @@ import {
   expireGhostLeads,
   releaseDigest,
   resumeLead,
+  type PostedDigest,
 } from '@/lib/store';
 import {
   sendDigest,
@@ -49,7 +50,7 @@ async function closeIdle(now: Date): Promise<number> {
 async function postDigest(now: Date): Promise<boolean> {
   const digest = await claimDigest(now);
   if (!digest) return false;
-  let posted: Awaited<ReturnType<typeof sendDigest>>;
+  let posted: PostedDigest | null;
   try {
     posted = await sendDigest(digest);
   } catch (err) {

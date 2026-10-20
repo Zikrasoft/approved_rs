@@ -400,7 +400,7 @@ export function createFormatter({
 
     digestMessage: (digest: Digest) => digestMessage(digest, botUsername),
 
-    redrawDigest: (digest: Digest, hidden: number) =>
+    renderDigest: (digest: Digest, hidden: number) =>
       renderDigest(digest, botUsername, hidden),
 
     buildHelp,

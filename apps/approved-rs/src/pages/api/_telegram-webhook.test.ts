@@ -722,7 +722,12 @@ describe('POST /api/telegram-webhook', () => {
           type: 'digest',
           day: '2026-01-01',
           createdAt: '2026-01-01T08:00:00.000Z',
-          posted: { messageId: DIGEST_ID, due, stale, hidden: 0 },
+          posted: {
+            messageId: DIGEST_ID,
+            dueIds: due,
+            staleIds: stale,
+            hidden: 0,
+          },
         },
       ]);
     const digestEdits = () =>
@@ -794,6 +799,18 @@ describe('POST /api/telegram-webhook', () => {
       expect(digestEdits()).toEqual([
         expect.objectContaining({
           text: '<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано',
+        }),
+      ]);
+    });
+
+    it('drops a Lead the admin deletes', async () => {
+      seedWithDigest([], [5, 6], makeLead({ id: 5 }), makeLead({ id: 6 }));
+
+      await tap('delconfirm:5', ADMIN_ID);
+
+      expect(digestEdits()).toEqual([
+        expect.objectContaining({
+          text: expect.not.stringContaining('#5<'),
         }),
       ]);
     });

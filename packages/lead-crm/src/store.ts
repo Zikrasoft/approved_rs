@@ -60,11 +60,18 @@ export interface Digest {
 
 const postedDigestSchema = z.object({
   messageId: z.number().int(),
-  due: z.array(z.number().int()),
-  stale: z.array(z.number().int()),
+  dueIds: z.array(z.number().int()),
+  staleIds: z.array(z.number().int()),
   hidden: z.number().int(),
 });
 export type PostedDigest = z.infer<typeof postedDigestSchema>;
+export type DigestRows = Omit<PostedDigest, 'messageId'>;
+
+export interface OpenDigest {
+  messageId: number;
+  digest: Digest;
+  hidden: number;
+}
 
 const digestMarkSchema = z.object({
   type: z.literal('digest'),
@@ -745,22 +752,41 @@ export function createLeadStore({
       }));
     },
 
-    async takeFromDigest(leadId: number): Promise<PostedDigest | undefined> {
-      let left: PostedDigest | undefined;
-      await updateRecords(({ digests }) => {
+    async takeFromDigest(leadId: number): Promise<OpenDigest | undefined> {
+      let left: OpenDigest | undefined;
+      await updateRecords(({ leads, digests }) => {
         left = undefined;
         const latest = digests.at(-1);
         const posted = latest?.posted;
-        if (!posted || ![...posted.due, ...posted.stale].includes(leadId))
+        if (
+          !latest ||
+          !posted ||
+          ![...posted.dueIds, ...posted.staleIds].includes(leadId)
+        )
           return {};
-        const without = (ids: number[]) => ids.filter((id) => id !== leadId);
-        left = {
-          ...posted,
-          due: without(posted.due),
-          stale: without(posted.stale),
+        const stillOpen = (ids: number[]) =>
+          ids.flatMap((id) => {
+            const lead = leads.find((l) => l.id === id);
+            return id !== leadId && lead && isInWork(lead) ? [lead] : [];
+          });
+        const digest = {
+          due: stillOpen(posted.dueIds),
+          stale: stillOpen(posted.staleIds),
         };
+        left = { messageId: posted.messageId, digest, hidden: posted.hidden };
+        const ids = (list: StoredLead[]) => list.map((l) => l.id);
         return {
-          digests: [...digests.slice(0, -1), { ...latest, posted: left }],
+          digests: [
+            ...digests.slice(0, -1),
+            {
+              ...latest,
+              posted: {
+                ...posted,
+                dueIds: ids(digest.due),
+                staleIds: ids(digest.stale),
+              },
+            },
+          ],
         };
       });
       return left;

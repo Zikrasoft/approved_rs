@@ -452,16 +452,16 @@ describe('dropFromDigest', () => {
     await digestStore.claimDigest(new Date(now.getTime() + 8 * 86_400_000));
     await digestStore.recordDigestMessage(
       new Date(now.getTime() + 8 * 86_400_000),
-      { messageId: 77, due: [a!.id], stale: [b!.id, c!.id], hidden: 1 },
+      { messageId: 77, dueIds: [a!.id], staleIds: [b!.id, c!.id], hidden: 1 },
     );
 
     await dropFromDigest(a!.id);
 
-    expect(editDigest).toHaveBeenCalledExactlyOnceWith(
-      77,
-      { due: [], stale: [expect.objectContaining({ id: b!.id })] },
-      1,
-    );
+    expect(editDigest).toHaveBeenCalledExactlyOnceWith({
+      messageId: 77,
+      digest: { due: [], stale: [expect.objectContaining({ id: b!.id })] },
+      hidden: 1,
+    });
   });
 
   it('survives a digest message that can no longer be edited', async () => {
@@ -479,8 +479,8 @@ describe('dropFromDigest', () => {
     await digestStore.claimDigest(later);
     await digestStore.recordDigestMessage(later, {
       messageId: 78,
-      due: [],
-      stale: [lead.id],
+      dueIds: [],
+      staleIds: [lead.id],
       hidden: 0,
     });
 

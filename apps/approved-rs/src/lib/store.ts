@@ -53,6 +53,7 @@ export type {
   LedgerOperation,
   OperationType,
   PendingPrompt,
+  PostedDigest,
   PromptKey,
   StoredLead,
 } from '@podbor/lead-crm';

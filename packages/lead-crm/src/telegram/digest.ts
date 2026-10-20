@@ -1,4 +1,4 @@
-import { MAX_LIST_ROWS, type Digest } from '../store.ts';
+import { MAX_LIST_ROWS, type Digest, type DigestRows } from '../store.ts';
 import { escapeHtml, leadDisplayName } from './markup.ts';
 
 const DIGEST_SECTIONS: [keyof Digest, string][] = [
@@ -10,12 +10,7 @@ const DIGEST_TITLE = '📋 Заявки ждут решения';
 const DIGEST_DONE = '✅ Всё разобрано';
 const MAX_DIGEST_NAME = 40;
 
-export type RenderedDigest = {
-  text: string;
-  due: number[];
-  stale: number[];
-  hidden: number;
-};
+export type RenderedDigest = DigestRows & { text: string };
 
 export function renderDigest(
   digest: Digest,
@@ -23,7 +18,7 @@ export function renderDigest(
   hidden = 0,
 ): RenderedDigest {
   const lines = [`<b>${DIGEST_TITLE}</b>`];
-  const shown: Record<keyof Digest, number[]> = { due: [], stale: [] };
+  const shown = { dueIds: [] as number[], staleIds: [] as number[] };
   let room = MAX_LIST_ROWS;
   for (const [key, title] of DIGEST_SECTIONS) {
     const leads = digest[key];
@@ -37,7 +32,7 @@ export function renderDigest(
       lines.push(
         `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
       );
-      shown[key].push(l.id);
+      shown[`${key}Ids`].push(l.id);
     }
   }
   if (room === MAX_LIST_ROWS) lines.push('', DIGEST_DONE);

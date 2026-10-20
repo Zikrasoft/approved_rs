@@ -581,7 +581,12 @@ describe('sendDigest', () => {
       due: [makeLead({ id: 5, status: 'postponed', name: '' })],
     });
 
-    expect(sent).toEqual({ messageId: 999, due: [5], stale: [3], hidden: 0 });
+    expect(sent).toEqual({
+      messageId: 999,
+      dueIds: [5],
+      staleIds: [3],
+      hidden: 0,
+    });
     expect(mockFetch).toHaveBeenCalledTimes(1);
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('-1009876543210');
@@ -610,7 +615,7 @@ describe('sendDigest', () => {
     });
 
     expect(sent).toMatchObject({
-      stale: [200, 201, 202, 203, 204],
+      staleIds: [200, 201, 202, 203, 204],
       hidden: 10,
     });
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -624,7 +629,11 @@ describe('sendDigest', () => {
     api.reset();
     mockFetch.mockImplementation(api.fetch);
 
-    await editDigest(77, { due: [], stale: [makeLead({ id: 4 })] }, 2);
+    await editDigest({
+      messageId: 77,
+      digest: { due: [], stale: [makeLead({ id: 4 })] },
+      hidden: 2,
+    });
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body).toMatchObject({ chat_id: '-1009876543210', message_id: 77 });
@@ -642,7 +651,7 @@ describe('sendDigest', () => {
     api.reset();
     mockFetch.mockImplementation(api.fetch);
 
-    await editDigest(77, empty, 0);
+    await editDigest({ messageId: 77, digest: empty, hidden: 0 });
 
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.text).toBe('<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано');

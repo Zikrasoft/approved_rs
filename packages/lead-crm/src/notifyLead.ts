@@ -1,6 +1,5 @@
 import {
   isClosed,
-  isInWork,
   type LeadInput,
   type LeadSubmission,
   type StoredLead,
@@ -154,21 +153,14 @@ export function createDropFromDigest({
   store,
   notifier,
 }: {
-  store: Pick<LeadStore, 'takeFromDigest' | 'readLeads'>;
+  store: Pick<LeadStore, 'takeFromDigest'>;
   notifier: Pick<Notifier, 'editDigest'>;
 }) {
   return async function dropFromDigest(leadId: number): Promise<void> {
     const left = await store.takeFromDigest(leadId);
     if (!left) return;
-    const leads = await store.readLeads();
-    const stillOpen = (ids: number[]) =>
-      leads.filter((l) => ids.includes(l.id) && isInWork(l));
     try {
-      await notifier.editDigest(
-        left.messageId,
-        { due: stillOpen(left.due), stale: stillOpen(left.stale) },
-        left.hidden,
-      );
+      await notifier.editDigest(left);
     } catch (error) {
       console.error('[lead-crm] could not redraw the digest', {
         error,

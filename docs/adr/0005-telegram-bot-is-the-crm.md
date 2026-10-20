@@ -1,6 +1,6 @@
 # The Telegram bot is the CRM, and lead capture never fails for the visitor
 
-**Amended 2026-10-20: the digest has no buttons.** Each `#N` already opens the Lead in the bot, so the ✅ ❌ 🔵 row per Lead only repeated the card. The day's `digest` record keeps the message id and the Leads it lists; when staff decide on one of them from its card or detail, or tap «🔵 В работе», the digest is redrawn without it, as the buttons used to do.
+**Amended 2026-10-20: the digest has no buttons.** Each `#N` already opens the Lead in the bot, so the ✅ ❌ 🔵 row per Lead only repeated the card. The day's `digest` record keeps the message id and the Leads it lists; when staff decide on one of them from its card or detail, tap «🔵 В работе» or delete it, the digest is redrawn without it, as the buttons used to do. A redraw shows no per-row status.
 
 **Amended 2026-10-12 a third time: statuses are no longer owner-only.** The owner and the admin both change a Lead's status — ✅ ❌ 🗣 🔵 ⏰ on the group card and the DM detail — and the other one gets a DM naming who changed it. A won or lost Lead still cannot be reopened; deleting stays the admin's. A role-gated button tapped by the wrong role answers with a toast saying whose it is. The «owner-only» wording below is superseded.
 
