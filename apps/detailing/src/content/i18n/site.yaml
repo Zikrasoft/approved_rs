@@ -82,9 +82,9 @@ cookie:
 telegramChoice:
   heading: Как удобнее написать?
   bot: Через бота
-  botHint: Расскажите, что с машиной, мастер ответит в том же чате
-  manager: Мастеру напрямую
-  managerHint: Личный чат с мастером в Telegram
+  botHint: Расскажите, что с машиной, менеджер ответит в том же чате
+  manager: Менеджеру напрямую
+  managerHint: Личный чат с менеджером в Telegram
 translations:
   sr:
     nav:
