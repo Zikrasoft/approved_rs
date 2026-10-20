@@ -158,12 +158,36 @@ describe('the profile script', () => {
     primaryLocale: 'ru' as const,
   };
 
-  function copyFile(): URL {
+  function copyFile(copy: object = FULL_COPY): URL {
     const dir = mkdtempSync(join(tmpdir(), 'capture-profile-'));
     const path = join(dir, 'captureBot.yaml');
-    writeFileSync(path, JSON.stringify(FULL_COPY));
+    writeFileSync(path, JSON.stringify(copy));
     return new URL(`file://${path}`);
   }
+
+  it('applies the translations of a copy that also asks for a budget', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const withBudget = { ...FULL_COPY, budget: 'B' };
+    const english = {
+      ...withBudget,
+      profile: { ...FULL_COPY.profile, description: 'ENGLISH' },
+    };
+
+    await runBotProfileScript(
+      copyFile({ ...withBudget, translations: { en: english } }),
+      PROFILE,
+      { TELEGRAM_CAPTURE_BOT_TOKEN: TOKEN, PUBLIC_TG_MANAGER: 'brand_manager' },
+    );
+
+    expect(payloads('setMyDescription')).toContainEqual({
+      description: 'ENGLISH',
+      language_code: 'en',
+    });
+    expect(warn).not.toHaveBeenCalled();
+    log.mockRestore();
+    warn.mockRestore();
+  });
 
   it('exits 1 without a manager to name', async () => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => {

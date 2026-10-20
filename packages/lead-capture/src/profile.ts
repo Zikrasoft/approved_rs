@@ -5,6 +5,10 @@ import { createSectionLoader } from '@podbor/i18n/section';
 import { createTelegramClient } from '@podbor/lead-crm/telegram-client';
 import { captureCopySchema, type CaptureCopy } from './copy.ts';
 
+const profileCopySchema = z.object({
+  profile: captureCopySchema.shape.profile,
+});
+
 export interface BotProfile<L extends LanguageCode> {
   botUsername: string;
   locales: readonly L[];
@@ -16,7 +20,7 @@ const MANAGER_VARIABLE = 'PUBLIC_TG_MANAGER';
 
 export async function applyBotProfile<L extends LanguageCode>(
   token: string,
-  copyFor: (locale: L) => CaptureCopy,
+  copyFor: (locale: L) => Pick<CaptureCopy, 'profile'>,
   { botUsername, locales, primaryLocale }: BotProfile<L>,
   manager: string,
 ): Promise<void> {
@@ -58,7 +62,7 @@ export async function runBotProfileScript<L extends LanguageCode>(
   const token = required(TOKEN_VARIABLE);
   const manager = required(MANAGER_VARIABLE);
   const copyFor = createSectionLoader<L>()(
-    captureCopySchema,
+    profileCopySchema,
     readFileSync(copyFile, 'utf8'),
   );
   await applyBotProfile(token, copyFor, profile, manager);
