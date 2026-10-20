@@ -34,12 +34,16 @@ afterEach(() => {
 
 describe('applying the capture bot profile', () => {
   beforeEach(async () => {
-    await applyBotProfile(TOKEN, copyFor, {
-      botUsername: 'capture_bot',
-      locales: ['ru', 'sr', 'en'],
-      primaryLocale: 'sr',
-      manager: 'brand_manager',
-    });
+    await applyBotProfile(
+      TOKEN,
+      copyFor,
+      {
+        botUsername: 'capture_bot',
+        locales: ['ru', 'sr', 'en'],
+        primaryLocale: 'sr',
+      },
+      'brand_manager',
+    );
   });
 
   it('sets the description for the default and every served locale', () => {
@@ -79,8 +83,8 @@ describe('applying the capture bot profile', () => {
         botUsername: 'capture_bot',
         locales: [],
         primaryLocale: 'ru',
-        manager: 'brand_manager',
       },
+      'brand_manager',
     );
 
     expect(payloads('setMyDescription')).toEqual([
@@ -109,12 +113,16 @@ it('stops at the first call Telegram refuses', async () => {
   api.fail('setMyDescription', 'Bad Request: description is too long');
 
   await expect(
-    applyBotProfile(TOKEN, copyFor, {
-      botUsername: 'capture_bot',
-      locales: ['ru'],
-      primaryLocale: 'ru',
-      manager: 'brand_manager',
-    }),
+    applyBotProfile(
+      TOKEN,
+      copyFor,
+      {
+        botUsername: 'capture_bot',
+        locales: ['ru'],
+        primaryLocale: 'ru',
+      },
+      'brand_manager',
+    ),
   ).rejects.toThrow('description is too long');
   expect(api.callsTo('setMyCommands', TOKEN)).toEqual([]);
 });

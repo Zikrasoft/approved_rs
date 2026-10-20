@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { defineTelegramChoice } from './telegramChoice.ts';
-import { MODAL_OPEN_EVENT } from './modalDialog.ts';
+import { defineModalDialog, MODAL_OPEN_EVENT } from './modalDialog.ts';
 import { TELEGRAM_CHOICE_SELECTOR } from './contactControl.ts';
 
 // TODO: drop once jsdom implements HTMLDialogElement.showModal/close.
@@ -20,8 +20,7 @@ const MANAGER = 'https://t.me/brand_manager';
 
 let counter = 0;
 
-function mount() {
-  const tagName = `telegram-choice-${(counter += 1)}`;
+function mount(tagName = `telegram-choice-${(counter += 1)}`) {
   defineTelegramChoice(tagName);
   document.body.innerHTML = `
     <a href="${BOT}?start=ppf_ru" data-telegram-choice="${MANAGER}" data-tile="ppf">Telegram</a>
@@ -52,6 +51,7 @@ const click = (element: HTMLElement) => {
 
 afterEach(() => {
   document.body.innerHTML = '';
+  vi.unstubAllGlobals();
 });
 
 describe('defineTelegramChoice', () => {
@@ -108,7 +108,6 @@ describe('defineTelegramChoice', () => {
       expect(trackGoal).toHaveBeenCalledExactlyOnceWith('telegram_choice', {
         option,
       });
-      vi.unstubAllGlobals();
     },
   );
 
@@ -125,6 +124,15 @@ describe('defineTelegramChoice', () => {
     );
 
     expect(bot.hasAttribute('href')).toBe(false);
+  });
+
+  it('wires a tag the modal dialog already registered', () => {
+    defineModalDialog('telegram-choice-registered');
+    const { tile, manager } = mount('telegram-choice-registered');
+
+    click(tile('ppf'));
+
+    expect(manager.href).toBe(MANAGER);
   });
 
   it('defines each tag once', () => {

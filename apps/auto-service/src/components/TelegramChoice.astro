@@ -14,14 +14,14 @@ const tile = contactControl({ channel: 'telegram', onThanks: false, locale });
 const managerHref = tile.attrs[TELEGRAM_CHOICE_ATTRIBUTE];
 const options = [
   {
-    hook: 'data-telegram-choice-bot',
+    attribute: 'data-telegram-choice-bot',
     href: tile.href,
     title: copy.bot,
     hint: copy.botHint,
     tone: 'border-signal/40 bg-signal/5',
   },
   {
-    hook: 'data-telegram-choice-manager',
+    attribute: 'data-telegram-choice-manager',
     href: managerHref,
     title: copy.manager,
     hint: copy.managerHint,
@@ -51,10 +51,10 @@ const options = [
           </button>
         </div>
         <ul class="flex flex-col gap-2 p-5 pt-2">
-          {options.map(({ hook, href, title, hint, tone }) => (
+          {options.map(({ attribute, href, title, hint, tone }) => (
             <li>
               <a
-                {...{ [hook]: '' }}
+                {...{ [attribute]: '' }}
                 href={href}
                 target="_blank"
                 rel="noopener"

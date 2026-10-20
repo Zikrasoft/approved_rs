@@ -71,11 +71,10 @@ export const createContactControls =
         pointer,
       };
     }
-    const href = {
-      whatsapp: () =>
-        whatsappLink(brand.whatsapp, brand.prefill?.(locale, service)),
-      viber: () => viberLink(brand.viber),
-    }[channel]();
+    const href =
+      channel === 'whatsapp'
+        ? whatsappLink(brand.whatsapp, brand.prefill?.(locale, service))
+        : viberLink(brand.viber);
     return { href, attrs, pointer };
   };
 

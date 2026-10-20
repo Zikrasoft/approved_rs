@@ -9,7 +9,6 @@ export interface BotProfile<L extends LanguageCode> {
   botUsername: string;
   locales: readonly L[];
   primaryLocale: L;
-  manager: string;
 }
 
 const TOKEN_VARIABLE = 'TELEGRAM_CAPTURE_BOT_TOKEN';
@@ -18,15 +17,20 @@ const MANAGER_VARIABLE = 'PUBLIC_TG_MANAGER';
 export async function applyBotProfile<L extends LanguageCode>(
   token: string,
   copyFor: (locale: L) => CaptureCopy,
-  { botUsername, locales, primaryLocale, manager }: BotProfile<L>,
+  { botUsername, locales, primaryLocale }: BotProfile<L>,
+  manager: string,
 ): Promise<void> {
   const { api } = createTelegramClient(token, botUsername);
-  const naming = (text: string) => text.replaceAll('{manager}', `@${manager}`);
+  const withManager = (text: string) =>
+    text.replaceAll('{manager}', `@${manager}`);
 
   const apply = async (locale: L, scope: { language_code?: L }) => {
     const { profile } = copyFor(locale);
-    await api.setMyDescription(naming(profile.description), scope);
-    await api.setMyShortDescription(naming(profile.shortDescription), scope);
+    await api.setMyDescription(withManager(profile.description), scope);
+    await api.setMyShortDescription(
+      withManager(profile.shortDescription),
+      scope,
+    );
     await api.setMyCommands(
       [
         { command: 'menu', description: profile.menuCommand },
@@ -42,7 +46,7 @@ export async function applyBotProfile<L extends LanguageCode>(
 
 export async function runBotProfileScript<L extends LanguageCode>(
   copyFile: URL,
-  profile: Omit<BotProfile<L>, 'manager'>,
+  profile: BotProfile<L>,
   env: Record<string, string | undefined> = process.env,
 ): Promise<void> {
   const required = (variable: string): string => {
@@ -57,7 +61,7 @@ export async function runBotProfileScript<L extends LanguageCode>(
     captureCopySchema,
     readFileSync(copyFile, 'utf8'),
   );
-  await applyBotProfile(token, copyFor, { ...profile, manager });
+  await applyBotProfile(token, copyFor, profile, manager);
   console.log(
     `Capture bot profile set for ${profile.locales.join(', ')} (default: ${profile.primaryLocale})`,
   );

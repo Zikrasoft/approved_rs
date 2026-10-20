@@ -347,8 +347,9 @@ Both new apps follow the same shape, and a third should too:
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
   second, unmergeable card in the chat. **Every site has a `/thanks/`
-  human-account carve-out, and approved.rs a second one.** The first is `/thanks/`: the visitor there has just sent the
-  form, so its Telegram tile opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
+  human-account carve-out, and approved.rs a second one.** The first is
+  `/thanks/`: the visitor there has just sent the form, so its Telegram tile
+  opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
   never a `packages/brands` field, because it is a staff account rather than
   brand identity) through `telegramLink`, with no `?start=`, and falls back to
   the capture bot when the variable is unset. The bound `contactControl`
@@ -368,9 +369,9 @@ Both new apps follow the same shape, and a third should too:
   its own `data-contact-channel`, so the tap beacons exactly as before, and the
   two options carry none, so a choice is never counted twice. The capture
   bot's profile names the manager as well: `{manager}` in the `profile` copy
-  of `captureBot.yaml` becomes `@` plus `PUBLIC_TG_MANAGER`. Each capture bot's «Написать менеджеру» menu
-  button follows the same rule: `humanTelegram` in the app's
-  `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
+  of `captureBot.yaml` becomes `@` plus `PUBLIC_TG_MANAGER`. Each capture
+  bot's «Написать менеджеру» menu button follows the same rule:
+  `humanTelegram` in the app's `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
   hand-off: the button stays a callback so the tap can first stamp
   `managerHandoff` on the Lead and post it to the Topic, then the screen offers
   the URL to the manager; unset it stays the in-bot manager screen. A
