@@ -1,0 +1,128 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import {
+  categoryPagesForBuild,
+  type CategoryPageEntry,
+} from '@/utils/catalogue';
+import { paragraphs } from '@/utils/paragraphs';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const categories = await categoryPagesForBuild();
+  return withLocales(
+    categories.map((category) => ({
+      params: { slug: category.slug },
+      props: { category },
+    })),
+  );
+}
+
+const { category } = Astro.props as { category: CategoryPageEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = inquiry.category;
+const name = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const fields = category.fields.map((field) => ({
+  key: field.key,
+  label: [translated(field, 'label', locale), field.unit]
+    .filter(Boolean)
+    .join(', '),
+  options: field.options.map((option) => translated(option, 'label', locale)),
+}));
+---
+
+<Shell
+  title={copy.metaTitleTemplate.replace('{name}', name)}
+  description={lead ?? inquiry.metaDescription}
+>
+  <PageHero
+    eyebrow={copy.eyebrow}
+    heading={name}
+    lead={lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCategory(locale, category.slug), label: name },
+    ]}
+  />
+
+  <section
+    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+  >
+    <div class="flex flex-col gap-8">
+      {
+        body.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        fields.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.fieldsHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {fields.map((field) => (
+                <div class="flex flex-col gap-1 px-5 py-4 sm:px-6">
+                  <dt class="font-semibold text-ink">{field.label}</dt>
+                  {field.options.length > 0 && (
+                    <dd class="spec text-sm text-muted">
+                      {field.options.join(', ')}
+                    </dd>
+                  )}
+                </div>
+              ))}
+            </dl>
+          </div>
+        )
+      }
+
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        {
+          category.pages.length > 0 ? (
+            <ul class="card divide-y divide-line">
+              {category.pages.map((page) => (
+                <li>
+                  <a
+                    href={PathBuilder.partNumber(locale, page.slug)}
+                    class="flex flex-wrap items-baseline gap-x-3 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+                  >
+                    <span class="font-semibold">{page.brand.name}</span>
+                    <span class="spec text-sm text-muted">{page.value}</span>
+                    <span class="text-sm text-ink-2">{page.part.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+      <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+      <LeadForm
+        service={VIN_INQUIRY_SERVICE}
+        vin={{ label: inquiry.vinLabel, placeholder: inquiry.vinPlaceholder }}
+        comment={`${name}: `}
+        commentLabel={inquiry.commentLabel}
+        commentPlaceholder={inquiry.commentPlaceholder}
+        commentNote={inquiry.commentNote}
+        defaultChannel="whatsapp"
+      />
+    </div>
+  </section>
+</Shell>

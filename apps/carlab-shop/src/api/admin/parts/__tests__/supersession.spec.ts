@@ -133,6 +133,8 @@ medusaIntegrationTestRunner({
           expect((await pageFor('34116761252')).part).toEqual({
             id: oldId,
             name: 'Brake pad, old',
+            category_id: null,
+            attributes: {},
             replaced_by: {
               id: newId,
               name: 'Brake pad, new',

@@ -1,21 +1,20 @@
 ---
-import { Image } from 'astro:assets';
+import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
 import VinLookupForm from '@/components/VinLookupForm.astro';
 import { localeFrom } from '@/i18n/config';
+import { categoriesForBuild } from '@/utils/catalogue';
+import { paragraphs } from '@/utils/paragraphs';
 import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
-import {
-  PARTS_CATEGORY_IMAGES,
-  PARTS_CATEGORY_SLUGS,
-} from '@/utils/partsCatalog';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { content } from '@/i18n/content';
 
-export function getStaticPaths() {
-  return localePaths();
+export async function getStaticPaths() {
+  const categories = await categoriesForBuild();
+  return localePaths().map((path) => ({ ...path, props: { categories } }));
 }
 
 const locale = localeFrom(Astro.url.pathname);
@@ -23,10 +22,13 @@ const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
 const vinCopy = content(locale).partsCar.vin;
-const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
-  slug,
-  ...copy.categories[slug],
-}));
+const categories = (Astro.props as { categories: Category[] }).categories.map(
+  (category) => ({
+    slug: category.slug,
+    name: translated(category, 'name', locale),
+    lead: paragraphs(translated(category, 'text', locale))[0],
+  }),
+);
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
@@ -44,44 +46,38 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
       {copy.sourcingNote}
     </p>
 
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col gap-1">
-        <h2 class="text-section">{copy.categoriesHeading}</h2>
-        <p class="max-w-2xl text-sm leading-relaxed text-muted">
-          {copy.categoriesLead}
-        </p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          categories.map((category) => (
-            <a
-              href={PathBuilder.partsCategory(locale, category.slug)}
-              class="card group flex flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
-            >
-              <Image
-                src={PARTS_CATEGORY_IMAGES[category.slug]}
-                alt={category.name}
-                widths={[320, 480, 640]}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
-                loading="lazy"
-                class="aspect-[4/3] w-full object-cover"
-              />
-              <div class="flex flex-1 flex-col gap-2 border-t border-line p-5">
+    {
+      categories.length > 0 && (
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-section">{copy.categoriesHeading}</h2>
+            <p class="max-w-2xl text-sm leading-relaxed text-muted">
+              {copy.categoriesLead}
+            </p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => (
+              <a
+                href={PathBuilder.partsCategory(locale, category.slug)}
+                class="card group flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+              >
                 <h3 class="text-base font-semibold text-ink">
                   {category.name}
                 </h3>
-                <p class="text-sm leading-relaxed text-ink-2">
-                  {category.lead}
-                </p>
+                {category.lead && (
+                  <p class="text-sm leading-relaxed text-ink-2">
+                    {category.lead}
+                  </p>
+                )}
                 <span class="spec mt-auto pt-2 text-xs text-signal-ink">
                   {copy.categoryCta} →
                 </span>
-              </div>
-            </a>
-          ))
-        }
-      </div>
-    </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )
+    }
 
     <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
       <div class="card flex flex-col gap-3 p-5">

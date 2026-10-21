@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { attributeValuesSchema } from './attributes.ts';
 
 export const PART_IDENTIFIER_TYPES = [
   'oem',
@@ -33,6 +34,8 @@ export const partPageSchema = brandNumberSchema.extend({
         brand_number: brandNumberSchema,
       })
       .nullable(),
+    category_id: z.string().nullable(),
+    attributes: attributeValuesSchema,
   }),
   equivalents: z.array(brandNumberSchema),
   has_offers: z.boolean(),

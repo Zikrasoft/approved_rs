@@ -8,6 +8,10 @@ replacedHeading: Деталь заменена
 replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
 supersededNotice: Этот номер устарел, производитель его больше не использует.
 supersededTag: устарел
+attributesHeading: Характеристики
+attributeYes: Да
+attributeNo: Нет
+categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
 priceOnRequestCta: Узнать цену
@@ -41,6 +45,10 @@ translations:
     replacedLead: 'Proizvođač je ovaj deo zamenio novim. Naručite aktuelni deo:'
     supersededNotice: Ovaj broj je zastareo i proizvođač ga više ne koristi.
     supersededTag: zastareo
+    attributesHeading: Karakteristike
+    attributeYes: Da
+    attributeNo: Ne
+    categoryLink: Svi delovi iz kategorije
     currencyLabel: RSD
     columns:
       brand: Brend
@@ -69,6 +77,10 @@ translations:
     replacedLead: 'The manufacturer replaced this part with a new one. Order the current part:'
     supersededNotice: This number is superseded and no longer used by the manufacturer.
     supersededTag: superseded
+    attributesHeading: Specifications
+    attributeYes: 'Yes'
+    attributeNo: 'No'
+    categoryLink: All parts in this category
     currencyLabel: RSD
     columns:
       brand: Brand

@@ -15,16 +15,34 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
+  const { replaced_by_id, category_id, attributes } = req.validatedBody;
+  const updated_by = req.auth_context.actor_id;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  await catalog.replacePart(
-    id,
-    req.validatedBody.replaced_by_id,
-    req.auth_context.actor_id,
-  );
+  const current = await catalog.retrievePart(id);
+  if (category_id !== undefined || attributes !== undefined) {
+    await catalog.classifyPart(id, {
+      category_id:
+        category_id === undefined ? current.category_id : category_id,
+      attributes: attributes ?? {},
+      updated_by,
+    });
+  }
+  if (replaced_by_id !== undefined) {
+    await catalog.replacePart(id, replaced_by_id, updated_by);
+  }
 
-  const { name, replaced_by_id, updated_by } = await catalog.retrievePart(id);
-  res.json({ part: { id, name, replaced_by_id, updated_by } });
+  const part = await catalog.retrievePart(id);
+  res.json({
+    part: {
+      id,
+      name: part.name,
+      replaced_by_id: part.replaced_by_id,
+      category_id: part.category_id,
+      attributes: part.attributes,
+      updated_by: part.updated_by,
+    },
+  });
 }
 
 export async function DELETE(

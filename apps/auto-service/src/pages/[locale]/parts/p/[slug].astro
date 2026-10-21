@@ -1,18 +1,17 @@
 ---
-import { partPageSlug } from '@podbor/catalog-contract';
+import { partPageSlug, translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
+import { paragraphs } from '@/utils/paragraphs';
 import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
-  const pages = await partPagesForBuild({
-    MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
-    MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
-  });
+  const pages = await partPagesForBuild();
   return withLocales(
     pages.map((page) => ({ params: { slug: page.slug }, props: { page } })),
   );
@@ -24,6 +23,16 @@ const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
 const replacement = page.part.replaced_by;
+const category = page.category;
+const attributes = category
+  ? attributeRows(category, page.part.attributes, locale, {
+      yes: copy.attributeYes,
+      no: copy.attributeNo,
+    })
+  : [];
+const categoryText = category
+  ? paragraphs(translated(category, 'text', locale))
+  : [];
 ---
 
 <Shell
@@ -37,6 +46,14 @@ const replacement = page.part.replaced_by;
     lead={page.part.name}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
+      ...(category
+        ? [
+            {
+              href: PathBuilder.partsCategory(locale, category.slug),
+              label: translated(category, 'name', locale),
+            },
+          ]
+        : []),
       { href: PathBuilder.partNumber(locale, page.slug), label: heading },
     ]}
   />
@@ -102,6 +119,40 @@ const replacement = page.part.replaced_by;
               <Icon name="arrowRight" />
             </a>
           </parts-list-add>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    category && (
+      <section class="wrap grid gap-6 pt-band md:pt-band-lg lg:grid-cols-[1fr_1.2fr] lg:items-start">
+        {attributes.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.attributesHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {attributes.map((row) => (
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 px-5 py-3 sm:px-6">
+                  <dt class="text-sm text-muted">{row.label}</dt>
+                  <dd class="spec font-semibold text-ink">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+        <div class="flex flex-col gap-3">
+          <h2 class="text-section">{translated(category, 'name', locale)}</h2>
+          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+            {categoryText.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+          <a
+            href={PathBuilder.partsCategory(locale, category.slug)}
+            class="text-sm font-semibold text-signal-ink hover:underline"
+          >
+            {copy.categoryLink}
+          </a>
         </div>
       </section>
     )

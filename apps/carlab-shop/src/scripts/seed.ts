@@ -166,6 +166,82 @@ async function seedVehiclesAndFitment(
   logger.info('Seeded vehicle/fitment pilot fixture (N47/B47/B48).');
 }
 
+const CATEGORIES = [
+  {
+    slug: 'maintenance-consumables',
+    name: 'ТО и расходники',
+    text: 'Все для планового ТО, от фильтров до технических жидкостей. Подбираем точно под ваш VIN, в том числе для BMW, Mercedes-Benz и других европейских марок.',
+  },
+  {
+    slug: 'brakes',
+    name: 'Тормозная система',
+    text: 'Колодки, диски и все, что с ними связано. Подбираем точно под модель и год выпуска.',
+  },
+  {
+    slug: 'suspension',
+    name: 'Подвеска и рулевое',
+    text: 'От стука в подвеске до замены рулевых наконечников. Подберем деталь под ваш автомобиль.',
+  },
+  {
+    slug: 'engine-parts',
+    name: 'Двигатель',
+    text: 'Запчасти для ремонта и обслуживания двигателя, от прокладок до турбины.',
+  },
+  {
+    slug: 'electrics',
+    name: 'Электрика',
+    text: 'Электрика автомобиля, от аккумулятора до датчиков. Подберем деталь, которая точно подойдет.',
+  },
+  {
+    slug: 'transmission',
+    name: 'Трансмиссия и приводы',
+    text: 'Детали трансмиссии и приводов, от сцепления до подшипников ступиц.',
+  },
+  {
+    slug: 'body-parts',
+    name: 'Кузовные детали',
+    text: 'Кузовные детали после ДТП или просто на замену. Подберем по VIN, чтобы точно подошло.',
+  },
+];
+
+async function seedCategories(
+  catalog: CatalogModuleService,
+  b47OilFilterPartId: string,
+  logger: { info: (message: string) => void },
+): Promise<void> {
+  if ((await catalog.listCategories({ slug: CATEGORIES[0].slug })).length) {
+    logger.info('Categories already seeded, skipping.');
+    return;
+  }
+  const [maintenance] = await catalog.createCategories(CATEGORIES);
+  const filterType = await catalog.createCategoryFields({
+    category_id: maintenance.id,
+    key: 'filter-type',
+    type: 'single-select',
+    label: 'Тип фильтра',
+    facet: true,
+  });
+  await catalog.createCategoryFieldOptions([
+    {
+      field_id: filterType.id,
+      key: 'cartridge',
+      label: 'Сменный элемент',
+      rank: 0,
+    },
+    {
+      field_id: filterType.id,
+      key: 'spin-on',
+      label: 'Навинчиваемый',
+      rank: 1,
+    },
+  ]);
+  await catalog.classifyPart(b47OilFilterPartId, {
+    category_id: maintenance.id,
+    attributes: { 'filter-type': 'cartridge' },
+  });
+  logger.info('Seeded the Categories the placeholder pages redirect to.');
+}
+
 export default async function seed({ container }: ExecArgs) {
   const logger = container.resolve('logger');
 
@@ -181,4 +257,5 @@ export default async function seed({ container }: ExecArgs) {
     logger,
   );
   await seedVehiclesAndFitment(catalog, b47OilFilterPartId, logger);
+  await seedCategories(catalog, b47OilFilterPartId, logger);
 }

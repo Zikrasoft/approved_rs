@@ -24,6 +24,15 @@ describe('CommonJS build', () => {
     ).toBe(true);
   });
 
+  it('serves the attributes module to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(
+      contract.matchesRequirements({ approvals: ['bmw-ll-04'] }, [
+        { field_key: 'approvals', option_keys: ['bmw-ll-04'] },
+      ]),
+    ).toBe(true);
+  });
+
   it('serves the vehicle schemas to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([

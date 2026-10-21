@@ -11,6 +11,216 @@
   },
   "redirects": [
     {
+      "source": "/ru/parts/maintenance-consumables",
+      "destination": "/ru/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/maintenance-consumables/",
+      "destination": "/ru/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/brakes",
+      "destination": "/ru/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/brakes/",
+      "destination": "/ru/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/suspension",
+      "destination": "/ru/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/suspension/",
+      "destination": "/ru/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/engine-parts",
+      "destination": "/ru/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/engine-parts/",
+      "destination": "/ru/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/electrics",
+      "destination": "/ru/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/electrics/",
+      "destination": "/ru/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/transmission",
+      "destination": "/ru/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/transmission/",
+      "destination": "/ru/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/body-parts",
+      "destination": "/ru/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/body-parts/",
+      "destination": "/ru/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/maintenance-consumables",
+      "destination": "/sr/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/maintenance-consumables/",
+      "destination": "/sr/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/brakes",
+      "destination": "/sr/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/brakes/",
+      "destination": "/sr/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/suspension",
+      "destination": "/sr/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/suspension/",
+      "destination": "/sr/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/engine-parts",
+      "destination": "/sr/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/engine-parts/",
+      "destination": "/sr/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/electrics",
+      "destination": "/sr/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/electrics/",
+      "destination": "/sr/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/transmission",
+      "destination": "/sr/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/transmission/",
+      "destination": "/sr/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/body-parts",
+      "destination": "/sr/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/body-parts/",
+      "destination": "/sr/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/maintenance-consumables",
+      "destination": "/en/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/maintenance-consumables/",
+      "destination": "/en/parts/c/maintenance-consumables/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/brakes",
+      "destination": "/en/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/brakes/",
+      "destination": "/en/parts/c/brakes/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/suspension",
+      "destination": "/en/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/suspension/",
+      "destination": "/en/parts/c/suspension/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/engine-parts",
+      "destination": "/en/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/engine-parts/",
+      "destination": "/en/parts/c/engine-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/electrics",
+      "destination": "/en/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/electrics/",
+      "destination": "/en/parts/c/electrics/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/transmission",
+      "destination": "/en/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/transmission/",
+      "destination": "/en/parts/c/transmission/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/body-parts",
+      "destination": "/en/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/body-parts/",
+      "destination": "/en/parts/c/body-parts/",
+      "permanent": true
+    },
+    {
       "source": "/services/:path*",
       "destination": "/sr/services/:path*",
       "permanent": true

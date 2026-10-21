@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   catalogueFromEnv,
+  categoriesForBuild,
+  categoryPagesForBuild,
   createCatalogue,
   partPagesForBuild,
   vehiclesForBuild,
@@ -12,6 +14,13 @@ const BACKEND_URL = 'http://localhost:9009';
 
 const mann = { name: 'Mann-Filter', slug: 'mann-filter' };
 const bmw = { name: 'BMW', slug: 'bmw' };
+const oilPart = {
+  id: 'part_oil',
+  name: 'Oil filter',
+  replaced_by: null,
+  category_id: null,
+  attributes: {},
+};
 
 const oilFilterMann = {
   id: 'pi_mann',
@@ -20,7 +29,7 @@ const oilFilterMann = {
   normalized_value: 'HU816X',
   superseded: false,
   brand: mann,
-  part: { id: 'part_oil', name: 'Oil filter', replaced_by: null },
+  part: oilPart,
   equivalents: [
     {
       id: 'pi_bmw',
@@ -41,7 +50,7 @@ const oilFilterBmw = {
   normalized_value: '11428575211',
   superseded: false,
   brand: bmw,
-  part: { id: 'part_oil', name: 'Oil filter', replaced_by: null },
+  part: oilPart,
   equivalents: [
     {
       id: 'pi_mann',
@@ -175,9 +184,96 @@ describe('catalogue.partPages', () => {
   });
 });
 
+describe('catalogue categories', () => {
+  const oilFilters = {
+    id: 'category_oil_filters',
+    slug: 'oil-filters',
+    name: 'Масляные фильтры',
+    text: 'Фильтр очищает масло.',
+    translations: { sr: { name: 'Filteri ulja' } },
+    fields: [
+      {
+        key: 'height',
+        type: 'number',
+        unit: 'mm',
+        label: 'Высота',
+        translations: null,
+        required: false,
+        facet: true,
+        rank: 0,
+        options: [],
+      },
+    ],
+  };
+  const cabinFilters = {
+    ...oilFilters,
+    id: 'category_cabin_filters',
+    slug: 'cabin-filters',
+    name: 'Салонные фильтры',
+    fields: [],
+  };
+  const classified = {
+    ...oilFilterMann,
+    part: {
+      ...oilPart,
+      category_id: oilFilters.id,
+      attributes: { height: 79 },
+    },
+  };
+  const backend = (pages: unknown[]) =>
+    vi.fn((url: string) =>
+      url.endsWith('/store/categories')
+        ? respond({ categories: [oilFilters, cabinFilters] })
+        : respond({ pages, count: pages.length, offset: 0, limit: 1000 }),
+    );
+
+  it('gives a classified page its Category with the field definitions', async () => {
+    const [page] = await catalogueWith(backend([classified])).partPages();
+
+    expect(page.category).toEqual(oilFilters);
+    expect(page.part.attributes).toEqual({ height: 79 });
+  });
+
+  it('asks for no Categories while no page has one', async () => {
+    const fetch = backend([oilFilterMann]);
+
+    const [page] = await catalogueWith(fetch).partPages();
+
+    expect(page.category).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds a page per Category with the brand-numbers in it', async () => {
+    const categories = await catalogueWith(
+      backend([classified, oilFilterBmw]),
+    ).categoryPages();
+
+    expect(
+      categories.map(({ slug, pages }) => [
+        slug,
+        pages.map((page) => page.slug),
+      ]),
+    ).toEqual([
+      ['oil-filters', ['mann-filter-hu816x']],
+      ['cabin-filters', []],
+    ]);
+  });
+
+  it('fails the build on a Category that breaks the contract', async () => {
+    const fetch = vi.fn(() => respond({ categories: [{ id: 'x' }] }));
+
+    await expect(catalogueWith(fetch).categories()).rejects.toThrow();
+  });
+});
+
 describe('partPagesForBuild', () => {
   it('builds no part pages when no backend is configured', async () => {
     expect(await partPagesForBuild({})).toEqual([]);
+  });
+
+  it('builds no Category pages when no backend is configured', async () => {
+    expect(await categoryPagesForBuild({})).toEqual([]);
+    expect(await categoriesForBuild({})).toEqual([]);
   });
 });
 

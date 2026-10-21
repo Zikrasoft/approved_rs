@@ -1,6 +1,8 @@
 import { z } from '@medusajs/framework/zod';
 import {
   BRAND_SLUG_PATTERN,
+  CATALOG_KEY_PATTERN,
+  CATEGORY_FIELD_TYPES,
   normalizePartNumber,
 } from '@podbor/catalog-contract';
 
@@ -32,11 +34,15 @@ export const AdminCreatePart = z.object({
       }),
     )
     .min(1),
+  category_id: z.string().min(1).nullable().optional(),
+  attributes: z.record(z.string(), z.unknown()).optional(),
 });
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
 export const AdminUpdatePart = z.strictObject({
-  replaced_by_id: z.string().min(1).nullable(),
+  replaced_by_id: z.string().min(1).nullable().optional(),
+  category_id: z.string().min(1).nullable().optional(),
+  attributes: z.record(z.string(), z.unknown()).optional(),
 });
 export type AdminUpdatePartType = z.infer<typeof AdminUpdatePart>;
 
@@ -86,4 +92,68 @@ export const AdminCreateBrandSpelling = z.strictObject({
 });
 export type AdminCreateBrandSpellingType = z.infer<
   typeof AdminCreateBrandSpelling
+>;
+
+const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
+
+const categoryColumns = {
+  name: z.string().trim().min(1),
+  text: z.string(),
+};
+
+export const AdminCreateCategory = z.strictObject({
+  slug: catalogKey,
+  ...categoryColumns,
+  text: categoryColumns.text.default(''),
+});
+export type AdminCreateCategoryType = z.infer<typeof AdminCreateCategory>;
+
+export const AdminUpdateCategory = z.strictObject(categoryColumns).partial();
+export type AdminUpdateCategoryType = z.infer<typeof AdminUpdateCategory>;
+
+const fieldColumns = {
+  type: z.enum(CATEGORY_FIELD_TYPES),
+  unit: z.string().trim().min(1).nullable(),
+  label: z.string().trim().min(1),
+  required: z.boolean(),
+  facet: z.boolean(),
+  rank: z.number().int(),
+};
+
+export const AdminCreateCategoryField = z.strictObject({
+  key: catalogKey,
+  ...fieldColumns,
+  unit: fieldColumns.unit.default(null),
+  required: fieldColumns.required.default(false),
+  facet: fieldColumns.facet.default(false),
+  rank: fieldColumns.rank.default(0),
+});
+export type AdminCreateCategoryFieldType = z.infer<
+  typeof AdminCreateCategoryField
+>;
+
+export const AdminUpdateCategoryField = z.strictObject(fieldColumns).partial();
+export type AdminUpdateCategoryFieldType = z.infer<
+  typeof AdminUpdateCategoryField
+>;
+
+const optionColumns = {
+  label: z.string().trim().min(1),
+  rank: z.number().int(),
+};
+
+export const AdminCreateCategoryFieldOption = z.strictObject({
+  key: catalogKey,
+  ...optionColumns,
+  rank: optionColumns.rank.default(0),
+});
+export type AdminCreateCategoryFieldOptionType = z.infer<
+  typeof AdminCreateCategoryFieldOption
+>;
+
+export const AdminUpdateCategoryFieldOption = z
+  .strictObject(optionColumns)
+  .partial();
+export type AdminUpdateCategoryFieldOptionType = z.infer<
+  typeof AdminUpdateCategoryFieldOption
 >;

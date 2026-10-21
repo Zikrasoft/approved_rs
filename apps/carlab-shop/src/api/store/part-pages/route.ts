@@ -95,6 +95,8 @@ export async function GET(
       id: identifier.part.id,
       name: identifier.part.name,
       replaced_by: replacedBy(identifier.part.replaced_by_id),
+      category_id: identifier.part.category_id,
+      attributes: identifier.part.attributes,
     },
     equivalents: siblings
       .filter(

@@ -117,6 +117,48 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       update: (catalog, rows) => catalog.updateSeries(rows),
     },
   ],
+  [
+    'category',
+    {
+      subject: 'car part category names and their descriptions',
+      fields: ['name', 'text'],
+      codec: nested,
+      list: (catalog, filters) =>
+        catalog.listCategories(filters, {
+          select: [...TRANSLATION_COLUMNS, 'name', 'text'],
+          take: null,
+        }),
+      update: (catalog, rows) => catalog.updateCategories(rows),
+    },
+  ],
+  [
+    'category_field',
+    {
+      subject: 'names of car part characteristics, such as "Вязкость"',
+      fields: ['label'],
+      codec: nested,
+      list: (catalog, filters) =>
+        catalog.listCategoryFields(filters, {
+          select: [...TRANSLATION_COLUMNS, 'label'],
+          take: null,
+        }),
+      update: (catalog, rows) => catalog.updateCategoryFields(rows),
+    },
+  ],
+  [
+    'category_field_option',
+    {
+      subject: 'values of car part characteristics, such as "Сменный элемент"',
+      fields: ['label'],
+      codec: nested,
+      list: (catalog, filters) =>
+        catalog.listCategoryFieldOptions(filters, {
+          select: [...TRANSLATION_COLUMNS, 'label'],
+          take: null,
+        }),
+      update: (catalog, rows) => catalog.updateCategoryFieldOptions(rows),
+    },
+  ],
 ]);
 
 type Item = {

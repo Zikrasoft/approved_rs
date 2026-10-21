@@ -10,12 +10,20 @@ const SERBIAN = new Map([
   ['Масляный фильтр', 'Filter ulja'],
   ['Воздушный фильтр', 'Filter vazduha'],
   ['Салонный фильтр', 'Kabinski filter'],
+  ['Моторное масло', 'Motorno ulje'],
+  ['Масло для двигателя.', 'Ulje za motor.'],
+  ['Вязкость', 'Viskozitet'],
+  ['Синтетика', 'Sintetika'],
 ]);
 const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
   ['Воздушный фильтр', 'Air filter'],
   ['Салонный фильтр', 'Cabin filter'],
   ['3 серия', '3 Series'],
+  ['Моторное масло', 'Engine oil'],
+  ['Масло для двигателя.', 'Oil for the engine.'],
+  ['Вязкость', 'Viscosity'],
+  ['Синтетика', 'Synthetic'],
 ]);
 
 type FakeNetwork = {
@@ -255,6 +263,41 @@ medusaIntegrationTestRunner({
         ).toEqual({ sr: { name: 'Serija 3' }, en: { name: '3 Series' } });
         const [stored] = await catalog.listSeries({ id: series.id });
         expect(stored.translations).toEqual({ sr: 'Serija 3', en: '3 Series' });
+      });
+
+      it('translates a Category with its field and option labels', async () => {
+        const category = await catalog.createCategories({
+          slug: 'engine-oil',
+          name: 'Моторное масло',
+          text: 'Масло для двигателя.',
+        });
+        const field = await catalog.createCategoryFields({
+          category_id: category.id,
+          key: 'viscosity',
+          type: 'single-select',
+          label: 'Вязкость',
+        });
+        const option = await catalog.createCategoryFieldOptions({
+          field_id: field.id,
+          key: '5w-30',
+          label: 'Синтетика',
+        });
+
+        await publish();
+
+        const translationsAt = async (entity: string, id: string) =>
+          (await get(`/admin/translations/${entity}/${id}`)).data.translations;
+        expect(await translationsAt('category', category.id)).toEqual({
+          sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
+          en: { name: 'Engine oil', text: 'Oil for the engine.' },
+        });
+        expect(await translationsAt('category_field', field.id)).toEqual({
+          sr: { label: 'Viskozitet' },
+          en: { label: 'Viscosity' },
+        });
+        expect(
+          await translationsAt('category_field_option', option.id),
+        ).toEqual({ sr: { label: 'Sintetika' }, en: { label: 'Synthetic' } });
       });
 
       it('stops before the deploy when a translation fails the safety checks', async () => {
