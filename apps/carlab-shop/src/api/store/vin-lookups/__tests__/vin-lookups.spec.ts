@@ -2,12 +2,10 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
-import { VEHICLE_MODULE } from '../../../../modules/vehicle';
-import type VehicleModuleService from '../../../../modules/vehicle/service';
 import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
 
 const B47_VIN = 'WBA3B1C50GL123456';
 const UNKNOWN_MANUFACTURER_VIN = '1HGCM82633A004352';
@@ -17,8 +15,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     describe('VIN lookup store API', () => {
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
-      let vehicleModuleService: VehicleModuleService;
-      let partModuleService: PartModuleService;
+      let catalog: CatalogModuleService;
       let vinLookupModuleService: VinLookupModuleService;
 
       beforeAll(async () => {
@@ -33,35 +30,32 @@ medusaIntegrationTestRunner({
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
 
-        vehicleModuleService = getContainer().resolve(VEHICLE_MODULE);
-        partModuleService = getContainer().resolve(PART_MODULE);
+        catalog = getContainer().resolve(CATALOG_MODULE);
         vinLookupModuleService = getContainer().resolve(VIN_LOOKUP_MODULE);
       });
 
       describe('POST /store/vin-lookups', () => {
         it('resolves a VIN to the seeded Vehicle it structurally decodes to, and creates a VinLookup', async () => {
-          const b47 = await vehicleModuleService.createVehicles({
+          const b47 = await catalog.createVehicles({
             make: 'BMW',
             model: '320d (F30)',
             engine_code: 'B47',
             year_from: 2015,
             year_to: 2018,
           });
-          const n47 = await vehicleModuleService.createVehicles({
+          const n47 = await catalog.createVehicles({
             make: 'BMW',
             model: '320d (F30)',
             engine_code: 'N47',
             year_from: 2010,
             year_to: 2012,
           });
-          const part = await partModuleService.createParts({
+          const part = await catalog.createParts({
             name: 'Oil filter, BMW B47/B48 engines',
           });
-          await vehicleModuleService.createFitments({
+          await catalog.createFitments({
             part_id: part.id,
             vehicle_id: b47.id,
-            source: 'manual',
-            status: 'active',
           });
 
           const response = await api.post(
@@ -100,7 +94,7 @@ medusaIntegrationTestRunner({
         });
 
         it('reuses the cached VinLookup row on a second lookup of the same VIN', async () => {
-          const vehicle = await vehicleModuleService.createVehicles({
+          const vehicle = await catalog.createVehicles({
             make: 'BMW',
             model: '320d (F30)',
             engine_code: 'B47',
@@ -145,12 +139,12 @@ medusaIntegrationTestRunner({
           expect(stored).toHaveLength(0);
         });
 
-        it('rejects a VIN that is not 17 structurally valid characters', async () => {
+        it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
           const response = await api
             .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)
             .catch((error) => error.response);
 
-          expect(response.status).not.toBe(200);
+          expect(response.status).toBe(400);
         });
       });
     });

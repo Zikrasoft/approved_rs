@@ -6,8 +6,10 @@ import {
 } from '@medusajs/framework/workflows-sdk';
 import { Modules } from '@medusajs/framework/utils';
 
-import { PART_MODULE } from '../modules/part';
-import type PartModuleService from '../modules/part/service';
+import { CATALOG_MODULE } from '../modules/catalog';
+import type CatalogModuleService from '../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../modules/supplier';
+import type SupplierModuleService from '../modules/supplier/service';
 import { PART_CHANGED_EVENT } from '../search/part-changed-event';
 
 export type UpdateSupplierOfferWorkflowInput = {
@@ -22,10 +24,11 @@ export type UpdateSupplierOfferWorkflowInput = {
 const updateSupplierOfferStep = createStep(
   'update-supplier-offer',
   async (input: UpdateSupplierOfferWorkflowInput, { container }) => {
-    const partModuleService: PartModuleService = container.resolve(PART_MODULE);
+    const supplierService: SupplierModuleService =
+      container.resolve(SUPPLIER_MODULE);
 
-    const previous = await partModuleService.retrieveSupplierOffer(input.id);
-    const updated = await partModuleService.updateSupplierOffers(input);
+    const previous = await supplierService.retrieveSupplierOffer(input.id);
+    const updated = await supplierService.updateSupplierOffers(input);
 
     return new StepResponse(updated, previous);
   },
@@ -34,13 +37,14 @@ const updateSupplierOfferStep = createStep(
       return;
     }
 
-    const partModuleService: PartModuleService = container.resolve(PART_MODULE);
-    await partModuleService.updateSupplierOffers({
+    const supplierService: SupplierModuleService =
+      container.resolve(SUPPLIER_MODULE);
+    await supplierService.updateSupplierOffers({
       id: previous.id,
       cost_price: previous.cost_price,
       stock_quantity: previous.stock_quantity,
       lead_time: previous.lead_time,
-      supplier_id: previous.supplier.id,
+      supplier_id: previous.supplier_id,
       supplier_article_id: previous.supplier_article_id,
     });
   },
@@ -48,10 +52,9 @@ const updateSupplierOfferStep = createStep(
 
 const emitPartChangedStep = createStep(
   'emit-part-changed-for-supplier-offer',
-  async (identifierId: string, { container }) => {
-    const partModuleService: PartModuleService = container.resolve(PART_MODULE);
-    const identifier =
-      await partModuleService.retrievePartIdentifier(identifierId);
+  async (partIdentifierId: string, { container }) => {
+    const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+    const identifier = await catalog.retrievePartIdentifier(partIdentifierId);
 
     const eventBus = container.resolve(Modules.EVENT_BUS);
     await eventBus.emit({
@@ -67,7 +70,7 @@ export const updateSupplierOfferWorkflow = createWorkflow(
   'update-supplier-offer',
   (input: UpdateSupplierOfferWorkflowInput) => {
     const offer = updateSupplierOfferStep(input);
-    emitPartChangedStep(offer.identifier_id);
+    emitPartChangedStep(offer.part_identifier_id);
 
     return new WorkflowResponse(offer);
   },

@@ -1,18 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { createCartWorkflow } from '@medusajs/medusa/core-flows';
-import { z } from 'zod';
 
 import { CASH_AT_PICKUP_METADATA } from '../../../lib/offer-cart';
-
-const bodySchema = z.object({
-  email: z.string().email().optional(),
-});
+import type { StoreCreateOfferCartType } from '../validators';
 
 export async function POST(
-  req: MedusaRequest,
+  req: MedusaRequest<StoreCreateOfferCartType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { email } = bodySchema.parse(req.body ?? {});
+  const { email } = req.validatedBody;
 
   const { result: cart } = await createCartWorkflow(req.scope).run({
     input: {

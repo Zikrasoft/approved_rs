@@ -3,6 +3,8 @@ import { Button, Container, Heading, Input, Table } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { adminFetch } from '../../lib/admin-fetch';
+
 type Supplier = {
   id: string;
   name: string;
@@ -17,11 +19,12 @@ const SuppliersPage = () => {
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const load = async () => {
-    const response = await fetch('/admin/suppliers', {
-      credentials: 'include',
-    });
-    const { suppliers: data } = await response.json();
-    setSuppliers(data);
+    const data = await adminFetch<{ suppliers: Supplier[] }>(
+      '/admin/suppliers',
+    );
+    if (data) {
+      setSuppliers(data.suppliers);
+    }
   };
 
   useEffect(() => {
@@ -35,10 +38,8 @@ const SuppliersPage = () => {
     }
 
     setSavingId(id);
-    await fetch(`/admin/suppliers/${id}`, {
+    await adminFetch(`/admin/suppliers/${id}`, {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ markup_percentage }),
     });
     setSavingId(null);

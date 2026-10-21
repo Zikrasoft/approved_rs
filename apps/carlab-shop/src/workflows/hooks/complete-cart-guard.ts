@@ -1,10 +1,10 @@
 import { MathBN, MedusaError } from '@medusajs/framework/utils';
 import { completeCartWorkflow } from '@medusajs/medusa/core-flows';
 
-import { PART_MODULE } from '../../modules/part';
-import type PartModuleService from '../../modules/part/service';
 import { offerIdOf, type OfferCartLineItem } from '../../lib/offer-cart';
-import { sellPrice } from '../../modules/part/store-response';
+import { SUPPLIER_MODULE } from '../../modules/supplier';
+import { sellPrice } from '../../modules/supplier/pricing';
+import type SupplierModuleService from '../../modules/supplier/service';
 
 export const OFFER_PRICE_CHANGED_CODE = 'OFFER_PRICE_CHANGED';
 
@@ -32,8 +32,9 @@ completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
     return;
   }
 
-  const partModuleService: PartModuleService = container.resolve(PART_MODULE);
-  const offers = await partModuleService.listSupplierOffers(
+  const supplierService: SupplierModuleService =
+    container.resolve(SUPPLIER_MODULE);
+  const offers = await supplierService.listSupplierOffers(
     { id: offerIds },
     { relations: ['supplier'] },
   );

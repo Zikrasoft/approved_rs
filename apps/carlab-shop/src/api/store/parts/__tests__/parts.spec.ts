@@ -2,11 +2,13 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 
 medusaIntegrationTestRunner({
-  moduleName: 'part',
+  moduleName: 'catalog',
   testSuite: ({ api, getContainer }) => {
     describe('GET /store/parts/:id', () => {
       let partId: string;
@@ -15,8 +17,10 @@ medusaIntegrationTestRunner({
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
 
       beforeAll(async () => {
-        const partModuleService: PartModuleService =
-          getContainer().resolve(PART_MODULE);
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const supplierService: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
         const apiKeyModuleService: IApiKeyModuleService =
           getContainer().resolve(Modules.API_KEY);
 
@@ -30,17 +34,17 @@ medusaIntegrationTestRunner({
         };
 
         const [intercars, carlabWarehouse] =
-          await partModuleService.createSuppliers([
+          await supplierService.createSuppliers([
             { name: 'Intercars', markup_percentage: 20 },
             { name: 'CarLab warehouse', markup_percentage: 15 },
           ]);
 
-        const part = await partModuleService.createParts({
+        const part = await catalog.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
         partId = part.id;
 
-        const oemIdentifier = await partModuleService.createPartIdentifiers({
+        const oemIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'oem',
           brand: 'BMW',
@@ -48,7 +52,7 @@ medusaIntegrationTestRunner({
         });
         oemIdentifierId = oemIdentifier.id;
 
-        const mannIdentifier = await partModuleService.createPartIdentifiers({
+        const mannIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'manufacturer-number',
           brand: 'Mann-Filter',
@@ -56,9 +60,9 @@ medusaIntegrationTestRunner({
         });
         mannIdentifierId = mannIdentifier.id;
 
-        await partModuleService.createSupplierOffers([
+        await supplierService.createSupplierOffers([
           {
-            identifier_id: oemIdentifierId,
+            part_identifier_id: oemIdentifierId,
             supplier_id: intercars.id,
             supplier_article_id: 'IC-11428575211',
             cost_price: 1542,
@@ -66,7 +70,7 @@ medusaIntegrationTestRunner({
             lead_time: 'in_stock',
           },
           {
-            identifier_id: mannIdentifierId,
+            part_identifier_id: mannIdentifierId,
             supplier_id: intercars.id,
             supplier_article_id: 'IC-HU816X',
             cost_price: 1000,
@@ -74,7 +78,7 @@ medusaIntegrationTestRunner({
             lead_time: 'in_stock',
           },
           {
-            identifier_id: mannIdentifierId,
+            part_identifier_id: mannIdentifierId,
             supplier_id: carlabWarehouse.id,
             supplier_article_id: 'WH-HU816X',
             cost_price: 1000,
@@ -130,11 +134,11 @@ medusaIntegrationTestRunner({
       });
 
       it('rejects a second PartIdentifier with the same (type, brand, value)', async () => {
-        const partModuleService: PartModuleService =
-          getContainer().resolve(PART_MODULE);
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
 
         await expect(
-          partModuleService.createPartIdentifiers({
+          catalog.createPartIdentifiers({
             part_id: partId,
             type: 'oem',
             brand: 'BMW',

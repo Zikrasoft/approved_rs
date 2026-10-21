@@ -2,25 +2,20 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { MathBN, Modules } from '@medusajs/framework/utils';
 import type { ICartModuleService } from '@medusajs/framework/types';
 import { updateLineItemInCartWorkflow } from '@medusajs/medusa/core-flows';
-import { z } from 'zod';
 
-import { PART_MODULE } from '../../../../../modules/part';
-import type PartModuleService from '../../../../../modules/part/service';
 import {
   ensureCashAtPickupPaymentSession,
   offerIdOf,
 } from '../../../../../lib/offer-cart';
-import { sellPrice } from '../../../../../modules/part/store-response';
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
+import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
+import { sellPrice } from '../../../../../modules/supplier/pricing';
+import type SupplierModuleService from '../../../../../modules/supplier/service';
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const { id: cartId } = paramsSchema.parse(req.params);
+  const { id: cartId } = req.params;
 
   const cartModuleService: ICartModuleService = req.scope.resolve(Modules.CART);
   const cart = await cartModuleService.retrieveCart(cartId, {
@@ -31,9 +26,10 @@ export async function POST(
     .map((item) => offerIdOf(item))
     .filter((id): id is string => !!id);
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const supplierService: SupplierModuleService =
+    req.scope.resolve(SUPPLIER_MODULE);
   const offers = offerIds.length
-    ? await partModuleService.listSupplierOffers(
+    ? await supplierService.listSupplierOffers(
         { id: offerIds },
         { relations: ['supplier'] },
       )
