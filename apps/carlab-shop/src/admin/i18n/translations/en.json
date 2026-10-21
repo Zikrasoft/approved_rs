@@ -14,7 +14,6 @@
   "fitments": {
     "heading": "Fitment curation",
     "step1Label": "1. Find or create the Part",
-    "identifierCount": "{{name}} ({{count}} identifier)",
     "identifierCount_other": "{{name}} ({{count}} identifiers)",
     "change": "Change",
     "searchPlaceholder": "OEM / manufacturer number or brand",
@@ -38,12 +37,10 @@
       "position": "Position",
       "criteria": "Conditions",
       "note": "Note",
-      "source": "Source",
-      "steering": "Steering",
-      "gearbox": "Gearbox"
+      "source": "Source"
     },
     "identifierTypes": {
-      "oem": "OEM",
+      "oem": "OEM number",
       "manufacturer-number": "Manufacturer number",
       "ean": "EAN barcode"
     },
@@ -56,7 +53,6 @@
       "automatic": "Automatic"
     },
     "step2Hint": "Fill in at least one filter. The Part is attached to every matching Vehicle, and existing Fitments are not duplicated.",
-    "any": "Any",
     "filters": {
       "vehicle": "One Vehicle",
       "make": "Make",
@@ -84,7 +80,15 @@
     "sideOptions": {
       "left": "Left",
       "right": "Right"
-    }
+    },
+    "steeringCriterion": "{{side}}-hand drive",
+    "gearboxCriterion": "{{gearbox}} gearbox",
+    "production": {
+      "between": "Built {{from}} to {{to}}",
+      "since": "Built from {{from}}",
+      "until": "Built until {{to}}"
+    },
+    "identifierCount_one": "{{name}} ({{count}} identifier)"
   },
   "suppliers": {
     "heading": "Suppliers",
@@ -144,7 +148,7 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "confirmDelete": "Delete this row? A reference row other rows point at cannot be deleted.",
+    "confirmDelete": "A reference row other rows point at cannot be deleted.",
     "entities": {
       "make": "Makes",
       "series": "Series",
@@ -207,7 +211,8 @@
         "bmw-type-code": "BMW type code (VIN 4-7)",
         "mercedes-baumuster": "Mercedes Baumuster"
       }
-    }
+    },
+    "confirmTitle": "Delete this row?"
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
@@ -217,6 +222,10 @@
       "make": "Make",
       "code": "Code",
       "count": "Lookups"
+    },
+    "makes": {
+      "bmw": "BMW",
+      "mercedes-benz": "Mercedes-Benz"
     }
   },
   "publish": {
@@ -238,7 +247,8 @@
       "translate": "translation",
       "deploy": "site build and deploy",
       "reindex": "search refresh"
-    }
+    },
+    "errorDetails": "Error details: {{error}}"
   },
   "supersession": {
     "heading": "Supersession",
@@ -340,7 +350,12 @@
     "add": "Add requirement",
     "delete": "Delete",
     "empty": "No requirements here yet.",
-    "pickOwner": "Choose an engine, chassis or vehicle to see and add its requirements."
+    "pickOwner": "Choose an engine, chassis or vehicle to see and add its requirements.",
+    "range": {
+      "between": "{{min}} to {{max}} {{unit}}",
+      "since": "from {{min}} {{unit}}",
+      "until": "up to {{max}} {{unit}}"
+    }
   },
   "edited": {
     "column": "Changed",
@@ -366,7 +381,8 @@
       "not_allowed": "This action is not available now.",
       "conflict": "The row has changed or is in use. Reload the page and try again.",
       "unauthorized": "Your session has ended. Sign in again.",
-      "duplicate_error": "This row already exists."
+      "duplicate_error": "This row already exists.",
+      "forbidden": "You do not have permission for this action."
     },
     "unknown": "The server could not complete the action. Try again.",
     "unexpectedAnswer": "The server answered in an unexpected shape. Reload the page.",
@@ -384,7 +400,10 @@
     "confirmBody_other": "{{count}} rows will be removed. They cannot be restored.",
     "removed_one": "{{source}}: {{count}} row removed",
     "removed_other": "{{source}}: {{count}} rows removed",
-    "empty": "The catalogue has no rows yet."
+    "empty": "The catalogue has no rows yet.",
+    "names": {
+      "manual": "Manual entry"
+    }
   },
   "translations": {
     "open": "Translations",

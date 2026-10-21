@@ -721,6 +721,11 @@ Check with `curl -k https://localhost:8443/health`.
 
 ### Easy to miss
 
+- **The admin opens in Russian.** Medusa keeps the admin language in the
+  browser (the `lng` cookie and `localStorage` key), not on the user, and falls
+  back to English. `adminLanguage` in `apps/carlab-shop/src/lib/admin-language.ts`,
+  wired through `admin.vite` in `medusa-config.ts`, sets `ru` once per browser;
+  a language picked later under Profile → Language sticks.
 - **`.env` is read literally.** `deploy.sh` pulls values out of `.env` with `sed`
   and does not strip quotes: do not wrap values in `"…"`, or the quotes end up in
   the value.

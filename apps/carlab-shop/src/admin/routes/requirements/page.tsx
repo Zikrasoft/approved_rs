@@ -98,22 +98,8 @@ const ownerLabel = (row: OwnerRow) =>
 const numberOrNull = (value: string) =>
   value.trim() === '' ? null : Number(value);
 
-const condition = (requirement: Requirement, categories: Category[]) => {
-  if (requirement.option_keys) {
-    const options =
-      categories
-        .find(({ id }) => id === requirement.field.category.id)
-        ?.fields.find(({ id }) => id === requirement.field.id)?.options ?? [];
-    return requirement.option_keys
-      .map((key) => options.find((option) => option.key === key)?.label ?? key)
-      .join(', ');
-  }
-  const unit = requirement.field.unit ?? '';
-  return `${requirement.min ?? ''} – ${requirement.max ?? ''} ${unit}`.trim();
-};
-
 const RequirementsPage = () => {
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const [ownerKey, setOwnerKey] = useState<OwnerKey>('engine_id');
   const [owners, setOwners] = useState<Record<string, OwnerRow[]>>({});
   const [ownerId, setOwnerId] = useState('');
@@ -146,10 +132,33 @@ const RequirementsPage = () => {
     loadRequirements();
   }, [ownerKey, ownerId]);
 
+  const condition = ({ option_keys, min, max, field }: Requirement) => {
+    if (option_keys) {
+      const options =
+        categories
+          .find(({ id }) => id === field.category.id)
+          ?.fields.find(({ id }) => id === field.id)?.options ?? [];
+      return option_keys
+        .map(
+          (key) => options.find((option) => option.key === key)?.label ?? key,
+        )
+        .join(', ');
+    }
+    if (min === null && max === null) return '-';
+    const kind = min === null ? 'until' : max === null ? 'since' : 'between';
+    return t(`requirements.range.${kind}`, {
+      min: min?.toLocaleString(i18n.language),
+      max: max?.toLocaleString(i18n.language),
+      unit: field.unit ?? '',
+    }).trim();
+  };
+
   const owner = OWNERS.find(({ key }) => key === ownerKey)!;
   const category = categories.find(({ id }) => id === draft.categoryId);
   const field = category?.fields.find(({ id }) => id === draft.fieldId);
   const isSelect = field?.type.endsWith('select') ?? false;
+  const withUnit = (label: string) =>
+    [label, field?.unit].filter(Boolean).join(', ');
 
   const add = async () => {
     if (!field) return;
@@ -262,9 +271,7 @@ const RequirementsPage = () => {
                   <Table.Row key={requirement.id}>
                     <Table.Cell>{requirement.field.category.name}</Table.Cell>
                     <Table.Cell>{requirement.field.label}</Table.Cell>
-                    <Table.Cell>
-                      {condition(requirement, categories)}
-                    </Table.Cell>
+                    <Table.Cell>{condition(requirement)}</Table.Cell>
                     <Table.Cell>{requirement.quantity}</Table.Cell>
                     <Table.Cell>
                       <Button
@@ -337,7 +344,7 @@ const RequirementsPage = () => {
                 <Input
                   type="number"
                   aria-label={t('requirements.min')}
-                  placeholder={`${t('requirements.min')} ${field.unit ?? ''}`}
+                  placeholder={withUnit(t('requirements.min'))}
                   value={draft.min}
                   onChange={(event) =>
                     setDraft({ ...draft, min: event.target.value })
@@ -346,7 +353,7 @@ const RequirementsPage = () => {
                 <Input
                   type="number"
                   aria-label={t('requirements.max')}
-                  placeholder={`${t('requirements.max')} ${field.unit ?? ''}`}
+                  placeholder={withUnit(t('requirements.max'))}
                   value={draft.max}
                   onChange={(event) =>
                     setDraft({ ...draft, max: event.target.value })

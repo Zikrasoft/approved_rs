@@ -7,6 +7,7 @@ import {
   Label,
   Select,
   Table,
+  usePrompt,
 } from '@medusajs/ui';
 import {
   BODY_STYLES,
@@ -178,6 +179,7 @@ const EntitySection = ({
   reload: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
+  const prompt = usePrompt();
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -227,7 +229,13 @@ const EntitySection = ({
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm(t('vehicles.confirmDelete'))) return;
+    const confirmed = await prompt({
+      title: t('vehicles.confirmTitle'),
+      description: t('vehicles.confirmDelete'),
+      confirmText: t('vehicles.delete'),
+      cancelText: t('vehicles.cancel'),
+    });
+    if (!confirmed) return;
     if (
       await adminFetch(`/admin/${entity.path}/${id}`, acknowledged, {
         method: 'DELETE',
