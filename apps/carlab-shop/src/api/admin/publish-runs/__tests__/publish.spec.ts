@@ -2,6 +2,7 @@ import { asValue } from '@medusajs/framework/awilix';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
@@ -20,6 +21,7 @@ const SERBIAN = new Map([
   ['Масло для двигателя.', 'Ulje za motor.'],
   ['Вязкость', 'Viskozitet'],
   ['Синтетика', 'Sintetika'],
+  ['Только с M-пакетом', 'Samo sa M paketom'],
 ]);
 const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
@@ -30,6 +32,7 @@ const ENGLISH = new Map([
   ['Масло для двигателя.', 'Oil for the engine.'],
   ['Вязкость', 'Viscosity'],
   ['Синтетика', 'Synthetic'],
+  ['Только с M-пакетом', 'M Sport package only'],
 ]);
 
 type FakeNetwork = {
@@ -354,6 +357,34 @@ medusaIntegrationTestRunner({
         expect(
           await translationsAt('category_field_option', option.id),
         ).toEqual({ sr: { label: 'Sintetika' }, en: { label: 'Synthetic' } });
+      });
+
+      it('translates a Fitment note and leaves Fitments without one alone', async () => {
+        const vehicle = (
+          await createVehicleFixture(catalog, { typeCode: 'PUBLISH-NOTE' })
+        ).vehicle;
+        const part = await catalog.createParts({ name: 'Масляный фильтр' });
+        const [noted, plain] = await catalog.createFitments([
+          {
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+            axle: 'front',
+            note: 'Только с M-пакетом',
+          },
+          { part_id: part.id, vehicle_id: vehicle.id, axle: 'rear' },
+        ]);
+
+        await publish();
+
+        expect(
+          (await get(`/admin/translations/fitment/${noted.id}`)).data
+            .translations,
+        ).toEqual({
+          sr: { note: 'Samo sa M paketom' },
+          en: { note: 'M Sport package only' },
+        });
+        const [untouched] = await catalog.listFitments({ id: plain.id });
+        expect(untouched.translated_from).toBeNull();
       });
 
       it('stops before the deploy when a translation fails the safety checks', async () => {

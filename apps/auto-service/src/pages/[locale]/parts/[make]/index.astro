@@ -1,0 +1,63 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { carName } from '@/utils/carName';
+import { makeHubsForBuild, type MakeHubEntry } from '@/utils/catalogue';
+import { PathBuilder, withLocales } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  return withLocales(
+    hubs.map((hub) => ({ params: { make: hub.make.slug }, props: { hub } })),
+  );
+}
+
+const { hub } = Astro.props as { hub: MakeHubEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsCar.hubs.make;
+const { make } = hub;
+---
+
+<Shell
+  title={copy.metaTitle.replace('{make}', make.name)}
+  description={copy.metaDescription.replace('{make}', make.name)}
+>
+  <PageHero
+    eyebrow={copy.eyebrow}
+    heading={make.name}
+    lead={copy.lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-4 py-band md:py-band-lg">
+    <h2 class="text-section">{copy.modelsHeading}</h2>
+    <ul class="card divide-y divide-line">
+      {
+        hub.models.map(({ model, categories }) => (
+          <li>
+            <a
+              href={PathBuilder.partsModel(locale, make.slug, model.slug)}
+              class="flex flex-col gap-1 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+            >
+              <span class="font-semibold">{carName(model, locale)}</span>
+              {categories.length > 0 && (
+                <span class="text-sm text-muted">
+                  {categories
+                    .map(({ category }) => translated(category, 'name', locale))
+                    .join(', ')}
+                </span>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Shell>

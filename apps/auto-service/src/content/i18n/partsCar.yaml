@@ -25,6 +25,8 @@ car:
   partsHeading: Запчасти для этого автомобиля
   partsLead: Каталог для этого автомобиля пополняется. Оставьте заявку, и мы подберем запчасти по VIN и сообщим цену.
   formHeading: Заявка на запчасти
+  confirmVariant: Уточните вариант. Здесь для вашего автомобиля подходит больше одной детали. Сверьте условия или отправьте заявку с VIN, и менеджер подтвердит нужную.
+  otherParts: Другие запчасти
   notYourCar: Это не ваш автомобиль? Проверьте VIN или отправьте заявку, и мы разберемся вручную.
   fuel:
     petrol: бензин
@@ -47,4 +49,40 @@ car:
   steering:
     left: левый
     right: правый
+fitment:
+  quantity: '{count} шт.'
+  axle:
+    front: передняя ось
+    rear: задняя ось
+  side:
+    left: слева
+    right: справа
+  gearbox:
+    manual: механическая КПП
+    automatic: автоматическая КПП
+  steering: '{side} руль'
+  builtFrom: выпуск с {date}
+  builtTo: выпуск по {date}
+  partFitsHeading: Подходит для автомобилей
+hubs:
+  indexHeading: Запчасти по марке
+  make:
+    metaTitle: '{make}: запчасти по моделям в CarLab'
+    metaDescription: 'Запчасти для {make} по моделям: фильтры, тормоза и расходники с подбором по VIN и установкой в сервисе CarLab в Белграде.'
+    eyebrow: Запчасти по марке
+    lead: Выберите модель, чтобы увидеть запчасти по категориям.
+    modelsHeading: Модели
+  model:
+    metaTitle: '{model}: запчасти в CarLab'
+    metaDescription: 'Запчасти для {model} по категориям, с количеством и местом установки. Подбор по VIN и установка в сервисе CarLab в Белграде.'
+    eyebrow: Запчасти по модели
+    categoriesHeading: Категории запчастей
+    noCategories: Каталог для этой модели пополняется. Оставьте заявку, и мы подберем запчасти по VIN.
+    carsHeading: Модификации
+    carsLead: Откройте свою модификацию, чтобы увидеть запчасти именно для нее.
+  modelCategory:
+    metaTitle: '{category} для {model} в CarLab'
+    metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
+    eyebrow: '{model}'
+    partsHeading: Подходящие запчасти
 translatedFrom: pending

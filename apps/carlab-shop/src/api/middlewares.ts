@@ -5,6 +5,7 @@ import {
 } from '@medusajs/framework/http';
 
 import {
+  AdminBulkAttachFitments,
   AdminCreateBrand,
   AdminCreateBrandSpelling,
   AdminCreateCategory,
@@ -29,8 +30,10 @@ import {
   StoreCompleteOfferCart,
   StoreCreateOfferCart,
   StoreCreateVinLookup,
+  StoreListFitments,
   StoreListPartPages,
   StoreSearchParts,
+  StoreVehicleParts,
 } from './store/validators';
 
 export default defineMiddlewares({
@@ -106,6 +109,11 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(AdminCreateFitment)],
     },
     {
+      matcher: '/admin/fitments/bulk',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminBulkAttachFitments)],
+    },
+    {
       matcher: '/admin/translations/:entity/:id',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminEditTranslation)],
@@ -136,6 +144,16 @@ export default defineMiddlewares({
       matcher: '/store/part-pages',
       method: 'GET',
       middlewares: [validateAndTransformQuery(StoreListPartPages, {})],
+    },
+    {
+      matcher: '/store/fitments',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(StoreListFitments, {})],
+    },
+    {
+      matcher: '/store/vehicles/:id/parts',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(StoreVehicleParts, {})],
     },
     {
       matcher: '/store/search',

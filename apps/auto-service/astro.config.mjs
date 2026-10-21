@@ -7,8 +7,13 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { sitemapFilter } from './src/utils/sitemap.ts';
+import { partPagesForBuild } from './src/utils/catalogue.ts';
 
 const site = CARLAB.url;
+const partPages = await partPagesForBuild({
+  MEDUSA_BACKEND_URL: process.env.MEDUSA_BACKEND_URL,
+  MEDUSA_PUBLISHABLE_KEY: process.env.MEDUSA_PUBLISHABLE_KEY,
+});
 
 export default defineConfig({
   site,
@@ -24,7 +29,7 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: sitemapFilter(site),
+      filter: sitemapFilter(site, partPages),
       i18n: {
         defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),

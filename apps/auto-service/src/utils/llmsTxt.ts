@@ -5,7 +5,7 @@ import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
-import { categoriesForBuild } from '@/utils/catalogue';
+import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
@@ -21,6 +21,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const site = content(locale).site;
   const works = publishedWorks(await getCollection('works'));
   const categories = await categoriesForBuild();
+  const makes = await makeHubsForBuild();
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -51,11 +52,18 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           href: url(PathBuilder.parts(locale)),
           note: pages.partsInquiry.llmsCatalogue,
         },
-        entries: categories.map((category) => ({
-          label: translated(category, 'name', locale),
-          href: url(PathBuilder.partsCategory(locale, category.slug)),
-          note: paragraphs(translated(category, 'text', locale))[0],
-        })),
+        entries: [
+          ...categories.map((category) => ({
+            label: translated(category, 'name', locale),
+            href: url(PathBuilder.partsCategory(locale, category.slug)),
+            note: paragraphs(translated(category, 'text', locale))[0],
+          })),
+          ...makes.map(({ make }) => ({
+            label: make.name,
+            href: url(PathBuilder.partsMake(locale, make.slug)),
+            note: content(locale).partsCar.hubs.make.lead,
+          })),
+        ],
       },
       {
         heading: site.nav.works,

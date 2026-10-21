@@ -1,0 +1,40 @@
+---
+import type { Fitment } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import {
+  fitConditions,
+  fitNote,
+  fitPosition,
+  fitQuantity,
+} from '@/utils/fitmentLabels';
+
+interface Props {
+  fit: Fitment;
+  car?: { href: string; label: string };
+}
+
+const { fit, car } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const details = [fitPosition(fit, locale), ...fitConditions(fit, locale)]
+  .filter(Boolean)
+  .join(', ');
+const note = fitNote(fit, locale);
+---
+
+<div class="flex items-baseline justify-between gap-4 text-sm">
+  <div class="flex min-w-0 flex-col gap-0.5">
+    {
+      car && (
+        <a
+          href={car.href}
+          class="font-semibold text-ink transition-colors duration-150 hover:text-signal-ink"
+        >
+          {car.label}
+        </a>
+      )
+    }
+    {details && <span class="text-muted">{details}</span>}
+    {note && <span class="text-ink-2">{note}</span>}
+  </div>
+  <span class="spec shrink-0 text-ink">{fitQuantity(fit, locale)}</span>
+</div>

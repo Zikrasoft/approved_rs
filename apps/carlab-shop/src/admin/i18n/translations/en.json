@@ -25,14 +25,18 @@
     "brandPlaceholder": "Brand",
     "numberPlaceholder": "Number",
     "createPart": "Create Part",
-    "step2Label": "2. Pick the Vehicle (catalogue only)",
-    "vehiclePlaceholder": "Select a Vehicle",
-    "step3Label": "3. Narrowing criteria (optional)",
+    "step2Label": "2. Pick the Vehicles",
+    "step3Label": "3. Quantity, position and conditions",
     "steeringPlaceholder": "Steering",
     "gearboxPlaceholder": "Gearbox",
-    "createFitment": "Create Fitment",
-    "existingRows": "Existing Fitment rows for this Part/Vehicle",
+    "createFitment": "Attach the Part",
+    "existingRows": "Fitments of this Part",
     "columns": {
+      "vehicle": "Vehicle",
+      "quantity": "Qty",
+      "position": "Position",
+      "criteria": "Conditions",
+      "note": "Note",
       "source": "Source",
       "steering": "Steering",
       "gearbox": "Gearbox"
@@ -49,6 +53,36 @@
     "gearboxOptions": {
       "manual": "Manual",
       "automatic": "Automatic"
+    },
+    "step2Hint": "Fill in at least one filter. The Part is attached to every matching Vehicle, and existing Fitments are not duplicated.",
+    "any": "Any",
+    "filters": {
+      "vehicle": "One Vehicle",
+      "make": "Make",
+      "series": "Series",
+      "chassis": "Chassis",
+      "model": "Model",
+      "engine": "Engine",
+      "engineFamily": "Engine family, e.g. B47",
+      "yearFrom": "Built from, year",
+      "yearTo": "Built until, year"
+    },
+    "quantityLabel": "Quantity per car",
+    "axlePlaceholder": "Axle",
+    "sidePlaceholder": "Side",
+    "productionFromLabel": "Built from",
+    "productionToLabel": "Built until",
+    "notePlaceholder": "Note for the customer, e.g. M Sport package only",
+    "noteHint": "The note is translated at Publish. A Part with a note is confirmed by the customer.",
+    "attached_one": "Created {{count}} Fitment, matching Vehicles: {{matched}}",
+    "attached_other": "Created {{count}} Fitments, matching Vehicles: {{matched}}",
+    "axleOptions": {
+      "front": "Front axle",
+      "rear": "Rear axle"
+    },
+    "sideOptions": {
+      "left": "Left",
+      "right": "Right"
     }
   },
   "suppliers": {

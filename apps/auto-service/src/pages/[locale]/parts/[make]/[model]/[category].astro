@@ -1,0 +1,141 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import FitLine from '@/components/FitLine.astro';
+import PartNumbers from '@/components/PartNumbers.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { carName, vehicleVariant } from '@/utils/carName';
+import {
+  makeHubsForBuild,
+  type ModelCategoryEntry,
+  type ModelHubEntry,
+} from '@/utils/catalogue';
+import { paragraphs } from '@/utils/paragraphs';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  return withLocales(
+    hubs.flatMap((hub) =>
+      hub.models.flatMap((model) =>
+        model.categories.map((entry) => ({
+          params: {
+            make: hub.make.slug,
+            model: model.model.slug,
+            category: entry.category.slug,
+          },
+          props: { hub: model, entry },
+        })),
+      ),
+    ),
+  );
+}
+
+const { hub, entry } = Astro.props as {
+  hub: ModelHubEntry;
+  entry: ModelCategoryEntry;
+};
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = content(locale).partsCar.hubs.modelCategory;
+const { make, model } = hub;
+const { category } = entry;
+const name = carName(model, locale);
+const categoryName = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const fill = (template: string) =>
+  template.replace('{category}', categoryName).replace('{model}', name);
+---
+
+<Shell title={fill(copy.metaTitle)} description={fill(copy.metaDescription)}>
+  <PageHero
+    eyebrow={fill(copy.eyebrow)}
+    heading={categoryName}
+    lead={lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        label: name,
+      },
+      {
+        href: PathBuilder.partsModelCategory(
+          locale,
+          make.slug,
+          model.slug,
+          category.slug,
+        ),
+        label: categoryName,
+      },
+    ]}
+  />
+
+  <section
+    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+  >
+    <div class="flex flex-col gap-8">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        <ul class="flex flex-col gap-4">
+          {
+            entry.parts.map(({ part, pages, fits }) => (
+              <li class="card flex flex-col gap-3 p-5 sm:p-6">
+                <h3 class="font-semibold text-ink">{part.name}</h3>
+                <PartNumbers pages={pages} />
+                <ul class="flex flex-col gap-3 border-t border-line pt-3">
+                  {fits.map((fit) => (
+                    <li>
+                      <FitLine
+                        fit={fit}
+                        car={{
+                          href: PathBuilder.partsCar(locale, fit.vehicle.id),
+                          label: vehicleVariant(fit.vehicle, locale),
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {
+        body.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+
+      <a
+        href={PathBuilder.partsCategory(locale, category.slug)}
+        class="text-sm font-semibold text-signal-ink hover:underline"
+      >
+        {content(locale).shopPart.categoryLink}
+      </a>
+    </div>
+
+    <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+      <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+      <LeadForm
+        service={VIN_INQUIRY_SERVICE}
+        vin={{ label: inquiry.vinLabel, placeholder: inquiry.vinPlaceholder }}
+        comment={`${name}, ${categoryName}: `}
+        commentLabel={inquiry.commentLabel}
+        commentPlaceholder={inquiry.commentPlaceholder}
+        commentNote={inquiry.commentNote}
+        defaultChannel="whatsapp"
+      />
+    </div>
+  </section>
+</Shell>
