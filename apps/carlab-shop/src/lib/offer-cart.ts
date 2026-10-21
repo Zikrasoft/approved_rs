@@ -198,6 +198,21 @@ export async function removeOfferLine(
   });
 }
 
+export async function sellableOffer(
+  scope: MedusaContainer,
+  offerId: string,
+  quantity: number,
+) {
+  const [offer] = await liveOffers(scope, { id: [offerId] });
+  if (!offer) {
+    return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
+  }
+  if (offer.stock_quantity < quantity) {
+    return refuse('OFFER_OUT_OF_STOCK', `Only ${offer.stock_quantity} left`);
+  }
+  return offer;
+}
+
 export async function addOffer(
   scope: MedusaContainer,
   cartId: string,
@@ -205,15 +220,9 @@ export async function addOffer(
   quantity: number,
 ): Promise<void> {
   const cart = await openCart(scope, cartId);
-  const [offer] = await liveOffers(scope, { id: [offerId] });
-  if (!offer) {
-    return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
-  }
   const line = (cart.items ?? []).find((item) => offerIdOf(item) === offerId);
   const wanted = Number(line?.quantity ?? 0) + quantity;
-  if (offer.stock_quantity < wanted) {
-    return refuse('OFFER_OUT_OF_STOCK', `Only ${offer.stock_quantity} left`);
-  }
+  const offer = await sellableOffer(scope, offerId, wanted);
   if (line) {
     await updateLineItemInCartWorkflow(scope).run({
       input: {
