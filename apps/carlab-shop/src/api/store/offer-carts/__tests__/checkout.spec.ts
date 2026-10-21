@@ -287,6 +287,19 @@ medusaIntegrationTestRunner({
         expect(cart.items[0].unit_price).toBe(2200);
       });
 
+      it('sets the quantity of a line within what the supplier has', async () => {
+        quote(1542, 3);
+        const cart = await cartWith(1);
+        const line = `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`;
+
+        const changed = await post(line, { quantity: 3 });
+        expect(changed.data.cart.items[0].quantity).toBe(3);
+
+        const refused = await post(line, { quantity: 4 });
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
+      });
+
       it('removes a line', async () => {
         const cart = await cartWith(1);
 

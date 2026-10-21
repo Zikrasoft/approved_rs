@@ -33,6 +33,11 @@ export const StoreAddOfferCartItem = z.object({
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
 
+export const StoreSetOfferCartItem = z.object({
+  quantity: z.number().int().positive(),
+});
+export type StoreSetOfferCartItemType = z.infer<typeof StoreSetOfferCartItem>;
+
 export const StoreCompleteOfferCart = z
   .record(z.string(), z.unknown())
   .transform((body, context) => {

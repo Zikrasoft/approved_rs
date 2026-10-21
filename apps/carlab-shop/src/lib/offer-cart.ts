@@ -220,6 +220,37 @@ export async function addOffer(
   });
 }
 
+export async function setOfferQuantity(
+  scope: MedusaContainer,
+  cartId: string,
+  itemId: string,
+  quantity: number,
+): Promise<void> {
+  const cart = await retrieveCart(scope, cartId);
+  const line = (cart.items ?? []).find((item) => item.id === itemId);
+  const offerId = line && offerIdOf(line);
+  if (cart.completed_at || !line || !offerId) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      `Cart ${cartId} has no line ${itemId}`,
+    );
+  }
+  const [offer] = await liveOffers(scope, { id: [offerId] });
+  if (!offer) {
+    return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
+  }
+  if (offer.stock_quantity < quantity) {
+    return refuse('OFFER_OUT_OF_STOCK', `Only ${offer.stock_quantity} left`);
+  }
+  await updateLineItemInCartWorkflow(scope).run({
+    input: {
+      cart_id: cartId,
+      item_id: itemId,
+      update: { quantity, unit_price: priceOf(offer) },
+    },
+  });
+}
+
 export async function checkoutRefusal(
   scope: MedusaContainer,
   items: OfferCartLineItem[],
