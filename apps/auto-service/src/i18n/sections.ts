@@ -8,7 +8,7 @@ import { promoBannersContentSchema } from './content/promoBannersContentSchema.t
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 import { shopSearchContentSchema } from './content/shopSearchContentSchema.ts';
 import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
-import { vehiclePickerContentSchema } from './content/vehiclePickerContentSchema.ts';
+import { partsCarContentSchema } from './content/partsCarContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -75,10 +75,10 @@ export const SECTIONS = [
       'cart and checkout page copy for a car parts shop, cash-at-pickup only (empty-cart state, total, a stale-price notice asking to refresh before confirming, an order-placed confirmation)',
   },
   {
-    key: 'vehiclePicker',
-    path: 'src/content/i18n/vehiclePicker.yaml',
-    schema: vehiclePickerContentSchema,
+    key: 'partsCar',
+    path: 'src/content/i18n/partsCar.yaml',
+    schema: partsCarContentSchema,
     promptSubject:
-      'a make/model/engine vehicle picker page for a car parts shop, including a "confirm your variant" state when a part has more than one matching fitment (steering side or gearbox) for the selected vehicle',
+      'a car parts shop: the VIN lookup form, its fallback notice when a VIN cannot be identified, and the car page listing what the shop knows about one vehicle configuration (engine, fuel, drive, body, steering, model code); keep {placeholders} intact',
   },
 ] as const satisfies readonly RegistryEntry[];

@@ -11,6 +11,7 @@ import {
   SERVICE_FIELD,
 } from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
+import { MY_GARAGE_VIN_ATTRIBUTE } from '@podbor/site-kit/browser';
 
 interface Props {
   service?: ServiceSlug | typeof VIN_INQUIRY_SERVICE;
@@ -171,17 +172,20 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
     {
       vin && (
-        <label class="block">
-          <span class="field-label">{vin.label}</span>
-          <input
-            name="vin"
-            type="text"
-            required
-            autocomplete="off"
-            placeholder={vin.placeholder}
-            class="field"
-          />
-        </label>
+        <my-garage class="block">
+          <label class="block">
+            <span class="field-label">{vin.label}</span>
+            <input
+              name="vin"
+              type="text"
+              required
+              autocomplete="off"
+              placeholder={vin.placeholder}
+              class="field"
+              {...{ [MY_GARAGE_VIN_ATTRIBUTE]: '' }}
+            />
+          </label>
+        </my-garage>
       )
     }
 
@@ -261,3 +265,9 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     </div>
   </form>
 </lead-form>
+
+<script>
+  import { defineMyGarage } from '@podbor/site-kit/browser';
+
+  defineMyGarage();
+</script>
