@@ -15,6 +15,7 @@ const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
   ['Воздушный фильтр', 'Air filter'],
   ['Салонный фильтр', 'Cabin filter'],
+  ['3 серия', '3 Series'],
 ]);
 
 type FakeNetwork = {
@@ -238,6 +239,24 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('translates a Series name and keeps the Serbian typed when it was created', async () => {
+        const make = await catalog.createMakes({ slug: 'bmw', name: 'BMW' });
+        const series = await catalog.createSeries({
+          make_id: make.id,
+          name: '3 серия',
+          translations: { sr: 'Serija 3' },
+        });
+
+        await publish();
+
+        expect(
+          (await get(`/admin/translations/series/${series.id}`)).data
+            .translations,
+        ).toEqual({ sr: { name: 'Serija 3' }, en: { name: '3 Series' } });
+        const [stored] = await catalog.listSeries({ id: series.id });
+        expect(stored.translations).toEqual({ sr: 'Serija 3', en: '3 Series' });
+      });
+
       it('stops before the deploy when a translation fails the safety checks', async () => {
         const part = await catalog.createParts({ name: 'Салонный фильтр' });
         network.unsafeAnswer = true;
@@ -249,7 +268,7 @@ medusaIntegrationTestRunner({
         expect(run.error).toContain('HTML');
         expect(network.dispatches).toEqual([]);
         expect(reindexCalls).toEqual([]);
-        expect(await translationsOf(part.id)).toBeNull();
+        expect(await translationsOf(part.id)).toEqual({});
       });
 
       it('stops before the reindex when the deploy dispatch is refused', async () => {

@@ -19,14 +19,15 @@ const BUSINESS_DESCRIPTION =
 const ROWS_PER_REQUEST = 50;
 
 const localeSchema = z.enum(TARGET_LOCALES);
-const translationsSchema = z
+const nestedSchema = z
   .partialRecord(localeSchema, z.record(z.string(), z.string()))
   .nullable();
+const flatSchema = z.partialRecord(localeSchema, z.string()).nullable();
 const translatedFromSchema = z
   .partialRecord(localeSchema, z.string())
   .nullable();
 
-export type Translations = NonNullable<z.infer<typeof translationsSchema>>;
+export type Translations = NonNullable<z.infer<typeof nestedSchema>>;
 type TranslatedFrom = NonNullable<z.infer<typeof translatedFromSchema>>;
 
 type StoredRow = {
@@ -38,13 +39,19 @@ type StoredRow = {
 
 type TranslationUpdate = {
   id: string;
-  translations: Translations;
+  translations: Record<string, unknown>;
   translated_from: TranslatedFrom;
+};
+
+type Codec = {
+  decode: (stored: unknown) => Translations;
+  encode: (translations: Translations) => Record<string, unknown>;
 };
 
 type TranslatableEntity = {
   subject: string;
   fields: readonly string[];
+  codec: Codec;
   list: (
     catalog: CatalogModuleService,
     filters: { id?: string },
@@ -55,6 +62,30 @@ type TranslatableEntity = {
   ) => Promise<unknown>;
 };
 
+const mapLocales = <From, To>(
+  record: Partial<Record<TargetLocale, From>>,
+  map: (value: From) => To,
+): Partial<Record<TargetLocale, To>> =>
+  Object.fromEntries(
+    Object.entries(record).map(([locale, value]) => [
+      locale,
+      map(value as From),
+    ]),
+  );
+
+const nested: Codec = {
+  decode: (stored) => nestedSchema.parse(stored ?? null) ?? {},
+  encode: (translations) => translations,
+};
+
+const flat = (field: string): Codec => ({
+  decode: (stored) =>
+    mapLocales(flatSchema.parse(stored ?? null) ?? {}, (text) => ({
+      [field]: text,
+    })),
+  encode: (translations) => mapLocales(translations, (fields) => fields[field]),
+});
+
 const TRANSLATION_COLUMNS = ['id', 'translations', 'translated_from'];
 
 export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
@@ -63,6 +94,7 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car part names in a parts catalogue',
       fields: ['name'],
+      codec: nested,
       list: (catalog, filters) =>
         catalog.listParts(filters, {
           select: [...TRANSLATION_COLUMNS, 'name'],
@@ -71,104 +103,120 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       update: (catalog, rows) => catalog.updateParts(rows),
     },
   ],
+  [
+    'series',
+    {
+      subject: 'car model series names, such as "3 серия"',
+      fields: ['name'],
+      codec: flat('name'),
+      list: (catalog, filters) =>
+        catalog.listSeries(filters, {
+          select: [...TRANSLATION_COLUMNS, 'name'],
+          take: null,
+        }),
+      update: (catalog, rows) => catalog.updateSeries(rows),
+    },
+  ],
 ]);
 
-type Pending = {
+type Item = {
   id: string;
   source: Record<string, string>;
   hash: string;
-  locales: TargetLocale[];
   translations: Translations;
   translatedFrom: TranslatedFrom;
 };
 
-const sourceOf = (row: StoredRow, fields: readonly string[]) =>
-  Object.fromEntries(
-    fields.flatMap((field) => {
+const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
+  const source = Object.fromEntries(
+    entity.fields.flatMap((field) => {
       const value = row[field];
       return typeof value === 'string' && value.trim()
         ? [[field, value.trim()]]
         : [];
     }),
   );
-
-const pendingOf = (row: StoredRow, fields: readonly string[]): Pending => {
-  const source = sourceOf(row, fields);
-  const hash = sha256Hex(JSON.stringify(source));
-  const translatedFrom =
-    translatedFromSchema.parse(row.translated_from ?? null) ?? {};
   return {
     id: row.id,
     source,
-    hash,
-    locales: TARGET_LOCALES.filter((locale) => translatedFrom[locale] !== hash),
-    translations: translationsSchema.parse(row.translations ?? null) ?? {},
-    translatedFrom,
+    hash: sha256Hex(JSON.stringify(source)),
+    translations: entity.codec.decode(row.translations),
+    translatedFrom:
+      translatedFromSchema.parse(row.translated_from ?? null) ?? {},
   };
 };
+
+const keptTranslation = (item: Item, locale: TargetLocale) => {
+  if (item.translatedFrom[locale] !== undefined) {
+    return {};
+  }
+  const written = item.translations[locale] ?? {};
+  return Object.fromEntries(
+    Object.keys(item.source).flatMap((field) =>
+      written[field]?.trim() ? [[field, written[field]]] : [],
+    ),
+  );
+};
+
+const fieldKey = (id: string, field: string) => `${id}.${field}`;
 
 const chunked = <T>(items: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
   );
 
-const byLocales = (pending: Pending[]): Pending[][] => {
-  const groups = new Map<string, Pending[]>();
-  for (const item of pending) {
-    const key = item.locales.join();
-    groups.set(key, [...(groups.get(key) ?? []), item]);
-  }
-  return [...groups.values()];
-};
-
-const fieldKey = (id: string, field: string) => `${id}.${field}`;
-
-async function translateChunk(
+async function translateLocale(
   entity: TranslatableEntity,
   catalog: CatalogModuleService,
-  chunk: Pending[],
-  apiKey: string,
+  items: Item[],
+  locale: TargetLocale,
+  apiKey: string | undefined,
 ): Promise<void> {
-  const locales = chunk[0].locales;
-  const answer = await translateFields({
-    fields: Object.fromEntries(
-      chunk.flatMap((item) =>
-        Object.entries(item.source).map(([field, text]) => [
-          fieldKey(item.id, field),
-          text,
-        ]),
-      ),
-    ),
-    targetLocales: locales,
-    languageName: LANGUAGE_NAME,
-    businessDescription: BUSINESS_DESCRIPTION,
-    subject: entity.subject,
-    apiKey,
-  });
-  await entity.update(
-    catalog,
-    chunk.map((item) => ({
-      id: item.id,
-      translations: {
-        ...item.translations,
-        ...Object.fromEntries(
-          locales.map((locale) => [
-            locale,
-            Object.fromEntries(
-              Object.keys(item.source).map((field) => [
-                field,
-                answer[locale][fieldKey(item.id, field)],
-              ]),
-            ),
-          ]),
-        ),
-      },
-      translated_from: {
-        ...item.translatedFrom,
-        ...Object.fromEntries(locales.map((locale) => [locale, item.hash])),
-      },
-    })),
+  const stale = items.filter(
+    (item) => item.translatedFrom[locale] !== item.hash,
   );
+  for (const chunk of chunked(stale, ROWS_PER_REQUEST)) {
+    const fields = Object.fromEntries(
+      chunk.flatMap((item) => {
+        const kept = keptTranslation(item, locale);
+        return Object.entries(item.source)
+          .filter(([field]) => !(field in kept))
+          .map(([field, text]) => [fieldKey(item.id, field), text]);
+      }),
+    );
+    if (Object.keys(fields).length > 0 && !apiKey) {
+      throw new Error('OPENAI_API_KEY is not set');
+    }
+    const answer = await translateFields({
+      fields,
+      targetLocales: [locale],
+      languageName: LANGUAGE_NAME,
+      businessDescription: BUSINESS_DESCRIPTION,
+      subject: entity.subject,
+      apiKey: apiKey ?? '',
+    });
+    await entity.update(
+      catalog,
+      chunk.map((item) => {
+        const kept = keptTranslation(item, locale);
+        item.translations = {
+          ...item.translations,
+          [locale]: Object.fromEntries(
+            Object.keys(item.source).map((field) => [
+              field,
+              kept[field] ?? answer[locale][fieldKey(item.id, field)],
+            ]),
+          ),
+        };
+        item.translatedFrom = { ...item.translatedFrom, [locale]: item.hash };
+        return {
+          id: item.id,
+          translations: entity.codec.encode(item.translations),
+          translated_from: item.translatedFrom,
+        };
+      }),
+    );
+  }
 }
 
 export async function translateCatalogue(
@@ -176,16 +224,11 @@ export async function translateCatalogue(
   apiKey: string | undefined,
 ): Promise<void> {
   for (const entity of TRANSLATABLE_ENTITIES.values()) {
-    const pending = (await entity.list(catalog, {}))
-      .map((row) => pendingOf(row, entity.fields))
-      .filter((item) => item.locales.length > 0);
-    if (pending.length > 0 && !apiKey) {
-      throw new Error('OPENAI_API_KEY is not set');
-    }
-    for (const group of byLocales(pending)) {
-      for (const chunk of chunked(group, ROWS_PER_REQUEST)) {
-        await translateChunk(entity, catalog, chunk, apiKey!);
-      }
+    const items = (await entity.list(catalog, {})).map((row) =>
+      itemOf(entity, row),
+    );
+    for (const locale of TARGET_LOCALES) {
+      await translateLocale(entity, catalog, items, locale, apiKey);
     }
   }
 }
@@ -201,25 +244,25 @@ const entityNamed = (name: string): TranslatableEntity => {
   return entity;
 };
 
-async function storedRow(
+async function storedItem(
   entity: TranslatableEntity,
   catalog: CatalogModuleService,
   id: string,
-): Promise<StoredRow> {
+): Promise<Item> {
   const [row] = await entity.list(catalog, { id });
   if (!row) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, `${id} was not found`);
   }
-  return row;
+  return itemOf(entity, row);
 }
 
 export async function readTranslations(
   catalog: CatalogModuleService,
   name: string,
   id: string,
-): Promise<Translations | null> {
-  const row = await storedRow(entityNamed(name), catalog, id);
-  return translationsSchema.parse(row.translations ?? null);
+): Promise<Translations> {
+  const entity = entityNamed(name);
+  return (await storedItem(entity, catalog, id)).translations;
 }
 
 export async function editTranslation(
@@ -239,7 +282,7 @@ export async function editTranslation(
       `${name} has no translatable ${unknown.join(', ')}`,
     );
   }
-  const item = pendingOf(await storedRow(entity, catalog, id), entity.fields);
+  const item = await storedItem(entity, catalog, id);
   const translations = {
     ...item.translations,
     [locale]: { ...item.translations[locale], ...fields },
@@ -247,7 +290,7 @@ export async function editTranslation(
   await entity.update(catalog, [
     {
       id,
-      translations,
+      translations: entity.codec.encode(translations),
       translated_from: { ...item.translatedFrom, [locale]: item.hash },
     },
   ]);
