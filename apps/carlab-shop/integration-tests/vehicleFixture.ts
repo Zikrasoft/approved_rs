@@ -1,6 +1,14 @@
+import type {
+  SteeringSide,
+  VehicleIdentifierType,
+} from '@podbor/catalog-contract';
+
 import type CatalogModuleService from '../src/modules/catalog/service';
 
 type FixtureOptions = {
+  make?: { slug: string; name: string };
+  identifierType?: VehicleIdentifierType;
+  steering?: SteeringSide | null;
   typeCode?: string;
   modelSlug?: string;
   chassisCode?: string;
@@ -16,6 +24,9 @@ const firstOrCreate = async <T>(
 export const createVehicleFixture = async (
   catalog: CatalogModuleService,
   {
+    make: makeFields = { slug: 'bmw', name: 'BMW' },
+    identifierType = 'bmw-type-code',
+    steering = 'left',
     typeCode = '35BG',
     modelSlug = 'f30-320d',
     chassisCode = 'F30',
@@ -23,8 +34,9 @@ export const createVehicleFixture = async (
     engineFamily = 'B47',
   }: FixtureOptions = {},
 ) => {
-  const make = await firstOrCreate(catalog.listMakes({ slug: 'bmw' }), () =>
-    catalog.createMakes({ slug: 'bmw', name: 'BMW' }),
+  const make = await firstOrCreate(
+    catalog.listMakes({ slug: makeFields.slug }),
+    () => catalog.createMakes(makeFields),
   );
   const series = await firstOrCreate(
     catalog.listSeries({ make_id: make.id, name: '3 серия' }),
@@ -73,11 +85,11 @@ export const createVehicleFixture = async (
     market: 'EU',
     year_from: 2015,
     year_to: 2019,
-    steering: 'left',
+    steering,
   });
   await catalog.createVehicleIdentifiers({
     vehicle_id: vehicle.id,
-    type: 'bmw-type-code',
+    type: identifierType,
     value: typeCode,
   });
   return { make, series, chassis, model, engine, vehicle };
