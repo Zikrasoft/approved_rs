@@ -30,6 +30,7 @@ export const partPageSchema = brandNumberSchema.extend({
     attributes: attributeValuesSchema,
   }),
   equivalents: z.array(brandNumberSchema),
+  has_offers: z.boolean(),
 });
 
 export const partPagesResponseSchema = z.object({

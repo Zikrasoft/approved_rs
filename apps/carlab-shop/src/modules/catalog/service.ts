@@ -19,13 +19,18 @@ import BrandSpelling from './models/brand-spelling';
 import Category from './models/category';
 import CategoryField from './models/category-field';
 import CategoryFieldOption from './models/category-field-option';
+import Chassis from './models/chassis';
+import Engine from './models/engine';
 import Fitment from './models/fitment';
+import Make from './models/make';
 import Part from './models/part';
 import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
 } from './models/part-identifier';
+import Series from './models/series';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
+import VehicleModel from './models/vehicle-model';
 
 type Provenance = {
   source?: string;
@@ -56,6 +61,11 @@ class CatalogModuleService extends MedusaService({
   Category,
   CategoryField,
   CategoryFieldOption,
+  Make,
+  Series,
+  Chassis,
+  VehicleModel,
+  Engine,
   Part,
   PartIdentifier,
   Vehicle,

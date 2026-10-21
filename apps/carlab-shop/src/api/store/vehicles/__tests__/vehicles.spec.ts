@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -28,13 +29,9 @@ medusaIntegrationTestRunner({
 
       describe('GET /store/vehicles', () => {
         it('lists the seeded vehicles for the picker', async () => {
-          const vehicle = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47',
-            year_from: 2015,
-            year_to: 2018,
-          });
+          const vehicle = (
+            await createVehicleFixture(catalog, { typeCode: 'T001' })
+          ).vehicle;
 
           const response = await api.get('/store/vehicles', storeHeaders);
 
@@ -43,9 +40,9 @@ medusaIntegrationTestRunner({
             expect.arrayContaining([
               expect.objectContaining({
                 id: vehicle.id,
-                make: 'BMW',
-                model: '320d (F30)',
-                engine_code: 'B47',
+                identifiers: [{ type: 'bmw-type-code', value: 'T001' }],
+                engine: expect.objectContaining({ code: 'B47D20O0' }),
+                model: expect.objectContaining({ slug: 'f30-320d' }),
               }),
             ]),
           );
@@ -54,13 +51,9 @@ medusaIntegrationTestRunner({
 
       describe('GET /store/vehicles/:id/parts', () => {
         it('returns only parts with a fitment row for the vehicle', async () => {
-          const vehicle = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47',
-            year_from: 2015,
-            year_to: 2018,
-          });
+          const vehicle = (
+            await createVehicleFixture(catalog, { typeCode: 'T002' })
+          ).vehicle;
 
           const fittingPart = await catalog.createParts({
             name: 'Oil filter, BMW B47/B48 engines',
@@ -94,13 +87,9 @@ medusaIntegrationTestRunner({
         });
 
         it('surfaces a confirm-your-variant state for an ambiguous fitment', async () => {
-          const vehicle = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'N47',
-            year_from: 2010,
-            year_to: 2012,
-          });
+          const vehicle = (
+            await createVehicleFixture(catalog, { typeCode: 'T003' })
+          ).vehicle;
 
           const part = await catalog.createParts({
             name: 'Oil filter, BMW N47 engines',

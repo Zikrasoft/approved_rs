@@ -107,6 +107,12 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
   });
 
+  it('describes the parts catalogue on the parts index link', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами.',
+    );
+  });
+
   it('links the about page', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
       '[О проекте](https://carlab.rs/ru/about/)',

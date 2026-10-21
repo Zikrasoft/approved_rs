@@ -2,12 +2,13 @@
 import { partPageSlug, translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
@@ -55,6 +56,34 @@ const categoryText = category
       { href: PathBuilder.partNumber(locale, page.slug), label: heading },
     ]}
   />
+
+  {
+    page.priceOnRequest && (
+      <section class="wrap pt-band md:pt-band-lg">
+        <div class="card flex max-w-2xl flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.priceOnRequestHeading}</h2>
+          <p class="text-sm leading-relaxed text-ink-2">
+            {copy.priceOnRequestBody}
+          </p>
+          <parts-list-add
+            class="mt-1 block"
+            data-slug={page.slug}
+            data-brand={page.brand.name}
+            data-number={page.value}
+            data-name={page.part.name}
+          >
+            <a
+              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              class="btn btn-primary w-full sm:w-auto"
+            >
+              {copy.priceOnRequestCta}
+              <Icon name="arrowRight" />
+            </a>
+          </parts-list-add>
+        </div>
+      </section>
+    )
+  }
 
   {
     category && (
@@ -119,3 +148,9 @@ const categoryText = category
     }
   </section>
 </Shell>
+
+<script>
+  import { definePartsListAdd } from '@/scripts/partsList';
+
+  definePartsListAdd();
+</script>

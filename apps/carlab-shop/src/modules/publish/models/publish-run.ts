@@ -1,0 +1,14 @@
+import { model } from '@medusajs/framework/utils';
+
+export const PUBLISH_RUN_STATUSES = ['running', 'succeeded', 'failed'] as const;
+
+const PublishRun = model.define('publish_run', {
+  id: model.id().primaryKey(),
+  status: model.enum([...PUBLISH_RUN_STATUSES]),
+  failed_step: model.text().nullable(),
+  error: model.text().nullable(),
+  finished_at: model.dateTime().nullable(),
+  created_by: model.text().nullable(),
+});
+
+export default PublishRun;

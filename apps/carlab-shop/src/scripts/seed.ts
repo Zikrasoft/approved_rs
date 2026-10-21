@@ -84,46 +84,67 @@ async function seedB47OilFilterPart(
   return partId;
 }
 
-const B47_VEHICLE_KTYPE = { type: 'ktype' as const, value: 'KTYPE-F30-B47' };
+const SEED_TYPE_CODE = (family: string) => ({
+  type: 'bmw-type-code' as const,
+  value: `SEED-${family}`,
+});
 
 async function seedVehiclesAndFitment(
   catalog: CatalogModuleService,
   b47OilFilterPartId: string,
   logger: { info: (message: string) => void },
 ): Promise<void> {
-  const [existing] = await catalog.listVehicleIdentifiers(B47_VEHICLE_KTYPE);
+  const [existing] = await catalog.listVehicleIdentifiers(
+    SEED_TYPE_CODE('B47'),
+  );
   if (existing) {
     logger.info('Vehicle/fitment pilot fixture already seeded, skipping.');
     return;
   }
 
-  const b47Vehicle = await catalog.createVehicles({
-    make: 'BMW',
-    model: '320d (F30)',
-    engine_code: 'B47',
-    year_from: 2015,
-    year_to: 2018,
+  const make = await catalog.createMakes({ slug: 'bmw', name: 'BMW' });
+  const series = await catalog.createSeries({
+    make_id: make.id,
+    name: '3 серия',
+    translations: { sr: 'Serija 3', en: '3 Series' },
   });
-  await catalog.createVehicleIdentifiers({
-    vehicle_id: b47Vehicle.id,
-    ...B47_VEHICLE_KTYPE,
+  const chassis = await catalog.createChassis({
+    series_id: series.id,
+    code: 'F30',
+    body_style: 'sedan',
+    year_from: 2011,
+    year_to: 2019,
   });
+  const model = await catalog.createVehicleModels({
+    chassis_id: chassis.id,
+    slug: 'f30-320d',
+    name: '320d',
+  });
+  const engines = await catalog.createEngines([
+    { code: 'B47D20', family: 'B47', fuel: 'diesel', displacement_cc: 1995 },
+    { code: 'N47D20', family: 'N47', fuel: 'diesel', displacement_cc: 1995 },
+    { code: 'B48B20', family: 'B48', fuel: 'petrol', displacement_cc: 1998 },
+  ]);
+
+  const vehicles = await Promise.all(
+    engines.map(async (engine) => {
+      const vehicle = await catalog.createVehicles({
+        model_id: model.id,
+        engine_id: engine.id,
+        drive: 'rwd',
+      });
+      await catalog.createVehicleIdentifiers({
+        vehicle_id: vehicle.id,
+        ...SEED_TYPE_CODE(engine.family),
+      });
+      return vehicle;
+    }),
+  );
+  const [b47Vehicle, n47Vehicle] = vehicles;
+
   await catalog.createFitments({
     part_id: b47OilFilterPartId,
     vehicle_id: b47Vehicle.id,
-  });
-
-  const n47Vehicle = await catalog.createVehicles({
-    make: 'BMW',
-    model: '320d (F30)',
-    engine_code: 'N47',
-    year_from: 2010,
-    year_to: 2012,
-  });
-  await catalog.createVehicleIdentifiers({
-    vehicle_id: n47Vehicle.id,
-    type: 'ktype',
-    value: 'KTYPE-F30-N47',
   });
 
   const n47OilFilterPartWithUnresolvedSteering = await catalog.createParts({
@@ -142,18 +163,6 @@ async function seedVehiclesAndFitment(
     },
   ]);
 
-  const b48Vehicle = await catalog.createVehicles({
-    make: 'BMW',
-    model: '320d (F30)',
-    engine_code: 'B48',
-    year_from: 2018,
-    year_to: 2021,
-  });
-  await catalog.createVehicleIdentifiers({
-    vehicle_id: b48Vehicle.id,
-    type: 'ktype',
-    value: 'KTYPE-F30-B48',
-  });
   logger.info('Seeded vehicle/fitment pilot fixture (N47/B47/B48).');
 }
 

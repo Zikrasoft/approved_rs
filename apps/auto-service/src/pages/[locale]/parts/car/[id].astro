@@ -1,0 +1,129 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { carName } from '@/utils/carName';
+import { vehiclesForBuild, type Vehicle } from '@/utils/catalogue';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const vehicles = await vehiclesForBuild({
+    MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+    MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+  });
+  return withLocales(
+    vehicles.map((vehicle) => ({
+      params: { id: vehicle.id },
+      props: { vehicle },
+    })),
+  );
+}
+
+const { vehicle } = Astro.props as { vehicle: Vehicle };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const partsInquiry = content(locale).pages.partsInquiry;
+const copy = content(locale).partsCar.car;
+const name = carName(vehicle.model, locale);
+const { engine, model } = vehicle;
+
+const years =
+  vehicle.year_from &&
+  `${vehicle.year_from}–${vehicle.year_to ?? copy.yearsOngoing}`;
+
+const specs = [
+  { label: copy.engineLabel, value: `${engine.code} (${engine.family})` },
+  { label: copy.fuelLabel, value: copy.fuel[engine.fuel] },
+  {
+    label: copy.displacementLabel,
+    value:
+      engine.displacement_cc &&
+      `${engine.displacement_cc} ${copy.displacementUnit}`,
+  },
+  {
+    label: copy.powerLabel,
+    value: vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
+  },
+  { label: copy.driveLabel, value: vehicle.drive && copy.drive[vehicle.drive] },
+  { label: copy.bodyLabel, value: copy.body[model.chassis.body_style] },
+  { label: copy.yearsLabel, value: years },
+  {
+    label: copy.steeringLabel,
+    value: vehicle.steering && copy.steering[vehicle.steering],
+  },
+  {
+    label: copy.typeCodeLabel,
+    value: vehicle.identifiers.map(({ value }) => value).join(', '),
+  },
+].filter((spec): spec is { label: string; value: string } =>
+  Boolean(spec.value),
+);
+---
+
+<Shell
+  title={copy.metaTitle.replace('{car}', name)}
+  description={copy.metaDescription.replace('{car}', name)}
+  noindex
+>
+  <PageHero
+    eyebrow={copy.eyebrow}
+    heading={name}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCar(locale, vehicle.id), label: name },
+    ]}
+  />
+
+  <section
+    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+  >
+    <div class="flex flex-col gap-6">
+      <div class="card flex flex-col gap-4 p-5 sm:p-6">
+        <h2 class="text-base font-semibold text-ink">{copy.specsHeading}</h2>
+        <dl class="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {
+            specs.map((spec) => (
+              <div class="flex flex-col gap-0.5 border-b border-line pb-3">
+                <dt class="text-xs text-muted">{spec.label}</dt>
+                <dd class="spec text-sm text-ink">{spec.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="card flex flex-col gap-2 p-5 sm:p-6">
+        <h2 class="text-base font-semibold text-ink">{copy.partsHeading}</h2>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.partsLead}</p>
+      </div>
+
+      <p class="text-sm leading-relaxed text-muted">
+        <a
+          href={PathBuilder.parts(locale)}
+          class="underline underline-offset-2 hover:text-signal-ink"
+        >
+          {copy.notYourCar}
+        </a>
+      </p>
+    </div>
+
+    <div id="lead" class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+      <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+      <LeadForm
+        service={VIN_INQUIRY_SERVICE}
+        vin={{
+          label: partsInquiry.vinLabel,
+          placeholder: partsInquiry.vinPlaceholder,
+        }}
+        comment={`${name}: `}
+        commentLabel={partsInquiry.commentLabel}
+        commentPlaceholder={partsInquiry.commentPlaceholder}
+        commentNote={partsInquiry.commentNote}
+        defaultChannel="whatsapp"
+      />
+    </div>
+  </section>
+</Shell>

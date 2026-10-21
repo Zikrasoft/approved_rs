@@ -1,6 +1,8 @@
+import { type Vehicle, vehicleSchema } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { PART_IDENTIFIER_TYPES } from '../modules/catalog/models/part-identifier';
+import type CatalogModuleService from '../modules/catalog/service';
 import { sellPrice } from '../modules/supplier/pricing';
 
 export const PART_WITH_OFFERS_FIELDS = [
@@ -42,16 +44,24 @@ export const partResponseSchema = z.object({
   identifiers: z.array(identifierSchema),
 });
 
-export const vehicleResponseSchema = z.object({
-  id: z.string(),
-  make: z.string(),
-  model: z.string(),
-  engine_code: z.string(),
-  year_from: z.number().nullable(),
-  year_to: z.number().nullable(),
-});
+const VEHICLE_RELATIONS = [
+  'model',
+  'model.chassis',
+  'model.chassis.series',
+  'model.chassis.series.make',
+  'engine',
+  'identifiers',
+];
 
-export type VehicleResponse = z.infer<typeof vehicleResponseSchema>;
+export const listVehicleResponses = async (
+  catalog: CatalogModuleService,
+  filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
+): Promise<Vehicle[]> =>
+  z
+    .array(vehicleSchema)
+    .parse(
+      await catalog.listVehicles(filters, { relations: VEHICLE_RELATIONS }),
+    );
 
 const rawPartSchema = z.object({
   id: z.string(),

@@ -4,6 +4,7 @@ import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import Category from './category';
 import CategoryFieldOption from './category-field-option';
 import { provenance } from './provenance';
+import { translatable } from './translatable';
 
 const CategoryField = model
   .define('category_field', {
@@ -12,7 +13,7 @@ const CategoryField = model
     type: model.enum([...CATEGORY_FIELD_TYPES]),
     unit: model.text().nullable(),
     label: model.text(),
-    translations: model.json().nullable(),
+    ...translatable(),
     required: model.boolean().default(false),
     facet: model.boolean().default(false),
     rank: model.number().default(0),

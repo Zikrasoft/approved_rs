@@ -365,24 +365,24 @@ medusaIntegrationTestRunner({
         expect(response.status).toBe(404);
       });
 
-      it('updates a Category name, text and translations', async () => {
+      it('updates a Category name and text but never its slug', async () => {
         const { category } = await createOilCategory();
-        const translations = {
-          sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
-          en: { name: 'Engine oil', text: 'Oil for the engine.' },
-        };
 
         const response = await post(`/admin/categories/${category.id}`, {
           name: 'Масло моторное',
-          translations,
+          text: 'Новый текст.',
+        });
+        const slugChange = await post(`/admin/categories/${category.id}`, {
+          slug: 'other-slug',
         });
 
         expect(response.status).toBe(200);
         expect(response.data.category).toMatchObject({
           slug: category.slug,
           name: 'Масло моторное',
-          translations,
+          text: 'Новый текст.',
         });
+        expect(slugChange.status).toBe(400);
       });
 
       it('refuses deleting a Category its Parts use and deletes an unused one with its fields', async () => {

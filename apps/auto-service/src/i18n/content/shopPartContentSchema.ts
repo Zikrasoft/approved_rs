@@ -12,6 +12,9 @@ export const shopPartContentSchema = z
     attributeYes: z.string(),
     attributeNo: z.string(),
     categoryLink: z.string(),
+    priceOnRequestHeading: z.string(),
+    priceOnRequestBody: z.string(),
+    priceOnRequestCta: z.string(),
     currencyLabel: z.string(),
     columns: z
       .object({

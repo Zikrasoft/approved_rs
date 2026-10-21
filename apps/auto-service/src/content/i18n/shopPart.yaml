@@ -8,6 +8,9 @@ attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
+priceOnRequestHeading: Цена по запросу
+priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
+priceOnRequestCta: Узнать цену
 currencyLabel: RSD
 columns:
   brand: Бренд

@@ -4,9 +4,11 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 
 medusaIntegrationTestRunner({
-  moduleName: 'catalog',
+  moduleName: 'part-pages',
   testSuite: ({ api, getContainer }) => {
     describe('GET /store/part-pages', () => {
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
@@ -65,6 +67,28 @@ medusaIntegrationTestRunner({
         });
       });
 
+      beforeAll(async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [mannOil] = await catalog.listPartIdentifiers({
+          normalized_value: 'HU816X',
+        });
+        const supplier = await suppliers.createSuppliers({
+          name: 'Intercars',
+          markup_percentage: 20,
+        });
+        await suppliers.createSupplierOffers({
+          supplier_id: supplier.id,
+          supplier_article_id: 'IC-HU816X',
+          cost_price: 1000,
+          stock_quantity: 4,
+          lead_time: '1 day',
+          part_identifier_id: mannOil.id,
+        });
+      });
+
       const get = (query = '') =>
         api
           .get(`/store/part-pages${query}`, storeHeaders)
@@ -100,6 +124,7 @@ medusaIntegrationTestRunner({
               brand: { name: 'BMW', slug: 'bmw' },
             },
           ],
+          has_offers: true,
         });
         const cabin = response.data.pages.find(
           (page: { normalized_value: string }) =>
@@ -107,6 +132,7 @@ medusaIntegrationTestRunner({
         );
         expect(cabin.equivalents).toEqual([]);
         expect(cabin.part).toMatchObject({ category_id: null, attributes: {} });
+        expect(cabin.has_offers).toBe(false);
       });
 
       it('pages through the list', async () => {

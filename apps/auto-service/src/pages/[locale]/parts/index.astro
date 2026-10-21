@@ -3,10 +3,12 @@ import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import Icon from '@/components/Icon.astro';
+import VinLookupForm from '@/components/VinLookupForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { categoriesForBuild } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
-import { localePaths, PathBuilder } from '@/utils/paths';
+import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { content } from '@/i18n/content';
 
@@ -19,6 +21,7 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
+const vinCopy = content(locale).partsCar.vin;
 const categories = (Astro.props as { categories: Category[] }).categories.map(
   (category) => ({
     slug: category.slug,
@@ -37,6 +40,8 @@ const categories = (Astro.props as { categories: Category[] }).categories.map(
   />
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+    <VinLookupForm />
+
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">
       {copy.sourcingNote}
     </p>
@@ -98,17 +103,62 @@ const categories = (Astro.props as { categories: Category[] }).categories.map(
         </ol>
       </div>
 
-      <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6">
+      <div
+        id={PARTS_INQUIRY_ANCHOR}
+        class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
+      >
+        <p
+          id="vin-unresolved"
+          role="status"
+          class="hidden scroll-mt-24 rounded-md bg-shade p-4 text-sm leading-relaxed text-ink target:block"
+        >
+          {vinCopy.unresolved}
+        </p>
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-        <LeadForm
-          service={VIN_INQUIRY_SERVICE}
-          vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
-          commentLabel={copy.commentLabel}
-          commentPlaceholder={copy.commentPlaceholder}
-          commentNote={copy.commentNote}
-          defaultChannel="whatsapp"
-        />
+        <parts-inquiry
+          class="flex flex-col gap-4"
+          data-more-template={copy.listMoreTemplate}
+          data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+        >
+          <div
+            class="rounded-field border border-line bg-shade px-4 pt-3 pb-1"
+            data-parts-list-block
+            hidden
+          >
+            <p class="field-label">{copy.listHeading}</p>
+            <ul class="divide-y divide-line" data-parts-list></ul>
+            <template data-parts-item>
+              <li class="flex items-center justify-between gap-2">
+                <a
+                  class="py-2 text-sm leading-snug text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                  data-part-link></a>
+                <button
+                  type="button"
+                  class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+                  aria-label={copy.listRemoveLabel}
+                  data-part-remove
+                >
+                  <Icon name="close" size={12} />
+                </button>
+              </li>
+            </template>
+          </div>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
+            commentLabel={copy.commentLabel}
+            commentPlaceholder={copy.commentPlaceholder}
+            commentNote={copy.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </parts-inquiry>
       </div>
     </div>
   </section>
 </Shell>
+
+<script>
+  import { definePartsInquiry } from '@/scripts/partsList';
+
+  definePartsInquiry();
+</script>
