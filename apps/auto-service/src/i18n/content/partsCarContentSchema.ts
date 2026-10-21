@@ -2,6 +2,9 @@ import { z } from 'zod';
 import {
   BODY_STYLES,
   ENGINE_FUELS,
+  FITMENT_AXLES,
+  FITMENT_SIDES,
+  GEARBOX_TYPES,
   STEERING_SIDES,
   VEHICLE_DRIVES,
 } from '@podbor/catalog-contract';
@@ -49,11 +52,58 @@ export const partsCarContentSchema = z
         partsHeading: z.string(),
         partsLead: z.string(),
         formHeading: z.string(),
+        confirmVariant: z.string(),
+        otherParts: z.string(),
         notYourCar: z.string(),
         fuel: labels(ENGINE_FUELS),
         drive: labels(VEHICLE_DRIVES),
         body: labels(BODY_STYLES),
         steering: labels(STEERING_SIDES),
+      })
+      .strict(),
+    fitment: z
+      .object({
+        quantity: z.string(),
+        axle: labels(FITMENT_AXLES),
+        side: labels(FITMENT_SIDES),
+        gearbox: labels(GEARBOX_TYPES),
+        steering: z.string(),
+        builtFrom: z.string(),
+        builtTo: z.string(),
+        partFitsHeading: z.string(),
+      })
+      .strict(),
+    hubs: z
+      .object({
+        indexHeading: z.string(),
+        make: z
+          .object({
+            metaTitle: z.string(),
+            metaDescription: z.string(),
+            eyebrow: z.string(),
+            lead: z.string(),
+            modelsHeading: z.string(),
+          })
+          .strict(),
+        model: z
+          .object({
+            metaTitle: z.string(),
+            metaDescription: z.string(),
+            eyebrow: z.string(),
+            categoriesHeading: z.string(),
+            noCategories: z.string(),
+            carsHeading: z.string(),
+            carsLead: z.string(),
+          })
+          .strict(),
+        modelCategory: z
+          .object({
+            metaTitle: z.string(),
+            metaDescription: z.string(),
+            eyebrow: z.string(),
+            partsHeading: z.string(),
+          })
+          .strict(),
       })
       .strict(),
   })
