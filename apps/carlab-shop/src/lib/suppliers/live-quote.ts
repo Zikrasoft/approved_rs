@@ -2,6 +2,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { z } from 'zod';
 
 import { SUPPLIER_MODULE } from '../../modules/supplier';
+import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { supplierAdapters, supplierQuoteSchema } from './adapter';
 
@@ -36,7 +37,9 @@ async function liveQuotes(
     const quotes = z
       .array(supplierQuoteSchema)
       .parse(await quoteOf(articleIds));
-    return new Map(quotes.map((quote) => [quote.article_id, quote]));
+    return new Map(
+      quotes.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
+    );
   } catch {
     return new Map();
   }

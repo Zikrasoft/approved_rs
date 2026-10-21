@@ -212,6 +212,25 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('drops a live quote in another currency than the shop sells in', async () => {
+        intercars.quotes.set(ARTICLE, {
+          article_id: ARTICLE,
+          cost_price: 13,
+          currency: 'EUR',
+          stock: [{ location: 'Beograd', quantity: 5 }],
+          lead_time_days: 0,
+        });
+
+        const response = await api.get(
+          `/store/part-identifiers/${identifierId}/offers`,
+          storeHeaders,
+        );
+
+        expect(
+          response.data.offers.map(({ id }: { id: string }) => id),
+        ).toEqual([warehouseOfferId]);
+      });
+
       it('adds an offer at the price the supplier quotes live', async () => {
         const cart = await cartWith(2);
 

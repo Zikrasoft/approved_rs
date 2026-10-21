@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
+import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
   cataloguePageSchema,
@@ -199,6 +200,7 @@ export async function importSupplier(
             .parse(
               await adapter.quote(wanted.map(({ article_id }) => article_id)),
             )
+            .filter(inShopCurrency)
             .map((quote) => [quote.article_id, quote])
         : [],
     );
