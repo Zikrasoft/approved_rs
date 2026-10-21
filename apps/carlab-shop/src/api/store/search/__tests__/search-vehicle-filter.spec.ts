@@ -20,6 +20,9 @@ medusaIntegrationTestRunner({
       let ambiguousVehicleId: string;
 
       const q = '13 71 8511877';
+      const partIds = (response: {
+        data: { results: { part: { id: string } }[] };
+      }) => response.data.results.map(({ part }) => part.id);
 
       beforeAll(async () => {
         const catalog: CatalogModuleService =
@@ -66,7 +69,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-13718511877',
             cost_price: 1200,
             stock_quantity: 10,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
         ]);
 
@@ -102,54 +105,55 @@ medusaIntegrationTestRunner({
         ]);
 
         const searchModuleService = getContainer().resolve(Modules.SEARCH);
-        await searchModuleService.reindex({ index: 'part' });
+        await searchModuleService.reindex({ index: 'part_identifier' });
       });
 
       it('returns the Part when the selected Vehicle has a Fitment for it', async () => {
         const response = await api.get(
-          `/store/search?q=${encodeURIComponent(q)}&vehicle_id=${fittingVehicleId}`,
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&vehicle_id=${fittingVehicleId}`,
           storeHeaders,
         );
 
         expect(response.status).toBe(200);
-        expect(response.data.part.id).toBe(partId);
+        expect(partIds(response)).toEqual([partId]);
       });
 
       it('ignores the vehicle filter when no Vehicle is selected', async () => {
         const response = await api.get(
-          `/store/search?q=${encodeURIComponent(q)}`,
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru`,
           storeHeaders,
         );
 
         expect(response.status).toBe(200);
-        expect(response.data.part.id).toBe(partId);
+        expect(partIds(response)).toEqual([partId]);
       });
 
       it('excludes the Part for a Vehicle with no Fitment row for it', async () => {
         const response = await api
           .get(
-            `/store/search?q=${encodeURIComponent(q)}&vehicle_id=${unrelatedVehicleId}`,
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&vehicle_id=${unrelatedVehicleId}`,
             storeHeaders,
           )
           .catch((error) => error.response);
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(200);
+        expect(response.data.results).toEqual([]);
       });
 
       it('returns the Part once for a Vehicle with multiple (ambiguous) Fitment rows', async () => {
         const response = await api.get(
-          `/store/search?q=${encodeURIComponent(q)}&vehicle_id=${ambiguousVehicleId}`,
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&vehicle_id=${ambiguousVehicleId}`,
           storeHeaders,
         );
 
         expect(response.status).toBe(200);
-        expect(response.data.part.id).toBe(partId);
+        expect(partIds(response)).toEqual([partId]);
       });
 
       it('returns 404 for an unknown vehicle_id', async () => {
         const response = await api
           .get(
-            `/store/search?q=${encodeURIComponent(q)}&vehicle_id=vehicle_missing`,
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&vehicle_id=vehicle_missing`,
             storeHeaders,
           )
           .catch((error) => error.response);

@@ -4,6 +4,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
+import PartsSearchForm from '@/components/PartsSearchForm.astro';
 import VinLookupForm from '@/components/VinLookupForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
@@ -47,6 +48,10 @@ const categories = props.categories.map((category) => ({
   />
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+    <div class="card p-5 sm:p-6">
+      <PartsSearchForm />
+    </div>
+
     <VinLookupForm />
 
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">

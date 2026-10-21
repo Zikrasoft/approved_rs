@@ -13,6 +13,7 @@ import {
   AdminCreateCategoryFieldOption,
   AdminCreateFitment,
   AdminCreatePart,
+  AdminCreateSupplierCategory,
   AdminEditTranslation,
   AdminListFitments,
   AdminSearchParts,
@@ -120,6 +121,11 @@ export default defineMiddlewares({
       matcher: '/admin/suppliers/:id',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminUpdateSupplier)],
+    },
+    {
+      matcher: '/admin/suppliers/:id/categories',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateSupplierCategory)],
     },
     ...VEHICLE_REFERENCE_BODIES.flatMap(([matcher, schema]) => [
       {

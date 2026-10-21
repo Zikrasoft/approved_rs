@@ -16,7 +16,7 @@ export type UpdateSupplierOfferWorkflowInput = {
   id: string;
   cost_price?: number;
   stock_quantity?: number;
-  lead_time?: string;
+  lead_time_days?: number;
   supplier_id?: string;
   supplier_article_id?: string;
 };
@@ -43,7 +43,7 @@ const updateSupplierOfferStep = createStep(
       id: previous.id,
       cost_price: previous.cost_price,
       stock_quantity: previous.stock_quantity,
-      lead_time: previous.lead_time,
+      lead_time_days: previous.lead_time_days,
       supplier_id: previous.supplier_id,
       supplier_article_id: previous.supplier_article_id,
     });

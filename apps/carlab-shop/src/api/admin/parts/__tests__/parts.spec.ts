@@ -292,7 +292,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: `ART-${value}`,
             cost_price: 1000,
             stock_quantity: 1,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           });
           const vehicle = (
             await createVehicleFixture(catalog, { typeCode: value })

@@ -4,12 +4,16 @@ import {
   partPageSlug,
   partPagesResponseSchema,
   positionGroups,
+  searchResponseSchema,
   vehiclesResponseSchema,
   vinLookupResponseSchema,
+  type CatalogLocale,
   type Category,
   type Fitment,
   type PartPage,
   type PositionGroup,
+  type SearchResponse,
+  type SearchResult,
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
@@ -28,6 +32,17 @@ export type PartPageEntry = PartPage & {
   priceOnRequest: boolean;
   category: Category | null;
   fits: Fit[];
+};
+
+export type SearchQuery = {
+  q: string;
+  locale: CatalogLocale;
+  facets: string[];
+  offset?: number;
+};
+
+export type SearchOutcome = Omit<SearchResponse, 'results'> & {
+  results: (SearchResult & { slug: string })[];
 };
 
 export type CategoryPageEntry = Category & { pages: PartPageEntry[] };
@@ -174,7 +189,7 @@ export function createCatalogue({
         indexable: Boolean(
           category && (partFits.length > 0 || page.equivalents.length > 0),
         ),
-        priceOnRequest: !page.has_offers,
+        priceOnRequest: page.offers.length === 0,
         category,
         fits: partFits,
       });
@@ -276,6 +291,35 @@ export function createCatalogue({
       return [...groupBy(models, ({ make }) => make.slug).values()].map(
         (makeModels) => ({ make: makeModels[0].make, models: makeModels }),
       );
+    },
+
+    async search({
+      q,
+      locale,
+      facets,
+      offset = 0,
+    }: SearchQuery): Promise<SearchOutcome | null> {
+      const params = new URLSearchParams({ q, locale });
+      for (const facet of facets) {
+        params.append('facets', facet);
+      }
+      if (offset) {
+        params.set('offset', String(offset));
+      }
+      try {
+        const found = searchResponseSchema.parse(
+          await request(`/store/search?${params}`),
+        );
+        return {
+          ...found,
+          results: found.results.map((result) => ({
+            ...result,
+            slug: partPageSlug(result.brand.slug, result.normalized_value),
+          })),
+        };
+      } catch {
+        return null;
+      }
     },
 
     async resolveVin(vin: string): Promise<VinOutcome> {

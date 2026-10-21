@@ -7,6 +7,7 @@ import {
   FITMENT_SIDES,
   GEARBOX_TYPES,
   normalizePartNumber,
+  STAGED_DATA_KINDS,
   STEERING_SIDES,
 } from '@podbor/catalog-contract';
 
@@ -40,6 +41,7 @@ export const AdminCreatePart = z.object({
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
 export const AdminUpdatePart = z.strictObject({
+  name: z.string().trim().min(1).optional(),
   replaced_by_id: z.string().min(1).nullable().optional(),
   category_id: z.string().min(1).nullable().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
@@ -118,10 +120,21 @@ export type AdminBulkAttachFitmentsType = z.infer<
   typeof AdminBulkAttachFitments
 >;
 
-export const AdminUpdateSupplier = z.object({
-  markup_percentage: z.number().min(0),
-});
+export const AdminUpdateSupplier = z
+  .strictObject({
+    markup_percentage: z.number().min(0).optional(),
+    released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;
+
+export const AdminCreateSupplierCategory = z.strictObject({
+  code: z.string().trim().min(1),
+  category_id: z.string().min(1),
+});
+export type AdminCreateSupplierCategoryType = z.infer<
+  typeof AdminCreateSupplierCategory
+>;
 
 export const AdminCreateBrand = z.strictObject({
   name: z.string().trim().min(1),

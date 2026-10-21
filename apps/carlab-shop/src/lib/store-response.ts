@@ -1,6 +1,7 @@
 import {
   type Fitment,
   fitmentSchema,
+  partOfferSchema,
   type Vehicle,
   vehicleSchema,
 } from '@podbor/catalog-contract';
@@ -8,7 +9,7 @@ import { z } from 'zod';
 
 import { PART_IDENTIFIER_TYPES } from '../modules/catalog/models/part-identifier';
 import type CatalogModuleService from '../modules/catalog/service';
-import { sellPrice } from '../modules/supplier/pricing';
+import { storeOffers } from '../modules/supplier/pricing';
 
 export const PART_WITH_OFFERS_FIELDS = [
   'id',
@@ -18,21 +19,20 @@ export const PART_WITH_OFFERS_FIELDS = [
   'identifiers.brand.name',
   'identifiers.value',
   'identifiers.offers.id',
-  'identifiers.offers.supplier.name',
   'identifiers.offers.supplier.markup_percentage',
-  'identifiers.offers.supplier_article_id',
   'identifiers.offers.cost_price',
+  'identifiers.offers.currency',
   'identifiers.offers.stock_quantity',
-  'identifiers.offers.lead_time',
+  'identifiers.offers.lead_time_days',
 ];
 
-export const offerSchema = z.object({
+const offerRowSchema = z.object({
   id: z.string(),
-  supplier: z.string(),
-  supplier_article_id: z.string(),
-  price: z.number(),
+  cost_price: z.number(),
+  currency: z.string(),
   stock_quantity: z.number(),
-  lead_time: z.string(),
+  lead_time_days: z.number(),
+  supplier: z.object({ markup_percentage: z.number() }),
 });
 
 export const identifierSchema = z.object({
@@ -40,7 +40,7 @@ export const identifierSchema = z.object({
   type: z.enum(PART_IDENTIFIER_TYPES),
   brand: z.string(),
   value: z.string(),
-  offers: z.array(offerSchema),
+  offers: z.array(partOfferSchema),
 });
 
 export const partResponseSchema = z.object({
@@ -74,17 +74,7 @@ const rawPartSchema = z.object({
   identifiers: z.array(
     identifierSchema.extend({
       brand: z.object({ name: z.string() }),
-      offers: z
-        .array(
-          offerSchema.omit({ supplier: true, price: true }).extend({
-            cost_price: z.number(),
-            supplier: z.object({
-              name: z.string(),
-              markup_percentage: z.number(),
-            }),
-          }),
-        )
-        .nullish(),
+      offers: z.array(offerRowSchema).nullish(),
     }),
   ),
 });
@@ -109,13 +99,7 @@ export const toPartResponse = (row: unknown) => {
     identifiers: part.identifiers.map((identifier) => ({
       ...identifier,
       brand: identifier.brand.name,
-      offers: (identifier.offers ?? []).map(
-        ({ cost_price, supplier, ...offer }) => ({
-          ...offer,
-          supplier: supplier.name,
-          price: sellPrice(cost_price, supplier.markup_percentage),
-        }),
-      ),
+      offers: storeOffers(identifier.offers ?? []),
     })),
   });
 };

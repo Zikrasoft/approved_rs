@@ -1,15 +1,17 @@
 ---
 import { partPageSlug, translated } from '@podbor/catalog-contract';
+import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
 import FitLine from '@/components/FitLine.astro';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
+import { formatLeadTime } from '@/utils/shopPart';
 import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
@@ -35,12 +37,31 @@ const attributes = category
 const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
+const [bestOffer] = page.offers;
+const price = (amount: number, currency: string) =>
+  `${amount.toLocaleString(BCP47_BY_LOCALE[locale])} ${currency}`;
+const jsonLd = bestOffer
+  ? [
+      (url: string) =>
+        productSchema({
+          name: heading,
+          brand: page.brand.name,
+          description: page.part.name,
+          price: bestOffer.price,
+          currency: bestOffer.currency,
+          inStock: bestOffer.stock_quantity > 0,
+          condition: 'NewCondition',
+          url,
+        }),
+    ]
+  : [];
 ---
 
 <Shell
   title={`${heading}, ${page.part.name} - ${copy.metaTitleSuffix}`}
   description={copy.metaDescription}
   noindex={!page.indexable}
+  jsonLd={jsonLd}
 >
   <PageHero
     eyebrow={copy.eyebrow}
@@ -93,6 +114,51 @@ const categoryText = category
               </a>
             </>
           )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    bestOffer && (
+      <section class="wrap pt-band md:pt-band-lg">
+        <div class="card flex max-w-2xl flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.offersHeading}</h2>
+          <ul class="flex flex-col divide-y divide-line">
+            {page.offers.map((offer) => (
+              <li class="flex flex-wrap items-baseline gap-x-5 gap-y-1 py-3 first:pt-0">
+                <span class="spec text-lg font-semibold text-ink">
+                  {price(offer.price, offer.currency)}
+                </span>
+                {offer.stock_quantity > 0 && (
+                  <span class="text-sm text-ink-2">
+                    {copy.columns.stock}: {offer.stock_quantity}
+                  </span>
+                )}
+                {offer.lead_time_days > 0 && (
+                  <span class="text-sm text-muted">
+                    {copy.columns.leadTime}:{' '}
+                    {formatLeadTime(offer.lead_time_days, copy.leadTime)}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          <parts-list-add
+            class="block"
+            data-slug={page.slug}
+            data-brand={page.brand.name}
+            data-number={page.value}
+            data-name={page.part.name}
+          >
+            <a
+              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              class="btn btn-primary w-full sm:w-auto"
+            >
+              {copy.offersCta}
+              <Icon name="arrowRight" />
+            </a>
+          </parts-list-add>
         </div>
       </section>
     )

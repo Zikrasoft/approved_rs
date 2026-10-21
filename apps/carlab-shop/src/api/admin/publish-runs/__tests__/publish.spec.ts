@@ -3,9 +3,15 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
+import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
+
+const supplier = createFakeSupplier('Nightly supplier');
 
 const SERBIAN = new Map([
   ['Масляный фильтр', 'Filter ulja'],
@@ -105,6 +111,10 @@ medusaIntegrationTestRunner({
           reindexCalls.push(Date.now());
         }),
       );
+      container.register(
+        SUPPLIER_ADAPTERS_REGISTRATION,
+        asValue([supplier.adapter]),
+      );
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -147,6 +157,30 @@ medusaIntegrationTestRunner({
           'admin@publish-tests.local',
           'supersecret',
         );
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const nightly = await suppliers.createSuppliers({
+          name: 'Nightly supplier',
+          markup_percentage: 20,
+        });
+        const mann = await catalog.createBrands({
+          name: 'Mann-Filter',
+          slug: 'mann-filter',
+        });
+        await catalog.createBrandSpellings({
+          brand_id: mann.id,
+          supplier_id: nightly.id,
+          value: 'MANN',
+        });
+        const oilFilters = await catalog.createCategories({
+          slug: 'oil-filters',
+          name: 'Масляные фильтры',
+        });
+        await suppliers.createSupplierCategories({
+          supplier_id: nightly.id,
+          code: 'OIL',
+          category_id: oilFilters.id,
+        });
         process.env.OPENAI_API_KEY = 'test-openai-key';
         process.env.PUBLISH_DISPATCH_TOKEN = 'test-dispatch-token';
         realFetch = globalThis.fetch;
@@ -166,6 +200,7 @@ medusaIntegrationTestRunner({
         network.githubStatus = 204;
         network.githubGate = null;
         reindexCalls.length = 0;
+        supplier.articles.length = 0;
       });
 
       it('shows no run before the first Publish', async () => {
@@ -198,6 +233,27 @@ medusaIntegrationTestRunner({
           },
         ]);
         expect(reindexCalls).toHaveLength(1);
+      });
+
+      it('imports supplier articles before translating them', async () => {
+        supplier.articles.push({
+          article_id: 'N-1',
+          brand: 'MANN',
+          number: 'HU 6004 x',
+          name: 'Масляный фильтр',
+          category: 'OIL',
+        });
+
+        const run = await publish();
+
+        expect(run.status).toBe('succeeded');
+        const [identifier] = await catalog.listPartIdentifiers({
+          normalized_value: 'HU6004X',
+        });
+        expect(await translationsOf(identifier.part_id)).toEqual({
+          sr: { name: 'Filter ulja' },
+          en: { name: 'Oil filter' },
+        });
       });
 
       it('asks the model nothing when no Russian changed', async () => {

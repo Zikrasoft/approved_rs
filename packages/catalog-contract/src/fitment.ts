@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { catalogTranslationsSchema } from './categories.ts';
+import { translationsSchema } from './categories.ts';
 import { STEERING_SIDES, type VinFacts } from './vehicle.ts';
 
 export const FITMENT_AXLES = ['front', 'rear'] as const;
@@ -21,7 +21,7 @@ export const fitmentSchema = z.object({
   gearbox: z.enum(GEARBOX_TYPES).nullable(),
   steering: z.enum(STEERING_SIDES).nullable(),
   note: z.string().nullable(),
-  translations: catalogTranslationsSchema,
+  translations: translationsSchema,
 });
 
 export const fitmentsResponseSchema = z.object({

@@ -12,6 +12,7 @@ import { CATALOG_MODULE } from '../../modules/catalog';
 import { PUBLISH_MODULE } from '../../modules/publish';
 import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
+import { importSupplierCatalogues } from '../suppliers/import';
 import { dispatchDeploy } from './deploy';
 import { translateCatalogue } from './translate';
 
@@ -26,9 +27,13 @@ type Reindex = () => Promise<unknown>;
 const reindex = (scope: MedusaContainer): Reindex =>
   scope.hasRegistration(PUBLISH_REINDEX_REGISTRATION)
     ? scope.resolve<Reindex>(PUBLISH_REINDEX_REGISTRATION)
-    : () => scope.resolve<ISearchModuleService>(Modules.SEARCH).reindex();
+    : () =>
+        scope
+          .resolve<ISearchModuleService>(Modules.SEARCH)
+          .reindex({ strategy: 'swap' });
 
 const publishSteps = (scope: MedusaContainer): PublishStep[] => [
+  { name: 'import', run: () => importSupplierCatalogues(scope) },
   {
     name: 'translate',
     run: () =>

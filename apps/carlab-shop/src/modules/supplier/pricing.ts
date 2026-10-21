@@ -1,4 +1,42 @@
+import type { PartOffer } from '@podbor/catalog-contract';
+
 export const sellPrice = (
   costPrice: number,
   markupPercentage: number,
 ): number => Math.round(costPrice * (1 + markupPercentage / 100));
+
+export type PricedOfferRow = {
+  id: string;
+  cost_price: number;
+  currency: string;
+  stock_quantity: number;
+  lead_time_days: number;
+  supplier: { markup_percentage: number };
+};
+
+const inStock = (offer: PartOffer) => Number(offer.stock_quantity > 0);
+
+export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
+  rows
+    .map(
+      ({
+        id,
+        cost_price,
+        currency,
+        stock_quantity,
+        lead_time_days,
+        supplier,
+      }) => ({
+        id,
+        price: sellPrice(cost_price, supplier.markup_percentage),
+        currency,
+        stock_quantity,
+        lead_time_days,
+      }),
+    )
+    .sort(
+      (a, b) =>
+        inStock(b) - inStock(a) ||
+        a.price - b.price ||
+        a.lead_time_days - b.lead_time_days,
+    );
