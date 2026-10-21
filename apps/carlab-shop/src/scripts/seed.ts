@@ -166,7 +166,7 @@ async function seedVehiclesAndFitment(
   logger.info('Seeded vehicle/fitment pilot fixture (N47/B47/B48).');
 }
 
-const CATEGORIES = [
+export const CATEGORIES = [
   {
     slug: 'maintenance-consumables',
     name: 'ТО и расходники',
