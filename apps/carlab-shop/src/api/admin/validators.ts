@@ -161,12 +161,16 @@ const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
 const categoryColumns = {
   name: z.string().trim().min(1),
   text: z.string(),
+  maintenance_kit: z.boolean(),
+  kit_rank: z.number().int(),
 };
 
 export const AdminCreateCategory = z.strictObject({
   slug: catalogKey,
   ...categoryColumns,
   text: categoryColumns.text.default(''),
+  maintenance_kit: categoryColumns.maintenance_kit.default(false),
+  kit_rank: categoryColumns.kit_rank.default(0),
 });
 export type AdminCreateCategoryType = z.infer<typeof AdminCreateCategory>;
 
@@ -219,3 +223,30 @@ export const AdminUpdateCategoryFieldOption = z
 export type AdminUpdateCategoryFieldOptionType = z.infer<
   typeof AdminUpdateCategoryFieldOption
 >;
+
+const REQUIREMENT_OWNERS = ['engine_id', 'chassis_id', 'vehicle_id'] as const;
+
+const requirementOwners = {
+  engine_id: z.string().min(1).optional(),
+  chassis_id: z.string().min(1).optional(),
+  vehicle_id: z.string().min(1).optional(),
+};
+
+export const AdminListRequirements = z.object(requirementOwners);
+export type AdminListRequirementsType = z.infer<typeof AdminListRequirements>;
+
+export const AdminCreateRequirement = z
+  .strictObject({
+    field_id: z.string().min(1),
+    ...requirementOwners,
+    option_keys: z.array(z.string().trim().min(1)).nullable().default(null),
+    min: z.number().nullable().default(null),
+    max: z.number().nullable().default(null),
+    quantity: z.number().int().positive().default(1),
+  })
+  .refine(
+    (requirement) =>
+      REQUIREMENT_OWNERS.filter((owner) => requirement[owner]).length === 1,
+    { message: 'Exactly one of engine_id, chassis_id, vehicle_id' },
+  );
+export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;

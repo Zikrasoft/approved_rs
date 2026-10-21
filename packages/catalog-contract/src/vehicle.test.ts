@@ -34,6 +34,17 @@ const vehicle: Vehicle = {
     displacement_cc: 1995,
   },
   identifiers: [{ type: 'bmw-type-code', value: '35BG' }],
+  requirements: [
+    {
+      id: 'requirement_1',
+      category_id: 'category_oil',
+      field_key: 'approvals',
+      option_keys: ['bmw-ll-04'],
+      min: null,
+      max: null,
+      quantity: 1,
+    },
+  ],
 };
 
 describe('vehiclesResponseSchema', () => {

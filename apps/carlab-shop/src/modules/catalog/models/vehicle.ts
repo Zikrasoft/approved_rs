@@ -4,6 +4,7 @@ import { STEERING_SIDES, VEHICLE_DRIVES } from '@podbor/catalog-contract';
 import Engine from './engine';
 import Fitment from './fitment';
 import { provenance } from './provenance';
+import Requirement from './requirement';
 import VehicleIdentifier from './vehicle-identifier';
 import VehicleModel from './vehicle-model';
 
@@ -22,8 +23,9 @@ const Vehicle = model
       mappedBy: 'vehicle',
     }),
     fitments: model.hasMany(() => Fitment, { mappedBy: 'vehicle' }),
+    requirements: model.hasMany(() => Requirement, { mappedBy: 'vehicle' }),
     ...provenance(),
   })
-  .cascades({ delete: ['identifiers', 'fitments'] });
+  .cascades({ delete: ['identifiers', 'fitments', 'requirements'] });
 
 export default Vehicle;

@@ -118,3 +118,124 @@ export const guardDefinitionChange = (
       ({ attributes }) => !validateAttributes(nextFields, attributes).success,
     )
     .map(({ id }) => id);
+
+export const requirementSchema = z.object({
+  id: z.string(),
+  category_id: z.string(),
+  field_key: z.string(),
+  option_keys: z.array(z.string()).nullable(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  quantity: z.number().int().positive(),
+});
+
+export type VehicleRequirement = z.infer<typeof requirementSchema>;
+
+export function requirementErrors(
+  { type, options }: CategoryFieldDefinition,
+  { option_keys, min, max }: Omit<Requirement, 'field_key'>,
+): string[] {
+  const keys = option_keys ?? [];
+  const bounded = (min ?? null) !== null || (max ?? null) !== null;
+  if (type === 'number') {
+    return [
+      ...(keys.length ? ['option_keys: Not allowed'] : []),
+      ...(bounded ? [] : ['min, max: Required']),
+      ...((min ?? -Infinity) > (max ?? Infinity)
+        ? ['min, max: min exceeds max']
+        : []),
+    ];
+  }
+  const known = options.map(({ key }) => key);
+  return [
+    ...(keys.length ? [] : ['option_keys: Required']),
+    ...(type.endsWith('select')
+      ? keys
+          .filter((key) => !known.includes(key))
+          .map((key) => `option_keys: Unknown option ${key}`)
+      : []),
+    ...(bounded ? ['min, max: Not allowed'] : []),
+  ];
+}
+
+export type RequirementMatch<Part> = {
+  category_id: string;
+  quantity: number;
+  parts: Part[];
+};
+
+export function requirementMatches<
+  Part extends { category_id: string | null; attributes: AttributeValues },
+>(parts: Part[], requirements: VehicleRequirement[]): RequirementMatch<Part>[] {
+  const categoryIds = [
+    ...new Set(requirements.map(({ category_id }) => category_id)),
+  ];
+  return categoryIds.flatMap((category_id) => {
+    const rows = requirements.filter(
+      (requirement) => requirement.category_id === category_id,
+    );
+    const matching = parts.filter(
+      (part) =>
+        part.category_id === category_id &&
+        matchesRequirements(part.attributes, rows),
+    );
+    return matching.length
+      ? [
+          {
+            category_id,
+            quantity: Math.max(...rows.map(({ quantity }) => quantity)),
+            parts: matching,
+          },
+        ]
+      : [];
+  });
+}
+
+export type KitCategory = {
+  id: string;
+  maintenance_kit: boolean;
+  kit_rank: number;
+};
+
+export type KitItem = {
+  category_id: string;
+  part_id: string;
+  quantity: number;
+};
+
+export const maintenanceKit = (
+  categories: KitCategory[],
+  groups: {
+    category_id: string | null;
+    ambiguous: boolean;
+    fitments: { part_id: string; quantity: number }[];
+  }[],
+  matches: RequirementMatch<{ id: string }>[],
+): KitItem[] =>
+  categories
+    .filter(({ maintenance_kit }) => maintenance_kit)
+    .sort((a, b) => a.kit_rank - b.kit_rank)
+    .flatMap(({ id }): KitItem[] => {
+      const fitted = groups.find(
+        (group) => group.category_id === id && !group.ambiguous,
+      )?.fitments[0];
+      if (fitted) {
+        return [
+          {
+            category_id: id,
+            part_id: fitted.part_id,
+            quantity: fitted.quantity,
+          },
+        ];
+      }
+      const matched = matches.find(({ category_id }) => category_id === id);
+      return matched
+        ? [
+            {
+              category_id: id,
+              part_id: matched.parts[0].id,
+              quantity: matched.quantity,
+            },
+          ]
+        : [];
+    });

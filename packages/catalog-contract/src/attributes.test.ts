@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   type CategoryFieldDefinition,
   guardDefinitionChange,
+  maintenanceKit,
   matchesRequirements,
+  requirementErrors,
+  requirementMatches,
+  requirementSchema,
   validateAttributes,
 } from './attributes.ts';
 
@@ -183,5 +187,158 @@ describe('guardDefinitionChange', () => {
     expect(
       guardDefinitionChange(withField('approvals', { required: true }), parts),
     ).toEqual(['part_2']);
+  });
+});
+
+describe('requirementErrors', () => {
+  const [viscosity, approvals, volume, synthetic, code] = oilFields;
+
+  it.each([
+    [viscosity, { option_keys: ['5w-30'] }],
+    [approvals, { option_keys: ['bmw-ll-04', 'mb-229-51'] }],
+    [volume, { min: 4.5, max: 5.5 }],
+    [volume, { min: 4.5 }],
+    [volume, { max: 5.5, option_keys: [] }],
+    [synthetic, { option_keys: ['true'] }],
+    [code, { option_keys: ['H7'] }],
+  ])('accepts a Requirement on %j: %j', (field, requirement) => {
+    expect(requirementErrors(field, requirement)).toEqual([]);
+  });
+
+  it.each([
+    [viscosity, {}, 'option_keys: Required'],
+    [
+      viscosity,
+      { option_keys: ['10w-60'] },
+      'option_keys: Unknown option 10w-60',
+    ],
+    [
+      approvals,
+      { option_keys: ['bmw-ll-04'], min: 1 },
+      'min, max: Not allowed',
+    ],
+    [volume, {}, 'min, max: Required'],
+    [volume, { min: 6, max: 5 }, 'min, max: min exceeds max'],
+    [volume, { min: 4, option_keys: ['4'] }, 'option_keys: Not allowed'],
+    [code, { option_keys: [] }, 'option_keys: Required'],
+  ])('refuses a Requirement on %j: %j', (field, requirement, error) => {
+    expect(requirementErrors(field, requirement)).toEqual([error]);
+  });
+});
+
+const requirement = (
+  overrides: Partial<ReturnType<typeof requirementSchema.parse>>,
+) =>
+  requirementSchema.parse({
+    id: 'requirement_1',
+    category_id: 'category_oil',
+    field_key: 'approvals',
+    option_keys: ['bmw-ll-04'],
+    min: null,
+    max: null,
+    quantity: 1,
+    ...overrides,
+  });
+
+describe('requirementMatches', () => {
+  const parts = [
+    {
+      id: 'part_ll04',
+      category_id: 'category_oil',
+      attributes: { approvals: ['bmw-ll-04', 'mb-229-51'], volume: 5 },
+    },
+    {
+      id: 'part_vw',
+      category_id: 'category_oil',
+      attributes: { approvals: ['vw-504-00'], volume: 5 },
+    },
+    { id: 'part_wiper', category_id: 'category_wiper', attributes: {} },
+    { id: 'part_loose', category_id: null, attributes: {} },
+  ];
+
+  it('lists the Parts of each required Category that meet all its Requirements', () => {
+    expect(
+      requirementMatches(parts, [
+        requirement({ quantity: 1 }),
+        requirement({
+          id: 'requirement_2',
+          field_key: 'volume',
+          option_keys: null,
+          min: 5,
+          quantity: 2,
+        }),
+      ]),
+    ).toEqual([
+      { category_id: 'category_oil', quantity: 2, parts: [parts[0]] },
+    ]);
+  });
+
+  it('leaves out a Category no Part meets', () => {
+    expect(
+      requirementMatches(parts, [requirement({ option_keys: ['mb-229-52'] })]),
+    ).toEqual([]);
+  });
+
+  it('matches nothing without Requirements', () => {
+    expect(requirementMatches(parts, [])).toEqual([]);
+  });
+});
+
+describe('maintenanceKit', () => {
+  const categories = [
+    { id: 'category_wiper', maintenance_kit: false, kit_rank: 0 },
+    { id: 'category_oil', maintenance_kit: true, kit_rank: 1 },
+    { id: 'category_filter', maintenance_kit: true, kit_rank: 0 },
+    { id: 'category_pads', maintenance_kit: true, kit_rank: 2 },
+    { id: 'category_plugs', maintenance_kit: true, kit_rank: 3 },
+  ];
+
+  it('takes one Part per flagged Category, ranked, from a Fitment or else a Requirement match', () => {
+    expect(
+      maintenanceKit(
+        categories,
+        [
+          {
+            category_id: 'category_filter',
+            ambiguous: false,
+            fitments: [{ part_id: 'part_filter', quantity: 1 }],
+          },
+          {
+            category_id: 'category_pads',
+            ambiguous: true,
+            fitments: [
+              { part_id: 'part_pads_a', quantity: 1 },
+              { part_id: 'part_pads_b', quantity: 1 },
+            ],
+          },
+          {
+            category_id: 'category_plugs',
+            ambiguous: false,
+            fitments: [{ part_id: 'part_plug', quantity: 4 }],
+          },
+          {
+            category_id: 'category_wiper',
+            ambiguous: false,
+            fitments: [{ part_id: 'part_wiper', quantity: 2 }],
+          },
+        ],
+        [
+          {
+            category_id: 'category_oil',
+            quantity: 5,
+            parts: [{ id: 'part_oil' }, { id: 'part_oil_2' }],
+          },
+          {
+            category_id: 'category_plugs',
+            quantity: 6,
+            parts: [{ id: 'part_plug_generic' }],
+          },
+        ],
+      ),
+    ).toEqual([
+      { category_id: 'category_filter', part_id: 'part_filter', quantity: 1 },
+      { category_id: 'category_oil', part_id: 'part_oil', quantity: 5 },
+      { category_id: 'category_plugs', part_id: 'part_plug', quantity: 4 },
+    ]);
   });
 });

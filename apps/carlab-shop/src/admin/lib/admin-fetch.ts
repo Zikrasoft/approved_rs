@@ -12,9 +12,12 @@ const errorMessage = async (response: Response): Promise<string> => {
     : `${response.status} ${response.statusText}`;
 };
 
+export type ErrorMessages = Record<string, string>;
+
 export const adminFetch = async <T>(
   path: string,
   init?: RequestInit,
+  messages: ErrorMessages = {},
 ): Promise<T | null> => {
   try {
     const response = await fetch(path, {
@@ -23,7 +26,12 @@ export const adminFetch = async <T>(
       ...init,
     });
     if (!response.ok) {
-      toast.error(await errorMessage(response));
+      const message = await errorMessage(response);
+      toast.error(
+        Object.entries(messages).find(([fragment]) =>
+          message.includes(fragment),
+        )?.[1] ?? message,
+      );
       return null;
     }
     return (await response.json()) as T;

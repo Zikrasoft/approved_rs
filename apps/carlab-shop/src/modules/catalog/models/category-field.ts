@@ -4,6 +4,7 @@ import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import Category from './category';
 import CategoryFieldOption from './category-field-option';
 import { provenance } from './provenance';
+import Requirement from './requirement';
 import { translatable } from './translatable';
 
 const CategoryField = model
@@ -19,6 +20,7 @@ const CategoryField = model
     rank: model.number().default(0),
     category: model.belongsTo(() => Category, { mappedBy: 'fields' }),
     options: model.hasMany(() => CategoryFieldOption, { mappedBy: 'field' }),
+    requirements: model.hasMany(() => Requirement, { mappedBy: 'field' }),
     ...provenance(),
   })
   .cascades({ delete: ['options'] })

@@ -40,6 +40,8 @@ export const categorySchema = z.object({
   name: z.string(),
   text: z.string(),
   translations: translationsSchema,
+  maintenance_kit: z.boolean(),
+  kit_rank: z.number(),
   fields: z.array(categoryFieldSchema),
 });
 

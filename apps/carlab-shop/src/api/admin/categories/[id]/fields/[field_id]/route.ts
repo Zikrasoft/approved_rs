@@ -17,7 +17,10 @@ export async function POST(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const { key } = await retrieveCategoryField(catalog, id, field_id);
+  const { key, type } = await retrieveCategoryField(catalog, id, field_id);
+  if (body.type && body.type !== type) {
+    await catalog.guardRequirementUse(field_id, null);
+  }
   await catalog.guardCategoryDefinition(id, (fields) =>
     fields.map((field) =>
       field.key === key
@@ -48,6 +51,7 @@ export async function DELETE(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const { key } = await retrieveCategoryField(catalog, id, field_id);
+  await catalog.guardRequirementUse(field_id, null);
   await catalog.guardCategoryDefinition(id, (fields) =>
     fields.filter((field) => field.key !== key),
   );

@@ -114,6 +114,25 @@ export function definePartsListAdd(tagName = 'parts-list-add'): void {
   );
 }
 
+export function definePartsListAddAll(tagName = 'parts-list-add-all'): void {
+  if (customElements.get(tagName)) return;
+  customElements.define(
+    tagName,
+    class extends HTMLElement {
+      connectedCallback(): void {
+        this.querySelector('[data-add-all]')?.addEventListener('click', () => {
+          for (const item of this.querySelectorAll<HTMLElement>(
+            '[data-slug]:not([hidden])',
+          )) {
+            const parsed = listedPartSchema.safeParse({ ...item.dataset });
+            if (parsed.success) addToPartsList(parsed.data);
+          }
+        });
+      }
+    },
+  );
+}
+
 export function definePartsInquiry(tagName = 'parts-inquiry'): void {
   if (customElements.get(tagName)) return;
   customElements.define(

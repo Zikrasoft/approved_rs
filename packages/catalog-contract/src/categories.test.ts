@@ -7,6 +7,8 @@ const category = {
   name: 'Моторное масло',
   text: 'Масло для двигателя.',
   translations: { sr: { name: 'Motorno ulje', text: '' } },
+  maintenance_kit: true,
+  kit_rank: 1,
   fields: [
     {
       key: 'viscosity',

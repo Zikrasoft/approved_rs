@@ -1,6 +1,7 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import Icon from '@/components/Icon.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -9,7 +10,7 @@ import PartNumbers from '@/components/PartNumbers.astro';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -28,6 +29,8 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const partsInquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.car;
+const quantity = (count: number) =>
+  content(locale).partsCar.fitment.quantity.replace('{count}', String(count));
 const variant = vehicleVariant(vehicle, locale);
 const name = `${carName(vehicle.model, locale)}, ${variant}`;
 const { engine, model } = vehicle;
@@ -96,7 +99,7 @@ const specs = [
     ]}
   />
 
-  <section
+  <car-facts
     class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
   >
     <div class="flex flex-col gap-6">
@@ -114,8 +117,59 @@ const specs = [
         </dl>
       </div>
 
+      {
+        car.kit.length > 0 && (
+          <parts-list-add-all class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6">
+            <div class="flex flex-col gap-1">
+              <h2 class="text-block font-semibold">{copy.kitHeading}</h2>
+              <p class="text-sm leading-relaxed text-ink-2">{copy.kitLead}</p>
+            </div>
+            <ul class="flex flex-col divide-y divide-line">
+              {car.kit.map((item) => (
+                <li
+                  class="flex items-baseline justify-between gap-4 py-3 first:pt-0"
+                  data-kit-part={item.part.id}
+                  data-slug={item.pages[0].slug}
+                  data-brand={item.pages[0].brand.name}
+                  data-number={item.pages[0].value}
+                  data-name={item.part.name}
+                >
+                  <div class="flex min-w-0 flex-col gap-1">
+                    <span class="text-xs text-muted">
+                      {translated(item.category, 'name', locale)}
+                    </span>
+                    <span class="text-sm text-ink">{item.part.name}</span>
+                    <PartNumbers pages={item.pages} />
+                  </div>
+                  <span class="spec shrink-0 text-sm text-ink">
+                    {quantity(item.quantity)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <a
+              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              class="btn btn-primary w-full sm:w-auto sm:self-start"
+              data-add-all
+            >
+              {copy.kitAdd}
+              <Icon name="arrowRight" />
+            </a>
+          </parts-list-add-all>
+        )
+      }
+
       <div class="flex flex-col gap-4">
         <h2 class="text-section">{copy.partsHeading}</h2>
+        <p
+          class="text-sm leading-relaxed text-ink-2"
+          data-vin-steering
+          data-template={copy.vinSteering}
+          data-left={copy.steering.left}
+          data-right={copy.steering.right}
+          hidden
+        >
+        </p>
         {
           blocks.length === 0 ? (
             <p class="card p-5 text-sm leading-relaxed text-ink-2 sm:p-6">
@@ -130,19 +184,22 @@ const specs = [
                 <ul class="divide-y divide-line">
                   {block.groups.map((group) => (
                     <li
-                      class:list={[
-                        'flex flex-col gap-3 px-5 py-4 sm:px-6',
-                        group.ambiguous && 'border-l-4 border-l-signal',
-                      ]}
+                      class="group flex flex-col gap-3 px-5 py-4 data-ambiguous:border-l-4 data-ambiguous:border-l-signal sm:px-6"
+                      data-position-group
+                      data-ambiguous={group.ambiguous || undefined}
                     >
-                      {group.ambiguous && (
-                        <p class="text-sm leading-relaxed font-semibold text-signal-ink">
-                          {copy.confirmVariant}
-                        </p>
-                      )}
+                      <p class="hidden text-sm leading-relaxed font-semibold text-signal-ink group-data-ambiguous:block">
+                        {copy.confirmVariant}
+                      </p>
                       <ul class="flex flex-col gap-4">
                         {group.fitments.map((fit) => (
-                          <li class="flex flex-col gap-1.5">
+                          <li
+                            class="flex flex-col gap-1.5"
+                            data-fitment
+                            data-part-id={fit.part.id}
+                            data-steering={fit.steering ?? undefined}
+                            data-note={fit.note ?? undefined}
+                          >
                             <span class="text-sm text-ink">
                               {fit.part.name}
                             </span>
@@ -159,6 +216,37 @@ const specs = [
           )
         }
       </div>
+
+      {
+        car.matches.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <h2 class="text-section">{copy.matchesHeading}</h2>
+              <p class="max-w-2xl text-sm leading-relaxed text-ink-2">
+                {copy.matchesLead}
+              </p>
+            </div>
+            {car.matches.map((match) => (
+              <section class="card overflow-hidden">
+                <h3 class="flex items-baseline justify-between gap-4 border-b border-line px-5 py-3 font-semibold sm:px-6">
+                  {translated(match.category, 'name', locale)}
+                  <span class="spec shrink-0 text-sm font-normal text-ink">
+                    {quantity(match.quantity)}
+                  </span>
+                </h3>
+                <ul class="divide-y divide-line">
+                  {match.parts.map(({ part, pages }) => (
+                    <li class="flex flex-col gap-1.5 px-5 py-4 sm:px-6">
+                      <span class="text-sm text-ink">{part.name}</span>
+                      <PartNumbers pages={pages} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )
+      }
 
       <p class="text-sm leading-relaxed text-muted">
         <a
@@ -185,5 +273,13 @@ const specs = [
         defaultChannel="whatsapp"
       />
     </div>
-  </section>
+  </car-facts>
 </Shell>
+
+<script>
+  import { defineCarFacts } from '@/scripts/carFacts';
+  import { definePartsListAddAll } from '@/scripts/partsList';
+
+  defineCarFacts();
+  definePartsListAddAll();
+</script>

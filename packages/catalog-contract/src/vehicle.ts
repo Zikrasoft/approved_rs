@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { requirementSchema } from './attributes.ts';
 
 export const VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',
@@ -58,6 +59,7 @@ export const vehicleSchema = z.object({
     displacement_cc: z.number().nullable(),
   }),
   identifiers: z.array(vehicleIdentifierSchema),
+  requirements: z.array(requirementSchema),
 });
 
 export type Vehicle = z.infer<typeof vehicleSchema>;

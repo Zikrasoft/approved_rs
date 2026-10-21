@@ -62,6 +62,8 @@ medusaIntegrationTestRunner({
               name: 'Моторное масло',
               text: 'Масло для двигателя.',
               translations: { sr: { name: 'Motorno ulje' } },
+              maintenance_kit: false,
+              kit_rank: 0,
               fields: [
                 {
                   key: 'viscosity',

@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
+import { carFactsQuery } from '@/utils/carFacts';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
 
@@ -28,7 +29,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     : null;
   return redirect(
     outcome?.kind === 'vehicle'
-      ? PathBuilder.partsCar(locale, outcome.vehicle.id)
+      ? `${PathBuilder.partsCar(locale, outcome.vehicle.id)}${carFactsQuery(outcome.facts)}`
       : PathBuilder.partsVinUnresolved(locale),
     303,
   );
