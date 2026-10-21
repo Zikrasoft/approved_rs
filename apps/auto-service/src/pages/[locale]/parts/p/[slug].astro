@@ -4,6 +4,8 @@ import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
+import FitLine from '@/components/FitLine.astro';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
@@ -220,6 +222,29 @@ const jsonLd = bestOffer
             {copy.categoryLink}
           </a>
         </div>
+      </section>
+    )
+  }
+
+  {
+    page.fits.length > 0 && (
+      <section class="wrap pt-band md:pt-band-lg">
+        <h2 class="text-section mb-6">
+          {content(locale).partsCar.fitment.partFitsHeading}
+        </h2>
+        <ul class="card divide-y divide-line">
+          {page.fits.map((fit) => (
+            <li class="px-5 py-4 sm:px-6">
+              <FitLine
+                fit={fit}
+                car={{
+                  href: PathBuilder.partsCar(locale, fit.vehicle.id),
+                  label: `${carName(fit.vehicle.model, locale)}, ${vehicleVariant(fit.vehicle, locale)}`,
+                }}
+              />
+            </li>
+          ))}
+        </ul>
       </section>
     )
   }

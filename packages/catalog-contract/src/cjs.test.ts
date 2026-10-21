@@ -33,6 +33,25 @@ describe('CommonJS build', () => {
     ).toBe(true);
   });
 
+  it('serves the ambiguity rule to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(
+      contract.positionGroups(
+        [
+          {
+            part_id: 'part_1',
+            category_id: null,
+            axle: 'front',
+            side: null,
+            steering: null,
+            note: null,
+          },
+        ],
+        {},
+      )[0].ambiguous,
+    ).toBe(false);
+  });
+
   it('serves the vehicle schemas to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([

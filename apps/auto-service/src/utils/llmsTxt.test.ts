@@ -70,36 +70,81 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
-  it('lists the Category pages with their localized name and first paragraph', async () => {
+  it('lists the Category pages and the Make hubs', async () => {
+    const answers: Record<string, unknown> = {
+      '/store/categories': {
+        categories: [
+          {
+            id: 'category_oil',
+            slug: 'engine-oil',
+            name: 'Моторное масло',
+            text: 'Масло для двигателя.\n\nВторой абзац.',
+            translations: {
+              sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
+            },
+            fields: [],
+          },
+        ],
+      },
+      '/store/vehicles': {
+        vehicles: [
+          {
+            id: 'veh_1',
+            power_kw: 140,
+            drive: 'rwd',
+            market: 'EU',
+            year_from: 2015,
+            year_to: 2019,
+            steering: 'left',
+            model: {
+              slug: 'f30-320d',
+              name: '320d',
+              chassis: {
+                code: 'F30',
+                body_style: 'sedan',
+                series: {
+                  name: '3 серия',
+                  translations: null,
+                  make: { slug: 'bmw', name: 'BMW' },
+                },
+              },
+            },
+            engine: {
+              code: 'B47D20O0',
+              family: 'B47',
+              fuel: 'diesel',
+              displacement_cc: 1995,
+            },
+            identifiers: [],
+          },
+        ],
+      },
+    };
     vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
+      vi.fn(async (url: string) => ({
         ok: true,
-        json: async () => ({
-          categories: [
-            {
-              id: 'category_oil',
-              slug: 'engine-oil',
-              name: 'Моторное масло',
-              text: 'Масло для двигателя.\n\nВторой абзац.',
-              translations: {
-                sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
-              },
-              fields: [],
-            },
-          ],
-        }),
+        json: async () =>
+          answers[new URL(url).pathname] ?? {
+            pages: [],
+            fitments: [],
+            count: 0,
+            offset: 0,
+            limit: 1000,
+          },
       })),
     );
 
-    const body = await generateLlmsTxt('sr');
-    vi.unstubAllEnvs();
-    vi.unstubAllGlobals();
+    const body = await generateLlmsTxt('sr').finally(() => {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    });
 
     expect(body).toContain(
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.',
     );
+    expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
   });
 
   it('links the BMW landing page', async () => {

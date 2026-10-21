@@ -87,6 +87,42 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('removes the left-hand candidate for a right-hand VIN', async () => {
+        const { vehicle } = await createBaumusterVehicle('205024');
+        const category = await catalog.createCategories({
+          slug: 'wiper-blades',
+          name: 'Щетки стеклоочистителя',
+        });
+        const [lhd, rhd] = await catalog.createParts([
+          { name: 'Wiper set, left-hand drive', category_id: category.id },
+          { name: 'Wiper set, right-hand drive', category_id: category.id },
+        ]);
+        await catalog.createFitments([
+          { part_id: lhd.id, vehicle_id: vehicle.id, steering: 'left' },
+          { part_id: rhd.id, vehicle_id: vehicle.id, steering: 'right' },
+        ]);
+        const partsFor = async (query: string) =>
+          (
+            await api.get(
+              `/store/vehicles/${vehicle.id}/parts${query}`,
+              storeHeaders,
+            )
+          ).data.groups;
+
+        const lookup = await lookUp('W1K2050242R000002');
+        const [before] = await partsFor('');
+        const [after] = await partsFor(
+          `?steering=${lookup.data.facts.steering}`,
+        );
+
+        expect(lookup.data.facts).toEqual({ steering: 'right' });
+        expect(before.ambiguous).toBe(true);
+        expect(after.ambiguous).toBe(false);
+        expect(
+          after.fitments.map(({ part }: { part: { id: string } }) => part.id),
+        ).toEqual([rhd.id]);
+      });
+
       it.each(['WDB', 'WDD', 'WDC', 'W1K', 'W1N'])(
         'routes the %s WMI to the Mercedes adapter',
         async (wmi) => {

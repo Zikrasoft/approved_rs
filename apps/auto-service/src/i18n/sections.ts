@@ -72,7 +72,7 @@ export const SECTIONS = [
     path: 'src/content/i18n/partsCar.yaml',
     schema: partsCarContentSchema,
     promptSubject:
-      'a car parts shop: the VIN lookup form, its fallback notice when a VIN cannot be identified, and the car page listing what the shop knows about one vehicle configuration (engine, fuel, drive, body, steering, model code); keep {placeholders} intact',
+      'a car parts shop: the VIN lookup form, its fallback notice when a VIN cannot be identified, and the car page listing what the shop knows about one vehicle configuration (engine, fuel, drive, body, steering, model code) and its parts with quantity and fitting position (axle, side), and the make and model hub pages listing part categories; keep {placeholders} intact',
   },
   {
     key: 'partsSearch',

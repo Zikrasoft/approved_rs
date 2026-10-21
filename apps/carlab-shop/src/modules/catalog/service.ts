@@ -9,7 +9,11 @@ import {
 import {
   type AttributeValues,
   type CategoryFieldDefinition,
+  type FitmentAxle,
+  type FitmentSide,
+  type GEARBOX_TYPES,
   guardDefinitionChange,
+  type SteeringSide,
   normalizePartNumber,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -48,6 +52,72 @@ export type PartClassification = {
   category_id: string | null;
   attributes: Record<string, unknown>;
 };
+
+export type FitmentConditions = {
+  quantity?: number;
+  axle?: FitmentAxle | null;
+  side?: FitmentSide | null;
+  production_from?: Date | null;
+  production_to?: Date | null;
+  steering?: SteeringSide | null;
+  gearbox?: (typeof GEARBOX_TYPES)[number] | null;
+  note?: string | null;
+};
+
+export type VehicleFilter = {
+  vehicle_id?: string;
+  make_id?: string;
+  series_id?: string;
+  chassis_id?: string;
+  model_id?: string;
+  engine_id?: string;
+  engine_family?: string;
+  year_from?: number;
+  year_to?: number;
+};
+
+type FilteredVehicle = {
+  model_id: string;
+  engine_id: string;
+  year_from: number | null;
+  year_to: number | null;
+  engine: { family: string };
+  model: {
+    chassis_id: string;
+    chassis: { series_id: string; series: { make_id: string } };
+  };
+};
+
+const matchesFilter =
+  (filter: VehicleFilter) =>
+  ({ model, engine, ...vehicle }: FilteredVehicle): boolean =>
+    [
+      [filter.make_id, model.chassis.series.make_id],
+      [filter.series_id, model.chassis.series_id],
+      [filter.chassis_id, model.chassis_id],
+      [filter.model_id, vehicle.model_id],
+      [filter.engine_id, vehicle.engine_id],
+      [filter.engine_family, engine.family],
+    ].every(([wanted, actual]) => wanted === undefined || wanted === actual) &&
+    (filter.year_from === undefined ||
+      vehicle.year_to === null ||
+      vehicle.year_to >= filter.year_from) &&
+    (filter.year_to === undefined ||
+      vehicle.year_from === null ||
+      vehicle.year_from <= filter.year_to);
+
+const time = (date: Date | null | undefined) => date?.getTime() ?? null;
+
+const sameIdentity = (
+  conditions: FitmentConditions,
+  fitment: FitmentConditions,
+): boolean =>
+  (conditions.axle ?? null) === fitment.axle &&
+  (conditions.side ?? null) === fitment.side &&
+  (conditions.steering ?? null) === fitment.steering &&
+  (conditions.gearbox ?? null) === fitment.gearbox &&
+  time(conditions.production_from) === time(fitment.production_from) &&
+  time(conditions.production_to) === time(fitment.production_to);
 
 export type NewPart = Provenance &
   Partial<PartClassification> & {
@@ -106,6 +176,54 @@ class CatalogModuleService extends MedusaService({
       sharedContext,
     );
     return created.id;
+  }
+
+  @InjectTransactionManager()
+  async attachPartToVehicles(
+    partId: string,
+    filter: VehicleFilter,
+    conditions: FitmentConditions & Provenance,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    await this.retrievePart(partId, {}, sharedContext);
+    const vehicles = (
+      await this.listVehicles(
+        filter.vehicle_id ? { id: filter.vehicle_id } : {},
+        {
+          relations: [
+            'model',
+            'model.chassis',
+            'model.chassis.series',
+            'engine',
+          ],
+          take: null,
+        },
+        sharedContext,
+      )
+    ).filter(matchesFilter(filter));
+    const existing = await this.listFitments(
+      { part_id: partId, vehicle_id: vehicles.map(({ id }) => id) },
+      { take: null },
+      sharedContext,
+    );
+    const missing = vehicles.filter(
+      ({ id }) =>
+        !existing.some(
+          (fitment) =>
+            fitment.vehicle_id === id && sameIdentity(conditions, fitment),
+        ),
+    );
+    const created = missing.length
+      ? await this.createFitments(
+          missing.map(({ id }) => ({
+            ...conditions,
+            part_id: partId,
+            vehicle_id: id,
+          })),
+          sharedContext,
+        )
+      : [];
+    return { matched: vehicles.length, created };
   }
 
   @InjectTransactionManager()

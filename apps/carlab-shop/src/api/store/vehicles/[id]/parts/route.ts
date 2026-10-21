@@ -1,60 +1,42 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { positionGroups } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { toFitmentResponse } from '../../../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
-import {
-  FITMENT_GEARBOX_TYPES,
-  FITMENT_STEERING_SIDES,
-} from '../../../../../modules/catalog/models/fitment';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
+import type { StoreVehiclePartsType } from '../../../validators';
 
-const candidateSchema = z.object({
-  fitment_id: z.string(),
-  production_from: z.date().nullable(),
-  production_to: z.date().nullable(),
-  steering: z.enum(FITMENT_STEERING_SIDES).nullable(),
-  gearbox: z.enum(FITMENT_GEARBOX_TYPES).nullable(),
-});
-
-const partEntrySchema = z.object({
-  part: z.object({ id: z.string(), name: z.string() }),
-  ambiguous: z.boolean(),
-  candidates: z.array(candidateSchema),
+const partSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  category_id: z.string().nullable(),
 });
 
 export async function GET(
-  req: MedusaRequest,
+  req: MedusaRequest<unknown, StoreVehiclePartsType>,
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
+  const { steering } = req.validatedQuery as StoreVehiclePartsType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  await catalog.retrieveVehicle(id);
+  const vehicle = await catalog.retrieveVehicle(id);
 
   const fitments = await catalog.listFitments(
     { vehicle_id: id },
-    { relations: ['part'] },
+    { relations: ['part'], take: null },
   );
 
-  const fitmentsByPartId = new Map<string, typeof fitments>();
-  for (const fitment of fitments) {
-    const group = fitmentsByPartId.get(fitment.part_id) ?? [];
-    group.push(fitment);
-    fitmentsByPartId.set(fitment.part_id, group);
-  }
+  const candidates = fitments.map((fitment) => {
+    const { category_id, ...part } = partSchema.parse(fitment.part);
+    return { ...toFitmentResponse(fitment), category_id, part };
+  });
 
-  const entries = [...fitmentsByPartId.values()].map((group) => ({
-    part: { id: group[0].part.id, name: group[0].part.name },
-    ambiguous: group.length > 1,
-    candidates: group.map((fitment) => ({
-      fitment_id: fitment.id,
-      production_from: fitment.production_from,
-      production_to: fitment.production_to,
-      steering: fitment.steering,
-      gearbox: fitment.gearbox,
-    })),
-  }));
-
-  res.json({ parts: z.array(partEntrySchema).parse(entries) });
+  res.json({
+    groups: positionGroups(candidates, {
+      steering: steering ?? vehicle.steering ?? undefined,
+    }),
+  });
 }
