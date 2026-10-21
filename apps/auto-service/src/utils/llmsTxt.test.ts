@@ -70,6 +70,38 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
+  it('lists the Category pages with their localized name and first paragraph', async () => {
+    vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          categories: [
+            {
+              id: 'category_oil',
+              slug: 'engine-oil',
+              name: 'Моторное масло',
+              text: 'Масло для двигателя.\n\nВторой абзац.',
+              translations: {
+                sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
+              },
+              fields: [],
+            },
+          ],
+        }),
+      })),
+    );
+
+    const body = await generateLlmsTxt('sr');
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+
+    expect(body).toContain(
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.',
+    );
+  });
+
   it('links the BMW landing page', async () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);

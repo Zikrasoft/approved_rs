@@ -1,7 +1,6 @@
 import { swapLocalePath } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
 import type { ServiceSlug } from './services';
-import type { PartsCategorySlug } from './partsCatalog';
 
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
@@ -10,8 +9,8 @@ export const PathBuilder = {
     `/${locale}/services/${slug}/`,
   works: (locale: Locale) => `/${locale}/works/`,
   parts: (locale: Locale) => `/${locale}/parts/`,
-  partsCategory: (locale: Locale, slug: PartsCategorySlug) =>
-    `/${locale}/parts/${slug}/`,
+  partsCategory: (locale: Locale, slug: string) =>
+    `/${locale}/parts/c/${slug}/`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
   shopSearch: (locale: Locale) => `/${locale}/shop/search/`,

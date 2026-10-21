@@ -4,7 +4,9 @@ import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
+import { translated } from '@podbor/catalog-contract';
+import { categoriesForBuild } from '@/utils/catalogue';
+import { paragraphs } from '@/utils/paragraphs';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
@@ -19,6 +21,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const site = content(locale).site;
   const vehiclePicker = content(locale).vehiclePicker;
   const works = publishedWorks(await getCollection('works'));
+  const categories = await categoriesForBuild();
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -49,10 +52,10 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           href: url(PathBuilder.parts(locale)),
           note: pages.partsInquiry.lead,
         },
-        entries: PARTS_CATEGORY_SLUGS.map((slug) => ({
-          label: pages.partsInquiry.categories[slug].name,
-          href: url(PathBuilder.partsCategory(locale, slug)),
-          note: pages.partsInquiry.categories[slug].lead,
+        entries: categories.map((category) => ({
+          label: translated(category, 'name', locale),
+          href: url(PathBuilder.partsCategory(locale, category.slug)),
+          note: paragraphs(translated(category, 'text', locale))[0],
         })),
       },
       {

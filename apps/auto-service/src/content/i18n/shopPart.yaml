@@ -4,6 +4,10 @@ eyebrow: Запчасть
 variantsHeading: Варианты и предложения поставщиков
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
+attributesHeading: Характеристики
+attributeYes: Да
+attributeNo: Нет
+categoryLink: Все запчасти категории
 currencyLabel: RSD
 columns:
   brand: Бренд
@@ -30,6 +34,10 @@ translations:
     variantsHeading: Opcije i ponude dobavljača
     equivalentsHeading: Zamenski delovi za ovaj deo
     noEquivalents: Za sada nema zamenskih delova u katalogu. Pišite nam, pronaći ćemo zamenu.
+    attributesHeading: Karakteristike
+    attributeYes: Da
+    attributeNo: Ne
+    categoryLink: Svi delovi iz kategorije
     currencyLabel: RSD
     columns:
       brand: Brend
@@ -54,6 +62,10 @@ translations:
     variantsHeading: Options and supplier offers
     equivalentsHeading: Equivalents of this part
     noEquivalents: No equivalents in the catalogue yet. Message us and we will find a replacement.
+    attributesHeading: Specifications
+    attributeYes: 'Yes'
+    attributeNo: 'No'
+    categoryLink: All parts in this category
     currencyLabel: RSD
     columns:
       brand: Brand
