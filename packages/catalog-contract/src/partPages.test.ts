@@ -16,7 +16,8 @@ const page = {
     attributes: {},
   },
   equivalents: [],
-  has_offers: false,
+  offers: [],
+  supplier_data: { cross_references: [], applicability: [], images: [] },
 };
 
 describe('partPageSchema', () => {
@@ -47,9 +48,43 @@ describe('partPageSchema', () => {
     expect(partPageSchema.parse(replaced)).toEqual(replaced);
   });
 
-  it('refuses a page that does not say whether it has offers', () => {
+  it('accepts offers with a price, currency, stock and lead time', () => {
+    const offered = {
+      ...page,
+      offers: [
+        {
+          id: 'offer_1',
+          price: 1850,
+          currency: 'RSD',
+          stock_quantity: 4,
+          lead_time_days: 0,
+        },
+      ],
+    };
+    expect(partPageSchema.parse(offered)).toEqual(offered);
+  });
+
+  it('refuses an offer that names its supplier', () => {
     expect(
-      partPageSchema.safeParse({ ...page, has_offers: undefined }).success,
+      partPageSchema.safeParse({
+        ...page,
+        offers: [
+          {
+            id: 'offer_1',
+            price: 1850,
+            currency: 'RSD',
+            stock_quantity: 4,
+            lead_time_days: 0,
+            supplier: 'Intercars',
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuses a page without its offers', () => {
+    expect(
+      partPageSchema.safeParse({ ...page, offers: undefined }).success,
     ).toBe(false);
   });
 

@@ -1,20 +1,12 @@
+import { partOfferSchema } from '@podbor/catalog-contract';
 import { z } from 'zod';
-
-const offerSchema = z.object({
-  id: z.string(),
-  supplier: z.string(),
-  supplier_article_id: z.string(),
-  price: z.number(),
-  stock_quantity: z.number(),
-  lead_time: z.string(),
-});
 
 const identifierSchema = z.object({
   id: z.string(),
   type: z.enum(['oem', 'manufacturer-number', 'ean']),
   brand: z.string(),
   value: z.string(),
-  offers: z.array(offerSchema),
+  offers: z.array(partOfferSchema),
 });
 
 const partSchema = z.object({
@@ -23,7 +15,6 @@ const partSchema = z.object({
   identifiers: z.array(identifierSchema),
 });
 
-export type ShopPartOffer = z.infer<typeof offerSchema>;
 export type ShopPartIdentifier = z.infer<typeof identifierSchema>;
 export type ShopPart = z.infer<typeof partSchema>;
 
@@ -46,20 +37,11 @@ export async function fetchShopPart(
   return partSchema.parse(body.part);
 }
 
-const DAYS_PATTERN = /^(\d+)_days$/;
-
 export function formatLeadTime(
-  leadTime: string,
+  days: number,
   copy: { inStock: string; daysTemplate: string },
 ): string {
-  if (leadTime === 'in_stock') {
-    return copy.inStock;
-  }
-
-  const match = DAYS_PATTERN.exec(leadTime);
-  if (match) {
-    return copy.daysTemplate.replace('{days}', match[1]);
-  }
-
-  return leadTime;
+  return days === 0
+    ? copy.inStock
+    : copy.daysTemplate.replace('{days}', String(days));
 }

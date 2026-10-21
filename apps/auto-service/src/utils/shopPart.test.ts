@@ -17,11 +17,10 @@ const PART_BODY = {
         offers: [
           {
             id: 'offer_1',
-            supplier: 'Intercars',
-            supplier_article_id: 'IC-11428575211',
             price: 1850,
+            currency: 'RSD',
             stock_quantity: 12,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
         ],
       },
@@ -85,15 +84,11 @@ describe('fetchShopPart', () => {
 describe('formatLeadTime', () => {
   const copy = { inStock: 'В наличии', daysTemplate: '{days} дн.' };
 
-  it('returns the in-stock label', () => {
-    expect(formatLeadTime('in_stock', copy)).toBe('В наличии');
+  it('says in stock for an offer ready today', () => {
+    expect(formatLeadTime(0, copy)).toBe('В наличии');
   });
 
-  it('formats an N_days tier', () => {
-    expect(formatLeadTime('3_days', copy)).toBe('3 дн.');
-  });
-
-  it('falls back to the raw value for an unrecognized tier', () => {
-    expect(formatLeadTime('special-order', copy)).toBe('special-order');
+  it('counts the days to delivery', () => {
+    expect(formatLeadTime(3, copy)).toBe('3 дн.');
   });
 });

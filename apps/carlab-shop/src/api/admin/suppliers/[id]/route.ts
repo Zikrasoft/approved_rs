@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -9,6 +10,7 @@ const supplierSchema = z.object({
   id: z.string(),
   name: z.string(),
   markup_percentage: z.number(),
+  released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
 });
 
 export async function POST(
@@ -16,7 +18,6 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  const { markup_percentage } = req.validatedBody;
 
   const supplierService: SupplierModuleService =
     req.scope.resolve(SUPPLIER_MODULE);
@@ -24,7 +25,7 @@ export async function POST(
   await supplierService.retrieveSupplier(id);
   const supplier = await supplierService.updateSuppliers({
     id,
-    markup_percentage,
+    ...req.validatedBody,
   });
 
   res.json({ supplier: supplierSchema.parse(supplier) });

@@ -40,7 +40,8 @@ const oilFilterMann = {
       brand: bmw,
     },
   ],
-  has_offers: false,
+  offers: [],
+  supplier_data: { cross_references: [], applicability: [], images: [] },
 };
 
 const oilFilterBmw = {
@@ -61,7 +62,16 @@ const oilFilterBmw = {
       brand: mann,
     },
   ],
-  has_offers: true,
+  offers: [
+    {
+      id: 'offer_1',
+      price: 1850,
+      currency: 'RSD',
+      stock_quantity: 4,
+      lead_time_days: 0,
+    },
+  ],
+  supplier_data: { cross_references: [], applicability: [], images: [] },
 };
 
 const respond = (body: unknown, ok = true) =>
