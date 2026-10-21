@@ -2,43 +2,43 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { Modules } from '@medusajs/framework/utils';
 import type { ICartModuleService } from '@medusajs/framework/types';
 import { addToCartWorkflow } from '@medusajs/medusa/core-flows';
-import { z } from 'zod';
 
-import { PART_MODULE } from '../../../../../modules/part';
-import type PartModuleService from '../../../../../modules/part/service';
 import {
   ensureCashAtPickupPaymentSession,
   OFFER_ID_METADATA_KEY,
 } from '../../../../../lib/offer-cart';
-import { sellPrice } from '../../../../../modules/part/store-response';
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
-
-const bodySchema = z.object({
-  offer_id: z.string().min(1),
-  quantity: z.number().int().positive().default(1),
-});
+import { CATALOG_MODULE } from '../../../../../modules/catalog';
+import type CatalogModuleService from '../../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
+import { sellPrice } from '../../../../../modules/supplier/pricing';
+import type SupplierModuleService from '../../../../../modules/supplier/service';
+import type { StoreAddOfferCartItemType } from '../../../validators';
 
 export async function POST(
-  req: MedusaRequest,
+  req: MedusaRequest<StoreAddOfferCartItemType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { id: cartId } = paramsSchema.parse(req.params);
-  const { offer_id: offerId, quantity } = bodySchema.parse(req.body ?? {});
+  const { id: cartId } = req.params;
+  const { offer_id: offerId, quantity } = req.validatedBody;
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
-  const offer = await partModuleService.retrieveSupplierOffer(offerId, {
-    relations: ['identifier', 'identifier.part', 'supplier'],
+  const supplierService: SupplierModuleService =
+    req.scope.resolve(SUPPLIER_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+
+  const offer = await supplierService.retrieveSupplierOffer(offerId, {
+    relations: ['supplier'],
   });
+  const identifier = await catalog.retrievePartIdentifier(
+    offer.part_identifier_id,
+    { relations: ['part'] },
+  );
 
   await addToCartWorkflow(req.scope).run({
     input: {
       cart_id: cartId,
       items: [
         {
-          title: `${offer.identifier.part.name} (${offer.identifier.brand})`,
+          title: `${identifier.part.name} (${identifier.brand})`,
           quantity,
           unit_price: sellPrice(
             offer.cost_price,
@@ -48,7 +48,7 @@ export async function POST(
           metadata: {
             [OFFER_ID_METADATA_KEY]: offer.id,
             supplier: offer.supplier.name,
-            part_identifier_id: offer.identifier.id,
+            part_identifier_id: identifier.id,
           },
         },
       ],

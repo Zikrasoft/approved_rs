@@ -1,29 +1,27 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { z } from 'zod';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
 import {
-  PART_WITH_OFFERS_RELATIONS,
-  partResponseSchema,
-  withComputedPrices,
-} from '../../../../modules/part/store-response';
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
+  PART_WITH_OFFERS_FIELDS,
+  toPartResponse,
+} from '../../../../lib/store-response';
 
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const { id } = paramsSchema.parse(req.params);
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const {
+    data: [part],
+  } = await query.graph(
+    {
+      entity: 'part',
+      fields: PART_WITH_OFFERS_FIELDS,
+      filters: { id: req.params.id },
+    },
+    { throwIfKeyNotFound: true },
+  );
 
-  const part = await partModuleService.retrievePart(id, {
-    relations: PART_WITH_OFFERS_RELATIONS,
-  });
-
-  res.json({ part: partResponseSchema.parse(withComputedPrices(part)) });
+  res.json({ part: toPartResponse(part) });
 }

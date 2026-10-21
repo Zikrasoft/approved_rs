@@ -1,13 +1,13 @@
-import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
 import { z } from 'zod';
 
-import { PART_MODULE } from '../../../modules/part';
-import { PART_IDENTIFIER_TYPES } from '../../../modules/part/models/part-identifier';
-import type PartModuleService from '../../../modules/part/service';
-
-const searchQuerySchema = z.object({
-  q: z.string().min(1),
-});
+import { CATALOG_MODULE } from '../../../modules/catalog';
+import { PART_IDENTIFIER_TYPES } from '../../../modules/catalog/models/part-identifier';
+import type CatalogModuleService from '../../../modules/catalog/service';
+import type { AdminCreatePartType, AdminSearchPartsType } from '../validators';
 
 const identifierSchema = z.object({
   id: z.string(),
@@ -19,73 +19,52 @@ const identifierSchema = z.object({
 const partSchema = z.object({
   id: z.string(),
   name: z.string(),
+  source: z.string(),
+  created_by: z.string().nullable(),
+  updated_by: z.string().nullable(),
   identifiers: z.array(identifierSchema),
 });
 
 export async function GET(
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest<unknown, AdminSearchPartsType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { q } = searchQuerySchema.parse(req.query);
+  const { q } = req.validatedQuery as AdminSearchPartsType;
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const matches = await partModuleService.listPartIdentifiers({
+  const matches = await catalog.listPartIdentifiers({
     $or: [{ value: { $ilike: `%${q}%` } }, { brand: { $ilike: `%${q}%` } }],
   });
 
   const partIds = [...new Set(matches.map((identifier) => identifier.part_id))];
   const parts = partIds.length
-    ? await partModuleService.listParts({ id: partIds })
-    : [];
-  const identifiers = partIds.length
-    ? await partModuleService.listPartIdentifiers({ part_id: partIds })
+    ? await catalog.listParts({ id: partIds }, { relations: ['identifiers'] })
     : [];
 
-  const identifiersByPartId = new Map<string, typeof identifiers>();
-  for (const identifier of identifiers) {
-    const group = identifiersByPartId.get(identifier.part_id) ?? [];
-    group.push(identifier);
-    identifiersByPartId.set(identifier.part_id, group);
-  }
-
-  const response = parts.map((part) => ({
-    id: part.id,
-    name: part.name,
-    identifiers: identifiersByPartId.get(part.id) ?? [],
-  }));
-
-  res.json({ parts: z.array(partSchema).parse(response) });
+  res.json({ parts: z.array(partSchema).parse(parts) });
 }
 
-const createBodySchema = z.object({
-  name: z.string().min(1),
-  identifier: z.object({
-    type: z.enum(PART_IDENTIFIER_TYPES),
-    brand: z.string().min(1),
-    value: z.string().min(1),
-  }),
-});
-
 export async function POST(
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest<AdminCreatePartType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { name, identifier } = createBodySchema.parse(req.body);
+  const { name, identifier } = req.validatedBody;
+  const actor = {
+    created_by: req.auth_context.actor_id,
+    updated_by: req.auth_context.actor_id,
+  };
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const part = await partModuleService.createParts({ name });
-  const createdIdentifier = await partModuleService.createPartIdentifiers({
+  const part = await catalog.createParts({ name, ...actor });
+  const createdIdentifier = await catalog.createPartIdentifiers({
     part_id: part.id,
     ...identifier,
+    ...actor,
   });
 
   res.json({
-    part: partSchema.parse({
-      id: part.id,
-      name: part.name,
-      identifiers: [createdIdentifier],
-    }),
+    part: partSchema.parse({ ...part, identifiers: [createdIdentifier] }),
   });
 }

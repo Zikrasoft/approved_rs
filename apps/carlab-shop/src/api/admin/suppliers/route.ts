@@ -1,8 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { z } from 'zod';
 
-import { PART_MODULE } from '../../../modules/part';
-import type PartModuleService from '../../../modules/part/service';
+import { SUPPLIER_MODULE } from '../../../modules/supplier';
+import type SupplierModuleService from '../../../modules/supplier/service';
 
 const supplierSchema = z.object({
   id: z.string(),
@@ -14,9 +14,9 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const supplier: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
 
-  const suppliers = await partModuleService.listSuppliers();
+  const suppliers = await supplier.listSuppliers();
 
   res.json({ suppliers: z.array(supplierSchema).parse(suppliers) });
 }

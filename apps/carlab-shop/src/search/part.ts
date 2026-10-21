@@ -5,8 +5,9 @@ import {
   search,
 } from '@medusajs/framework/utils';
 
+import { PART_WITH_OFFERS_FIELDS } from '../lib/store-response';
 import { compactValue } from '../modules/search-typesense/mapping';
-import { sellPrice } from '../modules/part/store-response';
+import { sellPrice } from '../modules/supplier/pricing';
 import { PART_CHANGED_EVENT } from './part-changed-event';
 
 type OfferRow = {
@@ -33,21 +34,7 @@ type PartRow = {
 };
 
 const source = {
-  fields: [
-    'id',
-    'name',
-    'identifiers.id',
-    'identifiers.type',
-    'identifiers.brand',
-    'identifiers.value',
-    'identifiers.offers.id',
-    'identifiers.offers.supplier.name',
-    'identifiers.offers.supplier.markup_percentage',
-    'identifiers.offers.supplier_article_id',
-    'identifiers.offers.cost_price',
-    'identifiers.offers.stock_quantity',
-    'identifiers.offers.lead_time',
-  ],
+  fields: PART_WITH_OFFERS_FIELDS,
   transform: (rows: PartRow[]) =>
     rows.map((row) => ({
       id: row.id,
@@ -93,7 +80,7 @@ export default defineSearchIndex({
   entity: 'part',
   fields: search.define({
     id: search.keyword().filterable().retrievable(),
-    name: search.text().searchable({ weight: 3 }).retrievable(),
+    name: search.text().searchable({ weight: 3 }).retrievable(false),
     identifiers: identifierFields.array().retrievable(false),
   }),
   events: [PART_CHANGED_EVENT],

@@ -1,25 +1,21 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
-import { VEHICLE_MODULE } from '../../../../modules/vehicle';
-import type VehicleModuleService from '../../../../modules/vehicle/service';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
 
 const ADMIN_EMAIL = 'admin@fitments-tests.local';
 const ADMIN_PASSWORD = 'supersecret';
 
 medusaIntegrationTestRunner({
-  moduleName: 'vehicle',
+  moduleName: 'catalog',
   testSuite: ({ api, getContainer }) => {
     describe('admin fitment curation', () => {
       let adminHeaders: { headers: { authorization: string } };
-      let partModuleService: PartModuleService;
-      let vehicleModuleService: VehicleModuleService;
+      let catalog: CatalogModuleService;
 
       beforeAll(async () => {
-        partModuleService = getContainer().resolve(PART_MODULE);
-        vehicleModuleService = getContainer().resolve(VEHICLE_MODULE);
+        catalog = getContainer().resolve(CATALOG_MODULE);
         adminHeaders = await createAdminAuth(
           getContainer(),
           api,
@@ -28,18 +24,23 @@ medusaIntegrationTestRunner({
         );
       });
 
+      const createPartAndVehicle = async (engineCode: string) => {
+        const part = await catalog.createParts({
+          name: `Admin-test part ${engineCode}`,
+        });
+        const vehicle = await catalog.createVehicles({
+          make: 'BMW',
+          model: '320d (F30)',
+          engine_code: engineCode,
+          year_from: 2015,
+          year_to: 2018,
+        });
+        return { part, vehicle };
+      };
+
       describe('POST /admin/fitments', () => {
-        it('creates a manual, active Fitment row for the Part/Vehicle pair', async () => {
-          const part = await partModuleService.createParts({
-            name: 'Admin-test fitment part',
-          });
-          const vehicle = await vehicleModuleService.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47-FITMENT-TEST',
-            year_from: 2015,
-            year_to: 2018,
-          });
+        it('creates a manual Fitment stamped with the admin who made it', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-CREATE');
 
           const response = await api.post(
             '/admin/fitments',
@@ -59,50 +60,53 @@ medusaIntegrationTestRunner({
             steering: 'left',
             gearbox: 'manual',
             source: 'manual',
-            status: 'active',
+            created_by: expect.stringMatching(/^user_/),
           });
-
-          const fitment = await vehicleModuleService.retrieveFitment(
-            response.data.fitment.id,
+          expect(response.data.fitment.updated_by).toBe(
+            response.data.fitment.created_by,
           );
-          expect(fitment.source).toBe('manual');
-          expect(fitment.status).toBe('active');
         });
 
-        it('ignores a client-supplied source/status and forces manual/active', async () => {
-          const part = await partModuleService.createParts({
-            name: 'Admin-test fitment forced-source part',
-          });
-          const vehicle = await vehicleModuleService.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B48-FITMENT-FORCE-TEST',
-            year_from: 2018,
-            year_to: 2021,
-          });
+        it('refuses a client-supplied source with a 400', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B48-SOURCE');
 
-          const response = await api.post(
-            '/admin/fitments',
-            {
-              part_id: part.id,
-              vehicle_id: vehicle.id,
-              source: 'auto:tecdoc',
-              status: 'rejected',
-            },
-            adminHeaders,
-          );
+          const response = await api
+            .post(
+              '/admin/fitments',
+              { part_id: part.id, vehicle_id: vehicle.id, source: 'auto:x' },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
 
-          expect(response.status).toBe(200);
-          expect(response.data.fitment).toMatchObject({
-            source: 'manual',
-            status: 'active',
-          });
+          expect(response.status).toBe(400);
+        });
+
+        it('returns a 400 for a steering side that does not exist', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-BAD');
+
+          const response = await api
+            .post(
+              '/admin/fitments',
+              { part_id: part.id, vehicle_id: vehicle.id, steering: 'middle' },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+        });
+
+        it('returns a 400 when the Part is missing from the body', async () => {
+          const { vehicle } = await createPartAndVehicle('B47-NO-PART');
+
+          const response = await api
+            .post('/admin/fitments', { vehicle_id: vehicle.id }, adminHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
         });
 
         it('returns a 404 for an unknown Vehicle', async () => {
-          const part = await partModuleService.createParts({
-            name: 'Admin-test fitment unknown-vehicle part',
-          });
+          const { part } = await createPartAndVehicle('B47-UNKNOWN-VEHICLE');
 
           const response = await api
             .post(
@@ -116,13 +120,7 @@ medusaIntegrationTestRunner({
         });
 
         it('returns a 404 for an unknown Part', async () => {
-          const vehicle = await vehicleModuleService.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47-UNKNOWN-PART-TEST',
-            year_from: 2015,
-            year_to: 2018,
-          });
+          const { vehicle } = await createPartAndVehicle('B47-UNKNOWN-PART');
 
           const response = await api
             .post(
@@ -136,52 +134,18 @@ medusaIntegrationTestRunner({
         });
       });
 
-      describe('POST /admin/fitments/:id/reject', () => {
-        it('flips an existing Fitment row to rejected without deleting it', async () => {
-          const part = await partModuleService.createParts({
-            name: 'Admin-test reject part',
-          });
-          const vehicle = await vehicleModuleService.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47-REJECT-TEST',
-            year_from: 2015,
-            year_to: 2018,
-          });
-          const fitment = await vehicleModuleService.createFitments({
-            part_id: part.id,
-            vehicle_id: vehicle.id,
-            source: 'auto:tecdoc',
-            status: 'active',
-          });
-
-          const response = await api.post(
-            `/admin/fitments/${fitment.id}/reject`,
-            {},
-            adminHeaders,
-          );
-
-          expect(response.status).toBe(200);
-          expect(response.data.fitment).toMatchObject({
-            id: fitment.id,
-            status: 'rejected',
-            source: 'auto:tecdoc',
-          });
-
-          const stillExists = await vehicleModuleService.retrieveFitment(
-            fitment.id,
-          );
-          expect(stillExists.id).toBe(fitment.id);
-          expect(stillExists.status).toBe('rejected');
+      it('has no endpoint to reject a Fitment', async () => {
+        const { part, vehicle } = await createPartAndVehicle('B47-REJECT');
+        const fitment = await catalog.createFitments({
+          part_id: part.id,
+          vehicle_id: vehicle.id,
         });
 
-        it('returns a 404 for an unknown Fitment', async () => {
-          const response = await api
-            .post('/admin/fitments/fitment_missing/reject', {}, adminHeaders)
-            .catch((error) => error.response);
+        const response = await api
+          .post(`/admin/fitments/${fitment.id}/reject`, {}, adminHeaders)
+          .catch((error) => error.response);
 
-          expect(response.status).toBe(404);
-        });
+        expect(response.status).toBe(404);
       });
     });
   },

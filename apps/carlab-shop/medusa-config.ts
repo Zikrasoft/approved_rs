@@ -23,10 +23,10 @@ export default defineConfig({
   },
   modules: [
     {
-      resolve: './src/modules/part',
+      resolve: './src/modules/catalog',
     },
     {
-      resolve: './src/modules/vehicle',
+      resolve: './src/modules/supplier',
     },
     {
       resolve: './src/modules/vin-lookup',

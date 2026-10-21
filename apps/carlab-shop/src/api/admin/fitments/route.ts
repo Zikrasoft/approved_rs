@@ -1,14 +1,19 @@
-import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
 import { z } from 'zod';
 
-import { PART_MODULE } from '../../../modules/part';
-import type PartModuleService from '../../../modules/part/service';
-import { VEHICLE_MODULE } from '../../../modules/vehicle';
+import { CATALOG_MODULE } from '../../../modules/catalog';
 import {
   FITMENT_GEARBOX_TYPES,
   FITMENT_STEERING_SIDES,
-} from '../../../modules/vehicle/models/fitment';
-import type VehicleModuleService from '../../../modules/vehicle/service';
+} from '../../../modules/catalog/models/fitment';
+import type CatalogModuleService from '../../../modules/catalog/service';
+import type {
+  AdminCreateFitmentType,
+  AdminListFitmentsType,
+} from '../validators';
 
 const fitmentSchema = z.object({
   id: z.string(),
@@ -19,57 +24,38 @@ const fitmentSchema = z.object({
   steering: z.enum(FITMENT_STEERING_SIDES).nullable(),
   gearbox: z.enum(FITMENT_GEARBOX_TYPES).nullable(),
   source: z.string(),
-  status: z.string(),
-});
-
-const listQuerySchema = z.object({
-  vehicle_id: z.string().optional(),
-  part_id: z.string().optional(),
+  created_by: z.string().nullable(),
+  updated_by: z.string().nullable(),
 });
 
 export async function GET(
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest<unknown, AdminListFitmentsType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { vehicle_id, part_id } = listQuerySchema.parse(req.query);
+  const filters = req.validatedQuery as AdminListFitmentsType;
 
-  const vehicleModuleService: VehicleModuleService =
-    req.scope.resolve(VEHICLE_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const fitments = await vehicleModuleService.listFitments({
-    ...(vehicle_id ? { vehicle_id } : {}),
-    ...(part_id ? { part_id } : {}),
-  });
+  const fitments = await catalog.listFitments(filters);
 
   res.json({ fitments: z.array(fitmentSchema).parse(fitments) });
 }
 
-const createBodySchema = z.object({
-  part_id: z.string().min(1),
-  vehicle_id: z.string().min(1),
-  production_from: z.coerce.date().nullable().optional(),
-  production_to: z.coerce.date().nullable().optional(),
-  steering: z.enum(FITMENT_STEERING_SIDES).nullable().optional(),
-  gearbox: z.enum(FITMENT_GEARBOX_TYPES).nullable().optional(),
-});
-
 export async function POST(
-  req: MedusaRequest,
+  req: AuthenticatedMedusaRequest<AdminCreateFitmentType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const body = createBodySchema.parse(req.body);
+  const body = req.validatedBody;
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
-  const vehicleModuleService: VehicleModuleService =
-    req.scope.resolve(VEHICLE_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  await vehicleModuleService.retrieveVehicle(body.vehicle_id);
-  await partModuleService.retrievePart(body.part_id);
+  await catalog.retrieveVehicle(body.vehicle_id);
+  await catalog.retrievePart(body.part_id);
 
-  const fitment = await vehicleModuleService.createFitments({
+  const fitment = await catalog.createFitments({
     ...body,
-    source: 'manual',
-    status: 'active',
+    created_by: req.auth_context.actor_id,
+    updated_by: req.auth_context.actor_id,
   });
 
   res.json({ fitment: fitmentSchema.parse(fitment) });

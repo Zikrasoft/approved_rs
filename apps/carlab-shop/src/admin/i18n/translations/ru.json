@@ -25,15 +25,13 @@
     "step3Label": "3. Уточняющие критерии (необязательно)",
     "steeringPlaceholder": "Руль",
     "gearboxPlaceholder": "Коробка передач",
-    "createFitment": "Создать соответствие (вручную, активное)",
+    "createFitment": "Создать соответствие",
     "existingRows": "Существующие соответствия для этой детали и автомобиля",
     "columns": {
       "source": "Источник",
-      "status": "Статус",
       "steering": "Руль",
       "gearbox": "Коробка передач"
     },
-    "reject": "Отклонить",
     "identifierTypes": {
       "oem": "OEM",
       "manufacturer-number": "Номер производителя",
@@ -46,10 +44,6 @@
     "gearboxOptions": {
       "manual": "Механическая",
       "automatic": "Автоматическая"
-    },
-    "statusValues": {
-      "active": "Активно",
-      "rejected": "Отклонено"
     }
   },
   "suppliers": {

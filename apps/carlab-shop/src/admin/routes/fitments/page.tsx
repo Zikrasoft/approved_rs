@@ -12,6 +12,8 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { adminFetch } from '../../lib/admin-fetch';
+
 type PartIdentifier = {
   id: string;
   type: string;
@@ -41,21 +43,11 @@ type Fitment = {
   steering: string | null;
   gearbox: string | null;
   source: string;
-  status: string;
 };
 
 const STEERING_OPTIONS = ['left', 'right'] as const;
 const GEARBOX_OPTIONS = ['manual', 'automatic'] as const;
 const IDENTIFIER_TYPES = ['oem', 'manufacturer-number', 'ean'] as const;
-
-const jsonFetch = async <T,>(path: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(path, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  });
-  return response.json();
-};
 
 const vehicleLabel = (vehicle: Vehicle): string =>
   `${vehicle.make} ${vehicle.model} (${vehicle.engine_code})`;
@@ -84,16 +76,20 @@ const FitmentsPage = () => {
   const [fitments, setFitments] = useState<Fitment[]>([]);
 
   useEffect(() => {
-    jsonFetch<{ vehicles: Vehicle[] }>('/admin/vehicles').then(
-      ({ vehicles: data }) => setVehicles(data),
-    );
+    adminFetch<{ vehicles: Vehicle[] }>('/admin/vehicles').then((data) => {
+      if (data) {
+        setVehicles(data.vehicles);
+      }
+    });
   }, []);
 
   const loadFitments = async (partId: string, vehId: string) => {
-    const { fitments: data } = await jsonFetch<{ fitments: Fitment[] }>(
+    const data = await adminFetch<{ fitments: Fitment[] }>(
       `/admin/fitments?part_id=${partId}&vehicle_id=${vehId}`,
     );
-    setFitments(data);
+    if (data) {
+      setFitments(data.fitments);
+    }
   };
 
   useEffect(() => {
@@ -108,22 +104,27 @@ const FitmentsPage = () => {
     if (!query.trim()) {
       return;
     }
-    const { parts: data } = await jsonFetch<{ parts: Part[] }>(
+    const data = await adminFetch<{ parts: Part[] }>(
       `/admin/parts?q=${encodeURIComponent(query.trim())}`,
     );
-    setParts(data);
-    setSearched(true);
+    if (data) {
+      setParts(data.parts);
+      setSearched(true);
+    }
   };
 
   const createPart = async () => {
-    const { part } = await jsonFetch<{ part: Part }>('/admin/parts', {
+    const data = await adminFetch<{ part: Part }>('/admin/parts', {
       method: 'POST',
       body: JSON.stringify({
         name: newPartName,
         identifier: { type: newType, brand: newBrand, value: newValue },
       }),
     });
-    setSelectedPart(part);
+    if (!data) {
+      return;
+    }
+    setSelectedPart(data.part);
     setParts([]);
     setSearched(false);
     setQuery('');
@@ -133,7 +134,7 @@ const FitmentsPage = () => {
     if (!selectedPart || !vehicleId) {
       return;
     }
-    await jsonFetch('/admin/fitments', {
+    const created = await adminFetch('/admin/fitments', {
       method: 'POST',
       body: JSON.stringify({
         part_id: selectedPart.id,
@@ -144,12 +145,7 @@ const FitmentsPage = () => {
         gearbox: gearbox || null,
       }),
     });
-    await loadFitments(selectedPart.id, vehicleId);
-  };
-
-  const rejectFitment = async (id: string) => {
-    await jsonFetch(`/admin/fitments/${id}/reject`, { method: 'POST' });
-    if (selectedPart && vehicleId) {
+    if (created) {
       await loadFitments(selectedPart.id, vehicleId);
     }
   };
@@ -325,27 +321,17 @@ const FitmentsPage = () => {
                   {t('fitments.columns.source')}
                 </Table.HeaderCell>
                 <Table.HeaderCell>
-                  {t('fitments.columns.status')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
                   {t('fitments.columns.steering')}
                 </Table.HeaderCell>
                 <Table.HeaderCell>
                   {t('fitments.columns.gearbox')}
                 </Table.HeaderCell>
-                <Table.HeaderCell />
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {fitments.map((fitment) => (
                 <Table.Row key={fitment.id}>
                   <Table.Cell>{fitment.source}</Table.Cell>
-                  <Table.Cell>
-                    {fitment.status === 'active' ||
-                    fitment.status === 'rejected'
-                      ? t(`fitments.statusValues.${fitment.status}`)
-                      : fitment.status}
-                  </Table.Cell>
                   <Table.Cell>
                     {fitment.steering
                       ? t(`fitments.steeringOptions.${fitment.steering}`)
@@ -355,17 +341,6 @@ const FitmentsPage = () => {
                     {fitment.gearbox
                       ? t(`fitments.gearboxOptions.${fitment.gearbox}`)
                       : '—'}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {fitment.status === 'active' && (
-                      <Button
-                        variant="danger"
-                        size="small"
-                        onClick={() => rejectFitment(fitment.id)}
-                      >
-                        {t('fitments.reject')}
-                      </Button>
-                    )}
                   </Table.Cell>
                 </Table.Row>
               ))}

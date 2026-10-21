@@ -23,15 +23,13 @@
     "step3Label": "3. Narrowing criteria (optional)",
     "steeringPlaceholder": "Steering",
     "gearboxPlaceholder": "Gearbox",
-    "createFitment": "Create Fitment (manual, active)",
+    "createFitment": "Create Fitment",
     "existingRows": "Existing Fitment rows for this Part/Vehicle",
     "columns": {
       "source": "Source",
-      "status": "Status",
       "steering": "Steering",
       "gearbox": "Gearbox"
     },
-    "reject": "Reject",
     "identifierTypes": {
       "oem": "OEM",
       "manufacturer-number": "Manufacturer number",
@@ -44,10 +42,6 @@
     "gearboxOptions": {
       "manual": "Manual",
       "automatic": "Automatic"
-    },
-    "statusValues": {
-      "active": "Active",
-      "rejected": "Rejected"
     }
   },
   "suppliers": {

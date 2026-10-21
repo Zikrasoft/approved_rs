@@ -1,16 +1,9 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { z } from 'zod';
 
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
-
-const bodySchema = z.object({
-  markup_percentage: z.number().min(0),
-});
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
+import type { AdminUpdateSupplierType } from '../../validators';
 
 const supplierSchema = z.object({
   id: z.string(),
@@ -19,15 +12,17 @@ const supplierSchema = z.object({
 });
 
 export async function POST(
-  req: MedusaRequest,
+  req: MedusaRequest<AdminUpdateSupplierType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { id } = paramsSchema.parse(req.params);
-  const { markup_percentage } = bodySchema.parse(req.body);
+  const { id } = req.params;
+  const { markup_percentage } = req.validatedBody;
 
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const supplierService: SupplierModuleService =
+    req.scope.resolve(SUPPLIER_MODULE);
 
-  const supplier = await partModuleService.updateSuppliers({
+  await supplierService.retrieveSupplier(id);
+  const supplier = await supplierService.updateSuppliers({
     id,
     markup_percentage,
   });

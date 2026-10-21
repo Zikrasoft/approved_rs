@@ -2,12 +2,14 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { PART_MODULE } from '../../../../modules/part';
-import type PartModuleService from '../../../../modules/part/service';
 import { updateSupplierOfferWorkflow } from '../../../../workflows/update-supplier-offer';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 
 medusaIntegrationTestRunner({
-  moduleName: 'part',
+  moduleName: 'catalog',
   dbName: 'medusa-search-typesense-integration',
   testSuite: ({ api, getContainer }) => {
     describe('GET /store/search', () => {
@@ -16,8 +18,10 @@ medusaIntegrationTestRunner({
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
 
       beforeAll(async () => {
-        const partModuleService: PartModuleService =
-          getContainer().resolve(PART_MODULE);
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const supplierService: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
         const apiKeyModuleService: IApiKeyModuleService =
           getContainer().resolve(Modules.API_KEY);
 
@@ -30,32 +34,32 @@ medusaIntegrationTestRunner({
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
 
-        const [intercars] = await partModuleService.createSuppliers([
+        const [intercars] = await supplierService.createSuppliers([
           { name: 'Intercars', markup_percentage: 20 },
         ]);
 
-        const part = await partModuleService.createParts({
+        const part = await catalog.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
         partId = part.id;
 
-        const oemIdentifier = await partModuleService.createPartIdentifiers({
+        const oemIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'oem',
           brand: 'BMW',
           value: '11 42 8575211',
         });
 
-        const mannIdentifier = await partModuleService.createPartIdentifiers({
+        const mannIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'manufacturer-number',
           brand: 'Mann-Filter',
           value: 'HU 816 x',
         });
 
-        const [oemOffer] = await partModuleService.createSupplierOffers([
+        const [oemOffer] = await supplierService.createSupplierOffers([
           {
-            identifier_id: oemIdentifier.id,
+            part_identifier_id: oemIdentifier.id,
             supplier_id: intercars.id,
             supplier_article_id: 'IC-11428575211',
             cost_price: 1542,
@@ -63,7 +67,7 @@ medusaIntegrationTestRunner({
             lead_time: 'in_stock',
           },
           {
-            identifier_id: mannIdentifier.id,
+            part_identifier_id: mannIdentifier.id,
             supplier_id: intercars.id,
             supplier_article_id: 'IC-HU816X',
             cost_price: 1000,
@@ -145,6 +149,14 @@ medusaIntegrationTestRunner({
           (identifier: { type: string }) => identifier.type,
         );
         expect(types.sort()).toEqual(['manufacturer-number', 'oem']);
+      });
+
+      it('returns 400 without a search query', async () => {
+        const response = await api
+          .get('/store/search', storeHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
       });
 
       it('returns 404 for a value that matches no Part', async () => {

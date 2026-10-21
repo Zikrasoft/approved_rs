@@ -1,54 +1,29 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import type { SearchFilters } from '@medusajs/framework/types';
-import { z } from 'zod';
 
 import {
-  partResponseSchema,
-  withComputedPrices,
-} from '../../../modules/part/store-response';
-import { VEHICLE_MODULE } from '../../../modules/vehicle';
-import type VehicleModuleService from '../../../modules/vehicle/service';
-
-const querySchema = z.object({
-  q: z.string().min(1),
-  vehicle_id: z.string().min(1).optional(),
-});
-
-const PART_FIELDS = [
-  'id',
-  'name',
-  'identifiers.id',
-  'identifiers.type',
-  'identifiers.brand',
-  'identifiers.value',
-  'identifiers.offers.id',
-  'identifiers.offers.supplier.name',
-  'identifiers.offers.supplier.markup_percentage',
-  'identifiers.offers.supplier_article_id',
-  'identifiers.offers.cost_price',
-  'identifiers.offers.stock_quantity',
-  'identifiers.offers.lead_time',
-];
+  PART_WITH_OFFERS_FIELDS,
+  toPartResponse,
+} from '../../../lib/store-response';
+import { CATALOG_MODULE } from '../../../modules/catalog';
+import type CatalogModuleService from '../../../modules/catalog/service';
+import type { StoreSearchPartsType } from '../validators';
 
 export async function GET(
-  req: MedusaRequest,
+  req: MedusaRequest<unknown, StoreSearchPartsType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { q, vehicle_id } = querySchema.parse(req.query);
+  const { q, vehicle_id } = req.validatedQuery as StoreSearchPartsType;
 
   const filters: SearchFilters = { q };
 
   if (vehicle_id) {
-    const vehicleModuleService: VehicleModuleService =
-      req.scope.resolve(VEHICLE_MODULE);
+    const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-    await vehicleModuleService.retrieveVehicle(vehicle_id);
+    await catalog.retrieveVehicle(vehicle_id);
 
-    const fitments = await vehicleModuleService.listFitments({
-      vehicle_id,
-      status: 'active',
-    });
+    const fitments = await catalog.listFitments({ vehicle_id });
     const partIds = [...new Set(fitments.map((fitment) => fitment.part_id))];
 
     if (!partIds.length) {
@@ -63,7 +38,7 @@ export async function GET(
 
   const { data } = await query.search({
     entity: 'part',
-    fields: PART_FIELDS,
+    fields: PART_WITH_OFFERS_FIELDS,
     filters,
     pagination: { take: 1 },
   });
@@ -75,5 +50,5 @@ export async function GET(
     return;
   }
 
-  res.json({ part: partResponseSchema.parse(withComputedPrices(part)) });
+  res.json({ part: toPartResponse(part) });
 }

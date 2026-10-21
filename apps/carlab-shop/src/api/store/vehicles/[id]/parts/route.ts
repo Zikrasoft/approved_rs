@@ -1,21 +1,19 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { z } from 'zod';
 
-import { PART_MODULE } from '../../../../../modules/part';
-import type PartModuleService from '../../../../../modules/part/service';
-import { VEHICLE_MODULE } from '../../../../../modules/vehicle';
-import type VehicleModuleService from '../../../../../modules/vehicle/service';
-
-const paramsSchema = z.object({
-  id: z.string().min(1),
-});
+import { CATALOG_MODULE } from '../../../../../modules/catalog';
+import {
+  FITMENT_GEARBOX_TYPES,
+  FITMENT_STEERING_SIDES,
+} from '../../../../../modules/catalog/models/fitment';
+import type CatalogModuleService from '../../../../../modules/catalog/service';
 
 const candidateSchema = z.object({
   fitment_id: z.string(),
   production_from: z.date().nullable(),
   production_to: z.date().nullable(),
-  steering: z.enum(['left', 'right']).nullable(),
-  gearbox: z.enum(['manual', 'automatic']).nullable(),
+  steering: z.enum(FITMENT_STEERING_SIDES).nullable(),
+  gearbox: z.enum(FITMENT_GEARBOX_TYPES).nullable(),
 });
 
 const partEntrySchema = z.object({
@@ -28,53 +26,35 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const { id } = paramsSchema.parse(req.params);
+  const { id } = req.params;
 
-  const vehicleModuleService: VehicleModuleService =
-    req.scope.resolve(VEHICLE_MODULE);
-  const partModuleService: PartModuleService = req.scope.resolve(PART_MODULE);
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  await vehicleModuleService.retrieveVehicle(id);
+  await catalog.retrieveVehicle(id);
 
-  const fitments = await vehicleModuleService.listFitments({
-    vehicle_id: id,
-    status: 'active',
-  });
+  const fitments = await catalog.listFitments(
+    { vehicle_id: id },
+    { relations: ['part'] },
+  );
 
-  const fitmentsByPartId = new Map<string, (typeof fitments)[number][]>();
+  const fitmentsByPartId = new Map<string, typeof fitments>();
   for (const fitment of fitments) {
     const group = fitmentsByPartId.get(fitment.part_id) ?? [];
     group.push(fitment);
     fitmentsByPartId.set(fitment.part_id, group);
   }
 
-  const partIds = [...fitmentsByPartId.keys()];
-  const parts = partIds.length
-    ? await partModuleService.listParts({ id: partIds })
-    : [];
-  const partById = new Map(parts.map((part) => [part.id, part]));
-
-  const entries = partIds
-    .map((partId) => {
-      const part = partById.get(partId);
-      if (!part) {
-        return null;
-      }
-
-      const group = fitmentsByPartId.get(partId)!;
-      return {
-        part: { id: part.id, name: part.name },
-        ambiguous: group.length > 1,
-        candidates: group.map((fitment) => ({
-          fitment_id: fitment.id,
-          production_from: fitment.production_from,
-          production_to: fitment.production_to,
-          steering: fitment.steering,
-          gearbox: fitment.gearbox,
-        })),
-      };
-    })
-    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  const entries = [...fitmentsByPartId.values()].map((group) => ({
+    part: { id: group[0].part.id, name: group[0].part.name },
+    ambiguous: group.length > 1,
+    candidates: group.map((fitment) => ({
+      fitment_id: fitment.id,
+      production_from: fitment.production_from,
+      production_to: fitment.production_to,
+      steering: fitment.steering,
+      gearbox: fitment.gearbox,
+    })),
+  }));
 
   res.json({ parts: z.array(partEntrySchema).parse(entries) });
 }
