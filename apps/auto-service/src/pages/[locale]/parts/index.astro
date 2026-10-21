@@ -51,6 +51,14 @@ const categories = (Astro.props as { categories: Category[] }).categories.map(
       {copy.sourcingNote}
     </p>
 
+    <a
+      href={PathBuilder.partsCart(locale)}
+      class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+    >
+      {content(locale).shopCart.cartLink}
+      <Icon name="arrowRight" />
+    </a>
+
     {
       categories.length > 0 && (
         <div class="flex flex-col gap-3">

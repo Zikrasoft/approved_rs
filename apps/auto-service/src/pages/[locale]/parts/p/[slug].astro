@@ -9,7 +9,7 @@ import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
-import { formatLeadTime } from '@/utils/shopPart';
+import OfferRow from '@/components/OfferRow.astro';
 import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
@@ -36,8 +36,6 @@ const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
 const [bestOffer] = page.offers;
-const price = (amount: number, currency: string) =>
-  `${amount.toLocaleString(BCP47_BY_LOCALE[locale])} ${currency}`;
 const jsonLd = bestOffer
   ? [
       (url: string) =>
@@ -120,44 +118,49 @@ const jsonLd = bestOffer
   {
     bestOffer && (
       <section class="wrap pt-band md:pt-band-lg">
-        <div class="card flex max-w-2xl flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6">
+        <part-offers
+          class="card flex max-w-2xl flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+          data-id={page.id}
+          data-locale-tag={BCP47_BY_LOCALE[locale]}
+          data-stock-label={copy.columns.stock}
+          data-lead-label={copy.columns.leadTime}
+          data-in-stock={copy.leadTime.inStock}
+          data-days-template={copy.leadTime.daysTemplate}
+          data-slug={page.slug}
+          data-brand={page.brand.name}
+          data-number={page.value}
+          data-name={page.part.name}
+        >
           <h2 class="text-block font-semibold">{copy.offersHeading}</h2>
-          <ul class="flex flex-col divide-y divide-line">
+          <ul class="flex flex-col divide-y divide-line" data-offers>
             {page.offers.map((offer) => (
-              <li class="flex flex-wrap items-baseline gap-x-5 gap-y-1 py-3 first:pt-0">
-                <span class="spec text-lg font-semibold text-ink">
-                  {price(offer.price, offer.currency)}
-                </span>
-                {offer.stock_quantity > 0 && (
-                  <span class="text-sm text-ink-2">
-                    {copy.columns.stock}: {offer.stock_quantity}
-                  </span>
-                )}
-                {offer.lead_time_days > 0 && (
-                  <span class="text-sm text-muted">
-                    {copy.columns.leadTime}:{' '}
-                    {formatLeadTime(offer.lead_time_days, copy.leadTime)}
-                  </span>
-                )}
-              </li>
+              <OfferRow offer={offer} />
             ))}
           </ul>
-          <parts-list-add
-            class="block"
-            data-slug={page.slug}
-            data-brand={page.brand.name}
-            data-number={page.value}
-            data-name={page.part.name}
-          >
-            <a
-              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
-              class="btn btn-primary w-full sm:w-auto"
-            >
-              {copy.offersCta}
-              <Icon name="arrowRight" />
-            </a>
-          </parts-list-add>
-        </div>
+          <template data-offer>
+            <OfferRow />
+          </template>
+          <div aria-live="polite" class="text-sm leading-relaxed text-ink-2">
+            <p data-added hidden>
+              {copy.addedNotice}{' '}
+              <a
+                href={PathBuilder.partsCart(locale)}
+                class="font-semibold text-signal-ink underline-offset-2 hover:underline"
+              >
+                {copy.addedCta}
+              </a>
+            </p>
+            <p data-inquiry hidden>
+              {copy.inquiryNotice}{' '}
+              <a
+                href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+                class="font-semibold text-signal-ink underline-offset-2 hover:underline"
+              >
+                {copy.inquiryCta}
+              </a>
+            </p>
+          </div>
+        </part-offers>
       </section>
     )
   }
@@ -258,7 +261,9 @@ const jsonLd = bestOffer
 </Shell>
 
 <script>
+  import { definePartOffers } from '@/scripts/offerCart';
   import { definePartsListAdd } from '@/scripts/partsList';
 
+  definePartOffers();
   definePartsListAdd();
 </script>

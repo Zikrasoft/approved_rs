@@ -12,13 +12,11 @@ export const PathBuilder = {
   partsCategory: (locale: Locale, slug: string) =>
     `/${locale}/parts/c/${slug}/`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
+  partsCart: (locale: Locale) => `/${locale}/parts/cart/`,
   partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
   partsVinUnresolved: (locale: Locale) => `/${locale}/parts/#vin-unresolved`,
   partsCar: (locale: Locale, vehicleId: string) =>
     `/${locale}/parts/car/${vehicleId}/`,
-  shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
-  shopCart: (locale: Locale) => `/${locale}/shop/cart/`,
-  shopCheckout: (locale: Locale) => `/${locale}/shop/checkout/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
   contact: (locale: Locale) => `/${locale}/contact/`,

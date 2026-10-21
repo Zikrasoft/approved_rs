@@ -58,14 +58,14 @@ export const SECTIONS = [
     path: 'src/content/i18n/shopPart.yaml',
     schema: shopPartContentSchema,
     promptSubject:
-      'part-detail page copy for a car parts shop (brand/supplier table column labels, stock and lead-time wording, a not-found state)',
+      'part-detail page copy for a car parts shop (offers with stock and lead-time wording, an add-to-cart button and its confirmation, a fallback that adds the part to a parts inquiry, equivalents, supersession notices); keep {placeholders} intact',
   },
   {
     key: 'shopCart',
     path: 'src/content/i18n/shopCart.yaml',
     schema: shopCartContentSchema,
     promptSubject:
-      'cart and checkout page copy for a car parts shop, cash-at-pickup only (empty-cart state, total, a stale-price notice asking to refresh before confirming, an order-placed confirmation)',
+      'cart page copy for a car parts shop, cash-at-pickup only (cart lines, an empty state, the total, a checkout form that asks only for a contact, notices for a changed price, missing stock or a failed order, an order-placed confirmation, a fallback to a parts inquiry); keep {placeholders} intact',
   },
   {
     key: 'partsCar',
