@@ -17,7 +17,7 @@ type UnresolvedCode = z.infer<typeof unresolvedCodeSchema>;
 const codesSchema = z.object({ codes: z.array(unresolvedCodeSchema) });
 
 const VinLookupsPage = () => {
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const [codes, setCodes] = useState<UnresolvedCode[]>([]);
 
   useEffect(() => {
@@ -50,9 +50,11 @@ const VinLookupsPage = () => {
           <Table.Body>
             {codes.map(({ make, code, count }) => (
               <Table.Row key={`${make}-${code}`}>
-                <Table.Cell>{make}</Table.Cell>
+                <Table.Cell>
+                  {t(`vinLookups.makes.${make}`, { defaultValue: make })}
+                </Table.Cell>
                 <Table.Cell>{code}</Table.Cell>
-                <Table.Cell>{count}</Table.Cell>
+                <Table.Cell>{count.toLocaleString(i18n.language)}</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>

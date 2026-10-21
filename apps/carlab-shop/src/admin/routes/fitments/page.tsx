@@ -114,8 +114,6 @@ const vehicleLabel = (vehicle: Vehicle): string =>
 const referenceLabel = (row: Reference): string =>
   [row.name, row.code].filter(Boolean).join(' ');
 
-const day = (iso: string | null): string => iso?.slice(0, 10) ?? '';
-
 const OptionSelect = ({
   value,
   onChange,
@@ -146,7 +144,7 @@ const OptionSelect = ({
 );
 
 const FitmentsPage = () => {
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
 
   const [query, setQuery] = useState('');
   const [searched, setSearched] = useState(false);
@@ -302,13 +300,28 @@ const FitmentsPage = () => {
       .filter(Boolean)
       .join(', ') || '-';
 
+  const day = (iso: string | null) =>
+    iso && new Date(iso).toLocaleDateString(i18n.language, { timeZone: 'UTC' });
+
+  const production = (fitment: Fitment) => {
+    const from = day(fitment.production_from);
+    const to = day(fitment.production_to);
+    if (from && to) return t('fitments.production.between', { from, to });
+    if (from) return t('fitments.production.since', { from });
+    return to && t('fitments.production.until', { to });
+  };
+
   const criteria = (fitment: Fitment) =>
     [
       fitment.steering &&
-        `${t('fitments.columns.steering')}: ${t(`fitments.steeringOptions.${fitment.steering}`)}`,
-      fitment.gearbox && t(`fitments.gearboxOptions.${fitment.gearbox}`),
-      (fitment.production_from || fitment.production_to) &&
-        `${day(fitment.production_from)}..${day(fitment.production_to)}`,
+        t('fitments.steeringCriterion', {
+          side: t(`fitments.steeringOptions.${fitment.steering}`),
+        }),
+      fitment.gearbox &&
+        t('fitments.gearboxCriterion', {
+          gearbox: t(`fitments.gearboxOptions.${fitment.gearbox}`),
+        }),
+      production(fitment),
     ]
       .filter(Boolean)
       .join(', ') || '-';
@@ -604,7 +617,11 @@ const FitmentsPage = () => {
                     <Table.Cell>{position(fitment)}</Table.Cell>
                     <Table.Cell>{criteria(fitment)}</Table.Cell>
                     <Table.Cell>{fitment.note ?? '-'}</Table.Cell>
-                    <Table.Cell>{fitment.source}</Table.Cell>
+                    <Table.Cell>
+                      {t(`sources.names.${fitment.source}`, {
+                        defaultValue: fitment.source,
+                      })}
+                    </Table.Cell>
                     <Table.Cell>
                       <EditedBy row={fitment} />
                     </Table.Cell>

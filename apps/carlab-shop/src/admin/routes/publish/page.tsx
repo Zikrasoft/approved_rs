@@ -110,7 +110,7 @@ const PublishPage = () => {
           )}
           {run.error && (
             <Text size="small" className="text-ui-fg-subtle break-words">
-              {run.error}
+              {t('publish.errorDetails', { error: run.error })}
             </Text>
           )}
         </div>
