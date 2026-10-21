@@ -2,7 +2,9 @@
   "menu": {
     "fitments": "Fitments",
     "suppliers": "Suppliers",
-    "brands": "Brands"
+    "brands": "Brands",
+    "vehicles": "Vehicles",
+    "vinLookups": "Unresolved VINs"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -71,5 +73,88 @@
     "addSpelling": "Add spelling",
     "removeSpelling": "Remove spelling {{spelling}}",
     "delete": "Delete brand"
+  },
+  "vehicles": {
+    "heading": "Vehicles and reference data",
+    "choose": "Choose",
+    "create": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Delete this row? A reference row other rows point at cannot be deleted.",
+    "entities": {
+      "make": "Makes",
+      "series": "Series",
+      "chassis": "Chassis",
+      "vehicle_model": "Models",
+      "engine": "Engines",
+      "vehicle": "Vehicles (configurations)",
+      "vehicle_identifier": "Vehicle codes"
+    },
+    "fields": {
+      "name": "Name",
+      "slug": "URL slug",
+      "make_id": "Make",
+      "series_id": "Series",
+      "chassis_id": "Chassis",
+      "model_id": "Model",
+      "engine_id": "Engine",
+      "vehicle_id": "Vehicle",
+      "code": "Code",
+      "body_style": "Body style",
+      "year_from": "Year from",
+      "year_to": "Year to",
+      "family": "Family",
+      "fuel": "Fuel",
+      "displacement_cc": "Displacement, cc",
+      "power_kw": "Power, kW",
+      "drive": "Drive",
+      "market": "Market",
+      "steering": "Steering",
+      "type": "Code type",
+      "value": "Value"
+    },
+    "values": {
+      "body_style": {
+        "sedan": "Sedan",
+        "touring": "Touring",
+        "hatchback": "Hatchback",
+        "coupe": "Coupe",
+        "convertible": "Convertible",
+        "gran-coupe": "Gran Coupe",
+        "suv": "SUV",
+        "van": "Van"
+      },
+      "fuel": {
+        "petrol": "Petrol",
+        "diesel": "Diesel",
+        "hybrid": "Hybrid",
+        "electric": "Electric"
+      },
+      "drive": {
+        "rwd": "Rear",
+        "fwd": "Front",
+        "awd": "All-wheel"
+      },
+      "steering": {
+        "left": "Left",
+        "right": "Right"
+      },
+      "type": {
+        "bmw-type-code": "BMW type code (VIN 4-7)",
+        "mercedes-baumuster": "Mercedes Baumuster"
+      }
+    }
+  },
+  "vinLookups": {
+    "heading": "Unresolved VINs",
+    "lead": "Codes from VINs customers searched for that match no Vehicle in the catalogue, most frequent first. Add them under Vehicles.",
+    "empty": "Every VIN customers searched for was resolved.",
+    "columns": {
+      "make": "Make",
+      "code": "Code",
+      "count": "Lookups"
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -28,13 +29,9 @@ medusaIntegrationTestRunner({
         const part = await catalog.createParts({
           name: `Admin-test part ${engineCode}`,
         });
-        const vehicle = await catalog.createVehicles({
-          make: 'BMW',
-          model: '320d (F30)',
-          engine_code: engineCode,
-          year_from: 2015,
-          year_to: 2018,
-        });
+        const vehicle = (
+          await createVehicleFixture(catalog, { typeCode: engineCode })
+        ).vehicle;
         return { part, vehicle };
       };
 
