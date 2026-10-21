@@ -6,17 +6,8 @@ import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 
-const OEM_IDENTIFIER = {
-  type: 'oem' as const,
-  brand: 'BMW',
-  value: '11 42 8575211',
-};
-
-const MANUFACTURER_IDENTIFIER = {
-  type: 'manufacturer-number' as const,
-  brand: 'Mann-Filter',
-  value: 'HU 816 x',
-};
+const BMW = { name: 'BMW', slug: 'bmw' };
+const MANN_FILTER = { name: 'Mann-Filter', slug: 'mann-filter' };
 
 const INTERCARS = { name: 'Intercars', markup_percentage: 20 };
 const CARLAB_WAREHOUSE = { name: 'CarLab warehouse', markup_percentage: 15 };
@@ -26,30 +17,41 @@ async function seedB47OilFilterPart(
   supplierService: SupplierModuleService,
   logger: { info: (message: string) => void },
 ): Promise<string> {
-  const [existing] = await catalog.listPartIdentifiers(OEM_IDENTIFIER);
+  const [existing] = await catalog.listPartIdentifiers({
+    normalized_value: '11428575211',
+  });
   if (existing) {
     logger.info('B47 oil filter fixture already seeded, skipping.');
     return existing.part_id;
   }
+
+  const [bmw, mannFilter] = await catalog.createBrands([BMW, MANN_FILTER]);
 
   const [intercars, carlabWarehouse] = await supplierService.createSuppliers([
     INTERCARS,
     CARLAB_WAREHOUSE,
   ]);
 
-  const part = await catalog.createParts({
+  const partId = await catalog.createPartWithIdentifiers({
     name: 'Oil filter, BMW B47/B48 engines',
+    identifiers: [
+      { type: 'oem', brand_id: bmw.id, value: '11 42 8575211' },
+      {
+        type: 'manufacturer-number',
+        brand_id: mannFilter.id,
+        value: 'HU 816 x',
+      },
+    ],
   });
-
-  const oemIdentifier = await catalog.createPartIdentifiers({
-    part_id: part.id,
-    ...OEM_IDENTIFIER,
-  });
-
-  const mannIdentifier = await catalog.createPartIdentifiers({
-    part_id: part.id,
-    ...MANUFACTURER_IDENTIFIER,
-  });
+  const [oemIdentifier, mannIdentifier] = await Promise.all(
+    [bmw.id, mannFilter.id].map(async (brand_id) => {
+      const [identifier] = await catalog.listPartIdentifiers({
+        part_id: partId,
+        brand_id,
+      });
+      return identifier;
+    }),
+  );
 
   await supplierService.createSupplierOffers([
     {
@@ -79,7 +81,7 @@ async function seedB47OilFilterPart(
   ]);
 
   logger.info('Seeded B47 oil filter fixture.');
-  return part.id;
+  return partId;
 }
 
 const B47_VEHICLE_KTYPE = { type: 'ktype' as const, value: 'KTYPE-F30-B47' };

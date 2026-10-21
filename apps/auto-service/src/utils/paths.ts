@@ -12,6 +12,7 @@ export const PathBuilder = {
   parts: (locale: Locale) => `/${locale}/parts/`,
   partsCategory: (locale: Locale, slug: PartsCategorySlug) =>
     `/${locale}/parts/${slug}/`,
+  partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
   shopSearch: (locale: Locale) => `/${locale}/shop/search/`,
   shopCart: (locale: Locale) => `/${locale}/shop/cart/`,

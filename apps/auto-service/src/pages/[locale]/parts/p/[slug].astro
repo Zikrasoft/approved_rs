@@ -1,0 +1,70 @@
+---
+import { partPageSlug } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
+import { PathBuilder, withLocales } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const pages = await partPagesForBuild({
+    MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+    MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+  });
+  return withLocales(
+    pages.map((page) => ({ params: { slug: page.slug }, props: { page } })),
+  );
+}
+
+const { page } = Astro.props as { page: PartPageEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).shopPart;
+const heading = `${page.brand.name} ${page.value}`;
+---
+
+<Shell
+  title={`${heading}, ${page.part.name} - ${copy.metaTitleSuffix}`}
+  description={copy.metaDescription}
+  noindex={!page.indexable}
+>
+  <PageHero
+    eyebrow={copy.eyebrow}
+    heading={heading}
+    lead={page.part.name}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partNumber(locale, page.slug), label: heading },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <h2 class="text-section mb-6">{copy.equivalentsHeading}</h2>
+    {
+      page.equivalents.length > 0 ? (
+        <ul class="card divide-y divide-line">
+          {page.equivalents.map((equivalent) => (
+            <li>
+              <a
+                href={PathBuilder.partNumber(
+                  locale,
+                  partPageSlug(
+                    equivalent.brand.slug,
+                    equivalent.normalized_value,
+                  ),
+                )}
+                class="flex flex-wrap items-baseline gap-x-3 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+              >
+                <span class="font-semibold">{equivalent.brand.name}</span>
+                <span class="spec text-sm text-muted">{equivalent.value}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="max-w-2xl text-muted">{copy.noEquivalents}</p>
+      )
+    }
+  </section>
+</Shell>

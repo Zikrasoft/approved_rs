@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { normalizePartNumber } from '@podbor/catalog-contract';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
@@ -36,14 +37,19 @@ medusaIntegrationTestRunner({
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
 
+        const [bmw] = await catalog.createBrands([
+          { name: 'BMW', slug: 'bmw' },
+        ]);
+
         const part = await catalog.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
         const identifier = await catalog.createPartIdentifiers({
           part_id: part.id,
           type: 'oem',
-          brand: 'BMW',
+          brand_id: bmw.id,
           value: '11 42 8575211',
+          normalized_value: normalizePartNumber('11 42 8575211'),
         });
         const supplier = await supplierService.createSuppliers({
           name: 'Intercars',

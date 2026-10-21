@@ -14,10 +14,15 @@ import { useTranslation } from 'react-i18next';
 
 import { adminFetch } from '../../lib/admin-fetch';
 
+type Brand = {
+  id: string;
+  name: string;
+};
+
 type PartIdentifier = {
   id: string;
   type: string;
-  brand: string;
+  brand: Brand;
   value: string;
 };
 
@@ -62,7 +67,8 @@ const FitmentsPage = () => {
 
   const [newPartName, setNewPartName] = useState('');
   const [newType, setNewType] = useState<string>(IDENTIFIER_TYPES[0]);
-  const [newBrand, setNewBrand] = useState('');
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [newBrandId, setNewBrandId] = useState('');
   const [newValue, setNewValue] = useState('');
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -79,6 +85,11 @@ const FitmentsPage = () => {
     adminFetch<{ vehicles: Vehicle[] }>('/admin/vehicles').then((data) => {
       if (data) {
         setVehicles(data.vehicles);
+      }
+    });
+    adminFetch<{ brands: Brand[] }>('/admin/brands').then((data) => {
+      if (data) {
+        setBrands(data.brands);
       }
     });
   }, []);
@@ -118,7 +129,7 @@ const FitmentsPage = () => {
       method: 'POST',
       body: JSON.stringify({
         name: newPartName,
-        identifier: { type: newType, brand: newBrand, value: newValue },
+        identifiers: [{ type: newType, brand_id: newBrandId, value: newValue }],
       }),
     });
     if (!data) {
@@ -190,7 +201,10 @@ const FitmentsPage = () => {
                       <Table.Cell>{part.name}</Table.Cell>
                       <Table.Cell>
                         {part.identifiers
-                          .map((identifier) => identifier.value)
+                          .map(
+                            (identifier) =>
+                              `${identifier.brand.name} ${identifier.value}`,
+                          )
                           .join(', ')}
                       </Table.Cell>
                       <Table.Cell>
@@ -229,11 +243,20 @@ const FitmentsPage = () => {
                       ))}
                     </Select.Content>
                   </Select>
-                  <Input
-                    placeholder={t('fitments.brandPlaceholder')}
-                    value={newBrand}
-                    onChange={(event) => setNewBrand(event.target.value)}
-                  />
+                  <Select value={newBrandId} onValueChange={setNewBrandId}>
+                    <Select.Trigger>
+                      <Select.Value
+                        placeholder={t('fitments.brandPlaceholder')}
+                      />
+                    </Select.Trigger>
+                    <Select.Content>
+                      {brands.map((brand) => (
+                        <Select.Item key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select>
                   <Input
                     placeholder={t('fitments.numberPlaceholder')}
                     value={newValue}
@@ -242,7 +265,7 @@ const FitmentsPage = () => {
                 </div>
                 <Button
                   onClick={createPart}
-                  disabled={!newPartName || !newBrand || !newValue}
+                  disabled={!newPartName || !newBrandId || !newValue}
                 >
                   {t('fitments.createPart')}
                 </Button>

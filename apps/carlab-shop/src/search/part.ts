@@ -22,7 +22,7 @@ type OfferRow = {
 type IdentifierRow = {
   id: string;
   type: string;
-  brand: string;
+  brand: { name: string };
   value: string;
   offers?: OfferRow[];
 };
@@ -42,7 +42,7 @@ const source = {
       identifiers: (row.identifiers ?? []).map((identifier) => ({
         id: identifier.id,
         type: identifier.type,
-        brand: identifier.brand,
+        brand: identifier.brand.name,
         value: identifier.value,
         value_compact: compactValue(identifier.value),
         offers: (identifier.offers ?? []).map((offer) => ({

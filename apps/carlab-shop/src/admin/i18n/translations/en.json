@@ -1,7 +1,8 @@
 {
   "menu": {
     "fitments": "Fitments",
-    "suppliers": "Suppliers"
+    "suppliers": "Suppliers",
+    "brands": "Brands"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -51,5 +52,24 @@
       "markup": "Markup %"
     },
     "save": "Save"
+  },
+  "brands": {
+    "heading": "Brands",
+    "createLabel": "New brand",
+    "namePlaceholder": "Name, e.g. Mann-Filter",
+    "slugPlaceholder": "URL slug, e.g. mann-filter",
+    "slugHint": "The slug is part of every part number page URL and never changes: lower-case Latin letters, digits and hyphens.",
+    "create": "Add brand",
+    "empty": "No brands yet. Add one before creating parts.",
+    "columns": {
+      "name": "Name",
+      "slug": "URL slug",
+      "spellings": "Supplier spellings"
+    },
+    "supplierPlaceholder": "Supplier",
+    "spellingPlaceholder": "Supplier's spelling",
+    "addSpelling": "Add spelling",
+    "removeSpelling": "Remove spelling {{spelling}}",
+    "delete": "Delete brand"
   }
 }

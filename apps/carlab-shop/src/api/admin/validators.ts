@@ -1,4 +1,8 @@
 import { z } from '@medusajs/framework/zod';
+import {
+  BRAND_SLUG_PATTERN,
+  normalizePartNumber,
+} from '@podbor/catalog-contract';
 
 import {
   FITMENT_GEARBOX_TYPES,
@@ -11,13 +15,22 @@ export const AdminSearchParts = z.object({
 });
 export type AdminSearchPartsType = z.infer<typeof AdminSearchParts>;
 
+const partNumber = z
+  .string()
+  .trim()
+  .refine((value) => normalizePartNumber(value).length > 0);
+
 export const AdminCreatePart = z.object({
   name: z.string().trim().min(1),
-  identifier: z.object({
-    type: z.enum(PART_IDENTIFIER_TYPES),
-    brand: z.string().trim().min(1),
-    value: z.string().trim().min(1),
-  }),
+  identifiers: z
+    .array(
+      z.object({
+        type: z.enum(PART_IDENTIFIER_TYPES),
+        brand_id: z.string().min(1),
+        value: partNumber,
+      }),
+    )
+    .min(1),
 });
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
@@ -41,3 +54,17 @@ export const AdminUpdateSupplier = z.object({
   markup_percentage: z.number().min(0),
 });
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;
+
+export const AdminCreateBrand = z.strictObject({
+  name: z.string().trim().min(1),
+  slug: z.string().regex(BRAND_SLUG_PATTERN),
+});
+export type AdminCreateBrandType = z.infer<typeof AdminCreateBrand>;
+
+export const AdminCreateBrandSpelling = z.strictObject({
+  supplier_id: z.string().min(1),
+  value: z.string().trim().min(1),
+});
+export type AdminCreateBrandSpellingType = z.infer<
+  typeof AdminCreateBrandSpelling
+>;
