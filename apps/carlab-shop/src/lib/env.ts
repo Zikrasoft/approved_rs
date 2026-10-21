@@ -19,6 +19,8 @@ const envSchema = z.object({
   TYPESENSE_PORT: z.coerce.number().int().positive().default(8108),
   TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
   TYPESENSE_API_KEY: z.string().min(1).default('xyz'),
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  PUBLISH_DISPATCH_TOKEN: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

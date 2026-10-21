@@ -4,6 +4,7 @@ import {
   normalizePartNumber,
 } from '@podbor/catalog-contract';
 
+import { TARGET_LOCALES } from '../../lib/publish/translate';
 import {
   FITMENT_GEARBOX_TYPES,
   FITMENT_STEERING_SIDES,
@@ -60,6 +61,12 @@ export const AdminCreateBrand = z.strictObject({
   slug: z.string().regex(BRAND_SLUG_PATTERN),
 });
 export type AdminCreateBrandType = z.infer<typeof AdminCreateBrand>;
+
+export const AdminEditTranslation = z.strictObject({
+  locale: z.enum(TARGET_LOCALES),
+  fields: z.record(z.string(), z.string().trim().min(1)),
+});
+export type AdminEditTranslationType = z.infer<typeof AdminEditTranslation>;
 
 export const AdminCreateBrandSpelling = z.strictObject({
   supplier_id: z.string().min(1),

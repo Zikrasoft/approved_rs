@@ -291,6 +291,9 @@ importers:
       '@podbor/catalog-contract':
         specifier: workspace:*
         version: link:../../packages/catalog-contract
+      '@podbor/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@tanstack/react-query':
         specifier: 5.64.2
         version: 5.64.2(react@18.3.1)
