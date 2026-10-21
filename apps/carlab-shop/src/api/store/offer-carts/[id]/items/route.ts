@@ -30,7 +30,7 @@ export async function POST(
   });
   const identifier = await catalog.retrievePartIdentifier(
     offer.part_identifier_id,
-    { relations: ['part'] },
+    { relations: ['part', 'brand'] },
   );
 
   await addToCartWorkflow(req.scope).run({
@@ -38,7 +38,7 @@ export async function POST(
       cart_id: cartId,
       items: [
         {
-          title: `${identifier.part.name} (${identifier.brand})`,
+          title: `${identifier.part.name} (${identifier.brand.name})`,
           quantity,
           unit_price: sellPrice(
             offer.cost_price,

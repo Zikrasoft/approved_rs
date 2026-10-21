@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { normalizePartNumber } from '@podbor/catalog-contract';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
@@ -38,6 +39,11 @@ medusaIntegrationTestRunner({
           { name: 'Intercars', markup_percentage: 20 },
         ]);
 
+        const [bmw, mann] = await catalog.createBrands([
+          { name: 'BMW', slug: 'bmw' },
+          { name: 'Mann-Filter', slug: 'mann-filter' },
+        ]);
+
         const part = await catalog.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
@@ -46,15 +52,17 @@ medusaIntegrationTestRunner({
         const oemIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'oem',
-          brand: 'BMW',
+          brand_id: bmw.id,
           value: '11 42 8575211',
+          normalized_value: normalizePartNumber('11 42 8575211'),
         });
 
         const mannIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'manufacturer-number',
-          brand: 'Mann-Filter',
+          brand_id: mann.id,
           value: 'HU 816 x',
+          normalized_value: normalizePartNumber('HU 816 x'),
         });
 
         const [oemOffer] = await supplierService.createSupplierOffers([

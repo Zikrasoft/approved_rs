@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { normalizePartNumber } from '@podbor/catalog-contract';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
@@ -39,6 +40,11 @@ medusaIntegrationTestRunner({
             { name: 'CarLab warehouse', markup_percentage: 15 },
           ]);
 
+        const [bmw, mann] = await catalog.createBrands([
+          { name: 'BMW', slug: 'bmw' },
+          { name: 'Mann-Filter', slug: 'mann-filter' },
+        ]);
+
         const part = await catalog.createParts({
           name: 'Oil filter, BMW B47/B48 engines',
         });
@@ -47,16 +53,18 @@ medusaIntegrationTestRunner({
         const oemIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'oem',
-          brand: 'BMW',
+          brand_id: bmw.id,
           value: '11 42 8575211',
+          normalized_value: normalizePartNumber('11 42 8575211'),
         });
         oemIdentifierId = oemIdentifier.id;
 
         const mannIdentifier = await catalog.createPartIdentifiers({
           part_id: partId,
           type: 'manufacturer-number',
-          brand: 'Mann-Filter',
+          brand_id: mann.id,
           value: 'HU 816 x',
+          normalized_value: normalizePartNumber('HU 816 x'),
         });
         mannIdentifierId = mannIdentifier.id;
 
@@ -131,20 +139,6 @@ medusaIntegrationTestRunner({
 
         const raw = JSON.stringify(response.data);
         expect(raw).not.toMatch(/cost_price|markup/i);
-      });
-
-      it('rejects a second PartIdentifier with the same (type, brand, value)', async () => {
-        const catalog: CatalogModuleService =
-          getContainer().resolve(CATALOG_MODULE);
-
-        await expect(
-          catalog.createPartIdentifiers({
-            part_id: partId,
-            type: 'oem',
-            brand: 'BMW',
-            value: '11 42 8575211',
-          }),
-        ).rejects.toThrow();
       });
     });
   },

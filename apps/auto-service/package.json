@@ -20,6 +20,7 @@
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
     "@podbor/brands": "workspace:*",
+    "@podbor/catalog-contract": "workspace:*",
     "@podbor/i18n": "workspace:*",
     "@podbor/lead-capture": "workspace:*",
     "@podbor/lead-crm": "workspace:*",

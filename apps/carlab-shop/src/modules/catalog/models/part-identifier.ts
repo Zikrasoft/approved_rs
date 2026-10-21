@@ -1,26 +1,25 @@
 import { model } from '@medusajs/framework/utils';
+import { PART_IDENTIFIER_TYPES } from '@podbor/catalog-contract';
 
+import Brand from './brand';
 import Part from './part';
 import { provenance } from './provenance';
 
-export const PART_IDENTIFIER_TYPES = [
-  'oem',
-  'manufacturer-number',
-  'ean',
-] as const;
+export { PART_IDENTIFIER_TYPES };
 
 const PartIdentifier = model
   .define('part_identifier', {
     id: model.id().primaryKey(),
     type: model.enum([...PART_IDENTIFIER_TYPES]),
-    brand: model.text(),
     value: model.text(),
+    normalized_value: model.text(),
+    brand: model.belongsTo(() => Brand, { mappedBy: 'identifiers' }),
     part: model.belongsTo(() => Part, { mappedBy: 'identifiers' }),
     ...provenance(),
   })
   .indexes([
     {
-      on: ['type', 'brand', 'value'],
+      on: ['type', 'brand_id', 'normalized_value'],
       unique: true,
     },
   ]);
