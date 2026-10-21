@@ -46,7 +46,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         index: {
           label: pages.partsInquiry.heading,
           href: url(PathBuilder.parts(locale)),
-          note: pages.partsInquiry.lead,
+          note: pages.partsInquiry.llmsCatalogue,
         },
         entries: PARTS_CATEGORY_SLUGS.map((slug) => ({
           label: pages.partsInquiry.categories[slug].name,

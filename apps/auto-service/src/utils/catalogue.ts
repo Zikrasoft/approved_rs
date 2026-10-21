@@ -13,7 +13,11 @@ export type { Vehicle, VinFacts };
 export const CATALOGUE_TIMEOUT_MS = 10_000;
 const PART_PAGES_BATCH = 1000;
 
-export type PartPageEntry = PartPage & { slug: string; indexable: boolean };
+export type PartPageEntry = PartPage & {
+  slug: string;
+  indexable: boolean;
+  priceOnRequest: boolean;
+};
 
 export type VinOutcome =
   | { kind: 'vehicle'; vehicle: Vehicle; facts: VinFacts }
@@ -68,7 +72,12 @@ export function createCatalogue({
         for (const page of pages) {
           const slug = partPageSlug(page.brand.slug, page.normalized_value);
           if (!bySlug.has(slug)) {
-            bySlug.set(slug, { ...page, slug, indexable: false });
+            bySlug.set(slug, {
+              ...page,
+              slug,
+              indexable: false,
+              priceOnRequest: !page.has_offers,
+            });
           }
         }
         offset += pages.length;

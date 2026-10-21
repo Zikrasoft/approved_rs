@@ -29,6 +29,7 @@ const oilFilterMann = {
       brand: bmw,
     },
   ],
+  has_offers: false,
 };
 
 const oilFilterBmw = {
@@ -47,6 +48,7 @@ const oilFilterBmw = {
       brand: mann,
     },
   ],
+  has_offers: true,
 };
 
 const respond = (body: unknown, ok = true) =>
@@ -98,6 +100,24 @@ describe('catalogue.partPages', () => {
     expect(
       keep(`https://carlab.rs${PathBuilder.partNumber('sr', page.slug)}`),
     ).toBe(false);
+  });
+
+  it('asks for the price on a brand-number no supplier offers', async () => {
+    const fetch = vi.fn(() =>
+      respond({
+        pages: [oilFilterMann, oilFilterBmw],
+        count: 2,
+        offset: 0,
+        limit: 1000,
+      }),
+    );
+
+    const pages = await catalogueWith(fetch).partPages();
+
+    expect(pages.map((page) => [page.slug, page.priceOnRequest])).toEqual([
+      ['mann-filter-hu816x', true],
+      ['bmw-11428575211', false],
+    ]);
   });
 
   it('pages through the backend until the count is reached', async () => {

@@ -6,7 +6,6 @@ import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
-import { shopSearchContentSchema } from './content/shopSearchContentSchema.ts';
 import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
 import { partsCarContentSchema } from './content/partsCarContentSchema.ts';
 
@@ -59,13 +58,6 @@ export const SECTIONS = [
     schema: shopPartContentSchema,
     promptSubject:
       'part-detail page copy for a car parts shop (brand/supplier table column labels, stock and lead-time wording, a not-found state)',
-  },
-  {
-    key: 'shopSearch',
-    path: 'src/content/i18n/shopSearch.yaml',
-    schema: shopSearchContentSchema,
-    promptSubject:
-      'part-number search page copy for a car parts shop (a search box inviting any OEM or brand number, a not-found state)',
   },
   {
     key: 'shopCart',

@@ -3,6 +3,8 @@ import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../modules/supplier';
+import type SupplierModuleService from '../../../modules/supplier/service';
 import type { StoreListPartPagesType } from '../validators';
 
 type BrandNumberRow = {
@@ -50,6 +52,13 @@ export async function GET(
     { relations: ['brand'], order: { id: 'ASC' } },
   );
 
+  const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
+  const offers = await suppliers.listSupplierOffers(
+    { part_identifier_id: identifiers.map(({ id }) => id) },
+    { select: ['part_identifier_id'] },
+  );
+  const offered = new Set(offers.map((offer) => offer.part_identifier_id));
+
   const pages = identifiers.map((identifier) => ({
     ...brandNumber(identifier),
     part: { id: identifier.part.id, name: identifier.part.name },
@@ -59,6 +68,7 @@ export async function GET(
           part_id === identifier.part_id && id !== identifier.id,
       )
       .map(brandNumber),
+    has_offers: offered.has(identifier.id),
   }));
 
   res.json(partPagesResponseSchema.parse({ pages, count, offset, limit }));

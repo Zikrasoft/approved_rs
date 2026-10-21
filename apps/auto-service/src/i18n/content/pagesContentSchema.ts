@@ -113,6 +113,10 @@ export const pagesContentSchema = z
         commentLabel: z.string(),
         commentPlaceholder: z.string(),
         commentNote: z.string(),
+        listHeading: z.string(),
+        listRemoveLabel: z.string(),
+        listMoreTemplate: z.string(),
+        llmsCatalogue: z.string(),
         stepsHeading: z.string(),
         steps: z
           .array(z.object({ heading: z.string(), body: z.string() }))
