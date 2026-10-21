@@ -10,7 +10,7 @@ export const PART_WITH_OFFERS_FIELDS = [
   'name',
   'identifiers.id',
   'identifiers.type',
-  'identifiers.brand',
+  'identifiers.brand.name',
   'identifiers.value',
   'identifiers.offers.id',
   'identifiers.offers.supplier.name',
@@ -68,6 +68,7 @@ const rawPartSchema = z.object({
   name: z.string(),
   identifiers: z.array(
     identifierSchema.extend({
+      brand: z.object({ name: z.string() }),
       offers: z
         .array(
           offerSchema.omit({ supplier: true, price: true }).extend({
@@ -89,6 +90,7 @@ export const toPartResponse = (row: unknown) => {
     ...part,
     identifiers: part.identifiers.map((identifier) => ({
       ...identifier,
+      brand: identifier.brand.name,
       offers: (identifier.offers ?? []).map(
         ({ cost_price, supplier, ...offer }) => ({
           ...offer,

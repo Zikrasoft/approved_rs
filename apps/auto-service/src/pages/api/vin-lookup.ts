@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
-import { catalogData } from '@/utils/catalogData';
+import { catalogueFromEnv } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
 
 const formSchema = z.object({
@@ -23,7 +23,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     locale: form.get('locale'),
     vin: form.get('vin'),
   });
-  const outcome = vin ? await catalogData.resolveVin(vin) : null;
+  const outcome = vin
+    ? await catalogueFromEnv({
+        MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+        MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+      }).resolveVin(vin)
+    : null;
   return redirect(
     outcome?.kind === 'vehicle'
       ? PathBuilder.partsCar(locale, outcome.vehicle.id)

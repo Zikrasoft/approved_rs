@@ -5,12 +5,15 @@ import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName } from '@/utils/carName';
-import { catalogData, type Vehicle } from '@/utils/catalogData';
+import { vehiclesForBuild, type Vehicle } from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
-  const vehicles = await catalogData.vehicles();
+  const vehicles = await vehiclesForBuild({
+    MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+    MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+  });
   return withLocales(
     vehicles.map((vehicle) => ({
       params: { id: vehicle.id },

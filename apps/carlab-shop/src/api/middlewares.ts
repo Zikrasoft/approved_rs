@@ -5,6 +5,8 @@ import {
 } from '@medusajs/framework/http';
 
 import {
+  AdminCreateBrand,
+  AdminCreateBrandSpelling,
   AdminCreateFitment,
   AdminCreatePart,
   AdminListFitments,
@@ -16,11 +18,22 @@ import {
   StoreAddOfferCartItem,
   StoreCreateOfferCart,
   StoreCreateVinLookup,
+  StoreListPartPages,
   StoreSearchParts,
 } from './store/validators';
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: '/admin/brands',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateBrand)],
+    },
+    {
+      matcher: '/admin/brands/:id/spellings',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateBrandSpelling)],
+    },
     {
       matcher: '/admin/parts',
       method: 'GET',
@@ -58,6 +71,11 @@ export default defineMiddlewares({
         middlewares: [validateAndTransformBody(schema.partial())],
       },
     ]),
+    {
+      matcher: '/store/part-pages',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(StoreListPartPages, {})],
+    },
     {
       matcher: '/store/search',
       method: 'GET',

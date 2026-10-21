@@ -2,6 +2,7 @@
   "menu": {
     "fitments": "Соответствия",
     "suppliers": "Поставщики",
+    "brands": "Бренды",
     "vehicles": "Автомобили",
     "vinLookups": "Нераспознанные VIN"
   },
@@ -55,6 +56,25 @@
       "markup": "Наценка, %"
     },
     "save": "Сохранить"
+  },
+  "brands": {
+    "heading": "Бренды",
+    "createLabel": "Новый бренд",
+    "namePlaceholder": "Название, например Mann-Filter",
+    "slugPlaceholder": "Адрес, например mann-filter",
+    "slugHint": "Адрес входит в ссылку на каждую страницу номера и потом не меняется: латиница в нижнем регистре, цифры и дефисы.",
+    "create": "Добавить бренд",
+    "empty": "Брендов пока нет. Добавьте первый, чтобы создавать детали.",
+    "columns": {
+      "name": "Название",
+      "slug": "Адрес",
+      "spellings": "Написания у поставщиков"
+    },
+    "supplierPlaceholder": "Поставщик",
+    "spellingPlaceholder": "Как пишет поставщик",
+    "addSpelling": "Добавить написание",
+    "removeSpelling": "Удалить написание {{spelling}}",
+    "delete": "Удалить бренд"
   },
   "vehicles": {
     "heading": "Автомобили и справочники",

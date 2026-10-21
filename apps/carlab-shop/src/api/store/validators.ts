@@ -25,3 +25,9 @@ export const StoreAddOfferCartItem = z.object({
   quantity: z.number().int().positive().default(1),
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
+
+export const StoreListPartPages = z.object({
+  offset: z.coerce.number().int().nonnegative().default(0),
+  limit: z.coerce.number().int().positive().max(5000).default(1000),
+});
+export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;

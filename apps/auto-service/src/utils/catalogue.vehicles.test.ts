@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCatalogData } from './catalogData';
+import {
+  catalogueFromEnv,
+  createCatalogue,
+  vehiclesForBuild,
+} from './catalogue';
 
 const VEHICLE = {
   id: 'veh_1',
@@ -37,7 +41,7 @@ const respond = (body: unknown, ok = true) =>
   vi.fn().mockResolvedValue({ ok, json: async () => body });
 
 const catalog = (fetch: ReturnType<typeof vi.fn>) =>
-  createCatalogData({
+  createCatalogue({
     backendUrl: 'http://shop.test',
     publishableKey: 'pk_test',
     timeoutMs: 50,
@@ -59,21 +63,12 @@ describe('vehicles', () => {
     );
   });
 
-  it('builds no car pages when the backend answers with an error', async () => {
-    expect(await catalog(respond({}, false)).vehicles()).toEqual([]);
+  it('fails the build when the backend answers with an error', async () => {
+    await expect(catalog(respond({}, false)).vehicles()).rejects.toThrow();
   });
 
   it('builds no car pages when no backend is configured', async () => {
-    const fetch = vi.fn();
-
-    expect(
-      await createCatalogData({
-        backendUrl: '',
-        publishableKey: '',
-        fetch,
-      }).vehicles(),
-    ).toEqual([]);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(await vehiclesForBuild({})).toEqual([]);
   });
 });
 
@@ -115,6 +110,13 @@ describe('resolveVin', () => {
     const fetch = respond({ resolved: true, vehicle: { id: 'veh_1' } });
 
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
+      kind: 'inquiry',
+      vin: VIN,
+    });
+  });
+
+  it('falls back to the inquiry when no backend is configured', async () => {
+    expect(await catalogueFromEnv({}).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
     });

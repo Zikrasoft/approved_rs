@@ -15,6 +15,7 @@ export const PathBuilder = {
   partsVinUnresolved: (locale: Locale) => `/${locale}/parts/#vin-unresolved`,
   partsCar: (locale: Locale, vehicleId: string) =>
     `/${locale}/parts/car/${vehicleId}/`,
+  partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
   shopSearch: (locale: Locale) => `/${locale}/shop/search/`,
   shopCart: (locale: Locale) => `/${locale}/shop/cart/`,
