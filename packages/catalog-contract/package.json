@@ -30,6 +30,13 @@
       },
       "default": "./src/steering.ts"
     },
+    "./fingerprint": {
+      "require": {
+        "types": "./dist/cjs/fingerprint.d.ts",
+        "default": "./dist/cjs/fingerprint.js"
+      },
+      "default": "./src/fingerprint.ts"
+    },
     "./comment": {
       "require": {
         "types": "./dist/cjs/comment.d.ts",

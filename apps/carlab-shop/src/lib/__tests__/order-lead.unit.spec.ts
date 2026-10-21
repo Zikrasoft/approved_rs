@@ -31,11 +31,41 @@ describe('orderLeadForm', () => {
       [
         'Заказ #12, самовывоз, оплата при получении',
         'BMW 3 серия F30 320d, B47D20O0',
-        'Oil filter × 2: 3700 RSD',
-        'Итого: 3700 RSD',
+        'Oil filter × 2: 3\u00a0700 RSD',
+        'Итого: 3\u00a0700 RSD',
         'Pozvati posle 17h',
       ].join('\n'),
     );
+  });
+
+  it('hands the lead route the attribution the checkout form carried', () => {
+    const form = orderLeadForm(
+      order({
+        metadata: {
+          contact: '+381601234567',
+          source_url: 'https://carlab.rs/ru/parts/cart/',
+          visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+          ad_source: '{"utm_source":"google"}',
+          meta_ids: '{"fbp":"fb.1.1.1"}',
+        },
+      }),
+    );
+
+    expect(Object.fromEntries(form)).toMatchObject({
+      source_url: 'https://carlab.rs/ru/parts/cart/',
+      visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      ad_source: '{"utm_source":"google"}',
+      meta_ids: '{"fbp":"fb.1.1.1"}',
+    });
+  });
+
+  it('writes sums with thousands separated for the owner', () => {
+    const comment =
+      orderLeadForm(
+        order({ items: [{ title: 'Oil', unit_price: 2400, quantity: 1 }] }),
+      ).get('comment') ?? '';
+
+    expect(comment).toContain('Итого: 2\u00a0400 RSD');
   });
 
   it('caps the comment at the lead limit and counts the lines left out', () => {
@@ -49,7 +79,7 @@ describe('orderLeadForm', () => {
 
     expect(comment.length).toBeLessThanOrEqual(MAX_COMMENT_LENGTH);
     expect(comment).toMatch(
-      /\nНе поместилось позиций: \d+\nИтого: 20000 RSD\n/,
+      /\nНе поместилось позиций: \d+\nИтого: 20\u00a0000 RSD\n/,
     );
     expect(comment.endsWith('Pozvati posle 17h')).toBe(true);
   });

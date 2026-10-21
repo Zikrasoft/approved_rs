@@ -5,7 +5,7 @@ import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
+import { cartFingerprint, normalizePartNumber } from '@podbor/catalog-contract';
 
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
@@ -287,6 +287,19 @@ medusaIntegrationTestRunner({
         expect(cart.items[0].unit_price).toBe(2200);
       });
 
+      it('sets the quantity of a line within what the supplier has', async () => {
+        quote(1542, 3);
+        const cart = await cartWith(1);
+        const line = `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`;
+
+        const changed = await post(line, { quantity: 3 });
+        expect(changed.data.cart.items[0].quantity).toBe(3);
+
+        const refused = await post(line, { quantity: 4 });
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
+      });
+
       it('removes a line', async () => {
         const cart = await cartWith(1);
 
@@ -328,6 +341,27 @@ medusaIntegrationTestRunner({
           (await post(`/store/offer-carts/${cart.id}/reprice`)).data.cart
             .completed,
         ).toBe(true);
+      });
+
+      it('refuses checkout of a cart that changed since the visitor saw it', async () => {
+        const shown = await cartWith(1);
+        const changed = await post(`/store/offer-carts/${shown.id}/items`, {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        const refused = await complete(shown.id, {
+          ...CONTACT,
+          cart_fingerprint: cartFingerprint(shown.items),
+        });
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('CART_CHANGED');
+
+        const placed = await complete(shown.id, {
+          ...CONTACT,
+          cart_fingerprint: cartFingerprint(changed.data.cart.items),
+        });
+        expect(placed.status).toBe(200);
       });
 
       it('refuses an order without a contact', async () => {
@@ -417,7 +451,12 @@ medusaIntegrationTestRunner({
       it('hands a placed order to the lead pipeline', async () => {
         const cart = await cartWith(2);
 
-        const placed = await complete(cart.id);
+        const placed = await complete(cart.id, {
+          ...CONTACT,
+          source_url: 'https://carlab.rs/sr/parts/cart/',
+          visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+          ad_source: '{"utm_source":"google"}',
+        });
 
         await waitFor(() => leads.length);
         expect(leads).toHaveLength(1);
@@ -429,13 +468,16 @@ medusaIntegrationTestRunner({
           vin: 'WBA35BG070N074158',
           locale: 'sr',
           consent: '1',
+          source_url: 'https://carlab.rs/sr/parts/cart/',
+          visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+          ad_source: '{"utm_source":"google"}',
         });
         expect(leads[0].comment).toBe(
           [
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3700 RSD',
-            'Итого: 3700 RSD',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD',
+            'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
         );

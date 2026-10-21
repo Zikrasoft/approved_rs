@@ -1,0 +1,1 @@
+export const PARTS_QUERY_MAX_LENGTH = 100;

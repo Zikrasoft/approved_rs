@@ -5,8 +5,9 @@ equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
 replacedHeading: Деталь заменена
 replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
-supersededNotice: Этот номер устарел, производитель его больше не использует.
-supersededTag: устарел
+supersededNotice: Производитель больше не использует этот номер.
+supersededTag: Номер устарел
+currentNumberLabel: 'Актуальный номер:'
 attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
@@ -19,13 +20,24 @@ columns:
   stock: В наличии
   leadTime: Срок поставки
 buyButtonLabel: В корзину
+addedLabel: В корзине
+outOfStock: Нет в наличии
+askSupplyCta: Узнать о поставке
+askedNotice: Добавили в заявку. Узнаем у поставщика срок и цену и напишем вам.
+stockLimitNotice: Больше этой запчасти у поставщика нет, все доступные уже в корзине.
+fromPrice: от {price}
+priceOnRequestTag: цена по запросу
 addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
 addedCta: Открыть корзину
 inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
 inquiryCta: Открыть заявку
 leadTime:
   inStock: В наличии
-  daysTemplate: '{days} дн.'
+  days:
+    one: '{days} день'
+    few: '{days} дня'
+    many: '{days} дней'
+    other: '{days} дня'
 translatedFrom: 699e9a4d39f2143b
 translations:
   sr:
@@ -47,7 +59,6 @@ translations:
       leadTime: Rok isporuke
     leadTime:
       inStock: Na skladištu
-      daysTemplate: '{days} d.'
     buyButtonLabel: Kupiti
   en:
     metaTitleSuffix: CarLab
@@ -68,5 +79,4 @@ translations:
       leadTime: Lead time
     leadTime:
       inStock: In stock
-      daysTemplate: '{days} days'
     buyButtonLabel: Buy

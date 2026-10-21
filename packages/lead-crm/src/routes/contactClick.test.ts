@@ -33,6 +33,19 @@ describe('createContactClickRoute', () => {
     expect(res.status).toBe(204);
   });
 
+  it('refuses a body that is not a form without storing a click', async () => {
+    const response = await POST({
+      request: new Request('http://localhost/api/contact-click', {
+        method: 'POST',
+        body: '{}',
+        headers: { 'content-type': 'application/json' },
+      }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('defaults to phone when no channel is given', async () => {
     await POST(makeCtx({ source_url: '/ru/' }));
     expect(notifyLead).toHaveBeenCalledWith(

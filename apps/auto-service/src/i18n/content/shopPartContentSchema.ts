@@ -11,6 +11,7 @@ export const shopPartContentSchema = z
     replacedLead: z.string(),
     supersededNotice: z.string(),
     supersededTag: z.string(),
+    currentNumberLabel: z.string(),
     attributesHeading: z.string(),
     attributeYes: z.string(),
     attributeNo: z.string(),
@@ -28,10 +29,25 @@ export const shopPartContentSchema = z
     leadTime: z
       .object({
         inStock: z.string(),
-        daysTemplate: z.string(),
+        days: z
+          .object({
+            one: z.string().optional(),
+            two: z.string().optional(),
+            few: z.string().optional(),
+            many: z.string().optional(),
+            other: z.string(),
+          })
+          .strict(),
       })
       .strict(),
     buyButtonLabel: z.string(),
+    addedLabel: z.string(),
+    outOfStock: z.string(),
+    askSupplyCta: z.string(),
+    askedNotice: z.string(),
+    stockLimitNotice: z.string(),
+    fromPrice: z.string(),
+    priceOnRequestTag: z.string(),
     addedNotice: z.string(),
     addedCta: z.string(),
     inquiryNotice: z.string(),

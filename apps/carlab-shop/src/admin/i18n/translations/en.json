@@ -346,7 +346,7 @@
     "values": "Allowed values, comma separated",
     "min": "From",
     "max": "To",
-    "quantity": "Quantity",
+    "quantity": "Quantity, pcs (packs to buy)",
     "add": "Add requirement",
     "delete": "Delete",
     "empty": "No requirements here yet.",

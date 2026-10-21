@@ -1,0 +1,35 @@
+---
+import type { PartOffer } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { bestPrice } from '@/utils/bestPrice';
+import { formatMoney } from '@/utils/money';
+
+interface Props {
+  pages: { offers: PartOffer[] }[];
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const best = bestPrice(Astro.props.pages);
+---
+
+{
+  best ? (
+    <span class="flex shrink-0 flex-col items-end text-right">
+      <span class="spec text-sm font-semibold text-ink">
+        {copy.fromPrice.replace(
+          '{price}',
+          formatMoney(best.price, best.currency, BCP47_BY_LOCALE[locale]),
+        )}
+      </span>
+      {best.inStock && (
+        <span class="text-xs text-ink-2">{copy.columns.stock}</span>
+      )}
+    </span>
+  ) : (
+    <span class="shrink-0 text-right text-xs text-muted">
+      {copy.priceOnRequestTag}
+    </span>
+  )
+}

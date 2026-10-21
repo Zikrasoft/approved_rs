@@ -60,7 +60,7 @@ partsInquiry:
       body: Перезвоним или напишем и предложим лучшие варианты.
   categoriesHeading: Какие запчасти мы подбираем
   categoriesLead: Примерный список того, с чем мы работаем. Не нашли нужную категорию? Напишите нам в любом случае, подберем и это.
-  categoryCta: Заказать
+  categoryCta: Смотреть запчасти
   category:
     eyebrow: Категория запчастей
     metaTitleTemplate: '{name} - запчасти CarLab'

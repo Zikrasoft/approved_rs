@@ -1,0 +1,51 @@
+---
+import type { PartOffer } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import Icon from './Icon.astro';
+import PriceTag from './PriceTag.astro';
+
+interface Props {
+  slug: string;
+  brand: string;
+  value: string;
+  name?: string;
+  detail?: string;
+  superseded?: boolean;
+  offers?: PartOffer[];
+}
+
+const { slug, brand, value, name, detail, superseded, offers } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+---
+
+<li>
+  <a
+    href={PathBuilder.partNumber(locale, slug)}
+    class="group flex items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-shade sm:px-6"
+  >
+    <span class="flex min-w-0 flex-1 flex-col gap-1">
+      <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span class="font-semibold text-ink">{brand}</span>
+        <span class="spec text-sm text-ink">{value}</span>
+        {
+          superseded && (
+            <span class="rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2">
+              {copy.supersededTag}
+            </span>
+          )
+        }
+      </span>
+      {name && <span class="text-sm text-ink-2">{name}</span>}
+      {detail && <span class="text-xs text-muted">{detail}</span>}
+    </span>
+    {offers && <PriceTag pages={[{ offers }]} />}
+    <Icon
+      name="chevronRight"
+      size={16}
+      class="shrink-0 text-muted transition-colors duration-150 group-hover:text-ink"
+    />
+  </a>
+</li>

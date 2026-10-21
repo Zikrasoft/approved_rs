@@ -14,5 +14,10 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "files": ["src/contactChannel.ts", "src/limits.ts", "src/phone.ts"]
+  "files": [
+    "src/contactChannel.ts",
+    "src/fields.ts",
+    "src/limits.ts",
+    "src/phone.ts"
+  ]
 }

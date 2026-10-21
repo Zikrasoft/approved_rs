@@ -27,6 +27,7 @@ const { make } = hub;
   description={copy.metaDescription.replace('{make}', make.name)}
 >
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={make.name}
     lead={copy.lead}
@@ -36,7 +37,7 @@ const { make } = hub;
     ]}
   />
 
-  <section class="wrap flex flex-col gap-4 py-band md:py-band-lg">
+  <section class="wrap flex flex-col gap-4 py-band md:pt-band-lg">
     <h2 class="text-section">{copy.modelsHeading}</h2>
     <ul class="card divide-y divide-line">
       {

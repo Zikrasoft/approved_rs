@@ -4,7 +4,9 @@ import {
   clearPartsList,
   inquiryComment,
   PARTS_LIST_STORAGE_KEY,
+  readPartsCar,
   readPartsList,
+  rememberPartsCar,
   removeFromPartsList,
 } from './partsList';
 
@@ -88,7 +90,20 @@ describe('parts list', () => {
     },
   );
 
+  it('keeps the car the parts were picked for until the list is cleared', () => {
+    const storage = memoryStorage();
+
+    rememberPartsCar('BMW 3 серия F30 320d, B47', storage);
+    addToPartsList(bmwOil, storage);
+    expect(readPartsCar(storage)).toBe('BMW 3 серия F30 320d, B47');
+
+    clearPartsList(storage);
+    expect(readPartsCar(storage)).toBe('');
+  });
+
   it('works as an empty list when storage is blocked', () => {
+    expect(() => rememberPartsCar('BMW', blockedStorage)).not.toThrow();
+    expect(readPartsCar(blockedStorage)).toBe('');
     expect(() => addToPartsList(mannOil, blockedStorage)).not.toThrow();
     expect(() => clearPartsList(blockedStorage)).not.toThrow();
     expect(readPartsList(blockedStorage)).toEqual([]);

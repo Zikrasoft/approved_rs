@@ -101,6 +101,10 @@ describe('vinSchema', () => {
     expect(vinSchema.parse(' wba8e9g50gnu12345 ')).toBe('WBA8E9G50GNU12345');
   });
 
+  it('reads a VIN pasted with spaces, dots or dashes inside', () => {
+    expect(vinSchema.parse('WBA 35BG0-70N.074158')).toBe('WBA35BG070N074158');
+  });
+
   it('refuses a VIN with I, O or Q or of the wrong length', () => {
     expect(vinSchema.safeParse('WBA8E9G50GNU1234O').success).toBe(false);
     expect(vinSchema.safeParse('WBA8E9G50GNU1234').success).toBe(false);

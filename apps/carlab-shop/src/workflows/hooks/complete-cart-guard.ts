@@ -11,7 +11,7 @@ import {
 } from '../../lib/offer-cart';
 
 const REFUSAL_MESSAGES: Record<
-  Exclude<CheckoutRefusal, 'CONTACT_MISSING'>,
+  Exclude<CheckoutRefusal, 'CONTACT_MISSING' | 'CART_CHANGED'>,
   string
 > = {
   OFFER_MISSING: 'A line in the cart has no offer that can be sold now.',

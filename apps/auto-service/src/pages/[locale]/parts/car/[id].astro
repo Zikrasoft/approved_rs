@@ -7,6 +7,7 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import FitLine from '@/components/FitLine.astro';
 import PartNumbers from '@/components/PartNumbers.astro';
+import PriceTag from '@/components/PriceTag.astro';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
@@ -78,6 +79,13 @@ const specs = [
 ].filter((spec): spec is { label: string; value: string } =>
   Boolean(spec.value),
 );
+const specsSummary = [
+  engine.code,
+  vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
+  years,
+]
+  .filter(Boolean)
+  .join(', ');
 ---
 
 <Shell
@@ -86,6 +94,7 @@ const specs = [
   noindex
 >
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={name}
     crumbs={[
@@ -103,23 +112,12 @@ const specs = [
     class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
   >
     <div class="flex flex-col gap-6">
-      <div class="card flex flex-col gap-4 p-5 sm:p-6">
-        <h2 class="text-base font-semibold text-ink">{copy.specsHeading}</h2>
-        <dl class="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-          {
-            specs.map((spec) => (
-              <div class="flex flex-col gap-0.5 border-b border-line pb-3">
-                <dt class="text-xs text-muted">{spec.label}</dt>
-                <dd class="spec text-sm text-ink">{spec.value}</dd>
-              </div>
-            ))
-          }
-        </dl>
-      </div>
-
       {
         car.kit.length > 0 && (
-          <parts-list-add-all class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6">
+          <parts-list-add-all
+            class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+            data-car={name}
+          >
             <div class="flex flex-col gap-1">
               <h2 class="text-block font-semibold">{copy.kitHeading}</h2>
               <p class="text-sm leading-relaxed text-ink-2">{copy.kitLead}</p>
@@ -143,8 +141,11 @@ const specs = [
                     </span>
                     <PartNumbers pages={item.pages} />
                   </div>
-                  <span class="spec shrink-0 text-sm text-ink">
-                    {quantity(item.quantity)}
+                  <span class="flex shrink-0 flex-col items-end gap-1">
+                    <span class="spec text-sm text-ink">
+                      {quantity(item.quantity)}
+                    </span>
+                    <PriceTag pages={item.pages} />
                   </span>
                 </li>
               ))}
@@ -190,8 +191,18 @@ const specs = [
                       data-position-group
                       data-ambiguous={group.ambiguous || undefined}
                     >
-                      <p class="hidden text-sm leading-relaxed font-semibold text-signal-ink group-data-ambiguous:block">
-                        {copy.confirmVariant}
+                      <p class="hidden items-start gap-2 text-sm leading-relaxed text-ink-2 group-data-ambiguous:flex">
+                        <Icon
+                          name="warning"
+                          size={16}
+                          class="mt-0.5 shrink-0 text-signal-ink"
+                        />
+                        <span>
+                          <strong class="font-semibold text-ink">
+                            {copy.confirmVariantLead}
+                          </strong>{' '}
+                          {copy.confirmVariant}
+                        </span>
                       </p>
                       <ul class="flex flex-col gap-4">
                         {group.fitments.map((fit) => (
@@ -202,8 +213,11 @@ const specs = [
                             data-steering={fit.steering ?? undefined}
                             data-note={fit.note ?? undefined}
                           >
-                            <span class="text-sm text-ink">
-                              {translated(fit.part, 'name', locale)}
+                            <span class="flex items-baseline justify-between gap-4">
+                              <span class="text-sm text-ink">
+                                {translated(fit.part, 'name', locale)}
+                              </span>
+                              <PriceTag pages={fit.pages} />
                             </span>
                             <PartNumbers pages={fit.pages} />
                             <FitLine fit={fit} />
@@ -239,8 +253,11 @@ const specs = [
                 <ul class="divide-y divide-line">
                   {match.parts.map(({ part, pages }) => (
                     <li class="flex flex-col gap-1.5 px-5 py-4 sm:px-6">
-                      <span class="text-sm text-ink">
-                        {translated(part, 'name', locale)}
+                      <span class="flex items-baseline justify-between gap-4">
+                        <span class="text-sm text-ink">
+                          {translated(part, 'name', locale)}
+                        </span>
+                        <PriceTag pages={pages} />
                       </span>
                       <PartNumbers pages={pages} />
                     </li>
@@ -251,6 +268,34 @@ const specs = [
           </div>
         )
       }
+
+      <details class="card group p-5 sm:p-6">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
+        >
+          <span class="flex flex-col gap-0.5">
+            {copy.specsHeading}
+            <span class="spec text-sm font-normal text-muted"
+              >{specsSummary}</span
+            >
+          </span>
+          <Icon
+            name="chevronDown"
+            size={16}
+            class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+          />
+        </summary>
+        <dl class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {
+            specs.map((spec) => (
+              <div class="flex flex-col gap-0.5 border-b border-line pb-3">
+                <dt class="text-xs text-muted">{spec.label}</dt>
+                <dd class="spec text-sm text-ink">{spec.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </details>
 
       <p class="text-sm leading-relaxed text-muted">
         <a

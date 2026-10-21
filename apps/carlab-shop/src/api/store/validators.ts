@@ -1,5 +1,6 @@
 import { z } from '@medusajs/framework/zod';
 import {
+  CART_FINGERPRINT_FIELD,
   checkoutContactSchema,
   STEERING_SIDES,
   vinSchema,
@@ -32,6 +33,11 @@ export const StoreAddOfferCartItem = z.object({
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
 
+export const StoreSetOfferCartItem = z.object({
+  quantity: z.number().int().positive(),
+});
+export type StoreSetOfferCartItemType = z.infer<typeof StoreSetOfferCartItem>;
+
 export const StoreCompleteOfferCart = z
   .record(z.string(), z.unknown())
   .transform((body, context) => {
@@ -40,7 +46,16 @@ export const StoreCompleteOfferCart = z
       context.addIssue({ code: 'custom', message: contact.error.message });
       return z.NEVER;
     }
-    return contact.data;
+    const fingerprint = z
+      .string()
+      .max(10_000)
+      .optional()
+      .safeParse(body[CART_FINGERPRINT_FIELD]);
+    if (!fingerprint.success) {
+      context.addIssue({ code: 'custom', message: fingerprint.error.message });
+      return z.NEVER;
+    }
+    return { contact: contact.data, fingerprint: fingerprint.data };
   });
 export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  CART_FINGERPRINT_FIELD,
   checkoutRefusalSchema,
   offerCartResponseSchema,
   partOffersResponseSchema,
@@ -115,7 +116,10 @@ export type OffersOutcome =
   { kind: 'offers'; offers: PartOffer[] } | { kind: 'inquiry' };
 
 export type CartOutcome =
-  { kind: 'cart'; cart: OfferCart } | { kind: 'empty' } | { kind: 'inquiry' };
+  | { kind: 'cart'; cart: OfferCart }
+  | { kind: 'empty' }
+  | { kind: 'refused'; code: CheckoutRefusal; cartId: string }
+  | { kind: 'inquiry' };
 
 export type OrderOutcome =
   | { kind: 'order'; order: { id: string; display_id: number } }
@@ -207,6 +211,7 @@ export function createCatalogue({
 
   const cartOutcome = async (
     answer: Promise<Response>,
+    cartId = '',
   ): Promise<CartOutcome> => {
     try {
       const response = await answer;
@@ -214,7 +219,12 @@ export function createCatalogue({
         return { kind: 'empty' };
       }
       if (!response.ok) {
-        return { kind: 'inquiry' };
+        const refusal = checkoutRefusalSchema.safeParse(
+          await response.json().catch(() => null),
+        );
+        return refusal.success && cartId
+          ? { kind: 'refused', code: refusal.data.code, cartId }
+          : { kind: 'inquiry' };
       }
       const { cart } = offerCartResponseSchema.parse(await response.json());
       return cart.completed || cart.items.length === 0
@@ -321,6 +331,18 @@ export function createCatalogue({
             : [];
         },
       );
+    const required = new Set(
+      allVehicles.flatMap((vehicle) =>
+        matchesFor(vehicle).flatMap((match) =>
+          match.parts.map(({ part }) => part.id),
+        ),
+      ),
+    );
+    for (const entry of entries) {
+      entry.indexable ||= Boolean(
+        entry.category && required.has(entry.part.id),
+      );
+    }
     return {
       categories: allCategories,
       categoryById,
@@ -500,16 +522,35 @@ export function createCatalogue({
           offer_id: offerId,
           quantity,
         });
-      const outcome = cartId ? await cartOutcome(add(cartId)) : null;
+      const outcome = cartId ? await cartOutcome(add(cartId), cartId) : null;
       if (outcome && outcome.kind !== 'empty') {
         return outcome;
       }
-      return cartOutcome(newCartId().then(add));
+      try {
+        const id = await newCartId();
+        return cartOutcome(add(id), id);
+      } catch {
+        return { kind: 'inquiry' };
+      }
     },
 
     viewCart: (cartId: string): Promise<CartOutcome> =>
       cartOutcome(
         send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
+      ),
+
+    setQuantity: (
+      cartId: string,
+      itemId: string,
+      quantity: number,
+    ): Promise<CartOutcome> =>
+      cartOutcome(
+        send(
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}`,
+          'POST',
+          { quantity },
+        ),
+        cartId,
       ),
 
     removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>
@@ -523,12 +564,15 @@ export function createCatalogue({
     async placeOrder(
       cartId: string,
       contact: CheckoutContact,
+      fingerprint?: string,
     ): Promise<OrderOutcome> {
       try {
         const response = await send(
           `/store/offer-carts/${segment(cartId)}/complete`,
           'POST',
-          contact,
+          fingerprint === undefined
+            ? contact
+            : { ...contact, [CART_FINGERPRINT_FIELD]: fingerprint },
         );
         const body: unknown = await response.json();
         if (response.ok) {

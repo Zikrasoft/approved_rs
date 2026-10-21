@@ -889,6 +889,15 @@ describe('Requirements and the maintenance kit', () => {
     ]);
   });
 
+  it('indexes a universal good a car Requirement matches, not one nothing asks for', async () => {
+    const pages = await withRequirements().partPages();
+    const indexable = (slug: string) =>
+      pages.find((page) => page.slug === slug)?.indexable;
+
+    expect(indexable('liqui-moly-20646')).toBe(true);
+    expect(indexable('liqui-moly-20800')).toBe(false);
+  });
+
   it('builds a Model x Category page for a Requirement match alone', async () => {
     const [hub] = await withRequirements().makeHubs();
 

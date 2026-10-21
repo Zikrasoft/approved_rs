@@ -42,6 +42,7 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
     categories: {
       'IC-OIL': 'engine-oil',
       'IC-FILTER': 'oil-filters',
+      'IC-AIR': 'maintenance-consumables',
       'IC-BRAKE': 'brake-pads',
     },
     spellings: {
@@ -127,7 +128,7 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
         brand: 'MANN',
         number: 'C 30 005',
         name: 'Air filter C 30 005',
-        category: 'IC-FILTER',
+        category: 'IC-AIR',
         cross_references: [{ brand: 'BMW', number: '13 71 8 577 170' }],
         offer: offer(1700, 9, 1),
       },

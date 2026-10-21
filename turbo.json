@@ -19,6 +19,11 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@podbor/auto-service#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".astro/**", ".vercel/output/**"],
+      "env": ["MEDUSA_BACKEND_URL", "MEDUSA_PUBLISHABLE_KEY"]
+    },
     "@podbor/carlab-shop#build": {
       "env": [
         "DATABASE_*",

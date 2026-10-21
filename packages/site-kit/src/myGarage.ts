@@ -40,6 +40,12 @@ export function defineMyGarage(tagName = 'my-garage'): void {
           if (vin) input.value = vin;
         }
 
+        input.addEventListener('input', () => {
+          if (/[\s.-]/.test(input.value)) {
+            input.value = input.value.replace(/[\s.-]+/g, '').toUpperCase();
+          }
+        });
+
         this.closest('form')?.addEventListener('submit', () => {
           const value = input.value.trim().toUpperCase();
           if (value) rememberVin(value);

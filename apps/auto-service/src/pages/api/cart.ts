@@ -13,6 +13,11 @@ const addSchema = z.object({
   cart_id: catalogueIdSchema.nullable(),
   offer_id: catalogueIdSchema,
 });
+const quantitySchema = z.object({
+  cart_id: catalogueIdSchema,
+  item_id: catalogueIdSchema,
+  quantity: z.number().int().positive().max(999),
+});
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
@@ -37,6 +42,19 @@ export const POST: APIRoute = async ({ request }) => {
   return respond(
     add.success
       ? catalogue()?.addToCart(add.data.cart_id, add.data.offer_id)
+      : undefined,
+  );
+};
+
+export const PATCH: APIRoute = async ({ request }) => {
+  const change = quantitySchema.safeParse(await body(request));
+  return respond(
+    change.success
+      ? catalogue()?.setQuantity(
+          change.data.cart_id,
+          change.data.item_id,
+          change.data.quantity,
+        )
       : undefined,
   );
 };

@@ -495,7 +495,7 @@ async function seedCatalogue(
     option_keys: ['5w-30', '0w-30'],
     min: null,
     max: null,
-    quantity: 5,
+    quantity: 1,
   });
   await catalog.createRequirement({
     field_id: approvals.id,
@@ -503,7 +503,7 @@ async function seedCatalogue(
     option_keys: ['bmw-ll-04'],
     min: null,
     max: null,
-    quantity: 5,
+    quantity: 1,
   });
   await catalog.createRequirement({
     field_id: approvals.id,
@@ -511,7 +511,7 @@ async function seedCatalogue(
     option_keys: ['mb-229-51', 'mb-229-52'],
     min: null,
     max: null,
-    quantity: 7,
+    quantity: 2,
   });
 
   const parts = await seedParts(catalog, brand, category);

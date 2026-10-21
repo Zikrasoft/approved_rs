@@ -42,7 +42,10 @@ export function createContactClickRoute({
   }: {
     request: Request;
   }): Promise<Response> {
-    const form = await request.formData();
+    const form = await request.formData().catch(() => null);
+    if (!form) {
+      return new Response(null, { status: 400 });
+    }
     const channel = clickedChannelSchema.parse(form.get('channel'));
     const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
 

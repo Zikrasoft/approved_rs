@@ -3,6 +3,7 @@ import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import PartRow from '@/components/PartRow.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
@@ -44,6 +45,7 @@ const fields = category.fields.map((field) => ({
   description={lead ?? inquiry.metaDescription}
 >
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={name}
     lead={lead}
@@ -93,18 +95,14 @@ const fields = category.fields.map((field) => ({
           category.pages.length > 0 ? (
             <ul class="card divide-y divide-line">
               {category.pages.map((page) => (
-                <li>
-                  <a
-                    href={PathBuilder.partNumber(locale, page.slug)}
-                    class="flex flex-wrap items-baseline gap-x-3 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
-                  >
-                    <span class="font-semibold">{page.brand.name}</span>
-                    <span class="spec text-sm text-muted">{page.value}</span>
-                    <span class="text-sm text-ink-2">
-                      {translated(page.part, 'name', locale)}
-                    </span>
-                  </a>
-                </li>
+                <PartRow
+                  slug={page.slug}
+                  brand={page.brand.name}
+                  value={page.value}
+                  name={translated(page.part, 'name', locale)}
+                  superseded={page.superseded}
+                  offers={page.offers}
+                />
               ))}
             </ul>
           ) : (

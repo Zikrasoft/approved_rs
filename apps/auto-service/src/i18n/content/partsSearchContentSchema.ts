@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const partsSearchContentSchema = z
   .object({
+    searchHeading: z.string(),
+    searchLead: z.string(),
     label: z.string(),
     placeholder: z.string(),
     submitLabel: z.string(),

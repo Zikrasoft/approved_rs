@@ -2,8 +2,9 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import type { ICartModuleService } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import { completeCartWorkflow } from '@medusajs/medusa/core-flows';
-import { vinSchema } from '@podbor/catalog-contract';
+import { cartFingerprint, vinSchema } from '@podbor/catalog-contract';
 
+import { refuse } from '../../../../../lib/offer-cart';
 import { carLabel } from '../../../../../lib/order-lead';
 import { vinDecoders } from '../../../../../lib/vin/chain';
 import { resolveVin } from '../../../../../lib/vin/resolve';
@@ -29,10 +30,20 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  const contact = req.validatedBody;
-  const car = (await carFor(req.scope, contact.vin)) ?? contact.car;
+  const { contact, fingerprint } = req.validatedBody;
   const carts: ICartModuleService = req.scope.resolve(Modules.CART);
-  const cart = await carts.retrieveCart(id);
+  const cart = await carts.retrieveCart(id, { relations: ['items'] });
+  const current = cartFingerprint(
+    (cart.items ?? []).map((item) => ({
+      id: item.id,
+      quantity: Number(item.quantity),
+      unit_price: Number(item.unit_price),
+    })),
+  );
+  if (fingerprint !== undefined && fingerprint !== current) {
+    refuse('CART_CHANGED', 'The cart changed since it was shown.');
+  }
+  const car = (await carFor(req.scope, contact.vin)) ?? contact.car;
   await carts.updateCarts(id, {
     metadata: { ...cart.metadata, ...contact, ...(car && { car }) },
   });

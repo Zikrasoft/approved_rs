@@ -71,8 +71,9 @@ What it creates:
 - The seven placeholder Categories, plus `engine-oil` (viscosity, approvals
   multi-select, volume; maintenance kit, rank 0), `oil-filters` (filter type;
   kit, rank 1) and `brake-pads` (required axle).
-- Requirements: B47 needs 5W-30 or 0W-30 and BMW LL-04 (5 l); OM654 needs
-  MB 229.51 or 229.52 (7 l).
+- Requirements: B47 needs 5W-30 or 0W-30 and BMW LL-04 (one 5 l can); OM654
+  needs MB 229.51 or 229.52 (7 l, so two 5 l cans). A Requirement's quantity
+  counts Parts to buy, never litres.
 - Parts and Fitments: the B47 oil filter with four numbers (one superseded,
   `11 42 8 507 683`), the OM654 filter, front pads and M Sport front pads on
   the 320d (two Parts plus a note: an ambiguous position), rear pads, an old
@@ -150,9 +151,13 @@ pnpm exec astro dev --port 4321
 Storefront: <http://localhost:4321/ru/parts/>. Leads only reach the local file
 under `astro dev`; a production build writes to Vercel Blob.
 
-To check the build against the demo backend:
+To check the build against the demo backend, export the storefront variables
+first: the sitemap reads `MEDUSA_BACKEND_URL` and `MEDUSA_PUBLISHABLE_KEY`
+from the environment (turbo passes only those two through), and without them it
+lists no part pages.
 
 ```bash
+set -a; . apps/auto-service/.env.local; set +a
 pnpm turbo run build --filter=@podbor/auto-service
 python3 -m http.server 4322 --bind 127.0.0.1 --directory apps/auto-service/.vercel/output/static
 ```

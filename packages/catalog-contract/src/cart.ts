@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
-import { MAX_COMMENT_LENGTH, MAX_FIELD_LENGTH } from '@podbor/lead-crm/limits';
+import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_FIELD_LENGTH,
+  MAX_URL_LENGTH,
+} from '@podbor/lead-crm/limits';
 import { isValidContact } from '@podbor/lead-crm/phone';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
@@ -10,6 +15,7 @@ export const CHECKOUT_REFUSALS = [
   'OFFER_OUT_OF_STOCK',
   'OFFER_MISSING',
   'CONTACT_MISSING',
+  'CART_CHANGED',
 ] as const;
 
 export const checkoutRefusalSchema = z.object({
@@ -50,6 +56,15 @@ export const partOffersResponseSchema = z.object({
   offers: z.array(partOfferSchema),
 });
 
+const attribution = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .catch(undefined)
+    .transform((value) => value || undefined);
+
 const optionalText = (max: number) =>
   z
     .string()
@@ -70,6 +85,10 @@ export const checkoutContactSchema = z
     car: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH),
     locale: z.enum(CATALOG_LOCALES).optional(),
+    source_url: attribution(MAX_URL_LENGTH),
+    visitor_id: attribution(MAX_FIELD_LENGTH),
+    [AD_SOURCE_FIELD]: attribution(MAX_COMMENT_LENGTH),
+    [META_IDS_FIELD]: attribution(MAX_COMMENT_LENGTH),
   })
   .refine(({ contact, contact_channel }) =>
     isValidContact(contact, contact_channel ?? null),

@@ -13,9 +13,17 @@ interface Props {
   lead?: string;
   crumbs?: { href: string; label: string }[];
   service?: ServiceSlug;
+  actions?: boolean;
 }
 
-const { eyebrow, heading, lead, crumbs = [], service } = Astro.props;
+const {
+  eyebrow,
+  heading,
+  lead,
+  crumbs = [],
+  service,
+  actions = true,
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const trail = [
@@ -47,21 +55,29 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
       </ol>
     </nav>
     <span class="eyebrow">{eyebrow}</span>
-    <h1 class="text-hero max-w-3xl">{heading}</h1>
+    <h1 class="text-hero max-w-3xl break-words" data-hero-heading>
+      {heading}
+    </h1>
     {
       lead && (
-        <p class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+        <p
+          class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg"
+          data-hero-lead
+        >
           {lead}
         </p>
       )
     }
-    <div
-      class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center"
-    >
-      <button type="button" data-open-lead-modal class="btn btn-primary">
-        {site.header.cta}
-      </button>
-      <ContactChannels placement="hero" service={service} />
-    </div>
+    {
+      actions && (
+        <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <button type="button" data-open-lead-modal class="btn btn-primary">
+            {site.header.cta}
+          </button>
+          <ContactChannels placement="hero" service={service} />
+        </div>
+      )
+    }
+    <slot />
   </div>
 </section>
