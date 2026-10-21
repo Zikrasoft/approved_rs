@@ -26,11 +26,11 @@ const partSchema = z.object({
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
-  replaced_by_id: z.string().nullable(),
+  replaced_by: z.object({ id: z.string(), name: z.string() }).nullable(),
   identifiers: z.array(identifierSchema),
 });
 
-const PART_RELATIONS = ['identifiers', 'identifiers.brand'];
+const PART_RELATIONS = ['identifiers', 'identifiers.brand', 'replaced_by'];
 
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminSearchPartsType>,

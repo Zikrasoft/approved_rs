@@ -2,7 +2,8 @@
   "menu": {
     "fitments": "Fitments",
     "suppliers": "Suppliers",
-    "brands": "Brands"
+    "brands": "Brands",
+    "supersession": "Supersession"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -71,5 +72,23 @@
     "addSpelling": "Add spelling",
     "removeSpelling": "Remove spelling {{spelling}}",
     "delete": "Delete brand"
+  },
+  "supersession": {
+    "heading": "Supersession",
+    "intro": "Mark an outdated number or name the part that replaced this one. The old number keeps leading buyers to the current part.",
+    "findLabel": "Find a part",
+    "searchPlaceholder": "Number or brand",
+    "search": "Search",
+    "noMatch": "Nothing found. Check the number.",
+    "columns": {
+      "number": "Number",
+      "superseded": "Superseded"
+    },
+    "markSuperseded": "Number {{number}} is superseded",
+    "replacedByLabel": "Replaced by",
+    "notReplaced": "This part is not replaced.",
+    "clearReplacement": "Remove replacement",
+    "replacementPlaceholder": "Number of the replacement part",
+    "replaceWith": "Replace with {{part}}"
   }
 }

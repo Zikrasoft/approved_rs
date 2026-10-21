@@ -2,7 +2,8 @@
   "menu": {
     "fitments": "Соответствия",
     "suppliers": "Поставщики",
-    "brands": "Бренды"
+    "brands": "Бренды",
+    "supersession": "Замены номеров"
   },
   "fitments": {
     "heading": "Подбор соответствий",
@@ -73,5 +74,23 @@
     "addSpelling": "Добавить написание",
     "removeSpelling": "Удалить написание {{spelling}}",
     "delete": "Удалить бренд"
+  },
+  "supersession": {
+    "heading": "Замены номеров",
+    "intro": "Отметьте устаревший номер или укажите деталь, которая заменила эту. Старый номер продолжит вести покупателя к актуальной детали.",
+    "findLabel": "Найдите деталь",
+    "searchPlaceholder": "Номер или бренд",
+    "search": "Найти",
+    "noMatch": "Ничего не найдено. Проверьте номер.",
+    "columns": {
+      "number": "Номер",
+      "superseded": "Устарел"
+    },
+    "markSuperseded": "Номер {{number}} устарел",
+    "replacedByLabel": "Заменена деталью",
+    "notReplaced": "Деталь не заменена.",
+    "clearReplacement": "Убрать замену",
+    "replacementPlaceholder": "Номер детали-замены",
+    "replaceWith": "Заменить на {{part}}"
   }
 }

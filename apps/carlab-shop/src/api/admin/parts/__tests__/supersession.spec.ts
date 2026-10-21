@@ -143,6 +143,14 @@ medusaIntegrationTestRunner({
             },
           });
           expect((await pageFor('34116761253')).part.replaced_by).toBeNull();
+          const admin = await api.get(
+            '/admin/parts?q=34116761252',
+            adminHeaders,
+          );
+          expect(admin.data.parts[0].replaced_by).toEqual({
+            id: newId,
+            name: 'Brake pad, new',
+          });
         });
 
         it('clears a replacement', async () => {
