@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import VinLookupForm from '@/components/VinLookupForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import {
@@ -20,6 +21,7 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
+const vinCopy = content(locale).partsCar.vin;
 const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
   slug,
   ...copy.categories[slug],
@@ -35,6 +37,8 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
   />
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+    <VinLookupForm />
+
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">
       {copy.sourcingNote}
     </p>
@@ -103,6 +107,13 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
       </div>
 
       <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6">
+        <p
+          id="vin-unresolved"
+          role="status"
+          class="hidden scroll-mt-24 rounded-md bg-shade p-4 text-sm leading-relaxed text-ink target:block"
+        >
+          {vinCopy.unresolved}
+        </p>
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
         <LeadForm
           service={VIN_INQUIRY_SERVICE}

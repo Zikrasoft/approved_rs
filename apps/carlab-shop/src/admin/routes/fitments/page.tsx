@@ -34,11 +34,9 @@ type Part = {
 
 type Vehicle = {
   id: string;
-  make: string;
-  model: string;
-  engine_code: string;
-  year_from: number | null;
-  year_to: number | null;
+  model: { name: string };
+  engine: { code: string };
+  identifiers: { value: string }[];
 };
 
 type Fitment = {
@@ -55,7 +53,9 @@ const GEARBOX_OPTIONS = ['manual', 'automatic'] as const;
 const IDENTIFIER_TYPES = ['oem', 'manufacturer-number', 'ean'] as const;
 
 const vehicleLabel = (vehicle: Vehicle): string =>
-  `${vehicle.make} ${vehicle.model} (${vehicle.engine_code})`;
+  `${vehicle.model.name} ${vehicle.engine.code} (${vehicle.identifiers
+    .map(({ value }) => value)
+    .join(', ')})`;
 
 const FitmentsPage = () => {
   const { t } = useTranslation('carlabAdmin');

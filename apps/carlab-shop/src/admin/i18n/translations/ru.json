@@ -2,7 +2,9 @@
   "menu": {
     "fitments": "Соответствия",
     "suppliers": "Поставщики",
-    "brands": "Бренды"
+    "brands": "Бренды",
+    "vehicles": "Автомобили",
+    "vinLookups": "Нераспознанные VIN"
   },
   "fitments": {
     "heading": "Подбор соответствий",
@@ -73,5 +75,88 @@
     "addSpelling": "Добавить написание",
     "removeSpelling": "Удалить написание {{spelling}}",
     "delete": "Удалить бренд"
+  },
+  "vehicles": {
+    "heading": "Автомобили и справочники",
+    "choose": "Выберите",
+    "create": "Добавить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "confirmDelete": "Удалить запись? Справочник, на который ссылаются другие записи, удалить нельзя.",
+    "entities": {
+      "make": "Марки",
+      "series": "Серии",
+      "chassis": "Кузова (шасси)",
+      "vehicle_model": "Модели",
+      "engine": "Двигатели",
+      "vehicle": "Автомобили (конфигурации)",
+      "vehicle_identifier": "Коды автомобилей"
+    },
+    "fields": {
+      "name": "Название",
+      "slug": "Slug для адреса",
+      "make_id": "Марка",
+      "series_id": "Серия",
+      "chassis_id": "Кузов",
+      "model_id": "Модель",
+      "engine_id": "Двигатель",
+      "vehicle_id": "Автомобиль",
+      "code": "Код",
+      "body_style": "Тип кузова",
+      "year_from": "Год с",
+      "year_to": "Год по",
+      "family": "Семейство",
+      "fuel": "Топливо",
+      "displacement_cc": "Объем, см³",
+      "power_kw": "Мощность, кВт",
+      "drive": "Привод",
+      "market": "Рынок",
+      "steering": "Руль",
+      "type": "Тип кода",
+      "value": "Значение"
+    },
+    "values": {
+      "body_style": {
+        "sedan": "Седан",
+        "touring": "Универсал",
+        "hatchback": "Хэтчбек",
+        "coupe": "Купе",
+        "convertible": "Кабриолет",
+        "gran-coupe": "Gran Coupe",
+        "suv": "Внедорожник",
+        "van": "Минивэн"
+      },
+      "fuel": {
+        "petrol": "Бензин",
+        "diesel": "Дизель",
+        "hybrid": "Гибрид",
+        "electric": "Электро"
+      },
+      "drive": {
+        "rwd": "Задний",
+        "fwd": "Передний",
+        "awd": "Полный"
+      },
+      "steering": {
+        "left": "Левый",
+        "right": "Правый"
+      },
+      "type": {
+        "bmw-type-code": "Код типа BMW (VIN 4-7)",
+        "mercedes-baumuster": "Baumuster Mercedes"
+      }
+    }
+  },
+  "vinLookups": {
+    "heading": "Нераспознанные VIN",
+    "lead": "Коды из VIN, по которым покупатели искали автомобиль, но в каталоге нет такого автомобиля. Сверху самые частые: добавьте их в разделе «Автомобили».",
+    "empty": "Все VIN, которые искали покупатели, распознаны.",
+    "columns": {
+      "make": "Марка",
+      "code": "Код",
+      "count": "Запросов"
+    }
   }
 }
