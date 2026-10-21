@@ -15,12 +15,12 @@ categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
 priceOnRequestCta: Узнать цену
+offersHeading: Цена и наличие
+offersCta: Добавить в заявку
 currencyLabel: RSD
 columns:
   brand: Бренд
   number: Номер
-  supplier: Поставщик
-  supplierArticle: Артикул поставщика
   price: Цена
   stock: В наличии
   leadTime: Срок поставки
@@ -53,8 +53,6 @@ translations:
     columns:
       brand: Brend
       number: Broj
-      supplier: Dobavljač
-      supplierArticle: Artikal dobavljača
       price: Cena
       stock: Na skladištu
       leadTime: Rok isporuke
@@ -85,8 +83,6 @@ translations:
     columns:
       brand: Brand
       number: Number
-      supplier: Supplier
-      supplierArticle: Supplier article
       price: Price
       stock: In stock
       leadTime: Lead time

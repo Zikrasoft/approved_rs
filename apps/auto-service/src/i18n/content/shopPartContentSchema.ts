@@ -19,13 +19,13 @@ export const shopPartContentSchema = z
     priceOnRequestHeading: z.string(),
     priceOnRequestBody: z.string(),
     priceOnRequestCta: z.string(),
+    offersHeading: z.string(),
+    offersCta: z.string(),
     currencyLabel: z.string(),
     columns: z
       .object({
         brand: z.string(),
         number: z.string(),
-        supplier: z.string(),
-        supplierArticle: z.string(),
         price: z.string(),
         stock: z.string(),
         leadTime: z.string(),
