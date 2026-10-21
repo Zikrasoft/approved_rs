@@ -151,9 +151,13 @@ pnpm exec astro dev --port 4321
 Storefront: <http://localhost:4321/ru/parts/>. Leads only reach the local file
 under `astro dev`; a production build writes to Vercel Blob.
 
-To check the build against the demo backend:
+To check the build against the demo backend, export the storefront variables
+first: the sitemap reads `MEDUSA_BACKEND_URL` and `MEDUSA_PUBLISHABLE_KEY`
+from the environment (turbo passes only those two through), and without them it
+lists no part pages.
 
 ```bash
+set -a; . apps/auto-service/.env.local; set +a
 pnpm turbo run build --filter=@podbor/auto-service
 python3 -m http.server 4322 --bind 127.0.0.1 --directory apps/auto-service/.vercel/output/static
 ```
