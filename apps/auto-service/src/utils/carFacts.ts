@@ -1,7 +1,7 @@
-import type { SteeringSide, VinFacts } from '@podbor/catalog-contract';
+import type { VinFacts } from '@podbor/catalog-contract';
+import { STEERING_SIDES } from '@podbor/catalog-contract/steering';
 
 const STEERING_PARAM = 'steering';
-const STEERING_SIDES: SteeringSide[] = ['left', 'right'];
 
 export const steeringSide = (value: string | null | undefined) =>
   STEERING_SIDES.find((side) => side === value) ?? null;

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
+  vinSchema,
   type Vehicle,
 } from './vehicle.ts';
 
@@ -92,5 +93,16 @@ describe('vinLookupResponseSchema', () => {
     expect(
       vinLookupResponseSchema.safeParse({ resolved: true, facts: {} }).success,
     ).toBe(false);
+  });
+});
+
+describe('vinSchema', () => {
+  it('reads a VIN typed in any case with spaces around it', () => {
+    expect(vinSchema.parse(' wba8e9g50gnu12345 ')).toBe('WBA8E9G50GNU12345');
+  });
+
+  it('refuses a VIN with I, O or Q or of the wrong length', () => {
+    expect(vinSchema.safeParse('WBA8E9G50GNU1234O').success).toBe(false);
+    expect(vinSchema.safeParse('WBA8E9G50GNU1234').success).toBe(false);
   });
 });

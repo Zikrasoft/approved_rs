@@ -1,13 +1,12 @@
 import * as z from 'zod/mini';
+import { fitComment } from '@podbor/catalog-contract/comment';
+import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
   LEAD_FORM_RESULT_EVENT,
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
 
 export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
-
-// TODO: mirrors MAX_COMMENT_LENGTH in @podbor/lead-crm/src/form.ts, which the package does not export
-export const INQUIRY_COMMENT_LIMIT = 2000;
 
 export const listedPartSchema = z.object({
   slug: z.string(),
@@ -81,22 +80,13 @@ export function inquiryComment({
   limit: number;
   more: (count: number) => string;
 }): string {
-  const head = [car.trim()].filter(Boolean);
-  const tail = [note.trim()].filter(Boolean);
-  const compose = (lines: string[], leftOut: number) =>
-    [...head, ...lines, ...(leftOut > 0 ? [more(leftOut)] : []), ...tail].join(
-      '\n',
-    );
-
-  const lines = parts.map(partLine);
-  let kept = lines.length;
-  while (
-    kept > 0 &&
-    compose(lines.slice(0, kept), lines.length - kept).length > limit
-  ) {
-    kept -= 1;
-  }
-  return compose(lines.slice(0, kept), lines.length - kept).slice(0, limit);
+  return fitComment({
+    head: [car],
+    lines: parts.map(partLine),
+    tail: [note],
+    limit,
+    more,
+  });
 }
 
 export function definePartsListAdd(tagName = 'parts-list-add'): void {
@@ -188,7 +178,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
               car: this.dataset.car ?? '',
               parts,
               note: String(event.formData.get('comment') ?? ''),
-              limit: INQUIRY_COMMENT_LIMIT,
+              limit: MAX_COMMENT_LENGTH,
               more: (count) =>
                 (this.dataset.moreTemplate ?? '').replace(
                   '{count}',

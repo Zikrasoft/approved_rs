@@ -1,12 +1,14 @@
 import { completeCartWorkflow } from '@medusajs/medusa/core-flows';
-import type { CheckoutRefusal } from '@podbor/catalog-contract';
+import {
+  type CheckoutRefusal,
+  checkoutContactSchema,
+} from '@podbor/catalog-contract';
 
 import {
   checkoutRefusal,
   type OfferCartLineItem,
   refuse,
 } from '../../lib/offer-cart';
-import { checkoutContactSchema } from '../../lib/order-lead';
 
 const REFUSAL_MESSAGES: Record<
   Exclude<CheckoutRefusal, 'CONTACT_MISSING'>,

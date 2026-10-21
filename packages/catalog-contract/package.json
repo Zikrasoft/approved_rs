@@ -22,6 +22,20 @@
         "default": "./dist/cjs/ambiguity.js"
       },
       "default": "./src/ambiguity.ts"
+    },
+    "./steering": {
+      "require": {
+        "types": "./dist/cjs/steering.d.ts",
+        "default": "./dist/cjs/steering.js"
+      },
+      "default": "./src/steering.ts"
+    },
+    "./comment": {
+      "require": {
+        "types": "./dist/cjs/comment.d.ts",
+        "default": "./dist/cjs/comment.js"
+      },
+      "default": "./src/comment.ts"
     }
   },
   "scripts": {
@@ -30,6 +44,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@podbor/lead-crm": "workspace:*",
     "zod": "4.5.4"
   },
   "devDependencies": {

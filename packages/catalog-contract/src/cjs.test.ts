@@ -61,6 +61,22 @@ describe('CommonJS build', () => {
     ).toEqual([]);
   });
 
+  it('serves the zod-free steering subpath to require()', () => {
+    expect(require.resolve('@podbor/catalog-contract/steering')).toMatch(
+      /dist\/cjs\/steering\.js$/,
+    );
+    expect(require('@podbor/catalog-contract/steering').STEERING_SIDES).toEqual(
+      ['left', 'right'],
+    );
+  });
+
+  it('serves the checkout contact check to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(
+      contract.checkoutContactSchema.safeParse({ contact: 'call me' }).success,
+    ).toBe(false);
+  });
+
   it('serves the vehicle schemas to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([

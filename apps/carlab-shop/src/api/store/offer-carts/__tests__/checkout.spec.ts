@@ -8,9 +8,11 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { normalizePartNumber } from '@podbor/catalog-contract';
 
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
+import { LEAD_HANDOFF_ERROR } from '../../../../lib/order-lead';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
@@ -57,6 +59,7 @@ medusaIntegrationTestRunner({
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let leadRoute: Server;
       const leads: LeadPost[] = [];
+      let leadRouteStatus = 302;
 
       beforeAll(async () => {
         leadRoute = createServer((request, response) => {
@@ -64,7 +67,9 @@ medusaIntegrationTestRunner({
           request.on('data', (chunk) => (body += chunk));
           request.on('end', () => {
             leads.push(Object.fromEntries(new URLSearchParams(body)));
-            response.writeHead(302, { location: '/sr/thanks/' }).end();
+            response
+              .writeHead(leadRouteStatus, { location: '/sr/thanks/' })
+              .end();
           });
         });
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
@@ -74,6 +79,7 @@ medusaIntegrationTestRunner({
         await seedCashAtPickupCommerceDefaults(container);
 
         const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        await createVehicleFixture(catalog, { typeCode: '35BG' });
         const suppliers: SupplierModuleService =
           container.resolve(SUPPLIER_MODULE);
         const apiKeys: IApiKeyModuleService = container.resolve(
@@ -126,7 +132,18 @@ medusaIntegrationTestRunner({
 
       beforeEach(() => {
         quote(1542, 12);
+        leadRouteStatus = 302;
+        leads.length = 0;
       });
+
+      const waitFor = async <T>(read: () => Promise<T> | T) => {
+        for (let tries = 0; tries < 50; tries += 1) {
+          const value = await read();
+          if (value) return value;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        return read();
+      };
 
       afterAll(async () => {
         delete process.env.LEAD_ROUTE_URL;
@@ -286,6 +303,7 @@ medusaIntegrationTestRunner({
         expect(order.metadata).toMatchObject({
           fulfillment: 'cash_at_pickup',
           contact: '+381601234567',
+          car: 'BMW 3 серия F30 320d, B47D20O0',
         });
         expect(
           (await post(`/store/offer-carts/${cart.id}/reprice`)).data.cart
@@ -297,6 +315,17 @@ medusaIntegrationTestRunner({
         const cart = await cartWith(1);
 
         const response = await complete(cart.id, { name: 'Marko' });
+
+        expect(response.status).toBe(400);
+      });
+
+      it('refuses a contact that is neither a phone number nor a Telegram handle', async () => {
+        const cart = await cartWith(1);
+
+        const response = await complete(cart.id, {
+          ...CONTACT,
+          contact: 'call me',
+        });
 
         expect(response.status).toBe(400);
       });
@@ -367,14 +396,11 @@ medusaIntegrationTestRunner({
       });
 
       it('hands a placed order to the lead pipeline', async () => {
-        leads.length = 0;
         const cart = await cartWith(2);
 
         const placed = await complete(cart.id);
 
-        for (let tries = 0; leads.length === 0 && tries < 50; tries += 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
+        await waitFor(() => leads.length);
         expect(leads).toHaveLength(1);
         expect(leads[0]).toMatchObject({
           service: 'parts-order',
@@ -388,11 +414,28 @@ medusaIntegrationTestRunner({
         expect(leads[0].comment).toBe(
           [
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
+            'BMW 3 серия F30 320d, B47D20O0',
             'Oil filter (BMW 11 42 8575211) × 2: 3700 RSD',
             'Итого: 3700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
         );
+      });
+
+      it('records on the order that the lead route refused it', async () => {
+        leadRouteStatus = 500;
+        const cart = await cartWith(1);
+
+        const placed = await complete(cart.id);
+
+        const orders = getContainer().resolve(Modules.ORDER);
+        const metadata = await waitFor(
+          async () =>
+            (await orders.retrieveOrder(placed.data.order.id)).metadata?.[
+              LEAD_HANDOFF_ERROR
+            ],
+        );
+        expect(metadata).toBe('The lead route answered 500');
       });
     });
   },

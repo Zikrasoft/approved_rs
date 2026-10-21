@@ -1,5 +1,9 @@
 import { z } from '@medusajs/framework/zod';
-import { CATALOG_LOCALES, STEERING_SIDES } from '@podbor/catalog-contract';
+import {
+  checkoutContactSchema,
+  STEERING_SIDES,
+  vinSchema,
+} from '@podbor/catalog-contract';
 
 export const StoreSearchParts = z.object({
   q: z.string().trim().min(1).max(200),
@@ -14,13 +18,7 @@ export const StoreSearchParts = z.object({
 });
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 
-export const StoreCreateVinLookup = z.object({
-  vin: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(/^[A-HJ-NPR-Z0-9]{17}$/),
-});
+export const StoreCreateVinLookup = z.object({ vin: vinSchema });
 export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
 
 export const StoreCreateOfferCart = z.object({
@@ -34,16 +32,7 @@ export const StoreAddOfferCartItem = z.object({
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
 
-export const StoreCompleteOfferCart = z.object({
-  contact: z.string().trim().min(1).max(200),
-  contact_channel: z
-    .enum(['phone', 'telegram', 'whatsapp', 'viber'])
-    .optional(),
-  name: z.string().trim().max(200).optional(),
-  vin: z.string().trim().max(200).optional(),
-  comment: z.string().trim().max(2000).optional(),
-  locale: z.enum(CATALOG_LOCALES).optional(),
-});
+export const StoreCompleteOfferCart = checkoutContactSchema;
 export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
 export const StoreListPartPages = z.object({

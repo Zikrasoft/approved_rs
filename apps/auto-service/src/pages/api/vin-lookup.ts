@@ -2,6 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
+import { vinSchema } from '@podbor/catalog-contract';
 import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
 import { carFactsQuery } from '@/utils/carFacts';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogue';
@@ -9,13 +10,7 @@ import { PathBuilder } from '@/utils/paths';
 
 const formSchema = z.object({
   locale: z.enum(SUPPORTED_LOCALES).catch(PRIMARY_LOCALE),
-  vin: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(/^[A-HJ-NPR-Z0-9]{17}$/)
-    .nullable()
-    .catch(null),
+  vin: vinSchema.nullable().catch(null),
 });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
