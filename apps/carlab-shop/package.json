@@ -23,6 +23,7 @@
     "@medusajs/medusa": "2.21.2",
     "@medusajs/search": "2.21.2",
     "@medusajs/ui": "4.2.6",
+    "@podbor/brands": "workspace:*",
     "@podbor/catalog-contract": "workspace:*",
     "@podbor/i18n": "workspace:*",
     "@tanstack/react-query": "5.64.2",

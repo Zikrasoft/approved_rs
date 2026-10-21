@@ -1,6 +1,7 @@
 import { z } from '@medusajs/framework/zod';
 import {
   BRAND_SLUG_PATTERN,
+  CATALOG_TRANSLATION_LOCALES,
   CATALOG_KEY_PATTERN,
   CATEGORY_FIELD_TYPES,
   FITMENT_AXLES,
@@ -11,7 +12,6 @@ import {
   STEERING_SIDES,
 } from '@podbor/catalog-contract';
 
-import { TARGET_LOCALES } from '../../lib/publish/translate';
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
 export const AdminSearchParts = z.object({
@@ -143,7 +143,7 @@ export const AdminCreateBrand = z.strictObject({
 export type AdminCreateBrandType = z.infer<typeof AdminCreateBrand>;
 
 export const AdminEditTranslation = z.strictObject({
-  locale: z.enum(TARGET_LOCALES),
+  locale: z.enum(CATALOG_TRANSLATION_LOCALES),
   fields: z.record(z.string(), z.string().trim().min(1)),
 });
 export type AdminEditTranslationType = z.infer<typeof AdminEditTranslation>;

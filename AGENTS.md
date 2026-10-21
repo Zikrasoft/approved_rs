@@ -19,6 +19,7 @@ packages/lead-capture/ the capture bots' webhook route: the /start dialog that t
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address
+packages/catalog-contract/ what carlab-shop and the carlab.rs storefront agree on: part numbers, response schemas, attributes, the ambiguity rule (dual ESM/CJS)
 ```
 
 A package's contents are an `ls` away and go stale in a document, so this lists
@@ -198,18 +199,16 @@ Approved's trust/verification semantics.
   package root: the root barrel pulls zod, date-fns and the Telegram client
   into the browser bundle.
 - **A package built for a CommonJS consumer ships a CommonJS build behind a
-  `require` condition.** `packages/brands` and `@podbor/i18n`'s
-  `./translate/core` and `./section` export
+  `require` condition.** `apps/carlab-shop` is CommonJS and consumes
+  `packages/catalog-contract`, `packages/brands` and `@podbor/i18n`'s
+  `./translate/core` and `./section`; they export
   `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
   depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
-  finds no `dist/`. This predates
-  [ADR-0036](docs/adr/0036-delete-the-old-medusa-shop-entirely.md) (it existed
-  for the now-deleted `apps/medusa`, a CommonJS app) and is kept: any future
-  CommonJS consumer, Medusa or otherwise, needs the same shape.
+  finds no `dist/`.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import

@@ -1,12 +1,11 @@
 import type { BigNumberValue } from '@medusajs/framework/types';
 import { MathBN } from '@medusajs/framework/utils';
+import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import { z } from 'zod';
 
 import { StoreCompleteOfferCart } from '../api/store/validators';
 
 export const checkoutContactSchema = StoreCompleteOfferCart;
-
-export const PARTS_ORDER_SERVICE = 'parts-order';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 

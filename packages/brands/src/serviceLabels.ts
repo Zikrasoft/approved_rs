@@ -70,6 +70,8 @@ export function isBrandServiceSlug<K extends BrandKey>(
   return (SERVICE_SLUGS_BY_BRAND[brand] as readonly string[]).includes(value);
 }
 
+export const PARTS_ORDER_SERVICE = 'parts-order' satisfies LabelledService;
+
 export const PARTNER_SERVICE = {
   carlab: 'partner-carlab',
   details: 'partner-details',

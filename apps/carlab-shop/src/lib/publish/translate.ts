@@ -1,24 +1,23 @@
 import { MedusaError } from '@medusajs/framework/utils';
+import { CARLAB } from '@podbor/brands';
+import { CATALOG_TRANSLATION_LOCALES } from '@podbor/catalog-contract';
 import { sha256Hex, translateFields } from '@podbor/i18n/translate/core';
 import { z } from 'zod';
 
 import type CatalogModuleService from '../../modules/catalog/service';
 
-export const TARGET_LOCALES = ['sr', 'en'] as const;
-
-export type TargetLocale = (typeof TARGET_LOCALES)[number];
+export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
 
 const LANGUAGE_NAME: Record<TargetLocale, string> = {
   sr: 'Serbian (Latin script)',
   en: 'English',
 };
 
-const BUSINESS_DESCRIPTION =
-  'CarLab, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz';
+const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
 
 const ROWS_PER_REQUEST = 50;
 
-const localeSchema = z.enum(TARGET_LOCALES);
+const localeSchema = z.enum(CATALOG_TRANSLATION_LOCALES);
 const nestedSchema = z
   .partialRecord(localeSchema, z.record(z.string(), z.string()))
   .nullable();
@@ -283,7 +282,7 @@ export async function translateCatalogue(
     const items = (await entity.list(catalog, {})).map((row) =>
       itemOf(entity, row),
     );
-    for (const locale of TARGET_LOCALES) {
+    for (const locale of CATALOG_TRANSLATION_LOCALES) {
       await translateLocale(entity, catalog, items, locale, apiKey);
     }
   }
