@@ -14,7 +14,6 @@ export const PathBuilder = {
     `/${locale}/parts/${slug}/`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   shopPart: (locale: Locale, id: string) => `/${locale}/shop/${id}/`,
-  shopSearch: (locale: Locale) => `/${locale}/shop/search/`,
   shopCart: (locale: Locale) => `/${locale}/shop/cart/`,
   shopCheckout: (locale: Locale) => `/${locale}/shop/checkout/`,
   shopVehicles: (locale: Locale) => `/${locale}/shop/vehicles/`,
@@ -25,6 +24,8 @@ export const PathBuilder = {
   privacy: (locale: Locale) => `/${locale}/privacy/`,
   about: (locale: Locale) => `/${locale}/about/`,
 };
+
+export const PARTS_INQUIRY_ANCHOR = 'inquiry';
 
 export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));

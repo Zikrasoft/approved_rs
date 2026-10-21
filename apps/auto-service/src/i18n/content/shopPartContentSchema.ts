@@ -8,6 +8,9 @@ export const shopPartContentSchema = z
     variantsHeading: z.string(),
     equivalentsHeading: z.string(),
     noEquivalents: z.string(),
+    priceOnRequestHeading: z.string(),
+    priceOnRequestBody: z.string(),
+    priceOnRequestCta: z.string(),
     currencyLabel: z.string(),
     columns: z
       .object({

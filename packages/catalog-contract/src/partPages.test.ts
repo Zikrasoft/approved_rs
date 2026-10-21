@@ -18,8 +18,9 @@ describe('partPageSchema', () => {
   });
 
   it('refuses a page that does not say whether it has offers', () => {
-    const { has_offers: _, ...withoutOffers } = page;
-    expect(partPageSchema.safeParse(withoutOffers).success).toBe(false);
+    expect(
+      partPageSchema.safeParse({ ...page, has_offers: undefined }).success,
+    ).toBe(false);
   });
 
   it.each(['Mann Filter', 'mann--filter', '-mann', ''])(
