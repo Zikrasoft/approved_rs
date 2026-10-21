@@ -177,6 +177,21 @@ privacy:
       text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно позвонить или написать нам в любой мессенджер.
   contactTitle: Вопросы по данным
   contactBefore: Позвоните или напишите, контакты есть на странице
+about:
+  metaTitle: О проекте carlab.rs, сайт автосервиса CarLab
+  metaDescription: Что есть на сайте автосервиса CarLab в Белграде, откуда примеры работ, кому принадлежит сайт и как с нами связаться.
+  heading: Сайт автосервиса CarLab
+  lead: Здесь собрано все об автосервисе CarLab в Белграде. Услуги, подбор запчастей, примеры работ, адрес и способы записаться.
+  sitemapHeading: Что есть на сайте
+  worksCountLabel: Примеров работ
+  servicesCountLabel: Услуг в каталоге
+  contentHeading: Откуда материалы
+  contentText: Примеры работ разбирают реальные машины, которые приезжали к нам в сервис. Тексты пишет команда сервиса на русском, на сербский и английский они переводятся автоматически.
+  ownerHeading: Кому принадлежит сайт
+  ownerText: Сайт принадлежит автосервису CarLab. Как мы обращаемся с данными посетителей, описано в разделе
+  contactsHeading: Контакты
+  contactsText: Телефон и мессенджеры собраны на странице
+  developerCredit: Сайт спроектирован и разработан в студии Zikrasoft.
 notFound:
   metaTitle: Страница не найдена — CarLab
   heading: Такой страницы нет
@@ -263,7 +278,22 @@ translations:
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovo ispravljanje ili brisanje. Dovoljno je da nas pozovete ili pišete u bilo koju aplikaciju.
       contactTitle: Pitanja o podacima
-      contactBefore: Pozovite ili pišite, kontakti su na stranici
+      contactBefore: Nazovite ili napišite, kontakti su na stranici
+    about:
+      metaTitle: O projektu carlab.rs, sajt autoservisa CarLab
+      metaDescription: Šta se nalazi na sajtu autoservisa CarLab u Beogradu, primere radova, ko poseduje sajt i kako da nas kontaktirate.
+      heading: Sajt autoservisa CarLab
+      lead: Ovde je sve o autoservisu CarLab u Beogradu. Usluge, izbor delova, primeri radova, adresa i načini kako da se prijavite.
+      sitemapHeading: Šta se nalazi na sajtu
+      worksCountLabel: Primera radova
+      servicesCountLabel: Usluga u katalogu
+      contentHeading: Odakle materijali
+      contentText: Primeri radova se bave stvarnim automobilima koji su dolazili u naš servis. Tekstove piše tim servisa, a na srpski i engleski se automatski prevode.
+      ownerHeading: Ko poseduje sajt
+      ownerText: Sajt pripada autoservisu CarLab. Kako se ophodimo prema podacima posetilaca, opisano je u delu
+      contactsHeading: Kontakti
+      contactsText: Telefon i poruke su prikupljeni na stranici
+      developerCredit: Sajt je projektovan i razvijen u studiju Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena — CarLab
       heading: Takve stranice nema
@@ -463,9 +493,24 @@ translations:
         - title: Cookies
           text: The site sets a technical cookie with the selected language, an analytical cookie for Google Analytics, and an advertising one - a Meta pixel. Analytics and pixel activate on the first page load; you can refuse in the banner at the bottom of the screen, and from the next load, they won’t be enabled. The pixel notifies Meta of page views and whether you submitted an application, messaged us, or placed an order - this way we see which ads on Facebook and Instagram bring in clients. The contents of the form are not sent to it. If you continue to our Telegram bot after the site and leave an application there, our server will only inform Meta of the fact of the application - without its content or your contact details. The cart and the anonymous identifier are stored in the browser's memory (localStorage) and do not leave to our server alone.
         - title: Your Rights
-          text: You can request a copy of your data, its correction, or deletion. Just call or message us on any messenger.
-      contactTitle: Questions About Data
-      contactBefore: Call or message us, our contacts are on the page
+          text: You can request a copy of your data, have it corrected, or delete it. Just call us or message us on any platform.
+      contactTitle: Data Questions
+      contactBefore: Call or message us, the contact details are on the page
+    about:
+      metaTitle: About carlab.rs, CarLab's auto service site
+      metaDescription: Explore the CarLab auto service site in Belgrade, with work examples, ownership details, and contact information.
+      heading: CarLab Auto Service Website
+      lead: Here you will find everything about CarLab auto service in Belgrade. Services, parts selection, work examples, address, and how to book an appointment.
+      sitemapHeading: What's on the site
+      worksCountLabel: Work examples
+      servicesCountLabel: Services in the catalog
+      contentHeading: Where the materials come from
+      contentText: The work examples showcase real cars that came to our service. The texts are written by our service team in Russian and automatically translated into Serbian and English.
+      ownerHeading: Who owns the site
+      ownerText: The site belongs to CarLab auto service. How we handle visitor data is described in the section
+      contactsHeading: Contact
+      contactsText: Phone and messaging options are available on the page
+      developerCredit: The site was designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page Not Found - CarLab
       heading: This Page Doesn't Exist
@@ -601,7 +646,7 @@ translations:
         - 'Coding and adaptations after repairs: your car won’t show errors on the dashboard'
       worksHeading: What We’ve Done with BMW
       ctaEyebrow: BMW
-      ctaHeading: Describe What’s Wrong with Your Car
-      ctaBody: 'Model, year, engine, and concerns: we’ll give a preliminary idea of where to start and the cost of diagnostics.'
-      ctaCommentPlaceholder: Model, year, and what concerns you
-translatedFrom: 673c950a0b4aa8d8
+      ctaHeading: Describe the Issue with Your Car
+      ctaBody: 'Model, year, engine, and any concerns: we will provide preliminary guidance on where to start and the estimated diagnostics cost.'
+      ctaCommentPlaceholder: Model, year, and concerns
+translatedFrom: 0053579418d7a921

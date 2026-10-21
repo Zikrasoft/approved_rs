@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   BRAND_LOCALES,
   brandLocale,
+  developerCreditUrl,
+  splitDeveloperCredit,
   isBrandLocale,
   WORKSHOP_ADDRESS,
   type BrandKey,
@@ -74,5 +76,33 @@ describe('isBrandLocale', () => {
 describe('WORKSHOP_ADDRESS', () => {
   it('holds a decimal Google Maps cid, not a hex ftid or a place_id', () => {
     expect(WORKSHOP_ADDRESS.googleMapsCid).toMatch(/^\d+$/);
+  });
+});
+
+describe('developerCreditUrl', () => {
+  it('tags the studio link with the brand site it came from', () => {
+    expect(developerCreditUrl({ domain: 'carlab.rs' })).toBe(
+      'https://zikrasoft.com/?utm_source=carlab.rs&utm_medium=referral&utm_campaign=footer_credit',
+    );
+  });
+});
+
+describe('splitDeveloperCredit', () => {
+  it('splits the label around the studio name', () => {
+    expect(splitDeveloperCredit('Сайт сделан в Zikrasoft')).toEqual({
+      before: 'Сайт сделан в ',
+      after: '',
+    });
+    expect(splitDeveloperCredit('Zikrasoft がつくりました')).toEqual({
+      before: '',
+      after: ' がつくりました',
+    });
+  });
+
+  it('drops a label that lost the studio name in translation', () => {
+    expect(splitDeveloperCredit('Сайт сделан в Зикрасофт')).toEqual({
+      before: '',
+      after: '',
+    });
   });
 });

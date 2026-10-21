@@ -20,6 +20,39 @@ export function pageSchema(schema: PageSchema, canonical: string): object {
   return typeof schema === 'function' ? schema(canonical) : schema;
 }
 
+interface WebsiteOptions {
+  name: string;
+  url: string;
+  creator: { name: string; url: string };
+}
+
+function website(options: WebsiteOptions) {
+  return {
+    '@type': 'WebSite',
+    name: options.name,
+    url: options.url,
+    creator: { '@type': 'Organization', ...options.creator },
+  };
+}
+
+export function websiteSchema(options: WebsiteOptions) {
+  return { '@context': 'https://schema.org', ...website(options) };
+}
+
+export function aboutPageSchema(options: {
+  name: string;
+  url: string;
+  website: WebsiteOptions;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: options.name,
+    url: options.url,
+    about: website(options.website),
+  };
+}
+
 export type SchemaRef = Record<string, unknown>;
 
 export function citySchema(name: string) {

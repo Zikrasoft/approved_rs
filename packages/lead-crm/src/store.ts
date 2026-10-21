@@ -58,10 +58,26 @@ export interface Digest {
   due: StoredLead[];
 }
 
+const postedDigestSchema = z.object({
+  messageId: z.number().int(),
+  dueIds: z.array(z.number().int()),
+  staleIds: z.array(z.number().int()),
+  hidden: z.number().int(),
+});
+export type PostedDigest = z.infer<typeof postedDigestSchema>;
+export type DigestRows = Omit<PostedDigest, 'messageId'>;
+
+export interface OpenDigest {
+  messageId: number;
+  digest: Digest;
+  hidden: number;
+}
+
 const digestMarkSchema = z.object({
   type: z.literal('digest'),
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   createdAt: z.string(),
+  posted: postedDigestSchema.optional(),
 });
 type DigestMark = z.infer<typeof digestMarkSchema>;
 
@@ -727,6 +743,53 @@ export function createLeadStore({
         return { digests: [mark] };
       });
       return claimed;
+    },
+
+    async recordDigestMessage(now: Date, posted: PostedDigest): Promise<void> {
+      const day = businessDay(now);
+      await updateRecords(({ digests }) => ({
+        digests: digests.map((d) => (d.day === day ? { ...d, posted } : d)),
+      }));
+    },
+
+    async takeFromDigest(leadId: number): Promise<OpenDigest | undefined> {
+      let left: OpenDigest | undefined;
+      await updateRecords(({ leads, digests }) => {
+        left = undefined;
+        const latest = digests.at(-1);
+        const posted = latest?.posted;
+        if (
+          !latest ||
+          !posted ||
+          ![...posted.dueIds, ...posted.staleIds].includes(leadId)
+        )
+          return {};
+        const stillOpen = (ids: number[]) =>
+          ids.flatMap((id) => {
+            const lead = leads.find((l) => l.id === id);
+            return id !== leadId && lead && isInWork(lead) ? [lead] : [];
+          });
+        const digest = {
+          due: stillOpen(posted.dueIds),
+          stale: stillOpen(posted.staleIds),
+        };
+        left = { messageId: posted.messageId, digest, hidden: posted.hidden };
+        const ids = (list: StoredLead[]) => list.map((l) => l.id);
+        return {
+          digests: [
+            ...digests.slice(0, -1),
+            {
+              ...latest,
+              posted: {
+                ...posted,
+                dueIds: ids(digest.due),
+                staleIds: ids(digest.stale),
+              },
+            },
+          ],
+        };
+      });
+      return left;
     },
 
     async releaseDigest(now: Date): Promise<void> {

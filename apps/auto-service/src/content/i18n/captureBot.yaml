@@ -1,9 +1,9 @@
-greeting: Здравствуйте! Спасибо, что написали — заявка у нас, мастер скоро ответит.
+greeting: Здравствуйте! Спасибо, что написали. Заявка у нас, менеджер скоро ответит.
 lookingFor: Расскажите, какая у вас машина — марка, модель, год — и что с ней случилось или какие работы нужны.
-phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому мастер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
+phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому менеджер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
 phoneButton: 📱 Поделиться номером
-thanks: Спасибо! Передали мастеру — он скоро с вами свяжется.
-received: Приняли, мастер увидит ваше сообщение.
+thanks: Спасибо! Передали менеджеру, он скоро с вами свяжется.
+received: Приняли, менеджер увидит ваше сообщение.
 menu:
   text: Чем можем помочь? Выберите, что вас интересует.
   back: « Назад
@@ -18,10 +18,10 @@ contacts:
   text: Мы в Белграде, ждём вас в сервисе.
   hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
 manager:
-  button: 👤 Написать мастеру
-  text: Напишите ваш вопрос одним сообщением — мастер ответит здесь же.
-  handoff: Мастер на связи в Telegram — нажмите, чтобы открыть чат.
-  chat: Открыть чат с мастером ↗
+  button: 👤 Написать менеджеру
+  text: Напишите ваш вопрос одним сообщением, менеджер ответит здесь же.
+  handoff: Менеджер на связи в Telegram. Нажмите, чтобы открыть чат.
+  chat: Открыть чат с менеджером ↗
 partners:
   button: Партнёры
   text: Наши партнёры — выберите, кому написать.
@@ -35,18 +35,18 @@ language:
   button: 🌐 Язык
   text: Выберите язык, на котором вам удобнее общаться.
 profile:
-  description: Автосервис в Белграде — диагностика, ремонт и обслуживание. Нажмите «Старт» — расскажите, что с машиной, и мастер ответит здесь же.
-  shortDescription: Автосервис в Белграде — диагностика, ремонт, обслуживание
+  description: 'Автосервис в Белграде: диагностика, ремонт и обслуживание. Нажмите «Старт» и расскажите, что с машиной, менеджер ответит здесь же. Удобнее без бота? Напишите менеджеру напрямую: {manager}'
+  shortDescription: 'Автосервис в Белграде: диагностика, ремонт, обслуживание. Менеджер: {manager}'
   menuCommand: Главное меню
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Zdravo! Hvala što ste se javili, vaš zahtev je kod nas, majstor će uskoro odgovoriti.
-    lookingFor: Recite mi, koja vam je auto? Marka, model, godina — i šta se desilo ili koje radove trebate.
-    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa majstor ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
+    greeting: Zdravo! Hvala što ste se javili. Vaša prijava je primljena, menadžer će vam uskoro odgovoriti.
+    lookingFor: Ispričajte kako se zove vaša mašina — marka, model, godina — i šta je pošlo po zlu ili koje radove trebate.
+    phoneAsk: Nemate korisničko ime (username) u Telegramu, pa menadžer ne može da vam piše. Molimo vas ostavite broj telefona kako bismo mogli da vas kontaktiramo.
     phoneButton: 📱 Podeliti broj
-    thanks: Hvala! Prosledili smo majstoru — uskoro će vas kontaktirati.
-    received: Primili smo, majstor će videti vašu poruku.
+    thanks: Hvala! Prosledili smo menadžeru, on će vas uskoro kontaktirati.
+    received: Primili smo, menadžer će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas zanima.
       back: « Nazad
@@ -61,10 +61,10 @@ translations:
       text: Mi smo u Beogradu, čekamo vas u servisu.
       hours: Pn–Pt 08:00–18:00 · Sub 09:00–14:00
     manager:
-      button: 👤 Pitatite majstora
-      text: Postavite vaše pitanje u jednoj poruci — majstor će ovde odgovoriti.
-      handoff: Majstor je dostupan na Telegramu — kliknite da otvorite chat.
-      chat: Otvoriti chat s majstorom ↗
+      button: 👤 Piši menadžeru
+      text: Postavite svoje pitanje u jednoj poruci, menadžer će odgovoriti ovde.
+      handoff: Menadžer je dostupan na Telegramu. Kliknite da otvorite čet.
+      chat: Otvorite čet sa menadžerom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da se obratite.
@@ -78,17 +78,17 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam je lakše za komunikaciju.
     profile:
-      description: Autoservis u Beogradu — dijagnostika, popravke i održavanje. Kliknite „Start“ — recite šta je sa autom, majstor će ovde odgovoriti.
-      shortDescription: Autoservis u Beogradu — dijagnostika, popravke, održavanje
+      description: "Autoseris u Beogradu: dijagnostika, popravka i održavanje. Kliknite 'Start' i recite šta se dešava sa vašim automobilom, menadžer će odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}"
+      shortDescription: 'Autoseris u Beogradu: dijagnostika, popravka, održavanje. Menadžer: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeniti jezik
   en:
-    greeting: Hello! Thank you for reaching out — your request has been received and our mechanic will respond shortly.
-    lookingFor: Please tell me about your car — make, model, year — and what happened or what work you need.
-    phoneAsk: You don't have a username in Telegram, so our mechanic can't message you. Please share your phone number so we can reach you.
+    greeting: Hello! Thanks for reaching out. Your request is received, and a manager will respond shortly.
+    lookingFor: Tell me about your car — the make, model, year — and what happened or what work you need done.
+    phoneAsk: You don't have a username set in Telegram, so the manager can't message you. Please provide your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
-    thanks: Thank you! I've passed your message to the mechanic — he will contact you soon.
-    received: Got it, the mechanic will see your message.
+    thanks: Thank you! I've passed your message to the manager, and they will contact you soon.
+    received: Got it, the manager will see your message.
     menu:
       text: How can we help you? Choose what you're interested in.
       back: « Back
@@ -103,10 +103,10 @@ translations:
       text: We're in Belgrade, looking forward to seeing you at the service.
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
-      button: 👤 Message the mechanic
-      text: Send your question in one message — the mechanic will reply here.
-      handoff: The mechanic is available on Telegram — click to open chat.
-      chat: Open chat with the mechanic ↗
+      button: 👤 Message the manager
+      text: Please send your question in one message, and the manager will reply here.
+      handoff: The manager is available on Telegram. Click to open the chat.
+      chat: Open chat with the manager ↗
     partners:
       button: Partners
       text: Our partners — choose who to message.
@@ -120,8 +120,8 @@ translations:
       button: 🌐 Language
       text: Choose the language you're most comfortable communicating in.
     profile:
-      description: Car service in Belgrade — diagnostics, repair, and maintenance. Click 'Start' — tell us what's wrong with your car, and the mechanic will respond here.
-      shortDescription: Car service in Belgrade — diagnostics, repair, maintenance
+      description: "Car service in Belgrade: diagnostics, repair, and servicing. Click 'Start' and tell us what's wrong with your car, the manager will reply here. Prefer to skip the bot? Message the manager directly: {manager}"
+      shortDescription: 'Car service in Belgrade: diagnostics, repair, servicing. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: e894bd7a77f929d2
+translatedFrom: 09fa7161aefbbff8

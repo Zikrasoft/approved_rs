@@ -2,7 +2,9 @@
 import { contactCta } from '@podbor/site-kit/contact-control';
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import { faqPageSchema } from '@podbor/site-kit';
+import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
+import { DEVELOPER } from '@podbor/brands';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
 import heroImage from '@/assets/hero-workshop.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
@@ -27,7 +29,7 @@ export function getStaticPaths() {
 const HERO_SIZES = '(min-width: 1024px) 35vw, 100vw';
 const heroPicture = await getImage({
   src: heroImage,
-  widths: [480, 960],
+  widths: [480, 720, 960],
   sizes: HERO_SIZES,
   format: 'webp',
 });
@@ -38,12 +40,17 @@ const pages = content(locale).pages;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = faqPageSchema(home.faq);
+const website = websiteSchema({
+  name: SITE_NAME,
+  url: SITE_URL,
+  creator: DEVELOPER,
+});
 ---
 
 <Shell
   title={home.meta.title}
   description={home.meta.description}
-  jsonLd={[faqSchema]}
+  jsonLd={[faqSchema, website]}
   preloadImage={{
     src: heroPicture.src,
     srcset: heroPicture.srcSet.attribute,

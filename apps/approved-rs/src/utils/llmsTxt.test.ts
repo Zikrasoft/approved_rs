@@ -37,4 +37,16 @@ describe('generateLlmsTxt', () => {
     expect(body.startsWith('# Approved.rs')).toBe(true);
     expect(body.endsWith('\n')).toBe(true);
   });
+
+  it('links the about page', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[О проекте](https://approved.rs/ru/about/)',
+    );
+  });
+
+  it('ends with the studio credit, without tracking parameters', async () => {
+    expect((await generateLlmsTxt('ru')).trimEnd()).toMatch(
+      /\nСайт сделан в студии Zikrasoft: https:\/\/zikrasoft\.com\/$/,
+    );
+  });
 });

@@ -69,6 +69,16 @@
       "source": "/privacy/",
       "destination": "/sr/privacy/",
       "permanent": true
+    },
+    {
+      "source": "/about",
+      "destination": "/sr/about/",
+      "permanent": true
+    },
+    {
+      "source": "/about/",
+      "destination": "/sr/about/",
+      "permanent": true
     }
   ],
   "headers": [

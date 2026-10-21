@@ -5,9 +5,11 @@ import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
   findIdleTopics,
+  recordDigestMessage,
   expireGhostLeads,
   releaseDigest,
   resumeLead,
+  type PostedDigest,
 } from '@/lib/store';
 import {
   sendDigest,
@@ -48,14 +50,20 @@ async function closeIdle(now: Date): Promise<number> {
 async function postDigest(now: Date): Promise<boolean> {
   const digest = await claimDigest(now);
   if (!digest) return false;
-  let sent: boolean;
+  let posted: PostedDigest | null;
   try {
-    sent = await sendDigest(digest);
+    posted = await sendDigest(digest);
   } catch (err) {
     console.error('[reminders] failed to send the digest', { error: err });
     await releaseDigest(now);
     return false;
   }
+  if (posted)
+    await recordDigestMessage(now, posted).catch((err: unknown) => {
+      console.error('[reminders] failed to remember the digest', {
+        error: err,
+      });
+    });
   for (const lead of digest.due) {
     try {
       const resumed = await resumeLead(lead.id);
@@ -69,7 +77,7 @@ async function postDigest(now: Date): Promise<boolean> {
       });
     }
   }
-  return sent;
+  return posted != null;
 }
 
 export async function GET({ request }: APIContext): Promise<Response> {

@@ -5,6 +5,7 @@ import {
   contactCta,
   contactRegion,
   createContactControls,
+  TELEGRAM_CHOICE_ATTRIBUTE,
 } from './contactControl.ts';
 
 const BRAND = {
@@ -75,6 +76,23 @@ describe('createContactControls', () => {
     } as const;
     expect(full(request).href).toBe('https://t.me/brand_manager');
     expect(bare(request).href).toBe('https://t.me/brand_capture_bot?start=ru');
+  });
+
+  it('offers the manager beside the capture bot wherever the tile opens the bot', () => {
+    const request = {
+      channel: 'telegram',
+      onThanks: false,
+      locale: 'ru',
+    } as const;
+    const choice = (control: { attrs: Record<string, string> }) =>
+      control.attrs[TELEGRAM_CHOICE_ATTRIBUTE];
+    expect(full(request).href).toBe('https://t.me/brand_capture_bot?start=ru');
+    expect(choice(full(request))).toBe('https://t.me/brand_manager');
+    expect(choice(bare(request))).toBeUndefined();
+    expect(choice(full({ ...request, onThanks: true }))).toBeUndefined();
+    expect(choice(full({ ...request, manager: true }))).toBeUndefined();
+    for (const channel of ['phone', 'whatsapp', 'viber'] as const)
+      expect(choice(full({ ...request, channel }))).toBeUndefined();
   });
 
   it('prefills WhatsApp only when the brand configures a message', () => {

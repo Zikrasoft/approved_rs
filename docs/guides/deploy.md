@@ -499,7 +499,8 @@ Settings → Secrets and variables → Actions:
 
 ### Job permissions
 
-`GITHUB_TOKEN` is granted per job rather than for the whole file:
+`GITHUB_TOKEN` is granted per job rather than for the whole file. Three jobs hold
+`contents: write`, for two different reasons:
 
 | Job                 | `permissions`     | Why exactly that much                                                            |
 | ------------------- | ----------------- | -------------------------------------------------------------------------------- |
@@ -511,7 +512,7 @@ Settings → Secrets and variables → Actions:
 
 Write access for `translate` and write access for the deploy jobs are different
 things: the first changes a branch's contents, the second touches only housekeeping
-tags.
+tags. The workflow asks for nothing beyond `contents`.
 
 Both deploy jobs check out with `persist-credentials: false`. They need the token
 only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
@@ -734,9 +735,11 @@ sees) and once per locale the site serves. The texts are the `profile` group of
 that app's `captureBot.yaml` — written in Russian, translated by the CI
 `translate` job like the rest of the capture copy. Run it by hand, from inside
 the app, after a change to that group has been translated and merged; until
-then a locale without a translation gets the Russian text. It is not a CI step,
-and a missing `TELEGRAM_CAPTURE_BOT_TOKEN` exits non-zero without calling
-Telegram:
+then a locale without a translation gets the Russian text. A `{manager}` in
+either description becomes `@` plus the app's `PUBLIC_TG_MANAGER`, so a visitor
+who will not press Start still sees whom to write to. It is not a CI step, and
+a missing `TELEGRAM_CAPTURE_BOT_TOKEN` or `PUBLIC_TG_MANAGER` exits non-zero
+without calling Telegram:
 
 ```bash
 cd apps/approved-rs && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts
@@ -760,9 +763,11 @@ closes every Topic nobody has written in a day after its Lead was created (once;
 a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (returned
 to the status they were postponed from once listed, with a DM reminder to the
 owner) and new, negotiating or in-progress leads with no action for 7 days, each
-with «✅ Сделка #N» «❌ Отказ #N» «🔵 В работе #N» — once per day, however often the cron runs.
-A tap on a digest button redraws that message: the Lead's row goes, the other
-rows show their current status, and «✅ Всё разобрано» replaces the last one. Nothing is posted when the list is empty.
+a `#N` link that opens the Lead in the bot. It carries no buttons. Once per day,
+however often the cron runs. The day's digest record remembers the message and
+the Leads it lists, so when staff change one of them from its card or detail,
+tap «🔵 В работе» or delete it, the message is redrawn without it (and without
+Leads closed meanwhile), and «✅ Всё разобрано» replaces the last one. Nothing is posted when the list is empty.
 There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.

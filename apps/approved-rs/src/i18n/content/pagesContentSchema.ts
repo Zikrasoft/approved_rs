@@ -37,6 +37,25 @@ const privacySchema = z
   })
   .strict();
 
+const aboutSchema = z
+  .object({
+    metaTitle: z.string(),
+    metaDescription: z.string(),
+    heading: z.string(),
+    lead: z.string(),
+    sitemapHeading: z.string(),
+    casesCountLabel: z.string(),
+    countriesCountLabel: z.string(),
+    contentHeading: z.string(),
+    contentText: z.string(),
+    ownerHeading: z.string(),
+    ownerText: z.string(),
+    contactsHeading: z.string(),
+    contactsText: z.string(),
+    developerCredit: z.string(),
+  })
+  .strict();
+
 const thanksSchema = z
   .object({
     metaTitle: z.string(),
@@ -69,6 +88,7 @@ export const pagesContentSchema = z
     partners: partnersSchema,
     privacy: privacySchema,
     thanks: thanksSchema,
+    about: aboutSchema,
     casesVehicleSourcing: pageMetaSchema,
     casesVehicleBuyback: pageMetaSchema,
     casesVehicleInspection: pageMetaSchema,

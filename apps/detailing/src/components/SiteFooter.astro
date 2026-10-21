@@ -5,7 +5,13 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import { BRAND, INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import {
+  DEVELOPER,
+  developerCreditUrl,
+  splitDeveloperCredit,
+} from '@podbor/brands';
+import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 
@@ -13,6 +19,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
 const year = new Date().getFullYear();
+const credit = splitDeveloperCredit(site.footer.developerCredit);
 
 const columnHeading = 'font-display text-xs font-medium text-mute';
 
@@ -78,6 +85,11 @@ const messengers = [
           >{site.nav.contact}</a
         >
         <a
+          href={PathBuilder.about(locale)}
+          class="text-sm text-mute transition-colors duration-400 hover:text-chalk"
+          >{site.footer.aboutLabel}</a
+        >
+        <a
           href={PathBuilder.privacy(locale)}
           class="text-sm text-mute transition-colors duration-400 hover:text-chalk"
           >{site.footer.privacyLabel}</a
@@ -132,8 +144,24 @@ const messengers = [
 
     <div class="hairline mt-14"></div>
 
-    <p class="mt-6 text-xs text-mute-2">
-      {`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}
-    </p>
+    <div
+      class="mt-6 flex flex-col gap-1.5 text-xs text-mute-2 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>{`© ${year} ${SITE_NAME}. ${site.footer.rightsSuffix}`}</p>
+      <a
+        href={developerCreditUrl(BRAND)}
+        target="_blank"
+        rel="nofollow noopener"
+        {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
+        class="group w-fit py-1 text-xs no-underline text-mute-2"
+      >
+        {credit.before}
+        <span
+          class="font-medium text-champagne group-hover:underline group-focus-visible:underline"
+          >{DEVELOPER.name}</span
+        >
+        {credit.after}
+      </a>
+    </div>
   </div>
 </footer>

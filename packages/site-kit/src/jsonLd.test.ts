@@ -3,6 +3,8 @@ import {
   articleSchema,
   citySchema,
   faqPageSchema,
+  websiteSchema,
+  aboutPageSchema,
   jsonLdText,
   localBusinessSchema,
   pageSchema,
@@ -231,5 +233,58 @@ describe('localBusinessSchema', () => {
     expect(text).toBe(
       '{"@context":"https://schema.org","@type":"LocalBusiness","@id":"i","name":"N","url":"u","address":{"@type":"PostalAddress","streetAddress":"s","addressLocality":"c","addressRegion":"d","addressCountry":"RS"},"geo":{"@type":"GeoCoordinates","latitude":1,"longitude":2}}',
     );
+  });
+});
+
+describe('websiteSchema', () => {
+  it('credits the studio that built the site', () => {
+    expect(
+      websiteSchema({
+        name: 'CarLab',
+        url: 'https://carlab.rs',
+        creator: { name: 'Zikrasoft', url: 'https://zikrasoft.com/' },
+      }),
+    ).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'CarLab',
+      url: 'https://carlab.rs',
+      creator: {
+        '@type': 'Organization',
+        name: 'Zikrasoft',
+        url: 'https://zikrasoft.com/',
+      },
+    });
+  });
+});
+
+describe('aboutPageSchema', () => {
+  it('describes the site it is about and credits its studio', () => {
+    expect(
+      aboutPageSchema({
+        name: 'О проекте',
+        url: 'https://details.rs/ru/about/',
+        website: {
+          name: 'Details',
+          url: 'https://details.rs',
+          creator: { name: 'Zikrasoft', url: 'https://zikrasoft.com/' },
+        },
+      }),
+    ).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      name: 'О проекте',
+      url: 'https://details.rs/ru/about/',
+      about: {
+        '@type': 'WebSite',
+        name: 'Details',
+        url: 'https://details.rs',
+        creator: {
+          '@type': 'Organization',
+          name: 'Zikrasoft',
+          url: 'https://zikrasoft.com/',
+        },
+      },
+    });
   });
 });

@@ -34,8 +34,6 @@ jobs:
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
 
-      # The two sites that prerender without a backend, so the markup contracts
-      # site-kit owns are checked against real HTML rather than a grep.
       - env:
           PUBLIC_PHONE_NUMBER: '381000000000'
           PUBLIC_WHATSAPP_NUMBER: '381000000000'

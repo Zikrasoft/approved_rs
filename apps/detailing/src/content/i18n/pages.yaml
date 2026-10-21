@@ -55,6 +55,21 @@ privacy:
       text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно написать нам в любой из мессенджеров или позвонить.
   contactTitle: Вопросы по данным
   contactBefore: Напишите или позвоните нам, контакты есть на странице
+about:
+  metaTitle: О проекте details.rs, сайт студии детейлинга Details
+  metaDescription: Что есть на сайте студии детейлинга Details в Белграде, откуда фотографии работ, кому принадлежит сайт и как с нами связаться.
+  heading: Сайт студии Details
+  lead: Здесь собрано все о студии детейлинга Details в Белграде. Услуги, наши работы, адрес и способы записаться.
+  sitemapHeading: Что есть на сайте
+  worksCountLabel: Работ в портфолио
+  servicesCountLabel: Услуг в каталоге
+  contentHeading: Откуда материалы
+  contentText: Каждая работа на сайте снята в нашем боксе, после работы, без стоковых кадров. Тексты пишет команда студии на русском, на сербский и английский они переводятся автоматически.
+  ownerHeading: Кому принадлежит сайт
+  ownerText: Сайт принадлежит студии детейлинга Details. Как мы обращаемся с данными посетителей, описано в разделе
+  contactsHeading: Контакты
+  contactsText: Телефон и мессенджеры собраны на странице
+  developerCredit: Сайт спроектирован и разработан в студии Zikrasoft.
 notFound:
   metaTitle: Страница не найдена — Details
   heading: Такой страницы нет
@@ -118,7 +133,22 @@ translations:
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovo ispravljenje ili brisanje. Dovoljno je da nam pišete u bilo kojem od mesendžera ili da pozovete.
       contactTitle: Pitanja o podacima
-      contactBefore: Pišite ili nas pozovite, kontakti su na stranici
+      contactBefore: Pišite ili pozovite nas, kontakti su na stranici
+    about:
+      metaTitle: O projektu details.rs, sajt studije detaljinga Details
+      metaDescription: Šta se može naći na sajtu studije detaljinga Details u Beogradu, odakle su fotografije radova, kome pripada sajt i kako stupiti u kontakt.
+      heading: Sajt studije Details
+      lead: Ovde je sve o studiji detaljinga Details u Beogradu. Usluge, naši radovi, adresa i načini zakazivanja.
+      sitemapHeading: Šta se nalazi na sajtu
+      worksCountLabel: Radova u portfoliju
+      servicesCountLabel: Usluga u katalogu
+      contentHeading: Odakle materijali
+      contentText: Svaka usluga na sajtu snimljena je u našem boksu, nakon završetka rada, bez stock fotografija. Tekstove piše tim studije na ruskom, prevode se automatski na srpski i engleski.
+      ownerHeading: Kome pripada sajt
+      ownerText: Sajt pripada studiji detaljinga Details. Kako tretiramo podatke posetilaca opisano je u odeljku
+      contactsHeading: Kontakti
+      contactsText: Telefon i mapežeri su okupljeni na stranici
+      developerCredit: Sajt je projektovan i razvijen u studiji Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena — Details
       heading: Takve stranice nema
@@ -179,12 +209,27 @@ translations:
         - title: Cookies
           text: The website uses a technical cookie for the chosen interface language and an analytical one — Google Analytics. The analytics tool is activated on the first page load; it can be declined via the banner at the bottom of the screen, and it will not be activated on subsequent visits. There are no advertising cookies tracking your activity on other websites. If you came through an advertisement and did not decline analytics, the site remembers this — the source and campaign — for 30 days, so we can see which ads lead to applications.
         - title: Your Rights
-          text: You can request a copy of your data, its correction, or deletion. Simply contact us via any messenger or call.
-      contactTitle: Questions About Your Data
-      contactBefore: Write or call us, contact information is available on the page
+          text: You can request a copy of your data, corrections, or deletion. Just message us on any of the messengers or call.
+      contactTitle: Data Questions
+      contactBefore: Write or call us, contact details are on the page.
+    about:
+      metaTitle: About details.rs, Details detailing studio website
+      metaDescription: What you'll find on the Details detailing studio website in Belgrade, where the photos come from, who owns the site, and how to contact us.
+      heading: Details Studio Website
+      lead: Here you'll find everything about the Details detailing studio in Belgrade. Services, our work, address, and how to book an appointment.
+      sitemapHeading: What you'll find on the site
+      worksCountLabel: Projects in portfolio
+      servicesCountLabel: Services in catalog
+      contentHeading: Where the materials come from
+      contentText: Every project on the site was photographed in our studio after completion, without stock images. Texts are written by the studio team in Russian and are automatically translated into Serbian and English.
+      ownerHeading: Who owns the site
+      ownerText: The site belongs to the Details detailing studio. Our data handling practices are outlined in the section
+      contactsHeading: Contact Us
+      contactsText: Phone and messaging options can be found on the page
+      developerCredit: The site was designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page Not Found — Details
-      heading: No Such Page
-      body: The link may be outdated or there might be a typo in the address. Check the homepage or view our work.
-      cta: Go to Home
-translatedFrom: 4452196958bbb205
+      heading: This Page Doesn’t Exist
+      body: The link may be outdated or there may be a typo in the address. Check the homepage or view our work.
+      cta: Back to Home
+translatedFrom: 488bb2564a1ef897

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   createAfterStatusChange,
+  createDropFromDigest,
   createEnsureLeadCard,
   createEnsureLeadTopic,
   createNotifyLead,
@@ -356,6 +357,9 @@ describe('afterStatusChange', () => {
       },
       unpinLeadCard: record('unpin'),
     },
+    dropFromDigest: async (leadId) => {
+      calls.push(`digest:${leadId}`);
+    },
   });
 
   beforeEach(() => {
@@ -370,7 +374,7 @@ describe('afterStatusChange', () => {
       'a plain change',
       { status: 'new' as const },
       { author },
-      ['card:42', 'status:42:admin:222'],
+      ['card:42', 'status:42:admin:222', 'digest:42'],
     ],
     [
       'a change from a DM',
@@ -382,13 +386,20 @@ describe('afterStatusChange', () => {
         'topic:42:null',
         'dm:7:8:42:owner',
         'status:42:admin:222',
+        'digest:42',
       ],
     ],
     [
       'won',
       { status: 'won' as const },
       { author },
-      ['card:42', 'unpin:42', 'topic:42:null', 'status:42:admin:222'],
+      [
+        'card:42',
+        'unpin:42',
+        'topic:42:null',
+        'status:42:admin:222',
+        'digest:42',
+      ],
     ],
     [
       'a Lead with a topic',
@@ -414,6 +425,73 @@ describe('afterStatusChange', () => {
 
     expect(calls).toEqual(expected);
     error.mockRestore();
+  });
+});
+
+describe('dropFromDigest', () => {
+  const editDigest = vi.fn();
+  const digestStore = createLeadStore({
+    storage: createMemoryStorage(),
+    schema: storedLeadSchema,
+  });
+  const dropFromDigest = createDropFromDigest({
+    store: digestStore,
+    notifier: { editDigest },
+  });
+
+  beforeEach(() => editDigest.mockReset());
+
+  it('redraws the digest without the Lead, dropping Leads closed meanwhile', async () => {
+    const [a, b, c] = [
+      await digestStore.insertLead(baseData),
+      await digestStore.insertLead(baseData),
+      await digestStore.insertLead(baseData),
+    ];
+    await digestStore.setStatus(c!.id, 'won');
+    const now = new Date();
+    await digestStore.claimDigest(new Date(now.getTime() + 8 * 86_400_000));
+    await digestStore.recordDigestMessage(
+      new Date(now.getTime() + 8 * 86_400_000),
+      { messageId: 77, dueIds: [a!.id], staleIds: [b!.id, c!.id], hidden: 1 },
+    );
+
+    await dropFromDigest(a!.id);
+
+    expect(editDigest).toHaveBeenCalledExactlyOnceWith({
+      messageId: 77,
+      digest: { due: [], stale: [expect.objectContaining({ id: b!.id })] },
+      hidden: 1,
+    });
+  });
+
+  it('survives a digest message that can no longer be edited', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const dropFromGoneDigest = createDropFromDigest({
+      store: digestStore,
+      notifier: {
+        editDigest: async () => {
+          throw new Error('message to edit not found');
+        },
+      },
+    });
+    const lead = await digestStore.insertLead(baseData);
+    const later = new Date(Date.now() + 16 * 86_400_000);
+    await digestStore.claimDigest(later);
+    await digestStore.recordDigestMessage(later, {
+      messageId: 78,
+      dueIds: [],
+      staleIds: [lead.id],
+      hidden: 0,
+    });
+
+    await expect(dropFromGoneDigest(lead.id)).resolves.toBeUndefined();
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it('edits nothing for a Lead the digest does not show', async () => {
+    await dropFromDigest(999);
+    expect(editDigest).not.toHaveBeenCalled();
   });
 });
 

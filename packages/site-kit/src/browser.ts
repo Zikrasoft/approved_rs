@@ -6,10 +6,12 @@ export {
   DEPTH_SLUG_ATTRIBUTE,
 } from './browsingDepth.ts';
 export { markFieldValidity } from './fieldValidity.ts';
+export { DEVELOPER_CREDIT_ATTRIBUTE } from './funnel.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
+export { defineTelegramChoice } from './telegramChoice.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { defineChipFilter } from './chipFilter.ts';
 export { defineZoneMap } from './zoneMap.ts';

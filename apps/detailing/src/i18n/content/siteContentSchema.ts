@@ -30,7 +30,9 @@ const footerSchema = z
     hoursHeading: z.string(),
     hours: z.string(),
     privacyLabel: z.string(),
+    aboutLabel: z.string(),
     rightsSuffix: z.string(),
+    developerCredit: z.string(),
   })
   .strict();
 
@@ -53,6 +55,16 @@ const commonSchema = z
     fromPrice: z.string(),
     perCar: z.string(),
     emptyWorks: z.string(),
+  })
+  .strict();
+
+const telegramChoiceSchema = z
+  .object({
+    heading: z.string(),
+    bot: z.string(),
+    botHint: z.string(),
+    manager: z.string(),
+    managerHint: z.string(),
   })
   .strict();
 
@@ -111,6 +123,7 @@ export const siteContentSchema = z
     footer: footerSchema,
     common: commonSchema,
     channels: channelsSchema,
+    telegramChoice: telegramChoiceSchema,
     form: formSchema,
     cookie: cookieSchema,
   })

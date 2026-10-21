@@ -54,6 +54,17 @@ export const dictionaryContentSchema = z
         copyrightSuffix: z.string(),
         cookieSettingsLabel: z.string(),
         channelLinkLabel: z.string(),
+        developerCredit: z.string(),
+        aboutLabel: z.string(),
+      })
+      .strict(),
+    telegramChoice: z
+      .object({
+        heading: z.string(),
+        bot: z.string(),
+        botHint: z.string(),
+        manager: z.string(),
+        managerHint: z.string(),
       })
       .strict(),
     common: z

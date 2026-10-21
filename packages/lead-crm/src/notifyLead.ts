@@ -146,6 +146,28 @@ interface AfterStatusChangeOptions {
     Notifier,
     'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
+  dropFromDigest: (leadId: number) => Promise<void>;
+}
+
+export function createDropFromDigest({
+  store,
+  notifier,
+}: {
+  store: Pick<LeadStore, 'takeFromDigest'>;
+  notifier: Pick<Notifier, 'editDigest'>;
+}) {
+  return async function dropFromDigest(leadId: number): Promise<void> {
+    const left = await store.takeFromDigest(leadId);
+    if (!left) return;
+    try {
+      await notifier.editDigest(left);
+    } catch (error) {
+      console.error('[lead-crm] could not redraw the digest', {
+        error,
+        leadId,
+      });
+    }
+  };
 }
 
 export function createAfterStatusChange({
@@ -153,6 +175,7 @@ export function createAfterStatusChange({
   ensureLeadTopic,
   closeLeadTopic,
   notifier,
+  dropFromDigest,
 }: AfterStatusChangeOptions) {
   async function refreshTopic(lead: StoredLead): Promise<StoredLead> {
     if (lead.topicId == null) return lead;
@@ -182,7 +205,9 @@ export function createAfterStatusChange({
         lead,
         surface.role,
       );
-    if (author) await notifier.sendStatusChange(lead, author.role, author.id);
+    if (!author) return;
+    await notifier.sendStatusChange(lead, author.role, author.id);
+    await dropFromDigest(lead.id);
   };
 }
 

@@ -43,7 +43,9 @@ export const siteContentSchema = z
         hoursHeading: z.string(),
         hours: z.string(),
         privacyLabel: z.string(),
+        aboutLabel: z.string(),
         rightsSuffix: z.string(),
+        developerCredit: z.string(),
       })
       .strict(),
     common: z
@@ -68,6 +70,15 @@ export const siteContentSchema = z
         whatsapp: z.string(),
         viber: z.string(),
         telegram: z.string(),
+      })
+      .strict(),
+    telegramChoice: z
+      .object({
+        heading: z.string(),
+        bot: z.string(),
+        botHint: z.string(),
+        manager: z.string(),
+        managerHint: z.string(),
       })
       .strict(),
     form: z

@@ -152,7 +152,7 @@ money, the daily digest and order notifications, for all three brands in one
 chat. For every Lead, whatever channel it came from, its card and its detail
 in the bot (status buttons, ✏️ Имя, ➕ Контакт, 📝 Заметка) are the
 workspace that must always work; either of the two may change a Lead's status
-(✅ ❌ 🗣 🔵 ⏰, on the card, the detail or the digest), correct its name or give
+(✅ ❌ 🗣 🔵 ⏰, on the card or the detail; the digest only lists and links), correct its name or give
 a Lead without a real contact one, and the other is told what changed and by
 whom. Only the admin deletes a Lead. A
 real contact — a phone, @username, link or e-mail — is never overwritten: a

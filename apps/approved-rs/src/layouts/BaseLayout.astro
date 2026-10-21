@@ -8,6 +8,7 @@ import IconSprite from '@/components/icons/IconSprite.astro';
 import Footer from '@/components/Footer.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import FloatingContactWidget from '@/components/FloatingContactWidget.astro';
+import TelegramChoice from '@/components/TelegramChoice.astro';
 import '../styles/global.css';
 import { SITE_NAME } from '@/utils/constants';
 import { localeFrom } from '@/i18n/config';
@@ -18,7 +19,7 @@ import navLatinUrl from '@fontsource/golos-text/files/golos-text-latin-400-norma
 import navCtaLatinUrl from '@fontsource/golos-text/files/golos-text-latin-500-normal.woff2?url';
 
 interface Props extends MetaProps {
-  schema?: PageSchema;
+  schema?: PageSchema | PageSchema[];
   preloadImage?: HeroImageAttrs;
   ogImageWidth?: number;
   ogImageHeight?: number;
@@ -102,12 +103,14 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     <meta name="twitter:image" content={ogImage} />
 
     {
-      schema && (
-        <script
-          type="application/ld+json"
-          set:html={jsonLdText(pageSchema(schema, canonical))}
-        />
-      )
+      [schema ?? []]
+        .flat()
+        .map((entry) => (
+          <script
+            type="application/ld+json"
+            set:html={jsonLdText(pageSchema(entry, canonical))}
+          />
+        ))
     }
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -142,6 +145,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
     </main>
     <Footer />
     <FloatingContactWidget />
+    <TelegramChoice />
     <CookieConsent />
     <script is:inline>
       setTimeout(function () {

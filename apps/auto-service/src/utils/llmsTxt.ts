@@ -1,3 +1,4 @@
+import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
@@ -75,12 +76,14 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       },
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
+      { label: site.footer.aboutLabel, href: url(PathBuilder.about(locale)) },
       {
         label: site.footer.privacyLabel,
         href: url(PathBuilder.privacy(locale)),
       },
     ],
     locales: SUPPORTED_LOCALES,
+    credit: `${site.footer.developerCredit}: ${DEVELOPER.url}`,
     locale,
   });
 }

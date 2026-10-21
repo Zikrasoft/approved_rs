@@ -23,6 +23,8 @@ footer:
   hours: Пн–Сб, 09:00–19:00
   privacyLabel: Политика конфиденциальности
   rightsSuffix: Все права защищены.
+  aboutLabel: О проекте
+  developerCredit: Сайт сделан в студии Zikrasoft
 common:
   homeLabel: Главная
   skipToContent: К содержанию
@@ -77,6 +79,12 @@ cookie:
   decline: Отклонить
   settings: Настройки cookie
 
+telegramChoice:
+  heading: Как удобнее написать?
+  bot: Через бота
+  botHint: Расскажите, что с машиной, менеджер ответит в том же чате
+  manager: Менеджеру напрямую
+  managerHint: Личный чат с менеджером в Telegram
 translations:
   sr:
     nav:
@@ -103,7 +111,9 @@ translations:
       hoursHeading: Radno vreme
       hours: Pon–Sub, 09:00–19:00
       privacyLabel: Politika privatnosti
+      aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
+      developerCredit: Sajt je napravljen u studiji Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Na sadržaj
@@ -128,6 +138,12 @@ translations:
       viber: Pisati na Viber
       telegram: Pisati na Telegram
       instagram: Instagram
+    telegramChoice:
+      heading: Kako je lakše pisati?
+      bot: Preko bota
+      botHint: Recite šta je s automobilom, menadžer će odgovoriti u istom čatu
+      manager: Direktno menadžeru
+      managerHint: Lični chat s menadžerom na Telegramu
     form:
       heading: Zakažite konsultaciju
       subheading: Pogledaćemo auto, iskreno reći šta mu zaista treba i navesti tačnu cenu.
@@ -182,7 +198,9 @@ translations:
       hoursHeading: Operating Hours
       hours: Mon–Sat, 09:00–19:00
       privacyLabel: Privacy Policy
+      aboutLabel: About Us
       rightsSuffix: All rights reserved.
+      developerCredit: Website created by Zikrasoft
     common:
       homeLabel: Home
       skipToContent: Skip to Content
@@ -207,6 +225,12 @@ translations:
       viber: Message on Viber
       telegram: Message on Telegram
       instagram: Instagram
+    telegramChoice:
+      heading: How would you prefer to reach out?
+      bot: Via the bot
+      botHint: Tell us what’s wrong with your car, the manager will respond in this chat
+      manager: Directly to the manager
+      managerHint: Personal chat with the manager on Telegram
     form:
       heading: Schedule a Consultation
       subheading: We'll take a look at your car, honestly tell you what it really needs, and provide an exact price.
@@ -236,4 +260,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: 2d4b72577b30c106
+translatedFrom: cb78964604e64ea0

@@ -34,7 +34,7 @@ export {
   MAX_LIST_ROWS,
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
-export type { CaptureUpdate, LeadStore } from './store.ts';
+export type { CaptureUpdate, LeadStore, PostedDigest } from './store.ts';
 export { LEDGER_PATH, LedgerUnreadableError } from './ledgerStore.ts';
 export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';

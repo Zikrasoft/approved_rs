@@ -22,6 +22,7 @@ export const PathBuilder = {
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
+  about: (locale: Locale) => `/${locale}/about/`,
 };
 
 export function localePaths(): { params: { locale: Locale } }[] {

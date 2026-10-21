@@ -709,42 +709,45 @@ describe('POST /api/telegram-webhook', () => {
     );
   });
 
-  describe('buttons on the daily digest', () => {
+  describe('the posted daily digest', () => {
     const DIGEST_ID = 700;
-    const row = (id: number) => [
-      { text: `✅ Сделка #${id}`, callback_data: `won:${id}` },
-      { text: `❌ Отказ #${id}`, callback_data: `lost:${id}` },
-      { text: `🔵 В работе #${id}`, callback_data: `work:${id}` },
-    ];
-    const digest = (...ids: number[]) => ({
-      text: [
-        '📋 Заявки ждут решения',
-        '',
-        '⏰ Пора вернуться',
-        `#${ids[0]} Иван · Approved.rs`,
-        '',
-        '🕐 Без движения 7 дней',
-        ...ids.slice(1).map((id) => `#${id} Иван · Approved.rs`),
-      ].join('\n'),
-      reply_markup: { inline_keyboard: ids.map(row) },
-    });
-    const onDigest = (...ids: number[]) => ({
-      chatId: Number(GROUP_ID),
-      messageId: DIGEST_ID,
-      shown: digest(...ids),
-    });
-    const digestEdits = () => edits(Number(GROUP_ID), DIGEST_ID);
+    const seedWithDigest = (
+      due: number[],
+      stale: number[],
+      ...leads: StoredLead[]
+    ) =>
+      leadsStorage().seed([
+        ...leads,
+        {
+          type: 'digest',
+          day: '2026-01-01',
+          createdAt: '2026-01-01T08:00:00.000Z',
+          posted: {
+            messageId: DIGEST_ID,
+            dueIds: due,
+            staleIds: stale,
+            hidden: 0,
+          },
+        },
+      ]);
+    const digestEdits = () =>
+      crm('editMessageText').filter(
+        (p) => p.chat_id === GROUP_ID && p.message_id === DIGEST_ID,
+      );
     const link = (id: number) =>
       `<a href="https://t.me/approved_test_bot?start=lead_${id}">#${id}</a> Иван · Approved.rs`;
 
-    it('❌ from the admin closes the Lead, drops its row and tells the owner', async () => {
-      seed(
+    it('drops a Lead the admin closes from its card, and Leads closed meanwhile', async () => {
+      seedWithDigest(
+        [4, 5],
+        [6, 7],
+        makeLead({ id: 4, status: 'won' }),
         makeLead({ id: 5 }),
         makeLead({ id: 6, telegramMessageId: 556, status: 'negotiations' }),
         makeLead({ id: 7, telegramMessageId: 557 }),
       );
 
-      await tap('lost:6', ADMIN_ID, { id: 'cb-dg', ...onDigest(5, 6, 7) });
+      await tap('st:6:lost', ADMIN_ID, { id: 'cb-dg' });
 
       expect((await stored(6)).status).toBe('lost');
       expect(edits(CARD_CHAT_ID, 556)).toHaveLength(1);
@@ -754,49 +757,33 @@ describe('POST /api/telegram-webhook', () => {
             '<b>📋 Заявки ждут решения</b>',
             '',
             '<b>⏰ Пора вернуться</b>',
-            `${link(5)} · 🆕 Новая`,
+            link(5),
             '',
             '<b>🕐 Без движения 7 дней</b>',
-            `${link(7)} · 🆕 Новая`,
+            link(7),
           ].join('\n'),
-          reply_markup: { inline_keyboard: [row(5), row(7)] },
         }),
       ]);
+      expect(digestEdits()[0]!.reply_markup).toBeUndefined();
       expect(textsTo(OWNER_ID)).toEqual([
         '🔔 Заявка #6 Иван: статус — ❌ Отказ\n✍️ Админ',
       ]);
-      expect(textsTo(ADMIN_ID)).toEqual([]);
-      expect(answers()).toEqual([
-        { callback_query_id: 'cb-dg', text: 'Статус обновлён' },
-      ]);
     });
 
-    it('shows the new status of a Lead moved elsewhere since the digest went out', async () => {
-      seed(makeLead({ id: 5 }), makeLead({ id: 6, status: 'negotiations' }));
+    it('🔵 on a Lead already in progress records the touch and drops it', async () => {
+      seedWithDigest(
+        [],
+        [5, 6],
+        makeLead({ status: 'in_progress' }),
+        makeLead({ id: 6 }),
+      );
 
-      await tap('won:5', OWNER_ID, onDigest(5, 6));
-
-      expect(digestEdits()).toEqual([
-        expect.objectContaining({
-          text: expect.stringContaining(`${link(6)} · 🗣 Переговоры`),
-          reply_markup: { inline_keyboard: [row(6)] },
-        }),
-      ]);
-      expect(textsTo(ADMIN_ID)).toEqual([
-        '🔔 Заявка #5 Иван: статус — ✅ Успешно\n✍️ Владелец',
-      ]);
-      expect(textsTo(OWNER_ID)).toEqual([]);
-    });
-
-    it('🔵 on a Lead already in progress records the touch and drops the row', async () => {
-      seed(makeLead({ status: 'in_progress' }), makeLead({ id: 6 }));
-
-      await tap('work:5', ADMIN_ID, { id: 'cb-touch', ...onDigest(5, 6) });
+      await tap('work:5', ADMIN_ID, { id: 'cb-touch' });
 
       expect((await stored()).lastActivityAt).not.toBeNull();
       expect(digestEdits()).toEqual([
         expect.objectContaining({
-          reply_markup: { inline_keyboard: [row(6)] },
+          text: expect.not.stringContaining('#5<'),
         }),
       ]);
       expect(answers()).toEqual([
@@ -804,33 +791,36 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
-    it('says everything is sorted once the last row is gone', async () => {
-      seed(makeLead({ id: 5 }), makeLead({ id: 6, status: 'won' }));
+    it('says everything is sorted once the last Lead is decided', async () => {
+      seedWithDigest([], [5], makeLead({ id: 5 }));
 
-      await tap('won:5', ADMIN_ID, onDigest(5, 6));
+      await tap('won:5', ADMIN_ID);
 
       expect(digestEdits()).toEqual([
         expect.objectContaining({
           text: '<b>📋 Заявки ждут решения</b>\n\n✅ Всё разобрано',
-          reply_markup: { inline_keyboard: [] },
         }),
       ]);
     });
 
-    it('drops the row of a Lead closed elsewhere when its button is tapped', async () => {
-      seed(makeLead({ status: 'lost' }), makeLead({ id: 6 }));
+    it('drops a Lead the admin deletes', async () => {
+      seedWithDigest([], [5, 6], makeLead({ id: 5 }), makeLead({ id: 6 }));
 
-      await tap('work:5', ADMIN_ID, { id: 'cb-gone', ...onDigest(5, 6) });
+      await tap('delconfirm:5', ADMIN_ID);
 
-      expect((await stored()).status).toBe('lost');
       expect(digestEdits()).toEqual([
         expect.objectContaining({
-          reply_markup: { inline_keyboard: [row(6)] },
+          text: expect.not.stringContaining('#5<'),
         }),
       ]);
-      expect(answers()).toEqual([
-        { callback_query_id: 'cb-gone', text: LEAD_ACTION_COPY.closed },
-      ]);
+    });
+
+    it('leaves the digest alone for a Lead it does not list', async () => {
+      seedWithDigest([], [6], makeLead({ id: 5 }), makeLead({ id: 6 }));
+
+      await tap('won:5', ADMIN_ID);
+
+      expect(digestEdits()).toEqual([]);
     });
   });
 

@@ -1087,6 +1087,16 @@
       "permanent": true
     },
     {
+      "source": "/about/:path*",
+      "destination": "/ru/about/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/about/:path*/",
+      "destination": "/ru/about/:path*",
+      "permanent": true
+    },
+    {
       "source": "/thanks/:path*",
       "destination": "/ru/thanks/:path*",
       "permanent": true

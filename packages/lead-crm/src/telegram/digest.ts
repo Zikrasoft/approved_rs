@@ -1,13 +1,5 @@
-import { z } from 'zod';
-import { isInWork, type StoredLead } from '../schema.ts';
-import { MAX_LIST_ROWS, type Digest } from '../store.ts';
-import {
-  escapeHtml,
-  leadDisplayName,
-  statusMark,
-  type Btn,
-  type Keyboard,
-} from './markup.ts';
+import { MAX_LIST_ROWS, type Digest, type DigestRows } from '../store.ts';
+import { escapeHtml, leadDisplayName } from './markup.ts';
 
 const DIGEST_SECTIONS: [keyof Digest, string][] = [
   ['due', '⏰ Пора вернуться'],
@@ -15,98 +7,43 @@ const DIGEST_SECTIONS: [keyof Digest, string][] = [
 ];
 
 const DIGEST_TITLE = '📋 Заявки ждут решения';
+const DIGEST_DONE = '✅ Всё разобрано';
 const MAX_DIGEST_NAME = 40;
 
-const DIGEST_COPY = {
-  done: '✅ Всё разобрано',
-} as const;
+export type RenderedDigest = DigestRows & { text: string };
 
-type DigestView = { text: string; reply_markup: Keyboard };
-
-function digestButtons({ id }: StoredLead): Btn[] {
-  return [
-    { text: `✅ Сделка #${id}`, callback_data: `won:${id}` },
-    { text: `❌ Отказ #${id}`, callback_data: `lost:${id}` },
-    { text: `🔵 В работе #${id}`, callback_data: `work:${id}` },
-  ];
-}
-
-function renderDigest(
+export function renderDigest(
   digest: Digest,
   botUsername: string,
-  { hidden = 0, withStatus = false } = {},
-): DigestView {
+  hidden = 0,
+): RenderedDigest {
   const lines = [`<b>${DIGEST_TITLE}</b>`];
-  const rows: Btn[][] = [];
+  const shown = { dueIds: [] as number[], staleIds: [] as number[] };
+  let room = MAX_LIST_ROWS;
   for (const [key, title] of DIGEST_SECTIONS) {
     const leads = digest[key];
-    const shown = leads.slice(0, MAX_LIST_ROWS - rows.length);
-    hidden += leads.length - shown.length;
-    if (shown.length === 0) continue;
+    const visible = leads.slice(0, room);
+    room -= visible.length;
+    hidden += leads.length - visible.length;
+    if (visible.length === 0) continue;
     lines.push('', `<b>${title}</b>`);
-    for (const l of shown) {
+    for (const l of visible) {
       const name = leadDisplayName(l).slice(0, MAX_DIGEST_NAME);
-      const status = withStatus ? ` · ${statusMark(l.status)}` : '';
       lines.push(
-        `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}${status}`,
+        `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
       );
-      rows.push(digestButtons(l));
+      shown[`${key}Ids`].push(l.id);
     }
   }
-  if (rows.length === 0) lines.push('', DIGEST_COPY.done);
+  if (room === MAX_LIST_ROWS) lines.push('', DIGEST_DONE);
   if (hidden > 0) lines.push('', `+${hidden} ещё`);
-  return { text: lines.join('\n'), reply_markup: { inline_keyboard: rows } };
+  return { text: lines.join('\n'), ...shown, hidden };
 }
 
 export function digestMessage(
   digest: Digest,
   botUsername: string,
-): DigestView | null {
+): RenderedDigest | null {
   if (digest.due.length + digest.stale.length === 0) return null;
   return renderDigest(digest, botUsername);
-}
-
-const digestButton = (action: string) =>
-  z
-    .object({ callback_data: z.string().regex(new RegExp(`^${action}:\\d+$`)) })
-    .transform(({ callback_data }) => Number(callback_data.split(':')[1]));
-
-const digestMessageSchema = z.object({
-  text: z.string(),
-  reply_markup: z.object({
-    inline_keyboard: z
-      .array(
-        z.tuple([
-          digestButton('won'),
-          digestButton('lost'),
-          digestButton('work'),
-        ]),
-      )
-      .min(1),
-  }),
-});
-
-function sectionOf(text: string, id: number): keyof Digest {
-  const at = text.indexOf(`#${id} `);
-  const stale = text.indexOf(DIGEST_SECTIONS[1]![1]);
-  return stale !== -1 && at > stale ? 'stale' : 'due';
-}
-
-export function redrawDigest(
-  message: unknown,
-  leads: StoredLead[],
-  actedOn: number,
-  botUsername: string,
-): DigestView | null {
-  const parsed = digestMessageSchema.safeParse(message);
-  if (!parsed.success) return null;
-  const { text, reply_markup } = parsed.data;
-  const digest: Digest = { due: [], stale: [] };
-  for (const [id] of reply_markup.inline_keyboard) {
-    const lead = leads.find((l) => l.id === id);
-    if (id === actedOn || !lead || !isInWork(lead)) continue;
-    digest[sectionOf(text, id)].push(lead);
-  }
-  const hidden = Number(/\n\+(\d+) ещё$/.exec(text)?.[1] ?? 0);
-  return renderDigest(digest, botUsername, { hidden, withStatus: true });
 }

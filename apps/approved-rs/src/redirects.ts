@@ -72,6 +72,7 @@ const UNPREFIXED_SECTIONS = [
   'cases',
   'contacts',
   'privacy',
+  'about',
   'thanks',
 ];
 

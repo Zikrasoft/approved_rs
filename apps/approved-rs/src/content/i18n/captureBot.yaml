@@ -36,8 +36,8 @@ language:
   button: 🌐 Язык
   text: Выберите язык, на котором вам удобнее общаться.
 profile:
-  description: Подбираем и проверяем автомобили в Германии, Испании, Швейцарии и Сербии, привозим из Европы и Китая. Нажмите «Старт» — расскажите, какая машина вам нужна, и менеджер ответит здесь же.
-  shortDescription: Автоподбор, привоз и выкуп авто в Европе
+  description: 'Подбираем и проверяем автомобили в Германии, Испании, Швейцарии и Сербии, привозим из Европы и Китая. Нажмите «Старт» и расскажите, какая машина вам нужна, менеджер ответит здесь же. Удобнее без бота? Напишите менеджеру напрямую: {manager}'
+  shortDescription: 'Автоподбор, привоз и выкуп авто в Европе. Менеджер: {manager}'
   menuCommand: Главное меню
   langCommand: Сменить язык
 translations:
@@ -80,8 +80,8 @@ translations:
       button: 🌐 Language
       text: Please choose the language you prefer to communicate in.
     profile:
-      description: We source and inspect vehicles in Germany, Spain, Switzerland, and Serbia, bringing them from Europe and China. Click 'Start' — tell us what car you need, and the manager will respond here.
-      shortDescription: Car sourcing, import, and buyback in Europe
+      description: "We source and inspect cars in Germany, Spain, Switzerland, and Serbia, bringing them in from Europe and China. Click 'Start' and tell us what kind of car you need, the manager will respond right here. Prefer to skip the bot? Message the manager directly: {manager}"
+      shortDescription: 'Car sourcing, import, and buyback in Europe. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
   sr:
@@ -123,8 +123,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik kojim vam je lakše da komunicirate.
     profile:
-      description: Biramo i proveravamo automobile u Nemačkoj, Španiji, Švajcarskoj i Srbiji, uvozimo iz Evrope i Kine. Kliknite „Start“ — recite nam koja vam kola trebaju, i menadžer će ovde odgovoriti.
-      shortDescription: Auto izbor, uvoz i otkup automobila u Evropi
+      description: 'Biramo i radimo provere automobila u Nemačkoj, Španiji, Švajcarskoj i Srbiji, donosimo iz Evrope i Kine. Kliknite na „Start“ i recite nam koja vam mašina treba, menadžer će vam odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}'
+      shortDescription: 'Odabir automobila, uvoz i otkup vozila u Evropi. Menadžer: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeni jezik
   es:
@@ -166,8 +166,8 @@ translations:
       button: 🌐 Idioma
       text: Elige el idioma en el que te sientas más cómodo.
     profile:
-      description: Seleccionamos y verificamos coches en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en 'Iniciar' y cuéntanos qué coche necesitas, el gerente responderá aquí.
-      shortDescription: Selección de coches, importación y compra en Europa
+      description: 'Seleccionamos y revisamos coches en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en «Inicio» y cuéntanos qué coche necesitas, el gerente responderá aquí mismo. ¿Prefieres comunicarte directamente? Escribe al gerente: {manager}'
+      shortDescription: 'Selección de coches, importación y compra de autos en Europa. Gerente: {manager}'
       menuCommand: Menú principal
       langCommand: Cambiar idioma
   de:
@@ -209,8 +209,8 @@ translations:
       button: 🌐 Sprache
       text: Wählen Sie die Sprache, in der Sie sich am wohlsten fühlen.
     profile:
-      description: Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien und bringen sie aus Europa und China. Klicken Sie auf „Start“ - erzählen Sie, welches Auto Sie brauchen, und der Manager wird hier antworten.
-      shortDescription: Autofindung, Bring- und Rückkauf von Autos in Europa
+      description: 'Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien, bringen sie aus Europa und China. Klicken Sie auf „Start“ und erzählen Sie uns, welches Auto Sie benötigen, der Manager wird hier antworten. Bequemer ohne Bot? Schreiben Sie direkt an den Manager: {manager}'
+      shortDescription: 'Autoauswahl, Import und Rückkauf von Autos in Europa. Manager: {manager}'
       menuCommand: Hauptmenü
-      langCommand: Sprache ändern
-translatedFrom: 69151eaa7ce25825
+      langCommand: Sprache wechseln
+translatedFrom: edb6a2d2dc324893

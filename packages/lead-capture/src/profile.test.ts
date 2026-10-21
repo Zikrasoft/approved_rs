@@ -34,11 +34,16 @@ afterEach(() => {
 
 describe('applying the capture bot profile', () => {
   beforeEach(async () => {
-    await applyBotProfile(TOKEN, copyFor, {
-      botUsername: 'capture_bot',
-      locales: ['ru', 'sr', 'en'],
-      primaryLocale: 'sr',
-    });
+    await applyBotProfile(
+      TOKEN,
+      copyFor,
+      {
+        botUsername: 'capture_bot',
+        locales: ['ru', 'sr', 'en'],
+        primaryLocale: 'sr',
+      },
+      'brand_manager',
+    );
   });
 
   it('sets the description for the default and every served locale', () => {
@@ -56,6 +61,37 @@ describe('applying the capture bot profile', () => {
       { short_description: 'SHORT_ru', language_code: 'ru' },
       { short_description: 'SHORT_sr', language_code: 'sr' },
       { short_description: 'SHORT_en', language_code: 'en' },
+    ]);
+  });
+
+  it('names the manager wherever the copy asks for one', async () => {
+    api = recordBotApi();
+    vi.stubGlobal('fetch', api.fetch);
+
+    await applyBotProfile(
+      TOKEN,
+      () =>
+        ({
+          profile: {
+            description: 'Press Start, or write to {manager} directly.',
+            shortDescription: 'Bot. Manager: {manager}',
+            menuCommand: 'MENU',
+            langCommand: 'LANG',
+          },
+        }) as CaptureCopy,
+      {
+        botUsername: 'capture_bot',
+        locales: [],
+        primaryLocale: 'ru',
+      },
+      'brand_manager',
+    );
+
+    expect(payloads('setMyDescription')).toEqual([
+      { description: 'Press Start, or write to @brand_manager directly.' },
+    ]);
+    expect(payloads('setMyShortDescription')).toEqual([
+      { short_description: 'Bot. Manager: @brand_manager' },
     ]);
   });
 
@@ -77,11 +113,16 @@ it('stops at the first call Telegram refuses', async () => {
   api.fail('setMyDescription', 'Bad Request: description is too long');
 
   await expect(
-    applyBotProfile(TOKEN, copyFor, {
-      botUsername: 'capture_bot',
-      locales: ['ru'],
-      primaryLocale: 'ru',
-    }),
+    applyBotProfile(
+      TOKEN,
+      copyFor,
+      {
+        botUsername: 'capture_bot',
+        locales: ['ru'],
+        primaryLocale: 'ru',
+      },
+      'brand_manager',
+    ),
   ).rejects.toThrow('description is too long');
   expect(api.callsTo('setMyCommands', TOKEN)).toEqual([]);
 });
@@ -103,7 +144,7 @@ const FULL_COPY = {
   request: { button: 'RQ', car: 'RC', service: 'RS', done: 'RD', unsure: 'RU' },
   language: { button: 'LG', text: 'LGT' },
   profile: {
-    description: 'DESCRIPTION',
+    description: 'DESCRIPTION {manager}',
     shortDescription: 'SHORT',
     menuCommand: 'MENU',
     langCommand: 'LANG',
@@ -117,12 +158,53 @@ describe('the profile script', () => {
     primaryLocale: 'ru' as const,
   };
 
-  function copyFile(): URL {
+  function copyFile(copy: object = FULL_COPY): URL {
     const dir = mkdtempSync(join(tmpdir(), 'capture-profile-'));
     const path = join(dir, 'captureBot.yaml');
-    writeFileSync(path, JSON.stringify(FULL_COPY));
+    writeFileSync(path, JSON.stringify(copy));
     return new URL(`file://${path}`);
   }
+
+  it('applies the translations of a copy that also asks for a budget', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const withBudget = { ...FULL_COPY, budget: 'B' };
+    const english = {
+      ...withBudget,
+      profile: { ...FULL_COPY.profile, description: 'ENGLISH' },
+    };
+
+    await runBotProfileScript(
+      copyFile({ ...withBudget, translations: { en: english } }),
+      PROFILE,
+      { TELEGRAM_CAPTURE_BOT_TOKEN: TOKEN, PUBLIC_TG_MANAGER: 'brand_manager' },
+    );
+
+    expect(payloads('setMyDescription')).toContainEqual({
+      description: 'ENGLISH',
+      language_code: 'en',
+    });
+    expect(warn).not.toHaveBeenCalled();
+    log.mockRestore();
+    warn.mockRestore();
+  });
+
+  it('exits 1 without a manager to name', async () => {
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit');
+    });
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await expect(
+      runBotProfileScript(copyFile(), PROFILE, {
+        TELEGRAM_CAPTURE_BOT_TOKEN: TOKEN,
+        PUBLIC_TG_MANAGER: '',
+      }),
+    ).rejects.toThrow('exit');
+    expect(error).toHaveBeenCalledWith('PUBLIC_TG_MANAGER is not set');
+    expect(exit).toHaveBeenCalledWith(1);
+    expect(api.calls).toEqual([]);
+  });
 
   it('exits 1 without a token', async () => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -145,12 +227,13 @@ describe('the profile script', () => {
 
     await runBotProfileScript(copyFile(), PROFILE, {
       TELEGRAM_CAPTURE_BOT_TOKEN: TOKEN,
+      PUBLIC_TG_MANAGER: 'brand_manager',
     });
 
     expect(payloads('setMyDescription')).toEqual([
-      { description: 'DESCRIPTION' },
-      { description: 'DESCRIPTION', language_code: 'ru' },
-      { description: 'DESCRIPTION', language_code: 'en' },
+      { description: 'DESCRIPTION @brand_manager' },
+      { description: 'DESCRIPTION @brand_manager', language_code: 'ru' },
+      { description: 'DESCRIPTION @brand_manager', language_code: 'en' },
     ]);
     expect(log).toHaveBeenCalledWith(
       'Capture bot profile set for ru, en (default: ru)',
