@@ -1,4 +1,5 @@
 import { z } from '@medusajs/framework/zod';
+import { STEERING_SIDES } from '@podbor/catalog-contract';
 
 export const StoreSearchParts = z.object({
   q: z.string().trim().min(1),
@@ -31,3 +32,11 @@ export const StoreListPartPages = z.object({
   limit: z.coerce.number().int().positive().max(5000).default(1000),
 });
 export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;
+
+export const StoreListFitments = StoreListPartPages;
+export type StoreListFitmentsType = StoreListPartPagesType;
+
+export const StoreVehicleParts = z.object({
+  steering: z.enum(STEERING_SIDES).optional(),
+});
+export type StoreVehiclePartsType = z.infer<typeof StoreVehicleParts>;

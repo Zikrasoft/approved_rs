@@ -8,6 +8,8 @@ import {
   Select,
   Table,
   Text,
+  Textarea,
+  toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,21 +43,83 @@ type Vehicle = {
 
 type Fitment = {
   id: string;
-  part_id: string;
   vehicle_id: string;
+  quantity: number;
+  axle: string | null;
+  side: string | null;
+  production_from: string | null;
+  production_to: string | null;
   steering: string | null;
   gearbox: string | null;
+  note: string | null;
   source: string;
 };
 
+type Reference = { id: string; name?: string; code?: string };
+
 const STEERING_OPTIONS = ['left', 'right'] as const;
 const GEARBOX_OPTIONS = ['manual', 'automatic'] as const;
+const AXLE_OPTIONS = ['front', 'rear'] as const;
+const SIDE_OPTIONS = ['left', 'right'] as const;
 const IDENTIFIER_TYPES = ['oem', 'manufacturer-number', 'ean'] as const;
+const ANY = 'any';
+
+const REFERENCE_FILTERS = [
+  { key: 'make_id', path: 'makes', collection: 'makes', label: 'make' },
+  { key: 'series_id', path: 'series', collection: 'series', label: 'series' },
+  {
+    key: 'chassis_id',
+    path: 'chassis',
+    collection: 'chassis',
+    label: 'chassis',
+  },
+  {
+    key: 'model_id',
+    path: 'vehicle-models',
+    collection: 'vehicle_models',
+    label: 'model',
+  },
+  { key: 'engine_id', path: 'engines', collection: 'engines', label: 'engine' },
+] as const;
 
 const vehicleLabel = (vehicle: Vehicle): string =>
   `${vehicle.model.name} ${vehicle.engine.code} (${vehicle.identifiers
     .map(({ value }) => value)
     .join(', ')})`;
+
+const referenceLabel = (row: Reference): string =>
+  [row.name, row.code].filter(Boolean).join(' ');
+
+const day = (iso: string | null): string => iso?.slice(0, 10) ?? '';
+
+const OptionSelect = ({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  options: { value: string; label: string }[];
+}) => (
+  <Select
+    value={value || ANY}
+    onValueChange={(next) => onChange(next === ANY ? '' : next)}
+  >
+    <Select.Trigger>
+      <Select.Value placeholder={placeholder} />
+    </Select.Trigger>
+    <Select.Content>
+      <Select.Item value={ANY}>{placeholder}</Select.Item>
+      {options.map((option) => (
+        <Select.Item key={option.value} value={option.value}>
+          {option.label}
+        </Select.Item>
+      ))}
+    </Select.Content>
+  </Select>
+);
 
 const FitmentsPage = () => {
   const { t } = useTranslation('carlabAdmin');
@@ -72,12 +136,17 @@ const FitmentsPage = () => {
   const [newValue, setNewValue] = useState('');
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [vehicleId, setVehicleId] = useState('');
+  const [references, setReferences] = useState<Record<string, Reference[]>>({});
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
+  const [quantity, setQuantity] = useState('1');
+  const [axle, setAxle] = useState('');
+  const [side, setSide] = useState('');
   const [productionFrom, setProductionFrom] = useState('');
   const [productionTo, setProductionTo] = useState('');
   const [steering, setSteering] = useState('');
   const [gearbox, setGearbox] = useState('');
+  const [note, setNote] = useState('');
 
   const [fitments, setFitments] = useState<Fitment[]>([]);
 
@@ -92,11 +161,21 @@ const FitmentsPage = () => {
         setBrands(data.brands);
       }
     });
+    for (const { path, collection } of REFERENCE_FILTERS) {
+      adminFetch<Record<string, Reference[]>>(`/admin/${path}`).then((data) => {
+        if (data) {
+          setReferences((current) => ({
+            ...current,
+            [collection]: data[collection],
+          }));
+        }
+      });
+    }
   }, []);
 
-  const loadFitments = async (partId: string, vehId: string) => {
+  const loadFitments = async (partId: string) => {
     const data = await adminFetch<{ fitments: Fitment[] }>(
-      `/admin/fitments?part_id=${partId}&vehicle_id=${vehId}`,
+      `/admin/fitments?part_id=${partId}`,
     );
     if (data) {
       setFitments(data.fitments);
@@ -104,12 +183,12 @@ const FitmentsPage = () => {
   };
 
   useEffect(() => {
-    if (selectedPart && vehicleId) {
-      loadFitments(selectedPart.id, vehicleId);
+    if (selectedPart) {
+      loadFitments(selectedPart.id);
     } else {
       setFitments([]);
     }
-  }, [selectedPart, vehicleId]);
+  }, [selectedPart]);
 
   const search = async () => {
     if (!query.trim()) {
@@ -141,25 +220,75 @@ const FitmentsPage = () => {
     setQuery('');
   };
 
-  const createFitment = async () => {
-    if (!selectedPart || !vehicleId) {
+  const setFilter = (key: string) => (value: string) =>
+    setFilters((current) => ({ ...current, [key]: value }));
+
+  const hasFilter = Object.values(filters).some((value) => value.trim());
+
+  const year = (value: string | undefined) =>
+    value?.trim() ? Number(value) : undefined;
+
+  const attach = async () => {
+    if (!selectedPart || !hasFilter) {
       return;
     }
-    const created = await adminFetch('/admin/fitments', {
-      method: 'POST',
-      body: JSON.stringify({
-        part_id: selectedPart.id,
-        vehicle_id: vehicleId,
-        production_from: productionFrom || null,
-        production_to: productionTo || null,
-        steering: steering || null,
-        gearbox: gearbox || null,
-      }),
-    });
-    if (created) {
-      await loadFitments(selectedPart.id, vehicleId);
+    const result = await adminFetch<{ matched: number; created: number }>(
+      '/admin/fitments/bulk',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          part_id: selectedPart.id,
+          vehicle_id: filters.vehicle_id || undefined,
+          make_id: filters.make_id || undefined,
+          series_id: filters.series_id || undefined,
+          chassis_id: filters.chassis_id || undefined,
+          model_id: filters.model_id || undefined,
+          engine_id: filters.engine_id || undefined,
+          engine_family: filters.engine_family?.trim() || undefined,
+          year_from: year(filters.year_from),
+          year_to: year(filters.year_to),
+          quantity: Number(quantity) || 1,
+          axle: axle || null,
+          side: side || null,
+          production_from: productionFrom || null,
+          production_to: productionTo || null,
+          steering: steering || null,
+          gearbox: gearbox || null,
+          note: note.trim() || null,
+        }),
+      },
+    );
+    if (result) {
+      toast.success(
+        t('fitments.attached', {
+          count: result.created,
+          matched: result.matched,
+        }),
+      );
+      await loadFitments(selectedPart.id);
     }
   };
+
+  const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+
+  const position = (fitment: Fitment) =>
+    [
+      fitment.axle && t(`fitments.axleOptions.${fitment.axle}`),
+      fitment.side && t(`fitments.sideOptions.${fitment.side}`),
+    ]
+      .filter(Boolean)
+      .join(', ') || '-';
+
+  const criteria = (fitment: Fitment) =>
+    [
+      fitment.steering &&
+        `${t('fitments.columns.steering')}: ${t(`fitments.steeringOptions.${fitment.steering}`)}`,
+      fitment.gearbox && t(`fitments.gearboxOptions.${fitment.gearbox}`),
+      (fitment.production_from || fitment.production_to) &&
+        `${day(fitment.production_from)}..${day(fitment.production_to)}`,
+    ]
+      .filter(Boolean)
+      .join(', ') || '-';
 
   return (
     <Container className="flex flex-col gap-y-6">
@@ -277,59 +406,125 @@ const FitmentsPage = () => {
 
       <div className="flex flex-col gap-y-2">
         <Label>{t('fitments.step2Label')}</Label>
-        <Select value={vehicleId} onValueChange={setVehicleId}>
-          <Select.Trigger>
-            <Select.Value placeholder={t('fitments.vehiclePlaceholder')} />
-          </Select.Trigger>
-          <Select.Content>
-            {vehicles.map((vehicle) => (
-              <Select.Item key={vehicle.id} value={vehicle.id}>
-                {vehicleLabel(vehicle)}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select>
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('fitments.step2Hint')}
+        </Text>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <OptionSelect
+            value={filters.vehicle_id ?? ''}
+            onChange={setFilter('vehicle_id')}
+            placeholder={t('fitments.filters.vehicle')}
+            options={vehicles.map((vehicle) => ({
+              value: vehicle.id,
+              label: vehicleLabel(vehicle),
+            }))}
+          />
+          {REFERENCE_FILTERS.map(({ key, collection, label }) => (
+            <OptionSelect
+              key={key}
+              value={filters[key] ?? ''}
+              onChange={setFilter(key)}
+              placeholder={t(`fitments.filters.${label}`)}
+              options={(references[collection] ?? []).map((row) => ({
+                value: row.id,
+                label: referenceLabel(row),
+              }))}
+            />
+          ))}
+          <Input
+            placeholder={t('fitments.filters.engineFamily')}
+            value={filters.engine_family ?? ''}
+            onChange={(event) => setFilter('engine_family')(event.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder={t('fitments.filters.yearFrom')}
+            value={filters.year_from ?? ''}
+            onChange={(event) => setFilter('year_from')(event.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder={t('fitments.filters.yearTo')}
+            value={filters.year_to ?? ''}
+            onChange={(event) => setFilter('year_to')(event.target.value)}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-y-2">
         <Label>{t('fitments.step3Label')}</Label>
-        <div className="flex gap-x-2">
-          <Input
-            type="date"
-            value={productionFrom}
-            onChange={(event) => setProductionFrom(event.target.value)}
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <Label className="flex flex-col gap-y-1">
+            <Text size="small">{t('fitments.quantityLabel')}</Text>
+            <Input
+              type="number"
+              min={1}
+              value={quantity}
+              onChange={(event) => setQuantity(event.target.value)}
+            />
+          </Label>
+          <Label className="flex flex-col gap-y-1">
+            <Text size="small">{t('fitments.productionFromLabel')}</Text>
+            <Input
+              type="date"
+              value={productionFrom}
+              onChange={(event) => setProductionFrom(event.target.value)}
+            />
+          </Label>
+          <Label className="flex flex-col gap-y-1">
+            <Text size="small">{t('fitments.productionToLabel')}</Text>
+            <Input
+              type="date"
+              value={productionTo}
+              onChange={(event) => setProductionTo(event.target.value)}
+            />
+          </Label>
+          <OptionSelect
+            value={axle}
+            onChange={setAxle}
+            placeholder={t('fitments.axlePlaceholder')}
+            options={AXLE_OPTIONS.map((value) => ({
+              value,
+              label: t(`fitments.axleOptions.${value}`),
+            }))}
           />
-          <Input
-            type="date"
-            value={productionTo}
-            onChange={(event) => setProductionTo(event.target.value)}
+          <OptionSelect
+            value={side}
+            onChange={setSide}
+            placeholder={t('fitments.sidePlaceholder')}
+            options={SIDE_OPTIONS.map((value) => ({
+              value,
+              label: t(`fitments.sideOptions.${value}`),
+            }))}
           />
-          <Select value={steering} onValueChange={setSteering}>
-            <Select.Trigger>
-              <Select.Value placeholder={t('fitments.steeringPlaceholder')} />
-            </Select.Trigger>
-            <Select.Content>
-              {STEERING_OPTIONS.map((side) => (
-                <Select.Item key={side} value={side}>
-                  {t(`fitments.steeringOptions.${side}`)}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
-          <Select value={gearbox} onValueChange={setGearbox}>
-            <Select.Trigger>
-              <Select.Value placeholder={t('fitments.gearboxPlaceholder')} />
-            </Select.Trigger>
-            <Select.Content>
-              {GEARBOX_OPTIONS.map((type) => (
-                <Select.Item key={type} value={type}>
-                  {t(`fitments.gearboxOptions.${type}`)}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
+          <OptionSelect
+            value={steering}
+            onChange={setSteering}
+            placeholder={t('fitments.steeringPlaceholder')}
+            options={STEERING_OPTIONS.map((value) => ({
+              value,
+              label: t(`fitments.steeringOptions.${value}`),
+            }))}
+          />
+          <OptionSelect
+            value={gearbox}
+            onChange={setGearbox}
+            placeholder={t('fitments.gearboxPlaceholder')}
+            options={GEARBOX_OPTIONS.map((value) => ({
+              value,
+              label: t(`fitments.gearboxOptions.${value}`),
+            }))}
+          />
         </div>
-        <Button onClick={createFitment} disabled={!selectedPart || !vehicleId}>
+        <Textarea
+          placeholder={t('fitments.notePlaceholder')}
+          value={note}
+          onChange={(event) => setNote(event.target.value)}
+        />
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('fitments.noteHint')}
+        </Text>
+        <Button onClick={attach} disabled={!selectedPart || !hasFilter}>
           {t('fitments.createFitment')}
         </Button>
       </div>
@@ -341,32 +536,41 @@ const FitmentsPage = () => {
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>
+                  {t('fitments.columns.vehicle')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.quantity')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.position')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.criteria')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('fitments.columns.note')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
                   {t('fitments.columns.source')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('fitments.columns.steering')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('fitments.columns.gearbox')}
                 </Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {fitments.map((fitment) => (
-                <Table.Row key={fitment.id}>
-                  <Table.Cell>{fitment.source}</Table.Cell>
-                  <Table.Cell>
-                    {fitment.steering
-                      ? t(`fitments.steeringOptions.${fitment.steering}`)
-                      : '—'}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {fitment.gearbox
-                      ? t(`fitments.gearboxOptions.${fitment.gearbox}`)
-                      : '—'}
-                  </Table.Cell>
-                </Table.Row>
-              ))}
+              {fitments.map((fitment) => {
+                const vehicle = vehicleById.get(fitment.vehicle_id);
+                return (
+                  <Table.Row key={fitment.id}>
+                    <Table.Cell>
+                      {vehicle ? vehicleLabel(vehicle) : fitment.vehicle_id}
+                    </Table.Cell>
+                    <Table.Cell>{fitment.quantity}</Table.Cell>
+                    <Table.Cell>{position(fitment)}</Table.Cell>
+                    <Table.Cell>{criteria(fitment)}</Table.Cell>
+                    <Table.Cell>{fitment.note ?? '-'}</Table.Cell>
+                    <Table.Cell>{fitment.source}</Table.Cell>
+                  </Table.Row>
+                );
+              })}
             </Table.Body>
           </Table>
         </div>

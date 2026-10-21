@@ -1,4 +1,9 @@
-import { type Vehicle, vehicleSchema } from '@podbor/catalog-contract';
+import {
+  type Fitment,
+  fitmentSchema,
+  type Vehicle,
+  vehicleSchema,
+} from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { PART_IDENTIFIER_TYPES } from '../modules/catalog/models/part-identifier';
@@ -83,6 +88,19 @@ const rawPartSchema = z.object({
     }),
   ),
 });
+
+const isoDate = z
+  .date()
+  .nullable()
+  .transform((date) => date?.toISOString() ?? null);
+
+export const fitmentRowSchema = fitmentSchema.extend({
+  production_from: isoDate,
+  production_to: isoDate,
+});
+
+export const toFitmentResponse = (row: unknown): Fitment =>
+  fitmentRowSchema.parse(row);
 
 export const toPartResponse = (row: unknown) => {
   const part = rawPartSchema.parse(row);

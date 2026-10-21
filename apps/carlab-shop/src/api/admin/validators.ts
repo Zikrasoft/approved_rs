@@ -3,14 +3,14 @@ import {
   BRAND_SLUG_PATTERN,
   CATALOG_KEY_PATTERN,
   CATEGORY_FIELD_TYPES,
+  FITMENT_AXLES,
+  FITMENT_SIDES,
+  GEARBOX_TYPES,
   normalizePartNumber,
+  STEERING_SIDES,
 } from '@podbor/catalog-contract';
 
 import { TARGET_LOCALES } from '../../lib/publish/translate';
-import {
-  FITMENT_GEARBOX_TYPES,
-  FITMENT_STEERING_SIDES,
-} from '../../modules/catalog/models/fitment';
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
 export const AdminSearchParts = z.object({
@@ -59,15 +59,64 @@ export const AdminListFitments = z.object({
 });
 export type AdminListFitmentsType = z.infer<typeof AdminListFitments>;
 
+const fitmentConditions = {
+  quantity: z.number().int().positive().optional(),
+  axle: z.enum(FITMENT_AXLES).nullable().optional(),
+  side: z.enum(FITMENT_SIDES).nullable().optional(),
+  production_from: z.coerce.date().nullable().optional(),
+  production_to: z.coerce.date().nullable().optional(),
+  steering: z.enum(STEERING_SIDES).nullable().optional(),
+  gearbox: z.enum(GEARBOX_TYPES).nullable().optional(),
+  note: z
+    .string()
+    .trim()
+    .transform((note) => note || null)
+    .nullable()
+    .optional(),
+};
+
 export const AdminCreateFitment = z.object({
   part_id: z.string().min(1),
   vehicle_id: z.string().min(1),
-  production_from: z.coerce.date().nullable().optional(),
-  production_to: z.coerce.date().nullable().optional(),
-  steering: z.enum(FITMENT_STEERING_SIDES).nullable().optional(),
-  gearbox: z.enum(FITMENT_GEARBOX_TYPES).nullable().optional(),
+  ...fitmentConditions,
 });
 export type AdminCreateFitmentType = z.infer<typeof AdminCreateFitment>;
+
+export const VEHICLE_FILTER_KEYS = [
+  'vehicle_id',
+  'make_id',
+  'series_id',
+  'chassis_id',
+  'model_id',
+  'engine_id',
+  'engine_family',
+  'year_from',
+  'year_to',
+] as const;
+
+export const AdminBulkAttachFitments = z
+  .object({
+    part_id: z.string().min(1),
+    vehicle_id: z.string().min(1).optional(),
+    make_id: z.string().min(1).optional(),
+    series_id: z.string().min(1).optional(),
+    chassis_id: z.string().min(1).optional(),
+    model_id: z.string().min(1).optional(),
+    engine_id: z.string().min(1).optional(),
+    engine_family: z.string().trim().min(1).optional(),
+    year_from: z.number().int().optional(),
+    year_to: z.number().int().optional(),
+    ...fitmentConditions,
+  })
+  .refine(
+    (body) => VEHICLE_FILTER_KEYS.some((key) => body[key] !== undefined),
+    {
+      message: 'Pick at least one Vehicle filter',
+    },
+  );
+export type AdminBulkAttachFitmentsType = z.infer<
+  typeof AdminBulkAttachFitments
+>;
 
 export const AdminUpdateSupplier = z.object({
   markup_percentage: z.number().min(0),

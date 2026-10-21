@@ -159,6 +159,20 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       update: (catalog, rows) => catalog.updateCategoryFieldOptions(rows),
     },
   ],
+  [
+    'fitment',
+    {
+      subject: 'notes on where a car part fits, such as "Только с M-пакетом"',
+      fields: ['note'],
+      codec: nested,
+      list: (catalog, filters) =>
+        catalog.listFitments(
+          { ...filters, note: { $ne: null } },
+          { select: [...TRANSLATION_COLUMNS, 'note'], take: null },
+        ),
+      update: (catalog, rows) => catalog.updateFitments(rows),
+    },
+  ],
 ]);
 
 type Item = {
