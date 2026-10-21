@@ -22,6 +22,8 @@ interface Props {
   commentNote?: string;
   vin?: { label: string; placeholder: string };
   defaultChannel?: 'phone' | 'whatsapp' | 'viber' | 'telegram';
+  action?: string;
+  submitLabel?: string;
   class?: string;
 }
 
@@ -34,6 +36,8 @@ const {
   commentNote,
   vin,
   defaultChannel = 'phone',
+  action = '/api/leads',
+  submitLabel,
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -72,7 +76,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 <lead-form class="contents">
   <form
     method="POST"
-    action="/api/leads"
+    action={action}
     data-lead-form
     data-submitting-label={site.form.submitting}
     class={`flex flex-col gap-4 ${className}`}
@@ -258,7 +262,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
         type="submit"
         class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
       >
-        <span data-submit-label>{site.form.submit}</span>
+        <span data-submit-label>{submitLabel ?? site.form.submit}</span>
         <Icon name="arrowRight" />
       </button>
     </div>

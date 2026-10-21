@@ -26,6 +26,7 @@ const envSchema = z.object({
   TYPESENSE_API_KEY: z.string().min(1).default('xyz'),
   OPENAI_API_KEY: optionalSecret,
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
+  LEAD_ROUTE_URL: optionalSecret.pipe(z.url().optional()),
 });
 
 export type Env = z.infer<typeof envSchema>;

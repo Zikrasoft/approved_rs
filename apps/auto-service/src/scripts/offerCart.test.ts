@@ -1,68 +1,81 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  readCartId,
-  writeCartId,
-  isOfferPriceChangedError,
-  CART_ID_STORAGE_KEY,
+  forgetCart,
+  moveCartToInquiry,
+  readCart,
+  rememberCart,
 } from './offerCart';
+import { readPartsList } from './partsList';
 
-describe('readCartId', () => {
-  it('returns the stored cart id', () => {
-    const storage = { getItem: vi.fn().mockReturnValue('cart_123') };
-    expect(readCartId(storage)).toBe('cart_123');
-    expect(storage.getItem).toHaveBeenCalledWith(CART_ID_STORAGE_KEY);
+const memoryStorage = () => {
+  const items = new Map<string, string>();
+  return {
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => void items.set(key, value),
+    removeItem: (key: string) => void items.delete(key),
+  };
+};
+
+const blockedStorage = {
+  getItem: () => {
+    throw new Error('blocked');
+  },
+  setItem: () => {
+    throw new Error('blocked');
+  },
+  removeItem: () => {
+    throw new Error('blocked');
+  },
+};
+
+const bmwOil = {
+  slug: 'bmw-11428575211',
+  brand: 'BMW',
+  number: '11 42 8575211',
+  name: 'Масляный фильтр',
+};
+
+const cart = {
+  id: 'cart_1',
+  completed: false,
+  currency: 'RSD',
+  total: 1850,
+  items: [
+    {
+      id: 'item_1',
+      offer_id: 'offer_1',
+      quantity: 1,
+      unit_price: 1850,
+      available: true,
+      part: bmwOil,
+    },
+  ],
+};
+
+describe('the remembered cart', () => {
+  it('keeps the cart id and its parts for the next page load', () => {
+    const storage = memoryStorage();
+
+    rememberCart(cart, storage);
+
+    expect(readCart(storage)).toEqual({ id: 'cart_1', parts: [bmwOil] });
+    forgetCart(storage);
+    expect(readCart(storage)).toBeNull();
   });
 
-  it('returns null when storage throws', () => {
-    const storage = {
-      getItem: vi.fn().mockImplementation(() => {
-        throw new Error('blocked');
-      }),
-    };
-    expect(readCartId(storage)).toBeNull();
-  });
-});
+  it('moves the parts into the inquiry list when the shop is down', () => {
+    const storage = memoryStorage();
+    rememberCart(cart, storage);
 
-describe('writeCartId', () => {
-  it('stores the cart id', () => {
-    const storage = { setItem: vi.fn() };
-    writeCartId('cart_123', storage);
-    expect(storage.setItem).toHaveBeenCalledWith(
-      CART_ID_STORAGE_KEY,
-      'cart_123',
-    );
+    moveCartToInquiry(storage);
+
+    expect(readPartsList(storage)).toEqual([bmwOil]);
   });
 
-  it('swallows a storage error', () => {
-    const storage = {
-      setItem: vi.fn().mockImplementation(() => {
-        throw new Error('blocked');
-      }),
-    };
-    expect(() => writeCartId('cart_123', storage)).not.toThrow();
-  });
-});
+  it('works without a cart when storage is blocked', () => {
+    rememberCart(cart, blockedStorage);
+    forgetCart(blockedStorage);
 
-describe('isOfferPriceChangedError', () => {
-  it('recognizes the structured stale-price error', () => {
-    const error = {
-      response: { status: 400, data: { code: 'OFFER_PRICE_CHANGED' } },
-    };
-    expect(isOfferPriceChangedError(error)).toBe(true);
-  });
-
-  it('rejects an unrelated error shape', () => {
-    expect(
-      isOfferPriceChangedError({ response: { data: { code: 'OTHER' } } }),
-    ).toBe(false);
-  });
-
-  it('rejects a non-object value', () => {
-    expect(isOfferPriceChangedError('nope')).toBe(false);
-    expect(isOfferPriceChangedError(null)).toBe(false);
-  });
-
-  it('rejects an object without a response', () => {
-    expect(isOfferPriceChangedError({})).toBe(false);
+    expect(readCart(blockedStorage)).toBeNull();
   });
 });

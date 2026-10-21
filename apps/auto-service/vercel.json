@@ -221,6 +221,96 @@
       "permanent": true
     },
     {
+      "source": "/ru/shop/cart",
+      "destination": "/ru/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/shop/cart/",
+      "destination": "/ru/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/shop/checkout",
+      "destination": "/ru/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/shop/checkout/",
+      "destination": "/ru/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/shop/:path*",
+      "destination": "/ru/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/shop/:path+/",
+      "destination": "/ru/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/cart",
+      "destination": "/sr/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/cart/",
+      "destination": "/sr/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/checkout",
+      "destination": "/sr/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/checkout/",
+      "destination": "/sr/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/:path*",
+      "destination": "/sr/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/shop/:path+/",
+      "destination": "/sr/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/cart",
+      "destination": "/en/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/cart/",
+      "destination": "/en/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/checkout",
+      "destination": "/en/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/checkout/",
+      "destination": "/en/parts/cart/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/:path*",
+      "destination": "/en/parts/",
+      "permanent": true
+    },
+    {
+      "source": "/en/shop/:path+/",
+      "destination": "/en/parts/",
+      "permanent": true
+    },
+    {
       "source": "/services/:path*",
       "destination": "/sr/services/:path*",
       "permanent": true
@@ -233,11 +323,6 @@
     {
       "source": "/parts/:path*",
       "destination": "/sr/parts/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/shop/:path*",
-      "destination": "/sr/shop/:path*",
       "permanent": true
     },
     {

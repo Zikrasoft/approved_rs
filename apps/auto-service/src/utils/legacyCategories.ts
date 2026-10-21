@@ -24,3 +24,19 @@ export const legacyCategoryRedirects = (): Redirect[] =>
       ),
     ),
   );
+
+export const legacyShopRedirects = (): Redirect[] =>
+  SUPPORTED_LOCALES.flatMap((locale) => [
+    ...['cart', 'checkout'].flatMap((page) =>
+      [`/${locale}/shop/${page}`, `/${locale}/shop/${page}/`].map((source) => ({
+        source,
+        destination: PathBuilder.partsCart(locale),
+        permanent: true,
+      })),
+    ),
+    ...[`/${locale}/shop/:path*`, `/${locale}/shop/:path+/`].map((source) => ({
+      source,
+      destination: PathBuilder.parts(locale),
+      permanent: true,
+    })),
+  ]);

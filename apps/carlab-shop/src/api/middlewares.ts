@@ -29,6 +29,7 @@ import {
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
   StoreAddOfferCartItem,
+  StoreCompleteOfferCart,
   StoreCreateOfferCart,
   StoreCreateVinLookup,
   StoreListFitments,
@@ -185,6 +186,11 @@ export default defineMiddlewares({
       matcher: '/store/offer-carts/:id/items',
       method: 'POST',
       middlewares: [validateAndTransformBody(StoreAddOfferCartItem)],
+    },
+    {
+      matcher: '/store/offer-carts/:id/complete',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(StoreCompleteOfferCart)],
     },
   ],
 });

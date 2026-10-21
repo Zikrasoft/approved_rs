@@ -1,4 +1,11 @@
 import {
+  checkoutRefusalSchema,
+  offerCartResponseSchema,
+  partOffersResponseSchema,
+  placedOrderResponseSchema,
+  type CheckoutRefusal,
+  type OfferCart,
+  type PartOffer,
   categoriesResponseSchema,
   fitmentsResponseSchema,
   maintenanceKit,
@@ -102,6 +109,26 @@ export type VinOutcome =
   | { kind: 'vehicle'; vehicle: Vehicle; facts: VinFacts }
   | { kind: 'inquiry'; vin: string };
 
+export type OffersOutcome =
+  { kind: 'offers'; offers: PartOffer[] } | { kind: 'inquiry' };
+
+export type CartOutcome =
+  { kind: 'cart'; cart: OfferCart } | { kind: 'empty' } | { kind: 'inquiry' };
+
+export type OrderOutcome =
+  | { kind: 'order'; order: { id: string; display_id: number } }
+  | { kind: 'refused'; code: CheckoutRefusal }
+  | { kind: 'inquiry' };
+
+export type CheckoutContact = {
+  contact: string;
+  contact_channel?: 'phone' | 'telegram' | 'whatsapp' | 'viber';
+  name?: string;
+  vin?: string;
+  comment?: string;
+  locale?: CatalogLocale;
+};
+
 export type CatalogueConfig = {
   backendUrl: string;
   publishableKey: string;
@@ -128,24 +155,52 @@ export function createCatalogue({
   fetch = globalThis.fetch,
   timeoutMs = CATALOGUE_TIMEOUT_MS,
 }: CatalogueConfig) {
-  const request = async (path: string, body?: unknown): Promise<unknown> => {
-    const response = await fetch(`${backendUrl}${path}`, {
-      headers: { 'x-publishable-api-key': publishableKey },
-      ...(body !== undefined && {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-publishable-api-key': publishableKey,
-        },
-        body: JSON.stringify(body),
-      }),
+  const send = (path: string, method = 'GET', body?: unknown) =>
+    fetch(`${backendUrl}${path}`, {
+      method,
+      headers: {
+        'x-publishable-api-key': publishableKey,
+        ...(body !== undefined && { 'content-type': 'application/json' }),
+      },
+      ...(body !== undefined && { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(timeoutMs),
     });
+
+  const request = async (path: string, body?: unknown): Promise<unknown> => {
+    const response = await send(
+      path,
+      body === undefined ? 'GET' : 'POST',
+      body,
+    );
     if (!response.ok) {
       throw new Error(`Catalogue ${path} answered ${response.status}`);
     }
     return response.json();
   };
+
+  const cartOutcome = async (
+    answer: Promise<Response>,
+  ): Promise<CartOutcome> => {
+    try {
+      const response = await answer;
+      if (response.status === 404) {
+        return { kind: 'empty' };
+      }
+      if (!response.ok) {
+        return { kind: 'inquiry' };
+      }
+      const { cart } = offerCartResponseSchema.parse(await response.json());
+      return cart.completed || cart.items.length === 0
+        ? { kind: 'empty' }
+        : { kind: 'cart', cart };
+    } catch {
+      return { kind: 'inquiry' };
+    }
+  };
+
+  const newCartId = async () =>
+    offerCartResponseSchema.parse(await request('/store/offer-carts', {})).cart
+      .id;
 
   const paged = async <T>(
     path: string,
@@ -395,6 +450,68 @@ export function createCatalogue({
       }
     },
 
+    async liveOffers(identifierId: string): Promise<OffersOutcome> {
+      try {
+        const { offers } = partOffersResponseSchema.parse(
+          await request(`/store/part-identifiers/${identifierId}/offers`),
+        );
+        return { kind: 'offers', offers };
+      } catch {
+        return { kind: 'inquiry' };
+      }
+    },
+
+    async addToCart(
+      cartId: string | null,
+      offerId: string,
+      quantity = 1,
+    ): Promise<CartOutcome> {
+      const add = (id: string) =>
+        send(`/store/offer-carts/${id}/items`, 'POST', {
+          offer_id: offerId,
+          quantity,
+        });
+      const outcome = cartId ? await cartOutcome(add(cartId)) : null;
+      if (outcome && outcome.kind !== 'empty') {
+        return outcome;
+      }
+      return cartOutcome(newCartId().then(add));
+    },
+
+    viewCart: (cartId: string): Promise<CartOutcome> =>
+      cartOutcome(send(`/store/offer-carts/${cartId}/reprice`, 'POST', {})),
+
+    removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>
+      cartOutcome(
+        send(`/store/offer-carts/${cartId}/items/${itemId}`, 'DELETE'),
+      ),
+
+    async placeOrder(
+      cartId: string,
+      contact: CheckoutContact,
+    ): Promise<OrderOutcome> {
+      try {
+        const response = await send(
+          `/store/offer-carts/${cartId}/complete`,
+          'POST',
+          contact,
+        );
+        const body: unknown = await response.json();
+        if (response.ok) {
+          return {
+            kind: 'order',
+            order: placedOrderResponseSchema.parse(body).order,
+          };
+        }
+        const refusal = checkoutRefusalSchema.safeParse(body);
+        return refusal.success
+          ? { kind: 'refused', code: refusal.data.code }
+          : { kind: 'inquiry' };
+      } catch {
+        return { kind: 'inquiry' };
+      }
+    },
+
     async resolveVin(vin: string): Promise<VinOutcome> {
       try {
         const lookup = vinLookupResponseSchema.parse(
@@ -419,37 +536,35 @@ export function catalogueFromEnv(env: CatalogueEnv) {
     : null;
 }
 
-const buildEnv = (): CatalogueEnv => ({
+export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
 });
 
 export async function partPagesForBuild(
-  env = buildEnv(),
+  env = siteEnv(),
 ): Promise<PartPageEntry[]> {
   return (await catalogueFromEnv(env)?.partPages()) ?? [];
 }
 
-export async function categoriesForBuild(
-  env = buildEnv(),
-): Promise<Category[]> {
+export async function categoriesForBuild(env = siteEnv()): Promise<Category[]> {
   return (await catalogueFromEnv(env)?.categories()) ?? [];
 }
 
 export async function categoryPagesForBuild(
-  env = buildEnv(),
+  env = siteEnv(),
 ): Promise<CategoryPageEntry[]> {
   return (await catalogueFromEnv(env)?.categoryPages()) ?? [];
 }
 
 export async function carPagesForBuild(
-  env = buildEnv(),
+  env = siteEnv(),
 ): Promise<CarPageEntry[]> {
   return (await catalogueFromEnv(env)?.carPages()) ?? [];
 }
 
 export async function makeHubsForBuild(
-  env = buildEnv(),
+  env = siteEnv(),
 ): Promise<MakeHubEntry[]> {
   return (await catalogueFromEnv(env)?.makeHubs()) ?? [];
 }

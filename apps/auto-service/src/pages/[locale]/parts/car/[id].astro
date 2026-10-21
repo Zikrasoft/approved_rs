@@ -8,7 +8,7 @@ import { content } from '@/i18n/content';
 import FitLine from '@/components/FitLine.astro';
 import PartNumbers from '@/components/PartNumbers.astro';
 import { translated } from '@podbor/catalog-contract';
-import { carName } from '@/utils/carName';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
 import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -31,7 +31,8 @@ const partsInquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.car;
 const quantity = (count: number) =>
   content(locale).partsCar.fitment.quantity.replace('{count}', String(count));
-const name = carName(vehicle.model, locale);
+const variant = vehicleVariant(vehicle, locale);
+const name = `${carName(vehicle.model, locale)}, ${variant}`;
 const { engine, model } = vehicle;
 const { make } = model.chassis.series;
 const byCategory = new Map<string, CarPageEntry['groups']>();
@@ -94,7 +95,7 @@ const specs = [
         href: PathBuilder.partsModel(locale, make.slug, model.slug),
         label: carName(model, locale),
       },
-      { href: PathBuilder.partsCar(locale, vehicle.id), label: name },
+      { href: PathBuilder.partsCar(locale, vehicle.id), label: variant },
     ]}
   />
 
