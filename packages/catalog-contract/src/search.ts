@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CATALOG_TRANSLATION_LOCALES } from './categories.ts';
-import { brandNumberSchema } from './partPages.ts';
+import { brandNumberSchema, partOfferSchema } from './partPages.ts';
 
 export const CATALOG_LOCALES = ['ru', ...CATALOG_TRANSLATION_LOCALES] as const;
 
@@ -12,6 +12,7 @@ export const searchResultSchema = brandNumberSchema.extend({
     name: z.string(),
     category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   }),
+  offers: z.array(partOfferSchema),
 });
 
 export const searchFacetSchema = z.object({

@@ -118,6 +118,21 @@ medusaIntegrationTestRunner({
         expect(partIds(response)).toEqual([partId]);
       });
 
+      it('shows the price and stock of each number it finds', async () => {
+        const response = await api.get(
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru`,
+          storeHeaders,
+        );
+
+        expect(response.data.results[0].offers).toEqual([
+          expect.objectContaining({
+            price: 1440,
+            currency: 'RSD',
+            stock_quantity: 10,
+          }),
+        ]);
+      });
+
       it('ignores the vehicle filter when no Vehicle is selected', async () => {
         const response = await api.get(
           `/store/search?q=${encodeURIComponent(q)}&locale=ru`,
