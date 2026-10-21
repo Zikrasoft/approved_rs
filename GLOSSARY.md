@@ -16,6 +16,18 @@ _Avoid_: part number (ambiguous about whose number), supplier SKU (that's Suppli
 One supplier's or warehouse's sellable line for a specific `PartIdentifier` (brand-variant) of a Part: their own article id, price, stock quantity, and lead-time tier (in-stock / N-days / etc, broken out per physical warehouse where the supplier's own stock feed does that). A supplier selling both the Mann-Filter and the Bosch version of the same Part creates two SupplierOffers — one per `PartIdentifier` — each its own purchasable line and its own price; the storefront never hides which brand-variant it's selling behind one generic "buy" button. Our own warehouse is a supplier like any other for this purpose.
 _Avoid_: Listing, Offer (bare) — always qualify with "supplier" or "warehouse"
 
+**Brand**:
+A manufacturer whose part numbers we list (BMW for genuine parts, Mann-Filter, Mahle, Bosch), kept as one canonical name with each supplier's spellings as aliases. A PartIdentifier's brand is always one of these.
+_Avoid_: Make (that is a vehicle manufacturer), manufacturer (bare)
+
+**Supplier adapter**:
+The connection to one supplier (Inter Cars, our own warehouse, a future distributor) that lists its catalogue and quotes price and stock. It feeds SupplierOffers and proposes new PartIdentifiers; it never owns catalogue data.
+_Avoid_: integration, connector, feed (bare)
+
+**Enriched**:
+Said of a brand-number page that carries enough of our own data to be worth indexing: a Category plus a Fitment or a published equivalent. Pages that are not enriched are buyable but `noindex`.
+_Avoid_: complete, published (a non-enriched page is published too)
+
 **Category**:
 A customer-facing group of Parts that do the same job (oil filter, cabin filter, spark plugs). Every Part belongs to exactly one Category. Staff maintain the list and its descriptive text, and a Vehicle's Parts are browsed per Category.
 _Avoid_: Group, Hauptgruppe (that is BMW's own catalogue structure, which this shop does not reproduce)

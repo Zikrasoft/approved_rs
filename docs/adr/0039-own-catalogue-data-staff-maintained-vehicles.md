@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, refined by ADR-0040 and ADR-0043
 ---
 
 # The parts catalogue runs on our own data: staff-maintained Vehicles, no licensed feed
