@@ -626,6 +626,10 @@ validates everything at startup. The non-obvious parts:
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
   nobody, and the log says so.
+- `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
+  are tried. An unknown name stops the server at startup.
+- `TYPESENSE_API_KEY` has a local default only outside production; with
+  `NODE_ENV=production` an empty one stops the server at startup.
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 
