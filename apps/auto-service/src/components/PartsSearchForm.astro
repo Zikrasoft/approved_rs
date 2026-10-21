@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  query?: string;
+}
+
+const { query = '' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+---
+
+<form
+  method="GET"
+  action={PathBuilder.partsSearch(locale)}
+  role="search"
+  class="flex flex-col gap-3 sm:flex-row sm:items-end"
+>
+  <label class="block flex-1">
+    <span class="field-label">{copy.label}</span>
+    <input
+      type="search"
+      name="q"
+      required
+      maxlength="200"
+      value={query}
+      autocomplete="off"
+      spellcheck="false"
+      placeholder={copy.placeholder}
+      class="field"
+    />
+  </label>
+  <button type="submit" class="btn btn-primary">
+    {copy.submitLabel}
+    <Icon name="arrowRight" />
+  </button>
+</form>
