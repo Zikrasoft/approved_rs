@@ -78,19 +78,15 @@ describe('catalogue.liveOffers', () => {
 });
 
 describe('catalogue.addToCart', () => {
-  it('opens a cart for the first offer', async () => {
-    const fetch = vi.fn((url: string) =>
-      status(200, {
-        cart: url.endsWith('/items') ? CART : { ...CART, items: [], total: 0 },
-      }),
-    );
+  it('opens a cart holding the first offer', async () => {
+    const fetch = answer({ cart: CART });
 
     expect(await catalog(fetch).addToCart(null, 'offer_1')).toEqual({
       kind: 'cart',
       cart: CART,
     });
-    expect(fetch).toHaveBeenLastCalledWith(
-      'http://shop.test/store/offer-carts/cart_1/items',
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/offer-carts',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ offer_id: 'offer_1', quantity: 1 }),
@@ -102,32 +98,22 @@ describe('catalogue.addToCart', () => {
     const fetch = vi
       .fn()
       .mockImplementationOnce(() => status(404))
-      .mockImplementationOnce(() =>
-        status(200, { cart: { ...CART, items: [], total: 0 } }),
-      )
       .mockImplementationOnce(() => status(200, { cart: CART }));
 
     expect(await catalog(fetch).addToCart('cart_old', 'offer_1')).toEqual({
       kind: 'cart',
       cart: CART,
     });
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('says the supplier has no more and keeps the cart it opened for the next try', async () => {
-    const fetch = vi
-      .fn()
-      .mockImplementationOnce(() =>
-        status(200, { cart: { ...CART, items: [], total: 0 } }),
-      )
-      .mockImplementationOnce(() =>
-        status(400, { code: 'OFFER_OUT_OF_STOCK' }),
-      );
+  it('says the supplier has none without opening a cart', async () => {
+    const fetch = vi.fn(() => status(400, { code: 'OFFER_OUT_OF_STOCK' }));
 
     expect(await catalog(fetch).addToCart(null, 'offer_1')).toEqual({
       kind: 'refused',
       code: 'OFFER_OUT_OF_STOCK',
-      cartId: 'cart_1',
+      cartId: null,
     });
   });
 
@@ -225,6 +211,7 @@ describe('catalogue.setQuantity', () => {
 });
 
 describe('catalogue.placeOrder', () => {
+  const SEEN = 'item_1:1:1850';
   const contact = {
     contact: '+381601234567',
     contact_channel: 'whatsapp' as const,
@@ -233,7 +220,7 @@ describe('catalogue.placeOrder', () => {
   it('places the order with the contact', async () => {
     const fetch = answer({ order: { id: 'order_1', display_id: 7 } });
 
-    expect(await catalog(fetch).placeOrder('cart_1', contact)).toEqual({
+    expect(await catalog(fetch).placeOrder('cart_1', contact, SEEN)).toEqual({
       kind: 'order',
       order: { id: 'order_1', display_id: 7 },
     });
@@ -241,31 +228,23 @@ describe('catalogue.placeOrder', () => {
       'http://shop.test/store/offer-carts/cart_1/complete',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify(contact),
+        body: JSON.stringify({ ...contact, cart_fingerprint: SEEN }),
       }),
     );
   });
 
-  it('sends the fingerprint of the cart the visitor saw', async () => {
-    const fetch = answer({ order: { id: 'order_1', display_id: 7 } });
+  it('says the cart expired when the shop no longer knows it', async () => {
+    const fetch = vi.fn(() => status(404, { type: 'not_found' }));
 
-    await catalog(fetch).placeOrder('cart_1', contact, 'item_1:1:1850');
-
-    expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/offer-carts/cart_1/complete',
-      expect.objectContaining({
-        body: JSON.stringify({
-          ...contact,
-          cart_fingerprint: 'item_1:1:1850',
-        }),
-      }),
-    );
+    expect(await catalog(fetch).placeOrder('cart_1', contact, SEEN)).toEqual({
+      kind: 'empty',
+    });
   });
 
   it('passes on why checkout refused the cart', async () => {
     const fetch = vi.fn(() => status(400, { code: 'OFFER_PRICE_CHANGED' }));
 
-    expect(await catalog(fetch).placeOrder('cart_1', contact)).toEqual({
+    expect(await catalog(fetch).placeOrder('cart_1', contact, SEEN)).toEqual({
       kind: 'refused',
       code: 'OFFER_PRICE_CHANGED',
     });
@@ -275,7 +254,7 @@ describe('catalogue.placeOrder', () => {
     ['an unexplained error', () => vi.fn(() => status(500))],
     ['an unreachable backend', unreachable],
   ])('falls back to the inquiry on %s', async (_, fetch) => {
-    expect(await catalog(fetch()).placeOrder('cart_1', contact)).toEqual({
+    expect(await catalog(fetch()).placeOrder('cart_1', contact, SEEN)).toEqual({
       kind: 'inquiry',
     });
   });

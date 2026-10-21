@@ -35,6 +35,7 @@ const part = {
       data-in-stock={copy.leadTime.inStock}
       data-days={JSON.stringify(copy.leadTime.days)}
       data-added-label={copy.addedLabel}
+      data-cart-href={PathBuilder.partsCart(locale)}
       {...part}
     >
       <h2 class="text-block font-semibold">{heading ?? copy.offersHeading}</h2>

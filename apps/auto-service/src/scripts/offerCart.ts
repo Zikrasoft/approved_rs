@@ -3,7 +3,11 @@ import {
   CART_FINGERPRINT_FIELD,
   cartFingerprint,
 } from '@podbor/catalog-contract/fingerprint';
-import { CART_NOTICE_PARAM, ORDER_NUMBER_PARAM } from '@/utils/cartNotice';
+import {
+  CART_NOTICE_PARAM,
+  ORDER_NUMBER_PARAM,
+  ORDERED_CART_PARAM,
+} from '@/utils/cartNotice';
 import { formatLeadTime, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
@@ -61,7 +65,7 @@ const cartOutcomeSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('refused'),
     code: z.string(),
-    cartId: z.string(),
+    cartId: z.nullable(z.string()),
   }),
   inquirySchema,
 ]);
@@ -113,9 +117,9 @@ export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
   );
 }
 
-function keepCartId(id: string, storage?: CartStorage): void {
+function keepCartId(id: string | null, storage?: CartStorage): void {
   const stored = readCart(storage);
-  if (stored?.id !== id) {
+  if (id && stored?.id !== id) {
     writeCart({ id, parts: [], count: 0 }, storage);
   }
 }
@@ -128,6 +132,16 @@ export function forgetCart(storage?: CartStorage): void {
   }
   announceCartChange();
 }
+
+export function forgetOrderedCart(
+  orderedId: string | null,
+  storage?: CartStorage,
+): void {
+  if (orderedId && readCart(storage)?.id === orderedId) forgetCart(storage);
+}
+
+export const unavailableNames = (cart: OfferCart): string[] =>
+  cart.items.filter(({ available }) => !available).map(({ part }) => part.name);
 
 export function moveCartToInquiry(storage?: CartStorage): void {
   for (const part of readCart(storage)?.parts ?? []) {
@@ -341,6 +355,19 @@ export function definePartOffers(tagName = 'part-offers'): void {
         return row;
       }
 
+      linkToCart(button: HTMLButtonElement): void {
+        const link = document.createElement('a');
+        link.href = this.dataset.cartHref ?? '';
+        link.className = button.className.replace(
+          'btn-primary',
+          'btn-secondary',
+        );
+        link.append(...button.childNodes);
+        const label = link.querySelector('[data-label]');
+        if (label) label.textContent = this.dataset.addedLabel ?? '';
+        button.replaceWith(link);
+      }
+
       async buy(button: HTMLButtonElement): Promise<void> {
         if (isBusy(button)) return;
         busy(button, true);
@@ -351,9 +378,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         busy(button, false);
         if (outcome?.kind === 'cart') {
           rememberCart(outcome.cart);
-          const label = button.querySelector('[data-label]');
-          if (label) label.textContent = this.dataset.addedLabel ?? '';
-          button.classList.replace('btn-primary', 'btn-secondary');
+          this.linkToCart(button);
           showOnly(this, 'data-status', 'added');
           return;
         }
@@ -384,7 +409,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const params = new URLSearchParams(location.search);
         const notice = params.get(CART_NOTICE_PARAM) ?? '';
         if (notice === 'ordered') {
-          forgetCart();
+          forgetOrderedCart(params.get(ORDERED_CART_PARAM));
           this.showOrdered(params.get(ORDER_NUMBER_PARAM));
           return;
         }
@@ -444,6 +469,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (!outcome || outcome.kind !== 'cart') {
           if (outcome?.kind === 'empty') {
             forgetCart();
+            showOnly(this, 'data-empty-notice', notice);
             this.show('empty');
           } else {
             moveCartToInquiry();
@@ -466,7 +492,23 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           formatMoney(payableTotal(cart), cart.currency, localeTag),
         );
         showOnly(this, 'data-notice', notice || (repriced ? 'repriced' : ''));
+        this.block(unavailableNames(cart));
         this.show('cart');
+      }
+
+      block(names: string[]): void {
+        const submit = this.querySelector<HTMLButtonElement>(
+          'form [type="submit"]',
+        );
+        if (submit) submit.disabled = names.length > 0;
+        const { blockedTemplate = '{names}' } = this.dataset;
+        fill(
+          this,
+          '[data-blocked]',
+          names.length
+            ? blockedTemplate.replace('{names}', names.join(', '))
+            : null,
+        );
       }
 
       async change(method: string, body: Record<string, unknown>) {

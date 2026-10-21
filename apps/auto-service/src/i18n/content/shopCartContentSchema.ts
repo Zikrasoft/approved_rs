@@ -24,11 +24,13 @@ export const shopCartContentSchema = z
     commentLabel: z.string(),
     commentPlaceholder: z.string(),
     submitLabel: z.string(),
+    checkoutBlocked: z.string(),
     notices: z
       .object({
         priceChanged: z.string(),
         unavailable: z.string(),
         unreachable: z.string(),
+        expired: z.string(),
         invalid: z.string(),
         cartChanged: z.string(),
         repriced: z.string(),
