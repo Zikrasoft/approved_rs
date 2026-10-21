@@ -101,7 +101,7 @@ export function createCatalogue({
           ...page,
           slug,
           indexable: false,
-          priceOnRequest: !page.has_offers,
+          priceOnRequest: page.offers.length === 0,
           category: byId.get(page.part.category_id ?? '') ?? null,
         });
       }

@@ -75,7 +75,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-11428575211',
             cost_price: 1542,
             stock_quantity: 12,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
           {
             part_identifier_id: mannIdentifierId,
@@ -83,7 +83,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-HU816X',
             cost_price: 1000,
             stock_quantity: 30,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
           {
             part_identifier_id: mannIdentifierId,
@@ -91,7 +91,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'WH-HU816X',
             cost_price: 1000,
             stock_quantity: 4,
-            lead_time: '3_days',
+            lead_time_days: 3,
           },
         ]);
       });
@@ -117,13 +117,13 @@ medusaIntegrationTestRunner({
           value: '11 42 8575211',
         });
         expect(oem.offers).toEqual([
-          expect.objectContaining({
-            supplier: 'Intercars',
-            supplier_article_id: 'IC-11428575211',
+          {
+            id: expect.any(String),
             price: 1850,
+            currency: 'RSD',
             stock_quantity: 12,
-            lead_time: 'in_stock',
-          }),
+            lead_time_days: 0,
+          },
         ]);
 
         const mann = identifiers.find(
@@ -138,7 +138,7 @@ medusaIntegrationTestRunner({
         const response = await api.get(`/store/parts/${partId}`, storeHeaders);
 
         const raw = JSON.stringify(response.data);
-        expect(raw).not.toMatch(/cost_price|markup/i);
+        expect(raw).not.toMatch(/cost_price|markup|supplier|Intercars/i);
       });
     });
   },

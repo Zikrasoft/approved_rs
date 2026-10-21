@@ -84,7 +84,7 @@ medusaIntegrationTestRunner({
           supplier_article_id: 'IC-HU816X',
           cost_price: 1000,
           stock_quantity: 4,
-          lead_time: '1 day',
+          lead_time_days: 1,
           part_identifier_id: mannOil.id,
         });
       });
@@ -127,7 +127,20 @@ medusaIntegrationTestRunner({
               brand: { name: 'BMW', slug: 'bmw' },
             },
           ],
-          has_offers: true,
+          offers: [
+            {
+              id: expect.any(String),
+              price: 1200,
+              currency: 'RSD',
+              stock_quantity: 4,
+              lead_time_days: 1,
+            },
+          ],
+          supplier_data: {
+            cross_references: [],
+            applicability: [],
+            images: [],
+          },
         });
         const cabin = response.data.pages.find(
           (page: { normalized_value: string }) =>
@@ -135,7 +148,7 @@ medusaIntegrationTestRunner({
         );
         expect(cabin.equivalents).toEqual([]);
         expect(cabin.part).toMatchObject({ category_id: null, attributes: {} });
-        expect(cabin.has_offers).toBe(false);
+        expect(cabin.offers).toEqual([]);
       });
 
       it('pages through the list', async () => {

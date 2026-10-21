@@ -15,11 +15,14 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  const { replaced_by_id, category_id, attributes } = req.validatedBody;
+  const { name, replaced_by_id, category_id, attributes } = req.validatedBody;
   const updated_by = req.auth_context.actor_id;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const current = await catalog.retrievePart(id);
+  if (name !== undefined) {
+    await catalog.updateParts({ id, name, updated_by });
+  }
   if (category_id !== undefined || attributes !== undefined) {
     await catalog.classifyPart(id, {
       category_id:

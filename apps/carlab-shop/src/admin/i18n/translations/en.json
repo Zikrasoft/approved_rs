@@ -55,9 +55,32 @@
     "heading": "Suppliers",
     "columns": {
       "name": "Name",
-      "markup": "Markup %"
+      "markup": "Markup %",
+      "released": "Publish"
     },
-    "save": "Save"
+    "save": "Save",
+    "import": "Import now",
+    "importLead": "Supplier catalogues are imported every night before publishing. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created, {{skipped}} skipped",
+    "importNoAdapters": "No supplier is connected to the import",
+    "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
+    "kinds": {
+      "cross_references": "Cross references",
+      "applicability": "Applicability",
+      "images": "Images"
+    },
+    "mappings": {
+      "heading": "Supplier categories",
+      "lead": "Map the supplier's categories to our Categories. Goods in unmapped categories are not imported.",
+      "supplierPlaceholder": "Choose a supplier",
+      "code": "Supplier category",
+      "category": "Our Category",
+      "codePlaceholder": "Supplier's category code",
+      "categoryPlaceholder": "Our Category",
+      "add": "Map",
+      "remove": "Remove",
+      "empty": "This supplier has no mapped categories yet."
+    }
   },
   "brands": {
     "heading": "Brands",

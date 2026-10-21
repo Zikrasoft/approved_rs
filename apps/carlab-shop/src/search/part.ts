@@ -7,24 +7,15 @@ import {
 
 import { PART_WITH_OFFERS_FIELDS } from '../lib/store-response';
 import { compactValue } from '../modules/search-typesense/mapping';
-import { sellPrice } from '../modules/supplier/pricing';
+import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
 import { PART_CHANGED_EVENT } from './part-changed-event';
-
-type OfferRow = {
-  id: string;
-  supplier: { name: string; markup_percentage: number };
-  supplier_article_id: string;
-  cost_price: number;
-  stock_quantity: number;
-  lead_time: string;
-};
 
 type IdentifierRow = {
   id: string;
   type: string;
   brand: { name: string };
   value: string;
-  offers?: OfferRow[];
+  offers?: PricedOfferRow[];
 };
 
 type PartRow = {
@@ -45,25 +36,17 @@ const source = {
         brand: identifier.brand.name,
         value: identifier.value,
         value_compact: compactValue(identifier.value),
-        offers: (identifier.offers ?? []).map((offer) => ({
-          id: offer.id,
-          supplier: offer.supplier.name,
-          supplier_article_id: offer.supplier_article_id,
-          price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
-          stock_quantity: offer.stock_quantity,
-          lead_time: offer.lead_time,
-        })),
+        offers: storeOffers(identifier.offers ?? []),
       })),
     })),
 };
 
 const offerFields = search.object({
   id: search.keyword().retrievable(false),
-  supplier: search.keyword().retrievable(false),
-  supplier_article_id: search.keyword().retrievable(false),
   price: search.float().retrievable(false),
+  currency: search.keyword().retrievable(false),
   stock_quantity: search.integer().retrievable(false),
-  lead_time: search.keyword().retrievable(false),
+  lead_time_days: search.integer().retrievable(false),
 });
 
 const identifierFields = search.object({

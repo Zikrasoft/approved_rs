@@ -23,6 +23,31 @@ export const brandNumberSchema = z.object({
   brand: brandSchema,
 });
 
+export const partOfferSchema = z.strictObject({
+  id: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  stock_quantity: z.number().int().nonnegative(),
+  lead_time_days: z.number().int().nonnegative(),
+});
+
+export const STAGED_DATA_KINDS = [
+  'cross_references',
+  'applicability',
+  'images',
+] as const;
+
+export const crossReferenceSchema = z.object({
+  brand: z.string(),
+  number: z.string(),
+});
+
+export const supplierDataSchema = z.object({
+  cross_references: z.array(crossReferenceSchema),
+  applicability: z.array(z.string()),
+  images: z.array(z.url()),
+});
+
 export const partPageSchema = brandNumberSchema.extend({
   part: z.object({
     id: z.string(),
@@ -38,7 +63,8 @@ export const partPageSchema = brandNumberSchema.extend({
     attributes: attributeValuesSchema,
   }),
   equivalents: z.array(brandNumberSchema),
-  has_offers: z.boolean(),
+  offers: z.array(partOfferSchema),
+  supplier_data: supplierDataSchema,
 });
 
 export const partPagesResponseSchema = z.object({
@@ -49,5 +75,8 @@ export const partPagesResponseSchema = z.object({
 });
 
 export type BrandNumber = z.infer<typeof brandNumberSchema>;
+export type PartOffer = z.infer<typeof partOfferSchema>;
+export type StagedDataKind = (typeof STAGED_DATA_KINDS)[number];
+export type SupplierData = z.infer<typeof supplierDataSchema>;
 export type PartPage = z.infer<typeof partPageSchema>;
 export type PartPagesResponse = z.infer<typeof partPagesResponseSchema>;

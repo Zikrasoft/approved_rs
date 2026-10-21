@@ -72,7 +72,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-11428575211',
             cost_price: 1542,
             stock_quantity: 12,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
           {
             part_identifier_id: mannIdentifier.id,
@@ -80,7 +80,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-HU816X',
             cost_price: 1000,
             stock_quantity: 30,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
         ]);
         oemOfferId = oemOffer.id;
