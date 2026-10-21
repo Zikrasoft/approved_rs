@@ -167,7 +167,21 @@ const categories = props.categories.map((category) => ({
             hidden
           >
             <p class="field-label">{copy.listHeading}</p>
-            <p class="text-sm font-semibold text-ink" data-parts-car hidden></p>
+            <p
+              class="flex items-center justify-between gap-2 border-b border-line text-sm font-semibold text-ink"
+              data-parts-car
+              hidden
+            >
+              <span data-parts-car-name></span>
+              <button
+                type="button"
+                class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+                aria-label={copy.listCarRemoveLabel}
+                data-parts-car-remove
+              >
+                <Icon name="close" size={12} />
+              </button>
+            </p>
             <ul class="divide-y divide-line" data-parts-list></ul>
             <template data-parts-item>
               <li class="flex items-center justify-between gap-2">
