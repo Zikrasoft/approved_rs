@@ -618,6 +618,10 @@ validates everything at startup. The non-obvious parts:
 - `DATABASE_URL` and the `TYPESENSE_HOST`/`PORT`/`PROTOCOL` are not written into
   `.env`: compose assembles them from the service names, `POSTGRES_PASSWORD` and
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.
+- `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
+  the first translates catalogue text, the second is a fine-grained GitHub token
+  with `actions: write` on this repository that dispatches `publish.yml`. Either
+  may stay empty; the chain then stops at that step and the admin shows why.
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 

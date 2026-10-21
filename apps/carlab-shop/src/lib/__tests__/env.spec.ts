@@ -22,6 +22,17 @@ describe('parseEnv', () => {
     expect(env.TYPESENSE_PROTOCOL).toBe('http');
   });
 
+  it('reads an empty publish secret as unset', () => {
+    const env = parseEnv({
+      ...VALID_ENV,
+      OPENAI_API_KEY: '',
+      PUBLISH_DISPATCH_TOKEN: 'token',
+    });
+
+    expect(env.OPENAI_API_KEY).toBeUndefined();
+    expect(env.PUBLISH_DISPATCH_TOKEN).toBe('token');
+  });
+
   it('coerces TYPESENSE_PORT from a string env value', () => {
     const env = parseEnv({ ...VALID_ENV, TYPESENSE_PORT: '58108' });
 
