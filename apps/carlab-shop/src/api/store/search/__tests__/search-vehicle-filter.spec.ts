@@ -66,7 +66,7 @@ medusaIntegrationTestRunner({
             supplier_article_id: 'IC-13718511877',
             cost_price: 1200,
             stock_quantity: 10,
-            lead_time: 'in_stock',
+            lead_time_days: 0,
           },
         ]);
 

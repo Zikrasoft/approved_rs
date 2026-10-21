@@ -1,11 +1,19 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { partPagesResponseSchema } from '@podbor/catalog-contract';
+import {
+  partPagesResponseSchema,
+  STAGED_DATA_KINDS,
+  type SupplierData,
+} from '@podbor/catalog-contract';
+import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
+import { storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { StoreListPartPagesType } from '../validators';
+
+const stagedPayloadSchema = z.object({ items: z.array(z.unknown()) });
 
 type BrandNumberRow = {
   id: string;
@@ -83,11 +91,29 @@ export async function GET(
     return part ? replacement(part) : null;
   };
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
+  const identifierIds = identifiers.map(({ id }) => id);
   const offers = await suppliers.listSupplierOffers(
-    { part_identifier_id: identifiers.map(({ id }) => id) },
-    { select: ['part_identifier_id'] },
+    { part_identifier_id: identifierIds },
+    { relations: ['supplier'], take: null },
   );
-  const offered = new Set(offers.map((offer) => offer.part_identifier_id));
+  const staged = await suppliers.listStagedRecords(
+    { part_identifier_id: identifierIds },
+    { relations: ['supplier'], take: null },
+  );
+  const supplierData = (identifierId: string) =>
+    Object.fromEntries(
+      STAGED_DATA_KINDS.map((kind) => [
+        kind,
+        staged
+          .filter(
+            (record) =>
+              record.part_identifier_id === identifierId &&
+              record.kind === kind &&
+              record.supplier.released_kinds.includes(kind),
+          )
+          .flatMap((record) => stagedPayloadSchema.parse(record.payload).items),
+      ]),
+    ) as SupplierData;
 
   const pages = identifiers.map((identifier) => ({
     ...brandNumber(identifier),
@@ -104,7 +130,10 @@ export async function GET(
           part_id === identifier.part_id && id !== identifier.id,
       )
       .map(brandNumber),
-    has_offers: offered.has(identifier.id),
+    offers: storeOffers(
+      offers.filter((offer) => offer.part_identifier_id === identifier.id),
+    ),
+    supplier_data: supplierData(identifier.id),
   }));
 
   res.json(partPagesResponseSchema.parse({ pages, count, offset, limit }));
