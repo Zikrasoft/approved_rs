@@ -1,4 +1,5 @@
 import { z } from '@medusajs/framework/zod';
+import { CATALOG_LOCALES } from '@podbor/catalog-contract';
 
 export const StoreSearchParts = z.object({
   q: z.string().trim().min(1).max(200),
@@ -32,6 +33,18 @@ export const StoreAddOfferCartItem = z.object({
   quantity: z.number().int().positive().default(1),
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
+
+export const StoreCompleteOfferCart = z.object({
+  contact: z.string().trim().min(1).max(200),
+  contact_channel: z
+    .enum(['phone', 'telegram', 'whatsapp', 'viber'])
+    .optional(),
+  name: z.string().trim().max(200).optional(),
+  vin: z.string().trim().max(200).optional(),
+  comment: z.string().trim().max(2000).optional(),
+  locale: z.enum(CATALOG_LOCALES).optional(),
+});
+export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
 export const StoreListPartPages = z.object({
   offset: z.coerce.number().int().nonnegative().default(0),

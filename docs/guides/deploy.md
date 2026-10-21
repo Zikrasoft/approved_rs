@@ -622,6 +622,10 @@ validates everything at startup. The non-obvious parts:
   the first translates catalogue text, the second is a fine-grained GitHub token
   with `actions: write` on this repository that dispatches `publish.yml`. Either
   may stay empty; the chain then stops at that step and the admin shows why.
+- `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
+  posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
+  reaches Telegram like every other Lead. Empty, orders are placed but reach
+  nobody, and the log says so.
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 
