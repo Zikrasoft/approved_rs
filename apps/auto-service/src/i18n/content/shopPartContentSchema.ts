@@ -6,6 +6,8 @@ export const shopPartContentSchema = z
     metaDescription: z.string(),
     eyebrow: z.string(),
     variantsHeading: z.string(),
+    equivalentsHeading: z.string(),
+    noEquivalents: z.string(),
     currencyLabel: z.string(),
     columns: z
       .object({

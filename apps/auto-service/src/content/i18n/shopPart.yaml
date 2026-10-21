@@ -2,6 +2,8 @@ metaTitleSuffix: CarLab
 metaDescription: Бренды, поставщики, цены и сроки поставки для этой запчасти в каталоге CarLab.
 eyebrow: Запчасть
 variantsHeading: Варианты и предложения поставщиков
+equivalentsHeading: Аналоги этой запчасти
+noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
 currencyLabel: RSD
 columns:
   brand: Бренд
@@ -26,6 +28,8 @@ translations:
     metaDescription: Brendovi, dobavljači, cene i rokovi isporuke za ovu delove u katalogu CarLab.
     eyebrow: Delovi
     variantsHeading: Opcije i ponude dobavljača
+    equivalentsHeading: Zamenski delovi za ovaj deo
+    noEquivalents: Za sada nema zamenskih delova u katalogu. Pišite nam, pronaći ćemo zamenu.
     currencyLabel: RSD
     columns:
       brand: Brend
@@ -48,6 +52,8 @@ translations:
     metaDescription: Brands, suppliers, prices and lead times for this part in the CarLab catalog.
     eyebrow: Part
     variantsHeading: Options and supplier offers
+    equivalentsHeading: Equivalents of this part
+    noEquivalents: No equivalents in the catalogue yet. Message us and we will find a replacement.
     currencyLabel: RSD
     columns:
       brand: Brand
