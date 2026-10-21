@@ -133,11 +133,13 @@ medusaIntegrationTestRunner({
           expect((await pageFor('34116761252')).part).toEqual({
             id: oldId,
             name: 'Brake pad, old',
+            translations: null,
             category_id: null,
             attributes: {},
             replaced_by: {
               id: newId,
               name: 'Brake pad, new',
+              translations: null,
               brand_number: expect.objectContaining({
                 normalized_value: '34116761253',
                 brand: { name: 'BMW', slug: 'bmw' },

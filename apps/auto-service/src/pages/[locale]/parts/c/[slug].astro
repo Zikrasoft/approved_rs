@@ -100,7 +100,9 @@ const fields = category.fields.map((field) => ({
                   >
                     <span class="font-semibold">{page.brand.name}</span>
                     <span class="spec text-sm text-muted">{page.value}</span>
-                    <span class="text-sm text-ink-2">{page.part.name}</span>
+                    <span class="text-sm text-ink-2">
+                      {translated(page.part, 'name', locale)}
+                    </span>
                   </a>
                 </li>
               ))}

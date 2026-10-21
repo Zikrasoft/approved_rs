@@ -1,17 +1,15 @@
 import { z } from 'zod';
 import { CATEGORY_FIELD_TYPES } from './attributes.ts';
 import { BRAND_SLUG_PATTERN } from './partPages.ts';
+import { translationsSchema } from './translations.ts';
+
+export {
+  CATALOG_TRANSLATION_LOCALES,
+  translated,
+  translationsSchema,
+} from './translations.ts';
 
 export const CATALOG_KEY_PATTERN = BRAND_SLUG_PATTERN;
-
-export const CATALOG_TRANSLATION_LOCALES = ['sr', 'en'] as const;
-
-export const translationsSchema = z
-  .partialRecord(
-    z.enum(CATALOG_TRANSLATION_LOCALES),
-    z.record(z.string(), z.string()),
-  )
-  .nullable();
 
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
 
@@ -51,16 +49,3 @@ export const categoriesResponseSchema = z.object({
 
 export type CategoryField = z.infer<typeof categoryFieldSchema>;
 export type Category = z.infer<typeof categorySchema>;
-
-type Translated<Column extends string> = Record<Column, string> & {
-  translations: z.infer<typeof translationsSchema>;
-};
-
-export const translated = <Column extends string>(
-  row: Translated<Column>,
-  column: Column,
-  locale: string,
-): string =>
-  row.translations?.[locale as (typeof CATALOG_TRANSLATION_LOCALES)[number]]?.[
-    column
-  ] || row[column];

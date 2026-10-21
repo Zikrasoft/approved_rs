@@ -10,7 +10,8 @@ const page = {
   brand: { name: 'Mann-Filter', slug: 'mann-filter' },
   part: {
     id: 'part_1',
-    name: 'Oil filter',
+    name: 'Масляный фильтр',
+    translations: { sr: { name: 'Filter ulja' }, en: { name: 'Oil filter' } },
     replaced_by: null,
     category_id: null,
     attributes: {},
@@ -34,6 +35,7 @@ describe('partPageSchema', () => {
         replaced_by: {
           id: 'part_2',
           name: 'Oil filter, revised',
+          translations: null,
           brand_number: {
             id: 'pi_2',
             type: 'manufacturer-number',

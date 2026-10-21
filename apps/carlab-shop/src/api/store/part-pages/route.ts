@@ -27,6 +27,7 @@ type BrandNumberRow = {
 type ReplacementRow = {
   id: string;
   name: string;
+  translations: unknown;
   identifiers: BrandNumberRow[];
 };
 
@@ -46,12 +47,19 @@ const brandNumber = ({
   brand: { name: brand.name, slug: brand.slug },
 });
 
-const replacement = ({ id, name, identifiers }: ReplacementRow) => {
+const replacement = ({
+  id,
+  name,
+  translations,
+  identifiers,
+}: ReplacementRow) => {
   const [current] = [...identifiers].sort(
     (a, b) =>
       Number(a.superseded) - Number(b.superseded) || a.id.localeCompare(b.id),
   );
-  return current ? { id, name, brand_number: brandNumber(current) } : null;
+  return current
+    ? { id, name, translations, brand_number: brandNumber(current) }
+    : null;
 };
 
 export async function GET(
@@ -74,7 +82,7 @@ export async function GET(
 
   const siblings = await catalog.listPartIdentifiers(
     { part_id: [...new Set(identifiers.map(({ part_id }) => part_id))] },
-    { relations: ['brand'], order: { id: 'ASC' } },
+    { relations: ['brand'], order: { id: 'ASC' }, take: null },
   );
 
   const replacementIds = [
@@ -83,7 +91,7 @@ export async function GET(
   const replacements = replacementIds.length
     ? await catalog.listParts(
         { id: replacementIds },
-        { relations: ['identifiers', 'identifiers.brand'] },
+        { relations: ['identifiers', 'identifiers.brand'], take: null },
       )
     : [];
   const replacedBy = (id: string | null) => {
@@ -120,6 +128,7 @@ export async function GET(
     part: {
       id: identifier.part.id,
       name: identifier.part.name,
+      translations: identifier.part.translations,
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,

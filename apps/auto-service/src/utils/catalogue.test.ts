@@ -18,6 +18,7 @@ const bmw = { name: 'BMW', slug: 'bmw' };
 const oilPart = {
   id: 'part_oil',
   name: 'Oil filter',
+  translations: null,
   replaced_by: null,
   category_id: null,
   attributes: {},
@@ -343,7 +344,7 @@ const brandNumber = (
   normalized_value: number,
   superseded: false,
   brand: { name: slug, slug },
-  part: { replaced_by: null, attributes: {}, ...part },
+  part: { translations: null, replaced_by: null, attributes: {}, ...part },
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },

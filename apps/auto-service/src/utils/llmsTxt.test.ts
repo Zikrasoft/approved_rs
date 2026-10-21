@@ -124,6 +124,7 @@ describe('generateLlmsTxt', () => {
       },
     };
     vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
+    vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string) => ({

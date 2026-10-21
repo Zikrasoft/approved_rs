@@ -26,6 +26,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
+const partName = translated(page.part, 'name', locale);
 const replacement = page.part.replaced_by;
 const category = page.category;
 const attributes = category
@@ -44,7 +45,7 @@ const jsonLd = bestOffer
         productSchema({
           name: heading,
           brand: page.brand.name,
-          description: page.part.name,
+          description: partName,
           price: bestOffer.price,
           currency: bestOffer.currency,
           inStock: bestOffer.stock_quantity > 0,
@@ -56,7 +57,7 @@ const jsonLd = bestOffer
 ---
 
 <Shell
-  title={`${heading}, ${page.part.name} - ${copy.metaTitleSuffix}`}
+  title={`${heading}, ${partName} - ${copy.metaTitleSuffix}`}
   description={copy.metaDescription}
   noindex={!page.indexable}
   jsonLd={jsonLd}
@@ -64,7 +65,7 @@ const jsonLd = bestOffer
   <PageHero
     eyebrow={copy.eyebrow}
     heading={heading}
-    lead={page.part.name}
+    lead={partName}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       ...(category
@@ -107,7 +108,7 @@ const jsonLd = bestOffer
                   {replacement.brand_number.value}
                 </span>
                 <span class="text-sm font-normal text-muted">
-                  {replacement.name}
+                  {translated(replacement, 'name', locale)}
                 </span>
               </a>
             </>
