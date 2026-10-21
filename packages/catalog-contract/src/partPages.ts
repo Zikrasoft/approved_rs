@@ -24,6 +24,7 @@ export const brandNumberSchema = z.object({
 export const partPageSchema = brandNumberSchema.extend({
   part: z.object({ id: z.string(), name: z.string() }),
   equivalents: z.array(brandNumberSchema),
+  has_offers: z.boolean(),
 });
 
 export const partPagesResponseSchema = z.object({
