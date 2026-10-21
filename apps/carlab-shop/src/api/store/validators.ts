@@ -1,8 +1,15 @@
 import { z } from '@medusajs/framework/zod';
 
 export const StoreSearchParts = z.object({
-  q: z.string().trim().min(1),
+  q: z.string().trim().min(1).max(200),
   vehicle_id: z.string().min(1).optional(),
+  facets: z
+    .union([z.string(), z.array(z.string())])
+    .transform((value) => [value].flat())
+    .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
+    .default([]),
+  offset: z.coerce.number().int().nonnegative().default(0),
+  limit: z.coerce.number().int().positive().max(100).default(20),
 });
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 

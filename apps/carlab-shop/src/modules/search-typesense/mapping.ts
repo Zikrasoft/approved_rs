@@ -11,9 +11,6 @@ const TYPESENSE_SCALAR_TYPE: Partial<
   boolean: 'bool',
 };
 
-export const compactValue = (value: string): string =>
-  value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-
 const mapField = (
   path: string,
   field: SearchTypes.SearchFieldDefinition,
@@ -136,4 +133,25 @@ export const compileFilters = (
   }
 
   return clauses.length ? clauses.join(' && ') : undefined;
+};
+
+export const compileFacets = (
+  facets: SearchTypes.SearchFacetRequest[],
+): { facet_by?: string; max_facet_values?: number } => {
+  if (!facets.length) {
+    return {};
+  }
+  const unsupported = facets.find(({ type }) => (type ?? 'value') !== 'value');
+  if (unsupported) {
+    throw new Error(
+      `search-typesense: unsupported "${unsupported.type}" facet on "${unsupported.field}"`,
+    );
+  }
+  const limits = facets.flatMap((facet) =>
+    'limit' in facet && facet.limit ? [facet.limit] : [],
+  );
+  return {
+    facet_by: facets.map(({ field }) => field).join(','),
+    ...(limits.length ? { max_facet_values: Math.max(...limits) } : {}),
+  };
 };

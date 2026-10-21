@@ -6,7 +6,7 @@ export const CATALOG_KEY_PATTERN = BRAND_SLUG_PATTERN;
 
 export const CATALOG_TRANSLATION_LOCALES = ['sr', 'en'] as const;
 
-const translationsSchema = z
+export const translationsSchema = z
   .partialRecord(
     z.enum(CATALOG_TRANSLATION_LOCALES),
     z.record(z.string(), z.string()),
