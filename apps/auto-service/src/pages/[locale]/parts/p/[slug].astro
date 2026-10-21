@@ -22,6 +22,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
+const replacement = page.part.replaced_by;
 ---
 
 <Shell
@@ -38,6 +39,42 @@ const heading = `${page.brand.name} ${page.value}`;
       { href: PathBuilder.partNumber(locale, page.slug), label: heading },
     ]}
   />
+
+  {
+    (replacement || page.superseded) && (
+      <section class="wrap pt-band md:pt-band-lg">
+        <div class="card flex max-w-3xl flex-col gap-3 border-l-4 border-l-signal p-6">
+          {page.superseded && (
+            <p class="font-semibold">{copy.supersededNotice}</p>
+          )}
+          {replacement && (
+            <>
+              <h2 class="text-xl font-semibold">{copy.replacedHeading}</h2>
+              <p class="text-muted">{copy.replacedLead}</p>
+              <a
+                href={PathBuilder.partNumber(
+                  locale,
+                  partPageSlug(
+                    replacement.brand_number.brand.slug,
+                    replacement.brand_number.normalized_value,
+                  ),
+                )}
+                class="flex flex-wrap items-baseline gap-x-3 font-semibold text-signal-ink hover:text-signal-dark"
+              >
+                <span>
+                  {replacement.brand_number.brand.name}{' '}
+                  {replacement.brand_number.value}
+                </span>
+                <span class="text-sm font-normal text-muted">
+                  {replacement.name}
+                </span>
+              </a>
+            </>
+          )}
+        </div>
+      </section>
+    )
+  }
 
   <section class="wrap py-band md:py-band-lg">
     <h2 class="text-section mb-6">{copy.equivalentsHeading}</h2>
@@ -58,6 +95,9 @@ const heading = `${page.brand.name} ${page.value}`;
               >
                 <span class="font-semibold">{equivalent.brand.name}</span>
                 <span class="spec text-sm text-muted">{equivalent.value}</span>
+                {equivalent.superseded && (
+                  <span class="text-sm text-muted">{copy.supersededTag}</span>
+                )}
               </a>
             </li>
           ))}
