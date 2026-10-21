@@ -579,6 +579,92 @@ describe('insertOrMergeLead', () => {
   });
 });
 
+describe('insertOrMergeLead with standalone services', () => {
+  const order = (contact: string): LeadInput => ({
+    brand: 'Test',
+    name: 'Иван',
+    contact,
+    service: 'parts-order',
+    visitorId: 'visitor-1',
+    locale: 'ru',
+  });
+  const inquiry: LeadInput = {
+    brand: 'Test',
+    name: 'Иван',
+    contact: '+381601111111',
+    service: 'vin-parts-inquiry',
+    visitorId: 'visitor-1',
+    locale: 'ru',
+  };
+
+  beforeEach(() => {
+    store = createLeadStore({
+      storage,
+      schema: storedLeadSchema,
+      standaloneServices: ['parts-order'],
+    });
+  });
+
+  it('keeps an order apart from the inquiry the same visitor sent before', async () => {
+    await store.insertOrMergeLead(inquiry);
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+
+    expect(merged).toBe(false);
+    expect(lead.contact).toBe('+381602222222');
+    expect(lead.service).toBe('parts-order');
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps two orders from one visitor as two Leads', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { merged } = await store.insertOrMergeLead(order('+381603333333'));
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps an inquiry sent after an order apart from it', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { lead, merged } = await store.insertOrMergeLead(inquiry);
+
+    expect(merged).toBe(false);
+    expect(lead.service).toBe('vin-parts-inquiry');
+  });
+
+  it('lets an order absorb the placeholder click before it', async () => {
+    const { lead: clicked } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'phone',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+      kind: 'call_click',
+    });
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(clicked.id);
+    expect(lead.contact).toBe('+381602222222');
+    expect(lead.service).toBe('parts-order');
+  });
+
+  it('still merges services that are not standalone', async () => {
+    await store.insertOrMergeLead(inquiry);
+    const { merged } = await store.insertOrMergeLead({
+      ...inquiry,
+      comment: 'ещё',
+    });
+
+    expect(merged).toBe(true);
+  });
+});
+
 describe('isFreshLead', () => {
   const NOW = Date.parse('2026-10-11T12:00:00.000Z');
   const ago = (minutes: number) =>

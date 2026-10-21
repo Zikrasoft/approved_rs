@@ -111,6 +111,7 @@ export interface LeadStoreOptions {
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
   beforeWrite?: () => Promise<void>;
+  standaloneServices?: readonly string[];
 }
 
 const promptedAt =
@@ -260,7 +261,16 @@ export function createLeadStore({
   schema,
   quarantine,
   beforeWrite,
+  standaloneServices = [],
 }: LeadStoreOptions) {
+  function standaloneApart(a: LeadInput, b: StoredLead): boolean {
+    return (
+      [a.service, b.service].some((s) => standaloneServices.includes(s)) &&
+      !isPlaceholderContact(a.contact) &&
+      !isPlaceholderContact(b.contact)
+    );
+  }
+
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
@@ -420,7 +430,8 @@ export function createLeadStore({
                 l.brand === data.brand &&
                 untouched(l) &&
                 isFreshLead(l, now) &&
-                (data.telegramId == null || isPlaceholderContact(l.contact)),
+                (data.telegramId == null || isPlaceholderContact(l.contact)) &&
+                !standaloneApart(data, l),
             )
           : undefined;
 
