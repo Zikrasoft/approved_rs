@@ -4,4 +4,5 @@ export * from './attributes.ts';
 export * from './categories.ts';
 export * from './vehicle.ts';
 export * from './fitment.ts';
+export * from './ambiguity.ts';
 export * from './search.ts';

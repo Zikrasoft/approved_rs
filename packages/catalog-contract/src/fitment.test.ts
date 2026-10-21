@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { fitmentsResponseSchema, positionGroups } from './fitment.ts';
+import { positionGroups } from './ambiguity.ts';
+import { fitmentsResponseSchema } from './fitment.ts';
 
 const row = (
   part_id: string,

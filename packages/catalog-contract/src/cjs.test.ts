@@ -52,6 +52,15 @@ describe('CommonJS build', () => {
     ).toBe(false);
   });
 
+  it('serves the zod-free ambiguity subpath to require()', () => {
+    expect(require.resolve('@podbor/catalog-contract/ambiguity')).toMatch(
+      /dist\/cjs\/ambiguity\.js$/,
+    );
+    expect(
+      require('@podbor/catalog-contract/ambiguity').positionGroups([], {}),
+    ).toEqual([]);
+  });
+
   it('serves the vehicle schemas to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([
