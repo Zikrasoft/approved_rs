@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 
+import { adminLanguage } from './src/lib/admin-language';
 import { parseEnv } from './src/lib/env';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
@@ -20,6 +21,9 @@ export default defineConfig({
       jwtSecret: env.JWT_SECRET,
       cookieSecret: env.COOKIE_SECRET,
     },
+  },
+  admin: {
+    vite: () => ({ plugins: [adminLanguage()] }),
   },
   modules: [
     {

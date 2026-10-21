@@ -64,7 +64,7 @@ const importsSchema = z.object({
 const sourceDeletedSchema = z.object({ deleted: z.number() });
 
 const SuppliersPage = () => {
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const prompt = usePrompt();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -186,7 +186,7 @@ const SuppliersPage = () => {
 
   const removeSource = async ({ source, rows }: Source) => {
     const confirmed = await prompt({
-      title: t('sources.confirmTitle', { source }),
+      title: t('sources.confirmTitle', { source: sourceName(source) }),
       description: t('sources.confirmBody', { count: rows }),
       confirmText: t('sources.remove'),
       cancelText: t('sources.cancel'),
@@ -202,10 +202,18 @@ const SuppliersPage = () => {
     );
     setRemovingSource(null);
     if (data) {
-      toast.success(t('sources.removed', { source, count: data.deleted }));
+      toast.success(
+        t('sources.removed', {
+          source: sourceName(source),
+          count: data.deleted,
+        }),
+      );
       await loadSources();
     }
   };
+
+  const sourceName = (source: string) =>
+    t(`sources.names.${source}`, { defaultValue: source });
 
   const categoryName = (id: string) =>
     categories.find((category) => category.id === id)?.name ?? id;
@@ -406,8 +414,10 @@ const SuppliersPage = () => {
             <Table.Body>
               {sources.map((entry) => (
                 <Table.Row key={entry.source}>
-                  <Table.Cell>{entry.source}</Table.Cell>
-                  <Table.Cell>{entry.rows}</Table.Cell>
+                  <Table.Cell>{sourceName(entry.source)}</Table.Cell>
+                  <Table.Cell>
+                    {entry.rows.toLocaleString(i18n.language)}
+                  </Table.Cell>
                   <Table.Cell>
                     <Button
                       size="small"
