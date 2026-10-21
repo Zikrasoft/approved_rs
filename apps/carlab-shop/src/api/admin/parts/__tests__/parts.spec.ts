@@ -203,6 +203,29 @@ medusaIntegrationTestRunner({
 
           expect(response.status).toBe(400);
         });
+
+        it.each([
+          ['an empty name', '', 'FIELD_REQUIRED'],
+          [
+            'a name longer than 200 characters',
+            'x'.repeat(201),
+            'INVALID_FIELD',
+          ],
+        ])('names the field for %s', async (_, name, code) => {
+          const response = await api
+            .post(
+              '/admin/parts',
+              {
+                name,
+                identifiers: [{ type: 'oem', brand_id: bmw.id, value: 'NF-1' }],
+              },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({ code, field: 'name' });
+        });
       });
 
       describe('part identity', () => {
@@ -215,7 +238,11 @@ medusaIntegrationTestRunner({
               'Identity duplicate',
               spelling,
             ).catch((error) => error.response);
-            expect(response.status).toBe(400);
+            expect(response.status).toBe(409);
+            expect(response.data).toMatchObject({
+              code: 'ALREADY_EXISTS',
+              entity: 'part_identifier',
+            });
           }
 
           const identifiers = await catalog.listPartIdentifiers({
@@ -224,6 +251,33 @@ medusaIntegrationTestRunner({
           expect(identifiers).toHaveLength(1);
           expect(
             await catalog.listParts({ name: 'Identity duplicate' }),
+          ).toHaveLength(0);
+        });
+
+        it('refuses the same Brand number under another identifier type', async () => {
+          await createPart('Typed part', 'TYPE-DUP-1');
+
+          const response = await api
+            .post(
+              '/admin/parts',
+              {
+                name: 'Typed duplicate',
+                identifiers: [
+                  {
+                    type: 'manufacturer-number',
+                    brand_id: bmw.id,
+                    value: 'type dup 1',
+                  },
+                ],
+              },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(409);
+          expect(response.data.code).toBe('ALREADY_EXISTS');
+          expect(
+            await catalog.listParts({ name: 'Typed duplicate' }),
           ).toHaveLength(0);
         });
 
@@ -256,7 +310,7 @@ medusaIntegrationTestRunner({
             'tx existing 1',
           ).catch((error) => error.response);
 
-          expect(response.status).toBe(400);
+          expect(response.status).toBe(409);
           expect(
             await catalog.listParts({ name: 'Transaction failed part' }),
           ).toHaveLength(0);

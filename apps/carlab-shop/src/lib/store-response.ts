@@ -129,6 +129,13 @@ export const fitmentRowSchema = fitmentSchema.extend({
   production_to: isoDate,
 });
 
+export const adminFitmentSchema = fitmentRowSchema.extend({
+  source: z.string(),
+  created_by: z.string().nullable(),
+  updated_by: z.string().nullable(),
+  updated_at: z.date(),
+});
+
 export const toFitmentResponse = (row: unknown): Fitment =>
   fitmentRowSchema.parse(row);
 

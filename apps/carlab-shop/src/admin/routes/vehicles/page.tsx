@@ -1,4 +1,5 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { TruckFast } from '@medusajs/icons';
 import {
   Button,
   Container,
@@ -7,7 +8,8 @@ import {
   Label,
   Select,
   Table,
-  usePrompt,
+  Text,
+  toast,
 } from '@medusajs/ui';
 import {
   BODY_STYLES,
@@ -27,6 +29,8 @@ import {
   adminFetch,
   editedBySchema,
 } from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
+import { useConfirmed } from '../../lib/confirm';
 
 const rowSchema = editedBySchema.extend({ id: z.string() }).loose();
 
@@ -179,7 +183,7 @@ const EntitySection = ({
   reload: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
-  const prompt = usePrompt();
+  const confirmed = useConfirmed();
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -223,22 +227,21 @@ const EntitySection = ({
       { method: 'POST', body: JSON.stringify(toBody(entity.fields, draft)) },
     );
     if (saved) {
+      toast.success(t('common.saved'));
       reset();
       await reload();
     }
   };
 
   const remove = async (id: string) => {
-    const confirmed = await prompt({
-      title: t('vehicles.confirmTitle'),
-      description: t('vehicles.confirmDelete'),
-      confirmText: t('vehicles.delete'),
-      cancelText: t('vehicles.cancel'),
-    });
-    if (!confirmed) return;
     if (
-      await adminFetch(`/admin/${entity.path}/${id}`, acknowledged, {
-        method: 'DELETE',
+      await confirmed({
+        title: t('vehicles.confirmTitle'),
+        description: t('vehicles.confirmDelete'),
+        run: () =>
+          adminFetch(`/admin/${entity.path}/${id}`, acknowledged, {
+            method: 'DELETE',
+          }),
       })
     ) {
       await reload();
@@ -248,66 +251,74 @@ const EntitySection = ({
   return (
     <div className="flex flex-col gap-y-3">
       <Heading level="h2">{t(`vehicles.entities.${entity.object}`)}</Heading>
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            {entity.fields.map((field) => (
-              <Table.HeaderCell key={field.key}>
-                {t(`vehicles.fields.${field.key}`)}
-              </Table.HeaderCell>
-            ))}
-            <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
-            <Table.HeaderCell />
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {(rows[entity.collection] ?? []).map((row) => (
-            <Table.Row key={row.id}>
+      <div className="overflow-x-auto">
+        <Table>
+          <Table.Header>
+            <Table.Row>
               {entity.fields.map((field) => (
-                <Table.Cell key={field.key}>{cell(field, row)}</Table.Cell>
+                <Table.HeaderCell key={field.key}>
+                  {t(`vehicles.fields.${field.key}`)}
+                </Table.HeaderCell>
               ))}
-              <Table.Cell>
-                <EditedBy row={row} />
-              </Table.Cell>
-              <Table.Cell>
-                <div className="flex gap-x-2">
-                  {entity.translatable && (
-                    <TranslationsDrawer
-                      entity={entity.translatable}
-                      id={row.id}
-                      source={{ name: String(row.name ?? '') }}
-                    />
-                  )}
-                  <Button
-                    size="small"
-                    variant="secondary"
-                    onClick={() => {
-                      setEditingId(row.id);
-                      setDraft(fromRow(entity.fields, row));
-                    }}
-                  >
-                    {t('vehicles.edit')}
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="danger"
-                    onClick={() => remove(row.id)}
-                  >
-                    {t('vehicles.delete')}
-                  </Button>
-                </div>
-              </Table.Cell>
+              <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+              <Table.HeaderCell />
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          </Table.Header>
+          <Table.Body>
+            {(rows[entity.collection] ?? []).map((row) => (
+              <Table.Row key={row.id}>
+                {entity.fields.map((field) => (
+                  <Table.Cell
+                    key={field.key}
+                    className="max-w-[14rem] whitespace-normal break-words"
+                  >
+                    {cell(field, row)}
+                  </Table.Cell>
+                ))}
+                <Table.Cell>
+                  <EditedBy row={row} />
+                </Table.Cell>
+                <Table.Cell>
+                  <div className="flex gap-x-2">
+                    {entity.translatable && (
+                      <TranslationsDrawer
+                        entity={entity.translatable}
+                        id={row.id}
+                        source={{ name: String(row.name ?? '') }}
+                      />
+                    )}
+                    <Button
+                      size="small"
+                      variant="secondary"
+                      onClick={() => {
+                        setEditingId(row.id);
+                        setDraft(fromRow(entity.fields, row));
+                      }}
+                    >
+                      {t('vehicles.edit')}
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="danger"
+                      onClick={() => remove(row.id)}
+                    >
+                      {t('vehicles.delete')}
+                    </Button>
+                  </div>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
         {entity.fields.map((field) => (
           <div key={field.key} className="flex flex-col gap-y-1">
             <Label size="xsmall">{t(`vehicles.fields.${field.key}`)}</Label>
             {field.kind === 'text' || field.kind === 'number' ? (
               <Input
                 type={field.kind}
+                maxLength={200}
                 value={draft[field.key] ?? ''}
                 onChange={(event) =>
                   setDraft({ ...draft, [field.key]: event.target.value })
@@ -335,6 +346,11 @@ const EntitySection = ({
           </div>
         ))}
       </div>
+      {entity.object === 'vehicle_identifier' && (
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('vehicles.identifierFormat')}
+        </Text>
+      )}
       <div className="flex gap-x-2">
         <Button onClick={save}>
           {editingId ? t('vehicles.save') : t('vehicles.create')}
@@ -384,7 +400,11 @@ const VehiclesPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.vehicles',
+  icon: TruckFast,
+  rank: 5,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.vehicles');
 
 export default VehiclesPage;

@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { withEditors } from '../../../lib/editors';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import type SupplierModuleService from '../../../modules/supplier/service';
 
@@ -10,6 +11,8 @@ const supplierSchema = z.object({
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
+  updated_at: z.date(),
+  updated_by: z.string().nullable(),
 });
 
 export async function GET(
@@ -23,5 +26,10 @@ export async function GET(
     { order: { name: 'ASC' } },
   );
 
-  res.json({ suppliers: z.array(supplierSchema).parse(suppliers) });
+  res.json({
+    suppliers: await withEditors(
+      req.scope,
+      z.array(supplierSchema).parse(suppliers),
+    ),
+  });
 }

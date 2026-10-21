@@ -42,7 +42,7 @@ const optionKey = (options: { key: string }[]) => {
 const valueSchema = ({ type, options }: CategoryFieldDefinition) => {
   switch (type) {
     case 'number':
-      return z.number();
+      return z.number().nonnegative();
     case 'boolean':
       return z.boolean();
     case 'text':
@@ -74,7 +74,7 @@ export function validateAttributes(
   values: unknown,
 ):
   | { success: true; values: AttributeValues }
-  | { success: false; errors: string[] } {
+  | { success: false; errors: string[]; fields: string[] } {
   const result = attributesSchema(fields).safeParse(values);
   return result.success
     ? { success: true, values: result.data as AttributeValues }
@@ -83,6 +83,11 @@ export function validateAttributes(
         errors: result.error.issues.map(
           ({ path, message }) =>
             `${path.join('.') || 'attributes'}: ${message}`,
+        ),
+        fields: result.error.issues.flatMap((issue) =>
+          issue.code === 'unrecognized_keys'
+            ? issue.keys
+            : issue.path.slice(0, 1).map(String),
         ),
       };
 }

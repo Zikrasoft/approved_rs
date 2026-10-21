@@ -1,9 +1,12 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { Buildings, EllipsisHorizontal, Trash } from '@medusajs/icons';
 import {
   Button,
   Checkbox,
   Container,
+  DropdownMenu,
   Heading,
+  IconButton,
   Input,
   Label,
   Select,
@@ -20,9 +23,16 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { acknowledged, adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
+import { useConfirmed } from '../../lib/confirm';
 
-const supplierSchema = z.object({
+const supplierSchema = editedBySchema.extend({
   id: z.string(),
   name: z.string(),
   markup_percentage: z.number(),
@@ -35,7 +45,7 @@ const categorySchema = z.object({ id: z.string(), name: z.string() });
 
 type Category = z.infer<typeof categorySchema>;
 
-const mappingSchema = z.object({
+const mappingSchema = editedBySchema.extend({
   id: z.string(),
   code: z.string(),
   category_id: z.string(),
@@ -58,6 +68,11 @@ const importsSchema = z.object({
       imported: z.number(),
       created: z.number(),
       skipped: z.number(),
+      skipped_by_reason: z.object({
+        category: z.number(),
+        brand: z.number(),
+        currency: z.number(),
+      }),
     }),
   ),
 });
@@ -66,6 +81,7 @@ const sourceDeletedSchema = z.object({ deleted: z.number() });
 const SuppliersPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const prompt = usePrompt();
+  const confirmed = useConfirmed();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -115,27 +131,78 @@ const SuppliersPage = () => {
 
   const update = async (id: string, body: Partial<Supplier>) => {
     setSavingId(id);
-    await adminFetch(`/admin/suppliers/${id}`, acknowledged, {
+    const saved = await adminFetch(`/admin/suppliers/${id}`, acknowledged, {
       method: 'POST',
       body: JSON.stringify(body),
     });
     setSavingId(null);
     await load();
+    return saved;
   };
 
-  const saveMarkup = (id: string) => {
-    const markup_percentage = Number(drafts[id]);
-    if (Number.isFinite(markup_percentage)) {
-      update(id, { markup_percentage });
+  const saveMarkup = async (supplier: Supplier) => {
+    const markup_percentage = Number(
+      (drafts[supplier.id] ?? '').replace(',', '.'),
+    );
+    if (await update(supplier.id, { markup_percentage })) {
+      setDrafts((current) => {
+        const next = { ...current };
+        delete next[supplier.id];
+        return next;
+      });
+      toast.success(
+        t('suppliers.markupSaved', {
+          supplier: supplier.name,
+          markup: markup_percentage.toLocaleString(i18n.language),
+        }),
+      );
     }
   };
 
-  const toggleRelease = (supplier: Supplier, kind: StagedDataKind) =>
-    update(supplier.id, {
-      released_kinds: supplier.released_kinds.includes(kind)
-        ? supplier.released_kinds.filter((released) => released !== kind)
-        : [...supplier.released_kinds, kind],
+  const toggleRelease = async (supplier: Supplier, kind: StagedDataKind) => {
+    const releasing = !supplier.released_kinds.includes(kind);
+    const kindName = t(`suppliers.kinds.${kind}`);
+    if (
+      releasing &&
+      !(await prompt({
+        variant: 'confirmation',
+        title: t('suppliers.confirmReleaseTitle', {
+          kind: kindName,
+          supplier: supplier.name,
+        }),
+        description: t('suppliers.confirmReleaseBody'),
+        confirmText: t('suppliers.confirmRelease'),
+        cancelText: t('common.cancel'),
+      }))
+    ) {
+      return;
+    }
+    const saved = await update(supplier.id, {
+      released_kinds: releasing
+        ? [...supplier.released_kinds, kind]
+        : supplier.released_kinds.filter((released) => released !== kind),
     });
+    if (saved) {
+      toast.success(
+        t(releasing ? 'suppliers.released' : 'suppliers.hidden', {
+          kind: kindName,
+          supplier: supplier.name,
+        }),
+      );
+    }
+  };
+
+  const importLine = (
+    summary: z.infer<typeof importsSchema>['imports'][number],
+  ) =>
+    [
+      t('suppliers.importSummary', summary),
+      summary.skipped || summary.skipped_by_reason.currency
+        ? t('suppliers.importSkipped', summary.skipped_by_reason)
+        : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
   const runImport = async () => {
     setImporting(true);
@@ -146,9 +213,7 @@ const SuppliersPage = () => {
     if (data) {
       toast.success(
         data.imports.length
-          ? data.imports
-              .map((summary) => t('suppliers.importSummary', summary))
-              .join('\n')
+          ? data.imports.map(importLine).join('\n')
           : t('suppliers.importNoAdapters'),
       );
     }
@@ -169,45 +234,59 @@ const SuppliersPage = () => {
       },
     );
     if (created) {
+      toast.success(
+        t('suppliers.mappings.added', {
+          code: code.trim(),
+          category: categoryName(categoryId),
+        }),
+      );
       setCode('');
       setCategoryId('');
       await loadMappings(mappedSupplierId);
     }
   };
 
-  const removeMapping = async (id: string) => {
-    await adminFetch(
-      `/admin/suppliers/${mappedSupplierId}/categories/${id}`,
-      acknowledged,
-      { method: 'DELETE' },
-    );
-    await loadMappings(mappedSupplierId);
+  const removeMapping = async (mapping: Mapping) => {
+    if (
+      await confirmed({
+        title: t('suppliers.mappings.confirmRemoveTitle', {
+          code: mapping.code,
+        }),
+        description: t('suppliers.mappings.confirmRemoveBody'),
+        done: t('suppliers.mappings.removed', { code: mapping.code }),
+        run: () =>
+          adminFetch(
+            `/admin/suppliers/${mappedSupplierId}/categories/${mapping.id}`,
+            acknowledged,
+            { method: 'DELETE' },
+          ),
+      })
+    ) {
+      await loadMappings(mappedSupplierId);
+    }
   };
 
   const removeSource = async ({ source, rows }: Source) => {
-    const confirmed = await prompt({
+    let deleted = 0;
+    const removed = await confirmed({
       title: t('sources.confirmTitle', { source: sourceName(source) }),
       description: t('sources.confirmBody', { count: rows }),
       confirmText: t('sources.remove'),
-      cancelText: t('sources.cancel'),
+      done: () =>
+        t('sources.removed', { source: sourceName(source), count: deleted }),
+      run: async () => {
+        setRemovingSource(source);
+        const data = await adminFetch(
+          `/admin/catalogue-sources/${encodeURIComponent(source)}`,
+          sourceDeletedSchema,
+          { method: 'DELETE' },
+        );
+        deleted = data?.deleted ?? 0;
+        return data;
+      },
     });
-    if (!confirmed) {
-      return;
-    }
-    setRemovingSource(source);
-    const data = await adminFetch(
-      `/admin/catalogue-sources/${encodeURIComponent(source)}`,
-      sourceDeletedSchema,
-      { method: 'DELETE' },
-    );
     setRemovingSource(null);
-    if (data) {
-      toast.success(
-        t('sources.removed', {
-          source: sourceName(source),
-          count: data.deleted,
-        }),
-      );
+    if (removed) {
       await loadSources();
     }
   };
@@ -221,7 +300,7 @@ const SuppliersPage = () => {
   return (
     <div className="flex flex-col gap-y-4">
       <Container className="flex flex-col gap-y-4">
-        <div className="flex items-start justify-between gap-x-4">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
           <div className="flex flex-col gap-y-1">
             <Heading level="h1">{t('suppliers.heading')}</Heading>
             <Text size="small" className="text-ui-fg-subtle">
@@ -232,67 +311,90 @@ const SuppliersPage = () => {
             {t('suppliers.import')}
           </Button>
         </div>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>{t('suppliers.columns.name')}</Table.HeaderCell>
-              <Table.HeaderCell>
-                {t('suppliers.columns.markup')}
-              </Table.HeaderCell>
-              <Table.HeaderCell />
-              <Table.HeaderCell>
-                {t('suppliers.columns.released')}
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {suppliers.map((supplier) => (
-              <Table.Row key={supplier.id}>
-                <Table.Cell>{supplier.name}</Table.Cell>
-                <Table.Cell>
-                  <Input
-                    type="number"
-                    value={
-                      drafts[supplier.id] ?? String(supplier.markup_percentage)
-                    }
-                    onChange={(event) =>
-                      setDrafts((prev) => ({
-                        ...prev,
-                        [supplier.id]: event.target.value,
-                      }))
-                    }
-                  />
-                </Table.Cell>
-                <Table.Cell>
-                  <Button
-                    size="small"
-                    isLoading={savingId === supplier.id}
-                    onClick={() => saveMarkup(supplier.id)}
-                  >
-                    {t('suppliers.save')}
-                  </Button>
-                </Table.Cell>
-                <Table.Cell>
-                  <div className="flex flex-col gap-y-1 py-2">
-                    {STAGED_DATA_KINDS.map((kind) => (
-                      <div key={kind} className="flex items-center gap-x-2">
-                        <Checkbox
-                          id={`${supplier.id}-${kind}`}
-                          checked={supplier.released_kinds.includes(kind)}
-                          disabled={savingId === supplier.id}
-                          onCheckedChange={() => toggleRelease(supplier, kind)}
-                        />
-                        <Label size="small" htmlFor={`${supplier.id}-${kind}`}>
-                          {t(`suppliers.kinds.${kind}`)}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </Table.Cell>
+        <div className="overflow-x-auto">
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>
+                  {t('suppliers.columns.name')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>
+                  {t('suppliers.columns.markup')}
+                </Table.HeaderCell>
+                <Table.HeaderCell />
+                <Table.HeaderCell>
+                  {t('suppliers.columns.released')}
+                </Table.HeaderCell>
+                <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+            </Table.Header>
+            <Table.Body>
+              {suppliers.map((supplier) => (
+                <Table.Row key={supplier.id}>
+                  <Table.Cell>{supplier.name}</Table.Cell>
+                  <Table.Cell>
+                    <Input
+                      type="number"
+                      className="w-24"
+                      min={0}
+                      max={500}
+                      step={0.01}
+                      aria-label={t('suppliers.markupLabel', {
+                        supplier: supplier.name,
+                      })}
+                      value={
+                        drafts[supplier.id] ??
+                        String(supplier.markup_percentage)
+                      }
+                      onChange={(event) =>
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [supplier.id]: event.target.value,
+                        }))
+                      }
+                    />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Button
+                      size="small"
+                      variant="secondary"
+                      isLoading={savingId === supplier.id}
+                      disabled={drafts[supplier.id] === undefined}
+                      onClick={() => saveMarkup(supplier)}
+                    >
+                      {t('suppliers.save')}
+                    </Button>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="flex flex-col gap-y-1 py-2">
+                      {STAGED_DATA_KINDS.map((kind) => (
+                        <div key={kind} className="flex items-center gap-x-2">
+                          <Checkbox
+                            id={`${supplier.id}-${kind}`}
+                            checked={supplier.released_kinds.includes(kind)}
+                            disabled={savingId === supplier.id}
+                            onCheckedChange={() =>
+                              toggleRelease(supplier, kind)
+                            }
+                          />
+                          <Label
+                            size="small"
+                            htmlFor={`${supplier.id}-${kind}`}
+                          >
+                            {t(`suppliers.kinds.${kind}`)}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <EditedBy row={supplier} />
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </div>
         <Text size="small" className="text-ui-fg-subtle">
           {t('suppliers.releasedHint')}
         </Text>
@@ -324,38 +426,44 @@ const SuppliersPage = () => {
         {mappedSupplierId && (
           <>
             {mappings.length ? (
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>
-                      {t('suppliers.mappings.code')}
-                    </Table.HeaderCell>
-                    <Table.HeaderCell>
-                      {t('suppliers.mappings.category')}
-                    </Table.HeaderCell>
-                    <Table.HeaderCell />
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {mappings.map((mapping) => (
-                    <Table.Row key={mapping.id}>
-                      <Table.Cell>{mapping.code}</Table.Cell>
-                      <Table.Cell>
-                        {categoryName(mapping.category_id)}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Button
-                          size="small"
-                          variant="secondary"
-                          onClick={() => removeMapping(mapping.id)}
-                        >
-                          {t('suppliers.mappings.remove')}
-                        </Button>
-                      </Table.Cell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>
+                        {t('suppliers.mappings.code')}
+                      </Table.HeaderCell>
+                      <Table.HeaderCell>
+                        {t('suppliers.mappings.category')}
+                      </Table.HeaderCell>
+                      <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+                      <Table.HeaderCell />
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
+                  </Table.Header>
+                  <Table.Body>
+                    {mappings.map((mapping) => (
+                      <Table.Row key={mapping.id}>
+                        <Table.Cell>{mapping.code}</Table.Cell>
+                        <Table.Cell>
+                          {categoryName(mapping.category_id)}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <EditedBy row={mapping} />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            onClick={() => removeMapping(mapping)}
+                          >
+                            {t('suppliers.mappings.remove')}
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table>
+              </div>
             ) : (
               <Text size="small">{t('suppliers.mappings.empty')}</Text>
             )}
@@ -403,35 +511,54 @@ const SuppliersPage = () => {
           </Text>
         </div>
         {sources.length ? (
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>{t('sources.source')}</Table.HeaderCell>
-                <Table.HeaderCell>{t('sources.rows')}</Table.HeaderCell>
-                <Table.HeaderCell />
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {sources.map((entry) => (
-                <Table.Row key={entry.source}>
-                  <Table.Cell>{sourceName(entry.source)}</Table.Cell>
-                  <Table.Cell>
-                    {entry.rows.toLocaleString(i18n.language)}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      variant="danger"
-                      isLoading={removingSource === entry.source}
-                      onClick={() => removeSource(entry)}
-                    >
-                      {t('sources.remove')}
-                    </Button>
-                  </Table.Cell>
+          <div className="overflow-x-auto">
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell>{t('sources.source')}</Table.HeaderCell>
+                  <Table.HeaderCell>{t('sources.rows')}</Table.HeaderCell>
+                  <Table.HeaderCell className="text-right">
+                    {t('common.actions')}
+                  </Table.HeaderCell>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
+              </Table.Header>
+              <Table.Body>
+                {sources.map((entry) => (
+                  <Table.Row key={entry.source}>
+                    <Table.Cell>{sourceName(entry.source)}</Table.Cell>
+                    <Table.Cell>
+                      {entry.rows.toLocaleString(i18n.language)}
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenu.Trigger asChild>
+                          <IconButton
+                            size="small"
+                            variant="transparent"
+                            isLoading={removingSource === entry.source}
+                            aria-label={t('sources.actionsFor', {
+                              source: sourceName(entry.source),
+                            })}
+                          >
+                            <EllipsisHorizontal />
+                          </IconButton>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content align="end">
+                          <DropdownMenu.Item
+                            className="text-ui-fg-error gap-x-2"
+                            onClick={() => removeSource(entry)}
+                          >
+                            <Trash />
+                            {t('sources.remove')}
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </div>
         ) : (
           <Text size="small">{t('sources.empty')}</Text>
         )}
@@ -442,7 +569,11 @@ const SuppliersPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.suppliers',
+  icon: Buildings,
+  rank: 9,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.suppliers');
 
 export default SuppliersPage;

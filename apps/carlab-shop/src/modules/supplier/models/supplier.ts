@@ -8,8 +8,10 @@ const Supplier = model
   .define('supplier', {
     id: model.id().primaryKey(),
     name: model.text().unique(),
-    markup_percentage: model.number(),
+    markup_percentage: model.float(),
     released_kinds: model.array().default([]),
+    created_by: model.text().nullable(),
+    updated_by: model.text().nullable(),
     offers: model.hasMany(() => SupplierOffer, { mappedBy: 'supplier' }),
     categories: model.hasMany(() => SupplierCategory, {
       mappedBy: 'supplier',

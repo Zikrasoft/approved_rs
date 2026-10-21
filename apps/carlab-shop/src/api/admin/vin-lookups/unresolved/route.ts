@@ -1,5 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
@@ -18,8 +20,20 @@ export async function GET(
     { select: ['make', 'code'], take: null },
   );
 
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+  const known = new Set(
+    (
+      await catalog.listVehicleIdentifiers(
+        { value: [...new Set(lookups.map(({ code }) => String(code)))] },
+        { select: ['value'], take: null },
+      )
+    ).map(({ value }) => value),
+  );
+
   const codes = new Map<string, UnresolvedCode>();
-  for (const { make, code } of lookups) {
+  for (const { make, code } of lookups.filter(
+    ({ code }) => !known.has(String(code)),
+  )) {
     const key = `${make}|${code}`;
     const entry = codes.get(key) ?? {
       make: String(make),

@@ -1,4 +1,5 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { ArrowPath } from '@medusajs/icons';
 import {
   Badge,
   Button,
@@ -9,14 +10,21 @@ import {
   Switch,
   Table,
   Text,
+  toast,
 } from '@medusajs/ui';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { acknowledged, adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
 
-const partSchema = z.object({
+const partSchema = editedBySchema.extend({
   id: z.string(),
   name: z.string(),
   replaced_by: z.object({ id: z.string(), name: z.string() }).nullable(),
@@ -78,9 +86,12 @@ const SupersessionPage = () => {
     setReplacementQuery('');
   };
 
-  const setSuperseded = async (identifierId: string, superseded: boolean) => {
+  const setSuperseded = async (
+    identifier: Part['identifiers'][number],
+    superseded: boolean,
+  ) => {
     const saved = await adminFetch(
-      `/admin/part-identifiers/${identifierId}`,
+      `/admin/part-identifiers/${identifier.id}`,
       acknowledged,
       {
         method: 'POST',
@@ -88,6 +99,16 @@ const SupersessionPage = () => {
       },
     );
     if (saved && selected) {
+      toast.success(
+        t(
+          superseded
+            ? 'supersession.markedSuperseded'
+            : 'supersession.markedCurrent',
+          {
+            number: `${identifier.brand.name} ${identifier.value}`,
+          },
+        ),
+      );
       await refresh(selected.id);
     }
   };
@@ -105,6 +126,13 @@ const SupersessionPage = () => {
       },
     );
     if (saved) {
+      toast.success(
+        t(
+          replacedById
+            ? 'supersession.replacementSaved'
+            : 'supersession.replacementCleared',
+        ),
+      );
       setCandidates(null);
       setReplacementQuery('');
       await refresh(selected.id);
@@ -122,8 +150,9 @@ const SupersessionPage = () => {
 
       <form className="flex flex-col gap-y-2" onSubmit={search}>
         <Label>{t('supersession.findLabel')}</Label>
-        <div className="flex gap-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            className="sm:w-80"
             placeholder={t('supersession.searchPlaceholder')}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -141,7 +170,7 @@ const SupersessionPage = () => {
             <Button
               key={part.id}
               variant={part.id === selected?.id ? 'primary' : 'secondary'}
-              className="justify-start"
+              className="h-auto justify-start whitespace-normal text-left"
               onClick={() => select(part)}
             >
               {part.name}: {numbersOf(part)}
@@ -154,38 +183,45 @@ const SupersessionPage = () => {
         <div className="flex flex-col gap-y-6">
           <div className="flex flex-col gap-y-2">
             <Heading level="h2">{selected.name}</Heading>
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>
-                    {t('supersession.columns.number')}
-                  </Table.HeaderCell>
-                  <Table.HeaderCell>
-                    {t('supersession.columns.superseded')}
-                  </Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {selected.identifiers.map((identifier) => (
-                  <Table.Row key={identifier.id}>
-                    <Table.Cell>
-                      {identifier.brand.name} {identifier.value}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Switch
-                        checked={identifier.superseded}
-                        aria-label={t('supersession.markSuperseded', {
-                          number: identifier.value,
-                        })}
-                        onCheckedChange={(checked) =>
-                          setSuperseded(identifier.id, checked)
-                        }
-                      />
-                    </Table.Cell>
+            <EditedBy row={selected} />
+            <div className="overflow-x-auto">
+              <Table>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>
+                      {t('supersession.columns.number')}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                      {t('supersession.columns.superseded')}
+                    </Table.HeaderCell>
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
+                </Table.Header>
+                <Table.Body>
+                  {selected.identifiers.map((identifier) => (
+                    <Table.Row key={identifier.id}>
+                      <Table.Cell>
+                        {identifier.brand.name} {identifier.value}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Label className="flex items-center gap-x-2">
+                          <Switch
+                            checked={identifier.superseded}
+                            onCheckedChange={(checked) =>
+                              setSuperseded(identifier, checked)
+                            }
+                          />
+                          <span className="sr-only">
+                            {t('supersession.markSuperseded', {
+                              number: identifier.value,
+                            })}
+                          </span>
+                        </Label>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            </div>
           </div>
 
           <div className="flex flex-col gap-y-2">
@@ -206,8 +242,12 @@ const SupersessionPage = () => {
                 {t('supersession.notReplaced')}
               </Text>
             )}
-            <form className="flex gap-x-2" onSubmit={searchReplacement}>
+            <form
+              className="flex flex-col gap-2 sm:flex-row"
+              onSubmit={searchReplacement}
+            >
               <Input
+                className="sm:w-80"
                 placeholder={t('supersession.replacementPlaceholder')}
                 value={replacementQuery}
                 onChange={(event) => setReplacementQuery(event.target.value)}
@@ -227,7 +267,7 @@ const SupersessionPage = () => {
               <Button
                 key={candidate.id}
                 variant="secondary"
-                className="justify-start"
+                className="h-auto justify-start whitespace-normal text-left"
                 onClick={() => setReplacement(candidate.id)}
               >
                 {t('supersession.replaceWith', {
@@ -244,7 +284,11 @@ const SupersessionPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.supersession',
+  icon: ArrowPath,
+  rank: 4,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.supersession');
 
 export default SupersessionPage;

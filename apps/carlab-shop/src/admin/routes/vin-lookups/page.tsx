@@ -1,10 +1,12 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { MagnifierAlert } from '@medusajs/icons';
 import { Container, Heading, Table, Text } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { adminFetch } from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
 
 const unresolvedCodeSchema = z.object({
   make: z.string(),
@@ -66,7 +68,11 @@ const VinLookupsPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.vinLookups',
+  icon: MagnifierAlert,
+  rank: 8,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.vinLookups');
 
 export default VinLookupsPage;

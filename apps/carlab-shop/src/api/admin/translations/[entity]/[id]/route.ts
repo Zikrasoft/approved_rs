@@ -3,11 +3,14 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
+import { withEditors } from '../../../../../lib/editors';
 import {
   editTranslation,
+  lastEdit,
   readTranslations,
 } from '../../../../../lib/publish/translate';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
+import type CatalogModuleService from '../../../../../modules/catalog/service';
 import type { AdminEditTranslationType } from '../../../validators';
 
 export async function GET(
@@ -15,13 +18,12 @@ export async function GET(
   res: MedusaResponse,
 ): Promise<void> {
   const { entity, id } = req.params;
-  res.json({
-    translations: await readTranslations(
-      req.scope.resolve(CATALOG_MODULE),
-      entity,
-      id,
-    ),
-  });
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+  const translations = await readTranslations(catalog, entity, id);
+  const [edited] = await withEditors(req.scope, [
+    await lastEdit(catalog, entity, id),
+  ]);
+  res.json({ translations, edited });
 }
 
 export async function POST(

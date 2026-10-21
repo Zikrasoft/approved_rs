@@ -65,11 +65,13 @@ medusaIntegrationTestRunner({
           `/admin/suppliers/${supplierId}/categories`,
         );
         expect(listed.data.categories).toEqual([
-          {
+          expect.objectContaining({
             id: created.data.category.id,
             code: 'IC-AIR',
             category_id: categoryId,
-          },
+            updated_at: expect.any(String),
+            updated_by_user: expect.objectContaining({ email: ADMIN_EMAIL }),
+          }),
         ]);
 
         const removed = await call(
@@ -117,12 +119,14 @@ medusaIntegrationTestRunner({
 
         const listed = await call('get', '/admin/suppliers');
         expect(listed.data.suppliers).toEqual([
-          {
+          expect.objectContaining({
             id: supplierId,
             name: 'Admin-test supplier',
             markup_percentage: 10,
             released_kinds: ['cross_references', 'applicability'],
-          },
+            updated_at: expect.any(String),
+            updated_by_user: expect.objectContaining({ email: ADMIN_EMAIL }),
+          }),
         ]);
       });
 
@@ -147,6 +151,35 @@ medusaIntegrationTestRunner({
 
         const supplier = await supplierService.retrieveSupplier(supplierId);
         expect(supplier.markup_percentage).toBe(50);
+      });
+
+      it('keeps a decimal markup as typed', async () => {
+        const response = await api.post(
+          `/admin/suppliers/${supplierId}`,
+          { markup_percentage: 12.5 },
+          adminHeaders,
+        );
+
+        expect(response.data.supplier.markup_percentage).toBe(12.5);
+        expect(
+          (await supplierService.retrieveSupplier(supplierId))
+            .markup_percentage,
+        ).toBe(12.5);
+      });
+
+      it.each([
+        ['a markup above 500%', { markup_percentage: 501 }],
+        ['a markup with three decimals', { markup_percentage: 12.345 }],
+      ])('names the markup field for %s', async (_, body) => {
+        const response = await api
+          .post(`/admin/suppliers/${supplierId}`, body, adminHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'INVALID_FIELD',
+          field: 'markup_percentage',
+        });
       });
 
       it.each([

@@ -5,6 +5,10 @@ describe('sellPrice', () => {
     expect(sellPrice(1542, 20)).toBe(1850);
   });
 
+  it('applies a decimal markup', () => {
+    expect(sellPrice(1000, 12.5)).toBe(1125);
+  });
+
   it('returns the cost price unchanged at a zero markup', () => {
     expect(sellPrice(1000, 0)).toBe(1000);
   });

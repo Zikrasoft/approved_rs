@@ -5,19 +5,48 @@ import {
   STEERING_SIDES,
   VEHICLE_DRIVES,
   VEHICLE_IDENTIFIER_TYPES,
+  type VehicleIdentifierType,
 } from '@podbor/catalog-contract';
 
-const text = z.string().trim().min(1);
+import { MAX_NAME_LENGTH } from './validators';
+
+const text = z.string().trim().min(1).max(MAX_NAME_LENGTH);
 const slug = z
   .string()
   .trim()
+  .max(MAX_NAME_LENGTH)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-const code = z.string().trim().toUpperCase().min(1);
+const code = z.string().trim().toUpperCase().min(1).max(MAX_NAME_LENGTH);
 const year = z.number().int().min(1950).max(2100).nullable();
 
-export const AdminMake = z.object({ slug, name: text });
+const IDENTIFIER_FORMATS: Record<VehicleIdentifierType, RegExp> = {
+  'bmw-type-code': /^[A-Z0-9]{4}$/,
+  'mercedes-baumuster': /^\d{6}$/,
+};
 
-export const AdminSeries = z.object({
+type Years = { year_from?: number | null; year_to?: number | null };
+
+const yearsInOrder = ({ year_from, year_to }: Years) =>
+  year_from == null || year_to == null || year_from <= year_to;
+
+const YEARS_OUT_OF_ORDER = {
+  path: ['year_to'],
+  message: 'Ends before it starts',
+};
+
+type Identifier = { type?: VehicleIdentifierType; value?: string };
+
+const identifierFormat = ({ type, value }: Identifier) =>
+  !type || value === undefined || IDENTIFIER_FORMATS[type].test(value);
+
+const BAD_IDENTIFIER_FORMAT = {
+  path: ['value'],
+  message: 'Does not match the format of its type',
+};
+
+const AdminMake = z.object({ slug, name: text });
+
+const AdminSeries = z.object({
   make_id: text,
   name: text,
   translations: z
@@ -26,7 +55,7 @@ export const AdminSeries = z.object({
     .optional(),
 });
 
-export const AdminChassis = z.object({
+const AdminChassis = z.object({
   series_id: text,
   code,
   body_style: z.enum(BODY_STYLES),
@@ -34,20 +63,20 @@ export const AdminChassis = z.object({
   year_to: year.optional(),
 });
 
-export const AdminVehicleModel = z.object({
+const AdminVehicleModel = z.object({
   chassis_id: text,
   slug,
   name: text,
 });
 
-export const AdminEngine = z.object({
+const AdminEngine = z.object({
   code,
   family: code,
   fuel: z.enum(ENGINE_FUELS),
   displacement_cc: z.number().int().positive().nullable().optional(),
 });
 
-export const AdminVehicle = z.object({
+const AdminVehicle = z.object({
   model_id: text,
   engine_id: text,
   power_kw: z.number().int().positive().nullable().optional(),
@@ -58,18 +87,34 @@ export const AdminVehicle = z.object({
   steering: z.enum(STEERING_SIDES).nullable().optional(),
 });
 
-export const AdminVehicleIdentifier = z.object({
+const AdminVehicleIdentifier = z.object({
   vehicle_id: text,
   type: z.enum(VEHICLE_IDENTIFIER_TYPES),
   value: code,
 });
 
+const withYears = <Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) =>
+  [
+    schema.refine(yearsInOrder, YEARS_OUT_OF_ORDER),
+    schema.partial().refine(yearsInOrder, YEARS_OUT_OF_ORDER),
+  ] as const;
+
+const plain = <Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) =>
+  [schema, schema.partial()] as const;
+
 export const VEHICLE_REFERENCE_BODIES = [
-  ['/admin/makes', AdminMake],
-  ['/admin/series', AdminSeries],
-  ['/admin/chassis', AdminChassis],
-  ['/admin/vehicle-models', AdminVehicleModel],
-  ['/admin/engines', AdminEngine],
-  ['/admin/vehicles', AdminVehicle],
-  ['/admin/vehicle-identifiers', AdminVehicleIdentifier],
+  ['/admin/makes', ...plain(AdminMake)],
+  ['/admin/series', ...plain(AdminSeries)],
+  ['/admin/chassis', ...withYears(AdminChassis)],
+  ['/admin/vehicle-models', ...plain(AdminVehicleModel)],
+  ['/admin/engines', ...plain(AdminEngine)],
+  ['/admin/vehicles', ...withYears(AdminVehicle)],
+  [
+    '/admin/vehicle-identifiers',
+    AdminVehicleIdentifier.refine(identifierFormat, BAD_IDENTIFIER_FORMAT),
+    AdminVehicleIdentifier.partial().refine(
+      identifierFormat,
+      BAD_IDENTIFIER_FORMAT,
+    ),
+  ],
 ] as const;

@@ -279,6 +279,9 @@ importers:
       '@medusajs/framework':
         specifier: 2.21.2
         version: 2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.9.0))(zod@4.5.4)
+      '@medusajs/icons':
+        specifier: 2.21.2
+        version: 2.21.2(react@18.3.1)
       '@medusajs/medusa':
         specifier: 2.21.2
         version: 2.21.2(5083e8a7573613d29cf8d1841f0591c5)

@@ -52,7 +52,7 @@
       "manual": "Manual",
       "automatic": "Automatic"
     },
-    "step2Hint": "Fill in at least one filter. The Part is attached to every matching Vehicle, and existing Fitments are not duplicated.",
+    "step2Hint": "Pick the vehicles this part belongs to. Years here pick vehicles by their production years. Fill in at least one filter: the part is attached to every matching vehicle and existing fitments are not duplicated.",
     "filters": {
       "vehicle": "One Vehicle",
       "make": "Make",
@@ -60,15 +60,15 @@
       "chassis": "Chassis",
       "model": "Model",
       "engine": "Engine",
-      "engineFamily": "Engine family, e.g. B47",
-      "yearFrom": "Built from, year",
-      "yearTo": "Built until, year"
+      "engineFamily": "Engine family",
+      "yearFrom": "Vehicles built from year",
+      "yearTo": "Vehicles built up to year"
     },
     "quantityLabel": "Quantity per car",
     "axlePlaceholder": "Axle",
     "sidePlaceholder": "Side",
-    "productionFromLabel": "Built from",
-    "productionToLabel": "Built until",
+    "productionFromLabel": "Fits cars built from",
+    "productionToLabel": "Fits cars built up to",
     "notePlaceholder": "Note for the customer, e.g. M Sport package only",
     "noteHint": "The note is translated at Publish. A Part with a note is confirmed by the customer.",
     "attached_one": "Created {{count}} Fitment, matching Vehicles: {{matched}}",
@@ -88,7 +88,32 @@
       "since": "Built from {{from}}",
       "until": "Built until {{to}}"
     },
-    "identifierCount_one": "{{name}} ({{count}} identifier)"
+    "identifierCount_one": "{{name}} ({{count}} identifier)",
+    "partCreated": "Part {{name}} created.",
+    "partNameLabel": "Name on the site",
+    "rename": "Rename",
+    "partRenamed": "Part renamed: {{name}}.",
+    "deletePart": "Delete part",
+    "confirmDeletePartTitle": "Delete part {{name}}?",
+    "confirmDeletePartBody": "All its numbers, supplier offers and fitments go with it. This cannot be undone.",
+    "partDeleted": "Part {{name}} deleted.",
+    "deleteNumber": "Delete number {{number}}",
+    "confirmDeleteNumberTitle": "Delete number {{number}}?",
+    "confirmDeleteNumberBody": "The number page leaves the site at the next publish and supplier offers for it are deleted. The part stays.",
+    "numberDeleted": "Number {{number}} deleted.",
+    "step3Hint": "Conditions describe the fitting itself: dates here mean the part fits only cars built in that period.",
+    "detach": "Detach by these filters",
+    "confirmDetachTitle": "Detach the part from the matching vehicles?",
+    "confirmDetachBody": "Every fitment of {{name}} on a vehicle matching the filters is deleted, whatever its conditions.",
+    "detached_one": "{{count}} fitment deleted.",
+    "detached_other": "{{count}} fitments deleted.",
+    "edit": "Edit",
+    "editLabel": "Editing a fitment",
+    "fitmentSaved": "Fitment saved.",
+    "confirmDeleteFitmentTitle": "Delete this fitment?",
+    "confirmDeleteFitmentBody": "The part stops showing for {{vehicle}}.",
+    "fitmentDeleted": "Fitment deleted.",
+    "supplierName": "Supplier name, not checked"
   },
   "suppliers": {
     "heading": "Suppliers",
@@ -118,8 +143,20 @@
       "categoryPlaceholder": "Our Category",
       "add": "Map",
       "remove": "Remove",
-      "empty": "This supplier has no mapped categories yet."
-    }
+      "empty": "This supplier has no mapped categories yet.",
+      "added": "Category {{code}} mapped to \"{{category}}\".",
+      "confirmRemoveTitle": "Delete mapping {{code}}?",
+      "confirmRemoveBody": "The next import skips this supplier category.",
+      "removed": "Mapping {{code}} deleted."
+    },
+    "markupLabel": "Markup of {{supplier}}, %",
+    "markupSaved": "{{supplier}} markup: {{markup}}%. Site prices update at the next publish.",
+    "confirmReleaseTitle": "Show \"{{kind}}\" from {{supplier}} on the site?",
+    "confirmReleaseBody": "Buyers see this data right away. Turn it on only with the supplier's written permission: the data may come from TecDoc.",
+    "confirmRelease": "Permission granted, show",
+    "released": "\"{{kind}}\" from {{supplier}} now shows on the site.",
+    "hidden": "\"{{kind}}\" from {{supplier}} is hidden from the site.",
+    "importSkipped": "Skipped articles: {{category}} in unmapped categories, {{brand}} with an unknown brand spelling. Without an RSD price: {{currency}}."
   },
   "brands": {
     "heading": "Brands",
@@ -138,7 +175,15 @@
     "spellingPlaceholder": "Supplier's spelling",
     "addSpelling": "Add spelling",
     "removeSpelling": "Remove spelling {{spelling}}",
-    "delete": "Delete brand"
+    "delete": "Delete brand",
+    "created": "Brand {{name}} added.",
+    "deleted": "Brand {{name}} deleted.",
+    "confirmDeleteTitle": "Delete brand {{name}}?",
+    "confirmDeleteBody": "The brand goes with its supplier spellings. A brand that has part numbers cannot be deleted.",
+    "spellingAdded": "Spelling {{spelling}} added.",
+    "spellingRemoved": "Spelling {{spelling}} removed.",
+    "confirmSpellingTitle": "Delete spelling {{spelling}}?",
+    "confirmSpellingBody": "The next import skips this supplier's articles with this brand spelling."
   },
   "vehicles": {
     "heading": "Vehicles and reference data",
@@ -212,7 +257,8 @@
         "mercedes-baumuster": "Mercedes Baumuster"
       }
     },
-    "confirmTitle": "Delete this row?"
+    "confirmTitle": "Delete this row?",
+    "identifierFormat": "BMW type code: 4 letters or digits, for example 35BG. Mercedes-Benz Baumuster: 6 digits, for example 213004."
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
@@ -230,7 +276,7 @@
   },
   "publish": {
     "heading": "Publish",
-    "description": "Publishing translates new catalogue text into Serbian and English, rebuilds and deploys carlab.rs, then refreshes search. Each step runs only after the previous one succeeds.",
+    "description": "Publishing first imports the supplier catalogues, then translates new catalogue texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. Each step runs only after the previous one succeeds.",
     "publish": "Publish",
     "started": "Publishing started",
     "empty": "Nothing has been published yet. Press Publish to put your edits live.",
@@ -246,9 +292,15 @@
     "steps": {
       "translate": "translation",
       "deploy": "site build and deploy",
-      "reindex": "search refresh"
+      "reindex": "search refresh",
+      "import": "Supplier import"
     },
-    "errorDetails": "Error details: {{error}}"
+    "errorDetails": "Error details: {{error}}",
+    "startedBy": "Started by: {{who}}",
+    "knownErrors": {
+      "openAiKey": "The OpenAI key (OPENAI_API_KEY) is not set, so translation did not run and the later steps were skipped. This is a server setting: ask a developer to add the key.",
+      "dispatchToken": "The site deploy token (PUBLISH_DISPATCH_TOKEN) is not set, so the site was not rebuilt and search was not updated. This is a server setting: ask a developer to add the token."
+    }
   },
   "supersession": {
     "heading": "Supersession",
@@ -266,7 +318,11 @@
     "notReplaced": "This part is not replaced.",
     "clearReplacement": "Remove replacement",
     "replacementPlaceholder": "Number of the replacement part",
-    "replaceWith": "Replace with {{part}}"
+    "replaceWith": "Replace with {{part}}",
+    "markedSuperseded": "Number {{number}} marked superseded.",
+    "markedCurrent": "Number {{number}} is current again.",
+    "replacementSaved": "Replacement saved.",
+    "replacementCleared": "Replacement removed."
   },
   "categories": {
     "heading": "Categories",
@@ -313,7 +369,13 @@
     },
     "maintenanceKit": "Part of the maintenance kit",
     "kitRank": "Place in the maintenance kit",
-    "maintenanceKitHint": "The car page puts one fitting part from each flagged category into the maintenance kit. A lower place puts it higher in the list."
+    "maintenanceKitHint": "The car page puts one fitting part from each flagged category into the maintenance kit. A lower place puts it higher in the list.",
+    "confirmDeleteOptionTitle": "Delete option \"{{option}}\"?",
+    "confirmDeleteOptionBody": "An option picked on parts or needed by requirements cannot be deleted.",
+    "confirmDeleteFieldTitle": "Delete attribute \"{{field}}\"?",
+    "confirmDeleteFieldBody": "An attribute used by parts or requirements cannot be deleted.",
+    "confirmDeleteCategoryTitle": "Delete category \"{{category}}\"?",
+    "confirmDeleteCategoryBody": "The category goes with its attributes. A category with parts cannot be deleted."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -355,6 +417,14 @@
       "between": "{{min}} to {{max}} {{unit}}",
       "since": "from {{min}} {{unit}}",
       "until": "up to {{max}} {{unit}}"
+    },
+    "added": "Requirement added.",
+    "confirmDeleteTitle": "Delete the \"{{field}}\" requirement?",
+    "confirmDeleteBody": "Consumables stop matching by this requirement after the next publish.",
+    "deleted": "Requirement deleted.",
+    "boolean": {
+      "true": "Yes",
+      "false": "No"
     }
   },
   "edited": {
@@ -373,7 +443,10 @@
       "INVALID_ATTRIBUTES": "The characteristic values do not fit the category: check required fields and options.",
       "INVALID_REQUIREMENT": "The requirement does not fit the characteristic: check the options and the From and To values.",
       "DEFINITION_BREAKS_PARTS": "The change would break the characteristics of parts in this category. Fix those parts first.",
-      "PUBLISH_RUNNING": "A publish run is already in progress. Wait for it to finish."
+      "PUBLISH_RUNNING": "A publish run is already in progress. Wait for it to finish.",
+      "ALREADY_EXISTS": "This record already exists.",
+      "FIELD_REQUIRED": "Fill in «{{field}}».",
+      "INVALID_FIELD": "Check «{{field}}»."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -386,7 +459,70 @@
     },
     "unknown": "The server could not complete the action. Try again.",
     "unexpectedAnswer": "The server answered in an unexpected shape. Reload the page.",
-    "unreachable": "The server cannot be reached. Check the connection and try again."
+    "unreachable": "The server cannot be reached. Check the connection and try again.",
+    "alreadyExists": {
+      "brand": "A brand with this name or link address already exists.",
+      "brand_spelling": "This supplier already has this brand spelling (case and spaces do not matter).",
+      "part_identifier": "This brand already has this number. One brand number belongs to one part, whatever the number type.",
+      "make": "A make with this name or link address already exists.",
+      "series": "This make already has this series.",
+      "chassis": "A chassis with this code already exists.",
+      "vehicle_model": "A model with this link address already exists.",
+      "engine": "An engine with this code already exists.",
+      "vehicle_identifier": "This code is already linked to a vehicle.",
+      "category": "A category with this link address already exists.",
+      "category_field": "This category already has an attribute with this key.",
+      "category_field_option": "This attribute already has an option with this key.",
+      "supplier_category": "This supplier category is already mapped.",
+      "fitment": "This part already fits this vehicle at this position with these conditions.",
+      "requirement": "This owner already has the same requirement.",
+      "supplier": "A supplier with this name already exists."
+    },
+    "invalidFields": {
+      "year_to": "The \"to\" year is before the \"from\" year. Check the years.",
+      "production_to": "Production ends before it starts. Check the dates.",
+      "markup_percentage": "Markup: a number from 0 to 500 with at most two decimals."
+    },
+    "fields": {
+      "name": "Name",
+      "slug": "Link address",
+      "code": "Code",
+      "value": "Value",
+      "label": "Label",
+      "key": "Key",
+      "family": "Family",
+      "unit": "Unit",
+      "markup_percentage": "Markup, %",
+      "year_from": "Year from",
+      "year_to": "Year to",
+      "production_from": "Production from",
+      "production_to": "Production to",
+      "note": "Note",
+      "quantity": "Quantity",
+      "type": "Type",
+      "body_style": "Body style",
+      "fuel": "Fuel",
+      "make_id": "Make",
+      "series_id": "Series",
+      "chassis_id": "Chassis",
+      "model_id": "Model",
+      "engine_id": "Engine",
+      "vehicle_id": "Vehicle",
+      "part_id": "Part",
+      "brand_id": "Brand",
+      "category_id": "Category",
+      "field_id": "Attribute",
+      "supplier_id": "Supplier",
+      "option_keys": "Options",
+      "min": "From",
+      "max": "To",
+      "displacement_cc": "Displacement, cc",
+      "power_kw": "Power, kW",
+      "market": "Market",
+      "text": "Text",
+      "identifiers": "Numbers"
+    },
+    "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative."
   },
   "sources": {
     "heading": "Catalogue data sources",
@@ -403,7 +539,8 @@
     "empty": "The catalogue has no rows yet.",
     "names": {
       "manual": "Manual entry"
-    }
+    },
+    "actionsFor": "Actions for source {{source}}"
   },
   "translations": {
     "open": "Translations",
@@ -421,6 +558,15 @@
       "text": "Description",
       "label": "Label",
       "note": "Note"
-    }
+    },
+    "nothingChanged": "No translation changed, nothing to save."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleted": "Deleted.",
+    "save": "Save",
+    "saved": "Saved.",
+    "actions": "Actions"
   }
 }

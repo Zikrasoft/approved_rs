@@ -1,4 +1,5 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { Adjustments } from '@medusajs/icons';
 import {
   Badge,
   Button,
@@ -23,6 +24,7 @@ import {
   adminFetch,
   editedBySchema,
 } from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
 
 const categoryFieldSchema = z.object({
   key: z.string(),
@@ -93,6 +95,7 @@ const ValueInput = ({
         <Input
           type="number"
           step="any"
+          min={0}
           value={value === undefined ? '' : String(value)}
           onChange={(event) =>
             onChange(
@@ -224,8 +227,9 @@ const PartAttributesPage = () => {
 
       <div className="flex flex-col gap-y-2">
         <Label>{t('partAttributes.findLabel')}</Label>
-        <div className="flex gap-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            className="sm:w-80"
             placeholder={t('partAttributes.searchPlaceholder')}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -314,7 +318,11 @@ const PartAttributesPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.partAttributes',
+  icon: Adjustments,
+  rank: 3,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.partAttributes');
 
 export default PartAttributesPage;

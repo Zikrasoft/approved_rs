@@ -86,7 +86,13 @@ const flat = (field: string): Codec => ({
   encode: (translations) => mapLocales(translations, (fields) => fields[field]),
 });
 
-const TRANSLATION_COLUMNS = ['id', 'translations', 'translated_from'];
+const TRANSLATION_COLUMNS = [
+  'id',
+  'translations',
+  'translated_from',
+  'updated_at',
+  'updated_by',
+];
 
 export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
   [
@@ -319,6 +325,20 @@ export async function readTranslations(
 ): Promise<Translations> {
   const entity = entityNamed(name);
   return (await storedItem(entity, catalog, id)).translations;
+}
+
+const editedSchema = z.object({
+  updated_at: z.date(),
+  updated_by: z.string().nullable(),
+});
+
+export async function lastEdit(
+  catalog: CatalogModuleService,
+  name: string,
+  id: string,
+): Promise<z.infer<typeof editedSchema>> {
+  const [row] = await entityNamed(name).list(catalog, { id });
+  return editedSchema.parse(row);
 }
 
 export async function editTranslation(

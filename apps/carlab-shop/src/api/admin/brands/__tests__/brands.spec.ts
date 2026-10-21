@@ -91,7 +91,52 @@ medusaIntegrationTestRunner({
           slug: 'mahle',
         });
 
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'brand',
+        });
+      });
+
+      it('names the empty field', async () => {
+        const response = await post('/admin/brands', { name: ' ', slug: 'x' });
+
+        expect(response.data).toMatchObject({
+          code: 'FIELD_REQUIRED',
+          field: 'name',
+        });
+      });
+
+      it('refuses a 600-character name', async () => {
+        const response = await post('/admin/brands', {
+          name: 'B'.repeat(600),
+          slug: 'long',
+        });
+
         expect(response.status).toBe(400);
+        expect(response.data.field).toBe('name');
+      });
+
+      it('refuses a spelling that differs from a stored one only by case', async () => {
+        const brand = await catalog.createBrands({
+          name: 'Case Brand',
+          slug: 'case-brand',
+        });
+        await post(`/admin/brands/${brand.id}/spellings`, {
+          supplier_id: intercars.id,
+          value: 'E2E-BRAND',
+        });
+
+        const response = await post(`/admin/brands/${brand.id}/spellings`, {
+          supplier_id: intercars.id,
+          value: ' e2e-brand ',
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'brand_spelling',
+        });
       });
 
       it('refuses a spelling for an unknown supplier', async () => {
@@ -123,7 +168,7 @@ medusaIntegrationTestRunner({
           value: 'FEBI',
         });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(409);
       });
 
       it('deletes a spelling', async () => {

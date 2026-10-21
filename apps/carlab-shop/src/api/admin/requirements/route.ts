@@ -3,6 +3,7 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
+import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type {
@@ -25,7 +26,7 @@ export async function GET(
     },
   );
 
-  res.json({ requirements });
+  res.json({ requirements: await withEditors(req.scope, requirements) });
 }
 
 export async function POST(
