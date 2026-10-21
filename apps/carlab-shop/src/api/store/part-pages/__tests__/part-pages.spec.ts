@@ -94,10 +94,12 @@ medusaIntegrationTestRunner({
           type: 'manufacturer-number',
           value: 'HU 816 x',
           normalized_value: 'HU816X',
+          superseded: false,
           brand: { name: 'Mann-Filter', slug: 'mann-filter' },
           part: {
             id: expect.any(String),
             name: 'Oil filter, BMW B47/B48 engines',
+            replaced_by: null,
           },
           equivalents: [
             {
@@ -105,6 +107,7 @@ medusaIntegrationTestRunner({
               type: 'oem',
               value: '11 42 8575211',
               normalized_value: '11428575211',
+              superseded: false,
               brand: { name: 'BMW', slug: 'bmw' },
             },
           ],

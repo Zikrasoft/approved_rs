@@ -177,6 +177,34 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(404);
       });
+
+      it('resolves a superseded number to its Part', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const [bmw] = await catalog.listBrands({ slug: 'bmw' });
+        const oldPartId = await catalog.createPartWithIdentifiers({
+          name: 'Oil filter, superseded number',
+          identifiers: [
+            { type: 'oem', brand_id: bmw.id, value: '11 42 7953125' },
+          ],
+        });
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: oldPartId,
+        });
+        await catalog.updatePartIdentifiers({
+          id: identifier.id,
+          superseded: true,
+        });
+        await getContainer().resolve(Modules.SEARCH).reindex({ index: 'part' });
+
+        const response = await api.get(
+          '/store/search?q=' + encodeURIComponent('11 42 7953125'),
+          storeHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.part.id).toBe(oldPartId);
+      });
     });
   },
 });

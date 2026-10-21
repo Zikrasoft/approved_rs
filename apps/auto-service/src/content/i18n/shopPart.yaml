@@ -4,6 +4,10 @@ eyebrow: Запчасть
 variantsHeading: Варианты и предложения поставщиков
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
+replacedHeading: Деталь заменена
+replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
+supersededNotice: Этот номер устарел, производитель его больше не использует.
+supersededTag: устарел
 priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
 priceOnRequestCta: Узнать цену
@@ -33,6 +37,10 @@ translations:
     variantsHeading: Opcije i ponude dobavljača
     equivalentsHeading: Zamenski delovi za ovaj deo
     noEquivalents: Za sada nema zamenskih delova u katalogu. Pišite nam, pronaći ćemo zamenu.
+    replacedHeading: Deo je zamenjen
+    replacedLead: 'Proizvođač je ovaj deo zamenio novim. Naručite aktuelni deo:'
+    supersededNotice: Ovaj broj je zastareo i proizvođač ga više ne koristi.
+    supersededTag: zastareo
     currencyLabel: RSD
     columns:
       brand: Brend
@@ -57,6 +65,10 @@ translations:
     variantsHeading: Options and supplier offers
     equivalentsHeading: Equivalents of this part
     noEquivalents: No equivalents in the catalogue yet. Message us and we will find a replacement.
+    replacedHeading: This part has been replaced
+    replacedLead: 'The manufacturer replaced this part with a new one. Order the current part:'
+    supersededNotice: This number is superseded and no longer used by the manufacturer.
+    supersededTag: superseded
     currencyLabel: RSD
     columns:
       brand: Brand

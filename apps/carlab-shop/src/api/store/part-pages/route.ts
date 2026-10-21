@@ -12,7 +12,14 @@ type BrandNumberRow = {
   type: string;
   value: string;
   normalized_value: string;
+  superseded: boolean;
   brand: { name: string; slug: string };
+};
+
+type ReplacementRow = {
+  id: string;
+  name: string;
+  identifiers: BrandNumberRow[];
 };
 
 const brandNumber = ({
@@ -20,14 +27,24 @@ const brandNumber = ({
   type,
   value,
   normalized_value,
+  superseded,
   brand,
 }: BrandNumberRow) => ({
   id,
   type,
   value,
   normalized_value,
+  superseded,
   brand: { name: brand.name, slug: brand.slug },
 });
+
+const replacement = ({ id, name, identifiers }: ReplacementRow) => {
+  const [current] = [...identifiers].sort(
+    (a, b) =>
+      Number(a.superseded) - Number(b.superseded) || a.id.localeCompare(b.id),
+  );
+  return current ? { id, name, brand_number: brandNumber(current) } : null;
+};
 
 export async function GET(
   req: MedusaRequest<unknown, StoreListPartPagesType>,
@@ -52,6 +69,19 @@ export async function GET(
     { relations: ['brand'], order: { id: 'ASC' } },
   );
 
+  const replacementIds = [
+    ...new Set(identifiers.map(({ part }) => part.replaced_by_id)),
+  ].filter((id) => id !== null);
+  const replacements = replacementIds.length
+    ? await catalog.listParts(
+        { id: replacementIds },
+        { relations: ['identifiers', 'identifiers.brand'] },
+      )
+    : [];
+  const replacedBy = (id: string | null) => {
+    const part = replacements.find((candidate) => candidate.id === id);
+    return part ? replacement(part) : null;
+  };
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const offers = await suppliers.listSupplierOffers(
     { part_identifier_id: identifiers.map(({ id }) => id) },
@@ -61,7 +91,11 @@ export async function GET(
 
   const pages = identifiers.map((identifier) => ({
     ...brandNumber(identifier),
-    part: { id: identifier.part.id, name: identifier.part.name },
+    part: {
+      id: identifier.part.id,
+      name: identifier.part.name,
+      replaced_by: replacedBy(identifier.part.replaced_by_id),
+    },
     equivalents: siblings
       .filter(
         ({ id, part_id }) =>

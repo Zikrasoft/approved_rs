@@ -5,7 +5,8 @@
     "brands": "Бренды",
     "vehicles": "Автомобили",
     "vinLookups": "Нераспознанные VIN",
-    "publish": "Публикация"
+    "publish": "Публикация",
+    "supersession": "Замены номеров"
   },
   "fitments": {
     "heading": "Подбор соответствий",
@@ -180,5 +181,23 @@
       "deploy": "Сборка и выкладка сайта",
       "reindex": "Обновление поиска"
     }
+  },
+  "supersession": {
+    "heading": "Замены номеров",
+    "intro": "Отметьте устаревший номер или укажите деталь, которая заменила эту. Старый номер продолжит вести покупателя к актуальной детали.",
+    "findLabel": "Найдите деталь",
+    "searchPlaceholder": "Номер или бренд",
+    "search": "Найти",
+    "noMatch": "Ничего не найдено. Проверьте номер.",
+    "columns": {
+      "number": "Номер",
+      "superseded": "Устарел"
+    },
+    "markSuperseded": "Номер {{number}} устарел",
+    "replacedByLabel": "Заменена деталью",
+    "notReplaced": "Деталь не заменена.",
+    "clearReplacement": "Убрать замену",
+    "replacementPlaceholder": "Номер детали-замены",
+    "replaceWith": "Заменить на {{part}}"
   }
 }

@@ -12,6 +12,10 @@ const Part = model
     ...translatable(),
     identifiers: model.hasMany(() => PartIdentifier, { mappedBy: 'part' }),
     fitments: model.hasMany(() => Fitment, { mappedBy: 'part' }),
+    replaced_by: model
+      .belongsTo(() => Part, { mappedBy: 'replaces' })
+      .nullable(),
+    replaces: model.hasMany(() => Part, { mappedBy: 'replaced_by' }),
     ...provenance(),
   })
   .cascades({ delete: ['identifiers', 'fitments'] });

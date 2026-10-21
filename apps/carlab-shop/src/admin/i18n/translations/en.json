@@ -5,7 +5,8 @@
     "brands": "Brands",
     "vehicles": "Vehicles",
     "vinLookups": "Unresolved VINs",
-    "publish": "Publish"
+    "publish": "Publish",
+    "supersession": "Supersession"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -178,5 +179,23 @@
       "deploy": "site build and deploy",
       "reindex": "search refresh"
     }
+  },
+  "supersession": {
+    "heading": "Supersession",
+    "intro": "Mark an outdated number or name the part that replaced this one. The old number keeps leading buyers to the current part.",
+    "findLabel": "Find a part",
+    "searchPlaceholder": "Number or brand",
+    "search": "Search",
+    "noMatch": "Nothing found. Check the number.",
+    "columns": {
+      "number": "Number",
+      "superseded": "Superseded"
+    },
+    "markSuperseded": "Number {{number}} is superseded",
+    "replacedByLabel": "Replaced by",
+    "notReplaced": "This part is not replaced.",
+    "clearReplacement": "Remove replacement",
+    "replacementPlaceholder": "Number of the replacement part",
+    "replaceWith": "Replace with {{part}}"
   }
 }

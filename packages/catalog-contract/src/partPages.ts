@@ -18,11 +18,22 @@ export const brandNumberSchema = z.object({
   type: z.enum(PART_IDENTIFIER_TYPES),
   value: z.string(),
   normalized_value: z.string(),
+  superseded: z.boolean(),
   brand: brandSchema,
 });
 
 export const partPageSchema = brandNumberSchema.extend({
-  part: z.object({ id: z.string(), name: z.string() }),
+  part: z.object({
+    id: z.string(),
+    name: z.string(),
+    replaced_by: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+        brand_number: brandNumberSchema,
+      })
+      .nullable(),
+  }),
   equivalents: z.array(brandNumberSchema),
   has_offers: z.boolean(),
 });
