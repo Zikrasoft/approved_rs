@@ -214,6 +214,20 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('drops a code from the unresolved list once staff add it to a Vehicle', async () => {
+        await lookUp('WBA33CC070N000013');
+        await createVehicleFixture(catalog, { typeCode: '33CC' });
+
+        const response = await api.get(
+          '/admin/vin-lookups/unresolved',
+          adminHeaders,
+        );
+
+        expect(response.data.codes).not.toContainEqual(
+          expect.objectContaining({ code: '33CC' }),
+        );
+      });
+
       it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
         const response = await api
           .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)

@@ -6,6 +6,7 @@ import {
 
 import {
   AdminBulkAttachFitments,
+  AdminBulkDetachFitments,
   AdminCreateBrand,
   AdminCreateBrandSpelling,
   AdminCreateCategory,
@@ -26,7 +27,8 @@ import {
   AdminUpdatePartIdentifier,
   AdminUpdateSupplier,
 } from './admin/validators';
-import { keepConflictCodes } from '../lib/admin-errors';
+import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
+import { refuseStockCartChange } from '../lib/offer-cart';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
   StoreAddOfferCartItem,
@@ -40,47 +42,47 @@ import {
 } from './store/validators';
 
 export default defineMiddlewares({
-  errorHandler: keepConflictCodes,
+  errorHandler: keepAdminCodes,
   routes: [
     {
       matcher: '/admin/brands',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateBrand)],
+      middlewares: [validateAdminBody(AdminCreateBrand)],
     },
     {
       matcher: '/admin/brands/:id/spellings',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateBrandSpelling)],
+      middlewares: [validateAdminBody(AdminCreateBrandSpelling)],
     },
     {
       matcher: '/admin/categories',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateCategory)],
+      middlewares: [validateAdminBody(AdminCreateCategory)],
     },
     {
       matcher: '/admin/categories/:id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdateCategory)],
+      middlewares: [validateAdminBody(AdminUpdateCategory)],
     },
     {
       matcher: '/admin/categories/:id/fields',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateCategoryField)],
+      middlewares: [validateAdminBody(AdminCreateCategoryField)],
     },
     {
       matcher: '/admin/categories/:id/fields/:field_id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdateCategoryField)],
+      middlewares: [validateAdminBody(AdminUpdateCategoryField)],
     },
     {
       matcher: '/admin/categories/:id/fields/:field_id/options',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateCategoryFieldOption)],
+      middlewares: [validateAdminBody(AdminCreateCategoryFieldOption)],
     },
     {
       matcher: '/admin/categories/:id/fields/:field_id/options/:option_id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdateCategoryFieldOption)],
+      middlewares: [validateAdminBody(AdminUpdateCategoryFieldOption)],
     },
     {
       matcher: '/admin/parts',
@@ -90,17 +92,17 @@ export default defineMiddlewares({
     {
       matcher: '/admin/parts',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreatePart)],
+      middlewares: [validateAdminBody(AdminCreatePart)],
     },
     {
       matcher: '/admin/parts/:id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdatePart)],
+      middlewares: [validateAdminBody(AdminUpdatePart)],
     },
     {
       matcher: '/admin/part-identifiers/:id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdatePartIdentifier)],
+      middlewares: [validateAdminBody(AdminUpdatePartIdentifier)],
     },
     {
       matcher: '/admin/fitments',
@@ -110,13 +112,19 @@ export default defineMiddlewares({
     {
       matcher: '/admin/fitments',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateFitment)],
+      middlewares: [validateAdminBody(AdminCreateFitment)],
     },
     {
       matcher: '/admin/fitments/bulk',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminBulkAttachFitments)],
+      middlewares: [validateAdminBody(AdminBulkAttachFitments)],
     },
+    {
+      matcher: '/admin/fitments/bulk/delete',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminBulkDetachFitments)],
+    },
+
     {
       matcher: '/admin/requirements',
       method: 'GET',
@@ -125,35 +133,49 @@ export default defineMiddlewares({
     {
       matcher: '/admin/requirements',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateRequirement)],
+      middlewares: [validateAdminBody(AdminCreateRequirement)],
     },
     {
       matcher: '/admin/translations/:entity/:id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminEditTranslation)],
+      middlewares: [validateAdminBody(AdminEditTranslation)],
     },
     {
       matcher: '/admin/suppliers/:id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminUpdateSupplier)],
+      middlewares: [validateAdminBody(AdminUpdateSupplier)],
     },
     {
       matcher: '/admin/suppliers/:id/categories',
       method: 'POST',
-      middlewares: [validateAndTransformBody(AdminCreateSupplierCategory)],
+      middlewares: [validateAdminBody(AdminCreateSupplierCategory)],
     },
-    ...VEHICLE_REFERENCE_BODIES.flatMap(([matcher, schema]) => [
+    ...VEHICLE_REFERENCE_BODIES.flatMap(([matcher, create, update]) => [
       {
         matcher,
         method: 'POST' as const,
-        middlewares: [validateAndTransformBody(schema)],
+        middlewares: [validateAdminBody(create)],
       },
       {
         matcher: `${matcher}/:id`,
         method: 'POST' as const,
-        middlewares: [validateAndTransformBody(schema.partial())],
+        middlewares: [validateAdminBody(update)],
       },
     ]),
+    ...[
+      '/store/carts',
+      '/store/carts/:id',
+      '/store/carts/:id/line-items',
+      '/store/carts/:id/line-items/:line_id',
+      '/store/carts/:id/promotions',
+      '/store/carts/:id/shipping-methods',
+      '/store/carts/:id/customer',
+      '/store/carts/:id/taxes',
+    ].map((matcher) => ({
+      matcher,
+      method: ['POST' as const, 'DELETE' as const],
+      middlewares: [refuseStockCartChange],
+    })),
     {
       matcher: '/store/part-pages',
       method: 'GET',

@@ -1,4 +1,5 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { SquaresPlus } from '@medusajs/icons';
 import {
   Badge,
   Button,
@@ -11,10 +12,11 @@ import {
   Table,
   Text,
   Textarea,
+  toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
-import { useTranslation } from 'react-i18next';
+import { getI18n, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
@@ -24,6 +26,8 @@ import {
   adminFetch,
   editedBySchema,
 } from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
+import { useConfirmed } from '../../lib/confirm';
 
 const FIELD_TYPES = CATEGORY_FIELD_TYPES;
 
@@ -90,11 +94,14 @@ const EMPTY_FIELD: FieldDraft = {
 const isSelect = (type: FieldType) =>
   type === 'single-select' || type === 'multi-select';
 
-const post = (path: string, body: unknown) =>
-  adminFetch(path, acknowledged, {
+const post = async (path: string, body: unknown) => {
+  const saved = await adminFetch(path, acknowledged, {
     method: 'POST',
     body: JSON.stringify(body),
   });
+  if (saved) toast.success(getI18n().t('common.saved', { ns: 'carlabAdmin' }));
+  return saved;
+};
 
 const remove = (path: string) =>
   adminFetch(path, acknowledged, { method: 'DELETE' });
@@ -109,6 +116,7 @@ const OptionRow = ({
   onChange: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
+  const confirmed = useConfirmed();
   const [label, setLabel] = useState(option.label);
 
   return (
@@ -139,7 +147,16 @@ const OptionRow = ({
         size="small"
         variant="transparent"
         onClick={async () => {
-          if (await remove(`${path}/${option.id}`)) await onChange();
+          if (
+            await confirmed({
+              title: t('categories.confirmDeleteOptionTitle', {
+                option: option.label,
+              }),
+              description: t('categories.confirmDeleteOptionBody'),
+              run: () => remove(`${path}/${option.id}`),
+            })
+          )
+            await onChange();
         }}
       >
         {t('categories.deleteOption')}
@@ -158,6 +175,7 @@ const FieldRow = ({
   onChange: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
+  const confirmed = useConfirmed();
   const [label, setLabel] = useState(field.label);
   const [unit, setUnit] = useState(field.unit ?? '');
   const [rank, setRank] = useState(String(field.rank));
@@ -285,7 +303,16 @@ const FieldRow = ({
             size="small"
             variant="danger"
             onClick={async () => {
-              if (await remove(path)) await onChange();
+              if (
+                await confirmed({
+                  title: t('categories.confirmDeleteFieldTitle', {
+                    field: field.label,
+                  }),
+                  description: t('categories.confirmDeleteFieldBody'),
+                  run: () => remove(path),
+                })
+              )
+                await onChange();
             }}
           >
             {t('categories.deleteField')}
@@ -304,6 +331,7 @@ const CategoryEditor = ({
   onChange: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
+  const confirmed = useConfirmed();
   const [name, setName] = useState(category.name);
   const [text, setText] = useState(category.text);
   const [kit, setKit] = useState(category.maintenance_kit);
@@ -389,7 +417,16 @@ const CategoryEditor = ({
           <Button
             variant="danger"
             onClick={async () => {
-              if (await remove(path)) await onChange();
+              if (
+                await confirmed({
+                  title: t('categories.confirmDeleteCategoryTitle', {
+                    category: category.name,
+                  }),
+                  description: t('categories.confirmDeleteCategoryBody'),
+                  run: () => remove(path),
+                })
+              )
+                await onChange();
             }}
           >
             {t('categories.deleteCategory')}
@@ -405,32 +442,36 @@ const CategoryEditor = ({
         {category.fields.length === 0 ? (
           <Text>{t('categories.noFields')}</Text>
         ) : (
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>{t('categories.key')}</Table.HeaderCell>
-                <Table.HeaderCell>{t('categories.type')}</Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('categories.fieldLabel')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>{t('categories.unit')}</Table.HeaderCell>
-                <Table.HeaderCell>{t('categories.required')}</Table.HeaderCell>
-                <Table.HeaderCell>{t('categories.facet')}</Table.HeaderCell>
-                <Table.HeaderCell>{t('categories.rank')}</Table.HeaderCell>
-                <Table.HeaderCell />
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {category.fields.map((field) => (
-                <FieldRow
-                  key={`${field.id}-${field.label}-${field.unit}-${field.rank}`}
-                  path={`${path}/fields/${field.id}`}
-                  field={field}
-                  onChange={onChange}
-                />
-              ))}
-            </Table.Body>
-          </Table>
+          <div className="overflow-x-auto">
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell>{t('categories.key')}</Table.HeaderCell>
+                  <Table.HeaderCell>{t('categories.type')}</Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('categories.fieldLabel')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>{t('categories.unit')}</Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('categories.required')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>{t('categories.facet')}</Table.HeaderCell>
+                  <Table.HeaderCell>{t('categories.rank')}</Table.HeaderCell>
+                  <Table.HeaderCell />
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {category.fields.map((field) => (
+                  <FieldRow
+                    key={`${field.id}-${field.label}-${field.unit}-${field.rank}`}
+                    path={`${path}/fields/${field.id}`}
+                    field={field}
+                    onChange={onChange}
+                  />
+                ))}
+              </Table.Body>
+            </Table>
+          </div>
         )}
       </div>
 
@@ -534,6 +575,7 @@ const CategoriesPage = () => {
       { method: 'POST', body: JSON.stringify({ slug, name }) },
     );
     if (created) {
+      toast.success(t('common.saved'));
       setSlug('');
       setName('');
       setSelectedId(created.category.id);
@@ -599,7 +641,11 @@ const CategoriesPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.categories',
+  icon: SquaresPlus,
+  rank: 2,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.categories');
 
 export default CategoriesPage;

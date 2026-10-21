@@ -37,7 +37,7 @@ import Series from './models/series';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
-import { adminError } from '../../lib/admin-errors';
+import { adminError, alreadyExists } from '../../lib/admin-errors';
 
 type Provenance = {
   source?: string;
@@ -215,21 +215,7 @@ class CatalogModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {},
   ) {
     await this.retrievePart(partId, {}, sharedContext);
-    const vehicles = (
-      await this.listVehicles(
-        filter.vehicle_id ? { id: filter.vehicle_id } : {},
-        {
-          relations: [
-            'model',
-            'model.chassis',
-            'model.chassis.series',
-            'engine',
-          ],
-          take: null,
-        },
-        sharedContext,
-      )
-    ).filter(matchesFilter(filter));
+    const vehicles = await this.filteredVehicles(filter, sharedContext);
     const existing = await this.listFitments(
       { part_id: partId, vehicle_id: vehicles.map(({ id }) => id) },
       { take: null },
@@ -253,6 +239,51 @@ class CatalogModuleService extends MedusaService({
         )
       : [];
     return { matched: vehicles.length, created };
+  }
+
+  @InjectTransactionManager()
+  async detachPartFromVehicles(
+    partId: string,
+    filter: VehicleFilter,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    await this.retrievePart(partId, {}, sharedContext);
+    const vehicles = await this.filteredVehicles(filter, sharedContext);
+    const fitments = vehicles.length
+      ? await this.listFitments(
+          { part_id: partId, vehicle_id: vehicles.map(({ id }) => id) },
+          { select: ['id'], take: null },
+          sharedContext,
+        )
+      : [];
+    if (fitments.length) {
+      await this.deleteFitments(
+        fitments.map(({ id }) => id),
+        sharedContext,
+      );
+    }
+    return { matched: vehicles.length, deleted: fitments.length };
+  }
+
+  private async filteredVehicles(
+    filter: VehicleFilter,
+    sharedContext: Context,
+  ) {
+    return (
+      await this.listVehicles(
+        filter.vehicle_id ? { id: filter.vehicle_id } : {},
+        {
+          relations: [
+            'model',
+            'model.chassis',
+            'model.chassis.series',
+            'engine',
+          ],
+          take: null,
+        },
+        sharedContext,
+      )
+    ).filter(matchesFilter(filter));
   }
 
   @InjectTransactionManager()
@@ -311,10 +342,20 @@ class CatalogModuleService extends MedusaService({
       : [];
     const result = validateAttributes(fields, values);
     if (!result.success) {
+      const [key] = result.fields;
+      const [field] =
+        key && categoryId
+          ? await this.listCategoryFields(
+              { category_id: categoryId, key },
+              { select: ['label'] },
+              sharedContext,
+            )
+          : [];
       throw adminError(
         MedusaError.Types.INVALID_DATA,
         'INVALID_ATTRIBUTES',
         `Attributes break the Category definition: ${result.errors.join('; ')}`,
+        { ...(key && { field: key }), ...(field && { label: field.label }) },
       );
     }
     return result.values;
@@ -357,6 +398,32 @@ class CatalogModuleService extends MedusaService({
         MedusaError.Types.INVALID_DATA,
         'INVALID_REQUIREMENT',
         `Requirement breaks its field: ${errors.join('; ')}`,
+      );
+    }
+    const owner = {
+      engine_id: requirement.engine_id ?? null,
+      chassis_id: requirement.chassis_id ?? null,
+      vehicle_id: requirement.vehicle_id ?? null,
+    };
+    const siblings = await this.listRequirements(
+      { field_id: requirement.field_id, ...owner },
+      { take: null },
+      sharedContext,
+    );
+    const sameOptions = (keys: string[] | null) =>
+      [...(keys ?? [])].sort().join() ===
+      [...(requirement.option_keys ?? [])].sort().join();
+    if (
+      siblings.some(
+        (sibling) =>
+          sameOptions(sibling.option_keys) &&
+          sibling.min === requirement.min &&
+          sibling.max === requirement.max,
+      )
+    ) {
+      throw alreadyExists(
+        'requirement',
+        'The owner already has this Requirement',
       );
     }
     return this.createRequirements(requirement, sharedContext);

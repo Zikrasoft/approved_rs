@@ -262,10 +262,48 @@ medusaIntegrationTestRunner({
         const response = await runImport();
 
         expect(response.data.imports).toEqual([
-          { supplier: 'Intercars', imported: 0, created: 0, skipped: 2 },
-          { supplier: 'Warehouse', imported: 0, created: 0, skipped: 0 },
+          {
+            supplier: 'Intercars',
+            imported: 0,
+            created: 0,
+            skipped: 2,
+            skipped_by_reason: { category: 1, brand: 1, currency: 0 },
+          },
+          {
+            supplier: 'Warehouse',
+            imported: 0,
+            created: 0,
+            skipped: 0,
+            skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+          },
         ]);
         expect(await pages()).toHaveLength(1);
+      });
+
+      it('matches a Brand spelling whatever its case and spacing', async () => {
+        intercars.articles.push({
+          article_id: 'IC-8',
+          brand: ' mann-filter ',
+          number: 'W 610/3',
+          name: 'Фильтр W610',
+          category: 'IC-OIL',
+        });
+        intercars.quotes.set('IC-8', {
+          article_id: 'IC-8',
+          cost_price: 900,
+          currency: 'EUR',
+          stock: [{ location: 'Beograd', quantity: 1 }],
+          lead_time_days: 1,
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          skipped: 0,
+          skipped_by_reason: { currency: 1 },
+        });
+        expect(await page('W6103')).toBeDefined();
       });
 
       it('keeps a name a person edited and refreshes one nobody touched', async () => {

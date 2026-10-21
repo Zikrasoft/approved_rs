@@ -5,7 +5,7 @@ import type {
 import { MedusaError } from '@medusajs/framework/utils';
 import { z } from 'zod';
 
-import { fitmentRowSchema } from '../../../lib/store-response';
+import { adminFitmentSchema } from '../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type {
@@ -14,13 +14,6 @@ import type {
 } from '../validators';
 import { adminError } from '../../../lib/admin-errors';
 import { withEditors } from '../../../lib/editors';
-
-const adminFitmentSchema = fitmentRowSchema.extend({
-  source: z.string(),
-  created_by: z.string().nullable(),
-  updated_by: z.string().nullable(),
-  updated_at: z.date(),
-});
 
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminListFitmentsType>,

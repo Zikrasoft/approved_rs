@@ -385,25 +385,70 @@ medusaIntegrationTestRunner({
       });
 
       it.each([
-        ['points at no offer', { offer_id: 'offer_forged' }],
-        ['drops its offer', { offer_id: '' }],
-      ])(
-        'refuses checkout of a line whose metadata was tampered so it %s',
-        async (_, metadata) => {
+        [
+          'change the metadata of',
+          'post',
+          (id: string) => `/store/carts/${id}`,
+        ],
+        [
+          'add a line to',
+          'post',
+          (id: string) => `/store/carts/${id}/line-items`,
+        ],
+        [
+          'change a line of',
+          'post',
+          (id: string, line: string) => `/store/carts/${id}/line-items/${line}`,
+        ],
+        [
+          'remove a line of',
+          'delete',
+          (id: string, line: string) => `/store/carts/${id}/line-items/${line}`,
+        ],
+      ] as const)(
+        'refuses the stock Medusa routes that %s an offer cart',
+        async (_, method, path) => {
           const cart = await cartWith(1);
-          const tampered = await api.post(
-            `/store/carts/${cart.id}/line-items/${cart.items[0].id}`,
-            { quantity: 1, metadata },
-            storeHeaders,
-          );
-          expect(tampered.status).toBe(200);
+          const url = path(cart.id, cart.items[0].id);
 
-          const refused = await complete(cart.id);
+          const refused = await (
+            method === 'post'
+              ? api.post(
+                  url,
+                  { quantity: 50, metadata: { offer_id: 'offer_forged' } },
+                  storeHeaders,
+                )
+              : api.delete(url, storeHeaders)
+          ).catch((error) => error.response);
 
-          expect(refused.status).toBe(400);
-          expect(refused.data.code).toBe('OFFER_MISSING');
+          expect(refused.status).toBe(404);
+          const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+          expect(repriced.data.cart.items).toEqual([
+            expect.objectContaining({ offer_id: offerId, quantity: 1 }),
+          ]);
         },
       );
+
+      it('answers 404 for a line removed from an unknown cart', async () => {
+        const response = await api
+          .delete('/store/offer-carts/cart_DOESNOTEXIST/items/x', storeHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(404);
+      });
+
+      it('answers 404 for a line that is not in the cart', async () => {
+        const cart = await cartWith(1);
+
+        const response = await api
+          .delete(
+            `/store/offer-carts/${cart.id}/items/cali_other`,
+            storeHeaders,
+          )
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(404);
+      });
 
       it('refuses the stock Medusa checkout of a cart without a contact', async () => {
         const cart = await cartWith(1);

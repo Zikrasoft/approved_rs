@@ -117,7 +117,63 @@ medusaIntegrationTestRunner({
           value: 'dup1',
         });
 
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'vehicle_identifier',
+        });
+      });
+
+      it.each([
+        ['a BMW type code of five characters', 'bmw-type-code', '35BGX'],
+        ['a Baumuster with letters', 'mercedes-baumuster', '213O04'],
+      ])('names the value for %s', async (_, type, value) => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'FMT1',
+        });
+
+        const response = await post('/admin/vehicle-identifiers', {
+          vehicle_id: vehicle.id,
+          type,
+          value,
+        });
+
         expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'INVALID_FIELD',
+          field: 'value',
+        });
+      });
+
+      it('refuses a Chassis whose years run backwards', async () => {
+        const { chassis } = await createVehicleFixture(catalog, {
+          typeCode: 'YRS1',
+        });
+
+        const created = await post('/admin/chassis', {
+          series_id: chassis.series_id,
+          code: 'E90',
+          body_style: 'sedan',
+          year_from: 2012,
+          year_to: 2005,
+        });
+        const updated = await post(`/admin/chassis/${chassis.id}`, {
+          year_from: 2019,
+          year_to: 2011,
+        });
+
+        expect(created.data.field).toBe('year_to');
+        expect(updated.data.field).toBe('year_to');
+      });
+
+      it('refuses a Make name past 200 characters', async () => {
+        const response = await post('/admin/makes', {
+          slug: 'long-make',
+          name: 'M'.repeat(201),
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data.field).toBe('name');
       });
 
       it('refuses to delete a Model that still has Vehicles', async () => {

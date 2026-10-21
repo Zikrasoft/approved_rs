@@ -18,6 +18,7 @@ import {
   supplierQuoteSchema,
 } from './adapter';
 import { quotedFields } from './live-quote';
+import { spellingKey } from './spelling';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
@@ -27,6 +28,7 @@ export type ImportSummary = {
   imported: number;
   created: number;
   skipped: number;
+  skipped_by_reason: { category: number; brand: number; currency: number };
 };
 
 type Context = {
@@ -176,39 +178,49 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ value, brand_id }) => [value, brand_id]),
+    ).map(({ value, brand_id }) => [spellingKey(value), brand_id]),
   );
   const summary: ImportSummary = {
     supplier: adapter.name,
     imported: 0,
     created: 0,
     skipped: 0,
+    skipped_by_reason: { category: 0, brand: 0, currency: 0 },
   };
+  const brandOfArticle = (article: Article) =>
+    brandOf.get(spellingKey(article.brand));
   const listed = new Set<string>();
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
+    const unmapped = page.articles.filter(
+      (article) => !categoryOf.has(article.category),
+    );
+    const unbranded = page.articles.filter(
+      (article) => categoryOf.has(article.category) && !brandOfArticle(article),
+    );
     const wanted = page.articles.filter(
-      (article) =>
-        categoryOf.has(article.category) && brandOf.has(article.brand),
+      (article) => categoryOf.has(article.category) && brandOfArticle(article),
     );
-    summary.skipped += page.articles.length - wanted.length;
+    summary.skipped += unmapped.length + unbranded.length;
+    summary.skipped_by_reason.category += unmapped.length;
+    summary.skipped_by_reason.brand += unbranded.length;
+    const quoted = wanted.length
+      ? z
+          .array(supplierQuoteSchema)
+          .parse(
+            await adapter.quote(wanted.map(({ article_id }) => article_id)),
+          )
+      : [];
     const quotes = new Map(
-      wanted.length
-        ? z
-            .array(supplierQuoteSchema)
-            .parse(
-              await adapter.quote(wanted.map(({ article_id }) => article_id)),
-            )
-            .filter(inShopCurrency)
-            .map((quote) => [quote.article_id, quote])
-        : [],
+      quoted.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
     );
+    summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
       const { identifierId, created } = await matchArticle(
         context,
         article,
-        brandOf.get(article.brand)!,
+        brandOfArticle(article)!,
         categoryOf.get(article.category)!,
       );
       const quote = quotes.get(article.article_id);

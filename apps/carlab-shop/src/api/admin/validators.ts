@@ -14,6 +14,10 @@ import {
 
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
+export const MAX_NAME_LENGTH = 200;
+
+const name = z.string().trim().min(1).max(MAX_NAME_LENGTH);
+
 export const AdminSearchParts = z.object({
   q: z.string().trim().min(1),
 });
@@ -25,7 +29,7 @@ const partNumber = z
   .refine((value) => normalizePartNumber(value).length > 0);
 
 export const AdminCreatePart = z.object({
-  name: z.string().trim().min(1),
+  name,
   identifiers: z
     .array(
       z.object({
@@ -41,7 +45,7 @@ export const AdminCreatePart = z.object({
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
 export const AdminUpdatePart = z.strictObject({
-  name: z.string().trim().min(1).optional(),
+  name: name.optional(),
   replaced_by_id: z.string().min(1).nullable().optional(),
   category_id: z.string().min(1).nullable().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
@@ -72,17 +76,38 @@ const fitmentConditions = {
   note: z
     .string()
     .trim()
+    .max(1000)
     .transform((note) => note || null)
     .nullable()
     .optional(),
 };
 
-export const AdminCreateFitment = z.object({
-  part_id: z.string().min(1),
-  vehicle_id: z.string().min(1),
-  ...fitmentConditions,
-});
+type FitmentPeriod = {
+  production_from?: Date | null;
+  production_to?: Date | null;
+};
+
+const inOrder = ({ production_from, production_to }: FitmentPeriod) =>
+  !production_from || !production_to || production_from <= production_to;
+
+const ENDS_BEFORE_IT_STARTS = {
+  path: ['production_to'],
+  message: 'Ends before it starts',
+};
+
+export const AdminCreateFitment = z
+  .object({
+    part_id: z.string().min(1),
+    vehicle_id: z.string().min(1),
+    ...fitmentConditions,
+  })
+  .refine(inOrder, ENDS_BEFORE_IT_STARTS);
 export type AdminCreateFitmentType = z.infer<typeof AdminCreateFitment>;
+
+export const AdminUpdateFitment = z
+  .strictObject(fitmentConditions)
+  .refine((body) => Object.keys(body).length > 0)
+  .refine(inOrder, ENDS_BEFORE_IT_STARTS);
 
 export const VEHICLE_FILTER_KEYS = [
   'vehicle_id',
@@ -96,40 +121,63 @@ export const VEHICLE_FILTER_KEYS = [
   'year_to',
 ] as const;
 
+const vehicleFilter = {
+  part_id: z.string().min(1),
+  vehicle_id: z.string().min(1).optional(),
+  make_id: z.string().min(1).optional(),
+  series_id: z.string().min(1).optional(),
+  chassis_id: z.string().min(1).optional(),
+  model_id: z.string().min(1).optional(),
+  engine_id: z.string().min(1).optional(),
+  engine_family: z.string().trim().toUpperCase().min(1).optional(),
+  year_from: z.number().int().optional(),
+  year_to: z.number().int().optional(),
+};
+
+type VehicleFilterBody = Partial<
+  Record<(typeof VEHICLE_FILTER_KEYS)[number], unknown>
+> & { year_from?: number; year_to?: number };
+
+const hasVehicleFilter = (body: VehicleFilterBody) =>
+  VEHICLE_FILTER_KEYS.some((key) => body[key] !== undefined);
+
+const yearsInOrder = ({ year_from, year_to }: VehicleFilterBody) =>
+  year_from === undefined || year_to === undefined || year_from <= year_to;
+
+const PICK_A_FILTER = { message: 'Pick at least one Vehicle filter' };
+
+const YEARS_OUT_OF_ORDER = {
+  path: ['year_to'],
+  message: 'Ends before it starts',
+};
+
 export const AdminBulkAttachFitments = z
-  .object({
-    part_id: z.string().min(1),
-    vehicle_id: z.string().min(1).optional(),
-    make_id: z.string().min(1).optional(),
-    series_id: z.string().min(1).optional(),
-    chassis_id: z.string().min(1).optional(),
-    model_id: z.string().min(1).optional(),
-    engine_id: z.string().min(1).optional(),
-    engine_family: z.string().trim().min(1).optional(),
-    year_from: z.number().int().optional(),
-    year_to: z.number().int().optional(),
-    ...fitmentConditions,
-  })
-  .refine(
-    (body) => VEHICLE_FILTER_KEYS.some((key) => body[key] !== undefined),
-    {
-      message: 'Pick at least one Vehicle filter',
-    },
-  );
+  .object({ ...vehicleFilter, ...fitmentConditions })
+  .refine(hasVehicleFilter, PICK_A_FILTER)
+  .refine(yearsInOrder, YEARS_OUT_OF_ORDER)
+  .refine(inOrder, ENDS_BEFORE_IT_STARTS);
 export type AdminBulkAttachFitmentsType = z.infer<
   typeof AdminBulkAttachFitments
 >;
 
+export const AdminBulkDetachFitments = z
+  .strictObject(vehicleFilter)
+  .refine(hasVehicleFilter, PICK_A_FILTER)
+  .refine(yearsInOrder, YEARS_OUT_OF_ORDER);
+export type AdminBulkDetachFitmentsType = z.infer<
+  typeof AdminBulkDetachFitments
+>;
+
 export const AdminUpdateSupplier = z
   .strictObject({
-    markup_percentage: z.number().min(0).optional(),
+    markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
   })
   .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;
 
 export const AdminCreateSupplierCategory = z.strictObject({
-  code: z.string().trim().min(1),
+  code: name,
   category_id: z.string().min(1),
 });
 export type AdminCreateSupplierCategoryType = z.infer<
@@ -137,20 +185,20 @@ export type AdminCreateSupplierCategoryType = z.infer<
 >;
 
 export const AdminCreateBrand = z.strictObject({
-  name: z.string().trim().min(1),
+  name,
   slug: z.string().regex(BRAND_SLUG_PATTERN),
 });
 export type AdminCreateBrandType = z.infer<typeof AdminCreateBrand>;
 
 export const AdminEditTranslation = z.strictObject({
   locale: z.enum(CATALOG_TRANSLATION_LOCALES),
-  fields: z.record(z.string(), z.string().trim().min(1)),
+  fields: z.record(z.string(), z.string().trim().min(1).max(2000)),
 });
 export type AdminEditTranslationType = z.infer<typeof AdminEditTranslation>;
 
 export const AdminCreateBrandSpelling = z.strictObject({
   supplier_id: z.string().min(1),
-  value: z.string().trim().min(1),
+  value: name,
 });
 export type AdminCreateBrandSpellingType = z.infer<
   typeof AdminCreateBrandSpelling
@@ -159,7 +207,7 @@ export type AdminCreateBrandSpellingType = z.infer<
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
 
 const categoryColumns = {
-  name: z.string().trim().min(1),
+  name,
   text: z.string(),
   maintenance_kit: z.boolean(),
   kit_rank: z.number().int(),
@@ -179,8 +227,8 @@ export type AdminUpdateCategoryType = z.infer<typeof AdminUpdateCategory>;
 
 const fieldColumns = {
   type: z.enum(CATEGORY_FIELD_TYPES),
-  unit: z.string().trim().min(1).nullable(),
-  label: z.string().trim().min(1),
+  unit: z.string().trim().min(1).max(20).nullable(),
+  label: name,
   required: z.boolean(),
   facet: z.boolean(),
   rank: z.number().int(),
@@ -204,7 +252,7 @@ export type AdminUpdateCategoryFieldType = z.infer<
 >;
 
 const optionColumns = {
-  label: z.string().trim().min(1),
+  label: name,
   rank: z.number().int(),
 };
 

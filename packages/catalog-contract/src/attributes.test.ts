@@ -57,6 +57,7 @@ describe('validateAttributes', () => {
     ],
     ['a number as text', { viscosity: '5w-30', volume: '5' }],
     ['an infinite number', { viscosity: '5w-30', volume: Infinity }],
+    ['a negative number', { viscosity: '5w-30', volume: -5 }],
     ['a boolean as text', { viscosity: '5w-30', synthetic: 'yes' }],
     ['a blank text code', { viscosity: '5w-30', code: ' ' }],
     ['something other than an object', ['5w-30']],
@@ -71,7 +72,14 @@ describe('validateAttributes', () => {
     expect(validateAttributes(oilFields, { viscosity: '10w-60' })).toEqual({
       success: false,
       errors: [expect.stringContaining('viscosity')],
+      fields: ['viscosity'],
     });
+  });
+
+  it('names a key the definition does not know', () => {
+    expect(
+      validateAttributes(oilFields, { viscosity: '5w-30', colour: 'red' }),
+    ).toMatchObject({ success: false, fields: ['colour'] });
   });
 
   it('refuses any value for a select field without options', () => {

@@ -1,4 +1,5 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
+import { ListCheckbox } from '@medusajs/icons';
 import {
   Badge,
   Button,
@@ -10,12 +11,20 @@ import {
   Select,
   Table,
   Text,
+  toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { acknowledged, adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
+import { breadcrumb } from '../../lib/breadcrumb';
+import { useConfirmed } from '../../lib/confirm';
 
 const OWNERS = [
   { key: 'engine_id', path: 'engines', collection: 'engines' },
@@ -50,7 +59,7 @@ const categorySchema = z.object({
 
 type Category = z.infer<typeof categorySchema>;
 
-const requirementSchema = z.object({
+const requirementSchema = editedBySchema.extend({
   id: z.string(),
   option_keys: z.array(z.string()).nullable(),
   min: z.number().nullable(),
@@ -98,8 +107,11 @@ const ownerLabel = (row: OwnerRow) =>
 const numberOrNull = (value: string) =>
   value.trim() === '' ? null : Number(value);
 
+const BOOLEAN_KEYS = ['true', 'false'] as const;
+
 const RequirementsPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
+  const confirmed = useConfirmed();
   const [ownerKey, setOwnerKey] = useState<OwnerKey>('engine_id');
   const [owners, setOwners] = useState<Record<string, OwnerRow[]>>({});
   const [ownerId, setOwnerId] = useState('');
@@ -134,13 +146,15 @@ const RequirementsPage = () => {
 
   const condition = ({ option_keys, min, max, field }: Requirement) => {
     if (option_keys) {
-      const options =
-        categories
-          .find(({ id }) => id === field.category.id)
-          ?.fields.find(({ id }) => id === field.id)?.options ?? [];
+      const definition = categories
+        .find(({ id }) => id === field.category.id)
+        ?.fields.find(({ id }) => id === field.id);
+      const options = definition?.options ?? [];
       return option_keys
-        .map(
-          (key) => options.find((option) => option.key === key)?.label ?? key,
+        .map((key) =>
+          definition?.type === 'boolean'
+            ? t(`requirements.boolean.${key}`, { defaultValue: key })
+            : (options.find((option) => option.key === key)?.label ?? key),
         )
         .join(', ');
     }
@@ -180,15 +194,24 @@ const RequirementsPage = () => {
       }),
     });
     if (created) {
+      toast.success(t('requirements.added'));
       setDraft(EMPTY_DRAFT);
       await loadRequirements();
     }
   };
 
-  const remove = async (id: string) => {
+  const remove = async (requirement: Requirement) => {
     if (
-      await adminFetch(`/admin/requirements/${id}`, acknowledged, {
-        method: 'DELETE',
+      await confirmed({
+        title: t('requirements.confirmDeleteTitle', {
+          field: requirement.field.label,
+        }),
+        description: t('requirements.confirmDeleteBody'),
+        done: t('requirements.deleted'),
+        run: () =>
+          adminFetch(`/admin/requirements/${requirement.id}`, acknowledged, {
+            method: 'DELETE',
+          }),
       })
     ) {
       await loadRequirements();
@@ -250,42 +273,50 @@ const RequirementsPage = () => {
           {requirements.length === 0 ? (
             <Text>{t('requirements.empty')}</Text>
           ) : (
-            <Table>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>
-                    {t('requirements.category')}
-                  </Table.HeaderCell>
-                  <Table.HeaderCell>{t('requirements.field')}</Table.HeaderCell>
-                  <Table.HeaderCell>
-                    {t('requirements.options')}
-                  </Table.HeaderCell>
-                  <Table.HeaderCell>
-                    {t('requirements.quantity')}
-                  </Table.HeaderCell>
-                  <Table.HeaderCell />
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {requirements.map((requirement) => (
-                  <Table.Row key={requirement.id}>
-                    <Table.Cell>{requirement.field.category.name}</Table.Cell>
-                    <Table.Cell>{requirement.field.label}</Table.Cell>
-                    <Table.Cell>{condition(requirement)}</Table.Cell>
-                    <Table.Cell>{requirement.quantity}</Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        size="small"
-                        variant="transparent"
-                        onClick={() => remove(requirement.id)}
-                      >
-                        {t('requirements.delete')}
-                      </Button>
-                    </Table.Cell>
+            <div className="overflow-x-auto">
+              <Table>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>
+                      {t('requirements.category')}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                      {t('requirements.field')}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                      {t('requirements.options')}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>
+                      {t('requirements.quantity')}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+                    <Table.HeaderCell />
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
+                </Table.Header>
+                <Table.Body>
+                  {requirements.map((requirement) => (
+                    <Table.Row key={requirement.id}>
+                      <Table.Cell>{requirement.field.category.name}</Table.Cell>
+                      <Table.Cell>{requirement.field.label}</Table.Cell>
+                      <Table.Cell>{condition(requirement)}</Table.Cell>
+                      <Table.Cell>{requirement.quantity}</Table.Cell>
+                      <Table.Cell>
+                        <EditedBy row={requirement} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          size="small"
+                          variant="transparent"
+                          onClick={() => remove(requirement)}
+                        >
+                          {t('requirements.delete')}
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            </div>
           )}
 
           <div className="flex flex-wrap items-end gap-2">
@@ -341,47 +372,77 @@ const RequirementsPage = () => {
             )}
             {field?.type === 'number' && (
               <>
-                <Input
-                  type="number"
-                  aria-label={t('requirements.min')}
-                  placeholder={withUnit(t('requirements.min'))}
-                  value={draft.min}
-                  onChange={(event) =>
-                    setDraft({ ...draft, min: event.target.value })
-                  }
-                />
-                <Input
-                  type="number"
-                  aria-label={t('requirements.max')}
-                  placeholder={withUnit(t('requirements.max'))}
-                  value={draft.max}
-                  onChange={(event) =>
-                    setDraft({ ...draft, max: event.target.value })
-                  }
-                />
+                <Label size="xsmall" className="flex w-40 flex-col gap-y-1">
+                  {withUnit(t('requirements.min'))}
+                  <Input
+                    type="number"
+                    value={draft.min}
+                    onChange={(event) =>
+                      setDraft({ ...draft, min: event.target.value })
+                    }
+                  />
+                </Label>
+                <Label size="xsmall" className="flex w-40 flex-col gap-y-1">
+                  {withUnit(t('requirements.max'))}
+                  <Input
+                    type="number"
+                    value={draft.max}
+                    onChange={(event) =>
+                      setDraft({ ...draft, max: event.target.value })
+                    }
+                  />
+                </Label>
               </>
             )}
-            {field && field.type !== 'number' && !isSelect && (
-              <Input
-                aria-label={t('requirements.values')}
-                placeholder={t('requirements.values')}
-                value={draft.values}
-                onChange={(event) =>
-                  setDraft({ ...draft, values: event.target.value })
-                }
-              />
+            {field?.type === 'boolean' && (
+              <div className="flex flex-col gap-y-1">
+                <Label size="xsmall">{t('requirements.values')}</Label>
+                <Select
+                  value={draft.values}
+                  onValueChange={(values) => setDraft({ ...draft, values })}
+                >
+                  <Select.Trigger>
+                    <Select.Value
+                      placeholder={t('requirements.ownerPlaceholder')}
+                    />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {BOOLEAN_KEYS.map((key) => (
+                      <Select.Item key={key} value={key}>
+                        {t(`requirements.boolean.${key}`)}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select>
+              </div>
+            )}
+            {field?.type === 'text' && (
+              <Label
+                size="xsmall"
+                className="flex min-w-[16rem] flex-col gap-y-1"
+              >
+                {t('requirements.values')}
+                <Input
+                  value={draft.values}
+                  maxLength={200}
+                  onChange={(event) =>
+                    setDraft({ ...draft, values: event.target.value })
+                  }
+                />
+              </Label>
             )}
             {field && (
-              <Input
-                type="number"
-                min={1}
-                aria-label={t('requirements.quantity')}
-                placeholder={t('requirements.quantity')}
-                value={draft.quantity}
-                onChange={(event) =>
-                  setDraft({ ...draft, quantity: event.target.value })
-                }
-              />
+              <Label size="xsmall" className="flex w-32 flex-col gap-y-1">
+                {t('requirements.quantity')}
+                <Input
+                  type="number"
+                  min={1}
+                  value={draft.quantity}
+                  onChange={(event) =>
+                    setDraft({ ...draft, quantity: event.target.value })
+                  }
+                />
+              </Label>
             )}
           </div>
           {field && isSelect && (
@@ -426,7 +487,11 @@ const RequirementsPage = () => {
 
 export const config = defineRouteConfig({
   label: 'menu.requirements',
+  icon: ListCheckbox,
+  rank: 7,
   translationNs: 'carlabAdmin',
 });
+
+export const handle = breadcrumb('menu.requirements');
 
 export default RequirementsPage;

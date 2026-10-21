@@ -341,6 +341,67 @@ medusaIntegrationTestRunner({
           expect(response.data).toEqual({ matched: 1, created: 1 });
         });
 
+        it('matches an engine family typed in lower case', async () => {
+          const { part } = await createFamily('LOWER');
+
+          const response = await api.post(
+            '/admin/fitments/bulk',
+            { part_id: part.id, engine_family: 'lower-b47' },
+            adminHeaders,
+          );
+
+          expect(response.data).toEqual({ matched: 3, created: 3 });
+        });
+
+        it('names the field when the years run backwards', async () => {
+          const part = await catalog.createParts({ name: 'Backwards part' });
+
+          const response = await api
+            .post(
+              '/admin/fitments/bulk',
+              { part_id: part.id, year_from: 2020, year_to: 2010 },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({
+            code: 'INVALID_FIELD',
+            field: 'year_to',
+          });
+        });
+
+        it('undoes a wrong bulk attach with the same filter', async () => {
+          const { f30b47, f30b48, part } = await createFamily('UNDO');
+          const kept = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: f30b48.vehicle.id,
+          });
+          const filter = {
+            part_id: part.id,
+            chassis_id: f30b47.chassis.id,
+            engine_family: 'UNDO-B47',
+          };
+          await api.post(
+            '/admin/fitments/bulk',
+            { ...filter, axle: 'front' },
+            adminHeaders,
+          );
+
+          const response = await api.post(
+            '/admin/fitments/bulk/delete',
+            filter,
+            adminHeaders,
+          );
+
+          expect(response.data).toEqual({ matched: 2, deleted: 2 });
+          expect(
+            (await catalog.listFitments({ part_id: part.id })).map(
+              ({ id }) => id,
+            ),
+          ).toEqual([kept.id]);
+        });
+
         it('returns a 400 without any Vehicle filter', async () => {
           const part = await catalog.createParts({ name: 'Unfiltered part' });
 
@@ -360,6 +421,81 @@ medusaIntegrationTestRunner({
               { part_id: 'part_missing', model_id: f30b47.model.id },
               adminHeaders,
             )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(404);
+        });
+      });
+
+      describe('/admin/fitments/:id', () => {
+        it('changes the conditions of a Fitment and stamps the editor', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-EDIT');
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          const response = await api.post(
+            `/admin/fitments/${fitment.id}`,
+            { axle: 'rear', quantity: 2, note: 'Только седан' },
+            adminHeaders,
+          );
+
+          expect(response.status).toBe(200);
+          expect(response.data.fitment).toMatchObject({
+            id: fitment.id,
+            axle: 'rear',
+            quantity: 2,
+            note: 'Только седан',
+            updated_by: expect.stringMatching(/^user_/),
+          });
+        });
+
+        it('refuses a production period that ends before it starts', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-PERIOD');
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          const response = await api
+            .post(
+              `/admin/fitments/${fitment.id}`,
+              {
+                production_from: '2020-01-01',
+                production_to: '2015-01-01',
+              },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data.field).toBe('production_to');
+        });
+
+        it('deletes a Fitment', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-DELETE');
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          const response = await api.delete(
+            `/admin/fitments/${fitment.id}`,
+            adminHeaders,
+          );
+
+          expect(response.data).toEqual({
+            id: fitment.id,
+            object: 'fitment',
+            deleted: true,
+          });
+          expect(await catalog.listFitments({ id: fitment.id })).toEqual([]);
+        });
+
+        it('returns a 404 for an unknown Fitment', async () => {
+          const response = await api
+            .delete('/admin/fitments/fit_missing', adminHeaders)
             .catch((error) => error.response);
 
           expect(response.status).toBe(404);

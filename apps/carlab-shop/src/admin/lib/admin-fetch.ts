@@ -5,21 +5,59 @@ import { z } from 'zod';
 const errorBodySchema = z.object({
   code: z.string().optional(),
   type: z.string().optional(),
+  entity: z.string().optional(),
+  field: z.string().optional(),
+  label: z.string().optional(),
 });
 
-const translate = (key: string): string | null => {
+type ErrorBody = z.infer<typeof errorBodySchema>;
+
+const translate = (
+  key: string,
+  options: Record<string, string> = {},
+): string | null => {
   const i18n = getI18n();
   return i18n?.exists(key, { ns: 'carlabAdmin' })
-    ? i18n.t(key, { ns: 'carlabAdmin' })
+    ? i18n.t(key, { ns: 'carlabAdmin', ...options })
     : null;
+};
+
+const fieldName = (path: string) => {
+  const key =
+    path
+      .split('.')
+      .filter((part) => !/^\d+$/.test(part))
+      .pop() ?? path;
+  return translate(`errors.fields.${key}`) ?? key;
+};
+
+const detailedMessage = ({ code, entity, field, label }: ErrorBody) => {
+  if (code === 'ALREADY_EXISTS' && entity) {
+    return translate(`errors.alreadyExists.${entity}`);
+  }
+  if (code === 'INVALID_ATTRIBUTES' && label) {
+    return translate('errors.attributeLabel', { label });
+  }
+  if (code !== 'INVALID_FIELD' && code !== 'FIELD_REQUIRED') {
+    return null;
+  }
+  if (!field) {
+    return translate('errors.types.invalid_data');
+  }
+  return (
+    (code === 'INVALID_FIELD' && translate(`errors.invalidFields.${field}`)) ||
+    translate(`errors.codes.${code}`, { field: fieldName(field) })
+  );
 };
 
 const errorMessage = async (response: Response): Promise<string> => {
   const body = errorBodySchema.safeParse(
     await response.json().catch(() => null),
   );
-  const { code, type } = body.success ? body.data : {};
+  const details: ErrorBody = body.success ? body.data : {};
+  const { code, type } = details;
   return (
+    detailedMessage(details) ||
     (code && translate(`errors.codes.${code}`)) ||
     (type && translate(`errors.types.${type}`)) ||
     translate('errors.unknown') ||

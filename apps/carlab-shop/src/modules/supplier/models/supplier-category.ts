@@ -8,6 +8,8 @@ const SupplierCategory = model
     supplier: model.belongsTo(() => Supplier, { mappedBy: 'categories' }),
     code: model.text(),
     category_id: model.text().index(),
+    created_by: model.text().nullable(),
+    updated_by: model.text().nullable(),
   })
   .indexes([{ on: ['supplier_id', 'code'], unique: true }]);
 

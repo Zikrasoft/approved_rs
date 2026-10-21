@@ -20,7 +20,7 @@ const PartIdentifier = model
   })
   .indexes([
     {
-      on: ['type', 'brand_id', 'normalized_value'],
+      on: ['brand_id', 'normalized_value'],
       unique: true,
     },
   ]);

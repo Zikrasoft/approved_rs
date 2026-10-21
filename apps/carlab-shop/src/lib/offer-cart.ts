@@ -13,6 +13,7 @@ import {
   addToCartWorkflow,
   createPaymentCollectionForCartWorkflow,
   createPaymentSessionsWorkflow,
+  deleteLineItemsWorkflow,
   updateLineItemInCartWorkflow,
 } from '@medusajs/medusa/core-flows';
 import {
@@ -43,6 +44,18 @@ export function offerIdOf(item: OfferCartLineItem): string | undefined {
   const offerId = item.metadata?.[OFFER_ID_METADATA_KEY];
   return typeof offerId === 'string' && offerId ? offerId : undefined;
 }
+
+export const refuseStockCartChange = (
+  _req: unknown,
+  _res: unknown,
+  next: (error: MedusaError) => void,
+): void =>
+  next(
+    new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      'Carts change only through /store/offer-carts',
+    ),
+  );
 
 export const refuse = (code: CheckoutRefusal, message: string): never => {
   throw new MedusaError(MedusaError.Types.INVALID_DATA, message, code);
@@ -157,12 +170,7 @@ export async function syncOfferCart(
   };
 }
 
-export async function addOffer(
-  scope: MedusaContainer,
-  cartId: string,
-  offerId: string,
-  quantity: number,
-): Promise<void> {
+const openCart = async (scope: MedusaContainer, cartId: string) => {
   const cart = await retrieveCart(scope, cartId);
   if (cart.completed_at) {
     throw new MedusaError(
@@ -170,6 +178,33 @@ export async function addOffer(
       `Cart ${cartId} is already an order`,
     );
   }
+  return cart;
+};
+
+export async function removeOfferLine(
+  scope: MedusaContainer,
+  cartId: string,
+  itemId: string,
+): Promise<void> {
+  const cart = await openCart(scope, cartId);
+  if (!(cart.items ?? []).some((item) => item.id === itemId)) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      `Cart ${cartId} has no line ${itemId}`,
+    );
+  }
+  await deleteLineItemsWorkflow(scope).run({
+    input: { cart_id: cartId, ids: [itemId] },
+  });
+}
+
+export async function addOffer(
+  scope: MedusaContainer,
+  cartId: string,
+  offerId: string,
+  quantity: number,
+): Promise<void> {
+  const cart = await openCart(scope, cartId);
   const [offer] = await liveOffers(scope, { id: [offerId] });
   if (!offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);

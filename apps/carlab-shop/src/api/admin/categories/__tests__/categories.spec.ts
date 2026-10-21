@@ -182,6 +182,22 @@ medusaIntegrationTestRunner({
         },
       );
 
+      it('names the field label of a negative volume', async () => {
+        const { category } = await createOilCategory();
+
+        const response = await createPart(category.id, {
+          viscosity: '5w-30',
+          volume: -5,
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'INVALID_ATTRIBUTES',
+          field: 'volume',
+          label: 'Объем',
+        });
+      });
+
       it('classifies an existing Part and refuses values that break the definition', async () => {
         const { category } = await createOilCategory();
         const partId = await catalog.createPartWithIdentifiers({

@@ -12,7 +12,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { adminFetch } from '../lib/admin-fetch';
+import {
+  adminFetch,
+  editedBySchema,
+  type EditedBy as Edited,
+} from '../lib/admin-fetch';
+import { EditedBy } from './edited-by';
 
 type Locale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
 type Drafts = Partial<Record<Locale, Record<string, string>>>;
@@ -22,6 +27,7 @@ const translationsSchema = z.object({
     z.enum(CATALOG_TRANSLATION_LOCALES),
     z.record(z.string(), z.string()),
   ),
+  edited: editedBySchema.optional(),
 });
 
 export const TranslationsDrawer = ({
@@ -36,12 +42,16 @@ export const TranslationsDrawer = ({
   const { t } = useTranslation('carlabAdmin');
   const [open, setOpen] = useState(false);
   const [drafts, setDrafts] = useState<Drafts>({});
+  const [stored, setStored] = useState<Drafts>({});
+  const [edited, setEdited] = useState<Edited | null>(null);
   const [saving, setSaving] = useState(false);
   const path = `/admin/translations/${entity}/${id}`;
 
   const load = async () => {
     const data = await adminFetch(path, translationsSchema);
     setDrafts(data?.translations ?? {});
+    setStored(data?.translations ?? {});
+    setEdited(data?.edited ?? null);
   };
 
   const change = (locale: Locale, field: string, value: string) =>
@@ -51,15 +61,26 @@ export const TranslationsDrawer = ({
     }));
 
   const save = async () => {
+    const changes = CATALOG_TRANSLATION_LOCALES.map(
+      (locale) =>
+        [
+          locale,
+          Object.fromEntries(
+            Object.entries(drafts[locale] ?? {}).filter(
+              ([field, value]) =>
+                value.trim() && value !== stored[locale]?.[field],
+            ),
+          ),
+        ] as const,
+    ).filter(([, fields]) => Object.keys(fields).length > 0);
+    if (changes.length === 0) {
+      toast.info(t('translations.nothingChanged'));
+      setOpen(false);
+      return;
+    }
     setSaving(true);
     let saved = true;
-    for (const locale of CATALOG_TRANSLATION_LOCALES) {
-      const fields = Object.fromEntries(
-        Object.entries(drafts[locale] ?? {}).filter(([, value]) =>
-          value.trim(),
-        ),
-      );
-      if (Object.keys(fields).length === 0) continue;
+    for (const [locale, fields] of changes) {
       saved =
         Boolean(
           await adminFetch(path, translationsSchema, {
@@ -96,6 +117,7 @@ export const TranslationsDrawer = ({
           <Text size="small" className="text-ui-fg-subtle">
             {t('translations.lead')}
           </Text>
+          {edited && <EditedBy row={edited} />}
           {Object.entries(source).map(([field, russian]) => (
             <div key={field} className="flex flex-col gap-y-3">
               <div className="flex flex-col gap-y-1">

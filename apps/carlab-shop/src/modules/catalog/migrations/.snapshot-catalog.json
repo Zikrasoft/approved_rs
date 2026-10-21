@@ -2176,13 +2176,13 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_part_identifier_deleted_at\" ON \"part_identifier\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_part_identifier_type_brand_id_normalized_value_unique",
+          "keyName": "IDX_part_identifier_brand_id_normalized_value_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_part_identifier_type_brand_id_normalized_value_unique\" ON \"part_identifier\" (\"type\", \"brand_id\", \"normalized_value\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_part_identifier_brand_id_normalized_value_unique\" ON \"part_identifier\" (\"brand_id\", \"normalized_value\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "part_identifier_pkey",

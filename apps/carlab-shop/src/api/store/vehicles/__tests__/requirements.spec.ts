@@ -273,6 +273,20 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('refuses a Requirement identical to one the owner has', async () => {
+        const response = await post('/admin/requirements', {
+          field_id: fields.approvals.id,
+          engine_id: om654.engine.id,
+          option_keys: ['mb-229-52', 'mb-229-51'],
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'requirement',
+        });
+      });
+
       it('lists and deletes the Requirements of an owner', async () => {
         const listed = (
           await api.get(
@@ -284,6 +298,9 @@ medusaIntegrationTestRunner({
         expect(listed).toEqual([
           expect.objectContaining({
             option_keys: ['mb-229-51', 'mb-229-52'],
+            updated_by_user: expect.objectContaining({
+              email: expect.any(String),
+            }),
             field: expect.objectContaining({
               key: 'approvals',
               category: expect.objectContaining({ id: oil.id }),

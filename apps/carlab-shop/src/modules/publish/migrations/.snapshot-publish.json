@@ -162,6 +162,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_publish_run_deleted_at\" ON \"publish_run\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_publish_run_one_running",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_publish_run_one_running\" ON \"publish_run\" (\"status\") WHERE status = 'running' AND deleted_at IS NULL"
+        },
+        {
           "keyName": "publish_run_pkey",
           "columnNames": ["id"],
           "composite": false,

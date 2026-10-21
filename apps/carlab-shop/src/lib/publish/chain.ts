@@ -97,26 +97,38 @@ export async function latestPublishRun(scope: MedusaContainer) {
   return latest ?? null;
 }
 
+const runningConflict = () =>
+  adminError(
+    MedusaError.Types.CONFLICT,
+    'PUBLISH_RUNNING',
+    'A publish run is already in progress',
+  );
+
 export async function startPublishRun(
   scope: MedusaContainer,
   actorId: string | null,
 ) {
-  const latest = await latestPublishRun(scope);
-  if (
-    latest?.status === 'running' &&
-    Date.now() - new Date(latest.created_at).getTime() < ABANDONED_RUN_MS
-  ) {
-    throw adminError(
-      MedusaError.Types.CONFLICT,
-      'PUBLISH_RUNNING',
-      'A publish run is already in progress',
-    );
-  }
   const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
-  const run = await publish.createPublishRuns({
-    status: 'running',
-    created_by: actorId,
-  });
+  const latest = await latestPublishRun(scope);
+  if (latest?.status === 'running') {
+    if (Date.now() - new Date(latest.created_at).getTime() < ABANDONED_RUN_MS) {
+      throw runningConflict();
+    }
+    await publish.updatePublishRuns({
+      id: latest.id,
+      status: 'failed',
+      error: 'Abandoned',
+      finished_at: new Date(),
+    });
+  }
+  const run = await publish
+    .createPublishRuns({ status: 'running', created_by: actorId })
+    .catch((error: unknown) => {
+      throw MedusaError.isMedusaError(error) &&
+        error.type === MedusaError.Types.INVALID_DATA
+        ? runningConflict()
+        : error;
+    });
   void finishRun(scope, run.id);
   return run;
 }

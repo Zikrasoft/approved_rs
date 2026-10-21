@@ -430,6 +430,32 @@ medusaIntegrationTestRunner({
         expect(second.data.code).toBe('PUBLISH_RUNNING');
       });
 
+      it('starts one run for two Publish clicks at the same moment', async () => {
+        let release = () => {};
+        network.githubGate = new Promise((resolve) => {
+          release = resolve;
+        });
+
+        const answers = await Promise.all([
+          post('/admin/publish-runs'),
+          post('/admin/publish-runs'),
+        ]);
+        release();
+        await finishedRun();
+
+        expect(answers.map(({ status }) => status).sort()).toEqual([202, 409]);
+      });
+
+      it('says who started the latest run', async () => {
+        await publish();
+
+        const latest = await get('/admin/publish-runs/latest');
+
+        expect(latest.data.publish_run.created_by_user).toMatchObject({
+          email: expect.any(String),
+        });
+      });
+
       it('rejects a translation edit for an unknown locale, field or entity', async () => {
         const part = await catalog.createParts({ name: 'Масляный фильтр' });
 
