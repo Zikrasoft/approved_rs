@@ -2,6 +2,7 @@ import type { Context } from '@medusajs/framework/types';
 import {
   InjectTransactionManager,
   MedusaContext,
+  MedusaError,
   MedusaService,
 } from '@medusajs/framework/utils';
 import { normalizePartNumber } from '@podbor/catalog-contract';
@@ -61,6 +62,29 @@ class CatalogModuleService extends MedusaService({
       sharedContext,
     );
     return created.id;
+  }
+
+  @InjectTransactionManager()
+  async replacePart(
+    partId: string,
+    replacedById: string | null,
+    updatedBy: string | null,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await this.retrievePart(partId, {}, sharedContext);
+    for (let next = replacedById; next;) {
+      if (next === partId) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          'Replacement would close a cycle',
+        );
+      }
+      next = (await this.retrievePart(next, {}, sharedContext)).replaced_by_id;
+    }
+    await this.updateParts(
+      { id: partId, replaced_by_id: replacedById, updated_by: updatedBy },
+      sharedContext,
+    );
   }
 }
 

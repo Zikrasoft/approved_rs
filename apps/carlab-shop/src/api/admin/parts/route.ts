@@ -16,6 +16,7 @@ const identifierSchema = z.object({
   type: z.enum(PART_IDENTIFIER_TYPES),
   value: z.string(),
   normalized_value: z.string(),
+  superseded: z.boolean(),
   brand: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
 });
 
@@ -25,6 +26,7 @@ const partSchema = z.object({
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
+  replaced_by_id: z.string().nullable(),
   identifiers: z.array(identifierSchema),
 });
 

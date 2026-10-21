@@ -34,6 +34,18 @@ export const AdminCreatePart = z.object({
 });
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
+export const AdminUpdatePart = z.strictObject({
+  replaced_by_id: z.string().min(1).nullable(),
+});
+export type AdminUpdatePartType = z.infer<typeof AdminUpdatePart>;
+
+export const AdminUpdatePartIdentifier = z.strictObject({
+  superseded: z.boolean(),
+});
+export type AdminUpdatePartIdentifierType = z.infer<
+  typeof AdminUpdatePartIdentifier
+>;
+
 export const AdminListFitments = z.object({
   vehicle_id: z.string().min(1).optional(),
   part_id: z.string().min(1).optional(),

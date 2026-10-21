@@ -442,6 +442,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "replaced_by_id": {
+          "name": "replaced_by_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "source": {
           "name": "source",
           "type": "text",
@@ -543,6 +559,15 @@
       "schema": "public",
       "indexes": [
         {
+          "keyName": "IDX_part_replaced_by_id",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_part_replaced_by_id\" ON \"part\" (\"replaced_by_id\") WHERE deleted_at IS NULL"
+        },
+        {
           "keyName": "IDX_part_deleted_at",
           "columnNames": [],
           "composite": false,
@@ -561,7 +586,17 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "part_replaced_by_id_foreign": {
+          "constraintName": "part_replaced_by_id_foreign",
+          "columnNames": ["replaced_by_id"],
+          "localTableName": "public.part",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.part",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {
@@ -629,6 +664,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "superseded": {
+          "name": "superseded",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
         },
         "brand_id": {
           "name": "brand_id",

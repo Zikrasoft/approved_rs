@@ -13,6 +13,7 @@ const PartIdentifier = model
     type: model.enum([...PART_IDENTIFIER_TYPES]),
     value: model.text(),
     normalized_value: model.text(),
+    superseded: model.boolean().default(false),
     brand: model.belongsTo(() => Brand, { mappedBy: 'identifiers' }),
     part: model.belongsTo(() => Part, { mappedBy: 'identifiers' }),
     ...provenance(),

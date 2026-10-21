@@ -11,6 +11,8 @@ import {
   AdminCreatePart,
   AdminListFitments,
   AdminSearchParts,
+  AdminUpdatePart,
+  AdminUpdatePartIdentifier,
   AdminUpdateSupplier,
 } from './admin/validators';
 import {
@@ -42,6 +44,16 @@ export default defineMiddlewares({
       matcher: '/admin/parts',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminCreatePart)],
+    },
+    {
+      matcher: '/admin/parts/:id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminUpdatePart)],
+    },
+    {
+      matcher: '/admin/part-identifiers/:id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminUpdatePartIdentifier)],
     },
     {
       matcher: '/admin/fitments',
