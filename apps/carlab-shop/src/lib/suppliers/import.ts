@@ -16,6 +16,7 @@ import {
   supplierAdapters,
   supplierQuoteSchema,
 } from './adapter';
+import { quotedFields } from './live-quote';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
@@ -106,16 +107,7 @@ async function storeOffer(
     supplier_id: supplierId,
     supplier_article_id: quote.article_id,
     part_identifier_id: identifierId,
-    cost_price: quote.cost_price,
-    currency: quote.currency,
-    stock_quantity: quote.stock.reduce(
-      (sum, { quantity }) => sum + quantity,
-      0,
-    ),
-    stock_by_location: Object.fromEntries(
-      quote.stock.map(({ location, quantity }) => [location, quantity]),
-    ),
-    lead_time_days: quote.lead_time_days,
+    ...quotedFields(quote),
   };
   const [existing] = await suppliers.listSupplierOffers({
     supplier_id: supplierId,

@@ -5,7 +5,6 @@ export const shopPartContentSchema = z
     metaTitleSuffix: z.string(),
     metaDescription: z.string(),
     eyebrow: z.string(),
-    variantsHeading: z.string(),
     equivalentsHeading: z.string(),
     noEquivalents: z.string(),
     replacedHeading: z.string(),
@@ -20,13 +19,8 @@ export const shopPartContentSchema = z
     priceOnRequestBody: z.string(),
     priceOnRequestCta: z.string(),
     offersHeading: z.string(),
-    offersCta: z.string(),
-    currencyLabel: z.string(),
     columns: z
       .object({
-        brand: z.string(),
-        number: z.string(),
-        price: z.string(),
         stock: z.string(),
         leadTime: z.string(),
       })
@@ -37,11 +31,11 @@ export const shopPartContentSchema = z
         daysTemplate: z.string(),
       })
       .strict(),
-    notFoundHeading: z.string(),
-    notFoundBody: z.string(),
-    notFoundCta: z.string(),
     buyButtonLabel: z.string(),
-    buyErrorLabel: z.string(),
+    addedNotice: z.string(),
+    addedCta: z.string(),
+    inquiryNotice: z.string(),
+    inquiryCta: z.string(),
   })
   .strict();
 

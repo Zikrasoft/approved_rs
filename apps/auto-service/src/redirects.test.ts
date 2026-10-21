@@ -5,11 +5,15 @@ import {
   unprefixedSectionRedirects,
 } from '@podbor/site-kit/redirects';
 import { PRIMARY_LOCALE } from './i18n/config';
-import { legacyCategoryRedirects } from './utils/legacyCategories';
+import {
+  legacyCategoryRedirects,
+  legacyShopRedirects,
+} from './utils/legacyCategories';
 import { PathBuilder } from './utils/paths';
 
 const redirectFor = createRedirectMatcher([
   ...legacyCategoryRedirects(),
+  ...legacyShopRedirects(),
   ...unprefixedSectionRedirects(PathBuilder, PRIMARY_LOCALE),
 ]);
 
@@ -60,8 +64,17 @@ describe('redirects', () => {
   });
 
   it.each([
+    ['/sr/shop/cart/', '/sr/parts/cart/'],
+    ['/en/shop/checkout', '/en/parts/cart/'],
+    ['/ru/shop/part_01ABC/', '/ru/parts/'],
+  ])('folds the old shop route %s into %s', (path, target) => {
+    expect(redirectFor(path)).toBe(target);
+  });
+
+  it.each([
     '/',
     '/sr/',
+    '/sr/parts/cart/',
     '/en/parts/',
     '/sr/parts/c/brakes/',
     '/sr/parts/p/mann-filter-hu816x/',

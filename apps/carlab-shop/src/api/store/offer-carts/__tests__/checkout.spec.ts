@@ -1,49 +1,95 @@
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+import { asValue } from '@medusajs/framework/awilix';
+import type { IApiKeyModuleService } from '@medusajs/framework/types';
+import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { normalizePartNumber } from '@podbor/catalog-contract';
-import { Modules } from '@medusajs/framework/utils';
-import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
-import { OFFER_PRICE_CHANGED_CODE } from '../../../../workflows/hooks/complete-cart-guard';
+import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
+const intercars = createFakeSupplier('Intercars');
+const ARTICLE = 'IC-11428575211';
+
+const quote = (cost_price: number, quantity: number) =>
+  intercars.quotes.set(ARTICLE, {
+    article_id: ARTICLE,
+    cost_price,
+    currency: 'RSD',
+    stock: [{ location: 'Beograd', quantity }],
+    lead_time_days: 0,
+  });
+
+const CONTACT = {
+  contact: '+381601234567',
+  contact_channel: 'whatsapp',
+  name: 'Marko',
+  vin: 'WBA35BG070N074158',
+  comment: 'Pozvati posle 17h',
+  locale: 'sr',
+};
+
+type LeadPost = Record<string, string>;
+
 medusaIntegrationTestRunner({
-  moduleName: 'cart',
+  moduleName: 'offer-cart-checkout',
+  dbName: 'medusa-offer-cart-checkout-integration',
+  hooks: {
+    beforeServerStart: async (container) => {
+      container.register(
+        SUPPLIER_ADAPTERS_REGISTRATION,
+        asValue([intercars.adapter]),
+      );
+    },
+  },
   testSuite: ({ api, getContainer }) => {
     describe('offer cart checkout', () => {
       let offerId: string;
-      let supplierService: SupplierModuleService;
+      let identifierId: string;
+      let warehouseOfferId: string;
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
+      let leadRoute: Server;
+      const leads: LeadPost[] = [];
 
       beforeAll(async () => {
+        leadRoute = createServer((request, response) => {
+          let body = '';
+          request.on('data', (chunk) => (body += chunk));
+          request.on('end', () => {
+            leads.push(Object.fromEntries(new URLSearchParams(body)));
+            response.writeHead(302, { location: '/sr/thanks/' }).end();
+          });
+        });
+        await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
+        process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
+
         const container = getContainer();
         await seedCashAtPickupCommerceDefaults(container);
 
         const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
-        supplierService = container.resolve(SUPPLIER_MODULE);
-        const apiKeyModuleService: IApiKeyModuleService = container.resolve(
+        const suppliers: SupplierModuleService =
+          container.resolve(SUPPLIER_MODULE);
+        const apiKeys: IApiKeyModuleService = container.resolve(
           Modules.API_KEY,
         );
-
-        const publishableKey = await apiKeyModuleService.createApiKeys({
+        const key = await apiKeys.createApiKeys({
           title: 'offer-cart-checkout-tests',
           type: 'publishable',
           created_by: 'test',
         });
-        storeHeaders = {
-          headers: { 'x-publishable-api-key': publishableKey.token },
-        };
+        storeHeaders = { headers: { 'x-publishable-api-key': key.token } };
 
         const [bmw] = await catalog.createBrands([
           { name: 'BMW', slug: 'bmw' },
         ]);
-
-        const part = await catalog.createParts({
-          name: 'Oil filter, BMW B47/B48 engines',
-        });
+        const part = await catalog.createParts({ name: 'Oil filter' });
         const identifier = await catalog.createPartIdentifiers({
           part_id: part.id,
           type: 'oem',
@@ -51,34 +97,59 @@ medusaIntegrationTestRunner({
           value: '11 42 8575211',
           normalized_value: normalizePartNumber('11 42 8575211'),
         });
-        const supplier = await supplierService.createSuppliers({
-          name: 'Intercars',
-          markup_percentage: 20,
-        });
-        const offer = await supplierService.createSupplierOffers({
-          part_identifier_id: identifier.id,
-          supplier_id: supplier.id,
-          supplier_article_id: 'IC-11428575211',
-          cost_price: 1542,
-          stock_quantity: 12,
-          lead_time_days: 0,
-        });
+        identifierId = identifier.id;
+        const [supplier, warehouse] = await suppliers.createSuppliers([
+          { name: 'Intercars', markup_percentage: 20 },
+          { name: 'CarLab warehouse', markup_percentage: 10 },
+        ]);
+        const [offer, own] = await suppliers.createSupplierOffers([
+          {
+            part_identifier_id: identifier.id,
+            supplier_id: supplier.id,
+            supplier_article_id: ARTICLE,
+            cost_price: 1000,
+            stock_quantity: 1,
+            lead_time_days: 3,
+          },
+          {
+            part_identifier_id: identifier.id,
+            supplier_id: warehouse.id,
+            supplier_article_id: 'WH-1',
+            cost_price: 2000,
+            stock_quantity: 2,
+            lead_time_days: 0,
+          },
+        ]);
         offerId = offer.id;
+        warehouseOfferId = own.id;
       });
 
-      async function createCartWithOffer() {
+      beforeEach(() => {
+        quote(1542, 12);
+      });
+
+      afterAll(async () => {
+        delete process.env.LEAD_ROUTE_URL;
+        await new Promise((resolve) => leadRoute.close(resolve));
+      });
+
+      const post = (path: string, body: unknown = {}) =>
+        api.post(path, body, storeHeaders).catch((error) => error.response);
+
+      async function cartWith(quantity = 1, offer = offerId) {
         const {
           data: { cart },
-        } = await api.post('/store/offer-carts', {}, storeHeaders);
-
-        await api.post(
-          `/store/offer-carts/${cart.id}/items`,
-          { offer_id: offerId, quantity: 1 },
-          storeHeaders,
-        );
-
-        return cart.id as string;
+        } = await post('/store/offer-carts');
+        const added = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offer,
+          quantity,
+        });
+        expect(added.status).toBe(200);
+        return added.data.cart;
       }
+
+      const complete = (cartId: string, body: unknown = CONTACT) =>
+        post(`/store/offer-carts/${cartId}/complete`, body);
 
       it.each([
         ['a zero quantity', { quantity: 0 }],
@@ -87,103 +158,241 @@ medusaIntegrationTestRunner({
       ])('returns a 400 when adding an item with %s', async (_, override) => {
         const {
           data: { cart },
-        } = await api.post('/store/offer-carts', {}, storeHeaders);
+        } = await post('/store/offer-carts');
+
+        const response = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offerId,
+          quantity: 1,
+          ...override,
+        });
+
+        expect(response.status).toBe(400);
+      });
+
+      it('refreshes the price and stock of a part page live from the supplier', async () => {
+        quote(1600, 7);
+
+        const response = await api.get(
+          `/store/part-identifiers/${identifierId}/offers`,
+          storeHeaders,
+        );
+
+        expect(response.data.offers).toEqual([
+          {
+            id: offerId,
+            price: 1920,
+            currency: 'RSD',
+            stock_quantity: 7,
+            lead_time_days: 0,
+          },
+          {
+            id: warehouseOfferId,
+            price: 2200,
+            currency: 'RSD',
+            stock_quantity: 2,
+            lead_time_days: 0,
+          },
+        ]);
+      });
+
+      it('adds an offer at the price the supplier quotes live', async () => {
+        const cart = await cartWith(2);
+
+        expect(cart).toMatchObject({
+          completed: false,
+          currency: 'RSD',
+          total: 3700,
+          items: [
+            {
+              offer_id: offerId,
+              quantity: 2,
+              unit_price: 1850,
+              available: true,
+              part: {
+                slug: 'bmw-11428575211',
+                brand: 'BMW',
+                number: '11 42 8575211',
+                name: 'Oil filter',
+              },
+            },
+          ],
+        });
+      });
+
+      it('adds more of the same offer to its line', async () => {
+        const cart = await cartWith(1);
+        const response = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offerId,
+          quantity: 2,
+        });
+
+        expect(response.data.cart.items).toHaveLength(1);
+        expect(response.data.cart.items[0].quantity).toBe(3);
+      });
+
+      it('refuses to add more than the supplier has in stock', async () => {
+        quote(1542, 1);
+        const {
+          data: { cart },
+        } = await post('/store/offer-carts');
+
+        const response = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offerId,
+          quantity: 2,
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data.code).toBe('OFFER_OUT_OF_STOCK');
+      });
+
+      it('sells an offer of a supplier without an adapter at its stored price', async () => {
+        const cart = await cartWith(1, warehouseOfferId);
+
+        expect(cart.items[0].unit_price).toBe(2200);
+      });
+
+      it('removes a line', async () => {
+        const cart = await cartWith(1);
 
         const response = await api
-          .post(
-            `/store/offer-carts/${cart.id}/items`,
-            { offer_id: offerId, quantity: 1, ...override },
+          .delete(
+            `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`,
             storeHeaders,
           )
           .catch((error) => error.response);
 
-        expect(response.status).toBe(400);
+        expect(response.data.cart.items).toEqual([]);
       });
 
-      it('returns a 400 for a malformed email on a new cart', async () => {
-        const response = await api
-          .post('/store/offer-carts', { email: 'not-an-email' }, storeHeaders)
-          .catch((error) => error.response);
+      it('answers 404 for a cart that does not exist', async () => {
+        const response = await post('/store/offer-carts/cart_missing/items', {
+          offer_id: offerId,
+          quantity: 1,
+        });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(404);
       });
 
-      it('completes checkout normally when the offer price did not change', async () => {
-        const cartId = await createCartWithOffer();
+      it('places the order with cash at pickup', async () => {
+        const cart = await cartWith(1);
 
-        const response = await api.post(
-          `/store/carts/${cartId}/complete`,
-          {},
-          storeHeaders,
-        );
+        const response = await complete(cart.id);
 
-        expect(response.data.type).toBe('order');
-        expect(response.data.order.items).toHaveLength(1);
-        expect(response.data.order.items[0].unit_price).toBe(1850);
-
-        const orderModuleService = getContainer().resolve(Modules.ORDER);
-        const order = await orderModuleService.retrieveOrder(
-          response.data.order.id,
-        );
+        expect(response.status).toBe(200);
+        const order = await getContainer()
+          .resolve(Modules.ORDER)
+          .retrieveOrder(response.data.order.id, { relations: ['items'] });
+        expect(Number(order.items?.[0].unit_price)).toBe(1850);
         expect(order.metadata).toMatchObject({
           fulfillment: 'cash_at_pickup',
+          contact: '+381601234567',
         });
+        expect(
+          (await post(`/store/offer-carts/${cart.id}/reprice`)).data.cart
+            .completed,
+        ).toBe(true);
       });
 
-      it('blocks completion with a structured error when the offer price changed', async () => {
-        const cartId = await createCartWithOffer();
-        await supplierService.updateSupplierOffers({
-          id: offerId,
-          cost_price: 1833,
-        });
+      it('refuses an order without a contact', async () => {
+        const cart = await cartWith(1);
 
-        await expect(
-          api.post(`/store/carts/${cartId}/complete`, {}, storeHeaders),
-        ).rejects.toMatchObject({
-          response: {
-            status: 400,
-            data: { code: OFFER_PRICE_CHANGED_CODE },
-          },
-        });
+        const response = await complete(cart.id, { name: 'Marko' });
 
-        await supplierService.updateSupplierOffers({
-          id: offerId,
-          cost_price: 1542,
-        });
+        expect(response.status).toBe(400);
       });
 
-      it('completes checkout at the new price after a reprice-and-confirm', async () => {
-        const cartId = await createCartWithOffer();
-        await supplierService.updateSupplierOffers({
-          id: offerId,
-          cost_price: 1833,
+      it('refuses a stale price and completes after a reprice', async () => {
+        const cart = await cartWith(1);
+        quote(1833, 12);
+
+        const refused = await complete(cart.id);
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
+
+        const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+        expect(repriced.data.cart.items[0].unit_price).toBe(2200);
+
+        const placed = await complete(cart.id);
+        expect(placed.status).toBe(200);
+      });
+
+      it('refuses checkout when the supplier no longer has enough in stock', async () => {
+        const cart = await cartWith(2);
+        quote(1542, 1);
+
+        const refused = await complete(cart.id);
+
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
+        const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+        expect(repriced.data.cart.items[0].available).toBe(false);
+      });
+
+      it('refuses checkout when the supplier no longer quotes the offer', async () => {
+        const cart = await cartWith(1);
+        intercars.quotes.clear();
+
+        const refused = await complete(cart.id);
+
+        expect(refused.data.code).toBe('OFFER_MISSING');
+      });
+
+      it.each([
+        ['points at no offer', { offer_id: 'offer_forged' }],
+        ['drops its offer', { offer_id: '' }],
+      ])(
+        'refuses checkout of a line whose metadata was tampered so it %s',
+        async (_, metadata) => {
+          const cart = await cartWith(1);
+          const tampered = await api.post(
+            `/store/carts/${cart.id}/line-items/${cart.items[0].id}`,
+            { quantity: 1, metadata },
+            storeHeaders,
+          );
+          expect(tampered.status).toBe(200);
+
+          const refused = await complete(cart.id);
+
+          expect(refused.status).toBe(400);
+          expect(refused.data.code).toBe('OFFER_MISSING');
+        },
+      );
+
+      it('refuses the stock Medusa checkout of a cart without a contact', async () => {
+        const cart = await cartWith(1);
+
+        const refused = await post(`/store/carts/${cart.id}/complete`);
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('CONTACT_MISSING');
+      });
+
+      it('hands a placed order to the lead pipeline', async () => {
+        leads.length = 0;
+        const cart = await cartWith(2);
+
+        const placed = await complete(cart.id);
+
+        for (let tries = 0; leads.length === 0 && tries < 50; tries += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        expect(leads).toHaveLength(1);
+        expect(leads[0]).toMatchObject({
+          service: 'parts-order',
+          contact: '+381601234567',
+          contact_channel: 'whatsapp',
+          name: 'Marko',
+          vin: 'WBA35BG070N074158',
+          locale: 'sr',
+          consent: '1',
         });
-
-        await expect(
-          api.post(`/store/carts/${cartId}/complete`, {}, storeHeaders),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-
-        const repriceResponse = await api.post(
-          `/store/offer-carts/${cartId}/reprice`,
-          {},
-          storeHeaders,
+        expect(leads[0].comment).toBe(
+          [
+            `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
+            'Oil filter (BMW 11 42 8575211) × 2: 3700 RSD',
+            'Итого: 3700 RSD',
+            'Pozvati posle 17h',
+          ].join('\n'),
         );
-        expect(repriceResponse.data.repriced_item_ids).toHaveLength(1);
-        expect(repriceResponse.data.cart.items[0].unit_price).toBe(2200);
-
-        const completed = await api.post(
-          `/store/carts/${cartId}/complete`,
-          {},
-          storeHeaders,
-        );
-
-        expect(completed.data.type).toBe('order');
-        expect(completed.data.order.items[0].unit_price).toBe(2200);
-
-        await supplierService.updateSupplierOffers({
-          id: offerId,
-          cost_price: 1542,
-        });
       });
     });
   },

@@ -1,0 +1,47 @@
+---
+import type { PartOffer } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { formatLeadTime } from '@/utils/leadTime';
+
+interface Props {
+  offer?: PartOffer;
+}
+
+const { offer } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const stock = offer && offer.stock_quantity > 0 ? offer.stock_quantity : null;
+const leadDays =
+  offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
+---
+
+<li
+  class="flex flex-wrap items-center gap-x-5 gap-y-2 py-3 first:pt-0 last:pb-0"
+>
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <span class="spec text-lg font-semibold text-ink" data-price>
+      {
+        offer &&
+          `${offer.price.toLocaleString(BCP47_BY_LOCALE[locale])} ${offer.currency}`
+      }
+    </span>
+    <span class="text-sm text-ink-2" data-stock hidden={stock === null}>
+      {stock !== null && `${copy.columns.stock}: ${stock}`}
+    </span>
+    <span class="text-sm text-muted" data-lead hidden={leadDays === null}>
+      {
+        leadDays !== null &&
+          `${copy.columns.leadTime}: ${formatLeadTime(leadDays, copy.leadTime)}`
+      }
+    </span>
+  </div>
+  <button
+    type="button"
+    class="btn btn-primary w-full disabled:cursor-progress disabled:opacity-60 sm:ml-auto sm:w-auto"
+    data-buy
+    data-offer-id={offer?.id}
+  >
+    {copy.buyButtonLabel}
+  </button>
+</li>

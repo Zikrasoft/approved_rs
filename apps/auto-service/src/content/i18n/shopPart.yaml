@@ -1,7 +1,6 @@
 metaTitleSuffix: CarLab
 metaDescription: Бренды, поставщики, цены и сроки поставки для этой запчасти в каталоге CarLab.
 eyebrow: Запчасть
-variantsHeading: Варианты и предложения поставщиков
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
 replacedHeading: Деталь заменена
@@ -16,29 +15,23 @@ priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
 priceOnRequestCta: Узнать цену
 offersHeading: Цена и наличие
-offersCta: Добавить в заявку
-currencyLabel: RSD
 columns:
-  brand: Бренд
-  number: Номер
-  price: Цена
   stock: В наличии
   leadTime: Срок поставки
-buyButtonLabel: Купить
-buyErrorLabel: Не удалось добавить в корзину. Попробуйте еще раз.
+buyButtonLabel: В корзину
+addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
+addedCta: Открыть корзину
+inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
+inquiryCta: Открыть заявку
 leadTime:
   inStock: В наличии
   daysTemplate: '{days} дн.'
-notFoundHeading: Запчасть не найдена
-notFoundBody: Возможно, ссылка устарела или запчасть убрали из каталога. Напишите нам, поможем найти нужную деталь.
-notFoundCta: Написать нам
 translatedFrom: 699e9a4d39f2143b
 translations:
   sr:
     metaTitleSuffix: CarLab
     metaDescription: Brendovi, dobavljači, cene i rokovi isporuke za ovu delove u katalogu CarLab.
     eyebrow: Delovi
-    variantsHeading: Opcije i ponude dobavljača
     equivalentsHeading: Zamenski delovi za ovaj deo
     noEquivalents: Za sada nema zamenskih delova u katalogu. Pišite nam, pronaći ćemo zamenu.
     replacedHeading: Deo je zamenjen
@@ -49,26 +42,17 @@ translations:
     attributeYes: Da
     attributeNo: Ne
     categoryLink: Svi delovi iz kategorije
-    currencyLabel: RSD
     columns:
-      brand: Brend
-      number: Broj
-      price: Cena
       stock: Na skladištu
       leadTime: Rok isporuke
     leadTime:
       inStock: Na skladištu
       daysTemplate: '{days} d.'
-    notFoundHeading: Delovi nisu pronađeni
-    notFoundBody: Moguće da je link zastareo ili je deo uklonjen iz kataloga. Kontaktirajte nas, pomoći ćemo vam da pronađete potrebni deo.
-    notFoundCta: Kontaktirajte nas
     buyButtonLabel: Kupiti
-    buyErrorLabel: Nije moguće dodati u korpu. Pokušajte ponovo.
   en:
     metaTitleSuffix: CarLab
     metaDescription: Brands, suppliers, prices and lead times for this part in the CarLab catalog.
     eyebrow: Part
-    variantsHeading: Options and supplier offers
     equivalentsHeading: Equivalents of this part
     noEquivalents: No equivalents in the catalogue yet. Message us and we will find a replacement.
     replacedHeading: This part has been replaced
@@ -79,18 +63,10 @@ translations:
     attributeYes: 'Yes'
     attributeNo: 'No'
     categoryLink: All parts in this category
-    currencyLabel: RSD
     columns:
-      brand: Brand
-      number: Number
-      price: Price
       stock: In stock
       leadTime: Lead time
     leadTime:
       inStock: In stock
       daysTemplate: '{days} days'
-    notFoundHeading: Part not found
-    notFoundBody: The link may be outdated or the part has been removed from the catalog. Contact us, we will help find the needed part.
-    notFoundCta: Contact us
     buyButtonLabel: Buy
-    buyErrorLabel: Could not add to cart. Please try again.

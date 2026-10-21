@@ -4,7 +4,7 @@ export function sitemapFilter(
   site: string,
   partPages: { slug: string; indexable: boolean }[] = [],
 ): (page: string) => boolean {
-  const excluded = ['/thanks/', '/parts/car/'];
+  const excluded = ['/thanks/', '/parts/car/', '/parts/cart/'];
   const indexable = new Set(
     partPages.filter((page) => page.indexable).map(({ slug }) => slug),
   );

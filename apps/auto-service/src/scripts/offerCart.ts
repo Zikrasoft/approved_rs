@@ -1,270 +1,275 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
+import type { OfferCart, PartOffer } from '@podbor/catalog-contract';
+import type { CartOutcome, OffersOutcome } from '@/utils/catalogue';
+import { CART_NOTICE_PARAM } from '@/utils/cartNotice';
+import { formatLeadTime } from '@/utils/leadTime';
+import { addToPartsList, listedPartSchema } from './partsList';
 
-export const CART_ID_STORAGE_KEY = 'carlab_offer_cart_id';
+export const CART_STORAGE_KEY = 'carlab_offer_cart';
 
-type ReadableStorage = Pick<Storage, 'getItem'>;
-type WritableStorage = Pick<Storage, 'setItem'>;
+const storedCartSchema = z.object({
+  id: z.string(),
+  parts: z.array(listedPartSchema),
+});
 
-export function readCartId(
-  storage: ReadableStorage = localStorage,
-): string | null {
+export type StoredCart = z.infer<typeof storedCartSchema>;
+
+type CartStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+
+const orBrowser = (storage?: CartStorage): CartStorage =>
+  storage ?? localStorage;
+
+export function readCart(storage?: CartStorage): StoredCart | null {
   try {
-    return storage.getItem(CART_ID_STORAGE_KEY);
+    const parsed = storedCartSchema.safeParse(
+      JSON.parse(orBrowser(storage).getItem(CART_STORAGE_KEY) ?? 'null'),
+    );
+    return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 }
 
-export function writeCartId(
-  id: string,
-  storage: WritableStorage = localStorage,
-): void {
+export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
+  const stored: StoredCart = {
+    id: cart.id,
+    parts: cart.items.map(({ part }) => part),
+  };
   try {
-    storage.setItem(CART_ID_STORAGE_KEY, id);
+    orBrowser(storage).setItem(CART_STORAGE_KEY, JSON.stringify(stored));
   } catch {
-    // TODO: surface a visible notice if storage is blocked (private browsing)
+    return;
   }
 }
 
-const offerPriceChangedErrorSchema = z.object({
-  response: z.object({
-    data: z.object({ code: z.literal('OFFER_PRICE_CHANGED') }),
-  }),
-});
-
-export function isOfferPriceChangedError(error: unknown): boolean {
-  return offerPriceChangedErrorSchema.safeParse(error).success;
+export function forgetCart(storage?: CartStorage): void {
+  try {
+    orBrowser(storage).removeItem(CART_STORAGE_KEY);
+  } catch {
+    return;
+  }
 }
 
-const cartItemSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  quantity: z.number(),
-  unit_price: z.number(),
-});
+export function moveCartToInquiry(storage?: CartStorage): void {
+  for (const part of readCart(storage)?.parts ?? []) {
+    addToPartsList(part, storage);
+  }
+}
 
-const cartSchema = z.object({
-  id: z.string(),
-  items: z.array(cartItemSchema).optional(),
-  total: z.number().optional(),
-});
+const getJson = async <T>(url: string, init?: RequestInit): Promise<T | null> =>
+  fetch(url, init)
+    .then((response) => (response.ok ? (response.json() as Promise<T>) : null))
+    .catch(() => null);
 
-const offerCartResponseSchema = z.object({
-  cart: cartSchema.optional(),
-});
-
-type CartItem = z.infer<typeof cartItemSchema>;
-type OfferCartResponse = z.infer<typeof offerCartResponseSchema>;
-
-async function postJson(
-  url: string,
-  publishableKey: string,
-  body: Record<string, unknown>,
-): Promise<{ status: number; data: OfferCartResponse }> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-publishable-api-key': publishableKey,
-    },
+const sendJson = <T>(method: string, body: unknown) =>
+  getJson<T>('/api/cart', {
+    method,
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
   });
-  const rawData = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw { response: { status: response.status, data: rawData } };
-  }
-  return {
-    status: response.status,
-    data: offerCartResponseSchema.parse(rawData),
-  };
-}
 
-async function ensureCartId(
-  backendUrl: string,
-  publishableKey: string,
-): Promise<string> {
-  const existing = readCartId();
-  if (existing) return existing;
-  const { data } = await postJson(
-    `${backendUrl}/store/offer-carts`,
-    publishableKey,
-    {},
-  );
-  if (!data.cart) {
-    throw new Error('offer-carts response had no cart');
-  }
-  const id = data.cart.id;
-  writeCartId(id);
-  return id;
-}
+const money = (amount: number, currency: string, localeTag: string) =>
+  `${amount.toLocaleString(localeTag)} ${currency}`;
 
-export function defineOfferCartBuy(tagName = 'offer-cart-buy'): void {
+const fill = (root: ParentNode, selector: string, text: string | null) => {
+  const node = root.querySelector<HTMLElement>(selector);
+  if (!node) return;
+  node.textContent = text ?? '';
+  node.hidden = text === null;
+};
+
+export function definePartOffers(tagName = 'part-offers'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
     tagName,
     class extends HTMLElement {
       connectedCallback(): void {
-        this.querySelector('button')?.addEventListener('click', () => {
-          this.buy();
+        this.addEventListener('click', (event) => {
+          const button = (event.target as Element).closest<HTMLButtonElement>(
+            '[data-buy]',
+          );
+          if (button) void this.buy(button);
         });
+        void this.refresh();
       }
 
-      async buy(): Promise<void> {
-        const button = this.querySelector('button');
-        const errorEl = this.querySelector('[data-error]');
+      async refresh(): Promise<void> {
+        const outcome = await getJson<OffersOutcome>(
+          `/api/part-offers?id=${encodeURIComponent(this.dataset.id ?? '')}`,
+        );
+        if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
+        this.querySelector('[data-offers]')?.replaceChildren(
+          ...outcome.offers.map((offer) => this.row(offer)),
+        );
+      }
+
+      row(offer: PartOffer): Node {
         const {
-          backendUrl = '',
-          publishableKey = '',
-          offerId = '',
-          cartPath = '',
+          localeTag = 'sr',
+          stockLabel = '',
+          leadLabel = '',
+          inStock = '',
+          daysTemplate = '',
         } = this.dataset;
-        if (button) button.setAttribute('disabled', '');
-        errorEl?.setAttribute('hidden', '');
-        try {
-          const cartId = await ensureCartId(backendUrl, publishableKey);
-          await postJson(
-            `${backendUrl}/store/offer-carts/${cartId}/items`,
-            publishableKey,
-            { offer_id: offerId, quantity: 1 },
-          );
-          location.href = cartPath;
-        } catch {
-          button?.removeAttribute('disabled');
-          errorEl?.removeAttribute('hidden');
+        const template = this.querySelector<HTMLTemplateElement>(
+          'template[data-offer]',
+        )!;
+        const row = template.content.cloneNode(true) as DocumentFragment;
+        fill(
+          row,
+          '[data-price]',
+          money(offer.price, offer.currency, localeTag),
+        );
+        fill(
+          row,
+          '[data-stock]',
+          offer.stock_quantity > 0
+            ? `${stockLabel}: ${offer.stock_quantity}`
+            : null,
+        );
+        fill(
+          row,
+          '[data-lead]',
+          offer.lead_time_days > 0
+            ? `${leadLabel}: ${formatLeadTime(offer.lead_time_days, { inStock, daysTemplate })}`
+            : null,
+        );
+        row
+          .querySelector<HTMLButtonElement>('[data-buy]')
+          ?.setAttribute('data-offer-id', offer.id);
+        return row;
+      }
+
+      async buy(button: HTMLButtonElement): Promise<void> {
+        button.disabled = true;
+        const outcome = await sendJson<CartOutcome>('POST', {
+          cart_id: readCart()?.id ?? null,
+          offer_id: button.dataset.offerId,
+        });
+        button.disabled = false;
+        const added = outcome?.kind === 'cart';
+        if (added) {
+          rememberCart(outcome.cart);
+        } else {
+          const part = listedPartSchema.safeParse({ ...this.dataset });
+          if (part.success) addToPartsList(part.data);
         }
+        this.querySelector<HTMLElement>('[data-added]')!.hidden = !added;
+        this.querySelector<HTMLElement>('[data-inquiry]')!.hidden = added;
       }
     },
   );
 }
 
-function renderItems(
-  root: HTMLElement,
-  items: CartItem[],
-  currencyLabel: string,
-): void {
-  const template = root.querySelector('template');
-  const list = root.querySelector('[data-items]');
-  if (!template || !list) return;
-  list.replaceChildren(
-    ...items.map((item) => {
-      const row = (template.content.firstElementChild as HTMLElement).cloneNode(
-        true,
-      ) as HTMLElement;
-      row.querySelector('[data-title]')!.textContent = item.title;
-      row.querySelector('[data-quantity]')!.textContent = String(item.quantity);
-      row.querySelector('[data-price]')!.textContent =
-        `${item.unit_price.toLocaleString('sr-RS')} ${currencyLabel}`;
-      return row;
-    }),
-  );
-}
-
-export function defineOfferCartView(tagName = 'offer-cart-view'): void {
+export function defineOfferCart(tagName = 'offer-cart'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
     tagName,
     class extends HTMLElement {
-      async connectedCallback(): Promise<void> {
-        const {
-          backendUrl = '',
-          publishableKey = '',
-          mode,
-          currencyLabel = '',
-        } = this.dataset;
-        const cartId = readCartId();
-        if (!cartId) {
-          this.querySelector('[data-empty]')?.removeAttribute('hidden');
-          this.querySelector('[data-loaded]')?.setAttribute('hidden', '');
+      connectedCallback(): void {
+        const notice =
+          new URLSearchParams(location.search).get(CART_NOTICE_PARAM) ?? '';
+        if (notice === 'ordered') {
+          forgetCart();
+          this.show('ordered');
           return;
         }
-
-        const cart = await this.fetchCart(backendUrl, publishableKey, cartId);
-        if (!cart) return;
-
-        this.querySelector('[data-loaded]')?.removeAttribute('hidden');
-        renderItems(this, cart.items ?? [], currencyLabel);
-        const totalEl = this.querySelector('[data-total]');
-        if (totalEl) {
-          totalEl.textContent = `${Number(cart.total ?? 0).toLocaleString('sr-RS')} ${currencyLabel}`;
+        const stored = readCart();
+        if (!stored) {
+          this.show('empty');
+          return;
         }
-
-        if (mode === 'checkout') {
-          this.wireCheckout(backendUrl, publishableKey, cartId);
-        }
+        this.querySelector('form')?.addEventListener('formdata', (event) => {
+          const id = readCart()?.id;
+          if (id) event.formData.set('cart_id', id);
+        });
+        void getJson<CartOutcome>(
+          `/api/cart?id=${encodeURIComponent(stored.id)}`,
+        ).then((outcome) => this.render(outcome, notice));
       }
 
-      async fetchCart(
-        backendUrl: string,
-        publishableKey: string,
-        cartId: string,
-      ): Promise<{ items: CartItem[]; total: number } | null> {
-        const response = await fetch(`${backendUrl}/store/carts/${cartId}`, {
-          headers: { 'x-publishable-api-key': publishableKey },
-        });
-        if (!response.ok) return null;
-        const body = await response.json();
-        const cart = offerCartResponseSchema.parse(body).cart;
-        if (!cart) return null;
-        return { items: cart.items ?? [], total: cart.total ?? 0 };
-      }
-
-      wireCheckout(
-        backendUrl: string,
-        publishableKey: string,
-        cartId: string,
-      ): void {
-        this.querySelector('[data-complete]')?.addEventListener('click', () => {
-          this.complete(backendUrl, publishableKey, cartId);
-        });
-        this.querySelector('[data-reprice]')?.addEventListener('click', () => {
-          this.reprice(backendUrl, publishableKey, cartId);
-        });
-      }
-
-      async complete(
-        backendUrl: string,
-        publishableKey: string,
-        cartId: string,
-      ): Promise<void> {
-        this.querySelector('[data-stale]')?.setAttribute('hidden', '');
-        this.querySelector('[data-order-placed]')?.setAttribute('hidden', '');
-        try {
-          await postJson(
-            `${backendUrl}/store/carts/${cartId}/complete`,
-            publishableKey,
-            {},
-          );
-          this.querySelector('[data-order-placed]')?.removeAttribute('hidden');
-          this.querySelector('[data-checkout-form]')?.setAttribute(
-            'hidden',
-            '',
-          );
-        } catch (error) {
-          if (isOfferPriceChangedError(error)) {
-            this.querySelector('[data-stale]')?.removeAttribute('hidden');
-            return;
-          }
-          this.querySelector('[data-error]')?.removeAttribute('hidden');
+      show(state: string): void {
+        for (const block of this.querySelectorAll<HTMLElement>(
+          '[data-state]',
+        )) {
+          block.hidden = block.dataset.state !== state;
         }
       }
 
-      async reprice(
-        backendUrl: string,
-        publishableKey: string,
-        cartId: string,
-      ): Promise<void> {
-        const { currencyLabel = '' } = this.dataset;
-        const { data } = await postJson(
-          `${backendUrl}/store/offer-carts/${cartId}/reprice`,
-          publishableKey,
-          {},
+      render(outcome: CartOutcome | null, notice = ''): void {
+        if (!outcome || outcome.kind === 'inquiry') {
+          moveCartToInquiry();
+          this.show('fallback');
+          return;
+        }
+        if (outcome.kind === 'empty') {
+          forgetCart();
+          this.show('empty');
+          return;
+        }
+        const { cart } = outcome;
+        rememberCart(cart);
+        const { localeTag = 'sr', quantityTemplate = '{count}' } = this.dataset;
+        this.querySelector('[data-lines]')?.replaceChildren(
+          ...cart.items.map((line) =>
+            this.line(line, cart, localeTag, quantityTemplate),
+          ),
         );
-        renderItems(this, data.cart?.items ?? [], currencyLabel);
-        const totalEl = this.querySelector('[data-total]');
-        if (totalEl) {
-          totalEl.textContent = `${Number(data.cart?.total ?? 0).toLocaleString('sr-RS')} ${currencyLabel}`;
+        fill(this, '[data-total]', money(cart.total, cart.currency, localeTag));
+        for (const block of this.querySelectorAll<HTMLElement>(
+          '[data-notice]',
+        )) {
+          block.hidden = block.dataset.notice !== notice;
         }
-        this.querySelector('[data-stale]')?.setAttribute('hidden', '');
+        this.show('cart');
+      }
+
+      line(
+        line: OfferCart['items'][number],
+        cart: OfferCart,
+        localeTag: string,
+        quantityTemplate: string,
+      ): Node {
+        const template = this.querySelector<HTMLTemplateElement>(
+          'template[data-line]',
+        )!;
+        const row = template.content.cloneNode(true) as DocumentFragment;
+        const link = row.querySelector<HTMLAnchorElement>('[data-part-link]');
+        if (link) {
+          link.textContent = line.part.name;
+          link.href = (this.dataset.partHref ?? '').replace(
+            '{slug}',
+            line.part.slug,
+          );
+        }
+        fill(row, '[data-number]', `${line.part.brand} ${line.part.number}`);
+        fill(
+          row,
+          '[data-quantity]',
+          quantityTemplate.replace('{count}', String(line.quantity)),
+        );
+        fill(
+          row,
+          '[data-price]',
+          money(line.unit_price * line.quantity, cart.currency, localeTag),
+        );
+        row.querySelector<HTMLElement>('[data-unavailable]')!.hidden =
+          line.available;
+        const remove = row.querySelector<HTMLButtonElement>('[data-remove]');
+        remove?.setAttribute(
+          'aria-label',
+          `${remove.getAttribute('aria-label') ?? ''}: ${line.part.name}`,
+        );
+        remove?.addEventListener('click', async () => {
+          remove.disabled = true;
+          this.render(
+            await sendJson<CartOutcome>('DELETE', {
+              cart_id: cart.id,
+              item_id: line.id,
+            }),
+          );
+        });
+        return row;
       }
     },
   );

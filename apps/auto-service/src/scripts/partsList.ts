@@ -9,7 +9,7 @@ export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
 // TODO: mirrors MAX_COMMENT_LENGTH in @podbor/lead-crm/src/form.ts, which the package does not export
 export const INQUIRY_COMMENT_LIMIT = 2000;
 
-const listedPartSchema = z.object({
+export const listedPartSchema = z.object({
   slug: z.string(),
   brand: z.string(),
   number: z.string(),
