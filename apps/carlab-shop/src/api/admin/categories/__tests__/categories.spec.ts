@@ -369,7 +369,8 @@ medusaIntegrationTestRunner({
           label: 'Еще объем',
         });
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({ code: 'ALREADY_EXISTS' });
       });
 
       it('returns a 404 for a field of another Category', async () => {

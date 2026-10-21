@@ -423,35 +423,39 @@ medusaIntegrationTestRunner({
           'change the metadata of',
           'post',
           (id: string) => `/store/carts/${id}`,
+          { metadata: { offer_id: 'offer_forged' } },
         ],
         [
           'add a line to',
           'post',
           (id: string) => `/store/carts/${id}/line-items`,
+          {
+            variant_id: 'variant_forged',
+            quantity: 50,
+            metadata: { offer_id: 'offer_forged' },
+          },
         ],
         [
           'change a line of',
           'post',
           (id: string, line: string) => `/store/carts/${id}/line-items/${line}`,
+          { quantity: 50, metadata: { offer_id: 'offer_forged' } },
         ],
         [
           'remove a line of',
           'delete',
           (id: string, line: string) => `/store/carts/${id}/line-items/${line}`,
+          undefined,
         ],
       ] as const)(
         'refuses the stock Medusa routes that %s an offer cart',
-        async (_, method, path) => {
+        async (_, method, path, body) => {
           const cart = await cartWith(1);
           const url = path(cart.id, cart.items[0].id);
 
           const refused = await (
             method === 'post'
-              ? api.post(
-                  url,
-                  { quantity: 50, metadata: { offer_id: 'offer_forged' } },
-                  storeHeaders,
-                )
+              ? api.post(url, body, storeHeaders)
               : api.delete(url, storeHeaders)
           ).catch((error) => error.response);
 

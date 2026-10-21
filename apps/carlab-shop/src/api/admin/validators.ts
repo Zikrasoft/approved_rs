@@ -28,7 +28,7 @@ const partNumber = z
   .trim()
   .refine((value) => normalizePartNumber(value).length > 0);
 
-export const AdminCreatePart = z.object({
+export const AdminCreatePart = z.strictObject({
   name,
   identifiers: z
     .array(
@@ -96,7 +96,7 @@ const ENDS_BEFORE_IT_STARTS = {
 };
 
 export const AdminCreateFitment = z
-  .object({
+  .strictObject({
     part_id: z.string().min(1),
     vehicle_id: z.string().min(1),
     ...fitmentConditions,
@@ -152,7 +152,7 @@ const YEARS_OUT_OF_ORDER = {
 };
 
 export const AdminBulkAttachFitments = z
-  .object({ ...vehicleFilter, ...fitmentConditions })
+  .strictObject({ ...vehicleFilter, ...fitmentConditions })
   .refine(hasVehicleFilter, PICK_A_FILTER)
   .refine(yearsInOrder, YEARS_OUT_OF_ORDER)
   .refine(inOrder, ENDS_BEFORE_IT_STARTS);
