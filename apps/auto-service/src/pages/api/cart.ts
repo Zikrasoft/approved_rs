@@ -9,11 +9,13 @@ import {
   type CartOutcome,
 } from '@/utils/catalogue';
 
+export const MAX_LINE_QUANTITY = 999;
+
 const addSchema = z.object({
   cart_id: catalogueIdSchema.nullable(),
   offer_id: catalogueIdSchema,
+  quantity: z.number().int().positive().max(MAX_LINE_QUANTITY).default(1),
 });
-export const MAX_LINE_QUANTITY = 999;
 
 const quantitySchema = z.object({
   cart_id: catalogueIdSchema,
@@ -48,7 +50,12 @@ export const POST: APIRoute = async ({ request }) => {
   const add = addSchema.safeParse(await body(request));
   return respond(
     add.success
-      ? () => catalogue()?.addToCart(add.data.cart_id, add.data.offer_id)
+      ? () =>
+          catalogue()?.addToCart(
+            add.data.cart_id,
+            add.data.offer_id,
+            add.data.quantity,
+          )
       : null,
   );
 };

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { APIContext } from 'astro';
-import { DELETE, GET, PATCH } from './cart';
+import { DELETE, GET, PATCH, POST } from './cart';
 
 const backend = vi.fn();
 
@@ -57,5 +57,24 @@ describe('/api/cart', () => {
       cartId: 'cart_1',
     });
     expect(backend).not.toHaveBeenCalled();
+  });
+
+  it('adds as many of an offer as a kit needs', async () => {
+    backend.mockResolvedValue(
+      new Response(JSON.stringify({ code: 'OFFER_OUT_OF_STOCK' }), {
+        status: 400,
+      }),
+    );
+
+    await call(POST, {
+      body: { cart_id: null, offer_id: 'offer_1', quantity: 4 },
+    });
+
+    const [url, init] = backend.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://shop.test/store/offer-carts');
+    expect(JSON.parse(String(init.body))).toEqual({
+      offer_id: 'offer_1',
+      quantity: 4,
+    });
   });
 });

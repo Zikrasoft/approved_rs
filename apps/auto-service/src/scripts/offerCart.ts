@@ -10,6 +10,7 @@ import {
 } from '@/utils/cartNotice';
 import { formatLeadTime, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
+import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
 import { addToPartsList, listedPartSchema, type ListedPart } from './partsList';
 
@@ -567,6 +568,57 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         });
         if (toInquiry) toInquiry.hidden = line.available;
         return row;
+      }
+    },
+  );
+}
+
+export function defineKitCart(tagName = 'kit-cart'): void {
+  if (customElements.get(tagName)) return;
+  customElements.define(
+    tagName,
+    class extends HTMLElement {
+      connectedCallback(): void {
+        const button = this.querySelector('button');
+        button?.addEventListener('click', () => {
+          if (isBusy(button)) return;
+          busy(button, true);
+          void this.addKit();
+        });
+      }
+
+      async addKit(): Promise<void> {
+        const kit = this.closest<HTMLElement>('parts-list-add-all');
+        const vin = vinFrom(location.search);
+        let cartId = readCart()?.id ?? null;
+        let moved = false;
+        for (const item of kit?.querySelectorAll<HTMLElement>(
+          '[data-offer-id]:not([hidden])',
+        ) ?? []) {
+          const outcome = await sendJson('POST', {
+            cart_id: cartId,
+            offer_id: item.dataset.offerId,
+            quantity: Number(item.dataset.quantity) || 1,
+          });
+          if (outcome?.kind === 'cart') {
+            rememberCart(outcome.cart);
+            cartId = outcome.cart.id;
+            continue;
+          }
+          const part = listedPartSchema.safeParse({
+            ...item.dataset,
+            car: kit?.dataset.car,
+            ...(vin && { vin }),
+          });
+          if (part.success) addToPartsList(part.data);
+          moved = true;
+        }
+        const href = this.dataset.cartHref ?? '';
+        location.assign(
+          moved
+            ? `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`
+            : href,
+        );
       }
     },
   );

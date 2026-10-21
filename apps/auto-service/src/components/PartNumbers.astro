@@ -1,13 +1,20 @@
 ---
 import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
-  pages: { slug: string; value: string; brand: { name: string } }[];
+  pages: {
+    slug: string;
+    value: string;
+    brand: { name: string };
+    superseded?: boolean;
+  }[];
 }
 
 const { pages } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
 ---
 
 <ul class="flex flex-wrap gap-x-4 gap-y-1">
@@ -20,6 +27,11 @@ const locale = localeFrom(Astro.url.pathname);
         >
           <span class="text-sm font-semibold">{page.brand.name}</span>
           <span class="spec text-sm">{page.value}</span>
+          {page.superseded && (
+            <span class="rounded-sm border border-line px-1.5 py-px text-xs text-ink-2">
+              {copy.supersededTag}
+            </span>
+          )}
         </a>
       </li>
     ))
