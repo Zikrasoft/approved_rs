@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const optionalSecret = z
+  .string()
+  .optional()
+  .transform((value) => value || undefined);
+
 const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
@@ -19,6 +24,8 @@ const envSchema = z.object({
   TYPESENSE_PORT: z.coerce.number().int().positive().default(8108),
   TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
   TYPESENSE_API_KEY: z.string().min(1).default('xyz'),
+  OPENAI_API_KEY: optionalSecret,
+  PUBLISH_DISPATCH_TOKEN: optionalSecret,
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -836,6 +836,38 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "translations": {
+          "name": "translations",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "translated_from": {
+          "name": "translated_from",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "source": {
           "name": "source",
           "type": "text",
@@ -1275,7 +1307,7 @@
         },
         "translated_from": {
           "name": "translated_from",
-          "type": "text",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -1287,7 +1319,7 @@
           "default": null,
           "comment": null,
           "enumItems": [],
-          "mappedType": "text"
+          "mappedType": "json"
         },
         "make_id": {
           "name": "make_id",

@@ -4,7 +4,8 @@
     "suppliers": "Suppliers",
     "brands": "Brands",
     "vehicles": "Vehicles",
-    "vinLookups": "Unresolved VINs"
+    "vinLookups": "Unresolved VINs",
+    "publish": "Publish"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -155,6 +156,27 @@
       "make": "Make",
       "code": "Code",
       "count": "Lookups"
+    }
+  },
+  "publish": {
+    "heading": "Publish",
+    "description": "Publishing translates new catalogue text into Serbian and English, rebuilds and deploys carlab.rs, then refreshes search. Each step runs only after the previous one succeeds.",
+    "publish": "Publish",
+    "started": "Publishing started",
+    "empty": "Nothing has been published yet. Press Publish to put your edits live.",
+    "lastRun": "Last run",
+    "startedAt": "Started: {{time}}",
+    "finishedAt": "Finished: {{time}}",
+    "failedAt": "Stopped at the {{step}} step",
+    "statuses": {
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed"
+    },
+    "steps": {
+      "translate": "translation",
+      "deploy": "site build and deploy",
+      "reindex": "search refresh"
     }
   }
 }

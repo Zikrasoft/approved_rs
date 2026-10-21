@@ -9,6 +9,7 @@ import {
   AdminCreateBrandSpelling,
   AdminCreateFitment,
   AdminCreatePart,
+  AdminEditTranslation,
   AdminListFitments,
   AdminSearchParts,
   AdminUpdateSupplier,
@@ -53,6 +54,11 @@ export default defineMiddlewares({
       matcher: '/admin/fitments',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminCreateFitment)],
+    },
+    {
+      matcher: '/admin/translations/:entity/:id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminEditTranslation)],
     },
     {
       matcher: '/admin/suppliers/:id',
