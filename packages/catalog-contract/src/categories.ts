@@ -6,7 +6,7 @@ export const CATALOG_KEY_PATTERN = BRAND_SLUG_PATTERN;
 
 export const CATALOG_TRANSLATION_LOCALES = ['sr', 'en'] as const;
 
-const translationsSchema = z
+export const catalogTranslationsSchema = z
   .partialRecord(
     z.enum(CATALOG_TRANSLATION_LOCALES),
     z.record(z.string(), z.string()),
@@ -18,7 +18,7 @@ const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
 export const categoryFieldOptionSchema = z.object({
   key: catalogKey,
   label: z.string(),
-  translations: translationsSchema,
+  translations: catalogTranslationsSchema,
   rank: z.number(),
 });
 
@@ -27,7 +27,7 @@ export const categoryFieldSchema = z.object({
   type: z.enum(CATEGORY_FIELD_TYPES),
   unit: z.string().nullable(),
   label: z.string(),
-  translations: translationsSchema,
+  translations: catalogTranslationsSchema,
   required: z.boolean(),
   facet: z.boolean(),
   rank: z.number(),
@@ -39,7 +39,7 @@ export const categorySchema = z.object({
   slug: catalogKey,
   name: z.string(),
   text: z.string(),
-  translations: translationsSchema,
+  translations: catalogTranslationsSchema,
   fields: z.array(categoryFieldSchema),
 });
 
@@ -51,7 +51,7 @@ export type CategoryField = z.infer<typeof categoryFieldSchema>;
 export type Category = z.infer<typeof categorySchema>;
 
 type Translated<Column extends string> = Record<Column, string> & {
-  translations: z.infer<typeof translationsSchema>;
+  translations: z.infer<typeof catalogTranslationsSchema>;
 };
 
 export const translated = <Column extends string>(

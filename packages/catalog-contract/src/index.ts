@@ -3,3 +3,4 @@ export * from './partPages.ts';
 export * from './attributes.ts';
 export * from './categories.ts';
 export * from './vehicle.ts';
+export * from './fitment.ts';
