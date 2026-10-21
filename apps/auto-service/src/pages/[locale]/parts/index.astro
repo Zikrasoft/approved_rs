@@ -6,7 +6,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
 import VinLookupForm from '@/components/VinLookupForm.astro';
 import { localeFrom } from '@/i18n/config';
-import { categoriesForBuild } from '@/utils/catalogue';
+import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
 import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -14,7 +14,11 @@ import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   const categories = await categoriesForBuild();
-  return localePaths().map((path) => ({ ...path, props: { categories } }));
+  const makes = (await makeHubsForBuild()).map(({ make }) => make);
+  return localePaths().map((path) => ({
+    ...path,
+    props: { categories, makes },
+  }));
 }
 
 const locale = localeFrom(Astro.url.pathname);
@@ -22,13 +26,16 @@ const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
 const vinCopy = content(locale).partsCar.vin;
-const categories = (Astro.props as { categories: Category[] }).categories.map(
-  (category) => ({
-    slug: category.slug,
-    name: translated(category, 'name', locale),
-    lead: paragraphs(translated(category, 'text', locale))[0],
-  }),
-);
+const props = Astro.props as {
+  categories: Category[];
+  makes: { slug: string; name: string }[];
+};
+const hubsCopy = content(locale).partsCar.hubs;
+const categories = props.categories.map((category) => ({
+  slug: category.slug,
+  name: translated(category, 'name', locale),
+  lead: paragraphs(translated(category, 'text', locale))[0],
+}));
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
@@ -75,6 +82,26 @@ const categories = (Astro.props as { categories: Category[] }).categories.map(
               </a>
             ))}
           </div>
+        </div>
+      )
+    }
+
+    {
+      props.makes.length > 0 && (
+        <div class="flex flex-col gap-3">
+          <h2 class="text-section">{hubsCopy.indexHeading}</h2>
+          <ul class="flex flex-wrap gap-3">
+            {props.makes.map((make) => (
+              <li>
+                <a
+                  href={PathBuilder.partsMake(locale, make.slug)}
+                  class="btn btn-secondary"
+                >
+                  {make.name}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )
     }

@@ -325,10 +325,6 @@ export async function categoryPagesForBuild(
   return (await catalogueFromEnv(env)?.categoryPages()) ?? [];
 }
 
-export async function vehiclesForBuild(env: CatalogueEnv): Promise<Vehicle[]> {
-  return (await catalogueFromEnv(env)?.vehicles()) ?? [];
-}
-
 export async function carPagesForBuild(
   env = buildEnv(),
 ): Promise<CarPageEntry[]> {

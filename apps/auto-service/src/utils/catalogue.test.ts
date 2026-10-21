@@ -7,7 +7,6 @@ import {
   createCatalogue,
   makeHubsForBuild,
   partPagesForBuild,
-  vehiclesForBuild,
 } from './catalogue';
 import { PathBuilder } from './paths';
 import { sitemapFilter } from './sitemap';
@@ -337,7 +336,7 @@ const brandNumber = (
 describe('enriched part pages', () => {
   const classified = { ...oilPart, category_id: oilFilters.id };
   const pageWith = (
-    part: typeof oilPart,
+    part: Record<string, unknown>,
     equivalents: unknown[],
     fitments: unknown[],
   ) =>
@@ -617,12 +616,6 @@ describe('catalogue.vehicles', () => {
     await expect(
       catalog(answer({ vehicles: [{ id: 'veh_1' }] })).vehicles(),
     ).rejects.toThrow();
-  });
-});
-
-describe('vehiclesForBuild', () => {
-  it('builds no car pages when no backend is configured', async () => {
-    expect(await vehiclesForBuild({})).toEqual([]);
   });
 });
 

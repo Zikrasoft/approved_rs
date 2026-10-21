@@ -4,31 +4,44 @@ import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import FitLine from '@/components/FitLine.astro';
+import PartNumbers from '@/components/PartNumbers.astro';
+import { translated } from '@podbor/catalog-contract';
 import { carName } from '@/utils/carName';
-import { vehiclesForBuild, type Vehicle } from '@/utils/catalogue';
+import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
-  const vehicles = await vehiclesForBuild({
-    MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
-    MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
-  });
+  const cars = await carPagesForBuild();
   return withLocales(
-    vehicles.map((vehicle) => ({
-      params: { id: vehicle.id },
-      props: { vehicle },
+    cars.map((car) => ({
+      params: { id: car.vehicle.id },
+      props: { car },
     })),
   );
 }
 
-const { vehicle } = Astro.props as { vehicle: Vehicle };
+const { car } = Astro.props as { car: CarPageEntry };
+const { vehicle } = car;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const partsInquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.car;
 const name = carName(vehicle.model, locale);
 const { engine, model } = vehicle;
+const { make } = model.chassis.series;
+const byCategory = new Map<string, CarPageEntry['groups']>();
+for (const group of car.groups) {
+  const key = group.category?.id ?? '';
+  byCategory.set(key, [...(byCategory.get(key) ?? []), group]);
+}
+const blocks = [...byCategory.values()].map((groups) => ({
+  name: groups[0].category
+    ? translated(groups[0].category, 'name', locale)
+    : copy.otherParts,
+  groups,
+}));
 
 const years =
   vehicle.year_from &&
@@ -73,6 +86,11 @@ const specs = [
     heading={name}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        label: carName(model, locale),
+      },
       { href: PathBuilder.partsCar(locale, vehicle.id), label: name },
     ]}
   />
@@ -95,9 +113,50 @@ const specs = [
         </dl>
       </div>
 
-      <div class="card flex flex-col gap-2 p-5 sm:p-6">
-        <h2 class="text-base font-semibold text-ink">{copy.partsHeading}</h2>
-        <p class="text-sm leading-relaxed text-ink-2">{copy.partsLead}</p>
+      <div class="flex flex-col gap-4">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        {
+          blocks.length === 0 ? (
+            <p class="card p-5 text-sm leading-relaxed text-ink-2 sm:p-6">
+              {copy.partsLead}
+            </p>
+          ) : (
+            blocks.map((block) => (
+              <section class="card overflow-hidden">
+                <h3 class="border-b border-line px-5 py-3 font-semibold sm:px-6">
+                  {block.name}
+                </h3>
+                <ul class="divide-y divide-line">
+                  {block.groups.map((group) => (
+                    <li
+                      class:list={[
+                        'flex flex-col gap-3 px-5 py-4 sm:px-6',
+                        group.ambiguous && 'border-l-4 border-l-signal',
+                      ]}
+                    >
+                      {group.ambiguous && (
+                        <p class="text-sm leading-relaxed font-semibold text-signal-ink">
+                          {copy.confirmVariant}
+                        </p>
+                      )}
+                      <ul class="flex flex-col gap-4">
+                        {group.fitments.map((fit) => (
+                          <li class="flex flex-col gap-1.5">
+                            <span class="text-sm text-ink">
+                              {fit.part.name}
+                            </span>
+                            <PartNumbers pages={fit.pages} />
+                            <FitLine fit={fit} />
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
+          )
+        }
       </div>
 
       <p class="text-sm leading-relaxed text-muted">
