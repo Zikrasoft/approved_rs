@@ -1,189 +1,266 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { updateSupplierOfferWorkflow } from '../../../../workflows/update-supplier-offer';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
+
+type Result = {
+  value: string;
+  superseded: boolean;
+  brand: { slug: string };
+  part: { id: string; name: string; category: { name: string } | null };
+};
 
 medusaIntegrationTestRunner({
   moduleName: 'catalog',
   dbName: 'medusa-search-typesense-integration',
   testSuite: ({ api, getContainer }) => {
     describe('GET /store/search', () => {
-      let partId: string;
-      let oemOfferId: string;
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
+      let oilFilterId: string;
+      let airFilterId: string;
+      let thinOilId: string;
+      let thickOilId: string;
+
+      const search = (params: Record<string, string | string[]>) => {
+        const query = new URLSearchParams();
+        for (const [key, value] of Object.entries(params)) {
+          for (const item of [value].flat()) {
+            query.append(key, item);
+          }
+        }
+        return api
+          .get(`/store/search?${query}`, storeHeaders)
+          .catch((error) => error.response);
+      };
+
+      const results = async (
+        params: Record<string, string | string[]>,
+      ): Promise<Result[]> => (await search(params)).data.results;
 
       beforeAll(async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
-        const supplierService: SupplierModuleService =
-          getContainer().resolve(SUPPLIER_MODULE);
-        const apiKeyModuleService: IApiKeyModuleService =
-          getContainer().resolve(Modules.API_KEY);
+        const apiKeys: IApiKeyModuleService = getContainer().resolve(
+          Modules.API_KEY,
+        );
 
-        const publishableKey = await apiKeyModuleService.createApiKeys({
+        const key = await apiKeys.createApiKeys({
           title: 'search-tests',
           type: 'publishable',
           created_by: 'test',
         });
-        storeHeaders = {
-          headers: { 'x-publishable-api-key': publishableKey.token },
-        };
+        storeHeaders = { headers: { 'x-publishable-api-key': key.token } };
 
-        const [intercars] = await supplierService.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
-        ]);
-
-        const [bmw, mann] = await catalog.createBrands([
+        const [bmw, mann, castrol] = await catalog.createBrands([
           { name: 'BMW', slug: 'bmw' },
           { name: 'Mann-Filter', slug: 'mann-filter' },
+          { name: 'Castrol', slug: 'castrol' },
         ]);
 
-        const part = await catalog.createParts({
-          name: 'Oil filter, BMW B47/B48 engines',
+        const oilFilters = await catalog.createCategories({
+          slug: 'oil-filters',
+          name: 'Масляные фильтры',
+          translations: {
+            sr: { name: 'Filteri za ulje' },
+            en: { name: 'Oil filters' },
+          },
         });
-        partId = part.id;
-
-        const oemIdentifier = await catalog.createPartIdentifiers({
-          part_id: partId,
-          type: 'oem',
-          brand_id: bmw.id,
-          value: '11 42 8575211',
-          normalized_value: normalizePartNumber('11 42 8575211'),
+        const engineOil = await catalog.createCategories({
+          slug: 'engine-oil',
+          name: 'Моторное масло',
+          translations: {
+            sr: { name: 'Motorno ulje' },
+            en: { name: 'Engine oil' },
+          },
         });
-
-        const mannIdentifier = await catalog.createPartIdentifiers({
-          part_id: partId,
-          type: 'manufacturer-number',
-          brand_id: mann.id,
-          value: 'HU 816 x',
-          normalized_value: normalizePartNumber('HU 816 x'),
-        });
-
-        const [oemOffer] = await supplierService.createSupplierOffers([
+        const [viscosity] = await catalog.createCategoryFields([
           {
-            part_identifier_id: oemIdentifier.id,
-            supplier_id: intercars.id,
-            supplier_article_id: 'IC-11428575211',
-            cost_price: 1542,
-            stock_quantity: 12,
-            lead_time_days: 0,
+            category_id: engineOil.id,
+            key: 'viscosity',
+            type: 'single-select',
+            label: 'Вязкость',
+            translations: { sr: { label: 'Viskozitet' } },
+            rank: 1,
+            facet: true,
           },
           {
-            part_identifier_id: mannIdentifier.id,
-            supplier_id: intercars.id,
-            supplier_article_id: 'IC-HU816X',
-            cost_price: 1000,
-            stock_quantity: 30,
-            lead_time_days: 0,
+            category_id: engineOil.id,
+            key: 'volume',
+            type: 'number',
+            unit: 'l',
+            label: 'Объем',
+            rank: 2,
           },
         ]);
-        oemOfferId = oemOffer.id;
+        await catalog.createCategoryFieldOptions([
+          { field_id: viscosity.id, key: '0w-20', label: '0W-20', rank: 1 },
+          { field_id: viscosity.id, key: '5w-30', label: '5W-30', rank: 2 },
+        ]);
 
-        const searchModuleService = getContainer().resolve(Modules.SEARCH);
-        await searchModuleService.reindex({ index: 'part' });
+        oilFilterId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          category_id: oilFilters.id,
+          identifiers: [
+            { type: 'oem', brand_id: bmw.id, value: '11 42 8575211' },
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'HU 816 x',
+            },
+          ],
+        });
+        airFilterId = await catalog.createPartWithIdentifiers({
+          name: 'Воздушный фильтр',
+          identifiers: [
+            { type: 'oem', brand_id: bmw.id, value: '13 71 8511877' },
+          ],
+        });
+        thinOilId = await catalog.createPartWithIdentifiers({
+          name: 'Масло Castrol Edge',
+          category_id: engineOil.id,
+          attributes: { viscosity: '0w-20', volume: 5 },
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: castrol.id,
+              value: '15F6E3',
+            },
+          ],
+        });
+        thickOilId = await catalog.createPartWithIdentifiers({
+          name: 'Масло Castrol Magnatec',
+          category_id: engineOil.id,
+          attributes: { viscosity: '5w-30', volume: 4 },
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: castrol.id,
+              value: '15C94E',
+            },
+          ],
+        });
+        await catalog.updateParts([
+          {
+            id: oilFilterId,
+            translations: {
+              sr: { name: 'Filter ulja' },
+              en: { name: 'Oil filter' },
+            },
+          },
+          {
+            id: airFilterId,
+            translations: {
+              sr: { name: 'Prečistač vazduha' },
+              en: { name: 'Filter' },
+            },
+          },
+        ]);
+
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
       });
 
-      it('resolves a spaced OEM number to the one canonical Part', async () => {
-        const response = await api.get(
-          '/store/search?q=' + encodeURIComponent('11 42 8575211'),
-          storeHeaders,
-        );
+      it('ranks a match in the page locale first', async () => {
+        const [serbian] = await results({ q: 'filter', locale: 'sr' });
+        const [english] = await results({ q: 'filter', locale: 'en' });
 
-        expect(response.status).toBe(200);
-        expect(response.data.part).toMatchObject({ id: partId });
+        expect(serbian.part).toMatchObject({
+          id: oilFilterId,
+          name: 'Filter ulja',
+          category: { name: 'Filteri za ulje' },
+        });
+        expect(english.part).toMatchObject({ id: airFilterId, name: 'Filter' });
       });
 
-      it('resolves the same OEM number with punctuation stripped', async () => {
-        const response = await api.get(
-          '/store/search?q=' + encodeURIComponent('1142 8575211'),
-          storeHeaders,
-        );
+      it('still finds a Russian query on a Serbian page', async () => {
+        const found = await results({ q: 'масляный фильтр', locale: 'sr' });
 
-        expect(response.status).toBe(200);
-        expect(response.data.part.id).toBe(partId);
+        expect(found[0].part.id).toBe(oilFilterId);
       });
 
-      it('resolves a manufacturer-brand number, with or without spacing, to the same Part', async () => {
-        const spaced = await api.get(
-          '/store/search?q=' + encodeURIComponent('HU 816 x'),
-          storeHeaders,
-        );
-        const compact = await api.get(
-          '/store/search?q=' + encodeURIComponent('hu816x'),
-          storeHeaders,
-        );
+      it('matches Cyrillic input to Latin Serbian names', async () => {
+        const [first] = await results({ q: 'Филтер уља', locale: 'sr' });
+        const [cleaner] = await results({ q: 'пречистач', locale: 'sr' });
 
-        expect(spaced.data.part.id).toBe(partId);
-        expect(compact.data.part.id).toBe(partId);
-        expect(spaced.data.part.id).toBe(compact.data.part.id);
+        expect(first.part.id).toBe(oilFilterId);
+        expect(cleaner.part).toMatchObject({
+          id: airFilterId,
+          name: 'Prečistač vazduha',
+        });
       });
 
-      it('reflects a changed SupplierOffer price without a manual reindex', async () => {
-        const container = getContainer();
+      it('returns every brand-number of a Part as a list, the typed one first', async () => {
+        const found = await results({ q: '11 42 8575211', locale: 'ru' });
 
-        await updateSupplierOfferWorkflow(container).run({
-          input: { id: oemOfferId, cost_price: 2000 },
+        expect(
+          found.map(({ brand, value }) => `${brand.slug} ${value}`),
+        ).toEqual(['bmw 11 42 8575211', 'mann-filter HU 816 x']);
+      });
+
+      it('finds a number typed without spaces or with punctuation', async () => {
+        const [compact] = await results({ q: 'hu816x', locale: 'ru' });
+        const [dotted] = await results({ q: '11.42.8575211', locale: 'ru' });
+
+        expect(compact.value).toBe('HU 816 x');
+        expect(dotted.value).toBe('11 42 8575211');
+      });
+
+      it('builds facets from the Category field definitions', async () => {
+        const response = await search({ q: 'castrol', locale: 'sr' });
+
+        expect(response.data.facets).toEqual([
+          {
+            key: 'viscosity',
+            label: 'Viskozitet',
+            unit: null,
+            values: [
+              { value: '0w-20', label: '0W-20', count: 1 },
+              { value: '5w-30', label: '5W-30', count: 1 },
+            ],
+          },
+        ]);
+      });
+
+      it('filters by a facet value', async () => {
+        const found = await results({
+          q: 'castrol',
+          locale: 'ru',
+          facets: 'viscosity:5w-30',
         });
 
-        const response = await api.get(
-          '/store/search?q=' + encodeURIComponent('11428575211'),
-          storeHeaders,
-        );
-
-        const oem = response.data.part.identifiers.find(
-          (identifier: { type: string }) => identifier.type === 'oem',
-        );
-        const offer = oem.offers.find(
-          (candidate: { id: string }) => candidate.id === oemOfferId,
-        );
-
-        expect(offer.price).toBe(2400);
+        expect(found.map(({ part }) => part.id)).toEqual([thickOilId]);
+        expect(found.map(({ part }) => part.id)).not.toContain(thinOilId);
       });
 
-      it('never duplicates a Part per brand-variant identifier', async () => {
-        const response = await api.get(
-          '/store/search?q=' + encodeURIComponent('HU 816 x'),
-          storeHeaders,
-        );
+      it('returns an empty list for a query nothing matches', async () => {
+        const response = await search({
+          q: 'does-not-exist-9999',
+          locale: 'ru',
+        });
 
-        expect(response.data.part.identifiers).toHaveLength(2);
-        const types = response.data.part.identifiers.map(
-          (identifier: { type: string }) => identifier.type,
-        );
-        expect(types.sort()).toEqual(['manufacturer-number', 'oem']);
+        expect(response.status).toBe(200);
+        expect(response.data.results).toEqual([]);
       });
 
-      it('returns 400 without a search query', async () => {
-        const response = await api
-          .get('/store/search', storeHeaders)
-          .catch((error) => error.response);
+      it('refuses a request without a query or with an unknown locale', async () => {
+        const withoutQuery = await search({ locale: 'ru' });
+        const unknownLocale = await search({ q: 'filter', locale: 'de' });
+        const withoutLocale = await search({ q: 'filter' });
 
-        expect(response.status).toBe(400);
+        expect(withoutQuery.status).toBe(400);
+        expect(unknownLocale.status).toBe(400);
+        expect(withoutLocale.status).toBe(400);
       });
 
-      it('returns 404 for a value that matches no Part', async () => {
-        const response = await api
-          .get(
-            '/store/search?q=' + encodeURIComponent('does-not-exist-9999'),
-            storeHeaders,
-          )
-          .catch((error) => error.response);
-
-        expect(response.status).toBe(404);
-      });
-
-      it('resolves a superseded number to its Part', async () => {
+      it('finds a superseded number and marks it', async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
         const [bmw] = await catalog.listBrands({ slug: 'bmw' });
         const oldPartId = await catalog.createPartWithIdentifiers({
-          name: 'Oil filter, superseded number',
+          name: 'Масляный фильтр, старый номер',
           identifiers: [
             { type: 'oem', brand_id: bmw.id, value: '11 42 7953125' },
           ],
@@ -195,15 +272,59 @@ medusaIntegrationTestRunner({
           id: identifier.id,
           superseded: true,
         });
-        await getContainer().resolve(Modules.SEARCH).reindex({ index: 'part' });
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
 
-        const response = await api.get(
-          '/store/search?q=' + encodeURIComponent('11 42 7953125'),
-          storeHeaders,
+        const [found] = await results({ q: '11 42 7953125', locale: 'ru' });
+
+        expect(found).toMatchObject({
+          superseded: true,
+          part: { id: oldPartId },
+        });
+      });
+
+      it('builds a new collection on reindex and swaps reads to it', async () => {
+        const collections = async () => {
+          const response = await fetch(
+            `http://localhost:${process.env.TYPESENSE_PORT}/collections`,
+            { headers: { 'X-TYPESENSE-API-KEY': 'xyz' } },
+          );
+          return (
+            (await response.json()) as {
+              name: string;
+              created_at: number;
+            }[]
+          ).filter(({ name }) => name.startsWith('part_identifier_v'));
+        };
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Салонный фильтр',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'CUK 2939',
+            },
+          ],
+        });
+        const before = await results({ q: 'CUK 2939', locale: 'ru' });
+        await new Promise((resolve) => setTimeout(resolve, 1100));
+        const startedAt = Math.floor(Date.now() / 1000);
+
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+
+        const built = (await collections()).filter(
+          ({ created_at }) => created_at >= startedAt,
         );
-
-        expect(response.status).toBe(200);
-        expect(response.data.part.id).toBe(oldPartId);
+        const [found] = await results({ q: 'CUK 2939', locale: 'ru' });
+        expect(before).toEqual([]);
+        expect(built).toHaveLength(1);
+        expect(found.value).toBe('CUK 2939');
       });
     });
   },

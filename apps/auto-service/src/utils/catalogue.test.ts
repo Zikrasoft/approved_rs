@@ -439,3 +439,83 @@ describe('catalogue.resolveVin', () => {
     });
   });
 });
+
+describe('catalogue.search', () => {
+  const found = {
+    results: [
+      {
+        id: 'pi_mann',
+        type: 'manufacturer-number',
+        value: 'HU 816 x',
+        normalized_value: 'HU816X',
+        superseded: false,
+        brand: mann,
+        part: {
+          id: 'part_oil',
+          name: 'Filter ulja',
+          category: { slug: 'oil-filters', name: 'Filteri za ulje' },
+        },
+      },
+    ],
+    facets: [
+      {
+        key: 'viscosity',
+        label: 'Viskozitet',
+        unit: null,
+        values: [{ value: '5w-30', label: '5W-30', count: 1 }],
+      },
+    ],
+    count: 1,
+    offset: 0,
+    limit: 20,
+  };
+
+  it('sends the query, the page locale and the chosen facets', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      q: 'filter ulja',
+      locale: 'sr',
+      facets: ['viscosity:5w-30', 'viscosity:0w-20'],
+      offset: 20,
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?q=filter+ulja&locale=sr&facets=viscosity%3A5w-30&facets=viscosity%3A0w-20&offset=20',
+      expect.anything(),
+    );
+  });
+
+  it('lists every match with a link slug to its brand-number page', async () => {
+    const result = await catalog(answer(found)).search({
+      q: 'hu816x',
+      locale: 'sr',
+      facets: [],
+    });
+
+    expect(result?.results.map(({ slug }) => slug)).toEqual([
+      'mann-filter-hu816x',
+    ]);
+    expect(result?.facets).toEqual(found.facets);
+  });
+
+  it('gives no results when the backend answers with an error', async () => {
+    expect(
+      await catalog(answer({}, false)).search({
+        q: 'x',
+        locale: 'ru',
+        facets: [],
+      }),
+    ).toBeNull();
+  });
+
+  it('gives no results on a body that breaks the contract', async () => {
+    expect(
+      await catalog(answer({ results: [{ id: 'pi_1' }] })).search({
+        q: 'x',
+        locale: 'ru',
+        facets: [],
+      }),
+    ).toBeNull();
+  });
+});

@@ -4,6 +4,7 @@ import { Client } from 'typesense';
 
 import {
   collectSearchableFields,
+  compileFacets,
   compileFilters,
   hasNestedFields,
   toTypesenseFields,
@@ -133,6 +134,10 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
     const perPage = Math.max(take, 1);
     const page = Math.floor(skip / perPage) + 1;
 
+    const facets = (input.search_options?.facets ?? []).map((facet) =>
+      typeof facet === 'string' ? { field: facet } : facet,
+    );
+
     const response = await this.client
       .collections(input.index.physical_name)
       .documents()
@@ -143,6 +148,10 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
         include_fields: input.attributes_to_retrieve.join(','),
         per_page: perPage,
         page,
+        ...compileFacets(facets),
+        ...input.search_options?.provider_options?.[
+          TypesenseSearchProviderService.identifier
+        ],
       });
 
     return {
@@ -151,6 +160,15 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
         score: hit.text_match,
         document: hit.document as Record<string, unknown>,
       })),
+      facets: Object.fromEntries(
+        (response.facet_counts ?? []).map(({ field_name, counts }) => [
+          field_name,
+          {
+            type: 'value' as const,
+            values: counts.map(({ value, count }) => ({ value, count })),
+          },
+        ]),
+      ),
       metadata: {
         skip,
         take,

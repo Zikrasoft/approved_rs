@@ -27,7 +27,10 @@ type Reindex = () => Promise<unknown>;
 const reindex = (scope: MedusaContainer): Reindex =>
   scope.hasRegistration(PUBLISH_REINDEX_REGISTRATION)
     ? scope.resolve<Reindex>(PUBLISH_REINDEX_REGISTRATION)
-    : () => scope.resolve<ISearchModuleService>(Modules.SEARCH).reindex();
+    : () =>
+        scope
+          .resolve<ISearchModuleService>(Modules.SEARCH)
+          .reindex({ strategy: 'swap' });
 
 const publishSteps = (scope: MedusaContainer): PublishStep[] => [
   { name: 'import', run: () => importSupplierCatalogues(scope) },

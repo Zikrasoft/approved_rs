@@ -1,20 +1,30 @@
 import type { SearchTypes } from '@medusajs/framework/types';
 
 import {
-  compactValue,
   collectSearchableFields,
+  compileFacets,
   compileFilters,
   toTypesenseFields,
 } from '../mapping';
 
-describe('compactValue', () => {
-  it('strips spaces and punctuation and lowercases', () => {
-    expect(compactValue('HU 816 x')).toBe('hu816x');
-    expect(compactValue('11 42 8575211')).toBe('11428575211');
+describe('compileFacets', () => {
+  it('asks for nothing without facets', () => {
+    expect(compileFacets([])).toEqual({});
   });
 
-  it('strips internal punctuation such as slashes and dots', () => {
-    expect(compactValue('B47/B48')).toBe('b47b48');
+  it('facets on every requested field with the largest limit', () => {
+    expect(
+      compileFacets([
+        { field: 'facets', type: 'value', limit: 50 },
+        { field: 'brand', limit: 10 },
+      ]),
+    ).toEqual({ facet_by: 'facets,brand', max_facet_values: 50 });
+  });
+
+  it('refuses a range facet', () => {
+    expect(() =>
+      compileFacets([{ field: 'price', type: 'range', ranges: [] }]),
+    ).toThrow('unsupported "range" facet on "price"');
   });
 });
 
