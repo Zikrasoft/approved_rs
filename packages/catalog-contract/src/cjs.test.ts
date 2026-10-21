@@ -23,4 +23,19 @@ describe('CommonJS build', () => {
       }).success,
     ).toBe(true);
   });
+
+  it('serves the vehicle schemas to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([
+      'bmw-type-code',
+      'mercedes-baumuster',
+    ]);
+    expect(
+      contract.vinLookupResponseSchema.safeParse({
+        resolved: false,
+        make: null,
+        code: null,
+      }).success,
+    ).toBe(true);
+  });
 });

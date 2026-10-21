@@ -35,6 +35,7 @@ export const partPageSchema = brandNumberSchema.extend({
       .nullable(),
   }),
   equivalents: z.array(brandNumberSchema),
+  has_offers: z.boolean(),
 });
 
 export const partPagesResponseSchema = z.object({

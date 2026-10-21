@@ -8,6 +8,9 @@ replacedHeading: Деталь заменена
 replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
 supersededNotice: Этот номер устарел, производитель его больше не использует.
 supersededTag: устарел
+priceOnRequestHeading: Цена по запросу
+priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
+priceOnRequestCta: Узнать цену
 currencyLabel: RSD
 columns:
   brand: Бренд

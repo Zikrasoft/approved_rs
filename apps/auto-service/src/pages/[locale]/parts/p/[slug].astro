@@ -2,10 +2,11 @@
 import { partPageSlug } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild({
@@ -43,14 +44,16 @@ const replacement = page.part.replaced_by;
   {
     (replacement || page.superseded) && (
       <section class="wrap pt-band md:pt-band-lg">
-        <div class="card flex max-w-3xl flex-col gap-3 border-l-4 border-l-signal p-6">
+        <div class="card flex max-w-2xl flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
           {page.superseded && (
             <p class="font-semibold">{copy.supersededNotice}</p>
           )}
           {replacement && (
             <>
-              <h2 class="text-xl font-semibold">{copy.replacedHeading}</h2>
-              <p class="text-muted">{copy.replacedLead}</p>
+              <h2 class="text-block font-semibold">{copy.replacedHeading}</h2>
+              <p class="text-sm leading-relaxed text-ink-2">
+                {copy.replacedLead}
+              </p>
               <a
                 href={PathBuilder.partNumber(
                   locale,
@@ -71,6 +74,34 @@ const replacement = page.part.replaced_by;
               </a>
             </>
           )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    page.priceOnRequest && (
+      <section class="wrap pt-band md:pt-band-lg">
+        <div class="card flex max-w-2xl flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.priceOnRequestHeading}</h2>
+          <p class="text-sm leading-relaxed text-ink-2">
+            {copy.priceOnRequestBody}
+          </p>
+          <parts-list-add
+            class="mt-1 block"
+            data-slug={page.slug}
+            data-brand={page.brand.name}
+            data-number={page.value}
+            data-name={page.part.name}
+          >
+            <a
+              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              class="btn btn-primary w-full sm:w-auto"
+            >
+              {copy.priceOnRequestCta}
+              <Icon name="arrowRight" />
+            </a>
+          </parts-list-add>
         </div>
       </section>
     )
@@ -108,3 +139,9 @@ const replacement = page.part.replaced_by;
     }
   </section>
 </Shell>
+
+<script>
+  import { definePartsListAdd } from '@/scripts/partsList';
+
+  definePartsListAdd();
+</script>

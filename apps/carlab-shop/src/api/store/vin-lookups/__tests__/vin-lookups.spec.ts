@@ -1,22 +1,54 @@
+import { asValue } from '@medusajs/framework/awilix';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
-import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
+import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
+import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
+import type { VinDecoder } from '../../../../lib/vin/decoder';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
+import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
-const B47_VIN = 'WBA3B1C50GL123456';
-const UNKNOWN_MANUFACTURER_VIN = '1HGCM82633A004352';
+const OWNER_VIN = 'WBA35BG070N074158';
+const PAID_ONLY_VIN = 'WBA77XX070N000001';
+
+const paidDecoder: VinDecoder = {
+  name: 'fake-paid',
+  version: 3,
+  async decode(vin) {
+    if (vin !== PAID_ONLY_VIN) return null;
+    return {
+      make: 'bmw',
+      identifiers: [{ type: 'bmw-type-code', value: '8X11' }],
+      facts: { steering: 'right' },
+      raw: { answer: 'from the fake paid decoder' },
+    };
+  },
+};
 
 medusaIntegrationTestRunner({
   moduleName: 'vin_lookup',
+  hooks: {
+    beforeServerStart: async (container) => {
+      container.register(
+        VIN_DECODERS_REGISTRATION,
+        asValue([bmwTypeCodeDecoder, paidDecoder]),
+      );
+    },
+  },
   testSuite: ({ api, getContainer }) => {
-    describe('VIN lookup store API', () => {
+    describe('VIN lookup', () => {
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
+      let adminHeaders: { headers: { authorization: string } };
       let catalog: CatalogModuleService;
-      let vinLookupModuleService: VinLookupModuleService;
+      let vinLookups: VinLookupModuleService;
+
+      const lookUp = (vin: string) =>
+        api.post('/store/vin-lookups', { vin }, storeHeaders);
 
       beforeAll(async () => {
         const apiKeyModuleService: IApiKeyModuleService =
@@ -29,123 +61,165 @@ medusaIntegrationTestRunner({
         storeHeaders = {
           headers: { 'x-publishable-api-key': publishableKey.token },
         };
-
+        adminHeaders = await createAdminAuth(
+          getContainer(),
+          api,
+          'admin@vin-lookup-tests.local',
+          'supersecret',
+        );
         catalog = getContainer().resolve(CATALOG_MODULE);
-        vinLookupModuleService = getContainer().resolve(VIN_LOOKUP_MODULE);
+        vinLookups = getContainer().resolve(VIN_LOOKUP_MODULE);
       });
 
-      describe('POST /store/vin-lookups', () => {
-        it('resolves a VIN to the seeded Vehicle it structurally decodes to, and creates a VinLookup', async () => {
-          const b47 = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47',
-            year_from: 2015,
-            year_to: 2018,
-          });
-          const n47 = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'N47',
-            year_from: 2010,
-            year_to: 2012,
-          });
-          const part = await catalog.createParts({
-            name: 'Oil filter, BMW B47/B48 engines',
-          });
-          await catalog.createFitments({
-            part_id: part.id,
-            vehicle_id: b47.id,
-          });
+      it("resolves the owner's VIN to the Vehicle holding its BMW type code", async () => {
+        const { vehicle } = await createVehicleFixture(catalog);
 
-          const response = await api.post(
-            '/store/vin-lookups',
-            { vin: B47_VIN },
-            storeHeaders,
-          );
+        const response = await lookUp(OWNER_VIN);
 
-          expect(response.status).toBe(200);
-          expect(response.data.resolved).toBe(true);
-          expect(response.data.vehicle).toMatchObject({
-            id: b47.id,
-            make: 'BMW',
-            engine_code: 'B47',
-          });
-          expect(response.data.vehicle.id).not.toBe(n47.id);
-          expect(response.data.vin_lookup_id).toBeTruthy();
-
-          const [stored] = await vinLookupModuleService.listVinLookups({
-            vin: B47_VIN,
-          });
-          expect(stored).toMatchObject({
-            vin: B47_VIN,
-            vehicle_id: b47.id,
-          });
-
-          const listingResponse = await api.get(
-            `/store/vehicles/${response.data.vehicle.id}/parts`,
-            storeHeaders,
-          );
-          expect(listingResponse.data.parts).toHaveLength(1);
-          expect(listingResponse.data.parts[0]).toMatchObject({
-            ambiguous: false,
-            part: expect.objectContaining({ id: part.id }),
-          });
+        expect(response.data).toEqual({
+          resolved: true,
+          facts: {},
+          vehicle: expect.objectContaining({
+            id: vehicle.id,
+            steering: 'left',
+            identifiers: [{ type: 'bmw-type-code', value: '35BG' }],
+            engine: expect.objectContaining({ code: 'B47D20O0' }),
+            model: expect.objectContaining({
+              slug: 'f30-320d',
+              chassis: expect.objectContaining({
+                code: 'F30',
+                series: expect.objectContaining({
+                  make: { slug: 'bmw', name: 'BMW' },
+                }),
+              }),
+            }),
+          }),
+        });
+        const [stored] = await vinLookups.listVinLookups({ vin: OWNER_VIN });
+        expect(stored).toMatchObject({
+          decoder: 'bmw-type-code',
+          decoder_version: 1,
+          make: 'bmw',
+          code: '35BG',
+          vehicle_id: vehicle.id,
+          raw: { wmi: 'WBA', typeCode: '35BG' },
         });
 
-        it('reuses the cached VinLookup row on a second lookup of the same VIN', async () => {
-          const vehicle = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: 'B47',
-            year_from: 2015,
-            year_to: 2018,
-          });
-          const vin = 'WBA3B1C50GL654321';
+        const again = await lookUp(OWNER_VIN);
+        expect(again.data).toEqual(response.data);
+        expect(
+          await vinLookups.listVinLookups({ vin: OWNER_VIN }),
+        ).toHaveLength(1);
+      });
 
-          const first = await api.post(
-            '/store/vin-lookups',
-            { vin },
-            storeHeaders,
-          );
-          const second = await api.post(
-            '/store/vin-lookups',
-            { vin },
-            storeHeaders,
-          );
-
-          expect(first.data.vin_lookup_id).toBe(second.data.vin_lookup_id);
-          expect(second.data.vehicle.id).toBe(vehicle.id);
-
-          const stored = await vinLookupModuleService.listVinLookups({ vin });
-          expect(stored).toHaveLength(1);
+      it('lets the next decoder in the chain answer when the own adapter is unresolved', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: '8X11',
         });
 
-        it('does not resolve or cache a VIN whose WMI is outside the stub decoder table', async () => {
-          const response = await api.post(
-            '/store/vin-lookups',
-            { vin: UNKNOWN_MANUFACTURER_VIN },
-            storeHeaders,
-          );
+        const response = await lookUp(PAID_ONLY_VIN);
 
-          expect(response.status).toBe(200);
-          expect(response.data.resolved).toBe(false);
-          expect(response.data.vehicle).toBeNull();
-          expect(response.data.vin_lookup_id).toBeNull();
+        expect(response.data).toMatchObject({
+          resolved: true,
+          vehicle: { id: vehicle.id },
+          facts: { steering: 'right' },
+        });
+        const [stored] = await vinLookups.listVinLookups({
+          vin: PAID_ONLY_VIN,
+        });
+        expect(stored).toMatchObject({
+          decoder: 'fake-paid',
+          decoder_version: 3,
+          vehicle_id: vehicle.id,
+        });
+      });
 
-          const stored = await vinLookupModuleService.listVinLookups({
-            vin: UNKNOWN_MANUFACTURER_VIN,
-          });
-          expect(stored).toHaveLength(0);
+      it('records an unknown type code as unresolved and resolves it once staff add the Vehicle', async () => {
+        const vin = 'WBA99ZZ070N000002';
+
+        const before = await lookUp(vin);
+        expect(before.data).toEqual({
+          resolved: false,
+          make: 'bmw',
+          code: '99ZZ',
         });
 
-        it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
-          const response = await api
-            .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)
-            .catch((error) => error.response);
-
-          expect(response.status).toBe(400);
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: '99ZZ',
         });
+        const after = await lookUp(vin);
+
+        expect(after.data).toMatchObject({
+          resolved: true,
+          vehicle: { id: vehicle.id },
+        });
+        expect(await vinLookups.listVinLookups({ vin })).toHaveLength(1);
+      });
+
+      it('leaves a VIN no decoder recognises unresolved without a make', async () => {
+        const response = await lookUp('1HGCM82633A004352');
+
+        expect(response.data).toEqual({
+          resolved: false,
+          make: null,
+          code: null,
+        });
+      });
+
+      it('resolves again a lookup recorded by an older decoder version', async () => {
+        const stale = await createVehicleFixture(catalog, {
+          typeCode: 'OLD1',
+        });
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: '7A55',
+        });
+        const vin = 'WBA7A55070N000003';
+        await vinLookups.createVinLookups({
+          vin,
+          decoder: 'bmw-type-code',
+          decoder_version: 0,
+          facts: {},
+          make: 'bmw',
+          code: 'OLD1',
+          vehicle_id: stale.vehicle.id,
+        });
+
+        const response = await lookUp(vin);
+
+        expect(response.data).toMatchObject({
+          resolved: true,
+          vehicle: { id: vehicle.id },
+        });
+        const [stored] = await vinLookups.listVinLookups({ vin });
+        expect(stored).toMatchObject({
+          decoder_version: 1,
+          code: '7A55',
+          vehicle_id: vehicle.id,
+        });
+      });
+
+      it('lists unresolved codes per Make, most searched first', async () => {
+        await lookUp('WBA11AA070N000010');
+        await lookUp('WBA22BB070N000011');
+        await lookUp('WBA22BB070N000012');
+
+        const response = await api.get(
+          '/admin/vin-lookups/unresolved',
+          adminHeaders,
+        );
+
+        expect(response.data.codes.slice(0, 2)).toEqual([
+          { make: 'bmw', code: '22BB', count: 2 },
+          { make: 'bmw', code: '11AA', count: 1 },
+        ]);
+      });
+
+      it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
+        const response = await api
+          .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
       });
     });
   },

@@ -1,0 +1,50 @@
+vin:
+  heading: Подбор по VIN
+  lead: Введите VIN, и мы откроем страницу вашего автомобиля с подходящими запчастями.
+  label: VIN
+  placeholder: Например, WBA35BG070N074158
+  submitLabel: Найти автомобиль
+  unresolved: Не получилось определить автомобиль по этому VIN автоматически. Отправьте заявку ниже, и менеджер подберет запчасти вручную.
+car:
+  metaTitle: '{car}: запчасти в CarLab'
+  metaDescription: 'Запчасти для {car}: подберем по VIN, привезем и установим в сервисе CarLab в Белграде.'
+  eyebrow: Ваш автомобиль
+  specsHeading: Характеристики
+  engineLabel: Двигатель
+  fuelLabel: Топливо
+  displacementLabel: Объем двигателя
+  powerLabel: Мощность
+  driveLabel: Привод
+  bodyLabel: Кузов
+  yearsLabel: Годы выпуска
+  steeringLabel: Руль
+  typeCodeLabel: Код модели
+  displacementUnit: см³
+  powerUnit: кВт
+  yearsOngoing: по наст. время
+  partsHeading: Запчасти для этого автомобиля
+  partsLead: Каталог для этого автомобиля пополняется. Оставьте заявку, и мы подберем запчасти по VIN и сообщим цену.
+  formHeading: Заявка на запчасти
+  notYourCar: Это не ваш автомобиль? Проверьте VIN или отправьте заявку, и мы разберемся вручную.
+  fuel:
+    petrol: бензин
+    diesel: дизель
+    hybrid: гибрид
+    electric: электро
+  drive:
+    rwd: задний
+    fwd: передний
+    awd: полный
+  body:
+    sedan: седан
+    touring: универсал
+    hatchback: хэтчбек
+    coupe: купе
+    convertible: кабриолет
+    gran-coupe: Gran Coupe
+    suv: внедорожник
+    van: минивэн
+  steering:
+    left: левый
+    right: правый
+translatedFrom: pending

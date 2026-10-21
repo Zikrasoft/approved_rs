@@ -12,6 +12,9 @@ export const shopPartContentSchema = z
     replacedLead: z.string(),
     supersededNotice: z.string(),
     supersededTag: z.string(),
+    priceOnRequestHeading: z.string(),
+    priceOnRequestBody: z.string(),
+    priceOnRequestCta: z.string(),
     currencyLabel: z.string(),
     columns: z
       .object({

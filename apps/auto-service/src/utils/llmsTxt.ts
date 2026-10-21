@@ -17,7 +17,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const pages = content(locale).pages;
   const services = content(locale).services;
   const site = content(locale).site;
-  const vehiclePicker = content(locale).vehiclePicker;
   const works = publishedWorks(await getCollection('works'));
 
   return renderBrandLlmsTxt({
@@ -47,7 +46,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         index: {
           label: pages.partsInquiry.heading,
           href: url(PathBuilder.parts(locale)),
-          note: pages.partsInquiry.lead,
+          note: pages.partsInquiry.llmsCatalogue,
         },
         entries: PARTS_CATEGORY_SLUGS.map((slug) => ({
           label: pages.partsInquiry.categories[slug].name,
@@ -69,11 +68,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
-      {
-        label: vehiclePicker.heading,
-        href: url(PathBuilder.shopVehicles(locale)),
-        note: vehiclePicker.lead,
-      },
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       { label: site.footer.aboutLabel, href: url(PathBuilder.about(locale)) },
