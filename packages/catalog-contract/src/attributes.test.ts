@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  type AttributeValues,
   type CategoryFieldDefinition,
   guardDefinitionChange,
   maintenanceKit,
@@ -241,7 +242,11 @@ const requirement = (
   });
 
 describe('requirementMatches', () => {
-  const parts = [
+  const parts: {
+    id: string;
+    category_id: string | null;
+    attributes: AttributeValues;
+  }[] = [
     {
       id: 'part_ll04',
       category_id: 'category_oil',
