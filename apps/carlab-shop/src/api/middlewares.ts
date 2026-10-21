@@ -14,6 +14,7 @@ import {
   AdminSearchParts,
   AdminUpdateSupplier,
 } from './admin/validators';
+import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
   StoreAddOfferCartItem,
   StoreCreateOfferCart,
@@ -64,6 +65,18 @@ export default defineMiddlewares({
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminUpdateSupplier)],
     },
+    ...VEHICLE_REFERENCE_BODIES.flatMap(([matcher, schema]) => [
+      {
+        matcher,
+        method: 'POST' as const,
+        middlewares: [validateAndTransformBody(schema)],
+      },
+      {
+        matcher: `${matcher}/:id`,
+        method: 'POST' as const,
+        middlewares: [validateAndTransformBody(schema.partial())],
+      },
+    ]),
     {
       matcher: '/store/part-pages',
       method: 'GET',

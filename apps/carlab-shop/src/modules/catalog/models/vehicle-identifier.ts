@@ -1,9 +1,8 @@
 import { model } from '@medusajs/framework/utils';
+import { VEHICLE_IDENTIFIER_TYPES } from '@podbor/catalog-contract';
 
 import { provenance } from './provenance';
 import Vehicle from './vehicle';
-
-export const VEHICLE_IDENTIFIER_TYPES = ['ktype', 'oem-type-code'] as const;
 
 const VehicleIdentifier = model
   .define('vehicle_identifier', {

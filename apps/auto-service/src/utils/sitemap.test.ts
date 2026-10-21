@@ -14,4 +14,10 @@ describe('sitemapFilter', () => {
     expect(keep(`${SITE}/`)).toBe(false);
     expect(keep(`${SITE}/sr/thanks/`)).toBe(false);
   });
+
+  it('keeps the noindex car pages out', () => {
+    const keep = sitemapFilter(SITE);
+    expect(keep(`${SITE}/sr/parts/car/veh_01/`)).toBe(false);
+    expect(keep(`${SITE}/sr/parts/`)).toBe(true);
+  });
 });

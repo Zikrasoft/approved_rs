@@ -15,7 +15,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN DATABASE_URL=postgres://build@localhost/build JWT_SECRET=build COOKIE_SECRET=build \
     STORE_CORS=http://build ADMIN_CORS=http://build AUTH_CORS=http://build \
-    pnpm --filter @podbor/carlab-shop build
+    pnpm --filter "@podbor/carlab-shop..." build
 RUN pnpm deploy --filter @podbor/carlab-shop --prod --legacy /prod
 
 FROM node:24.21.0-alpine
