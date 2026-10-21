@@ -90,6 +90,7 @@ export async function sendOrderLead(
 ): Promise<void> {
   const response = await fetch(url, {
     method: 'POST',
+    headers: { origin: new URL(url).origin },
     body: form,
     redirect: 'manual',
     signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
