@@ -14,11 +14,24 @@ const site = content(locale).site;
 const copy = content(locale).shopCart;
 const inquiry = content(locale).pages.partsInquiry;
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
-const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
+const notice =
+  'card mb-4 flex items-start gap-3 border-l-4 border-l-signal p-4 text-sm leading-relaxed text-ink';
+const notices = [
+  { key: 'price-changed', text: copy.notices.priceChanged },
+  { key: 'unavailable', text: copy.notices.unavailable },
+  { key: 'cart-changed', text: copy.notices.cartChanged },
+  { key: 'repriced', text: copy.notices.repriced },
+  { key: 'stock-limit', text: copy.notices.stockLimit },
+  { key: 'unreachable', text: copy.notices.unreachable },
+  { key: 'invalid', text: copy.notices.invalid },
+];
+const stepper =
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-signal disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
   <PageHero
+    actions={false}
     eyebrow={site.nav.parts}
     heading={copy.heading}
     lead={copy.lead}
@@ -32,8 +45,11 @@ const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
     <offer-cart
       class="block"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
-      data-quantity-template={copy.quantityTemplate}
+      data-unit-template={copy.unitTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+      data-ordered-heading={copy.orderedHeading}
+      data-ordered-lead={copy.orderedLead}
+      data-order-template={copy.orderNumberTemplate}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
         {copy.loading}
@@ -55,7 +71,8 @@ const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
         hidden
         class={`${panel} border-l-4 border-l-signal`}
       >
-        <h2 class="text-block font-semibold">{copy.orderedHeading}</h2>
+        <p class="spec text-lg font-semibold text-ink" data-order-number hidden>
+        </p>
         <p class="text-sm leading-relaxed text-ink-2">{copy.orderedBody}</p>
         <a
           href={PathBuilder.parts(locale)}
@@ -81,61 +98,115 @@ const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
         hidden
         class="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
       >
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col">
           <div aria-live="polite">
-            <p data-notice="price-changed" hidden class={notice}>
-              {copy.notices.priceChanged}
-            </p>
-            <p data-notice="unavailable" hidden class={notice}>
-              {copy.notices.unavailable}
-            </p>
-            <p data-notice="unreachable" hidden class={notice}>
-              {copy.notices.unreachable}
-            </p>
-            <p data-notice="invalid" hidden class={notice}>
-              {copy.notices.invalid}
+            {
+              notices.map(({ key, text }) => (
+                <p data-notice={key} hidden class={notice}>
+                  <Icon
+                    name="warning"
+                    size={16}
+                    class="mt-0.5 shrink-0 text-signal-ink"
+                  />
+                  <span>{text}</span>
+                </p>
+              ))
+            }
+            <p data-notice="moved" hidden class={notice}>
+              <Icon
+                name="warning"
+                size={16}
+                class="mt-0.5 shrink-0 text-signal-ink"
+              />
+              <span>
+                {copy.notices.moved}{' '}
+                <a
+                  href={PathBuilder.partsInquiry(locale)}
+                  class="font-semibold text-signal-ink underline underline-offset-2"
+                >
+                  {copy.notices.movedCta}
+                </a>
+              </span>
             </p>
           </div>
 
           <ul class="card divide-y divide-line" data-lines></ul>
           <template data-line>
-            <li class="flex items-start gap-3 py-4 pl-5 pr-3 sm:pl-6">
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <a
-                  class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-                  data-part-link></a>
-                <span class="spec text-sm text-muted" data-number></span>
-                <p
-                  class="text-sm leading-relaxed text-signal-dark"
-                  data-unavailable
-                  hidden
+            <li class="flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
+              <div class="flex items-start gap-3">
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <a
+                    class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                    data-part-link></a>
+                  <span class="spec text-sm text-muted" data-number></span>
+                </div>
+                <button
+                  type="button"
+                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal aria-busy:opacity-40"
+                  aria-label={copy.removeLabel}
+                  data-remove
                 >
-                  {copy.unavailableTag}
-                </p>
+                  <Icon name="close" size={16} />
+                </button>
               </div>
-              <div class="flex shrink-0 flex-col items-end gap-1 text-right">
-                <span class="spec font-semibold text-ink" data-price></span>
-                <span class="text-sm text-muted" data-quantity></span>
+              <p
+                class="flex items-start gap-2 text-sm leading-relaxed text-signal-dark"
+                data-unavailable
+                hidden
+              >
+                <Icon name="warning" size={16} class="mt-0.5 shrink-0" />
+                <span>{copy.unavailableTag}</span>
+              </p>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div
+                  class="flex items-center rounded-control border border-line-field"
+                >
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.decreaseLabel}
+                    data-decrease
+                  >
+                    <Icon name="minus" />
+                  </button>
+                  <span
+                    class="spec min-w-8 text-center text-sm font-semibold text-ink"
+                    data-quantity></span>
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.increaseLabel}
+                    data-increase
+                  >
+                    <Icon name="plus" />
+                  </button>
+                </div>
+                <div class="flex flex-col items-end text-right">
+                  <span class="spec font-semibold text-ink" data-price></span>
+                  <span class="text-xs text-muted" data-unit></span>
+                </div>
               </div>
               <button
                 type="button"
-                class="-my-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal disabled:opacity-40"
-                aria-label={copy.removeLabel}
-                data-remove
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-to-inquiry
+                hidden
               >
-                <Icon name="close" size={12} />
+                {copy.toInquiryLabel}
               </button>
             </li>
           </template>
 
           <div
-            class="flex items-baseline justify-between gap-4 border-t-2 border-ink pt-4"
+            class="mt-4 flex items-baseline justify-between gap-4 border-t-2 border-ink pt-4"
           >
             <span class="text-block font-semibold">{copy.totalLabel}</span>
             <span class="spec text-2xl font-semibold text-ink" data-total
             ></span>
           </div>
-          <p class="text-sm leading-relaxed text-muted">{copy.pickupNotice}</p>
+          <p class="mt-4 text-sm leading-relaxed text-muted">
+            {copy.pickupNotice}
+          </p>
         </div>
 
         <div class="card flex flex-col gap-4 p-5 sm:p-6">

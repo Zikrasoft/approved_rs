@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
 import react from '@astrojs/react';
@@ -10,9 +12,15 @@ import { sitemapFilter } from './src/utils/sitemap.ts';
 import { partPagesForBuild } from './src/utils/catalogue.ts';
 
 const site = CARLAB.url;
+const localEnvFile = new URL('./.env.local', import.meta.url);
+const localEnv = existsSync(localEnvFile)
+  ? parseEnv(readFileSync(localEnvFile, 'utf8'))
+  : {};
 const partPages = await partPagesForBuild({
-  MEDUSA_BACKEND_URL: process.env.MEDUSA_BACKEND_URL,
-  MEDUSA_PUBLISHABLE_KEY: process.env.MEDUSA_PUBLISHABLE_KEY,
+  MEDUSA_BACKEND_URL:
+    process.env.MEDUSA_BACKEND_URL ?? localEnv.MEDUSA_BACKEND_URL,
+  MEDUSA_PUBLISHABLE_KEY:
+    process.env.MEDUSA_PUBLISHABLE_KEY ?? localEnv.MEDUSA_PUBLISHABLE_KEY,
 });
 
 export default defineConfig({

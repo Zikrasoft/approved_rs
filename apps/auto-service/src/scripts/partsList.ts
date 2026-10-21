@@ -7,6 +7,7 @@ import {
 } from '@podbor/lead-crm/submit';
 
 export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
+export const PARTS_CAR_STORAGE_KEY = 'carlab_parts_car';
 
 export const listedPartSchema = z.object({
   slug: z.string(),
@@ -59,8 +60,25 @@ export function removeFromPartsList(slug: string, storage?: ListStorage): void {
 export function clearPartsList(storage?: ListStorage): void {
   try {
     orBrowser(storage).removeItem(PARTS_LIST_STORAGE_KEY);
+    orBrowser(storage).removeItem(PARTS_CAR_STORAGE_KEY);
   } catch {
     return;
+  }
+}
+
+export function rememberPartsCar(car: string, storage?: ListStorage): void {
+  try {
+    orBrowser(storage).setItem(PARTS_CAR_STORAGE_KEY, car);
+  } catch {
+    return;
+  }
+}
+
+export function readPartsCar(storage?: ListStorage): string {
+  try {
+    return orBrowser(storage).getItem(PARTS_CAR_STORAGE_KEY) ?? '';
+  } catch {
+    return '';
   }
 }
 
@@ -111,6 +129,7 @@ export function definePartsListAddAll(tagName = 'parts-list-add-all'): void {
     class extends HTMLElement {
       connectedCallback(): void {
         this.querySelector('[data-add-all]')?.addEventListener('click', () => {
+          if (this.dataset.car) rememberPartsCar(this.dataset.car);
           for (const item of this.querySelectorAll<HTMLElement>(
             '[data-slug]:not([hidden])',
           )) {
@@ -162,9 +181,16 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           return item;
         };
 
+        const car = () => this.dataset.car || readPartsCar();
+        const carLine = this.querySelector<HTMLElement>('[data-parts-car]');
+
         const render = (): void => {
           const parts = readPartsList();
           block.hidden = parts.length === 0;
+          if (carLine) {
+            carLine.textContent = car();
+            carLine.hidden = !car();
+          }
           list.replaceChildren(...parts.map((part) => itemFor(part, render)));
         };
         render();
@@ -175,7 +201,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           event.formData.set(
             'comment',
             inquiryComment({
-              car: this.dataset.car ?? '',
+              car: car(),
               parts,
               note: String(event.formData.get('comment') ?? ''),
               limit: MAX_COMMENT_LENGTH,

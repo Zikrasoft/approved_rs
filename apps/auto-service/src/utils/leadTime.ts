@@ -1,8 +1,16 @@
+export type LeadTimeCopy = {
+  inStock: string;
+  days: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
+};
+
 export function formatLeadTime(
   days: number,
-  copy: { inStock: string; daysTemplate: string },
+  copy: LeadTimeCopy,
+  localeTag: string,
 ): string {
-  return days === 0
-    ? copy.inStock
-    : copy.daysTemplate.replace('{days}', String(days));
+  if (days === 0) {
+    return copy.inStock;
+  }
+  const form = new Intl.PluralRules(localeTag).select(days);
+  return (copy.days[form] ?? copy.days.other).replace('{days}', String(days));
 }

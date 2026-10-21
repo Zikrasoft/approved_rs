@@ -70,6 +70,14 @@ describe('CommonJS build', () => {
     );
   });
 
+  it('serves the zod-free cart fingerprint subpath to require()', () => {
+    expect(
+      require('@podbor/catalog-contract/fingerprint').cartFingerprint([
+        { id: 'item_1', quantity: 2, unit_price: 50 },
+      ]),
+    ).toBe('item_1:2:50');
+  });
+
   it('serves the checkout contact check to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(

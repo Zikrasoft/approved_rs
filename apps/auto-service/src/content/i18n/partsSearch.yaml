@@ -1,5 +1,7 @@
+searchHeading: Поиск по номеру или названию
+searchLead: Номер можно вводить с пробелами, точками или без них.
 label: Номер или название запчасти
-placeholder: Например, 11428575211 или масляный фильтр
+placeholder: Номер или название
 submitLabel: Найти
 metaTitle: Поиск запчастей в CarLab
 metaDescription: Найдите запчасть по номеру производителя или по названию в каталоге CarLab.
@@ -12,7 +14,7 @@ unavailable: Поиск сейчас не отвечает. Отправьте �
 filtersHeading: Характеристики
 applyFilters: Показать
 resetFilters: Сбросить
-superseded: Номер заменен
+superseded: Номер устарел
 booleanTrue: да
 booleanFalse: нет
 previous: Назад

@@ -41,19 +41,19 @@ const categories = props.categories.map((category) => ({
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={copy.heading}
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
-  />
+  >
+    <div class="grid gap-4 pt-2 lg:grid-cols-2 lg:items-stretch">
+      <PartsSearchForm />
+      <VinLookupForm />
+    </div>
+  </PageHero>
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
-    <div class="card p-5 sm:p-6">
-      <PartsSearchForm />
-    </div>
-
-    <VinLookupForm />
-
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">
       {copy.sourcingNote}
     </p>
@@ -89,8 +89,9 @@ const categories = props.categories.map((category) => ({
                     {category.lead}
                   </p>
                 )}
-                <span class="spec mt-auto pt-2 text-xs text-signal-ink">
-                  {copy.categoryCta} →
+                <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
+                  {copy.categoryCta}
+                  <Icon name="arrowRight" />
                 </span>
               </a>
             ))}
@@ -166,6 +167,7 @@ const categories = props.categories.map((category) => ({
             hidden
           >
             <p class="field-label">{copy.listHeading}</p>
+            <p class="text-sm font-semibold text-ink" data-parts-car hidden></p>
             <ul class="divide-y divide-line" data-parts-list></ul>
             <template data-parts-item>
               <li class="flex items-center justify-between gap-2">

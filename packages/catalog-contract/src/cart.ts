@@ -94,20 +94,6 @@ export const checkoutContactSchema = z
     isValidContact(contact, contact_channel ?? null),
   );
 
-export type FingerprintLine = {
-  id: string;
-  quantity: number;
-  unit_price: number;
-};
-
-export const CART_FINGERPRINT_FIELD = 'cart_fingerprint';
-
-export const cartFingerprint = (lines: FingerprintLine[]): string =>
-  lines
-    .map(({ id, quantity, unit_price }) => `${id}:${quantity}:${unit_price}`)
-    .sort()
-    .join(',');
-
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
 export type ListedPart = z.infer<typeof listedPartSchema>;

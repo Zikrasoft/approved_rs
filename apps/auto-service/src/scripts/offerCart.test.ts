@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   forgetCart,
   moveCartToInquiry,
+  payableTotal,
   readCart,
   rememberCart,
+  repricedSince,
 } from './offerCart';
+import { cartCount } from './cartBadge';
 import { readPartsList } from './partsList';
 
 const memoryStorage = () => {
@@ -58,7 +61,7 @@ describe('the remembered cart', () => {
 
     rememberCart(cart, storage);
 
-    expect(readCart(storage)).toEqual({ id: 'cart_1', parts: [bmwOil] });
+    expect(readCart(storage)).toMatchObject({ id: 'cart_1', parts: [bmwOil] });
     forgetCart(storage);
     expect(readCart(storage)).toBeNull();
   });
@@ -70,6 +73,48 @@ describe('the remembered cart', () => {
     moveCartToInquiry(storage);
 
     expect(readPartsList(storage)).toEqual([bmwOil]);
+    expect(readCart(storage)).toBeNull();
+  });
+
+  it('notices a price that moved since the visitor last saw the cart', () => {
+    const storage = memoryStorage();
+    rememberCart(cart, storage);
+    const seen = readCart(storage)!;
+    const repriced = {
+      ...cart,
+      items: [{ ...cart.items[0], unit_price: 1990 }],
+    };
+
+    expect(repricedSince(seen, cart)).toBe(false);
+    expect(repricedSince(seen, repriced)).toBe(true);
+    expect(repricedSince({ id: 'cart_1', parts: [bmwOil] }, repriced)).toBe(
+      false,
+    );
+  });
+
+  it('counts the parts in the cart for the header', () => {
+    const storage = memoryStorage();
+    expect(cartCount(storage)).toBe(0);
+
+    rememberCart(
+      { ...cart, items: [{ ...cart.items[0], quantity: 3 }] },
+      storage,
+    );
+
+    expect(cartCount(storage)).toBe(3);
+    expect(cartCount(blockedStorage)).toBe(0);
+  });
+
+  it('totals only the lines the supplier can still sell', () => {
+    expect(
+      payableTotal({
+        ...cart,
+        items: [
+          { ...cart.items[0], quantity: 2 },
+          { ...cart.items[0], id: 'item_2', unit_price: 999, available: false },
+        ],
+      }),
+    ).toBe(3700);
   });
 
   it('works without a cart when storage is blocked', () => {

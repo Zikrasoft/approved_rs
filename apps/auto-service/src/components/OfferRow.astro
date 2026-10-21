@@ -4,6 +4,7 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { formatLeadTime } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   offer?: PartOffer;
@@ -11,38 +12,53 @@ interface Props {
 
 const { offer } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
+const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const stock = offer && offer.stock_quantity > 0 ? offer.stock_quantity : null;
+const outOfStock = offer !== undefined && stock === null;
 const leadDays =
   offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
 ---
 
 <li
-  class="flex flex-wrap items-center gap-x-5 gap-y-2 py-3 first:pt-0 last:pb-0"
+  class="flex flex-wrap items-center gap-x-5 gap-y-3 py-4 first:pt-0 last:pb-0"
 >
   <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-    <span class="spec text-lg font-semibold text-ink" data-price>
-      {
-        offer &&
-          formatMoney(offer.price, offer.currency, BCP47_BY_LOCALE[locale])
-      }
+    <span class="spec text-2xl font-semibold text-ink" data-price>
+      {offer && formatMoney(offer.price, offer.currency, localeTag)}
     </span>
     <span class="text-sm text-ink-2" data-stock hidden={stock === null}>
       {stock !== null && `${copy.columns.stock}: ${stock}`}
     </span>
+    <span
+      class="rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2"
+      data-out
+      hidden={!outOfStock}
+    >
+      {copy.outOfStock}
+    </span>
     <span class="text-sm text-muted" data-lead hidden={leadDays === null}>
       {
         leadDays !== null &&
-          `${copy.columns.leadTime}: ${formatLeadTime(leadDays, copy.leadTime)}`
+          `${copy.columns.leadTime}: ${formatLeadTime(leadDays, copy.leadTime, localeTag)}`
       }
     </span>
   </div>
   <button
     type="button"
-    class="btn btn-primary w-full disabled:cursor-progress disabled:opacity-60 sm:ml-auto sm:w-auto"
+    class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:ml-auto sm:w-auto"
     data-buy
     data-offer-id={offer?.id}
+    hidden={outOfStock}
   >
-    {copy.buyButtonLabel}
+    <span data-label>{copy.buyButtonLabel}</span>
   </button>
+  <a
+    href={PathBuilder.partsInquiry(locale)}
+    class="btn btn-secondary w-full sm:ml-auto sm:w-auto"
+    data-ask
+    hidden={!outOfStock}
+  >
+    {copy.askSupplyCta}
+  </a>
 </li>

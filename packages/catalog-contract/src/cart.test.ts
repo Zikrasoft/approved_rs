@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
-  cartFingerprint,
   checkoutContactSchema,
   checkoutRefusalSchema,
   offerCartResponseSchema,
   partOffersResponseSchema,
   placedOrderResponseSchema,
 } from './cart.ts';
+import { cartFingerprint } from './fingerprint.ts';
 
 const cart = {
   id: 'cart_1',

@@ -196,6 +196,34 @@ describe('catalogue.removeFromCart', () => {
   });
 });
 
+describe('catalogue.setQuantity', () => {
+  it('sets how many of a line the visitor wants', async () => {
+    const fetch = answer({ cart: CART });
+
+    expect(await catalog(fetch).setQuantity('cart_1', 'item_1', 2)).toEqual({
+      kind: 'cart',
+      cart: CART,
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/offer-carts/cart_1/items/item_1',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ quantity: 2 }),
+      }),
+    );
+  });
+
+  it('says when the supplier has no more', async () => {
+    const fetch = vi.fn(() => status(400, { code: 'OFFER_OUT_OF_STOCK' }));
+
+    expect(await catalog(fetch).setQuantity('cart_1', 'item_1', 9)).toEqual({
+      kind: 'refused',
+      code: 'OFFER_OUT_OF_STOCK',
+      cartId: 'cart_1',
+    });
+  });
+});
+
 describe('catalogue.placeOrder', () => {
   const contact = {
     contact: '+381601234567',

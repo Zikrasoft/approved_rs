@@ -100,6 +100,20 @@ describe('defineMyGarage', () => {
     expect(storedVin()).toBe('WBA3B1C50GL123456');
   });
 
+  it('drops the spaces, dots and dashes of a pasted VIN as it lands', () => {
+    const { input } = mount();
+    input.value = 'wba 35bg0-70n.074158';
+    input.dispatchEvent(new Event('input'));
+    expect(input.value).toBe('WBA35BG070N074158');
+  });
+
+  it('leaves a VIN being typed without separators untouched', () => {
+    const { input } = mount();
+    input.value = 'wba35';
+    input.dispatchEvent(new Event('input'));
+    expect(input.value).toBe('wba35');
+  });
+
   it('does not remember an empty submission', () => {
     const { root } = mount();
     root.closest('form')!.dispatchEvent(new Event('submit'));

@@ -331,6 +331,18 @@ export function createCatalogue({
             : [];
         },
       );
+    const required = new Set(
+      allVehicles.flatMap((vehicle) =>
+        matchesFor(vehicle).flatMap((match) =>
+          match.parts.map(({ part }) => part.id),
+        ),
+      ),
+    );
+    for (const entry of entries) {
+      entry.indexable ||= Boolean(
+        entry.category && required.has(entry.part.id),
+      );
+    }
     return {
       categories: allCategories,
       categoryById,
@@ -525,6 +537,20 @@ export function createCatalogue({
     viewCart: (cartId: string): Promise<CartOutcome> =>
       cartOutcome(
         send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
+      ),
+
+    setQuantity: (
+      cartId: string,
+      itemId: string,
+      quantity: number,
+    ): Promise<CartOutcome> =>
+      cartOutcome(
+        send(
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}`,
+          'POST',
+          { quantity },
+        ),
+        cartId,
       ),
 
     removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>

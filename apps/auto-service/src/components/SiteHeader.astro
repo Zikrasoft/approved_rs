@@ -12,6 +12,9 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const pathname = Astro.url.pathname;
 
+const onParts = pathname.startsWith(PathBuilder.parts(locale));
+const shopCart = content(locale).shopCart;
+
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
   { href: PathBuilder.parts(locale), label: site.nav.parts, attrs: {} },
@@ -96,6 +99,24 @@ const links = [
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
         </ContactControl>
+
+        <cart-badge
+          class="block"
+          hidden={!onParts}
+          data-reveal-when-filled={onParts ? undefined : ''}
+        >
+          <a
+            href={PathBuilder.partsCart(locale)}
+            class="relative flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+          >
+            <Icon name="cart" size={20} />
+            <span class="sr-only">{shopCart.cartLink}</span>
+            <span
+              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1 text-[0.6875rem] font-semibold text-white"
+              data-count
+              hidden></span>
+          </a>
+        </cart-badge>
 
         <button
           type="button"
@@ -186,6 +207,9 @@ const links = [
     defineMenuToggle,
   } from '@podbor/site-kit/browser';
 
+  import { defineCartBadge } from '@/scripts/cartBadge';
+
+  defineCartBadge();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
 </script>

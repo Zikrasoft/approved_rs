@@ -16,7 +16,7 @@ const locale = localeFrom(Astro.url.pathname);
       <li>
         <a
           href={PathBuilder.partNumber(locale, page.slug)}
-          class="inline-flex items-baseline gap-1.5 text-signal-ink hover:underline"
+          class="inline-flex items-baseline gap-1.5 text-ink underline-offset-2 hover:text-signal-ink hover:underline"
         >
           <span class="text-sm font-semibold">{page.brand.name}</span>
           <span class="spec text-sm">{page.value}</span>

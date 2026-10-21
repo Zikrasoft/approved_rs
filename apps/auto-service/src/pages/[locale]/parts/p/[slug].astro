@@ -3,25 +3,34 @@ import { partPageSlug, translated } from '@podbor/catalog-contract';
 import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import Icon from '@/components/Icon.astro';
 import FitLine from '@/components/FitLine.astro';
+import PartOffers from '@/components/PartOffers.astro';
+import PartRow from '@/components/PartRow.astro';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
+import { partSuccessor } from '@/utils/partSuccessor';
 import { paragraphs } from '@podbor/site-kit';
-import OfferRow from '@/components/OfferRow.astro';
 import { PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
+  const bySlug = new Map(pages.map((page) => [page.slug, page]));
   return withLocales(
-    pages.map((page) => ({ params: { slug: page.slug }, props: { page } })),
+    pages.map((page) => ({
+      params: { slug: page.slug },
+      props: { page, successor: partSuccessor(page, bySlug), bySlug },
+    })),
   );
 }
 
-const { page } = Astro.props as { page: PartPageEntry };
+const { page, successor, bySlug } = Astro.props as {
+  page: PartPageEntry;
+  successor: PartPageEntry | null;
+  bySlug: Map<string, PartPageEntry>;
+};
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
@@ -54,6 +63,10 @@ const jsonLd = bestOffer
         }),
     ]
   : [];
+const successorLabel =
+  successor && `${successor.brand.name} ${successor.value}`;
+const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
+  partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 ---
 
 <Shell
@@ -63,6 +76,7 @@ const jsonLd = bestOffer
   jsonLd={jsonLd}
 >
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={heading}
     lead={partName}
@@ -80,126 +94,50 @@ const jsonLd = bestOffer
     ]}
   />
 
-  {
-    (replacement || page.superseded) && (
-      <section class="wrap pt-band md:pt-band-lg">
-        <div class="card flex max-w-2xl flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
-          {page.superseded && (
-            <p class="font-semibold">{copy.supersededNotice}</p>
-          )}
-          {replacement && (
-            <>
-              <h2 class="text-block font-semibold">{copy.replacedHeading}</h2>
-              <p class="text-sm leading-relaxed text-ink-2">
-                {copy.replacedLead}
-              </p>
-              <a
-                href={PathBuilder.partNumber(
-                  locale,
-                  partPageSlug(
-                    replacement.brand_number.brand.slug,
-                    replacement.brand_number.normalized_value,
-                  ),
-                )}
-                class="flex flex-wrap items-baseline gap-x-3 font-semibold text-signal-ink hover:text-signal-dark"
-              >
-                <span>
-                  {replacement.brand_number.brand.name}{' '}
-                  {replacement.brand_number.value}
-                </span>
-                <span class="text-sm font-normal text-muted">
-                  {translated(replacement, 'name', locale)}
-                </span>
-              </a>
-            </>
-          )}
-        </div>
-      </section>
-    )
-  }
-
-  {
-    bestOffer && (
-      <section class="wrap pt-band md:pt-band-lg">
-        <part-offers
-          class="card flex max-w-2xl flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
-          data-id={page.id}
-          data-locale-tag={BCP47_BY_LOCALE[locale]}
-          data-stock-label={copy.columns.stock}
-          data-lead-label={copy.columns.leadTime}
-          data-in-stock={copy.leadTime.inStock}
-          data-days-template={copy.leadTime.daysTemplate}
-          data-slug={page.slug}
-          data-brand={page.brand.name}
-          data-number={page.value}
-          data-name={page.part.name}
-        >
-          <h2 class="text-block font-semibold">{copy.offersHeading}</h2>
-          <ul class="flex flex-col divide-y divide-line" data-offers>
-            {page.offers.map((offer) => (
-              <OfferRow offer={offer} />
-            ))}
-          </ul>
-          <template data-offer>
-            <OfferRow />
-          </template>
-          <div aria-live="polite" class="text-sm leading-relaxed text-ink-2">
-            <p data-added hidden>
-              {copy.addedNotice}{' '}
-              <a
-                href={PathBuilder.partsCart(locale)}
-                class="font-semibold text-signal-ink underline-offset-2 hover:underline"
-              >
-                {copy.addedCta}
-              </a>
-            </p>
-            <p data-inquiry hidden>
-              {copy.inquiryNotice}{' '}
-              <a
-                href={PathBuilder.partsInquiry(locale)}
-                class="font-semibold text-signal-ink underline-offset-2 hover:underline"
-              >
-                {copy.inquiryCta}
-              </a>
+  <section
+    class="wrap grid gap-6 pt-band md:pt-band-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start"
+  >
+    <div
+      class="flex flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1"
+    >
+      {
+        (replacement || page.superseded) && (
+          <div class="card flex flex-col gap-2 border-l-4 border-l-signal p-5 sm:p-6">
+            <span class="w-fit rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2">
+              {replacement ? copy.replacedHeading : copy.supersededTag}
+            </span>
+            <p class="text-sm leading-relaxed text-ink-2">
+              {replacement ? copy.replacedLead : copy.supersededNotice}
+              {successor && (
+                <>
+                  {' '}
+                  {replacement ? '' : `${copy.currentNumberLabel} `}
+                  <a
+                    href={PathBuilder.partNumber(locale, successor.slug)}
+                    class="font-semibold text-ink underline underline-offset-2 hover:text-signal-ink"
+                  >
+                    {successorLabel}
+                  </a>
+                </>
+              )}
             </p>
           </div>
-        </part-offers>
-      </section>
-    )
-  }
+        )
+      }
+      {
+        successor && (
+          <PartOffers
+            page={successor}
+            heading={`${copy.currentNumberLabel} ${successorLabel}`}
+          />
+        )
+      }
+      <PartOffers page={page} demoted={Boolean(successor)} />
+    </div>
 
-  {
-    page.priceOnRequest && (
-      <section class="wrap pt-band md:pt-band-lg">
-        <div class="card flex max-w-2xl flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
-          <h2 class="text-block font-semibold">{copy.priceOnRequestHeading}</h2>
-          <p class="text-sm leading-relaxed text-ink-2">
-            {copy.priceOnRequestBody}
-          </p>
-          <parts-list-add
-            class="mt-1 block"
-            data-slug={page.slug}
-            data-brand={page.brand.name}
-            data-number={page.value}
-            data-name={page.part.name}
-          >
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              class="btn btn-primary w-full sm:w-auto"
-            >
-              {copy.priceOnRequestCta}
-              <Icon name="arrowRight" />
-            </a>
-          </parts-list-add>
-        </div>
-      </section>
-    )
-  }
-
-  {
-    category && (
-      <section class="wrap grid gap-6 pt-band md:pt-band-lg lg:grid-cols-[1fr_1.2fr] lg:items-start">
-        {attributes.length > 0 && (
+    <div class="flex flex-col gap-8 lg:col-start-1 lg:row-start-1">
+      {
+        attributes.length > 0 && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section">{copy.attributesHeading}</h2>
             <dl class="card divide-y divide-line">
@@ -211,47 +149,50 @@ const jsonLd = bestOffer
               ))}
             </dl>
           </div>
-        )}
-        <div class="flex flex-col gap-3">
-          <h2 class="text-section">{translated(category, 'name', locale)}</h2>
-          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
-            {categoryText.map((paragraph) => (
-              <p>{paragraph}</p>
-            ))}
+        )
+      }
+      {
+        category && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{translated(category, 'name', locale)}</h2>
+            <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+              {categoryText.map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </div>
+            <a
+              href={PathBuilder.partsCategory(locale, category.slug)}
+              class="text-sm font-semibold text-signal-ink hover:underline"
+            >
+              {copy.categoryLink}
+            </a>
           </div>
-          <a
-            href={PathBuilder.partsCategory(locale, category.slug)}
-            class="text-sm font-semibold text-signal-ink hover:underline"
-          >
-            {copy.categoryLink}
-          </a>
-        </div>
-      </section>
-    )
-  }
-
-  {
-    page.fits.length > 0 && (
-      <section class="wrap pt-band md:pt-band-lg">
-        <h2 class="text-section mb-6">
-          {content(locale).partsCar.fitment.partFitsHeading}
-        </h2>
-        <ul class="card divide-y divide-line">
-          {page.fits.map((fit) => (
-            <li class="px-5 py-4 sm:px-6">
-              <FitLine
-                fit={fit}
-                car={{
-                  href: PathBuilder.partsCar(locale, fit.vehicle.id),
-                  label: `${carName(fit.vehicle.model, locale)}, ${vehicleVariant(fit.vehicle, locale)}`,
-                }}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+        )
+      }
+      {
+        page.fits.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">
+              {content(locale).partsCar.fitment.partFitsHeading}
+            </h2>
+            <ul class="card divide-y divide-line">
+              {page.fits.map((fit) => (
+                <li class="px-5 py-4 sm:px-6">
+                  <FitLine
+                    fit={fit}
+                    car={{
+                      href: PathBuilder.partsCar(locale, fit.vehicle.id),
+                      label: `${carName(fit.vehicle.model, locale)}, ${vehicleVariant(fit.vehicle, locale)}`,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
 
   <section class="wrap py-band md:py-band-lg">
     <h2 class="text-section mb-6">{copy.equivalentsHeading}</h2>
@@ -259,24 +200,13 @@ const jsonLd = bestOffer
       page.equivalents.length > 0 ? (
         <ul class="card divide-y divide-line">
           {page.equivalents.map((equivalent) => (
-            <li>
-              <a
-                href={PathBuilder.partNumber(
-                  locale,
-                  partPageSlug(
-                    equivalent.brand.slug,
-                    equivalent.normalized_value,
-                  ),
-                )}
-                class="flex flex-wrap items-baseline gap-x-3 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
-              >
-                <span class="font-semibold">{equivalent.brand.name}</span>
-                <span class="spec text-sm text-muted">{equivalent.value}</span>
-                {equivalent.superseded && (
-                  <span class="text-sm text-muted">{copy.supersededTag}</span>
-                )}
-              </a>
-            </li>
+            <PartRow
+              slug={equivalentSlug(equivalent)}
+              brand={equivalent.brand.name}
+              value={equivalent.value}
+              superseded={equivalent.superseded}
+              offers={bySlug.get(equivalentSlug(equivalent))?.offers ?? []}
+            />
           ))}
         </ul>
       ) : (

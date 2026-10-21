@@ -71,7 +71,10 @@ export const vehiclesResponseSchema = z.object({
 
 export const VIN_PATTERN = /^[A-HJ-NPR-Z0-9]{17}$/;
 
-export const vinSchema = z.string().trim().toUpperCase().regex(VIN_PATTERN);
+export const vinSchema = z
+  .string()
+  .transform((value) => value.replace(/[\s.-]+/g, '').toUpperCase())
+  .pipe(z.string().regex(VIN_PATTERN));
 
 export const vinFactsSchema = z.object({
   steering: z.enum(STEERING_SIDES).optional(),
