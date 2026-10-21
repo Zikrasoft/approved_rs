@@ -12,7 +12,10 @@ import {
 } from '@podbor/catalog-contract';
 
 import { serbianScripts } from '../lib/serbian';
-import { PART_CHANGED_EVENT } from './part-changed-event';
+import {
+  PART_CHANGED_EVENT,
+  partChangedEventSchema,
+} from './part-changed-event';
 
 export const PART_IDENTIFIER_INDEX = 'part_identifier';
 
@@ -194,7 +197,7 @@ export default defineSearchIndex({
       const { data } = await container.query.graph({
         entity: 'part_identifier',
         fields: ['id'],
-        filters: { part_id: (event.data as { part_id: string }).part_id },
+        filters: { part_id: partChangedEventSchema.parse(event.data).part_id },
       });
       return data.map(({ id }: { id: string }) => id);
     },
