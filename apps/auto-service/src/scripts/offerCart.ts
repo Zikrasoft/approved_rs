@@ -442,15 +442,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       showOrdered(orderNumber: string | null): void {
-        const {
-          orderedHeading,
-          orderedLead,
-          orderTemplate = '',
-        } = this.dataset;
+        const { orderedHeading, orderTemplate = '' } = this.dataset;
         const heading = document.querySelector('[data-hero-heading]');
-        const lead = document.querySelector<HTMLElement>('[data-hero-lead]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
-        if (lead && orderedLead) lead.textContent = orderedLead;
         fill(
           this,
           '[data-order-number]',

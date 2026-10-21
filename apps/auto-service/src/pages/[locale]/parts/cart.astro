@@ -34,21 +34,20 @@ const stepper =
     actions={false}
     eyebrow={site.nav.parts}
     heading={copy.heading}
-    lead={copy.lead}
+    compact
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsCart(locale), label: copy.heading },
     ]}
   />
 
-  <section class="wrap py-band md:py-band-lg">
+  <section class="wrap py-6 md:py-band-lg">
     <offer-cart
       class="block"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
       data-unit-template={copy.unitTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
-      data-ordered-lead={copy.orderedLead}
       data-order-template={copy.orderNumberTemplate}
       data-blocked-template={copy.checkoutBlocked}
     >
