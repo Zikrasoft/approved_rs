@@ -80,7 +80,12 @@ const part = {
         !demoted && 'border-l-4 border-l-signal',
       ]}
     >
-      <h2 class="text-block font-semibold">{copy.priceOnRequestHeading}</h2>
+      <h2 class="text-block font-semibold">
+        {heading ?? copy.priceOnRequestHeading}
+      </h2>
+      {heading && (
+        <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
+      )}
       <p class="text-sm leading-relaxed text-ink-2">
         {copy.priceOnRequestBody}
       </p>
