@@ -12,7 +12,7 @@ import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { paragraphs } from '@/utils/paragraphs';
 import OfferRow from '@/components/OfferRow.astro';
-import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
@@ -155,7 +155,7 @@ const jsonLd = bestOffer
             <p data-inquiry hidden>
               {copy.inquiryNotice}{' '}
               <a
-                href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+                href={PathBuilder.partsInquiry(locale)}
                 class="font-semibold text-signal-ink underline-offset-2 hover:underline"
               >
                 {copy.inquiryCta}
@@ -183,7 +183,7 @@ const jsonLd = bestOffer
             data-name={page.part.name}
           >
             <a
-              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              href={PathBuilder.partsInquiry(locale)}
               class="btn btn-primary w-full sm:w-auto"
             >
               {copy.priceOnRequestCta}

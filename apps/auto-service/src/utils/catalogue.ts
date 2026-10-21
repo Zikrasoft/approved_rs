@@ -1,8 +1,10 @@
+import { z } from 'zod';
 import {
   checkoutRefusalSchema,
   offerCartResponseSchema,
   partOffersResponseSchema,
   placedOrderResponseSchema,
+  type CheckoutContact,
   type CheckoutRefusal,
   type OfferCart,
   type PartOffer,
@@ -120,14 +122,11 @@ export type OrderOutcome =
   | { kind: 'refused'; code: CheckoutRefusal }
   | { kind: 'inquiry' };
 
-export type CheckoutContact = {
-  contact: string;
-  contact_channel?: 'phone' | 'telegram' | 'whatsapp' | 'viber';
-  name?: string;
-  vin?: string;
-  comment?: string;
-  locale?: CatalogLocale;
-};
+export const catalogueIdSchema = z
+  .string()
+  .trim()
+  .max(100)
+  .regex(/^[\w-]+$/);
 
 export type CatalogueConfig = {
   backendUrl: string;
@@ -140,6 +139,32 @@ export type CatalogueEnv = {
   MEDUSA_BACKEND_URL?: string;
   MEDUSA_PUBLISHABLE_KEY?: string;
 };
+
+const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => value || undefined, schema.optional());
+
+const catalogueEnvSchema = z
+  .object({
+    MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
+    MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
+  })
+  .transform(({ MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY }, context) => {
+    if (!MEDUSA_BACKEND_URL) {
+      return null;
+    }
+    if (!MEDUSA_PUBLISHABLE_KEY) {
+      context.addIssue({
+        code: 'custom',
+        path: ['MEDUSA_PUBLISHABLE_KEY'],
+        message: 'MEDUSA_PUBLISHABLE_KEY is required with MEDUSA_BACKEND_URL',
+      });
+      return z.NEVER;
+    }
+    return {
+      backendUrl: MEDUSA_BACKEND_URL,
+      publishableKey: MEDUSA_PUBLISHABLE_KEY,
+    };
+  });
 
 const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
   const groups = new Map<string, T[]>();
@@ -177,6 +202,8 @@ export function createCatalogue({
     }
     return response.json();
   };
+
+  const segment = encodeURIComponent;
 
   const cartOutcome = async (
     answer: Promise<Response>,
@@ -453,7 +480,9 @@ export function createCatalogue({
     async liveOffers(identifierId: string): Promise<OffersOutcome> {
       try {
         const { offers } = partOffersResponseSchema.parse(
-          await request(`/store/part-identifiers/${identifierId}/offers`),
+          await request(
+            `/store/part-identifiers/${segment(identifierId)}/offers`,
+          ),
         );
         return { kind: 'offers', offers };
       } catch {
@@ -467,7 +496,7 @@ export function createCatalogue({
       quantity = 1,
     ): Promise<CartOutcome> {
       const add = (id: string) =>
-        send(`/store/offer-carts/${id}/items`, 'POST', {
+        send(`/store/offer-carts/${segment(id)}/items`, 'POST', {
           offer_id: offerId,
           quantity,
         });
@@ -479,11 +508,16 @@ export function createCatalogue({
     },
 
     viewCart: (cartId: string): Promise<CartOutcome> =>
-      cartOutcome(send(`/store/offer-carts/${cartId}/reprice`, 'POST', {})),
+      cartOutcome(
+        send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
+      ),
 
     removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>
       cartOutcome(
-        send(`/store/offer-carts/${cartId}/items/${itemId}`, 'DELETE'),
+        send(
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}`,
+          'DELETE',
+        ),
       ),
 
     async placeOrder(
@@ -492,7 +526,7 @@ export function createCatalogue({
     ): Promise<OrderOutcome> {
       try {
         const response = await send(
-          `/store/offer-carts/${cartId}/complete`,
+          `/store/offer-carts/${segment(cartId)}/complete`,
           'POST',
           contact,
         );
@@ -528,12 +562,8 @@ export function createCatalogue({
 }
 
 export function catalogueFromEnv(env: CatalogueEnv) {
-  return env.MEDUSA_BACKEND_URL
-    ? createCatalogue({
-        backendUrl: env.MEDUSA_BACKEND_URL,
-        publishableKey: env.MEDUSA_PUBLISHABLE_KEY ?? '',
-      })
-    : null;
+  const config = catalogueEnvSchema.parse(env);
+  return config ? createCatalogue(config) : null;
 }
 
 export const siteEnv = (): CatalogueEnv => ({

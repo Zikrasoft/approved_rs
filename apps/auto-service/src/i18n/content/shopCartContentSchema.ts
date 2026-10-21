@@ -26,6 +26,7 @@ export const shopCartContentSchema = z
         priceChanged: z.string(),
         unavailable: z.string(),
         unreachable: z.string(),
+        invalid: z.string(),
       })
       .strict(),
     orderedHeading: z.string(),

@@ -5,7 +5,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
+import { localePaths, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = localePaths;
 
@@ -69,7 +69,7 @@ const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
         <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
         <p class="text-sm leading-relaxed text-ink-2">{copy.fallbackBody}</p>
         <a
-          href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+          href={PathBuilder.partsInquiry(locale)}
           class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
         >
           {copy.fallbackCta}
@@ -91,6 +91,9 @@ const notice = 'rounded-md bg-shade p-4 text-sm leading-relaxed text-ink';
             </p>
             <p data-notice="unreachable" hidden class={notice}>
               {copy.notices.unreachable}
+            </p>
+            <p data-notice="invalid" hidden class={notice}>
+              {copy.notices.invalid}
             </p>
           </div>
 

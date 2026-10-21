@@ -10,7 +10,7 @@ import PartNumbers from '@/components/PartNumbers.astro';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
-import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -148,7 +148,7 @@ const specs = [
               ))}
             </ul>
             <a
-              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              href={PathBuilder.partsInquiry(locale)}
               class="btn btn-primary w-full sm:w-auto sm:self-start"
               data-add-all
             >

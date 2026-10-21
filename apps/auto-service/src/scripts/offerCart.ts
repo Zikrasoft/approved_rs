@@ -1,8 +1,7 @@
 import * as z from 'zod/mini';
-import type { OfferCart, PartOffer } from '@podbor/catalog-contract';
-import type { CartOutcome, OffersOutcome } from '@/utils/catalogue';
 import { CART_NOTICE_PARAM } from '@/utils/cartNotice';
 import { formatLeadTime } from '@/utils/leadTime';
+import { formatMoney } from '@/utils/money';
 import { addToPartsList, listedPartSchema } from './partsList';
 
 export const CART_STORAGE_KEY = 'carlab_offer_cart';
@@ -13,6 +12,48 @@ const storedCartSchema = z.object({
 });
 
 export type StoredCart = z.infer<typeof storedCartSchema>;
+
+const offerSchema = z.object({
+  id: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  stock_quantity: z.number(),
+  lead_time_days: z.number(),
+});
+
+type PartOffer = z.infer<typeof offerSchema>;
+
+const inquirySchema = z.object({ kind: z.literal('inquiry') });
+
+const offersOutcomeSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('offers'), offers: z.array(offerSchema) }),
+  inquirySchema,
+]);
+
+const offerCartSchema = z.object({
+  id: z.string(),
+  currency: z.string(),
+  total: z.number(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      quantity: z.number(),
+      unit_price: z.number(),
+      available: z.boolean(),
+      part: listedPartSchema,
+    }),
+  ),
+});
+
+type OfferCart = z.infer<typeof offerCartSchema>;
+
+const cartOutcomeSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('cart'), cart: offerCartSchema }),
+  z.object({ kind: z.literal('empty') }),
+  inquirySchema,
+]);
+
+type CartOutcome = z.infer<typeof cartOutcomeSchema>;
 
 type CartStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
@@ -56,20 +97,27 @@ export function moveCartToInquiry(storage?: CartStorage): void {
   }
 }
 
-const getJson = async <T>(url: string, init?: RequestInit): Promise<T | null> =>
-  fetch(url, init)
-    .then((response) => (response.ok ? (response.json() as Promise<T>) : null))
-    .catch(() => null);
+const getJson = async <T>(
+  schema: z.ZodMiniType<T>,
+  url: string,
+  init?: RequestInit,
+): Promise<T | null> => {
+  try {
+    const response = await fetch(url, init);
+    if (!response.ok) return null;
+    const parsed = schema.safeParse(await response.json());
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+};
 
-const sendJson = <T>(method: string, body: unknown) =>
-  getJson<T>('/api/cart', {
+const sendJson = (method: string, body: unknown) =>
+  getJson(cartOutcomeSchema, '/api/cart', {
     method,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
   });
-
-const money = (amount: number, currency: string, localeTag: string) =>
-  `${amount.toLocaleString(localeTag)} ${currency}`;
 
 const fill = (root: ParentNode, selector: string, text: string | null) => {
   const node = root.querySelector<HTMLElement>(selector);
@@ -94,7 +142,8 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       async refresh(): Promise<void> {
-        const outcome = await getJson<OffersOutcome>(
+        const outcome = await getJson(
+          offersOutcomeSchema,
           `/api/part-offers?id=${encodeURIComponent(this.dataset.id ?? '')}`,
         );
         if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
@@ -118,7 +167,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         fill(
           row,
           '[data-price]',
-          money(offer.price, offer.currency, localeTag),
+          formatMoney(offer.price, offer.currency, localeTag),
         );
         fill(
           row,
@@ -142,7 +191,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
 
       async buy(button: HTMLButtonElement): Promise<void> {
         button.disabled = true;
-        const outcome = await sendJson<CartOutcome>('POST', {
+        const outcome = await sendJson('POST', {
           cart_id: readCart()?.id ?? null,
           offer_id: button.dataset.offerId,
         });
@@ -183,7 +232,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           const id = readCart()?.id;
           if (id) event.formData.set('cart_id', id);
         });
-        void getJson<CartOutcome>(
+        void getJson(
+          cartOutcomeSchema,
           `/api/cart?id=${encodeURIComponent(stored.id)}`,
         ).then((outcome) => this.render(outcome, notice));
       }
@@ -215,7 +265,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             this.line(line, cart, localeTag, quantityTemplate),
           ),
         );
-        fill(this, '[data-total]', money(cart.total, cart.currency, localeTag));
+        fill(
+          this,
+          '[data-total]',
+          formatMoney(cart.total, cart.currency, localeTag),
+        );
         for (const block of this.querySelectorAll<HTMLElement>(
           '[data-notice]',
         )) {
@@ -251,7 +305,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         fill(
           row,
           '[data-price]',
-          money(line.unit_price * line.quantity, cart.currency, localeTag),
+          formatMoney(
+            line.unit_price * line.quantity,
+            cart.currency,
+            localeTag,
+          ),
         );
         row.querySelector<HTMLElement>('[data-unavailable]')!.hidden =
           line.available;
@@ -263,7 +321,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         remove?.addEventListener('click', async () => {
           remove.disabled = true;
           this.render(
-            await sendJson<CartOutcome>('DELETE', {
+            await sendJson('DELETE', {
               cart_id: cart.id,
               item_id: line.id,
             }),
