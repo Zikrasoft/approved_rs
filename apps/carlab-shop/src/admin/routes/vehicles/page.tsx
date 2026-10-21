@@ -17,11 +17,22 @@ import {
 } from '@podbor/catalog-contract';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import { TranslationsDrawer } from '../../components/translations-drawer';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
 
-type Row = Record<string, unknown> & { id: string };
+const rowSchema = editedBySchema.extend({ id: z.string() }).loose();
+
+type Row = z.infer<typeof rowSchema>;
 type Rows = Record<string, Row[]>;
+
+const rowsSchema = z.record(z.string(), z.array(rowSchema));
 type Option = { value: string; label: string };
 
 type Field =
@@ -34,6 +45,7 @@ type Entity = {
   path: string;
   object: string;
   fields: Field[];
+  translatable?: string;
 };
 
 const ENTITIES: Entity[] = [
@@ -50,6 +62,7 @@ const ENTITIES: Entity[] = [
     collection: 'series',
     path: 'series',
     object: 'series',
+    translatable: 'series',
     fields: [
       { key: 'make_id', kind: 'ref', collection: 'makes' },
       { key: 'name', kind: 'text' },
@@ -115,6 +128,8 @@ const ENTITIES: Entity[] = [
   },
 ];
 
+const identifiersSchema = z.array(z.object({ value: z.string() })).optional();
+
 const rowLabel = (collection: string, row: Row, rows: Rows): string => {
   const ref = (key: string, target: string) =>
     rows[target]?.find(({ id }) => id === row[key]);
@@ -126,7 +141,8 @@ const rowLabel = (collection: string, row: Row, rows: Rows): string => {
     case 'vehicles': {
       const model = ref('model_id', 'vehicle_models');
       const engine = ref('engine_id', 'engines');
-      const codes = (row.identifiers as { value: string }[] | undefined)
+      const codes = identifiersSchema
+        .parse(row.identifiers)
         ?.map(({ value }) => value)
         .join(', ');
       return `${model?.name ?? ''} ${engine?.code ?? ''} ${codes ? `(${codes})` : ''}`.trim();
@@ -201,6 +217,7 @@ const EntitySection = ({
       editingId
         ? `/admin/${entity.path}/${editingId}`
         : `/admin/${entity.path}`,
+      acknowledged,
       { method: 'POST', body: JSON.stringify(toBody(entity.fields, draft)) },
     );
     if (saved) {
@@ -211,7 +228,11 @@ const EntitySection = ({
 
   const remove = async (id: string) => {
     if (!window.confirm(t('vehicles.confirmDelete'))) return;
-    if (await adminFetch(`/admin/${entity.path}/${id}`, { method: 'DELETE' })) {
+    if (
+      await adminFetch(`/admin/${entity.path}/${id}`, acknowledged, {
+        method: 'DELETE',
+      })
+    ) {
       await reload();
     }
   };
@@ -227,6 +248,7 @@ const EntitySection = ({
                 {t(`vehicles.fields.${field.key}`)}
               </Table.HeaderCell>
             ))}
+            <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
             <Table.HeaderCell />
           </Table.Row>
         </Table.Header>
@@ -237,7 +259,17 @@ const EntitySection = ({
                 <Table.Cell key={field.key}>{cell(field, row)}</Table.Cell>
               ))}
               <Table.Cell>
+                <EditedBy row={row} />
+              </Table.Cell>
+              <Table.Cell>
                 <div className="flex gap-x-2">
+                  {entity.translatable && (
+                    <TranslationsDrawer
+                      entity={entity.translatable}
+                      id={row.id}
+                      source={{ name: String(row.name ?? '') }}
+                    />
+                  )}
                   <Button
                     size="small"
                     variant="secondary"
@@ -316,7 +348,7 @@ const VehiclesPage = () => {
   const reload = async () => {
     const loaded = await Promise.all(
       ENTITIES.map(async ({ collection, path }) => {
-        const data = await adminFetch<Rows>(`/admin/${path}`);
+        const data = await adminFetch(`/admin/${path}`, rowsSchema);
         return [collection, data?.[collection] ?? []] as const;
       }),
     );

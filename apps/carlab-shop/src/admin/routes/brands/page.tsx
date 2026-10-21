@@ -12,26 +12,32 @@ import {
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
 
-type BrandSpelling = {
-  id: string;
-  supplier_id: string;
-  value: string;
-};
+const brandSchema = editedBySchema.extend({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  spellings: z.array(
+    z.object({ id: z.string(), supplier_id: z.string(), value: z.string() }),
+  ),
+});
 
-type Brand = {
-  id: string;
-  name: string;
-  slug: string;
-  spellings: BrandSpelling[];
-};
+type Brand = z.infer<typeof brandSchema>;
 
-type Supplier = {
-  id: string;
-  name: string;
-};
+const supplierSchema = z.object({ id: z.string(), name: z.string() });
+
+type Supplier = z.infer<typeof supplierSchema>;
+
+const brandsSchema = z.object({ brands: z.array(brandSchema) });
+const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
 
 type SpellingDraft = { supplierId: string; value: string };
 
@@ -49,7 +55,7 @@ const BrandsPage = () => {
   >({});
 
   const load = async () => {
-    const data = await adminFetch<{ brands: Brand[] }>('/admin/brands');
+    const data = await adminFetch('/admin/brands', brandsSchema);
     if (data) {
       setBrands(data.brands);
     }
@@ -57,7 +63,7 @@ const BrandsPage = () => {
 
   useEffect(() => {
     load();
-    adminFetch<{ suppliers: Supplier[] }>('/admin/suppliers').then((data) => {
+    adminFetch('/admin/suppliers', suppliersSchema).then((data) => {
       if (data) {
         setSuppliers(data.suppliers);
       }
@@ -77,7 +83,7 @@ const BrandsPage = () => {
     }));
 
   const createBrand = async () => {
-    const created = await adminFetch('/admin/brands', {
+    const created = await adminFetch('/admin/brands', acknowledged, {
       method: 'POST',
       body: JSON.stringify({ name, slug }),
     });
@@ -89,17 +95,25 @@ const BrandsPage = () => {
   };
 
   const removeBrand = async (id: string) => {
-    if (await adminFetch(`/admin/brands/${id}`, { method: 'DELETE' })) {
+    if (
+      await adminFetch(`/admin/brands/${id}`, acknowledged, {
+        method: 'DELETE',
+      })
+    ) {
       await load();
     }
   };
 
   const addSpelling = async (brandId: string) => {
     const { supplierId, value } = draftFor(brandId);
-    const created = await adminFetch(`/admin/brands/${brandId}/spellings`, {
-      method: 'POST',
-      body: JSON.stringify({ supplier_id: supplierId, value }),
-    });
+    const created = await adminFetch(
+      `/admin/brands/${brandId}/spellings`,
+      acknowledged,
+      {
+        method: 'POST',
+        body: JSON.stringify({ supplier_id: supplierId, value }),
+      },
+    );
     if (created) {
       setDraft(brandId, EMPTY_SPELLING);
       await load();
@@ -109,6 +123,7 @@ const BrandsPage = () => {
   const removeSpelling = async (brandId: string, spellingId: string) => {
     const removed = await adminFetch(
       `/admin/brands/${brandId}/spellings/${spellingId}`,
+      acknowledged,
       { method: 'DELETE' },
     );
     if (removed) {
@@ -153,6 +168,7 @@ const BrandsPage = () => {
               <Table.HeaderCell>
                 {t('brands.columns.spellings')}
               </Table.HeaderCell>
+              <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>
           </Table.Header>
@@ -223,6 +239,9 @@ const BrandsPage = () => {
                       </Button>
                     </div>
                   </div>
+                </Table.Cell>
+                <Table.Cell>
+                  <EditedBy row={brand} />
                 </Table.Cell>
                 <Table.Cell>
                   <Button

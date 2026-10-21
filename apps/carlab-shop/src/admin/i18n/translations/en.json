@@ -340,11 +340,68 @@
     "add": "Add requirement",
     "delete": "Delete",
     "empty": "No requirements here yet.",
-    "pickOwner": "Choose an engine, chassis or vehicle to see and add its requirements.",
-    "errors": {
-      "inUse": "Requirements use this characteristic or option. Delete them on the Requirements page first.",
-      "minExceedsMax": "The From value is above the To value.",
-      "unknownOption": "The characteristic has no such option."
+    "pickOwner": "Choose an engine, chassis or vehicle to see and add its requirements."
+  },
+  "edited": {
+    "column": "Changed",
+    "line": "{{when}}, {{who}}",
+    "nobody": "no staff member"
+  },
+  "errors": {
+    "codes": {
+      "IN_USE": "This row cannot be deleted: other catalogue data refers to it. Delete or move that data first.",
+      "REQUIREMENT_IN_USE": "Requirements use this characteristic or option. Delete them on the Requirements page first.",
+      "SOURCE_IN_USE": "This source cannot be removed: data from other sources refers to it. Delete or move that data first.",
+      "UNKNOWN_BRAND": "This brand does not exist. Pick a brand from the list.",
+      "DUPLICATE_FITMENT": "This part already fits this vehicle at that position with these conditions.",
+      "REPLACEMENT_CYCLE": "A part cannot be replaced so that the chain of replacements leads back to it.",
+      "INVALID_ATTRIBUTES": "The characteristic values do not fit the category: check required fields and options.",
+      "INVALID_REQUIREMENT": "The requirement does not fit the characteristic: check the options and the From and To values.",
+      "DEFINITION_BREAKS_PARTS": "The change would break the characteristics of parts in this category. Fix those parts first.",
+      "PUBLISH_RUNNING": "A publish run is already in progress. Wait for it to finish."
+    },
+    "types": {
+      "invalid_data": "Check the data you entered: the server did not accept it.",
+      "not_found": "The row was not found. Reload the page.",
+      "not_allowed": "This action is not available now.",
+      "conflict": "The row has changed or is in use. Reload the page and try again.",
+      "unauthorized": "Your session has ended. Sign in again.",
+      "duplicate_error": "This row already exists."
+    },
+    "unknown": "The server could not complete the action. Try again.",
+    "unexpectedAnswer": "The server answered in an unexpected shape. Reload the page.",
+    "unreachable": "The server cannot be reached. Check the connection and try again."
+  },
+  "sources": {
+    "heading": "Catalogue data sources",
+    "lead": "How many catalogue rows came from each source. If the rights to a source are lost, its rows can be removed at once.",
+    "source": "Source",
+    "rows": "Rows",
+    "remove": "Remove rows",
+    "cancel": "Cancel",
+    "confirmTitle": "Remove every row of {{source}}?",
+    "confirmBody_one": "{{count}} row will be removed. It cannot be restored.",
+    "confirmBody_other": "{{count}} rows will be removed. They cannot be restored.",
+    "removed_one": "{{source}}: {{count}} row removed",
+    "removed_other": "{{source}}: {{count}} rows removed",
+    "empty": "The catalogue has no rows yet."
+  },
+  "translations": {
+    "open": "Translations",
+    "heading": "Serbian and English translations",
+    "lead": "A corrected translation is kept until the Russian text changes. An empty field leaves the translation as it is.",
+    "save": "Save translations",
+    "cancel": "Cancel",
+    "saved": "Translations saved",
+    "locales": {
+      "sr": "Serbian",
+      "en": "English"
+    },
+    "fields": {
+      "name": "Name",
+      "text": "Description",
+      "label": "Label",
+      "note": "Note"
     }
   }
 }

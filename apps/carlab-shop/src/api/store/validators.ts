@@ -32,7 +32,16 @@ export const StoreAddOfferCartItem = z.object({
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
 
-export const StoreCompleteOfferCart = checkoutContactSchema;
+export const StoreCompleteOfferCart = z
+  .record(z.string(), z.unknown())
+  .transform((body, context) => {
+    const contact = checkoutContactSchema.safeParse(body);
+    if (!contact.success) {
+      context.addIssue({ code: 'custom', message: contact.error.message });
+      return z.NEVER;
+    }
+    return contact.data;
+  });
 export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
 export const StoreListPartPages = z.object({

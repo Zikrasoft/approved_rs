@@ -13,8 +13,9 @@ import {
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { acknowledged, adminFetch } from '../../lib/admin-fetch';
 
 const OWNERS = [
   { key: 'engine_id', path: 'engines', collection: 'engines' },
@@ -24,36 +25,52 @@ const OWNERS = [
 
 type OwnerKey = (typeof OWNERS)[number]['key'];
 
-type OwnerRow = {
-  id: string;
-  code?: string;
-  identifiers?: { value: string }[];
-};
+const ownerRowSchema = z.object({
+  id: z.string(),
+  code: z.string().optional(),
+  identifiers: z.array(z.object({ value: z.string() })).optional(),
+});
 
-type Field = {
-  id: string;
-  key: string;
-  type: string;
-  unit: string | null;
-  label: string;
-  options: { key: string; label: string }[];
-};
+type OwnerRow = z.infer<typeof ownerRowSchema>;
 
-type Category = { id: string; name: string; fields: Field[] };
+const categorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  fields: z.array(
+    z.object({
+      id: z.string(),
+      key: z.string(),
+      type: z.string(),
+      unit: z.string().nullable(),
+      label: z.string(),
+      options: z.array(z.object({ key: z.string(), label: z.string() })),
+    }),
+  ),
+});
 
-type Requirement = {
-  id: string;
-  option_keys: string[] | null;
-  min: number | null;
-  max: number | null;
-  quantity: number;
-  field: {
-    id: string;
-    label: string;
-    unit: string | null;
-    category: { id: string; name: string };
-  };
-};
+type Category = z.infer<typeof categorySchema>;
+
+const requirementSchema = z.object({
+  id: z.string(),
+  option_keys: z.array(z.string()).nullable(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  quantity: z.number(),
+  field: z.object({
+    id: z.string(),
+    label: z.string(),
+    unit: z.string().nullable(),
+    category: z.object({ id: z.string(), name: z.string() }),
+  }),
+});
+
+type Requirement = z.infer<typeof requirementSchema>;
+
+const ownersSchema = z.record(z.string(), z.array(ownerRowSchema));
+const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const requirementsSchema = z.object({
+  requirements: z.array(requirementSchema),
+});
 
 type Draft = {
   categoryId: string;
@@ -104,29 +121,23 @@ const RequirementsPage = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
 
-  const errors = {
-    'min exceeds max': t('requirements.errors.minExceedsMax'),
-    'Unknown option': t('requirements.errors.unknownOption'),
-  };
-
   useEffect(() => {
     Promise.all(
       OWNERS.map(async ({ path, collection }) => [
         collection,
-        (await adminFetch<Record<string, OwnerRow[]>>(`/admin/${path}`))?.[
-          collection
-        ] ?? [],
+        (await adminFetch(`/admin/${path}`, ownersSchema))?.[collection] ?? [],
       ]),
     ).then((loaded) => setOwners(Object.fromEntries(loaded)));
-    adminFetch<{ categories: Category[] }>('/admin/categories').then(
+    adminFetch('/admin/categories', categoriesSchema).then(
       (data) => data && setCategories(data.categories),
     );
   }, []);
 
   const loadRequirements = async () => {
     if (!ownerId) return setRequirements([]);
-    const data = await adminFetch<{ requirements: Requirement[] }>(
+    const data = await adminFetch(
       `/admin/requirements?${ownerKey}=${encodeURIComponent(ownerId)}`,
+      requirementsSchema,
     );
     if (data) setRequirements(data.requirements);
   };
@@ -148,21 +159,17 @@ const RequirementsPage = () => {
           .split(',')
           .map((value) => value.trim())
           .filter(Boolean);
-    const created = await adminFetch(
-      '/admin/requirements',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          field_id: field.id,
-          [ownerKey]: ownerId,
-          option_keys: field.type === 'number' ? null : optionKeys,
-          min: field.type === 'number' ? numberOrNull(draft.min) : null,
-          max: field.type === 'number' ? numberOrNull(draft.max) : null,
-          quantity: Number(draft.quantity),
-        }),
-      },
-      errors,
-    );
+    const created = await adminFetch('/admin/requirements', acknowledged, {
+      method: 'POST',
+      body: JSON.stringify({
+        field_id: field.id,
+        [ownerKey]: ownerId,
+        option_keys: field.type === 'number' ? null : optionKeys,
+        min: field.type === 'number' ? numberOrNull(draft.min) : null,
+        max: field.type === 'number' ? numberOrNull(draft.max) : null,
+        quantity: Number(draft.quantity),
+      }),
+    });
     if (created) {
       setDraft(EMPTY_DRAFT);
       await loadRequirements();
@@ -170,7 +177,11 @@ const RequirementsPage = () => {
   };
 
   const remove = async (id: string) => {
-    if (await adminFetch(`/admin/requirements/${id}`, { method: 'DELETE' })) {
+    if (
+      await adminFetch(`/admin/requirements/${id}`, acknowledged, {
+        method: 'DELETE',
+      })
+    ) {
       await loadRequirements();
     }
   };

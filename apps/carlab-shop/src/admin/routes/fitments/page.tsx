@@ -13,49 +13,73 @@ import {
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import { TranslationsDrawer } from '../../components/translations-drawer';
+import { adminFetch, editedBySchema } from '../../lib/admin-fetch';
 
-type Brand = {
-  id: string;
-  name: string;
-};
+const brandSchema = z.object({ id: z.string(), name: z.string() });
 
-type PartIdentifier = {
-  id: string;
-  type: string;
-  brand: Brand;
-  value: string;
-};
+type Brand = z.infer<typeof brandSchema>;
 
-type Part = {
-  id: string;
-  name: string;
-  identifiers: PartIdentifier[];
-};
+const partSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  identifiers: z.array(
+    z.object({
+      id: z.string(),
+      type: z.string(),
+      brand: brandSchema,
+      value: z.string(),
+    }),
+  ),
+});
 
-type Vehicle = {
-  id: string;
-  model: { name: string };
-  engine: { code: string };
-  identifiers: { value: string }[];
-};
+type Part = z.infer<typeof partSchema>;
 
-type Fitment = {
-  id: string;
-  vehicle_id: string;
-  quantity: number;
-  axle: string | null;
-  side: string | null;
-  production_from: string | null;
-  production_to: string | null;
-  steering: string | null;
-  gearbox: string | null;
-  note: string | null;
-  source: string;
-};
+const vehicleSchema = z.object({
+  id: z.string(),
+  model: z.object({ name: z.string() }),
+  engine: z.object({ code: z.string() }),
+  identifiers: z.array(z.object({ value: z.string() })),
+});
 
-type Reference = { id: string; name?: string; code?: string };
+type Vehicle = z.infer<typeof vehicleSchema>;
+
+const fitmentSchema = editedBySchema.extend({
+  id: z.string(),
+  vehicle_id: z.string(),
+  quantity: z.number(),
+  axle: z.string().nullable(),
+  side: z.string().nullable(),
+  production_from: z.string().nullable(),
+  production_to: z.string().nullable(),
+  steering: z.string().nullable(),
+  gearbox: z.string().nullable(),
+  note: z.string().nullable(),
+  source: z.string(),
+});
+
+type Fitment = z.infer<typeof fitmentSchema>;
+
+const referenceSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  code: z.string().optional(),
+});
+
+type Reference = z.infer<typeof referenceSchema>;
+
+const vehiclesSchema = z.object({ vehicles: z.array(vehicleSchema) });
+const brandsSchema = z.object({ brands: z.array(brandSchema) });
+const referencesSchema = z.record(z.string(), z.array(referenceSchema));
+const fitmentsSchema = z.object({ fitments: z.array(fitmentSchema) });
+const partsSchema = z.object({
+  parts: z.array(partSchema.extend(editedBySchema.shape)),
+});
+const createdPartSchema = z.object({ part: partSchema });
+const bulkSchema = z.object({ matched: z.number(), created: z.number() });
 
 const STEERING_OPTIONS = ['left', 'right'] as const;
 const GEARBOX_OPTIONS = ['manual', 'automatic'] as const;
@@ -126,7 +150,7 @@ const FitmentsPage = () => {
 
   const [query, setQuery] = useState('');
   const [searched, setSearched] = useState(false);
-  const [parts, setParts] = useState<Part[]>([]);
+  const [parts, setParts] = useState<z.infer<typeof partsSchema>['parts']>([]);
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
 
   const [newPartName, setNewPartName] = useState('');
@@ -151,18 +175,18 @@ const FitmentsPage = () => {
   const [fitments, setFitments] = useState<Fitment[]>([]);
 
   useEffect(() => {
-    adminFetch<{ vehicles: Vehicle[] }>('/admin/vehicles').then((data) => {
+    adminFetch('/admin/vehicles', vehiclesSchema).then((data) => {
       if (data) {
         setVehicles(data.vehicles);
       }
     });
-    adminFetch<{ brands: Brand[] }>('/admin/brands').then((data) => {
+    adminFetch('/admin/brands', brandsSchema).then((data) => {
       if (data) {
         setBrands(data.brands);
       }
     });
     for (const { path, collection } of REFERENCE_FILTERS) {
-      adminFetch<Record<string, Reference[]>>(`/admin/${path}`).then((data) => {
+      adminFetch(`/admin/${path}`, referencesSchema).then((data) => {
         if (data) {
           setReferences((current) => ({
             ...current,
@@ -174,8 +198,9 @@ const FitmentsPage = () => {
   }, []);
 
   const loadFitments = async (partId: string) => {
-    const data = await adminFetch<{ fitments: Fitment[] }>(
-      `/admin/fitments?part_id=${partId}`,
+    const data = await adminFetch(
+      `/admin/fitments?part_id=${encodeURIComponent(partId)}`,
+      fitmentsSchema,
     );
     if (data) {
       setFitments(data.fitments);
@@ -194,8 +219,9 @@ const FitmentsPage = () => {
     if (!query.trim()) {
       return;
     }
-    const data = await adminFetch<{ parts: Part[] }>(
+    const data = await adminFetch(
       `/admin/parts?q=${encodeURIComponent(query.trim())}`,
+      partsSchema,
     );
     if (data) {
       setParts(data.parts);
@@ -204,7 +230,7 @@ const FitmentsPage = () => {
   };
 
   const createPart = async () => {
-    const data = await adminFetch<{ part: Part }>('/admin/parts', {
+    const data = await adminFetch('/admin/parts', createdPartSchema, {
       method: 'POST',
       body: JSON.stringify({
         name: newPartName,
@@ -232,32 +258,29 @@ const FitmentsPage = () => {
     if (!selectedPart || !hasFilter) {
       return;
     }
-    const result = await adminFetch<{ matched: number; created: number }>(
-      '/admin/fitments/bulk',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          part_id: selectedPart.id,
-          vehicle_id: filters.vehicle_id || undefined,
-          make_id: filters.make_id || undefined,
-          series_id: filters.series_id || undefined,
-          chassis_id: filters.chassis_id || undefined,
-          model_id: filters.model_id || undefined,
-          engine_id: filters.engine_id || undefined,
-          engine_family: filters.engine_family?.trim() || undefined,
-          year_from: year(filters.year_from),
-          year_to: year(filters.year_to),
-          quantity: Number(quantity) || 1,
-          axle: axle || null,
-          side: side || null,
-          production_from: productionFrom || null,
-          production_to: productionTo || null,
-          steering: steering || null,
-          gearbox: gearbox || null,
-          note: note.trim() || null,
-        }),
-      },
-    );
+    const result = await adminFetch('/admin/fitments/bulk', bulkSchema, {
+      method: 'POST',
+      body: JSON.stringify({
+        part_id: selectedPart.id,
+        vehicle_id: filters.vehicle_id || undefined,
+        make_id: filters.make_id || undefined,
+        series_id: filters.series_id || undefined,
+        chassis_id: filters.chassis_id || undefined,
+        model_id: filters.model_id || undefined,
+        engine_id: filters.engine_id || undefined,
+        engine_family: filters.engine_family?.trim() || undefined,
+        year_from: year(filters.year_from),
+        year_to: year(filters.year_to),
+        quantity: Number(quantity) || 1,
+        axle: axle || null,
+        side: side || null,
+        production_from: productionFrom || null,
+        production_to: productionTo || null,
+        steering: steering || null,
+        gearbox: gearbox || null,
+        note: note.trim() || null,
+      }),
+    });
     if (result) {
       toast.success(
         t('fitments.attached', {
@@ -304,13 +327,20 @@ const FitmentsPage = () => {
                 count: selectedPart.identifiers.length,
               })}
             </Text>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setSelectedPart(null)}
-            >
-              {t('fitments.change')}
-            </Button>
+            <div className="flex gap-x-2">
+              <TranslationsDrawer
+                entity="part"
+                id={selectedPart.id}
+                source={{ name: selectedPart.name }}
+              />
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setSelectedPart(null)}
+              >
+                {t('fitments.change')}
+              </Button>
+            </div>
           </div>
         ) : (
           <>
@@ -327,7 +357,12 @@ const FitmentsPage = () => {
                 <Table.Body>
                   {parts.map((part) => (
                     <Table.Row key={part.id}>
-                      <Table.Cell>{part.name}</Table.Cell>
+                      <Table.Cell>
+                        <div className="flex flex-col">
+                          {part.name}
+                          <EditedBy row={part} />
+                        </div>
+                      </Table.Cell>
                       <Table.Cell>
                         {part.identifiers
                           .map(
@@ -553,6 +588,8 @@ const FitmentsPage = () => {
                 <Table.HeaderCell>
                   {t('fitments.columns.source')}
                 </Table.HeaderCell>
+                <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+                <Table.HeaderCell />
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -568,6 +605,18 @@ const FitmentsPage = () => {
                     <Table.Cell>{criteria(fitment)}</Table.Cell>
                     <Table.Cell>{fitment.note ?? '-'}</Table.Cell>
                     <Table.Cell>{fitment.source}</Table.Cell>
+                    <Table.Cell>
+                      <EditedBy row={fitment} />
+                    </Table.Cell>
+                    <Table.Cell>
+                      {fitment.note && (
+                        <TranslationsDrawer
+                          entity="fitment"
+                          id={fitment.id}
+                          source={{ note: fitment.note }}
+                        />
+                      )}
+                    </Table.Cell>
                   </Table.Row>
                 );
               })}
