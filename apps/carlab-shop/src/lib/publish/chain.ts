@@ -15,6 +15,7 @@ import { parseEnv } from '../env';
 import { importSupplierCatalogues } from '../suppliers/import';
 import { dispatchDeploy } from './deploy';
 import { translateCatalogue } from './translate';
+import { adminError } from '../admin-errors';
 
 export const PUBLISH_REINDEX_REGISTRATION = 'publishReindex';
 
@@ -105,8 +106,9 @@ export async function startPublishRun(
     latest?.status === 'running' &&
     Date.now() - new Date(latest.created_at).getTime() < ABANDONED_RUN_MS
   ) {
-    throw new MedusaError(
+    throw adminError(
       MedusaError.Types.CONFLICT,
+      'PUBLISH_RUNNING',
       'A publish run is already in progress',
     );
   }

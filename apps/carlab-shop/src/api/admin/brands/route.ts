@@ -15,7 +15,7 @@ export async function GET(
 
   const brands = await catalog.listBrands(
     {},
-    { relations: ['spellings'], order: { name: 'ASC' } },
+    { relations: ['spellings'], order: { name: 'ASC' }, take: null },
   );
 
   res.json({ brands });

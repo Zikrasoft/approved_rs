@@ -16,7 +16,7 @@ export async function GET(
 
   const categories = await catalog.listCategories(
     {},
-    { relations: CATEGORY_RELATIONS, order: { name: 'ASC' } },
+    { relations: CATEGORY_RELATIONS, order: { name: 'ASC' }, take: null },
   );
 
   res.json({ categories: categories.map(withRankedFields) });

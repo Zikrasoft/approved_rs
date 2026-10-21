@@ -7,6 +7,7 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import type { AdminUpdateCategoryType } from '../../validators';
+import { adminError } from '../../../../lib/admin-errors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdateCategoryType>,
@@ -41,8 +42,9 @@ export async function DELETE(
     { take: 1 },
   );
   if (used) {
-    throw new MedusaError(
+    throw adminError(
       MedusaError.Types.NOT_ALLOWED,
+      'IN_USE',
       `Category ${id} holds ${used} parts`,
     );
   }

@@ -5,6 +5,7 @@ import type {
 import { MedusaError } from '@medusajs/framework/utils';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
+import { adminError } from '../../lib/admin-errors';
 
 type ReferenceEntity = {
   singular: string;
@@ -30,7 +31,7 @@ export const collectionRoutes = ({
   GET: async (req: AuthenticatedMedusaRequest, res: MedusaResponse) => {
     const rows = await service(req, `list${plural}`)(
       {},
-      { relations, order: { created_at: 'ASC' } },
+      { relations, order: { created_at: 'ASC' }, take: null },
     );
     res.json({ [collection]: rows });
   },
@@ -77,8 +78,9 @@ export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
         MedusaError.isMedusaError(error) &&
         error.type === MedusaError.Types.NOT_FOUND
       ) {
-        throw new MedusaError(
+        throw adminError(
           MedusaError.Types.CONFLICT,
+          'IN_USE',
           `This ${object.replace('_', ' ')} is still in use and cannot be deleted.`,
         );
       }

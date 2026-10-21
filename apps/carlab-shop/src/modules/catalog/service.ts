@@ -37,6 +37,7 @@ import Series from './models/series';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
+import { adminError } from '../../lib/admin-errors';
 
 type Provenance = {
   source?: string;
@@ -137,6 +138,20 @@ export type NewPart = Provenance &
     name: string;
     identifiers: NewPartIdentifier[];
   };
+
+type SourcedRow = { id: string; source: string };
+
+type SourcedRows = {
+  list: (
+    filters: { source?: string },
+    context: Context,
+  ) => Promise<SourcedRow[]>;
+  remove: (ids: string[], context: Context) => Promise<void>;
+};
+
+export type SourceCount = { source: string; rows: number };
+
+const SOURCE_COLUMNS = { select: ['id', 'source'], take: null };
 
 class CatalogModuleService extends MedusaService({
   Brand,
@@ -250,8 +265,9 @@ class CatalogModuleService extends MedusaService({
     await this.retrievePart(partId, {}, sharedContext);
     for (let next = replacedById; next;) {
       if (next === partId) {
-        throw new MedusaError(
+        throw adminError(
           MedusaError.Types.INVALID_DATA,
+          'REPLACEMENT_CYCLE',
           'Replacement would close a cycle',
         );
       }
@@ -270,7 +286,7 @@ class CatalogModuleService extends MedusaService({
   ): Promise<CategoryFieldDefinition[]> {
     const fields = await this.listCategoryFields(
       { category_id: categoryId },
-      { relations: ['options'] },
+      { relations: ['options'], take: null },
       sharedContext,
     );
     return fields.map(({ key, type, required, options }) => ({
@@ -295,8 +311,9 @@ class CatalogModuleService extends MedusaService({
       : [];
     const result = validateAttributes(fields, values);
     if (!result.success) {
-      throw new MedusaError(
+      throw adminError(
         MedusaError.Types.INVALID_DATA,
+        'INVALID_ATTRIBUTES',
         `Attributes break the Category definition: ${result.errors.join('; ')}`,
       );
     }
@@ -336,8 +353,9 @@ class CatalogModuleService extends MedusaService({
     );
     const errors = requirementErrors(field, requirement);
     if (errors.length) {
-      throw new MedusaError(
+      throw adminError(
         MedusaError.Types.INVALID_DATA,
+        'INVALID_REQUIREMENT',
         `Requirement breaks its field: ${errors.join('; ')}`,
       );
     }
@@ -353,7 +371,7 @@ class CatalogModuleService extends MedusaService({
     const used = (
       await this.listRequirements(
         { field_id: fieldId },
-        { select: ['id', 'option_keys'] },
+        { select: ['id', 'option_keys'], take: null },
         sharedContext,
       )
     ).filter(
@@ -361,11 +379,128 @@ class CatalogModuleService extends MedusaService({
         optionKey === null || option_keys?.includes(optionKey),
     );
     if (used.length) {
-      throw new MedusaError(
+      throw adminError(
         MedusaError.Types.NOT_ALLOWED,
+        'REQUIREMENT_IN_USE',
         `${used.length} Requirements use it`,
       );
     }
+  }
+
+  private sourcedRows(): SourcedRows[] {
+    return [
+      {
+        list: (filters, context) =>
+          this.listRequirements(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteRequirements(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listFitments(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteFitments(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listVehicleIdentifiers(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteVehicleIdentifiers(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listBrandSpellings(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteBrandSpellings(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listPartIdentifiers(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deletePartIdentifiers(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listParts(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteParts(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listVehicles(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteVehicles(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listCategoryFieldOptions(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteCategoryFieldOptions(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listCategoryFields(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteCategoryFields(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listCategories(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteCategories(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listVehicleModels(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteVehicleModels(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listEngines(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteEngines(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listChassis(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteChassis(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listSeries(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteSeries(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listMakes(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteMakes(ids, context),
+      },
+      {
+        list: (filters, context) =>
+          this.listBrands(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteBrands(ids, context),
+      },
+    ];
+  }
+
+  @InjectManager()
+  async countRowsBySource(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<SourceCount[]> {
+    const counts = new Map<string, number>();
+    for (const { list } of this.sourcedRows()) {
+      for (const { source } of await list({}, sharedContext)) {
+        counts.set(source, (counts.get(source) ?? 0) + 1);
+      }
+    }
+    return [...counts]
+      .map(([source, rows]) => ({ source, rows }))
+      .sort((a, b) => a.source.localeCompare(b.source));
+  }
+
+  @InjectTransactionManager()
+  async deleteRowsBySource(
+    source: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<number> {
+    let deleted = 0;
+    for (const { list, remove } of this.sourcedRows()) {
+      const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
+      if (ids.length) {
+        await remove(ids, sharedContext);
+        deleted += ids.length;
+      }
+    }
+    return deleted;
   }
 
   @InjectManager()
@@ -376,7 +511,7 @@ class CatalogModuleService extends MedusaService({
   ): Promise<void> {
     const parts = await this.listParts(
       { category_id: categoryId },
-      { select: ['id', 'attributes'] },
+      { select: ['id', 'attributes'], take: null },
       sharedContext,
     );
     const broken = guardDefinitionChange(
@@ -384,8 +519,9 @@ class CatalogModuleService extends MedusaService({
       parts,
     );
     if (broken.length) {
-      throw new MedusaError(
+      throw adminError(
         MedusaError.Types.NOT_ALLOWED,
+        'DEFINITION_BREAKS_PARTS',
         `The change would break ${broken.length} parts in this Category`,
       );
     }

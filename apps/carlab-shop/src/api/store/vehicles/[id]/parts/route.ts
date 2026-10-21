@@ -85,7 +85,7 @@ export async function GET(
     kit: maintenanceKit(
       await catalog.listCategories(
         { maintenance_kit: true },
-        { select: ['id', 'maintenance_kit', 'kit_rank'] },
+        { select: ['id', 'maintenance_kit', 'kit_rank'], take: null },
       ),
       groups,
       matches,

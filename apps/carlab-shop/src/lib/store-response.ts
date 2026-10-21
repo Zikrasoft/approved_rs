@@ -91,19 +91,22 @@ export const listVehicleResponses = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
 ): Promise<Vehicle[]> =>
-  (await catalog.listVehicles(filters, { relations: VEHICLE_RELATIONS })).map(
-    (row) => {
-      const { requirements, engine, model } = inheritedRequirements.parse(row);
-      return vehicleSchema.parse({
-        ...row,
-        requirements: [
-          ...engine.requirements,
-          ...model.chassis.requirements,
-          ...requirements,
-        ],
-      });
-    },
-  );
+  (
+    await catalog.listVehicles(filters, {
+      relations: VEHICLE_RELATIONS,
+      take: null,
+    })
+  ).map((row) => {
+    const { requirements, engine, model } = inheritedRequirements.parse(row);
+    return vehicleSchema.parse({
+      ...row,
+      requirements: [
+        ...engine.requirements,
+        ...model.chassis.requirements,
+        ...requirements,
+      ],
+    });
+  });
 
 const rawPartSchema = z.object({
   id: z.string(),

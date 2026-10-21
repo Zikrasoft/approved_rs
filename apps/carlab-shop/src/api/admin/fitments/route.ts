@@ -12,6 +12,7 @@ import type {
   AdminCreateFitmentType,
   AdminListFitmentsType,
 } from '../validators';
+import { adminError } from '../../../lib/admin-errors';
 
 const adminFitmentSchema = fitmentRowSchema.extend({
   source: z.string(),
@@ -53,8 +54,9 @@ export async function POST(
     },
   );
   if (!fitment) {
-    throw new MedusaError(
+    throw adminError(
       MedusaError.Types.CONFLICT,
+      'DUPLICATE_FITMENT',
       'This Part already fits this Vehicle at that position and criteria',
     );
   }

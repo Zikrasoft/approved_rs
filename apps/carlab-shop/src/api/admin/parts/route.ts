@@ -10,6 +10,7 @@ import { CATALOG_MODULE } from '../../../modules/catalog';
 import { PART_IDENTIFIER_TYPES } from '../../../modules/catalog/models/part-identifier';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreatePartType, AdminSearchPartsType } from '../validators';
+import { adminError } from '../../../lib/admin-errors';
 
 const identifierSchema = z.object({
   id: z.string(),
@@ -42,7 +43,10 @@ export async function GET(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const brands = await catalog.listBrands({ name: { $ilike: `%${q}%` } });
+  const brands = await catalog.listBrands(
+    { name: { $ilike: `%${q}%` } },
+    { take: null },
+  );
   const normalized = normalizePartNumber(q);
   const matches = await catalog.listPartIdentifiers({
     $or: [
@@ -55,7 +59,10 @@ export async function GET(
 
   const partIds = [...new Set(matches.map((identifier) => identifier.part_id))];
   const parts = partIds.length
-    ? await catalog.listParts({ id: partIds }, { relations: PART_RELATIONS })
+    ? await catalog.listParts(
+        { id: partIds },
+        { relations: PART_RELATIONS, take: null },
+      )
     : [];
 
   res.json({ parts: z.array(partSchema).parse(parts) });
@@ -72,7 +79,11 @@ export async function POST(
   const brandIds = [...new Set(identifiers.map(({ brand_id }) => brand_id))];
   const brands = await catalog.listBrands({ id: brandIds });
   if (brands.length !== brandIds.length) {
-    throw new MedusaError(MedusaError.Types.INVALID_DATA, 'Unknown brand');
+    throw adminError(
+      MedusaError.Types.INVALID_DATA,
+      'UNKNOWN_BRAND',
+      'Unknown brand',
+    );
   }
 
   const partId = await catalog.createPartWithIdentifiers({
