@@ -7,7 +7,7 @@ const page = {
   value: 'HU 816 x',
   normalized_value: 'HU816X',
   brand: { name: 'Mann-Filter', slug: 'mann-filter' },
-  part: { id: 'part_1', name: 'Oil filter' },
+  part: { id: 'part_1', name: 'Oil filter', category_id: null, attributes: {} },
   equivalents: [],
 };
 

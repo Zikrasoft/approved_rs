@@ -1,0 +1,405 @@
+import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+
+import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
+
+type Response = {
+  status: number;
+  data: Record<string, { id: string; slug: string; key: string }>;
+};
+
+medusaIntegrationTestRunner({
+  moduleName: 'catalog',
+  testSuite: ({ api, getContainer }) => {
+    describe('admin categories and part attributes', () => {
+      let adminHeaders: { headers: { authorization: string } };
+      let catalog: CatalogModuleService;
+      let brandId: string;
+      let serial = 0;
+
+      const post = (path: string, body: unknown): Promise<Response> =>
+        api.post(path, body, adminHeaders).catch((error) => error.response);
+      const remove = (path: string): Promise<Response> =>
+        api.delete(path, adminHeaders).catch((error) => error.response);
+
+      const createOilCategory = async () => {
+        serial += 1;
+        const category = (
+          await post('/admin/categories', {
+            slug: `engine-oil-${serial}`,
+            name: 'Моторное масло',
+            text: 'Масло для двигателя.',
+          })
+        ).data.category;
+        const base = `/admin/categories/${category.id}/fields`;
+        const viscosity = (
+          await post(base, {
+            key: 'viscosity',
+            type: 'single-select',
+            label: 'Вязкость',
+            required: true,
+            facet: true,
+            rank: 1,
+          })
+        ).data.field;
+        const approvals = (
+          await post(base, {
+            key: 'approvals',
+            type: 'multi-select',
+            label: 'Допуски',
+            facet: true,
+            rank: 2,
+          })
+        ).data.field;
+        const volume = (
+          await post(base, {
+            key: 'volume',
+            type: 'number',
+            unit: 'l',
+            label: 'Объем',
+            rank: 3,
+          })
+        ).data.field;
+        for (const [field, keys] of [
+          [viscosity, ['5w-30', '0w-20']],
+          [approvals, ['bmw-ll-04', 'mb-229-51']],
+        ] as const) {
+          for (const [rank, key] of keys.entries()) {
+            await post(`${base}/${field.id}/options`, {
+              key,
+              label: key.toUpperCase(),
+              rank,
+            });
+          }
+        }
+        return { category, viscosity, approvals, volume, base };
+      };
+
+      const createPart = async (
+        category_id: string,
+        attributes: Record<string, unknown>,
+      ): Promise<Response> => {
+        serial += 1;
+        return post('/admin/parts', {
+          name: `Oil ${serial}`,
+          category_id,
+          attributes,
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: brandId,
+              value: `OIL-${serial}`,
+            },
+          ],
+        });
+      };
+
+      const optionId = async (fieldId: string, key: string) =>
+        (await catalog.listCategoryFieldOptions({ field_id: fieldId, key }))[0]
+          .id;
+
+      beforeAll(async () => {
+        catalog = getContainer().resolve(CATALOG_MODULE);
+        brandId = (
+          await catalog.createBrands({ name: 'Castrol', slug: 'castrol' })
+        ).id;
+        adminHeaders = await createAdminAuth(
+          getContainer(),
+          api,
+          'admin@categories-tests.local',
+          'supersecret',
+        );
+      });
+
+      it('lists a Category with its fields and options in rank order', async () => {
+        const { category } = await createOilCategory();
+
+        const listed = await api.get('/admin/categories', adminHeaders);
+
+        const found = listed.data.categories.find(
+          ({ id }: { id: string }) => id === category.id,
+        );
+        expect(found).toMatchObject({
+          slug: category.slug,
+          name: 'Моторное масло',
+          text: 'Масло для двигателя.',
+          translations: null,
+          source: 'manual',
+          created_by: expect.stringMatching(/^user_/),
+          fields: [
+            {
+              key: 'viscosity',
+              type: 'single-select',
+              unit: null,
+              label: 'Вязкость',
+              required: true,
+              facet: true,
+              rank: 1,
+              options: [
+                expect.objectContaining({ key: '5w-30', label: '5W-30' }),
+                expect.objectContaining({ key: '0w-20', label: '0W-20' }),
+              ],
+            },
+            expect.objectContaining({ key: 'approvals' }),
+            expect.objectContaining({ key: 'volume', unit: 'l', options: [] }),
+          ],
+        });
+      });
+
+      it('stores Part values keyed by field key with option keys', async () => {
+        const { category } = await createOilCategory();
+        const attributes = {
+          viscosity: '5w-30',
+          approvals: ['bmw-ll-04', 'mb-229-51'],
+          volume: 5,
+        };
+
+        const response = await createPart(category.id, attributes);
+
+        expect(response.status).toBe(200);
+        expect(await catalog.retrievePart(response.data.part.id)).toMatchObject(
+          { category_id: category.id, attributes },
+        );
+      });
+
+      it.each([
+        ['an unknown option', { viscosity: '10w-60' }],
+        ['a missing required field', { volume: 5 }],
+        ['an unknown field', { viscosity: '5w-30', colour: 'black' }],
+        ['a number as text', { viscosity: '5w-30', volume: '5' }],
+      ])(
+        'refuses a Part with %s and creates nothing',
+        async (_, attributes) => {
+          const { category } = await createOilCategory();
+
+          const response = await createPart(category.id, attributes);
+
+          expect(response.status).toBe(400);
+          expect(
+            await catalog.listParts({ category_id: category.id }),
+          ).toHaveLength(0);
+        },
+      );
+
+      it('classifies an existing Part and refuses values that break the definition', async () => {
+        const { category } = await createOilCategory();
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Unclassified oil',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: brandId, value: 'UNCL-1' },
+          ],
+        });
+
+        const refused = await post(`/admin/parts/${partId}`, {
+          category_id: category.id,
+          attributes: { viscosity: 'nope' },
+        });
+        const accepted = await post(`/admin/parts/${partId}`, {
+          category_id: category.id,
+          attributes: { viscosity: '0w-20' },
+        });
+
+        expect(refused.status).toBe(400);
+        expect(accepted.status).toBe(200);
+        expect(await catalog.retrievePart(partId)).toMatchObject({
+          category_id: category.id,
+          attributes: { viscosity: '0w-20' },
+          updated_by: expect.stringMatching(/^user_/),
+        });
+      });
+
+      it('refuses a Part in an unknown Category', async () => {
+        expect((await createPart('category_missing', {})).status).toBe(404);
+      });
+
+      it('renaming an option leaves Parts intact', async () => {
+        const { category, viscosity, base } = await createOilCategory();
+        const part = (await createPart(category.id, { viscosity: '5w-30' }))
+          .data.part;
+        const id = await optionId(viscosity.id, '5w-30');
+
+        const renamed = await post(`${base}/${viscosity.id}/options/${id}`, {
+          label: 'SAE 5W-30',
+        });
+
+        expect(renamed.status).toBe(200);
+        expect(renamed.data.option).toMatchObject({
+          key: '5w-30',
+          label: 'SAE 5W-30',
+        });
+        expect((await catalog.retrievePart(part.id)).attributes).toEqual({
+          viscosity: '5w-30',
+        });
+      });
+
+      it('refuses to change an option key', async () => {
+        const { viscosity, base } = await createOilCategory();
+        const id = await optionId(viscosity.id, '5w-30');
+
+        const response = await post(`${base}/${viscosity.id}/options/${id}`, {
+          key: '5w-40',
+        });
+
+        expect(response.status).toBe(400);
+      });
+
+      it('refuses deleting an option a Part uses and deletes an unused one', async () => {
+        const { category, approvals, base } = await createOilCategory();
+        await createPart(category.id, {
+          viscosity: '5w-30',
+          approvals: ['bmw-ll-04'],
+        });
+
+        const used = await remove(
+          `${base}/${approvals.id}/options/${await optionId(approvals.id, 'bmw-ll-04')}`,
+        );
+        const unused = await remove(
+          `${base}/${approvals.id}/options/${await optionId(approvals.id, 'mb-229-51')}`,
+        );
+
+        expect(used.status).toBe(400);
+        expect(unused.status).toBe(200);
+        expect(
+          (
+            await catalog.listCategoryFieldOptions({ field_id: approvals.id })
+          ).map(({ key }) => key),
+        ).toEqual(['bmw-ll-04']);
+      });
+
+      it('refuses deleting or retyping a field a Part uses', async () => {
+        const { category, approvals, base } = await createOilCategory();
+        await createPart(category.id, {
+          viscosity: '5w-30',
+          approvals: ['bmw-ll-04'],
+        });
+
+        expect((await remove(`${base}/${approvals.id}`)).status).toBe(400);
+        expect(
+          (await post(`${base}/${approvals.id}`, { type: 'text' })).status,
+        ).toBe(400);
+        expect(await catalog.retrieveCategoryField(approvals.id)).toMatchObject(
+          {
+            type: 'multi-select',
+          },
+        );
+      });
+
+      it('deletes an unused field with its options and relabels a used one', async () => {
+        const { category, approvals, volume, base } = await createOilCategory();
+        await createPart(category.id, { viscosity: '5w-30', volume: 4.5 });
+
+        expect((await remove(`${base}/${approvals.id}`)).status).toBe(200);
+        expect(
+          await catalog.listCategoryFieldOptions({ field_id: approvals.id }),
+        ).toHaveLength(0);
+        const relabelled = await post(`${base}/${volume.id}`, {
+          label: 'Объем канистры',
+          unit: 'L',
+          facet: true,
+        });
+        expect(relabelled.status).toBe(200);
+        expect(relabelled.data.field).toMatchObject({
+          key: 'volume',
+          label: 'Объем канистры',
+          facet: true,
+        });
+      });
+
+      it('refuses a required field that existing Parts lack', async () => {
+        const { category, base } = await createOilCategory();
+        await createPart(category.id, { viscosity: '5w-30' });
+
+        const response = await post(base, {
+          key: 'base-oil',
+          type: 'text',
+          label: 'База',
+          required: true,
+        });
+
+        expect(response.status).toBe(400);
+      });
+
+      it.each([
+        [
+          'an upper-case slug',
+          '/admin/categories',
+          { slug: 'Oil', name: 'Масло' },
+        ],
+        ['an empty name', '/admin/categories', { slug: 'oil', name: '' }],
+        [
+          'an unknown key',
+          '/admin/categories',
+          { slug: 'oil', name: 'Масло', icon: 'x' },
+        ],
+      ])('returns a 400 for %s', async (_, path, body) => {
+        expect((await post(path, body)).status).toBe(400);
+      });
+
+      it.each([
+        ['an unknown field type', { key: 'x', type: 'colour', label: 'X' }],
+        ['a key with spaces', { key: 'a b', type: 'text', label: 'X' }],
+      ])('returns a 400 for a field with %s', async (_, body) => {
+        const { base } = await createOilCategory();
+        expect((await post(base, body)).status).toBe(400);
+      });
+
+      it('refuses a second field with the same key in one Category', async () => {
+        const { base } = await createOilCategory();
+
+        const response = await post(base, {
+          key: 'volume',
+          type: 'number',
+          label: 'Еще объем',
+        });
+
+        expect(response.status).toBe(400);
+      });
+
+      it('returns a 404 for a field of another Category', async () => {
+        const first = await createOilCategory();
+        const second = await createOilCategory();
+
+        const response = await remove(`${second.base}/${first.volume.id}`);
+
+        expect(response.status).toBe(404);
+      });
+
+      it('updates a Category name, text and translations', async () => {
+        const { category } = await createOilCategory();
+        const translations = {
+          sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
+          en: { name: 'Engine oil', text: 'Oil for the engine.' },
+        };
+
+        const response = await post(`/admin/categories/${category.id}`, {
+          name: 'Масло моторное',
+          translations,
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.category).toMatchObject({
+          slug: category.slug,
+          name: 'Масло моторное',
+          translations,
+        });
+      });
+
+      it('refuses deleting a Category its Parts use and deletes an unused one with its fields', async () => {
+        const used = await createOilCategory();
+        await createPart(used.category.id, { viscosity: '5w-30' });
+        const unused = await createOilCategory();
+
+        expect(
+          (await remove(`/admin/categories/${used.category.id}`)).status,
+        ).toBe(400);
+        expect(
+          (await remove(`/admin/categories/${unused.category.id}`)).status,
+        ).toBe(200);
+        expect(
+          await catalog.listCategoryFields({ category_id: unused.category.id }),
+        ).toHaveLength(0);
+      });
+    });
+  },
+});

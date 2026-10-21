@@ -1,13 +1,24 @@
 import type { Context } from '@medusajs/framework/types';
 import {
+  InjectManager,
   InjectTransactionManager,
   MedusaContext,
+  MedusaError,
   MedusaService,
 } from '@medusajs/framework/utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
+import {
+  type AttributeValues,
+  type CategoryFieldDefinition,
+  guardDefinitionChange,
+  normalizePartNumber,
+  validateAttributes,
+} from '@podbor/catalog-contract';
 
 import Brand from './models/brand';
 import BrandSpelling from './models/brand-spelling';
+import Category from './models/category';
+import CategoryField from './models/category-field';
+import CategoryFieldOption from './models/category-field-option';
 import Fitment from './models/fitment';
 import Part from './models/part';
 import PartIdentifier, {
@@ -28,14 +39,23 @@ export type NewPartIdentifier = {
   value: string;
 };
 
-export type NewPart = Provenance & {
-  name: string;
-  identifiers: NewPartIdentifier[];
+export type PartClassification = {
+  category_id: string | null;
+  attributes: Record<string, unknown>;
 };
+
+export type NewPart = Provenance &
+  Partial<PartClassification> & {
+    name: string;
+    identifiers: NewPartIdentifier[];
+  };
 
 class CatalogModuleService extends MedusaService({
   Brand,
   BrandSpelling,
+  Category,
+  CategoryField,
+  CategoryFieldOption,
   Part,
   PartIdentifier,
   Vehicle,
@@ -44,11 +64,26 @@ class CatalogModuleService extends MedusaService({
 }) {
   @InjectTransactionManager()
   async createPartWithIdentifiers(
-    { name, identifiers, ...provenance }: NewPart,
+    {
+      name,
+      identifiers,
+      category_id = null,
+      attributes = {},
+      ...provenance
+    }: NewPart,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<string> {
     const created = await this.createParts(
-      { name, ...provenance },
+      {
+        name,
+        category_id,
+        attributes: await this.validatePartAttributes(
+          category_id,
+          attributes,
+          sharedContext,
+        ),
+        ...provenance,
+      },
       sharedContext,
     );
     await this.createPartIdentifiers(
@@ -61,6 +96,90 @@ class CatalogModuleService extends MedusaService({
       sharedContext,
     );
     return created.id;
+  }
+
+  @InjectManager()
+  async categoryDefinition(
+    categoryId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<CategoryFieldDefinition[]> {
+    const fields = await this.listCategoryFields(
+      { category_id: categoryId },
+      { relations: ['options'] },
+      sharedContext,
+    );
+    return fields.map(({ key, type, required, options }) => ({
+      key,
+      type,
+      required,
+      options: options.map((option) => ({ key: option.key })),
+    }));
+  }
+
+  @InjectManager()
+  async validatePartAttributes(
+    categoryId: string | null,
+    values: unknown,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<AttributeValues> {
+    if (categoryId) {
+      await this.retrieveCategory(categoryId, {}, sharedContext);
+    }
+    const fields = categoryId
+      ? await this.categoryDefinition(categoryId, sharedContext)
+      : [];
+    const result = validateAttributes(fields, values);
+    if (!result.success) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Attributes break the Category definition: ${result.errors.join('; ')}`,
+      );
+    }
+    return result.values;
+  }
+
+  @InjectTransactionManager()
+  async classifyPart(
+    partId: string,
+    { category_id, attributes, ...provenance }: PartClassification & Provenance,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await this.updateParts(
+      {
+        id: partId,
+        category_id,
+        attributes: await this.validatePartAttributes(
+          category_id,
+          attributes,
+          sharedContext,
+        ),
+        ...provenance,
+      },
+      sharedContext,
+    );
+  }
+
+  @InjectManager()
+  async guardCategoryDefinition(
+    categoryId: string,
+    change: (fields: CategoryFieldDefinition[]) => CategoryFieldDefinition[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const parts = await this.listParts(
+      { category_id: categoryId },
+      { select: ['id', 'attributes'] },
+      sharedContext,
+    );
+    const broken = guardDefinitionChange(
+      change(await this.categoryDefinition(categoryId, sharedContext)),
+      parts,
+    );
+    if (broken.length) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_ALLOWED,
+        `The change would break ${broken.length} parts in this Category`,
+      );
+    }
   }
 }
 

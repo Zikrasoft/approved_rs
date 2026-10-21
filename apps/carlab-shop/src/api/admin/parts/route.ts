@@ -22,6 +22,8 @@ const identifierSchema = z.object({
 const partSchema = z.object({
   id: z.string(),
   name: z.string(),
+  category_id: z.string().nullable(),
+  attributes: z.record(z.string(), z.unknown()),
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
@@ -61,7 +63,7 @@ export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreatePartType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { name, identifiers } = req.validatedBody;
+  const { name, identifiers, category_id, attributes } = req.validatedBody;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
@@ -74,6 +76,8 @@ export async function POST(
   const partId = await catalog.createPartWithIdentifiers({
     name,
     identifiers,
+    category_id,
+    attributes,
     created_by: req.auth_context.actor_id,
     updated_by: req.auth_context.actor_id,
   });

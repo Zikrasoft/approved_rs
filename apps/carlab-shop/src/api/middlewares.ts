@@ -5,12 +5,19 @@ import {
 } from '@medusajs/framework/http';
 
 import {
+  AdminClassifyPart,
   AdminCreateBrand,
   AdminCreateBrandSpelling,
+  AdminCreateCategory,
+  AdminCreateCategoryField,
+  AdminCreateCategoryFieldOption,
   AdminCreateFitment,
   AdminCreatePart,
   AdminListFitments,
   AdminSearchParts,
+  AdminUpdateCategory,
+  AdminUpdateCategoryField,
+  AdminUpdateCategoryFieldOption,
   AdminUpdateSupplier,
 } from './admin/validators';
 import {
@@ -32,6 +39,41 @@ export default defineMiddlewares({
       matcher: '/admin/brands/:id/spellings',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminCreateBrandSpelling)],
+    },
+    {
+      matcher: '/admin/categories',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateCategory)],
+    },
+    {
+      matcher: '/admin/categories/:id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminUpdateCategory)],
+    },
+    {
+      matcher: '/admin/categories/:id/fields',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateCategoryField)],
+    },
+    {
+      matcher: '/admin/categories/:id/fields/:field_id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminUpdateCategoryField)],
+    },
+    {
+      matcher: '/admin/categories/:id/fields/:field_id/options',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateCategoryFieldOption)],
+    },
+    {
+      matcher: '/admin/categories/:id/fields/:field_id/options/:option_id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminUpdateCategoryFieldOption)],
+    },
+    {
+      matcher: '/admin/parts/:id',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminClassifyPart)],
     },
     {
       matcher: '/admin/parts',

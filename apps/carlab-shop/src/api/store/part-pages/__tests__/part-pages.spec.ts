@@ -10,6 +10,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     describe('GET /store/part-pages', () => {
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
+      let oilFilters: { id: string };
 
       beforeAll(async () => {
         const catalog: CatalogModuleService =
@@ -28,8 +29,21 @@ medusaIntegrationTestRunner({
           { name: 'BMW', slug: 'bmw' },
           { name: 'Mann-Filter', slug: 'mann-filter' },
         ]);
+        oilFilters = await catalog.createCategories({
+          slug: 'oil-filters',
+          name: 'Масляные фильтры',
+        });
+        await catalog.createCategoryFields({
+          category_id: oilFilters.id,
+          key: 'height',
+          type: 'number',
+          unit: 'mm',
+          label: 'Высота',
+        });
         await catalog.createPartWithIdentifiers({
           name: 'Oil filter, BMW B47/B48 engines',
+          category_id: oilFilters.id,
+          attributes: { height: 75 },
           identifiers: [
             { type: 'oem', brand_id: bmw.id, value: '11 42 8575211' },
             {
@@ -74,6 +88,8 @@ medusaIntegrationTestRunner({
           part: {
             id: expect.any(String),
             name: 'Oil filter, BMW B47/B48 engines',
+            category_id: oilFilters.id,
+            attributes: { height: 75 },
           },
           equivalents: [
             {
@@ -90,6 +106,7 @@ medusaIntegrationTestRunner({
             page.normalized_value === 'CUK2939',
         );
         expect(cabin.equivalents).toEqual([]);
+        expect(cabin.part).toMatchObject({ category_id: null, attributes: {} });
       });
 
       it('pages through the list', async () => {

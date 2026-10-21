@@ -52,7 +52,12 @@ export async function GET(
 
   const pages = identifiers.map((identifier) => ({
     ...brandNumber(identifier),
-    part: { id: identifier.part.id, name: identifier.part.name },
+    part: {
+      id: identifier.part.id,
+      name: identifier.part.name,
+      category_id: identifier.part.category_id,
+      attributes: identifier.part.attributes,
+    },
     equivalents: siblings
       .filter(
         ({ id, part_id }) =>
