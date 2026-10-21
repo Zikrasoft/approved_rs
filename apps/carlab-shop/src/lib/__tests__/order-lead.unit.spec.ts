@@ -1,6 +1,9 @@
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 
-import { type LeadOrder, orderLeadForm } from '../order-lead';
+import { type LeadOrder, orderLeadForm, sendOrderLead } from '../order-lead';
 
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
   id: 'order_1',
@@ -49,5 +52,27 @@ describe('orderLeadForm', () => {
       /\nНе поместилось позиций: \d+\nИтого: 20000 RSD\n/,
     );
     expect(comment.endsWith('Pozvati posle 17h')).toBe(true);
+  });
+});
+
+describe('sendOrderLead', () => {
+  it('posts as the lead route origin, so the storefront CSRF check lets it in', async () => {
+    let origin: string | undefined;
+    const server = createServer((request, response) => {
+      origin = request.headers.origin;
+      response.writeHead(302, { location: '/ru/thanks/' }).end();
+    });
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    const { port } = server.address() as AddressInfo;
+    try {
+      await sendOrderLead(
+        `http://localhost:${port}/api/leads`,
+        new URLSearchParams({ contact: '+381601234567' }),
+      );
+    } finally {
+      server.close();
+    }
+
+    expect(origin).toBe(`http://localhost:${port}`);
   });
 });

@@ -104,4 +104,28 @@ describe('parseEnv', () => {
     ).toThrow();
     expect(() => parseEnv({ ...VALID_ENV, VIN_DECODERS: ' , ' })).toThrow();
   });
+
+  it('runs no supplier adapter unless SUPPLIER_ADAPTERS names one', () => {
+    expect(parseEnv(VALID_ENV).SUPPLIER_ADAPTERS).toEqual([]);
+    expect(
+      parseEnv({ ...VALID_ENV, SUPPLIER_ADAPTERS: ' demo ' }).SUPPLIER_ADAPTERS,
+    ).toEqual(['demo']);
+  });
+
+  it('refuses an unknown supplier adapter', () => {
+    expect(() =>
+      parseEnv({ ...VALID_ENV, SUPPLIER_ADAPTERS: 'demo,intercars' }),
+    ).toThrow();
+  });
+
+  it('refuses the demo supplier in production', () => {
+    expect(() =>
+      parseEnv({
+        ...VALID_ENV,
+        NODE_ENV: 'production',
+        TYPESENSE_API_KEY: 'key',
+        SUPPLIER_ADAPTERS: 'demo',
+      }),
+    ).toThrow('The demo supplier never runs in production');
+  });
 });

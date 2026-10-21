@@ -4,6 +4,14 @@ import { VIN_DECODER_NAMES } from './vin/decoders';
 
 const LOCAL_TYPESENSE_API_KEY = 'xyz';
 
+export const SUPPLIER_ADAPTER_NAMES = ['demo'] as const;
+
+const nameList = (value: string) =>
+  value
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+
 const optionalSecret = z
   .string()
   .optional()
@@ -35,14 +43,23 @@ const envSchema = z
     VIN_DECODERS: z
       .string()
       .default(VIN_DECODER_NAMES.join(','))
-      .transform((value) =>
-        value
-          .split(',')
-          .map((name) => name.trim())
-          .filter(Boolean),
-      )
+      .transform(nameList)
       .pipe(z.array(z.enum(VIN_DECODER_NAMES)).min(1)),
+    SUPPLIER_ADAPTERS: z
+      .string()
+      .default('')
+      .transform(nameList)
+      .pipe(z.array(z.enum(SUPPLIER_ADAPTER_NAMES))),
+    DEMO_SUPPLIER_OVERRIDES: optionalSecret,
   })
+  .refine(
+    ({ NODE_ENV, SUPPLIER_ADAPTERS }) =>
+      NODE_ENV !== 'production' || !SUPPLIER_ADAPTERS.includes('demo'),
+    {
+      path: ['SUPPLIER_ADAPTERS'],
+      message: 'The demo supplier never runs in production',
+    },
+  )
   .refine(
     ({ NODE_ENV, TYPESENSE_API_KEY }) =>
       NODE_ENV !== 'production' || TYPESENSE_API_KEY,

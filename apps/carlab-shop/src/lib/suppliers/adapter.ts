@@ -2,6 +2,9 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { crossReferenceSchema } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { parseEnv } from '../env';
+import { demoAdapters } from './demo-adapter';
+
 export const SUPPLIER_ADAPTERS_REGISTRATION = 'supplierAdapters';
 
 export const supplierArticleSchema = z.object({
@@ -43,7 +46,14 @@ export type SupplierAdapter = {
   quote: (articleIds: string[]) => Promise<SupplierQuote[]>;
 };
 
+const configuredAdapters = (): SupplierAdapter[] => {
+  const env = parseEnv(process.env);
+  return env.SUPPLIER_ADAPTERS.includes('demo')
+    ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES)
+    : [];
+};
+
 export const supplierAdapters = (scope: MedusaContainer): SupplierAdapter[] =>
   scope.hasRegistration(SUPPLIER_ADAPTERS_REGISTRATION)
     ? scope.resolve<SupplierAdapter[]>(SUPPLIER_ADAPTERS_REGISTRATION)
-    : [];
+    : configuredAdapters();
