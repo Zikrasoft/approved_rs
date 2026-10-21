@@ -103,6 +103,7 @@ const VEHICLE = {
     displacement_cc: 1995,
   },
   identifiers: [{ type: 'bmw-type-code', value: '35BG' }],
+  requirements: [] as unknown[],
 };
 
 const respond = (body: unknown, ok = true) =>
@@ -230,6 +231,8 @@ describe('catalogue categories', () => {
     name: 'Масляные фильтры',
     text: 'Фильтр очищает масло.',
     translations: { sr: { name: 'Filteri ulja' } },
+    maintenance_kit: false,
+    kit_rank: 0,
     fields: [
       {
         key: 'height',
@@ -302,7 +305,9 @@ const category = (slug: string, name: string) => ({
   name,
   text: '',
   translations: null,
-  fields: [],
+  maintenance_kit: false,
+  kit_rank: 0,
+  fields: [] as unknown[],
 });
 const oilFilters = category('oil-filters', 'Масляные фильтры');
 const brakePads = category('brake-pads', 'Тормозные колодки');
@@ -784,5 +789,94 @@ describe('catalogue.search', () => {
         facets: [],
       }),
     ).toBeNull();
+  });
+});
+
+describe('Requirements and the maintenance kit', () => {
+  const engineOil = {
+    ...category('engine-oil', 'Моторное масло'),
+    maintenance_kit: true,
+    kit_rank: 2,
+  };
+  const filters = { ...oilFilters, maintenance_kit: true, kit_rank: 1 };
+  const approvedOil = brandNumber('liqui-moly', '20646', {
+    id: 'part_ll04',
+    name: 'Масло 5W-30 LL-04',
+    category_id: engineOil.id,
+    attributes: { approvals: ['bmw-ll-04', 'mb-229-51'] },
+  });
+  const otherOil = brandNumber('liqui-moly', '20800', {
+    id: 'part_vw',
+    name: 'Масло 5W-30 VW',
+    category_id: engineOil.id,
+    attributes: { approvals: ['vw-504-00'] },
+  });
+  const oilFilter = brandNumber('mann-filter', 'HU816X', {
+    id: 'part_oil_filter',
+    name: 'Масляный фильтр',
+    category_id: filters.id,
+  });
+  const b47 = {
+    ...VEHICLE,
+    requirements: [
+      {
+        id: 'requirement_b47',
+        category_id: engineOil.id,
+        field_key: 'approvals',
+        option_keys: ['bmw-ll-04'],
+        min: null,
+        max: null,
+        quantity: 5,
+      },
+    ],
+  };
+  const withRequirements = (fitments: unknown[] = []) =>
+    catalogueWith(
+      backend({
+        pages: [approvedOil, otherOil, oilFilter],
+        categories: [filters, engineOil],
+        fitments,
+        vehicles: [b47],
+      }),
+    );
+
+  it('offers the universal goods that meet the car Requirements', async () => {
+    const [car] = await withRequirements().carPages();
+
+    expect(
+      car.matches.map(({ category, quantity, parts }) => [
+        category.slug,
+        quantity,
+        parts.map(({ pages }) => pages[0].slug),
+      ]),
+    ).toEqual([['engine-oil', 5, ['liqui-moly-20646']]]);
+  });
+
+  it('assembles the kit from one Part per flagged Category with quantities', async () => {
+    const [car] = await withRequirements([
+      fitment('fit_filter', 'part_oil_filter'),
+    ]).carPages();
+
+    expect(
+      car.kit.map(({ category, quantity, pages }) => [
+        category.slug,
+        quantity,
+        pages[0].slug,
+      ]),
+    ).toEqual([
+      ['oil-filters', 1, 'mann-filter-hu816x'],
+      ['engine-oil', 5, 'liqui-moly-20646'],
+    ]);
+  });
+
+  it('builds a Model x Category page for a Requirement match alone', async () => {
+    const [hub] = await withRequirements().makeHubs();
+
+    expect(
+      hub.models[0].categories.map(({ category, parts }) => [
+        category.slug,
+        parts.map(({ pages, fits }) => [pages[0].slug, fits]),
+      ]),
+    ).toEqual([['engine-oil', [['liqui-moly-20646', []]]]]);
   });
 });

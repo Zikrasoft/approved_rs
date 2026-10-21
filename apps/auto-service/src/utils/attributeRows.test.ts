@@ -17,6 +17,8 @@ const oil: Category = {
   name: 'Моторное масло',
   text: '',
   translations: null,
+  maintenance_kit: false,
+  kit_rank: 0,
   fields: [
     {
       ...field,

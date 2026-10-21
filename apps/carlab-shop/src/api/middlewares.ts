@@ -13,9 +13,11 @@ import {
   AdminCreateCategoryFieldOption,
   AdminCreateFitment,
   AdminCreatePart,
+  AdminCreateRequirement,
   AdminCreateSupplierCategory,
   AdminEditTranslation,
   AdminListFitments,
+  AdminListRequirements,
   AdminSearchParts,
   AdminUpdateCategory,
   AdminUpdateCategoryField,
@@ -111,6 +113,16 @@ export default defineMiddlewares({
       matcher: '/admin/fitments/bulk',
       method: 'POST',
       middlewares: [validateAndTransformBody(AdminBulkAttachFitments)],
+    },
+    {
+      matcher: '/admin/requirements',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(AdminListRequirements, {})],
+    },
+    {
+      matcher: '/admin/requirements',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(AdminCreateRequirement)],
     },
     {
       matcher: '/admin/translations/:entity/:id',

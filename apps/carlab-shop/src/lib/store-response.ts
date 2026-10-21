@@ -56,17 +56,54 @@ const VEHICLE_RELATIONS = [
   'model.chassis.series.make',
   'engine',
   'identifiers',
+  ...[
+    'requirements',
+    'engine.requirements',
+    'model.chassis.requirements',
+  ].flatMap((owner) => [owner, `${owner}.field`]),
 ];
+
+const ownedRequirements = z.object({
+  requirements: z.array(
+    z
+      .object({
+        id: z.string(),
+        option_keys: z.array(z.string()).nullable(),
+        min: z.number().nullable(),
+        max: z.number().nullable(),
+        quantity: z.number(),
+        field: z.object({ key: z.string(), category_id: z.string() }),
+      })
+      .transform(({ field, ...requirement }) => ({
+        ...requirement,
+        field_key: field.key,
+        category_id: field.category_id,
+      })),
+  ),
+});
+
+const inheritedRequirements = ownedRequirements.extend({
+  engine: ownedRequirements,
+  model: z.object({ chassis: ownedRequirements }),
+});
 
 export const listVehicleResponses = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
 ): Promise<Vehicle[]> =>
-  z
-    .array(vehicleSchema)
-    .parse(
-      await catalog.listVehicles(filters, { relations: VEHICLE_RELATIONS }),
-    );
+  (await catalog.listVehicles(filters, { relations: VEHICLE_RELATIONS })).map(
+    (row) => {
+      const { requirements, engine, model } = inheritedRequirements.parse(row);
+      return vehicleSchema.parse({
+        ...row,
+        requirements: [
+          ...engine.requirements,
+          ...model.chassis.requirements,
+          ...requirements,
+        ],
+      });
+    },
+  );
 
 const rawPartSchema = z.object({
   id: z.string(),

@@ -41,6 +41,7 @@ export async function DELETE(
     field_id,
     option_id,
   );
+  await catalog.guardRequirementUse(field_id, option.key);
   await catalog.guardCategoryDefinition(id, (fields) =>
     fields.map((definition) =>
       definition.key === field.key

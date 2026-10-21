@@ -15,7 +15,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { adminFetch, type ErrorMessages } from '../../lib/admin-fetch';
 
 const FIELD_TYPES = [
   'number',
@@ -46,6 +46,8 @@ type Category = {
   slug: string;
   name: string;
   text: string;
+  maintenance_kit: boolean;
+  kit_rank: number;
   fields: CategoryField[];
 };
 
@@ -73,7 +75,8 @@ const isSelect = (type: FieldType) =>
 const post = <T,>(path: string, body: unknown) =>
   adminFetch<T>(path, { method: 'POST', body: JSON.stringify(body) });
 
-const remove = (path: string) => adminFetch(path, { method: 'DELETE' });
+const remove = (path: string, messages?: ErrorMessages) =>
+  adminFetch(path, { method: 'DELETE' }, messages);
 
 const OptionRow = ({
   path,
@@ -110,7 +113,10 @@ const OptionRow = ({
         size="small"
         variant="transparent"
         onClick={async () => {
-          if (await remove(`${path}/${option.id}`)) await onChange();
+          const removed = await remove(`${path}/${option.id}`, {
+            'Requirements use it': t('requirements.errors.inUse'),
+          });
+          if (removed) await onChange();
         }}
       >
         {t('categories.deleteOption')}
@@ -251,7 +257,10 @@ const FieldRow = ({
             size="small"
             variant="danger"
             onClick={async () => {
-              if (await remove(path)) await onChange();
+              const removed = await remove(path, {
+                'Requirements use it': t('requirements.errors.inUse'),
+              });
+              if (removed) await onChange();
             }}
           >
             {t('categories.deleteField')}
@@ -272,6 +281,8 @@ const CategoryEditor = ({
   const { t } = useTranslation('carlabAdmin');
   const [name, setName] = useState(category.name);
   const [text, setText] = useState(category.text);
+  const [kit, setKit] = useState(category.maintenance_kit);
+  const [kitRank, setKitRank] = useState(String(category.kit_rank));
   const [draft, setDraft] = useState<FieldDraft>(EMPTY_FIELD);
   const path = `/admin/categories/${category.id}`;
 
@@ -308,11 +319,38 @@ const CategoryEditor = ({
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.textHint')}
         </Text>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="flex items-center gap-x-2">
+            <Checkbox
+              checked={kit}
+              onCheckedChange={(checked) => setKit(checked === true)}
+            />
+            {t('categories.maintenanceKit')}
+          </Label>
+          {kit && (
+            <Input
+              type="number"
+              aria-label={t('categories.kitRank')}
+              placeholder={t('categories.kitRank')}
+              value={kitRank}
+              onChange={(event) => setKitRank(event.target.value)}
+            />
+          )}
+        </div>
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('categories.maintenanceKitHint')}
+        </Text>
         <div className="flex gap-x-2">
           <Button
-            disabled={!name}
+            disabled={!name || !Number.isInteger(Number(kitRank))}
             onClick={async () => {
-              if (await post(path, { name, text })) await onChange();
+              const saved = await post(path, {
+                name,
+                text,
+                maintenance_kit: kit,
+                kit_rank: Number(kitRank),
+              });
+              if (saved) await onChange();
             }}
           >
             {t('categories.save')}
@@ -520,7 +558,7 @@ const CategoriesPage = () => {
 
       {selected && (
         <CategoryEditor
-          key={`${selected.id}-${selected.name}-${selected.text}`}
+          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}`}
           category={selected}
           onChange={load}
         />

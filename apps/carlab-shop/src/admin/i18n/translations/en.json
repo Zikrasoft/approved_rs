@@ -8,7 +8,8 @@
     "publish": "Publish",
     "supersession": "Supersession",
     "categories": "Categories",
-    "partAttributes": "Part attributes"
+    "partAttributes": "Part attributes",
+    "requirements": "Requirements"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -299,7 +300,10 @@
       "multi-select": "Several options from a list",
       "boolean": "Yes or no",
       "text": "Code (not translated)"
-    }
+    },
+    "maintenanceKit": "Part of the maintenance kit",
+    "kitRank": "Place in the maintenance kit",
+    "maintenanceKitHint": "The car page puts one fitting part from each flagged category into the maintenance kit. A lower place puts it higher in the list."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -315,5 +319,32 @@
     "noFields": "This Category has no fields.",
     "save": "Save attributes",
     "saved": "Attributes saved"
+  },
+  "requirements": {
+    "heading": "Requirements for consumables",
+    "hint": "A requirement says which universal goods fit a car: oil approval, capacity, wiper length. Engine and chassis requirements apply to every car with them, and a car's own requirements add to them.",
+    "owner": "Applies to",
+    "ownerKinds": {
+      "engine_id": "Engine",
+      "chassis_id": "Chassis",
+      "vehicle_id": "Vehicle"
+    },
+    "ownerPlaceholder": "Choose",
+    "category": "Category",
+    "field": "Characteristic",
+    "options": "Allowed options",
+    "values": "Allowed values, comma separated",
+    "min": "From",
+    "max": "To",
+    "quantity": "Quantity",
+    "add": "Add requirement",
+    "delete": "Delete",
+    "empty": "No requirements here yet.",
+    "pickOwner": "Choose an engine, chassis or vehicle to see and add its requirements.",
+    "errors": {
+      "inUse": "Requirements use this characteristic or option. Delete them on the Requirements page first.",
+      "minExceedsMax": "The From value is above the To value.",
+      "unknownOption": "The characteristic has no such option."
+    }
   }
 }

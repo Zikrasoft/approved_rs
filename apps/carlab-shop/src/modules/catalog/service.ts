@@ -15,6 +15,7 @@ import {
   guardDefinitionChange,
   type SteeringSide,
   normalizePartNumber,
+  requirementErrors,
   validateAttributes,
 } from '@podbor/catalog-contract';
 
@@ -28,6 +29,7 @@ import Engine from './models/engine';
 import Fitment from './models/fitment';
 import Make from './models/make';
 import Part from './models/part';
+import Requirement from './models/requirement';
 import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
 } from './models/part-identifier';
@@ -119,6 +121,17 @@ const sameIdentity = (
   time(conditions.production_from) === time(fitment.production_from) &&
   time(conditions.production_to) === time(fitment.production_to);
 
+export type NewRequirement = Provenance & {
+  field_id: string;
+  engine_id?: string;
+  chassis_id?: string;
+  vehicle_id?: string;
+  option_keys: string[] | null;
+  min: number | null;
+  max: number | null;
+  quantity: number;
+};
+
 export type NewPart = Provenance &
   Partial<PartClassification> & {
     name: string;
@@ -141,6 +154,7 @@ class CatalogModuleService extends MedusaService({
   Vehicle,
   VehicleIdentifier,
   Fitment,
+  Requirement,
 }) {
   @InjectTransactionManager()
   async createPartWithIdentifiers(
@@ -308,6 +322,50 @@ class CatalogModuleService extends MedusaService({
       },
       sharedContext,
     );
+  }
+
+  @InjectTransactionManager()
+  async createRequirement(
+    requirement: NewRequirement,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    const field = await this.retrieveCategoryField(
+      requirement.field_id,
+      { relations: ['options'] },
+      sharedContext,
+    );
+    const errors = requirementErrors(field, requirement);
+    if (errors.length) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Requirement breaks its field: ${errors.join('; ')}`,
+      );
+    }
+    return this.createRequirements(requirement, sharedContext);
+  }
+
+  @InjectManager()
+  async guardRequirementUse(
+    fieldId: string,
+    optionKey: string | null,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const used = (
+      await this.listRequirements(
+        { field_id: fieldId },
+        { select: ['id', 'option_keys'] },
+        sharedContext,
+      )
+    ).filter(
+      ({ option_keys }) =>
+        optionKey === null || option_keys?.includes(optionKey),
+    );
+    if (used.length) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_ALLOWED,
+        `${used.length} Requirements use it`,
+      );
+    }
   }
 
   @InjectManager()

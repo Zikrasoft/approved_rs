@@ -1,9 +1,11 @@
 import {
   categoriesResponseSchema,
   fitmentsResponseSchema,
+  maintenanceKit,
   partPageSlug,
   partPagesResponseSchema,
   positionGroups,
+  requirementMatches,
   searchResponseSchema,
   vehiclesResponseSchema,
   vinLookupResponseSchema,
@@ -57,14 +59,32 @@ export type CarPartGroup = PositionGroup<CarPart> & {
   category: Category | null;
 };
 
-export type CarPageEntry = { vehicle: Vehicle; groups: CarPartGroup[] };
-
 type Make = Vehicle['model']['chassis']['series']['make'];
 
 export type ModelPart = {
   part: PartPage['part'];
   pages: PartPageEntry[];
   fits: Fit[];
+};
+
+export type CarMatch = {
+  category: Category;
+  quantity: number;
+  parts: ModelPart[];
+};
+
+export type CarKitItem = {
+  category: Category;
+  quantity: number;
+  part: PartPage['part'];
+  pages: PartPageEntry[];
+};
+
+export type CarPageEntry = {
+  vehicle: Vehicle;
+  groups: CarPartGroup[];
+  matches: CarMatch[];
+  kit: CarKitItem[];
 };
 
 export type ModelCategoryEntry = { category: Category; parts: ModelPart[] };
@@ -195,13 +215,38 @@ export function createCatalogue({
       });
     }
     const entries = [...bySlug.values()];
+    const pagesByPart = groupBy(entries, ({ part }) => part.id);
+    const parts = [...pagesByPart.values()].map((partPages) => ({
+      ...partPages[0].part,
+      pages: partPages,
+    }));
+    const matchesFor = (vehicle: Vehicle): CarMatch[] =>
+      requirementMatches(parts, vehicle.requirements).flatMap(
+        ({ category_id, quantity, parts: matched }) => {
+          const category = categoryById.get(category_id);
+          return category
+            ? [
+                {
+                  category,
+                  quantity,
+                  parts: matched.map(({ pages }) => ({
+                    part: pages[0].part,
+                    pages,
+                    fits: [],
+                  })),
+                },
+              ]
+            : [];
+        },
+      );
     return {
       categories: allCategories,
       categoryById,
       vehicles: allVehicles,
       fits,
       entries,
-      pagesByPart: groupBy(entries, ({ part }) => part.id),
+      pagesByPart,
+      matchesFor,
     };
   };
 
@@ -223,10 +268,12 @@ export function createCatalogue({
 
     async carPages(): Promise<CarPageEntry[]> {
       const {
+        categories: allCategories,
         vehicles: all,
         fits,
         pagesByPart,
         categoryById,
+        matchesFor,
       } = await snapshot();
       const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
       return all.map((vehicle) => {
@@ -245,15 +292,29 @@ export function createCatalogue({
               : [];
           },
         );
-        return {
-          vehicle,
-          groups: positionGroups(candidates, {
-            steering: vehicle.steering ?? undefined,
-          }).map((group) => ({
-            ...group,
-            category: categoryById.get(group.category_id ?? '') ?? null,
+        const groups = positionGroups(candidates, {
+          steering: vehicle.steering ?? undefined,
+        }).map((group) => ({
+          ...group,
+          category: categoryById.get(group.category_id ?? '') ?? null,
+        }));
+        const matches = matchesFor(vehicle);
+        const kit = maintenanceKit(
+          allCategories,
+          groups,
+          matches.map(({ category, quantity, parts }) => ({
+            category_id: category.id,
+            quantity,
+            parts: parts.map(({ part }) => part),
           })),
-        };
+        ).flatMap(({ category_id, part_id, quantity }) => {
+          const pages = pagesByPart.get(part_id) ?? [];
+          const category = categoryById.get(category_id);
+          return category && pages.length
+            ? [{ category, quantity, part: pages[0].part, pages }]
+            : [];
+        });
+        return { vehicle, groups, matches, kit };
       });
     },
 
@@ -262,6 +323,7 @@ export function createCatalogue({
         categories: all,
         vehicles: allVehicles,
         pagesByPart,
+        matchesFor,
       } = await snapshot();
       const parts = [...pagesByPart.values()];
       const models = [
@@ -269,12 +331,13 @@ export function createCatalogue({
       ].map((vehicles): ModelHubEntry => {
         const ids = new Set(vehicles.map(({ id }) => id));
         const { model } = vehicles[0];
+        const required = vehicles.flatMap(matchesFor);
         return {
           make: model.chassis.series.make,
           model,
           vehicles,
           categories: all.flatMap((category) => {
-            const matches = parts.flatMap((pages) => {
+            const fitted = parts.flatMap((pages) => {
               const fits = pages[0].fits.filter(({ vehicle_id }) =>
                 ids.has(vehicle_id),
               );
@@ -282,6 +345,16 @@ export function createCatalogue({
                 ? [{ part: pages[0].part, pages, fits }]
                 : [];
             });
+            const matches = [
+              ...fitted,
+              ...required
+                .filter((match) => match.category.id === category.id)
+                .flatMap((match) => match.parts),
+            ].filter(
+              (match, index, all) =>
+                all.findIndex(({ part }) => part.id === match.part.id) ===
+                index,
+            );
             return matches.length >= MODEL_CATEGORY_MIN_MATCHES
               ? [{ category, parts: matches }]
               : [];

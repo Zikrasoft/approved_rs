@@ -82,6 +82,8 @@ describe('generateLlmsTxt', () => {
             translations: {
               sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
             },
+            maintenance_kit: false,
+            kit_rank: 0,
             fields: [],
           },
         ],
@@ -116,6 +118,7 @@ describe('generateLlmsTxt', () => {
               displacement_cc: 1995,
             },
             identifiers: [],
+            requirements: [],
           },
         ],
       },
