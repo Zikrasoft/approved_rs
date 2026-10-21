@@ -73,7 +73,7 @@ One characteristic a Category's Parts are described by (wiper length in mm, oil 
 _Avoid_: attribute (bare), property, spec, custom field
 
 **Requirement**:
-What an Engine, Chassis or Vehicle demands of a Part in one Category, stated on a Category field (allowed options or a numeric range) with a quantity, e.g. "B47: engine oil with approval BMW LL-04, 5.2 l". Universal Parts reach a Vehicle through Requirements instead of Fitments.
+What an Engine, Chassis or Vehicle demands of a Part in one Category, stated on a Category field (allowed options or a numeric range) with the quantity of Parts to buy, never a volume, e.g. "B47: engine oil with approval BMW LL-04, one 5 l can". Universal Parts reach a Vehicle through Requirements instead of Fitments.
 _Avoid_: spec (bare), recommendation, fitment (a Requirement names no Part)
 
 **Supersession**:

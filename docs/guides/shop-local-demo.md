@@ -71,8 +71,9 @@ What it creates:
 - The seven placeholder Categories, plus `engine-oil` (viscosity, approvals
   multi-select, volume; maintenance kit, rank 0), `oil-filters` (filter type;
   kit, rank 1) and `brake-pads` (required axle).
-- Requirements: B47 needs 5W-30 or 0W-30 and BMW LL-04 (5 l); OM654 needs
-  MB 229.51 or 229.52 (7 l).
+- Requirements: B47 needs 5W-30 or 0W-30 and BMW LL-04 (one 5 l can); OM654
+  needs MB 229.51 or 229.52 (7 l, so two 5 l cans). A Requirement's quantity
+  counts Parts to buy, never litres.
 - Parts and Fitments: the B47 oil filter with four numbers (one superseded,
   `11 42 8 507 683`), the OM654 filter, front pads and M Sport front pads on
   the 320d (two Parts plus a note: an ambiguous position), rear pads, an old
