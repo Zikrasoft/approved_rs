@@ -6,6 +6,7 @@ import {
   fitComment,
   type Vehicle,
 } from '@podbor/catalog-contract';
+import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { z } from 'zod';
 
@@ -54,7 +55,8 @@ export const carLabel = ({ model, engine }: Vehicle): string =>
 export function orderLeadForm(order: LeadOrder): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
   const currency = order.currency_code.toUpperCase();
-  const money = (amount: number) => `${amount} ${currency}`;
+  const money = (amount: number) =>
+    `${amount.toLocaleString('ru-RU')} ${currency}`;
   const total = order.items.reduce(
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
@@ -81,6 +83,10 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     comment,
     service: PARTS_ORDER_SERVICE,
     consent: '1',
+    source_url: contact.source_url ?? '',
+    visitor_id: contact.visitor_id ?? '',
+    [AD_SOURCE_FIELD]: contact[AD_SOURCE_FIELD] ?? '',
+    [META_IDS_FIELD]: contact[META_IDS_FIELD] ?? '',
   });
 }
 

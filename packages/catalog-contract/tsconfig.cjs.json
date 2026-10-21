@@ -17,6 +17,9 @@
       "@podbor/lead-crm/contact-channel": [
         "./node_modules/@podbor/lead-crm/dist/cjs/contactChannel.d.ts"
       ],
+      "@podbor/lead-crm/fields": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/fields.d.ts"
+      ],
       "@podbor/lead-crm/limits": [
         "./node_modules/@podbor/lead-crm/dist/cjs/limits.d.ts"
       ],

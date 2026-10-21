@@ -12,6 +12,9 @@ describe('CommonJS build', () => {
       require('@podbor/lead-crm/contact-channel').TRACKED_CONTACT_CHANNELS,
     ).toContain('viber');
     expect(require('@podbor/lead-crm/limits').MAX_COMMENT_LENGTH).toBe(2000);
+    expect(require('@podbor/lead-crm/fields').AD_SOURCE_FIELD).toBe(
+      'ad_source',
+    );
     expect(
       require('@podbor/lead-crm/phone').isValidContact(
         '@carlab_rs',

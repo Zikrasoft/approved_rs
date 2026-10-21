@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
+  cartFingerprint,
   checkoutContactSchema,
   checkoutRefusalSchema,
   offerCartResponseSchema,
@@ -120,5 +121,53 @@ describe('checkoutContactSchema', () => {
         comment: 'x'.repeat(MAX_COMMENT_LENGTH + 1),
       }).success,
     ).toBe(false);
+  });
+
+  it('carries the visitor attribution under the lead form field names', () => {
+    const attribution = {
+      source_url: 'https://carlab.rs/ru/parts/cart/',
+      visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      ad_source: '{"utm_source":"google"}',
+      meta_ids: '{"fbp":"fb.1.1.1"}',
+    };
+
+    expect(
+      checkoutContactSchema.parse({ contact: '+381641234567', ...attribution }),
+    ).toEqual({ contact: '+381641234567', ...attribution });
+  });
+
+  it('drops an attribution field past its limit rather than refusing the order', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: '+381641234567',
+        source_url: 'x'.repeat(5000),
+      }),
+    ).toEqual({ contact: '+381641234567' });
+  });
+});
+
+describe('cartFingerprint', () => {
+  const line = (id: string, quantity: number, unit_price: number) => ({
+    id,
+    quantity,
+    unit_price,
+  });
+
+  it('ignores the order of the lines', () => {
+    expect(cartFingerprint([line('b', 1, 100), line('a', 2, 50)])).toBe(
+      cartFingerprint([line('a', 2, 50), line('b', 1, 100)]),
+    );
+  });
+
+  it('changes when a line, a quantity or a price changes', () => {
+    const shown = cartFingerprint([line('a', 2, 50), line('b', 1, 100)]);
+
+    expect(cartFingerprint([line('a', 2, 50)])).not.toBe(shown);
+    expect(cartFingerprint([line('a', 3, 50), line('b', 1, 100)])).not.toBe(
+      shown,
+    );
+    expect(cartFingerprint([line('a', 2, 60), line('b', 1, 100)])).not.toBe(
+      shown,
+    );
   });
 });

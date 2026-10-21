@@ -49,7 +49,7 @@ export function createLeadsRoute<L extends string>({
     redirect,
     cookies,
   }: RouteRequestContext): Promise<Response> {
-    const form = await request.formData();
+    const form = await request.formData().catch(() => new FormData());
     const envelope = leadEnvelopeSchema.parse(form);
 
     const requested = envelope.locale || cookies.get(localeCookie)?.value;

@@ -114,16 +114,38 @@ describe('catalogue.addToCart', () => {
     expect(fetch).toHaveBeenCalledTimes(3);
   });
 
-  it.each([
-    [
-      'an offer the supplier cannot sell now',
-      () => vi.fn(() => status(400, { code: 'OFFER_OUT_OF_STOCK' })),
-    ],
-    ['an unreachable backend', unreachable],
-  ])('falls back to the inquiry on %s', async (_, fetch) => {
-    expect(await catalog(fetch()).addToCart('cart_1', 'offer_1')).toEqual({
-      kind: 'inquiry',
+  it('says the supplier has no more and keeps the cart it opened for the next try', async () => {
+    const fetch = vi
+      .fn()
+      .mockImplementationOnce(() =>
+        status(200, { cart: { ...CART, items: [], total: 0 } }),
+      )
+      .mockImplementationOnce(() =>
+        status(400, { code: 'OFFER_OUT_OF_STOCK' }),
+      );
+
+    expect(await catalog(fetch).addToCart(null, 'offer_1')).toEqual({
+      kind: 'refused',
+      code: 'OFFER_OUT_OF_STOCK',
+      cartId: 'cart_1',
     });
+  });
+
+  it('keeps the remembered cart when the supplier refuses more', async () => {
+    const fetch = vi.fn(() => status(400, { code: 'OFFER_OUT_OF_STOCK' }));
+
+    expect(await catalog(fetch).addToCart('cart_7', 'offer_1')).toEqual({
+      kind: 'refused',
+      code: 'OFFER_OUT_OF_STOCK',
+      cartId: 'cart_7',
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to the inquiry on an unreachable backend', async () => {
+    expect(await catalog(unreachable()).addToCart('cart_1', 'offer_1')).toEqual(
+      { kind: 'inquiry' },
+    );
   });
 });
 
@@ -192,6 +214,22 @@ describe('catalogue.placeOrder', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(contact),
+      }),
+    );
+  });
+
+  it('sends the fingerprint of the cart the visitor saw', async () => {
+    const fetch = answer({ order: { id: 'order_1', display_id: 7 } });
+
+    await catalog(fetch).placeOrder('cart_1', contact, 'item_1:1:1850');
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/offer-carts/cart_1/complete',
+      expect.objectContaining({
+        body: JSON.stringify({
+          ...contact,
+          cart_fingerprint: 'item_1:1:1850',
+        }),
       }),
     );
   });

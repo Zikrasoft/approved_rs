@@ -5,7 +5,7 @@ import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
+import { cartFingerprint, normalizePartNumber } from '@podbor/catalog-contract';
 
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
@@ -330,6 +330,27 @@ medusaIntegrationTestRunner({
         ).toBe(true);
       });
 
+      it('refuses checkout of a cart that changed since the visitor saw it', async () => {
+        const shown = await cartWith(1);
+        const changed = await post(`/store/offer-carts/${shown.id}/items`, {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        const refused = await complete(shown.id, {
+          ...CONTACT,
+          cart_fingerprint: cartFingerprint(shown.items),
+        });
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('CART_CHANGED');
+
+        const placed = await complete(shown.id, {
+          ...CONTACT,
+          cart_fingerprint: cartFingerprint(changed.data.cart.items),
+        });
+        expect(placed.status).toBe(200);
+      });
+
       it('refuses an order without a contact', async () => {
         const cart = await cartWith(1);
 
@@ -417,7 +438,12 @@ medusaIntegrationTestRunner({
       it('hands a placed order to the lead pipeline', async () => {
         const cart = await cartWith(2);
 
-        const placed = await complete(cart.id);
+        const placed = await complete(cart.id, {
+          ...CONTACT,
+          source_url: 'https://carlab.rs/sr/parts/cart/',
+          visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+          ad_source: '{"utm_source":"google"}',
+        });
 
         await waitFor(() => leads.length);
         expect(leads).toHaveLength(1);
@@ -429,13 +455,16 @@ medusaIntegrationTestRunner({
           vin: 'WBA35BG070N074158',
           locale: 'sr',
           consent: '1',
+          source_url: 'https://carlab.rs/sr/parts/cart/',
+          visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+          ad_source: '{"utm_source":"google"}',
         });
         expect(leads[0].comment).toBe(
           [
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3700 RSD',
-            'Итого: 3700 RSD',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD',
+            'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
         );

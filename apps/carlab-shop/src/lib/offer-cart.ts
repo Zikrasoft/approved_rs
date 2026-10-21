@@ -223,7 +223,10 @@ export async function addOffer(
 export async function checkoutRefusal(
   scope: MedusaContainer,
   items: OfferCartLineItem[],
-): Promise<Exclude<CheckoutRefusal, 'CONTACT_MISSING'> | null> {
+): Promise<Exclude<
+  CheckoutRefusal,
+  'CONTACT_MISSING' | 'CART_CHANGED'
+> | null> {
   if (items.some((item) => !offerIdOf(item))) {
     return 'OFFER_MISSING';
   }

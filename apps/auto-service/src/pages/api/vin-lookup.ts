@@ -14,7 +14,7 @@ const formSchema = z.object({
 });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
-  const form = await request.formData();
+  const form = await request.formData().catch(() => new FormData());
   const { locale, vin } = formSchema.parse({
     locale: form.get('locale'),
     vin: form.get('vin'),

@@ -26,7 +26,13 @@
       },
       "default": "./src/limits.ts"
     },
-    "./fields": "./src/fields.ts",
+    "./fields": {
+      "require": {
+        "types": "./dist/cjs/fields.d.ts",
+        "default": "./dist/cjs/fields.js"
+      },
+      "default": "./src/fields.ts"
+    },
     "./ad-text": "./src/adText.ts",
     "./phone": {
       "require": {

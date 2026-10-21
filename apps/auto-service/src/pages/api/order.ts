@@ -2,7 +2,10 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { checkoutContactSchema } from '@podbor/catalog-contract';
+import {
+  CART_FINGERPRINT_FIELD,
+  checkoutContactSchema,
+} from '@podbor/catalog-contract';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
 import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
 import {
@@ -12,6 +15,7 @@ import {
 } from '@/utils/catalogue';
 import {
   CART_NOTICE_PARAM,
+  ORDER_NUMBER_PARAM,
   refusalNotice,
   type CartNotice,
 } from '@/utils/cartNotice';
@@ -20,16 +24,19 @@ import { PathBuilder } from '@/utils/paths';
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,
   consent: z.string().min(1),
+  [CART_FINGERPRINT_FIELD]: z.string().max(10_000).optional(),
 });
 
 const localeSchema = z.enum(SUPPORTED_LOCALES).catch(PRIMARY_LOCALE);
 
 export const POST: APIRoute = async ({ request, redirect }) => {
-  const form = Object.fromEntries(await request.formData());
+  const form = Object.fromEntries(
+    await request.formData().catch(() => new FormData()),
+  );
   const locale = localeSchema.parse(form.locale);
-  const toCart = (notice: CartNotice) =>
+  const toCart = (notice: CartNotice, extra: Record<string, string> = {}) =>
     redirect(
-      `${PathBuilder.partsCart(locale)}?${CART_NOTICE_PARAM}=${notice}`,
+      `${PathBuilder.partsCart(locale)}?${new URLSearchParams({ [CART_NOTICE_PARAM]: notice, ...extra })}`,
       303,
     );
 
@@ -44,10 +51,13 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const outcome = await catalogueFromEnv(siteEnv())?.placeOrder(
     order.data.cart_id,
     contact.data,
+    order.data[CART_FINGERPRINT_FIELD],
   );
   switch (outcome?.kind) {
     case 'order':
-      return toCart('ordered');
+      return toCart('ordered', {
+        [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
+      });
     case 'refused':
       return toCart(refusalNotice(outcome.code));
     default:

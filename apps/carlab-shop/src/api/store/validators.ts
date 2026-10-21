@@ -1,5 +1,6 @@
 import { z } from '@medusajs/framework/zod';
 import {
+  CART_FINGERPRINT_FIELD,
   checkoutContactSchema,
   STEERING_SIDES,
   vinSchema,
@@ -40,7 +41,16 @@ export const StoreCompleteOfferCart = z
       context.addIssue({ code: 'custom', message: contact.error.message });
       return z.NEVER;
     }
-    return contact.data;
+    const fingerprint = z
+      .string()
+      .max(10_000)
+      .optional()
+      .safeParse(body[CART_FINGERPRINT_FIELD]);
+    if (!fingerprint.success) {
+      context.addIssue({ code: 'custom', message: fingerprint.error.message });
+      return z.NEVER;
+    }
+    return { contact: contact.data, fingerprint: fingerprint.data };
   });
 export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
