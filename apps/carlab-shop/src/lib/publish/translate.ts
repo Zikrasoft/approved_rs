@@ -40,6 +40,7 @@ type TranslationUpdate = {
   id: string;
   translations: Record<string, unknown>;
   translated_from: TranslatedFrom;
+  updated_by?: string;
 };
 
 type Codec = {
@@ -326,6 +327,7 @@ export async function editTranslation(
   id: string,
   locale: TargetLocale,
   fields: Record<string, string>,
+  actorId: string,
 ): Promise<Translations> {
   const entity = entityNamed(name);
   const unknown = Object.keys(fields).filter(
@@ -347,6 +349,7 @@ export async function editTranslation(
       id,
       translations: entity.codec.encode(translations),
       translated_from: { ...item.translatedFrom, [locale]: item.hash },
+      updated_by: actorId,
     },
   ]);
   return translations;

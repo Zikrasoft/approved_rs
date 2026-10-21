@@ -3,9 +3,13 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
+import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import { adminError } from '../../lib/admin-errors';
+import { withEditors } from '../../lib/editors';
+
+const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();
 
 type ReferenceEntity = {
   singular: string;
@@ -29,11 +33,15 @@ export const collectionRoutes = ({
   relations = [],
 }: ReferenceEntity) => ({
   GET: async (req: AuthenticatedMedusaRequest, res: MedusaResponse) => {
-    const rows = await service(req, `list${plural}`)(
-      {},
-      { relations, order: { created_at: 'ASC' }, take: null },
-    );
-    res.json({ [collection]: rows });
+    const rows = z
+      .array(editedRowSchema)
+      .parse(
+        await service(req, `list${plural}`)(
+          {},
+          { relations, order: { created_at: 'ASC' }, take: null },
+        ),
+      );
+    res.json({ [collection]: await withEditors(req.scope, rows) });
   },
   POST: async (
     req: AuthenticatedMedusaRequest<Record<string, unknown>>,

@@ -159,6 +159,20 @@ medusaIntegrationTestRunner({
           });
         });
 
+        it('shows who changed a Part and when in the admin list', async () => {
+          await createPart('Admin-test editor part', 'EDITOR-1');
+
+          const response = await api.get(
+            '/admin/parts?q=EDITOR-1',
+            adminHeaders,
+          );
+
+          expect(response.data.parts[0]).toMatchObject({
+            updated_at: expect.any(String),
+            updated_by_user: { email: ADMIN_EMAIL },
+          });
+        });
+
         it.each([
           [
             'an empty name',
@@ -266,6 +280,7 @@ medusaIntegrationTestRunner({
             .catch((error) => error.response);
 
           expect(response.status).toBe(400);
+          expect(response.data.code).toBe('UNKNOWN_BRAND');
           expect(
             await catalog.listParts({ name: 'Unknown brand part' }),
           ).toHaveLength(0);

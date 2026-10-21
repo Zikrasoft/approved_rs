@@ -11,6 +11,7 @@ import { PART_IDENTIFIER_TYPES } from '../../../modules/catalog/models/part-iden
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreatePartType, AdminSearchPartsType } from '../validators';
 import { adminError } from '../../../lib/admin-errors';
+import { withEditors } from '../../../lib/editors';
 
 const identifierSchema = z.object({
   id: z.string(),
@@ -29,6 +30,7 @@ const partSchema = z.object({
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
+  updated_at: z.date(),
   replaced_by: z.object({ id: z.string(), name: z.string() }).nullable(),
   identifiers: z.array(identifierSchema),
 });
@@ -65,7 +67,9 @@ export async function GET(
       )
     : [];
 
-  res.json({ parts: z.array(partSchema).parse(parts) });
+  res.json({
+    parts: await withEditors(req.scope, z.array(partSchema).parse(parts)),
+  });
 }
 
 export async function POST(
