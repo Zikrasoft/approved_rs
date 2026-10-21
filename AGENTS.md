@@ -13,6 +13,7 @@ apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site — carlab.rs
 apps/carlab-shop/     the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
+infra/carlab-shop/    its production: image, compose (postgres, typesense, medusa, caddy), host scripts; one VPS, docs/guides/deploy.md
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
