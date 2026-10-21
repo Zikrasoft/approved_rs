@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -186,11 +187,9 @@ medusaIntegrationTestRunner({
             stock_quantity: 1,
             lead_time: 'in_stock',
           });
-          const vehicle = await catalog.createVehicles({
-            make: 'BMW',
-            model: '320d (F30)',
-            engine_code: `B47-${value}`,
-          });
+          const vehicle = (
+            await createVehicleFixture(catalog, { typeCode: value })
+          ).vehicle;
           const fitment = await catalog.createFitments({
             part_id: part.id,
             vehicle_id: vehicle.id,

@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -63,35 +64,23 @@ medusaIntegrationTestRunner({
           },
         ]);
 
-        const fittingVehicle = await catalog.createVehicles({
-          make: 'BMW',
-          model: '320d (F30)',
-          engine_code: 'B47',
-          year_from: 2015,
-          year_to: 2018,
-        });
+        const fittingVehicle = (
+          await createVehicleFixture(catalog, { typeCode: 'T001' })
+        ).vehicle;
         fittingVehicleId = fittingVehicle.id;
         await catalog.createFitments({
           part_id: partId,
           vehicle_id: fittingVehicleId,
         });
 
-        const unrelatedVehicle = await catalog.createVehicles({
-          make: 'BMW',
-          model: '320d (F30)',
-          engine_code: 'N20',
-          year_from: 2012,
-          year_to: 2015,
-        });
+        const unrelatedVehicle = (
+          await createVehicleFixture(catalog, { typeCode: 'T002' })
+        ).vehicle;
         unrelatedVehicleId = unrelatedVehicle.id;
 
-        const ambiguousVehicle = await catalog.createVehicles({
-          make: 'BMW',
-          model: '320d (F30)',
-          engine_code: 'N47',
-          year_from: 2010,
-          year_to: 2012,
-        });
+        const ambiguousVehicle = (
+          await createVehicleFixture(catalog, { typeCode: 'T003' })
+        ).vehicle;
         ambiguousVehicleId = ambiguousVehicle.id;
         await catalog.createFitments([
           {
