@@ -5,7 +5,7 @@ equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
 replacedHeading: Деталь заменена
 replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
-supersededNotice: Номер устарел, производитель его больше не использует.
+supersededNotice: Производитель больше не использует этот номер.
 supersededTag: Номер устарел
 currentNumberLabel: 'Актуальный номер:'
 attributesHeading: Характеристики

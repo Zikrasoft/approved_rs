@@ -46,7 +46,7 @@ const leadDays =
   </div>
   <button
     type="button"
-    class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:ml-auto sm:w-auto"
+    class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60"
     data-buy
     data-offer-id={offer?.id}
     hidden={outOfStock}
@@ -55,7 +55,7 @@ const leadDays =
   </button>
   <a
     href={PathBuilder.partsInquiry(locale)}
-    class="btn btn-secondary w-full sm:ml-auto sm:w-auto"
+    class="btn btn-secondary w-full"
     data-ask
     hidden={!outOfStock}
   >

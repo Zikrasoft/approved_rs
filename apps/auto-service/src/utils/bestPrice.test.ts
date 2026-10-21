@@ -10,13 +10,21 @@ const offer = (price: number, stock_quantity: number) => ({
 });
 
 describe('bestPrice', () => {
-  it('gives the lowest price across every number of a part and whether any is in stock', () => {
+  it('gives the lowest price the visitor can buy now across every number of a part', () => {
     expect(
       bestPrice([
-        { offers: [offer(2200, 0)] },
-        { offers: [offer(1850, 0), offer(2400, 3)] },
+        { offers: [offer(1700, 0)] },
+        { offers: [offer(2400, 3), offer(1850, 2)] },
       ]),
     ).toEqual({ price: 1850, currency: 'RSD', inStock: true });
+  });
+
+  it('falls back to the lowest price on order when nothing is in stock', () => {
+    expect(bestPrice([{ offers: [offer(2200, 0), offer(1700, 0)] }])).toEqual({
+      price: 1700,
+      currency: 'RSD',
+      inStock: false,
+    });
   });
 
   it('has nothing to show for a part priced on request', () => {

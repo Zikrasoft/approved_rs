@@ -7,12 +7,13 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   if (offers.length === 0) {
     return null;
   }
-  const cheapest = offers.reduce((best, offer) =>
+  const inStock = offers.filter(({ stock_quantity }) => stock_quantity > 0);
+  const cheapest = (inStock.length ? inStock : offers).reduce((best, offer) =>
     offer.price < best.price ? offer : best,
   );
   return {
     price: cheapest.price,
     currency: cheapest.currency,
-    inStock: offers.some(({ stock_quantity }) => stock_quantity > 0),
+    inStock: inStock.length > 0,
   };
 }

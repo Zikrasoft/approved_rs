@@ -74,7 +74,12 @@ const part = {
       </div>
     </part-offers>
   ) : (
-    <div class="card flex flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
+    <div
+      class:list={[
+        'card flex flex-col gap-3 p-5 sm:p-6',
+        !demoted && 'border-l-4 border-l-signal',
+      ]}
+    >
       <h2 class="text-block font-semibold">{copy.priceOnRequestHeading}</h2>
       <p class="text-sm leading-relaxed text-ink-2">
         {copy.priceOnRequestBody}

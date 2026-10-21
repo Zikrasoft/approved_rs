@@ -102,8 +102,7 @@ const links = [
 
         <cart-badge
           class="block"
-          hidden={!onParts}
-          data-reveal-when-filled={onParts ? undefined : ''}
+          {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
         >
           <a
             href={PathBuilder.partsCart(locale)}
