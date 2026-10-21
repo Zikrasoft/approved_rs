@@ -13,43 +13,61 @@ import {
   Textarea,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
+import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch, type ErrorMessages } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import { TranslationsDrawer } from '../../components/translations-drawer';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
 
-const FIELD_TYPES = [
-  'number',
-  'single-select',
-  'multi-select',
-  'boolean',
-  'text',
-] as const;
+const FIELD_TYPES = CATEGORY_FIELD_TYPES;
 
 type FieldType = (typeof FIELD_TYPES)[number];
 
-type FieldOption = { id: string; key: string; label: string; rank: number };
+const fieldOptionSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  label: z.string(),
+  rank: z.number(),
+});
 
-type CategoryField = {
-  id: string;
-  key: string;
-  type: FieldType;
-  unit: string | null;
-  label: string;
-  required: boolean;
-  facet: boolean;
-  rank: number;
-  options: FieldOption[];
-};
+type FieldOption = z.infer<typeof fieldOptionSchema>;
 
-type Category = {
-  id: string;
-  slug: string;
-  name: string;
-  text: string;
-  maintenance_kit: boolean;
-  kit_rank: number;
-  fields: CategoryField[];
-};
+const categoryFieldSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  type: z.enum(FIELD_TYPES),
+  unit: z.string().nullable(),
+  label: z.string(),
+  required: z.boolean(),
+  facet: z.boolean(),
+  rank: z.number(),
+  options: z.array(fieldOptionSchema),
+});
+
+type CategoryField = z.infer<typeof categoryFieldSchema>;
+
+const categorySchema = editedBySchema.extend({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  text: z.string(),
+  maintenance_kit: z.boolean(),
+  kit_rank: z.number(),
+  fields: z.array(categoryFieldSchema),
+});
+
+type Category = z.infer<typeof categorySchema>;
+
+const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const createdCategorySchema = z.object({
+  category: z.object({ id: z.string() }),
+});
 
 type FieldDraft = {
   key: string;
@@ -72,11 +90,14 @@ const EMPTY_FIELD: FieldDraft = {
 const isSelect = (type: FieldType) =>
   type === 'single-select' || type === 'multi-select';
 
-const post = <T,>(path: string, body: unknown) =>
-  adminFetch<T>(path, { method: 'POST', body: JSON.stringify(body) });
+const post = (path: string, body: unknown) =>
+  adminFetch(path, acknowledged, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
-const remove = (path: string, messages?: ErrorMessages) =>
-  adminFetch(path, { method: 'DELETE' }, messages);
+const remove = (path: string) =>
+  adminFetch(path, acknowledged, { method: 'DELETE' });
 
 const OptionRow = ({
   path,
@@ -109,14 +130,16 @@ const OptionRow = ({
       >
         {t('categories.rename')}
       </Button>
+      <TranslationsDrawer
+        entity="category_field_option"
+        id={option.id}
+        source={{ label: option.label }}
+      />
       <Button
         size="small"
         variant="transparent"
         onClick={async () => {
-          const removed = await remove(`${path}/${option.id}`, {
-            'Requirements use it': t('requirements.errors.inUse'),
-          });
-          if (removed) await onChange();
+          if (await remove(`${path}/${option.id}`)) await onChange();
         }}
       >
         {t('categories.deleteOption')}
@@ -253,14 +276,16 @@ const FieldRow = ({
           >
             {t('categories.save')}
           </Button>
+          <TranslationsDrawer
+            entity="category_field"
+            id={field.id}
+            source={{ label: field.label }}
+          />
           <Button
             size="small"
             variant="danger"
             onClick={async () => {
-              const removed = await remove(path, {
-                'Requirements use it': t('requirements.errors.inUse'),
-              });
-              if (removed) await onChange();
+              if (await remove(path)) await onChange();
             }}
           >
             {t('categories.deleteField')}
@@ -308,6 +333,7 @@ const CategoryEditor = ({
         <Heading level="h2">
           {category.name} <Badge size="small">{category.slug}</Badge>
         </Heading>
+        <EditedBy row={category} />
         <Label>{t('categories.name')}</Label>
         <Input value={name} onChange={(event) => setName(event.target.value)} />
         <Label>{t('categories.text')}</Label>
@@ -355,6 +381,11 @@ const CategoryEditor = ({
           >
             {t('categories.save')}
           </Button>
+          <TranslationsDrawer
+            entity="category"
+            id={category.id}
+            source={{ name: category.name, text: category.text }}
+          />
           <Button
             variant="danger"
             onClick={async () => {
@@ -488,9 +519,7 @@ const CategoriesPage = () => {
   const [name, setName] = useState('');
 
   const load = async () => {
-    const data = await adminFetch<{ categories: Category[] }>(
-      '/admin/categories',
-    );
+    const data = await adminFetch('/admin/categories', categoriesSchema);
     if (data) setCategories(data.categories);
   };
 
@@ -499,10 +528,11 @@ const CategoriesPage = () => {
   }, []);
 
   const create = async () => {
-    const created = await post<{ category: Category }>('/admin/categories', {
-      slug,
-      name,
-    });
+    const created = await adminFetch(
+      '/admin/categories',
+      createdCategorySchema,
+      { method: 'POST', body: JSON.stringify({ slug, name }) },
+    );
     if (created) {
       setSlug('');
       setName('');

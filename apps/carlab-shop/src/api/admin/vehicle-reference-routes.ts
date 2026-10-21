@@ -3,8 +3,13 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
+import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
+import { adminError } from '../../lib/admin-errors';
+import { withEditors } from '../../lib/editors';
+
+const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();
 
 type ReferenceEntity = {
   singular: string;
@@ -28,11 +33,15 @@ export const collectionRoutes = ({
   relations = [],
 }: ReferenceEntity) => ({
   GET: async (req: AuthenticatedMedusaRequest, res: MedusaResponse) => {
-    const rows = await service(req, `list${plural}`)(
-      {},
-      { relations, order: { created_at: 'ASC' } },
-    );
-    res.json({ [collection]: rows });
+    const rows = z
+      .array(editedRowSchema)
+      .parse(
+        await service(req, `list${plural}`)(
+          {},
+          { relations, order: { created_at: 'ASC' }, take: null },
+        ),
+      );
+    res.json({ [collection]: await withEditors(req.scope, rows) });
   },
   POST: async (
     req: AuthenticatedMedusaRequest<Record<string, unknown>>,
@@ -77,8 +86,9 @@ export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
         MedusaError.isMedusaError(error) &&
         error.type === MedusaError.Types.NOT_FOUND
       ) {
-        throw new MedusaError(
+        throw adminError(
           MedusaError.Types.CONFLICT,
+          'IN_USE',
           `This ${object.replace('_', ' ')} is still in use and cannot be deleted.`,
         );
       }

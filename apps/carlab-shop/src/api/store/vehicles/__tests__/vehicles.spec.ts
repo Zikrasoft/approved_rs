@@ -47,6 +47,21 @@ medusaIntegrationTestRunner({
             ]),
           );
         });
+
+        it('lists every Vehicle, past the default page of a list', async () => {
+          for (let index = 0; index < 16; index += 1) {
+            await createVehicleFixture(catalog, {
+              typeCode: `L${String(index).padStart(3, '0')}`,
+            });
+          }
+
+          const response = await api.get('/store/vehicles', storeHeaders);
+
+          expect(response.data.vehicles.length).toBe(
+            (await catalog.listVehicles({}, { take: null })).length,
+          );
+          expect(response.data.vehicles.length).toBeGreaterThanOrEqual(16);
+        });
       });
 
       describe('GET /store/fitments', () => {

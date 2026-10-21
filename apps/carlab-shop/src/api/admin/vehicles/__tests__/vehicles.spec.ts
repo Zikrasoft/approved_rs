@@ -129,6 +129,7 @@ medusaIntegrationTestRunner({
         const response = await remove(`/admin/vehicle-models/${model.id}`);
 
         expect(response.status).toBe(409);
+        expect(response.data.code).toBe('IN_USE');
         expect(await catalog.listVehicleModels({ id: model.id })).toHaveLength(
           1,
         );

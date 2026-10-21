@@ -26,6 +26,7 @@ import {
   AdminUpdatePartIdentifier,
   AdminUpdateSupplier,
 } from './admin/validators';
+import { keepConflictCodes } from '../lib/admin-errors';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
   StoreAddOfferCartItem,
@@ -39,6 +40,7 @@ import {
 } from './store/validators';
 
 export default defineMiddlewares({
+  errorHandler: keepConflictCodes,
   routes: [
     {
       matcher: '/admin/brands',

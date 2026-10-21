@@ -10,6 +10,7 @@ import {
   Table,
   Text,
   toast,
+  usePrompt,
 } from '@medusajs/ui';
 import {
   STAGED_DATA_KINDS,
@@ -17,29 +18,54 @@ import {
 } from '@podbor/catalog-contract';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { acknowledged, adminFetch } from '../../lib/admin-fetch';
 
-type Supplier = {
-  id: string;
-  name: string;
-  markup_percentage: number;
-  released_kinds: StagedDataKind[];
-};
+const supplierSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  markup_percentage: z.number(),
+  released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
+});
 
-type Category = { id: string; name: string };
+type Supplier = z.infer<typeof supplierSchema>;
 
-type Mapping = { id: string; code: string; category_id: string };
+const categorySchema = z.object({ id: z.string(), name: z.string() });
 
-type ImportSummary = {
-  supplier: string;
-  imported: number;
-  created: number;
-  skipped: number;
-};
+type Category = z.infer<typeof categorySchema>;
+
+const mappingSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  category_id: z.string(),
+});
+
+type Mapping = z.infer<typeof mappingSchema>;
+
+const sourceSchema = z.object({ source: z.string(), rows: z.number() });
+
+type Source = z.infer<typeof sourceSchema>;
+
+const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
+const mappingsSchema = z.object({ categories: z.array(mappingSchema) });
+const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const sourcesSchema = z.object({ sources: z.array(sourceSchema) });
+const importsSchema = z.object({
+  imports: z.array(
+    z.object({
+      supplier: z.string(),
+      imported: z.number(),
+      created: z.number(),
+      skipped: z.number(),
+    }),
+  ),
+});
+const sourceDeletedSchema = z.object({ deleted: z.number() });
 
 const SuppliersPage = () => {
   const { t } = useTranslation('carlabAdmin');
+  const prompt = usePrompt();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -50,28 +76,37 @@ const SuppliersPage = () => {
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const [code, setCode] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [sources, setSources] = useState<Source[]>([]);
+  const [removingSource, setRemovingSource] = useState<string | null>(null);
 
   const load = async () => {
-    const data = await adminFetch<{ suppliers: Supplier[] }>(
-      '/admin/suppliers',
-    );
+    const data = await adminFetch('/admin/suppliers', suppliersSchema);
     if (data) {
       setSuppliers(data.suppliers);
     }
   };
 
   const loadMappings = async (supplierId: string) => {
-    const data = await adminFetch<{ categories: Mapping[] }>(
+    const data = await adminFetch(
       `/admin/suppliers/${supplierId}/categories`,
+      mappingsSchema,
     );
     if (data) {
       setMappings(data.categories);
     }
   };
 
+  const loadSources = async () => {
+    const data = await adminFetch('/admin/catalogue-sources', sourcesSchema);
+    if (data) {
+      setSources(data.sources);
+    }
+  };
+
   useEffect(() => {
     load();
-    adminFetch<{ categories: Category[] }>('/admin/categories').then((data) => {
+    loadSources();
+    adminFetch('/admin/categories', categoriesSchema).then((data) => {
       if (data) {
         setCategories(data.categories);
       }
@@ -80,7 +115,7 @@ const SuppliersPage = () => {
 
   const update = async (id: string, body: Partial<Supplier>) => {
     setSavingId(id);
-    await adminFetch(`/admin/suppliers/${id}`, {
+    await adminFetch(`/admin/suppliers/${id}`, acknowledged, {
       method: 'POST',
       body: JSON.stringify(body),
     });
@@ -104,10 +139,9 @@ const SuppliersPage = () => {
 
   const runImport = async () => {
     setImporting(true);
-    const data = await adminFetch<{ imports: ImportSummary[] }>(
-      '/admin/supplier-imports',
-      { method: 'POST' },
-    );
+    const data = await adminFetch('/admin/supplier-imports', importsSchema, {
+      method: 'POST',
+    });
     setImporting(false);
     if (data) {
       toast.success(
@@ -128,6 +162,7 @@ const SuppliersPage = () => {
   const addMapping = async () => {
     const created = await adminFetch(
       `/admin/suppliers/${mappedSupplierId}/categories`,
+      acknowledged,
       {
         method: 'POST',
         body: JSON.stringify({ code, category_id: categoryId }),
@@ -141,10 +176,35 @@ const SuppliersPage = () => {
   };
 
   const removeMapping = async (id: string) => {
-    await adminFetch(`/admin/suppliers/${mappedSupplierId}/categories/${id}`, {
-      method: 'DELETE',
-    });
+    await adminFetch(
+      `/admin/suppliers/${mappedSupplierId}/categories/${id}`,
+      acknowledged,
+      { method: 'DELETE' },
+    );
     await loadMappings(mappedSupplierId);
+  };
+
+  const removeSource = async ({ source, rows }: Source) => {
+    const confirmed = await prompt({
+      title: t('sources.confirmTitle', { source }),
+      description: t('sources.confirmBody', { count: rows }),
+      confirmText: t('sources.remove'),
+      cancelText: t('sources.cancel'),
+    });
+    if (!confirmed) {
+      return;
+    }
+    setRemovingSource(source);
+    const data = await adminFetch(
+      `/admin/catalogue-sources/${encodeURIComponent(source)}`,
+      sourceDeletedSchema,
+      { method: 'DELETE' },
+    );
+    setRemovingSource(null);
+    if (data) {
+      toast.success(t('sources.removed', { source, count: data.deleted }));
+      await loadSources();
+    }
   };
 
   const categoryName = (id: string) =>
@@ -324,6 +384,46 @@ const SuppliersPage = () => {
               </Button>
             </div>
           </>
+        )}
+      </Container>
+
+      <Container className="flex flex-col gap-y-4">
+        <div className="flex flex-col gap-y-1">
+          <Heading level="h2">{t('sources.heading')}</Heading>
+          <Text size="small" className="text-ui-fg-subtle">
+            {t('sources.lead')}
+          </Text>
+        </div>
+        {sources.length ? (
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>{t('sources.source')}</Table.HeaderCell>
+                <Table.HeaderCell>{t('sources.rows')}</Table.HeaderCell>
+                <Table.HeaderCell />
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {sources.map((entry) => (
+                <Table.Row key={entry.source}>
+                  <Table.Cell>{entry.source}</Table.Cell>
+                  <Table.Cell>{entry.rows}</Table.Cell>
+                  <Table.Cell>
+                    <Button
+                      size="small"
+                      variant="danger"
+                      isLoading={removingSource === entry.source}
+                      onClick={() => removeSource(entry)}
+                    >
+                      {t('sources.remove')}
+                    </Button>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        ) : (
+          <Text size="small">{t('sources.empty')}</Text>
         )}
       </Container>
     </div>

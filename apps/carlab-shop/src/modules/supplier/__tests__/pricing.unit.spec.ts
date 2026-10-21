@@ -16,10 +16,11 @@ describe('storeOffers', () => {
     cost_price: number,
     stock_quantity: number,
     lead_time_days: number,
+    currency = 'RSD',
   ) => ({
     id,
     cost_price,
-    currency: 'RSD',
+    currency,
     stock_quantity,
     lead_time_days,
     supplier_article_id: `art-${id}`,
@@ -64,5 +65,14 @@ describe('storeOffers', () => {
         lead_time_days: 0,
       },
     ]);
+  });
+
+  it('leaves out an offer in another currency than the shop sells in', () => {
+    expect(
+      storeOffers([
+        offer('euro', 10, 5, 0, 'EUR'),
+        offer('dinar', 1000, 1, 0),
+      ]).map(({ id }) => id),
+    ).toEqual(['dinar']);
   });
 });

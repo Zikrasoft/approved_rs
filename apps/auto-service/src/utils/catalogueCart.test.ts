@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCatalogue } from './catalogue';
+import { catalogueIdSchema, createCatalogue } from './catalogue';
 
 const CART = {
   id: 'cart_1',
@@ -212,5 +212,34 @@ describe('catalogue.placeOrder', () => {
     expect(await catalog(fetch()).placeOrder('cart_1', contact)).toEqual({
       kind: 'inquiry',
     });
+  });
+});
+
+describe('catalogue ids', () => {
+  it('accepts the ids the backend hands out and refuses anything that could change a path', () => {
+    expect(catalogueIdSchema.parse(' cart_01JABC-1 ')).toBe('cart_01JABC-1');
+    for (const id of [
+      '',
+      '../admin',
+      'cart_1?x=1',
+      'cart/1',
+      'x'.repeat(101),
+    ]) {
+      expect(catalogueIdSchema.safeParse(id).success).toBe(false);
+    }
+  });
+
+  it('encodes every id it puts into a backend path', async () => {
+    const fetch = answer({ cart: CART });
+
+    await catalog(fetch).viewCart('cart 1');
+    await catalog(fetch).removeFromCart('cart 1', 'item/1');
+    await catalog(fetch).addToCart('cart 1', 'offer_1');
+
+    expect(fetch.mock.calls.map((call: unknown[]) => call[0])).toEqual([
+      'http://shop.test/store/offer-carts/cart%201/reprice',
+      'http://shop.test/store/offer-carts/cart%201/items/item%2F1',
+      'http://shop.test/store/offer-carts/cart%201/items',
+    ]);
   });
 });

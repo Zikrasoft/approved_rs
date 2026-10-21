@@ -185,6 +185,28 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('stores no offer for an article quoted in another currency', async () => {
+        intercars.articles.push({
+          article_id: 'IC-EUR',
+          brand: 'MANN-FILTER',
+          number: 'HU-816 X',
+          name: 'Фильтр масляный MANN',
+          category: 'IC-OIL',
+        });
+        intercars.quotes.set('IC-EUR', {
+          article_id: 'IC-EUR',
+          cost_price: 9,
+          currency: 'EUR',
+          stock: [{ location: 'Beograd', quantity: 3 }],
+          lead_time_days: 1,
+        });
+
+        const response = await runImport();
+
+        expect(response.status).toBe(200);
+        expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
       it('creates a new Part in the mapped Category, stamped with its source, for an unknown number', async () => {
         intercars.articles.push({
           article_id: 'IC-2',

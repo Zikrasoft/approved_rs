@@ -3,6 +3,7 @@ import type { PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { formatLeadTime } from '@/utils/leadTime';
+import { formatMoney } from '@/utils/money';
 
 interface Props {
   offer?: PartOffer;
@@ -23,7 +24,7 @@ const leadDays =
     <span class="spec text-lg font-semibold text-ink" data-price>
       {
         offer &&
-          `${offer.price.toLocaleString(BCP47_BY_LOCALE[locale])} ${offer.currency}`
+          formatMoney(offer.price, offer.currency, BCP47_BY_LOCALE[locale])
       }
     </span>
     <span class="text-sm text-ink-2" data-stock hidden={stock === null}>

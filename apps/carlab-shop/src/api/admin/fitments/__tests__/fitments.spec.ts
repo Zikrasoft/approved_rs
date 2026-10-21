@@ -180,6 +180,7 @@ medusaIntegrationTestRunner({
             .catch((error) => error.response);
 
           expect(response.status).toBe(409);
+          expect(response.data.code).toBe('DUPLICATE_FITMENT');
           expect(
             await catalog.listFitments({
               part_id: part.id,

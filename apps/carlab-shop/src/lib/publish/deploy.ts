@@ -3,7 +3,7 @@ const PUBLISH_WORKFLOW_URL =
 
 const PUBLISH_WORKFLOW_REF = 'main';
 
-// TODO: publish.yml does not exist yet: the owner has not decided on a workflow that rebuilds and deploys carlab.rs (and runs this chain nightly), so every dispatch fails with 404 until it lands. Once it exists, wait for its run to finish instead of only for GitHub to accept the dispatch, so a failed site build stops the reindex.
+// TODO: publish.yml does not exist yet, so every dispatch fails with 404.
 export async function dispatchDeploy(token: string | undefined): Promise<void> {
   if (!token) {
     throw new Error('PUBLISH_DISPATCH_TOKEN is not set');

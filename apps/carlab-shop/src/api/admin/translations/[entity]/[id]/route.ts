@@ -37,6 +37,7 @@ export async function POST(
       id,
       locale,
       fields,
+      req.auth_context.actor_id,
     ),
   });
 }

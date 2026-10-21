@@ -23,6 +23,7 @@ export const PathBuilder = {
     category: string,
   ) => `/${locale}/parts/${make}/${model}/${category}/`,
   partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
+  partsInquiry: (locale: Locale) => `/${locale}/parts/#${PARTS_INQUIRY_ANCHOR}`,
   partsVinUnresolved: (locale: Locale) => `/${locale}/parts/#vin-unresolved`,
   partsCar: (locale: Locale, vehicleId: string) =>
     `/${locale}/parts/car/${vehicleId}/`,

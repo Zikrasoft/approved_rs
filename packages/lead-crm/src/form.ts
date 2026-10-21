@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SERVICE_LABELS_RU, type LabelledService } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
+import { MAX_COMMENT_LENGTH, MAX_FIELD_LENGTH } from './limits.ts';
 import { isValidContact } from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
 import {
@@ -17,8 +18,7 @@ export {
 } from './phone.ts';
 export type { PhoneCountry, PhoneCountryOption } from './phone.ts';
 
-export const MAX_FIELD_LENGTH = 200;
-export const MAX_COMMENT_LENGTH = 2000;
+export { MAX_COMMENT_LENGTH, MAX_FIELD_LENGTH } from './limits.ts';
 export const MAX_URL_LENGTH = 500;
 export const MAX_SERVICES = 20;
 export {

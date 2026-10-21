@@ -12,32 +12,64 @@ import {
   toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
+import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { EditedBy } from '../../components/edited-by';
+import { TranslationsDrawer } from '../../components/translations-drawer';
+import {
+  acknowledged,
+  adminFetch,
+  editedBySchema,
+} from '../../lib/admin-fetch';
 
-type FieldOption = { key: string; label: string };
+const categoryFieldSchema = z.object({
+  key: z.string(),
+  type: z.enum(CATEGORY_FIELD_TYPES),
+  unit: z.string().nullable(),
+  label: z.string(),
+  required: z.boolean(),
+  options: z.array(z.object({ key: z.string(), label: z.string() })),
+});
 
-type CategoryField = {
-  key: string;
-  type: 'number' | 'single-select' | 'multi-select' | 'boolean' | 'text';
-  unit: string | null;
-  label: string;
-  required: boolean;
-  options: FieldOption[];
-};
+type CategoryField = z.infer<typeof categoryFieldSchema>;
 
-type Category = { id: string; name: string; fields: CategoryField[] };
+const categorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  fields: z.array(categoryFieldSchema),
+});
 
-type AttributeValue = number | boolean | string | string[];
+type Category = z.infer<typeof categorySchema>;
 
-type Part = {
-  id: string;
-  name: string;
-  category_id: string | null;
-  attributes: Record<string, AttributeValue>;
-  identifiers: { id: string; value: string; brand: { name: string } }[];
-};
+const attributeValueSchema = z.union([
+  z.number(),
+  z.boolean(),
+  z.string(),
+  z.array(z.string()),
+]);
+
+type AttributeValue = z.infer<typeof attributeValueSchema>;
+
+const partSchema = editedBySchema.extend({
+  id: z.string(),
+  name: z.string(),
+  category_id: z.string().nullable(),
+  attributes: z.record(z.string(), attributeValueSchema),
+  identifiers: z.array(
+    z.object({
+      id: z.string(),
+      value: z.string(),
+      brand: z.object({ name: z.string() }),
+    }),
+  ),
+});
+
+type Part = z.infer<typeof partSchema>;
+
+const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const partsSchema = z.object({ parts: z.array(partSchema) });
 
 const partLabel = (part: Part) =>
   `${part.name} (${part.identifiers
@@ -145,14 +177,15 @@ const PartAttributesPage = () => {
   const [values, setValues] = useState<Record<string, AttributeValue>>({});
 
   useEffect(() => {
-    adminFetch<{ categories: Category[] }>('/admin/categories').then((data) => {
+    adminFetch('/admin/categories', categoriesSchema).then((data) => {
       if (data) setCategories(data.categories);
     });
   }, []);
 
   const search = async () => {
-    const data = await adminFetch<{ parts: Part[] }>(
+    const data = await adminFetch(
       `/admin/parts?q=${encodeURIComponent(query)}`,
+      partsSchema,
     );
     if (data) setParts(data.parts);
   };
@@ -173,16 +206,13 @@ const PartAttributesPage = () => {
 
   const save = async () => {
     if (!part) return;
-    const saved = await adminFetch<{ part: Pick<Part, 'id'> }>(
-      `/admin/parts/${part.id}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          category_id: categoryId || null,
-          attributes: values,
-        }),
-      },
-    );
+    const saved = await adminFetch(`/admin/parts/${part.id}`, acknowledged, {
+      method: 'POST',
+      body: JSON.stringify({
+        category_id: categoryId || null,
+        attributes: values,
+      }),
+    });
     if (saved) toast.success(t('partAttributes.saved'));
   };
 
@@ -220,7 +250,17 @@ const PartAttributesPage = () => {
 
       {part && (
         <div className="flex flex-col gap-y-4">
-          <Heading level="h2">{partLabel(part)}</Heading>
+          <div className="flex items-start justify-between gap-x-4">
+            <div className="flex flex-col gap-y-1">
+              <Heading level="h2">{partLabel(part)}</Heading>
+              <EditedBy row={part} />
+            </div>
+            <TranslationsDrawer
+              entity="part"
+              id={part.id}
+              source={{ name: part.name }}
+            />
+          </div>
           <div className="flex flex-col gap-y-2">
             <Label>{t('partAttributes.category')}</Label>
             <Select

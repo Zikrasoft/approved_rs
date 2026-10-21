@@ -14,6 +14,7 @@
     },
     "@podbor/i18n#test": { "dependsOn": ["build"] },
     "@podbor/brands#test": { "dependsOn": ["build"] },
+    "@podbor/lead-crm#test": { "dependsOn": ["build"] },
     "@podbor/catalog-contract#test": { "dependsOn": ["build"] },
     "typecheck": {
       "dependsOn": ["^build"]

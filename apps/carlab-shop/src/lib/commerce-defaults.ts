@@ -12,11 +12,12 @@ import {
   updateStoresWorkflow,
 } from '@medusajs/medusa/core-flows';
 
+import { SHOP_CURRENCY } from '../modules/supplier/pricing';
 import { CASH_AT_PICKUP_PROVIDER_ID } from './offer-cart';
 
 const SALES_CHANNEL_NAME = 'CarLab parts shop';
 const REGION_NAME = 'Serbia';
-const REGION_CURRENCY = 'rsd';
+const REGION_CURRENCY = SHOP_CURRENCY.toLowerCase();
 
 export async function seedCashAtPickupCommerceDefaults(
   container: MedusaContainer,

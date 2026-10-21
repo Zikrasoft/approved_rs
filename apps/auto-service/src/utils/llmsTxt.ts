@@ -6,7 +6,7 @@ import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
 import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
-import { paragraphs } from '@/utils/paragraphs';
+import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';

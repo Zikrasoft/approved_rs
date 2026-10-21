@@ -1,17 +1,14 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 
-import { bmwTypeCodeDecoder } from './bmw-type-code';
+import { parseEnv } from '../env';
 import type { VinDecoder } from './decoder';
-import { mercedesBaumusterDecoder } from './mercedes-baumuster';
-
-export const VIN_DECODER_CHAIN: VinDecoder[] = [
-  bmwTypeCodeDecoder,
-  mercedesBaumusterDecoder,
-];
+import { VIN_DECODERS_BY_NAME } from './decoders';
 
 export const VIN_DECODERS_REGISTRATION = 'vinDecoders';
 
 export const vinDecoders = (scope: MedusaContainer): VinDecoder[] =>
   scope.hasRegistration(VIN_DECODERS_REGISTRATION)
     ? scope.resolve<VinDecoder[]>(VIN_DECODERS_REGISTRATION)
-    : VIN_DECODER_CHAIN;
+    : parseEnv(process.env).VIN_DECODERS.map(
+        (name) => VIN_DECODERS_BY_NAME[name],
+      );

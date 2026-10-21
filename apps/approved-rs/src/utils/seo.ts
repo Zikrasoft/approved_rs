@@ -12,7 +12,7 @@ interface MetaOptions {
 }
 
 import { marked } from 'marked';
-import { articleSchema, serviceSchema } from '@podbor/site-kit';
+import { articleSchema, paragraphs, serviceSchema } from '@podbor/site-kit';
 import type { Country, City } from './geo';
 import { localeConfig, type Locale } from '@/i18n/config';
 import type { CountryScopedServiceSlug } from './labels';
@@ -111,10 +111,7 @@ const textRenderer = new marked.TextRenderer();
 
 export function excerptFromMarkdown(markdown: string, maxLen = 140): string {
   const firstParagraph =
-    markdown
-      .trim()
-      .split(/\n\s*\n/)
-      .find((block) => !/^#{1,6}\s/.test(block.trim())) ?? '';
+    paragraphs(markdown).find((block) => !/^#{1,6}\s/.test(block)) ?? '';
   const tokens = marked.Lexer.lexInline(firstParagraph);
   const plain = inlineParser
     .parseInline(tokens, textRenderer)

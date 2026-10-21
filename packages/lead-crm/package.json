@@ -4,14 +4,37 @@
   "private": true,
   "sideEffects": false,
   "version": "0.0.1",
+  "files": [
+    "dist",
+    "src"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./storage/vercel-blob": "./src/storage/vercelBlob.ts",
     "./storage/local": "./src/storage/localFiles.ts",
-    "./contact-channel": "./src/contactChannel.ts",
+    "./contact-channel": {
+      "require": {
+        "types": "./dist/cjs/contactChannel.d.ts",
+        "default": "./dist/cjs/contactChannel.js"
+      },
+      "default": "./src/contactChannel.ts"
+    },
+    "./limits": {
+      "require": {
+        "types": "./dist/cjs/limits.d.ts",
+        "default": "./dist/cjs/limits.js"
+      },
+      "default": "./src/limits.ts"
+    },
     "./fields": "./src/fields.ts",
     "./ad-text": "./src/adText.ts",
-    "./phone": "./src/phone.ts",
+    "./phone": {
+      "require": {
+        "types": "./dist/cjs/phone.d.ts",
+        "default": "./dist/cjs/phone.js"
+      },
+      "default": "./src/phone.ts"
+    },
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",
     "./phone-kit": "./src/phoneKit.ts",
@@ -21,6 +44,7 @@
     "./testing": "./src/testing/index.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist/cjs/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },

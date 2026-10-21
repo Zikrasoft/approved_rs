@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
+  checkoutContactSchema,
   checkoutRefusalSchema,
   offerCartResponseSchema,
   partOffersResponseSchema,
@@ -60,5 +62,63 @@ describe('checkout answers', () => {
     expect(partOffersResponseSchema.parse({ offers: [] })).toEqual({
       offers: [],
     });
+  });
+});
+
+describe('checkoutContactSchema', () => {
+  it('needs only a contact and drops blank optional fields', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: ' +381 64 1234567 ',
+        contact_channel: 'whatsapp',
+        name: '',
+        vin: null,
+        comment: '  ',
+      }),
+    ).toEqual({ contact: '+381 64 1234567', contact_channel: 'whatsapp' });
+  });
+
+  it('checks the contact the way the lead route does', () => {
+    expect(
+      checkoutContactSchema.safeParse({ contact: 'call me' }).success,
+    ).toBe(false);
+    expect(
+      checkoutContactSchema.safeParse({
+        contact: '@carlab_rs',
+        contact_channel: 'telegram',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('reads an unknown channel as none', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: '+381641234567',
+        contact_channel: 'pigeon',
+      }).contact_channel,
+    ).toBeUndefined();
+  });
+
+  it('carries the car and the locale', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: '+381641234567',
+        car: 'BMW 3 F30 320d',
+        locale: 'sr',
+      }),
+    ).toEqual({
+      contact: '+381641234567',
+      car: 'BMW 3 F30 320d',
+      locale: 'sr',
+    });
+  });
+
+  it('refuses a comment past the lead limit', () => {
+    expect(
+      checkoutContactSchema.safeParse({
+        contact: '+381641234567',
+        comment: 'x'.repeat(MAX_COMMENT_LENGTH + 1),
+      }).success,
+    ).toBe(false);
   });
 });

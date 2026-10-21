@@ -12,11 +12,14 @@ import type {
   AdminCreateFitmentType,
   AdminListFitmentsType,
 } from '../validators';
+import { adminError } from '../../../lib/admin-errors';
+import { withEditors } from '../../../lib/editors';
 
 const adminFitmentSchema = fitmentRowSchema.extend({
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
+  updated_at: z.date(),
 });
 
 export async function GET(
@@ -29,7 +32,12 @@ export async function GET(
 
   const fitments = await catalog.listFitments(filters, { take: null });
 
-  res.json({ fitments: z.array(adminFitmentSchema).parse(fitments) });
+  res.json({
+    fitments: await withEditors(
+      req.scope,
+      z.array(adminFitmentSchema).parse(fitments),
+    ),
+  });
 }
 
 export async function POST(
@@ -53,8 +61,9 @@ export async function POST(
     },
   );
   if (!fitment) {
-    throw new MedusaError(
+    throw adminError(
       MedusaError.Types.CONFLICT,
+      'DUPLICATE_FITMENT',
       'This Part already fits this Vehicle at that position and criteria',
     );
   }

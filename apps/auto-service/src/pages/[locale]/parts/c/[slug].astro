@@ -9,7 +9,7 @@ import {
   categoryPagesForBuild,
   type CategoryPageEntry,
 } from '@/utils/catalogue';
-import { paragraphs } from '@/utils/paragraphs';
+import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
@@ -100,7 +100,9 @@ const fields = category.fields.map((field) => ({
                   >
                     <span class="font-semibold">{page.brand.name}</span>
                     <span class="spec text-sm text-muted">{page.value}</span>
-                    <span class="text-sm text-ink-2">{page.part.name}</span>
+                    <span class="text-sm text-ink-2">
+                      {translated(page.part, 'name', locale)}
+                    </span>
                   </a>
                 </li>
               ))}

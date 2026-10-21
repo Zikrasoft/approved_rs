@@ -2,19 +2,26 @@ import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { Container, Heading, Table, Text } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
 import { adminFetch } from '../../lib/admin-fetch';
 
-type UnresolvedCode = { make: string; code: string; count: number };
+const unresolvedCodeSchema = z.object({
+  make: z.string(),
+  code: z.string(),
+  count: z.number(),
+});
+
+type UnresolvedCode = z.infer<typeof unresolvedCodeSchema>;
+
+const codesSchema = z.object({ codes: z.array(unresolvedCodeSchema) });
 
 const VinLookupsPage = () => {
   const { t } = useTranslation('carlabAdmin');
   const [codes, setCodes] = useState<UnresolvedCode[]>([]);
 
   useEffect(() => {
-    adminFetch<{ codes: UnresolvedCode[] }>(
-      '/admin/vin-lookups/unresolved',
-    ).then((data) => {
+    adminFetch('/admin/vin-lookups/unresolved', codesSchema).then((data) => {
       if (data) setCodes(data.codes);
     });
   }, []);

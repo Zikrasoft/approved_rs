@@ -427,6 +427,7 @@ medusaIntegrationTestRunner({
         expect(first.status).toBe(202);
         expect(first.data.publish_run.status).toBe('running');
         expect(second.status).toBe(409);
+        expect(second.data.code).toBe('PUBLISH_RUNNING');
       });
 
       it('rejects a translation edit for an unknown locale, field or entity', async () => {

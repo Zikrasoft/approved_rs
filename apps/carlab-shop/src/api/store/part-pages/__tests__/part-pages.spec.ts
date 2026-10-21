@@ -42,7 +42,7 @@ medusaIntegrationTestRunner({
           unit: 'mm',
           label: 'Высота',
         });
-        await catalog.createPartWithIdentifiers({
+        const oilFilterId = await catalog.createPartWithIdentifiers({
           name: 'Oil filter, BMW B47/B48 engines',
           category_id: oilFilters.id,
           attributes: { height: 75 },
@@ -54,6 +54,10 @@ medusaIntegrationTestRunner({
               value: 'HU 816 x',
             },
           ],
+        });
+        await catalog.updateParts({
+          id: oilFilterId,
+          translations: { sr: { name: 'Filter ulja, BMW B47/B48' } },
         });
         await catalog.createPartWithIdentifiers({
           name: 'Cabin filter',
@@ -113,6 +117,7 @@ medusaIntegrationTestRunner({
           part: {
             id: expect.any(String),
             name: 'Oil filter, BMW B47/B48 engines',
+            translations: { sr: { name: 'Filter ulja, BMW B47/B48' } },
             replaced_by: null,
             category_id: oilFilters.id,
             attributes: { height: 75 },
@@ -147,7 +152,11 @@ medusaIntegrationTestRunner({
             page.normalized_value === 'CUK2939',
         );
         expect(cabin.equivalents).toEqual([]);
-        expect(cabin.part).toMatchObject({ category_id: null, attributes: {} });
+        expect(cabin.part).toMatchObject({
+          translations: null,
+          category_id: null,
+          attributes: {},
+        });
         expect(cabin.offers).toEqual([]);
       });
 

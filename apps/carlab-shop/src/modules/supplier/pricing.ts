@@ -1,5 +1,10 @@
 import type { PartOffer } from '@podbor/catalog-contract';
 
+export const SHOP_CURRENCY = 'RSD';
+
+export const inShopCurrency = ({ currency }: { currency: string }): boolean =>
+  currency.toUpperCase() === SHOP_CURRENCY;
+
 export const sellPrice = (
   costPrice: number,
   markupPercentage: number,
@@ -18,6 +23,7 @@ const inStock = (offer: PartOffer) => Number(offer.stock_quantity > 0);
 
 export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
   rows
+    .filter(inShopCurrency)
     .map(
       ({
         id,

@@ -4,6 +4,7 @@ import type {
 } from '@medusajs/framework/http';
 
 import { CATEGORY_RELATIONS, withRankedFields } from '../../../lib/categories';
+import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreateCategoryType } from '../validators';
@@ -16,10 +17,12 @@ export async function GET(
 
   const categories = await catalog.listCategories(
     {},
-    { relations: CATEGORY_RELATIONS, order: { name: 'ASC' } },
+    { relations: CATEGORY_RELATIONS, order: { name: 'ASC' }, take: null },
   );
 
-  res.json({ categories: categories.map(withRankedFields) });
+  res.json({
+    categories: await withEditors(req.scope, categories.map(withRankedFields)),
+  });
 }
 
 export async function POST(

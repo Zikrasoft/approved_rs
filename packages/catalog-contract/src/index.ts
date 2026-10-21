@@ -7,3 +7,4 @@ export * from './fitment.ts';
 export * from './ambiguity.ts';
 export * from './search.ts';
 export * from './cart.ts';
+export * from './comment.ts';

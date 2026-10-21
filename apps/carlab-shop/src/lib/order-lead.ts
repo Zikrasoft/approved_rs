@@ -1,14 +1,26 @@
 import type { BigNumberValue } from '@medusajs/framework/types';
 import { MathBN } from '@medusajs/framework/utils';
+import { PARTS_ORDER_SERVICE } from '@podbor/brands';
+import {
+  checkoutContactSchema,
+  fitComment,
+  type Vehicle,
+} from '@podbor/catalog-contract';
+import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { z } from 'zod';
 
-import { StoreCompleteOfferCart } from '../api/store/validators';
-
-export const checkoutContactSchema = StoreCompleteOfferCart;
-
-export const PARTS_ORDER_SERVICE = 'parts-order';
-
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
+
+export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
+
+const OWNER_COPY = {
+  heading: (displayId: number) =>
+    `Заказ #${displayId}, самовывоз, оплата при получении`,
+  line: (title: string, quantity: number, sum: string) =>
+    `${title} × ${quantity}: ${sum}`,
+  total: (sum: string) => `Итого: ${sum}`,
+  leftOut: (count: number) => `Не поместилось позиций: ${count}`,
+};
 
 const amount = z.preprocess(
   (value) =>
@@ -36,6 +48,9 @@ export const leadOrderSchema = z.object({
 
 export type LeadOrder = z.infer<typeof leadOrderSchema>;
 
+export const carLabel = ({ model, engine }: Vehicle): string =>
+  `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
+
 export function orderLeadForm(order: LeadOrder): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
   const currency = order.currency_code.toUpperCase();
@@ -44,15 +59,19 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     (sum, item) => sum + item.unit_price * item.quantity,
     0,
   );
-  const comment = [
-    `Заказ #${order.display_id}, самовывоз, оплата при получении`,
-    ...order.items.map(
-      (item) =>
-        `${item.title} × ${item.quantity}: ${money(item.unit_price * item.quantity)}`,
+  const comment = fitComment({
+    head: [OWNER_COPY.heading(order.display_id), contact.car ?? ''],
+    lines: order.items.map((item) =>
+      OWNER_COPY.line(
+        item.title,
+        item.quantity,
+        money(item.unit_price * item.quantity),
+      ),
     ),
-    `Итого: ${money(total)}`,
-    ...(contact.comment ? [contact.comment] : []),
-  ].join('\n');
+    tail: [OWNER_COPY.total(money(total)), contact.comment ?? ''],
+    limit: MAX_COMMENT_LENGTH,
+    more: OWNER_COPY.leftOut,
+  });
   return new URLSearchParams({
     contact: contact.contact,
     contact_channel: contact.contact_channel ?? '',

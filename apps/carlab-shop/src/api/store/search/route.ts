@@ -62,7 +62,10 @@ async function partIdsForVehicle(
   vehicleId: string,
 ): Promise<string[]> {
   await catalog.retrieveVehicle(vehicleId);
-  const fitments = await catalog.listFitments({ vehicle_id: vehicleId });
+  const fitments = await catalog.listFitments(
+    { vehicle_id: vehicleId },
+    { take: null },
+  );
   return [...new Set(fitments.map((fitment) => fitment.part_id))];
 }
 
@@ -83,7 +86,7 @@ async function describeFacets(
     .parse(
       await catalog.listCategoryFields(
         { facet: true, key: [...new Set(values.map(({ key }) => key))] },
-        { relations: ['options'], order: { rank: 'ASC' } },
+        { relations: ['options'], order: { rank: 'ASC' }, take: null },
       ),
     );
   const seen = new Set<string>();

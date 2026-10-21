@@ -3,6 +3,7 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
+import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreateBrandType } from '../validators';
@@ -15,10 +16,10 @@ export async function GET(
 
   const brands = await catalog.listBrands(
     {},
-    { relations: ['spellings'], order: { name: 'ASC' } },
+    { relations: ['spellings'], order: { name: 'ASC' }, take: null },
   );
 
-  res.json({ brands });
+  res.json({ brands: await withEditors(req.scope, brands) });
 }
 
 export async function POST(

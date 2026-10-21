@@ -2,19 +2,24 @@ import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { Badge, Button, Container, Heading, Text, toast } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
 import { adminFetch } from '../../lib/admin-fetch';
 
-type PublishRun = {
-  id: string;
-  status: 'running' | 'succeeded' | 'failed';
-  failed_step: string | null;
-  error: string | null;
-  created_at: string;
-  finished_at: string | null;
-};
+const publishRunSchema = z.object({
+  id: z.string(),
+  status: z.enum(['running', 'succeeded', 'failed']),
+  failed_step: z.string().nullable(),
+  error: z.string().nullable(),
+  created_at: z.string(),
+  finished_at: z.string().nullable(),
+});
 
-type RunResponse = { publish_run: PublishRun | null };
+type PublishRun = z.infer<typeof publishRunSchema>;
+
+const runResponseSchema = z.object({
+  publish_run: publishRunSchema.nullable(),
+});
 
 const POLL_MS = 5000;
 
@@ -30,7 +35,10 @@ const PublishPage = () => {
   const [loaded, setLoaded] = useState(false);
 
   const load = async () => {
-    const data = await adminFetch<RunResponse>('/admin/publish-runs/latest');
+    const data = await adminFetch(
+      '/admin/publish-runs/latest',
+      runResponseSchema,
+    );
     if (data) {
       setRun(data.publish_run);
     }
@@ -50,7 +58,7 @@ const PublishPage = () => {
   }, [run]);
 
   const publish = async () => {
-    const data = await adminFetch<RunResponse>('/admin/publish-runs', {
+    const data = await adminFetch('/admin/publish-runs', runResponseSchema, {
       method: 'POST',
     });
     if (data) {

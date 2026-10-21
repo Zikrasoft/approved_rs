@@ -18,6 +18,7 @@ const bmw = { name: 'BMW', slug: 'bmw' };
 const oilPart = {
   id: 'part_oil',
   name: 'Oil filter',
+  translations: null,
   replaced_by: null,
   category_id: null,
   attributes: {},
@@ -343,7 +344,7 @@ const brandNumber = (
   normalized_value: number,
   superseded: false,
   brand: { name: slug, slug },
-  part: { replaced_by: null, attributes: {}, ...part },
+  part: { translations: null, replaced_by: null, attributes: {}, ...part },
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
@@ -636,10 +637,29 @@ describe('catalogue.vehicles', () => {
 });
 
 describe('catalogueFromEnv', () => {
-  it('builds a catalogue for a configured backend without a publishable key', () => {
+  it('builds a catalogue for a configured backend', () => {
     expect(
-      catalogueFromEnv({ MEDUSA_BACKEND_URL: 'http://shop.test' }),
+      catalogueFromEnv({
+        MEDUSA_BACKEND_URL: 'http://shop.test',
+        MEDUSA_PUBLISHABLE_KEY: 'pk_test',
+      }),
     ).not.toBeNull();
+  });
+
+  it('reads an empty backend URL as no backend', () => {
+    expect(
+      catalogueFromEnv({ MEDUSA_BACKEND_URL: '', MEDUSA_PUBLISHABLE_KEY: '' }),
+    ).toBeNull();
+  });
+
+  it.each([
+    ['without a publishable key', { MEDUSA_BACKEND_URL: 'http://shop.test' }],
+    [
+      'with a backend URL that is not a URL',
+      { MEDUSA_BACKEND_URL: 'shop.test', MEDUSA_PUBLISHABLE_KEY: 'pk_test' },
+    ],
+  ])('refuses a backend configured %s', (_, env) => {
+    expect(() => catalogueFromEnv(env)).toThrow();
   });
 });
 

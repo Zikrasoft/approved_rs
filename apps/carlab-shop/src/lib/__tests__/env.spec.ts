@@ -64,4 +64,44 @@ describe('parseEnv', () => {
   it('throws when a required secret is missing', () => {
     expect(() => parseEnv({ ...VALID_ENV, JWT_SECRET: undefined })).toThrow();
   });
+
+  it('falls back to the local Typesense key outside production', () => {
+    expect(parseEnv(VALID_ENV).TYPESENSE_API_KEY).toBe('xyz');
+  });
+
+  it('requires the Typesense key in production', () => {
+    expect(() => parseEnv({ ...VALID_ENV, NODE_ENV: 'production' })).toThrow(
+      /TYPESENSE_API_KEY/,
+    );
+    expect(
+      parseEnv({
+        ...VALID_ENV,
+        NODE_ENV: 'production',
+        TYPESENSE_API_KEY: 'secret',
+      }).TYPESENSE_API_KEY,
+    ).toBe('secret');
+  });
+
+  it('chains the BMW and Mercedes decoders by default', () => {
+    expect(parseEnv(VALID_ENV).VIN_DECODERS).toEqual([
+      'bmw-type-code',
+      'mercedes-baumuster',
+    ]);
+  });
+
+  it('reads the decoder chain order from VIN_DECODERS', () => {
+    expect(
+      parseEnv({
+        ...VALID_ENV,
+        VIN_DECODERS: ' mercedes-baumuster , bmw-type-code ',
+      }).VIN_DECODERS,
+    ).toEqual(['mercedes-baumuster', 'bmw-type-code']);
+  });
+
+  it('refuses an unknown or empty decoder chain', () => {
+    expect(() =>
+      parseEnv({ ...VALID_ENV, VIN_DECODERS: 'bmw-type-code,vindecoderz' }),
+    ).toThrow();
+    expect(() => parseEnv({ ...VALID_ENV, VIN_DECODERS: ' , ' })).toThrow();
+  });
 });

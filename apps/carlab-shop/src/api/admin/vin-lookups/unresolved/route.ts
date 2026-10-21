@@ -15,7 +15,7 @@ export async function GET(
   // TODO: groups in memory; move to a GROUP BY query once unresolved lookups reach tens of thousands.
   const lookups = await vinLookups.listVinLookups(
     { vehicle_id: null, code: { $ne: null } },
-    { select: ['make', 'code'] },
+    { select: ['make', 'code'], take: null },
   );
 
   const codes = new Map<string, UnresolvedCode>();

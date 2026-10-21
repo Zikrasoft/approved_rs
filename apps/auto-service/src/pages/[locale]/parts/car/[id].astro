@@ -10,7 +10,7 @@ import PartNumbers from '@/components/PartNumbers.astro';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
-import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -138,7 +138,9 @@ const specs = [
                     <span class="text-xs text-muted">
                       {translated(item.category, 'name', locale)}
                     </span>
-                    <span class="text-sm text-ink">{item.part.name}</span>
+                    <span class="text-sm text-ink">
+                      {translated(item.part, 'name', locale)}
+                    </span>
                     <PartNumbers pages={item.pages} />
                   </div>
                   <span class="spec shrink-0 text-sm text-ink">
@@ -148,7 +150,7 @@ const specs = [
               ))}
             </ul>
             <a
-              href={`${PathBuilder.parts(locale)}#${PARTS_INQUIRY_ANCHOR}`}
+              href={PathBuilder.partsInquiry(locale)}
               class="btn btn-primary w-full sm:w-auto sm:self-start"
               data-add-all
             >
@@ -201,7 +203,7 @@ const specs = [
                             data-note={fit.note ?? undefined}
                           >
                             <span class="text-sm text-ink">
-                              {fit.part.name}
+                              {translated(fit.part, 'name', locale)}
                             </span>
                             <PartNumbers pages={fit.pages} />
                             <FitLine fit={fit} />
@@ -237,7 +239,9 @@ const specs = [
                 <ul class="divide-y divide-line">
                   {match.parts.map(({ part, pages }) => (
                     <li class="flex flex-col gap-1.5 px-5 py-4 sm:px-6">
-                      <span class="text-sm text-ink">{part.name}</span>
+                      <span class="text-sm text-ink">
+                        {translated(part, 'name', locale)}
+                      </span>
                       <PartNumbers pages={pages} />
                     </li>
                   ))}

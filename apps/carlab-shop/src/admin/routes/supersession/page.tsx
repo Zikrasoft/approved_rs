@@ -12,29 +12,31 @@ import {
 } from '@medusajs/ui';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { acknowledged, adminFetch } from '../../lib/admin-fetch';
 
-type PartIdentifier = {
-  id: string;
-  value: string;
-  superseded: boolean;
-  brand: { name: string };
-};
+const partSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  replaced_by: z.object({ id: z.string(), name: z.string() }).nullable(),
+  identifiers: z.array(
+    z.object({
+      id: z.string(),
+      value: z.string(),
+      superseded: z.boolean(),
+      brand: z.object({ name: z.string() }),
+    }),
+  ),
+});
 
-type Part = {
-  id: string;
-  name: string;
-  replaced_by: { id: string; name: string } | null;
-  identifiers: PartIdentifier[];
-};
+type Part = z.infer<typeof partSchema>;
+
+const partsSchema = z.object({ parts: z.array(partSchema) });
 
 const searchParts = async (q: string): Promise<Part[]> =>
-  (
-    await adminFetch<{ parts: Part[] }>(
-      `/admin/parts?q=${encodeURIComponent(q)}`,
-    )
-  )?.parts ?? [];
+  (await adminFetch(`/admin/parts?q=${encodeURIComponent(q)}`, partsSchema))
+    ?.parts ?? [];
 
 const numbersOf = (part: Part): string =>
   part.identifiers
@@ -77,10 +79,14 @@ const SupersessionPage = () => {
   };
 
   const setSuperseded = async (identifierId: string, superseded: boolean) => {
-    const saved = await adminFetch(`/admin/part-identifiers/${identifierId}`, {
-      method: 'POST',
-      body: JSON.stringify({ superseded }),
-    });
+    const saved = await adminFetch(
+      `/admin/part-identifiers/${identifierId}`,
+      acknowledged,
+      {
+        method: 'POST',
+        body: JSON.stringify({ superseded }),
+      },
+    );
     if (saved && selected) {
       await refresh(selected.id);
     }
@@ -90,10 +96,14 @@ const SupersessionPage = () => {
     if (!selected) {
       return;
     }
-    const saved = await adminFetch(`/admin/parts/${selected.id}`, {
-      method: 'POST',
-      body: JSON.stringify({ replaced_by_id: replacedById }),
-    });
+    const saved = await adminFetch(
+      `/admin/parts/${selected.id}`,
+      acknowledged,
+      {
+        method: 'POST',
+        body: JSON.stringify({ replaced_by_id: replacedById }),
+      },
+    );
     if (saved) {
       setCandidates(null);
       setReplacementQuery('');

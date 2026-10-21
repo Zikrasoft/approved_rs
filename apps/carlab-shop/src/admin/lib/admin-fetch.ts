@@ -1,23 +1,47 @@
 import { toast } from '@medusajs/ui';
+import { getI18n } from 'react-i18next';
 import { z } from 'zod';
 
-const errorBodySchema = z.object({ message: z.string().min(1) });
+const errorBodySchema = z.object({
+  code: z.string().optional(),
+  type: z.string().optional(),
+});
+
+const translate = (key: string): string | null => {
+  const i18n = getI18n();
+  return i18n?.exists(key, { ns: 'carlabAdmin' })
+    ? i18n.t(key, { ns: 'carlabAdmin' })
+    : null;
+};
 
 const errorMessage = async (response: Response): Promise<string> => {
   const body = errorBodySchema.safeParse(
     await response.json().catch(() => null),
   );
-  return body.success
-    ? body.data.message
-    : `${response.status} ${response.statusText}`;
+  const { code, type } = body.success ? body.data : {};
+  return (
+    (code && translate(`errors.codes.${code}`)) ||
+    (type && translate(`errors.types.${type}`)) ||
+    translate('errors.unknown') ||
+    `${response.status} ${response.statusText}`
+  );
 };
 
-export type ErrorMessages = Record<string, string>;
+export const acknowledged = z.unknown().transform(() => true as const);
+
+export const editedBySchema = z.object({
+  updated_at: z.string(),
+  updated_by_user: z
+    .object({ email: z.string(), name: z.string().nullable() })
+    .nullable(),
+});
+
+export type EditedBy = z.infer<typeof editedBySchema>;
 
 export const adminFetch = async <T>(
   path: string,
+  schema: z.ZodType<T>,
   init?: RequestInit,
-  messages: ErrorMessages = {},
 ): Promise<T | null> => {
   try {
     const response = await fetch(path, {
@@ -26,17 +50,17 @@ export const adminFetch = async <T>(
       ...init,
     });
     if (!response.ok) {
-      const message = await errorMessage(response);
-      toast.error(
-        Object.entries(messages).find(([fragment]) =>
-          message.includes(fragment),
-        )?.[1] ?? message,
-      );
+      toast.error(await errorMessage(response));
       return null;
     }
-    return (await response.json()) as T;
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : String(error));
+    const body = schema.safeParse(await response.json());
+    if (!body.success) {
+      toast.error(translate('errors.unexpectedAnswer') ?? body.error.message);
+      return null;
+    }
+    return body.data;
+  } catch {
+    toast.error(translate('errors.unreachable') ?? 'errors.unreachable');
     return null;
   }
 };

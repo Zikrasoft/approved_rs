@@ -2,43 +2,50 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { catalogueFromEnv, siteEnv, type CartOutcome } from '@/utils/catalogue';
+import {
+  catalogueFromEnv,
+  catalogueIdSchema,
+  siteEnv,
+  type CartOutcome,
+} from '@/utils/catalogue';
 
-const id = z.string().trim().min(1).max(100);
-
-const addSchema = z.object({ cart_id: id.nullable(), offer_id: id });
-const removeSchema = z.object({ cart_id: id, item_id: id });
+const addSchema = z.object({
+  cart_id: catalogueIdSchema.nullable(),
+  offer_id: catalogueIdSchema,
+});
+const removeSchema = z.object({
+  cart_id: catalogueIdSchema,
+  item_id: catalogueIdSchema,
+});
 
 const INQUIRY: CartOutcome = { kind: 'inquiry' };
 
-const answer = async <T>(
-  input: unknown,
-  schema: z.ZodType<T>,
-  run: (
-    catalogue: NonNullable<ReturnType<typeof catalogueFromEnv>>,
-    data: T,
-  ) => Promise<CartOutcome>,
-): Promise<Response> => {
-  const parsed = schema.safeParse(input);
-  const catalogue = catalogueFromEnv(siteEnv());
-  return Response.json(
-    parsed.success && catalogue ? await run(catalogue, parsed.data) : INQUIRY,
-  );
-};
+const catalogue = () => catalogueFromEnv(siteEnv());
+
+const respond = async (outcome: Promise<CartOutcome> | undefined) =>
+  Response.json((await outcome) ?? INQUIRY);
 
 const body = (request: Request) => request.json().catch(() => null);
 
-export const GET: APIRoute = ({ url }) =>
-  answer(url.searchParams.get('id'), id, (catalogue, cartId) =>
-    catalogue.viewCart(cartId),
-  );
+export const GET: APIRoute = ({ url }) => {
+  const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));
+  return respond(id.success ? catalogue()?.viewCart(id.data) : undefined);
+};
 
-export const POST: APIRoute = async ({ request }) =>
-  answer(await body(request), addSchema, (catalogue, data) =>
-    catalogue.addToCart(data.cart_id, data.offer_id),
+export const POST: APIRoute = async ({ request }) => {
+  const add = addSchema.safeParse(await body(request));
+  return respond(
+    add.success
+      ? catalogue()?.addToCart(add.data.cart_id, add.data.offer_id)
+      : undefined,
   );
+};
 
-export const DELETE: APIRoute = async ({ request }) =>
-  answer(await body(request), removeSchema, (catalogue, data) =>
-    catalogue.removeFromCart(data.cart_id, data.item_id),
+export const DELETE: APIRoute = async ({ request }) => {
+  const remove = removeSchema.safeParse(await body(request));
+  return respond(
+    remove.success
+      ? catalogue()?.removeFromCart(remove.data.cart_id, remove.data.item_id)
+      : undefined,
   );
+};
