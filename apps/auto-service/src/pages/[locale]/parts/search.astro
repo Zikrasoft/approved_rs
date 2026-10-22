@@ -24,6 +24,7 @@ import {
   PARTS_QUERY_MAX_LENGTH,
   rangesFromParams,
 } from '@/utils/partsSearch';
+import { currentNumber } from '@/utils/partNumbers';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -205,6 +206,7 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
                     name={result.part.name}
                     detail={result.part.category?.name}
                     superseded={result.superseded}
+                    current={currentNumber(result, found.results)}
                     offers={result.offers}
                   />
                 ))}

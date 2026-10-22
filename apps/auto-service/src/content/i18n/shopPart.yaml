@@ -6,7 +6,10 @@ noEquivalents: Аналогов в каталоге пока нет. Напиш�
 replacedHeading: Деталь заменена
 replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
 supersededNotice: Производитель больше не использует этот номер.
-supersededTag: Номер устарел
+previousNumber: Прежний номер
+previousNumberCurrent: 'Прежний номер, актуальный:'
+earlierNumbers: 'Ранее:'
+previousNumbersHeading: Прежние номера
 currentNumberLabel: 'Актуальный номер:'
 attributesHeading: Характеристики
 attributeYes: Да
@@ -49,7 +52,6 @@ translations:
     replacedHeading: Deo je zamenjen
     replacedLead: 'Proizvođač je ovaj deo zamenio novim. Naručite aktuelni deo:'
     supersededNotice: Ovaj broj je zastareo i proizvođač ga više ne koristi.
-    supersededTag: zastareo
     attributesHeading: Karakteristike
     attributeYes: Da
     attributeNo: Ne
@@ -69,7 +71,6 @@ translations:
     replacedHeading: This part has been replaced
     replacedLead: 'The manufacturer replaced this part with a new one. Order the current part:'
     supersededNotice: This number is superseded and no longer used by the manufacturer.
-    supersededTag: superseded
     attributesHeading: Specifications
     attributeYes: 'Yes'
     attributeNo: 'No'

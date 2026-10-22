@@ -26,7 +26,6 @@ export const partsSearchContentSchema = z
     rangeBetween: z.string(),
     removeFilter: z.string(),
     noFilteredResults: z.string(),
-    superseded: z.string(),
     booleanTrue: z.string(),
     booleanFalse: z.string(),
     previous: z.string(),

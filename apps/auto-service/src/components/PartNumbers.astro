@@ -1,39 +1,56 @@
 ---
+import type { BrandNumber } from '@podbor/catalog-contract';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
+import { splitNumbers } from '@/utils/partNumbers';
 
 interface Props {
-  pages: {
+  pages: (Pick<BrandNumber, 'type' | 'superseded' | 'value'> & {
     slug: string;
-    value: string;
     brand: { name: string };
-    superseded?: boolean;
-  }[];
+  })[];
 }
 
-const { pages } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
+const { current, previous } = splitNumbers(Astro.props.pages);
 ---
 
-<ul class="flex flex-wrap gap-x-4 gap-y-1">
+<div class="flex flex-col gap-1">
   {
-    pages.map((page) => (
-      <li>
-        <a
-          href={PathBuilder.partNumber(locale, page.slug)}
-          class="inline-flex items-baseline gap-1.5 text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-        >
-          <span class="text-sm font-semibold">{page.brand.name}</span>
-          <span class="spec text-sm">{page.value}</span>
-          {page.superseded && (
-            <span class="rounded-sm border border-line px-1.5 py-px text-xs text-ink-2">
-              {copy.supersededTag}
-            </span>
-          )}
-        </a>
-      </li>
-    ))
+    current.length > 0 && (
+      <ul class="flex flex-wrap gap-x-4 gap-y-1">
+        {current.map((page) => (
+          <li>
+            <a
+              href={PathBuilder.partNumber(locale, page.slug)}
+              class="text-sm text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+            >
+              <span class="font-semibold">{page.brand.name}</span>{' '}
+              <span class="spec">{page.value}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
   }
-</ul>
+  {
+    previous.length > 0 && (
+      <p class="text-xs text-muted">
+        {copy.earlierNumbers}{' '}
+        {previous.map((page, index) => (
+          <>
+            {index > 0 && ', '}
+            <a
+              href={PathBuilder.partNumber(locale, page.slug)}
+              class="underline-offset-2 hover:text-signal-ink hover:underline"
+            >
+              {page.brand.name} <span class="spec">{page.value}</span>
+            </a>
+          </>
+        ))}
+      </p>
+    )
+  }
+</div>

@@ -13,6 +13,7 @@ import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { partSuccessor } from '@/utils/partSuccessor';
+import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 
@@ -68,6 +69,7 @@ const successorLabel =
   successor && `${successor.brand.name} ${successor.value}`;
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
+const equivalents = splitNumbers(page.equivalents);
 ---
 
 <Shell
@@ -106,7 +108,7 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
         (replacement || page.superseded) && (
           <div class="card flex flex-col gap-2 border-l-4 border-l-signal p-5 sm:p-6">
             <span class="w-fit rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2">
-              {replacement ? copy.replacedHeading : copy.supersededTag}
+              {replacement ? copy.replacedHeading : copy.previousNumber}
             </span>
             <p class="text-sm leading-relaxed text-ink-2">
               {replacement ? copy.replacedLead : copy.supersededNotice}
@@ -199,20 +201,45 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   <section class="wrap py-band md:py-band-lg">
     <h2 class="text-section mb-6">{copy.equivalentsHeading}</h2>
     {
-      page.equivalents.length > 0 ? (
+      page.equivalents.length === 0 && (
+        <p class="max-w-2xl text-muted">{copy.noEquivalents}</p>
+      )
+    }
+    {
+      equivalents.current.length > 0 && (
         <ul class="card divide-y divide-line">
-          {page.equivalents.map((equivalent) => (
+          {equivalents.current.map((equivalent) => (
             <PartRow
               slug={equivalentSlug(equivalent)}
               brand={equivalent.brand.name}
               value={equivalent.value}
-              superseded={equivalent.superseded}
               offers={bySlug.get(equivalentSlug(equivalent))?.offers ?? []}
             />
           ))}
         </ul>
-      ) : (
-        <p class="max-w-2xl text-muted">{copy.noEquivalents}</p>
+      )
+    }
+    {
+      equivalents.previous.length > 0 && (
+        <div class="mt-4 flex flex-col gap-1 text-sm">
+          <h3 class="text-muted">{copy.previousNumbersHeading}</h3>
+          <ul class="flex flex-wrap gap-x-4 gap-y-1">
+            {equivalents.previous.map((equivalent) => (
+              <li>
+                <a
+                  href={PathBuilder.partNumber(
+                    locale,
+                    equivalentSlug(equivalent),
+                  )}
+                  class="text-ink-2 underline-offset-2 hover:text-signal-ink hover:underline"
+                >
+                  {equivalent.brand.name}{' '}
+                  <span class="spec">{equivalent.value}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       )
     }
   </section>
