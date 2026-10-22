@@ -100,6 +100,30 @@ medusaIntegrationTestRunner({
           expect(response.status).toBe(200);
           expect(response.data.parts).toHaveLength(0);
         });
+        it('finds a Part by its name', async () => {
+          await createPart('Admin-test Oil Filter Housing', 'NAME-SEARCH-1');
+
+          const response = await api.get(
+            '/admin/parts?q=filter%20housing',
+            adminHeaders,
+          );
+
+          expect(response.data.parts).toEqual([
+            expect.objectContaining({ name: 'Admin-test Oil Filter Housing' }),
+          ]);
+        });
+
+        it.each(['%', '_', '\\'])(
+          'takes %j literally rather than as a wildcard',
+          async (q) => {
+            const response = await api.get(
+              `/admin/parts?q=${encodeURIComponent(q)}`,
+              adminHeaders,
+            );
+
+            expect(response.data.parts).toEqual([]);
+          },
+        );
       });
 
       describe('POST /admin/parts', () => {
@@ -341,6 +365,102 @@ medusaIntegrationTestRunner({
         });
       });
 
+      describe('POST /admin/parts/:id/identifiers', () => {
+        const addNumber = (partId: string, body: Record<string, unknown>) =>
+          api
+            .post(`/admin/parts/${partId}/identifiers`, body, adminHeaders)
+            .catch((error) => error.response);
+
+        it('adds a normalized number to an existing Part', async () => {
+          const {
+            data: { part },
+          } = await createPart('Add number part', 'ADD-NUMBER-1');
+
+          const response = await addNumber(part.id, {
+            type: 'manufacturer-number',
+            brand_id: bmw.id,
+            value: ' add-number 2 ',
+          });
+
+          expect(response.status).toBe(200);
+          expect(response.data.part.identifiers).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                type: 'manufacturer-number',
+                value: 'add-number 2',
+                normalized_value: 'ADDNUMBER2',
+              }),
+            ]),
+          );
+          const found = await api.get(
+            '/admin/parts?q=ADDNUMBER2',
+            adminHeaders,
+          );
+          expect(found.data.parts).toEqual([
+            expect.objectContaining({ id: part.id }),
+          ]);
+        });
+
+        it('refuses a number another Part already has, however it is spelled', async () => {
+          await createPart('Taken number part', 'ADD-TAKEN-1');
+          const {
+            data: { part },
+          } = await createPart('Second number part', 'ADD-TAKEN-2');
+
+          const response = await addNumber(part.id, {
+            type: 'ean',
+            brand_id: bmw.id,
+            value: 'add taken 1',
+          });
+
+          expect(response.status).toBe(409);
+          expect(response.data).toMatchObject({
+            code: 'ALREADY_EXISTS',
+            entity: 'part_identifier',
+          });
+        });
+
+        it.each([
+          [
+            'an unknown Brand',
+            { type: 'oem', brand_id: 'brand_missing', value: 'X1' },
+            'UNKNOWN_BRAND',
+          ],
+          [
+            'an empty number',
+            { type: 'oem', brand_id: 'brand', value: ' - ' },
+            'INVALID_FIELD',
+          ],
+          [
+            'an unknown key',
+            { type: 'oem', brand_id: 'brand', value: 'X1', x: 1 },
+            'INVALID_FIELD',
+          ],
+        ])('returns a 400 for %s', async (_, body, code) => {
+          const {
+            data: { part },
+          } = await createPart(`Bad number part ${code}`, `ADD-BAD-${code}`);
+
+          const response = await addNumber(part.id, {
+            ...body,
+            brand_id: body.brand_id === 'brand' ? bmw.id : body.brand_id,
+          });
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({ code });
+        });
+
+        it('returns a 404 for an unknown Part', async () => {
+          const response = await addNumber('part_missing', {
+            type: 'oem',
+            brand_id: bmw.id,
+            value: 'ADD-MISSING-1',
+          });
+
+          expect(response.status).toBe(404);
+        });
+      });
+
       describe('deleting', () => {
         const createPartWithOfferAndFitment = async (value: string) => {
           const partId = await catalog.createPartWithIdentifiers({
@@ -405,6 +525,11 @@ medusaIntegrationTestRunner({
         it('deleting a PartIdentifier removes its offers but keeps the Part', async () => {
           const { part, identifier, offer } =
             await createPartWithOfferAndFitment('DELETE-IDENTIFIER-1');
+          await api.post(
+            `/admin/parts/${part.id}/identifiers`,
+            { type: 'oem', brand_id: bmw.id, value: 'DELETE-IDENTIFIER-2' },
+            adminHeaders,
+          );
 
           await api.delete(
             `/admin/part-identifiers/${identifier.id}`,
@@ -418,6 +543,22 @@ medusaIntegrationTestRunner({
             await supplierService.listSupplierOffers({ id: offer.id }),
           ).toHaveLength(0);
           expect(await catalog.listParts({ id: part.id })).toHaveLength(1);
+        });
+
+        it('refuses to delete the last number of a Part', async () => {
+          const { part, identifier } = await createPartWithOfferAndFitment(
+            'DELETE-LAST-NUMBER-1',
+          );
+
+          const response = await api
+            .delete(`/admin/part-identifiers/${identifier.id}`, adminHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(409);
+          expect(response.data).toMatchObject({ code: 'LAST_IDENTIFIER' });
+          expect(
+            await catalog.listPartIdentifiers({ part_id: part.id }),
+          ).toHaveLength(1);
         });
 
         it('returns a 404 for an unknown Part', async () => {

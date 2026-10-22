@@ -28,17 +28,16 @@ const partNumber = z
   .trim()
   .refine((value) => normalizePartNumber(value).length > 0);
 
+export const AdminAddPartIdentifier = z.strictObject({
+  type: z.enum(PART_IDENTIFIER_TYPES),
+  brand_id: z.string().min(1),
+  value: partNumber,
+});
+export type AdminAddPartIdentifierType = z.infer<typeof AdminAddPartIdentifier>;
+
 export const AdminCreatePart = z.strictObject({
   name,
-  identifiers: z
-    .array(
-      z.object({
-        type: z.enum(PART_IDENTIFIER_TYPES),
-        brand_id: z.string().min(1),
-        value: partNumber,
-      }),
-    )
-    .min(1),
+  identifiers: z.array(AdminAddPartIdentifier).min(1),
   category_id: z.string().min(1).nullable().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });

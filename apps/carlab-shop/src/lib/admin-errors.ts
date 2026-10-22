@@ -22,6 +22,7 @@ export const ADMIN_ERROR_CODES = [
   'ALREADY_EXISTS',
   'FIELD_REQUIRED',
   'INVALID_FIELD',
+  'LAST_IDENTIFIER',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];

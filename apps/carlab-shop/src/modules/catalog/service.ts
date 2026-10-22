@@ -182,6 +182,7 @@ class CatalogModuleService extends MedusaService({
     }: NewPart,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<string> {
+    await this.refuseUnknownBrands(identifiers, sharedContext);
     const created = await this.createParts(
       {
         name,
@@ -205,6 +206,70 @@ class CatalogModuleService extends MedusaService({
       sharedContext,
     );
     return created.id;
+  }
+
+  @InjectTransactionManager()
+  async addPartIdentifier(
+    partId: string,
+    identifier: NewPartIdentifier,
+    provenance: Provenance,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await this.retrievePart(partId, { select: ['id'] }, sharedContext);
+    await this.refuseUnknownBrands([identifier], sharedContext);
+    await this.createPartIdentifiers(
+      {
+        ...identifier,
+        normalized_value: normalizePartNumber(identifier.value),
+        part_id: partId,
+        ...provenance,
+      },
+      sharedContext,
+    );
+  }
+
+  @InjectTransactionManager()
+  async removePartIdentifier(
+    id: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const { part_id } = await this.retrievePartIdentifier(
+      id,
+      { select: ['part_id'] },
+      sharedContext,
+    );
+    const [, count] = await this.listAndCountPartIdentifiers(
+      { part_id },
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    if (count < 2) {
+      throw adminError(
+        MedusaError.Types.CONFLICT,
+        'LAST_IDENTIFIER',
+        'A Part keeps at least one number; delete the Part instead',
+      );
+    }
+    await this.deletePartIdentifiers(id, sharedContext);
+  }
+
+  private async refuseUnknownBrands(
+    identifiers: NewPartIdentifier[],
+    sharedContext: Context,
+  ): Promise<void> {
+    const brandIds = [...new Set(identifiers.map(({ brand_id }) => brand_id))];
+    const brands = await this.listBrands(
+      { id: brandIds },
+      { select: ['id'] },
+      sharedContext,
+    );
+    if (brands.length !== brandIds.length) {
+      throw adminError(
+        MedusaError.Types.INVALID_DATA,
+        'UNKNOWN_BRAND',
+        'Unknown brand',
+      );
+    }
   }
 
   @InjectTransactionManager()
