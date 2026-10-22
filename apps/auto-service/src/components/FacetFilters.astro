@@ -1,0 +1,97 @@
+---
+import { facetFilter, type SearchFacet } from '@podbor/catalog-contract';
+import Icon from '@/components/Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { facetValueLabel } from '@/utils/partsSearch';
+
+interface Props {
+  action: string;
+  hidden: Record<string, string>;
+  facets: SearchFacet[];
+  chosen?: string[];
+  resetHref?: string;
+  class?: string;
+}
+
+const {
+  action,
+  hidden,
+  facets,
+  chosen = [],
+  resetHref,
+  class: className,
+} = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+---
+
+<form method="GET" action={action} class:list={['card p-5', className]}>
+  {
+    Object.entries(hidden).map(([name, value]) => (
+      <input type="hidden" name={name} value={value} />
+    ))
+  }
+  <open-at-large class="block">
+    <details class="group" open={chosen.length > 0}>
+      <summary
+        class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
+      >
+        {copy.filtersHeading}
+        <Icon
+          name="chevronDown"
+          size={16}
+          class="text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+        />
+      </summary>
+      <div class="mt-4 flex flex-col gap-5">
+        {
+          facets.map((facet) => (
+            <fieldset class="flex flex-col gap-2">
+              <legend class="mb-1 text-sm font-semibold text-ink">
+                {facet.label}
+              </legend>
+              {facet.values.map((value) => (
+                <label class="flex min-h-8 items-center gap-2 text-sm text-ink-2">
+                  <input
+                    type="checkbox"
+                    name="facets"
+                    value={facetFilter(facet.key, value.value)}
+                    checked={chosen.includes(
+                      facetFilter(facet.key, value.value),
+                    )}
+                    class="size-4 accent-signal"
+                  />
+                  <span class="flex-1">
+                    {facetValueLabel(facet, value, copy)}
+                  </span>
+                  <span class="spec text-xs text-muted">{value.count}</span>
+                </label>
+              ))}
+            </fieldset>
+          ))
+        }
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="submit" class="btn btn-primary">
+            {copy.applyFilters}
+          </button>
+          {
+            resetHref && chosen.length > 0 && (
+              <a
+                href={resetHref}
+                class="text-sm underline underline-offset-2 hover:text-signal-ink"
+              >
+                {copy.resetFilters}
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </details>
+  </open-at-large>
+</form>
+
+<script>
+  import { defineOpenAtLarge } from '@/scripts/openAtLarge';
+
+  defineOpenAtLarge();
+</script>

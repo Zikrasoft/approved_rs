@@ -14,6 +14,8 @@ unavailable: Поиск сейчас не отвечает. Отправьте �
 filtersHeading: Характеристики
 applyFilters: Показать
 resetFilters: Сбросить
+removeFilter: 'Убрать фильтр: {label}'
+noFilteredResults: С такими характеристиками в категории ничего нет. Уберите часть фильтров или отправьте заявку, и менеджер подберет запчасть вручную.
 superseded: Номер устарел
 booleanTrue: да
 booleanFalse: нет

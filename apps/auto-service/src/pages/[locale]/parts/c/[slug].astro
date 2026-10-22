@@ -4,9 +4,11 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import PartRow from '@/components/PartRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
+  categoryFacets,
   categoryPagesForBuild,
   type CategoryPageEntry,
 } from '@/utils/catalogue';
@@ -31,6 +33,7 @@ const inquiry = content(locale).pages.partsInquiry;
 const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const facets = categoryFacets(category, locale);
 const fields = category.fields.map((field) => ({
   key: field.key,
   label: [translated(field, 'label', locale), field.unit]
@@ -91,6 +94,15 @@ const fields = category.fields.map((field) => ({
 
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.partsHeading}</h2>
+        {
+          facets.length > 0 && (
+            <FacetFilters
+              action={PathBuilder.partsSearch(locale)}
+              hidden={{ category: category.slug }}
+              facets={facets}
+            />
+          )
+        }
         {
           category.pages.length > 0 ? (
             <ul class="card divide-y divide-line">
