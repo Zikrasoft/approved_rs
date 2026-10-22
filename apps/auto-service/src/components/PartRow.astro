@@ -21,10 +21,10 @@ const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 ---
 
-<li>
+<li class="first:rounded-t-[inherit] last:rounded-b-[inherit]">
   <a
     href={PathBuilder.partNumber(locale, slug)}
-    class="group flex items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-shade sm:px-6"
+    class="group flex rounded-[inherit] items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-shade sm:px-6"
   >
     <span class="flex min-w-0 flex-1 flex-col gap-1">
       <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
