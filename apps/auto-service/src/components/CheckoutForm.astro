@@ -1,0 +1,169 @@
+---
+import Icon from './Icon.astro';
+import LeadFormHidden from './LeadFormHidden.astro';
+import ContactChannelField from './ContactChannelField.astro';
+import ConsentField from './ConsentField.astro';
+import VinField from './VinField.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+import { mapPlaceUrl } from '@podbor/site-kit';
+
+const locale = localeFrom(Astro.url.pathname);
+const { site, shopCart: copy, pages } = content(locale);
+const inquiry = pages.partsInquiry;
+const uid = crypto.randomUUID().slice(0, 8);
+const steps = {
+  contact: `step-contact-${uid}`,
+  pickup: `step-pickup-${uid}`,
+  payment: `step-payment-${uid}`,
+};
+const step =
+  'flex items-center gap-2.5 text-base font-semibold leading-tight text-ink';
+const stepNumber =
+  'spec flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xs font-semibold';
+const summaryRow = 'flex items-baseline justify-between gap-4';
+---
+
+<div class="card overflow-hidden lg:sticky lg:top-24">
+  <section
+    class="flex flex-col gap-2 border-b border-line bg-shade px-5 py-4 sm:px-6"
+    aria-labelledby={`summary-${uid}`}
+  >
+    <h2 id={`summary-${uid}`} class="text-block font-semibold">
+      {copy.summaryHeading}
+    </h2>
+    <dl class="flex flex-col gap-1.5 text-sm text-ink-2">
+      <div class={summaryRow}>
+        <dt data-summary-count></dt>
+        <dd class="spec text-ink" data-summary-parts></dd>
+      </div>
+      <div class={summaryRow} data-summary-addon-row hidden>
+        <dt>{copy.summaryAddons}</dt>
+        <dd class="spec text-ink" data-summary-addons></dd>
+      </div>
+      <div class={`${summaryRow} mt-1 border-t border-line pt-2.5`}>
+        <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+        <dd class="spec text-xl font-semibold text-ink" data-total></dd>
+      </div>
+    </dl>
+  </section>
+
+  <lead-form class="contents">
+    <form
+      method="POST"
+      action="/api/order"
+      data-lead-form
+      data-submitting-label={site.form.submitting}
+      class="flex flex-col gap-6 px-5 pt-5 pb-6 sm:px-6"
+    >
+      <LeadFormHidden />
+
+      <section class="flex flex-col gap-4" aria-labelledby={steps.contact}>
+        <h3 id={steps.contact} class={step}>
+          <span class={stepNumber} aria-hidden="true">1</span>
+          {copy.contactStep}
+        </h3>
+        <ContactChannelField uid={uid} defaultChannel="whatsapp" />
+        <label class="block">
+          <span class="field-label">{site.form.nameLabel}</span>
+          <input
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder={site.form.namePlaceholder}
+            class="field"
+          />
+        </label>
+      </section>
+
+      <section class="flex flex-col gap-2" aria-labelledby={steps.pickup}>
+        <h3 id={steps.pickup} class={step}>
+          <span class={stepNumber} aria-hidden="true">2</span>
+          {copy.pickupStep}
+        </h3>
+        <div class="flex flex-col gap-1 pl-8.5 text-sm leading-relaxed">
+          <p class="font-semibold text-ink">{copy.pickupMethod}</p>
+          <address class="text-ink-2 not-italic">
+            {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}, {
+              GARAGE_ADDRESS.city
+            }
+          </address>
+          <p class="text-muted">{site.footer.hours}</p>
+          <a
+            href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
+            target="_blank"
+            rel="noopener"
+            class="mt-0.5 inline-flex min-h-11 items-center gap-1.5 self-start font-semibold text-signal-ink underline underline-offset-2 sm:min-h-0"
+          >
+            {pages.contact.mapHeading}
+            <Icon name="chevronRight" size={14} />
+          </a>
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-2" aria-labelledby={steps.payment}>
+        <h3 id={steps.payment} class={step}>
+          <span class={stepNumber} aria-hidden="true">3</span>
+          {copy.paymentStep}
+        </h3>
+        <p class="pl-8.5 text-sm font-semibold text-ink">
+          {copy.paymentMethod}
+        </p>
+      </section>
+
+      <details class="group rounded-field border border-line">
+        <summary
+          class="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3.5 text-sm font-semibold text-ink-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-signal [&::-webkit-details-marker]:hidden"
+        >
+          <Icon
+            name="plus"
+            size={14}
+            class="shrink-0 transition-transform duration-150 group-open:rotate-45"
+          />
+          {copy.extrasToggle}
+        </summary>
+        <div class="flex flex-col gap-4 border-t border-line p-3.5">
+          <VinField
+            label={inquiry.vinLabel}
+            placeholder={inquiry.vinPlaceholder}
+          />
+          <label class="block">
+            <span class="field-label">{copy.commentLabel}</span>
+            <textarea
+              name="comment"
+              rows={2}
+              placeholder={copy.commentPlaceholder}
+              class="field resize-none"></textarea>
+          </label>
+        </div>
+      </details>
+
+      <div class="flex flex-col gap-4 border-t border-line pt-5">
+        <p
+          class="border-l-4 border-l-signal pl-3 text-sm leading-relaxed text-signal-dark"
+          data-blocked
+          hidden
+        >
+        </p>
+        <ConsentField uid={uid} />
+        <div class="flex flex-col gap-2.5">
+          <button
+            type="submit"
+            class="btn btn-primary w-full disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2 aria-busy:cursor-progress aria-busy:opacity-60"
+          >
+            <span>
+              <span data-submit-label>{copy.submitLabel}</span>
+              <span class="spec in-aria-busy:hidden">
+                {' · '}<span data-total></span>
+              </span>
+            </span>
+          </button>
+          <p class="text-center text-xs leading-relaxed text-muted">
+            {copy.submitNote}
+          </p>
+        </div>
+      </div>
+    </form>
+  </lead-form>
+</div>
