@@ -20,7 +20,7 @@ export const listedPartSchema = z.object({
   quantity: z.optional(z.coerce.number()),
   addon: z.optional(z.string()),
   addon_translations: z.optional(
-    z.record(z.string(), z.object({ label: z.string() })),
+    z.record(z.string(), z.record(z.string(), z.string())),
   ),
   addon_price: z.optional(z.coerce.number()),
   with_addon: z.optional(z.boolean()),
@@ -28,7 +28,7 @@ export const listedPartSchema = z.object({
 
 export type ListedPart = z.infer<typeof listedPartSchema>;
 
-type AddonTranslations = Record<string, { label: string }> | null | undefined;
+type AddonTranslations = ListedPart['addon_translations'] | null;
 
 export const addonLabel = (
   label: string,

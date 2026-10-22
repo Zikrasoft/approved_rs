@@ -14,6 +14,7 @@ import {
 } from '@/utils/catalogue';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { rangeText } from '@/utils/partsSearch';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -34,13 +35,33 @@ const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const facets = categoryFacets(category, locale);
-const fields = category.fields.map((field) => ({
-  key: field.key,
-  label: [translated(field, 'label', locale), field.unit]
-    .filter(Boolean)
-    .join(', '),
-  options: field.options.map((option) => translated(option, 'label', locale)),
-}));
+const searchCopy = content(locale).partsSearch;
+const fields = category.fields
+  .map((field) => {
+    const numbers = category.pages
+      .flatMap(({ part }) => [part.attributes[field.key] ?? []].flat())
+      .map(Number)
+      .filter(Number.isFinite);
+    return {
+      key: field.key,
+      label: [translated(field, 'label', locale), field.unit]
+        .filter(Boolean)
+        .join(', '),
+      values:
+        field.type === 'number'
+          ? numbers.length
+            ? rangeText(
+                { min: Math.min(...numbers), max: Math.max(...numbers) },
+                null,
+                searchCopy,
+              )
+            : ''
+          : field.options
+              .map((option) => translated(option, 'label', locale))
+              .join(', '),
+    };
+  })
+  .filter(({ values }) => values);
 ---
 
 <Shell
@@ -80,11 +101,7 @@ const fields = category.fields.map((field) => ({
               {fields.map((field) => (
                 <div class="flex flex-col gap-1 px-5 py-4 sm:px-6">
                   <dt class="font-semibold text-ink">{field.label}</dt>
-                  {field.options.length > 0 && (
-                    <dd class="spec text-sm text-muted">
-                      {field.options.join(', ')}
-                    </dd>
-                  )}
+                  <dd class="spec text-sm text-muted">{field.values}</dd>
                 </div>
               ))}
             </dl>

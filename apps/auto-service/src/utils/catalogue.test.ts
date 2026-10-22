@@ -826,18 +826,19 @@ describe('catalogue.search', () => {
     );
   });
 
-  it('sends the query, the page locale and the chosen facets', async () => {
+  it('sends the query, the page locale, the chosen facets and ranges', async () => {
     const fetch = answer(found);
 
     await catalog(fetch).search({
       q: 'filter ulja',
       locale: 'sr',
       facets: ['viscosity:5w-30', 'viscosity:0w-20'],
+      ranges: [{ key: 'capacity', min: 70, max: null }],
       offset: 20,
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/search?q=filter+ulja&locale=sr&facets=viscosity%3A5w-30&facets=viscosity%3A0w-20&offset=20',
+      'http://shop.test/store/search?q=filter+ulja&locale=sr&facets=viscosity%3A5w-30&facets=viscosity%3A0w-20&range=capacity%3A70%3A&offset=20',
       expect.anything(),
     );
   });

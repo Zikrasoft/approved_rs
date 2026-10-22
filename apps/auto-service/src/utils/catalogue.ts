@@ -16,6 +16,8 @@ import {
   partPageSlug,
   partPagesResponseSchema,
   positionGroups,
+  rangeFilter,
+  type RangeFilter,
   requirementMatches,
   searchResponseSchema,
   vehiclesResponseSchema,
@@ -53,6 +55,7 @@ export type SearchQuery = {
   category?: string;
   locale: CatalogLocale;
   facets: string[];
+  ranges?: RangeFilter[];
   offset?: number;
 };
 
@@ -475,6 +478,7 @@ export function createCatalogue({
       category,
       locale,
       facets,
+      ranges = [],
       offset = 0,
     }: SearchQuery): Promise<SearchOutcome | null> {
       const params = new URLSearchParams({
@@ -484,6 +488,9 @@ export function createCatalogue({
       });
       for (const facet of facets) {
         params.append('facets', facet);
+      }
+      for (const range of ranges) {
+        params.append('range', rangeFilter(range));
       }
       if (offset) {
         params.set('offset', String(offset));
