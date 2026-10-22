@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { APIContext } from 'astro';
-import { DELETE, GET, PATCH, POST } from './cart';
+import { DELETE, GET, PATCH, POST, PUT } from './cart';
 
 const backend = vi.fn();
 
@@ -56,6 +56,35 @@ describe('/api/cart', () => {
       code: 'OFFER_OUT_OF_STOCK',
       cartId: 'cart_1',
     });
+    expect(backend).not.toHaveBeenCalled();
+  });
+
+  it('sends only which line wants the add-on, never a price', async () => {
+    backend.mockResolvedValue(new Response('{}', { status: 404 }));
+
+    await call(PUT, {
+      body: {
+        cart_id: 'cart_1',
+        item_id: 'item_1',
+        addon: true,
+        unit_price: 1,
+      },
+    });
+
+    const [url, init] = backend.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(
+      'http://shop.test/store/offer-carts/cart_1/items/item_1/addon',
+    );
+    expect(init.method).toBe('POST');
+    expect(init.body).toBe('{}');
+  });
+
+  it('answers a malformed add-on change with an empty cart', async () => {
+    expect(
+      await outcome(
+        call(PUT, { body: { cart_id: 'cart_1', item_id: 'item_1' } }),
+      ),
+    ).toEqual({ kind: 'empty' });
     expect(backend).not.toHaveBeenCalled();
   });
 

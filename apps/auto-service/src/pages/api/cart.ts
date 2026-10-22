@@ -22,6 +22,11 @@ const quantitySchema = z.object({
   item_id: catalogueIdSchema,
   quantity: z.number().int().positive(),
 });
+const addonSchema = z.object({
+  cart_id: catalogueIdSchema,
+  item_id: catalogueIdSchema,
+  addon: z.boolean(),
+});
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
@@ -76,6 +81,20 @@ export const PATCH: APIRoute = async ({ request }) => {
             change.data.cart_id,
             change.data.item_id,
             change.data.quantity,
+          )
+      : null,
+  );
+};
+
+export const PUT: APIRoute = async ({ request }) => {
+  const change = addonSchema.safeParse(await body(request));
+  return respond(
+    change.success
+      ? () =>
+          catalogue()?.setAddon(
+            change.data.cart_id,
+            change.data.item_id,
+            change.data.addon,
           )
       : null,
   );

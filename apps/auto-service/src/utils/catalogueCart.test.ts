@@ -13,6 +13,7 @@ const CART = {
       quantity: 1,
       unit_price: 1850,
       available: true,
+      addon: null,
       part: {
         slug: 'bmw-11428575211',
         brand: 'BMW',
@@ -178,6 +179,24 @@ describe('catalogue.removeFromCart', () => {
     expect(fetch).toHaveBeenCalledWith(
       'http://shop.test/store/offer-carts/cart_1/items/item_1',
       expect.objectContaining({ method: 'DELETE' }),
+    );
+  });
+});
+
+describe('catalogue.setAddon', () => {
+  it.each([
+    [true, 'POST'],
+    [false, 'DELETE'],
+  ])('adds or takes off the add-on of a line (%s)', async (on, method) => {
+    const fetch = answer({ cart: CART });
+
+    expect(await catalog(fetch).setAddon('cart_1', 'item_1', on)).toEqual({
+      kind: 'cart',
+      cart: CART,
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/offer-carts/cart_1/items/item_1/addon',
+      expect.objectContaining({ method }),
     );
   });
 });

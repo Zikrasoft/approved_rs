@@ -433,6 +433,81 @@ medusaIntegrationTestRunner({
           await catalog.listCategoryFields({ category_id: unused.category.id }),
         ).toHaveLength(0);
       });
+
+      it('sets, changes and clears the add-on service of a Category', async () => {
+        const { category } = await createOilCategory();
+        const path = `/admin/categories/${category.id}`;
+
+        const set = await post(path, {
+          service_label: 'Регистрация аккумулятора',
+          service_price: 2500,
+        });
+        expect(set.status).toBe(200);
+        expect(set.data.category).toMatchObject({
+          service_label: 'Регистрация аккумулятора',
+          service_price: 2500,
+        });
+
+        expect(
+          (await post(path, { service_price: 3000 })).data.category,
+        ).toMatchObject({
+          service_label: 'Регистрация аккумулятора',
+          service_price: 3000,
+        });
+
+        expect(
+          (await post(path, { service_label: '', service_price: null })).data
+            .category,
+        ).toMatchObject({ service_label: null, service_price: null });
+      });
+
+      it.each([
+        [
+          'a price without a label',
+          { service_price: 2500 },
+          'FIELD_REQUIRED',
+          'service_label',
+        ],
+        [
+          'a label without a price',
+          { service_label: 'Регистрация' },
+          'FIELD_REQUIRED',
+          'service_price',
+        ],
+        [
+          'a negative price',
+          { service_label: 'Регистрация', service_price: -1 },
+          'INVALID_FIELD',
+          'service_price',
+        ],
+        [
+          'a fractional price',
+          { service_label: 'Регистрация', service_price: 99.5 },
+          'INVALID_FIELD',
+          'service_price',
+        ],
+      ])('refuses an add-on service with %s', async (_, body, code, field) => {
+        const { category } = await createOilCategory();
+
+        const response = await post(`/admin/categories/${category.id}`, body);
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({ code, field });
+      });
+
+      it('refuses clearing the label of a priced add-on service', async () => {
+        const { category } = await createOilCategory();
+        const path = `/admin/categories/${category.id}`;
+        await post(path, { service_label: 'Регистрация', service_price: 0 });
+
+        const response = await post(path, { service_label: '  ' });
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'FIELD_REQUIRED',
+          field: 'service_label',
+        });
+      });
     });
   },
 });

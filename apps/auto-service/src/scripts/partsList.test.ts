@@ -10,6 +10,7 @@ import {
   partLine,
   readPartsList,
   removeFromPartsList,
+  setPartAddon,
 } from './partsList';
 
 const memoryStorage = (initial: Record<string, string> = {}) => {
@@ -144,6 +145,28 @@ describe('parts list', () => {
     );
   });
 
+  it('keeps the add-on service of a part and whether the visitor wants it', () => {
+    const storage = memoryStorage();
+    addToPartsList(
+      listedPartSchema.parse({
+        ...bmwOil,
+        car: 'BMW 320d F30',
+        addon: 'Регистрация аккумулятора',
+      }),
+      storage,
+    );
+
+    setPartAddon(bmwOil.slug, true, storage);
+    forgetListCar(storage);
+
+    expect(readPartsList(storage)).toEqual([
+      { ...bmwOil, addon: 'Регистрация аккумулятора', with_addon: true },
+    ]);
+
+    setPartAddon(bmwOil.slug, false, storage);
+    expect(readPartsList(storage)[0].with_addon).toBe(false);
+  });
+
   it('works as an empty list when storage is blocked', () => {
     expect(() => addToPartsList(mannOil, blockedStorage)).not.toThrow();
     expect(() => clearPartsList(blockedStorage)).not.toThrow();
@@ -172,6 +195,26 @@ describe('inquiryComment', () => {
         'Mann-Filter HU 816 x, Масляный фильтр',
         'BMW 11 42 8575211, Масляный фильтр',
         'Нужно к пятнице',
+      ].join('\n'),
+    );
+  });
+
+  it('lists a wanted add-on service under its part', () => {
+    expect(
+      inquiryComment({
+        parts: [
+          { ...bmwOil, addon: 'Регистрация аккумулятора', with_addon: true },
+          { ...mannOil, addon: 'Регистрация аккумулятора', with_addon: false },
+        ],
+        note: '',
+        limit: 2000,
+        more,
+      }),
+    ).toBe(
+      [
+        'BMW 11 42 8575211, Масляный фильтр',
+        '+ Регистрация аккумулятора',
+        'Mann-Filter HU 816 x, Масляный фильтр',
       ].join('\n'),
     );
   });

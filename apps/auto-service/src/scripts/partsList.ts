@@ -17,6 +17,8 @@ export const listedPartSchema = z.object({
   car: z.optional(z.string()),
   vin: z.optional(z.string()),
   quantity: z.optional(z.coerce.number()),
+  addon: z.optional(z.string()),
+  with_addon: z.optional(z.boolean()),
 });
 
 export type ListedPart = z.infer<typeof listedPartSchema>;
@@ -63,6 +65,19 @@ export function removeFromPartsList(slug: string, storage?: ListStorage): void {
   );
 }
 
+export function setPartAddon(
+  slug: string,
+  on: boolean,
+  storage?: ListStorage,
+): void {
+  writePartsList(
+    readPartsList(storage).map((part) =>
+      part.slug === slug ? { ...part, with_addon: on } : part,
+    ),
+    storage,
+  );
+}
+
 export function clearPartsList(storage?: ListStorage): void {
   try {
     orBrowser(storage).removeItem(PARTS_LIST_STORAGE_KEY);
@@ -85,13 +100,7 @@ export function listCar(parts: ListedPart[]): ListCar | null {
 
 export function forgetListCar(storage?: ListStorage): void {
   writePartsList(
-    readPartsList(storage).map(({ slug, brand, number, name, quantity }) => ({
-      slug,
-      brand,
-      number,
-      name,
-      ...(quantity !== undefined && { quantity }),
-    })),
+    readPartsList(storage).map(({ car: _car, vin: _vin, ...part }) => part),
     storage,
   );
 }
@@ -121,11 +130,13 @@ export function inquiryComment({
   const shared = listCar(parts);
   return fitComment({
     head: [shared?.car ?? ''],
-    lines: parts.map((part) =>
-      !shared && part.car
-        ? `${partLine(part)} (${carNote(part)})`
-        : partLine(part),
-    ),
+    lines: parts.map((part) => {
+      const line =
+        !shared && part.car
+          ? `${partLine(part)} (${carNote(part)})`
+          : partLine(part);
+      return part.addon && part.with_addon ? `${line}\n+ ${part.addon}` : line;
+    }),
     tail: [note],
     limit,
     more,
@@ -207,6 +218,20 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             removeFromPartsList(part.slug);
             rerender();
           });
+          const addon = item.querySelector<HTMLElement>('[data-part-addon]');
+          const toggle = addon?.querySelector<HTMLInputElement>(
+            '[data-part-addon-toggle]',
+          );
+          if (addon && toggle && part.addon) {
+            addon.hidden = false;
+            addon.querySelector('[data-part-addon-label]')!.textContent = (
+              this.dataset.addonTemplate ?? '{service}'
+            ).replace('{service}', part.addon);
+            toggle.checked = Boolean(part.with_addon);
+            toggle.addEventListener('change', () =>
+              setPartAddon(part.slug, toggle.checked),
+            );
+          }
           return item;
         };
 

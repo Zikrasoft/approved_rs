@@ -10,6 +10,8 @@ import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { z } from 'zod';
 
+import { ADDON_FOR_METADATA_KEY } from './offer-cart';
+
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
 export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
@@ -20,6 +22,7 @@ const OWNER_COPY = {
   confirm: 'Нужно подтвердить наличие и время самовывоза',
   line: (title: string, quantity: number, sum: string) =>
     `${title} × ${quantity}: ${sum}`,
+  addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
   total: (sum: string) => `Итого: ${sum}`,
   leftOut: (count: number) => `Не поместилось позиций: ${count}`,
 };
@@ -42,6 +45,7 @@ export const leadOrderSchema = z.object({
       .object({
         title: z.string(),
         unit_price: amount,
+        metadata: z.record(z.string(), z.unknown()).nullish(),
         detail: z.object({ quantity: amount }),
       })
       .transform(({ detail, ...item }) => ({ ...item, ...detail })),
@@ -69,11 +73,13 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
       contact.car ?? '',
     ],
     lines: order.items.map((item) =>
-      OWNER_COPY.line(
-        item.title,
-        item.quantity,
-        money(item.unit_price * item.quantity),
-      ),
+      item.metadata?.[ADDON_FOR_METADATA_KEY]
+        ? OWNER_COPY.addon(item.title, money(item.unit_price * item.quantity))
+        : OWNER_COPY.line(
+            item.title,
+            item.quantity,
+            money(item.unit_price * item.quantity),
+          ),
     ),
     tail: [OWNER_COPY.total(money(total)), contact.comment ?? ''],
     limit: MAX_COMMENT_LENGTH,

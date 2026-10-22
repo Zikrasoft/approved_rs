@@ -53,9 +53,16 @@ const cart = {
       quantity: 1,
       unit_price: 1850,
       available: true,
+      addon: null,
       part: bmwOil,
     },
   ],
+};
+
+const SERVICE = {
+  label: 'Регистрация аккумулятора',
+  translations: null,
+  unit_price: 2500,
 };
 
 describe('the remembered cart', () => {
@@ -109,6 +116,38 @@ describe('the remembered cart', () => {
 
     expect(readPartsList(storage)).toEqual([{ ...bmwOil, quantity: 1 }]);
     expect(readCart(storage)).toBeNull();
+  });
+
+  it('carries the add-on service of a line into the inquiry', () => {
+    const storage = memoryStorage();
+    rememberCart(
+      {
+        ...cart,
+        items: [
+          { ...cart.items[0], addon: { ...SERVICE, item_id: 'item_2' } },
+          {
+            ...cart.items[0],
+            id: 'item_3',
+            part: { ...bmwOil, slug: 'other' },
+            addon: { ...SERVICE, item_id: null },
+          },
+        ],
+      },
+      storage,
+    );
+
+    moveCartToInquiry(storage);
+
+    expect(readPartsList(storage)).toEqual([
+      { ...bmwOil, quantity: 1, addon: SERVICE.label, with_addon: true },
+      {
+        ...bmwOil,
+        slug: 'other',
+        quantity: 1,
+        addon: SERVICE.label,
+        with_addon: false,
+      },
+    ]);
   });
 
   it('carries each line quantity into the inquiry', () => {
@@ -186,6 +225,28 @@ describe('the remembered cart', () => {
         ],
       }),
     ).toBe(3700);
+  });
+
+  it('adds the add-on service a sellable line carries', () => {
+    expect(
+      payableTotal({
+        ...cart,
+        items: [
+          { ...cart.items[0], addon: { ...SERVICE, item_id: 'item_2' } },
+          {
+            ...cart.items[0],
+            id: 'item_3',
+            addon: { ...SERVICE, item_id: null },
+          },
+          {
+            ...cart.items[0],
+            id: 'item_4',
+            available: false,
+            addon: { ...SERVICE, item_id: 'item_5' },
+          },
+        ],
+      }),
+    ).toBe(1850 + 2500 + 1850);
   });
 
   it('works without a cart when storage is blocked', () => {

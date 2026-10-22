@@ -467,11 +467,7 @@ async function seedParts(
   };
 }
 
-async function seedCatalogue(
-  catalog: CatalogModuleService,
-  suppliers: SupplierModuleService,
-  logger: Logger,
-) {
+async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
   const brands = await catalog.createBrands(BRANDS);
   const brand: Ids = Object.fromEntries(brands.map((b) => [b.slug, b.id]));
   const { b47, om654, v320d, v320i, v520d, vE220d } =
@@ -547,32 +543,250 @@ async function seedCatalogue(
     },
   ]);
 
+  logger.info('Seeded the demo catalogue and vehicles.');
+}
+
+const BATTERY_FIELDS = [
+  ['capacity', 'number', 'Емкость', 'А·ч', true],
+  ['cold-cranking', 'number', 'Пусковой ток (EN)', 'А', true],
+  ['voltage', 'number', 'Напряжение', 'В', false],
+  ['technology', 'single-select', 'Технология', null, true],
+  ['polarity', 'single-select', 'Полярность', null, false],
+  ['case-size', 'single-select', 'Типоразмер', null, false],
+  ['length', 'number', 'Длина', 'мм', false],
+  ['width', 'number', 'Ширина', 'мм', false],
+  ['height', 'number', 'Высота', 'мм', false],
+] as const;
+
+const BATTERY_OPTIONS: Record<string, [string, string][]> = {
+  technology: [
+    ['standard', 'Обычный'],
+    ['efb', 'EFB'],
+    ['agm', 'AGM'],
+  ],
+  polarity: [
+    ['reverse', 'Обратная'],
+    ['normal', 'Прямая'],
+  ],
+  'case-size': [
+    ['h5-l2', 'H5/L2'],
+    ['h6-l3', 'H6/L3'],
+    ['h7-l4', 'H7/L4'],
+    ['h8-l5', 'H8/L5'],
+    ['h9-l6', 'H9/L6'],
+  ],
+};
+
+const BATTERIES: {
+  name: string;
+  brand: string;
+  number: string;
+  attributes: Record<string, string | number>;
+}[] = [
+  {
+    name: 'Аккумулятор Varta Silver Dynamic AGM G14, 80 А·ч',
+    brand: 'varta',
+    number: '580 901 080',
+    attributes: {
+      capacity: 80,
+      'cold-cranking': 800,
+      technology: 'agm',
+      polarity: 'reverse',
+      'case-size': 'h7-l4',
+      length: 315,
+      height: 190,
+    },
+  },
+  {
+    name: 'Аккумулятор Bosch S5 A13 AGM, 95 А·ч',
+    brand: 'bosch',
+    number: '0 092 S5A 130',
+    attributes: {
+      capacity: 95,
+      'cold-cranking': 850,
+      technology: 'agm',
+      polarity: 'reverse',
+      'case-size': 'h8-l5',
+      length: 353,
+      height: 190,
+    },
+  },
+  {
+    name: 'Аккумулятор Exide AGM EK700, 70 А·ч',
+    brand: 'exide',
+    number: 'EK700',
+    attributes: {
+      capacity: 70,
+      'cold-cranking': 760,
+      technology: 'agm',
+      polarity: 'reverse',
+      'case-size': 'h6-l3',
+      length: 278,
+      height: 190,
+    },
+  },
+  {
+    name: 'Аккумулятор Varta Blue Dynamic EFB N80, 80 А·ч',
+    brand: 'varta',
+    number: '580 500 080',
+    attributes: {
+      capacity: 80,
+      'cold-cranking': 800,
+      technology: 'efb',
+      polarity: 'reverse',
+      'case-size': 'h7-l4',
+      length: 315,
+      height: 190,
+    },
+  },
+  {
+    name: 'Аккумулятор Exide Excell EB741, 74 А·ч',
+    brand: 'exide',
+    number: 'EB741',
+    attributes: {
+      capacity: 74,
+      'cold-cranking': 680,
+      technology: 'standard',
+      polarity: 'normal',
+      'case-size': 'h6-l3',
+      length: 278,
+      height: 175,
+    },
+  },
+];
+
+async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
+  const brands = await catalog.createBrands([
+    { slug: 'varta', name: 'Varta' },
+    { slug: 'exide', name: 'Exide' },
+  ]);
+  const [bosch] = await catalog.listBrands({ slug: 'bosch' });
+  const brand: Ids = Object.fromEntries(
+    [...brands, bosch].map((b) => [b.slug, b.id]),
+  );
+  const category = await catalog.createCategories({
+    slug: 'batteries',
+    name: 'Аккумуляторы',
+    text: 'Стартерные аккумуляторы, в том числе AGM и EFB для автомобилей с системой старт-стоп. Подбираем по емкости, пусковому току, полярности и типоразмеру под ваш автомобиль.',
+    service_label:
+      'Регистрация аккумулятора в блоке управления (в сервисе CarLab)',
+    service_price: 2500,
+  });
+  const fields = await catalog.createCategoryFields(
+    BATTERY_FIELDS.map(([key, type, label, unit, facet], rank) => ({
+      category_id: category.id,
+      key,
+      type,
+      label,
+      unit,
+      facet,
+      rank,
+      required: key === 'capacity' || key === 'technology',
+    })),
+  );
+  const field = Object.fromEntries(fields.map((f) => [f.key, f.id]));
+  await catalog.createCategoryFieldOptions(
+    Object.entries(BATTERY_OPTIONS).flatMap(([key, options]) =>
+      options.map(([option, label], rank) => ({
+        field_id: field[key],
+        key: option,
+        label,
+        rank,
+      })),
+    ),
+  );
+  for (const { name, brand: slug, number, attributes } of BATTERIES) {
+    await catalog.createPartWithIdentifiers({
+      name,
+      category_id: category.id,
+      attributes: { voltage: 12, width: 175, ...attributes },
+      identifiers: [
+        { type: 'manufacturer-number', brand_id: brand[slug], value: number },
+      ],
+    });
+  }
+  const engines = await catalog.listEngines({ family: ['B47', 'OM654'] });
+  const engine = Object.fromEntries(engines.map((e) => [e.family, e.id]));
+  const requirement = (
+    family: string,
+    key: string,
+    rule: { option_keys?: string[]; min?: number },
+  ) =>
+    catalog.createRequirement({
+      field_id: field[key],
+      engine_id: engine[family],
+      option_keys: rule.option_keys ?? null,
+      min: rule.min ?? null,
+      max: null,
+      quantity: 1,
+    });
+  await requirement('B47', 'technology', { option_keys: ['agm'] });
+  await requirement('B47', 'capacity', { min: 80 });
+  await requirement('B47', 'cold-cranking', { min: 800 });
+  await requirement('B47', 'polarity', { option_keys: ['reverse'] });
+  await requirement('B47', 'case-size', { option_keys: ['h7-l4', 'h8-l5'] });
+  await requirement('OM654', 'technology', { option_keys: ['agm'] });
+  await requirement('OM654', 'capacity', { min: 80 });
+  logger.info('Seeded the demo batteries.');
+}
+
+async function syncDemoSuppliers(
+  catalog: CatalogModuleService,
+  suppliers: SupplierModuleService,
+) {
+  const category: Ids = Object.fromEntries(
+    (await catalog.listCategories({}, { take: null })).map((c) => [
+      c.slug,
+      c.id,
+    ]),
+  );
+  const brand: Ids = Object.fromEntries(
+    (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
+  );
   for (const {
     name,
     markup_percentage,
     categories,
     spellings,
   } of DEMO_SUPPLIERS) {
-    const supplier = await suppliers.createSuppliers({
-      name,
-      markup_percentage,
-    });
+    const [found] = await suppliers.listSuppliers({ name });
+    const supplier =
+      found ?? (await suppliers.createSuppliers({ name, markup_percentage }));
+    const mapped = new Set(
+      (
+        await suppliers.listSupplierCategories(
+          { supplier_id: supplier.id },
+          { take: null },
+        )
+      ).map(({ code }) => code),
+    );
     await suppliers.createSupplierCategories(
-      Object.entries(categories).map(([code, slug]) => ({
-        supplier_id: supplier.id,
-        code,
-        category_id: category[slug],
-      })),
+      Object.entries(categories)
+        .filter(([code, slug]) => !mapped.has(code) && category[slug])
+        .map(([code, slug]) => ({
+          supplier_id: supplier.id,
+          code,
+          category_id: category[slug],
+        })),
+    );
+    const spelled = new Set(
+      (
+        await catalog.listBrandSpellings(
+          { supplier_id: supplier.id },
+          { take: null },
+        )
+      ).map(({ value }) => value),
     );
     await catalog.createBrandSpellings(
-      Object.entries(spellings).map(([value, slug]) => ({
-        supplier_id: supplier.id,
-        value,
-        brand_id: brand[slug],
-      })),
+      Object.entries(spellings)
+        .filter(([value, slug]) => !spelled.has(value) && brand[slug])
+        .map(([value, slug]) => ({
+          supplier_id: supplier.id,
+          value,
+          brand_id: brand[slug],
+        })),
     );
   }
-  logger.info('Seeded the demo catalogue, vehicles and demo suppliers.');
 }
 
 export default async function seedDemo({ container }: ExecArgs) {
@@ -587,7 +801,13 @@ export default async function seedDemo({ container }: ExecArgs) {
     (await suppliers.listSuppliers({ name: DEMO_SUPPLIERS[0].name })).length
   ) {
     logger.info('Demo catalogue already seeded, skipping.');
-    return;
+  } else {
+    await seedCatalogue(catalog, logger);
   }
-  await seedCatalogue(catalog, suppliers, logger);
+  if ((await catalog.listCategories({ slug: 'batteries' })).length) {
+    logger.info('Demo batteries already seeded, skipping.');
+  } else {
+    await seedBatteries(catalog, logger);
+  }
+  await syncDemoSuppliers(catalog, suppliers);
 }

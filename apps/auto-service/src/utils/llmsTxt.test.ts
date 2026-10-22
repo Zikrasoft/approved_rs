@@ -80,10 +80,16 @@ describe('generateLlmsTxt', () => {
             name: 'Моторное масло',
             text: 'Масло для двигателя.\n\nВторой абзац.',
             translations: {
-              sr: { name: 'Motorno ulje', text: 'Ulje za motor.' },
+              sr: {
+                name: 'Motorno ulje',
+                text: 'Ulje za motor.',
+                service_label: 'Zamena ulja',
+              },
             },
             maintenance_kit: false,
             kit_rank: 0,
+            service_label: 'Замена масла',
+            service_price: 2500,
             fields: [],
           },
         ],
@@ -146,7 +152,7 @@ describe('generateLlmsTxt', () => {
     });
 
     expect(body).toContain(
-      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.',
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
     );
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
   });

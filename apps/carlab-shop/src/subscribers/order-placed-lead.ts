@@ -29,6 +29,7 @@ async function handOff(container: MedusaContainer, id: string): Promise<void> {
       'items.title',
       'items.detail.quantity',
       'items.unit_price',
+      'items.metadata',
     ],
   });
   await sendOrderLead(

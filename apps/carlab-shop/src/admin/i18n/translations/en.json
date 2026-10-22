@@ -410,7 +410,12 @@
     "confirmDeleteFieldTitle": "Delete attribute \"{{field}}\"?",
     "confirmDeleteFieldBody": "An attribute used by parts or requirements cannot be deleted.",
     "confirmDeleteCategoryTitle": "Delete category \"{{category}}\"?",
-    "confirmDeleteCategoryBody": "The category goes with its attributes. A category with parts cannot be deleted."
+    "confirmDeleteCategoryBody": "The category goes with its attributes. A category with parts cannot be deleted.",
+    "serviceHeading": "Service sold with the parts",
+    "serviceLabel": "Service name",
+    "serviceLabelPlaceholder": "For example, Battery registration in the control unit",
+    "servicePrice": "Price, RSD",
+    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. To drop the service, clear both fields and save."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -522,7 +527,9 @@
       "markup_percentage": "Markup: a number from 0 to 500 with at most two decimals.",
       "production_from": "The production start date is not a valid date. Pick it in the calendar.",
       "min": "«From» cannot be negative.",
-      "max": "«To» cannot be negative."
+      "max": "«To» cannot be negative.",
+      "service_price": "Service price: a whole number of RSD, 0 or more.",
+      "service_label": "Service name: 200 characters at most."
     },
     "fields": {
       "name": "Name",
@@ -561,7 +568,9 @@
       "power_kw": "Power, kW",
       "market": "Market",
       "text": "Text",
-      "identifiers": "Numbers"
+      "identifiers": "Numbers",
+      "service_label": "Service name",
+      "service_price": "Service price, RSD"
     },
     "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative.",
     "entities": {
@@ -622,7 +631,8 @@
       "name": "Name",
       "text": "Description",
       "label": "Label",
-      "note": "Note"
+      "note": "Note",
+      "service_label": "Service"
     },
     "nothingChanged": "No translation changed, nothing to save."
   },

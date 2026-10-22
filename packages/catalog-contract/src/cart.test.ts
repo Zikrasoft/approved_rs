@@ -21,6 +21,7 @@ const cart = {
       quantity: 2,
       unit_price: 1850,
       available: true,
+      addon: null,
       part: {
         slug: 'bmw-11428575211',
         brand: 'BMW',
@@ -34,6 +35,24 @@ const cart = {
 describe('offerCartResponseSchema', () => {
   it('accepts a cart of offer lines', () => {
     expect(offerCartResponseSchema.parse({ cart })).toEqual({ cart });
+  });
+
+  it('accepts a line with an add-on service in the cart', () => {
+    const items = [
+      {
+        ...cart.items[0],
+        addon: {
+          item_id: 'item_2',
+          label: 'Регистрация аккумулятора',
+          translations: { sr: { label: 'Registracija akumulatora' } },
+          unit_price: 2500,
+        },
+      },
+    ];
+    expect(
+      offerCartResponseSchema.parse({ cart: { ...cart, items } }).cart.items[0]
+        .addon?.item_id,
+    ).toBe('item_2');
   });
 
   it('refuses a line without a quantity', () => {
@@ -169,5 +188,23 @@ describe('cartFingerprint', () => {
     expect(cartFingerprint([line('a', 2, 60), line('b', 1, 100)])).not.toBe(
       shown,
     );
+  });
+
+  it('reads an added add-on service as a line of its own, as the stored cart holds it', () => {
+    const nested = cartFingerprint([
+      {
+        ...line('a', 2, 50),
+        addon: { item_id: 'b', unit_price: 2500 },
+      },
+    ]);
+
+    expect(nested).toBe(
+      cartFingerprint([line('a', 2, 50), line('b', 1, 2500)]),
+    );
+    expect(
+      cartFingerprint([
+        { ...line('a', 2, 50), addon: { item_id: null, unit_price: 2500 } },
+      ]),
+    ).toBe(cartFingerprint([line('a', 2, 50)]));
   });
 });
