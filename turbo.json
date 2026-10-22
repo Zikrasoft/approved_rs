@@ -34,6 +34,7 @@
       "env": ["MEDUSA_BACKEND_URL", "MEDUSA_PUBLISHABLE_KEY"]
     },
     "@podbor/carlab-shop#build": {
+      "dependsOn": ["^build"],
       "env": [
         "DATABASE_*",
         "JWT_SECRET",
