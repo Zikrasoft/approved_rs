@@ -71,9 +71,12 @@ Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset.
 `pnpm db:migrate` and `pnpm seed:demo` in `apps/carlab-shop`. `seed:demo` is
 idempotent per part: rerunning it keeps the admin, reuses the key, skips
 the catalogue once the demo suppliers exist, skips the batteries once the
-`batteries` Category exists, and adds any supplier category mapping or brand
-spelling the demo catalogue gained since. An existing demo database picks up
-the batteries on the next `pnpm dev:shop`.
+`batteries` Category exists, skips the filter variety once `oil-filters` has a
+`height` field, and adds any supplier category mapping or brand spelling the
+demo catalogue gained since. An existing demo database picks up the batteries
+and the filter variety on the next `pnpm dev:shop`; a part the import already
+created under one of the variety's numbers is classified rather than created
+twice.
 
 What it creates:
 
@@ -86,8 +89,11 @@ What it creates:
   type codes `35BG`, `8E31`, `JA31`. Mercedes-Benz: E-class W213 E 220 d
   (OM654), Baumuster `213004`.
 - The seven placeholder Categories, plus `engine-oil` (viscosity, approvals
-  multi-select, volume; maintenance kit, rank 0), `oil-filters` (filter type;
-  kit, rank 1) and `brake-pads` (required axle).
+  multi-select, volume; maintenance kit, rank 0), `oil-filters` (filter type
+  cartridge/spin-on, height mm, outer diameter mm, thread as a text code such
+  as `M20x1.5` or `3/4-16 UNF`, gasket included; all filters; kit, rank 1) and
+  `brake-pads` (required axle, thickness mm, wear sensor included / prepared /
+  none; all filters).
 - `batteries` (capacity Ah, cold cranking EN A, voltage, technology
   standard/EFB/AGM, polarity, case size H5/L2 to H9/L6, length, width, height
   mm; not a maintenance kit category). It sells one add-on service with every
@@ -104,6 +110,15 @@ What it creates:
   front pad replaced by the current one, two oils, left- and right-hand-drive
   wiper sets on the E-class (the steering-specific candidates), and an oil
   pressure sensor with no Category or Fitment (not enriched).
+- Filter variety: the B47 and OM654 oil filters and the four existing pads get
+  those attributes, and new Parts without Fitments join them: oil filters Mann
+  W 712/75 and W 610/3, Mahle OC 90, Bosch F 026 407 236, Hengst H90W24 and
+  E340H D247, Knecht OX 371D, Febi 27150 (ten oil filters in all); pads Brembo
+  P 06 038 and P 06 087, Zimmermann 23921.200.1, Textar 2412201, TRW GDB1919,
+  ATE 13.0460-7230.2 (ten pads). Brands Hengst, Knecht, Febi, Brembo and
+  Zimmermann are added. They give the storefront's brand, «Только в наличии»
+  and price filters something to narrow; no Requirement or maintenance kit
+  changes.
 - Five batteries: Varta Silver Dynamic AGM G14 80 Ah (`580 901 080`) and Bosch
   S5 A13 AGM 95 Ah (`0 092 S5A 130`) fit both cars; Exide AGM EK700 70 Ah is
   too small, Varta Blue Dynamic EFB N80 is EFB, Exide Excell EB741 is a
@@ -142,6 +157,8 @@ articles per page):
 | EUR quote dropped                                     | IC-1006 (Mahle OX 404D)                                                |
 | Staged data (cross references, applicability, images) | IC-1001, IC-1003, IC-1009, AD-2004                                     |
 | Batteries, one out of stock (Bosch S5 A13)            | IC-1012 to IC-1015                                                     |
+| Filter variety: priced, out of stock, several brands  | IC-1101 to IC-1107, AD-2101 to AD-2104                                 |
+| Variety Parts with no offer (price on request)        | Mann W 610/3, Hengst E340H D247, Brembo P 06 087                       |
 
 Staged data stays hidden until a Supplier releases the kind in the admin's
 Suppliers page.
@@ -192,6 +209,11 @@ Useful pages:
 - Part page: `/ru/parts/p/mann-filter-hu816x/`; superseded number:
   `/ru/parts/p/bmw-11428507683/`; replaced Part: `/ru/parts/p/ate-13046072172/`.
 - Search: `/ru/parts/search/?q=hu816x`; car hub: `/ru/parts/bmw/f30-320d/`.
+- Filters: `/ru/parts/c/oil-filters/` and `/ru/parts/c/brake-pads/` offer
+  brand, «Только в наличии» and price beside the Category's own fields; a
+  filter whose every result shares one value is hidden. Brand, stock and price
+  come from the search index, so they follow offers at the next reindex
+  (`publish:local`), not on a live quote.
 - Battery with the registration add-on: `/ru/parts/p/varta-580901080/`; the
   E-class car page lists the matching batteries.
 - Cart: `/ru/parts/cart/`.
