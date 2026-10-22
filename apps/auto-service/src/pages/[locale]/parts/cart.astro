@@ -23,6 +23,8 @@ const notices = [
   { key: 'repriced', text: copy.notices.repriced },
   { key: 'stock-limit', text: copy.notices.stockLimit },
   { key: 'unreachable', text: copy.notices.unreachable },
+  { key: 'offline', text: copy.notices.offline },
+  { key: 'expired', text: copy.notices.expired },
   { key: 'invalid', text: copy.notices.invalid },
 ];
 const stepper =
@@ -50,6 +52,7 @@ const stepper =
       data-ordered-heading={copy.orderedHeading}
       data-order-template={copy.orderNumberTemplate}
       data-blocked-template={copy.checkoutBlocked}
+      data-inquiry-href={PathBuilder.partsInquiry(locale)}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
         {copy.loading}
@@ -92,12 +95,14 @@ const stepper =
       <div data-state="fallback" hidden class={panel}>
         <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
         <p class="text-sm leading-relaxed text-ink-2">{copy.fallbackBody}</p>
-        <a
-          href={PathBuilder.partsInquiry(locale)}
-          class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
-        >
-          {copy.fallbackCta}
-        </a>
+        <div class="mt-1 flex flex-col gap-3 sm:flex-row">
+          <button type="button" class="btn btn-primary" data-retry>
+            {copy.fallbackRetry}
+          </button>
+          <button type="button" class="btn btn-secondary" data-send-inquiry>
+            {copy.fallbackCta}
+          </button>
+        </div>
       </div>
 
       <div
@@ -139,7 +144,7 @@ const stepper =
 
           <ul class="card divide-y divide-line" data-lines></ul>
           <template data-line>
-            <li class="flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
+            <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
               <div class="flex items-start gap-3">
                 <div class="flex min-w-0 flex-1 flex-col gap-1">
                   <a
@@ -189,7 +194,9 @@ const stepper =
                   </button>
                 </div>
                 <div class="flex flex-col items-end text-right">
-                  <span class="spec font-semibold text-ink" data-price></span>
+                  <span
+                    class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"
+                    data-price></span>
                   <span class="text-xs text-muted" data-unit></span>
                 </div>
               </div>

@@ -77,6 +77,7 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
 >
   <PageHero
     actions={false}
+    compact
     eyebrow={copy.eyebrow}
     heading={heading}
     lead={partName}
@@ -95,7 +96,7 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   />
 
   <section
-    class="wrap grid gap-6 pt-band md:pt-band-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start"
+    class="wrap grid gap-6 pt-6 md:pt-band-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start"
   >
     <div
       class="flex flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1"
@@ -108,28 +109,23 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
             </span>
             <p class="text-sm leading-relaxed text-ink-2">
               {replacement ? copy.replacedLead : copy.supersededNotice}
-              {successor && (
-                <>
-                  {' '}
-                  {replacement ? '' : `${copy.currentNumberLabel} `}
-                  <a
-                    href={PathBuilder.partNumber(locale, successor.slug)}
-                    class="font-semibold text-ink underline underline-offset-2 hover:text-signal-ink"
-                  >
-                    {successorLabel}
-                  </a>
-                </>
-              )}
             </p>
           </div>
         )
       }
       {
         successor && (
-          <PartOffers
-            page={successor}
-            heading={`${copy.currentNumberLabel} ${successorLabel}`}
-          />
+          <PartOffers page={successor}>
+            <Fragment slot="heading">
+              {copy.currentNumberLabel}{' '}
+              <a
+                href={PathBuilder.partNumber(locale, successor.slug)}
+                class="underline underline-offset-2 hover:text-signal-ink"
+              >
+                {successorLabel}
+              </a>
+            </Fragment>
+          </PartOffers>
         )
       }
       {

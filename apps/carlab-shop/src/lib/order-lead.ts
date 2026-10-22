@@ -17,6 +17,7 @@ export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
 const OWNER_COPY = {
   heading: (displayId: number) =>
     `Заказ #${displayId}, самовывоз, оплата при получении`,
+  confirm: 'Нужно подтвердить наличие и время самовывоза',
   line: (title: string, quantity: number, sum: string) =>
     `${title} × ${quantity}: ${sum}`,
   total: (sum: string) => `Итого: ${sum}`,
@@ -62,7 +63,11 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     0,
   );
   const comment = fitComment({
-    head: [OWNER_COPY.heading(order.display_id), contact.car ?? ''],
+    head: [
+      OWNER_COPY.heading(order.display_id),
+      OWNER_COPY.confirm,
+      contact.car ?? '',
+    ],
     lines: order.items.map((item) =>
       OWNER_COPY.line(
         item.title,

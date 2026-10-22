@@ -1,7 +1,11 @@
 ---
 export const prerender = false;
 
-import { facetFilter, type SearchFacet } from '@podbor/catalog-contract';
+import {
+  facetFilter,
+  searchableQuery,
+  type SearchFacet,
+} from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -32,11 +36,12 @@ const catalogue = catalogueFromEnv({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
 });
+const searchable = searchableQuery(q);
 const found =
-  q && catalogue
+  searchable && catalogue
     ? await catalogue.search({ q, locale, facets: chosen, offset })
     : null;
-const unavailable = Boolean(q) && !found;
+const unavailable = searchable && !found;
 const lastPage =
   found && found.count > 0
     ? Math.floor((found.count - 1) / found.limit) * found.limit
@@ -87,6 +92,14 @@ if (found && offset > lastPage) {
 
   <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
     <PartsSearchForm query={q} titled={false} />
+
+    {
+      !searchable && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.emptyQuery}
+        </p>
+      )
+    }
 
     {
       found && (

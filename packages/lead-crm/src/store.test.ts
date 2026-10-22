@@ -458,7 +458,7 @@ describe('insertOrMergeLead', () => {
       brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
-      service: 'polishing',
+      service: 'polishing-ceramic',
       visitorId: 'visitor-1',
       locale: 'ru',
     });
@@ -466,13 +466,15 @@ describe('insertOrMergeLead', () => {
       brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
-      service: 'ppf',
-      services: ['ppf', 'ceramic-coating'],
+      service: 'parts-order',
+      services: ['parts-order', 'unknown-slug'],
       visitorId: 'visitor-1',
       locale: 'ru',
     });
 
-    expect(lead.comment).toContain('Также пробовал: ppf, ceramic-coating');
+    expect(lead.comment).toContain(
+      'Также пробовал: Заказ из магазина, unknown-slug',
+    );
   });
 
   it('does not merge a different visitor — creates a separate lead', async () => {
@@ -494,7 +496,7 @@ describe('insertOrMergeLead', () => {
 
     expect(merged).toBe(true);
     expect(lead.comment).toContain('Аккумулятор 60 Ah × 1 — 95 €');
-    expect(lead.comment).toContain(`Также пробовал: ${baseData.service}`);
+    expect(lead.comment).toContain('Также пробовал: Автоподбор');
   });
 
   it('falls back to naming the clicked channel when the second submission carried no comment', async () => {

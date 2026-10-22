@@ -29,6 +29,8 @@ import {
 } from '@/utils/constants';
 import type { ServiceSlug } from '@/utils/services';
 import { content } from '@/i18n/content';
+import { navCurrent } from '@podbor/site-kit';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   title: string;
@@ -46,11 +48,14 @@ const {
   preloadImage,
   noindex = false,
   jsonLd = [],
-  stickyContact = true,
+  stickyContact: stickyRequested = true,
   service,
 } = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
+const stickyContact =
+  stickyRequested &&
+  navCurrent(Astro.url.pathname, PathBuilder.parts(locale)) === undefined;
 const site = content(locale).site;
 const { canonical, alternates, ogLocale, ogImage } = pageHead(
   locale,

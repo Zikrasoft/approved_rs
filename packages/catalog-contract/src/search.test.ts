@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CATALOG_LOCALES,
   facetFilter,
+  searchableQuery,
   searchResponseSchema,
 } from './search.ts';
 
@@ -68,5 +69,15 @@ describe('CATALOG_LOCALES', () => {
 describe('facetFilter', () => {
   it('joins a field key and a value', () => {
     expect(facetFilter('viscosity', '5w-30')).toBe('viscosity:5w-30');
+  });
+});
+
+describe('searchableQuery', () => {
+  it.each(['HU 816 x', 'фильтр', '1142', 'HU%'])('searches %j', (q) => {
+    expect(searchableQuery(q)).toBe(true);
+  });
+
+  it.each(['', ' ', '%', '*', '-/.'])('does not search %j', (q) => {
+    expect(searchableQuery(q)).toBe(false);
   });
 });
