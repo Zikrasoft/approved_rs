@@ -7,7 +7,9 @@ import {
   moveCartToInquiry,
   orderSummary,
   readCart,
+  readReceipt,
   rememberCart,
+  rememberReceipt,
   repricedSince,
 } from './offerCart';
 import { cartCount } from './cartBadge';
@@ -64,6 +66,23 @@ const SERVICE = {
   translations: null,
   unit_price: 2500,
 };
+
+describe('the order receipt', () => {
+  it('comes back only for the cart that became the order', () => {
+    const storage = memoryStorage();
+    rememberReceipt(cart, storage);
+
+    expect(readReceipt('cart_1', storage)).toMatchObject({ id: 'cart_1' });
+    expect(readReceipt('cart_0', storage)).toBeNull();
+    expect(readReceipt(null, memoryStorage())).toBeNull();
+  });
+
+  it('is skipped when storage is blocked', () => {
+    rememberReceipt(cart, blockedStorage);
+
+    expect(readReceipt('cart_1', blockedStorage)).toBeNull();
+  });
+});
 
 describe('the remembered cart', () => {
   it('keeps the cart id and its parts for the next page load', () => {

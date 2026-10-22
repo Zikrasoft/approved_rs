@@ -1,13 +1,12 @@
 ---
 import Icon from './Icon.astro';
+import PickupDetails from './PickupDetails.astro';
 import LeadFormHidden from './LeadFormHidden.astro';
 import ContactChannelField from './ContactChannelField.astro';
 import ConsentField from './ConsentField.astro';
 import VinField from './VinField.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { GARAGE_ADDRESS } from '@/utils/constants';
-import { mapPlaceUrl } from '@podbor/site-kit';
 
 const locale = localeFrom(Astro.url.pathname);
 const { site, shopCart: copy, pages } = content(locale);
@@ -25,7 +24,7 @@ const stepNumber =
 const summaryRow = 'flex items-baseline justify-between gap-4';
 ---
 
-<div class="card overflow-hidden lg:sticky lg:top-24">
+<div class="card scroll-mt-24 overflow-hidden" id="checkout">
   <section
     class="flex flex-col gap-2 border-b border-line bg-shade px-5 py-4 sm:px-6"
     aria-labelledby={`summary-${uid}`}
@@ -82,24 +81,7 @@ const summaryRow = 'flex items-baseline justify-between gap-4';
           <span class={stepNumber} aria-hidden="true">2</span>
           {copy.pickupStep}
         </h3>
-        <div class="flex flex-col gap-1 pl-8.5 text-sm leading-relaxed">
-          <p class="font-semibold text-ink">{copy.pickupMethod}</p>
-          <address class="text-ink-2 not-italic">
-            {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}, {
-              GARAGE_ADDRESS.city
-            }
-          </address>
-          <p class="text-muted">{site.footer.hours}</p>
-          <a
-            href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
-            target="_blank"
-            rel="noopener"
-            class="mt-0.5 inline-flex min-h-11 items-center gap-1.5 self-start font-semibold text-signal-ink underline underline-offset-2 sm:min-h-0"
-          >
-            {pages.contact.mapHeading}
-            <Icon name="chevronRight" size={14} />
-          </a>
-        </div>
+        <PickupDetails class="pl-8.5" />
       </section>
 
       <section class="flex flex-col gap-2" aria-labelledby={steps.payment}>
@@ -154,7 +136,7 @@ const summaryRow = 'flex items-baseline justify-between gap-4';
           >
             <span>
               <span data-submit-label>{copy.submitLabel}</span>
-              <span class="spec in-aria-busy:hidden">
+              <span class="spec whitespace-nowrap in-aria-busy:hidden">
                 {' · '}<span data-total></span>
               </span>
             </span>

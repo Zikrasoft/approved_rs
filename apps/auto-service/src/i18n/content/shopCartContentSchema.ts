@@ -52,6 +52,8 @@ export const shopCartContentSchema = z
     orderedBody: z.string(),
     orderNumberTemplate: z.string(),
     orderedCta: z.string(),
+    receiptQuantityTemplate: z.string(),
+    stickyCta: z.string(),
     fallbackHeading: z.string(),
     fallbackBody: z.string(),
     fallbackRetry: z.string(),
