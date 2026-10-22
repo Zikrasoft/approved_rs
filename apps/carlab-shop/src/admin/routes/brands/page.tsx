@@ -160,7 +160,7 @@ const BrandsPage = () => {
 
       <div className="flex flex-col gap-y-2">
         <Label>{t('brands.createLabel')}</Label>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
           <Input
             placeholder={t('brands.namePlaceholder')}
             value={name}

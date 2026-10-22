@@ -272,6 +272,7 @@ const FitmentsPage = () => {
 
   useEffect(() => {
     setPartName(selectedPart?.name ?? '');
+    setNewValue('');
     setEditing(null);
     setConditions(EMPTY_CONDITIONS);
     if (selectedPart) {
@@ -646,7 +647,7 @@ const FitmentsPage = () => {
             </div>
             <Label className="flex flex-col gap-y-1">
               <Text size="small">{t('fitments.partNameLabel')}</Text>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
                 <Input
                   value={partName}
                   maxLength={200}
