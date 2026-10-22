@@ -676,7 +676,7 @@ async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
     service_label: 'Регистрация аккумулятора в блоке управления',
     service_price: 2500,
     service_note:
-      'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно. Услугу можно добавить к заказу.',
+      'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
   });
   const fields = await catalog.createCategoryFields(
     BATTERY_FIELDS.map(([key, type, label, unit, facet], rank) => ({

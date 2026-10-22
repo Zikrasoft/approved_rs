@@ -190,7 +190,7 @@ describe('cartFingerprint', () => {
     );
   });
 
-  it('reads an added add-on service as a line of its own, as the stored cart holds it', () => {
+  it('reads an added add-on service as a line of its own, one per unit, as the stored cart holds it', () => {
     const nested = cartFingerprint([
       {
         ...line('a', 2, 50),
@@ -199,7 +199,7 @@ describe('cartFingerprint', () => {
     ]);
 
     expect(nested).toBe(
-      cartFingerprint([line('a', 2, 50), line('b', 1, 2500)]),
+      cartFingerprint([line('a', 2, 50), line('b', 2, 2500)]),
     );
     expect(
       cartFingerprint([

@@ -676,6 +676,32 @@ medusaIntegrationTestRunner({
           expect(again.total).toBe(12500);
         });
 
+        it('charges the add-on for every unit of its line', async () => {
+          const two = await cartWith(2, batteryOfferId);
+          const added = (await post(addonPath(two))).data.cart;
+          expect(added.total).toBe(2 * 10000 + 2 * 2500);
+
+          const three = (
+            await post(
+              `/store/offer-carts/${two.id}/items/${two.items[0].id}`,
+              { quantity: 3 },
+            )
+          ).data.cart;
+          expect(three.total).toBe(3 * 10000 + 3 * 2500);
+
+          const placed = await complete(three);
+          expect(placed.status).toBe(200);
+          const order = await getContainer()
+            .resolve(Modules.ORDER)
+            .retrieveOrder(placed.data.order.id, { relations: ['items'] });
+          expect(
+            order.items?.map(({ title, quantity }) => [
+              title,
+              Number(quantity),
+            ]),
+          ).toEqual(expect.arrayContaining([[SERVICE, 3]]));
+        });
+
         it('refuses a price sent with the add-on', async () => {
           const cart = await cartWith(1, batteryOfferId);
 

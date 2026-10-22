@@ -9,7 +9,14 @@ export const CART_FINGERPRINT_FIELD = 'cart_fingerprint';
 
 const withAddon = ({ addon, ...line }: FingerprintLine) =>
   addon?.item_id
-    ? [line, { id: addon.item_id, quantity: 1, unit_price: addon.unit_price }]
+    ? [
+        line,
+        {
+          id: addon.item_id,
+          quantity: line.quantity,
+          unit_price: addon.unit_price,
+        },
+      ]
     : [line];
 
 export const cartFingerprint = (lines: FingerprintLine[]): string =>

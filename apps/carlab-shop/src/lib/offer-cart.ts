@@ -231,19 +231,23 @@ export async function syncOfferCart(
       });
       repriced = true;
     }
+    const quantity = Number(item.quantity);
     const service = addons.get(item.id);
     const addonLine = service && addonLines.get(item.id);
-    if (addonLine && !MathBN.eq(service.unit_price, addonLine.unit_price)) {
+    if (
+      addonLine &&
+      (!MathBN.eq(service.unit_price, addonLine.unit_price) ||
+        Number(addonLine.quantity) !== quantity)
+    ) {
       await updateLineItemInCartWorkflow(scope).run({
         input: {
           cart_id: cartId,
           item_id: addonLine.id,
-          update: { unit_price: service.unit_price },
+          update: { unit_price: service.unit_price, quantity },
         },
       });
       repriced = true;
     }
-    const quantity = Number(item.quantity);
     lines.push({
       id: item.id,
       offer_id: offerId,
@@ -267,7 +271,7 @@ export async function syncOfferCart(
       (sum, line) =>
         sum +
         line.unit_price * line.quantity +
-        (line.addon?.item_id ? line.addon.unit_price : 0),
+        (line.addon?.item_id ? line.addon.unit_price * line.quantity : 0),
       0,
     ),
     items: lines,
@@ -353,7 +357,7 @@ export async function addLineAddon(
       items: [
         {
           title: service.label,
-          quantity: 1,
+          quantity: Number(line.quantity),
           unit_price: service.unit_price,
           requires_shipping: false,
           metadata: { [ADDON_FOR_METADATA_KEY]: line.id },
@@ -498,12 +502,17 @@ export async function checkoutRefusal(
       return 'OFFER_PRICE_CHANGED';
     }
   }
-  return addonRefusal(await addonsOf(scope, offerItems), addonItems);
+  return addonRefusal(
+    await addonsOf(scope, offerItems),
+    addonItems,
+    new Map(offerItems.map((item) => [item.id, Number(item.quantity)])),
+  );
 }
 
 const addonRefusal = (
   addons: Map<string, CategoryAddon>,
   addonItems: OfferCartLineItem[],
+  quantities: Map<string, number>,
 ): 'OFFER_MISSING' | 'OFFER_PRICE_CHANGED' | null => {
   const parents = addonItems.map((item) => addonForOf(item));
   for (const [index, item] of addonItems.entries()) {
@@ -513,7 +522,7 @@ const addonRefusal = (
     }
     if (
       parents.indexOf(parents[index]) !== index ||
-      Number(item.quantity) !== 1 ||
+      Number(item.quantity) !== quantities.get(parents[index]!) ||
       !MathBN.eq(service.unit_price, item.unit_price)
     ) {
       return 'OFFER_PRICE_CHANGED';
