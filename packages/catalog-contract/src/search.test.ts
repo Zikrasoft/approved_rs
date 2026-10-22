@@ -292,6 +292,12 @@ describe('usefulFacets', () => {
     ]);
   });
 
+  it('drops a number range with one value even when some results lack it', () => {
+    const range = { ...facet('height', [2]), type: 'number' as const };
+
+    expect(usefulFacets([range], 5, [])).toEqual([]);
+  });
+
   it('keeps a facet with an active selection', () => {
     expect(
       usefulFacets([facet('shared', [5]), facet('zero', [0])], 5, [

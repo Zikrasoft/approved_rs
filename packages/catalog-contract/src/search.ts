@@ -137,10 +137,13 @@ export const usefulFacets = (
   chosenKeys: string[],
 ): SearchFacet[] =>
   facets.filter(
-    ({ key, values }) =>
+    ({ key, type, values }) =>
       chosenKeys.includes(key) ||
       (values.some(({ count }) => count > 0) &&
-        !(values.length === 1 && values[0].count >= total)),
+        !(
+          values.length === 1 &&
+          (type === 'number' || values[0].count >= total)
+        )),
   );
 
 const NUMBER = '-?\\d+(?:\\.\\d+)?';
