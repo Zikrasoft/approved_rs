@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:shop": "turbo run dev:shop",
-    "dev:carlab": "docker compose -f apps/carlab-shop/docker-compose.test.yml up -d --wait && pnpm --filter @podbor/carlab-shop db:migrate && pnpm --filter @podbor/carlab-shop seed && pnpm --filter @podbor/carlab-shop --filter @podbor/auto-service run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
