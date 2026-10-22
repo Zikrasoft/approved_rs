@@ -546,6 +546,20 @@ export function createCatalogue({
         cartId,
       ),
 
+    setAddon: (
+      cartId: string,
+      itemId: string,
+      on: boolean,
+    ): Promise<CartOutcome> =>
+      cartOutcome(
+        send(
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/addon`,
+          on ? 'POST' : 'DELETE',
+          on ? {} : undefined,
+        ),
+        cartId,
+      ),
+
     removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>
       cartOutcome(
         send(

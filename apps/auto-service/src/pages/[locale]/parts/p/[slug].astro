@@ -3,6 +3,7 @@ import { partPageSlug, translated } from '@podbor/catalog-contract';
 import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import AddonNote from '@/components/AddonNote.astro';
 import FitLine from '@/components/FitLine.astro';
 import PartOffers from '@/components/PartOffers.astro';
 import PartRow from '@/components/PartRow.astro';
@@ -133,6 +134,7 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
           <PartOffers page={page} demoted={Boolean(successor)} />
         )
       }
+      <AddonNote category={category} class="px-1" />
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1 lg:row-start-1">

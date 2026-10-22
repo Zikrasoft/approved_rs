@@ -19,6 +19,8 @@ const oil: Category = {
   translations: null,
   maintenance_kit: false,
   kit_rank: 0,
+  service_label: null,
+  service_price: null,
   fields: [
     {
       ...field,

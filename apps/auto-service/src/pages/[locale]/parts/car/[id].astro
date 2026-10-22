@@ -6,6 +6,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import FitLine from '@/components/FitLine.astro';
+import AddonNote from '@/components/AddonNote.astro';
 import PartNumbers from '@/components/PartNumbers.astro';
 import PriceTag from '@/components/PriceTag.astro';
 import { translated } from '@podbor/catalog-contract';
@@ -209,6 +210,10 @@ const specsSummary = [
                 <h3 class="border-b border-line px-5 py-3 font-semibold sm:px-6">
                   {block.name}
                 </h3>
+                <AddonNote
+                  category={block.groups[0].category}
+                  class="border-b border-line bg-shade px-5 py-3 sm:px-6"
+                />
                 <ul class="divide-y divide-line">
                   {block.groups.map((group) => (
                     <li
@@ -275,6 +280,10 @@ const specsSummary = [
                     {quantity(match.quantity)}
                   </span>
                 </h3>
+                <AddonNote
+                  category={match.category}
+                  class="border-b border-line bg-shade px-5 py-3 sm:px-6"
+                />
                 <ul class="divide-y divide-line">
                   {match.parts.map(({ part, pages }) => (
                     <li class="flex flex-col gap-1.5 px-5 py-4 sm:px-6">

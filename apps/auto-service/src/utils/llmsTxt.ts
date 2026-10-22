@@ -6,10 +6,12 @@ import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
 import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
+import { categoryAddon } from '@/utils/categoryAddon';
+import { formatMoney } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
-import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
+import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
 const url = (path: string) => `${SITE_URL}${path}`;
@@ -53,11 +55,20 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           note: pages.partsInquiry.llmsCatalogue,
         },
         entries: [
-          ...categories.map((category) => ({
-            label: translated(category, 'name', locale),
-            href: url(PathBuilder.partsCategory(locale, category.slug)),
-            note: paragraphs(translated(category, 'text', locale))[0],
-          })),
+          ...categories.map((category) => {
+            const addon = categoryAddon(category, locale);
+            return {
+              label: translated(category, 'name', locale),
+              href: url(PathBuilder.partsCategory(locale, category.slug)),
+              note: [
+                paragraphs(translated(category, 'text', locale))[0],
+                addon &&
+                  `${addon.label}: ${formatMoney(addon.price, 'RSD', BCP47_BY_LOCALE[locale])}`,
+              ]
+                .filter(Boolean)
+                .join(' '),
+            };
+          }),
           ...makes.map(({ make }) => ({
             label: make.name,
             href: url(PathBuilder.partsMake(locale, make.slug)),

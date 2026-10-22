@@ -1,0 +1,39 @@
+---
+import type { Category } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { categoryAddon } from '@/utils/categoryAddon';
+import { formatMoney } from '@/utils/money';
+import Icon from './Icon.astro';
+
+interface Props {
+  category: Category | null;
+  class?: string;
+}
+
+const { category, class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const addon = categoryAddon(category, locale);
+const note =
+  addon &&
+  content(locale)
+    .shopCart.addonNote.replace('{service}', addon.label)
+    .replace(
+      '{price}',
+      formatMoney(addon.price, 'RSD', BCP47_BY_LOCALE[locale]),
+    );
+---
+
+{
+  note && (
+    <p
+      class:list={[
+        'flex items-start gap-2 text-sm leading-relaxed text-ink-2',
+        className,
+      ]}
+    >
+      <Icon name="info" size={16} class="mt-0.5 shrink-0 text-signal-ink" />
+      <span>{note}</span>
+    </p>
+  )
+}

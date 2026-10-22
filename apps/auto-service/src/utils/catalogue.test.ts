@@ -234,6 +234,8 @@ describe('catalogue categories', () => {
     translations: { sr: { name: 'Filteri ulja' } },
     maintenance_kit: false,
     kit_rank: 0,
+    service_label: null,
+    service_price: null,
     fields: [
       {
         key: 'height',
@@ -308,6 +310,8 @@ const category = (slug: string, name: string) => ({
   translations: null,
   maintenance_kit: false,
   kit_rank: 0,
+  service_label: null,
+  service_price: null,
   fields: [] as unknown[],
 });
 const oilFilters = category('oil-filters', 'Масляные фильтры');

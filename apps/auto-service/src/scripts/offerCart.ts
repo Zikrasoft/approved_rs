@@ -52,6 +52,16 @@ const offerCartSchema = z.object({
       quantity: z.number(),
       unit_price: z.number(),
       available: z.boolean(),
+      addon: z.nullable(
+        z.object({
+          item_id: z.nullable(z.string()),
+          label: z.string(),
+          translations: z.nullable(
+            z.record(z.string(), z.record(z.string(), z.string())),
+          ),
+          unit_price: z.number(),
+        }),
+      ),
       part: listedPartSchema,
     }),
   ),
@@ -108,7 +118,14 @@ export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
   writeCart(
     {
       id: cart.id,
-      parts: cart.items.map(({ part, quantity }) => ({ ...part, quantity })),
+      parts: cart.items.map(({ part, quantity, addon }) => ({
+        ...part,
+        quantity,
+        ...(addon && {
+          addon: addon.label,
+          with_addon: addon.item_id !== null,
+        }),
+      })),
       count: cart.items.reduce((sum, { quantity }) => sum + quantity, 0),
       prices: Object.fromEntries(
         cart.items.map(({ id, unit_price }) => [id, unit_price]),
@@ -179,7 +196,13 @@ export const repricedSince = (seen: StoredCart, cart: OfferCart): boolean =>
 export const payableTotal = (cart: OfferCart): number =>
   cart.items
     .filter(({ available }) => available)
-    .reduce((sum, line) => sum + line.unit_price * line.quantity, 0);
+    .reduce(
+      (sum, line) =>
+        sum +
+        line.unit_price * line.quantity +
+        (line.addon?.item_id ? line.addon.unit_price : 0),
+      0,
+    );
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const REMEMBERED_FIELDS = [
@@ -657,7 +680,41 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           );
         });
         if (toInquiry) toInquiry.hidden = line.available;
+        this.addon(row, line, cart, money);
         return row;
+      }
+
+      addon(
+        row: HTMLElement,
+        line: CartLine,
+        cart: OfferCart,
+        money: (amount: number) => string,
+      ): void {
+        const box = row.querySelector<HTMLElement>('[data-addon]');
+        const toggle = box?.querySelector<HTMLInputElement>(
+          '[data-addon-toggle]',
+        );
+        if (!box || !toggle || !line.addon) return;
+        const { addonTemplate = '{service}', locale = '' } = this.dataset;
+        const label =
+          line.addon.translations?.[locale]?.label || line.addon.label;
+        box.hidden = false;
+        fill(
+          box,
+          '[data-addon-label]',
+          addonTemplate
+            .replace('{service}', label)
+            .replace('{price}', money(line.addon.unit_price)),
+        );
+        toggle.checked = line.addon.item_id !== null;
+        toggle.addEventListener('change', () => {
+          toggle.disabled = true;
+          void this.change('PUT', {
+            cart_id: cart.id,
+            item_id: line.id,
+            addon: toggle.checked,
+          });
+        });
       }
     },
   );
