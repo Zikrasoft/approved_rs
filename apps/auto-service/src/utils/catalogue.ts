@@ -20,6 +20,8 @@ import {
   type RangeFilter,
   requirementMatches,
   searchResponseSchema,
+  universalFacets,
+  usefulFacets,
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   type CatalogLocale,
@@ -636,26 +638,51 @@ export function createCatalogue({
   };
 }
 
+const tally = (values: string[]) => {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return [...counts].map(([value, count]) => ({ value, count }));
+};
+
 export function categoryFacets(
   category: CategoryPageEntry,
   locale: CatalogLocale,
 ): SearchFacet[] {
-  return category.fields
-    .filter(({ facet }) => facet)
-    .map((field) => {
-      const counts = new Map<string, number>();
-      for (const { part } of category.pages) {
-        for (const value of [part.attributes[field.key] ?? []].flat()) {
-          counts.set(String(value), (counts.get(String(value)) ?? 0) + 1);
+  const { pages } = category;
+  const best = pages.flatMap(({ offers }) => offers.slice(0, 1));
+  const prices = best.map(({ price }) => price);
+  const brandName = new Map(pages.map(({ brand }) => [brand.slug, brand.name]));
+  const universal = universalFacets({
+    brands: tally(pages.map(({ brand }) => brand.slug)).map((value) => ({
+      ...value,
+      label: brandName.get(value.value) ?? value.value,
+    })),
+    inStock: best.filter(({ stock_quantity }) => stock_quantity > 0).length,
+    price: prices.length
+      ? {
+          min: Math.min(...prices),
+          max: Math.max(...prices),
+          count: prices.length,
         }
-      }
-      return describeFacet(
+      : null,
+    currency: best[0]?.currency ?? '',
+  });
+  const fields = category.fields
+    .filter(({ facet }) => facet)
+    .map((field) =>
+      describeFacet(
         field,
-        [...counts].map(([value, count]) => ({ value, count })),
+        tally(
+          pages.flatMap(({ part }) =>
+            [part.attributes[field.key] ?? []].flat().map(String),
+          ),
+        ),
         locale,
-      );
-    })
-    .filter(({ values }) => values.length > 0);
+      ),
+    );
+  return usefulFacets([...universal, ...fields], pages.length, []);
 }
 
 export function catalogueFromEnv(env: CatalogueEnv) {

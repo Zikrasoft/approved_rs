@@ -17,7 +17,7 @@ import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
-import { rangeText } from '@/utils/partsSearch';
+import { rangeText, withFacetCopy } from '@/utils/partsSearch';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -39,8 +39,8 @@ const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const empty = category.pages.length === 0;
 const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
-const facets = categoryFacets(category, locale);
 const searchCopy = content(locale).partsSearch;
+const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
 const fields = category.fields
   .map((field) => {
     const numbers = category.pages

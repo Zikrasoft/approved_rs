@@ -1,5 +1,8 @@
 import {
+  BRAND_FACET,
   facetFilter,
+  IN_STOCK_FACET,
+  PRICE_FACET,
   type RangeFilter,
   type SearchFacet,
 } from '@podbor/catalog-contract';
@@ -23,6 +26,37 @@ export const facetValueLabel = (
   if (value === 'false') return copy.booleanFalse;
   return facet.unit ? `${value} ${facet.unit}` : value;
 };
+
+type UniversalCopy = {
+  brandFacet: string;
+  availabilityFacet: string;
+  inStockOnly: string;
+  priceFacet: string;
+};
+
+export const withFacetCopy = (
+  facets: SearchFacet[],
+  copy: UniversalCopy,
+): SearchFacet[] =>
+  facets.map((facet) => {
+    switch (facet.key) {
+      case BRAND_FACET:
+        return { ...facet, label: copy.brandFacet };
+      case IN_STOCK_FACET:
+        return {
+          ...facet,
+          label: copy.availabilityFacet,
+          values: facet.values.map((value) => ({
+            ...value,
+            label: copy.inStockOnly,
+          })),
+        };
+      case PRICE_FACET:
+        return { ...facet, label: copy.priceFacet };
+      default:
+        return facet;
+    }
+  });
 
 export const rangeMinName = (key: string): string => `${RANGE_MIN}${key}`;
 export const rangeMaxName = (key: string): string => `${RANGE_MAX}${key}`;

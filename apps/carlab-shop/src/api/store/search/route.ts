@@ -5,23 +5,31 @@ import {
 } from '@medusajs/framework/utils';
 import type { SearchFilters } from '@medusajs/framework/types';
 import {
+  BRAND_FACET,
   brandNumberSchema,
   CATALOG_LOCALES,
   type CatalogLocale,
   categoryFieldSchema,
   describeFacet,
   facetFilter,
+  IN_STOCK,
+  IN_STOCK_FACET,
   inRange,
+  PRICE_FACET,
+  type RangeFilter,
   searchableQuery,
   searchResponseSchema,
   translated,
   translationsSchema,
+  UNIVERSAL_FACET_KEYS,
+  universalFacets,
+  usefulFacets,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
-import { storeOffers } from '../../../modules/supplier/pricing';
+import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import {
@@ -31,7 +39,12 @@ import {
 import type { StoreSearchPartsType } from '../validators';
 
 const FACETS_FIELD = 'facets';
+const PRICE_FIELD = 'price';
 const FACET_VALUE_LIMIT = 500;
+const FACET_REQUESTS = [
+  { field: FACETS_FIELD, limit: FACET_VALUE_LIMIT },
+  { field: PRICE_FIELD, type: 'stats' as const },
+];
 
 const named = z.object({ name: z.string(), translations: translationsSchema });
 
@@ -46,6 +59,15 @@ const facetCountsSchema = z
   .object({
     type: z.literal('value'),
     values: z.array(z.object({ value: z.string(), count: z.number() })),
+  })
+  .optional();
+
+const priceStatsSchema = z
+  .object({
+    type: z.literal('stats'),
+    min: z.number(),
+    max: z.number(),
+    count: z.number(),
   })
   .optional();
 
@@ -64,7 +86,25 @@ const facetGroups = (facets: string[]): Map<string, string[]> => {
 };
 
 type FacetCount = { value: string; count: number };
+type PriceStats = z.infer<typeof priceStatsSchema>;
+type Counted = { values: FacetCount[]; price: PriceStats };
 type KeyFilter = (key: string) => boolean;
+type SearchFacets = Record<string, unknown> | undefined;
+
+const counted = (facets: SearchFacets): Counted => ({
+  values: facetCountsSchema.parse(facets?.[FACETS_FIELD])?.values ?? [],
+  price: priceStatsSchema.parse(facets?.[PRICE_FIELD]),
+});
+
+const priceFilter = ({ min, max }: RangeFilter): SearchFilters => ({
+  [PRICE_FIELD]: {
+    ...(min === null ? {} : { $gte: min }),
+    ...(max === null ? {} : { $lte: max }),
+  },
+});
+
+const isUniversal = (key: string) =>
+  (UNIVERSAL_FACET_KEYS as readonly string[]).includes(key);
 
 async function partIdsForVehicle(
   catalog: CatalogModuleService,
@@ -78,42 +118,67 @@ async function partIdsForVehicle(
   return [...new Set(fitments.map((fitment) => fitment.part_id))];
 }
 
+async function describeBrands(
+  catalog: CatalogModuleService,
+  values: { value: string; count: number }[],
+) {
+  const brands = values.length
+    ? await catalog.listBrands(
+        { slug: values.map(({ value }) => value) },
+        { take: null },
+      )
+    : [];
+  return values.map(({ value, count }) => ({
+    value,
+    label: brands.find(({ slug }) => slug === value)?.name ?? value,
+    count,
+  }));
+}
+
 async function describeFacets(
   catalog: CatalogModuleService,
-  counted: FacetCount[],
+  { values: counts, price }: Counted,
   locale: CatalogLocale,
   categoryId: string | undefined,
   chosen: string[],
 ) {
   const values = [
-    ...counted,
+    ...counts,
     ...chosen
-      .filter((facet) => !counted.some(({ value }) => value === facet))
+      .filter((facet) => !counts.some(({ value }) => value === facet))
       .map((value) => ({ value, count: 0 })),
   ].map(({ value, count }) => ({ ...splitFacet(value), count }));
-  if (!values.length) {
-    return [];
+  const of = (wanted: string) => values.filter(({ key }) => key === wanted);
+  const universal = universalFacets({
+    brands: await describeBrands(catalog, of(BRAND_FACET)),
+    inStock:
+      of(IN_STOCK_FACET).find(({ value }) => value === IN_STOCK)?.count ?? 0,
+    price: price ?? null,
+    currency: SHOP_CURRENCY,
+  });
+  const fieldKeys = [
+    ...new Set(values.map(({ key }) => key).filter((key) => !isUniversal(key))),
+  ];
+  if (!fieldKeys.length) {
+    return universal;
   }
   const fields = z.array(categoryFieldSchema).parse(
     await catalog.listCategoryFields(
       {
         facet: true,
-        key: [...new Set(values.map(({ key }) => key))],
+        key: fieldKeys,
         ...(categoryId ? { category_id: categoryId } : {}),
       },
       { relations: ['options'], order: { rank: 'ASC' }, take: null },
     ),
   );
   const seen = new Set<string>();
-  return fields
-    .filter(({ key }) => !seen.has(key) && seen.add(key))
-    .map((field) =>
-      describeFacet(
-        field,
-        values.filter(({ key }) => key === field.key),
-        locale,
-      ),
-    );
+  return [
+    ...universal,
+    ...fields
+      .filter(({ key }) => !seen.has(key) && seen.add(key))
+      .map((field) => describeFacet(field, of(field.key), locale)),
+  ];
 }
 
 export async function GET(
@@ -186,33 +251,33 @@ export async function GET(
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const priceRange = range.find(({ key }) => key === PRICE_FACET);
   const filtersFor = (applied: KeyFilter): SearchFilters => {
     const and = [
       ...scope,
       ...[...groups]
         .filter(([key]) => applied(key))
         .map(([, values]) => ({ [FACETS_FIELD]: { $in: values } })),
+      ...(priceRange && applied(PRICE_FACET) ? [priceFilter(priceRange)] : []),
     ];
     return and.length ? { ...filters, $and: and } : filters;
   };
-  const countFacets = async (applied: KeyFilter): Promise<FacetCount[]> => {
+  const countFacets = async (applied: KeyFilter): Promise<Counted> => {
     const { search_result } = await query.search({
       entity: PART_IDENTIFIER_INDEX,
       fields: ['id'],
       filters: filtersFor(applied),
       pagination: { skip: 0, take: 1 },
-      search_options: {
-        facets: [{ field: FACETS_FIELD, limit: FACET_VALUE_LIMIT }],
-      },
+      search_options: { facets: FACET_REQUESTS },
     });
-    return (
-      facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD])?.values ??
-      []
-    );
+    return counted(search_result.facets);
   };
+  const fieldRanges = range.filter(({ key }) => key !== PRICE_FACET);
   const everything =
-    groups.size || range.length ? await countFacets(() => false) : [];
-  for (const bounds of range) {
+    groups.size || fieldRanges.length
+      ? (await countFacets(() => false)).values
+      : [];
+  for (const bounds of fieldRanges) {
     const known = everything
       .map(({ value }) => splitFacet(value))
       .filter(({ key, value }) => key === bounds.key && inRange(value, bounds))
@@ -226,24 +291,26 @@ export async function GET(
       within.length ? within : [facetFilter(bounds.key, '')],
     );
   }
-  const disjunctiveCounts = async (
-    counted: FacetCount[],
-  ): Promise<FacetCount[]> => {
-    if (!groups.size) {
-      return counted;
-    }
+  const disjunctiveCounts = async (main: Counted): Promise<Counted> => {
     const chosenKeys = [...groups.keys()];
-    const perKey = await Promise.all(
-      chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
-    );
-    return everything.map(({ value }) => {
-      const at = chosenKeys.indexOf(splitFacet(value).key);
-      const source = at === -1 ? counted : perKey[at];
-      return {
-        value,
-        count: source.find((entry) => entry.value === value)?.count ?? 0,
-      };
-    });
+    const [perKey, withoutPrice] = await Promise.all([
+      Promise.all(
+        chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
+      ),
+      priceRange ? countFacets((key) => key !== PRICE_FACET) : main,
+    ]);
+    const values = groups.size
+      ? everything.map(({ value }) => {
+          const at = chosenKeys.indexOf(splitFacet(value).key);
+          const source = at === -1 ? main : perKey[at];
+          return {
+            value,
+            count:
+              source.values.find((entry) => entry.value === value)?.count ?? 0,
+          };
+        })
+      : main.values;
+    return { values, price: withoutPrice.price };
   };
 
   const { data, search_result } = await query.search({
@@ -266,7 +333,7 @@ export async function GET(
     filters: filtersFor(() => true),
     pagination: { skip: offset, take: limit },
     search_options: {
-      facets: [{ field: FACETS_FIELD, limit: FACET_VALUE_LIMIT }],
+      facets: FACET_REQUESTS,
       provider_options: { typesense: searchRanking(locale) },
     },
   });
@@ -296,26 +363,31 @@ export async function GET(
         },
       },
     }));
+  const count = Math.max(
+    0,
+    (search_result.metadata.count ?? results.length) -
+      (search_result.hits.length - hits.length),
+  );
 
   res.json(
     searchResponseSchema.parse({
       results,
-      facets: await describeFacets(
-        catalog,
-        await disjunctiveCounts(
-          facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD])
-            ?.values ?? [],
+      facets: usefulFacets(
+        await describeFacets(
+          catalog,
+          await disjunctiveCounts(counted(search_result.facets)),
+          locale,
+          found?.id,
+          facets,
         ),
-        locale,
-        found?.id,
-        facets,
+        count,
+        [
+          ...facets.map((facet) => splitFacet(facet).key),
+          ...range.map(({ key }) => key),
+        ],
       ),
       category: narrowedTo,
-      count: Math.max(
-        0,
-        (search_result.metadata.count ?? results.length) -
-          (search_result.hits.length - hits.length),
-      ),
+      count,
       offset,
       limit,
     }),

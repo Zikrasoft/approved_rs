@@ -374,6 +374,25 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({ code: 'ALREADY_EXISTS' });
       });
 
+      it.each(['brand', 'in-stock', 'price'])(
+        'refuses the key %s, taken by the storefront filters',
+        async (key) => {
+          const { base } = await createOilCategory();
+
+          const response = await post(base, {
+            key,
+            type: 'number',
+            label: 'Занятый ключ',
+          });
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({
+            code: 'INVALID_FIELD',
+            field: 'key',
+          });
+        },
+      );
+
       it('refuses a Category name that differs from a stored one only by case', async () => {
         const { name } = await createOilCategory();
 

@@ -12,6 +12,10 @@ import type {
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import {
+  type CategoryFieldType,
+  normalizePartNumber,
+} from '@podbor/catalog-contract';
+import {
   createApiKeysWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
 } from '@medusajs/medusa/core-flows';
@@ -732,6 +736,258 @@ async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
   logger.info('Seeded the demo batteries.');
 }
 
+const VARIETY_BRANDS = [
+  { slug: 'hengst', name: 'Hengst' },
+  { slug: 'knecht', name: 'Knecht' },
+  { slug: 'febi', name: 'Febi' },
+  { slug: 'brembo', name: 'Brembo' },
+  { slug: 'zimmermann', name: 'Zimmermann' },
+];
+
+const OIL_FILTER_FIELDS = [
+  ['height', 'number', 'Высота', 'мм'],
+  ['outer-diameter', 'number', 'Наружный диаметр', 'мм'],
+  ['thread', 'text', 'Резьба', null],
+  ['gasket-included', 'boolean', 'Уплотнение в комплекте', null],
+] as const;
+
+const BRAKE_PAD_FIELDS = [
+  ['thickness', 'number', 'Толщина', 'мм'],
+  ['wear-sensor', 'single-select', 'Датчик износа', null],
+] as const;
+
+const WEAR_SENSOR_OPTIONS: [string, string][] = [
+  ['included', 'В комплекте'],
+  ['prepared', 'Подготовлены под датчик'],
+  ['none', 'Без датчика'],
+];
+
+type VarietyPart = {
+  name: string;
+  brand: string;
+  number: string;
+  attributes: Record<string, string | number | boolean>;
+};
+
+const cartridge = (height: number, diameter: number, gasket: boolean) => ({
+  'filter-type': 'cartridge',
+  height,
+  'outer-diameter': diameter,
+  'gasket-included': gasket,
+});
+
+const spinOn = (height: number, diameter: number, thread: string) => ({
+  'filter-type': 'spin-on',
+  height,
+  'outer-diameter': diameter,
+  thread,
+  'gasket-included': true,
+});
+
+const pads = (axle: string, thickness: number, sensor: string) => ({
+  axle,
+  thickness,
+  'wear-sensor': sensor,
+});
+
+const EXISTING_ATTRIBUTES: [string, string, Record<string, unknown>][] = [
+  ['mann-filter', 'HU816X', cartridge(125, 65, true)],
+  ['mann-filter', 'HU6020Z', cartridge(154, 64, true)],
+  ['ate', '13046027862', pads('front', 20, 'prepared')],
+  ['trw', 'GDB2033', pads('front', 20.3, 'prepared')],
+  ['ate', '13046072172', pads('front', 19.5, 'none')],
+  ['textar', '2459801', pads('rear', 17, 'prepared')],
+];
+
+const VARIETY_PARTS: { category: string; parts: VarietyPart[] }[] = [
+  {
+    category: 'oil-filters',
+    parts: [
+      {
+        name: 'Масляный фильтр Mann-Filter W 712/75',
+        brand: 'mann-filter',
+        number: 'W 712/75',
+        attributes: spinOn(79, 76, 'M20x1.5'),
+      },
+      {
+        name: 'Масляный фильтр Mann-Filter W 610/3',
+        brand: 'mann-filter',
+        number: 'W 610/3',
+        attributes: spinOn(66, 76, '3/4-16 UNF'),
+      },
+      {
+        name: 'Масляный фильтр Mahle OC 90',
+        brand: 'mahle',
+        number: 'OC 90',
+        attributes: spinOn(79, 76, '3/4-16 UNF'),
+      },
+      {
+        name: 'Масляный фильтр Bosch F 026 407 236',
+        brand: 'bosch',
+        number: 'F 026 407 236',
+        attributes: spinOn(86, 76, 'M20x1.5'),
+      },
+      {
+        name: 'Масляный фильтр Hengst H90W24',
+        brand: 'hengst',
+        number: 'H90W24',
+        attributes: spinOn(96, 76, 'M20x1.5'),
+      },
+      {
+        name: 'Масляный фильтр Hengst E340H D247',
+        brand: 'hengst',
+        number: 'E340H D247',
+        attributes: cartridge(141, 71, true),
+      },
+      {
+        name: 'Масляный фильтр Knecht OX 371D',
+        brand: 'knecht',
+        number: 'OX 371D',
+        attributes: cartridge(115, 64, true),
+      },
+      {
+        name: 'Масляный фильтр Febi 27150',
+        brand: 'febi',
+        number: '27150',
+        attributes: cartridge(103, 65, false),
+      },
+    ],
+  },
+  {
+    category: 'brake-pads',
+    parts: [
+      {
+        name: 'Тормозные колодки передние Brembo P 06 038',
+        brand: 'brembo',
+        number: 'P 06 038',
+        attributes: pads('front', 20.3, 'prepared'),
+      },
+      {
+        name: 'Тормозные колодки передние Zimmermann 23921.200.1',
+        brand: 'zimmermann',
+        number: '23921.200.1',
+        attributes: pads('front', 20, 'prepared'),
+      },
+      {
+        name: 'Тормозные колодки передние Textar 2412201',
+        brand: 'textar',
+        number: '2412201',
+        attributes: pads('front', 19.8, 'included'),
+      },
+      {
+        name: 'Тормозные колодки задние TRW GDB1919',
+        brand: 'trw',
+        number: 'GDB1919',
+        attributes: pads('rear', 17.5, 'prepared'),
+      },
+      {
+        name: 'Тормозные колодки задние ATE 13.0460-7230.2',
+        brand: 'ate',
+        number: '13.0460-7230.2',
+        attributes: pads('rear', 17.2, 'included'),
+      },
+      {
+        name: 'Тормозные колодки задние Brembo P 06 087',
+        brand: 'brembo',
+        number: 'P 06 087',
+        attributes: pads('rear', 16.8, 'none'),
+      },
+    ],
+  },
+];
+
+async function seedFilterVariety(
+  catalog: CatalogModuleService,
+  logger: Logger,
+) {
+  const known = new Set(
+    (await catalog.listBrands({}, { take: null })).map(({ slug }) => slug),
+  );
+  await catalog.createBrands(
+    VARIETY_BRANDS.filter(({ slug }) => !known.has(slug)),
+  );
+  const brand: Ids = Object.fromEntries(
+    (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
+  );
+  const category: Ids = Object.fromEntries(
+    (await catalog.listCategories({}, { take: null })).map((c) => [
+      c.slug,
+      c.id,
+    ]),
+  );
+  const addFields = (
+    categoryId: string,
+    fields: readonly (readonly [
+      string,
+      CategoryFieldType,
+      string,
+      string | null,
+    ])[],
+  ) =>
+    catalog.createCategoryFields(
+      fields.map(([key, type, label, unit], index) => ({
+        category_id: categoryId,
+        key,
+        type,
+        label,
+        unit,
+        facet: true,
+        rank: 10 + index,
+      })),
+    );
+  await addFields(category['oil-filters'], OIL_FILTER_FIELDS);
+  const [, sensor] = await addFields(category['brake-pads'], BRAKE_PAD_FIELDS);
+  await catalog.createCategoryFieldOptions(
+    WEAR_SENSOR_OPTIONS.map(([key, label], rank) => ({
+      field_id: sensor.id,
+      key,
+      label,
+      rank,
+    })),
+  );
+  const existing = async (slug: string, number: string) => {
+    const [identifier] = await catalog.listPartIdentifiers(
+      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { relations: ['part'] },
+    );
+    return identifier;
+  };
+  for (const [slug, number, attributes] of EXISTING_ATTRIBUTES) {
+    const identifier = await existing(slug, number);
+    if (identifier) {
+      await catalog.classifyPart(identifier.part_id, {
+        category_id: identifier.part.category_id,
+        attributes: { ...identifier.part.attributes, ...attributes },
+      });
+    }
+  }
+  for (const { category: slug, parts } of VARIETY_PARTS) {
+    for (const { name, brand: brandSlug, number, attributes } of parts) {
+      const imported = await existing(brandSlug, number);
+      if (imported) {
+        await catalog.classifyPart(imported.part_id, {
+          category_id: category[slug],
+          attributes,
+        });
+        continue;
+      }
+      await catalog.createPartWithIdentifiers({
+        name,
+        category_id: category[slug],
+        attributes,
+        identifiers: [
+          {
+            type: 'manufacturer-number',
+            brand_id: brand[brandSlug],
+            value: number,
+          },
+        ],
+      });
+    }
+  }
+  logger.info('Seeded the demo oil filter and brake pad variety.');
+}
+
 async function syncDemoSuppliers(
   catalog: CatalogModuleService,
   suppliers: SupplierModuleService,
@@ -810,6 +1066,19 @@ export default async function seedDemo({ container }: ExecArgs) {
     logger.info('Demo batteries already seeded, skipping.');
   } else {
     await seedBatteries(catalog, logger);
+  }
+  const [oilFilters] = await catalog.listCategories({ slug: 'oil-filters' });
+  if (
+    (
+      await catalog.listCategoryFields({
+        category_id: oilFilters.id,
+        key: 'height',
+      })
+    ).length
+  ) {
+    logger.info('Demo filter variety already seeded, skipping.');
+  } else {
+    await seedFilterVariety(catalog, logger);
   }
   await syncDemoSuppliers(catalog, suppliers);
   await seedDemoImages(container, catalog);

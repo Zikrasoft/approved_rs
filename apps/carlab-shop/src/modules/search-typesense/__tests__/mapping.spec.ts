@@ -4,6 +4,7 @@ import {
   collectSearchableFields,
   compileFacets,
   compileFilters,
+  toFacetResults,
   toTypesenseFields,
 } from '../mapping';
 
@@ -25,6 +26,12 @@ describe('compileFacets', () => {
     expect(() =>
       compileFacets([{ field: 'price', type: 'range', ranges: [] }]),
     ).toThrow('unsupported "range" facet on "price"');
+  });
+
+  it('facets a stats field like a value field', () => {
+    expect(compileFacets([{ field: 'price', type: 'stats' }])).toEqual({
+      facet_by: 'price',
+    });
   });
 });
 
@@ -197,5 +204,52 @@ describe('compileFilters', () => {
 
   it('throws for an unsupported logical operator', () => {
     expect(() => compileFilters({ $or: [{ a: 1 }] })).toThrow(/\$or/);
+  });
+
+  it('compiles inclusive bounds into comparisons', () => {
+    expect(compileFilters({ price: { $gte: 1000, $lte: 2500 } })).toBe(
+      'price:>=1000 && price:<=2500',
+    );
+    expect(compileFilters({ price: { $gte: 1000 } })).toBe('price:>=1000');
+    expect(compileFilters({ price: { $lte: 2500 } })).toBe('price:<=2500');
+  });
+});
+
+describe('toFacetResults', () => {
+  it('reads value counts and the stats of a stats facet', () => {
+    expect(
+      toFacetResults(
+        [{ field: 'facets' }, { field: 'price', type: 'stats' }],
+        [
+          {
+            field_name: 'facets',
+            counts: [{ value: 'brand:ate', count: 2 }],
+          },
+          {
+            field_name: 'price',
+            counts: [
+              { value: '900', count: 2 },
+              { value: '2400', count: 1 },
+            ],
+            stats: { min: 900, max: 2400 },
+          },
+        ],
+      ),
+    ).toEqual({
+      facets: {
+        type: 'value',
+        values: [{ value: 'brand:ate', count: 2 }],
+      },
+      price: { type: 'stats', min: 900, max: 2400, count: 3 },
+    });
+  });
+
+  it('leaves out a stats facet nothing has a value for', () => {
+    expect(
+      toFacetResults(
+        [{ field: 'price', type: 'stats' }],
+        [{ field_name: 'price', counts: [], stats: {} }],
+      ),
+    ).toEqual({});
   });
 });

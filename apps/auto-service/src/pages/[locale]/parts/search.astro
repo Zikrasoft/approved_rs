@@ -23,6 +23,7 @@ import {
   chosenFilters,
   PARTS_QUERY_MAX_LENGTH,
   rangesFromParams,
+  withFacetCopy,
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -92,7 +93,8 @@ if (found && offset > lastPage) {
 }
 const narrowedTo = found?.category;
 const heading = narrowedTo?.name ?? copy.heading;
-const chips = found ? chosenFilters(found.facets, chosen, ranges, copy) : [];
+const facets = found ? withFacetCopy(found.facets, copy) : [];
+const chips = chosenFilters(facets, chosen, ranges, copy);
 const emptyMessage = q
   ? copy.noResults.replace('{q}', q)
   : chips.length > 0
@@ -140,18 +142,17 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
         <div
           class:list={[
             'grid gap-6',
-            found.facets.length > 0 &&
-              'lg:grid-cols-[16rem_1fr] lg:items-start',
+            facets.length > 0 && 'lg:grid-cols-[16rem_1fr] lg:items-start',
           ]}
         >
-          {found.facets.length > 0 && (
+          {facets.length > 0 && (
             <FacetFilters
               action={PathBuilder.partsSearch(locale)}
               hidden={{
                 ...(q ? { q } : {}),
                 ...(category ? { category } : {}),
               }}
-              facets={found.facets}
+              facets={facets}
               chosen={chosen}
               ranges={ranges}
               resetHref={searchHref([], [])}

@@ -7,6 +7,7 @@ import {
   compileFacets,
   compileFilters,
   hasNestedFields,
+  toFacetResults,
   toTypesenseFields,
 } from './mapping';
 
@@ -160,15 +161,7 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
         score: hit.text_match,
         document: hit.document as Record<string, unknown>,
       })),
-      facets: Object.fromEntries(
-        (response.facet_counts ?? []).map(({ field_name, counts }) => [
-          field_name,
-          {
-            type: 'value' as const,
-            values: counts.map(({ value, count }) => ({ value, count })),
-          },
-        ]),
-      ),
+      facets: toFacetResults(facets, response.facet_counts ?? []),
       metadata: {
         skip,
         take,
