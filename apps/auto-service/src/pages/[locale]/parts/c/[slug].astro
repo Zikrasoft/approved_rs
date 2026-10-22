@@ -6,6 +6,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
@@ -41,6 +42,7 @@ const empty = category.pages.length === 0;
 const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
 const searchCopy = content(locale).partsSearch;
 const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
+const filtered = !empty && facets.length > 0;
 const fields = category.fields
   .map((field) => {
     const numbers = category.pages
@@ -86,11 +88,52 @@ const fields = category.fields
 
   <section
     class:list={[
-      'wrap grid gap-6 py-band md:py-band-lg',
-      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+      'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
+      empty
+        ? 'lg:grid-cols-[1.2fr_1fr]'
+        : filtered && 'lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
     ]}
   >
-    <div class="flex flex-col gap-8">
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{ category: category.slug }}
+          facets={facets}
+          count={category.pages.length}
+        />
+      )
+    }
+
+    <div class="flex min-w-0 flex-col gap-10">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        {
+          empty ? (
+            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+          ) : (
+            <>
+              <ListingBar count={category.pages.length} filters={filtered} />
+              <ul class="card divide-y divide-line">
+                {category.pages.map((page) => (
+                  <PartRow
+                    thumb={partThumbnail(page, category)}
+                    slug={page.slug}
+                    brand={page.brand.name}
+                    value={page.value}
+                    name={translated(page.part, 'name', locale)}
+                    superseded={page.superseded}
+                    current={partSuccessor(page, bySlug)}
+                    offers={page.offers}
+                  />
+                ))}
+              </ul>
+              <InquiryLink />
+            </>
+          )
+        }
+      </div>
+
       {
         body.length > 0 && (
           <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
@@ -116,40 +159,6 @@ const fields = category.fields
           </div>
         )
       }
-
-      <div class="flex flex-col gap-3 max-lg:order-first">
-        <h2 class="text-section">{copy.partsHeading}</h2>
-        {
-          facets.length > 0 && (
-            <FacetFilters
-              action={PathBuilder.partsSearch(locale)}
-              hidden={{ category: category.slug }}
-              facets={facets}
-            />
-          )
-        }
-        {
-          empty ? (
-            <p class="max-w-2xl text-muted">{copy.noParts}</p>
-          ) : (
-            <ul class="card divide-y divide-line">
-              {category.pages.map((page) => (
-                <PartRow
-                  thumb={partThumbnail(page, category)}
-                  slug={page.slug}
-                  brand={page.brand.name}
-                  value={page.value}
-                  name={translated(page.part, 'name', locale)}
-                  superseded={page.superseded}
-                  current={partSuccessor(page, bySlug)}
-                  offers={page.offers}
-                />
-              ))}
-            </ul>
-          )
-        }
-        {!empty && <InquiryLink />}
-      </div>
     </div>
 
     {

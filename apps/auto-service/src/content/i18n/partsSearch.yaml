@@ -13,6 +13,8 @@ noResults: По запросу «{q}» ничего не нашлось. Про�
 unavailable: Поиск сейчас не отвечает. Отправьте заявку, и менеджер подберет запчасть вручную.
 filtersHeading: Фильтры
 applyFilters: Показать
+showResults: Показать {count}
+showAllValues: Показать все ({count})
 resetFilters: Сбросить
 resetAllFilters: Сбросить все
 rangeMinLabel: От
