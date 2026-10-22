@@ -64,6 +64,21 @@ export type AdminUpdatePartIdentifierType = z.infer<
   typeof AdminUpdatePartIdentifier
 >;
 
+export const AdminListPartIdentifiers = z.object({
+  enriched: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .optional(),
+  q: z.string().trim().optional(),
+  category_id: z.string().min(1).optional(),
+  part_id: z.string().min(1).optional(),
+  offset: z.coerce.number().int().nonnegative().default(0),
+  limit: z.coerce.number().int().positive().max(200).default(50),
+});
+export type AdminListPartIdentifiersType = z.infer<
+  typeof AdminListPartIdentifiers
+>;
+
 export const AdminListFitments = z.object({
   vehicle_id: z.string().min(1).optional(),
   part_id: z.string().min(1).optional(),
