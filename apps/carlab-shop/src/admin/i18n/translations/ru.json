@@ -1,5 +1,6 @@
 {
   "menu": {
+    "parts": "Запчасти",
     "fitments": "Соответствия",
     "suppliers": "Поставщики",
     "brands": "Бренды",
@@ -702,5 +703,47 @@
     "numberOption_few": "{{number}} ({{count}} фото)",
     "numberOption_many": "{{number}} ({{count}} фото)",
     "numberOption_other": "{{number}} ({{count}} фото)"
+  },
+  "parts": {
+    "heading": "Запчасти",
+    "lead": "Индексируются номера с категорией и хотя бы одной машиной, аналогом или подходящим допуском. Только они попадают в поиск и карту сайта.",
+    "filterLabel": "Статус индексации",
+    "filters": {
+      "all": "Все",
+      "true": "Индексируется",
+      "false": "Не индексируется"
+    },
+    "status": {
+      "enriched": "Индексируется",
+      "notEnriched": "Не индексируется"
+    },
+    "reasons": {
+      "no_category": "нет категории",
+      "no_fitment_equivalent_or_requirement": "нет машин, аналогов и допусков"
+    },
+    "searchLabel": "Поиск по номеру или названию",
+    "searchPlaceholder": "Номер, бренд или название",
+    "categoryLabel": "Категория",
+    "allCategories": "Все категории",
+    "noCategory": "Без категории",
+    "columns": {
+      "number": "Номер",
+      "status": "Статус",
+      "category": "Категория",
+      "photos": "Фото",
+      "offers": "Предложения"
+    },
+    "fix": {
+      "attributes": "Категория и фото",
+      "fitments": "Машины и аналоги"
+    },
+    "emptyHint": "Измените фильтр или поиск.",
+    "pagination": {
+      "of": "из",
+      "results": "номеров",
+      "pages": "страниц",
+      "prev": "Назад",
+      "next": "Вперед"
+    }
   }
 }
