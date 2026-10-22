@@ -98,8 +98,13 @@ const searchHref = (
 if (found && offset > lastPage) {
   return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }
-const narrowedTo = found?.category;
-const scopedTo = found?.model;
+const scope =
+  found ??
+  (catalogue && (category || model)
+    ? await catalogue.listingScope({ category, model }, locale)
+    : null);
+const narrowedTo = scope?.category;
+const scopedTo = scope?.model;
 const modelName = scopedTo && carName(scopedTo, locale);
 const modelCopy = content(locale).partsCar.hubs.modelCategory;
 const heading = narrowedTo?.name ?? copy.heading;

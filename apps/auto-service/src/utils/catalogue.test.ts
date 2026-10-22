@@ -300,6 +300,35 @@ describe('catalogue categories', () => {
     ]);
   });
 
+  it('leaves out of a Category a superseded number whose current number is listed', async () => {
+    const part = { ...classified.part };
+    const current = { ...oilFilterBmw, part };
+    const retired = {
+      ...oilFilterBmw,
+      id: 'pi_bmw_old',
+      value: '11 42 8507683',
+      normalized_value: '11428507683',
+      superseded: true,
+      part,
+      equivalents: [{ ...oilFilterBmw.equivalents[0] }, { ...current }],
+      offers: [],
+    };
+    const orphan = {
+      ...retired,
+      id: 'pi_bmw_orphan',
+      normalized_value: '11420000000',
+      equivalents: [],
+    };
+    const [oil] = await catalogueWith(
+      withCategories([retired, current, orphan]),
+    ).categoryPages();
+
+    expect(oil.pages.map((page) => page.slug)).toEqual([
+      'bmw-11428575211',
+      'bmw-11420000000',
+    ]);
+  });
+
   it('offers the filter values the Category pages carry, counted per brand-number', async () => {
     const numbered = (normalized_value: string, attributes: object) => ({
       ...classified,
@@ -612,6 +641,33 @@ describe('catalogue.carPages', () => {
     expect(car.groups[0].ambiguous).toBe(false);
     expect(car.groups[0].fitments.map(({ part }) => part.id)).toEqual([
       'part_front',
+    ]);
+  });
+
+  it('leaves out a replaced Part once its successor is in the catalogue', async () => {
+    const replaced = {
+      ...frontPads,
+      part: {
+        ...frontPads.part,
+        replaced_by: {
+          id: 'part_sport',
+          name: 'Колодки передние, M Sport',
+          translations: null,
+          brand_number: { ...sportPads, part: undefined },
+        },
+      },
+    };
+    const [car] = await carPagesFor(
+      [replaced, sportPads],
+      [
+        fitment('fit_front', 'part_front', { axle: 'front' }),
+        fitment('fit_sport', 'part_sport', { axle: 'front' }),
+      ],
+    );
+
+    expect(car.groups[0].ambiguous).toBe(false);
+    expect(car.groups[0].fitments.map(({ part }) => part.id)).toEqual([
+      'part_sport',
     ]);
   });
 
@@ -1078,5 +1134,31 @@ describe('Requirements and the maintenance kit', () => {
         parts.map(({ pages, fits }) => [pages[0].slug, fits]),
       ]),
     ).toEqual([['engine-oil', [['liqui-moly-20646', []]]]]);
+  });
+});
+
+describe('catalogue.listingScope', () => {
+  it('names the Category and Model a filtered listing belongs to', async () => {
+    const scope = await catalogueWith(
+      backend({
+        categories: [
+          { ...oilFilters, translations: { sr: { name: 'Filteri ulja' } } },
+        ],
+        vehicles: [VEHICLE],
+      }),
+    ).listingScope({ category: 'oil-filters', model: 'f30-320d' }, 'sr');
+
+    expect(scope).toEqual({
+      category: { slug: 'oil-filters', name: 'Filteri ulja' },
+      model: VEHICLE.model,
+    });
+  });
+
+  it('names nothing when the backend cannot answer', async () => {
+    const scope = await catalogueWith(
+      vi.fn(() => respond({}, false)),
+    ).listingScope({ category: 'oil-filters' }, 'ru');
+
+    expect(scope).toEqual({ category: null, model: null });
   });
 });

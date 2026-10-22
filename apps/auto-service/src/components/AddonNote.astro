@@ -1,20 +1,24 @@
 ---
-import type { Category } from '@podbor/catalog-contract';
+import type { Category, PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { bestPrice } from '@/utils/bestPrice';
 import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import Icon from './Icon.astro';
 
 interface Props {
   category: Category | null;
+  pages: { offers: PartOffer[] }[];
   class?: string;
 }
 
-const { category, class: className } = Astro.props;
+const { category, pages, class: className } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const addon = categoryAddon(category, locale);
-const pickup = content(locale).shopCart.addonPickup;
+const addon = bestPrice(pages)?.inStock
+  ? categoryAddon(category, locale)
+  : null;
+const { addonPickup: pickup, addonInCart } = content(locale).shopCart;
 ---
 
 {
@@ -27,7 +31,9 @@ const pickup = content(locale).shopCart.addonPickup;
     >
       <Icon name="info" size={16} class="mt-1 shrink-0 text-signal-ink" />
       <div class="flex min-w-0 flex-1 flex-col gap-2">
-        <p>{addon.note}</p>
+        <p>
+          {addon.note} {addonInCart}
+        </p>
         <p class="flex items-baseline justify-between gap-3 text-ink">
           <span class="flex min-w-0 flex-col">
             <span>{addon.label}</span>

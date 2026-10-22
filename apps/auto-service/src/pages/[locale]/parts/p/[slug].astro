@@ -224,7 +224,10 @@ const thumbFor = (slug: string) => {
           <PartOffers page={page} demoted={Boolean(successor)} />
         )
       }
-      <AddonNote category={category} />
+      <AddonNote
+        category={category}
+        pages={[page, ...(successor ? [successor] : [])]}
+      />
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1">

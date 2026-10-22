@@ -19,6 +19,8 @@ export const shopCartContentSchema = z
     totalLabel: z.string(),
     addonTemplate: z.string(),
     addonPickup: z.string(),
+    addonInCart: z.string(),
+    priceChangeTemplate: z.string(),
     summaryHeading: z.string(),
     summaryCountTemplate: z.string(),
     summaryAddons: z.string(),
@@ -32,6 +34,8 @@ export const shopCartContentSchema = z
     commentLabel: z.string(),
     commentPlaceholder: z.string(),
     submitLabel: z.string(),
+    consentError: z.string(),
+    submitError: z.string(),
     checkoutBlocked: z.string(),
     notices: z
       .object({

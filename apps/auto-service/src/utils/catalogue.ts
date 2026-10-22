@@ -21,6 +21,7 @@ import {
   type RangeFilter,
   requirementMatches,
   searchResponseSchema,
+  translated,
   universalFacets,
   usefulFacets,
   vehiclesResponseSchema,
@@ -36,6 +37,7 @@ import {
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
+import { partSuccessor } from './partSuccessor';
 
 export type { Vehicle, VinFacts };
 
@@ -324,6 +326,8 @@ export function createCatalogue({
     }
     const entries = [...bySlug.values()];
     const pagesByPart = groupBy(entries, ({ part }) => part.id);
+    const retired = ({ replaced_by }: PartPage['part']) =>
+      replaced_by !== null && pagesByPart.has(replaced_by.id);
     const parts = [...pagesByPart.values()].map((partPages) => ({
       ...partPages[0].part,
       pages: partPages,
@@ -352,7 +356,7 @@ export function createCatalogue({
       const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap(
         (fit) => {
           const partPages = pagesByPart.get(fit.part_id);
-          return partPages
+          return partPages && !retired(partPages[0].part)
             ? [
                 {
                   ...fit,
@@ -405,6 +409,7 @@ export function createCatalogue({
       fits,
       entries,
       pagesByPart,
+      retired,
       matchesFor,
       cars,
     };
@@ -420,9 +425,11 @@ export function createCatalogue({
 
     async categoryPages(): Promise<CategoryPageEntry[]> {
       const { categories: all, entries } = await snapshot();
+      const bySlug = new Map(entries.map((page) => [page.slug, page]));
+      const listed = entries.filter((page) => !partSuccessor(page, bySlug));
       return all.map((category) => ({
         ...category,
-        pages: entries.filter((page) => page.category?.id === category.id),
+        pages: listed.filter((page) => page.category?.id === category.id),
       }));
     },
 
@@ -435,9 +442,12 @@ export function createCatalogue({
         categories: all,
         vehicles: allVehicles,
         pagesByPart,
+        retired,
         matchesFor,
       } = await snapshot();
-      const parts = [...pagesByPart.values()];
+      const parts = [...pagesByPart.values()].filter(
+        (pages) => !retired(pages[0].part),
+      );
       const models = [
         ...groupBy(allVehicles, ({ model }) => model.slug).values(),
       ].map((vehicles): ModelHubEntry => {
@@ -515,6 +525,29 @@ export function createCatalogue({
         };
       } catch {
         return null;
+      }
+    },
+
+    async listingScope(
+      { category, model }: Pick<SearchQuery, 'category' | 'model'>,
+      locale: CatalogLocale,
+    ): Promise<Pick<SearchResponse, 'category' | 'model'>> {
+      try {
+        const [allCategories, allVehicles] = await Promise.all([
+          category ? categories() : [],
+          model ? vehicles() : [],
+        ]);
+        const named = allCategories.find(({ slug }) => slug === category);
+        return {
+          category: named
+            ? { slug: named.slug, name: translated(named, 'name', locale) }
+            : null,
+          model:
+            allVehicles.find((vehicle) => vehicle.model.slug === model)
+              ?.model ?? null,
+        };
+      } catch {
+        return { category: null, model: null };
       }
     },
 

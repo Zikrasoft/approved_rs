@@ -1,6 +1,11 @@
 import type { PartOffer } from '@podbor/catalog-contract';
 
-export type BestPrice = { price: number; currency: string; inStock: boolean };
+export type BestPrice = {
+  price: number;
+  currency: string;
+  inStock: boolean;
+  leadDays: number;
+};
 
 export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   const offers = pages.flatMap(({ offers }) => offers);
@@ -15,5 +20,6 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
     price: cheapest.price,
     currency: cheapest.currency,
     inStock: inStock.length > 0,
+    leadDays: cheapest.lead_time_days,
   };
 }

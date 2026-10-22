@@ -13,6 +13,22 @@ describe('splitNumbers', () => {
     expect(current.map(({ id }) => id)).toEqual(['bmw', 'mann', 'mahle']);
     expect(previous.map(({ id }) => id)).toEqual(['old']);
   });
+
+  it('leads with the number the visitor is about to buy', () => {
+    const mann = {
+      id: 'mann',
+      type: 'manufacturer-number' as const,
+      superseded: false,
+    };
+    const numbers = [
+      { id: 'bmw', type: 'oem' as const, superseded: false },
+      mann,
+    ];
+    expect(splitNumbers(numbers, mann).current.map(({ id }) => id)).toEqual([
+      'mann',
+      'bmw',
+    ]);
+  });
 });
 
 describe('currentNumber', () => {

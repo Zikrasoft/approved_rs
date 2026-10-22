@@ -28,6 +28,7 @@ export const partsCarContentSchema = z
         label: z.string(),
         placeholder: z.string(),
         submitLabel: z.string(),
+        invalid: z.string(),
         unresolved: z.string(),
       })
       .strict(),

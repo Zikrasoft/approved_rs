@@ -10,7 +10,7 @@ import {
   readReceipt,
   rememberCart,
   rememberReceipt,
-  repricedSince,
+  priceChanges,
 } from './offerCart';
 import { cartCount } from './cartBadge';
 import { readPartsList } from './partsList';
@@ -217,7 +217,7 @@ describe('the remembered cart', () => {
     expect(readCart(storage)).toBeNull();
   });
 
-  it('notices a price that moved since the visitor last saw the cart', () => {
+  it('names each line whose price moved since the visitor last saw the cart', () => {
     const storage = memoryStorage();
     rememberCart(cart, storage);
     const seen = readCart(storage)!;
@@ -226,10 +226,12 @@ describe('the remembered cart', () => {
       items: [{ ...cart.items[0], unit_price: 1990 }],
     };
 
-    expect(repricedSince(seen, cart)).toBe(false);
-    expect(repricedSince(seen, repriced)).toBe(true);
-    expect(repricedSince({ id: 'cart_1', parts: [bmwOil] }, repriced)).toBe(
-      false,
+    expect(priceChanges(seen, cart)).toEqual([]);
+    expect(priceChanges(seen, repriced)).toEqual([
+      { name: 'Масляный фильтр', before: 1850, after: 1990 },
+    ]);
+    expect(priceChanges({ id: 'cart_1', parts: [bmwOil] }, repriced)).toEqual(
+      [],
     );
   });
 
@@ -258,12 +260,16 @@ describe('the remembered cart', () => {
     ).toEqual({ count: 2, parts: 3700, addons: 0, total: 3700 });
   });
 
-  it('adds the add-on service a sellable line carries', () => {
+  it('charges the add-on service once per unit of a sellable line', () => {
     expect(
       orderSummary({
         ...cart,
         items: [
-          { ...cart.items[0], addon: { ...SERVICE, item_id: 'item_2' } },
+          {
+            ...cart.items[0],
+            quantity: 2,
+            addon: { ...SERVICE, item_id: 'item_2' },
+          },
           {
             ...cart.items[0],
             id: 'item_3',
@@ -278,10 +284,10 @@ describe('the remembered cart', () => {
         ],
       }),
     ).toEqual({
-      count: 2,
-      parts: 1850 + 1850,
-      addons: 2500,
-      total: 1850 + 2500 + 1850,
+      count: 3,
+      parts: 2 * 1850 + 1850,
+      addons: 2 * 2500,
+      total: 2 * 1850 + 2 * 2500 + 1850,
     });
   });
 

@@ -18,6 +18,7 @@ const stock = offer && offer.stock_quantity > 0 ? offer.stock_quantity : null;
 const outOfStock = offer !== undefined && stock === null;
 const leadDays =
   offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
+const unavailable = outOfStock && leadDays === null;
 ---
 
 <li
@@ -33,14 +34,14 @@ const leadDays =
     <span
       class="rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2"
       data-out
-      hidden={!outOfStock}
+      hidden={!unavailable}
     >
       {copy.outOfStock}
     </span>
     <span class="text-sm text-muted" data-lead hidden={leadDays === null}>
       {
         leadDays !== null &&
-          `${copy.columns.leadTime}: ${formatLeadTime(leadDays, copy.leadTime, localeTag)}`
+          `${copy.columns.leadTime} ${formatLeadTime(leadDays, copy.leadTime, localeTag)}`
       }
     </span>
   </div>

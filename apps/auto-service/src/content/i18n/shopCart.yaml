@@ -26,6 +26,8 @@ submitNote: Менеджер подтвердит наличие и время, 
 commentLabel: Комментарий к заказу (необязательно)
 commentPlaceholder: Например, когда удобно забрать
 submitLabel: Оформить заказ
+consentError: Без согласия мы не сможем оформить заказ
+submitError: Заказ не отправился. Проверьте связь и попробуйте еще раз
 checkoutBlocked: 'Сейчас нельзя купить: {names}. Уберите позицию или отправьте ее заявкой, и заказ можно будет оформить.'
 notices:
   priceChanged: Пока вы оформляли заказ, цена изменилась. Мы обновили корзину, проверьте сумму и оформите заказ еще раз.
@@ -51,4 +53,6 @@ fallbackRetry: Попробовать еще раз
 fallbackCta: Отправить заявкой
 addonTemplate: 'Добавить: {service}'
 addonPickup: Делаем при выдаче в сервисе CarLab
+addonInCart: Услугу можно добавить в корзине.
+priceChangeTemplate: '{name}: было {before}, стало {after}'
 translatedFrom: pending

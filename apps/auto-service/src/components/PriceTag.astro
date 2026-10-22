@@ -3,17 +3,28 @@ import type { PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { bestPrice } from '@/utils/bestPrice';
+import { formatLeadTime } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 
 interface Props {
   pages: { offers: PartOffer[] }[];
+  exact?: boolean;
   class?: string;
 }
 
 const locale = localeFrom(Astro.url.pathname);
+const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
-const best = bestPrice(Astro.props.pages);
-const className = Astro.props.class;
+const { pages, exact = false, class: className } = Astro.props;
+const best = bestPrice(pages);
+const price = best ? formatMoney(best.price, best.currency, localeTag) : '';
+const availability =
+  best &&
+  (best.inStock
+    ? copy.columns.stock
+    : best.leadDays > 0
+      ? `${copy.columns.leadTime} ${formatLeadTime(best.leadDays, copy.leadTime, localeTag)}`
+      : copy.outOfStock);
 ---
 
 {
@@ -22,14 +33,9 @@ const className = Astro.props.class;
       class:list={['flex shrink-0 flex-col items-end text-right', className]}
     >
       <span class="spec text-sm font-semibold text-ink">
-        {copy.fromPrice.replace(
-          '{price}',
-          formatMoney(best.price, best.currency, BCP47_BY_LOCALE[locale]),
-        )}
+        {exact ? price : copy.fromPrice.replace('{price}', price)}
       </span>
-      {best.inStock && (
-        <span class="text-xs text-ink-2">{copy.columns.stock}</span>
-      )}
+      <span class="text-xs text-ink-2">{availability}</span>
     </span>
   ) : (
     <span class:list={['shrink-0 text-right text-xs text-muted', className]}>

@@ -26,7 +26,7 @@ columns:
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
-askSupplyCta: Узнать о наличии
+askSupplyCta: Добавить в заявку
 askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
 stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
 fromPrice: от {price}

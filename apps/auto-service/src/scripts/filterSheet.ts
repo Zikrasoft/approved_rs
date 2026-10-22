@@ -31,6 +31,15 @@ export function defineFilterSheet(
           },
           { signal },
         );
+        this.closest('form')?.addEventListener(
+          'formdata',
+          ({ formData }) => {
+            const kept = [...formData].filter(([, value]) => value !== '');
+            for (const name of new Set(formData.keys())) formData.delete(name);
+            for (const [name, value] of kept) formData.append(name, value);
+          },
+          { signal },
+        );
         const media = matchMedia(wide);
         media.addEventListener(
           'change',

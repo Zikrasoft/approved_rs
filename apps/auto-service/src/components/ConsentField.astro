@@ -6,9 +6,11 @@ import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   uid: string;
+  error?: string;
+  submitError?: string;
 }
 
-const { uid } = Astro.props;
+const { uid, error, submitError } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
@@ -48,9 +50,9 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     data-error-consent
     hidden
   >
-    {site.form.errorConsent}
+    {error ?? site.form.errorConsent}
   </p>
   <p class={errorText} role="alert" data-error-submit hidden>
-    {site.form.errorSubmit}
+    {submitError ?? site.form.errorSubmit}
   </p>
 </div>

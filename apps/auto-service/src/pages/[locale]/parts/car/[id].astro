@@ -155,13 +155,17 @@ const specsSummary = [
                     <span class="text-sm text-ink">
                       {translated(item.part, 'name', locale)}
                     </span>
-                    <PartNumbers pages={item.pages} />
+                    <PartNumbers pages={item.pages} first={item.page} />
                   </ThumbRow>
                   <span class="flex shrink-0 flex-col items-end gap-1">
                     <span class="spec text-sm text-ink">
                       {quantity(item.quantity)}
                     </span>
-                    <PriceTag pages={item.pages} />
+                    {item.offer ? (
+                      <PriceTag pages={[{ offers: [item.offer] }]} exact />
+                    ) : (
+                      <PriceTag pages={item.pages} />
+                    )}
                   </span>
                 </li>
               ))}
@@ -221,6 +225,9 @@ const specsSummary = [
                 </h3>
                 <AddonNote
                   category={block.groups[0].category}
+                  pages={block.groups.flatMap(({ fitments }) =>
+                    fitments.flatMap(({ pages }) => pages),
+                  )}
                   class="mx-5 mt-4 mb-1 sm:mx-6"
                 />
                 <ul class="divide-y divide-line">
@@ -292,6 +299,7 @@ const specsSummary = [
                 </h3>
                 <AddonNote
                   category={match.category}
+                  pages={match.parts.flatMap(({ pages }) => pages)}
                   class="mx-5 mt-4 mb-1 sm:mx-6"
                 />
                 <ul class="divide-y divide-line">

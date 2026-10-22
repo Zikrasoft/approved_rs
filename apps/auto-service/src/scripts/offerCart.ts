@@ -197,10 +197,17 @@ export function settleCart(
   }
 }
 
-export const repricedSince = (seen: StoredCart, cart: OfferCart): boolean =>
-  cart.items.some(({ id, unit_price }) => {
+export type PriceChange = { name: string; before: number; after: number };
+
+export const priceChanges = (
+  seen: StoredCart,
+  cart: OfferCart,
+): PriceChange[] =>
+  cart.items.flatMap(({ id, unit_price, part }) => {
     const before = seen.prices?.[id];
-    return before !== undefined && before !== unit_price;
+    return before !== undefined && before !== unit_price
+      ? [{ name: part.name, before, after: unit_price }]
+      : [];
   });
 
 export function orderSummary(cart: OfferCart) {
@@ -211,13 +218,14 @@ export function orderSummary(cart: OfferCart) {
     0,
   );
   const addons = sold.reduce(
-    (sum, { addon }) => sum + (addon?.item_id ? addon.unit_price : 0),
+    (sum, { addon, quantity }) =>
+      sum + (addon?.item_id ? addon.unit_price * quantity : 0),
     0,
   );
   return { count, parts, addons, total: parts + addons };
 }
 
-type FormStorage = Pick<Storage, 'getItem' | 'setItem'>;
+type FormStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 const RECEIPT_KEY = 'carlab_order_receipt';
 
@@ -247,57 +255,112 @@ export function readReceipt(
 }
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
-const REMEMBERED_FIELDS = [
+const CONTACT_MEMORY_KEY = 'carlab_checkout_contact';
+const CONTACT_FIELDS = [
   '[data-country]',
   '[data-phone]',
   '[data-telegram]',
   '[name="name"]',
+] as const;
+const REMEMBERED_FIELDS = [
+  ...CONTACT_FIELDS,
   '[name="vin"]',
   '[name="comment"]',
+  '[data-consent]',
 ] as const;
 
 const fieldIn = (form: HTMLFormElement, selector: string) =>
   form.querySelector<HTMLInputElement | HTMLSelectElement>(selector);
 
-export function rememberCheckout(
-  form: HTMLFormElement,
-  storage: FormStorage = sessionStorage,
-): void {
-  const values = Object.fromEntries(
-    REMEMBERED_FIELDS.map((selector) => [
-      selector,
-      fieldIn(form, selector)?.value ?? '',
-    ]),
-  );
-  const channel =
-    form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
-    '';
-  try {
-    storage.setItem(CHECKOUT_MEMORY_KEY, JSON.stringify({ values, channel }));
-  } catch {
-    return;
-  }
-}
+const fieldValue = (field: HTMLInputElement | HTMLSelectElement | null) =>
+  field instanceof HTMLInputElement && field.type === 'checkbox'
+    ? field.checked
+      ? field.value
+      : ''
+    : (field?.value ?? '');
 
 const checkoutMemorySchema = z.object({
   values: z.record(z.string(), z.string()),
   channel: z.string(),
 });
 
-export function restoreCheckout(
-  form: HTMLFormElement,
-  storage: FormStorage = sessionStorage,
-): void {
-  let memory: z.infer<typeof checkoutMemorySchema>;
+type CheckoutMemory = z.infer<typeof checkoutMemorySchema>;
+
+const readMemory = (
+  storage: FormStorage,
+  key: string,
+): CheckoutMemory | null => {
   try {
     const parsed = checkoutMemorySchema.safeParse(
-      JSON.parse(storage.getItem(CHECKOUT_MEMORY_KEY) ?? 'null'),
+      JSON.parse(storage.getItem(key) ?? 'null'),
     );
-    if (!parsed.success) return;
-    memory = parsed.data;
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeMemory = (
+  storage: FormStorage,
+  key: string,
+  memory: CheckoutMemory,
+) => {
+  try {
+    storage.setItem(key, JSON.stringify(memory));
   } catch {
     return;
   }
+};
+
+export function rememberCheckout(
+  form: HTMLFormElement,
+  storage: FormStorage = sessionStorage,
+): void {
+  writeMemory(storage, CHECKOUT_MEMORY_KEY, {
+    values: Object.fromEntries(
+      REMEMBERED_FIELDS.map((selector) => [
+        selector,
+        fieldValue(fieldIn(form, selector)),
+      ]),
+    ),
+    channel:
+      form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
+      '',
+  });
+}
+
+export function forgetCheckout(
+  session: FormStorage = sessionStorage,
+  local: FormStorage = localStorage,
+): void {
+  const memory = readMemory(session, CHECKOUT_MEMORY_KEY);
+  if (memory) {
+    writeMemory(local, CONTACT_MEMORY_KEY, {
+      channel: memory.channel,
+      values: Object.fromEntries(
+        CONTACT_FIELDS.map((selector) => [
+          selector,
+          memory.values[selector] ?? '',
+        ]),
+      ),
+    });
+  }
+  try {
+    session.removeItem(CHECKOUT_MEMORY_KEY);
+  } catch {
+    return;
+  }
+}
+
+export function restoreCheckout(
+  form: HTMLFormElement,
+  session: FormStorage = sessionStorage,
+  local: FormStorage = localStorage,
+): void {
+  const memory =
+    readMemory(session, CHECKOUT_MEMORY_KEY) ??
+    readMemory(local, CONTACT_MEMORY_KEY);
+  if (!memory) return;
   if (memory.channel) {
     form
       .querySelector<HTMLElement>(`[data-tab="${CSS.escape(memory.channel)}"]`)
@@ -305,12 +368,15 @@ export function restoreCheckout(
   }
   for (const [selector, value] of Object.entries(memory.values)) {
     const field = fieldIn(form, selector);
-    if (field && value) {
+    if (!field || !value) continue;
+    if (field instanceof HTMLInputElement && field.type === 'checkbox') {
+      field.checked = true;
+    } else {
       field.value = value;
-      field.dispatchEvent(new Event('input', { bubbles: true }));
-      const folded = field.closest('details');
-      if (folded) folded.open = true;
     }
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    const folded = field.closest('details');
+    if (folded) folded.open = true;
   }
 }
 
@@ -424,14 +490,15 @@ export function definePartOffers(tagName = 'part-offers'): void {
           row,
           '[data-lead]',
           offer.lead_time_days > 0
-            ? `${leadLabel}: ${formatLeadTime(
+            ? `${leadLabel} ${formatLeadTime(
                 offer.lead_time_days,
                 { inStock, days: JSON.parse(days) as LeadTimeCopy['days'] },
                 localeTag,
               )}`
             : null,
         );
-        row.querySelector<HTMLElement>('[data-out]')!.hidden = inStockNow;
+        row.querySelector<HTMLElement>('[data-out]')!.hidden =
+          inStockNow || offer.lead_time_days > 0;
         row.querySelector<HTMLElement>('[data-ask]')!.hidden = inStockNow;
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
         buy.hidden = !inStockNow;
@@ -499,6 +566,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const notice = params.get(CART_NOTICE_PARAM) ?? '';
         if (notice === 'ordered') {
           forgetOrderedCart(params.get(ORDERED_CART_PARAM));
+          forgetCheckout();
           this.showOrdered(
             params.get(ORDER_NUMBER_PARAM),
             readReceipt(params.get(ORDERED_CART_PARAM)),
@@ -507,7 +575,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         }
         const form = this.querySelector('form');
         if (form) {
-          if (notice) restoreCheckout(form);
+          void customElements
+            .whenDefined('lead-form')
+            .then(() => restoreCheckout(form));
+          form.addEventListener('change', () => rememberCheckout(form));
           form.addEventListener('submit', () => {
             rememberCheckout(form);
             if (this.cart) rememberReceipt(this.cart);
@@ -611,7 +682,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               row,
               '[data-addon]',
               addon?.item_id
-                ? `+ ${addonLabel(addon.label, addon.translations, locale)}, ${money(addon.unit_price)}`
+                ? `+ ${addonLabel(addon.label, addon.translations, locale)}, ${money(addon.unit_price * quantity)}`
                 : null,
             );
             return row;
@@ -649,7 +720,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
 
       draw(cart: OfferCart, notice: string): void {
         const seen = readCart();
-        const repriced = seen !== null && repricedSince(seen, cart);
+        const changes = seen ? priceChanges(seen, cart) : [];
         this.cart = cart;
         rememberCart(cart);
         for (const { id, quantity } of cart.items) {
@@ -660,9 +731,37 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           ...cart.items.map((line) => this.line(line, cart, localeTag)),
         );
         this.summarize(cart, localeTag);
-        showOnly(this, 'data-notice', notice || (repriced ? 'repriced' : ''));
+        showOnly(
+          this,
+          'data-notice',
+          notice || (changes.length ? 'repriced' : ''),
+        );
+        this.listChanges(changes, cart, localeTag);
         this.block(unavailableNames(cart));
         this.show('cart');
+      }
+
+      listChanges(
+        changes: PriceChange[],
+        cart: OfferCart,
+        localeTag: string,
+      ): void {
+        const list = this.querySelector<HTMLElement>('[data-price-changes]');
+        if (!list) return;
+        const { template = '' } = list.dataset;
+        const money = (amount: number) =>
+          formatMoney(amount, cart.currency, localeTag);
+        list.replaceChildren(
+          ...changes.map(({ name, before, after }) => {
+            const item = document.createElement('li');
+            item.textContent = template
+              .replace('{name}', name)
+              .replace('{before}', money(before))
+              .replace('{after}', money(after));
+            return item;
+          }),
+        );
+        list.hidden = changes.length === 0;
       }
 
       summarize(cart: OfferCart, localeTag: string): void {
@@ -825,8 +924,13 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             addonLabel(line.addon.label, line.addon.translations, locale),
           ),
         );
-        fill(box, '[data-addon-price]', `+${money(line.addon.unit_price)}`);
+        fill(
+          box,
+          '[data-addon-price]',
+          `+${money(line.addon.unit_price * line.quantity)}`,
+        );
         toggle.checked = line.addon.item_id !== null;
+        toggle.disabled = !line.available;
         toggle.addEventListener('change', () => {
           toggle.disabled = true;
           void this.change('PUT', {

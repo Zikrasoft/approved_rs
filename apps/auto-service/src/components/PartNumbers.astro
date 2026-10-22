@@ -5,16 +5,22 @@ import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { splitNumbers } from '@/utils/partNumbers';
 
+type Numbered = Pick<BrandNumber, 'type' | 'superseded' | 'value'> & {
+  slug: string;
+  brand: { name: string };
+};
+
 interface Props {
-  pages: (Pick<BrandNumber, 'type' | 'superseded' | 'value'> & {
-    slug: string;
-    brand: { name: string };
-  })[];
+  pages: Numbered[];
+  first?: Numbered;
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
-const { current, previous } = splitNumbers(Astro.props.pages);
+const { current, previous } = splitNumbers(
+  Astro.props.pages,
+  Astro.props.first,
+);
 ---
 
 <div class="flex flex-col gap-1">

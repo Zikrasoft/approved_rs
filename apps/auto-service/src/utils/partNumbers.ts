@@ -4,10 +4,11 @@ type Numbered = Pick<BrandNumber, 'type' | 'superseded'>;
 
 export function splitNumbers<T extends Numbered>(
   numbers: T[],
+  first?: T,
 ): { current: T[]; previous: T[] } {
-  const oemFirst = [...numbers].sort(
-    (a, b) => Number(b.type === 'oem') - Number(a.type === 'oem'),
-  );
+  const rank = (number: T) =>
+    number === first ? 2 : Number(number.type === 'oem');
+  const oemFirst = [...numbers].sort((a, b) => rank(b) - rank(a));
   return {
     current: oemFirst.filter(({ superseded }) => !superseded),
     previous: oemFirst.filter(({ superseded }) => superseded),
