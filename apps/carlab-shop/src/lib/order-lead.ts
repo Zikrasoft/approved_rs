@@ -1,5 +1,12 @@
-import type { BigNumberValue } from '@medusajs/framework/types';
-import { MathBN } from '@medusajs/framework/utils';
+import type {
+  BigNumberValue,
+  MedusaContainer,
+} from '@medusajs/framework/types';
+import {
+  ContainerRegistrationKeys,
+  MathBN,
+  Modules,
+} from '@medusajs/framework/utils';
 import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   checkoutContactSchema,
@@ -10,11 +17,20 @@ import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { z } from 'zod';
 
+import { parseEnv } from './env';
 import { ADDON_FOR_METADATA_KEY } from './offer-cart';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
 export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
+export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
+export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
+
+const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
+
+export const handOffAttempts = (
+  metadata: Record<string, unknown> | null | undefined,
+): number => attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
 
 const OWNER_COPY = {
   heading: (displayId: number) =>
@@ -115,5 +131,75 @@ export async function sendOrderLead(
   await response.body?.cancel();
   if (response.status >= 400) {
     throw new Error(`The lead route answered ${response.status}`);
+  }
+}
+
+const isTimeout = (error: unknown) =>
+  error instanceof Error && error.name === 'TimeoutError';
+
+async function readLeadOrder(
+  container: MedusaContainer,
+  id: string,
+): Promise<LeadOrder> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const {
+    data: [row],
+  } = await query.graph({
+    entity: 'order',
+    filters: { id },
+    fields: [
+      'id',
+      'display_id',
+      'currency_code',
+      'metadata',
+      'items.title',
+      'items.detail.quantity',
+      'items.unit_price',
+      'items.metadata',
+    ],
+  });
+  return leadOrderSchema.parse(row);
+}
+
+async function recordHandOff(
+  container: MedusaContainer,
+  id: string,
+  outcome: (metadata: Record<string, unknown>) => Record<string, unknown>,
+): Promise<void> {
+  const orders = container.resolve(Modules.ORDER);
+  const { metadata } = await orders.retrieveOrder(id);
+  await orders.updateOrders(id, {
+    metadata: { ...metadata, ...outcome(metadata ?? {}) },
+  });
+}
+
+export async function handOrderToLeadRoute(
+  container: MedusaContainer,
+  id: string,
+): Promise<void> {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  try {
+    const { LEAD_ROUTE_URL } = parseEnv(process.env);
+    if (!LEAD_ROUTE_URL) {
+      throw new Error('LEAD_ROUTE_URL is not set');
+    }
+    const order = await readLeadOrder(container, id);
+    await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order));
+    logger.info(`Order ${id} handed to the lead pipeline`);
+    if (order.metadata?.[LEAD_HANDOFF_ERROR]) {
+      await recordHandOff(container, id, () => ({
+        [LEAD_HANDOFF_ERROR]: '',
+        [LEAD_HANDOFF_ATTEMPTS]: '',
+      }));
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    logger.error(`Order ${id} did not reach the lead pipeline: ${reason}`);
+    await recordHandOff(container, id, (metadata) => ({
+      [LEAD_HANDOFF_ERROR]: reason,
+      [LEAD_HANDOFF_ATTEMPTS]: isTimeout(error)
+        ? LEAD_HANDOFF_MAX_ATTEMPTS
+        : handOffAttempts(metadata) + 1,
+    }));
   }
 }
