@@ -77,6 +77,7 @@ async function describeFacets(
   catalog: CatalogModuleService,
   counts: z.infer<typeof facetCountsSchema>,
   locale: CatalogLocale,
+  categoryId: string | undefined,
 ) {
   const values = (counts?.values ?? []).map(({ value, count }) => ({
     ...splitFacet(value),
@@ -85,14 +86,16 @@ async function describeFacets(
   if (!values.length) {
     return [];
   }
-  const fields = z
-    .array(categoryFieldSchema)
-    .parse(
-      await catalog.listCategoryFields(
-        { facet: true, key: [...new Set(values.map(({ key }) => key))] },
-        { relations: ['options'], order: { rank: 'ASC' }, take: null },
-      ),
-    );
+  const fields = z.array(categoryFieldSchema).parse(
+    await catalog.listCategoryFields(
+      {
+        facet: true,
+        key: [...new Set(values.map(({ key }) => key))],
+        ...(categoryId ? { category_id: categoryId } : {}),
+      },
+      { relations: ['options'], order: { rank: 'ASC' }, take: null },
+    ),
+  );
   const seen = new Set<string>();
   return fields
     .filter(({ key }) => !seen.has(key) && seen.add(key))
@@ -107,7 +110,8 @@ async function describeFacets(
           .filter(({ key }) => key === field.key)
           .sort(
             (a, b) =>
-              rank(a.value) - rank(b.value) || a.value.localeCompare(b.value),
+              rank(a.value) - rank(b.value) ||
+              a.value.localeCompare(b.value, 'en', { numeric: true }),
           )
           .map(({ value, count }) => {
             const option = field.options.find(({ key }) => key === value);
@@ -125,8 +129,14 @@ export async function GET(
   req: MedusaRequest<unknown, StoreSearchPartsType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { q, vehicle_id, facets, offset, limit } =
-    req.validatedQuery as StoreSearchPartsType;
+  const {
+    q = '',
+    category,
+    vehicle_id,
+    facets,
+    offset,
+    limit,
+  } = req.validatedQuery as StoreSearchPartsType;
   const parsedLocale = z.enum(CATALOG_LOCALES).safeParse(req.locale);
   if (!parsedLocale.success) {
     throw new MedusaError(
@@ -137,22 +147,41 @@ export async function GET(
   const locale = parsedLocale.data;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const filters: SearchFilters = { q: q.toLowerCase() };
+  const [found] = category
+    ? await catalog.listCategories({ slug: category })
+    : [];
+  if (category && !found) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      `Category ${category} not found`,
+    );
+  }
+  const narrowedTo = found
+    ? { slug: found.slug, name: translated(found, 'name', locale) }
+    : null;
+
+  const filters: SearchFilters = searchableQuery(q)
+    ? { q: q.toLowerCase() }
+    : {};
   const and = facetFilters(facets);
   const nothing = () =>
     res.json(
       searchResponseSchema.parse({
         results: [],
         facets: [],
+        category: narrowedTo,
         count: 0,
         offset,
         limit,
       }),
     );
 
-  if (!searchableQuery(q)) {
+  if (!filters.q && !found) {
     nothing();
     return;
+  }
+  if (found) {
+    and.push({ category: found.slug });
   }
   if (vehicle_id) {
     const partIds = await partIdsForVehicle(catalog, vehicle_id);
@@ -225,7 +254,9 @@ export async function GET(
         catalog,
         facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD]),
         locale,
+        found?.id,
       ),
+      category: narrowedTo,
       count: Math.max(
         0,
         (search_result.metadata.count ?? results.length) -

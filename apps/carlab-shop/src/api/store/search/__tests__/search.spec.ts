@@ -22,6 +22,7 @@ medusaIntegrationTestRunner({
       let airFilterId: string;
       let thinOilId: string;
       let thickOilId: string;
+      let batteryIds: Record<number, string>;
 
       const search = (params: Record<string, string | string[]>) => {
         const query = new URLSearchParams();
@@ -141,6 +142,36 @@ medusaIntegrationTestRunner({
             },
           ],
         });
+        const batteries = await catalog.createCategories({
+          slug: 'batteries',
+          name: 'Аккумуляторы',
+          translations: { en: { name: 'Batteries' } },
+        });
+        await catalog.createCategoryFields({
+          category_id: batteries.id,
+          key: 'capacity',
+          type: 'number',
+          unit: 'Ah',
+          label: 'Емкость',
+          rank: 1,
+          facet: true,
+        });
+        batteryIds = {};
+        for (const capacity of [100, 60, 80]) {
+          batteryIds[capacity] = await catalog.createPartWithIdentifiers({
+            name: `Аккумулятор ${capacity}`,
+            category_id: batteries.id,
+            attributes: { capacity },
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: mann.id,
+                value: `BAT ${capacity}`,
+              },
+            ],
+          });
+        }
+
         await catalog.updateParts([
           {
             id: oilFilterId,
@@ -233,6 +264,66 @@ medusaIntegrationTestRunner({
 
         expect(found.map(({ part }) => part.id)).toEqual([thickOilId]);
         expect(found.map(({ part }) => part.id)).not.toContain(thinOilId);
+      });
+
+      it('lists a whole Category without a query', async () => {
+        const response = await search({ category: 'engine-oil', locale: 'en' });
+
+        expect(response.status).toBe(200);
+        expect(response.data.count).toBe(2);
+        expect(
+          response.data.results.map(({ part }: Result) => part.id).sort(),
+        ).toEqual([thinOilId, thickOilId].sort());
+        expect(response.data.category).toEqual({
+          slug: 'engine-oil',
+          name: 'Engine oil',
+        });
+        expect(
+          response.data.facets.map(({ key }: { key: string }) => key),
+        ).toEqual(['viscosity']);
+      });
+
+      it('narrows a Category to a range of numbers, listed in numeric order', async () => {
+        const all = await search({ category: 'batteries', locale: 'ru' });
+        const large = await results({
+          category: 'batteries',
+          locale: 'ru',
+          facets: ['capacity:80', 'capacity:100'],
+        });
+
+        expect(all.data.facets).toEqual([
+          {
+            key: 'capacity',
+            label: 'Емкость',
+            unit: 'Ah',
+            values: [
+              { value: '60', label: '60', count: 1 },
+              { value: '80', label: '80', count: 1 },
+              { value: '100', label: '100', count: 1 },
+            ],
+          },
+        ]);
+        expect(large.map(({ part }) => part.id).sort()).toEqual(
+          [batteryIds[80], batteryIds[100]].sort(),
+        );
+      });
+
+      it('searches by text inside a Category', async () => {
+        const found = await results({
+          q: 'castrol',
+          category: 'oil-filters',
+          locale: 'ru',
+        });
+
+        expect(found).toEqual([]);
+      });
+
+      it('answers 404 for an unknown Category and 400 for a malformed one', async () => {
+        const unknown = await search({ category: 'no-such', locale: 'ru' });
+        const malformed = await search({ category: 'Bad Slug', locale: 'ru' });
+
+        expect(unknown.status).toBe(404);
+        expect(malformed.status).toBe(400);
       });
 
       it('returns an empty list for a query nothing matches', async () => {

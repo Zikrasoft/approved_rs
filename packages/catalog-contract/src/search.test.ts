@@ -39,6 +39,7 @@ const response = {
       values: [{ value: '5w-30', label: '5W-30', count: 1 }],
     },
   ],
+  category: null,
   count: 1,
   offset: 0,
   limit: 20,
@@ -47,6 +48,14 @@ const response = {
 describe('searchResponseSchema', () => {
   it('accepts a list of brand-numbers with their facets', () => {
     expect(searchResponseSchema.parse(response)).toEqual(response);
+  });
+
+  it('names the Category a listing was narrowed to', () => {
+    const narrowed = {
+      ...response,
+      category: { slug: 'oil-filters', name: 'Filteri ulja' },
+    };
+    expect(searchResponseSchema.parse(narrowed)).toEqual(narrowed);
   });
 
   it('refuses a result without its Part', () => {
