@@ -29,6 +29,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -172,6 +173,7 @@ const EntitySection = ({
   rows: Rows;
   reload: () => Promise<void>;
 }) => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [draft, setDraft] = useState<Record<string, string>>({});
@@ -280,6 +282,7 @@ const EntitySection = ({
                       />
                     )}
                     <Button
+                      disabled={writing}
                       size="small"
                       variant="secondary"
                       onClick={() => {
@@ -290,6 +293,7 @@ const EntitySection = ({
                       {t('vehicles.edit')}
                     </Button>
                     <Button
+                      disabled={writing}
                       size="small"
                       variant="danger"
                       onClick={() => remove(row)}
@@ -344,11 +348,11 @@ const EntitySection = ({
         </Text>
       )}
       <div className="flex gap-x-2">
-        <Button onClick={save}>
+        <Button disabled={writing} onClick={save}>
           {editingId ? t('vehicles.save') : t('vehicles.create')}
         </Button>
         {editingId && (
-          <Button variant="secondary" onClick={reset}>
+          <Button disabled={writing} variant="secondary" onClick={reset}>
             {t('vehicles.cancel')}
           </Button>
         )}

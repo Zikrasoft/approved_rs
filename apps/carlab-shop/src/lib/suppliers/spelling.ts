@@ -1,2 +1,7 @@
 export const spellingKey = (value: string): string =>
-  value.trim().replace(/\s+/g, ' ').toUpperCase();
+  value
+    .normalize('NFKC')
+    .replace(/\s+/gu, ' ')
+    .trim()
+    .toUpperCase()
+    .normalize('NFKC');

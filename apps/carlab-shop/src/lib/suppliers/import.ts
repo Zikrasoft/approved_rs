@@ -17,6 +17,7 @@ import {
   supplierAdapters,
   supplierQuoteSchema,
 } from './adapter';
+import { emitIndexChanges } from '../index-changes';
 import { quotedFields } from './live-quote';
 import { spellingKey } from './spelling';
 
@@ -43,7 +44,7 @@ async function createPart(
   article: Article,
   brandId: string,
   categoryId: string,
-): Promise<string> {
+): Promise<{ identifierId: string; partId: string }> {
   const part = {
     name: article.name,
     identifiers: [
@@ -67,7 +68,7 @@ async function createPart(
       throw error;
     });
   const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return identifier.id;
+  return { identifierId: identifier.id, partId };
 }
 
 async function matchArticle(
@@ -75,7 +76,7 @@ async function matchArticle(
   article: Article,
   brandId: string,
   categoryId: string,
-): Promise<{ identifierId: string; created: boolean }> {
+): Promise<{ identifierId: string; created: boolean; changedPartId?: string }> {
   const { adapter, catalog } = context;
   const [hit] = await catalog.listPartIdentifiers(
     {
@@ -85,10 +86,13 @@ async function matchArticle(
     { relations: ['part'], take: 1 },
   );
   if (!hit) {
-    return {
-      identifierId: await createPart(context, article, brandId, categoryId),
-      created: true,
-    };
+    const { identifierId, partId } = await createPart(
+      context,
+      article,
+      brandId,
+      categoryId,
+    );
+    return { identifierId, created: true, changedPartId: partId };
   }
   const { part } = hit;
   if (
@@ -97,6 +101,7 @@ async function matchArticle(
     part.name !== article.name
   ) {
     await catalog.updateParts({ id: part.id, name: article.name });
+    return { identifierId: hit.id, created: false, changedPartId: part.id };
   }
   return { identifierId: hit.id, created: false };
 }
@@ -170,7 +175,7 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ code, category_id }) => [spellingKey(code), category_id]),
+    ).map(({ code_key, category_id }) => [code_key, category_id]),
   );
   const brandOf = new Map(
     (
@@ -178,7 +183,7 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ value, brand_id }) => [spellingKey(value), brand_id]),
+    ).map(({ value_key, brand_id }) => [value_key, brand_id]),
   );
   const summary: ImportSummary = {
     supplier: adapter.name,
@@ -192,6 +197,7 @@ export async function importSupplier(
   const categoryOfArticle = (article: Article) =>
     categoryOf.get(spellingKey(article.category));
   const listed = new Set<string>();
+  const changedPartIds = new Set<string>();
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
@@ -219,12 +225,15 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, created } = await matchArticle(
+      const { identifierId, created, changedPartId } = await matchArticle(
         context,
         article,
         brandOfArticle(article)!,
         categoryOfArticle(article)!,
       );
+      if (changedPartId) {
+        changedPartIds.add(changedPartId);
+      }
       const quote = quotes.get(article.article_id);
       if (quote) {
         await storeOffer(context, identifierId, quote);
@@ -249,14 +258,24 @@ export async function importSupplier(
   if (gone.length) {
     await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
+  await emitIndexChanges(scope, { partIds: changedPartIds });
   return summary;
 }
 
 export async function importSupplierCatalogues(
   scope: MedusaContainer,
 ): Promise<ImportSummary[]> {
+  const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
+  const disabled = new Set(
+    (await suppliers.listSuppliers({ import_enabled: false })).map(
+      ({ name }) => name,
+    ),
+  );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {
+    if (disabled.has(adapter.name)) {
+      continue;
+    }
     summaries.push(await importSupplier(scope, adapter));
   }
   return summaries;

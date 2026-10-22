@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { adminFetch } from '../../lib/admin-fetch';
+import { adminFetch, useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 
 const publishRunSchema = z.object({
@@ -41,6 +41,7 @@ const BADGE_COLOR = {
 } as const;
 
 const PublishPage = () => {
+  const writing = useWriting();
   const { t, i18n } = useTranslation('carlabAdmin');
   const [run, setRun] = useState<PublishRun | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -97,7 +98,7 @@ const PublishPage = () => {
         <Button
           onClick={publish}
           isLoading={starting}
-          disabled={starting || run?.status === 'running'}
+          disabled={starting || run?.status === 'running' || writing}
         >
           {t('publish.publish')}
         </Button>

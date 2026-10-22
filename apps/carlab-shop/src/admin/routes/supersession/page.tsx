@@ -22,6 +22,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 
@@ -53,6 +54,7 @@ const numbersOf = (part: Part): string =>
     .join(', ');
 
 const SupersessionPage = () => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
 
   const [query, setQuery] = useState('');
@@ -158,7 +160,7 @@ const SupersessionPage = () => {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <Button type="submit" disabled={!query.trim()}>
+          <Button type="submit" disabled={!query.trim() || writing}>
             {t('supersession.search')}
           </Button>
         </div>
@@ -169,6 +171,7 @@ const SupersessionPage = () => {
         <div className="flex flex-col gap-y-2">
           {parts.map((part) => (
             <Button
+              disabled={writing}
               key={part.id}
               variant={part.id === selected?.id ? 'primary' : 'secondary'}
               className="h-auto justify-start whitespace-normal text-left"
@@ -231,6 +234,7 @@ const SupersessionPage = () => {
               <div className="flex items-center gap-x-2">
                 <Badge>{selected.replaced_by.name}</Badge>
                 <Button
+                  disabled={writing}
                   size="small"
                   variant="secondary"
                   onClick={() => setReplacement(null)}
@@ -256,7 +260,7 @@ const SupersessionPage = () => {
               <Button
                 type="submit"
                 variant="secondary"
-                disabled={!replacementQuery.trim()}
+                disabled={!replacementQuery.trim() || writing}
               >
                 {t('supersession.search')}
               </Button>
@@ -266,6 +270,7 @@ const SupersessionPage = () => {
             )}
             {candidates?.map((candidate) => (
               <Button
+                disabled={writing}
                 key={candidate.id}
                 variant="secondary"
                 className="h-auto justify-start whitespace-normal text-left"

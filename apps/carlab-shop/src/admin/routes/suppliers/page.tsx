@@ -10,6 +10,7 @@ import {
   Input,
   Label,
   Select,
+  Switch,
   Table,
   Text,
   toast,
@@ -29,6 +30,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -38,6 +40,7 @@ const supplierSchema = editedBySchema.extend({
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
+  import_enabled: z.boolean(),
 });
 
 type Supplier = z.infer<typeof supplierSchema>;
@@ -77,12 +80,18 @@ const importsSchema = z.object({
     }),
   ),
 });
-const sourceDeletedSchema = z.object({ deleted: z.number() });
+const sourceDeletedSchema = z.object({
+  deleted: z.number(),
+  import_disabled: z.boolean(),
+});
+
+const MANUAL_SOURCE = 'manual';
 
 const SuppliersPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const prompt = usePrompt();
   const confirmed = useConfirmed();
+  const writing = useWriting();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -196,6 +205,29 @@ const SuppliersPage = () => {
     }
   };
 
+  const toggleImport = async (supplier: Supplier) => {
+    const enabling = !supplier.import_enabled;
+    const state = enabling ? 'on' : 'off';
+    if (
+      !(await prompt({
+        variant: 'confirmation',
+        title: t(`suppliers.importSwitch.${state}.title`, {
+          supplier: supplier.name,
+        }),
+        description: t(`suppliers.importSwitch.${state}.body`),
+        confirmText: t(`suppliers.importSwitch.${state}.confirm`),
+        cancelText: t('common.cancel'),
+      }))
+    ) {
+      return;
+    }
+    if (await update(supplier.id, { import_enabled: enabling })) {
+      toast.success(
+        t(`suppliers.importSwitch.${state}.done`, { supplier: supplier.name }),
+      );
+    }
+  };
+
   const importLine = (
     summary: z.infer<typeof importsSchema>['imports'][number],
   ) =>
@@ -228,6 +260,7 @@ const SuppliersPage = () => {
     });
     setImporting(false);
     if (data) {
+      await loadSources();
       toast.success(
         data.imports.length
           ? data.imports.map(importLine).join('\n')
@@ -285,12 +318,22 @@ const SuppliersPage = () => {
 
   const removeSource = async ({ source, rows }: Source) => {
     let deleted = 0;
+    let importDisabled = false;
+    const fromSupplier = suppliers.some(({ name }) => name === source);
     const removed = await confirmed({
       title: t('sources.confirmTitle', { source: sourceName(source) }),
-      description: t('sources.confirmBody', { count: rows }),
+      description: t(
+        fromSupplier ? 'sources.confirmSupplierBody' : 'sources.confirmBody',
+        { count: rows },
+      ),
       confirmText: t('sources.remove'),
       done: () =>
-        t('sources.removed', { source: sourceName(source), count: deleted }),
+        [
+          t('sources.removed', { source: sourceName(source), count: deleted }),
+          importDisabled && t('sources.importDisabled', { source }),
+        ]
+          .filter(Boolean)
+          .join(' '),
       run: async () => {
         setRemovingSource(source);
         const data = await adminFetch(
@@ -299,12 +342,13 @@ const SuppliersPage = () => {
           { method: 'DELETE' },
         );
         deleted = data?.deleted ?? 0;
+        importDisabled = data?.import_disabled ?? false;
         return data;
       },
     });
     setRemovingSource(null);
     if (removed) {
-      await loadSources();
+      await Promise.all([loadSources(), load()]);
     }
   };
 
@@ -324,7 +368,12 @@ const SuppliersPage = () => {
               {t('suppliers.importLead')}
             </Text>
           </div>
-          <Button variant="secondary" isLoading={importing} onClick={runImport}>
+          <Button
+            variant="secondary"
+            isLoading={importing}
+            disabled={writing}
+            onClick={runImport}
+          >
             {t('suppliers.import')}
           </Button>
         </div>
@@ -339,6 +388,9 @@ const SuppliersPage = () => {
                   {t('suppliers.columns.markup')}
                 </Table.HeaderCell>
                 <Table.HeaderCell />
+                <Table.HeaderCell>
+                  {t('suppliers.columns.import')}
+                </Table.HeaderCell>
                 <Table.HeaderCell>
                   {t('suppliers.columns.released')}
                 </Table.HeaderCell>
@@ -369,6 +421,15 @@ const SuppliersPage = () => {
                           [supplier.id]: event.target.value,
                         }))
                       }
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === 'Enter' &&
+                          drafts[supplier.id] !== undefined &&
+                          !writing
+                        ) {
+                          saveMarkup(supplier);
+                        }
+                      }}
                     />
                   </Table.Cell>
                   <Table.Cell>
@@ -376,11 +437,28 @@ const SuppliersPage = () => {
                       size="small"
                       variant="secondary"
                       isLoading={savingId === supplier.id}
-                      disabled={drafts[supplier.id] === undefined}
+                      disabled={drafts[supplier.id] === undefined || writing}
                       onClick={() => saveMarkup(supplier)}
                     >
                       {t('suppliers.save')}
                     </Button>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="flex items-center gap-x-2">
+                      <Switch
+                        id={`${supplier.id}-import`}
+                        checked={supplier.import_enabled}
+                        disabled={writing}
+                        onCheckedChange={() => toggleImport(supplier)}
+                      />
+                      <Label size="small" htmlFor={`${supplier.id}-import`}>
+                        {t(
+                          supplier.import_enabled
+                            ? 'suppliers.importOn'
+                            : 'suppliers.importOff',
+                        )}
+                      </Label>
+                    </div>
                   </Table.Cell>
                   <Table.Cell>
                     <div className="flex flex-col gap-y-1 py-2">
@@ -389,7 +467,7 @@ const SuppliersPage = () => {
                           <Checkbox
                             id={`${supplier.id}-${kind}`}
                             checked={supplier.released_kinds.includes(kind)}
-                            disabled={savingId === supplier.id}
+                            disabled={writing}
                             onCheckedChange={() =>
                               toggleRelease(supplier, kind)
                             }
@@ -471,6 +549,7 @@ const SuppliersPage = () => {
                           <Button
                             size="small"
                             variant="secondary"
+                            disabled={writing}
                             onClick={() => removeMapping(mapping)}
                           >
                             {t('suppliers.mappings.remove')}
@@ -510,7 +589,7 @@ const SuppliersPage = () => {
               </div>
               <Button
                 size="small"
-                disabled={!code.trim() || !categoryId}
+                disabled={!code.trim() || !categoryId || writing}
                 onClick={addMapping}
               >
                 {t('suppliers.mappings.add')}
@@ -547,29 +626,32 @@ const SuppliersPage = () => {
                       {entry.rows.toLocaleString(i18n.language)}
                     </Table.Cell>
                     <Table.Cell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenu.Trigger asChild>
-                          <IconButton
-                            size="small"
-                            variant="transparent"
-                            isLoading={removingSource === entry.source}
-                            aria-label={t('sources.actionsFor', {
-                              source: sourceName(entry.source),
-                            })}
-                          >
-                            <EllipsisHorizontal />
-                          </IconButton>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content align="end">
-                          <DropdownMenu.Item
-                            className="text-ui-fg-error gap-x-2"
-                            onClick={() => removeSource(entry)}
-                          >
-                            <Trash />
-                            {t('sources.remove')}
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu>
+                      {entry.source !== MANUAL_SOURCE && (
+                        <DropdownMenu>
+                          <DropdownMenu.Trigger asChild>
+                            <IconButton
+                              size="small"
+                              variant="transparent"
+                              isLoading={removingSource === entry.source}
+                              disabled={writing}
+                              aria-label={t('sources.actionsFor', {
+                                source: sourceName(entry.source),
+                              })}
+                            >
+                              <EllipsisHorizontal />
+                            </IconButton>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Content align="end">
+                            <DropdownMenu.Item
+                              className="text-ui-fg-error gap-x-2"
+                              onClick={() => removeSource(entry)}
+                            >
+                              <Trash />
+                              {t('sources.remove')}
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu>
+                      )}
                     </Table.Cell>
                   </Table.Row>
                 ))}

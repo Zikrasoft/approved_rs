@@ -206,6 +206,100 @@ medusaIntegrationTestRunner({
         ).toBe(200);
       });
 
+      it('stores one of two identical Vehicles sent at once', async () => {
+        const { model, engine } = await createVehicleFixture(catalog, {
+          typeCode: 'TWIN',
+        });
+        const body = {
+          model_id: model.id,
+          engine_id: engine.id,
+          power_kw: 120,
+          market: 'EU',
+          year_from: 2016,
+        };
+
+        const responses = await Promise.all([
+          post('/admin/vehicles', body),
+          post('/admin/vehicles', body),
+        ]);
+
+        expect(responses.map(({ status }) => status).sort()).toEqual([
+          200, 409,
+        ]);
+        expect(responses.find(({ status }) => status === 409)?.data).toEqual(
+          expect.objectContaining({
+            code: 'ALREADY_EXISTS',
+            entity: 'vehicle',
+            message: 'This vehicle already exists.',
+          }),
+        );
+      });
+
+      it('refuses a Make name that differs from a stored one only by case', async () => {
+        await post('/admin/makes', { slug: 'skoda', name: 'Skoda' });
+
+        const response = await post('/admin/makes', {
+          slug: 'skoda-2',
+          name: ' SKODA ',
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'make',
+          message: 'This make already exists.',
+        });
+      });
+
+      it('refuses a second Series of the same name under one Make', async () => {
+        const { make } = await createVehicleFixture(catalog, {
+          typeCode: 'SER1',
+        });
+
+        const response = await post('/admin/series', {
+          make_id: make.id,
+          name: '3 СЕРИЯ',
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'series',
+        });
+      });
+
+      it('refuses a Series translation in a locale the catalogue does not have', async () => {
+        const { make } = await createVehicleFixture(catalog, {
+          typeCode: 'SER2',
+        });
+
+        const response = await post('/admin/series', {
+          make_id: make.id,
+          name: '1 серия',
+          translations: { de: '1er' },
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'INVALID_FIELD',
+          field: 'translations',
+        });
+      });
+
+      it('names what still holds a Make it refuses to delete', async () => {
+        const { make } = await createVehicleFixture(catalog, {
+          typeCode: 'HLD1',
+        });
+
+        const response = await remove(`/admin/makes/${make.id}`);
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'series', count: 1 }],
+        });
+      });
+
       it('refuses a Make name past 200 characters', async () => {
         const response = await post('/admin/makes', {
           slug: 'long-make',

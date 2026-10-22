@@ -1,3 +1,4 @@
+import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
   InjectManager,
@@ -14,6 +15,7 @@ import {
   type GEARBOX_TYPES,
   guardDefinitionChange,
   type SteeringSide,
+  type VEHICLE_DRIVES,
   normalizePartNumber,
   requirementErrors,
   validateAttributes,
@@ -38,6 +40,8 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
+import { spellingKey } from '../../lib/suppliers/spelling';
+import { MANUAL_SOURCE } from './models/provenance';
 
 type Provenance = {
   source?: string;
@@ -122,6 +126,28 @@ const sameIdentity = (
   time(conditions.production_from) === time(fitment.production_from) &&
   time(conditions.production_to) === time(fitment.production_to);
 
+const VEHICLE_IDENTITY = [
+  'model_id',
+  'engine_id',
+  'power_kw',
+  'drive',
+  'market',
+  'year_from',
+  'year_to',
+  'steering',
+] as const;
+
+export type NewVehicle = Provenance & {
+  model_id: string;
+  engine_id: string;
+  power_kw?: number | null;
+  drive?: (typeof VEHICLE_DRIVES)[number] | null;
+  market?: string | null;
+  year_from?: number | null;
+  year_to?: number | null;
+  steering?: SteeringSide | null;
+};
+
 export type NewRequirement = Provenance & {
   field_id: string;
   engine_id?: string;
@@ -142,6 +168,7 @@ export type NewPart = Provenance &
 type SourcedRow = { id: string; source: string };
 
 type SourcedRows = {
+  entity: string;
   list: (
     filters: { source?: string },
     context: Context,
@@ -153,7 +180,15 @@ export type SourceCount = { source: string; rows: number };
 
 const SOURCE_COLUMNS = { select: ['id', 'source'], take: null };
 
-class CatalogModuleService extends MedusaService({
+const sourceInUse = (source: string, details: Record<string, unknown>) =>
+  adminError(
+    MedusaError.Types.NOT_ALLOWED,
+    'SOURCE_IN_USE',
+    `Rows of other sources still use rows of ${source}`,
+    details,
+  );
+
+const CatalogModuleBase = MedusaService({
   Brand,
   BrandSpelling,
   Category,
@@ -170,7 +205,18 @@ class CatalogModuleService extends MedusaService({
   VehicleIdentifier,
   Fitment,
   Requirement,
-}) {
+});
+
+type CatalogModuleBase = InstanceType<typeof CatalogModuleBase>;
+
+type SpellingInput = { value: string } & Record<string, unknown>;
+
+const withValueKey = (row: SpellingInput) => ({
+  ...row,
+  value_key: spellingKey(row.value),
+});
+
+class CatalogModuleService extends CatalogModuleBase {
   @InjectTransactionManager()
   async createPartWithIdentifiers(
     {
@@ -208,6 +254,35 @@ class CatalogModuleService extends MedusaService({
     return created.id;
   }
 
+  override createBrandSpellings = ((
+    data: SpellingInput | SpellingInput[],
+    sharedContext?: Context,
+  ) =>
+    CatalogModuleBase.prototype.createBrandSpellings.call(
+      this,
+      Array.isArray(data) ? data.map(withValueKey) : withValueKey(data),
+      sharedContext,
+    )) as CatalogModuleBase['createBrandSpellings'];
+
+  @InjectTransactionManager()
+  async createVehicleOnce(
+    vehicle: NewVehicle,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    await this.lockRow('vehicle_model', vehicle.model_id, sharedContext);
+    const [, identical] = await this.listAndCountVehicles(
+      Object.fromEntries(
+        VEHICLE_IDENTITY.map((column) => [column, vehicle[column] ?? null]),
+      ),
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    if (identical) {
+      throw alreadyExists('vehicle', 'This vehicle already exists.');
+    }
+    return this.createVehicles(vehicle, sharedContext);
+  }
+
   @InjectTransactionManager()
   async addPartIdentifier(
     partId: string,
@@ -238,6 +313,7 @@ class CatalogModuleService extends MedusaService({
       { select: ['part_id'] },
       sharedContext,
     );
+    await this.lockRow('part', part_id, sharedContext);
     const [, count] = await this.listAndCountPartIdentifiers(
       { part_id },
       { select: ['id'], take: 1 },
@@ -251,6 +327,17 @@ class CatalogModuleService extends MedusaService({
       );
     }
     await this.deletePartIdentifiers(id, sharedContext);
+  }
+
+  private async lockRow(
+    table: 'part' | 'vehicle_model',
+    id: string,
+    sharedContext: Context,
+  ): Promise<void> {
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      `select id from "${table}" where id = ? for update`,
+      [id],
+    );
   }
 
   private async refuseUnknownBrands(
@@ -470,25 +557,15 @@ class CatalogModuleService extends MedusaService({
       chassis_id: requirement.chassis_id ?? null,
       vehicle_id: requirement.vehicle_id ?? null,
     };
-    const siblings = await this.listRequirements(
+    const [, siblings] = await this.listAndCountRequirements(
       { field_id: requirement.field_id, ...owner },
-      { take: null },
+      { select: ['id'], take: 1 },
       sharedContext,
     );
-    const sameOptions = (keys: string[] | null) =>
-      [...(keys ?? [])].sort().join() ===
-      [...(requirement.option_keys ?? [])].sort().join();
-    if (
-      siblings.some(
-        (sibling) =>
-          sameOptions(sibling.option_keys) &&
-          sibling.min === requirement.min &&
-          sibling.max === requirement.max,
-      )
-    ) {
+    if (siblings) {
       throw alreadyExists(
         'requirement',
-        'The owner already has this Requirement',
+        'The owner already has a Requirement on this field',
       );
     }
     return this.createRequirements(requirement, sharedContext);
@@ -522,81 +599,97 @@ class CatalogModuleService extends MedusaService({
   private sourcedRows(): SourcedRows[] {
     return [
       {
+        entity: 'requirement',
         list: (filters, context) =>
           this.listRequirements(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteRequirements(ids, context),
       },
       {
+        entity: 'fitment',
         list: (filters, context) =>
           this.listFitments(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteFitments(ids, context),
       },
       {
+        entity: 'vehicle_identifier',
         list: (filters, context) =>
           this.listVehicleIdentifiers(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleIdentifiers(ids, context),
       },
       {
+        entity: 'brand_spelling',
         list: (filters, context) =>
           this.listBrandSpellings(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteBrandSpellings(ids, context),
       },
       {
+        entity: 'part_identifier',
         list: (filters, context) =>
           this.listPartIdentifiers(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deletePartIdentifiers(ids, context),
       },
       {
+        entity: 'part',
         list: (filters, context) =>
           this.listParts(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteParts(ids, context),
       },
       {
+        entity: 'vehicle',
         list: (filters, context) =>
           this.listVehicles(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicles(ids, context),
       },
       {
+        entity: 'category_field_option',
         list: (filters, context) =>
           this.listCategoryFieldOptions(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFieldOptions(ids, context),
       },
       {
+        entity: 'category_field',
         list: (filters, context) =>
           this.listCategoryFields(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFields(ids, context),
       },
       {
+        entity: 'category',
         list: (filters, context) =>
           this.listCategories(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategories(ids, context),
       },
       {
+        entity: 'vehicle_model',
         list: (filters, context) =>
           this.listVehicleModels(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleModels(ids, context),
       },
       {
+        entity: 'engine',
         list: (filters, context) =>
           this.listEngines(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteEngines(ids, context),
       },
       {
+        entity: 'chassis',
         list: (filters, context) =>
           this.listChassis(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteChassis(ids, context),
       },
       {
+        entity: 'series',
         list: (filters, context) =>
           this.listSeries(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteSeries(ids, context),
       },
       {
+        entity: 'make',
         list: (filters, context) =>
           this.listMakes(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteMakes(ids, context),
       },
       {
+        entity: 'brand',
         list: (filters, context) =>
           this.listBrands(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteBrands(ids, context),
@@ -625,32 +718,40 @@ class CatalogModuleService extends MedusaService({
     source: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
-    const othersBefore = await this.otherSourceRows(source, sharedContext);
+    if (source === MANUAL_SOURCE) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'MANUAL_SOURCE',
+        'Rows typed in by hand are never deleted by source',
+      );
+    }
+    const before = await this.countRowsBySource(sharedContext);
     let deleted = 0;
-    for (const { list, remove } of this.sourcedRows()) {
+    for (const { entity, list, remove } of this.sourcedRows()) {
       const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
       if (ids.length) {
-        await remove(ids, sharedContext);
+        await remove(ids, sharedContext).catch((error: unknown) => {
+          throw MedusaError.isMedusaError(error) &&
+            error.type === MedusaError.Types.NOT_FOUND
+            ? sourceInUse(source, { blocked: entity })
+            : error;
+        });
         deleted += ids.length;
       }
     }
-    if ((await this.otherSourceRows(source, sharedContext)) !== othersBefore) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'SOURCE_IN_USE',
-        `Rows of other sources still use rows of ${source}`,
-      );
+    const after = await this.countRowsBySource(sharedContext);
+    const holders = before
+      .filter((count) => count.source !== source)
+      .map(({ source: holder, rows }) => ({
+        source: holder,
+        rows:
+          rows - (after.find((count) => count.source === holder)?.rows ?? 0),
+      }))
+      .filter(({ rows }) => rows > 0);
+    if (holders.length) {
+      throw sourceInUse(source, { holders });
     }
     return deleted;
-  }
-
-  private async otherSourceRows(
-    source: string,
-    sharedContext: Context,
-  ): Promise<number> {
-    return (await this.countRowsBySource(sharedContext))
-      .filter((count) => count.source !== source)
-      .reduce((total, { rows }) => total + rows, 0);
   }
 
   @InjectManager()

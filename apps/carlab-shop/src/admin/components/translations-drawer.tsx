@@ -16,6 +16,7 @@ import {
   adminFetch,
   editedBySchema,
   type EditedBy as Edited,
+  useWriting,
 } from '../lib/admin-fetch';
 import { EditedBy } from './edited-by';
 
@@ -39,6 +40,7 @@ export const TranslationsDrawer = ({
   id: string;
   source: Record<string, string>;
 }) => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const [open, setOpen] = useState(false);
   const [drafts, setDrafts] = useState<Drafts>({});
@@ -105,7 +107,7 @@ export const TranslationsDrawer = ({
       }}
     >
       <Drawer.Trigger asChild>
-        <Button size="small" variant="secondary">
+        <Button disabled={writing} size="small" variant="secondary">
           {t('translations.open')}
         </Button>
       </Drawer.Trigger>
@@ -151,9 +153,11 @@ export const TranslationsDrawer = ({
         </Drawer.Body>
         <Drawer.Footer>
           <Drawer.Close asChild>
-            <Button variant="secondary">{t('translations.cancel')}</Button>
+            <Button disabled={writing} variant="secondary">
+              {t('translations.cancel')}
+            </Button>
           </Drawer.Close>
-          <Button isLoading={saving} onClick={save}>
+          <Button disabled={writing} isLoading={saving} onClick={save}>
             {t('translations.save')}
           </Button>
         </Drawer.Footer>

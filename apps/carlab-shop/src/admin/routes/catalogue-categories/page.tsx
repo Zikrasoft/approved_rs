@@ -26,6 +26,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -116,6 +117,7 @@ const OptionRow = ({
   option: FieldOption;
   onChange: () => Promise<void>;
 }) => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [label, setLabel] = useState(option.label);
@@ -132,7 +134,7 @@ const OptionRow = ({
       <Button
         size="small"
         variant="secondary"
-        disabled={!label || label === option.label}
+        disabled={!label || label === option.label || writing}
         onClick={async () => {
           if (await post(`${path}/${option.id}`, { label })) await onChange();
         }}
@@ -145,6 +147,7 @@ const OptionRow = ({
         source={{ label: option.label }}
       />
       <Button
+        disabled={writing}
         size="small"
         variant="transparent"
         onClick={async () => {
@@ -175,6 +178,7 @@ const FieldRow = ({
   field: CategoryField;
   onChange: () => Promise<void>;
 }) => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [label, setLabel] = useState(field.label);
@@ -241,7 +245,7 @@ const FieldRow = ({
                 <Button
                   size="small"
                   variant="secondary"
-                  disabled={!optionKey || !optionLabel}
+                  disabled={!optionKey || !optionLabel || writing}
                   onClick={addOption}
                 >
                   {t('categories.addOption')}
@@ -288,7 +292,7 @@ const FieldRow = ({
           <Button
             size="small"
             variant="secondary"
-            disabled={!label}
+            disabled={!label || writing}
             onClick={() =>
               save({ label, unit: unit || null, rank: Number(rank) })
             }
@@ -301,6 +305,7 @@ const FieldRow = ({
             source={{ label: field.label }}
           />
           <Button
+            disabled={writing}
             size="small"
             variant="danger"
             onClick={async () => {
@@ -331,6 +336,7 @@ const CategoryEditor = ({
   category: Category;
   onChange: () => Promise<void>;
 }) => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [name, setName] = useState(category.name);
@@ -397,7 +403,7 @@ const CategoryEditor = ({
         </Text>
         <div className="flex gap-x-2">
           <Button
-            disabled={!name || !Number.isInteger(Number(kitRank))}
+            disabled={!name || !Number.isInteger(Number(kitRank)) || writing}
             onClick={async () => {
               const saved = await post(path, {
                 name,
@@ -416,6 +422,7 @@ const CategoryEditor = ({
             source={{ name: category.name, text: category.text }}
           />
           <Button
+            disabled={writing}
             variant="danger"
             onClick={async () => {
               if (
@@ -539,7 +546,7 @@ const CategoryEditor = ({
           </Label>
           <Button
             variant="secondary"
-            disabled={!draft.key || !draft.label}
+            disabled={!draft.key || !draft.label || writing}
             onClick={addField}
           >
             {t('categories.addField')}
@@ -554,6 +561,7 @@ const CategoryEditor = ({
 };
 
 const CategoriesPage = () => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedId, setSelectedId] = useState('');
@@ -603,7 +611,7 @@ const CategoriesPage = () => {
             value={slug}
             onChange={(event) => setSlug(event.target.value)}
           />
-          <Button onClick={create} disabled={!name || !slug}>
+          <Button onClick={create} disabled={!name || !slug || writing}>
             {t('categories.create')}
           </Button>
         </div>
@@ -618,6 +626,7 @@ const CategoriesPage = () => {
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
             <Button
+              disabled={writing}
               key={category.id}
               size="small"
               variant={category.id === selectedId ? 'primary' : 'secondary'}

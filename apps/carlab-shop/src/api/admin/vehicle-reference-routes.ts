@@ -12,12 +12,15 @@ import { STORED_ROW_RULES } from './vehicle-validators';
 
 const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();
 
+type Holder = { plural: string; entity: string; column: string };
+
 type ReferenceEntity = {
   singular: string;
   plural: string;
   object: string;
   collection: string;
   relations?: string[];
+  holders?: Holder[];
 };
 
 type Method = (...args: unknown[]) => Promise<unknown>;
@@ -60,7 +63,33 @@ export const collectionRoutes = ({
   },
 });
 
-export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
+const countHolders = async (
+  req: AuthenticatedMedusaRequest,
+  id: string,
+  holders: Holder[],
+) =>
+  (
+    await Promise.all(
+      holders.map(async ({ plural, entity, column }) => {
+        const [, count] = z
+          .tuple([z.array(z.unknown()), z.number()])
+          .parse(
+            await service(req, `listAndCount${plural}`)(
+              { [column]: id },
+              { select: ['id'], take: 1 },
+            ),
+          );
+        return { entity, count };
+      }),
+    )
+  ).filter(({ count }) => count > 0);
+
+export const itemRoutes = ({
+  singular,
+  plural,
+  object,
+  holders = [],
+}: ReferenceEntity) => ({
   POST: async (
     req: AuthenticatedMedusaRequest<Record<string, unknown>>,
     res: MedusaResponse,
@@ -98,6 +127,7 @@ export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
           MedusaError.Types.CONFLICT,
           'IN_USE',
           `This ${object.replace('_', ' ')} is still in use and cannot be deleted.`,
+          { holders: await countHolders(req, id, holders) },
         );
       }
       throw error;
@@ -106,35 +136,53 @@ export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
   },
 });
 
+const REQUIREMENTS = { plural: 'Requirements', entity: 'requirement' };
+const VEHICLE_HOLDERS = { plural: 'Vehicles', entity: 'vehicle' };
+
 export const MAKES = {
   singular: 'Make',
   plural: 'Makes',
   object: 'make',
   collection: 'makes',
+  holders: [{ plural: 'Series', entity: 'series', column: 'make_id' }],
 };
 export const SERIES = {
   singular: 'Series',
   plural: 'Series',
   object: 'series',
   collection: 'series',
+  holders: [{ plural: 'Chassis', entity: 'chassis', column: 'series_id' }],
 };
 export const CHASSIS = {
   singular: 'Chassis',
   plural: 'Chassis',
   object: 'chassis',
   collection: 'chassis',
+  holders: [
+    {
+      plural: 'VehicleModels',
+      entity: 'vehicle_model',
+      column: 'chassis_id',
+    },
+    { ...REQUIREMENTS, column: 'chassis_id' },
+  ],
 };
 export const VEHICLE_MODELS = {
   singular: 'VehicleModel',
   plural: 'VehicleModels',
   object: 'vehicle_model',
   collection: 'vehicle_models',
+  holders: [{ ...VEHICLE_HOLDERS, column: 'model_id' }],
 };
 export const ENGINES = {
   singular: 'Engine',
   plural: 'Engines',
   object: 'engine',
   collection: 'engines',
+  holders: [
+    { ...VEHICLE_HOLDERS, column: 'engine_id' },
+    { ...REQUIREMENTS, column: 'engine_id' },
+  ],
 };
 export const VEHICLES = {
   singular: 'Vehicle',

@@ -561,6 +561,40 @@ medusaIntegrationTestRunner({
           ).toHaveLength(1);
         });
 
+        it('keeps one number when both last numbers are deleted at once', async () => {
+          const partIds: string[] = [];
+          for (const race of [1, 2, 3, 4, 5]) {
+            const { part } = await createPartWithOfferAndFitment(
+              `DELETE-RACE-${race}-A`,
+            );
+            await api.post(
+              `/admin/parts/${part.id}/identifiers`,
+              { type: 'oem', brand_id: bmw.id, value: `DELETE-RACE-${race}-B` },
+              adminHeaders,
+            );
+            partIds.push(part.id);
+          }
+          const numbers = await catalog.listPartIdentifiers({
+            part_id: partIds,
+          });
+
+          await Promise.all(
+            numbers.map(({ id }) =>
+              api
+                .delete(`/admin/part-identifiers/${id}`, adminHeaders)
+                .catch((error) => error.response),
+            ),
+          );
+
+          const left = await catalog.listPartIdentifiers({ part_id: partIds });
+          expect(
+            partIds.map(
+              (partId) =>
+                left.filter(({ part_id }) => part_id === partId).length,
+            ),
+          ).toEqual([1, 1, 1, 1, 1]);
+        });
+
         it('returns a 404 for an unknown Part', async () => {
           const response = await api
             .delete('/admin/parts/part_missing', adminHeaders)

@@ -226,7 +226,11 @@ export async function GET(
         facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD]),
         locale,
       ),
-      count: search_result.metadata.count ?? results.length,
+      count: Math.max(
+        0,
+        (search_result.metadata.count ?? results.length) -
+          (search_result.hits.length - hits.length),
+      ),
       offset,
       limit,
     }),

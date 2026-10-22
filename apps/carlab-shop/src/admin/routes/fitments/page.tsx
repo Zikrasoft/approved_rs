@@ -25,6 +25,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -193,13 +194,22 @@ const OptionSelect = ({
     value={value || ANY}
     onValueChange={(next) => onChange(next === ANY ? '' : next)}
   >
-    <Select.Trigger aria-label={placeholder}>
-      <Select.Value placeholder={placeholder} />
+    <Select.Trigger
+      aria-label={placeholder}
+      className="h-auto min-h-8 gap-x-2 text-left"
+    >
+      <span className="min-w-0 flex-1 break-words">
+        <Select.Value placeholder={placeholder} />
+      </span>
     </Select.Trigger>
-    <Select.Content>
+    <Select.Content className="max-w-[calc(100vw-32px)]">
       <Select.Item value={ANY}>{placeholder}</Select.Item>
       {options.map((option) => (
-        <Select.Item key={option.value} value={option.value}>
+        <Select.Item
+          key={option.value}
+          value={option.value}
+          className="[&>span:last-child]:whitespace-normal [&>span:last-child]:break-words"
+        >
           {option.label}
         </Select.Item>
       ))}
@@ -208,6 +218,7 @@ const OptionSelect = ({
 );
 
 const FitmentsPage = () => {
+  const writing = useWriting();
   const { t, i18n } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
 
@@ -634,13 +645,19 @@ const FitmentsPage = () => {
                   source={{ name: selectedPart.name }}
                 />
                 <Button
+                  disabled={writing}
                   variant="secondary"
                   size="small"
                   onClick={() => setSelectedPart(null)}
                 >
                   {t('fitments.change')}
                 </Button>
-                <Button variant="danger" size="small" onClick={deletePart}>
+                <Button
+                  disabled={writing}
+                  variant="danger"
+                  size="small"
+                  onClick={deletePart}
+                >
                   {t('fitments.deletePart')}
                 </Button>
               </div>
@@ -657,7 +674,9 @@ const FitmentsPage = () => {
                   variant="secondary"
                   onClick={renamePart}
                   disabled={
-                    !partName.trim() || partName.trim() === selectedPart.name
+                    !partName.trim() ||
+                    partName.trim() === selectedPart.name ||
+                    writing
                   }
                 >
                   {t('fitments.rename')}
@@ -687,7 +706,7 @@ const FitmentsPage = () => {
                 variant="secondary"
                 className="self-start"
                 onClick={addIdentifier}
-                disabled={!newBrandId || !newValue.trim()}
+                disabled={!newBrandId || !newValue.trim() || writing}
               >
                 {t('fitments.addNumber')}
               </Button>
@@ -703,7 +722,7 @@ const FitmentsPage = () => {
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && search()}
               />
-              <Button variant="secondary" onClick={search}>
+              <Button disabled={writing} variant="secondary" onClick={search}>
                 {t('fitments.search')}
               </Button>
             </div>
@@ -730,6 +749,7 @@ const FitmentsPage = () => {
                         </Table.Cell>
                         <Table.Cell>
                           <Button
+                            disabled={writing}
                             size="small"
                             variant="secondary"
                             onClick={() => setSelectedPart(part)}
@@ -755,7 +775,7 @@ const FitmentsPage = () => {
                 {identifierFields}
                 <Button
                   onClick={createPart}
-                  disabled={!newPartName || !newBrandId || !newValue}
+                  disabled={!newPartName || !newBrandId || !newValue || writing}
                 >
                   {t('fitments.createPart')}
                 </Button>
@@ -906,20 +926,29 @@ const FitmentsPage = () => {
         </Text>
         {editing ? (
           <div className="flex flex-wrap gap-2">
-            <Button onClick={saveFitment}>{t('common.save')}</Button>
-            <Button variant="secondary" onClick={stopEditing}>
+            <Button disabled={writing} onClick={saveFitment}>
+              {t('common.save')}
+            </Button>
+            <Button
+              disabled={writing}
+              variant="secondary"
+              onClick={stopEditing}
+            >
               {t('common.cancel')}
             </Button>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            <Button onClick={attach} disabled={!selectedPart || !hasFilter}>
+            <Button
+              onClick={attach}
+              disabled={!selectedPart || !hasFilter || writing}
+            >
               {t('fitments.createFitment')}
             </Button>
             <Button
               variant="secondary"
               onClick={detach}
-              disabled={!selectedPart || !hasFilter}
+              disabled={!selectedPart || !hasFilter || writing}
             >
               {t('fitments.detach')}
             </Button>
@@ -937,7 +966,7 @@ const FitmentsPage = () => {
                   <Table.HeaderCell>
                     {t('fitments.columns.vehicle')}
                   </Table.HeaderCell>
-                  <Table.HeaderCell>
+                  <Table.HeaderCell className="whitespace-nowrap">
                     {t('fitments.columns.quantity')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
@@ -992,6 +1021,7 @@ const FitmentsPage = () => {
                             />
                           )}
                           <Button
+                            disabled={writing}
                             size="small"
                             variant="secondary"
                             onClick={() => startEditing(fitment)}
@@ -999,6 +1029,7 @@ const FitmentsPage = () => {
                             {t('fitments.edit')}
                           </Button>
                           <Button
+                            disabled={writing}
                             size="small"
                             variant="danger"
                             onClick={() => deleteFitment(fitment)}

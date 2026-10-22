@@ -182,6 +182,31 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it.each([
+        ['a no-break space', 'MANN FILTER', 'mann\u00a0filter'],
+        ['a sharp s', 'STRASSE', 'Straße'],
+        ['a full-width letter', 'FEBI', 'ＦEBI'],
+      ])(
+        'refuses a spelling that differs from a stored one by %s',
+        async (_, stored, typed) => {
+          const brand = await catalog.createBrands({
+            name: `Brand ${stored}`,
+            slug: `brand-${stored.toLowerCase().replace(' ', '-')}`,
+          });
+          await post(`/admin/brands/${brand.id}/spellings`, {
+            supplier_id: intercars.id,
+            value: stored,
+          });
+
+          const response = await post(`/admin/brands/${brand.id}/spellings`, {
+            supplier_id: intercars.id,
+            value: typed,
+          });
+
+          expect(response.status).toBe(409);
+        },
+      );
+
       it('refuses a spelling for an unknown supplier', async () => {
         const brand = await catalog.createBrands({
           name: 'Bosch',

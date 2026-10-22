@@ -68,6 +68,22 @@
           "enumItems": [],
           "mappedType": "array"
         },
+        "import_enabled": {
+          "name": "import_enabled",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "true",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "created_by": {
           "name": "created_by",
           "type": "text",
@@ -426,6 +442,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "code_key": {
+          "name": "code_key",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "category_id": {
           "name": "category_id",
           "type": "text",
@@ -561,6 +593,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_supplier_category_supplier_id_code_unique\" ON \"supplier_category\" (\"supplier_id\", \"code\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_supplier_category_supplier_id_code_key_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_supplier_category_supplier_id_code_key_unique\" ON \"supplier_category\" (\"supplier_id\", \"code_key\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "supplier_category_pkey",

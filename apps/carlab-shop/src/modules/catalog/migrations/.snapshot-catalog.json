@@ -242,6 +242,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "value_key": {
+          "name": "value_key",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "brand_id": {
           "name": "brand_id",
           "type": "text",
@@ -384,6 +400,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_supplier_id_value_unique\" ON \"brand_spelling\" (\"supplier_id\", \"value\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_brand_spelling_supplier_id_value_key_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_supplier_id_value_key_unique\" ON \"brand_spelling\" (\"supplier_id\", \"value_key\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "brand_spelling_pkey",
@@ -3717,6 +3742,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_requirement_deleted_at\" ON \"requirement\" (\"deleted_at\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_requirement_owner_field_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_requirement_owner_field_unique\" ON \"requirement\" (\"field_id\", \"engine_id\", \"chassis_id\", \"vehicle_id\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "requirement_pkey",

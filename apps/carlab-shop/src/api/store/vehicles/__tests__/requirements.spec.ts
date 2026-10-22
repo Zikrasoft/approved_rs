@@ -304,6 +304,20 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('refuses a second Requirement on the same field of one owner', async () => {
+        const response = await post('/admin/requirements', {
+          field_id: fields.approvals.id,
+          engine_id: om654.engine.id,
+          option_keys: ['mb-229-51'],
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'requirement',
+        });
+      });
+
       it('lists and deletes the Requirements of an owner', async () => {
         const listed = (
           await api.get(
