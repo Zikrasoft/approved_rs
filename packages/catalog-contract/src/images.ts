@@ -10,3 +10,6 @@ export const imageSchema = z.object({
 });
 
 export type Image = z.infer<typeof imageSchema>;
+
+export const smallestImage = (image: Image): string =>
+  image.srcset[0]?.url ?? image.src;

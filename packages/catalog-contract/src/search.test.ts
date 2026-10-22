@@ -40,6 +40,7 @@ const response = {
           lead_time_days: 0,
         },
       ],
+      thumbnail: 'https://api.carlab.rs/static/parts/a-160.webp',
     },
   ],
   facets: [

@@ -201,7 +201,7 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
               <ul class="card divide-y divide-line">
                 {found.results.map((result) => (
                   <PartRow
-                    thumb={null}
+                    thumb={result.thumbnail}
                     slug={result.slug}
                     brand={result.brand.name}
                     value={result.value}

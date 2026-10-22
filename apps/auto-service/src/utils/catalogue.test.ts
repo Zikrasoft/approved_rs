@@ -862,6 +862,7 @@ describe('catalogue.search', () => {
             lead_time_days: 0,
           },
         ],
+        thumbnail: null,
       },
     ],
     facets: [

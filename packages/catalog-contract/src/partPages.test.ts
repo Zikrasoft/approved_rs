@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { smallestImage } from './images.ts';
 import { partPageSchema } from './partPages.ts';
 
 const page = {
@@ -63,6 +64,8 @@ describe('partPageSchema', () => {
     };
     const pictured = { ...page, part: { ...page.part, images: [image] } };
     expect(partPageSchema.parse(pictured)).toEqual(pictured);
+    expect(smallestImage(image)).toBe(image.srcset[0].url);
+    expect(smallestImage({ ...image, srcset: [] })).toBe(image.src);
     expect(
       partPageSchema.parse({
         ...page,

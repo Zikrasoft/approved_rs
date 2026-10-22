@@ -12,6 +12,7 @@ import {
   categoryFieldSchema,
   describeFacet,
   facetFilter,
+  imageSchema,
   IN_STOCK,
   IN_STOCK_FACET,
   inRange,
@@ -19,6 +20,7 @@ import {
   type RangeFilter,
   searchableQuery,
   searchResponseSchema,
+  smallestImage,
   translated,
   translationsSchema,
   UNIVERSAL_FACET_KEYS,
@@ -27,6 +29,7 @@ import {
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { partImagesSchema } from '../../../lib/images';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
@@ -51,9 +54,18 @@ const named = z.object({ name: z.string(), translations: translationsSchema });
 const hitSchema = brandNumberSchema.extend({
   part: named.extend({
     id: z.string(),
-    category: named.extend({ slug: z.string() }).nullable(),
+    images: partImagesSchema,
+    category: named
+      .extend({ slug: z.string(), image: imageSchema.nullable() })
+      .nullable(),
   }),
 });
+
+const thumbnail = ({ images, category }: z.infer<typeof hitSchema>['part']) => {
+  const [first] = images.items;
+  const image = first ?? category?.image;
+  return image ? smallestImage(image) : null;
+};
 
 const facetCountsSchema = z
   .object({
@@ -329,6 +341,8 @@ export async function GET(
       'part.category.slug',
       'part.category.name',
       'part.category.translations',
+      'part.images',
+      'part.category.image',
     ],
     filters: filtersFor(() => true),
     pagination: { skip: offset, take: limit },
@@ -354,6 +368,7 @@ export async function GET(
       offers: storeOffers(
         offers.filter((offer) => offer.part_identifier_id === brandNumber.id),
       ),
+      thumbnail: thumbnail(part),
       part: {
         id: part.id,
         name: translated(part, 'name', locale),

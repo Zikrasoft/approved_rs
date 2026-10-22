@@ -1,4 +1,8 @@
-import type { Image, PartPage } from '@podbor/catalog-contract';
+import {
+  smallestImage,
+  type Image,
+  type PartPage,
+} from '@podbor/catalog-contract';
 
 const SUPPLIER_IMAGE_SIZE = 800;
 
@@ -15,8 +19,6 @@ type Pictured = {
   supplier_data: Pick<PartPage['supplier_data'], 'images'>;
 };
 
-const smallest = (image: Image) => image.srcset[0]?.url ?? image.src;
-
 export const partGallery = ({
   part,
   supplier_data,
@@ -26,7 +28,7 @@ export const partGallery = ({
     srcset: image.srcset.map(({ url, width }) => `${url} ${width}w`).join(', '),
     width: image.width,
     height: image.height,
-    thumb: smallest(image),
+    thumb: smallestImage(image),
   })),
   ...supplier_data.images.map((url) => ({
     src: url,
@@ -40,7 +42,7 @@ export const partGallery = ({
 type Illustrated = { image: Image | null } | null;
 
 const categoryThumbnail = (category: Illustrated) =>
-  category?.image ? smallest(category.image) : null;
+  category?.image ? smallestImage(category.image) : null;
 
 export const partThumbnail = (
   page: Pictured,
