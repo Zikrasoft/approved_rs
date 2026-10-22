@@ -24,13 +24,13 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 const intercars = createFakeSupplier('Intercars');
 const ARTICLE = 'IC-11428575211';
 
-const quote = (cost_price: number, quantity: number) =>
+const quote = (cost_price: number, quantity: number, lead_time_days = 0) =>
   intercars.quotes.set(ARTICLE, {
     article_id: ARTICLE,
     cost_price,
     currency: 'RSD',
     stock: [{ location: 'Beograd', quantity }],
-    lead_time_days: 0,
+    lead_time_days,
   });
 
 const CONTACT = {
@@ -254,6 +254,8 @@ medusaIntegrationTestRunner({
               quantity: 2,
               unit_price: 1850,
               available: true,
+              in_stock: true,
+              lead_time_days: 0,
               part: {
                 slug: 'bmw-11428575211',
                 brand: 'BMW',
@@ -289,6 +291,44 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(400);
         expect(response.data.code).toBe('OFFER_OUT_OF_STOCK');
+      });
+
+      it('sells an offer the supplier has no stock of but can bring in', async () => {
+        quote(1542, 0, 4);
+
+        const cart = await cartWith(2);
+
+        expect(cart.items[0]).toMatchObject({
+          quantity: 2,
+          available: true,
+          in_stock: false,
+          lead_time_days: 4,
+        });
+      });
+
+      it('caps an offer the supplier only brings in at ten', async () => {
+        quote(1542, 0, 4);
+        const cart = await cartWith(10);
+
+        const refused = await post(
+          `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`,
+          { quantity: 11 },
+        );
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
+      });
+
+      it('refuses an offer with neither stock nor a lead time', async () => {
+        quote(1542, 0, 0);
+
+        const refused = await post('/store/offer-carts', {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
       });
 
       it('sells an offer of a supplier without an adapter at its stored price', async () => {
@@ -473,6 +513,15 @@ medusaIntegrationTestRunner({
         expect(repriced.data.cart.items[0].available).toBe(false);
       });
 
+      it('completes a line that ran out of stock while the supplier can still bring it in', async () => {
+        const cart = await cartWith(2);
+        quote(1542, 0, 4);
+
+        const placed = await complete(cart);
+
+        expect(placed.status).toBe(200);
+      });
+
       it('refuses checkout when the supplier no longer quotes the offer', async () => {
         const cart = await cartWith(1);
         intercars.quotes.clear();
@@ -590,10 +639,26 @@ medusaIntegrationTestRunner({
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии',
             'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
+        );
+      });
+
+      it('tells the owner when a line can be picked up', async () => {
+        quote(1542, 0, 4);
+        const cart = await cartWith(2);
+
+        const placed = await complete(cart);
+
+        const lead = await waitFor(() =>
+          leads.find(({ comment }) =>
+            comment.startsWith(`Заказ #${placed.data.order.display_id},`),
+          ),
+        );
+        expect(lead?.comment.split('\n')[3]).toBe(
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня',
         );
       });
 
@@ -798,7 +863,7 @@ medusaIntegrationTestRunner({
             ),
           );
           expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
-            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD',
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии',
             `+ ${SERVICE}: 2\u00a0500 RSD`,
             'Итого: 12\u00a0500 RSD',
           ]);

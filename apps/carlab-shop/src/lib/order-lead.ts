@@ -18,7 +18,11 @@ import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { z } from 'zod';
 
 import { parseEnv } from './env';
-import { ADDON_FOR_METADATA_KEY } from './offer-cart';
+import {
+  ADDON_FOR_METADATA_KEY,
+  IN_STOCK_METADATA_KEY,
+  LEAD_TIME_METADATA_KEY,
+} from './offer-cart';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
@@ -32,12 +36,23 @@ export const handOffAttempts = (
   metadata: Record<string, unknown> | null | undefined,
 ): number => attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
 
+const DAY_WORDS: Partial<Record<Intl.LDMLPluralRule, string>> = {
+  one: 'день',
+  few: 'дня',
+  many: 'дней',
+};
+
+const dayWord = (days: number) =>
+  DAY_WORDS[new Intl.PluralRules('ru').select(days)] ?? 'дня';
+
 const OWNER_COPY = {
   heading: (displayId: number) =>
     `Заказ #${displayId}, самовывоз, оплата при получении`,
   confirm: 'Нужно подтвердить наличие и время самовывоза',
   line: (title: string, quantity: number, sum: string) =>
     `${title} × ${quantity}: ${sum}`,
+  inStock: 'в наличии',
+  pickupIn: (days: number) => `забрать через ${days} ${dayWord(days)}`,
   addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
   total: (sum: string) => `Итого: ${sum}`,
   leftOut: (count: number) => `Не поместилось позиций: ${count}`,
@@ -70,6 +85,30 @@ export const leadOrderSchema = z.object({
 
 export type LeadOrder = z.infer<typeof leadOrderSchema>;
 
+const readinessSchema = z
+  .object({
+    [IN_STOCK_METADATA_KEY]: z.boolean(),
+    [LEAD_TIME_METADATA_KEY]: z.number().int().nonnegative(),
+  })
+  .transform((ready) =>
+    [
+      ready[IN_STOCK_METADATA_KEY] && OWNER_COPY.inStock,
+      ready[LEAD_TIME_METADATA_KEY] > 0 &&
+        OWNER_COPY.pickupIn(ready[LEAD_TIME_METADATA_KEY]),
+    ]
+      .filter(Boolean)
+      .join(', '),
+  )
+  .catch('');
+
+const withReadiness = (
+  line: string,
+  metadata: Record<string, unknown> | null | undefined,
+) => {
+  const readiness = readinessSchema.parse(metadata ?? {});
+  return readiness ? `${line}, ${readiness}` : line;
+};
+
 export const carLabel = ({ model, engine }: Vehicle): string =>
   `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
 
@@ -91,10 +130,13 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     lines: order.items.map((item) =>
       item.metadata?.[ADDON_FOR_METADATA_KEY]
         ? OWNER_COPY.addon(item.title, money(item.unit_price * item.quantity))
-        : OWNER_COPY.line(
-            item.title,
-            item.quantity,
-            money(item.unit_price * item.quantity),
+        : withReadiness(
+            OWNER_COPY.line(
+              item.title,
+              item.quantity,
+              money(item.unit_price * item.quantity),
+            ),
+            item.metadata,
           ),
     ),
     tail: [OWNER_COPY.total(money(total)), contact.comment ?? ''],

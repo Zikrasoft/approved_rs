@@ -60,6 +60,28 @@ describe('orderLeadForm', () => {
     });
   });
 
+  it('says on each line when it can be picked up', () => {
+    const line = (in_stock: boolean, lead_time_days: number) => ({
+      title: 'Oil',
+      unit_price: 100,
+      quantity: 1,
+      metadata: { in_stock, lead_time_days },
+    });
+    const comment =
+      orderLeadForm(
+        order({
+          items: [line(true, 0), line(true, 2), line(false, 1), line(false, 5)],
+        }),
+      ).get('comment') ?? '';
+
+    expect(comment.split('\n').slice(3, 7)).toEqual([
+      'Oil × 1: 100 RSD, в наличии',
+      'Oil × 1: 100 RSD, в наличии, забрать через 2 дня',
+      'Oil × 1: 100 RSD, забрать через 1 день',
+      'Oil × 1: 100 RSD, забрать через 5 дней',
+    ]);
+  });
+
   it('writes sums with thousands separated for the owner', () => {
     const comment =
       orderLeadForm(

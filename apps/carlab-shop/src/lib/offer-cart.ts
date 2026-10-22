@@ -19,6 +19,7 @@ import {
 import {
   CATALOG_TRANSLATION_LOCALES,
   listedPartSchema,
+  orderCap,
   partPageSlug,
   type CheckoutRefusal,
   type LineAddon,
@@ -34,6 +35,8 @@ export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
 export const CASH_AT_PICKUP_METADATA = { fulfillment: 'cash_at_pickup' };
 export const OFFER_ID_METADATA_KEY = 'offer_id';
 export const ADDON_FOR_METADATA_KEY = 'addon_for';
+export const IN_STOCK_METADATA_KEY = 'in_stock';
+export const LEAD_TIME_METADATA_KEY = 'lead_time_days';
 
 export type OfferCartLineItem = {
   id: string;
@@ -146,6 +149,32 @@ const offersOf = async (
 const priceOf = (offer: LiveOffer) =>
   sellPrice(offer.cost_price, offer.supplier.markup_percentage);
 
+const stampReadiness = async (
+  scope: MedusaContainer,
+  item: OfferCartLineItem,
+  offer: LiveOffer,
+) => {
+  const readiness = {
+    in_stock: offer.stock_quantity > 0,
+    lead_time_days: offer.lead_time_days,
+  };
+  if (
+    item.metadata?.[IN_STOCK_METADATA_KEY] !== readiness.in_stock ||
+    item.metadata?.[LEAD_TIME_METADATA_KEY] !== readiness.lead_time_days
+  ) {
+    await scope
+      .resolve<ICartModuleService>(Modules.CART)
+      .updateLineItems(item.id, {
+        metadata: {
+          ...item.metadata,
+          [IN_STOCK_METADATA_KEY]: readiness.in_stock,
+          [LEAD_TIME_METADATA_KEY]: readiness.lead_time_days,
+        },
+      });
+  }
+  return readiness;
+};
+
 export async function ensureCashAtPickupPaymentSession(
   container: MedusaContainer,
   cartId: string,
@@ -232,6 +261,9 @@ export async function syncOfferCart(
       repriced = true;
     }
     const quantity = Number(item.quantity);
+    const readiness = offer
+      ? await stampReadiness(scope, item, offer)
+      : { in_stock: false, lead_time_days: 0 };
     const service = addons.get(item.id);
     const addonLine = service && addonLines.get(item.id);
     if (
@@ -253,7 +285,8 @@ export async function syncOfferCart(
       offer_id: offerId,
       quantity,
       unit_price: unitPrice,
-      available: !!offer && offer.stock_quantity >= quantity,
+      available: !!offer && orderCap(offer) >= quantity,
+      ...readiness,
       addon: service ? { item_id: addonLine?.id ?? null, ...service } : null,
       part: listedPartSchema
         .catch({ slug: '', brand: '', number: '', name: item.title })
@@ -389,8 +422,8 @@ export async function sellableOffer(
   if (!offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }
-  if (offer.stock_quantity < quantity) {
-    return refuse('OFFER_OUT_OF_STOCK', `Only ${offer.stock_quantity} left`);
+  if (orderCap(offer) < quantity) {
+    return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
   }
   return offer;
 }
@@ -465,8 +498,8 @@ export async function setOfferQuantity(
   if (!offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }
-  if (offer.stock_quantity < quantity) {
-    return refuse('OFFER_OUT_OF_STOCK', `Only ${offer.stock_quantity} left`);
+  if (orderCap(offer) < quantity) {
+    return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
   }
   await updateLineItemInCartWorkflow(scope).run({
     input: {
@@ -495,7 +528,7 @@ export async function checkoutRefusal(
     if (!offer) {
       return 'OFFER_MISSING';
     }
-    if (offer.stock_quantity < Number(item.quantity)) {
+    if (orderCap(offer) < Number(item.quantity)) {
       return 'OFFER_OUT_OF_STOCK';
     }
     if (!MathBN.eq(priceOf(offer), item.unit_price)) {
