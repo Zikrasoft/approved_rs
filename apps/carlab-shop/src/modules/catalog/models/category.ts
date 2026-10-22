@@ -16,6 +16,7 @@ const Category = model
     kit_rank: model.number().default(0),
     service_label: model.text().nullable(),
     service_price: model.number().nullable(),
+    service_note: model.text().nullable(),
     fields: model.hasMany(() => CategoryField, { mappedBy: 'category' }),
     parts: model.hasMany(() => Part, { mappedBy: 'category' }),
     ...provenance(),

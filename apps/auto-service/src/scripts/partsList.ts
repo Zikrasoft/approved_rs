@@ -2,6 +2,7 @@ import * as z from 'zod/mini';
 import { fitComment } from '@podbor/catalog-contract/comment';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { vinFrom } from '@/utils/carFacts';
+import { formatMoney } from '@/utils/money';
 import {
   LEAD_FORM_RESULT_EVENT,
   type LeadFormResult,
@@ -18,10 +19,44 @@ export const listedPartSchema = z.object({
   vin: z.optional(z.string()),
   quantity: z.optional(z.coerce.number()),
   addon: z.optional(z.string()),
+  addon_translations: z.optional(
+    z.record(z.string(), z.record(z.string(), z.string())),
+  ),
+  addon_price: z.optional(z.coerce.number()),
   with_addon: z.optional(z.boolean()),
 });
 
 export type ListedPart = z.infer<typeof listedPartSchema>;
+
+type AddonTranslations = ListedPart['addon_translations'] | null;
+
+export const addonLabel = (
+  label: string,
+  translations: AddonTranslations,
+  locale: string,
+): string => translations?.[locale]?.label || label;
+
+const parsedJson = (text: string | undefined): unknown => {
+  try {
+    return text ? JSON.parse(text) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const listedPartFromDataset = (
+  { addonTranslations, addonPrice, ...dataset }: DOMStringMap,
+  extra: Partial<ListedPart> = {},
+): ListedPart | null => {
+  const translations = parsedJson(addonTranslations);
+  const parsed = listedPartSchema.safeParse({
+    ...dataset,
+    ...(translations !== undefined && { addon_translations: translations }),
+    ...(addonPrice && { addon_price: addonPrice }),
+    ...extra,
+  });
+  return parsed.success ? parsed.data : null;
+};
 
 type ListStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
@@ -150,8 +185,8 @@ export function definePartsListAdd(tagName = 'parts-list-add'): void {
     class extends HTMLElement {
       connectedCallback(): void {
         this.addEventListener('click', () => {
-          const parsed = listedPartSchema.safeParse({ ...this.dataset });
-          if (parsed.success) addToPartsList(parsed.data);
+          const part = listedPartFromDataset(this.dataset);
+          if (part) addToPartsList(part);
         });
       }
     },
@@ -169,12 +204,11 @@ export function definePartsListAddAll(tagName = 'parts-list-add-all'): void {
           for (const item of this.querySelectorAll<HTMLElement>(
             '[data-slug]:not([hidden])',
           )) {
-            const parsed = listedPartSchema.safeParse({
-              ...item.dataset,
+            const part = listedPartFromDataset(item.dataset, {
               car: this.dataset.car,
               ...(vin && { vin }),
             });
-            if (parsed.success) addToPartsList(parsed.data);
+            if (part) addToPartsList(part);
           }
         });
       }
@@ -223,10 +257,21 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             '[data-part-addon-toggle]',
           );
           if (addon && toggle && part.addon) {
+            const {
+              addonTemplate = '{service}',
+              locale = '',
+              localeTag = 'sr',
+            } = this.dataset;
             addon.hidden = false;
-            addon.querySelector('[data-part-addon-label]')!.textContent = (
-              this.dataset.addonTemplate ?? '{service}'
-            ).replace('{service}', part.addon);
+            addon.querySelector('[data-part-addon-label]')!.textContent =
+              addonTemplate.replace(
+                '{service}',
+                addonLabel(part.addon, part.addon_translations, locale),
+              );
+            addon.querySelector('[data-part-addon-price]')!.textContent =
+              part.addon_price === undefined
+                ? ''
+                : `+${formatMoney(part.addon_price, 'RSD', localeTag)}`;
             toggle.checked = Boolean(part.with_addon);
             toggle.addEventListener('change', () =>
               setPartAddon(part.slug, toggle.checked),

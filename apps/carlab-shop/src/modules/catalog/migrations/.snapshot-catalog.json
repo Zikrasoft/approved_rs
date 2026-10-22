@@ -595,6 +595,22 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "service_note": {
+          "name": "service_note",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "source": {
           "name": "source",
           "type": "text",

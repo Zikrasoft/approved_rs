@@ -12,7 +12,13 @@ import { formatLeadTime, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
-import { addToPartsList, listedPartSchema, type ListedPart } from './partsList';
+import {
+  addonLabel,
+  addToPartsList,
+  listedPartFromDataset,
+  listedPartSchema,
+  type ListedPart,
+} from './partsList';
 
 export { CART_STORAGE_KEY };
 
@@ -114,18 +120,22 @@ function writeCart(stored: StoredCart, storage?: CartStorage): void {
   announceCartChange();
 }
 
+const listedLine = ({ part, quantity, addon }: CartLine): ListedPart => ({
+  ...part,
+  quantity,
+  ...(addon && {
+    addon: addon.label,
+    ...(addon.translations && { addon_translations: addon.translations }),
+    addon_price: addon.unit_price,
+    with_addon: addon.item_id !== null,
+  }),
+});
+
 export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
   writeCart(
     {
       id: cart.id,
-      parts: cart.items.map(({ part, quantity, addon }) => ({
-        ...part,
-        quantity,
-        ...(addon && {
-          addon: addon.label,
-          with_addon: addon.item_id !== null,
-        }),
-      })),
+      parts: cart.items.map(listedLine),
       count: cart.items.reduce((sum, { quantity }) => sum + quantity, 0),
       prices: Object.fromEntries(
         cart.items.map(({ id, unit_price }) => [id, unit_price]),
@@ -336,8 +346,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       listedPart(): ListedPart | null {
-        const part = listedPartSchema.safeParse({ ...this.dataset });
-        return part.success ? part.data : null;
+        return listedPartFromDataset(this.dataset);
       }
 
       addToInquiry(): void {
@@ -674,7 +683,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (increase) increase.disabled = !line.available;
         if (decrease) decrease.disabled = shown <= 1;
         const toInquiry = act('[data-to-inquiry]', () => {
-          addToPartsList({ ...line.part, quantity: line.quantity });
+          addToPartsList(listedLine(line));
           return this.change('DELETE', lineBody).then(() =>
             showOnly(this, 'data-notice', 'moved'),
           );
@@ -696,16 +705,16 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
         if (!box || !toggle || !line.addon) return;
         const { addonTemplate = '{service}', locale = '' } = this.dataset;
-        const label =
-          line.addon.translations?.[locale]?.label || line.addon.label;
         box.hidden = false;
         fill(
           box,
           '[data-addon-label]',
-          addonTemplate
-            .replace('{service}', label)
-            .replace('{price}', money(line.addon.unit_price)),
+          addonTemplate.replace(
+            '{service}',
+            addonLabel(line.addon.label, line.addon.translations, locale),
+          ),
         );
+        fill(box, '[data-addon-price]', `+${money(line.addon.unit_price)}`);
         toggle.checked = line.addon.item_id !== null;
         toggle.addEventListener('change', () => {
           toggle.disabled = true;
@@ -752,12 +761,11 @@ export function defineKitCart(tagName = 'kit-cart'): void {
             cartId = outcome.cart.id;
             continue;
           }
-          const part = listedPartSchema.safeParse({
-            ...item.dataset,
+          const part = listedPartFromDataset(item.dataset, {
             car: kit?.dataset.car,
             ...(vin && { vin }),
           });
-          if (part.success) addToPartsList(part.data);
+          if (part) addToPartsList(part);
           moved = true;
         }
         const href = this.dataset.cartHref ?? '';

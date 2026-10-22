@@ -128,11 +128,17 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject:
         'car part category names, their descriptions and the CarLab service sold with a part',
-      fields: ['name', 'text', 'service_label'],
+      fields: ['name', 'text', 'service_label', 'service_note'],
       codec: nested,
       list: (catalog, filters) =>
         catalog.listCategories(filters, {
-          select: [...TRANSLATION_COLUMNS, 'name', 'text', 'service_label'],
+          select: [
+            ...TRANSLATION_COLUMNS,
+            'name',
+            'text',
+            'service_label',
+            'service_note',
+          ],
           take: null,
         }),
       update: (catalog, rows) => catalog.updateCategories(rows),

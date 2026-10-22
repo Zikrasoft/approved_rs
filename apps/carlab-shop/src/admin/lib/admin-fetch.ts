@@ -85,20 +85,26 @@ const detailedMessage = ({
   );
 };
 
-const errorMessage = async (response: Response): Promise<string> => {
+const readError = async (
+  response: Response,
+): Promise<{ field?: string; message: string }> => {
   const body = errorBodySchema.safeParse(
     await response.json().catch(() => null),
   );
   const details: ErrorBody = body.success ? body.data : {};
-  const { code, type } = details;
-  return (
-    detailedMessage(details) ||
-    (code && translate(`errors.codes.${code}`)) ||
-    (type && translate(`errors.types.${type}`)) ||
-    translate('errors.unknown') ||
-    `${response.status} ${response.statusText}`
-  );
+  const { code, type, field } = details;
+  return {
+    field,
+    message:
+      detailedMessage(details) ||
+      (code && translate(`errors.codes.${code}`)) ||
+      (type && translate(`errors.types.${type}`)) ||
+      translate('errors.unknown') ||
+      `${response.status} ${response.statusText}`,
+  };
 };
+
+export type FieldErrorHandler = (field: string, message: string) => void;
 
 export const acknowledged = z.unknown().transform(() => true as const);
 
@@ -135,10 +141,11 @@ export const adminFetch = async <T>(
   path: string,
   schema: z.ZodType<T>,
   init?: RequestInit,
+  onFieldError?: FieldErrorHandler,
 ): Promise<T | null> => {
   const method = init?.method ?? 'GET';
   if (method === 'GET') {
-    return request(path, schema, init);
+    return request(path, schema, init, onFieldError);
   }
   const key = `${method} ${path} ${String(init?.body ?? '')}`;
   if (pendingWrites.has(key)) {
@@ -146,7 +153,7 @@ export const adminFetch = async <T>(
   }
   setPending(key, true);
   try {
-    return await request(path, schema, init);
+    return await request(path, schema, init, onFieldError);
   } finally {
     setPending(key, false);
   }
@@ -156,6 +163,7 @@ const request = async <T>(
   path: string,
   schema: z.ZodType<T>,
   init?: RequestInit,
+  onFieldError?: FieldErrorHandler,
 ): Promise<T | null> => {
   try {
     const response = await fetch(path, {
@@ -164,7 +172,9 @@ const request = async <T>(
       ...init,
     });
     if (!response.ok) {
-      toast.error(await errorMessage(response));
+      const { field, message } = await readError(response);
+      toast.error(message);
+      if (field) onFieldError?.(field, message);
       return null;
     }
     const body = schema.safeParse(await response.json());

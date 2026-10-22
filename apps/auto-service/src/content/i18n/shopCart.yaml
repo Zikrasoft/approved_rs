@@ -40,7 +40,6 @@ fallbackHeading: Магазин сейчас недоступен
 fallbackBody: Корзина сохранена. Попробуйте открыть ее еще раз через минуту или отправьте запчасти заявкой, и мы сами сообщим цену и срок.
 fallbackRetry: Попробовать еще раз
 fallbackCta: Отправить заявкой
-addonTemplate: 'Добавить: {service}, {price}'
-addonNote: 'На BMW и Mercedes-Benz после замены нужна услуга «{service}». Ее можно добавить к заказу: {price}.'
-inquiryAddonTemplate: 'Добавить: {service}'
+addonTemplate: 'Добавить: {service}'
+addonPickup: Делаем при выдаче в сервисе CarLab
 translatedFrom: pending

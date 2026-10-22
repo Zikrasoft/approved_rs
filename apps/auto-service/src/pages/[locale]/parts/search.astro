@@ -1,7 +1,11 @@
 ---
 export const prerender = false;
 
-import { CATALOG_KEY_PATTERN, searchableQuery } from '@podbor/catalog-contract';
+import {
+  CATALOG_KEY_PATTERN,
+  type RangeFilter,
+  searchableQuery,
+} from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -13,7 +17,12 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFromEnv } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
-import { chosenFilters, PARTS_QUERY_MAX_LENGTH } from '@/utils/partsSearch';
+import {
+  appendRange,
+  chosenFilters,
+  PARTS_QUERY_MAX_LENGTH,
+  rangesFromParams,
+} from '@/utils/partsSearch';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -28,6 +37,7 @@ const category = CATALOG_KEY_PATTERN.test(categoryParam)
   ? categoryParam
   : undefined;
 const chosen = params.getAll('facets');
+const ranges = rangesFromParams(params);
 const offset = Math.max(
   0,
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
@@ -40,7 +50,14 @@ const catalogue = catalogueFromEnv({
 const searchable = searchableQuery(q) || Boolean(category);
 const found =
   searchable && catalogue
-    ? await catalogue.search({ q, category, locale, facets: chosen, offset })
+    ? await catalogue.search({
+        q,
+        category,
+        locale,
+        facets: chosen,
+        ranges,
+        offset,
+      })
     : null;
 const unavailable = searchable && !found;
 const lastPage =
@@ -48,7 +65,11 @@ const lastPage =
     ? Math.floor((found.count - 1) / found.limit) * found.limit
     : 0;
 
-const searchHref = (facets: string[], nextOffset = 0) => {
+const searchHref = (
+  facets: string[],
+  nextRanges: RangeFilter[],
+  nextOffset = 0,
+) => {
   const next = new URLSearchParams({
     ...(q ? { q } : {}),
     ...(category ? { category } : {}),
@@ -56,20 +77,23 @@ const searchHref = (facets: string[], nextOffset = 0) => {
   for (const facet of facets) {
     next.append('facets', facet);
   }
+  for (const range of nextRanges) {
+    appendRange(next, range);
+  }
   if (nextOffset) {
     next.set('offset', String(nextOffset));
   }
   return `${PathBuilder.partsSearch(locale)}?${next}`;
 };
 if (found && offset > lastPage) {
-  return Astro.redirect(searchHref(chosen, lastPage), 302);
+  return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }
 const narrowedTo = found?.category;
 const heading = narrowedTo?.name ?? copy.heading;
-const chips = found ? chosenFilters(found.facets, chosen, copy) : [];
+const chips = found ? chosenFilters(found.facets, chosen, ranges, copy) : [];
 const emptyMessage = q
   ? copy.noResults.replace('{q}', q)
-  : chosen.length > 0
+  : chips.length > 0
     ? copy.noFilteredResults
     : partsInquiry.category.noParts;
 const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
@@ -127,7 +151,8 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
               }}
               facets={found.facets}
               chosen={chosen}
-              resetHref={searchHref([])}
+              ranges={ranges}
+              resetHref={searchHref([], [])}
               class="lg:sticky lg:top-24"
             />
           )}
@@ -139,20 +164,29 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
 
             {chips.length > 0 && (
               <ul class="flex flex-wrap gap-2">
-                {chips.map(({ filter, label }) => (
+                {chips.map((chip) => (
                   <li>
                     <a
-                      href={searchHref(
-                        chosen.filter((item) => item !== filter),
+                      href={searchHref(chip.facets, chip.ranges)}
+                      aria-label={copy.removeFilter.replace(
+                        '{label}',
+                        chip.label,
                       )}
-                      aria-label={copy.removeFilter.replace('{label}', label)}
                       class="inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
                     >
-                      {label}
+                      {chip.label}
                       <Icon name="close" size={12} class="text-muted" />
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href={searchHref([], [])}
+                    class="inline-flex min-h-9 items-center px-2 text-sm font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                  >
+                    {copy.resetAllFilters}
+                  </a>
+                </li>
               </ul>
             )}
 
@@ -180,7 +214,11 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
               <nav class="flex justify-between gap-4 pt-2 text-sm">
                 {offset > 0 ? (
                   <a
-                    href={searchHref(chosen, Math.max(0, offset - found.limit))}
+                    href={searchHref(
+                      chosen,
+                      ranges,
+                      Math.max(0, offset - found.limit),
+                    )}
                     class="underline underline-offset-2 hover:text-signal-ink"
                   >
                     {copy.previous}
@@ -190,7 +228,7 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
                 )}
                 {offset + found.limit < found.count && (
                   <a
-                    href={searchHref(chosen, offset + found.limit)}
+                    href={searchHref(chosen, ranges, offset + found.limit)}
                     class="underline underline-offset-2 hover:text-signal-ink"
                   >
                     {copy.next}

@@ -1,28 +1,57 @@
 ---
-import { facetFilter, type SearchFacet } from '@podbor/catalog-contract';
+import {
+  facetFilter,
+  type RangeFilter,
+  type SearchFacet,
+} from '@podbor/catalog-contract';
 import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { facetValueLabel } from '@/utils/partsSearch';
+import {
+  facetValueLabel,
+  numberBounds,
+  rangeMaxName,
+  rangeMinName,
+} from '@/utils/partsSearch';
 
 interface Props {
   action: string;
   hidden: Record<string, string>;
   facets: SearchFacet[];
   chosen?: string[];
+  ranges?: RangeFilter[];
   resetHref?: string;
   class?: string;
 }
+
+const PILL_LABEL_MAX = 10;
 
 const {
   action,
   hidden,
   facets,
   chosen = [],
+  ranges = [],
   resetHref,
   class: className,
 } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+const active = chosen.length + ranges.length;
+const values = (facet: SearchFacet) =>
+  facet.values.map((value) => {
+    const filter = facetFilter(facet.key, value.value);
+    return {
+      filter,
+      label: facetValueLabel(facet, value, copy),
+      count: value.count,
+      checked: chosen.includes(filter),
+    };
+  });
+const pills = (facet: SearchFacet) =>
+  values(facet).every(({ label }) => label.length <= PILL_LABEL_MAX);
+const range = (key: string) => ranges.find((item) => item.key === key);
+const bound = (value: number | null | undefined) =>
+  value === null || value === undefined ? undefined : String(value);
 ---
 
 <form method="GET" action={action} class:list={['card p-5', className]}>
@@ -32,11 +61,18 @@ const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
     ))
   }
   <open-at-large class="block">
-    <details class="group" open={chosen.length > 0}>
+    <details class="group" open={active > 0}>
       <summary
         class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
       >
-        {copy.filtersHeading}
+        <span>
+          {copy.filtersHeading}
+          {
+            active > 0 && (
+              <span class="spec font-normal text-muted"> · {active}</span>
+            )
+          }
+        </span>
         <Icon
           name="chevronDown"
           size={16}
@@ -48,25 +84,79 @@ const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
           facets.map((facet) => (
             <fieldset class="flex flex-col gap-2">
               <legend class="mb-1 text-sm font-semibold text-ink">
-                {facet.label}
+                {facet.unit ? `${facet.label}, ${facet.unit}` : facet.label}
               </legend>
-              {facet.values.map((value) => (
-                <label class="flex min-h-8 items-center gap-2 text-sm text-ink-2">
-                  <input
-                    type="checkbox"
-                    name="facets"
-                    value={facetFilter(facet.key, value.value)}
-                    checked={chosen.includes(
-                      facetFilter(facet.key, value.value),
-                    )}
-                    class="size-4 accent-signal"
-                  />
-                  <span class="flex-1">
-                    {facetValueLabel(facet, value, copy)}
-                  </span>
-                  <span class="spec text-xs text-muted">{value.count}</span>
-                </label>
-              ))}
+              {facet.type === 'number' ? (
+                <div class="grid grid-cols-2 gap-2">
+                  {[
+                    {
+                      name: rangeMinName(facet.key),
+                      label: copy.rangeMinLabel,
+                      value: bound(range(facet.key)?.min),
+                      placeholder: bound(numberBounds(facet)?.min),
+                    },
+                    {
+                      name: rangeMaxName(facet.key),
+                      label: copy.rangeMaxLabel,
+                      value: bound(range(facet.key)?.max),
+                      placeholder: bound(numberBounds(facet)?.max),
+                    },
+                  ].map((input) => (
+                    <label class="flex flex-col gap-1 text-xs text-muted">
+                      {input.label}
+                      <input
+                        type="number"
+                        inputmode="decimal"
+                        step="any"
+                        name={input.name}
+                        value={input.value}
+                        placeholder={input.placeholder}
+                        class="field spec min-h-11 py-2 text-sm"
+                      />
+                    </label>
+                  ))}
+                </div>
+              ) : pills(facet) ? (
+                <div class="flex flex-wrap gap-2">
+                  {values(facet).map((value) => (
+                    <label
+                      class:list={[
+                        'inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-signal has-checked:bg-signal/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-signal motion-reduce:transition-none',
+                        value.count === 0 && !value.checked && 'opacity-50',
+                      ]}
+                    >
+                      <input
+                        type="checkbox"
+                        name="facets"
+                        value={value.filter}
+                        checked={value.checked}
+                        class="sr-only"
+                      />
+                      {value.label}
+                      <span class="spec text-xs text-muted">{value.count}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                values(facet).map((value) => (
+                  <label
+                    class:list={[
+                      'flex min-h-8 items-center gap-2 text-sm text-ink-2',
+                      value.count === 0 && !value.checked && 'opacity-50',
+                    ]}
+                  >
+                    <input
+                      type="checkbox"
+                      name="facets"
+                      value={value.filter}
+                      checked={value.checked}
+                      class="size-4 accent-signal"
+                    />
+                    <span class="flex-1">{value.label}</span>
+                    <span class="spec text-xs text-muted">{value.count}</span>
+                  </label>
+                ))
+              )}
             </fieldset>
           ))
         }
@@ -75,7 +165,7 @@ const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
             {copy.applyFilters}
           </button>
           {
-            resetHref && chosen.length > 0 && (
+            resetHref && active > 0 && (
               <a
                 href={resetHref}
                 class="text-sm underline underline-offset-2 hover:text-signal-ink"

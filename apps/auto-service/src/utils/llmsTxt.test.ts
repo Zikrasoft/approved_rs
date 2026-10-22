@@ -90,6 +90,7 @@ describe('generateLlmsTxt', () => {
             kit_rank: 0,
             service_label: 'Замена масла',
             service_price: 2500,
+            service_note: null,
             fields: [],
           },
         ],
