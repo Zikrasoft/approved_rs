@@ -36,7 +36,7 @@ export const searchResponseSchema = z.object({
   results: z.array(searchResultSchema),
   facets: z.array(searchFacetSchema),
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
-  model: vehicleSchema.shape.model.nullable(),
+  model: vehicleSchema.shape.model.nullable().default(null),
   count: z.number().int().nonnegative(),
   offset: z.number().int().nonnegative(),
   limit: z.number().int().positive(),

@@ -955,7 +955,8 @@ describe('catalogue.search', () => {
     ).toBeNull();
   });
 
-  it('gives no results on a body that breaks the contract', async () => {
+  it('gives no results on a body that breaks the contract, and says why', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(
       await catalog(answer({ results: [{ id: 'pi_1' }] })).search({
         q: 'x',
@@ -963,6 +964,11 @@ describe('catalogue.search', () => {
         facets: [],
       }),
     ).toBeNull();
+    expect(log).toHaveBeenCalledWith(
+      'catalogue search failed',
+      expect.stringContaining('results'),
+    );
+    log.mockRestore();
   });
 });
 
