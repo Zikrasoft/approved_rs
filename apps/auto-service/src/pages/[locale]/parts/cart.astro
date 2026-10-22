@@ -1,7 +1,7 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import CheckoutForm from '@/components/CheckoutForm.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -12,7 +12,6 @@ export const getStaticPaths = localePaths;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopCart;
-const inquiry = content(locale).pages.partsInquiry;
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
   'card mb-4 flex items-start gap-3 border-l-4 border-l-signal p-4 text-sm leading-relaxed text-ink';
@@ -50,6 +49,7 @@ const stepper =
       data-locale={locale}
       data-addon-template={copy.addonTemplate}
       data-unit-template={copy.unitTemplate}
+      data-count-template={copy.summaryCountTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
       data-order-template={copy.orderNumberTemplate}
@@ -230,44 +230,9 @@ const stepper =
               </button>
             </li>
           </template>
-
-          <div
-            class="mt-4 flex items-baseline justify-between gap-4 border-t-2 border-ink pt-4"
-          >
-            <span class="text-block font-semibold">{copy.totalLabel}</span>
-            <span class="spec text-2xl font-semibold text-ink" data-total
-            ></span>
-          </div>
-          <p class="mt-4 text-sm leading-relaxed text-muted">
-            {copy.pickupNotice}
-          </p>
         </div>
 
-        <div class="card flex flex-col gap-4 p-5 sm:p-6">
-          <div class="flex flex-col gap-1">
-            <h2 class="text-block font-semibold">{copy.checkoutHeading}</h2>
-            <p class="text-sm leading-relaxed text-ink-2">
-              {copy.checkoutLead}
-            </p>
-          </div>
-          <p
-            class="border-l-4 border-l-signal pl-3 text-sm leading-relaxed text-signal-dark"
-            data-blocked
-            hidden
-          >
-          </p>
-          <LeadForm
-            action="/api/order"
-            vin={{
-              label: inquiry.vinLabel,
-              placeholder: inquiry.vinPlaceholder,
-            }}
-            commentLabel={copy.commentLabel}
-            commentPlaceholder={copy.commentPlaceholder}
-            submitLabel={copy.submitLabel}
-            defaultChannel="whatsapp"
-          />
-        </div>
+        <CheckoutForm />
       </div>
     </offer-cart>
   </section>

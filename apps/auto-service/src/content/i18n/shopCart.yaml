@@ -13,9 +13,16 @@ toInquiryLabel: Отправить заявкой
 unavailableTag: Сейчас нет в нужном количестве. Уберите позицию или отправьте ее заявкой.
 removeLabel: Убрать из корзины
 totalLabel: Итого
-pickupNotice: Оплата наличными при получении на нашей СТО в Белграде.
-checkoutHeading: Оформить заказ
-checkoutLead: Нужен только контакт. После заказа менеджер подтвердит наличие и сообщит, когда можно забрать.
+summaryHeading: Ваш заказ
+summaryCountTemplate: 'Запчасти, {count} шт.'
+summaryAddons: Работы при выдаче
+contactStep: Контакт
+pickupStep: Получение
+pickupMethod: Самовывоз с СТО CarLab
+paymentStep: Оплата
+paymentMethod: Наличными при получении
+extrasToggle: Добавить VIN или комментарий
+submitNote: Менеджер подтвердит наличие и время, когда можно забрать.
 commentLabel: Комментарий к заказу (необязательно)
 commentPlaceholder: Например, когда удобно забрать
 submitLabel: Оформить заказ

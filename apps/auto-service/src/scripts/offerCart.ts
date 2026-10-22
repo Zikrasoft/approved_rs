@@ -203,16 +203,19 @@ export const repricedSince = (seen: StoredCart, cart: OfferCart): boolean =>
     return before !== undefined && before !== unit_price;
   });
 
-export const payableTotal = (cart: OfferCart): number =>
-  cart.items
-    .filter(({ available }) => available)
-    .reduce(
-      (sum, line) =>
-        sum +
-        line.unit_price * line.quantity +
-        (line.addon?.item_id ? line.addon.unit_price : 0),
-      0,
-    );
+export function orderSummary(cart: OfferCart) {
+  const sold = cart.items.filter(({ available }) => available);
+  const count = sold.reduce((sum, { quantity }) => sum + quantity, 0);
+  const parts = sold.reduce(
+    (sum, { unit_price, quantity }) => sum + unit_price * quantity,
+    0,
+  );
+  const addons = sold.reduce(
+    (sum, { addon }) => sum + (addon?.item_id ? addon.unit_price : 0),
+    0,
+  );
+  return { count, parts, addons, total: parts + addons };
+}
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const REMEMBERED_FIELDS = [
@@ -278,6 +281,8 @@ export function restoreCheckout(
     if (field && value) {
       field.value = value;
       field.dispatchEvent(new Event('input', { bubbles: true }));
+      const folded = field.closest('details');
+      if (folded) folded.open = true;
     }
   }
 }
@@ -567,14 +572,31 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         this.querySelector('[data-lines]')?.replaceChildren(
           ...cart.items.map((line) => this.line(line, cart, localeTag)),
         );
-        fill(
-          this,
-          '[data-total]',
-          formatMoney(payableTotal(cart), cart.currency, localeTag),
-        );
+        this.summarize(cart, localeTag);
         showOnly(this, 'data-notice', notice || (repriced ? 'repriced' : ''));
         this.block(unavailableNames(cart));
         this.show('cart');
+      }
+
+      summarize(cart: OfferCart, localeTag: string): void {
+        const { countTemplate = '{count}' } = this.dataset;
+        const summary = orderSummary(cart);
+        const money = (amount: number) =>
+          formatMoney(amount, cart.currency, localeTag);
+        for (const node of this.querySelectorAll('[data-total]')) {
+          node.textContent = money(summary.total);
+        }
+        fill(
+          this,
+          '[data-summary-count]',
+          countTemplate.replace('{count}', String(summary.count)),
+        );
+        fill(this, '[data-summary-parts]', money(summary.parts));
+        fill(this, '[data-summary-addons]', money(summary.addons));
+        const addons = this.querySelector<HTMLElement>(
+          '[data-summary-addon-row]',
+        );
+        if (addons) addons.hidden = summary.addons === 0;
       }
 
       block(names: string[]): void {

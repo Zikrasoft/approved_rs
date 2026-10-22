@@ -5,7 +5,7 @@ import {
   forgetOrderedCart,
   unavailableNames,
   moveCartToInquiry,
-  payableTotal,
+  orderSummary,
   readCart,
   rememberCart,
   repricedSince,
@@ -227,21 +227,21 @@ describe('the remembered cart', () => {
     expect(cartCount(blockedStorage)).toBe(0);
   });
 
-  it('totals only the lines the supplier can still sell', () => {
+  it('sums only the lines that can still be sold', () => {
     expect(
-      payableTotal({
+      orderSummary({
         ...cart,
         items: [
           { ...cart.items[0], quantity: 2 },
           { ...cart.items[0], id: 'item_2', unit_price: 999, available: false },
         ],
       }),
-    ).toBe(3700);
+    ).toEqual({ count: 2, parts: 3700, addons: 0, total: 3700 });
   });
 
   it('adds the add-on service a sellable line carries', () => {
     expect(
-      payableTotal({
+      orderSummary({
         ...cart,
         items: [
           { ...cart.items[0], addon: { ...SERVICE, item_id: 'item_2' } },
@@ -258,7 +258,12 @@ describe('the remembered cart', () => {
           },
         ],
       }),
-    ).toBe(1850 + 2500 + 1850);
+    ).toEqual({
+      count: 2,
+      parts: 1850 + 1850,
+      addons: 2500,
+      total: 1850 + 2500 + 1850,
+    });
   });
 
   it('works without a cart when storage is blocked', () => {
