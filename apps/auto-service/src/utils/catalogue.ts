@@ -10,6 +10,7 @@ import {
   type OfferCart,
   type PartOffer,
   categoriesResponseSchema,
+  describeFacet,
   fitmentsResponseSchema,
   maintenanceKit,
   partPageSlug,
@@ -24,6 +25,7 @@ import {
   type Fitment,
   type PartPage,
   type PositionGroup,
+  type SearchFacet,
   type SearchResponse,
   type SearchResult,
   type Vehicle,
@@ -47,7 +49,8 @@ export type PartPageEntry = PartPage & {
 };
 
 export type SearchQuery = {
-  q: string;
+  q?: string;
+  category?: string;
   locale: CatalogLocale;
   facets: string[];
   offset?: number;
@@ -469,11 +472,16 @@ export function createCatalogue({
 
     async search({
       q,
+      category,
       locale,
       facets,
       offset = 0,
     }: SearchQuery): Promise<SearchOutcome | null> {
-      const params = new URLSearchParams({ q, locale });
+      const params = new URLSearchParams({
+        ...(q ? { q } : {}),
+        locale,
+        ...(category ? { category } : {}),
+      });
       for (const facet of facets) {
         params.append('facets', facet);
       }
@@ -597,6 +605,28 @@ export function createCatalogue({
       }
     },
   };
+}
+
+export function categoryFacets(
+  category: CategoryPageEntry,
+  locale: CatalogLocale,
+): SearchFacet[] {
+  return category.fields
+    .filter(({ facet }) => facet)
+    .map((field) => {
+      const counts = new Map<string, number>();
+      for (const { part } of category.pages) {
+        for (const value of [part.attributes[field.key] ?? []].flat()) {
+          counts.set(String(value), (counts.get(String(value)) ?? 0) + 1);
+        }
+      }
+      return describeFacet(
+        field,
+        [...counts].map(([value, count]) => ({ value, count })),
+        locale,
+      );
+    })
+    .filter(({ values }) => values.length > 0);
 }
 
 export function catalogueFromEnv(env: CatalogueEnv) {
