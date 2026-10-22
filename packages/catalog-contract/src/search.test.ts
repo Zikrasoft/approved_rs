@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BRAND_FACET,
   CATALOG_LOCALES,
+  IN_STOCK,
+  IN_STOCK_FACET,
+  PRICE_FACET,
+  UNIVERSAL_FACET_KEYS,
+  universalFacets,
+  usefulFacets,
   describeFacet,
   facetFilter,
   inRange,
@@ -188,5 +195,109 @@ describe('describeFacet', () => {
       { value: '80', label: '80', count: 2 },
       { value: '100', label: '100', count: 1 },
     ]);
+  });
+});
+
+describe('universalFacets', () => {
+  it('describes brand, availability and price, in that order', () => {
+    expect(
+      universalFacets({
+        brands: [
+          { value: 'mann-filter', label: 'Mann-Filter', count: 2 },
+          { value: 'ate', label: 'ATE', count: 1 },
+        ],
+        inStock: 2,
+        price: { min: 900, max: 2400, count: 3 },
+        currency: 'RSD',
+      }),
+    ).toEqual([
+      {
+        key: BRAND_FACET,
+        type: 'single-select',
+        label: BRAND_FACET,
+        unit: null,
+        values: [
+          { value: 'ate', label: 'ATE', count: 1 },
+          { value: 'mann-filter', label: 'Mann-Filter', count: 2 },
+        ],
+      },
+      {
+        key: IN_STOCK_FACET,
+        type: 'boolean',
+        label: IN_STOCK_FACET,
+        unit: null,
+        values: [{ value: IN_STOCK, label: IN_STOCK, count: 2 }],
+      },
+      {
+        key: PRICE_FACET,
+        type: 'number',
+        label: PRICE_FACET,
+        unit: 'RSD',
+        values: [
+          { value: '900', label: '900', count: 3 },
+          { value: '2400', label: '2400', count: 3 },
+        ],
+      },
+    ]);
+  });
+
+  it('gives one price value when every price is the same, none without prices', () => {
+    const [, , single] = universalFacets({
+      brands: [],
+      inStock: 0,
+      price: { min: 1200, max: 1200, count: 2 },
+      currency: 'RSD',
+    });
+    const [, , none] = universalFacets({
+      brands: [],
+      inStock: 0,
+      price: null,
+      currency: 'RSD',
+    });
+
+    expect(single.values).toEqual([{ value: '1200', label: '1200', count: 2 }]);
+    expect(none.values).toEqual([]);
+  });
+
+  it('reserves its keys', () => {
+    expect(UNIVERSAL_FACET_KEYS).toEqual(['brand', 'in-stock', 'price']);
+  });
+});
+
+describe('usefulFacets', () => {
+  const facet = (key: string, counts: number[]) => ({
+    key,
+    type: 'single-select' as const,
+    label: key,
+    unit: null,
+    values: counts.map((count, index) => ({
+      value: String(index),
+      label: String(index),
+      count,
+    })),
+  });
+
+  it('drops a facet every result shares one value of, or with nothing counted', () => {
+    const facets = [
+      facet('shared', [5]),
+      facet('empty', []),
+      facet('zero', [0]),
+      facet('split', [3, 2]),
+      facet('partial', [3]),
+    ];
+
+    expect(usefulFacets(facets, 5, []).map(({ key }) => key)).toEqual([
+      'split',
+      'partial',
+    ]);
+  });
+
+  it('keeps a facet with an active selection', () => {
+    expect(
+      usefulFacets([facet('shared', [5]), facet('zero', [0])], 5, [
+        'shared',
+        'zero',
+      ]).map(({ key }) => key),
+    ).toEqual(['shared', 'zero']);
   });
 });

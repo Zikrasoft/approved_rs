@@ -73,6 +73,76 @@ export const describeFacet = (
   };
 };
 
+export const BRAND_FACET = 'brand';
+export const IN_STOCK_FACET = 'in-stock';
+export const PRICE_FACET = 'price';
+export const IN_STOCK = 'true';
+
+export const UNIVERSAL_FACET_KEYS = [
+  BRAND_FACET,
+  IN_STOCK_FACET,
+  PRICE_FACET,
+] as const;
+
+type FacetValue = SearchFacet['values'][number];
+
+export const universalFacets = ({
+  brands,
+  inStock,
+  price,
+  currency,
+}: {
+  brands: FacetValue[];
+  inStock: number;
+  price: { min: number; max: number; count: number } | null;
+  currency: string;
+}): SearchFacet[] => {
+  const bounds = price
+    ? [...new Set([price.min, price.max])].map((value) => ({
+        value: String(value),
+        label: String(value),
+        count: price.count,
+      }))
+    : [];
+  return [
+    {
+      key: BRAND_FACET,
+      type: 'single-select',
+      label: BRAND_FACET,
+      unit: null,
+      values: brands
+        .slice()
+        .sort((a, b) => a.label.localeCompare(b.label, 'en')),
+    },
+    {
+      key: IN_STOCK_FACET,
+      type: 'boolean',
+      label: IN_STOCK_FACET,
+      unit: null,
+      values: [{ value: IN_STOCK, label: IN_STOCK, count: inStock }],
+    },
+    {
+      key: PRICE_FACET,
+      type: 'number',
+      label: PRICE_FACET,
+      unit: currency,
+      values: bounds,
+    },
+  ];
+};
+
+export const usefulFacets = (
+  facets: SearchFacet[],
+  total: number,
+  chosenKeys: string[],
+): SearchFacet[] =>
+  facets.filter(
+    ({ key, values }) =>
+      chosenKeys.includes(key) ||
+      (values.some(({ count }) => count > 0) &&
+        !(values.length === 1 && values[0].count >= total)),
+  );
+
 const NUMBER = '-?\\d+(?:\\.\\d+)?';
 
 export const RANGE_FILTER_PATTERN = new RegExp(

@@ -7,11 +7,15 @@ import {
 import type { SearchTypes } from '@medusajs/framework/types';
 import {
   type AttributeValues,
+  BRAND_FACET,
   type CatalogLocale,
   facetFilter,
+  IN_STOCK,
+  IN_STOCK_FACET,
 } from '@podbor/catalog-contract';
 
 import { serbianScripts } from '../lib/serbian';
+import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
 import {
   PART_CHANGED_EVENT,
   PART_IDENTIFIERS_DELETED_EVENT,
@@ -32,11 +36,13 @@ type NumberRow = {
 
 type FacetFieldRow = { key: string; category_id: string };
 
+type OfferRow = PricedOfferRow & { part_identifier_id: string };
+
 type IdentifierRow = {
   id: string;
   value: string;
   normalized_value: string;
-  brand: { name: string };
+  brand: { name: string; slug: string };
   part: {
     id: string;
     name: string;
@@ -84,23 +90,34 @@ const toDocument = (
   row: IdentifierRow,
   siblings: NumberRow[],
   facetFields: FacetFieldRow[],
-) => ({
-  id: row.id,
-  part_id: row.part.id,
-  brand: row.brand.name,
-  number: [row.value, row.normalized_value],
-  equivalent_numbers: siblings
-    .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
-    .flatMap(({ value, normalized_value }) => [value, normalized_value]),
-  ...names('name', row.part),
-  ...(row.part.category
-    ? {
-        category: row.part.category.slug,
-        ...names('category', row.part.category),
-      }
-    : {}),
-  facets: facets(row.part, facetFields),
-});
+  offers: OfferRow[],
+) => {
+  const [best] = storeOffers(
+    offers.filter(({ part_identifier_id }) => part_identifier_id === row.id),
+  );
+  return {
+    id: row.id,
+    part_id: row.part.id,
+    brand: row.brand.name,
+    number: [row.value, row.normalized_value],
+    equivalent_numbers: siblings
+      .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
+      .flatMap(({ value, normalized_value }) => [value, normalized_value]),
+    ...names('name', row.part),
+    ...(row.part.category
+      ? {
+          category: row.part.category.slug,
+          ...names('category', row.part.category),
+        }
+      : {}),
+    facets: [
+      facetFilter(BRAND_FACET, row.brand.slug),
+      ...(best?.stock_quantity ? [facetFilter(IN_STOCK_FACET, IN_STOCK)] : []),
+      ...facets(row.part, facetFields),
+    ],
+    price: best?.price,
+  };
+};
 
 const source = {
   fields: [
@@ -108,6 +125,7 @@ const source = {
     'value',
     'normalized_value',
     'brand.name',
+    'brand.slug',
     'part.id',
     'part.name',
     'part.translations',
@@ -124,20 +142,39 @@ const source = {
     const categoryIds = rows.flatMap(({ part }) =>
       part.category_id ? [part.category_id] : [],
     );
-    const [{ data: siblings }, { data: facetFields }] = await Promise.all([
-      container.query.graph({
-        entity: 'part_identifier',
-        fields: ['id', 'part_id', 'value', 'normalized_value'],
-        filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
-      }),
-      container.query.graph({
-        entity: 'category_field',
-        fields: ['key', 'category_id'],
-        filters: { category_id: [...new Set(categoryIds)], facet: true },
-      }),
-    ]);
+    const [{ data: siblings }, { data: facetFields }, { data: offers }] =
+      await Promise.all([
+        container.query.graph({
+          entity: 'part_identifier',
+          fields: ['id', 'part_id', 'value', 'normalized_value'],
+          filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
+        }),
+        container.query.graph({
+          entity: 'category_field',
+          fields: ['key', 'category_id'],
+          filters: { category_id: [...new Set(categoryIds)], facet: true },
+        }),
+        container.query.graph({
+          entity: 'supplier_offer',
+          fields: [
+            'id',
+            'part_identifier_id',
+            'cost_price',
+            'currency',
+            'stock_quantity',
+            'lead_time_days',
+            'supplier.markup_percentage',
+          ],
+          filters: { part_identifier_id: rows.map(({ id }) => id) },
+        }),
+      ]);
     return rows.map((row) =>
-      toDocument(row, siblings as NumberRow[], facetFields as FacetFieldRow[]),
+      toDocument(
+        row,
+        siblings as NumberRow[],
+        facetFields as FacetFieldRow[],
+        offers as OfferRow[],
+      ),
     );
   },
 };
@@ -201,6 +238,11 @@ export default defineSearchIndex({
       .array()
       .facetable()
       .filterable()
+      .retrievable(false),
+    price: search
+      .integer()
+      .filterable()
+      .facetable({ types: ['stats'] })
       .retrievable(false),
   }),
   events: [PART_CHANGED_EVENT, PART_IDENTIFIERS_DELETED_EVENT],

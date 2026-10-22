@@ -524,6 +524,7 @@
       "vehicle": "This vehicle already exists: same model, engine, power, drive, market, years and steering."
     },
     "invalidFields": {
+      "key": "Key: lowercase Latin letters, digits and hyphens. The keys brand, in-stock and price are taken by the storefront filters.",
       "year_to": "The \"to\" year is before the \"from\" year. Check the years.",
       "production_to": "Production ends before it starts. Check the dates.",
       "markup_percentage": "Markup: a number from 0 to 500 with at most two decimals.",
