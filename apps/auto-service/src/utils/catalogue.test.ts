@@ -878,6 +878,7 @@ describe('catalogue.search', () => {
       },
     ],
     category: null,
+    model: null,
     count: 1,
     offset: 0,
     limit: 20,
@@ -894,6 +895,22 @@ describe('catalogue.search', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       'http://shop.test/store/search?locale=en&category=engine-oil&facets=viscosity%3A5w-30',
+      expect.anything(),
+    );
+  });
+
+  it('scopes a Category listing to one Model', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      category: 'oil-filters',
+      model: 'f30-320d',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?locale=ru&category=oil-filters&model=f30-320d',
       expect.anything(),
     );
   });

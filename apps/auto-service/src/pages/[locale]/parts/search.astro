@@ -27,6 +27,7 @@ import {
   withFacetCopy,
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
+import { carName } from '@/utils/carName';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -40,6 +41,8 @@ const categoryParam = params.get('category') ?? '';
 const category = CATALOG_KEY_PATTERN.test(categoryParam)
   ? categoryParam
   : undefined;
+const modelParam = params.get('model') ?? '';
+const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
 const chosen = params.getAll('facets');
 const ranges = rangesFromParams(params);
 const offset = Math.max(
@@ -57,6 +60,7 @@ const found =
     ? await catalogue.search({
         q,
         category,
+        model,
         locale,
         facets: chosen,
         ranges,
@@ -73,10 +77,12 @@ const searchHref = (
   facets: string[],
   nextRanges: RangeFilter[],
   nextOffset = 0,
+  scope = model,
 ) => {
   const next = new URLSearchParams({
     ...(q ? { q } : {}),
     ...(category ? { category } : {}),
+    ...(scope ? { model: scope } : {}),
   });
   for (const facet of facets) {
     next.append('facets', facet);
@@ -93,7 +99,12 @@ if (found && offset > lastPage) {
   return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }
 const narrowedTo = found?.category;
+const scopedTo = found?.model;
+const modelName = scopedTo && carName(scopedTo, locale);
+const modelCopy = content(locale).partsCar.hubs.modelCategory;
 const heading = narrowedTo?.name ?? copy.heading;
+const fillModel = (template: string) =>
+  template.replace('{category}', heading).replace('{model}', modelName ?? '');
 const facets = found ? withFacetCopy(found.facets, copy) : [];
 const chips = chosenFilters(facets, chosen, ranges, copy);
 const emptyMessage = q
@@ -101,29 +112,71 @@ const emptyMessage = q
   : chips.length > 0
     ? copy.noFilteredResults
     : partsInquiry.category.noParts;
-const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
+const inquiryTopic = [modelName, narrowedTo?.name, q]
+  .filter(Boolean)
+  .join(', ');
+const scopeHidden = {
+  ...(q ? { q } : {}),
+  ...(category ? { category } : {}),
+  ...(model ? { model } : {}),
+};
 ---
 
 <Shell
-  title={narrowedTo
-    ? partsInquiry.category.metaTitleTemplate.replace('{name}', heading)
-    : copy.metaTitle}
+  title={modelName
+    ? fillModel(modelCopy.metaTitle)
+    : narrowedTo
+      ? partsInquiry.category.metaTitleTemplate.replace('{name}', heading)
+      : copy.metaTitle}
   description={copy.metaDescription}
   noindex
 >
   <PageHero
     actions={false}
-    eyebrow={narrowedTo ? partsInquiry.category.eyebrow : copy.eyebrow}
+    eyebrow={modelName
+      ? fillModel(modelCopy.eyebrow)
+      : narrowedTo
+        ? partsInquiry.category.eyebrow
+        : copy.eyebrow}
     heading={heading}
     compact
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
-      narrowedTo
+      ...(scopedTo && modelName
+        ? [
+            {
+              href: PathBuilder.partsMake(
+                locale,
+                scopedTo.chassis.series.make.slug,
+              ),
+              label: scopedTo.chassis.series.make.name,
+            },
+            {
+              href: PathBuilder.partsModel(
+                locale,
+                scopedTo.chassis.series.make.slug,
+                scopedTo.slug,
+              ),
+              label: modelName,
+            },
+          ]
+        : []),
+      scopedTo && narrowedTo
         ? {
-            href: PathBuilder.partsCategory(locale, narrowedTo.slug),
+            href: PathBuilder.partsModelCategory(
+              locale,
+              scopedTo.chassis.series.make.slug,
+              scopedTo.slug,
+              narrowedTo.slug,
+            ),
             label: narrowedTo.name,
           }
-        : { href: PathBuilder.partsSearch(locale), label: copy.heading },
+        : narrowedTo
+          ? {
+              href: PathBuilder.partsCategory(locale, narrowedTo.slug),
+              label: narrowedTo.name,
+            }
+          : { href: PathBuilder.partsSearch(locale), label: copy.heading },
     ]}
   />
 
@@ -150,10 +203,7 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
           {facets.length > 0 && (
             <FacetFilters
               action={PathBuilder.partsSearch(locale)}
-              hidden={{
-                ...(q ? { q } : {}),
-                ...(category ? { category } : {}),
-              }}
+              hidden={scopeHidden}
               facets={facets}
               chosen={chosen}
               ranges={ranges}
@@ -169,12 +219,25 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
               active={chips.length}
             />
 
-            {chips.length > 0 && (
+            {(chips.length > 0 || modelName) && (
               <ul class="flex flex-wrap gap-2">
-                {chips.map((chip) => (
+                {[
+                  ...(modelName
+                    ? [
+                        {
+                          label: modelName,
+                          href: searchHref(chosen, ranges, 0, ''),
+                        },
+                      ]
+                    : []),
+                  ...chips.map((chip) => ({
+                    label: chip.label,
+                    href: searchHref(chip.facets, chip.ranges),
+                  })),
+                ].map((chip) => (
                   <li>
                     <a
-                      href={searchHref(chip.facets, chip.ranges)}
+                      href={chip.href}
                       aria-label={copy.removeFilter.replace(
                         '{label}',
                         chip.label,
@@ -186,14 +249,16 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
                     </a>
                   </li>
                 ))}
-                <li>
-                  <a
-                    href={searchHref([], [])}
-                    class="inline-flex min-h-9 items-center px-2 text-sm font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-                  >
-                    {copy.resetAllFilters}
-                  </a>
-                </li>
+                {chips.length > 0 && (
+                  <li>
+                    <a
+                      href={searchHref([], [])}
+                      class="inline-flex min-h-9 items-center px-2 text-sm font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                    >
+                      {copy.resetAllFilters}
+                    </a>
+                  </li>
+                )}
               </ul>
             )}
 

@@ -83,7 +83,11 @@ medusaIntegrationTestRunner({
         });
 
         const unrelatedVehicle = (
-          await createVehicleFixture(catalog, { typeCode: 'T002' })
+          await createVehicleFixture(catalog, {
+            typeCode: 'T002',
+            modelSlug: 'g20-320d',
+            chassisCode: 'G20',
+          })
         ).vehicle;
         unrelatedVehicleId = unrelatedVehicle.id;
 
@@ -163,6 +167,46 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(200);
         expect(partIds(response)).toEqual([partId]);
+      });
+
+      it('narrows to the Parts fitted to any Vehicle of a Model and names the Model', async () => {
+        const response = await api.get(
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=f30-320d`,
+          storeHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(partIds(response)).toEqual([partId]);
+        expect(response.data.model).toMatchObject({
+          slug: 'f30-320d',
+          name: '320d',
+          chassis: {
+            code: 'F30',
+            series: { name: '3 серия', make: { slug: 'bmw', name: 'BMW' } },
+          },
+        });
+      });
+
+      it('finds nothing for a Model none of whose Vehicles fits the Part', async () => {
+        const response = await api.get(
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=g20-320d`,
+          storeHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.results).toEqual([]);
+        expect(response.data.model.slug).toBe('g20-320d');
+      });
+
+      it('returns 404 for an unknown model', async () => {
+        const response = await api
+          .get(
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=missing-model`,
+            storeHeaders,
+          )
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(404);
       });
 
       it('returns 404 for an unknown vehicle_id', async () => {

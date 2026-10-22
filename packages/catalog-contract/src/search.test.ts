@@ -53,6 +53,7 @@ const response = {
     },
   ],
   category: null,
+  model: null,
   count: 1,
   offset: 0,
   limit: 20,
@@ -69,6 +70,26 @@ describe('searchResponseSchema', () => {
       category: { slug: 'oil-filters', name: 'Filteri ulja' },
     };
     expect(searchResponseSchema.parse(narrowed)).toEqual(narrowed);
+  });
+
+  it('names the Model a listing was scoped to', () => {
+    const scoped = {
+      ...response,
+      model: {
+        slug: 'f30-320d',
+        name: '320d',
+        chassis: {
+          code: 'F30',
+          body_style: 'sedan',
+          series: {
+            name: '3 серия',
+            translations: { en: '3 Series' },
+            make: { slug: 'bmw', name: 'BMW' },
+          },
+        },
+      },
+    };
+    expect(searchResponseSchema.parse(scoped)).toEqual(scoped);
   });
 
   it('refuses a result without its Part', () => {

@@ -19,7 +19,7 @@ interface Props {
   action: string;
   hidden: Record<string, string>;
   facets: SearchFacet[];
-  count: number;
+  count?: number;
   chosen?: string[];
   ranges?: RangeFilter[];
   resetHref?: string;
@@ -76,7 +76,10 @@ const hint = (
   const text = bound(value);
   return text && template.replace(slot, text);
 };
-const showLabel = copy.showResults.replace('{count}', String(count));
+const showLabel =
+  count === undefined
+    ? copy.applyFilters
+    : copy.showResults.replace('{count}', String(count));
 const legend = (facet: SearchFacet) =>
   facet.unit ? `${facet.label}, ${facet.unit}` : facet.label;
 ---
