@@ -641,7 +641,10 @@ validates everything at startup. The non-obvious parts:
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
-  nobody, and the log says so.
+  nobody, and the log says so. A refused post is written on the order as
+  `lead_handoff_error`, and `src/jobs/retry-order-leads.ts` re-sends it every
+  10 minutes, six attempts in all. A timeout is not re-sent, since the route
+  may have stored it: find those orders by that metadata and check the chat.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
   are tried. An unknown name stops the server at startup.
 - `TYPESENSE_API_KEY` has a local default only outside production; with
