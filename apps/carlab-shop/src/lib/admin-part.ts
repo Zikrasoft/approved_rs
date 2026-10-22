@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { PART_IDENTIFIER_TYPES } from '../modules/catalog/models/part-identifier';
 import type CatalogModuleService from '../modules/catalog/service';
+import { adminImage, partImagesSchema } from './images';
 
 const identifierSchema = z.object({
   id: z.string(),
@@ -17,6 +18,7 @@ export const adminPartSchema = z.object({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), z.unknown()),
+  images: partImagesSchema.transform(({ items }) => items.map(adminImage)),
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),

@@ -18,6 +18,7 @@ export const searchResultSchema = brandNumberSchema.extend({
     category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   }),
   offers: z.array(partOfferSchema),
+  thumbnail: z.url().nullable(),
 });
 
 export const searchFacetSchema = z.object({

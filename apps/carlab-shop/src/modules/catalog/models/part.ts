@@ -12,6 +12,7 @@ const Part = model
     name: model.text(),
     category: model.belongsTo(() => Category, { mappedBy: 'parts' }).nullable(),
     attributes: model.json().default({}),
+    images: model.json().default({ items: [] }),
     ...translatable(),
     identifiers: model.hasMany(() => PartIdentifier, { mappedBy: 'part' }),
     fitments: model.hasMany(() => Fitment, { mappedBy: 'part' }),

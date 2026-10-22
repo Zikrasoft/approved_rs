@@ -490,7 +490,9 @@
       "FIELD_REQUIRED": "Fill in «{{field}}».",
       "INVALID_FIELD": "Check «{{field}}».",
       "LAST_IDENTIFIER": "This is the part's last number and a part cannot be found without one. Add another number or delete the whole part.",
-      "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections."
+      "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections.",
+      "INVALID_IMAGE": "This file cannot be used: upload a JPEG, PNG or WebP photo.",
+      "IMAGE_TOO_LARGE": "The photo is over 10 MB. Make it smaller and upload it again."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -662,5 +664,25 @@
       "left": "left-hand drive",
       "right": "right-hand drive"
     }
+  },
+  "images": {
+    "partHeading": "Photos",
+    "categoryHeading": "Category photo",
+    "categoryHint": "Shown in listings in place of a part's photo when the part has none.",
+    "add": "Add photos",
+    "replace": "Replace photo",
+    "hint": "JPEG, PNG or WebP, up to 10 MB. The first photo is the main one.",
+    "hintSingle": "JPEG, PNG or WebP, up to 10 MB.",
+    "empty": "No photos yet",
+    "main": "Main",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "delete": "Delete photo",
+    "deleted": "Photo deleted.",
+    "confirmDeleteTitle": "Delete this photo?",
+    "confirmDeleteBody": "The photo leaves the site with the next publish. The file is deleted right away and cannot be restored.",
+    "wrongType": "\"{{name}}\" cannot be used: upload a JPEG, PNG or WebP.",
+    "tooLarge": "\"{{name}}\" is over 10 MB. Make it smaller and upload it again.",
+    "altPreview": "Text for search engines and screen readers: \"{{alt}}\""
   }
 }

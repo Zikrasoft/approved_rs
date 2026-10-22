@@ -18,6 +18,12 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import {
+  adminImageSchema,
+  type AdminImage,
+  ImageUploads,
+  uploadImage,
+} from '../../components/image-uploads';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -60,6 +66,7 @@ const partSchema = editedBySchema.extend({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), attributeValueSchema),
+  images: z.array(adminImageSchema),
   identifiers: z.array(
     z.object({
       id: z.string(),
@@ -72,12 +79,16 @@ const partSchema = editedBySchema.extend({
 type Part = z.infer<typeof partSchema>;
 
 const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const imagesSchema = z.object({ images: z.array(adminImageSchema) });
 const partsSchema = z.object({ parts: z.array(partSchema) });
 
 const partLabel = (part: Part) =>
   `${part.name} (${part.identifiers
     .map((identifier) => `${identifier.brand.name} ${identifier.value}`)
     .join(', ')})`;
+
+const imageAlt = ({ name, identifiers: [first] }: Part) =>
+  first ? `${first.brand.name} ${first.value}, ${name}` : name;
 
 const ValueInput = ({
   field,
@@ -221,6 +232,16 @@ const PartAttributesPage = () => {
     if (saved) toast.success(t('partAttributes.saved'));
   };
 
+  const showImages = (images: AdminImage[] | undefined) => {
+    if (!part || !images) return Boolean(images);
+    const next = { ...part, images };
+    setPart(next);
+    setParts((current) =>
+      current.map((found) => (found.id === next.id ? next : found)),
+    );
+    return true;
+  };
+
   const category = categories.find(({ id }) => id === categoryId);
 
   return (
@@ -272,6 +293,57 @@ const PartAttributesPage = () => {
               source={{ name: part.name }}
             />
           </div>
+          <div className="flex flex-col gap-y-2">
+            <Heading level="h3">{t('images.partHeading')}</Heading>
+            <ImageUploads
+              images={part.images}
+              alt={imageAlt(part)}
+              multiple
+              onUpload={async (file) =>
+                showImages(
+                  (
+                    await uploadImage(
+                      `/admin/parts/${part.id}/images`,
+                      file,
+                      imagesSchema,
+                    )
+                  )?.images,
+                )
+              }
+              onDelete={async (image) =>
+                showImages(
+                  (
+                    await adminFetch(
+                      `/admin/parts/${part.id}/images/${image.id}`,
+                      imagesSchema,
+                      {
+                        method: 'DELETE',
+                      },
+                    )
+                  )?.images,
+                )
+              }
+              onMove={async (image, offset) => {
+                const ids = part.images.map(({ id }) => id);
+                const from = ids.indexOf(image.id);
+                ids.splice(from, 1);
+                ids.splice(from + offset, 0, image.id);
+                showImages(
+                  (
+                    await adminFetch(
+                      `/admin/parts/${part.id}/images/order`,
+                      imagesSchema,
+                      {
+                        method: 'POST',
+                        body: JSON.stringify({ ids }),
+                      },
+                    )
+                  )?.images,
+                );
+              }}
+            />
+          </div>
+
           <div className="flex flex-col gap-y-2">
             <Label>{t('partAttributes.category')}</Label>
             <Select

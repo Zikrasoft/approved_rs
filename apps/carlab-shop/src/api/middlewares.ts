@@ -20,6 +20,7 @@ import {
   AdminEditTranslation,
   AdminListFitments,
   AdminListRequirements,
+  AdminOrderImages,
   AdminSearchParts,
   AdminUpdateCategory,
   AdminUpdateCategoryField,
@@ -101,6 +102,11 @@ export default defineMiddlewares({
       matcher: '/admin/parts/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdatePart)],
+    },
+    {
+      matcher: '/admin/parts/:id/images/order',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminOrderImages)],
     },
     {
       matcher: '/admin/parts/:id/identifiers',

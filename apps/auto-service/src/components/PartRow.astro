@@ -4,9 +4,11 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import Icon from './Icon.astro';
+import PartThumb from './PartThumb.astro';
 import PriceTag from './PriceTag.astro';
 
 interface Props {
+  thumb: string | null;
   slug: string;
   brand: string;
   value: string;
@@ -17,46 +19,58 @@ interface Props {
   offers?: PartOffer[];
 }
 
-const { slug, brand, value, name, detail, superseded, current, offers } =
+const { thumb, slug, brand, value, name, detail, superseded, current, offers } =
   Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 ---
 
 <li
-  class="group relative flex items-center gap-4 px-5 py-4 transition-colors duration-150 first:rounded-t-[inherit] last:rounded-b-[inherit] hover:bg-shade sm:px-6"
+  class="group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 first:rounded-t-[inherit] last:rounded-b-[inherit] hover:bg-shade sm:gap-4 sm:px-6 sm:py-4"
 >
-  <span class="flex min-w-0 flex-1 flex-col gap-1">
-    <a
-      href={PathBuilder.partNumber(locale, slug)}
-      class="text-ink after:absolute after:inset-0 after:rounded-[inherit]"
-    >
-      <span class="font-semibold">{brand}</span>{' '}
-      <span class="spec text-sm">{value}</span>
-    </a>
-    {name && <span class="text-sm text-ink-2">{name}</span>}
-    {detail && <span class="text-xs text-muted">{detail}</span>}
+  <PartThumb src={thumb} class="group-hover:bg-paper" />
+  <span
+    class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
+  >
+    <span class="flex min-w-0 flex-1 flex-col gap-1">
+      <a
+        href={PathBuilder.partNumber(locale, slug)}
+        class="text-ink after:absolute after:inset-0 after:rounded-[inherit]"
+      >
+        <span class="font-semibold">{brand}</span>{' '}
+        <span class="spec text-sm">{value}</span>
+      </a>
+      {name && <span class="text-sm text-ink-2">{name}</span>}
+      {detail && <span class="text-xs text-muted">{detail}</span>}
+      {
+        superseded && (
+          <span class="text-xs text-muted">
+            {current ? (
+              <>
+                {copy.previousNumberCurrent}{' '}
+                <a
+                  href={PathBuilder.partNumber(locale, current.slug)}
+                  class="relative text-ink-2 underline underline-offset-2 hover:text-signal-ink"
+                >
+                  {current.brand.name} <span class="spec">{current.value}</span>
+                </a>
+              </>
+            ) : (
+              copy.previousNumber
+            )}
+          </span>
+        )
+      }
+    </span>
     {
-      superseded && (
-        <span class="text-xs text-muted">
-          {current ? (
-            <>
-              {copy.previousNumberCurrent}{' '}
-              <a
-                href={PathBuilder.partNumber(locale, current.slug)}
-                class="relative text-ink-2 underline underline-offset-2 hover:text-signal-ink"
-              >
-                {current.brand.name} <span class="spec">{current.value}</span>
-              </a>
-            </>
-          ) : (
-            copy.previousNumber
-          )}
-        </span>
+      offers && (
+        <PriceTag
+          pages={[{ offers }]}
+          class="max-sm:flex-row max-sm:items-baseline max-sm:gap-2 max-sm:text-left"
+        />
       )
     }
   </span>
-  {offers && <PriceTag pages={[{ offers }]} />}
   <Icon
     name="chevronRight"
     size={16}

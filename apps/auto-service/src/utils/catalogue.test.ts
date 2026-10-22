@@ -23,6 +23,7 @@ const oilPart = {
   replaced_by: null,
   category_id: null,
   attributes: {},
+  images: [],
 };
 
 const oilFilterMann = {
@@ -238,6 +239,7 @@ describe('catalogue categories', () => {
     service_label: null,
     service_price: null,
     service_note: null,
+    image: null,
     fields: [
       {
         key: 'height',
@@ -405,6 +407,7 @@ const category = (slug: string, name: string) => ({
   service_label: null,
   service_price: null,
   service_note: null,
+  image: null,
   fields: [] as unknown[],
 });
 const oilFilters = category('oil-filters', 'Масляные фильтры');
@@ -441,7 +444,13 @@ const brandNumber = (
   normalized_value: number,
   superseded: false,
   brand: { name: slug, slug },
-  part: { translations: null, replaced_by: null, attributes: {}, ...part },
+  part: {
+    translations: null,
+    replaced_by: null,
+    attributes: {},
+    images: [],
+    ...part,
+  },
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
@@ -853,6 +862,7 @@ describe('catalogue.search', () => {
             lead_time_days: 0,
           },
         ],
+        thumbnail: null,
       },
     ],
     facets: [
@@ -1020,6 +1030,23 @@ describe('Requirements and the maintenance kit', () => {
 
     expect(indexable('liqui-moly-20646')).toBe(true);
     expect(indexable('liqui-moly-20800')).toBe(false);
+  });
+
+  it('names on a page the cars its Requirements fit and the kits it is in', async () => {
+    const pages = await withRequirements([
+      fitment('fit_filter', 'part_oil_filter'),
+    ]).partPages();
+    const cars = (slug: string) => {
+      const page = pages.find((candidate) => candidate.slug === slug);
+      return [
+        page?.requirementCars.map(({ id }) => id),
+        page?.kitCars.map(({ id }) => id),
+      ];
+    };
+
+    expect(cars('liqui-moly-20646')).toEqual([['veh_1'], ['veh_1']]);
+    expect(cars('liqui-moly-20800')).toEqual([[], []]);
+    expect(cars('mann-filter-hu816x')).toEqual([[], ['veh_1']]);
   });
 
   it('builds a Model x Category page for a Requirement match alone', async () => {

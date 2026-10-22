@@ -50,6 +50,8 @@ export type PartPageEntry = PartPage & {
   priceOnRequest: boolean;
   category: Category | null;
   fits: Fit[];
+  requirementCars: Vehicle[];
+  kitCars: Vehicle[];
 };
 
 export type SearchQuery = {
@@ -309,6 +311,8 @@ export function createCatalogue({
         priceOnRequest: page.offers.length === 0,
         category,
         fits: partFits,
+        requirementCars: [],
+        kitCars: [],
       });
     }
     const entries = [...bySlug.values()];
@@ -348,6 +352,57 @@ export function createCatalogue({
         entry.category && required.has(entry.part.id),
       );
     }
+    const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
+    const cars = allVehicles.map((vehicle): CarPageEntry => {
+      const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap(
+        (fit) => {
+          const partPages = pagesByPart.get(fit.part_id);
+          return partPages
+            ? [
+                {
+                  ...fit,
+                  part: partPages[0].part,
+                  category_id: partPages[0].part.category_id,
+                  pages: partPages,
+                },
+              ]
+            : [];
+        },
+      );
+      const groups = positionGroups(candidates, {
+        steering: vehicle.steering ?? undefined,
+      }).map((group) => ({
+        ...group,
+        category: categoryById.get(group.category_id ?? '') ?? null,
+      }));
+      const matches = matchesFor(vehicle);
+      const kit = maintenanceKit(
+        allCategories,
+        groups,
+        matches.map(({ category, quantity, parts: matched }) => ({
+          category_id: category.id,
+          quantity,
+          parts: matched.map(({ part }) => part),
+        })),
+      ).flatMap(({ category_id, part_id, quantity }) => {
+        const partPages = pagesByPart.get(part_id) ?? [];
+        const category = categoryById.get(category_id);
+        return category && partPages.length
+          ? [{ category, quantity, part: partPages[0].part, pages: partPages }]
+          : [];
+      });
+      return { vehicle, groups, matches, kit };
+    });
+    for (const { vehicle, matches, kit } of cars) {
+      for (const { pages: partPages } of matches.flatMap(
+        (match) => match.parts,
+      )) {
+        partPages.forEach((page) => page.requirementCars.push(vehicle));
+      }
+      for (const { pages: partPages } of kit) {
+        partPages.forEach((page) => page.kitCars.push(vehicle));
+      }
+    }
     return {
       categories: allCategories,
       categoryById,
@@ -356,6 +411,7 @@ export function createCatalogue({
       entries,
       pagesByPart,
       matchesFor,
+      cars,
     };
   };
 
@@ -376,55 +432,7 @@ export function createCatalogue({
     },
 
     async carPages(): Promise<CarPageEntry[]> {
-      const {
-        categories: allCategories,
-        vehicles: all,
-        fits,
-        pagesByPart,
-        categoryById,
-        matchesFor,
-      } = await snapshot();
-      const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
-      return all.map((vehicle) => {
-        const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap(
-          (fit) => {
-            const pages = pagesByPart.get(fit.part_id);
-            return pages
-              ? [
-                  {
-                    ...fit,
-                    part: pages[0].part,
-                    category_id: pages[0].part.category_id,
-                    pages,
-                  },
-                ]
-              : [];
-          },
-        );
-        const groups = positionGroups(candidates, {
-          steering: vehicle.steering ?? undefined,
-        }).map((group) => ({
-          ...group,
-          category: categoryById.get(group.category_id ?? '') ?? null,
-        }));
-        const matches = matchesFor(vehicle);
-        const kit = maintenanceKit(
-          allCategories,
-          groups,
-          matches.map(({ category, quantity, parts }) => ({
-            category_id: category.id,
-            quantity,
-            parts: parts.map(({ part }) => part),
-          })),
-        ).flatMap(({ category_id, part_id, quantity }) => {
-          const pages = pagesByPart.get(part_id) ?? [];
-          const category = categoryById.get(category_id);
-          return category && pages.length
-            ? [{ category, quantity, part: pages[0].part, pages }]
-            : [];
-        });
-        return { vehicle, groups, matches, kit };
-      });
+      return (await snapshot()).cars;
     },
 
     async makeHubs(): Promise<MakeHubEntry[]> {

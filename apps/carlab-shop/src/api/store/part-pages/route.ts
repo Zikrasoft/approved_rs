@@ -6,6 +6,7 @@ import {
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { partImagesSchema } from '../../../lib/images';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
@@ -132,6 +133,7 @@ export async function GET(
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,
+      images: partImagesSchema.parse(identifier.part.images).items,
     },
     equivalents: siblings
       .filter(

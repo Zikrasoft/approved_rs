@@ -32,6 +32,8 @@ expect 'typesense keeps its index on a volume' \
   '[.services.typesense.volumes[] | .target] == ["/data"]'
 expect 'the edge network carries IPv6 so clients reach caddy without the userland proxy' \
   '.networks.edge.enable_ipv6 == true and ([.networks.edge.ipam.config[].subnet] | any(test(":")))'
+expect 'medusa writes uploads to the static volume caddy serves read-only, at the public file URL' \
+  '([.services.medusa.volumes[] | select(.target == "/server/static") | .source] == ["static"]) and ([.services.caddy.volumes[] | select(.target == "/srv/static") | [.source, .read_only]] == [["static", true]]) and .services.medusa.environment.FILE_URL == "https://api.carlab.rs/static"'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
 expect 'every service has a memory limit, together under 3.2 GB' \
   '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3200 * 1024 * 1024)'

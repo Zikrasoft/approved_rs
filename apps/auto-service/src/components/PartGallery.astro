@@ -1,0 +1,71 @@
+---
+import type { GalleryImage } from '@/utils/partImages';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  images: GalleryImage[];
+  alt: string;
+  note?: string;
+}
+
+const MAIN_SIZES = '(min-width: 64rem) 34rem, calc(100vw - 2rem)';
+
+const { images, alt, note } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).shopPart;
+const [main] = images;
+const label = (index: number) =>
+  copy.photoLabel
+    .replace('{n}', String(index + 1))
+    .replace('{total}', String(images.length));
+---
+
+{
+  main && (
+    <part-gallery class="flex w-full max-w-136 flex-col gap-3">
+      <figure class="flex flex-col gap-2">
+        <div class="aspect-square overflow-hidden rounded-block bg-shade">
+          <img
+            data-main
+            src={main.src}
+            srcset={main.srcset}
+            sizes={MAIN_SIZES}
+            alt={alt}
+            width={main.width}
+            height={main.height}
+            fetchpriority="high"
+            decoding="async"
+            class="size-full object-contain mix-blend-multiply"
+          />
+        </div>
+        {note && <figcaption class="text-xs text-muted">{note}</figcaption>}
+      </figure>
+      {images.length > 1 && (
+        <ul class="flex gap-2 overflow-x-auto pb-1">
+          {images.map((image, index) => (
+            <li class="shrink-0">
+              <a
+                href={image.src}
+                data-thumb
+                data-srcset={image.srcset}
+                aria-label={label(index)}
+                aria-current={index === 0 ? 'true' : undefined}
+                class="block size-16 overflow-hidden rounded-field border-2 border-transparent bg-shade transition-colors duration-150 hover:border-line-strong focus-visible:border-ink aria-[current]:border-signal sm:size-20"
+              >
+                <img
+                  src={image.thumb}
+                  alt=""
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-contain mix-blend-multiply"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </part-gallery>
+  )
+}

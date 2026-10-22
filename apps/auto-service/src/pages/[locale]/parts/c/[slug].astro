@@ -15,6 +15,7 @@ import {
 } from '@/utils/catalogue';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
 import { rangeText, withFacetCopy } from '@/utils/partsSearch';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -134,6 +135,7 @@ const fields = category.fields
             <ul class="card divide-y divide-line">
               {category.pages.map((page) => (
                 <PartRow
+                  thumb={partThumbnail(page, category)}
                   slug={page.slug}
                   brand={page.brand.name}
                   value={page.value}

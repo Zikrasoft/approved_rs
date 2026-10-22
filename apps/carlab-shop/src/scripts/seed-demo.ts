@@ -27,6 +27,7 @@ import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORIES } from './seed';
+import { seedDemoImages } from './seed-demo-images';
 
 const DEMO_ADMIN = { email: 'admin@carlab.local', password: 'carlab-demo' };
 const DEMO_KEY_TITLE = 'CarLab local demo storefront';
@@ -1080,4 +1081,6 @@ export default async function seedDemo({ container }: ExecArgs) {
     await seedFilterVariety(catalog, logger);
   }
   await syncDemoSuppliers(catalog, suppliers);
+  await seedDemoImages(container, catalog);
+  logger.info('Seeded the demo images.');
 }

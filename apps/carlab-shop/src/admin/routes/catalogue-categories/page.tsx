@@ -20,6 +20,11 @@ import { getI18n, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import {
+  adminImageSchema,
+  ImageUploads,
+  uploadImage,
+} from '../../components/image-uploads';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -69,12 +74,14 @@ const categorySchema = editedBySchema.extend({
   service_label: z.string().nullable(),
   service_price: z.number().nullable(),
   service_note: z.string().nullable(),
+  image: adminImageSchema.nullable(),
   fields: z.array(categoryFieldSchema),
 });
 
 type Category = z.infer<typeof categorySchema>;
 
 const categoriesSchema = z.object({ categories: z.array(categorySchema) });
+const categoryImageSchema = z.object({ image: adminImageSchema.nullable() });
 const createdCategorySchema = z.object({
   category: z.object({ id: z.string() }),
 });
@@ -416,6 +423,37 @@ const CategoryEditor = ({
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.textHint')}
         </Text>
+        <Heading level="h3" className="mt-2">
+          {t('images.categoryHeading')}
+        </Heading>
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('images.categoryHint')}
+        </Text>
+        <ImageUploads
+          images={category.image ? [category.image] : []}
+          alt={category.name}
+          multiple={false}
+          onUpload={async (file) => {
+            const saved = await uploadImage(
+              `${path}/image`,
+              file,
+              categoryImageSchema,
+            );
+            if (saved) await onChange();
+            return saved;
+          }}
+          onDelete={async () => {
+            const saved = await adminFetch(
+              `${path}/image`,
+              categoryImageSchema,
+              {
+                method: 'DELETE',
+              },
+            );
+            if (saved) await onChange();
+            return saved;
+          }}
+        />
         <div className="flex flex-wrap items-center gap-2">
           <Label className="flex items-center gap-x-2">
             <Checkbox

@@ -91,6 +91,7 @@ describe('generateLlmsTxt', () => {
             service_label: 'Замена масла',
             service_price: 2500,
             service_note: null,
+            image: null,
             fields: [],
           },
         ],

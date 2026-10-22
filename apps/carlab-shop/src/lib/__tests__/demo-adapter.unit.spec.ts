@@ -6,10 +6,13 @@ import { createMedusaContainer } from '@medusajs/framework/utils';
 
 import { supplierAdapters } from '../suppliers/adapter';
 import {
+  DEMO_SUPPLIER_IMAGES,
   DEMO_SUPPLIERS,
   demoAdapters,
   readDemoOverrides,
 } from '../suppliers/demo-adapter';
+
+const FILE_URL = 'http://localhost:9009/static';
 
 const overridesFile = (content: unknown): string => {
   const path = join(mkdtempSync(join(tmpdir(), 'demo-supplier-')), 'o.json');
@@ -31,7 +34,7 @@ const allArticles = async (
 
 describe('demo supplier adapter', () => {
   it('pages through the whole catalogue without leaking offer data', async () => {
-    const [intercars] = demoAdapters(undefined);
+    const [intercars] = demoAdapters(undefined, FILE_URL);
 
     const first = await intercars.listCatalogue(null);
 
@@ -42,8 +45,20 @@ describe('demo supplier adapter', () => {
     );
   });
 
+  it('points supplier photos at the demo files under the public file URL', async () => {
+    const [intercars] = demoAdapters(undefined, FILE_URL);
+
+    const [mann] = (await intercars.listCatalogue(null)).articles;
+
+    expect(mann.images).toEqual([`${FILE_URL}/demo-supplier/ic-1001.webp`]);
+    expect(DEMO_SUPPLIER_IMAGES['IC-1001']).toBe('oil-filter');
+  });
+
   it('quotes only the asked articles, with the built-in prices by default', async () => {
-    const [intercars] = demoAdapters(join(tmpdir(), 'no-such-demo-file.json'));
+    const [intercars] = demoAdapters(
+      join(tmpdir(), 'no-such-demo-file.json'),
+      FILE_URL,
+    );
 
     expect(await intercars.quote(['IC-1001', 'AD-2001'])).toEqual([
       {
@@ -58,7 +73,7 @@ describe('demo supplier adapter', () => {
 
   it('reads price and stock overrides on every quote', async () => {
     const path = overridesFile({ 'IC-1001': { cost_price: 1300 } });
-    const [intercars] = demoAdapters(path);
+    const [intercars] = demoAdapters(path, FILE_URL);
 
     expect((await intercars.quote(['IC-1001']))[0].cost_price).toBe(1300);
 

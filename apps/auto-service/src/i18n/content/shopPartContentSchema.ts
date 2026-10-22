@@ -55,6 +55,13 @@ export const shopPartContentSchema = z
     addedCta: z.string(),
     inquiryNotice: z.string(),
     inquiryCta: z.string(),
+    photoLabel: z.string(),
+    categoryIllustration: z.string(),
+    crossReferencesHeading: z.string(),
+    applicabilityHeading: z.string(),
+    supplierDataNote: z.string(),
+    requirementCarsLabel: z.string(),
+    kitCarsLabel: z.string(),
   })
   .strict();
 

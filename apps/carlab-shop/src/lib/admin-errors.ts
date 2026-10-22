@@ -24,6 +24,8 @@ export const ADMIN_ERROR_CODES = [
   'INVALID_FIELD',
   'LAST_IDENTIFIER',
   'MANUAL_SOURCE',
+  'INVALID_IMAGE',
+  'IMAGE_TOO_LARGE',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];

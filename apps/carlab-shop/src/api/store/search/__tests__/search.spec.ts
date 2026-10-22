@@ -8,6 +8,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 type Result = {
   value: string;
   superseded: boolean;
+  thumbnail: string | null;
   brand: { slug: string };
   part: { id: string; name: string; category: { name: string } | null };
 };
@@ -203,6 +204,48 @@ medusaIntegrationTestRunner({
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
+      });
+
+      it('gives each result a thumbnail: its Part photo, else its Category photo', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const image = (name: string) => ({
+          id: name,
+          src: `http://localhost/static/${name}-480.webp`,
+          width: 480,
+          height: 480,
+          srcset: [
+            { url: `http://localhost/static/${name}-160.webp`, width: 160 },
+            { url: `http://localhost/static/${name}-480.webp`, width: 480 },
+          ],
+          file_ids: [`${name}-160.webp`, `${name}-480.webp`],
+          source: 'manual',
+          created_by: null,
+        });
+        await catalog.updateParts({
+          id: thinOilId,
+          images: { items: [image('edge')] },
+        });
+        const [engineOil] = await catalog.listCategories({
+          slug: 'engine-oil',
+        });
+        await catalog.updateCategories({
+          id: engineOil.id,
+          image: image('oil'),
+        });
+
+        const thumbnails = Object.fromEntries(
+          [
+            ...(await results({ category: 'engine-oil', locale: 'ru' })),
+            ...(await results({ q: '13718511877', locale: 'ru' })),
+          ].map(({ value, thumbnail }) => [value, thumbnail]),
+        );
+
+        expect(thumbnails).toEqual({
+          '15F6E3': 'http://localhost/static/edge-160.webp',
+          '15C94E': 'http://localhost/static/oil-160.webp',
+          '13 71 8511877': null,
+        });
       });
 
       it('ranks a match in the page locale first', async () => {

@@ -34,6 +34,13 @@ addedNotice: Добавили в корзину. Цену еще раз пров
 addedCta: Открыть корзину
 inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
 inquiryCta: Открыть заявку
+photoLabel: Фото {n} из {total}
+categoryIllustration: Иллюстрация категории, не фото этой запчасти
+crossReferencesHeading: Номера других производителей
+applicabilityHeading: Применимость по данным поставщика
+supplierDataNote: Данные поставщика. Перед заказом проверим совместимость по VIN.
+requirementCarsLabel: 'Подходит по допускам для:'
+kitCarsLabel: 'Входит в комплект ТО для:'
 leadTime:
   inStock: В наличии
   days:
