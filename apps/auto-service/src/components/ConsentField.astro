@@ -1,0 +1,56 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  uid: string;
+}
+
+const { uid } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
+---
+
+<div>
+  <label class="flex min-h-11 items-start gap-3 py-1.5">
+    <input
+      type="checkbox"
+      name="consent"
+      value="1"
+      required
+      aria-describedby={`consent-error-${uid}`}
+      class="peer sr-only"
+      data-consent
+      data-field="consent"
+    />
+    <span
+      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal-ink peer-checked:bg-signal-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+    >
+      <Icon name="check" size={10} />
+    </span>
+    <span class="text-xs leading-relaxed text-muted">
+      {site.form.privacyNote}{' '}
+      <a
+        href={PathBuilder.privacy(locale)}
+        target="_blank"
+        class="underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
+        >{site.form.privacyLinkText}</a
+      >.
+    </span>
+  </label>
+  <p
+    id={`consent-error-${uid}`}
+    class={errorText}
+    aria-live="polite"
+    data-error-consent
+    hidden
+  >
+    {site.form.errorConsent}
+  </p>
+  <p class={errorText} role="alert" data-error-submit hidden>
+    {site.form.errorSubmit}
+  </p>
+</div>
