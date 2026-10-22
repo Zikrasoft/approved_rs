@@ -33,6 +33,7 @@ export const shopCartContentSchema = z
         invalid: z.string(),
         cartChanged: z.string(),
         repriced: z.string(),
+        offline: z.string(),
         stockLimit: z.string(),
         moved: z.string(),
         movedCta: z.string(),
@@ -44,6 +45,7 @@ export const shopCartContentSchema = z
     orderedCta: z.string(),
     fallbackHeading: z.string(),
     fallbackBody: z.string(),
+    fallbackRetry: z.string(),
     fallbackCta: z.string(),
   })
   .strict();

@@ -9,6 +9,7 @@ import {
   CATALOG_LOCALES,
   type CatalogLocale,
   categoryFieldSchema,
+  searchableQuery,
   searchResponseSchema,
   translated,
   translationsSchema,
@@ -138,19 +139,25 @@ export async function GET(
 
   const filters: SearchFilters = { q: q.toLowerCase() };
   const and = facetFilters(facets);
+  const nothing = () =>
+    res.json(
+      searchResponseSchema.parse({
+        results: [],
+        facets: [],
+        count: 0,
+        offset,
+        limit,
+      }),
+    );
 
+  if (!searchableQuery(q)) {
+    nothing();
+    return;
+  }
   if (vehicle_id) {
     const partIds = await partIdsForVehicle(catalog, vehicle_id);
     if (!partIds.length) {
-      res.json(
-        searchResponseSchema.parse({
-          results: [],
-          facets: [],
-          count: 0,
-          offset,
-          limit,
-        }),
-      );
+      nothing();
       return;
     }
     and.push({ part_id: { $in: partIds } });

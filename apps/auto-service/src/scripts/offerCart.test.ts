@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  settleCart,
   forgetCart,
   forgetOrderedCart,
   unavailableNames,
@@ -106,7 +107,43 @@ describe('the remembered cart', () => {
 
     moveCartToInquiry(storage);
 
-    expect(readPartsList(storage)).toEqual([bmwOil]);
+    expect(readPartsList(storage)).toEqual([{ ...bmwOil, quantity: 1 }]);
+    expect(readCart(storage)).toBeNull();
+  });
+
+  it('carries each line quantity into the inquiry', () => {
+    const storage = memoryStorage();
+    rememberCart(
+      { ...cart, items: [{ ...cart.items[0], quantity: 3 }] },
+      storage,
+    );
+
+    moveCartToInquiry(storage);
+
+    expect(readPartsList(storage)).toEqual([{ ...bmwOil, quantity: 3 }]);
+  });
+
+  it.each([
+    [{ kind: 'cart', cart } as const, 'cart'],
+    [{ kind: 'empty' } as const, 'gone'],
+    [
+      { kind: 'refused', code: 'OFFER_OUT_OF_STOCK', cartId: null } as const,
+      'refused',
+    ],
+    [{ kind: 'inquiry' } as const, 'unreachable'],
+    [null, 'unreachable'],
+  ])('reads %j as %s', (outcome, state) => {
+    expect(settleCart(outcome, memoryStorage())).toBe(state);
+  });
+
+  it('keeps the cart while the shop cannot be reached', () => {
+    const storage = memoryStorage();
+    rememberCart(cart, storage);
+
+    settleCart(null, storage);
+    expect(readCart(storage)).toMatchObject({ id: 'cart_1' });
+
+    settleCart({ kind: 'empty' }, storage);
     expect(readCart(storage)).toBeNull();
   });
 

@@ -35,6 +35,8 @@ export const searchResponseSchema = z.object({
 export const facetFilter = (key: string, value: string): string =>
   `${key}:${value}`;
 
+export const searchableQuery = (q: string): boolean => /[\p{L}\p{N}]/u.test(q);
+
 export type SearchResult = z.infer<typeof searchResultSchema>;
 export type SearchFacet = z.infer<typeof searchFacetSchema>;
 export type SearchResponse = z.infer<typeof searchResponseSchema>;

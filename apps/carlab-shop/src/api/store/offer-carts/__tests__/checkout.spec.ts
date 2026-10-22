@@ -584,6 +584,7 @@ medusaIntegrationTestRunner({
         expect(leads[0].comment).toBe(
           [
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
+            'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
             'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD',
             'Итого: 3\u00a0700 RSD',

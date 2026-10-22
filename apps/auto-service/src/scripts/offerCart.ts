@@ -108,7 +108,7 @@ export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
   writeCart(
     {
       id: cart.id,
-      parts: cart.items.map(({ part }) => part),
+      parts: cart.items.map(({ part, quantity }) => ({ ...part, quantity })),
       count: cart.items.reduce((sum, { quantity }) => sum + quantity, 0),
       prices: Object.fromEntries(
         cart.items.map(({ id, unit_price }) => [id, unit_price]),
@@ -149,6 +149,25 @@ export function moveCartToInquiry(storage?: CartStorage): void {
     addToPartsList(part, storage);
   }
   forgetCart(storage);
+}
+
+export type CartState = 'cart' | 'gone' | 'refused' | 'unreachable';
+
+export function settleCart(
+  outcome: CartOutcome | null,
+  storage?: CartStorage,
+): CartState {
+  switch (outcome?.kind) {
+    case 'cart':
+      return 'cart';
+    case 'refused':
+      return 'refused';
+    case 'empty':
+      forgetCart(storage);
+      return 'gone';
+    default:
+      return 'unreachable';
+  }
 }
 
 export const repricedSince = (seen: StoredCart, cart: OfferCart): boolean =>
@@ -399,12 +418,17 @@ export function definePartOffers(tagName = 'part-offers'): void {
   );
 }
 
+const STEP_SETTLE_MS = 400;
+
 export function defineOfferCart(tagName = 'offer-cart'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
     tagName,
     class extends HTMLElement {
       cart: OfferCart | null = null;
+      targets = new Map<string, number>();
+      settle: ReturnType<typeof setTimeout> | undefined;
+      queue: Promise<void> = Promise.resolve();
 
       connectedCallback(): void {
         const params = new URLSearchParams(location.search);
@@ -412,11 +436,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (notice === 'ordered') {
           forgetOrderedCart(params.get(ORDERED_CART_PARAM));
           this.showOrdered(params.get(ORDER_NUMBER_PARAM));
-          return;
-        }
-        const stored = readCart();
-        if (!stored) {
-          this.show('empty');
           return;
         }
         const form = this.querySelector('form');
@@ -432,10 +451,37 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             );
           });
         }
+        this.querySelector('[data-retry]')?.addEventListener('click', () =>
+          this.load(notice),
+        );
+        this.querySelector('[data-send-inquiry]')?.addEventListener(
+          'click',
+          () => {
+            moveCartToInquiry();
+            location.assign(this.dataset.inquiryHref ?? '');
+          },
+        );
+        this.load(notice);
+      }
+
+      load(notice: string): void {
+        const stored = readCart();
+        if (!stored) {
+          showOnly(this, 'data-empty-notice', notice);
+          this.show('empty');
+          return;
+        }
+        this.show('loading');
         void getJson(
           cartOutcomeSchema,
           `/api/cart?id=${encodeURIComponent(stored.id)}`,
-        ).then((outcome) => this.render(outcome, notice));
+        ).then((outcome) =>
+          this.render(
+            outcome,
+            notice,
+            notice || (stored.parts.length > 0 ? 'expired' : ''),
+          ),
+        );
       }
 
       show(state: string): void {
@@ -456,27 +502,35 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         this.show('ordered');
       }
 
-      render(outcome: CartOutcome | null, notice = ''): void {
-        if (outcome?.kind === 'refused' && this.cart) {
-          this.render({ kind: 'cart', cart: this.cart }, 'stock-limit');
+      render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {
+        const state = settleCart(outcome);
+        if (state === 'gone') {
+          this.cart = null;
+          this.targets.clear();
+          showOnly(this, 'data-empty-notice', goneNotice);
+          this.show('empty');
           return;
         }
-        if (!outcome || outcome.kind !== 'cart') {
-          if (outcome?.kind === 'empty') {
-            forgetCart();
-            showOnly(this, 'data-empty-notice', notice);
-            this.show('empty');
-          } else {
-            moveCartToInquiry();
-            this.show('fallback');
-          }
+        if (outcome?.kind === 'cart') {
+          this.draw(outcome.cart, notice);
           return;
         }
-        const { cart } = outcome;
+        this.targets.clear();
+        if (this.cart) {
+          this.draw(this.cart, state === 'refused' ? 'stock-limit' : 'offline');
+          return;
+        }
+        this.show('fallback');
+      }
+
+      draw(cart: OfferCart, notice: string): void {
         const seen = readCart();
         const repriced = seen !== null && repricedSince(seen, cart);
         this.cart = cart;
         rememberCart(cart);
+        for (const { id, quantity } of cart.items) {
+          if (this.targets.get(id) === quantity) this.targets.delete(id);
+        }
         const { localeTag = 'sr' } = this.dataset;
         this.querySelector('[data-lines]')?.replaceChildren(
           ...cart.items.map((line) => this.line(line, cart, localeTag)),
@@ -506,8 +560,31 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
       }
 
-      async change(method: string, body: Record<string, unknown>) {
-        this.render(await sendJson(method, body));
+      change(method: string, body: Record<string, unknown>): Promise<void> {
+        this.queue = this.queue.then(async () =>
+          this.render(await sendJson(method, body)),
+        );
+        return this.queue;
+      }
+
+      step(line: CartLine, delta: number, row: HTMLElement): void {
+        const target = Math.max(
+          1,
+          (this.targets.get(line.id) ?? line.quantity) + delta,
+        );
+        this.targets.set(line.id, target);
+        fill(row, '[data-quantity]', String(target));
+        row.setAttribute('aria-busy', 'true');
+        clearTimeout(this.settle);
+        this.settle = setTimeout(() => {
+          for (const [itemId, quantity] of this.targets) {
+            void this.change('PATCH', {
+              cart_id: this.cart?.id,
+              item_id: itemId,
+              quantity,
+            });
+          }
+        }, STEP_SETTLE_MS);
       }
 
       line(line: CartLine, cart: OfferCart, localeTag: string): Node {
@@ -515,7 +592,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const template = this.querySelector<HTMLTemplateElement>(
           'template[data-line]',
         )!;
-        const row = template.content.cloneNode(true) as DocumentFragment;
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const row = fragment.firstElementChild as HTMLElement;
         const money = (amount: number) =>
           formatMoney(amount, cart.currency, localeTag);
         const link = row.querySelector<HTMLAnchorElement>('[data-part-link]');
@@ -524,7 +602,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           link.href = partHref.replace('{slug}', line.part.slug);
         }
         fill(row, '[data-number]', `${line.part.brand} ${line.part.number}`);
-        fill(row, '[data-quantity]', String(line.quantity));
+        const shown = this.targets.get(line.id) ?? line.quantity;
+        fill(row, '[data-quantity]', String(shown));
+        if (shown !== line.quantity) row.setAttribute('aria-busy', 'true');
         fill(
           row,
           '[data-unit]',
@@ -536,32 +616,42 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           .classList.toggle('line-through', !line.available);
         row.querySelector<HTMLElement>('[data-unavailable]')!.hidden =
           line.available;
-        const name = (button: HTMLElement | null) =>
-          button?.setAttribute(
+        const button = (selector: string) => {
+          const found = row.querySelector<HTMLButtonElement>(selector);
+          found?.setAttribute(
             'aria-label',
-            `${button.getAttribute('aria-label') ?? ''}: ${line.part.name}`,
+            `${found.getAttribute('aria-label') ?? ''}: ${line.part.name}`,
           );
+          return found;
+        };
         const lineBody = { cart_id: cart.id, item_id: line.id };
         const act = (selector: string, action: () => Promise<void> | void) => {
-          const button = row.querySelector<HTMLButtonElement>(selector);
-          name(button);
-          button?.addEventListener('click', () => {
-            if (button.disabled || isBusy(button)) return;
-            busy(button, true);
+          const found = button(selector);
+          found?.addEventListener('click', () => {
+            if (found.disabled || isBusy(found)) return;
+            busy(found, true);
             void action();
           });
-          return button;
+          return found;
         };
         act('[data-remove]', () => this.change('DELETE', lineBody));
-        act('[data-increase]', () =>
-          this.change('PATCH', { ...lineBody, quantity: line.quantity + 1 }),
-        );
-        const decrease = act('[data-decrease]', () =>
-          this.change('PATCH', { ...lineBody, quantity: line.quantity - 1 }),
-        );
-        if (decrease) decrease.disabled = line.quantity <= 1;
+        const increase = button('[data-increase]');
+        const decrease = button('[data-decrease]');
+        const stepBy = (delta: number) => {
+          this.step(line, delta, row);
+          const target = this.targets.get(line.id) ?? line.quantity;
+          if (decrease) decrease.disabled = target <= 1;
+        };
+        increase?.addEventListener('click', () => {
+          if (!increase.disabled) stepBy(1);
+        });
+        decrease?.addEventListener('click', () => {
+          if (!decrease.disabled) stepBy(-1);
+        });
+        if (increase) increase.disabled = !line.available;
+        if (decrease) decrease.disabled = shown <= 1;
         const toInquiry = act('[data-to-inquiry]', () => {
-          addToPartsList(line.part);
+          addToPartsList({ ...line.part, quantity: line.quantity });
           return this.change('DELETE', lineBody).then(() =>
             showOnly(this, 'data-notice', 'moved'),
           );

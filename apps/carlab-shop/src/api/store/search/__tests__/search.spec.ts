@@ -245,6 +245,13 @@ medusaIntegrationTestRunner({
         expect(response.data.results).toEqual([]);
       });
 
+      it('finds nothing for a query of symbols only', async () => {
+        const response = await search({ q: '%', locale: 'ru' });
+
+        expect(response.status).toBe(200);
+        expect(response.data).toMatchObject({ results: [], count: 0 });
+      });
+
       it('refuses a request without a query or with an unknown locale', async () => {
         const withoutQuery = await search({ locale: 'ru' });
         const unknownLocale = await search({ q: 'filter', locale: 'de' });
