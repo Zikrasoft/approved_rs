@@ -34,22 +34,22 @@ const stepper =
     actions={false}
     eyebrow={site.nav.parts}
     heading={copy.heading}
-    lead={copy.lead}
+    compact
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsCart(locale), label: copy.heading },
     ]}
   />
 
-  <section class="wrap py-band md:py-band-lg">
+  <section class="wrap py-6 md:py-band-lg">
     <offer-cart
       class="block"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
       data-unit-template={copy.unitTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
-      data-ordered-lead={copy.orderedLead}
       data-order-template={copy.orderNumberTemplate}
+      data-blocked-template={copy.checkoutBlocked}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
         {copy.loading}
@@ -57,6 +57,13 @@ const stepper =
 
       <div data-state="empty" hidden class={panel}>
         <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
+        <p
+          data-empty-notice="expired"
+          hidden
+          class="text-sm leading-relaxed text-signal-dark"
+        >
+          {copy.notices.expired}
+        </p>
         <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
         <a
           href={PathBuilder.parts(locale)}
@@ -216,6 +223,12 @@ const stepper =
               {copy.checkoutLead}
             </p>
           </div>
+          <p
+            class="border-l-4 border-l-signal pl-3 text-sm leading-relaxed text-signal-dark"
+            data-blocked
+            hidden
+          >
+          </p>
           <LeadForm
             action="/api/order"
             vin={{

@@ -1,19 +1,21 @@
 import * as z from 'zod/mini';
 import { fitComment } from '@podbor/catalog-contract/comment';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
+import { vinFrom } from '@/utils/carFacts';
 import {
   LEAD_FORM_RESULT_EVENT,
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
 
 export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
-export const PARTS_CAR_STORAGE_KEY = 'carlab_parts_car';
 
 export const listedPartSchema = z.object({
   slug: z.string(),
   brand: z.string(),
   number: z.string(),
   name: z.string(),
+  car: z.optional(z.string()),
+  vin: z.optional(z.string()),
 });
 
 export type ListedPart = z.infer<typeof listedPartSchema>;
@@ -46,8 +48,11 @@ function writePartsList(parts: ListedPart[], storage?: ListStorage): void {
 
 export function addToPartsList(part: ListedPart, storage?: ListStorage): void {
   const parts = readPartsList(storage);
-  if (parts.some(({ slug }) => slug === part.slug)) return;
-  writePartsList([...parts, part], storage);
+  const listed = parts.findIndex(({ slug }) => slug === part.slug);
+  writePartsList(
+    listed === -1 ? [...parts, part] : parts.with(listed, part),
+    storage,
+  );
 }
 
 export function removeFromPartsList(slug: string, storage?: ListStorage): void {
@@ -60,47 +65,55 @@ export function removeFromPartsList(slug: string, storage?: ListStorage): void {
 export function clearPartsList(storage?: ListStorage): void {
   try {
     orBrowser(storage).removeItem(PARTS_LIST_STORAGE_KEY);
-    orBrowser(storage).removeItem(PARTS_CAR_STORAGE_KEY);
   } catch {
     return;
   }
 }
 
-export function rememberPartsCar(car: string, storage?: ListStorage): void {
-  try {
-    orBrowser(storage).setItem(PARTS_CAR_STORAGE_KEY, car);
-  } catch {
-    return;
-  }
+export type ListCar = { car: string; vin?: string };
+
+export function listCar(parts: ListedPart[]): ListCar | null {
+  const [first] = parts;
+  if (!first?.car) return null;
+  const shared = parts.every(
+    ({ car, vin }) => car === first.car && vin === first.vin,
+  );
+  if (!shared) return null;
+  return first.vin ? { car: first.car, vin: first.vin } : { car: first.car };
 }
 
-export function readPartsCar(storage?: ListStorage): string {
-  try {
-    return orBrowser(storage).getItem(PARTS_CAR_STORAGE_KEY) ?? '';
-  } catch {
-    return '';
-  }
+export function forgetListCar(storage?: ListStorage): void {
+  writePartsList(
+    readPartsList(storage).map(({ slug, brand, number, name }) => ({
+      slug,
+      brand,
+      number,
+      name,
+    })),
+    storage,
+  );
 }
 
 export const partLine = ({ brand, number, name }: ListedPart): string =>
   `${brand} ${number}, ${name}`;
 
 export function inquiryComment({
-  car,
   parts,
   note,
   limit,
   more,
 }: {
-  car: string;
   parts: ListedPart[];
   note: string;
   limit: number;
   more: (count: number) => string;
 }): string {
+  const shared = listCar(parts);
   return fitComment({
-    head: [car],
-    lines: parts.map(partLine),
+    head: [shared?.car ?? ''],
+    lines: parts.map((part) =>
+      !shared && part.car ? `${partLine(part)} (${part.car})` : partLine(part),
+    ),
     tail: [note],
     limit,
     more,
@@ -129,11 +142,15 @@ export function definePartsListAddAll(tagName = 'parts-list-add-all'): void {
     class extends HTMLElement {
       connectedCallback(): void {
         this.querySelector('[data-add-all]')?.addEventListener('click', () => {
-          if (this.dataset.car) rememberPartsCar(this.dataset.car);
+          const vin = vinFrom(location.search);
           for (const item of this.querySelectorAll<HTMLElement>(
             '[data-slug]:not([hidden])',
           )) {
-            const parsed = listedPartSchema.safeParse({ ...item.dataset });
+            const parsed = listedPartSchema.safeParse({
+              ...item.dataset,
+              car: this.dataset.car,
+              ...(vin && { vin }),
+            });
             if (parsed.success) addToPartsList(parsed.data);
           }
         });
@@ -181,19 +198,30 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           return item;
         };
 
-        const car = () => this.dataset.car || readPartsCar();
         const carLine = this.querySelector<HTMLElement>('[data-parts-car]');
+        const carName = carLine?.querySelector('[data-parts-car-name]');
+        const vinInput = form.querySelector<HTMLInputElement>('[name="vin"]');
 
         const render = (): void => {
           const parts = readPartsList();
+          const shared = listCar(parts);
           block.hidden = parts.length === 0;
-          if (carLine) {
-            carLine.textContent = car();
-            carLine.hidden = !car();
+          if (carLine && carName) {
+            carName.textContent = shared?.car ?? '';
+            carLine.hidden = !shared;
           }
           list.replaceChildren(...parts.map((part) => itemFor(part, render)));
         };
         render();
+        const listVin = listCar(readPartsList())?.vin;
+        if (vinInput && listVin) vinInput.value = listVin;
+
+        carLine
+          ?.querySelector('[data-parts-car-remove]')
+          ?.addEventListener('click', () => {
+            forgetListCar();
+            render();
+          });
 
         form.addEventListener('formdata', (event) => {
           const parts = readPartsList();
@@ -201,7 +229,6 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           event.formData.set(
             'comment',
             inquiryComment({
-              car: car(),
               parts,
               note: String(event.formData.get('comment') ?? ''),
               limit: MAX_COMMENT_LENGTH,

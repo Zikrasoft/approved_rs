@@ -305,6 +305,18 @@ describe('leadSubmissionSchema', () => {
     if (parsed.success) expect(parsed.data.name).toBe('');
   });
 
+  it('keeps every line of the comment on a plain line break', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WBA35BG070N074158',
+      comment: 'BMW 320d\r\nMann HU 816 x\rNote',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158\nBMW 320d\nMann HU 816 x\nNote',
+    );
+  });
+
   it('rejects a missing contact', () => {
     expect(submit({ name: 'Иван' }).success).toBe(false);
   });

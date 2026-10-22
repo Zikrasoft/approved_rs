@@ -58,6 +58,28 @@ describe('createBrandStore', () => {
     ]);
   });
 
+  it('keeps a standalone service the app names in a Lead of its own', async () => {
+    const { leadStore } = createBrandStore({
+      brand: 'CarLab',
+      storageFor,
+      getNotifier: vi.fn(),
+      standaloneServices: ['parts-order'],
+    });
+    const lead = {
+      ...submission,
+      brand: 'CarLab',
+      contact: '+381601111111',
+      visitorId: 'visitor-1',
+    };
+    await leadStore.insertOrMergeLead(lead);
+    const { merged } = await leadStore.insertOrMergeLead({
+      ...lead,
+      service: 'parts-order',
+    });
+
+    expect(merged).toBe(false);
+  });
+
   it('reaches the notifier only once a record is quarantined', async () => {
     const send = vi.fn().mockResolvedValue(undefined);
     const getNotifier = vi

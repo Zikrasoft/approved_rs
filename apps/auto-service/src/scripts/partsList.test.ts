@@ -4,9 +4,9 @@ import {
   clearPartsList,
   inquiryComment,
   PARTS_LIST_STORAGE_KEY,
-  readPartsCar,
+  forgetListCar,
+  listCar,
   readPartsList,
-  rememberPartsCar,
   removeFromPartsList,
 } from './partsList';
 
@@ -90,22 +90,45 @@ describe('parts list', () => {
     },
   );
 
-  it('keeps the car the parts were picked for until the list is cleared', () => {
+  it('names the car only while every listed part was picked for it', () => {
+    const storage = memoryStorage();
+    const forBmw = { car: 'BMW 320d F30', vin: 'WBA35BG070N074158' };
+
+    addToPartsList({ ...bmwOil, ...forBmw }, storage);
+    expect(listCar(readPartsList(storage))).toEqual(forBmw);
+
+    addToPartsList(mannOil, storage);
+    expect(listCar(readPartsList(storage))).toBeNull();
+  });
+
+  it('moves a part to the car it was added for last', () => {
     const storage = memoryStorage();
 
-    rememberPartsCar('BMW 3 серия F30 320d, B47', storage);
-    addToPartsList(bmwOil, storage);
-    expect(readPartsCar(storage)).toBe('BMW 3 серия F30 320d, B47');
+    addToPartsList({ ...bmwOil, car: 'BMW 320d F30' }, storage);
+    addToPartsList({ ...bmwOil, car: 'BMW 520d G30' }, storage);
 
-    clearPartsList(storage);
-    expect(readPartsCar(storage)).toBe('');
+    expect(readPartsList(storage)).toEqual([
+      { ...bmwOil, car: 'BMW 520d G30' },
+    ]);
+  });
+
+  it('forgets the car and keeps the parts', () => {
+    const storage = memoryStorage();
+    addToPartsList(
+      { ...bmwOil, car: 'BMW 320d F30', vin: 'WBA35BG070N074158' },
+      storage,
+    );
+
+    forgetListCar(storage);
+
+    expect(readPartsList(storage)).toEqual([bmwOil]);
+    expect(listCar(readPartsList(storage))).toBeNull();
   });
 
   it('works as an empty list when storage is blocked', () => {
-    expect(() => rememberPartsCar('BMW', blockedStorage)).not.toThrow();
-    expect(readPartsCar(blockedStorage)).toBe('');
     expect(() => addToPartsList(mannOil, blockedStorage)).not.toThrow();
     expect(() => clearPartsList(blockedStorage)).not.toThrow();
+    expect(() => forgetListCar(blockedStorage)).not.toThrow();
     expect(readPartsList(blockedStorage)).toEqual([]);
   });
 });
@@ -116,8 +139,10 @@ describe('inquiryComment', () => {
   it('carries the car and one line per part before the visitor note', () => {
     expect(
       inquiryComment({
-        car: 'BMW 320d F30',
-        parts: [mannOil, bmwOil],
+        parts: [mannOil, bmwOil].map((part) => ({
+          ...part,
+          car: 'BMW 320d F30',
+        })),
         note: 'Нужно к пятнице',
         limit: 2000,
         more,
@@ -132,10 +157,30 @@ describe('inquiryComment', () => {
     );
   });
 
+  it('names the car on each line when the parts were picked for different cars', () => {
+    expect(
+      inquiryComment({
+        parts: [
+          { ...bmwOil, car: 'BMW 320d F30' },
+          { ...mannOil, car: 'BMW 520d G30' },
+          { ...mannOil, slug: 'other' },
+        ],
+        note: '',
+        limit: 2000,
+        more,
+      }),
+    ).toBe(
+      [
+        'BMW 11 42 8575211, Масляный фильтр (BMW 320d F30)',
+        'Mann-Filter HU 816 x, Масляный фильтр (BMW 520d G30)',
+        'Mann-Filter HU 816 x, Масляный фильтр',
+      ].join('\n'),
+    );
+  });
+
   it('leaves out the car and the note when there are none', () => {
     expect(
       inquiryComment({
-        car: '',
         parts: [mannOil],
         note: '  ',
         limit: 2000,
@@ -150,10 +195,10 @@ describe('inquiryComment', () => {
       brand: 'BMW',
       number: `1000${index}`,
       name: 'Фильтр',
+      car: 'BMW X5',
     }));
 
     const comment = inquiryComment({
-      car: 'BMW X5',
       parts,
       note: '',
       limit: 60,
@@ -173,7 +218,6 @@ describe('inquiryComment', () => {
 
   it('never exceeds the limit even when the note alone is too long', () => {
     const comment = inquiryComment({
-      car: '',
       parts: [mannOil],
       note: 'x'.repeat(100),
       limit: 50,

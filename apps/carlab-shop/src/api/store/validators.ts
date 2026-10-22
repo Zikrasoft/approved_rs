@@ -24,6 +24,8 @@ export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
 
 export const StoreCreateOfferCart = z.object({
   email: z.email().optional(),
+  offer_id: z.string().min(1).optional(),
+  quantity: z.number().int().positive().default(1),
 });
 export type StoreCreateOfferCartType = z.infer<typeof StoreCreateOfferCart>;
 
@@ -48,8 +50,8 @@ export const StoreCompleteOfferCart = z
     }
     const fingerprint = z
       .string()
+      .min(1)
       .max(10_000)
-      .optional()
       .safeParse(body[CART_FINGERPRINT_FIELD]);
     if (!fingerprint.success) {
       context.addIssue({ code: 'custom', message: fingerprint.error.message });

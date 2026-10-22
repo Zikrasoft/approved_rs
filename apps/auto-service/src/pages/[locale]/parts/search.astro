@@ -78,15 +78,15 @@ if (found && offset > lastPage) {
     actions={false}
     eyebrow={copy.eyebrow}
     heading={copy.heading}
-    lead={copy.lead}
+    compact
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsSearch(locale), label: copy.heading },
     ]}
   />
 
-  <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
-    <PartsSearchForm query={q} />
+  <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
+    <PartsSearchForm query={q} titled={false} />
 
     {
       found && (
@@ -179,6 +179,7 @@ if (found && offset > lastPage) {
                     name={result.part.name}
                     detail={result.part.category?.name}
                     superseded={result.superseded}
+                    offers={result.offers}
                   />
                 ))}
               </ul>

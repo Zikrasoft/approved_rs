@@ -16,6 +16,9 @@ import {
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../../modules/catalog';
+import { SUPPLIER_MODULE } from '../../../modules/supplier';
+import { storeOffers } from '../../../modules/supplier/pricing';
+import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import {
   PART_IDENTIFIER_INDEX,
@@ -183,12 +186,21 @@ export async function GET(
   });
 
   const rank = new Map(search_result.hits.map(({ id }, index) => [id, index]));
-  const results = z
-    .array(hitSchema)
-    .parse(data)
+  const hits = z.array(hitSchema).parse(data);
+  const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
+  const offers = hits.length
+    ? await suppliers.listSupplierOffers(
+        { part_identifier_id: hits.map(({ id }) => id) },
+        { relations: ['supplier'], take: null },
+      )
+    : [];
+  const results = hits
     .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0))
     .map(({ part, ...brandNumber }) => ({
       ...brandNumber,
+      offers: storeOffers(
+        offers.filter((offer) => offer.part_identifier_id === brandNumber.id),
+      ),
       part: {
         id: part.id,
         name: translated(part, 'name', locale),

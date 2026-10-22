@@ -165,8 +165,14 @@ medusaIntegrationTestRunner({
         return added.data.cart;
       }
 
-      const complete = (cartId: string, body: unknown = CONTACT) =>
-        post(`/store/offer-carts/${cartId}/complete`, body);
+      const complete = (
+        cart: { id: string; items: Parameters<typeof cartFingerprint>[0] },
+        body: Record<string, unknown> = CONTACT,
+      ) =>
+        post(`/store/offer-carts/${cart.id}/complete`, {
+          cart_fingerprint: cartFingerprint(cart.items),
+          ...body,
+        });
 
       it.each([
         ['a zero quantity', { quantity: 0 }],
@@ -300,6 +306,34 @@ medusaIntegrationTestRunner({
         expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
       });
 
+      it('creates a cart holding the offer in one call', async () => {
+        const created = await post('/store/offer-carts', {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        expect(created.status).toBe(200);
+        expect(created.data.cart.items).toEqual([
+          expect.objectContaining({ offer_id: offerId, quantity: 1 }),
+        ]);
+      });
+
+      it('creates no cart for an offer the supplier cannot sell', async () => {
+        const carts = getContainer().resolve(Modules.CART);
+        const before = await carts.listCarts({}, { select: ['id'] });
+
+        const refused = await post('/store/offer-carts', {
+          offer_id: offerId,
+          quantity: 13,
+        });
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
+        expect(await carts.listCarts({}, { select: ['id'] })).toHaveLength(
+          before.length,
+        );
+      });
+
       it('removes a line', async () => {
         const cart = await cartWith(1);
 
@@ -325,7 +359,7 @@ medusaIntegrationTestRunner({
       it('places the order with cash at pickup', async () => {
         const cart = await cartWith(1);
 
-        const response = await complete(cart.id);
+        const response = await complete(cart);
 
         expect(response.status).toBe(200);
         const order = await getContainer()
@@ -343,6 +377,32 @@ medusaIntegrationTestRunner({
         ).toBe(true);
       });
 
+      it('refuses checkout without the fingerprint of the cart the visitor saw', async () => {
+        const cart = await cartWith(1);
+
+        const response = await post(
+          `/store/offer-carts/${cart.id}/complete`,
+          CONTACT,
+        );
+
+        expect(response.status).toBe(400);
+      });
+
+      it('names the car only from the VIN, never from what the visitor sent', async () => {
+        const cart = await cartWith(1);
+
+        const placed = await complete(cart, {
+          ...CONTACT,
+          vin: undefined,
+          car: 'Forged car',
+        });
+
+        const order = await getContainer()
+          .resolve(Modules.ORDER)
+          .retrieveOrder(placed.data.order.id);
+        expect(order.metadata?.car).toBeNull();
+      });
+
       it('refuses checkout of a cart that changed since the visitor saw it', async () => {
         const shown = await cartWith(1);
         const changed = await post(`/store/offer-carts/${shown.id}/items`, {
@@ -350,14 +410,14 @@ medusaIntegrationTestRunner({
           quantity: 1,
         });
 
-        const refused = await complete(shown.id, {
+        const refused = await complete(shown, {
           ...CONTACT,
           cart_fingerprint: cartFingerprint(shown.items),
         });
         expect(refused.status).toBe(400);
         expect(refused.data.code).toBe('CART_CHANGED');
 
-        const placed = await complete(shown.id, {
+        const placed = await complete(shown, {
           ...CONTACT,
           cart_fingerprint: cartFingerprint(changed.data.cart.items),
         });
@@ -367,7 +427,7 @@ medusaIntegrationTestRunner({
       it('refuses an order without a contact', async () => {
         const cart = await cartWith(1);
 
-        const response = await complete(cart.id, { name: 'Marko' });
+        const response = await complete(cart, { name: 'Marko' });
 
         expect(response.status).toBe(400);
       });
@@ -375,7 +435,7 @@ medusaIntegrationTestRunner({
       it('refuses a contact that is neither a phone number nor a Telegram handle', async () => {
         const cart = await cartWith(1);
 
-        const response = await complete(cart.id, {
+        const response = await complete(cart, {
           ...CONTACT,
           contact: 'call me',
         });
@@ -387,14 +447,14 @@ medusaIntegrationTestRunner({
         const cart = await cartWith(1);
         quote(1833, 12);
 
-        const refused = await complete(cart.id);
+        const refused = await complete(cart);
         expect(refused.status).toBe(400);
         expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
 
         const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
         expect(repriced.data.cart.items[0].unit_price).toBe(2200);
 
-        const placed = await complete(cart.id);
+        const placed = await complete(repriced.data.cart);
         expect(placed.status).toBe(200);
       });
 
@@ -402,7 +462,7 @@ medusaIntegrationTestRunner({
         const cart = await cartWith(2);
         quote(1542, 1);
 
-        const refused = await complete(cart.id);
+        const refused = await complete(cart);
 
         expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
         const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
@@ -413,7 +473,7 @@ medusaIntegrationTestRunner({
         const cart = await cartWith(1);
         intercars.quotes.clear();
 
-        const refused = await complete(cart.id);
+        const refused = await complete(cart);
 
         expect(refused.data.code).toBe('OFFER_MISSING');
       });
@@ -500,7 +560,7 @@ medusaIntegrationTestRunner({
       it('hands a placed order to the lead pipeline', async () => {
         const cart = await cartWith(2);
 
-        const placed = await complete(cart.id, {
+        const placed = await complete(cart, {
           ...CONTACT,
           source_url: 'https://carlab.rs/sr/parts/cart/',
           visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
@@ -536,7 +596,7 @@ medusaIntegrationTestRunner({
         leadRouteStatus = 500;
         const cart = await cartWith(1);
 
-        const placed = await complete(cart.id);
+        const placed = await complete(cart);
 
         const orders = getContainer().resolve(Modules.ORDER);
         const metadata = await waitFor(

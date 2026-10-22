@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { requirementSchema } from './attributes.ts';
-import { STEERING_SIDES } from './steering.ts';
+import { STEERING_SIDES, VIN_PATTERN } from './steering.ts';
 
-export { STEERING_SIDES, type SteeringSide } from './steering.ts';
+export { STEERING_SIDES, VIN_PATTERN, type SteeringSide } from './steering.ts';
 
 export const VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',
@@ -68,8 +68,6 @@ export type Vehicle = z.infer<typeof vehicleSchema>;
 export const vehiclesResponseSchema = z.object({
   vehicles: z.array(vehicleSchema),
 });
-
-export const VIN_PATTERN = /^[A-HJ-NPR-Z0-9]{17}$/;
 
 export const vinSchema = z
   .string()

@@ -19,6 +19,7 @@ type QuarantineNotifier = Awaited<
 export interface BrandStoreOptions {
   brand: string;
   storageFor: (path: string) => LeadStorage;
+  standaloneServices?: readonly string[];
   getNotifier: () => Promise<{
     notifier: QuarantineNotifier & {
       sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
@@ -30,6 +31,7 @@ export function createBrandStore({
   brand,
   storageFor,
   getNotifier,
+  standaloneServices,
 }: BrandStoreOptions) {
   const leadsStorage = storageFor(LEADS_PATH);
   const ledgerStore = createLedgerStore({
@@ -49,6 +51,7 @@ export function createBrandStore({
   const leadStore = createLeadStore({
     storage: leadsStorage,
     schema: storedLeadSchema,
+    standaloneServices,
     quarantine: createQuarantine({
       storage: storageFor(QUARANTINE_PATH),
       brand,

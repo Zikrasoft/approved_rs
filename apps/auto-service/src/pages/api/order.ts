@@ -16,6 +16,7 @@ import {
 import {
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,
+  ORDERED_CART_PARAM,
   refusalNotice,
   type CartNotice,
 } from '@/utils/cartNotice';
@@ -24,7 +25,7 @@ import { PathBuilder } from '@/utils/paths';
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,
   consent: z.string().min(1),
-  [CART_FINGERPRINT_FIELD]: z.string().max(10_000).optional(),
+  [CART_FINGERPRINT_FIELD]: z.string().min(1).max(10_000),
 });
 
 const localeSchema = z.enum(SUPPORTED_LOCALES).catch(PRIMARY_LOCALE);
@@ -57,9 +58,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     case 'order':
       return toCart('ordered', {
         [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
+        [ORDERED_CART_PARAM]: order.data.cart_id,
       });
     case 'refused':
       return toCart(refusalNotice(outcome.code));
+    case 'empty':
+      return toCart('expired');
     default:
       return toCart('unreachable');
   }
