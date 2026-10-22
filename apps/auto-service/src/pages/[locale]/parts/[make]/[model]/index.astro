@@ -3,6 +3,7 @@ import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -30,6 +31,7 @@ const inquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.hubs.model;
 const { make, model } = hub;
 const name = carName(model, locale);
+const empty = hub.categories.length === 0;
 ---
 
 <Shell
@@ -51,13 +53,16 @@ const name = carName(model, locale);
   />
 
   <section
-    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
   >
     <div class="flex flex-col gap-8">
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.categoriesHeading}</h2>
         {
-          hub.categories.length > 0 ? (
+          !empty ? (
             <ul class="card divide-y divide-line">
               {hub.categories.map(({ category }) => {
                 const [lead] = paragraphs(translated(category, 'text', locale));
@@ -85,6 +90,7 @@ const name = carName(model, locale);
             <p class="max-w-2xl text-muted">{copy.noCategories}</p>
           )
         }
+        {!empty && <InquiryLink />}
       </div>
 
       <div class="flex flex-col gap-3">
@@ -109,17 +115,24 @@ const name = carName(model, locale);
       </div>
     </div>
 
-    <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
-      <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
-      <LeadForm
-        service={VIN_INQUIRY_SERVICE}
-        vin={{ label: inquiry.vinLabel, placeholder: inquiry.vinPlaceholder }}
-        comment={`${name}: `}
-        commentLabel={inquiry.commentLabel}
-        commentPlaceholder={inquiry.commentPlaceholder}
-        commentNote={inquiry.commentNote}
-        defaultChannel="whatsapp"
-      />
-    </div>
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
   </section>
 </Shell>

@@ -12,6 +12,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import PartsSearchForm from '@/components/PartsSearchForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -236,6 +237,8 @@ const inquiryTopic = [narrowedTo?.name, q].filter(Boolean).join(', ');
                 )}
               </nav>
             )}
+
+            {found.results.length > 0 && <InquiryLink class="pt-2" />}
           </div>
         </div>
       )

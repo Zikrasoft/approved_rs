@@ -28,4 +28,6 @@ booleanFalse: нет
 previous: Назад
 next: Дальше
 formHeading: Заявка на запчасти
+notFoundQuestion: Не нашли нужное?
+notFoundLink: Оставьте заявку, подберем
 translatedFrom: pending

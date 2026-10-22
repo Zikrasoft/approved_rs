@@ -32,5 +32,7 @@ export const partsSearchContentSchema = z
     previous: z.string(),
     next: z.string(),
     formHeading: z.string(),
+    notFoundQuestion: z.string(),
+    notFoundLink: z.string(),
   })
   .strict();

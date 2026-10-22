@@ -1,0 +1,23 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+---
+
+<p class:list={['text-sm leading-relaxed text-muted', className]}>
+  {copy.notFoundQuestion}{' '}
+  <a
+    href={PathBuilder.partsInquiry(locale)}
+    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+  >
+    {copy.notFoundLink}
+  </a>
+</p>

@@ -2,6 +2,7 @@
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -52,6 +53,9 @@ const blocks = [...byCategory.values()].map((groups) => ({
 
 const kit = car.kit.map((item) => ({ ...item, ...kitPick(item.pages) }));
 const kitBuyable = kit.length > 0 && kit.every(({ offer }) => offer);
+
+const empty =
+  kit.length === 0 && blocks.length === 0 && car.matches.length === 0;
 
 const years =
   vehicle.year_from &&
@@ -114,7 +118,10 @@ const specsSummary = [
   />
 
   <car-facts
-    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
   >
     <div class="flex flex-col gap-6">
       {
@@ -303,6 +310,8 @@ const specsSummary = [
         )
       }
 
+      {!empty && <InquiryLink />}
+
       <details class="card group p-5 sm:p-6">
         <summary
           class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
@@ -341,21 +350,25 @@ const specsSummary = [
       </p>
     </div>
 
-    <div id="lead" class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
-      <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-      <LeadForm
-        service={VIN_INQUIRY_SERVICE}
-        vin={{
-          label: partsInquiry.vinLabel,
-          placeholder: partsInquiry.vinPlaceholder,
-        }}
-        comment={`${name}: `}
-        commentLabel={partsInquiry.commentLabel}
-        commentPlaceholder={partsInquiry.commentPlaceholder}
-        commentNote={partsInquiry.commentNote}
-        defaultChannel="whatsapp"
-      />
-    </div>
+    {
+      empty && (
+        <div id="lead" class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: partsInquiry.vinLabel,
+              placeholder: partsInquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={partsInquiry.commentLabel}
+            commentPlaceholder={partsInquiry.commentPlaceholder}
+            commentNote={partsInquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
   </car-facts>
 </Shell>
 

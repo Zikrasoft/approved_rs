@@ -3,6 +3,7 @@ import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import { localeFrom } from '@/i18n/config';
@@ -34,6 +35,7 @@ const inquiry = content(locale).pages.partsInquiry;
 const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const empty = category.pages.length === 0;
 const facets = categoryFacets(category, locale);
 const searchCopy = content(locale).partsSearch;
 const fields = category.fields
@@ -80,7 +82,10 @@ const fields = category.fields
   />
 
   <section
-    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr] lg:items-start"
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
   >
     <div class="flex flex-col gap-8">
       {
@@ -121,7 +126,9 @@ const fields = category.fields
           )
         }
         {
-          category.pages.length > 0 ? (
+          empty ? (
+            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+          ) : (
             <ul class="card divide-y divide-line">
               {category.pages.map((page) => (
                 <PartRow
@@ -134,24 +141,30 @@ const fields = category.fields
                 />
               ))}
             </ul>
-          ) : (
-            <p class="max-w-2xl text-muted">{copy.noParts}</p>
           )
         }
+        {!empty && <InquiryLink />}
       </div>
     </div>
 
-    <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
-      <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
-      <LeadForm
-        service={VIN_INQUIRY_SERVICE}
-        vin={{ label: inquiry.vinLabel, placeholder: inquiry.vinPlaceholder }}
-        comment={`${name}: `}
-        commentLabel={inquiry.commentLabel}
-        commentPlaceholder={inquiry.commentPlaceholder}
-        commentNote={inquiry.commentNote}
-        defaultChannel="whatsapp"
-      />
-    </div>
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
   </section>
 </Shell>
