@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { universalFacets } from '@podbor/catalog-contract';
 import {
   appendRange,
   chosenFilters,
@@ -6,6 +7,7 @@ import {
   numberBounds,
   rangesFromParams,
   rangeText,
+  withFacetCopy,
 } from './partsSearch';
 
 const copy = {
@@ -132,6 +134,31 @@ describe('chosenFilters', () => {
         ranges: [range],
         label: 'от 1',
       },
+    ]);
+  });
+});
+
+describe('withFacetCopy', () => {
+  it('names the brand, availability and price facets in the page language', () => {
+    const facets = universalFacets({
+      brands: [{ value: 'ate', label: 'ATE', count: 1 }],
+      inStock: 2,
+      price: { min: 900, max: 900, count: 1 },
+      currency: 'RSD',
+    });
+
+    expect(
+      withFacetCopy([...facets, viscosity], {
+        brandFacet: 'Бренд',
+        availabilityFacet: 'Наличие',
+        inStockOnly: 'Только в наличии',
+        priceFacet: 'Цена',
+      }).map(({ label, values }) => [label, values[0].label]),
+    ).toEqual([
+      ['Бренд', 'ATE'],
+      ['Наличие', 'Только в наличии'],
+      ['Цена', '900'],
+      ['Вязкость', '5W-30'],
     ]);
   });
 });

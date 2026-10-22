@@ -98,6 +98,12 @@ const compileFieldFilter = (field: string, value: unknown): string => {
   if (keys.length === 1 && keys[0] === '$in' && Array.isArray(operators.$in)) {
     return `${field}:=[${operators.$in.map(quote).join(',')}]`;
   }
+  const comparisons: Record<string, string> = { $gte: '>=', $lte: '<=' };
+  if (keys.every((key) => key in comparisons)) {
+    return keys
+      .map((key) => `${field}:${comparisons[key]}${quote(operators[key])}`)
+      .join(' && ');
+  }
 
   throw new Error(
     `search-typesense: unsupported filter on "${field}": ${keys.join(', ')}`,
@@ -144,7 +150,7 @@ export const compileFacets = (
   if (!facets.length) {
     return {};
   }
-  const unsupported = facets.find(({ type }) => (type ?? 'value') !== 'value');
+  const unsupported = facets.find(({ type }) => type === 'range');
   if (unsupported) {
     throw new Error(
       `search-typesense: unsupported "${unsupported.type}" facet on "${unsupported.field}"`,
@@ -158,3 +164,44 @@ export const compileFacets = (
     ...(limits.length ? { max_facet_values: Math.max(...limits) } : {}),
   };
 };
+
+type FacetCounts = {
+  field_name: string;
+  counts: { value: string; count: number }[];
+  stats?: { min?: number; max?: number };
+};
+
+const toFacetResult = (
+  type: SearchTypes.SearchFacetRequest['type'],
+  { counts, stats }: FacetCounts,
+): SearchTypes.SearchFacetResult | null => {
+  if (type !== 'stats') {
+    return {
+      type: 'value',
+      values: counts.map(({ value, count }) => ({ value, count })),
+    };
+  }
+  if (stats?.min === undefined || stats.max === undefined) {
+    return null;
+  }
+  return {
+    type: 'stats',
+    min: stats.min,
+    max: stats.max,
+    count: counts.reduce((sum, { count }) => sum + count, 0),
+  };
+};
+
+export const toFacetResults = (
+  requested: SearchTypes.SearchFacetRequest[],
+  facetCounts: FacetCounts[],
+): Record<string, SearchTypes.SearchFacetResult> =>
+  Object.fromEntries(
+    facetCounts.flatMap((counts) => {
+      const result = toFacetResult(
+        requested.find(({ field }) => field === counts.field_name)?.type,
+        counts,
+      );
+      return result ? [[counts.field_name, result]] : [];
+    }),
+  );

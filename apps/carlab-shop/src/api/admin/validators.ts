@@ -10,6 +10,7 @@ import {
   normalizePartNumber,
   STAGED_DATA_KINDS,
   STEERING_SIDES,
+  UNIVERSAL_FACET_KEYS,
 } from '@podbor/catalog-contract';
 
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
@@ -262,7 +263,9 @@ const fieldColumns = {
 };
 
 export const AdminCreateCategoryField = z.strictObject({
-  key: catalogKey,
+  key: catalogKey.refine(
+    (key) => !(UNIVERSAL_FACET_KEYS as readonly string[]).includes(key),
+  ),
   ...fieldColumns,
   unit: fieldColumns.unit.default(null),
   required: fieldColumns.required.default(false),
