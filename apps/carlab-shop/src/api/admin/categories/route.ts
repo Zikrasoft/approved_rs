@@ -3,7 +3,11 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
-import { CATEGORY_RELATIONS, withRankedFields } from '../../../lib/categories';
+import {
+  CATEGORY_RELATIONS,
+  guardCategoryService,
+  withRankedFields,
+} from '../../../lib/categories';
 import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
@@ -31,6 +35,7 @@ export async function POST(
 ): Promise<void> {
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
+  guardCategoryService(req.validatedBody);
   const category = await catalog.createCategories({
     ...req.validatedBody,
     created_by: req.auth_context.actor_id,

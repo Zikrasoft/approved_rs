@@ -14,6 +14,8 @@ const Category = model
     ...translatable(),
     maintenance_kit: model.boolean().default(false),
     kit_rank: model.number().default(0),
+    service_label: model.text().nullable(),
+    service_price: model.number().nullable(),
     fields: model.hasMany(() => CategoryField, { mappedBy: 'category' }),
     parts: model.hasMany(() => Part, { mappedBy: 'category' }),
     ...provenance(),

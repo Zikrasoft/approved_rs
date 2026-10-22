@@ -40,6 +40,8 @@ export const categorySchema = z.object({
   translations: translationsSchema,
   maintenance_kit: z.boolean(),
   kit_rank: z.number(),
+  service_label: z.string().nullable(),
+  service_price: z.number().int().nonnegative().nullable(),
   fields: z.array(categoryFieldSchema),
 });
 

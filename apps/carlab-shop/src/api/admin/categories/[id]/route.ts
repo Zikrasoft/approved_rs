@@ -8,6 +8,7 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import type { AdminUpdateCategoryType } from '../../validators';
 import { adminError } from '../../../../lib/admin-errors';
+import { guardCategoryService } from '../../../../lib/categories';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdateCategoryType>,
@@ -17,7 +18,12 @@ export async function POST(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  await catalog.retrieveCategory(id);
+  const stored = await catalog.retrieveCategory(id);
+  guardCategoryService({
+    service_label: stored.service_label,
+    service_price: stored.service_price,
+    ...req.validatedBody,
+  });
   const category = await catalog.updateCategories({
     id,
     ...req.validatedBody,

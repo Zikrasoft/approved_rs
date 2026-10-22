@@ -9,6 +9,7 @@ import {
 import { isValidContact } from '@podbor/lead-crm/phone';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
+import { translationsSchema } from './translations.ts';
 
 export const CHECKOUT_REFUSALS = [
   'OFFER_PRICE_CHANGED',
@@ -29,12 +30,20 @@ export const listedPartSchema = z.object({
   name: z.string(),
 });
 
+export const lineAddonSchema = z.object({
+  item_id: z.string().nullable(),
+  label: z.string(),
+  translations: translationsSchema,
+  unit_price: z.number().int().nonnegative(),
+});
+
 export const offerCartLineSchema = z.object({
   id: z.string(),
   offer_id: z.string(),
   quantity: z.number().int().positive(),
   unit_price: z.number().nonnegative(),
   available: z.boolean(),
+  addon: lineAddonSchema.nullable(),
   part: listedPartSchema,
 });
 
@@ -97,5 +106,6 @@ export const checkoutContactSchema = z
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
 export type ListedPart = z.infer<typeof listedPartSchema>;
+export type LineAddon = z.infer<typeof lineAddonSchema>;
 export type OfferCartLine = z.infer<typeof offerCartLineSchema>;
 export type OfferCart = z.infer<typeof offerCartSchema>;

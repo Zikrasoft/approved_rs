@@ -9,6 +9,8 @@ const category = {
   translations: { sr: { name: 'Motorno ulje', text: '' } },
   maintenance_kit: true,
   kit_rank: 1,
+  service_label: null,
+  service_price: null,
   fields: [
     {
       key: 'viscosity',
@@ -27,6 +29,25 @@ const category = {
 describe('categorySchema', () => {
   it('accepts a Category with its fields and options', () => {
     expect(categorySchema.parse(category)).toEqual(category);
+  });
+
+  it('accepts a Category with an add-on service', () => {
+    const serviced = {
+      ...category,
+      service_label: 'Регистрация аккумулятора',
+      service_price: 2500,
+    };
+    expect(categorySchema.parse(serviced)).toEqual(serviced);
+  });
+
+  it('refuses a fractional add-on price', () => {
+    expect(
+      categorySchema.safeParse({
+        ...category,
+        service_label: 'Регистрация аккумулятора',
+        service_price: 2500.5,
+      }).success,
+    ).toBe(false);
   });
 
   it('refuses an upper-case field key', () => {

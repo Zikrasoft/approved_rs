@@ -64,6 +64,8 @@ medusaIntegrationTestRunner({
               translations: { sr: { name: 'Motorno ulje' } },
               maintenance_kit: false,
               kit_rank: 0,
+              service_label: null,
+              service_price: null,
               fields: [
                 {
                   key: 'viscosity',
