@@ -1,6 +1,7 @@
 import { z } from '@medusajs/framework/zod';
 import {
   BODY_STYLES,
+  CATALOG_TRANSLATION_LOCALES,
   ENGINE_FUELS,
   STEERING_SIDES,
   VEHICLE_DRIVES,
@@ -50,7 +51,11 @@ const AdminSeries = z.strictObject({
   make_id: text,
   name: text,
   translations: z
-    .object({ sr: text.optional(), en: text.optional() })
+    .strictObject(
+      Object.fromEntries(
+        CATALOG_TRANSLATION_LOCALES.map((locale) => [locale, text.optional()]),
+      ),
+    )
     .nullable()
     .optional(),
 });

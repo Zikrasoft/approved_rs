@@ -175,7 +175,7 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ code, category_id }) => [spellingKey(code), category_id]),
+    ).map(({ code_key, category_id }) => [code_key, category_id]),
   );
   const brandOf = new Map(
     (
@@ -183,7 +183,7 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ value, brand_id }) => [spellingKey(value), brand_id]),
+    ).map(({ value_key, brand_id }) => [value_key, brand_id]),
   );
   const summary: ImportSummary = {
     supplier: adapter.name,

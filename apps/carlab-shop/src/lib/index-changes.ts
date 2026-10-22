@@ -28,6 +28,8 @@ export async function emitIndexChanges(
     })),
   ];
   if (messages.length) {
-    await scope.resolve(Modules.EVENT_BUS).emit(messages);
+    await scope
+      .resolve(Modules.EVENT_BUS)
+      .emit<{ part_id?: string; ids?: string[] }>(messages);
   }
 }

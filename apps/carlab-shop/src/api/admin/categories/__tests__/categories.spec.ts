@@ -25,10 +25,11 @@ medusaIntegrationTestRunner({
 
       const createOilCategory = async () => {
         serial += 1;
+        const name = `Моторное масло ${serial}`;
         const category = (
           await post('/admin/categories', {
             slug: `engine-oil-${serial}`,
-            name: 'Моторное масло',
+            name,
             text: 'Масло для двигателя.',
           })
         ).data.category;
@@ -73,7 +74,7 @@ medusaIntegrationTestRunner({
             });
           }
         }
-        return { category, viscosity, approvals, volume, base };
+        return { category, name, viscosity, approvals, volume, base };
       };
 
       const createPart = async (
@@ -113,7 +114,7 @@ medusaIntegrationTestRunner({
       });
 
       it('lists a Category with its fields and options in rank order', async () => {
-        const { category } = await createOilCategory();
+        const { category, name } = await createOilCategory();
 
         const listed = await api.get('/admin/categories', adminHeaders);
 
@@ -122,7 +123,7 @@ medusaIntegrationTestRunner({
         );
         expect(found).toMatchObject({
           slug: category.slug,
-          name: 'Моторное масло',
+          name,
           text: 'Масло для двигателя.',
           translations: null,
           source: 'manual',
@@ -371,6 +372,21 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(409);
         expect(response.data).toMatchObject({ code: 'ALREADY_EXISTS' });
+      });
+
+      it('refuses a Category name that differs from a stored one only by case', async () => {
+        const { name } = await createOilCategory();
+
+        const response = await post('/admin/categories', {
+          slug: 'engine-oil-copy',
+          name: ` ${name.toUpperCase()} `,
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'category',
+        });
       });
 
       it('returns a 404 for a field of another Category', async () => {

@@ -72,7 +72,12 @@ const coded = (error: unknown): DetailedError | null => {
     return error;
   }
   const entity = duplicateEntity(error);
-  return entity ? alreadyExists(entity, error.message) : null;
+  return entity
+    ? alreadyExists(
+        entity,
+        `This ${entity.replaceAll('_', ' ')} already exists.`,
+      )
+    : null;
 };
 
 const medusaErrorHandler = errorHandler();

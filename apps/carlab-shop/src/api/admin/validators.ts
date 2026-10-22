@@ -64,12 +64,16 @@ export const AdminListFitments = z.object({
 });
 export type AdminListFitmentsType = z.infer<typeof AdminListFitments>;
 
+const calendarDay = z.iso
+  .date({ error: 'Not a date' })
+  .transform((day) => new Date(day));
+
 const fitmentConditions = {
   quantity: z.number().int().positive().optional(),
   axle: z.enum(FITMENT_AXLES).nullable().optional(),
   side: z.enum(FITMENT_SIDES).nullable().optional(),
-  production_from: z.coerce.date({ error: 'Not a date' }).nullable().optional(),
-  production_to: z.coerce.date({ error: 'Not a date' }).nullable().optional(),
+  production_from: calendarDay.nullable().optional(),
+  production_to: calendarDay.nullable().optional(),
   steering: z.enum(STEERING_SIDES).nullable().optional(),
   gearbox: z.enum(GEARBOX_TYPES).nullable().optional(),
   note: z

@@ -519,6 +519,33 @@ medusaIntegrationTestRunner({
           });
         });
 
+        it.each([
+          ['a number', 0],
+          ['a date without its day', '2020-01'],
+        ])('refuses %s as a production date', async (_, production_from) => {
+          const { part, vehicle } = await createPartAndVehicle(
+            `B47-EPOCH-${String(production_from)}`,
+          );
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          const response = await api
+            .post(
+              `/admin/fitments/${fitment.id}`,
+              { production_from },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({
+            code: 'INVALID_FIELD',
+            field: 'production_from',
+          });
+        });
+
         it('deletes a Fitment', async () => {
           const { part, vehicle } = await createPartAndVehicle('B47-DELETE');
           const fitment = await catalog.createFitments({

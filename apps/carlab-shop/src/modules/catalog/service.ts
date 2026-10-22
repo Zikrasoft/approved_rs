@@ -15,6 +15,7 @@ import {
   type GEARBOX_TYPES,
   guardDefinitionChange,
   type SteeringSide,
+  type VEHICLE_DRIVES,
   normalizePartNumber,
   requirementErrors,
   validateAttributes,
@@ -39,6 +40,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
+import { spellingKey } from '../../lib/suppliers/spelling';
 import { MANUAL_SOURCE } from './models/provenance';
 
 type Provenance = {
@@ -124,6 +126,28 @@ const sameIdentity = (
   time(conditions.production_from) === time(fitment.production_from) &&
   time(conditions.production_to) === time(fitment.production_to);
 
+const VEHICLE_IDENTITY = [
+  'model_id',
+  'engine_id',
+  'power_kw',
+  'drive',
+  'market',
+  'year_from',
+  'year_to',
+  'steering',
+] as const;
+
+export type NewVehicle = Provenance & {
+  model_id: string;
+  engine_id: string;
+  power_kw?: number | null;
+  drive?: (typeof VEHICLE_DRIVES)[number] | null;
+  market?: string | null;
+  year_from?: number | null;
+  year_to?: number | null;
+  steering?: SteeringSide | null;
+};
+
 export type NewRequirement = Provenance & {
   field_id: string;
   engine_id?: string;
@@ -164,7 +188,7 @@ const sourceInUse = (source: string, details: Record<string, unknown>) =>
     details,
   );
 
-class CatalogModuleService extends MedusaService({
+const CatalogModuleBase = MedusaService({
   Brand,
   BrandSpelling,
   Category,
@@ -181,7 +205,18 @@ class CatalogModuleService extends MedusaService({
   VehicleIdentifier,
   Fitment,
   Requirement,
-}) {
+});
+
+type CatalogModuleBase = InstanceType<typeof CatalogModuleBase>;
+
+type SpellingInput = { value: string } & Record<string, unknown>;
+
+const withValueKey = (row: SpellingInput) => ({
+  ...row,
+  value_key: spellingKey(row.value),
+});
+
+class CatalogModuleService extends CatalogModuleBase {
   @InjectTransactionManager()
   async createPartWithIdentifiers(
     {
@@ -217,6 +252,35 @@ class CatalogModuleService extends MedusaService({
       sharedContext,
     );
     return created.id;
+  }
+
+  override createBrandSpellings = ((
+    data: SpellingInput | SpellingInput[],
+    sharedContext?: Context,
+  ) =>
+    CatalogModuleBase.prototype.createBrandSpellings.call(
+      this,
+      Array.isArray(data) ? data.map(withValueKey) : withValueKey(data),
+      sharedContext,
+    )) as CatalogModuleBase['createBrandSpellings'];
+
+  @InjectTransactionManager()
+  async createVehicleOnce(
+    vehicle: NewVehicle,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    await this.lockRow('vehicle_model', vehicle.model_id, sharedContext);
+    const [, identical] = await this.listAndCountVehicles(
+      Object.fromEntries(
+        VEHICLE_IDENTITY.map((column) => [column, vehicle[column] ?? null]),
+      ),
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    if (identical) {
+      throw alreadyExists('vehicle', 'This vehicle already exists.');
+    }
+    return this.createVehicles(vehicle, sharedContext);
   }
 
   @InjectTransactionManager()
@@ -493,25 +557,15 @@ class CatalogModuleService extends MedusaService({
       chassis_id: requirement.chassis_id ?? null,
       vehicle_id: requirement.vehicle_id ?? null,
     };
-    const siblings = await this.listRequirements(
+    const [, siblings] = await this.listAndCountRequirements(
       { field_id: requirement.field_id, ...owner },
-      { take: null },
+      { select: ['id'], take: 1 },
       sharedContext,
     );
-    const sameOptions = (keys: string[] | null) =>
-      [...(keys ?? [])].sort().join() ===
-      [...(requirement.option_keys ?? [])].sort().join();
-    if (
-      siblings.some(
-        (sibling) =>
-          sameOptions(sibling.option_keys) &&
-          sibling.min === requirement.min &&
-          sibling.max === requirement.max,
-      )
-    ) {
+    if (siblings) {
       throw alreadyExists(
         'requirement',
-        'The owner already has this Requirement',
+        'The owner already has a Requirement on this field',
       );
     }
     return this.createRequirements(requirement, sharedContext);

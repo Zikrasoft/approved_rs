@@ -328,6 +328,38 @@ medusaIntegrationTestRunner({
         expect(await page('W6103')).toBeDefined();
       });
 
+      it('matches a Brand spelling written with a no-break space and a sharp s', async () => {
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [strasse] = await catalog.createBrands([
+          { name: 'Strasse Teile', slug: 'strasse-teile' },
+        ]);
+        await catalog.createBrandSpellings({
+          brand_id: strasse.id,
+          supplier_id: intercarsId,
+          value: 'Straße\u00a0Teile',
+        });
+        await suppliers.createSupplierCategories({
+          supplier_id: intercarsId,
+          code: 'IC\u00a0Öl',
+          category_id: oilFiltersId,
+        });
+        intercars.articles.push({
+          article_id: 'IC-16',
+          brand: 'STRASSE TEILE',
+          number: 'ST 1',
+          name: 'Фильтр ST1',
+          category: 'ic öl',
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          skipped: 0,
+        });
+      });
+
       it('matches a supplier category code whatever its case and spacing', async () => {
         intercars.articles.push({
           article_id: 'IC-9',

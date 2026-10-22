@@ -463,7 +463,8 @@
       "ALREADY_EXISTS": "This record already exists.",
       "FIELD_REQUIRED": "Fill in «{{field}}».",
       "INVALID_FIELD": "Check «{{field}}».",
-      "LAST_IDENTIFIER": "This is the part's last number and a part cannot be found without one. Add another number or delete the whole part."
+      "LAST_IDENTIFIER": "This is the part's last number and a part cannot be found without one. Add another number or delete the whole part.",
+      "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -487,13 +488,14 @@
       "vehicle_model": "A model with this link address already exists.",
       "engine": "An engine with this code already exists.",
       "vehicle_identifier": "This code is already linked to a vehicle.",
-      "category": "A category with this link address already exists.",
+      "category": "A category with this name or link address already exists.",
       "category_field": "This category already has an attribute with this key.",
       "category_field_option": "This attribute already has an option with this key.",
       "supplier_category": "This supplier category is already mapped.",
       "fitment": "This part already fits this vehicle at this position with these conditions.",
-      "requirement": "This owner already has the same requirement.",
-      "supplier": "A supplier with this name already exists."
+      "requirement": "This owner already has a requirement on this attribute. Change or delete it instead of adding another.",
+      "supplier": "A supplier with this name already exists.",
+      "vehicle": "This vehicle already exists: same model, engine, power, drive, market, years and steering."
     },
     "invalidFields": {
       "year_to": "The \"to\" year is before the \"from\" year. Check the years.",
@@ -542,7 +544,28 @@
       "text": "Text",
       "identifiers": "Numbers"
     },
-    "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative."
+    "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative.",
+    "entities": {
+      "requirement": "Requirements",
+      "fitment": "Fitments",
+      "vehicle_identifier": "Vehicle codes",
+      "brand_spelling": "Brand spellings",
+      "part_identifier": "Part numbers",
+      "part": "Parts",
+      "vehicle": "Vehicles",
+      "category_field_option": "Attribute options",
+      "category_field": "Attributes",
+      "category": "Categories",
+      "vehicle_model": "Models",
+      "engine": "Engines",
+      "chassis": "Chassis",
+      "series": "Series",
+      "make": "Makes",
+      "brand": "Brands"
+    },
+    "inUseBy": "This row cannot be deleted, it is referenced by: {{holders}}. Delete or move them first.",
+    "sourceUsedBy": "This source cannot be removed: rows of other sources depend on it ({{holders}}). Delete or move them first.",
+    "sourceBlocked": "This source cannot be removed: rows of other sources refer to its {{entity}}. Delete or move them first."
   },
   "sources": {
     "heading": "Catalogue data sources",
