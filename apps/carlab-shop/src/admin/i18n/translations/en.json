@@ -671,6 +671,7 @@
     "add": "Add photos",
     "replace": "Replace photo",
     "hint": "JPEG, PNG or WebP, up to 10 MB. The first photo is the main one.",
+    "hintSingle": "JPEG, PNG or WebP, up to 10 MB.",
     "empty": "No photos yet",
     "main": "Main",
     "moveLeft": "Move left",

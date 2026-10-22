@@ -49,7 +49,7 @@ export type SupplierAdapter = {
 const configuredAdapters = (): SupplierAdapter[] => {
   const env = parseEnv(process.env);
   return env.SUPPLIER_ADAPTERS.includes('demo')
-    ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES)
+    ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES, env.FILE_URL)
     : [];
 };
 

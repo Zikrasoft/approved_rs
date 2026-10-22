@@ -65,9 +65,15 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
         number: 'HU816X',
         name: 'Oil filter HU 816 x',
         category: 'IC-FILTER',
-        cross_references: [{ brand: 'BMW', number: '11 42 8 575 211' }],
-        applicability: ['BMW 3 F30 320d B47D20 2015-2019'],
-        images: ['https://example.com/demo-supplier/hu816x.jpg'],
+        cross_references: [
+          { brand: 'BMW', number: '11 42 8 575 211' },
+          { brand: 'MAHLE', number: 'OX 404D' },
+        ],
+        applicability: [
+          'BMW 3 F30 320d B47D20 2015-2019',
+          'BMW 3 F30 320i B48B20 2015-2019',
+          'BMW 5 G30 520d B47D20 2017-2023',
+        ],
         offer: offer(1000, 12, 1),
       },
       {
@@ -101,6 +107,11 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
         number: '15669E',
         name: 'Castrol EDGE 5W-30 LL 5 l',
         category: 'IC-OIL',
+        applicability: [
+          'BMW Longlife-04',
+          'Mercedes-Benz 229.51',
+          'BMW 3 F30 320d B47D20 2015-2019',
+        ],
         offer: offer(3900, 20, 0),
       },
       {
@@ -158,6 +169,8 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
         number: '580901080',
         name: 'Battery Silver Dynamic AGM G14 80Ah 800A',
         category: 'IC-BATT',
+        cross_references: [{ brand: 'EXIDE', number: 'EK800' }],
+        applicability: ['BMW 3 F30 320d 2015-2019', 'BMW 5 G30 520d 2017-2023'],
         offer: offer(14500, 6, 1),
       },
       {
@@ -262,6 +275,16 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
   },
 ];
 
+export const DEMO_SUPPLIER_IMAGES: Record<string, string> = {
+  'IC-1001': 'oil-filter',
+  'IC-1003': 'brake-pad',
+  'IC-1005': 'oil-can',
+  'IC-1012': 'battery',
+};
+
+export const demoSupplierImage = (articleId: string) =>
+  `demo-supplier/${articleId.toLowerCase()}.webp`;
+
 const overridesSchema = z.record(
   z.string(),
   z
@@ -301,15 +324,19 @@ const quoteOf = (
 export const createDemoAdapter = (
   { name, articles }: DemoSupplier,
   overrides: () => DemoOverrides,
+  fileUrl: string,
 ): SupplierAdapter => ({
   name,
   listCatalogue: async (cursor) => {
     const start = Number(cursor ?? 0);
     const end = start + DEMO_PAGE_SIZE;
     return {
-      articles: articles
-        .slice(start, end)
-        .map(({ offer: _, ...article }) => article),
+      articles: articles.slice(start, end).map(({ offer: _, ...article }) => ({
+        ...article,
+        ...(DEMO_SUPPLIER_IMAGES[article.article_id] && {
+          images: [`${fileUrl}/${demoSupplierImage(article.article_id)}`],
+        }),
+      })),
       next: end < articles.length ? String(end) : null,
     };
   },
@@ -321,7 +348,14 @@ export const createDemoAdapter = (
   },
 });
 
-export const demoAdapters = (overridesPath: string | undefined) =>
+export const demoAdapters = (
+  overridesPath: string | undefined,
+  fileUrl: string,
+) =>
   DEMO_SUPPLIERS.map((supplier) =>
-    createDemoAdapter(supplier, () => readDemoOverrides(overridesPath)),
+    createDemoAdapter(
+      supplier,
+      () => readDemoOverrides(overridesPath),
+      fileUrl,
+    ),
   );

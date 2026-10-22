@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7bec8"/>
+      <stop offset=".5" stop-color="#7d8592"/>
+      <stop offset="1" stop-color="#525a66"/>
+    </linearGradient>
+    <linearGradient id="friction" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b4f56"/>
+      <stop offset="1" stop-color="#25282d"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="600" rx="290" ry="36" fill="#1d2430" opacity=".26" filter="url(#soft)"/>
+  <path d="M110 330 q290 -170 580 0 l-20 230 q-270 -90 -540 0 z" fill="url(#plate)"/>
+  <rect x="100" y="380" width="40" height="70" rx="12" fill="#646c78"/>
+  <rect x="660" y="380" width="40" height="70" rx="12" fill="#646c78"/>
+  <path d="M160 352 q240 -130 480 0 l-16 186 q-224 -70 -448 0 z" fill="url(#friction)"/>
+  <path d="M398 290 l2 210" stroke="#1a1c20" stroke-width="10" opacity=".9"/>
+  <path d="M175 360 q225 -118 450 0" fill="none" stroke="#ffffff" stroke-width="5" opacity=".12"/>
+  <text x="400" y="690" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="44" fill="#3c4450">{{brand}}</text>
+  <text x="400" y="732" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#6b7480">{{label}}</text>
+</svg>

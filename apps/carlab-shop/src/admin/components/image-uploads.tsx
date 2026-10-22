@@ -169,7 +169,7 @@ export const ImageUploads = ({
             : t('images.replace')}
         </Button>
         <Text id={hintId} size="small" className="text-ui-fg-subtle">
-          {t('images.hint')}
+          {t(multiple ? 'images.hint' : 'images.hintSingle')}
         </Text>
       </div>
       <Text size="small" className="text-ui-fg-subtle">

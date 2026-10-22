@@ -1,5 +1,8 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
-import type { IFileModuleService } from '@medusajs/framework/types';
+import type {
+  IFileModuleService,
+  MedusaContainer,
+} from '@medusajs/framework/types';
 import {
   generateEntityId,
   MedusaError,
@@ -68,7 +71,7 @@ export async function readImageUpload(req: MedusaRequest): Promise<Buffer> {
 }
 
 export async function storeImage(
-  scope: MedusaRequest['scope'],
+  scope: MedusaContainer,
   body: Buffer,
   name: string,
   actor: string | null,
@@ -117,7 +120,7 @@ export async function storeImage(
 }
 
 export async function deleteImageFiles(
-  scope: MedusaRequest['scope'],
+  scope: MedusaContainer,
   images: StoredImage[],
 ): Promise<void> {
   const ids = images.flatMap(({ file_ids }) => file_ids);

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" x2="1">
+      <stop offset="0" stop-color="#1d3a5c"/>
+      <stop offset=".22" stop-color="#3f6a9a"/>
+      <stop offset=".45" stop-color="#2a4f78"/>
+      <stop offset="1" stop-color="#132a44"/>
+    </linearGradient>
+    <linearGradient id="band" x1="0" x2="1">
+      <stop offset="0" stop-color="#d9dde3"/>
+      <stop offset=".25" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b9c0ca"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" x2="1">
+      <stop offset="0" stop-color="#6f7782"/>
+      <stop offset=".3" stop-color="#c9ced6"/>
+      <stop offset="1" stop-color="#525a65"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="640" rx="210" ry="34" fill="#1d2430" opacity=".28" filter="url(#soft)"/>
+  <path d="M215 250 v350 a185 40 0 0 0 370 0 v-350 z" fill="url(#body)"/>
+  <path d="M215 250 h370" stroke="#0d1f33" stroke-width="2"/>
+  <ellipse cx="400" cy="250" rx="185" ry="40" fill="url(#cap)"/>
+  <ellipse cx="400" cy="250" rx="140" ry="29" fill="#3a414b"/>
+  <ellipse cx="400" cy="246" rx="58" ry="12" fill="#1a1e24"/>
+  <g fill="#9aa2ad" opacity=".55">
+    <circle cx="300" cy="250" r="7"/><circle cx="345" cy="232" r="7"/><circle cx="455" cy="232" r="7"/><circle cx="500" cy="250" r="7"/><circle cx="455" cy="268" r="7"/><circle cx="345" cy="268" r="7"/>
+  </g>
+  <path d="M215 360 h370 v150 a185 40 0 0 1 -370 0 z" fill="url(#band)" opacity=".96"/>
+  <path d="M215 360 a185 40 0 0 0 370 0" fill="none" stroke="#132a44" stroke-width="3" opacity=".5"/>
+  <text x="400" y="442" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="54" fill="#13263d" letter-spacing="1">{{brand}}</text>
+  <text x="400" y="488" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#4a5462">{{label}}</text>
+  <path d="M250 290 v300" stroke="#ffffff" stroke-width="10" opacity=".14" stroke-linecap="round"/>
+</svg>
