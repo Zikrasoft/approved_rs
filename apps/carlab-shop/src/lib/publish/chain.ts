@@ -13,7 +13,7 @@ import { PUBLISH_MODULE } from '../../modules/publish';
 import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
 import { importSupplierCatalogues } from '../suppliers/import';
-import { dispatchDeploy } from './deploy';
+import { deploySite } from './deploy';
 import { translateCatalogue } from './translate';
 import { adminError } from '../admin-errors';
 
@@ -45,7 +45,7 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
   },
   {
     name: 'deploy',
-    run: () => dispatchDeploy(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN),
+    run: () => deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN),
   },
   { name: 'reindex', run: reindex(scope) },
 ];

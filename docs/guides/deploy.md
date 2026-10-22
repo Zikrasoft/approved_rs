@@ -632,7 +632,10 @@ validates everything at startup. The non-obvious parts:
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.
 - `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
   the first translates catalogue text, the second is a fine-grained GitHub token
-  with `actions: write` on this repository that dispatches `publish.yml`. Either
+  with `actions: write` on this repository that dispatches `publish.yml` and
+  then reads that run until it finishes (`write` includes `read`). Search is
+  reindexed only after the run succeeds; a failed or cancelled run, or one
+  still unfinished after 90 minutes, stops the chain at the deploy step. Either
   may stay empty; the chain then stops at that step and the admin shows why.
   `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
   ships fresh catalogue data and never code that is not live yet. The chain runs
