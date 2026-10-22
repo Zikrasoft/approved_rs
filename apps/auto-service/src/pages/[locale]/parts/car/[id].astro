@@ -13,6 +13,7 @@ import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { kitPick } from '@/utils/kitPick';
 
 export async function getStaticPaths() {
   const cars = await carPagesForBuild();
@@ -47,6 +48,9 @@ const blocks = [...byCategory.values()].map((groups) => ({
     : copy.otherParts,
   groups,
 }));
+
+const kit = car.kit.map((item) => ({ ...item, ...kitPick(item.pages) }));
+const kitBuyable = kit.length > 0 && kit.every(({ offer }) => offer);
 
 const years =
   vehicle.year_from &&
@@ -113,7 +117,7 @@ const specsSummary = [
   >
     <div class="flex flex-col gap-6">
       {
-        car.kit.length > 0 && (
+        kit.length > 0 && (
           <parts-list-add-all
             class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
             data-car={name}
@@ -123,14 +127,16 @@ const specsSummary = [
               <p class="text-sm leading-relaxed text-ink-2">{copy.kitLead}</p>
             </div>
             <ul class="flex flex-col divide-y divide-line">
-              {car.kit.map((item) => (
+              {kit.map((item) => (
                 <li
                   class="flex items-baseline justify-between gap-4 py-3 first:pt-0"
                   data-kit-part={item.part.id}
-                  data-slug={item.pages[0].slug}
-                  data-brand={item.pages[0].brand.name}
-                  data-number={item.pages[0].value}
+                  data-slug={item.page.slug}
+                  data-brand={item.page.brand.name}
+                  data-number={item.page.value}
                   data-name={item.part.name}
+                  data-offer-id={item.offer?.id}
+                  data-quantity={item.quantity}
                 >
                   <div class="flex min-w-0 flex-col gap-1">
                     <span class="text-xs text-muted">
@@ -150,14 +156,33 @@ const specsSummary = [
                 </li>
               ))}
             </ul>
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              class="btn btn-primary w-full sm:w-auto sm:self-start"
-              data-add-all
-            >
-              {copy.kitAdd}
-              <Icon name="arrowRight" />
-            </a>
+            <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {kitBuyable && (
+                <kit-cart
+                  class="contents"
+                  data-cart-href={PathBuilder.partsCart(locale)}
+                >
+                  <button
+                    type="button"
+                    class="btn btn-primary w-full sm:w-auto"
+                  >
+                    {copy.kitCart}
+                    <Icon name="arrowRight" />
+                  </button>
+                </kit-cart>
+              )}
+              <a
+                href={PathBuilder.partsInquiry(locale)}
+                class:list={[
+                  'btn w-full sm:w-auto',
+                  kitBuyable ? 'btn-secondary' : 'btn-primary',
+                ]}
+                data-add-all
+              >
+                {copy.kitAdd}
+                {!kitBuyable && <Icon name="arrowRight" />}
+              </a>
+            </div>
           </parts-list-add-all>
         )
       }
@@ -328,7 +353,9 @@ const specsSummary = [
 <script>
   import { defineCarFacts } from '@/scripts/carFacts';
   import { definePartsListAddAll } from '@/scripts/partsList';
+  import { defineKitCart } from '@/scripts/offerCart';
 
   defineCarFacts();
   definePartsListAddAll();
+  defineKitCart();
 </script>

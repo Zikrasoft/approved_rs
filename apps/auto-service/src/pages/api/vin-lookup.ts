@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     : null;
   return redirect(
     outcome?.kind === 'vehicle'
-      ? `${PathBuilder.partsCar(locale, outcome.vehicle.id)}${carFactsQuery(outcome.facts)}`
+      ? `${PathBuilder.partsCar(locale, outcome.vehicle.id)}${carFactsQuery(outcome.facts, vin ?? '')}`
       : PathBuilder.partsVinUnresolved(locale),
     303,
   );

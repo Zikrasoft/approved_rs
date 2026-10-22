@@ -40,12 +40,12 @@ export async function POST(
       unit_price: Number(item.unit_price),
     })),
   );
-  if (fingerprint !== undefined && fingerprint !== current) {
+  if (fingerprint !== current) {
     refuse('CART_CHANGED', 'The cart changed since it was shown.');
   }
-  const car = (await carFor(req.scope, contact.vin)) ?? contact.car;
+  const car = await carFor(req.scope, contact.vin);
   await carts.updateCarts(id, {
-    metadata: { ...cart.metadata, ...contact, ...(car && { car }) },
+    metadata: { ...cart.metadata, ...contact, car: car ?? null },
   });
 
   const { result } = await completeCartWorkflow(req.scope).run({

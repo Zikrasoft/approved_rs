@@ -104,6 +104,7 @@ export const pagesContentSchema = z
         commentNote: z.string(),
         listHeading: z.string(),
         listRemoveLabel: z.string(),
+        listCarRemoveLabel: z.string(),
         listMoreTemplate: z.string(),
         llmsCatalogue: z.string(),
         stepsHeading: z.string(),

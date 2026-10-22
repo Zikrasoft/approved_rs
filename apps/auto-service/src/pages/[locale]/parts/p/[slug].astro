@@ -132,7 +132,11 @@ const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
           />
         )
       }
-      <PartOffers page={page} demoted={Boolean(successor)} />
+      {
+        !(successor && successor.offers.length > 0 && page.priceOnRequest) && (
+          <PartOffers page={page} demoted={Boolean(successor)} />
+        )
+      }
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1 lg:row-start-1">

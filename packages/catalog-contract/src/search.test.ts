@@ -19,6 +19,15 @@ const response = {
         name: 'Filter ulja',
         category: { slug: 'oil-filters', name: 'Filteri ulja' },
       },
+      offers: [
+        {
+          id: 'offer_1',
+          price: 1850,
+          currency: 'RSD',
+          stock_quantity: 3,
+          lead_time_days: 0,
+        },
+      ],
     },
   ],
   facets: [

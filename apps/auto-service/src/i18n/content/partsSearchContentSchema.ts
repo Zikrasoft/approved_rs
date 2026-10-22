@@ -11,7 +11,6 @@ export const partsSearchContentSchema = z
     metaDescription: z.string(),
     eyebrow: z.string(),
     heading: z.string(),
-    lead: z.string(),
     found: z.string(),
     noResults: z.string(),
     unavailable: z.string(),

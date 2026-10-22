@@ -7,9 +7,10 @@ import { PARTS_QUERY_MAX_LENGTH } from '@/utils/partsSearch';
 
 interface Props {
   query?: string;
+  titled?: boolean;
 }
 
-const { query = '' } = Astro.props;
+const { query = '', titled = true } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).partsSearch;
 ---
@@ -20,12 +21,16 @@ const copy = content(locale).partsSearch;
   role="search"
   class="card flex flex-col gap-4 border-ink p-5 sm:p-6"
 >
-  <div class="flex flex-col gap-1">
-    <h2 class="text-section">{copy.searchHeading}</h2>
-    <p class="max-w-2xl text-sm leading-relaxed text-ink-2">
-      {copy.searchLead}
-    </p>
-  </div>
+  {
+    !query && (
+      <div class="flex flex-col gap-1">
+        {titled && <h2 class="text-section">{copy.searchHeading}</h2>}
+        <p class="max-w-2xl text-sm leading-relaxed text-ink-2">
+          {copy.searchLead}
+        </p>
+      </div>
+    )
+  }
   <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
     <label class="block min-w-0 flex-1">
       <span class="field-label">{copy.label}</span>

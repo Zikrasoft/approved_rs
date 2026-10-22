@@ -118,12 +118,13 @@ export type OffersOutcome =
 export type CartOutcome =
   | { kind: 'cart'; cart: OfferCart }
   | { kind: 'empty' }
-  | { kind: 'refused'; code: CheckoutRefusal; cartId: string }
+  | { kind: 'refused'; code: CheckoutRefusal; cartId: string | null }
   | { kind: 'inquiry' };
 
 export type OrderOutcome =
   | { kind: 'order'; order: { id: string; display_id: number } }
   | { kind: 'refused'; code: CheckoutRefusal }
+  | { kind: 'empty' }
   | { kind: 'inquiry' };
 
 export const catalogueIdSchema = z
@@ -211,7 +212,7 @@ export function createCatalogue({
 
   const cartOutcome = async (
     answer: Promise<Response>,
-    cartId = '',
+    cartId: string | null = null,
   ): Promise<CartOutcome> => {
     try {
       const response = await answer;
@@ -222,7 +223,7 @@ export function createCatalogue({
         const refusal = checkoutRefusalSchema.safeParse(
           await response.json().catch(() => null),
         );
-        return refusal.success && cartId
+        return refusal.success
           ? { kind: 'refused', code: refusal.data.code, cartId }
           : { kind: 'inquiry' };
       }
@@ -234,10 +235,6 @@ export function createCatalogue({
       return { kind: 'inquiry' };
     }
   };
-
-  const newCartId = async () =>
-    offerCartResponseSchema.parse(await request('/store/offer-carts', {})).cart
-      .id;
 
   const paged = async <T>(
     path: string,
@@ -517,21 +514,17 @@ export function createCatalogue({
       offerId: string,
       quantity = 1,
     ): Promise<CartOutcome> {
-      const add = (id: string) =>
-        send(`/store/offer-carts/${segment(id)}/items`, 'POST', {
-          offer_id: offerId,
-          quantity,
-        });
-      const outcome = cartId ? await cartOutcome(add(cartId), cartId) : null;
+      const line = { offer_id: offerId, quantity };
+      const outcome = cartId
+        ? await cartOutcome(
+            send(`/store/offer-carts/${segment(cartId)}/items`, 'POST', line),
+            cartId,
+          )
+        : null;
       if (outcome && outcome.kind !== 'empty') {
         return outcome;
       }
-      try {
-        const id = await newCartId();
-        return cartOutcome(add(id), id);
-      } catch {
-        return { kind: 'inquiry' };
-      }
+      return cartOutcome(send('/store/offer-carts', 'POST', line));
     },
 
     viewCart: (cartId: string): Promise<CartOutcome> =>
@@ -564,16 +557,17 @@ export function createCatalogue({
     async placeOrder(
       cartId: string,
       contact: CheckoutContact,
-      fingerprint?: string,
+      fingerprint: string,
     ): Promise<OrderOutcome> {
       try {
         const response = await send(
           `/store/offer-carts/${segment(cartId)}/complete`,
           'POST',
-          fingerprint === undefined
-            ? contact
-            : { ...contact, [CART_FINGERPRINT_FIELD]: fingerprint },
+          { ...contact, [CART_FINGERPRINT_FIELD]: fingerprint },
         );
+        if (response.status === 404) {
+          return { kind: 'empty' };
+        }
         const body: unknown = await response.json();
         if (response.ok) {
           return {

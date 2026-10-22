@@ -60,7 +60,9 @@ describe('POST /api/order', () => {
     const response = await checkout();
 
     expect(response.status).toBe(303);
-    expect(location(response)).toBe('/ru/parts/cart/?notice=ordered&order=42');
+    expect(location(response)).toBe(
+      '/ru/parts/cart/?notice=ordered&order=42&cart=cart_1',
+    );
   });
 
   it('checks out the cart the visitor saw and keeps their attribution', async () => {
@@ -85,6 +87,19 @@ describe('POST /api/order', () => {
     expect(location(await checkout())).toBe(
       '/ru/parts/cart/?notice=cart-changed',
     );
+  });
+
+  it('tells the visitor the cart expired when the shop no longer knows it', async () => {
+    answer(404, { type: 'not_found' });
+
+    expect(location(await checkout())).toBe('/ru/parts/cart/?notice=expired');
+  });
+
+  it('refuses a checkout that does not say which cart the visitor saw', async () => {
+    const response = await checkout({ cart_fingerprint: '' });
+
+    expect(location(response)).toBe('/ru/parts/cart/?notice=invalid');
+    expect(backend).not.toHaveBeenCalled();
   });
 
   it('answers a body that is not a form with a redirect, not a crash', async () => {

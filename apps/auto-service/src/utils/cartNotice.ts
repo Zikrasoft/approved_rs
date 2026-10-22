@@ -2,6 +2,7 @@ import type { CheckoutRefusal } from '@podbor/catalog-contract';
 
 export const CART_NOTICE_PARAM = 'notice';
 export const ORDER_NUMBER_PARAM = 'order';
+export const ORDERED_CART_PARAM = 'cart';
 
 export type CartNotice =
   | 'ordered'
@@ -9,6 +10,7 @@ export type CartNotice =
   | 'unavailable'
   | 'cart-changed'
   | 'unreachable'
+  | 'expired'
   | 'invalid';
 
 const REFUSAL_NOTICE: Partial<Record<CheckoutRefusal, CartNotice>> = {

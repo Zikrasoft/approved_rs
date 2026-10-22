@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   forgetCart,
+  forgetOrderedCart,
+  unavailableNames,
   moveCartToInquiry,
   payableTotal,
   readCart,
@@ -64,6 +66,38 @@ describe('the remembered cart', () => {
     expect(readCart(storage)).toMatchObject({ id: 'cart_1', parts: [bmwOil] });
     forgetCart(storage);
     expect(readCart(storage)).toBeNull();
+  });
+
+  it('forgets the cart once it became an order', () => {
+    const storage = memoryStorage();
+    rememberCart(cart, storage);
+
+    forgetOrderedCart('cart_1', storage);
+
+    expect(readCart(storage)).toBeNull();
+  });
+
+  it('keeps a newer cart when an old order confirmation is opened again', () => {
+    const storage = memoryStorage();
+    rememberCart(cart, storage);
+
+    forgetOrderedCart('cart_0', storage);
+    forgetOrderedCart(null, storage);
+
+    expect(readCart(storage)).toMatchObject({ id: 'cart_1' });
+  });
+
+  it('names the lines that keep the cart from being ordered', () => {
+    expect(
+      unavailableNames({
+        ...cart,
+        items: [
+          ...cart.items,
+          { ...cart.items[0], id: 'item_2', available: false },
+        ],
+      }),
+    ).toEqual(['Масляный фильтр']);
+    expect(unavailableNames(cart)).toEqual([]);
   });
 
   it('moves the parts into the inquiry list when the shop is down', () => {

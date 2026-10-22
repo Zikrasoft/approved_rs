@@ -78,6 +78,42 @@ describe('partSuccessor', () => {
     expect(partSuccessor(old, index(mannCurrent))).toBe(mannCurrent);
   });
 
+  it('sends a replaced part to the number of its replacement that is in stock', () => {
+    const ate = { name: 'ATE', slug: 'ate' };
+    const offer = (price: number, stock_quantity: number) => ({
+      id: `of_${price}`,
+      price,
+      currency: 'RSD',
+      stock_quantity,
+      lead_time_days: 0,
+    });
+    const successorPart = { ...current.part, id: 'part_2' };
+    const named = entry(number(bmw, '34116860242'), { part: successorPart });
+    const outOfStock = entry(number(mann, 'X1'), {
+      part: successorPart,
+      offers: [offer(100, 0)],
+    });
+    const inStock = entry(number(ate, '13046027862'), {
+      part: successorPart,
+      offers: [offer(6600, 3)],
+    });
+    const old = entry(number(ate, '13046072172'), {
+      part: {
+        ...current.part,
+        replaced_by: {
+          id: 'part_2',
+          name: 'Brake pads',
+          translations: null,
+          brand_number: number(bmw, '34116860242'),
+        },
+      },
+    });
+
+    expect(partSuccessor(old, index(named, outOfStock, inStock, old))).toBe(
+      inStock,
+    );
+  });
+
   it('has none for a current number', () => {
     expect(partSuccessor(current, index(current))).toBeNull();
   });

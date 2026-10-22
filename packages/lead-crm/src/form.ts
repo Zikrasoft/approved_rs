@@ -137,7 +137,10 @@ const submissionObject = z
   .transform((value) => {
     const services = value.service.filter(Boolean).slice(0, MAX_SERVICES);
     const vin = value.vin ? `VIN: ${value.vin}` : null;
-    const comment = [vin, value.car, value.comment].filter(Boolean).join('\n');
+    const comment = [vin, value.car, value.comment]
+      .filter(Boolean)
+      .join('\n')
+      .replace(/\r\n?/g, '\n');
     return {
       name: value.name,
       contact: value.contact,
