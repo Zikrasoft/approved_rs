@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PartPageEntry } from './catalogue';
-import { partSuccessor } from './partSuccessor';
+import { currentNumbers, partSuccessor } from './partSuccessor';
 
 const bmw = { name: 'BMW', slug: 'bmw' };
 const mann = { name: 'Mann-Filter', slug: 'mann-filter' };
@@ -11,7 +11,7 @@ const number = (
   superseded = false,
 ) => ({
   id: `pi_${normalized_value}`,
-  type: 'oem' as const,
+  type: 'oem' as PartPageEntry['type'],
   value: normalized_value,
   normalized_value,
   superseded,
@@ -119,5 +119,73 @@ describe('partSuccessor', () => {
 
   it('has none for a current number', () => {
     expect(partSuccessor(current, index(current))).toBeNull();
+  });
+});
+
+describe('currentNumbers', () => {
+  const mahle = { name: 'Mahle', slug: 'mahle' };
+  const aftermarket = (
+    brand: typeof bmw,
+    value: string,
+    superseded = false,
+  ) => ({
+    ...number(brand, value, superseded),
+    type: 'manufacturer-number' as const,
+  });
+  const labels = (numbers: ReturnType<typeof currentNumbers>) =>
+    numbers.map(({ brand, value }) => `${brand.name} ${value}`);
+
+  it('lists every current number of a superseded one, its own brand first', () => {
+    const dead = entry(number(bmw, '11428507683', true), {
+      superseded: true,
+      equivalents: [
+        aftermarket(mann, 'HU816X'),
+        aftermarket(mahle, 'OX404D'),
+        number(bmw, '11428575211'),
+        number(bmw, '11420000000', true),
+      ],
+    });
+
+    expect(labels(currentNumbers(dead, index()))).toEqual([
+      'BMW 11428575211',
+      'Mann-Filter HU816X',
+      'Mahle OX404D',
+    ]);
+  });
+
+  it('lists the current numbers of the replacement part once each, OEM first', () => {
+    const successorPart = { ...entry(number(bmw, 'X')).part, id: 'part_2' };
+    const old = entry(aftermarket(mann, 'OLD'), {
+      part: {
+        ...successorPart,
+        id: 'part_1',
+        replaced_by: {
+          id: 'part_2',
+          name: 'Oil filter',
+          translations: null,
+          brand_number: aftermarket(mahle, 'OX404D'),
+        },
+      },
+    });
+    const pages = index(
+      entry(aftermarket(mahle, 'OX404D'), { part: successorPart }),
+      entry(number(bmw, '11428575211'), { part: successorPart }),
+      entry(aftermarket(mann, 'HU816X'), { part: successorPart }),
+      entry(number(bmw, '11420000000', true), { part: successorPart }),
+      old,
+    );
+
+    expect(labels(currentNumbers(old, pages))).toEqual([
+      'BMW 11428575211',
+      'Mann-Filter HU816X',
+      'Mahle OX404D',
+    ]);
+  });
+
+  it('has none for a current number', () => {
+    const live = entry(number(bmw, '11428575211'), {
+      equivalents: [aftermarket(mann, 'HU816X')],
+    });
+    expect(currentNumbers(live, index())).toEqual([]);
   });
 });
