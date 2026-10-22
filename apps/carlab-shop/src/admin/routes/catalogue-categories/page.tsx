@@ -20,6 +20,7 @@ import { getI18n, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -442,7 +443,7 @@ const CategoryEditor = ({
         {category.fields.length === 0 ? (
           <Text>{t('categories.noFields')}</Text>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollArea>
             <Table>
               <Table.Header>
                 <Table.Row>
@@ -471,7 +472,7 @@ const CategoryEditor = ({
                 ))}
               </Table.Body>
             </Table>
-          </div>
+          </ScrollArea>
         )}
       </div>
 

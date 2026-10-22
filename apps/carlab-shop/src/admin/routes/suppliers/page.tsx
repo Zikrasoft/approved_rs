@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
   adminFetch,
@@ -141,9 +142,12 @@ const SuppliersPage = () => {
   };
 
   const saveMarkup = async (supplier: Supplier) => {
-    const markup_percentage = Number(
-      (drafts[supplier.id] ?? '').replace(',', '.'),
-    );
+    const typed = (drafts[supplier.id] ?? '').trim().replace(',', '.');
+    const markup_percentage = Number(typed);
+    if (!typed || !Number.isFinite(markup_percentage)) {
+      toast.error(t('suppliers.markupRequired'));
+      return;
+    }
     if (await update(supplier.id, { markup_percentage })) {
       setDrafts((current) => {
         const next = { ...current };
@@ -197,9 +201,22 @@ const SuppliersPage = () => {
   ) =>
     [
       t('suppliers.importSummary', summary),
-      summary.skipped || summary.skipped_by_reason.currency
-        ? t('suppliers.importSkipped', summary.skipped_by_reason)
-        : null,
+      summary.skipped > 0 &&
+        t('suppliers.importSkipped', {
+          count: summary.skipped,
+          reasons: (['category', 'brand'] as const)
+            .filter((reason) => summary.skipped_by_reason[reason] > 0)
+            .map((reason) =>
+              t(`suppliers.skippedReasons.${reason}`, {
+                count: summary.skipped_by_reason[reason],
+              }),
+            )
+            .join(', '),
+        }),
+      summary.skipped_by_reason.currency > 0 &&
+        t('suppliers.importWithoutPrice', {
+          count: summary.skipped_by_reason.currency,
+        }),
     ]
       .filter(Boolean)
       .join(' ');
@@ -311,7 +328,7 @@ const SuppliersPage = () => {
             {t('suppliers.import')}
           </Button>
         </div>
-        <div className="overflow-x-auto">
+        <ScrollArea>
           <Table>
             <Table.Header>
               <Table.Row>
@@ -394,7 +411,7 @@ const SuppliersPage = () => {
               ))}
             </Table.Body>
           </Table>
-        </div>
+        </ScrollArea>
         <Text size="small" className="text-ui-fg-subtle">
           {t('suppliers.releasedHint')}
         </Text>
@@ -426,7 +443,7 @@ const SuppliersPage = () => {
         {mappedSupplierId && (
           <>
             {mappings.length ? (
-              <div className="overflow-x-auto">
+              <ScrollArea>
                 <Table>
                   <Table.Header>
                     <Table.Row>
@@ -463,7 +480,7 @@ const SuppliersPage = () => {
                     ))}
                   </Table.Body>
                 </Table>
-              </div>
+              </ScrollArea>
             ) : (
               <Text size="small">{t('suppliers.mappings.empty')}</Text>
             )}
@@ -511,7 +528,7 @@ const SuppliersPage = () => {
           </Text>
         </div>
         {sources.length ? (
-          <div className="overflow-x-auto">
+          <ScrollArea>
             <Table>
               <Table.Header>
                 <Table.Row>
@@ -558,7 +575,7 @@ const SuppliersPage = () => {
                 ))}
               </Table.Body>
             </Table>
-          </div>
+          </ScrollArea>
         ) : (
           <Text size="small">{t('sources.empty')}</Text>
         )}

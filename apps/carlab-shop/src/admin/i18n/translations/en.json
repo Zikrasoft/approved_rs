@@ -15,7 +15,7 @@
     "heading": "Fitment curation",
     "step1Label": "1. Find or create the Part",
     "identifierCount_other": "{{name}} ({{count}} identifiers)",
-    "change": "Change",
+    "change": "Choose another part",
     "searchPlaceholder": "OEM / manufacturer number or brand",
     "search": "Search",
     "useThisPart": "Use this Part",
@@ -61,8 +61,8 @@
       "model": "Model",
       "engine": "Engine",
       "engineFamily": "Engine family",
-      "yearFrom": "Vehicles built from year",
-      "yearTo": "Vehicles built up to year"
+      "yearFrom": "Vehicle model year from",
+      "yearTo": "Vehicle model year to"
     },
     "quantityLabel": "Quantity per car",
     "axlePlaceholder": "Axle",
@@ -113,7 +113,12 @@
     "confirmDeleteFitmentTitle": "Delete this fitment?",
     "confirmDeleteFitmentBody": "The part stops showing for {{vehicle}}.",
     "fitmentDeleted": "Fitment deleted.",
-    "supplierName": "Supplier name, not checked"
+    "supplierName": "Supplier name, not checked",
+    "addNumber": "Add number",
+    "numberAdded": "Number {{number}} added.",
+    "lastNumberTitle": "{{number}} is the part's last number",
+    "lastNumberBody": "A part without a number cannot be found, so its last number cannot be deleted alone. Delete the part {{name}} entirely, with its fitments and supplier offers? This cannot be undone.",
+    "deleteWholePart": "Delete the whole part"
   },
   "suppliers": {
     "heading": "Suppliers",
@@ -125,7 +130,7 @@
     "save": "Save",
     "import": "Import now",
     "importLead": "Supplier catalogues are imported every night before publishing. The import takes only mapped categories and Brands with this supplier's spellings.",
-    "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created, {{skipped}} skipped",
+    "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
     "importNoAdapters": "No supplier is connected to the import",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
@@ -156,7 +161,13 @@
     "confirmRelease": "Permission granted, show",
     "released": "\"{{kind}}\" from {{supplier}} now shows on the site.",
     "hidden": "\"{{kind}}\" from {{supplier}} is hidden from the site.",
-    "importSkipped": "Skipped articles: {{category}} in unmapped categories, {{brand}} with an unknown brand spelling. Without an RSD price: {{currency}}."
+    "importSkipped": "{{count}} skipped: {{reasons}}.",
+    "markupRequired": "Enter the markup as a number, for example 20 or 12.5.",
+    "skippedReasons": {
+      "category": "{{count}} from unmapped categories",
+      "brand": "{{count}} with an unknown brand spelling"
+    },
+    "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}."
   },
   "brands": {
     "heading": "Brands",
@@ -257,8 +268,9 @@
         "mercedes-baumuster": "Mercedes Baumuster"
       }
     },
-    "confirmTitle": "Delete this row?",
-    "identifierFormat": "BMW type code: 4 letters or digits, for example 35BG. Mercedes-Benz Baumuster: 6 digits, for example 213004."
+    "confirmTitle": "Delete «{{name}}»?",
+    "identifierFormat": "BMW type code: 4 letters or digits, for example 35BG. Mercedes-Benz Baumuster: 6 digits, for example 213004.",
+    "deleted": "Deleted: {{name}}."
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
@@ -272,7 +284,11 @@
     "makes": {
       "bmw": "BMW",
       "mercedes-benz": "Mercedes-Benz"
-    }
+    },
+    "dismiss": "Dismiss code",
+    "confirmDismissTitle": "Dismiss code {{code}}?",
+    "confirmDismissBody": "Lookups with this code leave the list. If a customer searches such a VIN again, the code comes back.",
+    "dismissed": "Code {{code}} dismissed."
   },
   "publish": {
     "heading": "Publish",
@@ -446,7 +462,8 @@
       "PUBLISH_RUNNING": "A publish run is already in progress. Wait for it to finish.",
       "ALREADY_EXISTS": "This record already exists.",
       "FIELD_REQUIRED": "Fill in «{{field}}».",
-      "INVALID_FIELD": "Check «{{field}}»."
+      "INVALID_FIELD": "Check «{{field}}».",
+      "LAST_IDENTIFIER": "This is the part's last number and a part cannot be found without one. Add another number or delete the whole part."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -481,7 +498,10 @@
     "invalidFields": {
       "year_to": "The \"to\" year is before the \"from\" year. Check the years.",
       "production_to": "Production ends before it starts. Check the dates.",
-      "markup_percentage": "Markup: a number from 0 to 500 with at most two decimals."
+      "markup_percentage": "Markup: a number from 0 to 500 with at most two decimals.",
+      "production_from": "The production start date is not a valid date. Pick it in the calendar.",
+      "min": "«From» cannot be negative.",
+      "max": "«To» cannot be negative."
     },
     "fields": {
       "name": "Name",
@@ -568,5 +588,15 @@
     "save": "Save",
     "saved": "Saved.",
     "actions": "Actions"
+  },
+  "vehicleLabel": {
+    "kw": "{{kw}} kW",
+    "between": "{{from}}-{{to}}",
+    "since": "from {{from}}",
+    "until": "until {{to}}",
+    "steering": {
+      "left": "left-hand drive",
+      "right": "right-hand drive"
+    }
   }
 }

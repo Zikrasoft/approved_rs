@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
   adminFetch,
@@ -184,7 +185,7 @@ const BrandsPage = () => {
       {brands.length === 0 ? (
         <Text>{t('brands.empty')}</Text>
       ) : (
-        <div className="overflow-x-auto">
+        <ScrollArea>
           <Table>
             <Table.Header>
               <Table.Row>
@@ -289,7 +290,7 @@ const BrandsPage = () => {
               ))}
             </Table.Body>
           </Table>
-        </div>
+        </ScrollArea>
       )}
     </Container>
   );

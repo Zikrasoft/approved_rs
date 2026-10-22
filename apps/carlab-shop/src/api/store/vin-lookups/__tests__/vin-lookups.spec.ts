@@ -228,6 +228,29 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('dismisses an unresolved code of one Make', async () => {
+        await lookUp('WBA44DD070N000014');
+        await lookUp('WBA44DD070N000015');
+
+        const dismissed = await api.delete(
+          '/admin/vin-lookups/unresolved/bmw/44DD',
+          adminHeaders,
+        );
+
+        expect(dismissed.data).toEqual({
+          make: 'bmw',
+          code: '44DD',
+          deleted: 2,
+        });
+        expect(
+          (await api.get('/admin/vin-lookups/unresolved', adminHeaders)).data
+            .codes,
+        ).not.toContainEqual(expect.objectContaining({ code: '44DD' }));
+        expect(await vinLookups.listVinLookups({ code: '44DD' })).toHaveLength(
+          0,
+        );
+      });
+
       it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
         const response = await api
           .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)

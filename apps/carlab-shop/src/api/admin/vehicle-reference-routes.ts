@@ -141,7 +141,7 @@ export const VEHICLES = {
   plural: 'Vehicles',
   object: 'vehicle',
   collection: 'vehicles',
-  relations: ['identifiers', 'model', 'engine'],
+  relations: ['identifiers', 'model.chassis.series.make', 'engine'],
 };
 export const VEHICLE_IDENTIFIERS = {
   singular: 'VehicleIdentifier',
