@@ -43,6 +43,8 @@ export const offerCartLineSchema = z.object({
   quantity: z.number().int().positive(),
   unit_price: z.number().nonnegative(),
   available: z.boolean(),
+  in_stock: z.boolean(),
+  lead_time_days: z.number().int().nonnegative(),
   addon: lineAddonSchema.nullable(),
   part: listedPartSchema,
 });

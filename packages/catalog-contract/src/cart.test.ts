@@ -21,6 +21,8 @@ const cart = {
       quantity: 2,
       unit_price: 1850,
       available: true,
+      in_stock: true,
+      lead_time_days: 0,
       addon: null,
       part: {
         slug: 'bmw-11428575211',

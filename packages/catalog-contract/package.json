@@ -37,6 +37,13 @@
       },
       "default": "./src/fingerprint.ts"
     },
+    "./availability": {
+      "require": {
+        "types": "./dist/cjs/availability.d.ts",
+        "default": "./dist/cjs/availability.js"
+      },
+      "default": "./src/availability.ts"
+    },
     "./comment": {
       "require": {
         "types": "./dist/cjs/comment.d.ts",

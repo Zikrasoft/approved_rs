@@ -90,6 +90,15 @@ describe('CommonJS build', () => {
     ).toBe('item_1:2:50');
   });
 
+  it('serves the zod-free offer availability subpath to require()', () => {
+    expect(
+      require('@podbor/catalog-contract/availability').orderCap({
+        stock_quantity: 0,
+        lead_time_days: 4,
+      }),
+    ).toBe(10);
+  });
+
   it('serves the checkout contact check to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(
