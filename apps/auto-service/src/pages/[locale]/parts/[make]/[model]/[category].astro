@@ -7,6 +7,8 @@ import InquiryLink from '@/components/InquiryLink.astro';
 import FitLine from '@/components/FitLine.astro';
 import PartNumbers from '@/components/PartNumbers.astro';
 import PriceTag from '@/components/PriceTag.astro';
+import ThumbRow from '@/components/ThumbRow.astro';
+import { pagesThumbnail } from '@/utils/partImages';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -93,13 +95,15 @@ const fill = (template: string) =>
           {
             entry.parts.map(({ part, pages, fits }) => (
               <li class="card flex flex-col gap-3 p-5 sm:p-6">
-                <div class="flex items-baseline justify-between gap-4">
-                  <h3 class="font-semibold text-ink">
-                    {translated(part, 'name', locale)}
-                  </h3>
-                  <PriceTag pages={pages} />
-                </div>
-                <PartNumbers pages={pages} />
+                <ThumbRow thumb={pagesThumbnail(pages)} class="gap-2">
+                  <div class="flex items-baseline justify-between gap-4">
+                    <h3 class="font-semibold text-ink">
+                      {translated(part, 'name', locale)}
+                    </h3>
+                    <PriceTag pages={pages} />
+                  </div>
+                  <PartNumbers pages={pages} />
+                </ThumbRow>
                 {fits.length > 0 && (
                   <ul class="flex flex-col gap-3 border-t border-line pt-3">
                     {fits.map((fit) => (

@@ -7,16 +7,20 @@ import { formatMoney } from '@/utils/money';
 
 interface Props {
   pages: { offers: PartOffer[] }[];
+  class?: string;
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 const best = bestPrice(Astro.props.pages);
+const className = Astro.props.class;
 ---
 
 {
   best ? (
-    <span class="flex shrink-0 flex-col items-end text-right">
+    <span
+      class:list={['flex shrink-0 flex-col items-end text-right', className]}
+    >
       <span class="spec text-sm font-semibold text-ink">
         {copy.fromPrice.replace(
           '{price}',
@@ -28,7 +32,7 @@ const best = bestPrice(Astro.props.pages);
       )}
     </span>
   ) : (
-    <span class="shrink-0 text-right text-xs text-muted">
+    <span class:list={['shrink-0 text-right text-xs text-muted', className]}>
       {copy.priceOnRequestTag}
     </span>
   )
