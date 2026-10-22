@@ -15,9 +15,11 @@ import {
 import { useEffect, useState } from 'react';
 import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { PartEnrichment } from '../../components/enrichment';
 import {
   adminImageSchema,
   type AdminImage,
@@ -192,20 +194,32 @@ const PartAttributesPage = () => {
   const [categoryId, setCategoryId] = useState('');
   const [identifierId, setIdentifierId] = useState('');
   const [values, setValues] = useState<Record<string, AttributeValue>>({});
+  const [saves, setSaves] = useState(0);
+  const [params] = useSearchParams();
+
+  const search = async (text = query) => {
+    const data = await adminFetch(
+      `/admin/parts?q=${encodeURIComponent(text)}`,
+      partsSchema,
+    );
+    if (data) setParts(data.parts);
+    return data?.parts ?? [];
+  };
 
   useEffect(() => {
     adminFetch('/admin/categories', categoriesSchema).then((data) => {
       if (data) setCategories(data.categories);
     });
+    const linked = params.get('part');
+    const text = params.get('q');
+    if (linked && text) {
+      setQuery(text);
+      search(text).then((found) => {
+        const match = found.find(({ id }) => id === linked);
+        if (match) choose(match);
+      });
+    }
   }, []);
-
-  const search = async () => {
-    const data = await adminFetch(
-      `/admin/parts?q=${encodeURIComponent(query)}`,
-      partsSchema,
-    );
-    if (data) setParts(data.parts);
-  };
 
   const choose = (chosen: Part) => {
     setPart(chosen);
@@ -231,7 +245,10 @@ const PartAttributesPage = () => {
         attributes: values,
       }),
     });
-    if (saved) toast.success(t('partAttributes.saved'));
+    if (saved) {
+      toast.success(t('partAttributes.saved'));
+      setSaves((count) => count + 1);
+    }
   };
 
   const showImages = (
@@ -275,7 +292,7 @@ const PartAttributesPage = () => {
           />
           <Button
             variant="secondary"
-            onClick={search}
+            onClick={() => search()}
             disabled={!query || writing}
           >
             {t('partAttributes.search')}
@@ -302,6 +319,7 @@ const PartAttributesPage = () => {
             <div className="flex flex-col gap-y-1">
               <Heading level="h2">{partLabel(part)}</Heading>
               <EditedBy row={part} />
+              <PartEnrichment partId={part.id} version={saves} />
             </div>
             <TranslationsDrawer
               entity="part"

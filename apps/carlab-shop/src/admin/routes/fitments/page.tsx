@@ -16,9 +16,11 @@ import {
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { PartEnrichment } from '../../components/enrichment';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -293,22 +295,36 @@ const FitmentsPage = () => {
     }
   }, [selectedPart?.id]);
 
-  const search = async () => {
-    if (!query.trim()) {
+  const search = async (text = query.trim()) => {
+    if (!text) {
       return;
     }
     const data = await adminFetch(
-      `/admin/parts?q=${encodeURIComponent(query.trim())}`,
+      `/admin/parts?q=${encodeURIComponent(text)}`,
       partsSchema,
     );
     if (data) {
       setParts(data.parts);
       setSearched(true);
       if (!data.parts.length) {
-        setNewValue(query.trim());
+        setNewValue(text);
       }
     }
+    return data?.parts ?? [];
   };
+
+  const [params] = useSearchParams();
+  useEffect(() => {
+    const linked = params.get('part');
+    const text = params.get('q');
+    if (linked && text) {
+      setQuery(text);
+      search(text).then((found) => {
+        const match = found?.find(({ id }) => id === linked);
+        if (match) setSelectedPart(match);
+      });
+    }
+  }, []);
 
   const createPart = async () => {
     const data = await adminFetch('/admin/parts', createdPartSchema, {
@@ -632,12 +648,18 @@ const FitmentsPage = () => {
         {selectedPart ? (
           <div className="flex flex-col gap-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <Text weight="plus">
-                {t('fitments.identifierCount', {
-                  name: selectedPart.name,
-                  count: selectedPart.identifiers.length,
-                })}
-              </Text>
+              <div className="flex flex-col gap-y-1">
+                <Text weight="plus">
+                  {t('fitments.identifierCount', {
+                    name: selectedPart.name,
+                    count: selectedPart.identifiers.length,
+                  })}
+                </Text>
+                <PartEnrichment
+                  partId={selectedPart.id}
+                  version={`${fitments.length}-${selectedPart.identifiers.length}`}
+                />
+              </div>
               <div className="flex flex-wrap gap-2">
                 <TranslationsDrawer
                   entity="part"
@@ -722,7 +744,11 @@ const FitmentsPage = () => {
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && search()}
               />
-              <Button disabled={writing} variant="secondary" onClick={search}>
+              <Button
+                disabled={writing}
+                variant="secondary"
+                onClick={() => search()}
+              >
                 {t('fitments.search')}
               </Button>
             </div>

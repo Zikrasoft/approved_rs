@@ -10,3 +10,4 @@ export * from './search.ts';
 export * from './cart.ts';
 export * from './comment.ts';
 export * from './fingerprint.ts';
+export * from './enrichment.ts';

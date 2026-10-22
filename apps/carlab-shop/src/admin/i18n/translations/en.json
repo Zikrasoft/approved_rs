@@ -1,5 +1,6 @@
 {
   "menu": {
+    "parts": "Parts",
     "fitments": "Fitments",
     "suppliers": "Suppliers",
     "brands": "Brands",
@@ -688,5 +689,47 @@
     "numberHint": "A photo belongs to one number: it must show this brand's part. Equivalents have their own photos.",
     "numberOption_one": "{{number}} ({{count}} photo)",
     "numberOption_other": "{{number}} ({{count}} photos)"
+  },
+  "parts": {
+    "heading": "Parts",
+    "lead": "A number is indexed when it has a category and at least one vehicle, equivalent or matching approval. Only indexed numbers reach search and the sitemap.",
+    "filterLabel": "Indexing status",
+    "filters": {
+      "all": "All",
+      "true": "Indexed",
+      "false": "Not indexed"
+    },
+    "status": {
+      "enriched": "Indexed",
+      "notEnriched": "Not indexed"
+    },
+    "reasons": {
+      "no_category": "no category",
+      "no_fitment_equivalent_or_requirement": "no vehicles, equivalents or approvals"
+    },
+    "searchLabel": "Search by number or name",
+    "searchPlaceholder": "Number, brand or name",
+    "categoryLabel": "Category",
+    "allCategories": "All categories",
+    "noCategory": "No category",
+    "columns": {
+      "number": "Number",
+      "status": "Status",
+      "category": "Category",
+      "photos": "Photos",
+      "offers": "Offers"
+    },
+    "fix": {
+      "attributes": "Category and photos",
+      "fitments": "Vehicles and equivalents"
+    },
+    "emptyHint": "Change the filter or the search.",
+    "pagination": {
+      "of": "of",
+      "results": "numbers",
+      "pages": "pages",
+      "prev": "Previous",
+      "next": "Next"
+    }
   }
 }

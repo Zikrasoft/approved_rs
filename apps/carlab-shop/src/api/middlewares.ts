@@ -19,6 +19,7 @@ import {
   AdminCreateSupplierCategory,
   AdminEditTranslation,
   AdminListFitments,
+  AdminListPartIdentifiers,
   AdminListRequirements,
   AdminOrderImages,
   AdminSearchParts,
@@ -112,6 +113,11 @@ export default defineMiddlewares({
       matcher: '/admin/parts/:id/identifiers',
       method: 'POST',
       middlewares: [validateAdminBody(AdminAddPartIdentifier)],
+    },
+    {
+      matcher: '/admin/part-identifiers',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(AdminListPartIdentifiers, {})],
     },
     {
       matcher: '/admin/part-identifiers/:id',
