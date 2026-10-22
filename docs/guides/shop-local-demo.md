@@ -61,7 +61,11 @@ The sections below are what the command does, for reference.
 | `PORT`                    | `9009` (Medusa reads it itself; unset it is 9000)     |
 | `SUPPLIER_ADAPTERS`       | `demo`                                                |
 | `DEMO_SUPPLIER_OVERRIDES` | an absolute path to a JSON file, see step 7           |
-| `LEAD_ROUTE_URL`          | `http://localhost:4321/api/leads`                     |
+| `LEAD_ROUTE_URL`          | `http://127.0.0.1:4321/api/leads`                     |
+
+`LEAD_ROUTE_URL` names `127.0.0.1`, not `localhost`: Node resolves `localhost`
+to `[::1]` first, and anything else listening on IPv6 port 4321 gets the
+order. `shop:prepare` rewrites a `localhost` value left in an existing `.env`.
 
 Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset.
 `SUPPLIER_ADAPTERS=demo` is refused when `NODE_ENV=production`.
@@ -220,8 +224,17 @@ Useful pages:
 
 ## 7. Stale price and stock drop
 
-The demo adapter rereads `DEMO_SUPPLIER_OVERRIDES` on every quote, so edits
-apply on the next page view or cart action, no restart:
+The overrides file is whatever `DEMO_SUPPLIER_OVERRIDES` in the backend's env
+names. `shop:prepare` points a new `apps/carlab-shop/.env` at
+`apps/carlab-shop/.local-demo/supplier-overrides.json`; an existing `.env`, or
+a backend started with another env file, keeps its own path, so check it first:
+
+```bash
+grep DEMO_SUPPLIER_OVERRIDES apps/carlab-shop/.env
+```
+
+The demo adapter rereads the file on every quote, so edits apply on the next
+page view or cart action, no restart:
 
 ```json
 { "IC-1001": { "cost_price": 1300 }, "AD-2002": { "stock": 0 } }
