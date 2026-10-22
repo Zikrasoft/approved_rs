@@ -6,6 +6,7 @@ import {
   Wrench,
 } from '@medusajs/icons';
 import {
+  Button,
   Container,
   DropdownMenu,
   IconButton,
@@ -68,6 +69,13 @@ const PartsPage = () => {
   };
 
   useEffect(() => {
+    const typed = query.trim();
+    if (typed === q) return;
+    const timer = setTimeout(() => update({ q: typed }), 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
     adminFetch('/admin/categories', categoriesSchema).then((data) => {
       if (data) setCategories(data.categories);
     });
@@ -106,6 +114,11 @@ const PartsPage = () => {
         heading={t('parts.heading')}
         level="h1"
         lead={t('parts.lead')}
+        action={
+          <Button size="small" variant="secondary" asChild>
+            <Link to="/fitments?new=1">{t('parts.add')}</Link>
+          </Button>
+        }
       >
         <div className="flex flex-col gap-3">
           <div ref={tabsRef}>
@@ -147,10 +160,7 @@ const PartsPage = () => {
               aria-label={t('parts.searchLabel')}
               placeholder={t('parts.searchPlaceholder')}
               value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                if (!event.target.value) update({ q: '' });
-              }}
+              onChange={(event) => setQuery(event.target.value)}
             />
             <div className="sm:w-64">
               <Select

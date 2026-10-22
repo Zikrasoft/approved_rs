@@ -3,7 +3,10 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
-import { retrieveCategoryFieldOption } from '../../../../../../../../lib/categories';
+import {
+  refuseTakenOptionLabel,
+  retrieveCategoryFieldOption,
+} from '../../../../../../../../lib/categories';
 import { CATALOG_MODULE } from '../../../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../../../modules/catalog/service';
 import type { AdminUpdateCategoryFieldOptionType } from '../../../../../../validators';
@@ -17,6 +20,12 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await retrieveCategoryFieldOption(catalog, id, field_id, option_id);
+  await refuseTakenOptionLabel(
+    catalog,
+    field_id,
+    req.validatedBody.label,
+    option_id,
+  );
 
   const option = await catalog.updateCategoryFieldOptions({
     id: option_id,

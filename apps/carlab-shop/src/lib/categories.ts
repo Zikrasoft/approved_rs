@@ -1,6 +1,6 @@
 import { MedusaError } from '@medusajs/framework/utils';
 
-import { adminError } from './admin-errors';
+import { adminError, alreadyExists } from './admin-errors';
 import type CatalogModuleService from '../modules/catalog/service';
 
 export const CATEGORY_RELATIONS = ['fields', 'fields.options'];
@@ -54,6 +54,30 @@ export async function retrieveCategoryFieldOption(
     );
   }
   return { field, option };
+}
+
+export async function refuseTakenOptionLabel(
+  catalog: CatalogModuleService,
+  fieldId: string,
+  label: string | undefined,
+  optionId?: string,
+) {
+  if (label === undefined) return;
+  const siblings = await catalog.listCategoryFieldOptions(
+    { field_id: fieldId },
+    { select: ['id', 'label'], take: null },
+  );
+  const taken = siblings.some(
+    (sibling) =>
+      sibling.id !== optionId &&
+      sibling.label.toLocaleLowerCase() === label.toLocaleLowerCase(),
+  );
+  if (taken) {
+    throw alreadyExists(
+      'category_field_option_label',
+      'Another option of this field has this label.',
+    );
+  }
 }
 
 const requiredField = (field: string, message: string) =>

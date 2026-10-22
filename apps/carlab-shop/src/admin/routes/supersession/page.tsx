@@ -130,11 +130,11 @@ const SupersessionPage = () => {
     );
     if (saved) {
       toast.success(
-        t(
-          replacedById
-            ? 'supersession.replacementSaved'
-            : 'supersession.replacementCleared',
-        ),
+        replacedById
+          ? t('supersession.replacementSaved')
+          : t('supersession.replacementCleared', {
+              part: selected.replaced_by?.name,
+            }),
       );
       setCandidates(null);
       setReplacementQuery('');

@@ -250,6 +250,31 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('refuses an option label another option of the field has in any case', async () => {
+        const { viscosity, base } = await createOilCategory();
+        const id = await optionId(viscosity.id, '0w-20');
+
+        const created = await post(`${base}/${viscosity.id}/options`, {
+          key: '5w-30-copy',
+          label: '5w-30',
+        });
+        const renamed = await post(`${base}/${viscosity.id}/options/${id}`, {
+          label: ' 5W-30 ',
+        });
+        const kept = await post(`${base}/${viscosity.id}/options/${id}`, {
+          label: '0w-20',
+        });
+
+        for (const response of [created, renamed]) {
+          expect(response.status).toBe(409);
+          expect(response.data).toMatchObject({
+            code: 'ALREADY_EXISTS',
+            entity: 'category_field_option_label',
+          });
+        }
+        expect(kept.status).toBe(200);
+      });
+
       it('refuses to change an option key', async () => {
         const { viscosity, base } = await createOilCategory();
         const id = await optionId(viscosity.id, '5w-30');

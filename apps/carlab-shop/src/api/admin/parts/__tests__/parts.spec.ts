@@ -266,6 +266,7 @@ medusaIntegrationTestRunner({
             expect(response.data).toMatchObject({
               code: 'ALREADY_EXISTS',
               entity: 'part_identifier',
+              part: 'Identity part',
             });
           }
 
@@ -408,7 +409,7 @@ medusaIntegrationTestRunner({
           } = await createPart('Second number part', 'ADD-TAKEN-2');
 
           const response = await addNumber(part.id, {
-            type: 'ean',
+            type: 'manufacturer-number',
             brand_id: bmw.id,
             value: 'add taken 1',
           });
@@ -417,6 +418,7 @@ medusaIntegrationTestRunner({
           expect(response.data).toMatchObject({
             code: 'ALREADY_EXISTS',
             entity: 'part_identifier',
+            part: 'Taken number part',
           });
         });
 

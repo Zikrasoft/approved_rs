@@ -3,7 +3,10 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
-import { retrieveCategoryField } from '../../../../../../../lib/categories';
+import {
+  refuseTakenOptionLabel,
+  retrieveCategoryField,
+} from '../../../../../../../lib/categories';
 import { CATALOG_MODULE } from '../../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../../modules/catalog/service';
 import type { AdminCreateCategoryFieldOptionType } from '../../../../../validators';
@@ -17,6 +20,7 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await retrieveCategoryField(catalog, id, field_id);
+  await refuseTakenOptionLabel(catalog, field_id, req.validatedBody.label);
 
   const option = await catalog.createCategoryFieldOptions({
     ...req.validatedBody,

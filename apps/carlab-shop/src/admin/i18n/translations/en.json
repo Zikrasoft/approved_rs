@@ -119,7 +119,9 @@
     "numberAdded": "Number {{number}} added.",
     "lastNumberTitle": "{{number}} is the part's last number",
     "lastNumberBody": "A part without a number cannot be found, so its last number cannot be deleted alone. Delete the part {{name}} entirely, with its fitments and supplier offers? This cannot be undone.",
-    "deleteWholePart": "Delete the whole part"
+    "deleteWholePart": "Delete the whole part",
+    "quantityInvalid": "Enter the quantity as a whole number from 1 to 100.",
+    "editingVehicle": "Vehicle: {{vehicle}}"
   },
   "suppliers": {
     "heading": "Suppliers",
@@ -163,7 +165,7 @@
     "released": "\"{{kind}}\" from {{supplier}} now shows on the site.",
     "hidden": "\"{{kind}}\" from {{supplier}} is hidden from the site.",
     "importSkipped": "{{count}} skipped: {{reasons}}.",
-    "markupRequired": "Enter the markup as a number, for example 20 or 12.5.",
+    "markupRequired": "Enter the markup as a number from 0 to 500 with at most two decimals, for example 20 or 12.5.",
     "skippedReasons": {
       "category": "{{count}} from unmapped categories",
       "brand": "{{count}} with an unknown brand spelling"
@@ -174,9 +176,9 @@
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "The nightly import and Import now will stop loading this supplier's catalogue. Rows already loaded stay.",
+        "body": "The nightly import and Import now will stop loading this supplier's catalogue. Parts and offers with price and stock already loaded stay on the site. To remove them, delete this supplier's rows under Catalogue data sources below.",
         "confirm": "Switch off import",
-        "done": "Import from {{supplier}} switched off."
+        "done": "Import from {{supplier}} switched off. Its offers stay on the site."
       },
       "on": {
         "title": "Switch on the import from {{supplier}}?",
@@ -184,7 +186,8 @@
         "confirm": "Switch on import",
         "done": "Import from {{supplier}} switched on."
       }
-    }
+    },
+    "importSwitchedOff": "Import switched off, not loaded: {{suppliers}}. Their earlier offers stay on the site."
   },
   "brands": {
     "heading": "Brands",
@@ -360,7 +363,7 @@
     "markedSuperseded": "Number {{number}} marked superseded.",
     "markedCurrent": "Number {{number}} is current again.",
     "replacementSaved": "Replacement saved.",
-    "replacementCleared": "Replacement removed."
+    "replacementCleared": "Replacement removed: {{part}} no longer replaces this part."
   },
   "categories": {
     "heading": "Categories",
@@ -470,7 +473,9 @@
     "boolean": {
       "true": "Yes",
       "false": "No"
-    }
+    },
+    "boundsRequired": "Enter «From», «To» or both.",
+    "boundsInverted": "«From» is greater than «To». Swap the values."
   },
   "edited": {
     "column": "Changed",
@@ -502,7 +507,7 @@
       "not_found": "The row was not found. Reload the page.",
       "not_allowed": "This action is not available now.",
       "conflict": "The row has changed or is in use. Reload the page and try again.",
-      "unauthorized": "Your session has ended. Sign in again.",
+      "unauthorized": "Your session has expired. Sign in again.",
       "duplicate_error": "This row already exists.",
       "forbidden": "You do not have permission for this action."
     },
@@ -526,7 +531,9 @@
       "fitment": "This part already fits this vehicle at this position with these conditions.",
       "requirement": "This owner already has a requirement on this attribute. Change or delete it instead of adding another.",
       "supplier": "A supplier with this name already exists.",
-      "vehicle": "This vehicle already exists: same model, engine, power, drive, market, years and steering."
+      "vehicle": "This vehicle already exists: same model, engine, power, drive, market, years and steering.",
+      "category_field_option_label": "This attribute already has an option with this label (case does not matter).",
+      "part_identifier_held": "This number already belongs to the part «{{part}}». A brand number can belong to one part only: open that part or enter another number."
     },
     "invalidFields": {
       "key": "Key: lowercase Latin letters, digits and hyphens. The keys brand, in-stock and price are taken by the storefront filters.",
@@ -536,9 +543,16 @@
       "production_from": "The production start date is not a valid date. Pick it in the calendar.",
       "min": "«From» cannot be negative.",
       "max": "«To» cannot be negative.",
-      "service_price": "Service price: a whole number of RSD, 0 or more.",
+      "service_price": "Service price: a whole number of RSD from 0 to 1000000.",
       "service_label": "Service name: 200 characters at most.",
-      "service_note": "Service note: 500 characters at most."
+      "service_note": "Service note: 500 characters at most.",
+      "ean": "EAN barcode: 8 or 13 digits with a valid check digit. Check the number on the package.",
+      "quantity": "Quantity: a whole number from 1 to 100.",
+      "kit_rank": "Kit order: a whole number.",
+      "rank": "Order: a whole number.",
+      "power_kw": "Power: a whole number of kW from 1 to 2000.",
+      "displacement_cc": "Displacement: a whole number of cc from 1 to 20000.",
+      "slug": "URL name: lowercase Latin letters and digits with hyphens between them, for example skoda-octavia."
     },
     "fields": {
       "name": "Name",
@@ -580,7 +594,10 @@
       "identifiers": "Numbers",
       "service_label": "Service name",
       "service_price": "Service price, RSD",
-      "service_note": "Service note"
+      "service_note": "Service note",
+      "ean": "EAN barcode",
+      "kit_rank": "Kit order",
+      "rank": "Order"
     },
     "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative.",
     "entities": {
@@ -656,7 +673,8 @@
     "actions": "Actions",
     "edit": "Edit",
     "empty": "Nothing here yet",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {{name}}",
+    "close": "Close"
   },
   "vehicleLabel": {
     "kw": "{{kw}} kW",
@@ -678,9 +696,9 @@
     "hintSingle": "JPEG, PNG or WebP, up to 10 MB.",
     "empty": "No photos yet",
     "main": "Main",
-    "moveLeft": "Move left",
-    "moveRight": "Move right",
-    "delete": "Delete photo",
+    "moveLeft": "Move photo {{position}} left",
+    "moveRight": "Move photo {{position}} right",
+    "delete": "Delete photo {{position}}",
     "deleted": "Photo deleted.",
     "confirmDeleteTitle": "Delete this photo?",
     "confirmDeleteBody": "The photo leaves the site with the next publish. The file is deleted right away and cannot be restored.",
@@ -732,6 +750,7 @@
       "pages": "pages",
       "prev": "Previous",
       "next": "Next"
-    }
+    },
+    "add": "Add part"
   }
 }

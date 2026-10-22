@@ -97,7 +97,7 @@ export const ImageUploads = ({
                     <IconButton
                       size="small"
                       variant="transparent"
-                      aria-label={t('images.moveLeft')}
+                      aria-label={t('images.moveLeft', { position: index + 1 })}
                       disabled={index === 0 || writing}
                       onClick={() => onMove(image, -1)}
                     >
@@ -106,7 +106,9 @@ export const ImageUploads = ({
                     <IconButton
                       size="small"
                       variant="transparent"
-                      aria-label={t('images.moveRight')}
+                      aria-label={t('images.moveRight', {
+                        position: index + 1,
+                      })}
                       disabled={index === images.length - 1 || writing}
                       onClick={() => onMove(image, 1)}
                     >
@@ -119,7 +121,7 @@ export const ImageUploads = ({
                 <IconButton
                   size="small"
                   variant="transparent"
-                  aria-label={t('images.delete')}
+                  aria-label={t('images.delete', { position: index + 1 })}
                   disabled={writing}
                   onClick={() =>
                     confirmed({

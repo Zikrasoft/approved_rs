@@ -184,6 +184,16 @@ const RequirementsPage = () => {
 
   const add = async () => {
     if (!field) return;
+    const min = numberOrNull(draft.min);
+    const max = numberOrNull(draft.max);
+    if (field.type === 'number' && min === null && max === null) {
+      toast.error(t('requirements.boundsRequired'));
+      return;
+    }
+    if (min !== null && max !== null && min > max) {
+      toast.error(t('requirements.boundsInverted'));
+      return;
+    }
     const optionKeys = isSelect
       ? draft.optionKeys
       : draft.values
@@ -196,8 +206,8 @@ const RequirementsPage = () => {
         field_id: field.id,
         [ownerKey]: ownerId,
         option_keys: field.type === 'number' ? null : optionKeys,
-        min: field.type === 'number' ? numberOrNull(draft.min) : null,
-        max: field.type === 'number' ? numberOrNull(draft.max) : null,
+        min: field.type === 'number' ? min : null,
+        max: field.type === 'number' ? max : null,
         quantity: Number(draft.quantity),
       }),
     });
