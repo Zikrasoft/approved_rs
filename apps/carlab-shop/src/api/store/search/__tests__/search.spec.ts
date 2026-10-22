@@ -308,6 +308,29 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('keeps describing chosen values that leave nothing to list', async () => {
+        const response = await search({
+          category: 'engine-oil',
+          locale: 'ru',
+          facets: ['viscosity:0w-20', 'viscosity:5w-30', 'viscosity:10w-60'],
+          q: 'magnatec',
+        });
+
+        expect(response.data.results).toHaveLength(1);
+        expect(response.data.facets).toEqual([
+          {
+            key: 'viscosity',
+            label: 'Вязкость',
+            unit: null,
+            values: [
+              { value: '10w-60', label: '10w-60', count: 0 },
+              { value: '0w-20', label: '0W-20', count: 0 },
+              { value: '5w-30', label: '5W-30', count: 1 },
+            ],
+          },
+        ]);
+      });
+
       it('searches by text inside a Category', async () => {
         const found = await results({
           q: 'castrol',

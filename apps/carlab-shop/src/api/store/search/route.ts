@@ -79,11 +79,15 @@ async function describeFacets(
   counts: z.infer<typeof facetCountsSchema>,
   locale: CatalogLocale,
   categoryId: string | undefined,
+  chosen: string[],
 ) {
-  const values = (counts?.values ?? []).map(({ value, count }) => ({
-    ...splitFacet(value),
-    count,
-  }));
+  const counted = counts?.values ?? [];
+  const values = [
+    ...counted,
+    ...chosen
+      .filter((facet) => !counted.some(({ value }) => value === facet))
+      .map((value) => ({ value, count: 0 })),
+  ].map(({ value, count }) => ({ ...splitFacet(value), count }));
   if (!values.length) {
     return [];
   }
@@ -239,6 +243,7 @@ export async function GET(
         facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD]),
         locale,
         found?.id,
+        facets,
       ),
       category: narrowedTo,
       count: Math.max(
