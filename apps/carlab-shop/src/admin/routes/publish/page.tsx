@@ -1,33 +1,11 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { RocketLaunch } from '@medusajs/icons';
-import { Badge, Button, Container, Heading, Text, toast } from '@medusajs/ui';
-import { useEffect, useState } from 'react';
+import { Badge, Button, Container, Heading, Text } from '@medusajs/ui';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 
-import { adminFetch, useWriting } from '../../lib/admin-fetch';
+import { useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
-
-const publishRunSchema = z.object({
-  id: z.string(),
-  status: z.enum(['running', 'succeeded', 'failed']),
-  failed_step: z.string().nullable(),
-  error: z.string().nullable(),
-  created_at: z.string(),
-  finished_at: z.string().nullable(),
-  created_by_user: z
-    .object({ email: z.string(), name: z.string().nullable() })
-    .nullable()
-    .optional(),
-});
-
-type PublishRun = z.infer<typeof publishRunSchema>;
-
-const runResponseSchema = z.object({
-  publish_run: publishRunSchema.nullable(),
-});
-
-const POLL_MS = 5000;
+import { usePublishRun } from '../../lib/publish-run';
 
 const KNOWN_ERRORS: Record<string, string> = {
   'OPENAI_API_KEY is not set': 'publish.knownErrors.openAiKey',
@@ -43,44 +21,7 @@ const BADGE_COLOR = {
 const PublishPage = () => {
   const writing = useWriting();
   const { t, i18n } = useTranslation('carlabAdmin');
-  const [run, setRun] = useState<PublishRun | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [starting, setStarting] = useState(false);
-
-  const load = async () => {
-    const data = await adminFetch(
-      '/admin/publish-runs/latest',
-      runResponseSchema,
-    );
-    if (data) {
-      setRun(data.publish_run);
-    }
-    setLoaded(true);
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (run?.status !== 'running') {
-      return;
-    }
-    const timer = setTimeout(load, POLL_MS);
-    return () => clearTimeout(timer);
-  }, [run]);
-
-  const publish = async () => {
-    setStarting(true);
-    const data = await adminFetch('/admin/publish-runs', runResponseSchema, {
-      method: 'POST',
-    });
-    setStarting(false);
-    if (data) {
-      toast.success(t('publish.started'));
-    }
-    await load();
-  };
+  const { run, loaded, starting, publish } = usePublishRun();
 
   const starter = run?.created_by_user;
 

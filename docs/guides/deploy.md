@@ -634,6 +634,10 @@ validates everything at startup. The non-obvious parts:
   the first translates catalogue text, the second is a fine-grained GitHub token
   with `actions: write` on this repository that dispatches `publish.yml`. Either
   may stay empty; the chain then stops at that step and the admin shows why.
+  `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
+  ships fresh catalogue data and never code that is not live yet. The chain runs
+  on the admin's Publish button and every night at 03:00 server time
+  (`src/jobs/nightly-publish.ts`).
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach

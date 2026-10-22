@@ -133,8 +133,8 @@ pnpm publish:local
 ```
 
 It runs the supplier import, skips translate when `OPENAI_API_KEY` is unset,
-and reindexes Typesense. The deploy step is left out: there is no
-`publish.yml`, and locally "deploy" means rebuilding the storefront (step 6).
+and reindexes Typesense. The deploy step is left out: `publish.yml`
+rebuilds production, and locally "deploy" means rebuilding the storefront (step 6).
 
 The admin's Publish button runs the real chain and, without an OpenAI key,
 stops at `translate` with "OPENAI_API_KEY is not set" once any row is

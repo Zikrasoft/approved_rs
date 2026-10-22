@@ -336,7 +336,9 @@
     "knownErrors": {
       "openAiKey": "The OpenAI key (OPENAI_API_KEY) is not set, so translation did not run and the later steps were skipped. This is a server setting: ask a developer to add the key.",
       "dispatchToken": "The site deploy token (PUBLISH_DISPATCH_TOKEN) is not set, so the site was not rebuilt and search was not updated. This is a server setting: ask a developer to add the token."
-    }
+    },
+    "publishSite": "Publish to the site",
+    "lastFailed": "Publishing failed"
   },
   "supersession": {
     "heading": "Supersession",
