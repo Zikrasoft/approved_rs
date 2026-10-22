@@ -16,6 +16,7 @@ const number = (
   normalized_value,
   superseded,
   brand,
+  images: [],
 });
 
 const entry = (
@@ -32,7 +33,6 @@ const entry = (
     category_id: null,
     attributes: {},
   },
-  images: [],
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
