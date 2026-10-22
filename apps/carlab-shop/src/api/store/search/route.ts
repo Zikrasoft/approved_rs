@@ -9,6 +9,7 @@ import {
   CATALOG_LOCALES,
   type CatalogLocale,
   categoryFieldSchema,
+  describeFacet,
   searchableQuery,
   searchResponseSchema,
   translated,
@@ -99,30 +100,13 @@ async function describeFacets(
   const seen = new Set<string>();
   return fields
     .filter(({ key }) => !seen.has(key) && seen.add(key))
-    .map((field) => {
-      const rank = (value: string) =>
-        field.options.find(({ key }) => key === value)?.rank ?? 0;
-      return {
-        key: field.key,
-        label: translated(field, 'label', locale),
-        unit: field.unit,
-        values: values
-          .filter(({ key }) => key === field.key)
-          .sort(
-            (a, b) =>
-              rank(a.value) - rank(b.value) ||
-              a.value.localeCompare(b.value, 'en', { numeric: true }),
-          )
-          .map(({ value, count }) => {
-            const option = field.options.find(({ key }) => key === value);
-            return {
-              value,
-              label: option ? translated(option, 'label', locale) : value,
-              count,
-            };
-          }),
-      };
-    });
+    .map((field) =>
+      describeFacet(
+        field,
+        values.filter(({ key }) => key === field.key),
+        locale,
+      ),
+    );
 }
 
 export async function GET(

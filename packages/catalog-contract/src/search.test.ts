@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CATALOG_LOCALES,
+  describeFacet,
   facetFilter,
   searchableQuery,
   searchResponseSchema,
@@ -88,5 +89,69 @@ describe('searchableQuery', () => {
 
   it.each(['', ' ', '%', '*', '-/.'])('does not search %j', (q) => {
     expect(searchableQuery(q)).toBe(false);
+  });
+});
+
+describe('describeFacet', () => {
+  const field = {
+    key: 'viscosity',
+    type: 'single-select' as const,
+    unit: null,
+    label: 'Вязкость',
+    translations: { sr: { label: 'Viskozitet' } },
+    required: false,
+    facet: true,
+    rank: 1,
+    options: [
+      { key: '5w-30', label: '5W-30', translations: null, rank: 2 },
+      { key: '0w-20', label: '0W-20', translations: null, rank: 1 },
+    ],
+  };
+
+  it('labels the field and its options in the page locale, in option order', () => {
+    expect(
+      describeFacet(
+        field,
+        [
+          { value: '5w-30', count: 2 },
+          { value: '0w-20', count: 1 },
+        ],
+        'sr',
+      ),
+    ).toEqual({
+      key: 'viscosity',
+      label: 'Viskozitet',
+      unit: null,
+      values: [
+        { value: '0w-20', label: '0W-20', count: 1 },
+        { value: '5w-30', label: '5W-30', count: 2 },
+      ],
+    });
+  });
+
+  it('orders free values as numbers and keeps them as their own label', () => {
+    const capacity = {
+      ...field,
+      key: 'capacity',
+      type: 'number' as const,
+      unit: 'Ah',
+      options: [],
+    };
+
+    expect(
+      describeFacet(
+        capacity,
+        [
+          { value: '100', count: 1 },
+          { value: '60', count: 3 },
+          { value: '80', count: 2 },
+        ],
+        'ru',
+      ).values,
+    ).toEqual([
+      { value: '60', label: '60', count: 3 },
+      { value: '80', label: '80', count: 2 },
+      { value: '100', label: '100', count: 1 },
+    ]);
   });
 });
