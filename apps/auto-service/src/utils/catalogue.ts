@@ -58,6 +58,7 @@ export type PartPageEntry = PartPage & {
 export type SearchQuery = {
   q?: string;
   category?: string;
+  model?: string;
   locale: CatalogLocale;
   facets: string[];
   ranges?: RangeFilter[];
@@ -480,6 +481,7 @@ export function createCatalogue({
     async search({
       q,
       category,
+      model,
       locale,
       facets,
       ranges = [],
@@ -489,6 +491,7 @@ export function createCatalogue({
         ...(q ? { q } : {}),
         locale,
         ...(category ? { category } : {}),
+        ...(model ? { model } : {}),
       });
       for (const facet of facets) {
         params.append('facets', facet);

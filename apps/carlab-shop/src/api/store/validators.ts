@@ -13,6 +13,7 @@ export const StoreSearchParts = z
     q: z.string().trim().min(1).max(200).optional(),
     category: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     vehicle_id: z.string().min(1).optional(),
+    model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     facets: z
       .union([z.string(), z.array(z.string())])
       .transform((value) => [value].flat())

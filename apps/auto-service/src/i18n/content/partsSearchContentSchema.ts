@@ -17,6 +17,8 @@ export const partsSearchContentSchema = z
     unavailable: z.string(),
     filtersHeading: z.string(),
     applyFilters: z.string(),
+    showResults: z.string(),
+    showAllValues: z.string(),
     resetFilters: z.string(),
     resetAllFilters: z.string(),
     rangeMinLabel: z.string(),

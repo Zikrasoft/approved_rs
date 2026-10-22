@@ -26,6 +26,7 @@ import {
   UNIVERSAL_FACET_KEYS,
   universalFacets,
   usefulFacets,
+  vehicleSchema,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
@@ -135,6 +136,23 @@ async function partIdsForVehicle(
   return [...new Set(fitments.map((fitment) => fitment.part_id))];
 }
 
+async function partIdsForModel(
+  catalog: CatalogModuleService,
+  modelId: string,
+): Promise<string[]> {
+  const vehicles = await catalog.listVehicles(
+    { model_id: modelId },
+    { take: null },
+  );
+  const fitments = vehicles.length
+    ? await catalog.listFitments(
+        { vehicle_id: vehicles.map(({ id }) => id) },
+        { take: null },
+      )
+    : [];
+  return [...new Set(fitments.map((fitment) => fitment.part_id))];
+}
+
 async function describeBrands(
   catalog: CatalogModuleService,
   values: { value: string; count: number }[],
@@ -206,6 +224,7 @@ export async function GET(
     q = '',
     category,
     vehicle_id,
+    model,
     facets,
     range,
     offset,
@@ -233,6 +252,21 @@ export async function GET(
   const narrowedTo = found
     ? { slug: found.slug, name: translated(found, 'name', locale) }
     : null;
+  const [vehicleModel] = model
+    ? await catalog.listVehicleModels(
+        { slug: model },
+        { relations: ['chassis', 'chassis.series', 'chassis.series.make'] },
+      )
+    : [];
+  if (model && !vehicleModel) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      `Model ${model} not found`,
+    );
+  }
+  const scopedTo = vehicleModel
+    ? vehicleSchema.shape.model.parse(vehicleModel)
+    : null;
 
   const filters: SearchFilters = searchableQuery(q)
     ? { q: q.toLowerCase() }
@@ -245,6 +279,7 @@ export async function GET(
         results: [],
         facets: [],
         category: narrowedTo,
+        model: scopedTo,
         count: 0,
         offset,
         limit,
@@ -260,6 +295,14 @@ export async function GET(
   }
   if (vehicle_id) {
     const partIds = await partIdsForVehicle(catalog, vehicle_id);
+    if (!partIds.length) {
+      nothing();
+      return;
+    }
+    scope.push({ part_id: { $in: partIds } });
+  }
+  if (vehicleModel) {
+    const partIds = await partIdsForModel(catalog, vehicleModel.id);
     if (!partIds.length) {
       nothing();
       return;
@@ -411,6 +454,7 @@ export async function GET(
         ],
       ),
       category: narrowedTo,
+      model: scopedTo,
       count,
       offset,
       limit,

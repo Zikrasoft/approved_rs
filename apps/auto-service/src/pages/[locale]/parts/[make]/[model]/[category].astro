@@ -8,11 +8,14 @@ import FitLine from '@/components/FitLine.astro';
 import PartNumbers from '@/components/PartNumbers.astro';
 import PriceTag from '@/components/PriceTag.astro';
 import ThumbRow from '@/components/ThumbRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
 import {
+  categoryFacets,
   makeHubsForBuild,
   type ModelCategoryEntry,
   type ModelHubEntry,
@@ -20,6 +23,7 @@ import {
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { withFacetCopy } from '@/utils/partsSearch';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
@@ -53,6 +57,14 @@ const name = carName(model, locale);
 const empty = entry.parts.length === 0;
 const categoryName = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const facets = withFacetCopy(
+  categoryFacets(
+    { ...category, pages: entry.parts.flatMap(({ pages }) => pages) },
+    locale,
+  ),
+  content(locale).partsSearch,
+);
+const filtered = !empty && facets.length > 0;
 const fill = (template: string) =>
   template.replace('{category}', categoryName).replace('{model}', name);
 ---
@@ -84,13 +96,26 @@ const fill = (template: string) =>
 
   <section
     class:list={[
-      'wrap grid gap-6 py-band md:py-band-lg',
-      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+      'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
+      empty
+        ? 'lg:grid-cols-[1.2fr_1fr]'
+        : filtered && 'lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
     ]}
   >
-    <div class="flex flex-col gap-8">
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{ category: category.slug, model: model.slug }}
+          facets={facets}
+        />
+      )
+    }
+
+    <div class="flex min-w-0 flex-col gap-8">
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.partsHeading}</h2>
+        {!empty && <ListingBar count={entry.parts.length} filters={filtered} />}
         <ul class="flex flex-col gap-4">
           {
             entry.parts.map(({ part, pages, fits }) => (
