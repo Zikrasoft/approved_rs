@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import type { MedusaContainer } from '@medusajs/framework/types';
 import sharp from 'sharp';
 
-import { partImagesSchema, type StoredImage, storeImage } from '../lib/images';
+import { imagesSchema, type StoredImage, storeImage } from '../lib/images';
 import {
   DEMO_SUPPLIER_IMAGES,
   DEMO_SUPPLIERS,
@@ -86,22 +86,26 @@ export async function seedDemoImages(
       },
     );
     for (const [index, part] of parts.entries()) {
-      const [number] = part.identifiers.filter(({ superseded }) => !superseded);
-      const { items: stored } = partImagesSchema.parse(part.images);
-      if (index % 3 === 2 || !number || stored.length) continue;
+      if (index % 3 === 2) continue;
       const templates = variants[Math.min(index, variants.length - 1)];
-      const items: StoredImage[] = [];
-      for (const template of templates) {
-        items.push(
-          await storeImage(
-            container,
-            await render(template, number.brand.name, number.value),
-            `parts/${part.id}`,
-            SEEDED_BY,
-          ),
-        );
+      for (const number of part.identifiers) {
+        if (imagesSchema.parse(number.images).items.length) continue;
+        const items: StoredImage[] = [];
+        for (const template of templates) {
+          items.push(
+            await storeImage(
+              container,
+              await render(template, number.brand.name, number.value),
+              `part-identifiers/${number.id}`,
+              SEEDED_BY,
+            ),
+          );
+        }
+        await catalog.updatePartIdentifiers({
+          id: number.id,
+          images: { items },
+        });
       }
-      await catalog.updateParts({ id: part.id, images: { items } });
     }
   }
 

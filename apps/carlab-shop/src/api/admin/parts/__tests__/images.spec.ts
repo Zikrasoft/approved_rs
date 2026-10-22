@@ -31,11 +31,12 @@ type StoredImage = {
 medusaIntegrationTestRunner({
   moduleName: 'images',
   testSuite: ({ api, getContainer }) => {
-    describe('Part and Category images', () => {
+    describe('Brand-number and Category images', () => {
       let adminHeaders: { headers: { authorization: string } };
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let catalog: CatalogModuleService;
-      let partId: string;
+      let mannId: string;
+      let bmwId: string;
       let categoryId: string;
 
       const upload = (path: string, body: Buffer, type = 'image/png') =>
@@ -79,7 +80,8 @@ medusaIntegrationTestRunner({
           name: 'Масляные фильтры',
         });
         categoryId = category.id;
-        partId = await catalog.createPartWithIdentifiers({
+        const bmw = await catalog.createBrands({ name: 'BMW', slug: 'bmw' });
+        const partId = await catalog.createPartWithIdentifiers({
           name: 'Масляный фильтр',
           category_id: categoryId,
           identifiers: [
@@ -88,18 +90,35 @@ medusaIntegrationTestRunner({
               brand_id: mann.id,
               value: 'HU 816 x',
             },
+            { type: 'oem', brand_id: bmw.id, value: '11 42 8575211' },
           ],
         });
+        const identifiers = await catalog.listPartIdentifiers({
+          part_id: partId,
+        });
+        const idOf = (normalized: string) =>
+          identifiers.find(
+            ({ normalized_value }) => normalized_value === normalized,
+          )!.id;
+        mannId = idOf('HU816X');
+        bmwId = idOf('11428575211');
       });
 
-      const partImages = async (): Promise<StoredImage[]> => {
+      const imagesPath = (identifierId = mannId) =>
+        `/admin/part-identifiers/${identifierId}/images`;
+
+      const identifierImages = async (
+        identifierId = mannId,
+      ): Promise<StoredImage[]> => {
         const response = await api.get('/admin/parts?q=HU816X', adminHeaders);
-        return response.data.parts[0].images;
+        return response.data.parts[0].identifiers.find(
+          ({ id }: { id: string }) => id === identifierId,
+        ).images;
       };
 
       it('stores an uploaded photo as resized webp files served from /static', async () => {
         const response = await upload(
-          `/admin/parts/${partId}/images`,
+          imagesPath(),
           await picture(1200, 900, 'png'),
         );
 
@@ -124,16 +143,13 @@ medusaIntegrationTestRunner({
         expect(
           (await sharp(Buffer.from(served.data)).metadata()).width,
         ).toBeLessThanOrEqual(160);
-        expect(await partImages()).toEqual(response.data.images);
+        expect(await identifierImages()).toEqual(response.data.images);
       });
 
       const uploadTwo = async (): Promise<StoredImage[]> => {
-        await upload(
-          `/admin/parts/${partId}/images`,
-          await picture(1200, 900, 'png'),
-        );
+        await upload(imagesPath(), await picture(1200, 900, 'png'));
         const response = await upload(
-          `/admin/parts/${partId}/images`,
+          imagesPath(),
           await picture(300, 300, 'jpeg'),
           'image/jpeg',
         );
@@ -157,20 +173,16 @@ medusaIntegrationTestRunner({
           'image/png',
         ],
       ])('refuses %s', async (_, body, type) => {
-        const response = await upload(
-          `/admin/parts/${partId}/images`,
-          body,
-          type,
-        );
+        const response = await upload(imagesPath(), body, type);
 
         expect(response.status).toBe(400);
         expect(response.data.code).toBe('INVALID_IMAGE');
-        expect(await partImages()).toEqual([]);
+        expect(await identifierImages()).toEqual([]);
       });
 
       it('refuses a file over the size limit', async () => {
         const response = await upload(
-          `/admin/parts/${partId}/images`,
+          imagesPath(),
           Buffer.alloc(MAX_IMAGE_BYTES + 1),
         );
 
@@ -182,14 +194,14 @@ medusaIntegrationTestRunner({
         const [first, second] = await uploadTwo();
 
         const response = await api.post(
-          `/admin/parts/${partId}/images/order`,
+          `${imagesPath()}/order`,
           { ids: [second.id, first.id] },
           adminHeaders,
         );
 
         expect(response.status).toBe(200);
         expect(response.data.images).toEqual([second, first]);
-        expect(await partImages()).toEqual([second, first]);
+        expect(await identifierImages()).toEqual([second, first]);
       });
 
       it('refuses an order that does not list every photo once', async () => {
@@ -197,7 +209,7 @@ medusaIntegrationTestRunner({
 
         const response = await api
           .post(
-            `/admin/parts/${partId}/images/order`,
+            `${imagesPath()}/order`,
             { ids: [first.id, first.id] },
             adminHeaders,
           )
@@ -207,26 +219,61 @@ medusaIntegrationTestRunner({
         expect(response.data.code).toBe('INVALID_FIELD');
       });
 
-      it('shows the photos on the store part page in order, without stored files or provenance', async () => {
+      it('shows the photos only on their own brand-number page, in order, without stored files or provenance', async () => {
         const [first, second] = await uploadTwo();
 
         const response = await api.get('/store/part-pages', storeHeaders);
-
-        expect(response.data.pages[0].part.images).toEqual(
-          [first, second].map(({ src, width, height, srcset }) => ({
-            src,
-            width,
-            height,
-            srcset,
-          })),
+        const page = (id: string) =>
+          response.data.pages.find(
+            (candidate: { id: string }) => candidate.id === id,
+          );
+        const published = [first, second].map(
+          ({ src, width, height, srcset }) => ({ src, width, height, srcset }),
         );
+
+        expect(page(mannId).images).toEqual(published);
+        expect(page(mannId).part).not.toHaveProperty('images');
+        expect(page(bmwId).images).toEqual([]);
+        expect(page(bmwId).equivalents).toEqual([
+          expect.objectContaining({ id: mannId, images: published }),
+        ]);
+        expect(page(mannId).equivalents).toEqual([
+          expect.objectContaining({ id: bmwId, images: [] }),
+        ]);
+      });
+
+      it('keeps each brand-number of the Part its own photos', async () => {
+        await upload(imagesPath(), await picture(1200, 900, 'png'));
+        const response = await upload(
+          imagesPath(bmwId),
+          await picture(300, 300, 'jpeg'),
+          'image/jpeg',
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.images).toHaveLength(1);
+        expect((await identifierImages()).map(({ width }) => width)).toEqual([
+          960,
+        ]);
+        expect(
+          (await identifierImages(bmwId)).map(({ width }) => width),
+        ).toEqual([300]);
+      });
+
+      it('answers 404 for a brand-number that does not exist', async () => {
+        const response = await upload(
+          imagesPath('missing'),
+          await picture(300, 300, 'png'),
+        );
+
+        expect(response.status).toBe(404);
       });
 
       it('deletes a photo and its files', async () => {
         const [first, second] = await uploadTwo();
 
         const response = await api.delete(
-          `/admin/parts/${partId}/images/${first.id}`,
+          `${imagesPath()}/${first.id}`,
           adminHeaders,
         );
 
@@ -238,9 +285,9 @@ medusaIntegrationTestRunner({
         expect((await staticFile(second.src)).status).toBe(200);
       });
 
-      it('answers 404 for a photo the Part does not have', async () => {
+      it('answers 404 for a photo the brand-number does not have', async () => {
         const response = await api
-          .delete(`/admin/parts/${partId}/images/missing`, adminHeaders)
+          .delete(`${imagesPath()}/missing`, adminHeaders)
           .catch((error) => error.response);
 
         expect(response.status).toBe(404);

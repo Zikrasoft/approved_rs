@@ -9,6 +9,7 @@ const page = {
   normalized_value: 'HU816X',
   superseded: false,
   brand: { name: 'Mann-Filter', slug: 'mann-filter' },
+  images: [],
   part: {
     id: 'part_1',
     name: 'Масляный фильтр',
@@ -16,7 +17,6 @@ const page = {
     replaced_by: null,
     category_id: null,
     attributes: {},
-    images: [],
   },
   equivalents: [],
   offers: [],
@@ -52,7 +52,7 @@ describe('partPageSchema', () => {
     expect(partPageSchema.parse(replaced)).toEqual(replaced);
   });
 
-  it('accepts the Part images in order, without their stored files', () => {
+  it('accepts the brand-number images and its equivalents images in order, without their stored files', () => {
     const image = {
       src: 'https://api.carlab.rs/static/hu816x-960.webp',
       width: 960,
@@ -62,15 +62,29 @@ describe('partPageSchema', () => {
         { url: 'https://api.carlab.rs/static/hu816x-960.webp', width: 960 },
       ],
     };
-    const pictured = { ...page, part: { ...page.part, images: [image] } };
+    const pictured = {
+      ...page,
+      images: [image],
+      equivalents: [
+        {
+          id: 'pi_2',
+          type: 'oem',
+          value: '11 42 8575211',
+          normalized_value: '11428575211',
+          superseded: false,
+          brand: { name: 'BMW', slug: 'bmw' },
+          images: [image],
+        },
+      ],
+    };
     expect(partPageSchema.parse(pictured)).toEqual(pictured);
     expect(smallestImage(image)).toBe(image.srcset[0].url);
     expect(smallestImage({ ...image, srcset: [] })).toBe(image.src);
     expect(
       partPageSchema.parse({
         ...page,
-        part: { ...page.part, images: [{ ...image, file_ids: ['f_1'] }] },
-      }).part.images,
+        images: [{ ...image, file_ids: ['f_1'] }],
+      }).images,
     ).toEqual([image]);
   });
 

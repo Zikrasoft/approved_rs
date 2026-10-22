@@ -23,7 +23,6 @@ const oilPart = {
   replaced_by: null,
   category_id: null,
   attributes: {},
-  images: [],
 };
 
 const oilFilterMann = {
@@ -33,6 +32,7 @@ const oilFilterMann = {
   normalized_value: 'HU816X',
   superseded: false,
   brand: mann,
+  images: [],
   part: oilPart,
   equivalents: [
     {
@@ -42,6 +42,7 @@ const oilFilterMann = {
       normalized_value: '11428575211',
       superseded: false,
       brand: bmw,
+      images: [],
     },
   ],
   offers: [],
@@ -55,6 +56,7 @@ const oilFilterBmw = {
   normalized_value: '11428575211',
   superseded: false,
   brand: bmw,
+  images: [],
   part: oilPart,
   equivalents: [
     {
@@ -64,6 +66,7 @@ const oilFilterBmw = {
       normalized_value: 'HU816X',
       superseded: false,
       brand: mann,
+      images: [],
     },
   ],
   offers: [
@@ -444,11 +447,11 @@ const brandNumber = (
   normalized_value: number,
   superseded: false,
   brand: { name: slug, slug },
+  images: [],
   part: {
     translations: null,
     replaced_by: null,
     attributes: {},
-    images: [],
     ...part,
   },
   equivalents: [],

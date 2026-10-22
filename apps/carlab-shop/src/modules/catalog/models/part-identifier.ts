@@ -14,6 +14,7 @@ const PartIdentifier = model
     value: model.text(),
     normalized_value: model.text(),
     superseded: model.boolean().default(false),
+    images: model.json().default({ items: [] }),
     brand: model.belongsTo(() => Brand, { mappedBy: 'identifiers' }),
     part: model.belongsTo(() => Part, { mappedBy: 'identifiers' }),
     ...provenance(),

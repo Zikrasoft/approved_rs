@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { PART_IDENTIFIER_TYPES } from '../modules/catalog/models/part-identifier';
 import type CatalogModuleService from '../modules/catalog/service';
-import { adminImage, partImagesSchema } from './images';
+import { adminImage, imagesSchema } from './images';
 
 const identifierSchema = z.object({
   id: z.string(),
@@ -10,6 +10,7 @@ const identifierSchema = z.object({
   value: z.string(),
   normalized_value: z.string(),
   superseded: z.boolean(),
+  images: imagesSchema.transform(({ items }) => items.map(adminImage)),
   brand: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
 });
 
@@ -18,7 +19,6 @@ export const adminPartSchema = z.object({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), z.unknown()),
-  images: partImagesSchema.transform(({ items }) => items.map(adminImage)),
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),

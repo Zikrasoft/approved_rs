@@ -114,6 +114,7 @@ medusaIntegrationTestRunner({
           normalized_value: 'HU816X',
           superseded: false,
           brand: { name: 'Mann-Filter', slug: 'mann-filter' },
+          images: [],
           part: {
             id: expect.any(String),
             name: 'Oil filter, BMW B47/B48 engines',
@@ -121,7 +122,6 @@ medusaIntegrationTestRunner({
             replaced_by: null,
             category_id: oilFilters.id,
             attributes: { height: 75 },
-            images: [],
           },
           equivalents: [
             {
@@ -131,6 +131,7 @@ medusaIntegrationTestRunner({
               normalized_value: '11428575211',
               superseded: false,
               brand: { name: 'BMW', slug: 'bmw' },
+              images: [],
             },
           ],
           offers: [

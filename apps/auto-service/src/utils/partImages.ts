@@ -15,15 +15,15 @@ export type GalleryImage = {
 };
 
 type Pictured = {
-  part: { images: Image[] };
+  images: Image[];
   supplier_data: Pick<PartPage['supplier_data'], 'images'>;
 };
 
 export const partGallery = ({
-  part,
+  images,
   supplier_data,
 }: Pictured): GalleryImage[] => [
-  ...part.images.map((image) => ({
+  ...images.map((image) => ({
     src: image.src,
     srcset: image.srcset.map(({ url, width }) => `${url} ${width}w`).join(', '),
     width: image.width,
