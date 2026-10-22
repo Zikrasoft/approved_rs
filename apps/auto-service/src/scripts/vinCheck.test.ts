@@ -33,4 +33,19 @@ describe('the VIN field', () => {
 
     expect(input.checkValidity()).toBe(true);
   });
+
+  it('shows the message inline and marks the field invalid', () => {
+    const input = vinField('WBA35BG07');
+    input.checkValidity();
+    const alert = input.parentElement!.querySelector('[role="alert"]')!;
+
+    expect(alert.textContent).toBe(MESSAGE);
+    expect(alert.hasAttribute('hidden')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+
+    input.dispatchEvent(new Event('input'));
+
+    expect(alert.hasAttribute('hidden')).toBe(true);
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+  });
 });

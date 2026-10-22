@@ -19,6 +19,13 @@ const outOfStock = offer !== undefined && stock === null;
 const leadDays =
   offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
 const unavailable = outOfStock && leadDays === null;
+const leadText =
+  leadDays !== null && formatLeadTime(leadDays, copy.leadTime, localeTag);
+const stockText =
+  stock !== null &&
+  (leadText
+    ? copy.columns.inStockPickup.replace('{days}', leadText)
+    : copy.columns.stock);
 ---
 
 <li
@@ -28,8 +35,8 @@ const unavailable = outOfStock && leadDays === null;
     <span class="spec text-2xl font-semibold text-ink" data-price>
       {offer && formatMoney(offer.price, offer.currency, localeTag)}
     </span>
-    <span class="text-sm text-ink-2" data-stock hidden={stock === null}>
-      {stock !== null && `${copy.columns.stock}: ${stock}`}
+    <span class="text-sm text-ink-2" data-stock hidden={!stockText}>
+      {stockText}
     </span>
     <span
       class="rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2"
@@ -38,11 +45,12 @@ const unavailable = outOfStock && leadDays === null;
     >
       {copy.outOfStock}
     </span>
-    <span class="text-sm text-muted" data-lead hidden={leadDays === null}>
-      {
-        leadDays !== null &&
-          `${copy.columns.leadTime} ${formatLeadTime(leadDays, copy.leadTime, localeTag)}`
-      }
+    <span
+      class="text-sm text-muted"
+      data-lead
+      hidden={!leadText || !!stockText}
+    >
+      {leadText && !stockText && `${copy.columns.leadTime} ${leadText}`}
     </span>
   </div>
   <button

@@ -259,8 +259,8 @@ const specsSummary = [
                             data-note={fit.note ?? undefined}
                           >
                             <ThumbRow thumb={pagesThumbnail(fit.pages)}>
-                              <span class="flex items-baseline justify-between gap-4">
-                                <span class="text-sm text-ink">
+                              <span class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                <span class="min-w-0 text-sm text-ink">
                                   {translated(fit.part, 'name', locale)}
                                 </span>
                                 <PriceTag pages={fit.pages} />
@@ -306,8 +306,8 @@ const specsSummary = [
                   {match.parts.map(({ part, pages }) => (
                     <li class="px-5 py-4 sm:px-6">
                       <ThumbRow thumb={pagesThumbnail(pages)}>
-                        <span class="flex items-baseline justify-between gap-4">
-                          <span class="text-sm text-ink">
+                        <span class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                          <span class="min-w-0 text-sm text-ink">
                             {translated(part, 'name', locale)}
                           </span>
                           <PriceTag pages={pages} />

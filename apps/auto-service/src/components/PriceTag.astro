@@ -23,22 +23,20 @@ const availability =
   (best.inStock
     ? copy.columns.stock
     : best.leadDays > 0
-      ? `${copy.columns.leadTime} ${formatLeadTime(best.leadDays, copy.leadTime, localeTag)}`
+      ? `${copy.columns.leadTimeShort} ${formatLeadTime(best.leadDays, copy.leadTime, localeTag)}`
       : copy.outOfStock);
 ---
 
 {
   best ? (
-    <span
-      class:list={['flex shrink-0 flex-col items-end text-right', className]}
-    >
-      <span class="spec text-sm font-semibold text-ink">
+    <span class:list={['flex flex-col items-end text-right', className]}>
+      <span class="spec text-sm font-semibold whitespace-nowrap text-ink">
         {exact ? price : copy.fromPrice.replace('{price}', price)}
       </span>
       <span class="text-xs text-ink-2">{availability}</span>
     </span>
   ) : (
-    <span class:list={['shrink-0 text-right text-xs text-muted', className]}>
+    <span class:list={['text-right text-xs text-muted', className]}>
       {copy.priceOnRequestTag}
     </span>
   )

@@ -468,6 +468,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
           localeTag = 'sr',
           stockLabel = '',
           leadLabel = '',
+          stockPickup = '',
           inStock = '',
           days = '{}',
         } = this.dataset;
@@ -481,21 +482,27 @@ export function definePartOffers(tagName = 'part-offers'): void {
           '[data-price]',
           formatMoney(offer.price, offer.currency, localeTag),
         );
+        const leadText =
+          offer.lead_time_days > 0
+            ? formatLeadTime(
+                offer.lead_time_days,
+                { inStock, days: JSON.parse(days) as LeadTimeCopy['days'] },
+                localeTag,
+              )
+            : null;
         fill(
           row,
           '[data-stock]',
-          inStockNow ? `${stockLabel}: ${offer.stock_quantity}` : null,
+          inStockNow
+            ? leadText
+              ? stockPickup.replace('{days}', leadText)
+              : stockLabel
+            : null,
         );
         fill(
           row,
           '[data-lead]',
-          offer.lead_time_days > 0
-            ? `${leadLabel} ${formatLeadTime(
-                offer.lead_time_days,
-                { inStock, days: JSON.parse(days) as LeadTimeCopy['days'] },
-                localeTag,
-              )}`
-            : null,
+          !inStockNow && leadText ? `${leadLabel} ${leadText}` : null,
         );
         row.querySelector<HTMLElement>('[data-out]')!.hidden =
           inStockNow || offer.lead_time_days > 0;
@@ -899,7 +906,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           );
         });
         if (toInquiry) toInquiry.hidden = line.available;
-        this.addon(row, line, cart, money);
+        this.addon(row, line, cart, money, unitTemplate);
         return row;
       }
 
@@ -908,6 +915,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         line: CartLine,
         cart: OfferCart,
         money: (amount: number) => string,
+        unitTemplate: string,
       ): void {
         const box = row.querySelector<HTMLElement>('[data-addon]');
         const toggle = box?.querySelector<HTMLInputElement>(
@@ -915,7 +923,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
         if (!box || !toggle || !line.addon) return;
         const { addonTemplate = '{service}', locale = '' } = this.dataset;
-        box.hidden = false;
+        box.hidden = !line.available;
         fill(
           box,
           '[data-addon-label]',
@@ -929,10 +937,17 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           '[data-addon-price]',
           `+${money(line.addon.unit_price * line.quantity)}`,
         );
+        fill(
+          box,
+          '[data-addon-unit]',
+          line.quantity > 1
+            ? unitTemplate.replace('{price}', money(line.addon.unit_price))
+            : null,
+        );
         toggle.checked = line.addon.item_id !== null;
-        toggle.disabled = !line.available;
         toggle.addEventListener('change', () => {
           toggle.disabled = true;
+          box.setAttribute('aria-busy', 'true');
           void this.change('PUT', {
             cart_id: cart.id,
             item_id: line.id,

@@ -34,7 +34,7 @@ const { current, previous } = splitNumbers(
               class="text-sm text-ink underline-offset-2 hover:text-signal-ink hover:underline"
             >
               <span class="font-semibold">{page.brand.name}</span>{' '}
-              <span class="spec">{page.value}</span>
+              <span class="spec whitespace-nowrap">{page.value}</span>
             </a>
           </li>
         ))}
@@ -52,7 +52,8 @@ const { current, previous } = splitNumbers(
               href={PathBuilder.partNumber(locale, page.slug)}
               class="underline-offset-2 hover:text-signal-ink hover:underline"
             >
-              {page.brand.name} <span class="spec">{page.value}</span>
+              {page.brand.name}{' '}
+              <span class="spec whitespace-nowrap">{page.value}</span>
             </a>
           </>
         ))}

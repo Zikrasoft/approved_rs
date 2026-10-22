@@ -277,7 +277,7 @@ const stepper =
                 </div>
               </div>
               <label
-                class="flex cursor-pointer items-start gap-3 rounded-field border border-line bg-shade px-3 py-2.5 text-sm leading-snug text-ink has-checked:border-signal has-disabled:cursor-progress has-disabled:opacity-60"
+                class="flex cursor-pointer items-start gap-3 rounded-field border border-line bg-shade px-3 py-2.5 text-sm leading-snug text-ink has-checked:border-signal aria-busy:cursor-progress aria-busy:opacity-60"
                 data-addon
                 hidden
               >
@@ -290,9 +290,12 @@ const stepper =
                   <span data-addon-label></span>
                   <span class="text-xs text-muted">{copy.addonPickup}</span>
                 </span>
-                <span
-                  class="spec shrink-0 font-semibold text-ink"
-                  data-addon-price></span>
+                <span class="flex shrink-0 flex-col items-end text-right">
+                  <span
+                    class="spec font-semibold whitespace-nowrap text-ink"
+                    data-addon-price></span>
+                  <span class="text-xs text-muted" data-addon-unit></span>
+                </span>
               </label>
               <button
                 type="button"

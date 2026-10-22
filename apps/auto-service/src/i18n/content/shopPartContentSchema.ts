@@ -28,6 +28,8 @@ export const shopPartContentSchema = z
       .object({
         stock: z.string(),
         leadTime: z.string(),
+        leadTimeShort: z.string(),
+        inStockPickup: z.string(),
       })
       .strict(),
     leadTime: z

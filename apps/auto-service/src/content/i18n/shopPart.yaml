@@ -23,10 +23,12 @@ offersHeading: Цена и наличие
 columns:
   stock: В наличии
   leadTime: Можно забрать через
+  leadTimeShort: Через
+  inStockPickup: В наличии, забрать через {days}
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
-askSupplyCta: Добавить в заявку
+askSupplyCta: Заказать через менеджера
 askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
 stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
 fromPrice: от {price}

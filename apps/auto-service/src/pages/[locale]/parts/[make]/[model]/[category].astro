@@ -121,8 +121,8 @@ const fill = (template: string) =>
             entry.parts.map(({ part, pages, fits }) => (
               <li class="card flex flex-col gap-3 p-5 sm:p-6">
                 <ThumbRow thumb={pagesThumbnail(pages)} class="gap-2">
-                  <div class="flex items-baseline justify-between gap-4">
-                    <h3 class="font-semibold text-ink">
+                  <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <h3 class="min-w-0 font-semibold text-ink">
                       {translated(part, 'name', locale)}
                     </h3>
                     <PriceTag pages={pages} />

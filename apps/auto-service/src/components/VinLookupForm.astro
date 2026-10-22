@@ -18,8 +18,10 @@ const copy = content(locale).partsCar.vin;
     <h2 class="text-section">{copy.heading}</h2>
     <p class="max-w-2xl text-sm leading-relaxed text-ink-2">{copy.lead}</p>
   </div>
-  <my-garage class="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <vin-check class="block flex-1" data-message={copy.invalid}>
+  <my-garage
+    class="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-end sm:gap-y-0"
+  >
+    <vin-check class="block sm:contents" data-message={copy.invalid}>
       <label class="block">
         <span class="field-label">{copy.label}</span>
         <input
@@ -36,7 +38,7 @@ const copy = content(locale).partsCar.vin;
         />
       </label>
     </vin-check>
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary sm:col-start-2 sm:row-start-1">
       {copy.submitLabel}
       <Icon name="arrowRight" />
     </button>
