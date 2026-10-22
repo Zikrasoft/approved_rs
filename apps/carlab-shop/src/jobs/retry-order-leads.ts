@@ -11,16 +11,14 @@ import {
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 
 export default async function retryOrderLeads(container: MedusaContainer) {
-  const orders = await container
-    .resolve(Modules.ORDER)
-    .listOrders(
-      {
-        created_at: {
-          $gte: new Date(Date.now() - RETRY_WINDOW_MS).toISOString(),
-        },
+  const orders = await container.resolve(Modules.ORDER).listOrders(
+    {
+      created_at: {
+        $gte: new Date(Date.now() - RETRY_WINDOW_MS).toISOString(),
       },
-      { select: ['id', 'metadata'] },
-    );
+    },
+    { select: ['id', 'metadata'] },
+  );
   for (const { id, metadata } of orders) {
     if (
       metadata?.[LEAD_HANDOFF_ERROR] &&
