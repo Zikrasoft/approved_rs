@@ -14,7 +14,7 @@ import {
   Textarea,
   toast,
 } from '@medusajs/ui';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
@@ -773,15 +773,17 @@ const FitmentsPage = () => {
                               {part.name}
                             </Text>
                             <Text size="small" className="text-ui-fg-subtle">
-                              {part.identifiers
-                                .map(
-                                  (identifier) =>
-                                    `${identifier.brand.name} ${identifier.value}`,
-                                )
-                                .join(', ')}
+                              {part.identifiers.map((identifier, index) => (
+                                <Fragment key={identifier.id}>
+                                  {index > 0 && ', '}
+                                  <span className="whitespace-nowrap">
+                                    {identifier.brand.name} {identifier.value}
+                                  </span>
+                                </Fragment>
+                              ))}
                             </Text>
                             {supplierName(part)}
-                            <EditedBy row={part} />
+                            <EditedBy row={part} className="max-sm:hidden" />
                           </div>
                         </Table.Cell>
                         <Table.Cell>

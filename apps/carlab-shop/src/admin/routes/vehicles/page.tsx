@@ -62,7 +62,7 @@ type Option = { value: string; label: string };
 type Field =
   | { key: string; kind: 'text' | 'number' }
   | { key: string; kind: 'enum'; values: readonly string[] }
-  | { key: string; kind: 'ref'; collection: string };
+  | { key: string; kind: 'ref'; collection: string; ownName?: boolean };
 
 type Column = { key: string; read: (row: Row) => string | undefined };
 
@@ -93,7 +93,12 @@ const ENTITIES: Entity[] = [
       { key: 'chassis_id', read: (row) => vehicleChassis(row)?.code },
     ],
     fields: [
-      { key: 'model_id', kind: 'ref', collection: 'vehicle_models' },
+      {
+        key: 'model_id',
+        kind: 'ref',
+        collection: 'vehicle_models',
+        ownName: true,
+      },
       { key: 'engine_id', kind: 'ref', collection: 'engines' },
       { key: 'power_kw', kind: 'number' },
       { key: 'drive', kind: 'enum', values: VEHICLE_DRIVES },
@@ -242,6 +247,10 @@ const EntityTable = ({
     const value = row[field.key];
     if (value == null || value === '') return '-';
     if (field.kind === 'text' || field.kind === 'number') return String(value);
+    if (field.kind === 'ref' && field.ownName) {
+      const target = rows[field.collection]?.find(({ id }) => id === value);
+      if (target?.name != null) return String(target.name);
+    }
     return (
       optionsOf(t, rows, field).find((option) => option.value === value)
         ?.label ?? String(value)

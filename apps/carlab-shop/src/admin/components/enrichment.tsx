@@ -1,4 +1,4 @@
-import { StatusBadge, Text } from '@medusajs/ui';
+import { clx, StatusBadge, Text } from '@medusajs/ui';
 import { ENRICHMENT_GAPS } from '@podbor/catalog-contract';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,11 @@ export const partIdentifiersSchema = z.object({
   counts: z.object({ enriched: z.number(), not_enriched: z.number() }),
 });
 
-export const EnrichmentStatus = ({ enriched, reasons }: Enrichment) => {
+export const EnrichmentStatus = ({
+  enriched,
+  reasons,
+  reasonClassName,
+}: Enrichment & { reasonClassName?: string }) => {
   const { t } = useTranslation('carlabAdmin');
   return (
     <div className="flex flex-col items-start gap-y-1">
@@ -39,7 +43,11 @@ export const EnrichmentStatus = ({ enriched, reasons }: Enrichment) => {
         {t(enriched ? 'parts.status.enriched' : 'parts.status.notEnriched')}
       </StatusBadge>
       {reasons.map((reason) => (
-        <Text key={reason} size="xsmall" className="text-ui-fg-subtle">
+        <Text
+          key={reason}
+          size="xsmall"
+          className={clx('text-ui-fg-subtle', reasonClassName)}
+        >
           {t(`parts.reasons.${reason}`)}
         </Text>
       ))}

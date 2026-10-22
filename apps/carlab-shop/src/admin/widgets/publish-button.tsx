@@ -16,7 +16,11 @@ const PublishButton = () => {
   return (
     <div className="flex items-center gap-x-2">
       {run?.status === 'failed' && (
-        <Link to="/publish" aria-label={t('publish.lastFailed')}>
+        <Link
+          to="/publish"
+          aria-label={t('publish.lastFailed')}
+          className="inline-flex min-h-8 min-w-8 items-center justify-center"
+        >
           <Badge color="red" size="2xsmall" className="whitespace-nowrap">
             <span className="max-sm:hidden">{t('publish.lastFailed')}</span>
             <span className="sm:hidden">!</span>

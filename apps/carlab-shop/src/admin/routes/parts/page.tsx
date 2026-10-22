@@ -218,7 +218,7 @@ const PartsPage = () => {
                       key={row.id}
                       className="[&_td]:py-3 [&_td]:align-top"
                     >
-                      <Table.Cell className="max-w-[18rem] whitespace-normal">
+                      <Table.Cell className="max-w-[11rem] whitespace-normal sm:max-w-[18rem]">
                         <div className="flex flex-col">
                           <Text
                             size="small"
@@ -233,7 +233,10 @@ const PartsPage = () => {
                         </div>
                       </Table.Cell>
                       <Table.Cell className="whitespace-nowrap">
-                        <EnrichmentStatus {...row} />
+                        <EnrichmentStatus
+                          {...row}
+                          reasonClassName="max-sm:hidden"
+                        />
                       </Table.Cell>
                       <Table.Cell className="whitespace-normal">
                         {row.category?.name ?? (
