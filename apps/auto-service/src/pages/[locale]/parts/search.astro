@@ -15,7 +15,7 @@ import ListingBar from '@/components/ListingBar.astro';
 import PartsSearchForm from '@/components/PartsSearchForm.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFromEnv } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
@@ -106,7 +106,9 @@ const heading = narrowedTo?.name ?? copy.heading;
 const fillModel = (template: string) =>
   template.replace('{category}', heading).replace('{model}', modelName ?? '');
 const facets = found ? withFacetCopy(found.facets, copy) : [];
-const chips = chosenFilters(facets, chosen, ranges, copy);
+const chips = chosenFilters(facets, chosen, ranges, copy, (value) =>
+  value.toLocaleString(BCP47_BY_LOCALE[locale]),
+);
 const emptyMessage = q
   ? copy.noResults.replace('{q}', q)
   : chips.length > 0

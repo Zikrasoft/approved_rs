@@ -7,7 +7,7 @@ import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
   categoryFacets,
@@ -61,6 +61,7 @@ const fields = category.fields
                 { min: Math.min(...numbers), max: Math.max(...numbers) },
                 null,
                 searchCopy,
+                (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
               )
             : ''
           : field.options

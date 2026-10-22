@@ -109,17 +109,18 @@ export const rangeText = (
   { min, max }: Pick<RangeFilter, 'min' | 'max'>,
   unit: string | null,
   copy: RangeCopy,
+  format: (value: number) => string = String,
 ): string => {
   const text =
     min !== null && max !== null
       ? min === max
-        ? String(min)
+        ? format(min)
         : copy.rangeBetween
-            .replace('{min}', String(min))
-            .replace('{max}', String(max))
+            .replace('{min}', format(min))
+            .replace('{max}', format(max))
       : min !== null
-        ? copy.rangeFrom.replace('{min}', String(min))
-        : copy.rangeTo.replace('{max}', String(max));
+        ? copy.rangeFrom.replace('{min}', format(min))
+        : copy.rangeTo.replace('{max}', max === null ? '' : format(max));
   return unit ? `${text} ${unit}` : text;
 };
 
@@ -134,6 +135,7 @@ export const chosenFilters = (
   chosen: string[],
   ranges: RangeFilter[],
   copy: FacetCopy & RangeCopy,
+  format: (value: number) => string = String,
 ): FilterChip[] => [
   ...chosen.map((filter) => {
     const others = {
@@ -155,7 +157,7 @@ export const chosenFilters = (
   }),
   ...ranges.map((range) => {
     const facet = facets.find(({ key }) => key === range.key);
-    const text = rangeText(range, facet?.unit ?? null, copy);
+    const text = rangeText(range, facet?.unit ?? null, copy, format);
     return {
       facets: chosen,
       ranges: ranges.filter((item) => item !== range),
