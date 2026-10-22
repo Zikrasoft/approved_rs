@@ -92,6 +92,11 @@ describe('searchResponseSchema', () => {
     expect(searchResponseSchema.parse(scoped)).toEqual(scoped);
   });
 
+  it('reads a response from a backend that predates the Model as unscoped', () => {
+    const { model: _model, ...older } = response;
+    expect(searchResponseSchema.parse(older).model).toBeNull();
+  });
+
   it('refuses a result without its Part', () => {
     const [result] = response.results;
     expect(() =>

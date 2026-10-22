@@ -513,7 +513,11 @@ export function createCatalogue({
             slug: partPageSlug(result.brand.slug, result.normalized_value),
           })),
         };
-      } catch {
+      } catch (error) {
+        console.error(
+          'catalogue search failed',
+          error instanceof z.ZodError ? z.prettifyError(error) : String(error),
+        );
         return null;
       }
     },
