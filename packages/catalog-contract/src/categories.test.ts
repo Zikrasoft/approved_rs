@@ -12,6 +12,7 @@ const category = {
   service_label: null,
   service_price: null,
   service_note: null,
+  image: null,
   fields: [
     {
       key: 'viscosity',
@@ -40,6 +41,22 @@ describe('categorySchema', () => {
       service_note: 'На BMW после замены нужна регистрация.',
     };
     expect(categorySchema.parse(serviced)).toEqual(serviced);
+  });
+
+  it('accepts a Category with an image', () => {
+    const pictured = {
+      ...category,
+      image: {
+        src: 'https://api.carlab.rs/static/oil-960.webp',
+        width: 960,
+        height: 720,
+        srcset: [
+          { url: 'https://api.carlab.rs/static/oil-160.webp', width: 160 },
+          { url: 'https://api.carlab.rs/static/oil-960.webp', width: 960 },
+        ],
+      },
+    };
+    expect(categorySchema.parse(pictured)).toEqual(pictured);
   });
 
   it('refuses a fractional add-on price', () => {

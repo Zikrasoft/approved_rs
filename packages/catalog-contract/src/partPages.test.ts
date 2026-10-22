@@ -15,6 +15,7 @@ const page = {
     replaced_by: null,
     category_id: null,
     attributes: {},
+    images: [],
   },
   equivalents: [],
   offers: [],
@@ -48,6 +49,26 @@ describe('partPageSchema', () => {
       },
     };
     expect(partPageSchema.parse(replaced)).toEqual(replaced);
+  });
+
+  it('accepts the Part images in order, without their stored files', () => {
+    const image = {
+      src: 'https://api.carlab.rs/static/hu816x-960.webp',
+      width: 960,
+      height: 960,
+      srcset: [
+        { url: 'https://api.carlab.rs/static/hu816x-160.webp', width: 160 },
+        { url: 'https://api.carlab.rs/static/hu816x-960.webp', width: 960 },
+      ],
+    };
+    const pictured = { ...page, part: { ...page.part, images: [image] } };
+    expect(partPageSchema.parse(pictured)).toEqual(pictured);
+    expect(
+      partPageSchema.parse({
+        ...page,
+        part: { ...page.part, images: [{ ...image, file_ids: ['f_1'] }] },
+      }).part.images,
+    ).toEqual([image]);
   });
 
   it('accepts offers with a price, currency, stock and lead time', () => {

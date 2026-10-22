@@ -51,6 +51,7 @@ const envSchema = z
       .transform(nameList)
       .pipe(z.array(z.enum(SUPPLIER_ADAPTER_NAMES))),
     DEMO_SUPPLIER_OVERRIDES: optionalSecret,
+    FILE_URL: optionalSecret.pipe(z.url().optional()),
   })
   .refine(
     ({ NODE_ENV, SUPPLIER_ADAPTERS }) =>
@@ -68,9 +69,14 @@ const envSchema = z
       message: 'TYPESENSE_API_KEY is required in production',
     },
   )
+  .refine(({ NODE_ENV, FILE_URL }) => NODE_ENV !== 'production' || FILE_URL, {
+    path: ['FILE_URL'],
+    message: 'FILE_URL is required in production',
+  })
   .transform((env) => ({
     ...env,
     TYPESENSE_API_KEY: env.TYPESENSE_API_KEY ?? LOCAL_TYPESENSE_API_KEY,
+    FILE_URL: env.FILE_URL ?? `http://localhost:${env.PORT}/static`,
   }));
 
 export type Env = z.infer<typeof envSchema>;

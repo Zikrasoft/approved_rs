@@ -11,6 +11,7 @@ const Category = model
     slug: model.text().unique(),
     name: model.text(),
     text: model.text().default(''),
+    image: model.json().nullable(),
     ...translatable(),
     maintenance_kit: model.boolean().default(false),
     kit_rank: model.number().default(0),

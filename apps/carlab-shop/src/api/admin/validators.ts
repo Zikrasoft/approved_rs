@@ -51,6 +51,11 @@ export const AdminUpdatePart = z.strictObject({
 });
 export type AdminUpdatePartType = z.infer<typeof AdminUpdatePart>;
 
+export const AdminOrderImages = z.strictObject({
+  ids: z.array(z.string().min(1)),
+});
+export type AdminOrderImagesType = z.infer<typeof AdminOrderImages>;
+
 export const AdminUpdatePartIdentifier = z.strictObject({
   superseded: z.boolean(),
 });

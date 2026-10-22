@@ -78,8 +78,27 @@ describe('parseEnv', () => {
         ...VALID_ENV,
         NODE_ENV: 'production',
         TYPESENSE_API_KEY: 'secret',
+        FILE_URL: 'https://api.carlab.rs/static',
       }).TYPESENSE_API_KEY,
     ).toBe('secret');
+  });
+
+  it('serves uploaded files from the local backend outside production', () => {
+    expect(parseEnv(VALID_ENV).FILE_URL).toBe('http://localhost:9009/static');
+    expect(parseEnv({ ...VALID_ENV, PORT: '4000' }).FILE_URL).toBe(
+      'http://localhost:4000/static',
+    );
+  });
+
+  it('requires the public file URL in production', () => {
+    expect(() =>
+      parseEnv({
+        ...VALID_ENV,
+        NODE_ENV: 'production',
+        TYPESENSE_API_KEY: 'secret',
+      }),
+    ).toThrow(/FILE_URL/);
+    expect(() => parseEnv({ ...VALID_ENV, FILE_URL: 'static' })).toThrow();
   });
 
   it('chains the BMW and Mercedes decoders by default', () => {

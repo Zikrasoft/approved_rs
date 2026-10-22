@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { attributeValuesSchema } from './attributes.ts';
+import { imageSchema } from './images.ts';
 import { translationsSchema } from './translations.ts';
 
 export const PART_IDENTIFIER_TYPES = [
@@ -64,6 +65,7 @@ export const partPageSchema = brandNumberSchema.extend({
       .nullable(),
     category_id: z.string().nullable(),
     attributes: attributeValuesSchema,
+    images: z.array(imageSchema),
   }),
   equivalents: z.array(brandNumberSchema),
   offers: z.array(partOfferSchema),

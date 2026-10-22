@@ -39,6 +39,18 @@ export default defineConfig({
       resolve: './src/modules/publish',
     },
     {
+      resolve: '@medusajs/medusa/file',
+      options: {
+        providers: [
+          {
+            resolve: '@medusajs/medusa/file-local',
+            id: 'local',
+            options: { backend_url: env.FILE_URL },
+          },
+        ],
+      },
+    },
+    {
       resolve: '@medusajs/medusa/search',
       options: {
         default_provider: 'typesense',
