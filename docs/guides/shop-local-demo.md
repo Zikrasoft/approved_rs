@@ -69,8 +69,11 @@ Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset.
 ## 3. Migrate and seed
 
 `pnpm db:migrate` and `pnpm seed:demo` in `apps/carlab-shop`. `seed:demo` is
-idempotent per part: rerunning it keeps the admin, reuses the key and skips
-the catalogue once the demo suppliers exist.
+idempotent per part: rerunning it keeps the admin, reuses the key, skips
+the catalogue once the demo suppliers exist, skips the batteries once the
+`batteries` Category exists, and adds any supplier category mapping or brand
+spelling the demo catalogue gained since. An existing demo database picks up
+the batteries on the next `pnpm dev:shop`.
 
 What it creates:
 
@@ -85,15 +88,26 @@ What it creates:
 - The seven placeholder Categories, plus `engine-oil` (viscosity, approvals
   multi-select, volume; maintenance kit, rank 0), `oil-filters` (filter type;
   kit, rank 1) and `brake-pads` (required axle).
+- `batteries` (capacity Ah, cold cranking EN A, voltage, technology
+  standard/EFB/AGM, polarity, case size H5/L2 to H9/L6, length, width, height
+  mm; not a maintenance kit category). It sells one add-on service with every
+  battery: «Регистрация аккумулятора в блоке управления (в сервисе CarLab)»
+  for 2 500 RSD, editable in the admin's Categories page.
 - Requirements: B47 needs 5W-30 or 0W-30 and BMW LL-04 (one 5 l can); OM654
   needs MB 229.51 or 229.52 (7 l, so two 5 l cans). A Requirement's quantity
-  counts Parts to buy, never litres.
+  counts Parts to buy, never litres. Batteries: B47 needs AGM, at least 80 Ah
+  and 800 A, reverse polarity, case H7/L4 or H8/L5; OM654 needs AGM and at
+  least 80 Ah.
 - Parts and Fitments: the B47 oil filter with four numbers (one superseded,
   `11 42 8 507 683`), the OM654 filter, front pads and M Sport front pads on
   the 320d (two Parts plus a note: an ambiguous position), rear pads, an old
   front pad replaced by the current one, two oils, left- and right-hand-drive
   wiper sets on the E-class (the steering-specific candidates), and an oil
   pressure sensor with no Category or Fitment (not enriched).
+- Five batteries: Varta Silver Dynamic AGM G14 80 Ah (`580 901 080`) and Bosch
+  S5 A13 AGM 95 Ah (`0 092 S5A 130`) fit both cars; Exide AGM EK700 70 Ah is
+  too small, Varta Blue Dynamic EFB N80 is EFB, Exide Excell EB741 is a
+  standard battery with straight polarity and no offer (price on request).
 - Two Suppliers, `Demo Intercars` (20%) and `Demo Autodelovi` (10%), with their
   category codes mapped and their brand spellings.
 
@@ -127,6 +141,7 @@ articles per page):
 | Equal price, shorter lead time first                  | ATE 13.0460-2786.2: AD-2002 over IC-1003                               |
 | EUR quote dropped                                     | IC-1006 (Mahle OX 404D)                                                |
 | Staged data (cross references, applicability, images) | IC-1001, IC-1003, IC-1009, AD-2004                                     |
+| Batteries, one out of stock (Bosch S5 A13)            | IC-1012 to IC-1015                                                     |
 
 Staged data stays hidden until a Supplier releases the kind in the admin's
 Suppliers page.
@@ -177,6 +192,8 @@ Useful pages:
 - Part page: `/ru/parts/p/mann-filter-hu816x/`; superseded number:
   `/ru/parts/p/bmw-11428507683/`; replaced Part: `/ru/parts/p/ate-13046072172/`.
 - Search: `/ru/parts/search/?q=hu816x`; car hub: `/ru/parts/bmw/f30-320d/`.
+- Battery with the registration add-on: `/ru/parts/p/varta-580901080/`; the
+  E-class car page lists the matching batteries.
 - Cart: `/ru/parts/cart/`.
 
 ## 7. Stale price and stock drop
