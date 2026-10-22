@@ -68,8 +68,8 @@ const fitmentConditions = {
   quantity: z.number().int().positive().optional(),
   axle: z.enum(FITMENT_AXLES).nullable().optional(),
   side: z.enum(FITMENT_SIDES).nullable().optional(),
-  production_from: z.coerce.date().nullable().optional(),
-  production_to: z.coerce.date().nullable().optional(),
+  production_from: z.coerce.date({ error: 'Not a date' }).nullable().optional(),
+  production_to: z.coerce.date({ error: 'Not a date' }).nullable().optional(),
   steering: z.enum(STEERING_SIDES).nullable().optional(),
   gearbox: z.enum(GEARBOX_TYPES).nullable().optional(),
   note: z
@@ -102,6 +102,13 @@ export const AdminCreateFitment = z
   })
   .refine(inOrder, ENDS_BEFORE_IT_STARTS);
 export type AdminCreateFitmentType = z.infer<typeof AdminCreateFitment>;
+
+export const StoredFitmentPeriod = z
+  .object({
+    production_from: z.date().nullable(),
+    production_to: z.date().nullable(),
+  })
+  .refine(inOrder, ENDS_BEFORE_IT_STARTS);
 
 export const AdminUpdateFitment = z
   .strictObject(fitmentConditions)
@@ -287,8 +294,8 @@ export const AdminCreateRequirement = z
     field_id: z.string().min(1),
     ...requirementOwners,
     option_keys: z.array(z.string().trim().min(1)).nullable().default(null),
-    min: z.number().nullable().default(null),
-    max: z.number().nullable().default(null),
+    min: z.number().nonnegative().nullable().default(null),
+    max: z.number().nonnegative().nullable().default(null),
     quantity: z.number().int().positive().default(1),
   })
   .refine(

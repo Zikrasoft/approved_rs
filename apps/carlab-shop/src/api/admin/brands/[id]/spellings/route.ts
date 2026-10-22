@@ -8,8 +8,6 @@ import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
 import type { AdminCreateBrandSpellingType } from '../../../validators';
-import { alreadyExists } from '../../../../../lib/admin-errors';
-import { spellingKey } from '../../../../../lib/suppliers/spelling';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreateBrandSpellingType>,
@@ -23,19 +21,6 @@ export async function POST(
 
   await catalog.retrieveBrand(id);
   await suppliers.retrieveSupplier(supplier_id);
-  const taken = await catalog.listBrandSpellings(
-    { supplier_id },
-    { select: ['value'], take: null },
-  );
-  if (
-    taken.some((spelling) => spellingKey(spelling.value) === spellingKey(value))
-  ) {
-    throw alreadyExists(
-      'brand_spelling',
-      `This supplier already spells a Brand as ${value}`,
-    );
-  }
-
   const spelling = await catalog.createBrandSpellings({
     brand_id: id,
     supplier_id,

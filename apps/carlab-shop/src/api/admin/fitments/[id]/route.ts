@@ -8,7 +8,7 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { adminFitmentSchema } from '../../../../lib/store-response';
 import { parseAdminBody } from '../../../../lib/admin-errors';
-import { AdminUpdateFitment } from '../../validators';
+import { AdminUpdateFitment, StoredFitmentPeriod } from '../../validators';
 
 export async function POST(
   req: AuthenticatedMedusaRequest,
@@ -18,7 +18,10 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const changes = await parseAdminBody(AdminUpdateFitment, req.body);
-  await catalog.retrieveFitment(id);
+  await parseAdminBody(StoredFitmentPeriod, {
+    ...(await catalog.retrieveFitment(id)),
+    ...changes,
+  });
   await catalog.updateFitments({
     ...changes,
     id,

@@ -170,7 +170,7 @@ export async function importSupplier(
         { supplier_id: supplier.id },
         { take: null },
       )
-    ).map(({ code, category_id }) => [code, category_id]),
+    ).map(({ code, category_id }) => [spellingKey(code), category_id]),
   );
   const brandOf = new Map(
     (
@@ -189,18 +189,20 @@ export async function importSupplier(
   };
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
+  const categoryOfArticle = (article: Article) =>
+    categoryOf.get(spellingKey(article.category));
   const listed = new Set<string>();
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
     const unmapped = page.articles.filter(
-      (article) => !categoryOf.has(article.category),
+      (article) => !categoryOfArticle(article),
     );
     const unbranded = page.articles.filter(
-      (article) => categoryOf.has(article.category) && !brandOfArticle(article),
+      (article) => categoryOfArticle(article) && !brandOfArticle(article),
     );
     const wanted = page.articles.filter(
-      (article) => categoryOf.has(article.category) && brandOfArticle(article),
+      (article) => categoryOfArticle(article) && brandOfArticle(article),
     );
     summary.skipped += unmapped.length + unbranded.length;
     summary.skipped_by_reason.category += unmapped.length;
@@ -221,7 +223,7 @@ export async function importSupplier(
         context,
         article,
         brandOfArticle(article)!,
-        categoryOf.get(article.category)!,
+        categoryOfArticle(article)!,
       );
       const quote = quotes.get(article.article_id);
       if (quote) {

@@ -166,6 +166,46 @@ medusaIntegrationTestRunner({
         expect(updated.data.field).toBe('year_to');
       });
 
+      it('checks a partial update against the stored row', async () => {
+        const { chassis, vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'MRG1',
+          chassisCode: 'MRG-CHASSIS',
+        });
+        const [identifier] = await catalog.listVehicleIdentifiers({
+          vehicle_id: vehicle.id,
+        });
+
+        const refused = await Promise.all([
+          post(`/admin/chassis/${chassis.id}`, { year_to: 2005 }),
+          post(`/admin/vehicles/${vehicle.id}`, { year_from: 2025 }),
+          post(`/admin/vehicle-identifiers/${identifier.id}`, {
+            value: 'MRG12',
+          }),
+          post(`/admin/vehicle-identifiers/${identifier.id}`, {
+            type: 'mercedes-baumuster',
+          }),
+        ]);
+
+        expect(refused.map(({ status, data }) => [status, data.field])).toEqual(
+          [
+            [400, 'year_to'],
+            [400, 'year_to'],
+            [400, 'value'],
+            [400, 'value'],
+          ],
+        );
+        expect(await catalog.retrieveChassis(chassis.id)).toMatchObject({
+          year_to: 2019,
+        });
+        expect(await catalog.retrieveVehicle(vehicle.id)).toMatchObject({
+          year_from: 2015,
+        });
+        expect(
+          (await post(`/admin/vehicles/${vehicle.id}`, { year_from: 2016 }))
+            .status,
+        ).toBe(200);
+      });
+
       it('refuses a Make name past 200 characters', async () => {
         const response = await post('/admin/makes', {
           slug: 'long-make',

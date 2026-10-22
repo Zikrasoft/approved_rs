@@ -306,6 +306,24 @@ medusaIntegrationTestRunner({
         expect(await page('W6103')).toBeDefined();
       });
 
+      it('matches a supplier category code whatever its case and spacing', async () => {
+        intercars.articles.push({
+          article_id: 'IC-9',
+          brand: 'MANN-FILTER',
+          number: 'W 712/95',
+          name: 'Фильтр W712',
+          category: ' ic-oil ',
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          skipped: 0,
+        });
+        expect((await page('W71295'))?.part.category_id).toBe(oilFiltersId);
+      });
+
       it('keeps a name a person edited and refreshes one nobody touched', async () => {
         intercars.articles.push(
           {
