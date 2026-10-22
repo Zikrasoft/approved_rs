@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { ScrollArea } from '../../components/scroll-area';
-import { acknowledged, adminFetch } from '../../lib/admin-fetch';
+import { acknowledged, adminFetch, useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 
@@ -23,6 +23,7 @@ const codesSchema = z.object({ codes: z.array(unresolvedCodeSchema) });
 const VinLookupsPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
+  const writing = useWriting();
   const [codes, setCodes] = useState<UnresolvedCode[]>([]);
 
   const load = () =>
@@ -88,6 +89,8 @@ const VinLookupsPage = () => {
                     <Button
                       size="small"
                       variant="secondary"
+                      aria-label={t('vinLookups.dismissCode', { code })}
+                      disabled={writing}
                       onClick={() => dismiss({ make, code, count })}
                     >
                       {t('vinLookups.dismiss')}

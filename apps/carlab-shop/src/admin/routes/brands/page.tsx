@@ -22,6 +22,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -51,6 +52,7 @@ type SpellingDraft = { supplierId: string; value: string };
 const EMPTY_SPELLING: SpellingDraft = { supplierId: '', value: '' };
 
 const BrandsPage = () => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
 
@@ -173,7 +175,7 @@ const BrandsPage = () => {
             maxLength={200}
             onChange={(event) => setSlug(event.target.value)}
           />
-          <Button onClick={createBrand} disabled={!name || !slug}>
+          <Button onClick={createBrand} disabled={!name || !slug || writing}>
             {t('brands.create')}
           </Button>
         </div>
@@ -266,7 +268,8 @@ const BrandsPage = () => {
                           onClick={() => addSpelling(brand.id)}
                           disabled={
                             !draftFor(brand.id).supplierId ||
-                            !draftFor(brand.id).value
+                            !draftFor(brand.id).value ||
+                            writing
                           }
                         >
                           {t('brands.addSpelling')}
@@ -279,6 +282,7 @@ const BrandsPage = () => {
                   </Table.Cell>
                   <Table.Cell>
                     <Button
+                      disabled={writing}
                       size="small"
                       variant="danger"
                       onClick={() => removeBrand(brand)}

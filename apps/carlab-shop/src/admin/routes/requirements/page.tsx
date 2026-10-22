@@ -23,6 +23,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
@@ -116,6 +117,7 @@ const numberOrNull = (value: string) =>
 const BOOLEAN_KEYS = ['true', 'false'] as const;
 
 const RequirementsPage = () => {
+  const writing = useWriting();
   const { t, i18n } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [ownerKey, setOwnerKey] = useState<OwnerKey>('engine_id');
@@ -311,6 +313,7 @@ const RequirementsPage = () => {
                       </Table.Cell>
                       <Table.Cell>
                         <Button
+                          disabled={writing}
                           size="small"
                           variant="transparent"
                           onClick={() => remove(requirement)}
@@ -382,6 +385,7 @@ const RequirementsPage = () => {
                   {withUnit(t('requirements.min'))}
                   <Input
                     type="number"
+                    aria-label={withUnit(t('requirements.min'))}
                     value={draft.min}
                     onChange={(event) =>
                       setDraft({ ...draft, min: event.target.value })
@@ -392,6 +396,7 @@ const RequirementsPage = () => {
                   {withUnit(t('requirements.max'))}
                   <Input
                     type="number"
+                    aria-label={withUnit(t('requirements.max'))}
                     value={draft.max}
                     onChange={(event) =>
                       setDraft({ ...draft, max: event.target.value })
@@ -479,7 +484,9 @@ const RequirementsPage = () => {
           )}
           <div>
             <Button
-              disabled={!field || !Number.isInteger(Number(draft.quantity))}
+              disabled={
+                !field || !Number.isInteger(Number(draft.quantity)) || writing
+              }
               onClick={add}
             >
               {t('requirements.add')}

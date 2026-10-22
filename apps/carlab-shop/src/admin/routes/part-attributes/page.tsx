@@ -23,6 +23,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 
@@ -171,6 +172,7 @@ const ValueInput = ({
 };
 
 const PartAttributesPage = () => {
+  const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState('');
@@ -234,13 +236,18 @@ const PartAttributesPage = () => {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <Button variant="secondary" onClick={search} disabled={!query}>
+          <Button
+            variant="secondary"
+            onClick={search}
+            disabled={!query || writing}
+          >
             {t('partAttributes.search')}
           </Button>
         </div>
         <div className="flex flex-col items-start gap-y-1">
           {parts.map((found) => (
             <Button
+              disabled={writing}
               key={found.id}
               size="small"
               variant={found.id === part?.id ? 'primary' : 'transparent'}
@@ -308,7 +315,9 @@ const PartAttributesPage = () => {
           )}
 
           <div>
-            <Button onClick={save}>{t('partAttributes.save')}</Button>
+            <Button disabled={writing} onClick={save}>
+              {t('partAttributes.save')}
+            </Button>
           </div>
         </div>
       )}

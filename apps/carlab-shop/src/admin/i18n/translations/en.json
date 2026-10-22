@@ -125,13 +125,14 @@
     "columns": {
       "name": "Name",
       "markup": "Markup %",
-      "released": "Publish"
+      "released": "Publish",
+      "import": "Import"
     },
     "save": "Save",
     "import": "Import now",
     "importLead": "Supplier catalogues are imported every night before publishing. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
-    "importNoAdapters": "No supplier is connected to the import",
+    "importNoAdapters": "No supplier has its import switched on",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -167,7 +168,23 @@
       "category": "{{count}} from unmapped categories",
       "brand": "{{count}} with an unknown brand spelling"
     },
-    "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}."
+    "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
+    "importOn": "On",
+    "importOff": "Off",
+    "importSwitch": {
+      "off": {
+        "title": "Switch off the import from {{supplier}}?",
+        "body": "The nightly import and Import now will stop loading this supplier's catalogue. Rows already loaded stay.",
+        "confirm": "Switch off import",
+        "done": "Import from {{supplier}} switched off."
+      },
+      "on": {
+        "title": "Switch on the import from {{supplier}}?",
+        "body": "The next import loads this supplier's catalogue again, rows removed earlier included.",
+        "confirm": "Switch on import",
+        "done": "Import from {{supplier}} switched on."
+      }
+    }
   },
   "brands": {
     "heading": "Brands",
@@ -288,7 +305,8 @@
     "dismiss": "Dismiss code",
     "confirmDismissTitle": "Dismiss code {{code}}?",
     "confirmDismissBody": "Lookups with this code leave the list. If a customer searches such a VIN again, the code comes back.",
-    "dismissed": "Code {{code}} dismissed."
+    "dismissed": "Code {{code}} dismissed.",
+    "dismissCode": "Dismiss code {{code}}"
   },
   "publish": {
     "heading": "Publish",
@@ -583,7 +601,10 @@
     "names": {
       "manual": "Manual entry"
     },
-    "actionsFor": "Actions for source {{source}}"
+    "actionsFor": "Actions for source {{source}}",
+    "confirmSupplierBody_one": "{{count}} row will be removed and the import from this supplier switched off, so the next import does not bring it back. It cannot be restored.",
+    "confirmSupplierBody_other": "{{count}} rows will be removed and the import from this supplier switched off, so the next import does not bring them back. They cannot be restored.",
+    "importDisabled": "Import from {{source}} switched off."
   },
   "translations": {
     "open": "Translations",
