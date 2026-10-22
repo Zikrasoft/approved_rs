@@ -59,7 +59,7 @@ form:
   commentPlaceholder: Марка, модель, год — и что беспокоит
   submit: Отправить заявку
   submitting: Отправляем…
-  privacyNote: Отправляя форму, вы соглашаетесь с
+  privacyNote: Согласен с
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер — кажется, он введён не полностью

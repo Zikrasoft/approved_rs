@@ -2,6 +2,7 @@
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
+import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -14,7 +15,7 @@ const site = content(locale).site;
 const copy = content(locale).shopCart;
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
-  'card mb-4 flex items-start gap-3 border-l-4 border-l-signal p-4 text-sm leading-relaxed text-ink';
+  'card mb-4 flex items-start gap-3 border-signal/30 bg-signal/8 p-4 text-sm leading-relaxed text-ink';
 const notices = [
   { key: 'price-changed', text: copy.notices.priceChanged },
   { key: 'unavailable', text: copy.notices.unavailable },
@@ -53,6 +54,7 @@ const stepper =
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
       data-order-template={copy.orderNumberTemplate}
+      data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
     >
@@ -78,17 +80,82 @@ const stepper =
         </a>
       </div>
 
-      <div
-        data-state="ordered"
-        hidden
-        class={`${panel} border-l-4 border-l-signal`}
-      >
-        <p class="spec text-lg font-semibold text-ink" data-order-number hidden>
+      <div data-state="ordered" hidden class={`${panel} gap-5`}>
+        <div class="flex items-center gap-3">
+          <span
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-go/10 text-go"
+          >
+            <Icon name="check" size={18} />
+          </span>
+          <p
+            class="spec text-lg font-semibold text-ink"
+            data-order-number
+            hidden
+          >
+          </p>
+        </div>
+        <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
+          {copy.orderedBody}
         </p>
-        <p class="text-sm leading-relaxed text-ink-2">{copy.orderedBody}</p>
+        <div class="flex flex-col gap-5" data-receipt hidden>
+          <section class="flex flex-col gap-1">
+            <h2 class="text-block font-semibold">{copy.summaryHeading}</h2>
+            <ul class="divide-y divide-line" data-receipt-lines></ul>
+            <template data-receipt-line>
+              <li class="flex items-start justify-between gap-4 py-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                  <span class="leading-snug font-semibold text-ink" data-name
+                  ></span>
+                  <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-addon hidden></span>
+                </div>
+                <div class="flex shrink-0 flex-col items-end text-right">
+                  <span class="spec font-semibold text-ink" data-price></span>
+                  <span class="text-xs text-muted" data-quantity></span>
+                </div>
+              </li>
+            </template>
+            <dl class="flex flex-col gap-1.5 border-t border-line pt-3 text-sm">
+              <div
+                class="flex items-baseline justify-between gap-4 text-ink-2"
+                data-receipt-addon-row
+                hidden
+              >
+                <dt>{copy.summaryAddons}</dt>
+                <dd class="spec text-ink" data-receipt-addons></dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-4">
+                <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+                <dd
+                  class="spec text-xl font-semibold text-ink"
+                  data-receipt-total
+                >
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <div class="grid gap-5 rounded-field bg-shade p-4 sm:grid-cols-2">
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.pickupStep}
+              </h3>
+              <PickupDetails />
+            </section>
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.paymentStep}
+              </h3>
+              <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
+            </section>
+          </div>
+          <p class="flex items-start gap-2 text-sm leading-relaxed text-ink-2">
+            <Icon name="info" size={16} class="mt-0.5 shrink-0 text-muted" />
+            <span>{copy.submitNote}</span>
+          </p>
+        </div>
         <a
           href={PathBuilder.parts(locale)}
-          class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+          class="btn btn-primary w-full sm:w-auto sm:self-start"
         >
           {copy.orderedCta}
         </a>
@@ -233,6 +300,17 @@ const stepper =
         </div>
 
         <CheckoutForm />
+
+        <div
+          class="sticky bottom-0 -mx-5 -mt-8 flex items-center justify-between gap-4 border-t border-line bg-card px-5 py-3 lg:hidden"
+          data-checkout-bar
+        >
+          <div class="flex flex-col">
+            <span class="text-xs text-muted">{copy.totalLabel}</span>
+            <span class="spec text-lg font-semibold text-ink" data-total></span>
+          </div>
+          <a href="#checkout" class="btn btn-primary">{copy.stickyCta}</a>
+        </div>
       </div>
     </offer-cart>
   </section>

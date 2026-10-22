@@ -217,6 +217,35 @@ export function orderSummary(cart: OfferCart) {
   return { count, parts, addons, total: parts + addons };
 }
 
+type FormStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
+const RECEIPT_KEY = 'carlab_order_receipt';
+
+export function rememberReceipt(
+  cart: OfferCart,
+  storage: FormStorage = sessionStorage,
+): void {
+  try {
+    storage.setItem(RECEIPT_KEY, JSON.stringify(cart));
+  } catch {
+    return;
+  }
+}
+
+export function readReceipt(
+  cartId: string | null,
+  storage: FormStorage = sessionStorage,
+): OfferCart | null {
+  try {
+    const parsed = offerCartSchema.safeParse(
+      JSON.parse(storage.getItem(RECEIPT_KEY) ?? 'null'),
+    );
+    return parsed.success && parsed.data.id === cartId ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const REMEMBERED_FIELDS = [
   '[data-country]',
@@ -226,8 +255,6 @@ const REMEMBERED_FIELDS = [
   '[name="vin"]',
   '[name="comment"]',
 ] as const;
-
-type FormStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 const fieldIn = (form: HTMLFormElement, selector: string) =>
   form.querySelector<HTMLInputElement | HTMLSelectElement>(selector);
@@ -472,13 +499,20 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const notice = params.get(CART_NOTICE_PARAM) ?? '';
         if (notice === 'ordered') {
           forgetOrderedCart(params.get(ORDERED_CART_PARAM));
-          this.showOrdered(params.get(ORDER_NUMBER_PARAM));
+          this.showOrdered(
+            params.get(ORDER_NUMBER_PARAM),
+            readReceipt(params.get(ORDERED_CART_PARAM)),
+          );
           return;
         }
         const form = this.querySelector('form');
         if (form) {
           if (notice) restoreCheckout(form);
-          form.addEventListener('submit', () => rememberCheckout(form));
+          form.addEventListener('submit', () => {
+            rememberCheckout(form);
+            if (this.cart) rememberReceipt(this.cart);
+          });
+          this.watchCheckoutBar(form);
           form.addEventListener('formdata', (event) => {
             if (!this.cart) return;
             event.formData.set('cart_id', this.cart.id);
@@ -521,11 +555,21 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
       }
 
+      watchCheckoutBar(form: HTMLFormElement): void {
+        const bar = this.querySelector<HTMLElement>('[data-checkout-bar]');
+        const submit = form.querySelector('[type="submit"]');
+        if (!bar || !submit) return;
+        new IntersectionObserver(([entry]) => {
+          bar.hidden =
+            entry!.isIntersecting || entry!.boundingClientRect.top < 0;
+        }).observe(submit);
+      }
+
       show(state: string): void {
         showOnly(this, 'data-state', state);
       }
 
-      showOrdered(orderNumber: string | null): void {
+      showOrdered(orderNumber: string | null, receipt: OfferCart | null): void {
         const { orderedHeading, orderTemplate = '' } = this.dataset;
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
@@ -536,7 +580,50 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             ? orderTemplate.replace('{number}', orderNumber)
             : null,
         );
+        if (receipt) this.receipt(receipt);
         this.show('ordered');
+      }
+
+      receipt(cart: OfferCart): void {
+        const {
+          localeTag = 'sr',
+          locale = '',
+          quantityTemplate = '{count}',
+        } = this.dataset;
+        const money = (amount: number) =>
+          formatMoney(amount, cart.currency, localeTag);
+        const template = this.querySelector<HTMLTemplateElement>(
+          'template[data-receipt-line]',
+        )!;
+        const sold = cart.items.filter(({ available }) => available);
+        this.querySelector('[data-receipt-lines]')?.replaceChildren(
+          ...sold.map(({ part, quantity, unit_price, addon }) => {
+            const row = template.content.cloneNode(true) as DocumentFragment;
+            fill(row, '[data-name]', part.name);
+            fill(row, '[data-number]', `${part.brand} ${part.number}`);
+            fill(
+              row,
+              '[data-quantity]',
+              quantityTemplate.replace('{count}', String(quantity)),
+            );
+            fill(row, '[data-price]', money(unit_price * quantity));
+            fill(
+              row,
+              '[data-addon]',
+              addon?.item_id
+                ? `+ ${addonLabel(addon.label, addon.translations, locale)}, ${money(addon.unit_price)}`
+                : null,
+            );
+            return row;
+          }),
+        );
+        const summary = orderSummary(cart);
+        fill(this, '[data-receipt-addons]', money(summary.addons));
+        fill(this, '[data-receipt-total]', money(summary.total));
+        this.querySelector<HTMLElement>('[data-receipt-addon-row]')!.hidden =
+          summary.addons === 0;
+        this.querySelector<HTMLElement>('[data-ordered-body]')!.hidden = true;
+        this.querySelector<HTMLElement>('[data-receipt]')!.hidden = false;
       }
 
       render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {
@@ -662,7 +749,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         fill(
           row,
           '[data-unit]',
-          unitTemplate.replace('{price}', money(line.unit_price)),
+          line.quantity > 1
+            ? unitTemplate.replace('{price}', money(line.unit_price))
+            : null,
         );
         fill(row, '[data-price]', money(line.unit_price * line.quantity));
         row
