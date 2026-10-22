@@ -45,3 +45,29 @@ export function partSuccessor(
     current.map((number) => bySlug.get(slugOf(number))).find(Boolean) ?? null
   );
 }
+
+export function currentNumbers(
+  page: PartPageEntry,
+  bySlug: Map<string, PartPageEntry>,
+): (BrandNumber & { slug: string })[] {
+  const replacement = page.part.replaced_by;
+  const candidates: BrandNumber[] = replacement
+    ? [
+        replacement.brand_number,
+        ...[...bySlug.values()].filter(
+          ({ part }) => part.id === replacement.id,
+        ),
+      ]
+    : page.superseded
+      ? page.equivalents
+      : [];
+  const rank = (number: BrandNumber) =>
+    (number.type === 'oem' ? 0 : 2) +
+    Number(number.brand.slug !== page.brand.slug);
+  const unique = new Map(
+    candidates
+      .filter(({ superseded }) => !superseded)
+      .map((number) => [slugOf(number), { ...number, slug: slugOf(number) }]),
+  );
+  return [...unique.values()].sort((a, b) => rank(a) - rank(b));
+}

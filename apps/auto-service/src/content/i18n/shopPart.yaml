@@ -3,14 +3,15 @@ metaDescription: Бренды, аналоги, цены и наличие это
 eyebrow: Запчасть
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
-replacedHeading: Деталь заменена
-replacedLead: 'Производитель заменил эту деталь новой. Заказывайте актуальную:'
-supersededNotice: Производитель больше не использует этот номер.
+numberSupersededNotice: Номер {number} больше не используется производителем.
+partReplacedNotice: Производитель заменил деталь {number} новой.
 previousNumber: Прежний номер
 previousNumberCurrent: 'Прежний номер, актуальный:'
 earlierNumbers: 'Ранее:'
 previousNumbersHeading: Прежние номера
 currentNumberLabel: 'Актуальный номер:'
+currentNumbersLabel: 'Актуальные номера:'
+successorOffersHeading: Купить актуальную запчасть
 attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
@@ -56,9 +57,6 @@ translations:
     eyebrow: Delovi
     equivalentsHeading: Zamenski delovi za ovaj deo
     noEquivalents: Za sada nema zamenskih delova u katalogu. Pišite nam, pronaći ćemo zamenu.
-    replacedHeading: Deo je zamenjen
-    replacedLead: 'Proizvođač je ovaj deo zamenio novim. Naručite aktuelni deo:'
-    supersededNotice: Ovaj broj je zastareo i proizvođač ga više ne koristi.
     attributesHeading: Karakteristike
     attributeYes: Da
     attributeNo: Ne
@@ -75,9 +73,6 @@ translations:
     eyebrow: Part
     equivalentsHeading: Equivalents of this part
     noEquivalents: No equivalents in the catalogue yet. Message us and we will find a replacement.
-    replacedHeading: This part has been replaced
-    replacedLead: 'The manufacturer replaced this part with a new one. Order the current part:'
-    supersededNotice: This number is superseded and no longer used by the manufacturer.
     attributesHeading: Specifications
     attributeYes: 'Yes'
     attributeNo: 'No'

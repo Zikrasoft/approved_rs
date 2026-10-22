@@ -15,7 +15,7 @@ import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { partPagesForBuild, type PartPageEntry } from '@/utils/catalogue';
 import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
-import { partSuccessor } from '@/utils/partSuccessor';
+import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
@@ -26,14 +26,20 @@ export async function getStaticPaths() {
   return withLocales(
     pages.map((page) => ({
       params: { slug: page.slug },
-      props: { page, successor: partSuccessor(page, bySlug), bySlug },
+      props: {
+        page,
+        successor: partSuccessor(page, bySlug),
+        replacements: currentNumbers(page, bySlug),
+        bySlug,
+      },
     })),
   );
 }
 
-const { page, successor, bySlug } = Astro.props as {
+const { page, successor, replacements, bySlug } = Astro.props as {
   page: PartPageEntry;
   successor: PartPageEntry | null;
+  replacements: ReturnType<typeof currentNumbers>;
   bySlug: Map<string, PartPageEntry>;
 };
 const locale = localeFrom(Astro.url.pathname);
@@ -106,8 +112,9 @@ const jsonLd = bestOffer
         }),
     ]
   : [];
-const successorLabel =
-  successor && `${successor.brand.name} ${successor.value}`;
+const [noticeBefore, noticeAfter] = (
+  replacement ? copy.partReplacedNotice : copy.numberSupersededNotice
+).split('{number}');
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const equivalents = splitNumbers(page.equivalents);
@@ -159,13 +166,43 @@ const thumbFor = (slug: string) => {
     >
       {
         (replacement || page.superseded) && (
-          <div class="card flex flex-col gap-2 border-l-4 border-l-signal p-5 sm:p-6">
-            <span class="w-fit rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2">
-              {replacement ? copy.replacedHeading : copy.previousNumber}
-            </span>
-            <p class="text-sm leading-relaxed text-ink-2">
-              {replacement ? copy.replacedLead : copy.supersededNotice}
+          <div class="card flex flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
+            <p class="text-base leading-snug text-ink">
+              {noticeBefore}
+              <span class="font-semibold whitespace-nowrap">
+                {page.brand.name} <span class="spec">{page.value}</span>
+              </span>
+              {noticeAfter}
             </p>
+            {replacements.length > 0 && (
+              <div class="flex flex-col gap-1">
+                <p class="text-sm text-muted">
+                  {replacements.length > 1
+                    ? copy.currentNumbersLabel
+                    : copy.currentNumberLabel}
+                </p>
+                <ul class="-mx-2 flex flex-col">
+                  {replacements.map((number) => (
+                    <li>
+                      <a
+                        href={PathBuilder.partNumber(locale, number.slug)}
+                        class="group flex min-h-11 items-center justify-between gap-3 rounded-field px-2 text-ink hover:bg-shade hover:text-signal-ink"
+                      >
+                        <span>
+                          {number.brand.name}{' '}
+                          <span class="spec font-semibold">{number.value}</span>
+                        </span>
+                        <Icon
+                          name="chevronRight"
+                          size={16}
+                          class="shrink-0 text-muted group-hover:text-signal-ink"
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )
       }
@@ -173,13 +210,11 @@ const thumbFor = (slug: string) => {
         successor && (
           <PartOffers page={successor}>
             <Fragment slot="heading">
-              {copy.currentNumberLabel}{' '}
-              <a
-                href={PathBuilder.partNumber(locale, successor.slug)}
-                class="underline underline-offset-2 hover:text-signal-ink"
-              >
-                {successorLabel}
-              </a>
+              {copy.successorOffersHeading}
+              <span class="mt-1 block text-sm font-normal text-muted">
+                {successor.brand.name}{' '}
+                <span class="spec">{successor.value}</span>
+              </span>
             </Fragment>
           </PartOffers>
         )
