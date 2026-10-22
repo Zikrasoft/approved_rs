@@ -15,7 +15,7 @@ interface Props {
 
 const { category, pages, class: className } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const addon = bestPrice(pages)?.inStock
+const addon = bestPrice(pages)?.buyable
   ? categoryAddon(category, locale)
   : null;
 const { addonPickup: pickup, addonInCart } = content(locale).shopCart;

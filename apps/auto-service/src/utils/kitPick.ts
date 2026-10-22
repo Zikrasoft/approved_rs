@@ -1,19 +1,24 @@
 import type { PartOffer } from '@podbor/catalog-contract';
+import { isBuyable } from '@podbor/catalog-contract/availability';
 
 type KitPage = { superseded: boolean; offers: PartOffer[] };
+
+const inStockFirst = (offer: PartOffer) => Number(offer.stock_quantity > 0);
 
 export function kitPick<Page extends KitPage>(
   pages: Page[],
 ): { page: Page; offer: PartOffer | null } {
-  const inStock = pages
+  const buyable = pages
     .flatMap((page) =>
-      page.offers
-        .filter(({ stock_quantity }) => stock_quantity > 0)
-        .map((offer) => ({ page, offer })),
+      page.offers.filter(isBuyable).map((offer) => ({ page, offer })),
     )
-    .sort((a, b) => a.offer.price - b.offer.price);
+    .sort(
+      (a, b) =>
+        inStockFirst(b.offer) - inStockFirst(a.offer) ||
+        a.offer.price - b.offer.price,
+    );
   return (
-    inStock[0] ?? {
+    buyable[0] ?? {
       page: pages.find(({ superseded }) => !superseded) ?? pages[0],
       offer: null,
     }

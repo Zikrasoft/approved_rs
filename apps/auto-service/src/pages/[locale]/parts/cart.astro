@@ -13,6 +13,13 @@ export const getStaticPaths = localePaths;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopCart;
+const partCopy = content(locale).shopPart;
+const availability = {
+  stock: partCopy.columns.stock,
+  leadTime: partCopy.columns.leadTime,
+  inStockPickup: partCopy.columns.inStockPickup,
+  days: partCopy.leadTime,
+};
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
   'card mb-4 flex items-start gap-3 border-signal/30 bg-signal/8 p-4 text-sm leading-relaxed text-ink';
@@ -57,6 +64,7 @@ const stepper =
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
+      data-availability={JSON.stringify(availability)}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
         {copy.loading}
@@ -107,6 +115,7 @@ const stepper =
                   <span class="leading-snug font-semibold text-ink" data-name
                   ></span>
                   <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
                   <span class="text-sm text-ink-2" data-addon hidden></span>
                 </div>
                 <div class="flex shrink-0 flex-col items-end text-right">
@@ -227,6 +236,7 @@ const stepper =
                     class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
                     data-part-link></a>
                   <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
                 </div>
                 <button
                   type="button"

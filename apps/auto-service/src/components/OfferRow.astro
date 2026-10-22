@@ -1,5 +1,6 @@
 ---
 import type { PartOffer } from '@podbor/catalog-contract';
+import { isBuyable } from '@podbor/catalog-contract/availability';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { formatLeadTime } from '@/utils/leadTime';
@@ -19,6 +20,7 @@ const outOfStock = offer !== undefined && stock === null;
 const leadDays =
   offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
 const unavailable = outOfStock && leadDays === null;
+const buyable = offer !== undefined && isBuyable(offer);
 const leadText =
   leadDays !== null && formatLeadTime(leadDays, copy.leadTime, localeTag);
 const stockText =
@@ -58,7 +60,7 @@ const stockText =
     class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60"
     data-buy
     data-offer-id={offer?.id}
-    hidden={outOfStock}
+    hidden={!buyable}
   >
     <span data-label>{copy.buyButtonLabel}</span>
   </button>
@@ -66,7 +68,7 @@ const stockText =
     href={PathBuilder.partsInquiry(locale)}
     class="btn btn-secondary w-full"
     data-ask
-    hidden={!outOfStock}
+    hidden={buyable}
   >
     {copy.askSupplyCta}
   </a>

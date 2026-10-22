@@ -8,7 +8,13 @@ import {
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
 } from '@/utils/cartNotice';
-import { formatLeadTime, type LeadTimeCopy } from '@/utils/leadTime';
+import { isBuyable } from '@podbor/catalog-contract/availability';
+import {
+  availabilityText,
+  formatLeadTime,
+  type AvailabilityCopy,
+  type LeadTimeCopy,
+} from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
@@ -58,6 +64,8 @@ const offerCartSchema = z.object({
       quantity: z.number(),
       unit_price: z.number(),
       available: z.boolean(),
+      in_stock: z.boolean(),
+      lead_time_days: z.number(),
       addon: z.nullable(
         z.object({
           item_id: z.nullable(z.string()),
@@ -506,9 +514,9 @@ export function definePartOffers(tagName = 'part-offers'): void {
         );
         row.querySelector<HTMLElement>('[data-out]')!.hidden =
           inStockNow || offer.lead_time_days > 0;
-        row.querySelector<HTMLElement>('[data-ask]')!.hidden = inStockNow;
+        row.querySelector<HTMLElement>('[data-ask]')!.hidden = isBuyable(offer);
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
-        buy.hidden = !inStockNow;
+        buy.hidden = !isBuyable(offer);
         buy.setAttribute('data-offer-id', offer.id);
         return row;
       }
@@ -675,10 +683,12 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         )!;
         const sold = cart.items.filter(({ available }) => available);
         this.querySelector('[data-receipt-lines]')?.replaceChildren(
-          ...sold.map(({ part, quantity, unit_price, addon }) => {
+          ...sold.map((line) => {
+            const { part, quantity, unit_price, addon } = line;
             const row = template.content.cloneNode(true) as DocumentFragment;
             fill(row, '[data-name]', part.name);
             fill(row, '[data-number]', `${part.brand} ${part.number}`);
+            fill(row, '[data-ready]', this.readiness(line, localeTag));
             fill(
               row,
               '[data-quantity]',
@@ -702,6 +712,18 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           summary.addons === 0;
         this.querySelector<HTMLElement>('[data-ordered-body]')!.hidden = true;
         this.querySelector<HTMLElement>('[data-receipt]')!.hidden = false;
+      }
+
+      readiness(line: CartLine, localeTag: string): string | null {
+        try {
+          return availabilityText(
+            line,
+            JSON.parse(this.dataset.availability ?? '') as AvailabilityCopy,
+            localeTag,
+          );
+        } catch {
+          return null;
+        }
       }
 
       render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {
@@ -865,6 +887,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           .classList.toggle('line-through', !line.available);
         row.querySelector<HTMLElement>('[data-unavailable]')!.hidden =
           line.available;
+        fill(
+          row,
+          '[data-ready]',
+          line.available ? this.readiness(line, localeTag) : null,
+        );
         const button = (selector: string) => {
           const found = row.querySelector<HTMLButtonElement>(selector);
           found?.setAttribute(

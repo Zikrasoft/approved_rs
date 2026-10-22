@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatLeadTime } from './leadTime';
+import { availabilityText, formatLeadTime } from './leadTime';
 
 describe('formatLeadTime', () => {
   const copy = {
@@ -31,5 +31,41 @@ describe('formatLeadTime', () => {
         'en-GB',
       ),
     ).toBe('2 days');
+  });
+});
+
+describe('availabilityText', () => {
+  const copy = {
+    stock: 'В наличии',
+    leadTime: 'Можно забрать через',
+    inStockPickup: 'В наличии, забрать через {days}',
+    days: {
+      inStock: 'В наличии',
+      days: { one: '{days} день', few: '{days} дня', other: '{days} дней' },
+    },
+  };
+
+  it('says in stock for stock ready today', () => {
+    expect(
+      availabilityText({ in_stock: true, lead_time_days: 0 }, copy, 'ru-RU'),
+    ).toBe('В наличии');
+  });
+
+  it('says when stock held elsewhere can be picked up', () => {
+    expect(
+      availabilityText({ in_stock: true, lead_time_days: 2 }, copy, 'ru-RU'),
+    ).toBe('В наличии, забрать через 2 дня');
+  });
+
+  it('says when a part without stock can be picked up', () => {
+    expect(
+      availabilityText({ in_stock: false, lead_time_days: 4 }, copy, 'ru-RU'),
+    ).toBe('Можно забрать через 4 дня');
+  });
+
+  it('says nothing for a part with neither stock nor a pickup time', () => {
+    expect(
+      availabilityText({ in_stock: false, lead_time_days: 0 }, copy, 'ru-RU'),
+    ).toBeNull();
   });
 });
