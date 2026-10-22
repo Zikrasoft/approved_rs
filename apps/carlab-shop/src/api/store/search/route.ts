@@ -51,16 +51,17 @@ const splitFacet = (facet: string) => {
   return { key: facet.slice(0, at), value: facet.slice(at + 1) };
 };
 
-const facetFilters = (facets: string[]): SearchFilters[] => {
+const facetGroups = (facets: string[]): Map<string, string[]> => {
   const byKey = new Map<string, string[]>();
   for (const facet of facets) {
     const { key } = splitFacet(facet);
     byKey.set(key, [...(byKey.get(key) ?? []), facet]);
   }
-  return [...byKey.values()].map((values) => ({
-    [FACETS_FIELD]: { $in: values },
-  }));
+  return byKey;
 };
+
+type FacetCount = { value: string; count: number };
+type KeyFilter = (key: string) => boolean;
 
 async function partIdsForVehicle(
   catalog: CatalogModuleService,
@@ -76,12 +77,11 @@ async function partIdsForVehicle(
 
 async function describeFacets(
   catalog: CatalogModuleService,
-  counts: z.infer<typeof facetCountsSchema>,
+  counted: FacetCount[],
   locale: CatalogLocale,
   categoryId: string | undefined,
   chosen: string[],
 ) {
-  const counted = counts?.values ?? [];
   const values = [
     ...counted,
     ...chosen
@@ -151,7 +151,8 @@ export async function GET(
   const filters: SearchFilters = searchableQuery(q)
     ? { q: q.toLowerCase() }
     : {};
-  const and = facetFilters(facets);
+  const groups = facetGroups(facets);
+  const scope: SearchFilters[] = [];
   const nothing = () =>
     res.json(
       searchResponseSchema.parse({
@@ -169,7 +170,7 @@ export async function GET(
     return;
   }
   if (found) {
-    and.push({ category: found.slug });
+    scope.push({ category: found.slug });
   }
   if (vehicle_id) {
     const partIds = await partIdsForVehicle(catalog, vehicle_id);
@@ -177,13 +178,53 @@ export async function GET(
       nothing();
       return;
     }
-    and.push({ part_id: { $in: partIds } });
-  }
-  if (and.length) {
-    filters.$and = and;
+    scope.push({ part_id: { $in: partIds } });
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const filtersFor = (applied: KeyFilter): SearchFilters => {
+    const and = [
+      ...scope,
+      ...[...groups]
+        .filter(([key]) => applied(key))
+        .map(([, values]) => ({ [FACETS_FIELD]: { $in: values } })),
+    ];
+    return and.length ? { ...filters, $and: and } : filters;
+  };
+  const countFacets = async (applied: KeyFilter): Promise<FacetCount[]> => {
+    const { search_result } = await query.search({
+      entity: PART_IDENTIFIER_INDEX,
+      fields: ['id'],
+      filters: filtersFor(applied),
+      pagination: { skip: 0, take: 1 },
+      search_options: { facets: [{ field: FACETS_FIELD, limit: 100 }] },
+    });
+    return (
+      facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD])?.values ??
+      []
+    );
+  };
+  const disjunctiveCounts = async (
+    counted: FacetCount[],
+  ): Promise<FacetCount[]> => {
+    if (!groups.size) {
+      return counted;
+    }
+    const chosenKeys = [...groups.keys()];
+    const [everything, ...perKey] = await Promise.all([
+      countFacets(() => false),
+      ...chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
+    ]);
+    return everything.map(({ value }) => {
+      const at = chosenKeys.indexOf(splitFacet(value).key);
+      const source = at === -1 ? counted : perKey[at];
+      return {
+        value,
+        count: source.find((entry) => entry.value === value)?.count ?? 0,
+      };
+    });
+  };
+
   const { data, search_result } = await query.search({
     entity: PART_IDENTIFIER_INDEX,
     fields: [
@@ -201,7 +242,7 @@ export async function GET(
       'part.category.name',
       'part.category.translations',
     ],
-    filters,
+    filters: filtersFor(() => true),
     pagination: { skip: offset, take: limit },
     search_options: {
       facets: [{ field: FACETS_FIELD, limit: 100 }],
@@ -240,7 +281,10 @@ export async function GET(
       results,
       facets: await describeFacets(
         catalog,
-        facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD]),
+        await disjunctiveCounts(
+          facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD])
+            ?.values ?? [],
+        ),
         locale,
         found?.id,
         facets,

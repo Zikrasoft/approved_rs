@@ -147,21 +147,32 @@ medusaIntegrationTestRunner({
           name: 'Аккумуляторы',
           translations: { en: { name: 'Batteries' } },
         });
-        await catalog.createCategoryFields({
-          category_id: batteries.id,
-          key: 'capacity',
-          type: 'number',
-          unit: 'Ah',
-          label: 'Емкость',
-          rank: 1,
-          facet: true,
-        });
+        await catalog.createCategoryFields([
+          {
+            category_id: batteries.id,
+            key: 'capacity',
+            type: 'number',
+            unit: 'Ah',
+            label: 'Емкость',
+            rank: 1,
+            facet: true,
+          },
+          {
+            category_id: batteries.id,
+            key: 'voltage',
+            type: 'number',
+            unit: 'V',
+            label: 'Напряжение',
+            rank: 2,
+            facet: true,
+          },
+        ]);
         batteryIds = {};
         for (const capacity of [100, 60, 80]) {
           batteryIds[capacity] = await catalog.createPartWithIdentifiers({
             name: `Аккумулятор ${capacity}`,
             category_id: batteries.id,
-            attributes: { capacity },
+            attributes: { capacity, voltage: capacity === 100 ? 24 : 12 },
             identifiers: [
               {
                 type: 'manufacturer-number',
@@ -302,10 +313,45 @@ medusaIntegrationTestRunner({
               { value: '100', label: '100', count: 1 },
             ],
           },
+          {
+            key: 'voltage',
+            label: 'Напряжение',
+            unit: 'V',
+            values: [
+              { value: '12', label: '12', count: 2 },
+              { value: '24', label: '24', count: 1 },
+            ],
+          },
         ]);
         expect(large.map(({ part }) => part.id).sort()).toEqual(
           [batteryIds[80], batteryIds[100]].sort(),
         );
+      });
+
+      it('counts each facet with every other chosen facet applied but not its own', async () => {
+        const response = await search({
+          category: 'batteries',
+          locale: 'ru',
+          facets: ['capacity:60', 'voltage:12'],
+        });
+
+        expect(response.data.facets).toEqual([
+          expect.objectContaining({
+            key: 'capacity',
+            values: [
+              { value: '60', label: '60', count: 1 },
+              { value: '80', label: '80', count: 1 },
+              { value: '100', label: '100', count: 0 },
+            ],
+          }),
+          expect.objectContaining({
+            key: 'voltage',
+            values: [
+              { value: '12', label: '12', count: 1 },
+              { value: '24', label: '24', count: 0 },
+            ],
+          }),
+        ]);
       });
 
       it('keeps describing chosen values that leave nothing to list', async () => {
