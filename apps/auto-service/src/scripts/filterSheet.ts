@@ -25,6 +25,7 @@ export function defineFilterSheet(
         this.addEventListener(
           'change',
           () => {
+            this.toggleAttribute('data-dirty', true);
             const label = submit?.getAttribute(FILTERS_SUBMIT_ATTRIBUTE);
             if (submit && label) submit.textContent = label;
           },

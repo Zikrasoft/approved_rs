@@ -181,7 +181,7 @@ const scopeHidden = {
   />
 
   <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
-    <PartsSearchForm query={q} category={category} titled={false} />
+    {!found && <PartsSearchForm query={q} category={category} titled={false} />}
 
     {
       !searchable && (
@@ -213,6 +213,7 @@ const scopeHidden = {
           )}
 
           <div class="flex min-w-0 flex-col gap-3">
+            <PartsSearchForm query={q} category={category} compact />
             <ListingBar
               count={found.count}
               filters={facets.length > 0}
@@ -220,7 +221,7 @@ const scopeHidden = {
             />
 
             {(chips.length > 0 || modelName) && (
-              <ul class="flex flex-wrap gap-2">
+              <ul class="flex flex-wrap gap-2 max-lg:-mx-5 max-lg:flex-nowrap max-lg:overflow-x-auto max-lg:px-5 max-lg:[scrollbar-width:none]">
                 {[
                   ...(modelName
                     ? [
@@ -235,14 +236,14 @@ const scopeHidden = {
                     href: searchHref(chip.facets, chip.ranges),
                   })),
                 ].map((chip) => (
-                  <li>
+                  <li class="shrink-0">
                     <a
                       href={chip.href}
                       aria-label={copy.removeFilter.replace(
                         '{label}',
                         chip.label,
                       )}
-                      class="inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+                      class="inline-flex min-h-9 items-center gap-2 rounded-full whitespace-nowrap border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
                     >
                       {chip.label}
                       <Icon name="close" size={12} class="text-muted" />
@@ -250,10 +251,10 @@ const scopeHidden = {
                   </li>
                 ))}
                 {chips.length > 0 && (
-                  <li>
+                  <li class="shrink-0">
                     <a
                       href={searchHref([], [])}
-                      class="inline-flex min-h-9 items-center px-2 text-sm font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                      class="inline-flex min-h-9 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
                     >
                       {copy.resetAllFilters}
                     </a>
