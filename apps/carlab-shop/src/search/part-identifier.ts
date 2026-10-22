@@ -43,7 +43,11 @@ type IdentifierRow = {
     translations: Translations;
     attributes: AttributeValues;
     category_id: string | null;
-    category: { name: string; translations: Translations } | null;
+    category: {
+      slug: string;
+      name: string;
+      translations: Translations;
+    } | null;
   };
 };
 
@@ -89,7 +93,12 @@ const toDocument = (
     .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
     .flatMap(({ value, normalized_value }) => [value, normalized_value]),
   ...names('name', row.part),
-  ...(row.part.category ? names('category', row.part.category) : {}),
+  ...(row.part.category
+    ? {
+        category: row.part.category.slug,
+        ...names('category', row.part.category),
+      }
+    : {}),
   facets: facets(row.part, facetFields),
 });
 
@@ -104,6 +113,7 @@ const source = {
     'part.translations',
     'part.attributes',
     'part.category_id',
+    'part.category.slug',
     'part.category.name',
     'part.category.translations',
   ],
@@ -174,6 +184,7 @@ export default defineSearchIndex({
   fields: search.define({
     id: search.keyword().filterable().retrievable(),
     part_id: search.keyword().filterable().retrievable(false),
+    category: search.keyword().filterable().retrievable(false),
     brand: text(),
     number: numbers(),
     equivalent_numbers: numbers(),

@@ -18,6 +18,8 @@ export const partsSearchContentSchema = z
     filtersHeading: z.string(),
     applyFilters: z.string(),
     resetFilters: z.string(),
+    removeFilter: z.string(),
+    noFilteredResults: z.string(),
     superseded: z.string(),
     booleanTrue: z.string(),
     booleanFalse: z.string(),

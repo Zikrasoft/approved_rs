@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   catalogueFromEnv,
   categoriesForBuild,
+  categoryFacets,
   categoryPagesForBuild,
   carPagesForBuild,
   createCatalogue,
@@ -291,6 +292,36 @@ describe('catalogue categories', () => {
       ['oil-filters', ['mann-filter-hu816x']],
       ['cabin-filters', []],
     ]);
+  });
+
+  it('offers the filter values the Category pages carry, counted per brand-number', async () => {
+    const numbered = (normalized_value: string, attributes: object) => ({
+      ...classified,
+      id: `pi_${normalized_value}`,
+      normalized_value,
+      part: { ...classified.part, id: `part_${normalized_value}`, attributes },
+    });
+    const [oil, cabin] = await catalogueWith(
+      withCategories([
+        numbered('TALL1', { height: 100 }),
+        classified,
+        numbered('TWIN1', { height: 79 }),
+        numbered('BARE1', {}),
+      ]),
+    ).categoryPages();
+
+    expect(categoryFacets(oil, 'ru')).toEqual([
+      {
+        key: 'height',
+        label: 'Высота',
+        unit: 'mm',
+        values: [
+          { value: '79', label: '79', count: 2 },
+          { value: '100', label: '100', count: 1 },
+        ],
+      },
+    ]);
+    expect(categoryFacets(cabin, 'ru')).toEqual([]);
   });
 
   it('fails the build on a Category that breaks the contract', async () => {
@@ -770,10 +801,26 @@ describe('catalogue.search', () => {
         values: [{ value: '5w-30', label: '5W-30', count: 1 }],
       },
     ],
+    category: null,
     count: 1,
     offset: 0,
     limit: 20,
   };
+
+  it('lists a Category without a text query', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      category: 'engine-oil',
+      locale: 'en',
+      facets: ['viscosity:5w-30'],
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?locale=en&category=engine-oil&facets=viscosity%3A5w-30',
+      expect.anything(),
+    );
+  });
 
   it('sends the query, the page locale and the chosen facets', async () => {
     const fetch = answer(found);

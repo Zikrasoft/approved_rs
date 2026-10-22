@@ -1,22 +1,26 @@
 import { z } from '@medusajs/framework/zod';
 import {
   CART_FINGERPRINT_FIELD,
+  CATALOG_KEY_PATTERN,
   checkoutContactSchema,
   STEERING_SIDES,
   vinSchema,
 } from '@podbor/catalog-contract';
 
-export const StoreSearchParts = z.object({
-  q: z.string().trim().min(1).max(200),
-  vehicle_id: z.string().min(1).optional(),
-  facets: z
-    .union([z.string(), z.array(z.string())])
-    .transform((value) => [value].flat())
-    .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
-    .default([]),
-  offset: z.coerce.number().int().nonnegative().default(0),
-  limit: z.coerce.number().int().positive().max(100).default(20),
-});
+export const StoreSearchParts = z
+  .object({
+    q: z.string().trim().min(1).max(200).optional(),
+    category: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+    vehicle_id: z.string().min(1).optional(),
+    facets: z
+      .union([z.string(), z.array(z.string())])
+      .transform((value) => [value].flat())
+      .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
+      .default([]),
+    offset: z.coerce.number().int().nonnegative().default(0),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+  })
+  .refine(({ q, category }) => q || category, 'q or category is required');
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 
 export const StoreCreateVinLookup = z.object({ vin: vinSchema });
