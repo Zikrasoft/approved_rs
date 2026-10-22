@@ -658,7 +658,7 @@ describe('insertOrMergeLead with standalone services', () => {
     await store.insertOrMergeLead(inquiry);
     const { merged } = await store.insertOrMergeLead({
       ...inquiry,
-      comment: 'ещё',
+      comment: 'еще',
     });
 
     expect(merged).toBe(true);
