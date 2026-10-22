@@ -668,9 +668,10 @@ async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
     slug: 'batteries',
     name: 'Аккумуляторы',
     text: 'Стартерные аккумуляторы, в том числе AGM и EFB для автомобилей с системой старт-стоп. Подбираем по емкости, пусковому току, полярности и типоразмеру под ваш автомобиль.',
-    service_label:
-      'Регистрация аккумулятора в блоке управления (в сервисе CarLab)',
+    service_label: 'Регистрация аккумулятора в блоке управления',
     service_price: 2500,
+    service_note:
+      'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно. Услугу можно добавить к заказу.',
   });
   const fields = await catalog.createCategoryFields(
     BATTERY_FIELDS.map(([key, type, label, unit, facet], rank) => ({

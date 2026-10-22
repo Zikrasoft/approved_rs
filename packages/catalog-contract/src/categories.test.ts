@@ -11,6 +11,7 @@ const category = {
   kit_rank: 1,
   service_label: null,
   service_price: null,
+  service_note: null,
   fields: [
     {
       key: 'viscosity',
@@ -36,6 +37,7 @@ describe('categorySchema', () => {
       ...category,
       service_label: 'Регистрация аккумулятора',
       service_price: 2500,
+      service_note: 'На BMW после замены нужна регистрация.',
     };
     expect(categorySchema.parse(serviced)).toEqual(serviced);
   });

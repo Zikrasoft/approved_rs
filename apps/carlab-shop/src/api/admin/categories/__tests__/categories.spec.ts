@@ -441,11 +441,13 @@ medusaIntegrationTestRunner({
         const set = await post(path, {
           service_label: 'Регистрация аккумулятора',
           service_price: 2500,
+          service_note: ' На BMW после замены нужна регистрация. ',
         });
         expect(set.status).toBe(200);
         expect(set.data.category).toMatchObject({
           service_label: 'Регистрация аккумулятора',
           service_price: 2500,
+          service_note: 'На BMW после замены нужна регистрация.',
         });
 
         expect(
@@ -456,9 +458,18 @@ medusaIntegrationTestRunner({
         });
 
         expect(
-          (await post(path, { service_label: '', service_price: null })).data
-            .category,
-        ).toMatchObject({ service_label: null, service_price: null });
+          (
+            await post(path, {
+              service_label: '',
+              service_price: null,
+              service_note: '',
+            })
+          ).data.category,
+        ).toMatchObject({
+          service_label: null,
+          service_price: null,
+          service_note: null,
+        });
       });
 
       it.each([

@@ -415,7 +415,9 @@
     "serviceLabel": "Service name",
     "serviceLabelPlaceholder": "For example, Battery registration in the control unit",
     "servicePrice": "Price, RSD",
-    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. To drop the service, clear both fields and save."
+    "serviceNote": "Service note",
+    "serviceNotePlaceholder": "For example, on BMW and Mercedes-Benz a new battery has to be registered with the control unit",
+    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. Shoppers see the note on part and car pages next to the service price; leave it empty to show no note. To drop the service, clear the name and the price and save."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -529,7 +531,8 @@
       "min": "«From» cannot be negative.",
       "max": "«To» cannot be negative.",
       "service_price": "Service price: a whole number of RSD, 0 or more.",
-      "service_label": "Service name: 200 characters at most."
+      "service_label": "Service name: 200 characters at most.",
+      "service_note": "Service note: 500 characters at most."
     },
     "fields": {
       "name": "Name",
@@ -570,7 +573,8 @@
       "text": "Text",
       "identifiers": "Numbers",
       "service_label": "Service name",
-      "service_price": "Service price, RSD"
+      "service_price": "Service price, RSD",
+      "service_note": "Service note"
     },
     "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative.",
     "entities": {
@@ -632,7 +636,8 @@
       "text": "Description",
       "label": "Label",
       "note": "Note",
-      "service_label": "Service"
+      "service_label": "Service",
+      "service_note": "Service note"
     },
     "nothingChanged": "No translation changed, nothing to save."
   },

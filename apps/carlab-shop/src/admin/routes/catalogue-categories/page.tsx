@@ -14,7 +14,7 @@ import {
   Textarea,
   toast,
 } from '@medusajs/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import { getI18n, useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -26,6 +26,7 @@ import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  type FieldErrorHandler,
   useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
@@ -67,6 +68,7 @@ const categorySchema = editedBySchema.extend({
   kit_rank: z.number(),
   service_label: z.string().nullable(),
   service_price: z.number().nullable(),
+  service_note: z.string().nullable(),
   fields: z.array(categoryFieldSchema),
 });
 
@@ -98,11 +100,17 @@ const EMPTY_FIELD: FieldDraft = {
 const isSelect = (type: FieldType) =>
   type === 'single-select' || type === 'multi-select';
 
-const post = async (path: string, body: unknown) => {
-  const saved = await adminFetch(path, acknowledged, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+const post = async (
+  path: string,
+  body: unknown,
+  onFieldError?: FieldErrorHandler,
+) => {
+  const saved = await adminFetch(
+    path,
+    acknowledged,
+    { method: 'POST', body: JSON.stringify(body) },
+    onFieldError,
+  );
   if (saved) toast.success(getI18n().t('common.saved', { ns: 'carlabAdmin' }));
   return saved;
 };
@@ -351,6 +359,26 @@ const CategoryEditor = ({
   const [servicePrice, setServicePrice] = useState(
     category.service_price === null ? '' : String(category.service_price),
   );
+  const [serviceNote, setServiceNote] = useState(category.service_note ?? '');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const formId = useId();
+  const fieldProps = (field: string) => ({
+    id: `${formId}-${field}`,
+    'aria-invalid': Boolean(fieldErrors[field]),
+    'aria-describedby': fieldErrors[field]
+      ? `${formId}-${field}-error`
+      : undefined,
+  });
+  const fieldError = (field: string) =>
+    fieldErrors[field] && (
+      <Text
+        id={`${formId}-${field}-error`}
+        size="small"
+        className="text-ui-fg-error"
+      >
+        {fieldErrors[field]}
+      </Text>
+    );
   const [draft, setDraft] = useState<FieldDraft>(EMPTY_FIELD);
   const path = `/admin/categories/${category.id}`;
 
@@ -409,23 +437,49 @@ const CategoryEditor = ({
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.maintenanceKitHint')}
         </Text>
-        <Label>{t('categories.serviceHeading')}</Label>
+        <Heading level="h3" className="mt-2">
+          {t('categories.serviceHeading')}
+        </Heading>
         <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_10rem]">
-          <Input
-            aria-label={t('categories.serviceLabel')}
-            placeholder={t('categories.serviceLabelPlaceholder')}
-            value={serviceLabel}
-            onChange={(event) => setServiceLabel(event.target.value)}
+          <div className="flex flex-col gap-y-1">
+            <Label htmlFor={`${formId}-service_label`}>
+              {t('categories.serviceLabel')}
+            </Label>
+            <Input
+              {...fieldProps('service_label')}
+              placeholder={t('categories.serviceLabelPlaceholder')}
+              value={serviceLabel}
+              onChange={(event) => setServiceLabel(event.target.value)}
+            />
+            {fieldError('service_label')}
+          </div>
+          <div className="flex flex-col gap-y-1">
+            <Label htmlFor={`${formId}-service_price`}>
+              {t('categories.servicePrice')}
+            </Label>
+            <Input
+              {...fieldProps('service_price')}
+              type="number"
+              min={0}
+              step={1}
+              value={servicePrice}
+              onChange={(event) => setServicePrice(event.target.value)}
+            />
+            {fieldError('service_price')}
+          </div>
+        </div>
+        <div className="flex max-w-3xl flex-col gap-y-1">
+          <Label htmlFor={`${formId}-service_note`}>
+            {t('categories.serviceNote')}
+          </Label>
+          <Textarea
+            {...fieldProps('service_note')}
+            rows={3}
+            placeholder={t('categories.serviceNotePlaceholder')}
+            value={serviceNote}
+            onChange={(event) => setServiceNote(event.target.value)}
           />
-          <Input
-            type="number"
-            min={0}
-            step={1}
-            aria-label={t('categories.servicePrice')}
-            placeholder={t('categories.servicePrice')}
-            value={servicePrice}
-            onChange={(event) => setServicePrice(event.target.value)}
-          />
+          {fieldError('service_note')}
         </div>
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.serviceHint')}
@@ -434,15 +488,22 @@ const CategoryEditor = ({
           <Button
             disabled={!name || !Number.isInteger(Number(kitRank)) || writing}
             onClick={async () => {
-              const saved = await post(path, {
-                name,
-                text,
-                maintenance_kit: kit,
-                kit_rank: Number(kitRank),
-                service_label: serviceLabel.trim() || null,
-                service_price:
-                  servicePrice.trim() === '' ? null : Number(servicePrice),
-              });
+              setFieldErrors({});
+              const saved = await post(
+                path,
+                {
+                  name,
+                  text,
+                  maintenance_kit: kit,
+                  kit_rank: Number(kitRank),
+                  service_label: serviceLabel.trim() || null,
+                  service_price:
+                    servicePrice.trim() === '' ? null : Number(servicePrice),
+                  service_note: serviceNote.trim() || null,
+                },
+                (field, message) =>
+                  setFieldErrors((errors) => ({ ...errors, [field]: message })),
+              );
               if (saved) await onChange();
             }}
           >
@@ -456,6 +517,9 @@ const CategoryEditor = ({
               text: category.text,
               ...(category.service_label && {
                 service_label: category.service_label,
+              }),
+              ...(category.service_note && {
+                service_note: category.service_note,
               }),
             }}
           />
@@ -678,7 +742,7 @@ const CategoriesPage = () => {
 
       {selected && (
         <CategoryEditor
-          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}-${selected.service_label}-${selected.service_price}`}
+          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}-${selected.service_label}-${selected.service_price}-${selected.service_note}`}
           category={selected}
           onChange={load}
         />

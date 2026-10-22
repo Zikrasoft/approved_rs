@@ -229,6 +229,12 @@ const categoryColumns = {
     .nullable()
     .transform((label) => label || null),
   service_price: z.number().int().nonnegative().nullable(),
+  service_note: z
+    .string()
+    .trim()
+    .max(500)
+    .nullable()
+    .transform((note) => note || null),
 };
 
 export const AdminCreateCategory = z.strictObject({
@@ -239,6 +245,7 @@ export const AdminCreateCategory = z.strictObject({
   kit_rank: categoryColumns.kit_rank.default(0),
   service_label: categoryColumns.service_label.default(null),
   service_price: categoryColumns.service_price.default(null),
+  service_note: categoryColumns.service_note.default(null),
 });
 export type AdminCreateCategoryType = z.infer<typeof AdminCreateCategory>;
 
