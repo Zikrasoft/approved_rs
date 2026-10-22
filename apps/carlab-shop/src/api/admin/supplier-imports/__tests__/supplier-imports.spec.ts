@@ -228,6 +228,27 @@ medusaIntegrationTestRunner({
         expect(part.source).toBe('Intercars');
       });
 
+      it('makes a Part it creates searchable without a publish', async () => {
+        intercars.articles.push({
+          article_id: 'IC-15',
+          brand: 'MANN-FILTER',
+          number: 'HU 7020 z',
+          name: 'Фильтр HU7020',
+          category: 'IC-OIL',
+        });
+
+        await runImport();
+
+        let found = 0;
+        for (let attempt = 0; attempt < 50 && !found; attempt++) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          found = (
+            await api.get('/store/search?q=HU7020z&locale=ru', storeHeaders)
+          ).data.count;
+        }
+        expect(found).toBe(1);
+      });
+
       it('creates the Part without a Category whose required fields the article cannot fill', async () => {
         intercars.articles.push({
           article_id: 'IC-3',
@@ -509,7 +530,10 @@ medusaIntegrationTestRunner({
         const refused = await removeSource();
 
         expect(refused.status).toBe(400);
-        expect(refused.data.code).toBe('SOURCE_IN_USE');
+        expect(refused.data).toMatchObject({
+          code: 'SOURCE_IN_USE',
+          holders: [{ source: 'manual', rows: 1 }],
+        });
         expect(await sources()).toEqual(before);
 
         await api.delete(
@@ -522,6 +546,7 @@ medusaIntegrationTestRunner({
         expect(removed.data).toEqual({
           source: 'Intercars',
           deleted: before.Intercars,
+          import_disabled: true,
         });
         const after = await sources();
         expect(after.Intercars).toBeUndefined();
@@ -538,6 +563,55 @@ medusaIntegrationTestRunner({
           }),
         ).toEqual([]);
         expect((await page('HU816X'))?.offers).toHaveLength(1);
+
+        intercars.articles.push({
+          article_id: 'IC-13',
+          brand: 'MANN-FILTER',
+          number: 'W 1130',
+          name: 'Фильтр W1130',
+          category: 'IC-OIL',
+        });
+        const next = await runImport();
+
+        expect(
+          next.data.imports.map(
+            ({ supplier }: { supplier: string }) => supplier,
+          ),
+        ).toEqual(['Warehouse']);
+        expect(await page('W1130')).toBeUndefined();
+      });
+
+      it('switches a supplier import off and on again', async () => {
+        const switchImport = (import_enabled: boolean) =>
+          api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { import_enabled },
+            adminHeaders,
+          );
+        intercars.articles.push({
+          article_id: 'IC-14',
+          brand: 'MANN-FILTER',
+          number: 'W 1140',
+          name: 'Фильтр W1140',
+          category: 'IC-OIL',
+        });
+
+        await switchImport(false);
+        const skipped = await runImport();
+        const switched = await switchImport(true);
+        const imported = await runImport();
+
+        expect(
+          skipped.data.imports.map(
+            ({ supplier }: { supplier: string }) => supplier,
+          ),
+        ).toEqual(['Warehouse']);
+        expect(switched.data.supplier.import_enabled).toBe(true);
+        expect(imported.data.imports[0]).toMatchObject({
+          supplier: 'Intercars',
+          created: 1,
+        });
+        expect(await page('W1140')).toBeDefined();
       });
     });
   },

@@ -14,7 +14,9 @@ import {
 import { serbianScripts } from '../lib/serbian';
 import {
   PART_CHANGED_EVENT,
+  PART_IDENTIFIERS_DELETED_EVENT,
   partChangedEventSchema,
+  partIdentifiersDeletedEventSchema,
 } from './part-changed-event';
 
 export const PART_IDENTIFIER_INDEX = 'part_identifier';
@@ -190,10 +192,13 @@ export default defineSearchIndex({
       .filterable()
       .retrievable(false),
   }),
-  events: [PART_CHANGED_EVENT],
+  events: [PART_CHANGED_EVENT, PART_IDENTIFIERS_DELETED_EVENT],
   consume: graphConsume({
     ...source,
     resolve_ids: async (event, { container }) => {
+      if (event.name === PART_IDENTIFIERS_DELETED_EVENT) {
+        return partIdentifiersDeletedEventSchema.parse(event.data).ids;
+      }
       const { data } = await container.query.graph({
         entity: 'part_identifier',
         fields: ['id'],

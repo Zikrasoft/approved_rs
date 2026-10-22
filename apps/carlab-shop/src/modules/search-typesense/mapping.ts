@@ -85,6 +85,9 @@ const compileFieldFilter = (field: string, value: unknown): string => {
   if (value === null || typeof value !== 'object' || value instanceof Date) {
     return `${field}:=${quote(value)}`;
   }
+  if (Array.isArray(value)) {
+    return `${field}:=[${value.map(quote).join(',')}]`;
+  }
 
   const operators = value as Record<string, unknown>;
   const keys = Object.keys(operators);

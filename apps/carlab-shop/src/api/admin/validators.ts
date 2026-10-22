@@ -178,6 +178,7 @@ export const AdminUpdateSupplier = z
   .strictObject({
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
+    import_enabled: z.boolean().optional(),
   })
   .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;

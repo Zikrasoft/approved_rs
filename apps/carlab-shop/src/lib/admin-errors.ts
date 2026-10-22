@@ -23,13 +23,14 @@ export const ADMIN_ERROR_CODES = [
   'FIELD_REQUIRED',
   'INVALID_FIELD',
   'LAST_IDENTIFIER',
+  'MANUAL_SOURCE',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];
 
 type ErrorType = (typeof MedusaError.Types)[keyof typeof MedusaError.Types];
 
-type Details = Record<string, string>;
+type Details = Record<string, unknown>;
 
 type DetailedError = MedusaError & { details?: Details };
 

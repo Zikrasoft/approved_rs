@@ -38,6 +38,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
+import { MANUAL_SOURCE } from './models/provenance';
 
 type Provenance = {
   source?: string;
@@ -142,6 +143,7 @@ export type NewPart = Provenance &
 type SourcedRow = { id: string; source: string };
 
 type SourcedRows = {
+  entity: string;
   list: (
     filters: { source?: string },
     context: Context,
@@ -152,6 +154,14 @@ type SourcedRows = {
 export type SourceCount = { source: string; rows: number };
 
 const SOURCE_COLUMNS = { select: ['id', 'source'], take: null };
+
+const sourceInUse = (source: string, details: Record<string, unknown>) =>
+  adminError(
+    MedusaError.Types.NOT_ALLOWED,
+    'SOURCE_IN_USE',
+    `Rows of other sources still use rows of ${source}`,
+    details,
+  );
 
 class CatalogModuleService extends MedusaService({
   Brand,
@@ -522,81 +532,97 @@ class CatalogModuleService extends MedusaService({
   private sourcedRows(): SourcedRows[] {
     return [
       {
+        entity: 'requirement',
         list: (filters, context) =>
           this.listRequirements(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteRequirements(ids, context),
       },
       {
+        entity: 'fitment',
         list: (filters, context) =>
           this.listFitments(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteFitments(ids, context),
       },
       {
+        entity: 'vehicle_identifier',
         list: (filters, context) =>
           this.listVehicleIdentifiers(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleIdentifiers(ids, context),
       },
       {
+        entity: 'brand_spelling',
         list: (filters, context) =>
           this.listBrandSpellings(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteBrandSpellings(ids, context),
       },
       {
+        entity: 'part_identifier',
         list: (filters, context) =>
           this.listPartIdentifiers(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deletePartIdentifiers(ids, context),
       },
       {
+        entity: 'part',
         list: (filters, context) =>
           this.listParts(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteParts(ids, context),
       },
       {
+        entity: 'vehicle',
         list: (filters, context) =>
           this.listVehicles(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicles(ids, context),
       },
       {
+        entity: 'category_field_option',
         list: (filters, context) =>
           this.listCategoryFieldOptions(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFieldOptions(ids, context),
       },
       {
+        entity: 'category_field',
         list: (filters, context) =>
           this.listCategoryFields(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFields(ids, context),
       },
       {
+        entity: 'category',
         list: (filters, context) =>
           this.listCategories(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteCategories(ids, context),
       },
       {
+        entity: 'vehicle_model',
         list: (filters, context) =>
           this.listVehicleModels(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleModels(ids, context),
       },
       {
+        entity: 'engine',
         list: (filters, context) =>
           this.listEngines(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteEngines(ids, context),
       },
       {
+        entity: 'chassis',
         list: (filters, context) =>
           this.listChassis(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteChassis(ids, context),
       },
       {
+        entity: 'series',
         list: (filters, context) =>
           this.listSeries(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteSeries(ids, context),
       },
       {
+        entity: 'make',
         list: (filters, context) =>
           this.listMakes(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteMakes(ids, context),
       },
       {
+        entity: 'brand',
         list: (filters, context) =>
           this.listBrands(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteBrands(ids, context),
@@ -625,32 +651,40 @@ class CatalogModuleService extends MedusaService({
     source: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
-    const othersBefore = await this.otherSourceRows(source, sharedContext);
+    if (source === MANUAL_SOURCE) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'MANUAL_SOURCE',
+        'Rows typed in by hand are never deleted by source',
+      );
+    }
+    const before = await this.countRowsBySource(sharedContext);
     let deleted = 0;
-    for (const { list, remove } of this.sourcedRows()) {
+    for (const { entity, list, remove } of this.sourcedRows()) {
       const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
       if (ids.length) {
-        await remove(ids, sharedContext);
+        await remove(ids, sharedContext).catch((error: unknown) => {
+          throw MedusaError.isMedusaError(error) &&
+            error.type === MedusaError.Types.NOT_FOUND
+            ? sourceInUse(source, { blocked: entity })
+            : error;
+        });
         deleted += ids.length;
       }
     }
-    if ((await this.otherSourceRows(source, sharedContext)) !== othersBefore) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'SOURCE_IN_USE',
-        `Rows of other sources still use rows of ${source}`,
-      );
+    const after = await this.countRowsBySource(sharedContext);
+    const holders = before
+      .filter((count) => count.source !== source)
+      .map(({ source: holder, rows }) => ({
+        source: holder,
+        rows:
+          rows - (after.find((count) => count.source === holder)?.rows ?? 0),
+      }))
+      .filter(({ rows }) => rows > 0);
+    if (holders.length) {
+      throw sourceInUse(source, { holders });
     }
     return deleted;
-  }
-
-  private async otherSourceRows(
-    source: string,
-    sharedContext: Context,
-  ): Promise<number> {
-    return (await this.countRowsBySource(sharedContext))
-      .filter((count) => count.source !== source)
-      .reduce((total, { rows }) => total + rows, 0);
   }
 
   @InjectManager()

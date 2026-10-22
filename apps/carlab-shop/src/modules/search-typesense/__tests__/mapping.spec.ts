@@ -177,6 +177,10 @@ describe('compileFilters', () => {
     );
   });
 
+  it('compiles a plain list the way the module deletes removed documents', () => {
+    expect(compileFilters({ id: ['a', 'b'] })).toBe('id:=[`a`,`b`]');
+  });
+
   it('compiles $and into a conjunction', () => {
     expect(
       compileFilters({

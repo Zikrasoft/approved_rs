@@ -11,6 +11,7 @@ const supplierSchema = z.object({
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
+  import_enabled: z.boolean(),
   updated_at: z.date(),
   updated_by: z.string().nullable(),
 });
