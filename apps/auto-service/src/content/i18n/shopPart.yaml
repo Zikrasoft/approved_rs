@@ -1,5 +1,5 @@
 metaTitleSuffix: CarLab
-metaDescription: Бренды, поставщики, цены и сроки поставки для этой запчасти в каталоге CarLab.
+metaDescription: Бренды, аналоги, цены и наличие этой запчасти в каталоге CarLab. Самовывоз с СТО в Белграде.
 eyebrow: Запчасть
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
@@ -16,18 +16,18 @@ attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
-priceOnRequestBody: Сейчас этой запчасти нет в наличии у поставщиков. Добавьте ее в заявку, и мы сообщим цену и срок поставки.
+priceOnRequestBody: Сейчас этой запчасти нет в наличии. Добавьте ее в заявку, и мы сообщим цену и когда ее можно забрать.
 priceOnRequestCta: Узнать цену
 offersHeading: Цена и наличие
 columns:
   stock: В наличии
-  leadTime: Срок поставки
+  leadTime: Можно забрать через
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
-askSupplyCta: Узнать о поставке
-askedNotice: Добавили в заявку. Узнаем у поставщика срок и цену и напишем вам.
-stockLimitNotice: Больше этой запчасти у поставщика нет, все доступные уже в корзине.
+askSupplyCta: Узнать о наличии
+askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
+stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
 fromPrice: от {price}
 priceOnRequestTag: цена по запросу
 addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
@@ -37,8 +37,8 @@ inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
 crossReferencesHeading: Номера других производителей
-applicabilityHeading: Применимость по данным поставщика
-supplierDataNote: Данные поставщика. Перед заказом проверим совместимость по VIN.
+applicabilityHeading: Применимость по данным каталога
+supplierDataNote: Данные каталога. Перед заказом проверим совместимость по VIN.
 requirementCarsLabel: 'Подходит по допускам для:'
 kitCarsLabel: 'Входит в комплект ТО для:'
 leadTime:
