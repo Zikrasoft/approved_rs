@@ -22,6 +22,7 @@ export const ADMIN_ERROR_CODES = [
   'ALREADY_EXISTS',
   'FIELD_REQUIRED',
   'INVALID_FIELD',
+  'LAST_IDENTIFIER',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];
@@ -115,7 +116,9 @@ export async function parseAdminBody<Schema extends z.ZodType>(
   if (result.success) {
     return result.data;
   }
-  const [issue] = result.error.issues;
+  const { issues } = result.error;
+  const issue =
+    issues.find(({ code }) => code === 'unrecognized_keys') ?? issues[0];
   const field = issue.path.join('.');
   const required = field && isBlank(valueAt(body, issue.path));
   throw adminError(

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
   adminFetch,
@@ -25,6 +26,11 @@ import {
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import {
+  labelledVehicleSchema,
+  type TFunction,
+  vehicleLabel,
+} from '../../lib/vehicle-label';
 
 const OWNERS = [
   { key: 'engine_id', path: 'engines', collection: 'engines' },
@@ -34,11 +40,9 @@ const OWNERS = [
 
 type OwnerKey = (typeof OWNERS)[number]['key'];
 
-const ownerRowSchema = z.object({
-  id: z.string(),
-  code: z.string().optional(),
-  identifiers: z.array(z.object({ value: z.string() })).optional(),
-});
+const ownerRowSchema = z
+  .object({ id: z.string(), code: z.string().optional() })
+  .loose();
 
 type OwnerRow = z.infer<typeof ownerRowSchema>;
 
@@ -101,8 +105,10 @@ const EMPTY_DRAFT: Draft = {
   quantity: '1',
 };
 
-const ownerLabel = (row: OwnerRow) =>
-  row.code ?? (row.identifiers?.map(({ value }) => value).join(', ') || row.id);
+const ownerLabel = (t: TFunction, row: OwnerRow) => {
+  const vehicle = labelledVehicleSchema.safeParse(row);
+  return vehicle.success ? vehicleLabel(t, vehicle.data) : (row.code ?? row.id);
+};
 
 const numberOrNull = (value: string) =>
   value.trim() === '' ? null : Number(value);
@@ -258,7 +264,7 @@ const RequirementsPage = () => {
             <Select.Content>
               {(owners[owner.collection] ?? []).map((row) => (
                 <Select.Item key={row.id} value={row.id}>
-                  {ownerLabel(row)}
+                  {ownerLabel(t, row)}
                 </Select.Item>
               ))}
             </Select.Content>
@@ -273,7 +279,7 @@ const RequirementsPage = () => {
           {requirements.length === 0 ? (
             <Text>{t('requirements.empty')}</Text>
           ) : (
-            <div className="overflow-x-auto">
+            <ScrollArea>
               <Table>
                 <Table.Header>
                   <Table.Row>
@@ -316,7 +322,7 @@ const RequirementsPage = () => {
                   ))}
                 </Table.Body>
               </Table>
-            </div>
+            </ScrollArea>
           )}
 
           <div className="flex flex-wrap items-end gap-2">

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -27,6 +28,11 @@ import {
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import {
+  type LabelledVehicle,
+  labelledVehicleSchema,
+  vehicleLabel,
+} from '../../lib/vehicle-label';
 
 const brandSchema = z.object({ id: z.string(), name: z.string() });
 
@@ -51,14 +57,7 @@ type Part = z.infer<typeof partSchema>;
 
 type Identifier = z.infer<typeof identifierSchema>;
 
-const vehicleSchema = z.object({
-  id: z.string(),
-  model: z.object({ name: z.string() }),
-  engine: z.object({ code: z.string() }),
-  identifiers: z.array(z.object({ value: z.string() })),
-});
-
-type Vehicle = z.infer<typeof vehicleSchema>;
+type Vehicle = LabelledVehicle;
 
 const fitmentSchema = editedBySchema.extend({
   id: z.string(),
@@ -84,7 +83,7 @@ const referenceSchema = z.object({
 
 type Reference = z.infer<typeof referenceSchema>;
 
-const vehiclesSchema = z.object({ vehicles: z.array(vehicleSchema) });
+const vehiclesSchema = z.object({ vehicles: z.array(labelledVehicleSchema) });
 const brandsSchema = z.object({ brands: z.array(brandSchema) });
 const referencesSchema = z.record(z.string(), z.array(referenceSchema));
 const fitmentsSchema = z.object({ fitments: z.array(fitmentSchema) });
@@ -141,11 +140,6 @@ const EMPTY_CONDITIONS: Conditions = {
   gearbox: '',
   note: '',
 };
-
-const vehicleLabel = (vehicle: Vehicle): string =>
-  `${vehicle.model.name} ${vehicle.engine.code} (${vehicle.identifiers
-    .map(({ value }) => value)
-    .join(', ')})`;
 
 const referenceLabel = (row: Reference): string =>
   [row.name, row.code].filter(Boolean).join(' ');
@@ -278,6 +272,7 @@ const FitmentsPage = () => {
 
   useEffect(() => {
     setPartName(selectedPart?.name ?? '');
+    setNewValue('');
     setEditing(null);
     setConditions(EMPTY_CONDITIONS);
     if (selectedPart) {
@@ -298,6 +293,9 @@ const FitmentsPage = () => {
     if (data) {
       setParts(data.parts);
       setSearched(true);
+      if (!data.parts.length) {
+        setNewValue(query.trim());
+      }
     }
   };
 
@@ -351,9 +349,54 @@ const FitmentsPage = () => {
     }
   };
 
+  const addIdentifier = async () => {
+    if (!selectedPart) return;
+    const data = await adminFetch(
+      `/admin/parts/${selectedPart.id}/identifiers`,
+      createdPartSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: newType,
+          brand_id: newBrandId,
+          value: newValue,
+        }),
+      },
+    );
+    if (data) {
+      const brand = brands.find(({ id }) => id === newBrandId)?.name ?? '';
+      toast.success(
+        t('fitments.numberAdded', { number: `${brand} ${newValue.trim()}` }),
+      );
+      setSelectedPart(data.part);
+      setNewValue('');
+    }
+  };
+
+  const deleteLastIdentifier = async (number: string) => {
+    if (!selectedPart) return;
+    if (
+      await confirmed({
+        title: t('fitments.lastNumberTitle', { number }),
+        description: t('fitments.lastNumberBody', { name: selectedPart.name }),
+        confirmText: t('fitments.deleteWholePart'),
+        done: t('fitments.partDeleted', { name: selectedPart.name }),
+        run: () =>
+          adminFetch(`/admin/parts/${selectedPart.id}`, acknowledged, {
+            method: 'DELETE',
+          }),
+      })
+    ) {
+      setSelectedPart(null);
+    }
+  };
+
   const deleteIdentifier = async (identifier: Identifier) => {
     if (!selectedPart) return;
     const number = `${identifier.brand.name} ${identifier.value}`;
+    if (selectedPart.identifiers.length === 1) {
+      return deleteLastIdentifier(number);
+    }
     if (
       await confirmed({
         title: t('fitments.confirmDeleteNumberTitle', { number }),
@@ -475,7 +518,7 @@ const FitmentsPage = () => {
       await confirmed({
         title: t('fitments.confirmDeleteFitmentTitle'),
         description: t('fitments.confirmDeleteFitmentBody', {
-          vehicle: vehicle ? vehicleLabel(vehicle) : fitment.vehicle_id,
+          vehicle: vehicle ? vehicleLabel(t, vehicle) : fitment.vehicle_id,
         }),
         done: t('fitments.fitmentDeleted'),
         run: () =>
@@ -532,6 +575,43 @@ const FitmentsPage = () => {
       </Badge>
     );
 
+  const identifierFields = (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+      <Select value={newType} onValueChange={setNewType}>
+        <Select.Trigger aria-label={t('fitments.identifierTypePlaceholder')}>
+          <Select.Value placeholder={t('fitments.identifierTypePlaceholder')} />
+        </Select.Trigger>
+        <Select.Content>
+          {IDENTIFIER_TYPES.map((type) => (
+            <Select.Item key={type} value={type}>
+              {t(`fitments.identifierTypes.${type}`)}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select>
+      <Select value={newBrandId} onValueChange={setNewBrandId}>
+        <Select.Trigger aria-label={t('fitments.brandPlaceholder')}>
+          <Select.Value placeholder={t('fitments.brandPlaceholder')} />
+        </Select.Trigger>
+        <Select.Content>
+          {brands.map((brand) => (
+            <Select.Item key={brand.id} value={brand.id}>
+              {brand.name}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select>
+      <div className="sm:col-span-2">
+        <Input
+          aria-label={t('fitments.numberPlaceholder')}
+          placeholder={t('fitments.numberPlaceholder')}
+          value={newValue}
+          onChange={(event) => setNewValue(event.target.value)}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <Container className="flex flex-col gap-y-6">
       <Heading level="h1">{t('fitments.heading')}</Heading>
@@ -567,7 +647,7 @@ const FitmentsPage = () => {
             </div>
             <Label className="flex flex-col gap-y-1">
               <Text size="small">{t('fitments.partNameLabel')}</Text>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
                 <Input
                   value={partName}
                   maxLength={200}
@@ -601,6 +681,17 @@ const FitmentsPage = () => {
                 </Badge>
               ))}
             </div>
+            <div className="flex flex-col gap-2">
+              {identifierFields}
+              <Button
+                variant="secondary"
+                className="self-start"
+                onClick={addIdentifier}
+                disabled={!newBrandId || !newValue.trim()}
+              >
+                {t('fitments.addNumber')}
+              </Button>
+            </div>
           </div>
         ) : (
           <>
@@ -617,7 +708,7 @@ const FitmentsPage = () => {
               </Button>
             </div>
             {parts.length > 0 && (
-              <div className="overflow-x-auto">
+              <ScrollArea>
                 <Table>
                   <Table.Body>
                     {parts.map((part) => (
@@ -650,7 +741,7 @@ const FitmentsPage = () => {
                     ))}
                   </Table.Body>
                 </Table>
-              </div>
+              </ScrollArea>
             )}
             {searched && parts.length === 0 && (
               <div className="flex flex-col gap-y-2 border-t pt-2">
@@ -661,41 +752,7 @@ const FitmentsPage = () => {
                   maxLength={200}
                   onChange={(event) => setNewPartName(event.target.value)}
                 />
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Select value={newType} onValueChange={setNewType}>
-                    <Select.Trigger>
-                      <Select.Value
-                        placeholder={t('fitments.identifierTypePlaceholder')}
-                      />
-                    </Select.Trigger>
-                    <Select.Content>
-                      {IDENTIFIER_TYPES.map((type) => (
-                        <Select.Item key={type} value={type}>
-                          {t(`fitments.identifierTypes.${type}`)}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select>
-                  <Select value={newBrandId} onValueChange={setNewBrandId}>
-                    <Select.Trigger>
-                      <Select.Value
-                        placeholder={t('fitments.brandPlaceholder')}
-                      />
-                    </Select.Trigger>
-                    <Select.Content>
-                      {brands.map((brand) => (
-                        <Select.Item key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select>
-                  <Input
-                    placeholder={t('fitments.numberPlaceholder')}
-                    value={newValue}
-                    onChange={(event) => setNewValue(event.target.value)}
-                  />
-                </div>
+                {identifierFields}
                 <Button
                   onClick={createPart}
                   disabled={!newPartName || !newBrandId || !newValue}
@@ -721,7 +778,7 @@ const FitmentsPage = () => {
               placeholder={t('fitments.filters.vehicle')}
               options={vehicles.map((vehicle) => ({
                 value: vehicle.id,
-                label: vehicleLabel(vehicle),
+                label: vehicleLabel(t, vehicle),
               }))}
             />
             {REFERENCE_FILTERS.map(({ key, collection, label }) => (
@@ -873,7 +930,7 @@ const FitmentsPage = () => {
       {fitments.length > 0 && (
         <section className="flex flex-col gap-y-2">
           <Heading level="h2">{t('fitments.existingRows')}</Heading>
-          <div className="overflow-x-auto">
+          <ScrollArea>
             <Table>
               <Table.Header>
                 <Table.Row>
@@ -905,7 +962,9 @@ const FitmentsPage = () => {
                   return (
                     <Table.Row key={fitment.id}>
                       <Table.Cell className="whitespace-normal">
-                        {vehicle ? vehicleLabel(vehicle) : fitment.vehicle_id}
+                        {vehicle
+                          ? vehicleLabel(t, vehicle)
+                          : fitment.vehicle_id}
                       </Table.Cell>
                       <Table.Cell>{fitment.quantity}</Table.Cell>
                       <Table.Cell>{position(fitment)}</Table.Cell>
@@ -953,7 +1012,7 @@ const FitmentsPage = () => {
                 })}
               </Table.Body>
             </Table>
-          </div>
+          </ScrollArea>
         </section>
       )}
     </Container>

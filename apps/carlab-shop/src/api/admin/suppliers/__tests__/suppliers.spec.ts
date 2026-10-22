@@ -100,6 +100,36 @@ medusaIntegrationTestRunner({
         ).toBe(400);
       });
 
+      it('refuses a supplier category code that differs from a mapped one only by case', async () => {
+        const responses = await Promise.all(
+          ['IC-OIL', 'ic-oil', ' Ic-Oil '].map((code) =>
+            call('post', `/admin/suppliers/${supplierId}/categories`, {
+              code,
+              category_id: categoryId,
+            }),
+          ),
+        );
+
+        expect(responses.map(({ status }) => status).sort()).toEqual([
+          200, 409, 409,
+        ]);
+        expect(
+          responses
+            .filter(({ status }) => status === 409)
+            .map(({ data }) => [data.code, data.entity]),
+        ).toEqual(Array(2).fill(['ALREADY_EXISTS', 'supplier_category']));
+        const listed = await call(
+          'get',
+          `/admin/suppliers/${supplierId}/categories`,
+        );
+        for (const { id } of listed.data.categories) {
+          await call(
+            'delete',
+            `/admin/suppliers/${supplierId}/categories/${id}`,
+          );
+        }
+      });
+
       it('returns a 404 for a mapping to an unknown Category', async () => {
         expect(
           (
@@ -181,6 +211,31 @@ medusaIntegrationTestRunner({
           field: 'markup_percentage',
         });
       });
+
+      it.each([
+        ['an empty markup', { markup_percentage: '' }],
+        ['a markup sent as null', { markup_percentage: null }],
+      ])(
+        'asks for the markup for %s and keeps the stored one',
+        async (_, body) => {
+          const before = (await supplierService.retrieveSupplier(supplierId))
+            .markup_percentage;
+
+          const response = await api
+            .post(`/admin/suppliers/${supplierId}`, body, adminHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({
+            code: 'FIELD_REQUIRED',
+            field: 'markup_percentage',
+          });
+          expect(
+            (await supplierService.retrieveSupplier(supplierId))
+              .markup_percentage,
+          ).toBe(before);
+        },
+      );
 
       it.each([
         ['a negative markup', { markup_percentage: -5 }],

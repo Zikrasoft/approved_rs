@@ -12,6 +12,19 @@ describe('sellPrice', () => {
   it('returns the cost price unchanged at a zero markup', () => {
     expect(sellPrice(1000, 0)).toBe(1000);
   });
+
+  it.each([
+    [60, 2.5, 62],
+    [100, 0.5, 101],
+    [900, 12.5, 1013],
+    [10.1, 15, 12],
+    [33.3, 50, 50],
+  ])(
+    'rounds a half up exactly: %d at %d%% sells for %d',
+    (cost, markup, price) => {
+      expect(sellPrice(cost, markup)).toBe(price);
+    },
+  );
 });
 
 describe('storeOffers', () => {

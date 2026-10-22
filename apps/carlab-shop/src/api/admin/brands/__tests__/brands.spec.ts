@@ -139,6 +139,49 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('stores one of several spellings sent at once that differ only by case', async () => {
+        const brand = await catalog.createBrands({
+          name: 'Race Brand',
+          slug: 'race-brand',
+        });
+
+        const responses = await Promise.all(
+          ['RACE', 'race', 'Race', ' RACE '].map((value) =>
+            post(`/admin/brands/${brand.id}/spellings`, {
+              supplier_id: intercars.id,
+              value,
+            }),
+          ),
+        );
+
+        expect(responses.map(({ status }) => status).sort()).toEqual([
+          200, 409, 409, 409,
+        ]);
+        expect(
+          responses
+            .filter(({ status }) => status === 409)
+            .map(({ data }) => [data.code, data.entity]),
+        ).toEqual(Array(3).fill(['ALREADY_EXISTS', 'brand_spelling']));
+        expect(
+          await catalog.listBrandSpellings({ brand_id: brand.id }),
+        ).toHaveLength(1);
+      });
+
+      it('refuses a Brand name that differs from a stored one only by case', async () => {
+        await post('/admin/brands', { name: 'Febi Bilstein', slug: 'febi' });
+
+        const response = await post('/admin/brands', {
+          name: ' FEBI  bilstein ',
+          slug: 'febi-bilstein',
+        });
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'ALREADY_EXISTS',
+          entity: 'brand',
+        });
+      });
+
       it('refuses a spelling for an unknown supplier', async () => {
         const brand = await catalog.createBrands({
           name: 'Bosch',

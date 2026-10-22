@@ -6,8 +6,9 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
-import { adminError } from '../../lib/admin-errors';
+import { adminError, parseAdminBody } from '../../lib/admin-errors';
 import { withEditors } from '../../lib/editors';
+import { STORED_ROW_RULES } from './vehicle-validators';
 
 const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();
 
@@ -65,7 +66,14 @@ export const itemRoutes = ({ singular, plural, object }: ReferenceEntity) => ({
     res: MedusaResponse,
   ) => {
     const { id } = req.params;
-    await service(req, `retrieve${singular}`)(id);
+    const stored = await service(req, `retrieve${singular}`)(id);
+    const rule = STORED_ROW_RULES[object];
+    if (rule) {
+      await parseAdminBody(rule, {
+        ...(stored as object),
+        ...req.validatedBody,
+      });
+    }
     const row = await service(
       req,
       `update${plural}`,
@@ -133,7 +141,7 @@ export const VEHICLES = {
   plural: 'Vehicles',
   object: 'vehicle',
   collection: 'vehicles',
-  relations: ['identifiers', 'model', 'engine'],
+  relations: ['identifiers', 'model.chassis.series.make', 'engine'],
 };
 export const VEHICLE_IDENTIFIERS = {
   singular: 'VehicleIdentifier',

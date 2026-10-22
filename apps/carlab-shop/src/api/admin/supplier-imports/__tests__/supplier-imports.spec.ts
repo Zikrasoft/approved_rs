@@ -5,6 +5,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
+import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -306,6 +307,24 @@ medusaIntegrationTestRunner({
         expect(await page('W6103')).toBeDefined();
       });
 
+      it('matches a supplier category code whatever its case and spacing', async () => {
+        intercars.articles.push({
+          article_id: 'IC-9',
+          brand: 'MANN-FILTER',
+          number: 'W 712/95',
+          name: 'Фильтр W712',
+          category: ' ic-oil ',
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          skipped: 0,
+        });
+        expect((await page('W71295'))?.part.category_id).toBe(oilFiltersId);
+      });
+
       it('keeps a name a person edited and refreshes one nobody touched', async () => {
         intercars.articles.push(
           {
@@ -431,6 +450,94 @@ medusaIntegrationTestRunner({
         await runImport();
 
         expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
+      it('deletes what an import created by its source, refusing while manual rows hang off it', async () => {
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const sources = async () =>
+          Object.fromEntries(
+            (
+              await api.get('/admin/catalogue-sources', adminHeaders)
+            ).data.sources.map(
+              ({ source, rows }: { source: string; rows: number }) => [
+                source,
+                rows,
+              ],
+            ),
+          );
+        const removeSource = () =>
+          api
+            .delete('/admin/catalogue-sources/Intercars', adminHeaders)
+            .catch((error) => error.response);
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-11', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        intercars.articles.push({
+          article_id: 'IC-12',
+          brand: 'MANN-FILTER',
+          number: 'C 30 005',
+          name: 'Фильтр воздушный',
+          category: 'IC-OIL',
+          cross_references: [{ brand: 'BMW', number: '13 71 8 577 170' }],
+        });
+        intercars.quotes.set('IC-12', {
+          article_id: 'IC-12',
+          cost_price: 2000,
+          currency: 'RSD',
+          stock: [{ location: 'Beograd', quantity: 3 }],
+          lead_time_days: 1,
+        });
+        await runImport();
+        const imported = (await page('C30005'))!.part;
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: imported.id,
+        });
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'SRC1',
+        });
+        const fitment = await api.post(
+          '/admin/fitments',
+          { part_id: imported.id, vehicle_id: vehicle.id },
+          adminHeaders,
+        );
+        const before = await sources();
+        expect(before.Intercars).toBeGreaterThanOrEqual(2);
+
+        const refused = await removeSource();
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('SOURCE_IN_USE');
+        expect(await sources()).toEqual(before);
+
+        await api.delete(
+          `/admin/fitments/${fitment.data.fitment.id}`,
+          adminHeaders,
+        );
+        const removed = await removeSource();
+
+        expect(removed.status).toBe(200);
+        expect(removed.data).toEqual({
+          source: 'Intercars',
+          deleted: before.Intercars,
+        });
+        const after = await sources();
+        expect(after.Intercars).toBeUndefined();
+        expect(after.manual).toBe(before.manual - 1);
+        expect(await catalog.listParts({ id: imported.id })).toEqual([]);
+        expect(
+          await suppliers.listSupplierOffers({
+            part_identifier_id: identifier.id,
+          }),
+        ).toEqual([]);
+        expect(
+          await suppliers.listStagedRecords({
+            part_identifier_id: identifier.id,
+          }),
+        ).toEqual([]);
+        expect((await page('HU816X'))?.offers).toHaveLength(1);
       });
     });
   },

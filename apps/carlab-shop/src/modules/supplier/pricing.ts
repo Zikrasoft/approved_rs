@@ -8,7 +8,12 @@ export const inShopCurrency = ({ currency }: { currency: string }): boolean =>
 export const sellPrice = (
   costPrice: number,
   markupPercentage: number,
-): number => Math.round(costPrice * (1 + markupPercentage / 100));
+): number =>
+  Math.round(
+    (Math.round(costPrice * 100) *
+      (10_000 + Math.round(markupPercentage * 100))) /
+      1_000_000,
+  );
 
 export type PricedOfferRow = {
   id: string;

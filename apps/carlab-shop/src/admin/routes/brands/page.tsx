@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
   adminFetch,
@@ -159,7 +160,7 @@ const BrandsPage = () => {
 
       <div className="flex flex-col gap-y-2">
         <Label>{t('brands.createLabel')}</Label>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
           <Input
             placeholder={t('brands.namePlaceholder')}
             value={name}
@@ -184,7 +185,7 @@ const BrandsPage = () => {
       {brands.length === 0 ? (
         <Text>{t('brands.empty')}</Text>
       ) : (
-        <div className="overflow-x-auto">
+        <ScrollArea>
           <Table>
             <Table.Header>
               <Table.Row>
@@ -289,7 +290,7 @@ const BrandsPage = () => {
               ))}
             </Table.Body>
           </Table>
-        </div>
+        </ScrollArea>
       )}
     </Container>
   );

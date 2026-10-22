@@ -36,9 +36,7 @@ export async function DELETE(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
   const supplier: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
 
-  await catalog.retrievePartIdentifier(id);
-
-  await catalog.deletePartIdentifiers(id);
+  await catalog.removePartIdentifier(id);
   await supplier.deleteSupplierOffers({ part_identifier_id: id });
 
   res.json({ id, object: 'part_identifier', deleted: true });

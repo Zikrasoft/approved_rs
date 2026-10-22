@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -31,6 +32,11 @@ import {
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import {
+  labelledVehicleSchema,
+  type TFunction,
+  vehicleLabel,
+} from '../../lib/vehicle-label';
 
 const rowSchema = editedBySchema.extend({ id: z.string() }).loose();
 
@@ -133,28 +139,12 @@ const ENTITIES: Entity[] = [
   },
 ];
 
-const identifiersSchema = z.array(z.object({ value: z.string() })).optional();
-
-const rowLabel = (collection: string, row: Row, rows: Rows): string => {
-  const ref = (key: string, target: string) =>
-    rows[target]?.find(({ id }) => id === row[key]);
-  switch (collection) {
-    case 'chassis':
-      return String(row.code);
-    case 'engines':
-      return String(row.code);
-    case 'vehicles': {
-      const model = ref('model_id', 'vehicle_models');
-      const engine = ref('engine_id', 'engines');
-      const codes = identifiersSchema
-        .parse(row.identifiers)
-        ?.map(({ value }) => value)
-        .join(', ');
-      return `${model?.name ?? ''} ${engine?.code ?? ''} ${codes ? `(${codes})` : ''}`.trim();
-    }
-    default:
-      return String(row.name ?? row.value ?? row.id);
+const rowLabel = (t: TFunction, collection: string, row: Row): string => {
+  const vehicle = labelledVehicleSchema.safeParse(row);
+  if (collection === 'vehicles' && vehicle.success) {
+    return vehicleLabel(t, vehicle.data);
   }
+  return String(row.name ?? row.code ?? row.value ?? row.id);
 };
 
 const toBody = (fields: Field[], draft: Record<string, string>) =>
@@ -197,7 +187,7 @@ const EntitySection = ({
     if (field.kind === 'ref') {
       return (rows[field.collection] ?? []).map((row) => ({
         value: row.id,
-        label: rowLabel(field.collection, row, rows),
+        label: rowLabel(t, field.collection, row),
       }));
     }
     return [];
@@ -233,13 +223,15 @@ const EntitySection = ({
     }
   };
 
-  const remove = async (id: string) => {
+  const remove = async (row: Row) => {
+    const name = rowLabel(t, entity.collection, row);
     if (
       await confirmed({
-        title: t('vehicles.confirmTitle'),
+        title: t('vehicles.confirmTitle', { name }),
         description: t('vehicles.confirmDelete'),
+        done: t('vehicles.deleted', { name }),
         run: () =>
-          adminFetch(`/admin/${entity.path}/${id}`, acknowledged, {
+          adminFetch(`/admin/${entity.path}/${row.id}`, acknowledged, {
             method: 'DELETE',
           }),
       })
@@ -251,7 +243,7 @@ const EntitySection = ({
   return (
     <div className="flex flex-col gap-y-3">
       <Heading level="h2">{t(`vehicles.entities.${entity.object}`)}</Heading>
-      <div className="overflow-x-auto">
+      <ScrollArea>
         <Table>
           <Table.Header>
             <Table.Row>
@@ -300,7 +292,7 @@ const EntitySection = ({
                     <Button
                       size="small"
                       variant="danger"
-                      onClick={() => remove(row.id)}
+                      onClick={() => remove(row)}
                     >
                       {t('vehicles.delete')}
                     </Button>
@@ -310,7 +302,7 @@ const EntitySection = ({
             ))}
           </Table.Body>
         </Table>
-      </div>
+      </ScrollArea>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
         {entity.fields.map((field) => (
           <div key={field.key} className="flex flex-col gap-y-1">

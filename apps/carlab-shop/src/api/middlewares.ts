@@ -5,6 +5,7 @@ import {
 } from '@medusajs/framework/http';
 
 import {
+  AdminAddPartIdentifier,
   AdminBulkAttachFitments,
   AdminBulkDetachFitments,
   AdminCreateBrand,
@@ -99,6 +100,11 @@ export default defineMiddlewares({
       matcher: '/admin/parts/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdatePart)],
+    },
+    {
+      matcher: '/admin/parts/:id/identifiers',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminAddPartIdentifier)],
     },
     {
       matcher: '/admin/part-identifiers/:id',

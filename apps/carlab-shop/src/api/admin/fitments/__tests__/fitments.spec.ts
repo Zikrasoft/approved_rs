@@ -473,6 +473,52 @@ medusaIntegrationTestRunner({
           expect(response.data.field).toBe('production_to');
         });
 
+        it('checks a partial period change against the stored dates', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-MERGE');
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+            production_from: new Date('2020-01-01'),
+          });
+
+          const response = await api
+            .post(
+              `/admin/fitments/${fitment.id}`,
+              { production_to: '2015-01-01' },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data.field).toBe('production_to');
+          expect(
+            (await catalog.retrieveFitment(fitment.id)).production_to,
+          ).toBeNull();
+        });
+
+        it('names the field of a date that is not a date', async () => {
+          const { part, vehicle } = await createPartAndVehicle('B47-BADDATE');
+          const fitment = await catalog.createFitments({
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          const response = await api
+            .post(
+              `/admin/fitments/${fitment.id}`,
+              { production_from: 'not-a-date' },
+              adminHeaders,
+            )
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({
+            code: 'INVALID_FIELD',
+            field: 'production_from',
+            message: 'production_from: Not a date',
+          });
+        });
+
         it('deletes a Fitment', async () => {
           const { part, vehicle } = await createPartAndVehicle('B47-DELETE');
           const fitment = await catalog.createFitments({

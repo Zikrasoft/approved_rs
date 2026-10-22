@@ -2,40 +2,20 @@ import type {
   AuthenticatedMedusaRequest,
   MedusaResponse,
 } from '@medusajs/framework/http';
-import { MedusaError } from '@medusajs/framework/utils';
 import { normalizePartNumber } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../../modules/catalog';
-import { PART_IDENTIFIER_TYPES } from '../../../modules/catalog/models/part-identifier';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreatePartType, AdminSearchPartsType } from '../validators';
-import { adminError } from '../../../lib/admin-errors';
 import { withEditors } from '../../../lib/editors';
+import {
+  PART_RELATIONS,
+  adminPart,
+  adminPartSchema,
+} from '../../../lib/admin-part';
 
-const identifierSchema = z.object({
-  id: z.string(),
-  type: z.enum(PART_IDENTIFIER_TYPES),
-  value: z.string(),
-  normalized_value: z.string(),
-  superseded: z.boolean(),
-  brand: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
-});
-
-const partSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  category_id: z.string().nullable(),
-  attributes: z.record(z.string(), z.unknown()),
-  source: z.string(),
-  created_by: z.string().nullable(),
-  updated_by: z.string().nullable(),
-  updated_at: z.date(),
-  replaced_by: z.object({ id: z.string(), name: z.string() }).nullable(),
-  identifiers: z.array(identifierSchema),
-});
-
-const PART_RELATIONS = ['identifiers', 'identifiers.brand', 'replaced_by'];
+const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminSearchPartsType>,
@@ -45,21 +25,34 @@ export async function GET(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
+  const contains = `%${literalLike(q)}%`;
   const brands = await catalog.listBrands(
-    { name: { $ilike: `%${q}%` } },
-    { take: null },
+    { name: { $ilike: contains } },
+    { select: ['id'], take: null },
   );
   const normalized = normalizePartNumber(q);
-  const matches = await catalog.listPartIdentifiers({
-    $or: [
-      ...(normalized
-        ? [{ normalized_value: { $like: `%${normalized}%` } }]
-        : []),
-      { brand_id: brands.map((brand) => brand.id) },
-    ],
-  });
+  const matches = await catalog.listPartIdentifiers(
+    {
+      $or: [
+        ...(normalized
+          ? [{ normalized_value: { $like: `%${literalLike(normalized)}%` } }]
+          : []),
+        { brand_id: brands.map((brand) => brand.id) },
+      ],
+    },
+    { select: ['part_id'], take: null },
+  );
+  const named = await catalog.listParts(
+    { name: { $ilike: contains } },
+    { select: ['id'], take: null },
+  );
 
-  const partIds = [...new Set(matches.map((identifier) => identifier.part_id))];
+  const partIds = [
+    ...new Set([
+      ...matches.map((identifier) => identifier.part_id),
+      ...named.map((part) => part.id),
+    ]),
+  ];
   const parts = partIds.length
     ? await catalog.listParts(
         { id: partIds },
@@ -68,7 +61,7 @@ export async function GET(
     : [];
 
   res.json({
-    parts: await withEditors(req.scope, z.array(partSchema).parse(parts)),
+    parts: await withEditors(req.scope, z.array(adminPartSchema).parse(parts)),
   });
 }
 
@@ -80,16 +73,6 @@ export async function POST(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const brandIds = [...new Set(identifiers.map(({ brand_id }) => brand_id))];
-  const brands = await catalog.listBrands({ id: brandIds });
-  if (brands.length !== brandIds.length) {
-    throw adminError(
-      MedusaError.Types.INVALID_DATA,
-      'UNKNOWN_BRAND',
-      'Unknown brand',
-    );
-  }
-
   const partId = await catalog.createPartWithIdentifiers({
     name,
     identifiers,
@@ -99,9 +82,5 @@ export async function POST(
     updated_by: req.auth_context.actor_id,
   });
 
-  const part = await catalog.retrievePart(partId, {
-    relations: PART_RELATIONS,
-  });
-
-  res.json({ part: partSchema.parse(part) });
+  res.json({ part: await adminPart(catalog, partId) });
 }

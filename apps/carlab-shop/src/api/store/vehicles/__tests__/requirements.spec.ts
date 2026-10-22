@@ -258,6 +258,23 @@ medusaIntegrationTestRunner({
         expect(response.status).toBe(400);
       });
 
+      it.each([
+        ['a negative minimum', { min: -5 }],
+        ['a negative maximum', { max: -1 }],
+      ])('names the field for %s', async (_, bounds) => {
+        const response = await post('/admin/requirements', {
+          field_id: fields.volume.id,
+          engine_id: b47.engine.id,
+          ...bounds,
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.data).toMatchObject({
+          code: 'INVALID_FIELD',
+          field: Object.keys(bounds)[0],
+        });
+      });
+
       it('refuses an option the field does not have', async () => {
         const response = await post('/admin/requirements', {
           field_id: fields.viscosity.id,

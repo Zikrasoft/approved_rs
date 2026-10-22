@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
   adminFetch,
@@ -184,7 +185,7 @@ const SupersessionPage = () => {
           <div className="flex flex-col gap-y-2">
             <Heading level="h2">{selected.name}</Heading>
             <EditedBy row={selected} />
-            <div className="overflow-x-auto">
+            <ScrollArea>
               <Table>
                 <Table.Header>
                   <Table.Row>
@@ -221,7 +222,7 @@ const SupersessionPage = () => {
                   ))}
                 </Table.Body>
               </Table>
-            </div>
+            </ScrollArea>
           </div>
 
           <div className="flex flex-col gap-y-2">
