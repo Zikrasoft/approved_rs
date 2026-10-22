@@ -148,8 +148,7 @@
       "codePlaceholder": "Supplier's category code",
       "categoryPlaceholder": "Our Category",
       "add": "Map",
-      "remove": "Remove",
-      "empty": "This supplier has no mapped categories yet.",
+      "empty": "Map the first category with the form below.",
       "added": "Category {{code}} mapped to \"{{category}}\".",
       "confirmRemoveTitle": "Delete mapping {{code}}?",
       "confirmRemoveBody": "The next import skips this supplier category.",
@@ -220,8 +219,6 @@
     "create": "Add",
     "save": "Save",
     "cancel": "Cancel",
-    "edit": "Edit",
-    "delete": "Delete",
     "confirmDelete": "A reference row other rows point at cannot be deleted.",
     "entities": {
       "make": "Makes",
@@ -229,7 +226,7 @@
       "chassis": "Chassis",
       "vehicle_model": "Models",
       "engine": "Engines",
-      "vehicle": "Vehicles (configurations)",
+      "vehicle": "Vehicles",
       "vehicle_identifier": "Vehicle codes"
     },
     "fields": {
@@ -288,7 +285,10 @@
     },
     "confirmTitle": "Delete «{{name}}»?",
     "identifierFormat": "BMW type code: 4 letters or digits, for example 35BG. Mercedes-Benz Baumuster: 6 digits, for example 213004.",
-    "deleted": "Deleted: {{name}}."
+    "deleted": "Deleted: {{name}}.",
+    "emptyHint": "Click Add to create the first one.",
+    "newTitle": "New entry",
+    "editTitle": "Edit entry"
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
@@ -598,7 +598,7 @@
     "confirmBody_other": "{{count}} rows will be removed. They cannot be restored.",
     "removed_one": "{{source}}: {{count}} row removed",
     "removed_other": "{{source}}: {{count}} rows removed",
-    "empty": "The catalogue has no rows yet.",
+    "empty": "Rows appear after the first import or manual entry.",
     "names": {
       "manual": "Manual entry"
     },
@@ -632,7 +632,10 @@
     "deleted": "Deleted.",
     "save": "Save",
     "saved": "Saved.",
-    "actions": "Actions"
+    "actions": "Actions",
+    "edit": "Edit",
+    "empty": "Nothing here yet",
+    "actionsFor": "Actions for {{name}}"
   },
   "vehicleLabel": {
     "kw": "{{kw}} kW",

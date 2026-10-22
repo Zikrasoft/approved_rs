@@ -1,12 +1,9 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
-import { Buildings, EllipsisHorizontal, Trash } from '@medusajs/icons';
+import { Buildings } from '@medusajs/icons';
 import {
   Button,
   Checkbox,
   Container,
-  DropdownMenu,
-  Heading,
-  IconButton,
   Input,
   Label,
   Select,
@@ -25,6 +22,12 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import {
+  LIST_TABLE,
+  ListEmpty,
+  ListHeader,
+  RowActions,
+} from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
@@ -360,169 +363,172 @@ const SuppliersPage = () => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Container className="flex flex-col gap-y-4">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
-          <div className="flex flex-col gap-y-1">
-            <Heading level="h1">{t('suppliers.heading')}</Heading>
-            <Text size="small" className="text-ui-fg-subtle">
-              {t('suppliers.importLead')}
-            </Text>
-          </div>
-          <Button
-            variant="secondary"
-            isLoading={importing}
-            disabled={writing}
-            onClick={runImport}
-          >
-            {t('suppliers.import')}
-          </Button>
-        </div>
-        <ScrollArea>
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>
-                  {t('suppliers.columns.name')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('suppliers.columns.markup')}
-                </Table.HeaderCell>
-                <Table.HeaderCell />
-                <Table.HeaderCell>
-                  {t('suppliers.columns.import')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('suppliers.columns.released')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {suppliers.map((supplier) => (
-                <Table.Row key={supplier.id}>
-                  <Table.Cell>{supplier.name}</Table.Cell>
-                  <Table.Cell>
-                    <Input
-                      type="number"
-                      className="w-24"
-                      min={0}
-                      max={500}
-                      step={0.01}
-                      aria-label={t('suppliers.markupLabel', {
-                        supplier: supplier.name,
-                      })}
-                      value={
-                        drafts[supplier.id] ??
-                        String(supplier.markup_percentage)
-                      }
-                      onChange={(event) =>
-                        setDrafts((prev) => ({
-                          ...prev,
-                          [supplier.id]: event.target.value,
-                        }))
-                      }
-                      onKeyDown={(event) => {
-                        if (
-                          event.key === 'Enter' &&
-                          drafts[supplier.id] !== undefined &&
-                          !writing
-                        ) {
-                          saveMarkup(supplier);
-                        }
-                      }}
-                    />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      variant="secondary"
-                      isLoading={savingId === supplier.id}
-                      disabled={drafts[supplier.id] === undefined || writing}
-                      onClick={() => saveMarkup(supplier)}
-                    >
-                      {t('suppliers.save')}
-                    </Button>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="flex items-center gap-x-2">
-                      <Switch
-                        id={`${supplier.id}-import`}
-                        checked={supplier.import_enabled}
-                        disabled={writing}
-                        onCheckedChange={() => toggleImport(supplier)}
-                      />
-                      <Label size="small" htmlFor={`${supplier.id}-import`}>
-                        {t(
-                          supplier.import_enabled
-                            ? 'suppliers.importOn'
-                            : 'suppliers.importOff',
-                        )}
-                      </Label>
-                    </div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="flex flex-col gap-y-1 py-2">
-                      {STAGED_DATA_KINDS.map((kind) => (
-                        <div key={kind} className="flex items-center gap-x-2">
-                          <Checkbox
-                            id={`${supplier.id}-${kind}`}
-                            checked={supplier.released_kinds.includes(kind)}
-                            disabled={writing}
-                            onCheckedChange={() =>
-                              toggleRelease(supplier, kind)
-                            }
-                          />
-                          <Label
-                            size="small"
-                            htmlFor={`${supplier.id}-${kind}`}
-                          >
-                            {t(`suppliers.kinds.${kind}`)}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <EditedBy row={supplier} />
-                  </Table.Cell>
+      <Container className="divide-y overflow-hidden p-0">
+        <ListHeader
+          heading={t('suppliers.heading')}
+          level="h1"
+          lead={t('suppliers.importLead')}
+          action={
+            <Button
+              size="small"
+              variant="secondary"
+              isLoading={importing}
+              disabled={writing}
+              onClick={runImport}
+            >
+              {t('suppliers.import')}
+            </Button>
+          }
+        />
+        {suppliers.length ? (
+          <ScrollArea>
+            <Table className={LIST_TABLE}>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell>
+                    {t('suppliers.columns.name')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('suppliers.columns.markup')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell />
+                  <Table.HeaderCell>
+                    {t('suppliers.columns.import')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('suppliers.columns.released')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </ScrollArea>
-        <Text size="small" className="text-ui-fg-subtle">
+              </Table.Header>
+              <Table.Body>
+                {suppliers.map((supplier) => (
+                  <Table.Row key={supplier.id}>
+                    <Table.Cell>{supplier.name}</Table.Cell>
+                    <Table.Cell>
+                      <Input
+                        type="number"
+                        className="w-24"
+                        min={0}
+                        max={500}
+                        step={0.01}
+                        aria-label={t('suppliers.markupLabel', {
+                          supplier: supplier.name,
+                        })}
+                        value={
+                          drafts[supplier.id] ??
+                          String(supplier.markup_percentage)
+                        }
+                        onChange={(event) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [supplier.id]: event.target.value,
+                          }))
+                        }
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === 'Enter' &&
+                            drafts[supplier.id] !== undefined &&
+                            !writing
+                          ) {
+                            saveMarkup(supplier);
+                          }
+                        }}
+                      />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        isLoading={savingId === supplier.id}
+                        disabled={drafts[supplier.id] === undefined || writing}
+                        onClick={() => saveMarkup(supplier)}
+                      >
+                        {t('suppliers.save')}
+                      </Button>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div className="flex items-center gap-x-2">
+                        <Switch
+                          id={`${supplier.id}-import`}
+                          checked={supplier.import_enabled}
+                          disabled={writing}
+                          onCheckedChange={() => toggleImport(supplier)}
+                        />
+                        <Label size="small" htmlFor={`${supplier.id}-import`}>
+                          {t(
+                            supplier.import_enabled
+                              ? 'suppliers.importOn'
+                              : 'suppliers.importOff',
+                          )}
+                        </Label>
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div className="flex flex-col gap-y-1 py-2">
+                        {STAGED_DATA_KINDS.map((kind) => (
+                          <div key={kind} className="flex items-center gap-x-2">
+                            <Checkbox
+                              id={`${supplier.id}-${kind}`}
+                              checked={supplier.released_kinds.includes(kind)}
+                              disabled={writing}
+                              onCheckedChange={() =>
+                                toggleRelease(supplier, kind)
+                              }
+                            />
+                            <Label
+                              size="small"
+                              htmlFor={`${supplier.id}-${kind}`}
+                            >
+                              {t(`suppliers.kinds.${kind}`)}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <EditedBy row={supplier} />
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </ScrollArea>
+        ) : (
+          <ListEmpty />
+        )}
+        <Text size="small" className="text-ui-fg-subtle px-6 py-4">
           {t('suppliers.releasedHint')}
         </Text>
       </Container>
 
-      <Container className="flex flex-col gap-y-4">
-        <div className="flex flex-col gap-y-1">
-          <Heading level="h2">{t('suppliers.mappings.heading')}</Heading>
-          <Text size="small" className="text-ui-fg-subtle">
-            {t('suppliers.mappings.lead')}
-          </Text>
-        </div>
-        <div className="max-w-xs">
-          <Select value={mappedSupplierId} onValueChange={chooseSupplier}>
-            <Select.Trigger>
-              <Select.Value
-                placeholder={t('suppliers.mappings.supplierPlaceholder')}
-              />
-            </Select.Trigger>
-            <Select.Content>
-              {suppliers.map((supplier) => (
-                <Select.Item key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
-        </div>
+      <Container className="divide-y overflow-hidden p-0">
+        <ListHeader
+          heading={t('suppliers.mappings.heading')}
+          lead={t('suppliers.mappings.lead')}
+        >
+          <div className="max-w-xs">
+            <Select value={mappedSupplierId} onValueChange={chooseSupplier}>
+              <Select.Trigger>
+                <Select.Value
+                  placeholder={t('suppliers.mappings.supplierPlaceholder')}
+                />
+              </Select.Trigger>
+              <Select.Content>
+                {suppliers.map((supplier) => (
+                  <Select.Item key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
+          </div>
+        </ListHeader>
         {mappedSupplierId && (
           <>
             {mappings.length ? (
               <ScrollArea>
-                <Table>
+                <Table className={LIST_TABLE}>
                   <Table.Header>
                     <Table.Row>
                       <Table.HeaderCell>
@@ -545,15 +551,14 @@ const SuppliersPage = () => {
                         <Table.Cell>
                           <EditedBy row={mapping} />
                         </Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            size="small"
-                            variant="secondary"
+                        <Table.Cell className="text-right">
+                          <RowActions
+                            label={t('common.actionsFor', {
+                              name: mapping.code,
+                            })}
                             disabled={writing}
-                            onClick={() => removeMapping(mapping)}
-                          >
-                            {t('suppliers.mappings.remove')}
-                          </Button>
+                            onDelete={() => removeMapping(mapping)}
+                          />
                         </Table.Cell>
                       </Table.Row>
                     ))}
@@ -561,9 +566,9 @@ const SuppliersPage = () => {
                 </Table>
               </ScrollArea>
             ) : (
-              <Text size="small">{t('suppliers.mappings.empty')}</Text>
+              <ListEmpty hint={t('suppliers.mappings.empty')} />
             )}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 px-6 py-4">
               <Input
                 size="small"
                 className="max-w-xs"
@@ -599,16 +604,11 @@ const SuppliersPage = () => {
         )}
       </Container>
 
-      <Container className="flex flex-col gap-y-4">
-        <div className="flex flex-col gap-y-1">
-          <Heading level="h2">{t('sources.heading')}</Heading>
-          <Text size="small" className="text-ui-fg-subtle">
-            {t('sources.lead')}
-          </Text>
-        </div>
+      <Container className="divide-y overflow-hidden p-0">
+        <ListHeader heading={t('sources.heading')} lead={t('sources.lead')} />
         {sources.length ? (
           <ScrollArea>
-            <Table>
+            <Table className={LIST_TABLE}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>{t('sources.source')}</Table.HeaderCell>
@@ -627,30 +627,15 @@ const SuppliersPage = () => {
                     </Table.Cell>
                     <Table.Cell className="text-right">
                       {entry.source !== MANUAL_SOURCE && (
-                        <DropdownMenu>
-                          <DropdownMenu.Trigger asChild>
-                            <IconButton
-                              size="small"
-                              variant="transparent"
-                              isLoading={removingSource === entry.source}
-                              disabled={writing}
-                              aria-label={t('sources.actionsFor', {
-                                source: sourceName(entry.source),
-                              })}
-                            >
-                              <EllipsisHorizontal />
-                            </IconButton>
-                          </DropdownMenu.Trigger>
-                          <DropdownMenu.Content align="end">
-                            <DropdownMenu.Item
-                              className="text-ui-fg-error gap-x-2"
-                              onClick={() => removeSource(entry)}
-                            >
-                              <Trash />
-                              {t('sources.remove')}
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu>
+                        <RowActions
+                          label={t('sources.actionsFor', {
+                            source: sourceName(entry.source),
+                          })}
+                          isLoading={removingSource === entry.source}
+                          disabled={writing}
+                          deleteLabel={t('sources.remove')}
+                          onDelete={() => removeSource(entry)}
+                        />
                       )}
                     </Table.Cell>
                   </Table.Row>
@@ -659,7 +644,7 @@ const SuppliersPage = () => {
             </Table>
           </ScrollArea>
         ) : (
-          <Text size="small">{t('sources.empty')}</Text>
+          <ListEmpty hint={t('sources.empty')} />
         )}
       </Container>
     </div>

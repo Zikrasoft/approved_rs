@@ -7,7 +7,7 @@ export const EditedBy = ({ row }: { row: Edited }) => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const editor = row.updated_by_user;
   return (
-    <Text size="xsmall" className="text-ui-fg-subtle">
+    <Text size="xsmall" className="text-ui-fg-subtle whitespace-nowrap">
       {t('edited.line', {
         when: new Date(row.updated_at).toLocaleString(i18n.language),
         who: editor ? (editor.name ?? editor.email) : t('edited.nobody'),

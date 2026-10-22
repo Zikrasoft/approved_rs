@@ -3,6 +3,8 @@ import { TruckFast } from '@medusajs/icons';
 import {
   Button,
   Container,
+  Drawer,
+  FocusModal,
   Heading,
   Input,
   Label,
@@ -19,12 +21,18 @@ import {
   VEHICLE_DRIVES,
   VEHICLE_IDENTIFIER_TYPES,
 } from '@podbor/catalog-contract';
-import { useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import {
+  LIST_TABLE,
+  ListEmpty,
+  ListHeader,
+  RowActions,
+} from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -142,6 +150,8 @@ const ENTITIES: Entity[] = [
   },
 ];
 
+const WIDE_FORM_FIELDS = 6;
+
 const rowLabel = (t: TFunction, collection: string, row: Row): string => {
   const vehicle = labelledVehicleSchema.safeParse(row);
   if (collection === 'vehicles' && vehicle.success) {
@@ -166,65 +176,46 @@ const fromRow = (fields: Field[], row: Row): Record<string, string> =>
     fields.map(({ key }) => [key, row[key] == null ? '' : String(row[key])]),
   );
 
-const EntitySection = ({
+const optionsOf = (t: TFunction, rows: Rows, field: Field): Option[] => {
+  if (field.kind === 'enum') {
+    return field.values.map((value) => ({
+      value,
+      label: t(`vehicles.values.${field.key}.${value}`),
+    }));
+  }
+  if (field.kind === 'ref') {
+    return (rows[field.collection] ?? []).map((row) => ({
+      value: row.id,
+      label: rowLabel(t, field.collection, row),
+    }));
+  }
+  return [];
+};
+
+const EntityTable = ({
   entity,
   rows,
   reload,
+  onEdit,
 }: {
   entity: Entity;
   rows: Rows;
   reload: () => Promise<void>;
+  onEdit: (row: Row) => void;
 }) => {
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
-  const [draft, setDraft] = useState<Record<string, string>>({});
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  const options = (field: Field): Option[] => {
-    if (field.kind === 'enum') {
-      return field.values.map((value) => ({
-        value,
-        label: t(`vehicles.values.${field.key}.${value}`),
-      }));
-    }
-    if (field.kind === 'ref') {
-      return (rows[field.collection] ?? []).map((row) => ({
-        value: row.id,
-        label: rowLabel(t, field.collection, row),
-      }));
-    }
-    return [];
-  };
+  const list = rows[entity.collection];
 
   const cell = (field: Field, row: Row): string => {
     const value = row[field.key];
     if (value == null || value === '') return '-';
     if (field.kind === 'text' || field.kind === 'number') return String(value);
     return (
-      options(field).find((option) => option.value === value)?.label ??
-      String(value)
+      optionsOf(t, rows, field).find((option) => option.value === value)
+        ?.label ?? String(value)
     );
-  };
-
-  const reset = () => {
-    setDraft({});
-    setEditingId(null);
-  };
-
-  const save = async () => {
-    const saved = await adminFetch(
-      editingId
-        ? `/admin/${entity.path}/${editingId}`
-        : `/admin/${entity.path}`,
-      acknowledged,
-      { method: 'POST', body: JSON.stringify(toBody(entity.fields, draft)) },
-    );
-    if (saved) {
-      toast.success(t('common.saved'));
-      reset();
-      await reload();
-    }
   };
 
   const remove = async (row: Row) => {
@@ -244,76 +235,124 @@ const EntitySection = ({
     }
   };
 
+  if (!list) return null;
+  if (!list.length) return <ListEmpty hint={t('vehicles.emptyHint')} />;
+
   return (
-    <div className="flex flex-col gap-y-3">
-      <ScrollArea>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              {entity.fields.map((field) => (
-                <Table.HeaderCell key={field.key}>
-                  {t(`vehicles.fields.${field.key}`)}
-                </Table.HeaderCell>
-              ))}
-              <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
-              <Table.HeaderCell />
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {(rows[entity.collection] ?? []).map((row) => (
-              <Table.Row key={row.id}>
-                {entity.fields.map((field) => (
-                  <Table.Cell
-                    key={field.key}
-                    className="max-w-[14rem] whitespace-normal break-words"
-                  >
-                    {cell(field, row)}
-                  </Table.Cell>
-                ))}
-                <Table.Cell>
-                  <EditedBy row={row} />
-                </Table.Cell>
-                <Table.Cell>
-                  <div className="flex gap-x-2">
-                    {entity.translatable && (
-                      <TranslationsDrawer
-                        entity={entity.translatable}
-                        id={row.id}
-                        source={{ name: String(row.name ?? '') }}
-                      />
-                    )}
-                    <Button
-                      disabled={writing}
-                      size="small"
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingId(row.id);
-                        setDraft(fromRow(entity.fields, row));
-                      }}
-                    >
-                      {t('vehicles.edit')}
-                    </Button>
-                    <Button
-                      disabled={writing}
-                      size="small"
-                      variant="danger"
-                      onClick={() => remove(row)}
-                    >
-                      {t('vehicles.delete')}
-                    </Button>
-                  </div>
-                </Table.Cell>
-              </Table.Row>
+    <ScrollArea>
+      <Table className={LIST_TABLE}>
+        <Table.Header>
+          <Table.Row>
+            {entity.fields.map((field) => (
+              <Table.HeaderCell key={field.key}>
+                {t(`vehicles.fields.${field.key}`)}
+              </Table.HeaderCell>
             ))}
-          </Table.Body>
-        </Table>
-      </ScrollArea>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-        {entity.fields.map((field) => (
-          <div key={field.key} className="flex flex-col gap-y-1">
-            <Label size="xsmall">{t(`vehicles.fields.${field.key}`)}</Label>
+            <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+            <Table.HeaderCell />
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {list.map((row) => (
+            <Table.Row key={row.id}>
+              {entity.fields.map((field) => (
+                <Table.Cell
+                  key={field.key}
+                  className="max-w-[14rem] whitespace-normal break-words"
+                >
+                  {cell(field, row)}
+                </Table.Cell>
+              ))}
+              <Table.Cell>
+                <EditedBy row={row} />
+              </Table.Cell>
+              <Table.Cell>
+                <div className="flex items-center justify-end gap-x-2">
+                  {entity.translatable && (
+                    <TranslationsDrawer
+                      entity={entity.translatable}
+                      id={row.id}
+                      source={{ name: String(row.name ?? '') }}
+                    />
+                  )}
+                  <RowActions
+                    label={t('common.actionsFor', {
+                      name: rowLabel(t, entity.collection, row),
+                    })}
+                    disabled={writing}
+                    onEdit={() => onEdit(row)}
+                    onDelete={() => remove(row)}
+                  />
+                </div>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </ScrollArea>
+  );
+};
+
+const EntityForm = ({
+  entity,
+  rows,
+  row,
+  open,
+  onOpenChange,
+  reload,
+}: {
+  entity: Entity;
+  rows: Rows;
+  row: Row | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  reload: () => Promise<void>;
+}) => {
+  const writing = useWriting();
+  const { t } = useTranslation('carlabAdmin');
+  const [draft, setDraft] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const wide = entity.fields.length >= WIDE_FORM_FIELDS;
+
+  useEffect(() => {
+    if (open) setDraft(row ? fromRow(entity.fields, row) : {});
+  }, [open, row, entity]);
+
+  const save = async (event: FormEvent) => {
+    event.preventDefault();
+    setSaving(true);
+    const saved = await adminFetch(
+      row ? `/admin/${entity.path}/${row.id}` : `/admin/${entity.path}`,
+      acknowledged,
+      { method: 'POST', body: JSON.stringify(toBody(entity.fields, draft)) },
+    );
+    setSaving(false);
+    if (saved) {
+      toast.success(t('common.saved'));
+      onOpenChange(false);
+      await reload();
+    }
+  };
+
+  const title = t(row ? 'vehicles.editTitle' : 'vehicles.newTitle');
+  const section = t(`vehicles.entities.${entity.object}`);
+
+  const fields = (
+    <div
+      className={
+        wide ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'flex flex-col gap-y-4'
+      }
+    >
+      {entity.fields.map((field) => {
+        const id = `${entity.path}-${field.key}`;
+        return (
+          <div key={field.key} className="flex flex-col gap-y-2">
+            <Label size="small" weight="plus" htmlFor={id}>
+              {t(`vehicles.fields.${field.key}`)}
+            </Label>
             {field.kind === 'text' || field.kind === 'number' ? (
               <Input
+                id={id}
                 type={field.kind}
                 maxLength={200}
                 value={draft[field.key] ?? ''}
@@ -328,11 +367,11 @@ const EntitySection = ({
                   setDraft({ ...draft, [field.key]: value })
                 }
               >
-                <Select.Trigger>
+                <Select.Trigger id={id}>
                   <Select.Value placeholder={t('vehicles.choose')} />
                 </Select.Trigger>
                 <Select.Content>
-                  {options(field).map((option) => (
+                  {optionsOf(t, rows, field).map((option) => (
                     <Select.Item key={option.value} value={option.value}>
                       {option.label}
                     </Select.Item>
@@ -341,30 +380,99 @@ const EntitySection = ({
               </Select>
             )}
           </div>
-        ))}
-      </div>
+        );
+      })}
       {entity.object === 'vehicle_identifier' && (
         <Text size="small" className="text-ui-fg-subtle">
           {t('vehicles.identifierFormat')}
         </Text>
       )}
-      <div className="flex gap-x-2">
-        <Button disabled={writing} onClick={save}>
-          {editingId ? t('vehicles.save') : t('vehicles.create')}
-        </Button>
-        {editingId && (
-          <Button disabled={writing} variant="secondary" onClick={reset}>
+    </div>
+  );
+
+  const actions = (close: typeof Drawer.Close) => {
+    const Close = close;
+    return (
+      <>
+        <Close asChild>
+          <Button size="small" variant="secondary" disabled={saving}>
             {t('vehicles.cancel')}
           </Button>
-        )}
-      </div>
-    </div>
+        </Close>
+        <Button
+          size="small"
+          type="submit"
+          isLoading={saving}
+          disabled={writing}
+        >
+          {row ? t('vehicles.save') : t('vehicles.create')}
+        </Button>
+      </>
+    );
+  };
+
+  if (wide) {
+    return (
+      <FocusModal open={open} onOpenChange={onOpenChange}>
+        <FocusModal.Content>
+          <form
+            onSubmit={save}
+            className="flex h-full flex-col overflow-hidden"
+          >
+            <FocusModal.Header />
+            <FocusModal.Body className="flex flex-col items-center overflow-y-auto px-4 py-10 sm:py-16">
+              <div className="flex w-full max-w-[720px] flex-col gap-y-8">
+                <div className="flex flex-col gap-y-1">
+                  <FocusModal.Title asChild>
+                    <Heading>{title}</Heading>
+                  </FocusModal.Title>
+                  <FocusModal.Description asChild>
+                    <Text size="small" className="text-ui-fg-subtle">
+                      {section}
+                    </Text>
+                  </FocusModal.Description>
+                </div>
+                {fields}
+              </div>
+            </FocusModal.Body>
+            <FocusModal.Footer>{actions(FocusModal.Close)}</FocusModal.Footer>
+          </form>
+        </FocusModal.Content>
+      </FocusModal>
+    );
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer.Content>
+        <form onSubmit={save} className="flex flex-1 flex-col overflow-hidden">
+          <Drawer.Header>
+            <Drawer.Title asChild>
+              <Heading>{title}</Heading>
+            </Drawer.Title>
+            <Drawer.Description asChild>
+              <Text size="small" className="text-ui-fg-subtle">
+                {section}
+              </Text>
+            </Drawer.Description>
+          </Drawer.Header>
+          <Drawer.Body className="overflow-y-auto">{fields}</Drawer.Body>
+          <Drawer.Footer>{actions(Drawer.Close)}</Drawer.Footer>
+        </form>
+      </Drawer.Content>
+    </Drawer>
   );
 };
 
 const VehiclesPage = () => {
   const { t } = useTranslation('carlabAdmin');
+  const writing = useWriting();
   const [rows, setRows] = useState<Rows>({});
+  const [form, setForm] = useState<{ open: boolean; row: Row | null }>({
+    open: false,
+    row: null,
+  });
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   const reload = async () => {
     const loaded = await Promise.all(
@@ -378,48 +486,80 @@ const VehiclesPage = () => {
 
   useEffect(() => {
     reload();
+    tabsRef.current
+      ?.querySelector('[role="tab"][data-state="active"]')
+      ?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab =
-    ENTITIES.find(({ path }) => path === searchParams.get('tab'))?.path ??
-    ENTITIES[0].path;
+  const active =
+    ENTITIES.find(({ path }) => path === searchParams.get('tab')) ??
+    ENTITIES[0];
 
   return (
-    <Container className="flex flex-col gap-y-6">
-      <Heading level="h1">{t('vehicles.heading')}</Heading>
+    <Container className="overflow-hidden p-0">
       <Tabs
-        value={tab}
+        value={active.path}
         onValueChange={(next) =>
           setSearchParams({ tab: next }, { replace: true })
         }
-        className="flex flex-col gap-y-6"
+        className="divide-y"
       >
-        <ScrollArea>
-          <Tabs.List
-            aria-label={t('vehicles.sections')}
-            className="w-max p-0.5"
-          >
-            {ENTITIES.map((entity) => (
-              <Tabs.Trigger
-                key={entity.path}
-                value={entity.path}
-                className="gap-x-1.5 whitespace-nowrap"
+        <ListHeader
+          heading={t('vehicles.heading')}
+          level="h1"
+          action={
+            <Button
+              size="small"
+              variant="secondary"
+              disabled={writing}
+              onClick={() => setForm({ open: true, row: null })}
+            >
+              {t('vehicles.create')}
+            </Button>
+          }
+        >
+          <div ref={tabsRef}>
+            <ScrollArea>
+              <Tabs.List
+                aria-label={t('vehicles.sections')}
+                className="w-max p-0.5"
               >
-                {t(`vehicles.entities.${entity.object}`)}
-                <span className="text-ui-fg-muted tabular-nums">
-                  {rows[entity.collection]?.length}
-                </span>
-              </Tabs.Trigger>
-            ))}
-          </Tabs.List>
-        </ScrollArea>
+                {ENTITIES.map((entity) => (
+                  <Tabs.Trigger
+                    key={entity.path}
+                    value={entity.path}
+                    className="gap-x-1.5 whitespace-nowrap"
+                  >
+                    {t(`vehicles.entities.${entity.object}`)}
+                    <span className="text-ui-fg-muted inline-block min-w-[1ch] tabular-nums">
+                      {rows[entity.collection]?.length}
+                    </span>
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </ScrollArea>
+          </div>
+        </ListHeader>
         {ENTITIES.map((entity) => (
           <Tabs.Content key={entity.path} value={entity.path}>
-            <EntitySection entity={entity} rows={rows} reload={reload} />
+            <EntityTable
+              entity={entity}
+              rows={rows}
+              reload={reload}
+              onEdit={(row) => setForm({ open: true, row })}
+            />
           </Tabs.Content>
         ))}
       </Tabs>
+      <EntityForm
+        entity={active}
+        rows={rows}
+        row={form.row}
+        open={form.open}
+        onOpenChange={(open) => setForm((current) => ({ ...current, open }))}
+        reload={reload}
+      />
     </Container>
   );
 };
