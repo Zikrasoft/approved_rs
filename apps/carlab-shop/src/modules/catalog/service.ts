@@ -1,3 +1,4 @@
+import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
   InjectManager,
@@ -248,6 +249,7 @@ class CatalogModuleService extends MedusaService({
       { select: ['part_id'] },
       sharedContext,
     );
+    await this.lockRow('part', part_id, sharedContext);
     const [, count] = await this.listAndCountPartIdentifiers(
       { part_id },
       { select: ['id'], take: 1 },
@@ -261,6 +263,17 @@ class CatalogModuleService extends MedusaService({
       );
     }
     await this.deletePartIdentifiers(id, sharedContext);
+  }
+
+  private async lockRow(
+    table: 'part' | 'vehicle_model',
+    id: string,
+    sharedContext: Context,
+  ): Promise<void> {
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      `select id from "${table}" where id = ? for update`,
+      [id],
+    );
   }
 
   private async refuseUnknownBrands(
