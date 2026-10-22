@@ -1,4 +1,11 @@
-import { chmod, mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
+import {
+  chmod,
+  mkdir,
+  mkdtemp,
+  readdir,
+  utimes,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -78,6 +85,56 @@ describe('createFileStorage', () => {
     const { raw } = await store.read();
     expect([[{ id: 'a' }], [{ id: 'b' }]]).toContainEqual(raw);
     expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
+  });
+
+  it('lets exactly one of two writers against the same version win', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+
+    const outcomes = await Promise.allSettled(
+      Array.from({ length: 5 }, (_, index) =>
+        store.write([{ id: String(index) }], version),
+      ),
+    );
+
+    expect(
+      outcomes.filter(({ status }) => status === 'fulfilled'),
+    ).toHaveLength(1);
+    for (const outcome of outcomes) {
+      if (outcome.status === 'rejected') {
+        expect(outcome.reason).toBeInstanceOf(StorageConflictError);
+      }
+    }
+    expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
+  });
+
+  it('waits out a writer that holds the file', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+    await writeFile(join(dir, 'data', 'leads.json.lock'), '');
+
+    await expect(store.write([{ id: 'a' }], version)).rejects.toThrow(
+      StorageConflictError,
+    );
+  });
+
+  it('takes over from a writer that died holding the file', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+    const lock = join(dir, 'data', 'leads.json.lock');
+    await writeFile(lock, '');
+    const longAgo = new Date(Date.now() - 60_000);
+    await utimes(lock, longAgo, longAgo);
+
+    await expect(store.write([{ id: 'a' }], version)).rejects.toThrow(
+      StorageConflictError,
+    );
+    await store.write([{ id: 'a' }], version);
+
+    await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'a' }] });
   });
 
   it('lets any other create failure through', async () => {

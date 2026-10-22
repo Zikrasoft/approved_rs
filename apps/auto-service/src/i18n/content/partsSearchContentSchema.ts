@@ -12,6 +12,7 @@ export const partsSearchContentSchema = z
     eyebrow: z.string(),
     heading: z.string(),
     found: z.string(),
+    emptyQuery: z.string(),
     noResults: z.string(),
     unavailable: z.string(),
     filtersHeading: z.string(),

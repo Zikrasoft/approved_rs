@@ -260,7 +260,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 
       <button
         type="submit"
-        class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
+        class="btn btn-primary w-full disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2 aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
       >
         <span data-submit-label>{submitLabel ?? site.form.submit}</span>
         <Icon name="arrowRight" />

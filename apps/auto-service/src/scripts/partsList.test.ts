@@ -6,6 +6,8 @@ import {
   PARTS_LIST_STORAGE_KEY,
   forgetListCar,
   listCar,
+  listedPartSchema,
+  partLine,
   readPartsList,
   removeFromPartsList,
 } from './partsList';
@@ -125,6 +127,23 @@ describe('parts list', () => {
     expect(listCar(readPartsList(storage))).toBeNull();
   });
 
+  it('keeps how many of a part the visitor wanted', () => {
+    const storage = memoryStorage();
+
+    addToPartsList(
+      listedPartSchema.parse({ ...mannOil, quantity: '2' }),
+      storage,
+    );
+
+    expect(readPartsList(storage)).toEqual([{ ...mannOil, quantity: 2 }]);
+    expect(partLine(readPartsList(storage)[0])).toBe(
+      'Mann-Filter HU 816 x, Масляный фильтр × 2',
+    );
+    expect(partLine({ ...mannOil, quantity: 1 })).toBe(
+      'Mann-Filter HU 816 x, Масляный фильтр',
+    );
+  });
+
   it('works as an empty list when storage is blocked', () => {
     expect(() => addToPartsList(mannOil, blockedStorage)).not.toThrow();
     expect(() => clearPartsList(blockedStorage)).not.toThrow();
@@ -161,7 +180,7 @@ describe('inquiryComment', () => {
     expect(
       inquiryComment({
         parts: [
-          { ...bmwOil, car: 'BMW 320d F30' },
+          { ...bmwOil, car: 'BMW 320d F30', vin: 'WBA35BG070N074158' },
           { ...mannOil, car: 'BMW 520d G30' },
           { ...mannOil, slug: 'other' },
         ],
@@ -171,7 +190,7 @@ describe('inquiryComment', () => {
       }),
     ).toBe(
       [
-        'BMW 11 42 8575211, Масляный фильтр (BMW 320d F30)',
+        'BMW 11 42 8575211, Масляный фильтр (BMW 320d F30, VIN WBA35BG070N074158)',
         'Mann-Filter HU 816 x, Масляный фильтр (BMW 520d G30)',
         'Mann-Filter HU 816 x, Масляный фильтр',
       ].join('\n'),

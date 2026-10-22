@@ -8,11 +8,11 @@ import OfferRow from './OfferRow.astro';
 
 interface Props {
   page: PartPageEntry;
-  heading?: string;
   demoted?: boolean;
 }
 
-const { page, heading, demoted = false } = Astro.props;
+const { page, demoted = false } = Astro.props;
+const ownHeading = Astro.slots.has('heading');
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 const status = 'flex flex-col gap-3 text-sm leading-relaxed text-ink-2';
@@ -38,7 +38,9 @@ const part = {
       data-cart-href={PathBuilder.partsCart(locale)}
       {...part}
     >
-      <h2 class="text-block font-semibold">{heading ?? copy.offersHeading}</h2>
+      <h2 class="text-block font-semibold">
+        <slot name="heading">{copy.offersHeading}</slot>
+      </h2>
       <ul class="flex flex-col divide-y divide-line" data-offers>
         {page.offers.map((offer) => (
           <OfferRow offer={offer} />
@@ -82,9 +84,9 @@ const part = {
       ]}
     >
       <h2 class="text-block font-semibold">
-        {heading ?? copy.priceOnRequestHeading}
+        <slot name="heading">{copy.priceOnRequestHeading}</slot>
       </h2>
-      {heading && (
+      {ownHeading && (
         <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
       )}
       <p class="text-sm leading-relaxed text-ink-2">

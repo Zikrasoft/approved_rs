@@ -16,6 +16,7 @@ export const listedPartSchema = z.object({
   name: z.string(),
   car: z.optional(z.string()),
   vin: z.optional(z.string()),
+  quantity: z.optional(z.coerce.number()),
 });
 
 export type ListedPart = z.infer<typeof listedPartSchema>;
@@ -84,18 +85,27 @@ export function listCar(parts: ListedPart[]): ListCar | null {
 
 export function forgetListCar(storage?: ListStorage): void {
   writePartsList(
-    readPartsList(storage).map(({ slug, brand, number, name }) => ({
+    readPartsList(storage).map(({ slug, brand, number, name, quantity }) => ({
       slug,
       brand,
       number,
       name,
+      ...(quantity !== undefined && { quantity }),
     })),
     storage,
   );
 }
 
-export const partLine = ({ brand, number, name }: ListedPart): string =>
-  `${brand} ${number}, ${name}`;
+export const partLine = ({
+  brand,
+  number,
+  name,
+  quantity = 1,
+}: ListedPart): string =>
+  `${brand} ${number}, ${name}${quantity > 1 ? ` × ${quantity}` : ''}`;
+
+const carNote = ({ car, vin }: ListedPart): string =>
+  vin ? `${car}, VIN ${vin}` : String(car);
 
 export function inquiryComment({
   parts,
@@ -112,7 +122,9 @@ export function inquiryComment({
   return fitComment({
     head: [shared?.car ?? ''],
     lines: parts.map((part) =>
-      !shared && part.car ? `${partLine(part)} (${part.car})` : partLine(part),
+      !shared && part.car
+        ? `${partLine(part)} (${carNote(part)})`
+        : partLine(part),
     ),
     tail: [note],
     limit,
@@ -219,6 +231,11 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
         carLine
           ?.querySelector('[data-parts-car-remove]')
           ?.addEventListener('click', () => {
+            const forgotten = listCar(readPartsList())?.vin;
+            if (vinInput && forgotten && vinInput.value.trim() === forgotten) {
+              vinInput.value = '';
+              vinInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
             forgetListCar();
             render();
           });

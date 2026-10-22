@@ -1,3 +1,4 @@
+import { serviceLabel } from '@podbor/brands';
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
@@ -190,8 +191,8 @@ function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
 function triedLabel(data: LeadInput): string {
-  if (data.services?.length) return data.services.join(', ');
-  if (data.service) return data.service;
+  if (data.services?.length) return data.services.map(serviceLabel).join(', ');
+  if (data.service) return serviceLabel(data.service);
   return data.kind === 'call_click' && data.contactChannel
     ? channelLabel(data.contactChannel)
     : '';
