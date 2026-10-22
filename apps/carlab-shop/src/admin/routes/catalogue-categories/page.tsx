@@ -65,6 +65,8 @@ const categorySchema = editedBySchema.extend({
   text: z.string(),
   maintenance_kit: z.boolean(),
   kit_rank: z.number(),
+  service_label: z.string().nullable(),
+  service_price: z.number().nullable(),
   fields: z.array(categoryFieldSchema),
 });
 
@@ -343,6 +345,12 @@ const CategoryEditor = ({
   const [text, setText] = useState(category.text);
   const [kit, setKit] = useState(category.maintenance_kit);
   const [kitRank, setKitRank] = useState(String(category.kit_rank));
+  const [serviceLabel, setServiceLabel] = useState(
+    category.service_label ?? '',
+  );
+  const [servicePrice, setServicePrice] = useState(
+    category.service_price === null ? '' : String(category.service_price),
+  );
   const [draft, setDraft] = useState<FieldDraft>(EMPTY_FIELD);
   const path = `/admin/categories/${category.id}`;
 
@@ -401,6 +409,27 @@ const CategoryEditor = ({
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.maintenanceKitHint')}
         </Text>
+        <Label>{t('categories.serviceHeading')}</Label>
+        <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-[1fr_10rem]">
+          <Input
+            aria-label={t('categories.serviceLabel')}
+            placeholder={t('categories.serviceLabelPlaceholder')}
+            value={serviceLabel}
+            onChange={(event) => setServiceLabel(event.target.value)}
+          />
+          <Input
+            type="number"
+            min={0}
+            step={1}
+            aria-label={t('categories.servicePrice')}
+            placeholder={t('categories.servicePrice')}
+            value={servicePrice}
+            onChange={(event) => setServicePrice(event.target.value)}
+          />
+        </div>
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('categories.serviceHint')}
+        </Text>
         <div className="flex gap-x-2">
           <Button
             disabled={!name || !Number.isInteger(Number(kitRank)) || writing}
@@ -410,6 +439,9 @@ const CategoryEditor = ({
                 text,
                 maintenance_kit: kit,
                 kit_rank: Number(kitRank),
+                service_label: serviceLabel.trim() || null,
+                service_price:
+                  servicePrice.trim() === '' ? null : Number(servicePrice),
               });
               if (saved) await onChange();
             }}
@@ -419,7 +451,13 @@ const CategoryEditor = ({
           <TranslationsDrawer
             entity="category"
             id={category.id}
-            source={{ name: category.name, text: category.text }}
+            source={{
+              name: category.name,
+              text: category.text,
+              ...(category.service_label && {
+                service_label: category.service_label,
+              }),
+            }}
           />
           <Button
             disabled={writing}
@@ -640,7 +678,7 @@ const CategoriesPage = () => {
 
       {selected && (
         <CategoryEditor
-          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}`}
+          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}-${selected.service_label}-${selected.service_price}`}
           category={selected}
           onChange={load}
         />
