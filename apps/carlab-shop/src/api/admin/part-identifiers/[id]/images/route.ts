@@ -5,9 +5,9 @@ import type {
 
 import {
   readImageUpload,
-  readPartImages,
+  readIdentifierImages,
   storeImage,
-  writePartImages,
+  writeIdentifierImages,
 } from '../../../../../lib/images';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
@@ -20,9 +20,16 @@ export async function POST(
   const actor = req.auth_context.actor_id;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const current = await readPartImages(catalog, id);
+  const current = await readIdentifierImages(catalog, id);
   const body = await readImageUpload(req);
-  const image = await storeImage(req.scope, body, `parts/${id}`, actor);
+  const image = await storeImage(
+    req.scope,
+    body,
+    `part-identifiers/${id}`,
+    actor,
+  );
 
-  res.json(await writePartImages(catalog, id, [...current, image], actor));
+  res.json(
+    await writeIdentifierImages(catalog, id, [...current, image], actor),
+  );
 }

@@ -683,6 +683,10 @@
     "confirmDeleteBody": "The photo leaves the site with the next publish. The file is deleted right away and cannot be restored.",
     "wrongType": "\"{{name}}\" cannot be used: upload a JPEG, PNG or WebP.",
     "tooLarge": "\"{{name}}\" is over 10 MB. Make it smaller and upload it again.",
-    "altPreview": "Text for search engines and screen readers: \"{{alt}}\""
+    "altPreview": "Text for search engines and screen readers: \"{{alt}}\"",
+    "numberLabel": "Number",
+    "numberHint": "A photo belongs to one number: it must show this brand's part. Equivalents have their own photos.",
+    "numberOption_one": "{{number}} ({{count}} photo)",
+    "numberOption_other": "{{number}} ({{count}} photos)"
   }
 }

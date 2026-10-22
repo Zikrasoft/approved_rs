@@ -609,10 +609,10 @@ workflow engine. A second Medusa instance would need Redis first.
 
 ### Uploaded images
 
-Part and Category photos go through Medusa's File module with the local
+Brand-number and Category photos go through Medusa's File module with the local
 provider. The admin posts the original (JPEG, PNG or WebP, up to 10 MB, checked by
 decoding it, not by its name); the backend writes 160, 480 and 960 px WebP copies
-into `/server/static`, the `static` volume, and stores their URLs on the Part or
+into `/server/static`, the `static` volume, and stores their URLs on the PartIdentifier or
 Category. Caddy mounts the same volume read-only at `/srv/static` and answers
 `/static/*` itself with a year-long immutable cache, since every file name carries
 an upload timestamp; Medusa never sees those requests. The nightly backup already

@@ -25,6 +25,10 @@ export const brandNumberSchema = z.object({
   brand: brandSchema,
 });
 
+export const picturedBrandNumberSchema = brandNumberSchema.extend({
+  images: z.array(imageSchema),
+});
+
 export const partOfferSchema = z.strictObject({
   id: z.string(),
   price: z.number(),
@@ -50,7 +54,7 @@ export const supplierDataSchema = z.object({
   images: z.array(z.url()),
 });
 
-export const partPageSchema = brandNumberSchema.extend({
+export const partPageSchema = picturedBrandNumberSchema.extend({
   part: z.object({
     id: z.string(),
     name: z.string(),
@@ -65,9 +69,8 @@ export const partPageSchema = brandNumberSchema.extend({
       .nullable(),
     category_id: z.string().nullable(),
     attributes: attributeValuesSchema,
-    images: z.array(imageSchema),
   }),
-  equivalents: z.array(brandNumberSchema),
+  equivalents: z.array(picturedBrandNumberSchema),
   offers: z.array(partOfferSchema),
   supplier_data: supplierDataSchema,
 });
@@ -80,6 +83,7 @@ export const partPagesResponseSchema = z.object({
 });
 
 export type BrandNumber = z.infer<typeof brandNumberSchema>;
+export type PicturedBrandNumber = z.infer<typeof picturedBrandNumberSchema>;
 export type PartOffer = z.infer<typeof partOfferSchema>;
 export type StagedDataKind = (typeof STAGED_DATA_KINDS)[number];
 export type SupplierData = z.infer<typeof supplierDataSchema>;

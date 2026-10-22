@@ -29,10 +29,11 @@ import {
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
-import { partImagesSchema } from '../../../lib/images';
+import { imagesSchema } from '../../../lib/images';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
+import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import {
@@ -52,19 +53,23 @@ const FACET_REQUESTS = [
 const named = z.object({ name: z.string(), translations: translationsSchema });
 
 const hitSchema = brandNumberSchema.extend({
+  images: imagesSchema,
   part: named.extend({
     id: z.string(),
-    images: partImagesSchema,
     category: named
       .extend({ slug: z.string(), image: imageSchema.nullable() })
       .nullable(),
   }),
 });
 
-const thumbnail = ({ images, category }: z.infer<typeof hitSchema>['part']) => {
-  const [first] = images.items;
-  const image = first ?? category?.image;
-  return image ? smallestImage(image) : null;
+const thumbnail = (
+  { images, part }: z.infer<typeof hitSchema>,
+  [supplierImage]: string[],
+) => {
+  const [own] = images.items;
+  if (own) return smallestImage(own);
+  if (supplierImage) return supplierImage;
+  return part.category?.image ? smallestImage(part.category.image) : null;
 };
 
 const facetCountsSchema = z
@@ -341,7 +346,7 @@ export async function GET(
       'part.category.slug',
       'part.category.name',
       'part.category.translations',
-      'part.images',
+      'images',
       'part.category.image',
     ],
     filters: filtersFor(() => true),
@@ -361,20 +366,24 @@ export async function GET(
         { relations: ['supplier'], take: null },
       )
     : [];
+  const supplierData = await releasedSupplierData(
+    suppliers,
+    hits.map(({ id }) => id),
+  );
   const results = hits
     .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0))
-    .map(({ part, ...brandNumber }) => ({
-      ...brandNumber,
+    .map((hit) => ({
+      ...brandNumberSchema.parse(hit),
       offers: storeOffers(
-        offers.filter((offer) => offer.part_identifier_id === brandNumber.id),
+        offers.filter((offer) => offer.part_identifier_id === hit.id),
       ),
-      thumbnail: thumbnail(part),
+      thumbnail: thumbnail(hit, supplierData(hit.id).images),
       part: {
-        id: part.id,
-        name: translated(part, 'name', locale),
-        category: part.category && {
-          slug: part.category.slug,
-          name: translated(part.category, 'name', locale),
+        id: hit.part.id,
+        name: translated(hit.part, 'name', locale),
+        category: hit.part.category && {
+          slug: hit.part.category.slug,
+          name: translated(hit.part.category, 'name', locale),
         },
       },
     }));

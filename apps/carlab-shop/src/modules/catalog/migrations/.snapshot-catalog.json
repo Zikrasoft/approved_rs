@@ -1816,22 +1816,6 @@
           "enumItems": [],
           "mappedType": "json"
         },
-        "images": {
-          "name": "images",
-          "type": "jsonb",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": "'{\"items\":[]}'",
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "json"
-        },
         "translations": {
           "name": "translations",
           "type": "jsonb",
@@ -2120,6 +2104,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "boolean"
+        },
+        "images": {
+          "name": "images",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'{\"items\":[]}'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "brand_id": {
           "name": "brand_id",

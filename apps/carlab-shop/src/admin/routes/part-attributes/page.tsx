@@ -66,17 +66,18 @@ const partSchema = editedBySchema.extend({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), attributeValueSchema),
-  images: z.array(adminImageSchema),
   identifiers: z.array(
     z.object({
       id: z.string(),
       value: z.string(),
       brand: z.object({ name: z.string() }),
+      images: z.array(adminImageSchema),
     }),
   ),
 });
 
 type Part = z.infer<typeof partSchema>;
+type Identifier = Part['identifiers'][number];
 
 const categoriesSchema = z.object({ categories: z.array(categorySchema) });
 const imagesSchema = z.object({ images: z.array(adminImageSchema) });
@@ -87,8 +88,7 @@ const partLabel = (part: Part) =>
     .map((identifier) => `${identifier.brand.name} ${identifier.value}`)
     .join(', ')})`;
 
-const imageAlt = ({ name, identifiers: [first] }: Part) =>
-  first ? `${first.brand.name} ${first.value}, ${name}` : name;
+const numberLabel = ({ brand, value }: Identifier) => `${brand.name} ${value}`;
 
 const ValueInput = ({
   field,
@@ -190,6 +190,7 @@ const PartAttributesPage = () => {
   const [parts, setParts] = useState<Part[]>([]);
   const [part, setPart] = useState<Part | null>(null);
   const [categoryId, setCategoryId] = useState('');
+  const [identifierId, setIdentifierId] = useState('');
   const [values, setValues] = useState<Record<string, AttributeValue>>({});
 
   useEffect(() => {
@@ -208,6 +209,7 @@ const PartAttributesPage = () => {
 
   const choose = (chosen: Part) => {
     setPart(chosen);
+    setIdentifierId(chosen.identifiers[0]?.id ?? '');
     setCategoryId(chosen.category_id ?? '');
     setValues(chosen.attributes);
   };
@@ -232,9 +234,17 @@ const PartAttributesPage = () => {
     if (saved) toast.success(t('partAttributes.saved'));
   };
 
-  const showImages = (images: AdminImage[] | undefined) => {
+  const showImages = (
+    identifierId: string,
+    images: AdminImage[] | undefined,
+  ) => {
     if (!part || !images) return Boolean(images);
-    const next = { ...part, images };
+    const next = {
+      ...part,
+      identifiers: part.identifiers.map((identifier) =>
+        identifier.id === identifierId ? { ...identifier, images } : identifier,
+      ),
+    };
     setPart(next);
     setParts((current) =>
       current.map((found) => (found.id === next.id ? next : found)),
@@ -243,6 +253,12 @@ const PartAttributesPage = () => {
   };
 
   const category = categories.find(({ id }) => id === categoryId);
+  const identifier =
+    part?.identifiers.find(({ id }) => id === identifierId) ??
+    part?.identifiers[0];
+  const imagesPath = identifier
+    ? `/admin/part-identifiers/${identifier.id}/images`
+    : '';
 
   return (
     <Container className="flex flex-col gap-y-6">
@@ -295,53 +311,75 @@ const PartAttributesPage = () => {
           </div>
           <div className="flex flex-col gap-y-2">
             <Heading level="h3">{t('images.partHeading')}</Heading>
-            <ImageUploads
-              images={part.images}
-              alt={imageAlt(part)}
-              multiple
-              onUpload={async (file) =>
-                showImages(
-                  (
-                    await uploadImage(
-                      `/admin/parts/${part.id}/images`,
-                      file,
-                      imagesSchema,
+            <Text size="small" className="text-ui-fg-subtle">
+              {t('images.numberHint')}
+            </Text>
+            {identifier && (
+              <>
+                <div className="flex flex-col gap-y-1 sm:w-80">
+                  <Label>{t('images.numberLabel')}</Label>
+                  <Select
+                    value={identifier.id}
+                    onValueChange={setIdentifierId}
+                    disabled={writing}
+                  >
+                    <Select.Trigger>
+                      <Select.Value />
+                    </Select.Trigger>
+                    <Select.Content>
+                      {part.identifiers.map((option) => (
+                        <Select.Item key={option.id} value={option.id}>
+                          {t('images.numberOption', {
+                            number: numberLabel(option),
+                            count: option.images.length,
+                          })}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select>
+                </div>
+                <ImageUploads
+                  key={identifier.id}
+                  images={identifier.images}
+                  alt={`${numberLabel(identifier)}, ${part.name}`}
+                  multiple
+                  onUpload={async (file) =>
+                    showImages(
+                      identifier.id,
+                      (await uploadImage(imagesPath, file, imagesSchema))
+                        ?.images,
                     )
-                  )?.images,
-                )
-              }
-              onDelete={async (image) =>
-                showImages(
-                  (
-                    await adminFetch(
-                      `/admin/parts/${part.id}/images/${image.id}`,
-                      imagesSchema,
-                      {
-                        method: 'DELETE',
-                      },
+                  }
+                  onDelete={async (image) =>
+                    showImages(
+                      identifier.id,
+                      (
+                        await adminFetch(
+                          `${imagesPath}/${image.id}`,
+                          imagesSchema,
+                          { method: 'DELETE' },
+                        )
+                      )?.images,
                     )
-                  )?.images,
-                )
-              }
-              onMove={async (image, offset) => {
-                const ids = part.images.map(({ id }) => id);
-                const from = ids.indexOf(image.id);
-                ids.splice(from, 1);
-                ids.splice(from + offset, 0, image.id);
-                showImages(
-                  (
-                    await adminFetch(
-                      `/admin/parts/${part.id}/images/order`,
-                      imagesSchema,
-                      {
-                        method: 'POST',
-                        body: JSON.stringify({ ids }),
-                      },
-                    )
-                  )?.images,
-                );
-              }}
-            />
+                  }
+                  onMove={async (image, offset) => {
+                    const ids = identifier.images.map(({ id }) => id);
+                    const from = ids.indexOf(image.id);
+                    ids.splice(from, 1);
+                    ids.splice(from + offset, 0, image.id);
+                    showImages(
+                      identifier.id,
+                      (
+                        await adminFetch(`${imagesPath}/order`, imagesSchema, {
+                          method: 'POST',
+                          body: JSON.stringify({ ids }),
+                        })
+                      )?.images,
+                    );
+                  }}
+                />
+              </>
+            )}
           </div>
 
           <div className="flex flex-col gap-y-2">

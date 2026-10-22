@@ -1,20 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import {
-  partPagesResponseSchema,
-  STAGED_DATA_KINDS,
-  type SupplierData,
-} from '@podbor/catalog-contract';
-import { z } from 'zod';
+import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
-import { partImagesSchema } from '../../../lib/images';
+import { imagesSchema } from '../../../lib/images';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
+import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { StoreListPartPagesType } from '../validators';
-
-const stagedPayloadSchema = z.object({ items: z.array(z.unknown()) });
 
 type BrandNumberRow = {
   id: string;
@@ -23,6 +17,7 @@ type BrandNumberRow = {
   normalized_value: string;
   superseded: boolean;
   brand: { name: string; slug: string };
+  images: unknown;
 };
 
 type ReplacementRow = {
@@ -46,6 +41,11 @@ const brandNumber = ({
   normalized_value,
   superseded,
   brand: { name: brand.name, slug: brand.slug },
+});
+
+const picturedBrandNumber = (row: BrandNumberRow) => ({
+  ...brandNumber(row),
+  images: imagesSchema.parse(row.images).items,
 });
 
 const replacement = ({
@@ -105,27 +105,10 @@ export async function GET(
     { part_identifier_id: identifierIds },
     { relations: ['supplier'], take: null },
   );
-  const staged = await suppliers.listStagedRecords(
-    { part_identifier_id: identifierIds },
-    { relations: ['supplier'], take: null },
-  );
-  const supplierData = (identifierId: string) =>
-    Object.fromEntries(
-      STAGED_DATA_KINDS.map((kind) => [
-        kind,
-        staged
-          .filter(
-            (record) =>
-              record.part_identifier_id === identifierId &&
-              record.kind === kind &&
-              record.supplier.released_kinds.includes(kind),
-          )
-          .flatMap((record) => stagedPayloadSchema.parse(record.payload).items),
-      ]),
-    ) as SupplierData;
+  const supplierData = await releasedSupplierData(suppliers, identifierIds);
 
   const pages = identifiers.map((identifier) => ({
-    ...brandNumber(identifier),
+    ...picturedBrandNumber(identifier),
     part: {
       id: identifier.part.id,
       name: identifier.part.name,
@@ -133,14 +116,13 @@ export async function GET(
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,
-      images: partImagesSchema.parse(identifier.part.images).items,
     },
     equivalents: siblings
       .filter(
         ({ id, part_id }) =>
           part_id === identifier.part_id && id !== identifier.id,
       )
-      .map(brandNumber),
+      .map(picturedBrandNumber),
     offers: storeOffers(
       offers.filter((offer) => offer.part_identifier_id === identifier.id),
     ),

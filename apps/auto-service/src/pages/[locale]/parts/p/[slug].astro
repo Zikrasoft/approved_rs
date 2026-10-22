@@ -63,7 +63,7 @@ const shown =
     : category?.image
       ? {
           images: partGallery({
-            part: { images: [category.image] },
+            images: [category.image],
             supplier_data: { images: [] },
           }),
           alt: translated(category, 'name', locale),

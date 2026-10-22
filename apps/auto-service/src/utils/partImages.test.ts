@@ -20,7 +20,7 @@ const own = {
 };
 
 const page = (images: (typeof own)[], supplier: string[] = []) => ({
-  part: { images },
+  images,
   supplier_data: { cross_references: [], applicability: [], images: supplier },
 });
 
@@ -66,6 +66,12 @@ describe('partGallery', () => {
 describe('partThumbnail', () => {
   it('takes the smallest copy of the first own photo', () => {
     expect(partThumbnail(page([own]), category)).toBe(`${STATIC}/a-160.webp`);
+  });
+
+  it('never borrows a photo from an equivalent brand-number', () => {
+    const bmw = { ...page([]), equivalents: [{ ...page([own]) }] };
+    expect(partThumbnail(bmw, category)).toBe(`${STATIC}/c-160.webp`);
+    expect(partGallery(bmw)).toEqual([]);
   });
 
   it('falls back to a supplier photo, then the Category photo, then nothing', () => {

@@ -34,7 +34,7 @@ export const storedImageSchema = imageSchema.extend({
 
 export type StoredImage = z.infer<typeof storedImageSchema>;
 
-export const partImagesSchema = z.object({ items: z.array(storedImageSchema) });
+export const imagesSchema = z.object({ items: z.array(storedImageSchema) });
 
 export const adminImage = ({ file_ids: _, ...image }: StoredImage) => image;
 
@@ -130,20 +130,24 @@ export async function deleteImageFiles(
   }
 }
 
-export async function readPartImages(
+export async function readIdentifierImages(
   catalog: CatalogModuleService,
-  partId: string,
+  identifierId: string,
 ): Promise<StoredImage[]> {
-  const part = await catalog.retrievePart(partId);
-  return partImagesSchema.parse(part.images).items;
+  const identifier = await catalog.retrievePartIdentifier(identifierId);
+  return imagesSchema.parse(identifier.images).items;
 }
 
-export async function writePartImages(
+export async function writeIdentifierImages(
   catalog: CatalogModuleService,
-  partId: string,
+  identifierId: string,
   items: StoredImage[],
   updated_by: string | null,
 ) {
-  await catalog.updateParts({ id: partId, images: { items }, updated_by });
+  await catalog.updatePartIdentifiers({
+    id: identifierId,
+    images: { items },
+    updated_by,
+  });
   return { images: items.map(adminImage) };
 }

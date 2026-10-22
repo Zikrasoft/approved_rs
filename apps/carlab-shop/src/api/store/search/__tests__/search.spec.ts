@@ -4,6 +4,8 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 
 type Result = {
   value: string;
@@ -206,7 +208,7 @@ medusaIntegrationTestRunner({
           .reindex({ index: 'part_identifier' });
       });
 
-      it('gives each result a thumbnail: its Part photo, else its Category photo', async () => {
+      it('gives each result its own brand-number photo, else its released supplier photo, else its Category photo', async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
         const image = (name: string) => ({
@@ -222,10 +224,45 @@ medusaIntegrationTestRunner({
           source: 'manual',
           created_by: null,
         });
-        await catalog.updateParts({
-          id: thinOilId,
+        const identifierOf = async (partId: string, normalized: string) => {
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: partId,
+            normalized_value: normalized,
+          });
+          return identifier.id;
+        };
+        await catalog.updatePartIdentifiers({
+          id: await identifierOf(thinOilId, '15F6E3'),
           images: { items: [image('edge')] },
         });
+        await catalog.updatePartIdentifiers({
+          id: await identifierOf(oilFilterId, 'HU816X'),
+          images: { items: [image('mann')] },
+        });
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [released, held] = await suppliers.createSuppliers([
+          {
+            name: 'Released',
+            markup_percentage: 10,
+            released_kinds: ['images'],
+          },
+          { name: 'Held', markup_percentage: 10 },
+        ]);
+        await suppliers.createStagedRecords([
+          {
+            supplier_id: released.id,
+            part_identifier_id: await identifierOf(oilFilterId, '11428575211'),
+            kind: 'images',
+            payload: { items: ['https://cdn.supplier.test/bmw.jpg'] },
+          },
+          {
+            supplier_id: held.id,
+            part_identifier_id: await identifierOf(airFilterId, '13718511877'),
+            kind: 'images',
+            payload: { items: ['https://cdn.supplier.test/held.jpg'] },
+          },
+        ]);
         const [engineOil] = await catalog.listCategories({
           slug: 'engine-oil',
         });
@@ -238,6 +275,8 @@ medusaIntegrationTestRunner({
           [
             ...(await results({ category: 'engine-oil', locale: 'ru' })),
             ...(await results({ q: '13718511877', locale: 'ru' })),
+            ...(await results({ q: 'HU816X', locale: 'ru' })),
+            ...(await results({ q: '11428575211', locale: 'ru' })),
           ].map(({ value, thumbnail }) => [value, thumbnail]),
         );
 
@@ -245,6 +284,8 @@ medusaIntegrationTestRunner({
           '15F6E3': 'http://localhost/static/edge-160.webp',
           '15C94E': 'http://localhost/static/oil-160.webp',
           '13 71 8511877': null,
+          'HU 816 x': 'http://localhost/static/mann-160.webp',
+          '11 42 8575211': 'https://cdn.supplier.test/bmw.jpg',
         });
       });
 

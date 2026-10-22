@@ -104,7 +104,7 @@ export default defineMiddlewares({
       middlewares: [validateAdminBody(AdminUpdatePart)],
     },
     {
-      matcher: '/admin/parts/:id/images/order',
+      matcher: '/admin/part-identifiers/:id/images/order',
       method: 'POST',
       middlewares: [validateAdminBody(AdminOrderImages)],
     },

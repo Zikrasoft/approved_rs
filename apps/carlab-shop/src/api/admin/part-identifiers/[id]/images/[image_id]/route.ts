@@ -6,8 +6,8 @@ import { MedusaError } from '@medusajs/framework/utils';
 
 import {
   deleteImageFiles,
-  readPartImages,
-  writePartImages,
+  readIdentifierImages,
+  writeIdentifierImages,
 } from '../../../../../../lib/images';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
@@ -19,16 +19,16 @@ export async function DELETE(
   const { id, image_id } = req.params;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const current = await readPartImages(catalog, id);
+  const current = await readIdentifierImages(catalog, id);
   const removed = current.filter((image) => image.id === image_id);
   if (!removed.length) {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,
-      `Image ${image_id} not found on Part ${id}`,
+      `Image ${image_id} not found on brand-number ${id}`,
     );
   }
 
-  const result = await writePartImages(
+  const result = await writeIdentifierImages(
     catalog,
     id,
     current.filter((image) => image.id !== image_id),
