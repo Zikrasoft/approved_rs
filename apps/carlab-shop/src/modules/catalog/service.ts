@@ -619,11 +619,13 @@ class CatalogModuleService extends MedusaService({
       .sort((a, b) => a.source.localeCompare(b.source));
   }
 
+  // TODO: counts every catalogue row twice; count per table in SQL once catalogues reach hundreds of thousands of rows.
   @InjectTransactionManager()
   async deleteRowsBySource(
     source: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
+    const othersBefore = await this.otherSourceRows(source, sharedContext);
     let deleted = 0;
     for (const { list, remove } of this.sourcedRows()) {
       const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
@@ -632,7 +634,23 @@ class CatalogModuleService extends MedusaService({
         deleted += ids.length;
       }
     }
+    if ((await this.otherSourceRows(source, sharedContext)) !== othersBefore) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'SOURCE_IN_USE',
+        `Rows of other sources still use rows of ${source}`,
+      );
+    }
     return deleted;
+  }
+
+  private async otherSourceRows(
+    source: string,
+    sharedContext: Context,
+  ): Promise<number> {
+    return (await this.countRowsBySource(sharedContext))
+      .filter((count) => count.source !== source)
+      .reduce((total, { rows }) => total + rows, 0);
   }
 
   @InjectManager()
