@@ -11,6 +11,7 @@ import {
   type PartOffer,
   categoriesResponseSchema,
   describeFacet,
+  enrichmentRule,
   fitmentsResponseSchema,
   maintenanceKit,
   partPageSlug,
@@ -294,6 +295,7 @@ export function createCatalogue({
       return vehicle ? [{ ...fitment, vehicle }] : [];
     });
     const fitsByPart = groupBy(fits, ({ part_id }) => part_id);
+    const gaps = enrichmentRule(allVehicles);
     const bySlug = new Map<string, PartPageEntry>();
     for (const page of pages) {
       const slug = partPageSlug(page.brand.slug, page.normalized_value);
@@ -305,9 +307,13 @@ export function createCatalogue({
       bySlug.set(slug, {
         ...page,
         slug,
-        indexable: Boolean(
-          category && (partFits.length > 0 || page.equivalents.length > 0),
-        ),
+        indexable:
+          gaps({
+            category_id: category?.id ?? null,
+            attributes: page.part.attributes,
+            fitments: partFits.length,
+            equivalents: page.equivalents.length,
+          }).length === 0,
         priceOnRequest: page.offers.length === 0,
         category,
         fits: partFits,
@@ -340,18 +346,6 @@ export function createCatalogue({
             : [];
         },
       );
-    const required = new Set(
-      allVehicles.flatMap((vehicle) =>
-        matchesFor(vehicle).flatMap((match) =>
-          match.parts.map(({ part }) => part.id),
-        ),
-      ),
-    );
-    for (const entry of entries) {
-      entry.indexable ||= Boolean(
-        entry.category && required.has(entry.part.id),
-      );
-    }
     const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
     const cars = allVehicles.map((vehicle): CarPageEntry => {
       const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap(
