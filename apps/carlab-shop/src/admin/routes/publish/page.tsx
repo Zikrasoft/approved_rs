@@ -10,6 +10,15 @@ import { usePublishRun } from '../../lib/publish-run';
 const KNOWN_ERRORS: Record<string, string> = {
   'OPENAI_API_KEY is not set': 'publish.knownErrors.openAiKey',
   'PUBLISH_DISPATCH_TOKEN is not set': 'publish.knownErrors.dispatchToken',
+  'The deploy run did not succeed': 'publish.knownErrors.deployFailed',
+  'The deploy run timed out': 'publish.knownErrors.deployTimedOut',
+};
+
+const knownError = (error: string | null) => {
+  const known = Object.keys(KNOWN_ERRORS).find((prefix) =>
+    error?.startsWith(prefix),
+  );
+  return known ? KNOWN_ERRORS[known] : null;
 };
 
 const BADGE_COLOR = {
@@ -24,6 +33,7 @@ const PublishPage = () => {
   const { run, loaded, starting, publish } = usePublishRun();
 
   const starter = run?.created_by_user;
+  const knownErrorKey = knownError(run?.error ?? null);
 
   const formatTime = (value: string) =>
     new Date(value).toLocaleString(i18n.language);
@@ -77,9 +87,9 @@ const PublishPage = () => {
               })}
             </Text>
           )}
-          {run.error && KNOWN_ERRORS[run.error] && (
+          {knownErrorKey && (
             <Text size="small" className="text-ui-fg-error">
-              {t(KNOWN_ERRORS[run.error])}
+              {t(knownErrorKey)}
             </Text>
           )}
           {run.error && (

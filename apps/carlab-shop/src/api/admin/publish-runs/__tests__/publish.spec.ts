@@ -40,6 +40,7 @@ type FakeNetwork = {
   dispatches: { url: string; body: unknown; authorization: string | null }[];
   unsafeAnswer: boolean;
   githubStatus: number;
+  runConclusion: string;
   githubGate: Promise<void> | null;
 };
 
@@ -47,7 +48,8 @@ const network: FakeNetwork = {
   openAiRequests: 0,
   dispatches: [],
   unsafeAnswer: false,
-  githubStatus: 204,
+  githubStatus: 200,
+  runConclusion: 'success',
   githubGate: null,
 };
 
@@ -73,6 +75,10 @@ const openAiAnswer = (body: {
   );
 };
 
+const RUN_URL =
+  'https://api.github.com/repos/Zikrasoft/approved_rs/actions/runs/7';
+const RUN_HTML_URL = 'https://github.com/Zikrasoft/approved_rs/actions/runs/7';
+
 const fakeFetch =
   (realFetch: typeof fetch): typeof fetch =>
   async (input, init) => {
@@ -90,12 +96,21 @@ const fakeFetch =
     }
     if (hostname === 'api.github.com') {
       await network.githubGate;
+      if (url === RUN_URL) {
+        return Response.json({
+          status: 'completed',
+          conclusion: network.runConclusion,
+        });
+      }
       network.dispatches.push({
         url,
         body: JSON.parse(String(init?.body)),
         authorization: new Headers(init?.headers).get('authorization'),
       });
-      return new Response(null, { status: network.githubStatus });
+      return Response.json(
+        { workflow_run_id: 7, run_url: RUN_URL, html_url: RUN_HTML_URL },
+        { status: network.githubStatus },
+      );
     }
     return realFetch(input, init);
   };
@@ -197,7 +212,8 @@ medusaIntegrationTestRunner({
         network.openAiRequests = 0;
         network.dispatches = [];
         network.unsafeAnswer = false;
-        network.githubStatus = 204;
+        network.githubStatus = 200;
+        network.runConclusion = 'success';
         network.githubGate = null;
         reindexCalls.length = 0;
         supplier.articles.length = 0;
@@ -209,7 +225,7 @@ medusaIntegrationTestRunner({
         expect(latest.data.publish_run).toBeNull();
       });
 
-      it('translates Russian names, dispatches the deploy, then reindexes', async () => {
+      it('translates Russian names, deploys the site, then reindexes', async () => {
         const part = await catalog.createParts({ name: 'Масляный фильтр' });
 
         const run = await publish();
@@ -228,7 +244,7 @@ medusaIntegrationTestRunner({
         expect(network.dispatches).toEqual([
           {
             url: 'https://api.github.com/repos/Zikrasoft/approved_rs/actions/workflows/publish.yml/dispatches',
-            body: { ref: 'main' },
+            body: { ref: 'main', return_run_details: true },
             authorization: 'Bearer test-dispatch-token',
           },
         ]);
@@ -410,6 +426,19 @@ medusaIntegrationTestRunner({
         expect(run.failed_step).toBe('deploy');
         expect(run.error).toContain('500');
         expect(run.error).not.toContain('test-dispatch-token');
+        expect(reindexCalls).toEqual([]);
+      });
+
+      it('stops before the reindex when the site build fails', async () => {
+        network.runConclusion = 'failure';
+
+        const run = await publish();
+
+        expect(run.status).toBe('failed');
+        expect(run.failed_step).toBe('deploy');
+        expect(run.error).toBe(
+          `The deploy run did not succeed: failure ${RUN_HTML_URL}`,
+        );
         expect(reindexCalls).toEqual([]);
       });
 
