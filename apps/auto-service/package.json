@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "dev:shop": "until curl -sf http://localhost:9009/health >/dev/null; do sleep 1; done; node --env-file-if-exists=.env.local node_modules/astro/bin/astro.mjs dev --port 4321",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

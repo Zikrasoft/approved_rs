@@ -8,22 +8,47 @@ Telegram, no OpenAI, no GitHub dispatch.
 It does not touch the shared test stack (`podbor-carlab-shop`, ports 55432 and
 58108). The demo uses its own containers on 55444 and 58444.
 
-## 1. Postgres and Typesense
+## Run it
 
 ```bash
-docker run -d --name carlab-demo-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=medusa \
-  -p 127.0.0.1:55444:5432 postgres:16.15-alpine
-docker run -d --name carlab-demo-ts -p 127.0.0.1:58444:8108 \
-  typesense/typesense:30.2 --data-dir /tmp --api-key=xyz
+pnpm dev:shop
 ```
 
-Typesense keeps its data inside the container: removing it drops the index,
-and `publish:local` (step 4) rebuilds it.
+One command, on a fresh clone or an existing setup. It builds the CommonJS
+workspace packages, then `shop:prepare` (`apps/carlab-shop/scripts/shop-prepare.sh`):
 
-## 2. Backend environment
+- creates `apps/carlab-shop/.env` with the demo values below and random JWT and
+  cookie secrets, only if the file is missing;
+- creates `apps/auto-service/.env.local` from `.env.example` if missing, and
+  fills the Telegram placeholders (`TELEGRAM_BOT_TOKEN=1:fake`,
+  `TELEGRAM_BOT_USERNAME=demo_crm_bot`, `TELEGRAM_GROUP_ID=-1`,
+  `TELEGRAM_OWNER_ID=1`, `TELEGRAM_ADMIN_ID=2`) where a key is absent or empty,
+  leaving every other line alone;
+- creates `apps/carlab-shop/.local-demo/supplier-overrides.json` (`{}`, see
+  step 7);
+- starts Postgres (55444) and Typesense (58444) from
+  `apps/carlab-shop/docker-compose.demo.yml` (project `carlab-demo`, named
+  volumes), replacing `carlab-demo-pg` / `carlab-demo-ts` containers left over
+  from a hand-run `docker run`;
+- runs `db:migrate`, `seed:demo` and `publish:local`, all safe to rerun.
 
-Export these into the shell that runs `apps/carlab-shop` commands (never
-commit them; a `.env` there is gitignored if you prefer a file):
+Then it runs `medusa develop` on 9009 and, once `/health` answers, `astro dev`
+on 4321 with `.env.local` loaded into `process.env`. Ctrl-C stops both; the
+containers stay up. The root `pnpm dev` starts none of this.
+
+Start over with an empty database:
+
+```bash
+docker compose -f apps/carlab-shop/docker-compose.demo.yml down -v
+```
+
+The sections below are what the command does, for reference.
+
+## 1. Postgres and Typesense
+
+`docker compose -f apps/carlab-shop/docker-compose.demo.yml up -d --wait`.
+
+## 2. Backend environment (`apps/carlab-shop/.env`, gitignored)
 
 | Name                      | Demo value                                            |
 | ------------------------- | ----------------------------------------------------- |
@@ -43,20 +68,9 @@ Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset.
 
 ## 3. Migrate and seed
 
-The storefront needs its public variables before the build, so copy the
-example first; the seed then adds the backend URL and the publishable key.
-
-```bash
-pnpm turbo run build --filter=@podbor/i18n --filter=@podbor/brands --filter=@podbor/catalog-contract --filter=@podbor/lead-crm
-cp apps/auto-service/.env.example apps/auto-service/.env.local
-cd apps/carlab-shop
-pnpm db:migrate
-pnpm seed:demo
-```
-
-`seed:demo` is idempotent per part: rerunning it keeps the admin, reuses the
-key and skips the catalogue once the demo suppliers exist. To start over, drop
-the containers and begin at step 1.
+`pnpm db:migrate` and `pnpm seed:demo` in `apps/carlab-shop`. `seed:demo` is
+idempotent per part: rerunning it keeps the admin, reuses the key and skips
+the catalogue once the demo suppliers exist.
 
 What it creates:
 
@@ -119,12 +133,9 @@ Suppliers page.
 
 ## 5. Backend
 
-```bash
-pnpm develop
-```
-
-Admin: <http://localhost:9009/app>. Store API: <http://localhost:9009/store/...>
-with the `x-publishable-api-key` header.
+`pnpm dev:shop` in `apps/carlab-shop` (`medusa develop`). Admin:
+<http://localhost:9009/app>. Store API: <http://localhost:9009/store/...> with
+the `x-publishable-api-key` header.
 
 `medusa develop` does not restart on file changes when the checkout path
 contains a dot directory (a `.claude/worktrees/...` worktree): restart it by
@@ -133,20 +144,11 @@ hand after backend edits there.
 ## 6. Storefront
 
 `astro dev` does not put `.env.local` into `process.env`, and the lead route
-reads the Telegram variables from there, so export the file first. Placeholder
-Telegram values are enough: the Lead is stored in
-`apps/auto-service/.local-data/data/leads.json` (gitignored) and the Telegram
-notification fails in the log.
-
-In `apps/auto-service/.env.local` set `TELEGRAM_BOT_TOKEN=1:fake`,
-`TELEGRAM_BOT_USERNAME=demo_crm_bot`, `TELEGRAM_GROUP_ID=-1`,
-`TELEGRAM_OWNER_ID=1`, `TELEGRAM_ADMIN_ID=2`, then:
-
-```bash
-cd apps/auto-service
-set -a; . ./.env.local; set +a
-pnpm exec astro dev --port 4321
-```
+reads the Telegram variables from there, so `dev:shop` starts it under
+`node --env-file-if-exists=.env.local`. The placeholders are enough: the Lead
+is stored in `apps/auto-service/.local-data/data/leads.json` (gitignored) and
+the Telegram notification fails in the log. The Astro config fetches the part
+pages from Medusa at load, so the storefront waits for the backend.
 
 Storefront: <http://localhost:4321/ru/parts/>. Leads only reach the local file
 under `astro dev`; a production build writes to Vercel Blob.
@@ -193,9 +195,6 @@ to go back to the catalogue prices.
 
 ## 8. Stop
 
-```bash
-cd apps/auto-service && pnpm exec astro dev stop
-docker rm -f carlab-demo-pg carlab-demo-ts
-```
-
-Stop `pnpm develop` and the static server with Ctrl-C (or by PID).
+Ctrl-C `pnpm dev:shop`, then
+`docker compose -f apps/carlab-shop/docker-compose.demo.yml stop` (or `down -v`
+to drop the data).

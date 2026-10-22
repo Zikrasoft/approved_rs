@@ -12,6 +12,8 @@
     "seed": "medusa exec ./src/scripts/seed.ts",
     "seed:demo": "medusa exec ./src/scripts/seed-demo.ts",
     "publish:local": "medusa exec ./src/scripts/publish-local.ts",
+    "shop:prepare": "sh scripts/shop-prepare.sh",
+    "dev:shop": "medusa develop",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests"
   },
   "dependencies": {
