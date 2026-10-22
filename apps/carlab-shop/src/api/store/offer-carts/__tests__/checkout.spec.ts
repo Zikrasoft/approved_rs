@@ -12,7 +12,11 @@ import { createVehicleFixture } from '../../../../../integration-tests/vehicleFi
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
-import { LEAD_HANDOFF_ERROR } from '../../../../lib/order-lead';
+import retryOrderLeads from '../../../../jobs/retry-order-leads';
+import {
+  LEAD_HANDOFF_ERROR,
+  LEAD_HANDOFF_MAX_ATTEMPTS,
+} from '../../../../lib/order-lead';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
@@ -816,6 +820,48 @@ medusaIntegrationTestRunner({
             ],
         );
         expect(metadata).toBe('The lead route answered 500');
+      });
+
+      const leadsFor = (placed: { data: { order: { display_id: number } } }) =>
+        leads.filter(({ comment }) =>
+          comment.startsWith(`Заказ #${placed.data.order.display_id},`),
+        );
+
+      it('re-sends a refused order once the lead route answers again', async () => {
+        leadRouteStatus = 500;
+        const placed = await complete(await cartWith(1));
+        const orders = getContainer().resolve(Modules.ORDER);
+        const refused = () => orders.retrieveOrder(placed.data.order.id);
+        await waitFor(
+          async () => (await refused()).metadata?.[LEAD_HANDOFF_ERROR],
+        );
+        leads.length = 0;
+        leadRouteStatus = 302;
+
+        await retryOrderLeads(getContainer());
+
+        expect(leadsFor(placed)).toHaveLength(1);
+        expect((await refused()).metadata?.[LEAD_HANDOFF_ERROR]).toBeFalsy();
+        await retryOrderLeads(getContainer());
+        expect(leadsFor(placed)).toHaveLength(1);
+      });
+
+      it('stops re-sending an order the lead route keeps refusing', async () => {
+        leadRouteStatus = 400;
+        const placed = await complete(await cartWith(1));
+        const orders = getContainer().resolve(Modules.ORDER);
+        await waitFor(
+          async () =>
+            (await orders.retrieveOrder(placed.data.order.id)).metadata?.[
+              LEAD_HANDOFF_ERROR
+            ],
+        );
+
+        for (let run = 0; run < 15; run += 1) {
+          await retryOrderLeads(getContainer());
+        }
+
+        expect(leadsFor(placed)).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
       });
     });
   },

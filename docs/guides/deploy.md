@@ -636,12 +636,16 @@ validates everything at startup. The non-obvious parts:
   may stay empty; the chain then stops at that step and the admin shows why.
   `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
   ships fresh catalogue data and never code that is not live yet. The chain runs
-  on the admin's Publish button and every night at 03:00 server time
-  (`src/jobs/nightly-publish.ts`).
+  only from the admin's Publish button, in the top bar of every admin page.
+  There is no nightly run: cart and checkout quote price and stock live, and a
+  build bakes the prices current at that moment into the pages' structured data.
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
-  nobody, and the log says so.
+  nobody, and the log says so. A refused post is written on the order as
+  `lead_handoff_error`, and `src/jobs/retry-order-leads.ts` re-sends it every
+  10 minutes, six attempts in all. A timeout is not re-sent, since the route
+  may have stored it: find those orders by that metadata and check the chat.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
   are tried. An unknown name stops the server at startup.
 - `TYPESENSE_API_KEY` has a local default only outside production; with

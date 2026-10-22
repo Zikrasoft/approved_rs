@@ -33,6 +33,7 @@ import {
   ListHeader,
   RowActions,
 } from '../../components/list';
+import { DrawerHeader, ModalHeader } from '../../components/dialog-header';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -45,6 +46,7 @@ import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 import {
   labelledVehicleSchema,
+  referenceLabel,
   type TFunction,
   vehicleLabel,
 } from '../../lib/vehicle-label';
@@ -62,12 +64,20 @@ type Field =
   | { key: string; kind: 'enum'; values: readonly string[] }
   | { key: string; kind: 'ref'; collection: string };
 
+type Column = { key: string; read: (row: Row) => string | undefined };
+
 type Entity = {
   collection: string;
   path: string;
   object: string;
   fields: Field[];
+  columns?: Column[];
   translatable?: string;
+};
+
+const vehicleChassis = (row: Row) => {
+  const vehicle = labelledVehicleSchema.safeParse(row);
+  return vehicle.success ? vehicle.data.model.chassis : undefined;
 };
 
 const ENTITIES: Entity[] = [
@@ -75,6 +85,13 @@ const ENTITIES: Entity[] = [
     collection: 'vehicles',
     path: 'vehicles',
     object: 'vehicle',
+    columns: [
+      {
+        key: 'make_id',
+        read: (row) => vehicleChassis(row)?.series?.make?.name,
+      },
+      { key: 'chassis_id', read: (row) => vehicleChassis(row)?.code },
+    ],
     fields: [
       { key: 'model_id', kind: 'ref', collection: 'vehicle_models' },
       { key: 'engine_id', kind: 'ref', collection: 'engines' },
@@ -152,13 +169,26 @@ const ENTITIES: Entity[] = [
 
 const WIDE_FORM_FIELDS = 6;
 
-const rowLabel = (t: TFunction, collection: string, row: Row): string => {
+const rowLabel = (
+  t: TFunction,
+  rows: Rows,
+  collection: string,
+  row: Row,
+): string => {
   const vehicle = labelledVehicleSchema.safeParse(row);
   if (collection === 'vehicles' && vehicle.success) {
     return vehicleLabel(t, vehicle.data);
   }
-  return String(row.name ?? row.code ?? row.value ?? row.id);
+  return referenceLabel(rows, collection, row);
 };
+
+const slugOf = (name: string) =>
+  name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 
 const toBody = (fields: Field[], draft: Record<string, string>) =>
   Object.fromEntries(
@@ -186,7 +216,7 @@ const optionsOf = (t: TFunction, rows: Rows, field: Field): Option[] => {
   if (field.kind === 'ref') {
     return (rows[field.collection] ?? []).map((row) => ({
       value: row.id,
-      label: rowLabel(t, field.collection, row),
+      label: rowLabel(t, rows, field.collection, row),
     }));
   }
   return [];
@@ -219,7 +249,7 @@ const EntityTable = ({
   };
 
   const remove = async (row: Row) => {
-    const name = rowLabel(t, entity.collection, row);
+    const name = rowLabel(t, rows, entity.collection, row);
     if (
       await confirmed({
         title: t('vehicles.confirmTitle', { name }),
@@ -243,6 +273,11 @@ const EntityTable = ({
       <Table className={LIST_TABLE}>
         <Table.Header>
           <Table.Row>
+            {entity.columns?.map((column) => (
+              <Table.HeaderCell key={column.key}>
+                {t(`vehicles.fields.${column.key}`)}
+              </Table.HeaderCell>
+            ))}
             {entity.fields.map((field) => (
               <Table.HeaderCell key={field.key}>
                 {t(`vehicles.fields.${field.key}`)}
@@ -255,6 +290,11 @@ const EntityTable = ({
         <Table.Body>
           {list.map((row) => (
             <Table.Row key={row.id}>
+              {entity.columns?.map((column) => (
+                <Table.Cell key={column.key}>
+                  {column.read(row) ?? '-'}
+                </Table.Cell>
+              ))}
               {entity.fields.map((field) => (
                 <Table.Cell
                   key={field.key}
@@ -277,7 +317,7 @@ const EntityTable = ({
                   )}
                   <RowActions
                     label={t('common.actionsFor', {
-                      name: rowLabel(t, entity.collection, row),
+                      name: rowLabel(t, rows, entity.collection, row),
                     })}
                     disabled={writing}
                     onEdit={() => onEdit(row)}
@@ -318,6 +358,22 @@ const EntityForm = ({
     if (open) setDraft(row ? fromRow(entity.fields, row) : {});
   }, [open, row, entity]);
 
+  const hasSlug = entity.fields.some(({ key }) => key === 'slug');
+
+  const setText = (key: string, value: string) =>
+    setDraft((current) => {
+      const followsName =
+        !row &&
+        hasSlug &&
+        key === 'name' &&
+        (current.slug ?? '') === slugOf(current.name ?? '');
+      return {
+        ...current,
+        [key]: value,
+        ...(followsName && { slug: slugOf(value) }),
+      };
+    });
+
   const save = async (event: FormEvent) => {
     event.preventDefault();
     setSaving(true);
@@ -356,9 +412,7 @@ const EntityForm = ({
                 type={field.kind}
                 maxLength={200}
                 value={draft[field.key] ?? ''}
-                onChange={(event) =>
-                  setDraft({ ...draft, [field.key]: event.target.value })
-                }
+                onChange={(event) => setText(field.key, event.target.value)}
               />
             ) : (
               <Select
@@ -419,7 +473,7 @@ const EntityForm = ({
             onSubmit={save}
             className="flex h-full flex-col overflow-hidden"
           >
-            <FocusModal.Header />
+            <ModalHeader />
             <FocusModal.Body className="flex flex-col items-center overflow-y-auto px-4 py-10 sm:py-16">
               <div className="flex w-full max-w-[720px] flex-col gap-y-8">
                 <div className="flex flex-col gap-y-1">
@@ -446,16 +500,14 @@ const EntityForm = ({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <Drawer.Content>
         <form onSubmit={save} className="flex flex-1 flex-col overflow-hidden">
-          <Drawer.Header>
+          <DrawerHeader>
             <Drawer.Title asChild>
               <Heading>{title}</Heading>
             </Drawer.Title>
-            <Drawer.Description asChild>
-              <Text size="small" className="text-ui-fg-subtle">
-                {section}
-              </Text>
+            <Drawer.Description className="txt-small text-ui-fg-subtle">
+              {section}
             </Drawer.Description>
-          </Drawer.Header>
+          </DrawerHeader>
           <Drawer.Body className="overflow-y-auto">{fields}</Drawer.Body>
           <Drawer.Footer>{actions(Drawer.Close)}</Drawer.Footer>
         </form>

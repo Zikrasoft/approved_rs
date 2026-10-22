@@ -229,6 +229,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<string> {
     await this.refuseUnknownBrands(identifiers, sharedContext);
+    await this.refuseTakenNumbers(identifiers, sharedContext);
     const created = await this.createParts(
       {
         name,
@@ -292,6 +293,7 @@ class CatalogModuleService extends CatalogModuleBase {
   ): Promise<void> {
     await this.retrievePart(partId, { select: ['id'] }, sharedContext);
     await this.refuseUnknownBrands([identifier], sharedContext);
+    await this.refuseTakenNumbers([identifier], sharedContext);
     await this.createPartIdentifiers(
       {
         ...identifier,
@@ -338,6 +340,29 @@ class CatalogModuleService extends CatalogModuleBase {
       `select id from "${table}" where id = ? for update`,
       [id],
     );
+  }
+
+  private async refuseTakenNumbers(
+    identifiers: NewPartIdentifier[],
+    sharedContext: Context,
+  ): Promise<void> {
+    const [taken] = await this.listPartIdentifiers(
+      {
+        $or: identifiers.map(({ brand_id, value }) => ({
+          brand_id,
+          normalized_value: normalizePartNumber(value),
+        })),
+      },
+      { relations: ['part'], take: 1 },
+      sharedContext,
+    );
+    if (taken) {
+      throw alreadyExists(
+        'part_identifier',
+        'This number already belongs to a Part.',
+        { part: taken.part.name },
+      );
+    }
   }
 
   private async refuseUnknownBrands(

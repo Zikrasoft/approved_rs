@@ -16,6 +16,12 @@ import {
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
 export const MAX_NAME_LENGTH = 200;
+export const MAX_PART_NUMBER_LENGTH = 50;
+export const MAX_QUANTITY = 100;
+export const MAX_SERVICE_PRICE = 1_000_000;
+
+const INT4 = 2 ** 31 - 1;
+export const int4 = z.number().int().min(-INT4).max(INT4);
 
 const name = z.string().trim().min(1).max(MAX_NAME_LENGTH);
 
@@ -27,13 +33,34 @@ export type AdminSearchPartsType = z.infer<typeof AdminSearchParts>;
 const partNumber = z
   .string()
   .trim()
+  .max(MAX_PART_NUMBER_LENGTH)
   .refine((value) => normalizePartNumber(value).length > 0);
 
-export const AdminAddPartIdentifier = z.strictObject({
-  type: z.enum(PART_IDENTIFIER_TYPES),
-  brand_id: z.string().min(1),
-  value: partNumber,
-});
+const isEan = (value: string) => {
+  const digits = value.replace(/\s/g, '');
+  return (
+    /^(\d{8}|\d{13})$/.test(digits) &&
+    [...digits]
+      .reverse()
+      .reduce(
+        (sum, digit, index) => sum + Number(digit) * (index % 2 ? 3 : 1),
+        0,
+      ) %
+      10 ===
+      0
+  );
+};
+
+export const AdminAddPartIdentifier = z
+  .strictObject({
+    type: z.enum(PART_IDENTIFIER_TYPES),
+    brand_id: z.string().min(1),
+    value: partNumber,
+  })
+  .refine(({ type, value }) => type !== 'ean' || isEan(value), {
+    path: ['ean'],
+    message: 'Not an EAN-8 or EAN-13 with a valid check digit',
+  });
 export type AdminAddPartIdentifierType = z.infer<typeof AdminAddPartIdentifier>;
 
 export const AdminCreatePart = z.strictObject({
@@ -89,8 +116,10 @@ const calendarDay = z.iso
   .date({ error: 'Not a date' })
   .transform((day) => new Date(day));
 
+const quantity = z.number().int().positive().max(MAX_QUANTITY);
+
 const fitmentConditions = {
-  quantity: z.number().int().positive().optional(),
+  quantity: quantity.optional(),
   axle: z.enum(FITMENT_AXLES).nullable().optional(),
   side: z.enum(FITMENT_SIDES).nullable().optional(),
   production_from: calendarDay.nullable().optional(),
@@ -161,8 +190,8 @@ const vehicleFilter = {
   model_id: z.string().min(1).optional(),
   engine_id: z.string().min(1).optional(),
   engine_family: z.string().trim().toUpperCase().min(1).optional(),
-  year_from: z.number().int().optional(),
-  year_to: z.number().int().optional(),
+  year_from: z.number().int().min(1900).max(2100).optional(),
+  year_to: z.number().int().min(1900).max(2100).optional(),
 };
 
 type VehicleFilterBody = Partial<
@@ -242,14 +271,19 @@ const categoryColumns = {
   name,
   text: z.string(),
   maintenance_kit: z.boolean(),
-  kit_rank: z.number().int(),
+  kit_rank: int4,
   service_label: z
     .string()
     .trim()
     .max(200)
     .nullable()
     .transform((label) => label || null),
-  service_price: z.number().int().nonnegative().nullable(),
+  service_price: z
+    .number()
+    .int()
+    .nonnegative()
+    .max(MAX_SERVICE_PRICE)
+    .nullable(),
   service_note: z
     .string()
     .trim()
@@ -279,7 +313,7 @@ const fieldColumns = {
   label: name,
   required: z.boolean(),
   facet: z.boolean(),
-  rank: z.number().int(),
+  rank: int4,
 };
 
 export const AdminCreateCategoryField = z.strictObject({
@@ -303,7 +337,7 @@ export type AdminUpdateCategoryFieldType = z.infer<
 
 const optionColumns = {
   label: name,
-  rank: z.number().int(),
+  rank: int4,
 };
 
 export const AdminCreateCategoryFieldOption = z.strictObject({
@@ -340,7 +374,7 @@ export const AdminCreateRequirement = z
     option_keys: z.array(z.string().trim().min(1)).nullable().default(null),
     min: z.number().nonnegative().nullable().default(null),
     max: z.number().nonnegative().nullable().default(null),
-    quantity: z.number().int().positive().default(1),
+    quantity: quantity.default(1),
   })
   .refine(
     (requirement) =>

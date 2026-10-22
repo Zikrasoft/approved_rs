@@ -61,8 +61,13 @@ const duplicateEntity = (error: MedusaError): string | null => {
   return match ? match[1].toLowerCase().replaceAll(' ', '_') : null;
 };
 
-export const alreadyExists = (entity: string, message: string) =>
+export const alreadyExists = (
+  entity: string,
+  message: string,
+  details: Details = {},
+) =>
   adminError(MedusaError.Types.CONFLICT, 'ALREADY_EXISTS', message, {
+    ...details,
     entity,
   });
 
@@ -128,7 +133,8 @@ export async function parseAdminBody<Schema extends z.ZodType>(
   const issue =
     issues.find(({ code }) => code === 'unrecognized_keys') ?? issues[0];
   const field = issue.path.join('.');
-  const required = field && isBlank(valueAt(body, issue.path));
+  const required =
+    field && issue.code !== 'custom' && isBlank(valueAt(body, issue.path));
   throw adminError(
     MedusaError.Types.INVALID_DATA,
     required ? 'FIELD_REQUIRED' : 'INVALID_FIELD',

@@ -34,6 +34,7 @@ import { useConfirmed } from '../../lib/confirm';
 import {
   type LabelledVehicle,
   labelledVehicleSchema,
+  referenceLabel,
   vehicleLabel,
 } from '../../lib/vehicle-label';
 
@@ -78,11 +79,7 @@ const fitmentSchema = editedBySchema.extend({
 
 type Fitment = z.infer<typeof fitmentSchema>;
 
-const referenceSchema = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  code: z.string().optional(),
-});
+const referenceSchema = z.object({ id: z.string() }).loose();
 
 type Reference = z.infer<typeof referenceSchema>;
 
@@ -144,9 +141,6 @@ const EMPTY_CONDITIONS: Conditions = {
   note: '',
 };
 
-const referenceLabel = (row: Reference): string =>
-  [row.name, row.code].filter(Boolean).join(' ');
-
 const pad = (value: number) => String(value).padStart(2, '0');
 
 const calendarDay = (date: Date | null) =>
@@ -170,8 +164,15 @@ const conditionsOf = (fitment: Fitment): Conditions => ({
   note: fitment.note ?? '',
 });
 
+const MAX_QUANTITY = 100;
+
+const quantityValid = (quantity: string) =>
+  /^\d+$/.test(quantity.trim()) &&
+  Number(quantity) >= 1 &&
+  Number(quantity) <= MAX_QUANTITY;
+
 const conditionsBody = (conditions: Conditions) => ({
-  quantity: Number(conditions.quantity) || 1,
+  quantity: Number(conditions.quantity),
   axle: conditions.axle || null,
   side: conditions.side || null,
   production_from: calendarDay(conditions.productionFrom),
@@ -315,6 +316,7 @@ const FitmentsPage = () => {
 
   const [params] = useSearchParams();
   useEffect(() => {
+    if (params.get('new')) setSearched(true);
     const linked = params.get('part');
     const text = params.get('q');
     if (linked && text) {
@@ -538,14 +540,20 @@ const FitmentsPage = () => {
 
   const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
 
+  const vehicleTitle = (fitment: Fitment) => {
+    const vehicle = vehicleById.get(fitment.vehicle_id);
+    return vehicle ? vehicleLabel(t, vehicle) : fitment.vehicle_id;
+  };
+
+  const quantityOk = quantityValid(conditions.quantity);
+
   const deleteFitment = async (fitment: Fitment) => {
     if (!selectedPart) return;
-    const vehicle = vehicleById.get(fitment.vehicle_id);
     if (
       await confirmed({
         title: t('fitments.confirmDeleteFitmentTitle'),
         description: t('fitments.confirmDeleteFitmentBody', {
-          vehicle: vehicle ? vehicleLabel(t, vehicle) : fitment.vehicle_id,
+          vehicle: vehicleTitle(fitment),
         }),
         done: t('fitments.fitmentDeleted'),
         run: () =>
@@ -632,6 +640,7 @@ const FitmentsPage = () => {
         <Input
           aria-label={t('fitments.numberPlaceholder')}
           placeholder={t('fitments.numberPlaceholder')}
+          maxLength={50}
           value={newValue}
           onChange={(event) => setNewValue(event.target.value)}
         />
@@ -758,20 +767,22 @@ const FitmentsPage = () => {
                   <Table.Body>
                     {parts.map((part) => (
                       <Table.Row key={part.id}>
-                        <Table.Cell className="max-w-[20rem] whitespace-normal break-words">
+                        <Table.Cell className="min-w-[14rem] max-w-[32rem] whitespace-normal break-words">
                           <div className="flex flex-col items-start gap-y-1 py-2">
-                            {part.name}
+                            <Text size="small" weight="plus">
+                              {part.name}
+                            </Text>
+                            <Text size="small" className="text-ui-fg-subtle">
+                              {part.identifiers
+                                .map(
+                                  (identifier) =>
+                                    `${identifier.brand.name} ${identifier.value}`,
+                                )
+                                .join(', ')}
+                            </Text>
                             {supplierName(part)}
                             <EditedBy row={part} />
                           </div>
-                        </Table.Cell>
-                        <Table.Cell className="whitespace-normal">
-                          {part.identifiers
-                            .map(
-                              (identifier) =>
-                                `${identifier.brand.name} ${identifier.value}`,
-                            )
-                            .join(', ')}
                         </Table.Cell>
                         <Table.Cell>
                           <Button
@@ -791,7 +802,9 @@ const FitmentsPage = () => {
             )}
             {searched && parts.length === 0 && (
               <div className="flex flex-col gap-y-2 border-t pt-2">
-                <Text size="small">{t('fitments.noMatch')}</Text>
+                {query.trim() && (
+                  <Text size="small">{t('fitments.noMatch')}</Text>
+                )}
                 <Input
                   placeholder={t('fitments.partNamePlaceholder')}
                   value={newPartName}
@@ -835,7 +848,7 @@ const FitmentsPage = () => {
                 placeholder={t(`fitments.filters.${label}`)}
                 options={(references[collection] ?? []).map((row) => ({
                   value: row.id,
-                  label: referenceLabel(row),
+                  label: referenceLabel(references, collection, row),
                 }))}
               />
             ))}
@@ -875,6 +888,13 @@ const FitmentsPage = () => {
         <Heading level="h2">
           {editing ? t('fitments.editLabel') : t('fitments.step3Label')}
         </Heading>
+        {editing && (
+          <Text weight="plus">
+            {t('fitments.editingVehicle', {
+              vehicle: vehicleTitle(editing),
+            })}
+          </Text>
+        )}
         <Text size="small" className="text-ui-fg-subtle">
           {t('fitments.step3Hint')}
         </Text>
@@ -884,9 +904,25 @@ const FitmentsPage = () => {
             <Input
               type="number"
               min={1}
+              max={MAX_QUANTITY}
+              step={1}
+              required
+              aria-invalid={!quantityOk}
+              aria-describedby={
+                quantityOk ? undefined : 'fitment-quantity-error'
+              }
               value={conditions.quantity}
               onChange={(event) => setCondition('quantity', event.target.value)}
             />
+            {!quantityOk && (
+              <Text
+                id="fitment-quantity-error"
+                size="small"
+                className="text-ui-fg-error"
+              >
+                {t('fitments.quantityInvalid')}
+              </Text>
+            )}
           </Label>
           <div className="flex flex-col gap-y-1">
             <Text size="small">{t('fitments.productionFromLabel')}</Text>
@@ -952,7 +988,7 @@ const FitmentsPage = () => {
         </Text>
         {editing ? (
           <div className="flex flex-wrap gap-2">
-            <Button disabled={writing} onClick={saveFitment}>
+            <Button disabled={writing || !quantityOk} onClick={saveFitment}>
               {t('common.save')}
             </Button>
             <Button
@@ -967,7 +1003,7 @@ const FitmentsPage = () => {
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={attach}
-              disabled={!selectedPart || !hasFilter || writing}
+              disabled={!selectedPart || !hasFilter || !quantityOk || writing}
             >
               {t('fitments.createFitment')}
             </Button>
@@ -1013,13 +1049,10 @@ const FitmentsPage = () => {
               </Table.Header>
               <Table.Body>
                 {fitments.map((fitment) => {
-                  const vehicle = vehicleById.get(fitment.vehicle_id);
                   return (
                     <Table.Row key={fitment.id}>
                       <Table.Cell className="whitespace-normal">
-                        {vehicle
-                          ? vehicleLabel(t, vehicle)
-                          : fitment.vehicle_id}
+                        {vehicleTitle(fitment)}
                       </Table.Cell>
                       <Table.Cell>{fitment.quantity}</Table.Cell>
                       <Table.Cell>{position(fitment)}</Table.Cell>

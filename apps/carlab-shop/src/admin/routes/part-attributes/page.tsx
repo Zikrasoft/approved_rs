@@ -94,10 +94,12 @@ const numberLabel = ({ brand, value }: Identifier) => `${brand.name} ${value}`;
 
 const ValueInput = ({
   field,
+  label,
   value,
   onChange,
 }: {
   field: CategoryField;
+  label: string;
   value: AttributeValue | undefined;
   onChange: (value: AttributeValue | undefined) => void;
 }) => {
@@ -107,6 +109,7 @@ const ValueInput = ({
     case 'number':
       return (
         <Input
+          aria-label={label}
           type="number"
           step="any"
           min={0}
@@ -123,6 +126,7 @@ const ValueInput = ({
     case 'text':
       return (
         <Input
+          aria-label={label}
           value={typeof value === 'string' ? value : ''}
           onChange={(event) => onChange(event.target.value || undefined)}
         />
@@ -133,7 +137,7 @@ const ValueInput = ({
           value={value === undefined ? '' : String(value)}
           onValueChange={(next) => onChange(next === 'true')}
         >
-          <Select.Trigger>
+          <Select.Trigger aria-label={label}>
             <Select.Value placeholder={t('partAttributes.notSet')} />
           </Select.Trigger>
           <Select.Content>
@@ -148,7 +152,7 @@ const ValueInput = ({
           value={typeof value === 'string' ? value : ''}
           onValueChange={onChange}
         >
-          <Select.Trigger>
+          <Select.Trigger aria-label={label}>
             <Select.Value placeholder={t('partAttributes.notSet')} />
           </Select.Trigger>
           <Select.Content>
@@ -163,7 +167,7 @@ const ValueInput = ({
     case 'multi-select': {
       const keys = Array.isArray(value) ? value : [];
       return (
-        <div className="flex flex-wrap gap-3">
+        <div role="group" aria-label={label} className="flex flex-wrap gap-3">
           {field.options.map((option) => (
             <Label key={option.key} className="flex items-center gap-x-2">
               <Checkbox
@@ -286,6 +290,7 @@ const PartAttributesPage = () => {
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             className="sm:w-80"
+            aria-label={t('partAttributes.findLabel')}
             placeholder={t('partAttributes.searchPlaceholder')}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -341,7 +346,7 @@ const PartAttributesPage = () => {
                     onValueChange={setIdentifierId}
                     disabled={writing}
                   >
-                    <Select.Trigger>
+                    <Select.Trigger aria-label={t('images.numberLabel')}>
                       <Select.Value />
                     </Select.Trigger>
                     <Select.Content>
@@ -409,7 +414,7 @@ const PartAttributesPage = () => {
                 setValues({});
               }}
             >
-              <Select.Trigger>
+              <Select.Trigger aria-label={t('partAttributes.category')}>
                 <Select.Value placeholder={t('partAttributes.noCategory')} />
               </Select.Trigger>
               <Select.Content>
@@ -422,22 +427,25 @@ const PartAttributesPage = () => {
             </Select>
           </div>
 
-          {category?.fields.map((field) => (
-            <div key={field.key} className="flex flex-col gap-y-2">
-              <Label>
-                {field.label}
-                {field.unit && `, ${field.unit}`}{' '}
-                {field.required && (
-                  <Badge size="small">{t('partAttributes.required')}</Badge>
-                )}
-              </Label>
-              <ValueInput
-                field={field}
-                value={values[field.key]}
-                onChange={(value) => setValue(field.key, value)}
-              />
-            </div>
-          ))}
+          {category?.fields.map((field) => {
+            const label = [field.label, field.unit].filter(Boolean).join(', ');
+            return (
+              <div key={field.key} className="flex flex-col gap-y-2">
+                <Label>
+                  {label}{' '}
+                  {field.required && (
+                    <Badge size="small">{t('partAttributes.required')}</Badge>
+                  )}
+                </Label>
+                <ValueInput
+                  field={field}
+                  label={label}
+                  value={values[field.key]}
+                  onChange={(value) => setValue(field.key, value)}
+                />
+              </div>
+            );
+          })}
           {category && category.fields.length === 0 && (
             <Text>{t('partAttributes.noFields')}</Text>
           )}

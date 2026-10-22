@@ -54,3 +54,23 @@ export const vehicleLabel = (t: TFunction, vehicle: LabelledVehicle) => {
     .filter(Boolean)
     .join(', ');
 };
+
+export type ReferenceRow = { id: string } & Record<string, unknown>;
+
+const PARENTS: Record<string, [key: string, collection: string]> = {
+  series: ['make_id', 'makes'],
+  chassis: ['series_id', 'series'],
+  vehicle_models: ['chassis_id', 'chassis'],
+};
+
+export const referenceLabel = (
+  rows: Record<string, ReferenceRow[] | undefined>,
+  collection: string,
+  row: ReferenceRow,
+): string => {
+  const own = String(row.name ?? row.code ?? row.value ?? row.id);
+  const [key, parents] = PARENTS[collection] ?? [];
+  const parent =
+    key && parents && rows[parents]?.find(({ id }) => id === row[key]);
+  return parent ? `${referenceLabel(rows, parents, parent)} ${own}` : own;
+};

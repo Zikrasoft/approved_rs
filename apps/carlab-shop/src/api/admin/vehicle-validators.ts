@@ -11,6 +11,9 @@ import {
 
 import { MAX_NAME_LENGTH } from './validators';
 
+const MAX_POWER_KW = 2000;
+const MAX_DISPLACEMENT_CC = 20_000;
+
 const text = z.string().trim().min(1).max(MAX_NAME_LENGTH);
 const slug = z
   .string()
@@ -45,7 +48,7 @@ const BAD_IDENTIFIER_FORMAT = {
   message: 'Does not match the format of its type',
 };
 
-const AdminMake = z.strictObject({ slug, name: text });
+const AdminMake = z.strictObject({ name: text, slug });
 
 const AdminSeries = z.strictObject({
   make_id: text,
@@ -78,15 +81,21 @@ const AdminEngine = z.strictObject({
   code,
   family: code,
   fuel: z.enum(ENGINE_FUELS),
-  displacement_cc: z.number().int().positive().nullable().optional(),
+  displacement_cc: z
+    .number()
+    .int()
+    .positive()
+    .max(MAX_DISPLACEMENT_CC)
+    .nullable()
+    .optional(),
 });
 
 const AdminVehicle = z.strictObject({
   model_id: text,
   engine_id: text,
-  power_kw: z.number().int().positive().nullable().optional(),
+  power_kw: z.number().int().positive().max(MAX_POWER_KW).nullable().optional(),
   drive: z.enum(VEHICLE_DRIVES).nullable().optional(),
-  market: text.nullable().optional(),
+  market: text.toUpperCase().nullable().optional(),
   year_from: year.optional(),
   year_to: year.optional(),
   steering: z.enum(STEERING_SIDES).nullable().optional(),

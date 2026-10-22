@@ -90,6 +90,8 @@ const sourceDeletedSchema = z.object({
 
 const MANUAL_SOURCE = 'manual';
 
+const MARKUP = /^\d+(?:\.\d{1,2})?$/;
+
 const SuppliersPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const prompt = usePrompt();
@@ -156,7 +158,7 @@ const SuppliersPage = () => {
   const saveMarkup = async (supplier: Supplier) => {
     const typed = (drafts[supplier.id] ?? '').trim().replace(',', '.');
     const markup_percentage = Number(typed);
-    if (!typed || !Number.isFinite(markup_percentage)) {
+    if (!MARKUP.test(typed) || markup_percentage > 500) {
       toast.error(t('suppliers.markupRequired'));
       return;
     }
@@ -264,10 +266,21 @@ const SuppliersPage = () => {
     setImporting(false);
     if (data) {
       await loadSources();
+      const switchedOff = suppliers
+        .filter(({ import_enabled }) => !import_enabled)
+        .map(({ name }) => name);
       toast.success(
-        data.imports.length
-          ? data.imports.map(importLine).join('\n')
-          : t('suppliers.importNoAdapters'),
+        [
+          data.imports.length
+            ? data.imports.map(importLine).join('\n')
+            : t('suppliers.importNoAdapters'),
+          switchedOff.length > 0 &&
+            t('suppliers.importSwitchedOff', {
+              suppliers: switchedOff.join(', '),
+            }),
+        ]
+          .filter(Boolean)
+          .join('\n'),
       );
     }
   };

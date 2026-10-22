@@ -23,10 +23,11 @@ TYPESENSE_PORT=58444
 TYPESENSE_API_KEY=xyz
 SUPPLIER_ADAPTERS=demo
 DEMO_SUPPLIER_OVERRIDES=$OVERRIDES
-LEAD_ROUTE_URL=http://localhost:4321/api/leads
+LEAD_ROUTE_URL=http://127.0.0.1:4321/api/leads
 EOF
   echo "Created apps/carlab-shop/.env"
 fi
+sed -i.bak 's|^LEAD_ROUTE_URL=http://localhost:4321/|LEAD_ROUTE_URL=http://127.0.0.1:4321/|' .env && rm .env.bak
 
 [ -f "$STOREFRONT_ENV" ] || cp ../auto-service/.env.example "$STOREFRONT_ENV"
 for pair in TELEGRAM_BOT_TOKEN=1:fake TELEGRAM_BOT_USERNAME=demo_crm_bot \

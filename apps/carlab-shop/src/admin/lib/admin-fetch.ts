@@ -10,6 +10,7 @@ const errorBodySchema = z.object({
   field: z.string().optional(),
   label: z.string().optional(),
   blocked: z.string().optional(),
+  part: z.string().optional(),
   holders: z
     .array(
       z.union([
@@ -32,14 +33,14 @@ const translate = (
     : null;
 };
 
-const fieldName = (path: string) => {
-  const key =
-    path
-      .split('.')
-      .filter((part) => !/^\d+$/.test(part))
-      .pop() ?? path;
-  return translate(`errors.fields.${key}`) ?? key;
-};
+const lastKey = (path: string) =>
+  path
+    .split('.')
+    .filter((part) => !/^\d+$/.test(part))
+    .pop() ?? path;
+
+const fieldName = (path: string) =>
+  translate(`errors.fields.${lastKey(path)}`) ?? lastKey(path);
 
 const holderName = (holder: NonNullable<ErrorBody['holders']>[number]) =>
   'entity' in holder
@@ -53,6 +54,7 @@ const detailedMessage = ({
   label,
   blocked,
   holders,
+  part,
 }: ErrorBody) => {
   if (holders?.length) {
     return translate(
@@ -68,7 +70,9 @@ const detailedMessage = ({
     });
   }
   if (code === 'ALREADY_EXISTS' && entity) {
-    return translate(`errors.alreadyExists.${entity}`);
+    return part
+      ? translate(`errors.alreadyExists.${entity}_held`, { part })
+      : translate(`errors.alreadyExists.${entity}`);
   }
   if (code === 'INVALID_ATTRIBUTES' && label) {
     return translate('errors.attributeLabel', { label });
@@ -80,7 +84,8 @@ const detailedMessage = ({
     return translate('errors.types.invalid_data');
   }
   return (
-    (code === 'INVALID_FIELD' && translate(`errors.invalidFields.${field}`)) ||
+    (code === 'INVALID_FIELD' &&
+      translate(`errors.invalidFields.${lastKey(field)}`)) ||
     translate(`errors.codes.${code}`, { field: fieldName(field) })
   );
 };
@@ -171,6 +176,11 @@ const request = async <T>(
       headers: { 'Content-Type': 'application/json' },
       ...init,
     });
+    if (response.status === 401) {
+      toast.error(translate('errors.types.unauthorized') ?? 'unauthorized');
+      window.location.assign('/app/login');
+      return null;
+    }
     if (!response.ok) {
       const { field, message } = await readError(response);
       toast.error(message);

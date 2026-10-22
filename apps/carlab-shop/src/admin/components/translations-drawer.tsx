@@ -18,6 +18,7 @@ import {
   type EditedBy as Edited,
   useWriting,
 } from '../lib/admin-fetch';
+import { DrawerHeader } from './dialog-header';
 import { EditedBy } from './edited-by';
 
 type Locale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
@@ -112,13 +113,15 @@ export const TranslationsDrawer = ({
         </Button>
       </Drawer.Trigger>
       <Drawer.Content>
-        <Drawer.Header>
-          <Drawer.Title>{t('translations.heading')}</Drawer.Title>
-        </Drawer.Header>
-        <Drawer.Body className="flex flex-col gap-y-6 overflow-y-auto">
-          <Text size="small" className="text-ui-fg-subtle">
+        <DrawerHeader>
+          <Drawer.Title asChild>
+            <Heading>{t('translations.heading')}</Heading>
+          </Drawer.Title>
+          <Drawer.Description className="txt-small text-ui-fg-subtle">
             {t('translations.lead')}
-          </Text>
+          </Drawer.Description>
+        </DrawerHeader>
+        <Drawer.Body className="flex flex-col gap-y-6 overflow-y-auto">
           {edited && <EditedBy row={edited} />}
           {Object.entries(source).map(([field, russian]) => (
             <div key={field} className="flex flex-col gap-y-3">
