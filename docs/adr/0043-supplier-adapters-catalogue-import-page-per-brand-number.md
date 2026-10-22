@@ -2,7 +2,7 @@
 status: accepted
 ---
 
-# Suppliers feed the catalogue through adapters; a page per brand-number; nightly import, build and reindex
+# Suppliers feed the catalogue through adapters; a page per brand-number; import, build and reindex on Publish
 
 Decided 2026-10-21 with the owner, refining [ADR-0039](0039-own-catalogue-data-staff-maintained-vehicles.md): the catalogue must hold as many parts as possible, each with its own prerendered SEO page and a supplier price, without tying the shop to one supplier. Research: `docs/research/intercars-ecat-api.md`, `docs/research/acat-vs-parts-catalogs.md`, `docs/research/catalogue-auto-fill.md`.
 
@@ -14,7 +14,7 @@ Decided 2026-10-21 with the owner, refining [ADR-0039](0039-own-catalogue-data-s
 - **A page per brand-number,** at a URL that never changes (e.g. `/sr/parts/p/mann-hu6004x/`), showing its own SupplierOffers, best first, without supplier names. This replaces "one page per Part". The Part is the group of interchangeable brand-numbers, shown on each page as "equivalents"; merging two groups changes only that block, so no redirects are needed.
 - **Indexing.** A new page is buyable and searchable at once but `noindex` and out of the sitemap until it is enriched: it has a Category plus a Fitment or a published equivalent.
 - **Supplier data that may come from TecDoc** (OE cross references, vehicle applicability, images) is kept in staging and not published until the supplier confirms in writing that we may. A field a person has edited is never overwritten by an import.
-- **Rhythm.** Every night: import new articles, prices and stock; build and deploy the site; reindex search. The admin's Publish button runs the same chain on demand. Cart and checkout re-quote price and stock live from the supplier.
+- **Rhythm.** The admin's Publish button imports new articles, prices and stock, builds and deploys the site and reindexes search. There is no nightly run (2026-10-22): cart and checkout re-quote price and stock live from the supplier, and each build bakes the current prices into the pages' structured data, so an unattended run would only add a way to ship bad supplier data overnight.
 - **No supplier left.** A brand-number with no SupplierOffer keeps its page (indexed if enriched) with "price on request", which opens a Parts inquiry.
 - **Online OEM catalogues** (Parts-Catalogs, ACAT) are staff lookup tools only. Their terms forbid building a catalogue or public pages from their data, however we pay.
 
@@ -28,5 +28,5 @@ Decided 2026-10-21 with the owner, refining [ADR-0039](0039-own-catalogue-data-s
 ## Consequences
 
 - What makes a page indexable is our enrichment (Fitment, equivalents, attributes, texts), so SEO grows with staff work and with confirmed supplier data.
-- Nightly SSG of tens of thousands of pages must fit the build time limit; measure it on a prototype before relying on it.
+- SSG of tens of thousands of pages must fit the build time limit; measure it on a prototype before relying on it.
 - Inter Cars' catalogue fields, publication rights, Serbian availability and rate limits are still unknown (#328).
