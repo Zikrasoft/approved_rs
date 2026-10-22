@@ -129,7 +129,11 @@ describe('the remembered cart', () => {
             ...cart.items[0],
             id: 'item_3',
             part: { ...bmwOil, slug: 'other' },
-            addon: { ...SERVICE, item_id: null },
+            addon: {
+              ...SERVICE,
+              translations: { sr: { label: 'Registracija akumulatora' } },
+              item_id: null,
+            },
           },
         ],
       },
@@ -139,12 +143,20 @@ describe('the remembered cart', () => {
     moveCartToInquiry(storage);
 
     expect(readPartsList(storage)).toEqual([
-      { ...bmwOil, quantity: 1, addon: SERVICE.label, with_addon: true },
+      {
+        ...bmwOil,
+        quantity: 1,
+        addon: SERVICE.label,
+        addon_price: 2500,
+        with_addon: true,
+      },
       {
         ...bmwOil,
         slug: 'other',
         quantity: 1,
         addon: SERVICE.label,
+        addon_translations: { sr: { label: 'Registracija akumulatora' } },
+        addon_price: 2500,
         with_addon: false,
       },
     ]);

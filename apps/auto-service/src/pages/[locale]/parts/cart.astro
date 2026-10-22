@@ -212,7 +212,13 @@ const stepper =
                   class="mt-0.5 size-4 shrink-0 accent-signal-ink"
                   data-addon-toggle
                 />
-                <span data-addon-label></span>
+                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span data-addon-label></span>
+                  <span class="text-xs text-muted">{copy.addonPickup}</span>
+                </span>
+                <span
+                  class="spec shrink-0 font-semibold text-ink"
+                  data-addon-price></span>
               </label>
               <button
                 type="button"

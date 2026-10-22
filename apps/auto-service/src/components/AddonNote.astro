@@ -14,26 +14,30 @@ interface Props {
 const { category, class: className } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const addon = categoryAddon(category, locale);
-const note =
-  addon &&
-  content(locale)
-    .shopCart.addonNote.replace('{service}', addon.label)
-    .replace(
-      '{price}',
-      formatMoney(addon.price, 'RSD', BCP47_BY_LOCALE[locale]),
-    );
+const pickup = content(locale).shopCart.addonPickup;
 ---
 
 {
-  note && (
-    <p
+  addon?.note && (
+    <div
       class:list={[
-        'flex items-start gap-2 text-sm leading-relaxed text-ink-2',
+        'flex items-start gap-2 rounded-field bg-shade p-3 text-sm leading-relaxed text-ink-2',
         className,
       ]}
     >
-      <Icon name="info" size={16} class="mt-0.5 shrink-0 text-signal-ink" />
-      <span>{note}</span>
-    </p>
+      <Icon name="info" size={16} class="mt-1 shrink-0 text-signal-ink" />
+      <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <p>{addon.note}</p>
+        <p class="flex items-baseline justify-between gap-3 text-ink">
+          <span class="flex min-w-0 flex-col">
+            <span>{addon.label}</span>
+            <span class="text-xs text-muted">{pickup}</span>
+          </span>
+          <span class="spec shrink-0 font-semibold">
+            +{formatMoney(addon.price, 'RSD', BCP47_BY_LOCALE[locale])}
+          </span>
+        </p>
+      </div>
+    </div>
   )
 }

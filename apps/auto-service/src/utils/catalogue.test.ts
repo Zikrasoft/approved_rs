@@ -237,6 +237,7 @@ describe('catalogue categories', () => {
     kit_rank: 0,
     service_label: null,
     service_price: null,
+    service_note: null,
     fields: [
       {
         key: 'height',
@@ -313,6 +314,7 @@ describe('catalogue categories', () => {
     expect(categoryFacets(oil, 'ru')).toEqual([
       {
         key: 'height',
+        type: 'number',
         label: 'Высота',
         unit: 'mm',
         values: [
@@ -343,6 +345,7 @@ const category = (slug: string, name: string) => ({
   kit_rank: 0,
   service_label: null,
   service_price: null,
+  service_note: null,
   fields: [] as unknown[],
 });
 const oilFilters = category('oil-filters', 'Масляные фильтры');
@@ -796,6 +799,7 @@ describe('catalogue.search', () => {
     facets: [
       {
         key: 'viscosity',
+        type: 'single-select',
         label: 'Viskozitet',
         unit: null,
         values: [{ value: '5w-30', label: '5W-30', count: 1 }],
