@@ -40,6 +40,8 @@ export const StoreSetOfferCartItem = z.object({
 });
 export type StoreSetOfferCartItemType = z.infer<typeof StoreSetOfferCartItem>;
 
+export const StoreAddLineAddon = z.strictObject({});
+
 export const StoreCompleteOfferCart = z
   .record(z.string(), z.unknown())
   .transform((body, context) => {

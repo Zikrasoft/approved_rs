@@ -32,6 +32,7 @@ import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { refuseStockCartChange } from '../lib/offer-cart';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
+  StoreAddLineAddon,
   StoreAddOfferCartItem,
   StoreCompleteOfferCart,
   StoreSetOfferCartItem,
@@ -222,6 +223,11 @@ export default defineMiddlewares({
       matcher: '/store/offer-carts/:id/items/:item_id',
       method: 'POST',
       middlewares: [validateAndTransformBody(StoreSetOfferCartItem)],
+    },
+    {
+      matcher: '/store/offer-carts/:id/items/:item_id/addon',
+      method: 'POST',
+      middlewares: [validateAndTransformBody(StoreAddLineAddon)],
     },
     {
       matcher: '/store/offer-carts/:id/complete',

@@ -593,6 +593,189 @@ medusaIntegrationTestRunner({
         );
       });
 
+      describe('an add-on service sold with a line', () => {
+        const SERVICE = 'Регистрация аккумулятора в блоке управления';
+        let batteryOfferId: string;
+        let serviceCategoryId: string;
+
+        beforeEach(async () => {
+          const container = getContainer();
+          const catalog: CatalogModuleService =
+            container.resolve(CATALOG_MODULE);
+          const suppliers: SupplierModuleService =
+            container.resolve(SUPPLIER_MODULE);
+          const [varta] = await catalog.createBrands([
+            { name: 'Varta', slug: 'varta' },
+          ]);
+          const category = await catalog.createCategories({
+            slug: 'batteries',
+            name: 'Аккумуляторы',
+            service_label: SERVICE,
+            service_price: 2500,
+          });
+          serviceCategoryId = category.id;
+          const part = await catalog.createParts({
+            name: 'Аккумулятор AGM 80 Ач',
+            category_id: category.id,
+          });
+          const identifier = await catalog.createPartIdentifiers({
+            part_id: part.id,
+            type: 'manufacturer-number',
+            brand_id: varta.id,
+            value: '580 901 080',
+            normalized_value: normalizePartNumber('580 901 080'),
+          });
+          const shop = await suppliers.createSuppliers({
+            name: 'Battery shop',
+            markup_percentage: 0,
+          });
+          const offer = await suppliers.createSupplierOffers({
+            part_identifier_id: identifier.id,
+            supplier_id: shop.id,
+            supplier_article_id: 'BAT-1',
+            cost_price: 10000,
+            stock_quantity: 5,
+            lead_time_days: 0,
+          });
+          batteryOfferId = offer.id;
+        });
+
+        const addonPath = (cart: { id: string; items: { id: string }[] }) =>
+          `/store/offer-carts/${cart.id}/items/${cart.items[0].id}/addon`;
+
+        const batteryCart = async () => {
+          const cart = await cartWith(1, batteryOfferId);
+          const added = await post(addonPath(cart));
+          expect(added.status).toBe(200);
+          return added.data.cart;
+        };
+
+        it('offers the add-on of the Category on its lines only', async () => {
+          const battery = await cartWith(1, batteryOfferId);
+          const oil = await cartWith(1);
+
+          expect(battery.items[0].addon).toEqual({
+            item_id: null,
+            label: SERVICE,
+            translations: null,
+            unit_price: 2500,
+          });
+          expect(oil.items[0].addon).toBeNull();
+          expect((await post(addonPath(oil))).status).toBe(400);
+        });
+
+        it('adds the add-on once, at the price the Category sets', async () => {
+          const cart = await batteryCart();
+          const again = (await post(addonPath(cart))).data.cart;
+
+          expect(again.items).toHaveLength(1);
+          expect(again.items[0].addon).toMatchObject({
+            item_id: expect.any(String),
+            unit_price: 2500,
+          });
+          expect(again.total).toBe(12500);
+        });
+
+        it('refuses a price sent with the add-on', async () => {
+          const cart = await cartWith(1, batteryOfferId);
+
+          const forged = await post(addonPath(cart), { unit_price: 1 });
+
+          expect(forged.status).toBe(400);
+          const shown = await post(`/store/offer-carts/${cart.id}/reprice`);
+          expect(shown.data.cart.items[0].addon.item_id).toBeNull();
+          expect(shown.data.cart.total).toBe(10000);
+        });
+
+        it('takes the add-on off a line', async () => {
+          const cart = await batteryCart();
+
+          const removed = await api
+            .delete(addonPath(cart), storeHeaders)
+            .catch((error) => error.response);
+
+          expect(removed.data.cart.items[0].addon.item_id).toBeNull();
+          expect(removed.data.cart.total).toBe(10000);
+        });
+
+        it('removes the add-on together with its line', async () => {
+          const cart = await batteryCart();
+
+          await api.delete(
+            `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`,
+            storeHeaders,
+          );
+          const withOil = (
+            await post(`/store/offer-carts/${cart.id}/items`, {
+              offer_id: offerId,
+              quantity: 1,
+            })
+          ).data.cart;
+          const placed = await complete(withOil);
+
+          const order = await getContainer()
+            .resolve(Modules.ORDER)
+            .retrieveOrder(placed.data.order.id, { relations: ['items'] });
+          expect(order.items?.map(({ title }) => title)).toEqual([
+            'Oil filter (BMW 11 42 8575211)',
+          ]);
+        });
+
+        it('refuses checkout with an add-on priced before the Category changed it', async () => {
+          const cart = await batteryCart();
+          const catalog: CatalogModuleService =
+            getContainer().resolve(CATALOG_MODULE);
+          await catalog.updateCategories({
+            id: serviceCategoryId,
+            service_price: 3000,
+          });
+
+          const refused = await complete(cart);
+          expect(refused.status).toBe(400);
+          expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
+
+          const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+          expect(repriced.data.cart.items[0].addon.unit_price).toBe(3000);
+          expect((await complete(repriced.data.cart)).status).toBe(200);
+        });
+
+        it('refuses checkout with an add-on the Category no longer sells', async () => {
+          const cart = await batteryCart();
+          const catalog: CatalogModuleService =
+            getContainer().resolve(CATALOG_MODULE);
+          await catalog.updateCategories({
+            id: serviceCategoryId,
+            service_label: null,
+            service_price: null,
+          });
+
+          const refused = await complete(cart);
+
+          expect(refused.data.code).toBe('OFFER_MISSING');
+          const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+          expect(repriced.data.cart.items[0].addon).toBeNull();
+          expect(repriced.data.cart.total).toBe(10000);
+        });
+
+        it('lists the add-on as its own line of the order lead', async () => {
+          const cart = await batteryCart();
+
+          const placed = await complete(cart);
+
+          const lead = await waitFor(() =>
+            leads.find(({ comment }) =>
+              comment.startsWith(`Заказ #${placed.data.order.display_id},`),
+            ),
+          );
+          expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD',
+            `+ ${SERVICE}: 2\u00a0500 RSD`,
+            'Итого: 12\u00a0500 RSD',
+          ]);
+          expect(placed.status).toBe(200);
+        });
+      });
+
       it('records on the order that the lead route refused it', async () => {
         leadRouteStatus = 500;
         const cart = await cartWith(1);

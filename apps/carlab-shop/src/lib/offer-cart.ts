@@ -17,9 +17,11 @@ import {
   updateLineItemInCartWorkflow,
 } from '@medusajs/medusa/core-flows';
 import {
+  CATALOG_TRANSLATION_LOCALES,
   listedPartSchema,
   partPageSlug,
   type CheckoutRefusal,
+  type LineAddon,
   type OfferCart,
 } from '@podbor/catalog-contract';
 
@@ -31,6 +33,7 @@ import { liveOffers } from './suppliers/live-quote';
 export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
 export const CASH_AT_PICKUP_METADATA = { fulfillment: 'cash_at_pickup' };
 export const OFFER_ID_METADATA_KEY = 'offer_id';
+export const ADDON_FOR_METADATA_KEY = 'addon_for';
 
 export type OfferCartLineItem = {
   id: string;
@@ -44,6 +47,74 @@ export function offerIdOf(item: OfferCartLineItem): string | undefined {
   const offerId = item.metadata?.[OFFER_ID_METADATA_KEY];
   return typeof offerId === 'string' && offerId ? offerId : undefined;
 }
+
+const metadataText = (item: OfferCartLineItem, key: string) => {
+  const value = item.metadata?.[key];
+  return typeof value === 'string' && value ? value : undefined;
+};
+
+export const addonForOf = (item: OfferCartLineItem): string | undefined =>
+  metadataText(item, ADDON_FOR_METADATA_KEY);
+
+type CategoryAddon = Omit<LineAddon, 'item_id'>;
+
+type ServiceCategory = {
+  service_label: string | null;
+  service_price: number | null;
+  translations: unknown;
+};
+
+const addonLabelTranslations = ({
+  translations,
+}: ServiceCategory): LineAddon['translations'] => {
+  const stored = (translations ?? {}) as Record<
+    string,
+    Record<string, string> | undefined
+  >;
+  const labels = CATALOG_TRANSLATION_LOCALES.flatMap((locale) => {
+    const label = stored[locale]?.service_label;
+    return label ? [[locale, { label }]] : [];
+  });
+  return labels.length ? Object.fromEntries(labels) : null;
+};
+
+const categoryAddon = (
+  category: ServiceCategory | null | undefined,
+): CategoryAddon | null =>
+  category?.service_label && category.service_price !== null
+    ? {
+        label: category.service_label,
+        translations: addonLabelTranslations(category),
+        unit_price: category.service_price,
+      }
+    : null;
+
+const addonsOf = async (
+  scope: MedusaContainer,
+  items: OfferCartLineItem[],
+): Promise<Map<string, CategoryAddon>> => {
+  const lines = items.flatMap((item) => {
+    const identifierId = metadataText(item, 'part_identifier_id');
+    return offerIdOf(item) && identifierId ? [{ item, identifierId }] : [];
+  });
+  if (!lines.length) {
+    return new Map();
+  }
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const identifiers = await catalog.listPartIdentifiers(
+    { id: lines.map(({ identifierId }) => identifierId) },
+    { relations: ['part', 'part.category'], take: null },
+  );
+  const addonByIdentifier = new Map(
+    identifiers.map(({ id, part }) => [id, categoryAddon(part?.category)]),
+  );
+  return new Map(
+    lines.flatMap(({ item, identifierId }) => {
+      const addon = addonByIdentifier.get(identifierId);
+      return addon ? [[item.id, addon]] : [];
+    }),
+  );
+};
 
 export const refuseStockCartChange = (
   _req: unknown,
@@ -123,11 +194,28 @@ export async function syncOfferCart(
   }
   const items = cart.items ?? [];
   const live = await offersOf(scope, items);
+  const addons = await addonsOf(scope, items);
+  const addonLines = new Map(
+    items.flatMap((item) => {
+      const parent = addonForOf(item);
+      return parent ? [[parent, item]] : [];
+    }),
+  );
+  const orphans = items.filter((item) => {
+    const parent = addonForOf(item);
+    return parent && (!addons.has(parent) || addonLines.get(parent) !== item);
+  });
   let repriced = changed;
+  if (orphans.length) {
+    await deleteLineItemsWorkflow(scope).run({
+      input: { cart_id: cartId, ids: orphans.map(({ id }) => id) },
+    });
+    repriced = true;
+  }
   const lines: OfferCart['items'] = [];
   for (const item of items) {
     const offerId = offerIdOf(item);
-    if (!offerId) {
+    if (!offerId || addonForOf(item)) {
       continue;
     }
     const offer = live.get(offerId);
@@ -143,6 +231,18 @@ export async function syncOfferCart(
       });
       repriced = true;
     }
+    const service = addons.get(item.id);
+    const addonLine = service && addonLines.get(item.id);
+    if (addonLine && !MathBN.eq(service.unit_price, addonLine.unit_price)) {
+      await updateLineItemInCartWorkflow(scope).run({
+        input: {
+          cart_id: cartId,
+          item_id: addonLine.id,
+          update: { unit_price: service.unit_price },
+        },
+      });
+      repriced = true;
+    }
     const quantity = Number(item.quantity);
     lines.push({
       id: item.id,
@@ -150,6 +250,7 @@ export async function syncOfferCart(
       quantity,
       unit_price: unitPrice,
       available: !!offer && offer.stock_quantity >= quantity,
+      addon: service ? { item_id: addonLine?.id ?? null, ...service } : null,
       part: listedPartSchema
         .catch({ slug: '', brand: '', number: '', name: item.title })
         .parse(item.metadata),
@@ -163,7 +264,10 @@ export async function syncOfferCart(
     completed: false,
     currency,
     total: lines.reduce(
-      (sum, line) => sum + line.unit_price * line.quantity,
+      (sum, line) =>
+        sum +
+        line.unit_price * line.quantity +
+        (line.addon?.item_id ? line.addon.unit_price : 0),
       0,
     ),
     items: lines,
@@ -187,15 +291,89 @@ export async function removeOfferLine(
   itemId: string,
 ): Promise<void> {
   const cart = await openCart(scope, cartId);
-  if (!(cart.items ?? []).some((item) => item.id === itemId)) {
+  const items = cart.items ?? [];
+  if (!items.some((item) => item.id === itemId)) {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,
       `Cart ${cartId} has no line ${itemId}`,
     );
   }
   await deleteLineItemsWorkflow(scope).run({
-    input: { cart_id: cartId, ids: [itemId] },
+    input: {
+      cart_id: cartId,
+      ids: [
+        itemId,
+        ...items
+          .filter((item) => addonForOf(item) === itemId)
+          .map(({ id }) => id),
+      ],
+    },
   });
+}
+
+const offerLine = async (
+  scope: MedusaContainer,
+  cartId: string,
+  itemId: string,
+) => {
+  const cart = await openCart(scope, cartId);
+  const items = cart.items ?? [];
+  const line = items.find((item) => item.id === itemId && offerIdOf(item));
+  if (!line) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      `Cart ${cartId} has no line ${itemId}`,
+    );
+  }
+  return {
+    line,
+    addonLines: items.filter((item) => addonForOf(item) === itemId),
+  };
+};
+
+export async function addLineAddon(
+  scope: MedusaContainer,
+  cartId: string,
+  itemId: string,
+): Promise<void> {
+  const { line, addonLines } = await offerLine(scope, cartId, itemId);
+  const service = (await addonsOf(scope, [line])).get(line.id);
+  if (!service) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      `Line ${itemId} has no add-on service`,
+    );
+  }
+  if (addonLines.length) {
+    return;
+  }
+  await addToCartWorkflow(scope).run({
+    input: {
+      cart_id: cartId,
+      items: [
+        {
+          title: service.label,
+          quantity: 1,
+          unit_price: service.unit_price,
+          requires_shipping: false,
+          metadata: { [ADDON_FOR_METADATA_KEY]: line.id },
+        },
+      ],
+    },
+  });
+}
+
+export async function removeLineAddon(
+  scope: MedusaContainer,
+  cartId: string,
+  itemId: string,
+): Promise<void> {
+  const { addonLines } = await offerLine(scope, cartId, itemId);
+  if (addonLines.length) {
+    await deleteLineItemsWorkflow(scope).run({
+      input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
+    });
+  }
 }
 
 export async function sellableOffer(
@@ -302,11 +480,13 @@ export async function checkoutRefusal(
   CheckoutRefusal,
   'CONTACT_MISSING' | 'CART_CHANGED'
 > | null> {
-  if (items.some((item) => !offerIdOf(item))) {
+  const addonItems = items.filter((item) => addonForOf(item));
+  const offerItems = items.filter((item) => !addonForOf(item));
+  if (offerItems.some((item) => !offerIdOf(item))) {
     return 'OFFER_MISSING';
   }
-  const live = await offersOf(scope, items);
-  for (const item of items) {
+  const live = await offersOf(scope, offerItems);
+  for (const item of offerItems) {
     const offer = live.get(offerIdOf(item)!);
     if (!offer) {
       return 'OFFER_MISSING';
@@ -318,5 +498,26 @@ export async function checkoutRefusal(
       return 'OFFER_PRICE_CHANGED';
     }
   }
-  return null;
+  return addonRefusal(await addonsOf(scope, offerItems), addonItems);
 }
+
+const addonRefusal = (
+  addons: Map<string, CategoryAddon>,
+  addonItems: OfferCartLineItem[],
+): 'OFFER_MISSING' | 'OFFER_PRICE_CHANGED' | null => {
+  const parents = addonItems.map((item) => addonForOf(item));
+  for (const [index, item] of addonItems.entries()) {
+    const service = addons.get(parents[index]!);
+    if (!service) {
+      return 'OFFER_MISSING';
+    }
+    if (
+      parents.indexOf(parents[index]) !== index ||
+      Number(item.quantity) !== 1 ||
+      !MathBN.eq(service.unit_price, item.unit_price)
+    ) {
+      return 'OFFER_PRICE_CHANGED';
+    }
+  }
+  return null;
+};
