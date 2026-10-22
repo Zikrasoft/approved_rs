@@ -256,6 +256,7 @@ medusaIntegrationTestRunner({
         expect(response.data.facets).toEqual([
           {
             key: 'viscosity',
+            type: 'single-select',
             label: 'Viskozitet',
             unit: null,
             values: [
@@ -305,6 +306,7 @@ medusaIntegrationTestRunner({
         expect(all.data.facets).toEqual([
           {
             key: 'capacity',
+            type: 'number',
             label: 'Емкость',
             unit: 'Ah',
             values: [
@@ -315,6 +317,7 @@ medusaIntegrationTestRunner({
           },
           {
             key: 'voltage',
+            type: 'number',
             label: 'Напряжение',
             unit: 'V',
             values: [
@@ -354,6 +357,57 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('narrows a number field to a range and counts it without its own range', async () => {
+        const response = await search({
+          category: 'batteries',
+          locale: 'ru',
+          range: 'capacity:70:',
+        });
+        const below = await results({
+          category: 'batteries',
+          locale: 'ru',
+          range: ['capacity::80', 'voltage:24:'],
+        });
+        const outside = await search({
+          category: 'batteries',
+          locale: 'ru',
+          range: 'capacity:200:300',
+        });
+
+        expect(
+          response.data.results.map(({ part }: Result) => part.id).sort(),
+        ).toEqual([batteryIds[80], batteryIds[100]].sort());
+        expect(response.data.facets[0]).toMatchObject({
+          key: 'capacity',
+          type: 'number',
+          values: [
+            { value: '60', count: 1 },
+            { value: '80', count: 1 },
+            { value: '100', count: 1 },
+          ],
+        });
+        expect(response.data.facets[1].values).toEqual([
+          { value: '12', label: '12', count: 1 },
+          { value: '24', label: '24', count: 1 },
+        ]);
+        expect(below).toEqual([]);
+        expect(outside.status).toBe(200);
+        expect(outside.data.count).toBe(0);
+      });
+
+      it.each(['capacity::', 'capacity:abc:', 'capacity:95:60'])(
+        'refuses the malformed range %j',
+        async (range) => {
+          const response = await search({
+            category: 'batteries',
+            locale: 'ru',
+            range,
+          });
+
+          expect(response.status).toBe(400);
+        },
+      );
+
       it('keeps describing chosen values that leave nothing to list', async () => {
         const response = await search({
           category: 'engine-oil',
@@ -366,6 +420,7 @@ medusaIntegrationTestRunner({
         expect(response.data.facets).toEqual([
           {
             key: 'viscosity',
+            type: 'single-select',
             label: 'Вязкость',
             unit: null,
             values: [

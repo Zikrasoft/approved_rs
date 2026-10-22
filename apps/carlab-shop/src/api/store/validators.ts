@@ -3,6 +3,7 @@ import {
   CART_FINGERPRINT_FIELD,
   CATALOG_KEY_PATTERN,
   checkoutContactSchema,
+  parseRangeFilter,
   STEERING_SIDES,
   vinSchema,
 } from '@podbor/catalog-contract';
@@ -16,6 +17,29 @@ export const StoreSearchParts = z
       .union([z.string(), z.array(z.string())])
       .transform((value) => [value].flat())
       .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
+      .default([]),
+    range: z
+      .union([z.string(), z.array(z.string())])
+      .transform((value) => [value].flat())
+      .pipe(
+        z
+          .array(
+            z.string().transform((text, ctx) => {
+              const range = parseRangeFilter(text);
+              if (
+                !range ||
+                (range.min !== null &&
+                  range.max !== null &&
+                  range.min > range.max)
+              ) {
+                ctx.addIssue({ code: 'custom', message: 'invalid range' });
+                return z.NEVER;
+              }
+              return range;
+            }),
+          )
+          .max(10),
+      )
       .default([]),
     offset: z.coerce.number().int().nonnegative().default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CATEGORY_FIELD_TYPES } from './attributes.ts';
 import {
   CATALOG_TRANSLATION_LOCALES,
   type CategoryField,
@@ -21,6 +22,7 @@ export const searchResultSchema = brandNumberSchema.extend({
 
 export const searchFacetSchema = z.object({
   key: z.string(),
+  type: z.enum(CATEGORY_FIELD_TYPES),
   label: z.string(),
   unit: z.string().nullable(),
   values: z.array(
@@ -50,6 +52,7 @@ export const describeFacet = (
   const rank = (value: string) => option(value)?.rank ?? 0;
   return {
     key: field.key,
+    type: field.type,
     label: translated(field, 'label', locale),
     unit: field.unit,
     values: values
@@ -68,6 +71,41 @@ export const describeFacet = (
         };
       }),
   };
+};
+
+const NUMBER = '-?\\d+(?:\\.\\d+)?';
+
+export const RANGE_FILTER_PATTERN = new RegExp(
+  `^([a-z0-9-]+):(${NUMBER})?:(${NUMBER})?$`,
+);
+
+export type RangeFilter = {
+  key: string;
+  min: number | null;
+  max: number | null;
+};
+
+export const rangeFilter = ({ key, min, max }: RangeFilter): string =>
+  `${key}:${min ?? ''}:${max ?? ''}`;
+
+export const parseRangeFilter = (filter: string): RangeFilter | null => {
+  const match = RANGE_FILTER_PATTERN.exec(filter);
+  if (!match || (match[2] === undefined && match[3] === undefined)) {
+    return null;
+  }
+  const bound = (text: string | undefined) =>
+    text === undefined ? null : Number(text);
+  return { key: match[1], min: bound(match[2]), max: bound(match[3]) };
+};
+
+export const inRange = (value: string, { min, max }: RangeFilter): boolean => {
+  const number = Number(value);
+  return (
+    value.trim() !== '' &&
+    Number.isFinite(number) &&
+    (min === null || number >= min) &&
+    (max === null || number <= max)
+  );
 };
 
 export const searchableQuery = (q: string): boolean => /[\p{L}\p{N}]/u.test(q);

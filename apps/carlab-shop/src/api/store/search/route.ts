@@ -10,6 +10,8 @@ import {
   type CatalogLocale,
   categoryFieldSchema,
   describeFacet,
+  facetFilter,
+  inRange,
   searchableQuery,
   searchResponseSchema,
   translated,
@@ -29,6 +31,7 @@ import {
 import type { StoreSearchPartsType } from '../validators';
 
 const FACETS_FIELD = 'facets';
+const FACET_VALUE_LIMIT = 500;
 
 const named = z.object({ name: z.string(), translations: translationsSchema });
 
@@ -122,6 +125,7 @@ export async function GET(
     category,
     vehicle_id,
     facets,
+    range,
     offset,
     limit,
   } = req.validatedQuery as StoreSearchPartsType;
@@ -197,13 +201,31 @@ export async function GET(
       fields: ['id'],
       filters: filtersFor(applied),
       pagination: { skip: 0, take: 1 },
-      search_options: { facets: [{ field: FACETS_FIELD, limit: 100 }] },
+      search_options: {
+        facets: [{ field: FACETS_FIELD, limit: FACET_VALUE_LIMIT }],
+      },
     });
     return (
       facetCountsSchema.parse(search_result.facets?.[FACETS_FIELD])?.values ??
       []
     );
   };
+  const everything =
+    groups.size || range.length ? await countFacets(() => false) : [];
+  for (const bounds of range) {
+    const known = everything
+      .map(({ value }) => splitFacet(value))
+      .filter(({ key, value }) => key === bounds.key && inRange(value, bounds))
+      .map(({ value }) => facetFilter(bounds.key, value));
+    const picked = groups.get(bounds.key);
+    const within = picked
+      ? picked.filter((facet) => known.includes(facet))
+      : known;
+    groups.set(
+      bounds.key,
+      within.length ? within : [facetFilter(bounds.key, '')],
+    );
+  }
   const disjunctiveCounts = async (
     counted: FacetCount[],
   ): Promise<FacetCount[]> => {
@@ -211,10 +233,9 @@ export async function GET(
       return counted;
     }
     const chosenKeys = [...groups.keys()];
-    const [everything, ...perKey] = await Promise.all([
-      countFacets(() => false),
-      ...chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
-    ]);
+    const perKey = await Promise.all(
+      chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
+    );
     return everything.map(({ value }) => {
       const at = chosenKeys.indexOf(splitFacet(value).key);
       const source = at === -1 ? counted : perKey[at];
@@ -245,7 +266,7 @@ export async function GET(
     filters: filtersFor(() => true),
     pagination: { skip: offset, take: limit },
     search_options: {
-      facets: [{ field: FACETS_FIELD, limit: 100 }],
+      facets: [{ field: FACETS_FIELD, limit: FACET_VALUE_LIMIT }],
       provider_options: { typesense: searchRanking(locale) },
     },
   });

@@ -3,6 +3,9 @@ import {
   CATALOG_LOCALES,
   describeFacet,
   facetFilter,
+  inRange,
+  parseRangeFilter,
+  rangeFilter,
   searchableQuery,
   searchResponseSchema,
 } from './search.ts';
@@ -35,6 +38,7 @@ const response = {
   facets: [
     {
       key: 'viscosity',
+      type: 'single-select',
       label: 'Viskozitet',
       unit: null,
       values: [{ value: '5w-30', label: '5W-30', count: 1 }],
@@ -82,6 +86,36 @@ describe('facetFilter', () => {
   });
 });
 
+describe('range filters', () => {
+  it.each([
+    ['capacity:60:95', { key: 'capacity', min: 60, max: 95 }],
+    ['capacity:60:', { key: 'capacity', min: 60, max: null }],
+    ['capacity::95', { key: 'capacity', min: null, max: 95 }],
+    ['length:-1.5:2.25', { key: 'length', min: -1.5, max: 2.25 }],
+  ])('reads %j and writes it back', (text, range) => {
+    expect(parseRangeFilter(text)).toEqual(range);
+    expect(rangeFilter(range)).toBe(text);
+  });
+
+  it.each(['capacity::', 'capacity:abc:5', 'Capacity:1:2', 'capacity:1'])(
+    'refuses %j',
+    (text) => {
+      expect(parseRangeFilter(text)).toBeNull();
+    },
+  );
+
+  it('keeps the numbers inside both bounds, bounds included', () => {
+    const range = { key: 'capacity', min: 60, max: 80 };
+
+    expect(
+      ['50', '60', '70', '80', '95', 'agm', ''].filter((value) =>
+        inRange(value, range),
+      ),
+    ).toEqual(['60', '70', '80']);
+    expect(inRange('1000', { key: 'capacity', min: 60, max: null })).toBe(true);
+  });
+});
+
 describe('searchableQuery', () => {
   it.each(['HU 816 x', 'фильтр', '1142', 'HU%'])('searches %j', (q) => {
     expect(searchableQuery(q)).toBe(true);
@@ -120,6 +154,7 @@ describe('describeFacet', () => {
       ),
     ).toEqual({
       key: 'viscosity',
+      type: 'single-select',
       label: 'Viskozitet',
       unit: null,
       values: [
