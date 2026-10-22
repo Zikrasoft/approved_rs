@@ -326,6 +326,65 @@ describe('catalogue categories', () => {
     expect(categoryFacets(cabin, 'ru')).toEqual([]);
   });
 
+  it('adds brand, availability and best price, and hides a value every page shares', async () => {
+    const offer = (price: number, stock_quantity: number) => ({
+      id: `offer_${price}`,
+      price,
+      currency: 'RSD',
+      stock_quantity,
+      lead_time_days: 1,
+    });
+    const numbered = (
+      normalized_value: string,
+      brand: { name: string; slug: string },
+      offers: unknown[],
+    ) => ({
+      ...classified,
+      id: `pi_${normalized_value}`,
+      normalized_value,
+      brand,
+      offers,
+      part: { ...classified.part, id: `part_${normalized_value}` },
+    });
+    const [oil] = await catalogueWith(
+      withCategories([
+        numbered('A1', mann, [offer(1200, 4), offer(900, 0)]),
+        numbered('B1', bmw, [offer(2400, 0)]),
+        numbered('C1', bmw, []),
+      ]),
+    ).categoryPages();
+
+    expect(categoryFacets(oil, 'ru')).toEqual([
+      {
+        key: 'brand',
+        type: 'single-select',
+        label: 'brand',
+        unit: null,
+        values: [
+          { value: 'bmw', label: 'BMW', count: 2 },
+          { value: 'mann-filter', label: 'Mann-Filter', count: 1 },
+        ],
+      },
+      {
+        key: 'in-stock',
+        type: 'boolean',
+        label: 'in-stock',
+        unit: null,
+        values: [{ value: 'true', label: 'true', count: 1 }],
+      },
+      {
+        key: 'price',
+        type: 'number',
+        label: 'price',
+        unit: 'RSD',
+        values: [
+          { value: '1200', label: '1200', count: 2 },
+          { value: '2400', label: '2400', count: 2 },
+        ],
+      },
+    ]);
+  });
+
   it('fails the build on a Category that breaks the contract', async () => {
     const fetch = vi.fn(() => respond({ categories: [{ id: 'x' }] }));
 
