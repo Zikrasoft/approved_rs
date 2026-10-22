@@ -8,6 +8,7 @@ import {
   Label,
   Select,
   Table,
+  Tabs,
   Text,
   toast,
 } from '@medusajs/ui';
@@ -20,6 +21,7 @@ import {
 } from '@podbor/catalog-contract';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
@@ -61,6 +63,21 @@ type Entity = {
 };
 
 const ENTITIES: Entity[] = [
+  {
+    collection: 'vehicles',
+    path: 'vehicles',
+    object: 'vehicle',
+    fields: [
+      { key: 'model_id', kind: 'ref', collection: 'vehicle_models' },
+      { key: 'engine_id', kind: 'ref', collection: 'engines' },
+      { key: 'power_kw', kind: 'number' },
+      { key: 'drive', kind: 'enum', values: VEHICLE_DRIVES },
+      { key: 'market', kind: 'text' },
+      { key: 'year_from', kind: 'number' },
+      { key: 'year_to', kind: 'number' },
+      { key: 'steering', kind: 'enum', values: STEERING_SIDES },
+    ],
+  },
   {
     collection: 'makes',
     path: 'makes',
@@ -111,21 +128,6 @@ const ENTITIES: Entity[] = [
       { key: 'family', kind: 'text' },
       { key: 'fuel', kind: 'enum', values: ENGINE_FUELS },
       { key: 'displacement_cc', kind: 'number' },
-    ],
-  },
-  {
-    collection: 'vehicles',
-    path: 'vehicles',
-    object: 'vehicle',
-    fields: [
-      { key: 'model_id', kind: 'ref', collection: 'vehicle_models' },
-      { key: 'engine_id', kind: 'ref', collection: 'engines' },
-      { key: 'power_kw', kind: 'number' },
-      { key: 'drive', kind: 'enum', values: VEHICLE_DRIVES },
-      { key: 'market', kind: 'text' },
-      { key: 'year_from', kind: 'number' },
-      { key: 'year_to', kind: 'number' },
-      { key: 'steering', kind: 'enum', values: STEERING_SIDES },
     ],
   },
   {
@@ -244,7 +246,6 @@ const EntitySection = ({
 
   return (
     <div className="flex flex-col gap-y-3">
-      <Heading level="h2">{t(`vehicles.entities.${entity.object}`)}</Heading>
       <ScrollArea>
         <Table>
           <Table.Header>
@@ -379,17 +380,46 @@ const VehiclesPage = () => {
     reload();
   }, []);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab =
+    ENTITIES.find(({ path }) => path === searchParams.get('tab'))?.path ??
+    ENTITIES[0].path;
+
   return (
-    <Container className="flex flex-col gap-y-10">
+    <Container className="flex flex-col gap-y-6">
       <Heading level="h1">{t('vehicles.heading')}</Heading>
-      {ENTITIES.map((entity) => (
-        <EntitySection
-          key={entity.collection}
-          entity={entity}
-          rows={rows}
-          reload={reload}
-        />
-      ))}
+      <Tabs
+        value={tab}
+        onValueChange={(next) =>
+          setSearchParams({ tab: next }, { replace: true })
+        }
+        className="flex flex-col gap-y-6"
+      >
+        <ScrollArea>
+          <Tabs.List
+            aria-label={t('vehicles.sections')}
+            className="w-max p-0.5"
+          >
+            {ENTITIES.map((entity) => (
+              <Tabs.Trigger
+                key={entity.path}
+                value={entity.path}
+                className="gap-x-1.5 whitespace-nowrap"
+              >
+                {t(`vehicles.entities.${entity.object}`)}
+                <span className="text-ui-fg-muted tabular-nums">
+                  {rows[entity.collection]?.length}
+                </span>
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+        </ScrollArea>
+        {ENTITIES.map((entity) => (
+          <Tabs.Content key={entity.path} value={entity.path}>
+            <EntitySection entity={entity} rows={rows} reload={reload} />
+          </Tabs.Content>
+        ))}
+      </Tabs>
     </Container>
   );
 };

@@ -215,6 +215,7 @@
   },
   "vehicles": {
     "heading": "Vehicles and reference data",
+    "sections": "Reference data sections",
     "choose": "Choose",
     "create": "Add",
     "save": "Save",
