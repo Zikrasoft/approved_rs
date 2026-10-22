@@ -206,6 +206,7 @@ jobs:
             echo "TYPESENSE_HOST=127.0.0.1"
             echo "TYPESENSE_PORT=58108"
             echo "TYPESENSE_API_KEY=xyz"
+            echo "FILE_URL=https://api.carlab.test/static"
           } >"$RUNNER_TEMP/shop.env"
           docker run --rm --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA" \
             node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing

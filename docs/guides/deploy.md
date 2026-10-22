@@ -564,7 +564,7 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node` |
 | `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
-| `caddy/Caddyfile`                        | `api.carlab.rs` → `medusa:9000`, TLS, security headers, request body up to 25 MB                                                 |
+| `caddy/Caddyfile`                        | `api.carlab.rs` → `medusa:9000`, TLS, security headers, request body up to 25 MB; `/static/*` straight from the uploads volume   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
 | `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup, restore                                                                                            |
 | `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                          |
@@ -607,6 +607,18 @@ workflow engine. A second Medusa instance would need Redis first.
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
 
+### Uploaded images
+
+Part and Category photos go through Medusa's File module with the local
+provider. The admin posts the original (JPEG, PNG or WebP, up to 10 MB, checked by
+decoding it, not by its name); the backend writes 160, 480 and 960 px WebP copies
+into `/server/static`, the `static` volume, and stores their URLs on the Part or
+Category. Caddy mounts the same volume read-only at `/srv/static` and answers
+`/static/*` itself with a year-long immutable cache, since every file name carries
+an upload timestamp; Medusa never sees those requests. The nightly backup already
+archives the volume. Moving to S3 later is a provider swap in `medusa-config.ts`
+plus a copy of the volume; the stored URLs would need rewriting once.
+
 ### `.env`
 
 The template is `infra/carlab-shop/production.env.example`, and `src/lib/env.ts`
@@ -630,6 +642,9 @@ validates everything at startup. The non-obvious parts:
   are tried. An unknown name stops the server at startup.
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
+- `FILE_URL` is the public address of uploaded files, stored into every image
+  URL at upload time. Compose sets it to `https://$API_HOST/static`, so it is not
+  written into `.env`; without it production stops at startup.
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 
