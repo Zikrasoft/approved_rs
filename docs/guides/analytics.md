@@ -9,6 +9,10 @@ GA4 replaced Yandex Metrika on 2026-10-14 — [ADR-0033](../adr/0033-google-anal
 superseding [ADR-0012](../adr/0012-yandex-metrica-only-starting-before-consent.md). All
 history before that date is in Metrika only; see
 [Breaks in the series](#breaks-in-the-series) for the final snapshot.
+Metrika came back beside GA4 on 2026-10-23
+([ADR-0044](../adr/0044-yandex-metrika-beside-ga4.md)): every goal reaches both,
+under the same identifier, and Webvisor records sessions again with the lead
+forms masked by `METRIKA_MASK_CLASS` from `@podbor/site-kit/browser`.
 
 Exclusions from the sample (our own visits, Russia) are in
 [analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion
@@ -174,7 +178,7 @@ else in `docs/analytics-exclusions.md`.
 
 ## Meta Pixel
 
-Every goal goes through `reachGoal`, which reaches GA4 and, on a site with a
+Every goal goes through `reachGoal`, which reaches GA4, Metrika and, on a site with a
 pixel id, the Meta Pixel. The pixel shares the Google tag's gate in
 `packages/site-kit/src/analytics.ts`: never in dev, never under a refusal, queued
 on the first page view (`init` + `PageView`) with `fbevents.js` fetched while the
@@ -192,7 +196,7 @@ file is the one table:
 | `begin_checkout` | `InitiateCheckout`                              |
 | `purchase`       | `Purchase`, with `value` and `currency` (`RSD`) |
 
-The rest (scroll depth, form steps, language offer, case views) stay GA4-only: an
+The rest (scroll depth, form steps, language offer, case views) stay in GA4 and Metrika: an
 ads optimiser learns nothing from them and custom events only clutter Events
 Manager. To send one, add its row to `META_EVENTS`. Parameters other than
 `value` + `currency` never reach Meta.
@@ -336,6 +340,7 @@ would lie. What is already broken:
 | 2026-10-06 (this PR)   | `contact_click` on carlab.rs                | the homepage and service-page heroes gained a call / Telegram / WhatsApp row under a new `hero` placement, next to the booking door (issue #123). The series steps up from the zero baseline recorded on #123; `form_submit` and the `/thanks/` goal are compared against that same baseline two weeks later |
 | 2026-10-14             | every goal, all three sites                 | Yandex Metrika replaced with GA4 ([ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md)). Every series restarts from zero in the new properties — there is no automated history import. `order_placed` is renamed `purchase` and gains GA4's standard `items[]` shape                        |
 | 2026-10-20             | `telegram_choice`, all three sites          | a Telegram tile that opens the bot now asks bot or manager first ([ADR-0042](../adr/0042-telegram-tap-offers-bot-or-manager.md)); `contact_click` still fires on the tap itself, so taps minus picks is the share that closed the dialog                                                                     |
+| 2026-10-23             | every goal, all three sites                 | Yandex Metrika restored beside GA4 ([ADR-0044](../adr/0044-yandex-metrika-beside-ga4.md)). The counters resume their pre-2026-10-14 series with a nine-day gap; `purchase` replaces `order_placed` there and carries `order_price` for revenue                                                               |
 
 ### Final Metrika snapshot before cutover
 

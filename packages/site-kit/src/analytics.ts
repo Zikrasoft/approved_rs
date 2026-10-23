@@ -6,6 +6,9 @@ import {
   type ConsentDetail,
 } from './consent.ts';
 
+export const METRIKA_MASK_CLASS = 'ym-hide-content ym-disable-keys';
+
+const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
 const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
 const GOOGLE_TAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
 
@@ -18,12 +21,14 @@ const META_EVENTS: Readonly<Record<string, string>> = {
 };
 
 export interface AnalyticsConfig {
+  ymCounterId?: number;
   metaPixelId?: string;
   googleAdsId?: string;
   gaMeasurementId?: string;
   googleConversionLabels?: Partial<Record<Goal, string>>;
 }
 
+type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
 type FbqQueue = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void;
   queue: unknown[][];
@@ -34,6 +39,7 @@ type FbqQueue = ((...args: unknown[]) => void) & {
 
 declare global {
   interface Window {
+    ym?: (...args: unknown[]) => void;
     fbq?: (...args: unknown[]) => void;
     _fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
@@ -59,6 +65,42 @@ function whenIdle(run: () => void): void {
   };
   if (document.readyState === 'complete') schedule();
   else addEventListener('load', schedule, { once: true });
+}
+
+function stubYm(): void {
+  if (window.ym) return;
+  const queue: unknown[][] = [];
+  const ym: YmQueue = (...args) => {
+    queue.push(args);
+  };
+  ym.a = queue;
+  ym.l = Date.now();
+  window.ym = ym;
+}
+
+function startYm(ymCounterId: number): void {
+  stubYm();
+  window.ym?.(ymCounterId, 'init', {
+    ssr: true,
+    webvisor: true,
+    clickmap: true,
+    accurateTrackBounce: true,
+    trackLinks: true,
+  });
+  whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
+}
+
+function trackYmGoal(
+  ymCounterId: number,
+  goal: string,
+  params?: Record<string, unknown>,
+): void {
+  const { value, currency } = params ?? {};
+  const withRevenue =
+    typeof value === 'number' && typeof currency === 'string'
+      ? { ...params, currency: currency.toUpperCase(), order_price: value }
+      : params;
+  window.ym?.(ymCounterId, 'reachGoal', goal, withRevenue);
 }
 
 function stubFbq(): void {
@@ -153,6 +195,7 @@ function refused(): boolean {
 }
 
 export function defineAnalytics({
+  ymCounterId,
   metaPixelId,
   googleAdsId,
   gaMeasurementId,
@@ -161,6 +204,7 @@ export function defineAnalytics({
   if (window.loadAnalytics) return;
 
   window.trackGoal = (goal, params) => {
+    if (ymCounterId) trackYmGoal(ymCounterId, goal, params);
     if (metaPixelId) trackMetaGoal(goal, params);
     if (gaMeasurementId) trackGa4Goal(goal, params);
     if (googleAdsId)
@@ -176,6 +220,7 @@ export function defineAnalytics({
   const start = (): void => {
     if (started) return;
     started = true;
+    if (ymCounterId) startYm(ymCounterId);
     if (metaPixelId) startMetaPixel(metaPixelId);
     startGoogleTag(googleAdsId, gaMeasurementId);
   };

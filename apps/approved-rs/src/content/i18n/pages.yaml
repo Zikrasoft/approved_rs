@@ -39,11 +39,11 @@ privacy:
     - title: Какие данные мы собираем
       text: При отправке заявки мы собираем имя и контактные данные (Telegram/телефон), которые вы вводите в форму. Мы также фиксируем страницу, с которой отправлена заявка.
     - title: Как мы используем данные
-      text: Данные из заявки используются только для обратной связи по ней. Заявку мы не передаём третьим лицам и не используем для рекламы. Отдельно от заявок работает веб-аналитика — Google получает обезличенные данные о просмотре страниц.
+      text: Данные из заявки используются только для обратной связи по ней. Заявку мы не передаём третьим лицам и не используем для рекламы. Отдельно от заявок работает веб-аналитика — Google и Яндекс получают обезличенные данные о просмотре страниц.
     - title: Хранение данных
       text: Заявки хранятся в защищённом облачном хранилище Vercel Blob; доступ к ним есть только у нашей команды. Вы можете запросить удаление ваших данных в любое время, написав нам в Telegram.
     - title: Cookies
-      text: Сайт использует технические cookies, без которых он не работает, и аналитические. В баннере внизу экрана можно отказаться; выбор сохраняется в браузере. Если вы пришли по рекламе и не отказались от аналитики, сайт запоминает это — источник и кампанию — на 30 дней, чтобы мы видели, какая реклама приводит заявки.
+      text: Сайт использует технические cookies, без которых он не работает, и аналитические. В баннере внизу экрана можно отказаться; выбор сохраняется в браузере. Яндекс.Метрика записывает сессии (движение курсора, прокрутку и клики). Форму заявки мы из записи исключили, ее содержимое туда не попадает. Если вы пришли по рекламе и не отказались от аналитики, сайт запоминает это — источник и кампанию — на 30 дней, чтобы мы видели, какая реклама приводит заявки.
   contactTitle: Контакт
   contactBefore: 'По вопросам конфиденциальности обратитесь к нам через '
   contactLinkText: Telegram
@@ -145,11 +145,11 @@ translations:
         - title: What data we collect
           text: When submitting a request, we collect your name and contact information (Telegram/phone) entered in the form. We also log the page from which the request was sent.
         - title: How we use data
-          text: The data from the application is used solely for follow-up purposes. We do not share applications with third parties and do not use them for advertising. Web analytics operates separately — Google receives anonymized data on page views.
+          text: The data from your application is used solely for feedback purposes. We do not share your application with third parties or use it for advertising. Separately, web analytics operates — Google and Yandex receive anonymized data regarding page views.
         - title: Data storage
           text: Requests are stored in a secure Vercel Blob cloud storage; access is limited to our team. You may request deletion of your data anytime by messaging us on Telegram.
         - title: Cookies
-          text: The site uses essential technical cookies that are necessary for its operation, as well as analytical cookies. You can opt out via the banner at the bottom of the screen; your choice will be saved in the browser. If you arrived via an ad and did not opt out of analytics, the site remembers the source and campaign for 30 days, so we can see which ads generate applications.
+          text: The website uses technical cookies, without which it cannot function, and analytical cookies. You can opt out using the banner at the bottom of the screen; your choice is saved in the browser. Yandex.Metrica records sessions (mouse movement, scrolling, and clicks). We have excluded the application form from this recording, so its content is not captured. If you arrived through an advertisement and did not decline analytics, the site remembers this — the source and campaign — for 30 days so we can see which ads lead to applications.
       contactTitle: Contact
       contactBefore: 'For privacy inquiries, reach out to us through '
       contactLinkText: Telegram
@@ -245,11 +245,11 @@ translations:
         - title: Koje podatke prikupljamo
           text: Kada šaljete zahtev, prikupljamo ime i kontakt podatke (Telegram/telefon) koje unosite u formu. Takođe beležimo stranicu sa koje je zahtev poslat.
         - title: Kako koristimo podatke
-          text: Podaci iz zahteva se koriste samo za povratnu informaciju. Zahtev ne delimo sa trećim licima i ne koristimo ga za oglašavanje. Odvojeno od zahteva, imamo veb analitiku — Google dobija anonimizovane podatke o pregledima stranica.
+          text: Podaci iz zahteva se koriste isključivo za povratnu informaciju o njemu. Zahtev ne prosleđujemo trećim licima i ne koristimo za oglašavanje. Odvojeno od zahteva funkcioniše veb-analitika – Google i Yandex dobijaju anonimizovane podatke o pregledima stranica.
         - title: Skladištenje podataka
           text: Zahtevi se čuvaju u zaštićenom oblaku Vercel Blob; pristup imaju samo članovi našeg tima. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegram.
         - title: Cookies
-          text: Sajt koristi tehničke kolačiće bez kojih ne može da funkcioniše, kao i analitičke kolačiće. U baneru na dnu ekrana možete da se odjavite; vaš izbor se čuva u pretraživaču. Ako ste došli preko reklame i niste se odrekli analitike, sajt pamti izvor i kampanju 30 dana kako bismo videli koja reklama donosi zahteve.
+          text: Sajt koristi tehničke kolačiće, bez kojih ne može da funkcioniše, kao i analitičke. U baneru na dnu ekrana možete se odjaviti; izbor se čuva u pregledaču. Yandex.Metrica beleži sesije (kretanje kursora, skrolovanje i klikove). Formular zahteva smo iz te evidencije isključili, njeg sadržaj ne prolazi kroz to. Ako ste došli preko reklame i niste se odjavili od analitike, sajt pamti ovo – izvor i kampanju – 30 dana, tako da možemo videti koja reklama donosi zahteve.
       contactTitle: Kontakt
       contactBefore: 'Za pitanja o privatnosti obratite se kroz '
       contactLinkText: Telegram
@@ -345,11 +345,11 @@ translations:
         - title: Qué datos recopilamos
           text: Al enviar una solicitud, recopilamos tu nombre y datos de contacto (Telegram/teléfono) que introduces en el formulario. También registramos la página desde la que se envió la solicitud.
         - title: Cómo usamos los datos
-          text: 'Los datos de la solicitud se utilizan únicamente para dar seguimiento a la misma. No compartimos la solicitud con terceros ni la utilizamos con fines publicitarios. Aparte de las solicitudes, contamos con análisis web: Google recibe datos anonimizados sobre la visualización de páginas.'
+          text: 'Los datos de la solicitud se utilizan únicamente para responder a la misma. No compartimos la solicitud con terceros ni la utilizamos para publicidad. Aparte de las solicitudes, utilizamos analítica web: Google y Yandex reciben datos anónimos sobre la visualización de páginas.'
         - title: Almacenamiento de datos
           text: Las solicitudes se almacenan en un almacenamiento en la nube seguro de Vercel Blob; solo nuestro equipo tiene acceso. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
         - title: Cookies
-          text: 'El sitio utiliza cookies técnicas, sin las cuales no funcionaría, y cookies analíticas. Se puede optar por no participar a través del banner en la parte inferior de la pantalla; la elección se guarda en el navegador. Si llegaste a través de un anuncio y no rechazaste el análisis, el sitio recuerda esto: la fuente y la campaña, por 30 días, para que podamos ver qué publicidad genera solicitudes.'
+          text: El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Puedes rechazar en el banner en la parte inferior de la pantalla; tu elección se guarda en el navegador. Yandex.Metrica registra sesiones (movimiento del cursor, desplazamiento y clics). Hemos excluido el formulario de la grabación, su contenido no se incluye. Si llegaste a través de publicidad y no rechazaste la analítica, el sitio recuerda esto, la fuente y la campaña, durante 30 días para que podamos ver qué publicidad genera solicitudes.
       contactTitle: Contacto
       contactBefore: 'Para cuestiones de privacidad, contáctanos a través de '
       contactLinkText: Telegram
@@ -445,11 +445,11 @@ translations:
         - title: Welche Daten wir sammeln
           text: Bei der Anfrage sammeln wir den Namen und die Kontaktdaten (Telegram/Telefon), die Sie in das Formular eingeben. Wir protokollieren auch die Seite, von der die Anfrage gesendet wurde.
         - title: Wie wir die Daten verwenden
-          text: Die Daten aus der Anfrage werden ausschließlich für die Rückmeldung dazu verwendet. Wir geben die Anfrage nicht an Dritte weiter und verwenden sie nicht für Werbung. Unabhängig von den Anfragen läuft die Web-Analyse - Google erhält anonymisierte Daten zu den Seitenaufrufen.
+          text: Die Daten aus der Anfrage werden nur für die Rückmeldung dazu verwendet. Wir geben die Anfrage nicht an Dritte weiter und nutzen sie nicht für Werbung. Unabhängig von den Anfragen läuft die Webanalyse — Google und Yandex erhalten anonymisierte Daten über die Seitenaufrufe.
         - title: Datenspeicherung
           text: Anfragen werden in einem geschützten Cloud-Speicher Vercel Blob aufbewahrt; auf sie hat nur unser Team Zugriff. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram kontaktieren.
         - title: Cookies
-          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Wenn Sie über Werbung auf die Seite gekommen sind und die Analyse nicht abgelehnt haben, speichert die Seite dies - die Quelle und die Kampagne - für 30 Tage, damit wir sehen, welche Werbung Anfragen generiert.
+          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Yandex.Metrica zeichnet die Sitzungen auf (Mausbewegungen, Scrollen und Klicks). Das Anfrageformular haben wir von der Aufzeichnung ausgeschlossen, dessen Inhalt wird dort nicht erfasst. Wenn Sie über Werbung gekommen sind und nicht von der Analyse abgelehnt haben, merkt sich die Website dies — die Quelle und die Kampagne — für 30 Tage, damit wir sehen, welche Werbung Anfragen generiert.
       contactTitle: Kontakt
       contactBefore: 'Bei Fragen zur Privatsphäre kontaktieren Sie uns über '
       contactLinkText: Telegram
@@ -503,4 +503,4 @@ translations:
       closingLine2: was Sie suchen —
       closingLine3: wir finden auch für Sie
       closingText: Es reicht, wenn Sie Marke, Budget und ein paar zusätzliche Wünsche angeben. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: eafdcdbf8e586132
+translatedFrom: b3c7ab6e93f49c78

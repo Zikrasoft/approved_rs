@@ -35,7 +35,9 @@ depth on case and work pages), `data-contact-channel` /
 `data-contact-cta` (in-flow contact regions the floating CTA's `watch`
 selector hides behind — stamp it with `contactRegion`, `contactCta` and
 `CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
-literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+literal) and `METRIKA_MASK_CLASS` (on every form that takes a contact, keeping
+its fields out of Webvisor recordings as the privacy copy promises; from
+`@podbor/site-kit/browser`, never a literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
@@ -568,7 +570,7 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 `reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app.
-`reachGoal` reaches GA4 and, where a site sets `META_PIXEL_ID`, the Meta Pixel
+`reachGoal` reaches GA4 and Yandex Metrika (all three sites, [ADR-0044](docs/adr/0044-yandex-metrika-beside-ga4.md)) and, where a site sets `META_PIXEL_ID`, the Meta Pixel
 (standard events only, `META_EVENTS` in `analytics.ts`); carlab.rs additionally
 reaches Google Ads conversions where `GOOGLE_ADS_ID`/`GOOGLE_CONVERSION_LABELS`
 are set. Every event must also be marked a key event in **all three** GA4

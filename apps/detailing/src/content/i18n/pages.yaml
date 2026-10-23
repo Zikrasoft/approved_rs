@@ -50,7 +50,7 @@ privacy:
     - title: 'Сколько мы их храним'
       text: До двух лет с момента последнего контакта. По вашему запросу удалим раньше.
     - title: 'Куки'
-      text: Сайт использует техническую куку с выбранным языком интерфейса и аналитическую — Google Analytics. Аналитика запускается при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки она не включается. Рекламных кук, которые следят за вами на других сайтах, здесь нет. Если вы пришли по рекламе и не отказались от аналитики, сайт запоминает это — источник и кампанию — на 30 дней, чтобы мы видели, какая реклама приводит заявки.
+      text: Сайт использует техническую куку с выбранным языком интерфейса и аналитические (Google Analytics и Яндекс.Метрику). Аналитика запускается при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки она не включается. Яндекс.Метрика записывает сессии (движение курсора, прокрутку и клики). Форму заявки мы из записи исключили, ее содержимое туда не попадает. Рекламных кук, которые следят за вами на других сайтах, здесь нет. Если вы пришли по рекламе и не отказались от аналитики, сайт запоминает это — источник и кампанию — на 30 дней, чтобы мы видели, какая реклама приводит заявки.
     - title: 'Ваши права'
       text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно написать нам в любой из мессенджеров или позвонить.
   contactTitle: Вопросы по данным
@@ -129,7 +129,7 @@ translations:
         - title: Koliko ih čuvamo
           text: Do dve godine od poslednjeg kontakta. Na vaš zahtev ćemo ih obrisati ranije.
         - title: Kolačići
-          text: Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitički — Google Analytics. Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se prilikom sledećeg učitavanja ne uključuje. Reklamni kolačići koji vas prate na drugim sajtovima ovde ne postoje. Ako ste došli putem reklame i niste odbili analitiku, sajt pamti to — izvor i kampanju — u trajanju od 30 dana, kako bismo videli koja reklama donosi zahteve.
+          text: Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitičke (Google Analytics i Yandex.Metrica). Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, pa se od sledećeg učitavanja ne uključuje. Yandex.Metrica beleži sesije (pokrete kursora, skrolovanje i klikove). Oblik zahteva smo isključili iz snimka, njegovi sadržaji se ne beleže. Reklamni kolačići koji prate vašu aktivnost na drugim sajtovima nisu ovde prisutni. Ako ste došli preko reklame i niste se odrekli analitike, sajt pamti ovo — izvor i kampanju — na 30 dana, kako bismo videli koja reklama donosi zahteve.
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nam pišete u bilo kojem od messengera ili pozovete.
       contactTitle: Pitanja o podacima
@@ -207,7 +207,7 @@ translations:
         - title: How Long We Keep It
           text: Up to two years from the last contact. We will delete it earlier at your request.
         - title: Cookies
-          text: The site uses a technical cookie for the selected interface language and an analytical one — Google Analytics. The analytics start when the page is first loaded; you can decline in the banner at the bottom of the screen, and then it won't activate on your next visit. There are no advertising cookies that track you on other sites. If you arrived via an ad and did not opt out of analytics, the site remembers this — the source and campaign — for 30 days, so we can see which ads generate requests.
+          text: The site uses a technical cookie for the selected interface language and analytical tools (Google Analytics and Yandex.Metrica). Analytics is activated on the first page load; you can opt out via the banner at the bottom of the screen, so it won’t be activated on subsequent loads. Yandex.Metrica records sessions (mouse movement, scrolling, and clicks). We have excluded the application form from the recording, so its content is not captured. There are no advertising cookies that track you on other sites. If you arrived through an advertisement and did not opt out of analytics, the site remembers the source and campaign for 30 days, allowing us to see which ads generate leads.
         - title: Your Rights
           text: You can request a copy of your data, corrections, or deletion. Just message us on any of the messengers or call.
       contactTitle: Data Questions
@@ -232,4 +232,4 @@ translations:
       heading: This Page Doesn’t Exist
       body: The link may be outdated or there may be a typo in the address. Check the homepage or view our work.
       cta: Back to Home
-translatedFrom: 488bb2564a1ef897
+translatedFrom: 95b201144aa0bdf8

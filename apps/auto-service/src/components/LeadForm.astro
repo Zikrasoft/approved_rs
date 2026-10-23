@@ -1,4 +1,5 @@
 ---
+import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import { localeFrom } from '@/i18n/config';
 import Icon from './Icon.astro';
 import PhoneInput from './PhoneInput.astro';
@@ -78,7 +79,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     action="/api/leads"
     data-lead-form
     data-submitting-label={site.form.submitting}
-    class={`flex flex-col gap-4 ${className}`}
+    class={`${METRIKA_MASK_CLASS} flex flex-col gap-4 ${className}`}
   >
     <input type="hidden" name="locale" value={locale} />
     <div class="hidden" aria-hidden="true">

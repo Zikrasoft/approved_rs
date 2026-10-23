@@ -2,7 +2,9 @@
 
 Who to drop from any sample before drawing conclusions about traffic or
 conversion. Applies to all three properties — their measurement ids are listed in
-[deploy.md](deploy.md). Before 2026-10-14 this applied to Yandex Metrika; see
+[deploy.md](deploy.md), and to the Yandex Metrika counters running beside them
+since 2026-10-23 ([ADR-0044](../adr/0044-yandex-metrika-beside-ga4.md)), where a
+client id is the `_ym_uid` cookie. Before 2026-10-14 this applied to Metrika alone; see
 [ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md) for the
 cutover.
 

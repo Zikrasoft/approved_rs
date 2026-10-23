@@ -28,6 +28,7 @@ beforeEach(() => {
   });
   delete (window as Partial<Window>).loadAnalytics;
   delete (window as Partial<Window>).trackGoal;
+  delete (window as Partial<Window>).ym;
   delete (window as Partial<Window>).fbq;
   delete (window as Partial<Window>)._fbq;
   delete (window as Partial<Window>).gtag;
@@ -420,5 +421,91 @@ describe('defineAnalytics with Google Ads', () => {
   it('swallows a goal when no label map was passed at all', () => {
     defineAnalytics({ googleAdsId: AW });
     expect(() => window.trackGoal?.('form_submit')).not.toThrow();
+  });
+});
+
+const YM = 111800377;
+const YM_TAG = `https://mc.yandex.ru/metrika/tag.js?id=${YM}`;
+const ymQueue = () => (window.ym as unknown as { a: unknown[][] }).a;
+
+describe('defineAnalytics with Yandex Metrika', () => {
+  it('loads the counter beside the Google tag once the browser goes idle', () => {
+    defineAnalytics({ ymCounterId: YM, gaMeasurementId: GA });
+    expect(srcs()).toEqual([]);
+    runIdle();
+    expect(srcs()).toEqual([YM_TAG, GTAG_SRC(GA)]);
+  });
+
+  it('records init with Webvisor before the tag downloads, so nothing is lost', () => {
+    defineAnalytics({ ymCounterId: YM });
+    expect(ymQueue()).toEqual([
+      [
+        YM,
+        'init',
+        {
+          ssr: true,
+          webvisor: true,
+          clickmap: true,
+          accurateTrackBounce: true,
+          trackLinks: true,
+        },
+      ],
+    ]);
+    expect(typeof (window.ym as unknown as { l: number }).l).toBe('number');
+  });
+
+  it('holds the counter back under the same refusal as the others', () => {
+    refuse();
+    defineAnalytics({ ymCounterId: YM });
+    runIdle();
+    expect(srcs()).toEqual([]);
+    expect(window.ym).toBeUndefined();
+  });
+
+  it('leaves the counter out on a site with no counter id', () => {
+    defineAnalytics({ gaMeasurementId: GA });
+    runIdle();
+    expect(srcs()).toEqual([GTAG_SRC(GA)]);
+    expect(window.ym).toBeUndefined();
+  });
+
+  it('keeps an already-installed ym queue instead of replacing it', () => {
+    const existing = Object.assign(() => {}, { a: [] });
+    window.ym = existing;
+    defineAnalytics({ ymCounterId: YM });
+    expect(window.ym).toBe(existing);
+  });
+
+  it('sends a goal to the counter and to GA4 alike', () => {
+    defineAnalytics({ ymCounterId: YM, gaMeasurementId: GA });
+    window.trackGoal?.('contact_click', { channel: 'phone' });
+    expect(ymQueue().at(-1)).toEqual([
+      YM,
+      'reachGoal',
+      'contact_click',
+      { channel: 'phone' },
+    ]);
+    expect(dataLayer().at(-1)).toEqual([
+      'event',
+      'contact_click',
+      { channel: 'phone' },
+    ]);
+  });
+
+  it('adds the order price Metrika reads revenue from when a goal carries a value', () => {
+    defineAnalytics({ ymCounterId: YM });
+    window.trackGoal?.('purchase', { value: 12690, currency: 'rsd' });
+    expect(ymQueue().at(-1)).toEqual([
+      YM,
+      'reachGoal',
+      'purchase',
+      { value: 12690, currency: 'RSD', order_price: 12690 },
+    ]);
+  });
+
+  it('sends a goal with no params as a bare reachGoal', () => {
+    defineAnalytics({ ymCounterId: YM });
+    window.trackGoal?.('scroll_50');
+    expect(ymQueue().at(-1)).toEqual([YM, 'reachGoal', 'scroll_50', undefined]);
   });
 });
