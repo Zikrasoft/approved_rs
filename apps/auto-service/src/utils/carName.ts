@@ -20,6 +20,14 @@ export function carName({ name, chassis }: NamedModel, locale: Locale): string {
   return `${series.make.name} ${seriesName} ${chassis.code} ${name}`;
 }
 
+const naturally = new Intl.Collator('en', { numeric: true }).compare;
+
+type ModelEntry = { model: { name: string; chassis: { code: string } } };
+
+export const byModelName = (a: ModelEntry, b: ModelEntry): number =>
+  naturally(a.model.name, b.model.name) ||
+  naturally(a.model.chassis.code, b.model.chassis.code);
+
 type Variant = {
   engine: { code: string };
   power_kw: number | null;

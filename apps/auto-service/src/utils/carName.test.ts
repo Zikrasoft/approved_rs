@@ -1,5 +1,31 @@
 import { describe, expect, it } from 'vitest';
-import { carName, vehicleVariant } from './carName';
+import { byModelName, carName, vehicleVariant } from './carName';
+
+describe('byModelName', () => {
+  it('orders models by their own name in natural order, then by chassis', () => {
+    const entry = (name: string, code: string) => ({
+      model: { name, chassis: { code } },
+    });
+
+    expect(
+      [
+        entry('Octavia 2.0 TDI', 'NX'),
+        entry('320d', 'G20'),
+        entry('Octavia 2.0 TDI', '5E'),
+        entry('118d', 'F20'),
+        entry('20d', 'F30'),
+      ]
+        .sort(byModelName)
+        .map(({ model }) => `${model.name} ${model.chassis.code}`),
+    ).toEqual([
+      '20d F30',
+      '118d F20',
+      '320d G20',
+      'Octavia 2.0 TDI 5E',
+      'Octavia 2.0 TDI NX',
+    ]);
+  });
+});
 
 const model = (translations: { sr?: string; en?: string } | null) => ({
   name: '320d',

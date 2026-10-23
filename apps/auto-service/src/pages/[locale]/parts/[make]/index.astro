@@ -4,7 +4,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { carName } from '@/utils/carName';
+import { byModelName } from '@/utils/carName';
 import { makeHubsForBuild, type MakeHubEntry } from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 
@@ -41,13 +41,18 @@ const { make } = hub;
     <h2 class="text-section">{copy.modelsHeading}</h2>
     <ul class="card divide-y divide-line">
       {
-        hub.models.map(({ model, categories }) => (
+        hub.models.toSorted(byModelName).map(({ model, categories }) => (
           <li>
             <a
               href={PathBuilder.partsModel(locale, make.slug, model.slug)}
               class="flex flex-col gap-1 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
             >
-              <span class="font-semibold">{carName(model, locale)}</span>
+              <span class="flex flex-wrap items-baseline gap-x-2">
+                <span class="font-semibold">{model.name}</span>
+                <span class="spec text-sm text-muted">
+                  {model.chassis.code}
+                </span>
+              </span>
               {categories.length > 0 && (
                 <span class="text-sm text-muted">
                   {categories
