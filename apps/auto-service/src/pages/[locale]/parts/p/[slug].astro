@@ -227,6 +227,7 @@ const thumbFor = (slug: string) => {
       <AddonNote
         category={category}
         pages={[page, ...(successor ? [successor] : [])]}
+        installation={{ id: page.id, price: page.part.installation_price }}
       />
     </div>
 

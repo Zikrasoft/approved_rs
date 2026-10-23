@@ -64,8 +64,10 @@ describe('categorySchema', () => {
     expect(
       categorySchema.parse({ ...category, installation_price: 0 }),
     ).toEqual({ ...category, installation_price: 0 });
-    const { installation_price: _, ...older } = category;
-    expect(categorySchema.parse(older).installation_price).toBeNull();
+    expect(
+      categorySchema.parse({ ...category, installation_price: undefined })
+        .installation_price,
+    ).toBeNull();
   });
 
   it('refuses a fractional add-on price', () => {

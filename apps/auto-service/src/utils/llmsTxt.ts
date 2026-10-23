@@ -63,13 +63,20 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         entries: [
           ...categories.map((category) => {
             const addon = categoryAddon(category, locale);
+            const money = (price: number) =>
+              formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale]);
+            const { installationLabel, installationFree } =
+              content(locale).shopCart;
             return {
               label: translated(category, 'name', locale),
               href: url(PathBuilder.partsCategory(locale, category.slug)),
               note: [
                 paragraphs(translated(category, 'text', locale))[0],
-                addon &&
-                  `${addon.label}: ${formatMoney(addon.price, 'RSD', BCP47_BY_LOCALE[locale])}`,
+                addon && `${addon.label}: ${money(addon.price)}.`,
+                category.installation_price === 0
+                  ? `${installationFree}.`
+                  : category.installation_price !== null &&
+                    `${installationLabel}: ${money(category.installation_price)}.`,
               ]
                 .filter(Boolean)
                 .join(' '),

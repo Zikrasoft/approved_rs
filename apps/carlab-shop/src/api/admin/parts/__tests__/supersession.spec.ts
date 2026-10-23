@@ -136,6 +136,7 @@ medusaIntegrationTestRunner({
             translations: null,
             category_id: null,
             attributes: {},
+            installation_price: null,
             replaced_by: {
               id: newId,
               name: 'Brake pad, new',

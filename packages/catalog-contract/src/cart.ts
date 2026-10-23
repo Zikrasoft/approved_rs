@@ -51,7 +51,7 @@ export const offerCartLineSchema = z.object({
   in_stock: z.boolean(),
   lead_time_days: z.number().int().nonnegative(),
   addon: lineAddonSchema.nullable(),
-  installation: lineInstallationSchema.nullable(),
+  installation: lineInstallationSchema.nullable().default(null),
   part: listedPartSchema,
 });
 

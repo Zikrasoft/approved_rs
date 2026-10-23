@@ -54,6 +54,11 @@ fallbackCta: Отправить заявкой
 addonTemplate: 'Добавить: {service}'
 addonPickup: Делаем при выдаче в сервисе CarLab
 addonInCart: Услугу можно добавить в корзине.
+installationLabel: Установка в сервисе CarLab
+installationFree: Установка бесплатно
+installationInCart: Установку можно добавить в корзине.
+addonsInCart: Обе услуги можно добавить в корзине.
+freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
 translatedFrom: a69845dc385932cc
 translations:

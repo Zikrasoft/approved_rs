@@ -70,7 +70,7 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
-  const withBackend = async (shopOpen: string) => {
+  const withBackend = async (shopOpen: string, locale: 'sr' | 'ru' = 'sr') => {
     const answers: Record<string, unknown> = {
       '/store/categories': {
         categories: [
@@ -91,6 +91,7 @@ describe('generateLlmsTxt', () => {
             service_label: 'Замена масла',
             service_price: 2500,
             service_note: null,
+            installation_price: 1500,
             image: null,
             fields: [],
           },
@@ -149,7 +150,7 @@ describe('generateLlmsTxt', () => {
       })),
     );
 
-    return generateLlmsTxt('sr').finally(() => {
+    return generateLlmsTxt(locale).finally(() => {
       vi.unstubAllEnvs();
       vi.unstubAllGlobals();
     });
@@ -162,6 +163,14 @@ describe('generateLlmsTxt', () => {
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
     );
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
+  });
+
+  it('names the installation price of a Category beside its add-on service', async () => {
+    const body = await withBackend('true', 'ru');
+
+    expect(body).toContain(
+      'Масло для двигателя. Замена масла: 2\u00a0500 RSD. Установка в сервисе CarLab: 1\u00a0500 RSD',
+    );
   });
 
   it('names no price and no cart while the shop is closed', async () => {

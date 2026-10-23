@@ -27,6 +27,7 @@ const addonSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
   addon: z.boolean(),
+  kind: z.enum(['addon', 'installation']).default('addon'),
 });
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,
@@ -101,6 +102,7 @@ export const PUT: APIRoute = async ({ request }) => {
             change.data.cart_id,
             change.data.item_id,
             change.data.addon,
+            change.data.kind,
           )
       : null,
   );

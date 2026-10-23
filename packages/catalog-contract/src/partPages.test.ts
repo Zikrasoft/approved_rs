@@ -35,9 +35,11 @@ describe('partPageSchema', () => {
       part: { ...page.part, installation_price: 0 },
     };
     expect(partPageSchema.parse(installed)).toEqual(installed);
-    const { installation_price: _, ...older } = page.part;
     expect(
-      partPageSchema.parse({ ...page, part: older }).part.installation_price,
+      partPageSchema.parse({
+        ...page,
+        part: { ...page.part, installation_price: undefined },
+      }).part.installation_price,
     ).toBeNull();
   });
 

@@ -78,6 +78,13 @@ export type SearchOutcome = Omit<SearchResponse, 'results'> & {
 
 export type CategoryPageEntry = Category & { pages: PartPageEntry[] };
 
+export type LineAddonKind = 'addon' | 'installation';
+
+export type IdentifierPrices = {
+  offers: Record<string, PartOffer[]>;
+  installation: Record<string, number | null>;
+};
+
 export type CarPart = Fit & {
   category_id: string | null;
   part: PartPage['part'];
@@ -290,7 +297,9 @@ export function createCatalogue({
     categoriesResponseSchema
       .parse(await request('/store/categories'))
       .categories.map((category) =>
-        pricesHidden ? { ...category, service_price: null } : category,
+        pricesHidden
+          ? { ...category, service_price: null, installation_price: null }
+          : category,
       );
 
   const vehicles = async (): Promise<Vehicle[]> =>
@@ -300,7 +309,20 @@ export function createCatalogue({
     const [pages, allCategories, fitments, allVehicles] = await Promise.all([
       paged('/store/part-pages', (body) => {
         const { pages, count } = partPagesResponseSchema.parse(body);
-        return { items: pages.map(unpriced), count };
+        return {
+          items: pages.map((page) =>
+            unpriced({
+              ...page,
+              part: {
+                ...page.part,
+                installation_price: pricesHidden
+                  ? null
+                  : page.part.installation_price,
+              },
+            }),
+          ),
+          count,
+        };
       }),
       categories(),
       paged('/store/fitments', (body) => {
@@ -580,8 +602,8 @@ export function createCatalogue({
       }
     },
 
-    async offersFor(ids: string[]): Promise<Record<string, PartOffer[]>> {
-      if (pricesHidden) return {};
+    async offersFor(ids: string[]): Promise<IdentifierPrices> {
+      if (pricesHidden) return { offers: {}, installation: {} };
       const batches = Array.from(
         { length: Math.ceil(ids.length / OFFERS_BATCH) },
         (_, index) =>
@@ -594,10 +616,16 @@ export function createCatalogue({
           );
           return identifierOffersResponseSchema.parse(
             await request(`/store/offers?${params}`),
-          ).offers;
+          );
         }),
       );
-      return Object.assign({}, ...answers);
+      return {
+        offers: Object.assign({}, ...answers.map(({ offers }) => offers)),
+        installation: Object.assign(
+          {},
+          ...answers.map(({ installation }) => installation),
+        ),
+      };
     },
 
     async liveOffers(identifierId: string): Promise<OffersOutcome> {
@@ -655,10 +683,11 @@ export function createCatalogue({
       cartId: string,
       itemId: string,
       on: boolean,
+      kind: LineAddonKind = 'addon',
     ): Promise<CartOutcome> =>
       cartOutcome(
         send(
-          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/addon`,
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/${kind}`,
           on ? 'POST' : 'DELETE',
           on ? {} : undefined,
         ),
