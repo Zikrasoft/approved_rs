@@ -5,6 +5,7 @@ import type {
 import { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { announceMarkupChange } from '../../../../lib/suppliers/markup-reindex';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 import type { AdminUpdateSupplierType } from '../../validators';
@@ -28,12 +29,15 @@ export async function POST(
   const supplierService: SupplierModuleService =
     req.scope.resolve(SUPPLIER_MODULE);
 
-  await supplierService.retrieveSupplier(id);
+  const before = await supplierService.retrieveSupplier(id);
   const supplier = await supplierService.updateSuppliers({
     id,
     ...req.validatedBody,
     updated_by: req.auth_context.actor_id,
   });
+  if (supplier.markup_percentage !== before.markup_percentage) {
+    await announceMarkupChange(req.scope, id);
+  }
 
   res.json({ supplier: supplierSchema.parse(supplier) });
 }
