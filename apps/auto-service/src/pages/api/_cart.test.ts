@@ -117,7 +117,7 @@ describe('/api/cart', () => {
 
     await call(POST, {
       body: { cart_id: null, offer_id: 'offer_1' },
-      headers: { 'x-shop-preview': '1' },
+      headers: { cookie: 'carlab_shop_preview=1' },
     });
     await call(POST, { body: { cart_id: null, offer_id: 'offer_1' } });
 

@@ -18,6 +18,7 @@ import PartRow from '@/components/PartRow.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogue';
+import { previewRequested } from '@/scripts/shopPreview';
 import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
@@ -50,7 +51,9 @@ const offset = Math.max(
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
 );
 
-const catalogue = catalogueFromEnv(siteEnv());
+const catalogue = catalogueFromEnv(siteEnv(), {
+  preview: previewRequested(Astro.request),
+});
 const searchable = searchableQuery(q) || Boolean(category);
 const found =
   searchable && catalogue
@@ -283,7 +286,7 @@ const scopeHidden = {
                     detail={category ? undefined : result.part.category?.name}
                     superseded={result.superseded}
                     current={currentNumber(result, found.results)}
-                    offers={result.offers}
+                    priced={result}
                   />
                 ))}
               </ul>

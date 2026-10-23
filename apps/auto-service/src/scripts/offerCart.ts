@@ -18,7 +18,7 @@ import {
 import { formatMoney } from '@/utils/money';
 import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
-import { previewHeaders, SHOP_PREVIEW_FIELD, shopPreview } from './shopPreview';
+import { PRICES_FILLED_EVENT, shopPreview } from './shopPreview';
 import {
   addonLabel,
   addToPartsList,
@@ -395,13 +395,7 @@ const getJson = async <T>(
   init?: RequestInit,
 ): Promise<T | null> => {
   try {
-    const response = await fetch(url, {
-      ...init,
-      headers: {
-        ...(init?.headers as Record<string, string>),
-        ...previewHeaders(),
-      },
-    });
+    const response = await fetch(url, init);
     if (!response.ok) return null;
     const parsed = schema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;
@@ -625,7 +619,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               CART_FINGERPRINT_FIELD,
               cartFingerprint(this.cart.items),
             );
-            if (shopPreview()) event.formData.set(SHOP_PREVIEW_FIELD, '1');
           });
         }
         this.querySelector('[data-retry]')?.addEventListener('click', () =>
@@ -1018,6 +1011,25 @@ export function defineKitCart(tagName = 'kit-cart'): void {
           busy(button, true);
           void this.addKit();
         });
+        document.addEventListener(PRICES_FILLED_EVENT, () => this.priced());
+      }
+
+      priced(): void {
+        const kit = this.closest<HTMLElement>('parts-list-add-all');
+        const items = [
+          ...(kit?.querySelectorAll<HTMLElement>('[data-kit-part]') ?? []),
+        ];
+        for (const item of items) {
+          const offer =
+            item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset
+              .kitOffer;
+          if (offer) item.dataset.offerId = offer;
+        }
+        if (!items.every((item) => item.dataset.offerId)) return;
+        this.hidden = false;
+        const ask = kit?.querySelector('[data-add-all]');
+        ask?.classList.replace('btn-primary', 'btn-secondary');
+        ask?.querySelector('svg')?.remove();
       }
 
       async addKit(): Promise<void> {

@@ -3,24 +3,41 @@ import type { Category, PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { bestPrice } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogue';
 import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import Icon from './Icon.astro';
+import PriceSlot from './PriceSlot.astro';
 
 interface Props {
   category: Category | null;
-  pages: { offers: PartOffer[] }[];
+  pages: { id?: string; offers: PartOffer[] }[];
   class?: string;
+  live?: boolean;
 }
 
-const { category, pages, class: className } = Astro.props;
+const { category, pages, class: className, live = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
+const deferred =
+  !live && Astro.isPrerendered && !shopOpen() && category?.service_label;
 const addon = bestPrice(pages)?.buyable
   ? categoryAddon(category, locale)
   : null;
 const { addonPickup: pickup, addonInCart } = content(locale).shopCart;
 ---
 
+{
+  deferred && category && (
+    <PriceSlot
+      kind="addon"
+      fields={{
+        category: category.id,
+        ids: pages.flatMap(({ id }) => id ?? []).join(','),
+        class: className,
+      }}
+    />
+  )
+}
 {
   addon?.note && (
     <div

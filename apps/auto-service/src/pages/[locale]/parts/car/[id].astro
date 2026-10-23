@@ -14,7 +14,11 @@ import ThumbRow from '@/components/ThumbRow.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
+import {
+  carPagesForBuild,
+  shopOpen,
+  type CarPageEntry,
+} from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { kitPick } from '@/utils/kitPick';
@@ -161,19 +165,16 @@ const specsSummary = [
                     <span class="spec text-sm text-ink">
                       {quantity(item.quantity)}
                     </span>
-                    {item.offer ? (
-                      <PriceTag pages={[{ offers: [item.offer] }]} exact />
-                    ) : (
-                      <PriceTag pages={item.pages} />
-                    )}
+                    <PriceTag pages={item.pages} kit />
                   </span>
                 </li>
               ))}
             </ul>
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {kitBuyable && (
+              {(kitBuyable || !shopOpen()) && (
                 <kit-cart
                   class="contents"
+                  {...(kitBuyable ? {} : { hidden: '' })}
                   data-cart-href={PathBuilder.partsCart(locale)}
                 >
                   <button

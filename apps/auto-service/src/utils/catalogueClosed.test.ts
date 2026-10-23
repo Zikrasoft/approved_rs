@@ -173,6 +173,45 @@ describe('a closed shop', () => {
     );
   });
 
+  it('asks for the offers of a whole listing in one request per hundred numbers', async () => {
+    const ids = Array.from({ length: 150 }, (_, index) => `pi_${index}`);
+    const fetch = vi.fn((url: string) =>
+      respond({
+        offers: Object.fromEntries(
+          new URL(url).searchParams
+            .getAll('part_identifier_id')
+            .map((id) => [id, id === 'pi_149' ? OFFERS : []]),
+        ),
+      }),
+    );
+
+    const offers = await closed(fetch, true).offersFor(ids);
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(Object.keys(offers)).toHaveLength(150);
+    expect(offers.pi_149).toEqual(OFFERS);
+    expect(await closed(fetch).offersFor(ids)).toEqual({});
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('builds an open shop with prices even while the backend is still closed', async () => {
+    const fetch = backend();
+
+    await createCatalogue({
+      backendUrl: BACKEND_URL,
+      publishableKey: 'pk_test',
+      fetch: fetch as unknown as typeof globalThis.fetch,
+      shopOpen: true,
+    }).categories();
+
+    expect(fetch).toHaveBeenCalledWith(
+      `${BACKEND_URL}/store/categories`,
+      expect.objectContaining({
+        headers: { 'x-publishable-api-key': 'pk_test', 'x-shop-preview': '1' },
+      }),
+    );
+  });
+
   it('reads the shop as closed unless SHOP_OPEN is true', () => {
     expect(shopOpen({})).toBe(false);
     expect(shopOpen({ SHOP_OPEN: '' })).toBe(false);

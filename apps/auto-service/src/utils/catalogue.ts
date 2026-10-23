@@ -15,6 +15,7 @@ import {
   fitmentsResponseSchema,
   maintenanceKit,
   partPageSlug,
+  identifierOffersResponseSchema,
   partPagesResponseSchema,
   positionGroups,
   PRICE_FACET,
@@ -46,6 +47,7 @@ export type { Vehicle, VinFacts };
 export const CATALOGUE_TIMEOUT_MS = 10_000;
 export const MODEL_CATEGORY_MIN_MATCHES = 1;
 const PAGE_BATCH = 1000;
+const OFFERS_BATCH = 100;
 
 export type Fit = Fitment & { vehicle: Vehicle };
 
@@ -158,11 +160,6 @@ export type CatalogueConfig = {
   preview?: boolean;
 };
 
-const previewFlagSchema = z.literal('1');
-
-export const previewRequested = (flag: unknown): boolean =>
-  previewFlagSchema.safeParse(flag).success;
-
 export type CatalogueEnv = {
   MEDUSA_BACKEND_URL?: string;
   MEDUSA_PUBLISHABLE_KEY?: string;
@@ -219,7 +216,7 @@ export function createCatalogue({
       method,
       headers: {
         'x-publishable-api-key': publishableKey,
-        ...(preview && { [SHOP_PREVIEW_HEADER]: '1' }),
+        ...((preview || shopOpen) && { [SHOP_PREVIEW_HEADER]: '1' }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),
@@ -575,6 +572,26 @@ export function createCatalogue({
       } catch {
         return { category: null, model: null };
       }
+    },
+
+    async offersFor(ids: string[]): Promise<Record<string, PartOffer[]>> {
+      if (pricesHidden) return {};
+      const batches = Array.from(
+        { length: Math.ceil(ids.length / OFFERS_BATCH) },
+        (_, index) =>
+          ids.slice(index * OFFERS_BATCH, (index + 1) * OFFERS_BATCH),
+      );
+      const answers = await Promise.all(
+        batches.map(async (batch) => {
+          const params = new URLSearchParams(
+            batch.map((id) => ['part_identifier_id', id]),
+          );
+          return identifierOffersResponseSchema.parse(
+            await request(`/store/offers?${params}`),
+          ).offers;
+        }),
+      );
+      return Object.assign({}, ...answers);
     },
 
     async liveOffers(identifierId: string): Promise<OffersOutcome> {

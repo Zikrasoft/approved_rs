@@ -2,11 +2,10 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { SHOP_PREVIEW_HEADER } from '@/scripts/shopPreview';
+import { previewRequested } from '@/scripts/shopPreview';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
-  previewRequested,
   siteEnv,
   type CartOutcome,
 } from '@/utils/catalogue';
@@ -39,7 +38,7 @@ const EMPTY: CartOutcome = { kind: 'empty' };
 
 const catalogue = (request: Request) =>
   catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request.headers.get(SHOP_PREVIEW_HEADER)),
+    preview: previewRequested(request),
   });
 
 const respond = async (

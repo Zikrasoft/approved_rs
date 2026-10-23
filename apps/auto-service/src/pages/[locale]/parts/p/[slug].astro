@@ -367,7 +367,10 @@ const thumbFor = (slug: string) => {
               slug={equivalentSlug(equivalent)}
               brand={equivalent.brand.name}
               value={equivalent.value}
-              offers={bySlug.get(equivalentSlug(equivalent))?.offers ?? []}
+              priced={{
+                id: equivalent.id,
+                offers: bySlug.get(equivalentSlug(equivalent))?.offers ?? [],
+              }}
             />
           ))}
         </ul>

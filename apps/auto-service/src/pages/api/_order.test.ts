@@ -35,7 +35,10 @@ const submit = (body: BodyInit, headers: HeadersInit = {}) =>
       new Response(null, { status, headers: { location: path } }),
   } as unknown as APIContext);
 
-const checkout = (fields: Record<string, string> = {}) => {
+const checkout = (
+  fields: Record<string, string> = {},
+  headers: HeadersInit = {},
+) => {
   const form = new FormData();
   for (const [key, value] of Object.entries({
     locale: 'ru',
@@ -48,7 +51,7 @@ const checkout = (fields: Record<string, string> = {}) => {
   })) {
     form.set(key, value);
   }
-  return submit(form);
+  return submit(form, headers);
 };
 
 const location = (response: Response) => response.headers.get('location');
@@ -115,11 +118,10 @@ describe('POST /api/order', () => {
   it('passes the preview flag of a closed-beta visitor on to the shop', async () => {
     answer(200, { order: { id: 'order_1', display_id: 42 } });
 
-    const response = await checkout({ shop_preview: '1' });
+    const response = await checkout({}, { cookie: 'carlab_shop_preview=1' });
 
     expect(location(response)).toContain('notice=ordered');
     const [, init] = backend.mock.calls[0] as [string, RequestInit];
     expect(init.headers).toMatchObject({ 'x-shop-preview': '1' });
-    expect(JSON.parse(String(init.body))).not.toHaveProperty('shop_preview');
   });
 });

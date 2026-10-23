@@ -11,7 +11,6 @@ import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
-  previewRequested,
   siteEnv,
 } from '@/utils/catalogue';
 import {
@@ -22,7 +21,7 @@ import {
   type CartNotice,
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
-import { SHOP_PREVIEW_FIELD } from '@/scripts/shopPreview';
+import { previewRequested } from '@/scripts/shopPreview';
 
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,
@@ -52,7 +51,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     return toCart('invalid');
   }
   const outcome = await catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(form[SHOP_PREVIEW_FIELD]),
+    preview: previewRequested(request),
   })?.placeOrder(
     order.data.cart_id,
     contact.data,

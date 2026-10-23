@@ -1,29 +1,28 @@
 export const SHOP_PREVIEW_HEADER = 'x-shop-preview';
-export const SHOP_PREVIEW_FIELD = 'shop_preview';
+export const PRICES_FILLED_EVENT = 'carlab:prices-filled';
 
-const STORAGE_KEY = 'carlab_shop_preview';
-const PARAM = 'df';
+const COOKIE = 'carlab_shop_preview';
+const PARAM = 'dev';
 const ON = '1';
+const COOKIE_ON = `${COOKIE}=${ON}`;
 
-type PreviewStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+export function previewFrom(search: string, cookie: string | null): boolean {
+  const asked = new URLSearchParams(search).get(PARAM);
+  if (asked === ON || asked === '0') return asked === ON;
+  return (cookie ?? '').split(/;\s*/).includes(COOKIE_ON);
+}
 
 export function shopPreview(
   search = location.search,
-  storage?: PreviewStorage,
+  jar: { cookie: string } = document,
 ): boolean {
   const asked = new URLSearchParams(search).get(PARAM);
-  try {
-    const store = storage ?? localStorage;
-    if (asked === ON) store.setItem(STORAGE_KEY, ON);
-    if (asked === '0') store.removeItem(STORAGE_KEY);
-    return store.getItem(STORAGE_KEY) === ON;
-  } catch {
-    return asked === ON;
+  if (asked === ON) {
+    jar.cookie = `${COOKIE_ON}; path=/; max-age=31536000; samesite=lax`;
   }
+  if (asked === '0') jar.cookie = `${COOKIE}=; path=/; max-age=0`;
+  return previewFrom(search, jar.cookie);
 }
 
-export const previewHeaders = (
-  search?: string,
-  storage?: PreviewStorage,
-): Record<string, string> =>
-  shopPreview(search, storage) ? { [SHOP_PREVIEW_HEADER]: ON } : {};
+export const previewRequested = (request: Request): boolean =>
+  previewFrom(new URL(request.url).search, request.headers.get('cookie'));

@@ -16,10 +16,10 @@ interface Props {
   detail?: string;
   superseded?: boolean;
   current?: { slug: string; brand: { name: string }; value: string } | null;
-  offers?: PartOffer[];
+  priced?: { id: string; offers: PartOffer[] };
 }
 
-const { thumb, slug, brand, value, name, detail, superseded, current, offers } =
+const { thumb, slug, brand, value, name, detail, superseded, current, priced } =
   Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
@@ -63,9 +63,9 @@ const copy = content(locale).shopPart;
       }
     </span>
     {
-      offers && (
+      priced && (
         <PriceTag
-          pages={[{ offers }]}
+          pages={[priced]}
           class="max-sm:flex-row max-sm:flex-wrap max-sm:items-baseline max-sm:gap-x-2 max-sm:text-left"
         />
       )

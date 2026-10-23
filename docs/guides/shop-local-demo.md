@@ -198,7 +198,7 @@ without them it lists no part pages.
 
 To see production's closed beta, set `SHOP_OPEN=false` in
 `apps/auto-service/.env.local` (and in `apps/carlab-shop/.env` for the backend
-gate), restart, and open a page with `?df=1` to turn the preview on, `?df=0` to
+gate), restart, and open a page with `?dev=1` to turn the preview on, `?dev=0` to
 turn it off. See
 [Closed beta](deploy.md#closed-beta-the-preview-flag).
 
