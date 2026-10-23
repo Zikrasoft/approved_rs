@@ -45,8 +45,8 @@ translations:
     lookingFor: Recite nam, koje auto imate i šta želite da uradite — folija, poliranje, keramika ili nešto drugo?
     phoneAsk: Nemate korisničko ime na Telegramu, pa menadžer ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
     phoneButton: 📱 Podelite broj
-    thanks: Hvala! Preneli smo menadžeru, uskoro će vas kontaktirati.
-    received: Primili smo, menadžer će pročitati vašu poruku.
+    thanks: Hvala! Prosledili smo menadžeru, uskoro će vas kontaktirati.
+    received: Primili smo, menadžer će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas zanima.
       back: « Nazad
@@ -61,10 +61,10 @@ translations:
       text: Mi smo u Beogradu, čekamo vas u studiju.
       hours: Pon–Sub, 09:00–19:00
     manager:
-      button: 👤 Pisati menadžeru
-      text: Postavite vaše pitanje u jednoj poruci, menadžer će odgovoriti ovde.
+      button: 👤 Napisati menadžeru
+      text: Postavite svoje pitanje u jednoj poruci, menadžer će odgovoriti ovde.
       handoff: Menadžer je dostupan na Telegramu. Kliknite da otvorite chat.
-      chat: Otvorite chat sa menadžerom ↗
+      chat: Otvoriti chat sa menadžerom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
@@ -78,7 +78,7 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam je najugodniji za komunikaciju.
     profile:
-      description: 'Detaljerska studija u Beogradu: folija, poliranje, keramika. Kliknite «Start» i recite šta želite da uradite sa svojim autom, menadžer će odgovoriti ovde. Brže bez bota? Pišite menadžeru direktno: {manager}'
+      description: 'Detaljerska studija u Beogradu: folije, poliranje, keramika. Kliknite «Start» i recite šta želite da uradite sa autom, menadžer će odgovoriti ovde. Prikladnije bez bota? Napišite menadžeru direktno: {manager}'
       shortDescription: 'Detaljerska studija u Beogradu: folija, poliranje, keramika. Menadžer: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeniti jezik
@@ -87,8 +87,8 @@ translations:
     lookingFor: Tell us about your car and what you’d like to do — paint protection film, polishing, ceramic coating, or something else.
     phoneAsk: We don't see a username for you on Telegram, so our manager can't message you. Please provide your phone number so we can get in touch.
     phoneButton: 📱 Share number
-    thanks: Thank you! We've passed your message to the manager, they'll get in touch with you soon.
-    received: Message received, the manager will see your message.
+    thanks: Thank you! We've passed your message to the manager, they'll be in touch soon.
+    received: Got it, the manager will see your message.
     menu:
       text: How can we help you? Choose what you're interested in.
       back: « Back
@@ -104,8 +104,8 @@ translations:
       hours: Mon–Sat, 09:00–19:00
     manager:
       button: 👤 Message the manager
-      text: Please send your question in one message, the manager will respond here.
-      handoff: The manager is available on Telegram. Click to open the chat.
+      text: Send your question in one message, the manager will respond here.
+      handoff: The manager is online on Telegram. Click to open the chat.
       chat: Open chat with the manager ↗
     partners:
       button: Partners
@@ -120,8 +120,8 @@ translations:
       button: 🌐 Language
       text: Select the language you're most comfortable communicating in.
     profile:
-      description: "Detailing studio in Belgrade: paint protection film, polishing, ceramic. Click 'Start' and tell us what you want to do with your car, the manager will respond here. Prefer to chat without a bot? Message the manager directly: {manager}"
-      shortDescription: 'Detailing studio in Belgrade: film, polishing, ceramic. Manager: {manager}'
+      description: "Car detailing studio in Belgrade: film wraps, polishing, ceramic coating. Click 'Start' and tell us what you'd like to do with your car, the manager will respond here. Prefer to chat directly? Message the manager: {manager}"
+      shortDescription: 'Car detailing studio in Belgrade: wraps, polishing, ceramic coating. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: 5c057b4cdd7be308

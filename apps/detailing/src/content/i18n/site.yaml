@@ -113,7 +113,7 @@ translations:
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt je napravljen u studiji Zikrasoft
+      developerCredit: Sajt napravila studio Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Na sadržaj
@@ -139,11 +139,11 @@ translations:
       telegram: Pisati na Telegram
       instagram: Instagram
     telegramChoice:
-      heading: Kako je lakše pisati?
+      heading: Kako vam je lakše da pišete?
       bot: Preko bota
-      botHint: Recite šta je s automobilom, menadžer će odgovoriti u istom čatu
+      botHint: Ispričajte šta je sa kolima, menadžer će odgovoriti u istom čatu
       manager: Direktno menadžeru
-      managerHint: Lični chat s menadžerom na Telegramu
+      managerHint: Lični čat sa menadžerom na Telegramu
     form:
       heading: Zakažite konsultaciju
       subheading: Pogledaćemo auto, iskreno reći šta mu zaista treba i navesti tačnu cenu.
@@ -198,9 +198,9 @@ translations:
       hoursHeading: Operating Hours
       hours: Mon–Sat, 09:00–19:00
       privacyLabel: Privacy Policy
-      aboutLabel: About Us
+      aboutLabel: About the Project
       rightsSuffix: All rights reserved.
-      developerCredit: Website created by Zikrasoft
+      developerCredit: Website created by Zikrasoft studio
     common:
       homeLabel: Home
       skipToContent: Skip to Content
@@ -226,9 +226,9 @@ translations:
       telegram: Message on Telegram
       instagram: Instagram
     telegramChoice:
-      heading: How would you prefer to reach out?
+      heading: What’s the easiest way to contact us?
       bot: Via the bot
-      botHint: Tell us what’s wrong with your car, the manager will respond in this chat
+      botHint: Tell us what’s wrong with your car, and the manager will respond in the same chat
       manager: Directly to the manager
       managerHint: Personal chat with the manager on Telegram
     form:

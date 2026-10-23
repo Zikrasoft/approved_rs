@@ -41,12 +41,12 @@ profile:
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Zdravo! Hvala što ste se javili. Vaša prijava je primljena, menadžer će vam uskoro odgovoriti.
+    greeting: Zdravo! Hvala što ste se javili. Vaš zahtev je kod nas, menadžer će uskoro odgovoriti.
     lookingFor: Ispričajte kako se zove vaša mašina — marka, model, godina — i šta je pošlo po zlu ili koje radove trebate.
-    phoneAsk: Nemate korisničko ime (username) u Telegramu, pa menadžer ne može da vam piše. Molimo vas ostavite broj telefona kako bismo mogli da vas kontaktiramo.
+    phoneAsk: Nemate korisničko ime u Telegram-u, pa menadžer ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
     phoneButton: 📱 Podeliti broj
-    thanks: Hvala! Prosledili smo menadžeru, on će vas uskoro kontaktirati.
-    received: Primili smo, menadžer će videti vašu poruku.
+    thanks: Hvala! Prosledili smo menadžeru, uskoro će vas kontaktirati.
+    received: Prijem, menadžer će videti vašu poruku.
     menu:
       text: Kako možemo pomoći? Izaberite šta vas zanima.
       back: « Nazad
@@ -61,10 +61,10 @@ translations:
       text: Mi smo u Beogradu, čekamo vas u servisu.
       hours: Pn–Pt 08:00–18:00 · Sub 09:00–14:00
     manager:
-      button: 👤 Piši menadžeru
-      text: Postavite svoje pitanje u jednoj poruci, menadžer će odgovoriti ovde.
-      handoff: Menadžer je dostupan na Telegramu. Kliknite da otvorite čet.
-      chat: Otvorite čet sa menadžerom ↗
+      button: 👤 Pisati menadžeru
+      text: Postavite vaše pitanje jednim porukom, menadžer će ovde odgovoriti.
+      handoff: Menadžer je dostupan na Telegram-u. Kliknite da otvorite chat.
+      chat: Otvorite chat sa menadžerom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da se obratite.
@@ -78,16 +78,16 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik koji vam je lakše za komunikaciju.
     profile:
-      description: "Autoseris u Beogradu: dijagnostika, popravka i održavanje. Kliknite 'Start' i recite šta se dešava sa vašim automobilom, menadžer će odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}"
-      shortDescription: 'Autoseris u Beogradu: dijagnostika, popravka, održavanje. Menadžer: {manager}'
+      description: 'Automehaničarska radionica u Beogradu: dijagnostika, popravka i servis. Kliknite „Start“ i recite šta nije u redu sa autom, menadžer će ovde odgovoriti. Prirodnije je bez bota? Pišite menadžeru direktno: {manager}'
+      shortDescription: 'Automehaničarska radionica u Beogradu: dijagnostika, popravka, servis. Menadžer: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeniti jezik
   en:
-    greeting: Hello! Thanks for reaching out. Your request is received, and a manager will respond shortly.
+    greeting: Hello! Thanks for reaching out. We've received your request, and a manager will get back to you soon.
     lookingFor: Tell me about your car — the make, model, year — and what happened or what work you need done.
-    phoneAsk: You don't have a username set in Telegram, so the manager can't message you. Please provide your phone number so we can get in touch.
+    phoneAsk: You don't have a username in Telegram, so the manager can't message you. Please leave your phone number so we can contact you.
     phoneButton: 📱 Share phone number
-    thanks: Thank you! I've passed your message to the manager, and they will contact you soon.
+    thanks: Thank you! I've passed your message to the manager, and they'll be in touch soon.
     received: Got it, the manager will see your message.
     menu:
       text: How can we help you? Choose what you're interested in.
@@ -104,8 +104,8 @@ translations:
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
       button: 👤 Message the manager
-      text: Please send your question in one message, and the manager will reply here.
-      handoff: The manager is available on Telegram. Click to open the chat.
+      text: Please write your question in one message, and the manager will respond here.
+      handoff: The manager is available in Telegram. Click to open the chat.
       chat: Open chat with the manager ↗
     partners:
       button: Partners
@@ -120,8 +120,8 @@ translations:
       button: 🌐 Language
       text: Choose the language you're most comfortable communicating in.
     profile:
-      description: "Car service in Belgrade: diagnostics, repair, and servicing. Click 'Start' and tell us what's wrong with your car, the manager will reply here. Prefer to skip the bot? Message the manager directly: {manager}"
-      shortDescription: 'Car service in Belgrade: diagnostics, repair, servicing. Manager: {manager}'
+      description: "Car service in Belgrade: diagnostics, repairs, and servicing. Click 'Start' and tell us what's wrong with your car, the manager will reply here. Prefer to chat without the bot? Message the manager directly: {manager}"
+      shortDescription: 'Car service in Belgrade: diagnostics, repairs, servicing. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: 09fa7161aefbbff8
