@@ -18,6 +18,7 @@
     "src/contactChannel.ts",
     "src/fields.ts",
     "src/limits.ts",
+    "src/partsOrderCopy.ts",
     "src/phone.ts"
   ]
 }

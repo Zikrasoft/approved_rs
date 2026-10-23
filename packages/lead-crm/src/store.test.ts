@@ -656,6 +656,40 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(lead.service).toBe('parts-order');
   });
 
+  it('answers a resent order with the Lead it already made, untouched', async () => {
+    const { lead: first } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    await store.setStatus(first.id, 'won');
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+      comment: 'повтор',
+      orderId: 'order_1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(first.id);
+    expect(lead.status).toBe('won');
+    expect(lead.comment).toBeUndefined();
+    expect(await store.readLeads()).toHaveLength(1);
+  });
+
+  it('keeps two different orders apart', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_2',
+    });
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
   it('still merges services that are not standalone', async () => {
     await store.insertOrMergeLead(inquiry);
     const { merged } = await store.insertOrMergeLead({

@@ -124,6 +124,7 @@ const baseStoredLeadSchema = z.object({
   adSource: adSourceSchema.nullable().default(null).catch(null),
   metaIds: metaIdsSchema.nullable().default(null).catch(null),
   metaLeadSentAt: z.string().nullable().default(null).catch(null),
+  orderId: z.string().nullable().optional().catch(undefined),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
   postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),
@@ -185,6 +186,7 @@ export type LeadInput = Pick<
       | 'referredBy'
       | 'adSource'
       | 'metaIds'
+      | 'orderId'
     >
   >;
 

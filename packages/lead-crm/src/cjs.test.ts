@@ -15,6 +15,8 @@ describe('CommonJS build', () => {
     expect(require('@podbor/lead-crm/fields').AD_SOURCE_FIELD).toBe(
       'ad_source',
     );
+    expect(require('@podbor/lead-crm/fields').ORDER_ID_FIELD).toBe('order_id');
+    expect(require('@podbor/lead-crm/parts-order-copy').dayWord(2)).toBe('дня');
     expect(
       require('@podbor/lead-crm/phone').isValidContact(
         '@carlab_rs',

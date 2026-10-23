@@ -12,6 +12,7 @@ import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
 
@@ -32,6 +33,7 @@ export {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
 
@@ -128,6 +130,7 @@ const submissionObject = z
     visitor_id: visitorIdSchema,
     [AD_SOURCE_FIELD]: adSourceFieldSchema,
     [META_IDS_FIELD]: metaIdsFieldSchema,
+    [ORDER_ID_FIELD]: optionalText(MAX_FIELD_LENGTH),
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
     consent: z.string().trim().min(1),
   })
@@ -153,6 +156,7 @@ const submissionObject = z
       visitorId: value.visitor_id,
       adSource: value[AD_SOURCE_FIELD],
       metaIds: value[META_IDS_FIELD],
+      orderId: value[ORDER_ID_FIELD],
     };
   });
 

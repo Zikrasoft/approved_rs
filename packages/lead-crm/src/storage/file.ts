@@ -1,11 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { statSync } from 'node:fs';
 import {
   access,
   link,
   mkdir,
   readFile,
   rename,
+  stat,
   unlink,
   writeFile,
 } from 'node:fs/promises';
@@ -85,7 +85,7 @@ export function createFileStorage({
       await writeFile(lockFile, '', { flag: 'wx' });
     } catch (error) {
       if (!isExisting(error)) throw error;
-      const held = statSync(lockFile, { throwIfNoEntry: false });
+      const held = await stat(lockFile).catch(() => undefined);
       if (held && Date.now() - held.mtimeMs > STALE_LOCK_MS) {
         await unlink(lockFile);
       }

@@ -423,6 +423,15 @@ export function createLeadStore({
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
       await updateLeads((leads, idFloor) => {
+        const placed = data.orderId
+          ? leads.find(
+              (l) => l.orderId === data.orderId && l.brand === data.brand,
+            )
+          : undefined;
+        if (placed) {
+          outcome = { lead: placed, merged: true, before: placed };
+          return leads;
+        }
         const now = Date.now();
         const existing = data.visitorId
           ? leads.find(

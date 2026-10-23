@@ -33,6 +33,13 @@
       },
       "default": "./src/fields.ts"
     },
+    "./parts-order-copy": {
+      "require": {
+        "types": "./dist/cjs/partsOrderCopy.d.ts",
+        "default": "./dist/cjs/partsOrderCopy.js"
+      },
+      "default": "./src/partsOrderCopy.ts"
+    },
     "./ad-text": "./src/adText.ts",
     "./phone": {
       "require": {

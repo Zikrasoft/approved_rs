@@ -317,6 +317,20 @@ describe('leadSubmissionSchema', () => {
     );
   });
 
+  it('carries the shop order the Lead was placed for', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      order_id: ' order_01J ',
+    });
+    expect(parsed.success && parsed.data.orderId).toBe('order_01J');
+  });
+
+  it('leaves a form Lead without an order', () => {
+    const parsed = submit({ name: '', contact: '+381641234567' });
+    expect(parsed.success && parsed.data.orderId).toBeNull();
+  });
+
   it('rejects a missing contact', () => {
     expect(submit({ name: 'Иван' }).success).toBe(false);
   });
