@@ -6,7 +6,7 @@ noEquivalents: Аналогов в каталоге пока нет. Напиш�
 numberSupersededNotice: Номер {number} больше не используется производителем.
 partReplacedNotice: Производитель заменил деталь {number} новой.
 previousNumber: Прежний номер
-previousNumberCurrent: 'Прежний номер, актуальный:'
+previousNumberCurrent: Номер заменен на
 earlierNumbers: 'Ранее:'
 previousNumbersHeading: Прежние номера
 currentNumberLabel: 'Актуальный номер:'
