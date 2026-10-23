@@ -9,21 +9,24 @@ export type BestPrice = {
   leadDays: number;
 };
 
+const inStock = (offer: PartOffer) => offer.stock_quantity > 0;
+
 export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   const offers = pages.flatMap(({ offers }) => offers);
   if (offers.length === 0) {
     return null;
   }
-  const inStock = offers.filter(({ stock_quantity }) => stock_quantity > 0);
   const buyable = offers.filter(isBuyable);
-  const pool = inStock.length ? inStock : buyable.length ? buyable : offers;
-  const cheapest = pool.reduce((best, offer) =>
-    offer.price < best.price ? offer : best,
+  const cheapest = (buyable.length ? buyable : offers).reduce((best, offer) =>
+    offer.price < best.price ||
+    (offer.price === best.price && inStock(offer) && !inStock(best))
+      ? offer
+      : best,
   );
   return {
     price: cheapest.price,
     currency: cheapest.currency,
-    inStock: inStock.length > 0,
+    inStock: inStock(cheapest),
     buyable: buyable.length > 0,
     leadDays: cheapest.lead_time_days,
   };

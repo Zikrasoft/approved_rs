@@ -25,6 +25,24 @@ describe('bestPrice', () => {
     });
   });
 
+  it('gives the lowest price the visitor can buy, the supplier bringing it in or not', () => {
+    expect(
+      bestPrice([{ offers: [offer(1200, 4), offer(1125, 0, 2)] }]),
+    ).toEqual({
+      price: 1125,
+      currency: 'RSD',
+      inStock: false,
+      buyable: true,
+      leadDays: 2,
+    });
+  });
+
+  it('names the offer in stock when two buyable offers cost the same', () => {
+    expect(
+      bestPrice([{ offers: [offer(1125, 0, 2), offer(1125, 4)] }]),
+    ).toMatchObject({ price: 1125, inStock: true, leadDays: 0 });
+  });
+
   it('falls back to the lowest price and its pickup time when nothing is in stock', () => {
     expect(
       bestPrice([{ offers: [offer(2200, 0, 2), offer(1700, 0, 4)] }]),

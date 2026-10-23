@@ -8,7 +8,8 @@ const slugOf = (number: BrandNumber) =>
 function buyability(page: PartPageEntry): [number, number] {
   const best = bestPrice([page]);
   if (!best) return [0, 0];
-  return [best.inStock ? 2 : 1, -best.price];
+  const stocked = page.offers.some(({ stock_quantity }) => stock_quantity > 0);
+  return [stocked ? 2 : 1, -best.price];
 }
 
 const buyableFirst = (a: PartPageEntry, b: PartPageEntry) => {
