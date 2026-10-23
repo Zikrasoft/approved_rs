@@ -12,5 +12,5 @@ The shape is the pre-ADR-0033 one, restored inside today's `defineAnalytics` in 
 
 - `ymCounterId` is one more optional id next to `gaMeasurementId`, `metaPixelId` and `googleAdsId`, passed by each app's layout from `src/utils/analytics.ts`.
 - Same gate as every other tag: queued on the first page view, `tag.js` fetched while the browser is idle, held back from the next load by an explicit refusal, never in dev.
-- `init` with `webvisor`, `clickmap`, `trackLinks`, `accurateTrackBounce` and `ssr`, as before. The lead and checkout forms carry `ym-hide-content ym-disable-keys` again, so recordings keep the visitor's contact out.
+- `init` with `webvisor`, `clickmap`, `trackLinks`, `accurateTrackBounce` and `ssr`, as before. The lead and checkout forms carry `METRIKA_MASK_CLASS` (`ym-hide-content ym-disable-keys`) again, so recordings keep the visitor's contact out.
 - Every goal reaches Metrika under the same identifier from `goals.ts`. When a goal carries `value` and `currency`, Metrika also gets `order_price`, the parameter it reads revenue from, so `purchase` counts revenue without a second call shape.

@@ -1,4 +1,5 @@
 ---
+import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import FormField from './FormField.astro';
 import Button from './Button.astro';
 import TelegramIcon from './icons/TelegramIcon.astro';
@@ -102,7 +103,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
     <form
       method="POST"
       action="/api/leads"
-      class="ym-hide-content ym-disable-keys"
+      class={METRIKA_MASK_CLASS}
       data-lead-form
       {...{ [DATA_DEFAULT_SERVICE]: service }}
     >

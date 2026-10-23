@@ -12,7 +12,7 @@ history before that date is in Metrika only; see
 Metrika came back beside GA4 on 2026-10-23
 ([ADR-0044](../adr/0044-yandex-metrika-beside-ga4.md)): every goal reaches both,
 under the same identifier, and Webvisor records sessions again with the lead
-forms masked (`ym-hide-content ym-disable-keys`).
+forms masked by `METRIKA_MASK_CLASS` from `@podbor/site-kit/browser`.
 
 Exclusions from the sample (our own visits, Russia) are in
 [analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion

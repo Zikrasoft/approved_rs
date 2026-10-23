@@ -6,6 +6,8 @@ import {
   type ConsentDetail,
 } from './consent.ts';
 
+export const METRIKA_MASK_CLASS = 'ym-hide-content ym-disable-keys';
+
 const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
 const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
 const GOOGLE_TAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=';

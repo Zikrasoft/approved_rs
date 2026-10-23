@@ -281,7 +281,7 @@ carlab.rs, the same already-installed gtag.js (loaded for the `AW-18508613563`
 Google Ads tag) also carries the GA4 config — no second script. An explicit
 refusal in the banner takes effect from the next load — there is no way to
 unload a tag that has already started. Metrika's `webvisor` session recording
-is on; the lead and checkout forms carry `ym-hide-content ym-disable-keys` so
+is on; the lead and checkout forms carry `METRIKA_MASK_CLASS` so
 their contents stay out of it.
 
 **If you change a measurement id, or enable analytics somewhere it was
