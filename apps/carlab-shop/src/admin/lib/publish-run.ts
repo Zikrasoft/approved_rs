@@ -1,6 +1,6 @@
-import { toast } from '@medusajs/ui';
+import { toast, usePrompt } from '@medusajs/ui';
 import { useEffect, useSyncExternalStore } from 'react';
-import { getI18n } from 'react-i18next';
+import { getI18n, useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { adminFetch } from './admin-fetch';
@@ -72,8 +72,23 @@ const publish = async () => {
 
 export const usePublishRun = () => {
   const snapshot = useSyncExternalStore(subscribe, () => state);
+  const prompt = usePrompt();
+  const { t } = useTranslation('carlabAdmin');
   useEffect(() => {
     load();
   }, []);
-  return { ...snapshot, publish };
+  const confirmAndPublish = async () => {
+    if (
+      await prompt({
+        variant: 'confirmation',
+        title: t('publish.confirmTitle'),
+        description: t('publish.confirmBody'),
+        confirmText: t('publish.publish'),
+        cancelText: t('common.cancel'),
+      })
+    ) {
+      await publish();
+    }
+  };
+  return { ...snapshot, publish: confirmAndPublish };
 };

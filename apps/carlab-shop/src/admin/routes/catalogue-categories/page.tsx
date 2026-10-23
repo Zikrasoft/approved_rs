@@ -25,6 +25,7 @@ import {
   ImageUploads,
   uploadImage,
 } from '../../components/image-uploads';
+import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -590,8 +591,8 @@ const CategoryEditor = ({
         {category.fields.length === 0 ? (
           <Text>{t('categories.noFields')}</Text>
         ) : (
-          <ScrollArea>
-            <Table>
+          <ScrollArea pinnedEnd>
+            <Table className={PINNED_ACTIONS}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>{t('categories.key')}</Table.HeaderCell>
@@ -703,7 +704,7 @@ const CategoryEditor = ({
 const CategoriesPage = () => {
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[] | null>(null);
   const [selectedId, setSelectedId] = useState('');
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('');
@@ -732,7 +733,7 @@ const CategoriesPage = () => {
     }
   };
 
-  const selected = categories.find(({ id }) => id === selectedId);
+  const selected = categories?.find(({ id }) => id === selectedId);
 
   return (
     <Container className="flex flex-col gap-y-6">
@@ -760,7 +761,9 @@ const CategoriesPage = () => {
         </Text>
       </div>
 
-      {categories.length === 0 ? (
+      {categories === null ? (
+        <ListLoading />
+      ) : categories.length === 0 ? (
         <Text>{t('categories.empty')}</Text>
       ) : (
         <div className="flex flex-wrap gap-2">

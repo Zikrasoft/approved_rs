@@ -1,6 +1,12 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
-export const ScrollArea = ({ children }: { children: ReactNode }) => {
+export const ScrollArea = ({
+  children,
+  pinnedEnd = false,
+}: {
+  children: ReactNode;
+  pinnedEnd?: boolean;
+}) => {
   const ref = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(false);
 
@@ -30,7 +36,7 @@ export const ScrollArea = ({ children }: { children: ReactNode }) => {
       <div ref={ref} className="overflow-x-auto" onScroll={measure}>
         {children}
       </div>
-      {more && (
+      {more && !pinnedEnd && (
         <div
           aria-hidden
           className="from-ui-bg-base pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l to-transparent"

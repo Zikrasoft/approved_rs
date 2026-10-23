@@ -27,7 +27,12 @@ import {
   EnrichmentStatus,
   partIdentifiersSchema,
 } from '../../components/enrichment';
-import { LIST_TABLE, ListEmpty, ListHeader } from '../../components/list';
+import {
+  LIST_TABLE,
+  ListEmpty,
+  ListHeader,
+  PINNED_ACTIONS,
+} from '../../components/list';
 import {
   OffersDrawer,
   type OffersTarget,
@@ -194,8 +199,8 @@ const PartsPage = () => {
       </ListHeader>
       {listing?.part_identifiers.length ? (
         <>
-          <ScrollArea>
-            <Table className={LIST_TABLE}>
+          <ScrollArea pinnedEnd>
+            <Table className={`${LIST_TABLE} ${PINNED_ACTIONS}`}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>
@@ -240,10 +245,7 @@ const PartsPage = () => {
                         </div>
                       </Table.Cell>
                       <Table.Cell className="whitespace-nowrap">
-                        <EnrichmentStatus
-                          {...row}
-                          reasonClassName="max-sm:hidden"
-                        />
+                        <EnrichmentStatus {...row} />
                       </Table.Cell>
                       <Table.Cell className="whitespace-normal">
                         {row.category?.name ?? (

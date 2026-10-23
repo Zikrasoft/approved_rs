@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
@@ -125,6 +126,7 @@ const RequirementsPage = () => {
   const [ownerId, setOwnerId] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [loadedOwner, setLoadedOwner] = useState('');
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
 
   useEffect(() => {
@@ -145,7 +147,10 @@ const RequirementsPage = () => {
       `/admin/requirements?${ownerKey}=${encodeURIComponent(ownerId)}`,
       requirementsSchema,
     );
-    if (data) setRequirements(data.requirements);
+    if (data) {
+      setRequirements(data.requirements);
+      setLoadedOwner(ownerId);
+    }
   };
 
   useEffect(() => {
@@ -288,11 +293,13 @@ const RequirementsPage = () => {
         <Text>{t('requirements.pickOwner')}</Text>
       ) : (
         <>
-          {requirements.length === 0 ? (
+          {loadedOwner !== ownerId ? (
+            <ListLoading />
+          ) : requirements.length === 0 ? (
             <Text>{t('requirements.empty')}</Text>
           ) : (
-            <ScrollArea>
-              <Table>
+            <ScrollArea pinnedEnd>
+              <Table className={PINNED_ACTIONS}>
                 <Table.Header>
                   <Table.Row>
                     <Table.HeaderCell>
