@@ -391,6 +391,68 @@ medusaIntegrationTestRunner({
         expect(response.data.cart.items).toEqual([]);
       });
 
+      describe('while the shop is closed', () => {
+        const postPreview = (path: string, body: unknown = {}) =>
+          api
+            .post(path, body, {
+              headers: { ...storeHeaders.headers, 'x-shop-preview': '1' },
+            })
+            .catch((error) => error.response);
+
+        beforeAll(() => {
+          process.env.SHOP_OPEN = 'false';
+        });
+
+        afterAll(() => {
+          delete process.env.SHOP_OPEN;
+        });
+
+        it('refuses a cart to a visitor without the preview flag', async () => {
+          const refused = await post('/store/offer-carts', {
+            offer_id: offerId,
+            quantity: 1,
+          });
+
+          expect(refused.status).toBe(403);
+        });
+
+        it('sells to a visitor with the preview flag', async () => {
+          const created = await postPreview('/store/offer-carts', {
+            offer_id: offerId,
+            quantity: 1,
+          });
+
+          expect(created.status).toBe(200);
+          expect(
+            (
+              await postPreview(
+                `/store/offer-carts/${created.data.cart.id}/items`,
+                { offer_id: offerId, quantity: 1 },
+              )
+            ).status,
+          ).toBe(200);
+        });
+
+        it('refuses checkout to a visitor without the preview flag', async () => {
+          const {
+            data: { cart },
+          } = await postPreview('/store/offer-carts', {
+            offer_id: offerId,
+            quantity: 1,
+          });
+
+          expect(
+            (
+              await post(`/store/offer-carts/${cart.id}/items`, {
+                offer_id: offerId,
+                quantity: 1,
+              })
+            ).status,
+          ).toBe(403);
+          expect((await complete(cart)).status).toBe(403);
+        });
+      });
+
       it('answers 404 for a cart that does not exist', async () => {
         const response = await post('/store/offer-carts/cart_missing/items', {
           offer_id: offerId,

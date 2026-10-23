@@ -147,4 +147,23 @@ describe('parseEnv', () => {
       }),
     ).toThrow('The demo supplier never runs in production');
   });
+
+  it('keeps the shop closed in production and open elsewhere unless SHOP_OPEN says', () => {
+    const production = {
+      ...VALID_ENV,
+      NODE_ENV: 'production',
+      TYPESENSE_API_KEY: 'secret',
+      FILE_URL: 'https://api.carlab.rs/static',
+    };
+
+    expect(parseEnv(production).SHOP_OPEN).toBe(false);
+    expect(parseEnv({ ...production, SHOP_OPEN: 'true' }).SHOP_OPEN).toBe(true);
+    expect(parseEnv(VALID_ENV).SHOP_OPEN).toBe(true);
+    expect(parseEnv({ ...VALID_ENV, SHOP_OPEN: 'false' }).SHOP_OPEN).toBe(
+      false,
+    );
+    expect(() => parseEnv({ ...VALID_ENV, SHOP_OPEN: 'yes' })).toThrow(
+      /SHOP_OPEN/,
+    );
+  });
 });

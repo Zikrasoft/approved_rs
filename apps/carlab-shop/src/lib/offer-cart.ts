@@ -26,9 +26,13 @@ import {
   type OfferCart,
 } from '@podbor/catalog-contract';
 
+import type { MedusaRequest } from '@medusajs/framework/http';
+import { z } from 'zod';
+
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { sellPrice } from '../modules/supplier/pricing';
+import { parseEnv } from './env';
 import { liveOffers } from './suppliers/live-quote';
 
 export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
@@ -130,6 +134,25 @@ export const refuseStockCartChange = (
       'Carts change only through /store/offer-carts',
     ),
   );
+
+export const SHOP_PREVIEW_HEADER = 'x-shop-preview';
+
+const previewHeaderSchema = z.literal('1');
+
+export const refuseClosedShop = (
+  req: MedusaRequest,
+  _res: unknown,
+  next: (error?: MedusaError) => void,
+): void =>
+  parseEnv(process.env).SHOP_OPEN ||
+  previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success
+    ? next()
+    : next(
+        new MedusaError(
+          MedusaError.Types.FORBIDDEN,
+          'The shop sells only to preview visitors while it is closed',
+        ),
+      );
 
 export const refuse = (code: CheckoutRefusal, message: string): never => {
   throw new MedusaError(MedusaError.Types.INVALID_DATA, message, code);

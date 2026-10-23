@@ -52,6 +52,7 @@ const envSchema = z
       .pipe(z.array(z.enum(SUPPLIER_ADAPTER_NAMES))),
     DEMO_SUPPLIER_OVERRIDES: optionalSecret,
     FILE_URL: optionalSecret.pipe(z.url().optional()),
+    SHOP_OPEN: z.enum(['true', 'false']).optional(),
   })
   .refine(
     ({ NODE_ENV, SUPPLIER_ADAPTERS }) =>
@@ -77,6 +78,9 @@ const envSchema = z
     ...env,
     TYPESENSE_API_KEY: env.TYPESENSE_API_KEY ?? LOCAL_TYPESENSE_API_KEY,
     FILE_URL: env.FILE_URL ?? `http://localhost:${env.PORT}/static`,
+    SHOP_OPEN: env.SHOP_OPEN
+      ? env.SHOP_OPEN === 'true'
+      : env.NODE_ENV !== 'production',
   }));
 
 export type Env = z.infer<typeof envSchema>;
