@@ -39,12 +39,13 @@ import {
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
-import { SHOP_PREVIEW_HEADER } from '../scripts/shopPreview';
+import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { partSuccessor } from './partSuccessor';
 
 export type { Vehicle, VinFacts };
 
 export const CATALOGUE_TIMEOUT_MS = 10_000;
+export const ORDER_TIMEOUT_MS = 25_000;
 export const MODEL_CATEGORY_MIN_MATCHES = 1;
 const PAGE_BATCH = 1000;
 const OFFERS_BATCH = 100;
@@ -211,7 +212,12 @@ export function createCatalogue({
   const pricesHidden = !shopOpen && !preview;
   const unpriced = <T extends { offers: PartOffer[] }>(item: T): T =>
     pricesHidden ? { ...item, offers: [] } : item;
-  const send = (path: string, method = 'GET', body?: unknown) =>
+  const send = (
+    path: string,
+    method = 'GET',
+    body?: unknown,
+    timeout = timeoutMs,
+  ) =>
     fetch(`${backendUrl}${path}`, {
       method,
       headers: {
@@ -220,7 +226,7 @@ export function createCatalogue({
         ...(body !== undefined && { 'content-type': 'application/json' }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),
-      signal: AbortSignal.timeout(timeoutMs),
+      signal: AbortSignal.timeout(timeout),
     });
 
   const request = async (path: string, body?: unknown): Promise<unknown> => {
@@ -672,12 +678,15 @@ export function createCatalogue({
       contact: CheckoutContact,
       fingerprint: string,
     ): Promise<OrderOutcome> {
-      try {
-        const response = await send(
+      const complete = () =>
+        send(
           `/store/offer-carts/${segment(cartId)}/complete`,
           'POST',
           { ...contact, [CART_FINGERPRINT_FIELD]: fingerprint },
+          ORDER_TIMEOUT_MS,
         );
+      try {
+        const response = await complete().catch(complete);
         if (response.status === 404) {
           return { kind: 'empty' };
         }

@@ -271,6 +271,21 @@ describe('catalogue.placeOrder', () => {
     });
   });
 
+  it('asks the shop again when the answer to a placed order got lost', async () => {
+    const fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new DOMException('timed out', 'TimeoutError'))
+      .mockImplementation(() =>
+        status(200, { order: { id: 'order_1', display_id: 7 } }),
+      );
+
+    expect(await catalog(fetch).placeOrder('cart_1', contact, SEEN)).toEqual({
+      kind: 'order',
+      order: { id: 'order_1', display_id: 7 },
+    });
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     ['an unexplained error', () => vi.fn(() => status(500))],
     ['an unreachable backend', unreachable],
