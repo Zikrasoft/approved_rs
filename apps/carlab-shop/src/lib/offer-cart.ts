@@ -26,6 +26,7 @@ import {
   type OfferCart,
 } from '@podbor/catalog-contract';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
+import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 
 import type { MedusaRequest } from '@medusajs/framework/http';
 import { z } from 'zod';
@@ -34,12 +35,16 @@ import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { sellPrice } from '../modules/supplier/pricing';
 import { parseEnv } from './env';
+import { installationPrice } from './installation';
 import { liveOffers } from './suppliers/live-quote';
 
 export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
 export const CASH_AT_PICKUP_METADATA = { fulfillment: 'cash_at_pickup' };
 export const OFFER_ID_METADATA_KEY = 'offer_id';
 export const ADDON_FOR_METADATA_KEY = 'addon_for';
+export const ADDON_OFFER_METADATA_KEY = 'addon_offer_id';
+export const ADDON_KIND_METADATA_KEY = 'addon_kind';
+export const INSTALLATION = 'installation';
 export const IN_STOCK_METADATA_KEY = 'in_stock';
 export const LEAD_TIME_METADATA_KEY = 'lead_time_days';
 
@@ -63,6 +68,17 @@ const metadataText = (item: OfferCartLineItem, key: string) => {
 
 export const addonForOf = (item: OfferCartLineItem): string | undefined =>
   metadataText(item, ADDON_FOR_METADATA_KEY);
+
+export const isInstallationLine = (item: {
+  metadata?: Record<string, unknown> | null;
+}): boolean => item.metadata?.[ADDON_KIND_METADATA_KEY] === INSTALLATION;
+
+export type AddonKind = 'service' | typeof INSTALLATION;
+
+const kindOf = (item: OfferCartLineItem): AddonKind =>
+  isInstallationLine(item) ? INSTALLATION : 'service';
+
+const addonKey = (parentId: string, kind: AddonKind) => `${parentId}:${kind}`;
 
 type CategoryAddon = Omit<LineAddon, 'item_id'>;
 
@@ -97,10 +113,20 @@ const categoryAddon = (
       }
     : null;
 
-const addonsOf = async (
+type LineServices = {
+  service: CategoryAddon | null;
+  installation: number | null;
+};
+
+const priceFor = (services: LineServices | undefined, kind: AddonKind) =>
+  kind === INSTALLATION
+    ? (services?.installation ?? null)
+    : (services?.service?.unit_price ?? null);
+
+const servicesOf = async (
   scope: MedusaContainer,
   items: OfferCartLineItem[],
-): Promise<Map<string, CategoryAddon>> => {
+): Promise<Map<string, LineServices>> => {
   const lines = items.flatMap((item) => {
     const identifierId = metadataText(item, 'part_identifier_id');
     return offerIdOf(item) && identifierId ? [{ item, identifierId }] : [];
@@ -113,13 +139,19 @@ const addonsOf = async (
     { id: lines.map(({ identifierId }) => identifierId) },
     { relations: ['part', 'part.category'], take: null },
   );
-  const addonByIdentifier = new Map(
-    identifiers.map(({ id, part }) => [id, categoryAddon(part?.category)]),
+  const servicesByIdentifier = new Map(
+    identifiers.map(({ id, part }) => [
+      id,
+      {
+        service: categoryAddon(part?.category),
+        installation: part ? installationPrice(part) : null,
+      },
+    ]),
   );
   return new Map(
     lines.flatMap(({ item, identifierId }) => {
-      const addon = addonByIdentifier.get(identifierId);
-      return addon ? [[item.id, addon]] : [];
+      const services = servicesByIdentifier.get(identifierId);
+      return services ? [[item.id, services]] : [];
     }),
   );
 };
@@ -262,16 +294,20 @@ export async function syncOfferCart(
         new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id),
   );
   const live = await offersOf(scope, items);
-  const addons = await addonsOf(scope, items);
+  const services = await servicesOf(scope, items);
   const addonLines = new Map(
     items.flatMap((item) => {
       const parent = addonForOf(item);
-      return parent ? [[parent, item]] : [];
+      return parent ? [[addonKey(parent, kindOf(item)), item]] : [];
     }),
   );
   const orphans = items.filter((item) => {
     const parent = addonForOf(item);
-    return parent && (!addons.has(parent) || addonLines.get(parent) !== item);
+    return (
+      parent &&
+      (priceFor(services.get(parent), kindOf(item)) === null ||
+        addonLines.get(addonKey(parent, kindOf(item))) !== item)
+    );
   });
   let repriced = changed;
   if (orphans.length) {
@@ -303,21 +339,31 @@ export async function syncOfferCart(
     const readiness = offer
       ? await stampReadiness(scope, item, offer)
       : { in_stock: false, lead_time_days: 0 };
-    const service = addons.get(item.id);
-    const addonLine = service && addonLines.get(item.id);
-    if (
-      addonLine &&
-      (!MathBN.eq(service.unit_price, addonLine.unit_price) ||
-        Number(addonLine.quantity) !== quantity)
-    ) {
-      await updateLineItemInCartWorkflow(scope).run({
-        input: {
-          cart_id: cartId,
-          item_id: addonLine.id,
-          update: { unit_price: service.unit_price, quantity },
-        },
-      });
-      repriced = true;
+    const lineServices = services.get(item.id);
+    const service = lineServices?.service ?? null;
+    const installation = lineServices?.installation ?? null;
+    const added = (kind: AddonKind) =>
+      priceFor(lineServices, kind) === null
+        ? undefined
+        : addonLines.get(addonKey(item.id, kind));
+    for (const kind of ['service', INSTALLATION] as const) {
+      const addonLine = added(kind);
+      const price = priceFor(lineServices, kind);
+      if (
+        addonLine &&
+        price !== null &&
+        (!MathBN.eq(price, addonLine.unit_price) ||
+          Number(addonLine.quantity) !== quantity)
+      ) {
+        await updateLineItemInCartWorkflow(scope).run({
+          input: {
+            cart_id: cartId,
+            item_id: addonLine.id,
+            update: { unit_price: price, quantity },
+          },
+        });
+        repriced = true;
+      }
     }
     lines.push({
       id: item.id,
@@ -326,7 +372,16 @@ export async function syncOfferCart(
       unit_price: unitPrice,
       available: !!offer && orderCap(offer) >= quantity,
       ...readiness,
-      addon: service ? { item_id: addonLine?.id ?? null, ...service } : null,
+      addon: service
+        ? { item_id: added('service')?.id ?? null, ...service }
+        : null,
+      installation:
+        installation === null
+          ? null
+          : {
+              item_id: added(INSTALLATION)?.id ?? null,
+              unit_price: installation,
+            },
       part: listedPartSchema
         .catch({ slug: '', brand: '', number: '', name: item.title })
         .parse(item.metadata),
@@ -343,7 +398,10 @@ export async function syncOfferCart(
       (sum, line) =>
         sum +
         line.unit_price * line.quantity +
-        (line.addon?.item_id ? line.addon.unit_price * line.quantity : 0),
+        (line.addon?.item_id ? line.addon.unit_price * line.quantity : 0) +
+        (line.installation?.item_id
+          ? line.installation.unit_price * line.quantity
+          : 0),
       0,
     ),
     items: lines,
@@ -391,6 +449,7 @@ const offerLine = async (
   scope: MedusaContainer,
   cartId: string,
   itemId: string,
+  kind: AddonKind,
 ) => {
   const cart = await openCart(scope, cartId);
   const items = cart.items ?? [];
@@ -403,7 +462,9 @@ const offerLine = async (
   }
   return {
     line,
-    addonLines: items.filter((item) => addonForOf(item) === itemId),
+    addonLines: items.filter(
+      (item) => addonForOf(item) === itemId && kindOf(item) === kind,
+    ),
   };
 };
 
@@ -411,13 +472,15 @@ export async function addLineAddon(
   scope: MedusaContainer,
   cartId: string,
   itemId: string,
+  kind: AddonKind = 'service',
 ): Promise<void> {
-  const { line, addonLines } = await offerLine(scope, cartId, itemId);
-  const service = (await addonsOf(scope, [line])).get(line.id);
-  if (!service) {
+  const { line, addonLines } = await offerLine(scope, cartId, itemId, kind);
+  const lineServices = (await servicesOf(scope, [line])).get(line.id);
+  const price = priceFor(lineServices, kind);
+  if (price === null) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      `Line ${itemId} has no add-on service`,
+      `Line ${itemId} has no ${kind} add-on`,
     );
   }
   if (addonLines.length) {
@@ -428,11 +491,20 @@ export async function addLineAddon(
       cart_id: cartId,
       items: [
         {
-          title: service.label,
+          title:
+            kind === INSTALLATION
+              ? PARTS_ORDER_COPY.installation
+              : lineServices!.service!.label,
           quantity: Number(line.quantity),
-          unit_price: service.unit_price,
+          unit_price: price,
           requires_shipping: false,
-          metadata: { [ADDON_FOR_METADATA_KEY]: line.id },
+          metadata: {
+            [ADDON_FOR_METADATA_KEY]: line.id,
+            [ADDON_OFFER_METADATA_KEY]: offerIdOf(line),
+            ...(kind === INSTALLATION && {
+              [ADDON_KIND_METADATA_KEY]: INSTALLATION,
+            }),
+          },
         },
       ],
     },
@@ -443,8 +515,9 @@ export async function removeLineAddon(
   scope: MedusaContainer,
   cartId: string,
   itemId: string,
+  kind: AddonKind = 'service',
 ): Promise<void> {
-  const { addonLines } = await offerLine(scope, cartId, itemId);
+  const { addonLines } = await offerLine(scope, cartId, itemId, kind);
   if (addonLines.length) {
     await deleteLineItemsWorkflow(scope).run({
       input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
@@ -569,27 +642,30 @@ export async function checkoutRefusal(
     }
   }
   return addonRefusal(
-    await addonsOf(scope, offerItems),
+    await servicesOf(scope, offerItems),
     addonItems,
     new Map(offerItems.map((item) => [item.id, Number(item.quantity)])),
   );
 }
 
 const addonRefusal = (
-  addons: Map<string, CategoryAddon>,
+  services: Map<string, LineServices>,
   addonItems: OfferCartLineItem[],
   quantities: Map<string, number>,
 ): 'OFFER_MISSING' | 'OFFER_PRICE_CHANGED' | null => {
-  const parents = addonItems.map((item) => addonForOf(item));
+  const keys = addonItems.map((item) =>
+    addonKey(addonForOf(item)!, kindOf(item)),
+  );
   for (const [index, item] of addonItems.entries()) {
-    const service = addons.get(parents[index]!);
-    if (!service) {
+    const parent = addonForOf(item)!;
+    const price = priceFor(services.get(parent), kindOf(item));
+    if (price === null) {
       return 'OFFER_MISSING';
     }
     if (
-      parents.indexOf(parents[index]) !== index ||
-      Number(item.quantity) !== quantities.get(parents[index]!) ||
-      !MathBN.eq(service.unit_price, item.unit_price)
+      keys.indexOf(keys[index]) !== index ||
+      Number(item.quantity) !== quantities.get(parent) ||
+      !MathBN.eq(price, item.unit_price)
     ) {
       return 'OFFER_PRICE_CHANGED';
     }

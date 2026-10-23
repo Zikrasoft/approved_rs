@@ -226,10 +226,16 @@ const SupersessionPage = () => {
                 </Table.Body>
               </Table>
             </ScrollArea>
+            <Text size="small" className="text-ui-fg-subtle">
+              {t('supersession.supersededHint')}
+            </Text>
           </div>
 
           <div className="flex flex-col gap-y-2">
             <Label>{t('supersession.replacedByLabel')}</Label>
+            <Text size="small" className="text-ui-fg-subtle">
+              {t('supersession.replacedHint')}
+            </Text>
             {selected.replaced_by ? (
               <div className="flex items-center gap-x-2">
                 <Badge>{selected.replaced_by.name}</Badge>

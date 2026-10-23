@@ -23,7 +23,9 @@ export async function GET(
       categories: categories
         .map(withRankedFields)
         .map((category) =>
-          shown ? category : { ...category, service_price: null },
+          shown
+            ? category
+            : { ...category, service_price: null, installation_price: null },
         ),
     }),
   );

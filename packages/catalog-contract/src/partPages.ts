@@ -69,6 +69,7 @@ export const partPageSchema = picturedBrandNumberSchema.extend({
       .nullable(),
     category_id: z.string().nullable(),
     attributes: attributeValuesSchema,
+    installation_price: z.number().int().nonnegative().nullable().default(null),
   }),
   equivalents: z.array(picturedBrandNumberSchema),
   offers: z.array(partOfferSchema),

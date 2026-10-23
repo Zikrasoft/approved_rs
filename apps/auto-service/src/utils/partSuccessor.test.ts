@@ -32,6 +32,7 @@ const entry = (
     replaced_by: null,
     category_id: null,
     attributes: {},
+    installation_price: null,
   },
   equivalents: [],
   offers: [],

@@ -95,7 +95,7 @@ type FilteredVehicle = {
   };
 };
 
-const matchesFilter =
+export const matchesFilter =
   (filter: VehicleFilter) =>
   ({ model, engine, ...vehicle }: FilteredVehicle): boolean =>
     [

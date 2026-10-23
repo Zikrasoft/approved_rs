@@ -14,6 +14,7 @@ import type {
 } from '../validators';
 import { adminError } from '../../../lib/admin-errors';
 import { withEditors } from '../../../lib/editors';
+import { refuseConflictingFitment } from '../../../lib/fitment-conflicts';
 
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminListFitmentsType>,
@@ -37,11 +38,18 @@ export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreateFitmentType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { part_id, vehicle_id, ...conditions } = req.validatedBody;
+  const { part_id, vehicle_id, confirm_conflicts, ...conditions } =
+    req.validatedBody;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await catalog.retrieveVehicle(vehicle_id);
+  await refuseConflictingFitment(
+    catalog,
+    part_id,
+    { vehicle_id },
+    confirm_conflicts,
+  );
   const {
     created: [fitment],
   } = await catalog.attachPartToVehicles(

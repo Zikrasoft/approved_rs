@@ -1,10 +1,18 @@
-import { EllipsisHorizontal, PencilSquare, Trash } from '@medusajs/icons';
+import {
+  EllipsisHorizontal,
+  PencilSquare,
+  Spinner,
+  Trash,
+} from '@medusajs/icons';
 import { clx, DropdownMenu, Heading, IconButton, Text } from '@medusajs/ui';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const LIST_TABLE =
   '[&_thead]:border-t-0 [&_td:first-child]:pl-6 [&_th:first-child]:pl-6';
+
+export const PINNED_ACTIONS =
+  '[&_tr>*:last-child]:sticky [&_tr>*:last-child]:right-0 [&_tr>*:last-child]:bg-inherit max-sm:[&_tr>*:last-child]:shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.2)]';
 
 export const ListHeader = ({
   heading,
@@ -39,6 +47,19 @@ export const ListHeader = ({
     {children && <div className="px-6 pb-4">{children}</div>}
   </div>
 );
+
+export const ListLoading = () => {
+  const { t } = useTranslation('carlabAdmin');
+  return (
+    <div
+      role="status"
+      className="text-ui-fg-subtle flex items-center justify-center gap-x-2 px-6 py-10"
+    >
+      <Spinner className="animate-spin" />
+      <Text size="small">{t('common.loading')}</Text>
+    </div>
+  );
+};
 
 export const ListEmpty = ({ hint }: { hint?: string }) => {
   const { t } = useTranslation('carlabAdmin');

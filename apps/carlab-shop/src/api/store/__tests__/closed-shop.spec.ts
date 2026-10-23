@@ -36,6 +36,13 @@ medusaIntegrationTestRunner({
       const facetKeys = (facets: { key: string }[]) =>
         facets.map(({ key }) => key);
 
+      const installations = (
+        pages: { id: string; part: { installation_price: number | null } }[],
+      ) =>
+        identifiers.map(
+          (id) => pages.find((page) => page.id === id)?.part.installation_price,
+        );
+
       beforeAll(async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
@@ -60,6 +67,7 @@ medusaIntegrationTestRunner({
           name: 'Масляные фильтры',
           service_label: 'Замена фильтра',
           service_price: 900,
+          installation_price: 700,
         });
         for (const [brand, number] of [
           [mann.id, 'HU 1'],
@@ -78,6 +86,7 @@ medusaIntegrationTestRunner({
           });
           identifiers.push(identifier.id);
         }
+        await catalog.updateParts({ id: parts[1], installation_price: 0 });
         const supplier = await suppliers.createSuppliers({
           name: 'Intercars',
           markup_percentage: 20,
@@ -118,6 +127,12 @@ medusaIntegrationTestRunner({
         expect(facetKeys(search.data.facets)).not.toContain('price');
         expect(prices(pages.data.pages)).toEqual([]);
         expect(categories.data.categories[0].service_price).toBeNull();
+        expect(categories.data.categories[0].installation_price).toBeNull();
+        expect(installations(pages.data.pages)).toEqual([null, null]);
+        expect(batch.data.installation).toEqual({
+          [identifiers[0]]: null,
+          [identifiers[1]]: null,
+        });
         expect(live.data.offers).toEqual([]);
         expect(batch.data.offers).toEqual({
           [identifiers[0]]: [],
@@ -143,6 +158,12 @@ medusaIntegrationTestRunner({
         expect(narrowed.data.count).toBe(1);
         expect(prices(pages.data.pages)).toEqual([1200, 2400]);
         expect(categories.data.categories[0].service_price).toBe(900);
+        expect(categories.data.categories[0].installation_price).toBe(700);
+        expect(installations(pages.data.pages)).toEqual([700, 0]);
+        expect(batch.data.installation).toEqual({
+          [identifiers[0]]: 700,
+          [identifiers[1]]: 0,
+        });
         expect(prices([live.data])).toEqual([1200]);
         expect(prices([{ offers: batch.data.offers[identifiers[1]] }])).toEqual(
           [2400],

@@ -37,8 +37,9 @@ const slotSchema = z.discriminatedUnion('kind', [
   }),
   z.object({
     kind: z.literal('addon'),
-    category: catalogueIdSchema,
+    category: catalogueIdSchema.optional(),
     ids: idsSchema,
+    installation: catalogueIdSchema.optional(),
     class: classSchema,
   }),
   z.object({
@@ -109,7 +110,7 @@ const loaded = await Promise.all([
 if (!loaded) {
   return new Response(null, { status: 503 });
 }
-const [offers, categories, searches] = loaded;
+const [{ offers, installation }, categories, searches] = loaded;
 const pages = (pageIds: string[]) =>
   pageIds.map((id) => ({ id, offers: offers[id] ?? [] }));
 const searchCopy = content(locale).partsSearch;
@@ -130,6 +131,14 @@ const searchCopy = content(locale).partsSearch;
         <AddonNote
           category={categories.find(({ id }) => id === slot.category) ?? null}
           pages={pages(slot.ids)}
+          installation={
+            slot.installation
+              ? {
+                  id: slot.installation,
+                  price: installation[slot.installation] ?? null,
+                }
+              : undefined
+          }
           class={slot.class}
           live
         />

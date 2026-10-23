@@ -1,6 +1,7 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
+import CartAddonToggle from '@/components/CartAddonToggle.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
 import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
@@ -57,6 +58,9 @@ const stepper =
       data-locale-tag={BCP47_BY_LOCALE[locale]}
       data-locale={locale}
       data-addon-template={copy.addonTemplate}
+      data-installation-label={copy.installationLabel}
+      data-installation-free={copy.installationFree}
+      data-free-label={copy.freeLabel}
       data-unit-template={copy.unitTemplate}
       data-count-template={copy.summaryCountTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
@@ -119,6 +123,8 @@ const stepper =
                   <span class="spec text-sm text-muted" data-number></span>
                   <span class="text-sm text-ink-2" data-ready hidden></span>
                   <span class="text-sm text-ink-2" data-addon hidden></span>
+                  <span class="text-sm text-ink-2" data-installation hidden
+                  ></span>
                 </div>
                 <div class="flex shrink-0 flex-col items-end text-right">
                   <span class="spec font-semibold text-ink" data-price></span>
@@ -288,27 +294,8 @@ const stepper =
                   <span class="text-xs text-muted" data-unit></span>
                 </div>
               </div>
-              <label
-                class="flex cursor-pointer items-start gap-3 rounded-field border border-line bg-shade px-3 py-2.5 text-sm leading-snug text-ink has-checked:border-signal aria-busy:cursor-progress aria-busy:opacity-60"
-                data-addon
-                hidden
-              >
-                <input
-                  type="checkbox"
-                  class="mt-0.5 size-4 shrink-0 accent-signal-ink"
-                  data-addon-toggle
-                />
-                <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span data-addon-label></span>
-                  <span class="text-xs text-muted">{copy.addonPickup}</span>
-                </span>
-                <span class="flex shrink-0 flex-col items-end text-right">
-                  <span
-                    class="spec font-semibold whitespace-nowrap text-ink"
-                    data-addon-price></span>
-                  <span class="text-xs text-muted" data-addon-unit></span>
-                </span>
-              </label>
+              <CartAddonToggle hook="data-addon" />
+              <CartAddonToggle hook="data-installation" />
               <button
                 type="button"
                 class="btn btn-secondary w-full sm:w-auto sm:self-start"

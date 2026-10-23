@@ -22,6 +22,7 @@ const oil: Category = {
   service_label: null,
   service_price: null,
   service_note: null,
+  installation_price: null,
   image: null,
   fields: [
     {

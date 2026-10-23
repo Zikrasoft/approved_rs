@@ -16,6 +16,7 @@ const CART = {
       in_stock: true,
       lead_time_days: 0,
       addon: null,
+      installation: null,
       part: {
         slug: 'bmw-11428575211',
         brand: 'BMW',
@@ -198,6 +199,23 @@ describe('catalogue.setAddon', () => {
     });
     expect(fetch).toHaveBeenCalledWith(
       'http://shop.test/store/offer-carts/cart_1/items/item_1/addon',
+      expect.objectContaining({ method }),
+    );
+  });
+});
+
+describe('catalogue.setInstallation', () => {
+  it.each([
+    [true, 'POST'],
+    [false, 'DELETE'],
+  ])('adds or takes off installation at CarLab (%s)', async (on, method) => {
+    const fetch = answer({ cart: CART });
+
+    expect(
+      await catalog(fetch).setAddon('cart_1', 'item_1', on, 'installation'),
+    ).toEqual({ kind: 'cart', cart: CART });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/offer-carts/cart_1/items/item_1/installation',
       expect.objectContaining({ method }),
     );
   });

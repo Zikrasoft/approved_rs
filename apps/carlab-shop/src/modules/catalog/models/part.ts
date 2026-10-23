@@ -12,6 +12,8 @@ const Part = model
     name: model.text(),
     category: model.belongsTo(() => Category, { mappedBy: 'parts' }).nullable(),
     attributes: model.json().default({}),
+    installation_price: model.number().nullable(),
+    no_installation: model.boolean().default(false),
     ...translatable(),
     identifiers: model.hasMany(() => PartIdentifier, { mappedBy: 'part' }),
     fitments: model.hasMany(() => Fitment, { mappedBy: 'part' }),

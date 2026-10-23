@@ -72,8 +72,8 @@
     "productionToLabel": "Fits cars built up to",
     "notePlaceholder": "Note for the customer, e.g. M Sport package only",
     "noteHint": "The note is translated at Publish. A Part with a note is confirmed by the customer.",
-    "attached_one": "Created {{count}} Fitment, matching Vehicles: {{matched}}",
-    "attached_other": "Created {{count}} Fitments, matching Vehicles: {{matched}}",
+    "attached_one": "Created {{count}} Fitment, matching Vehicles: {{matched}}. The site updates after the next publish.",
+    "attached_other": "Created {{count}} Fitments, matching Vehicles: {{matched}}. The site updates after the next publish.",
     "axleOptions": {
       "front": "Front axle",
       "rear": "Rear axle"
@@ -90,38 +90,47 @@
       "until": "Built until {{to}}"
     },
     "identifierCount_one": "{{name}} ({{count}} identifier)",
-    "partCreated": "Part {{name}} created.",
+    "partCreated": "Part {{name}} created. The site updates after the next publish.",
     "partNameLabel": "Name on the site",
     "rename": "Rename",
-    "partRenamed": "Part renamed: {{name}}.",
+    "partRenamed": "Part renamed: {{name}}. The site updates after the next publish.",
     "deletePart": "Delete part",
     "confirmDeletePartTitle": "Delete part {{name}}?",
     "confirmDeletePartBody": "All its numbers, supplier offers and fitments go with it. This cannot be undone.",
-    "partDeleted": "Part {{name}} deleted.",
+    "partDeleted": "Part {{name}} deleted. The site updates after the next publish.",
     "deleteNumber": "Delete number {{number}}",
     "confirmDeleteNumberTitle": "Delete number {{number}}?",
     "confirmDeleteNumberBody": "The number page leaves the site at the next publish and supplier offers for it are deleted. The part stays.",
-    "numberDeleted": "Number {{number}} deleted.",
+    "numberDeleted": "Number {{number}} deleted. The site updates after the next publish.",
     "step3Hint": "Conditions describe the fitting itself: dates here mean the part fits only cars built in that period.",
     "detach": "Detach by these filters",
     "confirmDetachTitle": "Detach the part from the matching vehicles?",
     "confirmDetachBody": "Every fitment of {{name}} on a vehicle matching the filters is deleted, whatever its conditions.",
-    "detached_one": "{{count}} fitment deleted.",
-    "detached_other": "{{count}} fitments deleted.",
+    "detached_one": "{{count}} fitment deleted. The site updates after the next publish.",
+    "detached_other": "{{count}} fitments deleted. The site updates after the next publish.",
     "edit": "Edit",
     "editLabel": "Editing a fitment",
-    "fitmentSaved": "Fitment saved.",
+    "fitmentSaved": "Fitment saved. The site updates after the next publish.",
     "confirmDeleteFitmentTitle": "Delete this fitment?",
     "confirmDeleteFitmentBody": "The part stops showing for {{vehicle}}.",
-    "fitmentDeleted": "Fitment deleted.",
+    "fitmentDeleted": "Fitment deleted. The site updates after the next publish.",
     "supplierName": "Supplier name, not checked",
     "addNumber": "Add number",
-    "numberAdded": "Number {{number}} added.",
+    "numberAdded": "Number {{number}} added. The site updates after the next publish.",
     "lastNumberTitle": "{{number}} is the part's last number",
     "lastNumberBody": "A part without a number cannot be found, so its last number cannot be deleted alone. Delete the part {{name}} entirely, with its fitments and supplier offers? This cannot be undone.",
     "deleteWholePart": "Delete the whole part",
     "quantityInvalid": "Enter the quantity as a whole number from 1 to 100.",
-    "editingVehicle": "Vehicle: {{vehicle}}"
+    "editingVehicle": "Vehicle: {{vehicle}}",
+    "identifierTypeHint": "OEM: the car maker's number, e.g. BMW 11 42 8 575 211. Manufacturer number: the number in the part brand's catalogue, e.g. Mann HU 816 x. EAN: the 8 or 13 digit barcode on the box.",
+    "conflicts": {
+      "title": "Fitment not saved: the part contradicts these cars' requirements",
+      "line": "{{field}}: the part has {{value}}, required {{wanted}}. Cars: {{vehicles}}",
+      "moreVehicles_one": "{{vehicles}} and {{count}} more",
+      "moreVehicles_other": "{{vehicles}} and {{count}} more",
+      "why": "If you attach it anyway, the site shows the part as fitting these cars despite the requirement. Usually the part's attributes or the chosen cars are wrong: check them. Attach only if you are sure the requirement does not apply here.",
+      "confirm": "Attach anyway"
+    }
   },
   "suppliers": {
     "heading": "Suppliers",
@@ -133,7 +142,7 @@
     },
     "save": "Save",
     "import": "Import now",
-    "importLead": "Supplier catalogues are imported every night before publishing. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
     "importNoAdapters": "No supplier has its import switched on",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
@@ -158,7 +167,7 @@
       "removed": "Mapping {{code}} deleted."
     },
     "markupLabel": "Markup of {{supplier}}, %",
-    "markupSaved": "{{supplier}} markup: {{markup}}%. Site prices update at the next publish.",
+    "markupSaved": "{{supplier}} markup: {{markup}}%. The site updates after the next publish.",
     "confirmReleaseTitle": "Show \"{{kind}}\" from {{supplier}} on the site?",
     "confirmReleaseBody": "Buyers see this data right away. Turn it on only with the supplier's written permission: the data may come from TecDoc.",
     "confirmRelease": "Permission granted, show",
@@ -176,9 +185,9 @@
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "The nightly import and Import now will stop loading this supplier's catalogue. Parts and offers with price and stock already loaded stay on the site. To remove them, delete this supplier's rows under Catalogue data sources below.",
+        "body": "Publishing and Import now will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
         "confirm": "Switch off import",
-        "done": "Import from {{supplier}} switched off. Its offers stay on the site."
+        "done": "Import from {{supplier}} switched off. Its offers stay on the site until you take them off in the supplier's menu."
       },
       "on": {
         "title": "Switch on the import from {{supplier}}?",
@@ -187,7 +196,15 @@
         "done": "Import from {{supplier}} switched on."
       }
     },
-    "importSwitchedOff": "Import switched off, not loaded: {{suppliers}}. Their earlier offers stay on the site."
+    "importSwitchedOff": "Import switched off, not loaded: {{suppliers}}. Their earlier offers stay on the site until you take them off in the supplier's menu.",
+    "withdraw": {
+      "action": "Take offers off the site",
+      "title": "Take the offers of {{supplier}} off the site?",
+      "body_one": "{{count}} offer of this supplier will be deleted and its import switched off, so publishing does not bring it back. Parts, numbers and other suppliers' offers stay. The price leaves search right away and the site pages after the next publish.",
+      "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so publishing does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
+      "done_one": "{{supplier}}: {{count}} offer taken off, import switched off. Site pages update after the next publish.",
+      "done_other": "{{supplier}}: {{count}} offers taken off, import switched off. Site pages update after the next publish."
+    }
   },
   "brands": {
     "heading": "Brands",
@@ -207,8 +224,8 @@
     "addSpelling": "Add spelling",
     "removeSpelling": "Remove spelling {{spelling}}",
     "delete": "Delete brand",
-    "created": "Brand {{name}} added.",
-    "deleted": "Brand {{name}} deleted.",
+    "created": "Brand {{name}} added. The site updates after the next publish.",
+    "deleted": "Brand {{name}} deleted. The site updates after the next publish.",
     "confirmDeleteTitle": "Delete brand {{name}}?",
     "confirmDeleteBody": "The brand goes with its supplier spellings. A brand that has part numbers cannot be deleted.",
     "spellingAdded": "Spelling {{spelling}} added.",
@@ -254,7 +271,9 @@
       "market": "Market",
       "steering": "Steering",
       "type": "Code type",
-      "value": "Value"
+      "value": "Value",
+      "installation_price": "Installation price, RSD",
+      "no_installation": "No installation"
     },
     "values": {
       "body_style": {
@@ -289,7 +308,7 @@
     },
     "confirmTitle": "Delete «{{name}}»?",
     "identifierFormat": "BMW type code: 4 letters or digits, for example 35BG. Mercedes-Benz Baumuster: 6 digits, for example 213004.",
-    "deleted": "Deleted: {{name}}.",
+    "deleted": "Deleted: {{name}}. The site updates after the next publish.",
     "emptyHint": "Click Add to create the first one.",
     "newTitle": "New entry",
     "editTitle": "Edit entry"
@@ -343,29 +362,33 @@
       "deployTimedOut": "The site build on GitHub did not finish in time, so search was not updated. The build may still be running: check it at the link in the details below and publish again."
     },
     "publishSite": "Publish to the site",
-    "lastFailed": "Publishing failed"
+    "lastFailed": "Publishing failed",
+    "confirmTitle": "Publish your changes to the site?",
+    "confirmBody": "Publishing loads supplier catalogues, translates new texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. It usually takes a few minutes; the site build sometimes takes longer. You can keep working in the admin meanwhile and follow progress on the Publish page."
   },
   "supersession": {
     "heading": "Supersession",
-    "intro": "Mark an outdated number or name the part that replaced this one. The old number keeps leading buyers to the current part.",
+    "intro": "Mark a number that is no longer made, or name the part that replaced this one as a whole. Old numbers keep leading buyers to the current part.",
     "findLabel": "Find a part",
     "searchPlaceholder": "Number or brand",
     "search": "Search",
     "noMatch": "Nothing found. Check the number.",
     "columns": {
       "number": "Number",
-      "superseded": "Superseded"
+      "superseded": "No longer made"
     },
-    "markSuperseded": "Number {{number}} is superseded",
-    "replacedByLabel": "Replaced by",
+    "markSuperseded": "Number {{number}} is no longer made",
+    "replacedByLabel": "Now replaced by",
     "notReplaced": "This part is not replaced.",
     "clearReplacement": "Remove replacement",
     "replacementPlaceholder": "Number of the replacement part",
     "replaceWith": "Replace with {{part}}",
-    "markedSuperseded": "Number {{number}} marked superseded.",
-    "markedCurrent": "Number {{number}} is current again.",
-    "replacementSaved": "Replacement saved.",
-    "replacementCleared": "Replacement removed: {{part}} no longer replaces this part."
+    "markedSuperseded": "Number {{number}} marked as no longer made. The site updates after the next publish.",
+    "markedCurrent": "Number {{number}} is made again. The site updates after the next publish.",
+    "replacementSaved": "Replacement saved. The site updates after the next publish.",
+    "replacementCleared": "Replacement removed: {{part}} no longer replaces this part. The site updates after the next publish.",
+    "supersededHint": "No longer made applies to one number: its maker stopped making it. The part keeps selling under its other numbers.",
+    "replacedHint": "A replacement applies to the whole part with all its numbers: buyers on this part's pages are sent to the new one. Set it when the part was replaced as a whole."
   },
   "categories": {
     "heading": "Categories",
@@ -425,7 +448,10 @@
     "servicePrice": "Price, RSD",
     "serviceNote": "Service note",
     "serviceNotePlaceholder": "For example, on BMW and Mercedes-Benz a new battery has to be registered with the control unit",
-    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. Shoppers see the note on part and car pages next to the service price; leave it empty to show no note. To drop the service, clear the name and the price and save."
+    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. Shoppers see the note on part and car pages next to the service price; leave it empty to show no note. To drop the service, clear the name and the price and save.",
+    "installationHeading": "Installation at CarLab",
+    "installationPrice": "Default installation price, RSD",
+    "installationHint": "Shoppers can add installation at CarLab to every part of this category, charged per unit. 0 means free: shoppers see \"Free installation\". Leave it empty to offer no installation. A single part can set its own price or refuse installation on its attributes page."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -440,7 +466,20 @@
     "no": "No",
     "noFields": "This Category has no fields.",
     "save": "Save attributes",
-    "saved": "Attributes saved"
+    "installationHeading": "Installation at CarLab",
+    "installationMode": "Installation",
+    "installationInheritPrice": "As in the category: {{price}} RSD",
+    "installationInheritFree": "As in the category: free",
+    "installationInheritNone": "As in the category: not offered",
+    "installationOwnPrice": "Own price",
+    "installationFree": "Free",
+    "installationNone": "Do not offer",
+    "installationPrice": "Installation price, RSD",
+    "installationHint": "Charged per unit. Shoppers see \"Free\" as \"Free installation\", our purchase bonus.",
+    "saved": "Attributes saved. The site updates after the next publish.",
+    "hints": {
+      "polarity": "Look at the battery with its terminals towards you. Reverse: plus on the right, as on most European batteries. Normal: plus on the left."
+    }
   },
   "requirements": {
     "heading": "Requirements for consumables",
@@ -468,10 +507,10 @@
       "since": "from {{min}} {{unit}}",
       "until": "up to {{max}} {{unit}}"
     },
-    "added": "Requirement added.",
+    "added": "Requirement added. The site updates after the next publish.",
     "confirmDeleteTitle": "Delete the \"{{field}}\" requirement?",
     "confirmDeleteBody": "Consumables stop matching by this requirement after the next publish.",
-    "deleted": "Requirement deleted.",
+    "deleted": "Requirement deleted. The site updates after the next publish.",
     "boolean": {
       "true": "Yes",
       "false": "No"
@@ -502,7 +541,8 @@
       "LAST_IDENTIFIER": "This is the part's last number and a part cannot be found without one. Add another number or delete the whole part.",
       "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections.",
       "INVALID_IMAGE": "This file cannot be used: upload a JPEG, PNG or WebP photo.",
-      "IMAGE_TOO_LARGE": "The photo is over 10 MB. Make it smaller and upload it again."
+      "IMAGE_TOO_LARGE": "The photo is over 10 MB. Make it smaller and upload it again.",
+      "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -558,7 +598,8 @@
       "cost_price": "Purchase price: a number above 0 and at most 10000000 RSD.",
       "stock_quantity": "Stock: a whole number from 0 to 100000.",
       "lead_time_days": "Lead time: a whole number of days from 0 to 365.",
-      "availability": "Enter a stock above zero or a lead time in days."
+      "availability": "Enter a stock above zero or a lead time in days.",
+      "installation_price": "Installation price: a whole number of RSD from 0 to 1000000."
     },
     "fields": {
       "name": "Name",
@@ -641,8 +682,8 @@
     "confirmTitle": "Remove every row of {{source}}?",
     "confirmBody_one": "{{count}} row will be removed. It cannot be restored.",
     "confirmBody_other": "{{count}} rows will be removed. They cannot be restored.",
-    "removed_one": "{{source}}: {{count}} row removed",
-    "removed_other": "{{source}}: {{count}} rows removed",
+    "removed_one": "{{source}}: {{count}} row removed. The site updates after the next publish.",
+    "removed_other": "{{source}}: {{count}} rows removed. The site updates after the next publish.",
     "empty": "Rows appear after the first import or manual entry.",
     "names": {
       "manual": "Manual entry"
@@ -658,7 +699,7 @@
     "lead": "A corrected translation is kept until the Russian text changes. An empty field leaves the translation as it is.",
     "save": "Save translations",
     "cancel": "Cancel",
-    "saved": "Translations saved",
+    "saved": "Translations saved. The site updates after the next publish.",
     "locales": {
       "sr": "Serbian",
       "en": "English"
@@ -676,14 +717,15 @@
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",
-    "deleted": "Deleted.",
+    "deleted": "Deleted. The site updates after the next publish.",
     "save": "Save",
-    "saved": "Saved.",
+    "saved": "Saved. The site updates after the next publish.",
     "actions": "Actions",
     "edit": "Edit",
     "empty": "Nothing here yet",
     "actionsFor": "Actions for {{name}}",
-    "close": "Close"
+    "close": "Close",
+    "loading": "Loading"
   },
   "vehicleLabel": {
     "kw": "{{kw}} kW",
@@ -708,7 +750,7 @@
     "moveLeft": "Move photo {{position}} left",
     "moveRight": "Move photo {{position}} right",
     "delete": "Delete photo {{position}}",
-    "deleted": "Photo deleted.",
+    "deleted": "Photo deleted. The site updates after the next publish.",
     "confirmDeleteTitle": "Delete this photo?",
     "confirmDeleteBody": "The photo leaves the site with the next publish. The file is deleted right away and cannot be restored.",
     "wrongType": "\"{{name}}\" cannot be used: upload a JPEG, PNG or WebP.",
@@ -721,20 +763,20 @@
   },
   "parts": {
     "heading": "Parts",
-    "lead": "A number is indexed when it has a category and at least one vehicle, equivalent or matching approval. Only indexed numbers reach search and the sitemap.",
-    "filterLabel": "Indexing status",
+    "lead": "Search and the sitemap show only numbers with a category and at least one fitting car, equivalent or requirement (approval).",
+    "filterLabel": "Shown in search",
     "filters": {
       "all": "All",
-      "true": "Indexed",
-      "false": "Not indexed"
+      "true": "Shown in search",
+      "false": "Not shown in search"
     },
     "status": {
-      "enriched": "Indexed",
-      "notEnriched": "Not indexed"
+      "enriched": "Shown in search",
+      "notEnriched": "Not shown in search"
     },
     "reasons": {
-      "no_category": "no category",
-      "no_fitment_equivalent_or_requirement": "no vehicles, equivalents or approvals"
+      "no_category": "no category set",
+      "no_fitment_equivalent_or_requirement": "no fitting cars, equivalents or requirements"
     },
     "searchLabel": "Search by number or name",
     "searchPlaceholder": "Number, brand or name",
@@ -787,9 +829,50 @@
       "add": "Add offer",
       "delete": "Delete manual offer"
     },
-    "saved": "Manual offer saved. The storefront updates after the next publish.",
-    "deleted": "Manual offer deleted.",
+    "saved": "Manual offer saved. The site updates after the next publish.",
+    "deleted": "Manual offer deleted. The site updates after the next publish.",
     "confirmTitle": "Delete the manual offer?",
     "confirmBody": "Number {{number}} is left without a price unless it has other offers."
+  },
+  "order": {
+    "heading": "CarLab order",
+    "cashAtPickup": "Cash at pickup",
+    "paymentHint": "There is no online payment: the customer pays cash when picking the order up. Medusa's payment statuses on this page (Not paid, Authorized, Pending) only mean the order was placed without prepayment.",
+    "name": "Name",
+    "contact": "Contact",
+    "vin": "VIN",
+    "car": "Car",
+    "comment": "Customer's note",
+    "channels": {
+      "phone": "Phone call",
+      "telegram": "Telegram",
+      "whatsapp": "WhatsApp",
+      "viber": "Viber"
+    },
+    "addon": "Service",
+    "inStock": "In stock",
+    "pickupIn_one": "Pickup in {{count}} day",
+    "pickupIn_other": "Pickup in {{count}} days",
+    "line": "{{title}} × {{count}}",
+    "lead": {
+      "badge": {
+        "handedOff": "Lead in CRM",
+        "pending": "Lead on its way",
+        "failing": "Lead not delivered",
+        "alerted": "Lead not delivered",
+        "unalerted": "Lead not delivered"
+      },
+      "handedOff": "Lead handed to the CRM {{time}}.",
+      "pending": "The lead is still on its way to the CRM. If this does not change within 15 minutes, contact the customer yourself.",
+      "failing": "Lead not handed to the CRM, failed attempts: {{count}}. The server retries every 10 minutes.",
+      "alerted": "The lead never reached the CRM after {{count}} attempts. The owner was alerted in Telegram {{time}}. Contact the customer yourself.",
+      "unalerted": "The lead never reached the CRM after {{count}} attempts, and the owner could not be alerted in Telegram. Contact the customer yourself.",
+      "error": "Error: {{error}}"
+    },
+    "withoutLead": {
+      "title_one": "{{count}} order this week did not reach the CRM as a lead:",
+      "title_other": "{{count}} orders this week did not reach the CRM as leads:",
+      "hint": "Until the lead exists, nobody is reminded to call the customer back. Open the order: the CarLab order block shows the contact and what went wrong."
+    }
   }
 }

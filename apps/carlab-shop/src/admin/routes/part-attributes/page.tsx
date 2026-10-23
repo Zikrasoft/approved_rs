@@ -49,6 +49,7 @@ type CategoryField = z.infer<typeof categoryFieldSchema>;
 const categorySchema = z.object({
   id: z.string(),
   name: z.string(),
+  installation_price: z.number().nullable(),
   fields: z.array(categoryFieldSchema),
 });
 
@@ -68,6 +69,8 @@ const partSchema = editedBySchema.extend({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), attributeValueSchema),
+  installation_price: z.number().nullable(),
+  no_installation: z.boolean(),
   identifiers: z.array(
     z.object({
       id: z.string(),
@@ -91,6 +94,24 @@ const partLabel = (part: Part) =>
     .join(', ')})`;
 
 const numberLabel = ({ brand, value }: Identifier) => `${brand.name} ${value}`;
+
+const INSTALLATION_MODES = ['inherit', 'price', 'free', 'none'] as const;
+type InstallationMode = (typeof INSTALLATION_MODES)[number];
+
+const installationMode = (part: Part): InstallationMode =>
+  part.no_installation
+    ? 'none'
+    : part.installation_price === null
+      ? 'inherit'
+      : part.installation_price === 0
+        ? 'free'
+        : 'price';
+
+const installationBody = (mode: InstallationMode, price: string) => ({
+  no_installation: mode === 'none',
+  installation_price:
+    mode === 'free' ? 0 : mode === 'price' ? Number(price) : null,
+});
 
 const ValueInput = ({
   field,
@@ -190,7 +211,7 @@ const ValueInput = ({
 
 const PartAttributesPage = () => {
   const writing = useWriting();
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState('');
   const [parts, setParts] = useState<Part[]>([]);
@@ -198,6 +219,8 @@ const PartAttributesPage = () => {
   const [categoryId, setCategoryId] = useState('');
   const [identifierId, setIdentifierId] = useState('');
   const [values, setValues] = useState<Record<string, AttributeValue>>({});
+  const [installMode, setInstallMode] = useState<InstallationMode>('inherit');
+  const [installPrice, setInstallPrice] = useState('');
   const [saves, setSaves] = useState(0);
   const [params] = useSearchParams();
 
@@ -230,6 +253,10 @@ const PartAttributesPage = () => {
     setIdentifierId(chosen.identifiers[0]?.id ?? '');
     setCategoryId(chosen.category_id ?? '');
     setValues(chosen.attributes);
+    setInstallMode(installationMode(chosen));
+    setInstallPrice(
+      chosen.installation_price ? String(chosen.installation_price) : '',
+    );
   };
 
   const setValue = (key: string, value: AttributeValue | undefined) =>
@@ -247,6 +274,7 @@ const PartAttributesPage = () => {
       body: JSON.stringify({
         category_id: categoryId || null,
         attributes: values,
+        ...installationBody(installMode, installPrice),
       }),
     });
     if (saved) {
@@ -274,6 +302,21 @@ const PartAttributesPage = () => {
   };
 
   const category = categories.find(({ id }) => id === categoryId);
+  const inherited = category?.installation_price ?? null;
+  const modeLabels: Record<InstallationMode, string> = {
+    inherit:
+      inherited === null
+        ? t('partAttributes.installationInheritNone')
+        : inherited === 0
+          ? t('partAttributes.installationInheritFree')
+          : t('partAttributes.installationInheritPrice', { price: inherited }),
+    price: t('partAttributes.installationOwnPrice'),
+    free: t('partAttributes.installationFree'),
+    none: t('partAttributes.installationNone'),
+  };
+  const installPriceValid =
+    installMode !== 'price' ||
+    (Number.isInteger(Number(installPrice)) && Number(installPrice) > 0);
   const identifier =
     part?.identifiers.find(({ id }) => id === identifierId) ??
     part?.identifiers[0];
@@ -443,6 +486,13 @@ const PartAttributesPage = () => {
                   value={values[field.key]}
                   onChange={(value) => setValue(field.key, value)}
                 />
+                {i18n.exists(`partAttributes.hints.${field.key}`, {
+                  ns: 'carlabAdmin',
+                }) && (
+                  <Text size="xsmall" className="text-ui-fg-subtle">
+                    {t(`partAttributes.hints.${field.key}`)}
+                  </Text>
+                )}
               </div>
             );
           })}
@@ -450,8 +500,54 @@ const PartAttributesPage = () => {
             <Text>{t('partAttributes.noFields')}</Text>
           )}
 
+          <div className="flex flex-col gap-y-2">
+            <Heading level="h3">
+              {t('partAttributes.installationHeading')}
+            </Heading>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex flex-col gap-y-1 sm:w-80">
+                <Label>{t('partAttributes.installationMode')}</Label>
+                <Select
+                  value={installMode}
+                  onValueChange={(next) =>
+                    setInstallMode(z.enum(INSTALLATION_MODES).parse(next))
+                  }
+                >
+                  <Select.Trigger
+                    aria-label={t('partAttributes.installationMode')}
+                  >
+                    <Select.Value />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {INSTALLATION_MODES.map((mode) => (
+                      <Select.Item key={mode} value={mode}>
+                        {modeLabels[mode]}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select>
+              </div>
+              {installMode === 'price' && (
+                <div className="flex flex-col gap-y-1 sm:w-48">
+                  <Label>{t('partAttributes.installationPrice')}</Label>
+                  <Input
+                    aria-label={t('partAttributes.installationPrice')}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={installPrice}
+                    onChange={(event) => setInstallPrice(event.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+            <Text size="small" className="text-ui-fg-subtle">
+              {t('partAttributes.installationHint')}
+            </Text>
+          </div>
+
           <div>
-            <Button disabled={writing} onClick={save}>
+            <Button disabled={writing || !installPriceValid} onClick={save}>
               {t('partAttributes.save')}
             </Button>
           </div>

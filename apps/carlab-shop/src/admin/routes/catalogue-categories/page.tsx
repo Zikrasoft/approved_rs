@@ -25,6 +25,7 @@ import {
   ImageUploads,
   uploadImage,
 } from '../../components/image-uploads';
+import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -74,6 +75,7 @@ const categorySchema = editedBySchema.extend({
   service_label: z.string().nullable(),
   service_price: z.number().nullable(),
   service_note: z.string().nullable(),
+  installation_price: z.number().nullable(),
   image: adminImageSchema.nullable(),
   fields: z.array(categoryFieldSchema),
 });
@@ -367,6 +369,11 @@ const CategoryEditor = ({
     category.service_price === null ? '' : String(category.service_price),
   );
   const [serviceNote, setServiceNote] = useState(category.service_note ?? '');
+  const [installationPrice, setInstallationPrice] = useState(
+    category.installation_price === null
+      ? ''
+      : String(category.installation_price),
+  );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const formId = useId();
   const fieldProps = (field: string) => ({
@@ -522,6 +529,26 @@ const CategoryEditor = ({
         <Text size="small" className="text-ui-fg-subtle">
           {t('categories.serviceHint')}
         </Text>
+        <Heading level="h3" className="mt-2">
+          {t('categories.installationHeading')}
+        </Heading>
+        <div className="flex max-w-xs flex-col gap-y-1">
+          <Label htmlFor={`${formId}-installation_price`}>
+            {t('categories.installationPrice')}
+          </Label>
+          <Input
+            {...fieldProps('installation_price')}
+            type="number"
+            min={0}
+            step={1}
+            value={installationPrice}
+            onChange={(event) => setInstallationPrice(event.target.value)}
+          />
+          {fieldError('installation_price')}
+        </div>
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('categories.installationHint')}
+        </Text>
         <div className="flex gap-x-2">
           <Button
             disabled={!name || !Number.isInteger(Number(kitRank)) || writing}
@@ -538,6 +565,10 @@ const CategoryEditor = ({
                   service_price:
                     servicePrice.trim() === '' ? null : Number(servicePrice),
                   service_note: serviceNote.trim() || null,
+                  installation_price:
+                    installationPrice.trim() === ''
+                      ? null
+                      : Number(installationPrice),
                 },
                 (field, message) =>
                   setFieldErrors((errors) => ({ ...errors, [field]: message })),
@@ -590,8 +621,8 @@ const CategoryEditor = ({
         {category.fields.length === 0 ? (
           <Text>{t('categories.noFields')}</Text>
         ) : (
-          <ScrollArea>
-            <Table>
+          <ScrollArea pinnedEnd>
+            <Table className={PINNED_ACTIONS}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>{t('categories.key')}</Table.HeaderCell>
@@ -703,7 +734,7 @@ const CategoryEditor = ({
 const CategoriesPage = () => {
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[] | null>(null);
   const [selectedId, setSelectedId] = useState('');
   const [slug, setSlug] = useState('');
   const [name, setName] = useState('');
@@ -732,7 +763,7 @@ const CategoriesPage = () => {
     }
   };
 
-  const selected = categories.find(({ id }) => id === selectedId);
+  const selected = categories?.find(({ id }) => id === selectedId);
 
   return (
     <Container className="flex flex-col gap-y-6">
@@ -760,7 +791,9 @@ const CategoriesPage = () => {
         </Text>
       </div>
 
-      {categories.length === 0 ? (
+      {categories === null ? (
+        <ListLoading />
+      ) : categories.length === 0 ? (
         <Text>{t('categories.empty')}</Text>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -780,7 +813,7 @@ const CategoriesPage = () => {
 
       {selected && (
         <CategoryEditor
-          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}-${selected.service_label}-${selected.service_price}-${selected.service_note}`}
+          key={`${selected.id}-${selected.name}-${selected.text}-${selected.maintenance_kit}-${selected.kit_rank}-${selected.service_label}-${selected.service_price}-${selected.service_note}-${selected.installation_price}`}
           category={selected}
           onChange={load}
         />

@@ -31,6 +31,8 @@ import {
   LIST_TABLE,
   ListEmpty,
   ListHeader,
+  ListLoading,
+  PINNED_ACTIONS,
   RowActions,
 } from '../../components/list';
 import { DrawerHeader, ModalHeader } from '../../components/dialog-header';
@@ -274,12 +276,12 @@ const EntityTable = ({
     }
   };
 
-  if (!list) return null;
+  if (!list) return <ListLoading />;
   if (!list.length) return <ListEmpty hint={t('vehicles.emptyHint')} />;
 
   return (
-    <ScrollArea>
-      <Table className={LIST_TABLE}>
+    <ScrollArea pinnedEnd>
+      <Table className={`${LIST_TABLE} ${PINNED_ACTIONS}`}>
         <Table.Header>
           <Table.Row>
             {entity.columns?.map((column) => (

@@ -26,6 +26,7 @@ const battery = {
   service_label: 'Регистрация аккумулятора',
   service_price: 2500,
   service_note: null,
+  installation_price: 1500,
   image: null,
   fields: [],
 };
@@ -45,6 +46,7 @@ const page = {
     replaced_by: null,
     category_id: battery.id,
     attributes: {},
+    installation_price: 0,
   },
   equivalents: [],
   offers: OFFERS,
@@ -127,6 +129,8 @@ describe('a closed shop', () => {
     expect(built.offers).toEqual([]);
     expect(built.priceOnRequest).toBe(true);
     expect(built.category?.service_price).toBeNull();
+    expect(built.category?.installation_price).toBeNull();
+    expect(built.part.installation_price).toBeNull();
     expect(built.category?.service_label).toBe('Регистрация аккумулятора');
   });
 
@@ -134,6 +138,7 @@ describe('a closed shop', () => {
     const [category] = await closed(backend()).categories();
 
     expect(category.service_price).toBeNull();
+    expect(category.installation_price).toBeNull();
   });
 
   it('searches with no price and no price filter', async () => {
@@ -182,15 +187,20 @@ describe('a closed shop', () => {
             .getAll('part_identifier_id')
             .map((id) => [id, id === 'pi_149' ? OFFERS : []]),
         ),
+        installation: { pi_149: 0 },
       }),
     );
 
-    const offers = await closed(fetch, true).offersFor(ids);
+    const { offers, installation } = await closed(fetch, true).offersFor(ids);
 
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(Object.keys(offers)).toHaveLength(150);
     expect(offers.pi_149).toEqual(OFFERS);
-    expect(await closed(fetch).offersFor(ids)).toEqual({});
+    expect(installation).toEqual({ pi_149: 0 });
+    expect(await closed(fetch).offersFor(ids)).toEqual({
+      offers: {},
+      installation: {},
+    });
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 

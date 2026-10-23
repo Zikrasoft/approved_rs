@@ -25,8 +25,11 @@ import { z } from 'zod';
 import { parseEnv } from './env';
 import {
   ADDON_FOR_METADATA_KEY,
+  ADDON_OFFER_METADATA_KEY,
   IN_STOCK_METADATA_KEY,
+  isInstallationLine,
   LEAD_TIME_METADATA_KEY,
+  OFFER_ID_METADATA_KEY,
 } from './offer-cart';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
@@ -35,6 +38,7 @@ export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
 export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
 export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
 export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
+export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
 
 const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 
@@ -96,6 +100,30 @@ const withReadiness = (
 export const carLabel = ({ model, engine }: Vehicle): string =>
   `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
 
+type LeadOrderItem = LeadOrder['items'][number];
+
+const isAddon = (item: LeadOrderItem) =>
+  Boolean(item.metadata?.[ADDON_FOR_METADATA_KEY]);
+
+const byParent = (items: LeadOrderItem[]): LeadOrderItem[] => {
+  const addons = items
+    .filter(isAddon)
+    .sort(
+      (a, b) => Number(isInstallationLine(a)) - Number(isInstallationLine(b)),
+    );
+  const grouped = items
+    .filter((item) => !isAddon(item))
+    .flatMap((parent) => [
+      parent,
+      ...addons.filter(
+        (addon) =>
+          addon.metadata?.[ADDON_OFFER_METADATA_KEY] ===
+          parent.metadata?.[OFFER_ID_METADATA_KEY],
+      ),
+    ]);
+  return [...grouped, ...addons.filter((addon) => !grouped.includes(addon))];
+};
+
 export function orderLeadForm(order: LeadOrder): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
   const currency = order.currency_code.toUpperCase();
@@ -111,11 +139,13 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
       PARTS_ORDER_COPY.confirm,
       contact.car ?? '',
     ],
-    lines: order.items.map((item) =>
-      item.metadata?.[ADDON_FOR_METADATA_KEY]
+    lines: byParent(order.items).map((item) =>
+      isAddon(item)
         ? PARTS_ORDER_COPY.addon(
             item.title,
-            money(item.unit_price * item.quantity),
+            item.unit_price === 0
+              ? PARTS_ORDER_COPY.free
+              : money(item.unit_price * item.quantity),
           )
         : withReadiness(
             PARTS_ORDER_COPY.line(
@@ -164,7 +194,7 @@ export async function sendOrderLead(
   }
 }
 
-async function readLeadOrder(
+export async function readLeadOrder(
   container: MedusaContainer,
   id: string,
 ): Promise<LeadOrder> {
@@ -254,6 +284,10 @@ export async function handOrderToLeadRoute(
     );
     if (!alerted) {
       logger.error(`Order ${id} gave up on the lead pipeline, nobody alerted`);
+      return;
     }
+    await recordHandOff(container, id, () => ({
+      [LEAD_OWNER_ALERTED_AT]: new Date().toISOString(),
+    }));
   }
 }

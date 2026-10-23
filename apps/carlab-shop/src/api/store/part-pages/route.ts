@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
+import { installationPrice } from '../../../lib/installation';
 import { pricesShown } from '../../../lib/offer-cart';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
@@ -75,7 +76,7 @@ export async function GET(
   const [identifiers, count] = await catalog.listAndCountPartIdentifiers(
     {},
     {
-      relations: ['brand', 'part'],
+      relations: ['brand', 'part', 'part.category'],
       order: { id: 'ASC' },
       skip: offset,
       take: limit,
@@ -102,7 +103,8 @@ export async function GET(
   };
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const identifierIds = identifiers.map(({ id }) => id);
-  const offers = pricesShown(req)
+  const shown = pricesShown(req);
+  const offers = shown
     ? await suppliers.listSupplierOffers(
         { part_identifier_id: identifierIds },
         { relations: ['supplier'], take: null },
@@ -119,6 +121,7 @@ export async function GET(
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,
+      installation_price: shown ? installationPrice(identifier.part) : null,
     },
     equivalents: siblings
       .filter(

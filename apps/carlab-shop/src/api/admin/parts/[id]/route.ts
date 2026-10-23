@@ -15,13 +15,30 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  const { name, replaced_by_id, category_id, attributes } = req.validatedBody;
+  const {
+    name,
+    replaced_by_id,
+    category_id,
+    attributes,
+    installation_price,
+    no_installation,
+  } = req.validatedBody;
   const updated_by = req.auth_context.actor_id;
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const current = await catalog.retrievePart(id);
-  if (name !== undefined) {
-    await catalog.updateParts({ id, name, updated_by });
+  if (
+    name !== undefined ||
+    installation_price !== undefined ||
+    no_installation !== undefined
+  ) {
+    await catalog.updateParts({
+      id,
+      ...(name !== undefined && { name }),
+      ...(installation_price !== undefined && { installation_price }),
+      ...(no_installation !== undefined && { no_installation }),
+      updated_by,
+    });
   }
   if (category_id !== undefined || attributes !== undefined) {
     await catalog.classifyPart(id, {
@@ -43,6 +60,8 @@ export async function POST(
       replaced_by_id: part.replaced_by_id,
       category_id: part.category_id,
       attributes: part.attributes,
+      installation_price: part.installation_price,
+      no_installation: part.no_installation,
       updated_by: part.updated_by,
     },
   });

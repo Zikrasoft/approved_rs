@@ -6,7 +6,16 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 
 type Response = {
   status: number;
-  data: Record<string, { id: string; slug: string; key: string }>;
+  data: Record<
+    string,
+    {
+      id: string;
+      slug: string;
+      key: string;
+      name: string;
+      installation_price: number | null;
+    }
+  >;
 };
 
 medusaIntegrationTestRunner({
@@ -548,6 +557,72 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(400);
         expect(response.data).toMatchObject({ code, field });
+      });
+
+      it('sets and clears the installation price of a Category, free included', async () => {
+        const { category } = await createOilCategory();
+        const path = `/admin/categories/${category.id}`;
+        expect(category.installation_price).toBeNull();
+
+        expect(
+          (await post(path, { installation_price: 0 })).data.category,
+        ).toMatchObject({ installation_price: 0 });
+        expect(
+          (await post(path, { installation_price: 1500 })).data.category,
+        ).toMatchObject({ installation_price: 1500 });
+        expect(
+          (await post(path, { installation_price: null })).data.category,
+        ).toMatchObject({ installation_price: null });
+
+        const refused = await post(path, { installation_price: -1 });
+        expect(refused.status).toBe(400);
+        expect(refused.data).toMatchObject({
+          code: 'INVALID_FIELD',
+          field: 'installation_price',
+        });
+      });
+
+      it('lets a Part inherit, override, give free or refuse installation', async () => {
+        const { category } = await createOilCategory();
+        const created = await createPart(category.id, {
+          viscosity: '5w-30',
+        });
+        const path = `/admin/parts/${created.data.part.id}`;
+        const listed = async () =>
+          (
+            await api.get(
+              `/admin/parts?q=${encodeURIComponent(created.data.part.name)}`,
+              adminHeaders,
+            )
+          ).data.parts[0];
+        expect(await listed()).toMatchObject({
+          installation_price: null,
+          no_installation: false,
+        });
+
+        expect(
+          (await post(path, { installation_price: 0 })).data.part,
+        ).toMatchObject({ installation_price: 0, no_installation: false });
+        expect(
+          (await post(path, { no_installation: true })).data.part,
+        ).toMatchObject({ no_installation: true });
+        expect(await listed()).toMatchObject({
+          installation_price: 0,
+          no_installation: true,
+          attributes: { viscosity: '5w-30' },
+        });
+        expect(
+          (
+            await post(path, {
+              installation_price: null,
+              no_installation: false,
+            })
+          ).data.part,
+        ).toMatchObject({ installation_price: null, no_installation: false });
+
+        expect((await post(path, { installation_price: 1.5 })).status).toBe(
+          400,
+        );
       });
 
       it('refuses clearing the label of a priced add-on service', async () => {

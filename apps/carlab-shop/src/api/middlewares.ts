@@ -266,12 +266,25 @@ export default defineMiddlewares({
       ],
     },
     {
+      matcher: '/store/offer-carts/:id/items/:item_id/installation',
+      method: 'POST',
+      middlewares: [
+        refuseClosedShop,
+        validateAndTransformBody(StoreAddLineAddon),
+      ],
+    },
+    {
       matcher: '/store/offer-carts/:id/items/:item_id',
       method: 'DELETE',
       middlewares: [refuseClosedShop],
     },
     {
       matcher: '/store/offer-carts/:id/items/:item_id/addon',
+      method: 'DELETE',
+      middlewares: [refuseClosedShop],
+    },
+    {
+      matcher: '/store/offer-carts/:id/items/:item_id/installation',
       method: 'DELETE',
       middlewares: [refuseClosedShop],
     },

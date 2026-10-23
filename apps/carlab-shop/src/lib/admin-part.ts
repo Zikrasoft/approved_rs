@@ -19,6 +19,8 @@ export const adminPartSchema = z.object({
   name: z.string(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), z.unknown()),
+  installation_price: z.number().nullable(),
+  no_installation: z.boolean(),
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),

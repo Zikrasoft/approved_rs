@@ -18,6 +18,7 @@ const Category = model
     service_label: model.text().nullable(),
     service_price: model.number().nullable(),
     service_note: model.text().nullable(),
+    installation_price: model.number().nullable(),
     fields: model.hasMany(() => CategoryField, { mappedBy: 'category' }),
     parts: model.hasMany(() => Part, { mappedBy: 'category' }),
     ...provenance(),

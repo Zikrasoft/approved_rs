@@ -122,6 +122,7 @@ medusaIntegrationTestRunner({
             replaced_by: null,
             category_id: oilFilters.id,
             attributes: { height: 75 },
+            installation_price: null,
           },
           equivalents: [
             {

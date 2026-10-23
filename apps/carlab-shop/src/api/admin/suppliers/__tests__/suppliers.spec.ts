@@ -314,6 +314,82 @@ medusaIntegrationTestRunner({
         expect(count).toBe(values.length);
       });
 
+      it('takes only that supplier offers off the site and switches its import off', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const brand = await catalog.createBrands({
+          name: 'Bosch',
+          slug: 'bosch',
+        });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Свеча зажигания',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: brand.id, value: 'FR7' },
+          ],
+        });
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: partId,
+        });
+        const [leaving, staying] = await supplierService.createSuppliers([
+          { name: 'Leaving supplier', markup_percentage: 10 },
+          { name: 'Staying supplier', markup_percentage: 10 },
+        ]);
+        for (const supplier of [leaving, leaving, staying]) {
+          await supplierService.createSupplierOffers({
+            supplier_id: supplier.id,
+            supplier_article_id: `${supplier.id}-${Math.random()}`,
+            part_identifier_id: identifier.id,
+            cost_price: 500,
+            stock_quantity: 1,
+            lead_time_days: 0,
+          });
+        }
+        const listed = await call('get', '/admin/suppliers');
+        expect(
+          listed.data.suppliers
+            .filter(({ id }: { id: string }) =>
+              [leaving.id, staying.id].includes(id),
+            )
+            .map(({ offer_count }: { offer_count: number }) => offer_count),
+        ).toEqual([2, 1]);
+
+        const response = await call(
+          'delete',
+          `/admin/suppliers/${leaving.id}/offers`,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data).toEqual({ deleted: 2 });
+        expect(
+          await supplierService.listSupplierOffers({ supplier_id: leaving.id }),
+        ).toEqual([]);
+        expect(
+          await supplierService.listSupplierOffers({ supplier_id: staying.id }),
+        ).toHaveLength(1);
+        expect(
+          await supplierService.retrieveSupplier(leaving.id),
+        ).toMatchObject({
+          import_enabled: false,
+          updated_by: expect.any(String),
+        });
+      });
+
+      it('refuses to take the manual supplier offers off in bulk', async () => {
+        const manual = await supplierService.createSuppliers({
+          name: 'manual',
+          markup_percentage: 20,
+          import_enabled: false,
+        });
+
+        const response = await call(
+          'delete',
+          `/admin/suppliers/${manual.id}/offers`,
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.data.code).toBe('MANUAL_SOURCE');
+      });
+
       it('returns a 404 for an unknown supplier', async () => {
         const response = await api
           .post(

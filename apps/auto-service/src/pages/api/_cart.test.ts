@@ -84,6 +84,26 @@ describe('/api/cart', () => {
     expect(init.body).toBe('{}');
   });
 
+  it('sends which line wants installation at CarLab, never a price', async () => {
+    backend.mockResolvedValue(new Response('{}', { status: 404 }));
+
+    await call(PUT, {
+      body: {
+        cart_id: 'cart_1',
+        item_id: 'item_1',
+        addon: true,
+        kind: 'installation',
+        unit_price: 0,
+      },
+    });
+
+    const [url, init] = backend.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(
+      'http://shop.test/store/offer-carts/cart_1/items/item_1/installation',
+    );
+    expect(init.body).toBe('{}');
+  });
+
   it('answers a malformed add-on change with an empty cart', async () => {
     expect(
       await outcome(

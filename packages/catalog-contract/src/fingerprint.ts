@@ -2,26 +2,32 @@ export type FingerprintLine = {
   id: string;
   quantity: number;
   unit_price: number;
-  addon?: { item_id: string | null; unit_price: number } | null;
+  addon?: AddedLine | null;
+  installation?: AddedLine | null;
 };
+
+type AddedLine = { item_id: string | null; unit_price: number };
 
 export const CART_FINGERPRINT_FIELD = 'cart_fingerprint';
 
-const withAddon = ({ addon, ...line }: FingerprintLine) =>
-  addon?.item_id
-    ? [
-        line,
-        {
-          id: addon.item_id,
-          quantity: line.quantity,
-          unit_price: addon.unit_price,
-        },
-      ]
-    : [line];
+const withAddons = ({ addon, installation, ...line }: FingerprintLine) => [
+  line,
+  ...[addon, installation].flatMap((added) =>
+    added?.item_id
+      ? [
+          {
+            id: added.item_id,
+            quantity: line.quantity,
+            unit_price: added.unit_price,
+          },
+        ]
+      : [],
+  ),
+];
 
 export const cartFingerprint = (lines: FingerprintLine[]): string =>
   lines
-    .flatMap(withAddon)
+    .flatMap(withAddons)
     .map(({ id, quantity, unit_price }) => `${id}:${quantity}:${unit_price}`)
     .sort()
     .join(',');

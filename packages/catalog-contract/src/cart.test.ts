@@ -25,6 +25,7 @@ const cart = {
       in_stock: true,
       lead_time_days: 0,
       addon: null,
+      installation: null,
       part: {
         slug: 'bmw-11428575211',
         brand: 'BMW',
@@ -58,6 +59,16 @@ describe('offerCartResponseSchema', () => {
     ).toBe('item_2');
   });
 
+  it('accepts a line with installation at CarLab, free or priced', () => {
+    const items = [
+      { ...cart.items[0], installation: { item_id: 'item_3', unit_price: 0 } },
+    ];
+    expect(
+      offerCartResponseSchema.parse({ cart: { ...cart, items } }).cart.items[0]
+        .installation,
+    ).toEqual({ item_id: 'item_3', unit_price: 0 });
+  });
+
   it('refuses a line without a quantity', () => {
     const items = [{ ...cart.items[0], quantity: 0 }];
     expect(
@@ -89,6 +100,18 @@ describe('checkout answers', () => {
       identifierOffersResponseSchema.safeParse({ offers: { pi_1: [{}] } })
         .success,
     ).toBe(false);
+  });
+
+  it('carries what installing each part at CarLab costs, null where it is not offered', () => {
+    expect(
+      identifierOffersResponseSchema.parse({
+        offers: {},
+        installation: { pi_1: 0, pi_2: null },
+      }).installation,
+    ).toEqual({ pi_1: 0, pi_2: null });
+    expect(
+      identifierOffersResponseSchema.parse({ offers: {} }).installation,
+    ).toEqual({});
   });
 });
 
@@ -211,6 +234,25 @@ describe('cartFingerprint', () => {
     expect(
       cartFingerprint([
         { ...line('a', 2, 50), addon: { item_id: null, unit_price: 2500 } },
+      ]),
+    ).toBe(cartFingerprint([line('a', 2, 50)]));
+  });
+
+  it('reads an added installation as a line of its own beside the add-on service', () => {
+    expect(
+      cartFingerprint([
+        {
+          ...line('a', 2, 50),
+          addon: { item_id: 'b', unit_price: 2500 },
+          installation: { item_id: 'c', unit_price: 0 },
+        },
+      ]),
+    ).toBe(
+      cartFingerprint([line('a', 2, 50), line('b', 2, 2500), line('c', 2, 0)]),
+    );
+    expect(
+      cartFingerprint([
+        { ...line('a', 2, 50), installation: { item_id: null, unit_price: 0 } },
       ]),
     ).toBe(cartFingerprint([line('a', 2, 50)]));
   });

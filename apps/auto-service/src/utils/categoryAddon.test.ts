@@ -20,6 +20,7 @@ const batteries: Category = {
   service_label: 'Регистрация аккумулятора',
   service_price: 2500,
   service_note: 'На BMW после замены нужна регистрация.',
+  installation_price: null,
   image: null,
   fields: [],
 };

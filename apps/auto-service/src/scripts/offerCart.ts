@@ -77,6 +77,11 @@ const offerCartSchema = z.object({
           unit_price: z.number(),
         }),
       ),
+      installation: z.optional(
+        z.nullable(
+          z.object({ item_id: z.nullable(z.string()), unit_price: z.number() }),
+        ),
+      ),
       part: listedPartSchema,
     }),
   ),
@@ -227,8 +232,13 @@ export function orderSummary(cart: OfferCart) {
     0,
   );
   const addons = sold.reduce(
-    (sum, { addon, quantity }) =>
-      sum + (addon?.item_id ? addon.unit_price * quantity : 0),
+    (sum, { addon, installation, quantity }) =>
+      sum +
+      [addon, installation].reduce(
+        (added, extra) =>
+          added + (extra?.item_id ? extra.unit_price * quantity : 0),
+        0,
+      ),
     0,
   );
   return { count, parts, addons, total: parts + addons };
@@ -693,6 +703,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           localeTag = 'sr',
           locale = '',
           quantityTemplate = '{count}',
+          installationLabel = '',
+          installationFree = '',
         } = this.dataset;
         const money = (amount: number) =>
           formatMoney(amount, cart.currency, localeTag);
@@ -702,7 +714,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const sold = cart.items.filter(({ available }) => available);
         this.querySelector('[data-receipt-lines]')?.replaceChildren(
           ...sold.map((line) => {
-            const { part, quantity, unit_price, addon } = line;
+            const { part, quantity, unit_price, addon, installation } = line;
             const row = template.content.cloneNode(true) as DocumentFragment;
             fill(row, '[data-name]', part.name);
             fill(row, '[data-number]', `${part.brand} ${part.number}`);
@@ -718,6 +730,17 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               '[data-addon]',
               addon?.item_id
                 ? `+ ${addonLabel(addon.label, addon.translations, locale)}, ${money(addon.unit_price * quantity)}`
+                : null,
+            );
+            fill(
+              row,
+              '[data-installation]',
+              installation?.item_id
+                ? `+ ${
+                    installation.unit_price === 0
+                      ? installationFree
+                      : `${installationLabel}, ${money(installation.unit_price * quantity)}`
+                  }`
                 : null,
             );
             return row;
@@ -951,45 +974,71 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           );
         });
         if (toInquiry) toInquiry.hidden = line.available;
-        this.addon(row, line, cart, money, unitTemplate);
+        const { locale = '', installationLabel = '' } = this.dataset;
+        const toggles = { money, unitTemplate };
+        if (line.addon) {
+          this.addon(row, '[data-addon]', line, cart, toggles, {
+            ...line.addon,
+            label: addonLabel(
+              line.addon.label,
+              line.addon.translations,
+              locale,
+            ),
+            kind: 'addon',
+          });
+        }
+        if (line.installation) {
+          this.addon(row, '[data-installation]', line, cart, toggles, {
+            label: installationLabel,
+            ...line.installation,
+            kind: 'installation',
+          });
+        }
         return row;
       }
 
       addon(
         row: HTMLElement,
+        selector: string,
         line: CartLine,
         cart: OfferCart,
-        money: (amount: number) => string,
-        unitTemplate: string,
+        {
+          money,
+          unitTemplate,
+        }: { money: (amount: number) => string; unitTemplate: string },
+        added: {
+          label: string;
+          item_id: string | null;
+          unit_price: number;
+          kind: 'addon' | 'installation';
+        },
       ): void {
-        const box = row.querySelector<HTMLElement>('[data-addon]');
+        const box = row.querySelector<HTMLElement>(selector);
         const toggle = box?.querySelector<HTMLInputElement>(
           '[data-addon-toggle]',
         );
-        if (!box || !toggle || !line.addon) return;
-        const { addonTemplate = '{service}', locale = '' } = this.dataset;
+        if (!box || !toggle) return;
+        const { addonTemplate = '{service}', freeLabel = '' } = this.dataset;
+        const free = added.unit_price === 0;
         box.hidden = !line.available;
         fill(
           box,
           '[data-addon-label]',
-          addonTemplate.replace(
-            '{service}',
-            addonLabel(line.addon.label, line.addon.translations, locale),
-          ),
+          addonTemplate.replace('{service}', added.label),
         );
         fill(
           box,
           '[data-addon-price]',
-          `+${money(line.addon.unit_price * line.quantity)}`,
+          free ? freeLabel : `+${money(added.unit_price * line.quantity)}`,
         );
         fill(
           box,
           '[data-addon-unit]',
-          line.quantity > 1
-            ? unitTemplate.replace('{price}', money(line.addon.unit_price))
+          line.quantity > 1 && !free
+            ? unitTemplate.replace('{price}', money(added.unit_price))
             : null,
         );
-        toggle.checked = line.addon.item_id !== null;
+        toggle.checked = added.item_id !== null;
         toggle.addEventListener('change', () => {
           toggle.disabled = true;
           box.setAttribute('aria-busy', 'true');
@@ -997,6 +1046,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             cart_id: cart.id,
             item_id: line.id,
             addon: toggle.checked,
+            kind: added.kind,
           });
         });
       }

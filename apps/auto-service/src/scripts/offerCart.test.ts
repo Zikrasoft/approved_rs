@@ -262,6 +262,37 @@ describe('the remembered cart', () => {
     ).toEqual({ count: 2, parts: 3700, addons: 0, total: 3700 });
   });
 
+  it('charges installation per unit beside the add-on service, free installation adding nothing', () => {
+    expect(
+      orderSummary({
+        ...cart,
+        items: [
+          {
+            ...cart.items[0],
+            quantity: 2,
+            addon: { ...SERVICE, item_id: 'item_2' },
+            installation: { item_id: 'item_3', unit_price: 1500 },
+          },
+          {
+            ...cart.items[0],
+            id: 'item_4',
+            installation: { item_id: 'item_5', unit_price: 0 },
+          },
+          {
+            ...cart.items[0],
+            id: 'item_6',
+            installation: { item_id: null, unit_price: 900 },
+          },
+        ],
+      }),
+    ).toEqual({
+      count: 4,
+      parts: 4 * 1850,
+      addons: 2 * 2500 + 2 * 1500,
+      total: 4 * 1850 + 2 * 2500 + 2 * 1500,
+    });
+  });
+
   it('charges the add-on service once per unit of a sellable line', () => {
     expect(
       orderSummary({

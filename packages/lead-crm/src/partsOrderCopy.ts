@@ -16,6 +16,8 @@ export const PARTS_ORDER_COPY = {
   inStock: 'в наличии',
   pickupIn: (days: number) => `забрать через ${days} ${dayWord(days)}`,
   addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
+  installation: 'Установка в сервисе CarLab',
+  free: 'бесплатно',
   total: (sum: string) => `Итого: ${sum}`,
   leftOut: (count: number) => `Не поместилось позиций: ${count}`,
   undelivered: (order: number | string, reason: string) =>
