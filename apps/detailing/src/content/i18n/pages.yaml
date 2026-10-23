@@ -78,158 +78,158 @@ notFound:
 translations:
   sr:
     works:
-      metaTitle: Radovi detailing studija u Beogradu — Details
-      metaDescription: 'Automobili koji su prošli kroz naš boks na Zvezdari: zaštita PPF, zaštita farova, potpuno prekrivanje karoserije. Fotografije za svaki rad.'
+      metaTitle: Radovi studija detaljinga u Beogradu — Details
+      metaDescription: 'Automobili koji su prošli kroz naš boks na Zvezdari: zaštitna folija PPF, zaštita farova, kompletno obavijanje karoserije. Svoja foto po svakoj radnji.'
       eyebrow: Naši radovi
       heading: Automobili koji su prošli kroz naš boks
-      lead: Nema stock fotografija. Svaka kartica je automobil koji je bio kod nas u boksu, snimljen nakon radova.
+      lead: Nema stock fotografija. Svaka kartica — automobil koji je bio kod nas, snimljen nakon rada.
       filterAll: Sve
       detailMetaSuffix: Details
-      detailCtaHeading: Želite isto?
-      detailCtaBody: Dođite na pregled ili pošaljete fotografiju svog automobila — izračunaćemo i reći ćemo vam rok.
+      detailCtaHeading: Želite takođe?
+      detailCtaBody: Dođite na pregled ili pošaljite fotografiju svog automobila — izračunamo i javimo vreme.
       doorHeading: Sviđa vam se rezultat?
-      doorText: Pošaljite fotografiju svog automobila — izračunaćemo cenu i rok.
+      doorText: Pošaljite fotografiju svog automobila — izračunamo cenu i vreme.
       doorButtonLabel: Izračunaj cenu
     contact:
-      metaTitle: Kontakti detailing studija u Beogradu — Details
-      metaDescription: Adresa, radno vreme i telefon detailing studija Details u Beogradu. Zakazivanje pregleda telefonom, na WhatsApp, Viber ili Telegram.
+      metaTitle: Kontakti studija detaljinga u Beogradu — Details
+      metaDescription: Adresa, radno vreme i telefon studija detaljinga Details u Beogradu. Zakazivanje za pregled putem telefona, WhatsApp-a, Viber-a ili Telegram-a.
       eyebrow: Kontakti
-      heading: Dođite da vidite boks
-      lead: 'Ne prodajemo telefonom. Najbolji način je da svratite na petnaest minuta: pogledamo automobil zajedno i kažemo šta mu zapravo treba.'
+      heading: Dođite pogledati boks
+      lead: 'Ne prodajemo telefonom. Najbolji način je da svratite na petnaest minuta: pogledamo auto zajedno i kažemo šta mu zaista treba.'
       addressLabel: Adresa
       hoursLabel: Radno vreme
       phoneLabel: Telefon
       mapHeading: Kako nas pronaći
-      mapNote: Pristup iz dvorišta, kapija sa natpisom. Parking ispred boksa.
+      mapNote: Ulaz iz dvorišta, vrata sa natpisom. Parking ispred boksa.
       arrivalHeading: Pre dolaska
       arrival:
-        - Nema potrebe da perete automobil — mi ćemo ga sami oprati pre rada.
+        - Ne morate prati auto — i dalje ga peremo pre rada.
         - 'Ako imate vremena, dođite tokom dana: lak se bolje vidi na dnevnom svetlu.'
-        - Ponesite ključeve od svih brave, uključujući i tajne na točkovima.
+        - Ponesite ključeve od svih brava, uključujući tajne na točkovima.
     thanks:
-      metaTitle: Zahtev poslat — Details
-      metaDescription: Hvala na zahtevu. Javićemo se u radno vreme i dogovorićemo pregled.
+      metaTitle: Prijava poslata — Details
+      metaDescription: Hvala na prijavi. Javićemo se u radno vreme i dogovoriti pregled.
       eyebrow: Gotovo
-      heading: Zahtev je kod nas
-      body: Javićemo se u radno vreme — obično u roku od sati. Ako je pitanje hitno, pišite u messenger, tamo odgovaramo brže.
-      note: Ako nema odgovora duže od radnog dana, znači da je poruka izgubljena. Pišite ponovo, nećemo se uvrediti.
-      cta: Vratite se na početnu
+      heading: Prijava kod nas
+      body: Javićemo se u radno vreme — obično u roku od sat vremena. Ako je pitanje hitno, pišite nam u messanger, odgovaramo brže.
+      note: Ako odgovora nema duže od radnog dana, to znači da je poruka izgubljena. Pišite ponovo, nećemo se uvrediti.
+      cta: Povratak na početnu
     privacy:
       metaTitle: Politika privatnosti — Details
-      metaDescription: Koje podatke prikuplja sajt detailing studija Details, zašto i kako dugo ih čuva.
+      metaDescription: Koje podatke prikuplja sajt studija detaljinga Details, zašto i koliko dugo se čuvaju.
       heading: Politika privatnosti
       lastUpdated: Ažurirano 12. septembra 2026
       sections:
         - title: Koje podatke prikupljamo
-          text: Samo ono što sami unosite u obrazac — ime, kontakt i komentar, kao i adresu stranice sa koje je zahtev poslat, i anonimni identifikator pretraživača. Ovaj identifikator je nasumičan, čuva se u vašem pretraživaču i potreban je samo kako ne bismo kreirali tri kartice za isti zahtev.
-        - title: Zašto su nam ti podaci
-          text: Da bismo se povezali s vama u vezi zahteva i vodili istoriju komunikacije. Ne koristimo ih za slanje i ne predajemo trećim stranama u reklamne svrhe.
+          text: Samo ono što sami unosite u obrazac prijave — ime, kontakt i komentar, kao i adresu stranice sa koje je prijava poslata, i anonimni identifikator pregledača. Ovaj identifikator je slučajan, čuva se u vašem pregledaču i potrebna je samo da ne napravimo tri kartice za isti zahtev.
+        - title: Zašto nam ti podaci
+          text: Da bismo se javili vam povodom prijave i vodili istoriju kontakta. Ne koristimo ih za slanje e-pošte i ne prosleđujemo ih trećim licima u reklamne svrhe.
         - title: Gde se čuvaju
-          text: Zahtevi se čuvaju u enkriptovanoj bazi podataka našeg hosting provajdera i dupliraju se u naš intern chat. Pristup imaju samo zaposleni studija.
+          text: Prijave se čuvaju u enkriptovanoj bazi našeg hosting provajdera i dupliraju se u naš unutrašnji radni chat. Pristup imaju samo zaposleni studija.
         - title: Koliko ih čuvamo
           text: Do dve godine od poslednjeg kontakta. Na vaš zahtev ćemo ih obrisati ranije.
         - title: Kolačići
-          text: Sajt koristi tehnički kolačić sa izabranim jezikom sučelja i analitičke (Google Analytics i Yandex.Metrica). Analitika se pokreće prilikom prvog učitavanja stranice; u banneru na dnu ekrana možete se odjaviti, a tada se pri sledećem učitavanju ne uključuje. Yandex.Metrica snima sesije (pokret kursora, scroll i klikove). Obrazac zahteva smo iz snimka isključili, njegov sadržaj ne ulazi u to. Ovdje nema reklamnih kolačića koji vas prate na drugim sajtovima. Ako ste došli preko reklame i niste se odjavili od analitike, sajt pamti to — izvor i kampanju — na 30 dana, tako da vidimo koja reklama donosi zahteve.
+          text: Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitičke (Google Analytics i Yandex.Metrica). Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, pa se od sledećeg učitavanja ne uključuje. Yandex.Metrica beleži sesije (pokrete kursora, skrolovanje i klikove). Oblik zahteva smo isključili iz snimka, njegovi sadržaji se ne beleže. Reklamni kolačići koji prate vašu aktivnost na drugim sajtovima nisu ovde prisutni. Ako ste došli preko reklame i niste se odrekli analitike, sajt pamti ovo — izvor i kampanju — na 30 dana, kako bismo videli koja reklama donosi zahteve.
         - title: Vaša prava
-          text: Možete zatražiti kopiju svojih podataka, njihovo ispravljanje ili brisanje. Dovoljno je da nam napišete u bilo kojem od messengera ili pozovete.
+          text: Možete zatražiti kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nam pišete u bilo kojem od messengera ili pozovete.
       contactTitle: Pitanja o podacima
-      contactBefore: Napišite ili nazovite nas, kontakti su na stranici
+      contactBefore: Pišite ili pozovite nas, kontakti su na stranici
     about:
-      metaTitle: O projektu details.rs, sajt studije detailing Details
-      metaDescription: Šta se nalazi na sajtu studije detailing Details u Beogradu, odakle fotografije radova, kome pripada sajt i kako nas kontaktirati.
+      metaTitle: O projektu details.rs, sajt studije detaljinga Details
+      metaDescription: Šta se može naći na sajtu studije detaljinga Details u Beogradu, odakle su fotografije radova, kome pripada sajt i kako stupiti u kontakt.
       heading: Sajt studije Details
-      lead: Ovde je sve o studiji detailing Details u Beogradu. Usluge, naši radovi, adresa i načini zakazivanja.
+      lead: Ovde je sve o studiji detaljinga Details u Beogradu. Usluge, naši radovi, adresa i načini zakazivanja.
       sitemapHeading: Šta se nalazi na sajtu
       worksCountLabel: Radova u portfoliju
       servicesCountLabel: Usluga u katalogu
       contentHeading: Odakle materijali
-      contentText: Svaki rad na sajtu snimljen je u našem boksi, nakon rada, bez stock fotografija. Teksteve piše tim studije na ruskom, na srpski i engleski se automatski prevode.
+      contentText: Svaka usluga na sajtu snimljena je u našem boksu, nakon završetka rada, bez stock fotografija. Tekstove piše tim studije na ruskom, prevode se automatski na srpski i engleski.
       ownerHeading: Kome pripada sajt
-      ownerText: Sajt pripada studiji detailing Details. Kako se obraćamo s podacima posetilaca, opisano je u odeljku
+      ownerText: Sajt pripada studiji detaljinga Details. Kako tretiramo podatke posetilaca opisano je u odeljku
       contactsHeading: Kontakti
-      contactsText: Telefon i messengeri su na stranici
+      contactsText: Telefon i mapežeri su okupljeni na stranici
       developerCredit: Sajt je projektovan i razvijen u studiji Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena — Details
-      heading: Takva stranica ne postoji
-      body: Moguće je da je link zastareo ili da ima grešku u adresi. Pogledajte glavnu stranicu ili pogledajte radove.
-      cta: Na glavnu
+      heading: Ova stranica ne postoji
+      body: Možda je link zastareo ili je u adresi greška. Posetite početnu ili pogledajte radove.
+      cta: Na početnu
   en:
     works:
-      metaTitle: Detailing Studio Works in Belgrade — Details
-      metaDescription: 'Cars that have passed through our box in Zvezdara: PPF installation, headlight protection, full body wraps. Photos for each project.'
-      eyebrow: Our Works
-      heading: Cars That Have Been in Our Box
-      lead: No stock photos here. Each card features a car that visited us, captured after the work.
+      metaTitle: Detailing Studio Work in Belgrade — Details
+      metaDescription: 'Cars that have passed through our shop in Zvezdara: PPF, headlight protection, and full body wraps. Photos of each project.'
+      eyebrow: Our Work
+      heading: Cars We've Worked On
+      lead: No stock photos. Each card features a car we serviced, photographed after the work.
       filterAll: All
       detailMetaSuffix: Details
       detailCtaHeading: Want the same?
-      detailCtaBody: Come for an inspection or send a photo of your car — we’ll provide a quote and timeline.
+      detailCtaBody: Come for an inspection or send us a photo of your car — we'll provide a quote and timeline.
       doorHeading: Like the Result?
-      doorText: Send a photo of your car — we’ll calculate the cost and timeframe.
-      doorButtonLabel: Calculate Cost
+      doorText: Send us a photo of your car — we'll calculate the price and timeline.
+      doorButtonLabel: Calculate Price
     contact:
-      metaTitle: Contact Details of the Detailing Studio in Belgrade — Details
-      metaDescription: Address, hours, and phone number of the Details detailing studio in Belgrade. Schedule an inspection via phone, WhatsApp, Viber, or Telegram.
-      eyebrow: Contact
-      heading: Come Check Out the Box
-      lead: 'We don’t sell over the phone. The best way is to stop by for fifteen minutes: we’ll check the car together and tell you what it really needs.'
+      metaTitle: Contact Details of Detailing Studio in Belgrade — Details
+      metaDescription: Address, working hours, and phone number of the Details detailing studio in Belgrade. Schedule an inspection via phone, WhatsApp, Viber, or Telegram.
+      eyebrow: Contact Us
+      heading: Come See Our Shop
+      lead: 'We don’t sell over the phone. The best way is to stop by for 15 minutes: we’ll take a look at your car and discuss what it really needs.'
       addressLabel: Address
       hoursLabel: Working Hours
       phoneLabel: Phone
       mapHeading: How to Find Us
-      mapNote: Enter from the yard, gates with a sign. Parking is available in front of the box.
-      arrivalHeading: Before You Arrive
+      mapNote: Entrance from the yard, gates with a sign. Parking in front of the shop.
+      arrivalHeading: Before Arriving
       arrival:
-        - You don’t need to wash the car — we do that ourselves before starting.
-        - 'If you have time, come during the day: the paint shows better in daylight.'
-        - Bring keys for all locks, including the wheel locks.
+        - You don’t need to wash your car — we’ll wash it ourselves before starting.
+        - 'If you have time, come during the day: the paint looks better in daylight.'
+        - Bring the keys for all locks, including wheel locks.
     thanks:
       metaTitle: Application Submitted — Details
-      metaDescription: Thank you for your application. We will contact you during business hours to arrange the inspection.
+      metaDescription: Thank you for your application. We’ll get in touch during business hours to arrange an inspection.
       eyebrow: Done
-      heading: We Have Your Application
-      body: We will get back to you during business hours — usually within an hour. If your matter is urgent, message us on messenger for a faster response.
-      note: If you don't receive a reply by the end of the workday, it means your message was lost. Please write again, we won't mind.
-      cta: Return to Main
+      heading: We've Received Your Application
+      body: We will contact you during business hours — usually within an hour. If your inquiry is urgent, message us, we’re quicker there.
+      note: If you don’t hear back by the end of the business day, your message might have been lost. Please write again, we won’t be offended.
+      cta: Return to Home
     privacy:
       metaTitle: Privacy Policy — Details
-      metaDescription: What data the Details detailing studio website collects, why, and how long it is stored.
+      metaDescription: What data the Details detailing studio website collects, why and how long it’s stored.
       heading: Privacy Policy
-      lastUpdated: Updated September 12, 2026
+      lastUpdated: Last Updated September 12, 2026
       sections:
         - title: What Data We Collect
-          text: Only what you enter in the application form — name, contact details, and comments — as well as the address of the page from which the application was submitted and an anonymous browser identifier. This identifier is random, stored in your browser, and is solely for ensuring we don’t create multiple entries for the same request.
+          text: Only what you enter in the application form — name, contact, and comments — as well as the page address from which the application was sent, and an anonymous browser identifier. This identifier is random, stored in your browser, and needed only to prevent multiple cards for the same request.
         - title: Why We Need This Data
-          text: To contact you regarding your application and maintain a record of communications. We do not use it for newsletters and do not share it with third parties for advertising purposes.
-        - title: Where It Is Stored
-          text: Applications are stored in an encrypted repository of our hosting provider and are duplicated in our internal work chat. Access is restricted to our studio staff.
-        - title: How Long We Store It
-          text: Up to two years from the last contact. We will delete it sooner upon your request.
+          text: To contact you regarding your application and maintain a history of inquiries. We do not use it for newsletters or share it with third parties for advertising.
+        - title: Where It’s Stored
+          text: Applications are stored in an encrypted repository by our hosting provider and are duplicated in our internal work chat. Access is limited to studio staff.
+        - title: How Long We Keep It
+          text: Up to two years from the last contact. We will delete it earlier at your request.
         - title: Cookies
-          text: The website uses a technical cookie for the selected interface language and analytics (Google Analytics and Yandex.Metrica). Analytics starts upon the first page load; you can decline via the banner at the bottom of the screen, and it will be disabled for the next load. Yandex.Metrica records sessions (mouse movements, scrolling, and clicks). The application form is excluded from the recording; its content is not captured. There are no advertising cookies that track you on other sites. If you came via an ad and did not decline analytics, the site retains this information — the source and campaign — for 30 days, so we can see which ads generate applications.
+          text: The site uses a technical cookie for the selected interface language and analytical tools (Google Analytics and Yandex.Metrica). Analytics is activated on the first page load; you can opt out via the banner at the bottom of the screen, so it won’t be activated on subsequent loads. Yandex.Metrica records sessions (mouse movement, scrolling, and clicks). We have excluded the application form from the recording, so its content is not captured. There are no advertising cookies that track you on other sites. If you arrived through an advertisement and did not opt out of analytics, the site remembers the source and campaign for 30 days, allowing us to see which ads generate leads.
         - title: Your Rights
-          text: You can request a copy of your data, its correction, or deletion. It's enough to message us on any messenger or call.
-      contactTitle: Questions About Data
-      contactBefore: Message or call us; contact information is available on the page.
+          text: You can request a copy of your data, corrections, or deletion. Just message us on any of the messengers or call.
+      contactTitle: Data Questions
+      contactBefore: Write or call us, contact details are on the page.
     about:
-      metaTitle: About the details.rs Project, Website of the Detailing Studio Details
-      metaDescription: What is available on the website of the Details detailing studio in Belgrade, where the project photos come from, who owns the site, and how to contact us.
-      heading: Website of the Details Studio
-      lead: All about the Details detailing studio in Belgrade is gathered here. Services, our works, address, and ways to schedule.
-      sitemapHeading: What’s on the Website
-      worksCountLabel: Works in the Portfolio
-      servicesCountLabel: Services in the Catalog
-      contentHeading: Where the Materials Come From
-      contentText: Each project on the website was shot in our box, after the work, without stock photos. The texts are written by our studio team in Russian and are automatically translated into Serbian and English.
-      ownerHeading: Who Owns the Site
-      ownerText: The site belongs to the Details detailing studio. How we handle visitor data is described in the section.
-      contactsHeading: Contact
-      contactsText: Phone and messengers are listed on the page.
-      developerCredit: The website was designed and developed by Zikrasoft.
+      metaTitle: About details.rs, Details detailing studio website
+      metaDescription: What you'll find on the Details detailing studio website in Belgrade, where the photos come from, who owns the site, and how to contact us.
+      heading: Details Studio Website
+      lead: Here you'll find everything about the Details detailing studio in Belgrade. Services, our work, address, and how to book an appointment.
+      sitemapHeading: What you'll find on the site
+      worksCountLabel: Projects in portfolio
+      servicesCountLabel: Services in catalog
+      contentHeading: Where the materials come from
+      contentText: Every project on the site was photographed in our studio after completion, without stock images. Texts are written by the studio team in Russian and are automatically translated into Serbian and English.
+      ownerHeading: Who owns the site
+      ownerText: The site belongs to the Details detailing studio. Our data handling practices are outlined in the section
+      contactsHeading: Contact Us
+      contactsText: Phone and messaging options can be found on the page
+      developerCredit: The site was designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page Not Found — Details
       heading: This Page Doesn’t Exist
-      body: Perhaps the link is outdated or there’s a typo in the address. Check the homepage or view our works.
-      cta: Go to Main
+      body: The link may be outdated or there may be a typo in the address. Check the homepage or view our work.
+      cta: Back to Home
 translatedFrom: 95b201144aa0bdf8
