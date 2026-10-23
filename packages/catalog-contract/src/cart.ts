@@ -37,6 +37,11 @@ export const lineAddonSchema = z.object({
   unit_price: z.number().int().nonnegative(),
 });
 
+export const lineInstallationSchema = z.object({
+  item_id: z.string().nullable(),
+  unit_price: z.number().int().nonnegative(),
+});
+
 export const offerCartLineSchema = z.object({
   id: z.string(),
   offer_id: z.string(),
@@ -46,6 +51,7 @@ export const offerCartLineSchema = z.object({
   in_stock: z.boolean(),
   lead_time_days: z.number().int().nonnegative(),
   addon: lineAddonSchema.nullable(),
+  installation: lineInstallationSchema.nullable(),
   part: listedPartSchema,
 });
 
@@ -69,6 +75,9 @@ export const partOffersResponseSchema = z.object({
 
 export const identifierOffersResponseSchema = z.object({
   offers: z.record(z.string(), z.array(partOfferSchema)),
+  installation: z
+    .record(z.string(), z.number().int().nonnegative().nullable())
+    .default({}),
 });
 
 const attribution = (max: number) =>
@@ -113,5 +122,6 @@ export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
 export type ListedPart = z.infer<typeof listedPartSchema>;
 export type LineAddon = z.infer<typeof lineAddonSchema>;
+export type LineInstallation = z.infer<typeof lineInstallationSchema>;
 export type OfferCartLine = z.infer<typeof offerCartLineSchema>;
 export type OfferCart = z.infer<typeof offerCartSchema>;

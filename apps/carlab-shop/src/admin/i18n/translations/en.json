@@ -254,7 +254,9 @@
       "market": "Market",
       "steering": "Steering",
       "type": "Code type",
-      "value": "Value"
+      "value": "Value",
+      "installation_price": "Installation price, RSD",
+      "no_installation": "No installation"
     },
     "values": {
       "body_style": {
@@ -425,7 +427,10 @@
     "servicePrice": "Price, RSD",
     "serviceNote": "Service note",
     "serviceNotePlaceholder": "For example, on BMW and Mercedes-Benz a new battery has to be registered with the control unit",
-    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. Shoppers see the note on part and car pages next to the service price; leave it empty to show no note. To drop the service, clear the name and the price and save."
+    "serviceHint": "Shoppers can add the service to every part of this category in the cart. The price comes only from here, in whole dinars. Shoppers see the note on part and car pages next to the service price; leave it empty to show no note. To drop the service, clear the name and the price and save.",
+    "installationHeading": "Installation at CarLab",
+    "installationPrice": "Default installation price, RSD",
+    "installationHint": "Shoppers can add installation at CarLab to every part of this category, charged per unit. 0 means free: shoppers see \"Free installation\". Leave it empty to offer no installation. A single part can set its own price or refuse installation on its attributes page."
   },
   "partAttributes": {
     "heading": "Part attributes",
@@ -440,7 +445,17 @@
     "no": "No",
     "noFields": "This Category has no fields.",
     "save": "Save attributes",
-    "saved": "Attributes saved"
+    "saved": "Attributes saved",
+    "installationHeading": "Installation at CarLab",
+    "installationMode": "Installation",
+    "installationInheritPrice": "As in the category: {{price}} RSD",
+    "installationInheritFree": "As in the category: free",
+    "installationInheritNone": "As in the category: not offered",
+    "installationOwnPrice": "Own price",
+    "installationFree": "Free",
+    "installationNone": "Do not offer",
+    "installationPrice": "Installation price, RSD",
+    "installationHint": "Charged per unit. Shoppers see \"Free\" as \"Free installation\", our purchase bonus."
   },
   "requirements": {
     "heading": "Requirements for consumables",
@@ -558,7 +573,8 @@
       "cost_price": "Purchase price: a number above 0 and at most 10000000 RSD.",
       "stock_quantity": "Stock: a whole number from 0 to 100000.",
       "lead_time_days": "Lead time: a whole number of days from 0 to 365.",
-      "availability": "Enter a stock above zero or a lead time in days."
+      "availability": "Enter a stock above zero or a lead time in days.",
+      "installation_price": "Installation price: a whole number of RSD from 0 to 1000000."
     },
     "fields": {
       "name": "Name",

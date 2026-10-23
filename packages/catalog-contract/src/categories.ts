@@ -44,6 +44,7 @@ export const categorySchema = z.object({
   service_label: z.string().nullable(),
   service_price: z.number().int().nonnegative().nullable(),
   service_note: z.string().nullable(),
+  installation_price: z.number().int().nonnegative().nullable().default(null),
   image: imageSchema.nullable(),
   fields: z.array(categoryFieldSchema),
 });

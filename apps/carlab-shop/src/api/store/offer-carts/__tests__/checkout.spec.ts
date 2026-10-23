@@ -469,6 +469,8 @@ medusaIntegrationTestRunner({
           expect((await post(line, { quantity: 2 })).status).toBe(403);
           expect((await post(`${line}/addon`)).status).toBe(403);
           expect((await remove(`${line}/addon`)).status).toBe(403);
+          expect((await post(`${line}/installation`)).status).toBe(403);
+          expect((await remove(`${line}/installation`)).status).toBe(403);
           expect((await remove(line)).status).toBe(403);
           expect(
             (await post(`/store/offer-carts/${cart.id}/reprice`)).status,
@@ -752,6 +754,7 @@ medusaIntegrationTestRunner({
         const SERVICE = 'Регистрация аккумулятора в блоке управления';
         let batteryOfferId: string;
         let serviceCategoryId: string;
+        let batteryPartId: string;
 
         beforeEach(async () => {
           const container = getContainer();
@@ -767,12 +770,14 @@ medusaIntegrationTestRunner({
             name: 'Аккумуляторы',
             service_label: SERVICE,
             service_price: 2500,
+            installation_price: 1500,
           });
           serviceCategoryId = category.id;
           const part = await catalog.createParts({
             name: 'Аккумулятор AGM 80 Ач',
             category_id: category.id,
           });
+          batteryPartId = part.id;
           const identifier = await catalog.createPartIdentifiers({
             part_id: part.id,
             type: 'manufacturer-number',
@@ -954,6 +959,146 @@ medusaIntegrationTestRunner({
             'Итого: 12\u00a0500 RSD',
           ]);
           expect(placed.status).toBe(200);
+        });
+
+        describe('installation at CarLab', () => {
+          const installPath = (cart: { id: string; items: { id: string }[] }) =>
+            `/store/offer-carts/${cart.id}/items/${cart.items[0].id}/installation`;
+
+          const setPart = (update: {
+            installation_price?: number | null;
+            no_installation?: boolean;
+          }) =>
+            getContainer()
+              .resolve<CatalogModuleService>(CATALOG_MODULE)
+              .updateParts({ id: batteryPartId, ...update });
+
+          it('offers installation at the price the Category sets, and none where nothing sets one', async () => {
+            const battery = await cartWith(1, batteryOfferId);
+            const oil = await cartWith(1);
+
+            expect(battery.items[0].installation).toEqual({
+              item_id: null,
+              unit_price: 1500,
+            });
+            expect(oil.items[0].installation).toBeNull();
+            expect((await post(installPath(oil))).status).toBe(400);
+          });
+
+          it('takes the price the Part sets over the Category, free included', async () => {
+            await setPart({ installation_price: 0 });
+
+            const cart = (
+              await post(installPath(await cartWith(2, batteryOfferId)))
+            ).data.cart;
+
+            expect(cart.items[0].installation).toEqual({
+              item_id: expect.any(String),
+              unit_price: 0,
+            });
+            expect(cart.total).toBe(20000);
+            expect((await complete(cart)).status).toBe(200);
+          });
+
+          it('offers no installation on a Part that refuses it', async () => {
+            await setPart({ no_installation: true });
+
+            const cart = await cartWith(1, batteryOfferId);
+
+            expect(cart.items[0].installation).toBeNull();
+            expect((await post(installPath(cart))).status).toBe(400);
+          });
+
+          it('adds installation beside the add-on service, each charged per unit', async () => {
+            const two = await cartWith(2, batteryOfferId);
+            await post(addonPath(two));
+            const both = (await post(installPath(two))).data.cart;
+            expect(both.items).toHaveLength(1);
+            expect(both.total).toBe(2 * 10000 + 2 * 2500 + 2 * 1500);
+
+            const again = (await post(installPath(two))).data.cart;
+            expect(again.total).toBe(both.total);
+
+            const removed = (
+              await api
+                .delete(installPath(two), storeHeaders)
+                .catch((error) => error.response)
+            ).data.cart;
+            expect(removed.items[0].installation.item_id).toBeNull();
+            expect(removed.items[0].addon.item_id).toEqual(expect.any(String));
+            expect(removed.total).toBe(2 * 10000 + 2 * 2500);
+          });
+
+          it('refuses a price sent with installation', async () => {
+            const cart = await cartWith(1, batteryOfferId);
+
+            expect(
+              (await post(installPath(cart), { unit_price: 1 })).status,
+            ).toBe(400);
+          });
+
+          it('refuses checkout with installation priced before the Part changed it', async () => {
+            const cart = (
+              await post(installPath(await cartWith(1, batteryOfferId)))
+            ).data.cart;
+            await setPart({ installation_price: 2000 });
+
+            const refused = await complete(cart);
+            expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
+
+            const repriced = await post(
+              `/store/offer-carts/${cart.id}/reprice`,
+            );
+            expect(repriced.data.cart.items[0].installation.unit_price).toBe(
+              2000,
+            );
+            expect((await complete(repriced.data.cart)).status).toBe(200);
+          });
+
+          it('refuses checkout with installation the Part no longer offers', async () => {
+            const cart = (
+              await post(installPath(await cartWith(1, batteryOfferId)))
+            ).data.cart;
+            await setPart({ no_installation: true });
+
+            expect((await complete(cart)).data.code).toBe('OFFER_MISSING');
+            const repriced = await post(
+              `/store/offer-carts/${cart.id}/reprice`,
+            );
+            expect(repriced.data.cart.items[0].installation).toBeNull();
+            expect(repriced.data.cart.total).toBe(10000);
+          });
+
+          it('prints both add-ons under the battery line of the order lead, not under the line before it', async () => {
+            const cart = await cartWith(1);
+            const withBattery = (
+              await post(`/store/offer-carts/${cart.id}/items`, {
+                offer_id: batteryOfferId,
+                quantity: 1,
+              })
+            ).data.cart;
+            const battery = withBattery.items.find(
+              ({ offer_id }: { offer_id: string }) =>
+                offer_id === batteryOfferId,
+            );
+            const line = `/store/offer-carts/${cart.id}/items/${battery.id}`;
+            await post(`${line}/installation`);
+            const ready = (await post(`${line}/addon`)).data.cart;
+
+            const placed = await complete(ready);
+
+            const lead = await waitFor(() =>
+              leads.find(({ comment }) =>
+                comment.startsWith(`Заказ #${placed.data.order.display_id},`),
+              ),
+            );
+            const lines = lead?.comment.split('\n') ?? [];
+            const varta = lines.findIndex((text) => text.includes('Varta'));
+            expect(lines.slice(varta + 1, varta + 3)).toEqual([
+              `+ ${SERVICE}: 2\u00a0500 RSD`,
+              '+ Установка в сервисе CarLab: 1\u00a0500 RSD',
+            ]);
+          });
         });
       });
 

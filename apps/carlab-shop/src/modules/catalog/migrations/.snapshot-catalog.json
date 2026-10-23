@@ -627,6 +627,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "installation_price": {
+          "name": "installation_price",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "source": {
           "name": "source",
           "type": "text",
@@ -1815,6 +1831,38 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "json"
+        },
+        "installation_price": {
+          "name": "installation_price",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "no_installation": {
+          "name": "no_installation",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
         },
         "translations": {
           "name": "translations",

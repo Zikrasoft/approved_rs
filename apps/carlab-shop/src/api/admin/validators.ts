@@ -71,8 +71,12 @@ export const AdminCreatePart = z.strictObject({
 });
 export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
+const servicePrice = z.number().int().nonnegative().max(MAX_SERVICE_PRICE);
+
 export const AdminUpdatePart = z.strictObject({
   name: name.optional(),
+  installation_price: servicePrice.nullable().optional(),
+  no_installation: z.boolean().optional(),
   replaced_by_id: z.string().min(1).nullable().optional(),
   category_id: z.string().min(1).nullable().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
@@ -278,12 +282,8 @@ const categoryColumns = {
     .max(200)
     .nullable()
     .transform((label) => label || null),
-  service_price: z
-    .number()
-    .int()
-    .nonnegative()
-    .max(MAX_SERVICE_PRICE)
-    .nullable(),
+  service_price: servicePrice.nullable(),
+  installation_price: servicePrice.nullable(),
   service_note: z
     .string()
     .trim()
@@ -301,6 +301,7 @@ export const AdminCreateCategory = z.strictObject({
   service_label: categoryColumns.service_label.default(null),
   service_price: categoryColumns.service_price.default(null),
   service_note: categoryColumns.service_note.default(null),
+  installation_price: categoryColumns.installation_price.default(null),
 });
 export type AdminCreateCategoryType = z.infer<typeof AdminCreateCategory>;
 

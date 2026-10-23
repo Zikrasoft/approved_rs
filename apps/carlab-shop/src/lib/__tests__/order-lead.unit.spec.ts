@@ -88,6 +88,66 @@ describe('orderLeadForm', () => {
     ]);
   });
 
+  it('prints each add-on under its own line, whatever order the order keeps them in', () => {
+    const comment =
+      orderLeadForm(
+        order({
+          items: [
+            {
+              title: 'Установка в сервисе CarLab',
+              unit_price: 0,
+              quantity: 1,
+              metadata: {
+                addon_for: 'cali_2',
+                addon_offer_id: 'offer_battery',
+                addon_kind: 'installation',
+              },
+            },
+            {
+              title: 'Oil filter',
+              unit_price: 1850,
+              quantity: 1,
+              metadata: { offer_id: 'offer_oil' },
+            },
+            {
+              title: 'Регистрация аккумулятора',
+              unit_price: 2500,
+              quantity: 1,
+              metadata: {
+                addon_for: 'cali_2',
+                addon_offer_id: 'offer_battery',
+              },
+            },
+            {
+              title: 'Varta',
+              unit_price: 10000,
+              quantity: 1,
+              metadata: { offer_id: 'offer_battery' },
+            },
+            {
+              title: 'Установка в сервисе CarLab',
+              unit_price: 1000,
+              quantity: 1,
+              metadata: {
+                addon_for: 'cali_1',
+                addon_offer_id: 'offer_oil',
+                addon_kind: 'installation',
+              },
+            },
+          ],
+        }),
+      ).get('comment') ?? '';
+
+    expect(comment.split('\n').slice(3, 9)).toEqual([
+      'Oil filter × 1: 1\u00a0850 RSD',
+      '+ Установка в сервисе CarLab: 1\u00a0000 RSD',
+      'Varta × 1: 10\u00a0000 RSD',
+      '+ Регистрация аккумулятора: 2\u00a0500 RSD',
+      '+ Установка в сервисе CarLab: бесплатно',
+      'Итого: 15\u00a0350 RSD',
+    ]);
+  });
+
   it('writes sums with thousands separated for the owner', () => {
     const comment =
       orderLeadForm(

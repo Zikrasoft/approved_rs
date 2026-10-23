@@ -17,6 +17,7 @@ const page = {
     replaced_by: null,
     category_id: null,
     attributes: {},
+    installation_price: null,
   },
   equivalents: [],
   offers: [],
@@ -26,6 +27,18 @@ const page = {
 describe('partPageSchema', () => {
   it('accepts a brand-number page', () => {
     expect(partPageSchema.parse(page)).toEqual(page);
+  });
+
+  it('carries what installing the Part at CarLab costs', () => {
+    const installed = {
+      ...page,
+      part: { ...page.part, installation_price: 0 },
+    };
+    expect(partPageSchema.parse(installed)).toEqual(installed);
+    const { installation_price: _, ...older } = page.part;
+    expect(
+      partPageSchema.parse({ ...page, part: older }).part.installation_price,
+    ).toBeNull();
   });
 
   it('accepts a superseded number whose Part has a replacement', () => {

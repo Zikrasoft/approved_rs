@@ -28,6 +28,11 @@ describe('PARTS_ORDER_COPY', () => {
     expect(PARTS_ORDER_COPY.leftOut(3)).toBe('Не поместилось позиций: 3');
   });
 
+  it('names installation at CarLab and says when it is free', () => {
+    expect(PARTS_ORDER_COPY.installation).toBe('Установка в сервисе CarLab');
+    expect(PARTS_ORDER_COPY.free).toBe('бесплатно');
+  });
+
   it('names the order that never reached the CRM and why', () => {
     expect(PARTS_ORDER_COPY.undelivered(12, 'timeout')).toMatch(
       /^Заказ #12 не дошел до CRM.*Причина: timeout$/,
