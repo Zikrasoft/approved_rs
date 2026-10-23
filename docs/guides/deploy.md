@@ -15,7 +15,7 @@
 | App                 | Domain        | Brand                          | What it deploys                                                                                                             |
 | ------------------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab — auto service          | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
+| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 | `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 
 Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
@@ -23,7 +23,7 @@ Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` a
 deploy job runs entirely from its own `apps/<app>`.
 
 **Four bots, one chat, one lead store, three brands.** `@SerbCRMBot` is the CRM
-bot — cards, statuses, money, postpone and reminders — and it is the same bot
+bot (cards, statuses, money, postpone and reminders), and it is the same bot
 in all three projects; Telegram allows exactly one webhook
 URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only in
 `apps/approved-rs`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
@@ -150,7 +150,7 @@ Any change to those ships every app whose `deployed/*` tag is older than the
 change. The list is maintained by hand — if a new file starts affecting the build,
 it has to be added there too. The rest of `.github/` is deliberately not tracked:
 otherwise any workflow edit would ship all three sites. By the same logic
-`setup-pnpm` installs the whole workspace in every job — until that measurably
+`setup-pnpm` installs the whole workspace in every job; until that measurably
 hurts, we don't introduce `pnpm install --filter`.
 
 ### The `deployed/*` tags
@@ -522,7 +522,7 @@ workflow stays green.
 | ------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
 | `check`             | `contents: read`                    | checkout only                                                                            |
 | `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                     |
-| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0` — the `deployed/*` tags arrive with the history         |
+| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history          |
 | `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-carlab-shop:<sha>` to GHCR                              |
 | `deploy-shop`       | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo |
 | `record-shop`       | `contents: write`                   | moves `deployed/carlab-shop` after a successful `deploy-shop`, a separate job for that   |

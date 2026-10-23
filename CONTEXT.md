@@ -200,63 +200,63 @@ The carlab.rs parts shop. These are the words staff and code share; the full
 catalogue vocabulary (Vehicle, Category field, Maintenance kit and the rest)
 lives in [`GLOSSARY.md`](GLOSSARY.md).
 
-**Part** — one interchangeable thing that does one job on a car, under all its
+**Part**: one interchangeable thing that does one job on a car, under all its
 numbers at once: the car maker's OEM number and every aftermarket brand's
 equivalent. Fitments and search point at the Part; nobody buys a Part as such.
 _Avoid_: article, SKU, артикул
 
-**Brand-number** — one brand's number for a Part (`PartIdentifier` in code):
+**Brand-number**: one brand's number for a Part (`PartIdentifier` in code):
 OEM (the car maker's number), manufacturer number (the part brand's own
 catalogue number) or EAN (the barcode on the box). It is what a customer
 buys and what gets its own page; photos and offers belong to it, not to the
 Part.
 _Avoid_: part number (bare), supplier SKU
 
-**Offer** — one Supplier's price, stock and lead time for one Brand-number
+**Offer**: one Supplier's price, stock and lead time for one Brand-number
 (`SupplierOffer` in code). The site's price is the Offer's purchase price plus
 its Supplier's Markup.
 _Avoid_: listing, product, variant
 
-**Supplier** — where an Offer comes from: a distributor whose catalogue is
+**Supplier**: where an Offer comes from: a distributor whose catalogue is
 imported, or Manual entry. Its import can be switched off, which stops new
 data but leaves its Offers on the site until they are taken off.
 
-**Manual offer** — an Offer staff type in by hand for one Brand-number, under
+**Manual offer**: an Offer staff type in by hand for one Brand-number, under
 the Supplier «Ручной ввод» (`manual`). Imports never change or remove it, and
 it is removed only one at a time.
 
-**Markup** — the percentage one Supplier's purchase prices are raised by to
+**Markup**: the percentage one Supplier's purchase prices are raised by to
 give site prices. Set per Supplier, never per Offer.
 _Avoid_: margin, commission
 
-**Fitment** — staff's statement that one Part fits one Vehicle, with a quantity
+**Fitment**: staff's statement that one Part fits one Vehicle, with a quantity
 and, where it matters, a position, dates, steering side, gearbox or note.
 _Avoid_: compatibility, "fits" as a flag
 
-**Requirement** — what an engine, chassis or Vehicle demands of a Category's
+**Requirement**: what an engine, chassis or Vehicle demands of a Category's
 Parts (allowed options or a numeric range on one field), e.g. a battery of at
 least 80 Ah. Universal Parts reach a car through Requirements; a Fitment that
 contradicts one is refused unless staff confirm it.
 _Avoid_: spec, recommendation
 
-**Supersession** — a maker replacing a number. Per Brand-number: «снят с
+**Supersession**: a maker replacing a number. Per Brand-number: «снят с
 выпуска», the Part still sells under its other numbers. Per Part: «заменена
 запчастью», the whole Part now leads to its replacement.
 _Avoid_: substitute, cross-reference
 
-**Publish** — the one staff action that puts catalogue changes on carlab.rs:
+**Publish**: the one staff action that puts catalogue changes on carlab.rs:
 it imports Supplier catalogues, translates new texts, rebuilds and deploys the
 site and refreshes search. Admin edits are saved at once but reach the site
 only on the next Publish; there is no scheduled run.
 _Avoid_: deploy, sync, nightly import
 
-**Closed beta** — the state where the catalogue is public but buying is off
+**Closed beta**: the state where the catalogue is public but buying is off
 (`SHOP_OPEN` unset). A tester who opens any page with `?dev=1` carries the
 **preview flag** and sees prices, the cart and checkout as they will be once
 the shop opens.
 _Avoid_: staging, test mode
 
-**Add-on service** — a paid service a Category offers next to each of its
+**Add-on service**: a paid service a Category offers next to each of its
 Parts in the cart, such as registering a battery in the car's control unit.
 Its price is set on the Category, and the order lists it as its own line.
 _Avoid_: upsell, extra, option

@@ -11,7 +11,7 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 ```
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
-apps/auto-service/    CarLab, the car service site — carlab.rs
+apps/auto-service/    CarLab, the car service site: carlab.rs
 apps/carlab-shop/     the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
 infra/carlab-shop/    its production: image, compose (postgres, typesense, medusa, caddy), host scripts; one VPS, docs/guides/deploy.md
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
@@ -257,8 +257,8 @@ Both new apps follow the same shape, and a third should too:
   same reasoning removed the service picker from the brand forms. What posts a
   slug now is the page, through a hidden `SERVICE_FIELD` input: the service
   pages, CarLab's VIN-inquiry parts pages (`vin-parts-inquiry`) and Details'
-  work pages (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
-  homepage forms — a lead carries no service **by design**, and the owner
+  work pages (`servicesApplied[0]`). Everywhere else (the modal, the contact page, the
+  homepage forms) a lead carries no service **by design**, and the owner
   card renders `—` for it with the visited page on the `Страница:` line. A
   contact click renders `Клик: <канал>` instead: the click has a channel worth
   naming, a form lead does not. The
@@ -541,7 +541,7 @@ are set. Every event must also be marked a key event in **all three** GA4
 properties — one fired in code but not marked there is silently excluded from
 conversion reporting. The shop funnel goals (`add_to_cart`, `begin_checkout`,
 `purchase`) are the exception: carlab.rs only, dormant and unwired since the
-old shop's teardown (ADR-0036) — see `docs/guides/analytics.md`. The vocabulary, the
+old shop's teardown (ADR-0036); see `docs/guides/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
