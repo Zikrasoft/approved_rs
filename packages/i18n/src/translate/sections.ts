@@ -35,26 +35,37 @@ export interface SectionTranslatorOptions<L extends string> {
   languageName: Record<L, string>;
   businessDescription: string;
   localeGuidance?: Partial<Record<L, string>>;
+  placeholderRule?: string;
   model?: string;
   cachePath?: string;
 }
+
+export const PLACEHOLDER_RULE =
+  'If a string contains a placeholder token like {siteName} in curly braces, copy it into the ' +
+  'translation exactly as written, character for character, never translate, remove, or move it. ';
+
+export const STRICT_PLACEHOLDER_RULE =
+  'A curly-brace token already present in the Russian source, such as {count} or {days}, is a ' +
+  'placeholder: copy it into the translation exactly as written, character for character, never ' +
+  'translate, remove, or move it. Never introduce a curly-brace token that is not already in the ' +
+  'source: a literal brand or site name is plain text, not a placeholder, and must stay exactly as ' +
+  'written. ';
 
 export function buildSectionPrompt(
   promptSubject: string,
   languageName: string,
   businessDescription: string,
   guidance = '',
+  placeholderRule = PLACEHOLDER_RULE,
 ): string {
   return (
     `You translate ${promptSubject} from Russian into ${languageName} ` +
     `for ${businessDescription}. ` +
     'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
-    'it, never a literal word-for-word translation. Keep any markdown formatting intact. A curly-brace ' +
-    'token already present in the Russian source, such as {count} or {days}, is a placeholder: copy it ' +
-    'into the translation exactly as written, character for character, never translate, remove, or move ' +
-    'it. Never introduce a curly-brace token that is not already in the source: a literal brand or site ' +
-    'name is plain text, not a placeholder, and must stay exactly as written. Copy personal names exactly ' +
-    'as written too, keeping their original script, never transliterate or localise them. ' +
+    'it, never a literal word-for-word translation. Keep any markdown formatting intact. ' +
+    placeholderRule +
+    'Copy personal names exactly as written too, keeping their original script, never transliterate ' +
+    'or localise them. ' +
     'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
     'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
     'run longer than the Russian, so drop a detail rather than going over, but never drop a ' +
@@ -77,6 +88,7 @@ export function createSectionTranslator<L extends string>({
   languageName,
   businessDescription,
   localeGuidance = {},
+  placeholderRule,
   model,
   cachePath = DEFAULT_CACHE_PATH,
 }: SectionTranslatorOptions<L>) {
@@ -124,6 +136,7 @@ export function createSectionTranslator<L extends string>({
           names.get(locale) as string,
           businessDescription,
           localeGuidance[locale],
+          placeholderRule,
         ),
         apiKey,
         model,

@@ -12,6 +12,8 @@ import { parseDocument, stringify } from 'yaml';
 import { z } from 'zod';
 import {
   buildSectionPrompt,
+  PLACEHOLDER_RULE,
+  STRICT_PLACEHOLDER_RULE,
   createSectionTranslator,
   type Section,
 } from './sections.ts';
@@ -116,6 +118,19 @@ describe('buildSectionPrompt', () => {
     expect(buildSectionPrompt('x', 'y', 'z', 'Say provera.')).toMatch(
       /keys themselves\. Say provera\.$/,
     );
+  });
+
+  it('keeps the default placeholder rule unless a stricter one is passed', () => {
+    expect(buildSectionPrompt('x', 'y', 'z')).toContain(PLACEHOLDER_RULE);
+    const strict = buildSectionPrompt(
+      'x',
+      'y',
+      'z',
+      '',
+      STRICT_PLACEHOLDER_RULE,
+    );
+    expect(strict).toContain(STRICT_PLACEHOLDER_RULE);
+    expect(strict).not.toContain(PLACEHOLDER_RULE);
   });
 });
 

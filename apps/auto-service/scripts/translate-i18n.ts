@@ -1,4 +1,7 @@
-import { createSectionTranslator } from '@podbor/i18n/translate';
+import {
+  createSectionTranslator,
+  STRICT_PLACEHOLDER_RULE,
+} from '@podbor/i18n/translate';
 import { TRANSLATABLE_LOCALES } from '../src/i18n/config.ts';
 import {
   BUSINESS_DESCRIPTION,
@@ -10,6 +13,7 @@ const { run } = createSectionTranslator({
   targetLocales: TRANSLATABLE_LOCALES,
   languageName: TARGET_LANGUAGE_NAME,
   businessDescription: BUSINESS_DESCRIPTION,
+  placeholderRule: STRICT_PLACEHOLDER_RULE,
 });
 
 if (import.meta.url === `file://${process.argv[1]}`) {
