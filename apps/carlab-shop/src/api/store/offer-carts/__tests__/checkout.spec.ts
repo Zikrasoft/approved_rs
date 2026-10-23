@@ -14,6 +14,7 @@ import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapte
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import retryOrderLeads from '../../../../jobs/retry-order-leads';
 import {
+  LEAD_HANDED_OFF_AT,
   LEAD_HANDOFF_ERROR,
   LEAD_HANDOFF_MAX_ATTEMPTS,
 } from '../../../../lib/order-lead';
@@ -43,6 +44,8 @@ const CONTACT = {
 };
 
 type LeadPost = Record<string, string>;
+
+const settled = () => new Date(Date.now() + 5 * 60 * 1000);
 
 medusaIntegrationTestRunner({
   moduleName: 'offer-cart-checkout',
@@ -451,6 +454,26 @@ medusaIntegrationTestRunner({
           ).toBe(403);
           expect((await complete(cart)).status).toBe(403);
         });
+
+        it('refuses every change to a cart without the preview flag', async () => {
+          const {
+            data: { cart },
+          } = await postPreview('/store/offer-carts', {
+            offer_id: offerId,
+            quantity: 1,
+          });
+          const line = `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`;
+          const remove = (path: string) =>
+            api.delete(path, storeHeaders).catch((error) => error.response);
+
+          expect((await post(line, { quantity: 2 })).status).toBe(403);
+          expect((await post(`${line}/addon`)).status).toBe(403);
+          expect((await remove(`${line}/addon`)).status).toBe(403);
+          expect((await remove(line)).status).toBe(403);
+          expect(
+            (await post(`/store/offer-carts/${cart.id}/reprice`)).status,
+          ).toBe(403);
+        });
       });
 
       it('answers 404 for a cart that does not exist', async () => {
@@ -685,6 +708,7 @@ medusaIntegrationTestRunner({
         await waitFor(() => leads.length);
         expect(leads).toHaveLength(1);
         expect(leads[0]).toMatchObject({
+          order_id: placed.data.order.id,
           service: 'parts-order',
           contact: '+381601234567',
           contact_channel: 'whatsapp',
@@ -965,11 +989,35 @@ medusaIntegrationTestRunner({
         leads.length = 0;
         leadRouteStatus = 302;
 
-        await retryOrderLeads(getContainer());
+        await retryOrderLeads(getContainer(), settled());
 
         expect(leadsFor(placed)).toHaveLength(1);
         expect((await refused()).metadata?.[LEAD_HANDOFF_ERROR]).toBeFalsy();
+        await retryOrderLeads(getContainer(), settled());
+        expect(leadsFor(placed)).toHaveLength(1);
+      });
+
+      it('re-sends an order whose placed event never reached the subscriber', async () => {
+        const placed = await complete(await cartWith(1));
+        const orders = getContainer().resolve(Modules.ORDER);
+        const order = () => orders.retrieveOrder(placed.data.order.id);
+        await waitFor(
+          async () => (await order()).metadata?.[LEAD_HANDED_OFF_AT],
+        );
+        const { metadata } = await order();
+        await orders.updateOrders(placed.data.order.id, {
+          metadata: { ...metadata, [LEAD_HANDED_OFF_AT]: '' },
+        });
+        leads.length = 0;
+
         await retryOrderLeads(getContainer());
+        expect(leadsFor(placed)).toHaveLength(0);
+
+        await retryOrderLeads(getContainer(), settled());
+        expect(leadsFor(placed)).toEqual([
+          expect.objectContaining({ order_id: placed.data.order.id }),
+        ]);
+        await retryOrderLeads(getContainer(), settled());
         expect(leadsFor(placed)).toHaveLength(1);
       });
 
@@ -985,7 +1033,7 @@ medusaIntegrationTestRunner({
         );
 
         for (let run = 0; run < 15; run += 1) {
-          await retryOrderLeads(getContainer());
+          await retryOrderLeads(getContainer(), settled());
         }
 
         expect(leadsFor(placed)).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);

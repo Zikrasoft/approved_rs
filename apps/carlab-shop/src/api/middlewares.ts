@@ -252,12 +252,33 @@ export default defineMiddlewares({
     {
       matcher: '/store/offer-carts/:id/items/:item_id',
       method: 'POST',
-      middlewares: [validateAndTransformBody(StoreSetOfferCartItem)],
+      middlewares: [
+        refuseClosedShop,
+        validateAndTransformBody(StoreSetOfferCartItem),
+      ],
     },
     {
       matcher: '/store/offer-carts/:id/items/:item_id/addon',
       method: 'POST',
-      middlewares: [validateAndTransformBody(StoreAddLineAddon)],
+      middlewares: [
+        refuseClosedShop,
+        validateAndTransformBody(StoreAddLineAddon),
+      ],
+    },
+    {
+      matcher: '/store/offer-carts/:id/items/:item_id',
+      method: 'DELETE',
+      middlewares: [refuseClosedShop],
+    },
+    {
+      matcher: '/store/offer-carts/:id/items/:item_id/addon',
+      method: 'DELETE',
+      middlewares: [refuseClosedShop],
+    },
+    {
+      matcher: '/store/offer-carts/:id/reprice',
+      method: 'POST',
+      middlewares: [refuseClosedShop],
     },
     {
       matcher: '/store/offer-carts/:id/complete',
