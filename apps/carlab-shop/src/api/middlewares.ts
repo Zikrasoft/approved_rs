@@ -31,6 +31,7 @@ import {
   AdminUpdateSupplier,
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
+import { manualOfferSchema } from '../lib/suppliers/manual-offers';
 import { refuseStockCartChange } from '../lib/offer-cart';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import {
@@ -123,6 +124,11 @@ export default defineMiddlewares({
       matcher: '/admin/part-identifiers/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdatePartIdentifier)],
+    },
+    {
+      matcher: '/admin/part-identifiers/:id/manual-offer',
+      method: 'POST',
+      middlewares: [validateAdminBody(manualOfferSchema)],
     },
     {
       matcher: '/admin/fitments',
