@@ -21,7 +21,12 @@ import {
 } from '@medusajs/medusa/core-flows';
 
 import { seedCashAtPickupCommerceDefaults } from '../lib/commerce-defaults';
-import { CATEGORIES } from '../lib/production-seed';
+import {
+  BATTERY_CATEGORY,
+  BATTERY_FIELDS,
+  CATEGORIES,
+  seedCategoryFields,
+} from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -551,37 +556,6 @@ async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
   logger.info('Seeded the demo catalogue and vehicles.');
 }
 
-const BATTERY_FIELDS = [
-  ['capacity', 'number', 'Емкость', 'А·ч', true],
-  ['cold-cranking', 'number', 'Пусковой ток (EN)', 'А', true],
-  ['voltage', 'number', 'Напряжение', 'В', false],
-  ['technology', 'single-select', 'Технология', null, true],
-  ['polarity', 'single-select', 'Полярность', null, false],
-  ['case-size', 'single-select', 'Типоразмер', null, false],
-  ['length', 'number', 'Длина', 'мм', false],
-  ['width', 'number', 'Ширина', 'мм', false],
-  ['height', 'number', 'Высота', 'мм', false],
-] as const;
-
-const BATTERY_OPTIONS: Record<string, [string, string][]> = {
-  technology: [
-    ['standard', 'Обычный'],
-    ['efb', 'EFB'],
-    ['agm', 'AGM'],
-  ],
-  polarity: [
-    ['reverse', 'Обратная'],
-    ['normal', 'Прямая'],
-  ],
-  'case-size': [
-    ['h5-l2', 'H5/L2'],
-    ['h6-l3', 'H6/L3'],
-    ['h7-l4', 'H7/L4'],
-    ['h8-l5', 'H8/L5'],
-    ['h9-l6', 'H9/L6'],
-  ],
-};
-
 const BATTERIES: {
   name: string;
   brand: string;
@@ -669,38 +643,8 @@ async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
   const brand: Ids = Object.fromEntries(
     [...brands, bosch].map((b) => [b.slug, b.id]),
   );
-  const category = await catalog.createCategories({
-    slug: 'batteries',
-    name: 'Аккумуляторы',
-    text: 'Стартерные аккумуляторы, в том числе AGM и EFB для автомобилей с системой старт-стоп. Подбираем по емкости, пусковому току, полярности и типоразмеру под ваш автомобиль.',
-    service_label: 'Регистрация аккумулятора в блоке управления',
-    service_price: 2500,
-    service_note:
-      'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
-  });
-  const fields = await catalog.createCategoryFields(
-    BATTERY_FIELDS.map(([key, type, label, unit, facet], rank) => ({
-      category_id: category.id,
-      key,
-      type,
-      label,
-      unit,
-      facet,
-      rank,
-      required: key === 'capacity' || key === 'technology',
-    })),
-  );
-  const field = Object.fromEntries(fields.map((f) => [f.key, f.id]));
-  await catalog.createCategoryFieldOptions(
-    Object.entries(BATTERY_OPTIONS).flatMap(([key, options]) =>
-      options.map(([option, label], rank) => ({
-        field_id: field[key],
-        key: option,
-        label,
-        rank,
-      })),
-    ),
-  );
+  const category = await catalog.createCategories(BATTERY_CATEGORY);
+  const field = await seedCategoryFields(catalog, category.id, BATTERY_FIELDS);
   for (const { name, brand: slug, number, attributes } of BATTERIES) {
     await catalog.createPartWithIdentifiers({
       name,

@@ -1,7 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { MedusaContainer } from '@medusajs/framework/types';
+import type { CategoryFieldType } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -46,9 +47,144 @@ export const CATEGORIES = [
   },
 ];
 
+export const BATTERY_CATEGORY = {
+  slug: 'batteries',
+  name: 'Аккумуляторы',
+  text: 'Стартерные аккумуляторы, в том числе AGM и EFB для автомобилей с системой старт-стоп. Подбираем по емкости, пусковому току, полярности и типоразмеру под ваш автомобиль.',
+  service_label: 'Регистрация аккумулятора в блоке управления',
+  service_price: 2500,
+  service_note:
+    'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
+};
+
+type FieldDefinition = {
+  key: string;
+  type: CategoryFieldType;
+  label: string;
+  unit: string | null;
+  facet: boolean;
+  required: boolean;
+  options: [string, string][];
+};
+
+const number = (
+  key: string,
+  label: string,
+  unit: string,
+  facet = false,
+  required = false,
+): FieldDefinition => ({
+  key,
+  type: 'number',
+  label,
+  unit,
+  facet,
+  required,
+  options: [],
+});
+
+const select = (
+  key: string,
+  label: string,
+  facet: boolean,
+  required: boolean,
+  options: [string, string][],
+): FieldDefinition => ({
+  key,
+  type: 'single-select',
+  label,
+  unit: null,
+  facet,
+  required,
+  options,
+});
+
+export const BATTERY_FIELDS: FieldDefinition[] = [
+  number('capacity', 'Емкость', 'А·ч', true, true),
+  number('cold-cranking', 'Пусковой ток (EN)', 'А', true),
+  number('voltage', 'Напряжение', 'В'),
+  select('technology', 'Технология', true, true, [
+    ['standard', 'Обычный'],
+    ['efb', 'EFB'],
+    ['agm', 'AGM'],
+  ]),
+  select('polarity', 'Полярность', false, false, [
+    ['reverse', 'Обратная'],
+    ['normal', 'Прямая'],
+  ]),
+  select('case-size', 'Типоразмер', false, false, [
+    ['h5-l2', 'H5/L2'],
+    ['h6-l3', 'H6/L3'],
+    ['h7-l4', 'H7/L4'],
+    ['h8-l5', 'H8/L5'],
+    ['h9-l6', 'H9/L6'],
+  ]),
+  number('length', 'Длина', 'мм'),
+  number('width', 'Ширина', 'мм'),
+  number('height', 'Высота', 'мм'),
+];
+
 const IMAGES = join(process.cwd(), 'assets/categories');
-const imageFile = (slug: string) =>
-  slug === 'body-parts' ? `${slug}.png` : `${slug}.jpg`;
+
+const matches = (row: object, wanted: object) =>
+  Object.entries(wanted).every(
+    ([key, value]) => (row as Record<string, unknown>)[key] === value,
+  );
+
+async function upsert<Row extends { id: string; updated_by: string | null }>(
+  row: Row | undefined,
+  wanted: object,
+  create: () => Promise<Row>,
+  update: (wanted: object & { id: string }) => Promise<unknown>,
+): Promise<Row> {
+  if (!row) return create();
+  if (!row.updated_by && !matches(row, wanted)) {
+    await update({ id: row.id, ...wanted });
+  }
+  return row;
+}
+
+export async function seedCategoryFields(
+  catalog: CatalogModuleService,
+  categoryId: string,
+  definitions: FieldDefinition[],
+): Promise<Record<string, string>> {
+  const existing = await catalog.listCategoryFields(
+    { category_id: categoryId },
+    { take: null },
+  );
+  const ids: Record<string, string> = {};
+  for (const [rank, { options, ...definition }] of definitions.entries()) {
+    const wanted = { ...definition, rank };
+    const field = await upsert(
+      existing.find(({ key }) => key === definition.key),
+      wanted,
+      () =>
+        catalog.createCategoryFields({ ...wanted, category_id: categoryId }),
+      (update) => catalog.updateCategoryFields(update),
+    );
+    ids[field.key] = field.id;
+    const existingOptions = await catalog.listCategoryFieldOptions(
+      { field_id: field.id },
+      { take: null },
+    );
+    for (const [optionRank, [key, label]] of options.entries()) {
+      await upsert(
+        existingOptions.find((option) => option.key === key),
+        { key, label, rank: optionRank },
+        () =>
+          catalog.createCategoryFieldOptions({
+            field_id: field.id,
+            key,
+            label,
+            rank: optionRank,
+          }),
+        (update) => catalog.updateCategoryFieldOptions(update),
+      );
+    }
+  }
+  return ids;
+}
 
 export async function seedProductionCatalogue(
   container: MedusaContainer,
@@ -56,31 +192,32 @@ export async function seedProductionCatalogue(
   await seedCashAtPickupCommerceDefaults(container);
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+  const categories = [...CATEGORIES, BATTERY_CATEGORY];
   const existing = await catalog.listCategories(
-    { slug: CATEGORIES.map(({ slug }) => slug) },
+    { slug: categories.map(({ slug }) => slug) },
     { take: null },
   );
-  for (const category of CATEGORIES) {
+  const photos = readdirSync(IMAGES);
+  for (const category of categories) {
     const row =
       existing.find(({ slug }) => slug === category.slug) ??
       (await catalog.createCategories(category));
-    if (row.updated_by) continue;
-    if (row.image && row.name === category.name && row.text === category.text) {
-      continue;
+    if (category === BATTERY_CATEGORY) {
+      await seedCategoryFields(catalog, row.id, BATTERY_FIELDS);
     }
+    if (row.updated_by) continue;
+    const photo = photos.find((file) => file.startsWith(`${category.slug}.`));
+    if ((row.image || !photo) && matches(row, category)) continue;
     const image =
       row.image ??
-      (await storeImage(
-        container,
-        readFileSync(join(IMAGES, imageFile(category.slug))),
-        `categories/${row.id}`,
-        null,
-      ));
-    await catalog.updateCategories({
-      id: row.id,
-      name: category.name,
-      text: category.text,
-      image,
-    });
+      (photo
+        ? await storeImage(
+            container,
+            readFileSync(join(IMAGES, photo)),
+            `categories/${row.id}`,
+            null,
+          )
+        : null);
+    await catalog.updateCategories({ id: row.id, ...category, image });
   }
 }
