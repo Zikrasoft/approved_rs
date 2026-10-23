@@ -70,7 +70,7 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
-  it('lists the Category pages and the Make hubs', async () => {
+  const withBackend = async (shopOpen: string) => {
     const answers: Record<string, unknown> = {
       '/store/categories': {
         categories: [
@@ -133,6 +133,7 @@ describe('generateLlmsTxt', () => {
     };
     vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
     vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+    vi.stubEnv('SHOP_OPEN', shopOpen);
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string) => ({
@@ -148,15 +149,31 @@ describe('generateLlmsTxt', () => {
       })),
     );
 
-    const body = await generateLlmsTxt('sr').finally(() => {
+    return generateLlmsTxt('sr').finally(() => {
       vi.unstubAllEnvs();
       vi.unstubAllGlobals();
     });
+  };
+
+  it('lists the Category pages and the Make hubs', async () => {
+    const body = await withBackend('true');
 
     expect(body).toContain(
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
     );
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
+  });
+
+  it('names no price and no cart while the shop is closed', async () => {
+    const body = await withBackend('false');
+
+    expect(body).toContain(
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.\n',
+    );
+    expect(body).not.toContain('RSD');
+    expect(await generateLlmsTxt('ru')).toContain(
+      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цену и наличие сообщаем по заявке',
+    );
   });
 
   it('links the BMW landing page', async () => {
@@ -165,7 +182,9 @@ describe('generateLlmsTxt', () => {
   });
 
   it('describes the parts catalogue on the parts index link', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    vi.stubEnv('SHOP_OPEN', 'true');
+    const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());
+    expect(body).toContain(
       '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО',
     );
   });

@@ -19,6 +19,7 @@ categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: Сейчас этой запчасти нет в наличии. Добавьте ее в заявку, и мы сообщим цену и когда ее можно забрать.
 priceOnRequestCta: Узнать цену
+inquiryBody: Добавьте запчасть в заявку, и мы сообщим цену, наличие и когда ее можно забрать.
 offersHeading: Цена и наличие
 columns:
   stock: В наличии

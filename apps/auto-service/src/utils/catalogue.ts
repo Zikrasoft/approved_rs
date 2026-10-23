@@ -17,6 +17,7 @@ import {
   partPageSlug,
   partPagesResponseSchema,
   positionGroups,
+  PRICE_FACET,
   rangeFilter,
   type RangeFilter,
   requirementMatches,
@@ -37,6 +38,7 @@ import {
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
+import { SHOP_PREVIEW_HEADER } from '../scripts/shopPreview';
 import { partSuccessor } from './partSuccessor';
 
 export type { Vehicle, VinFacts };
@@ -152,11 +154,19 @@ export type CatalogueConfig = {
   publishableKey: string;
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
+  shopOpen?: boolean;
+  preview?: boolean;
 };
+
+const previewFlagSchema = z.literal('1');
+
+export const previewRequested = (flag: unknown): boolean =>
+  previewFlagSchema.safeParse(flag).success;
 
 export type CatalogueEnv = {
   MEDUSA_BACKEND_URL?: string;
   MEDUSA_PUBLISHABLE_KEY?: string;
+  SHOP_OPEN?: string;
 };
 
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
@@ -198,12 +208,18 @@ export function createCatalogue({
   publishableKey,
   fetch = globalThis.fetch,
   timeoutMs = CATALOGUE_TIMEOUT_MS,
+  shopOpen = true,
+  preview = false,
 }: CatalogueConfig) {
+  const pricesHidden = !shopOpen && !preview;
+  const unpriced = <T extends { offers: PartOffer[] }>(item: T): T =>
+    pricesHidden ? { ...item, offers: [] } : item;
   const send = (path: string, method = 'GET', body?: unknown) =>
     fetch(`${backendUrl}${path}`, {
       method,
       headers: {
         'x-publishable-api-key': publishableKey,
+        ...(preview && { [SHOP_PREVIEW_HEADER]: '1' }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),
@@ -268,8 +284,11 @@ export function createCatalogue({
   };
 
   const categories = async (): Promise<Category[]> =>
-    categoriesResponseSchema.parse(await request('/store/categories'))
-      .categories;
+    categoriesResponseSchema
+      .parse(await request('/store/categories'))
+      .categories.map((category) =>
+        pricesHidden ? { ...category, service_price: null } : category,
+      );
 
   const vehicles = async (): Promise<Vehicle[]> =>
     vehiclesResponseSchema.parse(await request('/store/vehicles')).vehicles;
@@ -278,7 +297,7 @@ export function createCatalogue({
     const [pages, allCategories, fitments, allVehicles] = await Promise.all([
       paged('/store/part-pages', (body) => {
         const { pages, count } = partPagesResponseSchema.parse(body);
-        return { items: pages, count };
+        return { items: pages.map(unpriced), count };
       }),
       categories(),
       paged('/store/fitments', (body) => {
@@ -518,8 +537,11 @@ export function createCatalogue({
         );
         return {
           ...found,
+          facets: pricesHidden
+            ? found.facets.filter(({ key }) => key !== PRICE_FACET)
+            : found.facets,
           results: found.results.map((result) => ({
-            ...result,
+            ...unpriced(result),
             slug: partPageSlug(result.brand.slug, result.normalized_value),
           })),
         };
@@ -556,6 +578,7 @@ export function createCatalogue({
     },
 
     async liveOffers(identifierId: string): Promise<OffersOutcome> {
+      if (pricesHidden) return { kind: 'inquiry' };
       try {
         const { offers } = partOffersResponseSchema.parse(
           await request(
@@ -719,14 +742,23 @@ export function categoryFacets(
   return usefulFacets([...universal, ...fields], pages.length, []);
 }
 
-export function catalogueFromEnv(env: CatalogueEnv) {
+export const shopOpen = (env: CatalogueEnv = siteEnv()): boolean =>
+  z.literal('true').safeParse(env.SHOP_OPEN).success;
+
+export function catalogueFromEnv(
+  env: CatalogueEnv,
+  { preview = false }: { preview?: boolean } = {},
+) {
   const config = catalogueEnvSchema.parse(env);
-  return config ? createCatalogue(config) : null;
+  return config
+    ? createCatalogue({ ...config, shopOpen: shopOpen(env), preview })
+    : null;
 }
 
 export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+  SHOP_OPEN: import.meta.env.SHOP_OPEN,
 });
 
 export async function partPagesForBuild(

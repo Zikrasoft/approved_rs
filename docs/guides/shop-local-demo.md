@@ -22,8 +22,8 @@ workspace packages, then `shop:prepare` (`apps/carlab-shop/scripts/shop-prepare.
 - creates `apps/auto-service/.env.local` from `.env.example` if missing, and
   fills the Telegram placeholders (`TELEGRAM_BOT_TOKEN=1:fake`,
   `TELEGRAM_BOT_USERNAME=demo_crm_bot`, `TELEGRAM_GROUP_ID=-1`,
-  `TELEGRAM_OWNER_ID=1`, `TELEGRAM_ADMIN_ID=2`) where a key is absent or empty,
-  leaving every other line alone;
+  `TELEGRAM_OWNER_ID=1`, `TELEGRAM_ADMIN_ID=2`) and `SHOP_OPEN=true` where a key
+  is absent or empty, leaving every other line alone;
 - creates `apps/carlab-shop/.local-demo/supplier-overrides.json` (`{}`, see
   step 7);
 - starts Postgres (55444) and Typesense (58444) from
@@ -67,7 +67,9 @@ The sections below are what the command does, for reference.
 to `[::1]` first, and anything else listening on IPv6 port 4321 gets the
 order. `shop:prepare` rewrites a `localhost` value left in an existing `.env`.
 
-Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset.
+Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset. Leave `SHOP_OPEN`
+unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
+`SHOP_OPEN=false` to try the closed beta locally.
 `SUPPLIER_ADAPTERS=demo` is refused when `NODE_ENV=production`.
 
 ## 3. Migrate and seed
@@ -191,8 +193,14 @@ under `astro dev`; a production build writes to Vercel Blob.
 
 To check the build against the demo backend, export the storefront variables
 first: the sitemap reads `MEDUSA_BACKEND_URL` and `MEDUSA_PUBLISHABLE_KEY`
-from the environment (turbo passes only those two through), and without them it
-lists no part pages.
+from the environment (turbo passes only those two and `SHOP_OPEN` through), and
+without them it lists no part pages.
+
+To see production's closed beta, set `SHOP_OPEN=false` in
+`apps/auto-service/.env.local` (and in `apps/carlab-shop/.env` for the backend
+gate), restart, and open a page with `?df=1` to turn the preview on, `?df=0` to
+turn it off. See
+[Closed beta](deploy.md#closed-beta-the-preview-flag).
 
 ```bash
 set -a; . apps/auto-service/.env.local; set +a

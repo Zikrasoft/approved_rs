@@ -17,7 +17,7 @@ import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { catalogueFromEnv } from '@/utils/catalogue';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
@@ -50,10 +50,7 @@ const offset = Math.max(
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
 );
 
-const catalogue = catalogueFromEnv({
-  MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
-  MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
-});
+const catalogue = catalogueFromEnv(siteEnv());
 const searchable = searchableQuery(q) || Boolean(category);
 const found =
   searchable && catalogue

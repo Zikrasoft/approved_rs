@@ -7,7 +7,11 @@ import Icon from '@/components/Icon.astro';
 import PartsSearchForm from '@/components/PartsSearchForm.astro';
 import VinLookupForm from '@/components/VinLookupForm.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
-import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
+import {
+  categoriesForBuild,
+  makeHubsForBuild,
+  shopOpen,
+} from '@/utils/catalogue';
 import { paragraphs } from '@podbor/site-kit';
 import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -58,13 +62,17 @@ const categories = props.categories.map((category) => ({
       {copy.sourcingNote}
     </p>
 
-    <a
-      href={PathBuilder.partsCart(locale)}
-      class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
-    >
-      {content(locale).shopCart.cartLink}
-      <Icon name="arrowRight" />
-    </a>
+    {
+      shopOpen() && (
+        <a
+          href={PathBuilder.partsCart(locale)}
+          class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+        >
+          {content(locale).shopCart.cartLink}
+          <Icon name="arrowRight" />
+        </a>
+      )
+    }
 
     {
       categories.length > 0 && (

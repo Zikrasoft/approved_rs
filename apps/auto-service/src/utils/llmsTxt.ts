@@ -5,7 +5,11 @@ import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
-import { categoriesForBuild, makeHubsForBuild } from '@/utils/catalogue';
+import {
+  categoriesForBuild,
+  makeHubsForBuild,
+  shopOpen,
+} from '@/utils/catalogue';
 import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
@@ -52,7 +56,9 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         index: {
           label: pages.partsInquiry.heading,
           href: url(PathBuilder.parts(locale)),
-          note: pages.partsInquiry.llmsCatalogue,
+          note: shopOpen()
+            ? pages.partsInquiry.llmsCatalogue
+            : pages.partsInquiry.llmsCatalogueClosed,
         },
         entries: [
           ...categories.map((category) => {

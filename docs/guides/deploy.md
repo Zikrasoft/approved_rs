@@ -656,8 +656,41 @@ validates everything at startup. The non-obvious parts:
 - `FILE_URL` is the public address of uploaded files, stored into every image
   URL at upload time. Compose sets it to `https://$API_HOST/static`, so it is not
   written into `.env`; without it production stops at startup.
+- `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
+  `NODE_ENV=production` and open everywhere else; the template sets `false`.
+  See [Closed beta](#closed-beta-the-preview-flag).
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
+
+### Closed beta: the preview flag
+
+The parts catalogue is public and indexable, but buying is closed until both
+sides say otherwise. Two variables, one per side:
+
+| Variable    | Where                                             | Closed (default)                                                                                                                                                       | `true`                       |
+| ----------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart | prices and cart for everyone |
+| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403 without the preview header                                  | anyone may buy               |
+
+On carlab.rs only the exact value `true` opens the shop: unset or anything else
+is closed. turbo passes `SHOP_OPEN` through to the `@podbor/auto-service`
+build, so a rebuild (`publish.yml` or a deploy) is what applies a change.
+
+A closed-beta tester opens any carlab.rs page with `?df=1`. The browser
+remembers it in `localStorage` (`carlab_shop_preview`) until a page is opened
+with `?df=0`. With the flag, the header shows the cart, a part page fetches its
+offers live from `/api/part-offers` and shows them in place of «Узнать цену»,
+and the cart and checkout work: the browser sends `x-shop-preview: 1` to
+carlab.rs's `/api/cart` and `/api/part-offers` (checkout posts it as the
+`shop_preview` form field), and those routes pass the same header to Medusa.
+Without the flag, `/parts/cart/` redirects to the inquiry form. Static pages,
+category filters and search stay unpriced even with the flag.
+
+This is a soft gate for a closed beta, not security. Anyone who learns `?df=1`
+can buy, and the prices remain readable through the public store API with the
+publishable key. Open the shop by setting `SHOP_OPEN=true` on both sides,
+restarting the backend (`deploy.sh` or `docker compose up -d medusa`) and
+rebuilding carlab.rs.
 
 ### How it ships
 

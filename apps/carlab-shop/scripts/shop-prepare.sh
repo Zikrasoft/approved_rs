@@ -31,7 +31,7 @@ sed -i.bak 's|^LEAD_ROUTE_URL=http://localhost:4321/|LEAD_ROUTE_URL=http://127.0
 
 [ -f "$STOREFRONT_ENV" ] || cp ../auto-service/.env.example "$STOREFRONT_ENV"
 for pair in TELEGRAM_BOT_TOKEN=1:fake TELEGRAM_BOT_USERNAME=demo_crm_bot \
-  TELEGRAM_GROUP_ID=-1 TELEGRAM_OWNER_ID=1 TELEGRAM_ADMIN_ID=2; do
+  TELEGRAM_GROUP_ID=-1 TELEGRAM_OWNER_ID=1 TELEGRAM_ADMIN_ID=2 SHOP_OPEN=true; do
   key=${pair%%=*}
   if grep -q "^$key=$" "$STOREFRONT_ENV"; then
     sed -i.bak "s|^$key=\$|$pair|" "$STOREFRONT_ENV" && rm "$STOREFRONT_ENV.bak"

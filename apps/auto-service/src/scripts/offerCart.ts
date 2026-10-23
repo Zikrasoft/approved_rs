@@ -18,6 +18,7 @@ import {
 import { formatMoney } from '@/utils/money';
 import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
+import { previewHeaders, SHOP_PREVIEW_FIELD, shopPreview } from './shopPreview';
 import {
   addonLabel,
   addToPartsList,
@@ -394,7 +395,13 @@ const getJson = async <T>(
   init?: RequestInit,
 ): Promise<T | null> => {
   try {
-    const response = await fetch(url, init);
+    const response = await fetch(url, {
+      ...init,
+      headers: {
+        ...(init?.headers as Record<string, string>),
+        ...previewHeaders(),
+      },
+    });
     if (!response.ok) return null;
     const parsed = schema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;
@@ -448,6 +455,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
           if (buy) void this.buy(buy);
           if (target.closest('[data-ask]')) this.addToInquiry();
         });
+        if (this.dataset.preview !== undefined && !shopPreview()) return;
         void this.refresh();
       }
 
@@ -469,6 +477,13 @@ export function definePartOffers(tagName = 'part-offers'): void {
         this.querySelector('[data-offers]')?.replaceChildren(
           ...outcome.offers.map((offer) => this.row(offer)),
         );
+        if (this.hidden) {
+          this.hidden = false;
+          (this.nextElementSibling as HTMLElement | null)?.setAttribute(
+            'hidden',
+            '',
+          );
+        }
       }
 
       row(offer: PartOffer): Node {
@@ -577,6 +592,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       queue: Promise<void> = Promise.resolve();
 
       connectedCallback(): void {
+        if (this.dataset.preview !== undefined && !shopPreview()) {
+          location.replace(this.dataset.inquiryHref ?? '/');
+          return;
+        }
         const params = new URLSearchParams(location.search);
         const notice = params.get(CART_NOTICE_PARAM) ?? '';
         if (notice === 'ordered') {
@@ -606,6 +625,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               CART_FINGERPRINT_FIELD,
               cartFingerprint(this.cart.items),
             );
+            if (shopPreview()) event.formData.set(SHOP_PREVIEW_FIELD, '1');
           });
         }
         this.querySelector('[data-retry]')?.addEventListener('click', () =>

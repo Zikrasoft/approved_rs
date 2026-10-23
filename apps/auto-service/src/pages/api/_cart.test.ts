@@ -18,12 +18,17 @@ afterEach(() => {
 
 const call = (
   route: typeof GET,
-  { query = '', body }: { query?: string; body?: unknown } = {},
+  {
+    query = '',
+    body,
+    headers = {},
+  }: { query?: string; body?: unknown; headers?: HeadersInit } = {},
 ) =>
   route({
     url: new URL(`http://localhost/api/cart${query}`),
     request: new Request(`http://localhost/api/cart${query}`, {
       method: body === undefined ? 'GET' : 'POST',
+      headers,
       ...(body !== undefined && { body: JSON.stringify(body) }),
     }),
   } as unknown as APIContext) as Promise<Response>;
@@ -105,5 +110,21 @@ describe('/api/cart', () => {
       offer_id: 'offer_1',
       quantity: 4,
     });
+  });
+
+  it('passes the preview flag of a closed-beta visitor on to the shop', async () => {
+    backend.mockResolvedValue(new Response('{}', { status: 403 }));
+
+    await call(POST, {
+      body: { cart_id: null, offer_id: 'offer_1' },
+      headers: { 'x-shop-preview': '1' },
+    });
+    await call(POST, { body: { cart_id: null, offer_id: 'offer_1' } });
+
+    const sent = backend.mock.calls.map(
+      ([, init]) => (init as RequestInit).headers,
+    );
+    expect(sent[0]).toMatchObject({ 'x-shop-preview': '1' });
+    expect(sent[1]).not.toHaveProperty('x-shop-preview');
   });
 });

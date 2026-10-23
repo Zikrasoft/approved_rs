@@ -111,4 +111,15 @@ describe('POST /api/order', () => {
     expect(location(response)).toBe('/sr/parts/cart/?notice=invalid');
     expect(backend).not.toHaveBeenCalled();
   });
+
+  it('passes the preview flag of a closed-beta visitor on to the shop', async () => {
+    answer(200, { order: { id: 'order_1', display_id: 42 } });
+
+    const response = await checkout({ shop_preview: '1' });
+
+    expect(location(response)).toContain('notice=ordered');
+    const [, init] = backend.mock.calls[0] as [string, RequestInit];
+    expect(init.headers).toMatchObject({ 'x-shop-preview': '1' });
+    expect(JSON.parse(String(init.body))).not.toHaveProperty('shop_preview');
+  });
 });

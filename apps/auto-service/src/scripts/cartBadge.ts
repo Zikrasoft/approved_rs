@@ -1,4 +1,5 @@
 import * as z from 'zod/mini';
+import { shopPreview } from './shopPreview';
 
 export const CART_STORAGE_KEY = 'carlab_offer_cart';
 export const CART_CHANGED_EVENT = 'carlab:cart-changed';
@@ -22,6 +23,10 @@ export function defineCartBadge(tagName = 'cart-badge'): void {
     tagName,
     class extends HTMLElement {
       connectedCallback(): void {
+        if (this.dataset.previewOnly !== undefined) {
+          if (!shopPreview()) return;
+          this.hidden = false;
+        }
         const update = () => {
           const count = cartCount();
           const badge = this.querySelector<HTMLElement>('[data-count]');

@@ -2,9 +2,11 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
+import { SHOP_PREVIEW_HEADER } from '@/scripts/shopPreview';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
+  previewRequested,
   siteEnv,
   type CartOutcome,
 } from '@/utils/catalogue';
@@ -35,7 +37,10 @@ const removeSchema = z.object({
 const INQUIRY: CartOutcome = { kind: 'inquiry' };
 const EMPTY: CartOutcome = { kind: 'empty' };
 
-const catalogue = () => catalogueFromEnv(siteEnv());
+const catalogue = (request: Request) =>
+  catalogueFromEnv(siteEnv(), {
+    preview: previewRequested(request.headers.get(SHOP_PREVIEW_HEADER)),
+  });
 
 const respond = async (
   outcome: (() => Promise<CartOutcome> | undefined) | null,
@@ -46,9 +51,11 @@ const respond = async (
 
 const body = (request: Request) => request.json().catch(() => null);
 
-export const GET: APIRoute = ({ url }) => {
+export const GET: APIRoute = ({ url, request }) => {
   const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));
-  return respond(id.success ? () => catalogue()?.viewCart(id.data) : null);
+  return respond(
+    id.success ? () => catalogue(request)?.viewCart(id.data) : null,
+  );
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -56,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
   return respond(
     add.success
       ? () =>
-          catalogue()?.addToCart(
+          catalogue(request)?.addToCart(
             add.data.cart_id,
             add.data.offer_id,
             add.data.quantity,
@@ -77,7 +84,7 @@ export const PATCH: APIRoute = async ({ request }) => {
   return respond(
     change.success
       ? () =>
-          catalogue()?.setQuantity(
+          catalogue(request)?.setQuantity(
             change.data.cart_id,
             change.data.item_id,
             change.data.quantity,
@@ -91,7 +98,7 @@ export const PUT: APIRoute = async ({ request }) => {
   return respond(
     change.success
       ? () =>
-          catalogue()?.setAddon(
+          catalogue(request)?.setAddon(
             change.data.cart_id,
             change.data.item_id,
             change.data.addon,
@@ -105,7 +112,10 @@ export const DELETE: APIRoute = async ({ request }) => {
   return respond(
     remove.success
       ? () =>
-          catalogue()?.removeFromCart(remove.data.cart_id, remove.data.item_id)
+          catalogue(request)?.removeFromCart(
+            remove.data.cart_id,
+            remove.data.item_id,
+          )
       : null,
   );
 };

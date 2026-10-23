@@ -31,7 +31,7 @@
     "@podbor/auto-service#build": {
       "dependsOn": ["^build"],
       "outputs": [".astro/**", ".vercel/output/**"],
-      "env": ["MEDUSA_BACKEND_URL", "MEDUSA_PUBLISHABLE_KEY"]
+      "env": ["MEDUSA_BACKEND_URL", "MEDUSA_PUBLISHABLE_KEY", "SHOP_OPEN"]
     },
     "@podbor/carlab-shop#build": {
       "dependsOn": ["^build"],

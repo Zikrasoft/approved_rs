@@ -107,6 +107,7 @@ export const pagesContentSchema = z
         listCarRemoveLabel: z.string(),
         listMoreTemplate: z.string(),
         llmsCatalogue: z.string(),
+        llmsCatalogueClosed: z.string(),
         stepsHeading: z.string(),
         steps: z
           .array(z.object({ heading: z.string(), body: z.string() }))

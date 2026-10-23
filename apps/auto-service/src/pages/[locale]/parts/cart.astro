@@ -6,6 +6,7 @@ import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogue';
 import { localePaths, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = localePaths;
@@ -64,6 +65,7 @@ const stepper =
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
+      data-preview={shopOpen() ? undefined : ''}
       data-availability={JSON.stringify(availability)}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
