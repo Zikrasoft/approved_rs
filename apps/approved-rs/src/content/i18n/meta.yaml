@@ -10,42 +10,42 @@ vehicle-inspection:
 translations:
   en:
     vehicle-sourcing:
-      title: Car Sourcing Service {location}
-      description: "Complete car sourcing in {location}: search, independent inspection, transaction support, and delivery to your city. Submit your request — we'll contact you on Telegram."
+      title: Car Sourcing Made Easy {location}
+      description: "Turnkey car sourcing in {location}: search, independent inspection, deal support, and delivery to your city. Submit a request — we'll contact you on Telegram."
     vehicle-buyback:
-      title: Car Buyback {location} — urgent, any plates
-      description: Urgent car buyback in {location} for any plates — foreign, Russian, or Serbian. Online valuation, processing in 1 day, transfer on the transaction day.
+      title: Car Buyback {location} — Fast, Any Plates
+      description: Instant buyback of cars in {location} with any plates — foreign, Russian, or Serbian. Online valuation, paperwork in 1 day, transfer on the sale day.
     vehicle-inspection:
       title: Car Inspection {location} Before Purchase
-      description: Independent vehicle inspection in {location}. Expert visit, body and drivetrain inspection, report. Protect yourself from buying a damaged car.
+      description: Independent vehicle inspection in {location}. Expert visit, body and undercarriage check, report. Protect yourself from buying a damaged car.
   sr:
     vehicle-sourcing:
-      title: Izbor automobila po meri {location}
-      description: 'Izbor automobila {location}: pretraga, nezavisna provera, pratnja toku transakcije i dostava do vašeg grada. Ostavite zahtev — javićemo se preko Telegrama.'
+      title: Pregled automobila po meri {location}
+      description: 'Pregled automobila po meri {location}: traženje, nezavisna provera, pratnja transakciji i dostava do vašeg grada. Ostavite zahtev - javićemo se na Telegramu.'
     vehicle-buyback:
-      title: Otkupljenje automobila {location} — hitno, sve registracije
-      description: Hitno otkupljenje automobila {location} na svim registracijama — stranih, ruskih ili srpskih. Procena online, obrada za 1 dan, transfer na dan transakcije.
+      title: Otkup automobila {location} — hitno, sve vrste
+      description: Hitni otkup automobila {location} svih registarskih brojeva — stranih, ruskih ili srpskih. Procena online, završavanje za 1 dan, prenos na dan transakcije.
     vehicle-inspection:
       title: Provera auta {location} pre kupovine
-      description: Nezavisna provera automobila {location}. Dolazak eksperta, pregled karoserije i vešanja, izveštaj. Zaštitite se od kupovine slupanog auta.
+      description: Nezavisna provera automobila {location}. Dolazak eksperta, pregled karoserije i ovjesa, izveštaj. Zaštitite se od kupovine oštećenog automobila.
   es:
     vehicle-sourcing:
-      title: Compra de coches llave en mano {location}
-      description: 'Compra de coches llave en mano {location}: búsqueda, inspección independiente, apoyo en la transacción y entrega a tu ciudad. Envía tu solicitud, nos contactaremos por Telegram.'
+      title: Selección de vehículos llave en mano {location}
+      description: 'Selección de vehículos {location}: búsqueda, verificación independiente, acompañamiento de la transacción y entrega a su ciudad. Envíe su solicitud, nos pondremos en contacto por Telegram.'
     vehicle-buyback:
-      title: Compra de coches {location} — urgente, cualquier matrícula
-      description: Compra urgente de vehículos {location} con cualquier matrícula — extranjera, rusa o serbia. Evaluación online, trámite en 1 día, transferencia el día de la transacción.
+      title: Compra de vehículos {location} - urgente, cualquier matrícula
+      description: Compra urgente de automóviles {location} con cualquier matrícula, ya sean extranjeras, rusas o serbias. Evaluación en línea, gestión en 1 día, transferencia el mismo día de la transacción.
     vehicle-inspection:
-      title: Inspección de coches {location} antes de la compra
-      description: Inspección independiente de automóviles {location}. Salida del experto, revisión de la carrocería y el sistema de suspensión, informe. Protéggete de comprar un coche dañado.
+      title: Inspección de vehículos {location} antes de la compra
+      description: Inspección independiente de vehículos {location}. Visita del experto, revisión de la carrocería y la mecánica, informe. Protéjase de comprar un vehículo dañado.
   de:
     vehicle-sourcing:
-      title: Fahrzeugbeschaffung schlüsselfertig {location}
-      description: 'Schlüsselfertige Fahrzeugbeschaffung {location}: Suche, unabhängige Überprüfung, Begleitung des Kaufs und Lieferung in Ihre Stadt. Lassen Sie uns eine Anfrage da — wir kontaktieren Sie über Telegram.'
+      title: Fahrzeugbeschaffung komplett {location}
+      description: 'Fahrzeugbeschaffung {location}: Suche, unabhängige Prüfung, Begleitung des Kaufes und Lieferung in Ihre Stadt. Anfrage hinterlassen — wir kontaktieren Sie über Telegram.'
     vehicle-buyback:
-      title: Autoankauf {location} - schnell, für alle Nummern
-      description: Schneller Autoankauf {location} für alle Nummern - ausländische, russische oder serbische. Online Bewertung, Abwicklung an einem Tag, Überweisung am Tag des Kaufs.
+      title: Autoankauf {location} — schnell, alle Nummern
+      description: Schneller Autoankauf {location} mit allen Nummernschildern — ausländischen, russischen oder serbischen. Online-Bewertung, Abwicklung in 1 Tag, Überweisung am Tag des Kaufs.
     vehicle-inspection:
       title: Fahrzeugprüfung {location} vor dem Kauf
-      description: Unabhängige Fahrzeugprüfung {location}. Anfahrt des Experten, Sichtprüfung der Karosserie und Fahrwerk, Bericht. Schützen Sie sich vor dem Kauf eines beschädigten Fahrzeugs.
+      description: Unabhängige Prüfung des Fahrzeugs {location}. Vor-Ort-Expertise, Inspektion von Karosserie und Fahrwerk, Bericht. Schützen Sie sich vor dem Kauf eines beschädigten Autos.
 translatedFrom: f09add1e1e1966f0

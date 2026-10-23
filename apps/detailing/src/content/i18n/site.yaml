@@ -98,12 +98,12 @@ translations:
       other: Ostalo
       languages: Drugi jezici
     header:
-      primaryNavLabel: Primarna navigacija
+      primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
       menuOpenLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      cta: Zakažite
+      cta: Zakaži
     footer:
       tagline: Studio detailing-a u Beogradu. Folija, poliranje, keramika, koža.
       navHeading: Sekcije
@@ -113,25 +113,25 @@ translations:
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt napravila studio Zikrasoft
+      developerCredit: Sajt napravljen u studiju Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Na sadržaj
       breadcrumbLabel: Hlebne mrvice
-      readMore: Više informacija
+      readMore: Pročitajte više
       backToWorks: Svi radovi
       allWorks: Pogledajte sve radove
       faqHeading: Česta pitanja
       beforeLabel: Pre
       afterLabel: Posle
-      dragHint: Prevucite da uporedite
+      dragHint: Povucite da uporedite
       closeLabel: Zatvori
       prevLabel: Prethodna slika
       nextLabel: Sledeća slika
-      scrollHint: Skrolujte dole
+      scrollHint: Pomerite se nadole
       fromPrice: od
-      perCar: po automobilu
-      emptyWorks: Uskoro će se ovde pojaviti radovi. Za sada nas kontaktirajte — ispričaćemo i prikazati uživo.
+      perCar: za automobil
+      emptyWorks: Uskoro će radovi biti ovde. Za sada nam pišite – ispričaćemo i pokazati uživo.
     channels:
       call: Pozvati
       whatsapp: Pisati na WhatsApp
@@ -139,14 +139,14 @@ translations:
       telegram: Pisati na Telegram
       instagram: Instagram
     telegramChoice:
-      heading: Kako vam je lakše da pišete?
-      bot: Preko bota
-      botHint: Ispričajte šta je sa kolima, menadžer će odgovoriti u istom čatu
+      heading: Kako je lakše napisati?
+      bot: Kroz bota
+      botHint: Recite šta je s autom, menadžer će odgovoriti u istom chatu
       manager: Direktno menadžeru
-      managerHint: Lični čat sa menadžerom na Telegramu
+      managerHint: Lični chat sa menadžerom na Telegramu
     form:
-      heading: Zakažite konsultaciju
-      subheading: Pogledaćemo auto, iskreno reći šta mu zaista treba i navesti tačnu cenu.
+      heading: Zakazivanje konsultacije
+      subheading: Pogledaćemo auto, iskreno ćemo reći šta mu zaista treba, i reći tačnu cenu.
       nameLabel: Kako se zovete
       namePlaceholder: Ime
       contactChannelLabel: Kako da vas kontaktiramo
@@ -162,13 +162,13 @@ translations:
       privacyNote: Prihvatam
       privacyLinkText: politiku privatnosti
       errorTelegram: Unesite @username na Telegramu ili broj telefona
-      errorPhone: Unesite tačan broj telefona
-      errorConsent: označite saglasnost da biste poslali zahtev
+      errorPhone: Unesite validan broj telefona
+      errorConsent: Označite saglasnost da biste poslali zahtev
       errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
       modalTitle: Ostavite zahtev
     cookie:
       notice: Koristimo kolačiće.
-      more: Više informacija u
+      more: Više u
       policyLink: politici privatnosti
       accept: Prihvatiti
       decline: Odbiti
@@ -177,7 +177,7 @@ translations:
     nav:
       services: Services
       works: Our Works
-      process: How It Works
+      process: Our Process
       prices: Prices
       contact: Contact
     llms:
@@ -192,18 +192,18 @@ translations:
       languageLabel: Language
       cta: Book Now
     footer:
-      tagline: Detailing studio in Belgrade. Film, polishing, ceramics, leather.
+      tagline: Premium car detailing studio in Belgrade. Film, polishing, ceramics, leather.
       navHeading: Sections
       contactHeading: Get in Touch
-      hoursHeading: Operating Hours
+      hoursHeading: Working Hours
       hours: Mon–Sat, 09:00–19:00
       privacyLabel: Privacy Policy
-      aboutLabel: About the Project
+      aboutLabel: About Us
       rightsSuffix: All rights reserved.
-      developerCredit: Website created by Zikrasoft studio
+      developerCredit: Website created by Zikrasoft
     common:
       homeLabel: Home
-      skipToContent: Skip to Content
+      skipToContent: Skip to content
       breadcrumbLabel: Breadcrumbs
       readMore: Read More
       backToWorks: All Works
@@ -218,7 +218,7 @@ translations:
       scrollHint: Scroll down
       fromPrice: from
       perCar: per car
-      emptyWorks: Work samples will be here soon. For now, drop us a message — we’ll share and show you in person.
+      emptyWorks: Works will be available soon. In the meantime, feel free to reach out — we’ll share and demonstrate it live.
     channels:
       call: Call
       whatsapp: Message on WhatsApp
@@ -226,32 +226,32 @@ translations:
       telegram: Message on Telegram
       instagram: Instagram
     telegramChoice:
-      heading: What’s the easiest way to contact us?
-      bot: Via the bot
-      botHint: Tell us what’s wrong with your car, and the manager will respond in the same chat
-      manager: Directly to the manager
+      heading: What’s the best way to reach out?
+      bot: Through the bot
+      botHint: Tell us about your car, the manager will respond in the same chat
+      manager: Directly with the manager
       managerHint: Personal chat with the manager on Telegram
     form:
-      heading: Schedule a Consultation
-      subheading: We'll take a look at your car, honestly tell you what it really needs, and provide an exact price.
+      heading: Book a Consultation
+      subheading: We’ll assess your vehicle, give you an honest opinion on what it really needs, and quote an exact price.
       nameLabel: What’s your name
       namePlaceholder: Name
-      contactChannelLabel: How to Reach You
-      channelPhone: Call
+      contactChannelLabel: How can we contact you
+      channelPhone: Phone Call
       countryLabel: Country Code
       contactLabel: Phone Number
       contactPlaceholder: 60 123 4567
       telegramPlaceholder: '@username or phone number'
       commentLabel: Comment
-      commentPlaceholder: Brand, model, year — and what you want done
+      commentPlaceholder: Brand, model, year — and what you'd like to do
       submit: Submit Request
-      submitting: Sending…
+      submitting: Sending...
       privacyNote: I accept
       privacyLinkText: the privacy policy
       errorTelegram: Please provide @username in Telegram or a phone number
       errorPhone: Please enter a valid phone number
-      errorConsent: Check the consent box to submit the request
-      errorSubmit: Request failed to send. Please check your connection and try again
+      errorConsent: Please confirm consent to submit the request
+      errorSubmit: Request not sent. Check your connection and try again
       modalTitle: Submit a Request
     cookie:
       notice: We use cookies.
