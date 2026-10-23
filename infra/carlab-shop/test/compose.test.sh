@@ -5,7 +5,7 @@ here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\n' 0000000000000000000000000000000000000000 >"$work/.env"
-docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
+env -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
 
 failures=0
 expect() {
