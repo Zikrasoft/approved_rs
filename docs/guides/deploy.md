@@ -567,7 +567,8 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 | `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
 | `caddy/Caddyfile`                        | `api.carlab.rs` → `medusa:9000`, TLS, security headers, request body up to 25 MB; `/static/*` straight from the uploads volume   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup, restore                                                                                            |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                           |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                   |
 | `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                          |
 | `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                          |
 
@@ -731,17 +732,29 @@ carlab.rs.
    the image (`outputs.deployed == 'true'`).
 5. `deploy-brand-site` waits for `deploy-shop` and is held back only if it failed, so
    carlab.rs never prerenders against a backend that failed to ship. approved.rs
-   does not wait: it does not read the shop.
+   does not wait: it does not read the shop. Right after `vercel pull` the
+   carlab.rs leg probes `MEDUSA_BACKEND_URL/health`
+   (`.github/scripts/shop-backend-up.sh`, a few retries over about 20 seconds).
+   If the backend does not answer, the leg prints a `::warning::`, skips the
+   build and the deploy, and leaves `deployed/auto-service` where it was, so the
+   live site keeps serving the last build and the next run retries. Without the
+   probe, a VPS outage would fail every carlab.rs deploy, since the storefront
+   build throws when the backend it is pointed at is unreachable. The Publish
+   workflow runs the same probe but fails instead (`::error::`), so the admin
+   shows the Publish as failed rather than as done.
 
 The production seed (`apps/carlab-shop/src/scripts/seed-production.ts`) runs on
 every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
-(store, the `CarLab parts shop` sales channel, the Serbia region) and the seven
+(store, the `CarLab parts shop` sales channel, the Serbia region), the seven
 Categories carlab.rs's old `/{locale}/parts/{slug}/` pages 301 to, with their
 Russian name and text and the old picture from `apps/carlab-shop/assets/categories`
-(the image copies that directory to `/server/assets`). Serbian and English come
-from the admin's Publish chain like any other catalogue text. A Category a person
-has edited (`updated_by` set) is never touched again; an unedited one gets its
-seeded name, text and missing image back. It seeds no Parts, suppliers or offers:
+(the image copies that directory to `/server/assets`), and «Аккумуляторы»
+(`batteries`) with its nine fields, their options and the battery registration
+service (label, price, note), from the same definitions the demo seed uses.
+Batteries ship without a picture: upload one in the admin. Serbian and English
+come from the admin's Publish chain like any other catalogue text. A Category,
+field or option a person has edited (`updated_by` set) is never touched again; an
+unedited one gets its seeded values and missing image back. It seeds no Parts, suppliers or offers:
 the manual supplier is created on the first hand-entered offer, and the demo data
 lives in `seed.ts` / `seed-demo.ts`, which never run in production.
 
@@ -780,6 +793,30 @@ once the fix is in `main`.
 ssh deploy@<IPv4> /srv/carlab/backup.sh
 ssh deploy@<IPv4> 'ls -la /var/backups/carlab'
 ssh deploy@<IPv4> '/srv/carlab/restore.sh /var/backups/carlab/db-<stamp>.dump /var/backups/carlab/static-<stamp>.tar.gz'
+```
+
+The nightly backup keeps seven days in `/var/backups/carlab` on the same VPS, and
+then copies the new database dump and uploads archive to an S3-compatible bucket
+(Backblaze B2, Cloudflare R2, Hetzner Object Storage) when
+`/srv/carlab/.env.backup` names one: `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`
+(optionally `bucket/path`), `BACKUP_S3_ACCESS_KEY_ID`,
+`BACKUP_S3_SECRET_ACCESS_KEY` and, where the provider wants one,
+`BACKUP_S3_REGION` (template: `infra/carlab-shop/backup.env.example`). The keys
+live in their own file rather than in `.env` because compose hands `.env` to the
+Medusa container, and a compromised backend must not be able to delete its own
+backups. The upload runs in a pinned `rclone/rclone` container, so the host needs
+nothing installed; the keys reach it through a temporary env file, never a command
+line. Copies older than 30 days are deleted from the bucket (on B2, also set the
+bucket's lifecycle to drop hidden versions, or deleted files keep costing). Without
+a bucket the backup still succeeds and prints a warning to
+`/var/log/carlab-backup.log`; a failed upload exits non-zero and leaves the local
+copy intact.
+
+Restoring from the bucket (a lost server) is one more step before `restore.sh`:
+
+```bash
+ssh deploy@<IPv4> '/srv/carlab/backup.sh fetch'            # list the stamps in the bucket
+ssh deploy@<IPv4> '/srv/carlab/backup.sh fetch <stamp>'    # download both files into /var/backups/carlab
 ```
 
 `restore.sh` refuses to write into a database that already has tables unless
@@ -871,7 +908,13 @@ Check with `curl -k https://localhost:8443/health`.
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
    then `chmod 600 /srv/carlab/.env`.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` prints `600`.
-5. **CI secrets.** Generate CI's ssh key (`ssh-keygen -t ed25519`), restrict the
+5. **Backup bucket.** Create a private bucket at an S3-compatible provider in
+   another location than the VPS (Backblaze B2, Cloudflare R2, Hetzner Object
+   Storage in a different region) and an access key limited to that bucket.
+   Copy `infra/carlab-shop/backup.env.example` to `/srv/carlab/.env.backup`, fill
+   it in, `chmod 600` it.
+   Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env.backup'` prints `600`.
+6. **CI secrets.** Generate CI's ssh key (`ssh-keygen -t ed25519`), restrict the
    public half on the server (`restrict` in `authorized_keys`), obtain
    `known_hosts` (`ssh-keyscan -t ed25519 <IPv4>`) and **verify the fingerprint**
    separately. Record `CARLAB_SHOP_VPS_USER`, `CARLAB_SHOP_VPS_SSH_KEY` and
@@ -879,31 +922,41 @@ Check with `curl -k https://localhost:8443/health`.
    `CARLAB_SHOP_VPS_HOST` **last**: with it in place, the next push to `main`
    deploys.
    Done: all four secrets are visible in Settings → Secrets and variables → Actions.
-6. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
+7. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
    package in GHCR: linked to the repository, Actions read access configured.
    Done: `deploy-shop` is green, `record-shop` moved `deployed/carlab-shop`, and
    `https://api.carlab.rs/health` answers 200.
-7. **Admin.** Create an admin
+8. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in
    at `https://api.carlab.rs/app`, and in Settings → Publishable API Keys create the
    key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
    production seed created the channel).
-   Done: signing in works, and the seven seeded Categories are in the admin.
-8. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
+   Then open «Аккумуляторы»: the production seed created it with its nine
+   fields, their options and the battery registration service (label, price,
+   note). Check the price is still right and upload the Category's picture,
+   which the seed does not ship.
+   Done: signing in works, the eight seeded Categories are in the admin, and
+   «Аккумуляторы» shows its fields, the registration service and a picture.
+9. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
    `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
    closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
    [`.env`](#env); `docker compose up -d medusa` after editing.
    Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
-9. **carlab.rs on Vercel.** In the carlab.rs project (Production):
-   `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
-   from step 7, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
-   in the admin so the Categories get their Serbian and English text and carlab.rs
-   rebuilds against the catalogue.
-   Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
-   answers 200 with the Category's text and picture.
-10. **Acceptance.** `docker stats --no-stream` under light load stays within the
-    memory limits; a manual `ssh deploy@<IPv4> /srv/carlab/backup.sh` works; the next
-    morning `/var/log/carlab-backup.log` shows the cron ran.
+10. **carlab.rs on Vercel.** In the carlab.rs project (Production):
+    `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
+    from step 8, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
+    in the admin so the Categories get their Serbian and English text and carlab.rs
+    rebuilds against the catalogue.
+    Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
+    answers 200 with the Category's text and picture. From now on a carlab.rs deploy
+    while `https://api.carlab.rs/health` is down is skipped with a warning in the
+    CI run rather than failed, and the next run retries it (see
+    [How it ships](#how-it-ships)); a Publish in that state fails.
+11. **Acceptance.** `docker stats --no-stream` under light load stays within the
+    memory limits; a manual `ssh deploy@<IPv4> /srv/carlab/backup.sh` works and
+    ends with `Copied to the <bucket> bucket`, and `backup.sh fetch` lists the new
+    stamp; the next morning `/var/log/carlab-backup.log` shows the cron ran,
+    without the `BACKUP_S3_BUCKET is not set` warning.
 
 ---
 

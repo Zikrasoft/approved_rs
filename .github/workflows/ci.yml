@@ -49,6 +49,7 @@ jobs:
 
       - run: sh infra/carlab-shop/test/scripts.test.sh
       - run: sh infra/carlab-shop/test/compose.test.sh
+      - run: sh .github/scripts/shop-backend-up.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/carlab-shop/*.sh infra/carlab-shop/test/*.sh
@@ -409,12 +410,21 @@ jobs:
         if: steps.guard.outputs.deploy == 'true'
       - run: pnpm exec vercel pull --yes --environment=production
         if: steps.guard.outputs.deploy == 'true'
+      - id: backend
+        if: steps.guard.outputs.deploy == 'true' && matrix.app == 'auto-service'
+        run: |
+          if sh ../../.github/scripts/shop-backend-up.sh; then
+            echo "up=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "up=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::The shop backend does not answer /health, so auto-service is not deployed; deployed/auto-service stays put and the next run retries. The live site keeps serving."
+          fi
       - run: pnpm exec vercel build --prod
-        if: steps.guard.outputs.deploy == 'true'
+        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-        if: steps.guard.outputs.deploy == 'true'
+        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
       - name: Record what is live
-        if: steps.guard.outputs.deploy == 'true'
+        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ needs.translate.outputs.sha }}

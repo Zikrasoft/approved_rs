@@ -5,7 +5,33 @@ cd "$(dirname -- "$0")"
 
 dest=${BACKUP_DIR:-/var/backups/carlab}
 stamp=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+bucket=$(sed -n 's/^BACKUP_S3_BUCKET=//p' .env.backup 2>/dev/null | tail -n 1)
 mkdir -p "$dest"
+
+rclone() {
+  creds=$(mktemp "${TMPDIR:-/tmp}/carlab-offsite.XXXXXX")
+  sed -nE 's/^BACKUP_S3_(ENDPOINT|REGION|ACCESS_KEY_ID|SECRET_ACCESS_KEY)=/RCLONE_S3_\1=/p' .env.backup >"$creds"
+  status=0
+  docker run --rm --user "$(id -u):$(id -g)" --env-file "$creds" \
+    -e RCLONE_S3_PROVIDER=Other -e RCLONE_S3_NO_CHECK_BUCKET=true \
+    -v "$dest:/backups" rclone/rclone:1.75.2 "$@" || status=$?
+  rm -f "$creds"
+  return "$status"
+}
+
+if [ "${1:-}" = fetch ]; then
+  [ -n "$bucket" ] || {
+    echo "BACKUP_S3_BUCKET is not set in .env.backup: there is no off-host copy to fetch." >&2
+    exit 2
+  }
+  if [ -z "${2:-}" ]; then
+    rclone lsf ":s3:$bucket"
+  else
+    rclone copy ":s3:$bucket" /backups --include "*-$2.*"
+    echo "Fetched $2 into $dest"
+  fi
+  exit 0
+fi
 
 find "$dest" -maxdepth 1 -type f \( -name 'db-*.dump' -o -name 'static-*.tar.gz' \) -mtime +6 -delete
 
@@ -22,5 +48,19 @@ mv "$dest/db-$stamp.dump.part" "$dest/db-$stamp.dump"
 docker compose exec -T medusa \
   tar -C /server/static -czf - . >"$dest/static-$stamp.tar.gz.part"
 mv "$dest/static-$stamp.tar.gz.part" "$dest/static-$stamp.tar.gz"
+rmdir .deploy.lock
 
 echo "Backed up to $dest/db-$stamp.dump and $dest/static-$stamp.tar.gz"
+
+if [ -z "$bucket" ]; then
+  echo "WARNING: BACKUP_S3_BUCKET is not set in .env.backup, so this backup stays on this host only." >&2
+  exit 0
+fi
+{
+  rclone copy /backups ":s3:$bucket" --include "*-$stamp.*" &&
+    rclone delete ":s3:$bucket" --min-age 30d --include 'db-*.dump' --include 'static-*.tar.gz'
+} || {
+  echo "The off-host copy failed; the local backup in $dest is intact." >&2
+  exit 1
+}
+echo "Copied to the $bucket bucket"

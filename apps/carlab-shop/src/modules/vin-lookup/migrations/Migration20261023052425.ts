@@ -1,12 +1,12 @@
 import { Migration } from '@medusajs/framework/mikro-orm/migrations';
 
-export class Migration20261018025539 extends Migration {
+export class Migration20261023052425 extends Migration {
   override async up(): Promise<void> {
     this.addSql(
       `alter table if exists "vin_lookup" drop constraint if exists "vin_lookup_vin_unique";`,
     );
     this.addSql(
-      `create table if not exists "vin_lookup" ("id" text not null, "vin" text not null, "vehicle_id" text not null, "decode_metadata" jsonb not null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vin_lookup_pkey" primary key ("id"));`,
+      `create table if not exists "vin_lookup" ("id" text not null, "vin" text not null, "decoder" text null, "decoder_version" integer null, "raw" jsonb null, "facts" jsonb not null, "make" text null, "code" text null, "vehicle_id" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vin_lookup_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_deleted_at" ON "vin_lookup" ("deleted_at") WHERE deleted_at IS NULL;`,

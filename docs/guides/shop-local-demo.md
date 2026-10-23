@@ -30,6 +30,9 @@ workspace packages, then `shop:prepare` (`apps/carlab-shop/scripts/shop-prepare.
   `apps/carlab-shop/docker-compose.demo.yml` (project `carlab-demo`, named
   volumes), replacing `carlab-demo-pg` / `carlab-demo-ts` containers left over
   from a hand-run `docker run`;
+- drops and recreates the demo database once if it still carries the shop
+  modules' pre-squash migration history (each module now has a single initial
+  migration, and the old history cannot be migrated forward);
 - runs `db:migrate`, `seed:demo` and `publish:local`, all safe to rerun.
 
 Then it runs `medusa develop` on 9009 and, once `/health` answers, `astro dev`
