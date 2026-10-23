@@ -25,13 +25,13 @@ translations:
     subtext: Free consultation
     nameLabel: Your name
     namePlaceholder: Ivan
-    contactLabel: How can we reach you
+    contactLabel: How to reach you
     telegramTab: Telegram
     telegramPlaceholder: '@username or phone'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Phone
-    commentLabel: Make, model, budget
+    commentLabel: Brand, model, budget
     commentPlaceholder: BMW 3, 2020–2022, up to €25,000…
     consentBefore: 'I agree with '
     consentLinkText: the privacy policy
@@ -39,9 +39,9 @@ translations:
     submitLabel: Calculate cost
     errorTelegramFormat: 'Format: @username or phone number'
     errorPhoneInvalid: Please check the phone number
-    errorSubmit: The request did not go through. Please check your connection and try again.
+    errorSubmit: The request did not go through. Please check the connection and try again
   sr:
-    headingLine1: Javićemo se sa vama
+    headingLine1: Kontaktiraćemo vas
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
     nameLabel: Vaše ime
@@ -54,22 +54,22 @@ translations:
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
     commentPlaceholder: BMW 3, 2020–2022, do €25 000…
-    consentBefore: 'Saglasan sam sa '
+    consentBefore: 'Slažem se sa '
     consentLinkText: politikom privatnosti
-    consentError: Neophodna je vaša saglasnost
+    consentError: Potrebna vaša saglasnost
     submitLabel: Izračunaj cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
+    errorSubmit: Zahtjev nije poslat. Proverite vezu i pokušajte ponovo
   es:
-    headingLine1: Nos pondremos en contacto contigo
-    headingEmphasis: dentro de 2 horas
+    headingLine1: Nos pondremos en contacto con usted
+    headingEmphasis: en un plazo de 2 horas
     subtext: Consulta gratuita
-    nameLabel: Tu nombre
-    namePlaceholder: Iván
-    contactLabel: Cómo contactarte
+    nameLabel: Su nombre
+    namePlaceholder: Juan
+    contactLabel: Cómo ponerse en contacto
     telegramTab: Telegram
-    telegramPlaceholder: '@usuario o teléfono'
+    telegramPlaceholder: '@nombredeusuario o teléfono'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Teléfono
@@ -77,13 +77,13 @@ translations:
     commentPlaceholder: BMW 3, 2020–2022, hasta €25 000…
     consentBefore: 'Acepto la '
     consentLinkText: política de privacidad
-    consentError: Se requiere tu consentimiento
-    submitLabel: Calcular costo
-    errorTelegramFormat: 'Formato: @usuario o número de teléfono'
-    errorPhoneInvalid: Verifica el número de teléfono
-    errorSubmit: La solicitud no se ha enviado. Verifica la conexión y vuelve a intentarlo
+    consentError: Se requiere su consentimiento
+    submitLabel: Calcular el costo
+    errorTelegramFormat: 'Formato: @nombredeusuario o número de teléfono'
+    errorPhoneInvalid: Verifique el número de teléfono
+    errorSubmit: La solicitud no se envió. Verifique la conexión y vuelva a intentarlo
   de:
-    headingLine1: Wir kontaktieren Sie
+    headingLine1: Wir melden uns bei Ihnen
     headingEmphasis: innerhalb von 2 Stunden
     subtext: Kostenlose Beratung
     nameLabel: Ihr Name
@@ -95,12 +95,12 @@ translations:
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marke, Modell, Budget
-    commentPlaceholder: BMW 3, 2020–2022, bis €25.000…
+    commentPlaceholder: BMW 3, 2020–2022, bis €25 000…
     consentBefore: 'Ich stimme der '
     consentLinkText: Datenschutzrichtlinie zu
-    consentError: Ihre Zustimmung ist erforderlich
+    consentError: Ihr Einverständnis ist erforderlich
     submitLabel: Kosten berechnen
     errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
     errorPhoneInvalid: Überprüfen Sie die Telefonnummer
-    errorSubmit: Die Anfrage wurde nicht gesendet. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut
+    errorSubmit: Die Anfrage wurde nicht gesendet. Überprüfen Sie die Verbindung und versuchen Sie es erneut
 translatedFrom: f19e1d1a771f6292
