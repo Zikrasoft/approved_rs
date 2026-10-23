@@ -394,7 +394,7 @@
     "89d58cbe5bcc39a8": "Thank you for your application. We’ll get in touch during business hours to arrange an inspection.",
     "8a914693ad613621": "Koje podatke prikuplja sajt studija detaljinga Details, zašto i koliko dugo se čuvaju.",
     "8bf8cf641d58b561": "Sajt je projektovan i razvijen u studiji Zikrasoft.",
-    "91c29ac2290f9d4d": "Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitički — Google Analytics. Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se prilikom sledećeg učitavanja ne uključuje. Reklamni kolačići koji vas prate na drugim sajtovima ovde ne postoje. Ako ste došli putem reklame i niste odbili analitiku, sajt pamti to — izvor i kampanju — u trajanju od 30 dana, kako bismo videli koja reklama donosi zahteve.",
+    "8cc307a5826f24a3": "The site uses a technical cookie for the selected interface language and analytical tools (Google Analytics and Yandex.Metrica). Analytics is activated on the first page load; you can opt out via the banner at the bottom of the screen, so it won’t be activated on subsequent loads. Yandex.Metrica records sessions (mouse movement, scrolling, and clicks). We have excluded the application form from the recording, so its content is not captured. There are no advertising cookies that track you on other sites. If you arrived through an advertisement and did not opt out of analytics, the site remembers the source and campaign for 30 days, allowing us to see which ads generate leads.",
     "92bef13128688173": "Kome pripada sajt",
     "94c0e66dba6cae72": "Sajt studije Details",
     "960968d923e0d2be": "What you'll find on the site",
@@ -458,14 +458,14 @@
     "f39896c1befb8ddd": "Ponesite ključeve od svih brava, uključujući tajne na točkovima.",
     "f5da54c05f624a6a": "Prijava poslata — Details",
     "f61ca6f9244418ec": "Cookies",
+    "f635bb47bd3a3114": "Sajt koristi tehnički kolačić sa odabranim jezikom interfejsa i analitičke (Google Analytics i Yandex.Metrica). Analitika se aktivira pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, pa se od sledećeg učitavanja ne uključuje. Yandex.Metrica beleži sesije (pokrete kursora, skrolovanje i klikove). Oblik zahteva smo isključili iz snimka, njegovi sadržaji se ne beleže. Reklamni kolačići koji prate vašu aktivnost na drugim sajtovima nisu ovde prisutni. Ako ste došli preko reklame i niste se odrekli analitike, sajt pamti ovo — izvor i kampanju — na 30 dana, kako bismo videli koja reklama donosi zahteve.",
     "f892881fe2e4cb0a": "Ova stranica ne postoji",
     "fa1caeade0a1dfa5": "Naši radovi",
     "fc115648f6df7226": "Samo ono što sami unosite u obrazac prijave — ime, kontakt i komentar, kao i adresu stranice sa koje je prijava poslata, i anonimni identifikator pregledača. Ovaj identifikator je slučajan, čuva se u vašem pregledaču i potrebna je samo da ne napravimo tri kartice za isti zahtev.",
     "fd248535decb5f78": "You don’t need to wash your car — we’ll wash it ourselves before starting.",
     "fdd824eae1c160f0": "To contact you regarding your application and maintain a history of inquiries. We do not use it for newsletters or share it with third parties for advertising.",
     "ff27d1ba5c6926fa": "Where It’s Stored",
-    "ff6aae5be7ffcda0": "Politika privatnosti — Details",
-    "ff965c8ec14c626d": "The site uses a technical cookie for the selected interface language and an analytical one — Google Analytics. The analytics start when the page is first loaded; you can decline in the banner at the bottom of the screen, and then it won't activate on your next visit. There are no advertising cookies that track you on other sites. If you arrived via an ad and did not opt out of analytics, the site remembers this — the source and campaign — for 30 days, so we can see which ads generate requests."
+    "ff6aae5be7ffcda0": "Politika privatnosti — Details"
   },
   "src/content/i18n/services.yaml": {
     "012107dc3e5db7ec": "Keramika preko nepoliranog laka samo konzervira paukovu mrežu na nekoliko godina. Prvo ispravljamo defekte, a premaz stavljamo na gotovu površinu.",
