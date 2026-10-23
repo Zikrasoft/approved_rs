@@ -644,6 +644,7 @@ validates everything at startup. The non-obvious parts:
   only from the admin's Publish button, in the top bar of every admin page.
   There is no nightly run: cart and checkout quote price and stock live, and a
   build bakes the prices current at that moment into the pages' structured data.
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached `/api/leads` after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
