@@ -278,7 +278,7 @@ export async function GET(
     ? { q: q.toLowerCase() }
     : {};
   const groups = facetGroups(facets);
-  const scope: SearchFilters[] = [];
+  const scope: SearchFilters[] = [{ published: true }];
   const nothing = () =>
     res.json(
       searchResponseSchema.parse({

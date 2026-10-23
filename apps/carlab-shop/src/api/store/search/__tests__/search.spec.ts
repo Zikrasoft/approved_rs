@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { publishAllNumbers } from '../../../../lib/publish/published';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -203,6 +204,7 @@ medusaIntegrationTestRunner({
           },
         ]);
 
+        await publishAllNumbers(getContainer());
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -578,6 +580,7 @@ medusaIntegrationTestRunner({
           id: identifier.id,
           superseded: true,
         });
+        await publishAllNumbers(getContainer());
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -620,6 +623,7 @@ medusaIntegrationTestRunner({
         await new Promise((resolve) => setTimeout(resolve, 1100));
         const startedAt = Math.floor(Date.now() / 1000);
 
+        await publishAllNumbers(getContainer());
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -631,6 +635,93 @@ medusaIntegrationTestRunner({
         expect(before).toEqual([]);
         expect(built).toHaveLength(1);
         expect(found.value).toBe('CUK 2939');
+      });
+
+      it('hides a brand-number from results and counts until a publish deploys its page', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Топливный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'WK 820' },
+          ],
+        });
+        const reindex = () =>
+          getContainer()
+            .resolve(Modules.SEARCH)
+            .reindex({ index: 'part_identifier' });
+
+        await reindex();
+        const unpublished = await search({ q: 'WK 820', locale: 'ru' });
+        await publishAllNumbers(getContainer());
+        await reindex();
+        const published = await search({ q: 'WK 820', locale: 'ru' });
+
+        expect(unpublished.data).toMatchObject({ results: [], count: 0 });
+        expect(published.data.count).toBe(1);
+        expect(published.data.results[0].value).toBe('WK 820');
+      });
+
+      it('lists buyable brand-numbers first and superseded ones last', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const identifierIds: Record<string, string> = {};
+        for (const value of ['SF 5', 'SF 4', 'SF 3', 'SF 2', 'SF 1']) {
+          const partId = await catalog.createPartWithIdentifiers({
+            name: `Салонный фильтр угольный ${value}`,
+            identifiers: [
+              { type: 'manufacturer-number', brand_id: mann.id, value },
+            ],
+          });
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: partId,
+          });
+          identifierIds[value] = identifier.id;
+        }
+        await catalog.updatePartIdentifiers({
+          id: identifierIds['SF 1'],
+          superseded: true,
+        });
+        const supplier = await suppliers.createSuppliers({
+          name: 'Ranking supplier',
+          markup_percentage: 0,
+        });
+        await suppliers.createSupplierOffers(
+          (
+            [
+              ['SF 1', 5, 0],
+              ['SF 2', 0, 0],
+              ['SF 4', 0, 3],
+              ['SF 5', 2, 0],
+            ] as const
+          ).map(([value, stock_quantity, lead_time_days]) => ({
+            supplier_id: supplier.id,
+            supplier_article_id: `rank-${value}`,
+            part_identifier_id: identifierIds[value],
+            cost_price: 1000,
+            stock_quantity,
+            lead_time_days,
+          })),
+        );
+        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+
+        const found = await results({
+          q: 'салонный фильтр угольный',
+          locale: 'ru',
+        });
+        const values = found.map(({ value }) => value);
+
+        expect(values).toHaveLength(5);
+        expect(values.slice(0, 2).sort()).toEqual(['SF 4', 'SF 5']);
+        expect(values.slice(2, 4).sort()).toEqual(['SF 2', 'SF 3']);
+        expect(values[4]).toBe('SF 1');
       });
     });
   },

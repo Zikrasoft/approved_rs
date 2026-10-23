@@ -2,6 +2,7 @@ import type { ExecArgs, ISearchModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
 import { parseEnv } from '../lib/env';
+import { publishAllNumbers } from '../lib/publish/published';
 import { translateCatalogue } from '../lib/publish/translate';
 import { importSupplierCatalogues } from '../lib/suppliers/import';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -19,6 +20,7 @@ export default async function publishLocal({ container }: ExecArgs) {
   } else {
     logger.info('OPENAI_API_KEY is not set, skipped translate.');
   }
+  await publishAllNumbers(container);
   await container
     .resolve<ISearchModuleService>(Modules.SEARCH)
     .reindex({ strategy: 'swap' });

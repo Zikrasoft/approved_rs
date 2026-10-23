@@ -6,6 +6,7 @@ import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import type SupplierModuleService from '../../../modules/supplier/service';
+import { publishAllNumbers } from '../../../lib/publish/published';
 
 type Priced = { offers: { price: number }[] };
 
@@ -91,6 +92,7 @@ medusaIntegrationTestRunner({
             lead_time_days: 1,
           })),
         );
+        await publishAllNumbers(getContainer());
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });

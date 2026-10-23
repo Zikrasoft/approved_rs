@@ -7,6 +7,8 @@ import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplie
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
@@ -440,6 +442,33 @@ medusaIntegrationTestRunner({
           `The deploy run did not succeed: failure ${RUN_HTML_URL}`,
         );
         expect(reindexCalls).toEqual([]);
+      });
+
+      it('marks the brand-numbers of a deployed site as published, never those of a failed deploy', async () => {
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'W 712' },
+          ],
+        });
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: partId,
+        });
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+        const published = async () =>
+          (await publishModule.listPublishedNumbers({ id: identifier.id }))
+            .length;
+
+        network.runConclusion = 'failure';
+        await publish();
+        const afterFailure = await published();
+        network.runConclusion = 'success';
+        await publish();
+
+        expect(afterFailure).toBe(0);
+        expect(await published()).toBe(1);
       });
 
       it('refuses a second Publish while one is running', async () => {

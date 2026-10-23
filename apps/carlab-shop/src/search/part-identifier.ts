@@ -13,6 +13,7 @@ import {
   IN_STOCK,
   IN_STOCK_FACET,
 } from '@podbor/catalog-contract';
+import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
@@ -41,6 +42,7 @@ type OfferRow = PricedOfferRow & { part_identifier_id: string };
 type IdentifierRow = {
   id: string;
   value: string;
+  superseded: boolean;
   normalized_value: string;
   brand: { name: string; slug: string };
   part: {
@@ -86,18 +88,28 @@ const facets = (
       [attributes[key]].flat().map((value) => facetFilter(key, String(value))),
     );
 
+const STANDING = { superseded: 0, unbuyable: 1, buyable: 2 } as const;
+
 const toDocument = (
   row: IdentifierRow,
   siblings: NumberRow[],
   facetFields: FacetFieldRow[],
   offers: OfferRow[],
+  published: Set<string>,
 ) => {
-  const [best] = storeOffers(
+  const own = storeOffers(
     offers.filter(({ part_identifier_id }) => part_identifier_id === row.id),
   );
+  const [best] = own;
   return {
     id: row.id,
     part_id: row.part.id,
+    published: published.has(row.id),
+    standing: row.superseded
+      ? STANDING.superseded
+      : own.some(isBuyable)
+        ? STANDING.buyable
+        : STANDING.unbuyable,
     brand: row.brand.name,
     number: [row.value, row.normalized_value],
     equivalent_numbers: siblings
@@ -124,6 +136,7 @@ const source = {
     'id',
     'value',
     'normalized_value',
+    'superseded',
     'brand.name',
     'brand.slug',
     'part.id',
@@ -142,38 +155,48 @@ const source = {
     const categoryIds = rows.flatMap(({ part }) =>
       part.category_id ? [part.category_id] : [],
     );
-    const [{ data: siblings }, { data: facetFields }, { data: offers }] =
-      await Promise.all([
-        container.query.graph({
-          entity: 'part_identifier',
-          fields: ['id', 'part_id', 'value', 'normalized_value'],
-          filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
-        }),
-        container.query.graph({
-          entity: 'category_field',
-          fields: ['key', 'category_id'],
-          filters: { category_id: [...new Set(categoryIds)], facet: true },
-        }),
-        container.query.graph({
-          entity: 'supplier_offer',
-          fields: [
-            'id',
-            'part_identifier_id',
-            'cost_price',
-            'currency',
-            'stock_quantity',
-            'lead_time_days',
-            'supplier.markup_percentage',
-          ],
-          filters: { part_identifier_id: rows.map(({ id }) => id) },
-        }),
-      ]);
+    const [
+      { data: siblings },
+      { data: facetFields },
+      { data: offers },
+      { data: published },
+    ] = await Promise.all([
+      container.query.graph({
+        entity: 'part_identifier',
+        fields: ['id', 'part_id', 'value', 'normalized_value'],
+        filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
+      }),
+      container.query.graph({
+        entity: 'category_field',
+        fields: ['key', 'category_id'],
+        filters: { category_id: [...new Set(categoryIds)], facet: true },
+      }),
+      container.query.graph({
+        entity: 'supplier_offer',
+        fields: [
+          'id',
+          'part_identifier_id',
+          'cost_price',
+          'currency',
+          'stock_quantity',
+          'lead_time_days',
+          'supplier.markup_percentage',
+        ],
+        filters: { part_identifier_id: rows.map(({ id }) => id) },
+      }),
+      container.query.graph({
+        entity: 'published_number',
+        fields: ['id'],
+        filters: { id: rows.map(({ id }) => id) },
+      }),
+    ]);
     return rows.map((row) =>
       toDocument(
         row,
         siblings as NumberRow[],
         facetFields as FacetFieldRow[],
         offers as OfferRow[],
+        new Set(published.map(({ id }: { id: string }) => id)),
       ),
     );
   },
@@ -212,6 +235,7 @@ export const searchRanking = (locale: CatalogLocale) => {
     query_by_weights: fields.map(([, weight]) => weight).join(','),
     num_typos: fields.map(([, , typos]) => typos).join(','),
     text_match_type: 'max_weight',
+    sort_by: 'standing:desc,_text_match:desc',
   };
 };
 
@@ -221,6 +245,8 @@ export default defineSearchIndex({
   fields: search.define({
     id: search.keyword().filterable().retrievable(),
     part_id: search.keyword().filterable().retrievable(false),
+    published: search.boolean().filterable().retrievable(false),
+    standing: search.integer().sortable().retrievable(false),
     category: search.keyword().filterable().retrievable(false),
     brand: text(),
     number: numbers(),

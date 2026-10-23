@@ -6,6 +6,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { publishAllNumbers } from '../../../../lib/publish/published';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -228,7 +229,7 @@ medusaIntegrationTestRunner({
         expect(part.source).toBe('Intercars');
       });
 
-      it('makes a Part it creates searchable without a publish', async () => {
+      it('keeps a Part it creates out of search until a publish deploys its page', async () => {
         intercars.articles.push({
           article_id: 'IC-15',
           brand: 'MANN-FILTER',
@@ -236,17 +237,20 @@ medusaIntegrationTestRunner({
           name: 'Фильтр HU7020',
           category: 'IC-OIL',
         });
+        const found = async () =>
+          (await api.get('/store/search?q=HU7020z&locale=ru', storeHeaders))
+            .data.count;
 
         await runImport();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const beforePublish = await found();
+        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
 
-        let found = 0;
-        for (let attempt = 0; attempt < 50 && !found; attempt++) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          found = (
-            await api.get('/store/search?q=HU7020z&locale=ru', storeHeaders)
-          ).data.count;
-        }
-        expect(found).toBe(1);
+        expect(beforePublish).toBe(0);
+        expect(await found()).toBe(1);
       });
 
       it('creates the Part without a Category whose required fields the article cannot fill', async () => {
