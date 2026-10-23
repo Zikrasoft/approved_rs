@@ -170,15 +170,7 @@ export const refuseStockCartChange = (
 
 const previewHeaderSchema = z.literal('1');
 
-let parsedShopOpen: { key: string; open: boolean } | undefined;
-
-const shopOpen = (): boolean => {
-  const key = `${process.env.NODE_ENV}:${process.env.SHOP_OPEN}`;
-  if (parsedShopOpen?.key !== key) {
-    parsedShopOpen = { key, open: parseEnv(process.env).SHOP_OPEN };
-  }
-  return parsedShopOpen.open;
-};
+const shopOpen = (): boolean => parseEnv(process.env).SHOP_OPEN;
 
 export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean =>
   shopOpen() ||

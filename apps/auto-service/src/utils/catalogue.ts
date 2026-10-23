@@ -39,7 +39,10 @@ import {
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
-import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
+import {
+  SHOP_PREVIEW_HEADER,
+  shopOpenSchema,
+} from '@podbor/catalog-contract/preview';
 import { partSuccessor } from './partSuccessor';
 
 export type { Vehicle, VinFacts };
@@ -78,7 +81,8 @@ export type SearchOutcome = Omit<SearchResponse, 'results'> & {
 
 export type CategoryPageEntry = Category & { pages: PartPageEntry[] };
 
-export type LineAddonKind = 'addon' | 'installation';
+export const LINE_ADDON_KINDS = ['addon', 'installation'] as const;
+export type LineAddonKind = (typeof LINE_ADDON_KINDS)[number];
 
 export type IdentifierPrices = {
   offers: Record<string, PartOffer[]>;
@@ -798,7 +802,7 @@ export function categoryFacets(
 }
 
 export const shopOpen = (env: CatalogueEnv = siteEnv()): boolean =>
-  z.literal('true').safeParse(env.SHOP_OPEN).success;
+  shopOpenSchema.parse(env.SHOP_OPEN) ?? false;
 
 export function catalogueFromEnv(
   env: CatalogueEnv,

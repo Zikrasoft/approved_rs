@@ -6,6 +6,7 @@ import { previewRequested } from '@/utils/shopPreview';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
+  LINE_ADDON_KINDS,
   siteEnv,
   type CartOutcome,
 } from '@/utils/catalogue';
@@ -27,7 +28,7 @@ const addonSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
   addon: z.boolean(),
-  kind: z.enum(['addon', 'installation']).default('addon'),
+  kind: z.enum(LINE_ADDON_KINDS).default('addon'),
 });
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,

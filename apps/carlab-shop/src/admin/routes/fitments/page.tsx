@@ -15,6 +15,13 @@ import {
   Textarea,
   toast,
 } from '@medusajs/ui';
+import {
+  FITMENT_AXLES,
+  FITMENT_SIDES,
+  GEARBOX_TYPES,
+  PART_IDENTIFIER_TYPES,
+  STEERING_SIDES,
+} from '@podbor/catalog-contract';
 import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -97,11 +104,6 @@ const createdPartSchema = z.object({ part: partSchema });
 const bulkSchema = z.object({ matched: z.number(), created: z.number() });
 const detachedSchema = z.object({ matched: z.number(), deleted: z.number() });
 
-const STEERING_OPTIONS = ['left', 'right'] as const;
-const GEARBOX_OPTIONS = ['manual', 'automatic'] as const;
-const AXLE_OPTIONS = ['front', 'rear'] as const;
-const SIDE_OPTIONS = ['left', 'right'] as const;
-const IDENTIFIER_TYPES = ['oem', 'manufacturer-number', 'ean'] as const;
 const ANY = 'any';
 
 const REFERENCE_FILTERS = [
@@ -314,7 +316,7 @@ const FitmentsPage = () => {
   const [partName, setPartName] = useState('');
 
   const [newPartName, setNewPartName] = useState('');
-  const [newType, setNewType] = useState<string>(IDENTIFIER_TYPES[0]);
+  const [newType, setNewType] = useState<string>(PART_IDENTIFIER_TYPES[0]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [newBrandId, setNewBrandId] = useState('');
   const [newValue, setNewValue] = useState('');
@@ -717,7 +719,7 @@ const FitmentsPage = () => {
             />
           </Select.Trigger>
           <Select.Content>
-            {IDENTIFIER_TYPES.map((type) => (
+            {PART_IDENTIFIER_TYPES.map((type) => (
               <Select.Item key={type} value={type}>
                 {t(`fitments.identifierTypes.${type}`)}
               </Select.Item>
@@ -1050,7 +1052,7 @@ const FitmentsPage = () => {
             value={conditions.axle}
             onChange={(value) => setCondition('axle', value)}
             placeholder={t('fitments.axlePlaceholder')}
-            options={AXLE_OPTIONS.map((value) => ({
+            options={FITMENT_AXLES.map((value) => ({
               value,
               label: t(`fitments.axleOptions.${value}`),
             }))}
@@ -1059,7 +1061,7 @@ const FitmentsPage = () => {
             value={conditions.side}
             onChange={(value) => setCondition('side', value)}
             placeholder={t('fitments.sidePlaceholder')}
-            options={SIDE_OPTIONS.map((value) => ({
+            options={FITMENT_SIDES.map((value) => ({
               value,
               label: t(`fitments.sideOptions.${value}`),
             }))}
@@ -1068,7 +1070,7 @@ const FitmentsPage = () => {
             value={conditions.steering}
             onChange={(value) => setCondition('steering', value)}
             placeholder={t('fitments.steeringPlaceholder')}
-            options={STEERING_OPTIONS.map((value) => ({
+            options={STEERING_SIDES.map((value) => ({
               value,
               label: t(`fitments.steeringOptions.${value}`),
             }))}
@@ -1077,7 +1079,7 @@ const FitmentsPage = () => {
             value={conditions.gearbox}
             onChange={(value) => setCondition('gearbox', value)}
             placeholder={t('fitments.gearboxPlaceholder')}
-            options={GEARBOX_OPTIONS.map((value) => ({
+            options={GEARBOX_TYPES.map((value) => ({
               value,
               label: t(`fitments.gearboxOptions.${value}`),
             }))}

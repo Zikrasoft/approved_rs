@@ -1,3 +1,4 @@
+import { shopOpenSchema } from '@podbor/catalog-contract/preview';
 import { z } from 'zod';
 
 import { VIN_DECODER_NAMES } from './vin/decoders';
@@ -61,7 +62,7 @@ const envSchema = z
         .regex(/^-?\d+$/)
         .optional(),
     ),
-    SHOP_OPEN: z.enum(['true', 'false']).optional(),
+    SHOP_OPEN: shopOpenSchema,
   })
   .refine(
     ({ NODE_ENV, SUPPLIER_ADAPTERS }) =>
@@ -87,9 +88,7 @@ const envSchema = z
     ...env,
     TYPESENSE_API_KEY: env.TYPESENSE_API_KEY ?? LOCAL_TYPESENSE_API_KEY,
     FILE_URL: env.FILE_URL ?? `http://localhost:${env.PORT}/static`,
-    SHOP_OPEN: env.SHOP_OPEN
-      ? env.SHOP_OPEN === 'true'
-      : env.NODE_ENV !== 'production',
+    SHOP_OPEN: env.SHOP_OPEN ?? env.NODE_ENV !== 'production',
   }));
 
 export type Env = z.infer<typeof envSchema>;

@@ -16,6 +16,7 @@ import {
   type LeadTimeCopy,
 } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
+import type { LineAddonKind } from '@/utils/catalogue';
 import { vinFrom } from '@/utils/carFacts';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
 import { PRICES_FILLED_EVENT, shopPreview } from './shopPreview';
@@ -1010,7 +1011,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           label: string;
           item_id: string | null;
           unit_price: number;
-          kind: 'addon' | 'installation';
+          kind: LineAddonKind;
         },
       ): void {
         const box = row.querySelector<HTMLElement>(selector);

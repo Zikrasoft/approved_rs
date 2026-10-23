@@ -36,7 +36,7 @@ fi
 find "$dest" -maxdepth 1 -type f \( -name 'db-*.dump' -o -name 'static-*.tar.gz' \) -mtime +6 -delete
 
 mkdir .deploy.lock 2>/dev/null || {
-  echo "A deploy is running (.deploy.lock present) — no backup tonight." >&2
+  echo "A deploy is running (.deploy.lock present), no backup tonight." >&2
   exit 1
 }
 trap 'rm -f "$dest"/*"$stamp"*.part; rmdir .deploy.lock 2>/dev/null || true' EXIT
