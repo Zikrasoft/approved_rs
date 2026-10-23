@@ -1,3 +1,4 @@
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
@@ -248,6 +249,67 @@ medusaIntegrationTestRunner({
           .catch((error) => error.response);
 
         expect(response.status).toBe(400);
+      });
+
+      it('reindexes the prices of every brand-number the supplier offers when its markup changes', async () => {
+        const container = getContainer();
+        const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        const brand = await catalog.createBrands({
+          name: 'Mann',
+          slug: 'mann',
+        });
+        const values = ['C27009', 'C27010'];
+        for (const value of values) {
+          const partId = await catalog.createPartWithIdentifiers({
+            name: `Фильтр ${value}`,
+            identifiers: [
+              { type: 'manufacturer-number', brand_id: brand.id, value },
+            ],
+          });
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: partId,
+          });
+          await supplierService.createSupplierOffers({
+            supplier_id: supplierId,
+            supplier_article_id: value,
+            part_identifier_id: identifier.id,
+            cost_price: 1000,
+            stock_quantity: 1,
+            lead_time_days: 0,
+          });
+        }
+        await call('post', `/admin/suppliers/${supplierId}`, {
+          markup_percentage: 10,
+        });
+        await container
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+        const pricedAt = async (price: number) =>
+          (
+            await container.resolve(ContainerRegistrationKeys.QUERY).search({
+              entity: 'part_identifier',
+              fields: ['id'],
+              filters: { price: { $gte: price, $lte: price } },
+              pagination: { skip: 0, take: 10 },
+            })
+          ).search_result.metadata.count;
+        expect(await pricedAt(1100)).toBe(values.length);
+
+        const response = await call('post', `/admin/suppliers/${supplierId}`, {
+          markup_percentage: 50,
+        });
+
+        expect(response.status).toBe(200);
+        let count: number | null = 0;
+        for (
+          let attempt = 0;
+          attempt < 20 && count !== values.length;
+          attempt += 1
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          count = await pricedAt(1500);
+        }
+        expect(count).toBe(values.length);
       });
 
       it('returns a 404 for an unknown supplier', async () => {
