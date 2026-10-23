@@ -9,6 +9,13 @@ mkdir "$work/bin"
 cat >"$work/bin/docker" <<'STUB'
 #!/bin/sh
 echo "docker[${MEDUSA_TAG:-}] $*" >>"$LOG"
+if [ "$1" = run ]; then
+  while [ "$#" -gt 0 ]; do
+    [ "$1" = --env-file ] && cat "$2" >>"$LOG.env"
+    shift
+  done
+  exit "${RCLONE_EXIT:-0}"
+fi
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
@@ -63,6 +70,10 @@ stage() {
   LOG="$work/host/log"
   export LOG
   : >"$LOG"
+  rm -f "$LOG.env"
+}
+offsite() {
+  printf 'BACKUP_S3_ENDPOINT=https://s3.test\nBACKUP_S3_BUCKET=carlab-backups\nBACKUP_S3_ACCESS_KEY_ID=key-canary\nBACKUP_S3_SECRET_ACCESS_KEY=secret-canary\n' >"$work/host/.env.backup"
 }
 run() {
   script=$1
@@ -256,7 +267,56 @@ refuse 'a failing pg_dump fails the backup' run backup.sh ''
 expect 'a failing pg_dump leaves no .part file' test -z "$(find "$work/backups2" -name '*.part')"
 unset PGDUMP_EXIT
 
+stage
+mkdir "$work/backups4"
+BACKUP_DIR="$work/backups4"
+export BACKUP_DIR
+expect 'a backup without a bucket succeeds' run backup.sh
+expect 'a backup without a bucket warns that it stays on this host' grep -q 'BACKUP_S3_BUCKET is not set' "$work/host/stderr"
+refuse 'a backup without a bucket uploads nothing' grep -q 'docker\[[^]]*\] run' "$LOG"
+
+stage
+offsite
+BACKUP_DIR="$work/backups4"
+expect 'a backup with a bucket succeeds' run backup.sh
+expect 'the new dump and archive go to the bucket through a pinned rclone image' \
+  grep -Eq "run --rm .*-v $work/backups4:/backups rclone/rclone:[0-9]+\.[0-9]+\.[0-9]+ copy /backups :s3:carlab-backups --include \*-2[^ ]*Z\.\*$" "$LOG"
+expect 'copies older than 30 days are deleted from the bucket' \
+  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include db-\*\.dump --include static-\*\.tar\.gz$" "$LOG"
+expect 'rclone gets the endpoint and keys through an env file' grep -qx 'RCLONE_S3_SECRET_ACCESS_KEY=secret-canary' "$LOG.env"
+expect 'the env file carries only the bucket credentials' test "$(grep -c . "$LOG.env")" -eq "$(grep -c '^RCLONE_S3_' "$LOG.env")"
+refuse 'no key reaches a command line' grep -q 'canary' "$LOG"
+expect 'no env file is left behind' test -z "$(find "$work/host" "${TMPDIR:-/tmp}" -maxdepth 1 -name 'carlab-offsite.*' 2>/dev/null)"
+
+stage
+offsite
+mkdir "$work/backups5"
+RCLONE_EXIT=1
+BACKUP_DIR="$work/backups5"
+export RCLONE_EXIT BACKUP_DIR
+refuse 'a failed upload fails the backup' run backup.sh
+expect 'a failed upload says so' grep -q 'off-host copy failed' "$work/host/stderr"
+expect 'a failed upload keeps the local dump' test -n "$(find "$work/backups5" -name 'db-*.dump')"
+expect 'a failed upload releases the lock' test ! -d "$work/host/.deploy.lock"
+unset RCLONE_EXIT
+
+stage
+offsite
+mkdir "$work/backups6"
+BACKUP_DIR="$work/backups6"
+expect 'fetch lists the bucket' run backup.sh fetch
+expect 'listing the bucket goes through rclone' grep -Eq 'rclone/rclone:[0-9.]+ lsf :s3:carlab-backups$' "$LOG"
+stage
+offsite
+expect 'fetch downloads one stamp' run backup.sh fetch 2026-10-23T03-30-00Z
+expect 'fetch copies that stamp into the backup dir' \
+  grep -Eq "run --rm .*-v $work/backups6:/backups rclone/rclone:[0-9.]+ copy :s3:carlab-backups /backups --include \*-2026-10-23T03-30-00Z\.\*$" "$LOG"
+refuse 'fetch takes no deploy lock and dumps nothing' grep -q 'compose' "$LOG"
+stage
+refuse 'fetch without a bucket fails' run backup.sh fetch
+unset BACKUP_DIR
+
 expect "the scripts ran and printed something" test -s "$work/printed"
-refuse "no script prints a secret from .env" grep -q leak-canary "$work/printed"
+refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary' "$work/printed"
 
 [ "$failures" -eq 0 ]
