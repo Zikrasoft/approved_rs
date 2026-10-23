@@ -568,7 +568,7 @@ This site supports 5 locales: `ru` (default), `en`, `sr`, `es`, `de`. Translatio
 
 Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 `reachGoal` from `@podbor/site-kit/browser`, never as string literals in an app.
-`reachGoal` reaches GA4 and, where a site sets `META_PIXEL_ID`, the Meta Pixel
+`reachGoal` reaches GA4 and Yandex Metrika (all three sites, [ADR-0044](docs/adr/0044-yandex-metrika-beside-ga4.md)) and, where a site sets `META_PIXEL_ID`, the Meta Pixel
 (standard events only, `META_EVENTS` in `analytics.ts`); carlab.rs additionally
 reaches Google Ads conversions where `GOOGLE_ADS_ID`/`GOOGLE_CONVERSION_LABELS`
 are set. Every event must also be marked a key event in **all three** GA4
