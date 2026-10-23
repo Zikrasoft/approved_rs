@@ -561,16 +561,16 @@ to do with them:
 server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 `infra/carlab-shop/`:
 
-| File                                     | What it is                                                                                                                       |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node` |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
-| `caddy/Caddyfile`                        | `api.carlab.rs` → `medusa:9000`, TLS, security headers, request body up to 25 MB; `/static/*` straight from the uploads volume   |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                           |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                   |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                          |
-| `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                          |
+| File                                     | What it is                                                                                                                          |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`    |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                        |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB; `/static/*` from the uploads volume |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                 |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                              |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                      |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                             |
+| `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                             |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -645,6 +645,7 @@ validates everything at startup. The non-obvious parts:
   There is no nightly run: cart and checkout quote price and stock live, and a
   build bakes the prices current at that moment into the pages' structured data.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached `/api/leads` after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
+- `ADMIN_HOST` is where staff open the admin (`admin.carlab.rs`): Caddy proxies it to the same Medusa, sends `/` to `/app`, and redirects `api.carlab.rs/app` there. `ADMIN_CORS` and `AUTH_CORS` name that origin; the admin calls the API on its own origin, so `admin.backendUrl` stays unset.
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
@@ -902,9 +903,10 @@ Check with `curl -k https://localhost:8443/health`.
    it open** until key-based login has been re-verified after hardening. From it,
    run `harden-ssh.sh` **through `sudo`**.
    Done: `ssh deploy@<IPv4>` lets you in by key; `ssh root@<IPv4>` refuses.
-3. **DNS.** A and AAAA records for `api.carlab.rs` at the server's addresses. If
-   IPv6 does not work at the host or on the network, remove the AAAA record.
-   Done: `dig +short api.carlab.rs` and `dig +short AAAA api.carlab.rs` return them.
+3. **DNS.** A and AAAA records for `api.carlab.rs` and `admin.carlab.rs` at the
+   server's addresses. If IPv6 does not work at the host or on the network, remove
+   the AAAA records.
+   Done: `dig +short` and `dig +short AAAA` return them for both names.
 4. **`.env` on the server.** Copy `infra/carlab-shop/production.env.example` to
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
    then `chmod 600 /srv/carlab/.env`.
@@ -929,7 +931,7 @@ Check with `curl -k https://localhost:8443/health`.
    `https://api.carlab.rs/health` answers 200.
 8. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in
-   at `https://api.carlab.rs/app`, and in Settings → Publishable API Keys create the
+   at `https://admin.carlab.rs`, and in Settings → Publishable API Keys create the
    key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
    production seed created the channel).
    Then open «Аккумуляторы»: the production seed created it with its nine
