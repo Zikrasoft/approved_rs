@@ -14,7 +14,7 @@ const json = (body: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
-const github = (runs: (Run | Response | Error)[]) => {
+const github = (runs: (Run | Response | Error)[], runUrl = RUN_URL) => {
   const calls: { url: string; method: string; body: unknown }[] = [];
   globalThis.fetch = jest.fn(async (input, init) => {
     const url = String(input);
@@ -26,7 +26,7 @@ const github = (runs: (Run | Response | Error)[]) => {
     if (url === DISPATCH_URL) {
       return json({
         workflow_run_id: 42,
-        run_url: RUN_URL,
+        run_url: runUrl,
         html_url: HTML_URL,
       });
     }
@@ -65,6 +65,18 @@ describe('deploySite', () => {
       RUN_URL,
       RUN_URL,
     ]);
+  });
+
+  it('never sends the token to a run address off the GitHub API', async () => {
+    const calls = github(
+      [{ status: 'completed', conclusion: 'success' }],
+      'https://api.github.com.evil.example/runs/42',
+    );
+
+    await expect(deploySite('token', fast)).rejects.toThrow(
+      'run_url is not on https://api.github.com',
+    );
+    expect(calls.map(({ url }) => url)).toEqual([DISPATCH_URL]);
   });
 
   it('fails when the run finishes without success', async () => {

@@ -1,17 +1,22 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { z } from 'zod';
 
-const PUBLISH_WORKFLOW_URL =
-  'https://api.github.com/repos/Zikrasoft/approved_rs/actions/workflows/publish.yml/dispatches';
+const GITHUB_API_ORIGIN = 'https://api.github.com';
+
+const PUBLISH_REPOSITORY = 'Zikrasoft/approved_rs';
 
 const PUBLISH_WORKFLOW_REF = 'main';
+
+const PUBLISH_WORKFLOW_URL = `${GITHUB_API_ORIGIN}/repos/${PUBLISH_REPOSITORY}/actions/workflows/publish.yml/dispatches`;
 
 export const DEPLOY_TIMEOUT_MS = 90 * 60 * 1000;
 
 const DEPLOY_POLL_MS = 30 * 1000;
 
 const dispatchedRunSchema = z.object({
-  run_url: z.url(),
+  run_url: z.url().refine((url) => new URL(url).origin === GITHUB_API_ORIGIN, {
+    message: `run_url is not on ${GITHUB_API_ORIGIN}`,
+  }),
   html_url: z.url(),
 });
 
