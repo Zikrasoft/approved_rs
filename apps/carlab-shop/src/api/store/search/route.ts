@@ -31,6 +31,7 @@ import {
 import { z } from 'zod';
 
 import { imagesSchema } from '../../../lib/images';
+import { pricesShown } from '../../../lib/offer-cart';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
@@ -226,7 +227,7 @@ export async function GET(
     vehicle_id,
     model,
     facets,
-    range,
+    range: requestedRanges,
     offset,
     limit,
   } = req.validatedQuery as StoreSearchPartsType;
@@ -238,6 +239,11 @@ export async function GET(
     );
   }
   const locale = parsedLocale.data;
+  const shown = pricesShown(req);
+  const facetRequests = shown ? FACET_REQUESTS : FACET_REQUESTS.slice(0, 1);
+  const range = shown
+    ? requestedRanges
+    : requestedRanges.filter(({ key }) => key !== PRICE_FACET);
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const [found] = category
@@ -328,7 +334,7 @@ export async function GET(
       fields: ['id'],
       filters: filtersFor(applied),
       pagination: { skip: 0, take: 1 },
-      search_options: { facets: FACET_REQUESTS },
+      search_options: { facets: facetRequests },
     });
     return counted(search_result.facets);
   };
@@ -395,7 +401,7 @@ export async function GET(
     filters: filtersFor(() => true),
     pagination: { skip: offset, take: limit },
     search_options: {
-      facets: FACET_REQUESTS,
+      facets: facetRequests,
       provider_options: { typesense: searchRanking(locale) },
     },
   });
@@ -403,12 +409,13 @@ export async function GET(
   const rank = new Map(search_result.hits.map(({ id }, index) => [id, index]));
   const hits = z.array(hitSchema).parse(data);
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
-  const offers = hits.length
-    ? await suppliers.listSupplierOffers(
-        { part_identifier_id: hits.map(({ id }) => id) },
-        { relations: ['supplier'], take: null },
-      )
-    : [];
+  const offers =
+    shown && hits.length
+      ? await suppliers.listSupplierOffers(
+          { part_identifier_id: hits.map(({ id }) => id) },
+          { relations: ['supplier'], take: null },
+        )
+      : [];
   const supplierData = await releasedSupplierData(
     suppliers,
     hits.map(({ id }) => id),

@@ -98,6 +98,14 @@ export const StoreListPartPages = z.object({
 });
 export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;
 
+export const StoreListOffers = z.object({
+  part_identifier_id: z
+    .union([z.string(), z.array(z.string())])
+    .transform((value) => [value].flat())
+    .pipe(z.array(z.string().min(1).max(100)).min(1).max(200)),
+});
+export type StoreListOffersType = z.infer<typeof StoreListOffers>;
+
 export const StoreListFitments = StoreListPartPages;
 export type StoreListFitmentsType = StoreListPartPagesType;
 

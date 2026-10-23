@@ -67,6 +67,10 @@ export const partOffersResponseSchema = z.object({
   offers: z.array(partOfferSchema),
 });
 
+export const identifierOffersResponseSchema = z.object({
+  offers: z.record(z.string(), z.array(partOfferSchema)),
+});
+
 const attribution = (max: number) =>
   z
     .string()

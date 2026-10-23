@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
+import { pricesShown } from '../../../lib/offer-cart';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
@@ -101,10 +102,12 @@ export async function GET(
   };
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const identifierIds = identifiers.map(({ id }) => id);
-  const offers = await suppliers.listSupplierOffers(
-    { part_identifier_id: identifierIds },
-    { relations: ['supplier'], take: null },
-  );
+  const offers = pricesShown(req)
+    ? await suppliers.listSupplierOffers(
+        { part_identifier_id: identifierIds },
+        { relations: ['supplier'], take: null },
+      )
+    : [];
   const supplierData = await releasedSupplierData(suppliers, identifierIds);
 
   const pages = identifiers.map((identifier) => ({

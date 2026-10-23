@@ -4,6 +4,7 @@ import {
   checkoutContactSchema,
   checkoutRefusalSchema,
   offerCartResponseSchema,
+  identifierOffersResponseSchema,
   partOffersResponseSchema,
   placedOrderResponseSchema,
 } from './cart.ts';
@@ -84,6 +85,10 @@ describe('checkout answers', () => {
     expect(partOffersResponseSchema.parse({ offers: [] })).toEqual({
       offers: [],
     });
+    expect(
+      identifierOffersResponseSchema.safeParse({ offers: { pi_1: [{}] } })
+        .success,
+    ).toBe(false);
   });
 });
 

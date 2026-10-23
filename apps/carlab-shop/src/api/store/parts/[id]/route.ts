@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 
+import { pricesShown } from '../../../../lib/offer-cart';
 import {
   PART_WITH_OFFERS_FIELDS,
   toPartResponse,
@@ -22,6 +23,17 @@ export async function GET(
     },
     { throwIfKeyNotFound: true },
   );
+  const response = toPartResponse(part);
 
-  res.json({ part: toPartResponse(part) });
+  res.json({
+    part: pricesShown(req)
+      ? response
+      : {
+          ...response,
+          identifiers: response.identifiers.map((identifier) => ({
+            ...identifier,
+            offers: [],
+          })),
+        },
+  });
 }

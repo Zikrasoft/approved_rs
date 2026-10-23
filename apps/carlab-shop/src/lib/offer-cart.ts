@@ -139,13 +139,16 @@ export const SHOP_PREVIEW_HEADER = 'x-shop-preview';
 
 const previewHeaderSchema = z.literal('1');
 
+export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean =>
+  parseEnv(process.env).SHOP_OPEN ||
+  previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success;
+
 export const refuseClosedShop = (
   req: MedusaRequest,
   _res: unknown,
   next: (error?: MedusaError) => void,
 ): void =>
-  parseEnv(process.env).SHOP_OPEN ||
-  previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success
+  pricesShown(req)
     ? next()
     : next(
         new MedusaError(

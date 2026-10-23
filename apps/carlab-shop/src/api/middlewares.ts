@@ -42,6 +42,7 @@ import {
   StoreCreateOfferCart,
   StoreCreateVinLookup,
   StoreListFitments,
+  StoreListOffers,
   StoreListPartPages,
   StoreSearchParts,
   StoreVehicleParts,
@@ -206,6 +207,11 @@ export default defineMiddlewares({
       matcher: '/store/part-pages',
       method: 'GET',
       middlewares: [validateAndTransformQuery(StoreListPartPages, {})],
+    },
+    {
+      matcher: '/store/offers',
+      method: 'GET',
+      middlewares: [validateAndTransformQuery(StoreListOffers, {})],
     },
     {
       matcher: '/store/fitments',
