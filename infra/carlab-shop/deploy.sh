@@ -39,6 +39,10 @@ echo "==> Migrations"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
 
+echo "==> Production seed"
+docker compose run --rm -T medusa \
+  node_modules/.bin/medusa exec ./src/scripts/seed-production.js
+
 grep -v '^MEDUSA_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next
 mv .env.next .env

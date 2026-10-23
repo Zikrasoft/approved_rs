@@ -11,6 +11,7 @@ cat >"$work/bin/docker" <<'STUB'
 echo "docker[${MEDUSA_TAG:-}] $*" >>"$LOG"
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
+*seed-production*) exit "${SEED_EXIT:-0}" ;;
 *pg_dump*)
   printf 'DUMP'
   exit "${PGDUMP_EXIT:-0}"
@@ -91,9 +92,10 @@ has() {
 
 stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
-expect 'pull, migrate, up, reload and health run in order on the new tag' logged \
+expect 'pull, migrate, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
+  "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health' \
@@ -137,6 +139,14 @@ unset MIGRATE_EXIT
 expect 'a failed migration leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
 refuse 'a failed migration restarts nothing' grep -q 'up -d' "$LOG"
 expect 'a failed migration releases the lock' test ! -d "$work/host/.deploy.lock"
+
+stage
+SEED_EXIT=1
+export SEED_EXIT
+refuse 'a failed seed fails the deploy' run deploy.sh "$NEW"
+unset SEED_EXIT
+expect 'a failed seed leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed seed restarts nothing' grep -q 'up -d' "$LOG"
 
 stage
 HEALTH_EXIT=22

@@ -713,9 +713,10 @@ carlab.rs.
    server cannot write to the repository.
 3. `deploy.sh`: refuses without `.env` and for anything that is not a 40-character
    sha; pulls the image; runs migrations in a one-off container
-   (`medusa db:migrate --execute-safe-links --all-or-nothing` from `/server`); only
-   after a successful migration does `MEDUSA_TAG` in `.env` change, with the old one
-   going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
+   (`medusa db:migrate --execute-safe-links --all-or-nothing` from `/server`), then
+   the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
+   see below); only after both succeed does `MEDUSA_TAG` in `.env` change, with the
+   old one going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
    `https://api.carlab.rs/health`. It prints stage names and the tag, never a value
    from `.env` (`infra/carlab-shop/test/scripts.test.sh` plants a canary secret and
    fails if any script prints it).
@@ -724,6 +725,18 @@ carlab.rs.
 5. `deploy-brand-site` waits for `deploy-shop` and is held back only if it failed, so
    carlab.rs never prerenders against a backend that failed to ship. approved.rs
    does not wait: it does not read the shop.
+
+The production seed (`apps/carlab-shop/src/scripts/seed-production.ts`) runs on
+every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
+(store, the `CarLab parts shop` sales channel, the Serbia region) and the seven
+Categories carlab.rs's old `/{locale}/parts/{slug}/` pages 301 to, with their
+Russian name and text and the old picture from `apps/carlab-shop/assets/categories`
+(the image copies that directory to `/server/assets`). Serbian and English come
+from the admin's Publish chain like any other catalogue text. A Category a person
+has edited (`updated_by` set) is never touched again; an unedited one gets its
+seeded name, text and missing image back. It seeds no Parts, suppliers or offers:
+the manual supplier is created on the first hand-entered offer, and the demo data
+lives in `seed.ts` / `seed-demo.ts`, which never run in production.
 
 `scope` treats `apps/carlab-shop` like any other app, plus one rule: a change under
 `infra/carlab-shop/` redeploys it, because turbo cannot see files outside the
@@ -865,11 +878,25 @@ Check with `curl -k https://localhost:8443/health`.
    `https://api.carlab.rs/health` answers 200.
 7. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in
-   at `https://api.carlab.rs/app`, and issue the publishable key carlab.rs uses.
-   Done: signing in works and the key is in the carlab.rs Vercel project.
-8. **Acceptance.** `docker stats --no-stream` under light load stays within the
-   memory limits; a manual `ssh deploy@<IPv4> /srv/carlab/backup.sh` works; the next
-   morning `/var/log/carlab-backup.log` shows the cron ran.
+   at `https://api.carlab.rs/app`, and in Settings → Publishable API Keys create the
+   key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
+   production seed created the channel).
+   Done: signing in works, and the seven seeded Categories are in the admin.
+8. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
+   `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
+   closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
+   [`.env`](#env); `docker compose up -d medusa` after editing.
+   Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
+9. **carlab.rs on Vercel.** In the carlab.rs project (Production):
+   `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
+   from step 7, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
+   in the admin so the Categories get their Serbian and English text and carlab.rs
+   rebuilds against the catalogue.
+   Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
+   answers 200 with the Category's text and picture.
+10. **Acceptance.** `docker stats --no-stream` under light load stays within the
+    memory limits; a manual `ssh deploy@<IPv4> /srv/carlab/backup.sh` works; the next
+    morning `/var/log/carlab-backup.log` shows the cron ran.
 
 ---
 

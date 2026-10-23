@@ -21,12 +21,12 @@ import {
 } from '@medusajs/medusa/core-flows';
 
 import { seedCashAtPickupCommerceDefaults } from '../lib/commerce-defaults';
+import { CATEGORIES } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
-import { CATEGORIES } from './seed';
 import { seedDemoImages } from './seed-demo-images';
 
 const DEMO_ADMIN = { email: 'admin@carlab.local', password: 'carlab-demo' };

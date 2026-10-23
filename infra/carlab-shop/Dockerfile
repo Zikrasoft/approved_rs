@@ -25,6 +25,7 @@ ENV NODE_ENV=production MEDUSA_DISABLE_TELEMETRY=1 PORT=9000
 
 COPY --from=builder --chown=node:node /prod/node_modules ./node_modules
 COPY --from=builder --chown=node:node /repo/apps/carlab-shop/.medusa/server ./
+COPY --from=builder --chown=node:node /repo/apps/carlab-shop/assets ./assets
 
 RUN node -e "require('typesense'); require('zod')" \
   && ! node -e "require.resolve('ts-node')" 2>/dev/null \
