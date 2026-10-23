@@ -31,6 +31,7 @@ export type ManualOffer = z.infer<typeof manualOfferSchema>;
 
 async function manualSupplierId(
   suppliers: SupplierModuleService,
+  actorId: string,
 ): Promise<string> {
   const [existing] = await suppliers.listSuppliers({ name: MANUAL_SUPPLIER });
   if (existing) {
@@ -40,6 +41,8 @@ async function manualSupplierId(
     name: MANUAL_SUPPLIER,
     markup_percentage: MANUAL_MARKUP_PERCENTAGE,
     import_enabled: false,
+    created_by: actorId,
+    updated_by: actorId,
   });
   return created.id;
 }
@@ -53,7 +56,7 @@ export async function saveManualOffer(
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const identifier = await catalog.retrievePartIdentifier(partIdentifierId);
-  const supplierId = await manualSupplierId(suppliers);
+  const supplierId = await manualSupplierId(suppliers, actorId);
   const key = { supplier_id: supplierId, supplier_article_id: identifier.id };
   const fields = {
     ...key,

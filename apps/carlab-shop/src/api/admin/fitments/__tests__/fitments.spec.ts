@@ -131,6 +131,98 @@ medusaIntegrationTestRunner({
         });
       });
 
+      describe('a Fitment that contradicts a Requirement', () => {
+        const batteryOn = async (tag: string) => {
+          const category = await catalog.createCategories({
+            slug: `batteries-${tag.toLowerCase()}`,
+            name: `Аккумуляторы ${tag}`,
+          });
+          const field = await catalog.createCategoryFields({
+            category_id: category.id,
+            key: 'capacity',
+            type: 'number',
+            label: 'Емкость',
+            unit: 'А·ч',
+          });
+          const part = await catalog.createParts({
+            name: 'Аккумулятор 70 А·ч',
+            category_id: category.id,
+            attributes: { capacity: 70 },
+          });
+          const { vehicle } = await createVehicleFixture(catalog, {
+            typeCode: `${tag}-1`,
+            modelSlug: `${tag.toLowerCase()}-f30-320d`,
+            chassisCode: `${tag}-F30`,
+            engineCode: `${tag}-B47D20O0`,
+            engineFamily: `${tag}-B47`,
+          });
+          await catalog.createRequirements({
+            field_id: field.id,
+            engine_id: vehicle.engine_id,
+            min: 80,
+          });
+          return { part, vehicle };
+        };
+
+        const attach = (path: string, body: Record<string, unknown>) =>
+          api.post(path, body, adminHeaders).catch((error) => error.response);
+
+        it('refuses it with the conflicting field and the cars, and saves it once confirmed', async () => {
+          const { part, vehicle } = await batteryOn('REQ');
+
+          const refused = await attach('/admin/fitments', {
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+          });
+
+          expect(refused.status).toBe(409);
+          expect(refused.data).toMatchObject({
+            code: 'REQUIREMENT_CONFLICT',
+            conflicts: [
+              {
+                field_key: 'capacity',
+                field: 'Емкость',
+                unit: 'А·ч',
+                value: '70',
+                min: 80,
+                max: null,
+                vehicles: [expect.stringContaining('REQ-B47D20O0')],
+              },
+            ],
+          });
+          expect(await catalog.listFitments({ part_id: part.id })).toEqual([]);
+
+          const confirmed = await attach('/admin/fitments', {
+            part_id: part.id,
+            vehicle_id: vehicle.id,
+            confirm_conflicts: true,
+          });
+
+          expect(confirmed.status).toBe(200);
+        });
+
+        it('refuses a bulk attach the same way', async () => {
+          const { part } = await batteryOn('BULKREQ');
+
+          const refused = await attach('/admin/fitments/bulk', {
+            part_id: part.id,
+            engine_family: 'BULKREQ-B47',
+          });
+
+          expect(refused.status).toBe(409);
+          expect(refused.data.code).toBe('REQUIREMENT_CONFLICT');
+          expect(
+            (
+              await attach('/admin/fitments/bulk', {
+                part_id: part.id,
+                engine_family: 'BULKREQ-B47',
+                confirm_conflicts: true,
+              })
+            ).data,
+          ).toEqual({ matched: 1, created: 1 });
+        });
+      });
+
       describe('Fitment conditions', () => {
         it('stores quantity, position and a note', async () => {
           const { part, vehicle } = await createPartAndVehicle('B47-PADS');

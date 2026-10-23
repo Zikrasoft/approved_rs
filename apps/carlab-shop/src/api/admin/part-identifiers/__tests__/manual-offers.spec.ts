@@ -144,6 +144,14 @@ medusaIntegrationTestRunner({
         expect(await storeOffers()).toEqual([
           expect.objectContaining({ price: 12000, stock_quantity: 3 }),
         ]);
+        const { data } = await api.get('/admin/suppliers', adminHeaders);
+        expect(
+          data.suppliers.find(
+            ({ name }: { name: string }) => name === 'manual',
+          ),
+        ).toMatchObject({
+          updated_by_user: { email: 'manager@manual-offers.local' },
+        });
       });
 
       it('edits the one manual offer of a number instead of adding another', async () => {
