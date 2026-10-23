@@ -60,6 +60,7 @@
       ]
     },
     "@podbor/carlab-shop#test": {
+      "dependsOn": ["^build"],
       "env": [
         "DATABASE_*",
         "JWT_SECRET",
