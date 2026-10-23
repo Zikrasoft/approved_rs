@@ -237,16 +237,17 @@ secrets, they are publicly visible in any request from the site, and spreading
 them across three Vercel dashboards would create a third place to get them
 wrong.
 
-| Site        | GA4 Measurement ID | Meta Pixel          | Google Ads       |
-| ----------- | ------------------ | ------------------- | ---------------- |
-| approved.rs | `G-KRZTP1VX7D`     | —                   | —                |
-| carlab.rs   | `G-DNDDCQWYRR`     | `29229430643330595` | `AW-18508613563` |
-| details.rs  | `G-XH3F0PZNCC`     | —                   | —                |
+| Site        | GA4 Measurement ID | Metrika     | Meta Pixel          | Google Ads       |
+| ----------- | ------------------ | ----------- | ------------------- | ---------------- |
+| approved.rs | `G-KRZTP1VX7D`     | `111800377` | —                   | —                |
+| carlab.rs   | `G-DNDDCQWYRR`     | `112647692` | `29229430643330595` | `AW-18508613563` |
+| details.rs  | `G-XH3F0PZNCC`     | `112647721` | —                   | —                |
 
 Each domain has its own GA4 property, under the "Zikrasoft" Analytics account;
-reusing another's is not allowed. Yandex Metrika was removed from all three —
-see [ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md) for
-why, superseding [ADR-0012](../adr/0012-yandex-metrica-only-starting-before-consent.md).
+reusing another's is not allowed. Yandex Metrika runs beside GA4 on all three,
+one counter per domain, under the same gate
+([ADR-0044](../adr/0044-yandex-metrika-beside-ga4.md), amending
+[ADR-0033](../adr/0033-google-analytics-instead-of-yandex-metrica.md)).
 
 All three behave the same way: `gtag('config', …)` is queued on the first page
 load, and `gtag/js` itself is fetched after `load`, while the browser is idle —
@@ -254,9 +255,9 @@ it is off the critical path, but not one pageview is lost because of it. On
 carlab.rs, the same already-installed gtag.js (loaded for the `AW-18508613563`
 Google Ads tag) also carries the GA4 config — no second script. An explicit
 refusal in the banner takes effect from the next load — there is no way to
-unload a tag that has already started. **GA4 has no equivalent to Metrika's
-`webvisor` session recording** — that capability was dropped, not replaced; see
-the open issue tracking a Microsoft Clarity add-on.
+unload a tag that has already started. Metrika's `webvisor` session recording
+is on; the lead and checkout forms carry `METRIKA_MASK_CLASS` so
+their contents stay out of it.
 
 **If you change a measurement id, or enable analytics somewhere it was
 absent**, three things travel with it: the Russian `privacy` section in

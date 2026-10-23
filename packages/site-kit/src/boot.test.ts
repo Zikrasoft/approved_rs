@@ -27,6 +27,7 @@ describe('bootSiteKit', () => {
   it('arms every part once, in order', async () => {
     const { defineAnalytics } = await import('./analytics.ts');
     (await boot())({
+      ymCounterId: 42,
       gaMeasurementId: 'G-42',
       metaPixelId: '7',
       googleAdsId: 'AW-1',
@@ -42,6 +43,7 @@ describe('bootSiteKit', () => {
       'funnel',
     ]);
     expect(defineAnalytics).toHaveBeenCalledWith({
+      ymCounterId: 42,
       gaMeasurementId: 'G-42',
       metaPixelId: '7',
       googleAdsId: 'AW-1',

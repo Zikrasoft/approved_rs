@@ -4,7 +4,7 @@ status: accepted
 
 # Google Analytics instead of Yandex Metrika
 
-Decided 2026-10-14. Supersedes [ADR-0012](0012-yandex-metrica-only-starting-before-consent.md).
+Decided 2026-10-14. Supersedes [ADR-0012](0012-yandex-metrica-only-starting-before-consent.md). Amended by [ADR-0044](0044-yandex-metrika-beside-ga4.md): Metrika is back beside GA4.
 
 Yandex Metrika is removed from all three sites and replaced with GA4. The driver is consolidation into the Google ecosystem: carlab.rs already runs Google Ads (`AW-18508613563`, live campaigns), and GA4 is what lets that account see conversions and build remarketing audiences from the site — Metrika never could. All three GA4 properties live under one new Analytics account ("Zikrasoft"), and the carlab.rs property is linked to the existing Ads account.
 

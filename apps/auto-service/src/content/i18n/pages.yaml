@@ -92,7 +92,7 @@ privacy:
     - title: Сколько мы их храним
       text: До трёх лет с момента последнего визита — сервисная история помогает при следующем ремонте. По вашему запросу удалим раньше.
     - title: Куки
-      text: Сайт ставит техническую куку с выбранным языком, аналитическую — Google Analytics — и рекламную — пиксель Meta. Аналитика и пиксель запускаются при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки они не включаются. Пиксель сообщает Meta о просмотре страницы и о том, что вы отправили заявку, написали нам или оформили заказ, — так мы видим, какая реклама в Facebook и Instagram приводит клиентов. Содержимое формы ему не передаётся. Если после сайта вы продолжите в нашем Telegram-боте и оставите там заявку, наш сервер сообщит Meta только сам факт заявки — без её содержания и без ваших контактов. Корзина и анонимный идентификатор хранятся в памяти браузера (localStorage) и на наш сервер сами по себе не уходят.
+      text: Сайт ставит техническую куку с выбранным языком, аналитические — Google Analytics и Яндекс.Метрику — и рекламную — пиксель Meta. Аналитика и пиксель запускаются при первой загрузке страницы; в баннере внизу экрана можно отказаться, и тогда со следующей загрузки они не включаются. Яндекс.Метрика записывает сессии (движение курсора, прокрутку и клики). Форму заявки мы из записи исключили, ее содержимое туда не попадает. Пиксель сообщает Meta о просмотре страницы и о том, что вы отправили заявку, написали нам или оформили заказ, — так мы видим, какая реклама в Facebook и Instagram приводит клиентов. Содержимое формы ему не передаётся. Если после сайта вы продолжите в нашем Telegram-боте и оставите там заявку, наш сервер сообщит Meta только сам факт заявки — без её содержания и без ваших контактов. Корзина и анонимный идентификатор хранятся в памяти браузера (localStorage) и на наш сервер сами по себе не уходят.
     - title: Ваши права
       text: Вы можете запросить копию своих данных, их исправление или удаление. Достаточно позвонить или написать нам в любой мессенджер.
   contactTitle: Вопросы по данным
@@ -194,7 +194,7 @@ translations:
         - title: Koliko ih čuvamo
           text: Do tri godine od poslednjeg dolaska — istorija servisa pomaže prilikom sledeće popravke. Na vaš zahtev možemo ih obrisati ranije.
         - title: Kolačići
-          text: Sajt postavlja tehnički kolačić sa odabranim jezikom, analitički — Google Analytics — i reklamni — Meta piksel. Analitika i piksel se aktiviraju prilikom prvog učitavanja stranice; u baneru na dnu ekrana možete se odjaviti, i tada se prilikom sledećeg učitavanja ne uključuju. Piksel obaveštava Meta o pregledu stranice i o tome da ste poslali zahtev, pisali nam ili izvršili porudžbinu — tako vidimo koja reklama na Facebook-u i Instagram-u dovodi klijente. Sadržaj forme mu se ne prenosi. Ako nakon sajta nastavite sa našim Telegram botom i ostavite zahtev, naš server će javiti Meta samo sam čin podnošenja zahteva — bez sadržaja i bez vaših kontakata. Korpa i anonimni identifikator čuvaju se u memoriji pretraživača (localStorage) i sami ne odlaze na naš server.
+          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitičke — Google Analytics i Yandex.Metrica — i reklamni — Meta piksel. Analitika i piksel se aktiviraju pri prvom učitavanju stranice; u baneru na dnu ekrana možete odbiti, i tada se pri sledećem učitavanju ne uključuju. Yandex.Metrica beleži sesije (pokret kursora, skrolovanje i klikove). Formu zahteva smo iz beleženja isključili, njen sadržaj ne ulazi u to. Piksel obaveštava Meta o pregledu stranice i o tome da ste poslali zahtev, napisali nam ili izvršili narudžbinu — tako mi vidimo koja reklama na Facebook-u i Instagram-u privlači klijente. Sadržaj forme se njemu ne prenosi. Ako nakon sajta nastavite u našem Telegram botu i ostavite tamo zahtev, naš server obaveštava Meta samo o samom faktu zahteva — bez njegovog sadržaja i bez vaših kontakata. Korpa i anonimni identifikator se čuvaju u memoriji pretraživača (localStorage) i ne odlaze sami na naš server.
         - title: Vaša prava
           text: Možete zatražiti kopiju svojih podataka, njihovo ispravljanje ili brisanje. Dovoljno je da nas pozovete ili pišete u bilo koju aplikaciju.
       contactTitle: Pitanja o podacima
@@ -331,7 +331,7 @@ translations:
         - title: How Long We Store It
           text: Up to three years from the last visit - service history helps with future repairs. We will delete it sooner upon your request.
         - title: Cookies
-          text: The site sets a technical cookie with the selected language, an analytical cookie for Google Analytics, and an advertising one - a Meta pixel. Analytics and pixel activate on the first page load; you can refuse in the banner at the bottom of the screen, and from the next load, they won’t be enabled. The pixel notifies Meta of page views and whether you submitted an application, messaged us, or placed an order - this way we see which ads on Facebook and Instagram bring in clients. The contents of the form are not sent to it. If you continue to our Telegram bot after the site and leave an application there, our server will only inform Meta of the fact of the application - without its content or your contact details. The cart and the anonymous identifier are stored in the browser's memory (localStorage) and do not leave to our server alone.
+          text: The site uses a technical cookie for the selected language, analytical cookies — Google Analytics and Yandex.Metrica — and an advertising cookie — the Meta pixel. The analytics and pixel are activated upon the first page load; you can opt out using the banner at the bottom of the screen, and they will not be enabled on subsequent loads. Yandex.Metrica records sessions (cursor movements, scrolling, and clicks). We have excluded the application form from the record, so its contents are not captured. The pixel notifies Meta about page views and that you submitted an application, messaged us, or placed an order, allowing us to see which ads on Facebook and Instagram drive clients. The contents of the form are not transmitted to it. If you proceed in our Telegram bot after visiting the site and leave an application there, our server will only inform Meta of the application itself — without its contents or your contact details. The cart and anonymous identifier are stored in the browser's memory (localStorage) and do not leave our server by themselves.
         - title: Your Rights
           text: You can request a copy of your data, its correction, or deletion. Just call or message us on any messenger.
       contactTitle: Questions About Data
@@ -406,7 +406,7 @@ translations:
         - 'Coding and adaptations after repairs: your car won’t show errors on the dashboard'
       worksHeading: What We’ve Done with BMW
       ctaEyebrow: BMW
-      ctaHeading: Describe What’s Wrong with Your Car
-      ctaBody: 'Model, year, engine, and concerns: we’ll give a preliminary idea of where to start and the cost of diagnostics.'
-      ctaCommentPlaceholder: Model, year, and what concerns you
-translatedFrom: '06e1750240623853'
+      ctaHeading: Describe the Issue with Your Car
+      ctaBody: 'Model, year, engine, and any concerns: we will provide preliminary guidance on where to start and the estimated diagnostics cost.'
+      ctaCommentPlaceholder: Model, year, and concerns
+translatedFrom: 921390ef2697b66d

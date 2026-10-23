@@ -194,9 +194,11 @@ const businessSchema = localBusinessSchema({
         GOOGLE_ADS_ID,
         GOOGLE_CONVERSION_LABELS,
         META_PIXEL_ID,
+        YM_COUNTER_ID,
       } from '@/utils/analytics';
 
       bootSiteKit({
+        ymCounterId: YM_COUNTER_ID,
         gaMeasurementId: GA_MEASUREMENT_ID,
         metaPixelId: META_PIXEL_ID,
         googleAdsId: GOOGLE_ADS_ID,

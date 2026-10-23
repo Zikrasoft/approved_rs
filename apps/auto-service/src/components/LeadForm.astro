@@ -1,4 +1,5 @@
 ---
+import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import { localeFrom } from '@/i18n/config';
 import Icon from './Icon.astro';
 import LeadFormHidden from './LeadFormHidden.astro';
@@ -48,7 +49,7 @@ const uid = crypto.randomUUID().slice(0, 8);
     action={action}
     data-lead-form
     data-submitting-label={site.form.submitting}
-    class={`flex flex-col gap-4 ${className}`}
+    class={`${METRIKA_MASK_CLASS} flex flex-col gap-4 ${className}`}
   >
     <LeadFormHidden />
 
