@@ -26,6 +26,7 @@ export const ADMIN_ERROR_CODES = [
   'MANUAL_SOURCE',
   'INVALID_IMAGE',
   'IMAGE_TOO_LARGE',
+  'REQUIREMENT_CONFLICT',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];

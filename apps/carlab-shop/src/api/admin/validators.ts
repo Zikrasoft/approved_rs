@@ -156,6 +156,7 @@ export const AdminCreateFitment = z
   .strictObject({
     part_id: z.string().min(1),
     vehicle_id: z.string().min(1),
+    confirm_conflicts: z.boolean().optional(),
     ...fitmentConditions,
   })
   .refine(inOrder, ENDS_BEFORE_IT_STARTS);
@@ -216,7 +217,11 @@ const YEARS_OUT_OF_ORDER = {
 };
 
 export const AdminBulkAttachFitments = z
-  .strictObject({ ...vehicleFilter, ...fitmentConditions })
+  .strictObject({
+    ...vehicleFilter,
+    ...fitmentConditions,
+    confirm_conflicts: z.boolean().optional(),
+  })
   .refine(hasVehicleFilter, PICK_A_FILTER)
   .refine(yearsInOrder, YEARS_OUT_OF_ORDER)
   .refine(inOrder, ENDS_BEFORE_IT_STARTS);

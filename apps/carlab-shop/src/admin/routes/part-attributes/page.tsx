@@ -211,7 +211,7 @@ const ValueInput = ({
 
 const PartAttributesPage = () => {
   const writing = useWriting();
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const [categories, setCategories] = useState<Category[]>([]);
   const [query, setQuery] = useState('');
   const [parts, setParts] = useState<Part[]>([]);
@@ -486,6 +486,13 @@ const PartAttributesPage = () => {
                   value={values[field.key]}
                   onChange={(value) => setValue(field.key, value)}
                 />
+                {i18n.exists(`partAttributes.hints.${field.key}`, {
+                  ns: 'carlabAdmin',
+                }) && (
+                  <Text size="xsmall" className="text-ui-fg-subtle">
+                    {t(`partAttributes.hints.${field.key}`)}
+                  </Text>
+                )}
               </div>
             );
           })}

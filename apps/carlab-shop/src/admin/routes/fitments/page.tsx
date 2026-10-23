@@ -1,6 +1,7 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { Link as LinkIcon } from '@medusajs/icons';
 import {
+  Alert,
   Badge,
   Button,
   Container,
@@ -21,12 +22,14 @@ import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
 import { PartEnrichment } from '../../components/enrichment';
+import { PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
   adminFetch,
   editedBySchema,
+  type RequirementConflict,
   useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
@@ -220,6 +223,85 @@ const OptionSelect = ({
   </Select>
 );
 
+const SHOWN_VEHICLES = 5;
+
+const ConflictsAlert = ({
+  conflicts,
+  disabled,
+  onConfirm,
+  onCancel,
+}: {
+  conflicts: RequirementConflict[];
+  disabled: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  const { t } = useTranslation('carlabAdmin');
+  const unit = (conflict: RequirementConflict) =>
+    conflict.unit ? ` ${conflict.unit}` : '';
+  const wanted = (conflict: RequirementConflict) =>
+    conflict.options
+      ? conflict.options.join(', ')
+      : t(
+          `requirements.range.${
+            conflict.min !== null && conflict.max !== null
+              ? 'between'
+              : conflict.min !== null
+                ? 'since'
+                : 'until'
+          }`,
+          { min: conflict.min, max: conflict.max, unit: conflict.unit ?? '' },
+        ).trim();
+  const vehicles = ({ vehicles: all }: RequirementConflict) =>
+    all.length > SHOWN_VEHICLES
+      ? t('fitments.conflicts.moreVehicles', {
+          vehicles: all.slice(0, SHOWN_VEHICLES).join('; '),
+          count: all.length - SHOWN_VEHICLES,
+        })
+      : all.join('; ');
+  return (
+    <Alert variant="warning">
+      <div className="flex flex-col gap-y-3">
+        <div className="flex flex-col gap-y-1">
+          <Text size="small" weight="plus">
+            {t('fitments.conflicts.title')}
+          </Text>
+          <ul className="flex list-disc flex-col gap-y-1 pl-4">
+            {conflicts.map((conflict) => (
+              <li key={`${conflict.field_key}-${wanted(conflict)}`}>
+                <Text size="small">
+                  {t('fitments.conflicts.line', {
+                    field: conflict.field,
+                    value: `${conflict.value}${unit(conflict)}`,
+                    wanted: wanted(conflict),
+                    vehicles: vehicles(conflict),
+                  })}
+                </Text>
+              </li>
+            ))}
+          </ul>
+          <Text size="small" className="text-ui-fg-subtle">
+            {t('fitments.conflicts.why')}
+          </Text>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="small" variant="secondary" onClick={onCancel}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            size="small"
+            variant="danger"
+            disabled={disabled}
+            onClick={onConfirm}
+          >
+            {t('fitments.conflicts.confirm')}
+          </Button>
+        </div>
+      </div>
+    </Alert>
+  );
+};
+
 const FitmentsPage = () => {
   const writing = useWriting();
   const { t, i18n } = useTranslation('carlabAdmin');
@@ -243,6 +325,7 @@ const FitmentsPage = () => {
 
   const [conditions, setConditions] = useState<Conditions>(EMPTY_CONDITIONS);
   const [editing, setEditing] = useState<Fitment | null>(null);
+  const [conflicts, setConflicts] = useState<RequirementConflict[]>([]);
 
   const [fitments, setFitments] = useState<Fitment[]>([]);
 
@@ -289,6 +372,7 @@ const FitmentsPage = () => {
     setNewValue('');
     setEditing(null);
     setConditions(EMPTY_CONDITIONS);
+    setConflicts([]);
     if (selectedPart) {
       loadFitments(selectedPart.id);
     } else {
@@ -446,8 +530,10 @@ const FitmentsPage = () => {
     }
   };
 
-  const setFilter = (key: string) => (value: string) =>
+  const setFilter = (key: string) => (value: string) => {
+    setConflicts([]);
     setFilters((current) => ({ ...current, [key]: value }));
+  };
 
   const hasFilter = Object.values(filters).some((value) => value.trim());
 
@@ -467,14 +553,25 @@ const FitmentsPage = () => {
     year_to: year(filters.year_to),
   });
 
-  const attach = async () => {
+  const attach = async (confirmConflicts = false) => {
     if (!selectedPart || !hasFilter) {
       return;
     }
-    const result = await adminFetch('/admin/fitments/bulk', bulkSchema, {
-      method: 'POST',
-      body: JSON.stringify({ ...filterBody(), ...conditionsBody(conditions) }),
-    });
+    setConflicts([]);
+    const result = await adminFetch(
+      '/admin/fitments/bulk',
+      bulkSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          ...filterBody(),
+          ...conditionsBody(conditions),
+          ...(confirmConflicts && { confirm_conflicts: true }),
+        }),
+      },
+      undefined,
+      setConflicts,
+    );
     if (result) {
       toast.success(
         t('fitments.attached', {
@@ -611,40 +708,47 @@ const FitmentsPage = () => {
     );
 
   const identifierFields = (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
-      <Select value={newType} onValueChange={setNewType}>
-        <Select.Trigger aria-label={t('fitments.identifierTypePlaceholder')}>
-          <Select.Value placeholder={t('fitments.identifierTypePlaceholder')} />
-        </Select.Trigger>
-        <Select.Content>
-          {IDENTIFIER_TYPES.map((type) => (
-            <Select.Item key={type} value={type}>
-              {t(`fitments.identifierTypes.${type}`)}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select>
-      <Select value={newBrandId} onValueChange={setNewBrandId}>
-        <Select.Trigger aria-label={t('fitments.brandPlaceholder')}>
-          <Select.Value placeholder={t('fitments.brandPlaceholder')} />
-        </Select.Trigger>
-        <Select.Content>
-          {brands.map((brand) => (
-            <Select.Item key={brand.id} value={brand.id}>
-              {brand.name}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select>
-      <div className="sm:col-span-2">
-        <Input
-          aria-label={t('fitments.numberPlaceholder')}
-          placeholder={t('fitments.numberPlaceholder')}
-          maxLength={50}
-          value={newValue}
-          onChange={(event) => setNewValue(event.target.value)}
-        />
+    <div className="flex flex-col gap-y-1">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+        <Select value={newType} onValueChange={setNewType}>
+          <Select.Trigger aria-label={t('fitments.identifierTypePlaceholder')}>
+            <Select.Value
+              placeholder={t('fitments.identifierTypePlaceholder')}
+            />
+          </Select.Trigger>
+          <Select.Content>
+            {IDENTIFIER_TYPES.map((type) => (
+              <Select.Item key={type} value={type}>
+                {t(`fitments.identifierTypes.${type}`)}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
+        <Select value={newBrandId} onValueChange={setNewBrandId}>
+          <Select.Trigger aria-label={t('fitments.brandPlaceholder')}>
+            <Select.Value placeholder={t('fitments.brandPlaceholder')} />
+          </Select.Trigger>
+          <Select.Content>
+            {brands.map((brand) => (
+              <Select.Item key={brand.id} value={brand.id}>
+                {brand.name}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
+        <div className="sm:col-span-2">
+          <Input
+            aria-label={t('fitments.numberPlaceholder')}
+            placeholder={t('fitments.numberPlaceholder')}
+            maxLength={50}
+            value={newValue}
+            onChange={(event) => setNewValue(event.target.value)}
+          />
+        </div>
       </div>
+      <Text size="xsmall" className="text-ui-fg-subtle">
+        {t('fitments.identifierTypeHint')}
+      </Text>
     </div>
   );
 
@@ -762,8 +866,8 @@ const FitmentsPage = () => {
               </Button>
             </div>
             {parts.length > 0 && (
-              <ScrollArea>
-                <Table>
+              <ScrollArea pinnedEnd>
+                <Table className={PINNED_ACTIONS}>
                   <Table.Body>
                     {parts.map((part) => (
                       <Table.Row key={part.id}>
@@ -1002,20 +1106,30 @@ const FitmentsPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={attach}
-              disabled={!selectedPart || !hasFilter || !quantityOk || writing}
-            >
-              {t('fitments.createFitment')}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={detach}
-              disabled={!selectedPart || !hasFilter || writing}
-            >
-              {t('fitments.detach')}
-            </Button>
+          <div className="flex flex-col gap-y-3">
+            {conflicts.length > 0 && (
+              <ConflictsAlert
+                conflicts={conflicts}
+                disabled={writing}
+                onConfirm={() => attach(true)}
+                onCancel={() => setConflicts([])}
+              />
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => attach()}
+                disabled={!selectedPart || !hasFilter || !quantityOk || writing}
+              >
+                {t('fitments.createFitment')}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={detach}
+                disabled={!selectedPart || !hasFilter || writing}
+              >
+                {t('fitments.detach')}
+              </Button>
+            </div>
           </div>
         )}
       </section>
@@ -1023,8 +1137,8 @@ const FitmentsPage = () => {
       {fitments.length > 0 && (
         <section className="flex flex-col gap-y-2">
           <Heading level="h2">{t('fitments.existingRows')}</Heading>
-          <ScrollArea>
-            <Table>
+          <ScrollArea pinnedEnd>
+            <Table className={PINNED_ACTIONS}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>

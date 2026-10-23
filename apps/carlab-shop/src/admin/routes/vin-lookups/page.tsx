@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { acknowledged, adminFetch, useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
@@ -24,7 +25,7 @@ const VinLookupsPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const writing = useWriting();
-  const [codes, setCodes] = useState<UnresolvedCode[]>([]);
+  const [codes, setCodes] = useState<UnresolvedCode[] | null>(null);
 
   const load = () =>
     adminFetch('/admin/vin-lookups/unresolved', codesSchema).then((data) => {
@@ -58,11 +59,13 @@ const VinLookupsPage = () => {
     <Container className="flex flex-col gap-y-4">
       <Heading level="h1">{t('vinLookups.heading')}</Heading>
       <Text className="text-ui-fg-subtle">{t('vinLookups.lead')}</Text>
-      {codes.length === 0 ? (
+      {codes === null ? (
+        <ListLoading />
+      ) : codes.length === 0 ? (
         <Text>{t('vinLookups.empty')}</Text>
       ) : (
-        <ScrollArea>
-          <Table>
+        <ScrollArea pinnedEnd>
+          <Table className={PINNED_ACTIONS}>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>

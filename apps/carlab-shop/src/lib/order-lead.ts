@@ -38,6 +38,7 @@ export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
 export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
 export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
 export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
+export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
 
 const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 
@@ -193,7 +194,7 @@ export async function sendOrderLead(
   }
 }
 
-async function readLeadOrder(
+export async function readLeadOrder(
   container: MedusaContainer,
   id: string,
 ): Promise<LeadOrder> {
@@ -283,6 +284,10 @@ export async function handOrderToLeadRoute(
     );
     if (!alerted) {
       logger.error(`Order ${id} gave up on the lead pipeline, nobody alerted`);
+      return;
     }
+    await recordHandOff(container, id, () => ({
+      [LEAD_OWNER_ALERTED_AT]: new Date().toISOString(),
+    }));
   }
 }

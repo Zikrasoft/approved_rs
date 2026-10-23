@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
+import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import {
   acknowledged,
@@ -56,7 +57,7 @@ const BrandsPage = () => {
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
 
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brands, setBrands] = useState<Brand[] | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -184,11 +185,13 @@ const BrandsPage = () => {
         </Text>
       </div>
 
-      {brands.length === 0 ? (
+      {brands === null ? (
+        <ListLoading />
+      ) : brands.length === 0 ? (
         <Text>{t('brands.empty')}</Text>
       ) : (
-        <ScrollArea>
-          <Table>
+        <ScrollArea pinnedEnd>
+          <Table className={PINNED_ACTIONS}>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>{t('brands.columns.name')}</Table.HeaderCell>

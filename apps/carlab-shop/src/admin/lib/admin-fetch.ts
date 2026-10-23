@@ -3,6 +3,21 @@ import { useSyncExternalStore } from 'react';
 import { getI18n } from 'react-i18next';
 import { z } from 'zod';
 
+export const requirementConflictSchema = z.object({
+  field_key: z.string(),
+  field: z.string(),
+  unit: z.string().nullable(),
+  value: z.string(),
+  options: z.array(z.string()).nullable(),
+  min: z.number().nullable(),
+  max: z.number().nullable(),
+  vehicles: z.array(z.string()),
+});
+
+export type RequirementConflict = z.infer<typeof requirementConflictSchema>;
+
+export type ConflictHandler = (conflicts: RequirementConflict[]) => void;
+
 const errorBodySchema = z.object({
   code: z.string().optional(),
   type: z.string().optional(),
@@ -19,6 +34,7 @@ const errorBodySchema = z.object({
       ]),
     )
     .optional(),
+  conflicts: z.array(requirementConflictSchema).optional(),
 });
 
 type ErrorBody = z.infer<typeof errorBodySchema>;
@@ -92,14 +108,19 @@ const detailedMessage = ({
 
 const readError = async (
   response: Response,
-): Promise<{ field?: string; message: string }> => {
+): Promise<{
+  field?: string;
+  message: string;
+  conflicts?: RequirementConflict[];
+}> => {
   const body = errorBodySchema.safeParse(
     await response.json().catch(() => null),
   );
   const details: ErrorBody = body.success ? body.data : {};
-  const { code, type, field } = details;
+  const { code, type, field, conflicts } = details;
   return {
     field,
+    conflicts,
     message:
       detailedMessage(details) ||
       (code && translate(`errors.codes.${code}`)) ||
@@ -147,6 +168,7 @@ export const adminFetch = async <T>(
   schema: z.ZodType<T>,
   init?: RequestInit,
   onFieldError?: FieldErrorHandler,
+  onConflicts?: ConflictHandler,
 ): Promise<T | null> => {
   const method = init?.method ?? 'GET';
   if (method === 'GET') {
@@ -158,7 +180,7 @@ export const adminFetch = async <T>(
   }
   setPending(key, true);
   try {
-    return await request(path, schema, init, onFieldError);
+    return await request(path, schema, init, onFieldError, onConflicts);
   } finally {
     setPending(key, false);
   }
@@ -169,6 +191,7 @@ const request = async <T>(
   schema: z.ZodType<T>,
   init?: RequestInit,
   onFieldError?: FieldErrorHandler,
+  onConflicts?: ConflictHandler,
 ): Promise<T | null> => {
   try {
     const response = await fetch(path, {
@@ -182,7 +205,11 @@ const request = async <T>(
       return null;
     }
     if (!response.ok) {
-      const { field, message } = await readError(response);
+      const { field, message, conflicts } = await readError(response);
+      if (conflicts?.length && onConflicts) {
+        onConflicts(conflicts);
+        return null;
+      }
       toast.error(message);
       if (field) onFieldError?.(field, message);
       return null;

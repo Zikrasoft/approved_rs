@@ -110,6 +110,11 @@ medusaIntegrationTestRunner({
         expect(await regions.listRegions({ name: 'Serbia' })).toHaveLength(1);
       });
 
+      it('names the store CarLab instead of the Medusa default', async () => {
+        const stores = await getContainer().resolve(Modules.STORE).listStores();
+        expect(stores.map(({ name }) => name)).toEqual(['CarLab']);
+      });
+
       it('keeps what a person edited and restores what nobody did', async () => {
         const [brakes] = await catalog.listCategories({ slug: 'brakes' });
         const [suspension] = await catalog.listCategories({

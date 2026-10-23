@@ -17,6 +17,8 @@ import { CASH_AT_PICKUP_PROVIDER_ID } from './offer-cart';
 
 const SALES_CHANNEL_NAME = 'CarLab parts shop';
 const REGION_NAME = 'Serbia';
+const STORE_NAME = 'CarLab';
+const MEDUSA_DEFAULT_STORE_NAME = 'Medusa Store';
 const REGION_CURRENCY = SHOP_CURRENCY.toLowerCase();
 
 export async function seedCashAtPickupCommerceDefaults(
@@ -48,7 +50,7 @@ export async function seedCashAtPickupCommerceDefaults(
       input: {
         stores: [
           {
-            name: 'CarLab',
+            name: STORE_NAME,
             default_sales_channel_id: salesChannel.id,
             supported_currencies: [
               { currency_code: REGION_CURRENCY, is_default: true },
@@ -57,11 +59,19 @@ export async function seedCashAtPickupCommerceDefaults(
         ],
       },
     });
-  } else if (existingStore.default_sales_channel_id !== salesChannel.id) {
+  } else if (
+    existingStore.default_sales_channel_id !== salesChannel.id ||
+    existingStore.name === MEDUSA_DEFAULT_STORE_NAME
+  ) {
     await updateStoresWorkflow(container).run({
       input: {
         selector: { id: existingStore.id },
-        update: { default_sales_channel_id: salesChannel.id },
+        update: {
+          default_sales_channel_id: salesChannel.id,
+          ...(existingStore.name === MEDUSA_DEFAULT_STORE_NAME && {
+            name: STORE_NAME,
+          }),
+        },
       },
     });
   }

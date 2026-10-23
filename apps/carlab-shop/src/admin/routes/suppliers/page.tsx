@@ -26,6 +26,8 @@ import {
   LIST_TABLE,
   ListEmpty,
   ListHeader,
+  ListLoading,
+  PINNED_ACTIONS,
   RowActions,
 } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
@@ -44,6 +46,7 @@ const supplierSchema = editedBySchema.extend({
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
   import_enabled: z.boolean(),
+  offer_count: z.number(),
 });
 
 type Supplier = z.infer<typeof supplierSchema>;
@@ -83,6 +86,7 @@ const importsSchema = z.object({
     }),
   ),
 });
+const offersWithdrawnSchema = z.object({ deleted: z.number() });
 const sourceDeletedSchema = z.object({
   deleted: z.number(),
   import_disabled: z.boolean(),
@@ -109,11 +113,15 @@ const SuppliersPage = () => {
   const [categoryId, setCategoryId] = useState('');
   const [sources, setSources] = useState<Source[]>([]);
   const [removingSource, setRemovingSource] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState<Record<string, boolean>>({});
+  const markLoaded = (list: string) =>
+    setLoaded((current) => ({ ...current, [list]: true }));
 
   const load = async () => {
     const data = await adminFetch('/admin/suppliers', suppliersSchema);
     if (data) {
       setSuppliers(data.suppliers);
+      markLoaded('suppliers');
     }
   };
 
@@ -124,6 +132,7 @@ const SuppliersPage = () => {
     );
     if (data) {
       setMappings(data.categories);
+      markLoaded(`mappings-${supplierId}`);
     }
   };
 
@@ -131,6 +140,7 @@ const SuppliersPage = () => {
     const data = await adminFetch('/admin/catalogue-sources', sourcesSchema);
     if (data) {
       setSources(data.sources);
+      markLoaded('sources');
     }
   };
 
@@ -170,7 +180,7 @@ const SuppliersPage = () => {
       });
       toast.success(
         t('suppliers.markupSaved', {
-          supplier: supplier.name,
+          supplier: sourceName(supplier.name),
           markup: markup_percentage.toLocaleString(i18n.language),
         }),
       );
@@ -186,7 +196,7 @@ const SuppliersPage = () => {
         variant: 'confirmation',
         title: t('suppliers.confirmReleaseTitle', {
           kind: kindName,
-          supplier: supplier.name,
+          supplier: sourceName(supplier.name),
         }),
         description: t('suppliers.confirmReleaseBody'),
         confirmText: t('suppliers.confirmRelease'),
@@ -204,7 +214,7 @@ const SuppliersPage = () => {
       toast.success(
         t(releasing ? 'suppliers.released' : 'suppliers.hidden', {
           kind: kindName,
-          supplier: supplier.name,
+          supplier: sourceName(supplier.name),
         }),
       );
     }
@@ -217,7 +227,7 @@ const SuppliersPage = () => {
       !(await prompt({
         variant: 'confirmation',
         title: t(`suppliers.importSwitch.${state}.title`, {
-          supplier: supplier.name,
+          supplier: sourceName(supplier.name),
         }),
         description: t(`suppliers.importSwitch.${state}.body`),
         confirmText: t(`suppliers.importSwitch.${state}.confirm`),
@@ -228,7 +238,9 @@ const SuppliersPage = () => {
     }
     if (await update(supplier.id, { import_enabled: enabling })) {
       toast.success(
-        t(`suppliers.importSwitch.${state}.done`, { supplier: supplier.name }),
+        t(`suppliers.importSwitch.${state}.done`, {
+          supplier: sourceName(supplier.name),
+        }),
       );
     }
   };
@@ -237,7 +249,10 @@ const SuppliersPage = () => {
     summary: z.infer<typeof importsSchema>['imports'][number],
   ) =>
     [
-      t('suppliers.importSummary', summary),
+      t('suppliers.importSummary', {
+        ...summary,
+        supplier: sourceName(summary.supplier),
+      }),
       summary.skipped > 0 &&
         t('suppliers.importSkipped', {
           count: summary.skipped,
@@ -267,8 +282,11 @@ const SuppliersPage = () => {
     if (data) {
       await loadSources();
       const switchedOff = suppliers
-        .filter(({ import_enabled }) => !import_enabled)
-        .map(({ name }) => name);
+        .filter(
+          ({ name, import_enabled }) =>
+            !import_enabled && name !== MANUAL_SOURCE,
+        )
+        .map(({ name }) => sourceName(name));
       toast.success(
         [
           data.imports.length
@@ -282,6 +300,32 @@ const SuppliersPage = () => {
           .filter(Boolean)
           .join('\n'),
       );
+    }
+  };
+
+  const withdrawOffers = async (supplier: Supplier) => {
+    let deleted = 0;
+    const name = sourceName(supplier.name);
+    const withdrawn = await confirmed({
+      title: t('suppliers.withdraw.title', { supplier: name }),
+      description: t('suppliers.withdraw.body', {
+        count: supplier.offer_count,
+      }),
+      confirmText: t('suppliers.withdraw.action'),
+      done: () =>
+        t('suppliers.withdraw.done', { supplier: name, count: deleted }),
+      run: async () => {
+        const data = await adminFetch(
+          `/admin/suppliers/${supplier.id}/offers`,
+          offersWithdrawnSchema,
+          { method: 'DELETE' },
+        );
+        deleted = data?.deleted ?? 0;
+        return data;
+      },
+    });
+    if (withdrawn) {
+      await Promise.all([load(), loadSources()]);
     }
   };
 
@@ -393,9 +437,11 @@ const SuppliersPage = () => {
             </Button>
           }
         />
-        {suppliers.length ? (
-          <ScrollArea>
-            <Table className={LIST_TABLE}>
+        {!loaded.suppliers ? (
+          <ListLoading />
+        ) : suppliers.length ? (
+          <ScrollArea pinnedEnd>
+            <Table className={`${LIST_TABLE} ${PINNED_ACTIONS}`}>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>
@@ -406,12 +452,12 @@ const SuppliersPage = () => {
                   </Table.HeaderCell>
                   <Table.HeaderCell />
                   <Table.HeaderCell>
-                    {t('suppliers.columns.import')}
-                  </Table.HeaderCell>
-                  <Table.HeaderCell>
                     {t('suppliers.columns.released')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('suppliers.columns.import')}
+                  </Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -426,7 +472,7 @@ const SuppliersPage = () => {
                         max={500}
                         step={0.01}
                         aria-label={t('suppliers.markupLabel', {
-                          supplier: supplier.name,
+                          supplier: sourceName(supplier.name),
                         })}
                         value={
                           drafts[supplier.id] ??
@@ -462,47 +508,66 @@ const SuppliersPage = () => {
                     </Table.Cell>
                     <Table.Cell>
                       {supplier.name !== MANUAL_SOURCE && (
-                        <div className="flex items-center gap-x-2">
-                          <Switch
-                            id={`${supplier.id}-import`}
-                            checked={supplier.import_enabled}
-                            disabled={writing}
-                            onCheckedChange={() => toggleImport(supplier)}
-                          />
-                          <Label size="small" htmlFor={`${supplier.id}-import`}>
-                            {t(
-                              supplier.import_enabled
-                                ? 'suppliers.importOn'
-                                : 'suppliers.importOff',
-                            )}
-                          </Label>
+                        <div className="flex flex-col gap-y-1 py-2">
+                          {STAGED_DATA_KINDS.map((kind) => (
+                            <div
+                              key={kind}
+                              className="flex items-center gap-x-2"
+                            >
+                              <Checkbox
+                                id={`${supplier.id}-${kind}`}
+                                checked={supplier.released_kinds.includes(kind)}
+                                disabled={writing}
+                                onCheckedChange={() =>
+                                  toggleRelease(supplier, kind)
+                                }
+                              />
+                              <Label
+                                size="small"
+                                htmlFor={`${supplier.id}-${kind}`}
+                              >
+                                {t(`suppliers.kinds.${kind}`)}
+                              </Label>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </Table.Cell>
                     <Table.Cell>
-                      <div className="flex flex-col gap-y-1 py-2">
-                        {STAGED_DATA_KINDS.map((kind) => (
-                          <div key={kind} className="flex items-center gap-x-2">
-                            <Checkbox
-                              id={`${supplier.id}-${kind}`}
-                              checked={supplier.released_kinds.includes(kind)}
+                      <EditedBy row={supplier} />
+                    </Table.Cell>
+                    <Table.Cell>
+                      {supplier.name !== MANUAL_SOURCE && (
+                        <div className="flex items-center justify-between gap-x-2">
+                          <div className="flex items-center gap-x-2">
+                            <Switch
+                              id={`${supplier.id}-import`}
+                              checked={supplier.import_enabled}
                               disabled={writing}
-                              onCheckedChange={() =>
-                                toggleRelease(supplier, kind)
-                              }
+                              onCheckedChange={() => toggleImport(supplier)}
                             />
                             <Label
                               size="small"
-                              htmlFor={`${supplier.id}-${kind}`}
+                              htmlFor={`${supplier.id}-import`}
+                              className="max-sm:sr-only"
                             >
-                              {t(`suppliers.kinds.${kind}`)}
+                              {t(
+                                supplier.import_enabled
+                                  ? 'suppliers.importOn'
+                                  : 'suppliers.importOff',
+                              )}
                             </Label>
                           </div>
-                        ))}
-                      </div>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <EditedBy row={supplier} />
+                          <RowActions
+                            label={t('common.actionsFor', {
+                              name: sourceName(supplier.name),
+                            })}
+                            disabled={writing}
+                            deleteLabel={t('suppliers.withdraw.action')}
+                            onDelete={() => withdrawOffers(supplier)}
+                          />
+                        </div>
+                      )}
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -541,7 +606,9 @@ const SuppliersPage = () => {
         </ListHeader>
         {mappedSupplierId && (
           <>
-            {mappings.length ? (
+            {!loaded[`mappings-${mappedSupplierId}`] ? (
+              <ListLoading />
+            ) : mappings.length ? (
               <ScrollArea>
                 <Table className={LIST_TABLE}>
                   <Table.Header>
@@ -621,7 +688,9 @@ const SuppliersPage = () => {
 
       <Container className="divide-y overflow-hidden p-0">
         <ListHeader heading={t('sources.heading')} lead={t('sources.lead')} />
-        {sources.length ? (
+        {!loaded.sources ? (
+          <ListLoading />
+        ) : sources.length ? (
           <ScrollArea>
             <Table className={LIST_TABLE}>
               <Table.Header>

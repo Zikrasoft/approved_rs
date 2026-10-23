@@ -27,10 +27,23 @@ export async function GET(
     { order: { name: 'ASC' } },
   );
 
+  const offerCounts = await Promise.all(
+    suppliers.map(async ({ id }) => {
+      const [, count] = await supplier.listAndCountSupplierOffers(
+        { supplier_id: id },
+        { select: ['id'], take: 1 },
+      );
+      return count;
+    }),
+  );
+
   res.json({
     suppliers: await withEditors(
       req.scope,
-      z.array(supplierSchema).parse(suppliers),
+      z
+        .array(supplierSchema)
+        .parse(suppliers)
+        .map((row, index) => ({ ...row, offer_count: offerCounts[index] })),
     ),
   });
 }
