@@ -437,6 +437,8 @@ const showOnly = (root: ParentNode, attribute: string, value: string) => {
   }
 };
 
+const OFFERS_TIMEOUT_MS = 8000;
+
 export function definePartOffers(tagName = 'part-offers'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
@@ -463,10 +465,13 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       async refresh(): Promise<void> {
+        this.setAttribute('aria-busy', 'true');
         const outcome = await getJson(
           offersOutcomeSchema,
           `/api/part-offers?id=${encodeURIComponent(this.dataset.id ?? '')}`,
+          { signal: AbortSignal.timeout(OFFERS_TIMEOUT_MS) },
         );
+        this.removeAttribute('aria-busy');
         if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
         this.querySelector('[data-offers]')?.replaceChildren(
           ...outcome.offers.map((offer) => this.row(offer)),
@@ -909,7 +914,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           const found = row.querySelector<HTMLButtonElement>(selector);
           found?.setAttribute(
             'aria-label',
-            `${found.getAttribute('aria-label') ?? ''}: ${line.part.name}`,
+            `${found.getAttribute('aria-label') ?? found.textContent?.trim() ?? ''}: ${line.part.name}`,
           );
           return found;
         };
@@ -1024,12 +1029,13 @@ export function defineKitCart(tagName = 'kit-cart'): void {
             item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset
               .kitOffer;
           if (offer) item.dataset.offerId = offer;
+          else delete item.dataset.offerId;
         }
-        if (!items.every((item) => item.dataset.offerId)) return;
-        this.hidden = false;
+        const buyable = items.every((item) => item.dataset.offerId);
+        this.hidden = !buyable;
         const ask = kit?.querySelector('[data-add-all]');
-        ask?.classList.replace('btn-primary', 'btn-secondary');
-        ask?.querySelector('svg')?.remove();
+        ask?.classList.toggle('btn-secondary', buyable);
+        ask?.classList.toggle('btn-primary', !buyable);
       }
 
       async addKit(): Promise<void> {

@@ -12,6 +12,7 @@ import { previewRequested } from '@/utils/shopPreview';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
+  shopOpen,
   siteEnv,
 } from '@/utils/catalogue';
 import { PathBuilder } from '@/utils/paths';
@@ -80,7 +81,8 @@ const body =
 if (!body?.success) {
   return new Response(null, { status: 400 });
 }
-const catalogue = preview ? catalogueFromEnv(siteEnv(), { preview }) : null;
+const catalogue =
+  preview || shopOpen() ? catalogueFromEnv(siteEnv(), { preview }) : null;
 if (!catalogue) {
   return new Response(null, { status: 204 });
 }

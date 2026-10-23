@@ -20,7 +20,7 @@ const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const { pages, kit = false, class: className, live = false } = Astro.props;
-const deferred = !live && Astro.isPrerendered && !shopOpen();
+const deferred = !live && Astro.isPrerendered && (kit || !shopOpen());
 const picked = kit
   ? kitPick(pages.map((page) => ({ ...page, superseded: false }))).offer
   : null;
@@ -39,6 +39,7 @@ const availability =
   deferred ? (
     <PriceSlot
       kind="tag"
+      fresh={kit && shopOpen()}
       fields={{
         ids: pages.flatMap(({ id }) => id ?? []).join(','),
         kit: kit ? '1' : undefined,

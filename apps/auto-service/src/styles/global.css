@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@custom-variant offers-pending {
+  @media (scripting: enabled) {
+    part-offers:is(:not(:defined), [aria-busy='true']) & {
+      @slot;
+    }
+  }
+}
+
 @font-face {
   font-family: 'Onest Variable';
   font-style: normal;

@@ -39,7 +39,11 @@ export function definePriceSlots(tagName = 'price-slot'): void {
     tagName,
     class extends HTMLElement {
       connectedCallback(): void {
-        if (this.dataset.queued !== undefined || !shopPreview()) return;
+        if (
+          this.dataset.queued !== undefined ||
+          (this.dataset.fresh === undefined && !shopPreview())
+        )
+          return;
         this.dataset.queued = '';
         if (queued.length === 0) {
           queueMicrotask(() => {

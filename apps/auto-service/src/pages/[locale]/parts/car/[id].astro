@@ -14,11 +14,7 @@ import ThumbRow from '@/components/ThumbRow.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
-import {
-  carPagesForBuild,
-  shopOpen,
-  type CarPageEntry,
-} from '@/utils/catalogue';
+import { carPagesForBuild, type CarPageEntry } from '@/utils/catalogue';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { kitPick } from '@/utils/kitPick';
@@ -171,31 +167,29 @@ const specsSummary = [
               ))}
             </ul>
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {(kitBuyable || !shopOpen()) && (
-                <kit-cart
-                  class="contents"
-                  {...(kitBuyable ? {} : { hidden: '' })}
-                  data-cart-href={PathBuilder.partsCart(locale)}
-                >
-                  <button
-                    type="button"
-                    class="btn btn-primary w-full sm:w-auto"
-                  >
-                    {copy.kitCart}
-                    <Icon name="arrowRight" />
-                  </button>
-                </kit-cart>
-              )}
+              <kit-cart
+                class="contents"
+                {...(kitBuyable ? {} : { hidden: '' })}
+                data-cart-href={PathBuilder.partsCart(locale)}
+              >
+                <button type="button" class="btn btn-primary w-full sm:w-auto">
+                  {copy.kitCart}
+                  <Icon name="arrowRight" />
+                </button>
+              </kit-cart>
               <a
                 href={PathBuilder.partsInquiry(locale)}
                 class:list={[
-                  'btn w-full sm:w-auto',
+                  'group/ask btn w-full sm:w-auto',
                   kitBuyable ? 'btn-secondary' : 'btn-primary',
                 ]}
                 data-add-all
               >
                 {copy.kitAdd}
-                {!kitBuyable && <Icon name="arrowRight" />}
+                <Icon
+                  name="arrowRight"
+                  class="group-[.btn-secondary]/ask:hidden"
+                />
               </a>
             </div>
           </parts-list-add-all>

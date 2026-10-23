@@ -5,14 +5,16 @@ import { PathBuilder } from '@/utils/paths';
 interface Props {
   kind: 'tag' | 'addon' | 'facets';
   fields: Record<string, string | undefined>;
+  fresh?: boolean;
 }
 
-const { kind, fields } = Astro.props;
+const { kind, fields, fresh = false } = Astro.props;
 ---
 
 <price-slot
   class="contents"
   data-kind={kind}
+  data-fresh={fresh ? '' : undefined}
   data-src={PathBuilder.partsPrices(localeFrom(Astro.url.pathname))}
   data-fields={JSON.stringify(fields)}
 >
