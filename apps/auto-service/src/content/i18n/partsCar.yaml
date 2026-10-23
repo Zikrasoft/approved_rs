@@ -94,20 +94,20 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: db50ceba02611569
+translatedFrom: fadb45b2314d83aa
 translations:
   sr:
     vin:
-      heading: Pretraga po VIN
+      heading: Pretraga po VIN-u
       lead: Unesite VIN i otvorićemo stranicu vašeg automobila sa odgovarajućim delovima.
       label: VIN
-      placeholder: Na primer, WBA35BG070N074158
-      submitLabel: Pronađi automobil
+      placeholder: WBA35BG070N074158
+      submitLabel: Pronaći automobil
       invalid: 'VIN se sastoji od 17 karaktera: latinična slova i brojevi, bez I, O i Q.'
-      unresolved: Nije uspelo da se automatski identifikuje automobil po ovom VIN-u. Pošaljite zahtev ispod, a menadžer će ručno pronaći delove.
+      unresolved: Nije moguće automatski odrediti automobil po ovom VIN-u. Pošaljite zahtev ispod, i menadžer će ručno odabrati delove.
     car:
       metaTitle: '{car}: delovi u CarLab'
-      metaDescription: 'Delovi za {car}: pronaći ćemo po VIN-u, doneti i ugraditi u servis CarLab u Beogradu.'
+      metaDescription: 'Delovi za {car}: odabraćemo po VIN-u, dovešćemo i postaviti u servisu CarLab u Beogradu.'
       eyebrow: Vaš automobil
       specsHeading: Karakteristike
       engineLabel: Motor
@@ -116,26 +116,26 @@ translations:
       powerLabel: Snaga
       driveLabel: Pogon
       bodyLabel: Karoserija
-      yearsLabel: Godine proizvodnje
+      yearsLabel: Godišta
       steeringLabel: Volan
       typeCodeLabel: Model kod
       displacementUnit: cm³
       powerUnit: kW
-      yearsOngoing: do danas
+      yearsOngoing: do sada
       partsHeading: Delovi za ovaj automobil
-      partsLead: Katalog za ovaj automobil se dopunjava. Ostavite zahtev i naći ćemo delove po VIN-u i javiti cenu.
+      partsLead: Katalog za ovaj automobil se dopunjava. Ostavite zahtev, i odabraćemo delove po VIN-u i obavestiti vas o ceni.
       formHeading: Zahtev za delove
-      confirmVariantLead: Definišite opciju.
-      confirmVariant: Za vaš automobil postoji više delova. Proverite uslove ili pošaljite zahtev sa VIN-om, a menadžer će potvrditi potreban.
+      confirmVariantLead: Potvrdite varijantu.
+      confirmVariant: Za vaš automobil postoji više delova. Proverite uslove ili pošaljite zahtev sa VIN-om, a menadžer će potvrditi potrebne.
       otherParts: Ostali delovi
-      notYourCar: To nije vaš automobil? Proverite VIN ili pošaljite zahtev i istražićemo ručno.
-      vinSteering: Prema VIN-u, vaš automobil ima {side} volan, pa su delovi za drugi volan skriveni.
-      kitHeading: Set za redovno održavanje
-      kitLead: Jedan odgovarajući deo za svaku poziciju planiranog održavanja i količina za jednu zamenu.
-      kitAdd: Proverite kod menadžera po VIN-u
-      kitCart: Dodaj set u korpu
-      matchesHeading: Potrošni materijali prema specifikacijama proizvođača
-      matchesLead: Ulja, sijalice i brisači koji odgovaraju zahtevima za motor i karoseriju ovog automobila.
+      notYourCar: Nije vaš automobil? Proverite VIN ili pošaljite zahtev, i razjasnićemo ručno.
+      vinSteering: Po VIN-u vaš automobil ima {side} volan, tako da su delovi za drugi volan skrivene.
+      kitHeading: Komplet za redovan servis
+      kitLead: Jedan odgovarajući deo za svaku poziciju planiranog održavanja i količinu za jednu zamenu.
+      kitAdd: Proveriti sa menadžerom po VIN-u
+      kitCart: Dodati komplet u korpu
+      matchesHeading: Potrošni materijal prema specifikacijama proizvođača
+      matchesLead: Ulja, lampe i metlice koje ispunjavaju zahteve motora i karoserije ovog automobila.
       fuel:
         petrol: benzin
         diesel: dizel
@@ -144,27 +144,27 @@ translations:
       drive:
         rwd: zadnji
         fwd: prednji
-        awd: svi točkovi
+        awd: puni
       body:
         sedan: sedan
         touring: karavan
-        hatchback: hečbek
+        hatchback: hatchback
         coupe: kupe
         convertible: kabriolet
         gran-coupe: Gran Coupe
-        suv: terenac
-        van: van
+        suv: SUV
+        van: minivan
       steering:
         left: levo
         right: desno
     fitment:
       quantity: '{count} kom.'
       axle:
-        front: prednji osovina
-        rear: zadnji osovina
+        front: prednja osovina
+        rear: zadnja osovina
       side:
-        left: levo
-        right: desno
+        left: s leva
+        right: s desna
       gearbox:
         manual: mehanička menjačka kutija
         automatic: automatska menjačka kutija
@@ -176,75 +176,75 @@ translations:
       indexHeading: Delovi po marki
       make:
         metaTitle: '{make}: delovi po modelima u CarLab'
-        metaDescription: 'Delovi za {make} po modelima: filteri, kočnice i potrošni materijali sa pretragom po VIN-u i ugradnjom u servis CarLab u Beogradu.'
+        metaDescription: 'Delovi za {make} po modelima: filteri, kočnice i potrošni materijal sa izborom po VIN-u i postavljanjem u servisu CarLab u Beogradu.'
         eyebrow: Delovi po marki
         lead: Izaberite model da vidite delove po kategorijama.
-        modelsHeading: Modelli
+        modelsHeading: Modeli
       model:
         metaTitle: '{model}: delovi u CarLab'
-        metaDescription: Delovi za {model} po kategorijama, sa količinom i mestom ugradnje. Pretraga po VIN-u i ugradnja u servis CarLab u Beogradu.
+        metaDescription: Delovi za {model} po kategorijama, sa količinom i mestom postavljanja. Izbor po VIN-u i postavljanje u servisu CarLab u Beogradu.
         eyebrow: Delovi po modelu
         categoriesHeading: Kategorije delova
-        noCategories: Katalog za ovaj model se dopunjava. Ostavite zahtev i naći ćemo delove po VIN-u.
+        noCategories: Katalog za ovaj model se dopunjava. Ostavite zahtev, i odabraćemo delove po VIN-u.
         carsHeading: Modifikacije
-        carsLead: Otvorite svoju modifikaciju da vidite delove specifične za nju.
+        carsLead: Otvorite vašu modifikaciju da vidite delove koji su baš za nju.
       modelCategory:
         metaTitle: '{category} za {model} u CarLab'
-        metaDescription: '{category} za {model}: odgovarajući brojevi, količina i mesto ugradnje. Pretraga po VIN-u i ugradnja u servis CarLab.'
+        metaDescription: '{category} za {model}: odgovarajući brojevi, količina i mesto postavljanja. Izbor po VIN-u i postavljanje u servisu CarLab.'
         eyebrow: '{model}'
-        partsHeading: Prikladni delovi
+        partsHeading: Odgovarajući delovi
   en:
     vin:
-      heading: VIN Lookup
-      lead: Enter your VIN, and we'll open the page for your vehicle with suitable parts.
+      heading: VIN lookup
+      lead: Enter your VIN, and we will open the page for your car with the appropriate parts.
       label: VIN
-      placeholder: For example, WBA35BG070N074158
-      submitLabel: Find Vehicle
-      invalid: 'VIN consists of 17 characters: Latin letters and numbers, excluding I, O, and Q.'
-      unresolved: We couldn't automatically identify the vehicle for this VIN. Submit a request below, and our manager will manually find the parts.
+      placeholder: WBA35BG070N074158
+      submitLabel: Find car
+      invalid: 'VIN consists of 17 characters: Latin letters and numbers, no I, O, and Q.'
+      unresolved: We couldn't automatically identify the car using this VIN. Please submit a request below, and our manager will manually find the parts.
     car:
       metaTitle: '{car}: parts at CarLab'
-      metaDescription: "Parts for {car}: we'll select by VIN, deliver and install at CarLab in Belgrade."
-      eyebrow: Your Vehicle
+      metaDescription: 'Parts for {car}: we will source by VIN, deliver, and install at CarLab in Belgrade.'
+      eyebrow: Your car
       specsHeading: Specifications
       engineLabel: Engine
       fuelLabel: Fuel
-      displacementLabel: Engine Displacement
+      displacementLabel: Engine displacement
       powerLabel: Power
       driveLabel: Drive
       bodyLabel: Body
-      yearsLabel: Production Years
+      yearsLabel: Production years
       steeringLabel: Steering
-      typeCodeLabel: Model Code
+      typeCodeLabel: Model code
       displacementUnit: cm³
       powerUnit: kW
       yearsOngoing: to present
-      partsHeading: Parts for this Vehicle
-      partsLead: The catalog for this vehicle is being updated. Leave a request, and we'll find parts by VIN and inform you of the price.
-      formHeading: Parts Request
-      confirmVariantLead: Please clarify the variant.
-      confirmVariant: More than one part fits your vehicle here. Check the details or submit a request with your VIN, and our manager will confirm the correct one.
-      otherParts: Other Parts
-      notYourCar: Is this not your vehicle? Check the VIN or submit a request, and we'll sort it out manually.
-      vinSteering: According to VIN, your vehicle has a {side} steering wheel, so parts for a different steering wheel are hidden.
-      kitHeading: Maintenance Kit
-      kitLead: One suitable part for each maintenance position and quantity for one replacement.
-      kitAdd: Confirm with the manager using VIN
+      partsHeading: Parts for this car
+      partsLead: The catalog for this car is being updated. Submit a request, and we will source parts by VIN and inform you of the price.
+      formHeading: Parts request
+      confirmVariantLead: Please specify the variant.
+      confirmVariant: There is more than one part suitable for your car. Check the details or send a request with the VIN, and our manager will confirm the correct one.
+      otherParts: Other parts
+      notYourCar: Is this not your car? Check the VIN or submit a request, and we will investigate manually.
+      vinSteering: Based on the VIN, your car has {side} steering, so parts for a different steering position are hidden.
+      kitHeading: Maintenance kit
+      kitLead: One suitable part for each position for scheduled maintenance, and the quantity is for one replacement.
+      kitAdd: Confirm with the manager using the VIN
       kitCart: Add kit to cart
-      matchesHeading: Consumables as per manufacturer approvals
-      matchesLead: Oils, bulbs, and wipers that meet the requirements for the engine and body of this vehicle.
+      matchesHeading: Compliant parts by manufacturer specifications
+      matchesLead: Oils, lamps, and filters that meet the requirements for the engine and body of this car.
       fuel:
         petrol: petrol
         diesel: diesel
         hybrid: hybrid
         electric: electric
       drive:
-        rwd: rear
-        fwd: front
-        awd: all-wheel
+        rwd: rear-wheel drive
+        fwd: front-wheel drive
+        awd: all-wheel drive
       body:
         sedan: sedan
-        touring: wagon
+        touring: station wagon
         hatchback: hatchback
         coupe: coupe
         convertible: convertible
@@ -267,26 +267,26 @@ translations:
         automatic: automatic transmission
       steering: '{side} steering'
       builtFrom: produced from {date}
-      builtTo: produced till {date}
+      builtTo: produced until {date}
       partFitsHeading: Fits these cars
     hubs:
-      indexHeading: Parts by Brand
+      indexHeading: Parts by brand
       make:
-        metaTitle: '{make}: parts by models at CarLab'
-        metaDescription: 'Parts for {make} by models: filters, brakes, and consumables with selection by VIN and installation at CarLab in Belgrade.'
-        eyebrow: Parts by Brand
+        metaTitle: '{make}: model parts at CarLab'
+        metaDescription: 'Parts for {make} by model: filters, brakes, and consumables with compatibility by VIN and installation at CarLab in Belgrade.'
+        eyebrow: Parts by brand
         lead: Select a model to see parts by categories.
         modelsHeading: Models
       model:
         metaTitle: '{model}: parts at CarLab'
-        metaDescription: Parts for {model} by categories, with quantity and fitting position. VIN selection and installation at CarLab in Belgrade.
-        eyebrow: Parts by Model
-        categoriesHeading: Parts Categories
-        noCategories: The catalog for this model is being updated. Leave a request, and we'll find parts by VIN.
-        carsHeading: Modifications
-        carsLead: Open your modification to see parts specifically for it.
+        metaDescription: Parts for {model} by categories, with quantity and fitting position. Sourcing by VIN and installation at CarLab in Belgrade.
+        eyebrow: Parts by model
+        categoriesHeading: Parts categories
+        noCategories: The catalog for this model is being updated. Please submit a request, and we will find parts by VIN.
+        carsHeading: Configurations
+        carsLead: Open your configuration to see the parts specifically for it.
       modelCategory:
         metaTitle: '{category} for {model} at CarLab'
-        metaDescription: '{category} for {model}: suitable numbers, quantity, and fitting position. VIN selection and installation at CarLab.'
+        metaDescription: '{category} for {model}: compatible numbers, quantity, and fitting position. Sourcing by VIN and installation at CarLab.'
         eyebrow: '{model}'
-        partsHeading: Suitable Parts
+        partsHeading: Suitable parts

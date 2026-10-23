@@ -39,18 +39,18 @@ translatedFrom: a3fe3b94b9ddbdd2
 translations:
   sr:
     searchHeading: Pretraga po broju ili nazivu
-    searchLead: Broj možete unositi sa razmacima, tačkama ili bez njih.
+    searchLead: Broj možete unositi sa razmakom, tačkama ili bez njih.
     label: Broj ili naziv delova
     placeholder: Broj ili naziv
     submitLabel: Pronađi
     metaTitle: Pretraga delova u CarLab
-    metaDescription: Pronađite deo po broju proizvođača ili nazivu u katalogu CarLab.
+    metaDescription: Pronađite deo po fabričkom broju ili nazivu u CarLab katalogu.
     eyebrow: Katalog delova
     heading: Pretraga delova
     found: 'Pronađeno: {count}'
     emptyQuery: Unesite broj dela ili njegov naziv, na primer HU 816 x ili filter ulja.
-    noResults: Za pretragu „{q}“ ništa nije pronađeno. Proverite broj ili pošaljite upit, i menadžer će ručno odabrati deo.
-    unavailable: Pretraga trenutno ne odgovara. Pošaljite upit, i menadžer će ručno odabrati deo.
+    noResults: Za pretragu „{q}“ nije pronađeno ništa. Proverite broj ili pošaljite zahtev, menadžer će ručno pronaći deo.
+    unavailable: Pretraga trenutno nije dostupna. Pošaljite zahtev, menadžer će ručno pronaći deo.
     filtersHeading: Filteri
     applyFilters: Prikaži
     showResults: Prikaži {count}
@@ -63,32 +63,32 @@ translations:
     rangeTo: do {max}
     rangeBetween: od {min} do {max}
     removeFilter: 'Ukloni filter: {label}'
-    noFilteredResults: Sa ovim karakteristikama u kategoriji ništa nema. Uklonite neke od filtera ili pošaljite upit, i menadžer će ručno odabrati deo.
+    noFilteredResults: Sa ovim karakteristikama u kategoriji nema ništa. Uklonite deo filtara ili pošaljite zahtev, menadžer će ručno pronaći deo.
     brandFacet: Brend
     availabilityFacet: Dostupnost
-    inStockOnly: Samo u skladištu
+    inStockOnly: Samo dostupno
     priceFacet: Cena
     booleanTrue: da
     booleanFalse: ne
     previous: Nazad
     next: Dalje
-    formHeading: Upit za delove
+    formHeading: Zahtev za delove
     notFoundQuestion: Niste našli šta vam treba?
-    notFoundLink: Ostavite upit, odabraćemo
+    notFoundLink: Ostavite zahtev, pronaći ćemo
   en:
     searchHeading: Search by part number or name
-    searchLead: You can enter the number with or without spaces or dots.
+    searchLead: You can enter the number with spaces, dots, or without them.
     label: Part number or name
     placeholder: Number or name
     submitLabel: Find
-    metaTitle: Spare Parts Search at CarLab
-    metaDescription: Find a part by manufacturer number or name in the CarLab catalog.
-    eyebrow: Parts Catalog
-    heading: Spare Parts Search
+    metaTitle: Parts search at CarLab
+    metaDescription: Find a part by part number or name in the CarLab catalog.
+    eyebrow: Parts catalog
+    heading: Parts search
     found: 'Found: {count}'
-    emptyQuery: Enter the part number or name, such as HU 816 x or oil filter.
-    noResults: No results found for “{q}”. Check the number or submit an inquiry, and our manager will manually find the part.
-    unavailable: The search is currently unresponsive. Submit an inquiry, and our manager will manually find the part.
+    emptyQuery: Enter the part number or name, for example HU 816 x or oil filter.
+    noResults: No results found for “{q}”. Check the number or submit an inquiry, and our manager will find the part manually.
+    unavailable: The search is currently unresponsive. Submit an inquiry, and our manager will find the part manually.
     filtersHeading: Filters
     applyFilters: Show
     showResults: Show {count}
@@ -101,7 +101,7 @@ translations:
     rangeTo: to {max}
     rangeBetween: from {min} to {max}
     removeFilter: 'Remove filter: {label}'
-    noFilteredResults: There are no items in this category with those characteristics. Remove some filters or submit an inquiry, and our manager will manually find the part.
+    noFilteredResults: There are no items in this category with these characteristics. Remove some filters or submit an inquiry, and our manager will find the part manually.
     brandFacet: Brand
     availabilityFacet: Availability
     inStockOnly: In stock only
@@ -110,6 +110,6 @@ translations:
     booleanFalse: no
     previous: Back
     next: Next
-    formHeading: Parts Inquiry
-    notFoundQuestion: Can’t find what you need?
-    notFoundLink: Submit an inquiry, and we will help you find it.
+    formHeading: Parts inquiry
+    notFoundQuestion: Couldn't find what you need?
+    notFoundLink: Submit an inquiry, and we will find it for you.
