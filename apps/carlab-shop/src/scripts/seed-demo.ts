@@ -267,7 +267,7 @@ async function seedCategories(catalog: CatalogModuleService) {
     {
       slug: 'oil-filters',
       name: 'Масляные фильтры',
-      text: 'Масляные фильтры для BMW и Mercedes-Benz.',
+      text: 'Масляные фильтры под двигатель вашего автомобиля.',
       maintenance_kit: true,
       kit_rank: 1,
     },
