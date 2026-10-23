@@ -10,6 +10,12 @@ describe('CommonJS build', () => {
     );
   });
 
+  it('serves the preview header to require()', () => {
+    expect(
+      require('@podbor/catalog-contract/preview').SHOP_PREVIEW_HEADER,
+    ).toBe('x-shop-preview');
+  });
+
   it('serves the part number helpers and the page schema to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.normalizePartNumber('hu 816 x')).toBe('HU816X');

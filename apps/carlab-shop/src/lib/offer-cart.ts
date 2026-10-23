@@ -25,6 +25,7 @@ import {
   type LineAddon,
   type OfferCart,
 } from '@podbor/catalog-contract';
+import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 
 import type { MedusaRequest } from '@medusajs/framework/http';
 import { z } from 'zod';
@@ -135,12 +136,20 @@ export const refuseStockCartChange = (
     ),
   );
 
-export const SHOP_PREVIEW_HEADER = 'x-shop-preview';
-
 const previewHeaderSchema = z.literal('1');
 
+let parsedShopOpen: { key: string; open: boolean } | undefined;
+
+const shopOpen = (): boolean => {
+  const key = `${process.env.NODE_ENV}:${process.env.SHOP_OPEN}`;
+  if (parsedShopOpen?.key !== key) {
+    parsedShopOpen = { key, open: parseEnv(process.env).SHOP_OPEN };
+  }
+  return parsedShopOpen.open;
+};
+
 export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean =>
-  parseEnv(process.env).SHOP_OPEN ||
+  shopOpen() ||
   previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success;
 
 export const refuseClosedShop = (
@@ -520,13 +529,7 @@ export async function setOfferQuantity(
       `Cart ${cartId} has no line ${itemId}`,
     );
   }
-  const [offer] = await liveOffers(scope, { id: [offerId] });
-  if (!offer) {
-    return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
-  }
-  if (orderCap(offer) < quantity) {
-    return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
-  }
+  const offer = await sellableOffer(scope, offerId, quantity);
   await updateLineItemInCartWorkflow(scope).run({
     input: {
       cart_id: cartId,

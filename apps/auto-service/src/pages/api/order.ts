@@ -21,7 +21,7 @@ import {
   type CartNotice,
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
-import { previewRequested } from '@/scripts/shopPreview';
+import { previewRequested } from '@/utils/shopPreview';
 
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,

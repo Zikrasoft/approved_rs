@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { previewFrom, shopPreview } from './shopPreview';
+import { shopPreview } from './shopPreview';
 
 const browser = () => {
   let stored = '';
@@ -43,15 +43,5 @@ describe('shopPreview', () => {
 
   it('ignores the old ?df=1 address', () => {
     expect(shopPreview('?df=1', browser())).toBe(false);
-  });
-});
-
-describe('previewFrom', () => {
-  it('reads the flag a server sees: the address first, then the cookie', () => {
-    expect(previewFrom('', 'lang=sr; carlab_shop_preview=1')).toBe(true);
-    expect(previewFrom('?dev=1', '')).toBe(true);
-    expect(previewFrom('?dev=0', 'carlab_shop_preview=1')).toBe(false);
-    expect(previewFrom('', 'carlab_shop_preview=10')).toBe(false);
-    expect(previewFrom('', null)).toBe(false);
   });
 });

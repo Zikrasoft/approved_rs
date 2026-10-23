@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
-import { previewRequested } from '@/scripts/shopPreview';
+import { previewRequested } from '@/utils/shopPreview';
 import {
   catalogueFromEnv,
   catalogueIdSchema,

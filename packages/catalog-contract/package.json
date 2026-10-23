@@ -50,6 +50,13 @@
         "default": "./dist/cjs/comment.js"
       },
       "default": "./src/comment.ts"
+    },
+    "./preview": {
+      "require": {
+        "types": "./dist/cjs/preview.d.ts",
+        "default": "./dist/cjs/preview.js"
+      },
+      "default": "./src/preview.ts"
     }
   },
   "scripts": {

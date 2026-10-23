@@ -7,7 +7,7 @@ import {
   siteEnv,
   type OffersOutcome,
 } from '@/utils/catalogue';
-import { previewRequested } from '@/scripts/shopPreview';
+import { previewRequested } from '@/utils/shopPreview';
 
 const INQUIRY: OffersOutcome = { kind: 'inquiry' };
 
