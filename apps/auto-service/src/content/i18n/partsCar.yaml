@@ -268,7 +268,7 @@ translations:
       steering: '{side} steering'
       builtFrom: produced from {date}
       builtTo: produced till {date}
-      partFitsHeading: Fits for Vehicles
+      partFitsHeading: Fits these cars
     hubs:
       indexHeading: Parts by Brand
       make:

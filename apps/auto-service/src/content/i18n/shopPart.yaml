@@ -80,9 +80,9 @@ translations:
     offersHeading: Cena i dostupnost
     columns:
       stock: Na skladištu
-      leadTime: Može se preuzeti kroz
-      leadTimeShort: Kroz
-      inStockPickup: Na skladištu, preuzeti kroz {days}
+      leadTime: Može se preuzeti za
+      leadTimeShort: Za
+      inStockPickup: Na skladištu, preuzimanje za {days}
     leadTime:
       inStock: Na skladištu
       days:
@@ -118,7 +118,7 @@ translations:
     numberSupersededNotice: Part number {number} is no longer used by the manufacturer.
     partReplacedNotice: The manufacturer has replaced part {number} with a new one.
     previousNumber: Previous number
-    previousNumberCurrent: 'Current previous number:'
+    previousNumberCurrent: 'Old number, now:'
     earlierNumbers: 'Earlier:'
     previousNumbersHeading: Previous numbers
     currentNumberLabel: 'Current number:'

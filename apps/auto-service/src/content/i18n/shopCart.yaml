@@ -75,7 +75,7 @@ translations:
     totalLabel: Ukupno
     addonTemplate: 'Dodati: {service}'
     addonPickup: Izvršava se prilikom izdavanja u servisu CarLab
-    addonInCart: Uslugu možete dodati u korpu.
+    addonInCart: Uslugu možete dodati u korpi.
     priceChangeTemplate: '{name}: bilo {before}, sada {after}'
     summaryHeading: Vaša narudžbina
     summaryCountTemplate: Delovi, {count} kom.
