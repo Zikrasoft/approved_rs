@@ -1,6 +1,7 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import {
   Adjustments,
+  Cash,
   EllipsisHorizontal,
   Link as LinkIcon,
   Wrench,
@@ -27,6 +28,10 @@ import {
   partIdentifiersSchema,
 } from '../../components/enrichment';
 import { LIST_TABLE, ListEmpty, ListHeader } from '../../components/list';
+import {
+  OffersDrawer,
+  type OffersTarget,
+} from '../../components/offers-drawer';
 import { ScrollArea } from '../../components/scroll-area';
 import { adminFetch } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
@@ -55,6 +60,8 @@ const PartsPage = () => {
   const [query, setQuery] = useState(q);
   const tabsRef = useRef<HTMLDivElement>(null);
   const [listing, setListing] = useState<Listing | null>(null);
+  const [offersFor, setOffersFor] = useState<OffersTarget | null>(null);
+  const [reloads, setReloads] = useState(0);
   const [categories, setCategories] = useState<
     z.infer<typeof categoriesSchema>['categories']
   >([]);
@@ -99,7 +106,7 @@ const PartsPage = () => {
     adminFetch(`/admin/part-identifiers?${search}`, partIdentifiersSchema).then(
       (data) => data && setListing(data),
     );
-  }, [state, q, categoryId, pageIndex]);
+  }, [state, q, categoryId, pageIndex, reloads]);
 
   const counts = listing && {
     [ALL]: listing.counts.enriched + listing.counts.not_enriched,
@@ -268,6 +275,15 @@ const PartsPage = () => {
                             </IconButton>
                           </DropdownMenu.Trigger>
                           <DropdownMenu.Content align="end">
+                            <DropdownMenu.Item
+                              className="gap-x-2"
+                              onSelect={() =>
+                                setOffersFor({ id: row.id, number })
+                              }
+                            >
+                              <Cash className="text-ui-fg-subtle" />
+                              {t('offers.open')}
+                            </DropdownMenu.Item>
                             <DropdownMenu.Item className="gap-x-2" asChild>
                               <Link
                                 to={fixLink(
@@ -318,6 +334,11 @@ const PartsPage = () => {
       ) : (
         listing && <ListEmpty hint={t('parts.emptyHint')} />
       )}
+      <OffersDrawer
+        target={offersFor}
+        onClose={() => setOffersFor(null)}
+        onChanged={() => setReloads((count) => count + 1)}
+      />
     </Container>
   );
 };

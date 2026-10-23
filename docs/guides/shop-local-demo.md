@@ -245,7 +245,27 @@ article's stock (one location). A missing file means no overrides; a malformed
 one makes the quote fail, which the shop treats as no live offer. Write `{}`
 to go back to the catalogue prices.
 
-## 8. Stop
+## 8. Manual offer
+
+For a number no supplier quotes, a manager enters the offer by hand: admin
+«Запчасти», the row's «...» menu, «Предложения». The drawer lists every offer of
+that brand-number (source, purchase price, storefront price after markup,
+stock, lead time, who changed it last) and holds one manual offer per number:
+purchase price in RSD, stock, lead time in days (stock above 0 or a lead time
+is required). Save, edit and delete apply to the manual offer only.
+
+The manual offer belongs to the Supplier `manual` («Ручной ввод» in the
+admin), created on the first save with a 20% markup; change the markup under
+«Поставщики». Imports never touch it, its live quote is the stored row, and the
+search index picks it up at once; the static part pages show it after the next
+Publish (`publish:local`). The same write path is
+`saveManualOffer(scope, partIdentifierId, offer, actorId)` in
+`apps/carlab-shop/src/lib/suppliers/manual-offers.ts`, for a future file
+import. Over HTTP: `POST` / `DELETE`
+`/admin/part-identifiers/:id/manual-offer`, `GET
+/admin/part-identifiers/:id/offers`.
+
+## 9. Stop
 
 Ctrl-C `pnpm dev:shop`, then
 `docker compose -f apps/carlab-shop/docker-compose.demo.yml stop` (or `down -v`
