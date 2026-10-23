@@ -202,8 +202,10 @@ Approved's trust/verification semantics.
   into the browser bundle.
 - **A package built for a CommonJS consumer ships a CommonJS build behind a
   `require` condition.** `apps/carlab-shop` is CommonJS and consumes
-  `packages/catalog-contract`, `packages/brands` and `@podbor/i18n`'s
-  `./translate/core` and `./section`; they export
+  `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
+  `./translate/core` and `./section`, and `@podbor/lead-crm`'s
+  `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy` and
+  `./phone`; they export
   `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
