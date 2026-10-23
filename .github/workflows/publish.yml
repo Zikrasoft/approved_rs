@@ -25,7 +25,18 @@ jobs:
         with:
           ref: refs/tags/deployed/auto-service
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: workflow
+          sparse-checkout: .github/scripts
+          persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm exec vercel pull --yes --environment=production
+      - name: Check the shop backend answers
+        run: |
+          sh ../../workflow/.github/scripts/shop-backend-up.sh || {
+            echo "::error::The shop backend does not answer /health, so the storefront cannot be built from it. Nothing was deployed; the live site keeps serving."
+            exit 1
+          }
       - run: pnpm exec vercel build --prod
       - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
