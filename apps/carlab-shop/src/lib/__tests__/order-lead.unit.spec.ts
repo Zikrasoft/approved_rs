@@ -3,7 +3,12 @@ import type { AddressInfo } from 'node:net';
 
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 
-import { type LeadOrder, orderLeadForm, sendOrderLead } from '../order-lead';
+import {
+  alertOwner,
+  type LeadOrder,
+  orderLeadForm,
+  sendOrderLead,
+} from '../order-lead';
 
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
   id: 'order_1',
@@ -26,6 +31,7 @@ describe('orderLeadForm', () => {
     const form = orderLeadForm(order());
 
     expect(form.get('service')).toBe('parts-order');
+    expect(form.get('order_id')).toBe('order_1');
     expect(form.get('vin')).toBe('WBA35BG070N074158');
     expect(form.get('comment')).toBe(
       [
@@ -127,5 +133,60 @@ describe('sendOrderLead', () => {
     }
 
     expect(origin).toBe(`http://localhost:${port}`);
+  });
+});
+
+describe('alertOwner', () => {
+  const saved = { ...process.env };
+  let posted: { path?: string; body?: unknown };
+  let reply: string;
+  let root: string;
+  const server = createServer((request, response) => {
+    let body = '';
+    request.on('data', (chunk) => (body += chunk));
+    request.on('end', () => {
+      posted = { path: request.url, body: JSON.parse(body) };
+      response.end(reply);
+    });
+  });
+
+  beforeAll(async () => {
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    root = `http://localhost:${(server.address() as AddressInfo).port}`;
+  });
+  afterAll(() => server.close());
+  beforeEach(() => {
+    posted = {};
+    reply = '{"ok":true,"result":{}}';
+    process.env.TELEGRAM_BOT_TOKEN = 'bot-token';
+    process.env.TELEGRAM_GROUP_ID = '-100123';
+  });
+  afterEach(() => {
+    process.env = { ...saved };
+  });
+
+  it('posts the message to the CRM group through the Bot API', async () => {
+    expect(await alertOwner('Заказ #12 не дошел', root)).toBe(true);
+    expect(posted).toEqual({
+      path: '/botbot-token/sendMessage',
+      body: { chat_id: '-100123', text: 'Заказ #12 не дошел' },
+    });
+  });
+
+  it('reports a message Telegram refused', async () => {
+    reply = '{"ok":false,"description":"chat not found"}';
+
+    expect(await alertOwner('text', root)).toBe(false);
+  });
+
+  it('reports an unreachable Bot API instead of throwing', async () => {
+    expect(await alertOwner('text', 'http://localhost:1')).toBe(false);
+  });
+
+  it('sends nothing while the bot is not configured', async () => {
+    delete process.env.TELEGRAM_GROUP_ID;
+
+    expect(await alertOwner('text', root)).toBe(false);
+    expect(posted).toEqual({});
   });
 });

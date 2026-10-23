@@ -13,8 +13,13 @@ import {
   fitComment,
   type Vehicle,
 } from '@podbor/catalog-contract';
-import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
+import {
+  AD_SOURCE_FIELD,
+  META_IDS_FIELD,
+  ORDER_ID_FIELD,
+} from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
+import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { z } from 'zod';
 
 import { parseEnv } from './env';
@@ -27,6 +32,7 @@ import {
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
 export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
+export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
 export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
 export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
 
@@ -35,28 +41,6 @@ const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 export const handOffAttempts = (
   metadata: Record<string, unknown> | null | undefined,
 ): number => attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
-
-const DAY_WORDS: Partial<Record<Intl.LDMLPluralRule, string>> = {
-  one: 'день',
-  few: 'дня',
-  many: 'дней',
-};
-
-const dayWord = (days: number) =>
-  DAY_WORDS[new Intl.PluralRules('ru').select(days)] ?? 'дня';
-
-const OWNER_COPY = {
-  heading: (displayId: number) =>
-    `Заказ #${displayId}, самовывоз, оплата при получении`,
-  confirm: 'Нужно подтвердить наличие и время самовывоза',
-  line: (title: string, quantity: number, sum: string) =>
-    `${title} × ${quantity}: ${sum}`,
-  inStock: 'в наличии',
-  pickupIn: (days: number) => `забрать через ${days} ${dayWord(days)}`,
-  addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
-  total: (sum: string) => `Итого: ${sum}`,
-  leftOut: (count: number) => `Не поместилось позиций: ${count}`,
-};
 
 const amount = z.preprocess(
   (value) =>
@@ -92,9 +76,9 @@ const readinessSchema = z
   })
   .transform((ready) =>
     [
-      ready[IN_STOCK_METADATA_KEY] && OWNER_COPY.inStock,
+      ready[IN_STOCK_METADATA_KEY] && PARTS_ORDER_COPY.inStock,
       ready[LEAD_TIME_METADATA_KEY] > 0 &&
-        OWNER_COPY.pickupIn(ready[LEAD_TIME_METADATA_KEY]),
+        PARTS_ORDER_COPY.pickupIn(ready[LEAD_TIME_METADATA_KEY]),
     ]
       .filter(Boolean)
       .join(', '),
@@ -123,15 +107,18 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
   );
   const comment = fitComment({
     head: [
-      OWNER_COPY.heading(order.display_id),
-      OWNER_COPY.confirm,
+      PARTS_ORDER_COPY.heading(order.display_id),
+      PARTS_ORDER_COPY.confirm,
       contact.car ?? '',
     ],
     lines: order.items.map((item) =>
       item.metadata?.[ADDON_FOR_METADATA_KEY]
-        ? OWNER_COPY.addon(item.title, money(item.unit_price * item.quantity))
+        ? PARTS_ORDER_COPY.addon(
+            item.title,
+            money(item.unit_price * item.quantity),
+          )
         : withReadiness(
-            OWNER_COPY.line(
+            PARTS_ORDER_COPY.line(
               item.title,
               item.quantity,
               money(item.unit_price * item.quantity),
@@ -139,9 +126,9 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
             item.metadata,
           ),
     ),
-    tail: [OWNER_COPY.total(money(total)), contact.comment ?? ''],
+    tail: [PARTS_ORDER_COPY.total(money(total)), contact.comment ?? ''],
     limit: MAX_COMMENT_LENGTH,
-    more: OWNER_COPY.leftOut,
+    more: PARTS_ORDER_COPY.leftOut,
   });
   return new URLSearchParams({
     contact: contact.contact,
@@ -156,6 +143,7 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     visitor_id: contact.visitor_id ?? '',
     [AD_SOURCE_FIELD]: contact[AD_SOURCE_FIELD] ?? '',
     [META_IDS_FIELD]: contact[META_IDS_FIELD] ?? '',
+    [ORDER_ID_FIELD]: order.id,
   });
 }
 
@@ -175,9 +163,6 @@ export async function sendOrderLead(
     throw new Error(`The lead route answered ${response.status}`);
   }
 }
-
-const isTimeout = (error: unknown) =>
-  error instanceof Error && error.name === 'TimeoutError';
 
 async function readLeadOrder(
   container: MedusaContainer,
@@ -207,12 +192,33 @@ async function recordHandOff(
   container: MedusaContainer,
   id: string,
   outcome: (metadata: Record<string, unknown>) => Record<string, unknown>,
-): Promise<void> {
+): Promise<Record<string, unknown>> {
   const orders = container.resolve(Modules.ORDER);
   const { metadata } = await orders.retrieveOrder(id);
-  await orders.updateOrders(id, {
-    metadata: { ...metadata, ...outcome(metadata ?? {}) },
-  });
+  const next = { ...metadata, ...outcome(metadata ?? {}) };
+  await orders.updateOrders(id, { metadata: next });
+  return next;
+}
+
+const telegramReplySchema = z.object({ ok: z.literal(true) });
+
+export async function alertOwner(
+  text: string,
+  apiRoot = 'https://api.telegram.org',
+): Promise<boolean> {
+  const { TELEGRAM_BOT_TOKEN, TELEGRAM_GROUP_ID } = parseEnv(process.env);
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_GROUP_ID) return false;
+  const response = await fetch(
+    `${apiRoot}/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_GROUP_ID, text }),
+      signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
+    },
+  ).catch(() => undefined);
+  const reply = await response?.json().catch(() => undefined);
+  return telegramReplySchema.safeParse(reply).success;
 }
 
 export async function handOrderToLeadRoute(
@@ -220,28 +226,34 @@ export async function handOrderToLeadRoute(
   id: string,
 ): Promise<void> {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  let displayId: number | string = id;
   try {
     const { LEAD_ROUTE_URL } = parseEnv(process.env);
     if (!LEAD_ROUTE_URL) {
       throw new Error('LEAD_ROUTE_URL is not set');
     }
     const order = await readLeadOrder(container, id);
+    displayId = order.display_id;
     await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order));
     logger.info(`Order ${id} handed to the lead pipeline`);
-    if (order.metadata?.[LEAD_HANDOFF_ERROR]) {
-      await recordHandOff(container, id, () => ({
-        [LEAD_HANDOFF_ERROR]: '',
-        [LEAD_HANDOFF_ATTEMPTS]: '',
-      }));
-    }
+    await recordHandOff(container, id, () => ({
+      [LEAD_HANDED_OFF_AT]: new Date().toISOString(),
+      [LEAD_HANDOFF_ERROR]: '',
+      [LEAD_HANDOFF_ATTEMPTS]: '',
+    }));
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     logger.error(`Order ${id} did not reach the lead pipeline: ${reason}`);
-    await recordHandOff(container, id, (metadata) => ({
+    const recorded = await recordHandOff(container, id, (metadata) => ({
       [LEAD_HANDOFF_ERROR]: reason,
-      [LEAD_HANDOFF_ATTEMPTS]: isTimeout(error)
-        ? LEAD_HANDOFF_MAX_ATTEMPTS
-        : handOffAttempts(metadata) + 1,
+      [LEAD_HANDOFF_ATTEMPTS]: handOffAttempts(metadata) + 1,
     }));
+    if (handOffAttempts(recorded) < LEAD_HANDOFF_MAX_ATTEMPTS) return;
+    const alerted = await alertOwner(
+      PARTS_ORDER_COPY.undelivered(displayId, reason),
+    );
+    if (!alerted) {
+      logger.error(`Order ${id} gave up on the lead pipeline, nobody alerted`);
+    }
   }
 }

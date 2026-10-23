@@ -18,6 +18,6 @@ export const PARTS_ORDER_COPY = {
   addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
   total: (sum: string) => `Итого: ${sum}`,
   leftOut: (count: number) => `Не поместилось позиций: ${count}`,
-  undelivered: (displayId: number, reason: string) =>
-    `Заказ #${displayId} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
+  undelivered: (order: number | string, reason: string) =>
+    `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
 };

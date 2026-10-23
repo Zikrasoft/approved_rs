@@ -12,10 +12,12 @@ const nameList = (value: string) =>
     .map((name) => name.trim())
     .filter(Boolean);
 
-const optionalSecret = z
+const optionalValue = z
   .string()
   .optional()
   .transform((value) => value || undefined);
+
+const optionalSecret = optionalValue;
 
 const envSchema = z
   .object({
@@ -39,7 +41,7 @@ const envSchema = z
     TYPESENSE_API_KEY: optionalSecret,
     OPENAI_API_KEY: optionalSecret,
     PUBLISH_DISPATCH_TOKEN: optionalSecret,
-    LEAD_ROUTE_URL: optionalSecret.pipe(z.url().optional()),
+    LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
     VIN_DECODERS: z
       .string()
       .default(VIN_DECODER_NAMES.join(','))
@@ -50,8 +52,15 @@ const envSchema = z
       .default('')
       .transform(nameList)
       .pipe(z.array(z.enum(SUPPLIER_ADAPTER_NAMES))),
-    DEMO_SUPPLIER_OVERRIDES: optionalSecret,
-    FILE_URL: optionalSecret.pipe(z.url().optional()),
+    DEMO_SUPPLIER_OVERRIDES: optionalValue,
+    FILE_URL: optionalValue.pipe(z.url().optional()),
+    TELEGRAM_BOT_TOKEN: optionalSecret,
+    TELEGRAM_GROUP_ID: optionalValue.pipe(
+      z
+        .string()
+        .regex(/^-?\d+$/)
+        .optional(),
+    ),
     SHOP_OPEN: z.enum(['true', 'false']).optional(),
   })
   .refine(

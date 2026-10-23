@@ -646,10 +646,16 @@ validates everything at startup. The non-obvious parts:
 - `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
   posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
-  nobody, and the log says so. A refused post is written on the order as
-  `lead_handoff_error`, and `src/jobs/retry-order-leads.ts` re-sends it every
-  10 minutes, six attempts in all. A timeout is not re-sent, since the route
-  may have stored it: find those orders by that metadata and check the chat.
+  nobody, and the log says so. A delivered order is stamped
+  `lead_handed_off_at`; every 10 minutes `src/jobs/retry-order-leads.ts`
+  re-sends each order from the last two days (older than two minutes) that
+  lacks the stamp, six attempts in all, timeouts included. That also catches
+  an `order.placed` event lost to a restart, since the event bus lives in
+  memory. A re-send cannot make a second Lead: the post carries `order_id`, and
+  the lead store answers a known order with the Lead it already made. The last
+  failed attempt is reported to the CRM group through `TELEGRAM_BOT_TOKEN` and
+  `TELEGRAM_GROUP_ID`, the same names and values as the CRM bot's on Vercel.
+  Both are optional; unset, the failure is only logged.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
   are tried. An unknown name stops the server at startup.
 - `TYPESENSE_API_KEY` has a local default only outside production; with

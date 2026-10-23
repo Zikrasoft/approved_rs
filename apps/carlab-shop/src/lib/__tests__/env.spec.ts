@@ -33,6 +33,19 @@ describe('parseEnv', () => {
     expect(env.PUBLISH_DISPATCH_TOKEN).toBe('token');
   });
 
+  it('reads the order alert chat as a Telegram chat id, empty as unset', () => {
+    expect(
+      parseEnv({ ...VALID_ENV, TELEGRAM_GROUP_ID: '-100123' })
+        .TELEGRAM_GROUP_ID,
+    ).toBe('-100123');
+    expect(
+      parseEnv({ ...VALID_ENV, TELEGRAM_GROUP_ID: '' }).TELEGRAM_GROUP_ID,
+    ).toBeUndefined();
+    expect(() =>
+      parseEnv({ ...VALID_ENV, TELEGRAM_GROUP_ID: 'crm-group' }),
+    ).toThrow();
+  });
+
   it('coerces TYPESENSE_PORT from a string env value', () => {
     const env = parseEnv({ ...VALID_ENV, TYPESENSE_PORT: '58108' });
 
