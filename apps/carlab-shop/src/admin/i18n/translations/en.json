@@ -554,7 +554,11 @@
       "rank": "Order: a whole number.",
       "power_kw": "Power: a whole number of kW from 1 to 2000.",
       "displacement_cc": "Displacement: a whole number of cc from 1 to 20000.",
-      "slug": "URL name: lowercase Latin letters and digits with hyphens between them, for example skoda-octavia."
+      "slug": "URL name: lowercase Latin letters and digits with hyphens between them, for example skoda-octavia.",
+      "cost_price": "Purchase price: a number above 0 and at most 10000000 RSD.",
+      "stock_quantity": "Stock: a whole number from 0 to 100000.",
+      "lead_time_days": "Lead time: a whole number of days from 0 to 365.",
+      "availability": "Enter a stock above zero or a lead time in days."
     },
     "fields": {
       "name": "Name",
@@ -599,7 +603,10 @@
       "service_note": "Service note",
       "ean": "EAN barcode",
       "kit_rank": "Kit order",
-      "rank": "Order"
+      "rank": "Order",
+      "cost_price": "Purchase price",
+      "stock_quantity": "Stock",
+      "lead_time_days": "Lead time"
     },
     "attributeLabel": "The value of «{{label}}» does not fit: check it is filled in, picked from the options and not negative.",
     "entities": {
@@ -754,5 +761,35 @@
       "next": "Next"
     },
     "add": "Add part"
+  },
+  "offers": {
+    "open": "Offers",
+    "heading": "Offers: {{number}}",
+    "lead": "The storefront price is the purchase price plus the supplier markup. Imports never change or delete a manual offer.",
+    "columns": {
+      "source": "Source",
+      "cost": "Purchase",
+      "price": "Storefront",
+      "stock": "Stock",
+      "leadTime": "Lead time"
+    },
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "empty": "This number has no offers yet. Add a manual one below to give it a storefront price.",
+    "manual": {
+      "heading": "Manual offer",
+      "lead": "Purchase price in RSD, before markup. Enter the stock, or a lead time when it is not in stock. The manual markup is set under Suppliers.",
+      "fields": {
+        "cost_price": "Purchase price, RSD",
+        "stock_quantity": "Stock, pcs",
+        "lead_time_days": "Lead time, days"
+      },
+      "add": "Add offer",
+      "delete": "Delete manual offer"
+    },
+    "saved": "Manual offer saved. The storefront updates after the next publish.",
+    "deleted": "Manual offer deleted.",
+    "confirmTitle": "Delete the manual offer?",
+    "confirmBody": "Number {{number}} is left without a price unless it has other offers."
   }
 }

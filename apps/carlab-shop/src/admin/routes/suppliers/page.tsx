@@ -417,7 +417,7 @@ const SuppliersPage = () => {
               <Table.Body>
                 {suppliers.map((supplier) => (
                   <Table.Row key={supplier.id}>
-                    <Table.Cell>{supplier.name}</Table.Cell>
+                    <Table.Cell>{sourceName(supplier.name)}</Table.Cell>
                     <Table.Cell>
                       <Input
                         type="number"
@@ -461,21 +461,23 @@ const SuppliersPage = () => {
                       </Button>
                     </Table.Cell>
                     <Table.Cell>
-                      <div className="flex items-center gap-x-2">
-                        <Switch
-                          id={`${supplier.id}-import`}
-                          checked={supplier.import_enabled}
-                          disabled={writing}
-                          onCheckedChange={() => toggleImport(supplier)}
-                        />
-                        <Label size="small" htmlFor={`${supplier.id}-import`}>
-                          {t(
-                            supplier.import_enabled
-                              ? 'suppliers.importOn'
-                              : 'suppliers.importOff',
-                          )}
-                        </Label>
-                      </div>
+                      {supplier.name !== MANUAL_SOURCE && (
+                        <div className="flex items-center gap-x-2">
+                          <Switch
+                            id={`${supplier.id}-import`}
+                            checked={supplier.import_enabled}
+                            disabled={writing}
+                            onCheckedChange={() => toggleImport(supplier)}
+                          />
+                          <Label size="small" htmlFor={`${supplier.id}-import`}>
+                            {t(
+                              supplier.import_enabled
+                                ? 'suppliers.importOn'
+                                : 'suppliers.importOff',
+                            )}
+                          </Label>
+                        </div>
+                      )}
                     </Table.Cell>
                     <Table.Cell>
                       <div className="flex flex-col gap-y-1 py-2">
@@ -530,7 +532,7 @@ const SuppliersPage = () => {
               <Select.Content>
                 {suppliers.map((supplier) => (
                   <Select.Item key={supplier.id} value={supplier.id}>
-                    {supplier.name}
+                    {sourceName(supplier.name)}
                   </Select.Item>
                 ))}
               </Select.Content>

@@ -13,7 +13,7 @@
     "publish:local": "medusa exec ./src/scripts/publish-local.ts",
     "shop:prepare": "sh scripts/shop-prepare.sh",
     "dev:shop": "medusa develop",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests"
+    "test": "for shard in 1 2 3 4; do NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests --shard=$shard/4 || exit 1; done"
   },
   "dependencies": {
     "@medusajs/admin-sdk": "2.21.2",
