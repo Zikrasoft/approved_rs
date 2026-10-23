@@ -587,6 +587,23 @@ medusaIntegrationTestRunner({
         expect(placed.status).toBe(200);
       });
 
+      it('keeps the order of the lines when a reprice changes the first one', async () => {
+        const cart = await cartWith(1);
+        await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: warehouseOfferId,
+          quantity: 1,
+        });
+        quote(1833, 12);
+
+        const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+
+        expect(
+          repriced.data.cart.items.map(
+            ({ offer_id }: { offer_id: string }) => offer_id,
+          ),
+        ).toEqual([offerId, warehouseOfferId]);
+      });
+
       it('refuses checkout when the supplier no longer has enough in stock', async () => {
         const cart = await cartWith(2);
         quote(1542, 1);

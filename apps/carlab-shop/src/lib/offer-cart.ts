@@ -256,7 +256,11 @@ export async function syncOfferCart(
   if (cart.completed_at) {
     return { id: cart.id, completed: true, currency, total: 0, items: [] };
   }
-  const items = cart.items ?? [];
+  const items = [...(cart.items ?? [])].sort(
+    (a, b) =>
+      new Date(a.created_at ?? 0).getTime() -
+        new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id),
+  );
   const live = await offersOf(scope, items);
   const addons = await addonsOf(scope, items);
   const addonLines = new Map(
