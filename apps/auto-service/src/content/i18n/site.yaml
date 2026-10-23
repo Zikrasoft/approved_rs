@@ -109,7 +109,7 @@ translations:
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt je napravljen u studiju Zikrasoft
+      developerCredit: Veb sajt napravila je studija Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Sadržaj
@@ -129,11 +129,11 @@ translations:
       viber: Viber
       telegram: Telegram
     telegramChoice:
-      heading: Kako je bolje da pišete?
+      heading: Kako je bolje napisati?
       bot: Kroz bota
-      botHint: Ispričajte šta je sa vozilom, menadžer će odgovoriti u istom čatu
+      botHint: Recite šta nije u redu sa autom, menadžer će odgovoriti u istom čatu
       manager: Direktno menadžeru
-      managerHint: Lični chat sa menadžerom u Telegramu
+      managerHint: Lični čat sa menadžerom na Telegramu
     form:
       heading: Zakažite servis
       subheading: Opšte, šta je sa vašim autom. Pozvaćemo vas, razjasnićemo detalje i reći ćemo vreme i cenu.
@@ -149,7 +149,7 @@ translations:
       commentPlaceholder: Marka, model, godina — i šta vas brine
       submit: Pošalji zahtev
       submitting: Šaljemo…
-      privacyNote: Slanjem obrasca, saglasni ste sa
+      privacyNote: Slažem se sa
       privacyLinkText: politikom privatnosti
       modalTitle: Zakažite servis
       errorPhone: Proverite broj - izgleda da nije unet u potpunosti
@@ -213,7 +213,7 @@ translations:
     telegramChoice:
       heading: What's the easiest way to reach us?
       bot: Through the bot
-      botHint: Tell us what's wrong with your car, and the manager will reply in the same chat
+      botHint: Let us know what's wrong with your car, and the manager will respond in the same chat
       manager: Directly to the manager
       managerHint: Personal chat with the manager on Telegram
     form:
@@ -231,7 +231,7 @@ translations:
       commentPlaceholder: Make, model, year — and what’s bothering you
       submit: Submit Application
       submitting: Submitting…
-      privacyNote: By submitting the form, you agree to our
+      privacyNote: I agree with
       privacyLinkText: privacy policy
       modalTitle: Book a Service
       errorPhone: Please check the number — it seems incomplete
@@ -245,4 +245,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: c28e23b13d0f329b
+translatedFrom: 1999abed24fe6a47

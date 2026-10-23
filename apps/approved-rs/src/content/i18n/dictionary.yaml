@@ -97,13 +97,13 @@ translations:
       copyrightSuffix: Vehicle sourcing, inspection, and delivery from Europe
       cookieSettingsLabel: Cookie Settings
       channelLinkLabel: Our Channel
-      developerCredit: Site created by Zikrasoft
+      developerCredit: Website created by Zikrasoft
       aboutLabel: About the project
     telegramChoice:
-      heading: What's the easiest way to reach out?
+      heading: What's the easiest way to get in touch?
       bot: Through the bot
-      botHint: Tell us what kind of car you need, the manager will respond in the same chat
-      manager: Directly to the manager
+      botHint: Tell us what car you need, the manager will reply in the same chat
+      manager: Directly with the manager
       managerHint: Personal chat with the manager on Telegram
     common:
       otherServicesLabel: 'Other Services:'
@@ -159,14 +159,14 @@ translations:
       copyrightSuffix: Autopodbor, provera i isporuka automobila iz Evrope
       cookieSettingsLabel: Podešavanja kolačića
       channelLinkLabel: Naš kanal
-      developerCredit: Sajt je napravila agencija Zikrasoft
+      developerCredit: Sajt je napravljen u studiju Zikrasoft
       aboutLabel: O projektu
     telegramChoice:
-      heading: Kako je bolje kontaktirati?
+      heading: Kako je najbolje napisati?
       bot: Kroz bota
-      botHint: Recite koja vam kola trebaju, menadžer će odgovoriti u istom čatu
-      manager: Direktno menadžeru
-      managerHint: Lični čat sa menadžerom na Telegramu
+      botHint: Recite koja vam je auto potrebna, menadžer će odgovoriti u istom čatu
+      manager: Menadžeru direktno
+      managerHint: Lični chat sa menadžerom na Telegramu
     common:
       otherServicesLabel: 'Ostale usluge:'
       alsoWorkingInLabel: 'Takođe radimo u:'
@@ -283,14 +283,14 @@ translations:
       copyrightSuffix: Fahrzeugauswahl, Inspektion und Lieferung von Autos aus Europa
       cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
-      developerCredit: Die Seite wurde von Zikrasoft erstellt
+      developerCredit: Die Website wurde von Zikrasoft erstellt
       aboutLabel: Über das Projekt
     telegramChoice:
-      heading: Wie möchten Sie uns am besten kontaktieren?
+      heading: Wie möchten Sie uns am liebsten kontaktieren?
       bot: Über den Bot
-      botHint: Erzählen Sie, welches Auto Sie benötigen, der Manager antwortet im selben Chat
-      manager: Direkt zum Manager
-      managerHint: Persönlicher Chat mit dem Manager über Telegram
+      botHint: Teilen Sie uns mit, welches Auto Sie benötigen, der Manager antwortet im selben Chat
+      manager: Direkt mit dem Manager
+      managerHint: Persönlicher Chat mit dem Manager in Telegram
     common:
       otherServicesLabel: 'Weitere Dienstleistungen:'
       alsoWorkingInLabel: 'Auch tätig in:'

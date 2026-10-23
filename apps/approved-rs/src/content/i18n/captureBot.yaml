@@ -80,7 +80,7 @@ translations:
       button: 🌐 Language
       text: Please choose the language you prefer to communicate in.
     profile:
-      description: "We source and inspect cars in Germany, Spain, Switzerland, and Serbia, bringing them in from Europe and China. Click 'Start' and tell us what kind of car you need, the manager will respond right here. Prefer to skip the bot? Message the manager directly: {manager}"
+      description: "We source and inspect cars in Germany, Spain, Switzerland, and Serbia, importing them from Europe and China. Click 'Start' and tell us what kind of car you need, and a manager will respond right here. Prefer to skip the bot? Message the manager directly: {manager}"
       shortDescription: 'Car sourcing, import, and buyback in Europe. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
@@ -123,8 +123,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik kojim vam je lakše da komunicirate.
     profile:
-      description: 'Biramo i radimo provere automobila u Nemačkoj, Španiji, Švajcarskoj i Srbiji, donosimo iz Evrope i Kine. Kliknite na „Start“ i recite nam koja vam mašina treba, menadžer će vam odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}'
-      shortDescription: 'Odabir automobila, uvoz i otkup vozila u Evropi. Menadžer: {manager}'
+      description: "Biramo i radimo provere automobila u Nemackoj, Spaniji, Svajcarskoj i Srbiji, donosimo iz Evrope i Kine. Kliknite na 'Start' i recite koja vam se kola dopadaju, menadžer će odgovoriti ovde. Više vam odgovara bez bota? Pišite menadžeru direktno: {manager}"
+      shortDescription: 'Provera auta pre kupovine, dovoz i otkup automobila u Evropi. Menadžer: {manager}'
       menuCommand: Glavni meni
       langCommand: Promeni jezik
   es:
@@ -166,7 +166,7 @@ translations:
       button: 🌐 Idioma
       text: Elige el idioma en el que te sientas más cómodo.
     profile:
-      description: 'Seleccionamos y revisamos coches en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en «Inicio» y cuéntanos qué coche necesitas, el gerente responderá aquí mismo. ¿Prefieres comunicarte directamente? Escribe al gerente: {manager}'
+      description: 'Seleccionamos y revisamos coches en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Presiona «Iniciar» y cuéntanos qué coche necesitas, el gerente te responderá aquí mismo. ¿Prefieres hacerlo sin el bot? Escribe directamente al gerente: {manager}'
       shortDescription: 'Selección de coches, importación y compra de autos en Europa. Gerente: {manager}'
       menuCommand: Menú principal
       langCommand: Cambiar idioma
@@ -209,8 +209,8 @@ translations:
       button: 🌐 Sprache
       text: Wählen Sie die Sprache, in der Sie sich am wohlsten fühlen.
     profile:
-      description: 'Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien, bringen sie aus Europa und China. Klicken Sie auf „Start“ und erzählen Sie uns, welches Auto Sie benötigen, der Manager wird hier antworten. Bequemer ohne Bot? Schreiben Sie direkt an den Manager: {manager}'
-      shortDescription: 'Autoauswahl, Import und Rückkauf von Autos in Europa. Manager: {manager}'
+      description: 'Wir suchen und prüfen Fahrzeuge in Deutschland, Spanien, der Schweiz und Serbien, importieren aus Europa und China. Klicken Sie auf „Start“ und erzählen Sie uns, welches Auto Sie benötigen, der Manager wird Ihnen hier antworten. Bequemer ohne Bot? Schreiben Sie direkt an den Manager: {manager}'
+      shortDescription: 'Fahrzeugauswahl, Import und Rückkauf von Autos in Europa. Manager: {manager}'
       menuCommand: Hauptmenü
       langCommand: Sprache wechseln
 translatedFrom: edb6a2d2dc324893

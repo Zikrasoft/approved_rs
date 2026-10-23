@@ -165,18 +165,18 @@ translations:
       waitSourcingLink: Turnkey car sourcing →
     about:
       metaTitle: About approved.rs
-      metaDescription: What you can find on Approved.rs, where the cases come from, who owns the site, and how to contact us.
-      heading: The Approved.rs Website
-      lead: Here you can find everything about how we source, inspect, buy back, and import cars. Services, real deals, and contact methods.
-      sitemapHeading: What’s on the site
-      casesCountLabel: Real deals
-      countriesCountLabel: Countries we operate in
-      contentHeading: Where the materials come from
-      contentText: Each case on the site describes a real car we worked on for a client. Our team writes the texts in Russian, and they are translated automatically into English, Serbian, Spanish, and German.
-      ownerHeading: Who owns the site
-      ownerText: The site is owned by the Approved.rs service. How we handle visitor data is described in the
+      metaDescription: What is on the Approved.rs site, where the cases come from, who owns the site, and how to contact us.
+      heading: Approved.rs Website
+      lead: Here, you can find everything about how we source, inspect, buy, and deliver cars. Services, real deals, and contact methods.
+      sitemapHeading: What is on the site
+      casesCountLabel: Real Deals
+      countriesCountLabel: Countries We Operate In
+      contentHeading: Source of Materials
+      contentText: Each case on the site describes a real car we have worked on for a client. Our team writes the texts in Russian, and they are automatically translated into English, Serbian, Spanish, and German.
+      ownerHeading: Who Owns the Site
+      ownerText: The site is owned by the Approved.rs service. Our approach to handling visitor data is described in the section
       contactsHeading: Contacts
-      contactsText: Messaging apps and ways to contact us are collected on the
+      contactsText: Messenger options and contact methods are compiled on the page
       developerCredit: The site was designed and developed by Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Real Deals on Car Sourcing — Vehicles, Prices, and Timelines
@@ -265,19 +265,19 @@ translations:
       waitSourcingLink: Autopodbor po meri →
     about:
       metaTitle: O projektu approved.rs
-      metaDescription: Šta je na sajtu Approved.rs, odakle dolaze slučajevi, ko je vlasnik sajta i kako da nas kontaktirate.
+      metaDescription: Šta je na sajtu Approved.rs, odakle dolaze slučajevi, ko je vlasnik sajta i kako nas kontaktirati.
       heading: Sajt Approved.rs
-      lead: Ovde je okupljeno sve o tome kako biramo, proveravamo, otkupljujemo i dovozimo automobile. Usluge, pravi poslovi i načini kontaktiranja.
+      lead: Ovde je sve o tome kako biramo, proveravamo, otkupljujemo i dovozimo automobile. Usluge, stvarni poslovi i načini kontaktiranja.
       sitemapHeading: Šta je na sajtu
       casesCountLabel: Stvarnih poslova
       countriesCountLabel: Zemalja u kojima radimo
-      contentHeading: Odakle dolaze materijali
-      contentText: Svaki slučaj na sajtu opisuje pravi auto sa kojim smo radili za klijenta. Tekstove piše naš tim na ruskom, a na engleski, srpski, španski i nemački se automatski prevode.
+      contentHeading: Odakle materijali
+      contentText: Svaki slučaj na sajtu opisuje pravi auto sa kojim smo radili za klijenta. Tekstove piše naš tim na ruskom, a na engleski, srpski, španski i nemački se prevode automatski.
       ownerHeading: Ko je vlasnik sajta
-      ownerText: Sajt pripada servisu Approved.rs. Kako se odnosimo prema podacima posetilaca, opisano je u odeljku
+      ownerText: Sajt pripada servisu Approved.rs. Kako se ophodimo sa podacima posetilaca, opisano je u odeljku
       contactsHeading: Kontakti
-      contactsText: Međutim, možete nas kontaktirati putem messengera i drugih načina na stranici
-      developerCredit: Sajt je projektovan i razvijen u studiju Zikrasoft.
+      contactsText: Međutim, načini kontaktiranja su prikupljeni na stranici
+      developerCredit: Sajt je osmišljen i razvijen u studiju Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Stvarni poslovi po autopodboru — automobili, cene i rokovi
       metaDescription: Stvarni poslovi po autopodboru, isporuci, otkupu i provere automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
@@ -365,19 +365,19 @@ translations:
       waitSourcingLink: Selección completa →
     about:
       metaTitle: Sobre el proyecto approved.rs
-      metaDescription: Qué hay en el sitio Approved.rs, de dónde provienen los casos, quién posee el sitio y cómo contactarnos.
-      heading: Sitio Approved.rs
-      lead: Aquí encontrarás todo sobre cómo seleccionamos, inspeccionamos, compramos y traemos vehículos. Servicios, transacciones reales y formas de contacto.
+      metaDescription: Qué hay en el sitio Approved.rs, de dónde provienen los casos, quién es el propietario del sitio y cómo contactarnos.
+      heading: El sitio Approved.rs
+      lead: Aquí encontrarás todo sobre cómo seleccionamos, inspeccionamos, compramos y entregamos automóviles. Servicios, transacciones reales y formas de contacto.
       sitemapHeading: Qué hay en el sitio
       casesCountLabel: Transacciones reales
       countriesCountLabel: Países donde trabajamos
       contentHeading: De dónde provienen los materiales
-      contentText: Cada caso en el sitio describe un vehículo real con el que trabajamos para un cliente. Los textos son escritos por nuestro equipo en ruso y se traducen automáticamente al inglés, serbio, español y alemán.
-      ownerHeading: Quién posee el sitio
-      ownerText: El sitio pertenece al servicio Approved.rs. Cómo manejamos los datos de los visitantes está descrito en la sección
+      contentText: Cada caso en el sitio describe un automóvil real con el que hemos trabajado para un cliente. Los textos son redactados por nuestro equipo en ruso, y se traducen automáticamente al inglés, serbio, español y alemán.
+      ownerHeading: Quién es el propietario del sitio
+      ownerText: El sitio pertenece al servicio Approved.rs. Cómo manejamos los datos de los visitantes se describe en la sección
       contactsHeading: Contactos
-      contactsText: Los mensajeros y formas de contacto se recopilan en la página
-      developerCredit: El sitio fue diseñado y desarrollado en el estudio Zikrasoft.
+      contactsText: Los mensajeros y formas de contacto están recopilados en la página
+      developerCredit: El sitio fue diseñado y desarrollado por el estudio Zikrasoft.
     casesVehicleSourcing:
       metaTitle: Transacciones reales de selección de autos — vehículos, precios y plazos
       metaDescription: Transacciones reales de selección, entrega, compra y revisión de autos de Alemania, España, Serbia y Suiza. Vehículo, precio y cómo fue el proceso.
@@ -465,18 +465,18 @@ translations:
       waitSourcingLink: Schlüsselfertiges Sourcing →
     about:
       metaTitle: Über das Projekt approved.rs
-      metaDescription: Informationen zu Approved.rs, Fallbeispiele, Besitzer und Kontaktmöglichkeiten.
+      metaDescription: Informationen zu Approved.rs, unseren Fällen, Eigentümern und Kontaktmöglichkeiten.
       heading: Die Website Approved.rs
-      lead: Hier finden Sie alles, wie wir Autos auswählen, überprüfen, zurückkaufen und liefern. Dienstleistungen, reale Geschäfte und Kontaktmöglichkeiten.
-      sitemapHeading: Inhalte der Website
-      casesCountLabel: Realer Geschäfte
-      countriesCountLabel: Ländern, in denen wir arbeiten
-      contentHeading: Woher die Materialien stammen
-      contentText: Jeder Fall auf der Website beschreibt ein echtes Auto, mit dem wir für einen Kunden gearbeitet haben. Die Texte stammen von unserem Team und werden automatisch ins Englische, Serbische, Spanische und Deutsche übersetzt.
-      ownerHeading: Wer die Website besitzt
-      ownerText: Die Website gehört dem Service Approved.rs. Wie wir mit den Daten der Besucher umgehen, ist im Abschnitt beschrieben.
+      lead: Hier finden Sie alles, wie wir Autos auswählen, prüfen, aufkaufen und liefern. Dienstleistungen, reale Geschäfte und Kontaktmöglichkeiten.
+      sitemapHeading: Inhalt der Website
+      casesCountLabel: Reale Geschäfte
+      countriesCountLabel: Länder, in denen wir tätig sind
+      contentHeading: Woher stammen die Materialien
+      contentText: Jeder Fall auf der Website beschreibt ein echtes Auto, das wir für einen Kunden bearbeitet haben. Die Texte werden von unserem Team in Russisch verfasst und automatisch ins Englische, Serbische, Spanische und Deutsche übersetzt.
+      ownerHeading: Wer ist der Eigentümer der Website
+      ownerText: Die Website gehört dem Dienst Approved.rs. Wie wir mit den Daten der Besucher umgehen, ist im Abschnitt beschrieben
       contactsHeading: Kontakte
-      contactsText: Messengerdienste und Kontaktmöglichkeiten sind auf der Seite gesammelt.
+      contactsText: Messenger und Kontaktmöglichkeiten finden Sie auf der Seite
       developerCredit: Die Website wurde von der Agentur Zikrasoft entworfen und entwickelt.
     casesVehicleSourcing:
       metaTitle: Reale Autowahl-Deals — Autos, Preise und Fristen
