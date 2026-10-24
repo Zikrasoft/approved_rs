@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { requirementSchema } from './attributes.ts';
-import { STEERING_SIDES, VIN_PATTERN } from './steering.ts';
+import { STEERING_SIDES } from './steering.ts';
+import { VIN_PATTERN } from './vin.ts';
 
-export { STEERING_SIDES, VIN_PATTERN, type SteeringSide } from './steering.ts';
+export { STEERING_SIDES, type SteeringSide } from './steering.ts';
+export { VIN_PATTERN } from './vin.ts';
 
 export const VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',

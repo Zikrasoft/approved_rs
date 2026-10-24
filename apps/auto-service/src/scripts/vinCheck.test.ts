@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
+import { VIN_INPUT_PATTERN } from '@podbor/catalog-contract/vin';
 import { defineVinCheck } from './vinCheck';
 
 const MESSAGE = 'VIN: 17 латинских букв и цифр';
@@ -8,8 +9,7 @@ const vinField = (value: string) => {
   defineVinCheck();
   const check = document.createElement('vin-check');
   check.dataset.message = MESSAGE;
-  check.innerHTML =
-    '<input name="vin" required pattern="[A-HJ-NPR-Za-hj-npr-z0-9]{17}" />';
+  check.innerHTML = `<input name="vin" required pattern="${VIN_INPUT_PATTERN}" />`;
   document.body.append(check);
   const input = check.querySelector('input')!;
   input.value = value;

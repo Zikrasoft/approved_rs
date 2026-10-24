@@ -1,5 +1,6 @@
 ---
 import { MY_GARAGE_VIN_ATTRIBUTE } from '@podbor/site-kit/browser';
+import { VIN_INPUT_PATTERN } from '@podbor/catalog-contract/vin';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -29,7 +30,7 @@ const copy = content(locale).partsCar.vin;
           name="vin"
           required
           minlength="17"
-          pattern="[A-HJ-NPR-Za-hj-npr-z0-9]{17}"
+          pattern={VIN_INPUT_PATTERN}
           autocomplete="off"
           spellcheck="false"
           placeholder={copy.placeholder}

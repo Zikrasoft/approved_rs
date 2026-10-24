@@ -88,6 +88,17 @@ describe('CommonJS build', () => {
     );
   });
 
+  it('serves the zod-free VIN subpath to require()', () => {
+    expect(require.resolve('@podbor/catalog-contract/vin')).toMatch(
+      /dist\/cjs\/vin\.js$/,
+    );
+    expect(
+      require('@podbor/catalog-contract/vin').VIN_PATTERN.test(
+        'WBA8E9G50GNU12345',
+      ),
+    ).toBe(true);
+  });
+
   it('serves the zod-free cart fingerprint subpath to require()', () => {
     expect(
       require('@podbor/catalog-contract/fingerprint').cartFingerprint([
