@@ -157,7 +157,7 @@ export function inquiryComment({
           : partLine(part);
       return part.addon && part.with_addon ? `${line}\n+ ${part.addon}` : line;
     }),
-    tail: [note],
+    note,
     limit,
     more,
   });

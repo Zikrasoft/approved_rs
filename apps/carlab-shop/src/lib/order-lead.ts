@@ -156,7 +156,8 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
             item.metadata,
           ),
     ),
-    tail: [PARTS_ORDER_COPY.total(money(total)), contact.comment ?? ''],
+    tail: [PARTS_ORDER_COPY.total(money(total))],
+    note: contact.comment ?? '',
     limit: MAX_COMMENT_LENGTH,
     more: PARTS_ORDER_COPY.leftOut,
   });

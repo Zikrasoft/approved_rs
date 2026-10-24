@@ -278,7 +278,7 @@ describe('inquiryComment', () => {
     expect(comment.length).toBeLessThanOrEqual(60);
   });
 
-  it('never exceeds the limit even when the note alone is too long', () => {
+  it('keeps the part lines and shortens a note too long to fit', () => {
     const comment = inquiryComment({
       parts: [mannOil],
       note: 'x'.repeat(100),
@@ -287,6 +287,9 @@ describe('inquiryComment', () => {
     });
 
     expect(comment.length).toBe(50);
-    expect(comment.startsWith('+1 не поместились')).toBe(true);
+    expect(comment.startsWith('Mann-Filter HU 816 x, Масляный фильтр\n')).toBe(
+      true,
+    );
+    expect(comment.endsWith('x…')).toBe(true);
   });
 });
