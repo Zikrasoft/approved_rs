@@ -180,6 +180,7 @@
       "brand": "{{count}} with an unknown brand spelling"
     },
     "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
+    "importWithoutCategory": "Added without their Category, because it has required attributes the supplier does not give: {{numbers}}. Fill them in on the Part attributes page.",
     "importOn": "On",
     "importOff": "Off",
     "importSwitch": {

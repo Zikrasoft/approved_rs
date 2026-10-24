@@ -30,6 +30,7 @@ export type ImportSummary = {
   created: number;
   skipped: number;
   skipped_by_reason: { category: number; brand: number; currency: number };
+  needs_category: string[];
 };
 
 type Context = {
@@ -44,7 +45,7 @@ async function createPart(
   article: Article,
   brandId: string,
   categoryId: string,
-): Promise<{ identifierId: string; partId: string }> {
+): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
   const part = {
     name: article.name,
     identifiers: [
@@ -56,19 +57,21 @@ async function createPart(
     ],
     source: adapter.name,
   };
+  let categorized = true;
   const partId = await catalog
     .createPartWithIdentifiers({ ...part, category_id: categoryId })
     .catch((error: unknown) => {
       if (
-        error instanceof MedusaError &&
-        error.type === MedusaError.Types.INVALID_DATA
+        MedusaError.isMedusaError(error) &&
+        error.code === 'INVALID_ATTRIBUTES'
       ) {
+        categorized = false;
         return catalog.createPartWithIdentifiers(part);
       }
       throw error;
     });
   const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return { identifierId: identifier.id, partId };
+  return { identifierId: identifier.id, partId, categorized };
 }
 
 async function matchArticle(
@@ -76,7 +79,12 @@ async function matchArticle(
   article: Article,
   brandId: string,
   categoryId: string,
-): Promise<{ identifierId: string; created: boolean; changedPartId?: string }> {
+): Promise<{
+  identifierId: string;
+  created: boolean;
+  changedPartId?: string;
+  categorized?: boolean;
+}> {
   const { adapter, catalog } = context;
   const [hit] = await catalog.listPartIdentifiers(
     {
@@ -86,13 +94,13 @@ async function matchArticle(
     { relations: ['part'], take: 1 },
   );
   if (!hit) {
-    const { identifierId, partId } = await createPart(
+    const { identifierId, partId, categorized } = await createPart(
       context,
       article,
       brandId,
       categoryId,
     );
-    return { identifierId, created: true, changedPartId: partId };
+    return { identifierId, created: true, changedPartId: partId, categorized };
   }
   const { part } = hit;
   if (
@@ -191,6 +199,7 @@ export async function importSupplier(
     created: 0,
     skipped: 0,
     skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+    needs_category: [],
   };
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
@@ -225,14 +234,18 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, created, changedPartId } = await matchArticle(
-        context,
-        article,
-        brandOfArticle(article)!,
-        categoryOfArticle(article)!,
-      );
+      const { identifierId, created, changedPartId, categorized } =
+        await matchArticle(
+          context,
+          article,
+          brandOfArticle(article)!,
+          categoryOfArticle(article)!,
+        );
       if (changedPartId) {
         changedPartIds.add(changedPartId);
+      }
+      if (categorized === false) {
+        summary.needs_category.push(article.number);
       }
       const quote = quotes.get(article.article_id);
       if (quote) {

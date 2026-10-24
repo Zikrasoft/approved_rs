@@ -253,7 +253,7 @@ medusaIntegrationTestRunner({
         expect(await found()).toBe(1);
       });
 
-      it('creates the Part without a Category whose required fields the article cannot fill', async () => {
+      it('creates the Part without a Category whose required fields the article cannot fill and names it in the summary', async () => {
         intercars.articles.push({
           article_id: 'IC-3',
           brand: 'MANN-FILTER',
@@ -262,9 +262,13 @@ medusaIntegrationTestRunner({
           category: 'IC-ENGINE-OIL',
         });
 
-        await runImport();
+        const response = await runImport();
 
         expect((await page('OIL5W30'))?.part.category_id).toBeNull();
+        expect(response.data.imports[0]).toMatchObject({
+          supplier: 'Intercars',
+          needs_category: ['OIL 5W30'],
+        });
       });
 
       it('skips an article in an unmapped category or of an unlisted Brand', async () => {
@@ -294,6 +298,7 @@ medusaIntegrationTestRunner({
             created: 0,
             skipped: 2,
             skipped_by_reason: { category: 1, brand: 1, currency: 0 },
+            needs_category: [],
           },
           {
             supplier: 'Warehouse',
@@ -301,6 +306,7 @@ medusaIntegrationTestRunner({
             created: 0,
             skipped: 0,
             skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+            needs_category: [],
           },
         ]);
         expect(await pages()).toHaveLength(1);

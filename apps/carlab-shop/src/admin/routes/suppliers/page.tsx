@@ -79,6 +79,7 @@ const importsSchema = z.object({
         brand: z.number(),
         currency: z.number(),
       }),
+      needs_category: z.array(z.string()),
     }),
   ),
 });
@@ -264,6 +265,10 @@ const SuppliersPage = () => {
       summary.skipped_by_reason.currency > 0 &&
         t('suppliers.importWithoutPrice', {
           count: summary.skipped_by_reason.currency,
+        }),
+      summary.needs_category.length > 0 &&
+        t('suppliers.importWithoutCategory', {
+          numbers: summary.needs_category.join(', '),
         }),
     ]
       .filter(Boolean)
