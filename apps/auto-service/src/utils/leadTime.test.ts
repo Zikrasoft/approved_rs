@@ -1,5 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { availabilityText, formatLeadTime } from './leadTime';
+import {
+  availabilityText,
+  formatLeadTime,
+  schemaAvailability,
+} from './leadTime';
+
+describe('schemaAvailability', () => {
+  it('says in stock while the supplier holds stock', () => {
+    expect(schemaAvailability({ stock_quantity: 3, lead_time_days: 0 })).toBe(
+      'InStock',
+    );
+  });
+
+  it('says back order for an offer orderable on a lead time beyond stock', () => {
+    expect(schemaAvailability({ stock_quantity: 0, lead_time_days: 4 })).toBe(
+      'BackOrder',
+    );
+  });
+
+  it('says out of stock for an offer nobody can order', () => {
+    expect(schemaAvailability({ stock_quantity: 0, lead_time_days: 0 })).toBe(
+      'OutOfStock',
+    );
+  });
+});
 
 describe('formatLeadTime', () => {
   const copy = {

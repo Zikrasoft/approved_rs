@@ -21,6 +21,7 @@ export type {
   BusinessAddress,
   OpeningHours,
   PageSchema,
+  SchemaAvailability,
 } from './jsonLd.ts';
 export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';

@@ -1,3 +1,18 @@
+import type { SchemaAvailability } from '@podbor/site-kit';
+import {
+  isBuyable,
+  type OfferAvailability,
+} from '@podbor/catalog-contract/availability';
+
+export const schemaAvailability = (
+  offer: OfferAvailability,
+): SchemaAvailability =>
+  offer.stock_quantity > 0
+    ? 'InStock'
+    : isBuyable(offer)
+      ? 'BackOrder'
+      : 'OutOfStock';
+
 export type LeadTimeCopy = {
   inStock: string;
   days: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };

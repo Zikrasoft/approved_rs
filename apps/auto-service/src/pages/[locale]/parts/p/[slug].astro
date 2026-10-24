@@ -19,6 +19,7 @@ import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { schemaAvailability } from '@/utils/leadTime';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
@@ -106,7 +107,7 @@ const jsonLd = bestOffer
           description: partName,
           price: bestOffer.price,
           currency: bestOffer.currency,
-          inStock: bestOffer.stock_quantity > 0,
+          availability: schemaAvailability(bestOffer),
           condition: 'NewCondition',
           url,
         }),
