@@ -11,13 +11,14 @@ import {
   createStoresWorkflow,
   updateStoresWorkflow,
 } from '@medusajs/medusa/core-flows';
+import { CARLAB } from '@podbor/brands';
 
 import { SHOP_CURRENCY } from '../modules/supplier/pricing';
 import { CASH_AT_PICKUP_PROVIDER_ID } from './offer-cart';
 
-const SALES_CHANNEL_NAME = 'CarLab parts shop';
+const SALES_CHANNEL_NAME = `${CARLAB.name} parts shop`;
 const REGION_NAME = 'Serbia';
-const STORE_NAME = 'CarLab';
+const STORE_NAME = CARLAB.name;
 const MEDUSA_DEFAULT_STORE_NAME = 'Medusa Store';
 const REGION_CURRENCY = SHOP_CURRENCY.toLowerCase();
 
