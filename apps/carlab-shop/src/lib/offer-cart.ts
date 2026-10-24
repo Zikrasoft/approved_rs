@@ -21,6 +21,7 @@ import {
   listedPartSchema,
   orderCap,
   partPageSlug,
+  translationsSchema,
   type CheckoutRefusal,
   type LineAddon,
   type OfferCart,
@@ -91,12 +92,9 @@ type ServiceCategory = {
 const addonLabelTranslations = ({
   translations,
 }: ServiceCategory): LineAddon['translations'] => {
-  const stored = (translations ?? {}) as Record<
-    string,
-    Record<string, string> | undefined
-  >;
+  const stored = translationsSchema.parse(translations ?? null);
   const labels = CATALOG_TRANSLATION_LOCALES.flatMap((locale) => {
-    const label = stored[locale]?.service_label;
+    const label = stored?.[locale]?.service_label;
     return label ? [[locale, { label }]] : [];
   });
   return labels.length ? Object.fromEntries(labels) : null;
