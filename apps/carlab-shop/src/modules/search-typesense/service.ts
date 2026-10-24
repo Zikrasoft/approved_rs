@@ -1,6 +1,7 @@
 import { AbstractSearchProviderService } from '@medusajs/framework/utils';
 import type { Logger, SearchTypes } from '@medusajs/framework/types';
 import { Client } from 'typesense';
+import { z } from 'zod';
 
 import {
   collectSearchableFields,
@@ -10,6 +11,8 @@ import {
   toFacetResults,
   toTypesenseFields,
 } from './mapping';
+
+const hitDocumentSchema = z.looseObject({ id: z.string() });
 
 type InjectedDependencies = {
   logger: Logger;
@@ -156,11 +159,10 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
       });
 
     return {
-      hits: (response.hits ?? []).map((hit) => ({
-        id: (hit.document as { id: string }).id,
-        score: hit.text_match,
-        document: hit.document as Record<string, unknown>,
-      })),
+      hits: (response.hits ?? []).map((hit) => {
+        const document = hitDocumentSchema.parse(hit.document);
+        return { id: document.id, score: hit.text_match, document };
+      }),
       facets: toFacetResults(facets, response.facet_counts ?? []),
       metadata: {
         skip,
