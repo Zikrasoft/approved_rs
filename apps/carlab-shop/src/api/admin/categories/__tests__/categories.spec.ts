@@ -476,9 +476,12 @@ medusaIntegrationTestRunner({
         await createPart(used.category.id, { viscosity: '5w-30' });
         const unused = await createOilCategory();
 
-        expect(
-          (await remove(`/admin/categories/${used.category.id}`)).status,
-        ).toBe(400);
+        const refused = await remove(`/admin/categories/${used.category.id}`);
+        expect(refused.status).toBe(409);
+        expect(refused.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'part', count: 1 }],
+        });
         expect(
           (await remove(`/admin/categories/${unused.category.id}`)).status,
         ).toBe(200);

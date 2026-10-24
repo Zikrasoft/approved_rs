@@ -290,8 +290,11 @@ medusaIntegrationTestRunner({
 
         const response = await remove(`/admin/brands/${brand.id}`);
 
-        expect(response.status).toBe(400);
-        expect(response.data.code).toBe('IN_USE');
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'part_identifier', count: 1 }],
+        });
         expect(await catalog.listBrands({ id: brand.id })).toHaveLength(1);
       });
 

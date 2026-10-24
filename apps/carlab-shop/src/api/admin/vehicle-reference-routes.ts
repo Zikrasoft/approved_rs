@@ -6,28 +6,53 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
+import type CatalogModuleService from '../../modules/catalog/service';
 import { adminError, parseAdminBody } from '../../lib/admin-errors';
-import { withEditors } from '../../lib/editors';
+import { createdBy, updatedBy, withEditors } from '../../lib/editors';
 import { STORED_ROW_RULES } from './vehicle-validators';
 
 const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();
 
-type Holder = { plural: string; entity: string; column: string };
+type Method = {
+  bivariant(...args: unknown[]): Promise<unknown>;
+}['bivariant'];
+
+type CatalogMethod = {
+  [Key in keyof CatalogModuleService]: CatalogModuleService[Key] extends Method
+    ? Key
+    : never;
+}[keyof CatalogModuleService];
+
+type Plural = {
+  [Key in CatalogMethod]: Key extends `listAndCount${infer Name}`
+    ? `create${Name}` | `update${Name}` | `delete${Name}` extends CatalogMethod
+      ? Name
+      : never
+    : never;
+}[CatalogMethod];
+
+type Singular = {
+  [Key in CatalogMethod]: Key extends `retrieve${infer Name}` ? Name : never;
+}[CatalogMethod];
+
+type Holder = { plural: Plural; entity: string; column: string };
 
 type ReferenceEntity = {
-  singular: string;
-  plural: string;
+  singular: Singular;
+  plural: Plural;
   object: string;
   collection: string;
   relations?: string[];
   holders?: Holder[];
 };
 
-type Method = (...args: unknown[]) => Promise<unknown>;
-
-const service = (req: AuthenticatedMedusaRequest, name: string): Method => {
-  const catalog = req.scope.resolve<Record<string, Method>>(CATALOG_MODULE);
-  return catalog[name].bind(catalog);
+const service = (
+  req: AuthenticatedMedusaRequest,
+  name: CatalogMethod,
+): Method => {
+  const catalog = req.scope.resolve<CatalogModuleService>(CATALOG_MODULE);
+  const method: Method = catalog[name];
+  return method.bind(catalog);
 };
 
 export const collectionRoutes = ({
@@ -56,8 +81,7 @@ export const collectionRoutes = ({
       `create${plural}`,
     )({
       ...req.validatedBody,
-      created_by: req.auth_context.actor_id,
-      updated_by: req.auth_context.actor_id,
+      ...createdBy(req),
     });
     res.json({ [object]: row });
   },
@@ -88,7 +112,7 @@ export const itemRoutes = ({
   singular,
   plural,
   object,
-  holders = [],
+  holders,
 }: ReferenceEntity) => ({
   POST: async (
     req: AuthenticatedMedusaRequest<Record<string, unknown>>,
@@ -109,51 +133,57 @@ export const itemRoutes = ({
     )({
       ...req.validatedBody,
       id,
-      updated_by: req.auth_context.actor_id,
+      ...updatedBy(req),
     });
     res.json({ [object]: row });
   },
   DELETE: async (req: AuthenticatedMedusaRequest, res: MedusaResponse) => {
     const { id } = req.params;
-    await service(req, `retrieve${singular}`)(id);
-    try {
-      await service(req, `delete${plural}`)(id);
-    } catch (error) {
-      if (
-        MedusaError.isMedusaError(error) &&
-        error.type === MedusaError.Types.NOT_FOUND
-      ) {
-        throw adminError(
-          MedusaError.Types.CONFLICT,
-          'IN_USE',
-          `This ${object.replace('_', ' ')} is still in use and cannot be deleted.`,
-          { holders: await countHolders(req, id, holders) },
-        );
-      }
-      throw error;
-    }
+    await deleteUnlessHeld(req, { singular, plural, object, holders }, id);
     res.json({ id, object, deleted: true });
   },
 });
 
-const REQUIREMENTS = { plural: 'Requirements', entity: 'requirement' };
-const VEHICLE_HOLDERS = { plural: 'Vehicles', entity: 'vehicle' };
+export const deleteUnlessHeld = async (
+  req: AuthenticatedMedusaRequest,
+  {
+    singular,
+    plural,
+    object,
+    holders = [],
+  }: Pick<ReferenceEntity, 'singular' | 'plural' | 'object' | 'holders'>,
+  id: string,
+) => {
+  await service(req, `retrieve${singular}`)(id);
+  const held = await countHolders(req, id, holders);
+  if (held.length) {
+    throw adminError(
+      MedusaError.Types.CONFLICT,
+      'IN_USE',
+      `This ${object.replace('_', ' ')} is still in use and cannot be deleted.`,
+      { holders: held },
+    );
+  }
+  await service(req, `delete${plural}`)(id);
+};
 
-export const MAKES = {
+const VEHICLE_HOLDERS = { plural: 'Vehicles', entity: 'vehicle' } as const;
+
+export const MAKES: ReferenceEntity = {
   singular: 'Make',
   plural: 'Makes',
   object: 'make',
   collection: 'makes',
   holders: [{ plural: 'Series', entity: 'series', column: 'make_id' }],
 };
-export const SERIES = {
+export const SERIES: ReferenceEntity = {
   singular: 'Series',
   plural: 'Series',
   object: 'series',
   collection: 'series',
   holders: [{ plural: 'Chassis', entity: 'chassis', column: 'series_id' }],
 };
-export const CHASSIS = {
+export const CHASSIS: ReferenceEntity = {
   singular: 'Chassis',
   plural: 'Chassis',
   object: 'chassis',
@@ -164,36 +194,56 @@ export const CHASSIS = {
       entity: 'vehicle_model',
       column: 'chassis_id',
     },
-    { ...REQUIREMENTS, column: 'chassis_id' },
   ],
 };
-export const VEHICLE_MODELS = {
+export const VEHICLE_MODELS: ReferenceEntity = {
   singular: 'VehicleModel',
   plural: 'VehicleModels',
   object: 'vehicle_model',
   collection: 'vehicle_models',
   holders: [{ ...VEHICLE_HOLDERS, column: 'model_id' }],
 };
-export const ENGINES = {
+export const ENGINES: ReferenceEntity = {
   singular: 'Engine',
   plural: 'Engines',
   object: 'engine',
   collection: 'engines',
-  holders: [
-    { ...VEHICLE_HOLDERS, column: 'engine_id' },
-    { ...REQUIREMENTS, column: 'engine_id' },
-  ],
+  holders: [{ ...VEHICLE_HOLDERS, column: 'engine_id' }],
 };
-export const VEHICLES = {
+export const VEHICLES: ReferenceEntity = {
   singular: 'Vehicle',
   plural: 'Vehicles',
   object: 'vehicle',
   collection: 'vehicles',
   relations: ['identifiers', 'model.chassis.series.make', 'engine'],
 };
-export const VEHICLE_IDENTIFIERS = {
+export const VEHICLE_IDENTIFIERS: ReferenceEntity = {
   singular: 'VehicleIdentifier',
   plural: 'VehicleIdentifiers',
   object: 'vehicle_identifier',
   collection: 'vehicle_identifiers',
+};
+export const BRANDS: Pick<
+  ReferenceEntity,
+  'singular' | 'plural' | 'object' | 'holders'
+> = {
+  singular: 'Brand',
+  plural: 'Brands',
+  object: 'brand',
+  holders: [
+    {
+      plural: 'PartIdentifiers',
+      entity: 'part_identifier',
+      column: 'brand_id',
+    },
+  ],
+};
+export const CATEGORIES: Pick<
+  ReferenceEntity,
+  'singular' | 'plural' | 'object' | 'holders'
+> = {
+  singular: 'Category',
+  plural: 'Categories',
+  object: 'category',
+  holders: [{ plural: 'Parts', entity: 'part', column: 'category_id' }],
 };
