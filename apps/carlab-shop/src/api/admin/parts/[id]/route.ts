@@ -8,6 +8,7 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { deletePartWorkflow } from '../../../../workflows/delete-catalog-rows';
 import type { AdminUpdatePartType } from '../../validators';
+import { updatedBy } from '../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdatePartType>,
@@ -22,7 +23,7 @@ export async function POST(
     installation_price,
     no_installation,
   } = req.validatedBody;
-  const updated_by = req.auth_context.actor_id;
+  const { updated_by } = updatedBy(req);
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const current = await catalog.retrievePart(id);
@@ -40,10 +41,12 @@ export async function POST(
     });
   }
   if (category_id !== undefined || attributes !== undefined) {
+    const nextCategoryId =
+      category_id === undefined ? current.category_id : category_id;
+    const categoryChanged = nextCategoryId !== current.category_id;
     await catalog.classifyPart(id, {
-      category_id:
-        category_id === undefined ? current.category_id : category_id,
-      attributes: attributes ?? {},
+      category_id: nextCategoryId,
+      attributes: attributes ?? (categoryChanged ? {} : current.attributes),
       updated_by,
     });
   }

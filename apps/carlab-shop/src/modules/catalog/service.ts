@@ -544,18 +544,18 @@ class CatalogModuleService extends CatalogModuleBase {
     { category_id, attributes, ...provenance }: PartClassification & Provenance,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    await this.updateParts(
-      {
-        id: partId,
-        category_id,
-        attributes: await this.validatePartAttributes(
-          category_id,
-          attributes,
-          sharedContext,
-        ),
-        ...provenance,
-      },
+    const values = await this.validatePartAttributes(
+      category_id,
+      attributes,
       sharedContext,
+    );
+    await this.updateParts(
+      { id: partId, category_id, ...provenance },
+      sharedContext,
+    );
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      'update "part" set "attributes" = ? where "id" = ?',
+      [JSON.stringify(values), partId],
     );
   }
 

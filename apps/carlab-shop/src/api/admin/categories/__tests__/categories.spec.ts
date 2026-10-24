@@ -235,6 +235,47 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('keeps attributes while the Category stays and clears them only when it changes', async () => {
+        const { category } = await createOilCategory();
+        const part = (
+          await createPart(category.id, { viscosity: '5w-30', volume: 4 })
+        ).data.part;
+        serial += 1;
+        const bare = (
+          await post('/admin/categories', {
+            slug: `bare-${serial}`,
+            name: `Bare ${serial}`,
+            text: 'Bare.',
+          })
+        ).data.category;
+
+        const same = await post(`/admin/parts/${part.id}`, {
+          category_id: category.id,
+        });
+        expect(same.status).toBe(200);
+        expect((await catalog.retrievePart(part.id)).attributes).toEqual({
+          viscosity: '5w-30',
+          volume: 4,
+        });
+
+        const edited = await post(`/admin/parts/${part.id}`, {
+          attributes: { viscosity: '0w-20' },
+        });
+        expect(edited.status).toBe(200);
+        expect((await catalog.retrievePart(part.id)).attributes).toEqual({
+          viscosity: '0w-20',
+        });
+
+        const moved = await post(`/admin/parts/${part.id}`, {
+          category_id: bare.id,
+        });
+        expect(moved.status).toBe(200);
+        expect(await catalog.retrievePart(part.id)).toMatchObject({
+          category_id: bare.id,
+          attributes: {},
+        });
+      });
+
       it('refuses a Part in an unknown Category', async () => {
         expect((await createPart('category_missing', {})).status).toBe(404);
       });
