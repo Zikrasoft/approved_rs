@@ -32,11 +32,16 @@ function memoryStorage(initial: Record<string, string> = {}) {
     getItem: (key: string) => data.get(key) ?? null,
     setItem: (key: string, value: string) => void data.set(key, value),
   };
-  return { storage: () => storage, data };
+  return { storage, data };
 }
 
-const blocked = () => {
-  throw new Error('SecurityError');
+const blocked = {
+  getItem: () => {
+    throw new Error('SecurityError');
+  },
+  setItem: () => {
+    throw new Error('SecurityError');
+  },
 };
 
 describe('storedVin / rememberVin', () => {

@@ -1,4 +1,5 @@
 import * as z from 'zod/mini';
+import { readStoredJson } from '@podbor/site-kit/stored-value';
 import { shopPreview } from './shopPreview';
 
 export const CART_STORAGE_KEY = 'carlab_offer_cart';
@@ -6,16 +7,8 @@ export const CART_CHANGED_EVENT = 'carlab:cart-changed';
 
 const countSchema = z.object({ count: z.number() });
 
-export function cartCount(storage?: Pick<Storage, 'getItem'>): number {
-  try {
-    const parsed = countSchema.safeParse(
-      JSON.parse((storage ?? localStorage).getItem(CART_STORAGE_KEY) ?? 'null'),
-    );
-    return parsed.success ? parsed.data.count : 0;
-  } catch {
-    return 0;
-  }
-}
+export const cartCount = (storage?: Pick<Storage, 'getItem'>): number =>
+  readStoredJson(CART_STORAGE_KEY, countSchema, null, storage)?.count ?? 0;
 
 export function defineCartBadge(tagName = 'cart-badge'): void {
   if (customElements.get(tagName)) return;

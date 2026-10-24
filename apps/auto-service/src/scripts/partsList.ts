@@ -4,6 +4,12 @@ import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { vinFrom } from '@/utils/carFacts';
 import { formatMoney } from '@/utils/money';
 import {
+  forgetStored,
+  readStoredJson,
+  writeStoredJson,
+  type ValueStorage as ListStorage,
+} from '@podbor/site-kit/stored-value';
+import {
   LEAD_FORM_RESULT_EVENT,
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
@@ -58,30 +64,13 @@ export const listedPartFromDataset = (
   return parsed.success ? parsed.data : null;
 };
 
-type ListStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+const partsListSchema = z.array(listedPartSchema);
 
-const orBrowser = (storage?: ListStorage): ListStorage =>
-  storage ?? localStorage;
-
-export function readPartsList(storage?: ListStorage): ListedPart[] {
-  try {
-    const parsed = z
-      .array(listedPartSchema)
-      .safeParse(
-        JSON.parse(orBrowser(storage).getItem(PARTS_LIST_STORAGE_KEY) ?? '[]'),
-      );
-    return parsed.success ? parsed.data : [];
-  } catch {
-    return [];
-  }
-}
+export const readPartsList = (storage?: ListStorage): ListedPart[] =>
+  readStoredJson(PARTS_LIST_STORAGE_KEY, partsListSchema, [], storage);
 
 function writePartsList(parts: ListedPart[], storage?: ListStorage): void {
-  try {
-    orBrowser(storage).setItem(PARTS_LIST_STORAGE_KEY, JSON.stringify(parts));
-  } catch {
-    return;
-  }
+  writeStoredJson(PARTS_LIST_STORAGE_KEY, parts, storage);
 }
 
 export function addToPartsList(part: ListedPart, storage?: ListStorage): void {
@@ -114,11 +103,7 @@ export function setPartAddon(
 }
 
 export function clearPartsList(storage?: ListStorage): void {
-  try {
-    orBrowser(storage).removeItem(PARTS_LIST_STORAGE_KEY);
-  } catch {
-    return;
-  }
+  forgetStored(PARTS_LIST_STORAGE_KEY, storage);
 }
 
 export type ListCar = { car: string; vin?: string };

@@ -18,6 +18,12 @@ import {
 import { formatMoney } from '@/utils/money';
 import type { LineAddonKind } from '@/utils/catalogue';
 import { vinFrom } from '@/utils/carFacts';
+import {
+  forgetStored,
+  readStoredJson,
+  writeStoredJson,
+  type ValueStorage as CartStorage,
+} from '@podbor/site-kit/stored-value';
 import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
 import { PRICES_FILLED_EVENT, shopPreview } from './shopPreview';
 import {
@@ -104,35 +110,17 @@ const cartOutcomeSchema = z.discriminatedUnion('kind', [
 
 type CartOutcome = z.infer<typeof cartOutcomeSchema>;
 
-type CartStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
-
-const orBrowser = (storage?: CartStorage): CartStorage =>
-  storage ?? localStorage;
-
 const announceCartChange = () => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(CART_CHANGED_EVENT));
   }
 };
 
-export function readCart(storage?: CartStorage): StoredCart | null {
-  try {
-    const parsed = storedCartSchema.safeParse(
-      JSON.parse(orBrowser(storage).getItem(CART_STORAGE_KEY) ?? 'null'),
-    );
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
-}
+export const readCart = (storage?: CartStorage): StoredCart | null =>
+  readStoredJson(CART_STORAGE_KEY, storedCartSchema, null, storage);
 
 function writeCart(stored: StoredCart, storage?: CartStorage): void {
-  try {
-    orBrowser(storage).setItem(CART_STORAGE_KEY, JSON.stringify(stored));
-  } catch {
-    return;
-  }
-  announceCartChange();
+  if (writeStoredJson(CART_STORAGE_KEY, stored, storage)) announceCartChange();
 }
 
 const listedLine = ({ part, quantity, addon }: CartLine): ListedPart => ({
@@ -168,12 +156,7 @@ function keepCartId(id: string | null, storage?: CartStorage): void {
 }
 
 export function forgetCart(storage?: CartStorage): void {
-  try {
-    orBrowser(storage).removeItem(CART_STORAGE_KEY);
-  } catch {
-    return;
-  }
-  announceCartChange();
+  if (forgetStored(CART_STORAGE_KEY, storage)) announceCartChange();
 }
 
 export function forgetOrderedCart(
@@ -245,33 +228,21 @@ export function orderSummary(cart: OfferCart) {
   return { count, parts, addons, total: parts + addons };
 }
 
-type FormStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
-
 const RECEIPT_KEY = 'carlab_order_receipt';
 
 export function rememberReceipt(
   cart: OfferCart,
-  storage: FormStorage = sessionStorage,
+  storage: CartStorage = sessionStorage,
 ): void {
-  try {
-    storage.setItem(RECEIPT_KEY, JSON.stringify(cart));
-  } catch {
-    return;
-  }
+  writeStoredJson(RECEIPT_KEY, cart, storage);
 }
 
 export function readReceipt(
   cartId: string | null,
-  storage: FormStorage = sessionStorage,
+  storage: CartStorage = sessionStorage,
 ): OfferCart | null {
-  try {
-    const parsed = offerCartSchema.safeParse(
-      JSON.parse(storage.getItem(RECEIPT_KEY) ?? 'null'),
-    );
-    return parsed.success && parsed.data.id === cartId ? parsed.data : null;
-  } catch {
-    return null;
-  }
+  const receipt = readStoredJson(RECEIPT_KEY, offerCartSchema, null, storage);
+  return receipt?.id === cartId ? receipt : null;
 }
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
@@ -306,35 +277,18 @@ const checkoutMemorySchema = z.object({
 
 type CheckoutMemory = z.infer<typeof checkoutMemorySchema>;
 
-const readMemory = (
-  storage: FormStorage,
-  key: string,
-): CheckoutMemory | null => {
-  try {
-    const parsed = checkoutMemorySchema.safeParse(
-      JSON.parse(storage.getItem(key) ?? 'null'),
-    );
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
-};
+const readMemory = (storage: CartStorage, key: string): CheckoutMemory | null =>
+  readStoredJson(key, checkoutMemorySchema, null, storage);
 
 const writeMemory = (
-  storage: FormStorage,
+  storage: CartStorage,
   key: string,
   memory: CheckoutMemory,
-) => {
-  try {
-    storage.setItem(key, JSON.stringify(memory));
-  } catch {
-    return;
-  }
-};
+) => writeStoredJson(key, memory, storage);
 
 export function rememberCheckout(
   form: HTMLFormElement,
-  storage: FormStorage = sessionStorage,
+  storage: CartStorage = sessionStorage,
 ): void {
   writeMemory(storage, CHECKOUT_MEMORY_KEY, {
     values: Object.fromEntries(
@@ -350,8 +304,8 @@ export function rememberCheckout(
 }
 
 export function forgetCheckout(
-  session: FormStorage = sessionStorage,
-  local: FormStorage = localStorage,
+  session: CartStorage = sessionStorage,
+  local: CartStorage = localStorage,
 ): void {
   const memory = readMemory(session, CHECKOUT_MEMORY_KEY);
   if (memory) {
@@ -365,17 +319,13 @@ export function forgetCheckout(
       ),
     });
   }
-  try {
-    session.removeItem(CHECKOUT_MEMORY_KEY);
-  } catch {
-    return;
-  }
+  forgetStored(CHECKOUT_MEMORY_KEY, session);
 }
 
 export function restoreCheckout(
   form: HTMLFormElement,
-  session: FormStorage = sessionStorage,
-  local: FormStorage = localStorage,
+  session: CartStorage = sessionStorage,
+  local: CartStorage = localStorage,
 ): void {
   const memory =
     readMemory(session, CHECKOUT_MEMORY_KEY) ??

@@ -1,27 +1,15 @@
+import { readStored, writeStored } from './storedValue.ts';
+
+type VinStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
 export const MY_GARAGE_STORAGE_KEY = 'my_garage_vin';
 export const MY_GARAGE_VIN_ATTRIBUTE = 'data-vin-input';
 
-type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
+export const storedVin = (storage?: VinStorage): string =>
+  readStored(MY_GARAGE_STORAGE_KEY, storage) ?? '';
 
-const browserStorage = (): StorageLike => localStorage;
-
-export function storedVin(storage: () => StorageLike = browserStorage): string {
-  try {
-    return storage().getItem(MY_GARAGE_STORAGE_KEY) ?? '';
-  } catch {
-    return '';
-  }
-}
-
-export function rememberVin(
-  vin: string,
-  storage: () => StorageLike = browserStorage,
-): void {
-  try {
-    storage().setItem(MY_GARAGE_STORAGE_KEY, vin);
-  } catch {
-    return;
-  }
+export function rememberVin(vin: string, storage?: VinStorage): void {
+  writeStored(MY_GARAGE_STORAGE_KEY, vin, storage);
 }
 
 export function defineMyGarage(tagName = 'my-garage'): void {
