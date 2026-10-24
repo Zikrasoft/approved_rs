@@ -13,7 +13,7 @@ import type {
   AdminListFitmentsType,
 } from '../validators';
 import { adminError } from '../../../lib/admin-errors';
-import { withEditors } from '../../../lib/editors';
+import { createdBy, withEditors } from '../../../lib/editors';
 import { refuseConflictingFitment } from '../../../lib/fitment-conflicts';
 
 export async function GET(
@@ -57,8 +57,7 @@ export async function POST(
     { vehicle_id },
     {
       ...conditions,
-      created_by: req.auth_context.actor_id,
-      updated_by: req.auth_context.actor_id,
+      ...createdBy(req),
     },
   );
   if (!fitment) {

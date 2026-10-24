@@ -34,3 +34,14 @@ export async function withEditors<Row extends { updated_by?: string | null }>(
     updated_by_user: (row.updated_by && editors.get(row.updated_by)) || null,
   }));
 }
+
+type ActorRequest = { auth_context: { actor_id: string } };
+
+export const updatedBy = (req: ActorRequest) => ({
+  updated_by: req.auth_context.actor_id,
+});
+
+export const createdBy = (req: ActorRequest) => ({
+  created_by: req.auth_context.actor_id,
+  ...updatedBy(req),
+});

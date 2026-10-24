@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreatePartType, AdminSearchPartsType } from '../validators';
-import { withEditors } from '../../../lib/editors';
+import { createdBy, withEditors } from '../../../lib/editors';
 import {
   PART_RELATIONS,
   adminPart,
@@ -78,8 +78,7 @@ export async function POST(
     identifiers,
     category_id,
     attributes,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ part: await adminPart(catalog, partId) });

@@ -13,6 +13,7 @@ import {
 } from '../../../../../lib/images';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
+import { updatedBy } from '../../../../../lib/editors';
 
 async function replaceImage(
   req: AuthenticatedMedusaRequest,
@@ -28,7 +29,7 @@ async function replaceImage(
   await catalog.updateCategories({
     id,
     image,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
   await deleteImageFiles(req.scope, previous ? [previous] : []);
 

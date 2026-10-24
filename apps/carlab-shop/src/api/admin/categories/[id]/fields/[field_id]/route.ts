@@ -7,6 +7,7 @@ import { retrieveCategoryField } from '../../../../../../lib/categories';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import type { AdminUpdateCategoryFieldType } from '../../../../validators';
+import { updatedBy } from '../../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdateCategoryFieldType>,
@@ -36,7 +37,7 @@ export async function POST(
   const field = await catalog.updateCategoryFields({
     id: field_id,
     ...body,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
 
   res.json({ field });

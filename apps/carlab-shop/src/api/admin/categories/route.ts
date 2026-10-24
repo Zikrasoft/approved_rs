@@ -8,7 +8,7 @@ import {
   guardCategoryService,
   withRankedFields,
 } from '../../../lib/categories';
-import { withEditors } from '../../../lib/editors';
+import { createdBy, withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreateCategoryType } from '../validators';
@@ -38,8 +38,7 @@ export async function POST(
   guardCategoryService(req.validatedBody);
   const category = await catalog.createCategories({
     ...req.validatedBody,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ category });

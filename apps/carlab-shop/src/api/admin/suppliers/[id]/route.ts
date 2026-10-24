@@ -9,6 +9,7 @@ import { announceMarkupChange } from '../../../../lib/suppliers/markup-reindex';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 import type { AdminUpdateSupplierType } from '../../validators';
+import { updatedBy } from '../../../../lib/editors';
 
 const supplierSchema = z.object({
   id: z.string(),
@@ -33,7 +34,7 @@ export async function POST(
   const supplier = await supplierService.updateSuppliers({
     id,
     ...req.validatedBody,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
   if (supplier.markup_percentage !== before.markup_percentage) {
     await announceMarkupChange(req.scope, id);

@@ -9,6 +9,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 import type { AdminUpdatePartIdentifierType } from '../../validators';
+import { updatedBy } from '../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdatePartIdentifierType>,
@@ -21,7 +22,7 @@ export async function POST(
   const { superseded, updated_by } = await catalog.updatePartIdentifiers({
     id,
     superseded: req.validatedBody.superseded,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
 
   res.json({ part_identifier: { id, superseded, updated_by } });

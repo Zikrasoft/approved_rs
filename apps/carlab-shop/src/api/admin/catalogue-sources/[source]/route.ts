@@ -8,6 +8,7 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
+import { updatedBy } from '../../../../lib/editors';
 
 export async function DELETE(
   req: AuthenticatedMedusaRequest,
@@ -39,7 +40,7 @@ export async function DELETE(
     await suppliers.updateSuppliers({
       id: supplier.id,
       import_enabled: false,
-      updated_by: req.auth_context.actor_id,
+      ...updatedBy(req),
     });
   }
   res.json({ source, deleted, import_disabled: Boolean(supplier) });

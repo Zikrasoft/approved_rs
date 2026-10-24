@@ -6,6 +6,7 @@ import type {
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
 import type { AdminCreateCategoryFieldType } from '../../../validators';
+import { createdBy } from '../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreateCategoryFieldType>,
@@ -25,8 +26,7 @@ export async function POST(
   const field = await catalog.createCategoryFields({
     ...body,
     category_id: id,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ field });

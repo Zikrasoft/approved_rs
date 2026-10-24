@@ -8,6 +8,7 @@ import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
 import type { AdminCreateBrandSpellingType } from '../../../validators';
+import { createdBy } from '../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreateBrandSpellingType>,
@@ -25,8 +26,7 @@ export async function POST(
     brand_id: id,
     supplier_id,
     value,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ spelling });

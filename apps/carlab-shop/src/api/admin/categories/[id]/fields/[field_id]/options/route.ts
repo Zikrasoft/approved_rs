@@ -10,6 +10,7 @@ import {
 import { CATALOG_MODULE } from '../../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../../modules/catalog/service';
 import type { AdminCreateCategoryFieldOptionType } from '../../../../../validators';
+import { createdBy } from '../../../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminCreateCategoryFieldOptionType>,
@@ -25,8 +26,7 @@ export async function POST(
   const option = await catalog.createCategoryFieldOptions({
     ...req.validatedBody,
     field_id,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ option });

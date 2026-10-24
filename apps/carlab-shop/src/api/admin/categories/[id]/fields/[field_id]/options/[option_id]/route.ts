@@ -10,6 +10,7 @@ import {
 import { CATALOG_MODULE } from '../../../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../../../modules/catalog/service';
 import type { AdminUpdateCategoryFieldOptionType } from '../../../../../../validators';
+import { updatedBy } from '../../../../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdateCategoryFieldOptionType>,
@@ -30,7 +31,7 @@ export async function POST(
   const option = await catalog.updateCategoryFieldOptions({
     id: option_id,
     ...req.validatedBody,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
 
   res.json({ option });

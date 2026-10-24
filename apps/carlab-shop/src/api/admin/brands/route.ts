@@ -3,7 +3,7 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
-import { withEditors } from '../../../lib/editors';
+import { createdBy, withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import type { AdminCreateBrandType } from '../validators';
@@ -30,8 +30,7 @@ export async function POST(
 
   const brand = await catalog.createBrands({
     ...req.validatedBody,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ brand });

@@ -7,6 +7,7 @@ import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { adminPart } from '../../../../../lib/admin-part';
 import type { AdminAddPartIdentifierType } from '../../../validators';
+import { createdBy } from '../../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminAddPartIdentifierType>,
@@ -16,8 +17,7 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await catalog.addPartIdentifier(id, req.validatedBody, {
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ part: await adminPart(catalog, id) });

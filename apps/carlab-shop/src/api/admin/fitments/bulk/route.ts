@@ -7,6 +7,7 @@ import { refuseConflictingFitment } from '../../../../lib/fitment-conflicts';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import type { AdminBulkAttachFitmentsType } from '../../validators';
+import { createdBy } from '../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminBulkAttachFitmentsType>,
@@ -46,8 +47,7 @@ export async function POST(
     filter,
     {
       ...conditions,
-      created_by: req.auth_context.actor_id,
-      updated_by: req.auth_context.actor_id,
+      ...createdBy(req),
     },
   );
 

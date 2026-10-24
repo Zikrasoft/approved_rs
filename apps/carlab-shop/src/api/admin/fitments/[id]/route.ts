@@ -9,6 +9,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { adminFitmentSchema } from '../../../../lib/store-response';
 import { parseAdminBody } from '../../../../lib/admin-errors';
 import { AdminUpdateFitment, StoredFitmentPeriod } from '../../validators';
+import { updatedBy } from '../../../../lib/editors';
 
 export async function POST(
   req: AuthenticatedMedusaRequest,
@@ -25,7 +26,7 @@ export async function POST(
   await catalog.updateFitments({
     ...changes,
     id,
-    updated_by: req.auth_context.actor_id,
+    ...updatedBy(req),
   });
 
   res.json({

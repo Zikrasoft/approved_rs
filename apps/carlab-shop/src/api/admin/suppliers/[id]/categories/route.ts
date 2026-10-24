@@ -4,7 +4,7 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
-import { withEditors } from '../../../../../lib/editors';
+import { createdBy, withEditors } from '../../../../../lib/editors';
 
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
@@ -50,8 +50,7 @@ export async function POST(
     supplier_id: id,
     code,
     category_id,
-    created_by: req.auth_context.actor_id,
-    updated_by: req.auth_context.actor_id,
+    ...createdBy(req),
   });
 
   res.json({ category: { id: mappingId, code, category_id } });
