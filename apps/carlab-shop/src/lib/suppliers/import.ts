@@ -166,7 +166,7 @@ async function stage(
   }
 }
 
-// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make the nightly run slow.
+// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make the import on Publish slow.
 export async function importSupplier(
   scope: MedusaContainer,
   adapter: SupplierAdapter,
