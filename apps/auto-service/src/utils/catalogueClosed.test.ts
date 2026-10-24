@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCatalogue, shopOpen } from './catalogue';
+import { createCatalogue } from './catalogue';
+import { shopOpen } from './catalogueEnv';
 
 const BACKEND_URL = 'http://shop.test';
 

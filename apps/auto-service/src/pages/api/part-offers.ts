@@ -1,12 +1,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import {
-  catalogueFromEnv,
-  catalogueIdSchema,
-  siteEnv,
-  type OffersOutcome,
-} from '@/utils/catalogue';
+import { catalogueIdSchema, type OffersOutcome } from '@/utils/catalogue';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import { previewRequested } from '@/utils/shopPreview';
 
 const INQUIRY: OffersOutcome = { kind: 'inquiry' };

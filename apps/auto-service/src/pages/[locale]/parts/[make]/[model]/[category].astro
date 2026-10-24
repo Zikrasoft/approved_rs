@@ -14,12 +14,12 @@ import { pagesThumbnail } from '@/utils/partImages';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
-import {
-  categoryFacets,
-  makeHubsForBuild,
-  type ModelCategoryEntry,
-  type ModelHubEntry,
-} from '@/utils/catalogue';
+import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import type {
+  ModelCategoryEntry,
+  ModelHubEntry,
+} from '@/utils/catalogueSnapshot';
+import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';

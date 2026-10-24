@@ -9,12 +9,8 @@ import PriceTag from '@/components/PriceTag.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { previewRequested } from '@/utils/shopPreview';
-import {
-  catalogueFromEnv,
-  catalogueIdSchema,
-  shopOpen,
-  siteEnv,
-} from '@/utils/catalogue';
+import { catalogueIdSchema } from '@/utils/catalogue';
+import { catalogueFromEnv, shopOpen, siteEnv } from '@/utils/catalogueEnv';
 import { PathBuilder } from '@/utils/paths';
 import { withFacetCopy } from '@/utils/partsSearch';
 

@@ -8,11 +8,8 @@ import {
 } from '@podbor/catalog-contract';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
 import { localeFieldSchema } from '@/i18n/localeField';
-import {
-  catalogueFromEnv,
-  catalogueIdSchema,
-  siteEnv,
-} from '@/utils/catalogue';
+import { catalogueIdSchema } from '@/utils/catalogue';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import {
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,

@@ -9,11 +9,9 @@ import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import {
-  categoryFacets,
-  categoryPagesForBuild,
-  type CategoryPageEntry,
-} from '@/utils/catalogue';
+import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import type { CategoryPageEntry } from '@/utils/catalogueSnapshot';
+import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';

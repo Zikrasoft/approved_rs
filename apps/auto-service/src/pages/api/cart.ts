@@ -4,12 +4,11 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { previewRequested } from '@/utils/shopPreview';
 import {
-  catalogueFromEnv,
   catalogueIdSchema,
   LINE_ADDON_KINDS,
-  siteEnv,
   type CartOutcome,
 } from '@/utils/catalogue';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
 

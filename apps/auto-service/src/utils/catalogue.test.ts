@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createCatalogue } from './catalogue';
 import {
   catalogueFromEnv,
   categoriesForBuild,
-  categoryFacets,
   categoryPagesForBuild,
   carPagesForBuild,
-  createCatalogue,
   makeHubsForBuild,
   partPagesForBuild,
-} from './catalogue';
+} from './catalogueEnv';
+import { categoryFacets } from './categoryFacets';
 import { PathBuilder } from './paths';
 import { sitemapFilter } from './sitemap';
 

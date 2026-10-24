@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { vinSchema } from '@podbor/catalog-contract';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { carFactsQuery } from '@/utils/carFacts';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogue';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import { PathBuilder } from '@/utils/paths';
 
 const formSchema = z.object({

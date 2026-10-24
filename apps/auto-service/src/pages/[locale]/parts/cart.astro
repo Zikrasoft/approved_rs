@@ -7,7 +7,7 @@ import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { shopOpen } from '@/utils/catalogue';
+import { shopOpen } from '@/utils/catalogueEnv';
 import { localePaths, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = localePaths;

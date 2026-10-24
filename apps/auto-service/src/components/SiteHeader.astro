@@ -7,7 +7,7 @@ import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
 import { content } from '@/i18n/content';
-import { shopOpen } from '@/utils/catalogue';
+import { shopOpen } from '@/utils/catalogueEnv';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;

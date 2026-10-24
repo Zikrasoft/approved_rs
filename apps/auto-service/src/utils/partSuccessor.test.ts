@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PartPageEntry } from './catalogue';
+import type { PartPageEntry } from './catalogueSnapshot';
 import { currentNumbers, partSuccessor } from './partSuccessor';
 
 const bmw = { name: 'BMW', slug: 'bmw' };

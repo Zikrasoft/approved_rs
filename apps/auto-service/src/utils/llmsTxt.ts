@@ -9,7 +9,7 @@ import {
   categoriesForBuild,
   makeHubsForBuild,
   shopOpen,
-} from '@/utils/catalogue';
+} from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';

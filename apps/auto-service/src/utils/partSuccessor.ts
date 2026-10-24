@@ -1,6 +1,6 @@
 import { partPageSlug, type BrandNumber } from '@podbor/catalog-contract';
 import { bestPrice } from './bestPrice';
-import type { PartPageEntry } from './catalogue';
+import type { PartPageEntry } from './catalogueSnapshot';
 
 const slugOf = (number: BrandNumber) =>
   partPageSlug(number.brand.slug, number.normalized_value);

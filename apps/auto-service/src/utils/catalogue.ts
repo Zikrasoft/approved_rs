@@ -10,60 +10,41 @@ import {
   type OfferCart,
   type PartOffer,
   categoriesResponseSchema,
-  describeFacet,
-  enrichmentRule,
   fitmentsResponseSchema,
-  maintenanceKit,
   partPageSlug,
   identifierOffersResponseSchema,
   partPagesResponseSchema,
-  positionGroups,
   PRICE_FACET,
   rangeFilter,
   type RangeFilter,
-  requirementMatches,
   searchResponseSchema,
   translated,
-  universalFacets,
-  usefulFacets,
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   type CatalogLocale,
   type Category,
-  type Fitment,
-  type PartPage,
-  type PositionGroup,
-  type SearchFacet,
   type SearchResponse,
   type SearchResult,
   type Vehicle,
   type VinFacts,
 } from '@podbor/catalog-contract';
+import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import {
-  SHOP_PREVIEW_HEADER,
-  shopOpenSchema,
-} from '@podbor/catalog-contract/preview';
-import { partSuccessor } from './partSuccessor';
+  assembleSnapshot,
+  categoryPagesFrom,
+  makeHubsFrom,
+  type CarPageEntry,
+  type CategoryPageEntry,
+  type MakeHubEntry,
+  type PartPageEntry,
+} from './catalogueSnapshot';
 
 export type { Vehicle, VinFacts };
 
 export const CATALOGUE_TIMEOUT_MS = 10_000;
 export const ORDER_TIMEOUT_MS = 25_000;
-export const MODEL_CATEGORY_MIN_MATCHES = 1;
 const PAGE_BATCH = 1000;
 const OFFERS_BATCH = 100;
-
-export type Fit = Fitment & { vehicle: Vehicle };
-
-export type PartPageEntry = PartPage & {
-  slug: string;
-  indexable: boolean;
-  priceOnRequest: boolean;
-  category: Category | null;
-  fits: Fit[];
-  requirementCars: Vehicle[];
-  kitCars: Vehicle[];
-};
 
 export type SearchQuery = {
   q?: string;
@@ -79,8 +60,6 @@ export type SearchOutcome = Omit<SearchResponse, 'results'> & {
   results: (SearchResult & { slug: string })[];
 };
 
-export type CategoryPageEntry = Category & { pages: PartPageEntry[] };
-
 export const LINE_ADDON_KINDS = ['addon', 'installation'] as const;
 export type LineAddonKind = (typeof LINE_ADDON_KINDS)[number];
 
@@ -88,55 +67,6 @@ export type IdentifierPrices = {
   offers: Record<string, PartOffer[]>;
   installation: Record<string, number | null>;
 };
-
-export type CarPart = Fit & {
-  category_id: string | null;
-  part: PartPage['part'];
-  pages: PartPageEntry[];
-};
-
-export type CarPartGroup = PositionGroup<CarPart> & {
-  category: Category | null;
-};
-
-type Make = Vehicle['model']['chassis']['series']['make'];
-
-export type ModelPart = {
-  part: PartPage['part'];
-  pages: PartPageEntry[];
-  fits: Fit[];
-};
-
-export type CarMatch = {
-  category: Category;
-  quantity: number;
-  parts: ModelPart[];
-};
-
-export type CarKitItem = {
-  category: Category;
-  quantity: number;
-  part: PartPage['part'];
-  pages: PartPageEntry[];
-};
-
-export type CarPageEntry = {
-  vehicle: Vehicle;
-  groups: CarPartGroup[];
-  matches: CarMatch[];
-  kit: CarKitItem[];
-};
-
-export type ModelCategoryEntry = { category: Category; parts: ModelPart[] };
-
-export type ModelHubEntry = {
-  make: Make;
-  model: Vehicle['model'];
-  vehicles: Vehicle[];
-  categories: ModelCategoryEntry[];
-};
-
-export type MakeHubEntry = { make: Make; models: ModelHubEntry[] };
 
 export type VinOutcome =
   | { kind: 'vehicle'; vehicle: Vehicle; facts: VinFacts }
@@ -170,46 +100,6 @@ export type CatalogueConfig = {
   timeoutMs?: number;
   shopOpen?: boolean;
   preview?: boolean;
-};
-
-export type CatalogueEnv = {
-  MEDUSA_BACKEND_URL?: string;
-  MEDUSA_PUBLISHABLE_KEY?: string;
-  SHOP_OPEN?: string;
-};
-
-const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
-  z.preprocess((value) => value || undefined, schema.optional());
-
-const catalogueEnvSchema = z
-  .object({
-    MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
-    MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
-  })
-  .transform(({ MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY }, context) => {
-    if (!MEDUSA_BACKEND_URL) {
-      return null;
-    }
-    if (!MEDUSA_PUBLISHABLE_KEY) {
-      context.addIssue({
-        code: 'custom',
-        path: ['MEDUSA_PUBLISHABLE_KEY'],
-        message: 'MEDUSA_PUBLISHABLE_KEY is required with MEDUSA_BACKEND_URL',
-      });
-      return z.NEVER;
-    }
-    return {
-      backendUrl: MEDUSA_BACKEND_URL,
-      publishableKey: MEDUSA_PUBLISHABLE_KEY,
-    };
-  });
-
-const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
-  const groups = new Map<string, T[]>();
-  for (const item of items) {
-    groups.set(key(item), [...(groups.get(key(item)) ?? []), item]);
-  }
-  return groups;
 };
 
 export function createCatalogue({
@@ -335,132 +225,7 @@ export function createCatalogue({
       }),
       vehicles(),
     ]);
-    const categoryById = new Map(
-      allCategories.map((category) => [category.id, category]),
-    );
-    const vehicleById = new Map(
-      allVehicles.map((vehicle) => [vehicle.id, vehicle]),
-    );
-    const fits = fitments.flatMap((fitment) => {
-      const vehicle = vehicleById.get(fitment.vehicle_id);
-      return vehicle ? [{ ...fitment, vehicle }] : [];
-    });
-    const fitsByPart = groupBy(fits, ({ part_id }) => part_id);
-    const gaps = enrichmentRule(allVehicles);
-    const bySlug = new Map<string, PartPageEntry>();
-    for (const page of pages) {
-      const slug = partPageSlug(page.brand.slug, page.normalized_value);
-      if (bySlug.has(slug)) {
-        continue;
-      }
-      const category = categoryById.get(page.part.category_id ?? '') ?? null;
-      const partFits = fitsByPart.get(page.part.id) ?? [];
-      bySlug.set(slug, {
-        ...page,
-        slug,
-        indexable:
-          gaps({
-            category_id: category?.id ?? null,
-            attributes: page.part.attributes,
-            fitments: partFits.length,
-            equivalents: page.equivalents.length,
-          }).length === 0,
-        priceOnRequest: page.offers.length === 0,
-        category,
-        fits: partFits,
-        requirementCars: [],
-        kitCars: [],
-      });
-    }
-    const entries = [...bySlug.values()];
-    const pagesByPart = groupBy(entries, ({ part }) => part.id);
-    const retired = ({ replaced_by }: PartPage['part']) =>
-      replaced_by !== null && pagesByPart.has(replaced_by.id);
-    const parts = [...pagesByPart.values()].map((partPages) => ({
-      ...partPages[0].part,
-      pages: partPages,
-    }));
-    const matchesFor = (vehicle: Vehicle): CarMatch[] =>
-      requirementMatches(parts, vehicle.requirements).flatMap(
-        ({ category_id, quantity, parts: matched }) => {
-          const category = categoryById.get(category_id);
-          return category
-            ? [
-                {
-                  category,
-                  quantity,
-                  parts: matched.map(({ pages }) => ({
-                    part: pages[0].part,
-                    pages,
-                    fits: [],
-                  })),
-                },
-              ]
-            : [];
-        },
-      );
-    const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
-    const cars = allVehicles.map((vehicle): CarPageEntry => {
-      const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap(
-        (fit) => {
-          const partPages = pagesByPart.get(fit.part_id);
-          return partPages && !retired(partPages[0].part)
-            ? [
-                {
-                  ...fit,
-                  part: partPages[0].part,
-                  category_id: partPages[0].part.category_id,
-                  pages: partPages,
-                },
-              ]
-            : [];
-        },
-      );
-      const groups = positionGroups(candidates, {
-        steering: vehicle.steering ?? undefined,
-      }).map((group) => ({
-        ...group,
-        category: categoryById.get(group.category_id ?? '') ?? null,
-      }));
-      const matches = matchesFor(vehicle);
-      const kit = maintenanceKit(
-        allCategories,
-        groups,
-        matches.map(({ category, quantity, parts: matched }) => ({
-          category_id: category.id,
-          quantity,
-          parts: matched.map(({ part }) => part),
-        })),
-      ).flatMap(({ category_id, part_id, quantity }) => {
-        const partPages = pagesByPart.get(part_id) ?? [];
-        const category = categoryById.get(category_id);
-        return category && partPages.length
-          ? [{ category, quantity, part: partPages[0].part, pages: partPages }]
-          : [];
-      });
-      return { vehicle, groups, matches, kit };
-    });
-    for (const { vehicle, matches, kit } of cars) {
-      for (const { pages: partPages } of matches.flatMap(
-        (match) => match.parts,
-      )) {
-        partPages.forEach((page) => page.requirementCars.push(vehicle));
-      }
-      for (const { pages: partPages } of kit) {
-        partPages.forEach((page) => page.kitCars.push(vehicle));
-      }
-    }
-    return {
-      categories: allCategories,
-      categoryById,
-      vehicles: allVehicles,
-      fits,
-      entries,
-      pagesByPart,
-      retired,
-      matchesFor,
-      cars,
-    };
+    return assembleSnapshot(pages, allCategories, fitments, allVehicles);
   };
 
   return {
@@ -472,13 +237,7 @@ export function createCatalogue({
     },
 
     async categoryPages(): Promise<CategoryPageEntry[]> {
-      const { categories: all, entries } = await snapshot();
-      const bySlug = new Map(entries.map((page) => [page.slug, page]));
-      const listed = entries.filter((page) => !partSuccessor(page, bySlug));
-      return all.map((category) => ({
-        ...category,
-        pages: listed.filter((page) => page.category?.id === category.id),
-      }));
+      return categoryPagesFrom(await snapshot());
     },
 
     async carPages(): Promise<CarPageEntry[]> {
@@ -486,54 +245,7 @@ export function createCatalogue({
     },
 
     async makeHubs(): Promise<MakeHubEntry[]> {
-      const {
-        categories: all,
-        vehicles: allVehicles,
-        pagesByPart,
-        retired,
-        matchesFor,
-      } = await snapshot();
-      const parts = [...pagesByPart.values()].filter(
-        (pages) => !retired(pages[0].part),
-      );
-      const models = [
-        ...groupBy(allVehicles, ({ model }) => model.slug).values(),
-      ].map((vehicles): ModelHubEntry => {
-        const ids = new Set(vehicles.map(({ id }) => id));
-        const { model } = vehicles[0];
-        const required = vehicles.flatMap(matchesFor);
-        return {
-          make: model.chassis.series.make,
-          model,
-          vehicles,
-          categories: all.flatMap((category) => {
-            const fitted = parts.flatMap((pages) => {
-              const fits = pages[0].fits.filter(({ vehicle_id }) =>
-                ids.has(vehicle_id),
-              );
-              return pages[0].part.category_id === category.id && fits.length
-                ? [{ part: pages[0].part, pages, fits }]
-                : [];
-            });
-            const matches = [
-              ...fitted,
-              ...required
-                .filter((match) => match.category.id === category.id)
-                .flatMap((match) => match.parts),
-            ].filter(
-              (match, index, all) =>
-                all.findIndex(({ part }) => part.id === match.part.id) ===
-                index,
-            );
-            return matches.length >= MODEL_CATEGORY_MIN_MATCHES
-              ? [{ category, parts: matches }]
-              : [];
-          }),
-        };
-      });
-      return [...groupBy(models, ({ make }) => make.slug).values()].map(
-        (makeModels) => ({ make: makeModels[0].make, models: makeModels }),
-      );
+      return makeHubsFrom(await snapshot());
     },
 
     async search({
@@ -752,98 +464,4 @@ export function createCatalogue({
       }
     },
   };
-}
-
-const tally = (values: string[]) => {
-  const counts = new Map<string, number>();
-  for (const value of values) {
-    counts.set(value, (counts.get(value) ?? 0) + 1);
-  }
-  return [...counts].map(([value, count]) => ({ value, count }));
-};
-
-export function categoryFacets(
-  category: CategoryPageEntry,
-  locale: CatalogLocale,
-): SearchFacet[] {
-  const { pages } = category;
-  const best = pages.flatMap(({ offers }) => offers.slice(0, 1));
-  const prices = best.map(({ price }) => price);
-  const brandName = new Map(pages.map(({ brand }) => [brand.slug, brand.name]));
-  const universal = universalFacets({
-    brands: tally(pages.map(({ brand }) => brand.slug)).map((value) => ({
-      ...value,
-      label: brandName.get(value.value) ?? value.value,
-    })),
-    inStock: best.filter(({ stock_quantity }) => stock_quantity > 0).length,
-    price: prices.length
-      ? {
-          min: Math.min(...prices),
-          max: Math.max(...prices),
-          count: prices.length,
-        }
-      : null,
-    currency: best[0]?.currency ?? '',
-  });
-  const fields = category.fields
-    .filter(({ facet }) => facet)
-    .map((field) =>
-      describeFacet(
-        field,
-        tally(
-          pages.flatMap(({ part }) =>
-            [part.attributes[field.key] ?? []].flat().map(String),
-          ),
-        ),
-        locale,
-      ),
-    );
-  return usefulFacets([...universal, ...fields], pages.length, []);
-}
-
-export const shopOpen = (env: CatalogueEnv = siteEnv()): boolean =>
-  shopOpenSchema.parse(env.SHOP_OPEN) ?? false;
-
-export function catalogueFromEnv(
-  env: CatalogueEnv,
-  { preview = false }: { preview?: boolean } = {},
-) {
-  const config = catalogueEnvSchema.parse(env);
-  return config
-    ? createCatalogue({ ...config, shopOpen: shopOpen(env), preview })
-    : null;
-}
-
-export const siteEnv = (): CatalogueEnv => ({
-  MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
-  MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
-  SHOP_OPEN: import.meta.env.SHOP_OPEN,
-});
-
-export async function partPagesForBuild(
-  env = siteEnv(),
-): Promise<PartPageEntry[]> {
-  return (await catalogueFromEnv(env)?.partPages()) ?? [];
-}
-
-export async function categoriesForBuild(env = siteEnv()): Promise<Category[]> {
-  return (await catalogueFromEnv(env)?.categories()) ?? [];
-}
-
-export async function categoryPagesForBuild(
-  env = siteEnv(),
-): Promise<CategoryPageEntry[]> {
-  return (await catalogueFromEnv(env)?.categoryPages()) ?? [];
-}
-
-export async function carPagesForBuild(
-  env = siteEnv(),
-): Promise<CarPageEntry[]> {
-  return (await catalogueFromEnv(env)?.carPages()) ?? [];
-}
-
-export async function makeHubsForBuild(
-  env = siteEnv(),
-): Promise<MakeHubEntry[]> {
-  return (await catalogueFromEnv(env)?.makeHubs()) ?? [];
 }

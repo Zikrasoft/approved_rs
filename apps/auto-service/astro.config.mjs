@@ -7,7 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { sitemapFilter } from './src/utils/sitemap.ts';
-import { partPagesForBuild } from './src/utils/catalogue.ts';
+import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild({
