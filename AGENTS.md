@@ -540,8 +540,8 @@ reaches Google Ads conversions where `GOOGLE_ADS_ID`/`GOOGLE_CONVERSION_LABELS`
 are set. Every event must also be marked a key event in **all three** GA4
 properties — one fired in code but not marked there is silently excluded from
 conversion reporting. The shop funnel goals (`add_to_cart`, `begin_checkout`,
-`purchase`) are the exception: carlab.rs only, dormant and unwired since the
-old shop's teardown (ADR-0036); see `docs/guides/analytics.md`. The vocabulary, the
+`purchase`) are the exception: carlab.rs only, not fired by the offer cart
+until the shop opens (ADR-0045); see `docs/guides/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in

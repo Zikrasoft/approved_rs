@@ -35,6 +35,8 @@ Decided 2026-10-20 with the owner, extending [ADR-0040](0040-one-catalog-module-
 
   "Confirm your variant" applies within one Category and one position, and a Fitment with a note always asks.
 
+  Staff attach or detach one Part to many Vehicles at once (`/admin/fitments/bulk`, `/admin/fitments/bulk/delete`). A Fitment that contradicts a Vehicle's Requirement is refused with the conflicts listed, and saved only when staff resend it with `confirm_conflicts`.
+
 - **Maintenance kit.** A Category flag and rank mark what a "maintenance kit" contains. The kit is assembled from Fitments and Requirements per Vehicle and never stored.
 - **Provenance.** Every catalogue row records who created and last changed it, and when. There is no full change history; database backups cover rollback.
 

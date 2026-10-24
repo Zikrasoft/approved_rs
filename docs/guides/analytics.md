@@ -164,15 +164,15 @@ and serves as a cross-check, the same role Metrika's automatic goals played.
 
 ## The CarLab shop
 
-The old Medusa-backed shop (catalog, cart, checkout) is gone; see
-[ADR-0036](../adr/0036-delete-the-old-medusa-shop-entirely.md). `GOALS.addToCart`
-/ `beginCheckout` / `purchase` (`add_to_cart`, `begin_checkout`, `purchase`,
-GA4's standard ecommerce event names) and their row in `META_EVENTS`
-(`packages/site-kit/src/analytics.ts`) stay in the shared vocabulary dormant
-and unwired: no code on carlab.rs currently fires them. Whatever the new shop
-turns out to be, it is expected to wire these same goals from `items[]` /
-`value`/`currency` (`rsd`) rather than invent new event names, and to mark them
-as key events in the GA4 property only once it actually ships.
+carlab.rs sells parts from a live-quoted offer cart
+([ADR-0045](../adr/0045-offer-cart-closed-beta-order-lead.md)), still in closed
+beta. `GOALS.addToCart` / `beginCheckout` / `purchase` (`add_to_cart`,
+`begin_checkout`, `purchase`, GA4's standard ecommerce event names) and their
+row in `META_EVENTS` (`packages/site-kit/src/analytics.ts`) stay in the shared
+vocabulary but are not fired yet: the cart and checkout reach no `reachGoal`.
+When the shop opens (`SHOP_OPEN=true`), wire these same goals from the offer
+cart's `items[]` / `value` / `currency` (`rsd`) rather than invent new event
+names, and mark them as key events in the GA4 property at the same time.
 
 ## Meta Pixel
 
