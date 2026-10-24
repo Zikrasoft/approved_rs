@@ -6,10 +6,9 @@ import type {
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
 import type { AdminUpdatePartIdentifierType } from '../../validators';
 import { updatedBy } from '../../../../lib/editors';
+import { deletePartIdentifierWorkflow } from '../../../../workflows/delete-catalog-rows';
 
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminUpdatePartIdentifierType>,
@@ -34,11 +33,7 @@ export async function DELETE(
 ): Promise<void> {
   const { id } = req.params;
 
-  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
-  const supplier: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
-
-  await catalog.removePartIdentifier(id);
-  await supplier.deleteSupplierOffers({ part_identifier_id: id });
+  await deletePartIdentifierWorkflow(req.scope).run({ input: { id } });
 
   res.json({ id, object: 'part_identifier', deleted: true });
 }

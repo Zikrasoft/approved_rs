@@ -485,6 +485,12 @@ medusaIntegrationTestRunner({
             stock_quantity: 1,
             lead_time_days: 0,
           });
+          const staged = await supplierService.createStagedRecords({
+            supplier_id: supplier.id,
+            part_identifier_id: identifier.id,
+            kind: 'images',
+            payload: { items: [] },
+          });
           const vehicle = (
             await createVehicleFixture(catalog, { typeCode: value })
           ).vehicle;
@@ -492,11 +498,11 @@ medusaIntegrationTestRunner({
             part_id: part.id,
             vehicle_id: vehicle.id,
           });
-          return { part, identifier, offer, vehicle, fitment };
+          return { part, identifier, offer, staged, vehicle, fitment };
         };
 
-        it('deleting a Part removes its identifiers, offers and Fitments but keeps the Vehicle', async () => {
-          const { part, identifier, offer, vehicle, fitment } =
+        it('deleting a Part removes its identifiers, offers, staged records and Fitments but keeps the Vehicle', async () => {
+          const { part, identifier, offer, staged, vehicle, fitment } =
             await createPartWithOfferAndFitment('DELETE-PART-1');
 
           const response = await api.delete(
@@ -519,13 +525,16 @@ medusaIntegrationTestRunner({
           expect(
             await supplierService.listSupplierOffers({ id: offer.id }),
           ).toHaveLength(0);
+          expect(
+            await supplierService.listStagedRecords({ id: staged.id }),
+          ).toHaveLength(0);
           expect(await catalog.listVehicles({ id: vehicle.id })).toHaveLength(
             1,
           );
         });
 
-        it('deleting a PartIdentifier removes its offers but keeps the Part', async () => {
-          const { part, identifier, offer } =
+        it('deleting a PartIdentifier removes its offers and staged records but keeps the Part', async () => {
+          const { part, identifier, offer, staged } =
             await createPartWithOfferAndFitment('DELETE-IDENTIFIER-1');
           await api.post(
             `/admin/parts/${part.id}/identifiers`,
@@ -544,13 +553,15 @@ medusaIntegrationTestRunner({
           expect(
             await supplierService.listSupplierOffers({ id: offer.id }),
           ).toHaveLength(0);
+          expect(
+            await supplierService.listStagedRecords({ id: staged.id }),
+          ).toHaveLength(0);
           expect(await catalog.listParts({ id: part.id })).toHaveLength(1);
         });
 
-        it('refuses to delete the last number of a Part', async () => {
-          const { part, identifier } = await createPartWithOfferAndFitment(
-            'DELETE-LAST-NUMBER-1',
-          );
+        it('refuses to delete the last number of a Part and keeps its supplier rows', async () => {
+          const { part, identifier, offer, staged } =
+            await createPartWithOfferAndFitment('DELETE-LAST-NUMBER-1');
 
           const response = await api
             .delete(`/admin/part-identifiers/${identifier.id}`, adminHeaders)
@@ -560,6 +571,17 @@ medusaIntegrationTestRunner({
           expect(response.data).toMatchObject({ code: 'LAST_IDENTIFIER' });
           expect(
             await catalog.listPartIdentifiers({ part_id: part.id }),
+          ).toHaveLength(1);
+          expect(
+            await supplierService.listSupplierOffers({ id: offer.id }),
+          ).toMatchObject([
+            {
+              cost_price: 1000,
+              supplier_article_id: offer.supplier_article_id,
+            },
+          ]);
+          expect(
+            await supplierService.listStagedRecords({ id: staged.id }),
           ).toHaveLength(1);
         });
 

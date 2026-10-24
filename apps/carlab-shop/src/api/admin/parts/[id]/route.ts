@@ -6,8 +6,7 @@ import type {
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
+import { deletePartWorkflow } from '../../../../workflows/delete-catalog-rows';
 import type { AdminUpdatePartType } from '../../validators';
 
 export async function POST(
@@ -74,13 +73,13 @@ export async function DELETE(
   const { id } = req.params;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
-  const supplier: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
 
   const part = await catalog.retrievePart(id, { relations: ['identifiers'] });
-
-  await catalog.deleteParts(id);
-  await supplier.deleteSupplierOffers({
-    part_identifier_id: part.identifiers.map((identifier) => identifier.id),
+  await deletePartWorkflow(req.scope).run({
+    input: {
+      id,
+      identifierIds: part.identifiers.map((identifier) => identifier.id),
+    },
   });
 
   res.json({ id, object: 'part', deleted: true });

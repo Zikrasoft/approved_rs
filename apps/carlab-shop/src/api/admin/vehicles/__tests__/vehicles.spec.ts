@@ -4,6 +4,8 @@ import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
+import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
 medusaIntegrationTestRunner({
   moduleName: 'catalog',
@@ -334,6 +336,15 @@ medusaIntegrationTestRunner({
           part_id: part.id,
           vehicle_id: vehicle.id,
         });
+        const vinLookups: VinLookupModuleService =
+          getContainer().resolve(VIN_LOOKUP_MODULE);
+        const lookup = await vinLookups.createVinLookups({
+          vin: 'WBA00000000DEL001',
+          facts: {},
+          make: 'bmw',
+          code: 'DEL1',
+          vehicle_id: vehicle.id,
+        });
 
         const response = await remove(`/admin/vehicles/${vehicle.id}`);
 
@@ -347,6 +358,10 @@ medusaIntegrationTestRunner({
         ).toHaveLength(0);
         expect(await catalog.listFitments({ id: fitment.id })).toHaveLength(0);
         expect(await catalog.listParts({ id: part.id })).toHaveLength(1);
+        expect(await vinLookups.retrieveVinLookup(lookup.id)).toMatchObject({
+          vehicle_id: null,
+          code: 'DEL1',
+        });
       });
 
       it('returns a 404 for an unknown Vehicle', async () => {
