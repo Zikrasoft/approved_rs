@@ -141,7 +141,7 @@ async function stage(
 ): Promise<void> {
   for (const kind of STAGED_DATA_KINDS) {
     const items = article[kind];
-    if (items.length === 0) {
+    if (!items) {
       continue;
     }
     const [existing] = await suppliers.listStagedRecords({
@@ -149,6 +149,12 @@ async function stage(
       part_identifier_id: identifierId,
       kind,
     });
+    if (!items.length) {
+      if (existing) {
+        await suppliers.deleteStagedRecords(existing.id);
+      }
+      continue;
+    }
     await (existing
       ? suppliers.updateStagedRecords({ id: existing.id, payload: { items } })
       : suppliers.createStagedRecords({

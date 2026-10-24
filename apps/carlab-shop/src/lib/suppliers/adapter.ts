@@ -13,9 +13,9 @@ export const supplierArticleSchema = z.object({
   number: z.string(),
   name: z.string().trim().min(1),
   category: z.string(),
-  cross_references: z.array(crossReferenceSchema).default([]),
-  applicability: z.array(z.string()).default([]),
-  images: z.array(z.url()).default([]),
+  cross_references: z.array(crossReferenceSchema).optional(),
+  applicability: z.array(z.string()).optional(),
+  images: z.array(z.url()).optional(),
 });
 
 export const cataloguePageSchema = z.object({

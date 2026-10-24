@@ -623,6 +623,46 @@ medusaIntegrationTestRunner({
         expect(await page('W1130')).toBeUndefined();
       });
 
+      it('keeps a staged kind the supplier leaves out and clears one it reports empty', async () => {
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const article = {
+          article_id: 'IC-15',
+          brand: 'MANN-FILTER',
+          number: 'W 1150',
+          name: 'Фильтр W1150',
+          category: 'IC-OIL',
+        };
+        const stagedKinds = async () => {
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: (await page('W1150'))!.part.id,
+          });
+          return (
+            await suppliers.listStagedRecords({
+              part_identifier_id: identifier.id,
+            })
+          )
+            .map(({ kind }) => kind)
+            .sort();
+        };
+        intercars.articles.push({
+          ...article,
+          cross_references: [{ brand: 'BMW', number: '11 42 7 953 125' }],
+          applicability: ['BMW 3 F30 320d'],
+        });
+        await runImport();
+        expect(await stagedKinds()).toEqual([
+          'applicability',
+          'cross_references',
+        ]);
+
+        intercars.articles.length = 0;
+        intercars.articles.push({ ...article, cross_references: [] });
+        await runImport();
+
+        expect(await stagedKinds()).toEqual(['applicability']);
+      });
+
       it('switches a supplier import off and on again', async () => {
         const switchImport = (import_enabled: boolean) =>
           api.post(
