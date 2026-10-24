@@ -12,7 +12,9 @@ import { createVehicleFixture } from '../../../../../integration-tests/vehicleFi
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
-import retryOrderLeads from '../../../../jobs/retry-order-leads';
+import retryOrderLeads, {
+  retryOrderLeadsAt,
+} from '../../../../jobs/retry-order-leads';
 import {
   LEAD_HANDED_OFF_AT,
   LEAD_HANDOFF_ERROR,
@@ -1151,11 +1153,11 @@ medusaIntegrationTestRunner({
         leads.length = 0;
         leadRouteStatus = 302;
 
-        await retryOrderLeads(getContainer(), settled());
+        await retryOrderLeadsAt(getContainer(), settled());
 
         expect(leadsFor(placed)).toHaveLength(1);
         expect((await refused()).metadata?.[LEAD_HANDOFF_ERROR]).toBeFalsy();
-        await retryOrderLeads(getContainer(), settled());
+        await retryOrderLeadsAt(getContainer(), settled());
         expect(leadsFor(placed)).toHaveLength(1);
       });
 
@@ -1175,11 +1177,11 @@ medusaIntegrationTestRunner({
         await retryOrderLeads(getContainer());
         expect(leadsFor(placed)).toHaveLength(0);
 
-        await retryOrderLeads(getContainer(), settled());
+        await retryOrderLeadsAt(getContainer(), settled());
         expect(leadsFor(placed)).toEqual([
           expect.objectContaining({ order_id: placed.data.order.id }),
         ]);
-        await retryOrderLeads(getContainer(), settled());
+        await retryOrderLeadsAt(getContainer(), settled());
         expect(leadsFor(placed)).toHaveLength(1);
       });
 
@@ -1195,7 +1197,7 @@ medusaIntegrationTestRunner({
         );
 
         for (let run = 0; run < 15; run += 1) {
-          await retryOrderLeads(getContainer(), settled());
+          await retryOrderLeadsAt(getContainer(), settled());
         }
 
         expect(leadsFor(placed)).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);

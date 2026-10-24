@@ -11,10 +11,7 @@ import {
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
 
-export default async function retryOrderLeads(
-  container: MedusaContainer,
-  now: Date = new Date(),
-) {
+export async function retryOrderLeadsAt(container: MedusaContainer, now: Date) {
   const orders = await container.resolve(Modules.ORDER).listOrders(
     {
       created_at: {
@@ -32,6 +29,10 @@ export default async function retryOrderLeads(
       await handOrderToLeadRoute(container, id);
     }
   }
+}
+
+export default async function retryOrderLeads(container: MedusaContainer) {
+  await retryOrderLeadsAt(container, new Date());
 }
 
 export const config = {
