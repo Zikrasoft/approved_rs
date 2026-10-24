@@ -7,7 +7,7 @@ import {
   checkoutContactSchema,
 } from '@podbor/catalog-contract';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm';
-import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '@/i18n/config';
+import { localeFieldSchema } from '@/i18n/localeField';
 import {
   catalogueFromEnv,
   catalogueIdSchema,
@@ -29,13 +29,11 @@ const orderSchema = z.object({
   [CART_FINGERPRINT_FIELD]: z.string().min(1).max(10_000),
 });
 
-const localeSchema = z.enum(SUPPORTED_LOCALES).catch(PRIMARY_LOCALE);
-
 export const POST: APIRoute = async ({ request, redirect }) => {
   const form = Object.fromEntries(
     await request.formData().catch(() => new FormData()),
   );
-  const locale = localeSchema.parse(form.locale);
+  const locale = localeFieldSchema.parse(form.locale);
   const toCart = (notice: CartNotice, extra: Record<string, string> = {}) =>
     redirect(
       `${PathBuilder.partsCart(locale)}?${new URLSearchParams({ [CART_NOTICE_PARAM]: notice, ...extra })}`,
