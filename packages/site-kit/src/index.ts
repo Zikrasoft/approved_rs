@@ -21,9 +21,11 @@ export type {
   BusinessAddress,
   OpeningHours,
   PageSchema,
+  SchemaAvailability,
 } from './jsonLd.ts';
 export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';
+export { paragraphs } from './paragraphs.ts';
 export { mapEmbedSrc, mapPlaceUrl } from './mapEmbed.ts';
 export {
   LOCALE_CHOICE_ATTRIBUTE,

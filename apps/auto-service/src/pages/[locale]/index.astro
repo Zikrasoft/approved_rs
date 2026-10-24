@@ -20,7 +20,6 @@ import ContactChannels from '@/components/ContactChannels.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { devOnly, shopBuilt, shopIndexed } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -167,36 +166,8 @@ const website = websiteSchema({
   </section>
 
   <section class="wrap pb-band md:pb-band-lg">
-    <div
-      class:list={[
-        'card grid gap-6 p-6 lg:p-8',
-        shopIndexed() && 'lg:grid-cols-2',
-      ]}
-    >
-      {
-        shopBuilt() && (
-          <div class="flex flex-col gap-3" {...devOnly()}>
-            <span class="eyebrow">{home.shopTeaser.eyebrow}</span>
-            <h2 class="text-section">{home.shopTeaser.heading}</h2>
-            <p class="text-base leading-relaxed text-muted">
-              {home.shopTeaser.body}
-            </p>
-            <a
-              href={PathBuilder.shop(locale)}
-              class="btn btn-primary mt-2 w-fit"
-            >
-              {home.shopTeaser.cta}
-            </a>
-          </div>
-        )
-      }
-      <div
-        class:list={[
-          'flex flex-col gap-3',
-          shopIndexed() &&
-            'border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0',
-        ]}
-      >
+    <div class="card grid gap-6 p-6 lg:p-8">
+      <div class="flex flex-col gap-3">
         <span class="eyebrow">{home.accident.eyebrow}</span>
         <h2 class="text-section">{home.accident.heading}</h2>
         <p class="text-base leading-relaxed text-muted">{home.accident.body}</p>

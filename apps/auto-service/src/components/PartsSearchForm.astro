@@ -1,0 +1,85 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { PARTS_QUERY_MAX_LENGTH } from '@/utils/partsSearch';
+
+interface Props {
+  query?: string;
+  category?: string;
+  titled?: boolean;
+  compact?: boolean;
+}
+
+const { query = '', category, titled = true, compact = false } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+---
+
+<form
+  method="GET"
+  action={PathBuilder.partsSearch(locale)}
+  role="search"
+  class:list={[
+    compact ? 'flex gap-2' : 'card flex flex-col gap-4 border-ink p-5 sm:p-6',
+  ]}
+>
+  {category && <input type="hidden" name="category" value={category} />}
+  {
+    compact ? (
+      <>
+        <label class="block min-w-0 flex-1">
+          <span class="sr-only">
+            {copy.label}. {copy.searchLead}
+          </span>
+          <input
+            type="search"
+            name="q"
+            required
+            maxlength={PARTS_QUERY_MAX_LENGTH}
+            value={query}
+            autocomplete="off"
+            spellcheck="false"
+            placeholder={copy.placeholder}
+            class="field min-h-11 py-2"
+          />
+        </label>
+        <button type="submit" class="btn btn-primary min-h-11 px-4 py-2">
+          {copy.submitLabel}
+        </button>
+      </>
+    ) : (
+      <>
+        {!query && (
+          <div class="flex flex-col gap-1">
+            {titled && <h2 class="text-section">{copy.searchHeading}</h2>}
+            <p class="max-w-2xl text-sm leading-relaxed text-ink-2">
+              {copy.searchLead}
+            </p>
+          </div>
+        )}
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label class="block min-w-0 flex-1">
+            <span class="field-label">{copy.label}</span>
+            <input
+              type="search"
+              name="q"
+              required
+              maxlength={PARTS_QUERY_MAX_LENGTH}
+              value={query}
+              autocomplete="off"
+              spellcheck="false"
+              placeholder={copy.placeholder}
+              class="field"
+            />
+          </label>
+          <button type="submit" class="btn btn-primary">
+            {copy.submitLabel}
+            <Icon name="arrowRight" />
+          </button>
+        </div>
+      </>
+    )
+  }
+</form>

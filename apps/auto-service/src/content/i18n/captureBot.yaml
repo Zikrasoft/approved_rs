@@ -41,87 +41,87 @@ profile:
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Zdravo! Hvala što ste se javili. Vaša prijava je primljena, menadžer će vam uskoro odgovoriti.
-    lookingFor: Ispričajte kako se zove vaša mašina — marka, model, godina — i šta je pošlo po zlu ili koje radove trebate.
-    phoneAsk: Nemate korisničko ime (username) u Telegramu, pa menadžer ne može da vam piše. Molimo vas ostavite broj telefona kako bismo mogli da vas kontaktiramo.
-    phoneButton: 📱 Podeliti broj
-    thanks: Hvala! Prosledili smo menadžeru, on će vas uskoro kontaktirati.
-    received: Primili smo, menadžer će videti vašu poruku.
+    greeting: Zdravo! Hvala što ste se javili. Vaša prijava je primljena, menadžer će uskoro odgovoriti.
+    lookingFor: Recite nam koja je vaša mašina — marka, model, godina — i šta se desilo ili koje radove treba izvršiti.
+    phoneAsk: Nemate korisničko ime u Telegramu, tako da menadžer ne može da vam piše. Ostavite broj telefona da možemo da vas kontaktiramo.
+    phoneButton: 📱 Podeli broj
+    thanks: Hvala! Preneli smo menadžeru, uskoro će vas kontaktirati.
+    received: Prijem, menadžer će videti vašu poruku.
     menu:
-      text: Kako možemo da pomognemo? Izaberite šta vas zanima.
+      text: Kako možemo pomoći? Izaberite ono što vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Evo čime se bavimo u servisu. Izaberite uslugu — pokazaćemo cenu, rokove i šta se uključuje.
+      text: Evo šta radimo u servisu. Izaberite uslugu — prikazaćemo cenu, rokove i šta je uključeno.
     card:
-      request: 📝 Ostaviti zahtev
+      request: 📝 Ostavite prijavu
       site: Više na sajtu
     contacts:
       button: Kontakti
       text: Mi smo u Beogradu, čekamo vas u servisu.
       hours: Pon–Pet 08:00–18:00 · Sub 09:00–14:00
     manager:
-      button: 👤 Piši menadžeru
+      button: 👤 Pišite menadžeru
       text: Postavite svoje pitanje u jednoj poruci, menadžer će odgovoriti ovde.
-      handoff: Menadžer je dostupan na Telegramu. Kliknite da otvorite čet.
-      chat: Otvorite čet sa menadžerom ↗
+      handoff: Menadžer je dostupan na Telegramu. Kliknite da otvorite čat.
+      chat: Otvorite čat s menadžerom ↗
     partners:
       button: Partneri
       text: Naši partneri — izaberite kome da pišete.
     request:
-      button: 📝 Ostaviti zahtev
+      button: 📝 Ostavite prijavu
       car: Koja je vaša mašina? Napišite marku, model i godinu.
-      service: Koji radovi su potrebni? Obeležite jedan ili više.
-      done: Gotovo →
-      unsure: Ne znam, potrebna je konsultacija
+      service: Koje radove treba izvršiti? Označite jednu ili više opcija.
+      done: Završeno →
+      unsure: Ne znam, treba mi konsultacija
     language:
       button: 🌐 Jezik
-      text: Izaberite jezik koji vam više odgovara.
+      text: Izaberite jezik kojim vam je lakše da komunicirate.
     profile:
-      description: "Autoseris u Beogradu: dijagnostika, popravka i održavanje. Kliknite 'Start' i recite šta se dešava sa vašim automobilom, menadžer će odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}"
-      shortDescription: 'Autoseris u Beogradu: dijagnostika, popravka, održavanje. Menadžer: {manager}'
+      description: 'Autoservis u Beogradu: dijagnostika, popravka i servisiranje. Kliknite „Start” i recite šta je sa mašinom, menadžer će odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}'
+      shortDescription: 'Autoservis u Beogradu: dijagnostika, popravka, servisiranje. Menadžer: {manager}'
       menuCommand: Glavni meni
-      langCommand: Promeniti jezik
+      langCommand: Promeni jezik
   en:
-    greeting: Hello! Thanks for reaching out. Your request is received, and a manager will respond shortly.
-    lookingFor: Tell me about your car — the make, model, year — and what happened or what work you need done.
-    phoneAsk: You don't have a username set in Telegram, so the manager can't message you. Please provide your phone number so we can get in touch.
+    greeting: Hello! Thank you for reaching out. We've received your request, and a manager will respond shortly.
+    lookingFor: Please tell us about your car — make, model, year — and what happened or what services you need.
+    phoneAsk: We can't find your username (username) on Telegram, so the manager won't be able to message you. Please share your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
-    thanks: Thank you! I've passed your message to the manager, and they will contact you soon.
-    received: Got it, the manager will see your message.
+    thanks: Thank you! We've passed your information to the manager, and they will contact you soon.
+    received: Message received, the manager will see your message.
     menu:
-      text: How can we help? Choose what you're interested in.
+      text: How can we help you? Choose what you're interested in.
       back: « Back
     services:
       button: Services
-      text: Here's what we offer at the workshop. Choose a service — we’ll show you the price, timeline, and what's included.
+      text: Here’s what we do at the service. Choose a service, and we'll show you the price, timeline, and what's included.
     card:
-      request: 📝 Submit a request
-      site: More details on the site
+      request: 📝 Make a request
+      site: More details on the website
     contacts:
       button: Contacts
-      text: We're in Belgrade, looking forward to seeing you at the workshop.
+      text: We're in Belgrade, looking forward to seeing you at the service.
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
       button: 👤 Message the manager
-      text: Please send your question in one message, and the manager will reply here.
+      text: Send your question in one message, and the manager will respond right here.
       handoff: The manager is available on Telegram. Click to open the chat.
       chat: Open chat with the manager ↗
     partners:
       button: Partners
       text: Our partners — choose who to contact.
     request:
-      button: 📝 Submit a request
+      button: 📝 Make a request
       car: What car do you have? Please provide the make, model, and year.
-      service: What work do you need? Select one or more.
+      service: What services do you need? Check one or more.
       done: Done →
-      unsure: Not sure, need a consultation
+      unsure: I'm not sure, I need advice
     language:
       button: 🌐 Language
-      text: Choose the language you prefer to communicate in.
+      text: Choose the language you're most comfortable communicating in.
     profile:
-      description: "Car service in Belgrade: diagnostics, repair, and servicing. Click 'Start' and tell us what's wrong with your car, the manager will reply here. Prefer to skip the bot? Message the manager directly: {manager}"
-      shortDescription: 'Car service in Belgrade: diagnostics, repair, servicing. Manager: {manager}'
+      description: "Car service in Belgrade: diagnostics, repairs, and maintenance. Click 'Start' and let us know what’s wrong with your car; the manager will respond here. Prefer to talk directly? Message the manager: {manager}"
+      shortDescription: 'Car service in Belgrade: diagnostics, repairs, maintenance. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: 09fa7161aefbbff8

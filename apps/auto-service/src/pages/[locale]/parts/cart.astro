@@ -1,0 +1,332 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import CartAddonToggle from '@/components/CartAddonToggle.astro';
+import CheckoutForm from '@/components/CheckoutForm.astro';
+import PickupDetails from '@/components/PickupDetails.astro';
+import Icon from '@/components/Icon.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).shopCart;
+const partCopy = content(locale).shopPart;
+const availability = {
+  stock: partCopy.columns.stock,
+  leadTime: partCopy.columns.leadTime,
+  inStockPickup: partCopy.columns.inStockPickup,
+  days: partCopy.leadTime,
+};
+const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
+const notice =
+  'card mb-4 flex items-start gap-3 border-signal/30 bg-signal/8 p-4 text-sm leading-relaxed text-ink';
+const notices = [
+  { key: 'price-changed', text: copy.notices.priceChanged },
+  { key: 'unavailable', text: copy.notices.unavailable },
+  { key: 'cart-changed', text: copy.notices.cartChanged },
+  { key: 'repriced', text: copy.notices.repriced },
+  { key: 'stock-limit', text: copy.notices.stockLimit },
+  { key: 'unreachable', text: copy.notices.unreachable },
+  { key: 'offline', text: copy.notices.offline },
+  { key: 'expired', text: copy.notices.expired },
+  { key: 'invalid', text: copy.notices.invalid },
+];
+const stepper =
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-signal disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+---
+
+<Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
+  <PageHero
+    actions={false}
+    eyebrow={site.nav.parts}
+    heading={copy.heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCart(locale), label: copy.heading },
+    ]}
+  />
+
+  <section class="wrap py-6 md:py-band-lg">
+    <offer-cart
+      class="block"
+      data-locale-tag={BCP47_BY_LOCALE[locale]}
+      data-locale={locale}
+      data-addon-template={copy.addonTemplate}
+      data-installation-label={copy.installationLabel}
+      data-installation-free={copy.installationFree}
+      data-free-label={copy.freeLabel}
+      data-unit-template={copy.unitTemplate}
+      data-count-template={copy.summaryCountTemplate}
+      data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+      data-ordered-heading={copy.orderedHeading}
+      data-order-template={copy.orderNumberTemplate}
+      data-quantity-template={copy.receiptQuantityTemplate}
+      data-blocked-template={copy.checkoutBlocked}
+      data-inquiry-href={PathBuilder.partsInquiry(locale)}
+      data-preview={shopOpen() ? undefined : ''}
+      data-availability={JSON.stringify(availability)}
+    >
+      <p data-state="loading" class="text-sm text-muted" role="status">
+        {copy.loading}
+      </p>
+
+      <div data-state="empty" hidden class={panel}>
+        <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
+        <p
+          data-empty-notice="expired"
+          hidden
+          class="text-sm leading-relaxed text-signal-dark"
+        >
+          {copy.notices.expired}
+        </p>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
+        <a
+          href={PathBuilder.parts(locale)}
+          class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+        >
+          {copy.emptyCta}
+        </a>
+      </div>
+
+      <div data-state="ordered" hidden class={`${panel} gap-5`}>
+        <div class="flex items-center gap-3">
+          <span
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-go/10 text-go"
+          >
+            <Icon name="check" size={18} />
+          </span>
+          <p
+            class="spec text-lg font-semibold text-ink"
+            data-order-number
+            hidden
+          >
+          </p>
+        </div>
+        <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
+          {copy.orderedBody}
+        </p>
+        <div class="flex flex-col gap-5" data-receipt hidden>
+          <section class="flex flex-col gap-1">
+            <h2 class="text-block font-semibold">{copy.summaryHeading}</h2>
+            <ul class="divide-y divide-line" data-receipt-lines></ul>
+            <template data-receipt-line>
+              <li class="flex items-start justify-between gap-4 py-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                  <span class="leading-snug font-semibold text-ink" data-name
+                  ></span>
+                  <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
+                  <span class="text-sm text-ink-2" data-addon hidden></span>
+                  <span class="text-sm text-ink-2" data-installation hidden
+                  ></span>
+                </div>
+                <div class="flex shrink-0 flex-col items-end text-right">
+                  <span class="spec font-semibold text-ink" data-price></span>
+                  <span class="text-xs text-muted" data-quantity></span>
+                </div>
+              </li>
+            </template>
+            <dl class="flex flex-col gap-1.5 border-t border-line pt-3 text-sm">
+              <div
+                class="flex items-baseline justify-between gap-4 text-ink-2"
+                data-receipt-addon-row
+                hidden
+              >
+                <dt>{copy.summaryAddons}</dt>
+                <dd class="spec text-ink" data-receipt-addons></dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-4">
+                <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+                <dd
+                  class="spec text-xl font-semibold text-ink"
+                  data-receipt-total
+                >
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <div class="grid gap-5 rounded-field bg-shade p-4 sm:grid-cols-2">
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.pickupStep}
+              </h3>
+              <PickupDetails />
+            </section>
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.paymentStep}
+              </h3>
+              <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
+            </section>
+          </div>
+          <p class="flex items-start gap-2 text-sm leading-relaxed text-ink-2">
+            <Icon name="info" size={16} class="mt-0.5 shrink-0 text-muted" />
+            <span>{copy.submitNote}</span>
+          </p>
+        </div>
+        <a
+          href={PathBuilder.parts(locale)}
+          class="btn btn-primary w-full sm:w-auto sm:self-start"
+        >
+          {copy.orderedCta}
+        </a>
+      </div>
+
+      <div data-state="fallback" hidden class={panel}>
+        <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.fallbackBody}</p>
+        <div class="mt-1 flex flex-col gap-3 sm:flex-row">
+          <button type="button" class="btn btn-primary" data-retry>
+            {copy.fallbackRetry}
+          </button>
+          <button type="button" class="btn btn-secondary" data-send-inquiry>
+            {copy.fallbackCta}
+          </button>
+        </div>
+      </div>
+
+      <div
+        data-state="cart"
+        hidden
+        class="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
+      >
+        <div class="flex flex-col">
+          <div aria-live="polite">
+            {
+              notices.map(({ key, text }) => (
+                <p data-notice={key} hidden class={notice}>
+                  <Icon
+                    name="warning"
+                    size={16}
+                    class="mt-0.5 shrink-0 text-signal-ink"
+                  />
+                  <span>{text}</span>
+                </p>
+              ))
+            }
+            <p data-notice="moved" hidden class={notice}>
+              <Icon
+                name="warning"
+                size={16}
+                class="mt-0.5 shrink-0 text-signal-ink"
+              />
+              <span>
+                {copy.notices.moved}{' '}
+                <a
+                  href={PathBuilder.partsInquiry(locale)}
+                  class="font-semibold text-signal-ink underline underline-offset-2"
+                >
+                  {copy.notices.movedCta}
+                </a>
+              </span>
+            </p>
+            <ul
+              data-price-changes
+              data-template={copy.priceChangeTemplate}
+              hidden
+              class="-mt-2 mb-4 flex flex-col gap-1 border-l-4 border-l-signal/40 pl-4 text-sm leading-relaxed text-ink"
+            >
+            </ul>
+          </div>
+
+          <ul class="card divide-y divide-line" data-lines></ul>
+          <template data-line>
+            <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
+              <div class="flex items-start gap-3">
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <a
+                    class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                    data-part-link></a>
+                  <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
+                </div>
+                <button
+                  type="button"
+                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal aria-busy:opacity-40"
+                  aria-label={copy.removeLabel}
+                  data-remove
+                >
+                  <Icon name="close" size={16} />
+                </button>
+              </div>
+              <p
+                class="flex items-start gap-2 text-sm leading-relaxed text-signal-dark"
+                data-unavailable
+                hidden
+              >
+                <Icon name="warning" size={16} class="mt-0.5 shrink-0" />
+                <span>{copy.unavailableTag}</span>
+              </p>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div
+                  class="flex items-center rounded-control border border-line-field"
+                >
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.decreaseLabel}
+                    data-decrease
+                  >
+                    <Icon name="minus" />
+                  </button>
+                  <span
+                    class="spec min-w-8 text-center text-sm font-semibold text-ink"
+                    data-quantity></span>
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.increaseLabel}
+                    data-increase
+                  >
+                    <Icon name="plus" />
+                  </button>
+                </div>
+                <div class="flex flex-col items-end text-right">
+                  <span
+                    class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"
+                    data-price></span>
+                  <span class="text-xs text-muted" data-unit></span>
+                </div>
+              </div>
+              <CartAddonToggle hook="data-addon" />
+              <CartAddonToggle hook="data-installation" />
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-to-inquiry
+                hidden
+              >
+                {copy.toInquiryLabel}
+              </button>
+            </li>
+          </template>
+        </div>
+
+        <CheckoutForm />
+
+        <div
+          class="sticky bottom-0 -mx-5 -mt-8 flex items-center justify-between gap-4 border-t border-line bg-card px-5 py-3 lg:hidden"
+          data-checkout-bar
+        >
+          <div class="flex flex-col">
+            <span class="text-xs text-muted">{copy.totalLabel}</span>
+            <span class="spec text-lg font-semibold text-ink" data-total></span>
+          </div>
+          <a href="#checkout" class="btn btn-primary">{copy.stickyCta}</a>
+        </div>
+      </div>
+    </offer-cart>
+  </section>
+</Shell>
+
+<script>
+  import { defineOfferCart } from '@/scripts/offerCart';
+
+  defineOfferCart();
+</script>

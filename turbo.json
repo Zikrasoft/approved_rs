@@ -9,16 +9,73 @@
       "cache": false,
       "persistent": true
     },
+    "shop:prepare": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "dev:shop": {
+      "dependsOn": ["^build", "@podbor/carlab-shop#shop:prepare"],
+      "cache": false,
+      "persistent": true
+    },
     "test": {
       "dependsOn": ["^build"]
     },
-    "@podbor/shop-catalog#test": { "dependsOn": ["build"] },
     "@podbor/i18n#test": { "dependsOn": ["build"] },
     "@podbor/brands#test": { "dependsOn": ["build"] },
+    "@podbor/lead-crm#test": { "dependsOn": ["build"] },
+    "@podbor/catalog-contract#test": { "dependsOn": ["build"] },
     "typecheck": {
       "dependsOn": ["^build"]
     },
-    "@podbor/medusa#typecheck": { "dependsOn": ["^build", "build"] },
+    "@podbor/auto-service#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".astro/**", ".vercel/output/**"],
+      "env": ["MEDUSA_BACKEND_URL", "MEDUSA_PUBLISHABLE_KEY", "SHOP_OPEN"]
+    },
+    "@podbor/carlab-shop#build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "DATABASE_*",
+        "JWT_SECRET",
+        "COOKIE_SECRET",
+        "STORE_CORS",
+        "ADMIN_CORS",
+        "AUTH_CORS",
+        "TYPESENSE_*",
+        "PORT"
+      ]
+    },
+    "@podbor/carlab-shop#typecheck": {
+      "dependsOn": ["build"],
+      "env": [
+        "DATABASE_*",
+        "JWT_SECRET",
+        "COOKIE_SECRET",
+        "STORE_CORS",
+        "ADMIN_CORS",
+        "AUTH_CORS",
+        "TYPESENSE_*",
+        "PORT"
+      ]
+    },
+    "@podbor/carlab-shop#test": {
+      "dependsOn": ["^build"],
+      "env": [
+        "DATABASE_*",
+        "JWT_SECRET",
+        "COOKIE_SECRET",
+        "STORE_CORS",
+        "ADMIN_CORS",
+        "AUTH_CORS",
+        "TYPESENSE_*",
+        "PORT",
+        "DB_HOST",
+        "DB_PORT",
+        "DB_USERNAME",
+        "DB_PASSWORD"
+      ]
+    },
     "lint": {}
   }
 }

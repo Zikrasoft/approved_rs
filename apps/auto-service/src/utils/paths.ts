@@ -1,7 +1,6 @@
 import { swapLocalePath } from '@podbor/site-kit';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
 import type { ServiceSlug } from './services';
-import type { PartsCategorySlug } from './partsCatalog';
 
 export const PathBuilder = {
   home: (locale: Locale) => `/${locale}/`,
@@ -10,22 +9,34 @@ export const PathBuilder = {
     `/${locale}/services/${slug}/`,
   works: (locale: Locale) => `/${locale}/works/`,
   parts: (locale: Locale) => `/${locale}/parts/`,
-  partsCategory: (locale: Locale, slug: PartsCategorySlug) =>
-    `/${locale}/parts/${slug}/`,
+  partsCategory: (locale: Locale, slug: string) =>
+    `/${locale}/parts/c/${slug}/`,
+  partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
+  partsCart: (locale: Locale) => `/${locale}/parts/cart/`,
+  partsMake: (locale: Locale, make: string) => `/${locale}/parts/${make}/`,
+  partsModel: (locale: Locale, make: string, model: string) =>
+    `/${locale}/parts/${make}/${model}/`,
+  partsModelCategory: (
+    locale: Locale,
+    make: string,
+    model: string,
+    category: string,
+  ) => `/${locale}/parts/${make}/${model}/${category}/`,
+  partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
+  partsPrices: (locale: Locale) => `/${locale}/parts/prices/`,
+  partsInquiry: (locale: Locale) => `/${locale}/parts/#${PARTS_INQUIRY_ANCHOR}`,
+  partsVinUnresolved: (locale: Locale) => `/${locale}/parts/#vin-unresolved`,
+  partsCar: (locale: Locale, vehicleId: string) =>
+    `/${locale}/parts/car/${vehicleId}/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
-  shop: (locale: Locale) => `/${locale}/shop/`,
-  shopType: (locale: Locale, type: string) => `/${locale}/shop/${type}/`,
-  shopProduct: (locale: Locale, type: string, handle: string) =>
-    `/${locale}/shop/${type}/${handle}/`,
-  shopLanding: (locale: Locale, type: string, slug: string) =>
-    `/${locale}/shop/${type}/f/${slug}/`,
-  cart: (locale: Locale) => `/${locale}/cart/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
   about: (locale: Locale) => `/${locale}/about/`,
 };
+
+export const PARTS_INQUIRY_ANCHOR = 'inquiry';
 
 export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));

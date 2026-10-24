@@ -1,0 +1,392 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import Icon from '@/components/Icon.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import FitLine from '@/components/FitLine.astro';
+import AddonNote from '@/components/AddonNote.astro';
+import PartNumbers from '@/components/PartNumbers.astro';
+import PriceTag from '@/components/PriceTag.astro';
+import ThumbRow from '@/components/ThumbRow.astro';
+import { pagesThumbnail } from '@/utils/partImages';
+import { translated } from '@podbor/catalog-contract';
+import { carName, vehicleVariant } from '@/utils/carName';
+import { carPagesForBuild } from '@/utils/catalogueEnv';
+import type { CarPageEntry } from '@/utils/catalogueSnapshot';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { kitPick } from '@/utils/kitPick';
+
+export async function getStaticPaths() {
+  const cars = await carPagesForBuild();
+  return withLocales(
+    cars.map((car) => ({
+      params: { id: car.vehicle.id },
+      props: { car },
+    })),
+  );
+}
+
+const { car } = Astro.props as { car: CarPageEntry };
+const { vehicle } = car;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const partsInquiry = content(locale).pages.partsInquiry;
+const copy = content(locale).partsCar.car;
+const quantity = (count: number) =>
+  content(locale).partsCar.fitment.quantity.replace('{count}', String(count));
+const variant = vehicleVariant(vehicle, locale);
+const name = `${carName(vehicle.model, locale)}, ${variant}`;
+const { engine, model } = vehicle;
+const { make } = model.chassis.series;
+const byCategory = new Map<string, CarPageEntry['groups']>();
+for (const group of car.groups) {
+  const key = group.category?.id ?? '';
+  byCategory.set(key, [...(byCategory.get(key) ?? []), group]);
+}
+const blocks = [...byCategory.values()].map((groups) => ({
+  name: groups[0].category
+    ? translated(groups[0].category, 'name', locale)
+    : copy.otherParts,
+  groups,
+}));
+
+const kit = car.kit.map((item) => ({ ...item, ...kitPick(item.pages) }));
+const kitBuyable = kit.length > 0 && kit.every(({ offer }) => offer);
+
+const empty =
+  kit.length === 0 && blocks.length === 0 && car.matches.length === 0;
+
+const years =
+  vehicle.year_from &&
+  `${vehicle.year_from}–${vehicle.year_to ?? copy.yearsOngoing}`;
+
+const specs = [
+  { label: copy.engineLabel, value: `${engine.code} (${engine.family})` },
+  { label: copy.fuelLabel, value: copy.fuel[engine.fuel] },
+  {
+    label: copy.displacementLabel,
+    value:
+      engine.displacement_cc &&
+      `${engine.displacement_cc} ${copy.displacementUnit}`,
+  },
+  {
+    label: copy.powerLabel,
+    value: vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
+  },
+  { label: copy.driveLabel, value: vehicle.drive && copy.drive[vehicle.drive] },
+  { label: copy.bodyLabel, value: copy.body[model.chassis.body_style] },
+  { label: copy.yearsLabel, value: years },
+  {
+    label: copy.steeringLabel,
+    value: vehicle.steering && copy.steering[vehicle.steering],
+  },
+  {
+    label: copy.typeCodeLabel,
+    value: vehicle.identifiers.map(({ value }) => value).join(', '),
+  },
+].filter((spec): spec is { label: string; value: string } =>
+  Boolean(spec.value),
+);
+const specsSummary = [
+  engine.code,
+  vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
+  years,
+]
+  .filter(Boolean)
+  .join(', ');
+---
+
+<Shell
+  title={copy.metaTitle.replace('{car}', name)}
+  description={copy.metaDescription.replace('{car}', name)}
+  noindex
+>
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={name}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        label: carName(model, locale),
+      },
+      { href: PathBuilder.partsCar(locale, vehicle.id), label: variant },
+    ]}
+  />
+
+  <car-facts
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
+  >
+    <div class="flex flex-col gap-6">
+      {
+        kit.length > 0 && (
+          <parts-list-add-all
+            class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+            data-car={name}
+          >
+            <div class="flex flex-col gap-1">
+              <h2 class="text-block font-semibold">{copy.kitHeading}</h2>
+              <p class="text-sm leading-relaxed text-ink-2">{copy.kitLead}</p>
+            </div>
+            <ul class="flex flex-col divide-y divide-line">
+              {kit.map((item) => (
+                <li
+                  class="flex items-baseline justify-between gap-4 py-3 first:pt-0"
+                  data-kit-part={item.part.id}
+                  data-slug={item.page.slug}
+                  data-brand={item.page.brand.name}
+                  data-number={item.page.value}
+                  data-name={item.part.name}
+                  data-offer-id={item.offer?.id}
+                  data-quantity={item.quantity}
+                >
+                  <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
+                    <span class="text-xs text-muted">
+                      {translated(item.category, 'name', locale)}
+                    </span>
+                    <span class="text-sm text-ink">
+                      {translated(item.part, 'name', locale)}
+                    </span>
+                    <PartNumbers pages={item.pages} first={item.page} />
+                  </ThumbRow>
+                  <span class="flex shrink-0 flex-col items-end gap-1">
+                    <span class="spec text-sm text-ink">
+                      {quantity(item.quantity)}
+                    </span>
+                    <PriceTag pages={item.pages} kit />
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <kit-cart
+                class="contents"
+                {...(kitBuyable ? {} : { hidden: '' })}
+                data-cart-href={PathBuilder.partsCart(locale)}
+              >
+                <button type="button" class="btn btn-primary w-full sm:w-auto">
+                  {copy.kitCart}
+                  <Icon name="arrowRight" />
+                </button>
+              </kit-cart>
+              <a
+                href={PathBuilder.partsInquiry(locale)}
+                class:list={[
+                  'group/ask btn w-full sm:w-auto',
+                  kitBuyable ? 'btn-secondary' : 'btn-primary',
+                ]}
+                data-add-all
+              >
+                {copy.kitAdd}
+                <Icon
+                  name="arrowRight"
+                  class="group-[.btn-secondary]/ask:hidden"
+                />
+              </a>
+            </div>
+          </parts-list-add-all>
+        )
+      }
+
+      <div class="flex flex-col gap-4">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        <p
+          class="text-sm leading-relaxed text-ink-2"
+          data-vin-steering
+          data-template={copy.vinSteering}
+          data-left={copy.steering.left}
+          data-right={copy.steering.right}
+          hidden
+        >
+        </p>
+        {
+          blocks.length === 0 ? (
+            <p class="card p-5 text-sm leading-relaxed text-ink-2 sm:p-6">
+              {copy.partsLead}
+            </p>
+          ) : (
+            blocks.map((block) => (
+              <section class="card overflow-hidden">
+                <h3 class="border-b border-line px-5 py-3 font-semibold sm:px-6">
+                  {block.name}
+                </h3>
+                <AddonNote
+                  category={block.groups[0].category}
+                  pages={block.groups.flatMap(({ fitments }) =>
+                    fitments.flatMap(({ pages }) => pages),
+                  )}
+                  class="mx-5 mt-4 mb-1 sm:mx-6"
+                />
+                <ul class="divide-y divide-line">
+                  {block.groups.map((group) => (
+                    <li
+                      class="group flex flex-col gap-3 px-5 py-4 data-ambiguous:border-l-4 data-ambiguous:border-l-signal sm:px-6"
+                      data-position-group
+                      data-ambiguous={group.ambiguous || undefined}
+                    >
+                      <p class="hidden items-start gap-2 text-sm leading-relaxed text-ink-2 group-data-ambiguous:flex">
+                        <Icon
+                          name="warning"
+                          size={16}
+                          class="mt-0.5 shrink-0 text-signal-ink"
+                        />
+                        <span>
+                          <strong class="font-semibold text-ink">
+                            {copy.confirmVariantLead}
+                          </strong>{' '}
+                          {copy.confirmVariant}
+                        </span>
+                      </p>
+                      <ul class="flex flex-col gap-4">
+                        {group.fitments.map((fit) => (
+                          <li
+                            data-fitment
+                            data-part-id={fit.part.id}
+                            data-steering={fit.steering ?? undefined}
+                            data-note={fit.note ?? undefined}
+                          >
+                            <ThumbRow thumb={pagesThumbnail(fit.pages)}>
+                              <span class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                <span class="min-w-0 text-sm text-ink">
+                                  {translated(fit.part, 'name', locale)}
+                                </span>
+                                <PriceTag pages={fit.pages} />
+                              </span>
+                              <PartNumbers pages={fit.pages} />
+                              <FitLine fit={fit} />
+                            </ThumbRow>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))
+          )
+        }
+      </div>
+
+      {
+        car.matches.length > 0 && (
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <h2 class="text-section">{copy.matchesHeading}</h2>
+              <p class="max-w-2xl text-sm leading-relaxed text-ink-2">
+                {copy.matchesLead}
+              </p>
+            </div>
+            {car.matches.map((match) => (
+              <section class="card overflow-hidden">
+                <h3 class="flex items-baseline justify-between gap-4 border-b border-line px-5 py-3 font-semibold sm:px-6">
+                  {translated(match.category, 'name', locale)}
+                  <span class="spec shrink-0 text-sm font-normal text-ink">
+                    {quantity(match.quantity)}
+                  </span>
+                </h3>
+                <AddonNote
+                  category={match.category}
+                  pages={match.parts.flatMap(({ pages }) => pages)}
+                  class="mx-5 mt-4 mb-1 sm:mx-6"
+                />
+                <ul class="divide-y divide-line">
+                  {match.parts.map(({ part, pages }) => (
+                    <li class="px-5 py-4 sm:px-6">
+                      <ThumbRow thumb={pagesThumbnail(pages)}>
+                        <span class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                          <span class="min-w-0 text-sm text-ink">
+                            {translated(part, 'name', locale)}
+                          </span>
+                          <PriceTag pages={pages} />
+                        </span>
+                        <PartNumbers pages={pages} />
+                      </ThumbRow>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )
+      }
+
+      {!empty && <InquiryLink />}
+
+      <details class="card group p-5 sm:p-6">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
+        >
+          <span class="flex flex-col gap-0.5">
+            {copy.specsHeading}
+            <span class="spec text-sm font-normal text-muted"
+              >{specsSummary}</span
+            >
+          </span>
+          <Icon
+            name="chevronDown"
+            size={16}
+            class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+          />
+        </summary>
+        <dl class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {
+            specs.map((spec) => (
+              <div class="flex flex-col gap-0.5 border-b border-line pb-3">
+                <dt class="text-xs text-muted">{spec.label}</dt>
+                <dd class="spec text-sm text-ink">{spec.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </details>
+
+      <p class="text-sm leading-relaxed text-muted">
+        <a
+          href={PathBuilder.parts(locale)}
+          class="underline underline-offset-2 hover:text-signal-ink"
+        >
+          {copy.notYourCar}
+        </a>
+      </p>
+    </div>
+
+    {
+      empty && (
+        <div id="lead" class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: partsInquiry.vinLabel,
+              placeholder: partsInquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={partsInquiry.commentLabel}
+            commentPlaceholder={partsInquiry.commentPlaceholder}
+            commentNote={partsInquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </car-facts>
+</Shell>
+
+<script>
+  import { defineCarFacts } from '@/scripts/carFacts';
+  import { definePartsListAddAll } from '@/scripts/partsList';
+  import { defineKitCart } from '@/scripts/offerCart';
+
+  defineCarFacts();
+  definePartsListAddAll();
+  defineKitCart();
+</script>

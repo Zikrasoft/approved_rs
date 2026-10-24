@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="ceramic" x1="0" x2="1">
+      <stop offset="0" stop-color="#d4d8de"/>
+      <stop offset=".35" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b7bdc6"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" x2="1">
+      <stop offset="0" stop-color="#6d747e"/>
+      <stop offset=".4" stop-color="#d9dde2"/>
+      <stop offset="1" stop-color="#5e6570"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="700" rx="110" ry="18" fill="#1d2430" opacity=".25" filter="url(#soft)"/>
+  <rect x="380" y="90" width="40" height="60" rx="8" fill="url(#steel)"/>
+  <path d="M350 150 h100 l10 210 h-120 z" fill="url(#ceramic)"/>
+  <g stroke="#c1c6cd" stroke-width="5"><path d="M352 190 h96"/><path d="M353 220 h94"/><path d="M354 250 h92"/></g>
+  <path d="M320 360 h160 l-12 90 h-136 z" fill="url(#steel)"/>
+  <rect x="352" y="450" width="96" height="170" fill="url(#steel)"/>
+  <g stroke="#5b626c" stroke-width="5" opacity=".7"><path d="M352 480 h96"/><path d="M352 510 h96"/><path d="M352 540 h96"/><path d="M352 570 h96"/><path d="M352 600 h96"/></g>
+  <path d="M392 620 v40 h40" fill="none" stroke="#6d747e" stroke-width="12"/>
+  <text x="520" y="300" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="38" fill="#3c4450">{{brand}}</text>
+  <text x="520" y="340" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#6b7480">{{label}}</text>
+</svg>

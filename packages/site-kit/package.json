@@ -14,6 +14,7 @@
     "./lead-form": "./src/leadForm.ts",
     "./public-env": "./src/publicEnv.ts",
     "./redirects": "./src/redirects.ts",
+    "./stored-value": "./src/storedValue.ts",
     "./og": "./src/ogImage.ts"
   },
   "scripts": {

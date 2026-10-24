@@ -1,0 +1,308 @@
+---
+import {
+  BRAND_FACET,
+  facetFilter,
+  type RangeFilter,
+  type SearchFacet,
+} from '@podbor/catalog-contract';
+import Icon from '@/components/Icon.astro';
+import PriceSlot from './PriceSlot.astro';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { FILTERS_SUBMIT_ATTRIBUTE } from '@/scripts/filterSheet';
+import {
+  facetValueLabel,
+  numberBounds,
+  rangeMaxName,
+  rangeMinName,
+} from '@/utils/partsSearch';
+
+interface Props {
+  action: string;
+  hidden: Record<string, string>;
+  facets: SearchFacet[];
+  count?: number;
+  chosen?: string[];
+  ranges?: RangeFilter[];
+  resetHref?: string;
+  class?: string;
+  live?: boolean;
+}
+
+const VISIBLE_VALUES = 6;
+
+const {
+  action,
+  hidden,
+  facets,
+  count,
+  chosen = [],
+  ranges = [],
+  resetHref,
+  class: className,
+  live = false,
+} = Astro.props;
+const deferred = !live && Astro.isPrerendered && !shopOpen();
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+const closeLabel = content(locale).site.common.closeLabel;
+const active = chosen.length + ranges.length;
+const reset = resetHref && active > 0 ? resetHref : undefined;
+const values = (facet: SearchFacet) =>
+  facet.values
+    .filter(({ value }) => facet.type !== 'boolean' || value !== 'false')
+    .map((value) => {
+      const filter = facetFilter(facet.key, value.value);
+      return {
+        filter,
+        label: facetValueLabel(facet, value, copy),
+        count: value.count,
+        checked: chosen.includes(filter),
+      };
+    });
+const groups = facets.map((facet) => {
+  const all = values(facet);
+  const rest = all.slice(VISIBLE_VALUES);
+  return {
+    facet,
+    pills:
+      facet.key !== BRAND_FACET &&
+      facet.type !== 'boolean' &&
+      all.length <= VISIBLE_VALUES,
+    shown: all.slice(0, VISIBLE_VALUES),
+    rest,
+    restOpen: rest.some(({ checked }) => checked),
+  };
+});
+const range = (key: string) => ranges.find((item) => item.key === key);
+const bound = (value: number | null | undefined) =>
+  value === null || value === undefined ? undefined : String(value);
+const hint = (template: string, slot: string, value: number | undefined) =>
+  value === undefined
+    ? undefined
+    : template.replace(slot, value.toLocaleString(BCP47_BY_LOCALE[locale]));
+const showLabel =
+  count === undefined
+    ? copy.applyFilters
+    : copy.showResults.replace('{count}', String(count));
+const legend = (facet: SearchFacet) =>
+  facet.unit ? `${facet.label}, ${facet.unit}` : facet.label;
+---
+
+{
+  deferred ? (
+    <PriceSlot
+      kind="facets"
+      fields={{
+        hidden: JSON.stringify(hidden),
+        count: count === undefined ? undefined : String(count),
+      }}
+    >
+      <Astro.self {...Astro.props} live />
+    </PriceSlot>
+  ) : (
+    <form
+      method="GET"
+      action={action}
+      class:list={[
+        'min-w-0 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:rounded-block lg:border lg:border-line lg:bg-card',
+        className,
+      ]}
+    >
+      {Object.entries(hidden).map(([name, value]) => (
+        <input type="hidden" name={name} value={value} />
+      ))}
+      <filter-sheet class="group/sheet block">
+        <details
+          class="group/details max-lg:card max-lg:group-[:defined]/sheet:border-0 max-lg:group-[:defined]/sheet:bg-transparent lg:[&::details-content]:block lg:[&::details-content]:[content-visibility:visible]"
+          open={active > 0}
+        >
+          <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 px-5 text-base font-semibold text-ink marker:hidden group-[:defined]/sheet:hidden lg:hidden [&::-webkit-details-marker]:hidden">
+            <span>
+              {copy.filtersHeading}
+              {active > 0 && (
+                <span class="spec font-normal text-muted"> · {active}</span>
+              )}
+            </span>
+            <Icon
+              name="chevronDown"
+              size={16}
+              class="text-muted transition-transform duration-150 group-open/details:rotate-180 motion-reduce:transition-none"
+            />
+          </summary>
+          <carlab-modal class="contents" trigger="[data-filters-open]">
+            <dialog
+              aria-label={copy.filtersHeading}
+              class="group/dialog static m-0 block h-auto max-h-none w-full max-w-none border-0 bg-transparent p-0 text-ink max-lg:group-[:defined]/sheet:not-open:hidden max-lg:open:fixed max-lg:open:inset-x-0 max-lg:open:top-auto max-lg:open:bottom-0 max-lg:open:flex max-lg:open:max-h-[88dvh] max-lg:open:flex-col max-lg:open:overflow-hidden max-lg:open:rounded-t-block md:open:mx-auto md:open:max-w-lg max-lg:open:bg-card max-lg:open:shadow-2xl pointer-events-auto translate-none opacity-100 max-lg:open:duration-200 max-lg:open:starting:translate-y-full motion-reduce:transition-none backdrop:bg-ink/50"
+            >
+              <div class="hidden items-center justify-between gap-4 border-b border-line px-5 py-3 group-open/dialog:flex lg:flex">
+                <h2 class="text-base font-semibold text-ink">
+                  {copy.filtersHeading}
+                  {active > 0 && (
+                    <span class="spec font-normal text-muted"> · {active}</span>
+                  )}
+                </h2>
+                <button
+                  type="button"
+                  data-modal-close
+                  aria-label={closeLabel}
+                  class="hidden size-10 shrink-0 items-center justify-center rounded-control text-muted transition-colors group-open/dialog:flex hover:bg-shade hover:text-ink motion-reduce:transition-none"
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+              <div class="flex min-h-0 flex-col divide-y divide-line group-open/dialog:flex-1 group-open/dialog:overflow-y-auto group-open/dialog:overscroll-contain">
+                {groups.map(({ facet, pills, shown, rest, restOpen }) => (
+                  <fieldset class="flex min-w-0 flex-col gap-1 px-5 py-4">
+                    <legend class="float-left mb-1.5 w-full text-sm font-semibold text-ink">
+                      {legend(facet)}
+                    </legend>
+                    {facet.type === 'number' ? (
+                      <div class="flex items-center gap-2">
+                        {[
+                          {
+                            name: rangeMinName(facet.key),
+                            label: copy.rangeMinLabel,
+                            value: bound(range(facet.key)?.min),
+                            placeholder: hint(
+                              copy.rangeFrom,
+                              '{min}',
+                              numberBounds(facet)?.min,
+                            ),
+                          },
+                          {
+                            name: rangeMaxName(facet.key),
+                            label: copy.rangeMaxLabel,
+                            value: bound(range(facet.key)?.max),
+                            placeholder: hint(
+                              copy.rangeTo,
+                              '{max}',
+                              numberBounds(facet)?.max,
+                            ),
+                          },
+                        ].map((input, index) => (
+                          <>
+                            {index > 0 && (
+                              <span class="text-muted" aria-hidden="true">
+                                –
+                              </span>
+                            )}
+                            <label class="min-w-0 flex-1">
+                              <span class="sr-only">{input.label}</span>
+                              <input
+                                type="number"
+                                inputmode="decimal"
+                                step="any"
+                                name={input.name}
+                                value={input.value}
+                                placeholder={input.placeholder}
+                                class="field spec min-h-10 [appearance:textfield] px-3 py-1.5 text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                              />
+                            </label>
+                          </>
+                        ))}
+                      </div>
+                    ) : (
+                      [
+                        { items: shown, tail: false },
+                        ...(rest.length ? [{ items: rest, tail: true }] : []),
+                      ].map(({ items, tail }) => {
+                        const list = (
+                          <div
+                            class:list={[
+                              pills ? 'flex flex-wrap gap-2' : 'flex flex-col',
+                            ]}
+                          >
+                            {items.map((value) =>
+                              pills ? (
+                                <label class="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-signal has-checked:bg-signal/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-signal has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
+                                  <input
+                                    type="checkbox"
+                                    name="facets"
+                                    value={value.filter}
+                                    checked={value.checked}
+                                    disabled={
+                                      value.count === 0 && !value.checked
+                                    }
+                                    class="sr-only"
+                                  />
+                                  {value.label}
+                                  <span class="spec text-xs text-muted">
+                                    {value.count}
+                                  </span>
+                                </label>
+                              ) : (
+                                <label class="flex min-h-9 cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:text-ink-2">
+                                  <input
+                                    type="checkbox"
+                                    name="facets"
+                                    value={value.filter}
+                                    checked={value.checked}
+                                    disabled={
+                                      value.count === 0 && !value.checked
+                                    }
+                                    class="size-4 shrink-0 accent-signal"
+                                  />
+                                  <span class="min-w-0 flex-1 break-words">
+                                    {value.label}
+                                  </span>
+                                  <span class="spec text-xs text-muted">
+                                    {value.count}
+                                  </span>
+                                </label>
+                              ),
+                            )}
+                          </div>
+                        );
+                        return tail ? (
+                          <details class="group/more" open={restOpen}>
+                            <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-signal-ink group-open/more:hidden hover:text-signal-dark [&::-webkit-details-marker]:hidden">
+                              {copy.showAllValues.replace(
+                                '{count}',
+                                String(shown.length + rest.length),
+                              )}
+                              <Icon name="chevronDown" size={12} />
+                            </summary>
+                            {list}
+                          </details>
+                        ) : (
+                          list
+                        );
+                      })
+                    )}
+                  </fieldset>
+                ))}
+              </div>
+              <div class="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-5 py-3 group-[:defined:not([data-dirty])]/sheet:lg:hidden before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8 before:bg-linear-to-t before:from-card before:to-transparent max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                <button
+                  type="submit"
+                  class="btn btn-primary flex-1"
+                  {...{ [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters }}
+                >
+                  {showLabel}
+                </button>
+                {reset && (
+                  <a
+                    href={reset}
+                    class="btn btn-secondary group-[:defined]/sheet:lg:hidden"
+                  >
+                    {copy.resetFilters}
+                  </a>
+                )}
+              </div>
+            </dialog>
+          </carlab-modal>
+        </details>
+      </filter-sheet>
+    </form>
+  )
+}
+
+<script>
+  import { defineModalDialog } from '@podbor/site-kit/browser';
+  import { defineFilterSheet } from '@/scripts/filterSheet';
+
+  defineModalDialog('carlab-modal');
+  defineFilterSheet();
+</script>

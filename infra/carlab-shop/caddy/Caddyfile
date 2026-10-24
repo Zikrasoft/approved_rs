@@ -1,0 +1,46 @@
+(common) {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+
+	request_body {
+		max_size 25MB
+	}
+}
+
+{$API_HOST} {
+	import common
+
+	redir /app https://{$ADMIN_HOST}/app
+	redir /app/* https://{$ADMIN_HOST}{uri}
+
+	handle /static/* {
+		root * /srv
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	handle {
+		reverse_proxy medusa:9000 {
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+}
+
+{$ADMIN_HOST} {
+	import common
+
+	redir / /app
+
+	handle {
+		reverse_proxy medusa:9000 {
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+}

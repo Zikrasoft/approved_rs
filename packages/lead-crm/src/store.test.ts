@@ -458,7 +458,7 @@ describe('insertOrMergeLead', () => {
       brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
-      service: 'polishing',
+      service: 'polishing-ceramic',
       visitorId: 'visitor-1',
       locale: 'ru',
     });
@@ -466,13 +466,15 @@ describe('insertOrMergeLead', () => {
       brand: 'Test',
       name: 'Иван',
       contact: '@ivan',
-      service: 'ppf',
-      services: ['ppf', 'ceramic-coating'],
+      service: 'parts-order',
+      services: ['parts-order', 'unknown-slug'],
       visitorId: 'visitor-1',
       locale: 'ru',
     });
 
-    expect(lead.comment).toContain('Также пробовал: ppf, ceramic-coating');
+    expect(lead.comment).toContain(
+      'Также пробовал: Заказ из магазина, unknown-slug',
+    );
   });
 
   it('does not merge a different visitor — creates a separate lead', async () => {
@@ -494,7 +496,7 @@ describe('insertOrMergeLead', () => {
 
     expect(merged).toBe(true);
     expect(lead.comment).toContain('Аккумулятор 60 Ah × 1 — 95 €');
-    expect(lead.comment).toContain(`Также пробовал: ${baseData.service}`);
+    expect(lead.comment).toContain('Также пробовал: Автоподбор');
   });
 
   it('falls back to naming the clicked channel when the second submission carried no comment', async () => {
@@ -576,6 +578,126 @@ describe('insertOrMergeLead', () => {
       visitorId: null,
     });
     expect(merged).toBe(false);
+  });
+});
+
+describe('insertOrMergeLead with standalone services', () => {
+  const order = (contact: string): LeadInput => ({
+    brand: 'Test',
+    name: 'Иван',
+    contact,
+    service: 'parts-order',
+    visitorId: 'visitor-1',
+    locale: 'ru',
+  });
+  const inquiry: LeadInput = {
+    brand: 'Test',
+    name: 'Иван',
+    contact: '+381601111111',
+    service: 'vin-parts-inquiry',
+    visitorId: 'visitor-1',
+    locale: 'ru',
+  };
+
+  beforeEach(() => {
+    store = createLeadStore({
+      storage,
+      schema: storedLeadSchema,
+      standaloneServices: ['parts-order'],
+    });
+  });
+
+  it('keeps an order apart from the inquiry the same visitor sent before', async () => {
+    await store.insertOrMergeLead(inquiry);
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+
+    expect(merged).toBe(false);
+    expect(lead.contact).toBe('+381602222222');
+    expect(lead.service).toBe('parts-order');
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps two orders from one visitor as two Leads', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { merged } = await store.insertOrMergeLead(order('+381603333333'));
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps an inquiry sent after an order apart from it', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { lead, merged } = await store.insertOrMergeLead(inquiry);
+
+    expect(merged).toBe(false);
+    expect(lead.service).toBe('vin-parts-inquiry');
+  });
+
+  it('lets an order absorb the placeholder click before it', async () => {
+    const { lead: clicked } = await store.insertOrMergeLead({
+      brand: 'Test',
+      name: '',
+      contact: '—',
+      service: '',
+      contactChannel: 'phone',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+      kind: 'call_click',
+    });
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(clicked.id);
+    expect(lead.contact).toBe('+381602222222');
+    expect(lead.service).toBe('parts-order');
+  });
+
+  it('answers a resent order with the Lead it already made, untouched', async () => {
+    const { lead: first } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    await store.setStatus(first.id, 'won');
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+      comment: 'повтор',
+      orderId: 'order_1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(first.id);
+    expect(lead.status).toBe('won');
+    expect(lead.comment).toBeUndefined();
+    expect(await store.readLeads()).toHaveLength(1);
+  });
+
+  it('keeps two different orders apart', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_2',
+    });
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('still merges services that are not standalone', async () => {
+    await store.insertOrMergeLead(inquiry);
+    const { merged } = await store.insertOrMergeLead({
+      ...inquiry,
+      comment: 'еще',
+    });
+
+    expect(merged).toBe(true);
   });
 });
 

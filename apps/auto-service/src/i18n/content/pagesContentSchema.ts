@@ -4,17 +4,6 @@ const privacySectionSchema = z
   .object({ title: z.string(), text: z.string() })
   .strict();
 
-const partsCategorySchema = z
-  .object({
-    name: z.string(),
-    metaTitle: z.string(),
-    metaDescription: z.string(),
-    lead: z.string(),
-    itemsHeading: z.string(),
-    items: z.array(z.string()).min(1),
-  })
-  .strict();
-
 export const pagesContentSchema = z
   .object({
     works: z
@@ -69,7 +58,6 @@ export const pagesContentSchema = z
         heading: z.string(),
         lastUpdated: z.string(),
         sections: z.array(privacySectionSchema),
-        shopSections: z.array(privacySectionSchema),
         contactTitle: z.string(),
         contactBefore: z.string(),
       })
@@ -114,6 +102,12 @@ export const pagesContentSchema = z
         commentLabel: z.string(),
         commentPlaceholder: z.string(),
         commentNote: z.string(),
+        listHeading: z.string(),
+        listRemoveLabel: z.string(),
+        listCarRemoveLabel: z.string(),
+        listMoreTemplate: z.string(),
+        llmsCatalogue: z.string(),
+        llmsCatalogueClosed: z.string(),
         stepsHeading: z.string(),
         steps: z
           .array(z.object({ heading: z.string(), body: z.string() }))
@@ -121,15 +115,13 @@ export const pagesContentSchema = z
         categoriesHeading: z.string(),
         categoriesLead: z.string(),
         categoryCta: z.string(),
-        categories: z
+        category: z
           .object({
-            'maintenance-consumables': partsCategorySchema,
-            brakes: partsCategorySchema,
-            suspension: partsCategorySchema,
-            'engine-parts': partsCategorySchema,
-            electrics: partsCategorySchema,
-            transmission: partsCategorySchema,
-            'body-parts': partsCategorySchema,
+            eyebrow: z.string(),
+            metaTitleTemplate: z.string().includes('{name}'),
+            partsHeading: z.string(),
+            noParts: z.string(),
+            fieldsHeading: z.string(),
           })
           .strict(),
       })

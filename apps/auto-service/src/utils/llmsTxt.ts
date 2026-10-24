@@ -1,43 +1,24 @@
 import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
-import { renderBrandLlmsTxt, type LlmsLinkList } from '@podbor/i18n';
+import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
-import { shopCatalog } from '@/lib/catalog';
-import { shopTypes } from '@/lib/shopPages';
-import { shopIndexed } from '@/utils/shopStatus';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { PARTS_CATEGORY_SLUGS } from '@/utils/partsCatalog';
+import { translated } from '@podbor/catalog-contract';
+import {
+  categoriesForBuild,
+  makeHubsForBuild,
+  shopOpen,
+} from '@/utils/catalogueEnv';
+import { categoryAddon } from '@/utils/categoryAddon';
+import { formatMoney } from '@/utils/money';
+import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
-import { SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
+import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
 const url = (path: string) => `${SITE_URL}${path}`;
-
-async function shopList(
-  locale: Locale,
-  heading: string,
-): Promise<LlmsLinkList[]> {
-  if (!shopIndexed()) return [];
-  const shop = content(locale).shop;
-  const { products } = await shopCatalog().catalog(locale);
-  return [
-    {
-      heading,
-      index: {
-        label: shop.heading,
-        href: url(PathBuilder.shop(locale)),
-        note: shop.lead,
-      },
-      entries: shopTypes(products).map(({ key }) => ({
-        label: shop.types[key].name,
-        href: url(PathBuilder.shopType(locale, key)),
-        note: shop.types[key].lead,
-      })),
-    },
-  ];
-}
 
 export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const home = content(locale).home;
@@ -45,6 +26,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const services = content(locale).services;
   const site = content(locale).site;
   const works = publishedWorks(await getCollection('works'));
+  const categories = await categoriesForBuild();
+  const makes = await makeHubsForBuild();
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -73,15 +56,39 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         index: {
           label: pages.partsInquiry.heading,
           href: url(PathBuilder.parts(locale)),
-          note: pages.partsInquiry.lead,
+          note: shopOpen()
+            ? pages.partsInquiry.llmsCatalogue
+            : pages.partsInquiry.llmsCatalogueClosed,
         },
-        entries: PARTS_CATEGORY_SLUGS.map((slug) => ({
-          label: pages.partsInquiry.categories[slug].name,
-          href: url(PathBuilder.partsCategory(locale, slug)),
-          note: pages.partsInquiry.categories[slug].lead,
-        })),
+        entries: [
+          ...categories.map((category) => {
+            const addon = categoryAddon(category, locale);
+            const money = (price: number) =>
+              formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale]);
+            const { installationLabel, installationFree } =
+              content(locale).shopCart;
+            return {
+              label: translated(category, 'name', locale),
+              href: url(PathBuilder.partsCategory(locale, category.slug)),
+              note: [
+                paragraphs(translated(category, 'text', locale))[0],
+                addon && `${addon.label}: ${money(addon.price)}.`,
+                category.installation_price === 0
+                  ? `${installationFree}.`
+                  : category.installation_price !== null &&
+                    `${installationLabel}: ${money(category.installation_price)}.`,
+              ]
+                .filter(Boolean)
+                .join(' '),
+            };
+          }),
+          ...makes.map(({ make }) => ({
+            label: make.name,
+            href: url(PathBuilder.partsMake(locale, make.slug)),
+            note: content(locale).partsCar.hubs.make.lead,
+          })),
+        ],
       },
-      ...(await shopList(locale, site.nav.parts)),
       {
         heading: site.nav.works,
         index: {

@@ -1,0 +1,166 @@
+metaTitleSuffix: CarLab
+metaDescription: Бренды, аналоги, цены и наличие этой запчасти в каталоге CarLab. Самовывоз с СТО в Белграде.
+eyebrow: Запчасть
+equivalentsHeading: Аналоги этой запчасти
+noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
+numberSupersededNotice: Номер {number} больше не используется производителем.
+partReplacedNotice: Производитель заменил деталь {number} новой.
+previousNumber: Прежний номер
+previousNumberCurrent: Номер заменен на
+earlierNumbers: 'Ранее:'
+previousNumbersHeading: Прежние номера
+currentNumberLabel: 'Актуальный номер:'
+currentNumbersLabel: 'Актуальные номера:'
+successorOffersHeading: Купить актуальную запчасть
+attributesHeading: Характеристики
+attributeYes: Да
+attributeNo: Нет
+categoryLink: Все запчасти категории
+priceOnRequestHeading: Цена по запросу
+priceOnRequestBody: Сейчас этой запчасти нет в наличии. Добавьте ее в заявку, и мы сообщим цену и когда ее можно забрать.
+priceOnRequestCta: Узнать цену
+inquiryBody: Добавьте запчасть в заявку, и мы сообщим цену, наличие и когда ее можно забрать.
+offersHeading: Цена и наличие
+columns:
+  stock: В наличии
+  leadTime: Можно забрать через
+  leadTimeShort: Через
+  inStockPickup: В наличии, забрать через {days}
+buyButtonLabel: В корзину
+addedLabel: В корзине
+outOfStock: Нет в наличии
+askSupplyCta: Заказать через менеджера
+askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
+stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
+fromPrice: от {price}
+priceOnRequestTag: цена по запросу
+addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
+addedCta: Открыть корзину
+inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
+inquiryCta: Открыть заявку
+photoLabel: Фото {n} из {total}
+categoryIllustration: Иллюстрация категории, не фото этой запчасти
+crossReferencesHeading: Номера других производителей
+applicabilityHeading: Применимость по данным каталога
+supplierDataNote: Данные каталога. Перед заказом проверим совместимость по VIN.
+requirementCarsLabel: 'Подходит по допускам для:'
+kitCarsLabel: 'Входит в комплект ТО для:'
+leadTime:
+  inStock: В наличии
+  days:
+    one: '{days} день'
+    few: '{days} дня'
+    many: '{days} дней'
+    other: '{days} дня'
+translatedFrom: ab5aa702611f307a
+translations:
+  sr:
+    metaTitleSuffix: CarLab
+    metaDescription: Brendovi, analogi, cene i dostupnost ove auto delove u CarLab katalogu. Preuzimanje sa servisnog centra u Beogradu.
+    eyebrow: Auto deo
+    equivalentsHeading: Analogi ovog dela
+    noEquivalents: Analoga u katalogu trenutno nema. Javite nam, naći ćemo zamenu.
+    numberSupersededNotice: Broj {number} više ne koristi proizvodjač.
+    partReplacedNotice: Proizvođač je zamenio deo {number} novim.
+    previousNumber: Prethodni broj
+    previousNumberCurrent: Broj zamenjen na
+    earlierNumbers: 'Ranije:'
+    previousNumbersHeading: Prethodni brojevi
+    currentNumberLabel: 'Aktuelni broj:'
+    currentNumbersLabel: 'Aktuelni brojevi:'
+    successorOffersHeading: Kupite aktuelni auto deo
+    attributesHeading: Karakteristike
+    attributeYes: Da
+    attributeNo: Ne
+    categoryLink: Svi delovi kategorije
+    priceOnRequestHeading: Cena na zahtev
+    priceOnRequestBody: Trenutno ovaj deo nije dostupna. Dodajte ga u upit, i javićemo vam cenu i kada može biti preuzet.
+    inquiryBody: Dodajte deo u upit, i javićemo vam cenu, dostupnost i kada može biti preuzet.
+    priceOnRequestCta: Saznajte cenu
+    offersHeading: Cena i dostupnost
+    columns:
+      stock: Dostupno
+      leadTime: Može se preuzeti za
+      leadTimeShort: Za
+      inStockPickup: Dostupno, preuzeti za {days}
+    leadTime:
+      inStock: Dostupno
+      days:
+        one: '{days} dan'
+        few: '{days} dana'
+        many: '{days} dana'
+        other: '{days} dana'
+    buyButtonLabel: U korpu
+    addedLabel: U korpi
+    outOfStock: Nema na skladištu
+    askSupplyCta: Narudzbina preko menadžera
+    askedNotice: Dodali smo u upit. Potvrdićemo cenu i kada može biti preuzeto i javiti vam.
+    stockLimitNotice: Više ovog dela trenutno nema, svi dostupni su već u korpi.
+    fromPrice: od {price}
+    priceOnRequestTag: cena na zahtev
+    addedNotice: Dodali smo u korpu. Cenu ćemo ponovo proveriti prilikom naručivanja.
+    addedCta: Otvorite korpu
+    inquiryNotice: Trenutno ne možemo potvrditi cenu i dostupnost, pa smo dodali deo u upit. Javićemo vam cenu.
+    inquiryCta: Otvorite upit
+    photoLabel: Foto {n} od {total}
+    categoryIllustration: Ilustracija kategorije, nije foto ovog dela
+    crossReferencesHeading: Brojevi drugih proizvođača
+    applicabilityHeading: Primernost prema podacima kataloga
+    supplierDataNote: Podaci iz kataloga. Pre narudžbe proverićemo kompatibilnost po VIN.
+    requirementCarsLabel: 'Prikladno prema dozvolama za:'
+    kitCarsLabel: 'Ulazi u paket servisa za:'
+  en:
+    metaTitleSuffix: CarLab
+    metaDescription: Brands, equivalents, prices, and availability of this part in the CarLab catalog. Pickup at the workshop in Belgrade.
+    eyebrow: Spare part
+    equivalentsHeading: Equivalents of this part
+    noEquivalents: No equivalents available in the catalog yet. Contact us for alternatives.
+    numberSupersededNotice: Part number {number} is no longer used by the manufacturer.
+    partReplacedNotice: The manufacturer has replaced part {number} with a new one.
+    previousNumber: Previous number
+    previousNumberCurrent: Replaced with number
+    earlierNumbers: 'Earlier:'
+    previousNumbersHeading: Previous numbers
+    currentNumberLabel: 'Current number:'
+    currentNumbersLabel: 'Current numbers:'
+    successorOffersHeading: Buy the current spare part
+    attributesHeading: Specifications
+    attributeYes: Yes
+    attributeNo: No
+    categoryLink: All parts in this category
+    priceOnRequestHeading: Price available upon request
+    priceOnRequestBody: This part is currently out of stock. Add it to your request, and we will inform you of the price and when it can be picked up.
+    inquiryBody: Add the spare part to your request, and we will provide you with the price, availability, and pickup information.
+    priceOnRequestCta: Request price
+    offersHeading: Price and availability
+    columns:
+      stock: In stock
+      leadTime: Available in
+      leadTimeShort: In
+      inStockPickup: In stock, pickup in {days}
+    leadTime:
+      inStock: In stock
+      days:
+        one: '{days} day'
+        few: '{days} days'
+        many: '{days} days'
+        other: '{days} days'
+    buyButtonLabel: Add to cart
+    addedLabel: In cart
+    outOfStock: Out of stock
+    askSupplyCta: Order through the manager
+    askedNotice: Added to your request. We will clarify the price and pickup information, and inform you.
+    stockLimitNotice: There are no more of this part available, all existing ones are already in the cart.
+    fromPrice: from {price}
+    priceOnRequestTag: price on request
+    addedNotice: Added to cart. We will recheck the price during checkout.
+    addedCta: Open cart
+    inquiryNotice: We cannot confirm the price and availability right now, so we added this item to your request. We will let you know the price ourselves.
+    inquiryCta: Open request
+    photoLabel: Photo {n} of {total}
+    categoryIllustration: Category illustration, not a photo of this part
+    crossReferencesHeading: Numbers from other manufacturers
+    applicabilityHeading: Applicability according to catalog data
+    supplierDataNote: Catalog data. We will check compatibility by VIN before ordering.
+    requirementCarsLabel: 'Suitable for approvals for:'
+    kitCarsLabel: 'Included in the service kit for:'

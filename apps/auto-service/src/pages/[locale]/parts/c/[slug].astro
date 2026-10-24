@@ -1,0 +1,183 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import type { CategoryPageEntry } from '@/utils/catalogueSnapshot';
+import { categoryFacets } from '@/utils/categoryFacets';
+import { paragraphs } from '@podbor/site-kit';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { partThumbnail } from '@/utils/partImages';
+import { partSuccessor } from '@/utils/partSuccessor';
+import { rangeText, withFacetCopy } from '@/utils/partsSearch';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const categories = await categoryPagesForBuild();
+  return withLocales(
+    categories.map((category) => ({
+      params: { slug: category.slug },
+      props: { category },
+    })),
+  );
+}
+
+const { category } = Astro.props as { category: CategoryPageEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = inquiry.category;
+const name = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const empty = category.pages.length === 0;
+const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
+const searchCopy = content(locale).partsSearch;
+const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
+const filtered = !empty && facets.length > 0;
+const fields = category.fields
+  .map((field) => {
+    const numbers = category.pages
+      .flatMap(({ part }) => [part.attributes[field.key] ?? []].flat())
+      .map(Number)
+      .filter(Number.isFinite);
+    return {
+      key: field.key,
+      label: [translated(field, 'label', locale), field.unit]
+        .filter(Boolean)
+        .join(', '),
+      values:
+        field.type === 'number'
+          ? numbers.length
+            ? rangeText(
+                { min: Math.min(...numbers), max: Math.max(...numbers) },
+                null,
+                searchCopy,
+                (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
+              )
+            : ''
+          : field.options
+              .map((option) => translated(option, 'label', locale))
+              .join(', '),
+    };
+  })
+  .filter(({ values }) => values);
+---
+
+<Shell
+  title={copy.metaTitleTemplate.replace('{name}', name)}
+  description={lead ?? inquiry.metaDescription}
+>
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={name}
+    lead={lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCategory(locale, category.slug), label: name },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
+      empty
+        ? 'lg:grid-cols-[1.2fr_1fr]'
+        : filtered && 'lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
+    ]}
+  >
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{ category: category.slug }}
+          facets={facets}
+          count={category.pages.length}
+        />
+      )
+    }
+
+    <div class="flex min-w-0 flex-col gap-10">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        {
+          empty ? (
+            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+          ) : (
+            <>
+              <ListingBar count={category.pages.length} filters={filtered} />
+              <ul class="card divide-y divide-line">
+                {category.pages.map((page) => (
+                  <PartRow
+                    thumb={partThumbnail(page, category)}
+                    slug={page.slug}
+                    brand={page.brand.name}
+                    value={page.value}
+                    name={translated(page.part, 'name', locale)}
+                    superseded={page.superseded}
+                    current={partSuccessor(page, bySlug)}
+                    priced={page}
+                  />
+                ))}
+              </ul>
+              <InquiryLink />
+            </>
+          )
+        }
+      </div>
+
+      {
+        body.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        fields.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.fieldsHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {fields.map((field) => (
+                <div class="flex flex-col gap-1 px-5 py-4 sm:px-6">
+                  <dt class="font-semibold text-ink">{field.label}</dt>
+                  <dd class="spec text-sm text-muted">{field.values}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

@@ -1,0 +1,37 @@
+---
+import Icon from '@/components/Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { FILTERS_OPEN_ATTRIBUTE } from '@/scripts/filterSheet';
+
+interface Props {
+  count: number;
+  filters: boolean;
+  active?: number;
+}
+
+const { count, filters, active = 0 } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+---
+
+<div
+  class="flex min-h-11 items-center justify-between gap-4 max-lg:sticky max-lg:top-[calc(4.5rem+1px)] max-lg:z-20 max-lg:-mx-5 max-lg:border-b max-lg:border-line max-lg:bg-paper/95 max-lg:px-5 max-lg:py-2 max-lg:backdrop-blur"
+>
+  <p class="spec text-sm text-muted" aria-live="polite">
+    {copy.found.replace('{count}', String(count))}
+  </p>
+  {
+    filters && (
+      <button
+        type="button"
+        hidden
+        {...{ [FILTERS_OPEN_ATTRIBUTE]: '' }}
+        class="btn btn-secondary min-h-10 gap-2 px-4 py-2 text-sm lg:hidden"
+      >
+        <Icon name="filters" />
+        {copy.filtersHeading}
+        {active > 0 && <span class="spec">· {active}</span>}
+      </button>
+    )
+  }
+</div>

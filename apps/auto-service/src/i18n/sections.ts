@@ -4,8 +4,11 @@ import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from './content/homeContentSchema.ts';
 import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
-import { shopContentSchema } from './content/shopContentSchema.ts';
 import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
+import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
+import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
+import { partsCarContentSchema } from './content/partsCarContentSchema.ts';
+import { partsSearchContentSchema } from './content/partsSearchContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -30,13 +33,6 @@ export const SECTIONS = [
       'car service page copy (diagnostics, scheduled servicing, brakes and suspension, engine and gearbox, accident repair and respraying, pre-purchase inspection) — keep the trade terms a Serbian driver would recognise',
   },
   {
-    key: 'shop',
-    path: 'src/content/i18n/shop.yaml',
-    schema: shopContentSchema,
-    promptSubject:
-      'car parts shop copy (product types, spec labels and units, filters, car picker, basket, pickup checkout and order confirmation) — keep brand names, codes such as 5W-30 or AGM, and the {placeholders} exactly as they are',
-  },
-  {
     key: 'captureBot',
     path: 'src/content/i18n/captureBot.yaml',
     schema: captureCopySchema,
@@ -56,5 +52,33 @@ export const SECTIONS = [
     schema: promoBannersContentSchema,
     promptSubject:
       'short promo banners shown on a car service work write-up, inviting the reader to book the same kind of job at our shop in the Zvezdara district of Belgrade, keep {placeholders} if any and markdown bold spans intact',
+  },
+  {
+    key: 'shopPart',
+    path: 'src/content/i18n/shopPart.yaml',
+    schema: shopPartContentSchema,
+    promptSubject:
+      'part-detail page copy for a car parts shop (offers with stock and lead-time wording, an add-to-cart button and its confirmation, a fallback that adds the part to a parts inquiry, equivalents, supersession notices); keep {placeholders} intact',
+  },
+  {
+    key: 'shopCart',
+    path: 'src/content/i18n/shopCart.yaml',
+    schema: shopCartContentSchema,
+    promptSubject:
+      'cart page copy for a car parts shop, cash-at-pickup only (cart lines, an empty state, the total, a checkout form that asks only for a contact, notices for a changed price, missing stock or a failed order, an order-placed confirmation, a fallback to a parts inquiry); keep {placeholders} intact',
+  },
+  {
+    key: 'partsCar',
+    path: 'src/content/i18n/partsCar.yaml',
+    schema: partsCarContentSchema,
+    promptSubject:
+      'a car parts shop: the VIN lookup form, its fallback notice when a VIN cannot be identified, and the car page listing what the shop knows about one vehicle configuration (engine, fuel, drive, body, steering, model code) and its parts with quantity and fitting position (axle, side), and the make and model hub pages listing part categories; keep {placeholders} intact',
+  },
+  {
+    key: 'partsSearch',
+    path: 'src/content/i18n/partsSearch.yaml',
+    schema: partsSearchContentSchema,
+    promptSubject:
+      'a car parts shop search: the search box for a part number or name, the results list with its characteristic filters, empty and unavailable states that point to a parts inquiry, and pagination; keep {placeholders} intact',
   },
 ] as const satisfies readonly RegistryEntry[];

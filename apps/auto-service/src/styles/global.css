@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@custom-variant offers-pending {
+  @media (scripting: enabled) {
+    part-offers:is(:not(:defined), [aria-busy='true']) & {
+      @slot;
+    }
+  }
+}
+
 @font-face {
   font-family: 'Onest Variable';
   font-style: normal;
@@ -253,6 +261,11 @@
     border-color: var(--color-signal);
   }
 
+  .field:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   .chip {
     display: inline-flex;
     align-items: center;
@@ -462,9 +475,4 @@
       }
     }
   }
-}
-
-html:not([data-dev]) [data-dev-only],
-html[data-dev] [data-dev-hidden] {
-  display: none;
 }

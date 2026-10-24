@@ -1,175 +1,156 @@
 ---
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import Icon from './Icon.astro';
-import PhoneInput from './PhoneInput.astro';
-import { CART_METADATA } from '@podbor/shop-catalog/browser';
+import PickupDetails from './PickupDetails.astro';
+import LeadFormHidden from './LeadFormHidden.astro';
+import ContactChannelField from './ContactChannelField.astro';
+import ConsentField from './ConsentField.astro';
+import VinField from './VinField.astro';
 import { localeFrom } from '@/i18n/config';
-import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
-const site = content(locale).site;
-const shop = content(locale).shop;
-const channels = [
-  { value: 'phone', label: site.form.channelPhone },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'viber', label: 'Viber' },
-  { value: 'telegram', label: 'Telegram' },
-] as const;
-const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
-const chip =
-  'flex min-h-11 items-center justify-center rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium text-ink-2 transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal';
+const { site, shopCart: copy, pages } = content(locale);
+const inquiry = pages.partsInquiry;
+const uid = crypto.randomUUID().slice(0, 8);
+const steps = {
+  contact: `step-contact-${uid}`,
+  pickup: `step-pickup-${uid}`,
+  payment: `step-payment-${uid}`,
+};
+const step =
+  'flex items-center gap-2.5 text-base font-semibold leading-tight text-ink';
+const stepNumber =
+  'spec flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-ink text-xs font-semibold';
+const summaryRow = 'flex items-baseline justify-between gap-4';
 ---
 
-<checkout-form
-  data-errors={JSON.stringify(shop.cart.errors)}
-  data-submitting={shop.cart.submitting}
->
-  <form novalidate class={`${METRIKA_MASK_CLASS} flex flex-col gap-4`}>
-    <div class="hidden" aria-hidden="true">
-      <label>
-        {CART_METADATA.honeypot}
-        <input
-          type="text"
-          name={CART_METADATA.honeypot}
-          tabindex="-1"
-          autocomplete="off"
-        />
-      </label>
-    </div>
-    <div>
-      <label class="block">
-        <span class="field-label">{site.form.nameLabel}</span>
-        <input
-          name="name"
-          type="text"
-          autocomplete="name"
-          required
-          maxlength={200}
-          placeholder={site.form.namePlaceholder}
-          aria-describedby="checkout-name-hint checkout-name-error"
-          class="field"
-        />
-      </label>
-      <span id="checkout-name-hint" class="mt-1 block text-xs text-muted">
-        {shop.cart.nameRequired}
-      </span>
-      <p
-        id="checkout-name-error"
-        data-error="name"
-        class={errorText}
-        aria-live="polite"
-        hidden
-      >
-        {shop.cart.errorName}
-      </p>
-    </div>
-    <div>
-      <label class="block">
-        <span class="field-label">{shop.cart.emailLabel}</span>
-        <input
-          name="email"
-          type="email"
-          inputmode="email"
-          autocomplete="email"
-          required
-          placeholder={shop.cart.emailPlaceholder}
-          aria-describedby="checkout-email-error"
-          class="field"
-        />
-      </label>
-      <p
-        id="checkout-email-error"
-        data-error="email"
-        class={errorText}
-        aria-live="polite"
-        hidden
-      >
-        {shop.cart.errorEmail}
-      </p>
-    </div>
-    <div>
-      <span class="field-label">{site.form.contactLabel}</span>
-      <PhoneInput name="phone" errorId="checkout-phone-error" />
-      <p
-        id="checkout-phone-error"
-        data-error="phone"
-        class={errorText}
-        aria-live="polite"
-        hidden
-      >
-        {site.form.errorPhone}
-      </p>
-    </div>
-    <fieldset class="m-0 border-0 p-0">
-      <legend class="field-label p-0">{site.form.contactChannelLabel}</legend>
-      <div
-        class:list={[
-          'grid gap-2',
-          channels.length === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3',
-        ]}
-      >
-        {
-          channels.map((channel, index) => (
-            <label class="block">
-              <input
-                type="radio"
-                name="contact_channel"
-                value={channel.value}
-                checked={index === 0}
-                class="peer sr-only"
-              />
-              <span class={chip}>{channel.label}</span>
-            </label>
-          ))
-        }
+<div class="card scroll-mt-24 overflow-hidden" id="checkout">
+  <section
+    class="flex flex-col gap-2 border-b border-line bg-shade px-5 py-4 sm:px-6"
+    aria-labelledby={`summary-${uid}`}
+  >
+    <h2 id={`summary-${uid}`} class="text-block font-semibold">
+      {copy.summaryHeading}
+    </h2>
+    <dl class="flex flex-col gap-1.5 text-sm text-ink-2">
+      <div class={summaryRow}>
+        <dt data-summary-count></dt>
+        <dd class="spec text-ink" data-summary-parts></dd>
       </div>
-    </fieldset>
-    <label class="block">
-      <span class="field-label">{shop.cart.commentLabel}</span>
-      <textarea
-        name="comment"
-        rows={2}
-        maxlength={2000}
-        class="field resize-none"></textarea>
-    </label>
-    <label class="flex min-h-11 items-start gap-3 py-1.5">
-      <input
-        type="checkbox"
-        required
-        data-consent
-        class="mt-1 size-4 shrink-0 accent-signal"
-      />
-      <span class="text-xs leading-relaxed text-muted">
-        {site.form.privacyNote}{' '}
-        <a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="underline underline-offset-2"
-        >
-          {site.form.privacyLinkText}
-        </a>.
-      </span>
-    </label>
-    <p data-error="consent" class={errorText} aria-live="polite" hidden>
-      {site.form.errorConsent}
-    </p>
-    <p
-      data-form-error
-      class="text-sm text-signal-dark"
-      aria-live="polite"
-      hidden
+      <div class={summaryRow} data-summary-addon-row hidden>
+        <dt>{copy.summaryAddons}</dt>
+        <dd class="spec text-ink" data-summary-addons></dd>
+      </div>
+      <div class={`${summaryRow} mt-1 border-t border-line pt-2.5`}>
+        <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+        <dd class="spec text-xl font-semibold text-ink" data-total></dd>
+      </div>
+    </dl>
+  </section>
+
+  <lead-form class="contents">
+    <form
+      method="POST"
+      action="/api/order"
+      data-lead-form
+      data-submitting-label={site.form.submitting}
+      class={`${METRIKA_MASK_CLASS} flex flex-col gap-6 px-5 pt-5 pb-6 sm:px-6`}
     >
-    </p>
-    <button type="submit" class="btn btn-primary w-full">
-      <span data-submit-label>{shop.cart.submit}</span>
-      <Icon name="arrowRight" />
-    </button>
-  </form>
-</checkout-form>
+      <LeadFormHidden />
 
-<script>
-  import { defineCheckoutForm } from '@/scripts/shop/checkoutForm';
+      <section class="flex flex-col gap-4" aria-labelledby={steps.contact}>
+        <h3 id={steps.contact} class={step}>
+          <span class={stepNumber} aria-hidden="true">1</span>
+          {copy.contactStep}
+        </h3>
+        <ContactChannelField uid={uid} defaultChannel="whatsapp" />
+        <label class="block">
+          <span class="field-label">{site.form.nameLabel}</span>
+          <input
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder={site.form.namePlaceholder}
+            class="field"
+          />
+        </label>
+      </section>
 
-  defineCheckoutForm();
-</script>
+      <section class="flex flex-col gap-2" aria-labelledby={steps.pickup}>
+        <h3 id={steps.pickup} class={step}>
+          <span class={stepNumber} aria-hidden="true">2</span>
+          {copy.pickupStep}
+        </h3>
+        <PickupDetails class="pl-8.5" />
+      </section>
+
+      <section class="flex flex-col gap-2" aria-labelledby={steps.payment}>
+        <h3 id={steps.payment} class={step}>
+          <span class={stepNumber} aria-hidden="true">3</span>
+          {copy.paymentStep}
+        </h3>
+        <p class="pl-8.5 text-sm font-semibold text-ink">
+          {copy.paymentMethod}
+        </p>
+      </section>
+
+      <details class="group rounded-field border border-line">
+        <summary
+          class="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3.5 text-sm font-semibold text-ink-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-signal [&::-webkit-details-marker]:hidden"
+        >
+          <Icon
+            name="plus"
+            size={14}
+            class="shrink-0 transition-transform duration-150 group-open:rotate-45"
+          />
+          {copy.extrasToggle}
+        </summary>
+        <div class="flex flex-col gap-4 border-t border-line p-3.5">
+          <VinField
+            label={inquiry.vinLabel}
+            placeholder={inquiry.vinPlaceholder}
+          />
+          <label class="block">
+            <span class="field-label">{copy.commentLabel}</span>
+            <textarea
+              name="comment"
+              rows={2}
+              placeholder={copy.commentPlaceholder}
+              class="field resize-none"></textarea>
+          </label>
+        </div>
+      </details>
+
+      <div class="flex flex-col gap-4 border-t border-line pt-5">
+        <p
+          class="border-l-4 border-l-signal pl-3 text-sm leading-relaxed text-signal-dark"
+          data-blocked
+          hidden
+        >
+        </p>
+        <ConsentField
+          uid={uid}
+          error={copy.consentError}
+          submitError={copy.submitError}
+        />
+        <div class="flex flex-col gap-2.5">
+          <button
+            type="submit"
+            class="btn btn-primary w-full disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2 aria-busy:cursor-progress aria-busy:opacity-60"
+          >
+            <span>
+              <span data-submit-label>{copy.submitLabel}</span>
+              <span class="spec whitespace-nowrap in-aria-busy:hidden">
+                {' · '}<span data-total></span>
+              </span>
+            </span>
+          </button>
+          <p class="text-center text-xs leading-relaxed text-muted">
+            {copy.submitNote}
+          </p>
+        </div>
+      </div>
+    </form>
+  </lead-form>
+</div>

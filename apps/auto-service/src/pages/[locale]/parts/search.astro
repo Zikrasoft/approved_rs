@@ -1,0 +1,356 @@
+---
+export const prerender = false;
+
+import {
+  CATALOG_KEY_PATTERN,
+  type RangeFilter,
+  searchableQuery,
+} from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import Icon from '@/components/Icon.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import PartsSearchForm from '@/components/PartsSearchForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import { previewRequested } from '@/utils/shopPreview';
+import { PathBuilder } from '@/utils/paths';
+import {
+  appendRange,
+  chosenFilters,
+  PARTS_QUERY_MAX_LENGTH,
+  rangesFromParams,
+  withFacetCopy,
+} from '@/utils/partsSearch';
+import { currentNumber } from '@/utils/partNumbers';
+import { carName } from '@/utils/carName';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsSearch;
+const partsInquiry = content(locale).pages.partsInquiry;
+
+const params = Astro.url.searchParams;
+const q = (params.get('q') ?? '').trim().slice(0, PARTS_QUERY_MAX_LENGTH);
+const categoryParam = params.get('category') ?? '';
+const category = CATALOG_KEY_PATTERN.test(categoryParam)
+  ? categoryParam
+  : undefined;
+const modelParam = params.get('model') ?? '';
+const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
+const chosen = params.getAll('facets');
+const ranges = rangesFromParams(params);
+const offset = Math.max(
+  0,
+  Number.parseInt(params.get('offset') ?? '0', 10) || 0,
+);
+
+const catalogue = catalogueFromEnv(siteEnv(), {
+  preview: previewRequested(Astro.request),
+});
+const searchable = searchableQuery(q) || Boolean(category);
+const found =
+  searchable && catalogue
+    ? await catalogue.search({
+        q,
+        category,
+        model,
+        locale,
+        facets: chosen,
+        ranges,
+        offset,
+      })
+    : null;
+const unavailable = searchable && !found;
+const lastPage =
+  found && found.count > 0
+    ? Math.floor((found.count - 1) / found.limit) * found.limit
+    : 0;
+
+const searchHref = (
+  facets: string[],
+  nextRanges: RangeFilter[],
+  nextOffset = 0,
+  scope = model,
+) => {
+  const next = new URLSearchParams({
+    ...(q ? { q } : {}),
+    ...(category ? { category } : {}),
+    ...(scope ? { model: scope } : {}),
+  });
+  for (const facet of facets) {
+    next.append('facets', facet);
+  }
+  for (const range of nextRanges) {
+    appendRange(next, range);
+  }
+  if (nextOffset) {
+    next.set('offset', String(nextOffset));
+  }
+  return `${PathBuilder.partsSearch(locale)}?${next}`;
+};
+if (found && offset > lastPage) {
+  return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
+}
+const scope =
+  found ??
+  (catalogue && (category || model)
+    ? await catalogue.listingScope({ category, model }, locale)
+    : null);
+const narrowedTo = scope?.category;
+const scopedTo = scope?.model;
+const modelName = scopedTo && carName(scopedTo, locale);
+const modelCopy = content(locale).partsCar.hubs.modelCategory;
+const heading = narrowedTo?.name ?? copy.heading;
+const fillModel = (template: string) =>
+  template.replace('{category}', heading).replace('{model}', modelName ?? '');
+const facets = found ? withFacetCopy(found.facets, copy) : [];
+const chips = chosenFilters(facets, chosen, ranges, copy, (value) =>
+  value.toLocaleString(BCP47_BY_LOCALE[locale]),
+);
+const emptyMessage = q
+  ? copy.noResults.replace('{q}', q)
+  : chips.length > 0
+    ? copy.noFilteredResults
+    : partsInquiry.category.noParts;
+const inquiryTopic = [modelName, narrowedTo?.name, q]
+  .filter(Boolean)
+  .join(', ');
+const scopeHidden = {
+  ...(q ? { q } : {}),
+  ...(category ? { category } : {}),
+  ...(model ? { model } : {}),
+};
+---
+
+<Shell
+  title={modelName
+    ? fillModel(modelCopy.metaTitle)
+    : narrowedTo
+      ? partsInquiry.category.metaTitleTemplate.replace('{name}', heading)
+      : copy.metaTitle}
+  description={copy.metaDescription}
+  noindex
+>
+  <PageHero
+    actions={false}
+    eyebrow={modelName
+      ? fillModel(modelCopy.eyebrow)
+      : narrowedTo
+        ? partsInquiry.category.eyebrow
+        : copy.eyebrow}
+    heading={heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      ...(scopedTo && modelName
+        ? [
+            {
+              href: PathBuilder.partsMake(
+                locale,
+                scopedTo.chassis.series.make.slug,
+              ),
+              label: scopedTo.chassis.series.make.name,
+            },
+            {
+              href: PathBuilder.partsModel(
+                locale,
+                scopedTo.chassis.series.make.slug,
+                scopedTo.slug,
+              ),
+              label: modelName,
+            },
+          ]
+        : []),
+      scopedTo && narrowedTo
+        ? {
+            href: PathBuilder.partsModelCategory(
+              locale,
+              scopedTo.chassis.series.make.slug,
+              scopedTo.slug,
+              narrowedTo.slug,
+            ),
+            label: narrowedTo.name,
+          }
+        : narrowedTo
+          ? {
+              href: PathBuilder.partsCategory(locale, narrowedTo.slug),
+              label: narrowedTo.name,
+            }
+          : { href: PathBuilder.partsSearch(locale), label: copy.heading },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
+    {!found && <PartsSearchForm query={q} category={category} titled={false} />}
+
+    {
+      !searchable && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.emptyQuery}
+        </p>
+      )
+    }
+
+    {
+      found && (
+        <div
+          class:list={[
+            'grid gap-6',
+            facets.length > 0 &&
+              'lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
+          ]}
+        >
+          {facets.length > 0 && (
+            <FacetFilters
+              action={PathBuilder.partsSearch(locale)}
+              hidden={scopeHidden}
+              facets={facets}
+              chosen={chosen}
+              ranges={ranges}
+              count={found.count}
+              resetHref={searchHref([], [])}
+            />
+          )}
+
+          <div class="flex min-w-0 flex-col gap-3">
+            <PartsSearchForm query={q} category={category} compact />
+            <ListingBar
+              count={found.count}
+              filters={facets.length > 0}
+              active={chips.length}
+            />
+
+            {(chips.length > 0 || modelName) && (
+              <ul class="flex flex-wrap gap-2 max-lg:-mx-5 max-lg:flex-nowrap max-lg:overflow-x-auto max-lg:px-5 max-lg:[scrollbar-width:none]">
+                {[
+                  ...(modelName
+                    ? [
+                        {
+                          label: modelName,
+                          href: searchHref(chosen, ranges, 0, ''),
+                        },
+                      ]
+                    : []),
+                  ...chips.map((chip) => ({
+                    label: chip.label,
+                    href: searchHref(chip.facets, chip.ranges),
+                  })),
+                ].map((chip) => (
+                  <li class="shrink-0">
+                    <a
+                      href={chip.href}
+                      aria-label={copy.removeFilter.replace(
+                        '{label}',
+                        chip.label,
+                      )}
+                      class="inline-flex min-h-9 items-center gap-2 rounded-full whitespace-nowrap border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+                    >
+                      {chip.label}
+                      <Icon name="close" size={12} class="text-muted" />
+                    </a>
+                  </li>
+                ))}
+                {chips.length > 0 && (
+                  <li class="shrink-0">
+                    <a
+                      href={searchHref([], [])}
+                      class="inline-flex min-h-9 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                    >
+                      {copy.resetAllFilters}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            )}
+
+            {found.results.length === 0 ? (
+              <p class="max-w-2xl text-base leading-relaxed break-words text-ink-2">
+                {emptyMessage}
+              </p>
+            ) : (
+              <ul class="card divide-y divide-line">
+                {found.results.map((result) => (
+                  <PartRow
+                    thumb={result.thumbnail}
+                    slug={result.slug}
+                    brand={result.brand.name}
+                    value={result.value}
+                    name={result.part.name}
+                    detail={category ? undefined : result.part.category?.name}
+                    superseded={result.superseded}
+                    current={currentNumber(result, found.results)}
+                    priced={result}
+                  />
+                ))}
+              </ul>
+            )}
+
+            {(offset > 0 || offset + found.limit < found.count) && (
+              <nav class="flex justify-between gap-4 pt-2 text-sm">
+                {offset > 0 ? (
+                  <a
+                    href={searchHref(
+                      chosen,
+                      ranges,
+                      Math.max(0, offset - found.limit),
+                    )}
+                    class="underline underline-offset-2 hover:text-signal-ink"
+                  >
+                    {copy.previous}
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {offset + found.limit < found.count && (
+                  <a
+                    href={searchHref(chosen, ranges, offset + found.limit)}
+                    class="underline underline-offset-2 hover:text-signal-ink"
+                  >
+                    {copy.next}
+                  </a>
+                )}
+              </nav>
+            )}
+
+            {found.results.length > 0 && <InquiryLink class="pt-2" />}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      unavailable && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.unavailable}
+        </p>
+      )
+    }
+
+    {
+      (unavailable || found?.results.length === 0) && (
+        <div id="lead" class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: partsInquiry.vinLabel,
+              placeholder: partsInquiry.vinPlaceholder,
+            }}
+            comment={`${inquiryTopic}: `}
+            commentLabel={partsInquiry.commentLabel}
+            commentPlaceholder={partsInquiry.commentPlaceholder}
+            commentNote={partsInquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

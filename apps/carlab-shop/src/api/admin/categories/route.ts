@@ -1,0 +1,45 @@
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
+
+import {
+  CATEGORY_RELATIONS,
+  guardCategoryService,
+  withRankedFields,
+} from '../../../lib/categories';
+import { createdBy, withEditors } from '../../../lib/editors';
+import { CATALOG_MODULE } from '../../../modules/catalog';
+import type CatalogModuleService from '../../../modules/catalog/service';
+import type { AdminCreateCategoryType } from '../validators';
+
+export async function GET(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+): Promise<void> {
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+
+  const categories = await catalog.listCategories(
+    {},
+    { relations: CATEGORY_RELATIONS, order: { name: 'ASC' }, take: null },
+  );
+
+  res.json({
+    categories: await withEditors(req.scope, categories.map(withRankedFields)),
+  });
+}
+
+export async function POST(
+  req: AuthenticatedMedusaRequest<AdminCreateCategoryType>,
+  res: MedusaResponse,
+): Promise<void> {
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+
+  guardCategoryService(req.validatedBody);
+  const category = await catalog.createCategories({
+    ...req.validatedBody,
+    ...createdBy(req),
+  });
+
+  res.json({ category });
+}

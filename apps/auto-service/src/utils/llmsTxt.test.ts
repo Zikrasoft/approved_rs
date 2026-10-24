@@ -70,13 +70,132 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
-  it('leaves the shop out of llms.txt unless the shop is live', async () => {
-    expect(await generateLlmsTxt('sr')).not.toContain('/sr/shop/');
+  const withBackend = async (shopOpen: string, locale: 'sr' | 'ru' = 'sr') => {
+    const answers: Record<string, unknown> = {
+      '/store/categories': {
+        categories: [
+          {
+            id: 'category_oil',
+            slug: 'engine-oil',
+            name: 'Моторное масло',
+            text: 'Масло для двигателя.\n\nВторой абзац.',
+            translations: {
+              sr: {
+                name: 'Motorno ulje',
+                text: 'Ulje za motor.',
+                service_label: 'Zamena ulja',
+              },
+            },
+            maintenance_kit: false,
+            kit_rank: 0,
+            service_label: 'Замена масла',
+            service_price: 2500,
+            service_note: null,
+            installation_price: 1500,
+            image: null,
+            fields: [],
+          },
+        ],
+      },
+      '/store/vehicles': {
+        vehicles: [
+          {
+            id: 'veh_1',
+            power_kw: 140,
+            drive: 'rwd',
+            market: 'EU',
+            year_from: 2015,
+            year_to: 2019,
+            steering: 'left',
+            model: {
+              slug: 'f30-320d',
+              name: '320d',
+              chassis: {
+                code: 'F30',
+                body_style: 'sedan',
+                series: {
+                  name: '3 серия',
+                  translations: null,
+                  make: { slug: 'bmw', name: 'BMW' },
+                },
+              },
+            },
+            engine: {
+              code: 'B47D20O0',
+              family: 'B47',
+              fuel: 'diesel',
+              displacement_cc: 1995,
+            },
+            identifiers: [],
+            requirements: [],
+          },
+        ],
+      },
+    };
+    vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
+    vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+    vi.stubEnv('SHOP_OPEN', shopOpen);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => ({
+        ok: true,
+        json: async () =>
+          answers[new URL(url).pathname] ?? {
+            pages: [],
+            fitments: [],
+            count: 0,
+            offset: 0,
+            limit: 1000,
+          },
+      })),
+    );
+
+    return generateLlmsTxt(locale).finally(() => {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    });
+  };
+
+  it('lists the Category pages and the Make hubs', async () => {
+    const body = await withBackend('true');
+
+    expect(body).toContain(
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
+    );
+    expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
+  });
+
+  it('names the installation price of a Category beside its add-on service', async () => {
+    const body = await withBackend('true', 'ru');
+
+    expect(body).toContain(
+      'Масло для двигателя. Замена масла: 2\u00a0500 RSD. Установка в сервисе CarLab: 1\u00a0500 RSD',
+    );
+  });
+
+  it('names no price and no cart while the shop is closed', async () => {
+    const body = await withBackend('false');
+
+    expect(body).toContain(
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.\n',
+    );
+    expect(body).not.toContain('RSD');
+    expect(await generateLlmsTxt('ru')).toContain(
+      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цену и наличие сообщаем по заявке',
+    );
   });
 
   it('links the BMW landing page', async () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
+  });
+
+  it('describes the parts catalogue on the parts index link', async () => {
+    vi.stubEnv('SHOP_OPEN', 'true');
+    const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());
+    expect(body).toContain(
+      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО',
+    );
   });
 
   it('links the about page', async () => {

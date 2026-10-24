@@ -305,6 +305,32 @@ describe('leadSubmissionSchema', () => {
     if (parsed.success) expect(parsed.data.name).toBe('');
   });
 
+  it('keeps every line of the comment on a plain line break', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WBA35BG070N074158',
+      comment: 'BMW 320d\r\nMann HU 816 x\rNote',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158\nBMW 320d\nMann HU 816 x\nNote',
+    );
+  });
+
+  it('carries the shop order the Lead was placed for', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      order_id: ' order_01J ',
+    });
+    expect(parsed.success && parsed.data.orderId).toBe('order_01J');
+  });
+
+  it('leaves a form Lead without an order', () => {
+    const parsed = submit({ name: '', contact: '+381641234567' });
+    expect(parsed.success && parsed.data.orderId).toBeNull();
+  });
+
   it('rejects a missing contact', () => {
     expect(submit({ name: 'Иван' }).success).toBe(false);
   });

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node10",
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "declaration": true,
+    "outDir": "dist/cjs",
+    "rootDir": "src",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@podbor/lead-crm/contact-channel": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/contactChannel.d.ts"
+      ],
+      "@podbor/lead-crm/fields": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/fields.d.ts"
+      ],
+      "@podbor/lead-crm/limits": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/limits.d.ts"
+      ],
+      "@podbor/lead-crm/phone": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/phone.d.ts"
+      ]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

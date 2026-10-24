@@ -1,0 +1,115 @@
+searchHeading: Поиск по номеру или названию
+searchLead: Номер можно вводить с пробелами, точками или без них.
+label: Номер или название запчасти
+placeholder: Номер или название
+submitLabel: Найти
+metaTitle: Поиск запчастей в CarLab
+metaDescription: Найдите запчасть по номеру производителя или по названию в каталоге CarLab.
+eyebrow: Каталог запчастей
+heading: Поиск запчастей
+found: 'Найдено: {count}'
+emptyQuery: Введите номер запчасти или ее название, например HU 816 x или масляный фильтр.
+noResults: По запросу «{q}» ничего не нашлось. Проверьте номер или отправьте заявку, и менеджер подберет запчасть вручную.
+unavailable: Поиск сейчас не отвечает. Отправьте заявку, и менеджер подберет запчасть вручную.
+filtersHeading: Фильтры
+applyFilters: Показать
+showResults: Показать {count}
+showAllValues: Показать все ({count})
+resetFilters: Сбросить
+resetAllFilters: Сбросить все
+rangeMinLabel: От
+rangeMaxLabel: До
+rangeFrom: от {min}
+rangeTo: до {max}
+rangeBetween: от {min} до {max}
+removeFilter: 'Убрать фильтр: {label}'
+noFilteredResults: С такими характеристиками в категории ничего нет. Уберите часть фильтров или отправьте заявку, и менеджер подберет запчасть вручную.
+brandFacet: Бренд
+availabilityFacet: Наличие
+inStockOnly: Только в наличии
+priceFacet: Цена
+booleanTrue: да
+booleanFalse: нет
+previous: Назад
+next: Дальше
+formHeading: Заявка на запчасти
+notFoundQuestion: Не нашли нужное?
+notFoundLink: Оставьте заявку, подберем
+translatedFrom: a3fe3b94b9ddbdd2
+translations:
+  sr:
+    searchHeading: Pretraga po broju ili nazivu
+    searchLead: Broj možete unositi sa razmakom, tačkama ili bez njih.
+    label: Broj ili naziv delova
+    placeholder: Broj ili naziv
+    submitLabel: Pronađi
+    metaTitle: Pretraga delova u CarLab
+    metaDescription: Pronađite deo po fabričkom broju ili nazivu u CarLab katalogu.
+    eyebrow: Katalog delova
+    heading: Pretraga delova
+    found: 'Pronađeno: {count}'
+    emptyQuery: Unesite broj dela ili njegov naziv, na primer HU 816 x ili filter ulja.
+    noResults: Za pretragu „{q}“ nije pronađeno ništa. Proverite broj ili pošaljite zahtev, menadžer će ručno pronaći deo.
+    unavailable: Pretraga trenutno nije dostupna. Pošaljite zahtev, menadžer će ručno pronaći deo.
+    filtersHeading: Filteri
+    applyFilters: Prikaži
+    showResults: Prikaži {count}
+    showAllValues: Prikaži sve ({count})
+    resetFilters: Resetuj
+    resetAllFilters: Resetuj sve
+    rangeMinLabel: Od
+    rangeMaxLabel: Do
+    rangeFrom: od {min}
+    rangeTo: do {max}
+    rangeBetween: od {min} do {max}
+    removeFilter: 'Ukloni filter: {label}'
+    noFilteredResults: Sa ovim karakteristikama u kategoriji nema ništa. Uklonite deo filtara ili pošaljite zahtev, menadžer će ručno pronaći deo.
+    brandFacet: Brend
+    availabilityFacet: Dostupnost
+    inStockOnly: Samo dostupno
+    priceFacet: Cena
+    booleanTrue: da
+    booleanFalse: ne
+    previous: Nazad
+    next: Dalje
+    formHeading: Zahtev za delove
+    notFoundQuestion: Niste našli šta vam treba?
+    notFoundLink: Ostavite zahtev, pronaći ćemo
+  en:
+    searchHeading: Search by part number or name
+    searchLead: You can enter the number with spaces, dots, or without them.
+    label: Part number or name
+    placeholder: Number or name
+    submitLabel: Find
+    metaTitle: Parts search at CarLab
+    metaDescription: Find a part by part number or name in the CarLab catalog.
+    eyebrow: Parts catalog
+    heading: Parts search
+    found: 'Found: {count}'
+    emptyQuery: Enter the part number or name, for example HU 816 x or oil filter.
+    noResults: No results found for “{q}”. Check the number or submit an inquiry, and our manager will find the part manually.
+    unavailable: The search is currently unresponsive. Submit an inquiry, and our manager will find the part manually.
+    filtersHeading: Filters
+    applyFilters: Show
+    showResults: Show {count}
+    showAllValues: Show all ({count})
+    resetFilters: Reset
+    resetAllFilters: Reset all
+    rangeMinLabel: From
+    rangeMaxLabel: To
+    rangeFrom: from {min}
+    rangeTo: to {max}
+    rangeBetween: from {min} to {max}
+    removeFilter: 'Remove filter: {label}'
+    noFilteredResults: There are no items in this category with these characteristics. Remove some filters or submit an inquiry, and our manager will find the part manually.
+    brandFacet: Brand
+    availabilityFacet: Availability
+    inStockOnly: In stock only
+    priceFacet: Price
+    booleanTrue: yes
+    booleanFalse: no
+    previous: Back
+    next: Next
+    formHeading: Parts inquiry
+    notFoundQuestion: Couldn't find what you need?
+    notFoundLink: Submit an inquiry, and we will find it for you.

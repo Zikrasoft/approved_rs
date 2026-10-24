@@ -1,0 +1,190 @@
+metaTitle: Корзина, CarLab
+metaDescription: Запчасти, которые вы выбрали в каталоге CarLab. Оплата наличными при получении на СТО в Белграде.
+heading: Корзина
+cartLink: Корзина
+loading: Проверяем цены и наличие
+emptyHeading: В корзине пусто
+emptyBody: Откройте страницу запчасти в каталоге и нажмите «В корзину».
+emptyCta: В каталог запчастей
+unitTemplate: '{price} за шт.'
+increaseLabel: Добавить еще одну
+decreaseLabel: Убрать одну
+toInquiryLabel: Отправить заявкой
+unavailableTag: Сейчас нет в нужном количестве. Уберите позицию или отправьте ее заявкой.
+removeLabel: Убрать из корзины
+totalLabel: Итого
+summaryHeading: Ваш заказ
+summaryCountTemplate: 'Запчасти, {count} шт.'
+summaryAddons: Работы при выдаче
+contactStep: Контакт
+pickupStep: Получение
+pickupMethod: Самовывоз с СТО CarLab
+paymentStep: Оплата
+paymentMethod: Наличными при получении
+extrasToggle: Добавить VIN или комментарий
+submitNote: Менеджер подтвердит наличие и время, когда можно забрать.
+commentLabel: Комментарий к заказу (необязательно)
+commentPlaceholder: Например, когда удобно забрать
+submitLabel: Оформить заказ
+consentError: Без согласия мы не сможем оформить заказ
+submitError: Заказ не отправился. Проверьте связь и попробуйте еще раз
+checkoutBlocked: 'Сейчас нельзя купить: {names}. Уберите позицию или отправьте ее заявкой, и заказ можно будет оформить.'
+notices:
+  priceChanged: Пока вы оформляли заказ, цена изменилась. Мы обновили корзину, проверьте сумму и оформите заказ еще раз.
+  unavailable: Одной из позиций больше нет в нужном количестве. Уберите ее и оформите заказ еще раз.
+  unreachable: Не получилось оформить заказ. Попробуйте еще раз через минуту.
+  expired: Эта корзина устарела, и заказ по ней не оформлен. Добавьте запчасти заново со страниц каталога.
+  invalid: Не получилось распознать контакт. Укажите номер телефона или ник в Telegram и оформите заказ еще раз.
+  cartChanged: Корзина изменилась в другой вкладке. Проверьте позиции и сумму и оформите заказ еще раз.
+  repriced: С прошлого раза цена изменилась. Проверьте сумму перед оформлением.
+  offline: Магазин не ответил, корзина осталась как была. Попробуйте еще раз через минуту.
+  stockLimit: Больше этой запчасти сейчас нет. В корзине уже все, что есть.
+  moved: Перенесли позицию в заявку. Отправьте ее, и мы сообщим цену и срок.
+  movedCta: Открыть заявку
+orderedHeading: Заказ принят
+orderNumberTemplate: 'Номер заказа: {number}'
+orderedBody: Менеджер проверит наличие, а затем напишет или позвонит, чтобы подтвердить заказ и время самовывоза. Оплата наличными при получении.
+orderedCta: Вернуться в каталог
+receiptQuantityTemplate: '{count} шт.'
+stickyCta: К оформлению
+fallbackHeading: Магазин сейчас недоступен
+fallbackBody: Корзина сохранена. Попробуйте открыть ее еще раз через минуту или отправьте запчасти заявкой, и мы сами сообщим цену и срок.
+fallbackRetry: Попробовать еще раз
+fallbackCta: Отправить заявкой
+addonTemplate: 'Добавить: {service}'
+addonPickup: Делаем при выдаче в сервисе CarLab
+addonInCart: Услугу можно добавить в корзине.
+installationLabel: Установка в сервисе CarLab
+installationFree: Установка бесплатно
+installationInCart: Установку можно добавить в корзине.
+addonsInCart: Обе услуги можно добавить в корзине.
+freeLabel: Бесплатно
+priceChangeTemplate: '{name}: было {before}, стало {after}'
+translatedFrom: 152e680446f5b1a6
+translations:
+  sr:
+    metaTitle: Korpa, CarLab
+    metaDescription: Delovi koje ste izabrali u katalogu CarLab. Plaćanje kešom prilikom preuzimanja u radnji u Beogradu.
+    heading: Korpa
+    cartLink: Korpa
+    loading: Proveravamo cene i dostupnost
+    emptyHeading: Korpa je prazna
+    emptyBody: Otvorite stranicu delova u katalogu i kliknite na „U korpu“.
+    emptyCta: U katalog delova
+    unitTemplate: '{price} po komadu'
+    increaseLabel: Dodaj još jedan
+    decreaseLabel: Ukloni jedan
+    toInquiryLabel: Poslati kao upit
+    unavailableTag: Trenutno nema u potrebnoj količini. Uklonite stavku ili pošaljite kao upit.
+    removeLabel: Ukloni iz korpe
+    totalLabel: Ukupno
+    addonTemplate: 'Dodati: {service}'
+    addonPickup: Obavljamo prilikom preuzimanja u CarLab-u
+    addonInCart: Uslugu možete dodati u korpu.
+    installationLabel: Instalacija u CarLab-u
+    installationFree: Instalacija besplatno
+    installationInCart: Instalaciju možete dodati u korpu.
+    addonsInCart: Obe usluge možete dodati u korpu.
+    freeLabel: Besplatno
+    priceChangeTemplate: '{name}: bilo {before}, sada {after}'
+    summaryHeading: Vaša porudžbina
+    summaryCountTemplate: Delovi, {count} kom.
+    summaryAddons: Radovi prilikom preuzimanja
+    contactStep: Kontakt
+    pickupStep: Preuzimanje
+    pickupMethod: Samoizvlačenje iz CarLab-a
+    paymentStep: Plaćanje
+    paymentMethod: Keš prilikom preuzimanja
+    extrasToggle: Dodati VIN ili komentar
+    submitNote: Menadžer će potvrditi dostupnost i vreme preuzimanja.
+    commentLabel: Komentar na porudžbinu (opcionalno)
+    commentPlaceholder: Na primer, kada je zgodno preuzeti
+    submitLabel: Potvrdi porudžbinu
+    consentError: Bez pristanka ne možemo realizovati porudžbinu
+    submitError: Porudžbina nije poslata. Proverite vezu i pokušajte ponovo
+    checkoutBlocked: 'Trenutno nije moguće kupiti: {names}. Uklonite stavku ili je pošaljite kao upit, i porudžbina će moći da se realizuje.'
+    notices:
+      priceChanged: Dok ste obrađivali porudžbinu, cena se promenila. Ažurirali smo korpu, proverite ukupno i još jednom potvrdite porudžbinu.
+      unavailable: Jedna od stavki više nije dostupna u potrebnoj količini. Uklonite je i ponovo potvrđujte porudžbinu.
+      unreachable: Nije uspelo da se potvrdi porudžbina. Pokušajte ponovo za minut.
+      expired: Ova korpa je istekao, i porudžbina na njoj nije potvrđena. Ponovo dodajte delove sa stranica kataloga.
+      invalid: Nije moglo da se prepozna kontakt. Unesite broj telefona ili nick u Telegramu i potvrdite porudžbinu još jednom.
+      cartChanged: Korpa je promenjena u drugom tabu. Proverite stavke i ukupno i ponovo potvrdite porudžbinu.
+      repriced: Od poslednjeg puta cena se promenila. Proverite ukupno pre potvrde.
+      offline: Prodavnica nije odgovorila, korpa je ostala kao što je bila. Pokušajte još jednom za minut.
+      stockLimit: Više ovih delova trenutno nema. U korpi su svi dostupni.
+      moved: Stavka je premeštena u upit. Pošaljite je, a mi ćemo javiti cenu i rok.
+      movedCta: Otvoriti upit
+    orderedHeading: Porudžbina primljena
+    orderedBody: Menadžer će proveriti dostupnost, a zatim će vam pisati ili zvati da potvrdi porudžbinu i vreme preuzimanja. Plaćanje kešom prilikom preuzimanja.
+    orderNumberTemplate: 'Broj porudžbine: {number}'
+    orderedCta: Vratite se u katalog
+    receiptQuantityTemplate: '{count} kom.'
+    stickyCta: Za potvrđivanje
+    fallbackHeading: Prodavnica je trenutno nedostupna
+    fallbackBody: Korpa je sačuvana. Pokušajte ponovo za minut ili pošaljite delove kao upit, a mi ćemo sami javiti cenu i rok.
+    fallbackRetry: Pokušati ponovo
+    fallbackCta: Poslati kao upit
+  en:
+    metaTitle: Cart, CarLab
+    metaDescription: Parts you selected from the CarLab catalog. Cash at pickup at the service center in Belgrade.
+    heading: Cart
+    cartLink: Cart
+    loading: Checking prices and availability
+    emptyHeading: Your cart is empty
+    emptyBody: Visit the parts catalog page and click 'Add to cart'.
+    emptyCta: Go to parts catalog
+    unitTemplate: '{price} each'
+    increaseLabel: Add one more
+    decreaseLabel: Remove one
+    toInquiryLabel: Send as inquiry
+    unavailableTag: Currently not in the required quantity. Remove the item or send it as an inquiry.
+    removeLabel: Remove from cart
+    totalLabel: Total
+    addonTemplate: 'Add: {service}'
+    addonPickup: Available upon pickup at CarLab
+    addonInCart: The service can be added in the cart.
+    installationLabel: Installation at CarLab
+    installationFree: Installation is free
+    installationInCart: Installation can be added in the cart.
+    addonsInCart: Both services can be added in the cart.
+    freeLabel: Free
+    priceChangeTemplate: '{name}: was {before}, now {after}'
+    summaryHeading: Your order
+    summaryCountTemplate: Parts, {count} items
+    summaryAddons: Services upon pickup
+    contactStep: Contact
+    pickupStep: Pickup
+    pickupMethod: Self-pickup from CarLab
+    paymentStep: Payment
+    paymentMethod: Cash on pickup
+    extrasToggle: Add VIN or comment
+    submitNote: The manager will confirm availability and the time for pickup.
+    commentLabel: Order comment (optional)
+    commentPlaceholder: For example, when is convenient for pickup
+    submitLabel: Place order
+    consentError: Without consent, we cannot process your order
+    submitError: Order did not go through. Check your connection and try again
+    checkoutBlocked: 'You cannot purchase right now: {names}. Remove the item or send it as an inquiry, and you can place your order.'
+    notices:
+      priceChanged: While you were placing your order, the price changed. We updated the cart, please check the total and place your order again.
+      unavailable: One of the items is no longer in the required quantity. Please remove it and place your order again.
+      unreachable: Failed to place the order. Please try again in a minute.
+      expired: This cart has expired, and the order has not been placed. Please add the parts again from the catalog pages.
+      invalid: Unable to recognize contact. Please provide a phone number or Telegram nickname and try placing your order again.
+      cartChanged: The cart was modified in another tab. Check the items and total, and place your order again.
+      repriced: The price has changed since last time. Please check the total before placing your order.
+      offline: The store did not respond, the cart remains as is. Please try again in a minute.
+      stockLimit: There are no more of this part available now. Your cart already contains all that is in stock.
+      moved: The item has been moved to the inquiry. Send it, and we will inform you of the price and timeline.
+      movedCta: Open inquiry
+    orderedHeading: Order received
+    orderedBody: The manager will check the availability and then write or call to confirm the order and pickup time. Payment is in cash at pickup.
+    orderNumberTemplate: 'Order number: {number}'
+    orderedCta: Return to catalog
+    receiptQuantityTemplate: '{count} items'
+    stickyCta: Proceed to checkout
+    fallbackHeading: The store is currently unavailable
+    fallbackBody: The cart has been saved. Please try accessing it again in a minute or send the parts as an inquiry, and we will inform you of the price and timeline.
+    fallbackRetry: Try again
+    fallbackCta: Send as inquiry

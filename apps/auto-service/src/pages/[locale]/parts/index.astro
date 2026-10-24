@@ -1,82 +1,133 @@
 ---
-import { Image } from 'astro:assets';
+import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
-import { localeFrom } from '@/i18n/config';
-import { localePaths, PathBuilder } from '@/utils/paths';
+import Icon from '@/components/Icon.astro';
+import PartsSearchForm from '@/components/PartsSearchForm.astro';
+import VinLookupForm from '@/components/VinLookupForm.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import {
-  PARTS_CATEGORY_IMAGES,
-  PARTS_CATEGORY_SLUGS,
-} from '@/utils/partsCatalog';
+  categoriesForBuild,
+  makeHubsForBuild,
+  shopOpen,
+} from '@/utils/catalogueEnv';
+import { paragraphs } from '@podbor/site-kit';
+import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { content } from '@/i18n/content';
 
-export function getStaticPaths() {
-  return localePaths();
+export async function getStaticPaths() {
+  const categories = await categoriesForBuild();
+  const makes = (await makeHubsForBuild()).map(({ make }) => make);
+  return localePaths().map((path) => ({
+    ...path,
+    props: { categories, makes },
+  }));
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
-const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
-  slug,
-  ...copy.categories[slug],
+const vinCopy = content(locale).partsCar.vin;
+const props = Astro.props as {
+  categories: Category[];
+  makes: { slug: string; name: string }[];
+};
+const hubsCopy = content(locale).partsCar.hubs;
+const categories = props.categories.map((category) => ({
+  slug: category.slug,
+  name: translated(category, 'name', locale),
+  lead: paragraphs(translated(category, 'text', locale))[0],
 }));
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={copy.heading}
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
-  />
+  >
+    <div class="grid gap-4 pt-2 lg:grid-cols-2 lg:items-stretch">
+      <PartsSearchForm />
+      <VinLookupForm />
+    </div>
+  </PageHero>
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">
       {copy.sourcingNote}
     </p>
 
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col gap-1">
-        <h2 class="text-section">{copy.categoriesHeading}</h2>
-        <p class="max-w-2xl text-sm leading-relaxed text-muted">
-          {copy.categoriesLead}
-        </p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          categories.map((category) => (
-            <a
-              href={PathBuilder.partsCategory(locale, category.slug)}
-              class="card group flex flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
-            >
-              <Image
-                src={PARTS_CATEGORY_IMAGES[category.slug]}
-                alt={category.name}
-                widths={[320, 480, 640]}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
-                loading="lazy"
-                class="aspect-[4/3] w-full object-cover"
-              />
-              <div class="flex flex-1 flex-col gap-2 border-t border-line p-5">
+    <cart-badge
+      class="self-start"
+      {...shopOpen() ? {} : { hidden: '', 'data-preview-only': '' }}
+    >
+      <a
+        href={PathBuilder.partsCart(locale)}
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+      >
+        {content(locale).shopCart.cartLink}
+        <Icon name="arrowRight" />
+      </a>
+    </cart-badge>
+
+    {
+      categories.length > 0 && (
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-section">{copy.categoriesHeading}</h2>
+            <p class="max-w-2xl text-sm leading-relaxed text-muted">
+              {copy.categoriesLead}
+            </p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => (
+              <a
+                href={PathBuilder.partsCategory(locale, category.slug)}
+                class="card group flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+              >
                 <h3 class="text-base font-semibold text-ink">
                   {category.name}
                 </h3>
-                <p class="text-sm leading-relaxed text-ink-2">
-                  {category.lead}
-                </p>
-                <span class="spec mt-auto pt-2 text-xs text-signal-ink">
-                  {copy.categoryCta} →
+                {category.lead && (
+                  <p class="text-sm leading-relaxed text-ink-2">
+                    {category.lead}
+                  </p>
+                )}
+                <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
+                  {copy.categoryCta}
+                  <Icon name="arrowRight" />
                 </span>
-              </div>
-            </a>
-          ))
-        }
-      </div>
-    </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      props.makes.length > 0 && (
+        <div class="flex flex-col gap-3">
+          <h2 class="text-section">{hubsCopy.indexHeading}</h2>
+          <ul class="flex flex-wrap gap-3">
+            {props.makes.map((make) => (
+              <li>
+                <a
+                  href={PathBuilder.partsMake(locale, make.slug)}
+                  class="btn btn-secondary"
+                >
+                  {make.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
 
     <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
       <div class="card flex flex-col gap-3 p-5">
@@ -102,17 +153,100 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
         </ol>
       </div>
 
-      <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6">
+      <div
+        id={PARTS_INQUIRY_ANCHOR}
+        class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
+      >
+        <p
+          id="vin-unresolved"
+          role="status"
+          class="hidden scroll-mt-24 rounded-md bg-shade p-4 text-sm leading-relaxed text-ink target:block"
+        >
+          {vinCopy.unresolved}
+        </p>
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-        <LeadForm
-          service={VIN_INQUIRY_SERVICE}
-          vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
-          commentLabel={copy.commentLabel}
-          commentPlaceholder={copy.commentPlaceholder}
-          commentNote={copy.commentNote}
-          defaultChannel="whatsapp"
-        />
+        <parts-inquiry
+          class="flex flex-col gap-4"
+          data-more-template={copy.listMoreTemplate}
+          data-addon-template={content(locale).shopCart.addonTemplate}
+          data-locale={locale}
+          data-locale-tag={BCP47_BY_LOCALE[locale]}
+          data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+        >
+          <div
+            class="rounded-field border border-line bg-shade px-4 pt-3 pb-1"
+            data-parts-list-block
+            hidden
+          >
+            <p class="field-label">{copy.listHeading}</p>
+            <p
+              class="flex items-center justify-between gap-2 border-b border-line text-sm font-semibold text-ink"
+              data-parts-car
+              hidden
+            >
+              <span data-parts-car-name></span>
+              <button
+                type="button"
+                class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+                aria-label={copy.listCarRemoveLabel}
+                data-parts-car-remove
+              >
+                <Icon name="close" size={12} />
+              </button>
+            </p>
+            <ul class="divide-y divide-line" data-parts-list></ul>
+            <template data-parts-item>
+              <li class="flex flex-wrap items-center justify-between gap-x-2">
+                <a
+                  class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                  data-part-link></a>
+                <button
+                  type="button"
+                  class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+                  aria-label={copy.listRemoveLabel}
+                  data-part-remove
+                >
+                  <Icon name="close" size={12} />
+                </button>
+                <label
+                  class="flex w-full cursor-pointer items-start gap-2 pb-2 text-sm leading-snug text-ink-2"
+                  data-part-addon
+                  hidden
+                >
+                  <input
+                    type="checkbox"
+                    class="mt-0.5 size-4 shrink-0 accent-signal-ink"
+                    data-part-addon-toggle
+                  />
+                  <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span data-part-addon-label></span>
+                    <span class="text-xs text-muted">
+                      {content(locale).shopCart.addonPickup}
+                    </span>
+                  </span>
+                  <span
+                    class="spec shrink-0 font-semibold text-ink"
+                    data-part-addon-price></span>
+                </label>
+              </li>
+            </template>
+          </div>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
+            commentLabel={copy.commentLabel}
+            commentPlaceholder={copy.commentPlaceholder}
+            commentNote={copy.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </parts-inquiry>
       </div>
     </div>
   </section>
 </Shell>
+
+<script>
+  import { definePartsInquiry } from '@/scripts/partsList';
+
+  definePartsInquiry();
+</script>

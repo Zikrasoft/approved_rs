@@ -71,6 +71,22 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
+  it('answers a body that is not a form with the refusal page, not a crash', async () => {
+    const ctx = {
+      ...makeCtx({}),
+      request: new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{"contact":"+381641234567"}',
+      }),
+    };
+
+    const response = await POST(ctx);
+
+    expect(response.status).toBe(400);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('redirects to the locale from the cookie', async () => {
     const ctx = makeCtx(valid(), 'sr');
     await POST(ctx);
@@ -295,6 +311,7 @@ describe('createLeadsRoute', () => {
           fbc: 'fb.1.1760000000000.IwAR2F4-dbP0l7Mn',
           fbp: 'fb.1.1596403881668.1116446470',
         },
+        orderId: null,
         locale: 'ru',
       },
       '[leads]',

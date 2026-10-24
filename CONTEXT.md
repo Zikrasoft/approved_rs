@@ -176,49 +176,6 @@ with an opposite operation. The owner sees it as «Мой долг», the admin 
 «Мне должны».
 _Avoid_: debt, to pay, ledger total
 
-## Shop
-
-**Order** — a purchase in Medusa. Medusa is its only source of truth: its
-status, its fulfillment and its inventory reservation all live there, and the
-owner advances it in the Medusa admin ([ADR-0027](docs/adr/0027-medusa-owns-the-order-the-bot-only-notifies.md)).
-An Order also produces a Lead so the conversation has a home, but that Lead's
-status is not the Order's state.
-
-**Order marker** — the claim one delivery attempt takes on an Order, so that
-only the attempt holding it stores the Order's Lead. Taken before the Lead is
-stored and never given back, which is what keeps a retried delivery from
-storing a second Lead ([ADR-0022](docs/adr/0022-orders-reach-the-bot-through-a-signed-hook.md)).
-
-**Product type** — a kind of part (batteries, motor oils, filters, brakes). A
-type declares which fields a product of that kind has, which of them filter,
-which show on the card and which get their own landing page. One declaration,
-not four copies.
-
-**Spec** — the attribute values of one product, keyed by its type's fields.
-
-**Fitment** — the set of cars a product fits, as make/model/year entries, typed
-by the admin as free text and checked for shape only. There is no vehicle
-dictionary to join them against, and none until a product type with required
-fitment ships ([ADR-0028](docs/adr/0028-no-vehicle-dictionary-until-fitment-is-required.md)).
-
-**Landing page** — a page for one value of one field ("batteries, 60 Ah"),
-built only when enough products fall under it to be worth a page.
-
-**Reserve window** — how long an unpaid, uncollected Order keeps the stock it
-reserved. Past it the order is cancelled outright, which is what frees the
-reservation. The buyer is told the window in the order email.
-
-**Installation** — a service sold alongside a part (fitting a battery, changing
-pads). Priced per type of part, not per product.
-
-**Catalog version** — a counter Medusa bumps on every catalog write. The
-storefront is static, so this is what says a built site has gone stale
-([ADR-0020](docs/adr/0020-static-storefront-rebuilt-on-catalog-version.md)).
-
-**Shop status** — `off`, `preview` or `live`: whether the shop's pages are built
-at all, built but hidden and unindexed, or public
-([ADR-0025](docs/adr/0025-shop-status-and-dev-preview.md)).
-
 ## Content
 
 **Source locale** — the language content is authored in (`ru`). Not the language
@@ -236,3 +193,70 @@ opening another, the same length as GA4's default session timeout.
 **Hand-written translation** — a translation a person wrote instead of the
 model. It is adopted and served, but only while the file's Russian source is
 unchanged.
+
+## Parts shop
+
+The carlab.rs parts shop. These are the words staff and code share; the full
+catalogue vocabulary (Vehicle, Category field, Maintenance kit and the rest)
+lives in [`GLOSSARY.md`](GLOSSARY.md).
+
+**Part**: one interchangeable thing that does one job on a car, under all its
+numbers at once: the car maker's OEM number and every aftermarket brand's
+equivalent. Fitments and search point at the Part; nobody buys a Part as such.
+_Avoid_: article, SKU, артикул
+
+**Brand-number**: one brand's number for a Part (`PartIdentifier` in code):
+OEM (the car maker's number), manufacturer number (the part brand's own
+catalogue number) or EAN (the barcode on the box). It is what a customer
+buys and what gets its own page; photos and offers belong to it, not to the
+Part.
+_Avoid_: part number (bare), supplier SKU
+
+**Offer**: one Supplier's price, stock and lead time for one Brand-number
+(`SupplierOffer` in code). The site's price is the Offer's purchase price plus
+its Supplier's Markup.
+_Avoid_: listing, product, variant
+
+**Supplier**: where an Offer comes from: a distributor whose catalogue is
+imported, or Manual entry. Its import can be switched off, which stops new
+data but leaves its Offers on the site until they are taken off.
+
+**Manual offer**: an Offer staff type in by hand for one Brand-number, under
+the Supplier «Ручной ввод» (`manual`). Imports never change or remove it, and
+it is removed only one at a time.
+
+**Markup**: the percentage one Supplier's purchase prices are raised by to
+give site prices. Set per Supplier, never per Offer.
+_Avoid_: margin, commission
+
+**Fitment**: staff's statement that one Part fits one Vehicle, with a quantity
+and, where it matters, a position, dates, steering side, gearbox or note.
+_Avoid_: compatibility, "fits" as a flag
+
+**Requirement**: what an engine, chassis or Vehicle demands of a Category's
+Parts (allowed options or a numeric range on one field), e.g. a battery of at
+least 80 Ah. Universal Parts reach a car through Requirements; a Fitment that
+contradicts one is refused unless staff confirm it.
+_Avoid_: spec, recommendation
+
+**Supersession**: a maker replacing a number. Per Brand-number: «снят с
+выпуска», the Part still sells under its other numbers. Per Part: «заменена
+запчастью», the whole Part now leads to its replacement.
+_Avoid_: substitute, cross-reference
+
+**Publish**: the one staff action that puts catalogue changes on carlab.rs:
+it imports Supplier catalogues, translates new texts, rebuilds and deploys the
+site and refreshes search. Admin edits are saved at once but reach the site
+only on the next Publish; there is no scheduled run.
+_Avoid_: deploy, sync, nightly import
+
+**Closed beta**: the state where the catalogue is public but buying is off
+(`SHOP_OPEN` unset). A tester who opens any page with `?dev=1` carries the
+**preview flag** and sees prices, the cart and checkout as they will be once
+the shop opens.
+_Avoid_: staging, test mode
+
+**Add-on service**: a paid service a Category offers next to each of its
+Parts in the cart, such as registering a battery in the car's control unit.
+Its price is set on the Category, and the order lists it as its own line.
+_Avoid_: upsell, extra, option

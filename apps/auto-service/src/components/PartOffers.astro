@@ -1,0 +1,120 @@
+---
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { addonDataset } from '@/utils/categoryAddon';
+import { PathBuilder } from '@/utils/paths';
+import Icon from './Icon.astro';
+import OfferRow from './OfferRow.astro';
+
+interface Props {
+  page: PartPageEntry;
+  demoted?: boolean;
+}
+
+const { page, demoted = false } = Astro.props;
+const ownHeading = Astro.slots.has('heading');
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const status = 'flex flex-col gap-3 text-sm leading-relaxed text-ink-2';
+const part = {
+  'data-slug': page.slug,
+  'data-brand': page.brand.name,
+  'data-number': page.value,
+  'data-name': page.part.name,
+  ...addonDataset(page.category),
+};
+const closed = !shopOpen();
+const priced = page.offers.length > 0;
+---
+
+{
+  (priced || closed) && (
+    <part-offers
+      class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+      {...(priced ? {} : { hidden: '' })}
+      data-preview={closed ? '' : undefined}
+      data-id={page.id}
+      data-locale-tag={BCP47_BY_LOCALE[locale]}
+      data-stock-label={copy.columns.stock}
+      data-lead-label={copy.columns.leadTime}
+      data-stock-pickup={copy.columns.inStockPickup}
+      data-in-stock={copy.leadTime.inStock}
+      data-days={JSON.stringify(copy.leadTime.days)}
+      data-added-label={copy.addedLabel}
+      data-cart-href={PathBuilder.partsCart(locale)}
+      {...part}
+    >
+      <h2 class="text-block font-semibold">
+        <slot name="heading">{copy.offersHeading}</slot>
+      </h2>
+      <ul class="flex flex-col divide-y divide-line" data-offers>
+        {page.offers.map((offer) => (
+          <OfferRow offer={offer} />
+        ))}
+      </ul>
+      <template data-offer>
+        <OfferRow />
+      </template>
+      <div aria-live="polite">
+        <div data-status="added" hidden class={status}>
+          <p>{copy.addedNotice}</p>
+          <a
+            href={PathBuilder.partsCart(locale)}
+            class="btn btn-primary w-full sm:w-auto sm:self-start"
+          >
+            {copy.addedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+        <p data-status="stock-limit" hidden class={status}>
+          {copy.stockLimitNotice}
+        </p>
+        <p data-status="inquiry" hidden class={status}>
+          <span>
+            {copy.inquiryNotice}{' '}
+            <a
+              href={PathBuilder.partsInquiry(locale)}
+              class="font-semibold text-signal-ink underline underline-offset-2"
+            >
+              {copy.inquiryCta}
+            </a>
+          </span>
+        </p>
+      </div>
+    </part-offers>
+  )
+}
+{
+  !priced && (
+    <div
+      class:list={[
+        'card flex flex-col gap-3 p-5 sm:p-6',
+        !demoted && 'border-l-4 border-l-signal',
+      ]}
+    >
+      <h2 class="text-block font-semibold">
+        <slot name="heading">{copy.priceOnRequestHeading}</slot>
+      </h2>
+      {ownHeading && (
+        <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
+      )}
+      <p class="text-sm leading-relaxed text-ink-2">
+        {closed ? copy.inquiryBody : copy.priceOnRequestBody}
+      </p>
+      <parts-list-add class="mt-1 block" {...part}>
+        <a
+          href={PathBuilder.partsInquiry(locale)}
+          class:list={[
+            'btn w-full sm:w-auto',
+            demoted ? 'btn-secondary' : 'btn-primary',
+          ]}
+        >
+          {copy.priceOnRequestCta}
+          <Icon name="arrowRight" />
+        </a>
+      </parts-list-add>
+    </div>
+  )
+}

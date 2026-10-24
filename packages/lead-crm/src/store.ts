@@ -1,3 +1,4 @@
+import { serviceLabel } from '@podbor/brands';
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
 import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
@@ -111,6 +112,7 @@ export interface LeadStoreOptions {
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
   beforeWrite?: () => Promise<void>;
+  standaloneServices?: readonly string[];
 }
 
 const promptedAt =
@@ -189,8 +191,8 @@ function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
 function triedLabel(data: LeadInput): string {
-  if (data.services?.length) return data.services.join(', ');
-  if (data.service) return data.service;
+  if (data.services?.length) return data.services.map(serviceLabel).join(', ');
+  if (data.service) return serviceLabel(data.service);
   return data.kind === 'call_click' && data.contactChannel
     ? channelLabel(data.contactChannel)
     : '';
@@ -260,7 +262,16 @@ export function createLeadStore({
   schema,
   quarantine,
   beforeWrite,
+  standaloneServices = [],
 }: LeadStoreOptions) {
+  function standaloneApart(a: LeadInput, b: StoredLead): boolean {
+    return (
+      [a.service, b.service].some((s) => standaloneServices.includes(s)) &&
+      !isPlaceholderContact(a.contact) &&
+      !isPlaceholderContact(b.contact)
+    );
+  }
+
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
@@ -412,6 +423,15 @@ export function createLeadStore({
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
       await updateLeads((leads, idFloor) => {
+        const placed = data.orderId
+          ? leads.find(
+              (l) => l.orderId === data.orderId && l.brand === data.brand,
+            )
+          : undefined;
+        if (placed) {
+          outcome = { lead: placed, merged: true, before: placed };
+          return leads;
+        }
         const now = Date.now();
         const existing = data.visitorId
           ? leads.find(
@@ -420,7 +440,8 @@ export function createLeadStore({
                 l.brand === data.brand &&
                 untouched(l) &&
                 isFreshLead(l, now) &&
-                (data.telegramId == null || isPlaceholderContact(l.contact)),
+                (data.telegramId == null || isPlaceholderContact(l.contact)) &&
+                !standaloneApart(data, l),
             )
           : undefined;
 

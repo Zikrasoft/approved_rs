@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "turbo run dev",
+    "dev:shop": "turbo run dev:shop",
     "build": "turbo run build",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",

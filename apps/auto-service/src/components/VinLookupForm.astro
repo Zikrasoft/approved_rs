@@ -1,0 +1,55 @@
+---
+import { MY_GARAGE_VIN_ATTRIBUTE } from '@podbor/site-kit/browser';
+import { VIN_INPUT_PATTERN } from '@podbor/catalog-contract/vin';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsCar.vin;
+---
+
+<form
+  method="POST"
+  action="/api/vin-lookup"
+  class="card flex flex-col gap-4 border-ink p-5 sm:p-6"
+>
+  <input type="hidden" name="locale" value={locale} />
+  <div class="flex flex-col gap-1">
+    <h2 class="text-section">{copy.heading}</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-2">{copy.lead}</p>
+  </div>
+  <my-garage
+    class="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-end sm:gap-y-0"
+  >
+    <vin-check class="block sm:contents" data-message={copy.invalid}>
+      <label class="block">
+        <span class="field-label">{copy.label}</span>
+        <input
+          type="text"
+          name="vin"
+          required
+          minlength="17"
+          pattern={VIN_INPUT_PATTERN}
+          autocomplete="off"
+          spellcheck="false"
+          placeholder={copy.placeholder}
+          class="field spec uppercase tracking-wider placeholder:normal-case placeholder:tracking-normal"
+          {...{ [MY_GARAGE_VIN_ATTRIBUTE]: '' }}
+        />
+      </label>
+    </vin-check>
+    <button type="submit" class="btn btn-primary sm:col-start-2 sm:row-start-1">
+      {copy.submitLabel}
+      <Icon name="arrowRight" />
+    </button>
+  </my-garage>
+</form>
+
+<script>
+  import { defineMyGarage } from '@podbor/site-kit/browser';
+  import { defineVinCheck } from '@/scripts/vinCheck';
+
+  defineMyGarage();
+  defineVinCheck();
+</script>

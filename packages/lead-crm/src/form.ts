@@ -1,12 +1,18 @@
 import { z } from 'zod';
 import { SERVICE_LABELS_RU, type LabelledService } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_FIELD_LENGTH,
+  MAX_URL_LENGTH,
+} from './limits.ts';
 import { isValidContact } from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
 
@@ -17,14 +23,17 @@ export {
 } from './phone.ts';
 export type { PhoneCountry, PhoneCountryOption } from './phone.ts';
 
-export const MAX_FIELD_LENGTH = 200;
-export const MAX_COMMENT_LENGTH = 2000;
-export const MAX_URL_LENGTH = 500;
+export {
+  MAX_COMMENT_LENGTH,
+  MAX_FIELD_LENGTH,
+  MAX_URL_LENGTH,
+} from './limits.ts';
 export const MAX_SERVICES = 20;
 export {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
 
@@ -121,6 +130,7 @@ const submissionObject = z
     visitor_id: visitorIdSchema,
     [AD_SOURCE_FIELD]: adSourceFieldSchema,
     [META_IDS_FIELD]: metaIdsFieldSchema,
+    [ORDER_ID_FIELD]: optionalText(MAX_FIELD_LENGTH),
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
     consent: z.string().trim().min(1),
   })
@@ -130,7 +140,10 @@ const submissionObject = z
   .transform((value) => {
     const services = value.service.filter(Boolean).slice(0, MAX_SERVICES);
     const vin = value.vin ? `VIN: ${value.vin}` : null;
-    const comment = [vin, value.car, value.comment].filter(Boolean).join('\n');
+    const comment = [vin, value.car, value.comment]
+      .filter(Boolean)
+      .join('\n')
+      .replace(/\r\n?/g, '\n');
     return {
       name: value.name,
       contact: value.contact,
@@ -143,6 +156,7 @@ const submissionObject = z
       visitorId: value.visitor_id,
       adSource: value[AD_SOURCE_FIELD],
       metaIds: value[META_IDS_FIELD],
+      orderId: value[ORDER_ID_FIELD],
     };
   });
 

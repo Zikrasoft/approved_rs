@@ -1,18 +1,20 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import CartButton from './CartButton.astro';
 import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
-import { devOnly, shopBuilt } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const pathname = Astro.url.pathname;
+
+const onParts = pathname.startsWith(PathBuilder.parts(locale));
+const shopCart = content(locale).shopCart;
 
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
@@ -91,14 +93,6 @@ const links = [
           }
         </carlab-lang>
 
-        {
-          shopBuilt() && (
-            <span class="contents" {...devOnly()}>
-              <CartButton />
-            </span>
-          )
-        }
-
         <ContactControl
           channel="phone"
           class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
@@ -106,6 +100,24 @@ const links = [
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
         </ContactControl>
+
+        <cart-badge
+          class="block"
+          {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
+          {...shopOpen() ? {} : { hidden: '', 'data-preview-only': '' }}
+        >
+          <a
+            href={PathBuilder.partsCart(locale)}
+            class="relative flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+          >
+            <Icon name="cart" size={20} />
+            <span class="sr-only">{shopCart.cartLink}</span>
+            <span
+              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1 text-[0.6875rem] font-semibold text-white"
+              data-count
+              hidden></span>
+          </a>
+        </cart-badge>
 
         <button
           type="button"
@@ -196,6 +208,9 @@ const links = [
     defineMenuToggle,
   } from '@podbor/site-kit/browser';
 
+  import { defineCartBadge } from '@/scripts/cartBadge';
+
+  defineCartBadge();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
 </script>
