@@ -13,7 +13,6 @@ import {
   toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
-import { CATEGORY_FIELD_TYPES } from '@podbor/catalog-contract';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
@@ -34,26 +33,11 @@ import {
   useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
-
-const categoryFieldSchema = z.object({
-  key: z.string(),
-  type: z.enum(CATEGORY_FIELD_TYPES),
-  unit: z.string().nullable(),
-  label: z.string(),
-  required: z.boolean(),
-  options: z.array(z.object({ key: z.string(), label: z.string() })),
-});
-
-type CategoryField = z.infer<typeof categoryFieldSchema>;
-
-const categorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  installation_price: z.number().nullable(),
-  fields: z.array(categoryFieldSchema),
-});
-
-type Category = z.infer<typeof categorySchema>;
+import {
+  type Category,
+  categoriesSchema,
+  type CategoryField,
+} from '../../lib/categories';
 
 const attributeValueSchema = z.union([
   z.number(),
@@ -84,7 +68,6 @@ const partSchema = editedBySchema.extend({
 type Part = z.infer<typeof partSchema>;
 type Identifier = Part['identifiers'][number];
 
-const categoriesSchema = z.object({ categories: z.array(categorySchema) });
 const imagesSchema = z.object({ images: z.array(adminImageSchema) });
 const partsSchema = z.object({ parts: z.array(partSchema) });
 

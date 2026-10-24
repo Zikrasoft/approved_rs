@@ -40,16 +40,13 @@ import {
 import { ScrollArea } from '../../components/scroll-area';
 import { adminFetch } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
+import { type Category, categoriesSchema } from '../../lib/categories';
 
 const PAGE_SIZE = 50;
 const ALL = 'all';
 const STATES = [ALL, 'true', 'false'] as const;
 
 type Listing = z.infer<typeof partIdentifiersSchema>;
-
-const categoriesSchema = z.object({
-  categories: z.array(z.object({ id: z.string(), name: z.string() })),
-});
 
 const fixLink = (page: string, partId: string, number: string) =>
   `/${page}?${new URLSearchParams({ part: partId, q: number })}`;
@@ -67,9 +64,7 @@ const PartsPage = () => {
   const [listing, setListing] = useState<Listing | null>(null);
   const [offersFor, setOffersFor] = useState<OffersTarget | null>(null);
   const [reloads, setReloads] = useState(0);
-  const [categories, setCategories] = useState<
-    z.infer<typeof categoriesSchema>['categories']
-  >([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const update = (changes: Record<string, string>) => {
     const next = new URLSearchParams(params);

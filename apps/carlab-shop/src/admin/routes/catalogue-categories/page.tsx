@@ -31,58 +31,22 @@ import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
   adminFetch,
-  editedBySchema,
   type FieldErrorHandler,
   useWriting,
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import {
+  type Category,
+  categoriesSchema,
+  type CategoryField,
+  type FieldOption,
+} from '../../lib/categories';
 
 const FIELD_TYPES = CATEGORY_FIELD_TYPES;
 
 type FieldType = (typeof FIELD_TYPES)[number];
 
-const fieldOptionSchema = z.object({
-  id: z.string(),
-  key: z.string(),
-  label: z.string(),
-  rank: z.number(),
-});
-
-type FieldOption = z.infer<typeof fieldOptionSchema>;
-
-const categoryFieldSchema = z.object({
-  id: z.string(),
-  key: z.string(),
-  type: z.enum(FIELD_TYPES),
-  unit: z.string().nullable(),
-  label: z.string(),
-  required: z.boolean(),
-  facet: z.boolean(),
-  rank: z.number(),
-  options: z.array(fieldOptionSchema),
-});
-
-type CategoryField = z.infer<typeof categoryFieldSchema>;
-
-const categorySchema = editedBySchema.extend({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  text: z.string(),
-  maintenance_kit: z.boolean(),
-  kit_rank: z.number(),
-  service_label: z.string().nullable(),
-  service_price: z.number().nullable(),
-  service_note: z.string().nullable(),
-  installation_price: z.number().nullable(),
-  image: adminImageSchema.nullable(),
-  fields: z.array(categoryFieldSchema),
-});
-
-type Category = z.infer<typeof categorySchema>;
-
-const categoriesSchema = z.object({ categories: z.array(categorySchema) });
 const categoryImageSchema = z.object({ image: adminImageSchema.nullable() });
 const createdCategorySchema = z.object({
   category: z.object({ id: z.string() }),

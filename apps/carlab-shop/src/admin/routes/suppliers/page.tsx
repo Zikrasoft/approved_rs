@@ -39,6 +39,7 @@ import {
 } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import { type Category, categoriesSchema } from '../../lib/categories';
 
 const supplierSchema = editedBySchema.extend({
   id: z.string(),
@@ -50,10 +51,6 @@ const supplierSchema = editedBySchema.extend({
 });
 
 type Supplier = z.infer<typeof supplierSchema>;
-
-const categorySchema = z.object({ id: z.string(), name: z.string() });
-
-type Category = z.infer<typeof categorySchema>;
 
 const mappingSchema = editedBySchema.extend({
   id: z.string(),
@@ -69,7 +66,6 @@ type Source = z.infer<typeof sourceSchema>;
 
 const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
 const mappingsSchema = z.object({ categories: z.array(mappingSchema) });
-const categoriesSchema = z.object({ categories: z.array(categorySchema) });
 const sourcesSchema = z.object({ sources: z.array(sourceSchema) });
 const importsSchema = z.object({
   imports: z.array(

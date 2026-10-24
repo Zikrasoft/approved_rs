@@ -33,6 +33,7 @@ import {
   type TFunction,
   vehicleLabel,
 } from '../../lib/vehicle-label';
+import { type Category, categoriesSchema } from '../../lib/categories';
 
 const OWNERS = [
   { key: 'engine_id', path: 'engines', collection: 'engines' },
@@ -47,23 +48,6 @@ const ownerRowSchema = z
   .loose();
 
 type OwnerRow = z.infer<typeof ownerRowSchema>;
-
-const categorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  fields: z.array(
-    z.object({
-      id: z.string(),
-      key: z.string(),
-      type: z.string(),
-      unit: z.string().nullable(),
-      label: z.string(),
-      options: z.array(z.object({ key: z.string(), label: z.string() })),
-    }),
-  ),
-});
-
-type Category = z.infer<typeof categorySchema>;
 
 const requirementSchema = editedBySchema.extend({
   id: z.string(),
@@ -82,7 +66,6 @@ const requirementSchema = editedBySchema.extend({
 type Requirement = z.infer<typeof requirementSchema>;
 
 const ownersSchema = z.record(z.string(), z.array(ownerRowSchema));
-const categoriesSchema = z.object({ categories: z.array(categorySchema) });
 const requirementsSchema = z.object({
   requirements: z.array(requirementSchema),
 });
