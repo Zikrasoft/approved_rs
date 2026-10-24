@@ -663,7 +663,7 @@ medusaIntegrationTestRunner({
         expect(published.data.results[0].value).toBe('WK 820');
       });
 
-      it('lists buyable brand-numbers first and superseded ones last', async () => {
+      it('lists buyable brand-numbers first and superseded ones last among equal matches', async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
         const suppliers: SupplierModuleService =
@@ -722,6 +722,49 @@ medusaIntegrationTestRunner({
         expect(values.slice(0, 2).sort()).toEqual(['SF 4', 'SF 5']);
         expect(values.slice(2, 4).sort()).toEqual(['SF 2', 'SF 3']);
         expect(values[4]).toBe('SF 1');
+      });
+
+      it('ranks a better match above a buyable one', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Свеча зажигания',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'XR7' },
+          ],
+        });
+        const buyablePartId = await catalog.createPartWithIdentifiers({
+          name: 'Свеча зажигания под XR7',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'BK 100' },
+          ],
+        });
+        const [buyable] = await catalog.listPartIdentifiers({
+          part_id: buyablePartId,
+        });
+        const supplier = await suppliers.createSuppliers({
+          name: 'Relevance supplier',
+          markup_percentage: 0,
+        });
+        await suppliers.createSupplierOffers({
+          supplier_id: supplier.id,
+          supplier_article_id: 'relevance-bk-100',
+          part_identifier_id: buyable.id,
+          cost_price: 1000,
+          stock_quantity: 3,
+          lead_time_days: 0,
+        });
+        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+
+        const found = await results({ q: 'XR7', locale: 'ru' });
+
+        expect(found.map(({ value }) => value)).toEqual(['XR7', 'BK 100']);
       });
     });
   },

@@ -235,7 +235,7 @@ export const searchRanking = (locale: CatalogLocale) => {
     query_by_weights: fields.map(([, weight]) => weight).join(','),
     num_typos: fields.map(([, , typos]) => typos).join(','),
     text_match_type: 'max_weight',
-    sort_by: 'standing:desc,_text_match:desc',
+    sort_by: '_text_match:desc,standing:desc',
   };
 };
 
