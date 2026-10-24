@@ -10,13 +10,23 @@ const STEERING_BY_CHARACTER: Record<string, SteeringSide> = {
 
 export const mercedesBaumusterDecoder: VinDecoder = {
   name: 'mercedes-baumuster',
-  version: 1,
+  version: 2,
   async decode(vin) {
     const wmi = vin.slice(0, 3);
+    if (!MERCEDES_WMIS.has(wmi)) {
+      return null;
+    }
     const baumuster = vin.slice(3, 9);
     const steering = STEERING_BY_CHARACTER[vin[9]];
-    if (!MERCEDES_WMIS.has(wmi) || !/^\d{6}$/.test(baumuster) || !steering) {
-      return null;
+    if (!/^\d{6}$/.test(baumuster) || !steering) {
+      const code = vin.slice(3, 8);
+      return {
+        make: 'mercedes-benz',
+        identifiers: [],
+        code,
+        facts: {},
+        raw: { wmi, code },
+      };
     }
     return {
       make: 'mercedes-benz',

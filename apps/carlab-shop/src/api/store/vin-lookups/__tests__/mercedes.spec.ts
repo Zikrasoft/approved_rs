@@ -67,7 +67,7 @@ medusaIntegrationTestRunner({
         });
         expect(stored).toMatchObject({
           decoder: 'mercedes-baumuster',
-          decoder_version: 1,
+          decoder_version: 2,
           make: 'mercedes-benz',
           code: '205004',
           facts: { steering: 'left' },
@@ -136,13 +136,23 @@ medusaIntegrationTestRunner({
         },
       );
 
-      it('leaves a 2023+ VIN without a Baumuster unresolved', async () => {
+      it('leaves a 2023+ VIN without a Baumuster unresolved with its code on the Mercedes list', async () => {
         const response = await lookUp('W1K3G1CB9PJ403934');
 
         expect(response.data).toEqual({
           resolved: false,
-          make: null,
-          code: null,
+          make: 'mercedes-benz',
+          code: '3G1CB',
+        });
+        const [stored] = await vinLookups.listVinLookups({
+          vin: 'W1K3G1CB9PJ403934',
+        });
+        expect(stored).toMatchObject({
+          decoder: 'mercedes-baumuster',
+          make: 'mercedes-benz',
+          code: '3G1CB',
+          facts: {},
+          vehicle_id: null,
         });
       });
     });

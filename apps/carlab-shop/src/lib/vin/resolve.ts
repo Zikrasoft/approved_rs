@@ -73,7 +73,7 @@ export const resolveVin = async (
     raw: answer?.decode.raw ?? null,
     facts: answer?.decode.facts ?? {},
     make: answer?.decode.make ?? null,
-    code: answer?.decode.identifiers[0]?.value ?? null,
+    code: answer?.decode.code ?? answer?.decode.identifiers[0]?.value ?? null,
     vehicle_id: vehicle?.id ?? null,
   };
   if (existing) {
