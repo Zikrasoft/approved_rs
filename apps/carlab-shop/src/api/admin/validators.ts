@@ -173,6 +173,7 @@ export const AdminUpdateFitment = z
   .strictObject(fitmentConditions)
   .refine((body) => Object.keys(body).length > 0)
   .refine(inOrder, ENDS_BEFORE_IT_STARTS);
+export type AdminUpdateFitmentType = z.infer<typeof AdminUpdateFitment>;
 
 export const VEHICLE_FILTER_KEYS = [
   'vehicle_id',

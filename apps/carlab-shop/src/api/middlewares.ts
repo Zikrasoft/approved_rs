@@ -27,6 +27,7 @@ import {
   AdminUpdateCategoryField,
   AdminUpdateCategoryFieldOption,
   AdminUpdatePart,
+  AdminUpdateFitment,
   AdminUpdatePartIdentifier,
   AdminUpdateSupplier,
 } from './admin/validators';
@@ -140,6 +141,11 @@ export default defineMiddlewares({
       matcher: '/admin/fitments',
       method: 'POST',
       middlewares: [validateAdminBody(AdminCreateFitment)],
+    },
+    {
+      matcher: '/admin/fitments/:id',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminUpdateFitment)],
     },
     {
       matcher: '/admin/fitments/bulk',

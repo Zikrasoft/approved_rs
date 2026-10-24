@@ -11,7 +11,6 @@ const writes = [
           String(matcher).startsWith('/admin') && methods?.includes('POST'),
       )
       .map(({ matcher }) => String(matcher)),
-    '/admin/fitments/:id',
   ]),
 ].map((matcher) => matcher.replace(/:\w+/g, 'missing_id'));
 
@@ -37,6 +36,7 @@ medusaIntegrationTestRunner({
             '/admin/vehicles/missing_id',
             '/admin/brands',
             '/admin/parts/missing_id/identifiers',
+            '/admin/fitments/missing_id',
           ]),
         );
       });
