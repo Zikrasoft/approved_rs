@@ -4,6 +4,7 @@ import {
   Configuration,
   HttpCrawler,
   type HttpCrawlerOptions,
+  type InternalHttpCrawlingContext,
   SessionError,
 } from '@crawlee/http';
 import {
@@ -73,6 +74,18 @@ const refusal = (headers: Record<string, string>, body: Buffer) => {
     : null;
 };
 
+class SitemapTolerantHttpCrawler extends HttpCrawler<InternalHttpCrawlingContext> {
+  protected override isRequestBlocked(context: InternalHttpCrawlingContext) {
+    if (!context.contentType.type.includes('xml')) {
+      return super.isRequestBlocked(context);
+    }
+    return super.isRequestBlocked({
+      ...context,
+      contentType: { ...context.contentType, type: 'application/octet-stream' },
+    });
+  }
+}
+
 export const crawleeFetcher = (mode: FetchMode): Fetcher => {
   const pending = new Map<
     string,
@@ -140,7 +153,7 @@ export const crawleeFetcher = (mode: FetchMode): Fetcher => {
   const config = new Configuration({ persistStorage: false });
   const crawler =
     mode === 'http'
-      ? new HttpCrawler(
+      ? new SitemapTolerantHttpCrawler(
           {
             ...common,
             additionalMimeTypes: ['*/*'],

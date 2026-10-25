@@ -1,3 +1,4 @@
+import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import {
   createServer,
@@ -5,6 +6,8 @@ import {
   type ServerResponse,
 } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
 import { gzipSync } from 'node:zlib';
 
 import { chromium } from 'playwright';
@@ -102,6 +105,36 @@ describe('crawleeFetcher', () => {
     expect(request.headers['if-none-match']).toBe('"0"');
     expect(attempts).toBe(2);
   });
+
+  it("fetches a sitemap far larger than the crawler's heap would hold as a DOM", async () => {
+    const entry = '<url><loc>https://example.test/p/1</loc></url>';
+    const sitemap = `<urlset>${entry.repeat(40e6 / entry.length)}</urlset>`;
+    web = await site({
+      '/sitemap.xml': (_request, response) =>
+        response
+          .writeHead(200, { 'content-type': 'application/xml' })
+          .end(sitemap),
+    });
+    const fetchInChild = `
+      const { crawleeFetcher } = require(${JSON.stringify(join(__dirname, '..', 'fetcher.ts'))});
+      const fetcher = crawleeFetcher('http');
+      fetcher.fetch({ url: ${JSON.stringify(web.url('/sitemap.xml'))}, beforeAttempt: async () => {} })
+        .then(async (fetched) => { console.log('fetched bytes', fetched.body.length); await fetcher.close(); });
+    `;
+
+    const { stdout } = await promisify(execFile)(
+      process.execPath,
+      [
+        '--max-old-space-size=160',
+        require.resolve('ts-node/dist/bin-transpile.js'),
+        '-e',
+        fetchInChild,
+      ],
+      { maxBuffer: 1e6 },
+    );
+
+    expect(stdout).toContain(`fetched bytes ${sitemap.length}`);
+  }, 120_000);
 
   it('hands a 404, a 429 and a 503 back once, without retrying them itself', async () => {
     web = await site({
