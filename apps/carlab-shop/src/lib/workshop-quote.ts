@@ -95,7 +95,7 @@ export async function draftQuote(
 ): Promise<QuoteDraft> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const categories: CategoryChoice[] = (
-    await catalog.listCategories({}, { select: ['id', 'name'] })
+    await catalog.listCategories({}, { select: ['id', 'name'], take: null })
   ).map(({ id, name }) => ({ id, name }));
   const byId = new Map(categories.map((category) => [category.id, category]));
 

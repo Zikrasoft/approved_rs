@@ -40,7 +40,7 @@ const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 const statusRows = async (
   db: Knex,
-  { q, category_id, part_id }: AdminListPartIdentifiersType,
+  { q, category_id, uncategorized, part_id }: AdminListPartIdentifiersType,
 ) => {
   const query = db('part_identifier as pi')
     .join('part as p', 'p.id', 'pi.part_id')
@@ -81,6 +81,9 @@ const statusRows = async (
     ]);
   if (category_id) {
     query.where('p.category_id', category_id);
+  }
+  if (uncategorized) {
+    query.whereNull('c.id');
   }
   if (part_id) {
     query.where('p.id', part_id);

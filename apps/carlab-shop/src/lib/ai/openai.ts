@@ -3,16 +3,24 @@ import { CARLAB } from '@podbor/brands';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-import { adminError } from '../admin-errors';
+import { adminError, type AdminErrorCode } from '../admin-errors';
 import {
-  quoteReadingSchema,
+  type ArticleFacts,
   type CategoryChoice,
+  type CategoryFieldChoice,
+  categoryPickSchema,
+  descriptionSchema,
+  quoteReadingSchema,
   type ShopAi,
+  specsMappingSchema,
 } from './contract';
 
-const QUOTE_MODEL = 'gpt-4o';
+const MODEL = 'gpt-4o';
 const TIMEOUT_MS = 120_000;
 const MAX_RETRIES = 1;
+
+const categoryList = (categories: CategoryChoice[]) =>
+  categories.map(({ id, name }) => `${id}: ${name}`).join('\n') || '(none)';
 
 const quotePrompt = (
   categories: CategoryChoice[],
@@ -45,60 +53,156 @@ Rules:
 - Never return prices, sums, discounts or VAT.
 
 Categories (id: name):
-${categories.map(({ id, name }) => `${id}: ${name}`).join('\n') || '(none)'}`;
+${categoryList(categories)}`;
 
-const unreadable = (detail: string) =>
+const categoryPrompt = (
+  categories: CategoryChoice[],
+) => `You file a car part from a supplier's catalogue into the parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: its name, brand, number, the supplier's description and its raw specs.
+
+Answer with one JSON object and nothing else: { "category_id": string or null }
+
+"category_id" is the id of the one category below the part belongs to, or null when none fits exactly. Never invent an id.
+
+Categories (id: name):
+${categoryList(categories)}`;
+
+const specsPrompt = (
+  fields: CategoryFieldChoice[],
+) => `You map a car part's raw specs, as a supplier's catalogue writes them (name to value, often in Serbian or English), to the fields of its category. The user message is the specs as JSON.
+
+Answer with one JSON object and nothing else: { "attributes": { field key: value } }
+
+Rules:
+- Use only the field keys below, each at most once. Leave a field out when no spec gives its value.
+- "number": a non-negative JSON number in the field's unit, converted when the spec uses another unit.
+- "boolean": true or false.
+- "text": a short string.
+- "single-select": the key of one option. "multi-select": a non-empty array of distinct option keys.
+- Never guess a value no spec states.
+
+Fields:
+${JSON.stringify(fields)}`;
+
+const descriptionPrompt = `You write the Russian description of a car part for its page in the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: its name, brand, number, the supplier's description and its raw specs.
+
+Answer with one JSON object and nothing else: { "description": string }
+
+Rules:
+- Two to four short paragraphs of plain Russian text separated by a blank line, no markdown, no HTML, no lists.
+- Use only facts the input states: what the part is, what it does, its key specs. Rewrite in your own words, never copy the supplier's sentences.
+- No prices, stock, delivery, the supplier's name, marketing superlatives or guarantees.
+- Never use the Cyrillic letter yo (U+0451), write «е» instead. Never use the em dash (U+2014).`;
+
+const unreadable = (code: AdminErrorCode, what: string, detail: string) =>
   adminError(
     MedusaError.Types.INVALID_DATA,
-    'QUOTE_UNREADABLE',
-    `The Workshop quote could not be read: ${detail}`,
+    code,
+    `${what} could not be read: ${detail}`,
   );
 
-const parseJson = (content: string): unknown => {
-  try {
-    return JSON.parse(content);
-  } catch {
-    throw unreadable('the answer is not JSON');
-  }
+type Ask<T> = {
+  apiKey: string | undefined;
+  system: string;
+  user: OpenAI.Chat.ChatCompletionUserMessageParam['content'];
+  schema: z.ZodType<T>;
+  code: AdminErrorCode;
+  what: string;
 };
 
+const ask = async <T>({
+  apiKey,
+  system,
+  user,
+  schema,
+  code,
+  what,
+}: Ask<T>): Promise<T> => {
+  if (!apiKey) {
+    throw adminError(
+      MedusaError.Types.NOT_ALLOWED,
+      'AI_NOT_CONFIGURED',
+      'OPENAI_API_KEY is not set',
+    );
+  }
+  const client = new OpenAI({
+    apiKey,
+    timeout: TIMEOUT_MS,
+    maxRetries: MAX_RETRIES,
+  });
+  const response = await client.chat.completions.create({
+    model: MODEL,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user },
+    ],
+  });
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw unreadable(code, what, 'the answer is empty');
+  let json: unknown;
+  try {
+    json = JSON.parse(content);
+  } catch {
+    throw unreadable(code, what, 'the answer is not JSON');
+  }
+  const parsed = schema.safeParse(json);
+  if (!parsed.success) {
+    throw unreadable(code, what, z.prettifyError(parsed.error));
+  }
+  return parsed.data;
+};
+
+const articleJson = (article: ArticleFacts) => JSON.stringify(article);
+
 export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
-  readQuote: async (pdf, categories) => {
-    if (!apiKey) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'AI_NOT_CONFIGURED',
-        'OPENAI_API_KEY is not set',
-      );
-    }
-    const client = new OpenAI({
+  readQuote: (pdf, categories) =>
+    ask({
       apiKey,
-      timeout: TIMEOUT_MS,
-      maxRetries: MAX_RETRIES,
-    });
-    const response = await client.chat.completions.create({
-      model: QUOTE_MODEL,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: quotePrompt(categories) },
+      system: quotePrompt(categories),
+      user: [
         {
-          role: 'user',
-          content: [
-            {
-              type: 'file',
-              file: {
-                filename: 'ponuda.pdf',
-                file_data: `data:application/pdf;base64,${pdf.toString('base64')}`,
-              },
-            },
-          ],
+          type: 'file',
+          file: {
+            filename: 'ponuda.pdf',
+            file_data: `data:application/pdf;base64,${pdf.toString('base64')}`,
+          },
         },
       ],
+      schema: quoteReadingSchema,
+      code: 'QUOTE_UNREADABLE',
+      what: 'The Workshop quote',
+    }),
+  pickCategory: async (article, categories) => {
+    const { category_id } = await ask({
+      apiKey,
+      system: categoryPrompt(categories),
+      user: articleJson(article),
+      schema: categoryPickSchema,
+      code: 'ARTICLE_UNREADABLE',
+      what: 'The Category pick',
     });
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw unreadable('the answer is empty');
-    const reading = quoteReadingSchema.safeParse(parseJson(content));
-    if (!reading.success) throw unreadable(z.prettifyError(reading.error));
-    return reading.data;
+    return categories.some(({ id }) => id === category_id) ? category_id : null;
   },
+  mapSpecs: async (specs, fields) =>
+    (
+      await ask({
+        apiKey,
+        system: specsPrompt(fields),
+        user: JSON.stringify(specs),
+        schema: specsMappingSchema,
+        code: 'ARTICLE_UNREADABLE',
+        what: 'The specs mapping',
+      })
+    ).attributes,
+  writeDescription: async (article) =>
+    (
+      await ask({
+        apiKey,
+        system: descriptionPrompt,
+        user: articleJson(article),
+        schema: descriptionSchema,
+        code: 'ARTICLE_UNREADABLE',
+        what: 'The description',
+      })
+    ).description,
 });

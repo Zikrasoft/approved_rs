@@ -163,6 +163,7 @@ export type NewRequirement = Provenance & {
 export type NewPart = Provenance &
   Partial<PartClassification> & {
     name: string;
+    description?: string | null;
     identifiers: NewPartIdentifier[];
   };
 
@@ -242,6 +243,7 @@ class CatalogModuleService extends CatalogModuleBase {
   async createPartWithIdentifiers(
     {
       name,
+      description = null,
       identifiers,
       category_id = null,
       attributes = {},
@@ -254,6 +256,7 @@ class CatalogModuleService extends CatalogModuleBase {
     const created = await this.createParts(
       {
         name,
+        description,
         category_id,
         attributes: await this.validatePartAttributes(
           category_id,

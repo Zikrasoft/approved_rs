@@ -4,8 +4,10 @@ import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { publishAllNumbers } from '../../../../lib/publish/published';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -15,10 +17,17 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 
 const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
+const shopAi = createFakeShopAi();
 
 type Page = {
   normalized_value: string;
-  part: { id: string; name: string; category_id: string | null };
+  part: {
+    id: string;
+    name: string;
+    description: string | null;
+    category_id: string | null;
+    attributes: Record<string, unknown>;
+  };
   offers: unknown[];
   equivalents: unknown[];
   supplier_data: Record<string, unknown[]>;
@@ -33,6 +42,7 @@ medusaIntegrationTestRunner({
         SUPPLIER_ADAPTERS_REGISTRATION,
         asValue([intercars.adapter, warehouse.adapter]),
       );
+      container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -42,6 +52,7 @@ medusaIntegrationTestRunner({
       let catalog: CatalogModuleService;
       let intercarsId: string;
       let oilFiltersId: string;
+      let engineOilId: string;
 
       beforeAll(async () => {
         const container = getContainer();
@@ -86,6 +97,7 @@ medusaIntegrationTestRunner({
           slug: 'engine-oil',
           name: 'Моторное масло',
         });
+        engineOilId = strict.id;
         await catalog.createCategoryFields({
           category_id: strict.id,
           key: 'viscosity',
@@ -115,6 +127,15 @@ medusaIntegrationTestRunner({
           fake.articles.length = 0;
           fake.quotes.clear();
         }
+        Object.assign(shopAi, {
+          category: null,
+          attributes: {},
+          description: '',
+          categoryPicks: [],
+          specsMapped: [],
+          descriptionsWritten: [],
+          failure: null,
+        });
       });
 
       const runImport = () =>
@@ -271,7 +292,7 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('skips an article in an unmapped category or of an unlisted Brand', async () => {
+      it('skips an article of an unlisted Brand and leaves an article AI cannot classify without a Category', async () => {
         intercars.articles.push(
           {
             article_id: 'IC-4',
@@ -295,21 +316,171 @@ medusaIntegrationTestRunner({
           {
             supplier: 'Intercars',
             imported: 0,
-            created: 0,
-            skipped: 2,
-            skipped_by_reason: { category: 1, brand: 1, currency: 0 },
-            needs_category: [],
+            created: 1,
+            skipped: 1,
+            skipped_by_reason: { brand: 1, currency: 0 },
+            needs_category: ['C 30 005'],
           },
           {
             supplier: 'Warehouse',
             imported: 0,
             created: 0,
             skipped: 0,
-            skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+            skipped_by_reason: { brand: 0, currency: 0 },
             needs_category: [],
           },
         ]);
-        expect(await pages()).toHaveLength(1);
+        expect((await page('C30005'))?.part.category_id).toBeNull();
+        expect(await page('F026407157')).toBeUndefined();
+      });
+
+      it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
+        intercars.articles.push({
+          article_id: 'IC-20',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          name: 'Масло 0W-20',
+          category: 'Motorna ulja',
+          description: 'Potpuno sintetičko motorno ulje 0W-20.',
+          specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+          applicability: ['BMW G20 320i'],
+        });
+        shopAi.category = engineOilId;
+        shopAi.attributes = { viscosity: '0W-20' };
+        shopAi.description = 'Синтетическое моторное масло 0W-20.';
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          needs_category: [],
+        });
+        expect(await page('OIL0W20')).toMatchObject({
+          part: {
+            category_id: engineOilId,
+            attributes: { viscosity: '0W-20' },
+            description: 'Синтетическое моторное масло 0W-20.',
+          },
+          offers: [],
+          supplier_data: { applicability: [] },
+        });
+        const facts = {
+          name: 'Масло 0W-20',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          description: 'Potpuno sintetičko motorno ulje 0W-20.',
+          specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+        };
+        expect(shopAi.categoryPicks).toEqual([
+          {
+            article: facts,
+            categories: expect.arrayContaining([
+              { id: engineOilId, name: 'Моторное масло' },
+              { id: oilFiltersId, name: 'Масляные фильтры' },
+            ]),
+          },
+        ]);
+        expect(shopAi.specsMapped).toEqual([
+          {
+            specs: facts.specs,
+            fields: [
+              {
+                key: 'viscosity',
+                label: 'Вязкость',
+                type: 'text',
+                unit: null,
+                required: true,
+                options: [],
+              },
+            ],
+          },
+        ]);
+        expect(shopAi.descriptionsWritten).toEqual([facts]);
+      });
+
+      it('keeps the mapped Category over AI and drops attributes the Category refuses', async () => {
+        intercars.articles.push({
+          article_id: 'IC-21',
+          brand: 'MANN-FILTER',
+          number: 'W 940',
+          name: 'Фильтр W940',
+          category: 'IC-OIL',
+          specs: { Visina: '120 mm' },
+        });
+        shopAi.category = engineOilId;
+        shopAi.attributes = { height: 120 };
+
+        await runImport();
+
+        expect((await page('W940'))?.part).toMatchObject({
+          category_id: oilFiltersId,
+          attributes: {},
+        });
+        expect(shopAi.specsMapped).toHaveLength(1);
+        expect(shopAi.categoryPicks).toEqual([]);
+      });
+
+      it('still creates the Part, unclassified and undescribed, when AI fails', async () => {
+        intercars.articles.push({
+          article_id: 'IC-24',
+          brand: 'MANN-FILTER',
+          number: 'W 970',
+          name: 'Фильтр W970',
+          category: 'Filteri',
+          description: 'Filter ulja W 970.',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          needs_category: ['W 970'],
+        });
+        expect((await page('W970'))?.part).toMatchObject({
+          category_id: null,
+          description: null,
+        });
+      });
+
+      it('writes an imported description once and never over a hand edit', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-22',
+            brand: 'MANN-FILTER',
+            number: 'W 950',
+            name: 'Фильтр W950',
+            category: 'IC-OIL',
+            description: 'Filter ulja W 950.',
+          },
+          {
+            article_id: 'IC-23',
+            brand: 'MANN-FILTER',
+            number: 'W 960',
+            name: 'Фильтр W960',
+            category: 'IC-OIL',
+            description: 'Filter ulja W 960.',
+          },
+        );
+        shopAi.description = 'Масляный фильтр.';
+        await runImport();
+        const edited = (await page('W950'))!.part;
+        await api.post(
+          `/admin/parts/${edited.id}`,
+          { description: 'Описание от мастера.' },
+          adminHeaders,
+        );
+        intercars.articles[0].description = 'Novi opis W 950.';
+        intercars.articles[1].description = 'Novi opis W 960.';
+        shopAi.description = 'Новое описание.';
+
+        await runImport();
+
+        expect((await page('W950'))?.part.description).toBe(
+          'Описание от мастера.',
+        );
+        expect((await page('W960'))?.part.description).toBe('Масляный фильтр.');
+        expect(shopAi.descriptionsWritten).toHaveLength(2);
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {

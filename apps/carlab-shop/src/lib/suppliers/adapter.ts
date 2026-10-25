@@ -13,6 +13,8 @@ export const supplierArticleSchema = z.object({
   number: z.string(),
   name: z.string().trim().min(1),
   category: z.string(),
+  description: z.string().trim().min(1).optional(),
+  specs: z.record(z.string(), z.string()).optional(),
   cross_references: z.array(crossReferenceSchema).optional(),
   applicability: z.array(z.string()).optional(),
   images: z.array(z.url()).optional(),

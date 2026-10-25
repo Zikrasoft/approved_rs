@@ -74,7 +74,6 @@ const importSummarySchema = z.object({
   created: z.number(),
   skipped: z.number(),
   skipped_by_reason: z.object({
-    category: z.number(),
     brand: z.number(),
     currency: z.number(),
   }),
@@ -263,17 +262,7 @@ const SuppliersPage = () => {
         supplier: sourceName(summary.supplier),
       }),
       summary.skipped > 0 &&
-        t('suppliers.importSkipped', {
-          count: summary.skipped,
-          reasons: (['category', 'brand'] as const)
-            .filter((reason) => summary.skipped_by_reason[reason] > 0)
-            .map((reason) =>
-              t(`suppliers.skippedReasons.${reason}`, {
-                count: summary.skipped_by_reason[reason],
-              }),
-            )
-            .join(', '),
-        }),
+        t('suppliers.importSkipped', { count: summary.skipped }),
       summary.skipped_by_reason.currency > 0 &&
         t('suppliers.importWithoutPrice', {
           count: summary.skipped_by_reason.currency,
