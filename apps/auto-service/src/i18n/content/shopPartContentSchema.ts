@@ -22,7 +22,6 @@ export const shopPartContentSchema = z
     categoryLink: z.string(),
     priceOnRequestHeading: z.string(),
     priceOnRequestBody: z.string(),
-    inquiryBody: z.string(),
     priceOnRequestCta: z.string(),
     offersHeading: z.string(),
     columns: z

@@ -173,7 +173,7 @@ describe('generateLlmsTxt', () => {
     );
   });
 
-  it('names no price and no cart while the shop is closed', async () => {
+  it('names no price and orders parts by inquiry, priced by staff, while the shop is closed', async () => {
     const body = await withBackend('false');
 
     expect(body).toContain(
@@ -181,7 +181,13 @@ describe('generateLlmsTxt', () => {
     );
     expect(body).not.toContain('RSD');
     expect(await generateLlmsTxt('ru')).toContain(
-      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цену и наличие сообщаем по заявке',
+      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цен на сайте нет',
+    );
+    expect(await generateLlmsTxt('ru')).toContain(
+      'Запчасти заказывают только по заявке',
+    );
+    expect(await generateLlmsTxt('ru')).toContain(
+      'Менеджер проверит совместимость по VIN, назовет цену',
     );
   });
 
