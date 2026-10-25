@@ -503,54 +503,48 @@ describe('enriched part pages', () => {
       vehicles: [VEHICLE],
     });
 
-  it('indexes a page with a Category and a Fitment and lists it in the sitemap', async () => {
-    const pages = await catalogueWith(
-      pageWith(classified, [], [fitment('fit_1', oilPart.id)]),
-    ).partPages();
+  const listed = (pages: { slug: string; indexable: boolean }[]) =>
+    sitemapFilter(
+      SITE,
+      pages,
+    )(`${SITE}${PathBuilder.partNumber('sr', 'mann-filter-hu816x')}`);
 
-    expect(pages[0].indexable).toBe(true);
-    expect(
-      sitemapFilter(
-        SITE,
-        pages,
-      )(`${SITE}${PathBuilder.partNumber('sr', 'mann-filter-hu816x')}`),
-    ).toBe(true);
-  });
+  it.each<[string, Record<string, unknown>, unknown[], unknown[]]>([
+    [
+      'a description',
+      { ...oilPart, description: 'Фильтр с обратным клапаном' },
+      [],
+      [],
+    ],
+    ['an attribute', { ...oilPart, attributes: { height: 79 } }, [], []],
+    ['a Fitment', oilPart, [], [fitment('fit_1', oilPart.id)]],
+    ['a published equivalent', oilPart, oilFilterMann.equivalents, []],
+    [
+      'a Category and a Fitment',
+      classified,
+      [],
+      [fitment('fit_1', oilPart.id)],
+    ],
+  ])(
+    'indexes a page with %s and lists it in the sitemap',
+    async (_, part, equivalents, fitments) => {
+      const pages = await catalogueWith(
+        pageWith(part, equivalents, fitments),
+      ).partPages();
 
-  it('indexes a page with a Category and a published equivalent', async () => {
-    const [page] = await catalogueWith(
-      pageWith(classified, oilFilterMann.equivalents, []),
-    ).partPages();
+      expect(pages[0].indexable).toBe(true);
+      expect(listed(pages)).toBe(true);
+    },
+  );
 
-    expect(page.indexable).toBe(true);
-  });
-
-  it('keeps a page with a Category but nothing else noindex and out of the sitemap', async () => {
-    const pages = await catalogueWith(pageWith(classified, [], [])).partPages();
+  it.each([
+    ['a bare page', oilPart],
+    ['a page with only a Category', classified],
+  ])('keeps %s noindex and out of the sitemap', async (_, part) => {
+    const pages = await catalogueWith(pageWith(part, [], [])).partPages();
 
     expect(pages[0].indexable).toBe(false);
-    expect(
-      sitemapFilter(
-        SITE,
-        pages,
-      )(`${SITE}${PathBuilder.partNumber('sr', 'mann-filter-hu816x')}`),
-    ).toBe(false);
-  });
-
-  it('keeps a page without a Category noindex however much it fits', async () => {
-    const pages = await catalogueWith(
-      pageWith(oilPart, oilFilterMann.equivalents, [
-        fitment('fit_1', oilPart.id),
-      ]),
-    ).partPages();
-
-    expect(pages[0].indexable).toBe(false);
-    expect(
-      sitemapFilter(
-        SITE,
-        pages,
-      )(`${SITE}${PathBuilder.partNumber('en', 'mann-filter-hu816x')}`),
-    ).toBe(false);
+    expect(listed(pages)).toBe(false);
   });
 
   it('lists the cars a part fits with quantity and position', async () => {
@@ -1104,15 +1098,6 @@ describe('Requirements and the maintenance kit', () => {
       ['oil-filters', 1, 'mann-filter-hu816x'],
       ['engine-oil', 5, 'liqui-moly-20646'],
     ]);
-  });
-
-  it('indexes a universal good a car Requirement matches, not one nothing asks for', async () => {
-    const pages = await withRequirements().partPages();
-    const indexable = (slug: string) =>
-      pages.find((page) => page.slug === slug)?.indexable;
-
-    expect(indexable('liqui-moly-20646')).toBe(true);
-    expect(indexable('liqui-moly-20800')).toBe(false);
   });
 
   it('names on a page the cars its Requirements fit and the kits it is in', async () => {

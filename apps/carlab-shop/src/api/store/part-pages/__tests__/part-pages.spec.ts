@@ -57,7 +57,13 @@ medusaIntegrationTestRunner({
         });
         await catalog.updateParts({
           id: oilFilterId,
-          translations: { sr: { name: 'Filter ulja, BMW B47/B48' } },
+          description: 'Фильтр с обратным клапаном',
+          translations: {
+            sr: {
+              name: 'Filter ulja, BMW B47/B48',
+              description: 'Filter sa nepovratnim ventilom',
+            },
+          },
         });
         await catalog.createPartWithIdentifiers({
           name: 'Cabin filter',
@@ -118,7 +124,13 @@ medusaIntegrationTestRunner({
           part: {
             id: expect.any(String),
             name: 'Oil filter, BMW B47/B48 engines',
-            translations: { sr: { name: 'Filter ulja, BMW B47/B48' } },
+            description: 'Фильтр с обратным клапаном',
+            translations: {
+              sr: {
+                name: 'Filter ulja, BMW B47/B48',
+                description: 'Filter sa nepovratnim ventilom',
+              },
+            },
             replaced_by: null,
             category_id: oilFilters.id,
             attributes: { height: 75 },

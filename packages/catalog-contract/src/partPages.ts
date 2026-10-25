@@ -58,6 +58,7 @@ export const partPageSchema = picturedBrandNumberSchema.extend({
   part: z.object({
     id: z.string(),
     name: z.string(),
+    description: z.string().nullable().default(null),
     translations: translationsSchema,
     replaced_by: z
       .object({

@@ -28,6 +28,7 @@ const entry = (
   part: {
     id: 'part_1',
     name: 'Oil filter',
+    description: null,
     translations: null,
     replaced_by: null,
     category_id: null,

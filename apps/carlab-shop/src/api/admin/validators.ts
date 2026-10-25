@@ -73,8 +73,17 @@ export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
 const servicePrice = z.number().int().nonnegative().max(MAX_SERVICE_PRICE);
 
+const MAX_DESCRIPTION_LENGTH = 5000;
+
 export const AdminUpdatePart = z.strictObject({
   name: name.optional(),
+  description: z
+    .string()
+    .trim()
+    .max(MAX_DESCRIPTION_LENGTH)
+    .transform((text) => text || null)
+    .nullable()
+    .optional(),
   installation_price: servicePrice.nullable().optional(),
   no_installation: z.boolean().optional(),
   replaced_by_id: z.string().min(1).nullable().optional(),

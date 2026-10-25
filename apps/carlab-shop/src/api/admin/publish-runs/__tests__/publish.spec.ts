@@ -24,6 +24,7 @@ const SERBIAN = new Map([
   ['Вязкость', 'Viskozitet'],
   ['Синтетика', 'Sintetika'],
   ['Только с M-пакетом', 'Samo sa M paketom'],
+  ['Фильтр с обратным клапаном.', 'Filter sa nepovratnim ventilom.'],
 ]);
 const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
@@ -35,6 +36,7 @@ const ENGLISH = new Map([
   ['Вязкость', 'Viscosity'],
   ['Синтетика', 'Synthetic'],
   ['Только с M-пакетом', 'M Sport package only'],
+  ['Фильтр с обратным клапаном.', 'Filter with a check valve.'],
 ]);
 
 type FakeNetwork = {
@@ -321,6 +323,23 @@ medusaIntegrationTestRunner({
         expect(await translationsOf(part.id)).toEqual({
           sr: { name: 'Filter vazduha' },
           en: { name: 'Engine air filter' },
+        });
+      });
+
+      it('translates a Part description with its name', async () => {
+        const part = await catalog.createParts({
+          name: 'Масляный фильтр',
+          description: 'Фильтр с обратным клапаном.',
+        });
+
+        await publish();
+
+        expect(await translationsOf(part.id)).toEqual({
+          sr: {
+            name: 'Filter ulja',
+            description: 'Filter sa nepovratnim ventilom.',
+          },
+          en: { name: 'Oil filter', description: 'Filter with a check valve.' },
         });
       });
 
