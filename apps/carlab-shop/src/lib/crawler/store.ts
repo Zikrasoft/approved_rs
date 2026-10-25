@@ -28,6 +28,7 @@ export type CrawlRun = {
   status: 'running' | 'paused' | 'done';
   paused_reason: PauseReason | null;
   seeded: boolean;
+  pages_left: number | null;
   started_at: Date;
   finished_at: Date | null;
 };
@@ -60,16 +61,12 @@ export type CrawlProgress = {
 
 const SEED_BATCH = 1000;
 
-const tally = <Key extends string, Column extends string>(
+const tally = <Key extends string>(
   keys: readonly Key[],
-  rows: (Record<Column, string | null> & { count: string })[],
-  column: Column,
+  countOf: (key: Key) => string | undefined,
 ) =>
   Object.fromEntries(
-    keys.map((key) => [
-      key,
-      Number(rows.find((row) => row[column] === key)?.count ?? 0),
-    ]),
+    keys.map((key) => [key, Number(countOf(key) ?? 0)]),
   ) as Record<Key, number>;
 
 export const crawlStore = (pg: Knex) => ({
@@ -81,18 +78,33 @@ export const crawlStore = (pg: Knex) => ({
     return pg('crawl_run').where({ status: 'running' }).pluck('site');
   },
 
-  async start(site: string, now: Date): Promise<void> {
+  async start(
+    site: string,
+    now: Date,
+    limit: number | null = null,
+  ): Promise<void> {
     await pg.raw(
-      `insert into crawl_run (site, status, seeded, started_at)
-       values (?, 'running', false, ?)
+      `insert into crawl_run (site, status, seeded, pages_left, started_at)
+       values (?, 'running', false, ?, ?)
        on conflict (site) do update set
          status = 'running',
          paused_reason = null,
+         pages_left = excluded.pages_left,
          finished_at = null,
          seeded = crawl_run.seeded and crawl_run.status = 'paused',
          started_at = case when crawl_run.status = 'paused' then crawl_run.started_at else excluded.started_at end`,
-      [site, now],
+      [site, limit, now],
     );
+  },
+
+  async countStored(site: string): Promise<boolean> {
+    const { rows } = await pg.raw(
+      `update crawl_run set pages_left = pages_left - 1
+       where site = ? and pages_left is not null
+       returning pages_left`,
+      [site],
+    );
+    return rows[0]?.pages_left === 0;
   },
 
   async seed(site: string, urls: string[], now: Date): Promise<void> {
@@ -180,13 +192,15 @@ export const crawlStore = (pg: Knex) => ({
       run: runs.find((run) => run.site === site) ?? null,
       pages: tally(
         PAGE_STATUSES,
-        counts.filter((row) => row.site === site),
-        'status',
+        (status) =>
+          counts.find((row) => row.site === site && row.status === status)
+            ?.count,
       ),
       failures: tally(
         FAILURE_REASONS,
-        failures.filter((row) => row.site === site),
-        'error',
+        (error) =>
+          failures.find((row) => row.site === site && row.error === error)
+            ?.count,
       ),
     }));
   },

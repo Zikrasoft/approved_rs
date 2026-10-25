@@ -96,12 +96,14 @@ async function crawlWith(
     fetcher: Fetcher,
     url: string,
     headers: Record<string, string> = {},
+    waitFor?: string,
   ): Promise<Fetched> => {
     const hold = holdUntil - clock.now();
     if (hold > 0) await clock.sleep(hold);
     return fetcher.fetch({
       url,
       headers: { ...(from && { from }), ...headers },
+      waitFor,
       beforeAttempt: async () => {
         const wait = lastRequestAt + gapMs - clock.now();
         if (wait > 0) await clock.sleep(wait);
@@ -147,8 +149,9 @@ async function crawlWith(
     if (fetched.kind === 'error' || !succeeded(fetched)) {
       return 'sitemap_unavailable';
     }
-    const links = sitemapLinks(xmlOf(fetched.body));
-    found.push(...links.pages);
+    const xml = xmlOf(fetched.body);
+    const links = sitemapLinks(xml);
+    found.push(...(site.sitemapPages?.(xml) ?? links.pages));
     for (const child of links.sitemaps) {
       const reason = await sitemapPages(child, found);
       if (reason) return reason;
@@ -200,15 +203,22 @@ async function crawlWith(
     return serverErrors >= MAX_SERVER_ERRORS ? 'server_errors' : null;
   };
 
-  const fetchPage = async (page: ClaimedPage): Promise<PauseReason | null> => {
+  const fetchPage = async (
+    page: ClaimedPage,
+  ): Promise<PauseReason | 'idle' | null> => {
     if (!allowed(page.url)) {
       await fail(page, 'robots');
       return null;
     }
-    const fetched = await request(pageFetcher, page.url, {
-      ...(page.etag && { 'if-none-match': page.etag }),
-      ...(page.last_modified && { 'if-modified-since': page.last_modified }),
-    });
+    const fetched = await request(
+      pageFetcher,
+      page.url,
+      {
+        ...(page.etag && { 'if-none-match': page.etag }),
+        ...(page.last_modified && { 'if-modified-since': page.last_modified }),
+      },
+      site.waitFor,
+    );
     if (fetched.kind === 'blocked') {
       blockedPages += 1;
       await fail(page, 'blocked');
@@ -230,6 +240,7 @@ async function crawlWith(
         etag: fetched.headers.etag ?? null,
         last_modified: fetched.headers['last-modified'] ?? null,
       });
+      if (await store.countStored(site.name)) return 'idle';
     } else if (status === 404 || status === 410) {
       await store.update(site.name, page.url, { status: 'gone', ...settled });
     } else {

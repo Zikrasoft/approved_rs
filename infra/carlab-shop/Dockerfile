@@ -21,7 +21,10 @@ RUN pnpm deploy --filter @podbor/carlab-shop --prod --legacy /prod
 FROM node:24.21.0-alpine
 
 WORKDIR /server
-ENV NODE_ENV=production MEDUSA_DISABLE_TELEMETRY=1 PORT=9000
+ENV NODE_ENV=production MEDUSA_DISABLE_TELEMETRY=1 PORT=9000 \
+    CRAWLEE_DEFAULT_BROWSER_PATH=/usr/bin/chromium-headless-shell
+
+RUN apk add --no-cache chromium-headless-shell
 
 COPY --from=builder --chown=node:node /prod/node_modules ./node_modules
 COPY --from=builder --chown=node:node /repo/apps/carlab-shop/.medusa/server ./

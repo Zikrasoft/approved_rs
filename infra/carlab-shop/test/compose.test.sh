@@ -39,8 +39,8 @@ expect 'medusa writes uploads to the static volume caddy serves read-only, at th
 expect 'caddy serves the admin on its own host' \
   '.services.caddy.environment.ADMIN_HOST == "admin.carlab.rs"'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
-expect 'every service has a memory limit, together under 3.2 GB' \
-  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3200 * 1024 * 1024)'
+expect 'every service has a memory limit, together under 3.5 GB' \
+  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3500 * 1024 * 1024)'
 expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":([0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 

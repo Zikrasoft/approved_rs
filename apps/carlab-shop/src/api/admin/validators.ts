@@ -261,6 +261,11 @@ export const AdminUpdateSupplier = z
   .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;
 
+export const AdminStartCrawl = z.strictObject({
+  limit: z.number().int().min(1).max(100_000).optional(),
+});
+export type AdminStartCrawlType = z.infer<typeof AdminStartCrawl>;
+
 export const AdminCreateSupplierCategory = z.strictObject({
   code: name,
   category_id: z.string().min(1),

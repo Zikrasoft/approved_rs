@@ -210,4 +210,26 @@ describe('crawleeFetcher', () => {
     ).toContain('data-rendered="yes"');
     expect(attempts).toBe(1);
   });
+
+  withBrowser(
+    'waits for what the site names before handing the page back',
+    async () => {
+      web = await site({
+        '/p/1': html(
+          '<html><body><script>setTimeout(() => { const late = document.createElement("table"); late.id = "late"; document.body.append(late) }, 300)</script></body></html>',
+        ),
+      });
+      open('browser');
+
+      const fetched = await fetcher.fetch({
+        url: web.url('/p/1'),
+        waitFor: '#late',
+        beforeAttempt: async () => {},
+      });
+
+      expect(
+        fetched.kind === 'response' && fetched.body.toString('utf8'),
+      ).toContain('<table id="late">');
+    },
+  );
 });

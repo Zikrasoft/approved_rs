@@ -9,6 +9,7 @@ export type CrawledSite = {
   sitemaps: string[];
   floorMs: number;
   fetchMode?: FetchMode;
+  waitFor?: string;
   isPage: (url: string) => boolean;
   sitemapPages?: (xml: string) => string[];
   parse: (html: string) => SupplierArticle | null;

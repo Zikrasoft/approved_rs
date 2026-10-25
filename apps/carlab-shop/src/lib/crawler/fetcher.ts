@@ -11,9 +11,7 @@ import {
   type PlaywrightCrawlerOptions,
 } from '@crawlee/playwright';
 
-export const FETCH_MODES = ['http', 'browser'] as const;
-
-export type FetchMode = (typeof FETCH_MODES)[number];
+export type FetchMode = 'http' | 'browser';
 
 export type Fetched =
   | {
@@ -28,6 +26,7 @@ export type Fetched =
 export type FetchRequest = {
   url: string;
   headers?: Record<string, string>;
+  waitFor?: string;
   beforeAttempt: () => Promise<void>;
 };
 
@@ -40,6 +39,21 @@ const CHALLENGE_TITLE =
   /<title>\s*(?:just a moment\.\.\.|attention required! \| cloudflare)/iu;
 const MAX_SESSION_ROTATIONS = 3;
 const REQUEST_HANDLER_TIMEOUT_SECS = 120;
+const WAIT_FOR_MS = 30_000;
+const UNUSED_RESOURCES = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.gif',
+  '.webp',
+  '.svg',
+  '.ico',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.mp4',
+  '.pdf',
+];
 
 const flatHeaders = (headers: IncomingHttpHeaders): Record<string, string> =>
   Object.fromEntries(
@@ -147,15 +161,27 @@ export const crawleeFetcher = (mode: FetchMode): Fetcher => {
       : new PlaywrightCrawler(
           {
             ...common,
-            preNavigationHooks: [beforeAttempt],
+            preNavigationHooks: [
+              beforeAttempt,
+              ({ blockRequests }) =>
+                blockRequests({ urlPatterns: UNUSED_RESOURCES }),
+            ],
             postNavigationHooks: [afterAttempt],
-            requestHandler: async ({ request, response, page }) =>
+            requestHandler: async ({ request, response, page }) => {
+              const waitFor = pending.get(request.uniqueKey)?.request.waitFor;
+              if (waitFor) {
+                await page.waitForSelector(waitFor, {
+                  state: 'attached',
+                  timeout: WAIT_FOR_MS,
+                });
+              }
               answer(
                 request.uniqueKey,
                 response?.status() ?? 200,
                 response?.headers() ?? {},
                 Buffer.from(await page.content()),
-              ),
+              );
+            },
           } satisfies PlaywrightCrawlerOptions,
           config,
         );

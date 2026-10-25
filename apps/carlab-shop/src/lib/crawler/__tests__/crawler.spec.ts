@@ -37,6 +37,7 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
     at: number;
     headers: Record<string, string>;
     mode: FetchMode;
+    waitFor?: string;
   }[] = [];
   const closed: FetchMode[] = [];
   const served = new Map<string, number>();
@@ -56,12 +57,12 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
     return route[Math.min(index, route.length - 1)];
   };
   const openFetcher = (mode: FetchMode): Fetcher => ({
-    fetch: async ({ url, headers = {}, beforeAttempt }) => {
+    fetch: async ({ url, headers = {}, waitFor, beforeAttempt }) => {
       const answer = responder(url);
       const attempts = answer().kind === 'blocked' ? BLOCKED_ATTEMPTS : 1;
       for (let attempt = 0; attempt < attempts; attempt++) {
         await beforeAttempt();
-        requests.push({ url, at: clock.time, headers, mode });
+        requests.push({ url, at: clock.time, headers, mode, waitFor });
       }
       return answer();
     },
@@ -119,8 +120,9 @@ medusaIntegrationTestRunner({
     const crawl = async (
       site: CrawledSite,
       web: ReturnType<typeof fakeWeb>,
+      limit: number | null = null,
     ) => {
-      await store.start(site.name, new Date(web.clock.now()));
+      await store.start(site.name, new Date(web.clock.now()), limit);
       await crawlSite(site, {
         store,
         openFetcher: web.openFetcher,
@@ -280,8 +282,11 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('fetches pages of a browser site through the browser and robots.txt and sitemaps over http', async () => {
-        const site = testSite('cloudy', 2000, 'browser');
+      it('fetches pages of a browser site through the browser, waiting for its selector, and robots.txt and sitemaps over http', async () => {
+        const site = {
+          ...testSite('cloudy', 2000, 'browser'),
+          waitFor: '#criteria',
+        };
         const web = fakeWeb({
           'https://cloudy.test/robots.txt': ok(''),
           'https://cloudy.test/sitemap.xml': ok(
@@ -292,10 +297,12 @@ medusaIntegrationTestRunner({
 
         const progress = await crawl(site, web);
 
-        expect(web.requests.map(({ mode }) => mode)).toEqual([
-          'http',
-          'http',
-          'browser',
+        expect(
+          web.requests.map(({ mode, waitFor }) => [mode, waitFor]),
+        ).toEqual([
+          ['http', undefined],
+          ['http', undefined],
+          ['browser', '#criteria'],
         ]);
         expect(progress.pages).toMatchObject({ done: 1 });
         expect([...web.closed].sort()).toEqual(['browser', 'http']);
@@ -434,6 +441,52 @@ medusaIntegrationTestRunner({
         expect(progress.pages).toMatchObject({ done: 1 });
       });
 
+      it("takes a sitemap's pages from the site's own reader when it has one", async () => {
+        const site: CrawledSite = {
+          ...testSite('picky'),
+          sitemapPages: (xml) =>
+            [...xml.matchAll(/<loc>([^<]*keep[^<]*)<\/loc>/gu)].map(
+              ([, url]) => url,
+            ),
+        };
+        const web = fakeWeb({
+          'https://picky.test/robots.txt': ok(''),
+          'https://picky.test/sitemap.xml': ok(
+            urlset(
+              'https://picky.test/p/keep-1',
+              'https://picky.test/p/skip-2',
+              'https://picky.test/other/keep-3',
+            ),
+          ),
+        });
+
+        await crawl(site, web);
+
+        expect(web.requests.map(({ url }) => url).slice(2)).toEqual([
+          'https://picky.test/p/keep-1',
+        ]);
+      });
+
+      it('ends a test run once it has stored the pages it was asked for', async () => {
+        const site = testSite('sample');
+        const pages = [1, 2, 3, 4].map((n) => `https://sample.test/p/${n}`);
+        const web = fakeWeb({
+          'https://sample.test/robots.txt': ok(''),
+          'https://sample.test/sitemap.xml': ok(urlset(...pages)),
+          [pages[0]]: status(404),
+          ...Object.fromEntries(pages.slice(1).map((url) => [url, ok('page')])),
+        });
+
+        const sample = await crawl(site, web, 2);
+
+        expect(sample.run?.status).toBe('done');
+        expect(sample.pages).toMatchObject({ done: 2, gone: 1, queued: 1 });
+
+        const full = await crawl(site, web);
+
+        expect(full.pages).toMatchObject({ done: 3, gone: 1, queued: 0 });
+      });
+
       it('re-reads robots.txt once a day during a long run', async () => {
         const site = testSite('daily', 13 * HOUR);
         const web = fakeWeb({
@@ -523,6 +576,23 @@ medusaIntegrationTestRunner({
           status: 'running',
           started_at: expect.any(String),
         });
+      });
+
+      it('takes a page limit for a test run and refuses one that is not a positive whole number', async () => {
+        const started = await api.post(
+          '/admin/crawls/mann-filter',
+          { limit: 10 },
+          adminHeaders,
+        );
+        expect(started.data).toEqual({ started: 'mann-filter' });
+        expect((await store.run('MANN-FILTER'))?.pages_left).toBe(10);
+
+        for (const limit of [0, 2.5, '10']) {
+          const refused = await api
+            .post('/admin/crawls/mann-filter', { limit }, adminHeaders)
+            .catch((error: { response: { status: number } }) => error.response);
+          expect(refused.status).toBe(400);
+        }
       });
 
       it('refuses a site no crawler reads', async () => {
