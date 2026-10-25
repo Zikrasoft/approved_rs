@@ -5,7 +5,12 @@ import { VIN_DECODER_NAMES } from './vin/decoders';
 
 const LOCAL_TYPESENSE_API_KEY = 'xyz';
 
-export const SUPPLIER_ADAPTER_NAMES = ['demo', 'mann-filter'] as const;
+export const SUPPLIER_ADAPTER_NAMES = [
+  'demo',
+  'mann-filter',
+  'varta',
+  'bilstein',
+] as const;
 
 export type SupplierAdapterName = (typeof SUPPLIER_ADAPTER_NAMES)[number];
 

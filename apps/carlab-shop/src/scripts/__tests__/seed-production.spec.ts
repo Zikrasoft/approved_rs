@@ -103,13 +103,18 @@ medusaIntegrationTestRunner({
       });
 
       it('registers each crawled site once as a Supplier imported only on its own button', async () => {
-        expect(await suppliers.listSuppliers()).toEqual([
-          expect.objectContaining({
-            name: 'MANN-FILTER',
-            import_enabled: true,
-            import_on_publish: false,
-          }),
+        const registered = await suppliers.listSuppliers();
+        expect(registered.map(({ name }) => name).sort()).toEqual([
+          'MANN-FILTER',
+          'VARTA',
+          'bilstein group',
         ]);
+        expect(
+          registered.every(
+            ({ import_enabled, import_on_publish }) =>
+              import_enabled && !import_on_publish,
+          ),
+        ).toBe(true);
       });
 
       it('creates the commerce defaults checkout needs', async () => {
