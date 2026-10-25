@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+import { Crawls } from '../../components/crawls';
 import { EditedBy } from '../../components/edited-by';
 import {
   LIST_TABLE,
@@ -643,6 +644,8 @@ const SuppliersPage = () => {
           {t('suppliers.releasedHint')}
         </Text>
       </Container>
+
+      <Crawls />
 
       <Container className="divide-y overflow-hidden p-0">
         <ListHeader

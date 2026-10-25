@@ -1,7 +1,11 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { crossReferenceSchema } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { crawledSupplierAdapter } from '../crawler/adapter';
+import { enabledCrawledSites } from '../crawler/sites';
+import { crawlStore } from '../crawler/store';
 import { parseEnv } from '../env';
 import { demoAdapters } from './demo-adapter';
 
@@ -48,14 +52,23 @@ export type SupplierAdapter = {
   quote: (articleIds: string[]) => Promise<SupplierQuote[]>;
 };
 
-const configuredAdapters = (): SupplierAdapter[] => {
+const configuredAdapters = (scope: MedusaContainer): SupplierAdapter[] => {
   const env = parseEnv(process.env);
-  return env.SUPPLIER_ADAPTERS.includes('demo')
-    ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES, env.FILE_URL)
-    : [];
+  const crawled = enabledCrawledSites().map((site) =>
+    crawledSupplierAdapter(
+      site,
+      crawlStore(scope.resolve(ContainerRegistrationKeys.PG_CONNECTION)),
+    ),
+  );
+  return [
+    ...(env.SUPPLIER_ADAPTERS.includes('demo')
+      ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES, env.FILE_URL)
+      : []),
+    ...crawled,
+  ];
 };
 
 export const supplierAdapters = (scope: MedusaContainer): SupplierAdapter[] =>
   scope.hasRegistration(SUPPLIER_ADAPTERS_REGISTRATION)
     ? scope.resolve<SupplierAdapter[]>(SUPPLIER_ADAPTERS_REGISTRATION)
-    : configuredAdapters();
+    : configuredAdapters(scope);

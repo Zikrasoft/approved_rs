@@ -20,8 +20,10 @@ expect() {
 }
 
 expect 'only caddy publishes a port' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy"]'
-expect 'the stack is medusa, postgres, typesense and caddy' \
-  '[.services | keys[]] == ["caddy", "medusa", "postgres", "typesense"]'
+expect 'the stack is medusa, its crawler, postgres, typesense and caddy' \
+  '[.services | keys[]] == ["caddy", "crawler", "medusa", "postgres", "typesense"]'
+expect 'the crawler runs the shop image as its own worker and reaches postgres by service name' \
+  '.services.crawler.image == .services.medusa.image and .services.crawler.command == ["node", "src/lib/crawler/worker.js"] and .services.crawler.environment.DATABASE_URL == "postgres://carlab:x@postgres:5432/carlab"'
 expect 'postgres and typesense sit on the internal network only' \
   '[.services.postgres, .services.typesense | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
 expect 'medusa reaches typesense by service name with the shared key' \
