@@ -143,7 +143,7 @@ export const TranslationsDrawer = ({
                   </Label>
                   <Textarea
                     id={`${id}-${field}-${locale}`}
-                    rows={field === 'text' ? 6 : 2}
+                    rows={field === 'text' || field === 'description' ? 6 : 2}
                     value={drafts[locale]?.[field] ?? ''}
                     onChange={(event) =>
                       change(locale, field, event.target.value)

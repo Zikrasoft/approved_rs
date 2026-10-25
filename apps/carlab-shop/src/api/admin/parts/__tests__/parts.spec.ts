@@ -366,6 +366,68 @@ medusaIntegrationTestRunner({
         });
       });
 
+      describe('POST /admin/parts/:id description', () => {
+        const describePart = (partId: string, description: unknown) =>
+          api
+            .post(`/admin/parts/${partId}`, { description }, adminHeaders)
+            .catch((error) => error.response);
+
+        it('writes the description as a hand edit and shows it in the admin list', async () => {
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Described part',
+            identifiers: [
+              { type: 'oem', brand_id: bmw.id, value: 'DESCRIBED-1' },
+            ],
+            source: 'Inter Cars',
+          });
+
+          const response = await describePart(
+            partId,
+            '  Фильтр с обратным клапаном  ',
+          );
+
+          expect(response.status).toBe(200);
+          expect(response.data.part).toMatchObject({
+            description: 'Фильтр с обратным клапаном',
+            updated_by: expect.stringMatching(/^user_/),
+          });
+          const found = await api.get(
+            '/admin/parts?q=DESCRIBED-1',
+            adminHeaders,
+          );
+          expect(found.data.parts[0]).toMatchObject({
+            description: 'Фильтр с обратным клапаном',
+            updated_by_user: { email: ADMIN_EMAIL },
+          });
+        });
+
+        it('clears the description with null or a blank', async () => {
+          const {
+            data: { part },
+          } = await createPart('Cleared part', 'DESCRIBED-2');
+          await describePart(part.id, 'Временный текст');
+
+          expect(
+            (await describePart(part.id, '   ')).data.part.description,
+          ).toBeNull();
+          await describePart(part.id, 'Снова текст');
+          expect(
+            (await describePart(part.id, null)).data.part.description,
+          ).toBeNull();
+        });
+
+        it('refuses a description longer than 5000 characters', async () => {
+          const {
+            data: { part },
+          } = await createPart('Long description part', 'DESCRIBED-3');
+
+          const response = await describePart(part.id, 'x'.repeat(5001));
+
+          expect(response.status).toBe(400);
+          expect(response.data).toMatchObject({ field: 'description' });
+        });
+      });
+
       describe('POST /admin/parts/:id/identifiers', () => {
         const addNumber = (partId: string, body: Record<string, unknown>) =>
           api

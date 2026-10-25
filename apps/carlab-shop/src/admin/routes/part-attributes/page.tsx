@@ -10,6 +10,7 @@ import {
   Label,
   Select,
   Text,
+  Textarea,
   toast,
 } from '@medusajs/ui';
 import { useEffect, useState } from 'react';
@@ -51,6 +52,7 @@ type AttributeValue = z.infer<typeof attributeValueSchema>;
 const partSchema = editedBySchema.extend({
   id: z.string(),
   name: z.string(),
+  description: z.string().nullable(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), attributeValueSchema),
   installation_price: z.number().nullable(),
@@ -202,6 +204,7 @@ const PartAttributesPage = () => {
   const [categoryId, setCategoryId] = useState('');
   const [identifierId, setIdentifierId] = useState('');
   const [values, setValues] = useState<Record<string, AttributeValue>>({});
+  const [description, setDescription] = useState('');
   const [installMode, setInstallMode] = useState<InstallationMode>('inherit');
   const [installPrice, setInstallPrice] = useState('');
   const [saves, setSaves] = useState(0);
@@ -236,6 +239,7 @@ const PartAttributesPage = () => {
     setIdentifierId(chosen.identifiers[0]?.id ?? '');
     setCategoryId(chosen.category_id ?? '');
     setValues(chosen.attributes);
+    setDescription(chosen.description ?? '');
     setInstallMode(installationMode(chosen));
     setInstallPrice(
       chosen.installation_price ? String(chosen.installation_price) : '',
@@ -258,9 +262,15 @@ const PartAttributesPage = () => {
         category_id: categoryId || null,
         attributes: values,
         ...installationBody(installMode, installPrice),
+        ...(description !== (part.description ?? '') && { description }),
       }),
     });
     if (saved) {
+      const next = { ...part, description: description.trim() || null };
+      setPart(next);
+      setParts((current) =>
+        current.map((found) => (found.id === next.id ? next : found)),
+      );
       toast.success(t('partAttributes.saved'));
       setSaves((count) => count + 1);
     }
@@ -355,7 +365,10 @@ const PartAttributesPage = () => {
             <TranslationsDrawer
               entity="part"
               id={part.id}
-              source={{ name: part.name }}
+              source={{
+                name: part.name,
+                ...(part.description && { description: part.description }),
+              }}
             />
           </div>
           <div className="flex flex-col gap-y-2">
@@ -429,6 +442,21 @@ const PartAttributesPage = () => {
                 />
               </>
             )}
+          </div>
+
+          <div className="flex flex-col gap-y-2">
+            <Label htmlFor={`${part.id}-description`}>
+              {t('partAttributes.description')}
+            </Label>
+            <Textarea
+              id={`${part.id}-description`}
+              rows={6}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+            <Text size="xsmall" className="text-ui-fg-subtle">
+              {t('partAttributes.descriptionHint')}
+            </Text>
           </div>
 
           <div className="flex flex-col gap-y-2">

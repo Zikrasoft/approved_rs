@@ -57,6 +57,15 @@ const attributes = category
       no: copy.attributeNo,
     })
   : [];
+const description = page.part.description
+  ? paragraphs(
+      translated(
+        { ...page.part, description: page.part.description },
+        'description',
+        locale,
+      ),
+    )
+  : [];
 const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
@@ -234,6 +243,15 @@ const thumbFor = (slug: string) => {
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1">
+      {
+        description.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+            {description.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
       {
         attributes.length > 0 && (
           <div class="flex flex-col gap-3">

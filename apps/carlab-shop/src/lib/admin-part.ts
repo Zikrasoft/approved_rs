@@ -17,6 +17,7 @@ const identifierSchema = z.object({
 export const adminPartSchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string().nullable(),
   category_id: z.string().nullable(),
   attributes: z.record(z.string(), z.unknown()),
   installation_price: z.number().nullable(),
