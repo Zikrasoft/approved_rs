@@ -39,6 +39,8 @@ const descriptionOf = ($: CheerioAPI) => {
   return words(description.text());
 };
 
+const technologyOf = (name: string) => name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0];
+
 export const parseVartaProduct = (html: string): SupplierArticle | null => {
   const $ = load(html);
   const articleId = $('#product-detail-buy-cta').attr('data-article-number');
@@ -47,6 +49,7 @@ export const parseVartaProduct = (html: string): SupplierArticle | null => {
   const number = specs.ETN;
   if (!articleId || !name || !number) return null;
   const description = descriptionOf($);
+  const technology = technologyOf(name);
   return {
     article_id: articleId,
     brand: 'VARTA',
@@ -54,7 +57,7 @@ export const parseVartaProduct = (html: string): SupplierArticle | null => {
     name,
     category: 'battery',
     ...(description && { description }),
-    specs,
+    specs: { ...specs, ...(technology && { Tehnologija: technology }) },
     images: imagesOf($),
   };
 };
