@@ -16,6 +16,8 @@
     "test": "for shard in 1 2 3 4; do NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests --shard=$shard/4 || exit 1; done"
   },
   "dependencies": {
+    "@crawlee/http": "3.18.2",
+    "@crawlee/playwright": "3.18.2",
     "@medusajs/admin-sdk": "2.21.2",
     "@medusajs/admin-shared": "2.21.2",
     "@medusajs/caching": "2.21.2",
@@ -34,6 +36,7 @@
     "@tanstack/react-query": "5.64.2",
     "cheerio": "1.2.0",
     "openai": "7.10.0",
+    "playwright": "1.64.1",
     "react-i18next": "13.5.0",
     "react-router-dom": "7.18.2",
     "robots-parser": "3.0.1",

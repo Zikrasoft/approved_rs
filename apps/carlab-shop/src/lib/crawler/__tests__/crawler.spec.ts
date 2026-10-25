@@ -8,17 +8,37 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../integration-tests/adminAuth';
 import { crawledSupplierAdapter } from '../adapter';
 import { crawlSite } from '../crawl';
+import type { Fetched, Fetcher, FetchMode } from '../fetcher';
 import type { CrawledSite } from '../site';
 import { mannFilter } from '../sites/mann-filter';
 import { crawlStore, type CrawlStore } from '../store';
 
-type Responder = () => Response;
+type Responder = () => Fetched;
 
 const START = Date.parse('2026-10-25T00:00:00Z');
 const HOUR = 60 * 60 * 1000;
+const BLOCKED_ATTEMPTS = 4;
+
+const ok =
+  (body: string, headers: Record<string, string> = {}): Responder =>
+  () => ({ kind: 'response', status: 200, headers, body: Buffer.from(body) });
+const status =
+  (code: number, headers: Record<string, string> = {}): Responder =>
+  () => ({ kind: 'response', status: code, headers, body: Buffer.alloc(0) });
+const blocked: Responder = () => ({
+  kind: 'blocked',
+  reason: 'Request blocked - received 403 status code.',
+});
+const unreachable: Responder = () => ({ kind: 'error', reason: 'ECONNRESET' });
 
 const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
-  const requests: { url: string; at: number; headers: Headers }[] = [];
+  const requests: {
+    url: string;
+    at: number;
+    headers: Record<string, string>;
+    mode: FetchMode;
+  }[] = [];
+  const closed: FetchMode[] = [];
   const served = new Map<string, number>();
   const clock = {
     time: START,
@@ -27,43 +47,60 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
       clock.time += ms;
     },
   };
-  const fetch = (async (input: string | URL | Request, init?: RequestInit) => {
-    const url = String(input);
-    requests.push({ url, at: clock.time, headers: new Headers(init?.headers) });
+  const responder = (url: string): Responder => {
     const route = routes[url];
-    if (!route) return new Response('', { status: 404 });
-    if (!Array.isArray(route)) return route();
+    if (!route) return status(404);
+    if (!Array.isArray(route)) return route;
     const index = served.get(url) ?? 0;
     served.set(url, index + 1);
-    return route[Math.min(index, route.length - 1)]();
-  }) as typeof globalThis.fetch;
+    return route[Math.min(index, route.length - 1)];
+  };
+  const openFetcher = (mode: FetchMode): Fetcher => ({
+    fetch: async ({ url, headers = {}, beforeAttempt }) => {
+      const answer = responder(url);
+      const attempts = answer().kind === 'blocked' ? BLOCKED_ATTEMPTS : 1;
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        await beforeAttempt();
+        requests.push({ url, at: clock.time, headers, mode });
+      }
+      return answer();
+    },
+    close: async () => {
+      closed.push(mode);
+    },
+  });
   const fetched = (url: string) =>
     requests.filter((request) => request.url === url);
-  return { requests, clock, fetch, fetched };
+  return { requests, closed, clock, openFetcher, fetched };
 };
 
-const ok =
-  (body: string, headers: Record<string, string> = {}): Responder =>
-  () =>
-    new Response(body, { status: 200, headers });
-const status =
-  (code: number, headers: Record<string, string> = {}): Responder =>
-  () =>
-    new Response('', { status: code, headers });
 const urlset = (...urls: string[]) =>
   `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls
     .map((url) => `<url><loc>${url}</loc></url>`)
     .join('')}</urlset>`;
 
-const testSite = (name: string, floorMs = 2000): CrawledSite => ({
+const testSite = (
+  name: string,
+  floorMs = 2000,
+  fetchMode?: FetchMode,
+): CrawledSite => ({
   key: 'mann-filter',
   name,
   origin: `https://${name}.test`,
   sitemaps: [`https://${name}.test/sitemap.xml`],
   floorMs,
+  ...(fetchMode && { fetchMode }),
   isPage: (url) => url.includes('/p/'),
   parse: () => null,
 });
+
+const NO_FAILURES = {
+  blocked: 0,
+  robots: 0,
+  network: 0,
+  server: 0,
+  http: 0,
+};
 
 const ADMIN_EMAIL = 'admin@crawler-tests.local';
 const ADMIN_PASSWORD = 'supersecret';
@@ -86,7 +123,7 @@ medusaIntegrationTestRunner({
       await store.start(site.name, new Date(web.clock.now()));
       await crawlSite(site, {
         store,
-        fetch: web.fetch,
+        openFetcher: web.openFetcher,
         clock: web.clock,
         from: 'crawler@carlab.test',
         random: () => 0,
@@ -96,7 +133,7 @@ medusaIntegrationTestRunner({
     };
 
     describe('crawlSite', () => {
-      it('reads robots.txt first, names itself and keeps the Crawl-delay between requests', async () => {
+      it('reads robots.txt first and keeps the Crawl-delay between requests', async () => {
         const site = testSite('polite');
         const page = (n: number) => `https://polite.test/p/${n}`;
         const web = fakeWeb({
@@ -123,10 +160,7 @@ medusaIntegrationTestRunner({
           .map(({ at }, index) => at - web.requests[index].at);
         expect(gaps).toEqual([3000, 3000, 3000]);
         for (const { headers } of web.requests) {
-          expect(headers.get('user-agent')).toMatch(
-            /^CarLabCatalogBot\/1\.0 \(\+https:\/\/carlab\.rs\//u,
-          );
-          expect(headers.get('from')).toBe('crawler@carlab.test');
+          expect(headers.from).toBe('crawler@carlab.test');
         }
         expect(progress.run?.status).toBe('done');
         expect(progress.pages).toEqual({
@@ -135,10 +169,12 @@ medusaIntegrationTestRunner({
           failed: 0,
           gone: 0,
         });
+        expect(progress.failures).toEqual(NO_FAILURES);
         const [snapshot] = await store.snapshots(site.name, null, 1);
         expect(gunzipSync(snapshot.body).toString('utf8')).toBe(
           '<html>one</html>',
         );
+        expect(web.closed).toEqual(['http']);
       });
 
       it('never waits less than the site floor when robots.txt asks for less', async () => {
@@ -180,60 +216,89 @@ medusaIntegrationTestRunner({
 
         expect(web.fetched('https://disallow.test/p/secret')).toEqual([]);
         expect(progress.pages).toMatchObject({ done: 1, failed: 1 });
+        expect(progress.failures).toEqual({ ...NO_FAILURES, robots: 1 });
       });
 
-      it('pauses on a 403 and resumes where it stopped', async () => {
-        const site = testSite('forbidden');
-        const page = (n: number) => `https://forbidden.test/p/${n}`;
+      it('marks a page the site keeps blocking failed and crawls on, keeping the gap between every retry', async () => {
+        const site = testSite('blocking');
+        const page = (n: number) => `https://blocking.test/p/${n}`;
         const web = fakeWeb({
-          'https://forbidden.test/robots.txt': ok(''),
-          'https://forbidden.test/sitemap.xml': ok(
-            urlset(page(1), page(2), page(3)),
-          ),
-          [page(1)]: ok('one'),
-          [page(2)]: [status(403), ok('two')],
-          [page(3)]: ok('three'),
+          'https://blocking.test/robots.txt': ok(''),
+          'https://blocking.test/sitemap.xml': ok(urlset(page(1), page(2))),
+          [page(1)]: blocked,
+          [page(2)]: ok('two'),
+        });
+
+        const progress = await crawl(site, web);
+
+        const attempts = web.fetched(page(1)).map(({ at }) => at - START);
+        expect(attempts).toEqual([4000, 6000, 8000, 10000]);
+        expect(web.fetched(page(2))[0].at - START).toBe(12000);
+        expect(progress.run?.status).toBe('done');
+        expect(progress.pages).toMatchObject({ done: 1, failed: 1 });
+        expect(progress.failures).toEqual({ ...NO_FAILURES, blocked: 1 });
+      });
+
+      it('pauses once five pages in a row stay blocked and resumes where it stopped', async () => {
+        const site = testSite('walled');
+        const pages = [1, 2, 3, 4, 5, 6, 7].map(
+          (n) => `https://walled.test/p/${n}`,
+        );
+        const web = fakeWeb({
+          'https://walled.test/robots.txt': ok(''),
+          'https://walled.test/sitemap.xml': ok(urlset(...pages)),
+          ...Object.fromEntries(pages.slice(0, 5).map((url) => [url, blocked])),
+          [pages[5]]: ok('six'),
+          [pages[6]]: ok('seven'),
         });
 
         const paused = await crawl(site, web);
 
         expect(paused.run).toMatchObject({
           status: 'paused',
-          paused_reason: 'forbidden',
+          paused_reason: 'blocked',
         });
-        expect(web.fetched(page(3))).toEqual([]);
-        expect(paused.pages).toMatchObject({ done: 1, queued: 2 });
+        expect(web.fetched(pages[5])).toEqual([]);
+        expect(paused.failures).toEqual({ ...NO_FAILURES, blocked: 5 });
 
         const resumed = await crawl(site, web);
 
         expect(resumed.run?.status).toBe('done');
-        expect(web.fetched('https://forbidden.test/sitemap.xml')).toHaveLength(
-          1,
-        );
-        expect(web.fetched(page(1))).toHaveLength(1);
-        expect(resumed.pages).toMatchObject({ done: 3, queued: 0 });
+        expect(web.fetched('https://walled.test/sitemap.xml')).toHaveLength(1);
+        expect(resumed.pages).toMatchObject({ done: 2, failed: 5, queued: 0 });
       });
 
-      it('pauses on a challenge page instead of storing it', async () => {
-        const site = testSite('challenge');
-        const web = fakeWeb({
-          'https://challenge.test/robots.txt': ok(''),
-          'https://challenge.test/sitemap.xml': ok(
-            urlset('https://challenge.test/p/1', 'https://challenge.test/p/2'),
-          ),
-          'https://challenge.test/p/1': ok(
-            '<html><head><title>Just a moment...</title></head></html>',
-          ),
-        });
+      it('pauses when the site blocks its robots.txt', async () => {
+        const site = testSite('closed');
+        const web = fakeWeb({ 'https://closed.test/robots.txt': blocked });
 
         const progress = await crawl(site, web);
 
         expect(progress.run).toMatchObject({
           status: 'paused',
-          paused_reason: 'challenge',
+          paused_reason: 'blocked',
         });
-        expect(web.fetched('https://challenge.test/p/2')).toEqual([]);
-        expect(await store.snapshots(site.name, null, 10)).toEqual([]);
+      });
+
+      it('fetches pages of a browser site through the browser and robots.txt and sitemaps over http', async () => {
+        const site = testSite('cloudy', 2000, 'browser');
+        const web = fakeWeb({
+          'https://cloudy.test/robots.txt': ok(''),
+          'https://cloudy.test/sitemap.xml': ok(
+            urlset('https://cloudy.test/p/1'),
+          ),
+          'https://cloudy.test/p/1': ok('one'),
+        });
+
+        const progress = await crawl(site, web);
+
+        expect(web.requests.map(({ mode }) => mode)).toEqual([
+          'http',
+          'http',
+          'browser',
+        ]);
+        expect(progress.pages).toMatchObject({ done: 1 });
+        expect([...web.closed].sort()).toEqual(['browser', 'http']);
       });
 
       it('waits out Retry-After, in seconds or as a date, before the next request', async () => {
@@ -245,12 +310,9 @@ medusaIntegrationTestRunner({
           [page(1)]: [status(429, { 'retry-after': '120' }), ok('one')],
           [page(2)]: [
             () =>
-              new Response('', {
-                status: 503,
-                headers: {
-                  'retry-after': new Date(web.clock.now() + HOUR).toUTCString(),
-                },
-              }),
+              status(503, {
+                'retry-after': new Date(web.clock.now() + HOUR).toUTCString(),
+              })(),
             ok('two'),
           ],
         });
@@ -285,6 +347,31 @@ medusaIntegrationTestRunner({
           paused_reason: 'server_errors',
         });
         expect(web.requests).toHaveLength(2 + 5);
+      });
+
+      it('gives up on a page that stays unreachable or refused and says why', async () => {
+        const site = testSite('flaky');
+        const page = (n: number) => `https://flaky.test/p/${n}`;
+        const web = fakeWeb({
+          'https://flaky.test/robots.txt': ok(''),
+          'https://flaky.test/sitemap.xml': ok(
+            urlset(page(1), page(2), page(3)),
+          ),
+          [page(1)]: unreachable,
+          [page(2)]: ok('two'),
+          [page(3)]: status(400),
+        });
+
+        const progress = await crawl(site, web);
+
+        expect(web.fetched(page(1))).toHaveLength(5);
+        expect(progress.run?.status).toBe('done');
+        expect(progress.pages).toMatchObject({ done: 1, failed: 2 });
+        expect(progress.failures).toEqual({
+          ...NO_FAILURES,
+          network: 1,
+          http: 1,
+        });
       });
 
       it('marks a page gone on 404', async () => {
@@ -425,6 +512,7 @@ medusaIntegrationTestRunner({
             started_at: null,
             finished_at: null,
             pages: { queued: 0, done: 0, failed: 0, gone: 0 },
+            failures: NO_FAILURES,
           },
         ]);
 

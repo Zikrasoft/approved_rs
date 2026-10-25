@@ -2,6 +2,7 @@ import { ModulesSdkUtils } from '@medusajs/framework/utils';
 
 import { parseEnv } from '../env';
 import { type Clock, crawlSite } from './crawl';
+import { crawleeFetcher } from './fetcher';
 import { CRAWLED_SITES } from './sites';
 import { crawlStore } from './store';
 
@@ -32,7 +33,12 @@ async function main(): Promise<void> {
       if (!running.includes(site.name) || active.has(site.name)) continue;
       active.add(site.name);
       console.log(`Crawling ${site.name}`);
-      crawlSite(site, { store, fetch, clock, from: env.CRAWLER_FROM })
+      crawlSite(site, {
+        store,
+        openFetcher: crawleeFetcher,
+        clock,
+        from: env.CRAWLER_FROM,
+      })
         .then(async () => {
           const run = await store.run(site.name);
           console.log(

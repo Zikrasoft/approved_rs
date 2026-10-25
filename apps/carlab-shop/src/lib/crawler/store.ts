@@ -3,8 +3,7 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 export const PAUSE_REASONS = [
   'robots_unavailable',
   'sitemap_unavailable',
-  'forbidden',
-  'challenge',
+  'blocked',
   'server_errors',
 ] as const;
 
@@ -13,6 +12,16 @@ export type PauseReason = (typeof PAUSE_REASONS)[number];
 export const PAGE_STATUSES = ['queued', 'done', 'failed', 'gone'] as const;
 
 type PageStatus = (typeof PAGE_STATUSES)[number];
+
+export const FAILURE_REASONS = [
+  'blocked',
+  'robots',
+  'network',
+  'server',
+  'http',
+] as const;
+
+export type FailureReason = (typeof FAILURE_REASONS)[number];
 
 export type CrawlRun = {
   site: string;
@@ -35,7 +44,7 @@ export type PageUpdate = Partial<{
   attempts: number;
   next_attempt_at: Date;
   http_status: number | null;
-  error: string | null;
+  error: FailureReason | null;
   etag: string | null;
   last_modified: string | null;
   fetched_at: Date;
@@ -46,9 +55,22 @@ export type CrawlProgress = {
   site: string;
   run: CrawlRun | null;
   pages: Record<PageStatus, number>;
+  failures: Record<FailureReason, number>;
 };
 
 const SEED_BATCH = 1000;
+
+const tally = <Key extends string, Column extends string>(
+  keys: readonly Key[],
+  rows: (Record<Column, string | null> & { count: string })[],
+  column: Column,
+) =>
+  Object.fromEntries(
+    keys.map((key) => [
+      key,
+      Number(rows.find((row) => row[column] === key)?.count ?? 0),
+    ]),
+  ) as Record<Key, number>;
 
 export const crawlStore = (pg: Knex) => ({
   async run(site: string): Promise<CrawlRun | null> {
@@ -146,18 +168,26 @@ export const crawlStore = (pg: Knex) => ({
         .count({ count: '*' })
         .whereIn('site', sites)
         .groupBy('site', 'status');
+    const failures: { site: string; error: FailureReason; count: string }[] =
+      await pg('crawl_page')
+        .select('site', 'error')
+        .count({ count: '*' })
+        .whereIn('site', sites)
+        .andWhere({ status: 'failed' })
+        .groupBy('site', 'error');
     return sites.map((site) => ({
       site,
       run: runs.find((run) => run.site === site) ?? null,
-      pages: Object.fromEntries(
-        PAGE_STATUSES.map((status) => [
-          status,
-          Number(
-            counts.find((row) => row.site === site && row.status === status)
-              ?.count ?? 0,
-          ),
-        ]),
-      ) as Record<PageStatus, number>,
+      pages: tally(
+        PAGE_STATUSES,
+        counts.filter((row) => row.site === site),
+        'status',
+      ),
+      failures: tally(
+        FAILURE_REASONS,
+        failures.filter((row) => row.site === site),
+        'error',
+      ),
     }));
   },
 

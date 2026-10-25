@@ -14,7 +14,7 @@ export async function GET(
   ).progress(sites.map(({ name }) => name));
   res.json({
     crawls: sites.map(({ key, name }, index) => {
-      const { run, pages } = progress[index];
+      const { run, pages, failures } = progress[index];
       return {
         key,
         supplier: name,
@@ -23,6 +23,7 @@ export async function GET(
         started_at: run?.started_at ?? null,
         finished_at: run?.finished_at ?? null,
         pages,
+        failures,
       };
     }),
   });
