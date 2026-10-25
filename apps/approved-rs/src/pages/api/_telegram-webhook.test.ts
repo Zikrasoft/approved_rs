@@ -946,12 +946,7 @@ describe('POST /api/telegram-webhook', () => {
 
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
       expect(sentTo(GROUP_ID)).toHaveLength(1);
-      expect(crm('pinChatMessage')).toEqual([
-        expect.objectContaining({
-          chat_id: Number(GROUP_ID),
-          message_id: PROMPT_ID,
-        }),
-      ]);
+      expect(crm('pinChatMessage')).toEqual([]);
       expect(await stored()).toMatchObject({
         status: 'postponed',
         telegramChatId: Number(GROUP_ID),
