@@ -143,9 +143,9 @@
     },
     "save": "Save",
     "import": "Import now",
-    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. A supplier with On publish switched off loads only from Import in its own row. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
-    "importNoAdapters": "No supplier has its import switched on",
+    "importNoAdapters": "No supplier loads on publish",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -187,7 +187,7 @@
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "Publishing and Import now will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
+        "body": "Publishing and the import buttons will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
         "confirm": "Switch off import",
         "done": "Import from {{supplier}} switched off. Its offers stay on the site until you take them off in the supplier's menu."
       },
@@ -206,7 +206,15 @@
       "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so publishing does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
       "done_one": "{{supplier}}: {{count}} offer taken off, import switched off. Site pages update after the next publish.",
       "done_other": "{{supplier}}: {{count}} offers taken off, import switched off. Site pages update after the next publish."
-    }
+    },
+    "importOnPublish": "On publish",
+    "importOnPublishSaved": {
+      "on": "{{supplier}} loads on every publish again.",
+      "off": "{{supplier}} no longer loads on publish, only from Import in its own row."
+    },
+    "importOne": "Import",
+    "importOneLabel": "Import {{supplier}}",
+    "importOffPublish": "Loaded only from their own button, not loaded now: {{suppliers}}."
   },
   "brands": {
     "heading": "Brands",

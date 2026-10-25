@@ -13,8 +13,13 @@ import {
   LEAD_FORM_RESULT_EVENT,
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
+import { PARTS_LIST_CHANGED_EVENT, PARTS_LIST_STORAGE_KEY } from './cartBadge';
 
-export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
+const announceChange = (): void => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(PARTS_LIST_CHANGED_EVENT));
+  }
+};
 
 export const listedPartSchema = z.object({
   slug: z.string(),
@@ -71,6 +76,7 @@ export const readPartsList = (storage?: ListStorage): ListedPart[] =>
 
 function writePartsList(parts: ListedPart[], storage?: ListStorage): void {
   writeStoredJson(PARTS_LIST_STORAGE_KEY, parts, storage);
+  announceChange();
 }
 
 export function addToPartsList(part: ListedPart, storage?: ListStorage): void {
@@ -94,7 +100,8 @@ export function setPartAddon(
   on: boolean,
   storage?: ListStorage,
 ): void {
-  writePartsList(
+  writeStoredJson(
+    PARTS_LIST_STORAGE_KEY,
     readPartsList(storage).map((part) =>
       part.slug === slug ? { ...part, with_addon: on } : part,
     ),
@@ -104,6 +111,7 @@ export function setPartAddon(
 
 export function clearPartsList(storage?: ListStorage): void {
   forgetStored(PARTS_LIST_STORAGE_KEY, storage);
+  announceChange();
 }
 
 export type ListCar = { car: string; vin?: string };
@@ -217,7 +225,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
         );
         if (!form || !block || !list || !template) return;
 
-        const itemFor = (part: ListedPart, rerender: () => void) => {
+        const itemFor = (part: ListedPart) => {
           const item = template.content.cloneNode(true) as DocumentFragment;
           const link =
             item.querySelector<HTMLAnchorElement>('[data-part-link]');
@@ -233,10 +241,9 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             'aria-label',
             `${remove.getAttribute('aria-label') ?? ''}: ${partLine(part)}`,
           );
-          remove?.addEventListener('click', () => {
-            removeFromPartsList(part.slug);
-            rerender();
-          });
+          remove?.addEventListener('click', () =>
+            removeFromPartsList(part.slug),
+          );
           const addon = item.querySelector<HTMLElement>('[data-part-addon]');
           const toggle = addon?.querySelector<HTMLInputElement>(
             '[data-part-addon-toggle]',
@@ -277,9 +284,11 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             carName.textContent = shared?.car ?? '';
             carLine.hidden = !shared;
           }
-          list.replaceChildren(...parts.map((part) => itemFor(part, render)));
+          list.replaceChildren(...parts.map(itemFor));
         };
         render();
+        window.addEventListener(PARTS_LIST_CHANGED_EVENT, render);
+        window.addEventListener('storage', render);
         const listVin = listCar(readPartsList())?.vin;
         if (vinInput && listVin) vinInput.value = listVin;
 
@@ -292,7 +301,6 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
               vinInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
             forgetListCar();
-            render();
           });
 
         form.addEventListener('formdata', (event) => {

@@ -99,6 +99,7 @@ export const pagesContentSchema = z
         formHeading: z.string(),
         vinLabel: z.string(),
         vinPlaceholder: z.string(),
+        vinNote: z.string(),
         commentLabel: z.string(),
         commentPlaceholder: z.string(),
         commentNote: z.string(),

@@ -695,6 +695,80 @@ medusaIntegrationTestRunner({
         });
         expect(await page('W1140')).toBeDefined();
       });
+
+      it('imports a supplier kept off Publish only on its own button', async () => {
+        const keepOffPublish = (import_on_publish: boolean) =>
+          api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { import_on_publish },
+            adminHeaders,
+          );
+        intercars.articles.push({
+          article_id: 'IC-15',
+          brand: 'MANN-FILTER',
+          number: 'W 712/75',
+          name: 'Фильтр W712/75',
+          category: 'IC-OIL',
+        });
+
+        const switched = await keepOffPublish(false);
+        const onPublish = await runImport();
+        const pageAfterPublish = await page('W71275');
+        const ownButton = await api.post(
+          `/admin/suppliers/${intercarsId}/import`,
+          {},
+          adminHeaders,
+        );
+        await keepOffPublish(true);
+
+        expect(switched.data.supplier.import_on_publish).toBe(false);
+        expect(
+          onPublish.data.imports.map(
+            ({ supplier }: { supplier: string }) => supplier,
+          ),
+        ).toEqual(['Warehouse']);
+        expect(pageAfterPublish).toBeUndefined();
+        expect(ownButton.data.import).toMatchObject({
+          supplier: 'Intercars',
+          created: 1,
+        });
+        expect(await page('W71275')).toBeDefined();
+      });
+
+      it('refuses the import button for a supplier without an adapter', async () => {
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const orphan = await suppliers.createSuppliers({
+          name: 'Orphan',
+          markup_percentage: 0,
+        });
+
+        const response = await api
+          .post(`/admin/suppliers/${orphan.id}/import`, {}, adminHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(404);
+        expect(response.data.message).toBe('No adapter reads Orphan');
+      });
+
+      it('refuses the import button for a supplier whose import is off', async () => {
+        await api.post(
+          `/admin/suppliers/${intercarsId}`,
+          { import_enabled: false },
+          adminHeaders,
+        );
+
+        const response = await api
+          .post(`/admin/suppliers/${intercarsId}/import`, {}, adminHeaders)
+          .catch((error) => error.response);
+        await api.post(
+          `/admin/suppliers/${intercarsId}`,
+          { import_enabled: true },
+          adminHeaders,
+        );
+
+        expect(response.status).toBe(400);
+      });
     });
   },
 });

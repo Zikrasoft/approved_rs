@@ -11,6 +11,7 @@ const Supplier = model
     markup_percentage: model.float(),
     released_kinds: model.array().default([]),
     import_enabled: model.boolean().default(true),
+    import_on_publish: model.boolean().default(true),
     created_by: model.text().nullable(),
     updated_by: model.text().nullable(),
     offers: model.hasMany(() => SupplierOffer, { mappedBy: 'supplier' }),
