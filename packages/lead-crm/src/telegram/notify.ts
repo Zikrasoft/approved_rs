@@ -1,5 +1,5 @@
 import type { LedgerOperation } from '../ledgerStore.ts';
-import { isClosed, type StoredLead } from '../schema.ts';
+import type { StoredLead } from '../schema.ts';
 import type { Digest, OpenDigest, PostedDigest } from '../store.ts';
 import {
   isMessageGone,
@@ -67,22 +67,7 @@ export function createNotifier({
           reply_markup: formatter.deepLinkKeyboard(lead),
         },
       );
-      const messageId = sent.message_id;
-      const chatId = sent.chat.id;
-      if (isClosed(lead)) return { chatId, messageId };
-
-      try {
-        await client.api.pinChatMessage(chatId, messageId, {
-          disable_notification: true,
-        });
-      } catch (err) {
-        console.error('[telegram] pinChatMessage failed', {
-          error: err,
-          messageId,
-        });
-      }
-
-      return { chatId, messageId };
+      return { chatId: sent.chat.id, messageId: sent.message_id };
     },
 
     async openLeadTopic(lead: StoredLead): Promise<number> {

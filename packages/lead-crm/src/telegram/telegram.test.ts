@@ -180,25 +180,12 @@ describe('sendLeadNotification', () => {
   beforeEach(() => mockFetchOk());
   afterEach(() => mockFetch.mockReset());
 
-  it('makes exactly 2 fetch calls (send + pin)', async () => {
-    await sendLeadNotification(makeLead());
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('pins the sent message using the chat/message id from the send response', async () => {
-    await sendLeadNotification(makeLead());
-    const pinBody = JSON.parse(mockFetch.mock.calls[1][1].body);
-    expect(mockFetch.mock.calls[1][0]).toContain('/pinChatMessage');
-    expect(pinBody.chat_id).toBe(-1009876543210);
-    expect(pinBody.message_id).toBe(999);
-  });
-
-  it('still returns the ids if pinning fails', async () => {
-    api.fail('pinChatMessage', 'Bad Request');
+  it('posts the card without pinning it', async () => {
     await expect(sendLeadNotification(makeLead())).resolves.toEqual({
       chatId: -1009876543210,
       messageId: 999,
     });
+    expect(api.callsTo('pinChatMessage')).toHaveLength(0);
   });
 
   it('sends only a minimal teaser — id, name, service, status — no contact/comment/PII', async () => {
@@ -346,14 +333,6 @@ describe('sendLeadNotification', () => {
         .flat()
         .map((b: { callback_data?: string }) => b.callback_data);
       expect(data).toEqual([undefined, 'won:42', 'lost:42']);
-    },
-  );
-
-  it.each(['won', 'lost'] as const)(
-    'posts a %s lead unpinned',
-    async (status) => {
-      await sendLeadNotification(makeLead({ status }));
-      expect(api.callsTo('pinChatMessage')).toHaveLength(0);
     },
   );
 
