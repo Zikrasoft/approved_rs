@@ -4,6 +4,8 @@ export type SitemapEntry = { loc: string; imageTitles: string[] };
 
 const CHUNK_BYTES = 64 * 1024;
 
+const detachedFromChunk = (text: string) => Buffer.from(text).toString();
+
 export const sitemapLinks = (
   xml: Buffer,
   keep: (entry: SitemapEntry) => boolean = () => true,
@@ -28,9 +30,11 @@ export const sitemapLinks = (
         const parent = open[open.length - 1];
         const value = text.trim();
         text = '';
-        if (name === 'loc' && parent === 'url') entry.loc = value;
+        if (name === 'loc' && parent === 'url') {
+          entry.loc = detachedFromChunk(value);
+        }
         if (name === 'loc' && parent === 'sitemap' && value) {
-          sitemaps.push(value);
+          sitemaps.push(detachedFromChunk(value));
         }
         if (name === 'image:title') entry.imageTitles.push(value);
         if (name === 'url' && entry.loc && keep(entry)) pages.push(entry.loc);
