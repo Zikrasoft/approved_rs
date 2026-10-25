@@ -98,6 +98,12 @@ describe('MANN-FILTER', () => {
     expect(article.applicability).toHaveLength(308);
   });
 
+  it('reads a spec the site writes with a doubled colon', () => {
+    expect(mannFilter.parse(page('0101410065.html.gz'))?.specs).toEqual({
+      'Spare part description': 'HEXAGON SCREW M10_65.0_',
+    });
+  });
+
   it('reads nothing from a page that is not a product', () => {
     expect(mannFilter.parse('<html><body><main></main></body></html>')).toBe(
       null,
