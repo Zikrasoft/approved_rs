@@ -390,3 +390,21 @@ export const AdminCreateRequirement = z
     { message: 'Exactly one of engine_id, chassis_id, vehicle_id' },
   );
 export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
+
+export const AdminConfirmWorkshopQuote = z.strictObject({
+  vin: z.string().nullable(),
+  lines: z
+    .array(
+      z.strictObject({
+        name,
+        number: partNumber,
+        quantity,
+        brand: name,
+        category_id: z.string().min(1).nullable(),
+      }),
+    )
+    .min(1),
+});
+export type AdminConfirmWorkshopQuoteType = z.infer<
+  typeof AdminConfirmWorkshopQuote
+>;

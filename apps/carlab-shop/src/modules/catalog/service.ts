@@ -40,8 +40,9 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
+import { slugOf } from '../../lib/slug';
 import { spellingKey } from '../../lib/suppliers/spelling';
-import { MANUAL_SOURCE } from './models/provenance';
+import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
 
 type Provenance = {
   source?: string;
@@ -165,6 +166,26 @@ export type NewPart = Provenance &
     identifiers: NewPartIdentifier[];
   };
 
+export type WorkshopQuoteLine = {
+  name: string;
+  number: string;
+  quantity: number;
+  brand: string;
+  category_id: string | null;
+};
+
+export type WorkshopQuoteResult = {
+  lines: { part_id: string; reused: boolean }[];
+  fitments: number;
+};
+
+type QuoteBrand = {
+  id: string;
+  name: string;
+  slug: string;
+  spellings: { value_key: string }[];
+};
+
 type SourcedRow = { id: string; source: string };
 
 type SourcedRows = {
@@ -253,6 +274,108 @@ class CatalogModuleService extends CatalogModuleBase {
       sharedContext,
     );
     return created.id;
+  }
+
+  @InjectTransactionManager()
+  async createFromWorkshopQuote(
+    lines: WorkshopQuoteLine[],
+    vehicleId: string | null,
+    provenance: Provenance,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<WorkshopQuoteResult> {
+    const brands = await this.listBrands(
+      {},
+      { relations: ['spellings'], take: null },
+      sharedContext,
+    );
+    const result: WorkshopQuoteResult = { lines: [], fitments: 0 };
+    for (const line of lines) {
+      const brandId = await this.quoteBrand(
+        line.brand,
+        brands,
+        provenance,
+        sharedContext,
+      );
+      const [existing] = await this.listPartIdentifiers(
+        {
+          brand_id: brandId,
+          normalized_value: normalizePartNumber(line.number),
+        },
+        { select: ['part_id'], take: 1 },
+        sharedContext,
+      );
+      const partId =
+        existing?.part_id ??
+        (await this.createPartWithIdentifiers(
+          {
+            name: line.name,
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: brandId,
+                value: line.number,
+              },
+            ],
+            category_id: await this.quoteCategory(
+              line.category_id,
+              sharedContext,
+            ),
+            ...provenance,
+            source: WORKSHOP_QUOTE_SOURCE,
+          },
+          sharedContext,
+        ));
+      if (vehicleId) {
+        const { created } = await this.attachPartToVehicles(
+          partId,
+          { vehicle_id: vehicleId },
+          { quantity: line.quantity, ...provenance },
+          sharedContext,
+        );
+        result.fitments += created.length;
+      }
+      result.lines.push({ part_id: partId, reused: Boolean(existing) });
+    }
+    return result;
+  }
+
+  private async quoteBrand(
+    name: string,
+    brands: QuoteBrand[],
+    provenance: Provenance,
+    sharedContext: Context,
+  ): Promise<string> {
+    const key = spellingKey(name);
+    const slug = slugOf(name);
+    const known = brands.find(
+      (brand) =>
+        spellingKey(brand.name) === key ||
+        brand.slug === slug ||
+        brand.spellings.some(({ value_key }) => value_key === key),
+    );
+    if (known) return known.id;
+    if (!slug) {
+      throw adminError(
+        MedusaError.Types.INVALID_DATA,
+        'INVALID_BRAND',
+        `Brand ${name} has no Latin letters for its slug`,
+      );
+    }
+    const created = await this.createBrands(
+      { name: name.trim(), slug, ...provenance },
+      sharedContext,
+    );
+    brands.push({ ...created, spellings: [] });
+    return created.id;
+  }
+
+  private async quoteCategory(
+    categoryId: string | null,
+    sharedContext: Context,
+  ): Promise<string | null> {
+    if (!categoryId) return null;
+    const fields = await this.categoryDefinition(categoryId, sharedContext);
+    return fields.some(({ required }) => required) ? null : categoryId;
   }
 
   override createBrandSpellings = ((

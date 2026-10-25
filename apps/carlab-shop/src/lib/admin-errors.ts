@@ -31,6 +31,7 @@ export const ADMIN_ERROR_CODES = [
   'QUOTE_TOO_LARGE',
   'QUOTE_UNREADABLE',
   'AI_NOT_CONFIGURED',
+  'INVALID_BRAND',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];
