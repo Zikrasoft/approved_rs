@@ -51,6 +51,7 @@ describe('VARTA', () => {
         Napon: '12 V',
         'Dimenzije (D/Š/V)': '278/175/190',
         'Veličina kućišta': 'H6R/L3R',
+        Tehnologija: 'SLI',
       },
       images: [
         'https://storage.data-varta-automotive.com/resources/images/v20200101/batteries/574013068k262.png',
@@ -76,7 +77,16 @@ describe('VARTA', () => {
       },
     });
     expect(article).not.toHaveProperty('description');
+    expect(article.specs).not.toHaveProperty('Tehnologija');
     expect(article.images).toHaveLength(4);
+  });
+
+  it('reads the technology off the product line name', () => {
+    const html = page('574013068k262.html.gz').replaceAll(
+      'DYNAMIC SLI 574013068',
+      'SILVER DYNAMIC AGM 574013068',
+    );
+    expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
   });
 
   it('reads nothing from a page that is not a product', () => {
