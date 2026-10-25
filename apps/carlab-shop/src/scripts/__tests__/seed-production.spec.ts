@@ -105,6 +105,7 @@ medusaIntegrationTestRunner({
       it('registers each crawled site once as a Supplier imported only on its own button', async () => {
         const registered = await suppliers.listSuppliers();
         expect(registered.map(({ name }) => name).sort()).toEqual([
+          'FILTRON',
           'MANN-FILTER',
           'VARTA',
           'bilstein group',

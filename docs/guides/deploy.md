@@ -693,7 +693,9 @@ validates everything at startup. The non-obvious parts:
   is the crawled VARTA battery catalogue (the Serbian product pages), run the
   same way. `bilstein` is the crawled bilstein group partsfinder (febi, SWAG,
   Blue Print), Serbian pages of the filter, brake, suspension and service part
-  families only, one request per 5 s. `demo` never runs in production.
+  families only, one request per 5 s. `filtron` is the crawled FILTRON
+  catalogue (the Serbian product pages, same platform as MANN-FILTER), its pages
+  rendered in Chromium. `demo` never runs in production.
 - `CRAWLER_FROM` is the mailbox the crawler sends in its `From` header, so a site
   owner can reach whoever runs it. Empty, no `From` is sent.
 - `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
