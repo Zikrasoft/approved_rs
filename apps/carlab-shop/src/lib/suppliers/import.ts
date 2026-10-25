@@ -285,14 +285,16 @@ export async function importSupplierCatalogues(
   scope: MedusaContainer,
 ): Promise<ImportSummary[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
-  const disabled = new Set(
-    (await suppliers.listSuppliers({ import_enabled: false })).map(
-      ({ name }) => name,
-    ),
+  const skipped = new Set(
+    (
+      await suppliers.listSuppliers({
+        $or: [{ import_enabled: false }, { import_on_publish: false }],
+      })
+    ).map(({ name }) => name),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {
-    if (disabled.has(adapter.name)) {
+    if (skipped.has(adapter.name)) {
       continue;
     }
     summaries.push(await importSupplier(scope, adapter));
