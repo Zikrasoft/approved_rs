@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { beforeEach, describe, expect, it } from 'vitest';
+import { defineModalDialog } from '@podbor/site-kit/browser';
 import {
   addToPartsList,
+  definePartsInquiry,
+  definePartsListAdd,
   clearPartsList,
   inquiryComment,
-  PARTS_LIST_STORAGE_KEY,
   forgetListCar,
   listCar,
   listedPartSchema,
@@ -12,6 +15,7 @@ import {
   removeFromPartsList,
   setPartAddon,
 } from './partsList';
+import { PARTS_LIST_STORAGE_KEY } from './cartBadge';
 
 const memoryStorage = (initial: Record<string, string> = {}) => {
   const items = new Map(Object.entries(initial));
@@ -291,5 +295,95 @@ describe('inquiryComment', () => {
       true,
     );
     expect(comment.endsWith('x…')).toBe(true);
+  });
+});
+
+describe('Подобрать on a part page', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    document.body.replaceChildren();
+    HTMLDialogElement.prototype.showModal ??= function (
+      this: HTMLDialogElement,
+    ) {
+      this.open = true;
+    };
+    HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
+      this.open = false;
+    };
+    definePartsListAdd();
+    definePartsInquiry();
+    defineModalDialog('parts-inquiry-modal');
+  });
+
+  const partPage = () => {
+    document.body.innerHTML = `
+      <parts-list-add
+        data-slug="${mannOil.slug}"
+        data-brand="${mannOil.brand}"
+        data-number="${mannOil.number}"
+        data-name="${mannOil.name}"
+      >
+        <a href="/ru/parts/#parts-inquiry" data-open-parts-inquiry>Подобрать</a>
+      </parts-list-add>
+      <parts-inquiry-modal trigger="[data-open-parts-inquiry]">
+        <dialog>
+          <button type="button" data-modal-close>×</button>
+          <parts-inquiry>
+            <div data-parts-list-block hidden>
+              <ul data-parts-list></ul>
+              <template data-parts-item><li><a data-part-link></a></li></template>
+            </div>
+            <form>
+              <input name="contact" value="+381601234567" />
+              <input name="vin" />
+              <textarea name="comment"></textarea>
+            </form>
+          </parts-inquiry>
+        </dialog>
+      </parts-inquiry-modal>
+    `;
+    return {
+      button: document.querySelector<HTMLElement>('[data-open-parts-inquiry]')!,
+      dialog: document.querySelector('dialog')!,
+      form: document.querySelector('form')!,
+    };
+  };
+
+  it('adds the part and opens the inquiry form with it listed', () => {
+    const { button, dialog } = partPage();
+
+    button.click();
+
+    expect(readPartsList()).toEqual([mannOil]);
+    expect(dialog.open).toBe(true);
+    expect(
+      [...dialog.querySelectorAll('[data-part-link]')].map(
+        (link) => link.textContent,
+      ),
+    ).toEqual(['Mann-Filter HU 816 x, Масляный фильтр']);
+  });
+
+  it('lets the visitor close the form and keep the part', () => {
+    const { button, dialog } = partPage();
+
+    button.click();
+    dialog.querySelector<HTMLElement>('[data-modal-close]')!.click();
+
+    expect(dialog.open).toBe(false);
+    expect(readPartsList()).toEqual([mannOil]);
+  });
+
+  it('sends the listed parts with only a contact and no VIN', () => {
+    const { button, form } = partPage();
+    button.click();
+
+    const formData = new FormData(form);
+    form.dispatchEvent(Object.assign(new Event('formdata'), { formData }));
+
+    expect(form.checkValidity()).toBe(true);
+    expect(formData.get('vin')).toBe('');
+    expect(formData.get('comment')).toBe(
+      'Mann-Filter HU 816 x, Масляный фильтр',
+    );
   });
 });

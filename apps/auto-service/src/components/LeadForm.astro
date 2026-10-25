@@ -17,7 +17,7 @@ interface Props {
   commentLabel?: string;
   commentPlaceholder?: string;
   commentNote?: string;
-  vin?: { label: string; placeholder: string };
+  vin?: { label: string; placeholder: string; note?: string };
   defaultChannel?: 'phone' | 'whatsapp' | 'viber' | 'telegram';
   action?: string;
   submitLabel?: string;
@@ -55,7 +55,7 @@ const uid = crypto.randomUUID().slice(0, 8);
 
     <ContactChannelField uid={uid} defaultChannel={defaultChannel} />
 
-    {vin && <VinField label={vin.label} placeholder={vin.placeholder} />}
+    {vin && <VinField {...vin} />}
 
     <label class="block">
       <span class="field-label">{site.form.nameLabel}</span>

@@ -101,11 +101,12 @@ const priced = page.offers.length > 0;
         <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
       )}
       <p class="text-sm leading-relaxed text-ink-2">
-        {closed ? copy.inquiryBody : copy.priceOnRequestBody}
+        {copy.priceOnRequestBody}
       </p>
       <parts-list-add class="mt-1 block" {...part}>
         <a
           href={PathBuilder.partsInquiry(locale)}
+          data-open-parts-inquiry
           class:list={[
             'btn w-full sm:w-auto',
             demoted ? 'btn-secondary' : 'btn-primary',

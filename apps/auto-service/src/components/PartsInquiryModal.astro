@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+import PartsInquiry from './PartsInquiry.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).pages.partsInquiry;
+const site = content(locale).site;
+---
+
+<carlab-modal trigger="[data-open-parts-inquiry]">
+  <dialog
+    aria-label={copy.formHeading}
+    class="m-0 h-dvh max-h-none w-full max-w-none rounded-none border-0 bg-card p-0 text-ink backdrop:bg-ink/50 sm:m-auto sm:h-fit sm:max-h-[calc(100dvh-4rem)] sm:w-[min(34rem,calc(100vw-2rem))] sm:rounded-block sm:border sm:border-line"
+  >
+    <div class="flex h-full flex-col sm:h-auto sm:max-h-[calc(100dvh-4rem)]">
+      <div class="flex shrink-0 items-start justify-between gap-6 p-6 pb-4">
+        <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+        <button
+          type="button"
+          data-modal-close
+          aria-label={site.common.closeLabel}
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+        >
+          <Icon name="close" />
+        </button>
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+        <PartsInquiry />
+      </div>
+    </div>
+  </dialog>
+</carlab-modal>
+
+<script>
+  import { defineModalDialog } from '@podbor/site-kit/browser';
+
+  defineModalDialog('carlab-modal');
+</script>
