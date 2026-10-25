@@ -14,7 +14,16 @@ const site = content(locale).site;
 const pathname = Astro.url.pathname;
 
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
-const shopCart = content(locale).shopCart;
+const open = shopOpen();
+const basket = open
+  ? {
+      href: PathBuilder.partsCart(locale),
+      label: content(locale).shopCart.cartLink,
+    }
+  : {
+      href: PathBuilder.partsInquiry(locale),
+      label: content(locale).pages.partsInquiry.listHeading,
+    };
 
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
@@ -104,14 +113,14 @@ const links = [
         <cart-badge
           class="block"
           {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
-          {...shopOpen() ? {} : { hidden: '', 'data-preview-only': '' }}
+          data-parts-list={open ? undefined : ''}
         >
           <a
-            href={PathBuilder.partsCart(locale)}
+            href={basket.href}
             class="relative flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
           >
             <Icon name="cart" size={20} />
-            <span class="sr-only">{shopCart.cartLink}</span>
+            <span class="sr-only">{basket.label}</span>
             <span
               class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1 text-[0.6875rem] font-semibold text-white"
               data-count
