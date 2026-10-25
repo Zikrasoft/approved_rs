@@ -87,6 +87,10 @@ describe('VARTA', () => {
     expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
   });
 
+  it("reads nothing from VARTA's placeholder product", () => {
+    expect(varta.parse(page('123456789z992.html.gz'))).toBe(null);
+  });
+
   it('reads nothing from a page that is not a product', () => {
     expect(varta.parse('<html><body><main></main></body></html>')).toBe(null);
   });
