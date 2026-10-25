@@ -10,6 +10,7 @@ import {
   PlaywrightCrawler,
   type PlaywrightCrawlerOptions,
 } from '@crawlee/playwright';
+import type { Page } from 'playwright';
 
 export type FetchMode = 'http' | 'browser';
 
@@ -27,6 +28,7 @@ export type FetchRequest = {
   url: string;
   headers?: Record<string, string>;
   waitFor?: string;
+  interact?: (page: Page) => Promise<void>;
   beforeAttempt: () => Promise<void>;
 };
 
@@ -168,13 +170,15 @@ export const crawleeFetcher = (mode: FetchMode): Fetcher => {
             ],
             postNavigationHooks: [afterAttempt],
             requestHandler: async ({ request, response, page }) => {
-              const waitFor = pending.get(request.uniqueKey)?.request.waitFor;
+              const { waitFor, interact } =
+                pending.get(request.uniqueKey)?.request ?? {};
               if (waitFor) {
                 await page.waitForSelector(waitFor, {
                   state: 'attached',
                   timeout: WAIT_FOR_MS,
                 });
               }
+              await interact?.(page);
               answer(
                 request.uniqueKey,
                 response?.status() ?? 200,

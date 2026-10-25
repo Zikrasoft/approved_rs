@@ -34,7 +34,13 @@ describe('bilstein group partsfinder', () => {
     ).toBe(false);
   });
 
-  it('reads a febi brake disc with its criterion, OE numbers and images', () => {
+  it('renders article pages in the browser and opens their vehicle list first', () => {
+    expect(bilstein.fetchMode).toBe('browser');
+    expect(bilstein.waitFor).toBe('#detail-page-applications');
+    expect(bilstein.interact).toBeDefined();
+  });
+
+  it('reads a febi brake disc with its criteria, OE numbers, images and vehicles', () => {
     const article = supplierArticleSchema.parse(
       bilstein.parse(page('febi-27699.html.gz')),
     );
@@ -46,7 +52,19 @@ describe('bilstein group partsfinder', () => {
       category: 'kočioni disk',
       description:
         'Kombinacija performansi, udobnosti vožnje i izdržljivosti; Udobnost: Bez škrgetanja kočnica, bez vibracija; Bezbednost: Optimalna efikasnost kočenja, kratke udaljenosti kočenja; Niskobučan: najsavremeniji metodi smanjenja buke',
-      specs: { 'Strana ugradnje': 'zadnja osovina' },
+      specs: {
+        'Strana ugradnje': 'zadnja osovina',
+        'Broj rupa felge': '6',
+        'Broj rupa za fiksiranje': '1',
+        'Debljina diska kočnice': '16,3 mm',
+        'Minimalna debljina disk kočnice': '14 mm',
+        površina: 'prevuceno slojem',
+        'Prečnik otvora': '130 mm',
+        'Promer centriranja': '85 mm',
+        'Spoljni presek': '298 mm',
+        'visina ili debljina': '71,4 mm',
+        'Vrsta kočionog diska': 'puno',
+      },
       cross_references: [
         { brand: 'Dodge', number: '68013764AA' },
         { brand: 'Mercedes-Benz', number: '906 423 00 12' },
@@ -60,7 +78,12 @@ describe('bilstein group partsfinder', () => {
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/1/27699_2.jpg',
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/1/27699_3.jpg',
       ],
+      applicability: expect.any(Array),
     });
+    expect(article.applicability).toHaveLength(204);
+    expect(article.applicability?.[0]).toBe(
+      'Dodge Sprinter I 2002 - 2006 2.7 CDI V6 24V - 113 kW / 154 hp; EX9; 2688 ccm; Dizel; Autobus, platforma/ram šasije, kutijasto vozilo',
+    );
   });
 
   it('reads a SWAG control arm with the contents of its set', () => {
@@ -75,6 +98,7 @@ describe('bilstein group partsfinder', () => {
       category: 'rame sa ležištem, zglobom, držačem i sigurnosnom navrtkom',
       specs: {
         'Strana ugradnje': 'prednja osovina dole, levo',
+        materijal: 'Celicni liv',
         'Sadržaj seta':
           '1 x 20 73 0036 rame bez ležaja, sa zglobom i sigurnosnom navrtkom; 1 x 20 92 1463 nosač ramena sa držačem',
       },
@@ -85,10 +109,12 @@ describe('bilstein group partsfinder', () => {
       images: [
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/3/20%2092%201466_1.jpg',
       ],
+      applicability: expect.any(Array),
     });
+    expect(article.applicability).toHaveLength(54);
   });
 
-  it('reads a Blue Print oil filter that lists no criteria', () => {
+  it('reads a Blue Print oil filter with the limits of each vehicle it fits', () => {
     const article = supplierArticleSchema.parse(
       bilstein.parse(page('blueprint-ada102116.html.gz')),
     );
@@ -97,12 +123,22 @@ describe('bilstein group partsfinder', () => {
       brand: 'Blue Print',
       number: 'ADA102116',
       name: 'uljni filter sa zaptivnim prstenom',
-      specs: {},
+      specs: {
+        'izgled filtera': 'uložak filtera',
+        'Prečnik zaptivnog prstena': '77 mm',
+        'Spoljni presek': '72 mm',
+        'Unutrašnji prečnik': '25,5 mm',
+        Visina: '143 mm',
+      },
       images: [
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/2/ADA102116_1.jpg',
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/2/ADA102116_2.jpg',
       ],
     });
+    expect(article.applicability).toHaveLength(7);
+    expect(article.applicability?.[0]).toBe(
+      'Dodge Nitro 2006 - 2012 2.8 CRD 16V - 130 kW / 177 hp; ENR, ENS; 2777 ccm; Dizel; terensko vozilo, Van (putničko vozilo); pogodno za kod motora: ENS',
+    );
     expect(article.cross_references).toHaveLength(8);
     expect(article.cross_references?.[7]).toEqual({
       brand: 'Jeep',

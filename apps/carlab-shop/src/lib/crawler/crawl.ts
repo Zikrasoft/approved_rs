@@ -96,14 +96,14 @@ async function crawlWith(
     fetcher: Fetcher,
     url: string,
     headers: Record<string, string> = {},
-    waitFor?: string,
+    browser: Pick<CrawledSite, 'waitFor' | 'interact'> = {},
   ): Promise<Fetched> => {
     const hold = holdUntil - clock.now();
     if (hold > 0) await clock.sleep(hold);
     return fetcher.fetch({
       url,
       headers: { ...(from && { from }), ...headers },
-      waitFor,
+      ...browser,
       beforeAttempt: async () => {
         const wait = lastRequestAt + gapMs - clock.now();
         if (wait > 0) await clock.sleep(wait);
@@ -217,7 +217,7 @@ async function crawlWith(
         ...(page.etag && { 'if-none-match': page.etag }),
         ...(page.last_modified && { 'if-modified-since': page.last_modified }),
       },
-      site.waitFor,
+      { waitFor: site.waitFor, interact: site.interact },
     );
     if (fetched.kind === 'blocked') {
       blockedPages += 1;

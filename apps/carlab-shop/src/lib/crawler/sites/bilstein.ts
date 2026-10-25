@@ -1,4 +1,5 @@
 import { type CheerioAPI, load } from 'cheerio/slim';
+import type { Page } from 'playwright';
 import { z } from 'zod';
 
 import type { SupplierArticle } from '../../suppliers/adapter';
@@ -37,6 +38,8 @@ const words = (text: string) => text.replace(/\s+/gu, ' ').trim();
 const inFamily = (name: string) => FAMILY.test(words(name).toLowerCase());
 
 const ORIGIN = 'https://partsfinder.bilsteingroup.com';
+const APPLICATIONS = '#detail-page-applications';
+const APPLICATIONS_DATA = 'data-bilstein-applications';
 const ARTICLE_PAGE =
   /^https:\/\/partsfinder\.bilsteingroup\.com\/sr\/article\/(?:febi|SWAG|blueprint)\/[^/]+$/u;
 
@@ -53,8 +56,37 @@ const sitemapPages = (xml: string) => {
     .map((url) => $(url).children('loc').text().trim());
 };
 
-const bgImagesSchema = z.array(
-  z.object({ brandId: z.number(), imageNames: z.array(z.string().min(1)) }),
+const applicationsSchema = z.array(
+  z.object({
+    data: z.array(
+      z.object({
+        attributes: z.object({
+          makeTitle: z.string(),
+          modelTitle: z.string(),
+          variantTitle: z.string(),
+          engine: z.string().nullish(),
+          engineCapacity: z.string().nullish(),
+          csvFuelTypes: z.string().nullish(),
+          body: z.string().nullish(),
+        }),
+        relationships: z
+          .object({
+            limitations: z.object({
+              data: z.array(z.object({ id: z.string() })),
+            }),
+          })
+          .optional(),
+      }),
+    ),
+    included: z
+      .array(
+        z.object({
+          id: z.string(),
+          attributes: z.object({ criteria: z.string(), value: z.string() }),
+        }),
+      )
+      .optional(),
+  }),
 );
 
 const parsedJson = (text: string): unknown => {
@@ -71,17 +103,62 @@ const each = ($: CheerioAPI, selector: string) =>
     .map((node) => words($(node).text()))
     .filter(Boolean);
 
-const imagesOf = ($: CheerioAPI) => {
-  const images = bgImagesSchema.safeParse(
-    parsedJson($('article-detail-image').attr(':bg-images') ?? '[]'),
+const imagesOf = ($: CheerioAPI) => [
+  ...new Set(
+    $('img[src*="/pf-article-details/"]')
+      .toArray()
+      .map(
+        (image) =>
+          new URL(
+            ($(image).attr('src') ?? '').replace(
+              '/pf-article-details/',
+              '/pf-article-zoomed/',
+            ),
+          ).href,
+      ),
+  ),
+];
+
+const attributesOf = ($: CheerioAPI) =>
+  Object.fromEntries(
+    $('.attributes-table tbody tr')
+      .toArray()
+      .map((row) => [
+        words($(row).children('td.is-hidden-touch').text()),
+        words(
+          $(row).children('td:not(.is-hidden-touch)').children('span').text(),
+        ),
+      ])
+      .filter(([name, value]) => name && value),
   );
-  if (!images.success) return [];
-  return images.data.flatMap(({ brandId, imageNames }) =>
-    imageNames.map(
-      (name) =>
-        `https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/${brandId}/${encodeURIComponent(name)}`,
-    ),
+
+const applicabilityOf = ($: CheerioAPI) => {
+  const applications = applicationsSchema.safeParse(
+    parsedJson($(`script[${APPLICATIONS_DATA}]`).text() || '[]'),
   );
+  if (!applications.success) return [];
+  return applications.data.flatMap(({ data, included = [] }) => {
+    const limits = new Map(
+      included.map(({ id, attributes }) => [
+        id,
+        `${attributes.criteria}: ${attributes.value}`,
+      ]),
+    );
+    return data.map(({ attributes, relationships }) =>
+      [
+        `${attributes.makeTitle} ${attributes.modelTitle} ${attributes.variantTitle}`,
+        attributes.engine,
+        attributes.engineCapacity && `${attributes.engineCapacity} ccm`,
+        attributes.csvFuelTypes,
+        attributes.body,
+        ...(relationships?.limitations.data ?? []).map(({ id }) =>
+          limits.get(id),
+        ),
+      ]
+        .filter(Boolean)
+        .join('; '),
+    );
+  });
 };
 
 const crossReferencesOf = ($: CheerioAPI) =>
@@ -116,7 +193,7 @@ const criteriaOf = (meta: string, makes: string[]): Record<string, string> => {
 };
 
 const setContentsOf = ($: CheerioAPI) =>
-  $('.repKitSol-div-padding tbody tr')
+  $('.repKitSol-div-padding tbody tr:has(td)')
     .toArray()
     .map((row) => {
       const cells = $(row)
@@ -137,14 +214,20 @@ export const parseBilsteinArticle = (html: string): SupplierArticle | null => {
   const [brand, , name] = $('title').text().split(' | ').map(words);
   const app = $('#app');
   const number = words(app.attr('data-bg-number') ?? '');
-  const brandPath = $('[bg-brand-name]').first().attr('bg-brand-name');
+  const brandPath = new URL(
+    $('link[hreflang="sr"]').attr('href') ?? '',
+    ORIGIN,
+  ).pathname.split('/')[3];
   if (!brand || !name || !number || !brandPath || !inFamily(name)) return null;
   const crossReferences = crossReferencesOf($);
   const makes = [...new Set(crossReferences.map(({ brand }) => brand))];
-  const specs = criteriaOf(
-    words($('meta[name="description"]').attr('content') ?? ''),
-    makes,
-  );
+  const specs = {
+    ...criteriaOf(
+      words($('meta[name="description"]').attr('content') ?? ''),
+      makes,
+    ),
+    ...attributesOf($),
+  };
   const contents = setContentsOf($);
   if (contents) specs['Sadržaj seta'] = contents;
   const description = each($, '.desc-bullet-points li').join('; ');
@@ -158,7 +241,58 @@ export const parseBilsteinArticle = (html: string): SupplierArticle | null => {
     specs,
     cross_references: crossReferences,
     images: imagesOf($),
+    applicability: applicabilityOf($),
   };
+};
+
+const makesSchema = z.object({
+  data: z.array(z.object({ attributes: z.object({ title: z.string() }) })),
+});
+
+const answer = async (page: Page, path: string, act: () => Promise<void>) => {
+  const response = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === path,
+  );
+  await act();
+  return (await response).json() as Promise<unknown>;
+};
+
+const openApplications = async (page: Page) => {
+  await page.waitForLoadState('networkidle');
+  return answer(page, '/api/makes', () =>
+    page
+      .locator(`section:has(${APPLICATIONS}) > header`)
+      .dispatchEvent('click'),
+  );
+};
+
+export const collectApplications = async (page: Page) => {
+  const makes = makesSchema.parse(await openApplications(page)).data;
+  const section = page.locator(APPLICATIONS);
+  const applications: unknown[] = [];
+  for (const { attributes } of makes) {
+    if (!(await section.locator('.makes').count())) {
+      await section.locator('a.trigger').dispatchEvent('click');
+    }
+    applications.push(
+      await answer(page, '/api/applications', () =>
+        section
+          .locator('.makes')
+          .getByText(attributes.title, { exact: true })
+          .dispatchEvent('click'),
+      ),
+    );
+  }
+  await page.evaluate(
+    ([attribute, json]) => {
+      const script = document.createElement('script');
+      script.type = 'application/json';
+      script.setAttribute(attribute, '');
+      script.textContent = json;
+      document.body.append(script);
+    },
+    [APPLICATIONS_DATA, JSON.stringify(applications)],
+  );
 };
 
 export const bilstein: CrawledSite = {
@@ -167,6 +301,9 @@ export const bilstein: CrawledSite = {
   origin: ORIGIN,
   sitemaps: [`${ORIGIN}/sitemaps/sr/sitemap-index.xml`],
   floorMs: 5000,
+  fetchMode: 'browser',
+  waitFor: APPLICATIONS,
+  interact: collectApplications,
   isPage: (url) => ARTICLE_PAGE.test(url),
   sitemapPages,
   parse: parseBilsteinArticle,
