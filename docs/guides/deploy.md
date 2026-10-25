@@ -963,9 +963,9 @@ The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the notice of a Balance operation the other
 one recorded) — Telegram forbids a bot from starting a conversation.
 
-In the group the bot needs **admin rights to pin messages**: every new card is
-pinned and a closed one is unpinned; without the right both calls fail and are
-only logged.
+New cards are not pinned. A card pinned before that change is unpinned when its
+Lead closes, which needs the **pin messages** admin right; without it the call
+fails and is only logged.
 
 The group runs as a **forum** (group settings → Topics on): every Lead a
 visitor starts in a Capture bot gets its own Topic, which the CRM bot opens and
