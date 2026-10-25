@@ -27,6 +27,10 @@ export const ADMIN_ERROR_CODES = [
   'INVALID_IMAGE',
   'IMAGE_TOO_LARGE',
   'REQUIREMENT_CONFLICT',
+  'INVALID_QUOTE',
+  'QUOTE_TOO_LARGE',
+  'QUOTE_UNREADABLE',
+  'AI_NOT_CONFIGURED',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];

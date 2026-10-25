@@ -8,6 +8,7 @@ import Icon from '@/components/Icon.astro';
 import FitLine from '@/components/FitLine.astro';
 import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { localeFrom } from '@/i18n/config';
@@ -421,6 +422,8 @@ const thumbFor = (slug: string) => {
       )
     }
   </section>
+
+  <PartsInquiryModal />
 </Shell>
 
 <script>

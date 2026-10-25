@@ -10,7 +10,8 @@
     "supersession": "Supersession",
     "categories": "Categories",
     "partAttributes": "Part attributes",
-    "requirements": "Requirements"
+    "requirements": "Requirements",
+    "workshopQuotes": "Workshop quotes"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -142,9 +143,9 @@
     },
     "save": "Save",
     "import": "Import now",
-    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. A supplier with On publish switched off loads only from Import in its own row. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
-    "importNoAdapters": "No supplier has its import switched on",
+    "importNoAdapters": "No supplier loads on publish",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -186,7 +187,7 @@
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "Publishing and Import now will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
+        "body": "Publishing and the import buttons will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
         "confirm": "Switch off import",
         "done": "Import from {{supplier}} switched off. Its offers stay on the site until you take them off in the supplier's menu."
       },
@@ -205,7 +206,15 @@
       "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so publishing does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
       "done_one": "{{supplier}}: {{count}} offer taken off, import switched off. Site pages update after the next publish.",
       "done_other": "{{supplier}}: {{count}} offers taken off, import switched off. Site pages update after the next publish."
-    }
+    },
+    "importOnPublish": "On publish",
+    "importOnPublishSaved": {
+      "on": "{{supplier}} loads on every publish again.",
+      "off": "{{supplier}} no longer loads on publish, only from Import in its own row."
+    },
+    "importOne": "Import",
+    "importOneLabel": "Import {{supplier}}",
+    "importOffPublish": "Loaded only from their own button, not loaded now: {{suppliers}}."
   },
   "brands": {
     "heading": "Brands",
@@ -545,7 +554,11 @@
       "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections.",
       "INVALID_IMAGE": "This file cannot be used: upload a JPEG, PNG or WebP photo.",
       "IMAGE_TOO_LARGE": "The photo is over 10 MB. Make it smaller and upload it again.",
-      "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars."
+      "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars.",
+      "INVALID_QUOTE": "This file does not fit: upload the quote as a PDF.",
+      "QUOTE_TOO_LARGE": "The quote is over 10 MB. Shrink the file and upload it again.",
+      "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
+      "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -877,5 +890,37 @@
       "title_other": "{{count}} orders this week did not reach the CRM as leads:",
       "hint": "Until the lead exists, nobody is reminded to call the customer back. Open the order: the CarLab order block shows the contact and what went wrong."
     }
+  },
+  "workshopQuotes": {
+    "heading": "Workshop quotes",
+    "lead": "Upload a workshop quote (ponuda) as a PDF: AI reads the VIN, the car and the part lines, and proposes a brand and a category for each. This is a draft: nothing is created in the catalogue and the quote's prices are not read.",
+    "upload": "Upload a quote",
+    "uploadAnother": "Upload another quote",
+    "hint": "PDF up to 10 MB.",
+    "reading": "Reading the quote, this can take up to a minute.",
+    "wrongType": "“{{name}}” is not a PDF. Upload the quote as a PDF.",
+    "tooLarge": "“{{name}}” is over 10 MB. Shrink the file and upload it again.",
+    "draftHeading": "Draft from “{{name}}”",
+    "draftNote": "Check the car, the brands and the categories. Nothing has been created in the catalogue yet.",
+    "vin": "VIN",
+    "noVin": "Not found in the quote",
+    "vehicleText": "Car in the quote",
+    "noVehicleText": "Not given",
+    "vehicle": "Car in the catalogue",
+    "noVehicle": "Not found",
+    "noVehicleHint": "No catalogue car matches this VIN. The parts can still be created without fitments; to get fitments, add the car under Vehicles.",
+    "noLines": "No part lines were found in the quote.",
+    "uncertainSummary_one": "{{count}} line has an uncertain brand: check it before creating.",
+    "uncertainSummary_other": "{{count}} lines have an uncertain brand: check them before creating.",
+    "columns": {
+      "name": "Name",
+      "number": "Number",
+      "quantity": "Qty",
+      "brand": "Brand",
+      "category": "Category"
+    },
+    "noBrand": "Unknown",
+    "checkBrand": "Check the brand",
+    "noCategory": "No category"
   }
 }
