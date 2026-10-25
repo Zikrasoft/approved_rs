@@ -84,7 +84,7 @@ services:
     image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-carlab-shop}:${MEDUSA_TAG:?}
     restart: unless-stopped
     logging: *logging
-    mem_limit: 240m
+    mem_limit: 512m
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     networks: [data, edge]

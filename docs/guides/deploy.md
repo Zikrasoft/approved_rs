@@ -577,13 +577,20 @@ workflow engine. A second Medusa instance would need Redis first.
 
 The `crawler` service runs the same image as a plain Node process
 (`node src/lib/crawler/worker.js`), not a second Medusa. It waits for a crawl
-started on the admin's Suppliers screen, reads the site's sitemap, and fetches one
-page at a time per site, at least 2 seconds apart (more if robots.txt asks), into
-Postgres (`crawl_run`, `crawl_page`, gzipped HTML). It pauses on a 403, a challenge
-page, an unreachable robots.txt or repeated server errors, and the admin shows the
-reason; pressing the button again resumes. A restart loses nothing: it picks up the
-queue where it stopped. It sits on `edge` as well as `data` because it needs the
-internet.
+started on the admin's Suppliers screen (a number next to the button makes it a
+test run that stops after that many stored pages), reads the site's sitemap, and
+fetches one page at a time per site, at least 2 seconds apart (more if robots.txt
+asks, and Retry-After is waited out), into Postgres (`crawl_run`, `crawl_page`,
+gzipped HTML). Requests go through Crawlee with browser-like headers and rotating
+sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) loads
+its pages in headless Chromium (`chromium-headless-shell` from Alpine, found
+through `CRAWLEE_DEFAULT_BROWSER_PATH` in the image), while robots.txt and sitemaps
+stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
+failed with its reason in the admin; five such pages in a row pause the crawl, as do
+an unreachable robots.txt or sitemap and five server errors in a row. Pressing the
+button again resumes. Postgres is the queue, Crawlee keeps nothing on disk, so the
+service has no volume and a restart picks up where it stopped. It sits on `edge` as
+well as `data` because it needs the internet.
 
 ### The server
 
@@ -614,8 +621,11 @@ internet.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, crawler 240m, caddy 128m, under 3.2 GB together (checked by the
-  compose test).
+  postgres 512m, crawler 512m, caddy 128m, under 3.5 GB together (checked by the
+  compose test). Measured in the image on a 1.4 MB page: the crawler holds about
+  180 MB on HTTP sites and 310 to 370 MB while Chromium renders a browser site; at
+  320m it stalled. Watch `docker stats` during the first FILTRON crawl. Chromium
+  adds about 650 MB to the image (1.39 GB in all).
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.

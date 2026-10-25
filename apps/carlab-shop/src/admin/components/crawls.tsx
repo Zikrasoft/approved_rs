@@ -1,4 +1,11 @@
-import { Button, Container, StatusBadge, Text, toast } from '@medusajs/ui';
+import {
+  Button,
+  Container,
+  Input,
+  StatusBadge,
+  Text,
+  toast,
+} from '@medusajs/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -16,8 +23,7 @@ const crawlSchema = z.object({
     .enum([
       'robots_unavailable',
       'sitemap_unavailable',
-      'forbidden',
-      'challenge',
+      'blocked',
       'server_errors',
     ])
     .nullable(),
@@ -29,6 +35,10 @@ const crawlSchema = z.object({
     failed: z.number(),
     gone: z.number(),
   }),
+  failures: z.record(
+    z.enum(['blocked', 'robots', 'network', 'server', 'http']),
+    z.number(),
+  ),
 });
 
 type Crawl = z.infer<typeof crawlSchema>;
@@ -56,10 +66,11 @@ const CrawlRow = ({
   starting,
 }: {
   crawl: Crawl;
-  onStart: () => void;
+  onStart: (limit: number | null) => void;
   starting: boolean;
 }) => {
   const { t, i18n } = useTranslation('carlabAdmin');
+  const [limit, setLimit] = useState('');
   const writing = useWriting();
   const number = (value: number) => value.toLocaleString(i18n.language);
   const date = (iso: string) => new Date(iso).toLocaleString(i18n.language);
@@ -78,16 +89,29 @@ const CrawlRow = ({
             {t(`crawls.status.${crawl.status}`)}
           </StatusBadge>
         </div>
-        <Button
-          size="small"
-          variant="secondary"
-          isLoading={starting}
-          disabled={crawl.status === 'running' || writing}
-          aria-label={t('crawls.startLabel', { supplier: crawl.supplier })}
-          onClick={onStart}
-        >
-          {t(`crawls.${ACTION[crawl.status]}`)}
-        </Button>
+        <div className="flex items-center gap-x-2">
+          <Input
+            type="number"
+            size="small"
+            className="w-28"
+            min={1}
+            step={1}
+            placeholder={t('crawls.limitPlaceholder')}
+            aria-label={t('crawls.limitLabel', { supplier: crawl.supplier })}
+            value={limit}
+            onChange={(event) => setLimit(event.target.value)}
+          />
+          <Button
+            size="small"
+            variant="secondary"
+            isLoading={starting}
+            disabled={crawl.status === 'running' || writing}
+            aria-label={t('crawls.startLabel', { supplier: crawl.supplier })}
+            onClick={() => onStart(limit ? Number(limit) : null)}
+          >
+            {t(`crawls.${ACTION[crawl.status]}`)}
+          </Button>
+        </div>
       </div>
       {total > 0 && (
         <div className="flex flex-col gap-y-2">
@@ -117,7 +141,14 @@ const CrawlRow = ({
             </Text>
             {failed > 0 && (
               <Text size="small">
-                {t('crawls.failed', { value: number(failed) })}
+                {t('crawls.failed', { value: number(failed) })} (
+                {Object.entries(crawl.failures)
+                  .filter(([, value]) => value > 0)
+                  .map(([reason, value]) =>
+                    t(`crawls.failures.${reason}`, { value: number(value) }),
+                  )
+                  .join(', ')}
+                )
               </Text>
             )}
             {gone > 0 && (
@@ -170,12 +201,12 @@ export const Crawls = () => {
     return () => clearInterval(timer);
   }, [running]);
 
-  const start = async (crawl: Crawl) => {
+  const start = async (crawl: Crawl, limit: number | null) => {
     setStartingKey(crawl.key);
     const started = await adminFetch(
       `/admin/crawls/${crawl.key}`,
       startedSchema,
-      { method: 'POST' },
+      { method: 'POST', body: JSON.stringify(limit ? { limit } : {}) },
     );
     setStartingKey(null);
     if (started) {
@@ -195,7 +226,7 @@ export const Crawls = () => {
             key={crawl.key}
             crawl={crawl}
             starting={startingKey === crawl.key}
-            onStart={() => start(crawl)}
+            onStart={(limit) => start(crawl, limit)}
           />
         ))
       ) : (

@@ -2,21 +2,24 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 
 import robotsParser from 'robots-parser';
 
+import type { Fetched, Fetcher, FetchMode } from './fetcher';
 import type { CrawledSite } from './site';
 import { sitemapLinks } from './sitemap';
-import type { ClaimedPage, CrawlStore, PauseReason } from './store';
+import type {
+  ClaimedPage,
+  CrawlStore,
+  FailureReason,
+  PauseReason,
+} from './store';
 
-export const CRAWLER_USER_AGENT =
-  'CarLabCatalogBot/1.0 (+https://carlab.rs/en/contact/)';
-
+const ROBOTS_AGENT = 'CarLabCatalogBot';
 const ROBOTS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const LEASE_MS = 10 * 60 * 1000;
 const IDLE_MS = 1000;
 const MAX_ATTEMPTS = 5;
 const MAX_SERVER_ERRORS = 5;
+const MAX_BLOCKED_PAGES = 5;
 const MAX_GAP_MS = 60 * 1000;
-const CHALLENGE_TITLE =
-  /<title>\s*(?:just a moment\.\.\.|attention required! \| cloudflare)/iu;
 
 export type Clock = {
   now: () => number;
@@ -25,26 +28,26 @@ export type Clock = {
 
 export type CrawlDeps = {
   store: CrawlStore;
-  fetch: typeof fetch;
+  openFetcher: (mode: FetchMode) => Fetcher;
   clock: Clock;
   from?: string;
   random?: () => number;
 };
 
 type Robots = ReturnType<typeof robotsParser>;
+type Response = Extract<Fetched, { kind: 'response' }>;
 
-const retryAfterMs = (value: string | null, now: number): number | null => {
+const retryAfterMs = (
+  value: string | undefined,
+  now: number,
+): number | null => {
   if (!value) return null;
   if (/^\d+$/u.test(value.trim())) return Number(value) * 1000;
   const date = Date.parse(value);
   return Number.isNaN(date) ? null : Math.max(0, date - now);
 };
 
-const pushback = (response: Response, body: string): PauseReason | null => {
-  if (response.headers.get('cf-mitigated') === 'challenge') return 'challenge';
-  if (CHALLENGE_TITLE.test(body)) return 'challenge';
-  return response.status === 403 ? 'forbidden' : null;
-};
+const succeeded = ({ status }: Response) => status >= 200 && status < 300;
 
 const xmlOf = (bytes: Buffer) =>
   (bytes[0] === 0x1f && bytes[1] === 0x8b ? gunzipSync(bytes) : bytes).toString(
@@ -53,7 +56,32 @@ const xmlOf = (bytes: Buffer) =>
 
 export async function crawlSite(
   site: CrawledSite,
-  { store, fetch, clock, from, random = Math.random }: CrawlDeps,
+  { store, openFetcher, clock, from, random = Math.random }: CrawlDeps,
+): Promise<void> {
+  const http = openFetcher('http');
+  const pages =
+    (site.fetchMode ?? 'http') === 'http' ? http : openFetcher('browser');
+  try {
+    await crawlWith(site, { store, clock, from, random, http, pages });
+  } finally {
+    await Promise.all([...new Set([http, pages])].map((one) => one.close()));
+  }
+}
+
+async function crawlWith(
+  site: CrawledSite,
+  {
+    store,
+    clock,
+    from,
+    random,
+    http,
+    pages: pageFetcher,
+  }: Omit<CrawlDeps, 'openFetcher'> & {
+    random: () => number;
+    http: Fetcher;
+    pages: Fetcher;
+  },
 ): Promise<void> {
   let robots: Robots | null = null;
   let robotsAt = -Infinity;
@@ -61,75 +89,96 @@ export async function crawlSite(
   let lastRequestAt = -Infinity;
   let holdUntil = -Infinity;
   let serverErrors = 0;
+  let blockedPages = 0;
   const at = () => new Date(clock.now());
 
   const request = async (
+    fetcher: Fetcher,
     url: string,
     headers: Record<string, string> = {},
-  ): Promise<Response | null> => {
-    const wait = Math.max(lastRequestAt + gapMs, holdUntil) - clock.now();
-    if (wait > 0) await clock.sleep(wait);
-    lastRequestAt = clock.now();
-    return fetch(url, {
-      redirect: 'follow',
-      headers: {
-        'user-agent': CRAWLER_USER_AGENT,
-        ...(from && { from }),
-        ...headers,
+    waitFor?: string,
+  ): Promise<Fetched> => {
+    const hold = holdUntil - clock.now();
+    if (hold > 0) await clock.sleep(hold);
+    return fetcher.fetch({
+      url,
+      headers: { ...(from && { from }), ...headers },
+      waitFor,
+      beforeAttempt: async () => {
+        const wait = lastRequestAt + gapMs - clock.now();
+        if (wait > 0) await clock.sleep(wait);
+        lastRequestAt = clock.now();
       },
-    }).catch(() => null);
+    });
   };
 
   const allowed = (url: string) =>
-    robots?.isAllowed(url, CRAWLER_USER_AGENT) ?? false;
+    robots?.isAllowed(url, ROBOTS_AGENT) ?? false;
 
   const freshRobots = async (): Promise<PauseReason | null> => {
     if (robots && clock.now() - robotsAt < ROBOTS_MAX_AGE_MS) return null;
     const url = new URL('/robots.txt', site.origin).href;
-    const response = await request(url);
-    if (!response || response.status === 429 || response.status >= 500) {
+    const fetched = await request(http, url);
+    if (fetched.kind === 'blocked') return 'blocked';
+    if (
+      fetched.kind === 'error' ||
+      fetched.status === 429 ||
+      fetched.status >= 500
+    ) {
       return 'robots_unavailable';
     }
-    const text = await response.text();
-    const refused = pushback(response, text);
-    if (refused) return refused;
-    robots = robotsParser(url, response.ok ? text : '');
+    robots = robotsParser(
+      url,
+      succeeded(fetched) ? fetched.body.toString('utf8') : '',
+    );
     robotsAt = clock.now();
-    const delayMs = (robots.getCrawlDelay(CRAWLER_USER_AGENT) ?? 0) * 1000;
+    const delayMs = (robots.getCrawlDelay(ROBOTS_AGENT) ?? 0) * 1000;
     gapMs = Math.max(gapMs, delayMs);
     return null;
   };
 
   const sitemapPages = async (
     url: string,
-    pages: string[],
+    found: string[],
   ): Promise<PauseReason | null> => {
     const stale = await freshRobots();
     if (stale) return stale;
     if (!allowed(url)) return null;
-    const response = await request(url);
-    if (!response) return 'sitemap_unavailable';
-    const bytes = Buffer.from(await response.arrayBuffer());
-    const refused = pushback(response, bytes.toString('utf8'));
-    if (refused) return refused;
-    if (!response.ok) return 'sitemap_unavailable';
-    const links = sitemapLinks(xmlOf(bytes));
-    pages.push(...links.pages);
+    const fetched = await request(http, url);
+    if (fetched.kind === 'blocked') return 'blocked';
+    if (fetched.kind === 'error' || !succeeded(fetched)) {
+      return 'sitemap_unavailable';
+    }
+    const xml = xmlOf(fetched.body);
+    const links = sitemapLinks(xml);
+    found.push(...(site.sitemapPages?.(xml) ?? links.pages));
     for (const child of links.sitemaps) {
-      const reason = await sitemapPages(child, pages);
+      const reason = await sitemapPages(child, found);
       if (reason) return reason;
     }
     return null;
   };
 
   const seed = async (): Promise<PauseReason | null> => {
-    const pages: string[] = [];
+    const found: string[] = [];
     for (const sitemap of site.sitemaps) {
-      const reason = await sitemapPages(sitemap, pages);
+      const reason = await sitemapPages(sitemap, found);
       if (reason) return reason;
     }
-    await store.seed(site.name, [...new Set(pages.filter(site.isPage))], at());
+    await store.seed(site.name, [...new Set(found.filter(site.isPage))], at());
     return null;
+  };
+
+  const fail = async (
+    page: ClaimedPage,
+    error: FailureReason,
+    http_status: number | null = null,
+  ) => {
+    await store.update(site.name, page.url, {
+      status: 'failed',
+      error,
+      http_status,
+    });
   };
 
   const backOff = async (
@@ -138,59 +187,64 @@ export async function crawlSite(
   ): Promise<PauseReason | null> => {
     if (!response || response.status >= 500) serverErrors += 1;
     const waitMs =
-      retryAfterMs(response?.headers.get('retry-after') ?? null, clock.now()) ??
+      retryAfterMs(response?.headers['retry-after'], clock.now()) ??
       site.floorMs * 2 ** page.attempts * (1 + random());
     gapMs = Math.max(gapMs, Math.min(gapMs * 2, MAX_GAP_MS));
     holdUntil = Math.max(holdUntil, clock.now() + waitMs);
     const attempts = page.attempts + 1;
+    const gaveUp = attempts >= MAX_ATTEMPTS;
     await store.update(site.name, page.url, {
-      status: attempts >= MAX_ATTEMPTS ? 'failed' : 'queued',
+      status: gaveUp ? 'failed' : 'queued',
       attempts,
       next_attempt_at: new Date(clock.now() + waitMs),
       http_status: response?.status ?? null,
-      error: response ? null : 'network',
+      error: gaveUp ? (response ? 'server' : 'network') : null,
     });
     return serverErrors >= MAX_SERVER_ERRORS ? 'server_errors' : null;
   };
 
-  const fetchPage = async (page: ClaimedPage): Promise<PauseReason | null> => {
+  const fetchPage = async (
+    page: ClaimedPage,
+  ): Promise<PauseReason | 'idle' | null> => {
     if (!allowed(page.url)) {
-      await store.update(site.name, page.url, {
-        status: 'failed',
-        error: 'robots',
-      });
+      await fail(page, 'robots');
       return null;
     }
-    const response = await request(page.url, {
-      ...(page.etag && { 'if-none-match': page.etag }),
-      ...(page.last_modified && { 'if-modified-since': page.last_modified }),
-    });
-    if (!response) return backOff(page, null);
-    const body = await response.text();
-    const refused = pushback(response, body);
-    if (refused) {
-      await store.update(site.name, page.url, { next_attempt_at: at() });
-      return refused;
+    const fetched = await request(
+      pageFetcher,
+      page.url,
+      {
+        ...(page.etag && { 'if-none-match': page.etag }),
+        ...(page.last_modified && { 'if-modified-since': page.last_modified }),
+      },
+      site.waitFor,
+    );
+    if (fetched.kind === 'blocked') {
+      blockedPages += 1;
+      await fail(page, 'blocked');
+      return blockedPages >= MAX_BLOCKED_PAGES ? 'blocked' : null;
     }
-    const { status } = response;
-    if (status === 429 || status >= 500) return backOff(page, response);
+    blockedPages = 0;
+    if (fetched.kind === 'error') return backOff(page, null);
+    const { status } = fetched;
+    if (status === 429 || status >= 500) return backOff(page, fetched);
     serverErrors = 0;
     const settled = { http_status: status, fetched_at: at(), error: null };
     if (status === 304) {
       await store.update(site.name, page.url, { status: 'done', ...settled });
-    } else if (response.ok) {
+    } else if (succeeded(fetched)) {
       await store.update(site.name, page.url, {
         status: 'done',
         ...settled,
-        body: gzipSync(body),
-        etag: response.headers.get('etag'),
-        last_modified: response.headers.get('last-modified'),
+        body: gzipSync(fetched.body),
+        etag: fetched.headers.etag ?? null,
+        last_modified: fetched.headers['last-modified'] ?? null,
       });
+      if (await store.countStored(site.name)) return 'idle';
+    } else if (status === 404 || status === 410) {
+      await store.update(site.name, page.url, { status: 'gone', ...settled });
     } else {
-      await store.update(site.name, page.url, {
-        status: status === 404 || status === 410 ? 'gone' : 'failed',
-        ...settled,
-      });
+      await fail(page, 'http', status);
     }
     return null;
   };
