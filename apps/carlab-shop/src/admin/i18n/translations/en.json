@@ -934,5 +934,35 @@
     "resultFitments": "New fitments",
     "resultFitmentsOn": "{{count}} on {{vehicle}}",
     "resultNoVehicle": "No catalogue car matches the VIN, so no fitments were created. Add the car under Vehicles and attach the parts under Fitments."
+  },
+  "crawls": {
+    "heading": "Catalogue crawls",
+    "lead": "The crawler reads a maker's site one page every few seconds and stores the pages here. The Supplier's import takes Parts from the stored pages. A full pass takes hours; you can close this page.",
+    "status": {
+      "idle": "Not started",
+      "running": "Crawling",
+      "paused": "Paused",
+      "done": "Crawled"
+    },
+    "start": "Start crawl",
+    "resume": "Resume crawl",
+    "restart": "Crawl again",
+    "startLabel": "Crawl the {{supplier}} catalogue",
+    "progressLabel": "{{supplier}} crawl progress",
+    "started": "{{supplier}}: crawl started. Progress updates by itself.",
+    "done": "{{done}} of {{total}} pages fetched",
+    "queued": "Queued: {{value}}",
+    "failed": "Failed: {{value}}",
+    "gone": "Gone from the site: {{value}}",
+    "startedAt": "Started {{date}}",
+    "finishedAt": "Finished {{date}}",
+    "empty": "No site is switched on for crawling.",
+    "pausedReasons": {
+      "forbidden": "The site refused access. It may have blocked the crawler: find out why before resuming.",
+      "challenge": "The site showed a robot check. The crawler does not get past it; resume only once the site drops it.",
+      "robots_unavailable": "The site's robots.txt did not open, which the rules read as no crawling. Resume later.",
+      "sitemap_unavailable": "The sitemap did not load. Resume later.",
+      "server_errors": "The site answered with a server error five times in a row. Resume later."
+    }
   }
 }

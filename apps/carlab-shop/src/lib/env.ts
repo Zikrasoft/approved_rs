@@ -5,7 +5,9 @@ import { VIN_DECODER_NAMES } from './vin/decoders';
 
 const LOCAL_TYPESENSE_API_KEY = 'xyz';
 
-export const SUPPLIER_ADAPTER_NAMES = ['demo'] as const;
+export const SUPPLIER_ADAPTER_NAMES = ['demo', 'mann-filter'] as const;
+
+export type SupplierAdapterName = (typeof SUPPLIER_ADAPTER_NAMES)[number];
 
 const nameList = (value: string) =>
   value
@@ -54,6 +56,7 @@ const envSchema = z
       .transform(nameList)
       .pipe(z.array(z.enum(SUPPLIER_ADAPTER_NAMES))),
     DEMO_SUPPLIER_OVERRIDES: optionalValue,
+    CRAWLER_FROM: optionalValue.pipe(z.email().optional()),
     FILE_URL: optionalValue.pipe(z.url().optional()),
     TELEGRAM_BOT_TOKEN: optionalSecret,
     TELEGRAM_GROUP_ID: optionalValue.pipe(

@@ -80,6 +80,26 @@ services:
     volumes:
       - static:/server/static
 
+  crawler:
+    image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-carlab-shop}:${MEDUSA_TAG:?}
+    restart: unless-stopped
+    logging: *logging
+    mem_limit: 240m
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    networks: [data, edge]
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgres://carlab:${POSTGRES_PASSWORD:?}@postgres:5432/carlab
+      NODE_OPTIONS: --max-old-space-size=160
+    command: ['node', 'src/lib/crawler/worker.js']
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+
   caddy:
     image: caddy:2.11.4-alpine
     restart: unless-stopped

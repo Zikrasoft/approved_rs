@@ -97,10 +97,19 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('seeds no Parts, suppliers or offers', async () => {
+      it('seeds no Parts or offers', async () => {
         expect(await catalog.listParts()).toEqual([]);
-        expect(await suppliers.listSuppliers()).toEqual([]);
         expect(await suppliers.listSupplierOffers()).toEqual([]);
+      });
+
+      it('registers each crawled site once as a Supplier imported only on its own button', async () => {
+        expect(await suppliers.listSuppliers()).toEqual([
+          expect.objectContaining({
+            name: 'MANN-FILTER',
+            import_enabled: true,
+            import_on_publish: false,
+          }),
+        ]);
       });
 
       it('creates the commerce defaults checkout needs', async () => {

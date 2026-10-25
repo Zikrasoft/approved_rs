@@ -564,7 +564,7 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 | File                                     | What it is                                                                                                                          |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`    |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                        |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), the catalogue crawler (same image), caddy 2.11.4                    |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB; `/static/*` from the uploads volume |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                 |
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                              |
@@ -574,6 +574,16 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
+
+The `crawler` service runs the same image as a plain Node process
+(`node src/lib/crawler/worker.js`), not a second Medusa. It waits for a crawl
+started on the admin's Suppliers screen, reads the site's sitemap, and fetches one
+page at a time per site, at least 2 seconds apart (more if robots.txt asks), into
+Postgres (`crawl_run`, `crawl_page`, gzipped HTML). It pauses on a 403, a challenge
+page, an unreachable robots.txt or repeated server errors, and the admin shows the
+reason; pressing the button again resumes. A restart loses nothing: it picks up the
+queue where it stopped. It sits on `edge` as well as `data` because it needs the
+internet.
 
 ### The server
 
@@ -604,7 +614,8 @@ workflow engine. A second Medusa instance would need Redis first.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 128m, under 3.2 GB together (checked by the compose test).
+  postgres 512m, crawler 240m, caddy 128m, under 3.2 GB together (checked by the
+  compose test).
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
@@ -666,6 +677,12 @@ validates everything at startup. The non-obvious parts:
 - `FILE_URL` is the public address of uploaded files, stored into every image
   URL at upload time. Compose sets it to `https://$API_HOST/static`, so it is not
   written into `.env`; without it production stops at startup.
+- `SUPPLIER_ADAPTERS` names the Supplier adapters the shop reads, comma-separated.
+  `mann-filter` is the crawled MANN-FILTER catalogue: its crawl starts from the
+  Suppliers screen and its Import button reads what the crawler stored. `demo`
+  never runs in production.
+- `CRAWLER_FROM` is the mailbox the crawler sends in its `From` header, so a site
+  owner can reach whoever runs it. Empty, no `From` is sent.
 - `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
   `NODE_ENV=production` and open everywhere else; the template sets `false`.
   See [Closed beta](#closed-beta-the-preview-flag).
