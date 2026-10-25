@@ -5,6 +5,10 @@ import { vinSchema, type Vehicle } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
+import type {
+  WorkshopQuoteLine,
+  WorkshopQuoteResult,
+} from '../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import { adminError } from './admin-errors';
 import { shopAi, type CategoryChoice } from './ai';
@@ -66,6 +70,23 @@ async function quoteVehicle(
     vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
   });
   return lookup.resolved ? lookup.vehicle : null;
+}
+
+export type ConfirmedQuote = WorkshopQuoteResult & { vehicle: Vehicle | null };
+
+export async function confirmQuote(
+  scope: MedusaContainer,
+  { vin, lines }: { vin: string | null; lines: WorkshopQuoteLine[] },
+  editor: { created_by: string; updated_by: string },
+): Promise<ConfirmedQuote> {
+  const vehicle = await quoteVehicle(scope, vin);
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const created = await catalog.createFromWorkshopQuote(
+    lines,
+    vehicle?.id ?? null,
+    editor,
+  );
+  return { vehicle, ...created };
 }
 
 export async function draftQuote(

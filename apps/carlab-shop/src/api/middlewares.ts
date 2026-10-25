@@ -9,6 +9,7 @@ import {
   AdminBulkAttachFitments,
   AdminBulkDetachFitments,
   AdminCreateBrand,
+  AdminConfirmWorkshopQuote,
   AdminCreateBrandSpelling,
   AdminCreateCategory,
   AdminCreateCategoryField,
@@ -177,6 +178,11 @@ export default defineMiddlewares({
       matcher: '/admin/suppliers/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdateSupplier)],
+    },
+    {
+      matcher: '/admin/workshop-quotes',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminConfirmWorkshopQuote)],
     },
     {
       matcher: '/admin/suppliers/:id/categories',

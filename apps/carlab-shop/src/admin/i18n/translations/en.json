@@ -558,7 +558,8 @@
       "INVALID_QUOTE": "This file does not fit: upload the quote as a PDF.",
       "QUOTE_TOO_LARGE": "The quote is over 10 MB. Shrink the file and upload it again.",
       "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
-      "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key."
+      "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
+      "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -702,7 +703,8 @@
     "removed_other": "{{source}}: {{count}} rows removed. The site updates after the next publish.",
     "empty": "Rows appear after the first import or manual entry.",
     "names": {
-      "manual": "Manual entry"
+      "manual": "Manual entry",
+      "workshop-quote": "Workshop quotes"
     },
     "actionsFor": "Actions for source {{source}}",
     "confirmSupplierBody_one": "{{count}} row will be removed and the import from this supplier switched off, so the next import does not bring it back. It cannot be restored.",
@@ -893,7 +895,7 @@
   },
   "workshopQuotes": {
     "heading": "Workshop quotes",
-    "lead": "Upload a workshop quote (ponuda) as a PDF: AI reads the VIN, the car and the part lines, and proposes a brand and a category for each. This is a draft: nothing is created in the catalogue and the quote's prices are not read.",
+    "lead": "Upload a workshop quote (ponuda) as a PDF: AI reads the VIN, the car and the part lines, and proposes a brand and a category for each. You get a draft: nothing reaches the catalogue until you press Create. The quote's prices are not read.",
     "upload": "Upload a quote",
     "uploadAnother": "Upload another quote",
     "hint": "PDF up to 10 MB.",
@@ -901,7 +903,7 @@
     "wrongType": "“{{name}}” is not a PDF. Upload the quote as a PDF.",
     "tooLarge": "“{{name}}” is over 10 MB. Shrink the file and upload it again.",
     "draftHeading": "Draft from “{{name}}”",
-    "draftNote": "Check the car, the brands and the categories. Nothing has been created in the catalogue yet.",
+    "draftNote": "Fix the lines and press Create: the parts, their numbers and their fitments on the car are added to the catalogue. Nothing has been created yet.",
     "vin": "VIN",
     "noVin": "Not found in the quote",
     "vehicleText": "Car in the quote",
@@ -917,10 +919,23 @@
       "number": "Number",
       "quantity": "Qty",
       "brand": "Brand",
-      "category": "Category"
+      "category": "Category",
+      "actions": "Actions"
     },
-    "noBrand": "Unknown",
     "checkBrand": "Check the brand",
-    "noCategory": "No category"
+    "noCategory": "No category",
+    "brandPlaceholder": "Enter the brand",
+    "useSuggestion": "Use {{brand}} ({{confidence}})",
+    "cellLabel": "{{column}}, line {{number}}",
+    "removeLine": "Remove line {{number}}",
+    "create": "Create",
+    "createBlocked": "To create, fill in the brand, name, number and quantity on every line.",
+    "created": "Quote added to the catalogue",
+    "resultHeading": "Created from “{{name}}”",
+    "resultNew": "New parts",
+    "resultReused": "Already in the catalogue",
+    "resultFitments": "New fitments",
+    "resultFitmentsOn": "{{count}} on {{vehicle}}",
+    "resultNoVehicle": "No catalogue car matches the VIN, so no fitments were created. Add the car under Vehicles and attach the parts under Fitments."
   }
 }

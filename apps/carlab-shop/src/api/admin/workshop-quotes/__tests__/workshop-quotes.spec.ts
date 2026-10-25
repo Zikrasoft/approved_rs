@@ -184,5 +184,208 @@ medusaIntegrationTestRunner({
         expect(ai.quotesRead).toEqual([]);
       });
     });
+
+    describe('Workshop quote confirmation', () => {
+      let adminHeaders: { headers: { authorization: string } };
+      let catalog: CatalogModuleService;
+
+      const confirm = (body: unknown) =>
+        api
+          .post('/admin/workshop-quotes', body, adminHeaders)
+          .catch((error) => error.response);
+
+      const line = (fields: Record<string, unknown>) => ({
+        name: 'Filter ulja',
+        number: 'HU 816 x',
+        quantity: 1,
+        brand: 'MANN-FILTER',
+        category_id: null,
+        ...fields,
+      });
+
+      beforeAll(async () => {
+        adminHeaders = await createAdminAuth(
+          getContainer(),
+          api,
+          'admin@workshop-quote-confirm.local',
+          'supersecret',
+        );
+        catalog = getContainer().resolve(CATALOG_MODULE);
+      });
+
+      it('creates Parts, Brand-numbers and manual Fitments on the VIN Vehicle', async () => {
+        const { vehicle } = await createVehicleFixture(catalog);
+        const oilFilters = await catalog.createCategories({
+          slug: 'oil-filters',
+          name: 'Масляные фильтры',
+        });
+        const bmw = await catalog.createBrands({ name: 'BMW', slug: 'bmw' });
+
+        const response = await confirm({
+          vin: OWNER_VIN,
+          lines: [
+            line({ category_id: oilFilters.id }),
+            line({
+              name: 'Pločice',
+              number: '34116860016',
+              quantity: 2,
+              brand: 'bmw',
+            }),
+          ],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.confirmed).toMatchObject({
+          vehicle: { id: vehicle.id },
+          fitments: 2,
+        });
+        const mann = await catalog.listBrands({ name: 'MANN-FILTER' });
+        expect(mann).toMatchObject([{ slug: 'mann-filter' }]);
+        const identifiers = await catalog.listPartIdentifiers(
+          {},
+          { relations: ['part', 'part.fitments'] },
+        );
+        expect(
+          identifiers
+            .map((identifier) => ({
+              brand_id: identifier.brand_id,
+              value: identifier.value,
+              part: {
+                name: identifier.part.name,
+                category_id: identifier.part.category_id,
+                source: identifier.part.source,
+              },
+              fitments: identifier.part.fitments.map((fitment) => ({
+                vehicle_id: fitment.vehicle_id,
+                quantity: fitment.quantity,
+                source: fitment.source,
+              })),
+            }))
+            .sort((a, b) => a.value.localeCompare(b.value)),
+        ).toEqual([
+          {
+            brand_id: bmw.id,
+            value: '34116860016',
+            part: {
+              name: 'Pločice',
+              category_id: null,
+              source: 'workshop-quote',
+            },
+            fitments: [
+              { vehicle_id: vehicle.id, quantity: 2, source: 'manual' },
+            ],
+          },
+          {
+            brand_id: mann[0].id,
+            value: 'HU 816 x',
+            part: {
+              name: 'Filter ulja',
+              category_id: oilFilters.id,
+              source: 'workshop-quote',
+            },
+            fitments: [
+              { vehicle_id: vehicle.id, quantity: 1, source: 'manual' },
+            ],
+          },
+        ]);
+      });
+
+      it('reuses an existing Brand-number and only adds the Fitment', async () => {
+        const { vehicle } = await createVehicleFixture(catalog);
+        const mann = await catalog.createBrands({
+          name: 'MANN-FILTER',
+          slug: 'mann-filter',
+        });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'HU816X',
+            },
+          ],
+        });
+
+        const response = await confirm({
+          vin: OWNER_VIN,
+          lines: [line({ brand: 'Mann-Filter', quantity: 3 })],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.confirmed).toMatchObject({
+          lines: [{ part_id: partId, reused: true }],
+          fitments: 1,
+        });
+        expect(await catalog.listBrands()).toHaveLength(1);
+        expect(await catalog.listParts()).toMatchObject([
+          { id: partId, name: 'Масляный фильтр', source: 'manual' },
+        ]);
+        expect(await catalog.listPartIdentifiers()).toHaveLength(1);
+        expect(await catalog.listFitments()).toMatchObject([
+          { part_id: partId, vehicle_id: vehicle.id, quantity: 3 },
+        ]);
+      });
+
+      it('refuses a line without a confirmed brand and creates nothing', async () => {
+        await createVehicleFixture(catalog);
+
+        const response = await confirm({
+          vin: OWNER_VIN,
+          lines: [line({}), line({ number: 'X-1', brand: null })],
+        });
+
+        expect(response.status).toBe(400);
+        expect(await catalog.listBrands()).toEqual([]);
+        expect(await catalog.listParts()).toEqual([]);
+        expect(await catalog.listFitments()).toEqual([]);
+      });
+
+      it('rolls back every line when one line fails', async () => {
+        await createVehicleFixture(catalog);
+
+        const response = await confirm({
+          vin: OWNER_VIN,
+          lines: [line({}), line({ number: 'X-1', brand: 'Бош' })],
+        });
+
+        expect([response.status, response.data.code]).toEqual([
+          400,
+          'INVALID_BRAND',
+        ]);
+        expect(await catalog.listBrands()).toEqual([]);
+        expect(await catalog.listParts()).toEqual([]);
+        expect(await catalog.listFitments()).toEqual([]);
+      });
+
+      it('creates Parts without Fitments when the VIN resolves to no Vehicle', async () => {
+        await createVehicleFixture(catalog);
+
+        const response = await confirm({
+          vin: UNKNOWN_VIN,
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.confirmed).toMatchObject({
+          vehicle: null,
+          fitments: 0,
+          lines: [{ reused: false }],
+        });
+        expect(await catalog.listParts()).toHaveLength(1);
+        expect(await catalog.listPartIdentifiers()).toHaveLength(1);
+        expect(await catalog.listFitments()).toEqual([]);
+      });
+
+      it('takes no price from the quote', async () => {
+        const response = await confirm({
+          vin: null,
+          lines: [line({ price: 4200 })],
+        });
+
+        expect(response.status).toBe(400);
+        expect(await catalog.listParts()).toEqual([]);
+      });
+    });
   },
 });
