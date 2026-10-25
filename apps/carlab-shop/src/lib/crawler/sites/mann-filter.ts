@@ -27,7 +27,7 @@ const brandOf = ($: CheerioAPI): string | null => {
 };
 
 const SPEC_PAIR = /^(.+?)\s*[=:]\s*(.+)$/u;
-const MAIN_APPLICATION = /^main application\b/iu;
+const MAIN_APPLICATION = /^(main application|glavna primena)\b/iu;
 
 const specsOf = ($: CheerioAPI): Record<string, string> => {
   const specs: Record<string, string> = {};
@@ -72,7 +72,9 @@ const applicabilityOf = ($: CheerioAPI) =>
     const [series, make] = each($, table.parents('.cmp-accordion__item'));
     const prefix = [accordionTitle(make), accordionTitle(series)];
     return each($, table.find('tbody.cmp-table__desktop tr'))
-      .map((row) => each($, row.find('td')).map(words))
+      .map((row) =>
+        each($, row.find('td')).map((cell) => words(cell).replace(/^-$/u, '')),
+      )
       .filter((cells) => cells.length >= 7)
       .map(([model, , engine, ccm, kw, , years]) =>
         [
