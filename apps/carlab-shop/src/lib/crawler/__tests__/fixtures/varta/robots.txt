@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /search
+Disallow: /dev-pages/
+Disallow: /dev-test-pages/
+Disallow: /sitemap.xml
+
+Sitemap: https://www.varta-automotive.com/sitemap/sitemap-index.xml
