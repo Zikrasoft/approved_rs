@@ -1,5 +1,5 @@
 import {
-  enrichmentRule,
+  enrichmentGaps,
   maintenanceKit,
   partPageSlug,
   positionGroups,
@@ -102,7 +102,6 @@ export function assembleSnapshot(
     return vehicle ? [{ ...fitment, vehicle }] : [];
   });
   const fitsByPart = groupBy(fits, ({ part_id }) => part_id);
-  const gaps = enrichmentRule(allVehicles);
   const bySlug = new Map<string, PartPageEntry>();
   for (const page of pages) {
     const slug = partPageSlug(page.brand.slug, page.normalized_value);
@@ -115,8 +114,8 @@ export function assembleSnapshot(
       ...page,
       slug,
       indexable:
-        gaps({
-          category_id: category?.id ?? null,
+        enrichmentGaps({
+          description: page.part.description,
           attributes: page.part.attributes,
           fitments: partFits.length,
           equivalents: page.equivalents.length,

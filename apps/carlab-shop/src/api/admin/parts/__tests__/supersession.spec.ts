@@ -133,6 +133,7 @@ medusaIntegrationTestRunner({
           expect((await pageFor('34116761252')).part).toEqual({
             id: oldId,
             name: 'Brake pad, old',
+            description: null,
             translations: null,
             category_id: null,
             attributes: {},

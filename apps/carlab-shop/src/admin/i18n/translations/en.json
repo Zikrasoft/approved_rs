@@ -468,6 +468,8 @@
     "findLabel": "Find the Part",
     "searchPlaceholder": "Number or brand",
     "search": "Search",
+    "description": "Description",
+    "descriptionHint": "Shown on every page of this Part. Publish translates it to Serbian and English.",
     "category": "Category",
     "noCategory": "No Category",
     "required": "required",
@@ -722,6 +724,7 @@
     },
     "fields": {
       "name": "Name",
+      "description": "Description",
       "text": "Description",
       "label": "Label",
       "note": "Note",
@@ -791,8 +794,7 @@
       "notEnriched": "Not shown in search"
     },
     "reasons": {
-      "no_category": "no category set",
-      "no_fitment_equivalent_or_requirement": "no fitting cars, equivalents or requirements"
+      "bare_number": "only a brand and number: add a description, attributes, fitting cars or an equivalent"
     },
     "searchLabel": "Search by number or name",
     "searchPlaceholder": "Number, brand or name",
