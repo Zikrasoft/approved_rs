@@ -722,7 +722,9 @@ carlab.rs.
    does, with its own `contents: write`; the token `deploy-shop` sends to the
    server cannot write to the repository.
 3. `deploy.sh`: refuses without `.env` and for anything that is not a 40-character
-   sha; pulls the image; runs migrations in a one-off container
+   sha; pulls the image; dumps the database to
+   `/var/backups/carlab/db-<stamp>-pre-deploy.dump` and stops if the dump fails;
+   runs migrations in a one-off container
    (`medusa db:migrate --execute-safe-links --all-or-nothing` from `/server`), then
    the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
    see below); only after both succeed does `MEDUSA_TAG` in `.env` change, with the
@@ -783,9 +785,10 @@ bad sha, and a second run would ship it back. Note the good sha down before roll
 back (`cat /srv/carlab/.previous-tag`).
 
 Only the image rolls back: migrations do not. If the ship changed the schema,
-restore from a backup instead: Medusa's migrations are not guaranteed to be
-backwards compatible, and an old image against a schema already migrated forward
-may fail to boot or corrupt data. After a manual rollback the
+restore the `db-<stamp>-pre-deploy.dump` that deploy wrote just before migrating
+instead: Medusa's migrations are not guaranteed to be backwards compatible, and an
+old image against a schema already migrated forward may fail to boot or corrupt
+data. The shop's own migrations stay additive for the same reason (AGENTS.md). After a manual rollback the
 `deployed/carlab-shop` tag points at a version that is not in production; delete it
 once the fix is in `main`.
 

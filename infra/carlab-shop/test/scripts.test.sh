@@ -25,7 +25,7 @@ case "$*" in
   ;;
 *'tar -C /server/static -czf'*) printf 'TAR' ;;
 *pg_tables*) printf '%s' "${TABLES:-0}" ;;
-*'up -d --wait'*) exit "${UP_EXIT:-0}" ;;
+*'up -d --wait --wait-timeout'*) exit "${UP_EXIT:-0}" ;;
 *'image ls'*) printf '%s\n' ${IMAGE_TAGS:-} ;;
 *'image rm'*) exit "${RM_EXIT:-0}" ;;
 esac
@@ -61,6 +61,8 @@ refuse() {
 
 OLD=1111111111111111111111111111111111111111
 NEW=2222222222222222222222222222222222222222
+BACKUP_DIR="$work/deploy-backups"
+export BACKUP_DIR
 
 stage() {
   rm -rf "$work/host"
@@ -71,6 +73,7 @@ stage() {
   export LOG
   : >"$LOG"
   rm -f "$LOG.env"
+  rm -rf "$work/deploy-backups"
 }
 offsite() {
   printf 'BACKUP_S3_ENDPOINT=https://s3.test\nBACKUP_S3_BUCKET=carlab-backups\nBACKUP_S3_ACCESS_KEY_ID=key-canary\nBACKUP_S3_SECRET_ACCESS_KEY=secret-canary\n' >"$work/host/.env.backup"
@@ -105,6 +108,8 @@ stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
 expect 'pull, migrate, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa" \
+  "docker[$NEW] compose up -d --wait postgres" \
+  "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
@@ -115,6 +120,17 @@ expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
+expect 'a deploy dumps the database before migrating' \
+  test "$(cat "$work/deploy-backups"/db-*-pre-deploy.dump)" = DUMP
+expect 'a deploy leaves no .part dump' test -z "$(find "$work/deploy-backups" -name '*.part')"
+
+stage
+PGDUMP_EXIT=1
+export PGDUMP_EXIT
+refuse 'a failed pre-deploy dump fails the deploy' run deploy.sh "$NEW"
+unset PGDUMP_EXIT
+refuse 'a failed pre-deploy dump migrates nothing' grep -q 'db:migrate' "$LOG"
+expect 'a failed pre-deploy dump leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
 
 OLDER=3333333333333333333333333333333333333333
 stage
@@ -148,7 +164,7 @@ export MIGRATE_EXIT
 refuse 'a failed migration fails the deploy' run deploy.sh "$NEW"
 unset MIGRATE_EXIT
 expect 'a failed migration leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
-refuse 'a failed migration restarts nothing' grep -q 'up -d' "$LOG"
+refuse 'a failed migration restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 expect 'a failed migration releases the lock' test ! -d "$work/host/.deploy.lock"
 
 stage
@@ -157,7 +173,7 @@ export SEED_EXIT
 refuse 'a failed seed fails the deploy' run deploy.sh "$NEW"
 unset SEED_EXIT
 expect 'a failed seed leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
-refuse 'a failed seed restarts nothing' grep -q 'up -d' "$LOG"
+refuse 'a failed seed restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 
 stage
 HEALTH_EXIT=22

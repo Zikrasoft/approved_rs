@@ -494,6 +494,22 @@ than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
 a commit but cannot run the review itself.
 
+## Shop migrations
+
+`apps/carlab-shop` migrates its Postgres while the previous image is still
+serving, and a rollback brings that image back over the new schema (deploy
+order in `docs/guides/deploy.md`). So every shop migration is **additive**:
+add a column nullable or with a default, add a table or an index. A rename or a
+drop ships in two deploys, first the code that stops reading the old shape,
+then the migration that removes it.
+
+Generate a module's migration with `medusa db:generate <module>` and leave the
+generated file as it comes. SQL the model DSL cannot express (`NULLS NOT
+DISTINCT`, an expression index) lives in a hand-written migration of its own,
+with the index left out of the model so the generator never rewrites it, and
+`src/modules/catalog/__tests__/hand-written-indexes.spec.ts` asserts it
+against `pg_indexes`.
+
 ## Architecture
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode.

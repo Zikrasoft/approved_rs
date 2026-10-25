@@ -1,7 +1,14 @@
 import { Migration } from '@medusajs/framework/mikro-orm/migrations';
 
-export class Migration20261023052426 extends Migration {
+export class Migration20261025010021 extends Migration {
   override async up(): Promise<void> {
+    this.addSql(
+      `create table if not exists "published_number" ("id" text not null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "published_number_pkey" primary key ("id"));`,
+    );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_published_number_deleted_at" ON "published_number" ("deleted_at") WHERE deleted_at IS NULL;`,
+    );
+
     this.addSql(
       `create table if not exists "publish_run" ("id" text not null, "status" text check ("status" in ('running', 'succeeded', 'failed')) not null, "failed_step" text null, "error" text null, "finished_at" timestamptz null, "created_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "publish_run_pkey" primary key ("id"));`,
     );
@@ -14,6 +21,8 @@ export class Migration20261023052426 extends Migration {
   }
 
   override async down(): Promise<void> {
+    this.addSql(`drop table if exists "published_number" cascade;`);
+
     this.addSql(`drop table if exists "publish_run" cascade;`);
   }
 }

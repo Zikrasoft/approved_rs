@@ -3872,15 +3872,6 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_requirement_deleted_at\" ON \"requirement\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_requirement_owner_field_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_requirement_owner_field_unique\" ON \"requirement\" (\"field_id\", \"engine_id\", \"chassis_id\", \"vehicle_id\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "requirement_pkey",
           "columnNames": ["id"],
           "composite": false,
@@ -4265,15 +4256,6 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_fitment_deleted_at\" ON \"fitment\" (\"deleted_at\") WHERE deleted_at IS NULL"
-        },
-        {
-          "keyName": "IDX_fitment_identity_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_fitment_identity_unique\" ON \"fitment\" (\"vehicle_id\", \"part_id\", \"axle\", \"side\", \"production_from\", \"production_to\", \"gearbox\", \"steering\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "fitment_pkey",

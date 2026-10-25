@@ -35,6 +35,15 @@ export MEDUSA_TAG="$tag"
 echo "==> Image $tag"
 docker compose pull --policy missing medusa
 
+backups=${BACKUP_DIR:-/var/backups/carlab}
+dump="$backups/db-$(date -u +%Y-%m-%dT%H-%M-%SZ)-pre-deploy.dump"
+echo "==> Backup to $dump"
+mkdir -p "$backups"
+docker compose up -d --wait postgres
+docker compose exec -T postgres \
+  pg_dump -U carlab -d carlab --format=custom >"$dump.part"
+mv "$dump.part" "$dump"
+
 echo "==> Migrations"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing

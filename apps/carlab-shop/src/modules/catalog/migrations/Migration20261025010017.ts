@@ -1,16 +1,7 @@
 import { Migration } from '@medusajs/framework/mikro-orm/migrations';
 
-const nameKey = (column: string) =>
-  `upper(regexp_replace(btrim(normalize("${column}", NFKC)), '\\s+', ' ', 'g'))`;
-
-export class Migration20261023052422 extends Migration {
+export class Migration20261025010017 extends Migration {
   override async up(): Promise<void> {
-    this.addSql(
-      `alter table if exists "fitment" drop constraint if exists "fitment_identity_unique";`,
-    );
-    this.addSql(
-      `alter table if exists "requirement" drop constraint if exists "requirement_owner_field_unique";`,
-    );
     this.addSql(
       `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_type_value_unique";`,
     );
@@ -80,7 +71,7 @@ export class Migration20261023052422 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "category" ("id" text not null, "slug" text not null, "name" text not null, "text" text not null default '', "image" jsonb null, "translations" jsonb null, "translated_from" jsonb null, "maintenance_kit" boolean not null default false, "kit_rank" integer not null default 0, "service_label" text null, "service_price" integer null, "service_note" text null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "category_pkey" primary key ("id"));`,
+      `create table if not exists "category" ("id" text not null, "slug" text not null, "name" text not null, "text" text not null default '', "image" jsonb null, "translations" jsonb null, "translated_from" jsonb null, "maintenance_kit" boolean not null default false, "kit_rank" integer not null default 0, "service_label" text null, "service_price" integer null, "service_note" text null, "installation_price" integer null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "category_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_category_slug_unique" ON "category" ("slug") WHERE deleted_at IS NULL;`,
@@ -136,7 +127,7 @@ export class Migration20261023052422 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "part" ("id" text not null, "name" text not null, "category_id" text null, "attributes" jsonb not null default '{}', "translations" jsonb null, "translated_from" jsonb null, "replaced_by_id" text null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_pkey" primary key ("id"));`,
+      `create table if not exists "part" ("id" text not null, "name" text not null, "category_id" text null, "attributes" jsonb not null default '{}', "installation_price" integer null, "no_installation" boolean not null default false, "translations" jsonb null, "translated_from" jsonb null, "replaced_by_id" text null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_part_category_id" ON "part" ("category_id") WHERE deleted_at IS NULL;`,
@@ -244,9 +235,6 @@ export class Migration20261023052422 extends Migration {
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_requirement_deleted_at" ON "requirement" ("deleted_at") WHERE deleted_at IS NULL;`,
     );
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_requirement_owner_field_unique" ON "requirement" ("field_id", "engine_id", "chassis_id", "vehicle_id") NULLS NOT DISTINCT WHERE deleted_at IS NULL;`,
-    );
 
     this.addSql(
       `create table if not exists "fitment" ("id" text not null, "part_id" text not null, "vehicle_id" text not null, "quantity" integer not null default 1, "axle" text check ("axle" in ('front', 'rear')) null, "side" text check ("side" in ('left', 'right')) null, "production_from" timestamptz null, "production_to" timestamptz null, "steering" text check ("steering" in ('left', 'right')) null, "gearbox" text check ("gearbox" in ('manual', 'automatic')) null, "note" text null, "translations" jsonb null, "translated_from" jsonb null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "fitment_pkey" primary key ("id"));`,
@@ -259,9 +247,6 @@ export class Migration20261023052422 extends Migration {
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_fitment_deleted_at" ON "fitment" ("deleted_at") WHERE deleted_at IS NULL;`,
-    );
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_fitment_identity_unique" ON "fitment" ("vehicle_id", "part_id", "axle", "side", "production_from", "production_to", "gearbox", "steering") NULLS NOT DISTINCT WHERE deleted_at IS NULL;`,
     );
 
     this.addSql(
@@ -331,19 +316,6 @@ export class Migration20261023052422 extends Migration {
     );
     this.addSql(
       `alter table if exists "fitment" add constraint "fitment_vehicle_id_foreign" foreign key ("vehicle_id") references "vehicle" ("id") on update cascade on delete cascade;`,
-    );
-
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_brand_name_key_unique" ON "brand" (upper(regexp_replace(btrim("name"), '\\s+', ' ', 'g'))) WHERE deleted_at IS NULL;`,
-    );
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_make_name_key_unique" ON "make" (${nameKey('name')}) WHERE deleted_at IS NULL;`,
-    );
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_category_name_key_unique" ON "category" (${nameKey('name')}) WHERE deleted_at IS NULL;`,
-    );
-    this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_series_make_id_name_key_unique" ON "series" ("make_id", ${nameKey('name')}) WHERE deleted_at IS NULL;`,
     );
   }
 

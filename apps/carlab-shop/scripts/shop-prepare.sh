@@ -50,7 +50,7 @@ done
 
 docker compose -f docker-compose.demo.yml up -d --wait
 if docker exec carlab-demo-pg psql -U postgres -d medusa -Atc \
-  "select 1 from mikro_orm_migrations where name = 'Migration20261021101943'" 2>/dev/null | grep -q 1; then
+  "select 1 from mikro_orm_migrations where name in ('Migration20261021101943', 'Migration20261023052422')" 2>/dev/null | grep -q 1; then
   echo "The demo database holds the shop's pre-squash migration history; recreating it"
   docker exec carlab-demo-pg psql -U postgres -q -c 'drop database medusa with (force)' -c 'create database medusa'
 fi
