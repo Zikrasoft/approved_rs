@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import type { SupplierArticle } from '../../suppliers/adapter';
 import type { CrawledSite } from '../site';
+import type { SitemapEntry } from '../sitemap';
 
 export const BILSTEIN_FAMILIES = [
   'filter',
@@ -43,18 +44,8 @@ const APPLICATIONS_DATA = 'data-bilstein-applications';
 const ARTICLE_PAGE =
   /^https:\/\/partsfinder\.bilsteingroup\.com\/sr\/article\/(?:febi|SWAG|blueprint)\/[^/]+$/u;
 
-const sitemapPages = (xml: string) => {
-  const $ = load(xml, { xml: true });
-  return $('url')
-    .toArray()
-    .filter((url) =>
-      $(url)
-        .find('image\\:title')
-        .toArray()
-        .some((title) => inFamily($(title).text())),
-    )
-    .map((url) => $(url).children('loc').text().trim());
-};
+const sitemapPage = ({ imageTitles }: SitemapEntry) =>
+  imageTitles.some(inFamily);
 
 const applicationsSchema = z.array(
   z.object({
@@ -305,6 +296,6 @@ export const bilstein: CrawledSite = {
   waitFor: APPLICATIONS,
   interact: collectApplications,
   isPage: (url) => ARTICLE_PAGE.test(url),
-  sitemapPages,
+  sitemapPage,
   parse: parseBilsteinArticle,
 };

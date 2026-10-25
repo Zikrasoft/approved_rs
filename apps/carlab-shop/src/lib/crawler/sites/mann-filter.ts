@@ -26,7 +26,7 @@ const brandOf = ($: CheerioAPI): string | null => {
   return null;
 };
 
-const SPEC_PAIR = /^(.+?)\s*[=:]\s*(.+)$/u;
+const SPEC_PAIR = /^(.+?)\s*[=:]+\s*(.+)$/u;
 const MAIN_APPLICATION = /^(main application|glavna primena)\b/iu;
 
 const specsOf = ($: CheerioAPI): Record<string, string> => {

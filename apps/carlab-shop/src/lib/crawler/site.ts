@@ -3,6 +3,7 @@ import type { Page } from 'playwright';
 import type { SupplierAdapterName } from '../env';
 import type { SupplierArticle } from '../suppliers/adapter';
 import type { FetchMode } from './fetcher';
+import type { SitemapEntry } from './sitemap';
 
 export type CrawledSite = {
   key: SupplierAdapterName;
@@ -14,6 +15,6 @@ export type CrawledSite = {
   waitFor?: string;
   interact?: (page: Page) => Promise<void>;
   isPage: (url: string) => boolean;
-  sitemapPages?: (xml: string) => string[];
+  sitemapPage?: (entry: SitemapEntry) => boolean;
   parse: (html: string) => SupplierArticle | null;
 };

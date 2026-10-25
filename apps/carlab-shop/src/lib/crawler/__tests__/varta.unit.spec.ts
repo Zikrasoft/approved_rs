@@ -15,14 +15,12 @@ describe('VARTA', () => {
     expect(varta.sitemaps).toEqual([
       'https://www.varta-automotive.com/sitemap/sitemap-index.xml',
     ]);
-    expect(
-      sitemapLinks(fixture('sitemap-index.xml').toString('utf8')).sitemaps,
-    ).toEqual([
+    expect(sitemapLinks(fixture('sitemap-index.xml')).sitemaps).toEqual([
       'https://www.varta-automotive.com/sitemap/sitemap.xml',
       'https://www.varta-automotive.com/sitemap/sitemap-2.xml',
       'https://www.varta-automotive.com/sitemap/sitemap-3.xml',
     ]);
-    const { pages } = sitemapLinks(fixture('sitemap.xml').toString('utf8'));
+    const { pages } = sitemapLinks(fixture('sitemap.xml'));
     expect(pages).toHaveLength(5);
     expect(pages.filter(varta.isPage)).toEqual([
       'https://www.varta-automotive.com/sr-latn-rs/products/product/574013068k262',
@@ -87,6 +85,10 @@ describe('VARTA', () => {
       'SILVER DYNAMIC AGM 574013068',
     );
     expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
+  });
+
+  it("reads nothing from VARTA's placeholder product", () => {
+    expect(varta.parse(page('123456789z992.html.gz'))).toBe(null);
   });
 
   it('reads nothing from a page that is not a product', () => {

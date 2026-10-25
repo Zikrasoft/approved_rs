@@ -398,7 +398,7 @@ medusaIntegrationTestRunner({
         expect(shopAi.descriptionsWritten).toEqual([facts]);
       });
 
-      it('keeps the mapped Category over AI and drops attributes the Category refuses', async () => {
+      it('keeps the mapped Category over AI and asks for no attributes a Category without fields cannot hold', async () => {
         intercars.articles.push({
           article_id: 'IC-21',
           brand: 'MANN-FILTER',
@@ -416,7 +416,7 @@ medusaIntegrationTestRunner({
           category_id: oilFiltersId,
           attributes: {},
         });
-        expect(shopAi.specsMapped).toHaveLength(1);
+        expect(shopAi.specsMapped).toEqual([]);
         expect(shopAi.categoryPicks).toEqual([]);
       });
 

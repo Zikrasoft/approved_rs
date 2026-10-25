@@ -13,7 +13,7 @@ const page = (name: string) => gunzipSync(fixture(name)).toString('utf8');
 describe('MANN-FILTER', () => {
   it('seeds from the English commerce sitemap and keeps only product pages', () => {
     const { pages, sitemaps } = sitemapLinks(
-      fixture('en.sitemap-commerce.xml').toString('utf8'),
+      fixture('en.sitemap-commerce.xml'),
     );
     expect(sitemaps).toEqual([]);
     expect(pages.filter(mannFilter.isPage)).toEqual([
@@ -96,6 +96,12 @@ describe('MANN-FILTER', () => {
     ).toEqual(new Set(['FOMOCO', 'FORD', 'VW GROUP (AUDI/SEAT/SKODA/VW)']));
     expect(article.cross_references).toHaveLength(5);
     expect(article.applicability).toHaveLength(308);
+  });
+
+  it('reads a spec the site writes with a doubled colon', () => {
+    expect(mannFilter.parse(page('0101410065.html.gz'))?.specs).toEqual({
+      'Spare part description': 'HEXAGON SCREW M10_65.0_',
+    });
   });
 
   it('reads nothing from a page that is not a product', () => {

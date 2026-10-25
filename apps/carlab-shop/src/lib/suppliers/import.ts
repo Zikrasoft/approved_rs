@@ -125,14 +125,10 @@ async function classify(
       null,
     ));
   const { specs } = article;
+  const fields = categoryId && specs ? await fieldsOf(catalog, categoryId) : [];
   const attributes =
-    categoryId && specs
-      ? await orElse(
-          context,
-          article,
-          async () => ai.mapSpecs(specs, await fieldsOf(catalog, categoryId)),
-          {},
-        )
+    specs && fields.length
+      ? await orElse(context, article, () => ai.mapSpecs(specs, fields), {})
       : {};
   return { category_id: categoryId, attributes };
 }

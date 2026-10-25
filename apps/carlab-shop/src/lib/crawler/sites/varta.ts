@@ -39,6 +39,8 @@ const descriptionOf = ($: CheerioAPI) => {
   return words(description.text());
 };
 
+const PLACEHOLDER = /^Pseudo Article\b/u;
+
 const technologyOf = (name: string) => name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0];
 
 export const parseVartaProduct = (html: string): SupplierArticle | null => {
@@ -47,7 +49,7 @@ export const parseVartaProduct = (html: string): SupplierArticle | null => {
   const name = words($('.products-detail__title').first().text());
   const specs = specsOf($);
   const number = specs.ETN;
-  if (!articleId || !name || !number) return null;
+  if (!articleId || !name || !number || PLACEHOLDER.test(name)) return null;
   const description = descriptionOf($);
   const technology = technologyOf(name);
   return {

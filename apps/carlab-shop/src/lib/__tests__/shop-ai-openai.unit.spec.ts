@@ -129,6 +129,16 @@ describe('OpenAI shop AI', () => {
     ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
   });
 
+  it('writes the description without the yo letter or an em dash even when the model uses them', async () => {
+    globalThis.fetch = answering({
+      description: 'Её задача — защитить двигатель. Ёмкость 2 Ач.',
+    });
+
+    const written = await openAiShopAi('test-key').writeDescription(article);
+
+    expect(written).toBe('Ее задача - защитить двигатель. Емкость 2 Ач.');
+  });
+
   it('says the key is missing without calling OpenAI', async () => {
     globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
 

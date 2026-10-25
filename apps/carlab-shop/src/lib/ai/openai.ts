@@ -154,6 +154,9 @@ const ask = async <T>({
 
 const articleJson = (article: ArticleFacts) => JSON.stringify(article);
 
+const inHouseStyle = (text: string) =>
+  text.replaceAll('ё', 'е').replaceAll('Ё', 'Е').replaceAll('—', '-');
+
 export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
   readQuote: (pdf, categories) =>
     ask({
@@ -195,14 +198,16 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
       })
     ).attributes,
   writeDescription: async (article) =>
-    (
-      await ask({
-        apiKey,
-        system: descriptionPrompt,
-        user: articleJson(article),
-        schema: descriptionSchema,
-        code: 'ARTICLE_UNREADABLE',
-        what: 'The description',
-      })
-    ).description,
+    inHouseStyle(
+      (
+        await ask({
+          apiKey,
+          system: descriptionPrompt,
+          user: articleJson(article),
+          schema: descriptionSchema,
+          code: 'ARTICLE_UNREADABLE',
+          what: 'The description',
+        })
+      ).description,
+    ),
 });
