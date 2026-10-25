@@ -1,8 +1,9 @@
 import { parseEnv } from '../../env';
 import type { CrawledSite } from '../site';
+import { bilstein } from './bilstein';
 import { mannFilter } from './mann-filter';
 
-export const CRAWLED_SITES: CrawledSite[] = [mannFilter];
+export const CRAWLED_SITES: CrawledSite[] = [mannFilter, bilstein];
 
 export const enabledCrawledSites = (): CrawledSite[] => {
   const { SUPPLIER_ADAPTERS } = parseEnv(process.env);

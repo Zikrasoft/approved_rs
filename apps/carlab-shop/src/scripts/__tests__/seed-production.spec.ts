@@ -109,6 +109,11 @@ medusaIntegrationTestRunner({
             import_enabled: true,
             import_on_publish: false,
           }),
+          expect.objectContaining({
+            name: 'bilstein group',
+            import_enabled: true,
+            import_on_publish: false,
+          }),
         ]);
       });
 

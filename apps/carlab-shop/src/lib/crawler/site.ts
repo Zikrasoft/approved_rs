@@ -8,5 +8,6 @@ export type CrawledSite = {
   sitemaps: string[];
   floorMs: number;
   isPage: (url: string) => boolean;
+  sitemapPages?: (xml: string) => string[];
   parse: (html: string) => SupplierArticle | null;
 };
