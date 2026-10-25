@@ -15,9 +15,7 @@ describe('FILTRON', () => {
     expect(filtron.sitemaps).toEqual([
       'https://filtron.eu/sr.sitemap-commerce.xml',
     ]);
-    const { pages } = sitemapLinks(
-      fixture('sr.sitemap-commerce.xml').toString('utf8'),
-    );
+    const { pages } = sitemapLinks(fixture('sr.sitemap-commerce.xml'));
     expect(pages.filter(filtron.isPage)).toEqual([
       'https://filtron.eu/sr/catalog/search-results/product.html/pp987/3_filtron.html',
       'https://filtron.eu/sr/catalog/search-results/product.html/k1477_filtron.html',

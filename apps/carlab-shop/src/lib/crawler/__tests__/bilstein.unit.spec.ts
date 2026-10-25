@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
 import { supplierArticleSchema } from '../../suppliers/adapter';
+import { sitemapLinks } from '../sitemap';
 import { bilstein } from '../sites/bilstein';
 
 const fixture = (name: string) =>
@@ -11,8 +12,11 @@ const page = (name: string) => gunzipSync(fixture(name)).toString('utf8');
 
 describe('bilstein group partsfinder', () => {
   it('seeds only febi, SWAG and Blue Print pages of the families the catalogue covers', () => {
-    const xml = fixture('sr-sitemap-1.xml').toString('utf8');
-    expect(bilstein.sitemapPages?.(xml).filter(bilstein.isPage)).toEqual([
+    const { pages } = sitemapLinks(
+      fixture('sr-sitemap-1.xml'),
+      bilstein.sitemapPage,
+    );
+    expect(pages.filter(bilstein.isPage)).toEqual([
       'https://partsfinder.bilsteingroup.com/sr/article/febi/27699',
       'https://partsfinder.bilsteingroup.com/sr/article/SWAG/20%2092%201466',
       'https://partsfinder.bilsteingroup.com/sr/article/blueprint/ADA102116',

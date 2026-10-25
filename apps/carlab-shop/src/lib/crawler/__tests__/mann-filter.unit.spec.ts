@@ -13,7 +13,7 @@ const page = (name: string) => gunzipSync(fixture(name)).toString('utf8');
 describe('MANN-FILTER', () => {
   it('seeds from the English commerce sitemap and keeps only product pages', () => {
     const { pages, sitemaps } = sitemapLinks(
-      fixture('en.sitemap-commerce.xml').toString('utf8'),
+      fixture('en.sitemap-commerce.xml'),
     );
     expect(sitemaps).toEqual([]);
     expect(pages.filter(mannFilter.isPage)).toEqual([

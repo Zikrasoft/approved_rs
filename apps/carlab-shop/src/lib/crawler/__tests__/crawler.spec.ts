@@ -444,10 +444,7 @@ medusaIntegrationTestRunner({
       it("takes a sitemap's pages from the site's own reader when it has one", async () => {
         const site: CrawledSite = {
           ...testSite('picky'),
-          sitemapPages: (xml) =>
-            [...xml.matchAll(/<loc>([^<]*keep[^<]*)<\/loc>/gu)].map(
-              ([, url]) => url,
-            ),
+          sitemapPage: ({ loc }) => loc.includes('keep'),
         };
         const web = fakeWeb({
           'https://picky.test/robots.txt': ok(''),

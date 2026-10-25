@@ -50,9 +50,7 @@ const retryAfterMs = (
 const succeeded = ({ status }: Response) => status >= 200 && status < 300;
 
 const xmlOf = (bytes: Buffer) =>
-  (bytes[0] === 0x1f && bytes[1] === 0x8b ? gunzipSync(bytes) : bytes).toString(
-    'utf8',
-  );
+  bytes[0] === 0x1f && bytes[1] === 0x8b ? gunzipSync(bytes) : bytes;
 
 export async function crawlSite(
   site: CrawledSite,
@@ -149,9 +147,8 @@ async function crawlWith(
     if (fetched.kind === 'error' || !succeeded(fetched)) {
       return 'sitemap_unavailable';
     }
-    const xml = xmlOf(fetched.body);
-    const links = sitemapLinks(xml);
-    found.push(...(site.sitemapPages?.(xml) ?? links.pages));
+    const links = sitemapLinks(xmlOf(fetched.body), site.sitemapPage);
+    found.push(...links.pages);
     for (const child of links.sitemaps) {
       const reason = await sitemapPages(child, found);
       if (reason) return reason;
