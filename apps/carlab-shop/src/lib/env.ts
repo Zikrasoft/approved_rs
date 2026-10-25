@@ -10,6 +10,7 @@ export const SUPPLIER_ADAPTER_NAMES = [
   'mann-filter',
   'varta',
   'bilstein',
+  'filtron',
 ] as const;
 
 export type SupplierAdapterName = (typeof SUPPLIER_ADAPTER_NAMES)[number];
