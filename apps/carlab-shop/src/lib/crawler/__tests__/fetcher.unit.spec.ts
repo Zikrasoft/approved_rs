@@ -232,4 +232,26 @@ describe('crawleeFetcher', () => {
       ).toContain('<table id="late">');
     },
   );
+
+  withBrowser(
+    'lets the site act on the rendered page before handing it back',
+    async () => {
+      web = await site({
+        '/p/1': html(
+          '<html><body><button onclick="document.body.dataset.opened = \'yes\'">open</button></body></html>',
+        ),
+      });
+      open('browser');
+
+      const fetched = await fetcher.fetch({
+        url: web.url('/p/1'),
+        interact: (page) => page.locator('button').click(),
+        beforeAttempt: async () => {},
+      });
+
+      expect(
+        fetched.kind === 'response' && fetched.body.toString('utf8'),
+      ).toContain('data-opened="yes"');
+    },
+  );
 });
