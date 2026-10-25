@@ -8,6 +8,7 @@ const LOCAL_TYPESENSE_API_KEY = 'xyz';
 export const SUPPLIER_ADAPTER_NAMES = [
   'demo',
   'mann-filter',
+  'varta',
   'bilstein',
 ] as const;
 
