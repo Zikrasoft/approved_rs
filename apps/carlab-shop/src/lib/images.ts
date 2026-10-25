@@ -13,6 +13,7 @@ import sharp from 'sharp';
 import { z } from 'zod';
 
 import { adminError } from './admin-errors';
+import { readUpload, uploadType } from './uploads';
 import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
 import type CatalogModuleService from '../modules/catalog/service';
 
@@ -42,24 +43,17 @@ const invalidImage = (message: string) =>
   adminError(MedusaError.Types.INVALID_DATA, 'INVALID_IMAGE', message);
 
 export async function readImageUpload(req: MedusaRequest): Promise<Buffer> {
-  const type = req.headers['content-type']?.split(';')[0].trim() ?? '';
+  const type = uploadType(req);
   if (!IMAGE_TYPES[type]) {
     throw invalidImage(`Unsupported image type ${type || 'none'}`);
   }
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > MAX_IMAGE_BYTES) {
-      throw adminError(
-        MedusaError.Types.INVALID_DATA,
-        'IMAGE_TOO_LARGE',
-        `Images are limited to ${MAX_IMAGE_BYTES} bytes`,
-      );
-    }
-    chunks.push(chunk);
-  }
-  const body = Buffer.concat(chunks);
+  const body = await readUpload(req, MAX_IMAGE_BYTES, () =>
+    adminError(
+      MedusaError.Types.INVALID_DATA,
+      'IMAGE_TOO_LARGE',
+      `Images are limited to ${MAX_IMAGE_BYTES} bytes`,
+    ),
+  );
   const format = await sharp(body)
     .metadata()
     .then((metadata) => metadata.format)
