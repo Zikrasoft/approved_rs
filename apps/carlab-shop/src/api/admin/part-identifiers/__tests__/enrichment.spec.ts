@@ -213,6 +213,14 @@ medusaIntegrationTestRunner({
         expect(listing.counts).toEqual({ enriched: 4, not_enriched: 1 });
       });
 
+      it('lists the brand-numbers of Parts without a Category for staff to classify', async () => {
+        expect(values(await list('?uncategorized=true'))).toEqual([
+          'BARE-1',
+          'DESC-1',
+          'LOOSE-1',
+        ]);
+      });
+
       it('narrows to the brand-numbers of one Part', async () => {
         const listing = await list(`?part_id=${fittedPartId}`);
 

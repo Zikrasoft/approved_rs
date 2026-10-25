@@ -174,14 +174,10 @@
     "confirmRelease": "Permission granted, show",
     "released": "\"{{kind}}\" from {{supplier}} now shows on the site.",
     "hidden": "\"{{kind}}\" from {{supplier}} is hidden from the site.",
-    "importSkipped": "{{count}} skipped: {{reasons}}.",
+    "importSkipped": "Skipped with an unknown brand spelling: {{count}}.",
     "markupRequired": "Enter the markup as a number from 0 to 500 with at most two decimals, for example 20 or 12.5.",
-    "skippedReasons": {
-      "category": "{{count}} from unmapped categories",
-      "brand": "{{count}} with an unknown brand spelling"
-    },
     "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
-    "importWithoutCategory": "Added without their Category, because it has required attributes the supplier does not give: {{numbers}}. Fill them in on the Part attributes page.",
+    "importWithoutCategory": "Added without a Category: {{numbers}}. They wait under Parts, filtered to No category.",
     "importOn": "On",
     "importOff": "Off",
     "importSwitch": {
@@ -557,6 +553,7 @@
       "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars.",
       "INVALID_QUOTE": "This file does not fit: upload the quote as a PDF.",
       "QUOTE_TOO_LARGE": "The quote is over 10 MB. Shrink the file and upload it again.",
+      "ARTICLE_UNREADABLE": "AI gave an unusable answer for an imported article. Run the import again.",
       "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
       "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
       "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line."

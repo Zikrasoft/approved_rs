@@ -71,6 +71,64 @@ describe('OpenAI shop AI', () => {
     ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
   });
 
+  const article = {
+    name: 'Масло 0W-20',
+    brand: 'MANN-FILTER',
+    number: 'OIL 0W20',
+    description: 'Potpuno sintetičko ulje.',
+    specs: { Viskozitet: '0W-20' },
+  };
+
+  it('picks a Category only from the list it was given', async () => {
+    globalThis.fetch = answering({ category_id: 'cat_oil' });
+    const picked = await openAiShopAi('test-key').pickCategory(
+      article,
+      CATEGORIES,
+    );
+    globalThis.fetch = answering({ category_id: 'cat_invented' });
+    const invented = await openAiShopAi('test-key').pickCategory(
+      article,
+      CATEGORIES,
+    );
+
+    expect([picked, invented]).toEqual(['cat_oil', null]);
+  });
+
+  it('maps specs to attribute values and refuses anything else', async () => {
+    const fields = [
+      {
+        key: 'viscosity',
+        label: 'Вязкость',
+        type: 'text' as const,
+        unit: null,
+        required: true,
+        options: [],
+      },
+    ];
+    globalThis.fetch = answering({ attributes: { viscosity: '0W-20' } });
+    const mapped = await openAiShopAi('test-key').mapSpecs(
+      article.specs,
+      fields,
+    );
+    globalThis.fetch = answering({ attributes: { viscosity: { w: 0 } } });
+
+    expect(mapped).toEqual({ viscosity: '0W-20' });
+    await expect(
+      openAiShopAi('test-key').mapSpecs(article.specs, fields),
+    ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+  });
+
+  it('writes a description and refuses a blank one', async () => {
+    globalThis.fetch = answering({ description: ' Синтетическое масло. ' });
+    const written = await openAiShopAi('test-key').writeDescription(article);
+    globalThis.fetch = answering({ description: ' ' });
+
+    expect(written).toBe('Синтетическое масло.');
+    await expect(
+      openAiShopAi('test-key').writeDescription(article),
+    ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+  });
+
   it('says the key is missing without calling OpenAI', async () => {
     globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
 
