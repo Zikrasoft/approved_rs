@@ -8,11 +8,9 @@ import {
 } from '../suppliers/adapter';
 import type { CrawledSite } from './site';
 import type { CrawlStore } from './store';
+import { errorMessage } from '../errors';
 
 const SNAPSHOTS_PER_PAGE = 50;
-
-const reasonOf = (error: unknown) =>
-  error instanceof Error ? error.message : String(error);
 
 export const crawledSupplierAdapter = (
   site: CrawledSite,
@@ -30,7 +28,7 @@ export const crawledSupplierAdapter = (
         const article = site.parse(gunzipSync(body).toString('utf8'));
         if (article) articles.push(supplierArticleSchema.parse(article));
       } catch (error) {
-        unreadable.push({ url, reason: reasonOf(error) });
+        unreadable.push({ url, reason: errorMessage(error) });
       }
     }
     return {
