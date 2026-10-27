@@ -630,10 +630,13 @@ so the shop's own secrets never reach the Chromium process.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, crawler 512m, caddy 128m, under 3.5 GB together (checked by the
-  compose test). Measured in the image on a 1.4 MB page: the crawler holds about
-  180 MB on HTTP sites and 310 to 370 MB while Chromium renders a browser site; at
-  320m it stalled. Its Node heap is capped at 256 MB: one browser crawl holds two
+  postgres 512m, crawler 640m, caddy 128m, 3584 MB together, under 3.6 GB (checked
+  by the compose test). Measured in the built image on live crawls (bilstein and
+  FILTRON, 3 pages each): the worker idles at about 180 MB, its anonymous memory
+  peaked at 479 MB while Chromium rendered a FILTRON page, and the cgroup total
+  with page cache reached 541 MB on bilstein and 801 MB on FILTRON without a cap.
+  Under a 640m cap the same run finished with no OOM kill, the cache reclaimed;
+  640m leaves about a third over the anonymous peak. At 320m it stalled. Its Node heap is capped at 256 MB: one browser crawl holds two
   Crawlee crawlers (about 20 MB each) and Playwright (about 67 MB) over the
   worker's own baseline, which left no room under the old 160 MB cap for a
   bilstein page or its sitemap list. Four crawls at once peaked at 316 MB of heap,
