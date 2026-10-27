@@ -24,6 +24,9 @@ expect 'the stack is medusa, postgres, typesense and caddy, the crawler runs els
   '[.services | keys[]] == ["caddy", "medusa", "postgres", "typesense"]'
 expect 'postgres and typesense sit on the internal network only' \
   '[.services.postgres, .services.typesense | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
+pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
+expect "postgres keeps the fixed address the crawler tunnel may open ($pg_address)" \
+  ".services.postgres.networks.data.ipv4_address == \"$pg_address\" and .networks.data.ipam.config == [{\"subnet\": \"10.200.0.0/24\", \"ip_range\": \"10.200.0.128/25\"}]"
 expect 'medusa reaches typesense by service name with the shared key' \
   '.services.medusa.environment.TYPESENSE_HOST == "typesense" and .services.medusa.environment.TYPESENSE_API_KEY == "y" and .services.typesense.environment.TYPESENSE_API_KEY == "y"'
 expect 'medusa reaches postgres by service name' \
