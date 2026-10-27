@@ -225,6 +225,15 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
       .update({ status: 'paused', paused_reason: reason });
   },
 
+  async beat(sites: string[], now: Date): Promise<void> {
+    await pg('crawl_run').whereIn('site', sites).update({ heartbeat_at: now });
+  },
+
+  async workerSeenAt(): Promise<Date | null> {
+    const row = await pg('crawl_run').max({ seen: 'heartbeat_at' }).first();
+    return row?.seen ?? null;
+  },
+
   async finish(site: string, now: Date): Promise<void> {
     await pg('crawl_run')
       .where({ site })

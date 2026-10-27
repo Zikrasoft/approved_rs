@@ -564,7 +564,7 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 | File                                     | What it is                                                                                                                       |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node` |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), the catalogue crawler (same image), caddy 2.11.4                 |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB                                   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                           |
@@ -576,8 +576,9 @@ server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
 
-The `crawler` service runs the same image as a plain Node process
-(`node src/lib/crawler/worker.js`), not a second Medusa. It waits for a crawl
+The catalogue crawler is not on the server. It runs on the owner's Mac
+(`src/lib/crawler/worker.ts`, a plain Node process, not a second Medusa), see
+[The crawler on the owner's Mac](#the-crawler-on-the-owners-mac). It waits for a crawl
 started on the admin's Suppliers screen (a number next to the button makes it a
 test run that stops after that many stored pages, picked at random across the
 whole sitemap), reads the site's sitemap, and fetches one page at a time, at
@@ -586,20 +587,59 @@ asks, and Retry-After is waited out). Postgres keeps the queue (`crawl_run`,
 `crawl_page`, with the object key in `crawl_page.body_key`); the gzipped HTML goes
 to the private S3 bucket. Requests go through Crawlee with browser-like headers and rotating
 sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) loads
-its pages in headless Chromium (`chromium-headless-shell` from Alpine, found
-through `CRAWLEE_DEFAULT_BROWSER_PATH` in the image), while robots.txt and sitemaps
+its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
 stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
 failed with its reason in the admin; five such pages in a row pause the crawl, as do
 an unreachable robots.txt or sitemap and five server errors in a row. Pressing the
 button again resumes. It crawls one site at a time: a crawl started while another
 runs waits as queued, and starts once the running one is done or paused; staff
 can pause the running one on its Pause button to let a queued one go first.
-Postgres is the queue, S3 holds the pages, Crawlee keeps nothing on disk, so the
-service has no volume and a restart picks up where it stopped. It sits on `edge` as
-well as `data` because it needs the internet. It does not get `.env`: compose hands
-it only what the worker reads (`NODE_ENV`, the database, `DATABASE_SSL`,
-`CRAWLER_FROM` and the `S3_*` settings, `CRAWLER_ENV_NAMES` in `src/lib/env.ts`),
-so the shop's own secrets never reach the Chromium process.
+Postgres is the queue, S3 holds the pages, Crawlee keeps nothing on disk, so a
+stopped worker picks up where it stopped. The worker stamps `crawl_run.heartbeat_at`
+every 5 s; while a crawl is queued or running and no stamp is newer than a minute,
+the Suppliers screen says the crawler is not running. The import still runs on the
+server, from the Supplier's Import button, over what the crawler stored.
+
+### The crawler on the owner's Mac
+
+Once, in `apps/carlab-shop`:
+
+```bash
+pnpm exec playwright install chromium
+cp .env.crawler.example .env.crawler
+```
+
+`.env.crawler` is gitignored and holds only what the worker reads
+(`CRAWLER_ENV_NAMES` in `src/lib/env.ts`): `NODE_ENV=production`,
+`DATABASE_URL=postgres://carlab:<POSTGRES_PASSWORD>@127.0.0.1:15432/carlab`,
+`DATABASE_SSL=false`, `CRAWLER_FROM` and the same `S3_*` as `/srv/carlab/.env`.
+Copy the values across without printing them.
+
+Postgres has no host port and sits on the internal `data` network, so the worker
+reaches it through an SSH tunnel to the container's address.
+TODO: `harden-ssh.sh` sets `AllowTcpForwarding no`, which refuses this tunnel; the
+owner decides whether to allow `local` forwarding for `deploy` (CI's key keeps
+`restrict`, which forbids it either way). Open the tunnel and leave it open:
+
+```bash
+host=deploy@<IPv4>
+pg=$(ssh "$host" "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' carlab-postgres-1")
+ssh -N -L 127.0.0.1:15432:"$pg":5432 "$host"
+```
+
+The address changes when the postgres container is recreated (a deploy that
+updates it, a reboot); reopen the tunnel then. In a second terminal, start the
+worker and keep the Mac awake while it runs:
+
+```bash
+caffeinate -i pnpm --filter @podbor/carlab-shop crawler
+```
+
+It builds the workspace packages it needs, then waits for a crawl queued in the
+admin. Stop it with Ctrl+C once the crawl is done, then close the tunnel. A crawl
+stopped mid-way (Ctrl+C, a sleeping Mac, a dropped tunnel) stays `running` and
+resumes from where it stopped the next time the worker starts; a page it held
+is retried once its 10 minute lease runs out.
 
 ### The server
 
@@ -630,18 +670,8 @@ so the shop's own secrets never reach the Chromium process.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, crawler 640m, caddy 128m, 3584 MB together, under 3.6 GB (checked
-  by the compose test). Measured in the built image on live crawls (bilstein and
-  FILTRON, 3 pages each): the worker idles at about 180 MB, its anonymous memory
-  peaked at 479 MB while Chromium rendered a FILTRON page, and the cgroup total
-  with page cache reached 541 MB on bilstein and 801 MB on FILTRON without a cap.
-  Under a 640m cap the same run finished with no OOM kill, the cache reclaimed;
-  640m leaves about a third over the anonymous peak. At 320m it stalled. Its Node heap is capped at 256 MB: one browser crawl holds two
-  Crawlee crawlers (about 20 MB each) and Playwright (about 67 MB) over the
-  worker's own baseline, which left no room under the old 160 MB cap for a
-  bilstein page or its sitemap list. Four crawls at once peaked at 316 MB of heap,
-  which is why the worker runs one at a time. Watch `docker stats` during the first FILTRON crawl. Chromium
-  adds about 650 MB to the image (1.39 GB in all).
+  postgres 512m, caddy 128m, 2944 MB together, under 3 GB (checked
+  by the compose test). The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
@@ -746,9 +776,9 @@ validates everything at startup. The non-obvious parts:
   Blue Print), Serbian pages of the filter, brake, suspension and service part
   families only, one request per 5 s. `filtron` is the crawled FILTRON
   catalogue (the Serbian product pages, same platform as MANN-FILTER), its pages
-  rendered in Chromium. `demo` never runs in production.
-- `CRAWLER_FROM` is the mailbox the crawler sends in its `From` header, so a site
-  owner can reach whoever runs it. Empty, no `From` is sent.
+  rendered in Chromium by the crawler on the owner's Mac. `demo` never runs in production.
+- `CRAWLER_FROM` (in the Mac's `.env.crawler`, not here) is the mailbox the crawler
+  sends in its `From` header, so a site owner can reach whoever runs it. Empty, no `From` is sent.
 - `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
   `NODE_ENV=production` and open everywhere else; the template sets `false`.
   See [Closed beta](#closed-beta-the-preview-flag).
