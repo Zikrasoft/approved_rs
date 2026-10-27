@@ -27,3 +27,7 @@ onlyBuiltDependencies:
   - msgpackr-extract
   - '@swc/core'
   - protobufjs
+packageExtensions:
+  '@medusajs/core-flows':
+    dependencies:
+      uuid: 11.1.1

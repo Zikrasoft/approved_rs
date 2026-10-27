@@ -18,7 +18,7 @@ export class Migration20261025010019 extends Migration {
       `alter table if exists "supplier" drop constraint if exists "supplier_name_unique";`,
     );
     this.addSql(
-      `create table if not exists "supplier" ("id" text not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"));`,
+      `create table if not exists "supplier" ("id" text not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "import_on_publish" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_supplier_name_unique" ON "supplier" ("name") WHERE deleted_at IS NULL;`,

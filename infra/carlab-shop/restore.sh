@@ -2,20 +2,12 @@
 set -eu
 
 dump=${1:-}
-files=${2:-}
 [ -s "$dump" ] || {
-  echo "usage: $0 /var/backups/carlab/db-<stamp>.dump [/var/backups/carlab/static-<stamp>.tar.gz]" >&2
-  exit 2
-}
-[ -z "$files" ] || [ -s "$files" ] || {
-  echo "$files is missing or empty." >&2
+  echo "usage: $0 /var/backups/carlab/db-<stamp>.dump" >&2
   exit 2
 }
 
 dump=$(cd "$(dirname -- "$dump")" && pwd)/$(basename -- "$dump")
-if [ -n "$files" ]; then
-  files=$(cd "$(dirname -- "$files")" && pwd)/$(basename -- "$files")
-fi
 
 cd "$(dirname -- "$0")"
 
@@ -33,12 +25,6 @@ docker compose stop medusa
 echo "==> Database from $dump"
 docker compose exec -T postgres \
   pg_restore -U carlab -d carlab --clean --if-exists --no-owner --single-transaction <"$dump"
-
-if [ -n "$files" ]; then
-  echo "==> Files from $files"
-  docker compose run --rm -T --no-deps --entrypoint sh medusa \
-    -c 'find /server/static -mindepth 1 -delete && tar -C /server/static -xzf -' <"$files"
-fi
 
 echo "==> Migrations"
 docker compose run --rm -T medusa \

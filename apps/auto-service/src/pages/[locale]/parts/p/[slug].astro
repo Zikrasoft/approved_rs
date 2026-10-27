@@ -8,6 +8,7 @@ import Icon from '@/components/Icon.astro';
 import FitLine from '@/components/FitLine.astro';
 import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { localeFrom } from '@/i18n/config';
@@ -56,6 +57,15 @@ const attributes = category
       yes: copy.attributeYes,
       no: copy.attributeNo,
     })
+  : [];
+const description = page.part.description
+  ? paragraphs(
+      translated(
+        { ...page.part, description: page.part.description },
+        'description',
+        locale,
+      ),
+    )
   : [];
 const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
@@ -235,6 +245,15 @@ const thumbFor = (slug: string) => {
 
     <div class="flex flex-col gap-8 lg:col-start-1">
       {
+        description.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+            {description.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+      {
         attributes.length > 0 && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section">{copy.attributesHeading}</h2>
@@ -403,6 +422,8 @@ const thumbFor = (slug: string) => {
       )
     }
   </section>
+
+  <PartsInquiryModal />
 </Shell>
 
 <script>

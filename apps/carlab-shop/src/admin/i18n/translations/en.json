@@ -10,7 +10,8 @@
     "supersession": "Supersession",
     "categories": "Categories",
     "partAttributes": "Part attributes",
-    "requirements": "Requirements"
+    "requirements": "Requirements",
+    "workshopQuotes": "Workshop quotes"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -142,9 +143,9 @@
     },
     "save": "Save",
     "import": "Import now",
-    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. A supplier with On publish switched off loads only from Import in its own row. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
-    "importNoAdapters": "No supplier has its import switched on",
+    "importNoAdapters": "No supplier loads on publish",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -173,20 +174,18 @@
     "confirmRelease": "Permission granted, show",
     "released": "\"{{kind}}\" from {{supplier}} now shows on the site.",
     "hidden": "\"{{kind}}\" from {{supplier}} is hidden from the site.",
-    "importSkipped": "{{count}} skipped: {{reasons}}.",
+    "importSkipped": "Skipped with an unknown brand spelling: {{count}}.",
     "markupRequired": "Enter the markup as a number from 0 to 500 with at most two decimals, for example 20 or 12.5.",
-    "skippedReasons": {
-      "category": "{{count}} from unmapped categories",
-      "brand": "{{count}} with an unknown brand spelling"
-    },
+    "importUnreadable": "Pages that could not be read, skipped and logged: {{count}}.",
     "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
-    "importWithoutCategory": "Added without their Category, because it has required attributes the supplier does not give: {{numbers}}. Fill them in on the Part attributes page.",
+    "importWithoutEngineCode": "Applicability rows without an engine code, fitted to no Vehicle: {{count}}.",
+    "importWithoutCategory": "Added without a Category: {{numbers}}. They wait under Parts, filtered to No category.",
     "importOn": "On",
     "importOff": "Off",
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "Publishing and Import now will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
+        "body": "Publishing and the import buttons will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
         "confirm": "Switch off import",
         "done": "Import from {{supplier}} switched off. Its offers stay on the site until you take them off in the supplier's menu."
       },
@@ -205,7 +204,15 @@
       "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so publishing does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
       "done_one": "{{supplier}}: {{count}} offer taken off, import switched off. Site pages update after the next publish.",
       "done_other": "{{supplier}}: {{count}} offers taken off, import switched off. Site pages update after the next publish."
-    }
+    },
+    "importOnPublish": "On publish",
+    "importOnPublishSaved": {
+      "on": "{{supplier}} loads on every publish again.",
+      "off": "{{supplier}} no longer loads on publish, only from Import in its own row."
+    },
+    "importOne": "Import",
+    "importOneLabel": "Import {{supplier}}",
+    "importOffPublish": "Loaded only from their own button, not loaded now: {{suppliers}}."
   },
   "brands": {
     "heading": "Brands",
@@ -459,6 +466,8 @@
     "findLabel": "Find the Part",
     "searchPlaceholder": "Number or brand",
     "search": "Search",
+    "description": "Description",
+    "descriptionHint": "Shown on every page of this Part. Publish translates it to Serbian and English.",
     "category": "Category",
     "noCategory": "No Category",
     "required": "required",
@@ -543,7 +552,13 @@
       "MANUAL_SOURCE": "Manually entered rows cannot be removed by source. Delete them one by one in their sections.",
       "INVALID_IMAGE": "This file cannot be used: upload a JPEG, PNG or WebP photo.",
       "IMAGE_TOO_LARGE": "The photo is over 10 MB. Make it smaller and upload it again.",
-      "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars."
+      "REQUIREMENT_CONFLICT": "The part contradicts the requirements of the chosen cars.",
+      "INVALID_QUOTE": "This file does not fit: upload the quote as a PDF.",
+      "QUOTE_TOO_LARGE": "The quote is over 10 MB. Shrink the file and upload it again.",
+      "ARTICLE_UNREADABLE": "AI gave an unusable answer for an imported article. Run the import again.",
+      "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
+      "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
+      "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -687,7 +702,8 @@
     "removed_other": "{{source}}: {{count}} rows removed. The site updates after the next publish.",
     "empty": "Rows appear after the first import or manual entry.",
     "names": {
-      "manual": "Manual entry"
+      "manual": "Manual entry",
+      "workshop-quote": "Workshop quotes"
     },
     "actionsFor": "Actions for source {{source}}",
     "confirmSupplierBody_one": "{{count}} row will be removed and the import from this supplier switched off, so the next import does not bring it back. It cannot be restored.",
@@ -707,6 +723,7 @@
     },
     "fields": {
       "name": "Name",
+      "description": "Description",
       "text": "Description",
       "label": "Label",
       "note": "Note",
@@ -776,8 +793,7 @@
       "notEnriched": "Not shown in search"
     },
     "reasons": {
-      "no_category": "no category set",
-      "no_fitment_equivalent_or_requirement": "no fitting cars, equivalents or requirements"
+      "bare_number": "only a brand and number: add a description, attributes, fitting cars or an equivalent"
     },
     "searchLabel": "Search by number or name",
     "searchPlaceholder": "Number, brand or name",
@@ -874,6 +890,96 @@
       "title_one": "{{count}} order this week did not reach the CRM as a lead:",
       "title_other": "{{count}} orders this week did not reach the CRM as leads:",
       "hint": "Until the lead exists, nobody is reminded to call the customer back. Open the order: the CarLab order block shows the contact and what went wrong."
+    }
+  },
+  "workshopQuotes": {
+    "heading": "Workshop quotes",
+    "lead": "Upload a workshop quote (ponuda) as a PDF: AI reads the VIN, the car and the part lines, and proposes a brand and a category for each. You get a draft: nothing reaches the catalogue until you press Create. The quote's prices are not read.",
+    "upload": "Upload a quote",
+    "uploadAnother": "Upload another quote",
+    "hint": "PDF up to 10 MB.",
+    "reading": "Reading the quote, this can take up to a minute.",
+    "wrongType": "“{{name}}” is not a PDF. Upload the quote as a PDF.",
+    "tooLarge": "“{{name}}” is over 10 MB. Shrink the file and upload it again.",
+    "draftHeading": "Draft from “{{name}}”",
+    "draftNote": "Fix the lines and press Create: the parts, their numbers and their fitments on the car are added to the catalogue. Nothing has been created yet.",
+    "vin": "VIN",
+    "noVin": "Not found in the quote",
+    "vehicleText": "Car in the quote",
+    "noVehicleText": "Not given",
+    "vehicle": "Car in the catalogue",
+    "noVehicle": "Not found",
+    "noVehicleHint": "No catalogue car matches this VIN. The parts can still be created without fitments; to get fitments, add the car under Vehicles.",
+    "noLines": "No part lines were found in the quote.",
+    "uncertainSummary_one": "{{count}} line has an uncertain brand: check it before creating.",
+    "uncertainSummary_other": "{{count}} lines have an uncertain brand: check them before creating.",
+    "columns": {
+      "name": "Name",
+      "number": "Number",
+      "quantity": "Qty",
+      "brand": "Brand",
+      "category": "Category",
+      "actions": "Actions"
+    },
+    "checkBrand": "Check the brand",
+    "noCategory": "No category",
+    "brandPlaceholder": "Enter the brand",
+    "useSuggestion": "Use {{brand}} ({{confidence}})",
+    "cellLabel": "{{column}}, line {{number}}",
+    "removeLine": "Remove line {{number}}",
+    "create": "Create",
+    "createBlocked": "To create, fill in the brand, name, number and quantity on every line.",
+    "created": "Quote added to the catalogue",
+    "resultHeading": "Created from “{{name}}”",
+    "resultNew": "New parts",
+    "resultReused": "Already in the catalogue",
+    "resultFitments": "New fitments",
+    "resultFitmentsOn": "{{count}} on {{vehicle}}",
+    "resultNoVehicle": "No catalogue car matches the VIN, so no fitments were created. Add the car under Vehicles and attach the parts under Fitments."
+  },
+  "crawls": {
+    "heading": "Catalogue crawls",
+    "lead": "The crawler reads a maker's site one page every few seconds and stores the pages here. The Supplier's import takes Parts from the stored pages. A full pass takes hours; you can close this page.",
+    "status": {
+      "idle": "Not started",
+      "queued": "Waiting its turn",
+      "running": "Crawling",
+      "paused": "Paused",
+      "done": "Crawled"
+    },
+    "start": "Start crawl",
+    "resume": "Resume crawl",
+    "restart": "Crawl again",
+    "pause": "Pause",
+    "pauseLabel": "Pause the {{supplier}} crawl",
+    "paused": "{{supplier}}: crawl paused. The next waiting crawl starts.",
+    "waiting": "The crawler reads one site at a time. This crawl starts once the running one is done or paused.",
+    "workerMissing": "The crawl is waiting for the crawler, which is not running. Start the crawler on your computer.",
+    "startLabel": "Crawl the {{supplier}} catalogue",
+    "limitLabel": "Pages of {{supplier}} to crawl as a test run, empty for all",
+    "limitPlaceholder": "All pages",
+    "progressLabel": "{{supplier}} crawl progress",
+    "started": "{{supplier}}: crawl started. Progress updates by itself.",
+    "done": "{{done}} of {{total}} pages fetched",
+    "queued": "Queued: {{value}}",
+    "failed": "Failed: {{value}}",
+    "failures": {
+      "blocked": "blocked by the site: {{value}}",
+      "robots": "disallowed by robots.txt: {{value}}",
+      "network": "site did not answer: {{value}}",
+      "server": "server error: {{value}}",
+      "http": "refused by the site: {{value}}"
+    },
+    "gone": "Gone from the site: {{value}}",
+    "startedAt": "Started {{date}}",
+    "finishedAt": "Finished {{date}}",
+    "empty": "No site is switched on for crawling.",
+    "pausedReasons": {
+      "blocked": "The site is blocking the crawler: five pages in a row did not open even after retries. Resume later.",
+      "robots_unavailable": "The site's robots.txt did not open, which the rules read as no crawling. Resume later.",
+      "sitemap_unavailable": "The sitemap did not load. Resume later.",
+      "server_errors": "The site answered with a server error five times in a row. Resume later.",
+      "staff": "Paused by staff. Resume it to put it back in line."
     }
   }
 }

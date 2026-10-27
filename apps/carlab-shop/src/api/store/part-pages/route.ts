@@ -117,6 +117,7 @@ export async function GET(
     part: {
       id: identifier.part.id,
       name: identifier.part.name,
+      description: identifier.part.description,
       translations: identifier.part.translations,
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,

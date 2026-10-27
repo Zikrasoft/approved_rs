@@ -13,6 +13,7 @@ const page = {
   part: {
     id: 'part_1',
     name: 'Масляный фильтр',
+    description: null,
     translations: { sr: { name: 'Filter ulja' }, en: { name: 'Oil filter' } },
     replaced_by: null,
     category_id: null,
@@ -40,6 +41,30 @@ describe('partPageSchema', () => {
         ...page,
         part: { ...page.part, installation_price: undefined },
       }).part.installation_price,
+    ).toBeNull();
+  });
+
+  it('carries the Part description in every locale', () => {
+    const described = {
+      ...page,
+      part: {
+        ...page.part,
+        description: 'Фильтр с обратным клапаном',
+        translations: {
+          sr: {
+            name: 'Filter ulja',
+            description: 'Filter sa nepovratnim ventilom',
+          },
+          en: { name: 'Oil filter', description: 'Filter with a check valve' },
+        },
+      },
+    };
+    expect(partPageSchema.parse(described)).toEqual(described);
+    expect(
+      partPageSchema.parse({
+        ...page,
+        part: { ...page.part, description: undefined },
+      }).part.description,
     ).toBeNull();
   });
 

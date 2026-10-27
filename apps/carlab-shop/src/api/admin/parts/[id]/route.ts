@@ -17,6 +17,7 @@ export async function POST(
   const { id } = req.params;
   const {
     name,
+    description,
     replaced_by_id,
     category_id,
     attributes,
@@ -29,14 +30,23 @@ export async function POST(
   const current = await catalog.retrievePart(id);
   if (
     name !== undefined ||
+    description !== undefined ||
     installation_price !== undefined ||
     no_installation !== undefined
   ) {
     await catalog.updateParts({
       id,
       ...(name !== undefined && { name }),
+      ...(description !== undefined && { description }),
       ...(installation_price !== undefined && { installation_price }),
       ...(no_installation !== undefined && { no_installation }),
+      edited_fields: [
+        ...new Set([
+          ...current.edited_fields,
+          ...(name === undefined ? [] : ['name']),
+          ...(description === undefined ? [] : ['description']),
+        ]),
+      ],
       updated_by,
     });
   }
@@ -59,6 +69,7 @@ export async function POST(
     part: {
       id,
       name: part.name,
+      description: part.description,
       replaced_by_id: part.replaced_by_id,
       category_id: part.category_id,
       attributes: part.attributes,

@@ -11,6 +11,7 @@ import {
   STAGED_DATA_KINDS,
   STEERING_SIDES,
   UNIVERSAL_FACET_KEYS,
+  vinSchema,
 } from '@podbor/catalog-contract';
 
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
@@ -73,8 +74,17 @@ export type AdminCreatePartType = z.infer<typeof AdminCreatePart>;
 
 const servicePrice = z.number().int().nonnegative().max(MAX_SERVICE_PRICE);
 
+const MAX_DESCRIPTION_LENGTH = 5000;
+
 export const AdminUpdatePart = z.strictObject({
   name: name.optional(),
+  description: z
+    .string()
+    .trim()
+    .max(MAX_DESCRIPTION_LENGTH)
+    .transform((text) => text || null)
+    .nullable()
+    .optional(),
   installation_price: servicePrice.nullable().optional(),
   no_installation: z.boolean().optional(),
   replaced_by_id: z.string().min(1).nullable().optional(),
@@ -102,6 +112,10 @@ export const AdminListPartIdentifiers = z.object({
     .optional(),
   q: z.string().trim().optional(),
   category_id: z.string().min(1).optional(),
+  uncategorized: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   part_id: z.string().min(1).optional(),
   offset: z.coerce.number().int().nonnegative().default(0),
   limit: z.coerce.number().int().positive().max(200).default(50),
@@ -243,9 +257,15 @@ export const AdminUpdateSupplier = z
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
     import_enabled: z.boolean().optional(),
+    import_on_publish: z.boolean().optional(),
   })
   .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;
+
+export const AdminStartCrawl = z.strictObject({
+  limit: z.number().int().min(1).max(100_000).optional(),
+});
+export type AdminStartCrawlType = z.infer<typeof AdminStartCrawl>;
 
 export const AdminCreateSupplierCategory = z.strictObject({
   code: name,
@@ -389,3 +409,21 @@ export const AdminCreateRequirement = z
     { message: 'Exactly one of engine_id, chassis_id, vehicle_id' },
   );
 export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
+
+export const AdminConfirmWorkshopQuote = z.strictObject({
+  vin: vinSchema.nullable(),
+  lines: z
+    .array(
+      z.strictObject({
+        name,
+        number: partNumber,
+        quantity,
+        brand: name,
+        category_id: z.string().min(1).nullable(),
+      }),
+    )
+    .min(1),
+});
+export type AdminConfirmWorkshopQuoteType = z.infer<
+  typeof AdminConfirmWorkshopQuote
+>;

@@ -1,6 +1,10 @@
-import type { MedusaContainer } from '@medusajs/framework/types';
-import { MedusaError } from '@medusajs/framework/utils';
+import type { Logger, MedusaContainer } from '@medusajs/framework/types';
 import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from '@medusajs/framework/utils';
+import {
+  type AttributeValues,
   normalizePartNumber,
   STAGED_DATA_KINDS,
 } from '@podbor/catalog-contract';
@@ -8,18 +12,30 @@ import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
+import type { PartClassification } from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
 import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
+import {
+  type ArticleFacts,
+  type CategoryChoice,
+  type CategoryFieldChoice,
+  shopAi,
+  type ShopAi,
+} from '../ai';
 import {
   cataloguePageSchema,
   type SupplierAdapter,
   supplierAdapters,
   supplierQuoteSchema,
 } from './adapter';
+import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
+import { shopStorage, type ShopStorage } from '../storage';
+import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
 import { spellingKey } from './spelling';
+import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
@@ -29,25 +45,125 @@ export type ImportSummary = {
   imported: number;
   created: number;
   skipped: number;
-  skipped_by_reason: { category: number; brand: number; currency: number };
+  skipped_by_reason: {
+    brand: number;
+    currency: number;
+    unreadable: number;
+    no_engine_code: number;
+  };
   needs_category: string[];
 };
 
 type Context = {
+  scope: MedusaContainer;
   adapter: SupplierAdapter;
   supplierId: string;
   catalog: CatalogModuleService;
   suppliers: SupplierModuleService;
+  ai: ShopAi;
+  categories: CategoryChoice[];
+  logger: Logger;
+  matched: Set<string>;
+  vehicles: VehicleMatcher;
+  storage: ShopStorage | null;
 };
 
+const factsOf = (article: Article): ArticleFacts => ({
+  name: article.name,
+  brand: article.brand,
+  number: article.number,
+  description: article.description ?? null,
+  specs: article.specs ?? {},
+});
+
+async function orElse<T>(
+  { adapter, logger }: Context,
+  article: Article,
+  run: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    logger.warn(
+      `Supplier import ${adapter.name}, ${article.number}: AI failed, ${errorMessage(error)}`,
+    );
+    return fallback;
+  }
+}
+
+async function fieldsOf(
+  catalog: CatalogModuleService,
+  categoryId: string,
+): Promise<CategoryFieldChoice[]> {
+  const fields = await catalog.listCategoryFields(
+    { category_id: categoryId },
+    { relations: ['options'], take: null },
+  );
+  return fields.map(({ key, label, type, unit, required, options }) => ({
+    key,
+    label,
+    type,
+    unit,
+    required,
+    options: options.map((option) => ({
+      key: option.key,
+      label: option.label,
+    })),
+  }));
+}
+
+const describe = (context: Context, article: Article) =>
+  article.description || article.specs
+    ? orElse(
+        context,
+        article,
+        () => context.ai.writeDescription(factsOf(article)),
+        null,
+      )
+    : Promise.resolve(null);
+
+const nameOf = (context: Context, article: Article) =>
+  orElse(context, article, () => context.ai.writeName(factsOf(article)), null);
+
+async function classify(
+  context: Context,
+  article: Article,
+  mappedCategoryId: string | undefined,
+): Promise<{ category_id: string | null; attributes: AttributeValues }> {
+  const { ai, catalog, categories } = context;
+  const categoryId =
+    mappedCategoryId ??
+    (await orElse(
+      context,
+      article,
+      () => ai.pickCategory(factsOf(article), categories),
+      null,
+    ));
+  const { specs } = article;
+  const fields = categoryId && specs ? await fieldsOf(catalog, categoryId) : [];
+  const attributes =
+    specs && fields.length
+      ? await orElse(context, article, () => ai.mapSpecs(specs, fields), {})
+      : {};
+  return { category_id: categoryId, attributes };
+}
+
+const refusedAttributes = (error: unknown) =>
+  MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
+
 async function createPart(
-  { adapter, catalog }: Context,
+  context: Context,
   article: Article,
   brandId: string,
-  categoryId: string,
+  mappedCategoryId: string | undefined,
 ): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
+  const { adapter, catalog } = context;
+  const name = await nameOf(context, article);
   const part = {
-    name: article.name,
+    name: name ?? article.name,
+    source_name: name && article.name,
+    description: await describe(context, article),
     identifiers: [
       {
         type: 'manufacturer-number' as const,
@@ -57,30 +173,38 @@ async function createPart(
     ],
     source: adapter.name,
   };
-  let categorized = true;
-  const partId = await catalog
-    .createPartWithIdentifiers({ ...part, category_id: categoryId })
-    .catch((error: unknown) => {
-      if (
-        MedusaError.isMedusaError(error) &&
-        error.code === 'INVALID_ATTRIBUTES'
-      ) {
-        categorized = false;
-        return catalog.createPartWithIdentifiers(part);
-      }
-      throw error;
-    });
+  const classification = await classify(context, article, mappedCategoryId);
+  let categoryId = classification.category_id;
+  const create = (attempt: Partial<PartClassification>) =>
+    catalog.createPartWithIdentifiers({ ...part, ...attempt });
+  const unlessRefused = (retry: () => Promise<string>) => (error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    return retry();
+  };
+  const partId = await create(classification)
+    .catch(unlessRefused(() => create({ category_id: categoryId })))
+    .catch(
+      unlessRefused(() => {
+        categoryId = null;
+        return create({});
+      }),
+    );
   const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return { identifierId: identifier.id, partId, categorized };
+  return {
+    identifierId: identifier.id,
+    partId,
+    categorized: Boolean(categoryId),
+  };
 }
 
 async function matchArticle(
   context: Context,
   article: Article,
   brandId: string,
-  categoryId: string,
+  categoryId: string | undefined,
 ): Promise<{
   identifierId: string;
+  partId: string;
   created: boolean;
   changedPartId?: string;
   categorized?: boolean;
@@ -100,18 +224,39 @@ async function matchArticle(
       brandId,
       categoryId,
     );
-    return { identifierId, created: true, changedPartId: partId, categorized };
+    return {
+      identifierId,
+      partId,
+      created: true,
+      changedPartId: partId,
+      categorized,
+    };
   }
   const { part } = hit;
-  if (
-    part.source === adapter.name &&
-    !part.updated_by &&
-    part.name !== article.name
-  ) {
-    await catalog.updateParts({ id: part.id, name: article.name });
-    return { identifierId: hit.id, created: false, changedPartId: part.id };
+  const unchanged = { identifierId: hit.id, partId: part.id, created: false };
+  if (part.source !== adapter.name) {
+    return unchanged;
   }
-  return { identifierId: hit.id, created: false };
+  const edited = new Set(part.edited_fields);
+  const name =
+    edited.has('name') ||
+    context.matched.has(hit.id) ||
+    part.source_name === article.name
+      ? null
+      : await nameOf(context, article);
+  const description =
+    edited.has('description') || part.description
+      ? null
+      : await describe(context, article);
+  if (!name && !description) {
+    return unchanged;
+  }
+  await catalog.updateParts({
+    id: part.id,
+    ...(name && { name, source_name: article.name }),
+    ...(description && { description }),
+  });
+  return { ...unchanged, changedPartId: part.id };
 }
 
 async function storeOffer(
@@ -134,16 +279,35 @@ async function storeOffer(
     : suppliers.createSupplierOffers(offer));
 }
 
+async function stagedImages(
+  { scope, storage, logger }: Context,
+  images: string[],
+): Promise<{ items: string[]; sources?: Record<string, string> }> {
+  if (!storage) return { items: images };
+  const sources: Record<string, string> = {};
+  for (const source of images) {
+    const mirrored = await mirroredImage(scope, storage, source, logger);
+    if (mirrored) sources[mirrored] = source;
+  }
+  return { items: Object.keys(sources), sources };
+}
+
 async function stage(
-  { supplierId, suppliers }: Context,
+  context: Context,
   identifierId: string,
   article: Article,
 ): Promise<void> {
+  const { supplierId, suppliers } = context;
   for (const kind of STAGED_DATA_KINDS) {
-    const items = article[kind];
-    if (!items) {
+    const listed = article[kind];
+    if (!listed) {
       continue;
     }
+    const payload =
+      kind === 'images'
+        ? await stagedImages(context, article.images!)
+        : { items: listed };
+    const { items } = payload;
     const [existing] = await suppliers.listStagedRecords({
       supplier_id: supplierId,
       part_identifier_id: identifierId,
@@ -156,12 +320,12 @@ async function stage(
       continue;
     }
     await (existing
-      ? suppliers.updateStagedRecords({ id: existing.id, payload: { items } })
+      ? suppliers.updateStagedRecords({ id: existing.id, payload })
       : suppliers.createStagedRecords({
           supplier_id: supplierId,
           part_identifier_id: identifierId,
           kind,
-          payload: { items },
+          payload,
         }));
   }
 }
@@ -178,10 +342,19 @@ export async function importSupplier(
     throw new Error(`No Supplier is named ${adapter.name}`);
   }
   const context: Context = {
+    scope,
     adapter,
     supplierId: supplier.id,
     catalog,
     suppliers,
+    ai: shopAi(scope),
+    categories: (
+      await catalog.listCategories({}, { select: ['id', 'name'], take: null })
+    ).map(({ id, name }) => ({ id, name })),
+    logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
+    matched: new Set(),
+    vehicles: vehicleMatcher(catalog, adapter.name),
+    storage: shopStorage(scope),
   };
   const categoryOf = new Map(
     (
@@ -204,7 +377,12 @@ export async function importSupplier(
     imported: 0,
     created: 0,
     skipped: 0,
-    skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+    skipped_by_reason: {
+      brand: 0,
+      currency: 0,
+      unreadable: 0,
+      no_engine_code: 0,
+    },
     needs_category: [],
   };
   const brandOfArticle = (article: Article) =>
@@ -216,18 +394,17 @@ export async function importSupplier(
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
-    const unmapped = page.articles.filter(
-      (article) => !categoryOfArticle(article),
-    );
-    const unbranded = page.articles.filter(
-      (article) => categoryOfArticle(article) && !brandOfArticle(article),
-    );
-    const wanted = page.articles.filter(
-      (article) => categoryOfArticle(article) && brandOfArticle(article),
-    );
-    summary.skipped += unmapped.length + unbranded.length;
-    summary.skipped_by_reason.category += unmapped.length;
-    summary.skipped_by_reason.brand += unbranded.length;
+    for (const { url, reason } of page.unreadable) {
+      context.logger.warn(
+        `${adapter.name}: skipped unreadable ${url}: ${reason}`,
+      );
+    }
+    summary.skipped += page.unreadable.length;
+    summary.skipped_by_reason.unreadable += page.unreadable.length;
+    const wanted = page.articles.filter(brandOfArticle);
+    const unbranded = page.articles.length - wanted.length;
+    summary.skipped += unbranded;
+    summary.skipped_by_reason.brand += unbranded;
     const quoted = wanted.length
       ? z
           .array(supplierQuoteSchema)
@@ -240,13 +417,14 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, created, changedPartId, categorized } =
+      const { identifierId, partId, created, changedPartId, categorized } =
         await matchArticle(
           context,
           article,
           brandOfArticle(article)!,
-          categoryOfArticle(article)!,
+          categoryOfArticle(article),
         );
+      context.matched.add(identifierId);
       if (changedPartId) {
         changedPartIds.add(changedPartId);
       }
@@ -259,6 +437,12 @@ export async function importSupplier(
         listed.add(article.article_id);
       }
       await stage(context, identifierId, article);
+      if (article.vehicles) {
+        await fitVehicles(context.vehicles, partId, article.vehicles);
+        summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+          ({ engine_codes }) => !engine_codes.length,
+        ).length;
+      }
       summary.imported += Number(!created);
       summary.created += Number(created);
     }
@@ -285,14 +469,16 @@ export async function importSupplierCatalogues(
   scope: MedusaContainer,
 ): Promise<ImportSummary[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
-  const disabled = new Set(
-    (await suppliers.listSuppliers({ import_enabled: false })).map(
-      ({ name }) => name,
-    ),
+  const skipped = new Set(
+    (
+      await suppliers.listSuppliers({
+        $or: [{ import_enabled: false }, { import_on_publish: false }],
+      })
+    ).map(({ name }) => name),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {
-    if (disabled.has(adapter.name)) {
+    if (skipped.has(adapter.name)) {
       continue;
     }
     summaries.push(await importSupplier(scope, adapter));

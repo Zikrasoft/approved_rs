@@ -42,13 +42,13 @@ describe('CommonJS build', () => {
   it('serves the enrichment rule to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(
-      contract.enrichmentRule([])({
-        category_id: null,
+      contract.enrichmentGaps({
+        description: null,
         attributes: {},
-        fitments: 1,
+        fitments: 0,
         equivalents: 0,
       }),
-    ).toEqual(['no_category']);
+    ).toEqual(['bare_number']);
   });
 
   it('serves the ambiguity rule to require()', () => {

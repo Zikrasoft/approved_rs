@@ -43,15 +43,17 @@ partsInquiry:
   formHeading: Оставить заявку
   vinLabel: VIN или номер шасси (необязательно)
   vinPlaceholder: Введите VIN или номер шасси
+  vinNote: Нужен, чтобы проверить совместимость запчастей с вашей машиной.
   commentLabel: Какие запчасти нужны? (необязательно)
   commentPlaceholder: Напишите, что нужно, если знаете
   commentNote: Не обязательно знать точное название детали, мы свяжемся с вами и вместе разберемся, что нужно.
-  listHeading: Запчасти в заявке
-  listRemoveLabel: Убрать из заявки
+  listHeading: Корзина
+  listRemoveLabel: Убрать из корзины
+  listQuantityLabel: Количество
   listCarRemoveLabel: Не привязывать заявку к этой машине
   listMoreTemplate: 'Не поместилось позиций: {count}'
   llmsCatalogue: 'Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО, указав только контакт; цену проверяем заново при оформлении, а наличие и время самовывоза менеджер подтверждает после заказа. Если цены нет, соберите список запчастей и отправьте его одной заявкой.'
-  llmsCatalogueClosed: 'Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цену и наличие сообщаем по заявке: соберите список запчастей и отправьте его одной заявкой, а забрать запчасти можно на СТО в Белграде.'
+  llmsCatalogueClosed: 'Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цен на сайте нет: запчастей слишком много, чтобы держать все цены актуальными. Запчасти заказывают только по заявке: соберите нужные в корзину и отправьте ее, указав контакт (VIN по желанию). Менеджер проверит совместимость по VIN, назовет цену и согласует покупку, а забрать запчасти можно на СТО в Белграде.'
   stepsHeading: Как это работает
   steps:
     - heading: Отправьте VIN или номер шасси
@@ -229,15 +231,17 @@ translations:
       formHeading: Ostavite zahtev
       vinLabel: VIN ili broj šasije (nije obavezno)
       vinPlaceholder: Unesite VIN ili broj šasije
+      vinNote: Treba nam da proverimo da li delovi odgovaraju vašem automobilu.
       commentLabel: Koji delovi su potrebni? (nije obavezno)
       commentPlaceholder: Napišite šta vam treba, ako znate
       commentNote: Nije obavezno znati tačan naziv dela, javićemo vam se i zajedno razjasniti šta je potrebno.
-      listHeading: Delovi u zahtevu
-      listRemoveLabel: Ukloni iz zahteva
+      listHeading: Korpa
+      listRemoveLabel: Ukloni iz korpe
+      listQuantityLabel: Količina
       listCarRemoveLabel: Ne vezujte zahtev za ovaj automobil
       listMoreTemplate: 'Nema više pozicija: {count}'
       llmsCatalogue: 'Katalog delova CarLab: za svaki deo postoji posebna stranica sa sličnim delovima, cenom i dostupnošću. Delovi sa cenom se dodaju u korpu i naručuju sa preuzimanjem i plaćanjem kešom na STU, uz navođenje samo kontakta; proveravamo cenu prilikom naručivanja, a dostupnost i vreme preuzimanja menadžer potvrđuje nakon naručivanja. Ako nema cene, skupite listu delova i pošaljite je jednim zahtevom.'
-      llmsCatalogueClosed: 'Katalog delova CarLab: za svaki deo postoji posebna stranica sa sličnim delovima i karakteristikama. Cenu i dostupnost javljamo po zahtevu: skupite listu delova i pošaljite je jednim zahtevom, a delove možete preuzeti na STU u Beogradu.'
+      llmsCatalogueClosed: 'Katalog delova CarLab: svaki kataloški broj ima svoju stranicu sa zamenama i karakteristikama. Cena na sajtu nema: delova ima previše da bismo sve cene držali ažurnim. Delovi se naručuju samo putem upita: dodajte potrebne u korpu i pošaljite je sa kontaktom (VIN po želji). Menadžer proverava kompatibilnost po VIN-u, javlja cenu i dogovara kupovinu, a delove možete preuzeti u servisu u Beogradu.'
       stepsHeading: Kako funkcioniše
       steps:
         - heading: Pošaljite VIN ili broj šasije
@@ -366,15 +370,17 @@ translations:
       formHeading: Submit a request
       vinLabel: VIN or chassis number (optional)
       vinPlaceholder: Enter VIN or chassis number
+      vinNote: We use it to check that the parts fit your car.
       commentLabel: What parts do you need? (optional)
       commentPlaceholder: Let us know what you need, if you know
       commentNote: You don’t need to know the exact part name; we’ll contact you to clarify what’s needed.
-      listHeading: Parts in the request
-      listRemoveLabel: Remove from request
+      listHeading: Cart
+      listRemoveLabel: Remove from cart
+      listQuantityLabel: Quantity
       listCarRemoveLabel: Do not link this request to this car
       listMoreTemplate: 'Items not fitting: {count}'
       llmsCatalogue: "CarLab parts catalog: each part number has its own page with alternatives, pricing, and availability. Add priced parts to the cart and order with pickup and cash payment at the workshop, providing only contact information; we verify the price again at checkout, and the manager confirms availability and pickup time after the order. If there's no price, compile a list of parts and submit it as one request."
-      llmsCatalogueClosed: 'CarLab parts catalog: each part number has its own page with alternatives and specifications. We provide pricing and availability upon request: compile a parts list and send it as one request, and you can pick up the parts at the workshop in Belgrade.'
+      llmsCatalogueClosed: 'CarLab parts catalogue: each part number has its own page with alternatives and specifications. The site shows no prices: there are too many parts to keep every price current. Parts are ordered by inquiry only: add the ones you need to the cart and send it with a contact (VIN optional). A manager checks compatibility by VIN, quotes the price and arranges the purchase, and you pick the parts up at the workshop in Belgrade.'
       stepsHeading: How it works
       steps:
         - heading: Send the VIN or chassis number

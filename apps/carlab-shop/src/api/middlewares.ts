@@ -9,6 +9,7 @@ import {
   AdminBulkAttachFitments,
   AdminBulkDetachFitments,
   AdminCreateBrand,
+  AdminConfirmWorkshopQuote,
   AdminCreateBrandSpelling,
   AdminCreateCategory,
   AdminCreateCategoryField,
@@ -30,6 +31,7 @@ import {
   AdminUpdateFitment,
   AdminUpdatePartIdentifier,
   AdminUpdateSupplier,
+  AdminStartCrawl,
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
@@ -174,9 +176,19 @@ export default defineMiddlewares({
       middlewares: [validateAdminBody(AdminEditTranslation)],
     },
     {
+      matcher: '/admin/crawls/:key',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminStartCrawl)],
+    },
+    {
       matcher: '/admin/suppliers/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdateSupplier)],
+    },
+    {
+      matcher: '/admin/workshop-quotes',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminConfirmWorkshopQuote)],
     },
     {
       matcher: '/admin/suppliers/:id/categories',

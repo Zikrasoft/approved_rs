@@ -98,12 +98,12 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
   [
     'part',
     {
-      subject: 'car part names in a parts catalogue',
-      fields: ['name'],
+      subject: 'car part names and descriptions in a parts catalogue',
+      fields: ['name', 'description'],
       codec: nested,
       list: (catalog, filters) =>
         catalog.listParts(filters, {
-          select: [...TRANSLATION_COLUMNS, 'name'],
+          select: [...TRANSLATION_COLUMNS, 'name', 'description'],
           take: null,
         }),
       update: (catalog, rows) => catalog.updateParts(rows),

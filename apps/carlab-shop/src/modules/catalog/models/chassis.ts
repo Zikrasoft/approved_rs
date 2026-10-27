@@ -10,7 +10,7 @@ const Chassis = model
   .define('chassis', {
     id: model.id().primaryKey(),
     code: model.text().unique(),
-    body_style: model.enum([...BODY_STYLES]),
+    body_style: model.enum([...BODY_STYLES]).nullable(),
     year_from: model.number().nullable(),
     year_to: model.number().nullable(),
     series: model.belongsTo(() => Series, { mappedBy: 'chassis' }),

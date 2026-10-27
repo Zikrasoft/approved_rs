@@ -10,6 +10,9 @@ const Part = model
   .define('part', {
     id: model.id().primaryKey(),
     name: model.text(),
+    description: model.text().nullable(),
+    source_name: model.text().nullable(),
+    edited_fields: model.array().default([]),
     category: model.belongsTo(() => Category, { mappedBy: 'parts' }).nullable(),
     attributes: model.json().default({}),
     installation_price: model.number().nullable(),

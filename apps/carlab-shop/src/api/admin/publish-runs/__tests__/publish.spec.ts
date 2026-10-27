@@ -2,8 +2,10 @@ import { asValue } from '@medusajs/framework/awilix';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
+import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -14,6 +16,7 @@ import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
 const supplier = createFakeSupplier('Nightly supplier');
+const shopAi = createFakeShopAi();
 
 const SERBIAN = new Map([
   ['Масляный фильтр', 'Filter ulja'],
@@ -24,6 +27,7 @@ const SERBIAN = new Map([
   ['Вязкость', 'Viskozitet'],
   ['Синтетика', 'Sintetika'],
   ['Только с M-пакетом', 'Samo sa M paketom'],
+  ['Фильтр с обратным клапаном.', 'Filter sa nepovratnim ventilom.'],
 ]);
 const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
@@ -35,6 +39,7 @@ const ENGLISH = new Map([
   ['Вязкость', 'Viscosity'],
   ['Синтетика', 'Synthetic'],
   ['Только с M-пакетом', 'M Sport package only'],
+  ['Фильтр с обратным клапаном.', 'Filter with a check valve.'],
 ]);
 
 type FakeNetwork = {
@@ -132,6 +137,7 @@ medusaIntegrationTestRunner({
         SUPPLIER_ADAPTERS_REGISTRATION,
         asValue([supplier.adapter]),
       );
+      container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -253,12 +259,13 @@ medusaIntegrationTestRunner({
         expect(reindexCalls).toHaveLength(1);
       });
 
-      it('imports supplier articles before translating them', async () => {
+      it('imports supplier articles in Russian before translating them', async () => {
+        shopAi.name = 'Масляный фильтр';
         supplier.articles.push({
           article_id: 'N-1',
           brand: 'MANN',
           number: 'HU 6004 x',
-          name: 'Масляный фильтр',
+          name: 'Uljni filter',
           category: 'OIL',
         });
 
@@ -321,6 +328,23 @@ medusaIntegrationTestRunner({
         expect(await translationsOf(part.id)).toEqual({
           sr: { name: 'Filter vazduha' },
           en: { name: 'Engine air filter' },
+        });
+      });
+
+      it('translates a Part description with its name', async () => {
+        const part = await catalog.createParts({
+          name: 'Масляный фильтр',
+          description: 'Фильтр с обратным клапаном.',
+        });
+
+        await publish();
+
+        expect(await translationsOf(part.id)).toEqual({
+          sr: {
+            name: 'Filter ulja',
+            description: 'Filter sa nepovratnim ventilom.',
+          },
+          en: { name: 'Oil filter', description: 'Filter with a check valve.' },
         });
       });
 

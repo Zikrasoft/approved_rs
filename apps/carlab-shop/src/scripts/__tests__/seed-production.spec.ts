@@ -97,10 +97,25 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('seeds no Parts, suppliers or offers', async () => {
+      it('seeds no Parts or offers', async () => {
         expect(await catalog.listParts()).toEqual([]);
-        expect(await suppliers.listSuppliers()).toEqual([]);
         expect(await suppliers.listSupplierOffers()).toEqual([]);
+      });
+
+      it('registers each crawled site once as a Supplier imported only on its own button', async () => {
+        const registered = await suppliers.listSuppliers();
+        expect(registered.map(({ name }) => name).sort()).toEqual([
+          'FILTRON',
+          'MANN-FILTER',
+          'VARTA',
+          'bilstein group',
+        ]);
+        expect(
+          registered.every(
+            ({ import_enabled, import_on_publish }) =>
+              import_enabled && !import_on_publish,
+          ),
+        ).toBe(true);
       });
 
       it('creates the commerce defaults checkout needs', async () => {

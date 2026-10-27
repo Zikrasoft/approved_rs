@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
+import { Crawls } from '../../components/crawls';
 import { EditedBy } from '../../components/edited-by';
 import {
   LIST_TABLE,
@@ -47,6 +48,7 @@ const supplierSchema = editedBySchema.extend({
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
   import_enabled: z.boolean(),
+  import_on_publish: z.boolean(),
   offer_count: z.number(),
 });
 
@@ -67,22 +69,21 @@ type Source = z.infer<typeof sourceSchema>;
 const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
 const mappingsSchema = z.object({ categories: z.array(mappingSchema) });
 const sourcesSchema = z.object({ sources: z.array(sourceSchema) });
-const importsSchema = z.object({
-  imports: z.array(
-    z.object({
-      supplier: z.string(),
-      imported: z.number(),
-      created: z.number(),
-      skipped: z.number(),
-      skipped_by_reason: z.object({
-        category: z.number(),
-        brand: z.number(),
-        currency: z.number(),
-      }),
-      needs_category: z.array(z.string()),
-    }),
-  ),
+const importSummarySchema = z.object({
+  supplier: z.string(),
+  imported: z.number(),
+  created: z.number(),
+  skipped: z.number(),
+  skipped_by_reason: z.object({
+    brand: z.number(),
+    currency: z.number(),
+    unreadable: z.number(),
+    no_engine_code: z.number(),
+  }),
+  needs_category: z.array(z.string()),
 });
+const importsSchema = z.object({ imports: z.array(importSummarySchema) });
+const supplierImportSchema = z.object({ import: importSummarySchema });
 const offersWithdrawnSchema = z.object({ deleted: z.number() });
 const sourceDeletedSchema = z.object({
   deleted: z.number(),
@@ -103,6 +104,7 @@ const SuppliersPage = () => {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [importingId, setImportingId] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [mappedSupplierId, setMappedSupplierId] = useState('');
   const [mappings, setMappings] = useState<Mapping[]>([]);
@@ -242,29 +244,41 @@ const SuppliersPage = () => {
     }
   };
 
-  const importLine = (
-    summary: z.infer<typeof importsSchema>['imports'][number],
-  ) =>
+  const togglePublishImport = async (supplier: Supplier) => {
+    const import_on_publish = !supplier.import_on_publish;
+    if (await update(supplier.id, { import_on_publish })) {
+      toast.success(
+        t(
+          `suppliers.importOnPublishSaved.${import_on_publish ? 'on' : 'off'}`,
+          {
+            supplier: sourceName(supplier.name),
+          },
+        ),
+      );
+    }
+  };
+
+  const importLine = (summary: z.infer<typeof importSummarySchema>) =>
     [
       t('suppliers.importSummary', {
         ...summary,
         supplier: sourceName(summary.supplier),
       }),
-      summary.skipped > 0 &&
+      summary.skipped_by_reason.brand > 0 &&
         t('suppliers.importSkipped', {
-          count: summary.skipped,
-          reasons: (['category', 'brand'] as const)
-            .filter((reason) => summary.skipped_by_reason[reason] > 0)
-            .map((reason) =>
-              t(`suppliers.skippedReasons.${reason}`, {
-                count: summary.skipped_by_reason[reason],
-              }),
-            )
-            .join(', '),
+          count: summary.skipped_by_reason.brand,
+        }),
+      summary.skipped_by_reason.unreadable > 0 &&
+        t('suppliers.importUnreadable', {
+          count: summary.skipped_by_reason.unreadable,
         }),
       summary.skipped_by_reason.currency > 0 &&
         t('suppliers.importWithoutPrice', {
           count: summary.skipped_by_reason.currency,
+        }),
+      summary.skipped_by_reason.no_engine_code > 0 &&
+        t('suppliers.importWithoutEngineCode', {
+          count: summary.skipped_by_reason.no_engine_code,
         }),
       summary.needs_category.length > 0 &&
         t('suppliers.importWithoutCategory', {
@@ -288,6 +302,12 @@ const SuppliersPage = () => {
             !import_enabled && name !== MANUAL_SOURCE,
         )
         .map(({ name }) => sourceName(name));
+      const offPublish = suppliers
+        .filter(
+          ({ import_enabled, import_on_publish }) =>
+            import_enabled && !import_on_publish,
+        )
+        .map(({ name }) => sourceName(name));
       toast.success(
         [
           data.imports.length
@@ -297,10 +317,28 @@ const SuppliersPage = () => {
             t('suppliers.importSwitchedOff', {
               suppliers: switchedOff.join(', '),
             }),
+          offPublish.length > 0 &&
+            t('suppliers.importOffPublish', {
+              suppliers: offPublish.join(', '),
+            }),
         ]
           .filter(Boolean)
           .join('\n'),
       );
+    }
+  };
+
+  const importOne = async (supplier: Supplier) => {
+    setImportingId(supplier.id);
+    const data = await adminFetch(
+      `/admin/suppliers/${supplier.id}/import`,
+      supplierImportSchema,
+      { method: 'POST' },
+    );
+    setImportingId(null);
+    if (data) {
+      await Promise.all([load(), loadSources()]);
+      toast.success(importLine(data.import));
     }
   };
 
@@ -540,33 +578,69 @@ const SuppliersPage = () => {
                     <Table.Cell>
                       {supplier.name !== MANUAL_SOURCE && (
                         <div className="flex items-center justify-between gap-x-2">
-                          <div className="flex items-center gap-x-2">
-                            <Switch
-                              id={`${supplier.id}-import`}
-                              checked={supplier.import_enabled}
-                              disabled={writing}
-                              onCheckedChange={() => toggleImport(supplier)}
-                            />
-                            <Label
-                              size="small"
-                              htmlFor={`${supplier.id}-import`}
-                              className="max-sm:sr-only"
-                            >
-                              {t(
-                                supplier.import_enabled
-                                  ? 'suppliers.importOn'
-                                  : 'suppliers.importOff',
-                              )}
-                            </Label>
+                          <div className="flex flex-col gap-y-2 py-2">
+                            <div className="flex items-center gap-x-2">
+                              <Switch
+                                id={`${supplier.id}-import`}
+                                checked={supplier.import_enabled}
+                                disabled={writing}
+                                onCheckedChange={() => toggleImport(supplier)}
+                              />
+                              <Label
+                                size="small"
+                                htmlFor={`${supplier.id}-import`}
+                                className="max-sm:sr-only"
+                              >
+                                {t(
+                                  supplier.import_enabled
+                                    ? 'suppliers.importOn'
+                                    : 'suppliers.importOff',
+                                )}
+                              </Label>
+                            </div>
+                            {supplier.import_enabled && (
+                              <div className="flex items-center gap-x-2">
+                                <Switch
+                                  id={`${supplier.id}-publish-import`}
+                                  checked={supplier.import_on_publish}
+                                  disabled={writing}
+                                  onCheckedChange={() =>
+                                    togglePublishImport(supplier)
+                                  }
+                                />
+                                <Label
+                                  size="small"
+                                  htmlFor={`${supplier.id}-publish-import`}
+                                >
+                                  {t('suppliers.importOnPublish')}
+                                </Label>
+                              </div>
+                            )}
                           </div>
-                          <RowActions
-                            label={t('common.actionsFor', {
-                              name: sourceName(supplier.name),
-                            })}
-                            disabled={writing}
-                            deleteLabel={t('suppliers.withdraw.action')}
-                            onDelete={() => withdrawOffers(supplier)}
-                          />
+                          <div className="flex items-center gap-x-2">
+                            {supplier.import_enabled && (
+                              <Button
+                                size="small"
+                                variant="secondary"
+                                aria-label={t('suppliers.importOneLabel', {
+                                  supplier: sourceName(supplier.name),
+                                })}
+                                isLoading={importingId === supplier.id}
+                                disabled={writing}
+                                onClick={() => importOne(supplier)}
+                              >
+                                {t('suppliers.importOne')}
+                              </Button>
+                            )}
+                            <RowActions
+                              label={t('common.actionsFor', {
+                                name: sourceName(supplier.name),
+                              })}
+                              disabled={writing}
+                              deleteLabel={t('suppliers.withdraw.action')}
+                              onDelete={() => withdrawOffers(supplier)}
+                            />
+                          </div>
                         </div>
                       )}
                     </Table.Cell>
@@ -582,6 +656,8 @@ const SuppliersPage = () => {
           {t('suppliers.releasedHint')}
         </Text>
       </Container>
+
+      <Crawls />
 
       <Container className="divide-y overflow-hidden p-0">
         <ListHeader

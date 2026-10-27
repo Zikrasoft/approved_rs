@@ -1,5 +1,5 @@
 ---
-status: accepted, refined by ADR-0040 and ADR-0043
+status: accepted, refined by ADR-0040 and ADR-0043; hand-entered Vehicles superseded for crawled Suppliers by ADR-0047
 ---
 
 # The parts catalogue runs on our own data: staff-maintained Vehicles, no licensed feed

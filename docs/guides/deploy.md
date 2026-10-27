@@ -561,19 +561,107 @@ to do with them:
 server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
 `infra/carlab-shop/`:
 
-| File                                     | What it is                                                                                                                          |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`    |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                        |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB; `/static/*` from the uploads volume |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                 |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                              |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                      |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                             |
-| `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                             |
+| File                                     | What it is                                                                                                                       |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node` |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB                                   |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                           |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                   |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                     |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                          |
+| `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                          |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
+
+The catalogue crawler is not on the server. It runs on the owner's Mac
+(`src/lib/crawler/worker.ts`, a plain Node process, not a second Medusa), see
+[The crawler on the owner's Mac](#the-crawler-on-the-owners-mac). It waits for a crawl
+started on the admin's Suppliers screen (a number next to the button makes it a
+test run that stops after that many stored pages, picked at random across the
+whole sitemap), reads the site's sitemap, and fetches one page at a time, at
+least 2 seconds apart (more if robots.txt
+asks, and Retry-After is waited out). Postgres keeps the queue (`crawl_run`,
+`crawl_page`, with the object key in `crawl_page.body_key`); the gzipped HTML goes
+to the private S3 bucket. Requests go through Crawlee with browser-like headers and rotating
+sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) loads
+its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
+stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
+failed with its reason in the admin; five such pages in a row pause the crawl, as do
+an unreachable robots.txt or sitemap and five server errors in a row. Pressing the
+button again resumes. It crawls one site at a time: a crawl started while another
+runs waits as queued, and starts once the running one is done or paused; staff
+can pause the running one on its Pause button to let a queued one go first.
+Postgres is the queue, S3 holds the pages, Crawlee keeps nothing on disk, so a
+stopped worker picks up where it stopped. The worker stamps `crawl_run.heartbeat_at`
+every 5 s; while a crawl is queued or running and no stamp is newer than a minute,
+the Suppliers screen says the crawler is not running. The import still runs on the
+server, from the Supplier's Import button, over what the crawler stored.
+
+### The crawler on the owner's Mac
+
+Once, in `apps/carlab-shop`:
+
+```bash
+pnpm exec playwright install chromium
+cp .env.crawler.example .env.crawler
+```
+
+`.env.crawler` is gitignored and holds only what the worker reads
+(`CRAWLER_ENV_NAMES` in `src/lib/env.ts`): `NODE_ENV=production`,
+`DATABASE_URL=postgres://carlab:<POSTGRES_PASSWORD>@127.0.0.1:15432/carlab`,
+`DATABASE_SSL=false`, `CRAWLER_FROM` and the same `S3_*` as `/srv/carlab/.env`.
+Copy the values across without printing them.
+
+Postgres has no host port and sits on the internal `data` network at a fixed
+address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
+`10.200.0.0/24`), so the worker reaches it through an SSH tunnel as the `crawler`
+user. `harden-ssh.sh` creates that user with no shell and an sshd
+`Match User crawler` block: local forwarding to `10.200.0.10:5432` and nothing
+else, no TTY, no command, no remote listening. Everyone else, `deploy` and CI's
+key included, keeps `AllowTcpForwarding no`. Checked by
+`infra/carlab-shop/test/harden-ssh.test.sh`.
+
+Once, on the Mac, make a key for the tunnel and copy its public half, with the
+script, to the Lightsail server. The private key never leaves the Mac:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/carlab-crawler -C carlab-crawler
+scp infra/carlab-shop/harden-ssh.sh ~/.ssh/carlab-crawler.pub deploy@<IPv4>:/tmp/
+```
+
+Then, from a `deploy` session on the server, rerun the hardening with that file
+(through `sudo`, as on the first setup). It installs the crawler's key, writes
+the same sshd config as before plus the `Match` block, and is safe to rerun;
+without the argument it keeps the key already there:
+
+```bash
+sudo sh /tmp/harden-ssh.sh /tmp/carlab-crawler.pub
+```
+
+Open the tunnel and leave it open:
+
+```bash
+ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>
+```
+
+The address survives a recreate of the postgres container, so the same command
+works after a deploy or a reboot; only a dropped connection needs it rerun. The
+first deploy that brings the fixed address recreates the `data` network, and
+postgres, typesense and medusa restart with it once. In a second terminal, start
+the worker and keep the Mac awake while it runs:
+
+```bash
+caffeinate -i pnpm --filter @podbor/carlab-shop crawler
+```
+
+It builds the workspace packages it needs, then waits for a crawl queued in the
+admin. Stop it with Ctrl+C once the crawl is done, then close the tunnel. A crawl
+stopped mid-way (Ctrl+C, a sleeping Mac, a dropped tunnel) stays `running` and
+resumes from where it stopped the next time the worker starts; a page it held
+is retried once its 10 minute lease runs out.
 
 ### The server
 
@@ -604,22 +692,49 @@ workflow engine. A second Medusa instance would need Redis first.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 128m, under 3.2 GB together (checked by the compose test).
+  postgres 512m, caddy 128m, 2944 MB together, under 3 GB (checked
+  by the compose test). The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
 
-### Uploaded images
+### Files on S3
 
-Brand-number and Category photos go through Medusa's File module with the local
-provider. The admin posts the original (JPEG, PNG or WebP, up to 10 MB, checked by
-decoding it, not by its name); the backend writes 160, 480 and 960 px WebP copies
-into `/server/static`, the `static` volume, and stores their URLs on the PartIdentifier or
-Category. Caddy mounts the same volume read-only at `/srv/static` and answers
-`/static/*` itself with a year-long immutable cache, since every file name carries
-an upload timestamp; Medusa never sees those requests. The nightly backup already
-archives the volume. Moving to S3 later is a provider swap in `medusa-config.ts`
-plus a copy of the volume; the stored URLs would need rewriting once.
+The shop keeps no files on the server: everything is on AWS S3, in two buckets of
+its own (not the backup bucket).
+
+- **Public bucket** (`S3_PUBLIC_BUCKET`): Brand-number and Category photos, through
+  Medusa's File module with the `@medusajs/medusa/file-s3` provider, and the images
+  found by the crawler. The admin posts the original (JPEG, PNG or WebP, up to
+  10 MB, checked by decoding it, not by its name); the backend writes 160, 480 and
+  960 px WebP copies and stores their URLs on the PartIdentifier or Category. A
+  Supplier import copies each crawled image once into `supplier-images/<sha256 of
+the source URL>`, with the source URL in the object's `source-url` metadata, and
+  stages our copy with its source URL beside it in the staged record; a later
+  import finds the object and downloads nothing. Only http(s) on a public address
+  is fetched (a host resolving to a private, loopback or link-local range is
+  refused), and a download stops at 10 MB. An image that cannot be fetched is
+  staged nowhere, so the site never links the brand's server, and is tried again
+  on the next import.
+- **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
+  `crawl/<site>/<sha256 of the URL>.html.gz`. The import reads them back from there.
+
+Bucket setup: keep Object Ownership on "Bucket owner enforced" (ACLs off; the file
+provider runs with `acl: false`), and make the public bucket readable with a
+bucket policy granting `s3:GetObject` on `arn:aws:s3:::<public bucket>/*` to
+everyone; the private bucket stays fully blocked. Lightsail has no instance role
+for S3, so the shop gets an IAM user of its own with `s3:PutObject`,
+`s3:GetObject`, `s3:DeleteObject` and `s3:ListBucket` on those two buckets only.
+Turn on versioning on both if a lost object should be recoverable: the nightly
+backup covers Postgres only.
+
+Moving an existing server off the old `static` volume, once, after the first
+deploy with the S3 settings: `/srv/carlab/move-static-to-s3.sh` copies the volume
+into the public bucket with `aws s3 sync` (in a pinned `amazon/aws-cli` container,
+keys through a temporary env file) and rewrites `https://$API_HOST/static` to
+`FILE_URL` in `part_identifier.images` and `category.image`. File ids keep working
+because the keys stay the file names. Then a Publish, and `docker volume rm
+carlab_static` once the images show.
 
 ### `.env`
 
@@ -663,9 +778,29 @@ validates everything at startup. The non-obvious parts:
   are tried. An unknown name stops the server at startup.
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
-- `FILE_URL` is the public address of uploaded files, stored into every image
-  URL at upload time. Compose sets it to `https://$API_HOST/static`, so it is not
-  written into `.env`; without it production stops at startup.
+- `FILE_URL` is the public base URL of the public bucket, stored into every image
+  URL at upload time: `https://<bucket>.s3.<region>.amazonaws.com` now, a
+  CloudFront or Lightsail CDN address later (only new uploads pick a change up;
+  stored URLs need the same rewrite `move-static-to-s3.sh` does). Without it
+  production stops at startup.
+- `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET` and
+  `S3_PRIVATE_BUCKET` are all required in production, and outside it either all
+  set or none (none keeps uploads on the local disk under `/static` and leaves
+  crawled images linked to their source; crawling needs the buckets).
+  `S3_ENDPOINT` stays empty for AWS itself and names a MinIO or other S3-compatible
+  server otherwise (path-style addressing is switched on with it). See
+  [Files on S3](#files-on-s3).
+- `SUPPLIER_ADAPTERS` names the Supplier adapters the shop reads, comma-separated.
+  `mann-filter` is the crawled MANN-FILTER catalogue: its crawl starts from the
+  Suppliers screen and its Import button reads what the crawler stored. `varta`
+  is the crawled VARTA battery catalogue (the Serbian product pages), run the
+  same way. `bilstein` is the crawled bilstein group partsfinder (febi, SWAG,
+  Blue Print), Serbian pages of the filter, brake, suspension and service part
+  families only, one request per 5 s. `filtron` is the crawled FILTRON
+  catalogue (the Serbian product pages, same platform as MANN-FILTER), its pages
+  rendered in Chromium by the crawler on the owner's Mac. `demo` never runs in production.
+- `CRAWLER_FROM` (in the Mac's `.env.crawler`, not here) is the mailbox the crawler
+  sends in its `From` header, so a site owner can reach whoever runs it. Empty, no `From` is sent.
 - `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
   `NODE_ENV=production` and open everywhere else; the template sets `false`.
   See [Closed beta](#closed-beta-the-preview-flag).
@@ -797,11 +932,11 @@ once the fix is in `main`.
 ```bash
 ssh deploy@<IPv4> /srv/carlab/backup.sh
 ssh deploy@<IPv4> 'ls -la /var/backups/carlab'
-ssh deploy@<IPv4> '/srv/carlab/restore.sh /var/backups/carlab/db-<stamp>.dump /var/backups/carlab/static-<stamp>.tar.gz'
+ssh deploy@<IPv4> '/srv/carlab/restore.sh /var/backups/carlab/db-<stamp>.dump'
 ```
 
 The nightly backup keeps seven days in `/var/backups/carlab` on the same VPS, and
-then copies the new database dump and uploads archive to an S3-compatible bucket
+then copies the new database dump to an S3-compatible bucket
 (Backblaze B2, Cloudflare R2, Hetzner Object Storage) when
 `/srv/carlab/.env.backup` names one: `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`
 (optionally `bucket/path`), `BACKUP_S3_ACCESS_KEY_ID`,
@@ -821,7 +956,7 @@ Restoring from the bucket (a lost server) is one more step before `restore.sh`:
 
 ```bash
 ssh deploy@<IPv4> '/srv/carlab/backup.sh fetch'            # list the stamps in the bucket
-ssh deploy@<IPv4> '/srv/carlab/backup.sh fetch <stamp>'    # download both files into /var/backups/carlab
+ssh deploy@<IPv4> '/srv/carlab/backup.sh fetch <stamp>'    # download that dump into /var/backups/carlab
 ```
 
 `restore.sh` refuses to write into a database that already has tables unless

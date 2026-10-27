@@ -44,6 +44,7 @@ import { type Category, categoriesSchema } from '../../lib/categories';
 
 const PAGE_SIZE = 50;
 const ALL = 'all';
+const UNCATEGORIZED = 'none';
 const STATES = [ALL, 'true', 'false'] as const;
 
 type Listing = z.infer<typeof partIdentifiersSchema>;
@@ -102,7 +103,8 @@ const PartsPage = () => {
     });
     if (state !== ALL) search.set('enriched', state);
     if (q) search.set('q', q);
-    if (categoryId !== ALL) search.set('category_id', categoryId);
+    if (categoryId === UNCATEGORIZED) search.set('uncategorized', 'true');
+    else if (categoryId !== ALL) search.set('category_id', categoryId);
     adminFetch(`/admin/part-identifiers?${search}`, partIdentifiersSchema).then(
       (data) => data && setListing(data),
     );
@@ -180,6 +182,9 @@ const PartsPage = () => {
                 <Select.Content>
                   <Select.Item value={ALL}>
                     {t('parts.allCategories')}
+                  </Select.Item>
+                  <Select.Item value={UNCATEGORIZED}>
+                    {t('parts.noCategory')}
                   </Select.Item>
                   {categories.map((category) => (
                     <Select.Item key={category.id} value={category.id}>

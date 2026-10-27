@@ -5,15 +5,13 @@ import type {
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import {
   attributeValuesSchema,
-  enrichmentRule,
+  enrichmentGaps,
   normalizePartNumber,
 } from '@podbor/catalog-contract';
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { z } from 'zod';
 
 import { withEditors } from '../../../lib/editors';
-import { listVehicleResponses } from '../../../lib/store-response';
-import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
@@ -27,6 +25,7 @@ const statusRowSchema = z.object({
   brand_name: z.string(),
   part_id: z.string(),
   part_name: z.string(),
+  description: z.string().nullable(),
   category_id: z.string().nullable(),
   category_name: z.string().nullable(),
   attributes: attributeValuesSchema.nullable(),
@@ -41,7 +40,7 @@ const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 const statusRows = async (
   db: Knex,
-  { q, category_id, part_id }: AdminListPartIdentifiersType,
+  { q, category_id, uncategorized, part_id }: AdminListPartIdentifiersType,
 ) => {
   const query = db('part_identifier as pi')
     .join('part as p', 'p.id', 'pi.part_id')
@@ -59,6 +58,7 @@ const statusRows = async (
       'b.name as brand_name',
       'p.id as part_id',
       'p.name as part_name',
+      'p.description',
       'c.id as category_id',
       'c.name as category_name',
       'p.attributes',
@@ -81,6 +81,9 @@ const statusRows = async (
     ]);
   if (category_id) {
     query.where('p.category_id', category_id);
+  }
+  if (uncategorized) {
+    query.whereNull('c.id');
   }
   if (part_id) {
     query.where('p.id', part_id);
@@ -108,17 +111,16 @@ export async function GET(
   const filters = req.validatedQuery as AdminListPartIdentifiersType;
   const { enriched, offset, limit } = filters;
 
-  const [rows, vehicles] = await Promise.all([
-    statusRows(
-      req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
-      filters,
-    ),
-    listVehicleResponses(req.scope.resolve(CATALOG_MODULE)),
-  ]);
-  const gaps = enrichmentRule(vehicles);
+  const rows = await statusRows(
+    req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
+    filters,
+  );
   // TODO: every matching brand-number is loaded and judged per request; persist the status once the catalogue passes ~100k brand-numbers.
   const judged = rows.map((row) => {
-    const reasons = gaps({ ...row, attributes: row.attributes ?? {} });
+    const reasons = enrichmentGaps({
+      ...row,
+      attributes: row.attributes ?? {},
+    });
     return { ...row, reasons, enriched: reasons.length === 0 };
   });
   const matching = judged.filter(

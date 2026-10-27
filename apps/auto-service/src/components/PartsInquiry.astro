@@ -1,0 +1,111 @@
+---
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { MAX_PART_QUANTITY } from '@/scripts/partsList';
+import Icon from './Icon.astro';
+import LeadForm from './LeadForm.astro';
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).pages.partsInquiry;
+---
+
+<parts-inquiry
+  class="flex flex-col gap-4"
+  data-more-template={copy.listMoreTemplate}
+  data-addon-template={content(locale).shopCart.addonTemplate}
+  data-locale={locale}
+  data-locale-tag={BCP47_BY_LOCALE[locale]}
+  data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+>
+  <div
+    class="rounded-field border border-line bg-shade px-4 pt-3 pb-1"
+    data-parts-list-block
+    hidden
+  >
+    <p class="field-label">{copy.listHeading}</p>
+    <p class="pb-2 text-xs leading-relaxed text-muted">
+      {content(locale).shopPart.priceOnRequestBody}
+    </p>
+    <p
+      class="flex items-center justify-between gap-2 border-b border-line text-sm font-semibold text-ink"
+      data-parts-car
+      hidden
+    >
+      <span data-parts-car-name></span>
+      <button
+        type="button"
+        class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+        aria-label={copy.listCarRemoveLabel}
+        data-parts-car-remove
+      >
+        <Icon name="close" size={12} />
+      </button>
+    </p>
+    <ul class="divide-y divide-line" data-parts-list></ul>
+    <template data-parts-item>
+      <li class="flex flex-wrap items-center justify-between gap-x-2">
+        <a
+          class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 [overflow-wrap:anywhere] hover:text-signal-ink hover:underline"
+          data-part-link></a>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="1"
+          max={MAX_PART_QUANTITY}
+          step="1"
+          class="field spec min-h-11 w-14 shrink-0 px-2 py-1.5 text-center"
+          aria-label={copy.listQuantityLabel}
+          data-part-quantity
+        />
+        <button
+          type="button"
+          class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
+          aria-label={copy.listRemoveLabel}
+          data-part-remove
+        >
+          <Icon name="close" size={12} />
+        </button>
+        <label
+          class="flex w-full cursor-pointer items-start gap-2 pb-2 text-sm leading-snug text-ink-2"
+          data-part-addon
+          hidden
+        >
+          <input
+            type="checkbox"
+            class="mt-0.5 size-4 shrink-0 accent-signal-ink"
+            data-part-addon-toggle
+          />
+          <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span data-part-addon-label></span>
+            <span class="text-xs text-muted">
+              {content(locale).shopCart.addonPickup}
+            </span>
+          </span>
+          <span
+            class="spec shrink-0 font-semibold text-ink"
+            data-part-addon-price></span>
+        </label>
+      </li>
+    </template>
+  </div>
+  <LeadForm
+    service={VIN_INQUIRY_SERVICE}
+    vin={{
+      label: copy.vinLabel,
+      placeholder: copy.vinPlaceholder,
+      note: copy.vinNote,
+    }}
+    commentLabel={copy.commentLabel}
+    commentPlaceholder={copy.commentPlaceholder}
+    commentNote={copy.commentNote}
+    defaultChannel="whatsapp"
+  />
+</parts-inquiry>
+
+<script>
+  import { definePartsInquiry } from '@/scripts/partsList';
+
+  definePartsInquiry();
+</script>

@@ -28,8 +28,7 @@ COPY --from=builder --chown=node:node /repo/apps/carlab-shop/.medusa/server ./
 COPY --from=builder --chown=node:node /repo/apps/carlab-shop/assets ./assets
 
 RUN node -e "require('typesense'); require('zod')" \
-  && ! node -e "require.resolve('ts-node')" 2>/dev/null \
-  && install -d -o node -g node static
+  && ! node -e "require.resolve('ts-node')" 2>/dev/null
 
 USER node
 EXPOSE 9000

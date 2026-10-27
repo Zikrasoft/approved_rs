@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
+import { slugOf } from '../../../lib/slug';
 import { EditedBy } from '../../components/edited-by';
 import {
   LIST_TABLE,
@@ -188,14 +189,6 @@ const rowLabel = (
   }
   return referenceLabel(rows, collection, row);
 };
-
-const slugOf = (name: string) =>
-  name
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 
 const toBody = (fields: Field[], draft: Record<string, string>) =>
   Object.fromEntries(

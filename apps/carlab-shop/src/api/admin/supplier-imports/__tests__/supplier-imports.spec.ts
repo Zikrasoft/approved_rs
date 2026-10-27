@@ -1,13 +1,24 @@
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo, LookupFunction } from 'node:net';
+
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
+import { memoryStorage } from '../../../../../integration-tests/fakeStorage';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { publishAllNumbers } from '../../../../lib/publish/published';
+import { SHOP_STORAGE_REGISTRATION } from '../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
+import {
+  IMAGE_LOOKUP_REGISTRATION,
+  publicLookup,
+} from '../../../../lib/suppliers/mirrored-images';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -15,10 +26,25 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 
 const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
+const shopAi = createFakeShopAi();
+const storage = memoryStorage();
+const BRAND_IMAGES_HOST = 'images.brand.test';
+const imageLookup: LookupFunction = (hostname, options, callback) =>
+  hostname === BRAND_IMAGES_HOST
+    ? options.all
+      ? callback(null, [{ address: '127.0.0.1', family: 4 }])
+      : callback(null, '127.0.0.1', 4)
+    : publicLookup(hostname, options, callback);
 
 type Page = {
   normalized_value: string;
-  part: { id: string; name: string; category_id: string | null };
+  part: {
+    id: string;
+    name: string;
+    description: string | null;
+    category_id: string | null;
+    attributes: Record<string, unknown>;
+  };
   offers: unknown[];
   equivalents: unknown[];
   supplier_data: Record<string, unknown[]>;
@@ -33,6 +59,9 @@ medusaIntegrationTestRunner({
         SUPPLIER_ADAPTERS_REGISTRATION,
         asValue([intercars.adapter, warehouse.adapter]),
       );
+      container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
+      container.register(SHOP_STORAGE_REGISTRATION, asValue(storage.storage));
+      container.register(IMAGE_LOOKUP_REGISTRATION, asValue(imageLookup));
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -42,6 +71,7 @@ medusaIntegrationTestRunner({
       let catalog: CatalogModuleService;
       let intercarsId: string;
       let oilFiltersId: string;
+      let engineOilId: string;
 
       beforeAll(async () => {
         const container = getContainer();
@@ -86,6 +116,7 @@ medusaIntegrationTestRunner({
           slug: 'engine-oil',
           name: 'Моторное масло',
         });
+        engineOilId = strict.id;
         await catalog.createCategoryFields({
           category_id: strict.id,
           key: 'viscosity',
@@ -113,8 +144,18 @@ medusaIntegrationTestRunner({
       beforeEach(() => {
         for (const fake of [intercars, warehouse]) {
           fake.articles.length = 0;
+          fake.unreadable.length = 0;
           fake.quotes.clear();
         }
+        Object.assign(shopAi, {
+          category: null,
+          attributes: {},
+          description: '',
+          categoryPicks: [],
+          specsMapped: [],
+          descriptionsWritten: [],
+          failure: null,
+        });
       });
 
       const runImport = () =>
@@ -271,7 +312,7 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('skips an article in an unmapped category or of an unlisted Brand', async () => {
+      it('skips an article of an unlisted Brand and leaves an article AI cannot classify without a Category', async () => {
         intercars.articles.push(
           {
             article_id: 'IC-4',
@@ -295,21 +336,268 @@ medusaIntegrationTestRunner({
           {
             supplier: 'Intercars',
             imported: 0,
-            created: 0,
-            skipped: 2,
-            skipped_by_reason: { category: 1, brand: 1, currency: 0 },
-            needs_category: [],
+            created: 1,
+            skipped: 1,
+            skipped_by_reason: {
+              brand: 1,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
+            needs_category: ['C 30 005'],
           },
           {
             supplier: 'Warehouse',
             imported: 0,
             created: 0,
             skipped: 0,
-            skipped_by_reason: { category: 0, brand: 0, currency: 0 },
+            skipped_by_reason: {
+              brand: 0,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
             needs_category: [],
           },
         ]);
-        expect(await pages()).toHaveLength(1);
+        expect((await page('C30005'))?.part.category_id).toBeNull();
+        expect(await page('F026407157')).toBeUndefined();
+      });
+
+      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it as skipped', async () => {
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/broken',
+          reason: 'Unexpected markup',
+        });
+        intercars.articles.push({
+          article_id: 'IC-30',
+          brand: 'MANN-FILTER',
+          number: 'W 610/3',
+          name: 'Фильтр W610',
+          category: 'IC-OIL',
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toEqual({
+          supplier: 'Intercars',
+          imported: 0,
+          created: 1,
+          skipped: 1,
+          skipped_by_reason: {
+            brand: 0,
+            currency: 0,
+            unreadable: 1,
+            no_engine_code: 0,
+          },
+          needs_category: [],
+        });
+        expect(await page('W6103')).toBeDefined();
+      });
+
+      it('names a Part after the first of its Supplier pages in catalogue order, the same on every import', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-31',
+            brand: 'MANN-FILTER',
+            number: 'W 811/80',
+            name: 'Фильтр W811 первый',
+            category: 'IC-OIL',
+          },
+          {
+            article_id: 'IC-32',
+            brand: 'MANN-FILTER',
+            number: 'W 811/80',
+            name: 'Фильтр W811 второй',
+            category: 'IC-OIL',
+          },
+        );
+
+        await runImport();
+        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+
+        await runImport();
+        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+      });
+
+      it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
+        intercars.articles.push({
+          article_id: 'IC-20',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          name: 'Масло 0W-20',
+          category: 'Motorna ulja',
+          description: 'Potpuno sintetičko motorno ulje 0W-20.',
+          specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+          applicability: ['BMW G20 320i'],
+        });
+        shopAi.category = engineOilId;
+        shopAi.attributes = { viscosity: '0W-20' };
+        shopAi.description = 'Синтетическое моторное масло 0W-20.';
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          needs_category: [],
+        });
+        expect(await page('OIL0W20')).toMatchObject({
+          part: {
+            category_id: engineOilId,
+            attributes: { viscosity: '0W-20' },
+            description: 'Синтетическое моторное масло 0W-20.',
+          },
+          offers: [],
+          supplier_data: { applicability: [] },
+        });
+        const facts = {
+          name: 'Масло 0W-20',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          description: 'Potpuno sintetičko motorno ulje 0W-20.',
+          specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+        };
+        expect(shopAi.categoryPicks).toEqual([
+          {
+            article: facts,
+            categories: expect.arrayContaining([
+              { id: engineOilId, name: 'Моторное масло' },
+              { id: oilFiltersId, name: 'Масляные фильтры' },
+            ]),
+          },
+        ]);
+        expect(shopAi.specsMapped).toEqual([
+          {
+            specs: facts.specs,
+            fields: [
+              {
+                key: 'viscosity',
+                label: 'Вязкость',
+                type: 'text',
+                unit: null,
+                required: true,
+                options: [],
+              },
+            ],
+          },
+        ]);
+        expect(shopAi.descriptionsWritten).toEqual([facts]);
+      });
+
+      it('keeps the mapped Category over AI and asks for no attributes a Category without fields cannot hold', async () => {
+        intercars.articles.push({
+          article_id: 'IC-21',
+          brand: 'MANN-FILTER',
+          number: 'W 940',
+          name: 'Фильтр W940',
+          category: 'IC-OIL',
+          specs: { Visina: '120 mm' },
+        });
+        shopAi.category = engineOilId;
+        shopAi.attributes = { height: 120 };
+
+        await runImport();
+
+        expect((await page('W940'))?.part).toMatchObject({
+          category_id: oilFiltersId,
+          attributes: {},
+        });
+        expect(shopAi.specsMapped).toEqual([]);
+        expect(shopAi.categoryPicks).toEqual([]);
+      });
+
+      it('still creates the Part, unclassified and undescribed, when AI fails', async () => {
+        intercars.articles.push({
+          article_id: 'IC-24',
+          brand: 'MANN-FILTER',
+          number: 'W 970',
+          name: 'Фильтр W970',
+          category: 'Filteri',
+          description: 'Filter ulja W 970.',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          needs_category: ['W 970'],
+        });
+        expect((await page('W970'))?.part).toMatchObject({
+          category_id: null,
+          description: null,
+        });
+      });
+
+      it('writes an imported description once and never over a hand edit', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-22',
+            brand: 'MANN-FILTER',
+            number: 'W 950',
+            name: 'Фильтр W950',
+            category: 'IC-OIL',
+            description: 'Filter ulja W 950.',
+          },
+          {
+            article_id: 'IC-23',
+            brand: 'MANN-FILTER',
+            number: 'W 960',
+            name: 'Фильтр W960',
+            category: 'IC-OIL',
+            description: 'Filter ulja W 960.',
+          },
+        );
+        shopAi.description = 'Масляный фильтр.';
+        await runImport();
+        const edited = (await page('W950'))!.part;
+        await api.post(
+          `/admin/parts/${edited.id}`,
+          { description: 'Описание от мастера.' },
+          adminHeaders,
+        );
+        intercars.articles[0].description = 'Novi opis W 950.';
+        intercars.articles[1].description = 'Novi opis W 960.';
+        shopAi.description = 'Новое описание.';
+
+        await runImport();
+
+        expect((await page('W950'))?.part.description).toBe(
+          'Описание от мастера.',
+        );
+        expect((await page('W960'))?.part.description).toBe('Масляный фильтр.');
+        expect(shopAi.descriptionsWritten).toHaveLength(2);
+      });
+
+      it('still describes and renames a Part whose Category staff changed', async () => {
+        intercars.articles.push({
+          article_id: 'IC-25',
+          brand: 'MANN-FILTER',
+          number: 'W 980',
+          name: 'Фильтр W980',
+          category: 'IC-OIL',
+          description: 'Filter ulja W 980.',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        const recategorized = (await page('W980'))!.part;
+        const update = await api.post(
+          `/admin/parts/${recategorized.id}`,
+          { category_id: null },
+          adminHeaders,
+        );
+        expect(update.status).toBe(200);
+        shopAi.failure = null;
+        shopAi.description = 'Масляный фильтр W 980.';
+        intercars.articles[0].name = 'Фильтр W980 новый';
+
+        await runImport();
+
+        expect((await page('W980'))?.part).toMatchObject({
+          name: 'Фильтр W980 новый',
+          description: 'Масляный фильтр W 980.',
+          category_id: null,
+        });
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {
@@ -448,15 +736,127 @@ medusaIntegrationTestRunner({
 
         const released = await api.post(
           `/admin/suppliers/${intercarsId}`,
-          { released_kinds: ['images'] },
+          { released_kinds: ['applicability'] },
           adminHeaders,
         );
         expect(released.status).toBe(200);
 
         expect((await page('HU816X'))?.supplier_data).toEqual({
           cross_references: [],
-          applicability: [],
-          images: ['https://cdn.intercars.test/hu816x.jpg'],
+          applicability: ['BMW E46 320d 2001-2005'],
+          images: [],
+        });
+      });
+
+      describe('crawled images', () => {
+        let server: Server;
+        let port: number;
+        const served: string[] = [];
+
+        beforeAll(async () => {
+          server = createServer((request, response) => {
+            served.push(request.url!);
+            if (request.url === '/hu7020z.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.from('jpeg-bytes'));
+            } else if (request.url === '/huge.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.alloc(10 * 1024 * 1024 + 1));
+            } else {
+              response.writeHead(404).end();
+            }
+          });
+          await new Promise<void>((resolve) => server.listen(0, resolve));
+          port = (server.address() as AddressInfo).port;
+        });
+
+        afterAll(() => new Promise((resolve) => server.close(resolve)));
+
+        beforeEach(async () => {
+          served.length = 0;
+          await api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { released_kinds: ['images'] },
+            adminHeaders,
+          );
+        });
+
+        const brandImage = (path: string) =>
+          `http://${BRAND_IMAGES_HOST}:${port}${path}`;
+
+        const articleWithImages = (images: string[]) => ({
+          article_id: 'IC-IMG',
+          brand: 'MANN-FILTER',
+          number: 'HU 7020 z',
+          name: 'Фильтр масляный HU 7020 z',
+          category: 'IC-OIL',
+          images,
+        });
+
+        const stagedImages = async () => {
+          const suppliers: SupplierModuleService =
+            getContainer().resolve(SUPPLIER_MODULE);
+          return (
+            await suppliers.listStagedRecords({
+              supplier_id: intercarsId,
+              kind: 'images',
+            })
+          ).map(({ payload }) => payload);
+        };
+
+        it('copies a crawled image to the public bucket once, keeps its source URL and serves the copy', async () => {
+          const source = brandImage('/hu7020z.jpg');
+          intercars.articles.push(articleWithImages([source]));
+
+          await runImport();
+          await runImport();
+
+          expect(served).toEqual(['/hu7020z.jpg']);
+          const [[key, stored]] = [...storage.images.objects].filter(
+            ([, object]) => object.metadata['source-url'] === source,
+          );
+          const copy = `https://files.carlab.test/${key}`;
+          expect(stored.body.toString()).toBe('jpeg-bytes');
+          expect(stored.contentType).toBe('image/jpeg');
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([copy]);
+          expect(await stagedImages()).toEqual([
+            { items: [copy], sources: { [copy]: source } },
+          ]);
+        });
+
+        it('stages nothing for an image it cannot fetch, and tries again on the next import', async () => {
+          const source = brandImage('/missing.jpg');
+          intercars.articles.push(articleWithImages([source]));
+
+          await runImport();
+          await runImport();
+
+          expect(served).toEqual(['/missing.jpg', '/missing.jpg']);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
+        });
+
+        it('stops reading an image past the size cap and stages nothing for it', async () => {
+          intercars.articles.push(articleWithImages([brandImage('/huge.jpg')]));
+
+          await runImport();
+
+          expect(served).toEqual(['/huge.jpg']);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
+        });
+
+        it('never fetches an image from a private address or over another scheme', async () => {
+          intercars.articles.push(
+            articleWithImages([
+              `http://127.0.0.1:${port}/hu7020z.jpg`,
+              `http://localhost:${port}/hu7020z.jpg`,
+              'file:///etc/passwd',
+            ]),
+          );
+
+          await runImport();
+
+          expect(served).toEqual([]);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
         });
       });
 
@@ -694,6 +1094,80 @@ medusaIntegrationTestRunner({
           created: 1,
         });
         expect(await page('W1140')).toBeDefined();
+      });
+
+      it('imports a supplier kept off Publish only on its own button', async () => {
+        const keepOffPublish = (import_on_publish: boolean) =>
+          api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { import_on_publish },
+            adminHeaders,
+          );
+        intercars.articles.push({
+          article_id: 'IC-15',
+          brand: 'MANN-FILTER',
+          number: 'W 712/75',
+          name: 'Фильтр W712/75',
+          category: 'IC-OIL',
+        });
+
+        const switched = await keepOffPublish(false);
+        const onPublish = await runImport();
+        const pageAfterPublish = await page('W71275');
+        const ownButton = await api.post(
+          `/admin/suppliers/${intercarsId}/import`,
+          {},
+          adminHeaders,
+        );
+        await keepOffPublish(true);
+
+        expect(switched.data.supplier.import_on_publish).toBe(false);
+        expect(
+          onPublish.data.imports.map(
+            ({ supplier }: { supplier: string }) => supplier,
+          ),
+        ).toEqual(['Warehouse']);
+        expect(pageAfterPublish).toBeUndefined();
+        expect(ownButton.data.import).toMatchObject({
+          supplier: 'Intercars',
+          created: 1,
+        });
+        expect(await page('W71275')).toBeDefined();
+      });
+
+      it('refuses the import button for a supplier without an adapter', async () => {
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const orphan = await suppliers.createSuppliers({
+          name: 'Orphan',
+          markup_percentage: 0,
+        });
+
+        const response = await api
+          .post(`/admin/suppliers/${orphan.id}/import`, {}, adminHeaders)
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(404);
+        expect(response.data.message).toBe('No adapter reads Orphan');
+      });
+
+      it('refuses the import button for a supplier whose import is off', async () => {
+        await api.post(
+          `/admin/suppliers/${intercarsId}`,
+          { import_enabled: false },
+          adminHeaders,
+        );
+
+        const response = await api
+          .post(`/admin/suppliers/${intercarsId}/import`, {}, adminHeaders)
+          .catch((error) => error.response);
+        await api.post(
+          `/admin/suppliers/${intercarsId}`,
+          { import_enabled: true },
+          adminHeaders,
+        );
+
+        expect(response.status).toBe(400);
       });
     });
   },

@@ -17,9 +17,8 @@ attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
-priceOnRequestBody: Сейчас этой запчасти нет в наличии. Добавьте ее в заявку, и мы сообщим цену и когда ее можно забрать.
-priceOnRequestCta: Узнать цену
-inquiryBody: Добавьте запчасть в заявку, и мы сообщим цену, наличие и когда ее можно забрать.
+priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что деталь подходит, и найдем лучшую цену.'
+priceOnRequestCta: Подобрать
 offersHeading: Цена и наличие
 columns:
   stock: В наличии
@@ -74,9 +73,8 @@ translations:
     attributeNo: Ne
     categoryLink: Svi delovi kategorije
     priceOnRequestHeading: Cena na zahtev
-    priceOnRequestBody: Trenutno ovaj deo nije dostupna. Dodajte ga u upit, i javićemo vam cenu i kada može biti preuzet.
-    inquiryBody: Dodajte deo u upit, i javićemo vam cenu, dostupnost i kada može biti preuzet.
-    priceOnRequestCta: Saznajte cenu
+    priceOnRequestBody: 'Delova u katalogu ima previše da bismo sve cene držali ažurnim. Pošaljite upit: po VIN-u ćemo proveriti da li deo odgovara i pronaći najbolju cenu.'
+    priceOnRequestCta: Pronađite deo za svoj auto
     offersHeading: Cena i dostupnost
     columns:
       stock: Dostupno
@@ -129,9 +127,8 @@ translations:
     attributeNo: No
     categoryLink: All parts in this category
     priceOnRequestHeading: Price available upon request
-    priceOnRequestBody: This part is currently out of stock. Add it to your request, and we will inform you of the price and when it can be picked up.
-    inquiryBody: Add the spare part to your request, and we will provide you with the price, availability, and pickup information.
-    priceOnRequestCta: Request price
+    priceOnRequestBody: 'Our catalogue holds too many parts to keep every price current. Send an inquiry: we will check by VIN that the part fits and find the best price.'
+    priceOnRequestCta: Match it to my car
     offersHeading: Price and availability
     columns:
       stock: In stock

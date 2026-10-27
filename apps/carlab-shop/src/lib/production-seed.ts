@@ -6,8 +6,32 @@ import type { CategoryFieldType } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../modules/supplier';
+import type SupplierModuleService from '../modules/supplier/service';
 import { seedCashAtPickupCommerceDefaults } from './commerce-defaults';
+import { CRAWLED_SITES } from './crawler/sites';
 import { storeImage } from './images';
+
+async function seedCrawledSuppliers(container: MedusaContainer) {
+  const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
+  const existing = new Set(
+    (
+      await suppliers.listSuppliers({
+        name: CRAWLED_SITES.map(({ name }) => name),
+      })
+    ).map(({ name }) => name),
+  );
+  const missing = CRAWLED_SITES.filter(({ name }) => !existing.has(name));
+  if (missing.length) {
+    await suppliers.createSuppliers(
+      missing.map(({ name }) => ({
+        name,
+        markup_percentage: 0,
+        import_on_publish: false,
+      })),
+    );
+  }
+}
 
 export const CATEGORIES = [
   {
@@ -190,6 +214,7 @@ export async function seedProductionCatalogue(
   container: MedusaContainer,
 ): Promise<void> {
   await seedCashAtPickupCommerceDefaults(container);
+  await seedCrawledSuppliers(container);
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const categories = [...CATEGORIES, BATTERY_CATEGORY];

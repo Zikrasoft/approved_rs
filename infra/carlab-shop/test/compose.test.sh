@@ -20,10 +20,13 @@ expect() {
 }
 
 expect 'only caddy publishes a port' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy"]'
-expect 'the stack is medusa, postgres, typesense and caddy' \
+expect 'the stack is medusa, postgres, typesense and caddy, the crawler runs elsewhere' \
   '[.services | keys[]] == ["caddy", "medusa", "postgres", "typesense"]'
 expect 'postgres and typesense sit on the internal network only' \
   '[.services.postgres, .services.typesense | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
+pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
+expect "postgres keeps the fixed address the crawler tunnel may open ($pg_address)" \
+  ".services.postgres.networks.data.ipv4_address == \"$pg_address\" and .networks.data.ipam.config == [{\"subnet\": \"10.200.0.0/24\", \"ip_range\": \"10.200.0.128/25\"}]"
 expect 'medusa reaches typesense by service name with the shared key' \
   '.services.medusa.environment.TYPESENSE_HOST == "typesense" and .services.medusa.environment.TYPESENSE_API_KEY == "y" and .services.typesense.environment.TYPESENSE_API_KEY == "y"'
 expect 'medusa reaches postgres by service name' \
@@ -32,13 +35,13 @@ expect 'typesense keeps its index on a volume' \
   '[.services.typesense.volumes[] | .target] == ["/data"]'
 expect 'the edge network carries IPv6 so clients reach caddy without the userland proxy' \
   '.networks.edge.enable_ipv6 == true and ([.networks.edge.ipam.config[].subnet] | any(test(":")))'
-expect 'medusa writes uploads to the static volume caddy serves read-only, at the public file URL' \
-  '([.services.medusa.volumes[] | select(.target == "/server/static") | .source] == ["static"]) and ([.services.caddy.volumes[] | select(.target == "/srv/static") | [.source, .read_only]] == [["static", true]]) and .services.medusa.environment.FILE_URL == "https://api.carlab.rs/static"'
+expect 'no service keeps shop files on a host volume, they live on S3' \
+  '(.services.medusa.volumes == null) and ([.services.caddy.volumes[] | .target] | index("/srv/static") == null) and (.volumes | has("static") | not)'
 expect 'caddy serves the admin on its own host' \
   '.services.caddy.environment.ADMIN_HOST == "admin.carlab.rs"'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
-expect 'every service has a memory limit, together under 3.2 GB' \
-  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3200 * 1024 * 1024)'
+expect 'every service has a memory limit, together under 3 GB' \
+  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3072 * 1024 * 1024)'
 expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":([0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 

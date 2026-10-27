@@ -53,7 +53,7 @@ One engine as its manufacturer codes it (B47D20O0, OM654), belonging to an engin
 _Avoid_: Motor, power unit
 
 **Vehicle**:
-One manufacturer configuration: a Model with one Engine, drive and market, as the manufacturer's own code identifies it (a BMW type code, a Mercedes Baumuster). Not one physical car: thousands of cars and VINs share one Vehicle. Staff create Vehicles by hand, as demand reaches a new code (see [ADR-0040](docs/adr/0040-one-catalog-module-vehicle-reference-tables.md)).
+One manufacturer configuration: a Model with one Engine, drive and market, as the manufacturer's own code identifies it (a BMW type code, a Mercedes Baumuster). Not one physical car: thousands of cars and VINs share one Vehicle. Staff create Vehicles by hand, as demand reaches a new code (see [ADR-0040](docs/adr/0040-one-catalog-module-vehicle-reference-tables.md)); a Supplier import creates one from a crawled site's applicability when no existing Vehicle matches (see [ADR-0047](docs/adr/0047-crawled-applicability-becomes-fitments.md)).
 _Avoid_: Car, Vin, Model (a Model spans several Vehicles)
 
 **VehicleIdentifier**:
@@ -61,7 +61,7 @@ One code a vehicle vocabulary uses for a Vehicle, typed by that vocabulary (`bmw
 _Avoid_: KType (bare), type code stored anywhere but here
 
 **Fitment**:
-The statement that one Part fits one Vehicle, with a quantity and, where it matters, a Position, optionally narrowed by a production-date range, steering side or gearbox, or qualified by a free-text note. Every Fitment is entered by staff. **Ambiguity** is not stored: it is what a customer sees when one Vehicle has several Parts in the same Category and Position, or a Fitment with a note, and it is shown as "confirm your variant", never resolved by a guess.
+The statement that one Part fits one Vehicle, with a quantity and, where it matters, a Position, optionally narrowed by a production-date range, steering side or gearbox, or qualified by a free-text note. A Fitment is entered by staff or created by a Supplier import from a crawled site's applicability; an import never changes one and never recreates one staff deleted. **Ambiguity** is not stored: it is what a customer sees when one Vehicle has several Parts in the same Category and Position, or a Fitment with a note, and it is shown as "confirm your variant", never resolved by a guess.
 _Avoid_: "fits" (as a flat boolean), rejecting a row (a wrong Fitment is deleted)
 
 **Position**:

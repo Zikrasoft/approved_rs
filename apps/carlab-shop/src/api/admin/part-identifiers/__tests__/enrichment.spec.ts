@@ -94,6 +94,10 @@ medusaIntegrationTestRunner({
             })),
             ...extra,
           });
+        const described = async (name: string, value: string) => {
+          const id = await part(name, [[mann.id, value]]);
+          await catalog.updateParts({ id, description: 'Описание детали' });
+        };
 
         fittedPartId = await part('Фильтр с машиной', [[mann.id, 'HU 816 X']], {
           category_id: oilId,
@@ -125,6 +129,7 @@ medusaIntegrationTestRunner({
         await part('Только категория', [[mann.id, 'CAT-ONLY']], {
           category_id: oilId,
         });
+        await described('С описанием', 'DESC-1');
 
         const [fitted] = await catalog.listPartIdentifiers({
           part_id: fittedPartId,
@@ -146,8 +151,8 @@ medusaIntegrationTestRunner({
       it('reports every brand-number with its enrichment and both counts', async () => {
         const listing = await list();
 
-        expect(listing.count).toBe(7);
-        expect(listing.counts).toEqual({ enriched: 4, not_enriched: 3 });
+        expect(listing.count).toBe(8);
+        expect(listing.counts).toEqual({ enriched: 6, not_enriched: 2 });
         expect(
           listing.part_identifiers.find(({ value }) => value === 'HU 816 X'),
         ).toEqual(
@@ -168,7 +173,7 @@ medusaIntegrationTestRunner({
       it('lists the brand-numbers that are not enriched with what each lacks', async () => {
         const listing = await list('?enriched=false');
 
-        expect(listing.count).toBe(3);
+        expect(listing.count).toBe(2);
         expect(
           Object.fromEntries(
             listing.part_identifiers.map(({ value, reasons }) => [
@@ -177,17 +182,18 @@ medusaIntegrationTestRunner({
             ]),
           ),
         ).toEqual({
-          'BARE-1': ['no_category', 'no_fitment_equivalent_or_requirement'],
-          'LOOSE-1': ['no_category'],
-          'CAT-ONLY': ['no_fitment_equivalent_or_requirement'],
+          'BARE-1': ['bare_number'],
+          'CAT-ONLY': ['bare_number'],
         });
       });
 
-      it('counts a Requirement match and a published equivalent as enrichment', async () => {
+      it('counts a description, an attribute, a Fitment or an equivalent as enrichment, with or without a Category', async () => {
         expect(values(await list('?enriched=true'))).toEqual([
+          'DESC-1',
           'EQ-1',
           'EQ-2',
           'HU 816 X',
+          'LOOSE-1',
           'OIL-LL04',
         ]);
       });
@@ -207,6 +213,14 @@ medusaIntegrationTestRunner({
         expect(listing.counts).toEqual({ enriched: 4, not_enriched: 1 });
       });
 
+      it('lists the brand-numbers of Parts without a Category for staff to classify', async () => {
+        expect(values(await list('?uncategorized=true'))).toEqual([
+          'BARE-1',
+          'DESC-1',
+          'LOOSE-1',
+        ]);
+      });
+
       it('narrows to the brand-numbers of one Part', async () => {
         const listing = await list(`?part_id=${fittedPartId}`);
 
@@ -219,9 +233,9 @@ medusaIntegrationTestRunner({
         const rest = await list('?offset=3&limit=10');
 
         expect(first.part_identifiers).toHaveLength(3);
-        expect(rest.part_identifiers).toHaveLength(4);
-        expect(first.count).toBe(7);
-        expect(new Set([...values(first), ...values(rest)]).size).toBe(7);
+        expect(rest.part_identifiers).toHaveLength(5);
+        expect(first.count).toBe(8);
+        expect(new Set([...values(first), ...values(rest)]).size).toBe(8);
       });
 
       it('refuses an unknown enriched value with a 400', async () => {
