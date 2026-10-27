@@ -74,7 +74,7 @@ translations:
     categoryLink: Svi delovi kategorije
     priceOnRequestHeading: Cena na zahtev
     priceOnRequestBody: 'Delova u katalogu ima previše da bismo sve cene držali ažurnim. Pošaljite upit: po VIN-u ćemo proveriti da li deo odgovara i pronaći najbolju cenu.'
-    priceOnRequestCta: Zatražite ovaj deo
+    priceOnRequestCta: Pronađite deo za svoj auto
     offersHeading: Cena i dostupnost
     columns:
       stock: Dostupno
@@ -128,7 +128,7 @@ translations:
     categoryLink: All parts in this category
     priceOnRequestHeading: Price available upon request
     priceOnRequestBody: 'Our catalogue holds too many parts to keep every price current. Send an inquiry: we will check by VIN that the part fits and find the best price.'
-    priceOnRequestCta: Request this part
+    priceOnRequestCta: Match it to my car
     offersHeading: Price and availability
     columns:
       stock: In stock
