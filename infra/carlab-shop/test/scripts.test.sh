@@ -23,7 +23,6 @@ case "$*" in
   printf 'DUMP'
   exit "${PGDUMP_EXIT:-0}"
   ;;
-*'tar -C /server/static -czf'*) printf 'TAR' ;;
 *pg_tables*) printf '%s' "${TABLES:-0}" ;;
 *'up -d --wait --wait-timeout'*) exit "${UP_EXIT:-0}" ;;
 *'image ls'*) printf '%s\n' ${IMAGE_TAGS:-} ;;
@@ -229,14 +228,12 @@ unset TABLES RESTORE_OVER_EXISTING
 
 stage
 printf 'DUMP' >"$work/host/db.dump"
-printf 'TAR' >"$work/host/static.tar.gz"
-expect 'a restore succeeds' run restore.sh db.dump static.tar.gz
-expect 'restore checks tables, restores the database and files, migrates, then restarts, in order' logged \
+expect 'a restore succeeds' run restore.sh db.dump
+expect 'restore checks tables, restores the database, migrates, then restarts, in order' logged \
   "docker[] compose up -d --wait postgres" \
   "docker[] compose exec -T postgres psql -U carlab -d carlab -tAc select count(*) from pg_tables where schemaname = 'public'" \
   "docker[] compose stop medusa" \
   "docker[] compose exec -T postgres pg_restore -U carlab -d carlab --clean --if-exists --no-owner --single-transaction" \
-  "docker[] compose run --rm -T --no-deps --entrypoint sh medusa -c find /server/static -mindepth 1 -delete && tar -C /server/static -xzf -" \
   "docker[] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[] compose up -d --wait --wait-timeout 300"
 
@@ -247,15 +244,13 @@ expect 'a relative dump path resolves against the invocation directory' run_from
 
 stage
 mkdir "$work/backups"
-touch -t 202001010000 "$work/backups/db-old.dump" "$work/backups/static-old.tar.gz" "$work/backups/db-old-notes.txt"
+touch -t 202001010000 "$work/backups/db-old.dump" "$work/backups/db-old-notes.txt"
 touch "$work/backups/db-recent.dump"
 BACKUP_DIR="$work/backups"
 export BACKUP_DIR
 expect 'a backup succeeds' run backup.sh ''
 expect 'the database dump lands in the backup dir' grep -qx DUMP "$work"/backups/db-2*.dump
-expect 'the files archive lands in the backup dir' grep -qx TAR "$work"/backups/static-2*.tar.gz
 refuse 'a week-old dump is removed' test -e "$work/backups/db-old.dump"
-refuse 'a week-old files archive is removed' test -e "$work/backups/static-old.tar.gz"
 expect 'a recent dump stays' test -e "$work/backups/db-recent.dump"
 expect 'an unrelated old file is not rotated away' test -e "$work/backups/db-old-notes.txt"
 expect 'no .part file is left behind' test -z "$(find "$work/backups" -name '*.part')"
@@ -295,10 +290,10 @@ stage
 offsite
 BACKUP_DIR="$work/backups4"
 expect 'a backup with a bucket succeeds' run backup.sh
-expect 'the new dump and archive go to the bucket through a pinned rclone image' \
+expect 'the new dump goes to the bucket through a pinned rclone image' \
   grep -Eq "run --rm .*-v $work/backups4:/backups rclone/rclone:[0-9]+\.[0-9]+\.[0-9]+ copy /backups :s3:carlab-backups --include \*-2[^ ]*Z\.\*$" "$LOG"
 expect 'copies older than 30 days are deleted from the bucket' \
-  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include db-\*\.dump --include static-\*\.tar\.gz$" "$LOG"
+  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include db-\*\.dump$" "$LOG"
 expect 'rclone gets the endpoint and keys through an env file' grep -qx 'RCLONE_S3_SECRET_ACCESS_KEY=secret-canary' "$LOG.env"
 expect 'the env file carries only the bucket credentials' test "$(grep -c . "$LOG.env")" -eq "$(grep -c '^RCLONE_S3_' "$LOG.env")"
 refuse 'no key reaches a command line' grep -q 'canary' "$LOG"

@@ -28,6 +28,23 @@ const optionalValue = z
 
 const optionalSecret = optionalValue;
 
+const S3_NAMES = [
+  'S3_REGION',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+  'S3_PUBLIC_BUCKET',
+  'S3_PRIVATE_BUCKET',
+] as const;
+
+export type S3Config = {
+  endpoint: string | undefined;
+  region: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  publicBucket: string;
+  privateBucket: string;
+};
+
 const envSchema = z
   .object({
     NODE_ENV: z
@@ -64,6 +81,12 @@ const envSchema = z
     DEMO_SUPPLIER_OVERRIDES: optionalValue,
     CRAWLER_FROM: optionalValue.pipe(z.email().optional()),
     FILE_URL: optionalValue.pipe(z.url().optional()),
+    S3_ENDPOINT: optionalValue.pipe(z.url().optional()),
+    S3_REGION: optionalValue,
+    S3_ACCESS_KEY_ID: optionalSecret,
+    S3_SECRET_ACCESS_KEY: optionalSecret,
+    S3_PUBLIC_BUCKET: optionalValue,
+    S3_PRIVATE_BUCKET: optionalValue,
     TELEGRAM_BOT_TOKEN: optionalSecret,
     TELEGRAM_GROUP_ID: optionalValue.pipe(
       z
@@ -93,8 +116,36 @@ const envSchema = z
     path: ['FILE_URL'],
     message: 'FILE_URL is required in production',
   })
+  .superRefine((env, context) => {
+    const missing = S3_NAMES.filter((name) => !env[name]);
+    const required =
+      env.NODE_ENV === 'production' || missing.length < S3_NAMES.length;
+    if (!required) return;
+    for (const name of missing) {
+      context.addIssue({
+        code: 'custom',
+        path: [name],
+        message: `${name} is required once any S3 setting is set, and always in production`,
+      });
+    }
+  })
   .transform((env) => ({
     ...env,
+    S3:
+      env.S3_REGION &&
+      env.S3_ACCESS_KEY_ID &&
+      env.S3_SECRET_ACCESS_KEY &&
+      env.S3_PUBLIC_BUCKET &&
+      env.S3_PRIVATE_BUCKET
+        ? ({
+            endpoint: env.S3_ENDPOINT,
+            region: env.S3_REGION,
+            accessKeyId: env.S3_ACCESS_KEY_ID,
+            secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+            publicBucket: env.S3_PUBLIC_BUCKET,
+            privateBucket: env.S3_PRIVATE_BUCKET,
+          } satisfies S3Config)
+        : null,
     TYPESENSE_API_KEY: env.TYPESENSE_API_KEY ?? LOCAL_TYPESENSE_API_KEY,
     FILE_URL: env.FILE_URL ?? `http://localhost:${env.PORT}/static`,
     SHOP_OPEN: env.SHOP_OPEN ?? env.NODE_ENV !== 'production',

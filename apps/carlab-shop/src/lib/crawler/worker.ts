@@ -1,6 +1,7 @@
 import { ModulesSdkUtils } from '@medusajs/framework/utils';
 
 import { parseEnv } from '../env';
+import { configuredStorage } from '../storage';
 import { type Clock, crawlSite } from './crawl';
 import { crawleeFetcher } from './fetcher';
 import { CRAWLED_SITES } from './sites';
@@ -24,6 +25,7 @@ async function main(): Promise<void> {
         : {},
       pool: { min: 0, max: 4 },
     }),
+    configuredStorage()?.pages ?? null,
   );
   const names = CRAWLED_SITES.map(({ name }) => name);
   console.log('Crawler waiting for a crawl started in the admin');
