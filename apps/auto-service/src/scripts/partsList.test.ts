@@ -13,6 +13,7 @@ import {
   partLine,
   readPartsList,
   removeFromPartsList,
+  PARTS_INQUIRY_OPEN_ATTRIBUTE,
   setPartAddon,
 } from './partsList';
 import { PARTS_LIST_STORAGE_KEY } from './cartBadge';
@@ -323,9 +324,9 @@ describe('Подобрать on a part page', () => {
         data-number="${mannOil.number}"
         data-name="${mannOil.name}"
       >
-        <a href="/ru/parts/#parts-inquiry" data-open-parts-inquiry>Подобрать</a>
+        <a href="/ru/parts/#parts-inquiry" ${PARTS_INQUIRY_OPEN_ATTRIBUTE}>Подобрать</a>
       </parts-list-add>
-      <parts-inquiry-modal trigger="[data-open-parts-inquiry]">
+      <parts-inquiry-modal trigger="[${PARTS_INQUIRY_OPEN_ATTRIBUTE}]">
         <dialog>
           <button type="button" data-modal-close>×</button>
           <parts-inquiry>
@@ -343,7 +344,9 @@ describe('Подобрать on a part page', () => {
       </parts-inquiry-modal>
     `;
     return {
-      button: document.querySelector<HTMLElement>('[data-open-parts-inquiry]')!,
+      button: document.querySelector<HTMLElement>(
+        `[${PARTS_INQUIRY_OPEN_ATTRIBUTE}]`,
+      )!,
       dialog: document.querySelector('dialog')!,
       form: document.querySelector('form')!,
     };

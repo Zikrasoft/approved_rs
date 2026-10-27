@@ -15,6 +15,8 @@ import {
 } from '@podbor/lead-crm/submit';
 import { PARTS_LIST_CHANGED_EVENT, PARTS_LIST_STORAGE_KEY } from './cartBadge';
 
+export const PARTS_INQUIRY_OPEN_ATTRIBUTE = 'data-open-parts-inquiry';
+
 const announceChange = (): void => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(PARTS_LIST_CHANGED_EVENT));
