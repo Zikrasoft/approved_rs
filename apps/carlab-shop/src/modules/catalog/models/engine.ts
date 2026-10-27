@@ -10,7 +10,7 @@ const Engine = model
     id: model.id().primaryKey(),
     code: model.text().unique(),
     family: model.text(),
-    fuel: model.enum([...ENGINE_FUELS]),
+    fuel: model.enum([...ENGINE_FUELS]).nullable(),
     displacement_cc: model.number().nullable(),
     vehicles: model.hasMany(() => Vehicle, { mappedBy: 'engine' }),
     requirements: model.hasMany(() => Requirement, { mappedBy: 'engine' }),

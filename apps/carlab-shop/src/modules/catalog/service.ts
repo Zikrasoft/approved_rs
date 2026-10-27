@@ -164,6 +164,7 @@ export type NewPart = Provenance &
   Partial<PartClassification> & {
     name: string;
     description?: string | null;
+    source_name?: string | null;
     identifiers: NewPartIdentifier[];
   };
 
@@ -244,6 +245,7 @@ class CatalogModuleService extends CatalogModuleBase {
     {
       name,
       description = null,
+      source_name = null,
       identifiers,
       category_id = null,
       attributes = {},
@@ -257,6 +259,7 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         name,
         description,
+        source_name,
         category_id,
         attributes: await this.validatePartAttributes(
           category_id,
@@ -560,8 +563,9 @@ class CatalogModuleService extends CatalogModuleBase {
         )
       : [];
     if (fitments.length) {
-      await this.deleteFitments(
+      await this.softDeleteFitments(
         fitments.map(({ id }) => id),
+        {},
         sharedContext,
       );
     }

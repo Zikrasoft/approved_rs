@@ -229,8 +229,9 @@ it is removed only one at a time.
 give site prices. Set per Supplier, never per Offer.
 _Avoid_: margin, commission
 
-**Fitment**: staff's statement that one Part fits one Vehicle, with a quantity
-and, where it matters, a position, dates, steering side, gearbox or note.
+**Fitment**: the statement, by staff or a Supplier import, that one Part fits
+one Vehicle, with a quantity and, where it matters, a position, dates, steering
+side, gearbox or note.
 _Avoid_: compatibility, "fits" as a flag
 
 **Requirement**: what an engine, chassis or Vehicle demands of a Category's

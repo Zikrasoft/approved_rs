@@ -36,6 +36,10 @@ export const descriptionSchema = z.object({
   description: z.string().trim().min(1),
 });
 
+export const nameSchema = z.object({
+  name: z.string().trim().min(1),
+});
+
 export type CategoryChoice = { id: string; name: string };
 
 export type CategoryFieldChoice = {
@@ -69,4 +73,5 @@ export type ShopAi = {
     fields: CategoryFieldChoice[],
   ) => Promise<AttributeValues>;
   writeDescription: (article: ArticleFacts) => Promise<string>;
+  writeName: (article: ArticleFacts) => Promise<string>;
 };

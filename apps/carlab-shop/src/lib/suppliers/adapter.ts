@@ -1,6 +1,10 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
-import { crossReferenceSchema } from '@podbor/catalog-contract';
+import {
+  BODY_STYLES,
+  crossReferenceSchema,
+  ENGINE_FUELS,
+} from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { crawledSupplierAdapter } from '../crawler/adapter';
@@ -10,6 +14,23 @@ import { parseEnv } from '../env';
 import { demoAdapters } from './demo-adapter';
 
 export const SUPPLIER_ADAPTERS_REGISTRATION = 'supplierAdapters';
+
+const yearSchema = z.number().int().min(1900).max(2100).nullable();
+
+export const vehicleFactsSchema = z.object({
+  make: z.string().trim().min(1),
+  model: z.string().trim().min(1),
+  variant: z.string().trim().min(1),
+  chassis_codes: z.array(z.string().trim().min(1)),
+  engine_codes: z.array(z.string().trim().min(1)),
+  displacement_cc: z.number().int().positive().nullable(),
+  power_kw: z.number().int().positive().nullable(),
+  fuel: z.enum(ENGINE_FUELS).nullable(),
+  body_style: z.enum(BODY_STYLES).nullable(),
+  year_from: yearSchema,
+  year_to: yearSchema,
+  notes: z.array(z.string().trim().min(1)),
+});
 
 export const supplierArticleSchema = z.object({
   article_id: z.string().min(1),
@@ -21,6 +42,7 @@ export const supplierArticleSchema = z.object({
   specs: z.record(z.string(), z.string()).optional(),
   cross_references: z.array(crossReferenceSchema).optional(),
   applicability: z.array(z.string()).optional(),
+  vehicles: z.array(vehicleFactsSchema).optional(),
   images: z.array(z.url()).optional(),
 });
 
@@ -46,6 +68,7 @@ export const supplierQuoteSchema = z.object({
 });
 
 export type SupplierArticle = z.input<typeof supplierArticleSchema>;
+export type VehicleFacts = z.infer<typeof vehicleFactsSchema>;
 export type CataloguePage = z.input<typeof cataloguePageSchema>;
 export type UnreadablePage = z.infer<typeof unreadablePageSchema>;
 export type SupplierQuote = z.input<typeof supplierQuoteSchema>;

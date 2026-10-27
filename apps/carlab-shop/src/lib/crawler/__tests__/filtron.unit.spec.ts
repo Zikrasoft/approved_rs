@@ -58,7 +58,22 @@ describe('FILTRON', () => {
         GTIN: '5904608804778',
       },
       cross_references: [{ brand: 'FOMOCO', number: 'KL3Z-19N619-AA' }],
-      applicability: ['FORD USA F-150 Lightning EV 337 kW 04/23 →'],
+      vehicles: [
+        {
+          make: 'FORD USA',
+          model: 'F-150 Lightning',
+          variant: 'EV',
+          chassis_codes: [],
+          engine_codes: [],
+          displacement_cc: null,
+          power_kw: 337,
+          fuel: null,
+          body_style: null,
+          year_from: 2023,
+          year_to: null,
+          notes: [],
+        },
+      ],
       images: [
         'https://s7g10.scene7.com/is/image/mannhummel/K_1477-1',
         'https://s7g10.scene7.com/is/image/mannhummel/K_1477-filter-with-box',

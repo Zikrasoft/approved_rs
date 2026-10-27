@@ -21,6 +21,8 @@ export type FakeShopAi = {
     fields: CategoryFieldChoice[];
   }[];
   descriptionsWritten: ArticleFacts[];
+  name: string | null;
+  namesWritten: ArticleFacts[];
   failure: Error | null;
 };
 
@@ -34,6 +36,8 @@ export const createFakeShopAi = (): FakeShopAi => {
     categoryPicks: [],
     specsMapped: [],
     descriptionsWritten: [],
+    name: null,
+    namesWritten: [],
     failure: null,
     ai: {
       readQuote: async (pdf, categories) => {
@@ -54,6 +58,11 @@ export const createFakeShopAi = (): FakeShopAi => {
         if (fake.failure) throw fake.failure;
         fake.descriptionsWritten.push(article);
         return fake.description;
+      },
+      writeName: async (article) => {
+        if (fake.failure) throw fake.failure;
+        fake.namesWritten.push(article);
+        return fake.name ?? article.name;
       },
     },
   };

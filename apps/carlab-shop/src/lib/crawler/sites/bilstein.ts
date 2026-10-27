@@ -2,7 +2,7 @@ import { type CheerioAPI, load } from 'cheerio/slim';
 import type { Page } from 'playwright';
 import { z } from 'zod';
 
-import type { SupplierArticle } from '../../suppliers/adapter';
+import type { SupplierArticle, VehicleFacts } from '../../suppliers/adapter';
 import type { CrawledSite } from '../site';
 import type { SitemapEntry } from '../sitemap';
 
@@ -59,6 +59,7 @@ const applicationsSchema = z.array(
           engineCapacity: z.string().nullish(),
           csvFuelTypes: z.string().nullish(),
           body: z.string().nullish(),
+          modelCodes: z.string().nullish(),
         }),
         relationships: z
           .object({
@@ -123,32 +124,90 @@ const attributesOf = ($: CheerioAPI) =>
       .filter(([name, value]) => name && value),
   );
 
-const applicabilityOf = ($: CheerioAPI) => {
+const FUELS: Record<string, NonNullable<VehicleFacts['fuel']>> = {
+  dizel: 'diesel',
+  benzin: 'petrol',
+  hibrid: 'hybrid',
+  elektro: 'electric',
+};
+
+const BODIES: Record<string, NonNullable<VehicleFacts['body_style']>> = {
+  limuzina: 'sedan',
+  'kombi vozilo': 'touring',
+  'kosa zadnja strana vozila': 'hatchback',
+  kupe: 'coupe',
+  cabriolet: 'convertible',
+  'terensko vozilo': 'suv',
+  'van (putničko vozilo)': 'van',
+  'kutijasto vozilo': 'van',
+  autobus: 'van',
+};
+
+const ENGINE_CODE_LIMIT = 'pogodno za kod motora';
+const MODEL_YEARS = /\s+(\d{4})\s*-\s*(\d{4})?\s*$/u;
+const CODES = /\s*\(([^)]+)\)/u;
+const POWER = /(\d+)\s*kW/u;
+
+const list = (text: string | null | undefined) =>
+  (text ?? '').split(/\s*,\s*/u).filter(Boolean);
+
+const bodyOf = (text: string | null | undefined) => {
+  const styles = new Set(
+    list(text).flatMap((body) => BODIES[body.toLowerCase()] ?? []),
+  );
+  return styles.size === 1 ? [...styles][0] : null;
+};
+
+const modelOf = (title: string) => {
+  const years = MODEL_YEARS.exec(title);
+  const model = title.replace(MODEL_YEARS, '');
+  return {
+    model: model.replace(CODES, '').trim(),
+    codes: list(CODES.exec(model)?.[1]),
+    year_from: years ? Number(years[1]) : null,
+    year_to: years?.[2] ? Number(years[2]) : null,
+  };
+};
+
+const vehiclesOf = ($: CheerioAPI): VehicleFacts[] => {
   const applications = applicationsSchema.safeParse(
     parsedJson($(`script[${APPLICATIONS_DATA}]`).text() || '[]'),
   );
   if (!applications.success) return [];
   return applications.data.flatMap(({ data, included = [] }) => {
     const limits = new Map(
-      included.map(({ id, attributes }) => [
-        id,
-        `${attributes.criteria}: ${attributes.value}`,
-      ]),
+      included.map(({ id, attributes }) => [id, attributes]),
     );
-    return data.map(({ attributes, relationships }) =>
-      [
-        `${attributes.makeTitle} ${attributes.modelTitle} ${attributes.variantTitle}`,
-        attributes.engine,
-        attributes.engineCapacity && `${attributes.engineCapacity} ccm`,
-        attributes.csvFuelTypes,
-        attributes.body,
-        ...(relationships?.limitations.data ?? []).map(({ id }) =>
-          limits.get(id),
-        ),
-      ]
-        .filter(Boolean)
-        .join('; '),
-    );
+    return data.map(({ attributes, relationships }) => {
+      const applied = (relationships?.limitations.data ?? []).flatMap(
+        ({ id }) => limits.get(id) ?? [],
+      );
+      const engineLimit = applied.find(
+        ({ criteria }) => criteria === ENGINE_CODE_LIMIT,
+      );
+      const { model, codes, year_from, year_to } = modelOf(
+        attributes.modelTitle,
+      );
+      const modelCodes = list(attributes.modelCodes);
+      return {
+        make: attributes.makeTitle,
+        model,
+        variant: attributes.variantTitle.split(' - ')[0].trim(),
+        chassis_codes: modelCodes.length ? modelCodes : codes,
+        engine_codes: engineLimit
+          ? list(engineLimit.value)
+          : list(attributes.engine),
+        displacement_cc: Number(attributes.engineCapacity) || null,
+        power_kw: Number(POWER.exec(attributes.variantTitle)?.[1]) || null,
+        fuel: FUELS[(attributes.csvFuelTypes ?? '').toLowerCase()] ?? null,
+        body_style: bodyOf(attributes.body),
+        year_from,
+        year_to,
+        notes: applied
+          .filter((limit) => limit !== engineLimit)
+          .map(({ criteria, value }) => `${criteria}: ${value}`),
+      };
+    });
   });
 };
 
@@ -232,7 +291,7 @@ export const parseBilsteinArticle = (html: string): SupplierArticle | null => {
     specs,
     cross_references: crossReferences,
     images: imagesOf($),
-    applicability: applicabilityOf($),
+    vehicles: vehiclesOf($),
   };
 };
 

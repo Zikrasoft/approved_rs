@@ -1,7 +1,7 @@
 import { type CheerioAPI, load } from 'cheerio/slim';
 import { z } from 'zod';
 
-import type { SupplierArticle } from '../../suppliers/adapter';
+import type { SupplierArticle, VehicleFacts } from '../../suppliers/adapter';
 import type { CrawledSite } from '../site';
 
 const productLdSchema = z.object({
@@ -66,30 +66,51 @@ const crossReferencesOf = ($: CheerioAPI) =>
     },
   );
 
-const withUnit = (value: string | undefined, unit: string) =>
-  value ? `${value} ${unit}` : '';
+const CODES = /\(([^)]+)\)/u;
+const MONTH_YEAR = /\d{2}\/(\d{2})/gu;
 
-const applicabilityOf = ($: CheerioAPI) =>
+const codesIn = (text: string) =>
+  CODES.exec(text)?.[1]
+    .split(/\s*[/,]\s*/u)
+    .filter(Boolean) ?? [];
+
+const withoutCodes = (text: string) => text.replace(CODES, '').trim();
+
+const yearsOf = (text: string) => {
+  const [from, to] = text.split('→').map((side) => {
+    const yy = [...side.matchAll(MONTH_YEAR)][0]?.[1];
+    return yy ? Number(yy) + (Number(yy) < 50 ? 2000 : 1900) : null;
+  });
+  return { year_from: from ?? null, year_to: to ?? null };
+};
+
+const count = (text: string | undefined) => Number(text) || null;
+
+const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
   each($, $('#applications .cmp-application-table')).flatMap((table) => {
-    const [series, make] = each($, table.parents('.cmp-accordion__item'));
-    const prefix = [accordionTitle(make), accordionTitle(series)];
+    const [series, make] = each($, table.parents('.cmp-accordion__item')).map(
+      accordionTitle,
+    );
     return each($, table.find('tbody.cmp-table__desktop tr'))
       .map((row) =>
         each($, row.find('td')).map((cell) => words(cell).replace(/^-$/u, '')),
       )
       .filter((cells) => cells.length >= 7)
-      .map(([model, , engine, ccm, kw, , years]) =>
-        [
-          ...prefix,
-          model,
-          engine,
-          withUnit(ccm, 'ccm'),
-          withUnit(kw, 'kW'),
-          years,
-        ]
-          .filter(Boolean)
-          .join(' '),
-      );
+      .map(([variant, , engine, ccm, kw, , years]) => ({
+        make,
+        model: withoutCodes(series),
+        variant,
+        chassis_codes: codesIn(variant).length
+          ? codesIn(variant)
+          : codesIn(series),
+        engine_codes: engine.split(/\s*,\s*/u).filter(Boolean),
+        displacement_cc: count(ccm),
+        power_kw: count(kw),
+        fuel: null,
+        body_style: null,
+        ...yearsOf(years),
+        notes: [],
+      }));
   });
 
 const parsedJson = (text: string): unknown => {
@@ -136,7 +157,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    applicability: applicabilityOf($),
+    vehicles: vehiclesOf($),
     images: imagesOf($),
   };
 };

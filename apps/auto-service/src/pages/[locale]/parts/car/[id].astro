@@ -66,7 +66,7 @@ const years =
 
 const specs = [
   { label: copy.engineLabel, value: `${engine.code} (${engine.family})` },
-  { label: copy.fuelLabel, value: copy.fuel[engine.fuel] },
+  { label: copy.fuelLabel, value: engine.fuel && copy.fuel[engine.fuel] },
   {
     label: copy.displacementLabel,
     value:
@@ -78,7 +78,10 @@ const specs = [
     value: vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
   },
   { label: copy.driveLabel, value: vehicle.drive && copy.drive[vehicle.drive] },
-  { label: copy.bodyLabel, value: copy.body[model.chassis.body_style] },
+  {
+    label: copy.bodyLabel,
+    value: model.chassis.body_style && copy.body[model.chassis.body_style],
+  },
   { label: copy.yearsLabel, value: years },
   {
     label: copy.steeringLabel,
