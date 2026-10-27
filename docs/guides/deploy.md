@@ -596,7 +596,10 @@ runs waits as queued, and starts once the running one is done or paused; staff
 can pause the running one on its Pause button to let a queued one go first.
 Postgres is the queue, S3 holds the pages, Crawlee keeps nothing on disk, so the
 service has no volume and a restart picks up where it stopped. It sits on `edge` as
-well as `data` because it needs the internet.
+well as `data` because it needs the internet. It does not get `.env`: compose hands
+it only what the worker reads (`NODE_ENV`, the database, `DATABASE_SSL`,
+`CRAWLER_FROM` and the `S3_*` settings, `CRAWLER_ENV_NAMES` in `src/lib/env.ts`),
+so the shop's own secrets never reach the Chromium process.
 
 ### The server
 

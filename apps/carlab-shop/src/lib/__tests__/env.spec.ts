@@ -1,4 +1,4 @@
-import { parseEnv } from '../env';
+import { CRAWLER_ENV_NAMES, parseCrawlerEnv, parseEnv } from '../env';
 
 const VALID_ENV = {
   DATABASE_URL: 'postgres://postgres:postgres@localhost:55432/medusa',
@@ -226,5 +226,42 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...VALID_ENV, SHOP_OPEN: 'yes' })).toThrow(
       /SHOP_OPEN/,
     );
+  });
+});
+
+describe('parseCrawlerEnv', () => {
+  it('runs the production crawler on its own variables, without the shop secrets', () => {
+    const env = parseCrawlerEnv({
+      ...S3_ENV,
+      NODE_ENV: 'production',
+      DATABASE_URL: VALID_ENV.DATABASE_URL,
+    });
+
+    expect(env.S3?.privateBucket).toBe('carlab-private');
+    expect(env).not.toHaveProperty('JWT_SECRET');
+  });
+
+  it('requires the S3 storage for the production crawler', () => {
+    expect(() =>
+      parseCrawlerEnv({
+        NODE_ENV: 'production',
+        DATABASE_URL: VALID_ENV.DATABASE_URL,
+      }),
+    ).toThrow(/S3_PRIVATE_BUCKET/);
+  });
+
+  it('names every variable the crawler reads', () => {
+    expect([...CRAWLER_ENV_NAMES].sort()).toEqual([
+      'CRAWLER_FROM',
+      'DATABASE_SSL',
+      'DATABASE_URL',
+      'NODE_ENV',
+      'S3_ACCESS_KEY_ID',
+      'S3_ENDPOINT',
+      'S3_PRIVATE_BUCKET',
+      'S3_PUBLIC_BUCKET',
+      'S3_REGION',
+      'S3_SECRET_ACCESS_KEY',
+    ]);
   });
 });
