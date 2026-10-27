@@ -33,7 +33,7 @@ if [ "${1:-}" = fetch ]; then
   exit 0
 fi
 
-find "$dest" -maxdepth 1 -type f \( -name 'db-*.dump' -o -name 'static-*.tar.gz' \) -mtime +6 -delete
+find "$dest" -maxdepth 1 -type f -name 'db-*.dump' -mtime +6 -delete
 
 mkdir .deploy.lock 2>/dev/null || {
   echo "A deploy is running (.deploy.lock present), no backup tonight." >&2
@@ -44,13 +44,9 @@ trap 'rm -f "$dest"/*"$stamp"*.part; rmdir .deploy.lock 2>/dev/null || true' EXI
 docker compose exec -T postgres \
   pg_dump -U carlab -d carlab --format=custom >"$dest/db-$stamp.dump.part"
 mv "$dest/db-$stamp.dump.part" "$dest/db-$stamp.dump"
-
-docker compose exec -T medusa \
-  tar -C /server/static -czf - . >"$dest/static-$stamp.tar.gz.part"
-mv "$dest/static-$stamp.tar.gz.part" "$dest/static-$stamp.tar.gz"
 rmdir .deploy.lock
 
-echo "Backed up to $dest/db-$stamp.dump and $dest/static-$stamp.tar.gz"
+echo "Backed up to $dest/db-$stamp.dump"
 
 if [ -z "$bucket" ]; then
   echo "WARNING: BACKUP_S3_BUCKET is not set in .env.backup, so this backup stays on this host only." >&2
@@ -58,7 +54,7 @@ if [ -z "$bucket" ]; then
 fi
 {
   rclone copy /backups ":s3:$bucket" --include "*-$stamp.*" &&
-    rclone delete ":s3:$bucket" --min-age 30d --include 'db-*.dump' --include 'static-*.tar.gz'
+    rclone delete ":s3:$bucket" --min-age 30d --include 'db-*.dump'
 } || {
   echo "The off-host copy failed; the local backup in $dest is intact." >&2
   exit 1

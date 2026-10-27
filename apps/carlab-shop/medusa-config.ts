@@ -7,6 +7,27 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 const env = parseEnv(process.env);
 
+const fileProvider = env.S3
+  ? {
+      resolve: '@medusajs/medusa/file-s3',
+      id: 's3',
+      options: {
+        file_url: env.FILE_URL,
+        access_key_id: env.S3.accessKeyId,
+        secret_access_key: env.S3.secretAccessKey,
+        region: env.S3.region,
+        bucket: env.S3.publicBucket,
+        endpoint: env.S3.endpoint,
+        acl: false,
+        additional_client_config: { forcePathStyle: Boolean(env.S3.endpoint) },
+      },
+    }
+  : {
+      resolve: '@medusajs/medusa/file-local',
+      id: 'local',
+      options: { backend_url: env.FILE_URL },
+    };
+
 export default defineConfig({
   projectConfig: {
     databaseUrl: env.DATABASE_URL,
@@ -41,13 +62,7 @@ export default defineConfig({
     {
       resolve: '@medusajs/medusa/file',
       options: {
-        providers: [
-          {
-            resolve: '@medusajs/medusa/file-local',
-            id: 'local',
-            options: { backend_url: env.FILE_URL },
-          },
-        ],
+        providers: [fileProvider],
       },
     },
     {

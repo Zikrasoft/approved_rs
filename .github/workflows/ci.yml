@@ -283,7 +283,7 @@ jobs:
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |
-          tar -C infra/carlab-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh \
+          tar -C infra/carlab-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh move-static-to-s3.sh \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'

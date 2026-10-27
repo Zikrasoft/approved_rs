@@ -6,6 +6,7 @@ import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../integration-tests/adminAuth';
+import { memoryBucket } from '../../../../integration-tests/fakeStorage';
 import { crawledSupplierAdapter } from '../adapter';
 import { crawlSite } from '../crawl';
 import type { Fetched, Fetcher, FetchMode } from '../fetcher';
@@ -110,10 +111,12 @@ medusaIntegrationTestRunner({
   moduleName: 'crawler',
   testSuite: ({ api, getContainer }) => {
     let store: CrawlStore;
+    const pageBucket = memoryBucket();
 
     beforeAll(() => {
       store = crawlStore(
         getContainer().resolve(ContainerRegistrationKeys.PG_CONNECTION),
+        pageBucket.bucket,
       );
     });
 
@@ -175,10 +178,37 @@ medusaIntegrationTestRunner({
         });
         expect(progress.failures).toEqual(NO_FAILURES);
         const [snapshot] = await store.snapshots(site.name, null, 1);
-        expect(gunzipSync(snapshot.body).toString('utf8')).toBe(
+        expect(gunzipSync(snapshot.body!).toString('utf8')).toBe(
           '<html>one</html>',
         );
         expect(web.closed).toEqual(['http']);
+      });
+
+      it('keeps the raw page in the private bucket and only its key in Postgres', async () => {
+        const site = testSite('bucketed');
+        const web = fakeWeb({
+          'https://bucketed.test/robots.txt': ok('User-agent: *\n'),
+          'https://bucketed.test/sitemap.xml': ok(
+            urlset('https://bucketed.test/p/1'),
+          ),
+          'https://bucketed.test/p/1': ok('<html>kept</html>'),
+        });
+
+        await crawl(site, web);
+
+        const row = await getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('crawl_page')
+          .where({ site: site.name, url: 'https://bucketed.test/p/1' })
+          .first('body', 'body_key');
+        expect(row.body).toBeNull();
+        const stored = pageBucket.objects.get(row.body_key);
+        expect(gunzipSync(stored!.body).toString('utf8')).toBe(
+          '<html>kept</html>',
+        );
+        const [snapshot] = await store.snapshots(site.name, null, 1);
+        expect(gunzipSync(snapshot.body!).toString('utf8')).toBe(
+          '<html>kept</html>',
+        );
       });
 
       it('never waits less than the site floor when robots.txt asks for less', async () => {

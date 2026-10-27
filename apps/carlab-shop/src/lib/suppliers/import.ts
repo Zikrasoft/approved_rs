@@ -30,6 +30,8 @@ import {
   supplierQuoteSchema,
 } from './adapter';
 import { emitIndexChanges } from '../index-changes';
+import { shopStorage, type ShopStorage } from '../storage';
+import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
 import { spellingKey } from './spelling';
 
@@ -54,6 +56,7 @@ type Context = {
   categories: CategoryChoice[];
   logger: Logger;
   matched: Set<string>;
+  storage: ShopStorage | null;
 };
 
 const factsOf = (article: Article): ArticleFacts => ({
@@ -250,13 +253,26 @@ async function storeOffer(
     : suppliers.createSupplierOffers(offer));
 }
 
+const stagedImages = async (
+  { storage, logger }: Context,
+  images: string[] | undefined,
+) =>
+  storage && images
+    ? Promise.all(images.map((url) => mirroredImage(storage, url, logger)))
+    : images;
+
 async function stage(
-  { supplierId, suppliers }: Context,
+  context: Context,
   identifierId: string,
   article: Article,
 ): Promise<void> {
+  const { supplierId, suppliers } = context;
+  const staged = {
+    ...article,
+    images: await stagedImages(context, article.images),
+  };
   for (const kind of STAGED_DATA_KINDS) {
-    const items = article[kind];
+    const items = staged[kind];
     if (!items) {
       continue;
     }
@@ -304,6 +320,7 @@ export async function importSupplier(
     ).map(({ id, name }) => ({ id, name })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
+    storage: shopStorage(scope),
   };
   const categoryOf = new Map(
     (

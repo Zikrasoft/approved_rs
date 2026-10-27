@@ -68,7 +68,6 @@ services:
       TYPESENSE_PORT: '8108'
       TYPESENSE_PROTOCOL: http
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?}
-      FILE_URL: https://${API_HOST:-api.carlab.rs}/static
       NODE_OPTIONS: --max-old-space-size=1024
     depends_on:
       postgres:
@@ -77,8 +76,6 @@ services:
       typesense:
         condition: service_healthy
         restart: true
-    volumes:
-      - static:/server/static
 
   crawler:
     image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-carlab-shop}:${MEDUSA_TAG:?}
@@ -121,7 +118,6 @@ services:
         condition: service_started
     volumes:
       - ./caddy:/etc/caddy:ro
-      - static:/srv/static:ro
       - caddydata:/data
       - caddyconfig:/config
     healthcheck:
@@ -151,6 +147,5 @@ networks:
 volumes:
   pgdata:
   typesensedata:
-  static:
   caddydata:
   caddyconfig:
