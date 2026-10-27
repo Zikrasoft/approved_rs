@@ -26,6 +26,7 @@ export const crawledSupplierAdapter = (
     const unreadable: UnreadablePage[] = [];
     for (const { url, body } of snapshots) {
       try {
+        if (!body) throw new Error('The stored page is missing from S3');
         const article = site.parse(gunzipSync(body).toString('utf8'));
         if (article) articles.push(supplierArticleSchema.parse(article));
       } catch (error) {

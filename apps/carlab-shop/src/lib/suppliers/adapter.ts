@@ -7,6 +7,7 @@ import { crawledSupplierAdapter } from '../crawler/adapter';
 import { enabledCrawledSites } from '../crawler/sites';
 import { crawlStore } from '../crawler/store';
 import { parseEnv } from '../env';
+import { shopStorage } from '../storage';
 import { demoAdapters } from './demo-adapter';
 
 export const SUPPLIER_ADAPTERS_REGISTRATION = 'supplierAdapters';
@@ -58,11 +59,12 @@ export type SupplierAdapter = {
 
 const configuredAdapters = (scope: MedusaContainer): SupplierAdapter[] => {
   const env = parseEnv(process.env);
+  const store = crawlStore(
+    scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
+    shopStorage(scope)?.pages ?? null,
+  );
   const crawled = enabledCrawledSites().map((site) =>
-    crawledSupplierAdapter(
-      site,
-      crawlStore(scope.resolve(ContainerRegistrationKeys.PG_CONNECTION)),
-    ),
+    crawledSupplierAdapter(site, store),
   );
   return [
     ...(env.SUPPLIER_ADAPTERS.includes('demo')

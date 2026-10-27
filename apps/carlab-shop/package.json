@@ -16,6 +16,7 @@
     "test": "for shard in 1 2 3 4; do NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests --shard=$shard/4 || exit 1; done"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1152.0",
     "@crawlee/http": "3.18.2",
     "@crawlee/playwright": "3.18.2",
     "@medusajs/admin-sdk": "2.21.2",

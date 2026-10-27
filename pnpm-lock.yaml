@@ -260,6 +260,9 @@ importers:
 
   apps/carlab-shop:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: 3.1152.0
+        version: 3.1152.0
       '@crawlee/http':
         specifier: 3.18.2
         version: 3.18.2(supports-color@8.1.1)

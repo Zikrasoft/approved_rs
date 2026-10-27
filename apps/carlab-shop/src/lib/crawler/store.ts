@@ -1,4 +1,8 @@
+import { createHash } from 'node:crypto';
+
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
+
+import type { Bucket } from '../storage';
 
 export const PAUSE_REASONS = [
   'robots_unavailable',
@@ -71,7 +75,15 @@ const tally = <Key extends string>(
     keys.map((key) => [key, Number(countOf(key) ?? 0)]),
   ) as Record<Key, number>;
 
-export const crawlStore = (pg: Knex) => ({
+const pageKey = (site: string, url: string) =>
+  `crawl/${encodeURIComponent(site)}/${createHash('sha256').update(url).digest('hex')}.html.gz`;
+
+const pagesBucket = (pages: Bucket | null): Bucket => {
+  if (!pages) throw new Error('Crawled pages need the S3 storage (S3_* env)');
+  return pages;
+};
+
+export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
   async run(site: string): Promise<CrawlRun | null> {
     return (await pg('crawl_run').where({ site }).first()) ?? null;
   },
@@ -180,8 +192,23 @@ export const crawlStore = (pg: Knex) => ({
     return row?.due ?? null;
   },
 
-  async update(site: string, url: string, update: PageUpdate): Promise<void> {
-    await pg('crawl_page').where({ site, url }).update(update);
+  async update(
+    site: string,
+    url: string,
+    { body, ...update }: PageUpdate,
+  ): Promise<void> {
+    const stored = body && {
+      body: null,
+      body_key: pageKey(site, url),
+    };
+    if (stored) {
+      await pagesBucket(pages).put(stored.body_key, body, {
+        contentType: 'application/gzip',
+      });
+    }
+    await pg('crawl_page')
+      .where({ site, url })
+      .update({ ...update, ...stored });
   },
 
   async pause(site: string, reason: PauseReason): Promise<void> {
@@ -234,14 +261,26 @@ export const crawlStore = (pg: Knex) => ({
     site: string,
     after: string | null,
     limit: number,
-  ): Promise<{ url: string; body: Buffer }[]> {
-    return pg('crawl_page')
-      .select('url', 'body')
+  ): Promise<{ url: string; body: Buffer | null }[]> {
+    const rows: {
+      url: string;
+      body: Buffer | null;
+      body_key: string | null;
+    }[] = await pg('crawl_page')
+      .select('url', 'body', 'body_key')
       .where({ site, status: 'done' })
-      .whereNotNull('body')
+      .andWhere((query) =>
+        query.whereNotNull('body').orWhereNotNull('body_key'),
+      )
       .andWhere('url', '>', after ?? '')
       .orderBy('url')
       .limit(limit);
+    return Promise.all(
+      rows.map(async ({ url, body, body_key }) => ({
+        url,
+        body: body ?? (await pagesBucket(pages).get(body_key!)),
+      })),
+    );
   },
 });
 

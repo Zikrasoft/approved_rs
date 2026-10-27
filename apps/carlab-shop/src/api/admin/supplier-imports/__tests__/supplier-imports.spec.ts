@@ -1,3 +1,6 @@
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
@@ -5,10 +8,12 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
+import { memoryStorage } from '../../../../../integration-tests/fakeStorage';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { publishAllNumbers } from '../../../../lib/publish/published';
+import { SHOP_STORAGE_REGISTRATION } from '../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -18,6 +23,7 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
 const shopAi = createFakeShopAi();
+const storage = memoryStorage();
 
 type Page = {
   normalized_value: string;
@@ -43,6 +49,7 @@ medusaIntegrationTestRunner({
         asValue([intercars.adapter, warehouse.adapter]),
       );
       container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
+      container.register(SHOP_STORAGE_REGISTRATION, asValue(storage.storage));
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -680,6 +687,82 @@ medusaIntegrationTestRunner({
           cross_references: [],
           applicability: [],
           images: ['https://cdn.intercars.test/hu816x.jpg'],
+        });
+      });
+
+      describe('crawled images', () => {
+        let server: Server;
+        let origin: string;
+        const served: string[] = [];
+
+        beforeAll(async () => {
+          server = createServer((request, response) => {
+            served.push(request.url!);
+            if (request.url === '/hu7020z.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.from('jpeg-bytes'));
+            } else {
+              response.writeHead(404).end();
+            }
+          });
+          await new Promise<void>((resolve) => server.listen(0, resolve));
+          origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+        });
+
+        afterAll(() => new Promise((resolve) => server.close(resolve)));
+
+        beforeEach(() => {
+          served.length = 0;
+        });
+
+        const articleWithImages = (images: string[]) => ({
+          article_id: 'IC-IMG',
+          brand: 'MANN-FILTER',
+          number: 'HU 7020 z',
+          name: 'Фильтр масляный HU 7020 z',
+          category: 'IC-OIL',
+          images,
+        });
+
+        it('copies a crawled image to the public bucket once, keeps its source URL and serves the copy', async () => {
+          const source = `${origin}/hu7020z.jpg`;
+          intercars.articles.push(articleWithImages([source]));
+          await api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { released_kinds: ['images'] },
+            adminHeaders,
+          );
+
+          await runImport();
+          await runImport();
+
+          expect(served).toEqual(['/hu7020z.jpg']);
+          const [[key, stored]] = [...storage.images.objects].filter(
+            ([, object]) => object.metadata['source-url'] === source,
+          );
+          expect(stored.body.toString()).toBe('jpeg-bytes');
+          expect(stored.contentType).toBe('image/jpeg');
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([
+            `https://files.carlab.test/${key}`,
+          ]);
+        });
+
+        it('keeps the source URL while the image cannot be fetched, and tries again on the next import', async () => {
+          const source = `${origin}/missing.jpg`;
+          intercars.articles.push(articleWithImages([source]));
+          await api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { released_kinds: ['images'] },
+            adminHeaders,
+          );
+
+          await runImport();
+          await runImport();
+
+          expect(served).toEqual(['/missing.jpg', '/missing.jpg']);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([
+            source,
+          ]);
         });
       });
 
