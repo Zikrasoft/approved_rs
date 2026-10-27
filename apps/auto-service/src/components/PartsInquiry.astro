@@ -3,6 +3,7 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { MAX_PART_QUANTITY } from '@/scripts/partsList';
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
 
@@ -48,6 +49,16 @@ const copy = content(locale).pages.partsInquiry;
         <a
           class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 hover:text-signal-ink hover:underline"
           data-part-link></a>
+        <input
+          type="number"
+          inputmode="numeric"
+          min="1"
+          max={MAX_PART_QUANTITY}
+          step="1"
+          class="field spec min-h-11 w-16 shrink-0 px-2 py-1.5 text-center"
+          aria-label={copy.listQuantityLabel}
+          data-part-quantity
+        />
         <button
           type="button"
           class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal"
