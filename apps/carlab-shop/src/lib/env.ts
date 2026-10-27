@@ -36,6 +36,12 @@ const S3_NAMES = [
   'S3_PRIVATE_BUCKET',
 ] as const;
 
+type S3Name = (typeof S3_NAMES)[number];
+
+const hasS3 = <Env extends Partial<Record<S3Name, string>>>(
+  env: Env,
+): env is Env & Record<S3Name, string> => S3_NAMES.every((name) => env[name]);
+
 export type S3Config = {
   endpoint: string | undefined;
   region: string;
@@ -131,21 +137,16 @@ const envSchema = z
   })
   .transform((env) => ({
     ...env,
-    S3:
-      env.S3_REGION &&
-      env.S3_ACCESS_KEY_ID &&
-      env.S3_SECRET_ACCESS_KEY &&
-      env.S3_PUBLIC_BUCKET &&
-      env.S3_PRIVATE_BUCKET
-        ? ({
-            endpoint: env.S3_ENDPOINT,
-            region: env.S3_REGION,
-            accessKeyId: env.S3_ACCESS_KEY_ID,
-            secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-            publicBucket: env.S3_PUBLIC_BUCKET,
-            privateBucket: env.S3_PRIVATE_BUCKET,
-          } satisfies S3Config)
-        : null,
+    S3: hasS3(env)
+      ? ({
+          endpoint: env.S3_ENDPOINT,
+          region: env.S3_REGION,
+          accessKeyId: env.S3_ACCESS_KEY_ID,
+          secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+          publicBucket: env.S3_PUBLIC_BUCKET,
+          privateBucket: env.S3_PRIVATE_BUCKET,
+        } satisfies S3Config)
+      : null,
     TYPESENSE_API_KEY: env.TYPESENSE_API_KEY ?? LOCAL_TYPESENSE_API_KEY,
     FILE_URL: env.FILE_URL ?? `http://localhost:${env.PORT}/static`,
     SHOP_OPEN: env.SHOP_OPEN ?? env.NODE_ENV !== 'production',

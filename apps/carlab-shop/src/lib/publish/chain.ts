@@ -17,6 +17,7 @@ import { deploySite } from './deploy';
 import { markNumbersPublished, partNumberIds } from './published';
 import { translateCatalogue } from './translate';
 import { adminError } from '../admin-errors';
+import { errorMessage } from '../errors';
 
 export const PUBLISH_REINDEX_REGISTRATION = 'publishReindex';
 
@@ -64,7 +65,7 @@ async function runSteps(steps: PublishStep[]): Promise<StepFailure | null> {
     } catch (error) {
       return {
         failed_step: step.name,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage(error),
       };
     }
   }

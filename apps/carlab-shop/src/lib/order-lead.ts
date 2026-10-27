@@ -31,6 +31,7 @@ import {
   LEAD_TIME_METADATA_KEY,
   OFFER_ID_METADATA_KEY,
 } from './offer-cart';
+import { errorMessage } from './errors';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
@@ -273,7 +274,7 @@ export async function handOrderToLeadRoute(
       [LEAD_HANDOFF_ATTEMPTS]: '',
     }));
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+    const reason = errorMessage(error);
     logger.error(`Order ${id} did not reach the lead pipeline: ${reason}`);
     const recorded = await recordHandOff(container, id, (metadata) => ({
       [LEAD_HANDOFF_ERROR]: reason,
