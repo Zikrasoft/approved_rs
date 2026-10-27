@@ -338,7 +338,12 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 1,
             skipped: 1,
-            skipped_by_reason: { brand: 1, currency: 0, unreadable: 0 },
+            skipped_by_reason: {
+              brand: 1,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
             needs_category: ['C 30 005'],
           },
           {
@@ -346,7 +351,12 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 0,
             skipped: 0,
-            skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
+            skipped_by_reason: {
+              brand: 0,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
             needs_category: [],
           },
         ]);
@@ -374,7 +384,12 @@ medusaIntegrationTestRunner({
           imported: 0,
           created: 1,
           skipped: 1,
-          skipped_by_reason: { brand: 0, currency: 0, unreadable: 1 },
+          skipped_by_reason: {
+            brand: 0,
+            currency: 0,
+            unreadable: 1,
+            no_engine_code: 0,
+          },
           needs_category: [],
         });
         expect(await page('W6103')).toBeDefined();

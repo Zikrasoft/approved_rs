@@ -45,7 +45,12 @@ export type ImportSummary = {
   imported: number;
   created: number;
   skipped: number;
-  skipped_by_reason: { brand: number; currency: number; unreadable: number };
+  skipped_by_reason: {
+    brand: number;
+    currency: number;
+    unreadable: number;
+    no_engine_code: number;
+  };
   needs_category: string[];
 };
 
@@ -372,7 +377,12 @@ export async function importSupplier(
     imported: 0,
     created: 0,
     skipped: 0,
-    skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
+    skipped_by_reason: {
+      brand: 0,
+      currency: 0,
+      unreadable: 0,
+      no_engine_code: 0,
+    },
     needs_category: [],
   };
   const brandOfArticle = (article: Article) =>
@@ -429,6 +439,9 @@ export async function importSupplier(
       await stage(context, identifierId, article);
       if (article.vehicles) {
         await fitVehicles(context.vehicles, partId, article.vehicles);
+        summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+          ({ engine_codes }) => !engine_codes.length,
+        ).length;
       }
       summary.imported += Number(!created);
       summary.created += Number(created);

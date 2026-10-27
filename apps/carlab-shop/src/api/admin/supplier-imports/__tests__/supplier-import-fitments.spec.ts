@@ -288,7 +288,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('fits no Vehicle for a row without an engine code', async () => {
+      it('fits no Vehicle for a row without an engine code and counts the row', async () => {
         mann.articles.push({
           article_id: 'K1477',
           brand: 'MANN-FILTER',
@@ -307,9 +307,10 @@ medusaIntegrationTestRunner({
           ],
         });
 
-        await runImport('MANN-FILTER');
+        const summary = await runImport('MANN-FILTER');
 
         expect(await fitmentsOf('K 1477')).toEqual([]);
+        expect(summary.skipped_by_reason.no_engine_code).toBe(1);
       });
 
       it('names an imported Part in Russian and renames it only when the source name changes', async () => {
