@@ -377,6 +377,16 @@ medusaIntegrationTestRunner({
         expect(await catalog.listFitments()).toEqual([]);
       });
 
+      it('refuses a VIN that is not one and creates nothing', async () => {
+        const response = await confirm({
+          vin: 'nečitljivo',
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(400);
+        expect(await catalog.listParts()).toEqual([]);
+      });
+
       it('takes no price from the quote', async () => {
         const response = await confirm({
           vin: null,

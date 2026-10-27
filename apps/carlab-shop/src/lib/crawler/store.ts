@@ -14,6 +14,13 @@ export const PAUSE_REASONS = [
 
 export type PauseReason = (typeof PAUSE_REASONS)[number];
 
+export const CRAWL_RUN_STATUSES = [
+  'queued',
+  'running',
+  'paused',
+  'done',
+] as const;
+
 export const PAGE_STATUSES = ['queued', 'done', 'failed', 'gone'] as const;
 
 type PageStatus = (typeof PAGE_STATUSES)[number];
@@ -30,7 +37,7 @@ export type FailureReason = (typeof FAILURE_REASONS)[number];
 
 export type CrawlRun = {
   site: string;
-  status: 'queued' | 'running' | 'paused' | 'done';
+  status: (typeof CRAWL_RUN_STATUSES)[number];
   paused_reason: PauseReason | null;
   seeded: boolean;
   pages_left: number | null;

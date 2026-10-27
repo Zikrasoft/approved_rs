@@ -49,6 +49,7 @@ partsInquiry:
   commentNote: Не обязательно знать точное название детали, мы свяжемся с вами и вместе разберемся, что нужно.
   listHeading: Корзина
   listRemoveLabel: Убрать из корзины
+  listQuantityLabel: Количество
   listCarRemoveLabel: Не привязывать заявку к этой машине
   listMoreTemplate: 'Не поместилось позиций: {count}'
   llmsCatalogue: 'Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО, указав только контакт; цену проверяем заново при оформлении, а наличие и время самовывоза менеджер подтверждает после заказа. Если цены нет, соберите список запчастей и отправьте его одной заявкой.'
@@ -236,6 +237,7 @@ translations:
       commentNote: Nije obavezno znati tačan naziv dela, javićemo vam se i zajedno razjasniti šta je potrebno.
       listHeading: Korpa
       listRemoveLabel: Ukloni iz korpe
+      listQuantityLabel: Količina
       listCarRemoveLabel: Ne vezujte zahtev za ovaj automobil
       listMoreTemplate: 'Nema više pozicija: {count}'
       llmsCatalogue: 'Katalog delova CarLab: za svaki deo postoji posebna stranica sa sličnim delovima, cenom i dostupnošću. Delovi sa cenom se dodaju u korpu i naručuju sa preuzimanjem i plaćanjem kešom na STU, uz navođenje samo kontakta; proveravamo cenu prilikom naručivanja, a dostupnost i vreme preuzimanja menadžer potvrđuje nakon naručivanja. Ako nema cene, skupite listu delova i pošaljite je jednim zahtevom.'
@@ -374,6 +376,7 @@ translations:
       commentNote: You don’t need to know the exact part name; we’ll contact you to clarify what’s needed.
       listHeading: Cart
       listRemoveLabel: Remove from cart
+      listQuantityLabel: Quantity
       listCarRemoveLabel: Do not link this request to this car
       listMoreTemplate: 'Items not fitting: {count}'
       llmsCatalogue: "CarLab parts catalog: each part number has its own page with alternatives, pricing, and availability. Add priced parts to the cart and order with pickup and cash payment at the workshop, providing only contact information; we verify the price again at checkout, and the manager confirms availability and pickup time after the order. If there's no price, compile a list of parts and submit it as one request."

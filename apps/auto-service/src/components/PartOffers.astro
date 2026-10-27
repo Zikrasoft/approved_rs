@@ -5,6 +5,7 @@ import { shopOpen } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { addonDataset } from '@/utils/categoryAddon';
 import { PathBuilder } from '@/utils/paths';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 
@@ -106,7 +107,7 @@ const priced = page.offers.length > 0;
       <parts-list-add class="mt-1 block" {...part}>
         <a
           href={PathBuilder.partsInquiry(locale)}
-          data-open-parts-inquiry
+          {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
           class:list={[
             'btn w-full sm:w-auto',
             demoted ? 'btn-secondary' : 'btn-primary',

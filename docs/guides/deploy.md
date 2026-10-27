@@ -596,7 +596,10 @@ runs waits as queued, and starts once the running one is done or paused; staff
 can pause the running one on its Pause button to let a queued one go first.
 Postgres is the queue, S3 holds the pages, Crawlee keeps nothing on disk, so the
 service has no volume and a restart picks up where it stopped. It sits on `edge` as
-well as `data` because it needs the internet.
+well as `data` because it needs the internet. It does not get `.env`: compose hands
+it only what the worker reads (`NODE_ENV`, the database, `DATABASE_SSL`,
+`CRAWLER_FROM` and the `S3_*` settings, `CRAWLER_ENV_NAMES` in `src/lib/env.ts`),
+so the shop's own secrets never reach the Chromium process.
 
 ### The server
 
@@ -627,10 +630,13 @@ well as `data` because it needs the internet.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, crawler 512m, caddy 128m, under 3.5 GB together (checked by the
-  compose test). Measured in the image on a 1.4 MB page: the crawler holds about
-  180 MB on HTTP sites and 310 to 370 MB while Chromium renders a browser site; at
-  320m it stalled. Its Node heap is capped at 256 MB: one browser crawl holds two
+  postgres 512m, crawler 640m, caddy 128m, 3584 MB together, under 3.6 GB (checked
+  by the compose test). Measured in the built image on live crawls (bilstein and
+  FILTRON, 3 pages each): the worker idles at about 180 MB, its anonymous memory
+  peaked at 479 MB while Chromium rendered a FILTRON page, and the cgroup total
+  with page cache reached 541 MB on bilstein and 801 MB on FILTRON without a cap.
+  Under a 640m cap the same run finished with no OOM kill, the cache reclaimed;
+  640m leaves about a third over the anonymous peak. At 320m it stalled. Its Node heap is capped at 256 MB: one browser crawl holds two
   Crawlee crawlers (about 20 MB each) and Playwright (about 67 MB) over the
   worker's own baseline, which left no room under the old 160 MB cap for a
   bilstein page or its sitemap list. Four crawls at once peaked at 316 MB of heap,
@@ -652,9 +658,12 @@ its own (not the backup bucket).
   960 px WebP copies and stores their URLs on the PartIdentifier or Category. A
   Supplier import copies each crawled image once into `supplier-images/<sha256 of
 the source URL>`, with the source URL in the object's `source-url` metadata, and
-  stages our copy; a later import finds the object and downloads nothing. An image
-  that cannot be fetched stays linked to its source and is tried again on the
-  next import.
+  stages our copy with its source URL beside it in the staged record; a later
+  import finds the object and downloads nothing. Only http(s) on a public address
+  is fetched (a host resolving to a private, loopback or link-local range is
+  refused), and a download stops at 10 MB. An image that cannot be fetched is
+  staged nowhere, so the site never links the brand's server, and is tried again
+  on the next import.
 - **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
   `crawl/<site>/<sha256 of the URL>.html.gz`. The import reads them back from there.
 

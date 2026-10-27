@@ -1,13 +1,8 @@
 import { type CheerioAPI, load } from 'cheerio/slim';
 
 import type { SupplierArticle } from '../../suppliers/adapter';
+import { imageUrls, words } from '../page-parsing';
 import type { CrawledSite } from '../site';
-
-const words = (text: string) =>
-  text
-    .replace(/\u200b/gu, '')
-    .replace(/\s+/gu, ' ')
-    .trim();
 
 const specsOf = ($: CheerioAPI): Record<string, string> =>
   Object.fromEntries(
@@ -20,18 +15,12 @@ const specsOf = ($: CheerioAPI): Record<string, string> =>
       .filter(([label, value]) => label && value),
   );
 
-const imagesOf = ($: CheerioAPI): string[] => {
-  const urls = $('.products-detail__media-img img')
-    .toArray()
-    .flatMap((img) => {
-      const src = $(img).attr('src');
-      if (!src) return [];
-      const url = new URL(src);
-      url.search = '';
-      return [url.href];
-    });
-  return [...new Set(urls)];
-};
+const imagesOf = ($: CheerioAPI): string[] =>
+  imageUrls(
+    $('.products-detail__media-img img')
+      .toArray()
+      .map((img) => $(img).attr('src')),
+  );
 
 const descriptionOf = ($: CheerioAPI) => {
   const description = $('.products-detail__description').first();

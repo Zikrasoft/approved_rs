@@ -40,6 +40,13 @@ export async function POST(
       ...(description !== undefined && { description }),
       ...(installation_price !== undefined && { installation_price }),
       ...(no_installation !== undefined && { no_installation }),
+      edited_fields: [
+        ...new Set([
+          ...current.edited_fields,
+          ...(name === undefined ? [] : ['name']),
+          ...(description === undefined ? [] : ['description']),
+        ]),
+      ],
       updated_by,
     });
   }

@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
+import type { AddressInfo, LookupFunction } from 'node:net';
 
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
@@ -15,6 +15,10 @@ import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { publishAllNumbers } from '../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
+import {
+  IMAGE_LOOKUP_REGISTRATION,
+  publicLookup,
+} from '../../../../lib/suppliers/mirrored-images';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -24,6 +28,13 @@ const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
+const BRAND_IMAGES_HOST = 'images.brand.test';
+const imageLookup: LookupFunction = (hostname, options, callback) =>
+  hostname === BRAND_IMAGES_HOST
+    ? options.all
+      ? callback(null, [{ address: '127.0.0.1', family: 4 }])
+      : callback(null, '127.0.0.1', 4)
+    : publicLookup(hostname, options, callback);
 
 type Page = {
   normalized_value: string;
@@ -50,6 +61,7 @@ medusaIntegrationTestRunner({
       );
       container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
       container.register(SHOP_STORAGE_REGISTRATION, asValue(storage.storage));
+      container.register(IMAGE_LOOKUP_REGISTRATION, asValue(imageLookup));
     },
   },
   testSuite: ({ api, getContainer }) => {
@@ -326,7 +338,12 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 1,
             skipped: 1,
-            skipped_by_reason: { brand: 1, currency: 0, unreadable: 0 },
+            skipped_by_reason: {
+              brand: 1,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
             needs_category: ['C 30 005'],
           },
           {
@@ -334,7 +351,12 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 0,
             skipped: 0,
-            skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
+            skipped_by_reason: {
+              brand: 0,
+              currency: 0,
+              unreadable: 0,
+              no_engine_code: 0,
+            },
             needs_category: [],
           },
         ]);
@@ -362,7 +384,12 @@ medusaIntegrationTestRunner({
           imported: 0,
           created: 1,
           skipped: 1,
-          skipped_by_reason: { brand: 0, currency: 0, unreadable: 1 },
+          skipped_by_reason: {
+            brand: 0,
+            currency: 0,
+            unreadable: 1,
+            no_engine_code: 0,
+          },
           needs_category: [],
         });
         expect(await page('W6103')).toBeDefined();
@@ -542,6 +569,37 @@ medusaIntegrationTestRunner({
         expect(shopAi.descriptionsWritten).toHaveLength(2);
       });
 
+      it('still describes and renames a Part whose Category staff changed', async () => {
+        intercars.articles.push({
+          article_id: 'IC-25',
+          brand: 'MANN-FILTER',
+          number: 'W 980',
+          name: 'Фильтр W980',
+          category: 'IC-OIL',
+          description: 'Filter ulja W 980.',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        const recategorized = (await page('W980'))!.part;
+        const update = await api.post(
+          `/admin/parts/${recategorized.id}`,
+          { category_id: null },
+          adminHeaders,
+        );
+        expect(update.status).toBe(200);
+        shopAi.failure = null;
+        shopAi.description = 'Масляный фильтр W 980.';
+        intercars.articles[0].name = 'Фильтр W980 новый';
+
+        await runImport();
+
+        expect((await page('W980'))?.part).toMatchObject({
+          name: 'Фильтр W980 новый',
+          description: 'Масляный фильтр W 980.',
+          category_id: null,
+        });
+      });
+
       it('matches a Brand spelling whatever its case and spacing', async () => {
         intercars.articles.push({
           article_id: 'IC-8',
@@ -678,21 +736,21 @@ medusaIntegrationTestRunner({
 
         const released = await api.post(
           `/admin/suppliers/${intercarsId}`,
-          { released_kinds: ['images'] },
+          { released_kinds: ['applicability'] },
           adminHeaders,
         );
         expect(released.status).toBe(200);
 
         expect((await page('HU816X'))?.supplier_data).toEqual({
           cross_references: [],
-          applicability: [],
-          images: ['https://cdn.intercars.test/hu816x.jpg'],
+          applicability: ['BMW E46 320d 2001-2005'],
+          images: [],
         });
       });
 
       describe('crawled images', () => {
         let server: Server;
-        let origin: string;
+        let port: number;
         const served: string[] = [];
 
         beforeAll(async () => {
@@ -701,19 +759,30 @@ medusaIntegrationTestRunner({
             if (request.url === '/hu7020z.jpg') {
               response.writeHead(200, { 'content-type': 'image/jpeg' });
               response.end(Buffer.from('jpeg-bytes'));
+            } else if (request.url === '/huge.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.alloc(10 * 1024 * 1024 + 1));
             } else {
               response.writeHead(404).end();
             }
           });
           await new Promise<void>((resolve) => server.listen(0, resolve));
-          origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+          port = (server.address() as AddressInfo).port;
         });
 
         afterAll(() => new Promise((resolve) => server.close(resolve)));
 
-        beforeEach(() => {
+        beforeEach(async () => {
           served.length = 0;
+          await api.post(
+            `/admin/suppliers/${intercarsId}`,
+            { released_kinds: ['images'] },
+            adminHeaders,
+          );
         });
+
+        const brandImage = (path: string) =>
+          `http://${BRAND_IMAGES_HOST}:${port}${path}`;
 
         const articleWithImages = (images: string[]) => ({
           article_id: 'IC-IMG',
@@ -724,14 +793,20 @@ medusaIntegrationTestRunner({
           images,
         });
 
+        const stagedImages = async () => {
+          const suppliers: SupplierModuleService =
+            getContainer().resolve(SUPPLIER_MODULE);
+          return (
+            await suppliers.listStagedRecords({
+              supplier_id: intercarsId,
+              kind: 'images',
+            })
+          ).map(({ payload }) => payload);
+        };
+
         it('copies a crawled image to the public bucket once, keeps its source URL and serves the copy', async () => {
-          const source = `${origin}/hu7020z.jpg`;
+          const source = brandImage('/hu7020z.jpg');
           intercars.articles.push(articleWithImages([source]));
-          await api.post(
-            `/admin/suppliers/${intercarsId}`,
-            { released_kinds: ['images'] },
-            adminHeaders,
-          );
 
           await runImport();
           await runImport();
@@ -740,29 +815,48 @@ medusaIntegrationTestRunner({
           const [[key, stored]] = [...storage.images.objects].filter(
             ([, object]) => object.metadata['source-url'] === source,
           );
+          const copy = `https://files.carlab.test/${key}`;
           expect(stored.body.toString()).toBe('jpeg-bytes');
           expect(stored.contentType).toBe('image/jpeg');
-          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([
-            `https://files.carlab.test/${key}`,
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([copy]);
+          expect(await stagedImages()).toEqual([
+            { items: [copy], sources: { [copy]: source } },
           ]);
         });
 
-        it('keeps the source URL while the image cannot be fetched, and tries again on the next import', async () => {
-          const source = `${origin}/missing.jpg`;
+        it('stages nothing for an image it cannot fetch, and tries again on the next import', async () => {
+          const source = brandImage('/missing.jpg');
           intercars.articles.push(articleWithImages([source]));
-          await api.post(
-            `/admin/suppliers/${intercarsId}`,
-            { released_kinds: ['images'] },
-            adminHeaders,
-          );
 
           await runImport();
           await runImport();
 
           expect(served).toEqual(['/missing.jpg', '/missing.jpg']);
-          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([
-            source,
-          ]);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
+        });
+
+        it('stops reading an image past the size cap and stages nothing for it', async () => {
+          intercars.articles.push(articleWithImages([brandImage('/huge.jpg')]));
+
+          await runImport();
+
+          expect(served).toEqual(['/huge.jpg']);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
+        });
+
+        it('never fetches an image from a private address or over another scheme', async () => {
+          intercars.articles.push(
+            articleWithImages([
+              `http://127.0.0.1:${port}/hu7020z.jpg`,
+              `http://localhost:${port}/hu7020z.jpg`,
+              'file:///etc/passwd',
+            ]),
+          );
+
+          await runImport();
+
+          expect(served).toEqual([]);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
         });
       });
 

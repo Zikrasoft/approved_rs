@@ -3,6 +3,7 @@ import type { Page } from 'playwright';
 import { z } from 'zod';
 
 import type { SupplierArticle, VehicleFacts } from '../../suppliers/adapter';
+import { imageUrls, parsedJson, words } from '../page-parsing';
 import type { CrawledSite } from '../site';
 import type { SitemapEntry } from '../sitemap';
 
@@ -33,8 +34,6 @@ const FAMILY = new RegExp(
   `(?:^|[\\s/-])(?:${BILSTEIN_FAMILIES.join('|')})`,
   'u',
 );
-
-const words = (text: string) => text.replace(/\s+/gu, ' ').trim();
 
 const inFamily = (name: string) => FAMILY.test(words(name).toLowerCase());
 
@@ -81,35 +80,23 @@ const applicationsSchema = z.array(
   }),
 );
 
-const parsedJson = (text: string): unknown => {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
-};
-
 const each = ($: CheerioAPI, selector: string) =>
   $(selector)
     .toArray()
     .map((node) => words($(node).text()))
     .filter(Boolean);
 
-const imagesOf = ($: CheerioAPI) => [
-  ...new Set(
+const imagesOf = ($: CheerioAPI) =>
+  imageUrls(
     $('img[src*="/pf-article-details/"]')
       .toArray()
-      .map(
-        (image) =>
-          new URL(
-            ($(image).attr('src') ?? '').replace(
-              '/pf-article-details/',
-              '/pf-article-zoomed/',
-            ),
-          ).href,
+      .map((image) =>
+        $(image)
+          .attr('src')
+          ?.replace('/pf-article-details/', '/pf-article-zoomed/'),
       ),
-  ),
-];
+    { keepQuery: true },
+  );
 
 const attributesOf = ($: CheerioAPI) =>
   Object.fromEntries(

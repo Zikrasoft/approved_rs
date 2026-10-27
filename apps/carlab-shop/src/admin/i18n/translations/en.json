@@ -178,6 +178,7 @@
     "markupRequired": "Enter the markup as a number from 0 to 500 with at most two decimals, for example 20 or 12.5.",
     "importUnreadable": "Pages that could not be read, skipped and logged: {{count}}.",
     "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
+    "importWithoutEngineCode": "Applicability rows without an engine code, fitted to no Vehicle: {{count}}.",
     "importWithoutCategory": "Added without a Category: {{numbers}}. They wait under Parts, filtered to No category.",
     "importOn": "On",
     "importOff": "Off",

@@ -1,7 +1,7 @@
 import { ModulesSdkUtils } from '@medusajs/framework/utils';
 
-import { parseEnv } from '../env';
-import { configuredStorage } from '../storage';
+import { parseCrawlerEnv } from '../env';
+import { s3PagesBucket } from '../storage';
 import { type Clock, crawlSite } from './crawl';
 import { crawleeFetcher } from './fetcher';
 import { CRAWLED_SITES } from './sites';
@@ -16,7 +16,7 @@ const clock: Clock = {
 
 // TODO: CRAWLER_FROM stays unset until the owner names a mailbox the crawler's operators read; the From header is sent only once it is set.
 async function main(): Promise<void> {
-  const env = parseEnv(process.env);
+  const env = parseCrawlerEnv(process.env);
   const store = crawlStore(
     ModulesSdkUtils.createPgConnection({
       clientUrl: env.DATABASE_URL,
@@ -25,7 +25,7 @@ async function main(): Promise<void> {
         : {},
       pool: { min: 0, max: 4 },
     }),
-    configuredStorage()?.pages ?? null,
+    env.S3 && s3PagesBucket(env.S3),
   );
   const names = CRAWLED_SITES.map(({ name }) => name);
   console.log('Crawler waiting for a crawl started in the admin');

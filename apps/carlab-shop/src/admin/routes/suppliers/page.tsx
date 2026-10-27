@@ -78,6 +78,7 @@ const importSummarySchema = z.object({
     brand: z.number(),
     currency: z.number(),
     unreadable: z.number(),
+    no_engine_code: z.number(),
   }),
   needs_category: z.array(z.string()),
 });
@@ -274,6 +275,10 @@ const SuppliersPage = () => {
       summary.skipped_by_reason.currency > 0 &&
         t('suppliers.importWithoutPrice', {
           count: summary.skipped_by_reason.currency,
+        }),
+      summary.skipped_by_reason.no_engine_code > 0 &&
+        t('suppliers.importWithoutEngineCode', {
+          count: summary.skipped_by_reason.no_engine_code,
         }),
       summary.needs_category.length > 0 &&
         t('suppliers.importWithoutCategory', {

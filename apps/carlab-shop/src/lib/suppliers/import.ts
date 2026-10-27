@@ -29,6 +29,7 @@ import {
   supplierAdapters,
   supplierQuoteSchema,
 } from './adapter';
+import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
@@ -44,11 +45,17 @@ export type ImportSummary = {
   imported: number;
   created: number;
   skipped: number;
-  skipped_by_reason: { brand: number; currency: number; unreadable: number };
+  skipped_by_reason: {
+    brand: number;
+    currency: number;
+    unreadable: number;
+    no_engine_code: number;
+  };
   needs_category: string[];
 };
 
 type Context = {
+  scope: MedusaContainer;
   adapter: SupplierAdapter;
   supplierId: string;
   catalog: CatalogModuleService;
@@ -79,7 +86,7 @@ async function orElse<T>(
     return await run();
   } catch (error) {
     logger.warn(
-      `Supplier import ${adapter.name}, ${article.number}: AI failed, ${error instanceof Error ? error.message : String(error)}`,
+      `Supplier import ${adapter.name}, ${article.number}: AI failed, ${errorMessage(error)}`,
     );
     return fallback;
   }
@@ -227,16 +234,20 @@ async function matchArticle(
   }
   const { part } = hit;
   const unchanged = { identifierId: hit.id, partId: part.id, created: false };
-  if (part.source !== adapter.name || part.updated_by) {
+  if (part.source !== adapter.name) {
     return unchanged;
   }
+  const edited = new Set(part.edited_fields);
   const name =
-    context.matched.has(hit.id) || part.source_name === article.name
+    edited.has('name') ||
+    context.matched.has(hit.id) ||
+    part.source_name === article.name
       ? null
       : await nameOf(context, article);
-  const description = part.description
-    ? null
-    : await describe(context, article);
+  const description =
+    edited.has('description') || part.description
+      ? null
+      : await describe(context, article);
   if (!name && !description) {
     return unchanged;
   }
@@ -268,13 +279,18 @@ async function storeOffer(
     : suppliers.createSupplierOffers(offer));
 }
 
-const stagedImages = async (
-  { storage, logger }: Context,
-  images: string[] | undefined,
-) =>
-  storage && images
-    ? Promise.all(images.map((url) => mirroredImage(storage, url, logger)))
-    : images;
+async function stagedImages(
+  { scope, storage, logger }: Context,
+  images: string[],
+): Promise<{ items: string[]; sources?: Record<string, string> }> {
+  if (!storage) return { items: images };
+  const sources: Record<string, string> = {};
+  for (const source of images) {
+    const mirrored = await mirroredImage(scope, storage, source, logger);
+    if (mirrored) sources[mirrored] = source;
+  }
+  return { items: Object.keys(sources), sources };
+}
 
 async function stage(
   context: Context,
@@ -282,15 +298,16 @@ async function stage(
   article: Article,
 ): Promise<void> {
   const { supplierId, suppliers } = context;
-  const staged = {
-    ...article,
-    images: await stagedImages(context, article.images),
-  };
   for (const kind of STAGED_DATA_KINDS) {
-    const items = staged[kind];
-    if (!items) {
+    const listed = article[kind];
+    if (!listed) {
       continue;
     }
+    const payload =
+      kind === 'images'
+        ? await stagedImages(context, article.images!)
+        : { items: listed };
+    const { items } = payload;
     const [existing] = await suppliers.listStagedRecords({
       supplier_id: supplierId,
       part_identifier_id: identifierId,
@@ -303,12 +320,12 @@ async function stage(
       continue;
     }
     await (existing
-      ? suppliers.updateStagedRecords({ id: existing.id, payload: { items } })
+      ? suppliers.updateStagedRecords({ id: existing.id, payload })
       : suppliers.createStagedRecords({
           supplier_id: supplierId,
           part_identifier_id: identifierId,
           kind,
-          payload: { items },
+          payload,
         }));
   }
 }
@@ -325,6 +342,7 @@ export async function importSupplier(
     throw new Error(`No Supplier is named ${adapter.name}`);
   }
   const context: Context = {
+    scope,
     adapter,
     supplierId: supplier.id,
     catalog,
@@ -359,7 +377,12 @@ export async function importSupplier(
     imported: 0,
     created: 0,
     skipped: 0,
-    skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
+    skipped_by_reason: {
+      brand: 0,
+      currency: 0,
+      unreadable: 0,
+      no_engine_code: 0,
+    },
     needs_category: [],
   };
   const brandOfArticle = (article: Article) =>
@@ -416,6 +439,9 @@ export async function importSupplier(
       await stage(context, identifierId, article);
       if (article.vehicles) {
         await fitVehicles(context.vehicles, partId, article.vehicles);
+        summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+          ({ engine_codes }) => !engine_codes.length,
+        ).length;
       }
       summary.imported += Number(!created);
       summary.created += Number(created);

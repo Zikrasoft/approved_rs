@@ -1832,6 +1832,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "edited_fields": {
+          "name": "edited_fields",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'{}'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "array"
+        },
         "category_id": {
           "name": "category_id",
           "type": "text",

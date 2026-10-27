@@ -74,10 +74,13 @@ export const s3Client = (config: S3Config) =>
     },
   });
 
+export const s3PagesBucket = (config: S3Config): Bucket =>
+  s3Bucket(s3Client(config), config.privateBucket);
+
 export const s3Storage = (config: S3Config, fileUrl: string): ShopStorage => {
   const client = s3Client(config);
   return {
-    pages: s3Bucket(client, config.privateBucket),
+    pages: s3PagesBucket(config),
     images: s3Bucket(client, config.publicBucket),
     publicUrl: (key) => `${fileUrl}/${key}`,
   };

@@ -1,7 +1,7 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
-import { vinSchema, type Vehicle } from '@podbor/catalog-contract';
+import type { Vehicle } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -63,9 +63,8 @@ async function quoteVehicle(
   scope: MedusaContainer,
   vin: string | null,
 ): Promise<Vehicle | null> {
-  const parsed = vinSchema.safeParse(vin);
-  if (!parsed.success) return null;
-  const lookup = await resolveVin(parsed.data, vinDecoders(scope), {
+  if (!vin) return null;
+  const lookup = await resolveVin(vin, vinDecoders(scope), {
     catalog: scope.resolve(CATALOG_MODULE),
     vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
   });

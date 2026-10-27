@@ -2,6 +2,7 @@ import { type CheerioAPI, load } from 'cheerio/slim';
 import { z } from 'zod';
 
 import type { SupplierArticle, VehicleFacts } from '../../suppliers/adapter';
+import { imageUrls, parsedJson, words } from '../page-parsing';
 import type { CrawledSite } from '../site';
 
 const productLdSchema = z.object({
@@ -14,9 +15,6 @@ const galleryItemsSchema = z.array(
 );
 
 type Nodes = ReturnType<CheerioAPI>;
-
-const words = (node: { text: () => string }) =>
-  node.text().replace(/\s+/gu, ' ').trim();
 
 const brandOf = ($: CheerioAPI): string | null => {
   for (const script of each($, $('script[type="application/ld+json"]'))) {
@@ -35,7 +33,7 @@ const specsOf = ($: CheerioAPI): Record<string, string> => {
   const specs: Record<string, string> = {};
   const features: string[] = [];
   for (const item of each($, $('.cmp-product__summary li'))) {
-    const line = words(item);
+    const line = words(item.text());
     if (!line || MAIN_APPLICATION.test(line)) continue;
     const pairs = line.split(/\s*;\s*/u).map((part) => SPEC_PAIR.exec(part));
     if (pairs.every(Boolean)) {
@@ -45,13 +43,15 @@ const specsOf = ($: CheerioAPI): Record<string, string> => {
     }
   }
   if (features.length) specs.Features = features.join('; ');
-  const gtin = /\d{8,14}/u.exec(words($('.cmp-product__sku-value')))?.[0];
+  const gtin = /\d{8,14}/u.exec(
+    words($('.cmp-product__sku-value').text()),
+  )?.[0];
   if (gtin) specs.GTIN = gtin;
   return specs;
 };
 
 const accordionTitle = (item: Nodes) =>
-  words(item.find('.cmp-accordion__title').first());
+  words(item.find('.cmp-accordion__title').first().text());
 
 const each = ($: CheerioAPI, nodes: Nodes): Nodes[] =>
   nodes.toArray().map((node) => $(node));
@@ -61,7 +61,7 @@ const crossReferencesOf = ($: CheerioAPI) =>
     (item) => {
       const brand = accordionTitle(item);
       return each($, item.find('li'))
-        .map((number) => ({ brand, number: words(number) }))
+        .map((number) => ({ brand, number: words(number.text()) }))
         .filter(({ number }) => number);
     },
   );
@@ -93,7 +93,9 @@ const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
     );
     return each($, table.find('tbody.cmp-table__desktop tr'))
       .map((row) =>
-        each($, row.find('td')).map((cell) => words(cell).replace(/^-$/u, '')),
+        each($, row.find('td')).map((cell) =>
+          words(cell.text()).replace(/^-$/u, ''),
+        ),
       )
       .filter((cells) => cells.length >= 7)
       .map(([variant, , engine, ccm, kw, , years]) => ({
@@ -113,27 +115,14 @@ const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
       }));
   });
 
-const parsedJson = (text: string): unknown => {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
-};
-
 const imagesOf = ($: CheerioAPI): string[] => {
   const gallery = galleryItemsSchema.safeParse(
     parsedJson($('[data-gallery-items]').attr('data-gallery-items') ?? '[]'),
   );
   if (!gallery.success) return [];
-  const urls = gallery.data
-    .filter(({ type }) => type === 'image')
-    .map(({ path }) => {
-      const url = new URL(path);
-      url.search = '';
-      return url.href;
-    });
-  return [...new Set(urls)];
+  return imageUrls(
+    gallery.data.filter(({ type }) => type === 'image').map(({ path }) => path),
+  );
 };
 
 export const parseMannHummelProduct = (
@@ -141,13 +130,13 @@ export const parseMannHummelProduct = (
 ): SupplierArticle | null => {
   const $ = load(html);
   const articleId = $('form[data-product-sku]').attr('data-product-sku');
-  const number = words($('.cmp-product__title-name').first());
-  const category = words($('.cmp-product__title-family').first());
+  const number = words($('.cmp-product__title-name').first().text());
+  const category = words($('.cmp-product__title-family').first().text());
   const brand = brandOf($);
   if (!articleId || !number || !brand || SPARE_PART.test(category)) {
     return null;
   }
-  const description = words($('.cmp-product__description-text').first());
+  const description = words($('.cmp-product__description-text').first().text());
   return {
     article_id: articleId,
     brand,

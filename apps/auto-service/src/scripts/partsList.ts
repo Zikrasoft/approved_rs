@@ -15,6 +15,8 @@ import {
 } from '@podbor/lead-crm/submit';
 import { PARTS_LIST_CHANGED_EVENT, PARTS_LIST_STORAGE_KEY } from './cartBadge';
 
+export const PARTS_INQUIRY_OPEN_ATTRIBUTE = 'data-open-parts-inquiry';
+
 const announceChange = (): void => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event(PARTS_LIST_CHANGED_EVENT));
@@ -95,19 +97,38 @@ export function removeFromPartsList(slug: string, storage?: ListStorage): void {
   );
 }
 
-export function setPartAddon(
+function updatePart(
   slug: string,
-  on: boolean,
+  change: Partial<ListedPart>,
   storage?: ListStorage,
 ): void {
   writeStoredJson(
     PARTS_LIST_STORAGE_KEY,
     readPartsList(storage).map((part) =>
-      part.slug === slug ? { ...part, with_addon: on } : part,
+      part.slug === slug ? { ...part, ...change } : part,
     ),
     storage,
   );
 }
+
+export const setPartAddon = (
+  slug: string,
+  on: boolean,
+  storage?: ListStorage,
+): void => updatePart(slug, { with_addon: on }, storage);
+
+export const MAX_PART_QUANTITY = 99;
+
+export const wantedQuantity = (value: number): number =>
+  Number.isFinite(value)
+    ? Math.min(MAX_PART_QUANTITY, Math.max(1, Math.floor(value)))
+    : 1;
+
+export const setPartQuantity = (
+  slug: string,
+  quantity: number,
+  storage?: ListStorage,
+): void => updatePart(slug, { quantity: wantedQuantity(quantity) }, storage);
 
 export function clearPartsList(storage?: ListStorage): void {
   forgetStored(PARTS_LIST_STORAGE_KEY, storage);
@@ -133,13 +154,13 @@ export function forgetListCar(storage?: ListStorage): void {
   );
 }
 
-export const partLine = ({
-  brand,
-  number,
-  name,
-  quantity = 1,
-}: ListedPart): string =>
-  `${brand} ${number}, ${name}${quantity > 1 ? ` × ${quantity}` : ''}`;
+const partTitle = ({ brand, number, name }: ListedPart): string =>
+  `${brand} ${number}, ${name}`;
+
+export const partLine = (part: ListedPart): string => {
+  const { quantity = 1 } = part;
+  return `${partTitle(part)}${quantity > 1 ? ` × ${quantity}` : ''}`;
+};
 
 const carNote = ({ car, vin }: ListedPart): string =>
   vin ? `${car}, VIN ${vin}` : String(car);
@@ -231,19 +252,34 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             item.querySelector<HTMLAnchorElement>('[data-part-link]');
           const remove = item.querySelector('[data-part-remove]');
           if (link) {
-            link.textContent = partLine(part);
+            link.textContent = partTitle(part);
             link.href = (this.dataset.partHref ?? '').replace(
               '{slug}',
               part.slug,
             );
           }
-          remove?.setAttribute(
-            'aria-label',
-            `${remove.getAttribute('aria-label') ?? ''}: ${partLine(part)}`,
-          );
+          for (const control of item.querySelectorAll(
+            '[data-part-remove], [data-part-quantity]',
+          )) {
+            control.setAttribute(
+              'aria-label',
+              `${control.getAttribute('aria-label') ?? ''}: ${partTitle(part)}`,
+            );
+          }
           remove?.addEventListener('click', () =>
             removeFromPartsList(part.slug),
           );
+          const quantity = item.querySelector<HTMLInputElement>(
+            '[data-part-quantity]',
+          );
+          if (quantity) {
+            quantity.value = String(part.quantity ?? 1);
+            quantity.addEventListener('change', () => {
+              const wanted = wantedQuantity(quantity.valueAsNumber);
+              quantity.value = String(wanted);
+              setPartQuantity(part.slug, wanted);
+            });
+          }
           const addon = item.querySelector<HTMLElement>('[data-part-addon]');
           const toggle = addon?.querySelector<HTMLInputElement>(
             '[data-part-addon-toggle]',

@@ -3,13 +3,14 @@ import Icon from './Icon.astro';
 import PartsInquiry from './PartsInquiry.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).pages.partsInquiry;
 const site = content(locale).site;
 ---
 
-<carlab-modal trigger="[data-open-parts-inquiry]">
+<carlab-modal trigger={`[${PARTS_INQUIRY_OPEN_ATTRIBUTE}]`}>
   <dialog
     aria-label={copy.formHeading}
     class="m-0 h-dvh max-h-none w-full max-w-none rounded-none border-0 bg-card p-0 text-ink backdrop:bg-ink/50 sm:m-auto sm:h-fit sm:max-h-[calc(100dvh-4rem)] sm:w-[min(34rem,calc(100vw-2rem))] sm:rounded-block sm:border sm:border-line"

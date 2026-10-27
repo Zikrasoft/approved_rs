@@ -13,6 +13,7 @@ import {
   toast,
 } from '@medusajs/ui';
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { vinSchema } from '@podbor/catalog-contract';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -158,7 +159,7 @@ const WorkshopQuotesPage = () => {
     const answer = await adminFetch('/admin/workshop-quotes', confirmedSchema, {
       method: 'POST',
       body: JSON.stringify({
-        vin: draft.vin,
+        vin: vinSchema.safeParse(draft.vin).data ?? null,
         lines: lines.map((line) => ({
           name: line.name.trim(),
           number: line.number.trim(),
