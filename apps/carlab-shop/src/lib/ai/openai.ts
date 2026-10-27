@@ -10,6 +10,7 @@ import {
   type CategoryFieldChoice,
   categoryPickSchema,
   descriptionSchema,
+  nameSchema,
   quoteReadingSchema,
   type ShopAi,
   specsMappingSchema,
@@ -91,6 +92,16 @@ Rules:
 - Two to four short paragraphs of plain Russian text separated by a blank line, no markdown, no HTML, no lists.
 - Use only facts the input states: what the part is, what it does, its key specs. Rewrite in your own words, never copy the supplier's sentences.
 - No prices, stock, delivery, the supplier's name, marketing superlatives or guarantees.
+- Never use the Cyrillic letter yo (U+0451), write «е» instead. Never use the em dash (U+2014).`;
+
+const namePrompt = `You write the Russian name of a car part for its page in the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: the supplier's name for it (often in Serbian or English), its brand, number, the supplier's description and its raw specs.
+
+Answer with one JSON object and nothing else: { "name": string }
+
+Rules:
+- The part type in Russian as a parts shop names it, with a lowercase rest, then the brand and the number exactly as given, e.g. «Масляный фильтр MANN-FILTER HU 816 x».
+- Add a short qualifier only when the input states it and it tells parts of one type apart (e.g. «передний», «с прокладкой»).
+- No marketing words, no vehicle names, no prices.
 - Never use the Cyrillic letter yo (U+0451), write «е» instead. Never use the em dash (U+2014).`;
 
 const unreadable = (code: AdminErrorCode, what: string, detail: string) =>
@@ -209,5 +220,18 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
           what: 'The description',
         })
       ).description,
+    ),
+  writeName: async (article) =>
+    inHouseStyle(
+      (
+        await ask({
+          apiKey,
+          system: namePrompt,
+          user: articleJson(article),
+          schema: nameSchema,
+          code: 'ARTICLE_UNREADABLE',
+          what: 'The name',
+        })
+      ).name,
     ),
 });

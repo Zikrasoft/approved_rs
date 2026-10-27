@@ -11,6 +11,7 @@ const Part = model
     id: model.id().primaryKey(),
     name: model.text(),
     description: model.text().nullable(),
+    source_name: model.text().nullable(),
     category: model.belongsTo(() => Category, { mappedBy: 'parts' }).nullable(),
     attributes: model.json().default({}),
     installation_price: model.number().nullable(),

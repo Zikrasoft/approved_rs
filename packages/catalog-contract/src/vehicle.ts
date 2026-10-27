@@ -47,7 +47,7 @@ export const vehicleSchema = z.object({
     name: z.string(),
     chassis: z.object({
       code: z.string(),
-      body_style: z.enum(BODY_STYLES),
+      body_style: z.enum(BODY_STYLES).nullable(),
       series: z.object({
         name: z.string(),
         translations: translationsSchema,
@@ -58,7 +58,7 @@ export const vehicleSchema = z.object({
   engine: z.object({
     code: z.string(),
     family: z.string(),
-    fuel: z.enum(ENGINE_FUELS),
+    fuel: z.enum(ENGINE_FUELS).nullable(),
     displacement_cc: z.number().nullable(),
   }),
   identifiers: z.array(vehicleIdentifierSchema),

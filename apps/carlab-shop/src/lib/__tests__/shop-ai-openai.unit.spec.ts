@@ -139,6 +139,17 @@ describe('OpenAI shop AI', () => {
     expect(written).toBe('Ее задача - защитить двигатель. Емкость 2 Ач.');
   });
 
+  it('writes a Russian name in house style and refuses a blank one', async () => {
+    globalThis.fetch = answering({ name: ' Моторное масло Castrol — 5W-30 ' });
+    const written = await openAiShopAi('test-key').writeName(article);
+    globalThis.fetch = answering({ name: ' ' });
+
+    expect(written).toBe('Моторное масло Castrol - 5W-30');
+    await expect(
+      openAiShopAi('test-key').writeName(article),
+    ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+  });
+
   it('says the key is missing without calling OpenAI', async () => {
     globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
 

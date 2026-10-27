@@ -82,12 +82,23 @@ describe('bilstein group partsfinder', () => {
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/1/27699_2.jpg',
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/1/27699_3.jpg',
       ],
-      applicability: expect.any(Array),
+      vehicles: expect.any(Array),
     });
-    expect(article.applicability).toHaveLength(204);
-    expect(article.applicability?.[0]).toBe(
-      'Dodge Sprinter I 2002 - 2006 2.7 CDI V6 24V - 113 kW / 154 hp; EX9; 2688 ccm; Dizel; Autobus, platforma/ram šasije, kutijasto vozilo',
-    );
+    expect(article.vehicles).toHaveLength(204);
+    expect(article.vehicles?.[0]).toEqual({
+      make: 'Dodge',
+      model: 'Sprinter I',
+      variant: '2.7 CDI V6 24V',
+      chassis_codes: ['VA'],
+      engine_codes: ['EX9'],
+      displacement_cc: 2688,
+      power_kw: 113,
+      fuel: 'diesel',
+      body_style: 'van',
+      year_from: 2002,
+      year_to: 2006,
+      notes: [],
+    });
   });
 
   it('reads a SWAG control arm with the contents of its set', () => {
@@ -113,9 +124,17 @@ describe('bilstein group partsfinder', () => {
       images: [
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/3/20%2092%201466_1.jpg',
       ],
-      applicability: expect.any(Array),
+      vehicles: expect.any(Array),
     });
-    expect(article.applicability).toHaveLength(54);
+    expect(article.vehicles).toHaveLength(54);
+    expect(article.vehicles).toContainEqual(
+      expect.objectContaining({
+        make: 'BMW',
+        model: '3',
+        chassis_codes: ['E36'],
+        engine_codes: ['M52'],
+      }),
+    );
   });
 
   it('reads a Blue Print oil filter with the limits of each vehicle it fits', () => {
@@ -139,9 +158,28 @@ describe('bilstein group partsfinder', () => {
         'https://cdn.partsfinder.bilsteingroup.com/pf-article-zoomed/2/ADA102116_2.jpg',
       ],
     });
-    expect(article.applicability).toHaveLength(7);
-    expect(article.applicability?.[0]).toBe(
-      'Dodge Nitro 2006 - 2012 2.8 CRD 16V - 130 kW / 177 hp; ENR, ENS; 2777 ccm; Dizel; terensko vozilo, Van (putničko vozilo); pogodno za kod motora: ENS',
+    expect(article.vehicles).toHaveLength(7);
+    expect(article.vehicles?.[0]).toEqual({
+      make: 'Dodge',
+      model: 'Nitro',
+      variant: '2.8 CRD 16V',
+      chassis_codes: ['KA'],
+      engine_codes: ['ENS'],
+      displacement_cc: 2777,
+      power_kw: 130,
+      fuel: 'diesel',
+      body_style: null,
+      year_from: 2006,
+      year_to: 2012,
+      notes: [],
+    });
+    expect(article.vehicles).toContainEqual(
+      expect.objectContaining({
+        model: 'Wrangler III 4x4',
+        chassis_codes: ['JK'],
+        year_from: 2006,
+        year_to: null,
+      }),
     );
     expect(article.cross_references).toHaveLength(8);
     expect(article.cross_references?.[7]).toEqual({

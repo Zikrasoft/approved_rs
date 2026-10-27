@@ -34,6 +34,7 @@ import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
 import { spellingKey } from './spelling';
+import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
@@ -56,6 +57,7 @@ type Context = {
   categories: CategoryChoice[];
   logger: Logger;
   matched: Set<string>;
+  vehicles: VehicleMatcher;
   storage: ShopStorage | null;
 };
 
@@ -114,6 +116,9 @@ const describe = (context: Context, article: Article) =>
       )
     : Promise.resolve(null);
 
+const nameOf = (context: Context, article: Article) =>
+  orElse(context, article, () => context.ai.writeName(factsOf(article)), null);
+
 async function classify(
   context: Context,
   article: Article,
@@ -147,8 +152,10 @@ async function createPart(
   mappedCategoryId: string | undefined,
 ): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
   const { adapter, catalog } = context;
+  const name = await nameOf(context, article);
   const part = {
-    name: article.name,
+    name: name ?? article.name,
+    source_name: name && article.name,
     description: await describe(context, article),
     identifiers: [
       {
@@ -190,6 +197,7 @@ async function matchArticle(
   categoryId: string | undefined,
 ): Promise<{
   identifierId: string;
+  partId: string;
   created: boolean;
   changedPartId?: string;
   categorized?: boolean;
@@ -209,28 +217,35 @@ async function matchArticle(
       brandId,
       categoryId,
     );
-    return { identifierId, created: true, changedPartId: partId, categorized };
+    return {
+      identifierId,
+      partId,
+      created: true,
+      changedPartId: partId,
+      categorized,
+    };
   }
   const { part } = hit;
+  const unchanged = { identifierId: hit.id, partId: part.id, created: false };
   if (part.source !== adapter.name || part.updated_by) {
-    return { identifierId: hit.id, created: false };
+    return unchanged;
   }
   const name =
-    context.matched.has(hit.id) || part.name === article.name
+    context.matched.has(hit.id) || part.source_name === article.name
       ? null
-      : article.name;
+      : await nameOf(context, article);
   const description = part.description
     ? null
     : await describe(context, article);
   if (!name && !description) {
-    return { identifierId: hit.id, created: false };
+    return unchanged;
   }
   await catalog.updateParts({
     id: part.id,
-    ...(name && { name }),
+    ...(name && { name, source_name: article.name }),
     ...(description && { description }),
   });
-  return { identifierId: hit.id, created: false, changedPartId: part.id };
+  return { ...unchanged, changedPartId: part.id };
 }
 
 async function storeOffer(
@@ -320,6 +335,7 @@ export async function importSupplier(
     ).map(({ id, name }) => ({ id, name })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
+    vehicles: vehicleMatcher(catalog, adapter.name),
     storage: shopStorage(scope),
   };
   const categoryOf = new Map(
@@ -378,7 +394,7 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, created, changedPartId, categorized } =
+      const { identifierId, partId, created, changedPartId, categorized } =
         await matchArticle(
           context,
           article,
@@ -398,6 +414,9 @@ export async function importSupplier(
         listed.add(article.article_id);
       }
       await stage(context, identifierId, article);
+      if (article.vehicles) {
+        await fitVehicles(context.vehicles, partId, article.vehicles);
+      }
       summary.imported += Number(!created);
       summary.created += Number(created);
     }

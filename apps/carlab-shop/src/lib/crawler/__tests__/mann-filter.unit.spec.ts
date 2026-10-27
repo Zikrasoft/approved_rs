@@ -66,13 +66,38 @@ describe('MANN-FILTER', () => {
     expect(article.description).toMatch(
       /^MANN-FILTER oil filters: Top filtration performance .* entire maintenance interval\.$/,
     );
-    expect(article.applicability).toHaveLength(105);
-    expect(article.applicability?.[0]).toBe(
-      'BMW 1 (E81/E82/E87/E88) 125i (E82/E88) N52 B30A 2996 ccm 160 kW 03/08 → 10/13',
+    expect(article.vehicles).toHaveLength(105);
+    expect(article.vehicles?.[0]).toEqual({
+      make: 'BMW',
+      model: '1',
+      variant: '125i (E82/E88)',
+      chassis_codes: ['E82', 'E88'],
+      engine_codes: ['N52 B30A'],
+      displacement_cc: 2996,
+      power_kw: 160,
+      fuel: null,
+      body_style: null,
+      year_from: 2008,
+      year_to: 2013,
+      notes: [],
+    });
+    expect(article.vehicles).toContainEqual(
+      expect.objectContaining({
+        variant: '128i (E82/E88)',
+        power_kw: 169,
+        year_from: 2008,
+        year_to: null,
+      }),
     );
-    expect(article.applicability).toContain(
-      'BMW 1 (E81/E82/E87/E88) 128i (E82/E88) N52 B30A 2996 ccm 169 kW 03/08 →',
+    expect(article.vehicles).toContainEqual(
+      expect.objectContaining({
+        model: '2',
+        variant: 'M235i (F22, F23)',
+        chassis_codes: ['F22', 'F23'],
+        engine_codes: ['N55B30A'],
+      }),
     );
+    expect(article.applicability).toBeUndefined();
   });
 
   it('reads cross-references grouped under several car makers', () => {
@@ -95,7 +120,7 @@ describe('MANN-FILTER', () => {
       new Set(article.cross_references?.map(({ brand }) => brand)),
     ).toEqual(new Set(['FOMOCO', 'FORD', 'VW GROUP (AUDI/SEAT/SKODA/VW)']));
     expect(article.cross_references).toHaveLength(5);
-    expect(article.applicability).toHaveLength(308);
+    expect(article.vehicles).toHaveLength(308);
   });
 
   it('reads a spec the site writes with a doubled colon', () => {
