@@ -25,32 +25,31 @@ async function main(): Promise<void> {
       pool: { min: 0, max: 4 },
     }),
   );
-  const active = new Set<string>();
+  const names = CRAWLED_SITES.map(({ name }) => name);
   console.log('Crawler waiting for a crawl started in the admin');
   for (;;) {
-    const running = await store.runningSites();
-    for (const site of CRAWLED_SITES) {
-      if (!running.includes(site.name) || active.has(site.name)) continue;
-      active.add(site.name);
-      console.log(`Crawling ${site.name}`);
-      crawlSite(site, {
+    const name = await store.next(names, new Date(clock.now()));
+    const site = CRAWLED_SITES.find((one) => one.name === name);
+    if (!site) {
+      await clock.sleep(POLL_MS);
+      continue;
+    }
+    console.log(`Crawling ${site.name}`);
+    try {
+      await crawlSite(site, {
         store,
         openFetcher: crawleeFetcher,
         clock,
         from: env.CRAWLER_FROM,
-      })
-        .then(async () => {
-          const run = await store.run(site.name);
-          console.log(
-            `Crawl of ${site.name} ${run?.status ?? 'stopped'}${run?.paused_reason ? `: ${run.paused_reason}` : ''}`,
-          );
-        })
-        .catch((error: unknown) =>
-          console.error(`Crawl of ${site.name} failed`, error),
-        )
-        .finally(() => active.delete(site.name));
+      });
+      const run = await store.run(site.name);
+      console.log(
+        `Crawl of ${site.name} ${run?.status ?? 'stopped'}${run?.paused_reason ? `: ${run.paused_reason}` : ''}`,
+      );
+    } catch (error) {
+      console.error(`Crawl of ${site.name} failed`, error);
+      await clock.sleep(POLL_MS);
     }
-    await clock.sleep(POLL_MS);
   }
 }
 

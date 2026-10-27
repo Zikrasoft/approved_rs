@@ -18,13 +18,14 @@ const POLL_MS = 5000;
 const crawlSchema = z.object({
   key: z.string(),
   supplier: z.string(),
-  status: z.enum(['idle', 'running', 'paused', 'done']),
+  status: z.enum(['idle', 'queued', 'running', 'paused', 'done']),
   paused_reason: z
     .enum([
       'robots_unavailable',
       'sitemap_unavailable',
       'blocked',
       'server_errors',
+      'staff',
     ])
     .nullable(),
   started_at: z.string().nullable(),
@@ -45,9 +46,11 @@ type Crawl = z.infer<typeof crawlSchema>;
 
 const crawlsSchema = z.object({ crawls: z.array(crawlSchema) });
 const startedSchema = z.object({ started: z.string() });
+const pausedSchema = z.object({ paused: z.string() });
 
 const BADGE = {
   idle: 'grey',
+  queued: 'purple',
   running: 'blue',
   paused: 'orange',
   done: 'green',
@@ -55,6 +58,7 @@ const BADGE = {
 
 const ACTION = {
   idle: 'start',
+  queued: 'start',
   running: 'start',
   paused: 'resume',
   done: 'restart',
@@ -63,11 +67,13 @@ const ACTION = {
 const CrawlRow = ({
   crawl,
   onStart,
-  starting,
+  onPause,
+  busy,
 }: {
   crawl: Crawl;
   onStart: (limit: number | null) => void;
-  starting: boolean;
+  onPause: () => void;
+  busy: boolean;
 }) => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const [limit, setLimit] = useState('');
@@ -77,6 +83,7 @@ const CrawlRow = ({
   const { queued, done, failed, gone } = crawl.pages;
   const total = queued + done + failed + gone;
   const share = total ? (done + failed + gone) / total : 0;
+  const active = crawl.status === 'running' || crawl.status === 'queued';
 
   return (
     <div className="flex flex-col gap-y-3 px-6 py-4">
@@ -101,16 +108,29 @@ const CrawlRow = ({
             value={limit}
             onChange={(event) => setLimit(event.target.value)}
           />
-          <Button
-            size="small"
-            variant="secondary"
-            isLoading={starting}
-            disabled={crawl.status === 'running' || writing}
-            aria-label={t('crawls.startLabel', { supplier: crawl.supplier })}
-            onClick={() => onStart(limit ? Number(limit) : null)}
-          >
-            {t(`crawls.${ACTION[crawl.status]}`)}
-          </Button>
+          {active ? (
+            <Button
+              size="small"
+              variant="secondary"
+              isLoading={busy}
+              disabled={writing}
+              aria-label={t('crawls.pauseLabel', { supplier: crawl.supplier })}
+              onClick={onPause}
+            >
+              {t('crawls.pause')}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              variant="secondary"
+              isLoading={busy}
+              disabled={writing}
+              aria-label={t('crawls.startLabel', { supplier: crawl.supplier })}
+              onClick={() => onStart(limit ? Number(limit) : null)}
+            >
+              {t(`crawls.${ACTION[crawl.status]}`)}
+            </Button>
+          )}
         </div>
       </div>
       {total > 0 && (
@@ -159,6 +179,11 @@ const CrawlRow = ({
           </div>
         </div>
       )}
+      {crawl.status === 'queued' && (
+        <Text size="small" className="text-ui-fg-subtle">
+          {t('crawls.waiting')}
+        </Text>
+      )}
       {crawl.status === 'paused' && crawl.paused_reason && (
         <Text size="small" className="text-ui-fg-error">
           {t(`crawls.pausedReasons.${crawl.paused_reason}`)}
@@ -169,6 +194,7 @@ const CrawlRow = ({
           {t('crawls.finishedAt', { date: date(crawl.finished_at) })}
         </Text>
       ) : (
+        crawl.status !== 'queued' &&
         crawl.started_at && (
           <Text size="small" className="text-ui-fg-muted">
             {t('crawls.startedAt', { date: date(crawl.started_at) })}
@@ -182,7 +208,7 @@ const CrawlRow = ({
 export const Crawls = () => {
   const { t } = useTranslation('carlabAdmin');
   const [crawls, setCrawls] = useState<Crawl[] | null>(null);
-  const [startingKey, setStartingKey] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const load = async () => {
     const data = await adminFetch('/admin/crawls', crawlsSchema);
@@ -193,7 +219,9 @@ export const Crawls = () => {
     load();
   }, []);
 
-  const running = crawls?.some(({ status }) => status === 'running') ?? false;
+  const running =
+    crawls?.some(({ status }) => status === 'running' || status === 'queued') ??
+    false;
 
   useEffect(() => {
     if (!running) return;
@@ -202,15 +230,29 @@ export const Crawls = () => {
   }, [running]);
 
   const start = async (crawl: Crawl, limit: number | null) => {
-    setStartingKey(crawl.key);
+    setBusyKey(crawl.key);
     const started = await adminFetch(
       `/admin/crawls/${crawl.key}`,
       startedSchema,
       { method: 'POST', body: JSON.stringify(limit ? { limit } : {}) },
     );
-    setStartingKey(null);
+    setBusyKey(null);
     if (started) {
       toast.success(t('crawls.started', { supplier: crawl.supplier }));
+      await load();
+    }
+  };
+
+  const pause = async (crawl: Crawl) => {
+    setBusyKey(crawl.key);
+    const paused = await adminFetch(
+      `/admin/crawls/${crawl.key}/pause`,
+      pausedSchema,
+      { method: 'POST' },
+    );
+    setBusyKey(null);
+    if (paused) {
+      toast.success(t('crawls.paused', { supplier: crawl.supplier }));
       await load();
     }
   };
@@ -225,8 +267,9 @@ export const Crawls = () => {
           <CrawlRow
             key={crawl.key}
             crawl={crawl}
-            starting={startingKey === crawl.key}
+            busy={busyKey === crawl.key}
             onStart={(limit) => start(crawl, limit)}
+            onPause={() => pause(crawl)}
           />
         ))
       ) : (

@@ -26,6 +26,8 @@ const brandOf = ($: CheerioAPI): string | null => {
   return null;
 };
 
+const SPARE_PART = /^MANN\+HUMMEL Spare Part$/iu;
+
 const SPEC_PAIR = /^(.+?)\s*[=:]+\s*(.+)$/u;
 const MAIN_APPLICATION = /^(main application|glavna primena)\b/iu;
 
@@ -121,7 +123,9 @@ export const parseMannHummelProduct = (
   const number = words($('.cmp-product__title-name').first());
   const category = words($('.cmp-product__title-family').first());
   const brand = brandOf($);
-  if (!articleId || !number || !brand) return null;
+  if (!articleId || !number || !brand || SPARE_PART.test(category)) {
+    return null;
+  }
   const description = words($('.cmp-product__description-text').first());
   return {
     article_id: articleId,

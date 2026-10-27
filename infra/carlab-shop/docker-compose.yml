@@ -91,7 +91,7 @@ services:
     env_file: [.env]
     environment:
       DATABASE_URL: postgres://carlab:${POSTGRES_PASSWORD:?}@postgres:5432/carlab
-      NODE_OPTIONS: --max-old-space-size=160
+      NODE_OPTIONS: --max-old-space-size=256
     command: ['node', 'src/lib/crawler/worker.js']
     healthcheck:
       disable: true

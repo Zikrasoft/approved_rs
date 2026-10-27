@@ -24,8 +24,11 @@ export const supplierArticleSchema = z.object({
   images: z.array(z.url()).optional(),
 });
 
+const unreadablePageSchema = z.object({ url: z.string(), reason: z.string() });
+
 export const cataloguePageSchema = z.object({
   articles: z.array(supplierArticleSchema),
+  unreadable: z.array(unreadablePageSchema).default([]),
   next: z.string().nullable(),
 });
 
@@ -44,6 +47,7 @@ export const supplierQuoteSchema = z.object({
 
 export type SupplierArticle = z.input<typeof supplierArticleSchema>;
 export type CataloguePage = z.input<typeof cataloguePageSchema>;
+export type UnreadablePage = z.infer<typeof unreadablePageSchema>;
 export type SupplierQuote = z.input<typeof supplierQuoteSchema>;
 
 export type SupplierAdapter = {

@@ -39,7 +39,7 @@ describe('VARTA', () => {
       name: 'DYNAMIC SLI 574013068',
       category: 'battery',
       description: expect.stringMatching(
-        /^Konvencionalna vozila bez Start-Stop tehnologije .* pružaju precizne performanse i dugotrajnu pouzdanost\.$/u,
+        /^Konvencionalna vozila bez Start-Stop tehnologije .* pružaju precizne performanse i dugotrajnu pouzdanost\.\n/u,
       ),
       specs: {
         Amperi: '74 Ah',
@@ -59,6 +59,22 @@ describe('VARTA', () => {
       ],
     });
     expect(article.description).not.toMatch(/DYNAMIC SLI 574013068|\u200b/u);
+  });
+
+  it("adds the product's benefits to the description, each as its title and text", () => {
+    const description = varta
+      .parse(page('574013068k262.html.gz'))
+      ?.description?.split('\n');
+    expect(description).toHaveLength(5);
+    expect(description?.[0]).toMatch(
+      /^Konvencionalna vozila .* pouzdanost\.$/u,
+    );
+    expect(description?.slice(1)).toEqual([
+      'Pouzdana snaga: Pouzdana snaga za vozila sa standardnom opremom bez Start-Stop sistema.',
+      'Originalni rezervni deo: Ispunjava sve OE kriterijume proizvođača vozila.',
+      'Projektovano u Nemačkoj: Projektovano sa preciznošću i stručnošću u Nemačkoj.',
+      'Bez održavanja: Akumulator bez održavanja dizajniran da pruži pouzdane performanse za vaše vozilo.',
+    ]);
   });
 
   it('reads a page without a description', () => {
