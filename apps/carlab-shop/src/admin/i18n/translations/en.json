@@ -956,7 +956,7 @@
     "waiting": "The crawler reads one site at a time. This crawl starts once the running one is done or paused.",
     "startLabel": "Crawl the {{supplier}} catalogue",
     "limitLabel": "Pages of {{supplier}} to crawl as a test run, empty for all",
-    "limitPlaceholder": "All",
+    "limitPlaceholder": "All pages",
     "progressLabel": "{{supplier}} crawl progress",
     "started": "{{supplier}}: crawl started. Progress updates by itself.",
     "done": "{{done}} of {{total}} pages fetched",
