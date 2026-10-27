@@ -985,7 +985,7 @@
     "workerMissing": "Сбор ждет краулер, а он не запущен. Запустите краулер на своем компьютере.",
     "startLabel": "Сбор каталога {{supplier}}",
     "limitLabel": "Сколько страниц {{supplier}} собрать для пробы, пусто значит все",
-    "limitPlaceholder": "Все",
+    "limitPlaceholder": "Все страницы",
     "progressLabel": "Прогресс сбора {{supplier}}",
     "started": "{{supplier}}: сбор запущен. Прогресс обновляется сам.",
     "done": "Пройдено {{done}} из {{total}} страниц",

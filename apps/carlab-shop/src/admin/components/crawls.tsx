@@ -107,6 +107,7 @@ const CrawlRow = ({
             min={1}
             step={1}
             placeholder={t('crawls.limitPlaceholder')}
+            disabled={active || writing}
             aria-label={t('crawls.limitLabel', { supplier: crawl.supplier })}
             value={limit}
             onChange={(event) => setLimit(event.target.value)}

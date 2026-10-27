@@ -47,7 +47,7 @@ const copy = content(locale).pages.partsInquiry;
     <template data-parts-item>
       <li class="flex flex-wrap items-center justify-between gap-x-2">
         <a
-          class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+          class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 [overflow-wrap:anywhere] hover:text-signal-ink hover:underline"
           data-part-link></a>
         <input
           type="number"
@@ -55,7 +55,7 @@ const copy = content(locale).pages.partsInquiry;
           min="1"
           max={MAX_PART_QUANTITY}
           step="1"
-          class="field spec min-h-11 w-16 shrink-0 px-2 py-1.5 text-center"
+          class="field spec min-h-11 w-14 shrink-0 px-2 py-1.5 text-center"
           aria-label={copy.listQuantityLabel}
           data-part-quantity
         />

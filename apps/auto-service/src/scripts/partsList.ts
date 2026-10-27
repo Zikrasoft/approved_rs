@@ -252,7 +252,10 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             item.querySelector<HTMLAnchorElement>('[data-part-link]');
           const remove = item.querySelector('[data-part-remove]');
           if (link) {
-            link.textContent = partTitle(part);
+            const number = document.createElement('span');
+            number.className = 'spec font-semibold';
+            number.textContent = part.number.replaceAll(' ', '\u00a0');
+            link.replaceChildren(`${part.brand} `, number, `, ${part.name}`);
             link.href = (this.dataset.partHref ?? '').replace(
               '{slug}',
               part.slug,

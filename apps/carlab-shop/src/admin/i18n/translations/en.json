@@ -957,7 +957,7 @@
     "workerMissing": "The crawl is waiting for the crawler, which is not running. Start the crawler on your computer.",
     "startLabel": "Crawl the {{supplier}} catalogue",
     "limitLabel": "Pages of {{supplier}} to crawl as a test run, empty for all",
-    "limitPlaceholder": "All",
+    "limitPlaceholder": "All pages",
     "progressLabel": "{{supplier}} crawl progress",
     "started": "{{supplier}}: crawl started. Progress updates by itself.",
     "done": "{{done}} of {{total}} pages fetched",
