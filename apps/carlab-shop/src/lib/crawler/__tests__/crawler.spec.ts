@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { gunzipSync } from 'node:zlib';
+import { gunzipSync, gzipSync } from 'node:zlib';
 
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
@@ -121,14 +121,16 @@ medusaIntegrationTestRunner({
       site: CrawledSite,
       web: ReturnType<typeof fakeWeb>,
       limit: number | null = null,
+      random = () => 0,
     ) => {
       await store.start(site.name, new Date(web.clock.now()), limit);
+      await store.next([site.name], new Date(web.clock.now()));
       await crawlSite(site, {
         store,
         openFetcher: web.openFetcher,
         clock: web.clock,
         from: 'crawler@carlab.test',
-        random: () => 0,
+        random,
       });
       const [progress] = await store.progress([site.name]);
       return progress;
@@ -484,6 +486,35 @@ medusaIntegrationTestRunner({
         expect(full.pages).toMatchObject({ done: 3, gone: 1, queued: 0 });
       });
 
+      it('samples a test run from across the whole sitemap rather than its first pages', async () => {
+        const sampled = async (name: string, random: () => number) => {
+          const site = testSite(name);
+          const pages = Array.from(
+            { length: 40 },
+            (_, n) => `https://${name}.test/p/${String(n).padStart(2, '0')}`,
+          );
+          const web = fakeWeb({
+            [`https://${name}.test/robots.txt`]: ok(''),
+            [`https://${name}.test/sitemap.xml`]: ok(urlset(...pages)),
+            ...Object.fromEntries(pages.map((url) => [url, ok('page')])),
+          });
+          await crawl(site, web, 4, random);
+          return web.requests
+            .slice(2)
+            .map(({ url }) => pages.indexOf(url))
+            .sort((a, b) => a - b);
+        };
+
+        const sample = await sampled('spread', () => 0.25);
+        const another = await sampled('spread-again', () => 0.75);
+
+        expect(sample).toHaveLength(4);
+        expect(sample).not.toEqual([0, 1, 2, 3]);
+        expect(Math.max(...sample)).toBeGreaterThanOrEqual(10);
+        expect(another).toHaveLength(4);
+        expect(another).not.toEqual(sample);
+      });
+
       it('re-reads robots.txt once a day during a long run', async () => {
         const site = testSite('daily', 13 * HOUR);
         const web = fakeWeb({
@@ -500,6 +531,65 @@ medusaIntegrationTestRunner({
         const robots = web.fetched('https://daily.test/robots.txt');
         expect(robots).toHaveLength(2);
         expect(robots[1].at - robots[0].at).toBeGreaterThanOrEqual(24 * HOUR);
+      });
+    });
+
+    describe('one crawl at a time', () => {
+      it('queues a crawl started while another runs and starts it once the running one is done', async () => {
+        const first = testSite('first');
+        const second = testSite('second');
+        const sites = [first.name, second.name];
+        const web = fakeWeb({
+          'https://first.test/robots.txt': ok(''),
+          'https://first.test/sitemap.xml': ok(
+            urlset('https://first.test/p/1'),
+          ),
+          'https://first.test/p/1': ok('one'),
+        });
+        await store.start(first.name, new Date(START));
+        await store.start(second.name, new Date(START + 1000));
+
+        expect(await store.next(sites, new Date(START))).toBe(first.name);
+        expect(await store.next(sites, new Date(START))).toBe(first.name);
+        expect((await store.run(second.name))?.status).toBe('queued');
+
+        await crawlSite(first, {
+          store,
+          openFetcher: web.openFetcher,
+          clock: web.clock,
+        });
+
+        expect((await store.run(first.name))?.status).toBe('done');
+        expect(await store.next(sites, new Date(START + HOUR))).toBe(
+          second.name,
+        );
+        expect(await store.run(second.name)).toMatchObject({
+          status: 'running',
+          started_at: new Date(START + HOUR),
+        });
+        expect(await store.next(sites, new Date(START + HOUR))).toBe(
+          second.name,
+        );
+      });
+
+      it('starts the next queued crawl once staff pause the running one, and queues the paused one again behind it', async () => {
+        const sites = ['ahead', 'behind'];
+        await store.start('ahead', new Date(START));
+        await store.start('behind', new Date(START + 1000));
+        await store.next(sites, new Date(START));
+
+        await store.pause('ahead', 'staff');
+
+        expect(await store.next(sites, new Date(START + HOUR))).toBe('behind');
+        await store.start('ahead', new Date(START + 2 * HOUR));
+        expect((await store.run('ahead'))?.status).toBe('queued');
+        expect(await store.next(sites, new Date(START + 3 * HOUR))).toBe(
+          'behind',
+        );
+      });
+
+      it('finds nothing to crawl when nothing is queued', async () => {
+        expect(await store.next(['nothing'], new Date(START))).toBe(null);
       });
     });
 
@@ -528,8 +618,54 @@ medusaIntegrationTestRunner({
         expect(
           [...first.articles, ...second.articles].map(({ number }) => number),
         ).toEqual(['C 30 005', 'HU 816 x']);
-        expect(last).toEqual({ articles: [], next: null });
+        expect(last).toEqual({ articles: [], next: null, unreadable: [] });
         expect(await adapter.quote(['HU816X_MANN-FILTER'])).toEqual([]);
+      });
+
+      it('reads the other pages on when one page throws or reads into an invalid article, and names the unreadable ones', async () => {
+        const site: CrawledSite = {
+          ...testSite('brittle'),
+          parse: (html) => {
+            if (html === 'throws') throw new Error('Unexpected markup');
+            return {
+              article_id: html,
+              brand: 'BRITTLE',
+              number: html,
+              name: html === 'invalid' ? '' : `Part ${html}`,
+              category: 'parts',
+            };
+          },
+        };
+        const pages = {
+          'https://brittle.test/p/1': 'one',
+          'https://brittle.test/p/2': 'throws',
+          'https://brittle.test/p/3': 'invalid',
+          'https://brittle.test/p/4': 'four',
+        };
+        await store.start(site.name, new Date(START));
+        await store.seed(site.name, Object.keys(pages), new Date(START));
+        for (const [url, body] of Object.entries(pages)) {
+          await store.update(site.name, url, {
+            status: 'done',
+            body: gzipSync(body),
+          });
+        }
+
+        const page = await crawledSupplierAdapter(site, store).listCatalogue(
+          null,
+        );
+
+        expect(page.articles.map(({ number }) => number)).toEqual([
+          'one',
+          'four',
+        ]);
+        expect(page.unreadable).toEqual([
+          {
+            url: 'https://brittle.test/p/2',
+            reason: 'Unexpected markup',
+          },
+          { url: 'https://brittle.test/p/3', reason: expect.any(String) },
+        ]);
       });
     });
 
@@ -569,10 +705,28 @@ medusaIntegrationTestRunner({
         await api.post('/admin/crawls/mann-filter', {}, adminHeaders);
 
         const after = await api.get('/admin/crawls', adminHeaders);
+        expect(after.data.crawls[0]).toMatchObject({ status: 'queued' });
+      });
+
+      it('lets staff pause a crawl from the admin', async () => {
+        await api.post('/admin/crawls/mann-filter', {}, adminHeaders);
+
+        const paused = await api.post(
+          '/admin/crawls/mann-filter/pause',
+          {},
+          adminHeaders,
+        );
+
+        expect(paused.data).toEqual({ paused: 'mann-filter' });
+        const after = await api.get('/admin/crawls', adminHeaders);
         expect(after.data.crawls[0]).toMatchObject({
-          status: 'running',
-          started_at: expect.any(String),
+          status: 'paused',
+          paused_reason: 'staff',
         });
+        const missing = await api
+          .post('/admin/crawls/nowhere/pause', {}, adminHeaders)
+          .catch((error: { response: { status: number } }) => error.response);
+        expect(missing.status).toBe(404);
       });
 
       it('takes a page limit for a test run and refuses one that is not a positive whole number', async () => {

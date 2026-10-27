@@ -1,10 +1,18 @@
 import { gunzipSync } from 'node:zlib';
 
-import type { SupplierAdapter, SupplierArticle } from '../suppliers/adapter';
+import {
+  type SupplierAdapter,
+  supplierArticleSchema,
+  type SupplierArticle,
+  type UnreadablePage,
+} from '../suppliers/adapter';
 import type { CrawledSite } from './site';
 import type { CrawlStore } from './store';
 
 const SNAPSHOTS_PER_PAGE = 50;
+
+const reasonOf = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
 
 export const crawledSupplierAdapter = (
   site: CrawledSite,
@@ -14,10 +22,19 @@ export const crawledSupplierAdapter = (
   name: site.name,
   listCatalogue: async (cursor) => {
     const snapshots = await store.snapshots(site.name, cursor, pageSize);
+    const articles: SupplierArticle[] = [];
+    const unreadable: UnreadablePage[] = [];
+    for (const { url, body } of snapshots) {
+      try {
+        const article = site.parse(gunzipSync(body).toString('utf8'));
+        if (article) articles.push(supplierArticleSchema.parse(article));
+      } catch (error) {
+        unreadable.push({ url, reason: reasonOf(error) });
+      }
+    }
     return {
-      articles: snapshots
-        .map(({ body }) => site.parse(gunzipSync(body).toString('utf8')))
-        .filter((article): article is SupplierArticle => article !== null),
+      articles,
+      unreadable,
       next:
         snapshots.length === pageSize
           ? snapshots[snapshots.length - 1].url

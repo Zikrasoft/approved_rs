@@ -125,6 +125,7 @@ medusaIntegrationTestRunner({
       beforeEach(() => {
         for (const fake of [intercars, warehouse]) {
           fake.articles.length = 0;
+          fake.unreadable.length = 0;
           fake.quotes.clear();
         }
         Object.assign(shopAi, {
@@ -318,7 +319,7 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 1,
             skipped: 1,
-            skipped_by_reason: { brand: 1, currency: 0 },
+            skipped_by_reason: { brand: 1, currency: 0, unreadable: 0 },
             needs_category: ['C 30 005'],
           },
           {
@@ -326,12 +327,63 @@ medusaIntegrationTestRunner({
             imported: 0,
             created: 0,
             skipped: 0,
-            skipped_by_reason: { brand: 0, currency: 0 },
+            skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
             needs_category: [],
           },
         ]);
         expect((await page('C30005'))?.part.category_id).toBeNull();
         expect(await page('F026407157')).toBeUndefined();
+      });
+
+      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it as skipped', async () => {
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/broken',
+          reason: 'Unexpected markup',
+        });
+        intercars.articles.push({
+          article_id: 'IC-30',
+          brand: 'MANN-FILTER',
+          number: 'W 610/3',
+          name: 'Фильтр W610',
+          category: 'IC-OIL',
+        });
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toEqual({
+          supplier: 'Intercars',
+          imported: 0,
+          created: 1,
+          skipped: 1,
+          skipped_by_reason: { brand: 0, currency: 0, unreadable: 1 },
+          needs_category: [],
+        });
+        expect(await page('W6103')).toBeDefined();
+      });
+
+      it('names a Part after the first of its Supplier pages in catalogue order, the same on every import', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-31',
+            brand: 'MANN-FILTER',
+            number: 'W 811/80',
+            name: 'Фильтр W811 первый',
+            category: 'IC-OIL',
+          },
+          {
+            article_id: 'IC-32',
+            brand: 'MANN-FILTER',
+            number: 'W 811/80',
+            name: 'Фильтр W811 второй',
+            category: 'IC-OIL',
+          },
+        );
+
+        await runImport();
+        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+
+        await runImport();
+        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
       });
 
       it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {

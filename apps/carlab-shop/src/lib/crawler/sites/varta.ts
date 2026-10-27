@@ -36,7 +36,17 @@ const imagesOf = ($: CheerioAPI): string[] => {
 const descriptionOf = ($: CheerioAPI) => {
   const description = $('.products-detail__description').first();
   description.find('h1').remove();
-  return words(description.text());
+  const benefits = $('.products-detail__benefits-item')
+    .toArray()
+    .map((item) =>
+      [
+        words($(item).find('.products-detail__benefits-title').text()),
+        words($(item).find('.products-detail__benefits-text').text()),
+      ]
+        .filter(Boolean)
+        .join(': '),
+    );
+  return [words(description.text()), ...benefits].filter(Boolean).join('\n');
 };
 
 const PLACEHOLDER = /^Pseudo Article\b/u;

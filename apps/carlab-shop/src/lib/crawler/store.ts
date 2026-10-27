@@ -5,6 +5,7 @@ export const PAUSE_REASONS = [
   'sitemap_unavailable',
   'blocked',
   'server_errors',
+  'staff',
 ] as const;
 
 export type PauseReason = (typeof PAUSE_REASONS)[number];
@@ -25,10 +26,11 @@ export type FailureReason = (typeof FAILURE_REASONS)[number];
 
 export type CrawlRun = {
   site: string;
-  status: 'running' | 'paused' | 'done';
+  status: 'queued' | 'running' | 'paused' | 'done';
   paused_reason: PauseReason | null;
   seeded: boolean;
   pages_left: number | null;
+  queued_at: Date | null;
   started_at: Date;
   finished_at: Date | null;
 };
@@ -74,8 +76,27 @@ export const crawlStore = (pg: Knex) => ({
     return (await pg('crawl_run').where({ site }).first()) ?? null;
   },
 
-  async runningSites(): Promise<string[]> {
-    return pg('crawl_run').where({ status: 'running' }).pluck('site');
+  async next(sites: string[], now: Date): Promise<string | null> {
+    const running = await pg('crawl_run')
+      .whereIn('site', sites)
+      .andWhere({ status: 'running' })
+      .orderBy('started_at')
+      .first('site');
+    if (running) return running.site;
+    const { rows } = await pg.raw(
+      `update crawl_run set
+         status = 'running',
+         started_at = case when seeded then started_at else ? end
+       where site = (
+         select site from crawl_run
+         where site = any(?) and status = 'queued'
+         order by queued_at, site
+         limit 1
+       )
+       returning site`,
+      [now, sites],
+    );
+    return rows[0]?.site ?? null;
   },
 
   async start(
@@ -84,16 +105,16 @@ export const crawlStore = (pg: Knex) => ({
     limit: number | null = null,
   ): Promise<void> {
     await pg.raw(
-      `insert into crawl_run (site, status, seeded, pages_left, started_at)
-       values (?, 'running', false, ?, ?)
+      `insert into crawl_run (site, status, seeded, pages_left, queued_at, started_at)
+       values (?, 'queued', false, ?, ?, ?)
        on conflict (site) do update set
-         status = 'running',
+         status = case when crawl_run.status = 'running' then 'running' else 'queued' end,
          paused_reason = null,
          pages_left = excluded.pages_left,
          finished_at = null,
-         seeded = crawl_run.seeded and crawl_run.status = 'paused',
-         started_at = case when crawl_run.status = 'paused' then crawl_run.started_at else excluded.started_at end`,
-      [site, limit, now],
+         seeded = crawl_run.seeded and crawl_run.status in ('paused', 'queued'),
+         queued_at = case when crawl_run.status in ('running', 'queued') then crawl_run.queued_at else excluded.queued_at end`,
+      [site, limit, now, now],
     );
   },
 
@@ -132,18 +153,21 @@ export const crawlStore = (pg: Knex) => ({
     site: string,
     now: Date,
     leaseUntil: Date,
+    sampleSeed: string | null = null,
   ): Promise<ClaimedPage | null> {
+    const order =
+      sampleSeed === null ? 'next_attempt_at, url' : 'md5(url || ?), url';
     const { rows } = await pg.raw(
       `update crawl_page set next_attempt_at = ?
        where (site, url) = (
          select site, url from crawl_page
          where site = ? and status = 'queued' and next_attempt_at <= ?
-         order by next_attempt_at, url
+         order by ${order}
          limit 1
          for update skip locked
        )
        returning url, attempts, etag, last_modified`,
-      [leaseUntil, site, now],
+      [leaseUntil, site, now, ...(sampleSeed === null ? [] : [sampleSeed])],
     );
     return rows[0] ?? null;
   },
@@ -163,6 +187,7 @@ export const crawlStore = (pg: Knex) => ({
   async pause(site: string, reason: PauseReason): Promise<void> {
     await pg('crawl_run')
       .where({ site })
+      .whereIn('status', ['queued', 'running'])
       .update({ status: 'paused', paused_reason: reason });
   },
 

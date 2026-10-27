@@ -2,11 +2,13 @@ import type {
   SupplierAdapter,
   SupplierArticle,
   SupplierQuote,
+  UnreadablePage,
 } from '../src/lib/suppliers/adapter';
 
 export type FakeSupplier = {
   adapter: SupplierAdapter;
   articles: SupplierArticle[];
+  unreadable: UnreadablePage[];
   quotes: Map<string, SupplierQuote>;
 };
 
@@ -16,6 +18,7 @@ export const createFakeSupplier = (
 ): FakeSupplier => {
   const fake: FakeSupplier = {
     articles: [],
+    unreadable: [],
     quotes: new Map(),
     adapter: {
       name,
@@ -24,6 +27,7 @@ export const createFakeSupplier = (
         const end = start + pageSize;
         return {
           articles: fake.articles.slice(start, end),
+          unreadable: cursor ? [] : fake.unreadable,
           next: end < fake.articles.length ? String(end) : null,
         };
       },

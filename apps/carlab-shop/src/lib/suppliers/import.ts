@@ -41,7 +41,7 @@ export type ImportSummary = {
   imported: number;
   created: number;
   skipped: number;
-  skipped_by_reason: { brand: number; currency: number };
+  skipped_by_reason: { brand: number; currency: number; unreadable: number };
   needs_category: string[];
 };
 
@@ -53,6 +53,7 @@ type Context = {
   ai: ShopAi;
   categories: CategoryChoice[];
   logger: Logger;
+  matched: Set<string>;
 };
 
 const factsOf = (article: Article): ArticleFacts => ({
@@ -211,7 +212,10 @@ async function matchArticle(
   if (part.source !== adapter.name || part.updated_by) {
     return { identifierId: hit.id, created: false };
   }
-  const name = part.name === article.name ? null : article.name;
+  const name =
+    context.matched.has(hit.id) || part.name === article.name
+      ? null
+      : article.name;
   const description = part.description
     ? null
     : await describe(context, article);
@@ -299,6 +303,7 @@ export async function importSupplier(
       await catalog.listCategories({}, { select: ['id', 'name'], take: null })
     ).map(({ id, name }) => ({ id, name })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
+    matched: new Set(),
   };
   const categoryOf = new Map(
     (
@@ -321,7 +326,7 @@ export async function importSupplier(
     imported: 0,
     created: 0,
     skipped: 0,
-    skipped_by_reason: { brand: 0, currency: 0 },
+    skipped_by_reason: { brand: 0, currency: 0, unreadable: 0 },
     needs_category: [],
   };
   const brandOfArticle = (article: Article) =>
@@ -333,6 +338,13 @@ export async function importSupplier(
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
+    for (const { url, reason } of page.unreadable) {
+      context.logger.warn(
+        `${adapter.name}: skipped unreadable ${url}: ${reason}`,
+      );
+    }
+    summary.skipped += page.unreadable.length;
+    summary.skipped_by_reason.unreadable += page.unreadable.length;
     const wanted = page.articles.filter(brandOfArticle);
     const unbranded = page.articles.length - wanted.length;
     summary.skipped += unbranded;
@@ -356,6 +368,7 @@ export async function importSupplier(
           brandOfArticle(article)!,
           categoryOfArticle(article),
         );
+      context.matched.add(identifierId);
       if (changedPartId) {
         changedPartIds.add(changedPartId);
       }

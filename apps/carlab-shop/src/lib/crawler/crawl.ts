@@ -7,6 +7,7 @@ import type { CrawledSite } from './site';
 import { sitemapLinks } from './sitemap';
 import type {
   ClaimedPage,
+  CrawlRun,
   CrawlStore,
   FailureReason,
   PauseReason,
@@ -88,6 +89,7 @@ async function crawlWith(
   let holdUntil = -Infinity;
   let serverErrors = 0;
   let blockedPages = 0;
+  const sampleSeed = String(random());
   const at = () => new Date(clock.now());
 
   const request = async (
@@ -246,9 +248,10 @@ async function crawlWith(
     return null;
   };
 
-  const step = async (
-    seeded: boolean,
-  ): Promise<PauseReason | 'idle' | null> => {
+  const step = async ({
+    seeded,
+    pages_left,
+  }: CrawlRun): Promise<PauseReason | 'idle' | null> => {
     const stale = await freshRobots();
     if (stale) return stale;
     if (!seeded) return seed();
@@ -256,6 +259,7 @@ async function crawlWith(
       site.name,
       at(),
       new Date(clock.now() + LEASE_MS),
+      pages_left === null ? null : sampleSeed,
     );
     if (page) return fetchPage(page);
     const due = await store.nextDue(site.name);
@@ -267,7 +271,7 @@ async function crawlWith(
   for (;;) {
     const run = await store.run(site.name);
     if (run?.status !== 'running') return;
-    const outcome = await step(run.seeded);
+    const outcome = await step(run);
     if (outcome === 'idle') {
       await store.finish(site.name, at());
       return;
