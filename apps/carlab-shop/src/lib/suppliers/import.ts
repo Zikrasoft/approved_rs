@@ -227,16 +227,20 @@ async function matchArticle(
   }
   const { part } = hit;
   const unchanged = { identifierId: hit.id, partId: part.id, created: false };
-  if (part.source !== adapter.name || part.updated_by) {
+  if (part.source !== adapter.name) {
     return unchanged;
   }
+  const edited = new Set(part.edited_fields);
   const name =
-    context.matched.has(hit.id) || part.source_name === article.name
+    edited.has('name') ||
+    context.matched.has(hit.id) ||
+    part.source_name === article.name
       ? null
       : await nameOf(context, article);
-  const description = part.description
-    ? null
-    : await describe(context, article);
+  const description =
+    edited.has('description') || part.description
+      ? null
+      : await describe(context, article);
   if (!name && !description) {
     return unchanged;
   }

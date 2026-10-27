@@ -542,6 +542,37 @@ medusaIntegrationTestRunner({
         expect(shopAi.descriptionsWritten).toHaveLength(2);
       });
 
+      it('still describes and renames a Part whose Category staff changed', async () => {
+        intercars.articles.push({
+          article_id: 'IC-25',
+          brand: 'MANN-FILTER',
+          number: 'W 980',
+          name: 'Фильтр W980',
+          category: 'IC-OIL',
+          description: 'Filter ulja W 980.',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        const recategorized = (await page('W980'))!.part;
+        const update = await api.post(
+          `/admin/parts/${recategorized.id}`,
+          { category_id: null },
+          adminHeaders,
+        );
+        expect(update.status).toBe(200);
+        shopAi.failure = null;
+        shopAi.description = 'Масляный фильтр W 980.';
+        intercars.articles[0].name = 'Фильтр W980 новый';
+
+        await runImport();
+
+        expect((await page('W980'))?.part).toMatchObject({
+          name: 'Фильтр W980 новый',
+          description: 'Масляный фильтр W 980.',
+          category_id: null,
+        });
+      });
+
       it('matches a Brand spelling whatever its case and spacing', async () => {
         intercars.articles.push({
           article_id: 'IC-8',
