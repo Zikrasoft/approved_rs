@@ -11,6 +11,7 @@ import {
   STAGED_DATA_KINDS,
   STEERING_SIDES,
   UNIVERSAL_FACET_KEYS,
+  vinSchema,
 } from '@podbor/catalog-contract';
 
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
@@ -410,7 +411,7 @@ export const AdminCreateRequirement = z
 export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
 
 export const AdminConfirmWorkshopQuote = z.strictObject({
-  vin: z.string().nullable(),
+  vin: vinSchema.nullable(),
   lines: z
     .array(
       z.strictObject({
