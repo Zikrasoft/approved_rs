@@ -652,9 +652,12 @@ its own (not the backup bucket).
   960 px WebP copies and stores their URLs on the PartIdentifier or Category. A
   Supplier import copies each crawled image once into `supplier-images/<sha256 of
 the source URL>`, with the source URL in the object's `source-url` metadata, and
-  stages our copy; a later import finds the object and downloads nothing. An image
-  that cannot be fetched stays linked to its source and is tried again on the
-  next import.
+  stages our copy with its source URL beside it in the staged record; a later
+  import finds the object and downloads nothing. Only http(s) on a public address
+  is fetched (a host resolving to a private, loopback or link-local range is
+  refused), and a download stops at 10 MB. An image that cannot be fetched is
+  staged nowhere, so the site never links the brand's server, and is tried again
+  on the next import.
 - **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
   `crawl/<site>/<sha256 of the URL>.html.gz`. The import reads them back from there.
 
