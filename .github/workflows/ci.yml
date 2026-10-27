@@ -49,6 +49,7 @@ jobs:
 
       - run: sh infra/carlab-shop/test/scripts.test.sh
       - run: sh infra/carlab-shop/test/compose.test.sh
+      - run: sh infra/carlab-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"

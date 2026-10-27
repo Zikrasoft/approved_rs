@@ -615,21 +615,43 @@ cp .env.crawler.example .env.crawler
 `DATABASE_SSL=false`, `CRAWLER_FROM` and the same `S3_*` as `/srv/carlab/.env`.
 Copy the values across without printing them.
 
-Postgres has no host port and sits on the internal `data` network, so the worker
-reaches it through an SSH tunnel to the container's address.
-TODO: `harden-ssh.sh` sets `AllowTcpForwarding no`, which refuses this tunnel; the
-owner decides whether to allow `local` forwarding for `deploy` (CI's key keeps
-`restrict`, which forbids it either way). Open the tunnel and leave it open:
+Postgres has no host port and sits on the internal `data` network at a fixed
+address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
+`10.200.0.0/24`), so the worker reaches it through an SSH tunnel as the `crawler`
+user. `harden-ssh.sh` creates that user with no shell and an sshd
+`Match User crawler` block: local forwarding to `10.200.0.10:5432` and nothing
+else, no TTY, no command, no remote listening. Everyone else, `deploy` and CI's
+key included, keeps `AllowTcpForwarding no`. Checked by
+`infra/carlab-shop/test/harden-ssh.test.sh`.
+
+Once, on the Mac, make a key for the tunnel and copy its public half, with the
+script, to the Lightsail server. The private key never leaves the Mac:
 
 ```bash
-host=deploy@<IPv4>
-pg=$(ssh "$host" "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' carlab-postgres-1")
-ssh -N -L 127.0.0.1:15432:"$pg":5432 "$host"
+ssh-keygen -t ed25519 -f ~/.ssh/carlab-crawler -C carlab-crawler
+scp infra/carlab-shop/harden-ssh.sh ~/.ssh/carlab-crawler.pub deploy@<IPv4>:/tmp/
 ```
 
-The address changes when the postgres container is recreated (a deploy that
-updates it, a reboot); reopen the tunnel then. In a second terminal, start the
-worker and keep the Mac awake while it runs:
+Then, from a `deploy` session on the server, rerun the hardening with that file
+(through `sudo`, as on the first setup). It installs the crawler's key, writes
+the same sshd config as before plus the `Match` block, and is safe to rerun;
+without the argument it keeps the key already there:
+
+```bash
+sudo sh /tmp/harden-ssh.sh /tmp/carlab-crawler.pub
+```
+
+Open the tunnel and leave it open:
+
+```bash
+ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>
+```
+
+The address survives a recreate of the postgres container, so the same command
+works after a deploy or a reboot; only a dropped connection needs it rerun. The
+first deploy that brings the fixed address recreates the `data` network, and
+postgres, typesense and medusa restart with it once. In a second terminal, start
+the worker and keep the Mac awake while it runs:
 
 ```bash
 caffeinate -i pnpm --filter @podbor/carlab-shop crawler
