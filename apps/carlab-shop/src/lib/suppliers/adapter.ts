@@ -82,13 +82,16 @@ export type SupplierAdapter = {
 
 const configuredAdapters = (scope: MedusaContainer): SupplierAdapter[] => {
   const env = parseEnv(process.env);
-  const store = crawlStore(
-    scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
-    shopStorage(scope)?.pages ?? null,
-  );
-  const crawled = enabledCrawledSites().map((site) =>
-    crawledSupplierAdapter(site, store),
-  );
+  const sites = enabledCrawledSites();
+  const store = sites.length
+    ? crawlStore(
+        scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
+        shopStorage(scope)?.pages ?? null,
+      )
+    : null;
+  const crawled = store
+    ? sites.map((site) => crawledSupplierAdapter(site, store))
+    : [];
   return [
     ...(env.SUPPLIER_ADAPTERS.includes('demo')
       ? demoAdapters(env.DEMO_SUPPLIER_OVERRIDES, env.FILE_URL)
