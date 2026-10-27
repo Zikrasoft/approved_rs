@@ -28,6 +28,12 @@ async function main(): Promise<void> {
     env.S3 && s3PagesBucket(env.S3),
   );
   const names = CRAWLED_SITES.map(({ name }) => name);
+  const beat = () =>
+    store.beat(names, new Date(clock.now())).catch((error: unknown) => {
+      console.error('Crawler heartbeat failed', error);
+    });
+  await beat();
+  setInterval(beat, POLL_MS);
   console.log('Crawler waiting for a crawl started in the admin');
   for (;;) {
     const name = await store.next(names, new Date(clock.now()));

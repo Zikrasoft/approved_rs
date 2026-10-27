@@ -44,7 +44,10 @@ const crawlSchema = z.object({
 
 type Crawl = z.infer<typeof crawlSchema>;
 
-const crawlsSchema = z.object({ crawls: z.array(crawlSchema) });
+const crawlsSchema = z.object({
+  worker_missing: z.boolean(),
+  crawls: z.array(crawlSchema),
+});
 const startedSchema = z.object({ started: z.string() });
 const pausedSchema = z.object({ paused: z.string() });
 
@@ -209,11 +212,14 @@ const CrawlRow = ({
 export const Crawls = () => {
   const { t } = useTranslation('carlabAdmin');
   const [crawls, setCrawls] = useState<Crawl[] | null>(null);
+  const [workerMissing, setWorkerMissing] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
   const load = async () => {
     const data = await adminFetch('/admin/crawls', crawlsSchema);
-    if (data) setCrawls(data.crawls);
+    if (!data) return;
+    setCrawls(data.crawls);
+    setWorkerMissing(data.worker_missing);
   };
 
   useEffect(() => {
@@ -261,6 +267,11 @@ export const Crawls = () => {
   return (
     <Container className="divide-y overflow-hidden p-0">
       <ListHeader heading={t('crawls.heading')} lead={t('crawls.lead')} />
+      {workerMissing && (
+        <Text size="small" role="status" className="text-ui-fg-error px-6 py-3">
+          {t('crawls.workerMissing')}
+        </Text>
+      )}
       {!crawls ? (
         <ListLoading />
       ) : crawls.length ? (

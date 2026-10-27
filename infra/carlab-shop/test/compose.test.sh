@@ -20,12 +20,8 @@ expect() {
 }
 
 expect 'only caddy publishes a port' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy"]'
-expect 'the stack is medusa, its crawler, postgres, typesense and caddy' \
-  '[.services | keys[]] == ["caddy", "crawler", "medusa", "postgres", "typesense"]'
-expect 'the crawler runs the shop image as its own worker and reaches postgres by service name' \
-  '.services.crawler.image == .services.medusa.image and .services.crawler.command == ["node", "src/lib/crawler/worker.js"] and .services.crawler.environment.DATABASE_URL == "postgres://carlab:x@postgres:5432/carlab"'
-expect 'the crawler gets only the variables it reads, none of the shop secrets' \
-  '(.services.crawler.env_file == null) and ([.services.crawler.environment | keys[]] == ["CRAWLER_FROM", "DATABASE_SSL", "DATABASE_URL", "NODE_ENV", "NODE_OPTIONS", "S3_ACCESS_KEY_ID", "S3_ENDPOINT", "S3_PRIVATE_BUCKET", "S3_PUBLIC_BUCKET", "S3_REGION", "S3_SECRET_ACCESS_KEY"])'
+expect 'the stack is medusa, postgres, typesense and caddy, the crawler runs elsewhere' \
+  '[.services | keys[]] == ["caddy", "medusa", "postgres", "typesense"]'
 expect 'postgres and typesense sit on the internal network only' \
   '[.services.postgres, .services.typesense | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
 expect 'medusa reaches typesense by service name with the shared key' \
@@ -41,8 +37,8 @@ expect 'no service keeps shop files on a host volume, they live on S3' \
 expect 'caddy serves the admin on its own host' \
   '.services.caddy.environment.ADMIN_HOST == "admin.carlab.rs"'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
-expect 'every service has a memory limit, together under 3.6 GB' \
-  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3600 * 1024 * 1024)'
+expect 'every service has a memory limit, together under 3 GB' \
+  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3072 * 1024 * 1024)'
 expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":([0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 

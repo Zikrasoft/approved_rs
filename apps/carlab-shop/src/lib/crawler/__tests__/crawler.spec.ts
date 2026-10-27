@@ -738,6 +738,23 @@ medusaIntegrationTestRunner({
         expect(after.data.crawls[0]).toMatchObject({ status: 'queued' });
       });
 
+      it('says the local crawler is not running while a crawl waits and no worker was seen in the last minute', async () => {
+        const idle = await api.get('/admin/crawls', adminHeaders);
+        expect(idle.data.worker_missing).toBe(false);
+
+        await api.post('/admin/crawls/mann-filter', {}, adminHeaders);
+        const unseen = await api.get('/admin/crawls', adminHeaders);
+        expect(unseen.data.worker_missing).toBe(true);
+
+        await store.beat(['MANN-FILTER'], new Date(Date.now() - 2 * 60_000));
+        const stale = await api.get('/admin/crawls', adminHeaders);
+        expect(stale.data.worker_missing).toBe(true);
+
+        await store.beat(['MANN-FILTER'], new Date());
+        const seen = await api.get('/admin/crawls', adminHeaders);
+        expect(seen.data.worker_missing).toBe(false);
+      });
+
       it('lets staff pause a crawl from the admin', async () => {
         await api.post('/admin/crawls/mann-filter', {}, adminHeaders);
 
