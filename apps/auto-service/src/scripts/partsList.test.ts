@@ -363,7 +363,7 @@ describe('Подобрать on a part page', () => {
       [...dialog.querySelectorAll('[data-part-link]')].map(
         (link) => link.textContent,
       ),
-    ).toEqual(['Mann-Filter HU 816 x, Масляный фильтр']);
+    ).toEqual(['Mann-Filter HU\u00a0816\u00a0x, Масляный фильтр']);
   });
 
   it('lets the visitor close the form and keep the part', () => {
