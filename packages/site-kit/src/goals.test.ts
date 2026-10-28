@@ -8,6 +8,11 @@ describe('GOALS', () => {
     expect(GOALS.purchase).toBe('purchase');
   });
 
+  it('names the catalogue search', () => {
+    expect(GOALS.search).toBe('search');
+    expect(GOALS.searchSuggestionPick).toBe('search_suggestion_pick');
+  });
+
   it('uses unique snake_case identifiers, the form GA4 key events are created with', () => {
     const ids = Object.values(GOALS);
     expect(new Set(ids).size).toBe(ids.length);
