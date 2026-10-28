@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+export const RESERVED_PARTS_SEGMENTS = [
+  'c',
+  'p',
+  'car',
+  'cart',
+  'search',
+  'prices',
+] as const;
+
 const slug = z.string().nullable().default(null);
 
 export const cataloguePlaceSchema = z.object({
