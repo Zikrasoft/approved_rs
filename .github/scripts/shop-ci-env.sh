@@ -2,7 +2,7 @@
 set -eu
 
 root="$(cd "$(dirname -- "$0")/../.." && pwd)"
-template=${1:-$root/infra/carlab-shop/production.env.example}
+template=${1:-$root/infra/auto-service-shop/production.env.example}
 
 awk -v placeholder=ci-placeholder '
   function split_line(line) {

@@ -5,7 +5,7 @@ browser: admin data entry, the supplier import, VIN, search, part pages, cart,
 order, and the Lead that order produces. Everything runs on your machine. No
 Telegram, no OpenAI, no GitHub dispatch.
 
-It does not touch the shared test stack (`podbor-carlab-shop`, ports 55432 and
+It does not touch the shared test stack (`podbor-auto-service-shop`, ports 55432 and
 58108). The demo uses its own containers on 55444 and 58444.
 
 ## Run it
@@ -15,19 +15,19 @@ pnpm dev:shop
 ```
 
 One command, on a fresh clone or an existing setup. It builds the CommonJS
-workspace packages, then `shop:prepare` (`apps/carlab-shop/scripts/shop-prepare.sh`):
+workspace packages, then `shop:prepare` (`apps/auto-service-shop/scripts/shop-prepare.sh`):
 
-- creates `apps/carlab-shop/.env` with the demo values below and random JWT and
+- creates `apps/auto-service-shop/.env` with the demo values below and random JWT and
   cookie secrets, only if the file is missing;
 - creates `apps/auto-service/.env.local` from `.env.example` if missing, and
   fills the Telegram placeholders (`TELEGRAM_BOT_TOKEN=1:fake`,
   `TELEGRAM_BOT_USERNAME=demo_crm_bot`, `TELEGRAM_GROUP_ID=-1`,
   `TELEGRAM_OWNER_ID=1`, `TELEGRAM_ADMIN_ID=2`) and `SHOP_OPEN=true` where a key
   is absent or empty, leaving every other line alone;
-- creates `apps/carlab-shop/.local-demo/supplier-overrides.json` (`{}`, see
+- creates `apps/auto-service-shop/.local-demo/supplier-overrides.json` (`{}`, see
   step 7);
 - starts Postgres (55444) and Typesense (58444) from
-  `apps/carlab-shop/docker-compose.demo.yml` (project `carlab-demo`, named
+  `apps/auto-service-shop/docker-compose.demo.yml` (project `carlab-demo`, named
   volumes), replacing `carlab-demo-pg` / `carlab-demo-ts` containers left over
   from a hand-run `docker run`;
 - drops and recreates the demo database once if it still carries the shop
@@ -43,16 +43,16 @@ containers stay up. The root `pnpm dev` starts none of this.
 Start over with an empty database:
 
 ```bash
-docker compose -f apps/carlab-shop/docker-compose.demo.yml down -v
+docker compose -f apps/auto-service-shop/docker-compose.demo.yml down -v
 ```
 
 The sections below are what the command does, for reference.
 
 ## 1. Postgres and Typesense
 
-`docker compose -f apps/carlab-shop/docker-compose.demo.yml up -d --wait`.
+`docker compose -f apps/auto-service-shop/docker-compose.demo.yml up -d --wait`.
 
-## 2. Backend environment (`apps/carlab-shop/.env`, gitignored)
+## 2. Backend environment (`apps/auto-service-shop/.env`, gitignored)
 
 | Name                      | Demo value                                            |
 | ------------------------- | ----------------------------------------------------- |
@@ -78,7 +78,7 @@ unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
 
 ## 3. Migrate and seed
 
-`pnpm db:migrate` and `pnpm seed:demo` in `apps/carlab-shop`. `seed:demo` is
+`pnpm db:migrate` and `pnpm seed:demo` in `apps/auto-service-shop`. `seed:demo` is
 idempotent per part: rerunning it keeps the admin, reuses the key, skips
 the catalogue once the demo suppliers exist, skips the batteries once the
 `batteries` Category exists, skips the filter variety once `oil-filters` has a
@@ -184,7 +184,7 @@ Suppliers page.
 
 ## 5. Backend
 
-`pnpm dev:shop` in `apps/carlab-shop` (`medusa develop`). Admin:
+`pnpm dev:shop` in `apps/auto-service-shop` (`medusa develop`). Admin:
 <http://localhost:9009/app>. Store API: <http://localhost:9009/store/...> with
 the `x-publishable-api-key` header.
 
@@ -210,7 +210,7 @@ from the environment (turbo passes only those two and `SHOP_OPEN` through), and
 without them it lists no part pages.
 
 To see production's closed beta, set `SHOP_OPEN=false` in
-`apps/auto-service/.env.local` (and in `apps/carlab-shop/.env` for the backend
+`apps/auto-service/.env.local` (and in `apps/auto-service-shop/.env` for the backend
 gate), restart, and open a page with `?dev=1` to turn the preview on, `?dev=0` to
 turn it off. See
 [Closed beta](deploy.md#closed-beta-the-preview-flag).
@@ -246,12 +246,12 @@ Useful pages:
 ## 7. Stale price and stock drop
 
 The overrides file is whatever `DEMO_SUPPLIER_OVERRIDES` in the backend's env
-names. `shop:prepare` points a new `apps/carlab-shop/.env` at
-`apps/carlab-shop/.local-demo/supplier-overrides.json`; an existing `.env`, or
+names. `shop:prepare` points a new `apps/auto-service-shop/.env` at
+`apps/auto-service-shop/.local-demo/supplier-overrides.json`; an existing `.env`, or
 a backend started with another env file, keeps its own path, so check it first:
 
 ```bash
-grep DEMO_SUPPLIER_OVERRIDES apps/carlab-shop/.env
+grep DEMO_SUPPLIER_OVERRIDES apps/auto-service-shop/.env
 ```
 
 The demo adapter rereads the file on every quote, so edits apply on the next
@@ -281,7 +281,7 @@ admin), created on the first save with a 20% markup; change the markup under
 search index picks it up at once; the static part pages show it after the next
 Publish (`publish:local`). The same write path is
 `saveManualOffer(scope, partIdentifierId, offer, actorId)` in
-`apps/carlab-shop/src/lib/suppliers/manual-offers.ts`, for a future file
+`apps/auto-service-shop/src/lib/suppliers/manual-offers.ts`, for a future file
 import. Over HTTP: `POST` / `DELETE`
 `/admin/part-identifiers/:id/manual-offer`, `GET
 /admin/part-identifiers/:id/offers`.
@@ -289,5 +289,5 @@ import. Over HTTP: `POST` / `DELETE`
 ## 9. Stop
 
 Ctrl-C `pnpm dev:shop`, then
-`docker compose -f apps/carlab-shop/docker-compose.demo.yml stop` (or `down -v`
+`docker compose -f apps/auto-service-shop/docker-compose.demo.yml stop` (or `down -v`
 to drop the data).

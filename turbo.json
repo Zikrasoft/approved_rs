@@ -14,7 +14,7 @@
       "cache": false
     },
     "dev:shop": {
-      "dependsOn": ["^build", "@podbor/carlab-shop#shop:prepare"],
+      "dependsOn": ["^build", "@podbor/auto-service-shop#shop:prepare"],
       "cache": false,
       "persistent": true
     },
@@ -39,7 +39,7 @@
         "CATALOGUE_SHRINK_ALLOWED"
       ]
     },
-    "@podbor/carlab-shop#build": {
+    "@podbor/auto-service-shop#build": {
       "dependsOn": ["^build"],
       "env": [
         "DATABASE_*",
@@ -52,7 +52,7 @@
         "PORT"
       ]
     },
-    "@podbor/carlab-shop#typecheck": {
+    "@podbor/auto-service-shop#typecheck": {
       "dependsOn": ["build"],
       "env": [
         "DATABASE_*",
@@ -65,7 +65,7 @@
         "PORT"
       ]
     },
-    "@podbor/carlab-shop#test": {
+    "@podbor/auto-service-shop#test": {
       "dependsOn": ["^build"],
       "env": [
         "DATABASE_*",

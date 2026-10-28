@@ -56,7 +56,7 @@ services:
       start_period: 20s
 
   medusa:
-    image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-carlab-shop}:${MEDUSA_TAG:?}
+    image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-auto-service-shop}:${MEDUSA_TAG:?}
     restart: unless-stopped
     logging: *logging
     mem_limit: 1536m

@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  SHOP_IMAGE: ghcr.io/zikrasoft/podbor-carlab-shop
+  SHOP_IMAGE: ghcr.io/zikrasoft/podbor-auto-service-shop
   ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12
 
 jobs:
@@ -29,12 +29,12 @@ jobs:
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
-      - uses: ./.github/actions/setup-carlab-shop-env
+      - uses: ./.github/actions/setup-auto-service-shop-env
       - run: pnpm typecheck
       - run: pnpm test
       - name: Shop migrations match the models
         run: |
-          docker compose -f apps/carlab-shop/docker-compose.test.yml exec -T postgres createdb -U postgres migration_drift
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres createdb -U postgres migration_drift
           DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/migration_drift sh .github/scripts/shop-migration-drift.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
@@ -51,15 +51,15 @@ jobs:
           node --experimental-strip-types .github/scripts/contact-placement.ts
           apps/approved-rs/dist/client apps/detailing/dist/client
 
-      - run: sh infra/carlab-shop/test/scripts.test.sh
-      - run: sh infra/carlab-shop/test/compose.test.sh
-      - run: sh infra/carlab-shop/test/crawler-role.test.sh
-      - run: sh infra/carlab-shop/test/harden-ssh.test.sh
+      - run: sh infra/auto-service-shop/test/scripts.test.sh
+      - run: sh infra/auto-service-shop/test/compose.test.sh
+      - run: sh infra/auto-service-shop/test/crawler-role.test.sh
+      - run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
-          .github/scripts/*.sh infra/carlab-shop/*.sh infra/carlab-shop/test/*.sh
+          .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
       - run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
 
   translate:
@@ -122,7 +122,7 @@ jobs:
           ref: ${{ needs.translate.outputs.sha }}
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
-      - uses: ./.github/actions/setup-carlab-shop-env
+      - uses: ./.github/actions/setup-auto-service-shop-env
       - run: pnpm test
 
       - id: scope
@@ -161,8 +161,8 @@ jobs:
                  .npmrc .node-version .pnpmfile.cjs \
                  .github/actions/setup-pnpm/action.yml; then
               reason='root build config changed'
-            elif [ "$app" = carlab-shop ] && ! git diff --quiet "$base" HEAD -- infra/carlab-shop; then
-              reason='infra/carlab-shop changed'
+            elif [ "$app" = auto-service-shop ] && ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
+              reason='infra/auto-service-shop changed'
             elif app_changed "$app" "$base"; then
               reason="changed since $base"
             else
@@ -179,7 +179,7 @@ jobs:
     if: >-
       needs.verify.result == 'success' &&
       (github.ref != 'refs/heads/main' ||
-       contains(fromJSON(needs.verify.outputs.changed), 'carlab-shop'))
+       contains(fromJSON(needs.verify.outputs.changed), 'auto-service-shop'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -195,7 +195,7 @@ jobs:
       - name: Build
         run: |
           docker buildx build --load \
-            --file infra/carlab-shop/Dockerfile \
+            --file infra/auto-service-shop/Dockerfile \
             --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             --tag "$SHOP_IMAGE:$SHA" \
             .
@@ -203,7 +203,7 @@ jobs:
 
       - name: Migrate a blank database and boot to healthy
         run: |
-          docker compose -f apps/carlab-shop/docker-compose.test.yml up -d --wait
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml up -d --wait
           sh .github/scripts/shop-ci-env.sh >"$RUNNER_TEMP/shop.env"
           docker run --rm --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA" \
             node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
@@ -223,13 +223,13 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
-          VPS_HOST: ${{ secrets.CARLAB_SHOP_VPS_HOST }}
-          VPS_USER: ${{ secrets.CARLAB_SHOP_VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.CARLAB_SHOP_VPS_SSH_KEY }}
-          VPS_KNOWN_HOSTS: ${{ secrets.CARLAB_SHOP_VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+          VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
           if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
-            echo "CARLAB_SHOP_VPS_* secrets are not set, nothing will deploy the image, so it is not pushed."
+            echo "AUTO_SERVICE_SHOP_VPS_* secrets are not set, nothing will deploy the image, so it is not pushed."
             exit 0
           fi
           echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
@@ -240,7 +240,7 @@ jobs:
     if: >-
       needs.shop-image.result == 'success' &&
       github.ref == 'refs/heads/main' &&
-      contains(fromJSON(needs.verify.outputs.changed), 'carlab-shop')
+      contains(fromJSON(needs.verify.outputs.changed), 'auto-service-shop')
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -250,16 +250,16 @@ jobs:
       deployed: ${{ steps.result.outputs.deployed }}
     env:
       SHA: ${{ needs.translate.outputs.sha }}
-      VPS_HOST: ${{ secrets.CARLAB_SHOP_VPS_HOST }}
-      VPS_USER: ${{ secrets.CARLAB_SHOP_VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.CARLAB_SHOP_VPS_SSH_KEY }}
-      VPS_KNOWN_HOSTS: ${{ secrets.CARLAB_SHOP_VPS_KNOWN_HOSTS }}
+      VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+      VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+      VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
     steps:
       - id: guard
         run: |
           if [ -z "$VPS_HOST" ] || [ -z "$VPS_USER" ] || [ -z "$VPS_SSH_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "CARLAB_SHOP_VPS_* secrets are not set, skipping the shop deploy."
+            echo "AUTO_SERVICE_SHOP_VPS_* secrets are not set, skipping the shop deploy."
           else
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
@@ -279,7 +279,7 @@ jobs:
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |
-          tar -C infra/carlab-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh move-static-to-s3.sh \
+          tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh move-static-to-s3.sh \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'
@@ -307,7 +307,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ needs.translate.outputs.sha }}
-          APP: carlab-shop
+          APP: auto-service-shop
         run: |
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
               -f sha="$SHA" -F force=true \

@@ -29,7 +29,7 @@ trap 'rmdir .deploy.lock 2>/dev/null || true' EXIT
 previous=$(sed -n 's/^MEDUSA_TAG=//p' .env)
 api_host=$(sed -n 's/^API_HOST=//p' .env)
 image=$(sed -n 's/^MEDUSA_IMAGE=//p' .env)
-image=${image:-ghcr.io/zikrasoft/podbor-carlab-shop}
+image=${image:-ghcr.io/zikrasoft/podbor-auto-service-shop}
 export MEDUSA_TAG="$tag"
 
 echo "==> Image $tag"

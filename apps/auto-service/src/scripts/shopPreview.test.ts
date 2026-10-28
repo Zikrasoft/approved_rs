@@ -31,7 +31,7 @@ describe('shopPreview', () => {
 
     expect(shopPreview('?q=filter&dev=1', jar)).toBe(true);
     expect(shopPreview('', jar)).toBe(true);
-    expect(jar.cookie).toBe('carlab_shop_preview=1');
+    expect(jar.cookie).toBe('auto_service_shop_preview=1');
     expect(shopPreview('?dev=0', jar)).toBe(false);
     expect(shopPreview('', jar)).toBe(false);
   });

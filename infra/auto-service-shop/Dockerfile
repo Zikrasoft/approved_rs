@@ -15,8 +15,8 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN DATABASE_URL=postgres://build@localhost/build JWT_SECRET=build COOKIE_SECRET=build \
     STORE_CORS=http://build ADMIN_CORS=http://build AUTH_CORS=http://build \
-    pnpm --filter "@podbor/carlab-shop..." build
-RUN pnpm deploy --filter @podbor/carlab-shop --prod --legacy /prod
+    pnpm --filter "@podbor/auto-service-shop..." build
+RUN pnpm deploy --filter @podbor/auto-service-shop --prod --legacy /prod
 
 FROM node:24.21.0-alpine
 
@@ -24,8 +24,8 @@ WORKDIR /server
 ENV NODE_ENV=production MEDUSA_DISABLE_TELEMETRY=1 PORT=9000
 
 COPY --from=builder --chown=node:node /prod/node_modules ./node_modules
-COPY --from=builder --chown=node:node /repo/apps/carlab-shop/.medusa/server ./
-COPY --from=builder --chown=node:node /repo/apps/carlab-shop/assets ./assets
+COPY --from=builder --chown=node:node /repo/apps/auto-service-shop/.medusa/server ./
+COPY --from=builder --chown=node:node /repo/apps/auto-service-shop/assets ./assets
 
 RUN node -e "require('typesense'); require('zod'); require('@sentry/node')" \
   && ! node -e "require.resolve('ts-node')" 2>/dev/null

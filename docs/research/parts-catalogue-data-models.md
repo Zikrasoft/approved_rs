@@ -280,7 +280,7 @@ data has `BrandNo` 9999, supplier data carries the supplier's `BrandNo`.
 ## 6. Gap table
 
 Ours = ADR-0040 as decided. The current code
-(`apps/carlab-shop/src/modules/{part,vehicle,vin-lookup}/models/*.ts`) still
+(`apps/auto-service-shop/src/modules/{part,vehicle,vin-lookup}/models/*.ts`) still
 predates it: separate modules, free-text `make`/`model`/`engine_code` on
 `vehicle`, no Category, an identifier enum of `ktype` and `oem-type-code`,
 `fitment.part_id` as text, and `source` / `status` (`active`, `rejected`) on

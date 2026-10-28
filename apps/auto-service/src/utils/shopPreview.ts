@@ -1,4 +1,4 @@
-export const PREVIEW_COOKIE = 'carlab_shop_preview';
+export const PREVIEW_COOKIE = 'auto_service_shop_preview';
 export const PREVIEW_PARAM = 'dev';
 export const PREVIEW_ON = '1';
 export const PREVIEW_OFF = '0';

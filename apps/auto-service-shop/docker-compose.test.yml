@@ -1,4 +1,4 @@
-name: podbor-carlab-shop
+name: podbor-auto-service-shop
 services:
   postgres:
     image: postgres:16.15-alpine

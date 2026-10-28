@@ -121,15 +121,15 @@ deploy moves the tag.
 
 The list is assembled per `apps/*/` like this:
 
-| What `scope` sees                                                  | Decision |
-| ------------------------------------------------------------------ | -------- |
-| the `deployed/<app>` tag does not exist yet                        | deploy   |
-| the tag is not an ancestor of `HEAD` (force-push, branch rollback) | deploy   |
-| a root build file changed (list below)                             | deploy   |
-| `turbo --filter="...[<tag>]"` names the package as changed         | deploy   |
-| turbo failed, or its output could not be parsed                    | deploy   |
-| `apps/carlab-shop`: something under `infra/carlab-shop/` changed   | deploy   |
-| turbo affirmatively said the package is not among the changed ones | skip     |
+| What `scope` sees                                                            | Decision |
+| ---------------------------------------------------------------------------- | -------- |
+| the `deployed/<app>` tag does not exist yet                                  | deploy   |
+| the tag is not an ancestor of `HEAD` (force-push, branch rollback)           | deploy   |
+| a root build file changed (list below)                                       | deploy   |
+| `turbo --filter="...[<tag>]"` names the package as changed                   | deploy   |
+| turbo failed, or its output could not be parsed                              | deploy   |
+| `apps/auto-service-shop`: something under `infra/auto-service-shop/` changed | deploy   |
+| turbo affirmatively said the package is not among the changed ones           | skip     |
 
 **Any uncertainty answers "deploy"**, and the `...[<tag>]` filter has leading dots,
 so an edit in `packages/*` ships all three sites. Why that is, and why the filter
@@ -475,24 +475,24 @@ lived that way for twelve days. To check by hand:
 
 Settings → Secrets and variables → Actions:
 
-| Secret                           | For what                                       | Where to get it                                                |
-| -------------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `OPENAI_API_KEY`                 | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                  |
-| `VERCEL_TOKEN`                   | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`                  | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`           |
-| `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                     |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
-| `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                            |
-| `CARLAB_SHOP_VPS_HOST`           | the shop deploy (the server's static IPv4)     | Lightsail console → Networking                                 |
-| `CARLAB_SHOP_VPS_USER`           | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
-| `CARLAB_SHOP_VPS_SSH_KEY`        | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
-| `CARLAB_SHOP_VPS_KNOWN_HOSTS`    | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
+| Secret                              | For what                                       | Where to get it                                                |
+| ----------------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| `OPENAI_API_KEY`                    | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                  |
+| `VERCEL_TOKEN`                      | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID`                     | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`           |
+| `VERCEL_PROJECT_ID`                 | the approved.rs deploy                         | Project Settings → General of that project                     |
+| `VERCEL_PROJECT_ID_AUTO_SERVICE`    | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
+| `VERCEL_PROJECT_ID_DETAILING`       | the details.rs deploy                          | the same, on the details.rs project                            |
+| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's static IPv4)     | Lightsail console → Networking                                 |
+| `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
+| `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
+| `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
 
-`CARLAB_SHOP_VPS_*` are **repository** secrets, not `production` environment
+`AUTO_SERVICE_SHOP_VPS_*` are **repository** secrets, not `production` environment
 secrets: `shop-image` has no environment, and with environment secrets it would not
 push the image while `deploy-shop` would try to pull a tag that does not exist.
 Until all four are set, `shop-image` does not push and `deploy-shop`'s `guard` step
-prints "`CARLAB_SHOP_VPS_* secrets are not set, skipping the shop deploy.`", and the
+prints "`AUTO_SERVICE_SHOP_VPS_* secrets are not set, skipping the shop deploy.`", and the
 workflow stays green.
 
 > **Careful: an unset `VERCEL_PROJECT_ID_*` is not highlighted anywhere.** The
@@ -518,20 +518,20 @@ workflow stays green.
 `GITHUB_TOKEN` is granted per job rather than for the whole file. Four jobs hold
 `contents: write`, for two different reasons:
 
-| Job                 | `permissions`                       | Why exactly that much                                                                    |
-| ------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `check`             | `contents: read`                    | checkout only                                                                            |
-| `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                     |
-| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history          |
-| `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-carlab-shop:<sha>` to GHCR                              |
-| `deploy-shop`       | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo |
-| `record-shop`       | `contents: write`                   | moves `deployed/carlab-shop` after a successful `deploy-shop`, a separate job for that   |
-| `deploy`            | `contents: write`                   | moves `refs/tags/deployed/approved-rs` after a successful deploy                         |
-| `deploy-brand-site` | `contents: write`                   | the same for `deployed/detailing` and `deployed/auto-service`                            |
+| Job                 | `permissions`                       | Why exactly that much                                                                        |
+| ------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| `check`             | `contents: read`                    | checkout only                                                                                |
+| `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                         |
+| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
+| `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
+| `deploy-shop`       | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo     |
+| `record-shop`       | `contents: write`                   | moves `deployed/auto-service-shop` after a successful `deploy-shop`, a separate job for that |
+| `deploy`            | `contents: write`                   | moves `refs/tags/deployed/approved-rs` after a successful deploy                             |
+| `deploy-brand-site` | `contents: write`                   | the same for `deployed/detailing` and `deployed/auto-service`                                |
 
 Write access for `translate` and write access for the deploy jobs are different
 things: the first changes a branch's contents, the second touches only housekeeping
-tags. Moving `deployed/carlab-shop` is its own `record-shop` job on purpose:
+tags. Moving `deployed/auto-service-shop` is its own `record-shop` job on purpose:
 `deploy-shop` sends its `GITHUB_TOKEN` to the server (a one-shot GHCR login), and a
 token that can write to the repository has no business being there. An accepted
 risk: that same token also carries `contents: read`, so while the job is alive the
@@ -557,14 +557,14 @@ to do with them:
 
 ## The shop backend: Medusa on a VPS (`api.carlab.rs`)
 
-`apps/carlab-shop` is not on Vercel. It is docker compose on a single AWS Lightsail
+`apps/auto-service-shop` is not on Vercel. It is docker compose on a single AWS Lightsail
 instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
 transfer, $24 a month), in the same region as the shop's S3 buckets, all
-described in `infra/carlab-shop/`:
+described in `infra/auto-service-shop/`:
 
 | File                                     | What it is                                                                                                                                                           |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                     |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
 | `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB, basic_auth on the admin host                                         |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
@@ -604,7 +604,7 @@ server, from the Supplier's Import button, over what the crawler stored.
 
 ### The crawler on the owner's Mac
 
-Once, in `apps/carlab-shop`:
+Once, in `apps/auto-service-shop`:
 
 ```bash
 pnpm exec playwright install chromium
@@ -627,7 +627,7 @@ every migration and `restore.sh` after a restore, from `CRAWLER_DB_PASSWORD` in
 log in and `select`, `insert` and `update` `crawl_run` and `crawl_page`, and
 nothing else: no other table, no delete, no DDL. A changed password applies at the
 next deploy. Unset, the step says so and the crawler has no role. Checked against
-a live Postgres by `infra/carlab-shop/test/crawler-role.test.sh`. `restore.sh`
+a live Postgres by `infra/auto-service-shop/test/crawler-role.test.sh`. `restore.sh`
 restores with `--no-privileges`, so a dump never needs the role to exist first.
 
 Postgres has no host port and sits on the internal `data` network at a fixed
@@ -637,14 +637,14 @@ user. `harden-ssh.sh` creates that user with no shell and an sshd
 `Match User crawler` block: local forwarding to `10.200.0.10:5432` and nothing
 else, no TTY, no command, no remote listening. Everyone else, `deploy` and CI's
 key included, keeps `AllowTcpForwarding no`. Checked by
-`infra/carlab-shop/test/harden-ssh.test.sh`.
+`infra/auto-service-shop/test/harden-ssh.test.sh`.
 
 Once, on the Mac, make a key for the tunnel and copy its public half, with the
 script, to the Lightsail server. The private key never leaves the Mac:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/carlab-crawler -C carlab-crawler
-scp infra/carlab-shop/harden-ssh.sh ~/.ssh/carlab-crawler.pub deploy@<IPv4>:/tmp/
+scp infra/auto-service-shop/harden-ssh.sh ~/.ssh/carlab-crawler.pub deploy@<IPv4>:/tmp/
 ```
 
 Then, from a `deploy` session on the server, rerun the hardening with that file
@@ -669,7 +669,7 @@ postgres, typesense and medusa restart with it once. In a second terminal, start
 the worker and keep the Mac awake while it runs:
 
 ```bash
-caffeinate -i pnpm --filter @podbor/carlab-shop crawler
+caffeinate -i pnpm --filter @podbor/auto-service-shop crawler
 ```
 
 It builds the workspace packages it needs, then waits for a crawl queued in the
@@ -704,7 +704,7 @@ is retried once its 10 minute lease runs out.
 - Only Caddy is published outward: 80, 443, 443/udp. Medusa, Postgres and Typesense
   have no host ports; Postgres and Typesense sit on an internal network with no
   route to the internet, and the storefront reaches search only through Medusa's
-  store routes. Checked by `infra/carlab-shop/test/compose.test.sh`.
+  store routes. Checked by `infra/auto-service-shop/test/compose.test.sh`.
 - IPv6 reaches Caddy directly: the `edge` network is dual-stack (`enable_ipv6`, ULA
   `fd00:ca7:1ab::/64`) and `userland-proxy` is disabled in `daemon.json`. Never turn
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
@@ -798,7 +798,7 @@ carlab_static` once the images show.
 
 ### `.env`
 
-The template is `infra/carlab-shop/production.env.example`, and `src/lib/env.ts`
+The template is `infra/auto-service-shop/production.env.example`, and `src/lib/env.ts`
 validates everything at startup. CI boots the image on the same template
 (`.github/scripts/shop-ci-env.sh` fills every empty value with a placeholder and
 swaps in the test stack), and `env.spec.ts` fails when the filled template does
@@ -850,7 +850,7 @@ number gets its CI value in that script. The non-obvious parts:
   not among them. The API host answers 404 on `/admin` and `/auth/user`, so
   staff routes exist only behind the admin host's basic_auth; the storefront
   calls only `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
-  `infra/carlab-shop/test/compose.test.sh`.
+  `infra/auto-service-shop/test/compose.test.sh`.
 - `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
   There is no nightly run: cart and checkout quote price and stock live, and a
@@ -922,7 +922,7 @@ open build sends the preview header itself, so it builds with prices even if
 the backend is still closed.
 
 A closed-beta tester opens any carlab.rs page with `?dev=1`. The browser keeps
-the `carlab_shop_preview=1` cookie for a year, until a page is opened with
+the `auto_service_shop_preview=1` cookie for a year, until a page is opened with
 `?dev=0`. With the flag the visitor sees the shop as it will look open: the
 header and the parts index show the cart; listings, car and model pages, kits
 (with their «в корзину» button), add-on prices and the price filter on static
@@ -942,16 +942,16 @@ carlab.rs.
 ### How it ships
 
 1. `shop-image` builds the image from the SHA after `translate`, migrates an empty
-   database on the CI runner (`apps/carlab-shop/docker-compose.test.yml`) with it,
+   database on the CI runner (`apps/auto-service-shop/docker-compose.test.yml`) with it,
    and boots it to `healthy`. On branches that is all. On `main`, and only if
-   `carlab-shop` is in the `scope` list, it pushes
-   `ghcr.io/zikrasoft/podbor-carlab-shop:<sha>`, and only when all four
-   `CARLAB_SHOP_VPS_*` secrets are set; otherwise the step says so and finishes
+   `auto-service-shop` is in the `scope` list, it pushes
+   `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>`, and only when all four
+   `AUTO_SERVICE_SHOP_VPS_*` secrets are set; otherwise the step says so and finishes
    without pushing.
 2. `deploy-shop` tars the stack files over ssh into `/srv/carlab`, logs the server
    into GHCR with the job's one-shot token (piped on stdin, never on a command
    line), runs `deploy.sh <sha>` and logs out (including on failure). This job
-   **does not move** the `deployed/carlab-shop` tag: the next one, `record-shop`,
+   **does not move** the `deployed/auto-service-shop` tag: the next one, `record-shop`,
    does, with its own `contents: write`; the token `deploy-shop` sends to the
    server cannot write to the repository.
 3. `deploy.sh`: refuses without `.env` and for anything that is not a 40-character
@@ -964,9 +964,9 @@ carlab.rs.
    see below); only after both succeed does `MEDUSA_TAG` in `.env` change, with the
    old one going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
    `https://api.carlab.rs/health/ready`. It prints stage names and the tag, never a value
-   from `.env` (`infra/carlab-shop/test/scripts.test.sh` plants a canary secret and
+   from `.env` (`infra/auto-service-shop/test/scripts.test.sh` plants a canary secret and
    fails if any script prints it).
-4. `record-shop` moves `deployed/carlab-shop` only if `deploy-shop` actually shipped
+4. `record-shop` moves `deployed/auto-service-shop` only if `deploy-shop` actually shipped
    the image (`outputs.deployed == 'true'`).
 5. `deploy-brand-site` waits for `deploy-shop` and is held back only if it failed, so
    carlab.rs never prerenders against a backend that failed to ship. approved.rs
@@ -992,11 +992,11 @@ carlab.rs.
    build; remove it afterwards. Part pages list only published numbers, the same
    ones search finds, so a CI deploy and a Publish build the same catalogue.
 
-The production seed (`apps/carlab-shop/src/scripts/seed-production.ts`) runs on
+The production seed (`apps/auto-service-shop/src/scripts/seed-production.ts`) runs on
 every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
 (store, the `CarLab parts shop` sales channel, the Serbia region), the seven
 Categories carlab.rs's old `/{locale}/parts/{slug}/` pages 301 to, with their
-Russian name and text and the old picture from `apps/carlab-shop/assets/categories`
+Russian name and text and the old picture from `apps/auto-service-shop/assets/categories`
 (the image copies that directory to `/server/assets`), and «Аккумуляторы»
 (`batteries`) with its nine fields, their options and the battery registration
 service (label, price, note), from the same definitions the demo seed uses.
@@ -1006,7 +1006,7 @@ field or option a person has edited (`updated_by` set) is never touched again; a
 unedited one gets its seeded values and missing image back.
 
 It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
-`apps/carlab-shop/src/lib/production-seed.ts`, one entry per crawled site: the
+`apps/auto-service-shop/src/lib/production-seed.ts`, one entry per crawled site: the
 Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
 mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
@@ -1023,16 +1023,16 @@ hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
 never run in production. `seed-demo.ts` ends with the production seed, so a local
 demo database carries the same crawled Suppliers, Brands and aliases.
 
-`scope` treats `apps/carlab-shop` like any other app, plus one rule: a change under
-`infra/carlab-shop/` redeploys it, because turbo cannot see files outside the
+`scope` treats `apps/auto-service-shop` like any other app, plus one rule: a change under
+`infra/auto-service-shop/` redeploys it, because turbo cannot see files outside the
 workspace.
 
 CI places the stack files before `deploy.sh` and outside its lock: if a migration
 fails, the new `docker-compose.yml` and `Caddyfile` sit next to the old image, and
 the next restart or rollback will bring the old image up with them.
 
-Until the shop's first deploy (the `CARLAB_SHOP_VPS_*` secrets) there is no
-`deployed/carlab-shop` tag, and every push to `main` builds, migrates and boots the
+Until the shop's first deploy (the `AUTO_SERVICE_SHOP_VPS_*` secrets) there is no
+`deployed/auto-service-shop` tag, and every push to `main` builds, migrates and boots the
 image while carlab.rs waits for `deploy-shop`. That is expected, not a `scope` bug.
 
 ### Rollback
@@ -1050,7 +1050,7 @@ restore the `db-<stamp>-pre-deploy.dump` that deploy wrote just before migrating
 instead: Medusa's migrations are not guaranteed to be backwards compatible, and an
 old image against a schema already migrated forward may fail to boot or corrupt
 data. The shop's own migrations stay additive for the same reason (AGENTS.md). After a manual rollback the
-`deployed/carlab-shop` tag points at a version that is not in production; delete it
+`deployed/auto-service-shop` tag points at a version that is not in production; delete it
 once the fix is in `main`.
 
 ### Backup and restore
@@ -1068,7 +1068,7 @@ another region than the instance, with the endpoint
 `/srv/carlab/.env.backup` names one: `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`
 (optionally `bucket/path`), `BACKUP_S3_ACCESS_KEY_ID`,
 `BACKUP_S3_SECRET_ACCESS_KEY` and, where the provider wants one,
-`BACKUP_S3_REGION` (template: `infra/carlab-shop/backup.env.example`). The keys
+`BACKUP_S3_REGION` (template: `infra/auto-service-shop/backup.env.example`). The keys
 live in their own file rather than in `.env` because compose hands `.env` to the
 Medusa container, and a compromised backend must not be able to delete its own
 backups. The upload runs in a pinned `rclone/rclone` container, so the host needs
@@ -1112,7 +1112,7 @@ and how long it took.
 
 ```bash
 mkdir -m 700 ~/carlab-drill && cd ~/carlab-drill
-cp <repo>/infra/carlab-shop/backup.sh .
+cp <repo>/infra/auto-service-shop/backup.sh .
 # write .env.backup here (mode 600) with the same values as /srv/carlab/.env.backup
 BACKUP_DIR=$PWD/dumps ./backup.sh fetch                 # pick the newest stamp
 BACKUP_DIR=$PWD/dumps ./backup.sh fetch <stamp>
@@ -1144,7 +1144,7 @@ from Sentry. Both accounts are the owner's; the code only reads one variable.
 
 **Two health routes.** `/health` is Medusa's own and answers `OK` while the
 process runs, whatever the database does. `/health/ready`
-(`apps/carlab-shop/src/api/health/ready/route.ts`) runs `select 1` on Postgres
+(`apps/auto-service-shop/src/api/health/ready/route.ts`) runs `select 1` on Postgres
 and asks Typesense's `/health` (giving it 3 seconds), and answers
 `200 {"status":"ok"}` or `503 {"status":"unavailable"}`. The response never says
 which one failed or why; the container log does:
@@ -1172,7 +1172,7 @@ one interval; `docker compose start typesense` produces the "up" one.
 
 **Sentry.** Create a Sentry project for the platform Node.js (Express), copy
 its DSN into `/srv/carlab/.env` as `SENTRY_DSN=`, and `docker compose up -d
-medusa`. `apps/carlab-shop/instrumentation.ts` starts the SDK when Medusa
+medusa`. `apps/auto-service-shop/instrumentation.ts` starts the SDK when Medusa
 boots; with `SENTRY_DSN` empty it does nothing and `captureException` is a
 no-op. What reaches Sentry: every request that ends in a 5xx (the shop's error
 handler in `src/lib/admin-errors.ts`; 4xx never) and uncaught exceptions. What
@@ -1191,17 +1191,17 @@ project.
 ### Checking the stack locally
 
 The same compose comes up on your own machine with no separate override, through
-variables in `infra/carlab-shop/.env` (covered by `.gitignore`'s `.env`):
+variables in `infra/auto-service-shop/.env` (covered by `.gitignore`'s `.env`):
 `API_HOST=localhost`, `HTTP_PORT=8080`, `HTTPS_PORT=8443`,
-`MEDUSA_IMAGE=podbor-carlab-shop`, `MEDUSA_TAG=local`, plus the secrets. The image
-comes from `docker build -f infra/carlab-shop/Dockerfile -t podbor-carlab-shop:local .`.
+`MEDUSA_IMAGE=podbor-auto-service-shop`, `MEDUSA_TAG=local`, plus the secrets. The image
+comes from `docker build -f infra/auto-service-shop/Dockerfile -t podbor-auto-service-shop:local .`.
 Check with `curl -k https://localhost:8443/health/ready`.
 
 ### Easy to miss
 
 - **The admin opens in Russian.** Medusa keeps the admin language in the
   browser (the `lng` cookie and `localStorage` key), not on the user, and falls
-  back to English. `adminLanguage` in `apps/carlab-shop/src/lib/admin-language.ts`,
+  back to English. `adminLanguage` in `apps/auto-service-shop/src/lib/admin-language.ts`,
   wired through `admin.vite` in `medusa-config.ts`, sets `ru` once per browser;
   a language picked later under Profile → Language sticks.
 - **`.env` is read literally.** `deploy.sh` pulls values out of `.env` with `sed`
@@ -1218,7 +1218,7 @@ Check with `curl -k https://localhost:8443/health/ready`.
   alike (they are two separate lists in the Networking tab).
 - **Use the static IP everywhere.** A Lightsail instance without a static IP gets a
   new public IPv4 on every stop and start. Attach one before writing DNS records or
-  `CARLAB_SHOP_VPS_HOST`; it is free while attached and billed once detached.
+  `AUTO_SERVICE_SHOP_VPS_HOST`; it is free while attached and billed once detached.
 - **The browser SSH console stops working after hardening.** Lightsail's
   "Connect using SSH" logs in as `ubuntu`, and `harden-ssh.sh` allows only `deploy`
   and `crawler`. Keep a working `deploy` key; if it is lost, recover through a
@@ -1274,7 +1274,7 @@ Check with `curl -k https://localhost:8443/health/ready`.
    rules on both lists and automatic snapshots on.
 
 2. **Bootstrap.** Log in as `ubuntu` with your key, upload
-   `infra/carlab-shop/bootstrap-host.sh` and `infra/carlab-shop/harden-ssh.sh`, and
+   `infra/auto-service-shop/bootstrap-host.sh` and `infra/auto-service-shop/harden-ssh.sh`, and
    run `sudo sh bootstrap-host.sh`: it gives `deploy` the keys of the user who ran
    `sudo`. Open a separate session, `ssh deploy@<IPv4>`, and **keep it open** until
    key-based login has been re-verified after hardening. From it, run
@@ -1287,7 +1287,7 @@ Check with `curl -k https://localhost:8443/health/ready`.
    AAAA records at the instance's IPv6. If IPv6 does not work at the host or on the
    network, remove the AAAA records.
    Done: `dig +short` and `dig +short AAAA` return them for both names.
-4. **`.env` on the server.** Copy `infra/carlab-shop/production.env.example` to
+4. **`.env` on the server.** Copy `infra/auto-service-shop/production.env.example` to
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,
    the admin's basic_auth hash as in [`.env`](#env)), then
    `chmod 600 /srv/carlab/.env`. Give staff the basic_auth user and password
@@ -1301,20 +1301,20 @@ Check with `curl -k https://localhost:8443/health/ready`.
 6. **Backup bucket.** Create a private AWS S3 bucket in another region than the
    instance (or at Backblaze B2 or Cloudflare R2) and an IAM user whose key is
    limited to that bucket, separate from the shop's.
-   Copy `infra/carlab-shop/backup.env.example` to `/srv/carlab/.env.backup`, fill
+   Copy `infra/auto-service-shop/backup.env.example` to `/srv/carlab/.env.backup`, fill
    it in, `chmod 600` it.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env.backup'` prints `600`.
 7. **CI secrets.** Generate CI's ssh key (`ssh-keygen -t ed25519`), restrict the
    public half on the server (`restrict` in `authorized_keys`), obtain
    `known_hosts` (`ssh-keyscan -t ed25519 <IPv4>`) and **verify the fingerprint**
-   separately. Record `CARLAB_SHOP_VPS_USER`, `CARLAB_SHOP_VPS_SSH_KEY` and
-   `CARLAB_SHOP_VPS_KNOWN_HOSTS` in the **repository's** secrets, and
-   `CARLAB_SHOP_VPS_HOST` **last**: with it in place, the next push to `main`
+   separately. Record `AUTO_SERVICE_SHOP_VPS_USER`, `AUTO_SERVICE_SHOP_VPS_SSH_KEY` and
+   `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` in the **repository's** secrets, and
+   `AUTO_SERVICE_SHOP_VPS_HOST` **last**: with it in place, the next push to `main`
    deploys.
    Done: all four secrets are visible in Settings → Secrets and variables → Actions.
 8. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
    package in GHCR: linked to the repository, Actions read access configured.
-   Done: `deploy-shop` is green, `record-shop` moved `deployed/carlab-shop`, and
+   Done: `deploy-shop` is green, `record-shop` moved `deployed/auto-service-shop`, and
    `https://api.carlab.rs/health/ready` answers 200.
 9. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in

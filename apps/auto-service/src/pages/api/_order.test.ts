@@ -118,7 +118,10 @@ describe('POST /api/order', () => {
   it('passes the preview flag of a closed-beta visitor on to the shop', async () => {
     answer(200, { order: { id: 'order_1', display_id: 42 } });
 
-    const response = await checkout({}, { cookie: 'carlab_shop_preview=1' });
+    const response = await checkout(
+      {},
+      { cookie: 'auto_service_shop_preview=1' },
+    );
 
     expect(location(response)).toContain('notice=ordered');
     const [, init] = backend.mock.calls[0] as [string, RequestInit];

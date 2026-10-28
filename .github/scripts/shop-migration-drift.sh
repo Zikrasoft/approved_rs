@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-cd "$(dirname -- "$0")/../../apps/carlab-shop"
+cd "$(dirname -- "$0")/../../apps/auto-service-shop"
 
 pnpm exec medusa db:migrate --skip-links --skip-search --skip-scripts
 pnpm exec medusa db:generate catalog supplier publish vin_lookup

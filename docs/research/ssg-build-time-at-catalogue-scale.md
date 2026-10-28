@@ -10,7 +10,7 @@ is the size of the build output and of the upload, not the render time.
 
 ## Setup
 
-- The `apps/auto-service` storefront on `carlab-shop` (Astro 7.2.10,
+- The `apps/auto-service` storefront on `auto-service-shop` (Astro 7.2.10,
   `@astrojs/vercel` 11.0.9, `output: 'static'`).
 - A throwaway prerendered copy of `src/pages/[locale]/shop/[id].astro`: the same
   `Shell`, `PageHero` and variant/offer table markup, and the same

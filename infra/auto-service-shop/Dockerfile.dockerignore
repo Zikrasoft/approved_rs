@@ -7,7 +7,7 @@
 **/coverage
 **/.env
 **/.env.*
-apps/carlab-shop/static
+apps/auto-service-shop/static
 .git
 .claude
 .superpowers

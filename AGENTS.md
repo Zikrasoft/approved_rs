@@ -12,14 +12,14 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
 apps/auto-service/    CarLab, the car service site: carlab.rs
-apps/carlab-shop/     the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
-infra/carlab-shop/    its production: image, compose (postgres, typesense, medusa, caddy), host scripts; one VPS, docs/guides/deploy.md
+apps/auto-service-shop/     the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
+infra/auto-service-shop/    its production: image, compose (postgres, typesense, medusa, caddy), host scripts; one VPS, docs/guides/deploy.md
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address
-packages/catalog-contract/ what carlab-shop and the carlab.rs storefront agree on: part numbers, response schemas, attributes, the ambiguity rule (dual ESM/CJS)
+packages/catalog-contract/ what auto-service-shop and the carlab.rs storefront agree on: part numbers, response schemas, attributes, the ambiguity rule (dual ESM/CJS)
 ```
 
 A package's contents are an `ls` away and go stale in a document, so this lists
@@ -201,7 +201,7 @@ Approved's trust/verification semantics.
   package root: the root barrel pulls zod, date-fns and the Telegram client
   into the browser bundle.
 - **A package built for a CommonJS consumer ships a CommonJS build behind a
-  `require` condition.** `apps/carlab-shop` is CommonJS and consumes
+  `require` condition.** `apps/auto-service-shop` is CommonJS and consumes
   `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
   `./translate/core` and `./section`, and `@podbor/lead-crm`'s
   `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy` and
@@ -506,7 +506,7 @@ a commit but cannot run the review itself.
 
 ## Shop migrations
 
-`apps/carlab-shop` migrates its Postgres while the previous image is still
+`apps/auto-service-shop` migrates its Postgres while the previous image is still
 serving, and a rollback brings that image back over the new schema (deploy
 order in `docs/guides/deploy.md`). So every shop migration is **additive**:
 add a column nullable or with a default, add a table or an index. A rename or a

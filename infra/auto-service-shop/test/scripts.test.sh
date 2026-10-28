@@ -128,7 +128,7 @@ expect 'pull, migrate, seed, up, reload and health run in order on the new tag' 
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
-  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-carlab-shop --format {{.Tag}}"
+  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-auto-service-shop --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
@@ -150,7 +150,7 @@ stage
 IMAGE_TAGS="$NEW $OLD $OLDER <none>"
 export IMAGE_TAGS
 expect 'a deploy with old images on the host succeeds' run deploy.sh "$NEW"
-expect 'an image older than the previous one is removed' grep -qxF "docker[$NEW] image rm ghcr.io/zikrasoft/podbor-carlab-shop:$OLDER" "$LOG"
+expect 'an image older than the previous one is removed' grep -qxF "docker[$NEW] image rm ghcr.io/zikrasoft/podbor-auto-service-shop:$OLDER" "$LOG"
 refuse 'the live and the previous image are kept' grep -Eq "image rm .*($NEW|$OLD)" "$LOG"
 refuse 'an untagged image is not addressed by tag' grep -q 'image rm .*<none>' "$LOG"
 

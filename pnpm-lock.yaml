@@ -258,7 +258,7 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
 
-  apps/carlab-shop:
+  apps/auto-service-shop:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: 3.1152.0

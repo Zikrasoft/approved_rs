@@ -3,7 +3,7 @@
 Research date: **2026-10-25**. Two questions for issue #399 (catalogue
 adapters for the four sites the owner approved in #396: MANN-FILTER, FILTRON,
 bilstein group partsfinder, VARTA). The owner's decisions on that issue fix the
-shape: a separate `crawler` container in `infra/carlab-shop` compose, raw pages
+shape: a separate `crawler` container in `infra/auto-service-shop` compose, raw pages
 stored in Postgres, resumable after a failure, started by a button in the shop
 admin that shows progress, images kept as their original URL, and each site's
 Supplier adapter ([ADR-0043](../adr/0043-supplier-adapters-catalogue-import-page-per-brand-number.md))
@@ -192,7 +192,7 @@ version, power and engine capacity) and Finland's Traficom register
   raw size [P]
   ([PostgreSQL TOAST](https://www.postgresql.org/docs/current/storage-toast.html)).
   The shop runs `postgres:16.15-alpine` [P,
-  `infra/carlab-shop/docker-compose.yml`], so `lz4` is available.
+  `infra/auto-service-shop/docker-compose.yml`], so `lz4` is available.
 - Sizes matter on one VPS. One MANN product page was **658 KB** of HTML and a
   bilstein article page **24 KB** [P, `Content-Length` in this session]. At
   13,132 MANN pages that is about 8.6 GB raw per locale; 163,709 bilstein

@@ -25,7 +25,7 @@ SUPPLIER_ADAPTERS=demo
 DEMO_SUPPLIER_OVERRIDES=$OVERRIDES
 LEAD_ROUTE_URL=http://127.0.0.1:4321/api/leads
 EOF
-  echo "Created apps/carlab-shop/.env"
+  echo "Created apps/auto-service-shop/.env"
 fi
 sed -i.bak 's|^LEAD_ROUTE_URL=http://localhost:4321/|LEAD_ROUTE_URL=http://127.0.0.1:4321/|' .env && rm .env.bak
 
