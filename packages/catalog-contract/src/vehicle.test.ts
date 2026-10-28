@@ -115,20 +115,49 @@ describe('vinLookupResponseSchema', () => {
       resolved: true,
       vehicle,
       facts: { steering: 'right' },
-      pages: null,
+      place: null,
     });
   });
 
-  it("names which of the car's places have a page", () => {
-    const pages = { vehicle: false, model: true, make: true };
+  const modelPlace = {
+    kind: 'model',
+    make: { slug: 'bmw', name: 'BMW' },
+    model: vehicle.model,
+    vehicle: null,
+  };
+
+  it('names the nearest place with a page for a resolved VIN', () => {
     expect(
       vinLookupResponseSchema.parse({
         resolved: true,
         vehicle,
         facts: {},
-        pages,
+        place: modelPlace,
       }),
-    ).toMatchObject({ pages });
+    ).toMatchObject({ place: modelPlace });
+  });
+
+  it('names the nearest place with a page the candidates of an unresolved VIN share', () => {
+    expect(
+      vinLookupResponseSchema.parse({
+        resolved: false,
+        make: 'bmw',
+        code: null,
+        vehicle_ids: ['veh_1', 'veh_2'],
+        place: modelPlace,
+      }),
+    ).toMatchObject({ place: modelPlace });
+  });
+
+  it('reads a place it cannot read as none', () => {
+    expect(
+      vinLookupResponseSchema.parse({
+        resolved: true,
+        vehicle,
+        facts: {},
+        place: { kind: 'trim' },
+      }),
+    ).toMatchObject({ place: null });
   });
 
   it('reads an unresolved lookup from a shop that names no candidates yet', () => {
@@ -144,6 +173,7 @@ describe('vinLookupResponseSchema', () => {
       code: '99ZZ',
       model_slug: null,
       vehicle_ids: [],
+      place: null,
     });
   });
 

@@ -6,7 +6,7 @@ import {
   translated,
 } from './categories.ts';
 import { brandNumberSchema, partOfferSchema } from './partPages.ts';
-import { placePagesSchema, vehicleSchema } from './vehicle.ts';
+import { carHitSchema, vehicleSchema } from './vehicle.ts';
 
 export const CATALOG_LOCALES = ['ru', ...CATALOG_TRANSLATION_LOCALES] as const;
 
@@ -20,26 +20,6 @@ export const searchResultSchema = brandNumberSchema.extend({
   }),
   offers: z.array(partOfferSchema),
   thumbnail: z.url().nullable(),
-});
-
-export const CAR_KINDS = ['make', 'model', 'vehicle'] as const;
-
-export type CarKind = (typeof CAR_KINDS)[number];
-
-export const carHitSchema = z.object({
-  kind: z.enum(CAR_KINDS),
-  make: vehicleSchema.shape.model.shape.chassis.shape.series.shape.make,
-  model: vehicleSchema.shape.model.nullable(),
-  vehicle: vehicleSchema
-    .pick({
-      id: true,
-      slug: true,
-      power_kw: true,
-      year_from: true,
-      year_to: true,
-    })
-    .extend({ engine: vehicleSchema.shape.engine.pick({ code: true }) })
-    .nullable(),
 });
 
 const readableCars = z
@@ -68,8 +48,8 @@ export const searchResponseSchema = z.object({
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
   cars: readableCars,
-  scope_pages: placePagesSchema
-    .pick({ model: true, make: true })
+  scope_pages: z
+    .object({ model: z.boolean(), make: z.boolean() })
     .nullable()
     .default(null)
     .catch(null),
@@ -222,7 +202,6 @@ export const inRange = (value: string, { min, max }: RangeFilter): boolean => {
 
 export const searchableQuery = (q: string): boolean => /[\p{L}\p{N}]/u.test(q);
 
-export type CarHit = z.infer<typeof carHitSchema>;
 export type SearchResult = z.infer<typeof searchResultSchema>;
 export type SearchFacet = z.infer<typeof searchFacetSchema>;
 export type SearchResponse = z.infer<typeof searchResponseSchema>;
