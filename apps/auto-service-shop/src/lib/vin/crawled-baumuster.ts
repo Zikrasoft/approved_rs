@@ -3,7 +3,7 @@ import type CatalogModuleService from '../../modules/catalog/service';
 const PARENTHESES = /\(([^)]*)\)/g;
 const BAUMUSTER_LIST = /(?<![\d.])(\d{3})\.(\d{3}(?:\/\d{3})*)(?![\d.])/g;
 
-export const baumusterInModelName = (name: string): string[] =>
+export const baumusterListedIn = (name: string): string[] =>
   [...name.matchAll(PARENTHESES)].flatMap(([, listed]) =>
     [...listed.matchAll(BAUMUSTER_LIST)].flatMap(([, series, variants]) =>
       variants.split('/').map((variant) => series + variant),
@@ -24,6 +24,6 @@ export const modelsListingBaumuster = async (
     .filter(
       ({ name, chassis }) =>
         chassis.series.make.slug === make &&
-        baumusterInModelName(name).includes(baumuster),
+        baumusterListedIn(name).includes(baumuster),
     )
     .map(({ id }) => id);

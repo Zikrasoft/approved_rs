@@ -85,7 +85,7 @@ export const resolveVin = async (
   );
   if (existing?.vehicle_id && current) {
     const vehicle = await vehicleById(catalog, existing.vehicle_id);
-    if (vehicle) {
+    if (vehicle?.identifiers.length) {
       return {
         resolved: true,
         vehicle,

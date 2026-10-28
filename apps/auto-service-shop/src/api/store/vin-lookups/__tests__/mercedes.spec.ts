@@ -161,6 +161,30 @@ medusaIntegrationTestRunner({
         expect(stored).toMatchObject({ vehicle_id: vehicle.id });
       });
 
+      it('stops resolving to a crawled Vehicle once a second one lists its Baumuster', async () => {
+        const first = await createCrawledVehicle(
+          'e-220-213',
+          'E 220 d (213.004)',
+          'filtron:e220-a',
+        );
+        await lookUp('WDD2130041A000001');
+        const second = await createCrawledVehicle(
+          'e-220-213',
+          'E 220 d (213.004)',
+          'filtron:e220-b',
+        );
+
+        const response = await lookUp('WDD2130041A000001');
+
+        expect(response.data).toMatchObject({
+          resolved: false,
+          model_slug: 'e-220-213',
+        });
+        expect([...response.data.vehicle_ids].sort()).toEqual(
+          [first.vehicle.id, second.vehicle.id].sort(),
+        );
+      });
+
       it('names the Model when several crawled Vehicles of one Model list the Baumuster', async () => {
         const first = await createCrawledVehicle(
           'g-63-amg-463',

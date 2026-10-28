@@ -1,6 +1,6 @@
-import { baumusterInModelName } from '../crawled-baumuster';
+import { baumusterListedIn } from '../crawled-baumuster';
 
-describe('baumusterInModelName', () => {
+describe('baumusterListedIn', () => {
   it.each([
     ['E 300 (212.054/254) Sistem: AIRMATIC', ['212054', '212254']],
     [
@@ -14,7 +14,7 @@ describe('baumusterInModelName', () => {
       ['246243'],
     ],
   ])('reads the Baumuster %s lists', (name, expected) => {
-    expect(baumusterInModelName(name)).toEqual(expected);
+    expect(baumusterListedIn(name)).toEqual(expected);
   });
 
   it.each([
@@ -23,6 +23,6 @@ describe('baumusterInModelName', () => {
     ['S 350 (W222.067/165) Engine Code: OM 222.167', ['222067', '222165']],
     ['1828 NTG (957) 05/13 → Series: 956.003/033', []],
   ])('reads only the parentheses of %s', (name, expected) => {
-    expect(baumusterInModelName(name)).toEqual(expected);
+    expect(baumusterListedIn(name)).toEqual(expected);
   });
 });
