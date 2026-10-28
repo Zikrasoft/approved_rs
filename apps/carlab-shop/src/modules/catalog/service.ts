@@ -19,6 +19,7 @@ import {
   normalizePartNumber,
   partPageSlug,
   requirementErrors,
+  RESERVED_PARTS_SEGMENTS,
   validateAttributes,
 } from '@podbor/catalog-contract';
 
@@ -289,6 +290,20 @@ const slugInUse = () =>
     'This slug is taken or was used before',
   );
 
+const reservedSection = (kind: SluggedKind, slug: string) =>
+  kind === 'make' &&
+  RESERVED_PARTS_SEGMENTS.some((segment) => segment === slug);
+
+const refuseReservedSection = (kind: SluggedKind, slug: string) => {
+  if (reservedSection(kind, slug)) {
+    throw adminError(
+      MedusaError.Types.INVALID_DATA,
+      'SLUG_RESERVED',
+      'This slug is a storefront section',
+    );
+  }
+};
+
 class CatalogModuleService extends CatalogModuleBase {
   private sluggedRows(kind: SluggedKind) {
     const rows = {
@@ -401,8 +416,10 @@ class CatalogModuleService extends CatalogModuleBase {
     const scope = kind === 'vehicle' ? String(row.model_id) : null;
     const free = async (slug: string) =>
       !reserved.has(`${scope}/${slug}`) &&
+      !reservedSection(kind, slug) &&
       !(await this.slugTaken(kind, slug, scope, context));
     if (row.slug !== undefined) {
+      refuseReservedSection(kind, row.slug);
       if (await this.slugRetired(kind, row.slug, scope, context)) {
         throw slugInUse();
       }
@@ -514,6 +531,7 @@ class CatalogModuleService extends CatalogModuleBase {
       );
     }
     if (row.slug === slug) return;
+    refuseReservedSection(kind, slug);
     const scope = await this.slugScope(kind, id, sharedContext);
     if (await this.slugTaken(kind, slug, scope, sharedContext)) {
       throw slugInUse();
@@ -540,6 +558,7 @@ class CatalogModuleService extends CatalogModuleBase {
     kind: SlugKind,
     retired: Retirement[],
     context: Context,
+    provenance: Provenance = {},
   ): Promise<void> {
     if (!retired.length) return;
     const byTarget = new Map<string, Retirement[]>();
@@ -563,6 +582,7 @@ class CatalogModuleService extends CatalogModuleBase {
         from_id: id,
         from_slug: slug,
         ...rest,
+        ...provenance,
       })),
       context,
     );
@@ -572,6 +592,7 @@ class CatalogModuleService extends CatalogModuleBase {
   async mergeMakes(
     sourceId: string,
     targetId: string,
+    provenance: Provenance,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     if (sourceId === targetId) {
@@ -620,7 +641,13 @@ class CatalogModuleService extends CatalogModuleBase {
         ({ name }) => spellingKey(name) === spellingKey(series.name),
       );
       if (same) {
-        await this.mergeSeries(series.id, same.id, targetId, sharedContext);
+        await this.mergeSeries(
+          series.id,
+          same.id,
+          targetId,
+          provenance,
+          sharedContext,
+        );
       } else {
         await this.updateSeries(
           { id: series.id, make_id: targetId },
@@ -647,6 +674,7 @@ class CatalogModuleService extends CatalogModuleBase {
         },
       ],
       sharedContext,
+      provenance,
     );
     await this.flush(sharedContext);
     await CatalogModuleBase.prototype.deleteMakes.call(
@@ -660,6 +688,7 @@ class CatalogModuleService extends CatalogModuleBase {
     sourceId: string,
     targetId: string,
     makeId: string,
+    provenance: Provenance,
     context: Context,
   ): Promise<void> {
     const targets = await this.listChassis(
@@ -674,7 +703,13 @@ class CatalogModuleService extends CatalogModuleBase {
     )) {
       const same = targets.find(({ code }) => code === chassis.code);
       if (same) {
-        await this.mergeChassis(chassis.id, same.id, makeId, context);
+        await this.mergeChassis(
+          chassis.id,
+          same.id,
+          makeId,
+          provenance,
+          context,
+        );
       } else {
         await this.updateChassis(
           { id: chassis.id, series_id: targetId },
@@ -690,6 +725,7 @@ class CatalogModuleService extends CatalogModuleBase {
     sourceId: string,
     targetId: string,
     makeId: string,
+    provenance: Provenance,
     context: Context,
   ): Promise<void> {
     const targets = await this.listVehicleModels(
@@ -706,7 +742,7 @@ class CatalogModuleService extends CatalogModuleBase {
         ({ name }) => spellingKey(name) === spellingKey(model.name),
       );
       if (same) {
-        await this.mergeModels(model, same.id, makeId, context);
+        await this.mergeModels(model, same.id, makeId, provenance, context);
       } else {
         await this.updateVehicleModels(
           { id: model.id, chassis_id: targetId },
@@ -747,8 +783,10 @@ class CatalogModuleService extends CatalogModuleBase {
     source: { id: string; slug: string },
     targetId: string,
     makeId: string,
+    provenance: Provenance,
     context: Context,
   ): Promise<void> {
+    const renamed: { id: string; slug: string }[] = [];
     for (const vehicle of await this.listVehicles(
       { model_id: source.id },
       { select: ['id', 'slug', 'engine_id', 'power_kw'], take: null },
@@ -767,6 +805,7 @@ class CatalogModuleService extends CatalogModuleBase {
             context,
           )
         : vehicle.slug;
+      if (slug !== vehicle.slug) renamed.push(vehicle);
       await this.updateVehicles(
         { id: vehicle.id, model_id: targetId, slug },
         context,
@@ -779,6 +818,20 @@ class CatalogModuleService extends CatalogModuleBase {
       },
       context,
     );
+    if (renamed.length) {
+      await this.createSlugRedirects(
+        renamed.map(({ id, slug }) => ({
+          kind: 'vehicle' as const,
+          from_id: id,
+          from_slug: slug,
+          scope_id: source.id,
+          target_kind: 'vehicle' as const,
+          target_id: id,
+          ...provenance,
+        })),
+        context,
+      );
+    }
     await this.retireSlugs(
       'model',
       [
@@ -791,6 +844,7 @@ class CatalogModuleService extends CatalogModuleBase {
         },
       ],
       context,
+      provenance,
     );
     await this.flush(context);
     await CatalogModuleBase.prototype.deleteVehicleModels.call(

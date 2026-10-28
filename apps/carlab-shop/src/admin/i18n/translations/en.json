@@ -583,6 +583,7 @@
       "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
       "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line.",
       "SLUG_TAKEN": "This address is taken or was used before. Pick another one.",
+      "SLUG_RESERVED": "This address belongs to a storefront section. Pick another one.",
       "NO_SLUG": "The name needs Latin letters or digits to make an address.",
       "MERGE_INTO_SELF": "Pick another row to merge into."
     },

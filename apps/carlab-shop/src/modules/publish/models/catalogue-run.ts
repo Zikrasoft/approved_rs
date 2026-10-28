@@ -1,6 +1,12 @@
 import { model } from '@medusajs/framework/utils';
 
-export const CATALOGUE_RUN_KINDS = ['import', 'publish', 'deletion'] as const;
+export const CATALOGUE_RUN_KINDS = [
+  'import',
+  'publish',
+  'deletion',
+  'merge',
+  'rename',
+] as const;
 
 export const CATALOGUE_RUN_STATUSES = [
   'running',

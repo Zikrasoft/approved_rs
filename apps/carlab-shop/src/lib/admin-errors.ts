@@ -36,6 +36,7 @@ export const ADMIN_ERROR_CODES = [
   'AI_NOT_CONFIGURED',
   'INVALID_BRAND',
   'SLUG_TAKEN',
+  'SLUG_RESERVED',
   'NO_SLUG',
   'MERGE_INTO_SELF',
 ] as const;
