@@ -70,7 +70,11 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
-  const withBackend = async (shopOpen: string, locale: 'sr' | 'ru' = 'sr') => {
+  const withBackend = async (
+    shopOpen: string,
+    locale: 'sr' | 'ru' = 'sr',
+    extraVehicles: unknown[] = [],
+  ) => {
     const answers: Record<string, unknown> = {
       '/store/categories': {
         categories: [
@@ -101,6 +105,7 @@ describe('generateLlmsTxt', () => {
         vehicles: [
           {
             id: 'veh_1',
+            slug: 'b47d20o0-140kw',
             power_kw: 140,
             drive: 'rwd',
             market: 'EU',
@@ -129,9 +134,13 @@ describe('generateLlmsTxt', () => {
             identifiers: [],
             requirements: [],
           },
+          ...extraVehicles,
         ],
       },
     };
+    (globalThis as { [key: symbol]: Map<string, unknown> | undefined })[
+      Symbol.for('carlab.buildSnapshots')
+    ]?.clear();
     vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
     vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
     vi.stubEnv('SHOP_OPEN', shopOpen);
@@ -164,6 +173,57 @@ describe('generateLlmsTxt', () => {
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
     );
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
+  });
+
+  it('lists a Model page, and its Vehicle pages only when it has several', async () => {
+    const alone = await withBackend('true');
+    expect(alone).toContain(
+      '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
+    );
+    expect(alone).not.toContain('/m/');
+
+    const several = await withBackend('true', 'sr', [
+      {
+        id: 'veh_2',
+        slug: 'b47d20o0-110kw',
+        power_kw: 110,
+        drive: 'rwd',
+        market: 'EU',
+        year_from: 2015,
+        year_to: 2019,
+        steering: 'left',
+        model: {
+          slug: 'f30-320d',
+          name: '320d',
+          chassis: {
+            code: 'F30',
+            body_style: 'sedan',
+            series: {
+              name: '3 серия',
+              translations: null,
+              make: { slug: 'bmw', name: 'BMW' },
+            },
+          },
+        },
+        engine: {
+          code: 'B47D20O0',
+          family: 'B47',
+          fuel: 'diesel',
+          displacement_cc: 1995,
+        },
+        identifiers: [],
+        requirements: [],
+      },
+    ]);
+    expect(several).toContain(
+      '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
+    );
+    expect(several).toContain(
+      '[BMW 3 серия F30 320d, B47D20O0, 140 kW, 2015–2019](https://carlab.rs/sr/parts/bmw/f30-320d/m/b47d20o0-140kw/)',
+    );
+    expect(several).toContain(
+      '](https://carlab.rs/sr/parts/bmw/f30-320d/m/b47d20o0-110kw/)',
+    );
   });
 
   it('names the installation price of a Category beside its add-on service', async () => {

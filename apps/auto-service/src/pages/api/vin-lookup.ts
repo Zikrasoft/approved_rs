@@ -6,7 +6,7 @@ import { vinSchema } from '@podbor/catalog-contract';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { carFactsQuery } from '@/utils/carFacts';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
-import { PathBuilder } from '@/utils/paths';
+import { PathBuilder, vehiclePath } from '@/utils/paths';
 
 const formSchema = z.object({
   locale: localeFieldSchema,
@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     : null;
   return redirect(
     outcome?.kind === 'vehicle'
-      ? `${PathBuilder.partsCar(locale, outcome.vehicle.id)}${carFactsQuery(outcome.facts, vin ?? '')}`
+      ? `${vehiclePath(locale, outcome.vehicle)}${carFactsQuery(outcome.facts, vin ?? '')}`
       : PathBuilder.partsVinUnresolved(locale),
     303,
   );

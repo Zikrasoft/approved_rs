@@ -21,7 +21,7 @@ import type {
 } from '@/utils/catalogueSnapshot';
 import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { withFacetCopy } from '@/utils/partsSearch';
 
@@ -136,7 +136,7 @@ const fill = (template: string) =>
                         <FitLine
                           fit={fit}
                           car={{
-                            href: PathBuilder.partsCar(locale, fit.vehicle.id),
+                            href: vehiclePath(locale, fit.vehicle),
                             label: vehicleVariant(fit.vehicle, locale),
                           }}
                         />

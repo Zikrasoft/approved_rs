@@ -790,6 +790,41 @@ describe('catalogue.carPages', () => {
     ]);
   });
 
+  it('marks a car alone in its Model, and only that one', async () => {
+    const sibling = { ...VEHICLE, id: 'veh_2', slug: 'b47d20o0-110kw' };
+    const alone = {
+      ...VEHICLE,
+      id: 'veh_3',
+      model: { ...VEHICLE.model, slug: 'g20-320d' },
+    };
+    const otherMake = {
+      ...alone,
+      id: 'veh_4',
+      model: {
+        ...alone.model,
+        chassis: {
+          ...alone.model.chassis,
+          series: {
+            ...alone.model.chassis.series,
+            make: { slug: 'mini', name: 'MINI' },
+          },
+        },
+      },
+    };
+    const cars = await catalogueWith(
+      backend({ vehicles: [VEHICLE, sibling, alone, otherMake] }),
+    ).carPages();
+
+    expect(cars.map(({ vehicle, solitary }) => [vehicle.id, solitary])).toEqual(
+      [
+        ['veh_1', false],
+        ['veh_2', false],
+        ['veh_3', true],
+        ['veh_4', true],
+      ],
+    );
+  });
+
   it('builds a car page with no parts while nothing fits it', async () => {
     const [car] = await carPagesFor([frontPads], []);
 

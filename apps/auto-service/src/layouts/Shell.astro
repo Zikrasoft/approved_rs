@@ -36,6 +36,7 @@ interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  canonicalPath?: string;
   jsonLd?: PageSchema[];
   stickyContact?: boolean;
   service?: ServiceSlug;
@@ -47,6 +48,7 @@ const {
   description,
   preloadImage,
   noindex = false,
+  canonicalPath,
   jsonLd = [],
   stickyContact: stickyRequested = true,
   service,
@@ -59,7 +61,7 @@ const stickyContact =
 const site = content(locale).site;
 const { canonical, alternates, ogLocale, ogImage } = pageHead(
   locale,
-  Astro.url.pathname,
+  canonicalPath ?? Astro.url.pathname,
   { title, description },
 );
 const fontUrl = locale === 'ru' ? cyrillicFontUrl : latinFontUrl;

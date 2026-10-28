@@ -5,6 +5,7 @@ import {
 } from '@podbor/catalog-contract';
 import {
   catalogueRoutes,
+  carRoutes,
   type RedirectRoute,
   withCatalogueRoutes,
 } from './catalogueRedirects';
@@ -149,5 +150,28 @@ describe('withCatalogueRoutes', () => {
       version: 3,
       routes: [route],
     });
+  });
+});
+
+describe('carRoutes', () => {
+  it('301s an old car page to its Vehicle page, in every locale', () => {
+    const routes = carRoutes([
+      {
+        id: 'veh_01',
+        slug: 'b47d20o0-140kw',
+        model: {
+          slug: 'f30-320d',
+          chassis: { series: { make: { slug: 'bmw' } } },
+        },
+      },
+    ]);
+
+    expect(follow(routes, '/sr/parts/car/veh_01/')).toEqual(
+      moved('/sr/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
+    );
+    expect(follow(routes, '/en/parts/car/veh_01')).toEqual(
+      moved('/en/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
+    );
+    expect(follow(routes, '/ru/parts/car/veh_012/')).toBeNull();
   });
 });
