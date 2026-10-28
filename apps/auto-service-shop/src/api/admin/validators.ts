@@ -14,6 +14,7 @@ import {
   vinSchema,
 } from '@podbor/catalog-contract';
 
+import { MAX_LINKED_VEHICLES } from '../../lib/vin/linkable';
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
 export const MAX_NAME_LENGTH = 200;
@@ -445,3 +446,8 @@ export type AdminRenameSlugType = z.infer<typeof AdminRenameSlug>;
 
 export const AdminMerge = z.strictObject({ into: z.string().min(1) });
 export type AdminMergeType = z.infer<typeof AdminMerge>;
+
+export const AdminLinkVinCode = z.strictObject({
+  vehicle_ids: z.array(z.string().min(1)).min(1).max(MAX_LINKED_VEHICLES),
+});
+export type AdminLinkVinCodeType = z.infer<typeof AdminLinkVinCode>;

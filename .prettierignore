@@ -9,3 +9,5 @@ apps/*/src/content/**/*.md
 # Static assets served byte-for-byte as their provider wrote them (search-console
 # verification files, manifests, robots.txt) — prettier must not touch them.
 apps/*/public/
+
+apps/auto-service-shop/src/lib/vin/bimmerarchive-type-keys.json

@@ -1,9 +1,13 @@
-import type { Vehicle, VinLookupResponse } from '@podbor/catalog-contract';
-import { vinFactsSchema } from '@podbor/catalog-contract';
+import type {
+  Vehicle,
+  VehicleIdentifierType,
+  VinLookupResponse,
+} from '@podbor/catalog-contract';
 
 import type CatalogModuleService from '../../modules/catalog/service';
 import type VinLookupModuleService from '../../modules/vin-lookup/service';
 import { listVehicleResponses } from '../store-response';
+import { vehiclesDescribedByTypeKey } from './bmw-type-key';
 import { modelsListingBaumuster } from './crawled-baumuster';
 import type { VinDecode, VinDecoder } from './decoder';
 
@@ -14,41 +18,57 @@ type Services = {
   vinLookups: VinLookupModuleService;
 };
 
-const vehicleById = async (
+type CrawledMatch = (
   catalog: CatalogModuleService,
-  id: string,
-): Promise<Vehicle | null> =>
-  (await listVehicleResponses(catalog, { id }))[0] ?? null;
+  make: string,
+  value: string,
+) => Promise<Vehicle[]>;
 
-const identifiedVehicle = async (
+const identifiedVehicles = async (
   catalog: CatalogModuleService,
   identifiers: VinDecode['identifiers'],
 ): Promise<Vehicle[]> => {
   if (!identifiers.length) return [];
-  const [match] = await catalog.listVehicleIdentifiers({ $or: identifiers });
-  const vehicle = match && (await vehicleById(catalog, match.vehicle_id));
-  return vehicle ? [vehicle] : [];
+  const ids = (
+    await catalog.listVehicleIdentifiers(
+      { $or: identifiers },
+      { select: ['vehicle_id'], take: null },
+    )
+  ).map(({ vehicle_id }) => vehicle_id);
+  return ids.length
+    ? listVehicleResponses(catalog, { id: [...new Set(ids)] })
+    : [];
+};
+
+const vehiclesListingBaumuster: CrawledMatch = async (
+  catalog,
+  make,
+  baumuster,
+) => {
+  const modelIds = await modelsListingBaumuster(catalog, make, baumuster);
+  return modelIds.length
+    ? listVehicleResponses(catalog, { model_id: modelIds })
+    : [];
+};
+
+const CRAWLED_MATCHES: Partial<Record<VehicleIdentifierType, CrawledMatch>> = {
+  'mercedes-baumuster': vehiclesListingBaumuster,
+  'bmw-type-code': vehiclesDescribedByTypeKey,
 };
 
 const crawledVehicles = async (
   catalog: CatalogModuleService,
-  { make, identifiers }: VinDecode,
+  { make, identifiers: [identifier] }: VinDecode,
 ): Promise<Vehicle[]> => {
-  const baumuster = identifiers.find(
-    ({ type }) => type === 'mercedes-baumuster',
-  );
-  if (!baumuster) return [];
-  const modelIds = await modelsListingBaumuster(catalog, make, baumuster.value);
-  return modelIds.length
-    ? listVehicleResponses(catalog, { model_id: modelIds })
-    : [];
+  const match = identifier && CRAWLED_MATCHES[identifier.type];
+  return match ? match(catalog, make, identifier.value) : [];
 };
 
 const vehiclesFor = async (
   catalog: CatalogModuleService,
   decode: VinDecode,
 ): Promise<Vehicle[]> => {
-  const identified = await identifiedVehicle(catalog, decode.identifiers);
+  const identified = await identifiedVehicles(catalog, decode.identifiers);
   return identified.length ? identified : crawledVehicles(catalog, decode);
 };
 
@@ -82,21 +102,6 @@ export const resolveVin = async (
   | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
 > => {
   const [existing] = await vinLookups.listVinLookups({ vin });
-  const current = decoders.some(
-    ({ name, version }) =>
-      name === existing?.decoder && version === existing?.decoder_version,
-  );
-  if (existing?.vehicle_id && current) {
-    const vehicle = await vehicleById(catalog, existing.vehicle_id);
-    if (vehicle?.identifiers.length) {
-      return {
-        resolved: true,
-        vehicle,
-        facts: vinFactsSchema.parse(existing.facts),
-      };
-    }
-  }
-
   const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
   const vehicle = vehicles.length === 1 ? vehicles[0] : null;
   const record = {

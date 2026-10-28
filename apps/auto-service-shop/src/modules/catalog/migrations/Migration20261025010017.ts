@@ -6,7 +6,7 @@ export class Migration20261025010017 extends Migration {
       `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_supplier_id_type_value_unique";`,
     );
     this.addSql(
-      `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_type_value_unique";`,
+      `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_type_value_vehicle_id_unique";`,
     );
     this.addSql(
       `alter table if exists "vehicle" drop constraint if exists "vehicle_model_id_slug_unique";`,
@@ -252,7 +252,7 @@ export class Migration20261025010017 extends Migration {
       `CREATE INDEX IF NOT EXISTS "IDX_vehicle_identifier_deleted_at" ON "vehicle_identifier" ("deleted_at") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_type_value_unique" ON "vehicle_identifier" ("type", "value") WHERE supplier_id IS NULL AND deleted_at IS NULL;`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_type_value_vehicle_id_unique" ON "vehicle_identifier" ("type", "value", "vehicle_id") WHERE supplier_id IS NULL AND deleted_at IS NULL;`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_supplier_id_type_value_unique" ON "vehicle_identifier" ("supplier_id", "type", "value") WHERE supplier_id IS NOT NULL AND deleted_at IS NULL;`,

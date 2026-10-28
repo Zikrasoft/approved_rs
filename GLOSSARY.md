@@ -57,7 +57,7 @@ One manufacturer configuration: a Model with one Engine, drive and market, as th
 _Avoid_: Car, Vin, Model (a Model spans several Vehicles)
 
 **VehicleIdentifier**:
-One code a vehicle vocabulary uses for a Vehicle, typed by that vocabulary (`bmw-type-code`, `mercedes-baumuster`, a Supplier's own id for the car, later others). A Vehicle may carry codes from several vocabularies; a VIN resolves through the manufacturer's, and an Import recognises a car it has seen before through its Supplier's.
+One code a vehicle vocabulary uses for a Vehicle, typed by that vocabulary (`bmw-type-code`, `mercedes-baumuster`, a Supplier's own id for the car, later others). A Vehicle may carry codes from several vocabularies; a VIN resolves through the manufacturer's, and an Import recognises a car it has seen before through its Supplier's. Staff may link one manufacturer code to several Vehicles; a VIN whose code names several is left for the customer to choose (see [ADR-0051](docs/adr/0051-a-bmw-type-code-reaches-crawled-vehicles-through-open-type-key-data.md)).
 _Avoid_: KType (bare), type code stored anywhere but here
 
 **Fitment**:

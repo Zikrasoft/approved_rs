@@ -345,12 +345,32 @@
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
-    "lead": "Codes from VINs customers searched for that match no Vehicle in the catalogue, most frequent first. Add them under Vehicles.",
+    "lead": "Codes from VINs customers searched for that the catalogue could not narrow to one Vehicle, most frequent first. Link a BMW type code to the Vehicles it stands for, and the next customer with that VIN lands on them.",
     "empty": "Every VIN customers searched for was resolved.",
+    "notInOpenData": "Not in the open data",
     "columns": {
       "make": "Make",
       "code": "Code",
-      "count": "Lookups"
+      "openData": "Open data says",
+      "count": "Lookups",
+      "lastSeen": "Last searched"
+    },
+    "link": {
+      "button": "Link Vehicles",
+      "action": "Link code {{code}} to Vehicles",
+      "title": "Link code {{code}}",
+      "openData": "Open data: {{facts}}. Check it against the Vehicles before linking.",
+      "noOpenData": "The open data does not list this code. Decode the VIN by hand before linking.",
+      "hint": "Tick every Vehicle the code stands for. One Vehicle resolves the VIN; several let the customer choose.",
+      "search": "Find Vehicles",
+      "searchPlaceholder": "Chassis, model or engine code",
+      "noVehicles": "No Vehicle matches. Try fewer words, or add the Vehicle under Vehicles first.",
+      "more_one": "{{count}} more Vehicle matches. Narrow the search to see it.",
+      "more_other": "{{count}} more Vehicles match. Narrow the search to see them.",
+      "save_one": "Link {{count}} Vehicle",
+      "save_other": "Link {{count}} Vehicles",
+      "linked_one": "Code {{code}} linked to {{count}} Vehicle.",
+      "linked_other": "Code {{code}} linked to {{count}} Vehicles."
     },
     "makes": {
       "bmw": "BMW",

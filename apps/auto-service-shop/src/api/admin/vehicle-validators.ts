@@ -24,7 +24,10 @@ const slug = z
 const code = z.string().trim().toUpperCase().min(1).max(MAX_NAME_LENGTH);
 const year = z.number().int().min(1950).max(2100).nullable();
 
-const IDENTIFIER_FORMATS: Record<ManufacturerVehicleIdentifierType, RegExp> = {
+export const IDENTIFIER_FORMATS: Record<
+  ManufacturerVehicleIdentifierType,
+  RegExp
+> = {
   'bmw-type-code': /^[A-Z0-9]{4}$/,
   'mercedes-baumuster': /^\d{6}$/,
 };
