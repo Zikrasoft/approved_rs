@@ -16,6 +16,7 @@ import {
 import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
+import { type CarAddress, fittedCarKeys } from './catalogue-car';
 import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
 import {
   PART_CHANGED_EVENT,
@@ -38,6 +39,8 @@ type NumberRow = {
 type FacetFieldRow = { key: string; category_id: string };
 
 type OfferRow = PricedOfferRow & { part_identifier_id: string };
+
+type FitmentRow = { part_id: string; vehicle: CarAddress };
 
 type IdentifierRow = {
   id: string;
@@ -96,6 +99,7 @@ const toDocument = (
   facetFields: FacetFieldRow[],
   offers: OfferRow[],
   published: Set<string>,
+  fitments: FitmentRow[],
 ) => {
   const own = storeOffers(
     offers.filter(({ part_identifier_id }) => part_identifier_id === row.id),
@@ -128,6 +132,13 @@ const toDocument = (
       ...facets(row.part, facetFields),
     ],
     price: best?.price,
+    cars: [
+      ...new Set(
+        fitments
+          .filter(({ part_id }) => part_id === row.part.id)
+          .flatMap(({ vehicle }) => fittedCarKeys(vehicle)),
+      ),
+    ],
   };
 };
 
@@ -160,6 +171,7 @@ const source = {
       { data: facetFields },
       { data: offers },
       { data: published },
+      { data: fitments },
     ] = await Promise.all([
       container.query.graph({
         entity: 'part_identifier',
@@ -189,6 +201,16 @@ const source = {
         fields: ['id'],
         filters: { id: rows.map(({ id }) => id) },
       }),
+      container.query.graph({
+        entity: 'fitment',
+        fields: [
+          'part_id',
+          'vehicle.id',
+          'vehicle.model.slug',
+          'vehicle.model.chassis.series.make.slug',
+        ],
+        filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
+      }),
     ]);
     return rows.map((row) =>
       toDocument(
@@ -197,6 +219,7 @@ const source = {
         facetFields as FacetFieldRow[],
         offers as OfferRow[],
         new Set(published.map(({ id }: { id: string }) => id)),
+        fitments as FitmentRow[],
       ),
     );
   },
@@ -211,7 +234,15 @@ const localeFields = (locale: CatalogLocale) =>
 const text = () => search.text().searchable().retrievable(false);
 const numbers = () => search.keyword().array().searchable().retrievable(false);
 
-export const searchRanking = (locale: CatalogLocale) => {
+const fittingFirst = (cars: string[]) =>
+  cars.length
+    ? [`_eval(cars:=[${cars.map((car) => `\`${car}\``).join(',')}]):desc`]
+    : [];
+
+export const searchRanking = (
+  locale: CatalogLocale,
+  fitting: string[] = [],
+) => {
   const own = localeFields(locale);
   const fields: [string, number, number][] = [
     ['number', 15, 0],
@@ -235,7 +266,11 @@ export const searchRanking = (locale: CatalogLocale) => {
     query_by_weights: fields.map(([, weight]) => weight).join(','),
     num_typos: fields.map(([, , typos]) => typos).join(','),
     text_match_type: 'max_weight',
-    sort_by: '_text_match:desc,standing:desc',
+    sort_by: [
+      ...fittingFirst(fitting),
+      '_text_match:desc',
+      'standing:desc',
+    ].join(','),
   };
 };
 
@@ -248,6 +283,7 @@ export default defineSearchIndex({
     published: search.boolean().filterable().retrievable(false),
     standing: search.integer().sortable().retrievable(false),
     category: search.keyword().filterable().retrievable(false),
+    cars: search.keyword().array().filterable().retrievable(false),
     brand: text(),
     number: numbers(),
     equivalent_numbers: numbers(),
