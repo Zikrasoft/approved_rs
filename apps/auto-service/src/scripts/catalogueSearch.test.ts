@@ -43,6 +43,8 @@ const mount = () => {
       data-cars-label="Автомобили"
       data-parts-label="Запчасти"
       data-vin-label="Подобрать по VIN"
+      data-failed-label="Подсказки не загрузились"
+      data-retry-label="Повторить"
     >
       <form action="/ru/parts/search/" method="GET" role="search">
         <input type="search" name="q" />
@@ -199,6 +201,55 @@ describe('the catalogue search box', () => {
     await type(input, 'qqqq');
 
     expect(panel.hidden).toBe(true);
+  });
+
+  it('keeps quiet about a request a newer keystroke replaced', async () => {
+    backend.mockImplementationOnce(
+      (_url: string, { signal }: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    const { input, panel } = mount();
+
+    await type(input, 'bmw');
+    await type(input, 'bmw x3');
+
+    expect(panel.querySelector('button')).toBeNull();
+    expect(options(panel)).toEqual([
+      'BMW X3 E83',
+      'Mann-Filter HU 816 x Масляный фильтр',
+    ]);
+  });
+
+  it.each([
+    [
+      'answers with an error',
+      () => Promise.resolve(new Response(null, { status: 503 })),
+    ],
+    [
+      'cannot be reached',
+      () => Promise.reject(new TypeError('Failed to fetch')),
+    ],
+  ])('offers a retry when the search %s', async (_, failure) => {
+    backend.mockImplementationOnce(failure);
+    const { input, panel } = mount();
+
+    await type(input, 'bmw x3');
+
+    expect(panel.hidden).toBe(false);
+    expect(panel.textContent).toContain('Подсказки не загрузились');
+    expect(panel.textContent).not.toContain('Failed to fetch');
+    panel.querySelector('button')!.click();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(backend).toHaveBeenCalledTimes(2);
+    expect(options(panel)).toEqual([
+      'BMW X3 E83',
+      'Mann-Filter HU 816 x Масляный фильтр',
+    ]);
   });
 
   it('suggests for what was typed before it woke up', async () => {

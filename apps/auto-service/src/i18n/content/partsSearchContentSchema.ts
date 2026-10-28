@@ -42,6 +42,8 @@ export const partsSearchContentSchema = z
     carsGroup: z.string(),
     partsGroup: z.string(),
     vinOption: z.string(),
+    suggestFailed: z.string(),
+    suggestRetry: z.string(),
     openSearch: z.string(),
     closeSearch: z.string(),
     llmsSearch: z.string(),
