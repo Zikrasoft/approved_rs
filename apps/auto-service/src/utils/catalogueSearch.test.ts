@@ -3,6 +3,7 @@ import type { CarHit } from '@podbor/catalog-contract';
 import {
   carLink,
   exactPart,
+  listingCrumbs,
   vinDestination,
   searchIntent,
   suggestionsFrom,
@@ -54,15 +55,25 @@ describe('searchIntent', () => {
 });
 
 describe('vinDestination', () => {
+  const VIN = 'WBA35BG070N074158';
+  const resolved = (
+    pages: {
+      vehicle: boolean;
+      model: boolean;
+      make: boolean;
+    } | null,
+  ) => ({
+    kind: 'vehicle' as const,
+    vehicle: { ...vehicle, model },
+    facts: { steering: 'left' as const },
+    pages,
+  });
+
   it('opens the page of the car a VIN resolved to, carrying the VIN', () => {
     expect(
       vinDestination(
-        {
-          kind: 'vehicle',
-          vehicle: { ...vehicle, model },
-          facts: { steering: 'left' },
-        },
-        'WBA35BG070N074158',
+        resolved({ vehicle: true, model: true, make: true }),
+        VIN,
         'ru',
       ),
     ).toBe(
@@ -70,10 +81,42 @@ describe('vinDestination', () => {
     );
   });
 
-  it('opens nothing for a VIN the decoder did not resolve', () => {
+  it('opens the Model page when the Vehicle has none', () => {
     expect(
-      vinDestination({ kind: 'inquiry' }, 'WBA35BG070N074158', 'ru'),
+      vinDestination(
+        resolved({ vehicle: false, model: true, make: true }),
+        VIN,
+        'ru',
+      ),
+    ).toBe('/ru/parts/bmw/e83-x3-20d/');
+  });
+
+  it('opens the Make page when neither the Vehicle nor the Model has one', () => {
+    expect(
+      vinDestination(
+        resolved({ vehicle: false, model: false, make: true }),
+        VIN,
+        'ru',
+      ),
+    ).toBe('/ru/parts/bmw/');
+  });
+
+  it('opens nothing when no place of the car has a page', () => {
+    expect(
+      vinDestination(
+        resolved({ vehicle: false, model: false, make: false }),
+        VIN,
+        'ru',
+      ),
     ).toBeNull();
+  });
+
+  it('opens nothing when the shop does not say which places have a page', () => {
+    expect(vinDestination(resolved(null), VIN, 'ru')).toBeNull();
+  });
+
+  it('opens nothing for a VIN the decoder did not resolve', () => {
+    expect(vinDestination({ kind: 'inquiry' }, VIN, 'ru')).toBeNull();
   });
 });
 
@@ -147,5 +190,55 @@ describe('suggestionsFrom', () => {
         },
       ],
     });
+  });
+});
+
+describe('listingCrumbs', () => {
+  const category = { slug: 'oil-filters', name: 'Масляные фильтры' };
+  const crumbs = (pages: { model: boolean; make: boolean } | null) =>
+    listingCrumbs({
+      locale: 'ru',
+      model,
+      modelName: 'BMW X3',
+      category,
+      pages,
+      searchLabel: 'Поиск запчастей',
+    });
+
+  it('walks up through the Make and the Model when both have a page', () => {
+    expect(crumbs({ model: true, make: true })).toEqual([
+      { href: '/ru/parts/bmw/', label: 'BMW' },
+      { href: '/ru/parts/bmw/e83-x3-20d/', label: 'BMW X3' },
+      {
+        href: '/ru/parts/bmw/e83-x3-20d/oil-filters/',
+        label: 'Масляные фильтры',
+      },
+    ]);
+  });
+
+  it('links only the Make and the Category when the Model has no page', () => {
+    expect(crumbs({ model: false, make: true })).toEqual([
+      { href: '/ru/parts/bmw/', label: 'BMW' },
+      { href: '/ru/parts/c/oil-filters/', label: 'Масляные фильтры' },
+    ]);
+  });
+
+  it('links only the Category when the shop does not say which pages exist', () => {
+    expect(crumbs(null)).toEqual([
+      { href: '/ru/parts/c/oil-filters/', label: 'Масляные фильтры' },
+    ]);
+  });
+
+  it('ends on the search page for an unscoped query', () => {
+    expect(
+      listingCrumbs({
+        locale: 'ru',
+        model: null,
+        modelName: null,
+        category: null,
+        pages: null,
+        searchLabel: 'Поиск запчастей',
+      }),
+    ).toEqual([{ href: '/ru/parts/search/', label: 'Поиск запчастей' }]);
   });
 });

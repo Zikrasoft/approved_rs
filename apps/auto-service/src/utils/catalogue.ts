@@ -72,8 +72,18 @@ export type IdentifierPrices = {
   installation: Record<string, number | null>;
 };
 
+type VinPages = Extract<
+  z.infer<typeof vinLookupResponseSchema>,
+  { resolved: true }
+>['pages'];
+
 export type VinOutcome =
-  | { kind: 'vehicle'; vehicle: Vehicle; facts: VinFacts }
+  | {
+      kind: 'vehicle';
+      vehicle: Vehicle;
+      facts: VinFacts;
+      pages: VinPages;
+    }
   | { kind: 'inquiry'; vin: string };
 
 export type OffersOutcome =
@@ -328,7 +338,7 @@ export function createCatalogue({
     async listingScope(
       { category, model }: Pick<SearchQuery, 'category' | 'model'>,
       locale: CatalogLocale,
-    ): Promise<Pick<SearchResponse, 'category' | 'model'>> {
+    ): Promise<Pick<SearchResponse, 'category' | 'model' | 'scope_pages'>> {
       try {
         const [allCategories, allVehicles] = await Promise.all([
           category ? categories() : [],
@@ -342,9 +352,10 @@ export function createCatalogue({
           model:
             allVehicles.find((vehicle) => vehicle.model.slug === model)
               ?.model ?? null,
+          scope_pages: null,
         };
       } catch {
-        return { category: null, model: null };
+        return { category: null, model: null, scope_pages: null };
       }
     },
 
@@ -487,7 +498,12 @@ export function createCatalogue({
           await request('/store/vin-lookups', { vin }),
         );
         return lookup.resolved
-          ? { kind: 'vehicle', vehicle: lookup.vehicle, facts: lookup.facts }
+          ? {
+              kind: 'vehicle',
+              vehicle: lookup.vehicle,
+              facts: lookup.facts,
+              pages: lookup.pages,
+            }
           : { kind: 'inquiry', vin };
       } catch {
         return { kind: 'inquiry', vin };

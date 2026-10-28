@@ -18,18 +18,30 @@ export const searchIntent = (q: string): SearchIntent => {
 };
 
 type ResolvedVin =
-  | { kind: 'vehicle'; vehicle: VehicleAddress; facts: VinFacts }
+  | {
+      kind: 'vehicle';
+      vehicle: VehicleAddress;
+      facts: VinFacts;
+      pages: { vehicle: boolean; model: boolean; make: boolean } | null;
+    }
   | { kind: 'inquiry' };
 
-// TODO: open the Model page when the Vehicle has none, once the page-existence predicates land in @podbor/catalog-contract.
 export const vinDestination = (
   outcome: ResolvedVin,
   vin: string,
   locale: Locale,
-): string | null =>
-  outcome.kind === 'vehicle'
-    ? `${vehiclePath(locale, outcome.vehicle)}${carFactsQuery(outcome.facts, vin)}`
-    : null;
+): string | null => {
+  if (outcome.kind !== 'vehicle' || !outcome.pages) return null;
+  const { vehicle, facts, pages } = outcome;
+  const make = vehicle.model.chassis.series.make.slug;
+  if (pages.vehicle) {
+    return `${vehiclePath(locale, vehicle)}${carFactsQuery(facts, vin)}`;
+  }
+  if (pages.model) {
+    return PathBuilder.partsModel(locale, make, vehicle.model.slug);
+  }
+  return pages.make ? PathBuilder.partsMake(locale, make) : null;
+};
 
 type PartResult = SearchOutcome['results'][number];
 
@@ -80,3 +92,51 @@ export const suggestionsFrom = (
     thumb: result.thumbnail,
   })),
 });
+
+type ListingScope = {
+  locale: Locale;
+  model: SearchOutcome['model'];
+  modelName: string | null;
+  category: SearchOutcome['category'];
+  pages: SearchOutcome['scope_pages'];
+  searchLabel: string;
+};
+
+export const listingCrumbs = ({
+  locale,
+  model,
+  modelName,
+  category,
+  pages,
+  searchLabel,
+}: ListingScope): SearchLink[] => {
+  const make = model?.chassis.series.make;
+  const modelPage = Boolean(model && make && pages?.model);
+  return [
+    ...(make && pages?.make
+      ? [{ href: PathBuilder.partsMake(locale, make.slug), label: make.name }]
+      : []),
+    ...(model && make && modelName && modelPage
+      ? [
+          {
+            href: PathBuilder.partsModel(locale, make.slug, model.slug),
+            label: modelName,
+          },
+        ]
+      : []),
+    category
+      ? {
+          href:
+            model && make && modelPage
+              ? PathBuilder.partsModelCategory(
+                  locale,
+                  make.slug,
+                  model.slug,
+                  category.slug,
+                )
+              : PathBuilder.partsCategory(locale, category.slug),
+          label: category.name,
+        }
+      : { href: PathBuilder.partsSearch(locale), label: searchLabel },
+  ];
+};

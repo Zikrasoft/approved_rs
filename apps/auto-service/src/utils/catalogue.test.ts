@@ -1276,13 +1276,20 @@ describe('catalogueFromEnv', () => {
 });
 
 describe('catalogue.resolveVin', () => {
-  it('lands on the car page for a resolved VIN', async () => {
-    const fetch = answer({ resolved: true, vehicle: VEHICLE, facts: {} });
+  it('names the car a VIN resolved to and which of its places have a page', async () => {
+    const pages = { vehicle: false, model: true, make: true };
+    const fetch = answer({
+      resolved: true,
+      vehicle: VEHICLE,
+      facts: {},
+      pages,
+    });
 
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'vehicle',
       vehicle: VEHICLE,
       facts: {},
+      pages,
     });
     expect(fetch).toHaveBeenCalledWith(
       'http://shop.test/store/vin-lookups',
@@ -1647,6 +1654,7 @@ describe('catalogue.listingScope', () => {
     expect(scope).toEqual({
       category: { slug: 'oil-filters', name: 'Filteri ulja' },
       model: VEHICLE.model,
+      scope_pages: null,
     });
   });
 
@@ -1655,7 +1663,7 @@ describe('catalogue.listingScope', () => {
       vi.fn(() => respond({}, false)),
     ).listingScope({ category: 'oil-filters' }, 'ru');
 
-    expect(scope).toEqual({ category: null, model: null });
+    expect(scope).toEqual({ category: null, model: null, scope_pages: null });
   });
 });
 
