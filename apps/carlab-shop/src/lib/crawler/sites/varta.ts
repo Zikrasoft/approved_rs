@@ -40,7 +40,7 @@ const descriptionOf = ($: CheerioAPI) => {
 
 const PLACEHOLDER = /^Pseudo Article\b/u;
 
-const AGM_LINES = /\bRED TOP\b/u;
+const AGM_LINES = /\b(?:RED|YELLOW) TOP\b/u;
 
 const technologyOf = (name: string) =>
   name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0] ??

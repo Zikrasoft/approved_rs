@@ -103,6 +103,14 @@ describe('VARTA', () => {
     expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
   });
 
+  it('reads a YELLOW TOP as an AGM battery', () => {
+    const html = page('8032510008882.html.gz').replaceAll(
+      'RED TOP 803251000',
+      'YELLOW TOP 814254000',
+    );
+    expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
+  });
+
   it("reads nothing from VARTA's placeholder product", () => {
     expect(varta.parse(page('123456789z992.html.gz'))).toBe(null);
   });
