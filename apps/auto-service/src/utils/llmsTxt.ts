@@ -14,7 +14,8 @@ import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
-import { PathBuilder } from '@/utils/paths';
+import { PathBuilder, vehiclePath } from '@/utils/paths';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
@@ -82,11 +83,25 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
                 .join(' '),
             };
           }),
-          ...makes.map(({ make }) => ({
-            label: make.name,
-            href: url(PathBuilder.partsMake(locale, make.slug)),
-            note: content(locale).partsCar.hubs.make.lead,
-          })),
+          ...makes.flatMap(({ make, models }) => [
+            {
+              label: make.name,
+              href: url(PathBuilder.partsMake(locale, make.slug)),
+              note: content(locale).partsCar.hubs.make.lead,
+            },
+            ...models.flatMap(({ model, vehicles }) => [
+              {
+                label: carName(model, locale),
+                href: url(
+                  PathBuilder.partsModel(locale, make.slug, model.slug),
+                ),
+              },
+              ...(vehicles.length > 1 ? vehicles : []).map((vehicle) => ({
+                label: `${carName(model, locale)}, ${vehicleVariant(vehicle, locale)}`,
+                href: url(vehiclePath(locale, vehicle)),
+              })),
+            ]),
+          ]),
         ],
       },
       {

@@ -62,6 +62,7 @@ export type CarKitItem = {
 
 export type CarPageEntry = {
   vehicle: Vehicle;
+  solitary: boolean;
   groups: CarPartGroup[];
   matches: CarMatch[];
   kit: CarKitItem[];
@@ -157,6 +158,9 @@ export function assembleSnapshot(
       },
     );
   const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
+  const modelKey = ({ model }: Vehicle) =>
+    `${model.chassis.series.make.slug}/${model.slug}`;
+  const vehiclesByModel = groupBy(allVehicles, modelKey);
   const cars = allVehicles.map((vehicle): CarPageEntry => {
     const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap((fit) => {
       const partPages = pagesByPart.get(fit.part_id);
@@ -193,7 +197,8 @@ export function assembleSnapshot(
         ? [{ category, quantity, part: partPages[0].part, pages: partPages }]
         : [];
     });
-    return { vehicle, groups, matches, kit };
+    const solitary = vehiclesByModel.get(modelKey(vehicle))?.length === 1;
+    return { vehicle, solitary, groups, matches, kit };
   });
   for (const { vehicle, matches, kit } of cars) {
     for (const { pages: partPages } of matches.flatMap(
