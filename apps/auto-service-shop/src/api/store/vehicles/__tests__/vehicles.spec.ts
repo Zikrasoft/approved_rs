@@ -2,7 +2,10 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { VEHICLE_BATCH } from '../../../../lib/store-response';
+import {
+  listVehicleResponses,
+  VEHICLE_BATCH,
+} from '../../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -49,22 +52,75 @@ medusaIntegrationTestRunner({
           );
         });
 
-        it('lists every Vehicle, past the default page of a list', async () => {
-          for (let index = 0; index < 16; index += 1) {
+        it('pages through every Vehicle with its count', async () => {
+          for (let index = 0; index < 3; index += 1) {
             await createVehicleFixture(catalog, {
               typeCode: `L${String(index).padStart(3, '0')}`,
             });
           }
+          const total = (await catalog.listVehicles({}, { take: null })).length;
 
-          const response = await api.get('/store/vehicles', storeHeaders);
-
-          expect(response.data.vehicles.length).toBe(
-            (await catalog.listVehicles({}, { take: null })).length,
+          const page = async (offset: number) =>
+            (
+              await api.get(
+                `/store/vehicles?offset=${offset}&limit=2`,
+                storeHeaders,
+              )
+            ).data;
+          const pages: { vehicles: { id: string }[] }[] = [];
+          for (let offset = 0; offset < total; offset += 2) {
+            pages.push(await page(offset));
+          }
+          const ids = pages.flatMap(({ vehicles }) =>
+            vehicles.map(({ id }) => id),
           );
-          expect(response.data.vehicles.length).toBeGreaterThanOrEqual(16);
+
+          expect(pages[0]).toMatchObject({ count: total, offset: 0, limit: 2 });
+          expect(pages[0].vehicles).toHaveLength(2);
+          expect(new Set(ids).size).toBe(total);
         });
 
-        it('lists every Vehicle, past one read batch', async () => {
+        it('answers one default page when no page is asked for', async () => {
+          const response = await api.get('/store/vehicles', storeHeaders);
+
+          expect(response.data).toMatchObject({ offset: 0, limit: 1000 });
+        });
+
+        it('refuses a page past the largest limit', async () => {
+          const response = await api
+            .get('/store/vehicles?limit=5001', storeHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+        });
+
+        it('lists only the Vehicles of the Model asked for', async () => {
+          const { vehicle, model } = await createVehicleFixture(catalog, {
+            typeCode: 'M001',
+            modelSlug: 'g20-330i',
+          });
+
+          const response = await api.get(
+            `/store/vehicles?model=${model.slug}&limit=1`,
+            storeHeaders,
+          );
+
+          expect(response.data).toMatchObject({ count: 1 });
+          expect(response.data.vehicles).toEqual([
+            expect.objectContaining({ id: vehicle.id }),
+          ]);
+        });
+
+        it('lists no Vehicle for a Model that does not exist', async () => {
+          const response = await api.get(
+            '/store/vehicles?model=no-such-model',
+            storeHeaders,
+          );
+
+          expect(response.data).toMatchObject({ vehicles: [], count: 0 });
+        });
+
+        it('reads every Vehicle past one read batch for the shop itself', async () => {
           const { model, engine } = await createVehicleFixture(catalog, {
             typeCode: 'B000',
           });
@@ -81,10 +137,7 @@ medusaIntegrationTestRunner({
             })),
           );
 
-          const response = await api.get('/store/vehicles', storeHeaders);
-          const ids = response.data.vehicles.map(
-            ({ id }: { id: string }) => id,
-          );
+          const ids = (await listVehicleResponses(catalog)).map(({ id }) => id);
 
           expect(new Set(ids).size).toBe(ids.length);
           expect(ids.length).toBe(

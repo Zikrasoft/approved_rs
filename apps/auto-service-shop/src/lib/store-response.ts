@@ -111,24 +111,42 @@ const vehicleRows = async (
   }
 };
 
+export const toVehicleResponse = (
+  row: Awaited<ReturnType<CatalogModuleService['listVehicles']>>[number],
+): Vehicle => {
+  const { requirements, engine, model } = inheritedRequirements.parse(row);
+  return vehicleSchema.parse({
+    ...row,
+    identifiers: row.identifiers.filter(
+      ({ type }) => type !== SUPPLIER_VEHICLE_ID,
+    ),
+    requirements: [
+      ...engine.requirements,
+      ...model.chassis.requirements,
+      ...requirements,
+    ],
+  });
+};
+
 export const listVehicleResponses = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
 ): Promise<Vehicle[]> =>
-  (await vehicleRows(catalog, filters)).map((row) => {
-    const { requirements, engine, model } = inheritedRequirements.parse(row);
-    return vehicleSchema.parse({
-      ...row,
-      identifiers: row.identifiers.filter(
-        ({ type }) => type !== SUPPLIER_VEHICLE_ID,
-      ),
-      requirements: [
-        ...engine.requirements,
-        ...model.chassis.requirements,
-        ...requirements,
-      ],
-    });
+  (await vehicleRows(catalog, filters)).map(toVehicleResponse);
+
+export const listVehiclePage = async (
+  catalog: CatalogModuleService,
+  filters: Parameters<CatalogModuleService['listVehicles']>[0],
+  { offset, limit }: { offset: number; limit: number },
+): Promise<{ vehicles: Vehicle[]; count: number }> => {
+  const [rows, count] = await catalog.listAndCountVehicles(filters, {
+    relations: VEHICLE_RELATIONS,
+    order: { id: 'ASC' },
+    skip: offset,
+    take: limit,
   });
+  return { vehicles: rows.map(toVehicleResponse), count };
+};
 
 const rawPartSchema = z.object({
   id: z.string(),
