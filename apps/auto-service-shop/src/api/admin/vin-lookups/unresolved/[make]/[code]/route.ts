@@ -4,20 +4,16 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
-import type { ManufacturerVehicleIdentifierType } from '@podbor/catalog-contract';
 
 import { adminError } from '../../../../../../lib/admin-errors';
 import { createdBy } from '../../../../../../lib/editors';
+import { LINKABLE_CODE_TYPES } from '../../../../../../lib/vin/linkable';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../../../../modules/vin-lookup/service';
 import type { AdminLinkVinCodeType } from '../../../../validators';
 import { IDENTIFIER_FORMATS } from '../../../../vehicle-validators';
-
-const LINKABLE: Partial<Record<string, ManufacturerVehicleIdentifierType>> = {
-  bmw: 'bmw-type-code',
-};
 
 const invalid = (field: string, message: string) =>
   adminError(MedusaError.Types.INVALID_DATA, 'INVALID_FIELD', message, {
@@ -29,7 +25,7 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { make, code } = req.params;
-  const type = LINKABLE[make];
+  const type = LINKABLE_CODE_TYPES[make];
   if (!type || !IDENTIFIER_FORMATS[type].test(code)) {
     throw invalid('code', 'code: Only a BMW type code can be linked');
   }

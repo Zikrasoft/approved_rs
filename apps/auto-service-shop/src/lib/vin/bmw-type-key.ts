@@ -17,7 +17,7 @@ const DRIVES: Record<string, (typeof VEHICLE_DRIVES)[number]> = {
 
 const BODIES_NAMED: [RegExp, string][] = [
   [/\btouring\b/i, 'Touring'],
-  [/\bgran tourismo\b/i, 'Gran Turismo'],
+  [/\bgran to?urismo\b/i, 'Gran Turismo'],
   [/\bcabrio(?:let)?\b/i, 'Convertible'],
   [/\bcoupe\b/i, 'Coupe'],
 ];
@@ -63,9 +63,9 @@ const chassisCodes = (code: string) =>
 const engineFamily = (engine: string) =>
   /^[A-Z]+\d{2}/.exec(compact(engine))?.[0] ?? null;
 
-const engineLitres = (engine: string | null) => {
-  const tenths = engine && /^[A-Z]+\d{2}[A-Z](\d{2})/.exec(compact(engine));
-  return tenths ? Number(tenths[1]) : null;
+const engineDecilitres = (engine: string | null) => {
+  const match = engine && /^[A-Z]+\d{2}[A-Z](\d{2})/.exec(compact(engine));
+  return match ? Number(match[1]) : null;
 };
 
 const designation = (name: string) => {
@@ -86,8 +86,10 @@ const agree = <T>(left: T | null, right: T | null) =>
   left === null || right === null || left === right;
 
 const sameDisplacement = (key: TypeKey, cc: number | null) => {
-  const litres = engineLitres(key.engine);
-  return litres === null || cc === null || Math.abs(cc / 100 - litres) <= 1;
+  const decilitres = engineDecilitres(key.engine);
+  return (
+    decilitres === null || cc === null || Math.abs(cc / 100 - decilitres) <= 1
+  );
 };
 
 const yearsOverlap = (key: TypeKey, vehicle: Vehicle) => {

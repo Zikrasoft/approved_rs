@@ -102,6 +102,8 @@ describe('typeKeyMatches', () => {
     ['another power', { kw: 135 }],
     ['another model designation', { name: '318 d (F30, F31)' }],
     ['a body its name gives', { name: '320d Touring (F30/F31)' }],
+    ['a Gran Turismo body', { name: '320d Gran Turismo (F30/F31)' }],
+    ['a Gran Tourismo body', { name: '320d Gran Tourismo (F30/F31)' }],
     ['all-wheel drive its name gives', { name: '320d xDrive (F30, F31)' }],
     ['a drive of its own', { drive: 'awd' }],
     ['the other steering side', { steering: 'right' }],

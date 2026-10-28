@@ -14,8 +14,13 @@ import {
 } from '@medusajs/ui';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { STEERING_SIDES, VEHICLE_DRIVES } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import {
+  LINKABLE_CODE_TYPES,
+  MAX_LINKED_VEHICLES,
+} from '../../../lib/vin/linkable';
 import { DrawerHeader } from '../../components/dialog-header';
 import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
@@ -28,7 +33,6 @@ import {
   vehicleLabel,
 } from '../../lib/vehicle-label';
 
-const LINKABLE_MAKES = new Set(['bmw']);
 const SHOWN_VEHICLES = 100;
 
 const referenceSchema = z.object({
@@ -37,6 +41,10 @@ const referenceSchema = z.object({
   body: z.string().nullable(),
   engine: z.string().nullable(),
   power_kw: z.number().nullable(),
+  drivetrain: z.enum(VEHICLE_DRIVES).nullable(),
+  steering: z.enum(STEERING_SIDES),
+  from: z.string().nullable(),
+  to: z.string().nullable(),
 });
 
 type Reference = z.infer<typeof referenceSchema>;
@@ -78,6 +86,12 @@ const vehiclesSchema = z.object({
 
 const linkedSchema = z.object({ linked: z.number() });
 
+const referenceYears = (t: TFunction, { from, to }: Reference) => {
+  if (from && to) return t('vehicleLabel.between', { from, to });
+  if (from) return t('vehicleLabel.since', { from });
+  return to ? t('vehicleLabel.until', { to }) : null;
+};
+
 const referenceLine = (t: TFunction, reference: Reference) =>
   [
     [reference.chassis, reference.model, reference.body]
@@ -85,6 +99,9 @@ const referenceLine = (t: TFunction, reference: Reference) =>
       .join(' '),
     reference.engine,
     reference.power_kw && t('vehicleLabel.kw', { kw: reference.power_kw }),
+    reference.drivetrain && t(`vehicles.values.drive.${reference.drivetrain}`),
+    t(`vehicleLabel.steering.${reference.steering}`),
+    referenceYears(t, reference),
   ]
     .filter(Boolean)
     .join(', ');
@@ -202,6 +219,9 @@ const LinkDrawer = ({
                       <Checkbox
                         className="mt-0.5"
                         checked={chosen.has(id)}
+                        disabled={
+                          !chosen.has(id) && chosen.size >= MAX_LINKED_VEHICLES
+                        }
                         onCheckedChange={() => toggle(id)}
                       />
                       <span>{label}</span>
@@ -333,7 +353,7 @@ const VinLookupsPage = () => {
                   </Table.Cell>
                   <Table.Cell>
                     <div className="flex items-center justify-end gap-x-2">
-                      {LINKABLE_MAKES.has(entry.make) && (
+                      {LINKABLE_CODE_TYPES[entry.make] && (
                         <Button
                           size="small"
                           variant="secondary"

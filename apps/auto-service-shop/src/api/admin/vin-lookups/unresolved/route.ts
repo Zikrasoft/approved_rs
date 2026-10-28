@@ -1,39 +1,21 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
-import { typeKey } from '../../../../lib/vin/bmw-type-key';
+import { type TypeKey, typeKey } from '../../../../lib/vin/bmw-type-key';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
-
-type Reference = {
-  chassis: string;
-  model: string;
-  body: string | null;
-  engine: string | null;
-  power_kw: number | null;
-};
 
 type UnresolvedCode = {
   make: string;
   code: string;
   count: number;
   last_seen: Date;
-  reference: Reference | null;
+  reference: TypeKey | null;
 };
 
-const referenceOf = (make: string, code: string): Reference | null => {
-  const key = make === 'bmw' ? typeKey(code) : undefined;
-  return key
-    ? {
-        chassis: key.chassis,
-        model: key.model,
-        body: key.body,
-        engine: key.engine,
-        power_kw: key.power_kw,
-      }
-    : null;
-};
+const referenceOf = (make: string, code: string): TypeKey | null =>
+  (make === 'bmw' && typeKey(code)) || null;
 
 export async function GET(
   req: MedusaRequest,

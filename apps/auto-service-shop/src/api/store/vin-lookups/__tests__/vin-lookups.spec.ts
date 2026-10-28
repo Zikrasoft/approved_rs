@@ -277,11 +277,16 @@ medusaIntegrationTestRunner({
           count: 1,
           last_seen: expect.any(String),
           reference: {
+            code: '3K11',
             chassis: 'F31',
             model: '318d',
             body: 'Touring',
             engine: 'N47D20U1',
             power_kw: 105,
+            drivetrain: 'rwd',
+            steering: 'left',
+            from: null,
+            to: null,
           },
         });
         expect(Date.parse(entry.last_seen)).toBeGreaterThanOrEqual(
