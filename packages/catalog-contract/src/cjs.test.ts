@@ -30,6 +30,12 @@ describe('CommonJS build', () => {
     ).toBe(true);
   });
 
+  it('serves the place page rules to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);
+    expect(contract.modelHasPage(3)).toBe(true);
+  });
+
   it('serves the attributes module to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(
