@@ -988,7 +988,7 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
-      it('flags a Part its source stops listing, keeps its page, and clears the flag when it returns', async () => {
+      it('flags a Part its source stops listing, keeps its page, and clears the flag when it returns, flagging nothing new while a page is unreadable', async () => {
         const article = {
           article_id: 'IC-GONE',
           brand: 'MANN-FILTER',
@@ -1011,6 +1011,16 @@ medusaIntegrationTestRunner({
         expect(await missing()).toEqual([]);
 
         intercars.articles.length = 0;
+        const broken = {
+          url: 'https://intercars.test/p/c-30-005',
+          reason: 'Unexpected markup',
+        };
+        intercars.unreadable.push(broken);
+        await runImport();
+
+        expect(await missing()).toEqual([]);
+
+        intercars.unreadable.length = 0;
         await runImport();
 
         expect(await missing()).toMatchObject([
@@ -1022,6 +1032,7 @@ medusaIntegrationTestRunner({
         expect(await page('C30005')).toEqual(listed);
 
         intercars.articles.push(article);
+        intercars.unreadable.push(broken);
         await runImport();
 
         expect(await missing()).toEqual([]);

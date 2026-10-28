@@ -415,6 +415,7 @@ async function flagUnlistedParts(
   catalog: CatalogModuleService,
   source: string,
   listedNumbers: Set<string>,
+  mayFlag: boolean,
 ): Promise<void> {
   const parts = await catalog.listParts(
     { source },
@@ -425,7 +426,7 @@ async function flagUnlistedParts(
     const missing = !identifiers.some(({ normalized_value }) =>
       listedNumbers.has(normalized_value),
     );
-    return missing === Boolean(source_missing_since)
+    return missing === Boolean(source_missing_since) || (missing && !mayFlag)
       ? []
       : [{ id, source_missing_since: missing ? now : null }];
   });
@@ -572,7 +573,12 @@ export async function importSupplier(
   if (gone.length) {
     await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
-  await flagUnlistedParts(catalog, adapter.name, state.listedNumbers);
+  await flagUnlistedParts(
+    catalog,
+    adapter.name,
+    state.listedNumbers,
+    summary.skipped_by_reason.unreadable === 0,
+  );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;
 }
