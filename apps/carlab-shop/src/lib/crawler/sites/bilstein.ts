@@ -19,7 +19,7 @@ export const BILSTEIN_FAMILIES = [
   'ramena',
   'spon[ae]',
   'aksijalni zglob',
-  'kugla$',
+  'kugla(?!\\p{L})',
   'kuglasti zglob',
   'stabilizator',
   'odbojn',

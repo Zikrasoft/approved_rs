@@ -188,6 +188,21 @@ describe('bilstein group partsfinder', () => {
     });
   });
 
+  it('keeps a ball joint whose name goes on past the word kugla, not a ball bearing', () => {
+    const named = (name: string) =>
+      bilstein.parse(
+        page('febi-27699.html.gz').replace(
+          '27699 | kočioni disk |',
+          `27699 | ${name} |`,
+        ),
+      )?.name ?? null;
+    const ballJoint =
+      'kugla sa krunastom navrtkom, rascepkom i sigurnosnim prstenom';
+    expect(named(ballJoint)).toBe(ballJoint);
+    expect(named('kugla')).toBe('kugla');
+    expect(named('kuglasti ležaj')).toBe(null);
+  });
+
   it('skips an article outside the covered families and a page that is not an article', () => {
     const turbo = page('febi-27699.html.gz').replace(
       '27699 | kočioni disk |',
