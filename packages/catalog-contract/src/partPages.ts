@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { displayEnum } from './displayEnum.ts';
 import { attributeValuesSchema } from './attributes.ts';
 import { imageSchema } from './images.ts';
 import { translationsSchema } from './translations.ts';
@@ -18,7 +19,7 @@ export const brandSchema = z.object({
 
 export const brandNumberSchema = z.object({
   id: z.string(),
-  type: z.enum(PART_IDENTIFIER_TYPES),
+  type: displayEnum(PART_IDENTIFIER_TYPES),
   value: z.string(),
   normalized_value: z.string(),
   superseded: z.boolean(),
@@ -29,7 +30,7 @@ export const picturedBrandNumberSchema = brandNumberSchema.extend({
   images: z.array(imageSchema),
 });
 
-export const partOfferSchema = z.strictObject({
+export const partOfferSchema = z.object({
   id: z.string(),
   price: z.number(),
   currency: z.string(),

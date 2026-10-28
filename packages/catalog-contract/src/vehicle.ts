@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { displayEnum } from './displayEnum.ts';
 import { requirementSchema } from './attributes.ts';
 import { STEERING_SIDES } from './steering.ts';
 import { VIN_PATTERN } from './vin.ts';
@@ -30,24 +31,24 @@ const translationsSchema = z
   .nullable();
 
 export const vehicleIdentifierSchema = z.object({
-  type: z.enum(VEHICLE_IDENTIFIER_TYPES),
+  type: displayEnum(VEHICLE_IDENTIFIER_TYPES),
   value: z.string(),
 });
 
 export const vehicleSchema = z.object({
   id: z.string(),
   power_kw: z.number().nullable(),
-  drive: z.enum(VEHICLE_DRIVES).nullable(),
+  drive: displayEnum(VEHICLE_DRIVES),
   market: z.string().nullable(),
   year_from: z.number().nullable(),
   year_to: z.number().nullable(),
-  steering: z.enum(STEERING_SIDES).nullable(),
+  steering: displayEnum(STEERING_SIDES),
   model: z.object({
     slug: z.string(),
     name: z.string(),
     chassis: z.object({
       code: z.string(),
-      body_style: z.enum(BODY_STYLES).nullable(),
+      body_style: displayEnum(BODY_STYLES),
       series: z.object({
         name: z.string(),
         translations: translationsSchema,
@@ -58,7 +59,7 @@ export const vehicleSchema = z.object({
   engine: z.object({
     code: z.string(),
     family: z.string(),
-    fuel: z.enum(ENGINE_FUELS).nullable(),
+    fuel: displayEnum(ENGINE_FUELS),
     displacement_cc: z.number().nullable(),
   }),
   identifiers: z.array(vehicleIdentifierSchema),
@@ -77,7 +78,7 @@ export const vinSchema = z
   .pipe(z.string().regex(VIN_PATTERN));
 
 export const vinFactsSchema = z.object({
-  steering: z.enum(STEERING_SIDES).optional(),
+  steering: z.enum(STEERING_SIDES).optional().catch(undefined),
 });
 
 export type VinFacts = z.infer<typeof vinFactsSchema>;
