@@ -1,5 +1,6 @@
 import {
   errorHandler,
+  getHttpResponseFromError,
   type MedusaErrorHandlerFunction,
   type MedusaNextFunction,
   type MedusaRequest,
@@ -7,6 +8,7 @@ import {
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
 import type { z } from '@medusajs/framework/zod';
+import { captureException } from '@sentry/node';
 
 export const ADMIN_ERROR_CODES = [
   'IN_USE',
@@ -104,6 +106,9 @@ export const keepAdminCodes: MedusaErrorHandlerFunction = (
 ) => {
   const known = coded(error);
   if (!known) {
+    if (getHttpResponseFromError(error).statusCode >= 500) {
+      captureException(error);
+    }
     return medusaErrorHandler(error, req, res, next);
   }
   res.status(STATUS[known.type as ErrorType] ?? 400).json({

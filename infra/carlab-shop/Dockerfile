@@ -27,12 +27,12 @@ COPY --from=builder --chown=node:node /prod/node_modules ./node_modules
 COPY --from=builder --chown=node:node /repo/apps/carlab-shop/.medusa/server ./
 COPY --from=builder --chown=node:node /repo/apps/carlab-shop/assets ./assets
 
-RUN node -e "require('typesense'); require('zod')" \
+RUN node -e "require('typesense'); require('zod'); require('@sentry/node')" \
   && ! node -e "require.resolve('ts-node')" 2>/dev/null
 
 USER node
 EXPOSE 9000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
-  CMD wget -q -O /dev/null http://127.0.0.1:9000/health || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:9000/health/ready || exit 1
 
 CMD ["node_modules/.bin/medusa", "start"]
