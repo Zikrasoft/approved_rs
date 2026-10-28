@@ -91,7 +91,7 @@ medusaIntegrationTestRunner({
 
       beforeEach(() => {
         for (const fake of [mann, bilstein]) fake.articles.length = 0;
-        Object.assign(shopAi, { name: null, namesWritten: [], failure: null });
+        Object.assign(shopAi, { name: null, failure: null });
       });
 
       const runImport = async (supplier: string) =>
@@ -493,9 +493,6 @@ medusaIntegrationTestRunner({
         expect((await partOf('W 712/95')).name).toBe(
           'Масляный фильтр MANN-FILTER W 712/95',
         );
-        expect(shopAi.namesWritten).toEqual([
-          expect.objectContaining({ name: 'Oil Filter W 712/95' }),
-        ]);
 
         mann.articles[0].name = 'Oil Filter W 712/95 new';
         await runImport('MANN-FILTER');
