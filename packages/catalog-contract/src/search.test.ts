@@ -55,6 +55,7 @@ const response = {
   category: null,
   model: null,
   cars: [],
+  scope_pages: null,
   count: 1,
   offset: 0,
   limit: 20,
@@ -163,6 +164,18 @@ describe('searchResponseSchema', () => {
     expect(searchResponseSchema.parse({ ...response, cars }).cars).toEqual([
       cars[1],
     ]);
+  });
+
+  it('says whether the scoped Model and its Make have a page', () => {
+    const scope_pages = { model: false, make: true };
+    expect(
+      searchResponseSchema.parse({ ...response, scope_pages }).scope_pages,
+    ).toEqual(scope_pages);
+  });
+
+  it('reads a response from a backend that predates scope pages as not knowing', () => {
+    const { scope_pages: _scopePages, ...older } = response;
+    expect(searchResponseSchema.parse(older).scope_pages).toBeNull();
   });
 
   it('reads a response from a backend that predates cars as having none', () => {

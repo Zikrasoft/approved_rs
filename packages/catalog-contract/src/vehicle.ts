@@ -96,6 +96,11 @@ export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
     resolved: z.literal(true),
     vehicle: vehicleSchema,
     facts: vinFactsSchema,
+    pages: z
+      .object({ vehicle: z.boolean(), model: z.boolean(), make: z.boolean() })
+      .nullable()
+      .default(null)
+      .catch(null),
   }),
   z.object({
     resolved: z.literal(false),

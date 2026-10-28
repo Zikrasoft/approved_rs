@@ -111,7 +111,24 @@ describe('vinLookupResponseSchema', () => {
         vehicle,
         facts: { steering: 'right' },
       }),
-    ).toEqual({ resolved: true, vehicle, facts: { steering: 'right' } });
+    ).toEqual({
+      resolved: true,
+      vehicle,
+      facts: { steering: 'right' },
+      pages: null,
+    });
+  });
+
+  it("names which of the car's places have a page", () => {
+    const pages = { vehicle: false, model: true, make: true };
+    expect(
+      vinLookupResponseSchema.parse({
+        resolved: true,
+        vehicle,
+        facts: {},
+        pages,
+      }),
+    ).toMatchObject({ pages });
   });
 
   it('reads an unresolved lookup with the extracted code', () => {

@@ -68,6 +68,11 @@ export const searchResponseSchema = z.object({
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
   cars: readableCars,
+  scope_pages: z
+    .object({ model: z.boolean(), make: z.boolean() })
+    .nullable()
+    .default(null)
+    .catch(null),
   count: z.number().int().nonnegative(),
   offset: z.number().int().nonnegative(),
   limit: z.number().int().positive(),
