@@ -26,6 +26,21 @@ describe('PathBuilder', () => {
   it.each(SERVICE_SLUGS)('builds a service URL for %s', (slug) => {
     expect(PathBuilder.service('ru', slug)).toBe(`/ru/services/${slug}/`);
   });
+
+  it.each(SUPPORTED_LOCALES)(
+    'puts a %s Category page past the first under its number',
+    (locale) => {
+      expect(PathBuilder.partsCategory(locale, 'oil-filters')).toBe(
+        `/${locale}/parts/c/oil-filters/`,
+      );
+      expect(PathBuilder.partsCategory(locale, 'oil-filters', 1)).toBe(
+        `/${locale}/parts/c/oil-filters/`,
+      );
+      expect(PathBuilder.partsCategory(locale, 'oil-filters', 2)).toBe(
+        `/${locale}/parts/c/oil-filters/2/`,
+      );
+    },
+  );
 });
 
 describe('swapLocale', () => {

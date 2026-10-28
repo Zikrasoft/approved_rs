@@ -124,6 +124,8 @@ export const pagesContentSchema = z
             partsHeading: z.string(),
             noParts: z.string(),
             fieldsHeading: z.string(),
+            pageName: z.string().includes('{name}').includes('{page}'),
+            pagination: z.string(),
           })
           .strict(),
       })
