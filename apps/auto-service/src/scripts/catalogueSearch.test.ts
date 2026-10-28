@@ -201,6 +201,38 @@ describe('the catalogue search box', () => {
     expect(panel.hidden).toBe(true);
   });
 
+  it('marks itself busy while it waits for suggestions', async () => {
+    let answer: (response: Response) => void = () => {};
+    backend.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+    const { input } = mount();
+    const box = document.querySelector('catalogue-search')!;
+
+    await type(input, 'bmw');
+    expect(box.getAttribute('aria-busy')).toBe('true');
+
+    answer(Response.json(suggestions));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(box.hasAttribute('aria-busy')).toBe(false);
+  });
+
+  it('swaps a picture that fails to load for an empty frame', async () => {
+    backend.mockResolvedValue(
+      Response.json({
+        ...suggestions,
+        parts: [{ ...suggestions.parts[0], thumb: '/missing.jpg' }],
+      }),
+    );
+    const { input, panel } = mount();
+
+    await type(input, 'hu 816');
+    panel.querySelector('img')!.dispatchEvent(new Event('error'));
+
+    expect(panel.querySelector('img')).toBeNull();
+    expect(
+      panel.querySelector('[role="option"] > span[aria-hidden="true"]'),
+    ).not.toBeNull();
+  });
+
   it('suggests for what was typed before it woke up', async () => {
     const input = document.createElement('input');
     document.body.innerHTML = `

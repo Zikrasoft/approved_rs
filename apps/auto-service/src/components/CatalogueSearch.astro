@@ -48,7 +48,7 @@ const copy = content(locale).partsSearch;
           name="search"
           size={large ? 20 : 16}
           class:list={[
-            'pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted',
+            'pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted in-aria-busy:animate-pulse motion-reduce:animate-none',
             large ? 'left-4' : 'left-3',
           ]}
         />

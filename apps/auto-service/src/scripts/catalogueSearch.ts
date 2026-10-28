@@ -12,6 +12,8 @@ type Suggestions = { vin: boolean; cars: Link[]; parts: PartLink[] };
 type Group = 'cars' | 'parts' | 'vin';
 
 const ACTIVE_CLASS = 'bg-shade';
+const THUMB_CLASS =
+  'size-9 shrink-0 rounded-md border border-line bg-paper object-contain';
 
 let instances = 0;
 
@@ -40,6 +42,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
         const close = () => {
           this.#request?.abort();
           clearTimeout(this.#timer);
+          this.removeAttribute('aria-busy');
           panel.hidden = true;
           input.setAttribute('aria-expanded', 'false');
           input.removeAttribute('aria-activedescendant');
@@ -72,22 +75,38 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           anchor.className =
             'flex min-h-11 items-center gap-3 rounded-field px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
           if ('thumb' in link) {
-            const thumb = document.createElement(link.thumb ? 'img' : 'span');
-            thumb.className =
-              'size-9 shrink-0 rounded-md border border-line bg-paper object-contain';
-            if (thumb instanceof HTMLImageElement && link.thumb) {
+            const blank = () => {
+              const box = document.createElement('span');
+              box.className = THUMB_CLASS;
+              box.setAttribute('aria-hidden', 'true');
+              return box;
+            };
+            if (link.thumb) {
+              const thumb = document.createElement('img');
+              thumb.className = THUMB_CLASS;
               thumb.src = link.thumb;
               thumb.alt = '';
               thumb.loading = 'lazy';
+              thumb.setAttribute('aria-hidden', 'true');
+              thumb.addEventListener(
+                'error',
+                () => thumb.replaceWith(blank()),
+                {
+                  once: true,
+                },
+              );
+              anchor.append(thumb);
+            } else {
+              anchor.append(blank());
             }
-            thumb.setAttribute('aria-hidden', 'true');
-            anchor.append(thumb);
           }
           const text = document.createElement('span');
           text.className = 'flex min-w-0 flex-col';
           const label = document.createElement('span');
           label.className =
-            group === 'parts' ? 'spec truncate font-semibold' : 'font-semibold';
+            group === 'parts'
+              ? 'spec truncate font-semibold'
+              : 'line-clamp-2 font-semibold wrap-anywhere';
           label.textContent = link.label;
           text.append(label);
           if (link.detail) {
@@ -156,6 +175,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             q,
             locale: this.dataset.locale ?? '',
           });
+          this.setAttribute('aria-busy', 'true');
           try {
             const response = await fetch(`${this.dataset.endpoint}?${params}`, {
               signal: request.signal,
@@ -164,6 +184,8 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             show(q, (await response.json()) as Suggestions);
           } catch {
             if (!request.signal.aborted) close();
+          } finally {
+            if (this.#request === request) this.removeAttribute('aria-busy');
           }
         };
         const later = () => {
