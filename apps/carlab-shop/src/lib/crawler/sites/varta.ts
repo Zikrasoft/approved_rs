@@ -40,7 +40,11 @@ const descriptionOf = ($: CheerioAPI) => {
 
 const PLACEHOLDER = /^Pseudo Article\b/u;
 
-const technologyOf = (name: string) => name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0];
+const AGM_LINES = /\bRED TOP\b/u;
+
+const technologyOf = (name: string) =>
+  name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0] ??
+  (AGM_LINES.test(name) ? 'AGM' : undefined);
 
 export const parseVartaProduct = (html: string): SupplierArticle | null => {
   const $ = load(html);

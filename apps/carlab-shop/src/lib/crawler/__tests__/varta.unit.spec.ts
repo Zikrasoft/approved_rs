@@ -77,7 +77,7 @@ describe('VARTA', () => {
     ]);
   });
 
-  it('reads a page without a description', () => {
+  it('reads a RED TOP page without a description as an AGM battery', () => {
     const article = supplierArticleSchema.parse(
       varta.parse(page('8032510008882.html.gz')),
     );
@@ -91,7 +91,7 @@ describe('VARTA', () => {
       },
     });
     expect(article).not.toHaveProperty('description');
-    expect(article.specs).not.toHaveProperty('Tehnologija');
+    expect(article.specs).toMatchObject({ Tehnologija: 'AGM' });
     expect(article.images).toHaveLength(4);
   });
 
