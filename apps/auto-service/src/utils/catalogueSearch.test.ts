@@ -3,6 +3,7 @@ import type { CarHit } from '@podbor/catalog-contract';
 import {
   carLink,
   exactPart,
+  vinDestination,
   searchIntent,
   suggestionsFrom,
 } from './catalogueSearch';
@@ -28,7 +29,7 @@ const vehicle = {
 
 const result = (value: string, normalized: string, slug: string) => ({
   id: `pi_${slug}`,
-  type: 'manufacturer-number',
+  type: 'manufacturer-number' as const,
   value,
   normalized_value: normalized,
   superseded: false,
@@ -49,6 +50,30 @@ describe('searchIntent', () => {
 
   it('reads anything else as a query', () => {
     expect(searchIntent('HU 816 x')).toEqual({ kind: 'query' });
+  });
+});
+
+describe('vinDestination', () => {
+  it('opens the page of the car a VIN resolved to, carrying the VIN', () => {
+    expect(
+      vinDestination(
+        {
+          kind: 'vehicle',
+          vehicle: { ...vehicle, model },
+          facts: { steering: 'left' },
+        },
+        'WBA35BG070N074158',
+        'ru',
+      ),
+    ).toBe(
+      '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/?steering=left&vin=WBA35BG070N074158',
+    );
+  });
+
+  it('opens nothing for a VIN the decoder did not resolve', () => {
+    expect(
+      vinDestination({ kind: 'inquiry' }, 'WBA35BG070N074158', 'ru'),
+    ).toBeNull();
   });
 });
 

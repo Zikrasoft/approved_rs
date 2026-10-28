@@ -12,7 +12,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import Icon from '@/components/Icon.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
-import PartsSearchForm from '@/components/PartsSearchForm.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
@@ -30,6 +30,12 @@ import {
 import { currentNumber } from '@/utils/partNumbers';
 import { carName } from '@/utils/carName';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import {
+  carLink,
+  exactPart,
+  searchIntent,
+  vinDestination,
+} from '@/utils/catalogueSearch';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -54,7 +60,19 @@ const offset = Math.max(
 const catalogue = catalogueFromEnv(siteEnv(), {
   preview: previewRequested(Astro.request),
 });
-const searchable = searchableQuery(q) || Boolean(category);
+const intent = searchIntent(q);
+const vin = intent.kind === 'vin' ? intent.vin : null;
+if (vin && catalogue) {
+  const destination = vinDestination(
+    await catalogue.resolveVin(vin),
+    vin,
+    locale,
+  );
+  if (destination) {
+    return Astro.redirect(destination, 303);
+  }
+}
+const searchable = !vin && (searchableQuery(q) || Boolean(category));
 const found =
   searchable && catalogue
     ? await catalogue.search({
@@ -98,6 +116,14 @@ const searchHref = (
 if (found && offset > lastPage) {
   return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }
+const exact =
+  found && !category && !model && !chosen.length && !ranges.length && !offset
+    ? exactPart(q, found.results)
+    : null;
+if (exact) {
+  return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
+}
+const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const scope =
   found ??
   (catalogue && (category || model)
@@ -188,10 +214,31 @@ const scopeHidden = {
   />
 
   <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
-    {!found && <PartsSearchForm query={q} category={category} titled={false} />}
+    {
+      !found && (
+        <CatalogueSearch
+          query={q}
+          category={category}
+          large
+          hint={false}
+          class="max-w-3xl"
+        />
+      )
+    }
 
     {
-      !searchable && (
+      vin && (
+        <p
+          role="status"
+          class="max-w-2xl rounded-field bg-shade p-4 text-sm leading-relaxed text-ink"
+        >
+          {content(locale).partsCar.vin.unresolved}
+        </p>
+      )
+    }
+
+    {
+      !searchable && !vin && (
         <p class="max-w-2xl text-base leading-relaxed text-ink-2">
           {copy.emptyQuery}
         </p>
@@ -220,7 +267,34 @@ const scopeHidden = {
           )}
 
           <div class="flex min-w-0 flex-col gap-3">
-            <PartsSearchForm query={q} category={category} compact />
+            <CatalogueSearch query={q} category={category} />
+            {cars.length > 0 && (
+              <section class="flex flex-col gap-2 pt-2">
+                <h2 class="text-base font-semibold text-ink">
+                  {copy.carsGroup}
+                </h2>
+                <ul class="flex flex-wrap gap-2">
+                  {cars.map((car) => (
+                    <li>
+                      <a
+                        href={car.href}
+                        class="flex min-h-11 flex-col justify-center rounded-field border border-line bg-paper px-4 py-2 transition-colors duration-150 hover:border-ink motion-reduce:transition-none"
+                      >
+                        <span class="text-sm font-semibold text-ink">
+                          {car.label}
+                        </span>
+                        {car.detail && (
+                          <span class="text-xs text-muted">{car.detail}</span>
+                        )}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <h2 class="pt-3 text-base font-semibold text-ink">
+                  {copy.partsGroup}
+                </h2>
+              </section>
+            )}
             <ListingBar
               count={found.count}
               filters={facets.length > 0}
@@ -334,7 +408,7 @@ const scopeHidden = {
     }
 
     {
-      (unavailable || found?.results.length === 0) && (
+      (vin || unavailable || found?.results.length === 0) && (
         <div id="lead" class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6">
           <h2 class="text-block font-semibold">{copy.formHeading}</h2>
           <LeadForm
@@ -342,8 +416,9 @@ const scopeHidden = {
             vin={{
               label: partsInquiry.vinLabel,
               placeholder: partsInquiry.vinPlaceholder,
+              value: vin ?? undefined,
             }}
-            comment={`${inquiryTopic}: `}
+            comment={vin ? '' : `${inquiryTopic}: `}
             commentLabel={partsInquiry.commentLabel}
             commentPlaceholder={partsInquiry.commentPlaceholder}
             commentNote={partsInquiry.commentNote}

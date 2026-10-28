@@ -6,11 +6,13 @@ import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
+import CatalogueSearch from './CatalogueSearch.astro';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
+const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
 
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
@@ -47,7 +49,9 @@ const links = [
   <header
     class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur"
   >
-    <div class="wrap flex h-[4.5rem] items-center justify-between gap-4">
+    <div
+      class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
+    >
       <a
         href={PathBuilder.home(locale)}
         class="shrink-0"
@@ -79,7 +83,7 @@ const links = [
         }
       </nav>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1 sm:gap-2">
         <carlab-lang class="hidden items-center gap-1 lg:flex">
           {
             SUPPORTED_LOCALES.map((code) => (
@@ -110,6 +114,15 @@ const links = [
           <span class="spec text-xs">{site.header.phoneLabel}</span>
         </ContactControl>
 
+        <a
+          href={PathBuilder.partsSearch(locale)}
+          data-search-open
+          aria-label={searchCopy.openSearch}
+          class="flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+        >
+          <Icon name="search" size={20} />
+        </a>
+
         <cart-badge
           class="block"
           {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
@@ -131,7 +144,7 @@ const links = [
         <button
           type="button"
           data-open-lead-modal
-          class="btn btn-primary h-10 py-0"
+          class="btn btn-primary h-10 py-0 max-sm:px-4"
         >
           {site.header.cta}
         </button>
@@ -157,6 +170,25 @@ const links = [
       </div>
     </div>
   </header>
+
+  <div
+    id="site-search"
+    popover
+    class="inset-x-0 top-0 bottom-auto m-0 w-full max-w-none overflow-visible border-0 border-b border-line bg-paper p-0 text-ink shadow-lg backdrop:bg-ink/20"
+  >
+    <div class="wrap flex items-start gap-2 py-3">
+      <CatalogueSearch class="min-w-0 flex-1" />
+      <button
+        type="button"
+        popovertarget="site-search"
+        popovertargetaction="hide"
+        aria-label={searchCopy.closeSearch}
+        class="flex size-11 shrink-0 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+      >
+        <Icon name="close" size={16} />
+      </button>
+    </div>
+  </div>
 
   <div
     id="site-menu"
@@ -222,4 +254,18 @@ const links = [
   defineCartBadge();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
+
+  const searchPanel = document.getElementById('site-search');
+  const searchOpener = document.querySelector('[data-search-open]');
+  if (searchPanel && searchOpener && 'showPopover' in searchPanel) {
+    searchOpener.addEventListener('click', (event) => {
+      event.preventDefault();
+      searchPanel.showPopover();
+    });
+    searchPanel.addEventListener('toggle', (event) => {
+      if ((event as ToggleEvent).newState === 'open') {
+        searchPanel.querySelector('input')?.focus();
+      }
+    });
+  }
 </script>

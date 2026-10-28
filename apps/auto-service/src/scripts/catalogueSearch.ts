@@ -68,7 +68,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           anchor.setAttribute('aria-selected', 'false');
           anchor.dataset.group = group;
           anchor.className =
-            'flex min-h-11 items-center gap-3 rounded-control px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
+            'flex min-h-11 items-center gap-3 rounded-field px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
           if ('thumb' in link) {
             const thumb = document.createElement(link.thumb ? 'img' : 'span');
             thumb.className =

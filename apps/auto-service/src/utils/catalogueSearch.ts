@@ -2,11 +2,13 @@ import {
   normalizePartNumber,
   vinSchema,
   type CarHit,
+  type VinFacts,
 } from '@podbor/catalog-contract';
 import type { Locale } from '@/i18n/config';
 import { carName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';
-import { PathBuilder, vehiclePath } from './paths';
+import { carFactsQuery } from './carFacts';
+import { PathBuilder, vehiclePath, type VehicleAddress } from './paths';
 
 export type SearchIntent = { kind: 'vin'; vin: string } | { kind: 'query' };
 
@@ -14,6 +16,20 @@ export const searchIntent = (q: string): SearchIntent => {
   const vin = vinSchema.safeParse(q);
   return vin.success ? { kind: 'vin', vin: vin.data } : { kind: 'query' };
 };
+
+type ResolvedVin =
+  | { kind: 'vehicle'; vehicle: VehicleAddress; facts: VinFacts }
+  | { kind: 'inquiry' };
+
+// TODO: open the Model page when the Vehicle has none, once the page-existence predicates land in @podbor/catalog-contract.
+export const vinDestination = (
+  outcome: ResolvedVin,
+  vin: string,
+  locale: Locale,
+): string | null =>
+  outcome.kind === 'vehicle'
+    ? `${vehiclePath(locale, outcome.vehicle)}${carFactsQuery(outcome.facts, vin)}`
+    : null;
 
 type PartResult = SearchOutcome['results'][number];
 
