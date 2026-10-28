@@ -32,7 +32,8 @@ export async function POST(
     name !== undefined ||
     description !== undefined ||
     installation_price !== undefined ||
-    no_installation !== undefined
+    no_installation !== undefined ||
+    category_id !== undefined
   ) {
     await catalog.updateParts({
       id,
@@ -45,6 +46,7 @@ export async function POST(
           ...current.edited_fields,
           ...(name === undefined ? [] : ['name']),
           ...(description === undefined ? [] : ['description']),
+          ...(category_id === undefined ? [] : ['category_id']),
         ]),
       ],
       updated_by,

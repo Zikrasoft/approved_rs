@@ -536,6 +536,47 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('files a Part it left without a Category once a later import classifies it', async () => {
+        intercars.articles.push({
+          article_id: 'IC-26',
+          brand: 'MANN-FILTER',
+          number: 'W 990',
+          name: 'Фильтр W990',
+          category: 'Filteri',
+          specs: { Visina: '80 mm' },
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        shopAi.failure = null;
+        shopAi.category = oilFiltersId;
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({ needs_category: [] });
+        expect((await page('W990'))?.part.category_id).toBe(oilFiltersId);
+      });
+
+      it('names a Part a later import still cannot file in the summary', async () => {
+        intercars.articles.push({
+          article_id: 'IC-27',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          name: 'Масло моторное 0W-20',
+          category: 'Filteri',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        shopAi.failure = null;
+        shopAi.category = engineOilId;
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: ['OIL 0W20'],
+        });
+        expect((await page('OIL0W20'))?.part.category_id).toBeNull();
+      });
+
       it('writes an imported description once and never over a hand edit', async () => {
         intercars.articles.push(
           {

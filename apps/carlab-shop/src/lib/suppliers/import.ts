@@ -165,6 +165,34 @@ async function classify(
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
 
+const unlessRefused =
+  <T>(retry: () => Promise<T>) =>
+  (error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    return retry();
+  };
+
+async function filed<T>(
+  classification: PartClassification,
+  write: (attempt: PartClassification) => Promise<T>,
+  unfiled: () => Promise<T>,
+): Promise<{ written: T; categorized: boolean }> {
+  let categorized = Boolean(classification.category_id);
+  const written = await write(classification)
+    .catch(
+      unlessRefused(() =>
+        write({ category_id: classification.category_id, attributes: {} }),
+      ),
+    )
+    .catch(
+      unlessRefused(() => {
+        categorized = false;
+        return unfiled();
+      }),
+    );
+  return { written, categorized };
+}
+
 async function createPart(
   context: Context,
   article: Article,
@@ -174,7 +202,6 @@ async function createPart(
   const { adapter, catalog } = context;
   const name = await nameOf(context, article);
   const classification = await classify(context, article, mappedCategoryId);
-  let categoryId = classification.category_id;
   const part = {
     name: name ?? article.name,
     source_name: name && article.name,
@@ -182,7 +209,7 @@ async function createPart(
       context,
       article,
       name ?? article.name,
-      categoryId,
+      classification.category_id,
     ),
     identifiers: [
       {
@@ -195,24 +222,29 @@ async function createPart(
   };
   const create = (attempt: Partial<PartClassification>) =>
     catalog.createPartWithIdentifiers({ ...part, ...attempt });
-  const unlessRefused = (retry: () => Promise<string>) => (error: unknown) => {
-    if (!refusedAttributes(error)) throw error;
-    return retry();
-  };
-  const partId = await create(classification)
-    .catch(unlessRefused(() => create({ category_id: categoryId })))
-    .catch(
-      unlessRefused(() => {
-        categoryId = null;
-        return create({});
-      }),
-    );
+  const { written: partId, categorized } = await filed(
+    classification,
+    create,
+    () => create({}),
+  );
   const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return {
-    identifierId: identifier.id,
-    partId,
-    categorized: Boolean(categoryId),
-  };
+  return { identifierId: identifier.id, partId, categorized };
+}
+
+async function fileUnfiled(
+  context: Context,
+  article: Article,
+  partId: string,
+  mappedCategoryId: string | undefined,
+): Promise<string | null> {
+  const classification = await classify(context, article, mappedCategoryId);
+  if (!classification.category_id) return null;
+  const { categorized } = await filed(
+    classification,
+    (attempt) => context.catalog.classifyPart(partId, attempt),
+    async () => undefined,
+  );
+  return categorized ? classification.category_id : null;
 }
 
 async function matchArticle(
@@ -256,6 +288,12 @@ async function matchArticle(
     return unchanged;
   }
   const edited = new Set(part.edited_fields);
+  const filedCategoryId =
+    part.category_id || edited.has('category_id')
+      ? undefined
+      : await fileUnfiled(context, article, part.id, categoryId);
+  const categorized =
+    filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
   const name =
     edited.has('name') ||
     context.matched.has(hit.id) ||
@@ -265,16 +303,25 @@ async function matchArticle(
   const description =
     edited.has('description') || part.description
       ? null
-      : await describe(context, article, name ?? part.name, part.category_id);
+      : await describe(
+          context,
+          article,
+          name ?? part.name,
+          filedCategoryId ?? part.category_id,
+        );
   if (!name && !description) {
-    return unchanged;
+    return {
+      ...unchanged,
+      categorized,
+      ...(filedCategoryId && { changedPartId: part.id }),
+    };
   }
   await catalog.updateParts({
     id: part.id,
     ...(name && { name, source_name: article.name }),
     ...(description && { description }),
   });
-  return { ...unchanged, changedPartId: part.id };
+  return { ...unchanged, categorized, changedPartId: part.id };
 }
 
 async function storeOffer(
