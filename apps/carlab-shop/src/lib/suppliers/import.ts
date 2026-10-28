@@ -4,7 +4,6 @@ import {
   MedusaError,
 } from '@medusajs/framework/utils';
 import {
-  type AttributeValues,
   normalizePartNumber,
   STAGED_DATA_KINDS,
 } from '@podbor/catalog-contract';
@@ -20,12 +19,14 @@ import { SUPPLIER_MODULE } from '../../modules/supplier';
 import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
+  type ArticleAnswer,
   type ArticleFacts,
   type CategoryChoice,
   type CategoryFieldChoice,
   shopAi,
   type ShopAi,
 } from '../ai';
+import { cachedArticleAnswer } from '../ai/cache';
 import {
   cataloguePageSchema,
   type SupplierAdapter,
@@ -104,74 +105,83 @@ async function orElse<T>(
   }
 }
 
-async function fieldsOf(
+async function categoryChoices(
   catalog: CatalogModuleService,
-  categoryId: string,
-): Promise<CategoryFieldChoice[]> {
-  const fields = await catalog.listCategoryFields(
-    { category_id: categoryId },
-    { relations: ['options'], take: null },
-  );
-  return fields.map(({ key, label, type, unit, required, options }) => ({
-    key,
-    label,
-    type,
-    unit,
-    required,
-    options: options.map((option) => ({
-      key: option.key,
-      label: option.label,
-    })),
+): Promise<CategoryChoice[]> {
+  const [categories, fields] = await Promise.all([
+    catalog.listCategories({}, { select: ['id', 'name', 'text'], take: null }),
+    catalog.listCategoryFields({}, { relations: ['options'], take: null }),
+  ]);
+  return categories.map(({ id, name, text }) => ({
+    id,
+    name,
+    text,
+    fields: fields
+      .filter(({ category_id }) => category_id === id)
+      .map(
+        ({
+          key,
+          label,
+          type,
+          unit,
+          required,
+          options,
+        }): CategoryFieldChoice => ({
+          key,
+          label,
+          type,
+          unit,
+          required,
+          options: options.map((option) => ({
+            key: option.key,
+            label: option.label,
+          })),
+        }),
+      ),
   }));
 }
 
-const categoryName = ({ categories }: Context, categoryId: string | null) =>
-  categories.find(({ id }) => id === categoryId)?.name ?? null;
-
-const describe = (
+const answerOf = (
   context: Context,
   article: Article,
-  name: string,
   categoryId: string | null,
 ) =>
-  article.description || article.specs
-    ? orElse(
-        context,
-        article,
-        () =>
-          context.ai.writeDescription(factsOf(article), {
-            name,
-            category: categoryName(context, categoryId),
-          }),
-        null,
-      )
-    : Promise.resolve(null);
+  orElse(
+    context,
+    article,
+    () =>
+      cachedArticleAnswer(
+        context.ai,
+        context.storage?.pages ?? null,
+        { ...factsOf(article), category_id: categoryId },
+        context.categories,
+      ),
+    null,
+  );
 
-const nameOf = (context: Context, article: Article) =>
-  orElse(context, article, () => context.ai.writeName(factsOf(article)), null);
+const lazily = <T>(run: () => Promise<T>) => {
+  let running: Promise<T> | undefined;
+  return () => (running ??= run());
+};
 
-async function classify(
-  context: Context,
+function classificationOf(
+  { categories }: Context,
   article: Article,
   mappedCategoryId: string | undefined,
-): Promise<{ category_id: string | null; attributes: AttributeValues }> {
-  const { ai, catalog, categories } = context;
-  const categoryId =
-    mappedCategoryId ??
-    (await orElse(
-      context,
-      article,
-      () => ai.pickCategory(factsOf(article), categories),
-      null,
-    ));
-  const { specs } = article;
-  const fields = categoryId && specs ? await fieldsOf(catalog, categoryId) : [];
-  const attributes =
-    specs && fields.length
-      ? await orElse(context, article, () => ai.mapSpecs(specs, fields), {})
-      : {};
-  return { category_id: categoryId, attributes };
+  answer: ArticleAnswer | null,
+): PartClassification {
+  const picked = categories.find(({ id }) => id === answer?.category_id);
+  const categoryId = mappedCategoryId ?? picked?.id ?? null;
+  const mapped =
+    answer && categoryId && article.specs && answer.category_id === categoryId;
+  return {
+    category_id: categoryId,
+    attributes: mapped ? answer.attributes : {},
+  };
 }
+
+const descriptionOf = (article: Article, answer: ArticleAnswer | null) =>
+  article.description || article.specs ? (answer?.description ?? null) : null;
 
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
@@ -211,17 +221,17 @@ async function createPart(
   mappedCategoryId: string | undefined,
 ): Promise<FoundPart & { categorized: boolean }> {
   const { adapter, catalog } = context;
-  const name = await nameOf(context, article);
-  const classification = await classify(context, article, mappedCategoryId);
+  const answer = await answerOf(context, article, mappedCategoryId ?? null);
+  const classification = classificationOf(
+    context,
+    article,
+    mappedCategoryId,
+    answer,
+  );
   const part = {
-    name: name ?? article.name,
-    source_name: name && article.name,
-    description: await describe(
-      context,
-      article,
-      name ?? article.name,
-      classification.category_id,
-    ),
+    name: answer?.name ?? article.name,
+    source_name: answer && article.name,
+    description: descriptionOf(article, answer),
     identifier: {
       type: 'manufacturer-number' as const,
       brand_id: brandId,
@@ -239,11 +249,9 @@ async function createPart(
 
 async function fileUnfiled(
   context: Context,
-  article: Article,
   partId: string,
-  mappedCategoryId: string | undefined,
+  classification: PartClassification,
 ): Promise<string | null> {
-  const classification = await classify(context, article, mappedCategoryId);
   if (!classification.category_id) return null;
   const { categorized } = await filed(
     classification,
@@ -291,10 +299,21 @@ async function matchArticle(
     return unchanged;
   }
   const edited = new Set(part.edited_fields);
-  const filedCategoryId =
-    part.category_id || edited.has('category_id')
-      ? undefined
-      : await fileUnfiled(context, article, part.id, categoryId);
+  const fileable = !part.category_id && !edited.has('category_id');
+  const answer = lazily(() =>
+    answerOf(
+      context,
+      article,
+      part.category_id ?? (fileable ? (categoryId ?? null) : null),
+    ),
+  );
+  const filedCategoryId = fileable
+    ? await fileUnfiled(
+        context,
+        part.id,
+        classificationOf(context, article, categoryId, await answer()),
+      )
+    : undefined;
   const categorized =
     filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
   const name =
@@ -302,16 +321,11 @@ async function matchArticle(
     context.matched.has(hit.id) ||
     part.source_name === article.name
       ? null
-      : await nameOf(context, article);
+      : ((await answer())?.name ?? null);
   const description =
     edited.has('description') || part.description
       ? null
-      : await describe(
-          context,
-          article,
-          name ?? part.name,
-          filedCategoryId ?? part.category_id,
-        );
+      : descriptionOf(article, await answer());
   if (!name && !description) {
     return {
       ...unchanged,
@@ -454,12 +468,7 @@ export async function importSupplier(
     catalog,
     suppliers,
     ai: shopAi(scope),
-    categories: (
-      await catalog.listCategories(
-        {},
-        { select: ['id', 'name', 'text'], take: null },
-      )
-    ).map(({ id, name, text }) => ({ id, name, text })),
+    categories: await categoryChoices(catalog),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
     vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),

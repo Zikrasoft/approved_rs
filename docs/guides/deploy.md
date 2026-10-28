@@ -825,6 +825,12 @@ validates everything at startup. The non-obvious parts:
   pushed, so the token cannot ship code that is not in the repository. Give it
   the shortest expiry you are willing to rotate, and revoke it at
   Settings → Developer settings at the first sign the server is compromised.
+- `OPENAI_API_KEY` also answers a Supplier Import's one question per new
+  article (Russian name, Category, attributes, description), on
+  `OPENAI_IMPORT_MODEL` (empty means `gpt-4o-mini`). Answers are cached in the
+  private bucket under `ai-answers/`, keyed by prompt, model and article, so a
+  rerun or a rebuilt database asks nothing twice; changing the model or the
+  prompt asks again. Without S3 nothing is cached.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
   front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
   passwords cannot be guessed from the internet. The hash is bcrypt, made
