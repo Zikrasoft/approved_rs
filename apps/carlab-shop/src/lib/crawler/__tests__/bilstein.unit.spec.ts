@@ -42,6 +42,7 @@ describe('bilstein group partsfinder', () => {
     expect(bilstein.fetchMode).toBe('browser');
     expect(bilstein.waitFor).toBe('#detail-page-applications');
     expect(bilstein.interact).toBeDefined();
+    expect(bilstein.locale).toBe('sr-RS');
   });
 
   it('reads a febi brake disc with its criteria, OE numbers, images and vehicles', () => {
@@ -186,6 +187,51 @@ describe('bilstein group partsfinder', () => {
       brand: 'Jeep',
       number: 'K68032204AA',
     });
+  });
+
+  it('reads the fuel and body of a vehicle list the site sent in English', () => {
+    const english: Record<string, string> = {
+      benzin: 'Petrol',
+      Dizel: 'Diesel',
+      limuzina: 'Saloon',
+      'kombi vozilo': 'Estate',
+      'kosa zadnja strana vozila': 'Hatchback',
+      kupe: 'Coupe',
+      'terensko vozilo': 'Off-Road Vehicle',
+      'Van (putničko vozilo)': 'Car Derived Van',
+    };
+    const serbian = page('swag-20-92-1466.html.gz');
+    const translated = serbian.replace(
+      /"(csvFuelTypes|body)":"([^"]*)"/gu,
+      (_, field: string, value: string) =>
+        `"${field}":"${value
+          .split(', ')
+          .map((part) => english[part] ?? part)
+          .join(', ')}"`,
+    );
+    expect(translated).not.toBe(serbian);
+
+    const vehicles = bilstein.parse(translated)?.vehicles;
+
+    expect(vehicles).toEqual(bilstein.parse(serbian)?.vehicles);
+    expect(vehicles).toContainEqual(
+      expect.objectContaining({ fuel: 'petrol', body_style: 'sedan' }),
+    );
+  });
+
+  it('keeps a ball joint whose name goes on past the word kugla, not a ball bearing', () => {
+    const named = (name: string) =>
+      bilstein.parse(
+        page('febi-27699.html.gz').replace(
+          '27699 | kočioni disk |',
+          `27699 | ${name} |`,
+        ),
+      )?.name ?? null;
+    const ballJoint =
+      'kugla sa krunastom navrtkom, rascepkom i sigurnosnim prstenom';
+    expect(named(ballJoint)).toBe(ballJoint);
+    expect(named('kugla')).toBe('kugla');
+    expect(named('kuglasti ležaj')).toBe(null);
   });
 
   it('skips an article outside the covered families and a page that is not an article', () => {

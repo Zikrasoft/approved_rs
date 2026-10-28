@@ -50,6 +50,7 @@ export type ImportSummary = {
     currency: number;
     unreadable: number;
     no_engine_code: number;
+    not_in_scope: number;
   };
   needs_category: string[];
 };
@@ -113,12 +114,24 @@ async function fieldsOf(
   }));
 }
 
-const describe = (context: Context, article: Article) =>
+const categoryName = ({ categories }: Context, categoryId: string | null) =>
+  categories.find(({ id }) => id === categoryId)?.name ?? null;
+
+const describe = (
+  context: Context,
+  article: Article,
+  name: string,
+  categoryId: string | null,
+) =>
   article.description || article.specs
     ? orElse(
         context,
         article,
-        () => context.ai.writeDescription(factsOf(article)),
+        () =>
+          context.ai.writeDescription(factsOf(article), {
+            name,
+            category: categoryName(context, categoryId),
+          }),
         null,
       )
     : Promise.resolve(null);
@@ -152,6 +165,34 @@ async function classify(
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
 
+const unlessRefused =
+  <T>(retry: () => Promise<T>) =>
+  (error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    return retry();
+  };
+
+async function filed<T>(
+  classification: PartClassification,
+  write: (attempt: PartClassification) => Promise<T>,
+  unfiled: () => Promise<T>,
+): Promise<{ written: T; categorized: boolean }> {
+  let categorized = Boolean(classification.category_id);
+  const written = await write(classification)
+    .catch(
+      unlessRefused(() =>
+        write({ category_id: classification.category_id, attributes: {} }),
+      ),
+    )
+    .catch(
+      unlessRefused(() => {
+        categorized = false;
+        return unfiled();
+      }),
+    );
+  return { written, categorized };
+}
+
 async function createPart(
   context: Context,
   article: Article,
@@ -160,10 +201,16 @@ async function createPart(
 ): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
   const { adapter, catalog } = context;
   const name = await nameOf(context, article);
+  const classification = await classify(context, article, mappedCategoryId);
   const part = {
     name: name ?? article.name,
     source_name: name && article.name,
-    description: await describe(context, article),
+    description: await describe(
+      context,
+      article,
+      name ?? article.name,
+      classification.category_id,
+    ),
     identifiers: [
       {
         type: 'manufacturer-number' as const,
@@ -173,28 +220,31 @@ async function createPart(
     ],
     source: adapter.name,
   };
-  const classification = await classify(context, article, mappedCategoryId);
-  let categoryId = classification.category_id;
   const create = (attempt: Partial<PartClassification>) =>
     catalog.createPartWithIdentifiers({ ...part, ...attempt });
-  const unlessRefused = (retry: () => Promise<string>) => (error: unknown) => {
-    if (!refusedAttributes(error)) throw error;
-    return retry();
-  };
-  const partId = await create(classification)
-    .catch(unlessRefused(() => create({ category_id: categoryId })))
-    .catch(
-      unlessRefused(() => {
-        categoryId = null;
-        return create({});
-      }),
-    );
+  const { written: partId, categorized } = await filed(
+    classification,
+    create,
+    () => create({}),
+  );
   const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return {
-    identifierId: identifier.id,
-    partId,
-    categorized: Boolean(categoryId),
-  };
+  return { identifierId: identifier.id, partId, categorized };
+}
+
+async function fileUnfiled(
+  context: Context,
+  article: Article,
+  partId: string,
+  mappedCategoryId: string | undefined,
+): Promise<string | null> {
+  const classification = await classify(context, article, mappedCategoryId);
+  if (!classification.category_id) return null;
+  const { categorized } = await filed(
+    classification,
+    (attempt) => context.catalog.classifyPart(partId, attempt),
+    async () => undefined,
+  );
+  return categorized ? classification.category_id : null;
 }
 
 async function matchArticle(
@@ -238,6 +288,12 @@ async function matchArticle(
     return unchanged;
   }
   const edited = new Set(part.edited_fields);
+  const filedCategoryId =
+    part.category_id || edited.has('category_id')
+      ? undefined
+      : await fileUnfiled(context, article, part.id, categoryId);
+  const categorized =
+    filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
   const name =
     edited.has('name') ||
     context.matched.has(hit.id) ||
@@ -247,16 +303,25 @@ async function matchArticle(
   const description =
     edited.has('description') || part.description
       ? null
-      : await describe(context, article);
+      : await describe(
+          context,
+          article,
+          name ?? part.name,
+          filedCategoryId ?? part.category_id,
+        );
   if (!name && !description) {
-    return unchanged;
+    return {
+      ...unchanged,
+      categorized,
+      ...(filedCategoryId && { changedPartId: part.id }),
+    };
   }
   await catalog.updateParts({
     id: part.id,
     ...(name && { name, source_name: article.name }),
     ...(description && { description }),
   });
-  return { ...unchanged, changedPartId: part.id };
+  return { ...unchanged, categorized, changedPartId: part.id };
 }
 
 async function storeOffer(
@@ -349,8 +414,11 @@ export async function importSupplier(
     suppliers,
     ai: shopAi(scope),
     categories: (
-      await catalog.listCategories({}, { select: ['id', 'name'], take: null })
-    ).map(({ id, name }) => ({ id, name })),
+      await catalog.listCategories(
+        {},
+        { select: ['id', 'name', 'text'], take: null },
+      )
+    ).map(({ id, name, text }) => ({ id, name, text })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
     vehicles: vehicleMatcher(catalog, adapter.name),
@@ -382,6 +450,7 @@ export async function importSupplier(
       currency: 0,
       unreadable: 0,
       no_engine_code: 0,
+      not_in_scope: 0,
     },
     needs_category: [],
   };
@@ -401,6 +470,8 @@ export async function importSupplier(
     }
     summary.skipped += page.unreadable.length;
     summary.skipped_by_reason.unreadable += page.unreadable.length;
+    summary.skipped += page.not_in_scope;
+    summary.skipped_by_reason.not_in_scope += page.not_in_scope;
     const wanted = page.articles.filter(brandOfArticle);
     const unbranded = page.articles.length - wanted.length;
     summary.skipped += unbranded;

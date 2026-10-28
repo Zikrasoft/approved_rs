@@ -25,6 +25,7 @@ const brandOf = ($: CheerioAPI): string | null => {
 };
 
 const SPARE_PART = /^MANN\+HUMMEL Spare Part$/iu;
+const OTHER_FAMILY = '.cmp-product__title-section--family-other';
 
 const SPEC_PAIR = /^(.+?)\s*[=:]+\s*(.+)$/u;
 const MAIN_APPLICATION = /^(main application|glavna primena)\b/iu;
@@ -86,6 +87,15 @@ const yearsOf = (text: string) => {
 
 const count = (text: string | undefined) => Number(text) || null;
 
+const OFF_ROAD_MAKE = /\b(?:ENGINES|MOTORCYCLES?|MARINE|TRACTORS?)\b/u;
+
+const OFF_ROAD_MAKER =
+  /^(?:AGCO|BOMAG|CASE IH|CATERPILLAR|CLAAS|DEUTZ-FAHR|DOOSAN|DYNAPAC|FENDT|HAMM|HYSTER|IMT|JCB|JOHN DEERE|JUNGHEINRICH|KOMATSU|KUBOTA|LIEBHERR|MANITOU|MASSEY FERGUSON|NEW HOLLAND|PERKINS|PRINOTH|TAKEUCHI|VALTRA|WACKER NEUSON|YANMAR|ZETOR)\b/u;
+
+const onTheRoad = ({ make }: VehicleFacts) =>
+  !OFF_ROAD_MAKE.test(make.toUpperCase()) &&
+  !OFF_ROAD_MAKER.test(make.toUpperCase());
+
 const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
   each($, $('#applications .cmp-application-table')).flatMap((table) => {
     const [series, make] = each($, table.parents('.cmp-accordion__item')).map(
@@ -136,6 +146,9 @@ export const parseMannHummelProduct = (
   if (!articleId || !number || !brand || SPARE_PART.test(category)) {
     return null;
   }
+  const applications = vehiclesOf($);
+  if (!applications.length && $(OTHER_FAMILY).length) return null;
+  const vehicles = applications.filter(onTheRoad);
   const description = words($('.cmp-product__description-text').first().text());
   return {
     article_id: articleId,
@@ -146,7 +159,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles: vehiclesOf($),
+    vehicles,
     images: imagesOf($),
   };
 };

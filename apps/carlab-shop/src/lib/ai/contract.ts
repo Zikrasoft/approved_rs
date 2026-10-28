@@ -32,15 +32,24 @@ export const specsMappingSchema = z.object({
   attributes: attributeValuesSchema,
 });
 
-export const descriptionSchema = z.object({
-  description: z.string().trim().min(1),
-});
+const mixesScripts = (word: string) =>
+  /\p{Script=Latin}/u.test(word) && /\p{Script=Cyrillic}/u.test(word);
 
-export const nameSchema = z.object({
-  name: z.string().trim().min(1),
-});
+const russianText = z
+  .string()
+  .trim()
+  .min(1)
+  .refine((text) => !(text.match(/\p{L}+/gu) ?? []).some(mixesScripts), {
+    error: 'a word mixes Latin and Cyrillic letters',
+  });
 
-export type CategoryChoice = { id: string; name: string };
+export const descriptionSchema = z.object({ description: russianText });
+
+export const nameSchema = z.object({ name: russianText });
+
+export type CategoryChoice = { id: string; name: string; text?: string };
+
+export type PlacedPart = { name: string; category: string | null };
 
 export type CategoryFieldChoice = {
   key: string;
@@ -72,6 +81,9 @@ export type ShopAi = {
     specs: Record<string, string>,
     fields: CategoryFieldChoice[],
   ) => Promise<AttributeValues>;
-  writeDescription: (article: ArticleFacts) => Promise<string>;
+  writeDescription: (
+    article: ArticleFacts,
+    placed: PlacedPart,
+  ) => Promise<string>;
   writeName: (article: ArticleFacts) => Promise<string>;
 };

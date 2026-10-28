@@ -77,7 +77,7 @@ describe('VARTA', () => {
     ]);
   });
 
-  it('reads a page without a description', () => {
+  it('reads a RED TOP page without a description as an AGM battery', () => {
     const article = supplierArticleSchema.parse(
       varta.parse(page('8032510008882.html.gz')),
     );
@@ -91,7 +91,7 @@ describe('VARTA', () => {
       },
     });
     expect(article).not.toHaveProperty('description');
-    expect(article.specs).not.toHaveProperty('Tehnologija');
+    expect(article.specs).toMatchObject({ Tehnologija: 'AGM' });
     expect(article.images).toHaveLength(4);
   });
 
@@ -99,6 +99,14 @@ describe('VARTA', () => {
     const html = page('574013068k262.html.gz').replaceAll(
       'DYNAMIC SLI 574013068',
       'SILVER DYNAMIC AGM 574013068',
+    );
+    expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
+  });
+
+  it('reads a YELLOW TOP as an AGM battery', () => {
+    const html = page('8032510008882.html.gz').replaceAll(
+      'RED TOP 803251000',
+      'YELLOW TOP 814254000',
     );
     expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
   });

@@ -124,10 +124,15 @@ describe('MANN-FILTER', () => {
   });
 
   it('reads a spec the site writes with a doubled colon', () => {
-    const html = page('0101410065.html.gz').replace(
-      'cmp-product__title-family">MANN+HUMMEL Spare Part',
-      'cmp-product__title-family">Oil Filter',
-    );
+    const html = page('0101410065.html.gz')
+      .replace(
+        'cmp-product__title-family">MANN+HUMMEL Spare Part',
+        'cmp-product__title-family">Oil Filter',
+      )
+      .replace(
+        'cmp-product__title-section--family-other',
+        'cmp-product__title-section--family-o',
+      );
     expect(mannFilter.parse(html)?.specs).toEqual({
       'Spare part description': 'HEXAGON SCREW M10_65.0_',
     });
@@ -135,6 +140,15 @@ describe('MANN-FILTER', () => {
 
   it('reads nothing from a MANN+HUMMEL spare part page, a screw or a plug for a filter housing', () => {
     expect(mannFilter.parse(page('0101410065.html.gz'))).toBe(null);
+  });
+
+  it('reads nothing from an industrial filter page that fits no vehicle, a spark erosion filter', () => {
+    expect(mannFilter.parse(page('h341158-22.html.gz'))).toBe(null);
+  });
+
+  it('fits a filter for excavators and loaders to no vehicle', () => {
+    const article = mannFilter.parse(page('p5005.html.gz'));
+    expect(article).toMatchObject({ number: 'P 5005', vehicles: [] });
   });
 
   it('reads nothing from a page that is not a product', () => {

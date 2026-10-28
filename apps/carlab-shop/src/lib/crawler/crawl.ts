@@ -29,7 +29,7 @@ export type Clock = {
 
 export type CrawlDeps = {
   store: CrawlStore;
-  openFetcher: (mode: FetchMode) => Fetcher;
+  openFetcher: (mode: FetchMode, locale?: string) => Fetcher;
   clock: Clock;
   from?: string;
   random?: () => number;
@@ -57,9 +57,11 @@ export async function crawlSite(
   site: CrawledSite,
   { store, openFetcher, clock, from, random = Math.random }: CrawlDeps,
 ): Promise<void> {
-  const http = openFetcher('http');
+  const http = openFetcher('http', site.locale);
   const pages =
-    (site.fetchMode ?? 'http') === 'http' ? http : openFetcher('browser');
+    (site.fetchMode ?? 'http') === 'http'
+      ? http
+      : openFetcher('browser', site.locale);
   try {
     await crawlWith(site, { store, clock, from, random, http, pages });
   } finally {

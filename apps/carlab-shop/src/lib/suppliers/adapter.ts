@@ -52,6 +52,7 @@ const unreadablePageSchema = z.object({ url: z.string(), reason: z.string() });
 export const cataloguePageSchema = z.object({
   articles: z.array(supplierArticleSchema),
   unreadable: z.array(unreadablePageSchema).default([]),
+  not_in_scope: z.number().int().nonnegative().default(0),
   next: z.string().nullable(),
 });
 

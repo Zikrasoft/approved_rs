@@ -79,6 +79,7 @@ const importSummarySchema = z.object({
     currency: z.number(),
     unreadable: z.number(),
     no_engine_code: z.number(),
+    not_in_scope: z.number(),
   }),
   needs_category: z.array(z.string()),
 });
@@ -271,6 +272,10 @@ const SuppliersPage = () => {
       summary.skipped_by_reason.unreadable > 0 &&
         t('suppliers.importUnreadable', {
           count: summary.skipped_by_reason.unreadable,
+        }),
+      summary.skipped_by_reason.not_in_scope > 0 &&
+        t('suppliers.importNotInScope', {
+          count: summary.skipped_by_reason.not_in_scope,
         }),
       summary.skipped_by_reason.currency > 0 &&
         t('suppliers.importWithoutPrice', {

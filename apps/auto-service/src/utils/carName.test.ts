@@ -80,4 +80,36 @@ describe('carName', () => {
       'BMW 3 серия F30 320d',
     );
   });
+
+  it('says a series once when the catalogue reused it as the chassis code and the model name repeats it', () => {
+    const bus = {
+      name: 'MB 200 DKDL',
+      chassis: {
+        code: 'MB',
+        series: {
+          name: 'MB',
+          translations: null,
+          make: { name: 'DAF BUS (VDL BUS GROUP)' },
+        },
+      },
+    };
+    expect(carName(bus, 'en')).toBe('DAF BUS (VDL BUS GROUP) MB 200 DKDL');
+    expect(
+      carName(
+        {
+          name: '1.6 GDI',
+          chassis: {
+            ...bus.chassis,
+            code: 'Veloster',
+            series: {
+              ...bus.chassis.series,
+              name: 'Veloster',
+              make: { name: 'HYUNDAI' },
+            },
+          },
+        },
+        'en',
+      ),
+    ).toBe('HYUNDAI Veloster 1.6 GDI');
+  });
 });

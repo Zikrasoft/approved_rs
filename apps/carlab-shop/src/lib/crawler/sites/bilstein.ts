@@ -19,7 +19,7 @@ export const BILSTEIN_FAMILIES = [
   'ramena',
   'spon[ae]',
   'aksijalni zglob',
-  'kugla$',
+  'kugla(?!\\p{L})',
   'kuglasti zglob',
   'stabilizator',
   'odbojn',
@@ -113,19 +113,27 @@ const attributesOf = ($: CheerioAPI) =>
 
 const FUELS: Record<string, NonNullable<VehicleFacts['fuel']>> = {
   dizel: 'diesel',
+  diesel: 'diesel',
   benzin: 'petrol',
+  petrol: 'petrol',
   hibrid: 'hybrid',
   elektro: 'electric',
 };
 
 const BODIES: Record<string, NonNullable<VehicleFacts['body_style']>> = {
   limuzina: 'sedan',
+  saloon: 'sedan',
   'kombi vozilo': 'touring',
+  estate: 'touring',
   'kosa zadnja strana vozila': 'hatchback',
+  hatchback: 'hatchback',
   kupe: 'coupe',
+  coupe: 'coupe',
   cabriolet: 'convertible',
   'terensko vozilo': 'suv',
+  'off-road vehicle': 'suv',
   'van (putničko vozilo)': 'van',
+  'car derived van': 'van',
   'kutijasto vozilo': 'van',
   autobus: 'van',
 };
@@ -339,6 +347,7 @@ export const bilstein: CrawledSite = {
   sitemaps: [`${ORIGIN}/sitemaps/sr/sitemap-index.xml`],
   floorMs: 5000,
   fetchMode: 'browser',
+  locale: 'sr-RS',
   waitFor: APPLICATIONS,
   interact: collectApplications,
   isPage: (url) => ARTICLE_PAGE.test(url),

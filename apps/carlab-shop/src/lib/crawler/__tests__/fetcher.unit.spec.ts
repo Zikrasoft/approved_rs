@@ -52,8 +52,8 @@ describe('crawleeFetcher', () => {
   let fetcher: Fetcher;
   let web: Awaited<ReturnType<typeof site>>;
   let attempts: number;
-  const open = (mode: FetchMode = 'http') => {
-    fetcher = crawleeFetcher(mode);
+  const open = (mode: FetchMode = 'http', locale?: string) => {
+    fetcher = crawleeFetcher(mode, locale);
     return fetcher;
   };
   const get = (path: string, headers?: Record<string, string>) =>
@@ -198,6 +198,15 @@ describe('crawleeFetcher', () => {
     expect(web.hits('/p/1').length).toBeGreaterThan(1);
   });
 
+  it("asks for the site's language when it names one", async () => {
+    web = await site({ '/p/1': html('<html>jedan</html>') });
+    open('http', 'sr-RS');
+
+    await get('/p/1');
+
+    expect(web.hits('/p/1')[0].headers['accept-language']).toBe('sr-RS');
+  });
+
   it('reports a host that does not answer as an error', async () => {
     web = await site({});
     const url = web.url('/p/1');
@@ -285,6 +294,33 @@ describe('crawleeFetcher', () => {
       expect(
         fetched.kind === 'response' && fetched.body.toString('utf8'),
       ).toContain('data-opened="yes"');
+    },
+  );
+
+  withBrowser(
+    "presents the site's language in the browser when it names one",
+    async () => {
+      web = await site({
+        '/p/1': html(
+          '<html><body><script>document.body.dataset.language = navigator.language</script></body></html>',
+        ),
+        '/api': html('{}'),
+      });
+      open('browser', 'sr-RS');
+
+      const fetched = await fetcher.fetch({
+        url: web.url('/p/1'),
+        interact: async (page) => {
+          await page.evaluate(() => fetch('/api'));
+        },
+        beforeAttempt: async () => {},
+      });
+
+      expect(
+        fetched.kind === 'response' && fetched.body.toString('utf8'),
+      ).toContain('data-language="sr-RS"');
+      expect(web.hits('/p/1')[0].headers['accept-language']).toBe('sr-RS');
+      expect(web.hits('/api')[0].headers['accept-language']).toBe('sr-RS');
     },
   );
 });

@@ -145,6 +145,7 @@ medusaIntegrationTestRunner({
         for (const fake of [intercars, warehouse]) {
           fake.articles.length = 0;
           fake.unreadable.length = 0;
+          fake.notInScope = 0;
           fake.quotes.clear();
         }
         Object.assign(shopAi, {
@@ -343,6 +344,7 @@ medusaIntegrationTestRunner({
               currency: 0,
               unreadable: 0,
               no_engine_code: 0,
+              not_in_scope: 0,
             },
             needs_category: ['C 30 005'],
           },
@@ -356,6 +358,7 @@ medusaIntegrationTestRunner({
               currency: 0,
               unreadable: 0,
               no_engine_code: 0,
+              not_in_scope: 0,
             },
             needs_category: [],
           },
@@ -364,11 +367,12 @@ medusaIntegrationTestRunner({
         expect(await page('F026407157')).toBeUndefined();
       });
 
-      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it as skipped', async () => {
+      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it and the pages out of scope as skipped', async () => {
         intercars.unreadable.push({
           url: 'https://intercars.test/p/broken',
           reason: 'Unexpected markup',
         });
+        intercars.notInScope = 2;
         intercars.articles.push({
           article_id: 'IC-30',
           brand: 'MANN-FILTER',
@@ -383,12 +387,13 @@ medusaIntegrationTestRunner({
           supplier: 'Intercars',
           imported: 0,
           created: 1,
-          skipped: 1,
+          skipped: 3,
           skipped_by_reason: {
             brand: 0,
             currency: 0,
             unreadable: 1,
             no_engine_code: 0,
+            not_in_scope: 2,
           },
           needs_category: [],
         });
@@ -461,8 +466,8 @@ medusaIntegrationTestRunner({
           {
             article: facts,
             categories: expect.arrayContaining([
-              { id: engineOilId, name: 'Моторное масло' },
-              { id: oilFiltersId, name: 'Масляные фильтры' },
+              { id: engineOilId, name: 'Моторное масло', text: '' },
+              { id: oilFiltersId, name: 'Масляные фильтры', text: '' },
             ]),
           },
         ]);
@@ -481,7 +486,9 @@ medusaIntegrationTestRunner({
             ],
           },
         ]);
-        expect(shopAi.descriptionsWritten).toEqual([facts]);
+        expect(shopAi.descriptionsWritten).toEqual([
+          { article: facts, name: 'Масло 0W-20', category: 'Моторное масло' },
+        ]);
       });
 
       it('keeps the mapped Category over AI and asks for no attributes a Category without fields cannot hold', async () => {
@@ -527,6 +534,47 @@ medusaIntegrationTestRunner({
           category_id: null,
           description: null,
         });
+      });
+
+      it('files a Part it left without a Category once a later import classifies it', async () => {
+        intercars.articles.push({
+          article_id: 'IC-26',
+          brand: 'MANN-FILTER',
+          number: 'W 990',
+          name: 'Фильтр W990',
+          category: 'Filteri',
+          specs: { Visina: '80 mm' },
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        shopAi.failure = null;
+        shopAi.category = oilFiltersId;
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({ needs_category: [] });
+        expect((await page('W990'))?.part.category_id).toBe(oilFiltersId);
+      });
+
+      it('names a Part a later import still cannot file in the summary', async () => {
+        intercars.articles.push({
+          article_id: 'IC-27',
+          brand: 'MANN-FILTER',
+          number: 'OIL 0W20',
+          name: 'Масло моторное 0W-20',
+          category: 'Filteri',
+        });
+        shopAi.failure = new Error('OpenAI is down');
+        await runImport();
+        shopAi.failure = null;
+        shopAi.category = engineOilId;
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: ['OIL 0W20'],
+        });
+        expect((await page('OIL0W20'))?.part.category_id).toBeNull();
       });
 
       it('writes an imported description once and never over a hand edit', async () => {
@@ -598,6 +646,12 @@ medusaIntegrationTestRunner({
           description: 'Масляный фильтр W 980.',
           category_id: null,
         });
+        expect(shopAi.descriptionsWritten).toContainEqual(
+          expect.objectContaining({
+            name: 'Фильтр W980 новый',
+            category: null,
+          }),
+        );
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {

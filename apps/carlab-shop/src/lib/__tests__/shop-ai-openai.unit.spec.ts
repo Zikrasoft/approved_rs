@@ -14,6 +14,33 @@ const replying = (content: string) =>
 
 const answering = (answer: unknown) => replying(JSON.stringify(answer));
 
+const answeringInTurn = (...answers: unknown[]) => {
+  const queue = [...answers];
+  return jest.fn(
+    async () =>
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: JSON.stringify(queue.shift()) } }],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+  );
+};
+
+const sentMessages = (fetch: unknown, call = 0) => {
+  const [, init] = (fetch as jest.Mock).mock.calls[call] as [
+    unknown,
+    { body: string },
+  ];
+  const { messages } = JSON.parse(init.body) as {
+    messages: { role: string; content: string }[];
+  };
+  return {
+    system: messages.find(({ role }) => role === 'system')?.content ?? '',
+    user: messages.find(({ role }) => role === 'user')?.content ?? '',
+  };
+};
+
 const line = {
   name: 'Filter ulja',
   number: 'HU 816 x',
@@ -71,6 +98,8 @@ describe('OpenAI shop AI', () => {
     ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
   });
 
+  const placed = { name: 'Моторное масло 0W-20', category: 'Моторное масло' };
+
   const article = {
     name: 'Масло 0W-20',
     brand: 'MANN-FILTER',
@@ -120,12 +149,15 @@ describe('OpenAI shop AI', () => {
 
   it('writes a description and refuses a blank one', async () => {
     globalThis.fetch = answering({ description: ' Синтетическое масло. ' });
-    const written = await openAiShopAi('test-key').writeDescription(article);
+    const written = await openAiShopAi('test-key').writeDescription(
+      article,
+      placed,
+    );
     globalThis.fetch = answering({ description: ' ' });
 
     expect(written).toBe('Синтетическое масло.');
     await expect(
-      openAiShopAi('test-key').writeDescription(article),
+      openAiShopAi('test-key').writeDescription(article, placed),
     ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
   });
 
@@ -134,9 +166,135 @@ describe('OpenAI shop AI', () => {
       description: 'Её задача — защитить двигатель. Ёмкость 2 Ач.',
     });
 
-    const written = await openAiShopAi('test-key').writeDescription(article);
+    const written = await openAiShopAi('test-key').writeDescription(
+      article,
+      placed,
+    );
 
     expect(written).toBe('Ее задача - защитить двигатель. Емкость 2 Ач.');
+  });
+
+  it('describes the part under the Russian name and the Category it was given', async () => {
+    globalThis.fetch = answering({ description: 'Масляный фильтр.' });
+
+    await openAiShopAi('test-key').writeDescription(
+      { ...article, name: 'uljni filter sa zaptivnim prstenom' },
+      {
+        name: 'Масляный фильтр Blue Print ADA102116',
+        category: 'Масляные фильтры',
+      },
+    );
+
+    const { system, user } = sentMessages(globalThis.fetch);
+    expect(JSON.parse(user)).toMatchObject({
+      name: 'uljni filter sa zaptivnim prstenom',
+      russian_name: 'Масляный фильтр Blue Print ADA102116',
+      category: 'Масляные фильтры',
+    });
+    expect(system).toContain('russian_name');
+    expect(system).toContain('category');
+  });
+
+  it.each([
+    ['a Latin letter inside a Cyrillic word', 'Оpruga амортизатора.'],
+    ['a Cyrillic letter inside a Latin word', 'Емкость 70 Аh, ток 720 ВA.'],
+  ])(
+    'asks again once for a description with %s, then refuses it',
+    async (_, mixed) => {
+      globalThis.fetch = answeringInTurn(
+        { description: mixed },
+        { description: 'Пружина подвески.' },
+      );
+      const retried = await openAiShopAi('test-key').writeDescription(
+        article,
+        placed,
+      );
+      expect(retried).toBe('Пружина подвески.');
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+
+      globalThis.fetch = answering({ description: mixed });
+      await expect(
+        openAiShopAi('test-key').writeDescription(article, placed),
+      ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('asks again once for a name with a word of mixed letters, then refuses it', async () => {
+    globalThis.fetch = answeringInTurn(
+      { name: 'Оpruga Bilstein B4' },
+      { name: 'Пружина подвески Bilstein B4' },
+    );
+    const retried = await openAiShopAi('test-key').writeName(article);
+    globalThis.fetch = answering({ name: 'Оpruga Bilstein B4' });
+
+    expect(retried).toBe('Пружина подвески Bilstein B4');
+    await expect(
+      openAiShopAi('test-key').writeName(article),
+    ).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+  });
+
+  it('keeps brand names and numbers in Latin beside Russian words', async () => {
+    globalThis.fetch = answering({
+      name: 'Масляный фильтр MANN-FILTER HU 816 x',
+    });
+
+    await expect(openAiShopAi('test-key').writeName(article)).resolves.toBe(
+      'Масляный фильтр MANN-FILTER HU 816 x',
+    );
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers each Category with its description and files control arms under suspension', async () => {
+    globalThis.fetch = answering({ category_id: 'cat_arm' });
+
+    await openAiShopAi('test-key').pickCategory(article, [
+      {
+        id: 'cat_arm',
+        name: 'Подвеска',
+        text: 'Рычаги, шаровые опоры, сайлентблоки',
+      },
+      { id: 'cat_body', name: 'Кузов', text: '' },
+    ]);
+
+    const { system } = sentMessages(globalThis.fetch);
+    expect(system).toMatch(
+      /^cat_arm: Подвеска \(Рычаги, шаровые опоры, сайлентблоки\)$/mu,
+    );
+    expect(system).toMatch(/^cat_body: Кузов$/mu);
+    expect(system).toMatch(/rame/u);
+  });
+
+  it('files a bump stop under suspension', async () => {
+    globalThis.fetch = answering({ category_id: 'cat_oil' });
+
+    await openAiShopAi('test-key').pickCategory(article, CATEGORIES);
+
+    expect(sentMessages(globalThis.fetch).system).toMatch(/odbojna guma/u);
+  });
+
+  it('maps an SLI battery to the standard technology option', async () => {
+    globalThis.fetch = answering({ attributes: {} });
+
+    await openAiShopAi('test-key').mapSpecs(article.specs, []);
+
+    expect(sentMessages(globalThis.fetch).system).toMatch(/SLI/u);
+  });
+
+  it('classifies with the most likely answer, never a sampled one', async () => {
+    globalThis.fetch = answeringInTurn(
+      { category_id: 'cat_oil' },
+      { attributes: {} },
+    );
+
+    await openAiShopAi('test-key').pickCategory(article, CATEGORIES);
+    await openAiShopAi('test-key').mapSpecs(article.specs, []);
+
+    const temperatures = (globalThis.fetch as jest.Mock).mock.calls.map(
+      ([, init]: [unknown, { body: string }]) =>
+        JSON.parse(init.body).temperature,
+    );
+    expect(temperatures).toEqual([0, 0]);
   });
 
   it('writes a Russian name in house style and refuses a blank one', async () => {
