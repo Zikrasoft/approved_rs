@@ -24,7 +24,7 @@ import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   type CatalogLocale,
-  type PlacePages,
+  type CarHit,
   type Category,
   type SearchResponse,
   type SearchResult,
@@ -78,9 +78,9 @@ export type VinOutcome =
       kind: 'vehicle';
       vehicle: Vehicle;
       facts: VinFacts;
-      pages: PlacePages | null;
+      place: CarHit | null;
     }
-  | { kind: 'inquiry'; vin: string };
+  | { kind: 'inquiry'; vin: string; place: CarHit | null };
 
 export type OffersOutcome =
   { kind: 'offers'; offers: PartOffer[] } | { kind: 'inquiry' };
@@ -498,11 +498,11 @@ export function createCatalogue({
               kind: 'vehicle',
               vehicle: lookup.vehicle,
               facts: lookup.facts,
-              pages: lookup.pages,
+              place: lookup.place,
             }
-          : { kind: 'inquiry', vin };
+          : { kind: 'inquiry', vin, place: lookup.place };
       } catch {
-        return { kind: 'inquiry', vin };
+        return { kind: 'inquiry', vin, place: null };
       }
     },
   };

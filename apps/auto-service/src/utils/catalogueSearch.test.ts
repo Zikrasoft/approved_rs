@@ -56,67 +56,47 @@ describe('searchIntent', () => {
 
 describe('vinDestination', () => {
   const VIN = 'WBA35BG070N074158';
-  const resolved = (
-    pages: {
-      vehicle: boolean;
-      model: boolean;
-      make: boolean;
-    } | null,
-  ) => ({
+  const vehiclePlace: CarHit = { kind: 'vehicle', make, model, vehicle };
+  const modelPlace: CarHit = { kind: 'model', make, model, vehicle: null };
+  const makePlace: CarHit = { kind: 'make', make, model: null, vehicle: null };
+  const resolved = (place: CarHit | null) => ({
     kind: 'vehicle' as const,
-    vehicle: { ...vehicle, model },
     facts: { steering: 'left' as const },
-    pages,
+    place,
   });
 
-  it('opens the page of the car a VIN resolved to, carrying the VIN', () => {
-    expect(
-      vinDestination(
-        resolved({ vehicle: true, model: true, make: true }),
-        VIN,
-        'ru',
-      ),
-    ).toBe(
+  it('opens the Vehicle page of a resolved VIN, carrying the VIN', () => {
+    expect(vinDestination(resolved(vehiclePlace), VIN, 'ru')).toBe(
       '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/?steering=left&vin=WBA35BG070N074158',
     );
   });
 
   it('opens the Model page when the Vehicle has none', () => {
-    expect(
-      vinDestination(
-        resolved({ vehicle: false, model: true, make: true }),
-        VIN,
-        'ru',
-      ),
-    ).toBe('/ru/parts/bmw/e83-x3-20d/');
+    expect(vinDestination(resolved(modelPlace), VIN, 'ru')).toBe(
+      '/ru/parts/bmw/e83-x3-20d/',
+    );
   });
 
   it('opens the Make page when neither the Vehicle nor the Model has one', () => {
-    expect(
-      vinDestination(
-        resolved({ vehicle: false, model: false, make: true }),
-        VIN,
-        'ru',
-      ),
-    ).toBe('/ru/parts/bmw/');
+    expect(vinDestination(resolved(makePlace), VIN, 'ru')).toBe(
+      '/ru/parts/bmw/',
+    );
   });
 
   it('opens nothing when no place of the car has a page', () => {
-    expect(
-      vinDestination(
-        resolved({ vehicle: false, model: false, make: false }),
-        VIN,
-        'ru',
-      ),
-    ).toBeNull();
-  });
-
-  it('opens nothing when the shop does not say which places have a page', () => {
     expect(vinDestination(resolved(null), VIN, 'ru')).toBeNull();
   });
 
-  it('opens nothing for a VIN the decoder did not resolve', () => {
-    expect(vinDestination({ kind: 'inquiry' }, VIN, 'ru')).toBeNull();
+  it('opens the place the candidates of an unresolved VIN share', () => {
+    expect(
+      vinDestination({ kind: 'inquiry', place: modelPlace }, VIN, 'ru'),
+    ).toBe('/ru/parts/bmw/e83-x3-20d/');
+  });
+
+  it('opens nothing for an unresolved VIN without a shared place', () => {
+    expect(
+      vinDestination({ kind: 'inquiry', place: null }, VIN, 'ru'),
+    ).toBeNull();
   });
 });
 

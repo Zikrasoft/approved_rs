@@ -2,14 +2,13 @@ import {
   normalizePartNumber,
   vinSchema,
   type CarHit,
-  type PlacePages,
   type VinFacts,
 } from '@podbor/catalog-contract';
 import type { Locale } from '@/i18n/config';
 import { carName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';
 import { carFactsQuery } from './carFacts';
-import { PathBuilder, vehiclePath, type VehicleAddress } from './paths';
+import { PathBuilder, vehiclePath } from './paths';
 
 export type SearchIntent = { kind: 'vin'; vin: string } | { kind: 'query' };
 
@@ -19,29 +18,20 @@ export const searchIntent = (q: string): SearchIntent => {
 };
 
 type ResolvedVin =
-  | {
-      kind: 'vehicle';
-      vehicle: VehicleAddress;
-      facts: VinFacts;
-      pages: PlacePages | null;
-    }
-  | { kind: 'inquiry' };
+  | { kind: 'vehicle'; facts: VinFacts; place: CarHit | null }
+  | { kind: 'inquiry'; place: CarHit | null };
 
 export const vinDestination = (
   outcome: ResolvedVin,
   vin: string,
   locale: Locale,
 ): string | null => {
-  if (outcome.kind !== 'vehicle' || !outcome.pages) return null;
-  const { vehicle, facts, pages } = outcome;
-  const make = vehicle.model.chassis.series.make.slug;
-  if (pages.vehicle) {
-    return `${vehiclePath(locale, vehicle)}${carFactsQuery(facts, vin)}`;
-  }
-  if (pages.model) {
-    return PathBuilder.partsModel(locale, make, vehicle.model.slug);
-  }
-  return pages.make ? PathBuilder.partsMake(locale, make) : null;
+  const { place } = outcome;
+  if (!place) return null;
+  const { href } = carLink(place, locale);
+  return place.kind === 'vehicle' && outcome.kind === 'vehicle'
+    ? `${href}${carFactsQuery(outcome.facts, vin)}`
+    : href;
 };
 
 type PartResult = SearchOutcome['results'][number];

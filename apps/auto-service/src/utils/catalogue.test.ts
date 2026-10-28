@@ -1276,20 +1276,25 @@ describe('catalogueFromEnv', () => {
 });
 
 describe('catalogue.resolveVin', () => {
-  it('names the car a VIN resolved to and which of its places have a page', async () => {
-    const pages = { vehicle: false, model: true, make: true };
+  it('names the car a VIN resolved to and its nearest place with a page', async () => {
+    const place = {
+      kind: 'model',
+      make: { slug: 'bmw', name: 'BMW' },
+      model: VEHICLE.model,
+      vehicle: null,
+    };
     const fetch = answer({
       resolved: true,
       vehicle: VEHICLE,
       facts: {},
-      pages,
+      place,
     });
 
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'vehicle',
       vehicle: VEHICLE,
       facts: {},
-      pages,
+      place,
     });
     expect(fetch).toHaveBeenCalledWith(
       'http://shop.test/store/vin-lookups',
@@ -1306,6 +1311,7 @@ describe('catalogue.resolveVin', () => {
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
+      place: null,
     });
   });
 
@@ -1313,6 +1319,7 @@ describe('catalogue.resolveVin', () => {
     expect(await catalog(answer({}, false)).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
+      place: null,
     });
   });
 
@@ -1322,6 +1329,7 @@ describe('catalogue.resolveVin', () => {
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
+      place: null,
     });
   });
 
@@ -1331,6 +1339,7 @@ describe('catalogue.resolveVin', () => {
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
+      place: null,
     });
   });
 
@@ -1347,6 +1356,7 @@ describe('catalogue.resolveVin', () => {
     expect(await catalog(fetch).resolveVin(VIN)).toEqual({
       kind: 'inquiry',
       vin: VIN,
+      place: null,
     });
   });
 });
