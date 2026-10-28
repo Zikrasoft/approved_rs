@@ -17,7 +17,15 @@ export function carName({ name, chassis }: NamedModel, locale: Locale): string {
   const { series } = chassis;
   const seriesName =
     (locale !== 'ru' && series.translations?.[locale]) || series.name;
-  return `${series.make.name} ${seriesName} ${chassis.code} ${name}`;
+  const words = [
+    series.make.name,
+    seriesName,
+    chassis.code === series.name ? '' : chassis.code,
+    name,
+  ].filter(Boolean);
+  return words
+    .filter((word, index) => !words[index + 1]?.startsWith(`${word} `))
+    .join(' ');
 }
 
 const naturally = new Intl.Collator('en', { numeric: true }).compare;
