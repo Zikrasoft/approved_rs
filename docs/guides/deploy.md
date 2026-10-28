@@ -562,17 +562,18 @@ instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
 transfer, $24 a month), in the same region as the shop's S3 buckets, all
 described in `infra/carlab-shop/`:
 
-| File                                     | What it is                                                                                                                       |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node` |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                     |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB                                   |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                              |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                           |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                   |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                     |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                          |
-| `test/*.test.sh`                         | the compose shape and the scripts' behaviour against a stubbed `docker`, run in `check`                                          |
+| File                                     | What it is                                                                                                                                                           |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/carlab-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                     |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB, basic_auth on the admin host                                         |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                       |
+| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                         |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -612,9 +613,22 @@ cp .env.crawler.example .env.crawler
 
 `.env.crawler` is gitignored and holds only what the worker reads
 (`CRAWLER_ENV_NAMES` in `src/lib/env.ts`): `NODE_ENV=production`,
-`DATABASE_URL=postgres://carlab:<POSTGRES_PASSWORD>@127.0.0.1:15432/carlab`,
-`DATABASE_SSL=false`, `CRAWLER_FROM` and the same `S3_*` as `/srv/carlab/.env`.
-Copy the values across without printing them.
+`DATABASE_URL=postgres://crawler:<CRAWLER_DB_PASSWORD>@127.0.0.1:15432/carlab`,
+`DATABASE_SSL=false`, `CRAWLER_FROM`, the same `S3_ENDPOINT`, `S3_REGION` and
+bucket names as `/srv/carlab/.env`, and the crawler's own IAM key in
+`S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY` (see [Files on S3](#files-on-s3)). Copy
+the values across without printing them. The Mac never holds `POSTGRES_PASSWORD`
+or the shop's S3 key, so a stolen laptop reaches the crawl queue and the crawled
+pages, not the catalogue, the orders or the staff accounts.
+
+The `crawler` role is made by `crawler-role.sh`, which `deploy.sh` runs after
+every migration and `restore.sh` after a restore, from `CRAWLER_DB_PASSWORD` in
+`/srv/carlab/.env` (`openssl rand -hex 32`; anything but hex is refused). It can
+log in and `select`, `insert` and `update` `crawl_run` and `crawl_page`, and
+nothing else: no other table, no delete, no DDL. A changed password applies at the
+next deploy. Unset, the step says so and the crawler has no role. Checked against
+a live Postgres by `infra/carlab-shop/test/crawler-role.test.sh`. `restore.sh`
+restores with `--no-privileges`, so a dump never needs the role to exist first.
 
 Postgres has no host port and sits on the internal `data` network at a fixed
 address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
@@ -749,6 +763,31 @@ bucket> --prefix <key>` and a `copy-object` of the wanted `VersionId` onto the
 same key. The private bucket is not versioned: its raw pages are re-fetched by
 the next crawl.
 
+The crawler on the owner's Mac gets a second IAM user, with the private bucket
+only, so a key lifted off the Mac cannot touch the public images:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::<private bucket>/crawl/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::<private bucket>",
+      "Condition": { "StringLike": { "s3:prefix": "crawl/*" } }
+    }
+  ]
+}
+```
+
+Its `.env.crawler` still names `S3_PUBLIC_BUCKET` because the shared env schema
+requires it, but the worker never writes there and the policy would refuse it.
+
 Moving an existing server off the old `static` volume, once, after the first
 deploy with the S3 settings: `/srv/carlab/move-static-to-s3.sh` copies the volume
 into the public bucket with `aws s3 sync` (in a pinned `amazon/aws-cli` container,
@@ -778,6 +817,32 @@ validates everything at startup. The non-obvious parts:
   `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
   ships fresh catalogue data and never code that is not live yet. The chain runs
   only from the admin's Publish button, in the top bar of every admin page.
+  **Accepted risk:** the token sits in `/srv/carlab/.env` in plain text, and
+  `actions: write` lets whoever reads it dispatch or cancel any workflow in this
+  repository, not only `publish.yml`, since a fine-grained token cannot be
+  narrowed to one workflow. Only `deploy` (and root) can read that file, and a
+  dispatched workflow runs the repository's own code at a ref that is already
+  pushed, so the token cannot ship code that is not in the repository. Give it
+  the shortest expiry you are willing to rotate, and revoke it at
+  Settings → Developer settings at the first sign the server is compromised.
+- `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
+  front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
+  passwords cannot be guessed from the internet. The hash is bcrypt, made
+  without printing the password to the terminal history:
+  `docker run --rm -it caddy:2.11.4-alpine caddy hash-password` (it prompts).
+  Write it in **single quotes**, `ADMIN_BASIC_AUTH_HASH='$2a$14$...'`, or compose
+  substitutes its `$` signs. Both are required: compose refuses to start without
+  them. Three requests on the admin host pass with a `Bearer` token alone, since
+  the admin's own fetch replaces the browser's basic_auth header there:
+  `/auth/session` (sign-in), `/admin/invites/accept` and
+  `/auth/user/emailpass/update` (a password reset); each one is refused by Medusa
+  without a valid token, and staff sign-in itself (`/auth/user/emailpass`) is
+  not among them. The API host answers 404 on `/admin` and `/auth/user`, so
+  staff routes exist only behind the admin host's basic_auth; the storefront
+  calls only `/store/*` (and Caddy's `/health`). Checked against a live Caddy by
+  `infra/carlab-shop/test/compose.test.sh`.
+- `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
+  [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
   There is no nightly run: cart and checkout quote price and stock live, and a
   build bakes the prices current at that moment into the pages' structured data.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached `/api/leads` after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
@@ -1186,12 +1251,15 @@ Check with `curl -k https://localhost:8443/health/ready`.
    network, remove the AAAA records.
    Done: `dig +short` and `dig +short AAAA` return them for both names.
 4. **`.env` on the server.** Copy `infra/carlab-shop/production.env.example` to
-   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
-   then `chmod 600 /srv/carlab/.env`.
+   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,
+   the admin's basic_auth hash as in [`.env`](#env)), then
+   `chmod 600 /srv/carlab/.env`. Give staff the basic_auth user and password
+   apart from their Medusa sign-in.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` prints `600`.
 5. **Shop buckets.** Create the public and the private S3 bucket and the shop's
    IAM user as in [Files on S3](#files-on-s3), and put their values in
-   `/srv/carlab/.env`.
+   `/srv/carlab/.env`. Create the crawler's IAM user with the private-bucket
+   policy there too; its key goes only to the Mac's `.env.crawler`.
    Done: `cut -d= -f1 /srv/carlab/.env | grep '^S3_'` lists the five required names.
 6. **Backup bucket.** Create a private AWS S3 bucket in another region than the
    instance (or at Backblaze B2 or Cloudflare R2) and an IAM user whose key is
