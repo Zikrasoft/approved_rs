@@ -101,6 +101,8 @@ export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
     resolved: z.literal(false),
     make: z.string().nullable(),
     code: z.string().nullable(),
+    model_slug: z.string().nullable().default(null),
+    vehicle_ids: z.array(z.string()).default([]),
   }),
 ]);
 
