@@ -254,7 +254,7 @@ const scopeHidden = {
                         href={car.href}
                         class="flex min-h-11 flex-col justify-center rounded-field border border-line bg-paper px-4 py-2 transition-colors duration-150 hover:border-ink motion-reduce:transition-none"
                       >
-                        <span class="text-sm font-semibold text-ink">
+                        <span class="line-clamp-3 text-sm font-semibold wrap-anywhere text-ink">
                           {car.label}
                         </span>
                         {car.detail && (
@@ -298,7 +298,7 @@ const scopeHidden = {
                         '{label}',
                         chip.label,
                       )}
-                      class="inline-flex min-h-9 items-center gap-2 rounded-full whitespace-nowrap border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+                      class="inline-flex min-h-11 items-center gap-2 rounded-full whitespace-nowrap border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
                     >
                       {chip.label}
                       <Icon name="close" size={12} class="text-muted" />
@@ -309,7 +309,7 @@ const scopeHidden = {
                   <li class="shrink-0">
                     <a
                       href={searchHref([], [])}
-                      class="inline-flex min-h-9 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                      class="inline-flex min-h-11 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
                     >
                       {copy.resetAllFilters}
                     </a>
@@ -349,7 +349,7 @@ const scopeHidden = {
                       ranges,
                       Math.max(0, offset - found.limit),
                     )}
-                    class="underline underline-offset-2 hover:text-signal-ink"
+                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
                   >
                     {copy.previous}
                   </a>
@@ -359,7 +359,7 @@ const scopeHidden = {
                 {offset + found.limit < found.count && (
                   <a
                     href={searchHref(chosen, ranges, offset + found.limit)}
-                    class="underline underline-offset-2 hover:text-signal-ink"
+                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
                   >
                     {copy.next}
                   </a>
