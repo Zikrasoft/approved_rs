@@ -86,7 +86,21 @@ class SitemapTolerantHttpCrawler extends HttpCrawler<InternalHttpCrawlingContext
   }
 }
 
-export const crawleeFetcher = (mode: FetchMode): Fetcher => {
+const presenting = (locale: string | undefined) =>
+  locale && {
+    browserPoolOptions: {
+      fingerprintOptions: {
+        fingerprintGeneratorOptions: {
+          devices: ['desktop' as const],
+          browsers: ['chrome' as const],
+          operatingSystems: ['linux' as const],
+          locales: [locale],
+        },
+      },
+    },
+  };
+
+export const crawleeFetcher = (mode: FetchMode, locale?: string): Fetcher => {
   const pending = new Map<
     string,
     {
@@ -176,6 +190,7 @@ export const crawleeFetcher = (mode: FetchMode): Fetcher => {
       : new PlaywrightCrawler(
           {
             ...common,
+            ...presenting(locale),
             preNavigationHooks: [
               beforeAttempt,
               ({ blockRequests }) =>
@@ -212,7 +227,14 @@ export const crawleeFetcher = (mode: FetchMode): Fetcher => {
         pending.set(uniqueKey, { request, resolve, answered: false });
         crawler
           .addRequests([
-            { url: request.url, uniqueKey, headers: request.headers },
+            {
+              url: request.url,
+              uniqueKey,
+              headers: {
+                ...(locale && { 'accept-language': locale }),
+                ...request.headers,
+              },
+            },
           ])
           .catch((error: unknown) => {
             pending.delete(uniqueKey);

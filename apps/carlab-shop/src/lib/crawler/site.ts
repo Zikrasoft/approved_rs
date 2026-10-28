@@ -12,6 +12,7 @@ export type CrawledSite = {
   sitemaps: string[];
   floorMs: number;
   fetchMode?: FetchMode;
+  locale?: string;
   waitFor?: string;
   interact?: (page: Page) => Promise<void>;
   isPage: (url: string) => boolean;

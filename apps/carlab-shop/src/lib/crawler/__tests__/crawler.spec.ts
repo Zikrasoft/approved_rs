@@ -41,6 +41,7 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
     waitFor?: string;
   }[] = [];
   const closed: FetchMode[] = [];
+  const locales: [FetchMode, string | undefined][] = [];
   const served = new Map<string, number>();
   const clock = {
     time: START,
@@ -57,23 +58,26 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
     served.set(url, index + 1);
     return route[Math.min(index, route.length - 1)];
   };
-  const openFetcher = (mode: FetchMode): Fetcher => ({
-    fetch: async ({ url, headers = {}, waitFor, beforeAttempt }) => {
-      const answer = responder(url);
-      const attempts = answer().kind === 'blocked' ? BLOCKED_ATTEMPTS : 1;
-      for (let attempt = 0; attempt < attempts; attempt++) {
-        await beforeAttempt();
-        requests.push({ url, at: clock.time, headers, mode, waitFor });
-      }
-      return answer();
-    },
-    close: async () => {
-      closed.push(mode);
-    },
-  });
+  const openFetcher = (mode: FetchMode, locale?: string): Fetcher => {
+    locales.push([mode, locale]);
+    return {
+      fetch: async ({ url, headers = {}, waitFor, beforeAttempt }) => {
+        const answer = responder(url);
+        const attempts = answer().kind === 'blocked' ? BLOCKED_ATTEMPTS : 1;
+        for (let attempt = 0; attempt < attempts; attempt++) {
+          await beforeAttempt();
+          requests.push({ url, at: clock.time, headers, mode, waitFor });
+        }
+        return answer();
+      },
+      close: async () => {
+        closed.push(mode);
+      },
+    };
+  };
   const fetched = (url: string) =>
     requests.filter((request) => request.url === url);
-  return { requests, closed, clock, openFetcher, fetched };
+  return { requests, closed, locales, clock, openFetcher, fetched };
 };
 
 const urlset = (...urls: string[]) =>
@@ -318,6 +322,7 @@ medusaIntegrationTestRunner({
         const site = {
           ...testSite('cloudy', 2000, 'browser'),
           waitFor: '#criteria',
+          locale: 'sr-RS',
         };
         const web = fakeWeb({
           'https://cloudy.test/robots.txt': ok(''),
@@ -338,6 +343,10 @@ medusaIntegrationTestRunner({
         ]);
         expect(progress.pages).toMatchObject({ done: 1 });
         expect([...web.closed].sort()).toEqual(['browser', 'http']);
+        expect(web.locales).toEqual([
+          ['http', 'sr-RS'],
+          ['browser', 'sr-RS'],
+        ]);
       });
 
       it('waits out Retry-After, in seconds or as a date, before the next request', async () => {
