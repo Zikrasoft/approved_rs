@@ -64,9 +64,9 @@ echo "==> Restarting"
 docker compose up -d --wait --wait-timeout 300 --remove-orphans
 docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 
-echo "==> https://${api_host:-api.carlab.rs}/health"
+echo "==> https://${api_host:-api.carlab.rs}/health/ready"
 if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors \
-  "https://${api_host:-api.carlab.rs}/health"; then
+  "https://${api_host:-api.carlab.rs}/health/ready"; then
   echo "Live at $tag."
   keep=$(cat .previous-tag 2>/dev/null || echo "$tag")
   docker image ls "$image" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e '<none>' -e '' | while read -r old; do

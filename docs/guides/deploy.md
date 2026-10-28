@@ -806,6 +806,8 @@ validates everything at startup. The non-obvious parts:
 - `SHOP_OPEN` decides whether anyone may buy. Unset, the shop is closed with
   `NODE_ENV=production` and open everywhere else; the template sets `false`.
   See [Closed beta](#closed-beta-the-preview-flag).
+- `SENTRY_DSN` turns on error reporting to Sentry. Empty, the SDK is never
+  started and nothing leaves the server. See [Monitoring](#monitoring).
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 
@@ -866,7 +868,7 @@ carlab.rs.
    the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
    see below); only after both succeed does `MEDUSA_TAG` in `.env` change, with the
    old one going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
-   `https://api.carlab.rs/health`. It prints stage names and the tag, never a value
+   `https://api.carlab.rs/health/ready`. It prints stage names and the tag, never a value
    from `.env` (`infra/carlab-shop/test/scripts.test.sh` plants a canary secret and
    fails if any script prints it).
 4. `record-shop` moves `deployed/carlab-shop` only if `deploy-shop` actually shipped
@@ -973,6 +975,57 @@ Migrations and creating an admin run from the image only
 (`docker compose exec -T medusa node_modules/.bin/medusa …`), never from a
 repository checkout: the image has no ts-node.
 
+### Monitoring
+
+The owner hears about an outage from an uptime check and about a server error
+from Sentry. Both accounts are the owner's; the code only reads one variable.
+
+**Two health routes.** `/health` is Medusa's own and answers `OK` while the
+process runs, whatever the database does. `/health/ready`
+(`apps/carlab-shop/src/api/health/ready/route.ts`) runs `select 1` on Postgres
+and asks Typesense's `/health` (giving it 3 seconds), and answers
+`200 {"status":"ok"}` or `503 {"status":"unavailable"}`. The response never says
+which one failed or why; the container log does:
+`docker compose logs medusa | grep 'Health check failed'` prints
+`postgres`, `typesense` or both. The image's `HEALTHCHECK` and `deploy.sh` use
+`/health/ready`, so a Typesense that does not come up fails the deploy rather
+than shipping a shop without search. carlab.rs's build probe
+(`.github/scripts/shop-backend-up.sh`) stays on `/health`: it only asks whether
+the backend answers.
+
+**The uptime check.** Any external monitor that can alert in Telegram works
+(UptimeRobot, for one, has a Telegram alert contact; check that the chosen plan
+includes it). Set it up once:
+
+1. Create an HTTP(S) monitor on `https://api.carlab.rs/health/ready`, expecting
+   status 200, every 5 minutes or more often, with a timeout of about 10 seconds.
+2. Add Telegram as an alert contact, the way the service's own guide describes
+   (usually a bot you start in Telegram that links the chat), and attach it to
+   the monitor for both "down" and "up again".
+3. Send the service's test notification and confirm it arrives.
+
+Done: the monitor shows the endpoint up, and stopping Typesense on the server
+(`docker compose stop typesense`) produces a "down" message in Telegram within
+one interval; `docker compose start typesense` produces the "up" one.
+
+**Sentry.** Create a Sentry project for the platform Node.js (Express), copy
+its DSN into `/srv/carlab/.env` as `SENTRY_DSN=`, and `docker compose up -d
+medusa`. `apps/carlab-shop/instrumentation.ts` starts the SDK when Medusa
+boots; with `SENTRY_DSN` empty it does nothing and `captureException` is a
+no-op. What reaches Sentry: every request that ends in a 5xx (the shop's error
+handler in `src/lib/admin-errors.ts`; 4xx never) and uncaught exceptions. What
+does not, by `src/lib/sentry.ts`: the request (URL, query, headers, cookies,
+body), the user, breadcrumbs, local variables and database query data, and no
+tracing. The exception message and stack still go, so a thrown message must not
+carry a phone number or an address. Sentry mails the project's members about a
+new issue by default; that is the alert. A DSN only lets someone send events to
+the project, but keep it in `.env` like everything else and out of the
+repository.
+
+Done: `cut -d= -f1 /srv/carlab/.env` lists `SENTRY_DSN`, the medusa log shows
+no Sentry error after the restart, and the next 5xx appears as an issue in the
+project.
+
 ### Checking the stack locally
 
 The same compose comes up on your own machine with no separate override, through
@@ -980,7 +1033,7 @@ variables in `infra/carlab-shop/.env` (covered by `.gitignore`'s `.env`):
 `API_HOST=localhost`, `HTTP_PORT=8080`, `HTTPS_PORT=8443`,
 `MEDUSA_IMAGE=podbor-carlab-shop`, `MEDUSA_TAG=local`, plus the secrets. The image
 comes from `docker build -f infra/carlab-shop/Dockerfile -t podbor-carlab-shop:local .`.
-Check with `curl -k https://localhost:8443/health`.
+Check with `curl -k https://localhost:8443/health/ready`.
 
 ### Easy to miss
 
@@ -1097,7 +1150,7 @@ Check with `curl -k https://localhost:8443/health`.
 8. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
    package in GHCR: linked to the repository, Actions read access configured.
    Done: `deploy-shop` is green, `record-shop` moved `deployed/carlab-shop`, and
-   `https://api.carlab.rs/health` answers 200.
+   `https://api.carlab.rs/health/ready` answers 200.
 9. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in
    at `https://admin.carlab.rs`, and in Settings → Publishable API Keys create the

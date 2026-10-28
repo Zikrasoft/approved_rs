@@ -113,7 +113,7 @@ expect 'pull, migrate, seed, up, reload and health run in order on the new tag' 
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
-  'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health' \
+  'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
   "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-carlab-shop --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
@@ -329,5 +329,11 @@ unset BACKUP_DIR
 
 expect "the scripts ran and printed something" test -s "$work/printed"
 refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary' "$work/printed"
+
+expect 'the image health check asks Postgres and Typesense through /health/ready' \
+  grep -q 'http://127.0.0.1:9000/health/ready ' "$here/Dockerfile"
+expect 'the production image carries the Sentry SDK' grep -q "require('@sentry/node')" "$here/Dockerfile"
+expect 'the env template names SENTRY_DSN, empty until the owner has a project' \
+  grep -qx 'SENTRY_DSN=' "$here/production.env.example"
 
 [ "$failures" -eq 0 ]
