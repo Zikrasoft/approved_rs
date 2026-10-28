@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCatalogue } from './catalogue';
 import {
+  PREVIOUS_BUILD_URL,
+  type CatalogueEnv,
   catalogueFromEnv,
   categoriesForBuild,
   categoryPagesForBuild,
@@ -11,6 +13,7 @@ import {
 import { categoryFacets } from './categoryFacets';
 import { PathBuilder } from './paths';
 import { sitemapFilter } from './sitemap';
+import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
 const BACKEND_URL = 'http://localhost:9009';
 
@@ -756,6 +759,131 @@ describe('partPagesForBuild', () => {
   });
 });
 
+describe('the deploy build', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  let shops = 0;
+  const shopEnv = (env: CatalogueEnv = {}): CatalogueEnv => ({
+    MEDUSA_BACKEND_URL: `http://shop-${++shops}.test`,
+    MEDUSA_PUBLISHABLE_KEY: 'pk_test',
+    ...env,
+  });
+  const partPages = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      ...oilFilterMann,
+      id: `pi_${index}`,
+      normalized_value: `HU${index}`,
+    }));
+  const deployed = (
+    previous: number | null,
+    shop: ReturnType<typeof backend> = backend(),
+  ) =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) =>
+        url === PREVIOUS_BUILD_URL
+          ? previous === null
+            ? Promise.resolve({
+                ok: false,
+                status: 404,
+                json: async () => ({}),
+              })
+            : respond({ partPages: previous })
+          : shop(url),
+      ),
+    );
+
+  it('reads the catalogue once for every page, the sitemap and llms.txt', async () => {
+    const shop = backend({ pages: partPages(2) });
+    deployed(2, shop);
+    const env = shopEnv({ VERCEL: '1' });
+
+    await partPagesForBuild(env);
+    await categoriesForBuild(env);
+    await categoryPagesForBuild(env);
+    await carPagesForBuild(env);
+    await makeHubsForBuild(env);
+
+    const reads = (path: string) =>
+      shop.mock.calls.filter(([url]) => url.includes(path)).length;
+    expect(reads('/store/part-pages')).toBe(1);
+    expect(reads('/store/categories')).toBe(1);
+  });
+
+  it('fails without the backend URL once the live site has part pages', async () => {
+    deployed(120);
+
+    await expect(partPagesForBuild({ VERCEL: '1' })).rejects.toThrow(
+      'MEDUSA_BACKEND_URL',
+    );
+  });
+
+  it('builds without a catalogue while the live site has none', async () => {
+    deployed(null);
+
+    expect(await partPagesForBuild({ VERCEL: '1' })).toEqual([]);
+  });
+
+  it('fails on a shop with no part pages once the catalogue is live, even when shrinking is allowed', async () => {
+    deployed(120, backend());
+
+    await expect(
+      partPagesForBuild(
+        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+      ),
+    ).rejects.toThrow('0 part pages');
+  });
+
+  it('fails on far fewer part pages than the live site has', async () => {
+    deployed(10, backend({ pages: partPages(4) }));
+
+    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
+      '4 part pages',
+    );
+  });
+
+  it('builds a catalogue that shrank by less than half', async () => {
+    deployed(10, backend({ pages: partPages(6) }));
+
+    expect(await partPagesForBuild(shopEnv({ VERCEL: '1' }))).toHaveLength(6);
+  });
+
+  it('builds a shrunken catalogue the owner allowed', async () => {
+    deployed(10, backend({ pages: partPages(4) }));
+
+    expect(
+      await partPagesForBuild(
+        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+      ),
+    ).toHaveLength(4);
+  });
+
+  it('never asks the live site outside a deploy build', async () => {
+    const shop = backend();
+    deployed(120, shop);
+
+    expect(await partPagesForBuild(shopEnv())).toEqual([]);
+    expect(shop).toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalledWith(
+      PREVIOUS_BUILD_URL,
+      expect.anything(),
+    );
+  });
+
+  it('fails when the live site cannot say what it serves', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => respond({}, false)),
+    );
+
+    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
+      '503',
+    );
+  });
+});
+
 const VIN = 'WBA35BG070N074158';
 
 const answer = (body: unknown, ok = true) => vi.fn(() => respond(body, ok));
@@ -1152,5 +1280,13 @@ describe('catalogue.listingScope', () => {
     ).listingScope({ category: 'oil-filters' }, 'ru');
 
     expect(scope).toEqual({ category: null, model: null });
+  });
+});
+
+describe('the build record', () => {
+  it('tells the next build how many part pages this one serves', async () => {
+    const response = await recordBuild({} as Parameters<typeof recordBuild>[0]);
+
+    expect(await response.json()).toEqual({ partPages: 0 });
   });
 });

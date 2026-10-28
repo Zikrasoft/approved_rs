@@ -495,6 +495,40 @@ medusaIntegrationTestRunner({
         expect(await published()).toBe(1);
       });
 
+      it('publishes the brand-numbers before the site build reads them', async () => {
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'W 719' },
+          ],
+        });
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: partId,
+        });
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+        const published = async () =>
+          (await publishModule.listPublishedNumbers({ id: identifier.id }))
+            .length;
+        let release = () => {};
+        network.githubGate = new Promise((resolve) => {
+          release = resolve;
+        });
+
+        await post('/admin/publish-runs');
+        const deadline = Date.now() + 20_000;
+        while ((await published()) === 0 && Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        const duringBuild = await published();
+        release();
+        const run = await finishedRun();
+
+        expect(duringBuild).toBe(1);
+        expect(run.status).toBe('succeeded');
+      });
+
       it('refuses a second Publish while one is running', async () => {
         let release = () => {};
         network.githubGate = new Promise((resolve) => {

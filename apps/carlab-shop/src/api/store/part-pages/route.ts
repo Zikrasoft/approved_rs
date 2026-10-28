@@ -6,6 +6,8 @@ import { installationPrice } from '../../../lib/installation';
 import { pricesShown } from '../../../lib/offer-cart';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { PUBLISH_MODULE } from '../../../modules/publish';
+import type PublishModuleService from '../../../modules/publish/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
@@ -72,16 +74,31 @@ export async function GET(
   const { offset, limit } = req.validatedQuery as StoreListPartPagesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+  const publish: PublishModuleService = req.scope.resolve(PUBLISH_MODULE);
 
-  const [identifiers, count] = await catalog.listAndCountPartIdentifiers(
-    {},
-    {
-      relations: ['brand', 'part', 'part.category'],
-      order: { id: 'ASC' },
-      skip: offset,
-      take: limit,
-    },
+  const published = new Set(
+    (
+      await publish.listPublishedNumbers({}, { select: ['id'], take: null })
+    ).map(({ id }) => id),
   );
+  const listed = (
+    await catalog.listPartIdentifiers(
+      {},
+      { select: ['id'], order: { id: 'ASC' }, take: null },
+    )
+  ).flatMap(({ id }) => (published.has(id) ? [id] : []));
+  const count = listed.length;
+  const pageIds = listed.slice(offset, offset + limit);
+  const identifiers = pageIds.length
+    ? await catalog.listPartIdentifiers(
+        { id: pageIds },
+        {
+          relations: ['brand', 'part', 'part.category'],
+          order: { id: 'ASC' },
+          take: null,
+        },
+      )
+    : [];
 
   const siblings = await catalog.listPartIdentifiers(
     { part_id: [...new Set(identifiers.map(({ part_id }) => part_id))] },

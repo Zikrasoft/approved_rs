@@ -54,6 +54,7 @@ medusaIntegrationTestRunner({
           .post(manualPath(), body, adminHeaders)
           .catch(({ response }) => response);
       const storeOffers = async () => {
+        await publishAllNumbers(getContainer());
         const { data } = await api.get(
           '/store/part-pages?limit=50',
           storeHeaders,
