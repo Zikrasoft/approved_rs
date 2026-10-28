@@ -3,6 +3,10 @@ import type {
   MedusaResponse,
 } from '@medusajs/framework/http';
 
+import {
+  claimCatalogueWriter,
+  holdCatalogueWriter,
+} from '../../../../lib/catalogue-writer';
 import { emitIndexChanges } from '../../../../lib/index-changes';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -15,6 +19,18 @@ export async function DELETE(
   res: MedusaResponse,
 ): Promise<void> {
   const { source } = req.params;
+  const run = await claimCatalogueWriter(req.scope, {
+    kind: 'deletion',
+    created_by: req.auth_context?.actor_id ?? null,
+  });
+  res.json(
+    await holdCatalogueWriter(req.scope, run.id, () =>
+      deleteSource(req, source),
+    ),
+  );
+}
+
+async function deleteSource(req: AuthenticatedMedusaRequest, source: string) {
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const identifiers = await catalog.listPartIdentifiers(
@@ -43,5 +59,5 @@ export async function DELETE(
       ...updatedBy(req),
     });
   }
-  res.json({ source, deleted, import_disabled: Boolean(supplier) });
+  return { source, deleted, import_disabled: Boolean(supplier) };
 }

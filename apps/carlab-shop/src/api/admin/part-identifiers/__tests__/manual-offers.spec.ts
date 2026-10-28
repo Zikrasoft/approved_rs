@@ -5,6 +5,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
+import { importRuns } from '../../../../../integration-tests/importRuns';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { liveOffers } from '../../../../lib/suppliers/live-quote';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -42,6 +43,7 @@ medusaIntegrationTestRunner({
       let adminHeaders: { headers: { authorization: string } };
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let identifierId: string;
+      let intercarsId: string;
       let partId: string;
 
       const offersPath = () => `/admin/part-identifiers/${identifierId}/offers`;
@@ -110,6 +112,7 @@ medusaIntegrationTestRunner({
           name: 'Intercars',
           markup_percentage: 20,
         });
+        intercarsId = supplier.id;
         await suppliers.createSupplierCategories({
           supplier_id: supplier.id,
           code: 'IC-BATT',
@@ -240,7 +243,7 @@ medusaIntegrationTestRunner({
           stock: [{ location: 'Beograd', quantity: 6 }],
           lead_time_days: 1,
         });
-        await api.post('/admin/supplier-imports', {}, adminHeaders);
+        await importRuns(api, adminHeaders).run(intercarsId);
 
         expect(
           (await listOffers()).map(({ source, cost_price }) => [
@@ -253,7 +256,7 @@ medusaIntegrationTestRunner({
         ]);
 
         intercars.articles.length = 0;
-        await api.post('/admin/supplier-imports', {}, adminHeaders);
+        await importRuns(api, adminHeaders).run(intercarsId);
 
         expect(await listOffers()).toEqual([
           expect.objectContaining({ source: 'manual', cost_price: 9000 }),

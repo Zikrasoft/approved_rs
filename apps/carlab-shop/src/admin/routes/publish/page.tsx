@@ -6,20 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { usePublishRun } from '../../lib/publish-run';
-
-const KNOWN_ERRORS: Record<string, string> = {
-  'OPENAI_API_KEY is not set': 'publish.knownErrors.openAiKey',
-  'PUBLISH_DISPATCH_TOKEN is not set': 'publish.knownErrors.dispatchToken',
-  'The deploy run did not succeed': 'publish.knownErrors.deployFailed',
-  'The deploy run timed out': 'publish.knownErrors.deployTimedOut',
-};
-
-const knownError = (error: string | null) => {
-  const known = Object.keys(KNOWN_ERRORS).find((prefix) =>
-    error?.startsWith(prefix),
-  );
-  return known ? KNOWN_ERRORS[known] : null;
-};
+import { knownError } from '../../lib/run-errors';
 
 const BADGE_COLOR = {
   running: 'blue',

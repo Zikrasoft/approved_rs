@@ -5,6 +5,7 @@ import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
+import { importRuns } from '../../../../../integration-tests/importRuns';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
@@ -145,6 +146,7 @@ medusaIntegrationTestRunner({
       let adminHeaders: { headers: { authorization: string } };
       let catalog: CatalogModuleService;
       let realFetch: typeof fetch;
+      let nightlyId: string;
 
       const post = (path: string, body?: unknown) =>
         api.post(path, body, adminHeaders).catch((error) => error.response);
@@ -186,6 +188,7 @@ medusaIntegrationTestRunner({
           name: 'Nightly supplier',
           markup_percentage: 20,
         });
+        nightlyId = nightly.id;
         const mann = await catalog.createBrands({
           name: 'Mann-Filter',
           slug: 'mann-filter',
@@ -259,7 +262,7 @@ medusaIntegrationTestRunner({
         expect(reindexCalls).toHaveLength(1);
       });
 
-      it('imports supplier articles in Russian before translating them', async () => {
+      it('imports no Supplier catalogue; its own Import brings the articles Publish then translates', async () => {
         shopAi.name = 'Масляный фильтр';
         supplier.articles.push({
           article_id: 'N-1',
@@ -269,8 +272,14 @@ medusaIntegrationTestRunner({
           category: 'OIL',
         });
 
+        await publish();
+        const beforeImport = await catalog.listPartIdentifiers({
+          normalized_value: 'HU6004X',
+        });
+        await importRuns(api, adminHeaders).run(nightlyId);
         const run = await publish();
 
+        expect(beforeImport).toEqual([]);
         expect(run.status).toBe('succeeded');
         const [identifier] = await catalog.listPartIdentifiers({
           normalized_value: 'HU6004X',
@@ -543,7 +552,7 @@ medusaIntegrationTestRunner({
         expect(first.status).toBe(202);
         expect(first.data.publish_run.status).toBe('running');
         expect(second.status).toBe(409);
-        expect(second.data.code).toBe('PUBLISH_RUNNING');
+        expect(second.data.code).toBe('CATALOGUE_BUSY');
       });
 
       it('starts one run for two Publish clicks at the same moment', async () => {

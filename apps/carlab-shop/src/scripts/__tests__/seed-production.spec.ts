@@ -102,7 +102,7 @@ medusaIntegrationTestRunner({
         expect(await suppliers.listSupplierOffers()).toEqual([]);
       });
 
-      it('registers each crawled site once as a Supplier imported only on its own button', async () => {
+      it('registers each crawled site once as a Supplier with its import on', async () => {
         const registered = await suppliers.listSuppliers();
         expect(registered.map(({ name }) => name).sort()).toEqual([
           'FILTRON',
@@ -110,12 +110,9 @@ medusaIntegrationTestRunner({
           'VARTA',
           'bilstein group',
         ]);
-        expect(
-          registered.every(
-            ({ import_enabled, import_on_publish }) =>
-              import_enabled && !import_on_publish,
-          ),
-        ).toBe(true);
+        expect(registered.every(({ import_enabled }) => import_enabled)).toBe(
+          true,
+        );
       });
 
       it('creates the commerce defaults checkout needs', async () => {
