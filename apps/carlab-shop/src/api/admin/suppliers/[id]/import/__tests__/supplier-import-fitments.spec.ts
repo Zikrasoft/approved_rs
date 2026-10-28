@@ -237,6 +237,110 @@ medusaIntegrationTestRunner({
         expect(await catalog.listEngines({ family: 'N52' })).toHaveLength(1);
       });
 
+      const golf = (make: string): VehicleFacts => ({
+        ...bmw125i,
+        make,
+        model: 'Golf',
+        variant: '1.4 TSI',
+        chassis_codes: ['5K1'],
+        engine_codes: ['CAXA'],
+        power_kw: 90,
+      });
+
+      const makeOfFitment = async (number: string) => {
+        const [fitment] = await fitmentsOf(number);
+        return fitment.vehicle.model.chassis.series.make;
+      };
+
+      const volkswagen = async () =>
+        catalog.listMakes({ slug: 'volkswagen' }, { relations: ['spellings'] });
+
+      it('lands two Suppliers spelling one Make differently on one Make with a clean slug, keeping each spelling', async () => {
+        mann.articles.push({
+          article_id: 'HU712',
+          brand: 'MANN-FILTER',
+          number: 'HU 712/11 x',
+          name: 'Oil Filter HU 712/11 x',
+          category: 'Oil Filter',
+          vehicles: [golf('VOLKSWAGEN (VW)')],
+        });
+        bilstein.articles.push({
+          article_id: 'febi/38481',
+          brand: 'febi',
+          number: '38481',
+          name: 'uljni filter',
+          category: 'uljni filter',
+          vehicles: [{ ...golf('Volkswagen'), power_kw: null }],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('bilstein group');
+
+        const makes = await volkswagen();
+        expect(makes).toEqual([
+          expect.objectContaining({ name: 'VOLKSWAGEN', slug: 'volkswagen' }),
+        ]);
+        expect(
+          makes[0].spellings.map(({ supplier_id, value }) => ({
+            supplier_id,
+            value,
+          })),
+        ).toEqual(
+          expect.arrayContaining([
+            {
+              supplier_id: supplierIds['MANN-FILTER'],
+              value: 'VOLKSWAGEN (VW)',
+            },
+            { supplier_id: supplierIds['bilstein group'], value: 'Volkswagen' },
+          ]),
+        );
+        expect(makes[0].spellings).toHaveLength(2);
+        expect((await makeOfFitment('38481')).id).toBe(makes[0].id);
+        expect((await makeOfFitment('HU 712/11 x')).id).toBe(makes[0].id);
+      });
+
+      it('resolves a spelling staff added to a Make in the admin, and lists and removes it there', async () => {
+        const make = await catalog.createMakes({
+          name: 'Volkswagen',
+          slug: 'volkswagen',
+        });
+        const added = await api.post(
+          `/admin/makes/${make.id}/spellings`,
+          { supplier_id: supplierIds['bilstein group'], value: 'VW' },
+          adminHeaders,
+        );
+        expect(added.status).toBe(200);
+        bilstein.articles.push({
+          article_id: 'febi/38482',
+          brand: 'febi',
+          number: '38482',
+          name: 'uljni filter',
+          category: 'uljni filter',
+          vehicles: [golf('VW')],
+        });
+
+        await runImport('bilstein group');
+
+        expect((await makeOfFitment('38482')).id).toBe(make.id);
+        const listed = await api.get('/admin/makes', adminHeaders);
+        const spellings = listed.data.makes.find(
+          ({ id }: { id: string }) => id === make.id,
+        ).spellings;
+        expect(spellings).toEqual([
+          expect.objectContaining({
+            supplier_id: supplierIds['bilstein group'],
+            value: 'VW',
+          }),
+        ]);
+
+        const removed = await api.delete(
+          `/admin/makes/${make.id}/spellings/${spellings[0].id}`,
+          adminHeaders,
+        );
+        expect(removed.status).toBe(200);
+        expect((await volkswagen())[0].spellings).toEqual([]);
+      });
+
       it('never recreates a Fitment staff deleted and leaves a manual Fitment alone', async () => {
         mann.articles.push({
           article_id: 'HU7020',

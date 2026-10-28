@@ -286,13 +286,11 @@ export const AdminEditTranslation = z.strictObject({
 });
 export type AdminEditTranslationType = z.infer<typeof AdminEditTranslation>;
 
-export const AdminCreateBrandSpelling = z.strictObject({
+export const AdminCreateSpelling = z.strictObject({
   supplier_id: z.string().min(1),
   value: name,
 });
-export type AdminCreateBrandSpellingType = z.infer<
-  typeof AdminCreateBrandSpelling
->;
+export type AdminCreateSpellingType = z.infer<typeof AdminCreateSpelling>;
 
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN);
 

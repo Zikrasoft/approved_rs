@@ -10,7 +10,7 @@ import {
   AdminBulkDetachFitments,
   AdminCreateBrand,
   AdminConfirmWorkshopQuote,
-  AdminCreateBrandSpelling,
+  AdminCreateSpelling,
   AdminCreateCategory,
   AdminCreateCategoryField,
   AdminCreateCategoryFieldOption,
@@ -62,7 +62,12 @@ export default defineMiddlewares({
     {
       matcher: '/admin/brands/:id/spellings',
       method: 'POST',
-      middlewares: [validateAdminBody(AdminCreateBrandSpelling)],
+      middlewares: [validateAdminBody(AdminCreateSpelling)],
+    },
+    {
+      matcher: '/admin/makes/:id/spellings',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminCreateSpelling)],
     },
     {
       matcher: '/admin/categories',

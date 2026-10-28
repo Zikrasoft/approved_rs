@@ -322,7 +322,18 @@
     "deleted": "Deleted: {{name}}. The site updates after the next publish.",
     "emptyHint": "Click Add to create the first one.",
     "newTitle": "New entry",
-    "editTitle": "Edit entry"
+    "editTitle": "Edit entry",
+    "makeSpellings": {
+      "column": "Source spellings",
+      "supplierPlaceholder": "Supplier",
+      "spellingPlaceholder": "Supplier's spelling, e.g. VW",
+      "addSpelling": "Add spelling",
+      "removeSpelling": "Remove spelling {{spelling}}",
+      "spellingAdded": "Spelling {{spelling}} added. The next import puts this supplier's cars spelled so under this make.",
+      "spellingRemoved": "Spelling {{spelling}} removed.",
+      "confirmSpellingTitle": "Delete spelling {{spelling}}?",
+      "confirmSpellingBody": "The next import matches this spelling by name again, and adds a new make if no make's name matches."
+    }
   },
   "vinLookups": {
     "heading": "Unresolved VINs",

@@ -15,6 +15,12 @@ export class Migration20261025010017 extends Migration {
       `alter table if exists "part_identifier" drop constraint if exists "part_identifier_brand_id_normalized_value_unique";`,
     );
     this.addSql(
+      `alter table if exists "make_spelling" drop constraint if exists "make_spelling_supplier_id_value_key_unique";`,
+    );
+    this.addSql(
+      `alter table if exists "make_spelling" drop constraint if exists "make_spelling_supplier_id_value_unique";`,
+    );
+    this.addSql(
       `alter table if exists "make" drop constraint if exists "make_slug_unique";`,
     );
     this.addSql(
@@ -124,6 +130,22 @@ export class Migration20261025010017 extends Migration {
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_make_deleted_at" ON "make" ("deleted_at") WHERE deleted_at IS NULL;`,
+    );
+
+    this.addSql(
+      `create table if not exists "make_spelling" ("id" text not null, "supplier_id" text not null, "value" text not null, "value_key" text not null, "make_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "make_spelling_pkey" primary key ("id"));`,
+    );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_make_spelling_make_id" ON "make_spelling" ("make_id") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_make_spelling_deleted_at" ON "make_spelling" ("deleted_at") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_make_spelling_supplier_id_value_unique" ON "make_spelling" ("supplier_id", "value") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_make_spelling_supplier_id_value_key_unique" ON "make_spelling" ("supplier_id", "value_key") WHERE deleted_at IS NULL;`,
     );
 
     this.addSql(
@@ -262,6 +284,10 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
+      `alter table if exists "make_spelling" add constraint "make_spelling_make_id_foreign" foreign key ("make_id") references "make" ("id") on update cascade on delete cascade;`,
+    );
+
+    this.addSql(
       `alter table if exists "part" add constraint "part_category_id_foreign" foreign key ("category_id") references "category" ("id") on update cascade on delete set null;`,
     );
     this.addSql(
@@ -353,6 +379,10 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
+      `alter table if exists "make_spelling" drop constraint if exists "make_spelling_make_id_foreign";`,
+    );
+
+    this.addSql(
       `alter table if exists "series" drop constraint if exists "series_make_id_foreign";`,
     );
 
@@ -409,6 +439,8 @@ export class Migration20261025010017 extends Migration {
     this.addSql(`drop table if exists "engine" cascade;`);
 
     this.addSql(`drop table if exists "make" cascade;`);
+
+    this.addSql(`drop table if exists "make_spelling" cascade;`);
 
     this.addSql(`drop table if exists "part" cascade;`);
 
