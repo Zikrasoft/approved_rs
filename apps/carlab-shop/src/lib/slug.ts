@@ -16,14 +16,19 @@ export function modelSlugOf(names: {
   chassis: string;
   model: string;
 }): string {
-  const make = new Set(slugOf(names.make).split('-'));
+  const make = slugOf(names.make);
+  const withoutMake = (name: string) => {
+    const slug = slugOf(name.replace(DATES, ' '));
+    if (slug === make) return '';
+    return slug.startsWith(`${make}-`) ? slug.slice(make.length + 1) : slug;
+  };
   const seen = new Set<string>();
-  return slugOf(
-    `${names.series} ${names.chassis} ${names.model}`.replace(DATES, ' '),
-  )
+  return [names.series, names.chassis, names.model]
+    .map(withoutMake)
+    .join('-')
     .split('-')
     .filter((token) => {
-      if (make.has(token)) return false;
+      if (!token) return false;
       if (!isCode(token)) return true;
       if (seen.has(token)) return false;
       seen.add(token);
