@@ -428,3 +428,20 @@ export const AdminConfirmWorkshopQuote = z.strictObject({
 export type AdminConfirmWorkshopQuoteType = z.infer<
   typeof AdminConfirmWorkshopQuote
 >;
+
+export const RENAMEABLE_SLUG_KINDS = [
+  'brand',
+  'make',
+  'model',
+  'category',
+] as const;
+
+export const AdminRenameSlug = z.strictObject({
+  kind: z.enum(RENAMEABLE_SLUG_KINDS),
+  id: z.string().min(1),
+  slug: z.string().trim().max(MAX_NAME_LENGTH).regex(BRAND_SLUG_PATTERN),
+});
+export type AdminRenameSlugType = z.infer<typeof AdminRenameSlug>;
+
+export const AdminMerge = z.strictObject({ into: z.string().min(1) });
+export type AdminMergeType = z.infer<typeof AdminMerge>;

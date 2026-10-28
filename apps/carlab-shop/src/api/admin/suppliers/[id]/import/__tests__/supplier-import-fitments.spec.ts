@@ -343,6 +343,82 @@ medusaIntegrationTestRunner({
         expect((await volkswagen())[0].spellings).toEqual([]);
       });
 
+      it('lands a spelling on the Make of the same name whatever slug staff gave it', async () => {
+        const make = await catalog.createMakes({
+          name: 'Mercedes-Benz',
+          slug: 'mercedes',
+        });
+        mann.articles.push({
+          article_id: 'HU7008Z',
+          brand: 'MANN-FILTER',
+          number: 'HU 7008 z',
+          name: 'Oil Filter HU 7008 z',
+          category: 'Oil Filter',
+          vehicles: [
+            {
+              ...golf('MERCEDES-BENZ'),
+              model: 'C-Class',
+              variant: 'C 220 d',
+              chassis_codes: ['W205'],
+              engine_codes: ['OM654'],
+            },
+          ],
+        });
+
+        const report = await runImport('MANN-FILTER');
+
+        expect(report.failed).toEqual([]);
+        expect(await makeOfFitment('HU 7008 z')).toMatchObject({
+          id: make.id,
+          slug: 'mercedes',
+        });
+      });
+
+      it('gives a crawled Model a series-chassis-model slug and its Vehicle an engine-kW slug, and a re-import keeps a slug staff renamed', async () => {
+        mann.articles.push({
+          article_id: 'HU816X',
+          brand: 'MANN-FILTER',
+          number: 'HU 816 x',
+          name: 'Oil Filter HU 816 x',
+          category: 'Oil Filter',
+          vehicles: [bmw125i],
+        });
+        await runImport('MANN-FILTER');
+        const [{ vehicle }] = await fitmentsOf('HU 816 x');
+        expect(vehicle).toMatchObject({
+          slug: 'n52-b30a-160kw',
+          model: { slug: '1-e82-e88-125i' },
+        });
+
+        const renamed = await api.post(
+          '/admin/catalogue-slugs',
+          { kind: 'model', id: vehicle.model.id, slug: '1-series-e82-125i' },
+          adminHeaders,
+        );
+        expect(renamed.status).toBe(200);
+        mann.articles.push({
+          article_id: 'HU816X2',
+          brand: 'MANN-FILTER',
+          number: 'HU 816 x2',
+          name: 'Oil Filter HU 816 x2',
+          category: 'Oil Filter',
+          vehicles: [bmw125i, { ...bmw125i, power_kw: 130 }],
+        });
+        await runImport('MANN-FILTER');
+
+        const models = await catalog.listVehicleModels(
+          { id: vehicle.model.id },
+          { relations: ['vehicles'] },
+        );
+        expect(models).toEqual([
+          expect.objectContaining({ slug: '1-series-e82-125i' }),
+        ]);
+        expect(models[0].vehicles.map(({ slug }) => slug).sort()).toEqual([
+          'n52-b30a-130kw',
+          'n52-b30a-160kw',
+        ]);
+      });
+
       it('never recreates a Fitment staff deleted and leaves a manual Fitment alone', async () => {
         mann.articles.push({
           article_id: 'HU7020',

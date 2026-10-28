@@ -9,6 +9,7 @@ import {
 
 const vehicle: Vehicle = {
   id: 'veh_1',
+  slug: 'b47d20o0-140kw',
   power_kw: 140,
   drive: 'rwd',
   market: 'EU',
@@ -83,15 +84,19 @@ describe('vehiclesResponseSchema', () => {
     });
   });
 
-  it('reads a vehicle from a shop that has not shipped fuel and body style', () => {
+  it('reads a vehicle from a shop that has not shipped its slug, fuel and body style', () => {
+    const { slug: _slug, ...unslugged } = vehicle;
     const { fuel: _fuel, ...engine } = vehicle.engine;
     const { body_style: _body, ...chassis } = vehicle.model.chassis;
 
     const parsed = vehiclesResponseSchema.parse({
-      vehicles: [{ ...vehicle, engine, model: { ...vehicle.model, chassis } }],
+      vehicles: [
+        { ...unslugged, engine, model: { ...vehicle.model, chassis } },
+      ],
     });
 
     expect(parsed.vehicles[0]).toMatchObject({
+      slug: null,
       engine: { fuel: null },
       model: { chassis: { body_style: null } },
     });

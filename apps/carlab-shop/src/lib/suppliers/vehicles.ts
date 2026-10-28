@@ -3,7 +3,6 @@ import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
 import { fitmentConflicts } from '../fitment-conflicts';
-import { slugOf } from '../slug';
 import type { VehicleFacts } from './adapter';
 import { spellingKey } from './spelling';
 
@@ -130,7 +129,9 @@ async function knownMake(
     { relations: ['make'], take: 1 },
   );
   if (aliased) return { make: aliased.make, spelled: false };
-  const [named] = await catalog.listMakes({ slug: slugOf(name) }, { take: 1 });
+  const named = (
+    await catalog.listMakes({}, { select: ['id', 'name'], take: null })
+  ).find((make) => spellingKey(make.name) === spellingKey(name));
   return named ? { make: named, spelled: false } : null;
 }
 
@@ -141,9 +142,7 @@ async function makeOf(matcher: VehicleMatcher, spelling: string) {
   const { catalog, source, supplierId } = matcher;
   const name = canonicalMakeName(spelling);
   const known = await knownMake(matcher, key, name);
-  const make =
-    known?.make ??
-    (await catalog.createMakes({ slug: slugOf(name), name, source }));
+  const make = known?.make ?? (await catalog.createMakes({ name, source }));
   if (!known?.spelled) {
     await catalog.createMakeSpellings({
       make_id: make.id,
@@ -185,17 +184,6 @@ async function chassisOf(
   });
 }
 
-async function freeModelSlug(catalog: CatalogModuleService, name: string) {
-  for (let attempt = 1; ; attempt += 1) {
-    const slug = attempt > 1 ? `${slugOf(name)}-${attempt}` : slugOf(name);
-    const [, taken] = await catalog.listAndCountVehicleModels(
-      { slug },
-      { select: ['id'], take: 1 },
-    );
-    if (!taken) return slug;
-  }
-}
-
 async function modelOf(
   matcher: VehicleMatcher,
   facts: VehicleFacts,
@@ -211,10 +199,6 @@ async function modelOf(
     catalog.createVehicleModels({
       chassis_id: chassis.id,
       name: facts.variant,
-      slug: await freeModelSlug(
-        catalog,
-        `${make.name} ${chassis.code} ${facts.variant}`,
-      ),
       source,
     })
   );

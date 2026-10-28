@@ -120,6 +120,10 @@ const withYears = <Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) =>
 const plain = <Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) =>
   [schema, schema.partial()] as const;
 
+const slugged = <Shape extends z.ZodRawShape & { slug: typeof slug }>(
+  schema: z.ZodObject<Shape>,
+) => [schema, schema.omit({ slug: true }).partial()] as const;
+
 const storedYears = z
   .object({ year_from: year.optional(), year_to: year.optional() })
   .refine(yearsInOrder, YEARS_OUT_OF_ORDER);
@@ -136,10 +140,10 @@ export const STORED_ROW_RULES: Record<string, z.ZodType> = {
 };
 
 export const VEHICLE_REFERENCE_BODIES = [
-  ['/admin/makes', ...plain(AdminMake)],
+  ['/admin/makes', ...slugged(AdminMake)],
   ['/admin/series', ...plain(AdminSeries)],
   ['/admin/chassis', ...withYears(AdminChassis)],
-  ['/admin/vehicle-models', ...plain(AdminVehicleModel)],
+  ['/admin/vehicle-models', ...slugged(AdminVehicleModel)],
   ['/admin/engines', ...plain(AdminEngine)],
   ['/admin/vehicles', ...withYears(AdminVehicle)],
   [

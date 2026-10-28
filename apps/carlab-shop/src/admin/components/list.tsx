@@ -1,4 +1,5 @@
 import {
+  ArrowDownRightMini,
   EllipsisHorizontal,
   PencilSquare,
   Spinner,
@@ -82,6 +83,8 @@ export const RowActions = ({
   disabled,
   isLoading,
   onEdit,
+  onMerge,
+  mergeLabel,
   onDelete,
   deleteLabel,
 }: {
@@ -89,6 +92,8 @@ export const RowActions = ({
   disabled?: boolean;
   isLoading?: boolean;
   onEdit?: () => void;
+  onMerge?: () => void;
+  mergeLabel?: string;
   onDelete: () => void;
   deleteLabel?: string;
 }) => {
@@ -112,6 +117,15 @@ export const RowActions = ({
             <DropdownMenu.Item className="gap-x-2" onClick={onEdit}>
               <PencilSquare className="text-ui-fg-subtle" />
               {t('common.edit')}
+            </DropdownMenu.Item>
+            <DropdownMenu.Separator />
+          </>
+        )}
+        {onMerge && (
+          <>
+            <DropdownMenu.Item className="gap-x-2" onClick={onMerge}>
+              <ArrowDownRightMini className="text-ui-fg-subtle" />
+              {mergeLabel}
             </DropdownMenu.Item>
             <DropdownMenu.Separator />
           </>

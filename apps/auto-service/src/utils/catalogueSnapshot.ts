@@ -5,6 +5,7 @@ import {
   positionGroups,
   requirementMatches,
   type Category,
+  type CatalogueRedirect,
   type Fitment,
   type PartPage,
   type PositionGroup,
@@ -90,6 +91,7 @@ export function assembleSnapshot(
   allCategories: Category[],
   fitments: Fitment[],
   allVehicles: Vehicle[],
+  redirects: CatalogueRedirect[] = [],
 ) {
   const categoryById = new Map(
     allCategories.map((category) => [category.id, category]),
@@ -213,6 +215,7 @@ export function assembleSnapshot(
     retired,
     matchesFor,
     cars,
+    redirects,
   };
 }
 

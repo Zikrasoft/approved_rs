@@ -10,6 +10,8 @@ import {
   type OfferCart,
   type PartOffer,
   categoriesResponseSchema,
+  catalogueRedirectsResponseSchema,
+  type CatalogueRedirect,
   fitmentsResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -199,33 +201,54 @@ export function createCatalogue({
   const vehicles = async (): Promise<Vehicle[]> =>
     vehiclesResponseSchema.parse(await request('/store/vehicles')).vehicles;
 
+  const redirects = async (): Promise<CatalogueRedirect[]> => {
+    const path = '/store/catalogue-redirects';
+    const response = await send(path);
+    if (response.status === 404) {
+      return [];
+    }
+    if (!response.ok) {
+      throw new Error(`Catalogue ${path} answered ${response.status}`);
+    }
+    return catalogueRedirectsResponseSchema.parse(await response.json())
+      .redirects;
+  };
+
   const snapshot = async () => {
-    const [pages, allCategories, fitments, allVehicles] = await Promise.all([
-      paged('/store/part-pages', (body) => {
-        const { pages, count } = partPagesResponseSchema.parse(body);
-        return {
-          items: pages.map((page) =>
-            unpriced({
-              ...page,
-              part: {
-                ...page.part,
-                installation_price: pricesHidden
-                  ? null
-                  : page.part.installation_price,
-              },
-            }),
-          ),
-          count,
-        };
-      }),
-      categories(),
-      paged('/store/fitments', (body) => {
-        const { fitments, count } = fitmentsResponseSchema.parse(body);
-        return { items: fitments, count };
-      }),
-      vehicles(),
-    ]);
-    return assembleSnapshot(pages, allCategories, fitments, allVehicles);
+    const [pages, allCategories, fitments, allVehicles, allRedirects] =
+      await Promise.all([
+        paged('/store/part-pages', (body) => {
+          const { pages, count } = partPagesResponseSchema.parse(body);
+          return {
+            items: pages.map((page) =>
+              unpriced({
+                ...page,
+                part: {
+                  ...page.part,
+                  installation_price: pricesHidden
+                    ? null
+                    : page.part.installation_price,
+                },
+              }),
+            ),
+            count,
+          };
+        }),
+        categories(),
+        paged('/store/fitments', (body) => {
+          const { fitments, count } = fitmentsResponseSchema.parse(body);
+          return { items: fitments, count };
+        }),
+        vehicles(),
+        redirects(),
+      ]);
+    return assembleSnapshot(
+      pages,
+      allCategories,
+      fitments,
+      allVehicles,
+      allRedirects,
+    );
   };
 
   return {

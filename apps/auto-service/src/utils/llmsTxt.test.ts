@@ -143,6 +143,7 @@ describe('generateLlmsTxt', () => {
           answers[new URL(url).pathname] ?? {
             pages: [],
             fitments: [],
+            redirects: [],
             count: 0,
             offset: 0,
             limit: 1000,

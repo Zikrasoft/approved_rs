@@ -17,6 +17,7 @@ import {
   type SteeringSide,
   type VEHICLE_DRIVES,
   normalizePartNumber,
+  partPageSlug,
   requirementErrors,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -37,11 +38,12 @@ import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
 } from './models/part-identifier';
 import Series from './models/series';
+import SlugRedirect, { type SlugKind } from './models/slug-redirect';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
-import { slugOf } from '../../lib/slug';
+import { modelSlugOf, slugOf, vehicleSlugOf } from '../../lib/slug';
 import { spellingKey } from '../../lib/suppliers/spelling';
 import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
 
@@ -240,6 +242,7 @@ const CatalogModuleBase = MedusaService({
   VehicleIdentifier,
   Fitment,
   Requirement,
+  SlugRedirect,
 });
 
 type CatalogModuleBase = InstanceType<typeof CatalogModuleBase>;
@@ -251,7 +254,680 @@ const withValueKey = (row: SpellingInput) => ({
   value_key: spellingKey(row.value),
 });
 
+export type SluggedKind = Exclude<SlugKind, 'part'>;
+
+type SlugInput = Record<string, unknown> & { slug?: string };
+
+type SluggedRow = { id: string; slug: string };
+
+type Retirement = {
+  id: string;
+  slug: string;
+  scope_id: string | null;
+  target_kind: SlugKind | null;
+  target_id: string | null;
+};
+
+const SLUG_COLUMNS = { select: ['id', 'slug'], take: null };
+
+const RETIRING_DELETES = {
+  part_identifier: 'deletePartIdentifiers',
+  part: 'deleteParts',
+  vehicle: 'deleteVehicles',
+  model: 'deleteVehicleModels',
+  make: 'deleteMakes',
+  brand: 'deleteBrands',
+  category: 'deleteCategories',
+} as const;
+
+type RetiringTable = keyof typeof RETIRING_DELETES;
+
+const slugInUse = () =>
+  adminError(
+    MedusaError.Types.CONFLICT,
+    'SLUG_TAKEN',
+    'This slug is taken or was used before',
+  );
+
 class CatalogModuleService extends CatalogModuleBase {
+  private sluggedRows(kind: SluggedKind) {
+    const rows = {
+      brand: {
+        list: (filter: object, context: Context) =>
+          this.listBrands(filter, SLUG_COLUMNS, context),
+        update: (data: SlugInput, context: Context) =>
+          this.updateBrands(data, context),
+      },
+      make: {
+        list: (filter: object, context: Context) =>
+          this.listMakes(filter, SLUG_COLUMNS, context),
+        update: (data: SlugInput, context: Context) =>
+          this.updateMakes(data, context),
+      },
+      model: {
+        list: (filter: object, context: Context) =>
+          this.listVehicleModels(filter, SLUG_COLUMNS, context),
+        update: (data: SlugInput, context: Context) =>
+          this.updateVehicleModels(data, context),
+      },
+      vehicle: {
+        list: (filter: object, context: Context) =>
+          this.listVehicles(filter, SLUG_COLUMNS, context),
+        update: (data: SlugInput, context: Context) =>
+          this.updateVehicles(data, context),
+      },
+      category: {
+        list: (filter: object, context: Context) =>
+          this.listCategories(filter, SLUG_COLUMNS, context),
+        update: (data: SlugInput, context: Context) =>
+          this.updateCategories(data, context),
+      },
+    };
+    return rows[kind] as {
+      list: (filter: object, context: Context) => Promise<SluggedRow[]>;
+      update: (data: SlugInput, context: Context) => Promise<unknown>;
+    };
+  }
+
+  private async slugRetired(
+    kind: SluggedKind,
+    slug: string,
+    scopeId: string | null,
+    context: Context,
+  ): Promise<boolean> {
+    const [, retired] = await this.listAndCountSlugRedirects(
+      {
+        kind,
+        from_slug: slug,
+        ...(kind === 'vehicle' && { scope_id: scopeId }),
+      },
+      { select: ['id'], take: 1 },
+      context,
+    );
+    return retired > 0;
+  }
+
+  private async slugTaken(
+    kind: SluggedKind,
+    slug: string,
+    scopeId: string | null,
+    context: Context,
+  ): Promise<boolean> {
+    const scope = kind === 'vehicle' ? { model_id: scopeId } : {};
+    const live = await this.sluggedRows(kind).list({ slug, ...scope }, context);
+    return (
+      live.length > 0 || (await this.slugRetired(kind, slug, scopeId, context))
+    );
+  }
+
+  private async baseSlug(
+    kind: SluggedKind,
+    row: SlugInput,
+    context: Context,
+  ): Promise<string> {
+    if (kind === 'model') {
+      const chassis = await this.retrieveChassis(
+        String(row.chassis_id),
+        { relations: ['series.make'] },
+        context,
+      );
+      return modelSlugOf({
+        make: chassis.series.make.name,
+        series: chassis.series.name,
+        chassis: chassis.code,
+        model: String(row.name),
+      });
+    }
+    if (kind === 'vehicle') {
+      const engine = await this.retrieveEngine(
+        String(row.engine_id),
+        { select: ['code'] },
+        context,
+      );
+      return vehicleSlugOf({
+        engine: engine.code,
+        power_kw: typeof row.power_kw === 'number' ? row.power_kw : null,
+      });
+    }
+    return slugOf(String(row.name));
+  }
+
+  private async slugFor(
+    kind: SluggedKind,
+    row: SlugInput,
+    reserved: Set<string>,
+    context: Context,
+  ): Promise<string> {
+    const scope = kind === 'vehicle' ? String(row.model_id) : null;
+    const free = async (slug: string) =>
+      !reserved.has(`${scope}/${slug}`) &&
+      !(await this.slugTaken(kind, slug, scope, context));
+    if (row.slug !== undefined) {
+      if (await this.slugRetired(kind, row.slug, scope, context)) {
+        throw slugInUse();
+      }
+      return row.slug;
+    }
+    const base = await this.baseSlug(kind, row, context);
+    if (!base) {
+      throw adminError(
+        MedusaError.Types.INVALID_DATA,
+        'NO_SLUG',
+        `${String(row.name ?? kind)} has no Latin letters or digits for its slug`,
+      );
+    }
+    for (let attempt = 1; ; attempt += 1) {
+      const slug = attempt > 1 ? `${base}-${attempt}` : base;
+      if (await free(slug)) return slug;
+    }
+  }
+
+  private async withSlugs<Data extends SlugInput | SlugInput[]>(
+    kind: SluggedKind,
+    data: Data,
+    context: Context = {},
+  ): Promise<Data> {
+    const reserved = new Set<string>();
+    const slugged: SlugInput[] = [];
+    for (const row of [data].flat()) {
+      const slug = await this.slugFor(kind, row, reserved, context);
+      reserved.add(
+        `${kind === 'vehicle' ? String(row.model_id) : null}/${slug}`,
+      );
+      slugged.push({ ...row, slug });
+    }
+    return (Array.isArray(data) ? slugged : slugged[0]) as Data;
+  }
+
+  override createBrands = ((data: SlugInput | SlugInput[], context?: Context) =>
+    this.withSlugs('brand', data, context).then((slugged) =>
+      CatalogModuleBase.prototype.createBrands.call(this, slugged, context),
+    )) as CatalogModuleBase['createBrands'];
+
+  override createMakes = ((data: SlugInput | SlugInput[], context?: Context) =>
+    this.withSlugs('make', data, context).then((slugged) =>
+      CatalogModuleBase.prototype.createMakes.call(this, slugged, context),
+    )) as CatalogModuleBase['createMakes'];
+
+  override createVehicleModels = ((
+    data: SlugInput | SlugInput[],
+    context?: Context,
+  ) =>
+    this.withSlugs('model', data, context).then((slugged) =>
+      CatalogModuleBase.prototype.createVehicleModels.call(
+        this,
+        slugged,
+        context,
+      ),
+    )) as CatalogModuleBase['createVehicleModels'];
+
+  override createVehicles = ((
+    data: SlugInput | SlugInput[],
+    context?: Context,
+  ) =>
+    this.withSlugs('vehicle', data, context).then((slugged) =>
+      CatalogModuleBase.prototype.createVehicles.call(this, slugged, context),
+    )) as CatalogModuleBase['createVehicles'];
+
+  override createCategories = ((
+    data: SlugInput | SlugInput[],
+    context?: Context,
+  ) =>
+    this.withSlugs('category', data, context).then((slugged) =>
+      CatalogModuleBase.prototype.createCategories.call(this, slugged, context),
+    )) as CatalogModuleBase['createCategories'];
+
+  private async slugScope(
+    kind: SluggedKind,
+    id: string,
+    context: Context,
+  ): Promise<string | null> {
+    if (kind === 'model') {
+      const model = await this.retrieveVehicleModel(
+        id,
+        { relations: ['chassis.series'] },
+        context,
+      );
+      return model.chassis.series.make_id;
+    }
+    if (kind === 'vehicle') {
+      return (await this.retrieveVehicle(id, { select: ['model_id'] }, context))
+        .model_id;
+    }
+    return null;
+  }
+
+  @InjectTransactionManager()
+  async renameSlug(
+    kind: SluggedKind,
+    id: string,
+    slug: string,
+    provenance: Provenance,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const rows = this.sluggedRows(kind);
+    const [row] = await rows.list({ id }, sharedContext);
+    if (!row) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_FOUND,
+        `${kind} ${id} was not found`,
+      );
+    }
+    if (row.slug === slug) return;
+    const scope = await this.slugScope(kind, id, sharedContext);
+    if (await this.slugTaken(kind, slug, scope, sharedContext)) {
+      throw slugInUse();
+    }
+    await rows.update(
+      { id, slug, updated_by: provenance.updated_by },
+      sharedContext,
+    );
+    await this.createSlugRedirects(
+      {
+        kind,
+        from_id: id,
+        from_slug: row.slug,
+        scope_id: scope,
+        target_kind: kind,
+        target_id: id,
+        ...provenance,
+      },
+      sharedContext,
+    );
+  }
+
+  private async retireSlugs(
+    kind: SlugKind,
+    retired: Retirement[],
+    context: Context,
+  ): Promise<void> {
+    if (!retired.length) return;
+    const byTarget = new Map<string, Retirement[]>();
+    for (const row of retired) {
+      const key = JSON.stringify([row.target_kind, row.target_id]);
+      byTarget.set(key, [...(byTarget.get(key) ?? []), row]);
+    }
+    for (const group of byTarget.values()) {
+      const [{ target_kind, target_id }] = group;
+      await this.updateSlugRedirects(
+        {
+          selector: { target_kind: kind, target_id: group.map(({ id }) => id) },
+          data: { target_kind, target_id },
+        },
+        context,
+      );
+    }
+    await this.createSlugRedirects(
+      retired.map(({ id, slug, ...rest }) => ({
+        kind,
+        from_id: id,
+        from_slug: slug,
+        ...rest,
+      })),
+      context,
+    );
+  }
+
+  @InjectTransactionManager()
+  async mergeMakes(
+    sourceId: string,
+    targetId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    if (sourceId === targetId) {
+      throw adminError(
+        MedusaError.Types.INVALID_DATA,
+        'MERGE_INTO_SELF',
+        'A Make cannot be merged into itself',
+      );
+    }
+    const source = await this.retrieveMake(
+      sourceId,
+      { select: ['id', 'slug'] },
+      sharedContext,
+    );
+    await this.retrieveMake(targetId, { select: ['id'] }, sharedContext);
+    const spellingsOf = (make_id: string) =>
+      this.listMakeSpellings(
+        { make_id },
+        { select: ['id', 'supplier_id', 'value_key'], take: null },
+        sharedContext,
+      );
+    const seriesOf = (make_id: string) =>
+      this.listSeries(
+        { make_id },
+        { select: ['id', 'name'], take: null },
+        sharedContext,
+      );
+    const spelled = new Set(
+      (await spellingsOf(targetId)).map(({ supplier_id, value_key }) =>
+        JSON.stringify([supplier_id, value_key]),
+      ),
+    );
+    for (const { id, supplier_id, value_key } of await spellingsOf(sourceId)) {
+      if (spelled.has(JSON.stringify([supplier_id, value_key]))) {
+        await this.deleteMakeSpellings(id, sharedContext);
+      } else {
+        await this.updateMakeSpellings(
+          { id, make_id: targetId },
+          sharedContext,
+        );
+      }
+    }
+    const targetSeries = await seriesOf(targetId);
+    for (const series of await seriesOf(sourceId)) {
+      const same = targetSeries.find(
+        ({ name }) => spellingKey(name) === spellingKey(series.name),
+      );
+      if (same) {
+        await this.mergeSeries(series.id, same.id, targetId, sharedContext);
+      } else {
+        await this.updateSeries(
+          { id: series.id, make_id: targetId },
+          sharedContext,
+        );
+      }
+    }
+    await this.updateSlugRedirects(
+      {
+        selector: { kind: 'model', scope_id: sourceId },
+        data: { scope_id: targetId },
+      },
+      sharedContext,
+    );
+    await this.retireSlugs(
+      'make',
+      [
+        {
+          id: sourceId,
+          slug: source.slug,
+          scope_id: null,
+          target_kind: 'make',
+          target_id: targetId,
+        },
+      ],
+      sharedContext,
+    );
+    await this.flush(sharedContext);
+    await CatalogModuleBase.prototype.deleteMakes.call(
+      this,
+      sourceId,
+      sharedContext,
+    );
+  }
+
+  private async mergeSeries(
+    sourceId: string,
+    targetId: string,
+    makeId: string,
+    context: Context,
+  ): Promise<void> {
+    const targets = await this.listChassis(
+      { series_id: targetId },
+      { take: null },
+      context,
+    );
+    for (const chassis of await this.listChassis(
+      { series_id: sourceId },
+      { take: null },
+      context,
+    )) {
+      const same = targets.find(({ code }) => code === chassis.code);
+      if (same) {
+        await this.mergeChassis(chassis.id, same.id, makeId, context);
+      } else {
+        await this.updateChassis(
+          { id: chassis.id, series_id: targetId },
+          context,
+        );
+      }
+    }
+    await this.flush(context);
+    await this.deleteSeries(sourceId, context);
+  }
+
+  private async mergeChassis(
+    sourceId: string,
+    targetId: string,
+    makeId: string,
+    context: Context,
+  ): Promise<void> {
+    const targets = await this.listVehicleModels(
+      { chassis_id: targetId },
+      { take: null },
+      context,
+    );
+    for (const model of await this.listVehicleModels(
+      { chassis_id: sourceId },
+      { take: null },
+      context,
+    )) {
+      const same = targets.find(
+        ({ name }) => spellingKey(name) === spellingKey(model.name),
+      );
+      if (same) {
+        await this.mergeModels(model, same.id, makeId, context);
+      } else {
+        await this.updateVehicleModels(
+          { id: model.id, chassis_id: targetId },
+          context,
+        );
+      }
+    }
+    const required = new Set(
+      (
+        await this.listRequirements(
+          { chassis_id: targetId },
+          { select: ['field_id'], take: null },
+          context,
+        )
+      ).map(({ field_id }) => field_id),
+    );
+    const movable = (
+      await this.listRequirements(
+        { chassis_id: sourceId },
+        { select: ['id', 'field_id'], take: null },
+        context,
+      )
+    ).filter(({ field_id }) => !required.has(field_id));
+    if (movable.length) {
+      await this.updateRequirements(
+        {
+          selector: { id: movable.map(({ id }) => id) },
+          data: { chassis_id: targetId },
+        },
+        context,
+      );
+    }
+    await this.flush(context);
+    await this.deleteChassis(sourceId, context);
+  }
+
+  private async mergeModels(
+    source: { id: string; slug: string },
+    targetId: string,
+    makeId: string,
+    context: Context,
+  ): Promise<void> {
+    for (const vehicle of await this.listVehicles(
+      { model_id: source.id },
+      { select: ['id', 'slug', 'engine_id', 'power_kw'], take: null },
+      context,
+    )) {
+      const slug = (await this.slugTaken(
+        'vehicle',
+        vehicle.slug,
+        targetId,
+        context,
+      ))
+        ? await this.slugFor(
+            'vehicle',
+            { ...vehicle, slug: undefined, model_id: targetId },
+            new Set(),
+            context,
+          )
+        : vehicle.slug;
+      await this.updateVehicles(
+        { id: vehicle.id, model_id: targetId, slug },
+        context,
+      );
+    }
+    await this.updateSlugRedirects(
+      {
+        selector: { kind: 'vehicle', scope_id: source.id },
+        data: { scope_id: targetId },
+      },
+      context,
+    );
+    await this.retireSlugs(
+      'model',
+      [
+        {
+          id: source.id,
+          slug: source.slug,
+          scope_id: makeId,
+          target_kind: 'model',
+          target_id: targetId,
+        },
+      ],
+      context,
+    );
+    await this.flush(context);
+    await CatalogModuleBase.prototype.deleteVehicleModels.call(
+      this,
+      source.id,
+      context,
+    );
+  }
+
+  private async retirementsOf(
+    table: RetiringTable,
+    ids: string[],
+    context: Context,
+  ): Promise<Retirement[]> {
+    if (table === 'part_identifier' || table === 'part') {
+      const identifiers = await this.listPartIdentifiers(
+        table === 'part' ? { part_id: ids } : { id: ids },
+        { relations: ['brand', 'part'], take: null },
+        context,
+      );
+      return identifiers.map(({ id, brand, normalized_value, part }) => ({
+        id,
+        slug: partPageSlug(brand.slug, normalized_value),
+        scope_id: null,
+        target_kind: part.category_id ? 'category' : null,
+        target_id: part.category_id ?? null,
+      }));
+    }
+    if (table === 'vehicle') {
+      const vehicles = await this.listVehicles(
+        { id: ids },
+        { select: ['id', 'slug', 'model_id'], take: null },
+        context,
+      );
+      return vehicles.map(({ id, slug, model_id }) => ({
+        id,
+        slug,
+        scope_id: model_id,
+        target_kind: 'model',
+        target_id: model_id,
+      }));
+    }
+    if (table === 'model') {
+      const models = await this.listVehicleModels(
+        { id: ids },
+        { relations: ['chassis.series'], take: null },
+        context,
+      );
+      return models.map(({ id, slug, chassis }) => ({
+        id,
+        slug,
+        scope_id: chassis.series.make_id,
+        target_kind: 'make',
+        target_id: chassis.series.make_id,
+      }));
+    }
+    const rows = await this.sluggedRows(table).list({ id: ids }, context);
+    return rows.map(({ id, slug }) => ({
+      id,
+      slug,
+      scope_id: null,
+      target_kind: null,
+      target_id: null,
+    }));
+  }
+
+  @InjectTransactionManager()
+  private async deleteRetiring(
+    table: RetiringTable,
+    ids: string | string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const list = [ids].flat();
+    await this.retireSlugs(
+      table === 'part_identifier' ? 'part' : table,
+      await this.retirementsOf(table, list, sharedContext),
+      sharedContext,
+    );
+    await CatalogModuleBase.prototype[RETIRING_DELETES[table]].call(
+      this,
+      list,
+      sharedContext,
+    );
+  }
+
+  override deletePartIdentifiers = ((
+    ids: string | string[],
+    context?: Context,
+  ) =>
+    this.deleteRetiring(
+      'part_identifier',
+      ids,
+      context,
+    )) as CatalogModuleBase['deletePartIdentifiers'];
+
+  override deleteParts = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'part',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteParts'];
+
+  override deleteVehicles = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'vehicle',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteVehicles'];
+
+  override deleteVehicleModels = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'model',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteVehicleModels'];
+
+  override deleteMakes = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'make',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteMakes'];
+
+  override deleteBrands = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'brand',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteBrands'];
+
+  override deleteCategories = ((ids: string | string[], context?: Context) =>
+    this.deleteRetiring(
+      'category',
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteCategories'];
+
   @InjectTransactionManager()
   async createPartWithIdentifiers(
     {
@@ -400,7 +1076,7 @@ class CatalogModuleService extends CatalogModuleBase {
       );
     }
     const created = await this.createBrands(
-      { name: name.trim(), slug, ...provenance },
+      { name: name.trim(), ...provenance },
       sharedContext,
     );
     brands.push({ ...created, spellings: [] });
@@ -501,6 +1177,10 @@ class CatalogModuleService extends CatalogModuleBase {
       );
     }
     await this.deletePartIdentifiers(id, sharedContext);
+  }
+
+  private async flush(context: Context): Promise<void> {
+    await (context.transactionManager as SqlEntityManager).flush();
   }
 
   private async lockRow(

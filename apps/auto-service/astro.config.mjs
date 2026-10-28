@@ -7,10 +7,18 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { sitemapFilter } from './src/utils/sitemap.ts';
-import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
+import {
+  partPagesForBuild,
+  redirectsForBuild,
+} from './src/utils/catalogueEnv.ts';
+import {
+  catalogueRedirectsIntegration,
+  catalogueRoutes,
+} from './src/utils/catalogueRedirects.ts';
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
+const redirects = catalogueRoutes(await redirectsForBuild(process.env));
 
 export default defineConfig({
   site,
@@ -32,6 +40,7 @@ export default defineConfig({
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
       },
     }),
+    catalogueRedirectsIntegration(redirects),
   ],
   vite: {
     plugins: [tailwindcss()],

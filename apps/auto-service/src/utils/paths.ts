@@ -22,6 +22,12 @@ export const PathBuilder = {
     model: string,
     category: string,
   ) => `/${locale}/parts/${make}/${model}/${category}/`,
+  partsVehicle: (
+    locale: Locale,
+    make: string,
+    model: string,
+    vehicle: string,
+  ) => `/${locale}/parts/${make}/${model}/m/${vehicle}/`,
   partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
   partsPrices: (locale: Locale) => `/${locale}/parts/prices/`,
   partsInquiry: (locale: Locale) => `/${locale}/parts/#${PARTS_INQUIRY_ANCHOR}`,

@@ -222,7 +222,7 @@
     "createLabel": "New brand",
     "namePlaceholder": "Name, e.g. Mann-Filter",
     "slugPlaceholder": "URL slug, e.g. mann-filter",
-    "slugHint": "The slug is part of every part number page URL and never changes: lower-case Latin letters, digits and hyphens.",
+    "slugHint": "The slug is part of every part number page URL: lower-case Latin letters, digits and hyphens. A renamed slug keeps its old address as a redirect.",
     "create": "Add brand",
     "empty": "No brands yet. Add one before creating parts.",
     "columns": {
@@ -333,6 +333,14 @@
       "spellingRemoved": "Spelling {{spelling}} removed.",
       "confirmSpellingTitle": "Delete spelling {{spelling}}?",
       "confirmSpellingBody": "The next import matches this spelling by name again, and adds a new make if no make's name matches."
+    },
+    "merge": {
+      "action": "Merge into another make",
+      "title": "Merge {{name}}",
+      "description": "Its series, models, vehicles and spellings move to the make you pick, and its pages lead there. This cannot be undone.",
+      "into": "Merge into",
+      "save": "Merge",
+      "merged": "{{name}} merged into {{into}}. The site updates after the next publish."
     }
   },
   "vinLookups": {
@@ -418,7 +426,7 @@
     "createLabel": "New Category",
     "namePlaceholder": "Name, e.g. Oil filters",
     "slugPlaceholder": "Slug, e.g. oil-filters",
-    "slugHint": "The slug is part of the Category page URL and never changes: lower-case latin letters, digits and dashes.",
+    "slugHint": "The slug is part of the Category page URL: lower-case latin letters, digits and dashes. A renamed slug keeps its old address as a redirect.",
     "create": "Add Category",
     "empty": "No Categories yet. Add the first one to describe parts.",
     "name": "Name",
@@ -573,7 +581,10 @@
       "ARTICLE_UNREADABLE": "AI gave an unusable answer for an imported article. Run the import again.",
       "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
       "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
-      "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line."
+      "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line.",
+      "SLUG_TAKEN": "This address is taken or was used before. Pick another one.",
+      "NO_SLUG": "The name needs Latin letters or digits to make an address.",
+      "MERGE_INTO_SELF": "Pick another row to merge into."
     },
     "types": {
       "invalid_data": "Check the data you entered: the server did not accept it.",
@@ -999,5 +1010,14 @@
       "server_errors": "The site answered with a server error five times in a row. Resume later.",
       "staff": "Paused by staff. Resume it to put it back in line."
     }
+  },
+  "slugRename": {
+    "open": "Rename the address of {{name}}",
+    "title": "Address of {{name}}",
+    "description": "The old address keeps working and leads visitors here.",
+    "label": "New address",
+    "hint": "Lower-case Latin letters, digits and hyphens. An address used before cannot be taken again.",
+    "save": "Rename",
+    "renamed": "Address changed to {{slug}}. The site updates after the next publish."
   }
 }
