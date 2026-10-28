@@ -69,9 +69,10 @@ const engineLitres = (engine: string | null) => {
 };
 
 const designation = (name: string) => {
-  const match = /(?<![\d.])(\d{3})\s?(tds|td|sd|is|ix|dx|si|d|i|e)?\b/i.exec(
-    name,
-  );
+  const match =
+    /(?<![\d.])(\d{3})\s?l?(tds|td|sd|is|ix|dx|si|d|i|e)?(?![a-z\d])/i.exec(
+      name,
+    );
   return match ? (match[1] + (match[2] ?? '')).toLowerCase() : null;
 };
 
@@ -99,9 +100,15 @@ const yearsOverlap = (key: TypeKey, vehicle: Vehicle) => {
 };
 
 const vehicleDrive = ({ drive, model }: Vehicle) =>
-  drive ?? (/xdrive/i.test(model.name) ? 'awd' : null);
+  drive ?? (/xdrive|\b\d+\s?[di]x\b/i.test(model.name) ? 'awd' : null);
 
-export const typeKeyDescribes = (key: TypeKey, vehicle: Vehicle): boolean => {
+const vehicleSteering = ({ steering, model }: Vehicle) =>
+  steering ??
+  (/volan sa desne strane|right[- ]hand drive/i.test(model.name)
+    ? 'right'
+    : null);
+
+const typeKeyDescribes = (key: TypeKey, vehicle: Vehicle): boolean => {
   const family = key.engine && engineFamily(key.engine);
   return (
     Boolean(family) &&
@@ -113,9 +120,23 @@ export const typeKeyDescribes = (key: TypeKey, vehicle: Vehicle): boolean => {
     agree(designation(key.model), designation(vehicle.model.name)) &&
     agree(bodyNamed(vehicle.model.name), key.body) &&
     agree(vehicleDrive(vehicle), key.drivetrain) &&
-    agree(vehicle.steering, key.steering) &&
+    agree(vehicleSteering(vehicle), key.steering) &&
     yearsOverlap(key, vehicle)
   );
+};
+
+const allWheelDrive = (vehicle: Vehicle) => vehicleDrive(vehicle) === 'awd';
+
+export const typeKeyMatches = (
+  key: TypeKey,
+  vehicles: Vehicle[],
+): Vehicle[] => {
+  const described = vehicles.filter((vehicle) =>
+    typeKeyDescribes(key, vehicle),
+  );
+  return key.drivetrain === 'awd' && described.some(allWheelDrive)
+    ? described.filter(allWheelDrive)
+    : described;
 };
 
 export const vehiclesDescribedByTypeKey = async (
@@ -145,7 +166,8 @@ export const vehiclesDescribedByTypeKey = async (
     )
   ).map(({ id }) => id);
   if (!modelIds.length) return [];
-  return (await listVehicleResponses(catalog, { model_id: modelIds })).filter(
-    (vehicle) => typeKeyDescribes(key, vehicle),
+  return typeKeyMatches(
+    key,
+    await listVehicleResponses(catalog, { model_id: modelIds }),
   );
 };

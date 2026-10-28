@@ -1,6 +1,6 @@
 import { type Vehicle, vehicleSchema } from '@podbor/catalog-contract';
 
-import { type TypeKey, typeKey, typeKeyDescribes } from '../bmw-type-key';
+import { type TypeKey, typeKey, typeKeyMatches } from '../bmw-type-key';
 
 type Facts = {
   name?: string;
@@ -60,7 +60,23 @@ const key = (code: string): TypeKey => {
   return found;
 };
 
-describe('typeKeyDescribes', () => {
+const describes = (typeKeyRow: TypeKey, vehicle: Vehicle) =>
+  typeKeyMatches(typeKeyRow, [vehicle]).length === 1;
+
+describe('typeKeyMatches', () => {
+  it('keeps only the all-wheel-drive Vehicles where the crawl names them apart', () => {
+    const facts = { chassis: 'F01/F02', family: 'N57', kw: 190, cc: 2993 };
+    const plain = crawled({ ...facts, name: '730 d (F01/F02)' });
+    const xDrive = {
+      ...crawled({ ...facts, name: '730 d xDrive (F01/F02)' }),
+      id: 'veh_2',
+    };
+
+    expect(typeKeyMatches(key('YC41'), [plain, xDrive])).toEqual([xDrive]);
+    expect(typeKeyMatches(key('YC41'), [plain])).toEqual([plain]);
+    expect(typeKeyMatches(key('YC21'), [plain, xDrive])).toEqual([plain]);
+  });
+
   it('reads the open-data row of a type code', () => {
     expect(key('8C51')).toEqual({
       code: '8C51',
@@ -77,7 +93,7 @@ describe('typeKeyDescribes', () => {
   });
 
   it('accepts a crawled Vehicle whose chassis, engine family and power agree', () => {
-    expect(typeKeyDescribes(key('8C51'), crawled())).toBe(true);
+    expect(describes(key('8C51'), crawled())).toBe(true);
   });
 
   it.each<[string, Facts]>([
@@ -89,18 +105,33 @@ describe('typeKeyDescribes', () => {
     ['all-wheel drive its name gives', { name: '320d xDrive (F30, F31)' }],
     ['a drive of its own', { drive: 'awd' }],
     ['the other steering side', { steering: 'right' }],
+    [
+      'the right-hand drive its name gives',
+      { name: '320 d (F30, F31) Volan sa desne strane' },
+    ],
   ])('rejects a crawled Vehicle with %s', (_, facts) => {
-    expect(typeKeyDescribes(key('8C51'), crawled(facts))).toBe(false);
+    expect(describes(key('8C51'), crawled(facts))).toBe(false);
+  });
+
+  it('reads a long-wheelbase designation as its model number', () => {
+    const facts = { chassis: 'F01/F02', family: 'N57', kw: 190, cc: 2993 };
+
+    expect(
+      describes(key('YG63'), crawled({ ...facts, name: '730 d (F01/F02)' })),
+    ).toBe(false);
+    expect(
+      describes(key('YG41'), crawled({ ...facts, name: '730 d (F01/F02)' })),
+    ).toBe(true);
   });
 
   it('rejects an engine whose displacement the type key contradicts', () => {
     const facts = { name: '523i (F10/F11)', chassis: 'F10/F11', family: 'N52' };
 
     expect(
-      typeKeyDescribes(key('FP15'), crawled({ ...facts, kw: 150, cc: 2996 })),
+      describes(key('FP15'), crawled({ ...facts, kw: 150, cc: 2996 })),
     ).toBe(false);
     expect(
-      typeKeyDescribes(key('FP15'), crawled({ ...facts, kw: 150, cc: 2497 })),
+      describes(key('FP15'), crawled({ ...facts, kw: 150, cc: 2497 })),
     ).toBe(true);
   });
 
@@ -113,10 +144,10 @@ describe('typeKeyDescribes', () => {
     };
 
     expect(
-      typeKeyDescribes(key('VG91'), crawled({ ...facts, years: [2010, 2012] })),
+      describes(key('VG91'), crawled({ ...facts, years: [2010, 2012] })),
     ).toBe(false);
     expect(
-      typeKeyDescribes(key('VG91'), crawled({ ...facts, years: [2005, 2011] })),
+      describes(key('VG91'), crawled({ ...facts, years: [2005, 2011] })),
     ).toBe(true);
   });
 
