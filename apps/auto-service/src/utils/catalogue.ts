@@ -56,6 +56,7 @@ export type SearchQuery = {
   facets: string[];
   ranges?: RangeFilter[];
   offset?: number;
+  limit?: number;
 };
 
 export type SearchOutcome = Omit<SearchResponse, 'results'> & {
@@ -280,6 +281,7 @@ export function createCatalogue({
       facets,
       ranges = [],
       offset = 0,
+      limit,
     }: SearchQuery): Promise<SearchOutcome | null> {
       const params = new URLSearchParams({
         ...(q ? { q } : {}),
@@ -295,6 +297,9 @@ export function createCatalogue({
       }
       if (offset) {
         params.set('offset', String(offset));
+      }
+      if (limit) {
+        params.set('limit', String(limit));
       }
       try {
         const found = searchResponseSchema.parse(

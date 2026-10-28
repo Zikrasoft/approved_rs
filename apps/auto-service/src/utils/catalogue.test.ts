@@ -1303,6 +1303,29 @@ describe('catalogue.search', () => {
     );
   });
 
+  it('asks for a few matches and the cars when suggesting', async () => {
+    const car = {
+      kind: 'make',
+      make: { slug: 'bmw', name: 'BMW' },
+      model: null,
+      vehicle: null,
+    };
+    const fetch = answer({ ...found, cars: [car] });
+
+    const suggested = await catalog(fetch).search({
+      q: 'bmw',
+      locale: 'ru',
+      facets: [],
+      limit: 5,
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?q=bmw&locale=ru&limit=5',
+      expect.anything(),
+    );
+    expect(suggested?.cars).toEqual([car]);
+  });
+
   it('lists every match with a link slug to its brand-number page', async () => {
     const result = await catalog(answer(found)).search({
       q: 'hu816x',
