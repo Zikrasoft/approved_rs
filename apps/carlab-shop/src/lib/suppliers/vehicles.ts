@@ -252,14 +252,6 @@ async function vehicleOf(
   return vehicle.id;
 }
 
-async function forgetStaleEngines(matcher: VehicleMatcher) {
-  const [, count] = await matcher.catalog.listAndCountEngines(
-    {},
-    { select: ['id'], take: 1 },
-  );
-  if (count !== matcher.engines?.length) matcher.engines = null;
-}
-
 async function vehicleBySupplierId(
   { catalog, supplierId }: VehicleMatcher,
   value: string,
@@ -271,23 +263,24 @@ async function vehicleBySupplierId(
   return known?.vehicle_id;
 }
 
-async function matchVehicles(
+async function vehiclesOf(
   matcher: VehicleMatcher,
   facts: VehicleFacts,
 ): Promise<string[]> {
+  const key = JSON.stringify({ ...facts, notes: [] });
+  const found = matcher.found.get(key);
+  if (found) return found;
   const { catalog, source, supplierId } = matcher;
   const supplierVehicleId =
     facts.engine_codes.length === 1 ? facts.supplier_vehicle_id : undefined;
-  if (supplierVehicleId) {
-    const known = await vehicleBySupplierId(matcher, supplierVehicleId);
-    if (known) return [known];
-  }
-  await forgetStaleEngines(matcher);
-  const ids: string[] = [];
-  for (const code of facts.engine_codes) {
+  const known =
+    supplierVehicleId &&
+    (await vehicleBySupplierId(matcher, supplierVehicleId));
+  const ids: string[] = known ? [known] : [];
+  for (const code of known ? [] : facts.engine_codes) {
     ids.push(await vehicleOf(matcher, facts, code));
   }
-  if (supplierVehicleId) {
+  if (supplierVehicleId && !known) {
     await catalog.createVehicleIdentifiers({
       vehicle_id: ids[0],
       type: SUPPLIER_VEHICLE_ID,
@@ -296,19 +289,6 @@ async function matchVehicles(
       source,
     });
   }
-  return ids;
-}
-
-async function vehiclesOf(
-  matcher: VehicleMatcher,
-  facts: VehicleFacts,
-): Promise<string[]> {
-  const key = JSON.stringify({ ...facts, notes: [] });
-  const found = matcher.found.get(key);
-  if (found) return found;
-  const ids = await matcher.catalog.matchVehiclesAlone(() =>
-    matchVehicles(matcher, facts),
-  );
   matcher.found.set(key, ids);
   return ids;
 }

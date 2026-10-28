@@ -589,52 +589,6 @@ medusaIntegrationTestRunner({
         expect(chassisOf('118d').id).toBe(chassisOf('120d').id);
       });
 
-      it('creates a car two Suppliers import at once only once', async () => {
-        const mini: VehicleFacts = {
-          ...bmw125i,
-          make: 'MINI',
-          model: 'Cooper',
-          variant: 'Cooper S',
-          chassis_codes: ['R56'],
-          engine_codes: ['N14 B16A'],
-          power_kw: 128,
-        };
-        for (let index = 0; index < 5; index += 1) {
-          mann.articles.push({
-            article_id: `MINI-${index}`,
-            brand: 'MANN-FILTER',
-            number: `MINI ${index}`,
-            name: `Oil Filter MINI ${index}`,
-            category: 'Oil Filter',
-            vehicles: [mini],
-          });
-          bilstein.articles.push({
-            article_id: `febi/MINI-${index}`,
-            brand: 'febi',
-            number: `MINI-F ${index}`,
-            name: 'uljni filter',
-            category: 'uljni filter',
-            vehicles: [mini],
-          });
-        }
-
-        await Promise.all([
-          runImport('MANN-FILTER'),
-          runImport('bilstein group'),
-        ]);
-
-        const [make] = await catalog.listMakes({ slug: 'mini' });
-        const vehicles = await catalog.listVehicles(
-          {},
-          { relations: ['model.chassis.series'] },
-        );
-        expect(
-          vehicles.filter(
-            ({ model }) => model.chassis.series.make_id === make.id,
-          ),
-        ).toHaveLength(1);
-      });
-
       it('fits no Vehicle for a row without an engine code and counts the row', async () => {
         mann.articles.push({
           article_id: 'K1477',

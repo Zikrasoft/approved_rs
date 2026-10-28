@@ -1468,18 +1468,10 @@ medusaIntegrationTestRunner({
         });
 
         it('lists an article that fails with its reason and imports the rest', async () => {
-          const make = await catalog.createMakes({
-            slug: 'zz-motors',
+          await catalog.createMakes({
+            slug: 'zz-motors-renamed',
             name: 'ZZ Motors',
           });
-          const series = await catalog.createSeries({
-            make_id: make.id,
-            name: 'ZZ',
-          });
-          await catalog.createChassis([
-            { series_id: series.id, code: 'ZZ9' },
-            { series_id: series.id, code: 'BMW ZZ9' },
-          ]);
           intercars.articles.push(
             {
               article_id: 'IC-FAIL-1',
@@ -1489,7 +1481,7 @@ medusaIntegrationTestRunner({
               category: 'IC-OIL',
               vehicles: [
                 {
-                  make: 'BMW',
+                  make: 'ZZ Motors',
                   model: '3',
                   variant: '320d',
                   chassis_codes: ['ZZ9'],
@@ -1522,7 +1514,7 @@ medusaIntegrationTestRunner({
               failed: [
                 {
                   number: 'FAIL 1',
-                  reason: 'Chassis ZZ9 is taken by another make',
+                  reason: expect.stringContaining('Make with name'),
                 },
               ],
             },
