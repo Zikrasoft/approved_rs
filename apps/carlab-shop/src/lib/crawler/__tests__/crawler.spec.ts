@@ -657,15 +657,21 @@ medusaIntegrationTestRunner({
         expect(
           [...first.articles, ...second.articles].map(({ number }) => number),
         ).toEqual(['C 30 005', 'HU 816 x']);
-        expect(last).toEqual({ articles: [], next: null, unreadable: [] });
+        expect(last).toEqual({
+          articles: [],
+          next: null,
+          unreadable: [],
+          not_in_scope: 0,
+        });
         expect(await adapter.quote(['HU816X_MANN-FILTER'])).toEqual([]);
       });
 
-      it('reads the other pages on when one page throws or reads into an invalid article, and names the unreadable ones', async () => {
+      it('reads the other pages on when one page throws or reads into an invalid article, names the unreadable ones and counts the ones out of scope', async () => {
         const site: CrawledSite = {
           ...testSite('brittle'),
           parse: (html) => {
             if (html === 'throws') throw new Error('Unexpected markup');
+            if (html === 'spare') return null;
             return {
               article_id: html,
               brand: 'BRITTLE',
@@ -680,6 +686,7 @@ medusaIntegrationTestRunner({
           'https://brittle.test/p/2': 'throws',
           'https://brittle.test/p/3': 'invalid',
           'https://brittle.test/p/4': 'four',
+          'https://brittle.test/p/5': 'spare',
         };
         await store.start(site.name, new Date(START));
         await store.seed(site.name, Object.keys(pages), new Date(START));
@@ -705,6 +712,7 @@ medusaIntegrationTestRunner({
           },
           { url: 'https://brittle.test/p/3', reason: expect.any(String) },
         ]);
+        expect(page.not_in_scope).toBe(1);
       });
     });
 

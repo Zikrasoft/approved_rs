@@ -145,6 +145,7 @@ medusaIntegrationTestRunner({
         for (const fake of [intercars, warehouse]) {
           fake.articles.length = 0;
           fake.unreadable.length = 0;
+          fake.notInScope = 0;
           fake.quotes.clear();
         }
         Object.assign(shopAi, {
@@ -343,6 +344,7 @@ medusaIntegrationTestRunner({
               currency: 0,
               unreadable: 0,
               no_engine_code: 0,
+              not_in_scope: 0,
             },
             needs_category: ['C 30 005'],
           },
@@ -356,6 +358,7 @@ medusaIntegrationTestRunner({
               currency: 0,
               unreadable: 0,
               no_engine_code: 0,
+              not_in_scope: 0,
             },
             needs_category: [],
           },
@@ -364,11 +367,12 @@ medusaIntegrationTestRunner({
         expect(await page('F026407157')).toBeUndefined();
       });
 
-      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it as skipped', async () => {
+      it('imports the rest of the catalogue past a page the Supplier could not read, and counts it and the pages out of scope as skipped', async () => {
         intercars.unreadable.push({
           url: 'https://intercars.test/p/broken',
           reason: 'Unexpected markup',
         });
+        intercars.notInScope = 2;
         intercars.articles.push({
           article_id: 'IC-30',
           brand: 'MANN-FILTER',
@@ -383,12 +387,13 @@ medusaIntegrationTestRunner({
           supplier: 'Intercars',
           imported: 0,
           created: 1,
-          skipped: 1,
+          skipped: 3,
           skipped_by_reason: {
             brand: 0,
             currency: 0,
             unreadable: 1,
             no_engine_code: 0,
+            not_in_scope: 2,
           },
           needs_category: [],
         });

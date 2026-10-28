@@ -50,6 +50,7 @@ export type ImportSummary = {
     currency: number;
     unreadable: number;
     no_engine_code: number;
+    not_in_scope: number;
   };
   needs_category: string[];
 };
@@ -382,6 +383,7 @@ export async function importSupplier(
       currency: 0,
       unreadable: 0,
       no_engine_code: 0,
+      not_in_scope: 0,
     },
     needs_category: [],
   };
@@ -401,6 +403,8 @@ export async function importSupplier(
     }
     summary.skipped += page.unreadable.length;
     summary.skipped_by_reason.unreadable += page.unreadable.length;
+    summary.skipped += page.not_in_scope;
+    summary.skipped_by_reason.not_in_scope += page.not_in_scope;
     const wanted = page.articles.filter(brandOfArticle);
     const unbranded = page.articles.length - wanted.length;
     summary.skipped += unbranded;

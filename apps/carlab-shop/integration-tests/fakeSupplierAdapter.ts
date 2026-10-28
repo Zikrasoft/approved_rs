@@ -9,6 +9,7 @@ export type FakeSupplier = {
   adapter: SupplierAdapter;
   articles: SupplierArticle[];
   unreadable: UnreadablePage[];
+  notInScope: number;
   quotes: Map<string, SupplierQuote>;
 };
 
@@ -19,6 +20,7 @@ export const createFakeSupplier = (
   const fake: FakeSupplier = {
     articles: [],
     unreadable: [],
+    notInScope: 0,
     quotes: new Map(),
     adapter: {
       name,
@@ -28,6 +30,7 @@ export const createFakeSupplier = (
         return {
           articles: fake.articles.slice(start, end),
           unreadable: cursor ? [] : fake.unreadable,
+          not_in_scope: cursor ? 0 : fake.notInScope,
           next: end < fake.articles.length ? String(end) : null,
         };
       },
