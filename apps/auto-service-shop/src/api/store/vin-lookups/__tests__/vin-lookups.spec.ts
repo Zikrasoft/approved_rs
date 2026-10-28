@@ -212,10 +212,97 @@ medusaIntegrationTestRunner({
           adminHeaders,
         );
 
-        expect(response.data.codes.slice(0, 2)).toEqual([
+        expect(response.data.codes.slice(0, 2)).toMatchObject([
           { make: 'bmw', code: '22BB', count: 2 },
           { make: 'bmw', code: '11AA', count: 1 },
         ]);
+      });
+
+      it('says when an unresolved code was last searched and what the open data calls it', async () => {
+        const before = Date.now();
+        await lookUp('WBA3K11070N000020');
+        await lookUp('WBA22BB070N000021');
+
+        const { codes } = (
+          await api.get('/admin/vin-lookups/unresolved', adminHeaders)
+        ).data;
+
+        const entry = codes.find(
+          ({ code }: { code: string }) => code === '3K11',
+        );
+        expect(entry).toEqual({
+          make: 'bmw',
+          code: '3K11',
+          count: 1,
+          last_seen: expect.any(String),
+          reference: {
+            chassis: 'F31',
+            model: '318d',
+            body: 'Touring',
+            engine: 'N47D20U1',
+            power_kw: 105,
+          },
+        });
+        expect(Date.parse(entry.last_seen)).toBeGreaterThanOrEqual(
+          before - 1000,
+        );
+        expect(
+          codes.find(({ code }: { code: string }) => code === '22BB'),
+        ).toMatchObject({ reference: null });
+      });
+
+      it('links an unresolved code to the Vehicles staff choose', async () => {
+        const vin = 'WBA55EE070N000016';
+        await lookUp(vin);
+        const crawled = (supplierId: string, modelSlug: string) =>
+          createVehicleFixture(catalog, {
+            identifierType: 'supplier-vehicle-id',
+            typeCode: supplierId,
+            modelSlug,
+            chassisCode: 'G20',
+          });
+        const first = await crawled('mann:g20-a', 'g20-320d-link');
+        const second = await crawled('mann:g20-b', 'g20-320d-xdrive-link');
+
+        const linked = await api.post(
+          '/admin/vin-lookups/unresolved/bmw/55EE',
+          { vehicle_ids: [first.vehicle.id, second.vehicle.id] },
+          adminHeaders,
+        );
+
+        expect(linked.data).toEqual({ make: 'bmw', code: '55EE', linked: 2 });
+        const after = await lookUp(vin);
+        expect(after.data).toMatchObject({ resolved: false, code: '55EE' });
+        expect([...after.data.vehicle_ids].sort()).toEqual(
+          [first.vehicle.id, second.vehicle.id].sort(),
+        );
+        expect(
+          (await api.get('/admin/vin-lookups/unresolved', adminHeaders)).data
+            .codes,
+        ).not.toContainEqual(expect.objectContaining({ code: '55EE' }));
+      });
+
+      it('refuses to link a code to a Vehicle of another Make', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          make: { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
+          identifierType: 'mercedes-baumuster',
+          typeCode: '205004',
+          modelSlug: 'w205-link',
+          chassisCode: 'W205',
+        });
+
+        const response = await api
+          .post(
+            '/admin/vin-lookups/unresolved/bmw/66FF',
+            { vehicle_ids: [vehicle.id] },
+            adminHeaders,
+          )
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
+        expect(
+          await catalog.listVehicleIdentifiers({ value: '66FF' }),
+        ).toHaveLength(0);
       });
 
       it('drops a code from the unresolved list once staff add it to a Vehicle', async () => {

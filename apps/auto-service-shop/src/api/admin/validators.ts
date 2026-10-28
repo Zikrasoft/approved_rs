@@ -445,3 +445,8 @@ export type AdminRenameSlugType = z.infer<typeof AdminRenameSlug>;
 
 export const AdminMerge = z.strictObject({ into: z.string().min(1) });
 export type AdminMergeType = z.infer<typeof AdminMerge>;
+
+export const AdminLinkVinCode = z.strictObject({
+  vehicle_ids: z.array(z.string().min(1)).min(1).max(50),
+});
+export type AdminLinkVinCodeType = z.infer<typeof AdminLinkVinCode>;

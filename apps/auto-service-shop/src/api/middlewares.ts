@@ -21,6 +21,7 @@ import {
   AdminEditTranslation,
   AdminListFitments,
   AdminListPartIdentifiers,
+  AdminLinkVinCode,
   AdminListRequirements,
   AdminMerge,
   AdminOrderImages,
@@ -65,6 +66,11 @@ export default defineMiddlewares({
       matcher: '/admin/makes/:id/merge',
       method: 'POST',
       middlewares: [validateAdminBody(AdminMerge)],
+    },
+    {
+      matcher: '/admin/vin-lookups/unresolved/:make/:code',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminLinkVinCode)],
     },
     {
       matcher: '/admin/brands',
