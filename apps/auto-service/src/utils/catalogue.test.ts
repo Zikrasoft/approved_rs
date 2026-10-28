@@ -151,8 +151,13 @@ const backend = ({
     if (url.endsWith('/store/categories')) {
       return respond({ categories });
     }
-    if (url.endsWith('/store/vehicles')) {
-      return respond({ vehicles });
+    if (url.includes('/store/vehicles')) {
+      return respond({
+        vehicles,
+        count: vehicles.length,
+        offset: 0,
+        limit: 1000,
+      });
     }
     return respond({}, false);
   });
@@ -1247,11 +1252,16 @@ const catalog = (fetch: ReturnType<typeof vi.fn>) =>
 
 describe('catalogue.vehicles', () => {
   it('lists the Vehicles the car pages are built from', async () => {
-    const fetch = answer({ vehicles: [VEHICLE] });
+    const fetch = answer({
+      vehicles: [VEHICLE],
+      count: 1,
+      offset: 0,
+      limit: 1000,
+    });
 
     expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/vehicles',
+      'http://shop.test/store/vehicles?offset=0&limit=1000',
       expect.objectContaining({
         headers: expect.objectContaining({
           'x-publishable-api-key': 'pk_test',
@@ -1260,9 +1270,34 @@ describe('catalogue.vehicles', () => {
     );
   });
 
+  it('pages through the Vehicles until the count is reached', async () => {
+    const second = { ...VEHICLE, id: 'veh_2' };
+    const fetch = vi.fn((url: string) =>
+      respond(
+        url.endsWith('offset=0&limit=1000')
+          ? { vehicles: [VEHICLE], count: 2, offset: 0, limit: 1 }
+          : { vehicles: [second], count: 2, offset: 1, limit: 1 },
+      ),
+    );
+
+    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE, second]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://shop.test/store/vehicles?offset=1&limit=1000',
+      expect.anything(),
+    );
+  });
+
+  it('takes the whole list in one answer from a shop that does not page it', async () => {
+    const fetch = answer({ vehicles: [VEHICLE] });
+
+    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('fails the build when the backend answers with an error', async () => {
     await expect(catalog(answer({}, false)).vehicles()).rejects.toThrow(
-      '/store/vehicles answered 503',
+      '/store/vehicles?offset=0&limit=1000 answered 503',
     );
   });
 
@@ -1691,6 +1726,32 @@ describe('catalogue.listingScope', () => {
       model: VEHICLE.model,
       scope_pages: null,
     });
+  });
+
+  it('asks the shop for the one Model, not every Vehicle', async () => {
+    const fetch = backend({ vehicles: [VEHICLE] });
+
+    await catalogueWith(fetch).listingScope({ model: 'f30-320d' }, 'ru');
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith(
+      `${BACKEND_URL}/store/vehicles?model=f30-320d&limit=1`,
+      expect.anything(),
+    );
+  });
+
+  it('finds the Model in the whole list of a shop that cannot filter', async () => {
+    const other = {
+      ...VEHICLE,
+      id: 'veh_g20',
+      model: { ...VEHICLE.model, slug: 'g20-320d' },
+    };
+
+    const scope = await catalogueWith(
+      backend({ vehicles: [other, VEHICLE] }),
+    ).listingScope({ model: 'f30-320d' }, 'ru');
+
+    expect(scope.model).toEqual(VEHICLE.model);
   });
 
   it('names nothing when the backend cannot answer', async () => {
