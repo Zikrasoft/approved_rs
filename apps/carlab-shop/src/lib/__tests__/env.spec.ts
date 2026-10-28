@@ -1,4 +1,8 @@
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
+
 import { CRAWLER_ENV_NAMES, parseCrawlerEnv, parseEnv } from '../env';
+import { sentryOptions } from '../sentry';
 
 const VALID_ENV = {
   DATABASE_URL: 'postgres://postgres:postgres@localhost:55432/medusa',
@@ -274,5 +278,31 @@ describe('parseCrawlerEnv', () => {
       'S3_REGION',
       'S3_SECRET_ACCESS_KEY',
     ]);
+  });
+});
+
+describe('The production env template', () => {
+  const ciShopEnv = () =>
+    Object.fromEntries(
+      execFileSync('sh', [
+        path.resolve(
+          __dirname,
+          '../../../../../.github/scripts/shop-ci-env.sh',
+        ),
+      ])
+        .toString()
+        .trim()
+        .split('\n')
+        .map((line) => [
+          line.slice(0, line.indexOf('=')),
+          line.slice(line.indexOf('=') + 1),
+        ]),
+    );
+
+  it('passes production env validation once CI fills it', () => {
+    const env = ciShopEnv();
+
+    expect(parseEnv(env).NODE_ENV).toBe('production');
+    expect(sentryOptions(env)).toBeNull();
   });
 });

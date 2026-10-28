@@ -1,6 +1,41 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
+import { globSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+
+type SnapshotTable = {
+  name: string;
+  columns: Record<string, { name: string; type: string; nullable: boolean }>;
+  indexes: { keyName: string }[];
+  checks: { name: string }[];
+  foreignKeys: Record<string, { constraintName: string }>;
+};
+
+const snapshotTables = (): SnapshotTable[] =>
+  globSync('*/migrations/.snapshot-*.json', {
+    cwd: path.resolve(__dirname, '../..'),
+  }).flatMap(
+    (file) =>
+      JSON.parse(readFileSync(path.resolve(__dirname, '../..', file), 'utf8'))
+        .tables as SnapshotTable[],
+  );
+
+const UDT_OF: Record<string, string> = {
+  integer: 'int4',
+  real: 'float4',
+  boolean: 'bool',
+  'text[]': '_text',
+};
+
+const HAND_WRITTEN_TYPES: Record<string, string> = {
+  'supplier.markup_percentage': 'numeric',
+  'fitment.production_from': 'date',
+  'fitment.production_to': 'date',
+};
+
+const columnSignature = (type: string, nullable: boolean) =>
+  `${type} ${nullable ? 'null' : 'not null'}`;
 
 medusaIntegrationTestRunner({
   moduleName: 'hand_written_indexes',
@@ -64,6 +99,74 @@ medusaIntegrationTestRunner({
       it('keeps no page body in the crawl table', async () => {
         expect(await columnType('crawl_page', 'body')).toBeNull();
       });
+    });
+
+    describe('The migrated schema', () => {
+      const tables = snapshotTables();
+      const namesOf = (rows: Record<string, string>[], column: string) =>
+        rows.map((row) => row[column]);
+
+      it('reads every module snapshot', () => {
+        expect(tables.map(({ name }) => name)).toEqual(
+          expect.arrayContaining([
+            'fitment',
+            'supplier',
+            'catalogue_run',
+            'vin_lookup',
+          ]),
+        );
+      });
+
+      it.each(tables.map((table) => [table.name, table] as const))(
+        'builds %s exactly as its snapshot says',
+        async (name, table) => {
+          const { rows: columns } = await pg().raw(
+            `select column_name, udt_name, is_nullable from information_schema.columns
+             where table_schema = 'public' and table_name = ?`,
+            [name],
+          );
+          const { rows: indexes } = await pg().raw(
+            `select indexname from pg_indexes where schemaname = 'public' and tablename = ?`,
+            [name],
+          );
+          const { rows: constraints } = await pg().raw(
+            'select conname from pg_constraint where conrelid = ?::regclass',
+            [name],
+          );
+
+          expect(
+            Object.fromEntries(
+              columns.map((column: Record<string, string>) => [
+                column.column_name,
+                columnSignature(column.udt_name, column.is_nullable === 'YES'),
+              ]),
+            ),
+          ).toEqual(
+            Object.fromEntries(
+              Object.values(table.columns).map((column) => [
+                column.name,
+                columnSignature(
+                  HAND_WRITTEN_TYPES[`${name}.${column.name}`] ??
+                    UDT_OF[column.type] ??
+                    column.type,
+                  column.nullable,
+                ),
+              ]),
+            ),
+          );
+          expect(namesOf(indexes, 'indexname')).toEqual(
+            expect.arrayContaining(table.indexes.map(({ keyName }) => keyName)),
+          );
+          expect(namesOf(constraints, 'conname')).toEqual(
+            expect.arrayContaining([
+              ...table.checks.map((check) => check.name),
+              ...Object.values(table.foreignKeys).map(
+                (key) => key.constraintName,
+              ),
+            ]),
+          );
+        },
+      );
     });
 
     describe('The checks on catalog rows', () => {
