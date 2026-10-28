@@ -91,7 +91,7 @@ export const Spellings = ({
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Select value={supplierId} onValueChange={setSupplierId}>
+        <Select size="small" value={supplierId} onValueChange={setSupplierId}>
           <Select.Trigger>
             <Select.Value placeholder={t(`${copy}.supplierPlaceholder`)} />
           </Select.Trigger>
@@ -103,14 +103,15 @@ export const Spellings = ({
             ))}
           </Select.Content>
         </Select>
-        <Input
-          size="small"
-          className="min-w-[10rem]"
-          maxLength={200}
-          placeholder={t(`${copy}.spellingPlaceholder`)}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-        />
+        <div className="min-w-[15rem] flex-1">
+          <Input
+            size="small"
+            maxLength={200}
+            placeholder={t(`${copy}.spellingPlaceholder`)}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        </div>
         <Button
           size="small"
           variant="secondary"
