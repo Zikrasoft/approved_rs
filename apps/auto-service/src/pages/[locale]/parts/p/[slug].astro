@@ -14,6 +14,7 @@ import { carName, vehicleVariant } from '@/utils/carName';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
+import { fitGroups } from '@/utils/fitGroups';
 import { partPagesForBuild } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
@@ -106,6 +107,10 @@ const carLists = [
       .map(carLink),
   }))
   .filter(({ links }) => links.length > 0);
+const fitmentCopy = content(locale).partsCar.fitment;
+const fitsByMake = fitGroups(page.fits);
+const singleModel =
+  fitsByMake.length === 1 && fitsByMake[0].models.length === 1;
 const { cross_references: crossReferences, applicability } = page.supplier_data;
 const [bestOffer] = page.offers;
 const jsonLd = bestOffer
@@ -287,24 +292,71 @@ const thumbFor = (slug: string) => {
         )
       }
       {
-        page.fits.length > 0 && (
+        fitsByMake.length > 0 && (
           <div class="flex flex-col gap-3">
-            <h2 class="text-section">
-              {content(locale).partsCar.fitment.partFitsHeading}
-            </h2>
-            <ul class="card divide-y divide-line">
-              {page.fits.map((fit) => (
-                <li class="px-5 py-4 sm:px-6">
-                  <FitLine
-                    fit={fit}
-                    car={{
-                      href: PathBuilder.partsCar(locale, fit.vehicle.id),
-                      label: `${carName(fit.vehicle.model, locale)}, ${vehicleVariant(fit.vehicle, locale)}`,
-                    }}
-                  />
-                </li>
+            <h2 class="text-section">{fitmentCopy.partFitsHeading}</h2>
+            <div class="flex flex-col gap-5">
+              {fitsByMake.map(({ make, models }) => (
+                <section class="flex flex-col gap-2">
+                  <h3 class="text-sm font-semibold text-muted">{make.name}</h3>
+                  <ul class="card divide-y divide-line">
+                    {models.map(({ model, fits }) => (
+                      <li>
+                        <details class="group" open={singleModel}>
+                          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-3 px-5 py-3 marker:hidden sm:px-6 [&::-webkit-details-marker]:hidden">
+                            <span class="min-w-0 flex-1 font-semibold text-ink">
+                              {carName(model, locale)}
+                            </span>
+                            <span class="spec shrink-0 text-sm text-muted">
+                              {fits.length}
+                            </span>
+                            <Icon
+                              name="chevronDown"
+                              size={16}
+                              class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+                            />
+                          </summary>
+                          <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6">
+                            <a
+                              href={PathBuilder.partsModel(
+                                locale,
+                                make.slug,
+                                model.slug,
+                              )}
+                              class="text-sm font-semibold text-signal-ink hover:underline"
+                            >
+                              {fitmentCopy.modelLink.replace(
+                                '{model}',
+                                carName(model, locale),
+                              )}
+                            </a>
+                            <ul class="flex flex-col gap-3 border-l-2 border-line pl-4">
+                              {fits.map((fit) => (
+                                <li>
+                                  <FitLine
+                                    fit={fit}
+                                    car={{
+                                      href: PathBuilder.partsCar(
+                                        locale,
+                                        fit.vehicle.id,
+                                      ),
+                                      label: vehicleVariant(
+                                        fit.vehicle,
+                                        locale,
+                                      ),
+                                    }}
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </details>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           </div>
         )
       }

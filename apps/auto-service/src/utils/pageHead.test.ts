@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SITE_URL } from '@/utils/constants';
-import { pageHead } from './pageHead';
+import { NOINDEX, pageHead } from './pageHead';
+import { PathBuilder } from './paths';
 
 const copy = { title: 'T', description: 'D' };
 
@@ -20,6 +21,29 @@ describe('pageHead', () => {
       ]);
     },
   );
+
+  it.each(SUPPORTED_LOCALES)(
+    'keeps a %s Category page past the first canonical to itself',
+    (locale) => {
+      const head = pageHead(
+        locale,
+        PathBuilder.partsCategory(locale, 'oil-filters', 2),
+        copy,
+      );
+
+      expect(head.canonical).toBe(
+        `${SITE_URL}/${locale}/parts/c/oil-filters/2/`,
+      );
+      expect(head.alternates.at(-1)).toEqual({
+        hreflang: 'x-default',
+        href: `${SITE_URL}/sr/parts/c/oil-filters/2/`,
+      });
+    },
+  );
+
+  it('keeps a noindex page followed', () => {
+    expect(NOINDEX).toBe('noindex, follow');
+  });
 
   it('points the bare site root at the locale homepage', () => {
     const head = pageHead('en', '/', copy);

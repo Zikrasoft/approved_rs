@@ -11,6 +11,7 @@ import { content } from '@/i18n/content';
 import { previewRequested } from '@/utils/shopPreview';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import { catalogueFromEnv, shopOpen, siteEnv } from '@/utils/catalogueEnv';
+import { NOINDEX } from '@/utils/pageHead';
 import { PathBuilder } from '@/utils/paths';
 import { withFacetCopy } from '@/utils/partsSearch';
 
@@ -67,7 +68,7 @@ const bodySchema = z
   );
 
 Astro.response.headers.set('cache-control', 'private, no-store');
-Astro.response.headers.set('x-robots-tag', 'noindex');
+Astro.response.headers.set('x-robots-tag', NOINDEX);
 
 const locale = localeFrom(Astro.url.pathname);
 const preview = previewRequested(Astro.request);

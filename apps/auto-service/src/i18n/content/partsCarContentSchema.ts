@@ -80,6 +80,7 @@ export const partsCarContentSchema = z
         builtFrom: z.string(),
         builtTo: z.string(),
         partFitsHeading: z.string(),
+        modelLink: z.string().includes('{model}'),
       })
       .strict(),
     hubs: z
