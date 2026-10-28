@@ -971,6 +971,17 @@ carlab.rs.
    workflow runs the same probe but fails instead (`::error::`), so the admin
    shows the Publish as failed rather than as done.
 
+   The build reads the catalogue once (pages, sitemap and llms.txt share it)
+   and records how many part pages it serves at
+   `https://carlab.rs/catalogue-build.json`. A `vercel build` (it sets
+   `VERCEL=1`) reads that record from the live site first, and once it counts
+   any part pages the catalogue is live: the build then fails without
+   `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
+   live site serves. A shrink that is meant (a supplier removed) goes through
+   with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs Vercel project for one
+   build; remove it afterwards. Part pages list only published numbers, the same
+   ones search finds, so a CI deploy and a Publish build the same catalogue.
+
 The production seed (`apps/carlab-shop/src/scripts/seed-production.ts`) runs on
 every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
 (store, the `CarLab parts shop` sales channel, the Serbia region), the seven

@@ -164,8 +164,10 @@ medusaIntegrationTestRunner({
           .post('/admin/supplier-imports', {}, adminHeaders)
           .catch((error) => error.response);
 
-      const pages = async (): Promise<Page[]> =>
-        (await api.get('/store/part-pages', storeHeaders)).data.pages;
+      const pages = async (): Promise<Page[]> => {
+        await publishAllNumbers(getContainer());
+        return (await api.get('/store/part-pages', storeHeaders)).data.pages;
+      };
 
       const page = async (normalized: string) =>
         (await pages()).find((entry) => entry.normalized_value === normalized);
