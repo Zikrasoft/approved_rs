@@ -56,6 +56,13 @@ export type ImportSummary = {
     not_in_scope: number;
   };
   needs_category: string[];
+  failed: { number: string; reason: string }[];
+};
+
+type ImportState = {
+  summary: ImportSummary;
+  listed: Set<string>;
+  changedPartIds: Set<string>;
 };
 
 type Context = {
@@ -371,10 +378,43 @@ async function stage(
   }
 }
 
-// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make the import on Publish slow.
+async function importArticle(
+  context: Context,
+  { summary, listed, changedPartIds }: ImportState,
+  article: Article,
+  brandId: string,
+  categoryId: string | undefined,
+  quote: Quote | undefined,
+): Promise<void> {
+  const { identifierId, partId, created, changedPartId, categorized } =
+    await matchArticle(context, article, brandId, categoryId);
+  context.matched.add(identifierId);
+  if (changedPartId) {
+    changedPartIds.add(changedPartId);
+  }
+  if (quote) {
+    await storeOffer(context, identifierId, quote);
+    listed.add(article.article_id);
+  }
+  await stage(context, identifierId, article);
+  if (article.vehicles) {
+    await fitVehicles(context.vehicles, partId, article.vehicles);
+    summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+      ({ engine_codes }) => !engine_codes.length,
+    ).length;
+  }
+  if (categorized === false) {
+    summary.needs_category.push(article.number);
+  }
+  summary.imported += Number(!created);
+  summary.created += Number(created);
+}
+
+// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make an Import slow.
 export async function importSupplier(
   scope: MedusaContainer,
   adapter: SupplierAdapter,
+  onPage?: (progress: ImportSummary) => Promise<unknown>,
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
@@ -429,13 +469,17 @@ export async function importSupplier(
       not_in_scope: 0,
     },
     needs_category: [],
+    failed: [],
   };
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
   const categoryOfArticle = (article: Article) =>
     categoryOf.get(spellingKey(article.category));
-  const listed = new Set<string>();
-  const changedPartIds = new Set<string>();
+  const state: ImportState = {
+    summary,
+    listed: new Set(),
+    changedPartIds: new Set(),
+  };
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
@@ -464,35 +508,27 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, partId, created, changedPartId, categorized } =
-        await matchArticle(
+      try {
+        await importArticle(
           context,
+          state,
           article,
           brandOfArticle(article)!,
           categoryOfArticle(article),
+          quotes.get(article.article_id),
         );
-      context.matched.add(identifierId);
-      if (changedPartId) {
-        changedPartIds.add(changedPartId);
+      } catch (error) {
+        context.logger.warn(
+          `Supplier import ${adapter.name}, ${article.number}: failed, ${errorMessage(error)}`,
+        );
+        summary.failed.push({
+          number: article.number,
+          reason: errorMessage(error),
+        });
+        state.listed.add(article.article_id);
       }
-      if (categorized === false) {
-        summary.needs_category.push(article.number);
-      }
-      const quote = quotes.get(article.article_id);
-      if (quote) {
-        await storeOffer(context, identifierId, quote);
-        listed.add(article.article_id);
-      }
-      await stage(context, identifierId, article);
-      if (article.vehicles) {
-        await fitVehicles(context.vehicles, partId, article.vehicles);
-        summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
-          ({ engine_codes }) => !engine_codes.length,
-        ).length;
-      }
-      summary.imported += Number(!created);
-      summary.created += Number(created);
     }
+    await onPage?.(structuredClone(summary));
     if (!page.next) {
       break;
     }
@@ -504,11 +540,11 @@ export async function importSupplier(
       { supplier_id: supplier.id },
       { select: ['id', 'supplier_article_id'], take: null },
     )
-  ).filter(({ supplier_article_id }) => !listed.has(supplier_article_id));
+  ).filter(({ supplier_article_id }) => !state.listed.has(supplier_article_id));
   if (gone.length) {
     await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
-  await emitIndexChanges(scope, { partIds: changedPartIds });
+  await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;
 }
 
@@ -517,11 +553,9 @@ export async function importSupplierCatalogues(
 ): Promise<ImportSummary[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const skipped = new Set(
-    (
-      await suppliers.listSuppliers({
-        $or: [{ import_enabled: false }, { import_on_publish: false }],
-      })
-    ).map(({ name }) => name),
+    (await suppliers.listSuppliers({ import_enabled: false })).map(
+      ({ name }) => name,
+    ),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {

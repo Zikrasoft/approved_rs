@@ -6,23 +6,28 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
-import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
-import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
-import { memoryStorage } from '../../../../../integration-tests/fakeStorage';
-import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
-import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
-import { publishAllNumbers } from '../../../../lib/publish/published';
-import { SHOP_STORAGE_REGISTRATION } from '../../../../lib/storage';
-import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
+import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../../../integration-tests/fakeShopAi';
+import { memoryStorage } from '../../../../../../../integration-tests/fakeStorage';
+import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
+import { importRuns } from '../../../../../../../integration-tests/importRuns';
+import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
+import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
+import { publishAllNumbers } from '../../../../../../lib/publish/published';
+import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
+import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
+import type { ImportSummary } from '../../../../../../lib/suppliers/import';
 import {
   IMAGE_LOOKUP_REGISTRATION,
   publicLookup,
-} from '../../../../lib/suppliers/mirrored-images';
-import { CATALOG_MODULE } from '../../../../modules/catalog';
-import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
+} from '../../../../../../lib/suppliers/mirrored-images';
+import { CATALOG_MODULE } from '../../../../../../modules/catalog';
+import type CatalogModuleService from '../../../../../../modules/catalog/service';
+import { PUBLISH_MODULE } from '../../../../../../modules/publish';
+import type PublishModuleService from '../../../../../../modules/publish/service';
+import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/publish/service';
+import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
+import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
 const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
@@ -70,6 +75,8 @@ medusaIntegrationTestRunner({
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let catalog: CatalogModuleService;
       let intercarsId: string;
+      let warehouseId: string;
+      let imports: ReturnType<typeof importRuns>;
       let oilFiltersId: string;
       let engineOilId: string;
 
@@ -99,6 +106,8 @@ medusaIntegrationTestRunner({
           { name: 'Warehouse', markup_percentage: 10 },
         ]);
         intercarsId = ic.id;
+        warehouseId = wh.id;
+        imports = importRuns(api, adminHeaders);
         const [mann] = await catalog.createBrands([
           { name: 'Mann-Filter', slug: 'mann-filter' },
           { name: 'Bosch', slug: 'bosch' },
@@ -147,6 +156,7 @@ medusaIntegrationTestRunner({
           fake.unreadable.length = 0;
           fake.notInScope = 0;
           fake.quotes.clear();
+          fake.laterPages = null;
         }
         Object.assign(shopAi, {
           category: null,
@@ -159,10 +169,16 @@ medusaIntegrationTestRunner({
         });
       });
 
-      const runImport = () =>
-        api
-          .post('/admin/supplier-imports', {}, adminHeaders)
-          .catch((error) => error.response);
+      const runImport = async () => {
+        const reports: ImportSummary[] = [];
+        for (const supplierId of [intercarsId, warehouseId]) {
+          const started = await imports.start(supplierId);
+          if (started.status === 202) {
+            reports.push((await imports.finished(supplierId)).report);
+          }
+        }
+        return { data: { imports: reports } };
+      };
 
       const pages = async (): Promise<Page[]> => {
         await publishAllNumbers(getContainer());
@@ -214,9 +230,8 @@ medusaIntegrationTestRunner({
           lead_time_days: 1,
         });
 
-        const response = await runImport();
+        await runImport();
 
-        expect(response.status).toBe(200);
         const all = await pages();
         expect(all).toHaveLength(1);
         expect(all[0].part.name).toBe('Oil filter');
@@ -247,9 +262,8 @@ medusaIntegrationTestRunner({
           lead_time_days: 1,
         });
 
-        const response = await runImport();
+        await runImport();
 
-        expect(response.status).toBe(200);
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
@@ -349,6 +363,7 @@ medusaIntegrationTestRunner({
               not_in_scope: 0,
             },
             needs_category: ['C 30 005'],
+            failed: [],
           },
           {
             supplier: 'Warehouse',
@@ -363,6 +378,7 @@ medusaIntegrationTestRunner({
               not_in_scope: 0,
             },
             needs_category: [],
+            failed: [],
           },
         ]);
         expect((await page('C30005'))?.part.category_id).toBeNull();
@@ -398,6 +414,7 @@ medusaIntegrationTestRunner({
             not_in_scope: 2,
           },
           needs_category: [],
+          failed: [],
         });
         expect(await page('W6103')).toBeDefined();
       });
@@ -1152,45 +1169,6 @@ medusaIntegrationTestRunner({
         expect(await page('W1140')).toBeDefined();
       });
 
-      it('imports a supplier kept off Publish only on its own button', async () => {
-        const keepOffPublish = (import_on_publish: boolean) =>
-          api.post(
-            `/admin/suppliers/${intercarsId}`,
-            { import_on_publish },
-            adminHeaders,
-          );
-        intercars.articles.push({
-          article_id: 'IC-15',
-          brand: 'MANN-FILTER',
-          number: 'W 712/75',
-          name: 'Фильтр W712/75',
-          category: 'IC-OIL',
-        });
-
-        const switched = await keepOffPublish(false);
-        const onPublish = await runImport();
-        const pageAfterPublish = await page('W71275');
-        const ownButton = await api.post(
-          `/admin/suppliers/${intercarsId}/import`,
-          {},
-          adminHeaders,
-        );
-        await keepOffPublish(true);
-
-        expect(switched.data.supplier.import_on_publish).toBe(false);
-        expect(
-          onPublish.data.imports.map(
-            ({ supplier }: { supplier: string }) => supplier,
-          ),
-        ).toEqual(['Warehouse']);
-        expect(pageAfterPublish).toBeUndefined();
-        expect(ownButton.data.import).toMatchObject({
-          supplier: 'Intercars',
-          created: 1,
-        });
-        expect(await page('W71275')).toBeDefined();
-      });
-
       it('refuses the import button for a supplier without an adapter', async () => {
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
@@ -1224,6 +1202,227 @@ medusaIntegrationTestRunner({
         );
 
         expect(response.status).toBe(400);
+      });
+
+      describe('import runs', () => {
+        const pushFilters = (fake: typeof intercars, numbers: string[]) => {
+          for (const number of numbers) {
+            fake.articles.push({
+              article_id: `${fake.adapter.name}-${number}`,
+              brand: fake === intercars ? 'MANN-FILTER' : 'Mann',
+              number,
+              name: `Фильтр ${number}`,
+              category: fake === intercars ? 'IC-OIL' : 'filters',
+            });
+          }
+        };
+
+        const holdLaterPages = (fake: typeof intercars) => {
+          let release = () => {};
+          fake.laterPages = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          return () => release();
+        };
+
+        const latestImportOf = async (supplierId: string) =>
+          (await api.get('/admin/suppliers', adminHeaders)).data.suppliers.find(
+            ({ id }: { id: string }) => id === supplierId,
+          ).latest_import;
+
+        it('answers at once, shows progress on the Suppliers screen, then the report', async () => {
+          pushFilters(intercars, ['RUN 1', 'RUN 2', 'RUN 3']);
+          const release = holdLaterPages(intercars);
+
+          const started = await imports.start(intercarsId);
+          const deadline = Date.now() + 20_000;
+          let during = await latestImportOf(intercarsId);
+          while (!during.report && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            during = await latestImportOf(intercarsId);
+          }
+          release();
+          const finished = await imports.finished(intercarsId);
+
+          expect(started.status).toBe(202);
+          expect(started.data.import_run).toMatchObject({
+            kind: 'import',
+            supplier_id: intercarsId,
+            status: 'running',
+          });
+          expect(during).toMatchObject({
+            status: 'running',
+            report: { created: 2, failed: [] },
+          });
+          expect(finished).toMatchObject({
+            status: 'succeeded',
+            report: { supplier: 'Intercars', created: 3, failed: [] },
+          });
+          expect(await latestImportOf(intercarsId)).toEqual(finished);
+        });
+
+        it('keeps every report readable later, newest first', async () => {
+          pushFilters(warehouse, ['HIST 1']);
+
+          const first = await imports.run(warehouseId);
+          const second = await imports.run(warehouseId);
+
+          expect((await imports.history(warehouseId)).slice(0, 2)).toEqual([
+            second,
+            first,
+          ]);
+          expect(first.report).toMatchObject({ created: 1, imported: 0 });
+          expect(second.report).toMatchObject({ created: 0, imported: 1 });
+        });
+
+        it('refuses a second Import, a Publish and a bulk deletion while an Import runs', async () => {
+          pushFilters(intercars, ['LOCK 1', 'LOCK 2', 'LOCK 3']);
+          const release = holdLaterPages(intercars);
+
+          const first = await imports.start(intercarsId);
+          const refused = [
+            await imports.start(warehouseId),
+            await imports.start(intercarsId),
+            await api
+              .post('/admin/publish-runs', {}, adminHeaders)
+              .catch((error) => error.response),
+            await api
+              .delete('/admin/catalogue-sources/Warehouse', adminHeaders)
+              .catch((error) => error.response),
+          ];
+          release();
+          await imports.finished(intercarsId);
+
+          expect(first.status).toBe(202);
+          expect(
+            refused.map(({ status, data }) => [status, data.code]),
+          ).toEqual(Array(4).fill([409, 'CATALOGUE_BUSY']));
+        });
+
+        it('abandons a run only once its heartbeat goes stale', async () => {
+          const runs: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          const longAgo = new Date(Date.now() - 60 * 60 * 1000);
+          const silent = await runs.createCatalogueRuns({
+            kind: 'import',
+            supplier_id: warehouseId,
+            status: 'running',
+            heartbeat_at: new Date(),
+          });
+
+          const whileAlive = await imports.start(warehouseId);
+          await runs.updateCatalogueRuns({
+            id: silent.id,
+            heartbeat_at: longAgo,
+          });
+          const afterSilence = await imports.start(warehouseId);
+          await imports.finished(warehouseId);
+
+          expect(whileAlive.status).toBe(409);
+          expect(afterSilence.status).toBe(202);
+          expect(
+            (await imports.history(warehouseId)).find(
+              ({ id }: { id: string }) => id === silent.id,
+            ),
+          ).toMatchObject({ status: 'failed', error: 'Abandoned' });
+        });
+
+        it('fails the runs a restart left running, a Publish included', async () => {
+          const runs: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          const leftImport = await runs.createCatalogueRuns({
+            kind: 'import',
+            supplier_id: warehouseId,
+            status: 'running',
+            heartbeat_at: new Date(),
+          });
+          await runs.__hooks.onApplicationStart();
+          const leftPublish = await runs.createCatalogueRuns({
+            kind: 'publish',
+            status: 'running',
+            heartbeat_at: new Date(),
+          });
+          await runs.__hooks.onApplicationStart();
+
+          expect(
+            (await imports.history(warehouseId)).find(
+              ({ id }: { id: string }) => id === leftImport.id,
+            ),
+          ).toMatchObject({ status: 'failed', error: INTERRUPTED_BY_RESTART });
+          expect(
+            (await api.get('/admin/publish-runs/latest', adminHeaders)).data
+              .publish_run,
+          ).toMatchObject({
+            id: leftPublish.id,
+            status: 'failed',
+            error: INTERRUPTED_BY_RESTART,
+          });
+          expect((await imports.start(warehouseId)).status).toBe(202);
+          await imports.finished(warehouseId);
+        });
+
+        it('lists an article that fails with its reason and imports the rest', async () => {
+          const make = await catalog.createMakes({
+            slug: 'zz-motors',
+            name: 'ZZ Motors',
+          });
+          const series = await catalog.createSeries({
+            make_id: make.id,
+            name: 'ZZ',
+          });
+          await catalog.createChassis([
+            { series_id: series.id, code: 'ZZ9' },
+            { series_id: series.id, code: 'BMW ZZ9' },
+          ]);
+          intercars.articles.push(
+            {
+              article_id: 'IC-FAIL-1',
+              brand: 'MANN-FILTER',
+              number: 'FAIL 1',
+              name: 'Фильтр FAIL 1',
+              category: 'IC-OIL',
+              vehicles: [
+                {
+                  make: 'BMW',
+                  model: '3',
+                  variant: '320d',
+                  chassis_codes: ['ZZ9'],
+                  engine_codes: ['B47D20'],
+                  displacement_cc: null,
+                  power_kw: null,
+                  fuel: null,
+                  body_style: null,
+                  year_from: null,
+                  year_to: null,
+                  notes: [],
+                },
+              ],
+            },
+            {
+              article_id: 'IC-FAIL-2',
+              brand: 'MANN-FILTER',
+              number: 'FAIL 2',
+              name: 'Фильтр FAIL 2',
+              category: 'IC-OIL',
+            },
+          );
+
+          const run = await imports.run(intercarsId);
+
+          expect(run).toMatchObject({
+            status: 'succeeded',
+            report: {
+              created: 1,
+              failed: [
+                {
+                  number: 'FAIL 1',
+                  reason: 'Chassis ZZ9 is taken by another make',
+                },
+              ],
+            },
+          });
+          expect(await page('FAIL2')).toBeDefined();
+        });
       });
     });
   },

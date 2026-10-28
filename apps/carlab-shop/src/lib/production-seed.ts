@@ -27,7 +27,6 @@ async function seedCrawledSuppliers(container: MedusaContainer) {
       missing.map(({ name }) => ({
         name,
         markup_percentage: 0,
-        import_on_publish: false,
       })),
     );
   }

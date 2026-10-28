@@ -142,10 +142,8 @@
       "import": "Import"
     },
     "save": "Save",
-    "import": "Import now",
-    "importLead": "Supplier catalogues load at the start of every publish and when you press Import now; nothing runs on a schedule. A supplier with On publish switched off loads only from Import in its own row. The import takes only mapped categories and Brands with this supplier's spellings.",
+    "importLead": "An import reads a supplier's catalogue into the shop and puts its prices on the site. Press Import in the supplier's row: it runs in the background, so you can leave this page and the report stays here. Publishing does not import. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{imported}} updated, {{created}} created.",
-    "importNoAdapters": "No supplier loads on publish",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -186,7 +184,7 @@
     "importSwitch": {
       "off": {
         "title": "Switch off the import from {{supplier}}?",
-        "body": "Publishing and the import buttons will stop loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
+        "body": "Its Import button stops loading this supplier's catalogue. Offers with price and stock already loaded stay on the site. To remove them, choose Take offers off the site in the supplier's menu (the ... button in its row).",
         "confirm": "Switch off import",
         "done": "Import from {{supplier}} switched off. Its offers stay on the site until you take them off in the supplier's menu."
       },
@@ -197,23 +195,27 @@
         "done": "Import from {{supplier}} switched on."
       }
     },
-    "importSwitchedOff": "Import switched off, not loaded: {{suppliers}}. Their earlier offers stay on the site until you take them off in the supplier's menu.",
     "withdraw": {
       "action": "Take offers off the site",
       "title": "Take the offers of {{supplier}} off the site?",
-      "body_one": "{{count}} offer of this supplier will be deleted and its import switched off, so publishing does not bring it back. Parts, numbers and other suppliers' offers stay. The price leaves search right away and the site pages after the next publish.",
-      "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so publishing does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
+      "body_one": "{{count}} offer of this supplier will be deleted and its import switched off, so an import does not bring it back. Parts, numbers and other suppliers' offers stay. The price leaves search right away and the site pages after the next publish.",
+      "body_other": "{{count}} offers of this supplier will be deleted and its import switched off, so an import does not bring them back. Parts, numbers and other suppliers' offers stay. Prices leave search right away and the site pages after the next publish.",
       "done_one": "{{supplier}}: {{count}} offer taken off, import switched off. Site pages update after the next publish.",
       "done_other": "{{supplier}}: {{count}} offers taken off, import switched off. Site pages update after the next publish."
     },
-    "importOnPublish": "On publish",
-    "importOnPublishSaved": {
-      "on": "{{supplier}} loads on every publish again.",
-      "off": "{{supplier}} no longer loads on publish, only from Import in its own row."
-    },
     "importOne": "Import",
     "importOneLabel": "Import {{supplier}}",
-    "importOffPublish": "Loaded only from their own button, not loaded now: {{suppliers}}."
+    "importStarted": "{{supplier}}: import started. The progress and the report appear in its row.",
+    "importRunning": "Importing: {{count}} articles so far",
+    "importFailed": "The import stopped: {{error}}",
+    "importArticlesFailed": "Not imported because of an error: {{articles}}. Fix the cause and import again.",
+    "importFinishedAt": "Finished {{time}}.",
+    "reports": {
+      "heading": "Import reports",
+      "lead": "The last 20 imports of a supplier, newest first.",
+      "empty": "This supplier has not been imported yet.",
+      "startedAt": "Started {{time}}"
+    }
   },
   "brands": {
     "heading": "Brands",
@@ -343,7 +345,7 @@
   },
   "publish": {
     "heading": "Publish",
-    "description": "Publishing first imports the supplier catalogues, then translates new catalogue texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. Each step runs only after the previous one succeeds.",
+    "description": "Publishing translates new catalogue texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. Each step runs only after the previous one succeeds. Supplier catalogues load separately, from Import on the Suppliers page.",
     "publish": "Publish",
     "started": "Publishing started",
     "empty": "Nothing has been published yet. Press Publish to put your edits live.",
@@ -359,8 +361,7 @@
     "steps": {
       "translate": "translation",
       "deploy": "site build and deploy",
-      "reindex": "search refresh",
-      "import": "Supplier import"
+      "reindex": "search refresh"
     },
     "errorDetails": "Error details: {{error}}",
     "startedBy": "Started by: {{who}}",
@@ -368,12 +369,14 @@
       "openAiKey": "The OpenAI key (OPENAI_API_KEY) is not set, so translation did not run and the later steps were skipped. This is a server setting: ask a developer to add the key.",
       "dispatchToken": "The site deploy token (PUBLISH_DISPATCH_TOKEN) is not set, so the site was not rebuilt and search was not updated. This is a server setting: ask a developer to add the token.",
       "deployFailed": "The site build or deploy on GitHub failed or was cancelled, so search was not updated and still matches the previous version of the site. The build link is in the details below: pass it to a developer and publish again.",
-      "deployTimedOut": "The site build on GitHub did not finish in time, so search was not updated. The build may still be running: check it at the link in the details below and publish again."
+      "deployTimedOut": "The site build on GitHub did not finish in time, so search was not updated. The build may still be running: check it at the link in the details below and publish again.",
+      "abandoned": "The run stopped reporting that it was alive, so it was marked as failed. Start it again.",
+      "interrupted": "The server restarted while this run was going, so it did not finish. Start it again."
     },
     "publishSite": "Publish to the site",
     "lastFailed": "Publishing failed",
     "confirmTitle": "Publish your changes to the site?",
-    "confirmBody": "Publishing loads supplier catalogues, translates new texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. It usually takes a few minutes; the site build sometimes takes longer. You can keep working in the admin meanwhile and follow progress on the Publish page."
+    "confirmBody": "Publishing translates new texts into Serbian and English, rebuilds and deploys carlab.rs and updates search. It usually takes a few minutes; the site build sometimes takes longer. You can keep working in the admin meanwhile and follow progress on the Publish page."
   },
   "supersession": {
     "heading": "Supersession",
@@ -545,7 +548,7 @@
       "INVALID_ATTRIBUTES": "The characteristic values do not fit the category: check required fields and options.",
       "INVALID_REQUIREMENT": "The requirement does not fit the characteristic: check the options and the From and To values.",
       "DEFINITION_BREAKS_PARTS": "The change would break the characteristics of parts in this category. Fix those parts first.",
-      "PUBLISH_RUNNING": "A publish run is already in progress. Wait for it to finish.",
+      "CATALOGUE_BUSY": "Another import, publish or source deletion is running. Wait for it to finish and try again.",
       "ALREADY_EXISTS": "This record already exists.",
       "FIELD_REQUIRED": "Fill in «{{field}}».",
       "INVALID_FIELD": "Check «{{field}}».",

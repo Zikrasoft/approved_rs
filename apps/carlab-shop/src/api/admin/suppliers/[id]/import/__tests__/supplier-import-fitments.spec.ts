@@ -1,19 +1,20 @@
 import { asValue } from '@medusajs/framework/awilix';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
-import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
-import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
-import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
-import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
+import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../../../integration-tests/fakeShopAi';
+import { importRuns } from '../../../../../../../integration-tests/importRuns';
+import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
+import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
+import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
 import {
   SUPPLIER_ADAPTERS_REGISTRATION,
   type SupplierArticle,
-} from '../../../../lib/suppliers/adapter';
-import { CATALOG_MODULE } from '../../../../modules/catalog';
-import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
+} from '../../../../../../lib/suppliers/adapter';
+import { CATALOG_MODULE } from '../../../../../../modules/catalog';
+import type CatalogModuleService from '../../../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
+import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
 const mann = createFakeSupplier('MANN-FILTER');
 const bilstein = createFakeSupplier('bilstein group');
@@ -93,15 +94,8 @@ medusaIntegrationTestRunner({
         Object.assign(shopAi, { name: null, namesWritten: [], failure: null });
       });
 
-      const runImport = async (supplier: string) => {
-        const response = await api.post(
-          `/admin/suppliers/${supplierIds[supplier]}/import`,
-          {},
-          adminHeaders,
-        );
-        expect(response.status).toBe(200);
-        return response.data.import;
-      };
+      const runImport = async (supplier: string) =>
+        (await importRuns(api, adminHeaders).run(supplierIds[supplier])).report;
 
       const partOf = async (number: string) => {
         const [identifier] = await catalog.listPartIdentifiers(
