@@ -2,11 +2,13 @@ import { z } from 'zod';
 
 export const CATALOG_TRANSLATION_LOCALES = ['sr', 'en'] as const;
 
+const columns = z.record(z.string(), z.string()).optional();
+
 export const translationsSchema = z
-  .partialRecord(
-    z.enum(CATALOG_TRANSLATION_LOCALES),
-    z.record(z.string(), z.string()),
-  )
+  .object({ sr: columns, en: columns } satisfies Record<
+    (typeof CATALOG_TRANSLATION_LOCALES)[number],
+    typeof columns
+  >)
   .nullable();
 
 type Translated<Column extends string> = Record<Column, string> & {
