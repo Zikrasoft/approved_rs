@@ -57,18 +57,15 @@ export async function saveManualOffer(
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const identifier = await catalog.retrievePartIdentifier(partIdentifierId);
   const supplierId = await manualSupplierId(suppliers, actorId);
-  const key = { supplier_id: supplierId, supplier_article_id: identifier.id };
-  const fields = {
-    ...key,
+  const saved = await suppliers.upsertSupplierOffer({
+    supplier_id: supplierId,
+    supplier_article_id: identifier.id,
     part_identifier_id: identifier.id,
     ...offer,
     stock_by_location: {},
+    created_by: actorId,
     updated_by: actorId,
-  };
-  const [existing] = await suppliers.listSupplierOffers(key);
-  const saved = await (existing
-    ? suppliers.updateSupplierOffers({ id: existing.id, ...fields })
-    : suppliers.createSupplierOffers({ ...fields, created_by: actorId }));
+  });
   await emitIndexChanges(scope, { partIds: [identifier.part_id] });
   return saved;
 }

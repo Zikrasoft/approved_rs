@@ -168,6 +168,16 @@ export type NewPart = Provenance &
     identifiers: NewPartIdentifier[];
   };
 
+export type NewNumberedPart = Omit<NewPart, 'identifiers'> & {
+  identifier: NewPartIdentifier;
+};
+
+export type FoundPart = {
+  part_id: string;
+  part_identifier_id: string;
+  created: boolean;
+};
+
 export type WorkshopQuoteLine = {
   name: string;
   number: string;
@@ -254,6 +264,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<string> {
     await this.refuseUnknownBrands(identifiers, sharedContext);
+    await this.lockNumbers(identifiers, sharedContext);
     await this.refuseTakenNumbers(identifiers, sharedContext);
     const created = await this.createParts(
       {
@@ -283,6 +294,37 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectTransactionManager()
+  async findOrCreatePart(
+    { identifier, ...part }: NewNumberedPart,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<FoundPart> {
+    await this.lockNumbers([identifier], sharedContext);
+    const normalized = normalizePartNumber(identifier.value);
+    const [existing] = await this.listPartIdentifiers(
+      { brand_id: identifier.brand_id, normalized_value: normalized },
+      { select: ['id', 'part_id'], take: 1 },
+      sharedContext,
+    );
+    if (existing) {
+      return {
+        part_id: existing.part_id,
+        part_identifier_id: existing.id,
+        created: false,
+      };
+    }
+    const partId = await this.createPartWithIdentifiers(
+      { ...part, identifiers: [identifier] },
+      sharedContext,
+    );
+    const [created] = await this.listPartIdentifiers(
+      { part_id: partId },
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    return { part_id: partId, part_identifier_id: created.id, created: true };
+  }
+
+  @InjectTransactionManager()
   async createFromWorkshopQuote(
     lines: WorkshopQuoteLine[],
     vehicleId: string | null,
@@ -302,35 +344,23 @@ class CatalogModuleService extends CatalogModuleBase {
         provenance,
         sharedContext,
       );
-      const [existing] = await this.listPartIdentifiers(
+      const { part_id: partId, created: newPart } = await this.findOrCreatePart(
         {
-          brand_id: brandId,
-          normalized_value: normalizePartNumber(line.number),
+          name: line.name,
+          identifier: {
+            type: 'manufacturer-number',
+            brand_id: brandId,
+            value: line.number,
+          },
+          category_id: await this.quoteCategory(
+            line.category_id,
+            sharedContext,
+          ),
+          ...provenance,
+          source: WORKSHOP_QUOTE_SOURCE,
         },
-        { select: ['part_id'], take: 1 },
         sharedContext,
       );
-      const partId =
-        existing?.part_id ??
-        (await this.createPartWithIdentifiers(
-          {
-            name: line.name,
-            identifiers: [
-              {
-                type: 'manufacturer-number',
-                brand_id: brandId,
-                value: line.number,
-              },
-            ],
-            category_id: await this.quoteCategory(
-              line.category_id,
-              sharedContext,
-            ),
-            ...provenance,
-            source: WORKSHOP_QUOTE_SOURCE,
-          },
-          sharedContext,
-        ));
       if (vehicleId) {
         const { created } = await this.attachPartToVehicles(
           partId,
@@ -340,7 +370,7 @@ class CatalogModuleService extends CatalogModuleBase {
         );
         result.fitments += created.length;
       }
-      result.lines.push({ part_id: partId, reused: Boolean(existing) });
+      result.lines.push({ part_id: partId, reused: !newPart });
     }
     return result;
   }
@@ -422,6 +452,7 @@ class CatalogModuleService extends CatalogModuleBase {
   ): Promise<void> {
     await this.retrievePart(partId, { select: ['id'] }, sharedContext);
     await this.refuseUnknownBrands([identifier], sharedContext);
+    await this.lockNumbers([identifier], sharedContext);
     await this.refuseTakenNumbers([identifier], sharedContext);
     await this.createPartIdentifiers(
       {
@@ -469,6 +500,25 @@ class CatalogModuleService extends CatalogModuleBase {
       `select id from "${table}" where id = ? for update`,
       [id],
     );
+  }
+
+  private async lockNumbers(
+    identifiers: NewPartIdentifier[],
+    sharedContext: Context,
+  ): Promise<void> {
+    const keys = [
+      ...new Set(
+        identifiers.map(
+          ({ brand_id, value }) => `${brand_id}:${normalizePartNumber(value)}`,
+        ),
+      ),
+    ].sort();
+    for (const key of keys) {
+      await (sharedContext.transactionManager as SqlEntityManager).execute(
+        'select pg_advisory_xact_lock(hashtextextended(?, 0))',
+        [key],
+      );
+    }
   }
 
   private async refuseTakenNumbers(

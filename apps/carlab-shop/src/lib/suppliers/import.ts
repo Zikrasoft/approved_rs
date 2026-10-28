@@ -12,7 +12,10 @@ import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
-import type { PartClassification } from '../../modules/catalog/service';
+import type {
+  FoundPart,
+  PartClassification,
+} from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
 import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
@@ -198,7 +201,7 @@ async function createPart(
   article: Article,
   brandId: string,
   mappedCategoryId: string | undefined,
-): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
+): Promise<FoundPart & { categorized: boolean }> {
   const { adapter, catalog } = context;
   const name = await nameOf(context, article);
   const classification = await classify(context, article, mappedCategoryId);
@@ -211,24 +214,19 @@ async function createPart(
       name ?? article.name,
       classification.category_id,
     ),
-    identifiers: [
-      {
-        type: 'manufacturer-number' as const,
-        brand_id: brandId,
-        value: article.number,
-      },
-    ],
+    identifier: {
+      type: 'manufacturer-number' as const,
+      brand_id: brandId,
+      value: article.number,
+    },
     source: adapter.name,
   };
   const create = (attempt: Partial<PartClassification>) =>
-    catalog.createPartWithIdentifiers({ ...part, ...attempt });
-  const { written: partId, categorized } = await filed(
-    classification,
-    create,
-    () => create({}),
+    catalog.findOrCreatePart({ ...part, ...attempt });
+  const { written, categorized } = await filed(classification, create, () =>
+    create({}),
   );
-  const [identifier] = await catalog.listPartIdentifiers({ part_id: partId });
-  return { identifierId: identifier.id, partId, categorized };
+  return { ...written, categorized };
 }
 
 async function fileUnfiled(
@@ -268,18 +266,15 @@ async function matchArticle(
     { relations: ['part'], take: 1 },
   );
   if (!hit) {
-    const { identifierId, partId, categorized } = await createPart(
-      context,
-      article,
-      brandId,
-      categoryId,
-    );
+    const found = await createPart(context, article, brandId, categoryId);
     return {
-      identifierId,
-      partId,
-      created: true,
-      changedPartId: partId,
-      categorized,
+      identifierId: found.part_identifier_id,
+      partId: found.part_id,
+      created: found.created,
+      ...(found.created && {
+        changedPartId: found.part_id,
+        categorized: found.categorized,
+      }),
     };
   }
   const { part } = hit;
@@ -329,19 +324,12 @@ async function storeOffer(
   identifierId: string,
   quote: Quote,
 ): Promise<void> {
-  const offer = {
+  await suppliers.upsertSupplierOffer({
     supplier_id: supplierId,
     supplier_article_id: quote.article_id,
     part_identifier_id: identifierId,
     ...quotedFields(quote),
-  };
-  const [existing] = await suppliers.listSupplierOffers({
-    supplier_id: supplierId,
-    supplier_article_id: quote.article_id,
   });
-  await (existing
-    ? suppliers.updateSupplierOffers({ id: existing.id, ...offer })
-    : suppliers.createSupplierOffers(offer));
 }
 
 async function stagedImages(
@@ -372,26 +360,14 @@ async function stage(
       kind === 'images'
         ? await stagedImages(context, article.images!)
         : { items: listed };
-    const { items } = payload;
-    const [existing] = await suppliers.listStagedRecords({
+    const key = {
       supplier_id: supplierId,
       part_identifier_id: identifierId,
       kind,
-    });
-    if (!items.length) {
-      if (existing) {
-        await suppliers.deleteStagedRecords(existing.id);
-      }
-      continue;
-    }
-    await (existing
-      ? suppliers.updateStagedRecords({ id: existing.id, payload })
-      : suppliers.createStagedRecords({
-          supplier_id: supplierId,
-          part_identifier_id: identifierId,
-          kind,
-          payload,
-        }));
+    };
+    await (payload.items.length
+      ? suppliers.upsertStagedRecord({ ...key, payload })
+      : suppliers.deleteStagedRecords(key));
   }
 }
 
