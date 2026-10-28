@@ -56,4 +56,5 @@ if docker exec carlab-demo-pg psql -U postgres -d medusa -Atc \
 fi
 pnpm db:migrate
 pnpm seed:demo
+pnpm import:local
 pnpm publish:local
