@@ -227,6 +227,12 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
   });
 
+  it('links the page of every Make', async () => {
+    expect(await withBackend('true', 'ru')).toContain(
+      '[Все марки](https://carlab.rs/ru/parts/makes/)',
+    );
+  });
+
   it('leaves out a Make and a Model with too few Parts for a page', async () => {
     const body = await withBackend('true', 'sr', [], []);
 

@@ -7,6 +7,7 @@ describe('sitemapFilter', () => {
   it('keeps ordinary pages', () => {
     const keep = sitemapFilter(SITE);
     expect(keep(`${SITE}/sr/services/`)).toBe(true);
+    expect(keep(`${SITE}/sr/parts/makes/`)).toBe(true);
   });
 
   it('never lists the root redirect or the thank-you page', () => {

@@ -85,6 +85,15 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
                 .join(' '),
             };
           }),
+          ...(makes.length > 0
+            ? [
+                {
+                  label: content(locale).partsCar.hubs.makes.heading,
+                  href: url(PathBuilder.partsMakes(locale)),
+                  note: content(locale).partsCar.hubs.makes.lead,
+                },
+              ]
+            : []),
           ...makes.flatMap(({ make, models }) => [
             {
               label: make.name,

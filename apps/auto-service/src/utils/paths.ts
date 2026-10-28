@@ -13,6 +13,7 @@ export const PathBuilder = {
     `/${locale}/parts/c/${slug}/${Number(page) > 1 ? `${page}/` : ''}`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   partsCart: (locale: Locale) => `/${locale}/parts/cart/`,
+  partsMakes: (locale: Locale) => `/${locale}/parts/makes/`,
   partsMake: (locale: Locale, make: string) => `/${locale}/parts/${make}/`,
   partsModel: (locale: Locale, make: string, model: string) =>
     `/${locale}/parts/${make}/${model}/`,
