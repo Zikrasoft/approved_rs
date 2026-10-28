@@ -13,6 +13,8 @@ import {
   toTypesenseFields,
 } from './mapping';
 
+const TYPESENSE = 'typesense';
+
 const hitDocumentSchema = z.looseObject({ id: z.string() });
 
 const refusalSchema = z.object({ error: z.string() });
@@ -22,9 +24,15 @@ const facetsOf = (input: SearchTypes.ProviderSearchQuery) =>
     typeof facet === 'string' ? { field: facet } : facet,
   );
 
+const paging = (input: SearchTypes.ProviderSearchQuery) => ({
+  skip: input.pagination?.skip ?? 0,
+  take: input.pagination?.take ?? 20,
+});
+
 const searchParams = (input: SearchTypes.ProviderSearchQuery) => {
   const queryByFields = collectSearchableFields(input.index.fields);
-  const perPage = Math.max(input.pagination?.take ?? 20, 1);
+  const { skip, take } = paging(input);
+  const perPage = Math.max(take, 1);
   return {
     collection: input.index.physical_name,
     q: input.q && input.q.length ? input.q : '*',
@@ -32,9 +40,9 @@ const searchParams = (input: SearchTypes.ProviderSearchQuery) => {
     filter_by: compileFilters(input.filters),
     include_fields: input.attributes_to_retrieve.join(','),
     per_page: perPage,
-    page: Math.floor((input.pagination?.skip ?? 0) / perPage) + 1,
+    page: Math.floor(skip / perPage) + 1,
     ...compileFacets(facetsOf(input)),
-    ...input.search_options?.provider_options?.typesense,
+    ...input.search_options?.provider_options?.[TYPESENSE],
   };
 };
 
@@ -50,7 +58,7 @@ type Options = {
 };
 
 class TypesenseSearchProviderService extends AbstractSearchProviderService {
-  static identifier = 'typesense';
+  static identifier = TYPESENSE;
 
   protected logger_: Logger;
   protected client: Client;
@@ -174,18 +182,13 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
         );
       }
       const response = results[at];
-      const take = input.pagination?.take ?? 20;
       return {
         hits: (response.hits ?? []).map((hit) => {
           const document = hitDocumentSchema.parse(hit.document);
           return { id: document.id, score: hit.text_match, document };
         }),
         facets: toFacetResults(facetsOf(input), response.facet_counts ?? []),
-        metadata: {
-          skip: input.pagination?.skip ?? 0,
-          take,
-          count: response.found ?? null,
-        },
+        metadata: { ...paging(input), count: response.found ?? null },
       };
     });
   }
