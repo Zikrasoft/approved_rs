@@ -6,6 +6,12 @@ process.env.DB_HOST ??= 'localhost';
 process.env.DB_PORT ??= '55432';
 process.env.DB_USERNAME ??= 'postgres';
 process.env.DB_PASSWORD ??= 'postgres';
+process.env.DATABASE_URL ??= `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/medusa`;
+process.env.JWT_SECRET ??= 'jest-only-jwt-secret';
+process.env.COOKIE_SECRET ??= 'jest-only-cookie-secret';
+process.env.STORE_CORS ??= 'http://localhost:4321';
+process.env.ADMIN_CORS ??= 'http://localhost:9000';
+process.env.AUTH_CORS ??= 'http://localhost:9000';
 
 process.env.TYPESENSE_HOST ??= 'localhost';
 process.env.TYPESENSE_PORT ??= '58108';
