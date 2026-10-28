@@ -1,9 +1,16 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 
 import type { MedusaContainer } from '@medusajs/framework/types';
-import type { CategoryFieldType } from '@podbor/catalog-contract';
+import {
+  type CategoryFieldType,
+  STAGED_DATA_KINDS,
+} from '@podbor/catalog-contract';
 
+import type { SupplierAdapterName } from './env';
+import { slugOf } from './slug';
+import { spellingKey } from './suppliers/spelling';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
@@ -11,26 +18,6 @@ import type SupplierModuleService from '../modules/supplier/service';
 import { seedCashAtPickupCommerceDefaults } from './commerce-defaults';
 import { CRAWLED_SITES } from './crawler/sites';
 import { storeImage } from './images';
-
-async function seedCrawledSuppliers(container: MedusaContainer) {
-  const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
-  const existing = new Set(
-    (
-      await suppliers.listSuppliers({
-        name: CRAWLED_SITES.map(({ name }) => name),
-      })
-    ).map(({ name }) => name),
-  );
-  const missing = CRAWLED_SITES.filter(({ name }) => !existing.has(name));
-  if (missing.length) {
-    await suppliers.createSuppliers(
-      missing.map(({ name }) => ({
-        name,
-        markup_percentage: 0,
-      })),
-    );
-  }
-}
 
 export const CATEGORIES = [
   {
@@ -150,8 +137,8 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
 const IMAGES = join(process.cwd(), 'assets/categories');
 
 const matches = (row: object, wanted: object) =>
-  Object.entries(wanted).every(
-    ([key, value]) => (row as Record<string, unknown>)[key] === value,
+  Object.entries(wanted).every(([key, value]) =>
+    isDeepStrictEqual((row as Record<string, unknown>)[key], value),
   );
 
 async function upsert<Row extends { id: string; updated_by: string | null }>(
@@ -209,11 +196,158 @@ export async function seedCategoryFields(
   return ids;
 }
 
+type CrawledCatalogue = {
+  brands: Record<string, string[]>;
+  categories: Record<string, string>;
+  makes: Record<string, string>;
+};
+
+const CRAWLED_CATALOGUES: Record<
+  Exclude<SupplierAdapterName, 'demo'>,
+  CrawledCatalogue
+> = {
+  'mann-filter': {
+    brands: { 'MANN-FILTER': ['MANN-FILTER'] },
+    categories: {},
+    makes: { 'VW (VOLKSWAGEN)': 'Volkswagen' },
+  },
+  filtron: {
+    brands: { FILTRON: ['FILTRON'] },
+    categories: {},
+    makes: {},
+  },
+  varta: {
+    brands: { VARTA: ['VARTA'] },
+    categories: { battery: BATTERY_CATEGORY.slug },
+    makes: {},
+  },
+  bilstein: {
+    brands: { febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
+    categories: {},
+    makes: { 'Volkswagen (VW)': 'Volkswagen' },
+  },
+};
+
+const CRAWLED_SUPPLIER = { released_kinds: [...STAGED_DATA_KINDS] };
+
+async function seedCrawledSupplier(
+  suppliers: SupplierModuleService,
+  name: string,
+) {
+  const [row] = await suppliers.listSuppliers({ name });
+  return upsert(
+    row,
+    CRAWLED_SUPPLIER,
+    () =>
+      suppliers.createSuppliers({
+        name,
+        markup_percentage: 0,
+        ...CRAWLED_SUPPLIER,
+      }),
+    (update) => suppliers.updateSuppliers(update),
+  );
+}
+
+async function seedNamed<Row extends { id: string; updated_by: string | null }>(
+  name: string,
+  list: (filter: { slug: string }) => Promise<Row[]>,
+  create: (data: { slug: string; name: string }) => Promise<Row>,
+  update: (wanted: object & { id: string }) => Promise<unknown>,
+) {
+  const slug = slugOf(name);
+  const [row] = await list({ slug });
+  return upsert(row, { name }, () => create({ slug, name }), update);
+}
+
+async function seedSpellings<
+  Row extends { id: string; value_key: string; updated_by: string | null },
+  Owner extends object,
+>(
+  existing: Row[],
+  wanted: [value: string, owner: Owner][],
+  create: (value: string, owner: Owner) => Promise<Row>,
+  update: (wanted: object & { id: string }) => Promise<unknown>,
+) {
+  for (const [value, owner] of wanted) {
+    await upsert(
+      existing.find(({ value_key }) => value_key === spellingKey(value)),
+      owner,
+      () => create(value, owner),
+      update,
+    );
+  }
+}
+
+async function seedCrawledCatalogues(container: MedusaContainer) {
+  const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+  const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
+  for (const site of CRAWLED_SITES) {
+    if (site.key === 'demo') continue;
+    const { brands, categories, makes } = CRAWLED_CATALOGUES[site.key];
+    const { id: supplier_id } = await seedCrawledSupplier(suppliers, site.name);
+
+    const brandSpellings: [string, { brand_id: string }][] = [];
+    for (const [name, values] of Object.entries(brands)) {
+      const brand = await seedNamed(
+        name,
+        (filter) => catalog.listBrands(filter),
+        (data) => catalog.createBrands(data),
+        (update) => catalog.updateBrands(update),
+      );
+      for (const value of values)
+        brandSpellings.push([value, { brand_id: brand.id }]);
+    }
+    await seedSpellings(
+      await catalog.listBrandSpellings({ supplier_id }, { take: null }),
+      brandSpellings,
+      (value, owner) =>
+        catalog.createBrandSpellings({ supplier_id, value, ...owner }),
+      (update) => catalog.updateBrandSpellings(update),
+    );
+
+    const makeSpellings: [string, { make_id: string }][] = [];
+    for (const [value, name] of Object.entries(makes)) {
+      const make = await seedNamed(
+        name,
+        (filter) => catalog.listMakes(filter),
+        (data) => catalog.createMakes(data),
+        (update) => catalog.updateMakes(update),
+      );
+      makeSpellings.push([value, { make_id: make.id }]);
+    }
+    await seedSpellings(
+      await catalog.listMakeSpellings({ supplier_id }, { take: null }),
+      makeSpellings,
+      (value, owner) =>
+        catalog.createMakeSpellings({ supplier_id, value, ...owner }),
+      (update) => catalog.updateMakeSpellings(update),
+    );
+
+    const mapped = await suppliers.listSupplierCategories(
+      { supplier_id },
+      { take: null },
+    );
+    for (const [code, slug] of Object.entries(categories)) {
+      const [category] = await catalog.listCategories({ slug });
+      await upsert(
+        mapped.find(({ code_key }) => code_key === spellingKey(code)),
+        { category_id: category.id },
+        () =>
+          suppliers.createSupplierCategories({
+            supplier_id,
+            code,
+            category_id: category.id,
+          }),
+        (update) => suppliers.updateSupplierCategories(update),
+      );
+    }
+  }
+}
+
 export async function seedProductionCatalogue(
   container: MedusaContainer,
 ): Promise<void> {
   await seedCashAtPickupCommerceDefaults(container);
-  await seedCrawledSuppliers(container);
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const categories = [...CATEGORIES, BATTERY_CATEGORY];
@@ -244,4 +378,5 @@ export async function seedProductionCatalogue(
         : null);
     await catalog.updateCategories({ id: row.id, ...category, image });
   }
+  await seedCrawledCatalogues(container);
 }
