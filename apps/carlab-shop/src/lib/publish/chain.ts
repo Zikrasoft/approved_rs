@@ -14,7 +14,11 @@ import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
 import { importSupplierCatalogues } from '../suppliers/import';
 import { deploySite } from './deploy';
-import { markNumbersPublished, partNumberIds } from './published';
+import {
+  markNumbersPublished,
+  partNumberIds,
+  unmarkNumbersPublished,
+} from './published';
 import { translateCatalogue } from './translate';
 import { adminError } from '../admin-errors';
 import { errorMessage } from '../errors';
@@ -48,9 +52,16 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
   {
     name: 'deploy',
     run: async () => {
-      const built = await partNumberIds(scope);
-      await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
-      await markNumbersPublished(scope, built);
+      const fresh = await markNumbersPublished(
+        scope,
+        await partNumberIds(scope),
+      );
+      try {
+        await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
+      } catch (error) {
+        await unmarkNumbersPublished(scope, fresh);
+        throw error;
+      }
     },
   },
   { name: 'reindex', run: reindex(scope) },

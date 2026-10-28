@@ -3,6 +3,7 @@ import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
+import Icon from '@/components/Icon.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
@@ -10,7 +11,11 @@ import ListingBar from '@/components/ListingBar.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { categoryPagesForBuild } from '@/utils/catalogueEnv';
-import type { CategoryPageEntry } from '@/utils/catalogueSnapshot';
+import {
+  categoryListings,
+  type CategoryListing,
+  type CategoryPageEntry,
+} from '@/utils/catalogueSnapshot';
 import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
@@ -22,14 +27,22 @@ import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 export async function getStaticPaths() {
   const categories = await categoryPagesForBuild();
   return withLocales(
-    categories.map((category) => ({
-      params: { slug: category.slug },
-      props: { category },
-    })),
+    categories.flatMap((category) =>
+      categoryListings(category).map((listing) => ({
+        params: {
+          slug: category.slug,
+          page: listing.number > 1 ? String(listing.number) : undefined,
+        },
+        props: { category, listing },
+      })),
+    ),
   );
 }
 
-const { category } = Astro.props as { category: CategoryPageEntry };
+const { category, listing } = Astro.props as {
+  category: CategoryPageEntry;
+  listing: CategoryListing;
+};
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const inquiry = content(locale).pages.partsInquiry;
@@ -37,6 +50,27 @@ const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const empty = category.pages.length === 0;
+const firstPage = listing.number === 1;
+const pageHref = (number: number) =>
+  PathBuilder.partsCategory(locale, category.slug, number);
+const prev = listing.number > 1 ? pageHref(listing.number - 1) : null;
+const next =
+  listing.number < listing.count ? pageHref(listing.number + 1) : null;
+const pageNumbers = Array.from(
+  { length: listing.count },
+  (_, index) => index + 1,
+).filter(
+  (number) =>
+    number === 1 ||
+    number === listing.count ||
+    Math.abs(number - listing.number) <= 1,
+);
+const pageTitle =
+  listing.number > 1
+    ? copy.pageName
+        .replace('{name}', name)
+        .replace('{page}', String(listing.number))
+    : name;
 const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
 const searchCopy = content(locale).partsSearch;
 const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
@@ -71,17 +105,19 @@ const fields = category.fields
 ---
 
 <Shell
-  title={copy.metaTitleTemplate.replace('{name}', name)}
+  title={copy.metaTitleTemplate.replace('{name}', pageTitle)}
   description={lead ?? inquiry.metaDescription}
 >
+  {prev && <link slot="head" rel="prev" href={prev} />}
+  {next && <link slot="head" rel="next" href={next} />}
   <PageHero
     actions={false}
     eyebrow={copy.eyebrow}
-    heading={name}
-    lead={lead}
+    heading={pageTitle}
+    lead={firstPage ? lead : undefined}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
-      { href: PathBuilder.partsCategory(locale, category.slug), label: name },
+      { href: pageHref(1), label: name },
     ]}
   />
 
@@ -114,7 +150,7 @@ const fields = category.fields
             <>
               <ListingBar count={category.pages.length} filters={filtered} />
               <ul class="card divide-y divide-line">
-                {category.pages.map((page) => (
+                {listing.pages.map((page) => (
                   <PartRow
                     thumb={partThumbnail(page, category)}
                     slug={page.slug}
@@ -127,6 +163,55 @@ const fields = category.fields
                   />
                 ))}
               </ul>
+              {listing.count > 1 && (
+                <nav
+                  aria-label={copy.pagination}
+                  class="flex flex-wrap items-center gap-2 text-sm"
+                >
+                  {prev && (
+                    <a
+                      href={prev}
+                      rel="prev"
+                      class="flex min-h-11 items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                    >
+                      <Icon name="chevronRight" size={16} class="rotate-180" />
+                      {searchCopy.previous}
+                    </a>
+                  )}
+                  <ol class="flex flex-wrap items-center gap-1">
+                    {pageNumbers.map((number, index) => (
+                      <>
+                        {index > 0 && number - pageNumbers[index - 1] > 1 && (
+                          <li aria-hidden="true" class="px-1 text-muted">
+                            …
+                          </li>
+                        )}
+                        <li>
+                          <a
+                            href={pageHref(number)}
+                            aria-current={
+                              number === listing.number ? 'page' : undefined
+                            }
+                            class="spec flex size-11 items-center justify-center rounded-field text-ink hover:bg-shade hover:text-signal-ink aria-[current=page]:bg-ink aria-[current=page]:font-semibold aria-[current=page]:text-paper"
+                          >
+                            {number}
+                          </a>
+                        </li>
+                      </>
+                    ))}
+                  </ol>
+                  {next && (
+                    <a
+                      href={next}
+                      rel="next"
+                      class="flex min-h-11 items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                    >
+                      {searchCopy.next}
+                      <Icon name="chevronRight" size={16} />
+                    </a>
+                  )}
+                </nav>
+              )}
               <InquiryLink />
             </>
           )
@@ -134,7 +219,7 @@ const fields = category.fields
       </div>
 
       {
-        body.length > 0 && (
+        firstPage && body.length > 0 && (
           <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
             {body.map((paragraph) => (
               <p>{paragraph}</p>
@@ -144,7 +229,7 @@ const fields = category.fields
       }
 
       {
-        fields.length > 0 && (
+        firstPage && fields.length > 0 && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section">{copy.fieldsHeading}</h2>
             <dl class="card divide-y divide-line">

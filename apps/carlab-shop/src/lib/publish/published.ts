@@ -17,7 +17,7 @@ export async function partNumberIds(scope: MedusaContainer): Promise<string[]> {
 export async function markNumbersPublished(
   scope: MedusaContainer,
   ids: string[],
-): Promise<void> {
+): Promise<string[]> {
   const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
   const known = new Set(
     (await publish.listPublishedNumbers({ id: ids }, { take: null })).map(
@@ -27,6 +27,17 @@ export async function markNumbersPublished(
   const fresh = ids.filter((id) => !known.has(id));
   if (fresh.length) {
     await publish.createPublishedNumbers(fresh.map((id) => ({ id })));
+  }
+  return fresh;
+}
+
+export async function unmarkNumbersPublished(
+  scope: MedusaContainer,
+  ids: string[],
+): Promise<void> {
+  if (ids.length) {
+    const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
+    await publish.deletePublishedNumbers(ids);
   }
 }
 

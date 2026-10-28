@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { publishAllNumbers } from '../../../../lib/publish/published';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -97,6 +98,7 @@ medusaIntegrationTestRunner({
           lead_time_days: 1,
           part_identifier_id: mannOil.id,
         });
+        await publishAllNumbers(getContainer());
       });
 
       const get = (query = '') =>
@@ -186,6 +188,31 @@ medusaIntegrationTestRunner({
           (page: { id: string }) => page.id,
         );
         expect(new Set(ids).size).toBe(3);
+      });
+
+      it('leaves out a number Publish has not reached, as search does', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Air filter',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'C 30 005',
+            },
+          ],
+        });
+
+        const response = await get();
+
+        expect(response.data.count).toBe(3);
+        expect(
+          response.data.pages.map(
+            (page: { normalized_value: string }) => page.normalized_value,
+          ),
+        ).not.toContain('C30005');
       });
 
       it.each(['?limit=0', '?limit=5001', '?offset=-1', '?limit=abc'])(

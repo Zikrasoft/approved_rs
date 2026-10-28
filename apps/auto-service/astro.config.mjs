@@ -10,10 +10,7 @@ import { sitemapFilter } from './src/utils/sitemap.ts';
 import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
 
 const site = CARLAB.url;
-const partPages = await partPagesForBuild({
-  MEDUSA_BACKEND_URL: process.env.MEDUSA_BACKEND_URL,
-  MEDUSA_PUBLISHABLE_KEY: process.env.MEDUSA_PUBLISHABLE_KEY,
-});
+const partPages = await partPagesForBuild(process.env);
 
 export default defineConfig({
   site,

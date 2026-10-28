@@ -151,14 +151,22 @@ describe('fitmentsResponseSchema', () => {
     ).toEqual([fitment]);
   });
 
-  it('refuses a position outside the vocabulary', () => {
+  it('reads a vocabulary value newer than the contract as null', () => {
     expect(
-      fitmentsResponseSchema.safeParse({
-        fitments: [{ ...fitment, axle: 'middle' }],
+      fitmentsResponseSchema.parse({
+        fitments: [
+          {
+            ...fitment,
+            axle: 'middle',
+            side: 'centre',
+            gearbox: 'cvt',
+            steering: 'centre',
+          },
+        ],
         count: 1,
         offset: 0,
         limit: 1000,
-      }).success,
-    ).toBe(false);
+      }).fitments[0],
+    ).toMatchObject({ axle: null, side: null, gearbox: null, steering: null });
   });
 });

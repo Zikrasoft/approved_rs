@@ -71,6 +71,8 @@ partsInquiry:
     partsHeading: Запчасти в каталоге
     noParts: В этой категории пока нет запчастей в каталоге. Пришлите VIN, подберем нужную деталь.
     fieldsHeading: На что смотреть при выборе
+    pageName: '{name}, страница {page}'
+    pagination: Страницы категории
 thanks:
   metaTitle: Заявка принята — CarLab
   metaDescription: Спасибо за заявку. Перезвоним в рабочее время и согласуем время визита.
