@@ -3928,7 +3928,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "requirement_one_target",
+          "expression": "num_nonnulls(engine_id, chassis_id, vehicle_id) = 1",
+          "definition": "check ((num_nonnulls(engine_id, chassis_id, vehicle_id) = 1))"
+        }
+      ],
       "foreignKeys": {
         "requirement_field_id_foreign": {
           "constraintName": "requirement_field_id_foreign",
@@ -4314,7 +4320,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "fitment_production_ordered",
+          "expression": "production_from <= production_to",
+          "definition": "check ((production_from <= production_to))"
+        }
+      ],
       "foreignKeys": {
         "fitment_part_id_foreign": {
           "constraintName": "fitment_part_id_foreign",

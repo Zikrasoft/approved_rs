@@ -204,10 +204,7 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     url: string,
     { body, ...update }: PageUpdate,
   ): Promise<void> {
-    const stored = body && {
-      body: null,
-      body_key: pageKey(site, url),
-    };
+    const stored = body && { body_key: pageKey(site, url) };
     if (stored) {
       await pagesBucket(pages).put(stored.body_key, body, {
         contentType: 'application/gzip',
@@ -278,23 +275,17 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     after: string | null,
     limit: number,
   ): Promise<{ url: string; body: Buffer | null }[]> {
-    const rows: {
-      url: string;
-      body: Buffer | null;
-      body_key: string | null;
-    }[] = await pg('crawl_page')
-      .select('url', 'body', 'body_key')
+    const rows: { url: string; body_key: string }[] = await pg('crawl_page')
+      .select('url', 'body_key')
       .where({ site, status: 'done' })
-      .andWhere((query) =>
-        query.whereNotNull('body').orWhereNotNull('body_key'),
-      )
+      .whereNotNull('body_key')
       .andWhere('url', '>', after ?? '')
       .orderBy('url')
       .limit(limit);
     return Promise.all(
-      rows.map(async ({ url, body, body_key }) => ({
+      rows.map(async ({ url, body_key }) => ({
         url,
-        body: body ?? (await pagesBucket(pages).get(body_key!)),
+        body: await pagesBucket(pages).get(body_key),
       })),
     );
   },

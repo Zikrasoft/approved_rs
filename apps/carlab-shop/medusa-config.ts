@@ -1,11 +1,14 @@
 import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 
 import { adminLanguage } from './src/lib/admin-language';
+import { readCalendarDatesAsText } from './src/lib/calendar-dates';
 import { parseEnv } from './src/lib/env';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 const env = parseEnv(process.env);
+
+readCalendarDatesAsText();
 
 const fileProvider = env.S3
   ? {
