@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { EditedBy } from '../../components/edited-by';
-import { ListLoading, PINNED_ACTIONS } from '../../components/list';
+import { ListLoading, PINNED_ACTIONS, RowActions } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
 import { SlugRename } from '../../components/slug-rename';
 import {
@@ -173,14 +173,12 @@ const BrandsPage = () => {
                     <EditedBy row={brand} />
                   </Table.Cell>
                   <Table.Cell>
-                    <Button
+                    <RowActions
+                      label={t('common.actionsFor', { name: brand.name })}
                       disabled={writing}
-                      size="small"
-                      variant="danger"
-                      onClick={() => removeBrand(brand)}
-                    >
-                      {t('brands.delete')}
-                    </Button>
+                      deleteLabel={t('brands.delete')}
+                      onDelete={() => removeBrand(brand)}
+                    />
                   </Table.Cell>
                 </Table.Row>
               ))}
