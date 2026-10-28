@@ -91,6 +91,8 @@ services:
     environment:
       API_HOST: ${API_HOST:-api.carlab.rs}
       ADMIN_HOST: ${ADMIN_HOST:-admin.carlab.rs}
+      ADMIN_BASIC_AUTH_USER: ${ADMIN_BASIC_AUTH_USER:?}
+      ADMIN_BASIC_AUTH_HASH: ${ADMIN_BASIC_AUTH_HASH:?}
     ports:
       - '${HTTP_PORT:-80}:80'
       - '${HTTPS_PORT:-443}:443'

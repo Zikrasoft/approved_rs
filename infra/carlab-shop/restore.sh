@@ -24,11 +24,13 @@ docker compose stop medusa
 
 echo "==> Database from $dump"
 docker compose exec -T postgres \
-  pg_restore -U carlab -d carlab --clean --if-exists --no-owner --single-transaction <"$dump"
+  pg_restore -U carlab -d carlab --clean --if-exists --no-owner --no-privileges --single-transaction <"$dump"
 
 echo "==> Migrations"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
+
+./crawler-role.sh
 
 docker compose up -d --wait --wait-timeout 300
 echo "Restored."
