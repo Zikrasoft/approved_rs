@@ -499,6 +499,11 @@ export async function importSupplier(
     vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
     storage: shopStorage(scope),
   };
+  if (!context.storage) {
+    context.logger.warn(
+      `${adapter.name}: S3 is not configured, so AI answers are not cached and every article is asked again`,
+    );
+  }
   const categoryOf = new Map(
     (
       await suppliers.listSupplierCategories(

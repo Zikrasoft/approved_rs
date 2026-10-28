@@ -3,7 +3,7 @@ import type { AddressInfo, LookupFunction } from 'node:net';
 
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
-import { Modules } from '@medusajs/framework/utils';
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
@@ -1567,6 +1567,42 @@ medusaIntegrationTestRunner({
           });
           expect((await imports.start(warehouseId)).status).toBe(202);
           await imports.finished(warehouseId);
+        });
+
+        it('warns once per Import that AI answers are not cached without S3', async () => {
+          const container = getContainer();
+          const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+          const warned: string[] = [];
+          container.register(
+            ContainerRegistrationKeys.LOGGER,
+            asValue(
+              Object.assign(Object.create(logger), {
+                warn: (message: string) => {
+                  warned.push(message);
+                },
+              }),
+            ),
+          );
+          container.register(SHOP_STORAGE_REGISTRATION, asValue(null));
+          pushFilters(intercars, ['NOCACHE 1', 'NOCACHE 2', 'NOCACHE 3']);
+          try {
+            await imports.run(intercarsId);
+          } finally {
+            container.register(
+              SHOP_STORAGE_REGISTRATION,
+              asValue(storage.storage),
+            );
+            container.register(
+              ContainerRegistrationKeys.LOGGER,
+              asValue(logger),
+            );
+          }
+
+          expect(
+            warned.filter((message) => message.includes('not cached')),
+          ).toEqual([
+            'Intercars: S3 is not configured, so AI answers are not cached and every article is asked again',
+          ]);
         });
 
         it('lists an article that fails with its reason and imports the rest', async () => {
