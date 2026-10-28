@@ -134,6 +134,10 @@ What it creates:
   standard battery with straight polarity and no offer (price on request).
 - Two Suppliers, `Demo Intercars` (20%) and `Demo Autodelovi` (10%), with their
   category codes mapped and their brand spellings.
+- Last, the production seed (see `docs/guides/deploy.md`): the four crawled
+  Suppliers with their Brands, spellings, the VARTA battery mapping and the
+  Volkswagen aliases, so a fresh demo database matches production. It renames
+  the demo's `Varta`, `Mann-Filter` and `Febi` Brands to the crawled spelling.
 
 ## 4. Import, translate, reindex (the publish chain, locally)
 

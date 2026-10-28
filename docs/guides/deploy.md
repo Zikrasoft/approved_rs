@@ -993,9 +993,23 @@ service (label, price, note), from the same definitions the demo seed uses.
 Batteries ship without a picture: upload one in the admin. Serbian and English
 come from the admin's Publish chain like any other catalogue text. A Category,
 field or option a person has edited (`updated_by` set) is never touched again; an
-unedited one gets its seeded values and missing image back. It seeds no Parts, suppliers or offers:
-the manual supplier is created on the first hand-entered offer, and the demo data
-lives in `seed.ts` / `seed-demo.ts`, which never run in production.
+unedited one gets its seeded values and missing image back.
+
+It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
+`apps/carlab-shop/src/lib/production-seed.ts`, one entry per crawled site: the
+Supplier (Import on Publish off, cross-references, applicability and images
+released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
+VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
+mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
+`VW (VOLKSWAGEN)` and bilstein group's `Volkswagen (VW)` on one Volkswagen). The
+same `updated_by` rule holds for each of these rows. A spelling or mapping staff
+delete comes back on the next deploy: change it instead. Every other site
+category is still mapped by hand on the Supplier's categories screen.
+
+It seeds no Parts or offers: the manual supplier is created on the first
+hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
+never run in production. `seed-demo.ts` ends with the production seed, so a local
+demo database carries the same crawled Suppliers, Brands and aliases.
 
 `scope` treats `apps/carlab-shop` like any other app, plus one rule: a change under
 `infra/carlab-shop/` redeploys it, because turbo cannot see files outside the
@@ -1299,8 +1313,12 @@ Check with `curl -k https://localhost:8443/health/ready`.
    fields, their options and the battery registration service (label, price,
    note). Check the price is still right and upload the Category's picture,
    which the seed does not ship.
-   Done: signing in works, the eight seeded Categories are in the admin, and
-   «Аккумуляторы» shows its fields, the registration service and a picture.
+   The crawled Suppliers, their Brands and spellings, the VARTA battery mapping
+   and the Volkswagen aliases are seeded too: nothing to set up before the first
+   crawl and Import.
+   Done: signing in works, the eight seeded Categories are in the admin,
+   «Аккумуляторы» shows its fields, the registration service and a picture, and
+   the Suppliers screen lists the four crawled sites.
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
     `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
