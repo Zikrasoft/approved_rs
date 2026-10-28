@@ -672,10 +672,12 @@ is retried once its 10 minute lease runs out.
   ship, `deploy.sh` deletes shop images other than the current one and
   `.previous-tag` (a failed deletion does not fail the deploy), otherwise every ship
   leaves a few hundred MB on the disk.
-- `/var/backups/carlab/`: backups, kept for 7 days; the cron
-  `/etc/cron.d/carlab-backup` at 03:30 UTC, logging to `/var/log/carlab-backup.log`.
-  Each night holds a `pg_dump` of the catalogue and an archive of Medusa's uploaded
-  files. If a deploy or a backup is killed mid-run (a reboot, a `kill -9`),
+- `/var/backups/carlab/`: backups. The cron `/etc/cron.d/carlab-backup` runs
+  `backup.sh` at 03:30 UTC, logging to `/var/log/carlab-backup.log`; each night adds
+  one `pg_dump` of the database, kept for 7 days. That is the database only:
+  uploaded and crawled images live on S3 and are protected there by versioning
+  (see [Files on S3](#files-on-s3)). `deploy.sh` adds a `*-pre-deploy.dump` per
+  ship and keeps the last three of them, whatever their age. If a deploy or a backup is killed mid-run (a reboot, a `kill -9`),
   `.deploy.lock` is left behind and blocks both: once you have confirmed that
   neither `deploy.sh` nor `backup.sh` is running (`pgrep -f "deploy.sh|backup.sh"`),
   remove it with `rmdir /srv/carlab/.deploy.lock`. This is a copy on the same disk;
@@ -727,8 +729,25 @@ bucket policy granting `s3:GetObject` on `arn:aws:s3:::<public bucket>/*` to
 everyone; the private bucket stays fully blocked. Lightsail has no instance role
 for S3, so the shop gets an IAM user of its own with `s3:PutObject`,
 `s3:GetObject`, `s3:DeleteObject` and `s3:ListBucket` on those two buckets only.
-Turn on versioning on both if a lost object should be recoverable: the nightly
-backup covers Postgres only.
+The nightly backup covers Postgres only, so the public bucket is versioned: an
+overwritten or deleted image stays recoverable as a noncurrent version for 30
+days, then expires so old versions stop costing. Set it once, with an
+administrator's AWS credentials (the shop's IAM user cannot change bucket
+settings):
+
+```bash
+aws s3api put-bucket-versioning --bucket <public bucket> \
+  --versioning-configuration Status=Enabled
+aws s3api put-bucket-lifecycle-configuration --bucket <public bucket> \
+  --lifecycle-configuration '{"Rules":[{"ID":"expire-noncurrent","Status":"Enabled","Filter":{},"NoncurrentVersionExpiration":{"NoncurrentDays":30},"Expiration":{"ExpiredObjectDeleteMarker":true},"AbortIncompleteMultipartUpload":{"DaysAfterInitiation":7}}]}'
+aws s3api get-bucket-versioning --bucket <public bucket>
+aws s3api get-bucket-lifecycle-configuration --bucket <public bucket>
+```
+
+A lost image comes back with `aws s3api list-object-versions --bucket <public
+bucket> --prefix <key>` and a `copy-object` of the wanted `VersionId` onto the
+same key. The private bucket is not versioned: its raw pages are re-fetched by
+the next crawl.
 
 Moving an existing server off the old `static` volume, once, after the first
 deploy with the S3 settings: `/srv/carlab/move-static-to-s3.sh` copies the volume
@@ -862,7 +881,8 @@ carlab.rs.
    server cannot write to the repository.
 3. `deploy.sh`: refuses without `.env` and for anything that is not a 40-character
    sha; pulls the image; dumps the database to
-   `/var/backups/carlab/db-<stamp>-pre-deploy.dump` and stops if the dump fails;
+   `/var/backups/carlab/db-<stamp>-pre-deploy.dump` and stops if the dump fails,
+   then deletes all but the newest three pre-deploy dumps;
    runs migrations in a one-off container
    (`medusa db:migrate --execute-safe-links --all-or-nothing` from `/server`), then
    the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
@@ -957,6 +977,14 @@ a bucket the backup still succeeds and prints a warning to
 `/var/log/carlab-backup.log`; a failed upload exits non-zero and leaves the local
 copy intact.
 
+Any nightly run that exits non-zero (a failed dump, a failed off-site copy, a
+skipped night because a deploy held `.deploy.lock`) posts one message to the CRM
+Telegram group through `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` from
+`/srv/carlab/.env`, the same values the shop's order alerts use. The token reaches
+`curl` through a config on stdin, never a command line or the log. With either
+variable empty the failure only reaches the log; a Telegram error never changes
+the backup's own exit code. `backup.sh fetch` is run by hand and never alerts.
+
 Restoring from the bucket (a lost server) is one more step before `restore.sh`:
 
 ```bash
@@ -971,6 +999,38 @@ first (compose will not come up without `MEDUSA_TAG` in `.env`), and only then
 database, then a Publish to rebuild search. `backup.sh` takes the same
 `.deploy.lock` as `deploy.sh`: if a deploy is running at 03:30, the backup is
 skipped with a non-zero exit code and a line in `/var/log/carlab-backup.log`.
+
+#### Restore drill
+
+Proves the off-site copy restores without the server, so it never touches
+production. Run it on any machine with Docker (the owner's Mac is fine), once
+before the shop opens and again after any change to `backup.sh` or the bucket,
+then post the result on the tracking issue: the stamp restored, the counts below
+and how long it took.
+
+```bash
+mkdir -m 700 ~/carlab-drill && cd ~/carlab-drill
+cp <repo>/infra/carlab-shop/backup.sh .
+# write .env.backup here (mode 600) with the same values as /srv/carlab/.env.backup
+BACKUP_DIR=$PWD/dumps ./backup.sh fetch                 # pick the newest stamp
+BACKUP_DIR=$PWD/dumps ./backup.sh fetch <stamp>
+docker run -d --name carlab-drill -e POSTGRES_USER=carlab -e POSTGRES_DB=carlab \
+  -e POSTGRES_PASSWORD=drill postgres:16.15-alpine
+until docker exec carlab-drill pg_isready -U carlab -d carlab; do sleep 1; done
+docker exec -i carlab-drill pg_restore -U carlab -d carlab --no-owner \
+  --single-transaction <dumps/db-<stamp>.dump
+docker exec carlab-drill psql -U carlab -d carlab -tAc \
+  "select (select count(*) from pg_tables where schemaname = 'public'),
+          (select count(*) from part_identifier),
+          (select count(*) from \"order\")"
+docker rm -f carlab-drill && cd ~ && rm -rf ~/carlab-drill
+```
+
+It passes when `pg_restore` exits 0 and the counts match the live admin's
+catalogue and orders as of the dump's night. Use the same Postgres image as
+`docker-compose.yml`. Delete the folder afterwards: the dump holds customers'
+orders and `.env.backup` holds the bucket keys.
+
 Migrations and creating an admin run from the image only
 (`docker compose exec -T medusa node_modules/.bin/medusa …`), never from a
 repository checkout: the image has no ts-node.

@@ -33,13 +33,32 @@ if [ "${1:-}" = fetch ]; then
   exit 0
 fi
 
-find "$dest" -maxdepth 1 -type f -name 'db-*.dump' -mtime +6 -delete
+alert() {
+  [ "$1" -eq 0 ] && return 0
+  token=$(sed -n 's/^TELEGRAM_BOT_TOKEN=//p' .env 2>/dev/null | tail -n 1)
+  group=$(sed -n 's/^TELEGRAM_GROUP_ID=//p' .env 2>/dev/null | tail -n 1)
+  [ -n "$token" ] && [ -n "$group" ] || return 0
+  printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$token" |
+    curl -fs --max-time 20 --config - --data-urlencode "chat_id=$group" \
+      --data-urlencode "text=CarLab shop: the nightly backup on $(hostname) failed (exit $1). See /var/log/carlab-backup.log." \
+      >/dev/null 2>&1 || echo "Could not post the failure to Telegram." >&2
+  return 0
+}
+trap 'alert $?' EXIT
+
+find "$dest" -maxdepth 1 -type f -name 'db-*.dump' ! -name '*-pre-deploy.dump' -mtime +6 -delete
 
 mkdir .deploy.lock 2>/dev/null || {
   echo "A deploy is running (.deploy.lock present), no backup tonight." >&2
   exit 1
 }
-trap 'rm -f "$dest"/*"$stamp"*.part; rmdir .deploy.lock 2>/dev/null || true' EXIT
+release() {
+  exited=$?
+  rm -f "$dest"/*"$stamp"*.part
+  rmdir .deploy.lock 2>/dev/null || true
+  alert "$exited"
+}
+trap release EXIT
 
 docker compose exec -T postgres \
   pg_dump -U carlab -d carlab --format=custom >"$dest/db-$stamp.dump.part"
