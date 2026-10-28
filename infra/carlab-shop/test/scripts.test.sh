@@ -32,6 +32,12 @@ STUB
 cat >"$work/bin/curl" <<'STUB'
 #!/bin/sh
 echo "curl $*" >>"$LOG"
+case "$*" in
+*'--config -'*)
+  cat >>"$LOG.curl"
+  exit "${TELEGRAM_EXIT:-0}"
+  ;;
+esac
 exit "${HEALTH_EXIT:-0}"
 STUB
 chmod +x "$work/bin/docker" "$work/bin/curl"
@@ -71,11 +77,17 @@ stage() {
   LOG="$work/host/log"
   export LOG
   : >"$LOG"
-  rm -f "$LOG.env"
+  rm -f "$LOG.env" "$LOG.curl"
   rm -rf "$work/deploy-backups"
 }
 offsite() {
   printf 'BACKUP_S3_ENDPOINT=https://s3.test\nBACKUP_S3_BUCKET=carlab-backups\nBACKUP_S3_ACCESS_KEY_ID=key-canary\nBACKUP_S3_SECRET_ACCESS_KEY=secret-canary\n' >"$work/host/.env.backup"
+}
+crm() {
+  printf 'TELEGRAM_BOT_TOKEN=bot-canary\nTELEGRAM_GROUP_ID=-100123\n' >>"$work/host/.env"
+}
+alerted() {
+  grep -q 'api.telegram.org' "$LOG.curl" 2>/dev/null
 }
 run() {
   script=$1
@@ -190,6 +202,20 @@ expect 'a failed restart prints the rollback command' grep -Eq "Roll back with: 
 expect 'the lock is released after a failed restart' test ! -d "$work/host/.deploy.lock"
 
 stage
+mkdir -p "$work/deploy-backups"
+for old in 2026-01-01T00-00-00Z 2026-01-02T00-00-00Z 2026-01-03T00-00-00Z 2026-01-04T00-00-00Z; do
+  printf 'OLD' >"$work/deploy-backups/db-$old-pre-deploy.dump"
+done
+printf 'NIGHTLY' >"$work/deploy-backups/db-2026-01-01T03-30-00Z.dump"
+expect 'a deploy with older pre-deploy dumps succeeds' run deploy.sh "$NEW"
+expect 'only the last three pre-deploy dumps are kept' \
+  test "$(find "$work/deploy-backups" -name 'db-*-pre-deploy.dump' | wc -l | tr -d ' ')" -eq 3
+expect 'the new pre-deploy dump is among them' test -n "$(grep -lx DUMP "$work/deploy-backups"/db-*-pre-deploy.dump)"
+refuse 'the oldest pre-deploy dumps go' test -e "$work/deploy-backups/db-2026-01-02T00-00-00Z-pre-deploy.dump"
+expect 'the newest older pre-deploy dumps stay' test -e "$work/deploy-backups/db-2026-01-04T00-00-00Z-pre-deploy.dump"
+expect 'pre-deploy retention leaves nightly dumps alone' test -e "$work/deploy-backups/db-2026-01-01T03-30-00Z.dump"
+
+stage
 mkdir "$work/host/.deploy.lock"
 refuse 'a held lock refuses the deploy' run deploy.sh "$NEW"
 refuse 'a held lock never reaches docker' test -s "$LOG"
@@ -244,15 +270,17 @@ expect 'a relative dump path resolves against the invocation directory' run_from
 
 stage
 mkdir "$work/backups"
-touch -t 202001010000 "$work/backups/db-old.dump" "$work/backups/db-old-notes.txt"
+touch -t 202001010000 "$work/backups/db-old.dump" "$work/backups/db-old-notes.txt" "$work/backups/db-old-pre-deploy.dump"
 touch "$work/backups/db-recent.dump"
 BACKUP_DIR="$work/backups"
 export BACKUP_DIR
 expect 'a backup succeeds' run backup.sh ''
 expect 'the database dump lands in the backup dir' grep -qx DUMP "$work"/backups/db-2*.dump
 refuse 'a week-old dump is removed' test -e "$work/backups/db-old.dump"
+expect 'a week-old pre-deploy dump is left to the deploy retention' test -e "$work/backups/db-old-pre-deploy.dump"
 expect 'a recent dump stays' test -e "$work/backups/db-recent.dump"
 expect 'an unrelated old file is not rotated away' test -e "$work/backups/db-old-notes.txt"
+refuse 'a backup without a CRM bot posts nothing' alerted
 expect 'no .part file is left behind' test -z "$(find "$work/backups" -name '*.part')"
 
 stage
@@ -263,6 +291,20 @@ refuse 'a running deploy makes the backup fail' run backup.sh ''
 expect 'a skipped backup says why' grep -q 'deploy is running' "$work/host/stderr"
 refuse 'a skipped backup never reaches docker' test -s "$LOG"
 expect 'a skipped backup leaves the deploy lock alone' test -d "$work/host/.deploy.lock"
+
+stage
+crm
+mkdir "$work/host/.deploy.lock"
+BACKUP_DIR="$work/backups3"
+refuse 'a backup skipped for a deploy fails' run backup.sh ''
+expect 'a skipped backup alerts the CRM group' alerted
+expect 'a skipped backup leaves the deploy lock alone when it alerts' test -d "$work/host/.deploy.lock"
+
+stage
+crm
+BACKUP_DIR="$work/backups3"
+expect 'a backup with a CRM bot succeeds' run backup.sh ''
+refuse 'a successful backup posts nothing' alerted
 
 stage
 BACKUP_DIR="$work/backups3"
@@ -276,6 +318,24 @@ BACKUP_DIR="$work/backups2"
 export PGDUMP_EXIT BACKUP_DIR
 refuse 'a failing pg_dump fails the backup' run backup.sh ''
 expect 'a failing pg_dump leaves no .part file' test -z "$(find "$work/backups2" -name '*.part')"
+refuse 'a failing pg_dump without a CRM bot posts nothing' alerted
+
+stage
+crm
+BACKUP_DIR="$work/backups2"
+refuse 'a failing pg_dump with a CRM bot fails the backup' run backup.sh ''
+expect 'a failing pg_dump alerts the CRM group' alerted
+expect 'the alert goes to the CRM group' grep -q 'chat_id=-100123' "$LOG"
+expect 'the alert names the shop backup' grep -q 'text=.*backup' "$LOG"
+expect 'the bot token reaches curl only through its config on stdin' grep -q 'bot-canary' "$LOG.curl"
+refuse 'the bot token never reaches a command line' grep -q 'bot-canary' "$LOG"
+TELEGRAM_EXIT=7
+export TELEGRAM_EXIT
+stage
+crm
+BACKUP_DIR="$work/backups2"
+refuse 'a backup still fails when the alert cannot be sent' run backup.sh ''
+unset TELEGRAM_EXIT
 unset PGDUMP_EXIT
 
 stage
@@ -309,6 +369,11 @@ refuse 'a failed upload fails the backup' run backup.sh
 expect 'a failed upload says so' grep -q 'off-host copy failed' "$work/host/stderr"
 expect 'a failed upload keeps the local dump' test -n "$(find "$work/backups5" -name 'db-*.dump')"
 expect 'a failed upload releases the lock' test ! -d "$work/host/.deploy.lock"
+stage
+offsite
+crm
+refuse 'a failed upload with a CRM bot fails the backup' run backup.sh
+expect 'a failed upload alerts the CRM group' alerted
 unset RCLONE_EXIT
 
 stage
@@ -328,6 +393,6 @@ refuse 'fetch without a bucket fails' run backup.sh fetch
 unset BACKUP_DIR
 
 expect "the scripts ran and printed something" test -s "$work/printed"
-refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary' "$work/printed"
+refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|bot-canary' "$work/printed"
 
 [ "$failures" -eq 0 ]
