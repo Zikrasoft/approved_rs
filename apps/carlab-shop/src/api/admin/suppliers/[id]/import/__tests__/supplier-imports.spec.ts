@@ -25,7 +25,7 @@ import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../../modules/publish';
 import type PublishModuleService from '../../../../../../modules/publish/service';
-import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/publish/service';
+import { INTERRUPTED_BY_RESTART } from '../../../../../../lib/run-errors';
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
