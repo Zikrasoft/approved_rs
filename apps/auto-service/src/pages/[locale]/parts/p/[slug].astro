@@ -15,17 +15,26 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { fitGroups } from '@/utils/fitGroups';
-import { partPagesForBuild } from '@/utils/catalogueEnv';
+import {
+  cataloguePagesForBuild,
+  partPagesForBuild,
+} from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
+import {
+  catalogueLinks,
+  PathBuilder,
+  withLocales,
+  type CataloguePages,
+} from '@/utils/paths';
 import { schemaAvailability } from '@/utils/leadTime';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
+  const places = await cataloguePagesForBuild();
   const bySlug = new Map(pages.map((page) => [page.slug, page]));
   return withLocales(
     pages.map((page) => ({
@@ -35,18 +44,21 @@ export async function getStaticPaths() {
         successor: partSuccessor(page, bySlug),
         replacements: currentNumbers(page, bySlug),
         bySlug,
+        places,
       },
     })),
   );
 }
 
-const { page, successor, replacements, bySlug } = Astro.props as {
+const { page, successor, replacements, bySlug, places } = Astro.props as {
   page: PartPageEntry;
   successor: PartPageEntry | null;
   replacements: ReturnType<typeof currentNumbers>;
   bySlug: Map<string, PartPageEntry>;
+  places: CataloguePages;
 };
 const locale = localeFrom(Astro.url.pathname);
+const pageLinks = catalogueLinks(locale, places);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
@@ -90,7 +102,7 @@ const shown =
         }
       : null;
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
-  href: vehiclePath(locale, vehicle),
+  href: pageLinks.vehicle(vehicle),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
 const carLists = [
@@ -317,26 +329,24 @@ const thumbFor = (slug: string) => {
                             />
                           </summary>
                           <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6 pointer-coarse:gap-1">
-                            <a
-                              href={PathBuilder.partsModel(
-                                locale,
-                                make.slug,
-                                model.slug,
-                              )}
-                              class="flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
-                            >
-                              {fitmentCopy.modelLink.replace(
-                                '{model}',
-                                carName(model, locale),
-                              )}
-                            </a>
+                            {pageLinks.model(model) && (
+                              <a
+                                href={pageLinks.model(model)}
+                                class="flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
+                              >
+                                {fitmentCopy.modelLink.replace(
+                                  '{model}',
+                                  carName(model, locale),
+                                )}
+                              </a>
+                            )}
                             <ul class="flex flex-col gap-3 border-l-2 border-line pl-4 pointer-coarse:gap-1">
                               {fits.map((fit) => (
                                 <li>
                                   <FitLine
                                     fit={fit}
                                     car={{
-                                      href: vehiclePath(locale, fit.vehicle),
+                                      href: pageLinks.vehicle(fit.vehicle),
                                       label: vehicleVariant(
                                         fit.vehicle,
                                         locale,
@@ -364,14 +374,18 @@ const thumbFor = (slug: string) => {
               <p class="flex flex-col gap-1.5 px-5 py-4 text-sm leading-relaxed sm:px-6">
                 <span class="text-muted">{label}</span>
                 <span class="flex flex-wrap gap-x-4 gap-y-1">
-                  {links.map((link) => (
-                    <a
-                      href={link.href}
-                      class="font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
+                  {links.map((link) =>
+                    link.href ? (
+                      <a
+                        href={link.href}
+                        class="font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <span class="font-semibold text-ink">{link.label}</span>
+                    ),
+                  )}
                 </span>
               </p>
             ))}

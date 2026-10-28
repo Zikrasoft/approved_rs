@@ -9,6 +9,19 @@ import {
   type RedirectRoute,
   withCatalogueRoutes,
 } from './catalogueRedirects';
+import type { CataloguePages } from './paths';
+
+const pagesOf = ({
+  makes = [],
+  models = [],
+  categories = [],
+  vehicles = [],
+}: Partial<Record<keyof CataloguePages, string[]>>): CataloguePages => ({
+  makes: new Set(makes),
+  models: new Set(models),
+  categories: new Set(categories),
+  vehicles: new Set(vehicles),
+});
 
 const redirect = (
   from: Record<string, string>,
@@ -38,16 +51,23 @@ const moved = (location: string) => ({ status: 301, location });
 
 describe('catalogueRoutes', () => {
   it('sends a car renamed by a Model merge to itself, not to the car that kept its slug', () => {
-    const routes = catalogueRoutes([
-      redirect(
-        { make: 'volkswagen', model: 'vw-golf' },
-        { make: 'volkswagen', model: 'golf' },
-      ),
-      redirect(
-        { make: 'volkswagen', model: 'vw-golf', vehicle: 'caxa-90kw' },
-        { make: 'volkswagen', model: 'golf', vehicle: 'caxa-90kw-2' },
-      ),
-    ]);
+    const routes = catalogueRoutes(
+      [
+        redirect(
+          { make: 'volkswagen', model: 'vw-golf' },
+          { make: 'volkswagen', model: 'golf' },
+        ),
+        redirect(
+          { make: 'volkswagen', model: 'vw-golf', vehicle: 'caxa-90kw' },
+          { make: 'volkswagen', model: 'golf', vehicle: 'caxa-90kw-2' },
+        ),
+      ],
+      pagesOf({
+        makes: ['volkswagen'],
+        models: ['volkswagen/golf'],
+        vehicles: ['volkswagen/golf/caxa-90kw-2'],
+      }),
+    );
 
     expect(follow(routes, '/sr/parts/volkswagen/vw-golf/m/caxa-90kw/')).toEqual(
       moved('/sr/parts/volkswagen/golf/m/caxa-90kw-2/'),
@@ -58,9 +78,10 @@ describe('catalogueRoutes', () => {
   });
 
   it('301s every page under a renamed Make, in every locale', () => {
-    const routes = catalogueRoutes([
-      redirect({ make: 'bmw-old' }, { make: 'bmw' }),
-    ]);
+    const routes = catalogueRoutes(
+      [redirect({ make: 'bmw-old' }, { make: 'bmw' })],
+      pagesOf({ makes: ['bmw'] }),
+    );
 
     expect(follow(routes, '/sr/parts/bmw-old/')).toEqual(
       moved('/sr/parts/bmw/'),
@@ -75,13 +96,16 @@ describe('catalogueRoutes', () => {
   });
 
   it('follows a Model renamed after its Make in two hops', () => {
-    const routes = catalogueRoutes([
-      redirect({ make: 'bmw-old' }, { make: 'bmw' }),
-      redirect(
-        { make: 'bmw', model: 'f30-old' },
-        { make: 'bmw', model: '3-series-f30-320d' },
-      ),
-    ]);
+    const routes = catalogueRoutes(
+      [
+        redirect({ make: 'bmw-old' }, { make: 'bmw' }),
+        redirect(
+          { make: 'bmw', model: 'f30-old' },
+          { make: 'bmw', model: '3-series-f30-320d' },
+        ),
+      ],
+      pagesOf({ makes: ['bmw'], models: ['bmw/3-series-f30-320d'] }),
+    );
 
     const first = follow(routes, '/sr/parts/bmw-old/f30-old/oil-filters/');
     expect(first).toEqual(moved('/sr/parts/bmw/f30-old/oil-filters/'));
@@ -91,9 +115,14 @@ describe('catalogueRoutes', () => {
   });
 
   it('301s a renamed Category, its listing pages and its pages under every Model', () => {
-    const routes = catalogueRoutes([
-      redirect({ category: 'oil' }, { category: 'oil-filters' }),
-    ]);
+    const routes = catalogueRoutes(
+      [redirect({ category: 'oil' }, { category: 'oil-filters' })],
+      pagesOf({
+        makes: ['bmw'],
+        models: ['bmw/f30-320d'],
+        categories: ['bmw/f30-320d/oil-filters'],
+      }),
+    );
 
     expect(follow(routes, '/sr/parts/c/oil/')).toEqual(
       moved('/sr/parts/c/oil-filters/'),
@@ -108,9 +137,10 @@ describe('catalogueRoutes', () => {
   });
 
   it('301s each part page of a renamed Brand without touching a Brand that shares its start', () => {
-    const routes = catalogueRoutes([
-      redirect({ brand: 'mann' }, { brand: 'mann-filter' }),
-    ]);
+    const routes = catalogueRoutes(
+      [redirect({ brand: 'mann' }, { brand: 'mann-filter' })],
+      pagesOf({}),
+    );
 
     expect(follow(routes, '/sr/parts/p/mann-hu816x/')).toEqual(
       moved('/sr/parts/p/mann-filter-hu816x/'),
@@ -118,16 +148,63 @@ describe('catalogueRoutes', () => {
     expect(follow(routes, '/sr/parts/p/mann-filter-hu816x/')).toBeNull();
   });
 
+  it('falls back from a target without a page to its Model, its Make, then the parts index', () => {
+    const routes = catalogueRoutes(
+      [
+        redirect(
+          { make: 'bmw', model: 'f30-320d', vehicle: 'old-140kw' },
+          { make: 'bmw', model: 'f30-320d', vehicle: 'b47d20o0-140kw' },
+        ),
+        redirect(
+          { make: 'bmw', model: 'e90-old' },
+          { make: 'bmw', model: 'e90' },
+        ),
+        redirect({ make: 'vw' }, { make: 'volkswagen' }),
+      ],
+      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
+    );
+
+    expect(follow(routes, '/sr/parts/bmw/f30-320d/m/old-140kw/')).toEqual(
+      moved('/sr/parts/bmw/f30-320d/'),
+    );
+    expect(follow(routes, '/sr/parts/bmw/e90-old/oil-filters/')).toEqual(
+      moved('/sr/parts/bmw/'),
+    );
+    expect(follow(routes, '/sr/parts/vw/golf/')).toEqual(moved('/sr/parts/'));
+  });
+
+  it('sends a renamed Category under a Model only from a Model page, to the Model page when it lacks the Category', () => {
+    const routes = catalogueRoutes(
+      [redirect({ category: 'oil' }, { category: 'oil-filters' })],
+      pagesOf({
+        makes: ['bmw'],
+        models: ['bmw/f30-320d', 'bmw/g20-320d'],
+        categories: ['bmw/f30-320d/oil-filters'],
+      }),
+    );
+
+    expect(follow(routes, '/sr/parts/bmw/f30-320d/oil/')).toEqual(
+      moved('/sr/parts/bmw/f30-320d/oil-filters/'),
+    );
+    expect(follow(routes, '/sr/parts/bmw/g20-320d/oil/')).toEqual(
+      moved('/sr/parts/bmw/g20-320d/'),
+    );
+    expect(follow(routes, '/sr/parts/bmw/e90-320d/oil/')).toBeNull();
+  });
+
   it('sends a deleted part to its Category, a deleted Vehicle to its Model and a deleted Make to the parts index', () => {
-    const routes = catalogueRoutes([
-      redirect({ part: 'mann-filter-w712' }, { category: 'oil-filters' }),
-      redirect(
-        { make: 'bmw', model: 'f30-320d', vehicle: 'b47d20o0-140kw' },
-        { make: 'bmw', model: 'f30-320d' },
-      ),
-      redirect({ make: 'zz' }, {}),
-      redirect({ category: 'gone' }, {}),
-    ]);
+    const routes = catalogueRoutes(
+      [
+        redirect({ part: 'mann-filter-w712' }, { category: 'oil-filters' }),
+        redirect(
+          { make: 'bmw', model: 'f30-320d', vehicle: 'b47d20o0-140kw' },
+          { make: 'bmw', model: 'f30-320d' },
+        ),
+        redirect({ make: 'zz' }, {}),
+        redirect({ category: 'gone' }, {}),
+      ],
+      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
+    );
 
     expect(follow(routes, '/sr/parts/p/mann-filter-w712/')).toEqual(
       moved('/sr/parts/c/oil-filters/'),
@@ -174,17 +251,26 @@ describe('withCatalogueRoutes', () => {
 });
 
 describe('carRoutes', () => {
+  const vehicle = (
+    id: string,
+    slug: string,
+    model = 'f30-320d',
+    make = 'bmw',
+  ) => ({
+    id,
+    slug,
+    model: { slug: model, chassis: { series: { make: { slug: make } } } },
+  });
+
   it('301s an old car page to its Vehicle page, in every locale', () => {
-    const routes = carRoutes([
-      {
-        id: 'veh_01',
-        slug: 'b47d20o0-140kw',
-        model: {
-          slug: 'f30-320d',
-          chassis: { series: { make: { slug: 'bmw' } } },
-        },
-      },
-    ]);
+    const routes = carRoutes(
+      [vehicle('veh_01', 'b47d20o0-140kw')],
+      pagesOf({
+        makes: ['bmw'],
+        models: ['bmw/f30-320d'],
+        vehicles: ['bmw/f30-320d/b47d20o0-140kw'],
+      }),
+    );
 
     expect(follow(routes, '/sr/parts/car/veh_01/')).toEqual(
       moved('/sr/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
@@ -193,5 +279,26 @@ describe('carRoutes', () => {
       moved('/en/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
     );
     expect(follow(routes, '/ru/parts/car/veh_012/')).toBeNull();
+  });
+
+  it('301s an old car page without a Vehicle page to its Model, its Make, or the parts index', () => {
+    const routes = carRoutes(
+      [
+        vehicle('veh_f30', 'b47d20o0-140kw'),
+        vehicle('veh_e90', 'n47d20c-130kw', 'e90-320d'),
+        vehicle('veh_zz', 'x-1kw', 'x', 'zz'),
+      ],
+      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
+    );
+
+    expect(follow(routes, '/sr/parts/car/veh_f30/')).toEqual(
+      moved('/sr/parts/bmw/f30-320d/'),
+    );
+    expect(follow(routes, '/sr/parts/car/veh_e90/')).toEqual(
+      moved('/sr/parts/bmw/'),
+    );
+    expect(follow(routes, '/sr/parts/car/veh_zz/')).toEqual(
+      moved('/sr/parts/'),
+    );
   });
 });

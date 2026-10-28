@@ -74,8 +74,60 @@ describe('generateLlmsTxt', () => {
     shopOpen: string,
     locale: 'sr' | 'ru' = 'sr',
     extraVehicles: unknown[] = [],
+    fitted: string[] = ['veh_1'],
   ) => {
+    const numbers = ['HU816X', 'HU7020Z', 'HU6004X'];
     const answers: Record<string, unknown> = {
+      '/store/part-pages': {
+        pages: numbers.map((number) => ({
+          id: `pi_${number}`,
+          type: 'manufacturer-number',
+          value: number,
+          normalized_value: number,
+          superseded: false,
+          brand: { name: 'MANN-FILTER', slug: 'mann-filter' },
+          images: [],
+          part: {
+            id: `part_${number}`,
+            name: 'Масляный фильтр',
+            translations: null,
+            replaced_by: null,
+            category_id: null,
+            attributes: {},
+          },
+          equivalents: [],
+          offers: [],
+          supplier_data: {
+            cross_references: [],
+            applicability: [],
+            images: [],
+          },
+        })),
+        count: numbers.length,
+        offset: 0,
+        limit: 1000,
+      },
+      '/store/fitments': {
+        fitments: fitted.flatMap((vehicle_id) =>
+          numbers.map((number) => ({
+            id: `fit_${vehicle_id}_${number}`,
+            part_id: `part_${number}`,
+            vehicle_id,
+            quantity: 1,
+            axle: null,
+            side: null,
+            production_from: null,
+            production_to: null,
+            gearbox: null,
+            steering: null,
+            note: null,
+            translations: null,
+          })),
+        ),
+        count: fitted.length * numbers.length,
+        offset: 0,
+        limit: 1000,
+      },
       '/store/categories': {
         categories: [
           {
@@ -175,46 +227,88 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
   });
 
-  it('lists a Model page, and its Vehicle pages only when it has several', async () => {
+  it('leaves out a Make and a Model with too few Parts for a page', async () => {
+    const body = await withBackend('true', 'sr', [], []);
+
+    expect(body).not.toContain('https://carlab.rs/sr/parts/bmw/');
+  });
+
+  it('lists a Model page, and its Vehicle pages only when several of them have one', async () => {
     const alone = await withBackend('true');
     expect(alone).toContain(
       '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
     );
     expect(alone).not.toContain('/m/');
 
-    const several = await withBackend('true', 'sr', [
-      {
-        id: 'veh_2',
-        slug: 'b47d20o0-110kw',
-        power_kw: 110,
-        drive: 'rwd',
-        market: 'EU',
-        year_from: 2015,
-        year_to: 2019,
-        steering: 'left',
-        model: {
-          slug: 'f30-320d',
-          name: '320d',
-          chassis: {
-            code: 'F30',
-            body_style: 'sedan',
-            series: {
-              name: '3 серия',
-              translations: null,
-              make: { slug: 'bmw', name: 'BMW' },
+    const several = await withBackend(
+      'true',
+      'sr',
+      [
+        {
+          id: 'veh_2',
+          slug: 'b47d20o0-110kw',
+          power_kw: 110,
+          drive: 'rwd',
+          market: 'EU',
+          year_from: 2015,
+          year_to: 2019,
+          steering: 'left',
+          model: {
+            slug: 'f30-320d',
+            name: '320d',
+            chassis: {
+              code: 'F30',
+              body_style: 'sedan',
+              series: {
+                name: '3 серия',
+                translations: null,
+                make: { slug: 'bmw', name: 'BMW' },
+              },
             },
           },
+          engine: {
+            code: 'B47D20O0',
+            family: 'B47',
+            fuel: 'diesel',
+            displacement_cc: 1995,
+          },
+          identifiers: [],
+          requirements: [],
         },
-        engine: {
-          code: 'B47D20O0',
-          family: 'B47',
-          fuel: 'diesel',
-          displacement_cc: 1995,
+        {
+          id: 'veh_3',
+          slug: 'b47d20o0-100kw',
+          power_kw: 100,
+          drive: 'rwd',
+          market: 'EU',
+          year_from: 2015,
+          year_to: 2019,
+          steering: 'left',
+          model: {
+            slug: 'f30-320d',
+            name: '320d',
+            chassis: {
+              code: 'F30',
+              body_style: 'sedan',
+              series: {
+                name: '3 серия',
+                translations: null,
+                make: { slug: 'bmw', name: 'BMW' },
+              },
+            },
+          },
+          engine: {
+            code: 'B47D20O0',
+            family: 'B47',
+            fuel: 'diesel',
+            displacement_cc: 1995,
+          },
+          identifiers: [],
+          requirements: [],
         },
-        identifiers: [],
-        requirements: [],
-      },
-    ]);
+      ],
+      ['veh_1', 'veh_2'],
+    );
     expect(several).toContain(
       '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
     );
@@ -224,6 +318,7 @@ describe('generateLlmsTxt', () => {
     expect(several).toContain(
       '](https://carlab.rs/sr/parts/bmw/f30-320d/m/b47d20o0-110kw/)',
     );
+    expect(several).not.toContain('/m/b47d20o0-100kw/');
   });
 
   it('names the installation price of a Category beside its add-on service', async () => {
