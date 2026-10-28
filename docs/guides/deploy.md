@@ -727,9 +727,11 @@ its own (not the backup bucket).
   10 MB, checked by decoding it, not by its name); the backend writes 160, 480 and
   960 px WebP copies and stores their URLs on the PartIdentifier or Category. A
   Supplier import copies each crawled image once into `supplier-images/<sha256 of
-the source URL>`, with the source URL in the object's `source-url` metadata, and
-  stages our copy with its source URL beside it in the staged record; a later
-  import finds the object and downloads nothing. Only http(s) on a public address
+the file>`, with the source URL in the object's `source-url` metadata, and a
+  pointer `supplier-images/by-source/<sha256 of the source URL>` holding that key.
+  It stages every image of the page in the page's order, one copy of identical
+  files, each with its source URL beside it in the staged record; a later import
+  finds the pointer and downloads nothing. Only http(s) on a public address
   is fetched (a host resolving to a private, loopback or link-local range is
   refused), and a download stops at 10 MB. An image that cannot be fetched is
   staged nowhere, so the site never links the brand's server, and is tried again
