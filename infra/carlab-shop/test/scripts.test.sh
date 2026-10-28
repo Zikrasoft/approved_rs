@@ -19,6 +19,7 @@ fi
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
+*ON_ERROR_STOP*) exit "${ROLE_EXIT:-0}" ;;
 *pg_dump*)
   printf 'DUMP'
   exit "${PGDUMP_EXIT:-0}"
@@ -66,8 +67,8 @@ export BACKUP_DIR
 stage() {
   rm -rf "$work/host"
   mkdir "$work/host"
-  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$work/host/"
-  printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nJWT_SECRET=leak-canary\n' "$OLD" >"$work/host/.env"
+  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$here/crawler-role.sh" "$work/host/"
+  printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nJWT_SECRET=leak-canary\nCRAWLER_DB_PASSWORD=c0ffeec0ffee\n' "$OLD" >"$work/host/.env"
   LOG="$work/host/log"
   export LOG
   : >"$LOG"
@@ -111,6 +112,7 @@ expect 'pull, migrate, seed, up, reload and health run in order on the new tag' 
   "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
+  "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health' \
@@ -175,6 +177,14 @@ expect 'a failed seed leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/h
 refuse 'a failed seed restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 
 stage
+ROLE_EXIT=1
+export ROLE_EXIT
+refuse 'a failed crawler role setup fails the deploy' run deploy.sh "$NEW"
+unset ROLE_EXIT
+expect 'a failed crawler role setup leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed crawler role setup restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
+
+stage
 HEALTH_EXIT=22
 export HEALTH_EXIT
 refuse 'a dead public endpoint fails the deploy' run deploy.sh "$NEW"
@@ -233,8 +243,9 @@ expect 'restore checks tables, restores the database, migrates, then restarts, i
   "docker[] compose up -d --wait postgres" \
   "docker[] compose exec -T postgres psql -U carlab -d carlab -tAc select count(*) from pg_tables where schemaname = 'public'" \
   "docker[] compose stop medusa" \
-  "docker[] compose exec -T postgres pg_restore -U carlab -d carlab --clean --if-exists --no-owner --single-transaction" \
+  "docker[] compose exec -T postgres pg_restore -U carlab -d carlab --clean --if-exists --no-owner --no-privileges --single-transaction" \
   "docker[] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
+  "docker[] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
   "docker[] compose up -d --wait --wait-timeout 300"
 
 stage
@@ -328,6 +339,6 @@ refuse 'fetch without a bucket fails' run backup.sh fetch
 unset BACKUP_DIR
 
 expect "the scripts ran and printed something" test -s "$work/printed"
-refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary' "$work/printed"
+refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|c0ffeec0ffee' "$work/printed"
 
 [ "$failures" -eq 0 ]
