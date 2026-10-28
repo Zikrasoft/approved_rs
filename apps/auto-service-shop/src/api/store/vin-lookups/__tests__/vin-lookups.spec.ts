@@ -142,6 +142,8 @@ medusaIntegrationTestRunner({
           resolved: false,
           make: 'bmw',
           code: '99ZZ',
+          model_slug: null,
+          vehicle_ids: [],
         });
 
         const { vehicle } = await createVehicleFixture(catalog, {
@@ -163,6 +165,8 @@ medusaIntegrationTestRunner({
           resolved: false,
           make: null,
           code: null,
+          model_slug: null,
+          vehicle_ids: [],
         });
       });
 

@@ -114,14 +114,35 @@ describe('vinLookupResponseSchema', () => {
     ).toEqual({ resolved: true, vehicle, facts: { steering: 'right' } });
   });
 
-  it('reads an unresolved lookup with the extracted code', () => {
+  it('reads an unresolved lookup from a shop that names no candidates yet', () => {
     expect(
       vinLookupResponseSchema.parse({
         resolved: false,
         make: 'bmw',
         code: '99ZZ',
       }),
-    ).toEqual({ resolved: false, make: 'bmw', code: '99ZZ' });
+    ).toEqual({
+      resolved: false,
+      make: 'bmw',
+      code: '99ZZ',
+      model_slug: null,
+      vehicle_ids: [],
+    });
+  });
+
+  it('reads an unresolved lookup with the candidate Vehicles and their common Model', () => {
+    expect(
+      vinLookupResponseSchema.parse({
+        resolved: false,
+        make: 'mercedes-benz',
+        code: '463273',
+        model_slug: 'g-63-amg-463',
+        vehicle_ids: ['veh_1', 'veh_2'],
+      }),
+    ).toMatchObject({
+      model_slug: 'g-63-amg-463',
+      vehicle_ids: ['veh_1', 'veh_2'],
+    });
   });
 
   it('refuses a resolved lookup without a vehicle', () => {
