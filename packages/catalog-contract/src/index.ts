@@ -13,3 +13,4 @@ export * from './fingerprint.ts';
 export * from './availability.ts';
 export * from './enrichment.ts';
 export * from './redirects.ts';
+export * from './placePages.ts';

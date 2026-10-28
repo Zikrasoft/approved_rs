@@ -14,19 +14,25 @@ import { pagesThumbnail } from '@/utils/partImages';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
 import type {
   ModelCategoryEntry,
   ModelHubEntry,
 } from '@/utils/catalogueSnapshot';
 import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
+import {
+  catalogueLinks,
+  PathBuilder,
+  withLocales,
+  type CataloguePages,
+} from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { withFacetCopy } from '@/utils/partsSearch';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
+  const pages = await cataloguePagesForBuild();
   return withLocales(
     hubs.flatMap((hub) =>
       hub.models.flatMap((model) =>
@@ -36,18 +42,20 @@ export async function getStaticPaths() {
             model: model.model.slug,
             category: entry.category.slug,
           },
-          props: { hub: model, entry },
+          props: { hub: model, entry, pages },
         })),
       ),
     ),
   );
 }
 
-const { hub, entry } = Astro.props as {
+const { hub, entry, pages } = Astro.props as {
   hub: ModelHubEntry;
   entry: ModelCategoryEntry;
+  pages: CataloguePages;
 };
 const locale = localeFrom(Astro.url.pathname);
+const links = catalogueLinks(locale, pages);
 const site = content(locale).site;
 const inquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.hubs.modelCategory;
@@ -139,7 +147,7 @@ const fill = (template: string) =>
                         <FitLine
                           fit={fit}
                           car={{
-                            href: vehiclePath(locale, fit.vehicle),
+                            href: links.vehicle(fit.vehicle),
                             label: vehicleVariant(fit.vehicle, locale),
                           }}
                         />

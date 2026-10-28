@@ -3,7 +3,10 @@ import { shopOpenSchema } from '@podbor/catalog-contract/preview';
 import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
+import type { CataloguePages } from './paths';
 import {
+  carPagesFrom,
+  cataloguePagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
   type CarPageEntry,
@@ -158,7 +161,26 @@ export async function categoryPagesForBuild(
 export async function carPagesForBuild(
   env = siteEnv(),
 ): Promise<CarPageEntry[]> {
-  return (await snapshotForBuild(env))?.cars ?? [];
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? carPagesFrom(snapshot) : [];
+}
+
+export async function vehiclesForBuild(env = siteEnv()) {
+  return (await snapshotForBuild(env))?.vehicles ?? [];
+}
+
+export async function cataloguePagesForBuild(
+  env = siteEnv(),
+): Promise<CataloguePages> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot
+    ? cataloguePagesFrom(snapshot)
+    : {
+        makes: new Set(),
+        models: new Set(),
+        categories: new Set(),
+        vehicles: new Set(),
+      };
 }
 
 export async function makeHubsForBuild(

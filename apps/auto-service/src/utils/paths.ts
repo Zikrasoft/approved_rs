@@ -13,6 +13,7 @@ export const PathBuilder = {
     `/${locale}/parts/c/${slug}/${Number(page) > 1 ? `${page}/` : ''}`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   partsCart: (locale: Locale) => `/${locale}/parts/cart/`,
+  partsMakes: (locale: Locale) => `/${locale}/parts/makes/`,
   partsMake: (locale: Locale, make: string) => `/${locale}/parts/${make}/`,
   partsModel: (locale: Locale, make: string, model: string) =>
     `/${locale}/parts/${make}/${model}/`,
@@ -60,6 +61,36 @@ export const vehiclePath = (
     model.slug,
     slug ?? id,
   );
+
+export type CataloguePages = {
+  makes: Set<string>;
+  models: Set<string>;
+  categories: Set<string>;
+  vehicles: Set<string>;
+};
+
+export const placeKey = (...slugs: string[]): string => slugs.join('/');
+
+export const modelKey = ({ slug, chassis }: VehicleAddress['model']) =>
+  placeKey(chassis.series.make.slug, slug);
+
+export const vehicleKey = (vehicle: VehicleAddress) =>
+  placeKey(modelKey(vehicle.model), vehicle.slug ?? vehicle.id);
+
+export const catalogueLinks = (locale: Locale, pages: CataloguePages) => ({
+  model: (model: VehicleAddress['model']): string | null =>
+    pages.models.has(modelKey(model))
+      ? PathBuilder.partsModel(
+          locale,
+          model.chassis.series.make.slug,
+          model.slug,
+        )
+      : null,
+  vehicle: (vehicle: VehicleAddress): string | null =>
+    pages.vehicles.has(vehicleKey(vehicle))
+      ? vehiclePath(locale, vehicle)
+      : null,
+});
 
 export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));

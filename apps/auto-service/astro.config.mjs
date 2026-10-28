@@ -8,9 +8,10 @@ import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { sitemapFilter } from './src/utils/sitemap.ts';
 import {
-  carPagesForBuild,
+  cataloguePagesForBuild,
   partPagesForBuild,
   redirectsForBuild,
+  vehiclesForBuild,
 } from './src/utils/catalogueEnv.ts';
 import {
   carRoutes,
@@ -20,10 +21,10 @@ import {
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
-const cars = await carPagesForBuild(process.env);
+const pages = await cataloguePagesForBuild(process.env);
 const redirects = [
-  ...catalogueRoutes(await redirectsForBuild(process.env)),
-  ...carRoutes(cars.map(({ vehicle }) => vehicle)),
+  ...catalogueRoutes(await redirectsForBuild(process.env), pages),
+  ...carRoutes(await vehiclesForBuild(process.env), pages),
 ];
 
 export default defineConfig({
@@ -40,7 +41,7 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: sitemapFilter(site, partPages, cars),
+      filter: sitemapFilter(site, partPages),
       i18n: {
         defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),

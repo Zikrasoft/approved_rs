@@ -1,6 +1,9 @@
 import {
   enrichmentGaps,
   maintenanceKit,
+  makeHasPage,
+  MIN_PARTS_FOR_PAGE,
+  modelHasPage,
   partPageSlug,
   positionGroups,
   requirementMatches,
@@ -10,8 +13,10 @@ import {
   type PartPage,
   type PositionGroup,
   type Vehicle,
+  vehicleHasPage,
 } from '@podbor/catalog-contract';
 import { partSuccessor } from './partSuccessor';
+import { modelKey, placeKey, vehicleKey, type CataloguePages } from './paths';
 
 export const MODEL_CATEGORY_MIN_MATCHES = 1;
 
@@ -62,7 +67,6 @@ export type CarKitItem = {
 
 export type CarPageEntry = {
   vehicle: Vehicle;
-  solitary: boolean;
   groups: CarPartGroup[];
   matches: CarMatch[];
   kit: CarKitItem[];
@@ -77,7 +81,13 @@ export type ModelHubEntry = {
   categories: ModelCategoryEntry[];
 };
 
-export type MakeHubEntry = { make: Make; models: ModelHubEntry[] };
+export type MakeHubEntry = {
+  make: Make;
+  models: ModelHubEntry[];
+  parts: number;
+};
+
+const byName = new Intl.Collator('en', { numeric: true }).compare;
 
 const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
   const groups = new Map<string, T[]>();
@@ -158,9 +168,15 @@ export function assembleSnapshot(
       },
     );
   const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
-  const modelKey = ({ model }: Vehicle) =>
-    `${model.chassis.series.make.slug}/${model.slug}`;
-  const vehiclesByModel = groupBy(allVehicles, modelKey);
+  const partsFitting = (vehicles: Vehicle[]) =>
+    new Set(
+      vehicles.flatMap((vehicle) =>
+        (fitsByVehicle.get(vehicle.id) ?? []).flatMap(({ part_id }) => {
+          const partPages = pagesByPart.get(part_id);
+          return partPages && !retired(partPages[0].part) ? [part_id] : [];
+        }),
+      ),
+    );
   const cars = allVehicles.map((vehicle): CarPageEntry => {
     const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap((fit) => {
       const partPages = pagesByPart.get(fit.part_id);
@@ -197,8 +213,7 @@ export function assembleSnapshot(
         ? [{ category, quantity, part: partPages[0].part, pages: partPages }]
         : [];
     });
-    const solitary = vehiclesByModel.get(modelKey(vehicle))?.length === 1;
-    return { vehicle, solitary, groups, matches, kit };
+    return { vehicle, groups, matches, kit };
   });
   for (const { vehicle, matches, kit } of cars) {
     for (const { pages: partPages } of matches.flatMap(
@@ -219,6 +234,7 @@ export function assembleSnapshot(
     pagesByPart,
     retired,
     matchesFor,
+    partsFitting,
     cars,
     redirects,
   };
@@ -238,54 +254,116 @@ export function categoryPagesFrom({
   }));
 }
 
-export function makeHubsFrom({
+const oncePerSnapshot = <T>(build: (snapshot: CatalogueSnapshot) => T) => {
+  const built = new WeakMap<CatalogueSnapshot, T>();
+  return (snapshot: CatalogueSnapshot): T => {
+    if (!built.has(snapshot)) {
+      built.set(snapshot, build(snapshot));
+    }
+    return built.get(snapshot) as T;
+  };
+};
+
+export const makeHubsFrom = oncePerSnapshot(function makeHubs({
   categories: all,
   vehicles: allVehicles,
   pagesByPart,
   retired,
   matchesFor,
+  partsFitting,
 }: CatalogueSnapshot): MakeHubEntry[] {
   const parts = [...pagesByPart.values()].filter(
     (pages) => !retired(pages[0].part),
   );
   const models = [
-    ...groupBy(allVehicles, ({ model }) => model.slug).values(),
-  ].map((vehicles): ModelHubEntry => {
-    const ids = new Set(vehicles.map(({ id }) => id));
-    const { model } = vehicles[0];
-    const required = vehicles.flatMap(matchesFor);
-    return {
-      make: model.chassis.series.make,
-      model,
-      vehicles,
-      categories: all.flatMap((category) => {
-        const fitted = parts.flatMap((pages) => {
-          const fits = pages[0].fits.filter(({ vehicle_id }) =>
-            ids.has(vehicle_id),
+    ...groupBy(allVehicles, ({ model }) => modelKey(model)).values(),
+  ]
+    .filter((vehicles) => modelHasPage(partsFitting(vehicles).size))
+    .map((vehicles): ModelHubEntry => {
+      const ids = new Set(vehicles.map(({ id }) => id));
+      const { model } = vehicles[0];
+      const required = vehicles.flatMap(matchesFor);
+      return {
+        make: model.chassis.series.make,
+        model,
+        vehicles,
+        categories: all.flatMap((category) => {
+          const fitted = parts.flatMap((pages) => {
+            const fits = pages[0].fits.filter(({ vehicle_id }) =>
+              ids.has(vehicle_id),
+            );
+            return pages[0].part.category_id === category.id && fits.length
+              ? [{ part: pages[0].part, pages, fits }]
+              : [];
+          });
+          const matches = [
+            ...fitted,
+            ...required
+              .filter((match) => match.category.id === category.id)
+              .flatMap((match) => match.parts),
+          ].filter(
+            (match, index, all) =>
+              all.findIndex(({ part }) => part.id === match.part.id) === index,
           );
-          return pages[0].part.category_id === category.id && fits.length
-            ? [{ part: pages[0].part, pages, fits }]
+          return matches.length >= MODEL_CATEGORY_MIN_MATCHES
+            ? [{ category, parts: matches }]
             : [];
-        });
-        const matches = [
-          ...fitted,
-          ...required
-            .filter((match) => match.category.id === category.id)
-            .flatMap((match) => match.parts),
-        ].filter(
-          (match, index, all) =>
-            all.findIndex(({ part }) => part.id === match.part.id) === index,
-        );
-        return matches.length >= MODEL_CATEGORY_MIN_MATCHES
-          ? [{ category, parts: matches }]
-          : [];
+        }),
+      };
+    });
+  return [...groupBy(models, ({ make }) => make.slug).values()]
+    .map((makeModels) => ({
+      make: makeModels[0].make,
+      models: makeModels,
+      parts: partsFitting(makeModels.flatMap(({ vehicles }) => vehicles)).size,
+    }))
+    .filter(({ models: makeModels }) => makeHasPage(makeModels.length))
+    .sort((a, b) => byName(a.make.name, b.make.name));
+});
+
+export function carPagesFrom({
+  cars,
+  partsFitting,
+}: CatalogueSnapshot): CarPageEntry[] {
+  const byModel = groupBy(cars, ({ vehicle }) => modelKey(vehicle.model));
+  return [...byModel.values()].flatMap((modelCars) => {
+    const modelParts = partsFitting(
+      modelCars.map(({ vehicle }) => vehicle),
+    ).size;
+    const parts = modelCars.map(({ vehicle }) => partsFitting([vehicle]).size);
+    const modelVehiclesWithEnoughParts = parts.filter(
+      (count) => count >= MIN_PARTS_FOR_PAGE,
+    ).length;
+    return modelCars.filter((_, index) =>
+      vehicleHasPage({
+        parts: parts[index],
+        modelParts,
+        modelVehiclesWithEnoughParts,
       }),
-    };
+    );
   });
-  return [...groupBy(models, ({ make }) => make.slug).values()].map(
-    (makeModels) => ({ make: makeModels[0].make, models: makeModels }),
-  );
 }
+
+export const cataloguePagesFrom = oncePerSnapshot(function cataloguePages(
+  snapshot: CatalogueSnapshot,
+): CataloguePages {
+  const hubs = makeHubsFrom(snapshot);
+  const models = hubs.flatMap(({ models: makeModels }) => makeModels);
+  return {
+    makes: new Set(hubs.map(({ make }) => make.slug)),
+    models: new Set(models.map(({ model }) => modelKey(model))),
+    categories: new Set(
+      models.flatMap(({ model, categories }) =>
+        categories.map(({ category }) =>
+          placeKey(modelKey(model), category.slug),
+        ),
+      ),
+    ),
+    vehicles: new Set(
+      carPagesFrom(snapshot).map(({ vehicle }) => vehicleKey(vehicle)),
+    ),
+  };
+});
 
 export const CATEGORY_PAGE_SIZE = 48;
 

@@ -86,6 +86,16 @@ export const partsCarContentSchema = z
     hubs: z
       .object({
         indexHeading: z.string(),
+        allMakesLink: z.string(),
+        makes: z
+          .object({
+            metaTitle: z.string(),
+            metaDescription: z.string(),
+            heading: z.string(),
+            lead: z.string(),
+            lettersLabel: z.string(),
+          })
+          .strict(),
         make: z
           .object({
             metaTitle: z.string(),

@@ -7,26 +7,32 @@ import InquiryLink from '@/components/InquiryLink.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
 import type { ModelHubEntry } from '@/utils/catalogueSnapshot';
+import type { CataloguePages } from '@/utils/paths';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
+import { catalogueLinks, PathBuilder, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
+  const pages = await cataloguePagesForBuild();
   return withLocales(
     hubs.flatMap((hub) =>
       hub.models.map((model) => ({
         params: { make: hub.make.slug, model: model.model.slug },
-        props: { hub: model },
+        props: { hub: model, pages },
       })),
     ),
   );
 }
 
-const { hub } = Astro.props as { hub: ModelHubEntry };
+const { hub, pages } = Astro.props as {
+  hub: ModelHubEntry;
+  pages: CataloguePages;
+};
 const locale = localeFrom(Astro.url.pathname);
+const links = catalogueLinks(locale, pages);
 const site = content(locale).site;
 const inquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.hubs.model;
@@ -99,18 +105,28 @@ const empty = hub.categories.length === 0;
         <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
         <ul class="card divide-y divide-line">
           {
-            hub.vehicles.map((vehicle) => (
-              <li>
-                <a
-                  href={vehiclePath(locale, vehicle)}
-                  class="block px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
-                >
-                  <span class="spec text-sm">
-                    {vehicleVariant(vehicle, locale)}
-                  </span>
-                </a>
-              </li>
-            ))
+            hub.vehicles.map((vehicle) => {
+              const href = links.vehicle(vehicle);
+              const variant = (
+                <span class="spec text-sm">
+                  {vehicleVariant(vehicle, locale)}
+                </span>
+              );
+              return (
+                <li>
+                  {href ? (
+                    <a
+                      href={href}
+                      class="block px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+                    >
+                      {variant}
+                    </a>
+                  ) : (
+                    <p class="px-5 py-4 text-ink-2 sm:px-6">{variant}</p>
+                  )}
+                </li>
+              );
+            })
           }
         </ul>
       </div>
