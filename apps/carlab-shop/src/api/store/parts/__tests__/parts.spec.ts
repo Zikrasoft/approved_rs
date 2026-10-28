@@ -36,7 +36,7 @@ medusaIntegrationTestRunner({
 
         const [intercars, carlabWarehouse] =
           await supplierService.createSuppliers([
-            { name: 'Intercars', markup_percentage: 20 },
+            { name: 'Intercars', markup_percentage: 20.15 },
             { name: 'CarLab warehouse', markup_percentage: 15 },
           ]);
 
@@ -119,7 +119,7 @@ medusaIntegrationTestRunner({
         expect(oem.offers).toEqual([
           {
             id: expect.any(String),
-            price: 1850,
+            price: 1853,
             currency: 'RSD',
             stock_quantity: 12,
             lead_time_days: 0,

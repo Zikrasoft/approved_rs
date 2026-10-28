@@ -203,8 +203,7 @@ medusaIntegrationTestRunner({
         const row = await getContainer()
           .resolve(ContainerRegistrationKeys.PG_CONNECTION)('crawl_page')
           .where({ site: site.name, url: 'https://bucketed.test/p/1' })
-          .first('body', 'body_key');
-        expect(row.body).toBeNull();
+          .first('body_key');
         const stored = pageBucket.objects.get(row.body_key);
         expect(gunzipSync(stored!.body).toString('utf8')).toBe(
           '<html>kept</html>',

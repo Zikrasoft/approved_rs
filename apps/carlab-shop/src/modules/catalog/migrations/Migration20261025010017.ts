@@ -107,7 +107,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "engine" ("id" text not null, "code" text not null, "family" text not null, "fuel" text check ("fuel" in ('petrol', 'diesel', 'hybrid', 'electric')) not null, "displacement_cc" integer null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "engine_pkey" primary key ("id"));`,
+      `create table if not exists "engine" ("id" text not null, "code" text not null, "family" text not null, "fuel" text check ("fuel" in ('petrol', 'diesel', 'hybrid', 'electric')) null, "displacement_cc" integer null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "engine_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_engine_code_unique" ON "engine" ("code") WHERE deleted_at IS NULL;`,
@@ -127,7 +127,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "part" ("id" text not null, "name" text not null, "description" text null, "category_id" text null, "attributes" jsonb not null default '{}', "installation_price" integer null, "no_installation" boolean not null default false, "translations" jsonb null, "translated_from" jsonb null, "replaced_by_id" text null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_pkey" primary key ("id"));`,
+      `create table if not exists "part" ("id" text not null, "name" text not null, "description" text null, "source_name" text null, "edited_fields" text[] not null default '{}', "category_id" text null, "attributes" jsonb not null default '{}', "installation_price" integer null, "no_installation" boolean not null default false, "translations" jsonb null, "translated_from" jsonb null, "replaced_by_id" text null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_part_category_id" ON "part" ("category_id") WHERE deleted_at IS NULL;`,
@@ -166,7 +166,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "chassis" ("id" text not null, "code" text not null, "body_style" text check ("body_style" in ('sedan', 'touring', 'hatchback', 'coupe', 'convertible', 'gran-coupe', 'suv', 'van')) not null, "year_from" integer null, "year_to" integer null, "series_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "chassis_pkey" primary key ("id"));`,
+      `create table if not exists "chassis" ("id" text not null, "code" text not null, "body_style" text check ("body_style" in ('sedan', 'touring', 'hatchback', 'coupe', 'convertible', 'gran-coupe', 'suv', 'van')) null, "year_from" integer null, "year_to" integer null, "series_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "chassis_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_chassis_code_unique" ON "chassis" ("code") WHERE deleted_at IS NULL;`,
@@ -218,7 +218,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "requirement" ("id" text not null, "field_id" text not null, "engine_id" text null, "chassis_id" text null, "vehicle_id" text null, "option_keys" text[] null, "min" real null, "max" real null, "quantity" integer not null default 1, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "requirement_pkey" primary key ("id"));`,
+      `create table if not exists "requirement" ("id" text not null, "field_id" text not null, "engine_id" text null, "chassis_id" text null, "vehicle_id" text null, "option_keys" text[] null, "min" real null, "max" real null, "quantity" integer not null default 1, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "requirement_pkey" primary key ("id"), constraint requirement_one_target check (num_nonnulls(engine_id, chassis_id, vehicle_id) = 1));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_requirement_field_id" ON "requirement" ("field_id") WHERE deleted_at IS NULL;`,
@@ -237,7 +237,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "fitment" ("id" text not null, "part_id" text not null, "vehicle_id" text not null, "quantity" integer not null default 1, "axle" text check ("axle" in ('front', 'rear')) null, "side" text check ("side" in ('left', 'right')) null, "production_from" timestamptz null, "production_to" timestamptz null, "steering" text check ("steering" in ('left', 'right')) null, "gearbox" text check ("gearbox" in ('manual', 'automatic')) null, "note" text null, "translations" jsonb null, "translated_from" jsonb null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "fitment_pkey" primary key ("id"));`,
+      `create table if not exists "fitment" ("id" text not null, "part_id" text not null, "vehicle_id" text not null, "quantity" integer not null default 1, "axle" text check ("axle" in ('front', 'rear')) null, "side" text check ("side" in ('left', 'right')) null, "production_from" timestamptz null, "production_to" timestamptz null, "steering" text check ("steering" in ('left', 'right')) null, "gearbox" text check ("gearbox" in ('manual', 'automatic')) null, "note" text null, "translations" jsonb null, "translated_from" jsonb null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "fitment_pkey" primary key ("id"), constraint fitment_production_ordered check (production_from <= production_to));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_fitment_part_id" ON "fitment" ("part_id") WHERE deleted_at IS NULL;`,

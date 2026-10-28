@@ -11,20 +11,27 @@ import { provenance } from './provenance';
 import { translatable } from './translatable';
 import Vehicle from './vehicle';
 
-const Fitment = model.define('fitment', {
-  id: model.id().primaryKey(),
-  part: model.belongsTo(() => Part, { mappedBy: 'fitments' }),
-  vehicle: model.belongsTo(() => Vehicle, { mappedBy: 'fitments' }),
-  quantity: model.number().default(1),
-  axle: model.enum([...FITMENT_AXLES]).nullable(),
-  side: model.enum([...FITMENT_SIDES]).nullable(),
-  production_from: model.dateTime().nullable(),
-  production_to: model.dateTime().nullable(),
-  steering: model.enum([...STEERING_SIDES]).nullable(),
-  gearbox: model.enum([...GEARBOX_TYPES]).nullable(),
-  note: model.text().nullable(),
-  ...translatable(),
-  ...provenance(),
-});
+const Fitment = model
+  .define('fitment', {
+    id: model.id().primaryKey(),
+    part: model.belongsTo(() => Part, { mappedBy: 'fitments' }),
+    vehicle: model.belongsTo(() => Vehicle, { mappedBy: 'fitments' }),
+    quantity: model.number().default(1),
+    axle: model.enum([...FITMENT_AXLES]).nullable(),
+    side: model.enum([...FITMENT_SIDES]).nullable(),
+    production_from: model.dateTime().nullable(),
+    production_to: model.dateTime().nullable(),
+    steering: model.enum([...STEERING_SIDES]).nullable(),
+    gearbox: model.enum([...GEARBOX_TYPES]).nullable(),
+    note: model.text().nullable(),
+    ...translatable(),
+    ...provenance(),
+  })
+  .checks([
+    {
+      name: 'fitment_production_ordered',
+      expression: 'production_from <= production_to',
+    },
+  ]);
 
 export default Fitment;
