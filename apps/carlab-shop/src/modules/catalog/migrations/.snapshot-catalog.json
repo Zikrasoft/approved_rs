@@ -2153,6 +2153,22 @@
           "enumItems": [],
           "mappedType": "boolean"
         },
+        "source_missing_since": {
+          "name": "source_missing_since",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "translations": {
           "name": "translations",
           "type": "jsonb",

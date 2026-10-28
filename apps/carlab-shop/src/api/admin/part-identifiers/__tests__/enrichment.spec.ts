@@ -159,7 +159,11 @@ medusaIntegrationTestRunner({
           expect.objectContaining({
             value: 'HU 816 X',
             brand: expect.objectContaining({ name: 'Mann-Filter' }),
-            part: { id: fittedPartId, name: 'Фильтр с машиной' },
+            part: {
+              id: fittedPartId,
+              name: 'Фильтр с машиной',
+              source_missing_since: null,
+            },
             category: { id: oilId, name: 'Моторное масло' },
             enriched: true,
             reasons: [],
