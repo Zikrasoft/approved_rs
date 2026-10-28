@@ -72,6 +72,7 @@ describe('FILTRON', () => {
           year_from: 2023,
           year_to: null,
           notes: [],
+          supplier_vehicle_id: '00000005320232',
         },
       ],
       images: [

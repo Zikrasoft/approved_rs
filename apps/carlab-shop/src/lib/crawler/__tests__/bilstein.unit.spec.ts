@@ -99,6 +99,7 @@ describe('bilstein group partsfinder', () => {
       year_from: 2002,
       year_to: 2006,
       notes: [],
+      supplier_vehicle_id: '12670011900092',
     });
   });
 
@@ -173,6 +174,7 @@ describe('bilstein group partsfinder', () => {
       year_from: 2006,
       year_to: 2012,
       notes: [],
+      supplier_vehicle_id: '1267007100106',
     });
     expect(article.vehicles).toContainEqual(
       expect.objectContaining({

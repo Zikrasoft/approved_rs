@@ -31,6 +31,7 @@ export const vehicleFactsSchema = z.object({
   year_from: yearSchema,
   year_to: yearSchema,
   notes: z.array(z.string().trim().min(1)),
+  supplier_vehicle_id: z.string().trim().min(1).optional(),
 });
 
 export const supplierArticleSchema = z.object({

@@ -96,33 +96,47 @@ const onTheRoad = ({ make }: VehicleFacts) =>
   !OFF_ROAD_MAKE.test(make.toUpperCase()) &&
   !OFF_ROAD_MAKER.test(make.toUpperCase());
 
+const vehicleTypeIdOf = (row: Nodes) =>
+  new URLSearchParams(
+    decodeURIComponent(
+      row.find('a.cmp-table__link').attr('data-g-binding-params') ?? '',
+    ),
+  ).get('vehicleTypeId') ?? undefined;
+
 const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
   each($, $('#applications .cmp-application-table')).flatMap((table) => {
     const [series, make] = each($, table.parents('.cmp-accordion__item')).map(
       accordionTitle,
     );
     return each($, table.find('tbody.cmp-table__desktop tr'))
-      .map((row) =>
-        each($, row.find('td')).map((cell) =>
+      .map((row) => ({
+        cells: each($, row.find('td')).map((cell) =>
           words(cell.text()).replace(/^-$/u, ''),
         ),
-      )
-      .filter((cells) => cells.length >= 7)
-      .map(([variant, , engine, ccm, kw, , years]) => ({
-        make,
-        model: withoutCodes(series),
-        variant,
-        chassis_codes: codesIn(variant).length
-          ? codesIn(variant)
-          : codesIn(series),
-        engine_codes: engine.split(/\s*,\s*/u).filter(Boolean),
-        displacement_cc: count(ccm),
-        power_kw: count(kw),
-        fuel: null,
-        body_style: null,
-        ...yearsOf(years),
-        notes: [],
-      }));
+        supplierVehicleId: vehicleTypeIdOf(row),
+      }))
+      .filter(({ cells }) => cells.length >= 7)
+      .map(
+        ({
+          cells: [variant, , engine, ccm, kw, , years],
+          supplierVehicleId,
+        }) => ({
+          make,
+          model: withoutCodes(series),
+          variant,
+          chassis_codes: codesIn(variant).length
+            ? codesIn(variant)
+            : codesIn(series),
+          engine_codes: engine.split(/\s*,\s*/u).filter(Boolean),
+          displacement_cc: count(ccm),
+          power_kw: count(kw),
+          fuel: null,
+          body_style: null,
+          ...yearsOf(years),
+          notes: [],
+          ...(supplierVehicleId && { supplier_vehicle_id: supplierVehicleId }),
+        }),
+      );
   });
 
 const imagesOf = ($: CheerioAPI): string[] => {

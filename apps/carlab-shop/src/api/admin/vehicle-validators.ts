@@ -4,11 +4,12 @@ import {
   CATALOG_TRANSLATION_LOCALES,
   ENGINE_FUELS,
   STEERING_SIDES,
+  MANUFACTURER_VEHICLE_IDENTIFIER_TYPES,
+  type ManufacturerVehicleIdentifierType,
   VEHICLE_DRIVES,
-  VEHICLE_IDENTIFIER_TYPES,
-  type VehicleIdentifierType,
 } from '@podbor/catalog-contract';
 
+import { canonicalChassisCode } from '../../lib/chassis-code';
 import { MAX_NAME_LENGTH } from './validators';
 
 const MAX_POWER_KW = 2000;
@@ -23,7 +24,7 @@ const slug = z
 const code = z.string().trim().toUpperCase().min(1).max(MAX_NAME_LENGTH);
 const year = z.number().int().min(1950).max(2100).nullable();
 
-const IDENTIFIER_FORMATS: Record<VehicleIdentifierType, RegExp> = {
+const IDENTIFIER_FORMATS: Record<ManufacturerVehicleIdentifierType, RegExp> = {
   'bmw-type-code': /^[A-Z0-9]{4}$/,
   'mercedes-baumuster': /^\d{6}$/,
 };
@@ -38,7 +39,10 @@ const YEARS_OUT_OF_ORDER = {
   message: 'Ends before it starts',
 };
 
-type Identifier = { type?: VehicleIdentifierType; value?: string };
+type Identifier = {
+  type?: ManufacturerVehicleIdentifierType;
+  value?: string;
+};
 
 const identifierFormat = ({ type, value }: Identifier) =>
   !type || value === undefined || IDENTIFIER_FORMATS[type].test(value);
@@ -65,7 +69,7 @@ const AdminSeries = z.strictObject({
 
 const AdminChassis = z.strictObject({
   series_id: text,
-  code,
+  code: code.transform(canonicalChassisCode),
   body_style: z.enum(BODY_STYLES),
   year_from: year.optional(),
   year_to: year.optional(),
@@ -103,7 +107,7 @@ const AdminVehicle = z.strictObject({
 
 const AdminVehicleIdentifier = z.strictObject({
   vehicle_id: text,
-  type: z.enum(VEHICLE_IDENTIFIER_TYPES),
+  type: z.enum(MANUFACTURER_VEHICLE_IDENTIFIER_TYPES),
   value: code,
 });
 
@@ -124,7 +128,10 @@ export const STORED_ROW_RULES: Record<string, z.ZodType> = {
   chassis: storedYears,
   vehicle: storedYears,
   vehicle_identifier: z
-    .object({ type: z.enum(VEHICLE_IDENTIFIER_TYPES), value: z.string() })
+    .object({
+      type: z.enum(MANUFACTURER_VEHICLE_IDENTIFIER_TYPES),
+      value: z.string(),
+    })
     .refine(identifierFormat, BAD_IDENTIFIER_FORMAT),
 };
 

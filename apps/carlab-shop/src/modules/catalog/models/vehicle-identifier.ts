@@ -9,6 +9,7 @@ const VehicleIdentifier = model
     id: model.id().primaryKey(),
     type: model.enum([...VEHICLE_IDENTIFIER_TYPES]),
     value: model.text(),
+    supplier_id: model.text().nullable(),
     vehicle: model.belongsTo(() => Vehicle, { mappedBy: 'identifiers' }),
     ...provenance(),
   })
@@ -16,6 +17,12 @@ const VehicleIdentifier = model
     {
       on: ['type', 'value'],
       unique: true,
+      where: { supplier_id: null },
+    },
+    {
+      on: ['supplier_id', 'type', 'value'],
+      unique: true,
+      where: { supplier_id: { $ne: null } },
     },
   ]);
 

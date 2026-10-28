@@ -19,7 +19,7 @@ import {
   ENGINE_FUELS,
   STEERING_SIDES,
   VEHICLE_DRIVES,
-  VEHICLE_IDENTIFIER_TYPES,
+  MANUFACTURER_VEHICLE_IDENTIFIER_TYPES,
 } from '@podbor/catalog-contract';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -179,7 +179,11 @@ const ENTITIES: Entity[] = [
     object: 'vehicle_identifier',
     fields: [
       { key: 'vehicle_id', kind: 'ref', collection: 'vehicles' },
-      { key: 'type', kind: 'enum', values: VEHICLE_IDENTIFIER_TYPES },
+      {
+        key: 'type',
+        kind: 'enum',
+        values: MANUFACTURER_VEHICLE_IDENTIFIER_TYPES,
+      },
       { key: 'value', kind: 'text' },
     ],
   },

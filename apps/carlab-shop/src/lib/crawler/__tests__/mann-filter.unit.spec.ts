@@ -80,6 +80,7 @@ describe('MANN-FILTER', () => {
       year_from: 2008,
       year_to: 2013,
       notes: [],
+      supplier_vehicle_id: '00000000146042',
     });
     expect(article.vehicles).toContainEqual(
       expect.objectContaining({

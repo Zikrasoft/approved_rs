@@ -9,7 +9,7 @@ import VehicleModel from './vehicle-model';
 const Chassis = model
   .define('chassis', {
     id: model.id().primaryKey(),
-    code: model.text().unique(),
+    code: model.text(),
     body_style: model.enum([...BODY_STYLES]).nullable(),
     year_from: model.number().nullable(),
     year_to: model.number().nullable(),
@@ -18,6 +18,7 @@ const Chassis = model
     requirements: model.hasMany(() => Requirement, { mappedBy: 'chassis' }),
     ...provenance(),
   })
+  .indexes([{ on: ['series_id', 'code'], unique: true }])
   .cascades({ delete: ['requirements'] });
 
 export default Chassis;

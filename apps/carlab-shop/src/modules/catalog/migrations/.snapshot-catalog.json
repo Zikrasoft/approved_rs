@@ -3087,15 +3087,6 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_chassis_code_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_chassis_code_unique\" ON \"chassis\" (\"code\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "IDX_chassis_series_id",
           "columnNames": [],
           "composite": false,
@@ -3112,6 +3103,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_chassis_deleted_at\" ON \"chassis\" (\"deleted_at\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_chassis_series_id_code_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_chassis_series_id_code_unique\" ON \"chassis\" (\"series_id\", \"code\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "chassis_pkey",
@@ -3684,7 +3684,11 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["bmw-type-code", "mercedes-baumuster"],
+          "enumItems": [
+            "bmw-type-code",
+            "mercedes-baumuster",
+            "supplier-vehicle-id"
+          ],
           "mappedType": "enum"
         },
         "value": {
@@ -3694,6 +3698,22 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "supplier_id": {
+          "name": "supplier_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -3844,7 +3864,16 @@
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_vehicle_identifier_type_value_unique\" ON \"vehicle_identifier\" (\"type\", \"value\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_vehicle_identifier_type_value_unique\" ON \"vehicle_identifier\" (\"type\", \"value\") WHERE supplier_id IS NULL AND deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_vehicle_identifier_supplier_id_type_value_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_vehicle_identifier_supplier_id_type_value_unique\" ON \"vehicle_identifier\" (\"supplier_id\", \"type\", \"value\") WHERE supplier_id IS NOT NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "vehicle_identifier_pkey",

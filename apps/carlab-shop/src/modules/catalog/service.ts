@@ -456,6 +456,18 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectTransactionManager()
+  async matchVehiclesAlone<T>(
+    match: () => Promise<T>,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<T> {
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      'select pg_advisory_xact_lock(hashtextextended(?, 0))',
+      ['vehicle-matching'],
+    );
+    return match();
+  }
+
+  @InjectTransactionManager()
   async addPartIdentifier(
     partId: string,
     identifier: NewPartIdentifier,
