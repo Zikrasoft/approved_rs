@@ -62,6 +62,7 @@ export type ImportSummary = {
 type ImportState = {
   summary: ImportSummary;
   listed: Set<string>;
+  listedNumbers: Set<string>;
   changedPartIds: Set<string>;
 };
 
@@ -410,6 +411,29 @@ async function importArticle(
   summary.created += Number(created);
 }
 
+async function flagUnlistedParts(
+  catalog: CatalogModuleService,
+  source: string,
+  listedNumbers: Set<string>,
+): Promise<void> {
+  const parts = await catalog.listParts(
+    { source },
+    { relations: ['identifiers'], take: null },
+  );
+  const now = new Date();
+  const changes = parts.flatMap(({ id, source_missing_since, identifiers }) => {
+    const missing = !identifiers.some(({ normalized_value }) =>
+      listedNumbers.has(normalized_value),
+    );
+    return missing === Boolean(source_missing_since)
+      ? []
+      : [{ id, source_missing_since: missing ? now : null }];
+  });
+  if (changes.length) {
+    await catalog.updateParts(changes);
+  }
+}
+
 // TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make an Import slow.
 export async function importSupplier(
   scope: MedusaContainer,
@@ -478,6 +502,7 @@ export async function importSupplier(
   const state: ImportState = {
     summary,
     listed: new Set(),
+    listedNumbers: new Set(),
     changedPartIds: new Set(),
   };
 
@@ -492,6 +517,9 @@ export async function importSupplier(
     summary.skipped_by_reason.unreadable += page.unreadable.length;
     summary.skipped += page.not_in_scope;
     summary.skipped_by_reason.not_in_scope += page.not_in_scope;
+    for (const { number } of page.articles) {
+      state.listedNumbers.add(normalizePartNumber(number));
+    }
     const wanted = page.articles.filter(brandOfArticle);
     const unbranded = page.articles.length - wanted.length;
     summary.skipped += unbranded;
@@ -544,6 +572,7 @@ export async function importSupplier(
   if (gone.length) {
     await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
+  await flagUnlistedParts(catalog, adapter.name, state.listedNumbers);
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;
 }

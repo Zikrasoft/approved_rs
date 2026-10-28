@@ -988,6 +988,49 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
+      it('flags a Part its source stops listing, keeps its page, and clears the flag when it returns', async () => {
+        const article = {
+          article_id: 'IC-GONE',
+          brand: 'MANN-FILTER',
+          number: 'C 30 005',
+          name: 'Фильтр воздушный C 30 005',
+          category: 'IC-OIL',
+          description: 'Воздушный фильтр',
+        };
+        shopAi.description = 'Воздушный фильтр MANN';
+        intercars.articles.push(article);
+        const missing = async () =>
+          (
+            await api.get(
+              '/admin/part-identifiers?source_missing=true&q=C30005',
+              adminHeaders,
+            )
+          ).data.part_identifiers;
+        await runImport();
+        const listed = await page('C30005');
+        expect(await missing()).toEqual([]);
+
+        intercars.articles.length = 0;
+        await runImport();
+
+        expect(await missing()).toMatchObject([
+          {
+            normalized_value: 'C30005',
+            part: { source_missing_since: expect.any(String) },
+          },
+        ]);
+        expect(await page('C30005')).toEqual(listed);
+
+        intercars.articles.push(article);
+        await runImport();
+
+        expect(await missing()).toEqual([]);
+        const [row] = (
+          await api.get('/admin/part-identifiers?q=C30005', adminHeaders)
+        ).data.part_identifiers;
+        expect(row.part.source_missing_since).toBeNull();
+      });
+
       it('deletes what an import created by its source, refusing while manual rows hang off it', async () => {
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
@@ -1422,6 +1465,10 @@ medusaIntegrationTestRunner({
             },
           });
           expect(await page('FAIL2')).toBeDefined();
+          const [failed] = (
+            await api.get('/admin/part-identifiers?q=FAIL1', adminHeaders)
+          ).data.part_identifiers;
+          expect(failed.part.source_missing_since).toBeNull();
         });
       });
     });

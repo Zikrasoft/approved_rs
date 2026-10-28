@@ -835,6 +835,9 @@
     "categoryLabel": "Категория",
     "allCategories": "Все категории",
     "noCategory": "Без категории",
+    "sourceMissingOnly": "Только пропавшие у источника",
+    "sourceMissing": "Пропала у источника",
+    "sourceMissingSince": "с {{date}}",
     "columns": {
       "number": "Номер",
       "status": "Статус",

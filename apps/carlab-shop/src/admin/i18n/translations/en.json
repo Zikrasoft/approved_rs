@@ -815,6 +815,9 @@
     "categoryLabel": "Category",
     "allCategories": "All categories",
     "noCategory": "No category",
+    "sourceMissingOnly": "Only parts their source no longer lists",
+    "sourceMissing": "Gone from source",
+    "sourceMissingSince": "since {{date}}",
     "columns": {
       "number": "Number",
       "status": "Status",

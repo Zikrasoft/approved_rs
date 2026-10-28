@@ -19,7 +19,11 @@ export const partIdentifierRowSchema = enrichmentSchema
     id: z.string(),
     value: z.string(),
     brand: z.object({ id: z.string(), name: z.string() }),
-    part: z.object({ id: z.string(), name: z.string() }),
+    part: z.object({
+      id: z.string(),
+      name: z.string(),
+      source_missing_since: z.string().nullable(),
+    }),
     category: z.object({ id: z.string(), name: z.string() }).nullable(),
     photos: z.number(),
     offers: z.number(),

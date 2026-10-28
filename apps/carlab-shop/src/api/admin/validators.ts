@@ -117,6 +117,10 @@ export const AdminListPartIdentifiers = z.object({
     .transform(() => true)
     .optional(),
   part_id: z.string().min(1).optional(),
+  source_missing: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   offset: z.coerce.number().int().nonnegative().default(0),
   limit: z.coerce.number().int().positive().max(200).default(50),
 });
