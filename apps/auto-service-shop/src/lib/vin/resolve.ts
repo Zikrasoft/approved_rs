@@ -4,6 +4,7 @@ import { vinFactsSchema } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../../modules/catalog/service';
 import type VinLookupModuleService from '../../modules/vin-lookup/service';
 import { listVehicleResponses } from '../store-response';
+import { modelsListingBaumuster } from './crawled-baumuster';
 import type { VinDecode, VinDecoder } from './decoder';
 
 type Answer = { decoder: VinDecoder; decode: VinDecode };
@@ -19,29 +20,57 @@ const vehicleById = async (
 ): Promise<Vehicle | null> =>
   (await listVehicleResponses(catalog, { id }))[0] ?? null;
 
-const vehicleFor = async (
+const identifiedVehicle = async (
   catalog: CatalogModuleService,
-  { identifiers }: VinDecode,
-): Promise<Vehicle | null> => {
-  if (!identifiers.length) return null;
+  identifiers: VinDecode['identifiers'],
+): Promise<Vehicle[]> => {
+  if (!identifiers.length) return [];
   const [match] = await catalog.listVehicleIdentifiers({ $or: identifiers });
-  return match ? vehicleById(catalog, match.vehicle_id) : null;
+  const vehicle = match && (await vehicleById(catalog, match.vehicle_id));
+  return vehicle ? [vehicle] : [];
+};
+
+const crawledVehicles = async (
+  catalog: CatalogModuleService,
+  { make, identifiers }: VinDecode,
+): Promise<Vehicle[]> => {
+  const baumuster = identifiers.find(
+    ({ type }) => type === 'mercedes-baumuster',
+  );
+  if (!baumuster) return [];
+  const modelIds = await modelsListingBaumuster(catalog, make, baumuster.value);
+  return modelIds.length
+    ? listVehicleResponses(catalog, { model_id: modelIds })
+    : [];
+};
+
+const vehiclesFor = async (
+  catalog: CatalogModuleService,
+  decode: VinDecode,
+): Promise<Vehicle[]> => {
+  const identified = await identifiedVehicle(catalog, decode.identifiers);
+  return identified.length ? identified : crawledVehicles(catalog, decode);
 };
 
 const decodeThroughChain = async (
   vin: string,
   decoders: VinDecoder[],
   catalog: CatalogModuleService,
-): Promise<{ answer: Answer | null; vehicle: Vehicle | null }> => {
+): Promise<{ answer: Answer | null; vehicles: Vehicle[] }> => {
   let first: Answer | null = null;
   for (const decoder of decoders) {
     const decode = await decoder.decode(vin);
     if (!decode) continue;
     first ??= { decoder, decode };
-    const vehicle = await vehicleFor(catalog, decode);
-    if (vehicle) return { answer: { decoder, decode }, vehicle };
+    const vehicles = await vehiclesFor(catalog, decode);
+    if (vehicles.length) return { answer: { decoder, decode }, vehicles };
   }
-  return { answer: first, vehicle: null };
+  return { answer: first, vehicles: [] };
+};
+
+const commonModelSlug = (vehicles: Vehicle[]): string | null => {
+  const slugs = new Set(vehicles.map(({ model }) => model.slug));
+  return slugs.size === 1 ? [...slugs][0] : null;
 };
 
 export const resolveVin = async (
@@ -59,7 +88,7 @@ export const resolveVin = async (
   );
   if (existing?.vehicle_id && current) {
     const vehicle = await vehicleById(catalog, existing.vehicle_id);
-    if (vehicle) {
+    if (vehicle?.identifiers.length) {
       return {
         resolved: true,
         vehicle,
@@ -68,7 +97,8 @@ export const resolveVin = async (
     }
   }
 
-  const { answer, vehicle } = await decodeThroughChain(vin, decoders, catalog);
+  const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
+  const vehicle = vehicles.length === 1 ? vehicles[0] : null;
   const record = {
     vin,
     decoder: answer?.decoder.name ?? null,
@@ -87,5 +117,11 @@ export const resolveVin = async (
 
   return vehicle
     ? { resolved: true, vehicle, facts: record.facts }
-    : { resolved: false, make: record.make, code: record.code };
+    : {
+        resolved: false,
+        make: record.make,
+        code: record.code,
+        model_slug: commonModelSlug(vehicles),
+        vehicle_ids: vehicles.map(({ id }) => id),
+      };
 };

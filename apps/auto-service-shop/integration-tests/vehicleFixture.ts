@@ -11,6 +11,7 @@ type FixtureOptions = {
   steering?: SteeringSide | null;
   typeCode?: string;
   modelSlug?: string;
+  modelName?: string;
   chassisCode?: string;
   engineCode?: string;
   engineFamily?: string;
@@ -29,6 +30,7 @@ export const createVehicleFixture = async (
     steering = 'left',
     typeCode = '35BG',
     modelSlug = 'f30-320d',
+    modelName = '320d',
     chassisCode = 'F30',
     engineCode = 'B47D20O0',
     engineFamily = 'B47',
@@ -64,7 +66,7 @@ export const createVehicleFixture = async (
       catalog.createVehicleModels({
         chassis_id: chassis.id,
         slug: modelSlug,
-        name: '320d',
+        name: modelName,
       }),
   );
   const engine = await firstOrCreate(
