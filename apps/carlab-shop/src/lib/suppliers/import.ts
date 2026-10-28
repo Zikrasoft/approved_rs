@@ -397,7 +397,7 @@ export async function importSupplier(
     ).map(({ id, name, text }) => ({ id, name, text })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
-    vehicles: vehicleMatcher(catalog, adapter.name),
+    vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
     storage: shopStorage(scope),
   };
   const categoryOf = new Map(

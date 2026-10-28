@@ -7,11 +7,11 @@ import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
-import type { AdminCreateBrandSpellingType } from '../../../validators';
+import type { AdminCreateSpellingType } from '../../../validators';
 import { createdBy } from '../../../../../lib/editors';
 
 export async function POST(
-  req: AuthenticatedMedusaRequest<AdminCreateBrandSpellingType>,
+  req: AuthenticatedMedusaRequest<AdminCreateSpellingType>,
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;

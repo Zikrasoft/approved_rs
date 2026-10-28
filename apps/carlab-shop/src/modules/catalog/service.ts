@@ -30,6 +30,7 @@ import Chassis from './models/chassis';
 import Engine from './models/engine';
 import Fitment from './models/fitment';
 import Make from './models/make';
+import MakeSpelling from './models/make-spelling';
 import Part from './models/part';
 import Requirement from './models/requirement';
 import PartIdentifier, {
@@ -228,6 +229,7 @@ const CatalogModuleBase = MedusaService({
   CategoryField,
   CategoryFieldOption,
   Make,
+  MakeSpelling,
   Series,
   Chassis,
   VehicleModel,
@@ -423,6 +425,16 @@ class CatalogModuleService extends CatalogModuleBase {
       Array.isArray(data) ? data.map(withValueKey) : withValueKey(data),
       sharedContext,
     )) as CatalogModuleBase['createBrandSpellings'];
+
+  override createMakeSpellings = ((
+    data: SpellingInput | SpellingInput[],
+    sharedContext?: Context,
+  ) =>
+    CatalogModuleBase.prototype.createMakeSpellings.call(
+      this,
+      Array.isArray(data) ? data.map(withValueKey) : withValueKey(data),
+      sharedContext,
+    )) as CatalogModuleBase['createMakeSpellings'];
 
   @InjectTransactionManager()
   async createVehicleOnce(
@@ -826,6 +838,12 @@ class CatalogModuleService extends CatalogModuleBase {
         list: (filters, context) =>
           this.listBrandSpellings(filters, SOURCE_COLUMNS, context),
         remove: (ids, context) => this.deleteBrandSpellings(ids, context),
+      },
+      {
+        entity: 'make_spelling',
+        list: (filters, context) =>
+          this.listMakeSpellings(filters, SOURCE_COLUMNS, context),
+        remove: (ids, context) => this.deleteMakeSpellings(ids, context),
       },
       {
         entity: 'part_identifier',

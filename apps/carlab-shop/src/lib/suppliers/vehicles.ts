@@ -2,6 +2,7 @@ import type CatalogModuleService from '../../modules/catalog/service';
 import { fitmentConflicts } from '../fitment-conflicts';
 import { slugOf } from '../slug';
 import type { VehicleFacts } from './adapter';
+import { spellingKey } from './spelling';
 
 type Years = { year_from: number | null; year_to: number | null };
 
@@ -9,13 +10,17 @@ type Candidate = Years & {
   id: string;
   power_kw: number | null;
   model: {
-    chassis: { code: string; series: { make: { slug: string } } };
+    chassis: { code: string; series: { make_id: string } };
   };
 };
+
+type Make = { id: string; name: string };
 
 export type VehicleMatcher = {
   catalog: CatalogModuleService;
   source: string;
+  supplierId: string;
+  makes: Map<string, Make>;
   engines: { id: string; key: string }[] | null;
   found: Map<string, string[]>;
 };
@@ -23,7 +28,15 @@ export type VehicleMatcher = {
 export const vehicleMatcher = (
   catalog: CatalogModuleService,
   source: string,
-): VehicleMatcher => ({ catalog, source, engines: null, found: new Map() });
+  supplierId: string,
+): VehicleMatcher => ({
+  catalog,
+  source,
+  supplierId,
+  makes: new Map(),
+  engines: null,
+  found: new Map(),
+});
 
 const codeKey = (code: string) => code.replace(/[\s-]+/gu, '').toUpperCase();
 
@@ -41,11 +54,11 @@ const overlaps = (a: Years, b: Years) =>
   (b.year_from ?? -Infinity) <= (a.year_to ?? Infinity);
 
 const sameCar =
-  (facts: VehicleFacts) =>
+  (facts: VehicleFacts, makeId: string) =>
   (vehicle: Candidate): boolean => {
     const codes = new Set(chassisCodesOf(facts).map(codeKey));
     return (
-      vehicle.model.chassis.series.make.slug === slugOf(facts.make) &&
+      vehicle.model.chassis.series.make_id === makeId &&
       (vehicle.power_kw === null ||
         facts.power_kw === null ||
         vehicle.power_kw === facts.power_kw) &&
@@ -93,10 +106,51 @@ async function engineOf(
   return created.id;
 }
 
-async function makeOf({ catalog, source }: VehicleMatcher, name: string) {
-  const slug = slugOf(name);
-  const [known] = await catalog.listMakes({ slug }, { take: 1 });
-  return known ?? catalog.createMakes({ slug, name, source });
+const canonicalMakeName = (spelling: string) =>
+  spelling
+    .replace(/\([^)]*\)/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim() || spelling.trim();
+
+async function knownMake(
+  { catalog, supplierId }: VehicleMatcher,
+  key: string,
+  name: string,
+): Promise<{ make: Make; spelled: boolean } | null> {
+  const [own] = await catalog.listMakeSpellings(
+    { supplier_id: supplierId, value_key: key },
+    { relations: ['make'], take: 1 },
+  );
+  if (own) return { make: own.make, spelled: true };
+  const [aliased] = await catalog.listMakeSpellings(
+    { value_key: [key, spellingKey(name)] },
+    { relations: ['make'], take: 1 },
+  );
+  if (aliased) return { make: aliased.make, spelled: false };
+  const [named] = await catalog.listMakes({ slug: slugOf(name) }, { take: 1 });
+  return named ? { make: named, spelled: false } : null;
+}
+
+async function makeOf(matcher: VehicleMatcher, spelling: string) {
+  const key = spellingKey(spelling);
+  const cached = matcher.makes.get(key);
+  if (cached) return cached;
+  const { catalog, source, supplierId } = matcher;
+  const name = canonicalMakeName(spelling);
+  const known = await knownMake(matcher, key, name);
+  const make =
+    known?.make ??
+    (await catalog.createMakes({ slug: slugOf(name), name, source }));
+  if (!known?.spelled) {
+    await catalog.createMakeSpellings({
+      make_id: make.id,
+      supplier_id: supplierId,
+      value: spelling,
+      source,
+    });
+  }
+  matcher.makes.set(key, make);
+  return make;
 }
 
 async function seriesOf(
@@ -112,19 +166,19 @@ async function seriesOf(
 
 async function chassisOf(
   matcher: VehicleMatcher,
-  makeId: string,
+  make: Make,
   facts: VehicleFacts,
 ) {
   const { catalog, source } = matcher;
   const codes = chassisCodesOf(facts).join('/');
-  for (const code of [codes, `${facts.make} ${codes}`]) {
+  for (const code of [codes, `${make.name} ${codes}`]) {
     const [known] = await catalog.listChassis(
       { code },
       { relations: ['series'], take: 1 },
     );
-    if (known?.series.make_id === makeId) return known;
+    if (known?.series.make_id === make.id) return known;
     if (!known) {
-      const series = await seriesOf(matcher, makeId, facts.model);
+      const series = await seriesOf(matcher, make.id, facts.model);
       return catalog.createChassis({
         series_id: series.id,
         code,
@@ -147,10 +201,13 @@ async function freeModelSlug(catalog: CatalogModuleService, name: string) {
   }
 }
 
-async function modelOf(matcher: VehicleMatcher, facts: VehicleFacts) {
+async function modelOf(
+  matcher: VehicleMatcher,
+  facts: VehicleFacts,
+  make: Make,
+) {
   const { catalog, source } = matcher;
-  const make = await makeOf(matcher, facts.make);
-  const chassis = await chassisOf(matcher, make.id, facts);
+  const chassis = await chassisOf(matcher, make, facts);
   const known = (
     await catalog.listVehicleModels({ chassis_id: chassis.id }, { take: null })
   ).find((model) => nameKey(model.name) === nameKey(facts.variant));
@@ -161,7 +218,7 @@ async function modelOf(matcher: VehicleMatcher, facts: VehicleFacts) {
       name: facts.variant,
       slug: await freeModelSlug(
         catalog,
-        `${facts.make} ${chassis.code} ${facts.variant}`,
+        `${make.name} ${chassis.code} ${facts.variant}`,
       ),
       source,
     })
@@ -174,6 +231,7 @@ async function vehicleOf(
   code: string,
 ): Promise<string> {
   const { catalog, source } = matcher;
+  const make = await makeOf(matcher, facts.make);
   const engineIds = (await enginesOf(matcher))
     .filter(sameEngine(code))
     .map(({ id }) => id);
@@ -181,15 +239,15 @@ async function vehicleOf(
     ? await catalog.listVehicles(
         { engine_id: engineIds },
         {
-          relations: ['model.chassis.series.make'],
+          relations: ['model.chassis.series'],
           take: null,
         },
       )
     : [];
-  const known = candidates.find(sameCar(facts));
+  const known = candidates.find(sameCar(facts, make.id));
   if (known) return known.id;
   const vehicle = await catalog.createVehicles({
-    model_id: (await modelOf(matcher, facts)).id,
+    model_id: (await modelOf(matcher, facts, make)).id,
     engine_id: await engineOf(matcher, code, facts),
     power_kw: facts.power_kw,
     year_from: facts.year_from,

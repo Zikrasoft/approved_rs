@@ -174,6 +174,7 @@ export const MAKES: ReferenceEntity = {
   plural: 'Makes',
   object: 'make',
   collection: 'makes',
+  relations: ['spellings'],
   holders: [{ plural: 'Series', entity: 'series', column: 'make_id' }],
 };
 export const SERIES: ReferenceEntity = {

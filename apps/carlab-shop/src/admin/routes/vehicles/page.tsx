@@ -38,6 +38,12 @@ import {
 } from '../../components/list';
 import { DrawerHeader, ModalHeader } from '../../components/dialog-header';
 import { ScrollArea } from '../../components/scroll-area';
+import {
+  Spellings,
+  spellingSchema,
+  type Supplier,
+  suppliersSchema,
+} from '../../components/spellings';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -76,7 +82,10 @@ type Entity = {
   fields: Field[];
   columns?: Column[];
   translatable?: string;
+  spellings?: boolean;
 };
+
+const spelledRowSchema = z.object({ spellings: z.array(spellingSchema) });
 
 const vehicleChassis = (row: Row) => {
   const vehicle = labelledVehicleSchema.safeParse(row);
@@ -115,6 +124,7 @@ const ENTITIES: Entity[] = [
     collection: 'makes',
     path: 'makes',
     object: 'make',
+    spellings: true,
     fields: [
       { key: 'name', kind: 'text' },
       { key: 'slug', kind: 'text' },
@@ -225,11 +235,13 @@ const optionsOf = (t: TFunction, rows: Rows, field: Field): Option[] => {
 const EntityTable = ({
   entity,
   rows,
+  suppliers,
   reload,
   onEdit,
 }: {
   entity: Entity;
   rows: Rows;
+  suppliers: Supplier[];
   reload: () => Promise<void>;
   onEdit: (row: Row) => void;
 }) => {
@@ -287,6 +299,11 @@ const EntityTable = ({
                 {t(`vehicles.fields.${field.key}`)}
               </Table.HeaderCell>
             ))}
+            {entity.spellings && (
+              <Table.HeaderCell>
+                {t('vehicles.makeSpellings.column')}
+              </Table.HeaderCell>
+            )}
             <Table.HeaderCell>{t('edited.column')}</Table.HeaderCell>
             <Table.HeaderCell />
           </Table.Row>
@@ -307,6 +324,17 @@ const EntityTable = ({
                   {cell(field, row)}
                 </Table.Cell>
               ))}
+              {entity.spellings && (
+                <Table.Cell>
+                  <Spellings
+                    path={`/admin/${entity.path}/${row.id}/spellings`}
+                    copy="vehicles.makeSpellings"
+                    spellings={spelledRowSchema.parse(row).spellings}
+                    suppliers={suppliers}
+                    reload={reload}
+                  />
+                </Table.Cell>
+              )}
               <Table.Cell>
                 <EditedBy row={row} />
               </Table.Cell>
@@ -524,6 +552,7 @@ const VehiclesPage = () => {
   const { t } = useTranslation('carlabAdmin');
   const writing = useWriting();
   const [rows, setRows] = useState<Rows>({});
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [form, setForm] = useState<{ open: boolean; row: Row | null }>({
     open: false,
     row: null,
@@ -542,6 +571,9 @@ const VehiclesPage = () => {
 
   useEffect(() => {
     reload();
+    adminFetch('/admin/suppliers', suppliersSchema).then((data) => {
+      if (data) setSuppliers(data.suppliers);
+    });
     tabsRef.current
       ?.querySelector('[role="tab"][data-state="active"]')
       ?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
@@ -602,6 +634,7 @@ const VehiclesPage = () => {
             <EntityTable
               entity={entity}
               rows={rows}
+              suppliers={suppliers}
               reload={reload}
               onEdit={(row) => setForm({ open: true, row })}
             />

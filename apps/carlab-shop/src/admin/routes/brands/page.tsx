@@ -1,13 +1,11 @@
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { Tag } from '@medusajs/icons';
 import {
-  Badge,
   Button,
   Container,
   Heading,
   Input,
   Label,
-  Select,
   Table,
   Text,
   toast,
@@ -19,6 +17,12 @@ import { z } from 'zod';
 import { EditedBy } from '../../components/edited-by';
 import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
+import {
+  Spellings,
+  spellingSchema,
+  type Supplier,
+  suppliersSchema,
+} from '../../components/spellings';
 import {
   acknowledged,
   adminFetch,
@@ -32,25 +36,12 @@ const brandSchema = editedBySchema.extend({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
-  spellings: z.array(
-    z.object({ id: z.string(), supplier_id: z.string(), value: z.string() }),
-  ),
+  spellings: z.array(spellingSchema),
 });
 
 type Brand = z.infer<typeof brandSchema>;
 
-type Spelling = Brand['spellings'][number];
-
-const supplierSchema = z.object({ id: z.string(), name: z.string() });
-
-type Supplier = z.infer<typeof supplierSchema>;
-
 const brandsSchema = z.object({ brands: z.array(brandSchema) });
-const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
-
-type SpellingDraft = { supplierId: string; value: string };
-
-const EMPTY_SPELLING: SpellingDraft = { supplierId: '', value: '' };
 
 const BrandsPage = () => {
   const writing = useWriting();
@@ -61,9 +52,6 @@ const BrandsPage = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
-  const [spellingDrafts, setSpellingDrafts] = useState<
-    Record<string, SpellingDraft>
-  >({});
 
   const load = async () => {
     const data = await adminFetch('/admin/brands', brandsSchema);
@@ -80,18 +68,6 @@ const BrandsPage = () => {
       }
     });
   }, []);
-
-  const supplierName = (id: string) =>
-    suppliers.find((supplier) => supplier.id === id)?.name ?? id;
-
-  const draftFor = (brandId: string) =>
-    spellingDrafts[brandId] ?? EMPTY_SPELLING;
-
-  const setDraft = (brandId: string, draft: Partial<SpellingDraft>) =>
-    setSpellingDrafts((drafts) => ({
-      ...drafts,
-      [brandId]: { ...draftFor(brandId), ...draft },
-    }));
 
   const createBrand = async () => {
     const created = await adminFetch('/admin/brands', acknowledged, {
@@ -116,41 +92,6 @@ const BrandsPage = () => {
           adminFetch(`/admin/brands/${brand.id}`, acknowledged, {
             method: 'DELETE',
           }),
-      })
-    ) {
-      await load();
-    }
-  };
-
-  const addSpelling = async (brandId: string) => {
-    const { supplierId, value } = draftFor(brandId);
-    const created = await adminFetch(
-      `/admin/brands/${brandId}/spellings`,
-      acknowledged,
-      {
-        method: 'POST',
-        body: JSON.stringify({ supplier_id: supplierId, value }),
-      },
-    );
-    if (created) {
-      toast.success(t('brands.spellingAdded', { spelling: value }));
-      setDraft(brandId, EMPTY_SPELLING);
-      await load();
-    }
-  };
-
-  const removeSpelling = async (brandId: string, spelling: Spelling) => {
-    if (
-      await confirmed({
-        title: t('brands.confirmSpellingTitle', { spelling: spelling.value }),
-        description: t('brands.confirmSpellingBody'),
-        done: t('brands.spellingRemoved', { spelling: spelling.value }),
-        run: () =>
-          adminFetch(
-            `/admin/brands/${brandId}/spellings/${spelling.id}`,
-            acknowledged,
-            { method: 'DELETE' },
-          ),
       })
     ) {
       await load();
@@ -213,72 +154,13 @@ const BrandsPage = () => {
                     {brand.slug}
                   </Table.Cell>
                   <Table.Cell>
-                    <div className="flex flex-col gap-y-2 py-2">
-                      <div className="flex flex-wrap gap-2">
-                        {brand.spellings.map((spelling) => (
-                          <Badge key={spelling.id} size="small">
-                            {supplierName(spelling.supplier_id)}:{' '}
-                            {spelling.value}
-                            <button
-                              type="button"
-                              className="ml-1"
-                              aria-label={t('brands.removeSpelling', {
-                                spelling: spelling.value,
-                              })}
-                              onClick={() => removeSpelling(brand.id, spelling)}
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Select
-                          value={draftFor(brand.id).supplierId}
-                          onValueChange={(supplierId) =>
-                            setDraft(brand.id, { supplierId })
-                          }
-                        >
-                          <Select.Trigger>
-                            <Select.Value
-                              placeholder={t('brands.supplierPlaceholder')}
-                            />
-                          </Select.Trigger>
-                          <Select.Content>
-                            {suppliers.map((supplier) => (
-                              <Select.Item
-                                key={supplier.id}
-                                value={supplier.id}
-                              >
-                                {supplier.name}
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select>
-                        <Input
-                          size="small"
-                          className="min-w-[10rem]"
-                          maxLength={200}
-                          placeholder={t('brands.spellingPlaceholder')}
-                          value={draftFor(brand.id).value}
-                          onChange={(event) =>
-                            setDraft(brand.id, { value: event.target.value })
-                          }
-                        />
-                        <Button
-                          size="small"
-                          variant="secondary"
-                          onClick={() => addSpelling(brand.id)}
-                          disabled={
-                            !draftFor(brand.id).supplierId ||
-                            !draftFor(brand.id).value ||
-                            writing
-                          }
-                        >
-                          {t('brands.addSpelling')}
-                        </Button>
-                      </div>
-                    </div>
+                    <Spellings
+                      path={`/admin/brands/${brand.id}/spellings`}
+                      copy="brands"
+                      spellings={brand.spellings}
+                      suppliers={suppliers}
+                      reload={load}
+                    />
                   </Table.Cell>
                   <Table.Cell>
                     <EditedBy row={brand} />
