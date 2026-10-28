@@ -26,12 +26,19 @@ export const GET: APIRoute = async ({ url, request }) => {
   if (searchIntent(q).kind === 'vin') {
     return Response.json({ ...NOTHING, vin: true });
   }
-  const found = searchableQuery(q)
-    ? await catalogueFromEnv(siteEnv(), {
-        preview: previewRequested(request),
-      })?.search({ q, locale, facets: [], limit: SUGGESTION_LIMIT })
+  const catalogue = searchableQuery(q)
+    ? catalogueFromEnv(siteEnv(), { preview: previewRequested(request) })
     : null;
-  return Response.json(
-    found ? { vin: false, ...suggestionsFrom(found, locale) } : NOTHING,
-  );
+  if (!catalogue) {
+    return Response.json(NOTHING);
+  }
+  const found = await catalogue.search({
+    q,
+    locale,
+    facets: [],
+    limit: SUGGESTION_LIMIT,
+  });
+  return found
+    ? Response.json({ vin: false, ...suggestionsFrom(found, locale) })
+    : Response.json(NOTHING, { status: 503 });
 };

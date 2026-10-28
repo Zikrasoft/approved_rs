@@ -120,24 +120,34 @@ async function loadSnapshot(env: CatalogueEnv) {
 
 const BUILD_SNAPSHOTS = Symbol.for('carlab.buildSnapshots');
 
-type SnapshotMemo = Map<string, ReturnType<typeof loadSnapshot>>;
+export const DEV_SNAPSHOT_FRESH_MS = 30_000;
+
+type SnapshotMemo = Map<
+  string,
+  { loading: ReturnType<typeof loadSnapshot>; at: number }
+>;
 
 function snapshotForBuild(env: CatalogueEnv) {
-  if (import.meta.env?.MODE === 'development') {
-    return loadSnapshot(env);
-  }
   const holder = globalThis as { [BUILD_SNAPSHOTS]?: SnapshotMemo };
   const memo = (holder[BUILD_SNAPSHOTS] ??= new Map());
   const key = JSON.stringify(catalogueEnvKeys.map((name) => env[name]));
   const cached = memo.get(key);
-  if (cached) {
-    return cached;
+  const stale =
+    cached &&
+    import.meta.env?.MODE === 'development' &&
+    Date.now() - cached.at >= DEV_SNAPSHOT_FRESH_MS;
+  if (cached && !stale) {
+    return cached.loading;
   }
-  const loading = loadSnapshot(env).catch((error: unknown) => {
-    memo.delete(key);
-    throw error;
-  });
-  memo.set(key, loading);
+  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).catch(
+    (error: unknown) => {
+      if (memo.get(key)?.loading === loading) {
+        memo.delete(key);
+      }
+      throw error;
+    },
+  );
+  memo.set(key, { loading, at: Date.now() });
   return loading;
 }
 

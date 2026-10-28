@@ -16,13 +16,13 @@ afterEach(() => {
   backend.mockReset();
 });
 
-const suggest = async (query: string) => {
-  const response = await (GET({
+const ask = (query: string) =>
+  GET({
     url: new URL(`http://localhost/api/search?${query}`),
     request: new Request(`http://localhost/api/search?${query}`),
-  } as unknown as APIContext) as Promise<Response>);
-  return response.json();
-};
+  } as unknown as APIContext) as Promise<Response>;
+
+const suggest = async (query: string) => (await ask(query)).json();
 
 const answer = {
   results: [],
@@ -74,14 +74,10 @@ describe('/api/search', () => {
     expect(backend).not.toHaveBeenCalled();
   });
 
-  it('suggests nothing while the shop is unreachable', async () => {
+  it('says the search is unavailable while the shop is unreachable', async () => {
     backend.mockRejectedValue(new Error('down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    expect(await suggest('q=bmw&locale=ru')).toEqual({
-      vin: false,
-      cars: [],
-      parts: [],
-    });
+    expect((await ask('q=bmw&locale=ru')).status).toBe(503);
   });
 });

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCatalogue } from './catalogue';
 import {
+  DEV_SNAPSHOT_FRESH_MS,
   PREVIOUS_BUILD_URL,
   type CatalogueEnv,
   catalogueFromEnv,
@@ -1134,6 +1135,30 @@ describe('the deploy build', () => {
       shop.mock.calls.filter(([url]) => url.includes(path)).length;
     expect(reads('/store/part-pages')).toBe(1);
     expect(reads('/store/categories')).toBe(1);
+  });
+
+  it('reads the catalogue once for a burst of dev pages, and again once it went stale', async () => {
+    vi.stubEnv('MODE', 'development');
+    vi.useFakeTimers();
+    try {
+      const shop = backend({ pages: partPages(2) });
+      deployed(null, shop);
+      const env = shopEnv();
+      const reads = () =>
+        shop.mock.calls.filter(([url]) => url.includes('/store/part-pages'))
+          .length;
+
+      await Promise.all([partPagesForBuild(env), makeHubsForBuild(env)]);
+      await carPagesForBuild(env);
+      expect(reads()).toBe(1);
+
+      vi.advanceTimersByTime(DEV_SNAPSHOT_FRESH_MS);
+      await partPagesForBuild(env);
+      expect(reads()).toBe(2);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllEnvs();
+    }
   });
 
   it('fails without the backend URL once the live site has part pages', async () => {

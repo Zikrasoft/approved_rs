@@ -1,6 +1,7 @@
 import { AbstractSearchProviderService } from '@medusajs/framework/utils';
 import type { Logger, SearchTypes } from '@medusajs/framework/types';
 import { Client } from 'typesense';
+import type { DocumentSchema } from 'typesense/lib/Typesense/Documents';
 import { z } from 'zod';
 
 import {
@@ -12,7 +13,38 @@ import {
   toTypesenseFields,
 } from './mapping';
 
+const TYPESENSE = 'typesense';
+
 const hitDocumentSchema = z.looseObject({ id: z.string() });
+
+const refusalSchema = z.object({ error: z.string() });
+
+const facetsOf = (input: SearchTypes.ProviderSearchQuery) =>
+  (input.search_options?.facets ?? []).map((facet) =>
+    typeof facet === 'string' ? { field: facet } : facet,
+  );
+
+const paging = (input: SearchTypes.ProviderSearchQuery) => ({
+  skip: input.pagination?.skip ?? 0,
+  take: input.pagination?.take ?? 20,
+});
+
+const searchParams = (input: SearchTypes.ProviderSearchQuery) => {
+  const queryByFields = collectSearchableFields(input.index.fields);
+  const { skip, take } = paging(input);
+  const perPage = Math.max(take, 1);
+  return {
+    collection: input.index.physical_name,
+    q: input.q && input.q.length ? input.q : '*',
+    query_by: queryByFields.length ? queryByFields.join(',') : undefined,
+    filter_by: compileFilters(input.filters),
+    include_fields: input.attributes_to_retrieve.join(','),
+    per_page: perPage,
+    page: Math.floor(skip / perPage) + 1,
+    ...compileFacets(facetsOf(input)),
+    ...input.search_options?.provider_options?.[TYPESENSE],
+  };
+};
 
 type InjectedDependencies = {
   logger: Logger;
@@ -26,7 +58,7 @@ type Options = {
 };
 
 class TypesenseSearchProviderService extends AbstractSearchProviderService {
-  static identifier = 'typesense';
+  static identifier = TYPESENSE;
 
   protected logger_: Logger;
   protected client: Client;
@@ -130,46 +162,35 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
   async search(
     input: SearchTypes.ProviderSearchQuery,
   ): Promise<SearchTypes.SearchResult> {
-    const queryByFields = collectSearchableFields(input.index.fields);
-    const filterBy = compileFilters(input.filters);
+    const [result] = await this.searchMany([input]);
+    return result;
+  }
 
-    const take = input.pagination?.take ?? 20;
-    const skip = input.pagination?.skip ?? 0;
-    const perPage = Math.max(take, 1);
-    const page = Math.floor(skip / perPage) + 1;
-
-    const facets = (input.search_options?.facets ?? []).map((facet) =>
-      typeof facet === 'string' ? { field: facet } : facet,
-    );
-
-    const response = await this.client
-      .collections(input.index.physical_name)
-      .documents()
-      .search({
-        q: input.q && input.q.length ? input.q : '*',
-        query_by: queryByFields.length ? queryByFields.join(',') : undefined,
-        filter_by: filterBy,
-        include_fields: input.attributes_to_retrieve.join(','),
-        per_page: perPage,
-        page,
-        ...compileFacets(facets),
-        ...input.search_options?.provider_options?.[
-          TypesenseSearchProviderService.identifier
-        ],
-      });
-
-    return {
-      hits: (response.hits ?? []).map((hit) => {
-        const document = hitDocumentSchema.parse(hit.document);
-        return { id: document.id, score: hit.text_match, document };
-      }),
-      facets: toFacetResults(facets, response.facet_counts ?? []),
-      metadata: {
-        skip,
-        take,
-        count: response.found ?? null,
+  async searchMany(
+    inputs: SearchTypes.ProviderSearchQuery[],
+  ): Promise<SearchTypes.SearchResult[]> {
+    const { results } = await this.client.multiSearch.perform<DocumentSchema[]>(
+      {
+        searches: inputs.map(searchParams),
       },
-    };
+    );
+    return inputs.map((input, at) => {
+      const refused = refusalSchema.safeParse(results[at]);
+      if (refused.success) {
+        throw new Error(
+          `search-typesense: ${input.index.physical_name} refused a search: ${refused.data.error}`,
+        );
+      }
+      const response = results[at];
+      return {
+        hits: (response.hits ?? []).map((hit) => {
+          const document = hitDocumentSchema.parse(hit.document);
+          return { id: document.id, score: hit.text_match, document };
+        }),
+        facets: toFacetResults(facetsOf(input), response.facet_counts ?? []),
+        metadata: { ...paging(input), count: response.found ?? null },
+      };
+    });
   }
 }
 

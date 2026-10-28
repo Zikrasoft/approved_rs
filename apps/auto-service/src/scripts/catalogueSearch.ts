@@ -155,11 +155,37 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
                   ? [group('parts', this.dataset.partsLabel ?? '', found.parts)]
                   : []),
               ];
+          panel.setAttribute('role', 'listbox');
           panel.replaceChildren(...groups);
           this.#active = -1;
           input.removeAttribute('aria-activedescendant');
           panel.hidden = groups.length === 0;
           input.setAttribute('aria-expanded', String(!panel.hidden));
+        };
+
+        const failed = () => {
+          const row = document.createElement('div');
+          row.className =
+            'flex items-center justify-between gap-3 py-1 pl-3 text-sm text-muted';
+          const note = document.createElement('span');
+          note.setAttribute('role', 'status');
+          note.textContent = this.dataset.failedLabel ?? '';
+          const retry = document.createElement('button');
+          retry.type = 'button';
+          retry.className =
+            'min-h-11 shrink-0 rounded-field px-3 font-semibold text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
+          retry.textContent = this.dataset.retryLabel ?? '';
+          retry.addEventListener('click', () => {
+            input.focus();
+            void suggest();
+          });
+          row.append(note, retry);
+          panel.removeAttribute('role');
+          panel.replaceChildren(row);
+          this.#active = -1;
+          input.removeAttribute('aria-activedescendant');
+          input.setAttribute('aria-expanded', 'false');
+          panel.hidden = false;
         };
 
         const suggest = async () => {
@@ -183,12 +209,13 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             if (!response.ok) throw new Error(String(response.status));
             show(q, (await response.json()) as Suggestions);
           } catch {
-            if (!request.signal.aborted) close();
+            if (!request.signal.aborted) failed();
           } finally {
             if (this.#request === request) this.removeAttribute('aria-busy');
           }
         };
         const later = () => {
+          this.#request?.abort();
           clearTimeout(this.#timer);
           this.#timer = setTimeout(suggest, SUGGEST_DELAY_MS);
         };

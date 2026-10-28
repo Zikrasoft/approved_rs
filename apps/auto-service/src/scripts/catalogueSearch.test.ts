@@ -43,6 +43,8 @@ const mount = () => {
       data-cars-label="Автомобили"
       data-parts-label="Запчасти"
       data-vin-label="Подобрать по VIN"
+      data-failed-label="Подсказки не загрузились"
+      data-retry-label="Повторить"
     >
       <form action="/ru/parts/search/" method="GET" role="search">
         <input type="search" name="q" />
@@ -231,6 +233,78 @@ describe('the catalogue search box', () => {
     expect(
       panel.querySelector('[role="option"] > span[aria-hidden="true"]'),
     ).not.toBeNull();
+  });
+
+  it('keeps quiet about a request a newer keystroke replaced', async () => {
+    backend.mockImplementationOnce(
+      (_url: string, { signal }: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    const { input, panel } = mount();
+
+    await type(input, 'bmw');
+    await type(input, 'bmw x3');
+
+    expect(panel.querySelector('button')).toBeNull();
+    expect(options(panel)).toEqual([
+      'BMW X3 E83',
+      'Mann-Filter HU 816 x Масляный фильтр',
+    ]);
+  });
+
+  it('drops the pending answer as soon as the visitor types on', async () => {
+    let signal: AbortSignal | undefined;
+    backend.mockImplementationOnce(
+      (_url: string, init: { signal: AbortSignal }) => {
+        signal = init.signal;
+        return new Promise(() => {});
+      },
+    );
+    const { input } = mount();
+    await type(input, 'bmw');
+
+    input.value = 'bmw x';
+    input.dispatchEvent(new Event('input'));
+
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it.each([
+    [
+      'answers with an error',
+      () => Promise.resolve(new Response(null, { status: 503 })),
+    ],
+    [
+      'cannot be reached',
+      () => Promise.reject(new TypeError('Failed to fetch')),
+    ],
+  ])('offers a retry when the search %s', async (_, failure) => {
+    backend.mockImplementationOnce(failure);
+    const { input, panel } = mount();
+
+    await type(input, 'bmw x3');
+
+    expect(panel.hidden).toBe(false);
+    expect(panel.textContent).toContain('Подсказки не загрузились');
+    expect(panel.textContent).not.toContain('Failed to fetch');
+    expect(panel.querySelector('[role="status"]')?.textContent).toContain(
+      'Подсказки не загрузились',
+    );
+    const retry = panel.querySelector('button')!;
+    retry.focus();
+    retry.click();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(document.activeElement).toBe(input);
+    expect(backend).toHaveBeenCalledTimes(2);
+    expect(options(panel)).toEqual([
+      'BMW X3 E83',
+      'Mann-Filter HU 816 x Масляный фильтр',
+    ]);
   });
 
   it('suggests for what was typed before it woke up', async () => {
