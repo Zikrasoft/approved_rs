@@ -213,6 +213,16 @@ Approved's trust/verification semantics.
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
   finds no `dist/`.
+- **A `packages/catalog-contract` response schema tolerates a shop ahead of or
+  behind the storefront.** The shop deploys on its own VPS and can roll back,
+  so the storefront build parses responses from a newer or older shop. Response
+  schemas are `z.object` (unknown keys strip, never `z.strictObject`), a display
+  vocabulary (fuel, body style, identifier type, position) is `displayEnum`, so
+  a value newer than the contract reads as `null`, and **every field added from
+  now on is `.nullable().default(null)`** (or `.catch(null)`), so a shop that
+  has not shipped it yet still parses. A field becomes required only once every
+  deployed shop sends it. The contract tests pin this with an extra key, an
+  unknown enum value and a missing new field.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import
