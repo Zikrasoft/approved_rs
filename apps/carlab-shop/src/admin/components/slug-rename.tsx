@@ -62,7 +62,7 @@ export const SlugRename = ({
           variant="transparent"
           disabled={writing}
           aria-label={t('slugRename.open', { name })}
-          className="txt-compact-small max-w-full justify-start whitespace-normal break-all text-left font-normal"
+          className="txt-compact-small max-w-full justify-start whitespace-normal text-left [overflow-wrap:anywhere] font-normal"
         >
           {slug}
           <PencilSquare className="text-ui-fg-muted shrink-0" />

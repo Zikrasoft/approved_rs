@@ -178,7 +178,7 @@ const fields = category.fields
                       {searchCopy.previous}
                     </a>
                   )}
-                  <ol class="flex flex-wrap items-center gap-1">
+                  <ol class="flex flex-wrap items-center gap-1 max-sm:order-first max-sm:w-full">
                     {pageNumbers.map((number, index) => (
                       <>
                         {index > 0 && number - pageNumbers[index - 1] > 1 && (
@@ -204,7 +204,7 @@ const fields = category.fields
                     <a
                       href={next}
                       rel="next"
-                      class="flex min-h-11 items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                      class="flex min-h-11 max-sm:ml-auto items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
                     >
                       {searchCopy.next}
                       <Icon name="chevronRight" size={16} />
