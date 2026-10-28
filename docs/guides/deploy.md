@@ -799,7 +799,11 @@ carlab_static` once the images show.
 ### `.env`
 
 The template is `infra/carlab-shop/production.env.example`, and `src/lib/env.ts`
-validates everything at startup. The non-obvious parts:
+validates everything at startup. CI boots the image on the same template
+(`.github/scripts/shop-ci-env.sh` fills every empty value with a placeholder and
+swaps in the test stack), and `env.spec.ts` fails when the filled template does
+not pass production validation. A new variable whose value must be a URL or a
+number gets its CI value in that script. The non-obvious parts:
 
 - do not touch `MEDUSA_TAG` by hand: `deploy.sh` rewrites it.
 - `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`:

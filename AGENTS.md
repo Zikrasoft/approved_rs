@@ -518,7 +518,11 @@ generated file as it comes. SQL the model DSL cannot express (`NULLS NOT
 DISTINCT`, an expression index) lives in a hand-written migration of its own,
 with the index left out of the model so the generator never rewrites it, and
 `src/modules/catalog/__tests__/hand-written-indexes.spec.ts` asserts it
-against `pg_indexes`.
+against `pg_indexes`. The same spec compares a freshly migrated database with
+every `.snapshot-*.json`; a column type only a hand-written migration sets is
+listed there in `HAND_WRITTEN_TYPES`. `check` runs
+`.github/scripts/shop-migration-drift.sh`, which fails when `medusa db:generate`
+on a fresh database writes anything.
 
 ## Architecture
 

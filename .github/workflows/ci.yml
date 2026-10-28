@@ -32,6 +32,10 @@ jobs:
       - uses: ./.github/actions/setup-carlab-shop-env
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Shop migrations match the models
+        run: |
+          docker compose -f apps/carlab-shop/docker-compose.test.yml exec -T postgres createdb -U postgres migration_drift
+          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/migration_drift sh .github/scripts/shop-migration-drift.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
 
@@ -52,6 +56,7 @@ jobs:
       - run: sh infra/carlab-shop/test/crawler-role.test.sh
       - run: sh infra/carlab-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
+      - run: sh .github/scripts/shop-ci-env.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/carlab-shop/*.sh infra/carlab-shop/test/*.sh
@@ -199,23 +204,7 @@ jobs:
       - name: Migrate a blank database and boot to healthy
         run: |
           docker compose -f apps/carlab-shop/docker-compose.test.yml up -d --wait
-          {
-            echo "DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/medusa"
-            echo "JWT_SECRET=$(openssl rand -hex 32)"
-            echo "COOKIE_SECRET=$(openssl rand -hex 32)"
-            echo "STORE_CORS=https://carlab.test"
-            echo "ADMIN_CORS=https://api.carlab.test"
-            echo "AUTH_CORS=https://api.carlab.test"
-            echo "TYPESENSE_HOST=127.0.0.1"
-            echo "TYPESENSE_PORT=58108"
-            echo "TYPESENSE_API_KEY=xyz"
-            echo "FILE_URL=https://carlab-public.s3.eu-central-1.amazonaws.com"
-            echo "S3_REGION=eu-central-1"
-            echo "S3_ACCESS_KEY_ID=ci"
-            echo "S3_SECRET_ACCESS_KEY=ci"
-            echo "S3_PUBLIC_BUCKET=carlab-public"
-            echo "S3_PRIVATE_BUCKET=carlab-private"
-          } >"$RUNNER_TEMP/shop.env"
+          sh .github/scripts/shop-ci-env.sh >"$RUNNER_TEMP/shop.env"
           docker run --rm --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA" \
             node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
           docker run -d --name shop --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA"
