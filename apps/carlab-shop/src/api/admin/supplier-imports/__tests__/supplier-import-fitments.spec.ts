@@ -288,6 +288,71 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('drops its Fitments and Vehicles the source no longer lists, never recreates a staff deletion, and leaves manual ones', async () => {
+        const audi = (variant: string, engine: string): VehicleFacts => ({
+          ...bmw125i,
+          make: 'Audi',
+          model: 'A4',
+          variant,
+          chassis_codes: ['B8'],
+          engine_codes: [engine],
+          power_kw: null,
+        });
+        const kept = audi('2.0 TDI', 'CAGA');
+        const dropped = audi('1.8 TFSI', 'CDHA');
+        const article = {
+          article_id: 'W712',
+          brand: 'MANN-FILTER',
+          number: 'W 712',
+          name: 'Oil Filter W 712',
+          category: 'Oil Filter',
+          vehicles: [kept, dropped],
+        };
+        mann.articles.push(article);
+        await runImport('MANN-FILTER');
+        const fitted = await fitmentsOf('W 712');
+        const fittedTo = (variant: string) =>
+          fitted.find(({ vehicle }) => vehicle.model.name === variant)!;
+        const staffDeleted = fittedTo(kept.variant);
+        const unlisted = fittedTo(dropped.variant);
+        await api.delete(`/admin/fitments/${staffDeleted.id}`, adminHeaders);
+        const manual = await createVehicleFixture(catalog, {
+          typeCode: '8K22',
+          modelSlug: 'b8-20-tdi-manual',
+          chassisCode: 'F31',
+          engineCode: 'N47D20C',
+          engineFamily: 'N47',
+        });
+        await api.post(
+          '/admin/fitments',
+          {
+            part_id: (await partOf('W 712')).id,
+            vehicle_id: manual.vehicle.id,
+          },
+          adminHeaders,
+        );
+        article.vehicles = [];
+
+        await runImport('MANN-FILTER');
+
+        expect(await fitmentsOf('W 712')).toEqual([
+          expect.objectContaining({ vehicle_id: manual.vehicle.id }),
+        ]);
+        expect(
+          await catalog.listVehicles({
+            id: [staffDeleted.vehicle_id, unlisted.vehicle_id],
+          }),
+        ).toEqual([expect.objectContaining({ id: staffDeleted.vehicle_id })]);
+
+        article.vehicles = [kept, dropped];
+        await runImport('MANN-FILTER');
+
+        expect(
+          (await fitmentsOf('W 712')).map(({ vehicle }) => vehicle.model.name),
+        ).toEqual(expect.arrayContaining([dropped.variant, manual.model.name]));
+        expect(await fitmentsOf('W 712')).toHaveLength(2);
+      });
+
       it('fits no Vehicle for a row without an engine code and counts the row', async () => {
         mann.articles.push({
           article_id: 'K1477',

@@ -214,6 +214,43 @@ async function vehiclesOf(
   return ids;
 }
 
+async function dropUnlisted(
+  { catalog, source }: VehicleMatcher,
+  partId: string,
+  listed: Set<string>,
+): Promise<void> {
+  const unlisted = (
+    await catalog.listFitments(
+      { part_id: partId, source },
+      { select: ['id', 'vehicle_id'], take: null },
+    )
+  ).filter(({ vehicle_id }) => !listed.has(vehicle_id));
+  if (!unlisted.length) return;
+  await catalog.deleteFitments(unlisted.map(({ id }) => id));
+  const vehicleIds = unlisted.map(({ vehicle_id }) => vehicle_id);
+  const byVehicle = { vehicle_id: vehicleIds };
+  const columns = { select: ['vehicle_id'], take: null };
+  const held = new Set(
+    [
+      ...(await catalog.listFitments(byVehicle, {
+        ...columns,
+        withDeleted: true,
+      })),
+      ...(await catalog.listRequirements(byVehicle, columns)),
+      ...(await catalog.listVehicleIdentifiers(byVehicle, columns)),
+    ].map(({ vehicle_id }) => vehicle_id),
+  );
+  const orphans = (
+    await catalog.listVehicles(
+      { id: vehicleIds, source },
+      { select: ['id'], take: null },
+    )
+  ).filter(({ id }) => !held.has(id));
+  if (orphans.length) {
+    await catalog.deleteVehicles(orphans.map(({ id }) => id));
+  }
+}
+
 export async function fitVehicles(
   matcher: VehicleMatcher,
   partId: string,
@@ -226,6 +263,7 @@ export async function fitVehicles(
       if (!notes.has(id)) notes.set(id, row.notes.join('; ') || null);
     }
   }
+  await dropUnlisted(matcher, partId, new Set(notes.keys()));
   if (!notes.size) return;
   const fitted = new Set(
     (
