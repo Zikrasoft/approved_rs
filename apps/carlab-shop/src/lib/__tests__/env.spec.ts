@@ -38,6 +38,17 @@ describe('parseEnv', () => {
     expect(env.TYPESENSE_PROTOCOL).toBe('http');
   });
 
+  it('asks Import questions of gpt-4o-mini unless another model is set', () => {
+    expect(parseEnv(VALID_ENV).OPENAI_IMPORT_MODEL).toBe('gpt-4o-mini');
+    expect(
+      parseEnv({ ...VALID_ENV, OPENAI_IMPORT_MODEL: '' }).OPENAI_IMPORT_MODEL,
+    ).toBe('gpt-4o-mini');
+    expect(
+      parseEnv({ ...VALID_ENV, OPENAI_IMPORT_MODEL: 'gpt-4.1-mini' })
+        .OPENAI_IMPORT_MODEL,
+    ).toBe('gpt-4.1-mini');
+  });
+
   it('reads an empty publish secret as unset', () => {
     const env = parseEnv({
       ...VALID_ENV,

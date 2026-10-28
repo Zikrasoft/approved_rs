@@ -24,6 +24,11 @@ import { z } from 'zod';
 import { Crawls } from '../../components/crawls';
 import { EditedBy } from '../../components/edited-by';
 import {
+  ImportReports,
+  importRunSchema,
+  ImportRunReport,
+} from '../../components/import-report';
+import {
   LIST_TABLE,
   ListEmpty,
   ListHeader,
@@ -48,8 +53,8 @@ const supplierSchema = editedBySchema.extend({
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
   import_enabled: z.boolean(),
-  import_on_publish: z.boolean(),
   offer_count: z.number(),
+  latest_import: importRunSchema.nullable(),
 });
 
 type Supplier = z.infer<typeof supplierSchema>;
@@ -69,23 +74,8 @@ type Source = z.infer<typeof sourceSchema>;
 const suppliersSchema = z.object({ suppliers: z.array(supplierSchema) });
 const mappingsSchema = z.object({ categories: z.array(mappingSchema) });
 const sourcesSchema = z.object({ sources: z.array(sourceSchema) });
-const importSummarySchema = z.object({
-  supplier: z.string(),
-  imported: z.number(),
-  created: z.number(),
-  skipped: z.number(),
-  skipped_by_reason: z.object({
-    brand: z.number(),
-    currency: z.number(),
-    unreadable: z.number(),
-    no_engine_code: z.number(),
-    not_in_scope: z.number(),
-  }),
-  needs_category: z.array(z.string()),
-});
-const importsSchema = z.object({ imports: z.array(importSummarySchema) });
-const supplierImportSchema = z.object({ import: importSummarySchema });
 const offersWithdrawnSchema = z.object({ deleted: z.number() });
+const importStartedSchema = z.object({ import_run: importRunSchema });
 const sourceDeletedSchema = z.object({
   deleted: z.number(),
   import_disabled: z.boolean(),
@@ -94,6 +84,8 @@ const sourceDeletedSchema = z.object({
 const MANUAL_SOURCE = 'manual';
 
 const MARKUP = /^\d+(?:\.\d{1,2})?$/;
+
+const POLL_MS = 5000;
 
 const SuppliersPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
@@ -104,7 +96,6 @@ const SuppliersPage = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [importing, setImporting] = useState(false);
   const [importingId, setImportingId] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [mappedSupplierId, setMappedSupplierId] = useState('');
@@ -143,6 +134,19 @@ const SuppliersPage = () => {
       markLoaded('sources');
     }
   };
+
+  const importRunning = suppliers.some(
+    ({ latest_import }) => latest_import?.status === 'running',
+  );
+
+  useEffect(() => {
+    if (!importRunning) return;
+    const timer = setTimeout(() => {
+      load();
+      loadSources();
+    }, POLL_MS);
+    return () => clearTimeout(timer);
+  }, [suppliers]);
 
   useEffect(() => {
     load();
@@ -245,106 +249,20 @@ const SuppliersPage = () => {
     }
   };
 
-  const togglePublishImport = async (supplier: Supplier) => {
-    const import_on_publish = !supplier.import_on_publish;
-    if (await update(supplier.id, { import_on_publish })) {
-      toast.success(
-        t(
-          `suppliers.importOnPublishSaved.${import_on_publish ? 'on' : 'off'}`,
-          {
-            supplier: sourceName(supplier.name),
-          },
-        ),
-      );
-    }
-  };
-
-  const importLine = (summary: z.infer<typeof importSummarySchema>) =>
-    [
-      t('suppliers.importSummary', {
-        ...summary,
-        supplier: sourceName(summary.supplier),
-      }),
-      summary.skipped_by_reason.brand > 0 &&
-        t('suppliers.importSkipped', {
-          count: summary.skipped_by_reason.brand,
-        }),
-      summary.skipped_by_reason.unreadable > 0 &&
-        t('suppliers.importUnreadable', {
-          count: summary.skipped_by_reason.unreadable,
-        }),
-      summary.skipped_by_reason.not_in_scope > 0 &&
-        t('suppliers.importNotInScope', {
-          count: summary.skipped_by_reason.not_in_scope,
-        }),
-      summary.skipped_by_reason.currency > 0 &&
-        t('suppliers.importWithoutPrice', {
-          count: summary.skipped_by_reason.currency,
-        }),
-      summary.skipped_by_reason.no_engine_code > 0 &&
-        t('suppliers.importWithoutEngineCode', {
-          count: summary.skipped_by_reason.no_engine_code,
-        }),
-      summary.needs_category.length > 0 &&
-        t('suppliers.importWithoutCategory', {
-          numbers: summary.needs_category.join(', '),
-        }),
-    ]
-      .filter(Boolean)
-      .join(' ');
-
-  const runImport = async () => {
-    setImporting(true);
-    const data = await adminFetch('/admin/supplier-imports', importsSchema, {
-      method: 'POST',
-    });
-    setImporting(false);
-    if (data) {
-      await loadSources();
-      const switchedOff = suppliers
-        .filter(
-          ({ name, import_enabled }) =>
-            !import_enabled && name !== MANUAL_SOURCE,
-        )
-        .map(({ name }) => sourceName(name));
-      const offPublish = suppliers
-        .filter(
-          ({ import_enabled, import_on_publish }) =>
-            import_enabled && !import_on_publish,
-        )
-        .map(({ name }) => sourceName(name));
-      toast.success(
-        [
-          data.imports.length
-            ? data.imports.map(importLine).join('\n')
-            : t('suppliers.importNoAdapters'),
-          switchedOff.length > 0 &&
-            t('suppliers.importSwitchedOff', {
-              suppliers: switchedOff.join(', '),
-            }),
-          offPublish.length > 0 &&
-            t('suppliers.importOffPublish', {
-              suppliers: offPublish.join(', '),
-            }),
-        ]
-          .filter(Boolean)
-          .join('\n'),
-      );
-    }
-  };
-
   const importOne = async (supplier: Supplier) => {
     setImportingId(supplier.id);
     const data = await adminFetch(
       `/admin/suppliers/${supplier.id}/import`,
-      supplierImportSchema,
+      importStartedSchema,
       { method: 'POST' },
     );
-    setImportingId(null);
     if (data) {
-      await Promise.all([load(), loadSources()]);
-      toast.success(importLine(data.import));
+      toast.success(
+        t('suppliers.importStarted', { supplier: sourceName(supplier.name) }),
+      );
+      await load();
     }
+    setImportingId(null);
   };
 
   const withdrawOffers = async (supplier: Supplier) => {
@@ -469,17 +387,6 @@ const SuppliersPage = () => {
           heading={t('suppliers.heading')}
           level="h1"
           lead={t('suppliers.importLead')}
-          action={
-            <Button
-              size="small"
-              variant="secondary"
-              isLoading={importing}
-              disabled={writing}
-              onClick={runImport}
-            >
-              {t('suppliers.import')}
-            </Button>
-          }
         />
         {!loaded.suppliers ? (
           <ListLoading />
@@ -603,23 +510,8 @@ const SuppliersPage = () => {
                                 )}
                               </Label>
                             </div>
-                            {supplier.import_enabled && (
-                              <div className="flex items-center gap-x-2">
-                                <Switch
-                                  id={`${supplier.id}-publish-import`}
-                                  checked={supplier.import_on_publish}
-                                  disabled={writing}
-                                  onCheckedChange={() =>
-                                    togglePublishImport(supplier)
-                                  }
-                                />
-                                <Label
-                                  size="small"
-                                  htmlFor={`${supplier.id}-publish-import`}
-                                >
-                                  {t('suppliers.importOnPublish')}
-                                </Label>
-                              </div>
+                            {supplier.latest_import && (
+                              <ImportRunReport run={supplier.latest_import} />
                             )}
                           </div>
                           <div className="flex items-center gap-x-2">
@@ -630,7 +522,10 @@ const SuppliersPage = () => {
                                 aria-label={t('suppliers.importOneLabel', {
                                   supplier: sourceName(supplier.name),
                                 })}
-                                isLoading={importingId === supplier.id}
+                                isLoading={
+                                  importingId === supplier.id ||
+                                  supplier.latest_import?.status === 'running'
+                                }
                                 disabled={writing}
                                 onClick={() => importOne(supplier)}
                               >
@@ -661,6 +556,10 @@ const SuppliersPage = () => {
           {t('suppliers.releasedHint')}
         </Text>
       </Container>
+
+      <ImportReports
+        suppliers={suppliers.filter(({ name }) => name !== MANUAL_SOURCE)}
+      />
 
       <Crawls />
 

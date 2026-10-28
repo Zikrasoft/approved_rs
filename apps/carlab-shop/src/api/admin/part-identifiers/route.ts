@@ -25,6 +25,7 @@ const statusRowSchema = z.object({
   brand_name: z.string(),
   part_id: z.string(),
   part_name: z.string(),
+  source_missing_since: z.date().nullable(),
   description: z.string().nullable(),
   category_id: z.string().nullable(),
   category_name: z.string().nullable(),
@@ -40,7 +41,13 @@ const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 const statusRows = async (
   db: Knex,
-  { q, category_id, uncategorized, part_id }: AdminListPartIdentifiersType,
+  {
+    q,
+    category_id,
+    uncategorized,
+    part_id,
+    source_missing,
+  }: AdminListPartIdentifiersType,
 ) => {
   const query = db('part_identifier as pi')
     .join('part as p', 'p.id', 'pi.part_id')
@@ -58,6 +65,7 @@ const statusRows = async (
       'b.name as brand_name',
       'p.id as part_id',
       'p.name as part_name',
+      'p.source_missing_since',
       'p.description',
       'c.id as category_id',
       'c.name as category_name',
@@ -87,6 +95,9 @@ const statusRows = async (
   }
   if (part_id) {
     query.where('p.id', part_id);
+  }
+  if (source_missing) {
+    query.whereNotNull('p.source_missing_since');
   }
   if (q) {
     const contains = `%${literalLike(q)}%`;
@@ -144,7 +155,11 @@ export async function GET(
         value: row.value,
         normalized_value: row.normalized_value,
         brand: { id: row.brand_id, name: row.brand_name },
-        part: { id: row.part_id, name: row.part_name },
+        part: {
+          id: row.part_id,
+          name: row.part_name,
+          source_missing_since: row.source_missing_since?.toISOString() ?? null,
+        },
         category:
           row.category_id && row.category_name
             ? { id: row.category_id, name: row.category_name }

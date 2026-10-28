@@ -11,6 +11,7 @@ export type FakeSupplier = {
   unreadable: UnreadablePage[];
   notInScope: number;
   quotes: Map<string, SupplierQuote>;
+  laterPages: Promise<void> | null;
 };
 
 export const createFakeSupplier = (
@@ -22,9 +23,11 @@ export const createFakeSupplier = (
     unreadable: [],
     notInScope: 0,
     quotes: new Map(),
+    laterPages: null,
     adapter: {
       name,
       listCatalogue: async (cursor) => {
+        if (cursor) await fake.laterPages;
         const start = Number(cursor ?? 0);
         const end = start + pageSize;
         return {

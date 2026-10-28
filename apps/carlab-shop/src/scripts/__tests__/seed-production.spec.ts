@@ -102,7 +102,7 @@ medusaIntegrationTestRunner({
         expect(await suppliers.listSupplierOffers()).toEqual([]);
       });
 
-      it('registers each crawled site once as a Supplier imported only on its own button', async () => {
+      it('registers each crawled site once as a Supplier with its import on and every staged kind released', async () => {
         const registered = await suppliers.listSuppliers();
         expect(registered.map(({ name }) => name).sort()).toEqual([
           'FILTRON',
@@ -110,12 +110,98 @@ medusaIntegrationTestRunner({
           'VARTA',
           'bilstein group',
         ]);
+        for (const supplier of registered) {
+          expect(supplier).toMatchObject({
+            import_enabled: true,
+            released_kinds: ['cross_references', 'applicability', 'images'],
+          });
+        }
+      });
+
+      it('creates each crawled Brand once with the spelling its site prints', async () => {
+        const supplierNames = new Map(
+          (await suppliers.listSuppliers()).map(({ id, name }) => [id, name]),
+        );
+        const spellings = await catalog.listBrandSpellings(
+          {},
+          { relations: ['brand'], take: null },
+        );
         expect(
-          registered.every(
-            ({ import_enabled, import_on_publish }) =>
-              import_enabled && !import_on_publish,
-          ),
-        ).toBe(true);
+          spellings
+            .map(
+              ({ supplier_id, value, brand }) =>
+                `${supplierNames.get(supplier_id)}: ${value} -> ${brand.name}`,
+            )
+            .sort(),
+        ).toEqual([
+          'FILTRON: FILTRON -> FILTRON',
+          'MANN-FILTER: MANN-FILTER -> MANN-FILTER',
+          'VARTA: VARTA -> VARTA',
+          'bilstein group: Blue Print -> Blue Print',
+          'bilstein group: SWAG -> SWAG',
+          'bilstein group: febi -> febi',
+        ]);
+        expect(
+          (await catalog.listBrands({}, { take: null }))
+            .map(({ slug }) => slug)
+            .sort(),
+        ).toEqual([
+          'blue-print',
+          'febi',
+          'filtron',
+          'mann-filter',
+          'swag',
+          'varta',
+        ]);
+      });
+
+      it('maps the VARTA battery category to «Аккумуляторы»', async () => {
+        const [varta] = await suppliers.listSuppliers({ name: 'VARTA' });
+        const [batteries] = await catalog.listCategories({ slug: 'batteries' });
+        const mappings = await suppliers.listSupplierCategories(
+          {},
+          { take: null },
+        );
+        expect(
+          mappings.map(({ supplier_id, code, category_id }) => ({
+            supplier_id,
+            code,
+            category_id,
+          })),
+        ).toEqual([
+          { supplier_id: varta.id, code: 'battery', category_id: batteries.id },
+        ]);
+      });
+
+      it('files both crawled spellings of Volkswagen under one Make', async () => {
+        const supplierNames = new Map(
+          (await suppliers.listSuppliers()).map(({ id, name }) => [id, name]),
+        );
+        const makes = await catalog.listMakes(
+          {},
+          { relations: ['spellings'], take: null },
+        );
+        expect(
+          makes.map(({ slug, name, spellings }) => ({
+            slug,
+            name,
+            spellings: spellings
+              .map(
+                ({ supplier_id, value }) =>
+                  `${supplierNames.get(supplier_id)}: ${value}`,
+              )
+              .sort(),
+          })),
+        ).toEqual([
+          {
+            slug: 'volkswagen',
+            name: 'Volkswagen',
+            spellings: [
+              'MANN-FILTER: VW (VOLKSWAGEN)',
+              'bilstein group: Volkswagen (VW)',
+            ],
+          },
+        ]);
       });
 
       it('creates the commerce defaults checkout needs', async () => {
@@ -194,6 +280,79 @@ medusaIntegrationTestRunner({
         expect(
           (await catalog.retrieveCategory(batteries.id)).service_price,
         ).toBe(3000);
+      });
+
+      it('keeps a crawled Supplier, Brand, spelling, mapping or Make a person edited and restores the rest', async () => {
+        const [varta, filtron, bilstein] = await Promise.all(
+          ['VARTA', 'FILTRON', 'bilstein group'].map(
+            async (name) => (await suppliers.listSuppliers({ name }))[0],
+          ),
+        );
+        const [brakes] = await catalog.listCategories({ slug: 'brakes' });
+        const [mapping] = await suppliers.listSupplierCategories({
+          supplier_id: varta.id,
+        });
+        const [swag] = await catalog.listBrands({ slug: 'swag' });
+        const [febi] = await catalog.listBrands({ slug: 'febi' });
+        const [blueprintSpelling] = await catalog.listBrandSpellings({
+          supplier_id: bilstein.id,
+          value: 'Blue Print',
+        });
+        const [swagSpelling] = await catalog.listBrandSpellings({
+          supplier_id: bilstein.id,
+          value: 'SWAG',
+        });
+        const [volkswagen] = await catalog.listMakes({ slug: 'volkswagen' });
+        await suppliers.updateSuppliers([
+          {
+            id: varta.id,
+            released_kinds: ['images'],
+            updated_by: 'user_1',
+          },
+          { id: filtron.id, released_kinds: [] },
+        ]);
+        await suppliers.updateSupplierCategories({
+          id: mapping.id,
+          category_id: brakes.id,
+          updated_by: 'user_1',
+        });
+        await catalog.updateBrands([
+          { id: swag.id, name: 'SWAG Autoteile', updated_by: 'user_1' },
+          { id: febi.id, name: 'FEBI' },
+        ]);
+        await catalog.updateBrandSpellings([
+          { id: blueprintSpelling.id, brand_id: febi.id, updated_by: 'user_1' },
+          { id: swagSpelling.id, brand_id: febi.id },
+        ]);
+        await catalog.updateMakes({
+          id: volkswagen.id,
+          name: 'VW',
+          updated_by: 'user_1',
+        });
+
+        await run();
+
+        expect(
+          (await suppliers.retrieveSupplier(varta.id)).released_kinds,
+        ).toEqual(['images']);
+        expect(
+          (await suppliers.retrieveSupplier(filtron.id)).released_kinds,
+        ).toEqual(['cross_references', 'applicability', 'images']);
+        expect(
+          (await suppliers.retrieveSupplierCategory(mapping.id)).category_id,
+        ).toBe(brakes.id);
+        expect((await catalog.retrieveBrand(swag.id)).name).toBe(
+          'SWAG Autoteile',
+        );
+        expect((await catalog.retrieveBrand(febi.id)).name).toBe('febi');
+        expect(
+          (await catalog.retrieveBrandSpelling(blueprintSpelling.id)).brand_id,
+        ).toBe(febi.id);
+        expect(
+          (await catalog.retrieveBrandSpelling(swagSpelling.id)).brand_id,
+        ).toBe(swag.id);
+        expect((await catalog.retrieveMake(volkswagen.id)).name).toBe('VW');
+        expect(await catalog.listMakes({}, { take: null })).toHaveLength(1);
       });
     });
   },

@@ -71,6 +71,9 @@ const envFields = z.object({
   TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
   TYPESENSE_API_KEY: optionalSecret,
   OPENAI_API_KEY: optionalSecret,
+  OPENAI_IMPORT_MODEL: optionalValue.transform(
+    (model) => model ?? 'gpt-4o-mini',
+  ),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
   VIN_DECODERS: z

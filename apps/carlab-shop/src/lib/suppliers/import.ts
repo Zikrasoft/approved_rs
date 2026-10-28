@@ -4,7 +4,6 @@ import {
   MedusaError,
 } from '@medusajs/framework/utils';
 import {
-  type AttributeValues,
   normalizePartNumber,
   STAGED_DATA_KINDS,
 } from '@podbor/catalog-contract';
@@ -20,12 +19,14 @@ import { SUPPLIER_MODULE } from '../../modules/supplier';
 import { inShopCurrency } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
+  type ArticleAnswer,
   type ArticleFacts,
   type CategoryChoice,
   type CategoryFieldChoice,
   shopAi,
   type ShopAi,
 } from '../ai';
+import { cachedArticleAnswer } from '../ai/cache';
 import {
   cataloguePageSchema,
   type SupplierAdapter,
@@ -56,6 +57,14 @@ export type ImportSummary = {
     not_in_scope: number;
   };
   needs_category: string[];
+  failed: { number: string; reason: string }[];
+};
+
+type ImportState = {
+  summary: ImportSummary;
+  listed: Set<string>;
+  listedNumbers: Set<string>;
+  changedPartIds: Set<string>;
 };
 
 type Context = {
@@ -96,74 +105,83 @@ async function orElse<T>(
   }
 }
 
-async function fieldsOf(
+async function categoryChoices(
   catalog: CatalogModuleService,
-  categoryId: string,
-): Promise<CategoryFieldChoice[]> {
-  const fields = await catalog.listCategoryFields(
-    { category_id: categoryId },
-    { relations: ['options'], take: null },
-  );
-  return fields.map(({ key, label, type, unit, required, options }) => ({
-    key,
-    label,
-    type,
-    unit,
-    required,
-    options: options.map((option) => ({
-      key: option.key,
-      label: option.label,
-    })),
+): Promise<CategoryChoice[]> {
+  const [categories, fields] = await Promise.all([
+    catalog.listCategories({}, { select: ['id', 'name', 'text'], take: null }),
+    catalog.listCategoryFields({}, { relations: ['options'], take: null }),
+  ]);
+  return categories.map(({ id, name, text }) => ({
+    id,
+    name,
+    text,
+    fields: fields
+      .filter(({ category_id }) => category_id === id)
+      .map(
+        ({
+          key,
+          label,
+          type,
+          unit,
+          required,
+          options,
+        }): CategoryFieldChoice => ({
+          key,
+          label,
+          type,
+          unit,
+          required,
+          options: options.map((option) => ({
+            key: option.key,
+            label: option.label,
+          })),
+        }),
+      ),
   }));
 }
 
-const categoryName = ({ categories }: Context, categoryId: string | null) =>
-  categories.find(({ id }) => id === categoryId)?.name ?? null;
-
-const describe = (
+const answerOf = (
   context: Context,
   article: Article,
-  name: string,
   categoryId: string | null,
 ) =>
-  article.description || article.specs
-    ? orElse(
-        context,
-        article,
-        () =>
-          context.ai.writeDescription(factsOf(article), {
-            name,
-            category: categoryName(context, categoryId),
-          }),
-        null,
-      )
-    : Promise.resolve(null);
+  orElse(
+    context,
+    article,
+    () =>
+      cachedArticleAnswer(
+        context.ai,
+        context.storage?.pages ?? null,
+        { ...factsOf(article), category_id: categoryId },
+        context.categories,
+      ),
+    null,
+  );
 
-const nameOf = (context: Context, article: Article) =>
-  orElse(context, article, () => context.ai.writeName(factsOf(article)), null);
+const lazily = <T>(run: () => Promise<T>) => {
+  let running: Promise<T> | undefined;
+  return () => (running ??= run());
+};
 
-async function classify(
-  context: Context,
+function classificationOf(
+  { categories }: Context,
   article: Article,
   mappedCategoryId: string | undefined,
-): Promise<{ category_id: string | null; attributes: AttributeValues }> {
-  const { ai, catalog, categories } = context;
-  const categoryId =
-    mappedCategoryId ??
-    (await orElse(
-      context,
-      article,
-      () => ai.pickCategory(factsOf(article), categories),
-      null,
-    ));
-  const { specs } = article;
-  const fields = categoryId && specs ? await fieldsOf(catalog, categoryId) : [];
-  const attributes =
-    specs && fields.length
-      ? await orElse(context, article, () => ai.mapSpecs(specs, fields), {})
-      : {};
-  return { category_id: categoryId, attributes };
+  answer: ArticleAnswer | null,
+): PartClassification {
+  const picked = categories.find(({ id }) => id === answer?.category_id);
+  const categoryId = mappedCategoryId ?? picked?.id ?? null;
+  const mapped =
+    answer && categoryId && article.specs && answer.category_id === categoryId;
+  return {
+    category_id: categoryId,
+    attributes: mapped ? answer.attributes : {},
+  };
 }
+
+const descriptionOf = (article: Article, answer: ArticleAnswer | null) =>
+  article.description || article.specs ? (answer?.description ?? null) : null;
 
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
@@ -203,17 +221,17 @@ async function createPart(
   mappedCategoryId: string | undefined,
 ): Promise<FoundPart & { categorized: boolean }> {
   const { adapter, catalog } = context;
-  const name = await nameOf(context, article);
-  const classification = await classify(context, article, mappedCategoryId);
+  const answer = await answerOf(context, article, mappedCategoryId ?? null);
+  const classification = classificationOf(
+    context,
+    article,
+    mappedCategoryId,
+    answer,
+  );
   const part = {
-    name: name ?? article.name,
-    source_name: name && article.name,
-    description: await describe(
-      context,
-      article,
-      name ?? article.name,
-      classification.category_id,
-    ),
+    name: answer?.name ?? article.name,
+    source_name: answer && article.name,
+    description: descriptionOf(article, answer),
     identifier: {
       type: 'manufacturer-number' as const,
       brand_id: brandId,
@@ -231,11 +249,9 @@ async function createPart(
 
 async function fileUnfiled(
   context: Context,
-  article: Article,
   partId: string,
-  mappedCategoryId: string | undefined,
+  classification: PartClassification,
 ): Promise<string | null> {
-  const classification = await classify(context, article, mappedCategoryId);
   if (!classification.category_id) return null;
   const { categorized } = await filed(
     classification,
@@ -283,10 +299,21 @@ async function matchArticle(
     return unchanged;
   }
   const edited = new Set(part.edited_fields);
-  const filedCategoryId =
-    part.category_id || edited.has('category_id')
-      ? undefined
-      : await fileUnfiled(context, article, part.id, categoryId);
+  const fileable = !part.category_id && !edited.has('category_id');
+  const answer = lazily(() =>
+    answerOf(
+      context,
+      article,
+      part.category_id ?? (fileable ? (categoryId ?? null) : null),
+    ),
+  );
+  const filedCategoryId = fileable
+    ? await fileUnfiled(
+        context,
+        part.id,
+        classificationOf(context, article, categoryId, await answer()),
+      )
+    : undefined;
   const categorized =
     filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
   const name =
@@ -294,16 +321,11 @@ async function matchArticle(
     context.matched.has(hit.id) ||
     part.source_name === article.name
       ? null
-      : await nameOf(context, article);
+      : ((await answer())?.name ?? null);
   const description =
     edited.has('description') || part.description
       ? null
-      : await describe(
-          context,
-          article,
-          name ?? part.name,
-          filedCategoryId ?? part.category_id,
-        );
+      : descriptionOf(article, await answer());
   if (!name && !description) {
     return {
       ...unchanged,
@@ -371,10 +393,67 @@ async function stage(
   }
 }
 
-// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make the import on Publish slow.
+async function importArticle(
+  context: Context,
+  { summary, listed, changedPartIds }: ImportState,
+  article: Article,
+  brandId: string,
+  categoryId: string | undefined,
+  quote: Quote | undefined,
+): Promise<void> {
+  const { identifierId, partId, created, changedPartId, categorized } =
+    await matchArticle(context, article, brandId, categoryId);
+  context.matched.add(identifierId);
+  if (changedPartId) {
+    changedPartIds.add(changedPartId);
+  }
+  if (quote) {
+    await storeOffer(context, identifierId, quote);
+    listed.add(article.article_id);
+  }
+  await stage(context, identifierId, article);
+  if (article.vehicles) {
+    await fitVehicles(context.vehicles, partId, article.vehicles);
+    summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+      ({ engine_codes }) => !engine_codes.length,
+    ).length;
+  }
+  if (categorized === false) {
+    summary.needs_category.push(article.number);
+  }
+  summary.imported += Number(!created);
+  summary.created += Number(created);
+}
+
+async function flagUnlistedParts(
+  catalog: CatalogModuleService,
+  source: string,
+  listedNumbers: Set<string>,
+  mayFlag: boolean,
+): Promise<void> {
+  const parts = await catalog.listParts(
+    { source },
+    { relations: ['identifiers'], take: null },
+  );
+  const now = new Date();
+  const changes = parts.flatMap(({ id, source_missing_since, identifiers }) => {
+    const missing = !identifiers.some(({ normalized_value }) =>
+      listedNumbers.has(normalized_value),
+    );
+    return missing === Boolean(source_missing_since) || (missing && !mayFlag)
+      ? []
+      : [{ id, source_missing_since: missing ? now : null }];
+  });
+  if (changes.length) {
+    await catalog.updateParts(changes);
+  }
+}
+
+// TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make an Import slow.
 export async function importSupplier(
   scope: MedusaContainer,
   adapter: SupplierAdapter,
+  onPage?: (progress: ImportSummary) => Promise<unknown>,
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
@@ -389,12 +468,7 @@ export async function importSupplier(
     catalog,
     suppliers,
     ai: shopAi(scope),
-    categories: (
-      await catalog.listCategories(
-        {},
-        { select: ['id', 'name', 'text'], take: null },
-      )
-    ).map(({ id, name, text }) => ({ id, name, text })),
+    categories: await categoryChoices(catalog),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
     vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
@@ -429,13 +503,18 @@ export async function importSupplier(
       not_in_scope: 0,
     },
     needs_category: [],
+    failed: [],
   };
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
   const categoryOfArticle = (article: Article) =>
     categoryOf.get(spellingKey(article.category));
-  const listed = new Set<string>();
-  const changedPartIds = new Set<string>();
+  const state: ImportState = {
+    summary,
+    listed: new Set(),
+    listedNumbers: new Set(),
+    changedPartIds: new Set(),
+  };
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
@@ -448,6 +527,9 @@ export async function importSupplier(
     summary.skipped_by_reason.unreadable += page.unreadable.length;
     summary.skipped += page.not_in_scope;
     summary.skipped_by_reason.not_in_scope += page.not_in_scope;
+    for (const { number } of page.articles) {
+      state.listedNumbers.add(normalizePartNumber(number));
+    }
     const wanted = page.articles.filter(brandOfArticle);
     const unbranded = page.articles.length - wanted.length;
     summary.skipped += unbranded;
@@ -464,35 +546,27 @@ export async function importSupplier(
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
     for (const article of wanted) {
-      const { identifierId, partId, created, changedPartId, categorized } =
-        await matchArticle(
+      try {
+        await importArticle(
           context,
+          state,
           article,
           brandOfArticle(article)!,
           categoryOfArticle(article),
+          quotes.get(article.article_id),
         );
-      context.matched.add(identifierId);
-      if (changedPartId) {
-        changedPartIds.add(changedPartId);
+      } catch (error) {
+        context.logger.warn(
+          `Supplier import ${adapter.name}, ${article.number}: failed, ${errorMessage(error)}`,
+        );
+        summary.failed.push({
+          number: article.number,
+          reason: errorMessage(error),
+        });
+        state.listed.add(article.article_id);
       }
-      if (categorized === false) {
-        summary.needs_category.push(article.number);
-      }
-      const quote = quotes.get(article.article_id);
-      if (quote) {
-        await storeOffer(context, identifierId, quote);
-        listed.add(article.article_id);
-      }
-      await stage(context, identifierId, article);
-      if (article.vehicles) {
-        await fitVehicles(context.vehicles, partId, article.vehicles);
-        summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
-          ({ engine_codes }) => !engine_codes.length,
-        ).length;
-      }
-      summary.imported += Number(!created);
-      summary.created += Number(created);
     }
+    await onPage?.(structuredClone(summary));
     if (!page.next) {
       break;
     }
@@ -504,11 +578,17 @@ export async function importSupplier(
       { supplier_id: supplier.id },
       { select: ['id', 'supplier_article_id'], take: null },
     )
-  ).filter(({ supplier_article_id }) => !listed.has(supplier_article_id));
+  ).filter(({ supplier_article_id }) => !state.listed.has(supplier_article_id));
   if (gone.length) {
     await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
-  await emitIndexChanges(scope, { partIds: changedPartIds });
+  await flagUnlistedParts(
+    catalog,
+    adapter.name,
+    state.listedNumbers,
+    summary.skipped_by_reason.unreadable === 0,
+  );
+  await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;
 }
 
@@ -517,11 +597,9 @@ export async function importSupplierCatalogues(
 ): Promise<ImportSummary[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const skipped = new Set(
-    (
-      await suppliers.listSuppliers({
-        $or: [{ import_enabled: false }, { import_on_publish: false }],
-      })
-    ).map(({ name }) => name),
+    (await suppliers.listSuppliers({ import_enabled: false })).map(
+      ({ name }) => name,
+    ),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {

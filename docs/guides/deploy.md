@@ -825,6 +825,12 @@ validates everything at startup. The non-obvious parts:
   pushed, so the token cannot ship code that is not in the repository. Give it
   the shortest expiry you are willing to rotate, and revoke it at
   Settings → Developer settings at the first sign the server is compromised.
+- `OPENAI_API_KEY` also answers a Supplier Import's one question per new
+  article (Russian name, Category, attributes, description), on
+  `OPENAI_IMPORT_MODEL` (empty means `gpt-4o-mini`). Answers are cached in the
+  private bucket under `ai-answers/`, keyed by prompt, model and article, so a
+  rerun or a rebuilt database asks nothing twice; changing the model or the
+  prompt asks again. Without S3 nothing is cached.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
   front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
   passwords cannot be guessed from the internet. The hash is bcrypt, made
@@ -993,9 +999,22 @@ service (label, price, note), from the same definitions the demo seed uses.
 Batteries ship without a picture: upload one in the admin. Serbian and English
 come from the admin's Publish chain like any other catalogue text. A Category,
 field or option a person has edited (`updated_by` set) is never touched again; an
-unedited one gets its seeded values and missing image back. It seeds no Parts, suppliers or offers:
-the manual supplier is created on the first hand-entered offer, and the demo data
-lives in `seed.ts` / `seed-demo.ts`, which never run in production.
+unedited one gets its seeded values and missing image back.
+
+It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
+`apps/carlab-shop/src/lib/production-seed.ts`, one entry per crawled site: the
+Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
+VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
+mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
+`VW (VOLKSWAGEN)` and bilstein group's `Volkswagen (VW)` on one Volkswagen). The
+same `updated_by` rule holds for each of these rows. A spelling or mapping staff
+delete comes back on the next deploy: change it instead. Every other site
+category is still mapped by hand on the Supplier's categories screen.
+
+It seeds no Parts or offers: the manual supplier is created on the first
+hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
+never run in production. `seed-demo.ts` ends with the production seed, so a local
+demo database carries the same crawled Suppliers, Brands and aliases.
 
 `scope` treats `apps/carlab-shop` like any other app, plus one rule: a change under
 `infra/carlab-shop/` redeploys it, because turbo cannot see files outside the
@@ -1299,8 +1318,12 @@ Check with `curl -k https://localhost:8443/health/ready`.
    fields, their options and the battery registration service (label, price,
    note). Check the price is still right and upload the Category's picture,
    which the seed does not ship.
-   Done: signing in works, the eight seeded Categories are in the admin, and
-   «Аккумуляторы» shows its fields, the registration service and a picture.
+   The crawled Suppliers, their Brands and spellings, the VARTA battery mapping
+   and the Volkswagen aliases are seeded too: nothing to set up before the first
+   crawl and Import.
+   Done: signing in works, the eight seeded Categories are in the admin,
+   «Аккумуляторы» shows its fields, the registration service and a picture, and
+   the Suppliers screen lists the four crawled sites.
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
     `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in

@@ -12,7 +12,10 @@ import {
   DropdownMenu,
   IconButton,
   Input,
+  Label,
   Select,
+  StatusBadge,
+  Switch,
   Table,
   Tabs,
   Text,
@@ -53,11 +56,12 @@ const fixLink = (page: string, partId: string, number: string) =>
   `/${page}?${new URLSearchParams({ part: partId, q: number })}`;
 
 const PartsPage = () => {
-  const { t } = useTranslation('carlabAdmin');
+  const { t, i18n } = useTranslation('carlabAdmin');
   const [params, setParams] = useSearchParams();
   const state = STATES.find((value) => value === params.get('enriched')) ?? ALL;
   const q = params.get('q') ?? '';
   const categoryId = params.get('category') ?? ALL;
+  const sourceMissing = params.get('source_missing') === 'true';
   const pageIndex = Math.max(0, Number(params.get('page')) || 0);
 
   const [query, setQuery] = useState(q);
@@ -105,10 +109,11 @@ const PartsPage = () => {
     if (q) search.set('q', q);
     if (categoryId === UNCATEGORIZED) search.set('uncategorized', 'true');
     else if (categoryId !== ALL) search.set('category_id', categoryId);
+    if (sourceMissing) search.set('source_missing', 'true');
     adminFetch(`/admin/part-identifiers?${search}`, partIdentifiersSchema).then(
       (data) => data && setListing(data),
     );
-  }, [state, q, categoryId, pageIndex, reloads]);
+  }, [state, q, categoryId, sourceMissing, pageIndex, reloads]);
 
   const counts = listing && {
     [ALL]: listing.counts.enriched + listing.counts.not_enriched,
@@ -194,6 +199,15 @@ const PartsPage = () => {
                 </Select.Content>
               </Select>
             </div>
+            <Label className="flex items-center gap-x-2 sm:ml-2">
+              <Switch
+                checked={sourceMissing}
+                onCheckedChange={(checked) =>
+                  update({ source_missing: checked ? 'true' : '' })
+                }
+              />
+              {t('parts.sourceMissingOnly')}
+            </Label>
           </form>
         </div>
       </ListHeader>
@@ -245,7 +259,23 @@ const PartsPage = () => {
                         </div>
                       </Table.Cell>
                       <Table.Cell className="whitespace-nowrap">
-                        <EnrichmentStatus {...row} />
+                        <div className="flex flex-col items-start gap-y-1">
+                          <EnrichmentStatus {...row} />
+                          {row.part.source_missing_since && (
+                            <>
+                              <StatusBadge color="red">
+                                {t('parts.sourceMissing')}
+                              </StatusBadge>
+                              <Text size="xsmall" className="text-ui-fg-subtle">
+                                {t('parts.sourceMissingSince', {
+                                  date: new Date(
+                                    row.part.source_missing_since,
+                                  ).toLocaleDateString(i18n.language),
+                                })}
+                              </Text>
+                            </>
+                          )}
+                        </div>
                       </Table.Cell>
                       <Table.Cell className="whitespace-normal">
                         {row.category?.name ?? (

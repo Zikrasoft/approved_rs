@@ -117,6 +117,10 @@ export const AdminListPartIdentifiers = z.object({
     .transform(() => true)
     .optional(),
   part_id: z.string().min(1).optional(),
+  source_missing: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   offset: z.coerce.number().int().nonnegative().default(0),
   limit: z.coerce.number().int().positive().max(200).default(50),
 });
@@ -257,7 +261,6 @@ export const AdminUpdateSupplier = z
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
     import_enabled: z.boolean().optional(),
-    import_on_publish: z.boolean().optional(),
   })
   .refine((body) => Object.keys(body).length > 0);
 export type AdminUpdateSupplierType = z.infer<typeof AdminUpdateSupplier>;

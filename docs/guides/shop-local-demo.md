@@ -134,6 +134,10 @@ What it creates:
   standard battery with straight polarity and no offer (price on request).
 - Two Suppliers, `Demo Intercars` (20%) and `Demo Autodelovi` (10%), with their
   category codes mapped and their brand spellings.
+- Last, the production seed (see `docs/guides/deploy.md`): the four crawled
+  Suppliers with their Brands, spellings, the VARTA battery mapping and the
+  Volkswagen aliases, so a fresh demo database matches production. It renames
+  the demo's `Varta`, `Mann-Filter` and `Febi` Brands to the crawled spelling.
 
 ## 4. Import, translate, reindex (the publish chain, locally)
 
@@ -145,10 +149,12 @@ It runs the supplier import, skips translate when `OPENAI_API_KEY` is unset,
 and reindexes Typesense. The deploy step is left out: `publish.yml`
 rebuilds production, and locally "deploy" means rebuilding the storefront (step 6).
 
-The admin's Publish button runs the real chain and, without an OpenAI key,
-stops at `translate` with "OPENAI_API_KEY is not set" once any row is
-untranslated. That is expected here. `POST /admin/supplier-imports` (import
-only) works from the admin.
+The admin's Publish button runs the real chain (translate, deploy, reindex;
+it imports nothing) and, without an OpenAI key, stops at `translate` with
+"OPENAI_API_KEY is not set" once any row is untranslated. That is expected
+here. A supplier's Import button on the Suppliers page (`POST
+/admin/suppliers/:id/import`) starts the import in the background; its
+progress and report show in the supplier's row.
 
 What the demo catalogue exercises (`src/lib/suppliers/demo-adapter.ts`, three
 articles per page):

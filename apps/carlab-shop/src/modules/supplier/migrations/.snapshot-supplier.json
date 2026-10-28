@@ -84,22 +84,6 @@
           "enumItems": [],
           "mappedType": "boolean"
         },
-        "import_on_publish": {
-          "name": "import_on_publish",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": "true",
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "boolean"
-        },
         "created_by": {
           "name": "created_by",
           "type": "text",

@@ -3,19 +3,20 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
-import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
-import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
-import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
-import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
+import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
+import { createFakeShopAi } from '../../../../../../../integration-tests/fakeShopAi';
+import { importRuns } from '../../../../../../../integration-tests/importRuns';
+import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
+import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
+import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
 import {
   SUPPLIER_ADAPTERS_REGISTRATION,
   type SupplierArticle,
-} from '../../../../lib/suppliers/adapter';
-import { CATALOG_MODULE } from '../../../../modules/catalog';
-import type CatalogModuleService from '../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../modules/supplier';
-import type SupplierModuleService from '../../../../modules/supplier/service';
+} from '../../../../../../lib/suppliers/adapter';
+import { CATALOG_MODULE } from '../../../../../../modules/catalog';
+import type CatalogModuleService from '../../../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
+import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
 const mann = createFakeSupplier('MANN-FILTER');
 const bilstein = createFakeSupplier('bilstein group');
@@ -92,18 +93,11 @@ medusaIntegrationTestRunner({
 
       beforeEach(() => {
         for (const fake of [mann, bilstein]) fake.articles.length = 0;
-        Object.assign(shopAi, { name: null, namesWritten: [], failure: null });
+        Object.assign(shopAi, { name: null, failure: null });
       });
 
-      const runImport = async (supplier: string) => {
-        const response = await api.post(
-          `/admin/suppliers/${supplierIds[supplier]}/import`,
-          {},
-          adminHeaders,
-        );
-        expect(response.status).toBe(200);
-        return response.data.import;
-      };
+      const runImport = async (supplier: string) =>
+        (await importRuns(api, adminHeaders).run(supplierIds[supplier])).report;
 
       const partOf = async (number: string) => {
         const [identifier] = await catalog.listPartIdentifiers(
@@ -683,9 +677,6 @@ medusaIntegrationTestRunner({
         expect((await partOf('W 712/95')).name).toBe(
           'Масляный фильтр MANN-FILTER W 712/95',
         );
-        expect(shopAi.namesWritten).toEqual([
-          expect.objectContaining({ name: 'Oil Filter W 712/95' }),
-        ]);
 
         mann.articles[0].name = 'Oil Filter W 712/95 new';
         await runImport('MANN-FILTER');
