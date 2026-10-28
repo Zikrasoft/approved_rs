@@ -54,9 +54,24 @@ const response = {
   ],
   category: null,
   model: null,
+  cars: [],
   count: 1,
   offset: 0,
   limit: 20,
+};
+
+const bmwX3 = {
+  slug: 'e83-x3-20d',
+  name: 'X3 2.0d',
+  chassis: {
+    code: 'E83',
+    body_style: 'suv',
+    series: {
+      name: 'X3',
+      translations: null,
+      make: { slug: 'bmw', name: 'BMW' },
+    },
+  },
 };
 
 describe('searchResponseSchema', () => {
@@ -95,6 +110,64 @@ describe('searchResponseSchema', () => {
   it('reads a response from a backend that predates the Model as unscoped', () => {
     const { model: _model, ...older } = response;
     expect(searchResponseSchema.parse(older).model).toBeNull();
+  });
+
+  it('names the Makes, Models and Vehicles the query matched', () => {
+    const cars = [
+      {
+        kind: 'make',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: null,
+        vehicle: null,
+      },
+      {
+        kind: 'model',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: bmwX3,
+        vehicle: null,
+      },
+      {
+        kind: 'vehicle',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: bmwX3,
+        vehicle: {
+          id: 'veh_1',
+          slug: 'n47-130kw',
+          engine: { code: 'N47D20' },
+          power_kw: 130,
+          year_from: 2007,
+          year_to: 2010,
+        },
+      },
+    ];
+    expect(searchResponseSchema.parse({ ...response, cars }).cars).toEqual(
+      cars,
+    );
+  });
+
+  it('drops a car it cannot read rather than the whole answer', () => {
+    const cars = [
+      {
+        kind: 'trim',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: null,
+        vehicle: null,
+      },
+      {
+        kind: 'make',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: null,
+        vehicle: null,
+      },
+    ];
+    expect(searchResponseSchema.parse({ ...response, cars }).cars).toEqual([
+      cars[1],
+    ]);
+  });
+
+  it('reads a response from a backend that predates cars as having none', () => {
+    const { cars: _cars, ...older } = response;
+    expect(searchResponseSchema.parse(older).cars).toEqual([]);
   });
 
   it('refuses a result without its Part', () => {

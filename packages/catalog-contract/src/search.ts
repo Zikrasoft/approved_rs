@@ -22,6 +22,36 @@ export const searchResultSchema = brandNumberSchema.extend({
   thumbnail: z.url().nullable(),
 });
 
+export const CAR_KINDS = ['make', 'model', 'vehicle'] as const;
+
+export type CarKind = (typeof CAR_KINDS)[number];
+
+export const carHitSchema = z.object({
+  kind: z.enum(CAR_KINDS),
+  make: vehicleSchema.shape.model.shape.chassis.shape.series.shape.make,
+  model: vehicleSchema.shape.model.nullable(),
+  vehicle: vehicleSchema
+    .pick({
+      id: true,
+      slug: true,
+      power_kw: true,
+      year_from: true,
+      year_to: true,
+    })
+    .extend({ engine: vehicleSchema.shape.engine.pick({ code: true }) })
+    .nullable(),
+});
+
+const readableCars = z
+  .array(z.unknown())
+  .default([])
+  .transform((items) =>
+    items.flatMap((item) => {
+      const car = carHitSchema.safeParse(item);
+      return car.success ? [car.data] : [];
+    }),
+  );
+
 export const searchFacetSchema = z.object({
   key: z.string(),
   type: z.enum(CATEGORY_FIELD_TYPES),
@@ -37,6 +67,7 @@ export const searchResponseSchema = z.object({
   facets: z.array(searchFacetSchema),
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
+  cars: readableCars,
   count: z.number().int().nonnegative(),
   offset: z.number().int().nonnegative(),
   limit: z.number().int().positive(),
@@ -186,6 +217,7 @@ export const inRange = (value: string, { min, max }: RangeFilter): boolean => {
 
 export const searchableQuery = (q: string): boolean => /[\p{L}\p{N}]/u.test(q);
 
+export type CarHit = z.infer<typeof carHitSchema>;
 export type SearchResult = z.infer<typeof searchResultSchema>;
 export type SearchFacet = z.infer<typeof searchFacetSchema>;
 export type SearchResponse = z.infer<typeof searchResponseSchema>;
