@@ -849,7 +849,7 @@ number gets its CI value in that script. The non-obvious parts:
   without a valid token, and staff sign-in itself (`/auth/user/emailpass`) is
   not among them. The API host answers 404 on `/admin` and `/auth/user`, so
   staff routes exist only behind the admin host's basic_auth; the storefront
-  calls only `/store/*` (and Caddy's `/health`). Checked against a live Caddy by
+  calls only `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
   `infra/carlab-shop/test/compose.test.sh`.
 - `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
