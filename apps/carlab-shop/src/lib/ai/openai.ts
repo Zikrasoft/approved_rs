@@ -72,7 +72,7 @@ Answer with one JSON object and nothing else: { "category_id": string or null }
 
 Rules:
 - Judge by what the part is, read from its name, description and specs, and by each category's name and the description in brackets after it.
-- A control arm or wishbone (Serbian «rame», «ramena», «poprečno rame», «vodjica»), a ball joint («kugla», «kuglasti zglob»), a tie rod or its end («spona»), a stabiliser link and their bushings and bearings belong to the suspension or steering category, never to a body, frame or engine category.
+- A control arm or wishbone (Serbian «rame», «ramena», «poprečno rame», «vodjica»), a ball joint («kugla», «kuglasti zglob»), a tie rod or its end («spona»), a stabiliser link, a bump stop («odbojnik», «odbojna guma»), a spring, a shock absorber and their bushings, mounts and bearings belong to the suspension or steering category, never to a body, frame or engine category.
 - Prefer null over a category that only shares a word with the part.
 
 Categories (id: name (description)):
@@ -90,6 +90,7 @@ Rules:
 - "boolean": true or false.
 - "text": a short string.
 - "single-select": the key of one option. "multi-select": a non-empty array of distinct option keys.
+- An option counts when the spec names the same thing in other words, such as a battery's SLI, wet or flooded technology for the plain standard option.
 - Never guess a value no spec states.
 
 Fields:
@@ -133,6 +134,7 @@ type Ask<T> = {
   code: AdminErrorCode;
   what: string;
   retries?: number;
+  temperature?: number;
 };
 
 const ask = async <T>({ retries = 0, ...question }: Ask<T>): Promise<T> => {
@@ -160,6 +162,7 @@ const askOnce = async <T>({
   schema,
   code,
   what,
+  temperature,
 }: Omit<Ask<T>, 'retries'> & { apiKey: string }): Promise<T> => {
   const client = new OpenAI({
     apiKey,
@@ -168,6 +171,7 @@ const askOnce = async <T>({
   });
   const response = await client.chat.completions.create({
     model: MODEL,
+    temperature,
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: system },
@@ -223,6 +227,7 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
       schema: categoryPickSchema,
       code: 'ARTICLE_UNREADABLE',
       what: 'The Category pick',
+      temperature: 0,
     });
     return categories.some(({ id }) => id === category_id) ? category_id : null;
   },
@@ -235,6 +240,7 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
         schema: specsMappingSchema,
         code: 'ARTICLE_UNREADABLE',
         what: 'The specs mapping',
+        temperature: 0,
       })
     ).attributes,
   writeDescription: async (article, placed) =>

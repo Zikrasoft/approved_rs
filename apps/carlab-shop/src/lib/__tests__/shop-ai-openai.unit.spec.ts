@@ -265,6 +265,38 @@ describe('OpenAI shop AI', () => {
     expect(system).toMatch(/rame/u);
   });
 
+  it('files a bump stop under suspension', async () => {
+    globalThis.fetch = answering({ category_id: 'cat_oil' });
+
+    await openAiShopAi('test-key').pickCategory(article, CATEGORIES);
+
+    expect(sentMessages(globalThis.fetch).system).toMatch(/odbojna guma/u);
+  });
+
+  it('maps an SLI battery to the standard technology option', async () => {
+    globalThis.fetch = answering({ attributes: {} });
+
+    await openAiShopAi('test-key').mapSpecs(article.specs, []);
+
+    expect(sentMessages(globalThis.fetch).system).toMatch(/SLI/u);
+  });
+
+  it('classifies with the most likely answer, never a sampled one', async () => {
+    globalThis.fetch = answeringInTurn(
+      { category_id: 'cat_oil' },
+      { attributes: {} },
+    );
+
+    await openAiShopAi('test-key').pickCategory(article, CATEGORIES);
+    await openAiShopAi('test-key').mapSpecs(article.specs, []);
+
+    const temperatures = (globalThis.fetch as jest.Mock).mock.calls.map(
+      ([, init]: [unknown, { body: string }]) =>
+        JSON.parse(init.body).temperature,
+    );
+    expect(temperatures).toEqual([0, 0]);
+  });
+
   it('writes a Russian name in house style and refuses a blank one', async () => {
     globalThis.fetch = answering({ name: ' Моторное масло Castrol — 5W-30 ' });
     const written = await openAiShopAi('test-key').writeName(article);
