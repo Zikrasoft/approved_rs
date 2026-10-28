@@ -34,7 +34,7 @@ const busy = () =>
   adminError(
     MedusaError.Types.CONFLICT,
     'CATALOGUE_BUSY',
-    'Another import, publish or deletion is running',
+    'Another import, publish, deletion, merge or rename is running',
   );
 
 const isStale = (heartbeatAt: Date) =>

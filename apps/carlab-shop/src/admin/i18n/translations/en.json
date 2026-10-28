@@ -567,7 +567,7 @@
       "INVALID_ATTRIBUTES": "The characteristic values do not fit the category: check required fields and options.",
       "INVALID_REQUIREMENT": "The requirement does not fit the characteristic: check the options and the From and To values.",
       "DEFINITION_BREAKS_PARTS": "The change would break the characteristics of parts in this category. Fix those parts first.",
-      "CATALOGUE_BUSY": "Another import, publish or source deletion is running. Wait for it to finish and try again.",
+      "CATALOGUE_BUSY": "Another import, publish, source deletion, merge or address change is running. Wait for it to finish and try again.",
       "ALREADY_EXISTS": "This record already exists.",
       "FIELD_REQUIRED": "Fill in «{{field}}».",
       "INVALID_FIELD": "Check «{{field}}».",
