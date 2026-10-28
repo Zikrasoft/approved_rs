@@ -39,11 +39,8 @@ import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
-import {
-  type CarMatch,
-  carPages,
-  matchCars,
-} from '../../../search/catalogue-car';
+import { makeKey, modelKey, pagedCars } from '../../../lib/car-pages';
+import { type CarMatch, matchCars } from '../../../search/catalogue-car';
 import {
   PART_IDENTIFIER_INDEX,
   searchRanking,
@@ -279,11 +276,21 @@ export async function GET(
   const scopedTo = vehicleModel
     ? vehicleSchema.shape.model.parse(vehicleModel)
     : null;
-  const scopePages = vehicleModel
-    ? await carPages(req.scope.resolve(ContainerRegistrationKeys.QUERY), {
-        model: vehicleModel,
-      })
-    : null;
+  const scopeMake = scopedTo?.chassis.series.make.slug;
+  const scopePaged =
+    scopedTo && scopeMake
+      ? await pagedCars(req.scope.resolve(Modules.SEARCH), [
+          modelKey(scopedTo.slug),
+          makeKey(scopeMake),
+        ])
+      : null;
+  const scopePages =
+    scopedTo && scopeMake && scopePaged
+      ? {
+          model: scopePaged.has(modelKey(scopedTo.slug)),
+          make: scopePaged.has(makeKey(scopeMake)),
+        }
+      : null;
 
   const cars: CarMatch =
     searchableQuery(q) && !found && !vehicleModel && !vehicle_id

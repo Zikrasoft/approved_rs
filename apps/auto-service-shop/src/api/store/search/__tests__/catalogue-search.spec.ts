@@ -164,6 +164,7 @@ medusaIntegrationTestRunner({
           id: retired,
           replaced_by_id: await part('Ремень', '61 004', []),
         });
+        await part('Прокладка', '3 160 000', []);
         await part('Щетка', '31 001', [f30.vehicle.id]);
         await part('Щетка', '31 002', [f30.vehicle.id]);
         await part('Щетка', '41 001', [audi.vehicle.id]);
@@ -207,6 +208,16 @@ medusaIntegrationTestRunner({
 
       it('reads a code typed in Cyrillic', async () => {
         expect((await cars('Е90'))[0]).toBe('model:e90-320d');
+      });
+
+      it('reads a make and a model typed in Russian Cyrillic', async () => {
+        expect((await cars('бмв х3'))[0]).toBe('model:e83-x3-20d');
+      });
+
+      it('finds no car in a spaced part number whose digits name a series', async () => {
+        const { cars: found, results } = await search('3 160 000');
+        expect(found).toEqual([]);
+        expect(results.map(({ value }) => value)).toEqual(['3 160 000']);
       });
 
       it('finds a Vehicle by its engine code', async () => {

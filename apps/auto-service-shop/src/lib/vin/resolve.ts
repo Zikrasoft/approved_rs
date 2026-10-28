@@ -78,8 +78,8 @@ export const resolveVin = async (
   decoders: VinDecoder[],
   { catalog, vinLookups }: Services,
 ): Promise<
-  | Omit<Extract<VinLookupResponse, { resolved: true }>, 'pages'>
-  | Extract<VinLookupResponse, { resolved: false }>
+  | Omit<Extract<VinLookupResponse, { resolved: true }>, 'place'>
+  | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
 > => {
   const [existing] = await vinLookups.listVinLookups({ vin });
   const current = decoders.some(

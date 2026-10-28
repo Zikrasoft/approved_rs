@@ -6,17 +6,20 @@ import type {
 import {
   type CarHit,
   type CarKind,
-  carHitSchema,
   makeHasPage,
   MIN_PARTS_FOR_PAGE,
   modelHasPage,
   vehicleHasPage,
 } from '@podbor/catalog-contract';
-import { z } from 'zod';
 
+import {
+  CATALOGUE_CAR_INDEX,
+  makeKey,
+  modelKey,
+  readCarHit,
+  vehicleKey,
+} from '../lib/car-pages';
 import { serbianScripts } from '../lib/serbian';
-
-export const CATALOGUE_CAR_INDEX = 'catalogue_car';
 
 const MAX_QUERY_TOKENS = 8;
 const HITS_PER_TOKEN = 100;
@@ -51,33 +54,54 @@ type VehicleRow = {
 
 type FitmentRow = { part_id: string; vehicle_id: string };
 
-export type CarAddress = {
-  id: string;
-  model: { slug: string; chassis: { series: { make: { slug: string } } } };
-};
-
 export const searchTokens = (text: string): string[] =>
   text
     .toLowerCase()
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
 
+const RUSSIAN_LETTERS: Record<string, string> = {
+  a: 'а',
+  b: 'б',
+  c: 'ц',
+  d: 'д',
+  e: 'е',
+  f: 'ф',
+  g: 'г',
+  h: 'х',
+  i: 'и',
+  j: 'й',
+  k: 'к',
+  l: 'л',
+  m: 'м',
+  n: 'н',
+  o: 'о',
+  p: 'п',
+  q: 'к',
+  r: 'р',
+  s: 'с',
+  t: 'т',
+  u: 'у',
+  v: 'в',
+  w: 'в',
+  x: 'х',
+  y: 'и',
+  z: 'з',
+};
+
+const russianSpelling = (text: string) =>
+  [...text.toLowerCase()]
+    .map((letter) => RUSSIAN_LETTERS[letter] ?? letter)
+    .join('');
+
 const termsOf = (...texts: (string | null | undefined)[]): string[] =>
   texts.flatMap((text) => {
     if (!text) return [];
     const { latin, cyrillic } = serbianScripts(text);
-    return [text, latin, cyrillic].flatMap(searchTokens);
+    return [text, latin, cyrillic, russianSpelling(latin)].flatMap(
+      searchTokens,
+    );
   });
-
-const makeKey = (slug: string) => `make:${slug}`;
-const modelKey = (slug: string) => `model:${slug}`;
-const vehicleKey = (id: string) => `vehicle:${id}`;
-
-export const fittedCarKeys = ({ id, model }: CarAddress): string[] => [
-  makeKey(model.chassis.series.make.slug),
-  modelKey(model.slug),
-  vehicleKey(id),
-];
 
 const makeOf = ({ model }: VehicleRow) => model.chassis.series.make.slug;
 const modelOf = ({ model }: VehicleRow) => model.slug;
@@ -244,9 +268,9 @@ const VEHICLE_FIELDS = [
 
 type NumberRow = { part_id: string; part: { replaced_by_id: string | null } };
 
-type Query = Pick<SearchTypes.SearchContainer['query'], 'graph'>;
-
-const listedParts = async (query: Query): Promise<Set<string>> => {
+const listedParts = async (
+  query: SearchTypes.SearchContainer['query'],
+): Promise<Set<string>> => {
   const { data: published } = await query.graph({
     entity: 'published_number',
     fields: ['id'],
@@ -291,34 +315,7 @@ async function* seed({ container, catchup }: SearchTypes.SearchSeedContext) {
   }
 }
 
-export async function carPages(
-  query: Query,
-  car: Omit<CarAddress, 'id'> & { id?: string },
-) {
-  const [{ data }, listed] = await Promise.all([
-    query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    listedParts(query),
-  ]);
-  const make = car.model.chassis.series.make.slug;
-  const kin = (data as VehicleRow[]).filter((row) => makeOf(row) === make);
-  const { data: fitments } = await query.graph({
-    entity: 'fitment',
-    fields: ['part_id', 'vehicle_id'],
-    filters: { vehicle_id: kin.map(({ id }) => id) },
-  });
-  const paged = carsWithPages(kin, fitments as FitmentRow[], listed);
-  return {
-    vehicle: paged.vehicles.some(({ id }) => id === car.id),
-    model: paged.models.some((row) => modelOf(row) === car.model.slug),
-    make: paged.makes.length > 0,
-  };
-}
-
-const hitSchema = z.object({
-  id: z.string(),
-  terms: z.array(z.string()),
-  card: z.string().transform((card) => carHitSchema.parse(JSON.parse(card))),
-});
+const HAS_LETTER = /\p{L}/u;
 
 export type CarMatch = { cars: CarHit[]; keys: string[]; rest: string[] };
 
@@ -326,7 +323,8 @@ export async function matchCars(
   searchModule: ISearchModuleService,
   q: string,
 ): Promise<CarMatch> {
-  const tokens = searchTokens(q).slice(0, MAX_QUERY_TOKENS);
+  const typed = searchTokens(q);
+  const tokens = typed.slice(0, MAX_QUERY_TOKENS);
   const last = tokens.length - 1;
   const answers = await searchModule.searchMany(
     tokens.map((token, index) => ({
@@ -350,7 +348,7 @@ export async function matchCars(
   const hits = new Map(
     answers
       .flatMap(({ hits: found }) => found)
-      .map(({ document: found }) => hitSchema.parse(found))
+      .flatMap(({ document: found }) => readCarHit(found))
       .map((hit) => [hit.id, hit]),
   );
   const covers = (terms: string[], token: string, index: number) =>
@@ -358,10 +356,15 @@ export async function matchCars(
     (index === last &&
       token.length >= 2 &&
       terms.some((term) => term.startsWith(token)));
-  const scored = [...hits.values()].map((hit) => ({
-    ...hit,
-    covered: tokens.filter((token, index) => covers(hit.terms, token, index)),
-  }));
+  const scored = [...hits.values()].map((hit) => {
+    const covered = tokens.filter((token, index) =>
+      covers(hit.terms, token, index),
+    );
+    return {
+      ...hit,
+      covered: covered.some((token) => HAS_LETTER.test(token)) ? covered : [],
+    };
+  });
   const best = Math.max(0, ...scored.map(({ covered }) => covered.length));
   const top = scored
     .filter(({ covered }) => best > 0 && covered.length === best)
@@ -373,7 +376,7 @@ export async function matchCars(
     keys: top
       .filter(({ card }) => BREADTH[card.kind] === broadest)
       .map(({ id }) => id),
-    rest: tokens.filter((token) => !covered.has(token)),
+    rest: typed.filter((token) => !covered.has(token)),
   };
 }
 

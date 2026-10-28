@@ -80,7 +80,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toEqual({
           resolved: true,
           facts: {},
-          pages: { vehicle: false, model: false, make: false },
+          place: null,
           vehicle: expect.objectContaining({
             id: vehicle.id,
             steering: 'left',
@@ -114,7 +114,7 @@ medusaIntegrationTestRunner({
         ).toHaveLength(1);
       });
 
-      it("names which of the resolved car's places have a page", async () => {
+      it('names the Vehicle page of the resolved car once it has one', async () => {
         const owner =
           (await catalog.listVehicles({}, { take: 1 }))[0] ??
           (await createVehicleFixture(catalog)).vehicle;
@@ -143,11 +143,11 @@ medusaIntegrationTestRunner({
           }
         }
         await publishAllNumbers(getContainer());
+        await getContainer().resolve(Modules.SEARCH).reindex();
 
-        expect((await lookUp(OWNER_VIN)).data.pages).toEqual({
-          vehicle: true,
-          model: true,
-          make: true,
+        expect((await lookUp(OWNER_VIN)).data.place).toMatchObject({
+          kind: 'vehicle',
+          vehicle: { id: owner.id },
         });
       });
 
@@ -179,6 +179,7 @@ medusaIntegrationTestRunner({
         const before = await lookUp(vin);
         expect(before.data).toEqual({
           resolved: false,
+          place: null,
           make: 'bmw',
           code: '99ZZ',
           model_slug: null,
@@ -202,6 +203,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: false,
+          place: null,
           make: null,
           code: null,
           model_slug: null,
