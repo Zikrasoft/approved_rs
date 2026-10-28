@@ -1,0 +1,78 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { makesByLetter, type MakeLetter } from '@/utils/makeIndex';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const letters = makesByLetter(await makeHubsForBuild());
+  return localePaths().map((path) => ({ ...path, props: { letters } }));
+}
+
+const { letters } = Astro.props as { letters: MakeLetter[] };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const hubs = content(locale).partsCar.hubs;
+const copy = hubs.makes;
+const anchor = (index: number) => `makes-${index}`;
+---
+
+<Shell title={copy.metaTitle} description={copy.metaDescription}>
+  <PageHero
+    actions={false}
+    eyebrow={hubs.make.eyebrow}
+    heading={copy.heading}
+    lead={copy.lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMakes(locale), label: copy.heading },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-8 py-band md:py-band-lg">
+    {
+      letters.length > 1 && (
+        <nav aria-label={copy.lettersLabel}>
+          <ul class="flex flex-wrap gap-1">
+            {letters.map(({ letter }, index) => (
+              <li>
+                <a
+                  href={`#${anchor(index)}`}
+                  class="spec flex h-11 min-w-11 items-center justify-center rounded-control px-2 text-base text-ink transition-colors duration-150 hover:bg-shade hover:text-signal-ink"
+                >
+                  {letter}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    {
+      letters.map(({ letter, makes }, index) => (
+        <section
+          id={anchor(index)}
+          class="flex scroll-mt-24 flex-col gap-3 border-t border-line pt-4"
+        >
+          <h2 class="text-section">{letter}</h2>
+          <ul class="columns-2 gap-x-6 sm:columns-3 lg:columns-4">
+            {makes.map((make) => (
+              <li class="break-inside-avoid">
+                <a
+                  href={PathBuilder.partsMake(locale, make.slug)}
+                  class="flex min-h-11 items-center text-base text-ink underline-offset-2 hover:text-signal-ink hover:underline sm:min-h-9"
+                >
+                  {make.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </section>
+</Shell>

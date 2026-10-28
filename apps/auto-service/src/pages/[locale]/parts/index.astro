@@ -12,12 +12,15 @@ import {
   shopOpen,
 } from '@/utils/catalogueEnv';
 import { paragraphs } from '@podbor/site-kit';
+import { TOP_MAKES, topMakes } from '@/utils/makeIndex';
 import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   const categories = await categoriesForBuild();
-  const makes = (await makeHubsForBuild()).map(({ make }) => make);
+  const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
+    ({ make }) => make,
+  );
   return localePaths().map((path) => ({
     ...path,
     props: { categories, makes },
@@ -105,20 +108,27 @@ const categories = props.categories.map((category) => ({
 
     {
       props.makes.length > 0 && (
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-4">
           <h2 class="text-section">{hubsCopy.indexHeading}</h2>
-          <ul class="flex flex-wrap gap-3">
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {props.makes.map((make) => (
               <li>
                 <a
                   href={PathBuilder.partsMake(locale, make.slug)}
-                  class="btn btn-secondary"
+                  class="card flex min-h-20 items-end p-4 text-lg leading-tight font-semibold text-ink transition-colors duration-150 hover:border-ink sm:p-5"
                 >
                   {make.name}
                 </a>
               </li>
             ))}
           </ul>
+          <a
+            href={PathBuilder.partsMakes(locale)}
+            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+          >
+            {hubsCopy.allMakesLink}
+            <Icon name="arrowRight" />
+          </a>
         </div>
       )
     }

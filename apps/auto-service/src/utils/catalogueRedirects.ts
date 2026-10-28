@@ -6,7 +6,12 @@ import type {
   CatalogueRedirect,
 } from '@podbor/catalog-contract';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
-import { PathBuilder, vehiclePath, type VehicleAddress } from './paths.ts';
+import {
+  PathBuilder,
+  placeKey,
+  type CataloguePages,
+  type VehicleAddress,
+} from './paths.ts';
 
 export type RedirectRoute = {
   src: string;
@@ -20,14 +25,12 @@ const vercelConfigSchema = z
 
 type VercelConfig = z.infer<typeof vercelConfigSchema>;
 
-const SEGMENT = '\u0000';
 const PART_NUMBER = '\u0001';
 
 const pattern = (path: string) =>
   path
     .slice(0, -1)
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    .replaceAll(SEGMENT, '([^/]+)')
     .replaceAll(PART_NUMBER, '([a-z0-9]+)');
 
 const exactly = (path: string) => `^${pattern(path)}/?$`;
@@ -53,10 +56,31 @@ const pathOf = (locale: Locale, to: CataloguePlace) => {
   return PathBuilder.parts(locale);
 };
 
+function withPage(
+  pages: CataloguePages,
+  place: CataloguePlace,
+): CataloguePlace {
+  const { part, make, model, vehicle } = place;
+  if (part || !make) return place;
+  if (model && vehicle) {
+    return pages.vehicles.has(placeKey(make, model, vehicle))
+      ? place
+      : withPage(pages, { ...place, vehicle: null });
+  }
+  if (model) {
+    return pages.models.has(placeKey(make, model))
+      ? place
+      : withPage(pages, { ...place, model: null });
+  }
+  return pages.makes.has(make) ? place : { ...place, make: null };
+}
+
 function localeRoutes(
   locale: Locale,
-  { from, to }: CatalogueRedirect,
+  { from, to: wanted }: CatalogueRedirect,
+  pages: CataloguePages,
 ): RedirectRoute[] {
+  const to = withPage(pages, wanted);
   const target = pathOf(locale, to);
   if (from.part) {
     return [route(exactly(PathBuilder.partNumber(locale, from.part)), target)];
@@ -80,20 +104,19 @@ function localeRoutes(
   }
   if (from.category) {
     const listing = PathBuilder.partsCategory(locale, from.category);
-    const inModel = PathBuilder.partsModelCategory(
-      locale,
-      SEGMENT,
-      SEGMENT,
-      from.category,
-    );
+    const renamed = from.category;
+    const next = to.category;
     return [
-      route(under(listing), to.category ? `${target}$1` : target),
-      route(
-        exactly(inModel),
-        to.category
-          ? PathBuilder.partsModelCategory(locale, '$1', '$2', to.category)
-          : PathBuilder.partsModel(locale, '$1', '$2'),
-      ),
+      route(under(listing), next ? `${target}$1` : target),
+      ...[...pages.models].map((key) => {
+        const [make, model] = key.split('/');
+        return route(
+          exactly(PathBuilder.partsModelCategory(locale, make, model, renamed)),
+          next && pages.categories.has(placeKey(key, next))
+            ? PathBuilder.partsModelCategory(locale, make, model, next)
+            : PathBuilder.partsModel(locale, make, model),
+        );
+      }),
     ];
   }
   if (from.brand && to.brand) {
@@ -109,23 +132,37 @@ function localeRoutes(
 
 export const catalogueRoutes = (
   redirects: CatalogueRedirect[],
+  pages: CataloguePages,
 ): RedirectRoute[] =>
   [
     ...redirects.filter(({ from }) => from.vehicle),
     ...redirects.filter(({ from }) => !from.vehicle),
   ].flatMap((redirect) =>
-    SUPPORTED_LOCALES.flatMap((locale) => localeRoutes(locale, redirect)),
-  );
-
-export const carRoutes = (vehicles: VehicleAddress[]): RedirectRoute[] =>
-  vehicles.flatMap((vehicle) =>
-    SUPPORTED_LOCALES.map((locale) =>
-      route(
-        exactly(PathBuilder.partsCar(locale, vehicle.id)),
-        vehiclePath(locale, vehicle),
-      ),
+    SUPPORTED_LOCALES.flatMap((locale) =>
+      localeRoutes(locale, redirect, pages),
     ),
   );
+
+export const carRoutes = (
+  vehicles: VehicleAddress[],
+  pages: CataloguePages,
+): RedirectRoute[] =>
+  vehicles.flatMap((vehicle) => {
+    const place = withPage(pages, {
+      brand: null,
+      make: vehicle.model.chassis.series.make.slug,
+      model: vehicle.model.slug,
+      vehicle: vehicle.slug ?? vehicle.id,
+      category: null,
+      part: null,
+    });
+    return SUPPORTED_LOCALES.map((locale) =>
+      route(
+        exactly(PathBuilder.partsCar(locale, vehicle.id)),
+        pathOf(locale, place),
+      ),
+    );
+  });
 
 export function withCatalogueRoutes<Config extends VercelConfig>(
   config: Config,

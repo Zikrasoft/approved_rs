@@ -7,6 +7,7 @@ export const RESERVED_PARTS_SEGMENTS = [
   'cart',
   'search',
   'prices',
+  'makes',
 ] as const;
 
 const slug = z.string().nullable().default(null);

@@ -33,6 +33,7 @@ import {
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import {
   assembleSnapshot,
+  carPagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
   type CarPageEntry,
@@ -266,7 +267,7 @@ export function createCatalogue({
     },
 
     async carPages(): Promise<CarPageEntry[]> {
-      return (await snapshot()).cars;
+      return carPagesFrom(await snapshot());
     },
 
     async makeHubs(): Promise<MakeHubEntry[]> {
