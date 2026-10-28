@@ -1,10 +1,8 @@
 import type { AttributeValues } from '@podbor/catalog-contract';
 
 import type {
-  ArticleFacts,
+  ArticleInput,
   CategoryChoice,
-  PlacedPart,
-  CategoryFieldChoice,
   QuoteReading,
   ShopAi,
 } from '../src/lib/ai';
@@ -13,17 +11,12 @@ export type FakeShopAi = {
   ai: ShopAi;
   reading: QuoteReading;
   quotesRead: { pdf: Buffer; categories: CategoryChoice[] }[];
+  model: string;
+  name: string | null;
   category: string | null;
   attributes: AttributeValues;
-  description: string;
-  categoryPicks: { article: ArticleFacts; categories: CategoryChoice[] }[];
-  specsMapped: {
-    specs: Record<string, string>;
-    fields: CategoryFieldChoice[];
-  }[];
-  descriptionsWritten: ({ article: ArticleFacts } & PlacedPart)[];
-  name: string | null;
-  namesWritten: ArticleFacts[];
+  description: string | null;
+  articlesAsked: { article: ArticleInput; categories: CategoryChoice[] }[];
   failure: Error | null;
 };
 
@@ -31,39 +24,36 @@ export const createFakeShopAi = (): FakeShopAi => {
   const fake: FakeShopAi = {
     reading: { vin: null, vehicle: null, lines: [] },
     quotesRead: [],
+    model: 'fake',
+    name: null,
     category: null,
     attributes: {},
-    description: '',
-    categoryPicks: [],
-    specsMapped: [],
-    descriptionsWritten: [],
-    name: null,
-    namesWritten: [],
+    description: null,
+    articlesAsked: [],
     failure: null,
     ai: {
       readQuote: async (pdf, categories) => {
         fake.quotesRead.push({ pdf, categories });
         return fake.reading;
       },
-      pickCategory: async (article, categories) => {
+      articleQuestion: (article, categories) => ({
+        model: fake.model,
+        system: JSON.stringify(categories),
+        user: JSON.stringify(article),
+      }),
+      answerArticle: async ({ system, user }) => {
         if (fake.failure) throw fake.failure;
-        fake.categoryPicks.push({ article, categories });
-        return fake.category;
-      },
-      mapSpecs: async (specs, fields) => {
-        if (fake.failure) throw fake.failure;
-        fake.specsMapped.push({ specs, fields });
-        return fake.attributes;
-      },
-      writeDescription: async (article, placed) => {
-        if (fake.failure) throw fake.failure;
-        fake.descriptionsWritten.push({ article, ...placed });
-        return fake.description;
-      },
-      writeName: async (article) => {
-        if (fake.failure) throw fake.failure;
-        fake.namesWritten.push(article);
-        return fake.name ?? article.name;
+        const article = JSON.parse(user) as ArticleInput;
+        fake.articlesAsked.push({
+          article,
+          categories: JSON.parse(system) as CategoryChoice[],
+        });
+        return {
+          name: fake.name ?? article.name,
+          category_id: fake.category,
+          attributes: fake.attributes,
+          description: fake.description,
+        };
       },
     },
   };

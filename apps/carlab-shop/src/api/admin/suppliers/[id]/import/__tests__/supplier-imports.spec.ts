@@ -159,14 +159,14 @@ medusaIntegrationTestRunner({
           fake.laterPages = null;
         }
         Object.assign(shopAi, {
+          name: null,
           category: null,
           attributes: {},
-          description: '',
-          categoryPicks: [],
-          specsMapped: [],
-          descriptionsWritten: [],
+          description: null,
+          articlesAsked: [],
           failure: null,
         });
+        storage.pages.objects.clear();
       });
 
       const runImport = async () => {
@@ -474,43 +474,90 @@ medusaIntegrationTestRunner({
           offers: [],
           supplier_data: { applicability: [] },
         });
-        const facts = {
-          name: 'Масло 0W-20',
-          brand: 'MANN-FILTER',
-          number: 'OIL 0W20',
-          description: 'Potpuno sintetičko motorno ulje 0W-20.',
-          specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
-        };
-        expect(shopAi.categoryPicks).toEqual([
+        expect(shopAi.articlesAsked).toEqual([
           {
-            article: facts,
+            article: {
+              name: 'Масло 0W-20',
+              brand: 'MANN-FILTER',
+              number: 'OIL 0W20',
+              description: 'Potpuno sintetičko motorno ulje 0W-20.',
+              specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+              category_id: null,
+            },
             categories: expect.arrayContaining([
-              { id: engineOilId, name: 'Моторное масло', text: '' },
-              { id: oilFiltersId, name: 'Масляные фильтры', text: '' },
+              {
+                id: engineOilId,
+                name: 'Моторное масло',
+                text: '',
+                fields: [
+                  {
+                    key: 'viscosity',
+                    label: 'Вязкость',
+                    type: 'text',
+                    unit: null,
+                    required: true,
+                    options: [],
+                  },
+                ],
+              },
+              {
+                id: oilFiltersId,
+                name: 'Масляные фильтры',
+                text: '',
+                fields: [],
+              },
             ]),
           },
         ]);
-        expect(shopAi.specsMapped).toEqual([
-          {
-            specs: facts.specs,
-            fields: [
-              {
-                key: 'viscosity',
-                label: 'Вязкость',
-                type: 'text',
-                unit: null,
-                required: true,
-                options: [],
-              },
-            ],
-          },
-        ]);
-        expect(shopAi.descriptionsWritten).toEqual([
-          { article: facts, name: 'Масло 0W-20', category: 'Моторное масло' },
-        ]);
       });
 
-      it('keeps the mapped Category over AI and asks for no attributes a Category without fields cannot hold', async () => {
+      it('asks the AI once for an article and answers it from the cache when the Part is made again', async () => {
+        intercars.articles.push({
+          article_id: 'IC-30',
+          brand: 'MANN-FILTER',
+          number: 'W 1000',
+          name: 'Filter ulja W 1000',
+          category: 'Filteri',
+          description: 'Filter ulja.',
+        });
+        shopAi.name = 'Масляный фильтр MANN-FILTER W 1000';
+        shopAi.category = oilFiltersId;
+        shopAi.description = 'Масляный фильтр.';
+        await runImport();
+        const made = (await page('W1000'))!.part;
+        await runImport();
+        await api.delete(`/admin/parts/${made.id}`, adminHeaders);
+        shopAi.name = 'Другое имя';
+
+        await runImport();
+
+        expect(shopAi.articlesAsked).toHaveLength(1);
+        expect((await page('W1000'))?.part).toMatchObject({
+          name: 'Масляный фильтр MANN-FILTER W 1000',
+          category_id: oilFiltersId,
+          description: 'Масляный фильтр.',
+        });
+      });
+
+      it('files an article only under a Category from the list', async () => {
+        intercars.articles.push({
+          article_id: 'IC-31',
+          brand: 'MANN-FILTER',
+          number: 'W 1100',
+          name: 'Filter ulja W 1100',
+          category: 'Filteri',
+        });
+        shopAi.category = 'cat_invented';
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: ['W 1100'],
+        });
+        expect((await page('W1100'))?.part.category_id).toBeNull();
+      });
+
+      it('keeps the mapped Category over AI and drops the attributes AI mapped for another Category', async () => {
         intercars.articles.push({
           article_id: 'IC-21',
           brand: 'MANN-FILTER',
@@ -528,8 +575,11 @@ medusaIntegrationTestRunner({
           category_id: oilFiltersId,
           attributes: {},
         });
-        expect(shopAi.specsMapped).toEqual([]);
-        expect(shopAi.categoryPicks).toEqual([]);
+        expect(shopAi.articlesAsked).toEqual([
+          expect.objectContaining({
+            article: expect.objectContaining({ category_id: oilFiltersId }),
+          }),
+        ]);
       });
 
       it('still creates the Part, unclassified and undescribed, when AI fails', async () => {
@@ -633,7 +683,7 @@ medusaIntegrationTestRunner({
           'Описание от мастера.',
         );
         expect((await page('W960'))?.part.description).toBe('Масляный фильтр.');
-        expect(shopAi.descriptionsWritten).toHaveLength(2);
+        expect(shopAi.articlesAsked).toHaveLength(2);
       });
 
       it('still describes and renames a Part whose Category staff changed', async () => {
@@ -665,12 +715,14 @@ medusaIntegrationTestRunner({
           description: 'Масляный фильтр W 980.',
           category_id: null,
         });
-        expect(shopAi.descriptionsWritten).toContainEqual(
+        expect(shopAi.articlesAsked).toEqual([
           expect.objectContaining({
-            name: 'Фильтр W980 новый',
-            category: null,
+            article: expect.objectContaining({
+              name: 'Фильтр W980 новый',
+              category_id: null,
+            }),
           }),
-        );
+        ]);
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {

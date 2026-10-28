@@ -1,5 +1,4 @@
 import {
-  type AttributeValues,
   attributeValuesSchema,
   type CategoryFieldType,
 } from '@podbor/catalog-contract';
@@ -24,14 +23,6 @@ export const quoteReadingSchema = z.object({
 
 export type QuoteReading = z.infer<typeof quoteReadingSchema>;
 
-export const categoryPickSchema = z.object({
-  category_id: z.string().nullable(),
-});
-
-export const specsMappingSchema = z.object({
-  attributes: attributeValuesSchema,
-});
-
 const mixesScripts = (word: string) =>
   /\p{Script=Latin}/u.test(word) && /\p{Script=Cyrillic}/u.test(word);
 
@@ -43,13 +34,14 @@ const russianText = z
     error: 'a word mixes Latin and Cyrillic letters',
   });
 
-export const descriptionSchema = z.object({ description: russianText });
+export const articleAnswerSchema = z.object({
+  name: russianText,
+  category_id: z.string().nullable(),
+  attributes: attributeValuesSchema,
+  description: russianText.nullable(),
+});
 
-export const nameSchema = z.object({ name: russianText });
-
-export type CategoryChoice = { id: string; name: string; text?: string };
-
-export type PlacedPart = { name: string; category: string | null };
+export type ArticleAnswer = z.infer<typeof articleAnswerSchema>;
 
 export type CategoryFieldChoice = {
   key: string;
@@ -60,6 +52,13 @@ export type CategoryFieldChoice = {
   options: { key: string; label: string }[];
 };
 
+export type CategoryChoice = {
+  id: string;
+  name: string;
+  text?: string;
+  fields?: CategoryFieldChoice[];
+};
+
 export type ArticleFacts = {
   name: string;
   brand: string;
@@ -68,22 +67,18 @@ export type ArticleFacts = {
   specs: Record<string, string>;
 };
 
+export type ArticleInput = ArticleFacts & { category_id: string | null };
+
+export type ArticleQuestion = { model: string; system: string; user: string };
+
 export type ShopAi = {
   readQuote: (
     pdf: Buffer,
     categories: CategoryChoice[],
   ) => Promise<QuoteReading>;
-  pickCategory: (
-    article: ArticleFacts,
+  articleQuestion: (
+    article: ArticleInput,
     categories: CategoryChoice[],
-  ) => Promise<string | null>;
-  mapSpecs: (
-    specs: Record<string, string>,
-    fields: CategoryFieldChoice[],
-  ) => Promise<AttributeValues>;
-  writeDescription: (
-    article: ArticleFacts,
-    placed: PlacedPart,
-  ) => Promise<string>;
-  writeName: (article: ArticleFacts) => Promise<string>;
+  ) => ArticleQuestion;
+  answerArticle: (question: ArticleQuestion) => Promise<ArticleAnswer>;
 };
