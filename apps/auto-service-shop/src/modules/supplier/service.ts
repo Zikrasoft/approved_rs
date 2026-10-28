@@ -92,9 +92,14 @@ class SupplierModuleService extends SupplierModuleBase {
       { select: ['id'], take: 1 },
       sharedContext,
     );
-    return existing
-      ? this.updateStagedRecords({ id: existing.id, payload }, sharedContext)
-      : this.createStagedRecords({ ...key, payload }, sharedContext);
+    if (!existing) {
+      return this.createStagedRecords({ ...key, payload }, sharedContext);
+    }
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      'update staged_record set payload = ?, updated_at = now() where id = ?',
+      [JSON.stringify(payload), existing.id],
+    );
+    return this.retrieveStagedRecord(existing.id, {}, sharedContext);
   }
 
   private async lockKey(key: unknown, sharedContext: Context): Promise<void> {

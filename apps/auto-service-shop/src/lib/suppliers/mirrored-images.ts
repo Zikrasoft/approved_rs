@@ -106,6 +106,9 @@ async function download(
   return { body: Buffer.concat(chunks), contentType };
 }
 
+const sha256 = (data: string | Buffer) =>
+  createHash('sha256').update(data).digest('hex');
+
 export async function mirroredImage(
   scope: MedusaContainer,
   storage: ShopStorage,
@@ -113,13 +116,20 @@ export async function mirroredImage(
   logger: Logger,
 ): Promise<string | null> {
   if (source.startsWith(storage.publicUrl(''))) return source;
-  const key = `supplier-images/${createHash('sha256').update(source).digest('hex')}`;
-  if (await storage.images.has(key)) return storage.publicUrl(key);
+  const pointer = `supplier-images/by-source/${sha256(source)}`;
+  const known = await storage.images.get(pointer);
+  if (known) return storage.publicUrl(known.toString());
   try {
     const { body, contentType } = await download(source, imageLookup(scope));
-    await storage.images.put(key, body, {
-      contentType,
-      metadata: { 'source-url': new URL(source).href },
+    const key = `supplier-images/${sha256(body)}`;
+    if (!(await storage.images.has(key))) {
+      await storage.images.put(key, body, {
+        contentType,
+        metadata: { 'source-url': new URL(source).href },
+      });
+    }
+    await storage.images.put(pointer, Buffer.from(key), {
+      contentType: 'text/plain',
     });
     return storage.publicUrl(key);
   } catch (error) {

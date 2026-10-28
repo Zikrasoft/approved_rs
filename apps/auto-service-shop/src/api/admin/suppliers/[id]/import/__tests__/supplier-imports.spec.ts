@@ -884,6 +884,15 @@ medusaIntegrationTestRunner({
             if (request.url === '/hu7020z.jpg') {
               response.writeHead(200, { 'content-type': 'image/jpeg' });
               response.end(Buffer.from('jpeg-bytes'));
+            } else if (request.url === '/hu7020z-box.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.from('box-bytes'));
+            } else if (
+              request.url === '/hu7020z-front.jpg' ||
+              request.url === '/hu7020z-front-copy.jpg'
+            ) {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(Buffer.from('front-bytes'));
             } else if (request.url === '/huge.jpg') {
               response.writeHead(200, { 'content-type': 'image/jpeg' });
               response.end(Buffer.alloc(10 * 1024 * 1024 + 1));
@@ -947,6 +956,35 @@ medusaIntegrationTestRunner({
           expect(await stagedImages()).toEqual([
             { items: [copy], sources: { [copy]: source } },
           ]);
+        });
+
+        it('stages every image of the page in its order and one copy of identical files, on every import', async () => {
+          intercars.articles.push(
+            articleWithImages([
+              brandImage('/hu7020z-front.jpg'),
+              brandImage('/hu7020z-box.jpg'),
+              brandImage('/hu7020z-front-copy.jpg'),
+            ]),
+          );
+
+          await runImport();
+          const first = (await page('HU7020Z'))?.supplier_data.images;
+          await runImport();
+
+          expect(served).toEqual([
+            '/hu7020z-front.jpg',
+            '/hu7020z-box.jpg',
+            '/hu7020z-front-copy.jpg',
+          ]);
+          const copyOf = (body: string) =>
+            [...storage.images.objects]
+              .filter(([, object]) => object.body.toString() === body)
+              .map(([key]) => `https://files.carlab.test/${key}`);
+          expect(first).toEqual([
+            ...copyOf('front-bytes'),
+            ...copyOf('box-bytes'),
+          ]);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual(first);
         });
 
         it('stages nothing for an image it cannot fetch, and tries again on the next import', async () => {

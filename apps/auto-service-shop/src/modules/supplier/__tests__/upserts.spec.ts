@@ -90,6 +90,23 @@ medusaIntegrationTestRunner({
         ).toEqual([expect.objectContaining({ payload: { items: ['222'] } })]);
       });
 
+      it('drops the keys of a replaced payload object instead of merging them in', async () => {
+        await suppliers.upsertStagedRecord({
+          ...staged('images', ['a.jpg']),
+          payload: { items: ['a.jpg'], sources: { 'a.jpg': 'https://a' } },
+        });
+        await suppliers.upsertStagedRecord({
+          ...staged('images', ['b.jpg']),
+          payload: { items: ['b.jpg'], sources: { 'b.jpg': 'https://b' } },
+        });
+
+        expect(await suppliers.listStagedRecords({ kind: 'images' })).toEqual([
+          expect.objectContaining({
+            payload: { items: ['b.jpg'], sources: { 'b.jpg': 'https://b' } },
+          }),
+        ]);
+      });
+
       it('resolves writers racing on one staged record to a single row', async () => {
         await Promise.all(
           ['1', '2', '3', '4'].map((item) =>

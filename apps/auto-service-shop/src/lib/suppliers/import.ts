@@ -366,7 +366,7 @@ async function stagedImages(
   const sources: Record<string, string> = {};
   for (const source of images) {
     const mirrored = await mirroredImage(scope, storage, source, logger);
-    if (mirrored) sources[mirrored] = source;
+    if (mirrored) sources[mirrored] ??= source;
   }
   return { items: Object.keys(sources), sources };
 }
