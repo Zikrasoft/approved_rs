@@ -16,6 +16,7 @@ const LANGUAGE_NAME: Record<TargetLocale, string> = {
 const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
 
 const ROWS_PER_REQUEST = 50;
+const CHARS_PER_REQUEST = 4_000;
 
 const localeSchema = z.enum(CATALOG_TRANSLATION_LOCALES);
 const nestedSchema = z
@@ -229,10 +230,36 @@ const keptTranslation = (item: Item, locale: TargetLocale) => {
 
 const fieldKey = (id: string, field: string) => `${id}.${field}`;
 
-const chunked = <T>(items: T[], size: number): T[][] =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
-    items.slice(index * size, (index + 1) * size),
-  );
+const pendingFields = (item: Item, locale: TargetLocale) => {
+  const kept = keptTranslation(item, locale);
+  return Object.entries(item.source)
+    .filter(([field]) => !(field in kept))
+    .map(([field, text]) => [fieldKey(item.id, field), text] as const);
+};
+
+const sizeOf = (item: Item, locale: TargetLocale) =>
+  pendingFields(item, locale).reduce((sum, [, text]) => sum + text.length, 0);
+
+const requestBatches = (items: Item[], locale: TargetLocale): Item[][] => {
+  const batches: Item[][] = [];
+  let size = 0;
+  for (const item of items) {
+    const itemSize = sizeOf(item, locale);
+    const last = batches[batches.length - 1];
+    if (
+      last &&
+      last.length < ROWS_PER_REQUEST &&
+      size + itemSize <= CHARS_PER_REQUEST
+    ) {
+      last.push(item);
+      size += itemSize;
+    } else {
+      batches.push([item]);
+      size = itemSize;
+    }
+  }
+  return batches;
+};
 
 async function translateLocale(
   entity: TranslatableEntity,
@@ -244,14 +271,9 @@ async function translateLocale(
   const stale = items.filter(
     (item) => item.translatedFrom[locale] !== item.hash,
   );
-  for (const chunk of chunked(stale, ROWS_PER_REQUEST)) {
+  for (const chunk of requestBatches(stale, locale)) {
     const fields = Object.fromEntries(
-      chunk.flatMap((item) => {
-        const kept = keptTranslation(item, locale);
-        return Object.entries(item.source)
-          .filter(([field]) => !(field in kept))
-          .map(([field, text]) => [fieldKey(item.id, field), text]);
-      }),
+      chunk.flatMap((item) => pendingFields(item, locale)),
     );
     if (Object.keys(fields).length > 0 && !apiKey) {
       throw new Error('OPENAI_API_KEY is not set');
