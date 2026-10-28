@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { displayEnum } from './displayEnum.ts';
 import { translationsSchema } from './categories.ts';
 import { STEERING_SIDES } from './vehicle.ts';
 
@@ -14,12 +15,12 @@ export const fitmentSchema = z.object({
   part_id: z.string(),
   vehicle_id: z.string(),
   quantity: z.number().int().positive(),
-  axle: z.enum(FITMENT_AXLES).nullable(),
-  side: z.enum(FITMENT_SIDES).nullable(),
+  axle: displayEnum(FITMENT_AXLES),
+  side: displayEnum(FITMENT_SIDES),
   production_from: z.string().nullable(),
   production_to: z.string().nullable(),
-  gearbox: z.enum(GEARBOX_TYPES).nullable(),
-  steering: z.enum(STEERING_SIDES).nullable(),
+  gearbox: displayEnum(GEARBOX_TYPES),
+  steering: displayEnum(STEERING_SIDES),
   note: z.string().nullable(),
   translations: translationsSchema,
 });

@@ -20,6 +20,11 @@
 	redir /app https://{$ADMIN_HOST}/app
 	redir /app/* https://{$ADMIN_HOST}{uri}
 
+	@staff path /admin /admin/* /auth/user /auth/user/*
+	handle @staff {
+		respond 404
+	}
+
 	handle {
 		reverse_proxy medusa:9000 {
 			header_up X-Forwarded-For {remote_host}
@@ -31,6 +36,16 @@
 	import common
 
 	redir / /app
+
+	@guarded {
+		not {
+			path /auth/session /admin/invites/accept /auth/user/emailpass/update
+			header Authorization "Bearer *"
+		}
+	}
+	basic_auth @guarded {
+		{$ADMIN_BASIC_AUTH_USER} {$ADMIN_BASIC_AUTH_HASH}
+	}
 
 	handle {
 		reverse_proxy medusa:9000 {
