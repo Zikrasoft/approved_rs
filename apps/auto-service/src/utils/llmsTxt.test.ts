@@ -366,6 +366,12 @@ describe('generateLlmsTxt', () => {
     );
   });
 
+  it('describes the one catalogue search and how to query it', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Поиск запчастей](https://carlab.rs/ru/parts/search/) — Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: https://carlab.rs/ru/parts/search/?q=HU+816+x',
+    );
+  });
+
   it('links the about page', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
       '[О проекте](https://carlab.rs/ru/about/)',

@@ -5,6 +5,7 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { publishAllNumbers } from '../../../../lib/publish/published';
 import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
 import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
 import type { VinDecoder } from '../../../../lib/vin/decoder';
@@ -79,6 +80,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toEqual({
           resolved: true,
           facts: {},
+          place: null,
           vehicle: expect.objectContaining({
             id: vehicle.id,
             steering: 'left',
@@ -112,6 +114,43 @@ medusaIntegrationTestRunner({
         ).toHaveLength(1);
       });
 
+      it('names the Vehicle page of the resolved car once it has one', async () => {
+        const owner =
+          (await catalog.listVehicles({}, { take: 1 }))[0] ??
+          (await createVehicleFixture(catalog)).vehicle;
+        const { vehicle: sibling } = await createVehicleFixture(catalog, {
+          typeCode: '35BH',
+        });
+        const [febi] = await catalog.createBrands([
+          { name: 'Febi', slug: 'febi' },
+        ]);
+        for (const vehicleId of [owner.id, sibling.id]) {
+          for (const value of ['1', '2', '3']) {
+            const partId = await catalog.createPartWithIdentifiers({
+              name: 'Фильтр',
+              identifiers: [
+                {
+                  type: 'manufacturer-number',
+                  brand_id: febi.id,
+                  value: `${vehicleId}-${value}`,
+                },
+              ],
+            });
+            await catalog.createFitments({
+              part_id: partId,
+              vehicle_id: vehicleId,
+            });
+          }
+        }
+        await publishAllNumbers(getContainer());
+        await getContainer().resolve(Modules.SEARCH).reindex();
+
+        expect((await lookUp(OWNER_VIN)).data.place).toMatchObject({
+          kind: 'vehicle',
+          vehicle: { id: owner.id },
+        });
+      });
+
       it('lets the next decoder in the chain answer when the own adapter is unresolved', async () => {
         const { vehicle } = await createVehicleFixture(catalog, {
           typeCode: '8X11',
@@ -140,6 +179,7 @@ medusaIntegrationTestRunner({
         const before = await lookUp(vin);
         expect(before.data).toEqual({
           resolved: false,
+          place: null,
           make: 'bmw',
           code: '99ZZ',
           model_slug: null,
@@ -163,6 +203,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: false,
+          place: null,
           make: null,
           code: null,
           model_slug: null,

@@ -91,11 +91,36 @@ export const vinFactsSchema = z.object({
 
 export type VinFacts = z.infer<typeof vinFactsSchema>;
 
+export const CAR_KINDS = ['make', 'model', 'vehicle'] as const;
+
+export type CarKind = (typeof CAR_KINDS)[number];
+
+export const carHitSchema = z.object({
+  kind: z.enum(CAR_KINDS),
+  make: vehicleSchema.shape.model.shape.chassis.shape.series.shape.make,
+  model: vehicleSchema.shape.model.nullable(),
+  vehicle: vehicleSchema
+    .pick({
+      id: true,
+      slug: true,
+      power_kw: true,
+      year_from: true,
+      year_to: true,
+    })
+    .extend({ engine: vehicleSchema.shape.engine.pick({ code: true }) })
+    .nullable(),
+});
+
+export type CarHit = z.infer<typeof carHitSchema>;
+
+const placeSchema = carHitSchema.nullable().default(null).catch(null);
+
 export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
   z.object({
     resolved: z.literal(true),
     vehicle: vehicleSchema,
     facts: vinFactsSchema,
+    place: placeSchema,
   }),
   z.object({
     resolved: z.literal(false),
@@ -103,6 +128,7 @@ export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
     code: z.string().nullable(),
     model_slug: z.string().nullable().default(null),
     vehicle_ids: z.array(z.string()).default([]),
+    place: placeSchema,
   }),
 ]);
 

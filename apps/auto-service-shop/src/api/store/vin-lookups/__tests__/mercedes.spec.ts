@@ -56,6 +56,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toEqual({
           resolved: true,
           facts: { steering: 'left' },
+          place: null,
           vehicle: expect.objectContaining({
             id: vehicle.id,
             steering: null,
@@ -152,6 +153,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: true,
+          place: null,
           facts: { steering: 'left' },
           vehicle: expect.objectContaining({ id: vehicle.id }),
         });
@@ -201,6 +203,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: false,
+          place: null,
           make: 'mercedes-benz',
           code: '463273',
           model_slug: 'g-63-amg-463',
@@ -269,6 +272,7 @@ medusaIntegrationTestRunner({
 
           expect(response.data).toEqual({
             resolved: false,
+            place: null,
             make: 'mercedes-benz',
             code: '999001',
             model_slug: null,
@@ -282,6 +286,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: false,
+          place: null,
           make: 'mercedes-benz',
           code: '3G1CB',
           model_slug: null,

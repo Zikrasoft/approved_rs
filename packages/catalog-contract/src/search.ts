@@ -6,7 +6,7 @@ import {
   translated,
 } from './categories.ts';
 import { brandNumberSchema, partOfferSchema } from './partPages.ts';
-import { vehicleSchema } from './vehicle.ts';
+import { carHitSchema, vehicleSchema } from './vehicle.ts';
 
 export const CATALOG_LOCALES = ['ru', ...CATALOG_TRANSLATION_LOCALES] as const;
 
@@ -21,6 +21,16 @@ export const searchResultSchema = brandNumberSchema.extend({
   offers: z.array(partOfferSchema),
   thumbnail: z.url().nullable(),
 });
+
+const readableCars = z
+  .array(z.unknown())
+  .default([])
+  .transform((items) =>
+    items.flatMap((item) => {
+      const car = carHitSchema.safeParse(item);
+      return car.success ? [car.data] : [];
+    }),
+  );
 
 export const searchFacetSchema = z.object({
   key: z.string(),
@@ -37,6 +47,12 @@ export const searchResponseSchema = z.object({
   facets: z.array(searchFacetSchema),
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
+  cars: readableCars,
+  scope_pages: z
+    .object({ model: z.boolean(), make: z.boolean() })
+    .nullable()
+    .default(null)
+    .catch(null),
   count: z.number().int().nonnegative(),
   offset: z.number().int().nonnegative(),
   limit: z.number().int().positive(),
