@@ -1,5 +1,10 @@
 ---
-import { jsonLdText, pageSchema, type PageSchema } from '@podbor/site-kit';
+import {
+  jsonLdText,
+  NOINDEX,
+  pageSchema,
+  type PageSchema,
+} from '@podbor/site-kit';
 import type { HeroImageAttrs } from '@/utils/heroImage';
 import type { MetaProps } from '@/utils/seo';
 import { pageHead } from '@/utils/pageHead';
@@ -88,7 +93,7 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
         <link rel="alternate" hreflang={link.hreflang} href={link.href} />
       ))
     }
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content={NOINDEX} />}
 
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />
