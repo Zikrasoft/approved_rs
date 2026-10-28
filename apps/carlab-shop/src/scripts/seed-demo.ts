@@ -26,6 +26,7 @@ import {
   BATTERY_FIELDS,
   CATEGORIES,
   seedCategoryFields,
+  seedProductionCatalogue,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -1027,4 +1028,5 @@ export default async function seedDemo({ container }: ExecArgs) {
   await syncDemoSuppliers(catalog, suppliers);
   await seedDemoImages(container, catalog);
   logger.info('Seeded the demo images.');
+  await seedProductionCatalogue(container);
 }
