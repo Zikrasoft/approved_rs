@@ -3,6 +3,7 @@ import type { AttributeValues } from '@podbor/catalog-contract';
 import type {
   ArticleFacts,
   CategoryChoice,
+  PlacedPart,
   CategoryFieldChoice,
   QuoteReading,
   ShopAi,
@@ -20,7 +21,7 @@ export type FakeShopAi = {
     specs: Record<string, string>;
     fields: CategoryFieldChoice[];
   }[];
-  descriptionsWritten: ArticleFacts[];
+  descriptionsWritten: ({ article: ArticleFacts } & PlacedPart)[];
   name: string | null;
   namesWritten: ArticleFacts[];
   failure: Error | null;
@@ -54,9 +55,9 @@ export const createFakeShopAi = (): FakeShopAi => {
         fake.specsMapped.push({ specs, fields });
         return fake.attributes;
       },
-      writeDescription: async (article) => {
+      writeDescription: async (article, placed) => {
         if (fake.failure) throw fake.failure;
-        fake.descriptionsWritten.push(article);
+        fake.descriptionsWritten.push({ article, ...placed });
         return fake.description;
       },
       writeName: async (article) => {

@@ -114,12 +114,24 @@ async function fieldsOf(
   }));
 }
 
-const describe = (context: Context, article: Article) =>
+const categoryName = ({ categories }: Context, categoryId: string | null) =>
+  categories.find(({ id }) => id === categoryId)?.name ?? null;
+
+const describe = (
+  context: Context,
+  article: Article,
+  name: string,
+  categoryId: string | null,
+) =>
   article.description || article.specs
     ? orElse(
         context,
         article,
-        () => context.ai.writeDescription(factsOf(article)),
+        () =>
+          context.ai.writeDescription(factsOf(article), {
+            name,
+            category: categoryName(context, categoryId),
+          }),
         null,
       )
     : Promise.resolve(null);
@@ -161,10 +173,17 @@ async function createPart(
 ): Promise<{ identifierId: string; partId: string; categorized: boolean }> {
   const { adapter, catalog } = context;
   const name = await nameOf(context, article);
+  const classification = await classify(context, article, mappedCategoryId);
+  let categoryId = classification.category_id;
   const part = {
     name: name ?? article.name,
     source_name: name && article.name,
-    description: await describe(context, article),
+    description: await describe(
+      context,
+      article,
+      name ?? article.name,
+      categoryId,
+    ),
     identifiers: [
       {
         type: 'manufacturer-number' as const,
@@ -174,8 +193,6 @@ async function createPart(
     ],
     source: adapter.name,
   };
-  const classification = await classify(context, article, mappedCategoryId);
-  let categoryId = classification.category_id;
   const create = (attempt: Partial<PartClassification>) =>
     catalog.createPartWithIdentifiers({ ...part, ...attempt });
   const unlessRefused = (retry: () => Promise<string>) => (error: unknown) => {
@@ -248,7 +265,7 @@ async function matchArticle(
   const description =
     edited.has('description') || part.description
       ? null
-      : await describe(context, article);
+      : await describe(context, article, name ?? part.name, part.category_id);
   if (!name && !description) {
     return unchanged;
   }
@@ -350,8 +367,11 @@ export async function importSupplier(
     suppliers,
     ai: shopAi(scope),
     categories: (
-      await catalog.listCategories({}, { select: ['id', 'name'], take: null })
-    ).map(({ id, name }) => ({ id, name })),
+      await catalog.listCategories(
+        {},
+        { select: ['id', 'name', 'text'], take: null },
+      )
+    ).map(({ id, name, text }) => ({ id, name, text })),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
     vehicles: vehicleMatcher(catalog, adapter.name),

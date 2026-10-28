@@ -466,8 +466,8 @@ medusaIntegrationTestRunner({
           {
             article: facts,
             categories: expect.arrayContaining([
-              { id: engineOilId, name: 'Моторное масло' },
-              { id: oilFiltersId, name: 'Масляные фильтры' },
+              { id: engineOilId, name: 'Моторное масло', text: '' },
+              { id: oilFiltersId, name: 'Масляные фильтры', text: '' },
             ]),
           },
         ]);
@@ -486,7 +486,9 @@ medusaIntegrationTestRunner({
             ],
           },
         ]);
-        expect(shopAi.descriptionsWritten).toEqual([facts]);
+        expect(shopAi.descriptionsWritten).toEqual([
+          { article: facts, name: 'Масло 0W-20', category: 'Моторное масло' },
+        ]);
       });
 
       it('keeps the mapped Category over AI and asks for no attributes a Category without fields cannot hold', async () => {
@@ -603,6 +605,12 @@ medusaIntegrationTestRunner({
           description: 'Масляный фильтр W 980.',
           category_id: null,
         });
+        expect(shopAi.descriptionsWritten).toContainEqual(
+          expect.objectContaining({
+            name: 'Фильтр W980 новый',
+            category: null,
+          }),
+        );
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {
