@@ -108,6 +108,9 @@ const backend = () =>
     if (url.endsWith('/store/vehicles')) {
       return respond({ vehicles: [] });
     }
+    if (url.endsWith('/store/catalogue-redirects')) {
+      return respond({ redirects: [] });
+    }
     if (url.includes('/store/search')) {
       return respond(found);
     }

@@ -22,7 +22,9 @@ import {
   AdminListFitments,
   AdminListPartIdentifiers,
   AdminListRequirements,
+  AdminMerge,
   AdminOrderImages,
+  AdminRenameSlug,
   AdminSearchParts,
   AdminUpdateCategory,
   AdminUpdateCategoryField,
@@ -54,6 +56,16 @@ import {
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,
   routes: [
+    {
+      matcher: '/admin/catalogue-slugs',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminRenameSlug)],
+    },
+    {
+      matcher: '/admin/makes/:id/merge',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminMerge)],
+    },
     {
       matcher: '/admin/brands',
       method: 'POST',

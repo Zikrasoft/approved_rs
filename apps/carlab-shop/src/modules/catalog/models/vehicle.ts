@@ -11,6 +11,7 @@ import VehicleModel from './vehicle-model';
 const Vehicle = model
   .define('vehicle', {
     id: model.id().primaryKey(),
+    slug: model.text(),
     model: model.belongsTo(() => VehicleModel, { mappedBy: 'vehicles' }),
     engine: model.belongsTo(() => Engine, { mappedBy: 'vehicles' }),
     power_kw: model.number().nullable(),
@@ -26,6 +27,7 @@ const Vehicle = model
     requirements: model.hasMany(() => Requirement, { mappedBy: 'vehicle' }),
     ...provenance(),
   })
+  .indexes([{ on: ['model_id', 'slug'], unique: true }])
   .cascades({ delete: ['identifiers', 'fitments', 'requirements'] });
 
 export default Vehicle;

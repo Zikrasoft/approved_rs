@@ -88,6 +88,7 @@ const oilFilterBmw = {
 
 const VEHICLE = {
   id: 'veh_1',
+  slug: 'b47d20o0-140kw',
   power_kw: 140,
   drive: 'rwd',
   market: 'EU',
@@ -125,8 +126,12 @@ const backend = ({
   categories = [] as unknown[],
   fitments = [] as unknown[],
   vehicles = [] as unknown[],
+  redirects = [] as unknown[],
 } = {}) =>
   vi.fn((url: string) => {
+    if (url.endsWith('/store/catalogue-redirects')) {
+      return respond({ redirects });
+    }
     if (url.includes('/store/part-pages')) {
       return respond({ pages, count: pages.length, offset: 0, limit: 1000 });
     }
@@ -861,6 +866,42 @@ describe('catalogue.makeHubs', () => {
   it('builds no hubs when no backend is configured', async () => {
     expect(await makeHubsForBuild({})).toEqual([]);
     expect(await carPagesForBuild({})).toEqual([]);
+  });
+});
+
+describe('catalogue redirects', () => {
+  const renamed = {
+    from: { make: 'bmw-old' },
+    to: { make: 'bmw' },
+  };
+
+  it('reads the redirect list with the rest of the catalogue', async () => {
+    const { redirects } = await catalogueWith(
+      backend({ redirects: [renamed] }),
+    ).snapshot();
+
+    expect(redirects).toEqual([
+      {
+        from: expect.objectContaining({ make: 'bmw-old', model: null }),
+        to: expect.objectContaining({ make: 'bmw', model: null }),
+      },
+    ]);
+  });
+
+  it('builds without redirects from a shop that has no redirect list yet, and fails on a shop error', async () => {
+    const answering = (status: number) =>
+      vi.fn((url: string) =>
+        url.endsWith('/store/catalogue-redirects')
+          ? Promise.resolve({ ok: false, status, json: async () => ({}) })
+          : backend()(url),
+      );
+
+    expect((await catalogueWith(answering(404)).snapshot()).redirects).toEqual(
+      [],
+    );
+    await expect(catalogueWith(answering(503)).snapshot()).rejects.toThrow(
+      '503',
+    );
   });
 });
 

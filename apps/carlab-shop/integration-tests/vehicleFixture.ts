@@ -48,7 +48,7 @@ export const createVehicleFixture = async (
       }),
   );
   const chassis = await firstOrCreate(
-    catalog.listChassis({ code: chassisCode }),
+    catalog.listChassis({ series_id: series.id, code: chassisCode }),
     () =>
       catalog.createChassis({
         series_id: series.id,

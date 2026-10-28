@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { EditedBy } from '../../components/edited-by';
 import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
+import { SlugRename } from '../../components/slug-rename';
 import {
   Spellings,
   spellingSchema,
@@ -150,8 +151,14 @@ const BrandsPage = () => {
                   <Table.Cell className="max-w-[16rem] whitespace-normal break-words">
                     {brand.name}
                   </Table.Cell>
-                  <Table.Cell className="max-w-[12rem] whitespace-normal break-words">
-                    {brand.slug}
+                  <Table.Cell className="max-w-[12rem]">
+                    <SlugRename
+                      kind="brand"
+                      id={brand.id}
+                      slug={brand.slug}
+                      name={brand.name}
+                      reload={load}
+                    />
                   </Table.Cell>
                   <Table.Cell>
                     <Spellings

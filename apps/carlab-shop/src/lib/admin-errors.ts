@@ -35,6 +35,9 @@ export const ADMIN_ERROR_CODES = [
   'ARTICLE_UNREADABLE',
   'AI_NOT_CONFIGURED',
   'INVALID_BRAND',
+  'SLUG_TAKEN',
+  'NO_SLUG',
+  'MERGE_INTO_SELF',
 ] as const;
 
 export type AdminErrorCode = (typeof ADMIN_ERROR_CODES)[number];

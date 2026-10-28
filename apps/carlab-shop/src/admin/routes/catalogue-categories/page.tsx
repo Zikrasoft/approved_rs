@@ -27,6 +27,7 @@ import {
 } from '../../components/image-uploads';
 import { ListLoading, PINNED_ACTIONS } from '../../components/list';
 import { ScrollArea } from '../../components/scroll-area';
+import { SlugRename } from '../../components/slug-rename';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
   acknowledged,
@@ -379,9 +380,16 @@ const CategoryEditor = ({
   return (
     <div className="flex flex-col gap-y-6">
       <div className="flex flex-col gap-y-2">
-        <Heading level="h2">
-          {category.name} <Badge size="small">{category.slug}</Badge>
-        </Heading>
+        <div className="flex flex-wrap items-center gap-x-2">
+          <Heading level="h2">{category.name}</Heading>
+          <SlugRename
+            kind="category"
+            id={category.id}
+            slug={category.slug}
+            name={category.name}
+            reload={onChange}
+          />
+        </div>
         <EditedBy row={category} />
         <Label>{t('categories.name')}</Label>
         <Input value={name} onChange={(event) => setName(event.target.value)} />

@@ -38,6 +38,7 @@ import {
 } from '../../components/list';
 import { DrawerHeader, ModalHeader } from '../../components/dialog-header';
 import { ScrollArea } from '../../components/scroll-area';
+import { SlugRename } from '../../components/slug-rename';
 import {
   Spellings,
   spellingSchema,
@@ -191,6 +192,14 @@ const ENTITIES: Entity[] = [
 
 const WIDE_FORM_FIELDS = 6;
 
+const SLUG_KINDS: Record<string, 'make' | 'model'> = {
+  make: 'make',
+  vehicle_model: 'model',
+};
+
+const formFields = (entity: Entity, row: Row | null) =>
+  row ? entity.fields.filter(({ key }) => key !== 'slug') : entity.fields;
+
 const rowLabel = (
   t: TFunction,
   rows: Rows,
@@ -242,12 +251,14 @@ const EntityTable = ({
   suppliers,
   reload,
   onEdit,
+  onMerge,
 }: {
   entity: Entity;
   rows: Rows;
   suppliers: Supplier[];
   reload: () => Promise<void>;
   onEdit: (row: Row) => void;
+  onMerge: (row: Row) => void;
 }) => {
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
@@ -325,7 +336,17 @@ const EntityTable = ({
                   key={field.key}
                   className="max-w-[14rem] whitespace-normal break-words"
                 >
-                  {cell(field, row)}
+                  {field.key === 'slug' && SLUG_KINDS[entity.object] ? (
+                    <SlugRename
+                      kind={SLUG_KINDS[entity.object]}
+                      id={row.id}
+                      slug={String(row.slug)}
+                      name={rowLabel(t, rows, entity.collection, row)}
+                      reload={reload}
+                    />
+                  ) : (
+                    cell(field, row)
+                  )}
                 </Table.Cell>
               ))}
               {entity.spellings && (
@@ -357,6 +378,10 @@ const EntityTable = ({
                     })}
                     disabled={writing}
                     onEdit={() => onEdit(row)}
+                    {...(entity.object === 'make' && {
+                      onMerge: () => onMerge(row),
+                      mergeLabel: t('vehicles.merge.action'),
+                    })}
                     onDelete={() => remove(row)}
                   />
                 </div>
@@ -388,13 +413,14 @@ const EntityForm = ({
   const { t } = useTranslation('carlabAdmin');
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const wide = entity.fields.length >= WIDE_FORM_FIELDS;
+  const shown = formFields(entity, row);
+  const wide = shown.length >= WIDE_FORM_FIELDS;
 
   useEffect(() => {
-    if (open) setDraft(row ? fromRow(entity.fields, row) : {});
+    if (open) setDraft(row ? fromRow(formFields(entity, row), row) : {});
   }, [open, row, entity]);
 
-  const hasSlug = entity.fields.some(({ key }) => key === 'slug');
+  const hasSlug = shown.some(({ key }) => key === 'slug');
 
   const setText = (key: string, value: string) =>
     setDraft((current) => {
@@ -416,7 +442,7 @@ const EntityForm = ({
     const saved = await adminFetch(
       row ? `/admin/${entity.path}/${row.id}` : `/admin/${entity.path}`,
       acknowledged,
-      { method: 'POST', body: JSON.stringify(toBody(entity.fields, draft)) },
+      { method: 'POST', body: JSON.stringify(toBody(shown, draft)) },
     );
     setSaving(false);
     if (saved) {
@@ -435,7 +461,7 @@ const EntityForm = ({
         wide ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'flex flex-col gap-y-4'
       }
     >
-      {entity.fields.map((field) => {
+      {shown.map((field) => {
         const id = `${entity.path}-${field.key}`;
         return (
           <div key={field.key} className="flex flex-col gap-y-2">
@@ -552,6 +578,99 @@ const EntityForm = ({
   );
 };
 
+const MergeMakeDrawer = ({
+  rows,
+  make,
+  onClose,
+  reload,
+}: {
+  rows: Rows;
+  make: Row | null;
+  onClose: () => void;
+  reload: () => Promise<void>;
+}) => {
+  const { t } = useTranslation('carlabAdmin');
+  const writing = useWriting();
+  const [into, setInto] = useState('');
+  const [saving, setSaving] = useState(false);
+  const name = String(make?.name ?? '');
+  const others = (rows.makes ?? []).filter(({ id }) => id !== make?.id);
+
+  useEffect(() => {
+    if (make) setInto('');
+  }, [make]);
+
+  const merge = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!make) return;
+    setSaving(true);
+    const merged = await adminFetch(
+      `/admin/makes/${make.id}/merge`,
+      acknowledged,
+      { method: 'POST', body: JSON.stringify({ into }) },
+    );
+    setSaving(false);
+    if (merged) {
+      const target = others.find(({ id }) => id === into);
+      toast.success(
+        t('vehicles.merge.merged', { name, into: String(target?.name ?? '') }),
+      );
+      onClose();
+      await reload();
+    }
+  };
+
+  return (
+    <Drawer open={Boolean(make)} onOpenChange={(open) => !open && onClose()}>
+      <Drawer.Content>
+        <form onSubmit={merge} className="flex flex-1 flex-col overflow-hidden">
+          <DrawerHeader>
+            <Drawer.Title asChild>
+              <Heading>{t('vehicles.merge.title', { name })}</Heading>
+            </Drawer.Title>
+            <Drawer.Description className="txt-small text-ui-fg-subtle">
+              {t('vehicles.merge.description')}
+            </Drawer.Description>
+          </DrawerHeader>
+          <Drawer.Body className="flex flex-col gap-y-2 overflow-y-auto">
+            <Label size="small" weight="plus" htmlFor="merge-make-into">
+              {t('vehicles.merge.into')}
+            </Label>
+            <Select value={into} onValueChange={setInto}>
+              <Select.Trigger id="merge-make-into">
+                <Select.Value placeholder={t('vehicles.choose')} />
+              </Select.Trigger>
+              <Select.Content>
+                {others.map((other) => (
+                  <Select.Item key={other.id} value={other.id}>
+                    {String(other.name)}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
+          </Drawer.Body>
+          <Drawer.Footer>
+            <Drawer.Close asChild>
+              <Button size="small" variant="secondary" disabled={saving}>
+                {t('vehicles.cancel')}
+              </Button>
+            </Drawer.Close>
+            <Button
+              size="small"
+              type="submit"
+              variant="danger"
+              isLoading={saving}
+              disabled={writing || !into}
+            >
+              {t('vehicles.merge.save')}
+            </Button>
+          </Drawer.Footer>
+        </form>
+      </Drawer.Content>
+    </Drawer>
+  );
+};
+
 const VehiclesPage = () => {
   const { t } = useTranslation('carlabAdmin');
   const writing = useWriting();
@@ -561,6 +680,7 @@ const VehiclesPage = () => {
     open: false,
     row: null,
   });
+  const [merging, setMerging] = useState<Row | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const reload = async () => {
@@ -641,6 +761,7 @@ const VehiclesPage = () => {
               suppliers={suppliers}
               reload={reload}
               onEdit={(row) => setForm({ open: true, row })}
+              onMerge={setMerging}
             />
           </Tabs.Content>
         ))}
@@ -651,6 +772,12 @@ const VehiclesPage = () => {
         row={form.row}
         open={form.open}
         onOpenChange={(open) => setForm((current) => ({ ...current, open }))}
+        reload={reload}
+      />
+      <MergeMakeDrawer
+        rows={rows}
+        make={merging}
+        onClose={() => setMerging(null)}
         reload={reload}
       />
     </Container>

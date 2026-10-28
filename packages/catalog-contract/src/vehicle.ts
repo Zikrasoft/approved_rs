@@ -44,6 +44,7 @@ export const vehicleIdentifierSchema = z.object({
 
 export const vehicleSchema = z.object({
   id: z.string(),
+  slug: z.string().nullable().default(null),
   power_kw: z.number().nullable(),
   drive: displayEnum(VEHICLE_DRIVES),
   market: z.string().nullable(),

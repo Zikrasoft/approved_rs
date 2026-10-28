@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { shopOpenSchema } from '@podbor/catalog-contract/preview';
-import type { Category } from '@podbor/catalog-contract';
+import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import {
@@ -166,4 +166,10 @@ export async function makeHubsForBuild(
 ): Promise<MakeHubEntry[]> {
   const snapshot = await snapshotForBuild(env);
   return snapshot ? makeHubsFrom(snapshot) : [];
+}
+
+export async function redirectsForBuild(
+  env = siteEnv(),
+): Promise<CatalogueRedirect[]> {
+  return (await snapshotForBuild(env))?.redirects ?? [];
 }
