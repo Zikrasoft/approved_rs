@@ -228,10 +228,7 @@ const CRAWLED_CATALOGUES: Record<
   },
 };
 
-const CRAWLED_SUPPLIER = {
-  import_on_publish: false,
-  released_kinds: [...STAGED_DATA_KINDS],
-};
+const CRAWLED_SUPPLIER = { released_kinds: [...STAGED_DATA_KINDS] };
 
 async function seedCrawledSupplier(
   suppliers: SupplierModuleService,

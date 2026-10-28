@@ -102,7 +102,7 @@ medusaIntegrationTestRunner({
         expect(await suppliers.listSupplierOffers()).toEqual([]);
       });
 
-      it('registers each crawled site once as a Supplier imported only on its own button, with every staged kind released', async () => {
+      it('registers each crawled site once as a Supplier with its import on and every staged kind released', async () => {
         const registered = await suppliers.listSuppliers();
         expect(registered.map(({ name }) => name).sort()).toEqual([
           'FILTRON',
@@ -113,7 +113,6 @@ medusaIntegrationTestRunner({
         for (const supplier of registered) {
           expect(supplier).toMatchObject({
             import_enabled: true,
-            import_on_publish: false,
             released_kinds: ['cross_references', 'applicability', 'images'],
           });
         }
@@ -307,11 +306,10 @@ medusaIntegrationTestRunner({
         await suppliers.updateSuppliers([
           {
             id: varta.id,
-            import_on_publish: true,
             released_kinds: ['images'],
             updated_by: 'user_1',
           },
-          { id: filtron.id, import_on_publish: true, released_kinds: [] },
+          { id: filtron.id, released_kinds: [] },
         ]);
         await suppliers.updateSupplierCategories({
           id: mapping.id,
@@ -334,14 +332,12 @@ medusaIntegrationTestRunner({
 
         await run();
 
-        expect(await suppliers.retrieveSupplier(varta.id)).toMatchObject({
-          import_on_publish: true,
-          released_kinds: ['images'],
-        });
-        expect(await suppliers.retrieveSupplier(filtron.id)).toMatchObject({
-          import_on_publish: false,
-          released_kinds: ['cross_references', 'applicability', 'images'],
-        });
+        expect(
+          (await suppliers.retrieveSupplier(varta.id)).released_kinds,
+        ).toEqual(['images']);
+        expect(
+          (await suppliers.retrieveSupplier(filtron.id)).released_kinds,
+        ).toEqual(['cross_references', 'applicability', 'images']);
         expect(
           (await suppliers.retrieveSupplierCategory(mapping.id)).category_id,
         ).toBe(brakes.id);

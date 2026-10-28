@@ -997,8 +997,7 @@ unedited one gets its seeded values and missing image back.
 
 It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
 `apps/carlab-shop/src/lib/production-seed.ts`, one entry per crawled site: the
-Supplier (Import on Publish off, cross-references, applicability and images
-released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
+Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
 mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
 `VW (VOLKSWAGEN)` and bilstein group's `Volkswagen (VW)` on one Volkswagen). The
