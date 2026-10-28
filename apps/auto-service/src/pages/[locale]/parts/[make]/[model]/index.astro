@@ -10,7 +10,7 @@ import { carName, vehicleVariant } from '@/utils/carName';
 import { makeHubsForBuild } from '@/utils/catalogueEnv';
 import type { ModelHubEntry } from '@/utils/catalogueSnapshot';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 export async function getStaticPaths() {
@@ -102,7 +102,7 @@ const empty = hub.categories.length === 0;
             hub.vehicles.map((vehicle) => (
               <li>
                 <a
-                  href={PathBuilder.partsCar(locale, vehicle.id)}
+                  href={vehiclePath(locale, vehicle)}
                   class="block px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
                 >
                   <span class="spec text-sm">

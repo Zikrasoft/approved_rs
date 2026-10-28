@@ -44,6 +44,23 @@ export const PathBuilder = {
 
 export const PARTS_INQUIRY_ANCHOR = 'inquiry';
 
+export type VehicleAddress = {
+  id: string;
+  slug: string | null;
+  model: { slug: string; chassis: { series: { make: { slug: string } } } };
+};
+
+export const vehiclePath = (
+  locale: Locale,
+  { id, slug, model }: VehicleAddress,
+): string =>
+  PathBuilder.partsVehicle(
+    locale,
+    model.chassis.series.make.slug,
+    model.slug,
+    slug ?? id,
+  );
+
 export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));
 }

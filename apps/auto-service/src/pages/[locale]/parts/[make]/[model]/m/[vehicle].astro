@@ -16,7 +16,7 @@ import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild } from '@/utils/catalogueEnv';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { kitPick } from '@/utils/kitPick';
 
@@ -24,7 +24,11 @@ export async function getStaticPaths() {
   const cars = await carPagesForBuild();
   return withLocales(
     cars.map((car) => ({
-      params: { id: car.vehicle.id },
+      params: {
+        make: car.vehicle.model.chassis.series.make.slug,
+        model: car.vehicle.model.slug,
+        vehicle: car.vehicle.slug ?? car.vehicle.id,
+      },
       props: { car },
     })),
   );
@@ -106,7 +110,9 @@ const specsSummary = [
 <Shell
   title={copy.metaTitle.replace('{car}', name)}
   description={copy.metaDescription.replace('{car}', name)}
-  noindex
+  canonicalPath={car.solitary
+    ? PathBuilder.partsModel(locale, make.slug, model.slug)
+    : undefined}
 >
   <PageHero
     actions={false}
@@ -119,7 +125,7 @@ const specsSummary = [
         href: PathBuilder.partsModel(locale, make.slug, model.slug),
         label: carName(model, locale),
       },
-      { href: PathBuilder.partsCar(locale, vehicle.id), label: variant },
+      { href: vehiclePath(locale, vehicle), label: variant },
     ]}
   />
 

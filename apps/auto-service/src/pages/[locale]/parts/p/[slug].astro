@@ -21,7 +21,7 @@ import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { schemaAvailability } from '@/utils/leadTime';
 
 export async function getStaticPaths() {
@@ -90,7 +90,7 @@ const shown =
         }
       : null;
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
-  href: PathBuilder.partsCar(locale, vehicle.id),
+  href: vehiclePath(locale, vehicle),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
 const carLists = [
@@ -336,10 +336,7 @@ const thumbFor = (slug: string) => {
                                   <FitLine
                                     fit={fit}
                                     car={{
-                                      href: PathBuilder.partsCar(
-                                        locale,
-                                        fit.vehicle.id,
-                                      ),
+                                      href: vehiclePath(locale, fit.vehicle),
                                       label: vehicleVariant(
                                         fit.vehicle,
                                         locale,

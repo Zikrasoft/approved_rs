@@ -1,7 +1,33 @@
 import { describe, it, expect } from 'vitest';
-import { PathBuilder, swapLocale, withLocales } from './paths';
+import { PathBuilder, swapLocale, vehiclePath, withLocales } from './paths';
 import { SERVICE_SLUGS } from './services';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
+
+describe('vehiclePath', () => {
+  const vehicle = {
+    id: 'veh_1',
+    slug: 'b47d20o0-140kw',
+    model: {
+      slug: '3-series-f30-320d',
+      chassis: { series: { make: { slug: 'bmw' } } },
+    },
+  };
+
+  it.each(SUPPORTED_LOCALES)(
+    'puts a %s Vehicle page under its Model',
+    (locale) => {
+      expect(vehiclePath(locale, vehicle)).toBe(
+        `/${locale}/parts/bmw/3-series-f30-320d/m/b47d20o0-140kw/`,
+      );
+    },
+  );
+
+  it('falls back to the id for a shop that has not shipped Vehicle slugs', () => {
+    expect(vehiclePath('sr', { ...vehicle, slug: null })).toBe(
+      '/sr/parts/bmw/3-series-f30-320d/m/veh_1/',
+    );
+  });
+});
 
 describe('PathBuilder', () => {
   it('prefixes every path with the locale and ends with a slash', () => {

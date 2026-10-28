@@ -224,7 +224,7 @@ see new Parts on static pages.
 Useful pages:
 
 - Owner VIN: post `WBA35BG070N074158` in the VIN form, or open the car page it
-  redirects to (`/ru/parts/car/<vehicle id>/`).
+  redirects to (`/ru/parts/<make>/<model>/m/<vehicle slug>/`).
 - E-class: `WDD2130041A123456` (left-hand drive) and `WDD2130042A123456`
   (right-hand drive; the redirect carries `?steering=right`).
 - Part page: `/ru/parts/p/mann-filter-hu816x/`; superseded number:
