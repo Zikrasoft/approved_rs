@@ -51,7 +51,7 @@ leadTime:
     few: '{days} дня'
     many: '{days} дней'
     other: '{days} дня'
-translatedFrom: ab5aa702611f307a
+translatedFrom: 326db525b824f2f4
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -73,8 +73,8 @@ translations:
     attributeNo: Ne
     categoryLink: Svi delovi kategorije
     priceOnRequestHeading: Cena na zahtev
-    priceOnRequestBody: 'Delova u katalogu ima previše da bismo sve cene držali ažurnim. Pošaljite upit: po VIN-u ćemo proveriti da li deo odgovara i pronaći najbolju cenu.'
-    priceOnRequestCta: Pronađite deo za svoj auto
+    priceOnRequestBody: 'U katalogu ima previše delova da bismo održavali sve cene ažurnim. Pošaljite upit: proverićemo po VIN-u koja komponenta odgovara i pronaći ćemo najbolju cenu.'
+    priceOnRequestCta: Pronađi
     offersHeading: Cena i dostupnost
     columns:
       stock: Dostupno
@@ -127,8 +127,8 @@ translations:
     attributeNo: No
     categoryLink: All parts in this category
     priceOnRequestHeading: Price available upon request
-    priceOnRequestBody: 'Our catalogue holds too many parts to keep every price current. Send an inquiry: we will check by VIN that the part fits and find the best price.'
-    priceOnRequestCta: Match it to my car
+    priceOnRequestBody: "There are too many parts in the catalog to keep all prices up to date. Please submit a request: we'll check by VIN to see if the part is suitable and find the best price."
+    priceOnRequestCta: Find out
     offersHeading: Price and availability
     columns:
       stock: In stock
