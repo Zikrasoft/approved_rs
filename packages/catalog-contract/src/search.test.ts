@@ -174,12 +174,12 @@ describe('searchResponseSchema', () => {
   });
 
   it('reads a response from a backend that predates scope pages as not knowing', () => {
-    const { scope_pages: _scopePages, ...older } = response;
+    const older = { ...response, scope_pages: undefined };
     expect(searchResponseSchema.parse(older).scope_pages).toBeNull();
   });
 
   it('reads a response from a backend that predates cars as having none', () => {
-    const { cars: _cars, ...older } = response;
+    const older = { ...response, cars: undefined };
     expect(searchResponseSchema.parse(older).cars).toEqual([]);
   });
 
