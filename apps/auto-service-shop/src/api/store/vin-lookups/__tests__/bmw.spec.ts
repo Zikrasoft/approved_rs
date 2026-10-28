@@ -63,6 +63,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: true,
+          place: null,
           facts: { steering: 'left' },
           vehicle: expect.objectContaining({ id: vehicle.id }),
         });
@@ -87,6 +88,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data).toEqual({
           resolved: false,
+          place: null,
           make: 'bmw',
           code: '3W31',
           model_slug: 'f30-316d-crawled',
