@@ -152,6 +152,18 @@ describe('the catalogue search box', () => {
     expect(trackGoal).toHaveBeenCalledWith(GOALS.search, { kind: 'query' });
   });
 
+  it('keeps the field focused while a suggestion is pressed, so the tap lands', async () => {
+    const { input, panel } = mount();
+    await type(input, 'bmw x3');
+    const [car] = panel.querySelectorAll('[role="option"]');
+
+    const press = new Event('pointerdown', { bubbles: true, cancelable: true });
+    car.dispatchEvent(press);
+
+    expect(press.defaultPrevented).toBe(true);
+    expect(panel.hidden).toBe(false);
+  });
+
   it('closes the suggestions on Escape', async () => {
     const { input, panel } = mount();
     await type(input, 'bmw x3');

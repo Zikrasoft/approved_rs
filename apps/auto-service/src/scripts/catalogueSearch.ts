@@ -4,6 +4,8 @@ import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 export const SUGGEST_DELAY_MS = 200;
 const MIN_QUERY_LENGTH = 2;
 
+const compact = (text: string) => text.replace(/[\s.-]/g, '').toUpperCase();
+
 type Link = { href: string; label: string; detail?: string };
 type PartLink = Link & { thumb: string | null };
 type Suggestions = { vin: boolean; cars: Link[]; parts: PartLink[] };
@@ -143,7 +145,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
 
         const suggest = async () => {
           const q = input.value.trim();
-          if (q.replace(/[\s.-]/g, '').length < MIN_QUERY_LENGTH) {
+          if (compact(q).length < MIN_QUERY_LENGTH) {
             close();
             return;
           }
@@ -193,6 +195,9 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             options()[this.#active]?.click();
           }
         });
+        panel.addEventListener('pointerdown', (event) => {
+          event.preventDefault();
+        });
         panel.addEventListener('click', (event) => {
           const picked = (event.target as Element).closest<HTMLElement>(
             '[role="option"]',
@@ -207,9 +212,8 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           if (!this.contains(event.relatedTarget as Node | null)) close();
         });
         form.addEventListener('submit', () => {
-          const compact = input.value.replace(/[\s.-]/g, '').toUpperCase();
           reachGoal(GOALS.search, {
-            kind: VIN_PATTERN.test(compact) ? 'vin' : 'query',
+            kind: VIN_PATTERN.test(compact(input.value)) ? 'vin' : 'query',
           });
         });
 

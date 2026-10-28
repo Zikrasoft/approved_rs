@@ -2,6 +2,7 @@ import {
   normalizePartNumber,
   vinSchema,
   type CarHit,
+  type PlacePages,
   type VinFacts,
 } from '@podbor/catalog-contract';
 import type { Locale } from '@/i18n/config';
@@ -22,7 +23,7 @@ type ResolvedVin =
       kind: 'vehicle';
       vehicle: VehicleAddress;
       facts: VinFacts;
-      pages: { vehicle: boolean; model: boolean; make: boolean } | null;
+      pages: PlacePages | null;
     }
   | { kind: 'inquiry' };
 
@@ -111,30 +112,33 @@ export const listingCrumbs = ({
   searchLabel,
 }: ListingScope): SearchLink[] => {
   const make = model?.chassis.series.make;
-  const modelPage = Boolean(model && make && pages?.model);
+  const paged = model && pages?.model ? model : null;
   return [
     ...(make && pages?.make
       ? [{ href: PathBuilder.partsMake(locale, make.slug), label: make.name }]
       : []),
-    ...(model && make && modelName && modelPage
+    ...(paged && modelName
       ? [
           {
-            href: PathBuilder.partsModel(locale, make.slug, model.slug),
+            href: PathBuilder.partsModel(
+              locale,
+              paged.chassis.series.make.slug,
+              paged.slug,
+            ),
             label: modelName,
           },
         ]
       : []),
     category
       ? {
-          href:
-            model && make && modelPage
-              ? PathBuilder.partsModelCategory(
-                  locale,
-                  make.slug,
-                  model.slug,
-                  category.slug,
-                )
-              : PathBuilder.partsCategory(locale, category.slug),
+          href: paged
+            ? PathBuilder.partsModelCategory(
+                locale,
+                paged.chassis.series.make.slug,
+                paged.slug,
+                category.slug,
+              )
+            : PathBuilder.partsCategory(locale, category.slug),
           label: category.name,
         }
       : { href: PathBuilder.partsSearch(locale), label: searchLabel },

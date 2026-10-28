@@ -24,6 +24,7 @@ import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   type CatalogLocale,
+  type PlacePages,
   type Category,
   type SearchResponse,
   type SearchResult,
@@ -72,17 +73,12 @@ export type IdentifierPrices = {
   installation: Record<string, number | null>;
 };
 
-type VinPages = Extract<
-  z.infer<typeof vinLookupResponseSchema>,
-  { resolved: true }
->['pages'];
-
 export type VinOutcome =
   | {
       kind: 'vehicle';
       vehicle: Vehicle;
       facts: VinFacts;
-      pages: VinPages;
+      pages: PlacePages | null;
     }
   | { kind: 'inquiry'; vin: string };
 

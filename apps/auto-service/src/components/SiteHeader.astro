@@ -114,14 +114,14 @@ const links = [
           <span class="spec text-xs">{site.header.phoneLabel}</span>
         </ContactControl>
 
-        <a
-          href={PathBuilder.partsSearch(locale)}
-          data-search-open
+        <button
+          type="button"
+          popovertarget="site-search"
           aria-label={searchCopy.openSearch}
           class="flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
         >
           <Icon name="search" size={20} />
-        </a>
+        </button>
 
         <cart-badge
           class="block"
@@ -177,7 +177,7 @@ const links = [
     class="inset-x-0 top-0 bottom-auto m-0 w-full max-w-none overflow-visible border-0 border-b border-line bg-paper p-0 text-ink shadow-lg backdrop:bg-ink/20"
   >
     <div class="wrap flex items-start gap-2 py-3">
-      <CatalogueSearch class="min-w-0 flex-1" />
+      <CatalogueSearch class="min-w-0 flex-1" autofocus />
       <button
         type="button"
         popovertarget="site-search"
@@ -254,18 +254,4 @@ const links = [
   defineCartBadge();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
-
-  const searchPanel = document.getElementById('site-search');
-  const searchOpener = document.querySelector('[data-search-open]');
-  if (searchPanel && searchOpener && 'showPopover' in searchPanel) {
-    searchOpener.addEventListener('click', (event) => {
-      event.preventDefault();
-      searchPanel.showPopover();
-    });
-    searchPanel.addEventListener('toggle', (event) => {
-      if ((event as ToggleEvent).newState === 'open') {
-        searchPanel.querySelector('input')?.focus();
-      }
-    });
-  }
 </script>
