@@ -147,6 +147,46 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('stores joined chassis codes in one order, and the same code under another Series', async () => {
+        const { chassis } = await createVehicleFixture(catalog, {
+          typeCode: 'JND1',
+        });
+        const series = (
+          await post('/admin/series', {
+            make_id: (await catalog.retrieveSeries(chassis.series_id)).make_id,
+            name: '1 серия',
+          })
+        ).data.series;
+
+        const joined = await post('/admin/chassis', {
+          series_id: series.id,
+          code: 'e88 / e82',
+          body_style: 'coupe',
+        });
+        const shared = await post('/admin/chassis', {
+          series_id: series.id,
+          code: chassis.code,
+          body_style: 'sedan',
+        });
+
+        expect(joined.data.chassis.code).toBe('E82/E88');
+        expect(shared.status).toBe(200);
+      });
+
+      it('leaves Supplier vehicle ids to the import', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'SUP1',
+        });
+
+        const response = await post('/admin/vehicle-identifiers', {
+          vehicle_id: vehicle.id,
+          type: 'supplier-vehicle-id',
+          value: '141461',
+        });
+
+        expect(response.status).toBe(400);
+      });
+
       it('refuses a Chassis whose years run backwards', async () => {
         const { chassis } = await createVehicleFixture(catalog, {
           typeCode: 'YRS1',

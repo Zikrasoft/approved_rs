@@ -1,4 +1,7 @@
+import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
+
 import type CatalogModuleService from '../../modules/catalog/service';
+import { canonicalChassisCode } from '../chassis-code';
 import { fitmentConflicts } from '../fitment-conflicts';
 import { slugOf } from '../slug';
 import type { VehicleFacts } from './adapter';
@@ -153,41 +156,33 @@ async function makeOf(matcher: VehicleMatcher, spelling: string) {
   return make;
 }
 
-async function seriesOf(
-  { catalog, source }: VehicleMatcher,
-  makeId: string,
-  name: string,
-) {
-  const known = (
-    await catalog.listSeries({ make_id: makeId }, { take: null })
-  ).find((series) => nameKey(series.name) === nameKey(name));
-  return known ?? catalog.createSeries({ make_id: makeId, name, source });
-}
-
 async function chassisOf(
-  matcher: VehicleMatcher,
+  { catalog, source }: VehicleMatcher,
   make: Make,
   facts: VehicleFacts,
 ) {
-  const { catalog, source } = matcher;
-  const codes = chassisCodesOf(facts).join('/');
-  for (const code of [codes, `${make.name} ${codes}`]) {
-    const [known] = await catalog.listChassis(
-      { code },
-      { relations: ['series'], take: 1 },
-    );
-    if (known?.series.make_id === make.id) return known;
-    if (!known) {
-      const series = await seriesOf(matcher, make.id, facts.model);
-      return catalog.createChassis({
-        series_id: series.id,
-        code,
-        body_style: facts.body_style,
-        source,
-      });
-    }
-  }
-  throw new Error(`Chassis ${codes} is taken by another make`);
+  const code = canonicalChassisCode(chassisCodesOf(facts).join('/'));
+  const series = await catalog.listSeries({ make_id: make.id }, { take: null });
+  const [known] = series.length
+    ? await catalog.listChassis(
+        { series_id: series.map(({ id }) => id), code },
+        { take: 1 },
+      )
+    : [];
+  if (known) return known;
+  const named =
+    series.find(({ name }) => nameKey(name) === nameKey(facts.model)) ??
+    (await catalog.createSeries({
+      make_id: make.id,
+      name: facts.model,
+      source,
+    }));
+  return catalog.createChassis({
+    series_id: named.id,
+    code,
+    body_style: facts.body_style,
+    source,
+  });
 }
 
 async function freeModelSlug(catalog: CatalogModuleService, name: string) {
@@ -257,6 +252,17 @@ async function vehicleOf(
   return vehicle.id;
 }
 
+async function vehicleBySupplierId(
+  { catalog, supplierId }: VehicleMatcher,
+  value: string,
+) {
+  const [known] = await catalog.listVehicleIdentifiers(
+    { type: SUPPLIER_VEHICLE_ID, supplier_id: supplierId, value },
+    { select: ['vehicle_id'], take: 1 },
+  );
+  return known?.vehicle_id;
+}
+
 async function vehiclesOf(
   matcher: VehicleMatcher,
   facts: VehicleFacts,
@@ -264,9 +270,24 @@ async function vehiclesOf(
   const key = JSON.stringify({ ...facts, notes: [] });
   const found = matcher.found.get(key);
   if (found) return found;
-  const ids: string[] = [];
-  for (const code of facts.engine_codes) {
+  const { catalog, source, supplierId } = matcher;
+  const supplierVehicleId =
+    facts.engine_codes.length === 1 ? facts.supplier_vehicle_id : undefined;
+  const known =
+    supplierVehicleId &&
+    (await vehicleBySupplierId(matcher, supplierVehicleId));
+  const ids: string[] = known ? [known] : [];
+  for (const code of known ? [] : facts.engine_codes) {
     ids.push(await vehicleOf(matcher, facts, code));
+  }
+  if (supplierVehicleId && !known) {
+    await catalog.createVehicleIdentifiers({
+      vehicle_id: ids[0],
+      type: SUPPLIER_VEHICLE_ID,
+      supplier_id: supplierId,
+      value: supplierVehicleId,
+      source,
+    });
   }
   matcher.found.set(key, ids);
   return ids;
@@ -295,7 +316,10 @@ async function dropUnlisted(
         withDeleted: true,
       })),
       ...(await catalog.listRequirements(byVehicle, columns)),
-      ...(await catalog.listVehicleIdentifiers(byVehicle, columns)),
+      ...(await catalog.listVehicleIdentifiers(
+        { ...byVehicle, supplier_id: null },
+        columns,
+      )),
     ].map(({ vehicle_id }) => vehicle_id),
   );
   const orphans = (

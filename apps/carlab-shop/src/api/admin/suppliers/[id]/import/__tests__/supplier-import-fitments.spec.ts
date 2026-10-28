@@ -1,4 +1,6 @@
 import { asValue } from '@medusajs/framework/awilix';
+import type { IApiKeyModuleService } from '@medusajs/framework/types';
+import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
@@ -449,6 +451,142 @@ medusaIntegrationTestRunner({
           (await fitmentsOf('W 712')).map(({ vehicle }) => vehicle.model.name),
         ).toEqual(expect.arrayContaining([dropped.variant, manual.model.name]));
         expect(await fitmentsOf('W 712')).toHaveLength(2);
+      });
+
+      it('recognises a car by its Supplier vehicle id when the facts the site gives for it change, and keeps two Suppliers ids apart', async () => {
+        const article = {
+          article_id: 'HU925',
+          brand: 'MANN-FILTER',
+          number: 'HU 925/4 x',
+          name: 'Oil Filter HU 925/4 x',
+          category: 'Oil Filter',
+          vehicles: [{ ...bmw125i, supplier_vehicle_id: '00000000141461' }],
+        };
+        mann.articles.push(article);
+        bilstein.articles.push({
+          article_id: 'febi/30000',
+          brand: 'febi',
+          number: '30000',
+          name: 'uljni filter',
+          category: 'uljni filter',
+          vehicles: [
+            {
+              ...golf('Volkswagen'),
+              supplier_vehicle_id: '00000000141461',
+            },
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('bilstein group');
+        const [first] = await fitmentsOf('HU 925/4 x');
+        article.vehicles = [
+          {
+            ...bmw125i,
+            variant: '125i Coupé',
+            power_kw: 165,
+            year_from: 2007,
+            supplier_vehicle_id: '00000000141461',
+          },
+        ];
+        await runImport('MANN-FILTER');
+
+        const [again] = await fitmentsOf('HU 925/4 x');
+        const [febi] = await fitmentsOf('30000');
+        expect(again.vehicle_id).toBe(first.vehicle_id);
+        expect(febi.vehicle_id).not.toBe(first.vehicle_id);
+        expect(
+          again.vehicle.identifiers.map(({ type, value, supplier_id }) => ({
+            type,
+            value,
+            supplier_id,
+          })),
+        ).toEqual([
+          {
+            type: 'supplier-vehicle-id',
+            value: '00000000141461',
+            supplier_id: supplierIds['MANN-FILTER'],
+          },
+        ]);
+      });
+
+      it('keeps Supplier vehicle ids out of the storefront', async () => {
+        mann.articles.push({
+          article_id: 'HU926',
+          brand: 'MANN-FILTER',
+          number: 'HU 926',
+          name: 'Oil Filter HU 926',
+          category: 'Oil Filter',
+          vehicles: [{ ...bmw125i, supplier_vehicle_id: '00000000141462' }],
+        });
+        await runImport('MANN-FILTER');
+        const [fitment] = await fitmentsOf('HU 926');
+        const { token } = await getContainer()
+          .resolve<IApiKeyModuleService>(Modules.API_KEY)
+          .createApiKeys({
+            title: 'supplier-import-fitments',
+            type: 'publishable',
+            created_by: 'test',
+          });
+
+        const response = await api.get('/store/vehicles', {
+          headers: { 'x-publishable-api-key': token },
+        });
+
+        expect(
+          response.data.vehicles.find(
+            ({ id }: { id: string }) => id === fitment.vehicle_id,
+          ).identifiers,
+        ).toEqual([]);
+      });
+
+      it('keeps one chassis code apart across Makes and stores joined codes in one order', async () => {
+        const e12 = (make: string, model: string): VehicleFacts => ({
+          ...bmw125i,
+          make,
+          model,
+          variant: `${make} ${model}`,
+          chassis_codes: ['E12'],
+          engine_codes: [`${make} engine`],
+        });
+        mann.articles.push({
+          article_id: 'C2029',
+          brand: 'MANN-FILTER',
+          number: 'C 2029',
+          name: 'Air Filter C 2029',
+          category: 'Air Filter',
+          vehicles: [
+            e12('BMW', '5'),
+            e12('Toyota', 'Corolla'),
+            {
+              ...bmw125i,
+              variant: '118d',
+              chassis_codes: ['E88', 'E82'],
+              engine_codes: ['N47 D20A'],
+              power_kw: 105,
+            },
+            {
+              ...bmw125i,
+              variant: '120d',
+              chassis_codes: ['E82', 'E88'],
+              engine_codes: ['N47 D20C'],
+              power_kw: 130,
+            },
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+
+        const fitted = await fitmentsOf('C 2029');
+        const chassisOf = (variant: string) =>
+          fitted.find(({ vehicle }) => vehicle.model.name === variant)!.vehicle
+            .model.chassis;
+        expect(chassisOf('BMW 5').code).toBe('E12');
+        expect(chassisOf('Toyota Corolla').code).toBe('E12');
+        expect(chassisOf('BMW 5').series.make.name).toBe('BMW');
+        expect(chassisOf('Toyota Corolla').series.make.name).toBe('Toyota');
+        expect(chassisOf('118d').code).toBe('E82/E88');
+        expect(chassisOf('118d').id).toBe(chassisOf('120d').id);
       });
 
       it('fits no Vehicle for a row without an engine code and counts the row', async () => {

@@ -128,6 +128,11 @@ describe('CommonJS build', () => {
     expect(contract.VEHICLE_IDENTIFIER_TYPES).toEqual([
       'bmw-type-code',
       'mercedes-baumuster',
+      'supplier-vehicle-id',
+    ]);
+    expect(contract.MANUFACTURER_VEHICLE_IDENTIFIER_TYPES).toEqual([
+      'bmw-type-code',
+      'mercedes-baumuster',
     ]);
     expect(
       contract.vinLookupResponseSchema.safeParse({

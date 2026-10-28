@@ -3,13 +3,16 @@ import { Migration } from '@medusajs/framework/mikro-orm/migrations';
 export class Migration20261025010017 extends Migration {
   override async up(): Promise<void> {
     this.addSql(
+      `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_supplier_id_type_value_unique";`,
+    );
+    this.addSql(
       `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_type_value_unique";`,
     );
     this.addSql(
       `alter table if exists "vehicle_model" drop constraint if exists "vehicle_model_slug_unique";`,
     );
     this.addSql(
-      `alter table if exists "chassis" drop constraint if exists "chassis_code_unique";`,
+      `alter table if exists "chassis" drop constraint if exists "chassis_series_id_code_unique";`,
     );
     this.addSql(
       `alter table if exists "part_identifier" drop constraint if exists "part_identifier_brand_id_normalized_value_unique";`,
@@ -191,13 +194,13 @@ export class Migration20261025010017 extends Migration {
       `create table if not exists "chassis" ("id" text not null, "code" text not null, "body_style" text check ("body_style" in ('sedan', 'touring', 'hatchback', 'coupe', 'convertible', 'gran-coupe', 'suv', 'van')) null, "year_from" integer null, "year_to" integer null, "series_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "chassis_pkey" primary key ("id"));`,
     );
     this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_chassis_code_unique" ON "chassis" ("code") WHERE deleted_at IS NULL;`,
-    );
-    this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_chassis_series_id" ON "chassis" ("series_id") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_chassis_deleted_at" ON "chassis" ("deleted_at") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_chassis_series_id_code_unique" ON "chassis" ("series_id", "code") WHERE deleted_at IS NULL;`,
     );
 
     this.addSql(
@@ -227,7 +230,7 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "vehicle_identifier" ("id" text not null, "type" text check ("type" in ('bmw-type-code', 'mercedes-baumuster')) not null, "value" text not null, "vehicle_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vehicle_identifier_pkey" primary key ("id"));`,
+      `create table if not exists "vehicle_identifier" ("id" text not null, "type" text check ("type" in ('bmw-type-code', 'mercedes-baumuster', 'supplier-vehicle-id')) not null, "value" text not null, "supplier_id" text null, "vehicle_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vehicle_identifier_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vehicle_identifier_vehicle_id" ON "vehicle_identifier" ("vehicle_id") WHERE deleted_at IS NULL;`,
@@ -236,7 +239,10 @@ export class Migration20261025010017 extends Migration {
       `CREATE INDEX IF NOT EXISTS "IDX_vehicle_identifier_deleted_at" ON "vehicle_identifier" ("deleted_at") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_type_value_unique" ON "vehicle_identifier" ("type", "value") WHERE deleted_at IS NULL;`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_type_value_unique" ON "vehicle_identifier" ("type", "value") WHERE supplier_id IS NULL AND deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_identifier_supplier_id_type_value_unique" ON "vehicle_identifier" ("supplier_id", "type", "value") WHERE supplier_id IS NOT NULL AND deleted_at IS NULL;`,
     );
 
     this.addSql(

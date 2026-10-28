@@ -59,6 +59,7 @@ const applicationsSchema = z.array(
           csvFuelTypes: z.string().nullish(),
           body: z.string().nullish(),
           modelCodes: z.string().nullish(),
+          variantId: z.number().int().nullish(),
         }),
         relationships: z
           .object({
@@ -201,6 +202,9 @@ const vehiclesOf = ($: CheerioAPI): VehicleFacts[] => {
         notes: applied
           .filter((limit) => limit !== engineLimit)
           .map(({ criteria, value }) => `${criteria}: ${value}`),
+        ...(attributes.variantId != null && {
+          supplier_vehicle_id: String(attributes.variantId),
+        }),
       };
     });
   });

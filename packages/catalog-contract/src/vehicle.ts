@@ -7,9 +7,14 @@ import { VIN_PATTERN } from './vin.ts';
 export { STEERING_SIDES, type SteeringSide } from './steering.ts';
 export { VIN_PATTERN } from './vin.ts';
 
-export const VEHICLE_IDENTIFIER_TYPES = [
+export const MANUFACTURER_VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',
   'mercedes-baumuster',
+] as const;
+export const SUPPLIER_VEHICLE_ID = 'supplier-vehicle-id';
+export const VEHICLE_IDENTIFIER_TYPES = [
+  ...MANUFACTURER_VEHICLE_IDENTIFIER_TYPES,
+  SUPPLIER_VEHICLE_ID,
 ] as const;
 export const VEHICLE_DRIVES = ['rwd', 'fwd', 'awd'] as const;
 export const ENGINE_FUELS = ['petrol', 'diesel', 'hybrid', 'electric'] as const;
@@ -25,6 +30,8 @@ export const BODY_STYLES = [
 ] as const;
 
 export type VehicleIdentifierType = (typeof VEHICLE_IDENTIFIER_TYPES)[number];
+export type ManufacturerVehicleIdentifierType =
+  (typeof MANUFACTURER_VEHICLE_IDENTIFIER_TYPES)[number];
 
 const translationsSchema = z
   .object({ sr: z.string().optional(), en: z.string().optional() })

@@ -2,6 +2,7 @@ import {
   type Fitment,
   fitmentSchema,
   partOfferSchema,
+  SUPPLIER_VEHICLE_ID,
   type Vehicle,
   vehicleSchema,
 } from '@podbor/catalog-contract';
@@ -100,6 +101,9 @@ export const listVehicleResponses = async (
     const { requirements, engine, model } = inheritedRequirements.parse(row);
     return vehicleSchema.parse({
       ...row,
+      identifiers: row.identifiers.filter(
+        ({ type }) => type !== SUPPLIER_VEHICLE_ID,
+      ),
       requirements: [
         ...engine.requirements,
         ...model.chassis.requirements,
