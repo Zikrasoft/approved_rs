@@ -217,9 +217,16 @@ _Avoid_: part number (bare), supplier SKU
 its Supplier's Markup.
 _Avoid_: listing, product, variant
 
-**Supplier**: where an Offer comes from: a distributor whose catalogue is
-imported, or Manual entry. Its import can be switched off, which stops new
-data but leaves its Offers on the site until they are taken off.
+**Supplier**: a source the catalogue is imported from: a distributor, a brand
+or shop site whose pages are read, or Manual entry. Only a Supplier that sells
+to us brings Offers; the rest bring Parts, Brand-numbers and facts alone. Its
+import can be switched off, which stops new data but leaves its Offers on the
+site until they are taken off.
+
+**Workshop quote**: a CarLab service quote (Serbian «ponuda»): one car's VIN
+and the Brand-numbers fitted to it. Staff upload it in the shop admin, check
+the Parts and Fitments read from it, and confirm them; its prices are dropped.
+_Avoid_: invoice, receipt, order history
 
 **Manual offer**: an Offer staff type in by hand for one Brand-number, under
 the Supplier «Ручной ввод» (`manual`). Imports never change or remove it, and
@@ -246,16 +253,17 @@ _Avoid_: spec, recommendation
 _Avoid_: substitute, cross-reference
 
 **Publish**: the one staff action that puts catalogue changes on carlab.rs:
-it imports Supplier catalogues, translates new texts, rebuilds and deploys the
-site and refreshes search. Admin edits are saved at once but reach the site
-only on the next Publish; there is no scheduled run.
+it translates new texts, rebuilds and deploys the site and refreshes search.
+Admin edits and Imports are saved at once but reach the site only on the next
+Publish; there is no scheduled run.
 _Avoid_: deploy, sync, nightly import
 
-**Closed beta**: the state where the catalogue is public but buying is off
-(`SHOP_OPEN` unset). A tester who opens any page with `?dev=1` carries the
-**preview flag** and sees prices, the cart and checkout as they will be once
-the shop opens.
-_Avoid_: staging, test mode
+**Import**: one run that reads a single Supplier's catalogue into Parts,
+Brand-numbers, Offers and Fitments, started from that Supplier's button and
+finished in the background with a report of what it made and skipped. Only one
+Import or Publish changes the catalogue at a time; a later Import of the same
+Supplier picks up where a failed one left off.
+_Avoid_: sync, crawl (a crawl only fetches pages; the Import reads them)
 
 **Add-on service**: a paid service a Category offers next to each of its
 Parts in the cart, such as registering a battery in the car's control unit.

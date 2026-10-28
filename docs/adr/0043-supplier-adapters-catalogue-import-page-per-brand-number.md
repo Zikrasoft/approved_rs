@@ -1,5 +1,5 @@
 ---
-status: accepted, crawled applicability published as Fitments by ADR-0047
+status: accepted, crawled applicability published as Fitments by ADR-0047, import moved out of Publish by ADR-0048
 ---
 
 # Suppliers feed the catalogue through adapters; a page per brand-number; import, build and reindex on Publish

@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted, slugs frozen by ADR-0049
 ---
 
 # Crawled applicability becomes Vehicles and Fitments at import
