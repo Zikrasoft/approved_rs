@@ -1433,6 +1433,49 @@ medusaIntegrationTestRunner({
           ).toMatchObject({ status: 'failed', error: 'Abandoned' });
         });
 
+        it('stops writing progress onto a run once it is no longer running', async () => {
+          const runs: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          pushFilters(intercars, ['GONE 1', 'GONE 2', 'GONE 3']);
+          const release = holdLaterPages(intercars);
+
+          const started = await imports.start(intercarsId);
+          const runId = started.data.import_run?.id ?? '';
+          const deadline = Date.now() + 20_000;
+          while (
+            !(await latestImportOf(intercarsId)).report &&
+            Date.now() < deadline
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          await runs.updateCatalogueRuns({
+            id: runId,
+            status: 'failed',
+            error: 'Abandoned',
+            report: null,
+            finished_at: new Date(),
+          });
+          release();
+          while (
+            !(await catalog.listPartIdentifiers({ normalized_value: 'GONE3' }))
+              .length &&
+            Date.now() < deadline
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2_000));
+
+          expect(
+            (await imports.history(intercarsId)).find(
+              ({ id }: { id: string }) => id === runId,
+            ),
+          ).toMatchObject({
+            status: 'failed',
+            error: 'Abandoned',
+            report: null,
+          });
+        });
+
         it('fails the runs a restart left running, a Publish included', async () => {
           const runs: PublishModuleService =
             getContainer().resolve(PUBLISH_MODULE);
