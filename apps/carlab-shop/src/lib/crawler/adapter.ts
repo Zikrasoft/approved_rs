@@ -27,8 +27,13 @@ export const crawledSupplierAdapter = (
       try {
         if (!body) throw new Error('The stored page is missing from S3');
         const article = site.parse(gunzipSync(body).toString('utf8'));
-        if (article) articles.push(supplierArticleSchema.parse(article));
-        else notInScope += 1;
+        if (!article) {
+          notInScope += 1;
+          continue;
+        }
+        articles.push(
+          supplierArticleSchema.parse({ ...article, source_url: url }),
+        );
       } catch (error) {
         unreadable.push({ url, reason: errorMessage(error) });
       }

@@ -18,6 +18,7 @@ const Part = model
     installation_price: model.number().nullable(),
     no_installation: model.boolean().default(false),
     source_missing_since: model.dateTime().nullable(),
+    source_url: model.text().nullable(),
     ...translatable(),
     identifiers: model.hasMany(() => PartIdentifier, { mappedBy: 'part' }),
     fitments: model.hasMany(() => Fitment, { mappedBy: 'part' }),

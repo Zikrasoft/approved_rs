@@ -238,6 +238,7 @@ async function createPart(
       value: article.number,
     },
     source: adapter.name,
+    source_url: article.source_url ?? null,
   };
   const create = (attempt: Partial<PartClassification>) =>
     catalog.findOrCreatePart({ ...part, ...attempt });
@@ -297,6 +298,9 @@ async function matchArticle(
   const unchanged = { identifierId: hit.id, partId: part.id, created: false };
   if (part.source !== adapter.name) {
     return unchanged;
+  }
+  if (article.source_url && part.source_url !== article.source_url) {
+    await catalog.updateParts({ id: part.id, source_url: article.source_url });
   }
   const edited = new Set(part.edited_fields);
   const fileable = !part.category_id && !edited.has('category_id');
@@ -429,23 +433,44 @@ async function flagUnlistedParts(
   catalog: CatalogModuleService,
   source: string,
   listedNumbers: Set<string>,
-  mayFlag: boolean,
+  unreadableUrls: Set<string>,
 ): Promise<void> {
+  const mayFlag = (sourceUrl: string | null) =>
+    sourceUrl ? !unreadableUrls.has(sourceUrl) : unreadableUrls.size === 0;
   const parts = await catalog.listParts(
     { source },
     { relations: ['identifiers'], take: null },
   );
   const now = new Date();
-  const changes = parts.flatMap(({ id, source_missing_since, identifiers }) => {
-    const missing = !identifiers.some(({ normalized_value }) =>
-      listedNumbers.has(normalized_value),
-    );
-    return missing === Boolean(source_missing_since) || (missing && !mayFlag)
-      ? []
-      : [{ id, source_missing_since: missing ? now : null }];
-  });
+  const changes = parts.flatMap(
+    ({ id, source_missing_since, source_url, identifiers }) => {
+      const missing = !identifiers.some(({ normalized_value }) =>
+        listedNumbers.has(normalized_value),
+      );
+      return missing === Boolean(source_missing_since) ||
+        (missing && !mayFlag(source_url))
+        ? []
+        : [{ id, source_missing_since: missing ? now : null }];
+    },
+  );
   if (changes.length) {
     await catalog.updateParts(changes);
+  }
+}
+
+async function dropUnlistedOffers(
+  suppliers: SupplierModuleService,
+  supplierId: string,
+  listed: Set<string>,
+): Promise<void> {
+  const gone = (
+    await suppliers.listSupplierOffers(
+      { supplier_id: supplierId },
+      { select: ['id', 'supplier_article_id'], take: null },
+    )
+  ).filter(({ supplier_article_id }) => !listed.has(supplier_article_id));
+  if (gone.length) {
+    await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
   }
 }
 
@@ -515,10 +540,12 @@ export async function importSupplier(
     listedNumbers: new Set(),
     changedPartIds: new Set(),
   };
+  const unreadableUrls = new Set<string>();
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
     for (const { url, reason } of page.unreadable) {
+      unreadableUrls.add(url);
       context.logger.warn(
         `${adapter.name}: skipped unreadable ${url}: ${reason}`,
       );
@@ -573,20 +600,18 @@ export async function importSupplier(
     cursor = page.next;
   }
 
-  const gone = (
-    await suppliers.listSupplierOffers(
-      { supplier_id: supplier.id },
-      { select: ['id', 'supplier_article_id'], take: null },
-    )
-  ).filter(({ supplier_article_id }) => !state.listed.has(supplier_article_id));
-  if (gone.length) {
-    await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
+  if (unreadableUrls.size) {
+    context.logger.warn(
+      `${adapter.name}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
+    );
+  } else {
+    await dropUnlistedOffers(suppliers, supplier.id, state.listed);
   }
   await flagUnlistedParts(
     catalog,
     adapter.name,
     state.listedNumbers,
-    summary.skipped_by_reason.unreadable === 0,
+    unreadableUrls,
   );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;

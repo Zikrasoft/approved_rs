@@ -169,6 +169,7 @@ export type NewPart = Provenance &
     name: string;
     description?: string | null;
     source_name?: string | null;
+    source_url?: string | null;
     identifiers: NewPartIdentifier[];
   };
 
@@ -988,6 +989,7 @@ class CatalogModuleService extends CatalogModuleBase {
       name,
       description = null,
       source_name = null,
+      source_url = null,
       identifiers,
       category_id = null,
       attributes = {},
@@ -1003,6 +1005,7 @@ class CatalogModuleService extends CatalogModuleBase {
         name,
         description,
         source_name,
+        source_url,
         category_id,
         attributes: await this.validatePartAttributes(
           category_id,

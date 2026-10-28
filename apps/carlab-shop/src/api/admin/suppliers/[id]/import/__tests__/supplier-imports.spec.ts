@@ -1040,6 +1040,64 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
+      it('keeps the offer of an unlisted article while a page is unreadable and drops it on the next clean run', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-11', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        await runImport();
+        intercars.articles.length = 0;
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/hu-816-x',
+          reason: 'Unexpected markup',
+        });
+
+        await runImport();
+
+        expect((await page('HU816X'))?.offers).toHaveLength(1);
+
+        intercars.unreadable.length = 0;
+        await runImport();
+
+        expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
+      it('flags a Part gone from a readable page while another page is unreadable, sparing only the Part of that page', async () => {
+        const articleOn = (number: string, url: string) => ({
+          article_id: `IC-${number}`,
+          brand: 'MANN-FILTER',
+          number,
+          name: `Фильтр ${number}`,
+          category: 'IC-OIL',
+          source_url: url,
+        });
+        intercars.articles.push(
+          articleOn('C 30 006', 'https://intercars.test/p/c-30-006'),
+          articleOn('C 30 007', 'https://intercars.test/p/c-30-007'),
+        );
+        await runImport();
+        intercars.articles.length = 0;
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/c-30-006',
+          reason: 'Unexpected markup',
+        });
+
+        await runImport();
+
+        const flagged = (
+          await api.get(
+            '/admin/part-identifiers?source_missing=true&q=C3000',
+            adminHeaders,
+          )
+        ).data.part_identifiers.map(
+          ({ normalized_value }: { normalized_value: string }) =>
+            normalized_value,
+        );
+        expect(flagged).toContain('C30007');
+        expect(flagged).not.toContain('C30006');
+      });
+
       it('flags a Part its source stops listing, keeps its page, and clears the flag when it returns, flagging nothing new while a page is unreadable', async () => {
         const article = {
           article_id: 'IC-GONE',
@@ -1048,6 +1106,7 @@ medusaIntegrationTestRunner({
           name: 'Фильтр воздушный C 30 005',
           category: 'IC-OIL',
           description: 'Воздушный фильтр',
+          source_url: 'https://intercars.test/p/c-30-005',
         };
         shopAi.description = 'Воздушный фильтр MANN';
         intercars.articles.push(article);
