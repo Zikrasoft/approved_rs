@@ -30,6 +30,28 @@ medusaIntegrationTestRunner({
         }
       });
 
+      it('gives up on a Postgres that never answers', async () => {
+        const container = getContainer();
+        const pg = container.resolve(ContainerRegistrationKeys.PG_CONNECTION);
+        container.register(
+          ContainerRegistrationKeys.PG_CONNECTION,
+          asValue({ raw: () => new Promise(() => undefined) }),
+        );
+        try {
+          const response = await api
+            .get('/health/ready', { timeout: 10_000 })
+            .catch((error) => error.response);
+
+          expect(response?.status).toBe(503);
+          expect(response?.data).toEqual({ status: 'unavailable' });
+        } finally {
+          container.register(
+            ContainerRegistrationKeys.PG_CONNECTION,
+            asValue(pg),
+          );
+        }
+      });
+
       it('fails without naming the cause when Postgres is down', async () => {
         const container = getContainer();
         const pg = container.resolve(ContainerRegistrationKeys.PG_CONNECTION);

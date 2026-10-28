@@ -19,10 +19,19 @@ const pingTypesense = async () => {
   typesenseHealthSchema.parse(await response.json());
 };
 
+const timedOut = () =>
+  new Promise<never>((_, reject) => {
+    setTimeout(
+      () => reject(new Error('The probe timed out')),
+      PROBE_TIMEOUT_MS,
+    ).unref();
+  });
+
 const pingPostgres = async (req: MedusaRequest) => {
-  await req.scope
-    .resolve(ContainerRegistrationKeys.PG_CONNECTION)
-    .raw('select 1');
+  await Promise.race([
+    req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION).raw('select 1'),
+    timedOut(),
+  ]);
 };
 
 export async function GET(
