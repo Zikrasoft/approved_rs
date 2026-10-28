@@ -149,13 +149,17 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           row.className =
             'flex items-center justify-between gap-3 py-1 pl-3 text-sm text-muted';
           const note = document.createElement('span');
+          note.setAttribute('role', 'status');
           note.textContent = this.dataset.failedLabel ?? '';
           const retry = document.createElement('button');
           retry.type = 'button';
           retry.className =
             'min-h-11 shrink-0 rounded-field px-3 font-semibold text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
           retry.textContent = this.dataset.retryLabel ?? '';
-          retry.addEventListener('click', () => void suggest());
+          retry.addEventListener('click', () => {
+            input.focus();
+            void suggest();
+          });
           row.append(note, retry);
           panel.removeAttribute('role');
           panel.replaceChildren(row);
@@ -189,6 +193,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           }
         };
         const later = () => {
+          this.#request?.abort();
           clearTimeout(this.#timer);
           this.#timer = setTimeout(suggest, SUGGEST_DELAY_MS);
         };

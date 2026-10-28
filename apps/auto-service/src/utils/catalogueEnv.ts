@@ -139,10 +139,14 @@ function snapshotForBuild(env: CatalogueEnv) {
   if (cached && !stale) {
     return cached.loading;
   }
-  const loading = loadSnapshot(env).catch((error: unknown) => {
-    memo.delete(key);
-    throw error;
-  });
+  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).catch(
+    (error: unknown) => {
+      if (memo.get(key)?.loading === loading) {
+        memo.delete(key);
+      }
+      throw error;
+    },
+  );
   memo.set(key, { loading, at: Date.now() });
   return loading;
 }

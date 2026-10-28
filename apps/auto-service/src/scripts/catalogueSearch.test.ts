@@ -224,6 +224,23 @@ describe('the catalogue search box', () => {
     ]);
   });
 
+  it('drops the pending answer as soon as the visitor types on', async () => {
+    let signal: AbortSignal | undefined;
+    backend.mockImplementationOnce(
+      (_url: string, init: { signal: AbortSignal }) => {
+        signal = init.signal;
+        return new Promise(() => {});
+      },
+    );
+    const { input } = mount();
+    await type(input, 'bmw');
+
+    input.value = 'bmw x';
+    input.dispatchEvent(new Event('input'));
+
+    expect(signal?.aborted).toBe(true);
+  });
+
   it.each([
     [
       'answers with an error',
@@ -242,9 +259,15 @@ describe('the catalogue search box', () => {
     expect(panel.hidden).toBe(false);
     expect(panel.textContent).toContain('Подсказки не загрузились');
     expect(panel.textContent).not.toContain('Failed to fetch');
-    panel.querySelector('button')!.click();
+    expect(panel.querySelector('[role="status"]')?.textContent).toContain(
+      'Подсказки не загрузились',
+    );
+    const retry = panel.querySelector('button')!;
+    retry.focus();
+    retry.click();
     await vi.advanceTimersByTimeAsync(0);
 
+    expect(document.activeElement).toBe(input);
     expect(backend).toHaveBeenCalledTimes(2);
     expect(options(panel)).toEqual([
       'BMW X3 E83',
