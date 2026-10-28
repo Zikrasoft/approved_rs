@@ -133,6 +133,37 @@ medusaIntegrationTestRunner({
         for (const value of ['21 001', '21 002', '21 003']) {
           await part('Ремень', value, [e90.vehicle.id]);
         }
+        const g20Rich = await createVehicleFixture(catalog, {
+          typeCode: 'G201',
+          modelSlug: 'g20-320d',
+          chassisCode: 'G20',
+          engineCode: 'B47D20B',
+        });
+        const g20Poor = await createVehicleFixture(catalog, {
+          typeCode: 'G202',
+          modelSlug: 'g20-320d',
+          chassisCode: 'G20',
+          engineCode: 'B48B20',
+        });
+        for (const value of ['51 001', '51 002', '51 003']) {
+          await part('Фильтр салона', value, [g20Rich.vehicle.id]);
+        }
+        await part('Фильтр салона', '51 004', [g20Poor.vehicle.id]);
+        const e46 = await createVehicleFixture(catalog, {
+          typeCode: 'E461',
+          modelSlug: 'e46-320d',
+          chassisCode: 'E46',
+          engineCode: 'M47D20',
+        });
+        const [, , retired] = await Promise.all(
+          ['61 001', '61 002', '61 003'].map((value) =>
+            part('Ремень', value, [e46.vehicle.id]),
+          ),
+        );
+        await catalog.updateParts({
+          id: retired,
+          replaced_by_id: await part('Ремень', '61 004', []),
+        });
         await part('Щетка', '31 001', [f30.vehicle.id]);
         await part('Щетка', '31 002', [f30.vehicle.id]);
         await part('Щетка', '41 001', [audi.vehicle.id]);
@@ -189,6 +220,14 @@ medusaIntegrationTestRunner({
       it('offers no page for fewer than three published Parts', async () => {
         expect(await cars('f30')).toEqual([]);
         expect(await cars('audi')).toEqual([]);
+      });
+
+      it('offers no Vehicle page when no other Vehicle of its Model has enough Parts', async () => {
+        expect(await cars('g20')).toEqual(['model:g20-320d']);
+      });
+
+      it('counts no Part replaced by a published successor', async () => {
+        expect(await cars('e46')).toEqual([]);
       });
 
       it('finds no car in a part number', async () => {

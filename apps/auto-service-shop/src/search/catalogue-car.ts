@@ -7,6 +7,10 @@ import {
   type CarHit,
   type CarKind,
   carHitSchema,
+  makeHasPage,
+  MIN_PARTS_FOR_PAGE,
+  modelHasPage,
+  vehicleHasPage,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
@@ -14,7 +18,6 @@ import { serbianScripts } from '../lib/serbian';
 
 export const CATALOGUE_CAR_INDEX = 'catalogue_car';
 
-const MIN_PARTS_FOR_PAGE = 3;
 const MAX_QUERY_TOKENS = 8;
 const HITS_PER_TOKEN = 100;
 const CARS_SHOWN = 8;
@@ -79,58 +82,55 @@ export const fittedCarKeys = ({ id, model }: CarAddress): string[] => [
 const makeOf = ({ model }: VehicleRow) => model.chassis.series.make.slug;
 const modelOf = ({ model }: VehicleRow) => model.slug;
 
-const unionBy = (
+const groupBy = (
   vehicles: VehicleRow[],
   key: (vehicle: VehicleRow) => string,
-  members: (vehicle: VehicleRow) => Iterable<string>,
 ) => {
-  const byKey = new Map<string, Set<string>>();
+  const groups = new Map<string, VehicleRow[]>();
   for (const vehicle of vehicles) {
-    const set = byKey.get(key(vehicle)) ?? new Set<string>();
-    for (const member of members(vehicle)) set.add(member);
-    byKey.set(key(vehicle), set);
+    groups.set(key(vehicle), [...(groups.get(key(vehicle)) ?? []), vehicle]);
   }
-  return byKey;
+  return [...groups.values()];
 };
 
-const firstBy = (
-  vehicles: VehicleRow[],
-  key: (vehicle: VehicleRow) => string,
-) => [...new Map(vehicles.map((vehicle) => [key(vehicle), vehicle])).values()];
-
-// TODO: switch to the shared page-existence predicates (MIN_PARTS_FOR_PAGE) in @podbor/catalog-contract once feat/fewer-catalogue-pages lands.
 export function carsWithPages(
   vehicles: VehicleRow[],
   fitments: FitmentRow[],
-  publishedParts: Set<string>,
+  listedParts: Set<string>,
 ) {
   const partsOf = new Map<string, Set<string>>();
   for (const { part_id, vehicle_id } of fitments) {
-    if (publishedParts.has(part_id)) {
+    if (listedParts.has(part_id)) {
       partsOf.set(
         vehicle_id,
         (partsOf.get(vehicle_id) ?? new Set()).add(part_id),
       );
     }
   }
-  const fitted = (vehicle: VehicleRow) => partsOf.get(vehicle.id) ?? [];
-  const byMake = unionBy(vehicles, makeOf, fitted);
-  const byModel = unionBy(vehicles, modelOf, fitted);
-  const modelVehicles = unionBy(vehicles, modelOf, ({ id }) => [id]);
-  const enough = (parts: Set<string> | undefined) =>
-    (parts?.size ?? 0) >= MIN_PARTS_FOR_PAGE;
+  const partsFitting = (rows: VehicleRow[]) =>
+    new Set(rows.flatMap(({ id }) => [...(partsOf.get(id) ?? [])])).size;
+  const models = groupBy(vehicles, modelOf).filter((rows) =>
+    modelHasPage(partsFitting(rows)),
+  );
   return {
-    makes: firstBy(vehicles, makeOf).filter((row) =>
-      enough(byMake.get(makeOf(row))),
-    ),
-    models: firstBy(vehicles, modelOf).filter((row) =>
-      enough(byModel.get(modelOf(row))),
-    ),
-    vehicles: vehicles.filter(
-      (row) =>
-        enough(partsOf.get(row.id)) &&
-        (modelVehicles.get(modelOf(row))?.size ?? 0) > 1,
-    ),
+    makes: groupBy(models.flat(), makeOf)
+      .filter((rows) => makeHasPage(groupBy(rows, modelOf).length))
+      .map(([row]) => row),
+    models: models.map(([row]) => row),
+    vehicles: models.flatMap((rows) => {
+      const modelParts = partsFitting(rows);
+      const parts = rows.map((row) => partsFitting([row]));
+      const modelVehiclesWithEnoughParts = parts.filter(
+        (count) => count >= MIN_PARTS_FOR_PAGE,
+      ).length;
+      return rows.filter((_, index) =>
+        vehicleHasPage({
+          parts: parts[index],
+          modelParts,
+          modelVehiclesWithEnoughParts,
+        }),
+      );
+    }),
   };
 }
 
@@ -165,9 +165,9 @@ const document = (
 export function carDocuments(
   vehicles: VehicleRow[],
   fitments: FitmentRow[],
-  publishedParts: Set<string>,
+  listed: Set<string>,
 ) {
-  const paged = carsWithPages(vehicles, fitments, publishedParts);
+  const paged = carsWithPages(vehicles, fitments, listed);
   const makeTerms = ({ model }: VehicleRow) => {
     const { make } = model.chassis.series;
     return termsOf(make.name, ...make.spellings.map(({ value }) => value));
@@ -242,6 +242,20 @@ const VEHICLE_FIELDS = [
   'model.chassis.series.make.spellings.value',
 ];
 
+type NumberRow = { part_id: string; part: { replaced_by_id: string | null } };
+
+const listedParts = (numbers: NumberRow[]) => {
+  const published = new Set(numbers.map(({ part_id }) => part_id));
+  return new Set(
+    numbers
+      .filter(
+        ({ part }) =>
+          !part.replaced_by_id || !published.has(part.replaced_by_id),
+      )
+      .map(({ part_id }) => part_id),
+  );
+};
+
 async function* seed({ container, catchup }: SearchTypes.SearchSeedContext) {
   if (catchup) {
     return;
@@ -258,14 +272,14 @@ async function* seed({ container, catchup }: SearchTypes.SearchSeedContext) {
   const { data: numbers } = published.length
     ? await container.query.graph({
         entity: 'part_identifier',
-        fields: ['part_id'],
+        fields: ['part_id', 'part.replaced_by_id'],
         filters: { id: published.map(({ id }: { id: string }) => id) },
       })
     : { data: [] };
   const documents = carDocuments(
     vehicles as VehicleRow[],
     fitments as FitmentRow[],
-    new Set(numbers.map(({ part_id }: { part_id: string }) => part_id)),
+    listedParts(numbers as NumberRow[]),
   );
   if (documents.length) {
     yield [{ action: 'upsert' as const, documents }];
