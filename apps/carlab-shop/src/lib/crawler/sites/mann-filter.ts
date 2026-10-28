@@ -25,6 +25,7 @@ const brandOf = ($: CheerioAPI): string | null => {
 };
 
 const SPARE_PART = /^MANN\+HUMMEL Spare Part$/iu;
+const OTHER_FAMILY = '.cmp-product__title-section--family-other';
 
 const SPEC_PAIR = /^(.+?)\s*[=:]+\s*(.+)$/u;
 const MAIN_APPLICATION = /^(main application|glavna primena)\b/iu;
@@ -136,6 +137,8 @@ export const parseMannHummelProduct = (
   if (!articleId || !number || !brand || SPARE_PART.test(category)) {
     return null;
   }
+  const vehicles = vehiclesOf($);
+  if (!vehicles.length && $(OTHER_FAMILY).length) return null;
   const description = words($('.cmp-product__description-text').first().text());
   return {
     article_id: articleId,
@@ -146,7 +149,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles: vehiclesOf($),
+    vehicles,
     images: imagesOf($),
   };
 };
