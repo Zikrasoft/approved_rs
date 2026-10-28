@@ -56,9 +56,13 @@ usermod --append --groups docker "$DEPLOY_USER"
 
 install -d -m 0700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "/home/$DEPLOY_USER/.ssh"
 keys="/home/$DEPLOY_USER/.ssh/authorized_keys"
-if [ -s /root/.ssh/authorized_keys ]; then
+source_keys=/root/.ssh/authorized_keys
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != root ]; then
+  source_keys="$(getent passwd "$SUDO_USER" | cut -d: -f6)/.ssh/authorized_keys"
+fi
+if [ -s "$source_keys" ]; then
   touch "$keys"
-  cat /root/.ssh/authorized_keys "$keys" | awk 'NF && !seen[$0]++' >"$keys.next"
+  cat "$source_keys" "$keys" | awk 'NF && !seen[$0]++' >"$keys.next"
   install -m 0600 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$keys.next" "$keys"
   rm -f "$keys.next"
 fi

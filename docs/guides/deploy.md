@@ -483,7 +483,7 @@ Settings → Secrets and variables → Actions:
 | `VERCEL_PROJECT_ID`              | the approved.rs deploy                         | Project Settings → General of that project                     |
 | `VERCEL_PROJECT_ID_AUTO_SERVICE` | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
 | `VERCEL_PROJECT_ID_DETAILING`    | the details.rs deploy                          | the same, on the details.rs project                            |
-| `CARLAB_SHOP_VPS_HOST`           | the shop deploy (the server's IPv4)            | Hetzner Console                                                |
+| `CARLAB_SHOP_VPS_HOST`           | the shop deploy (the server's static IPv4)     | Lightsail console → Networking                                 |
 | `CARLAB_SHOP_VPS_USER`           | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
 | `CARLAB_SHOP_VPS_SSH_KEY`        | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
 | `CARLAB_SHOP_VPS_KNOWN_HOSTS`    | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
@@ -557,9 +557,10 @@ to do with them:
 
 ## The shop backend: Medusa on a VPS (`api.carlab.rs`)
 
-`apps/carlab-shop` is not on Vercel. It is docker compose on a single Hetzner Cloud
-server (CX23: 2 vCPU x86, 4 GB; the fallback is CPX22), all described in
-`infra/carlab-shop/`:
+`apps/carlab-shop` is not on Vercel. It is docker compose on a single AWS Lightsail
+instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
+transfer, $24 a month), in the same region as the shop's S3 buckets, all
+described in `infra/carlab-shop/`:
 
 | File                                     | What it is                                                                                                                       |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -678,8 +679,9 @@ is retried once its 10 minute lease runs out.
   `.deploy.lock` is left behind and blocks both: once you have confirmed that
   neither `deploy.sh` nor `backup.sh` is running (`pgrep -f "deploy.sh|backup.sh"`),
   remove it with `rmdir /srv/carlab/.deploy.lock`. This is a copy on the same disk;
-  the off-server copy is Hetzner's automatic backups, switched on when the server is
-  created.
+  off the server there are the dumps in the backup bucket (see
+  [Backup and restore](#backup-and-restore)) and Lightsail's automatic snapshots of
+  the whole instance, switched on when it is created.
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
   the reindex at every Publish (ADR-0041), so after a restore search stays empty
   until the next Publish.
@@ -936,8 +938,9 @@ ssh deploy@<IPv4> '/srv/carlab/restore.sh /var/backups/carlab/db-<stamp>.dump'
 ```
 
 The nightly backup keeps seven days in `/var/backups/carlab` on the same VPS, and
-then copies the new database dump to an S3-compatible bucket
-(Backblaze B2, Cloudflare R2, Hetzner Object Storage) when
+then copies the new database dump to an S3-compatible bucket (an AWS S3 bucket in
+another region than the instance, with the endpoint
+`https://s3.<region>.amazonaws.com`; Backblaze B2 or Cloudflare R2 work the same) when
 `/srv/carlab/.env.backup` names one: `BACKUP_S3_ENDPOINT`, `BACKUP_S3_BUCKET`
 (optionally `bucket/path`), `BACKUP_S3_ACCESS_KEY_ID`,
 `BACKUP_S3_SECRET_ACCESS_KEY` and, where the provider wants one,
@@ -994,7 +997,17 @@ Check with `curl -k https://localhost:8443/health`.
   by `deploy`.
 - **Only Caddy exposes a port.** `ports:` in docker compose bypasses ufw: the rule
   filters traffic on the host, not what Docker forwards itself through iptables.
-  Never add `ports:` to another service in the compose stack.
+  Never add `ports:` to another service in the compose stack. Lightsail's own
+  firewall sits in front of the instance and does filter it, so it must allow
+  exactly 22/tcp, 80/tcp, 443/tcp and 443/udp, on the IPv4 and the IPv6 firewall
+  alike (they are two separate lists in the Networking tab).
+- **Use the static IP everywhere.** A Lightsail instance without a static IP gets a
+  new public IPv4 on every stop and start. Attach one before writing DNS records or
+  `CARLAB_SHOP_VPS_HOST`; it is free while attached and billed once detached.
+- **The browser SSH console stops working after hardening.** Lightsail's
+  "Connect using SSH" logs in as `ubuntu`, and `harden-ssh.sh` allows only `deploy`
+  and `crawler`. Keep a working `deploy` key; if it is lost, recover through a
+  snapshot rather than the console.
 - **Docker's apt key is not verified by fingerprint.** `bootstrap-host.sh` does not
   pin the fingerprint of Docker's GPG key. After bootstrapping, check it by hand
   with `gpg --show-keys /etc/apt/keyrings/docker.asc` against the fingerprint
@@ -1006,7 +1019,8 @@ Check with `curl -k https://localhost:8443/health`.
   one address. `deploy-shop` opens 4 ssh connections per run (the stack files, the
   GHCR login, `deploy.sh`, the logout): there is headroom, but do not add ssh calls
   to that job carelessly.
-- **The backup cron runs in the host's timezone**, which on Hetzner images is UTC.
+- **The backup cron runs in the host's timezone**, UTC on Lightsail's Ubuntu image
+  (check with `timedatectl`).
   `/var/log/carlab-backup.log` grows without bound; add a logrotate snippet by hand:
   ```
   /var/log/carlab-backup.log {
@@ -1029,33 +1043,50 @@ Check with `curl -k https://localhost:8443/health`.
 ### The first ship: a checklist
 
 > For the human who owns the infrastructure. An agent does not execute this
-> section: every step happens outside the repository (Hetzner Console, DNS at the
+> section: every step happens outside the repository (AWS console, DNS at the
 > registrar, GitHub Secrets).
 
-1. **Hetzner.** Create the server: CX23 (fallback CPX22), Ubuntu 24.04, IPv4 + IPv6,
-   automatic backups on.
-   Done: the server is visible in the Console with both addresses and backups on.
-2. **Bootstrap.** Log in as root over an ssh key, upload
+1. **Lightsail.** Create the instance in the shop's region: Linux/Unix, OS only,
+   Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB SSD), dual-stack (IPv4 +
+   IPv6), with your own ssh key pair uploaded rather than Lightsail's default one.
+   Then:
+   - Networking: create a static IP and attach it to the instance.
+   - Networking, both the IPv4 and the IPv6 firewall: keep SSH 22/tcp and HTTP
+     80/tcp, add HTTPS 443/tcp and a custom rule for 443/udp (HTTP/3).
+   - Snapshots: turn on automatic snapshots.
+
+   Done: the instance shows the static IPv4, an IPv6 address, the four firewall
+   rules on both lists and automatic snapshots on.
+
+2. **Bootstrap.** Log in as `ubuntu` with your key, upload
    `infra/carlab-shop/bootstrap-host.sh` and `infra/carlab-shop/harden-ssh.sh`, and
-   run `bootstrap-host.sh`. Open a separate session, `ssh deploy@<IPv4>`, and **keep
-   it open** until key-based login has been re-verified after hardening. From it,
-   run `harden-ssh.sh` **through `sudo`**.
-   Done: `ssh deploy@<IPv4>` lets you in by key; `ssh root@<IPv4>` refuses.
-3. **DNS.** A and AAAA records for `api.carlab.rs` and `admin.carlab.rs` at the
-   server's addresses. If IPv6 does not work at the host or on the network, remove
-   the AAAA records.
+   run `sudo sh bootstrap-host.sh`: it gives `deploy` the keys of the user who ran
+   `sudo`. Open a separate session, `ssh deploy@<IPv4>`, and **keep it open** until
+   key-based login has been re-verified after hardening. From it, run
+   `harden-ssh.sh` **through `sudo`** (with the crawler's public key, see
+   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac), or without it
+   for now).
+   Done: `ssh deploy@<IPv4>` lets you in by key; `ssh ubuntu@<IPv4>` and
+   `ssh root@<IPv4>` refuse.
+3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the static IPv4,
+   AAAA records at the instance's IPv6. If IPv6 does not work at the host or on the
+   network, remove the AAAA records.
    Done: `dig +short` and `dig +short AAAA` return them for both names.
 4. **`.env` on the server.** Copy `infra/carlab-shop/production.env.example` to
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
    then `chmod 600 /srv/carlab/.env`.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` prints `600`.
-5. **Backup bucket.** Create a private bucket at an S3-compatible provider in
-   another location than the VPS (Backblaze B2, Cloudflare R2, Hetzner Object
-   Storage in a different region) and an access key limited to that bucket.
+5. **Shop buckets.** Create the public and the private S3 bucket and the shop's
+   IAM user as in [Files on S3](#files-on-s3), and put their values in
+   `/srv/carlab/.env`.
+   Done: `cut -d= -f1 /srv/carlab/.env | grep '^S3_'` lists the five required names.
+6. **Backup bucket.** Create a private AWS S3 bucket in another region than the
+   instance (or at Backblaze B2 or Cloudflare R2) and an IAM user whose key is
+   limited to that bucket, separate from the shop's.
    Copy `infra/carlab-shop/backup.env.example` to `/srv/carlab/.env.backup`, fill
    it in, `chmod 600` it.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env.backup'` prints `600`.
-6. **CI secrets.** Generate CI's ssh key (`ssh-keygen -t ed25519`), restrict the
+7. **CI secrets.** Generate CI's ssh key (`ssh-keygen -t ed25519`), restrict the
    public half on the server (`restrict` in `authorized_keys`), obtain
    `known_hosts` (`ssh-keyscan -t ed25519 <IPv4>`) and **verify the fingerprint**
    separately. Record `CARLAB_SHOP_VPS_USER`, `CARLAB_SHOP_VPS_SSH_KEY` and
@@ -1063,11 +1094,11 @@ Check with `curl -k https://localhost:8443/health`.
    `CARLAB_SHOP_VPS_HOST` **last**: with it in place, the next push to `main`
    deploys.
    Done: all four secrets are visible in Settings → Secrets and variables → Actions.
-7. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
+8. **The first deploy.** A push to `main` or Actions → CI → Run workflow. Check the
    package in GHCR: linked to the repository, Actions read access configured.
    Done: `deploy-shop` is green, `record-shop` moved `deployed/carlab-shop`, and
    `https://api.carlab.rs/health` answers 200.
-8. **Admin.** Create an admin
+9. **Admin.** Create an admin
    (`docker compose exec -T medusa node_modules/.bin/medusa user --invite`), sign in
    at `https://admin.carlab.rs`, and in Settings → Publishable API Keys create the
    key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
@@ -1078,14 +1109,14 @@ Check with `curl -k https://localhost:8443/health`.
    which the seed does not ship.
    Done: signing in works, the eight seeded Categories are in the admin, and
    «Аккумуляторы» shows its fields, the registration service and a picture.
-9. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
-   `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
-   closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
-   [`.env`](#env); `docker compose up -d medusa` after editing.
-   Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
-10. **carlab.rs on Vercel.** In the carlab.rs project (Production):
+10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
+    `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
+    closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
+    [`.env`](#env); `docker compose up -d medusa` after editing.
+    Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
+11. **carlab.rs on Vercel.** In the carlab.rs project (Production):
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
-    from step 8, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
+    from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
     in the admin so the Categories get their Serbian and English text and carlab.rs
     rebuilds against the catalogue.
     Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
@@ -1093,7 +1124,7 @@ Check with `curl -k https://localhost:8443/health`.
     while `https://api.carlab.rs/health` is down is skipped with a warning in the
     CI run rather than failed, and the next run retries it (see
     [How it ships](#how-it-ships)); a Publish in that state fails.
-11. **Acceptance.** `docker stats --no-stream` under light load stays within the
+12. **Acceptance.** `docker stats --no-stream` under light load stays within the
     memory limits; a manual `ssh deploy@<IPv4> /srv/carlab/backup.sh` works and
     ends with `Copied to the <bucket> bucket`, and `backup.sh fetch` lists the new
     stamp; the next morning `/var/log/carlab-backup.log` shows the cron ran,
