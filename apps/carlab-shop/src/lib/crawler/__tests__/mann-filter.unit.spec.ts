@@ -146,6 +146,11 @@ describe('MANN-FILTER', () => {
     expect(mannFilter.parse(page('h341158-22.html.gz'))).toBe(null);
   });
 
+  it('fits a filter for excavators and loaders to no vehicle', () => {
+    const article = mannFilter.parse(page('p5005.html.gz'));
+    expect(article).toMatchObject({ number: 'P 5005', vehicles: [] });
+  });
+
   it('reads nothing from a page that is not a product', () => {
     expect(mannFilter.parse('<html><body><main></main></body></html>')).toBe(
       null,
