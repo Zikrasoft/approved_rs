@@ -244,13 +244,26 @@ const VEHICLE_FIELDS = [
 
 type NumberRow = { part_id: string; part: { replaced_by_id: string | null } };
 
-const listedParts = (numbers: NumberRow[]) => {
-  const published = new Set(numbers.map(({ part_id }) => part_id));
+type Query = Pick<SearchTypes.SearchContainer['query'], 'graph'>;
+
+const listedParts = async (query: Query): Promise<Set<string>> => {
+  const { data: published } = await query.graph({
+    entity: 'published_number',
+    fields: ['id'],
+  });
+  const { data } = published.length
+    ? await query.graph({
+        entity: 'part_identifier',
+        fields: ['part_id', 'part.replaced_by_id'],
+        filters: { id: published.map(({ id }: { id: string }) => id) },
+      })
+    : { data: [] };
+  const numbers = data as NumberRow[];
+  const parts = new Set(numbers.map(({ part_id }) => part_id));
   return new Set(
     numbers
       .filter(
-        ({ part }) =>
-          !part.replaced_by_id || !published.has(part.replaced_by_id),
+        ({ part }) => !part.replaced_by_id || !parts.has(part.replaced_by_id),
       )
       .map(({ part_id }) => part_id),
   );
@@ -260,30 +273,45 @@ async function* seed({ container, catchup }: SearchTypes.SearchSeedContext) {
   if (catchup) {
     return;
   }
-  const [{ data: vehicles }, { data: fitments }, { data: published }] =
-    await Promise.all([
-      container.query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-      container.query.graph({
-        entity: 'fitment',
-        fields: ['part_id', 'vehicle_id'],
-      }),
-      container.query.graph({ entity: 'published_number', fields: ['id'] }),
-    ]);
-  const { data: numbers } = published.length
-    ? await container.query.graph({
-        entity: 'part_identifier',
-        fields: ['part_id', 'part.replaced_by_id'],
-        filters: { id: published.map(({ id }: { id: string }) => id) },
-      })
-    : { data: [] };
+  const [{ data: vehicles }, { data: fitments }, listed] = await Promise.all([
+    container.query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
+    container.query.graph({
+      entity: 'fitment',
+      fields: ['part_id', 'vehicle_id'],
+    }),
+    listedParts(container.query),
+  ]);
   const documents = carDocuments(
     vehicles as VehicleRow[],
     fitments as FitmentRow[],
-    listedParts(numbers as NumberRow[]),
+    listed,
   );
   if (documents.length) {
     yield [{ action: 'upsert' as const, documents }];
   }
+}
+
+export async function carPages(
+  query: Query,
+  car: Omit<CarAddress, 'id'> & { id?: string },
+) {
+  const [{ data }, listed] = await Promise.all([
+    query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
+    listedParts(query),
+  ]);
+  const make = car.model.chassis.series.make.slug;
+  const kin = (data as VehicleRow[]).filter((row) => makeOf(row) === make);
+  const { data: fitments } = await query.graph({
+    entity: 'fitment',
+    fields: ['part_id', 'vehicle_id'],
+    filters: { vehicle_id: kin.map(({ id }) => id) },
+  });
+  const paged = carsWithPages(kin, fitments as FitmentRow[], listed);
+  return {
+    vehicle: paged.vehicles.some(({ id }) => id === car.id),
+    model: paged.models.some((row) => modelOf(row) === car.model.slug),
+    make: paged.makes.length > 0,
+  };
 }
 
 const hitSchema = z.object({

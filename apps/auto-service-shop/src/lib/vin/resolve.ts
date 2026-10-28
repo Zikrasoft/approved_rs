@@ -48,7 +48,10 @@ export const resolveVin = async (
   vin: string,
   decoders: VinDecoder[],
   { catalog, vinLookups }: Services,
-): Promise<VinLookupResponse> => {
+): Promise<
+  | Omit<Extract<VinLookupResponse, { resolved: true }>, 'pages'>
+  | Extract<VinLookupResponse, { resolved: false }>
+> => {
   const [existing] = await vinLookups.listVinLookups({ vin });
   const current = decoders.some(
     ({ name, version }) =>

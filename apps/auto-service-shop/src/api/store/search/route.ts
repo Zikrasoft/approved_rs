@@ -39,7 +39,11 @@ import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
-import { type CarMatch, matchCars } from '../../../search/catalogue-car';
+import {
+  type CarMatch,
+  carPages,
+  matchCars,
+} from '../../../search/catalogue-car';
 import {
   PART_IDENTIFIER_INDEX,
   searchRanking,
@@ -275,6 +279,11 @@ export async function GET(
   const scopedTo = vehicleModel
     ? vehicleSchema.shape.model.parse(vehicleModel)
     : null;
+  const scopePages = vehicleModel
+    ? await carPages(req.scope.resolve(ContainerRegistrationKeys.QUERY), {
+        model: vehicleModel,
+      })
+    : null;
 
   const cars: CarMatch =
     searchableQuery(q) && !found && !vehicleModel && !vehicle_id
@@ -294,6 +303,7 @@ export async function GET(
         category: narrowedTo,
         model: scopedTo,
         cars: cars.cars,
+        scope_pages: scopePages,
         count: 0,
         offset,
         limit,
@@ -474,6 +484,7 @@ export async function GET(
       category: narrowedTo,
       model: scopedTo,
       cars: cars.cars,
+      scope_pages: scopePages,
       count,
       offset,
       limit,

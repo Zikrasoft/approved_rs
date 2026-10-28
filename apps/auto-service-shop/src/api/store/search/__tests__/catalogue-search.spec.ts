@@ -226,6 +226,23 @@ medusaIntegrationTestRunner({
         expect(await cars('g20')).toEqual(['model:g20-320d']);
       });
 
+      it('says whether the Model a listing is scoped to, and its Make, have a page', async () => {
+        const scoped = async (model: string) =>
+          (
+            await api.get(
+              `/store/search?${new URLSearchParams({ q: 'щетка', locale: 'ru', model })}`,
+              storeHeaders,
+            )
+          ).data.scope_pages;
+
+        expect(await scoped('g20-320d')).toEqual({ model: true, make: true });
+        expect(await scoped('f30-320d')).toEqual({ model: false, make: true });
+        expect(await scoped('b8-a4-20tdi')).toEqual({
+          model: false,
+          make: false,
+        });
+      });
+
       it('counts no Part replaced by a published successor', async () => {
         expect(await cars('e46')).toEqual([]);
       });

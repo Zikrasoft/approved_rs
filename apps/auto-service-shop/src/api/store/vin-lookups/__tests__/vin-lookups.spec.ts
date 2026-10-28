@@ -5,6 +5,7 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { publishAllNumbers } from '../../../../lib/publish/published';
 import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
 import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
 import type { VinDecoder } from '../../../../lib/vin/decoder';
@@ -79,6 +80,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toEqual({
           resolved: true,
           facts: {},
+          pages: { vehicle: false, model: false, make: false },
           vehicle: expect.objectContaining({
             id: vehicle.id,
             steering: 'left',
@@ -110,6 +112,43 @@ medusaIntegrationTestRunner({
         expect(
           await vinLookups.listVinLookups({ vin: OWNER_VIN }),
         ).toHaveLength(1);
+      });
+
+      it("names which of the resolved car's places have a page", async () => {
+        const owner =
+          (await catalog.listVehicles({}, { take: 1 }))[0] ??
+          (await createVehicleFixture(catalog)).vehicle;
+        const { vehicle: sibling } = await createVehicleFixture(catalog, {
+          typeCode: '35BH',
+        });
+        const [febi] = await catalog.createBrands([
+          { name: 'Febi', slug: 'febi' },
+        ]);
+        for (const vehicleId of [owner.id, sibling.id]) {
+          for (const value of ['1', '2', '3']) {
+            const partId = await catalog.createPartWithIdentifiers({
+              name: 'Фильтр',
+              identifiers: [
+                {
+                  type: 'manufacturer-number',
+                  brand_id: febi.id,
+                  value: `${vehicleId}-${value}`,
+                },
+              ],
+            });
+            await catalog.createFitments({
+              part_id: partId,
+              vehicle_id: vehicleId,
+            });
+          }
+        }
+        await publishAllNumbers(getContainer());
+
+        expect((await lookUp(OWNER_VIN)).data.pages).toEqual({
+          vehicle: true,
+          model: true,
+          make: true,
+        });
       });
 
       it('lets the next decoder in the chain answer when the own adapter is unresolved', async () => {

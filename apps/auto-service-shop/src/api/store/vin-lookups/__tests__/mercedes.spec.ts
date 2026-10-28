@@ -56,6 +56,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toEqual({
           resolved: true,
           facts: { steering: 'left' },
+          pages: { vehicle: false, model: false, make: false },
           vehicle: expect.objectContaining({
             id: vehicle.id,
             steering: null,
