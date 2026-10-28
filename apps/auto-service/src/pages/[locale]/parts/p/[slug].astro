@@ -316,21 +316,21 @@ const thumbFor = (slug: string) => {
                               class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
                             />
                           </summary>
-                          <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6">
+                          <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6 pointer-coarse:gap-1">
                             <a
                               href={PathBuilder.partsModel(
                                 locale,
                                 make.slug,
                                 model.slug,
                               )}
-                              class="text-sm font-semibold text-signal-ink hover:underline"
+                              class="flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
                             >
                               {fitmentCopy.modelLink.replace(
                                 '{model}',
                                 carName(model, locale),
                               )}
                             </a>
-                            <ul class="flex flex-col gap-3 border-l-2 border-line pl-4">
+                            <ul class="flex flex-col gap-3 border-l-2 border-line pl-4 pointer-coarse:gap-1">
                               {fits.map((fit) => (
                                 <li>
                                   <FitLine
