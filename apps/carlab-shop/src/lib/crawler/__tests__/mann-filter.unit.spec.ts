@@ -101,6 +101,17 @@ describe('MANN-FILTER', () => {
     expect(article.applicability).toBeUndefined();
   });
 
+  it('reads a car whose link carries a malformed escape without its supplier id', () => {
+    const html = page('hu816x.html.gz').replace(
+      '%26vehicleTypeId%3D00000000146042',
+      '%26vehicleTypeId%3D00000000146042%E0%A4%A',
+    );
+    const article = supplierArticleSchema.parse(mannFilter.parse(html));
+    expect(article.vehicles).toHaveLength(105);
+    expect(article.vehicles?.[0]).toMatchObject({ variant: '125i (E82/E88)' });
+    expect(article.vehicles?.[0].supplier_vehicle_id).toBeUndefined();
+  });
+
   it('reads cross-references grouped under several car makers', () => {
     const article = supplierArticleSchema.parse(
       mannFilter.parse(page('c30005.html.gz')),

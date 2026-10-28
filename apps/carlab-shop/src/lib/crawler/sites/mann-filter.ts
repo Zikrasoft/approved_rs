@@ -96,12 +96,22 @@ const onTheRoad = ({ make }: VehicleFacts) =>
   !OFF_ROAD_MAKE.test(make.toUpperCase()) &&
   !OFF_ROAD_MAKER.test(make.toUpperCase());
 
-const vehicleTypeIdOf = (row: Nodes) =>
-  new URLSearchParams(
-    decodeURIComponent(
-      row.find('a.cmp-table__link').attr('data-g-binding-params') ?? '',
-    ),
-  ).get('vehicleTypeId') ?? undefined;
+const decoded = (value: string): string | null => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+};
+
+const vehicleTypeIdOf = (row: Nodes) => {
+  const params = decoded(
+    row.find('a.cmp-table__link').attr('data-g-binding-params') ?? '',
+  );
+  return params === null
+    ? undefined
+    : (new URLSearchParams(params).get('vehicleTypeId') ?? undefined);
+};
 
 const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
   each($, $('#applications .cmp-application-table')).flatMap((table) => {
