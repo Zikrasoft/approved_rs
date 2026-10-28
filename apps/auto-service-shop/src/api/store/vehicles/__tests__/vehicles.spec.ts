@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { VEHICLE_BATCH } from '../../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -61,6 +62,35 @@ medusaIntegrationTestRunner({
             (await catalog.listVehicles({}, { take: null })).length,
           );
           expect(response.data.vehicles.length).toBeGreaterThanOrEqual(16);
+        });
+
+        it('lists every Vehicle, past one read batch', async () => {
+          const { model, engine } = await createVehicleFixture(catalog, {
+            typeCode: 'B000',
+          });
+          await catalog.createVehicles(
+            Array.from({ length: VEHICLE_BATCH }, (_, index) => ({
+              model_id: model.id,
+              engine_id: engine.id,
+              power_kw: index + 1,
+              drive: 'rwd' as const,
+              market: 'EU',
+              year_from: 2015,
+              year_to: 2019,
+              steering: 'left' as const,
+            })),
+          );
+
+          const response = await api.get('/store/vehicles', storeHeaders);
+          const ids = response.data.vehicles.map(
+            ({ id }: { id: string }) => id,
+          );
+
+          expect(new Set(ids).size).toBe(ids.length);
+          expect(ids.length).toBe(
+            (await catalog.listVehicles({}, { take: null })).length,
+          );
+          expect(ids.length).toBeGreaterThan(VEHICLE_BATCH);
         });
       });
 

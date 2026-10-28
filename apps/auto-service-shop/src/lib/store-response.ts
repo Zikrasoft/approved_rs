@@ -88,16 +88,34 @@ const inheritedRequirements = ownedRequirements.extend({
   model: z.object({ chassis: ownedRequirements }),
 });
 
+export const VEHICLE_BATCH = 1000;
+
+const vehicleRows = async (
+  catalog: CatalogModuleService,
+  filters: Parameters<CatalogModuleService['listVehicles']>[0],
+) => {
+  const batch = (skip: number) =>
+    catalog.listVehicles(filters, {
+      relations: VEHICLE_RELATIONS,
+      order: { id: 'ASC' },
+      skip,
+      take: VEHICLE_BATCH,
+    });
+  const rows: Awaited<ReturnType<typeof batch>> = [];
+  for (let skip = 0; ; skip += VEHICLE_BATCH) {
+    const next = await batch(skip);
+    rows.push(...next);
+    if (next.length < VEHICLE_BATCH) {
+      return rows;
+    }
+  }
+};
+
 export const listVehicleResponses = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
 ): Promise<Vehicle[]> =>
-  (
-    await catalog.listVehicles(filters, {
-      relations: VEHICLE_RELATIONS,
-      take: null,
-    })
-  ).map((row) => {
+  (await vehicleRows(catalog, filters)).map((row) => {
     const { requirements, engine, model } = inheritedRequirements.parse(row);
     return vehicleSchema.parse({
       ...row,
