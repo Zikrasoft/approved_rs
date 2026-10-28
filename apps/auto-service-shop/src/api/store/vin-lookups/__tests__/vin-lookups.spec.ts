@@ -98,7 +98,7 @@ medusaIntegrationTestRunner({
         const [stored] = await vinLookups.listVinLookups({ vin: OWNER_VIN });
         expect(stored).toMatchObject({
           decoder: 'bmw-type-code',
-          decoder_version: 1,
+          decoder_version: 2,
           make: 'bmw',
           code: '35BG',
           vehicle_id: vehicle.id,
@@ -196,7 +196,7 @@ medusaIntegrationTestRunner({
         });
         const [stored] = await vinLookups.listVinLookups({ vin });
         expect(stored).toMatchObject({
-          decoder_version: 1,
+          decoder_version: 2,
           code: '7A55',
           vehicle_id: vehicle.id,
         });

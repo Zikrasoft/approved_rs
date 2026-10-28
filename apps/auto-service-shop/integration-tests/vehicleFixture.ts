@@ -15,6 +15,7 @@ type FixtureOptions = {
   chassisCode?: string;
   engineCode?: string;
   engineFamily?: string;
+  powerKw?: number;
 };
 
 const firstOrCreate = async <T>(
@@ -34,6 +35,7 @@ export const createVehicleFixture = async (
     chassisCode = 'F30',
     engineCode = 'B47D20O0',
     engineFamily = 'B47',
+    powerKw = 140,
   }: FixtureOptions = {},
 ) => {
   const make = await firstOrCreate(
@@ -82,7 +84,7 @@ export const createVehicleFixture = async (
   const vehicle = await catalog.createVehicles({
     model_id: model.id,
     engine_id: engine.id,
-    power_kw: 140,
+    power_kw: powerKw,
     drive: 'rwd',
     market: 'EU',
     year_from: 2015,

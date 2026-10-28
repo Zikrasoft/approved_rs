@@ -15,7 +15,7 @@ const VehicleIdentifier = model
   })
   .indexes([
     {
-      on: ['type', 'value'],
+      on: ['type', 'value', 'vehicle_id'],
       unique: true,
       where: { supplier_id: null },
     },
