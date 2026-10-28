@@ -16,7 +16,7 @@ import TelegramChoice from '@/components/TelegramChoice.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
-import { pageHead } from '@/utils/pageHead';
+import { NOINDEX, pageHead } from '@/utils/pageHead';
 import { BUSINESS_ID } from '@/utils/schema';
 import {
   GARAGE_ADDRESS,
@@ -113,7 +113,8 @@ const businessSchema = localBusinessSchema({
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content={NOINDEX} />}
+    <slot name="head" />
     {
       alternates.map((alt) => (
         <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />

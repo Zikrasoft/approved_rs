@@ -144,9 +144,9 @@ describe('partPageSchema', () => {
     expect(partPageSchema.parse(offered)).toEqual(offered);
   });
 
-  it('refuses an offer that names its supplier', () => {
+  it('drops the supplier an offer names', () => {
     expect(
-      partPageSchema.safeParse({
+      partPageSchema.parse({
         ...page,
         offers: [
           {
@@ -158,8 +158,20 @@ describe('partPageSchema', () => {
             supplier: 'Intercars',
           },
         ],
-      }).success,
-    ).toBe(false);
+      }).offers,
+    ).toEqual([
+      {
+        id: 'offer_1',
+        price: 1850,
+        currency: 'RSD',
+        stock_quantity: 4,
+        lead_time_days: 0,
+      },
+    ]);
+  });
+
+  it('reads a number type newer than the contract as null', () => {
+    expect(partPageSchema.parse({ ...page, type: 'ktype' }).type).toBeNull();
   });
 
   it('refuses a page without its offers', () => {

@@ -57,14 +57,44 @@ describe('vehiclesResponseSchema', () => {
     expect(parsed.vehicles).toEqual([vehicle]);
   });
 
-  it('refuses an identifier outside the known vocabularies', () => {
-    const result = vehiclesResponseSchema.safeParse({
+  it('reads a vocabulary value newer than the contract as null', () => {
+    const parsed = vehiclesResponseSchema.parse({
       vehicles: [
-        { ...vehicle, identifiers: [{ type: 'ktype', value: '1234' }] },
+        {
+          ...vehicle,
+          drive: 'four-wheel',
+          steering: 'centre',
+          identifiers: [{ type: 'ktype', value: '1234' }],
+          model: {
+            ...vehicle.model,
+            chassis: { ...vehicle.model.chassis, body_style: 'shooting-brake' },
+          },
+          engine: { ...vehicle.engine, fuel: 'hydrogen' },
+        },
       ],
     });
 
-    expect(result.success).toBe(false);
+    expect(parsed.vehicles[0]).toMatchObject({
+      drive: null,
+      steering: null,
+      identifiers: [{ type: null, value: '1234' }],
+      model: { chassis: { body_style: null } },
+      engine: { fuel: null },
+    });
+  });
+
+  it('reads a vehicle from a shop that has not shipped fuel and body style', () => {
+    const { fuel: _fuel, ...engine } = vehicle.engine;
+    const { body_style: _body, ...chassis } = vehicle.model.chassis;
+
+    const parsed = vehiclesResponseSchema.parse({
+      vehicles: [{ ...vehicle, engine, model: { ...vehicle.model, chassis } }],
+    });
+
+    expect(parsed.vehicles[0]).toMatchObject({
+      engine: { fuel: null },
+      model: { chassis: { body_style: null } },
+    });
   });
 });
 

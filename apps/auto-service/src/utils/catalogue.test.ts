@@ -11,6 +11,8 @@ import {
   partPagesForBuild,
 } from './catalogueEnv';
 import { categoryFacets } from './categoryFacets';
+import { categoryListings } from './catalogueSnapshot';
+import { fitGroups } from './fitGroups';
 import { PathBuilder } from './paths';
 import { sitemapFilter } from './sitemap';
 import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
@@ -562,6 +564,120 @@ describe('enriched part pages', () => {
     expect(page.fits).toEqual([
       expect.objectContaining({ quantity: 2, axle: 'front', vehicle: VEHICLE }),
     ]);
+  });
+});
+
+describe('Category listing pages', () => {
+  const numbers = (count: number) =>
+    Array.from({ length: count }, (_, index) =>
+      brandNumber('mann-filter', `HU${String(index).padStart(3, '0')}`, {
+        id: `part_${index}`,
+        name: 'Масляный фильтр',
+        category_id: oilFilters.id,
+      }),
+    );
+  const listingsOf = async (count: number) => {
+    const [category] = await catalogueWith(
+      backend({ pages: numbers(count), categories: [oilFilters] }),
+    ).categoryPages();
+    return categoryListings(category).map(({ number, count, pages }) => ({
+      number,
+      count,
+      first: pages[0]?.value,
+      size: pages.length,
+    }));
+  };
+
+  it('splits a Category into pages of 48 brand-numbers', async () => {
+    expect(await listingsOf(97)).toEqual([
+      { number: 1, count: 3, first: 'HU000', size: 48 },
+      { number: 2, count: 3, first: 'HU048', size: 48 },
+      { number: 3, count: 3, first: 'HU096', size: 1 },
+    ]);
+  });
+
+  it('keeps one page for a Category of 48', async () => {
+    expect(await listingsOf(48)).toEqual([
+      { number: 1, count: 1, first: 'HU000', size: 48 },
+    ]);
+  });
+
+  it('keeps the first page for an empty Category', async () => {
+    expect(await listingsOf(0)).toEqual([
+      { number: 1, count: 1, first: undefined, size: 0 },
+    ]);
+  });
+
+  it('lists every page of a Category in the sitemap', () => {
+    const keep = sitemapFilter(SITE);
+    expect(
+      keep(`${SITE}${PathBuilder.partsCategory('sr', 'oil-filters', 2)}`),
+    ).toBe(true);
+  });
+});
+
+describe('a part page groups its Fitments', () => {
+  const variant = { ...VEHICLE, id: 'veh_1b', power_kw: 120 };
+  const g20 = {
+    ...VEHICLE,
+    id: 'veh_g20',
+    model: {
+      ...VEHICLE.model,
+      slug: 'g20-320d',
+      chassis: { ...VEHICLE.model.chassis, code: 'G20' },
+    },
+  };
+  const a4 = {
+    ...VEHICLE,
+    id: 'veh_a4',
+    model: {
+      slug: 'b9-a4',
+      name: 'A4 2.0 TDI',
+      chassis: {
+        code: 'B9',
+        body_style: 'sedan',
+        series: {
+          name: 'A4',
+          translations: null,
+          make: { slug: 'audi', name: 'Audi' },
+        },
+      },
+    },
+  };
+
+  it('by Make and Model, makes and models in name order', async () => {
+    const [page] = await catalogueWith(
+      backend({
+        pages: [oilFilterMann],
+        fitments: [
+          fitment('fit_g20', oilPart.id, { vehicle_id: g20.id }),
+          fitment('fit_f30', oilPart.id),
+          fitment('fit_a4', oilPart.id, { vehicle_id: a4.id }),
+          fitment('fit_f30b', oilPart.id, { vehicle_id: variant.id }),
+        ],
+        vehicles: [VEHICLE, variant, g20, a4],
+      }),
+    ).partPages();
+
+    expect(
+      fitGroups(page.fits).map(({ make, models }) => [
+        make.slug,
+        models.map(({ model, fits }) => [model.slug, fits.map(({ id }) => id)]),
+      ]),
+    ).toEqual([
+      ['audi', [['b9-a4', ['fit_a4']]]],
+      [
+        'bmw',
+        [
+          ['f30-320d', ['fit_f30', 'fit_f30b']],
+          ['g20-320d', ['fit_g20']],
+        ],
+      ],
+    ]);
+  });
+
+  it('into nothing when the part fits no car', () => {
+    expect(fitGroups([])).toEqual([]);
   });
 });
 
