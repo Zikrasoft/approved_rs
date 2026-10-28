@@ -6,7 +6,7 @@ import {
   translated,
 } from './categories.ts';
 import { brandNumberSchema, partOfferSchema } from './partPages.ts';
-import { vehicleSchema } from './vehicle.ts';
+import { placePagesSchema, vehicleSchema } from './vehicle.ts';
 
 export const CATALOG_LOCALES = ['ru', ...CATALOG_TRANSLATION_LOCALES] as const;
 
@@ -68,8 +68,8 @@ export const searchResponseSchema = z.object({
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
   cars: readableCars,
-  scope_pages: z
-    .object({ model: z.boolean(), make: z.boolean() })
+  scope_pages: placePagesSchema
+    .pick({ model: true, make: true })
     .nullable()
     .default(null)
     .catch(null),

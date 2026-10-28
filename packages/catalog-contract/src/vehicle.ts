@@ -91,16 +91,20 @@ export const vinFactsSchema = z.object({
 
 export type VinFacts = z.infer<typeof vinFactsSchema>;
 
+export const placePagesSchema = z.object({
+  vehicle: z.boolean(),
+  model: z.boolean(),
+  make: z.boolean(),
+});
+
+export type PlacePages = z.infer<typeof placePagesSchema>;
+
 export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
   z.object({
     resolved: z.literal(true),
     vehicle: vehicleSchema,
     facts: vinFactsSchema,
-    pages: z
-      .object({ vehicle: z.boolean(), model: z.boolean(), make: z.boolean() })
-      .nullable()
-      .default(null)
-      .catch(null),
+    pages: placePagesSchema.nullable().default(null).catch(null),
   }),
   z.object({
     resolved: z.literal(false),
