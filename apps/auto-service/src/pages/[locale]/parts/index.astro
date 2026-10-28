@@ -4,8 +4,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import PartsInquiry from '@/components/PartsInquiry.astro';
 import Icon from '@/components/Icon.astro';
-import PartsSearchForm from '@/components/PartsSearchForm.astro';
-import VinLookupForm from '@/components/VinLookupForm.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import {
   categoriesForBuild,
@@ -32,7 +31,6 @@ const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
-const vinCopy = content(locale).partsCar.vin;
 const props = Astro.props as {
   categories: Category[];
   makes: { slug: string; name: string }[];
@@ -53,10 +51,7 @@ const categories = props.categories.map((category) => ({
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
   >
-    <div class="grid gap-4 pt-2 lg:grid-cols-2 lg:items-stretch">
-      <PartsSearchForm />
-      <VinLookupForm />
-    </div>
+    <CatalogueSearch large class="max-w-3xl pt-2" />
   </PageHero>
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
@@ -166,13 +161,6 @@ const categories = props.categories.map((category) => ({
         id={PARTS_INQUIRY_ANCHOR}
         class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
       >
-        <p
-          id="vin-unresolved"
-          role="status"
-          class="hidden scroll-mt-24 rounded-md bg-shade p-4 text-sm leading-relaxed text-ink target:block"
-        >
-          {vinCopy.unresolved}
-        </p>
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
         <PartsInquiry />
       </div>

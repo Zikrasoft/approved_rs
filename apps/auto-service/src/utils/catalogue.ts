@@ -24,6 +24,7 @@ import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   type CatalogLocale,
+  type CarHit,
   type Category,
   type SearchResponse,
   type SearchResult,
@@ -57,6 +58,7 @@ export type SearchQuery = {
   facets: string[];
   ranges?: RangeFilter[];
   offset?: number;
+  limit?: number;
 };
 
 export type SearchOutcome = Omit<SearchResponse, 'results'> & {
@@ -72,8 +74,13 @@ export type IdentifierPrices = {
 };
 
 export type VinOutcome =
-  | { kind: 'vehicle'; vehicle: Vehicle; facts: VinFacts }
-  | { kind: 'inquiry'; vin: string };
+  | {
+      kind: 'vehicle';
+      vehicle: Vehicle;
+      facts: VinFacts;
+      place: CarHit | null;
+    }
+  | { kind: 'inquiry'; vin: string; place: CarHit | null };
 
 export type OffersOutcome =
   { kind: 'offers'; offers: PartOffer[] } | { kind: 'inquiry' };
@@ -281,6 +288,7 @@ export function createCatalogue({
       facets,
       ranges = [],
       offset = 0,
+      limit,
     }: SearchQuery): Promise<SearchOutcome | null> {
       const params = new URLSearchParams({
         ...(q ? { q } : {}),
@@ -296,6 +304,9 @@ export function createCatalogue({
       }
       if (offset) {
         params.set('offset', String(offset));
+      }
+      if (limit) {
+        params.set('limit', String(limit));
       }
       try {
         const found = searchResponseSchema.parse(
@@ -323,7 +334,7 @@ export function createCatalogue({
     async listingScope(
       { category, model }: Pick<SearchQuery, 'category' | 'model'>,
       locale: CatalogLocale,
-    ): Promise<Pick<SearchResponse, 'category' | 'model'>> {
+    ): Promise<Pick<SearchResponse, 'category' | 'model' | 'scope_pages'>> {
       try {
         const [allCategories, allVehicles] = await Promise.all([
           category ? categories() : [],
@@ -337,9 +348,10 @@ export function createCatalogue({
           model:
             allVehicles.find((vehicle) => vehicle.model.slug === model)
               ?.model ?? null,
+          scope_pages: null,
         };
       } catch {
-        return { category: null, model: null };
+        return { category: null, model: null, scope_pages: null };
       }
     },
 
@@ -482,10 +494,15 @@ export function createCatalogue({
           await request('/store/vin-lookups', { vin }),
         );
         return lookup.resolved
-          ? { kind: 'vehicle', vehicle: lookup.vehicle, facts: lookup.facts }
-          : { kind: 'inquiry', vin };
+          ? {
+              kind: 'vehicle',
+              vehicle: lookup.vehicle,
+              facts: lookup.facts,
+              place: lookup.place,
+            }
+          : { kind: 'inquiry', vin, place: lookup.place };
       } catch {
-        return { kind: 'inquiry', vin };
+        return { kind: 'inquiry', vin, place: null };
       }
     },
   };

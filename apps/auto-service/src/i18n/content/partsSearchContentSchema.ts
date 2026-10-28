@@ -39,5 +39,11 @@ export const partsSearchContentSchema = z
     formHeading: z.string(),
     notFoundQuestion: z.string(),
     notFoundLink: z.string(),
+    carsGroup: z.string(),
+    partsGroup: z.string(),
+    vinOption: z.string(),
+    openSearch: z.string(),
+    closeSearch: z.string(),
+    llmsSearch: z.string(),
   })
   .strict();

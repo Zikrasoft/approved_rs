@@ -1,0 +1,116 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { PARTS_QUERY_MAX_LENGTH } from '@/utils/partsSearch';
+
+interface Props {
+  query?: string;
+  category?: string;
+  large?: boolean;
+  hint?: boolean;
+  autofocus?: boolean;
+  class?: string;
+}
+
+const {
+  query = '',
+  category,
+  large = false,
+  hint = large,
+  autofocus = false,
+  class: className,
+} = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+---
+
+<catalogue-search
+  class:list={['relative block', className]}
+  data-endpoint="/api/search"
+  data-locale={locale}
+  data-cars-label={copy.carsGroup}
+  data-parts-label={copy.partsGroup}
+  data-vin-label={copy.vinOption}
+>
+  <div class="relative">
+    <form
+      method="GET"
+      action={PathBuilder.partsSearch(locale)}
+      role="search"
+      class="flex gap-2"
+    >
+      {category && <input type="hidden" name="category" value={category} />}
+      <label class="relative block min-w-0 flex-1">
+        <span class="sr-only">{copy.label}</span>
+        <Icon
+          name="search"
+          size={large ? 20 : 16}
+          class:list={[
+            'pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted',
+            large ? 'left-4' : 'left-3',
+          ]}
+        />
+        <input
+          type="search"
+          name="q"
+          required
+          maxlength={PARTS_QUERY_MAX_LENGTH}
+          value={query}
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          autofocus={autofocus}
+          placeholder={copy.placeholder}
+          class:list={[
+            'field',
+            large
+              ? 'min-h-14 pl-12 text-base sm:text-lg'
+              : 'min-h-11 py-2 pl-9',
+          ]}
+        />
+      </label>
+      <button
+        type="submit"
+        class:list={[
+          'btn btn-primary shrink-0',
+          large ? 'min-h-14 px-5 sm:px-7' : 'min-h-11 px-4 py-2',
+        ]}
+      >
+        {copy.submitLabel}
+      </button>
+    </form>
+    <div
+      data-suggestions
+      hidden
+      aria-label={copy.label}
+      class="absolute inset-x-0 top-full z-40 mt-2 max-h-[min(70vh,30rem)] overflow-y-auto overscroll-contain rounded-field border border-line-strong bg-paper p-1.5 text-left shadow-lg"
+    >
+    </div>
+  </div>
+  {
+    hint && (
+      <p
+        class:list={[
+          'mt-2.5 text-sm leading-relaxed',
+          large ? 'text-ink-2' : 'text-muted',
+        ]}
+      >
+        {copy.searchLead}
+      </p>
+    )
+  }
+</catalogue-search>
+
+<script>
+  const wake = () =>
+    import('@/scripts/catalogueSearch').then(({ defineCatalogueSearch }) =>
+      defineCatalogueSearch(),
+    );
+  for (const box of document.querySelectorAll('catalogue-search')) {
+    box.addEventListener('focusin', wake, { once: true });
+    box.addEventListener('pointerdown', wake, { once: true });
+  }
+</script>

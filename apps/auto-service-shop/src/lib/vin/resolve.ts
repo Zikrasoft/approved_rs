@@ -97,7 +97,10 @@ export const resolveVin = async (
   vin: string,
   decoders: VinDecoder[],
   { catalog, vinLookups }: Services,
-): Promise<VinLookupResponse> => {
+): Promise<
+  | Omit<Extract<VinLookupResponse, { resolved: true }>, 'place'>
+  | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
+> => {
   const [existing] = await vinLookups.listVinLookups({ vin });
   const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
   const vehicle = vehicles.length === 1 ? vehicles[0] : null;

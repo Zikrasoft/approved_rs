@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
   ContainerRegistrationKeys,
   MedusaError,
+  Modules,
 } from '@medusajs/framework/utils';
 import type { SearchFilters } from '@medusajs/framework/types';
 import {
@@ -38,6 +39,8 @@ import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { makeKey, modelKey, pagedCars } from '../../../lib/car-pages';
+import { type CarMatch, matchCars } from '../../../search/catalogue-car';
 import {
   PART_IDENTIFIER_INDEX,
   searchRanking,
@@ -273,9 +276,29 @@ export async function GET(
   const scopedTo = vehicleModel
     ? vehicleSchema.shape.model.parse(vehicleModel)
     : null;
+  const scopeMake = scopedTo?.chassis.series.make.slug;
+  const scopePaged =
+    scopedTo && scopeMake
+      ? await pagedCars(req.scope.resolve(Modules.SEARCH), [
+          modelKey(scopedTo.slug),
+          makeKey(scopeMake),
+        ])
+      : null;
+  const scopePages =
+    scopedTo && scopeMake && scopePaged
+      ? {
+          model: scopePaged.has(modelKey(scopedTo.slug)),
+          make: scopePaged.has(makeKey(scopeMake)),
+        }
+      : null;
 
-  const filters: SearchFilters = searchableQuery(q)
-    ? { q: q.toLowerCase() }
+  const cars: CarMatch =
+    searchableQuery(q) && !found && !vehicleModel && !vehicle_id
+      ? await matchCars(req.scope.resolve(Modules.SEARCH), q)
+      : { cars: [], keys: [], rest: [] };
+  const partQuery = cars.keys.length ? cars.rest.join(' ') : q;
+  const filters: SearchFilters = searchableQuery(partQuery)
+    ? { q: partQuery.toLowerCase() }
     : {};
   const groups = facetGroups(facets);
   const scope: SearchFilters[] = [{ published: true }];
@@ -286,15 +309,20 @@ export async function GET(
         facets: [],
         category: narrowedTo,
         model: scopedTo,
+        cars: cars.cars,
+        scope_pages: scopePages,
         count: 0,
         offset,
         limit,
       }),
     );
 
-  if (!filters.q && !found) {
+  if (!filters.q && !found && !cars.keys.length) {
     nothing();
     return;
+  }
+  if (!filters.q && cars.keys.length) {
+    scope.push({ cars: { $in: cars.keys } });
   }
   if (found) {
     scope.push({ category: found.slug });
@@ -402,7 +430,7 @@ export async function GET(
     pagination: { skip: offset, take: limit },
     search_options: {
       facets: facetRequests,
-      provider_options: { typesense: searchRanking(locale) },
+      provider_options: { typesense: searchRanking(locale, cars.keys) },
     },
   });
 
@@ -462,6 +490,8 @@ export async function GET(
       ),
       category: narrowedTo,
       model: scopedTo,
+      cars: cars.cars,
+      scope_pages: scopePages,
       count,
       offset,
       limit,

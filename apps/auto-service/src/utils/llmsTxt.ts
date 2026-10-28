@@ -64,6 +64,14 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
             : pages.partsInquiry.llmsCatalogueClosed,
         },
         entries: [
+          {
+            label: content(locale).partsSearch.heading,
+            href: url(PathBuilder.partsSearch(locale)),
+            note: content(locale).partsSearch.llmsSearch.replace(
+              '{example}',
+              `${url(PathBuilder.partsSearch(locale))}?${new URLSearchParams({ q: 'HU 816 x' })}`,
+            ),
+          },
           ...categories.map((category) => {
             const addon = categoryAddon(category, locale);
             const money = (price: number) =>

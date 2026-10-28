@@ -17,6 +17,7 @@ import LeadForm from '@/components/LeadForm.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
@@ -115,6 +116,13 @@ const website = websiteSchema({
         ))
       }
     </ul>
+  </section>
+
+  <section class="wrap pt-band md:pt-band-lg">
+    <div class="flex max-w-3xl flex-col gap-4">
+      <h2 class="text-section">{content(locale).partsSearch.searchHeading}</h2>
+      <CatalogueSearch large />
+    </div>
   </section>
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
