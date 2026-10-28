@@ -231,6 +231,7 @@ export function createCatalogue({
   return {
     categories,
     vehicles,
+    snapshot,
 
     async partPages(): Promise<PartPageEntry[]> {
       return (await snapshot()).entries;

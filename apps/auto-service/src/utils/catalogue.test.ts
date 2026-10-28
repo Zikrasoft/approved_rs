@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCatalogue } from './catalogue';
 import {
+  PREVIOUS_BUILD_URL,
+  type CatalogueEnv,
   catalogueFromEnv,
   categoriesForBuild,
   categoryPagesForBuild,
@@ -9,8 +11,11 @@ import {
   partPagesForBuild,
 } from './catalogueEnv';
 import { categoryFacets } from './categoryFacets';
+import { categoryListings } from './catalogueSnapshot';
+import { fitGroups } from './fitGroups';
 import { PathBuilder } from './paths';
 import { sitemapFilter } from './sitemap';
+import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
 const BACKEND_URL = 'http://localhost:9009';
 
@@ -562,6 +567,120 @@ describe('enriched part pages', () => {
   });
 });
 
+describe('Category listing pages', () => {
+  const numbers = (count: number) =>
+    Array.from({ length: count }, (_, index) =>
+      brandNumber('mann-filter', `HU${String(index).padStart(3, '0')}`, {
+        id: `part_${index}`,
+        name: 'Масляный фильтр',
+        category_id: oilFilters.id,
+      }),
+    );
+  const listingsOf = async (count: number) => {
+    const [category] = await catalogueWith(
+      backend({ pages: numbers(count), categories: [oilFilters] }),
+    ).categoryPages();
+    return categoryListings(category).map(({ number, count, pages }) => ({
+      number,
+      count,
+      first: pages[0]?.value,
+      size: pages.length,
+    }));
+  };
+
+  it('splits a Category into pages of 48 brand-numbers', async () => {
+    expect(await listingsOf(97)).toEqual([
+      { number: 1, count: 3, first: 'HU000', size: 48 },
+      { number: 2, count: 3, first: 'HU048', size: 48 },
+      { number: 3, count: 3, first: 'HU096', size: 1 },
+    ]);
+  });
+
+  it('keeps one page for a Category of 48', async () => {
+    expect(await listingsOf(48)).toEqual([
+      { number: 1, count: 1, first: 'HU000', size: 48 },
+    ]);
+  });
+
+  it('keeps the first page for an empty Category', async () => {
+    expect(await listingsOf(0)).toEqual([
+      { number: 1, count: 1, first: undefined, size: 0 },
+    ]);
+  });
+
+  it('lists every page of a Category in the sitemap', () => {
+    const keep = sitemapFilter(SITE);
+    expect(
+      keep(`${SITE}${PathBuilder.partsCategory('sr', 'oil-filters', 2)}`),
+    ).toBe(true);
+  });
+});
+
+describe('a part page groups its Fitments', () => {
+  const variant = { ...VEHICLE, id: 'veh_1b', power_kw: 120 };
+  const g20 = {
+    ...VEHICLE,
+    id: 'veh_g20',
+    model: {
+      ...VEHICLE.model,
+      slug: 'g20-320d',
+      chassis: { ...VEHICLE.model.chassis, code: 'G20' },
+    },
+  };
+  const a4 = {
+    ...VEHICLE,
+    id: 'veh_a4',
+    model: {
+      slug: 'b9-a4',
+      name: 'A4 2.0 TDI',
+      chassis: {
+        code: 'B9',
+        body_style: 'sedan',
+        series: {
+          name: 'A4',
+          translations: null,
+          make: { slug: 'audi', name: 'Audi' },
+        },
+      },
+    },
+  };
+
+  it('by Make and Model, makes and models in name order', async () => {
+    const [page] = await catalogueWith(
+      backend({
+        pages: [oilFilterMann],
+        fitments: [
+          fitment('fit_g20', oilPart.id, { vehicle_id: g20.id }),
+          fitment('fit_f30', oilPart.id),
+          fitment('fit_a4', oilPart.id, { vehicle_id: a4.id }),
+          fitment('fit_f30b', oilPart.id, { vehicle_id: variant.id }),
+        ],
+        vehicles: [VEHICLE, variant, g20, a4],
+      }),
+    ).partPages();
+
+    expect(
+      fitGroups(page.fits).map(({ make, models }) => [
+        make.slug,
+        models.map(({ model, fits }) => [model.slug, fits.map(({ id }) => id)]),
+      ]),
+    ).toEqual([
+      ['audi', [['b9-a4', ['fit_a4']]]],
+      [
+        'bmw',
+        [
+          ['f30-320d', ['fit_f30', 'fit_f30b']],
+          ['g20-320d', ['fit_g20']],
+        ],
+      ],
+    ]);
+  });
+
+  it('into nothing when the part fits no car', () => {
+    expect(fitGroups([])).toEqual([]);
+  });
+});
+
 describe('catalogue.carPages', () => {
   const frontPads = brandNumber('textar', '2512101', {
     id: 'part_front',
@@ -753,6 +872,131 @@ describe('partPagesForBuild', () => {
   it('builds no Category pages when no backend is configured', async () => {
     expect(await categoryPagesForBuild({})).toEqual([]);
     expect(await categoriesForBuild({})).toEqual([]);
+  });
+});
+
+describe('the deploy build', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  let shops = 0;
+  const shopEnv = (env: CatalogueEnv = {}): CatalogueEnv => ({
+    MEDUSA_BACKEND_URL: `http://shop-${++shops}.test`,
+    MEDUSA_PUBLISHABLE_KEY: 'pk_test',
+    ...env,
+  });
+  const partPages = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      ...oilFilterMann,
+      id: `pi_${index}`,
+      normalized_value: `HU${index}`,
+    }));
+  const deployed = (
+    previous: number | null,
+    shop: ReturnType<typeof backend> = backend(),
+  ) =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) =>
+        url === PREVIOUS_BUILD_URL
+          ? previous === null
+            ? Promise.resolve({
+                ok: false,
+                status: 404,
+                json: async () => ({}),
+              })
+            : respond({ partPages: previous })
+          : shop(url),
+      ),
+    );
+
+  it('reads the catalogue once for every page, the sitemap and llms.txt', async () => {
+    const shop = backend({ pages: partPages(2) });
+    deployed(2, shop);
+    const env = shopEnv({ VERCEL: '1' });
+
+    await partPagesForBuild(env);
+    await categoriesForBuild(env);
+    await categoryPagesForBuild(env);
+    await carPagesForBuild(env);
+    await makeHubsForBuild(env);
+
+    const reads = (path: string) =>
+      shop.mock.calls.filter(([url]) => url.includes(path)).length;
+    expect(reads('/store/part-pages')).toBe(1);
+    expect(reads('/store/categories')).toBe(1);
+  });
+
+  it('fails without the backend URL once the live site has part pages', async () => {
+    deployed(120);
+
+    await expect(partPagesForBuild({ VERCEL: '1' })).rejects.toThrow(
+      'MEDUSA_BACKEND_URL',
+    );
+  });
+
+  it('builds without a catalogue while the live site has none', async () => {
+    deployed(null);
+
+    expect(await partPagesForBuild({ VERCEL: '1' })).toEqual([]);
+  });
+
+  it('fails on a shop with no part pages once the catalogue is live, even when shrinking is allowed', async () => {
+    deployed(120, backend());
+
+    await expect(
+      partPagesForBuild(
+        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+      ),
+    ).rejects.toThrow('0 part pages');
+  });
+
+  it('fails on far fewer part pages than the live site has', async () => {
+    deployed(10, backend({ pages: partPages(4) }));
+
+    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
+      '4 part pages',
+    );
+  });
+
+  it('builds a catalogue that shrank by less than half', async () => {
+    deployed(10, backend({ pages: partPages(6) }));
+
+    expect(await partPagesForBuild(shopEnv({ VERCEL: '1' }))).toHaveLength(6);
+  });
+
+  it('builds a shrunken catalogue the owner allowed', async () => {
+    deployed(10, backend({ pages: partPages(4) }));
+
+    expect(
+      await partPagesForBuild(
+        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+      ),
+    ).toHaveLength(4);
+  });
+
+  it('never asks the live site outside a deploy build', async () => {
+    const shop = backend();
+    deployed(120, shop);
+
+    expect(await partPagesForBuild(shopEnv())).toEqual([]);
+    expect(shop).toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalledWith(
+      PREVIOUS_BUILD_URL,
+      expect.anything(),
+    );
+  });
+
+  it('fails when the live site cannot say what it serves', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => respond({}, false)),
+    );
+
+    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
+      '503',
+    );
   });
 });
 
@@ -1152,5 +1396,13 @@ describe('catalogue.listingScope', () => {
     ).listingScope({ category: 'oil-filters' }, 'ru');
 
     expect(scope).toEqual({ category: null, model: null });
+  });
+});
+
+describe('the build record', () => {
+  it('tells the next build how many part pages this one serves', async () => {
+    const response = await recordBuild({} as Parameters<typeof recordBuild>[0]);
+
+    expect(await response.json()).toEqual({ partPages: 0 });
   });
 });

@@ -73,6 +73,7 @@ fitment:
   builtFrom: выпуск с {date}
   builtTo: выпуск по {date}
   partFitsHeading: Подходит для автомобилей
+  modelLink: 'Все запчасти для {model}'
 hubs:
   indexHeading: Запчасти по марке
   make:

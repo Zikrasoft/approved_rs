@@ -278,3 +278,25 @@ export function makeHubsFrom({
     (makeModels) => ({ make: makeModels[0].make, models: makeModels }),
   );
 }
+
+export const CATEGORY_PAGE_SIZE = 48;
+
+export type CategoryListing = {
+  number: number;
+  count: number;
+  pages: PartPageEntry[];
+};
+
+export function categoryListings({
+  pages,
+}: CategoryPageEntry): CategoryListing[] {
+  const count = Math.max(1, Math.ceil(pages.length / CATEGORY_PAGE_SIZE));
+  return Array.from({ length: count }, (_, index) => ({
+    number: index + 1,
+    count,
+    pages: pages.slice(
+      index * CATEGORY_PAGE_SIZE,
+      (index + 1) * CATEGORY_PAGE_SIZE,
+    ),
+  }));
+}

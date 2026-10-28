@@ -9,8 +9,8 @@ export const PathBuilder = {
     `/${locale}/services/${slug}/`,
   works: (locale: Locale) => `/${locale}/works/`,
   parts: (locale: Locale) => `/${locale}/parts/`,
-  partsCategory: (locale: Locale, slug: string) =>
-    `/${locale}/parts/c/${slug}/`,
+  partsCategory: (locale: Locale, slug: string, page: number | string = 1) =>
+    `/${locale}/parts/c/${slug}/${Number(page) > 1 ? `${page}/` : ''}`,
   partNumber: (locale: Locale, slug: string) => `/${locale}/parts/p/${slug}/`,
   partsCart: (locale: Locale) => `/${locale}/parts/cart/`,
   partsMake: (locale: Locale, make: string) => `/${locale}/parts/${make}/`,
