@@ -110,7 +110,10 @@ function localeRoutes(
 export const catalogueRoutes = (
   redirects: CatalogueRedirect[],
 ): RedirectRoute[] =>
-  redirects.flatMap((redirect) =>
+  [
+    ...redirects.filter(({ from }) => from.vehicle),
+    ...redirects.filter(({ from }) => !from.vehicle),
+  ].flatMap((redirect) =>
     SUPPORTED_LOCALES.flatMap((locale) => localeRoutes(locale, redirect)),
   );
 

@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import type { IRegionModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
+import { createAdminAuth } from '../../../integration-tests/adminAuth';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
@@ -21,7 +22,7 @@ const SLUGS = [
 
 medusaIntegrationTestRunner({
   moduleName: 'seed_production',
-  testSuite: ({ getContainer }) => {
+  testSuite: ({ api, getContainer }) => {
     describe('The production seed', () => {
       let catalog: CatalogModuleService;
       let suppliers: SupplierModuleService;
@@ -353,6 +354,72 @@ medusaIntegrationTestRunner({
         ).toBe(swag.id);
         expect((await catalog.retrieveMake(volkswagen.id)).name).toBe('VW');
         expect(await catalog.listMakes({}, { take: null })).toHaveLength(1);
+      });
+
+      it('finds a crawled Brand and Make again after staff renamed their slugs', async () => {
+        const [filtron] = await catalog.listBrands({ slug: 'filtron' });
+        const [volkswagen] = await catalog.listMakes({ slug: 'volkswagen' });
+        const staff = { created_by: 'user_1', updated_by: 'user_1' };
+        await catalog.renameSlug('brand', filtron.id, 'filtron-filters', staff);
+        await catalog.renameSlug('make', volkswagen.id, 'vw-cars', staff);
+
+        await run();
+
+        expect(
+          (await catalog.listBrands({}, { take: null })).filter(({ name }) =>
+            name.startsWith('FILTRON'),
+          ),
+        ).toEqual([expect.objectContaining({ id: filtron.id })]);
+        expect(await catalog.listMakes({}, { take: null })).toEqual([
+          expect.objectContaining({ id: volkswagen.id, slug: 'vw-cars' }),
+        ]);
+      });
+
+      it('does not bring back a seeded spelling or mapping staff deleted', async () => {
+        const adminHeaders = await createAdminAuth(
+          getContainer(),
+          api,
+          'admin@seed-production.local',
+          'supersecret',
+        );
+        const [filtron, varta, mann] = await Promise.all(
+          ['FILTRON', 'VARTA', 'MANN-FILTER'].map(
+            async (name) => (await suppliers.listSuppliers({ name }))[0],
+          ),
+        );
+        const [brandSpelling] = await catalog.listBrandSpellings({
+          supplier_id: filtron.id,
+        });
+        const [makeSpelling] = await catalog.listMakeSpellings({
+          supplier_id: mann.id,
+        });
+        const [mapping] = await suppliers.listSupplierCategories({
+          supplier_id: varta.id,
+        });
+        await api.delete(
+          `/admin/brands/${brandSpelling.brand_id}/spellings/${brandSpelling.id}`,
+          adminHeaders,
+        );
+        await api.delete(
+          `/admin/makes/${makeSpelling.make_id}/spellings/${makeSpelling.id}`,
+          adminHeaders,
+        );
+        await api.delete(
+          `/admin/suppliers/${varta.id}/categories/${mapping.id}`,
+          adminHeaders,
+        );
+
+        await run();
+
+        expect(
+          await catalog.listBrandSpellings({ supplier_id: filtron.id }),
+        ).toEqual([]);
+        expect(
+          await catalog.listMakeSpellings({ supplier_id: mann.id }),
+        ).toEqual([]);
+        expect(
+          await suppliers.listSupplierCategories({ supplier_id: varta.id }),
+        ).toEqual([]);
       });
     });
   },

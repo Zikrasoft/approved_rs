@@ -20,7 +20,7 @@ export async function DELETE(
     );
   }
 
-  await catalog.deleteBrandSpellings(spelling_id);
+  await catalog.softDeleteBrandSpellings(spelling_id);
 
   res.json({ id: spelling_id, object: 'brand_spelling', deleted: true });
 }

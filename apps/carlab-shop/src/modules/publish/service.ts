@@ -2,10 +2,9 @@ import { MedusaService } from '@medusajs/framework/utils';
 
 import CatalogueRun from './models/catalogue-run';
 import PublishedNumber from './models/published-number';
+import { INTERRUPTED_BY_RESTART } from '../../lib/run-errors';
 
-export const INTERRUPTED_BY_RESTART = 'Interrupted by a restart';
-
-const startedByCliCommand = () => process.env.MEDUSA_WORKER_MODE === 'server';
+const inServerWorkerMode = () => process.env.MEDUSA_WORKER_MODE === 'server';
 
 class PublishModuleService extends MedusaService({
   CatalogueRun,
@@ -13,7 +12,7 @@ class PublishModuleService extends MedusaService({
 }) {
   __hooks = {
     onApplicationStart: async () => {
-      if (!startedByCliCommand()) await this.failRunsLeftRunning();
+      if (!inServerWorkerMode()) await this.failRunsLeftRunning();
     },
   };
 

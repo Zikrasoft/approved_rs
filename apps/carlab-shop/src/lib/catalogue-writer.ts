@@ -9,10 +9,10 @@ import type { CATALOGUE_RUN_KINDS } from '../modules/publish/models/catalogue-ru
 import type PublishModuleService from '../modules/publish/service';
 import { adminError } from './admin-errors';
 import { errorMessage } from './errors';
+import { ABANDONED } from './run-errors';
 
 export const HEARTBEAT_MS = 30_000;
 export const STALE_HEARTBEAT_MS = 5 * 60_000;
-export const ABANDONED = 'Abandoned';
 
 type RunStart = {
   kind: (typeof CATALOGUE_RUN_KINDS)[number];
@@ -34,7 +34,7 @@ const busy = () =>
   adminError(
     MedusaError.Types.CONFLICT,
     'CATALOGUE_BUSY',
-    'Another import, publish or deletion is running',
+    'Another import, publish, deletion, merge or rename is running',
   );
 
 const isStale = (heartbeatAt: Date) =>

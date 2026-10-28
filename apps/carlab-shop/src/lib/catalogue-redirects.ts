@@ -79,6 +79,10 @@ export async function catalogueRedirects(
     return null;
   };
 
+  const retiredModels = new Map(
+    rows.flatMap((row) => (row.kind === 'model' ? [[row.from_id, row]] : [])),
+  );
+
   const fromOf = ({
     kind,
     from_slug,
@@ -89,7 +93,9 @@ export async function catalogueRedirects(
       return make && { ...make, model: from_slug };
     }
     if (kind === 'vehicle') {
-      const model = placeOf('model', scope_id);
+      const retired = scope_id ? retiredModels.get(scope_id) : undefined;
+      const model =
+        placeOf('model', scope_id) ?? (retired ? fromOf(retired) : null);
       return model && { ...model, vehicle: from_slug };
     }
     return { [kind]: from_slug };

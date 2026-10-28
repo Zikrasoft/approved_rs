@@ -37,6 +37,26 @@ const follow = (routes: RedirectRoute[], path: string) => {
 const moved = (location: string) => ({ status: 301, location });
 
 describe('catalogueRoutes', () => {
+  it('sends a car renamed by a Model merge to itself, not to the car that kept its slug', () => {
+    const routes = catalogueRoutes([
+      redirect(
+        { make: 'volkswagen', model: 'vw-golf' },
+        { make: 'volkswagen', model: 'golf' },
+      ),
+      redirect(
+        { make: 'volkswagen', model: 'vw-golf', vehicle: 'caxa-90kw' },
+        { make: 'volkswagen', model: 'golf', vehicle: 'caxa-90kw-2' },
+      ),
+    ]);
+
+    expect(follow(routes, '/sr/parts/volkswagen/vw-golf/m/caxa-90kw/')).toEqual(
+      moved('/sr/parts/volkswagen/golf/m/caxa-90kw-2/'),
+    );
+    expect(
+      follow(routes, '/sr/parts/volkswagen/vw-golf/m/caxa-110kw/'),
+    ).toEqual(moved('/sr/parts/volkswagen/golf/m/caxa-110kw/'));
+  });
+
   it('301s every page under a renamed Make, in every locale', () => {
     const routes = catalogueRoutes([
       redirect({ make: 'bmw-old' }, { make: 'bmw' }),

@@ -16,7 +16,7 @@ export async function DELETE(
     supplier_id: id,
   });
   if (mapping) {
-    await suppliers.deleteSupplierCategories(mapping.id);
+    await suppliers.softDeleteSupplierCategories(mapping.id);
   }
 
   res.json({ id: mapping_id, object: 'supplier_category', deleted: true });

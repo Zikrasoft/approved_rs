@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 import { SITE_URL } from '@/utils/constants';
-import { NOINDEX, pageHead } from './pageHead';
+import { pageHead } from './pageHead';
 import { PathBuilder } from './paths';
 
 const copy = { title: 'T', description: 'D' };
@@ -40,10 +40,6 @@ describe('pageHead', () => {
       });
     },
   );
-
-  it('keeps a noindex page followed', () => {
-    expect(NOINDEX).toBe('noindex, follow');
-  });
 
   it('points the bare site root at the locale homepage', () => {
     const head = pageHead('en', '/', copy);

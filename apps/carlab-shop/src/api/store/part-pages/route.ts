@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
@@ -6,8 +7,6 @@ import { installationPrice } from '../../../lib/installation';
 import { pricesShown } from '../../../lib/offer-cart';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
-import { PUBLISH_MODULE } from '../../../modules/publish';
-import type PublishModuleService from '../../../modules/publish/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
@@ -74,21 +73,20 @@ export async function GET(
   const { offset, limit } = req.validatedQuery as StoreListPartPagesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
-  const publish: PublishModuleService = req.scope.resolve(PUBLISH_MODULE);
-
-  const published = new Set(
-    (
-      await publish.listPublishedNumbers({}, { select: ['id'], take: null })
-    ).map(({ id }) => id),
-  );
-  const listed = (
-    await catalog.listPartIdentifiers(
-      {},
-      { select: ['id'], order: { id: 'ASC' }, take: null },
-    )
-  ).flatMap(({ id }) => (published.has(id) ? [id] : []));
-  const count = listed.length;
-  const pageIds = listed.slice(offset, offset + limit);
+  const db = req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION);
+  const published = () =>
+    db('published_number as pn')
+      .join('part_identifier as pi', 'pi.id', 'pn.id')
+      .whereNull('pn.deleted_at')
+      .whereNull('pi.deleted_at');
+  const [{ count }] = await published().count({ count: '*' });
+  const pageIds = (
+    await published()
+      .select<{ id: string }[]>('pn.id')
+      .orderBy('pn.id')
+      .offset(offset)
+      .limit(limit)
+  ).map(({ id }) => id);
   const identifiers = pageIds.length
     ? await catalog.listPartIdentifiers(
         { id: pageIds },
@@ -153,5 +151,12 @@ export async function GET(
     supplier_data: supplierData(identifier.id),
   }));
 
-  res.json(partPagesResponseSchema.parse({ pages, count, offset, limit }));
+  res.json(
+    partPagesResponseSchema.parse({
+      pages,
+      count: Number(count),
+      offset,
+      limit,
+    }),
+  );
 }

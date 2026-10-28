@@ -3,7 +3,7 @@ import type { AddressInfo, LookupFunction } from 'node:net';
 
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
-import { Modules } from '@medusajs/framework/utils';
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
@@ -25,7 +25,7 @@ import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../../modules/publish';
 import type PublishModuleService from '../../../../../../modules/publish/service';
-import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/publish/service';
+import { INTERRUPTED_BY_RESTART } from '../../../../../../lib/run-errors';
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
@@ -1040,6 +1040,64 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
+      it('keeps the offer of an unlisted article while a page is unreadable and drops it on the next clean run', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-11', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        await runImport();
+        intercars.articles.length = 0;
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/hu-816-x',
+          reason: 'Unexpected markup',
+        });
+
+        await runImport();
+
+        expect((await page('HU816X'))?.offers).toHaveLength(1);
+
+        intercars.unreadable.length = 0;
+        await runImport();
+
+        expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
+      it('flags a Part gone from a readable page while another page is unreadable, sparing only the Part of that page', async () => {
+        const articleOn = (number: string, url: string) => ({
+          article_id: `IC-${number}`,
+          brand: 'MANN-FILTER',
+          number,
+          name: `Фильтр ${number}`,
+          category: 'IC-OIL',
+          source_url: url,
+        });
+        intercars.articles.push(
+          articleOn('C 30 006', 'https://intercars.test/p/c-30-006'),
+          articleOn('C 30 007', 'https://intercars.test/p/c-30-007'),
+        );
+        await runImport();
+        intercars.articles.length = 0;
+        intercars.unreadable.push({
+          url: 'https://intercars.test/p/c-30-006',
+          reason: 'Unexpected markup',
+        });
+
+        await runImport();
+
+        const flagged = (
+          await api.get(
+            '/admin/part-identifiers?source_missing=true&q=C3000',
+            adminHeaders,
+          )
+        ).data.part_identifiers.map(
+          ({ normalized_value }: { normalized_value: string }) =>
+            normalized_value,
+        );
+        expect(flagged).toContain('C30007');
+        expect(flagged).not.toContain('C30006');
+      });
+
       it('flags a Part its source stops listing, keeps its page, and clears the flag when it returns, flagging nothing new while a page is unreadable', async () => {
         const article = {
           article_id: 'IC-GONE',
@@ -1048,6 +1106,7 @@ medusaIntegrationTestRunner({
           name: 'Фильтр воздушный C 30 005',
           category: 'IC-OIL',
           description: 'Воздушный фильтр',
+          source_url: 'https://intercars.test/p/c-30-005',
         };
         shopAi.description = 'Воздушный фильтр MANN';
         intercars.articles.push(article);
@@ -1433,6 +1492,49 @@ medusaIntegrationTestRunner({
           ).toMatchObject({ status: 'failed', error: 'Abandoned' });
         });
 
+        it('stops writing progress onto a run once it is no longer running', async () => {
+          const runs: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          pushFilters(intercars, ['GONE 1', 'GONE 2', 'GONE 3']);
+          const release = holdLaterPages(intercars);
+
+          const started = await imports.start(intercarsId);
+          const runId = started.data.import_run?.id ?? '';
+          const deadline = Date.now() + 20_000;
+          while (
+            !(await latestImportOf(intercarsId)).report &&
+            Date.now() < deadline
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          await runs.updateCatalogueRuns({
+            id: runId,
+            status: 'failed',
+            error: 'Abandoned',
+            report: null,
+            finished_at: new Date(),
+          });
+          release();
+          while (
+            !(await catalog.listPartIdentifiers({ normalized_value: 'GONE3' }))
+              .length &&
+            Date.now() < deadline
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2_000));
+
+          expect(
+            (await imports.history(intercarsId)).find(
+              ({ id }: { id: string }) => id === runId,
+            ),
+          ).toMatchObject({
+            status: 'failed',
+            error: 'Abandoned',
+            report: null,
+          });
+        });
+
         it('fails the runs a restart left running, a Publish included', async () => {
           const runs: PublishModuleService =
             getContainer().resolve(PUBLISH_MODULE);
@@ -1465,6 +1567,42 @@ medusaIntegrationTestRunner({
           });
           expect((await imports.start(warehouseId)).status).toBe(202);
           await imports.finished(warehouseId);
+        });
+
+        it('warns once per Import that AI answers are not cached without S3', async () => {
+          const container = getContainer();
+          const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+          const warned: string[] = [];
+          container.register(
+            ContainerRegistrationKeys.LOGGER,
+            asValue(
+              Object.assign(Object.create(logger), {
+                warn: (message: string) => {
+                  warned.push(message);
+                },
+              }),
+            ),
+          );
+          container.register(SHOP_STORAGE_REGISTRATION, asValue(null));
+          pushFilters(intercars, ['NOCACHE 1', 'NOCACHE 2', 'NOCACHE 3']);
+          try {
+            await imports.run(intercarsId);
+          } finally {
+            container.register(
+              SHOP_STORAGE_REGISTRATION,
+              asValue(storage.storage),
+            );
+            container.register(
+              ContainerRegistrationKeys.LOGGER,
+              asValue(logger),
+            );
+          }
+
+          expect(
+            warned.filter((message) => message.includes('not cached')),
+          ).toEqual([
+            'Intercars: S3 is not configured, so AI answers are not cached and every article is asked again',
+          ]);
         });
 
         it('lists an article that fails with its reason and imports the rest', async () => {

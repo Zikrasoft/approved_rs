@@ -43,7 +43,10 @@ export async function POST(
     },
     (runId) =>
       importSupplier(req.scope, adapter, (progress) =>
-        runs.updateCatalogueRuns({ id: runId, report: progress }),
+        runs.updateCatalogueRuns({
+          selector: { id: runId, status: 'running' },
+          data: { report: progress },
+        }),
       ),
     (report) => ({ report }),
   );

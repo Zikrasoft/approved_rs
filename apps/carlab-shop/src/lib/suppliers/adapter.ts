@@ -46,6 +46,7 @@ export const supplierArticleSchema = z.object({
   applicability: z.array(z.string()).optional(),
   vehicles: z.array(vehicleFactsSchema).optional(),
   images: z.array(z.url()).optional(),
+  source_url: z.string().min(1).optional(),
 });
 
 const unreadablePageSchema = z.object({ url: z.string(), reason: z.string() });

@@ -1,4 +1,6 @@
+import { readdirSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
+import { RESERVED_PARTS_SEGMENTS } from '@podbor/catalog-contract';
 import { PathBuilder, swapLocale, vehiclePath, withLocales } from './paths';
 import { SERVICE_SLUGS } from './services';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
@@ -97,5 +99,33 @@ describe('withLocales', () => {
       [...SUPPORTED_LOCALES].sort(),
     );
     paths.forEach((p) => expect(p.params.slug).toBe('a'));
+  });
+});
+
+describe('reserved parts segments', () => {
+  const reserved: readonly string[] = RESERVED_PARTS_SEGMENTS;
+
+  it('reserves every section page under /parts/ a Make slug could shadow', () => {
+    const sections = readdirSync(
+      new URL('../pages/[locale]/parts/', import.meta.url),
+    )
+      .map((entry) => entry.replace(/\.astro$/, ''))
+      .filter((entry) => entry !== 'index' && !entry.startsWith('['));
+    expect(sections.length).toBeGreaterThan(0);
+    expect(sections.filter((entry) => !reserved.includes(entry))).toEqual([]);
+  });
+
+  it('reserves every fixed segment a PathBuilder link puts under /parts/', () => {
+    const segments = Object.values(PathBuilder)
+      .map((build) =>
+        (build as (...args: string[]) => string)('sr', '$a', '$b', '$c', '$d'),
+      )
+      .filter((path) => path.startsWith('/sr/parts/'))
+      .map((path) => path.split('/')[3])
+      .filter((segment) => segment && !/^[$#]/.test(segment));
+    expect(segments).toContain('car');
+    expect(segments.filter((segment) => !reserved.includes(segment))).toEqual(
+      [],
+    );
   });
 });

@@ -4,6 +4,7 @@ export {
   pickRandomBanner,
 } from './safeMarkdown.ts';
 export { breadcrumbListSchema } from './breadcrumbSchema.ts';
+export { NOINDEX } from './robots.ts';
 export {
   jsonLdText,
   serviceSchema,

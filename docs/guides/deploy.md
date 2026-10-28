@@ -849,7 +849,7 @@ number gets its CI value in that script. The non-obvious parts:
   without a valid token, and staff sign-in itself (`/auth/user/emailpass`) is
   not among them. The API host answers 404 on `/admin` and `/auth/user`, so
   staff routes exist only behind the admin host's basic_auth; the storefront
-  calls only `/store/*` (and Caddy's `/health`). Checked against a live Caddy by
+  calls only `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
   `infra/carlab-shop/test/compose.test.sh`.
 - `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
@@ -1011,9 +1011,12 @@ Supplier (with cross-references, applicability and images released), its Brands 
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
 mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
 `VW (VOLKSWAGEN)` and bilstein group's `Volkswagen (VW)` on one Volkswagen). The
-same `updated_by` rule holds for each of these rows. A spelling or mapping staff
-delete comes back on the next deploy: change it instead. Every other site
-category is still mapped by hand on the Supplier's categories screen.
+same `updated_by` rule holds for each of these rows. A Brand or Make is found by
+its name, then its slug, then the seeded spelling that points at it, so a staff
+rename of either does not seed a duplicate. Deleting a spelling or a mapping in
+the admin is a soft delete, and the seed reads a deleted row as the staff's
+decision and leaves it deleted. Every other site category is still mapped by
+hand on the Supplier's categories screen.
 
 It seeds no Parts or offers: the manual supplier is created on the first
 hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which

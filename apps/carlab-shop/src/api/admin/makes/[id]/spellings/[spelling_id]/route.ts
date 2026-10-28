@@ -20,7 +20,7 @@ export async function DELETE(
     );
   }
 
-  await catalog.deleteMakeSpellings(spelling_id);
+  await catalog.softDeleteMakeSpellings(spelling_id);
 
   res.json({ id: spelling_id, object: 'make_spelling', deleted: true });
 }

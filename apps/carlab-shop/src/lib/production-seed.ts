@@ -141,14 +141,20 @@ const matches = (row: object, wanted: object) =>
     isDeepStrictEqual((row as Record<string, unknown>)[key], value),
   );
 
-async function upsert<Row extends { id: string; updated_by: string | null }>(
+type Seeded = {
+  id: string;
+  updated_by: string | null;
+  deleted_at?: Date | null;
+};
+
+async function upsert<Row extends Seeded>(
   row: Row | undefined,
   wanted: object,
   create: () => Promise<Row>,
   update: (wanted: object & { id: string }) => Promise<unknown>,
 ): Promise<Row> {
   if (!row) return create();
-  if (!row.updated_by && !matches(row, wanted)) {
+  if (!row.updated_by && !row.deleted_at && !matches(row, wanted)) {
     await update({ id: row.id, ...wanted });
   }
   return row;
@@ -248,19 +254,44 @@ async function seedCrawledSupplier(
   );
 }
 
-async function seedNamed<Row extends { id: string; updated_by: string | null }>(
+const liveFirst = <Row extends Seeded>(
+  rows: Row[],
+  wanted: (row: Row) => boolean,
+) => rows.find((row) => wanted(row) && !row.deleted_at) ?? rows.find(wanted);
+
+const WITH_DELETED = { take: null, withDeleted: true };
+
+async function seedNamed<Row extends Seeded & { name: string; slug: string }>(
   name: string,
-  list: (filter: { slug: string }) => Promise<Row[]>,
-  create: (data: { slug: string; name: string }) => Promise<Row>,
+  spelledId: string | undefined,
+  list: () => Promise<Row[]>,
+  create: (data: { name: string }) => Promise<Row>,
   update: (wanted: object & { id: string }) => Promise<unknown>,
 ) {
-  const slug = slugOf(name);
-  const [row] = await list({ slug });
-  return upsert(row, { name }, () => create({ slug, name }), update);
+  const rows = await list();
+  const row =
+    rows.find(
+      (candidate) => spellingKey(candidate.name) === spellingKey(name),
+    ) ??
+    rows.find(({ slug }) => slug === slugOf(name)) ??
+    rows.find(({ id }) => id === spelledId);
+  return upsert(row, { name }, () => create({ name }), update);
 }
 
+const spelledOwner = <Row extends Seeded & { value_key: string }>(
+  existing: Row[],
+  value: string,
+  owner: (row: Row) => string,
+) => {
+  const row = existing.find(
+    (candidate) =>
+      candidate.value_key === spellingKey(value) && !candidate.deleted_at,
+  );
+  return row && owner(row);
+};
+
 async function seedSpellings<
-  Row extends { id: string; value_key: string; updated_by: string | null },
+  Row extends Seeded & { value_key: string },
   Owner extends object,
 >(
   existing: Row[],
@@ -270,7 +301,7 @@ async function seedSpellings<
 ) {
   for (const [value, owner] of wanted) {
     await upsert(
-      existing.find(({ value_key }) => value_key === spellingKey(value)),
+      liveFirst(existing, ({ value_key }) => value_key === spellingKey(value)),
       owner,
       () => create(value, owner),
       update,
@@ -286,11 +317,20 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
     const { brands, categories, makes } = CRAWLED_CATALOGUES[site.key];
     const { id: supplier_id } = await seedCrawledSupplier(suppliers, site.name);
 
+    const seededBrandSpellings = await catalog.listBrandSpellings(
+      { supplier_id },
+      WITH_DELETED,
+    );
     const brandSpellings: [string, { brand_id: string }][] = [];
     for (const [name, values] of Object.entries(brands)) {
       const brand = await seedNamed(
         name,
-        (filter) => catalog.listBrands(filter),
+        values
+          .map((value) =>
+            spelledOwner(seededBrandSpellings, value, (row) => row.brand_id),
+          )
+          .find(Boolean),
+        () => catalog.listBrands({}, { take: null }),
         (data) => catalog.createBrands(data),
         (update) => catalog.updateBrands(update),
       );
@@ -298,25 +338,30 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
         brandSpellings.push([value, { brand_id: brand.id }]);
     }
     await seedSpellings(
-      await catalog.listBrandSpellings({ supplier_id }, { take: null }),
+      seededBrandSpellings,
       brandSpellings,
       (value, owner) =>
         catalog.createBrandSpellings({ supplier_id, value, ...owner }),
       (update) => catalog.updateBrandSpellings(update),
     );
 
+    const seededMakeSpellings = await catalog.listMakeSpellings(
+      { supplier_id },
+      WITH_DELETED,
+    );
     const makeSpellings: [string, { make_id: string }][] = [];
     for (const [value, name] of Object.entries(makes)) {
       const make = await seedNamed(
         name,
-        (filter) => catalog.listMakes(filter),
+        spelledOwner(seededMakeSpellings, value, (row) => row.make_id),
+        () => catalog.listMakes({}, { take: null }),
         (data) => catalog.createMakes(data),
         (update) => catalog.updateMakes(update),
       );
       makeSpellings.push([value, { make_id: make.id }]);
     }
     await seedSpellings(
-      await catalog.listMakeSpellings({ supplier_id }, { take: null }),
+      seededMakeSpellings,
       makeSpellings,
       (value, owner) =>
         catalog.createMakeSpellings({ supplier_id, value, ...owner }),
@@ -325,12 +370,12 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
 
     const mapped = await suppliers.listSupplierCategories(
       { supplier_id },
-      { take: null },
+      WITH_DELETED,
     );
     for (const [code, slug] of Object.entries(categories)) {
       const [category] = await catalog.listCategories({ slug });
       await upsert(
-        mapped.find(({ code_key }) => code_key === spellingKey(code)),
+        liveFirst(mapped, ({ code_key }) => code_key === spellingKey(code)),
         { category_id: category.id },
         () =>
           suppliers.createSupplierCategories({

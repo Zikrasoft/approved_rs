@@ -33,7 +33,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["import", "publish", "deletion"],
+          "enumItems": ["import", "publish", "deletion", "merge", "rename"],
           "mappedType": "enum"
         },
         "supplier_id": {

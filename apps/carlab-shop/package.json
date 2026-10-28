@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "seed:demo": "medusa exec ./src/scripts/seed-demo.ts",
+    "import:local": "medusa exec ./src/scripts/import-local.ts",
     "publish:local": "medusa exec ./src/scripts/publish-local.ts",
     "shop:prepare": "sh scripts/shop-prepare.sh",
     "dev:shop": "medusa develop",

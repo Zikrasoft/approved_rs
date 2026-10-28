@@ -23,6 +23,17 @@ describe('modelSlugOf', () => {
     ).toBe('c-class-w205-c-220-d');
   });
 
+  it('keeps a series word the make also uses', () => {
+    expect(
+      modelSlugOf({
+        make: 'Land Rover',
+        series: 'Range Rover',
+        chassis: 'L322',
+        model: 'LAND ROVER 4.4 V8 (L322)',
+      }),
+    ).toBe('range-rover-l322-4-4-v8');
+  });
+
   it('keeps a number that repeats', () => {
     expect(
       modelSlugOf({

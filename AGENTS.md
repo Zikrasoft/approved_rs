@@ -513,6 +513,12 @@ add a column nullable or with a default, add a table or an index. A rename or a
 drop ships in two deploys, first the code that stops reading the old shape,
 then the migration that removes it.
 
+The one sanctioned exception is the pre-launch squash of spec #404: before the
+shop's first production deploy each module's history was folded into a single
+initial migration, and changes were folded into it until launch. From the first
+production deploy on, every schema change is a new additive migration beside
+the initial one; never edit a migration a production database has run.
+
 Generate a module's migration with `medusa db:generate <module>` and leave the
 generated file as it comes. SQL the model DSL cannot express (`NULLS NOT
 DISTINCT`, an expression index) lives in a hand-written migration of its own,

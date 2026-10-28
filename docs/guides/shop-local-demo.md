@@ -33,7 +33,8 @@ workspace packages, then `shop:prepare` (`apps/carlab-shop/scripts/shop-prepare.
 - drops and recreates the demo database once if it still carries the shop
   modules' pre-squash migration history (each module now has a single initial
   migration, and the old history cannot be migrated forward);
-- runs `db:migrate`, `seed:demo` and `publish:local`, all safe to rerun.
+- runs `db:migrate`, `seed:demo`, `import:local` and `publish:local`, all safe
+  to rerun.
 
 Then it runs `medusa develop` on 9009 and, once `/health` answers, `astro dev`
 on 4321 with `.env.local` loaded into `process.env`. Ctrl-C stops both; the
@@ -142,11 +143,14 @@ What it creates:
 ## 4. Import, translate, reindex (the publish chain, locally)
 
 ```bash
+pnpm import:local
 pnpm publish:local
 ```
 
-It runs the supplier import, skips translate when `OPENAI_API_KEY` is unset,
-and reindexes Typesense. The deploy step is left out: `publish.yml`
+`import:local` imports every Supplier whose import is on, as one Import run.
+`publish:local` imports nothing (ADR-0048): it skips translate when
+`OPENAI_API_KEY` is unset and reindexes Typesense. Each holds the catalogue
+writer lock, so neither starts while an Import, Publish or deletion runs. The deploy step is left out: `publish.yml`
 rebuilds production, and locally "deploy" means rebuilding the storefront (step 6).
 
 The admin's Publish button runs the real chain (translate, deploy, reindex;
@@ -234,7 +238,7 @@ Useful pages:
   brand, «Только в наличии» and price beside the Category's own fields; a
   filter whose every result shares one value is hidden. Brand, stock and price
   come from the search index, so they follow offers at the next reindex
-  (`publish:local`), not on a live quote.
+  (`import:local`, then `publish:local`), not on a live quote.
 - Battery with the registration add-on: `/ru/parts/p/varta-580901080/`; the
   E-class car page lists the matching batteries.
 - Cart: `/ru/parts/cart/`.
