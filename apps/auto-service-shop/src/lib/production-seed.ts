@@ -93,6 +93,20 @@ const number = (
   options: [],
 });
 
+const yesNo = (
+  key: string,
+  label: string,
+  facet: boolean,
+): FieldDefinition => ({
+  key,
+  type: 'boolean',
+  label,
+  unit: null,
+  facet,
+  required: false,
+  options: [],
+});
+
 const select = (
   key: string,
   label: string,
@@ -118,6 +132,7 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
     ['efb', 'EFB'],
     ['agm', 'AGM'],
   ]),
+  yesNo('start-stop', 'Подходит для Start-Stop', true),
   select('polarity', 'Полярность', false, false, [
     ['reverse', 'Обратная'],
     ['normal', 'Прямая'],
