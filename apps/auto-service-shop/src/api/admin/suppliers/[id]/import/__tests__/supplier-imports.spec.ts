@@ -178,6 +178,7 @@ medusaIntegrationTestRunner({
         await catalog.createCategoryFieldOptions([
           { field_id: technology.id, key: 'standard', label: 'Стандартная' },
           { field_id: technology.id, key: 'agm', label: 'AGM' },
+          { field_id: technology.id, key: 'lithium', label: 'Литий-ионный' },
           { field_id: caseSize.id, key: 'h6-l3', label: 'H6 (L3)' },
         ]);
         await suppliers.createSupplierCategories([
@@ -844,6 +845,42 @@ medusaIntegrationTestRunner({
         expect((await page('BAT574'))?.part).toMatchObject({
           name: 'Аккумулятор 12 В 74 Ач MANN-FILTER BAT 574',
           attributes: { 'start-stop': false },
+        });
+      });
+
+      it('files a Li-ion battery as lithium and not for Start-Stop when the source does not say so', async () => {
+        const [varta] = await catalog.createBrands([
+          { name: 'VARTA', slug: 'varta' },
+        ]);
+        await catalog.createBrandSpellings({
+          brand_id: varta.id,
+          supplier_id: intercarsId,
+          value: 'VARTA',
+        });
+        intercars.articles.push({
+          article_id: 'IC-BAT-LI',
+          brand: 'VARTA',
+          number: '850150000',
+          name: 'VARTA Lithium Li-ion 50 Ah',
+          category: 'battery',
+          specs: { Amperi: '50 Ah', Tehnologija: 'Li-ion' },
+        });
+        shopAi.category = batteriesId;
+        shopAi.attributes = { capacity: 50, technology: 'lithium' };
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: [],
+          missing_fields: [],
+        });
+        expect((await page('850150000'))?.part).toMatchObject({
+          category_id: batteriesId,
+          attributes: {
+            capacity: 50,
+            technology: 'lithium',
+            'start-stop': false,
+          },
         });
       });
 
