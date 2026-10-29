@@ -142,8 +142,8 @@ ${glossaryLines}
 - "text": a short string.
 - "single-select": the key of one listed option. "multi-select": a non-empty array of distinct listed option keys. Never write a key that is not listed.
 - An option counts only when the input names it or the same thing in other words, such as a battery's SLI, wet or flooded technology for the plain standard option. Never pick the nearest option: a case size, polarity or similar code counts only when the input gives that very code; otherwise leave the field out.
-- A lead-acid starter battery whose input names no AGM, EFB or gel technology is a standard flooded battery: use the standard option. A lithium battery has none of these technologies.
-- A boolean field for Start-Stop suitability is true for an AGM or EFB battery or one the input calls Start-Stop, and false for a standard flooded battery.
+- A lead-acid starter battery whose input names no AGM, EFB or gel technology is a standard flooded battery: use the standard option. A lithium, Li-ion or LiFePO4 battery is never one of these technologies: use the lithium option.
+- A boolean field for Start-Stop suitability is true for an AGM or EFB battery or one the input calls Start-Stop, and false for a standard flooded battery or a lithium battery the input does not call Start-Stop.
 - Never guess any other value the input does not state.
 
 "description" is the Russian description for the part's page, or null when the input has neither a description nor specs:
