@@ -116,7 +116,8 @@ const count = (text: string | undefined) => Number(text) || null;
 
 const TRACTOR_MAKES_NAMED_LIKE_CARS = new Set(['LAMBORGHINI']);
 
-const notATractor = ({ make }: VehicleFacts) =>
+const named = ({ make, model, variant }: VehicleFacts) =>
+  Boolean(model && variant) &&
   !TRACTOR_MAKES_NAMED_LIKE_CARS.has(make.toUpperCase());
 
 const decoded = (value: string): string | null => {
@@ -221,7 +222,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles: applications.filter(notATractor),
+    vehicles: applications.filter(named),
     images: imagesOf($),
   };
 };

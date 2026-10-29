@@ -206,6 +206,18 @@ describe('MANN-FILTER', () => {
     ).toEqual(new Set(['LAMBORGHINI ALPINA B. BOVENSIEPEN']));
   });
 
+  it('leaves out a row the site gives no model line for and reads the rest', () => {
+    const html = page('hu816x.html.gz').replace(
+      'cmp-accordion__title">1 (E81/E82/E87/E88)',
+      'cmp-accordion__title">(E81/E82/E87/E88)',
+    );
+    const article = supplierArticleSchema.parse(mannFilter.parse(html));
+    expect(article.vehicles?.length).toBeGreaterThan(0);
+    expect(
+      article.vehicles?.filter(({ variant }) => variant === '125i (E82/E88)'),
+    ).toEqual([]);
+  });
+
   it('reads nothing from a page that is not a product', () => {
     expect(mannFilter.parse('<html><body><main></main></body></html>')).toBe(
       null,
