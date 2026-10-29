@@ -29,6 +29,7 @@ import {
   type ShopAi,
 } from '../ai';
 import { cachedArticleAnswer } from '../ai/cache';
+import { plainDescription } from '../ai/description';
 import {
   cataloguePageSchema,
   type SupplierAdapter,
@@ -253,7 +254,8 @@ const descriptionOf = (
   const written =
     article.description || article.specs ? answer?.description : null;
   if (!written) return null;
-  const distinct = [written, `${name}.\n\n${written}`].find(
+  const plain = plainDescription(written);
+  const distinct = [plain, `${name}.\n\n${plain}`].find(
     (text) => !descriptions.has(text),
   );
   if (distinct) descriptions.add(distinct);

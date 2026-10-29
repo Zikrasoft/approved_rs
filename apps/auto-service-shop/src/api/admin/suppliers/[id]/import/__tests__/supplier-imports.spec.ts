@@ -874,6 +874,25 @@ medusaIntegrationTestRunner({
         expect((await page('BAT519'))?.part.category_id).toBeNull();
       });
 
+      it('drops the supplier claims from a description', async () => {
+        intercars.articles.push({
+          article_id: 'IC-CLAIM',
+          brand: 'MANN-FILTER',
+          number: 'W 975',
+          name: 'Filter ulja W 975',
+          category: 'IC-OIL',
+          description: 'Dug vek trajanja; Strogi standardi kvaliteta.',
+        });
+        shopAi.description =
+          'Масляный фильтр MANN-FILTER W 975, высота 75 мм. Отличается высоким качеством и долговечностью.';
+
+        await runImport();
+
+        expect((await page('W975'))?.part.description).toBe(
+          'Масляный фильтр MANN-FILTER W 975, высота 75 мм.',
+        );
+      });
+
       it('never gives two Parts the same description', async () => {
         intercars.articles.push(
           {
