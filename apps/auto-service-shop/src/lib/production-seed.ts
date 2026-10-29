@@ -93,6 +93,20 @@ const number = (
   options: [],
 });
 
+const yesNo = (
+  key: string,
+  label: string,
+  facet: boolean,
+): FieldDefinition => ({
+  key,
+  type: 'boolean',
+  label,
+  unit: null,
+  facet,
+  required: false,
+  options: [],
+});
+
 const select = (
   key: string,
   label: string,
@@ -109,6 +123,12 @@ const select = (
   options,
 });
 
+export const START_STOP = {
+  field: 'start-stop',
+  technologyField: 'technology',
+  technologies: ['agm', 'efb'],
+};
+
 export const BATTERY_FIELDS: FieldDefinition[] = [
   number('capacity', 'Емкость', 'А·ч', true, true),
   number('cold-cranking', 'Пусковой ток (EN)', 'А', true),
@@ -118,6 +138,7 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
     ['efb', 'EFB'],
     ['agm', 'AGM'],
   ]),
+  yesNo(START_STOP.field, 'Подходит для Start-Stop', true),
   select('polarity', 'Полярность', false, false, [
     ['reverse', 'Обратная'],
     ['normal', 'Прямая'],

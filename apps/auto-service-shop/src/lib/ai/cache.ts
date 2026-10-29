@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
 
+import { MedusaError } from '@medusajs/framework/utils';
+import { z } from 'zod';
+
+import { adminError } from '../admin-errors';
 import type { Bucket } from '../storage';
 import {
   type ArticleAnswer,
@@ -9,18 +13,40 @@ import {
   type ShopAi,
 } from './contract';
 
+const UNREADABLE = 'ARTICLE_UNREADABLE';
+
+const storedSchema = z.union([
+  articleAnswerSchema,
+  z.object({ unreadable: z.string() }),
+]);
+
+const invalidAnswerSchema = z.object({
+  code: z.literal(UNREADABLE),
+  details: z.object({ invalid: z.literal(true) }),
+});
+
+const invalidAnswer = (error: unknown): error is MedusaError =>
+  MedusaError.isMedusaError(error) &&
+  invalidAnswerSchema.safeParse(error).success;
+
+const unreadableAnswer = (message: string) =>
+  adminError(MedusaError.Types.INVALID_DATA, UNREADABLE, message);
+
 const storedAnswer = async (bucket: Bucket, key: string) => {
   const stored = await bucket.get(key);
   if (!stored) return null;
   try {
-    const parsed = articleAnswerSchema.safeParse(
-      JSON.parse(stored.toString('utf8')),
-    );
+    const parsed = storedSchema.safeParse(JSON.parse(stored.toString('utf8')));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 };
+
+const store = (bucket: Bucket, key: string, value: unknown) =>
+  bucket.put(key, Buffer.from(JSON.stringify(value)), {
+    contentType: 'application/json',
+  });
 
 export async function cachedArticleAnswer(
   ai: ShopAi,
@@ -34,10 +60,18 @@ export async function cachedArticleAnswer(
     .update(JSON.stringify([question.model, question.system, question.user]))
     .digest('hex')}.json`;
   const stored = await storedAnswer(bucket, key);
+  if (stored && 'unreadable' in stored) {
+    throw unreadableAnswer(stored.unreadable);
+  }
   if (stored) return stored;
-  const answer = await ai.answerArticle(question);
-  await bucket.put(key, Buffer.from(JSON.stringify(answer)), {
-    contentType: 'application/json',
-  });
-  return answer;
+  try {
+    const answer = await ai.answerArticle(question);
+    await store(bucket, key, answer);
+    return answer;
+  } catch (error) {
+    if (invalidAnswer(error)) {
+      await store(bucket, key, { unreadable: error.message });
+    }
+    throw error;
+  }
 }

@@ -26,18 +26,54 @@ export type QuoteReading = z.infer<typeof quoteReadingSchema>;
 const mixesScripts = (word: string) =>
   /\p{Script=Latin}/u.test(word) && /\p{Script=Cyrillic}/u.test(word);
 
+const CYRILLIC_TWIN: Record<string, string> = Object.fromEntries(
+  [...'aceopxyABCEHKMOPTX'].map((latin, at) => [
+    latin,
+    'асеорхуАВСЕНКМОРТХ'[at]!,
+  ]),
+);
+
+const inCyrillic = (word: string) => {
+  const repaired = word.replace(
+    /\p{Script=Latin}/gu,
+    (letter) => CYRILLIC_TWIN[letter] ?? letter,
+  );
+  return mixesScripts(repaired) ? word : repaired;
+};
+
+const wordsOf = (text: string) => text.match(/\p{L}+/gu) ?? [];
+
 const russianText = z
   .string()
   .trim()
   .min(1)
-  .refine((text) => !(text.match(/\p{L}+/gu) ?? []).some(mixesScripts), {
-    error: 'a word mixes Latin and Cyrillic letters',
+  .transform((text) =>
+    text.replace(/\p{L}+/gu, (word) =>
+      mixesScripts(word) ? inCyrillic(word) : word,
+    ),
+  )
+  .refine((text) => !wordsOf(text).some(mixesScripts), {
+    error: ({ input }) =>
+      `a word mixes Latin and Cyrillic letters: ${wordsOf(String(input)).filter(mixesScripts).join(', ')}`,
   });
+
+const valuesThatFit = z
+  .record(z.string(), z.unknown())
+  .transform((values) =>
+    attributeValuesSchema.parse(
+      Object.fromEntries(
+        Object.entries(values).filter(
+          ([key, value]) =>
+            attributeValuesSchema.safeParse({ [key]: value }).success,
+        ),
+      ),
+    ),
+  );
 
 export const articleAnswerSchema = z.object({
   name: russianText,
   category_id: z.string().nullable(),
-  attributes: attributeValuesSchema,
+  attributes: valuesThatFit,
   description: russianText.nullable(),
 });
 
@@ -65,11 +101,17 @@ export type ArticleFacts = {
   number: string;
   description: string | null;
   specs: Record<string, string>;
+  fits: string[];
 };
 
 export type ArticleInput = ArticleFacts & { category_id: string | null };
 
-export type ArticleQuestion = { model: string; system: string; user: string };
+export type ArticleQuestion = {
+  model: string;
+  system: string;
+  user: string;
+  categoryIds: string[];
+};
 
 export type ShopAi = {
   readQuote: (

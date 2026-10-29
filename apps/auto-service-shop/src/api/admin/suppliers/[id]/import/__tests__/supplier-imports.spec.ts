@@ -3,7 +3,11 @@ import type { AddressInfo, LookupFunction } from 'node:net';
 
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
-import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../../../integration-tests/adminAuth';
@@ -12,6 +16,7 @@ import { memoryStorage } from '../../../../../../../integration-tests/fakeStorag
 import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
 import { importRuns } from '../../../../../../../integration-tests/importRuns';
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
+import { adminError } from '../../../../../../lib/admin-errors';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
 import { publishAllNumbers } from '../../../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
@@ -79,6 +84,7 @@ medusaIntegrationTestRunner({
       let imports: ReturnType<typeof importRuns>;
       let oilFiltersId: string;
       let engineOilId: string;
+      let batteriesId: string;
 
       beforeAll(async () => {
         const container = getContainer();
@@ -133,6 +139,47 @@ medusaIntegrationTestRunner({
           label: 'Вязкость',
           required: true,
         });
+        const batteries = await catalog.createCategories({
+          slug: 'batteries',
+          name: 'Аккумуляторы',
+        });
+        batteriesId = batteries.id;
+        const [, technology, caseSize] = await catalog.createCategoryFields([
+          {
+            category_id: batteries.id,
+            key: 'capacity',
+            type: 'number',
+            unit: 'Ah',
+            label: 'Емкость',
+            required: true,
+          },
+          {
+            category_id: batteries.id,
+            key: 'technology',
+            type: 'single-select',
+            label: 'Технология',
+            required: true,
+          },
+          {
+            category_id: batteries.id,
+            key: 'case-size',
+            type: 'single-select',
+            label: 'Типоразмер',
+            required: false,
+          },
+          {
+            category_id: batteries.id,
+            key: 'start-stop',
+            type: 'boolean',
+            label: 'Подходит для Start-Stop',
+            required: false,
+          },
+        ]);
+        await catalog.createCategoryFieldOptions([
+          { field_id: technology.id, key: 'standard', label: 'Стандартная' },
+          { field_id: technology.id, key: 'agm', label: 'AGM' },
+          { field_id: caseSize.id, key: 'h6-l3', label: 'H6 (L3)' },
+        ]);
         await suppliers.createSupplierCategories([
           { supplier_id: ic.id, code: 'IC-OIL', category_id: oilFilters.id },
           { supplier_id: ic.id, code: 'IC-ENGINE-OIL', category_id: strict.id },
@@ -157,6 +204,7 @@ medusaIntegrationTestRunner({
           fake.notInScope = 0;
           fake.quotes.clear();
           fake.laterPages = null;
+          fake.pageSize = 2;
         }
         Object.assign(shopAi, {
           name: null,
@@ -165,6 +213,9 @@ medusaIntegrationTestRunner({
           description: null,
           articlesAsked: [],
           failure: null,
+          questions: 0,
+          delayMs: 0,
+          mostInFlight: 0,
         });
         storage.pages.objects.clear();
       });
@@ -326,6 +377,13 @@ medusaIntegrationTestRunner({
         expect(response.data.imports[0]).toMatchObject({
           supplier: 'Intercars',
           needs_category: ['OIL 5W30'],
+          missing_fields: [
+            {
+              number: 'OIL 5W30',
+              category: 'Моторное масло',
+              fields: ['Вязкость'],
+            },
+          ],
         });
       });
 
@@ -363,6 +421,8 @@ medusaIntegrationTestRunner({
               not_in_scope: 0,
             },
             needs_category: ['C 30 005'],
+            missing_fields: [],
+            unanswered: [],
             failed: [],
           },
           {
@@ -378,6 +438,8 @@ medusaIntegrationTestRunner({
               not_in_scope: 0,
             },
             needs_category: [],
+            missing_fields: [],
+            unanswered: [],
             failed: [],
           },
         ]);
@@ -414,6 +476,8 @@ medusaIntegrationTestRunner({
             not_in_scope: 2,
           },
           needs_category: [],
+          missing_fields: [],
+          unanswered: [],
           failed: [],
         });
         expect(await page('W6103')).toBeDefined();
@@ -425,23 +489,28 @@ medusaIntegrationTestRunner({
             article_id: 'IC-31',
             brand: 'MANN-FILTER',
             number: 'W 811/80',
-            name: 'Фильтр W811 первый',
+            name: 'Фильтр W 811/80 первый',
             category: 'IC-OIL',
           },
           {
             article_id: 'IC-32',
             brand: 'MANN-FILTER',
             number: 'W 811/80',
-            name: 'Фильтр W811 второй',
+            name: 'Фильтр W 811/80 второй',
             category: 'IC-OIL',
           },
         );
+        shopAi.delayMs = 50;
 
         await runImport();
-        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+        expect((await page('W81180'))?.part.name).toBe(
+          'Фильтр W 811/80 первый',
+        );
 
         await runImport();
-        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+        expect((await page('W81180'))?.part.name).toBe(
+          'Фильтр W 811/80 первый',
+        );
       });
 
       it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
@@ -482,6 +551,7 @@ medusaIntegrationTestRunner({
               number: 'OIL 0W20',
               description: 'Potpuno sintetičko motorno ulje 0W-20.',
               specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+              fits: [],
               category_id: null,
             },
             categories: expect.arrayContaining([
@@ -598,6 +668,7 @@ medusaIntegrationTestRunner({
         expect(response.data.imports[0]).toMatchObject({
           created: 1,
           needs_category: ['W 970'],
+          unanswered: [{ number: 'W 970', reason: 'OpenAI is down' }],
         });
         expect((await page('W970'))?.part).toMatchObject({
           category_id: null,
@@ -668,6 +739,7 @@ medusaIntegrationTestRunner({
         shopAi.description = 'Масляный фильтр.';
         await runImport();
         const edited = (await page('W950'))!.part;
+        const untouched = (await page('W960'))!.part.description;
         await api.post(
           `/admin/parts/${edited.id}`,
           { description: 'Описание от мастера.' },
@@ -682,7 +754,7 @@ medusaIntegrationTestRunner({
         expect((await page('W950'))?.part.description).toBe(
           'Описание от мастера.',
         );
-        expect((await page('W960'))?.part.description).toBe('Масляный фильтр.');
+        expect((await page('W960'))?.part.description).toBe(untouched);
         expect(shopAi.articlesAsked).toHaveLength(2);
       });
 
@@ -723,6 +795,180 @@ medusaIntegrationTestRunner({
             }),
           }),
         ]);
+      });
+
+      it('files a battery with the attributes that fit its Category and drops only the ones that do not', async () => {
+        intercars.articles.push({
+          article_id: 'IC-BAT-1',
+          brand: 'MANN-FILTER',
+          number: 'BAT 560',
+          name: 'Silver Dynamic AGM 560',
+          category: 'battery',
+          specs: { Amperi: '60 Ah', 'Veličina kućišta': 'H4 / L1' },
+        });
+        shopAi.category = batteriesId;
+        shopAi.attributes = {
+          capacity: 60,
+          technology: 'agm',
+          'case-size': 'h4-l1',
+          voltage: 12,
+        };
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: [],
+          missing_fields: [],
+        });
+        expect((await page('BAT560'))?.part).toMatchObject({
+          category_id: batteriesId,
+          attributes: { capacity: 60, technology: 'agm', 'start-stop': true },
+        });
+      });
+
+      it('names a Part with its brand and number when the AI leaves them out', async () => {
+        intercars.articles.push({
+          article_id: 'IC-BAT-3',
+          brand: 'MANN-FILTER',
+          number: 'BAT 574',
+          name: 'Blue Dynamic 574',
+          category: 'battery',
+          specs: { Amperi: '74 Ah' },
+        });
+        shopAi.name = 'Аккумулятор 12 В 74 Ач';
+        shopAi.category = batteriesId;
+        shopAi.attributes = { capacity: 74, technology: 'standard' };
+
+        await runImport();
+
+        expect((await page('BAT574'))?.part).toMatchObject({
+          name: 'Аккумулятор 12 В 74 Ач MANN-FILTER BAT 574',
+          attributes: { 'start-stop': false },
+        });
+      });
+
+      it('leaves a battery whose answer misses a required field unfiled and names the field', async () => {
+        intercars.articles.push({
+          article_id: 'IC-BAT-2',
+          brand: 'MANN-FILTER',
+          number: 'BAT 519',
+          name: 'Powersports Freshpack 519',
+          category: 'battery',
+          specs: { Amperi: '19 Ah' },
+        });
+        shopAi.category = batteriesId;
+        shopAi.attributes = { capacity: 19, technology: 'gel' };
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          needs_category: ['BAT 519'],
+          missing_fields: [
+            {
+              number: 'BAT 519',
+              category: 'Аккумуляторы',
+              fields: ['Технология'],
+            },
+          ],
+        });
+        expect((await page('BAT519'))?.part.category_id).toBeNull();
+      });
+
+      it('drops the supplier claims from a description', async () => {
+        intercars.articles.push({
+          article_id: 'IC-CLAIM',
+          brand: 'MANN-FILTER',
+          number: 'W 975',
+          name: 'Filter ulja W 975',
+          category: 'IC-OIL',
+          description: 'Dug vek trajanja; Strogi standardi kvaliteta.',
+        });
+        shopAi.description =
+          'Масляный фильтр MANN-FILTER W 975, высота 75 мм. Отличается высоким качеством и долговечностью.';
+
+        await runImport();
+
+        expect((await page('W975'))?.part.description).toBe(
+          'Масляный фильтр MANN-FILTER W 975, высота 75 мм.',
+        );
+      });
+
+      it('never gives two Parts the same description', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-DUP-1',
+            brand: 'MANN-FILTER',
+            number: 'W 712/1',
+            name: 'Filter ulja W 712/1',
+            category: 'IC-OIL',
+            description: 'Filter ulja iz serije W 712.',
+          },
+          {
+            article_id: 'IC-DUP-2',
+            brand: 'MANN-FILTER',
+            number: 'W 712/2',
+            name: 'Filter ulja W 712/2',
+            category: 'IC-OIL',
+            description: 'Filter ulja iz serije W 712.',
+          },
+        );
+        shopAi.description = 'Масляный фильтр серии W 712.';
+
+        await runImport();
+
+        const descriptions = [
+          (await page('W7121'))?.part.description,
+          (await page('W7122'))?.part.description,
+        ];
+        expect(new Set(descriptions).size).toBe(2);
+        expect(descriptions).toContain('Масляный фильтр серии W 712.');
+        expect(descriptions.join('\n')).toMatch(/W 712\/[12]\./u);
+      });
+
+      it('asks the AI about several articles at once, four by default, and imports every one', async () => {
+        for (const n of [1, 2, 3, 4, 5, 6, 7]) {
+          intercars.articles.push({
+            article_id: `IC-PAR-${n}`,
+            brand: 'MANN-FILTER',
+            number: `PAR ${n}`,
+            name: `Filter PAR ${n}`,
+            category: 'IC-OIL',
+          });
+        }
+        intercars.pageSize = 10;
+        shopAi.delayMs = 200;
+
+        const response = await runImport();
+
+        expect(shopAi.mostInFlight).toBe(4);
+        expect(response.data.imports[0]).toMatchObject({ created: 7 });
+      });
+
+      it('reports an article the AI cannot answer and does not ask about it again', async () => {
+        intercars.articles.push({
+          article_id: 'IC-MIX',
+          brand: 'MANN-FILTER',
+          number: 'MIX 1',
+          name: 'kraj spone',
+          category: 'Filteri',
+        });
+        shopAi.failure = adminError(
+          MedusaError.Types.INVALID_DATA,
+          'ARTICLE_UNREADABLE',
+          'The article could not be read: a word mixes Latin and Cyrillic letters: Кrај',
+          { invalid: true },
+        );
+
+        await runImport();
+        const response = await runImport();
+
+        expect(shopAi.questions).toBe(1);
+        expect(response.data.imports[0]).toMatchObject({
+          unanswered: [
+            { number: 'MIX 1', reason: expect.stringContaining('Кrај') },
+          ],
+        });
+        expect((await page('MIX1'))?.part.name).toBe('kraj spone');
       });
 
       it('matches a Brand spelling whatever its case and spacing', async () => {
@@ -788,7 +1034,7 @@ medusaIntegrationTestRunner({
           article_id: 'IC-9',
           brand: 'MANN-FILTER',
           number: 'W 712/95',
-          name: 'Фильтр W712',
+          name: 'Фильтр W 712/95',
           category: ' ic-oil ',
         });
 
@@ -807,14 +1053,14 @@ medusaIntegrationTestRunner({
             article_id: 'IC-6',
             brand: 'MANN-FILTER',
             number: 'W 712/95',
-            name: 'Фильтр W712',
+            name: 'Фильтр W 712/95',
             category: 'IC-OIL',
           },
           {
             article_id: 'IC-7',
             brand: 'MANN-FILTER',
             number: 'W 719/30',
-            name: 'Фильтр W719',
+            name: 'Фильтр W 719/30',
             category: 'IC-OIL',
           },
         );
@@ -826,15 +1072,15 @@ medusaIntegrationTestRunner({
           adminHeaders,
         );
         expect(update.status).toBe(200);
-        intercars.articles[0].name = 'Фильтр W712 новый';
-        intercars.articles[1].name = 'Фильтр W719 новый';
+        intercars.articles[0].name = 'Фильтр W 712/95 новый';
+        intercars.articles[1].name = 'Фильтр W 719/30 новый';
 
         await runImport();
 
         expect((await page('W71295'))?.part.name).toBe(
           'Масляный фильтр MANN W 712/95',
         );
-        expect((await page('W71930'))?.part.name).toBe('Фильтр W719 новый');
+        expect((await page('W71930'))?.part.name).toBe('Фильтр W 719/30 новый');
       });
 
       it('holds TecDoc-derived data in staging until its kind is released', async () => {
@@ -1692,6 +1938,11 @@ medusaIntegrationTestRunner({
             },
           });
           expect(await page('FAIL2')).toBeDefined();
+          expect(
+            shopAi.articlesAsked.find(
+              ({ article }) => article.number === 'FAIL 1',
+            )?.article.fits,
+          ).toEqual(['ЗИЛ 3']);
           const [failed] = (
             await api.get('/admin/part-identifiers?q=FAIL1', adminHeaders)
           ).data.part_identifiers;

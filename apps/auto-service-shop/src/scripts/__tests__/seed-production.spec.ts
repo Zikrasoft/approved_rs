@@ -73,6 +73,7 @@ medusaIntegrationTestRunner({
           'cold-cranking',
           'voltage',
           'technology',
+          'start-stop',
           'polarity',
           'case-size',
           'length',
@@ -85,6 +86,12 @@ medusaIntegrationTestRunner({
           unit: 'А·ч',
           facet: true,
           required: true,
+        });
+        expect(fields.find(({ key }) => key === 'start-stop')).toMatchObject({
+          type: 'boolean',
+          label: 'Подходит для Start-Stop',
+          facet: true,
+          required: false,
         });
         const technology = fields.find(({ key }) => key === 'technology')!;
         const options = await catalog.listCategoryFieldOptions(

@@ -74,6 +74,9 @@ const envFields = z.object({
   OPENAI_IMPORT_MODEL: optionalValue.transform(
     (model) => model ?? 'gpt-4o-mini',
   ),
+  IMPORT_CONCURRENCY: optionalValue
+    .transform((articles) => Number(articles ?? 4))
+    .pipe(z.number().int().positive()),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
   VIN_DECODERS: z

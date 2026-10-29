@@ -107,6 +107,7 @@ describe('OpenAI shop AI', () => {
     number: 'OIL 0W20',
     description: 'Potpuno sintetičko ulje.',
     specs: { Viskozitet: '0W-20' },
+    fits: ['BMW 3 (G20)'],
     category_id: null,
   };
 
@@ -115,6 +116,13 @@ describe('OpenAI shop AI', () => {
     category_id: 'cat_oil',
     attributes: { viscosity: '0W-20' },
     description: 'Синтетическое масло.',
+  };
+
+  const reply = {
+    name: answer.name,
+    category: 1,
+    attributes: answer.attributes,
+    description: answer.description,
   };
 
   const shopAi = () => openAiShopAi('test-key', 'gpt-4o-mini');
@@ -129,7 +137,7 @@ describe('OpenAI shop AI', () => {
     ) as { model: string; temperature: number };
 
   it('answers an article in one call on the configured model, with the most likely answer', async () => {
-    globalThis.fetch = answering(answer);
+    globalThis.fetch = answering(reply);
 
     await expect(answerOf()).resolves.toEqual(answer);
     await answerOf(openAiShopAi('test-key', 'gpt-4.1-mini'));
@@ -146,7 +154,7 @@ describe('OpenAI shop AI', () => {
   });
 
   it('sends the article as JSON with the Category it is already filed under', async () => {
-    globalThis.fetch = answering(answer);
+    globalThis.fetch = answering(reply);
     const ai = shopAi();
 
     await ai.answerArticle(
@@ -154,19 +162,55 @@ describe('OpenAI shop AI', () => {
     );
 
     expect(JSON.parse(sentMessages(globalThis.fetch).user)).toEqual({
-      ...article,
-      category_id: 'cat_oil',
+      name: article.name,
+      brand: article.brand,
+      number: article.number,
+      description: article.description,
+      specs: article.specs,
+      fits: article.fits,
+      glossary: [],
+      category: 1,
     });
-    expect(sentMessages(globalThis.fetch).system).toContain('category_id');
+    expect(sentMessages(globalThis.fetch).system).toMatch(
+      /^1: Масляные фильтры$/mu,
+    );
+  });
+
+  it('files under no Category for a number that is not listed', async () => {
+    globalThis.fetch = answering({ ...reply, category: 7 });
+
+    await expect(answerOf()).resolves.toMatchObject({ category_id: null });
+  });
+
+  it('starts the name with a capital letter', async () => {
+    globalThis.fetch = answering({
+      ...reply,
+      name: 'наконечник рулевой тяги SWAG 13 94 1929',
+    });
+
+    await expect(answerOf()).resolves.toMatchObject({
+      name: 'Наконечник рулевой тяги SWAG 13 94 1929',
+    });
+  });
+
+  it('keeps an answer and drops only its attribute values that are not values', async () => {
+    globalThis.fetch = answering({
+      ...reply,
+      attributes: { viscosity: '0W-20', capacity: null, volume: { l: 5 } },
+    });
+
+    await expect(answerOf()).resolves.toMatchObject({
+      attributes: { viscosity: '0W-20' },
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
   it.each([
-    ['attributes that are not values', { attributes: { viscosity: { w: 0 } } }],
     ['a blank name', { name: ' ' }],
     ['a blank description', { description: ' ' }],
-    ['no Category field', { category_id: undefined }],
+    ['no Category field', { category: undefined }],
   ])('refuses an answer with %s', async (_, bad) => {
-    globalThis.fetch = answering({ ...answer, ...bad });
+    globalThis.fetch = answering({ ...reply, ...bad });
 
     await expect(answerOf()).rejects.toMatchObject({
       code: 'ARTICLE_UNREADABLE',
@@ -174,14 +218,14 @@ describe('OpenAI shop AI', () => {
   });
 
   it('takes an answer without a description', async () => {
-    globalThis.fetch = answering({ ...answer, description: null });
+    globalThis.fetch = answering({ ...reply, description: null });
 
     await expect(answerOf()).resolves.toMatchObject({ description: null });
   });
 
   it('writes the name and description without the yo letter or an em dash even when the model uses them', async () => {
     globalThis.fetch = answering({
-      ...answer,
+      ...reply,
       name: ' Моторное масло Castrol — 5W-30 ',
       description: 'Её задача — защитить двигатель. Ёмкость 2 Ач.',
     });
@@ -205,11 +249,11 @@ describe('OpenAI shop AI', () => {
   ])(
     'asks again once for an answer with %s, then refuses it',
     async (_, mixed) => {
-      globalThis.fetch = answeringInTurn({ ...answer, ...mixed }, answer);
+      globalThis.fetch = answeringInTurn({ ...reply, ...mixed }, reply);
       await expect(answerOf()).resolves.toEqual(answer);
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
 
-      globalThis.fetch = answering({ ...answer, ...mixed });
+      globalThis.fetch = answering({ ...reply, ...mixed });
       await expect(answerOf()).rejects.toMatchObject({
         code: 'ARTICLE_UNREADABLE',
       });
@@ -217,9 +261,41 @@ describe('OpenAI shop AI', () => {
     },
   );
 
+  it('reads a Latin look-alike letter inside a Russian word as its Cyrillic twin without asking again', async () => {
+    globalThis.fetch = answering({
+      ...reply,
+      name: 'Тормозной cуппорт febi 179174',
+      description: 'Тормозной cуппорт для задней оси.',
+    });
+
+    await expect(answerOf()).resolves.toMatchObject({
+      name: 'Тормозной суппорт febi 179174',
+      description: 'Тормозной суппорт для задней оси.',
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks a refused answer as invalid and an empty one as not', async () => {
+    globalThis.fetch = answering({ ...reply, name: ' ' });
+    await expect(answerOf()).rejects.toMatchObject({
+      details: { invalid: true },
+    });
+
+    globalThis.fetch = replying('');
+    await expect(answerOf()).rejects.toMatchObject({
+      details: { invalid: false },
+    });
+  });
+
+  it('names the word that mixes letters when it refuses an answer', async () => {
+    globalThis.fetch = answering({ ...reply, name: 'Оpruga Bilstein B4' });
+
+    await expect(answerOf()).rejects.toThrow(/Оpruga/u);
+  });
+
   it('keeps brand names and numbers in Latin beside Russian words', async () => {
     globalThis.fetch = answering({
-      ...answer,
+      ...reply,
       name: 'Масляный фильтр MANN-FILTER HU 816 x',
     });
 
@@ -254,17 +330,53 @@ describe('OpenAI shop AI', () => {
     ]);
 
     expect(system).toMatch(
-      /^cat_arm: Подвеска \(Рычаги, шаровые опоры, сайлентблоки\)$/mu,
+      /^1: Подвеска \(Рычаги, шаровые опоры, сайлентблоки\)$/mu,
     );
-    expect(system).toMatch(/^cat_battery: Аккумуляторы$/mu);
+    expect(system).toMatch(/^2: Аккумуляторы$/mu);
     expect(system).toMatch(/^ {2}fields: \[\{"key":"technology"/mu);
     expect(system).toMatch(/rame/u);
     expect(system).toMatch(/odbojna guma/u);
     expect(system).toMatch(/SLI/u);
   });
 
+  it('sends the glossary lines for the Serbian words in the part name, whatever their case', () => {
+    const { user } = shopAi().articleQuestion(
+      { ...article, name: 'kraj spone sa krunastom navrtkom i rascepkom' },
+      CATEGORIES,
+    );
+
+    expect(JSON.parse(user).glossary).toEqual([
+      'spona, poprečna spona: рулевая тяга',
+      'kraj spone: наконечник рулевой тяги',
+      'krunasta navrtka: корончатая гайка',
+      'rascepka: шплинт',
+    ]);
+  });
+
+  it('steers Serbian part names through the parts glossary', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/nosač stabilizatora.*втулка стабилизатора/u);
+    expect(system).toMatch(/španer.*натяжитель ремня/u);
+    expect(system).toMatch(/svećica.*свеча зажигания/u);
+  });
+
+  it('files every filter and battery and leaves a Category empty only when none covers the part', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/oil, air, cabin, fuel/u);
+    expect(system).toMatch(/batter/u);
+    expect(system).not.toMatch(/Prefer null/u);
+  });
+
+  it('asks for a description of its own for each part, without the supplier claims', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/Strogi standardi kvaliteta/u);
+  });
+
   it('asks nothing without a key', async () => {
-    globalThis.fetch = answering(answer);
+    globalThis.fetch = answering(reply);
 
     await expect(
       answerOf(openAiShopAi(undefined, 'gpt-4o-mini')),

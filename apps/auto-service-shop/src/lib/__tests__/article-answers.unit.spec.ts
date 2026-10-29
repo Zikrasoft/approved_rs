@@ -1,5 +1,8 @@
 import { createFakeShopAi } from '../../../integration-tests/fakeShopAi';
 import { memoryBucket } from '../../../integration-tests/fakeStorage';
+import { MedusaError } from '@medusajs/framework/utils';
+
+import { adminError } from '../admin-errors';
 import { cachedArticleAnswer } from '../ai/cache';
 
 const article = {
@@ -8,6 +11,7 @@ const article = {
   number: 'HU 816 x',
   description: null,
   specs: {},
+  fits: [],
   category_id: null,
 };
 const categories = [{ id: 'cat_oil', name: 'Масляные фильтры' }];
@@ -72,6 +76,53 @@ describe('cached article answers', () => {
 
     expect(answer.name).toBe('Filter ulja');
     expect(fake.articlesAsked).toHaveLength(2);
+  });
+
+  it('keeps an answer that failed validation, so a rerun asks nothing and fails the same way', async () => {
+    const fake = createFakeShopAi();
+    fake.failure = adminError(
+      MedusaError.Types.INVALID_DATA,
+      'ARTICLE_UNREADABLE',
+      'The article could not be read: a word mixes Latin and Cyrillic letters: Оpruga',
+      { invalid: true },
+    );
+    const { bucket } = memoryBucket();
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+
+    await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+    await expect(ask()).rejects.toThrow(/Оpruga/u);
+
+    expect(fake.questions).toBe(1);
+  });
+
+  it('asks again after an answer that was empty rather than invalid', async () => {
+    const fake = createFakeShopAi();
+    fake.failure = adminError(
+      MedusaError.Types.INVALID_DATA,
+      'ARTICLE_UNREADABLE',
+      'The article could not be read: the answer is empty',
+      { invalid: false },
+    );
+    const { bucket } = memoryBucket();
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+
+    await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+    await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+
+    expect(fake.questions).toBe(2);
+  });
+
+  it('asks again after a failure that is not about the answer', async () => {
+    const fake = createFakeShopAi();
+    fake.failure = new Error('OpenAI is down');
+    const { bucket } = memoryBucket();
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+
+    await expect(ask()).rejects.toThrow('OpenAI is down');
+    fake.failure = null;
+    await expect(ask()).resolves.toMatchObject({ name: 'Filter ulja' });
+
+    expect(fake.questions).toBe(2);
   });
 
   it('asks every time without storage', async () => {
