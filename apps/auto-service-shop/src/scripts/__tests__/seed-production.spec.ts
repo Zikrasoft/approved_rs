@@ -102,6 +102,7 @@ medusaIntegrationTestRunner({
           ['standard', 'Обычный'],
           ['efb', 'EFB'],
           ['agm', 'AGM'],
+          ['lithium', 'Литий-ионный'],
         ]);
       });
 

@@ -137,6 +137,7 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
     ['standard', 'Обычный'],
     ['efb', 'EFB'],
     ['agm', 'AGM'],
+    ['lithium', 'Литий-ионный'],
   ]),
   yesNo(START_STOP.field, 'Подходит для Start-Stop', true),
   select('polarity', 'Полярность', false, false, [
