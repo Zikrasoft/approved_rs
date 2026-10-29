@@ -4,8 +4,10 @@ import {
   MedusaError,
 } from '@medusajs/framework/utils';
 import {
+  type AttributeValues,
   normalizePartNumber,
   STAGED_DATA_KINDS,
+  validateAttributes,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
@@ -33,6 +35,7 @@ import {
   supplierAdapters,
   supplierQuoteSchema,
 } from './adapter';
+import { parseEnv } from '../env';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
@@ -57,6 +60,8 @@ export type ImportSummary = {
     not_in_scope: number;
   };
   needs_category: string[];
+  missing_fields: { number: string; category: string; fields: string[] }[];
+  unanswered: { number: string; reason: string }[];
   failed: { number: string; reason: string }[];
 };
 
@@ -79,6 +84,9 @@ type Context = {
   matched: Set<string>;
   vehicles: VehicleMatcher;
   storage: ShopStorage | null;
+  summary: ImportSummary;
+  descriptions: Set<string>;
+  oneAtATime: <T>(run: () => Promise<T>) => Promise<T>;
 };
 
 const factsOf = (article: Article): ArticleFacts => ({
@@ -88,22 +96,6 @@ const factsOf = (article: Article): ArticleFacts => ({
   description: article.description ?? null,
   specs: article.specs ?? {},
 });
-
-async function orElse<T>(
-  { adapter, logger }: Context,
-  article: Article,
-  run: () => Promise<T>,
-  fallback: T,
-): Promise<T> {
-  try {
-    return await run();
-  } catch (error) {
-    logger.warn(
-      `Supplier import ${adapter.name}, ${article.number}: AI failed, ${errorMessage(error)}`,
-    );
-    return fallback;
-  }
-}
 
 async function categoryChoices(
   catalog: CatalogModuleService,
@@ -141,57 +133,93 @@ async function categoryChoices(
   }));
 }
 
-const answerOf = (
+async function answerOf(
   context: Context,
   article: Article,
   categoryId: string | null,
-) =>
-  orElse(
-    context,
-    article,
-    () =>
-      cachedArticleAnswer(
-        context.ai,
-        context.storage?.pages ?? null,
-        { ...factsOf(article), category_id: categoryId },
-        context.categories,
-      ),
-    null,
-  );
+): Promise<ArticleAnswer | null> {
+  try {
+    return await cachedArticleAnswer(
+      context.ai,
+      context.storage?.pages ?? null,
+      { ...factsOf(article), category_id: categoryId },
+      context.categories,
+    );
+  } catch (error) {
+    const reason = errorMessage(error);
+    context.logger.warn(
+      `Supplier import ${context.adapter.name}, ${article.number}: AI failed, ${reason}`,
+    );
+    context.summary.unanswered.push({ number: article.number, reason });
+    return null;
+  }
+}
 
 const lazily = <T>(run: () => Promise<T>) => {
   let running: Promise<T> | undefined;
   return () => (running ??= run());
 };
 
+const fittingAttributes = (
+  fields: CategoryFieldChoice[],
+  values: AttributeValues,
+): AttributeValues =>
+  Object.fromEntries(
+    Object.entries(values).filter(([key, value]) => {
+      const field = fields.find((candidate) => candidate.key === key);
+      return (
+        field &&
+        validateAttributes([{ ...field, required: true }], { [key]: value })
+          .success
+      );
+    }),
+  );
+
 function classificationOf(
-  { categories }: Context,
+  { categories, summary }: Context,
   article: Article,
   mappedCategoryId: string | undefined,
   answer: ArticleAnswer | null,
 ): PartClassification {
   const picked = categories.find(({ id }) => id === answer?.category_id);
   const categoryId = mappedCategoryId ?? picked?.id ?? null;
+  const category = categories.find(({ id }) => id === categoryId);
+  const fields = category?.fields ?? [];
   const mapped =
     answer && categoryId && article.specs && answer.category_id === categoryId;
-  return {
-    category_id: categoryId,
-    attributes: mapped ? answer.attributes : {},
-  };
+  const attributes = mapped ? fittingAttributes(fields, answer.attributes) : {};
+  const missing = fields.filter(
+    ({ key, required }) => required && !(key in attributes),
+  );
+  if (category && missing.length) {
+    summary.missing_fields.push({
+      number: article.number,
+      category: category.name,
+      fields: missing.map(({ label }) => label),
+    });
+    return { category_id: null, attributes: {} };
+  }
+  return { category_id: categoryId, attributes };
 }
 
-const descriptionOf = (article: Article, answer: ArticleAnswer | null) =>
-  article.description || article.specs ? (answer?.description ?? null) : null;
+const descriptionOf = (
+  { descriptions }: Context,
+  article: Article,
+  name: string,
+  answer: ArticleAnswer | null,
+) => {
+  const written =
+    article.description || article.specs ? answer?.description : null;
+  if (!written) return null;
+  const distinct = [written, `${name}.\n\n${written}`].find(
+    (text) => !descriptions.has(text),
+  );
+  if (distinct) descriptions.add(distinct);
+  return distinct ?? null;
+};
 
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
-
-const unlessRefused =
-  <T>(retry: () => Promise<T>) =>
-  (error: unknown) => {
-    if (!refusedAttributes(error)) throw error;
-    return retry();
-  };
 
 async function filed<T>(
   classification: PartClassification,
@@ -199,18 +227,11 @@ async function filed<T>(
   unfiled: () => Promise<T>,
 ): Promise<{ written: T; categorized: boolean }> {
   let categorized = Boolean(classification.category_id);
-  const written = await write(classification)
-    .catch(
-      unlessRefused(() =>
-        write({ category_id: classification.category_id, attributes: {} }),
-      ),
-    )
-    .catch(
-      unlessRefused(() => {
-        categorized = false;
-        return unfiled();
-      }),
-    );
+  const written = await write(classification).catch((error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    categorized = false;
+    return unfiled();
+  });
   return { written, categorized };
 }
 
@@ -228,10 +249,11 @@ async function createPart(
     mappedCategoryId,
     answer,
   );
+  const name = answer?.name ?? article.name;
   const part = {
-    name: answer?.name ?? article.name,
+    name,
     source_name: answer && article.name,
-    description: descriptionOf(article, answer),
+    description: descriptionOf(context, article, name, answer),
     identifier: {
       type: 'manufacturer-number' as const,
       brand_id: brandId,
@@ -329,7 +351,7 @@ async function matchArticle(
   const description =
     edited.has('description') || part.description
       ? null
-      : descriptionOf(article, await answer());
+      : descriptionOf(context, article, name ?? part.name, await answer());
   if (!name && !description) {
     return {
       ...unchanged,
@@ -417,7 +439,10 @@ async function importArticle(
   }
   await stage(context, identifierId, article);
   if (article.vehicles) {
-    await fitVehicles(context.vehicles, partId, article.vehicles);
+    const vehicles = article.vehicles;
+    await context.oneAtATime(() =>
+      fitVehicles(context.vehicles, partId, vehicles),
+    );
     summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
       ({ engine_codes }) => !engine_codes.length,
     ).length;
@@ -474,6 +499,52 @@ async function dropUnlistedOffers(
   }
 }
 
+const oneAtATime = () => {
+  let last: Promise<unknown> = Promise.resolve();
+  return <T>(run: () => Promise<T>): Promise<T> => {
+    const next = last.then(run);
+    last = next.catch(() => undefined);
+    return next;
+  };
+};
+
+async function eachAtOnce<T>(
+  items: T[],
+  limit: number,
+  run: (item: T) => Promise<void>,
+): Promise<void> {
+  const queue = [...items];
+  await Promise.all(
+    Array.from({ length: Math.min(limit, queue.length) }, async () => {
+      for (let item = queue.shift(); item; item = queue.shift()) {
+        await run(item);
+      }
+    }),
+  );
+}
+
+const sameNumberRuns = (
+  articles: Article[],
+  brandOf: (article: Article) => string | undefined,
+): Article[][] => {
+  const runs = new Map<string, Article[]>();
+  for (const article of articles) {
+    const key = `${brandOf(article)} ${normalizePartNumber(article.number)}`;
+    runs.set(key, [...(runs.get(key) ?? []), article]);
+  }
+  return [...runs.values()];
+};
+
+async function knownDescriptions(
+  catalog: CatalogModuleService,
+): Promise<Set<string>> {
+  const parts = await catalog.listParts(
+    {},
+    { select: ['description'], take: null },
+  );
+  return new Set(parts.flatMap(({ description }) => description ?? []));
+}
+
 // TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make an Import slow.
 export async function importSupplier(
   scope: MedusaContainer,
@@ -482,10 +553,28 @@ export async function importSupplier(
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
+  const { IMPORT_CONCURRENCY } = parseEnv(process.env);
   const [supplier] = await suppliers.listSuppliers({ name: adapter.name });
   if (!supplier) {
     throw new Error(`No Supplier is named ${adapter.name}`);
   }
+  const summary: ImportSummary = {
+    supplier: adapter.name,
+    imported: 0,
+    created: 0,
+    skipped: 0,
+    skipped_by_reason: {
+      brand: 0,
+      currency: 0,
+      unreadable: 0,
+      no_engine_code: 0,
+      not_in_scope: 0,
+    },
+    needs_category: [],
+    missing_fields: [],
+    unanswered: [],
+    failed: [],
+  };
   const context: Context = {
     scope,
     adapter,
@@ -498,6 +587,9 @@ export async function importSupplier(
     matched: new Set(),
     vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
     storage: shopStorage(scope),
+    summary,
+    descriptions: await knownDescriptions(catalog),
+    oneAtATime: oneAtATime(),
   };
   if (!context.storage) {
     context.logger.warn(
@@ -520,21 +612,6 @@ export async function importSupplier(
       )
     ).map(({ value_key, brand_id }) => [value_key, brand_id]),
   );
-  const summary: ImportSummary = {
-    supplier: adapter.name,
-    imported: 0,
-    created: 0,
-    skipped: 0,
-    skipped_by_reason: {
-      brand: 0,
-      currency: 0,
-      unreadable: 0,
-      no_engine_code: 0,
-      not_in_scope: 0,
-    },
-    needs_category: [],
-    failed: [],
-  };
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
   const categoryOfArticle = (article: Article) =>
@@ -577,7 +654,7 @@ export async function importSupplier(
       quoted.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
     );
     summary.skipped_by_reason.currency += quoted.length - quotes.size;
-    for (const article of wanted) {
+    const importOne = async (article: Article) => {
       try {
         await importArticle(
           context,
@@ -597,7 +674,14 @@ export async function importSupplier(
         });
         state.listed.add(article.article_id);
       }
-    }
+    };
+    await eachAtOnce(
+      sameNumberRuns(wanted, brandOfArticle),
+      IMPORT_CONCURRENCY,
+      async (run) => {
+        for (const article of run) await importOne(article);
+      },
+    );
     await onPage?.(structuredClone(summary));
     if (!page.next) {
       break;

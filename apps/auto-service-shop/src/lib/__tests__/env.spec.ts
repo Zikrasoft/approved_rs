@@ -53,6 +53,17 @@ describe('parseEnv', () => {
     ).toBe('gpt-4.1-mini');
   });
 
+  it('asks about four Import articles at once unless another number is set', () => {
+    expect(parseEnv(VALID_ENV).IMPORT_CONCURRENCY).toBe(4);
+    expect(
+      parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '' }).IMPORT_CONCURRENCY,
+    ).toBe(4);
+    expect(
+      parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '8' }).IMPORT_CONCURRENCY,
+    ).toBe(8);
+    expect(() => parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '0' })).toThrow();
+  });
+
   it('reads an empty publish secret as unset', () => {
     const env = parseEnv({
       ...VALID_ENV,

@@ -179,6 +179,8 @@
     "importWithoutPrice": "Without an RSD price, added with no offer: {{count}}.",
     "importWithoutEngineCode": "Applicability rows without an engine code, fitted to no Vehicle: {{count}}.",
     "importWithoutCategory": "Added without a Category: {{numbers}}. They wait under Parts, filtered to No category.",
+    "importMissingFields": "Not filed, a required field is missing: {{articles}}. Fill it under Parts.",
+    "importUnanswered": "AI gave no answer, kept the supplier name: {{articles}}.",
     "importOn": "On",
     "importOff": "Off",
     "importSwitch": {

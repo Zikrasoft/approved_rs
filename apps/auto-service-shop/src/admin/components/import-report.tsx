@@ -20,6 +20,18 @@ const importSummarySchema = z.object({
     not_in_scope: z.number(),
   }),
   needs_category: z.array(z.string()),
+  missing_fields: z
+    .array(
+      z.object({
+        number: z.string(),
+        category: z.string(),
+        fields: z.array(z.string()),
+      }),
+    )
+    .default([]),
+  unanswered: z
+    .array(z.object({ number: z.string(), reason: z.string() }))
+    .default([]),
   failed: z.array(z.object({ number: z.string(), reason: z.string() })),
 });
 
@@ -70,6 +82,21 @@ const useSummaryLines = () => {
       summary.needs_category.length > 0 &&
         t('suppliers.importWithoutCategory', {
           numbers: summary.needs_category.join(', '),
+        }),
+      summary.missing_fields.length > 0 &&
+        t('suppliers.importMissingFields', {
+          articles: summary.missing_fields
+            .map(
+              ({ number, category, fields }) =>
+                `${number} (${category}: ${fields.join(', ')})`,
+            )
+            .join('; '),
+        }),
+      summary.unanswered.length > 0 &&
+        t('suppliers.importUnanswered', {
+          articles: summary.unanswered
+            .map(({ number, reason }) => `${number} (${reason})`)
+            .join('; '),
         }),
       summary.failed.length > 0 &&
         t('suppliers.importArticlesFailed', {

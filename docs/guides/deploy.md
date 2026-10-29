@@ -836,7 +836,13 @@ number gets its CI value in that script. The non-obvious parts:
   `OPENAI_IMPORT_MODEL` (empty means `gpt-4o-mini`). Answers are cached in the
   private bucket under `ai-answers/`, keyed by prompt, model and article, so a
   rerun or a rebuilt database asks nothing twice; changing the model or the
-  prompt asks again. Without S3 nothing is cached.
+  prompt asks again. An answer that fails validation twice is cached as a
+  failure too and listed in the Import report, so a rerun does not pay for it
+  again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
+  how many articles are asked at once; vehicle fitting still runs one article
+  at a time. An answer's attributes that do not fit its Category are dropped one
+  by one; a Part whose answer still misses a required field stays without a
+  Category, and the report names the Category and the missing fields.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
   front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
   passwords cannot be guessed from the internet. The hash is bcrypt, made
