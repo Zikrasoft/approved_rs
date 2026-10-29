@@ -174,35 +174,40 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('files both crawled spellings of Volkswagen under one Make', async () => {
+      it('files each crawled spelling of one manufacturer under its one Make', async () => {
         const supplierNames = new Map(
           (await suppliers.listSuppliers()).map(({ id, name }) => [id, name]),
         );
         const makes = await catalog.listMakes(
-          {},
-          { relations: ['spellings'], take: null },
+          { slug: ['volkswagen', 'skoda', 'kia', 'ldv'] },
+          { relations: ['spellings'], order: { slug: 'ASC' } },
         );
-        expect(
-          makes.map(({ slug, name, spellings }) => ({
-            slug,
-            name,
-            spellings: spellings
-              .map(
-                ({ supplier_id, value }) =>
-                  `${supplierNames.get(supplier_id)}: ${value}`,
-              )
-              .sort(),
-          })),
-        ).toEqual([
-          {
-            slug: 'volkswagen',
-            name: 'Volkswagen',
-            spellings: [
-              'MANN-FILTER: VW (VOLKSWAGEN)',
-              'bilstein group: Volkswagen (VW)',
-            ],
-          },
+        const spelled = (slug: string, supplier: string) =>
+          makes
+            .find((make) => make.slug === slug)
+            ?.spellings.filter(
+              ({ supplier_id }) => supplierNames.get(supplier_id) === supplier,
+            )
+            .map(({ value }) => value)
+            .sort();
+        expect(makes.map(({ name }) => name)).toEqual([
+          'Kia',
+          'LDV',
+          'Škoda',
+          'Volkswagen',
         ]);
+        expect(spelled('skoda', 'MANN-FILTER')).toEqual(['SKODA']);
+        expect(spelled('kia', 'FILTRON')).toEqual(['KIA MOTORS']);
+        expect(spelled('ldv', 'bilstein group')).toEqual([
+          'LDV (Leyland-Daf Vans)',
+          'LDV LIMITED',
+        ]);
+        expect(spelled('volkswagen', 'MANN-FILTER')).toEqual([
+          'VW',
+          'VW (VOLKSWAGEN)',
+          'Volkswagen (VW)',
+        ]);
+        expect(await catalog.listMakes({ name: 'VOLVO CARS' })).toEqual([]);
       });
 
       it('creates the commerce defaults checkout needs', async () => {
@@ -353,7 +358,7 @@ medusaIntegrationTestRunner({
           (await catalog.retrieveBrandSpelling(swagSpelling.id)).brand_id,
         ).toBe(swag.id);
         expect((await catalog.retrieveMake(volkswagen.id)).name).toBe('VW');
-        expect(await catalog.listMakes({}, { take: null })).toHaveLength(1);
+        expect(await catalog.listMakes({ name: 'Volkswagen' })).toEqual([]);
       });
 
       it('finds a crawled Brand and Make again after staff renamed their slugs', async () => {
@@ -370,7 +375,9 @@ medusaIntegrationTestRunner({
             name.startsWith('FILTRON'),
           ),
         ).toEqual([expect.objectContaining({ id: filtron.id })]);
-        expect(await catalog.listMakes({}, { take: null })).toEqual([
+        expect(
+          await catalog.listMakes({ slug: ['volkswagen', 'vw-cars'] }),
+        ).toEqual([
           expect.objectContaining({ id: volkswagen.id, slug: 'vw-cars' }),
         ]);
       });
@@ -392,6 +399,7 @@ medusaIntegrationTestRunner({
         });
         const [makeSpelling] = await catalog.listMakeSpellings({
           supplier_id: mann.id,
+          value: 'SKODA',
         });
         const [mapping] = await suppliers.listSupplierCategories({
           supplier_id: varta.id,
@@ -415,7 +423,10 @@ medusaIntegrationTestRunner({
           await catalog.listBrandSpellings({ supplier_id: filtron.id }),
         ).toEqual([]);
         expect(
-          await catalog.listMakeSpellings({ supplier_id: mann.id }),
+          await catalog.listMakeSpellings({
+            supplier_id: mann.id,
+            value: 'SKODA',
+          }),
         ).toEqual([]);
         expect(
           await suppliers.listSupplierCategories({ supplier_id: varta.id }),

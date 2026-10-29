@@ -34,7 +34,7 @@ export const CAR_MAKES: Record<string, string[]> = {
   Lamborghini: ['LAMBORGHINI AUTOMOBILI'],
   Lancia: [],
   'Land Rover': [],
-  LDV: ['LDV LIMITED'],
+  LDV: ['LDV LIMITED', 'LDV (Leyland-Daf Vans)'],
   Lexus: [],
   Lotus: [],
   'Lynk & Co': [],
@@ -65,10 +65,16 @@ export const CAR_MAKES: Record<string, string[]> = {
   Tesla: [],
   Toyota: [],
   Vauxhall: [],
-  Volkswagen: ['VW'],
+  Volkswagen: ['VW', 'VW (VOLKSWAGEN)', 'Volkswagen (VW)'],
   Volvo: ['VOLVO CARS'],
   Zastava: [],
 };
+
+export const MAKE_ALIASES: Record<string, string> = Object.fromEntries(
+  Object.entries(CAR_MAKES).flatMap(([name, spellings]) =>
+    spellings.map((spelling) => [spelling, name]),
+  ),
+);
 
 const withoutOwner = (spelling: string) =>
   spelling

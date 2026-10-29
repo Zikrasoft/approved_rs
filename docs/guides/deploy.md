@@ -1011,8 +1011,10 @@ It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
 `apps/auto-service-shop/src/lib/production-seed.ts`, one entry per crawled site: the
 Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
-mapping (VARTA `battery` to «Аккумуляторы») and its known Make aliases (MANN-FILTER's
-`VW (VOLKSWAGEN)` and bilstein group's `Volkswagen (VW)` on one Volkswagen). The
+mapping (VARTA `battery` to «Аккумуляторы») and, for the three sites that list cars,
+every Make alias of the car Make table `CAR_MAKES` in
+`apps/auto-service-shop/src/lib/suppliers/makes.ts` (`SKODA` on Škoda, `VOLVO CARS` on
+Volvo, `VW (VOLKSWAGEN)` on Volkswagen, ...). The
 same `updated_by` rule holds for each of these rows. A Brand or Make is found by
 its name, then its slug, then the seeded spelling that points at it, so a staff
 rename of either does not seed a duplicate. Deleting a spelling or a mapping in
