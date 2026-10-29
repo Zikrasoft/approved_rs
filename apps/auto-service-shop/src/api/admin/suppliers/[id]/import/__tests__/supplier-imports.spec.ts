@@ -1979,7 +1979,7 @@ medusaIntegrationTestRunner({
             shopAi.articlesAsked.find(
               ({ article }) => article.number === 'FAIL 1',
             )?.article.fits,
-          ).toEqual(['ЗИЛ 3']);
+          ).toEqual(['Lada Нива']);
           const [failed] = (
             await api.get('/admin/part-identifiers?q=FAIL1', adminHeaders)
           ).data.part_identifiers;
