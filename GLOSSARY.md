@@ -33,7 +33,7 @@ A customer-facing group of Parts that do the same job (oil filter, cabin filter,
 _Avoid_: Group, Hauptgruppe (that is BMW's own catalogue structure, which this shop does not reproduce)
 
 **Make**:
-A vehicle manufacturer whose cars the shop covers (BMW, Mercedes-Benz). Its VINs are recognised by their first three characters. Kept as one canonical name with each source's spellings as aliases (`VW` and `VOLKSWAGEN (VW)` are both Volkswagen).
+A vehicle manufacturer whose cars or vans the shop covers (BMW, Mercedes-Benz); truck, bus and machine makers are not Makes (see [ADR-0052](docs/adr/0052-crawled-vehicles-are-cars-and-vans-under-one-make-table.md)). Its VINs are recognised by their first three characters. Kept as one canonical name with each source's spellings as aliases (`VW` and `VOLKSWAGEN (VW)` are both Volkswagen, `SKODA` is Škoda).
 _Avoid_: Brand (that word is taken by a PartIdentifier's brand)
 
 **Series**:
