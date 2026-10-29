@@ -254,7 +254,8 @@ const descriptionOf = (
   const written =
     article.description || article.specs ? answer?.description : null;
   if (!written) return null;
-  const plain = plainDescription(written);
+  const plain = plainDescription(written, name);
+  if (!plain) return null;
   const distinct = [plain, `${name}.\n\n${plain}`].find(
     (text) => !descriptions.has(text),
   );

@@ -13,17 +13,18 @@ const sentencesOf = (paragraph: string) =>
   paragraph.trim().split(/(?<=[.!?])\s+/u);
 
 // TODO: a stem list over-cuts a sentence that only mentions a listed word in passing; tune claim-words.json from real descriptions.
-export const plainDescription = (text: string): string => {
-  const [first, ...rest] = text
+export const plainDescription = (text: string, name: string): string => {
+  const paragraphs = text
     .split(/\n\s*\n/u)
-    .map((paragraph, at) =>
-      sentencesOf(paragraph)
-        .filter(
-          (sentence, index) => (at === 0 && index === 0) || !claims(sentence),
-        )
-        .join(' '),
+    .map((paragraph) => sentencesOf(paragraph));
+  const opensWithClaim = claims(paragraphs[0]?.[0] ?? '');
+  const kept = paragraphs
+    .map((sentences) =>
+      sentences.filter((sentence) => !claims(sentence)).join(' '),
     )
-    .filter(Boolean);
-  const kept = [first ?? '', ...rest].join('\n\n');
-  return kept.charAt(0).toLocaleUpperCase('ru') + kept.slice(1);
+    .filter(Boolean)
+    .join('\n\n');
+  if (!kept) return '';
+  const opened = opensWithClaim ? `${name}. ${kept}` : kept;
+  return opened.charAt(0).toLocaleUpperCase('ru') + opened.slice(1);
 };
