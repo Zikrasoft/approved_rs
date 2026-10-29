@@ -80,14 +80,31 @@ const glossarySchema = z.array(
   z.object({ sr: z.string().min(1), ru: z.string().min(1) }),
 );
 
-const glossaryLines = glossarySchema
+const glossary = glossarySchema
   .parse(partsGlossary)
-  .map(({ sr, ru }) => `- ${sr}: ${ru}`)
-  .join('\n');
+  .map(({ sr, ru }) => ({ terms: sr.split(','), line: `${sr}: ${ru}` }));
+
+const glossaryLines = glossary.map(({ line }) => `- ${line}`).join('\n');
+
+const wordsOf = (text: string) => text.toLowerCase().match(/\p{L}+/gu) ?? [];
+
+const stemOf = (word: string) => word.slice(0, Math.max(4, word.length - 2));
+
+const mentions = (words: string[], term: string) =>
+  wordsOf(term).every((termWord) =>
+    words.some((word) => word.startsWith(stemOf(termWord))),
+  );
+
+const glossaryFor = (name: string) => {
+  const words = wordsOf(name);
+  return glossary
+    .filter(({ terms }) => terms.some((term) => mentions(words, term)))
+    .map(({ line }) => line);
+};
 
 const articlePrompt = (
   categories: CategoryChoice[],
-) => `You put a car part from a supplier's catalogue into the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: the supplier's name for it (often in Serbian or English), its brand, number, the supplier's description, its raw specs (name to value), "fits", the vehicles it fits most often (make and model, possibly empty), and "category", the number of the category it is already filed under, or null.
+) => `You put a car part from a supplier's catalogue into the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: the supplier's name for it (often in Serbian or English), its brand, number, the supplier's description, its raw specs (name to value), "fits", the vehicles it fits most often (make and model, possibly empty), "glossary", the glossary lines for the Serbian words in its name, and "category", the number of the category it is already filed under, or null.
 
 Answer with one JSON object and nothing else:
 {
@@ -99,7 +116,8 @@ Answer with one JSON object and nothing else:
 
 "name" is the Russian name of the part:
 - The part type in Russian as a Russian parts shop names it, with a lowercase rest, then the brand and the number exactly as given, e.g. «Масляный фильтр MANN-FILTER HU 816 x», «Втулка стабилизатора febi 41997».
-- Translate the meaning, never the sound: a Serbian word is never written in Cyrillic letters as if it were Russian («nosač» is not «носач», «rame» is not «рама», «kugla» is not «кугла»). Use the glossary below for Serbian part words. No Serbian or English word stays in the name, in any script.
+- The brand and the number are always in the name, even when the input name lacks them.
+- Translate the meaning, never the sound: a Serbian word is never written in Cyrillic letters as if it were Russian («nosač» is not «носач», «rame» is not «рама», «kugla» is not «кугла»). The input's "glossary" lines and the glossary below give the Russian term for Serbian part words: use that term, not your own translation. No Serbian or English word stays in the name, in any script.
 - Keep a short qualifier the input states when it tells parts of one type apart (e.g. «передний», «для АКПП», «с прокладкой», «с монтажным комплектом»).
 - No marketing words, no vehicle names, no prices.
 
@@ -251,6 +269,7 @@ export const openAiShopAi = (
     system: articlePrompt(categories),
     user: JSON.stringify({
       ...article,
+      glossary: glossaryFor(article.name),
       category: categoryNumber(categories, category_id),
     }),
     categoryIds: categories.map(({ id }) => id),

@@ -36,6 +36,7 @@ import {
   supplierQuoteSchema,
 } from './adapter';
 import { parseEnv } from '../env';
+import { START_STOP } from '../production-seed';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
@@ -190,6 +191,30 @@ const fittingAttributes = (
     }),
   );
 
+const withStartStop = (
+  fields: CategoryFieldChoice[],
+  attributes: AttributeValues,
+): AttributeValues => {
+  const technology = attributes[START_STOP.technologyField];
+  const derivable =
+    fields.some(
+      ({ key, type }) => key === START_STOP.field && type === 'boolean',
+    ) &&
+    attributes[START_STOP.field] === undefined &&
+    typeof technology === 'string';
+  return derivable
+    ? {
+        ...attributes,
+        [START_STOP.field]: START_STOP.technologies.includes(technology),
+      }
+    : attributes;
+};
+
+const withBrandAndNumber = (name: string, { brand, number }: Article) =>
+  normalizePartNumber(name).includes(normalizePartNumber(number))
+    ? name
+    : `${name} ${brand} ${number}`;
+
 function classificationOf(
   { categories, summary }: Context,
   article: Article,
@@ -202,7 +227,9 @@ function classificationOf(
   const fields = category?.fields ?? [];
   const mapped =
     answer && categoryId && article.specs && answer.category_id === categoryId;
-  const attributes = mapped ? fittingAttributes(fields, answer.attributes) : {};
+  const attributes = mapped
+    ? withStartStop(fields, fittingAttributes(fields, answer.attributes))
+    : {};
   const missing = fields.filter(
     ({ key, required }) => required && !(key in attributes),
   );
@@ -264,7 +291,7 @@ async function createPart(
     mappedCategoryId,
     answer,
   );
-  const name = answer?.name ?? article.name;
+  const name = answer ? withBrandAndNumber(answer.name, article) : article.name;
   const part = {
     name,
     source_name: answer && article.name,
@@ -357,12 +384,13 @@ async function matchArticle(
     : undefined;
   const categorized =
     filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
-  const name =
+  const renamed =
     edited.has('name') ||
     context.matched.has(hit.id) ||
     part.source_name === article.name
       ? null
-      : ((await answer())?.name ?? null);
+      : await answer();
+  const name = renamed && withBrandAndNumber(renamed.name, article);
   const description =
     edited.has('description') || part.description
       ? null

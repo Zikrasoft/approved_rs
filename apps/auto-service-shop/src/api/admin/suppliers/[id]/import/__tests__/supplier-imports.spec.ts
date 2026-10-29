@@ -167,6 +167,13 @@ medusaIntegrationTestRunner({
             label: 'Типоразмер',
             required: false,
           },
+          {
+            category_id: batteries.id,
+            key: 'start-stop',
+            type: 'boolean',
+            label: 'Подходит для Start-Stop',
+            required: false,
+          },
         ]);
         await catalog.createCategoryFieldOptions([
           { field_id: technology.id, key: 'standard', label: 'Стандартная' },
@@ -482,24 +489,28 @@ medusaIntegrationTestRunner({
             article_id: 'IC-31',
             brand: 'MANN-FILTER',
             number: 'W 811/80',
-            name: 'Фильтр W811 первый',
+            name: 'Фильтр W 811/80 первый',
             category: 'IC-OIL',
           },
           {
             article_id: 'IC-32',
             brand: 'MANN-FILTER',
             number: 'W 811/80',
-            name: 'Фильтр W811 второй',
+            name: 'Фильтр W 811/80 второй',
             category: 'IC-OIL',
           },
         );
         shopAi.delayMs = 50;
 
         await runImport();
-        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+        expect((await page('W81180'))?.part.name).toBe(
+          'Фильтр W 811/80 первый',
+        );
 
         await runImport();
-        expect((await page('W81180'))?.part.name).toBe('Фильтр W811 первый');
+        expect((await page('W81180'))?.part.name).toBe(
+          'Фильтр W 811/80 первый',
+        );
       });
 
       it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
@@ -811,7 +822,28 @@ medusaIntegrationTestRunner({
         });
         expect((await page('BAT560'))?.part).toMatchObject({
           category_id: batteriesId,
-          attributes: { capacity: 60, technology: 'agm' },
+          attributes: { capacity: 60, technology: 'agm', 'start-stop': true },
+        });
+      });
+
+      it('names a Part with its brand and number when the AI leaves them out', async () => {
+        intercars.articles.push({
+          article_id: 'IC-BAT-3',
+          brand: 'MANN-FILTER',
+          number: 'BAT 574',
+          name: 'Blue Dynamic 574',
+          category: 'battery',
+          specs: { Amperi: '74 Ah' },
+        });
+        shopAi.name = 'Аккумулятор 12 В 74 Ач';
+        shopAi.category = batteriesId;
+        shopAi.attributes = { capacity: 74, technology: 'standard' };
+
+        await runImport();
+
+        expect((await page('BAT574'))?.part).toMatchObject({
+          name: 'Аккумулятор 12 В 74 Ач MANN-FILTER BAT 574',
+          attributes: { 'start-stop': false },
         });
       });
 
@@ -982,7 +1014,7 @@ medusaIntegrationTestRunner({
           article_id: 'IC-9',
           brand: 'MANN-FILTER',
           number: 'W 712/95',
-          name: 'Фильтр W712',
+          name: 'Фильтр W 712/95',
           category: ' ic-oil ',
         });
 
@@ -1001,14 +1033,14 @@ medusaIntegrationTestRunner({
             article_id: 'IC-6',
             brand: 'MANN-FILTER',
             number: 'W 712/95',
-            name: 'Фильтр W712',
+            name: 'Фильтр W 712/95',
             category: 'IC-OIL',
           },
           {
             article_id: 'IC-7',
             brand: 'MANN-FILTER',
             number: 'W 719/30',
-            name: 'Фильтр W719',
+            name: 'Фильтр W 719/30',
             category: 'IC-OIL',
           },
         );
@@ -1020,15 +1052,15 @@ medusaIntegrationTestRunner({
           adminHeaders,
         );
         expect(update.status).toBe(200);
-        intercars.articles[0].name = 'Фильтр W712 новый';
-        intercars.articles[1].name = 'Фильтр W719 новый';
+        intercars.articles[0].name = 'Фильтр W 712/95 новый';
+        intercars.articles[1].name = 'Фильтр W 719/30 новый';
 
         await runImport();
 
         expect((await page('W71295'))?.part.name).toBe(
           'Масляный фильтр MANN W 712/95',
         );
-        expect((await page('W71930'))?.part.name).toBe('Фильтр W719 новый');
+        expect((await page('W71930'))?.part.name).toBe('Фильтр W 719/30 новый');
       });
 
       it('holds TecDoc-derived data in staging until its kind is released', async () => {

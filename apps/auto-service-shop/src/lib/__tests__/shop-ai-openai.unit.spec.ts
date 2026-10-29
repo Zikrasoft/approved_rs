@@ -168,6 +168,7 @@ describe('OpenAI shop AI', () => {
       description: article.description,
       specs: article.specs,
       fits: article.fits,
+      glossary: [],
       category: 1,
     });
     expect(sentMessages(globalThis.fetch).system).toMatch(
@@ -324,6 +325,20 @@ describe('OpenAI shop AI', () => {
     expect(system).toMatch(/rame/u);
     expect(system).toMatch(/odbojna guma/u);
     expect(system).toMatch(/SLI/u);
+  });
+
+  it('sends the glossary lines for the Serbian words in the part name, whatever their case', () => {
+    const { user } = shopAi().articleQuestion(
+      { ...article, name: 'kraj spone sa krunastom navrtkom i rascepkom' },
+      CATEGORIES,
+    );
+
+    expect(JSON.parse(user).glossary).toEqual([
+      'spona, poprečna spona: рулевая тяга',
+      'kraj spone: наконечник рулевой тяги',
+      'krunasta navrtka: корончатая гайка',
+      'rascepka: шплинт',
+    ]);
   });
 
   it('steers Serbian part names through the parts glossary', () => {
