@@ -18,6 +18,10 @@ export type FakeShopAi = {
   description: string | null;
   articlesAsked: { article: ArticleInput; categories: CategoryChoice[] }[];
   failure: Error | null;
+  questions: number;
+  delayMs: number;
+  inFlight: number;
+  mostInFlight: number;
 };
 
 export const createFakeShopAi = (): FakeShopAi => {
@@ -31,6 +35,10 @@ export const createFakeShopAi = (): FakeShopAi => {
     description: null,
     articlesAsked: [],
     failure: null,
+    questions: 0,
+    delayMs: 0,
+    inFlight: 0,
+    mostInFlight: 0,
     ai: {
       readQuote: async (pdf, categories) => {
         fake.quotesRead.push({ pdf, categories });
@@ -42,18 +50,28 @@ export const createFakeShopAi = (): FakeShopAi => {
         user: JSON.stringify(article),
       }),
       answerArticle: async ({ system, user }) => {
-        if (fake.failure) throw fake.failure;
-        const article = JSON.parse(user) as ArticleInput;
-        fake.articlesAsked.push({
-          article,
-          categories: JSON.parse(system) as CategoryChoice[],
-        });
-        return {
-          name: fake.name ?? article.name,
-          category_id: fake.category,
-          attributes: fake.attributes,
-          description: fake.description,
-        };
+        fake.questions += 1;
+        fake.inFlight += 1;
+        fake.mostInFlight = Math.max(fake.mostInFlight, fake.inFlight);
+        try {
+          if (fake.delayMs) {
+            await new Promise((resolve) => setTimeout(resolve, fake.delayMs));
+          }
+          if (fake.failure) throw fake.failure;
+          const article = JSON.parse(user) as ArticleInput;
+          fake.articlesAsked.push({
+            article,
+            categories: JSON.parse(system) as CategoryChoice[],
+          });
+          return {
+            name: fake.name ?? article.name,
+            category_id: fake.category,
+            attributes: fake.attributes,
+            description: fake.description,
+          };
+        } finally {
+          fake.inFlight -= 1;
+        }
       },
     },
   };
