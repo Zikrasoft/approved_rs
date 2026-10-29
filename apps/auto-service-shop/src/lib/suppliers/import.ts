@@ -89,12 +89,27 @@ type Context = {
   oneAtATime: <T>(run: () => Promise<T>) => Promise<T>;
 };
 
+const MOST_FITTED = 6;
+
+const mostFitted = ({ vehicles = [] }: Article) => {
+  const counts = new Map<string, number>();
+  for (const { make, model } of vehicles) {
+    const car = `${make} ${model}`;
+    counts.set(car, (counts.get(car) ?? 0) + 1);
+  }
+  return [...counts]
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, MOST_FITTED)
+    .map(([car]) => car);
+};
+
 const factsOf = (article: Article): ArticleFacts => ({
   name: article.name,
   brand: article.brand,
   number: article.number,
   description: article.description ?? null,
   specs: article.specs ?? {},
+  fits: mostFitted(article),
 });
 
 async function categoryChoices(

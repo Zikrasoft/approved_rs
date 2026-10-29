@@ -1,4 +1,5 @@
 import {
+  type AttributeValues,
   attributeValuesSchema,
   type CategoryFieldType,
 } from '@podbor/catalog-contract';
@@ -57,10 +58,22 @@ const russianText = z
       `a word mixes Latin and Cyrillic letters: ${wordsOf(String(input)).filter(mixesScripts).join(', ')}`,
   });
 
+const valuesThatFit = z
+  .record(z.string(), z.unknown())
+  .transform(
+    (values): AttributeValues =>
+      Object.fromEntries(
+        Object.entries(values).filter(
+          ([key, value]) =>
+            attributeValuesSchema.safeParse({ [key]: value }).success,
+        ),
+      ) as AttributeValues,
+  );
+
 export const articleAnswerSchema = z.object({
   name: russianText,
   category_id: z.string().nullable(),
-  attributes: attributeValuesSchema,
+  attributes: valuesThatFit,
   description: russianText.nullable(),
 });
 
@@ -88,6 +101,7 @@ export type ArticleFacts = {
   number: string;
   description: string | null;
   specs: Record<string, string>;
+  fits: string[];
 };
 
 export type ArticleInput = ArticleFacts & { category_id: string | null };

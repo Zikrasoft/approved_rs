@@ -11,6 +11,7 @@ const article = {
   number: 'HU 816 x',
   description: null,
   specs: {},
+  fits: [],
   category_id: null,
 };
 const categories = [{ id: 'cat_oil', name: 'Масляные фильтры' }];

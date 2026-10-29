@@ -540,6 +540,7 @@ medusaIntegrationTestRunner({
               number: 'OIL 0W20',
               description: 'Potpuno sintetičko motorno ulje 0W-20.',
               specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
+              fits: [],
               category_id: null,
             },
             categories: expect.arrayContaining([
@@ -1885,6 +1886,11 @@ medusaIntegrationTestRunner({
             },
           });
           expect(await page('FAIL2')).toBeDefined();
+          expect(
+            shopAi.articlesAsked.find(
+              ({ article }) => article.number === 'FAIL 1',
+            )?.article.fits,
+          ).toEqual(['ЗИЛ 3']);
           const [failed] = (
             await api.get('/admin/part-identifiers?q=FAIL1', adminHeaders)
           ).data.part_identifiers;

@@ -107,6 +107,7 @@ describe('OpenAI shop AI', () => {
     number: 'OIL 0W20',
     description: 'Potpuno sintetičko ulje.',
     specs: { Viskozitet: '0W-20' },
+    fits: ['BMW 3 (G20)'],
     category_id: null,
   };
 
@@ -160,8 +161,19 @@ describe('OpenAI shop AI', () => {
     expect(sentMessages(globalThis.fetch).system).toContain('category_id');
   });
 
+  it('keeps an answer and drops only its attribute values that are not values', async () => {
+    globalThis.fetch = answering({
+      ...answer,
+      attributes: { viscosity: '0W-20', capacity: null, volume: { l: 5 } },
+    });
+
+    await expect(answerOf()).resolves.toMatchObject({
+      attributes: { viscosity: '0W-20' },
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it.each([
-    ['attributes that are not values', { attributes: { viscosity: { w: 0 } } }],
     ['a blank name', { name: ' ' }],
     ['a blank description', { description: ' ' }],
     ['no Category field', { category_id: undefined }],
