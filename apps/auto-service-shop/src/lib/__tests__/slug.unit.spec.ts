@@ -69,6 +69,17 @@ describe('modelSlugOf', () => {
     ).toBe('4-f32-f82-m4-cs');
   });
 
+  it('names a chassis once when a site gives the series as its code', () => {
+    expect(
+      modelSlugOf({
+        make: 'Opel',
+        series: 'Kadett-C',
+        chassis: 'Kadett-C',
+        model: '1.2',
+      }),
+    ).toBe('kadett-c-1-2');
+  });
+
   it('keeps a number that repeats', () => {
     expect(
       modelSlugOf({

@@ -32,6 +32,7 @@ export function modelSlugOf(names: {
   const seen = new Set<string>();
   return [names.series, names.chassis, withoutCodeLists(names.model)]
     .map(withoutMake)
+    .filter((part, index, parts) => index !== 1 || part !== parts[0])
     .join('-')
     .split('-')
     .filter((token) => {
