@@ -58,6 +58,26 @@ describe('vehiclesResponseSchema', () => {
     expect(parsed.vehicles).toEqual([vehicle]);
   });
 
+  it('reads one page of the vehicle list with its count', () => {
+    expect(
+      vehiclesResponseSchema.parse({
+        vehicles: [vehicle],
+        count: 3,
+        offset: 1,
+        limit: 1,
+      }),
+    ).toEqual({ vehicles: [vehicle], count: 3, offset: 1, limit: 1 });
+  });
+
+  it('reads the whole list from a shop that does not page it yet', () => {
+    expect(vehiclesResponseSchema.parse({ vehicles: [vehicle] })).toEqual({
+      vehicles: [vehicle],
+      count: null,
+      offset: null,
+      limit: null,
+    });
+  });
+
   it('reads a vocabulary value newer than the contract as null', () => {
     const parsed = vehiclesResponseSchema.parse({
       vehicles: [

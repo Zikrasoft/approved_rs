@@ -182,7 +182,7 @@ export function createCatalogue({
 
   const paged = async <T>(
     path: string,
-    read: (body: unknown) => { items: T[]; count: number },
+    read: (body: unknown) => { items: T[]; count: number | null },
   ): Promise<T[]> => {
     const all: T[] = [];
     for (let offset = 0; ;) {
@@ -191,7 +191,7 @@ export function createCatalogue({
       );
       all.push(...items);
       offset += items.length;
-      if (items.length === 0 || offset >= count) {
+      if (items.length === 0 || count === null || offset >= count) {
         return all;
       }
     }
@@ -206,8 +206,20 @@ export function createCatalogue({
           : category,
       );
 
-  const vehicles = async (): Promise<Vehicle[]> =>
-    vehiclesResponseSchema.parse(await request('/store/vehicles')).vehicles;
+  const vehicles = (): Promise<Vehicle[]> =>
+    paged('/store/vehicles', (body) => {
+      const { vehicles, count } = vehiclesResponseSchema.parse(body);
+      return { items: vehicles, count };
+    });
+
+  const modelNamed = async (slug: string) =>
+    vehiclesResponseSchema
+      .parse(
+        await request(
+          `/store/vehicles?${new URLSearchParams({ model: slug, limit: '1' })}`,
+        ),
+      )
+      .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
   const redirects = async (): Promise<CatalogueRedirect[]> => {
     const path = '/store/catalogue-redirects';
@@ -336,18 +348,16 @@ export function createCatalogue({
       locale: CatalogLocale,
     ): Promise<Pick<SearchResponse, 'category' | 'model' | 'scope_pages'>> {
       try {
-        const [allCategories, allVehicles] = await Promise.all([
+        const [allCategories, namedModel] = await Promise.all([
           category ? categories() : [],
-          model ? vehicles() : [],
+          model ? modelNamed(model) : null,
         ]);
         const named = allCategories.find(({ slug }) => slug === category);
         return {
           category: named
             ? { slug: named.slug, name: translated(named, 'name', locale) }
             : null,
-          model:
-            allVehicles.find((vehicle) => vehicle.model.slug === model)
-              ?.model ?? null,
+          model: namedModel,
           scope_pages: null,
         };
       } catch {

@@ -109,6 +109,11 @@ export type StoreListOffersType = z.infer<typeof StoreListOffers>;
 export const StoreListFitments = StoreListPartPages;
 export type StoreListFitmentsType = StoreListPartPagesType;
 
+export const StoreListVehicles = StoreListPartPages.extend({
+  model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+});
+export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;
+
 export const StoreVehicleParts = z.object({
   steering: z.enum(STEERING_SIDES).optional(),
 });
