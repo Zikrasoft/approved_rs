@@ -8,6 +8,13 @@ export const slugOf = (name: string) =>
 
 const DATES = /\b\d{1,2}[./]\d{4}\b|\b(?:19|20)\d{2}\b/gu;
 
+const CODE_LIST = /\(([^()]*)\)/gu;
+
+const withoutCodeLists = (name: string) =>
+  name.replace(CODE_LIST, (list, codes: string) =>
+    /\s/u.test(codes.trim().replace(/\s*[,/]\s*/gu, '/')) ? list : ' ',
+  );
+
 const isCode = (token: string) => /[a-z]/u.test(token) && /\d/u.test(token);
 
 export function modelSlugOf(names: {
@@ -23,7 +30,7 @@ export function modelSlugOf(names: {
     return slug.startsWith(`${make}-`) ? slug.slice(make.length + 1) : slug;
   };
   const seen = new Set<string>();
-  return [names.series, names.chassis, names.model]
+  return [names.series, names.chassis, withoutCodeLists(names.model)]
     .map(withoutMake)
     .join('-')
     .split('-')

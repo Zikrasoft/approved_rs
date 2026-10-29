@@ -34,6 +34,41 @@ describe('modelSlugOf', () => {
     ).toBe('range-rover-l322-4-4-v8');
   });
 
+  it('drops the codes a crawled model lists in parentheses, which its chassis already names', () => {
+    expect(
+      modelSlugOf({
+        make: 'BMW',
+        series: '6',
+        chassis: 'E63/E64',
+        model: '645 Ci (E63/64)',
+      }),
+    ).toBe('6-e63-e64-645-ci');
+    expect(
+      modelSlugOf({
+        make: 'Mercedes-Benz',
+        series: 'C-Class',
+        chassis: '205',
+        model: 'C 220 d / BlueTEC (205)',
+      }),
+    ).toBe('c-class-205-c-220-d-bluetec');
+    expect(
+      modelSlugOf({
+        make: 'Volkswagen',
+        series: 'Transporter/Bus',
+        chassis: '24/25',
+        model: '1.6 TD (24,25)',
+      }),
+    ).toBe('transporter-bus-24-25-1-6-td');
+    expect(
+      modelSlugOf({
+        make: 'BMW',
+        series: '4',
+        chassis: 'F32/F82',
+        model: 'M4 (F32/F82) ( M4 CS)',
+      }),
+    ).toBe('4-f32-f82-m4-cs');
+  });
+
   it('keeps a number that repeats', () => {
     expect(
       modelSlugOf({
