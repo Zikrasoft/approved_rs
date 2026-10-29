@@ -260,7 +260,8 @@ async function vehiclesOf(
   const key = JSON.stringify({ ...facts, notes: [] });
   const found = matcher.found.get(key);
   if (found) return found;
-  const make = await makeOf(matcher, facts.make);
+  const make =
+    facts.engine_codes.length > 0 && (await makeOf(matcher, facts.make));
   if (!make) return [];
   const { catalog, source, supplierId } = matcher;
   const supplierVehicleId =

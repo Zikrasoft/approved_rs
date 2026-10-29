@@ -798,6 +798,7 @@ medusaIntegrationTestRunner({
 
         expect(await fitmentsOf('K 1477')).toEqual([]);
         expect(summary.skipped_by_reason.no_engine_code).toBe(1);
+        expect(await catalog.listMakes({ slug: 'ford' })).toEqual([]);
       });
 
       it('names an imported Part in Russian and renames it only when the source name changes', async () => {
