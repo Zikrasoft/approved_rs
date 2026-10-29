@@ -48,6 +48,7 @@ export const createFakeShopAi = (): FakeShopAi => {
         model: fake.model,
         system: JSON.stringify(categories),
         user: JSON.stringify(article),
+        categoryIds: categories.map(({ id }) => id),
       }),
       answerArticle: async ({ system, user }) => {
         fake.questions += 1;

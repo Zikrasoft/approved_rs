@@ -106,7 +106,12 @@ export type ArticleFacts = {
 
 export type ArticleInput = ArticleFacts & { category_id: string | null };
 
-export type ArticleQuestion = { model: string; system: string; user: string };
+export type ArticleQuestion = {
+  model: string;
+  system: string;
+  user: string;
+  categoryIds: string[];
+};
 
 export type ShopAi = {
   readQuote: (

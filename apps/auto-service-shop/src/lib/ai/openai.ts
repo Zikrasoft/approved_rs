@@ -57,14 +57,24 @@ Rules:
 Categories (id: name):
 ${categoryList(categories)}`;
 
-const fieldedCategoryList = (categories: CategoryChoice[]) =>
+const numberedCategoryList = (categories: CategoryChoice[]) =>
   categories
-    .map((category) =>
-      category.fields?.length
-        ? `${categoryLine(category)}\n  fields: ${JSON.stringify(category.fields)}`
-        : categoryLine(category),
-    )
+    .map((category, at) => {
+      const line = categoryLine({ ...category, id: String(at + 1) });
+      return category.fields?.length
+        ? `${line}\n  fields: ${JSON.stringify(category.fields)}`
+        : line;
+    })
     .join('\n') || '(none)';
+
+const numberedAnswerSchema = articleAnswerSchema
+  .omit({ category_id: true })
+  .extend({ category: z.coerce.number().int().positive().nullable() });
+
+const categoryNumber = (categories: CategoryChoice[], id: string | null) => {
+  const at = categories.findIndex((category) => category.id === id);
+  return at < 0 ? null : at + 1;
+};
 
 const glossarySchema = z.array(
   z.object({ sr: z.string().min(1), ru: z.string().min(1) }),
@@ -77,12 +87,12 @@ const glossaryLines = glossarySchema
 
 const articlePrompt = (
   categories: CategoryChoice[],
-) => `You put a car part from a supplier's catalogue into the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: the supplier's name for it (often in Serbian or English), its brand, number, the supplier's description, its raw specs (name to value), "fits", the vehicles it fits most often (make and model, possibly empty), and "category_id", the category it is already filed under, or null.
+) => `You put a car part from a supplier's catalogue into the online parts catalogue of ${CARLAB.name}, a car service in Belgrade, Serbia. The user message is the part as JSON: the supplier's name for it (often in Serbian or English), its brand, number, the supplier's description, its raw specs (name to value), "fits", the vehicles it fits most often (make and model, possibly empty), and "category", the number of the category it is already filed under, or null.
 
 Answer with one JSON object and nothing else:
 {
   "name": string,
-  "category_id": string or null,
+  "category": category number or null,
   "attributes": { field key: value },
   "description": string or null
 }
@@ -96,7 +106,7 @@ Answer with one JSON object and nothing else:
 Serbian to Russian part glossary (Serbian words: Russian term):
 ${glossaryLines}
 
-"category_id" is the id of the one category below the part belongs to. Never invent an id. When the input's "category_id" is not null, return it unchanged.
+"category" is the number of the one category below the part belongs to, exactly as listed. When the input's "category" is not null, return it unchanged.
 - Judge by what the part is, read from its name, description and specs, and by each category's name and the description in brackets after it.
 - Every filter (oil, air, cabin, fuel, hydraulic, transmission or particle filter) and every other part replaced at scheduled service (spark and glow plugs, wiper blades, service fluids) belongs to the category for scheduled maintenance and consumables.
 - Every starter battery, of any technology and for any vehicle, belongs to the battery category.
@@ -113,6 +123,7 @@ ${glossaryLines}
 - "single-select": the key of one listed option. "multi-select": a non-empty array of distinct listed option keys. Never write a key that is not listed.
 - An option counts only when the input names it or the same thing in other words, such as a battery's SLI, wet or flooded technology for the plain standard option. Never pick the nearest option: a case size, polarity or similar code counts only when the input gives that very code; otherwise leave the field out.
 - A lead-acid starter battery whose input names no AGM, EFB or gel technology is a standard flooded battery: use the standard option. A lithium battery has none of these technologies.
+- A boolean field for Start-Stop suitability is true for an AGM or EFB battery or one the input calls Start-Stop, and false for a standard flooded battery.
 - Never guess any other value the input does not state.
 
 "description" is the Russian description for the part's page, or null when the input has neither a description nor specs:
@@ -128,8 +139,8 @@ ${glossaryLines}
 
 In "name" and "description": never use the Cyrillic letter yo (U+0451), write «е» instead. Never use the em dash (U+2014). Every Russian word in Cyrillic letters only; brand names and numbers stay as given.
 
-Categories (id: name (description), then the category's fields):
-${fieldedCategoryList(categories)}`;
+Categories (number: name (description), then the category's fields):
+${numberedCategoryList(categories)}`;
 
 const unreadable = (code: AdminErrorCode, what: string, detail: string) =>
   adminError(
@@ -207,6 +218,9 @@ const askOnce = async <T>({
   return parsed.data;
 };
 
+const capitalized = (text: string) =>
+  text.charAt(0).toLocaleUpperCase('ru') + text.slice(1);
+
 const inHouseStyle = (text: string) =>
   text.replaceAll('ё', 'е').replaceAll('Ё', 'Е').replaceAll('—', '-');
 
@@ -232,16 +246,20 @@ export const openAiShopAi = (
       code: 'QUOTE_UNREADABLE',
       what: 'The Workshop quote',
     }),
-  articleQuestion: (article, categories) => ({
+  articleQuestion: ({ category_id, ...article }, categories) => ({
     model: articleModel,
     system: articlePrompt(categories),
-    user: JSON.stringify(article),
+    user: JSON.stringify({
+      ...article,
+      category: categoryNumber(categories, category_id),
+    }),
+    categoryIds: categories.map(({ id }) => id),
   }),
-  answerArticle: async (question) => {
-    const answer = await ask({
+  answerArticle: async ({ categoryIds, ...question }) => {
+    const { category, ...answer } = await ask({
       apiKey,
       ...question,
-      schema: articleAnswerSchema,
+      schema: numberedAnswerSchema,
       code: 'ARTICLE_UNREADABLE',
       what: 'The article',
       retries: 1,
@@ -249,7 +267,8 @@ export const openAiShopAi = (
     });
     return {
       ...answer,
-      name: inHouseStyle(answer.name),
+      category_id: category ? (categoryIds[category - 1] ?? null) : null,
+      name: capitalized(inHouseStyle(answer.name)),
       description: answer.description && inHouseStyle(answer.description),
     };
   },
