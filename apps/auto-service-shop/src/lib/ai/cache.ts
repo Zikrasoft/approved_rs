@@ -20,6 +20,15 @@ const storedSchema = z.union([
   z.object({ unreadable: z.string() }),
 ]);
 
+const invalidAnswerSchema = z.object({
+  code: z.literal(UNREADABLE),
+  details: z.object({ invalid: z.literal(true) }),
+});
+
+const invalidAnswer = (error: unknown): error is MedusaError =>
+  MedusaError.isMedusaError(error) &&
+  invalidAnswerSchema.safeParse(error).success;
+
 const unreadableAnswer = (message: string) =>
   adminError(MedusaError.Types.INVALID_DATA, UNREADABLE, message);
 
@@ -60,7 +69,7 @@ export async function cachedArticleAnswer(
     await store(bucket, key, answer);
     return answer;
   } catch (error) {
-    if (MedusaError.isMedusaError(error) && error.code === UNREADABLE) {
+    if (invalidAnswer(error)) {
       await store(bucket, key, { unreadable: error.message });
     }
     throw error;

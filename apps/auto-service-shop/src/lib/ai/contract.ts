@@ -1,5 +1,4 @@
 import {
-  type AttributeValues,
   attributeValuesSchema,
   type CategoryFieldType,
 } from '@podbor/catalog-contract';
@@ -60,14 +59,15 @@ const russianText = z
 
 const valuesThatFit = z
   .record(z.string(), z.unknown())
-  .transform(
-    (values): AttributeValues =>
+  .transform((values) =>
+    attributeValuesSchema.parse(
       Object.fromEntries(
         Object.entries(values).filter(
           ([key, value]) =>
             attributeValuesSchema.safeParse({ [key]: value }).success,
         ),
-      ) as AttributeValues,
+      ),
+    ),
   );
 
 export const articleAnswerSchema = z.object({

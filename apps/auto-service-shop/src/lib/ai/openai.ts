@@ -10,6 +10,7 @@ import {
   quoteReadingSchema,
   type ShopAi,
 } from './contract';
+import { capitalized } from './description';
 import partsGlossary from './parts-glossary.json';
 
 const QUOTE_MODEL = 'gpt-4o';
@@ -86,17 +87,18 @@ const glossary = glossarySchema
 
 const glossaryLines = glossary.map(({ line }) => `- ${line}`).join('\n');
 
-const wordsOf = (text: string) => text.toLowerCase().match(/\p{L}+/gu) ?? [];
+const lowerWordsOf = (text: string) =>
+  text.toLowerCase().match(/\p{L}+/gu) ?? [];
 
 const stemOf = (word: string) => word.slice(0, Math.max(4, word.length - 2));
 
 const mentions = (words: string[], term: string) =>
-  wordsOf(term).every((termWord) =>
+  lowerWordsOf(term).every((termWord) =>
     words.some((word) => word.startsWith(stemOf(termWord))),
   );
 
 const glossaryFor = (name: string) => {
-  const words = wordsOf(name);
+  const words = lowerWordsOf(name);
   return glossary
     .filter(({ terms }) => terms.some((term) => mentions(words, term)))
     .map(({ line }) => line);
@@ -160,11 +162,17 @@ In "name" and "description": never use the Cyrillic letter yo (U+0451), write «
 Categories (number: name (description), then the category's fields):
 ${numberedCategoryList(categories)}`;
 
-const unreadable = (code: AdminErrorCode, what: string, detail: string) =>
+const unreadable = (
+  code: AdminErrorCode,
+  what: string,
+  detail: string,
+  invalid = false,
+) =>
   adminError(
     MedusaError.Types.INVALID_DATA,
     code,
     `${what} could not be read: ${detail}`,
+    { invalid },
   );
 
 type Ask<T> = {
@@ -231,13 +239,10 @@ const askOnce = async <T>({
   }
   const parsed = schema.safeParse(json);
   if (!parsed.success) {
-    throw unreadable(code, what, z.prettifyError(parsed.error));
+    throw unreadable(code, what, z.prettifyError(parsed.error), true);
   }
   return parsed.data;
 };
-
-const capitalized = (text: string) =>
-  text.charAt(0).toLocaleUpperCase('ru') + text.slice(1);
 
 const inHouseStyle = (text: string) =>
   text.replaceAll('ё', 'е').replaceAll('Ё', 'Е').replaceAll('—', '-');

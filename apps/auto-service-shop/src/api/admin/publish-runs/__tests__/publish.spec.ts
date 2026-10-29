@@ -21,6 +21,7 @@ const shopAi = createFakeShopAi();
 
 const SERBIAN = new Map([
   ['Масляный фильтр', 'Filter ulja'],
+  ['Масляный фильтр MANN HU 6004 x', 'Filter ulja MANN HU 6004 x'],
   ['Воздушный фильтр', 'Filter vazduha'],
   ['Салонный фильтр', 'Kabinski filter'],
   ['Моторное масло', 'Motorno ulje'],
@@ -32,6 +33,7 @@ const SERBIAN = new Map([
 ]);
 const ENGLISH = new Map([
   ['Масляный фильтр', 'Oil filter'],
+  ['Масляный фильтр MANN HU 6004 x', 'Oil filter MANN HU 6004 x'],
   ['Воздушный фильтр', 'Air filter'],
   ['Салонный фильтр', 'Cabin filter'],
   ['3 серия', '3 Series'],
@@ -263,7 +265,7 @@ medusaIntegrationTestRunner({
       });
 
       it('imports no Supplier catalogue; its own Import brings the articles Publish then translates', async () => {
-        shopAi.name = 'Масляный фильтр';
+        shopAi.name = 'Масляный фильтр MANN HU 6004 x';
         supplier.articles.push({
           article_id: 'N-1',
           brand: 'MANN',
@@ -285,8 +287,8 @@ medusaIntegrationTestRunner({
           normalized_value: 'HU6004X',
         });
         expect(await translationsOf(identifier.part_id)).toEqual({
-          sr: { name: 'Filter ulja' },
-          en: { name: 'Oil filter' },
+          sr: { name: 'Filter ulja MANN HU 6004 x' },
+          en: { name: 'Oil filter MANN HU 6004 x' },
         });
       });
 

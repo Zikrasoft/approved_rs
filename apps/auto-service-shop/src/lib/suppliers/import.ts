@@ -387,13 +387,13 @@ async function matchArticle(
     : undefined;
   const categorized =
     filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
-  const renamed =
+  const renaming =
     edited.has('name') ||
     context.matched.has(hit.id) ||
     part.source_name === article.name
       ? null
       : await answer();
-  const name = renamed && withBrandAndNumber(renamed.name, article);
+  const name = renaming && withBrandAndNumber(renaming.name, article);
   const description =
     edited.has('description') || part.description
       ? null
@@ -562,8 +562,8 @@ async function eachAtOnce<T>(
   const queue = [...items];
   await Promise.all(
     Array.from({ length: Math.min(limit, queue.length) }, async () => {
-      for (let item = queue.shift(); item; item = queue.shift()) {
-        await run(item);
+      while (queue.length) {
+        await run(queue.shift()!);
       }
     }),
   );

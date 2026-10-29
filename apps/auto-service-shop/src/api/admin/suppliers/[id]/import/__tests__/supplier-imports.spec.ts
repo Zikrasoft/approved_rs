@@ -956,6 +956,7 @@ medusaIntegrationTestRunner({
           MedusaError.Types.INVALID_DATA,
           'ARTICLE_UNREADABLE',
           'The article could not be read: a word mixes Latin and Cyrillic letters: Кrај',
+          { invalid: true },
         );
 
         await runImport();

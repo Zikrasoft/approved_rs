@@ -84,6 +84,7 @@ describe('cached article answers', () => {
       MedusaError.Types.INVALID_DATA,
       'ARTICLE_UNREADABLE',
       'The article could not be read: a word mixes Latin and Cyrillic letters: Оpruga',
+      { invalid: true },
     );
     const { bucket } = memoryBucket();
     const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
@@ -92,6 +93,23 @@ describe('cached article answers', () => {
     await expect(ask()).rejects.toThrow(/Оpruga/u);
 
     expect(fake.questions).toBe(1);
+  });
+
+  it('asks again after an answer that was empty rather than invalid', async () => {
+    const fake = createFakeShopAi();
+    fake.failure = adminError(
+      MedusaError.Types.INVALID_DATA,
+      'ARTICLE_UNREADABLE',
+      'The article could not be read: the answer is empty',
+      { invalid: false },
+    );
+    const { bucket } = memoryBucket();
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+
+    await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+    await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
+
+    expect(fake.questions).toBe(2);
   });
 
   it('asks again after a failure that is not about the answer', async () => {

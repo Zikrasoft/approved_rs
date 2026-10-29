@@ -275,6 +275,18 @@ describe('OpenAI shop AI', () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
+  it('marks a refused answer as invalid and an empty one as not', async () => {
+    globalThis.fetch = answering({ ...reply, name: ' ' });
+    await expect(answerOf()).rejects.toMatchObject({
+      details: { invalid: true },
+    });
+
+    globalThis.fetch = replying('');
+    await expect(answerOf()).rejects.toMatchObject({
+      details: { invalid: false },
+    });
+  });
+
   it('names the word that mixes letters when it refuses an answer', async () => {
     globalThis.fetch = answering({ ...reply, name: 'Оpruga Bilstein B4' });
 

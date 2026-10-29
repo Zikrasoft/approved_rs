@@ -12,6 +12,9 @@ const claims = (sentence: string) => {
 const sentencesOf = (paragraph: string) =>
   paragraph.trim().split(/(?<=[.!?])\s+/u);
 
+export const capitalized = (text: string) =>
+  text.charAt(0).toLocaleUpperCase('ru') + text.slice(1);
+
 // TODO: a stem list over-cuts a sentence that only mentions a listed word in passing; tune claim-words.json from real descriptions.
 export const plainDescription = (text: string, name: string): string => {
   const paragraphs = text
@@ -26,5 +29,5 @@ export const plainDescription = (text: string, name: string): string => {
     .join('\n\n');
   if (!kept) return '';
   const opened = opensWithClaim ? `${name}. ${kept}` : kept;
-  return opened.charAt(0).toLocaleUpperCase('ru') + opened.slice(1);
+  return capitalized(opened);
 };
