@@ -3,6 +3,7 @@ import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
 import { fitmentConflicts } from '../fitment-conflicts';
+import { slugOf, withoutCodeLists } from '../slug';
 import type { VehicleFacts } from './adapter';
 import { carMakeName } from './makes';
 import { spellingKey } from './spelling';
@@ -45,6 +46,9 @@ const codeKey = (code: string) => code.replace(/[\s-]+/gu, '').toUpperCase();
 
 const nameKey = (name: string) =>
   name.replace(/\s+/gu, ' ').trim().toLowerCase();
+
+const modelKey = (name: string) =>
+  slugOf(withoutCodeLists(name)).replace(/-/gu, '');
 
 const familyOf = (code: string) =>
   /^[A-Z]{1,3}\d{2,3}/u.exec(codeKey(code))?.[0] ?? codeKey(code);
@@ -195,7 +199,7 @@ async function modelOf(
   const chassis = await chassisOf(matcher, make, facts);
   const known = (
     await catalog.listVehicleModels({ chassis_id: chassis.id }, { take: null })
-  ).find((model) => nameKey(model.name) === nameKey(facts.variant));
+  ).find((model) => modelKey(model.name) === modelKey(facts.variant));
   return (
     known ??
     catalog.createVehicleModels({

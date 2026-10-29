@@ -738,6 +738,43 @@ medusaIntegrationTestRunner({
         expect(chassisOf('118d').id).toBe(chassisOf('120d').id);
       });
 
+      it('files rows naming one car with and without its codes or spaces under one Model', async () => {
+        mann.articles.push({
+          article_id: 'HU925',
+          brand: 'MANN-FILTER',
+          number: 'HU 925/4 x',
+          name: 'Oil Filter HU 925/4 x',
+          category: 'Oil Filter',
+          vehicles: [
+            {
+              ...bmw125i,
+              model: '3',
+              variant: '320 d (E90)',
+              chassis_codes: ['E90'],
+              engine_codes: ['N47 D20A'],
+              power_kw: 120,
+            },
+            {
+              ...bmw125i,
+              model: '3',
+              variant: '320d',
+              chassis_codes: ['E90'],
+              engine_codes: ['N47 D20C'],
+              power_kw: 135,
+            },
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+
+        const models = new Set(
+          (await fitmentsOf('HU 925/4 x')).map(({ vehicle }) => vehicle.model),
+        );
+        expect([
+          ...new Map([...models].map((model) => [model.id, model])).values(),
+        ]).toEqual([expect.objectContaining({ slug: '3-e90-320-d' })]);
+      });
+
       it('fits no Vehicle for a row without an engine code and counts the row', async () => {
         mann.articles.push({
           article_id: 'K1477',

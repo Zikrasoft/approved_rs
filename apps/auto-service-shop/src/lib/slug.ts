@@ -10,7 +10,7 @@ const DATES = /\b\d{1,2}[./]\d{4}\b|\b(?:19|20)\d{2}\b/gu;
 
 const CODE_LIST = /\(([^()]*)\)/gu;
 
-const withoutCodeLists = (name: string) =>
+export const withoutCodeLists = (name: string) =>
   name.replace(CODE_LIST, (list, codes: string) =>
     /\s/u.test(codes.trim().replace(/\s*[,/]\s*/gu, '/')) ? list : ' ',
   );
