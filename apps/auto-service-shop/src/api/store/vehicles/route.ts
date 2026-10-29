@@ -13,17 +13,11 @@ export async function GET(
   const { offset, limit, model } = req.validatedQuery as StoreListVehiclesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
-  const modelIds = model
-    ? (await catalog.listVehicleModels({ slug: model })).map(({ id }) => id)
-    : null;
-
-  const page =
-    modelIds?.length === 0
-      ? { vehicles: [], count: 0 }
-      : await listVehiclePage(catalog, modelIds ? { model_id: modelIds } : {}, {
-          offset,
-          limit,
-        });
+  const page = await listVehiclePage(catalog, {
+    modelSlug: model,
+    offset,
+    limit,
+  });
 
   res.json(vehiclesResponseSchema.parse({ ...page, offset, limit }));
 }

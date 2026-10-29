@@ -52,10 +52,15 @@ medusaIntegrationTestRunner({
           );
         });
 
-        it('pages through every Vehicle with its count', async () => {
+        it('pages through every Vehicle with its count, one row per Vehicle', async () => {
           for (let index = 0; index < 3; index += 1) {
-            await createVehicleFixture(catalog, {
+            const { vehicle } = await createVehicleFixture(catalog, {
               typeCode: `L${String(index).padStart(3, '0')}`,
+            });
+            await catalog.createVehicleIdentifiers({
+              vehicle_id: vehicle.id,
+              type: 'mercedes-baumuster',
+              value: `M${index}`,
             });
           }
           const total = (await catalog.listVehicles({}, { take: null })).length;
@@ -77,6 +82,7 @@ medusaIntegrationTestRunner({
 
           expect(pages[0]).toMatchObject({ count: total, offset: 0, limit: 2 });
           expect(pages[0].vehicles).toHaveLength(2);
+          expect(ids).toHaveLength(total);
           expect(new Set(ids).size).toBe(total);
         });
 

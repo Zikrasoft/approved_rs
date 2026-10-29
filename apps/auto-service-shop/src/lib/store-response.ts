@@ -90,14 +90,18 @@ const inheritedRequirements = ownedRequirements.extend({
 
 export const VEHICLE_BATCH = 1000;
 
+const VEHICLE_READ = {
+  relations: VEHICLE_RELATIONS,
+  order: { id: 'ASC' as const },
+};
+
 const vehicleRows = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0],
 ) => {
   const batch = (skip: number) =>
     catalog.listVehicles(filters, {
-      relations: VEHICLE_RELATIONS,
-      order: { id: 'ASC' },
+      ...VEHICLE_READ,
       skip,
       take: VEHICLE_BATCH,
     });
@@ -111,7 +115,7 @@ const vehicleRows = async (
   }
 };
 
-export const toVehicleResponse = (
+const toVehicleResponse = (
   row: Awaited<ReturnType<CatalogModuleService['listVehicles']>>[number],
 ): Vehicle => {
   const { requirements, engine, model } = inheritedRequirements.parse(row);
@@ -136,15 +140,22 @@ export const listVehicleResponses = async (
 
 export const listVehiclePage = async (
   catalog: CatalogModuleService,
-  filters: Parameters<CatalogModuleService['listVehicles']>[0],
-  { offset, limit }: { offset: number; limit: number },
+  {
+    modelSlug,
+    offset,
+    limit,
+  }: { modelSlug?: string; offset: number; limit: number },
 ): Promise<{ vehicles: Vehicle[]; count: number }> => {
-  const [rows, count] = await catalog.listAndCountVehicles(filters, {
-    relations: VEHICLE_RELATIONS,
-    order: { id: 'ASC' },
-    skip: offset,
-    take: limit,
-  });
+  const modelIds = modelSlug
+    ? (await catalog.listVehicleModels({ slug: modelSlug })).map(({ id }) => id)
+    : null;
+  if (modelIds?.length === 0) {
+    return { vehicles: [], count: 0 };
+  }
+  const [rows, count] = await catalog.listAndCountVehicles(
+    modelIds ? { model_id: modelIds } : {},
+    { ...VEHICLE_READ, skip: offset, take: limit },
+  );
   return { vehicles: rows.map(toVehicleResponse), count };
 };
 
