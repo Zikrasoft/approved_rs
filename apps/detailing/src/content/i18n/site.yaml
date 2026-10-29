@@ -52,7 +52,7 @@ channels:
 form:
   heading: Записаться на консультацию
   subheading: Посмотрим машину, честно скажем, что ей действительно нужно, и назовём точную цену.
-  nameLabel: Как вас зовут
+  nameLabel: Как вас зовут (необязательно)
   namePlaceholder: Имя
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок

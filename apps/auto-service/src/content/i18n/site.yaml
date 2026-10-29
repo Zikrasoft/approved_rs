@@ -47,7 +47,7 @@ channels:
 form:
   heading: Записаться в сервис
   subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовём время и цену.
-  nameLabel: Имя
+  nameLabel: Имя (необязательно)
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
   contactPlaceholder: +381 11 000 0000
