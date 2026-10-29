@@ -217,6 +217,26 @@ describe('OpenAI shop AI', () => {
     },
   );
 
+  it('reads a Latin look-alike letter inside a Russian word as its Cyrillic twin without asking again', async () => {
+    globalThis.fetch = answering({
+      ...answer,
+      name: 'Тормозной cуппорт febi 179174',
+      description: 'Тормозной cуппорт для задней оси.',
+    });
+
+    await expect(answerOf()).resolves.toMatchObject({
+      name: 'Тормозной суппорт febi 179174',
+      description: 'Тормозной суппорт для задней оси.',
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('names the word that mixes letters when it refuses an answer', async () => {
+    globalThis.fetch = answering({ ...answer, name: 'Оpruga Bilstein B4' });
+
+    await expect(answerOf()).rejects.toThrow(/Оpruga/u);
+  });
+
   it('keeps brand names and numbers in Latin beside Russian words', async () => {
     globalThis.fetch = answering({
       ...answer,
@@ -261,6 +281,28 @@ describe('OpenAI shop AI', () => {
     expect(system).toMatch(/rame/u);
     expect(system).toMatch(/odbojna guma/u);
     expect(system).toMatch(/SLI/u);
+  });
+
+  it('steers Serbian part names through the parts glossary', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/nosač stabilizatora.*втулка стабилизатора/u);
+    expect(system).toMatch(/španer.*натяжитель ремня/u);
+    expect(system).toMatch(/svećica.*свеча зажигания/u);
+  });
+
+  it('files every filter and battery and leaves a Category empty only when none covers the part', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/oil, air, cabin, fuel/u);
+    expect(system).toMatch(/batter/u);
+    expect(system).not.toMatch(/Prefer null/u);
+  });
+
+  it('asks for a description of its own for each part, without the supplier claims', () => {
+    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+
+    expect(system).toMatch(/Strogi standardi kvaliteta/u);
   });
 
   it('asks nothing without a key', async () => {

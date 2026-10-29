@@ -26,12 +26,35 @@ export type QuoteReading = z.infer<typeof quoteReadingSchema>;
 const mixesScripts = (word: string) =>
   /\p{Script=Latin}/u.test(word) && /\p{Script=Cyrillic}/u.test(word);
 
+const CYRILLIC_TWIN: Record<string, string> = Object.fromEntries(
+  [...'aceopxyABCEHKMOPTX'].map((latin, at) => [
+    latin,
+    'асеорхуАВСЕНКМОРТХ'[at]!,
+  ]),
+);
+
+const inCyrillic = (word: string) => {
+  const repaired = word.replace(
+    /\p{Script=Latin}/gu,
+    (letter) => CYRILLIC_TWIN[letter] ?? letter,
+  );
+  return mixesScripts(repaired) ? word : repaired;
+};
+
+const wordsOf = (text: string) => text.match(/\p{L}+/gu) ?? [];
+
 const russianText = z
   .string()
   .trim()
   .min(1)
-  .refine((text) => !(text.match(/\p{L}+/gu) ?? []).some(mixesScripts), {
-    error: 'a word mixes Latin and Cyrillic letters',
+  .transform((text) =>
+    text.replace(/\p{L}+/gu, (word) =>
+      mixesScripts(word) ? inCyrillic(word) : word,
+    ),
+  )
+  .refine((text) => !wordsOf(text).some(mixesScripts), {
+    error: ({ input }) =>
+      `a word mixes Latin and Cyrillic letters: ${wordsOf(String(input)).filter(mixesScripts).join(', ')}`,
   });
 
 export const articleAnswerSchema = z.object({
