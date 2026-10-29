@@ -10,6 +10,7 @@ import {
 
 import type { SupplierAdapterName } from './env';
 import { slugOf } from './slug';
+import { MAKE_ALIASES } from './suppliers/makes';
 import { spellingKey } from './suppliers/spelling';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -237,12 +238,12 @@ const CRAWLED_CATALOGUES: Record<
   'mann-filter': {
     brands: { 'MANN-FILTER': ['MANN-FILTER'] },
     categories: {},
-    makes: { 'VW (VOLKSWAGEN)': 'Volkswagen' },
+    makes: MAKE_ALIASES,
   },
   filtron: {
     brands: { FILTRON: ['FILTRON'] },
     categories: {},
-    makes: {},
+    makes: MAKE_ALIASES,
   },
   varta: {
     brands: { VARTA: ['VARTA'] },
@@ -252,7 +253,7 @@ const CRAWLED_CATALOGUES: Record<
   bilstein: {
     brands: { febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
     categories: {},
-    makes: { 'Volkswagen (VW)': 'Volkswagen' },
+    makes: MAKE_ALIASES,
   },
 };
 

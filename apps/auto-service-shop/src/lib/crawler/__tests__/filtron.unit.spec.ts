@@ -82,23 +82,4 @@ describe('FILTRON', () => {
       ],
     });
   });
-
-  it('fits a filter to trucks and buses but not to industrial engines or a snow groomer', () => {
-    const makes = new Set(
-      filtron.parse(page('am416.html.gz'))?.vehicles?.map(({ make }) => make),
-    );
-    expect([...makes].sort()).toEqual([
-      'DAF BUS (VDL BUS GROUP)',
-      'DAF TRUCKS',
-      'IVECO BUS',
-      'JELCZ',
-      'LEYLAND',
-      'LEYLAND-DAF',
-      'NEOPLAN (NEOMAN)',
-      'SCANIA',
-      'SCANIA BUS / SCANIA-IRIZAR',
-      'SOLARIS BUS',
-      'VAN HOOL',
-    ]);
-  });
 });

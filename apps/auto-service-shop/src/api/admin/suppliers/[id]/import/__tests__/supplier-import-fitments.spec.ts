@@ -280,7 +280,7 @@ medusaIntegrationTestRunner({
 
         const makes = await volkswagen();
         expect(makes).toEqual([
-          expect.objectContaining({ name: 'VOLKSWAGEN', slug: 'volkswagen' }),
+          expect.objectContaining({ name: 'Volkswagen', slug: 'volkswagen' }),
         ]);
         expect(
           makes[0].spellings.map(({ supplier_id, value }) => ({
@@ -299,6 +299,79 @@ medusaIntegrationTestRunner({
         expect(makes[0].spellings).toHaveLength(2);
         expect((await makeOfFitment('38481')).id).toBe(makes[0].id);
         expect((await makeOfFitment('HU 712/11 x')).id).toBe(makes[0].id);
+      });
+
+      it('lands each spelling of one manufacturer on one Make under its own name', async () => {
+        const fabia = (make: string): VehicleFacts => ({
+          ...golf(make),
+          model: 'Fabia',
+          chassis_codes: ['5J'],
+          engine_codes: ['CGGB'],
+        });
+        mann.articles.push({
+          article_id: 'W7158',
+          brand: 'MANN-FILTER',
+          number: 'W 715/8',
+          name: 'Oil Filter W 715/8',
+          category: 'Oil Filter',
+          vehicles: [fabia('SKODA'), { ...fabia('KIA MOTORS'), model: 'Rio' }],
+        });
+        bilstein.articles.push({
+          article_id: 'febi/38483',
+          brand: 'febi',
+          number: '38483',
+          name: 'uljni filter',
+          category: 'uljni filter',
+          vehicles: [fabia('Škoda'), { ...fabia('KIA'), model: 'Rio' }],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('bilstein group');
+
+        const makes = await catalog.listMakes(
+          { slug: ['skoda', 'kia'] },
+          { relations: ['spellings'], order: { slug: 'ASC' } },
+        );
+        expect(
+          makes.map(({ name, slug, spellings }) => ({
+            name,
+            slug,
+            spellings: spellings.map(({ value }) => value).sort(),
+          })),
+        ).toEqual([
+          { name: 'Kia', slug: 'kia', spellings: ['KIA', 'KIA MOTORS'] },
+          { name: 'Škoda', slug: 'skoda', spellings: ['SKODA', 'Škoda'] },
+        ]);
+      });
+
+      it('fits no construction, agricultural, truck or bus maker and makes no Make of it', async () => {
+        mann.articles.push({
+          article_id: 'WK9406',
+          brand: 'MANN-FILTER',
+          number: 'WK 940/6',
+          name: 'Fuel Filter WK 940/6',
+          category: 'Fuel Filter',
+          vehicles: [
+            golf('VOLVO CONSTRUCTION EQUIPMENT'),
+            golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'),
+            golf('DAF TRUCKS'),
+            golf('IVECO BUS'),
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+
+        expect(await fitmentsOf('WK 940/6')).toEqual([]);
+        expect(
+          await catalog.listMakes({
+            slug: [
+              'volvo-construction-equipment',
+              'massey-ferguson-traktoren',
+              'daf-trucks',
+              'iveco-bus',
+            ],
+          }),
+        ).toEqual([]);
       });
 
       it('resolves a spelling staff added to a Make in the admin, and lists and removes it there', async () => {
@@ -665,6 +738,43 @@ medusaIntegrationTestRunner({
         expect(chassisOf('118d').id).toBe(chassisOf('120d').id);
       });
 
+      it('files rows naming one car with and without its codes or spaces under one Model', async () => {
+        mann.articles.push({
+          article_id: 'HU925',
+          brand: 'MANN-FILTER',
+          number: 'HU 925/4 x',
+          name: 'Oil Filter HU 925/4 x',
+          category: 'Oil Filter',
+          vehicles: [
+            {
+              ...bmw125i,
+              model: '3',
+              variant: '320 d (E90)',
+              chassis_codes: ['E90'],
+              engine_codes: ['N47 D20A'],
+              power_kw: 120,
+            },
+            {
+              ...bmw125i,
+              model: '3',
+              variant: '320d',
+              chassis_codes: ['E90'],
+              engine_codes: ['N47 D20C'],
+              power_kw: 135,
+            },
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+
+        const models = new Set(
+          (await fitmentsOf('HU 925/4 x')).map(({ vehicle }) => vehicle.model),
+        );
+        expect([
+          ...new Map([...models].map((model) => [model.id, model])).values(),
+        ]).toEqual([expect.objectContaining({ slug: '3-e90-320-d' })]);
+      });
+
       it('fits no Vehicle for a row without an engine code and counts the row', async () => {
         mann.articles.push({
           article_id: 'K1477',
@@ -688,6 +798,7 @@ medusaIntegrationTestRunner({
 
         expect(await fitmentsOf('K 1477')).toEqual([]);
         expect(summary.skipped_by_reason.no_engine_code).toBe(1);
+        expect(await catalog.listMakes({ slug: 'ford' })).toEqual([]);
       });
 
       it('names an imported Part in Russian and renames it only when the source name changes', async () => {

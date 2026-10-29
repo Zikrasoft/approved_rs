@@ -67,15 +67,41 @@ const crossReferencesOf = ($: CheerioAPI) =>
     },
   );
 
-const CODES = /\(([^)]+)\)/u;
+const GROUPS = /\(([^()]*)\)/gu;
+const CODE = /^[A-Z0-9][A-Z0-9._-]*$/u;
+const DISPLACEMENT = /^\d\.\d$/u;
 const MONTH_YEAR = /\d{2}\/(\d{2})/gu;
 
-const codesIn = (text: string) =>
-  CODES.exec(text)?.[1]
+const codesOfGroup = (group: string) => {
+  const tokens = group
     .split(/\s*[/,]\s*/u)
-    .filter(Boolean) ?? [];
+    .map((token) => token.trim())
+    .filter(Boolean);
+  return tokens.every((token) => CODE.test(token) && !DISPLACEMENT.test(token))
+    ? tokens
+    : [];
+};
 
-const withoutCodes = (text: string) => text.replace(CODES, '').trim();
+const withPrefixes = (codes: string[]) => {
+  const full: string[] = [];
+  for (const code of codes) {
+    const previous = full[full.length - 1];
+    const digits = previous && /^(.*\D)(\d+)$/u.exec(previous);
+    if (!/^\d+$/u.test(code) || !digits) full.push(code);
+    else if (digits[2].length === code.length) full.push(digits[1] + code);
+  }
+  return full;
+};
+
+const codesIn = (text: string) => [
+  ...new Set(
+    [...text.matchAll(GROUPS)].flatMap(([, group]) =>
+      withPrefixes(codesOfGroup(group)),
+    ),
+  ),
+];
+
+const withoutCodes = (text: string) => words(text.replace(GROUPS, ' '));
 
 const yearsOf = (text: string) => {
   const [from, to] = text.split('→').map((side) => {
@@ -87,14 +113,11 @@ const yearsOf = (text: string) => {
 
 const count = (text: string | undefined) => Number(text) || null;
 
-const OFF_ROAD_MAKE = /\b(?:ENGINES|MOTORCYCLES?|MARINE|TRACTORS?)\b/u;
+const TRACTOR_MAKES_NAMED_LIKE_CARS = new Set(['LAMBORGHINI']);
 
-const OFF_ROAD_MAKER =
-  /^(?:AGCO|BOMAG|CASE IH|CATERPILLAR|CLAAS|DEUTZ-FAHR|DOOSAN|DYNAPAC|FENDT|HAMM|HYSTER|IMT|JCB|JOHN DEERE|JUNGHEINRICH|KOMATSU|KUBOTA|LIEBHERR|MANITOU|MASSEY FERGUSON|NEW HOLLAND|PERKINS|PRINOTH|TAKEUCHI|VALTRA|WACKER NEUSON|YANMAR|ZETOR)\b/u;
-
-const onTheRoad = ({ make }: VehicleFacts) =>
-  !OFF_ROAD_MAKE.test(make.toUpperCase()) &&
-  !OFF_ROAD_MAKER.test(make.toUpperCase());
+const carRow = ({ make, model, variant }: VehicleFacts) =>
+  Boolean(model && variant) &&
+  !TRACTOR_MAKES_NAMED_LIKE_CARS.has(make.toUpperCase());
 
 const decoded = (value: string): string | null => {
   try {
@@ -113,6 +136,17 @@ const vehicleTypeIdOf = (row: Nodes) => {
     : (new URLSearchParams(params).get('vehicleTypeId') ?? undefined);
 };
 
+const designationOf = ($: CheerioAPI, cell: Nodes) => {
+  const notes = each($, cell.find('.cmp-tooltip li'))
+    .map((line) => words(line.text()))
+    .filter(Boolean);
+  const shown = cell.clone();
+  shown.find('.cmp-tooltip').remove();
+  const variant = words(shown.text()).replace(/^-$/u, '');
+  shown.find('a').remove();
+  return { variant, notes, codes: codesIn(shown.text()) };
+};
+
 const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
   each($, $('#applications .cmp-application-table')).flatMap((table) => {
     const [series, make] = each($, table.parents('.cmp-accordion__item')).map(
@@ -120,6 +154,7 @@ const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
     );
     return each($, table.find('tbody.cmp-table__desktop tr'))
       .map((row) => ({
+        designation: designationOf($, row.find('td').first()),
         cells: each($, row.find('td')).map((cell) =>
           words(cell.text()).replace(/^-$/u, ''),
         ),
@@ -128,22 +163,21 @@ const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
       .filter(({ cells }) => cells.length >= 7)
       .map(
         ({
-          cells: [variant, , engine, ccm, kw, , years],
+          designation: { variant, codes, notes },
+          cells: [, , engine, ccm, kw, , years],
           supplierVehicleId,
         }) => ({
           make,
           model: withoutCodes(series),
           variant,
-          chassis_codes: codesIn(variant).length
-            ? codesIn(variant)
-            : codesIn(series),
+          chassis_codes: codes.length ? codes : codesIn(series),
           engine_codes: engine.split(/\s*,\s*/u).filter(Boolean),
           displacement_cc: count(ccm),
           power_kw: count(kw),
           fuel: null,
           body_style: null,
           ...yearsOf(years),
-          notes: [],
+          notes,
           ...(supplierVehicleId && { supplier_vehicle_id: supplierVehicleId }),
         }),
       );
@@ -172,7 +206,6 @@ export const parseMannHummelProduct = (
   }
   const applications = vehiclesOf($);
   if (!applications.length && $(OTHER_FAMILY).length) return null;
-  const vehicles = applications.filter(onTheRoad);
   const description = words($('.cmp-product__description-text').first().text());
   return {
     article_id: articleId,
@@ -183,7 +216,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles,
+    vehicles: applications.filter(carRow),
     images: imagesOf($),
   };
 };

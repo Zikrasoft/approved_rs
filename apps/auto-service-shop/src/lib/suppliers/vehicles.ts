@@ -3,7 +3,9 @@ import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
 import { fitmentConflicts } from '../fitment-conflicts';
+import { slugOf, withoutCodeLists } from '../slug';
 import type { VehicleFacts } from './adapter';
+import { carMakeName } from './makes';
 import { spellingKey } from './spelling';
 
 type Years = { year_from: number | null; year_to: number | null };
@@ -22,7 +24,7 @@ export type VehicleMatcher = {
   catalog: CatalogModuleService;
   source: string;
   supplierId: string;
-  makes: Map<string, Make>;
+  makes: Map<string, Make | null>;
   engines: { id: string; key: string }[] | null;
   found: Map<string, string[]>;
 };
@@ -44,6 +46,9 @@ const codeKey = (code: string) => code.replace(/[\s-]+/gu, '').toUpperCase();
 
 const nameKey = (name: string) =>
   name.replace(/\s+/gu, ' ').trim().toLowerCase();
+
+const modelKey = (name: string) =>
+  slugOf(withoutCodeLists(name)).replace(/-/gu, '');
 
 const familyOf = (code: string) =>
   /^[A-Z]{1,3}\d{2,3}/u.exec(codeKey(code))?.[0] ?? codeKey(code);
@@ -108,12 +113,6 @@ async function engineOf(
   return created.id;
 }
 
-const canonicalMakeName = (spelling: string) =>
-  spelling
-    .replace(/\([^)]*\)/gu, ' ')
-    .replace(/\s+/gu, ' ')
-    .trim() || spelling.trim();
-
 async function knownMake(
   { catalog, supplierId }: VehicleMatcher,
   key: string,
@@ -135,14 +134,21 @@ async function knownMake(
   return named ? { make: named, spelled: false } : null;
 }
 
-async function makeOf(matcher: VehicleMatcher, spelling: string) {
+async function makeOf(
+  matcher: VehicleMatcher,
+  spelling: string,
+): Promise<Make | null> {
   const key = spellingKey(spelling);
-  const cached = matcher.makes.get(key);
-  if (cached) return cached;
+  if (matcher.makes.has(key)) return matcher.makes.get(key) ?? null;
   const { catalog, source, supplierId } = matcher;
-  const name = canonicalMakeName(spelling);
-  const known = await knownMake(matcher, key, name);
-  const make = known?.make ?? (await catalog.createMakes({ name, source }));
+  const name = carMakeName(spelling);
+  const known = await knownMake(matcher, key, name ?? spelling);
+  const make =
+    known?.make ?? (name && (await catalog.createMakes({ name, source })));
+  if (!make) {
+    matcher.makes.set(key, null);
+    return null;
+  }
   if (!known?.spelled) {
     await catalog.createMakeSpellings({
       make_id: make.id,
@@ -193,7 +199,7 @@ async function modelOf(
   const chassis = await chassisOf(matcher, make, facts);
   const known = (
     await catalog.listVehicleModels({ chassis_id: chassis.id }, { take: null })
-  ).find((model) => nameKey(model.name) === nameKey(facts.variant));
+  ).find((model) => modelKey(model.name) === modelKey(facts.variant));
   return (
     known ??
     catalog.createVehicleModels({
@@ -207,10 +213,10 @@ async function modelOf(
 async function vehicleOf(
   matcher: VehicleMatcher,
   facts: VehicleFacts,
+  make: Make,
   code: string,
 ): Promise<string> {
   const { catalog, source } = matcher;
-  const make = await makeOf(matcher, facts.make);
   const engineIds = (await enginesOf(matcher))
     .filter(sameEngine(code))
     .map(({ id }) => id);
@@ -254,6 +260,9 @@ async function vehiclesOf(
   const key = JSON.stringify({ ...facts, notes: [] });
   const found = matcher.found.get(key);
   if (found) return found;
+  const make =
+    facts.engine_codes.length > 0 && (await makeOf(matcher, facts.make));
+  if (!make) return [];
   const { catalog, source, supplierId } = matcher;
   const supplierVehicleId =
     facts.engine_codes.length === 1 ? facts.supplier_vehicle_id : undefined;
@@ -262,7 +271,7 @@ async function vehiclesOf(
     (await vehicleBySupplierId(matcher, supplierVehicleId));
   const ids: string[] = known ? [known] : [];
   for (const code of known ? [] : facts.engine_codes) {
-    ids.push(await vehicleOf(matcher, facts, code));
+    ids.push(await vehicleOf(matcher, facts, make, code));
   }
   if (supplierVehicleId && !known) {
     await catalog.createVehicleIdentifiers({

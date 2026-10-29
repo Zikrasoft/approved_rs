@@ -158,9 +158,64 @@ describe('MANN-FILTER', () => {
     expect(mannFilter.parse(page('h341158-22.html.gz'))).toBe(null);
   });
 
-  it('fits a filter for excavators and loaders to no vehicle', () => {
-    const article = mannFilter.parse(page('p5005.html.gz'));
-    expect(article).toMatchObject({ number: 'P 5005', vehicles: [] });
+  it('names a car by its designation and chassis, its tooltip lines becoming notes', () => {
+    const vehicles = mannFilter.parse(page('hu816x.html.gz'))?.vehicles ?? [];
+    expect(vehicles).toContainEqual(
+      expect.objectContaining({
+        model: '5',
+        variant: '535i (F10/F11)',
+        chassis_codes: ['F10', 'F11'],
+        notes: ['For aluminium oil filter module'],
+      }),
+    );
+    expect(vehicles).toContainEqual(
+      expect.objectContaining({
+        variant: '535i (E60/61)',
+        chassis_codes: ['E60', 'E61'],
+      }),
+    );
+    expect(
+      vehicles.filter(({ variant }) => /aluminium|→/u.test(variant)),
+    ).toEqual([]);
+  });
+
+  it('reads chassis codes from outside the designation and dates as notes', () => {
+    const vehicles = mannFilter.parse(page('c30005.html.gz'))?.vehicles ?? [];
+    expect(vehicles).toContainEqual(
+      expect.objectContaining({
+        variant: '2.0 TFSI (TTS) (FV)',
+        chassis_codes: ['FV'],
+      }),
+    );
+    expect(vehicles).toContainEqual(
+      expect.objectContaining({
+        model: 'Tiguan Allspace',
+        variant: '2.0 TDI',
+        notes: ['→ 11/24'],
+      }),
+    );
+  });
+
+  it('fits no Lamborghini tractor, which the site names like the car maker', () => {
+    const html = page('hu816x.html.gz').replaceAll(
+      'cmp-accordion__title">BMW',
+      'cmp-accordion__title">LAMBORGHINI',
+    );
+    expect(
+      new Set(mannFilter.parse(html)?.vehicles?.map(({ make }) => make)),
+    ).toEqual(new Set(['LAMBORGHINI ALPINA B. BOVENSIEPEN']));
+  });
+
+  it('leaves out a row the site gives no model line for and reads the rest', () => {
+    const html = page('hu816x.html.gz').replace(
+      'cmp-accordion__title">1 (E81/E82/E87/E88)',
+      'cmp-accordion__title">(E81/E82/E87/E88)',
+    );
+    const article = supplierArticleSchema.parse(mannFilter.parse(html));
+    expect(article.vehicles?.length).toBeGreaterThan(0);
+    expect(
+      article.vehicles?.filter(({ variant }) => variant === '125i (E82/E88)'),
+    ).toEqual([]);
   });
 
   it('reads nothing from a page that is not a product', () => {
