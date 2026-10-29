@@ -86,7 +86,7 @@ const codesOfGroup = (group: string) => {
 const withPrefixes = (codes: string[]) => {
   const full: string[] = [];
   for (const code of codes) {
-    const previous = full.at(-1);
+    const previous = full[full.length - 1];
     const digits = previous && /^(.*\D)(\d+)$/u.exec(previous);
     if (!/^\d+$/u.test(code) || !digits) full.push(code);
     else if (digits[2].length === code.length) full.push(digits[1] + code);
@@ -114,14 +114,10 @@ const yearsOf = (text: string) => {
 
 const count = (text: string | undefined) => Number(text) || null;
 
-const OFF_ROAD_MAKE = /\b(?:ENGINES|MOTORCYCLES?|MARINE|TRACTORS?)\b/u;
+const TRACTOR_MAKES_NAMED_LIKE_CARS = new Set(['LAMBORGHINI']);
 
-const OFF_ROAD_MAKER =
-  /^(?:AGCO|BOMAG|CASE IH|CATERPILLAR|CLAAS|DEUTZ-FAHR|DOOSAN|DYNAPAC|FENDT|HAMM|HYSTER|IMT|JCB|JOHN DEERE|JUNGHEINRICH|KOMATSU|KUBOTA|LIEBHERR|MANITOU|MASSEY FERGUSON|NEW HOLLAND|PERKINS|PRINOTH|TAKEUCHI|VALTRA|WACKER NEUSON|YANMAR|ZETOR)\b/u;
-
-const onTheRoad = ({ make }: VehicleFacts) =>
-  !OFF_ROAD_MAKE.test(make.toUpperCase()) &&
-  !OFF_ROAD_MAKER.test(make.toUpperCase());
+const notATractor = ({ make }: VehicleFacts) =>
+  !TRACTOR_MAKES_NAMED_LIKE_CARS.has(make.toUpperCase());
 
 const decoded = (value: string): string | null => {
   try {
@@ -225,7 +221,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles: applications.filter(onTheRoad),
+    vehicles: applications.filter(notATractor),
     images: imagesOf($),
   };
 };

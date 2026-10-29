@@ -196,6 +196,16 @@ describe('MANN-FILTER', () => {
     );
   });
 
+  it('fits no Lamborghini tractor, which the site names like the car maker', () => {
+    const html = page('hu816x.html.gz').replaceAll(
+      'cmp-accordion__title">BMW',
+      'cmp-accordion__title">LAMBORGHINI',
+    );
+    expect(
+      new Set(mannFilter.parse(html)?.vehicles?.map(({ make }) => make)),
+    ).toEqual(new Set(['LAMBORGHINI ALPINA B. BOVENSIEPEN']));
+  });
+
   it('reads nothing from a page that is not a product', () => {
     expect(mannFilter.parse('<html><body><main></main></body></html>')).toBe(
       null,

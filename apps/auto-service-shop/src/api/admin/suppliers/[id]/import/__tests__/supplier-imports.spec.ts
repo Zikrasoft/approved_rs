@@ -1653,10 +1653,10 @@ medusaIntegrationTestRunner({
               category: 'IC-OIL',
               vehicles: [
                 {
-                  make: 'ЗИЛ',
-                  model: '3',
-                  variant: '320d',
-                  chassis_codes: ['ZZ9'],
+                  make: 'Lada',
+                  model: 'Нива',
+                  variant: 'Нива',
+                  chassis_codes: [],
                   engine_codes: ['B47D20'],
                   displacement_cc: null,
                   power_kw: null,

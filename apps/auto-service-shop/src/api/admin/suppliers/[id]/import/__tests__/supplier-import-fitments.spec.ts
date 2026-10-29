@@ -280,7 +280,7 @@ medusaIntegrationTestRunner({
 
         const makes = await volkswagen();
         expect(makes).toEqual([
-          expect.objectContaining({ name: 'VOLKSWAGEN', slug: 'volkswagen' }),
+          expect.objectContaining({ name: 'Volkswagen', slug: 'volkswagen' }),
         ]);
         expect(
           makes[0].spellings.map(({ supplier_id, value }) => ({
@@ -299,6 +299,79 @@ medusaIntegrationTestRunner({
         expect(makes[0].spellings).toHaveLength(2);
         expect((await makeOfFitment('38481')).id).toBe(makes[0].id);
         expect((await makeOfFitment('HU 712/11 x')).id).toBe(makes[0].id);
+      });
+
+      it('lands each spelling of one manufacturer on one Make under its own name', async () => {
+        const fabia = (make: string): VehicleFacts => ({
+          ...golf(make),
+          model: 'Fabia',
+          chassis_codes: ['5J'],
+          engine_codes: ['CGGB'],
+        });
+        mann.articles.push({
+          article_id: 'W7158',
+          brand: 'MANN-FILTER',
+          number: 'W 715/8',
+          name: 'Oil Filter W 715/8',
+          category: 'Oil Filter',
+          vehicles: [fabia('SKODA'), { ...fabia('KIA MOTORS'), model: 'Rio' }],
+        });
+        bilstein.articles.push({
+          article_id: 'febi/38483',
+          brand: 'febi',
+          number: '38483',
+          name: 'uljni filter',
+          category: 'uljni filter',
+          vehicles: [fabia('Škoda'), { ...fabia('KIA'), model: 'Rio' }],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('bilstein group');
+
+        const makes = await catalog.listMakes(
+          { slug: ['skoda', 'kia'] },
+          { relations: ['spellings'], order: { slug: 'ASC' } },
+        );
+        expect(
+          makes.map(({ name, slug, spellings }) => ({
+            name,
+            slug,
+            spellings: spellings.map(({ value }) => value).sort(),
+          })),
+        ).toEqual([
+          { name: 'Kia', slug: 'kia', spellings: ['KIA', 'KIA MOTORS'] },
+          { name: 'Škoda', slug: 'skoda', spellings: ['SKODA', 'Škoda'] },
+        ]);
+      });
+
+      it('fits no construction, agricultural, truck or bus maker and makes no Make of it', async () => {
+        mann.articles.push({
+          article_id: 'WK9406',
+          brand: 'MANN-FILTER',
+          number: 'WK 940/6',
+          name: 'Fuel Filter WK 940/6',
+          category: 'Fuel Filter',
+          vehicles: [
+            golf('VOLVO CONSTRUCTION EQUIPMENT'),
+            golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'),
+            golf('DAF TRUCKS'),
+            golf('IVECO BUS'),
+          ],
+        });
+
+        await runImport('MANN-FILTER');
+
+        expect(await fitmentsOf('WK 940/6')).toEqual([]);
+        expect(
+          await catalog.listMakes({
+            slug: [
+              'volvo-construction-equipment',
+              'massey-ferguson-traktoren',
+              'daf-trucks',
+              'iveco-bus',
+            ],
+          }),
+        ).toEqual([]);
       });
 
       it('resolves a spelling staff added to a Make in the admin, and lists and removes it there', async () => {
