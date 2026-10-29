@@ -67,7 +67,6 @@ const crossReferencesOf = ($: CheerioAPI) =>
     },
   );
 
-const CODES = /\(([^)]+)\)/u;
 const GROUPS = /\(([^()]*)\)/gu;
 const CODE = /^[A-Z0-9][A-Z0-9._-]*$/u;
 const DISPLACEMENT = /^\d\.\d$/u;
@@ -102,7 +101,7 @@ const codesIn = (text: string) => [
   ),
 ];
 
-const withoutCodes = (text: string) => text.replace(CODES, '').trim();
+const withoutCodes = (text: string) => words(text.replace(GROUPS, ' '));
 
 const yearsOf = (text: string) => {
   const [from, to] = text.split('→').map((side) => {
@@ -116,7 +115,7 @@ const count = (text: string | undefined) => Number(text) || null;
 
 const TRACTOR_MAKES_NAMED_LIKE_CARS = new Set(['LAMBORGHINI']);
 
-const named = ({ make, model, variant }: VehicleFacts) =>
+const carRow = ({ make, model, variant }: VehicleFacts) =>
   Boolean(model && variant) &&
   !TRACTOR_MAKES_NAMED_LIKE_CARS.has(make.toUpperCase());
 
@@ -141,16 +140,11 @@ const designationOf = ($: CheerioAPI, cell: Nodes) => {
   const notes = each($, cell.find('.cmp-tooltip li'))
     .map((line) => words(line.text()))
     .filter(Boolean);
-  cell.find('.cmp-tooltip').remove();
-  const variant = words(cell.text()).replace(/^-$/u, '');
-  const label = words(cell.find('a').text());
-  return {
-    variant,
-    notes,
-    codes: codesIn(
-      label ? variant.slice(variant.indexOf(label) + label.length) : variant,
-    ),
-  };
+  const shown = cell.clone();
+  shown.find('.cmp-tooltip').remove();
+  const variant = words(shown.text()).replace(/^-$/u, '');
+  shown.find('a').remove();
+  return { variant, notes, codes: codesIn(shown.text()) };
 };
 
 const vehiclesOf = ($: CheerioAPI): VehicleFacts[] =>
@@ -222,7 +216,7 @@ export const parseMannHummelProduct = (
     ...(description && { description }),
     specs: specsOf($),
     cross_references: crossReferencesOf($),
-    vehicles: applications.filter(named),
+    vehicles: applications.filter(carRow),
     images: imagesOf($),
   };
 };

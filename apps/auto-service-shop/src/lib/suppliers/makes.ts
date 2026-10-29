@@ -83,9 +83,10 @@ const withoutOwner = (spelling: string) =>
     .trim();
 
 const CAR_MAKE_NAMES = new Map(
-  Object.entries(CAR_MAKES).flatMap(([name, spellings]) =>
-    [name, ...spellings].map((spelling) => [spellingKey(spelling), name]),
-  ),
+  [
+    ...Object.keys(CAR_MAKES).map((name) => [name, name]),
+    ...Object.entries(MAKE_ALIASES),
+  ].map(([spelling, name]) => [spellingKey(spelling), name]),
 );
 
 export const carMakeName = (spelling: string): string | null =>
