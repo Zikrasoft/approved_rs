@@ -7,7 +7,6 @@ import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
 import {
   categoriesForBuild,
-  cataloguePagesForBuild,
   makeHubsForBuild,
   shopOpen,
 } from '@/utils/catalogueEnv';
@@ -15,8 +14,7 @@ import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
-import { catalogueLinks, PathBuilder } from '@/utils/paths';
-import { carName, vehicleVariant } from '@/utils/carName';
+import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
@@ -30,7 +28,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const works = publishedWorks(await getCollection('works'));
   const categories = await categoriesForBuild();
   const makes = await makeHubsForBuild();
-  const links = catalogueLinks(locale, await cataloguePagesForBuild());
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -102,32 +99,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
                 },
               ]
             : []),
-          ...makes.flatMap(({ make, models }) => [
-            {
-              label: make.name,
-              href: url(PathBuilder.partsMake(locale, make.slug)),
-              note: content(locale).partsCar.hubs.make.lead,
-            },
-            ...models.flatMap(({ model, vehicles }) => [
-              {
-                label: carName(model, locale),
-                href: url(
-                  PathBuilder.partsModel(locale, make.slug, model.slug),
-                ),
-              },
-              ...vehicles.flatMap((vehicle) => {
-                const href = links.vehicle(vehicle);
-                return href
-                  ? [
-                      {
-                        label: `${carName(model, locale)}, ${vehicleVariant(vehicle, locale)}`,
-                        href: url(href),
-                      },
-                    ]
-                  : [];
-              }),
-            ]),
-          ]),
         ],
       },
       {
