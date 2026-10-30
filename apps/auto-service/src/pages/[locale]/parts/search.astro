@@ -326,7 +326,15 @@ const scopeHidden = {
               <ul class="card divide-y divide-line">
                 {found.results.map((result) => (
                   <PartRow
-                    thumb={result.thumbnail}
+                    thumb={
+                      result.thumbnail
+                        ? {
+                            src: result.thumbnail,
+                            illustration:
+                              result.thumbnail_illustration === true,
+                          }
+                        : null
+                    }
                     slug={result.slug}
                     brand={result.brand.name}
                     value={result.value}

@@ -4,11 +4,12 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import Icon from './Icon.astro';
+import type { Thumbnail } from '@/utils/partImages';
 import PartThumb from './PartThumb.astro';
 import PriceTag from './PriceTag.astro';
 
 interface Props {
-  thumb: string | null;
+  thumb: Thumbnail | null;
   slug: string;
   brand: string;
   value: string;
@@ -28,7 +29,7 @@ const copy = content(locale).shopPart;
 <li
   class="group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 first:rounded-t-[inherit] last:rounded-b-[inherit] hover:bg-shade sm:gap-4 sm:px-6 sm:py-4"
 >
-  <PartThumb src={thumb} class="group-hover:bg-paper" />
+  <PartThumb thumb={thumb} class="group-hover:bg-paper" />
   <span
     class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
   >

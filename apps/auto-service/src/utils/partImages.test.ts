@@ -3,6 +3,7 @@ import {
   imageAlt,
   pagesThumbnail,
   partGallery,
+  partPicture,
   partThumbnail,
 } from './partImages';
 
@@ -63,39 +64,73 @@ describe('partGallery', () => {
   });
 });
 
+const photo = (src: string) => ({ src, illustration: false });
+const illustration = { src: `${STATIC}/c-160.webp`, illustration: true };
+
 describe('partThumbnail', () => {
   it('takes the smallest copy of the first own photo', () => {
-    expect(partThumbnail(page([own]), category)).toBe(`${STATIC}/a-160.webp`);
+    expect(partThumbnail(page([own]), category)).toEqual(
+      photo(`${STATIC}/a-160.webp`),
+    );
   });
 
   it('never borrows a photo from an equivalent brand-number', () => {
     const bmw = { ...page([]), equivalents: [{ ...page([own]) }] };
-    expect(partThumbnail(bmw, category)).toBe(`${STATIC}/c-160.webp`);
+    expect(partThumbnail(bmw, category)).toEqual(illustration);
     expect(partGallery(bmw)).toEqual([]);
   });
 
-  it('falls back to a supplier photo, then the Category photo, then nothing', () => {
-    expect(partThumbnail(page([], ['https://cdn.test/x.jpg']), category)).toBe(
-      'https://cdn.test/x.jpg',
-    );
-    expect(partThumbnail(page([]), category)).toBe(`${STATIC}/c-160.webp`);
+  it('falls back to a supplier photo, then the Category picture marked as an illustration, then nothing', () => {
+    expect(
+      partThumbnail(page([], ['https://cdn.test/x.jpg']), category),
+    ).toEqual(photo('https://cdn.test/x.jpg'));
+    expect(partThumbnail(page([]), category)).toEqual(illustration);
     expect(partThumbnail(page([]), { image: null })).toBeNull();
     expect(partThumbnail(page([]), null)).toBeNull();
   });
 });
 
 describe('pagesThumbnail', () => {
-  it('takes the first brand-number with a photo, then the Category photo', () => {
+  it('takes the first brand-number with a photo, then the Category picture', () => {
     expect(
       pagesThumbnail([
         { ...page([]), category },
         { ...page([], ['https://cdn.test/x.jpg']), category },
       ]),
-    ).toBe('https://cdn.test/x.jpg');
-    expect(pagesThumbnail([{ ...page([]), category }])).toBe(
-      `${STATIC}/c-160.webp`,
-    );
+    ).toEqual(photo('https://cdn.test/x.jpg'));
+    expect(pagesThumbnail([{ ...page([]), category }])).toEqual(illustration);
     expect(pagesThumbnail([])).toBeNull();
+  });
+});
+
+describe('partPicture', () => {
+  it('shows the supplier photos when the Part has them', () => {
+    expect(partPicture(page([], ['https://cdn.test/x.jpg']), category)).toEqual(
+      {
+        images: partGallery(page([], ['https://cdn.test/x.jpg'])),
+        illustration: false,
+      },
+    );
+  });
+
+  it('shows the Category picture as an illustration when the Part has no photo', () => {
+    expect(partPicture(page([]), category)).toEqual({
+      images: [
+        {
+          src: `${STATIC}/c-480.webp`,
+          srcset: `${STATIC}/c-160.webp 160w, ${STATIC}/c-480.webp 480w`,
+          width: 480,
+          height: 480,
+          thumb: `${STATIC}/c-160.webp`,
+        },
+      ],
+      illustration: true,
+    });
+  });
+
+  it('shows nothing when neither has a picture', () => {
+    expect(partPicture(page([]), null)).toBeNull();
+    expect(partPicture(page([]), { image: null })).toBeNull();
   });
 });
 

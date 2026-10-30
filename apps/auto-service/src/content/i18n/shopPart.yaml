@@ -16,9 +16,10 @@ attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
-priceOnRequestHeading: Цена по запросу
+priceOnRequestHeading: Под заказ
 priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что деталь подходит, и найдем лучшую цену.'
-priceOnRequestCta: Подобрать
+priceOnRequestCta: Заказать
+orderBody: 'Магазин новый, и мы работаем напрямую с лучшими поставщиками, чтобы держать хорошие цены. Скорее всего, эта запчасть есть, но наличие нужно проверить. Оставьте контакт: купим ее для вас или предложим аналог.'
 offersHeading: Цена и наличие
 columns:
   stock: В наличии
@@ -32,13 +33,17 @@ askSupplyCta: Заказать через менеджера
 askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
 stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
 fromPrice: от {price}
-priceOnRequestTag: цена по запросу
+priceOnRequestTag: Заказать
 addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
 addedCta: Открыть корзину
 inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
 inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
+illustrationLabel: иллюстрация
+installHeading: Установить у нас
+installBody: Поставим эту запчасть в сервисе CarLab в Белграде. Оставьте контакт, и мы предложим удобное время.
+installCta: Записаться на установку
 crossReferencesHeading: Номера других производителей
 worksHeading: Мы уже подбирали эту запчасть
 applicabilityHeading: Применимость по данным каталога

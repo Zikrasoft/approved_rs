@@ -38,6 +38,7 @@ const result = (value: string, normalized: string, slug: string) => ({
   part: { id: `part_${slug}`, name: 'Масляный фильтр', category: null },
   offers: [],
   thumbnail: null,
+  thumbnail_illustration: null,
   slug,
 });
 

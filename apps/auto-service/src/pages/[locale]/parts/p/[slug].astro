@@ -10,11 +10,14 @@ import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
+import LeadModal from '@/components/LeadModal.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { getCollection } from 'astro:content';
 import { sourcingWorks } from '@/utils/works';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { formatMoney } from '@/utils/money';
+import { installationService } from '@/utils/services';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { fitGroups } from '@/utils/fitGroups';
@@ -23,7 +26,12 @@ import {
   partPagesForBuild,
 } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
-import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
+import {
+  imageAlt,
+  partGallery,
+  partPicture,
+  partThumbnail,
+} from '@/utils/partImages';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
@@ -87,23 +95,15 @@ const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
 const gallery = partGallery(page);
-const shown =
-  gallery.length > 0
-    ? {
-        images: gallery,
-        alt: imageAlt(page.brand.name, page.value, partName),
-        note: undefined,
-      }
-    : category?.image
-      ? {
-          images: partGallery({
-            images: [category.image],
-            supplier_data: { images: [] },
-          }),
-          alt: translated(category, 'name', locale),
-          note: copy.categoryIllustration,
-        }
-      : null;
+const picture = partPicture(page, category);
+const shown = picture && {
+  images: picture.images,
+  alt:
+    picture.illustration && category
+      ? translated(category, 'name', locale)
+      : imageAlt(page.brand.name, page.value, partName),
+  note: picture.illustration ? copy.categoryIllustration : undefined,
+};
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
   href: pageLinks.vehicle(vehicle),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
@@ -150,6 +150,17 @@ const [noticeBefore, noticeAfter] = (
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const equivalents = splitNumbers(page.equivalents);
+const installation = page.part.installation_price;
+const cart = content(locale).shopCart;
+const installPrice =
+  installation === null
+    ? null
+    : installation === 0
+      ? { label: cart.installationFree, price: null }
+      : {
+          label: cart.installationLabel,
+          price: formatMoney(installation, 'RSD', BCP47_BY_LOCALE[locale]),
+        };
 const works = sourcingWorks(await getCollection('works'), page);
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
@@ -262,6 +273,29 @@ const thumbFor = (slug: string) => {
         pages={[page, ...(successor ? [successor] : [])]}
         installation={{ id: page.id, price: page.part.installation_price }}
       />
+      <div class="card flex flex-col gap-3 p-5 sm:p-6">
+        <h2 class="text-block font-semibold">{copy.installHeading}</h2>
+        {
+          installPrice && (
+            <p class="flex items-baseline justify-between gap-3 text-sm text-ink">
+              <span>{installPrice.label}</span>
+              {installPrice.price && (
+                <span class="spec shrink-0 font-semibold">
+                  {installPrice.price}
+                </span>
+              )}
+            </p>
+          )
+        }
+        <p class="text-sm leading-relaxed text-ink-2">{copy.installBody}</p>
+        <button
+          type="button"
+          data-open-install-modal
+          class="btn btn-secondary mt-1 w-full sm:w-auto sm:self-start"
+        >
+          {copy.installCta}
+        </button>
+      </div>
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1">
@@ -500,6 +534,10 @@ const thumbFor = (slug: string) => {
   }
 
   <PartsInquiryModal />
+  <LeadModal
+    trigger="[data-open-install-modal]"
+    service={installationService(category)}
+  />
 </Shell>
 
 <script>

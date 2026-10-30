@@ -101,9 +101,7 @@ const priced = page.offers.length > 0;
       {ownHeading && (
         <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
       )}
-      <p class="text-sm leading-relaxed text-ink-2">
-        {copy.priceOnRequestBody}
-      </p>
+      <p class="text-sm leading-relaxed text-ink-2">{copy.orderBody}</p>
       <parts-list-add class="mt-1 block" {...part}>
         <a
           href={PathBuilder.partsInquiry(locale)}
