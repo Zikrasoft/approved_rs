@@ -81,7 +81,7 @@ translations:
     priceOnRequestHeading: Na zahtev
     priceOnRequestBody: 'U katalogu ima previše delova da bismo održavali sve cene ažurnim. Pošaljite upit: proverićemo po VIN-u koja komponenta odgovara i pronaći ćemo najbolju cenu.'
     priceOnRequestCta: Poručiti
-    orderBody: 'Naša prodavnica je nova i radimo direktno sa najboljim dobavljačima kako bismo održali povoljne cene. Verovatno je ova auto delovi dostupna, ali je potrebno proveriti zalihe. Ostavite kontakt: nabavićemo je za vas ili ćemo ponuditi ekvivalent.'
+    orderBody: 'Naša prodavnica je nova i radimo direktno sa najboljim dobavljačima kako bismo održali povoljne cene. Ovaj deo je verovatno dostupan, ali treba proveriti zalihe. Ostavite kontakt: nabavićemo ga za vas ili ćemo ponuditi ekvivalent.'
     offersHeading: Cena i dostupnost
     columns:
       stock: Dostupno
@@ -110,11 +110,11 @@ translations:
     photoLabel: Foto {n} od {total}
     categoryIllustration: Ilustracija kategorije, nije foto ovog dela
     illustrationLabel: ilustracija
-    installHeading: Postaviti kod nas
-    installBody: Postavićemo ovaj deo u servisu CarLab u Beogradu. Ostavite kontakt, i predložićemo vam pogodan termin.
-    installCta: Zakazati ugradnju
+    installHeading: Ugradnja kod nas
+    installBody: Ugradićemo ovaj deo u servisu CarLab u Beogradu. Ostavite kontakt i predložićemo vam pogodan termin.
+    installCta: Zakažite ugradnju
     crossReferencesHeading: Brojevi drugih proizvođača
-    worksHeading: Već smo tražili ovaj deo
+    worksHeading: Već smo nabavljali ovaj deo
     applicabilityHeading: Primernost prema podacima kataloga
     supplierDataNote: Podaci iz kataloga. Pre narudžbe proverićemo kompatibilnost po VIN.
     requirementCarsLabel: 'Prikladno prema dozvolama za:'

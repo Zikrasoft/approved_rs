@@ -428,7 +428,7 @@ translations:
       name: Izbor delova
       short: Nalazimo delove koji odgovaraju vašem automobilu i navodimo cenu pre kupovine.
       metaTitle: Izbor auto delova po VIN-u u Beogradu - CarLab
-      metaDescription: 'Izbor delova po VIN-u ili broju šasije u Beogradu: originalni i provereni analozi, provera kompatibilnosti, cena pre kupovine. Preuzimanje sa SClab.'
+      metaDescription: 'Izbor delova po VIN-u ili broju šasije u Beogradu: originalni i provereni analozi, provera kompatibilnosti, cena pre kupovine. Preuzimanje u servisu CarLab.'
       heroEyebrow: Delovi
       heroTitle: Pronaći ćemo delove koji će savršeno odgovarati vašem automobilu
       heroLead: Pošaljite VIN ili broj šasije i navedite šta vam treba. Proverićemo kompatibilnost, pronaći originalne i proverene analoge i ponuditi najbolje opcije.
@@ -438,7 +438,7 @@ translations:
       body: |-
         Preko VIN-a utvrđujemo tačnu opremu vozila: motor, menjač, godinu i tržište za koje je napravljeno. Na osnovu toga određujemo koja komponenta odgovara, čak i ako je model isti.
 
-        Nakon toga tražimo broj delova kod proizvođača i proverene analoge, upoređujemo cene i rokove kod dobavljača i nudimo vam nekoliko opcija. Vi birate, mi naručujemo, a delove možete preuzeti u našoj servisnoj radionici u Beogradu.
+        Nakon toga tražimo kataloški broj dela proizvođača i proverene analoge, upoređujemo cene i rokove kod dobavljača i nudimo vam nekoliko opcija. Vi birate, mi naručujemo, a delove možete preuzeti u našoj servisnoj radionici u Beogradu.
 
         Ako vam je potrebna i montaža, možemo to uraditi i kod nas: deo je proveren na kompatibilnost, a majstor zna šta postavlja.
       includesHeading: Šta ulazi

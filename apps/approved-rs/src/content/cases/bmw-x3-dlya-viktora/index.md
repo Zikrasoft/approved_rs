@@ -41,29 +41,29 @@ translations:
   sr:
     title: BMW X3 za Viktora
     body: |-
-      **Autoprobir u Srbiji. Kako smo tražili BMW 3 serije, a na kraju kupili BMW X3 sa originalnim pređenim kilometrima!**\
+      **Odabir automobila u Srbiji. Kako smo tražili BMW 3 serije, a na kraju kupili BMW X3 sa originalnim pređenim kilometrima!**\
       Viktor se obratio za pomoć u pronalasku BMW 3 serije u Srbiji. Razgovarali smo o budžetu, željama vezanim za automobil i specifičnostima korišćenja. Tokom razgovora, predložili smo da razmotri i BMW X3, s obzirom na to da je budžet to dozvoljavao, a X3 je mogao postati svestraniji i praktičniji izbor.\
       Kako bi Viktor mogao da uporedi automobile ne samo na osnovu fotografija i oglasa, provozali smo se u BMW X3. Automobil mu se veoma dopao i odlučeno je da proširimo pretragu.\
-      Pronašli smo nekoliko zanimljivih opcija BMW 3 serije, a Viktor je samostalno našao i poslao nam još jedan BMW X3 na proverenje. Nakon razmatranja nekoliko automobila, izbor je pao na prelepi sivi **BMW X3 sa dvolitarskim dizel motorom**.\
+      Pronašli smo nekoliko zanimljivih opcija BMW 3 serije, a Viktor je samostalno našao i poslao nam još jedan BMW X3 na proveru. Nakon razmatranja nekoliko automobila, izbor je pao na prelepi sivi **BMW X3 sa dvolitarskim dizel motorom**.\
       **Provera BMW-a pre kupovine u Srbiji**\
-      Kupovina polovnog BMW-a zahteva posebnu pažnju prilikom provere. U Srbiji ima dovoljno automobila sa sakupljenim kilometrima, skrivenim tehničkim problemima i sumnjivom servisnom istorijom. Zato se ne oslanjamo samo na spoljni izgled: proveravamo da li je pređen kilometraža verodostojna i koliko je automobil tehnički ispravan.\
-      Odabrani BMW X3 je prošao sveobuhvatnu provere, uključujući dijagnostiku koristeći originalni softver **BMW ISTA**.\
+      Kupovina polovnog BMW-a zahteva posebnu pažnju prilikom provere. U Srbiji ima dovoljno automobila sa vraćenom kilometražom, skrivenim tehničkim problemima i sumnjivom servisnom istorijom. Zato se ne oslanjamo samo na spoljni izgled: proveravamo da li je pređena kilometraža verodostojna i koliko je automobil tehnički ispravan.\
+      Odabrani BMW X3 je prošao sveobuhvatnu proveru, uključujući dijagnostiku pomoću originalnog softvera **BMW ISTA**.\
       Tokom provere, posebno smo obratili pažnju na:
 
       <ul class="icon-check">
       <li>proveru stvarne kilometraže automobila i upoređivanje podataka iz elektronskih blokova;</li>
-      <li>diagnozu motora i elektronskih sistema putem BMW ISTA;</li>
-      <li>proveru stanja remena razvodnika;</li>
+      <li>dijagnostiku motora i elektronskih sistema putem BMW ISTA;</li>
+      <li>proveru stanja lanca razvodnog mehanizma;</li>
       <li>proveru EGR sistema;</li>
       <li>analizu grešaka, tehničkih parametara i stanja glavnih sklopova automobila;</li>
       <li>opštu procenu tehničkog stanja pre kupovine.</li>
       </ul>
 
-      Rezultati provere su nas obradovali. **Kilometri su se pokazali kao originalni, bez znakova prepravke, remen razvodnika je bio u dobrom stanju, a provera EGR i drugih važnih sistema nije pokazala kritične probleme.**\
-      Povrh svega, prilikom odabira vozila, posebno obraćamo pažnju na pregled automobila sa donje strane. Praktično svi automobili koje razmatramo za kupovinu se proveravaju na dizalici. To omogućava procenu stanja ovjesa, dna, prisustva curenja ulja i tehničkih tečnosti, oštećenja i drugih nedostataka, koji se ne mogu potpuno uočiti prilikom uobičajenog pregleda.\
+      Rezultati provere su nas obradovali. **Kilometri su se pokazali kao originalni, bez znakova prepravke, lanac razvodnog mehanizma je bio u dobrom stanju, a provera EGR i drugih važnih sistema nije pokazala kritične probleme.**\
+      Povrh svega, prilikom odabira vozila, posebno obraćamo pažnju na pregled automobila sa donje strane. Praktično svi automobili koje razmatramo za kupovinu se proveravaju na dizalici. To omogućava procenu stanja vešanja, dna, prisustva curenja ulja i tehničkih tečnosti, oštećenja i drugih nedostataka, koji se ne mogu potpuno uočiti prilikom uobičajenog pregleda.\
       **Rezultat našeg odabira za Viktora: BMW X3, 2.0 dizel, prelepa siva boja, originalni pređeni kilometri i dobro tehničko stanje.**\
       Čestitamo Viktoru na kupovini i želimo mu uživanje u svakoj vožnji!\
-      Ako vam je potrebna **autoprobira u Srbiji, provera auta pre kupovine u Beogradu ili pomoć s kupovinom polovnog BMW-a**, obratite se. Pomoći ćemo vam da pronađete odgovarajući automobil i smanjite rizike vezane za kupovinu vozila sa skrivenim problemima.
+      Ako vam je potrebna **pomoć pri odabiru automobila u Srbiji, provera auta pre kupovine u Beogradu ili pomoć s kupovinom polovnog BMW-a**, obratite se. Pomoći ćemo vam da pronađete odgovarajući automobil i smanjite rizike vezane za kupovinu vozila sa skrivenim problemima.
   es:
     title: BMW X3 para Viktor
     body: |-

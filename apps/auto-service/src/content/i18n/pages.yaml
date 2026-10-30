@@ -165,10 +165,10 @@ translations:
       doorHeading: Slična priča sa vašim automobilom?
       doorText: Opisujte simptome, pomoći ćemo vam da odlučite odakle da krenete.
       doorButtonLabel: Opišite problem
-      partsHeading: Izabrani delovi
+      partsHeading: Nabavljeni delovi
       priceLabel: Cena delova za klijenta
       sourcingCta:
-        heading: Treba vam delova za vaš auto?
+        heading: Trebaju vam delovi za auto?
         body: Pošaljite VIN ili broj dela, pronaći ćemo original ili ekvivalent i javiti cenu i rok isporuke.
     contact:
       metaTitle: Kontakti auto servisa CarLab u Beogradu, adresa i telefon
@@ -311,7 +311,7 @@ translations:
       doorHeading: Is this a similar issue with your car?
       doorText: Describe the symptoms, and we'll suggest where to start.
       doorButtonLabel: Describe the problem
-      partsHeading: Recommended parts
+      partsHeading: Sourced parts
       priceLabel: Parts cost for customers
       sourcingCta:
         heading: Need parts for your car?

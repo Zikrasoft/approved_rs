@@ -26,13 +26,13 @@ translations:
   sr:
     title: BMW X1
     body: |-
-      ## Auto-sourcing u Srbiji: Viktor je došao po Peugeot, a otišao sa BMW X1
+      ## Odabir automobila u Srbiji: Viktor je došao po Peugeot, a otišao sa BMW X1
 
-      Viktor se obratio nama još pre dobijanja boravišne dozvole u Srbiji. Odmah smo ga obavestili da auto može da bude registrovano na njegovo ime tek nakon dobijanja boravišne dozvole, pa je bio neophodan kratkotrajni prekid u potrazi. Nakon nekoliko meseci, u julu 2026. godine, kada je dobio potrebne dokumente, započeli smo potragu za automobilom.
+      Viktor se obratio nama još pre dobijanja boravišne dozvole u Srbiji. Odmah smo ga obavestili da auto može da bude registrovan na njegovo ime tek nakon dobijanja boravišne dozvole, pa je bio neophodan kratkotrajni prekid u potrazi. Nakon nekoliko meseci, u julu 2026. godine, kada je dobio potrebne dokumente, započeli smo potragu za automobilom.
 
-      Tokom tog vremena, njegove zahteve za budući automobil su se promenili. Prvobitno je Viktor razmatrao **Peugeot**, ali nakon razmatranja svih prednosti i nedostataka, odlučio je da se fokusira na pouzdaniju opciju, **BMW X1**.
+      Tokom tog vremena, njegovi zahtevi za budući automobil su se promenili. Prvobitno je Viktor razmatrao **Peugeot**, ali nakon razmatranja svih prednosti i nedostataka, odlučio je da se fokusira na pouzdaniju opciju, **BMW X1**.
 
-      Zahvaljujući tome što koristimo **formalnu BMW ISTA dijagnostiku**, auto je pregledan sa maksimalnom pažnjom. Dijagnostika je pokazala odlično stanje motora: **razvodna karika**, **mlaznice**, **EGR sistem** i ostali parametri su bili u skladu sa normom. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: dobro poznata i proverena kombinacija za ovu klasu vozila.
+      Zahvaljujući tome što koristimo **zvaničnu dilersku BMW ISTA dijagnostiku**, auto je pregledan sa maksimalnom pažnjom. Dijagnostika je pokazala odlično stanje motora: **lanac razvodnog mehanizma**, **mlaznice**, **EGR sistem** i ostali parametri su bili u skladu sa normom. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: dobro poznata i proverena kombinacija za ovu klasu vozila.
 
       Viktor je preuzeo automobil sa čistom istorijom, poznavajući tačno stanje motora i transmisije do poslednjeg detalja.
   es:
@@ -56,7 +56,7 @@ translations:
 
       In der Zwischenzeit hatten sich die Anforderungen an das zukünftige Auto geändert. Ursprünglich hatte Viktor **Peugeot** ins Auge gefasst, entschied sich nach einer eingehenden Diskussion über Vor- und Nachteile jedoch für eine zuverlässigere Option, den **BMW X1**.
 
-      Dank der Verwendung der **offiziellen BMW ISTA-Diagnose** wurde das Fahrzeug äußerst gründlich geprüft. Die Diagnose ergab einen ausgezeichneten Zustand des Motors: **Zahnriemen**, **Einspritzdüsen**, **EGR-System** und weitere Parameter entsprachen den Normen. Das Fahrzeug ist mit einem zuverlässigen **2,0-Liter-Diesel B47**-Motor und einem **8-Gang-Automatikgetriebe Aisin** ausgestattet: eine gängige und bewährte Kombination für diese Fahrzeugklasse.
+      Dank der Verwendung der **offiziellen BMW ISTA-Diagnose** wurde das Fahrzeug äußerst gründlich geprüft. Die Diagnose ergab einen ausgezeichneten Zustand des Motors: **Steuerkette**, **Einspritzdüsen**, **EGR-System** und weitere Parameter entsprachen den Normen. Das Fahrzeug ist mit einem zuverlässigen **2,0-Liter-Diesel B47**-Motor und einem **8-Gang-Automatikgetriebe Aisin** ausgestattet: eine gängige und bewährte Kombination für diese Fahrzeugklasse.
 
       Viktor holte das Auto mit einer sauberen Historie ab und kannte den genauen Zustand des Motors und des Getriebes bis ins letzte Detail.
 translatedFrom: 3420f5bd0747f49a
