@@ -19,24 +19,24 @@ function orderUnsettled(lead: StoredLead): lead is ClosedLead {
 export interface ShopOrdersOptions {
   store: Pick<LeadStore, 'readLeads' | 'settleOrder'>;
   shopUrl?: string;
-  apiKey?: string;
+  secret?: string;
 }
 
 export function createShopOrders({
   store,
   shopUrl,
-  apiKey,
+  secret,
 }: ShopOrdersOptions) {
   async function tellShop(lead: ClosedLead): Promise<void> {
     const response = await fetch(
       new URL(
-        `/admin/carlab-orders/${encodeURIComponent(lead.orderId)}/outcome`,
+        `/hooks/carlab-orders/${encodeURIComponent(lead.orderId)}/outcome`,
         shopUrl,
       ),
       {
         method: 'POST',
         headers: {
-          authorization: `Basic ${btoa(`${apiKey}:`)}`,
+          authorization: `Bearer ${secret}`,
           'content-type': 'application/json',
         },
         body: JSON.stringify({ outcome: ORDER_OUTCOME[lead.status] }),
@@ -54,7 +54,7 @@ export function createShopOrders({
   }
 
   async function settleOrder(lead: StoredLead): Promise<void> {
-    if (!orderUnsettled(lead) || !shopUrl || !apiKey) return;
+    if (!orderUnsettled(lead) || !shopUrl || !secret) return;
     try {
       await tellShop(lead);
       await store.settleOrder(lead.id, lead.status);

@@ -30,8 +30,8 @@ const BotEnvSchema = z.object({
   TELEGRAM_GROUP_ID: required('TELEGRAM_GROUP_ID'),
   TELEGRAM_OWNER_ID: ids,
   TELEGRAM_ADMIN_ID: ids,
-  SHOP_ADMIN_URL: optional.pipe(z.url().optional()),
-  SHOP_ADMIN_API_KEY: optional,
+  SHOP_API_URL: optional.pipe(z.url().optional()),
+  SHOP_ORDER_OUTCOME_SECRET: optional,
 });
 
 function readBotEnv() {
@@ -77,8 +77,8 @@ export function createBrandBot({
   const dropFromDigest = createDropFromDigest({ store, notifier });
   const { settleOrder, settlePendingOrders } = createShopOrders({
     store,
-    shopUrl: env.SHOP_ADMIN_URL,
-    apiKey: env.SHOP_ADMIN_API_KEY,
+    shopUrl: env.SHOP_API_URL,
+    secret: env.SHOP_ORDER_OUTCOME_SECRET,
   });
   const afterStatusChange = createAfterStatusChange({
     ensureLeadCard,

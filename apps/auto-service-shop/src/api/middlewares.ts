@@ -24,7 +24,6 @@ import {
   AdminLinkVinCode,
   AdminListRequirements,
   AdminMerge,
-  AdminOrderOutcome,
   AdminOrderImages,
   AdminRenameSlug,
   AdminSearchParts,
@@ -41,6 +40,8 @@ import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
 import { refuseClosedShop, refuseStockCartChange } from '../lib/offer-cart';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
+import { OrderOutcome } from './hooks/validators';
+import { requireOrderOutcomeSecret } from '../lib/order-outcome-secret';
 import {
   StoreAddLineAddon,
   StoreAddOfferCartItem,
@@ -211,9 +212,9 @@ export default defineMiddlewares({
       middlewares: [validateAdminBody(AdminUpdateSupplier)],
     },
     {
-      matcher: '/admin/carlab-orders/:id/outcome',
+      matcher: '/hooks/carlab-orders/:id/outcome',
       method: 'POST',
-      middlewares: [validateAdminBody(AdminOrderOutcome)],
+      middlewares: [requireOrderOutcomeSecret, validateAdminBody(OrderOutcome)],
     },
     {
       matcher: '/admin/workshop-quotes',

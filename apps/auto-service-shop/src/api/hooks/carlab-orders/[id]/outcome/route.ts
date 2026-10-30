@@ -6,10 +6,10 @@ import {
 } from '@medusajs/medusa/core-flows';
 
 import { LEAD_LOST_AT } from '../../../../../lib/order-lead';
-import type { AdminOrderOutcomeType } from '../../../validators';
+import type { OrderOutcomeType } from '../../../validators';
 
 export async function POST(
-  req: MedusaRequest<AdminOrderOutcomeType>,
+  req: MedusaRequest<OrderOutcomeType>,
   res: MedusaResponse,
 ): Promise<void> {
   const { outcome } = req.validatedBody;

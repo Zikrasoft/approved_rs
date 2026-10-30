@@ -10,11 +10,11 @@ const ENV = {
   TELEGRAM_GROUP_ID: '-100',
   TELEGRAM_OWNER_ID: '1',
   TELEGRAM_ADMIN_ID: '3',
-  SHOP_ADMIN_URL: 'https://shop.carlab.rs',
-  SHOP_ADMIN_API_KEY: 'sk_test',
+  SHOP_API_URL: 'https://api.carlab.rs',
+  SHOP_ORDER_OUTCOME_SECRET: 'outcome-secret',
 };
 
-const SHOP = 'https://shop.carlab.rs/';
+const SHOP = 'https://api.carlab.rs/';
 
 const order = {
   name: 'Ana',
@@ -83,10 +83,10 @@ describe('a shop Order decided in the CRM bot', () => {
     await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'won'))!);
 
     expect(outcomes()).toEqual([
-      [`${SHOP}admin/carlab-orders/order_01/outcome`, { outcome: 'completed' }],
+      [`${SHOP}hooks/carlab-orders/order_01/outcome`, { outcome: 'completed' }],
     ]);
     expect(shopCalls[0]!.init.headers).toMatchObject({
-      authorization: `Basic ${btoa('sk_test:')}`,
+      authorization: 'Bearer outcome-secret',
     });
     expect(await leadStore.getLead(lead.id)).toMatchObject({
       orderSettled: 'won',
@@ -101,7 +101,7 @@ describe('a shop Order decided in the CRM bot', () => {
     await bot.afterStatusChange((await leadStore.getLead(lead.id))!);
 
     expect(outcomes()).toEqual([
-      [`${SHOP}admin/carlab-orders/order_01/outcome`, { outcome: 'canceled' }],
+      [`${SHOP}hooks/carlab-orders/order_01/outcome`, { outcome: 'canceled' }],
     ]);
   });
 
@@ -150,7 +150,7 @@ describe('a shop Order decided in the CRM bot', () => {
   });
 
   it('keeps the outcome pending while no shop is configured', async () => {
-    vi.stubEnv('SHOP_ADMIN_API_KEY', '');
+    vi.stubEnv('SHOP_ORDER_OUTCOME_SECRET', '');
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
 

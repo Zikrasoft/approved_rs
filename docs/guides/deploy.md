@@ -350,22 +350,22 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable             | approved.rs | carlab.rs | details.rs | Without it                                                                  |
-| -------------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------- |
-| `SHOP_ADMIN_URL`     | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order     |
-| `SHOP_ADMIN_API_KEY` | ✅ secret   | no        | no         | same                                                                        |
-| `SHOP_LEAD_SECRET`   | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost |
+| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                  |
+| --------------------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------- |
+| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order     |
+| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                        |
+| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost |
 
-`SHOP_ADMIN_URL` is the shop's admin origin, `https://admin.carlab.rs`: the
-API host answers 404 on `/admin`. That host also sits behind Caddy's basic_auth,
-so the bot's request must pass it: TODO: decide whether Caddy lets
-`/admin/carlab-orders/*/outcome` through on a Basic secret API key alone, or
-the bot points at an origin without basic_auth. `SHOP_ADMIN_API_KEY` is a
-Medusa secret API key (`sk_…`), created in the shop admin under Settings →
-Secret API Keys; the bot sends it as `Authorization: Basic base64(key:)` to
-`POST /admin/carlab-orders/:id/outcome`. When the bot marks a `parts-order`
-Lead ✅ it completes the Order, ❌ cancels it; a call that fails stays pending
-on the Lead and `/api/reminders` retries it every day until the shop takes it.
+`SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
+the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
+through `POST /hooks/carlab-orders/:id/outcome` with
+`Authorization: Bearer $SHOP_ORDER_OUTCOME_SECRET`. That route is not under
+`/admin`, so Caddy's admin basic_auth never sees it, and the secret can do
+nothing but complete or cancel an Order. `SHOP_ORDER_OUTCOME_SECRET` is one
+value set twice, on approved.rs and in the shop's `.env`
+(`openssl rand -hex 32`); unset in the shop, the route answers 401 to
+everyone. A call that fails stays pending on the Lead and `/api/reminders`
+retries it every day until the shop takes it.
 `SHOP_LEAD_SECRET` is one value set twice, on carlab.rs and in the shop's
 `.env` (`openssl rand -hex 32`): the shop's `order.canceled` subscriber posts the
 cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the Lead is

@@ -1,7 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
@@ -9,12 +8,15 @@ import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { retryOrderLeadsAt } from '../../../../jobs/retry-order-leads';
 
 const SHOP_LEAD_SECRET = 'shop-lead-secret';
+const SHOP_ORDER_OUTCOME_SECRET = 'shop-order-outcome-secret';
 
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     describe('a shop Order decided in the CRM bot', () => {
       let adminHeaders: { headers: { authorization: string } };
-      let botHeaders: { headers: { authorization: string } };
+      const botHeaders = {
+        headers: { authorization: `Bearer ${SHOP_ORDER_OUTCOME_SECRET}` },
+      };
       let leadRoute: Server;
       let leadRouteStatus = 204;
       const posts: { authorization?: string; body: Record<string, string> }[] =
@@ -38,9 +40,13 @@ medusaIntegrationTestRunner({
       const statusOf = async (id: string) =>
         (await getContainer().resolve(Modules.ORDER).retrieveOrder(id)).status;
 
-      const decide = (id: string, outcome: string, headers = botHeaders) =>
+      const decide = (
+        id: string,
+        outcome: string,
+        headers: { headers: Record<string, string> } = botHeaders,
+      ) =>
         api
-          .post(`/admin/carlab-orders/${id}/outcome`, { outcome }, headers)
+          .post(`/hooks/carlab-orders/${id}/outcome`, { outcome }, headers)
           .catch((error) => error.response);
 
       const waitFor = async <T>(read: () => Promise<T> | T) => {
@@ -67,6 +73,7 @@ medusaIntegrationTestRunner({
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
         process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
         process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
+        process.env.SHOP_ORDER_OUTCOME_SECRET = SHOP_ORDER_OUTCOME_SECRET;
 
         adminHeaders = await createAdminAuth(
           getContainer(),
@@ -74,19 +81,6 @@ medusaIntegrationTestRunner({
           'admin@order-outcome.local',
           'supersecret',
         );
-        const apiKeys: IApiKeyModuleService = getContainer().resolve(
-          Modules.API_KEY,
-        );
-        const key = await apiKeys.createApiKeys({
-          title: 'CRM bot',
-          type: 'secret',
-          created_by: 'test',
-        });
-        botHeaders = {
-          headers: {
-            authorization: `Basic ${Buffer.from(`${key.token}:`).toString('base64')}`,
-          },
-        };
       });
 
       beforeEach(() => {
@@ -97,6 +91,7 @@ medusaIntegrationTestRunner({
       afterAll(async () => {
         delete process.env.LEAD_ROUTE_URL;
         delete process.env.SHOP_LEAD_SECRET;
+        delete process.env.SHOP_ORDER_OUTCOME_SECRET;
         await new Promise((resolve) => leadRoute.close(resolve));
       });
 
@@ -131,12 +126,27 @@ medusaIntegrationTestRunner({
         expect(await statusOf(order.id)).toBe('completed');
       });
 
-      it('lets only staff or the bot decide', async () => {
+      it.each([
+        ['no secret', {}],
+        ['a wrong secret', { authorization: 'Bearer wrong' }],
+        ['a staff session', null],
+      ])('refuses a decision carrying %s', async (_name, headers) => {
         const order = await placeOrder();
 
         const response = await decide(order.id, 'completed', {
-          headers: { authorization: 'Basic bm9wZTo=' },
+          headers: headers ?? adminHeaders.headers,
         });
+
+        expect(response.status).toBe(401);
+        expect(await statusOf(order.id)).toBe('pending');
+      });
+
+      it('refuses every decision while the secret is unset', async () => {
+        const order = await placeOrder();
+        delete process.env.SHOP_ORDER_OUTCOME_SECRET;
+
+        const response = await decide(order.id, 'completed');
+        process.env.SHOP_ORDER_OUTCOME_SECRET = SHOP_ORDER_OUTCOME_SECRET;
 
         expect(response.status).toBe(401);
         expect(await statusOf(order.id)).toBe('pending');

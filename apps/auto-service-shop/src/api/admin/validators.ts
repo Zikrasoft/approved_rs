@@ -451,9 +451,3 @@ export const AdminLinkVinCode = z.strictObject({
   vehicle_ids: z.array(z.string().min(1)).min(1).max(MAX_LINKED_VEHICLES),
 });
 export type AdminLinkVinCodeType = z.infer<typeof AdminLinkVinCode>;
-
-export const AdminOrderOutcome = z.strictObject({
-  outcome: z.enum(['completed', 'canceled']),
-});
-
-export type AdminOrderOutcomeType = z.infer<typeof AdminOrderOutcome>;
