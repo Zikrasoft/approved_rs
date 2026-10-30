@@ -4,15 +4,9 @@ import { z } from 'zod';
 export const INSTALLATION = 'installation';
 export type AddonKind = 'service' | typeof INSTALLATION;
 
-export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
-export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
-export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
-export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
-export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
-
 type Metadata = Record<string, unknown> | null | undefined;
 
-const filled = z
+export const filled = z
   .string()
   .min(1)
   .nullish()
@@ -123,20 +117,4 @@ export const withAddonsUnderParts = <T extends { metadata?: Metadata }>(
     ...grouped,
     ...addons.filter((addon) => !grouped.includes(addon)),
   ].map(({ item }) => item);
-};
-
-const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
-
-export const handOffAttempts = (metadata: Metadata): number =>
-  attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
-
-export const leadHandoff = (metadata: Metadata) => {
-  const attempts = handOffAttempts(metadata);
-  return {
-    handed_off_at: filled.parse(metadata?.[LEAD_HANDED_OFF_AT]),
-    attempts,
-    error: filled.parse(metadata?.[LEAD_HANDOFF_ERROR]),
-    gave_up: attempts >= LEAD_HANDOFF_MAX_ATTEMPTS,
-    alerted_at: filled.parse(metadata?.[LEAD_OWNER_ALERTED_AT]),
-  };
 };

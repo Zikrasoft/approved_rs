@@ -25,29 +25,36 @@ import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { z } from 'zod';
 
 import { parseEnv } from './env';
-import {
-  handOffAttempts,
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_ATTEMPTS,
-  LEAD_HANDOFF_ERROR,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
-  LEAD_OWNER_ALERTED_AT,
-  readLine,
-  withAddonsUnderParts,
-} from './line-metadata';
+import { filled, readLine, withAddonsUnderParts } from './line-metadata';
 import { errorMessage } from './errors';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
+export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
+export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
+export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
+export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
+export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
 export const LEAD_LOST_AT = 'lead_lost_at';
 export const LEAD_LOST_ERROR = 'lead_lost_error';
 export const LEAD_CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
 
-export {
-  handOffAttempts,
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_ERROR,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
+type Metadata = Record<string, unknown> | null | undefined;
+
+const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
+
+export const handOffAttempts = (metadata: Metadata): number =>
+  attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
+
+export const leadHandoff = (metadata: Metadata) => {
+  const attempts = handOffAttempts(metadata);
+  return {
+    handed_off_at: filled.parse(metadata?.[LEAD_HANDED_OFF_AT]),
+    attempts,
+    error: filled.parse(metadata?.[LEAD_HANDOFF_ERROR]),
+    gave_up: attempts >= LEAD_HANDOFF_MAX_ATTEMPTS,
+    alerted_at: filled.parse(metadata?.[LEAD_OWNER_ALERTED_AT]),
+  };
 };
 
 const amount = z.preprocess(
