@@ -10,6 +10,7 @@ import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
 import {
   fieldChangeText,
   noteNoticeText,
+  orderConflictText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -183,6 +184,12 @@ export function createNotifier({
       brand: string,
     ): Promise<void> {
       await sendToAll(adminIds, unreadableLedgerText(path, brand));
+    },
+
+    async sendOrderConflict(
+      lead: StoredLead & { orderId: string },
+    ): Promise<void> {
+      await sendToAll([...ownerIds, ...adminIds], orderConflictText(lead));
     },
 
     async sendStatusChange(

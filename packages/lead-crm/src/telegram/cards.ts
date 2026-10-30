@@ -275,6 +275,13 @@ export function statusChangeText(lead: StoredLead, by: Role): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
 }
 
+export function orderConflictText(lead: StoredLead & { orderId: string }) {
+  return [
+    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе.`,
+    `Сверь заказ в админке магазина: сами они не сойдутся.`,
+  ].join('\n');
+}
+
 export function createFormatter({
   serviceLabel,
   botUsername,

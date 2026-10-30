@@ -135,18 +135,45 @@ describe('a shop Order decided in the CRM bot', () => {
     });
   });
 
-  it('stops asking once the shop already holds the other outcome', async () => {
+  it('records a shop holding the other outcome as a conflict, tells staff once and stops asking', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
     shopAnswers = [409];
 
     await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'lost'))!);
 
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      orderConflict: 'lost',
+    });
+    expect((await leadStore.getLead(lead.id))?.orderSettled).toBeUndefined();
     expect(await bot.settlePendingOrders()).toBe(0);
-    expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('already holds'),
-      expect.objectContaining({ orderId: 'order_01' }),
+    expect(shopCalls).toHaveLength(1);
+    const notices = api
+      .callsTo('sendMessage')
+      .filter(({ payload }) => String(payload.text).includes('order_01'));
+    expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
+      1, 3,
+    ]);
+    expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
+  });
+
+  it('draws the card before asking the shop, so a slow shop never delays it', async () => {
+    const { leadStore, bot } = crm();
+    const lead = await leadStore.insertLead(order);
+    await leadStore.setTelegramMessage(lead.id, -100, 55);
+    const asked: string[] = [];
+    const record = globalThis.fetch;
+    vi.stubGlobal(
+      'fetch',
+      (input: string | URL | Request, init?: RequestInit) => {
+        asked.push(String(input).startsWith(SHOP) ? 'shop' : 'telegram');
+        return record(input, init);
+      },
     );
+
+    await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'won'))!);
+
+    expect(asked.indexOf('telegram')).toBeLessThan(asked.indexOf('shop'));
   });
 
   it('keeps the outcome pending while no shop is configured', async () => {
@@ -167,7 +194,7 @@ describe('a shop Order cancelled in the shop admin', () => {
     const lead = await leadStore.insertLead(order);
     await leadStore.setTelegramMessage(lead.id, -100, 55);
 
-    await expect(bot.cancelOrderLead('order_01')).resolves.toBe(true);
+    await expect(bot.cancelOrderLead('order_01')).resolves.toBe('lost');
 
     expect(await leadStore.getLead(lead.id)).toMatchObject({
       status: 'lost',
@@ -212,19 +239,29 @@ describe('a shop Order cancelled in the shop admin', () => {
     expect(api.calls).toEqual([]);
   });
 
-  it('leaves a won Lead won', async () => {
+  it('refuses to lose a won Lead, records the conflict and tells staff', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
     await leadStore.setStatus(lead.id, 'won');
 
-    await expect(bot.cancelOrderLead('order_01')).resolves.toBe(true);
+    await expect(bot.cancelOrderLead('order_01')).resolves.toBe('won');
 
-    expect(await leadStore.getLead(lead.id)).toMatchObject({ status: 'won' });
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      status: 'won',
+      orderConflict: 'won',
+    });
+    expect(await bot.settlePendingOrders()).toBe(0);
+    expect(shopCalls).toEqual([]);
+    expect(
+      api
+        .callsTo('sendMessage')
+        .filter(({ payload }) => String(payload.text).includes('order_01')),
+    ).toHaveLength(2);
   });
 
   it('says so when no Lead carries the Order', async () => {
     const { bot } = crm();
 
-    await expect(bot.cancelOrderLead('order_missing')).resolves.toBe(false);
+    await expect(bot.cancelOrderLead('order_missing')).resolves.toBe('missing');
   });
 });

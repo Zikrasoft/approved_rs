@@ -53,6 +53,8 @@ function readBotEnv() {
   return env.data;
 }
 
+export type CancelOrderResult = 'lost' | 'won' | 'missing';
+
 export interface BrandBotOptions {
   store: LeadStore;
   brand: string;
@@ -87,11 +89,14 @@ export function createBrandBot({
   const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });
   const closeLeadTopic = createCloseLeadTopic({ store, notifier });
   const dropFromDigest = createDropFromDigest({ store, notifier });
-  const { settleOrder, settlePendingOrders } = createShopOrders({
-    store,
-    shopUrl: env.SHOP_API_URL,
-    secret: env.SHOP_ORDER_OUTCOME_SECRET,
-  });
+  const { settleOrder, settlePendingOrders, recordConflict } = createShopOrders(
+    {
+      store,
+      notifier,
+      shopUrl: env.SHOP_API_URL,
+      secret: env.SHOP_ORDER_OUTCOME_SECRET,
+    },
+  );
   const afterStatusChange = createAfterStatusChange({
     ensureLeadCard,
     ensureLeadTopic,
@@ -101,14 +106,18 @@ export function createBrandBot({
     settleOrder,
   });
 
-  async function cancelOrderLead(orderId: string): Promise<boolean> {
+  async function cancelOrderLead(orderId: string): Promise<CancelOrderResult> {
     const before = (await store.readLeads()).find(
       (lead) => lead.orderId === orderId,
     );
-    if (!before) return false;
+    if (!before) return 'missing';
     const lost = await store.loseOrderLead(orderId);
-    if (lost && before.status !== 'lost') await afterStatusChange(lost);
-    return true;
+    if (!lost) {
+      await recordConflict({ ...before, orderId, status: 'won' });
+      return 'won';
+    }
+    if (before.status !== 'lost') await afterStatusChange(lost);
+    return 'lost';
   }
 
   return {
