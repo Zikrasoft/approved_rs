@@ -259,7 +259,8 @@ const HISTORY: StoredShape[] = [
     keeps: { id: 7 },
   },
   {
-    label: 'pre-v10 money, part paid',
+    label:
+      'pre-v10 money, part paid: a deal amount with only some of its commission confirmed',
     record: {
       id: 8,
       brand: 'Approved.rs',
@@ -446,7 +447,7 @@ const HISTORY: StoredShape[] = [
     },
   },
   {
-    label: 'money with no stored rate',
+    label: 'a deal amount stored with no commissionPercent beside it',
     record: {
       id: 15,
       name: 'Luka',
