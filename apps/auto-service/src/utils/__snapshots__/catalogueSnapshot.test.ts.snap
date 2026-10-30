@@ -1,0 +1,4882 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`makeHubsFrom > groups Parts by Model and Category, fitted before required, in a mixed catalogue 1`] = `
+[
+  [
+    "audi",
+    113,
+    [
+      [
+        "model-1",
+        "veh_2 veh_3",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_1 part_43:mann-filter-hu43: part_99:mann-filter-hu99:",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_6",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_1",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_13",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_4+fit_12_5",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_18",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_12",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_19",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_8+fit_21_9 part_50:mann-filter-hu50:fit_50_1",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_1",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_3+fit_72_4",
+          ],
+          [
+            "category-15",
+            "part_92:mann-filter-hu92:fit_92_0",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_6",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_10",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_4 part_9:mann-filter-hu9:fit_9_13+fit_9_14 part_34:mann-filter-hu34:fit_34_9",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_14",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_17+fit_18_18 part_32:mann-filter-hu32:fit_32_6 part_115:mann-filter-hu115:fit_115_1",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_9",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_0+fit_30_1 part_53:mann-filter-hu53:fit_53_18 part_59:mann-filter-hu59:fit_59_13",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_8 part_71:mann-filter-hu71:fit_71_11 part_104:mann-filter-hu104:fit_104_2 part_112:mann-filter-hu112+bosch-f112:fit_112_0",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_11 part_111:mann-filter-hu111:fit_111_0+fit_111_1",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_2+fit_33_3 part_40:mann-filter-hu40:fit_40_7",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_0",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_9+fit_6_10 part_114:mann-filter-hu114:fit_114_11+fit_114_12",
+          ],
+          [
+            "category-38",
+            "part_81:mann-filter-hu81:fit_81_18+fit_81_19",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_9",
+          ],
+        ],
+      ],
+      [
+        "model-shared",
+        "veh_18 veh_19",
+        [
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_4",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_13+fit_63_14",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_9",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_18",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_2",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_2",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_1",
+          ],
+          [
+            "category-11",
+            "part_50:mann-filter-hu50:fit_50_6",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_2 part_97:mann-filter-hu97:fit_97_9",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_19",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_3+fit_54_4 part_95:mann-filter-hu95:fit_95_15",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_4",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_11 part_101:mann-filter-hu101:fit_101_19",
+          ],
+          [
+            "category-17",
+            "part_105:mann-filter-hu105+bosch-f105:fit_105_0+fit_105_1",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_12 part_34:mann-filter-hu34:fit_34_17 part_64:mann-filter-hu64:fit_64_5",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_7",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_2",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_11 part_115:mann-filter-hu115:fit_115_9",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_14",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_16+fit_30_17 part_110:mann-filter-hu110:fit_110_3 part_118:mann-filter-hu118:fit_118_1",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_16 part_104:mann-filter-hu104:fit_104_7 part_112:mann-filter-hu112+bosch-f112:fit_112_8",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_19",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_4",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_19 part_111:mann-filter-hu111:fit_111_16+fit_111_17",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_1",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_3",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_19",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_18+fit_33_19 part_40:mann-filter-hu40:fit_40_15",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_8",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_6",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_18",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_17",
+          ],
+        ],
+      ],
+      [
+        "model-17",
+        "veh_34 veh_35",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_12 part_43:mann-filter-hu43:fit_43_2",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_2 part_28:mann-filter-hu28+bosch-f28:fit_28_12 part_113:mann-filter-hu113:fit_113_17",
+          ],
+          [
+            "category-3",
+            "part_100:mann-filter-hu100:fit_100_2",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_9+fit_24_10 part_44:mann-filter-hu44:fit_44_9",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_7 part_46:mann-filter-hu46:fit_46_17 part_108:mann-filter-hu108:fit_108_13+fit_108_14",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_10",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_6",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_0+fit_3_1 part_11:mann-filter-hu11:fit_11_4 part_49:mann-filter-hu49+bosch-f49:fit_49_4 part_70:mann-filter-hu70+bosch-f70:fit_70_6",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_17",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_19",
+          ],
+          [
+            "category-15",
+            "part_88:mann-filter-hu88:fit_88_4 part_92:mann-filter-hu92:fit_92_11",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_3 part_105:mann-filter-hu105+bosch-f105:fit_105_16+fit_105_17",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_1 part_64:mann-filter-hu64:fit_64_13",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_15",
+          ],
+          [
+            "category-21",
+            "part_115:mann-filter-hu115:fit_115_17",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_7+fit_42_8 part_53:mann-filter-hu53:fit_53_1 part_110:mann-filter-hu110:fit_110_8 part_118:mann-filter-hu118:fit_118_9",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_7 part_55:mann-filter-hu55:fit_55_5 part_80:mann-filter-hu80:fit_80_5 part_102:mann-filter-hu102:fit_102_4+fit_102_5",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_7+fit_48_8 part_112:mann-filter-hu112+bosch-f112:fit_112_16",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_5",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_12 part_119:mann-filter-hu119+bosch-f119:fit_119_2",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_9",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_11",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_7",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_16",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_3 part_91:mann-filter-hu91+bosch-f91:fit_91_14",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_4",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_7+fit_117_8",
+          ],
+        ],
+      ],
+      [
+        "model-25",
+        "veh_50 veh_51",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_17 part_43:mann-filter-hu43:fit_43_10 part_99:mann-filter-hu99:fit_99_4+fit_99_5",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_10 part_60:mann-filter-hu60:fit_60_10+fit_60_11",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_5 part_100:mann-filter-hu100:fit_100_10",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_14",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_15",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_1",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_6 part_51:mann-filter-hu51:fit_51_10+fit_51_11 part_103:mann-filter-hu103:fit_103_18",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_0 part_89:mann-filter-hu89:fit_89_13",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_1",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_16+fit_3_17 part_49:mann-filter-hu49+bosch-f49:fit_49_12 part_50:mann-filter-hu50:fit_50_17 part_70:mann-filter-hu70+bosch-f70:fit_70_14",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_13",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_15 part_88:mann-filter-hu88:fit_88_12 part_92:mann-filter-hu92:fit_92_16",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_11",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_9",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_13",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_8+fit_36_9 part_53:mann-filter-hu53:fit_53_6 part_59:mann-filter-hu59:fit_59_1 part_118:mann-filter-hu118:fit_118_17",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_15 part_55:mann-filter-hu55:fit_55_13 part_80:mann-filter-hu80:fit_80_10",
+          ],
+          [
+            "category-25",
+            "part_104:mann-filter-hu104:fit_104_18",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_10",
+          ],
+          [
+            "category-28",
+            "part_79:mann-filter-hu79:fit_79_3",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_10+fit_66_11 part_85:mann-filter-hu85:fit_85_17",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_19 part_96:mann-filter-hu96:fit_96_14+fit_96_15",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_15 part_75:mann-filter-hu75:fit_75_10+fit_75_11",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_11",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_5+fit_57_6",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_9",
+          ],
+        ],
+      ],
+      [
+        "model-33",
+        "veh_66 veh_67",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_18 part_69:mann-filter-hu69:fit_69_13+fit_69_14 part_38:mann-filter-hu38:",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_18",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_13 part_100:mann-filter-hu100:fit_100_18",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_8",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_6",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_11+fit_45_12 part_47:mann-filter-hu47:fit_47_11",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_18",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_17 part_82:mann-filter-hu82:fit_82_9",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_15",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_18",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_0+fit_78_1",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_3",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_7+fit_15_8",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_7",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_19",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_17",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_4",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_18",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_10+fit_84_11",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_2 part_93:mann-filter-hu93:fit_93_12+fit_93_13",
+          ],
+          [
+            "category-23",
+            "part_110:mann-filter-hu110:fit_110_19",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_8",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_7",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_13",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_14+fit_27_15 part_31:mann-filter-hu31:fit_31_1 part_79:mann-filter-hu79:fit_79_11",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_7",
+          ],
+          [
+            "category-32",
+            "part_77:mann-filter-hu77+bosch-f77:fit_77_8",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_19",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_6",
+          ],
+        ],
+      ],
+      [
+        "model-41",
+        "veh_82 veh_83",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_0",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_5",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_13",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_0+fit_12_1",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_11",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_17",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_4+fit_21_5",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_0 part_78:mann-filter-hu78:fit_78_16+fit_78_17",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_8",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_12",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_9",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_2 part_9:mann-filter-hu9:fit_9_9+fit_9_10 part_34:mann-filter-hu34:fit_34_7",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_12",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_13+fit_18_14",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_17 part_59:mann-filter-hu59:fit_59_12",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_13",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_6 part_71:mann-filter-hu71:fit_71_10",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_12",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_18",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_9 part_79:mann-filter-hu79:fit_79_19",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_12",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_5 part_77:mann-filter-hu77+bosch-f77:fit_77_13",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_5+fit_6_6 part_114:mann-filter-hu114:fit_114_7+fit_114_8",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_11 part_81:mann-filter-hu81:fit_81_14+fit_81_15",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_7",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "bmw",
+    113,
+    [
+      [
+        "model-0",
+        "veh_0 veh_1",
+        [
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_0 part_65:mann-filter-hu65:fit_65_14",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_12",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_2+fit_12_3",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_17",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_18",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_6+fit_21_7 part_50:mann-filter-hu50:fit_50_0",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_0",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_1+fit_72_2 part_78:mann-filter-hu78:fit_78_18+fit_78_19",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_9",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_5 part_101:mann-filter-hu101:fit_101_13",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_3 part_9:mann-filter-hu9:fit_9_11+fit_9_12 part_34:mann-filter-hu34:fit_34_8",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_13",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_15+fit_18_16 part_32:mann-filter-hu32:fit_32_5 part_115:mann-filter-hu115:fit_115_0",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_8",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_14",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_7 part_104:mann-filter-hu104:fit_104_1",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_13",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_19",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_10",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_13",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_0+fit_33_1 part_40:mann-filter-hu40:fit_40_6 part_77:mann-filter-hu77+bosch-f77:fit_77_14",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_7+fit_6_8 part_114:mann-filter-hu114:fit_114_9+fit_114_10",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_12 part_81:mann-filter-hu81:fit_81_16+fit_81_17",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_8",
+          ],
+        ],
+      ],
+      [
+        "model-8",
+        "veh_16 veh_17",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_6",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_3 part_113:mann-filter-hu113:fit_113_11",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_11+fit_63_12",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_3",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_8 part_65:mann-filter-hu65:fit_65_19",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_18+fit_12_19",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_1",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_17",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_0",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_8",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_17+fit_72_18",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_1+fit_54_2 part_95:mann-filter-hu95:fit_95_14",
+          ],
+          [
+            "category-15",
+            "part_92:mann-filter-hu92:fit_92_5",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_18",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_15",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_11 part_34:mann-filter-hu34:fit_34_16 part_64:mann-filter-hu64:fit_64_4",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_6",
+          ],
+          [
+            "category-21",
+            "part_115:mann-filter-hu115:fit_115_8",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_14+fit_30_15 part_59:mann-filter-hu59:fit_59_18 part_110:mann-filter-hu110:fit_110_2 part_118:mann-filter-hu118:fit_118_0",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_19",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_15 part_71:mann-filter-hu71:fit_71_16 part_112:mann-filter-hu112+bosch-f112:fit_112_7",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_18",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_3",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_18 part_111:mann-filter-hu111:fit_111_14+fit_111_15",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_0",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_2",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_18",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_16+fit_33_17 part_40:mann-filter-hu40:fit_40_14 part_77:mann-filter-hu77+bosch-f77:fit_77_19",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_7",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_5",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_17",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_16",
+          ],
+        ],
+      ],
+      [
+        "model-16",
+        "veh_32 veh_33",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_11 part_43:mann-filter-hu43:fit_43_1",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_1 part_28:mann-filter-hu28+bosch-f28:fit_28_11 part_113:mann-filter-hu113:fit_113_16",
+          ],
+          [
+            "category-3",
+            "part_100:mann-filter-hu100:fit_100_1",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_7+fit_24_8 part_44:mann-filter-hu44:fit_44_8",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_6 part_46:mann-filter-hu46:fit_46_16 part_108:mann-filter-hu108:fit_108_11+fit_108_12",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_0 part_103:mann-filter-hu103:fit_103_9",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_7",
+          ],
+          [
+            "category-11",
+            "part_49:mann-filter-hu49+bosch-f49:fit_49_3 part_50:mann-filter-hu50:fit_50_11 part_70:mann-filter-hu70+bosch-f70:fit_70_5",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_7 part_97:mann-filter-hu97:fit_97_16",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_17+fit_54_18",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_9 part_88:mann-filter-hu88:fit_88_3 part_92:mann-filter-hu92:fit_92_10",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_16",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_2 part_105:mann-filter-hu105+bosch-f105:fit_105_14+fit_105_15",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_19 part_61:mann-filter-hu61:fit_61_0 part_64:mann-filter-hu64:fit_64_12",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_14",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_7",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_16 part_115:mann-filter-hu115:fit_115_16",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_19",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_5+fit_42_6 part_53:mann-filter-hu53:fit_53_0 part_118:mann-filter-hu118:fit_118_8",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_6 part_55:mann-filter-hu55:fit_55_4 part_80:mann-filter-hu80:fit_80_4 part_102:mann-filter-hu102:fit_102_2+fit_102_3",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_5+fit_48_6 part_104:mann-filter-hu104:fit_104_12 part_112:mann-filter-hu112+bosch-f112:fit_112_15",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_4",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_11",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_8",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_10",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_6",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_15",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_2 part_91:mann-filter-hu91+bosch-f91:fit_91_13",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_3",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_5+fit_117_6",
+          ],
+        ],
+      ],
+      [
+        "model-24",
+        "veh_48 veh_49",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_9 part_99:mann-filter-hu99:fit_99_2+fit_99_3",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_9 part_28:mann-filter-hu28+bosch-f28:fit_28_19 part_60:mann-filter-hu60:fit_60_8+fit_60_9",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_4 part_100:mann-filter-hu100:fit_100_9",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_14 part_65:mann-filter-hu65:fit_65_2",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_0",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_5 part_51:mann-filter-hu51:fit_51_8+fit_51_9 part_103:mann-filter-hu103:fit_103_17",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_12",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_11 part_82:mann-filter-hu82:fit_82_0",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_14+fit_3_15 part_11:mann-filter-hu11:fit_11_9 part_49:mann-filter-hu49+bosch-f49:fit_49_11 part_50:mann-filter-hu50:fit_50_16 part_70:mann-filter-hu70+bosch-f70:fit_70_13",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_12",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_14 part_88:mann-filter-hu88:fit_88_11",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_1",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_10",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_8",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_12",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_6+fit_36_7 part_110:mann-filter-hu110:fit_110_13 part_118:mann-filter-hu118:fit_118_16",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_14 part_55:mann-filter-hu55:fit_55_12 part_86:mann-filter-hu86:fit_86_2 part_102:mann-filter-hu102:fit_102_18+fit_102_19",
+          ],
+          [
+            "category-25",
+            "part_104:mann-filter-hu104:fit_104_17",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_1",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_19 part_119:mann-filter-hu119+bosch-f119:fit_119_7",
+          ],
+          [
+            "category-28",
+            "part_79:mann-filter-hu79:fit_79_2",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_8+fit_66_9 part_85:mann-filter-hu85:fit_85_16",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_18 part_96:mann-filter-hu96:fit_96_12+fit_96_13",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_1",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_14 part_75:mann-filter-hu75:fit_75_8+fit_75_9 part_77:mann-filter-hu77+bosch-f77:fit_77_2",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_10",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_3+fit_57_4",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_0",
+          ],
+        ],
+      ],
+      [
+        "model-32",
+        "veh_64 veh_65",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_17 part_69:mann-filter-hu69:fit_69_11+fit_69_12 part_99:mann-filter-hu99:fit_99_18+fit_99_19",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_17",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_12 part_100:mann-filter-hu100:fit_100_17",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_19",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_7",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_9+fit_45_10",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_5",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_16 part_82:mann-filter-hu82:fit_82_8",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_14 part_49:mann-filter-hu49+bosch-f49:fit_49_19",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_2",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_5+fit_15_6 part_88:mann-filter-hu88:fit_88_19",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_6",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_18 part_35:mann-filter-hu35+bosch-f35:fit_35_3",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_16",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_3",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_8+fit_84_9",
+          ],
+          [
+            "category-22",
+            "part_93:mann-filter-hu93:fit_93_10+fit_93_11",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_11 part_59:mann-filter-hu59:fit_59_6 part_110:mann-filter-hu110:fit_110_18",
+          ],
+          [
+            "category-24",
+            "part_80:mann-filter-hu80:fit_80_15 part_86:mann-filter-hu86:fit_86_7",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_4",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_6 part_17:mann-filter-hu17:fit_17_15",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_12",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_12+fit_27_13 part_31:mann-filter-hu31:fit_31_0 part_79:mann-filter-hu79:fit_79_10",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_6",
+          ],
+          [
+            "category-32",
+            "part_77:mann-filter-hu77+bosch-f77:fit_77_7",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_18",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_19",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_14",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_5",
+          ],
+        ],
+      ],
+      [
+        "model-40",
+        "veh_80 veh_81",
+        [
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_4",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_11",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_16",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_10",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_16",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_2+fit_21_3",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_14+fit_78_15",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_4",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_8",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_1 part_9:mann-filter-hu9:fit_9_7+fit_9_8 part_34:mann-filter-hu34:fit_34_6",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_11",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_11+fit_18_12 part_32:mann-filter-hu32:fit_32_4",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_7",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_16 part_59:mann-filter-hu59:fit_59_11",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_5 part_71:mann-filter-hu71:fit_71_9 part_104:mann-filter-hu104:fit_104_0",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_8 part_79:mann-filter-hu79:fit_79_18",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_4",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_3+fit_6_4 part_114:mann-filter-hu114:fit_114_5+fit_114_6",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_19",
+          ],
+          [
+            "category-38",
+            "part_81:mann-filter-hu81:fit_81_12+fit_81_13",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_6",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "fiat",
+    113,
+    [
+      [
+        "model-5",
+        "veh_10 veh_11",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_4",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_0 part_113:mann-filter-hu113:fit_113_9",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_5+fit_63_6",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_1",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_5 part_65:mann-filter-hu65:fit_65_17",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_12+fit_12_13",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_15",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_16+fit_21_17",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_5",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_11+fit_72_12",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_12",
+          ],
+          [
+            "category-15",
+            "part_92:mann-filter-hu92:fit_92_3",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_16",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_13",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_8 part_34:mann-filter-hu34:fit_34_13 part_64:mann-filter-hu64:fit_64_1",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_3 part_106:mann-filter-hu106:fit_106_18",
+          ],
+          [
+            "category-21",
+            "part_115:mann-filter-hu115:fit_115_5",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_8+fit_30_9 part_59:mann-filter-hu59:fit_59_16 part_110:mann-filter-hu110:fit_110_0",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_17",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_12 part_71:mann-filter-hu71:fit_71_14 part_112:mann-filter-hu112+bosch-f112:fit_112_4",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_16",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_0",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_15 part_111:mann-filter-hu111:fit_111_8+fit_111_9",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_16",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_10+fit_33_11 part_40:mann-filter-hu40:fit_40_11 part_77:mann-filter-hu77+bosch-f77:fit_77_17",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_4",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_17+fit_6_18 part_91:mann-filter-hu91+bosch-f91:fit_91_2 part_114:mann-filter-hu114:fit_114_19",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_15",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_13",
+          ],
+        ],
+      ],
+      [
+        "model-13",
+        "veh_26 veh_27",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_9",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_8 part_113:mann-filter-hu113:fit_113_14",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_1+fit_24_2 part_44:mann-filter-hu44:fit_44_6",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_3 part_46:mann-filter-hu46:fit_46_13 part_108:mann-filter-hu108:fit_108_5+fit_108_6",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_6",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_5",
+          ],
+          [
+            "category-11",
+            "part_49:mann-filter-hu49+bosch-f49:fit_49_0 part_50:mann-filter-hu50:fit_50_9 part_70:mann-filter-hu70+bosch-f70:fit_70_2",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_5 part_97:mann-filter-hu97:fit_97_13",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_11+fit_54_12",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_7 part_88:mann-filter-hu88:fit_88_0 part_92:mann-filter-hu92:fit_92_8",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_14",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_18 part_105:mann-filter-hu105+bosch-f105:fit_105_8+fit_105_9",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_16 part_64:mann-filter-hu64:fit_64_9",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_11",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_5",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_14 part_115:mann-filter-hu115:fit_115_13",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_17",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_0 part_118:mann-filter-hu118:fit_118_5",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_3 part_55:mann-filter-hu55:fit_55_1 part_80:mann-filter-hu80:fit_80_2",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_0 part_71:mann-filter-hu71:fit_71_19 part_104:mann-filter-hu104:fit_104_10 part_112:mann-filter-hu112+bosch-f112:fit_112_12",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_2",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_8",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_5",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_7",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_3 part_40:mann-filter-hu40:fit_40_19",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_12",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_10",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_1",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_0",
+          ],
+        ],
+      ],
+      [
+        "model-21",
+        "veh_42 veh_43",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_6",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_6 part_28:mann-filter-hu28+bosch-f28:fit_28_16 part_60:mann-filter-hu60:fit_60_2+fit_60_3",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_1 part_100:mann-filter-hu100:fit_100_6",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_17+fit_24_18",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_11 part_65:mann-filter-hu65:fit_65_0",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_3 part_51:mann-filter-hu51:fit_51_2+fit_51_3 part_103:mann-filter-hu103:fit_103_14",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_10",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_9",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_8+fit_3_9 part_11:mann-filter-hu11:fit_11_7 part_49:mann-filter-hu49+bosch-f49:fit_49_8 part_50:mann-filter-hu50:fit_50_14 part_70:mann-filter-hu70+bosch-f70:fit_70_10",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_10",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_12 part_88:mann-filter-hu88:fit_88_8",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_19",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_7",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_5 part_64:mann-filter-hu64:fit_64_17",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_19",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_10",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_19",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_0+fit_36_1 part_42:mann-filter-hu42+bosch-f42:fit_42_15+fit_42_16 part_110:mann-filter-hu110:fit_110_11 part_118:mann-filter-hu118:fit_118_13",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_11 part_55:mann-filter-hu55:fit_55_9 part_86:mann-filter-hu86:fit_86_0 part_102:mann-filter-hu102:fit_102_12+fit_102_13",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_15+fit_48_16 part_104:mann-filter-hu104:fit_104_15",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_16 part_119:mann-filter-hu119+bosch-f119:fit_119_5",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_2+fit_66_3 part_85:mann-filter-hu85:fit_85_13",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_15 part_96:mann-filter-hu96:fit_96_6+fit_96_7",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_11 part_75:mann-filter-hu75:fit_75_2+fit_75_3 part_77:mann-filter-hu77+bosch-f77:fit_77_0",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_7 part_91:mann-filter-hu91+bosch-f91:fit_91_18",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_15+fit_117_16",
+          ],
+        ],
+      ],
+      [
+        "model-shared",
+        "veh_58 veh_59",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_14 part_69:mann-filter-hu69:fit_69_5+fit_69_6 part_99:mann-filter-hu99:fit_99_12+fit_99_13",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_14 part_60:mann-filter-hu60:fit_60_18+fit_60_19",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_9 part_100:mann-filter-hu100:fit_100_14",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_17",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_19 part_65:mann-filter-hu65:fit_65_5",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_3+fit_45_4 part_51:mann-filter-hu51:fit_51_18+fit_51_19",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_3",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_14 part_82:mann-filter-hu82:fit_82_5",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_12 part_49:mann-filter-hu49+bosch-f49:fit_49_16 part_70:mann-filter-hu70+bosch-f70:fit_70_18",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_0",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_0 part_88:mann-filter-hu88:fit_88_16 part_92:mann-filter-hu92:fit_92_19",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_4",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_15 part_35:mann-filter-hu35+bosch-f35:fit_35_1",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_13",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_0",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_2+fit_84_3",
+          ],
+          [
+            "category-22",
+            "part_93:mann-filter-hu93:fit_93_4+fit_93_5",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_16+fit_36_17 part_53:mann-filter-hu53:fit_53_9 part_59:mann-filter-hu59:fit_59_4 part_110:mann-filter-hu110:fit_110_16",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_19 part_55:mann-filter-hu55:fit_55_17 part_80:mann-filter-hu80:fit_80_13 part_86:mann-filter-hu86:fit_86_5",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_2",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_4 part_17:mann-filter-hu17:fit_17_13",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_10",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_6+fit_27_7 part_79:mann-filter-hu79:fit_79_7",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_18+fit_66_19",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_4",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_19 part_75:mann-filter-hu75:fit_75_18+fit_75_19 part_77:mann-filter-hu77+bosch-f77:fit_77_5",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_15",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_13+fit_57_14",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_12",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_3",
+          ],
+        ],
+      ],
+      [
+        "model-37",
+        "veh_74 veh_75",
+        [
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_2",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_17",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_9",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_19 part_47:mann-filter-hu47:fit_47_14",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_8",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_13",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_8+fit_78_9",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_15+fit_15_16",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_2",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_6",
+          ],
+          [
+            "category-18",
+            "part_9:mann-filter-hu9:fit_9_1+fit_9_2 part_34:mann-filter-hu34:fit_34_3",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_8",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_5+fit_18_6 part_32:mann-filter-hu32:fit_32_2 part_84:mann-filter-hu84+bosch-f84:fit_84_18+fit_84_19",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_5",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_14 part_59:mann-filter-hu59:fit_59_9",
+          ],
+          [
+            "category-24",
+            "part_80:mann-filter-hu80:fit_80_18",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_2 part_71:mann-filter-hu71:fit_71_7",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_18",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_5 part_79:mann-filter-hu79:fit_79_15",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_1",
+          ],
+          [
+            "category-35",
+            "part_114:mann-filter-hu114:fit_114_0",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_17",
+          ],
+          [
+            "category-38",
+            "part_81:mann-filter-hu81:fit_81_6+fit_81_7",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_3",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "kia",
+    113,
+    [
+      [
+        "model-7",
+        "veh_14 veh_15",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_5",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_2 part_113:mann-filter-hu113:fit_113_10",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_9+fit_63_10",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_2",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_7",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_17",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_16+fit_12_17",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_0",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_16 part_89:mann-filter-hu89:fit_89_1",
+          ],
+          [
+            "category-11",
+            "part_50:mann-filter-hu50:fit_50_5",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_1 part_97:mann-filter-hu97:fit_97_7",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_15+fit_72_16",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_0",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_3 part_92:mann-filter-hu92:fit_92_4",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_10",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_14",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_10 part_34:mann-filter-hu34:fit_34_15 part_64:mann-filter-hu64:fit_64_3",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_5",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_1",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_10 part_115:mann-filter-hu115:fit_115_7",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_13",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_12+fit_30_13 part_59:mann-filter-hu59:fit_59_17",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_14 part_71:mann-filter-hu71:fit_71_15 part_104:mann-filter-hu104:fit_104_6 part_112:mann-filter-hu112+bosch-f112:fit_112_6",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_2",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_17 part_111:mann-filter-hu111:fit_111_12+fit_111_13",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_1",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_14+fit_33_15 part_40:mann-filter-hu40:fit_40_13",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_6",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_4",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_15",
+          ],
+        ],
+      ],
+      [
+        "model-15",
+        "veh_30 veh_31",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_0",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_0 part_28:mann-filter-hu28+bosch-f28:fit_28_10 part_39:mann-filter-hu39:",
+          ],
+          [
+            "category-3",
+            "part_100:mann-filter-hu100:fit_100_0",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_5+fit_24_6",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_5 part_46:mann-filter-hu46:fit_46_15 part_108:mann-filter-hu108:fit_108_9+fit_108_10",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_8",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_6",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_5",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_3 part_49:mann-filter-hu49+bosch-f49:fit_49_2 part_50:mann-filter-hu50:fit_50_10 part_70:mann-filter-hu70+bosch-f70:fit_70_4",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_6 part_97:mann-filter-hu97:fit_97_15",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_15+fit_54_16 part_95:mann-filter-hu95:fit_95_19",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_8 part_88:mann-filter-hu88:fit_88_2",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_15",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_1 part_105:mann-filter-hu105+bosch-f105:fit_105_12+fit_105_13",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_18 part_64:mann-filter-hu64:fit_64_11",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_13",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_6",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_15 part_115:mann-filter-hu115:fit_115_15",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_18",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_3+fit_42_4 part_110:mann-filter-hu110:fit_110_7 part_118:mann-filter-hu118:fit_118_7",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_5 part_55:mann-filter-hu55:fit_55_3 part_102:mann-filter-hu102:fit_102_0+fit_102_1",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_3+fit_48_4 part_104:mann-filter-hu104:fit_104_11 part_112:mann-filter-hu112+bosch-f112:fit_112_14",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_10 part_119:mann-filter-hu119+bosch-f119:fit_119_1",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_7",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_9",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_5",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_14",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_1 part_91:mann-filter-hu91+bosch-f91:fit_91_12",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_3+fit_117_4",
+          ],
+        ],
+      ],
+      [
+        "model-23",
+        "veh_46 veh_47",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_16 part_43:mann-filter-hu43:fit_43_8 part_99:mann-filter-hu99:fit_99_0+fit_99_1",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_8 part_28:mann-filter-hu28+bosch-f28:fit_28_18 part_60:mann-filter-hu60:fit_60_6+fit_60_7",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_3 part_100:mann-filter-hu100:fit_100_8",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_13",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_13 part_65:mann-filter-hu65:fit_65_1",
+          ],
+          [
+            "category-8",
+            "part_51:mann-filter-hu51:fit_51_6+fit_51_7 part_103:mann-filter-hu103:fit_103_16",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_10",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_12+fit_3_13 part_11:mann-filter-hu11:fit_11_8 part_49:mann-filter-hu49+bosch-f49:fit_49_10 part_70:mann-filter-hu70+bosch-f70:fit_70_12",
+          ],
+          [
+            "category-15",
+            "part_88:mann-filter-hu88:fit_88_10 part_92:mann-filter-hu92:fit_92_15",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_0",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_9",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_7 part_64:mann-filter-hu64:fit_64_19",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_4+fit_36_5 part_42:mann-filter-hu42+bosch-f42:fit_42_19 part_53:mann-filter-hu53:fit_53_5 part_59:mann-filter-hu59:fit_59_0 part_110:mann-filter-hu110:fit_110_12 part_118:mann-filter-hu118:fit_118_15",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_13 part_55:mann-filter-hu55:fit_55_11 part_80:mann-filter-hu80:fit_80_9 part_86:mann-filter-hu86:fit_86_1 part_102:mann-filter-hu102:fit_102_16+fit_102_17",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_19",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_0 part_17:mann-filter-hu17:fit_17_9",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_18 part_119:mann-filter-hu119+bosch-f119:fit_119_6",
+          ],
+          [
+            "category-28",
+            "part_79:mann-filter-hu79:fit_79_1",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_6+fit_66_7 part_85:mann-filter-hu85:fit_85_15",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_17 part_96:mann-filter-hu96:fit_96_10+fit_96_11",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_0",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_13 part_75:mann-filter-hu75:fit_75_6+fit_75_7 part_77:mann-filter-hu77+bosch-f77:fit_77_1",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_9",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_1+fit_57_2",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_8",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_19",
+          ],
+        ],
+      ],
+      [
+        "model-31",
+        "veh_62 veh_63",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_16 part_69:mann-filter-hu69:fit_69_9+fit_69_10 part_99:mann-filter-hu99:fit_99_16+fit_99_17",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_16",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_11 part_100:mann-filter-hu100:fit_100_16",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_18",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_5",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_7+fit_45_8 part_47:mann-filter-hu47:fit_47_10",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_4 part_89:mann-filter-hu89:fit_89_17",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_7",
+          ],
+          [
+            "category-11",
+            "part_49:mann-filter-hu49+bosch-f49:fit_49_18",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_17",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_3+fit_15_4 part_83:mann-filter-hu83:fit_83_19 part_88:mann-filter-hu88:fit_88_18",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_17 part_35:mann-filter-hu35+bosch-f35:fit_35_2",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_15",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_2",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_17",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_6+fit_84_7",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_1 part_93:mann-filter-hu93:fit_93_8+fit_93_9",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_10 part_59:mann-filter-hu59:fit_59_5",
+          ],
+          [
+            "category-24",
+            "part_55:mann-filter-hu55:fit_55_19 part_80:mann-filter-hu80:fit_80_14",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_3",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_14",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_10+fit_27_11 part_79:mann-filter-hu79:fit_79_9",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_17",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_17+fit_57_18",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_13",
+          ],
+        ],
+      ],
+      [
+        "model-shared",
+        "veh_78 veh_79",
+        [
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_19",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_12",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_10",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_15",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_15",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_19 part_21:mann-filter-hu21+bosch-f21:fit_21_0+fit_21_1",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_12+fit_78_13",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_7",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_19",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_3 part_101:mann-filter-hu101:fit_101_11",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_0 part_9:mann-filter-hu9:fit_9_5+fit_9_6 part_34:mann-filter-hu34:fit_34_5",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_10",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_9+fit_18_10 part_32:mann-filter-hu32:fit_32_3",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_6",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_12",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_4",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_11",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_17",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_7 part_79:mann-filter-hu79:fit_79_17",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_11",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_3 part_77:mann-filter-hu77+bosch-f77:fit_77_12",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_1+fit_6_2 part_114:mann-filter-hu114:fit_114_3+fit_114_4",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_10 part_81:mann-filter-hu81:fit_81_10+fit_81_11",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_5",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "lada",
+    113,
+    [
+      [
+        "model-3",
+        "veh_6 veh_7",
+        [
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_1+fit_63_2",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_3 part_65:mann-filter-hu65:fit_65_16",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_14",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_8+fit_12_9",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_19",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_12+fit_21_13 part_50:mann-filter-hu50:fit_50_2",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_3",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_7+fit_72_8",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_11",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_0",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_7 part_101:mann-filter-hu101:fit_101_15",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_6 part_9:mann-filter-hu9:fit_9_17+fit_9_18 part_34:mann-filter-hu34:fit_34_11",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_1 part_106:mann-filter-hu106:fit_106_16",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_7 part_115:mann-filter-hu115:fit_115_3",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_10",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_4+fit_30_5",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_16",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_10 part_104:mann-filter-hu104:fit_104_3 part_112:mann-filter-hu112+bosch-f112:fit_112_2",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_15",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_13 part_111:mann-filter-hu111:fit_111_4+fit_111_5",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_15",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_6+fit_33_7 part_40:mann-filter-hu40:fit_40_9 part_77:mann-filter-hu77+bosch-f77:fit_77_16",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_2",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_13+fit_6_14 part_91:mann-filter-hu91+bosch-f91:fit_91_0 part_114:mann-filter-hu114:fit_114_15+fit_114_16",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_14",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_11",
+          ],
+        ],
+      ],
+      [
+        "model-11",
+        "veh_22 veh_23",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_8",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_6 part_113:mann-filter-hu113:fit_113_13",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_17+fit_63_18",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_5",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_1 part_46:mann-filter-hu46:fit_46_11 part_108:mann-filter-hu108:fit_108_1+fit_108_2",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_4",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_19",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_2",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_0 part_70:mann-filter-hu70+bosch-f70:fit_70_0",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_11",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_7+fit_54_8 part_95:mann-filter-hu95:fit_95_16",
+          ],
+          [
+            "category-15",
+            "part_92:mann-filter-hu92:fit_92_7",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_17 part_105:mann-filter-hu105+bosch-f105:fit_105_4+fit_105_5",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_14 part_34:mann-filter-hu34:fit_34_19 part_64:mann-filter-hu64:fit_64_7",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_9",
+          ],
+          [
+            "category-21",
+            "part_115:mann-filter-hu115:fit_115_11",
+          ],
+          [
+            "category-23",
+            "part_110:mann-filter-hu110:fit_110_4 part_118:mann-filter-hu118:fit_118_3",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_1 part_80:mann-filter-hu80:fit_80_1",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_18 part_71:mann-filter-hu71:fit_71_18 part_112:mann-filter-hu112+bosch-f112:fit_112_10",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_1",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_6",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_3",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_5",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_1 part_40:mann-filter-hu40:fit_40_17",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_10",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_8",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_0",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_19",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_19",
+          ],
+        ],
+      ],
+      [
+        "model-shared",
+        "veh_38 veh_39",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_13 part_43:mann-filter-hu43:fit_43_4",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_4 part_28:mann-filter-hu28+bosch-f28:fit_28_14 part_113:mann-filter-hu113:fit_113_18",
+          ],
+          [
+            "category-3",
+            "part_100:mann-filter-hu100:fit_100_4",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_13+fit_24_14 part_44:mann-filter-hu44:fit_44_10",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_9 part_46:mann-filter-hu46:fit_46_19 part_108:mann-filter-hu108:fit_108_17+fit_108_18",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_2 part_103:mann-filter-hu103:fit_103_12",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_9",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_4+fit_3_5 part_49:mann-filter-hu49+bosch-f49:fit_49_6 part_50:mann-filter-hu50:fit_50_13 part_70:mann-filter-hu70+bosch-f70:fit_70_8",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_9 part_97:mann-filter-hu97:fit_97_19",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_11 part_88:mann-filter-hu88:fit_88_6 part_92:mann-filter-hu92:fit_92_12",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_18",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_5",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_3 part_64:mann-filter-hu64:fit_64_15",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_17",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_9",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_18 part_115:mann-filter-hu115:fit_115_19",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_11+fit_42_12 part_53:mann-filter-hu53:fit_53_2 part_118:mann-filter-hu118:fit_118_11",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_9 part_55:mann-filter-hu55:fit_55_7 part_80:mann-filter-hu80:fit_80_6 part_102:mann-filter-hu102:fit_102_8+fit_102_9",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_11+fit_48_12 part_104:mann-filter-hu104:fit_104_14 part_112:mann-filter-hu112+bosch-f112:fit_112_18",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_6",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_14",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_11",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_13 part_96:mann-filter-hu96:fit_96_2+fit_96_3",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_9",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_18",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_5 part_91:mann-filter-hu91+bosch-f91:fit_91_16",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_5",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_11+fit_117_12",
+          ],
+        ],
+      ],
+      [
+        "model-27",
+        "veh_54 veh_55",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_12 part_69:mann-filter-hu69:fit_69_1+fit_69_2 part_99:mann-filter-hu99:fit_99_8+fit_99_9",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_12 part_60:mann-filter-hu60:fit_60_14+fit_60_15",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_7 part_100:mann-filter-hu100:fit_100_12",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_17 part_65:mann-filter-hu65:fit_65_4",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_2",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_0 part_47:mann-filter-hu47:fit_47_7 part_51:mann-filter-hu51:fit_51_14+fit_51_15",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_14",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_13 part_82:mann-filter-hu82:fit_82_3",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_11 part_49:mann-filter-hu49+bosch-f49:fit_49_14 part_50:mann-filter-hu50:fit_50_18 part_70:mann-filter-hu70+bosch-f70:fit_70_16",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_14",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_16 part_88:mann-filter-hu88:fit_88_14",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_3",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_13",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_11",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_14",
+          ],
+          [
+            "category-22",
+            "part_93:mann-filter-hu93:fit_93_0+fit_93_1",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_12+fit_36_13 part_110:mann-filter-hu110:fit_110_15 part_118:mann-filter-hu118:fit_118_19",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_17 part_55:mann-filter-hu55:fit_55_15 part_86:mann-filter-hu86:fit_86_4",
+          ],
+          [
+            "category-25",
+            "part_104:mann-filter-hu104:fit_104_19",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_3",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_9",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_2+fit_27_3 part_79:mann-filter-hu79:fit_79_5",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_14+fit_66_15 part_85:mann-filter-hu85:fit_85_19",
+          ],
+          [
+            "category-30",
+            "part_96:mann-filter-hu96:fit_96_18+fit_96_19",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_3",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_17 part_75:mann-filter-hu75:fit_75_14+fit_75_15 part_77:mann-filter-hu77+bosch-f77:fit_77_4",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_13",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_9+fit_57_10",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_2",
+          ],
+        ],
+      ],
+      [
+        "model-35",
+        "veh_70 veh_71",
+        [
+          [
+            "category-0",
+            "part_69:mann-filter-hu69:fit_69_17+fit_69_18",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_1",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_15",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_9",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_15+fit_45_16",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_7",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_18 part_82:mann-filter-hu82:fit_82_11",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_16",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_4+fit_78_5",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_4",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_11+fit_15_12",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_8",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_5",
+          ],
+          [
+            "category-18",
+            "part_34:mann-filter-hu34:fit_34_1 part_61:mann-filter-hu61:fit_61_19",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_6",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_1+fit_18_2 part_84:mann-filter-hu84+bosch-f84:fit_84_14+fit_84_15",
+          ],
+          [
+            "category-22",
+            "part_93:mann-filter-hu93:fit_93_16+fit_93_17",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_13 part_59:mann-filter-hu59:fit_59_8",
+          ],
+          [
+            "category-24",
+            "part_80:mann-filter-hu80:fit_80_17 part_86:mann-filter-hu86:fit_86_9",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_0 part_71:mann-filter-hu71:fit_71_6",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_8 part_17:mann-filter-hu17:fit_17_17",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_14",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_18+fit_27_19 part_31:mann-filter-hu31:fit_31_3 part_79:mann-filter-hu79:fit_79_13",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_8",
+          ],
+          [
+            "category-32",
+            "part_77:mann-filter-hu77+bosch-f77:fit_77_9",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_16",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_7 part_81:mann-filter-hu81:fit_81_2+fit_81_3",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_1",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "mini",
+    113,
+    [
+      [
+        "model-2",
+        "veh_4 veh_5",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_2",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_7",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_0",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_2 part_65:mann-filter-hu65:fit_65_15",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_6+fit_12_7",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_13",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_10+fit_21_11",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_2",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_5+fit_72_6",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_10",
+          ],
+          [
+            "category-15",
+            "part_92:mann-filter-hu92:fit_92_1",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_14",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_11",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_5 part_9:mann-filter-hu9:fit_9_15+fit_9_16 part_34:mann-filter-hu34:fit_34_10",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_0 part_106:mann-filter-hu106:fit_106_15",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_19 part_115:mann-filter-hu115:fit_115_2",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_2+fit_30_3 part_53:mann-filter-hu53:fit_53_19 part_59:mann-filter-hu59:fit_59_14",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_15",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_9 part_71:mann-filter-hu71:fit_71_12 part_112:mann-filter-hu112+bosch-f112:fit_112_1",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_14",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_12 part_111:mann-filter-hu111:fit_111_2+fit_111_3",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_14",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_4+fit_33_5 part_40:mann-filter-hu40:fit_40_8 part_77:mann-filter-hu77+bosch-f77:fit_77_15",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_1",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_11+fit_6_12 part_114:mann-filter-hu114:fit_114_13+fit_114_14",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_13",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_10",
+          ],
+        ],
+      ],
+      [
+        "model-10",
+        "veh_20 veh_21",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_7",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_5 part_113:mann-filter-hu113:fit_113_12",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_15+fit_63_16",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_4",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_0 part_46:mann-filter-hu46:fit_46_10 part_108:mann-filter-hu108:fit_108_0",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_19",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_3",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_18 part_89:mann-filter-hu89:fit_89_3",
+          ],
+          [
+            "category-11",
+            "part_50:mann-filter-hu50:fit_50_7",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_3 part_97:mann-filter-hu97:fit_97_10",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_5+fit_54_6",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_5 part_92:mann-filter-hu92:fit_92_6",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_12",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_16 part_105:mann-filter-hu105+bosch-f105:fit_105_2+fit_105_3",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_13 part_34:mann-filter-hu34:fit_34_18 part_64:mann-filter-hu64:fit_64_6",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_8",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_3",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_12 part_115:mann-filter-hu115:fit_115_10",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_15",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_18+fit_30_19 part_59:mann-filter-hu59:fit_59_19 part_118:mann-filter-hu118:fit_118_2",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_0 part_80:mann-filter-hu80:fit_80_0",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_17 part_71:mann-filter-hu71:fit_71_17 part_104:mann-filter-hu104:fit_104_8 part_112:mann-filter-hu112+bosch-f112:fit_112_9",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_0",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_5",
+          ],
+          [
+            "category-28",
+            "part_111:mann-filter-hu111:fit_111_18+fit_111_19",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_2",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_4",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_0 part_40:mann-filter-hu40:fit_40_16",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_9",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_7",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_18",
+          ],
+        ],
+      ],
+      [
+        "model-18",
+        "veh_36 veh_37",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_3",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_3 part_28:mann-filter-hu28+bosch-f28:fit_28_13",
+          ],
+          [
+            "category-3",
+            "part_100:mann-filter-hu100:fit_100_3",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_11+fit_24_12",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_8 part_46:mann-filter-hu46:fit_46_18 part_108:mann-filter-hu108:fit_108_15+fit_108_16",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_1 part_103:mann-filter-hu103:fit_103_11",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_8",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_7",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_2+fit_3_3 part_11:mann-filter-hu11:fit_11_5 part_49:mann-filter-hu49+bosch-f49:fit_49_5 part_50:mann-filter-hu50:fit_50_12 part_70:mann-filter-hu70+bosch-f70:fit_70_7",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_8 part_97:mann-filter-hu97:fit_97_18",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_10 part_88:mann-filter-hu88:fit_88_5",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_17",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_4 part_105:mann-filter-hu105+bosch-f105:fit_105_18+fit_105_19",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_2 part_64:mann-filter-hu64:fit_64_14",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_16",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_8",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_17 part_115:mann-filter-hu115:fit_115_18",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_9+fit_42_10 part_110:mann-filter-hu110:fit_110_9 part_118:mann-filter-hu118:fit_118_10",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_8 part_55:mann-filter-hu55:fit_55_6 part_102:mann-filter-hu102:fit_102_6+fit_102_7",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_9+fit_48_10 part_104:mann-filter-hu104:fit_104_13 part_112:mann-filter-hu112+bosch-f112:fit_112_17",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_13 part_119:mann-filter-hu119+bosch-f119:fit_119_3",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_10",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_12 part_96:mann-filter-hu96:fit_96_0+fit_96_1",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_8",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_17",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_4 part_91:mann-filter-hu91+bosch-f91:fit_91_15",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_9+fit_117_10",
+          ],
+        ],
+      ],
+      [
+        "model-26",
+        "veh_52 veh_53",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_18 part_43:mann-filter-hu43:fit_43_11 part_69:mann-filter-hu69:fit_69_0 part_99:mann-filter-hu99:fit_99_6+fit_99_7",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_11 part_60:mann-filter-hu60:fit_60_12+fit_60_13 part_28:mann-filter-hu28+bosch-f28:",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_6 part_100:mann-filter-hu100:fit_100_11",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_15",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_16 part_65:mann-filter-hu65:fit_65_3",
+          ],
+          [
+            "category-8",
+            "part_51:mann-filter-hu51:fit_51_12+fit_51_13 part_103:mann-filter-hu103:fit_103_19",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_1",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_12 part_82:mann-filter-hu82:fit_82_2",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_18+fit_3_19 part_11:mann-filter-hu11:fit_11_10 part_49:mann-filter-hu49+bosch-f49:fit_49_13 part_70:mann-filter-hu70+bosch-f70:fit_70_15",
+          ],
+          [
+            "category-15",
+            "part_88:mann-filter-hu88:fit_88_13 part_92:mann-filter-hu92:fit_92_17",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_2",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_12",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_10",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_10+fit_36_11 part_53:mann-filter-hu53:fit_53_7 part_59:mann-filter-hu59:fit_59_2 part_110:mann-filter-hu110:fit_110_14 part_118:mann-filter-hu118:fit_118_18",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_16 part_55:mann-filter-hu55:fit_55_14 part_80:mann-filter-hu80:fit_80_11 part_86:mann-filter-hu86:fit_86_3",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_0",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_2 part_17:mann-filter-hu17:fit_17_11",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_8",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_0+fit_27_1 part_79:mann-filter-hu79:fit_79_4",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_12+fit_66_13 part_85:mann-filter-hu85:fit_85_18",
+          ],
+          [
+            "category-30",
+            "part_96:mann-filter-hu96:fit_96_16+fit_96_17",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_2",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_16 part_75:mann-filter-hu75:fit_75_12+fit_75_13 part_77:mann-filter-hu77+bosch-f77:fit_77_3",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_12",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_7+fit_57_8",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_10",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_1",
+          ],
+        ],
+      ],
+      [
+        "model-34",
+        "veh_68 veh_69",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_19 part_69:mann-filter-hu69:fit_69_15+fit_69_16",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_19 part_113:mann-filter-hu113:fit_113_0",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_14 part_100:mann-filter-hu100:fit_100_19",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_7",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_13+fit_45_14 part_47:mann-filter-hu47:fit_47_12",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_6 part_89:mann-filter-hu89:fit_89_19",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_10",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_19",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_2+fit_78_3",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_9+fit_15_10",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_0",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_4",
+          ],
+          [
+            "category-18",
+            "part_34:mann-filter-hu34:fit_34_0 part_61:mann-filter-hu61:fit_61_18",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_5",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_19",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_0 part_32:mann-filter-hu32:fit_32_0 part_84:mann-filter-hu84+bosch-f84:fit_84_12+fit_84_13",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_3 part_93:mann-filter-hu93:fit_93_14+fit_93_15",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_12 part_59:mann-filter-hu59:fit_59_7",
+          ],
+          [
+            "category-24",
+            "part_80:mann-filter-hu80:fit_80_16",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_5",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_16",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_16+fit_27_17 part_31:mann-filter-hu31:fit_31_2 part_79:mann-filter-hu79:fit_79_12",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_15",
+          ],
+          [
+            "category-38",
+            "part_81:mann-filter-hu81:fit_81_0+fit_81_1",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_0",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "opel",
+    113,
+    [
+      [
+        "model-4",
+        "veh_8 veh_9",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_3",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_8",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_3+fit_63_4",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_0",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_4",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_15",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_10+fit_12_11",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_14",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_14+fit_21_15 part_50:mann-filter-hu50:fit_50_3",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_4",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_9+fit_72_10",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_1 part_92:mann-filter-hu92:fit_92_2",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_8",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_12",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_7 part_9:mann-filter-hu9:fit_9_19 part_34:mann-filter-hu34:fit_34_12 part_64:mann-filter-hu64:fit_64_0",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_2 part_106:mann-filter-hu106:fit_106_17",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_8 part_115:mann-filter-hu115:fit_115_4",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_11",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_6+fit_30_7 part_59:mann-filter-hu59:fit_59_15",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_11 part_71:mann-filter-hu71:fit_71_13 part_104:mann-filter-hu104:fit_104_4 part_112:mann-filter-hu112+bosch-f112:fit_112_3",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_14 part_111:mann-filter-hu111:fit_111_6+fit_111_7",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_8+fit_33_9 part_40:mann-filter-hu40:fit_40_10",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_3",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_15+fit_6_16 part_91:mann-filter-hu91+bosch-f91:fit_91_1 part_114:mann-filter-hu114:fit_114_17+fit_114_18",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_12",
+          ],
+        ],
+      ],
+      [
+        "model-12",
+        "veh_24 veh_25",
+        [
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_7",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_19",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_0",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_2 part_46:mann-filter-hu46:fit_46_12 part_108:mann-filter-hu108:fit_108_3+fit_108_4",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_5",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_4",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_3",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_1 part_50:mann-filter-hu50:fit_50_8 part_70:mann-filter-hu70+bosch-f70:fit_70_1",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_4 part_97:mann-filter-hu97:fit_97_12",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_9+fit_54_10 part_95:mann-filter-hu95:fit_95_17",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_6",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_13",
+          ],
+          [
+            "category-17",
+            "part_105:mann-filter-hu105+bosch-f105:fit_105_6+fit_105_7",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_15 part_64:mann-filter-hu64:fit_64_8",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_10",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_4",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_13 part_115:mann-filter-hu115:fit_115_12",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_16",
+          ],
+          [
+            "category-23",
+            "part_110:mann-filter-hu110:fit_110_5 part_118:mann-filter-hu118:fit_118_4",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_2 part_55:mann-filter-hu55:fit_55_0",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_19 part_104:mann-filter-hu104:fit_104_9 part_112:mann-filter-hu112+bosch-f112:fit_112_11",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_7",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_4",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_6",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_2 part_40:mann-filter-hu40:fit_40_18",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_11",
+          ],
+          [
+            "category-35",
+            "part_91:mann-filter-hu91+bosch-f91:fit_91_9",
+          ],
+        ],
+      ],
+      [
+        "model-20",
+        "veh_40 veh_41",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_14 part_43:mann-filter-hu43:fit_43_5",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_5 part_28:mann-filter-hu28+bosch-f28:fit_28_15 part_60:mann-filter-hu60:fit_60_0+fit_60_1 part_113:mann-filter-hu113:fit_113_19",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_0 part_100:mann-filter-hu100:fit_100_5",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_15+fit_24_16 part_44:mann-filter-hu44:fit_44_11",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_10 part_108:mann-filter-hu108:fit_108_19",
+          ],
+          [
+            "category-8",
+            "part_51:mann-filter-hu51:fit_51_0+fit_51_1 part_103:mann-filter-hu103:fit_103_13",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_8",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_6+fit_3_7 part_11:mann-filter-hu11:fit_11_6 part_49:mann-filter-hu49+bosch-f49:fit_49_7 part_70:mann-filter-hu70+bosch-f70:fit_70_9",
+          ],
+          [
+            "category-15",
+            "part_88:mann-filter-hu88:fit_88_7 part_92:mann-filter-hu92:fit_92_13",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_6",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_4 part_64:mann-filter-hu64:fit_64_16",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_18",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_13+fit_42_14 part_53:mann-filter-hu53:fit_53_3 part_110:mann-filter-hu110:fit_110_10 part_118:mann-filter-hu118:fit_118_12",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_10 part_55:mann-filter-hu55:fit_55_8 part_80:mann-filter-hu80:fit_80_7 part_102:mann-filter-hu102:fit_102_10+fit_102_11",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_13+fit_48_14 part_112:mann-filter-hu112+bosch-f112:fit_112_19",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_7",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_15 part_119:mann-filter-hu119+bosch-f119:fit_119_4",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_0+fit_66_1 part_85:mann-filter-hu85:fit_85_12",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_14 part_96:mann-filter-hu96:fit_96_4+fit_96_5",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_10 part_75:mann-filter-hu75:fit_75_0+fit_75_1",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_19",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_6 part_91:mann-filter-hu91+bosch-f91:fit_91_17",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_6",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_13+fit_117_14",
+          ],
+        ],
+      ],
+      [
+        "model-28",
+        "veh_56 veh_57",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_19 part_43:mann-filter-hu43:fit_43_13 part_69:mann-filter-hu69:fit_69_3+fit_69_4 part_99:mann-filter-hu99:fit_99_10+fit_99_11",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_13 part_60:mann-filter-hu60:fit_60_16+fit_60_17",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_8 part_100:mann-filter-hu100:fit_100_13",
+          ],
+          [
+            "category-4",
+            "part_44:mann-filter-hu44:fit_44_16",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_18",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_3",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_1+fit_45_2 part_47:mann-filter-hu47:fit_47_8 part_51:mann-filter-hu51:fit_51_16+fit_51_17",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_2 part_89:mann-filter-hu89:fit_89_15",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_4",
+          ],
+          [
+            "category-11",
+            "part_49:mann-filter-hu49+bosch-f49:fit_49_15 part_50:mann-filter-hu50:fit_50_19 part_70:mann-filter-hu70+bosch-f70:fit_70_17",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_15",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_17 part_88:mann-filter-hu88:fit_88_15 part_92:mann-filter-hu92:fit_92_18",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_14 part_35:mann-filter-hu35+bosch-f35:fit_35_0",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_12",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_15",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_0+fit_84_1",
+          ],
+          [
+            "category-22",
+            "part_93:mann-filter-hu93:fit_93_2+fit_93_3",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_14+fit_36_15 part_53:mann-filter-hu53:fit_53_8 part_59:mann-filter-hu59:fit_59_3",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_18 part_55:mann-filter-hu55:fit_55_16 part_80:mann-filter-hu80:fit_80_12",
+          ],
+          [
+            "category-25",
+            "part_71:mann-filter-hu71:fit_71_1",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_12",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_4+fit_27_5 part_79:mann-filter-hu79:fit_79_6",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_16+fit_66_17",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_18 part_75:mann-filter-hu75:fit_75_16+fit_75_17",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_14",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_11+fit_57_12",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_11",
+          ],
+        ],
+      ],
+      [
+        "model-36",
+        "veh_72 veh_73",
+        [
+          [
+            "category-0",
+            "part_69:mann-filter-hu69:fit_69_19",
+          ],
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_16",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_10",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_8",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_17+fit_45_18 part_47:mann-filter-hu47:fit_47_13",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_19 part_82:mann-filter-hu82:fit_82_12",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_17",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_6+fit_78_7",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_5",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_13+fit_15_14",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_1 part_101:mann-filter-hu101:fit_101_9",
+          ],
+          [
+            "category-18",
+            "part_9:mann-filter-hu9:fit_9_0 part_34:mann-filter-hu34:fit_34_2",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_7",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_3+fit_18_4 part_32:mann-filter-hu32:fit_32_1 part_84:mann-filter-hu84+bosch-f84:fit_84_16+fit_84_17",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_4 part_93:mann-filter-hu93:fit_93_18+fit_93_19",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_10",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_1",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_9",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_15",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_4 part_79:mann-filter-hu79:fit_79_14",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_9",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_0 part_77:mann-filter-hu77+bosch-f77:fit_77_10",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_8 part_81:mann-filter-hu81:fit_81_4+fit_81_5",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_2",
+          ],
+        ],
+      ],
+    ],
+  ],
+  [
+    "skoda",
+    113,
+    [
+      [
+        "model-6",
+        "veh_12 veh_13",
+        [
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_1",
+          ],
+          [
+            "category-2",
+            "part_63:mann-filter-hu63+bosch-f63:fit_63_7+fit_63_8",
+          ],
+          [
+            "category-5",
+            "part_46:mann-filter-hu46:fit_46_6 part_65:mann-filter-hu65:fit_65_18",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_16",
+          ],
+          [
+            "category-7",
+            "part_12:mann-filter-hu12:fit_12_14+fit_12_15",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_0",
+          ],
+          [
+            "category-11",
+            "part_21:mann-filter-hu21+bosch-f21:fit_21_18+fit_21_19 part_50:mann-filter-hu50:fit_50_4",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_0 part_97:mann-filter-hu97:fit_97_6",
+          ],
+          [
+            "category-13",
+            "part_72:mann-filter-hu72:fit_72_13+fit_72_14",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_13",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_2",
+          ],
+          [
+            "category-16",
+            "part_68:mann-filter-hu68:fit_68_9 part_101:mann-filter-hu101:fit_101_17",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_9 part_34:mann-filter-hu34:fit_34_14 part_64:mann-filter-hu64:fit_64_2",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_4 part_106:mann-filter-hu106:fit_106_19",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_0",
+          ],
+          [
+            "category-21",
+            "part_32:mann-filter-hu32:fit_32_9 part_115:mann-filter-hu115:fit_115_6",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_12",
+          ],
+          [
+            "category-23",
+            "part_30:mann-filter-hu30:fit_30_10+fit_30_11 part_110:mann-filter-hu110:fit_110_1",
+          ],
+          [
+            "category-24",
+            "part_86:mann-filter-hu86:fit_86_18",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_13 part_104:mann-filter-hu104:fit_104_5 part_112:mann-filter-hu112+bosch-f112:fit_112_5",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_17",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_1",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_16 part_111:mann-filter-hu111:fit_111_10+fit_111_11",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_0",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_17",
+          ],
+          [
+            "category-32",
+            "part_33:mann-filter-hu33:fit_33_12+fit_33_13 part_40:mann-filter-hu40:fit_40_12 part_77:mann-filter-hu77+bosch-f77:fit_77_18",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_5",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_19 part_91:mann-filter-hu91+bosch-f91:fit_91_3",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_16",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_14",
+          ],
+        ],
+      ],
+      [
+        "model-14",
+        "veh_28 veh_29",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_10",
+          ],
+          [
+            "category-1",
+            "part_28:mann-filter-hu28+bosch-f28:fit_28_9 part_113:mann-filter-hu113:fit_113_15",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_3+fit_24_4 part_44:mann-filter-hu44:fit_44_7",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_4 part_46:mann-filter-hu46:fit_46_14 part_108:mann-filter-hu108:fit_108_7+fit_108_8",
+          ],
+          [
+            "category-8",
+            "part_103:mann-filter-hu103:fit_103_7",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_4",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_2 part_49:mann-filter-hu49+bosch-f49:fit_49_1 part_70:mann-filter-hu70+bosch-f70:fit_70_3",
+          ],
+          [
+            "category-12",
+            "part_97:mann-filter-hu97:fit_97_14",
+          ],
+          [
+            "category-14",
+            "part_54:mann-filter-hu54:fit_54_13+fit_54_14 part_95:mann-filter-hu95:fit_95_18",
+          ],
+          [
+            "category-15",
+            "part_88:mann-filter-hu88:fit_88_1 part_92:mann-filter-hu92:fit_92_9",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_0 part_35:mann-filter-hu35+bosch-f35:fit_35_19 part_105:mann-filter-hu105+bosch-f105:fit_105_10+fit_105_11",
+          ],
+          [
+            "category-18",
+            "part_4:mann-filter-hu4:fit_4_17 part_64:mann-filter-hu64:fit_64_10",
+          ],
+          [
+            "category-19",
+            "part_76:mann-filter-hu76:fit_76_12",
+          ],
+          [
+            "category-21",
+            "part_115:mann-filter-hu115:fit_115_14",
+          ],
+          [
+            "category-23",
+            "part_42:mann-filter-hu42+bosch-f42:fit_42_1+fit_42_2 part_110:mann-filter-hu110:fit_110_6 part_118:mann-filter-hu118:fit_118_6",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_4 part_55:mann-filter-hu55:fit_55_2 part_80:mann-filter-hu80:fit_80_3",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_1+fit_48_2 part_112:mann-filter-hu112+bosch-f112:fit_112_13",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_3",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_9 part_119:mann-filter-hu119+bosch-f119:fit_119_0",
+          ],
+          [
+            "category-29",
+            "part_85:mann-filter-hu85:fit_85_6",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_8",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_4",
+          ],
+          [
+            "category-33",
+            "part_37:mann-filter-hu37:fit_37_13",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_0 part_91:mann-filter-hu91+bosch-f91:fit_91_11",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_2",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_1+fit_117_2",
+          ],
+        ],
+      ],
+      [
+        "model-22",
+        "veh_44 veh_45",
+        [
+          [
+            "category-0",
+            "part_38:mann-filter-hu38:fit_38_15 part_43:mann-filter-hu43:fit_43_7 part_69:mann-filter-hu69:",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_7 part_28:mann-filter-hu28+bosch-f28:fit_28_17 part_60:mann-filter-hu60:fit_60_4+fit_60_5",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_2 part_100:mann-filter-hu100:fit_100_7",
+          ],
+          [
+            "category-4",
+            "part_24:mann-filter-hu24:fit_24_19 part_44:mann-filter-hu44:fit_44_12",
+          ],
+          [
+            "category-5",
+            "part_1:mann-filter-hu1:fit_1_12",
+          ],
+          [
+            "category-8",
+            "part_47:mann-filter-hu47:fit_47_4 part_51:mann-filter-hu51:fit_51_4+fit_51_5 part_103:mann-filter-hu103:fit_103_15",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_11",
+          ],
+          [
+            "category-11",
+            "part_3:mann-filter-hu3:fit_3_10+fit_3_11 part_49:mann-filter-hu49+bosch-f49:fit_49_9 part_50:mann-filter-hu50:fit_50_15 part_70:mann-filter-hu70+bosch-f70:fit_70_11",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_11",
+          ],
+          [
+            "category-15",
+            "part_83:mann-filter-hu83:fit_83_13 part_88:mann-filter-hu88:fit_88_9 part_92:mann-filter-hu92:fit_92_14",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_8",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_6 part_64:mann-filter-hu64:fit_64_18",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_11",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_2+fit_36_3 part_42:mann-filter-hu42+bosch-f42:fit_42_17+fit_42_18 part_53:mann-filter-hu53:fit_53_4 part_118:mann-filter-hu118:fit_118_14",
+          ],
+          [
+            "category-24",
+            "part_52:mann-filter-hu52:fit_52_12 part_55:mann-filter-hu55:fit_55_10 part_80:mann-filter-hu80:fit_80_8 part_102:mann-filter-hu102:fit_102_14+fit_102_15",
+          ],
+          [
+            "category-25",
+            "part_48:mann-filter-hu48:fit_48_17+fit_48_18 part_104:mann-filter-hu104:fit_104_16",
+          ],
+          [
+            "category-26",
+            "part_17:mann-filter-hu17:fit_17_8",
+          ],
+          [
+            "category-27",
+            "part_109:mann-filter-hu109:fit_109_17",
+          ],
+          [
+            "category-28",
+            "part_79:mann-filter-hu79:fit_79_0",
+          ],
+          [
+            "category-29",
+            "part_66:mann-filter-hu66:fit_66_4+fit_66_5 part_85:mann-filter-hu85:fit_85_14",
+          ],
+          [
+            "category-30",
+            "part_94:mann-filter-hu94:fit_94_16 part_96:mann-filter-hu96:fit_96_8+fit_96_9",
+          ],
+          [
+            "category-32",
+            "part_7:mann-filter-hu7+bosch-f7:fit_7_12 part_75:mann-filter-hu75:fit_75_4+fit_75_5",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_8 part_91:mann-filter-hu91+bosch-f91:fit_91_19",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_0",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_7",
+          ],
+          [
+            "category-38",
+            "part_117:mann-filter-hu117:fit_117_17+fit_117_18",
+          ],
+        ],
+      ],
+      [
+        "model-30",
+        "veh_60 veh_61",
+        [
+          [
+            "category-0",
+            "part_43:mann-filter-hu43:fit_43_15 part_69:mann-filter-hu69:fit_69_7+fit_69_8 part_99:mann-filter-hu99:fit_99_14+fit_99_15",
+          ],
+          [
+            "category-1",
+            "part_19:mann-filter-hu19:fit_19_15",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_10 part_100:mann-filter-hu100:fit_100_15",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_6",
+          ],
+          [
+            "category-6",
+            "part_98:mann-filter-hu98+bosch-f98:fit_98_4",
+          ],
+          [
+            "category-8",
+            "part_45:mann-filter-hu45:fit_45_5+fit_45_6 part_47:mann-filter-hu47:fit_47_9",
+          ],
+          [
+            "category-9",
+            "part_89:mann-filter-hu89:fit_89_16",
+          ],
+          [
+            "category-10",
+            "part_26:mann-filter-hu26:fit_26_15 part_82:mann-filter-hu82:fit_82_6",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_13 part_49:mann-filter-hu49+bosch-f49:fit_49_17 part_70:mann-filter-hu70+bosch-f70:fit_70_19",
+          ],
+          [
+            "category-12",
+            "part_41:mann-filter-hu41:fit_41_16",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_1",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_1+fit_15_2 part_83:mann-filter-hu83:fit_83_18 part_88:mann-filter-hu88:fit_88_17",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_5",
+          ],
+          [
+            "category-17",
+            "part_13:mann-filter-hu13:fit_13_16",
+          ],
+          [
+            "category-18",
+            "part_61:mann-filter-hu61:fit_61_14",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_1",
+          ],
+          [
+            "category-20",
+            "part_20:mann-filter-hu20:fit_20_16",
+          ],
+          [
+            "category-21",
+            "part_84:mann-filter-hu84+bosch-f84:fit_84_4+fit_84_5",
+          ],
+          [
+            "category-22",
+            "part_14:mann-filter-hu14+bosch-f14:fit_14_0 part_93:mann-filter-hu93:fit_93_6+fit_93_7",
+          ],
+          [
+            "category-23",
+            "part_36:mann-filter-hu36:fit_36_18+fit_36_19 part_110:mann-filter-hu110:fit_110_17",
+          ],
+          [
+            "category-24",
+            "part_55:mann-filter-hu55:fit_55_18 part_86:mann-filter-hu86:fit_86_6",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_5",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_11",
+          ],
+          [
+            "category-28",
+            "part_27:mann-filter-hu27:fit_27_8+fit_27_9 part_79:mann-filter-hu79:fit_79_8",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_5",
+          ],
+          [
+            "category-32",
+            "part_77:mann-filter-hu77+bosch-f77:fit_77_6",
+          ],
+          [
+            "category-35",
+            "part_16:mann-filter-hu16:fit_16_16",
+          ],
+          [
+            "category-36",
+            "part_57:mann-filter-hu57:fit_57_15+fit_57_16",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_4",
+          ],
+        ],
+      ],
+      [
+        "model-38",
+        "veh_76 veh_77",
+        [
+          [
+            "category-1",
+            "part_113:mann-filter-hu113:fit_113_3",
+          ],
+          [
+            "category-3",
+            "part_10:mann-filter-hu10:fit_10_18",
+          ],
+          [
+            "category-5",
+            "part_65:mann-filter-hu65:fit_65_11",
+          ],
+          [
+            "category-9",
+            "part_23:mann-filter-hu23:fit_23_9",
+          ],
+          [
+            "category-10",
+            "part_82:mann-filter-hu82:fit_82_14",
+          ],
+          [
+            "category-11",
+            "part_11:mann-filter-hu11:fit_11_18",
+          ],
+          [
+            "category-13",
+            "part_78:mann-filter-hu78:fit_78_10+fit_78_11",
+          ],
+          [
+            "category-14",
+            "part_95:mann-filter-hu95:fit_95_6",
+          ],
+          [
+            "category-15",
+            "part_15:mann-filter-hu15:fit_15_17+fit_15_18",
+          ],
+          [
+            "category-16",
+            "part_101:mann-filter-hu101:fit_101_10",
+          ],
+          [
+            "category-17",
+            "part_35:mann-filter-hu35+bosch-f35:fit_35_7",
+          ],
+          [
+            "category-18",
+            "part_9:mann-filter-hu9:fit_9_3+fit_9_4 part_34:mann-filter-hu34:fit_34_4",
+          ],
+          [
+            "category-19",
+            "part_106:mann-filter-hu106:fit_106_9",
+          ],
+          [
+            "category-21",
+            "part_18:mann-filter-hu18:fit_18_7+fit_18_8",
+          ],
+          [
+            "category-23",
+            "part_53:mann-filter-hu53:fit_53_15 part_59:mann-filter-hu59:fit_59_10",
+          ],
+          [
+            "category-24",
+            "part_80:mann-filter-hu80:fit_80_19 part_86:mann-filter-hu86:fit_86_11",
+          ],
+          [
+            "category-25",
+            "part_67:mann-filter-hu67:fit_67_3 part_71:mann-filter-hu71:fit_71_8",
+          ],
+          [
+            "category-26",
+            "part_2:mann-filter-hu2:fit_2_10 part_17:mann-filter-hu17:fit_17_19",
+          ],
+          [
+            "category-27",
+            "part_119:mann-filter-hu119+bosch-f119:fit_119_16",
+          ],
+          [
+            "category-28",
+            "part_31:mann-filter-hu31:fit_31_6 part_79:mann-filter-hu79:fit_79_16",
+          ],
+          [
+            "category-31",
+            "part_62:mann-filter-hu62:fit_62_10",
+          ],
+          [
+            "category-32",
+            "part_40:mann-filter-hu40:fit_40_2 part_77:mann-filter-hu77+bosch-f77:fit_77_11",
+          ],
+          [
+            "category-35",
+            "part_6:mann-filter-hu6:fit_6_0 part_114:mann-filter-hu114:fit_114_1+fit_114_2",
+          ],
+          [
+            "category-37",
+            "part_8:mann-filter-hu8:fit_8_18",
+          ],
+          [
+            "category-38",
+            "part_74:mann-filter-hu74:fit_74_9 part_81:mann-filter-hu81:fit_81_8+fit_81_9",
+          ],
+          [
+            "category-39",
+            "part_25:mann-filter-hu25:fit_25_4",
+          ],
+        ],
+      ],
+    ],
+  ],
+]
+`;
