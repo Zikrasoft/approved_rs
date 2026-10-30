@@ -12,6 +12,7 @@ export const {
   ensureLeadTopic,
   touchLeadTopic,
   notifyLead,
+  cancelOrderLead,
   groupId,
 } = createBrandBot({
   store: leadStore,

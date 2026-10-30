@@ -2,6 +2,7 @@ import {
   adminIds,
   ownerIds,
   afterStatusChange,
+  settlePendingOrders,
   dropFromDigest,
   client,
   ensureLeadCard,
@@ -23,6 +24,7 @@ export const {
 
 export {
   afterStatusChange,
+  settlePendingOrders,
   dropFromDigest,
   closeLeadTopic,
   ensureLeadCard,

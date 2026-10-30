@@ -9,6 +9,7 @@ export const {
   touchLeadTopic,
   closeLeadTopic,
   afterStatusChange,
+  settlePendingOrders,
   dropFromDigest,
   notifyLead,
   client,

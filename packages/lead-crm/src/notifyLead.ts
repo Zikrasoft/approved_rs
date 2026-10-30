@@ -147,6 +147,7 @@ interface AfterStatusChangeOptions {
     'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
   dropFromDigest: (leadId: number) => Promise<void>;
+  settleOrder: (lead: StoredLead) => Promise<void>;
 }
 
 export function createDropFromDigest({
@@ -176,6 +177,7 @@ export function createAfterStatusChange({
   closeLeadTopic,
   notifier,
   dropFromDigest,
+  settleOrder,
 }: AfterStatusChangeOptions) {
   async function refreshTopic(lead: StoredLead): Promise<StoredLead> {
     if (lead.topicId == null) return lead;
@@ -192,6 +194,7 @@ export function createAfterStatusChange({
     lead: StoredLead,
     { surface, author }: StatusChangeOptions = {},
   ): Promise<void> {
+    await settleOrder(lead);
     await ensureLeadCard(lead);
     const current = await refreshTopic(lead);
     if (isClosed(lead)) {

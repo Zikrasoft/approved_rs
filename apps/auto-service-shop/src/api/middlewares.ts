@@ -40,6 +40,8 @@ import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
 import { refuseClosedShop, refuseStockCartChange } from '../lib/offer-cart';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
+import { OrderOutcome } from './hooks/validators';
+import { requireOrderOutcomeSecret } from '../lib/order-outcome-secret';
 import {
   StoreAddLineAddon,
   StoreAddOfferCartItem,
@@ -208,6 +210,11 @@ export default defineMiddlewares({
       matcher: '/admin/suppliers/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdateSupplier)],
+    },
+    {
+      matcher: '/hooks/carlab-orders/:id/outcome',
+      method: 'POST',
+      middlewares: [requireOrderOutcomeSecret, validateAdminBody(OrderOutcome)],
     },
     {
       matcher: '/admin/workshop-quotes',
