@@ -75,6 +75,7 @@ const channelsSchema = z
     viber: z.string(),
     telegram: z.string(),
     instagram: z.string(),
+    social: z.string(),
   })
   .strict();
 
