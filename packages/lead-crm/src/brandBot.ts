@@ -9,7 +9,7 @@ import {
   createTouchLeadTopic,
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
-import { createTelegramClient, parseIds } from './telegram/client.ts';
+import { createTelegramClient } from './telegram/client.ts';
 import { createFormatter } from './telegram/cards.ts';
 import { createNotifier } from './telegram/notify.ts';
 
@@ -17,14 +17,26 @@ const required = (name: string) =>
   z.string({ error: `[telegram] ${name} is not set` }).min(1, {
     error: `[telegram] ${name} is not set`,
   });
-const ids = z.string().optional().transform(parseIds);
+const ids = (name: string) => {
+  const error = `[telegram] ${name} must be comma-separated Telegram ids`;
+  return z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.coerce.number<string>({ error }).int({ error })));
+};
 
 const BotEnvSchema = z.object({
   TELEGRAM_BOT_TOKEN: required('TELEGRAM_BOT_TOKEN'),
   TELEGRAM_BOT_USERNAME: required('TELEGRAM_BOT_USERNAME'),
   TELEGRAM_GROUP_ID: required('TELEGRAM_GROUP_ID'),
-  TELEGRAM_OWNER_ID: ids,
-  TELEGRAM_ADMIN_ID: ids,
+  TELEGRAM_OWNER_ID: ids('TELEGRAM_OWNER_ID'),
+  TELEGRAM_ADMIN_ID: ids('TELEGRAM_ADMIN_ID'),
 });
 
 function readBotEnv() {

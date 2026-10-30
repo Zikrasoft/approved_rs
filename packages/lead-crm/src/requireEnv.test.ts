@@ -15,12 +15,12 @@ describe('requireEnv', () => {
   });
 
   it('names the variable when it is missing', () => {
-    expect(() => requireEnv(NAME)).toThrow(`[telegram] ${NAME} is not set`);
+    expect(() => requireEnv(NAME)).toThrow(`${NAME} is not set`);
   });
 
   it('refuses an empty value rather than handing it on', () => {
     process.env[NAME] = '';
 
-    expect(() => requireEnv(NAME)).toThrow(`[telegram] ${NAME} is not set`);
+    expect(() => requireEnv(NAME)).toThrow(`${NAME} is not set`);
   });
 });
