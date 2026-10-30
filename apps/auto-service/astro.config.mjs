@@ -52,4 +52,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  experimental: {
+    incrementalBuild: true,
+  },
 });

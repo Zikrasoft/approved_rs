@@ -14,6 +14,7 @@ import LeadModal from '@/components/LeadModal.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { getCollection } from 'astro:content';
 import { sourcingWorks } from '@/utils/works';
+import { partCacheKey } from '@/utils/cacheKey';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { formatMoney } from '@/utils/money';
@@ -46,18 +47,21 @@ import { schemaAvailability } from '@/utils/leadTime';
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
   const places = await cataloguePagesForBuild();
+  const works = await getCollection('works');
   const bySlug = new Map(pages.map((page) => [page.slug, page]));
   return withLocales(
-    pages.map((page) => ({
-      params: { slug: page.slug },
-      props: {
+    pages.map((page) => {
+      const rendered = {
         page,
         successor: partSuccessor(page, bySlug),
         replacements: currentNumbers(page, bySlug),
-        bySlug,
-        places,
-      },
-    })),
+      };
+      return {
+        params: { slug: page.slug },
+        props: { ...rendered, bySlug, places },
+        cacheKey: partCacheKey(rendered, { bySlug, places, works }),
+      };
+    }),
   );
 }
 
