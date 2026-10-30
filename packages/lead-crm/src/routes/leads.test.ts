@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import { MAX_SERVICES } from '../form.ts';
 import { createLeadsRoute } from './leads.ts';
+import {
+  ORDER_CANCELED,
+  ORDER_ID_FIELD,
+  ORDER_OUTCOME_FIELD,
+} from '../fields.ts';
 
 type Locale = 'ru' | 'en' | 'sr';
 
@@ -404,5 +409,73 @@ describe('createLeadsRoute', () => {
 
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
     resolveNotify();
+  });
+});
+
+describe('a shop Order cancelled in the shop admin', () => {
+  const cancelOrder = vi.fn();
+  const cancelPOST = createLeadsRoute<Locale>({
+    notifyLead,
+    waitUntil,
+    isLocale: (value): value is Locale => LOCALES.includes(value),
+    defaultLocale: 'ru',
+    localeCookie: 'lang',
+    thanksPath: (locale) => `/${locale}/thanks/`,
+    missingFieldsMessage: { ru: 'ru', en: 'en', sr: 'sr' },
+    orderCanceled: { secret: 'shop-secret', cancel: cancelOrder },
+  });
+
+  const cancelCtx = (authorization?: string) => {
+    const ctx = makeCtx({
+      [ORDER_ID_FIELD]: 'order_01',
+      [ORDER_OUTCOME_FIELD]: ORDER_CANCELED,
+    });
+    if (authorization) ctx.request.headers.set('authorization', authorization);
+    return ctx;
+  };
+
+  beforeEach(() => {
+    cancelOrder.mockReset().mockResolvedValue('lost');
+    notifyLead.mockReset();
+  });
+
+  it('marks the Lead lost when the shop proves who it is', async () => {
+    const response = await cancelPOST(cancelCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(204);
+    expect(cancelOrder).toHaveBeenCalledWith('order_01');
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
+  it('answers 404 while no Lead carries the Order, so the shop retries', async () => {
+    cancelOrder.mockResolvedValue('missing');
+
+    const response = await cancelPOST(cancelCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(404);
+  });
+
+  it('answers 409 for a won Lead, so the shop never takes it for lost', async () => {
+    cancelOrder.mockResolvedValue('won');
+
+    const response = await cancelPOST(cancelCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(409);
+  });
+
+  it.each([undefined, 'Bearer wrong', 'shop-secret'])(
+    'refuses a cancel without the shop secret (%s)',
+    async (authorization) => {
+      const response = await cancelPOST(cancelCtx(authorization));
+
+      expect(response.status).toBe(401);
+      expect(cancelOrder).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses a cancel on a site that takes none', async () => {
+    const response = await POST(cancelCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(401);
   });
 });

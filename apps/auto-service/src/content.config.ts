@@ -14,20 +14,34 @@ const translationSchema = z
 const works = defineCollection({
   loader: glob({ pattern: '*/index.md', base: './src/content/works' }),
   schema: ({ image }) =>
-    z.object({
-      title: z.string().trim().min(1),
-      translations: z
-        .object({ sr: translationSchema, en: translationSchema })
-        .optional(),
-      car: z.string(),
-      year: z.number().optional(),
-      servicesApplied: z.array(z.enum(SERVICE_SLUGS)).default([]),
-      image: image(),
-      gallery: z.array(image()).default([]),
-      date: z.coerce.date(),
-      published: z.boolean().default(true),
-      translatedFrom: z.string().optional(),
-    }),
+    z
+      .object({
+        title: z.string().trim().min(1),
+        translations: z
+          .object({ sr: translationSchema, en: translationSchema })
+          .optional(),
+        car: z.string(),
+        year: z.number().optional(),
+        servicesApplied: z.array(z.enum(SERVICE_SLUGS)).default([]),
+        parts: z
+          .array(
+            z.object({
+              brand: z.string().trim().min(1),
+              number: z.string().trim().min(1),
+            }),
+          )
+          .default([]),
+        priceRsd: z.number().int().positive().optional(),
+        image: image().optional(),
+        gallery: z.array(image()).default([]),
+        date: z.coerce.date(),
+        published: z.boolean().default(true),
+        translatedFrom: z.string().optional(),
+      })
+      .refine(({ published, image }) => !published || image, {
+        message: 'A published Work needs a photo',
+        path: ['image'],
+      }),
 });
 
 export const collections = { works };

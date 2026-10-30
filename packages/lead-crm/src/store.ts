@@ -562,6 +562,42 @@ export function createLeadStore({
       );
     },
 
+    settleOrder(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderSettled: status,
+      }));
+    },
+
+    markOrderConflict(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderConflict: status,
+      }));
+    },
+
+    loseOrderLead(orderId: string): Promise<StoredLead | undefined> {
+      return updateMatching(
+        (l) => l.orderId === orderId && l.status !== 'won',
+        (l) => ({
+          ...l,
+          ...(l.status === 'lost'
+            ? {}
+            : {
+                ...(l.status === 'postponed' ? resumePatch(l) : {}),
+                ...statusPatch('lost'),
+              }),
+          orderSettled: 'lost',
+        }),
+      );
+    },
+
     recordOwnerReply(
       id: number,
       at: Date = new Date(),

@@ -15,6 +15,7 @@ import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -30,6 +31,7 @@ export async function getStaticPaths() {
         vehicle: car.vehicle.slug ?? car.vehicle.id,
       },
       props: { car },
+      cacheKey: cacheKey(car),
     })),
   );
 }
@@ -136,7 +138,7 @@ const specsSummary = [
       {
         kit.length > 0 && (
           <parts-list-add-all
-            class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+            class="card flex flex-col gap-4 border-signal/40 bg-signal/5 p-5 sm:p-6"
             data-car={name}
           >
             <div class="flex flex-col gap-1">
@@ -187,16 +189,13 @@ const specsSummary = [
               <a
                 href={PathBuilder.partsInquiry(locale)}
                 class:list={[
-                  'group/ask btn w-full sm:w-auto',
+                  'btn w-full sm:w-auto',
                   kitBuyable ? 'btn-secondary' : 'btn-primary',
                 ]}
                 data-add-all
               >
                 {copy.kitAdd}
-                <Icon
-                  name="arrowRight"
-                  class="group-[.btn-secondary]/ask:hidden"
-                />
+                <Icon name="arrowRight" />
               </a>
             </div>
           </parts-list-add-all>

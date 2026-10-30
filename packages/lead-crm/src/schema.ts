@@ -125,6 +125,8 @@ const baseStoredLeadSchema = z.object({
   metaIds: metaIdsSchema.nullable().default(null).catch(null),
   metaLeadSentAt: z.string().nullable().default(null).catch(null),
   orderId: z.string().nullable().optional().catch(undefined),
+  orderSettled: z.enum(['won', 'lost']).optional().catch(undefined),
+  orderConflict: z.enum(['won', 'lost']).optional().catch(undefined),
   archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
   postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),

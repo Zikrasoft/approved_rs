@@ -79,6 +79,8 @@ const envFields = z.object({
     .pipe(z.number().int().positive()),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
+  SHOP_LEAD_SECRET: optionalSecret,
+  SHOP_ORDER_OUTCOME_SECRET: optionalSecret,
   VIN_DECODERS: z
     .string()
     .default(VIN_DECODER_NAMES.join(','))

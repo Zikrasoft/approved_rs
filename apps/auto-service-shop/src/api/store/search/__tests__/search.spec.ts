@@ -12,6 +12,7 @@ type Result = {
   value: string;
   superseded: boolean;
   thumbnail: string | null;
+  thumbnail_illustration: boolean | null;
   brand: { slug: string };
   part: { id: string; name: string; category: { name: string } | null };
 };
@@ -279,15 +280,18 @@ medusaIntegrationTestRunner({
             ...(await results({ q: '13718511877', locale: 'ru' })),
             ...(await results({ q: 'HU816X', locale: 'ru' })),
             ...(await results({ q: '11428575211', locale: 'ru' })),
-          ].map(({ value, thumbnail }) => [value, thumbnail]),
+          ].map(({ value, thumbnail, thumbnail_illustration }) => [
+            value,
+            [thumbnail, thumbnail_illustration],
+          ]),
         );
 
         expect(thumbnails).toEqual({
-          '15F6E3': 'http://localhost/static/edge-160.webp',
-          '15C94E': 'http://localhost/static/oil-160.webp',
-          '13 71 8511877': null,
-          'HU 816 x': 'http://localhost/static/mann-160.webp',
-          '11 42 8575211': 'https://cdn.supplier.test/bmw.jpg',
+          '15F6E3': ['http://localhost/static/edge-160.webp', false],
+          '15C94E': ['http://localhost/static/oil-160.webp', true],
+          '13 71 8511877': [null, false],
+          'HU 816 x': ['http://localhost/static/mann-160.webp', false],
+          '11 42 8575211': ['https://cdn.supplier.test/bmw.jpg', false],
         });
       });
 

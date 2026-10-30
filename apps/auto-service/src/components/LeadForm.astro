@@ -1,17 +1,16 @@
 ---
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import { localeFrom } from '@/i18n/config';
-import Icon from './Icon.astro';
 import LeadFormHidden from './LeadFormHidden.astro';
 import ContactChannelField from './ContactChannelField.astro';
 import ConsentField from './ConsentField.astro';
 import VinField from './VinField.astro';
-import { VIN_INQUIRY_SERVICE, type ServiceSlug } from '@/utils/services';
+import type { ServiceSlug } from '@/utils/services';
 import { SERVICE_FIELD } from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
 
 interface Props {
-  service?: ServiceSlug | typeof VIN_INQUIRY_SERVICE;
+  service?: ServiceSlug;
   compact?: boolean;
   comment?: string;
   commentLabel?: string;
@@ -89,7 +88,6 @@ const uid = crypto.randomUUID().slice(0, 8);
         class="btn btn-primary w-full disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2 aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
       >
         <span data-submit-label>{submitLabel ?? site.form.submit}</span>
-        <Icon name="arrowRight" />
       </button>
     </div>
   </form>

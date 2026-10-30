@@ -53,13 +53,13 @@ translations:
       <ul class="icon-check">
       <li>proveri stvarnog pređenog broja kilometara i upoređivanju podataka iz elektronskih blokova;</li>
       <li>dijagnostici motora i elektronskih sistema kroz BMW ISTA;</li>
-      <li>proveri stanja lanca razdvajanja;</li>
+      <li>proveri stanja lanca razvodnog mehanizma;</li>
       <li>proveri EGR sistema;</li>
       <li>analizi grešaka, tehničkih parametara i stanja osnovnih sklopova automobila;</li>
       <li>generalnoj proceni tehničkog stanja pre kupovine.</li>
       </ul>
 
-      Rezultati provere su nas obradovali. **Pređeni broj kilometara se pokazao kao originalan, bez znakova prepravke, lanac razdvajanja je bio u dobrom stanju, a provere EGR i drugih važnih sistema nisu otkrile kritične probleme.**\
+      Rezultati provere su nas obradovali. **Pređeni broj kilometara se pokazao kao originalan, bez znakova prepravke, lanac razvodnog mehanizma je bio u dobrom stanju, a provere EGR i drugih važnih sistema nisu otkrile kritične probleme.**\
       Pritom, posebnu pažnju prilikom auto-sourcinga posvećujemo i pregledu automobila sa donje strane. Gotovo svi automobili koje razmatramo za kupovinu proveravamo na dizalici. To omogućava da se proceni stanje ogibljenja, podvozja, prisustvo curenja ulja i tehničkih tečnosti, oštećenja i drugih nedostataka koje nije moguće potpuno uočiti tokom običnog pregleda.\
       **Zaključak našeg izbora za Viktora: BMW X3, 2.0 dizel, lepa siva boja, originalni pređeni kilometri i dobro tehničko stanje.**\
       Čestitamo Viktoru na kupovini i želimo mu uživanje u svakoj vožnji!\
@@ -119,12 +119,12 @@ translations:
 translatedFrom: c674721511dc811d
 ---
 **Автоподбор в Сербии. Как мы искали BMW 3 серии, а в итоге купили BMW X3 с оригинальным пробегом!**\
-К нам обратился Виктор с запросом на подбор BMW 3 серии в Сербии. Мы обсудили бюджет, пожелания к автомобилю и особенности эксплуатации. В процессе общения предложили рассмотреть ещё и BMW X3, поскольку бюджет позволял, а по своим характеристикам X3 мог стать более универсальным и практичным вариантом.\
+К нам обратился Виктор с запросом на подбор BMW 3 серии в Сербии. Мы обсудили бюджет, пожелания к автомобилю и особенности эксплуатации. В процессе общения предложили рассмотреть еще и BMW X3, поскольку бюджет позволял, а по своим характеристикам X3 мог стать более универсальным и практичным вариантом.\
 Чтобы Виктор мог сравнить автомобили не только по фотографиям и объявлениям, мы прокатились на BMW X3. Машина ему очень понравилась, и было решено расширить поиск.\
-Мы подобрали несколько интересных вариантов BMW 3 серии, а Виктор самостоятельно нашёл и прислал нам ещё один BMW X3 для проверки. После рассмотрения нескольких автомобилей выбор остановился на красивом сером **BMW X3 с двухлитровым дизельным двигателем**.\
+Мы подобрали несколько интересных вариантов BMW 3 серии, а Виктор самостоятельно нашел и прислал нам еще один BMW X3 для проверки. После рассмотрения нескольких автомобилей выбор остановился на красивом сером **BMW X3 с двухлитровым дизельным двигателем**.\
 **Проверка BMW перед покупкой в Сербии**\
 Покупка подержанного BMW требует особенно внимательной диагностики. В Сербии достаточно автомобилей со скрученным пробегом, скрытыми техническими проблемами и сомнительной историей обслуживания. Поэтому мы не останавливаемся на внешнем виде: проверяем, подтверждается ли пробег и насколько машина исправна технически.\
-Выбранный BMW X3 прошёл комплексную проверку, включая диагностику с использованием оригинального программного обеспечения **BMW ISTA**.\
+Выбранный BMW X3 прошел комплексную проверку, включая диагностику с использованием оригинального программного обеспечения **BMW ISTA**.\
 В ходе проверки мы уделили особое внимание:
 
 <ul class="icon-check">
@@ -137,7 +137,7 @@ translatedFrom: c674721511dc811d
 </ul>
 
 Результаты проверки нас порадовали. **Пробег оказался оригинальным, без признаков скрутки, цепь ГРМ находилась в хорошем состоянии, а проверка EGR и остальных важных систем не выявила критичных проблем.**\
-Отдельное внимание при автоподборе мы уделяем осмотру автомобиля снизу. Практически все автомобили, которые мы рассматриваем к покупке, проверяем на подъёмнике. Это позволяет оценить состояние подвески, днища, наличие течей масла и технических жидкостей, повреждений и других дефектов, которые невозможно полноценно увидеть при обычном осмотре.\
+Отдельное внимание при автоподборе мы уделяем осмотру автомобиля снизу. Практически все автомобили, которые мы рассматриваем к покупке, проверяем на подъемнике. Это позволяет оценить состояние подвески, днища, наличие течей масла и технических жидкостей, повреждений и других дефектов, которые невозможно полноценно увидеть при обычном осмотре.\
 **Итог нашего подбора для Виктора: BMW X3, 2.0 дизель, красивый серый цвет, оригинальный пробег и хорошее техническое состояние.**\
 Виктора поздравляем с покупкой и желаем получать удовольствие от каждой поездки!\
 Если вам нужен **автоподбор в Сербии, проверка автомобиля перед покупкой в Белграде или помощь с покупкой подержанного BMW**, обращайтесь. Поможем найти достойный автомобиль и снизить риски покупки машины со скрытыми проблемами.

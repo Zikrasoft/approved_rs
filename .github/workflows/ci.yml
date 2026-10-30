@@ -29,6 +29,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
+      - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
+      - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
       - uses: ./.github/actions/setup-auto-service-shop-env
       - run: pnpm typecheck
       - run: pnpm test
@@ -404,6 +406,12 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
         if: steps.guard.outputs.deploy == 'true'
+      - uses: actions/cache@v4
+        if: steps.guard.outputs.deploy == 'true' && matrix.app == 'auto-service'
+        with:
+          path: apps/auto-service/node_modules/.astro
+          key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: astro-carlab-${{ github.ref_name }}-
       - run: pnpm exec vercel pull --yes --environment=production
         if: steps.guard.outputs.deploy == 'true'
       - id: backend

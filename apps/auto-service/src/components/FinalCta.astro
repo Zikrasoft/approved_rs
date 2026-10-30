@@ -1,6 +1,7 @@
 ---
 import LeadForm from './LeadForm.astro';
 import ContactChannels from './ContactChannels.astro';
+import SocialLinks from './SocialLinks.astro';
 import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
@@ -20,7 +21,10 @@ const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
       <h2 class="text-section">{heading}</h2>
       <p class="max-w-md text-base leading-relaxed text-muted">{body}</p>
       <ContactChannels class="mt-2" service={service} />
+      <SocialLinks class="mt-2" />
     </div>
-    <LeadForm service={service} commentPlaceholder={commentPlaceholder} />
+    <slot name="form">
+      <LeadForm service={service} commentPlaceholder={commentPlaceholder} />
+    </slot>
   </div>
 </section>

@@ -91,13 +91,14 @@ const stepper =
           class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
         >
           {copy.emptyCta}
+          <Icon name="arrowRight" />
         </a>
       </div>
 
       <div data-state="ordered" hidden class={`${panel} gap-5`}>
         <div class="flex items-center gap-3">
           <span
-            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-go/10 text-go"
+            class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-go/10 text-go"
           >
             <Icon name="check" size={18} />
           </span>
@@ -151,7 +152,7 @@ const stepper =
               </div>
             </dl>
           </section>
-          <div class="grid gap-5 rounded-field bg-shade p-4 sm:grid-cols-2">
+          <div class="grid gap-5 rounded-control bg-shade p-4 sm:grid-cols-2">
             <section class="flex flex-col gap-1.5">
               <h3 class="text-sm font-semibold text-muted">
                 {copy.pickupStep}
@@ -175,6 +176,7 @@ const stepper =
           class="btn btn-primary w-full sm:w-auto sm:self-start"
         >
           {copy.orderedCta}
+          <Icon name="arrowRight" />
         </a>
       </div>
 
@@ -318,7 +320,10 @@ const stepper =
             <span class="text-xs text-muted">{copy.totalLabel}</span>
             <span class="spec text-lg font-semibold text-ink" data-total></span>
           </div>
-          <a href="#checkout" class="btn btn-primary">{copy.stickyCta}</a>
+          <a href="#checkout" class="btn btn-primary">
+            {copy.stickyCta}
+            <Icon name="arrowRight" />
+          </a>
         </div>
       </div>
     </offer-cart>

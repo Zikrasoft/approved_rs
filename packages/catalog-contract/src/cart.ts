@@ -69,6 +69,26 @@ export const placedOrderResponseSchema = z.object({
   order: z.object({ id: z.string(), display_id: z.number().int() }),
 });
 
+export const orderCaseSummaryResponseSchema = z.object({
+  summary: z.object({
+    display_id: z.number().int(),
+    car: z
+      .object({
+        make: z.string(),
+        model: z.string(),
+        year: z.number().int().nullable().default(null),
+      })
+      .nullable()
+      .default(null),
+    parts: z.array(z.object({ brand: z.string(), number: z.string() })),
+    total_rsd: z.number().int().nullable().default(null),
+  }),
+});
+
+export type OrderCaseSummary = z.infer<
+  typeof orderCaseSummaryResponseSchema
+>['summary'];
+
 export const partOffersResponseSchema = z.object({
   offers: z.array(partOfferSchema),
 });

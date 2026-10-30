@@ -9,6 +9,7 @@ vi.mock('astro:content', () => ({
       data: {
         title: 'BMW X5 — плёнка PPF',
         published: true,
+        image: { src: '/image.jpg' },
         date: new Date('2026-01-01'),
         translations: { sr: { title: 'BMW X5 — PPF folija', body: 'Telo.' } },
       },
@@ -38,6 +39,12 @@ describe('generateLlmsTxt', () => {
       for (const slug of SERVICE_SLUGS)
         expect(body).toContain(`/${locale}/services/${slug}/)`);
     }
+  });
+
+  it('lists Parts sourcing among the services', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Подбор запчастей](https://carlab.rs/ru/services/vin-parts-inquiry/)',
+    );
   });
 
   it('links each published work by its localized title, leaving drafts out', async () => {
@@ -73,7 +80,6 @@ describe('generateLlmsTxt', () => {
   const withBackend = async (
     shopOpen: string,
     locale: 'sr' | 'ru' = 'sr',
-    extraVehicles: unknown[] = [],
     fitted: string[] = ['veh_1'],
   ) => {
     const numbers = ['HU816X', 'HU7020Z', 'HU6004X'];
@@ -186,7 +192,6 @@ describe('generateLlmsTxt', () => {
             identifiers: [],
             requirements: [],
           },
-          ...extraVehicles,
         ],
       },
     };
@@ -218,113 +223,20 @@ describe('generateLlmsTxt', () => {
     });
   };
 
-  it('lists the Category pages and the Make hubs', async () => {
+  it('lists the Category pages and the page of every Make, but no Make, Model or Vehicle page', async () => {
     const body = await withBackend('true');
 
     expect(body).toContain(
-      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor. Zamena ulja: 2.500 RSD',
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor. Zamena ulja: 2.500 RSD',
     );
-    expect(body).toContain('[BMW](https://carlab.rs/sr/parts/bmw/)');
-  });
-
-  it('links the page of every Make', async () => {
-    expect(await withBackend('true', 'ru')).toContain(
-      '[Все марки](https://carlab.rs/ru/parts/makes/)',
-    );
-  });
-
-  it('leaves out a Make and a Model with too few Parts for a page', async () => {
-    const body = await withBackend('true', 'sr', [], []);
-
+    expect(body).toContain('](https://carlab.rs/sr/parts/makes/)');
     expect(body).not.toContain('https://carlab.rs/sr/parts/bmw/');
   });
 
-  it('lists a Model page, and its Vehicle pages only when several of them have one', async () => {
-    const alone = await withBackend('true');
-    expect(alone).toContain(
-      '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
-    );
-    expect(alone).not.toContain('/m/');
+  it('leaves the page of every Make out while no Make has enough Parts for a page', async () => {
+    const body = await withBackend('true', 'sr', []);
 
-    const several = await withBackend(
-      'true',
-      'sr',
-      [
-        {
-          id: 'veh_2',
-          slug: 'b47d20o0-110kw',
-          power_kw: 110,
-          drive: 'rwd',
-          market: 'EU',
-          year_from: 2015,
-          year_to: 2019,
-          steering: 'left',
-          model: {
-            slug: 'f30-320d',
-            name: '320d',
-            chassis: {
-              code: 'F30',
-              body_style: 'sedan',
-              series: {
-                name: '3 серия',
-                translations: null,
-                make: { slug: 'bmw', name: 'BMW' },
-              },
-            },
-          },
-          engine: {
-            code: 'B47D20O0',
-            family: 'B47',
-            fuel: 'diesel',
-            displacement_cc: 1995,
-          },
-          identifiers: [],
-          requirements: [],
-        },
-        {
-          id: 'veh_3',
-          slug: 'b47d20o0-100kw',
-          power_kw: 100,
-          drive: 'rwd',
-          market: 'EU',
-          year_from: 2015,
-          year_to: 2019,
-          steering: 'left',
-          model: {
-            slug: 'f30-320d',
-            name: '320d',
-            chassis: {
-              code: 'F30',
-              body_style: 'sedan',
-              series: {
-                name: '3 серия',
-                translations: null,
-                make: { slug: 'bmw', name: 'BMW' },
-              },
-            },
-          },
-          engine: {
-            code: 'B47D20O0',
-            family: 'B47',
-            fuel: 'diesel',
-            displacement_cc: 1995,
-          },
-          identifiers: [],
-          requirements: [],
-        },
-      ],
-      ['veh_1', 'veh_2'],
-    );
-    expect(several).toContain(
-      '[BMW 3 серия F30 320d](https://carlab.rs/sr/parts/bmw/f30-320d/)',
-    );
-    expect(several).toContain(
-      '[BMW 3 серия F30 320d, B47D20O0, 140 kW, 2015–2019](https://carlab.rs/sr/parts/bmw/f30-320d/m/b47d20o0-140kw/)',
-    );
-    expect(several).toContain(
-      '](https://carlab.rs/sr/parts/bmw/f30-320d/m/b47d20o0-110kw/)',
-    );
-    expect(several).not.toContain('/m/b47d20o0-100kw/');
+    expect(body).not.toContain('https://carlab.rs/sr/parts/makes/');
   });
 
   it('names the installation price of a Category beside its add-on service', async () => {
@@ -339,11 +251,11 @@ describe('generateLlmsTxt', () => {
     const body = await withBackend('false');
 
     expect(body).toContain(
-      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/) — Ulje za motor.\n',
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor.\n',
     );
     expect(body).not.toContain('RSD');
     expect(await generateLlmsTxt('ru')).toContain(
-      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цен на сайте нет',
+      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цен на сайте нет',
     );
     expect(await generateLlmsTxt('ru')).toContain(
       'Запчасти заказывают только по заявке',
@@ -362,13 +274,13 @@ describe('generateLlmsTxt', () => {
     vi.stubEnv('SHOP_OPEN', 'true');
     const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());
     expect(body).toContain(
-      '](https://carlab.rs/ru/parts/) — Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО',
+      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО',
     );
   });
 
   it('describes the one catalogue search and how to query it', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '[Поиск запчастей](https://carlab.rs/ru/parts/search/) — Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: https://carlab.rs/ru/parts/search/?q=HU+816+x',
+      '[Поиск запчастей](https://carlab.rs/ru/parts/search/): Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: https://carlab.rs/ru/parts/search/?q=HU+816+x',
     );
   });
 

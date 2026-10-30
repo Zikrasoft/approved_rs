@@ -2,12 +2,14 @@ import { defineWidgetConfig } from '@medusajs/admin-sdk';
 import type { AdminOrder, DetailWidgetProps } from '@medusajs/framework/types';
 import {
   Badge,
+  Button,
   Container,
   Copy,
   Heading,
   StatusBadge,
   Text,
 } from '@medusajs/ui';
+import { CARLAB } from '@podbor/brands';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -109,6 +111,20 @@ const CarlabOrderWidget = ({ data }: DetailWidgetProps<AdminOrder>) => {
         <Heading level="h2">{t('order.heading')}</Heading>
         <LeadStatus lead={order.lead} compact />
       </div>
+
+      {data.status === 'completed' && (
+        <div className="px-6 py-4">
+          <Button size="small" variant="secondary" asChild>
+            <a
+              href={`${CARLAB.url}/admin/work-draft?${new URLSearchParams({ order: data.id })}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('order.makeCase')}
+            </a>
+          </Button>
+        </div>
+      )}
 
       {order.cash_at_pickup && (
         <div className="flex flex-col gap-y-1 px-6 py-4">

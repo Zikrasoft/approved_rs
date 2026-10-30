@@ -66,9 +66,16 @@ const response = await fetch(
   },
 );
 
-const data = await response.json();
+const botApiResponseSchema = z.object({
+  ok: z.boolean(),
+  result: z.unknown().optional(),
+  description: z.string().optional(),
+});
+
+const data = botApiResponseSchema.parse(await response.json());
 console.log('setWebhook result:', JSON.stringify(data, null, 2));
+if (!data.ok) process.exit(1);
 
 const info = await fetch(`https://api.telegram.org/bot${token}/getWebhookInfo`);
-const infoData = await info.json();
+const infoData = botApiResponseSchema.parse(await info.json());
 console.log('Webhook info:', JSON.stringify(infoData.result, null, 2));

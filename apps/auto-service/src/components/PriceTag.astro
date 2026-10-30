@@ -59,7 +59,12 @@ const availability =
       <span class="text-xs text-ink-2">{availability}</span>
     </span>
   ) : (
-    <span class:list={['text-right text-xs text-muted', className]}>
+    <span
+      class:list={[
+        'text-right text-sm font-semibold whitespace-nowrap text-signal-ink',
+        className,
+      ]}
+    >
       {copy.priceOnRequestTag}
     </span>
   )

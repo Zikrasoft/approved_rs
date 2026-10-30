@@ -6,6 +6,7 @@ import {
   offerCartResponseSchema,
   identifierOffersResponseSchema,
   partOffersResponseSchema,
+  orderCaseSummaryResponseSchema,
   placedOrderResponseSchema,
 } from './cart.ts';
 import { cartFingerprint } from './fingerprint.ts';
@@ -255,5 +256,36 @@ describe('cartFingerprint', () => {
         { ...line('a', 2, 50), installation: { item_id: null, unit_price: 0 } },
       ]),
     ).toBe(cartFingerprint([line('a', 2, 50)]));
+  });
+});
+
+describe('orderCaseSummaryResponseSchema', () => {
+  it('reads the car, the Parts and the RSD total of a completed Order', () => {
+    expect(
+      orderCaseSummaryResponseSchema.parse({
+        summary: {
+          display_id: 7,
+          car: { make: 'BMW', model: '3 серия F30 320d', year: 2016 },
+          parts: [{ brand: 'MANN-FILTER', number: 'HU 816 x' }],
+          total_rsd: 3700,
+          vin: 'WBA8E9G50GNT12345',
+        },
+      }),
+    ).toEqual({
+      summary: {
+        display_id: 7,
+        car: { make: 'BMW', model: '3 серия F30 320d', year: 2016 },
+        parts: [{ brand: 'MANN-FILTER', number: 'HU 816 x' }],
+        total_rsd: 3700,
+      },
+    });
+  });
+
+  it('reads a shop that sends no car and no total yet', () => {
+    expect(
+      orderCaseSummaryResponseSchema.parse({
+        summary: { display_id: 7, parts: [] },
+      }).summary,
+    ).toEqual({ display_id: 7, car: null, parts: [], total_rsd: null });
   });
 });

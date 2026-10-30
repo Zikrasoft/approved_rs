@@ -11,9 +11,7 @@ interface Props {
 const { class: className } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).partsSearch;
-const priceNote = shopOpen()
-  ? null
-  : content(locale).shopPart.priceOnRequestBody;
+const priceNote = shopOpen() ? null : content(locale).shopPart.orderBody;
 ---
 
 <p class:list={['text-sm leading-relaxed text-muted', className]}>

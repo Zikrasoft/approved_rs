@@ -2,10 +2,8 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import {
-  isKnownCaseDir,
-  isValidSlug,
+  galleryPhotoSchema,
   KEYSTATIC_AUTH_COOKIE,
-  SAFE_GALLERY_FILENAME,
 } from '@/utils/adminGallery';
 import { getGithubFileBuffer, GithubApiError } from '@/lib/githubContents';
 
@@ -22,18 +20,11 @@ const MIME_BY_EXT: Record<string, string> = {
 // prod fetches it from GitHub through the same auth-cookie gate as the rest
 // of this tool, since Vercel's fs never has these files.
 export async function GET({ request, cookies }: APIContext): Promise<Response> {
-  const url = new URL(request.url);
-  const dir = url.searchParams.get('dir') ?? '';
-  const slug = url.searchParams.get('slug') ?? '';
-  const file = url.searchParams.get('file') ?? '';
-
-  if (
-    !isKnownCaseDir(dir) ||
-    !isValidSlug(slug) ||
-    !SAFE_GALLERY_FILENAME.test(file)
-  ) {
-    return new Response('Bad request', { status: 400 });
-  }
+  const query = galleryPhotoSchema.safeParse(
+    Object.fromEntries(new URL(request.url).searchParams),
+  );
+  if (!query.success) return new Response('Bad request', { status: 400 });
+  const { dir, slug, file } = query.data;
   const ext = file.slice(file.lastIndexOf('.') + 1);
   const contentType = MIME_BY_EXT[ext];
   if (!contentType) {

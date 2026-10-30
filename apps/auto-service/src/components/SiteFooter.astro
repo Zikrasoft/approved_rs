@@ -12,6 +12,7 @@ import {
 } from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
+import SocialLinks from './SocialLinks.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
 
@@ -112,6 +113,7 @@ const channels = [
         <span class="block text-xs text-ink-2">{site.footer.hoursHeading}</span>
         {site.footer.hours}
       </p>
+      <SocialLinks class="mt-2" />
     </div>
   </div>
 

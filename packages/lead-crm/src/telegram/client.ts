@@ -5,16 +5,6 @@ import type { Keyboard } from './markup.ts';
 
 export type SendExtra = Parameters<Api['sendMessage']>[2];
 
-export function parseIds(value: string | undefined): number[] {
-  if (!value) return [];
-  return value
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map(Number)
-    .filter(Number.isFinite);
-}
-
 export function isMessageGone(err: unknown): boolean {
   return (
     err instanceof GrammyError &&

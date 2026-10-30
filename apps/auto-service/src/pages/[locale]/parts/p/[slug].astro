@@ -10,8 +10,15 @@ import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
+import LeadModal from '@/components/LeadModal.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import { getCollection } from 'astro:content';
+import { sourcingWorks } from '@/utils/works';
+import { partCacheKey } from '@/utils/cacheKey';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { formatMoney } from '@/utils/money';
+import { installationService } from '@/utils/services';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { fitGroups } from '@/utils/fitGroups';
@@ -20,7 +27,12 @@ import {
   partPagesForBuild,
 } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
-import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
+import {
+  imageAlt,
+  partGallery,
+  partPicture,
+  partThumbnail,
+} from '@/utils/partImages';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
@@ -35,18 +47,21 @@ import { schemaAvailability } from '@/utils/leadTime';
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
   const places = await cataloguePagesForBuild();
+  const works = await getCollection('works');
   const bySlug = new Map(pages.map((page) => [page.slug, page]));
   return withLocales(
-    pages.map((page) => ({
-      params: { slug: page.slug },
-      props: {
+    pages.map((page) => {
+      const rendered = {
         page,
         successor: partSuccessor(page, bySlug),
         replacements: currentNumbers(page, bySlug),
-        bySlug,
-        places,
-      },
-    })),
+      };
+      return {
+        params: { slug: page.slug },
+        props: { ...rendered, bySlug, places },
+        cacheKey: partCacheKey(rendered, { bySlug, places, works }),
+      };
+    }),
   );
 }
 
@@ -84,23 +99,15 @@ const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
 const gallery = partGallery(page);
-const shown =
-  gallery.length > 0
-    ? {
-        images: gallery,
-        alt: imageAlt(page.brand.name, page.value, partName),
-        note: undefined,
-      }
-    : category?.image
-      ? {
-          images: partGallery({
-            images: [category.image],
-            supplier_data: { images: [] },
-          }),
-          alt: translated(category, 'name', locale),
-          note: copy.categoryIllustration,
-        }
-      : null;
+const picture = partPicture(page, category);
+const shown = picture && {
+  images: picture.images,
+  alt:
+    picture.illustration && category
+      ? translated(category, 'name', locale)
+      : imageAlt(page.brand.name, page.value, partName),
+  note: picture.illustration ? copy.categoryIllustration : undefined,
+};
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
   href: pageLinks.vehicle(vehicle),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
@@ -147,6 +154,18 @@ const [noticeBefore, noticeAfter] = (
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const equivalents = splitNumbers(page.equivalents);
+const installation = page.part.installation_price;
+const cart = content(locale).shopCart;
+const installPrice =
+  installation === null
+    ? null
+    : installation === 0
+      ? { label: cart.installationFree, price: null }
+      : {
+          label: cart.installationLabel,
+          price: formatMoney(installation, 'RSD', BCP47_BY_LOCALE[locale]),
+        };
+const works = sourcingWorks(await getCollection('works'), page);
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
   return entry ? partThumbnail(entry, entry.category) : null;
@@ -180,7 +199,7 @@ const thumbFor = (slug: string) => {
   />
 
   <section
-    class="wrap grid gap-6 pt-6 md:pt-band-lg lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-x-10 lg:gap-y-10"
+    class="wrap grid gap-6 pt-6 md:pt-band lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-x-10 lg:gap-y-10"
   >
     {
       shown && (
@@ -195,7 +214,7 @@ const thumbFor = (slug: string) => {
     >
       {
         (replacement || page.superseded) && (
-          <div class="card flex flex-col gap-3 border-l-4 border-l-signal p-5 sm:p-6">
+          <div class="card flex flex-col gap-3 border-signal/40 bg-signal/5 p-5 sm:p-6">
             <p class="text-base leading-snug text-ink">
               {noticeBefore}
               <span class="font-semibold whitespace-nowrap">
@@ -215,7 +234,7 @@ const thumbFor = (slug: string) => {
                     <li>
                       <a
                         href={PathBuilder.partNumber(locale, number.slug)}
-                        class="group flex min-h-11 items-center justify-between gap-3 rounded-field px-2 text-ink hover:bg-shade hover:text-signal-ink"
+                        class="group flex min-h-11 items-center justify-between gap-3 rounded-control px-2 text-ink hover:bg-shade hover:text-signal-ink"
                       >
                         <span>
                           {number.brand.name}{' '}
@@ -258,6 +277,29 @@ const thumbFor = (slug: string) => {
         pages={[page, ...(successor ? [successor] : [])]}
         installation={{ id: page.id, price: page.part.installation_price }}
       />
+      <div class="card flex flex-col gap-3 p-5 sm:p-6">
+        <h2 class="text-block font-semibold">{copy.installHeading}</h2>
+        {
+          installPrice && (
+            <p class="flex items-baseline justify-between gap-3 text-sm text-ink">
+              <span>{installPrice.label}</span>
+              {installPrice.price && (
+                <span class="spec shrink-0 font-semibold">
+                  {installPrice.price}
+                </span>
+              )}
+            </p>
+          )
+        }
+        <p class="text-sm leading-relaxed text-ink-2">{copy.installBody}</p>
+        <button
+          type="button"
+          data-open-install-modal
+          class="btn btn-secondary mt-1 w-full sm:w-auto sm:self-start"
+        >
+          {copy.installCta}
+        </button>
+      </div>
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1">
@@ -398,7 +440,7 @@ const thumbFor = (slug: string) => {
             <h2 class="text-section">{copy.crossReferencesHeading}</h2>
             <ul class="flex flex-wrap gap-2">
               {crossReferences.map((reference) => (
-                <li class="rounded-field bg-shade px-3 py-1.5 text-sm text-ink">
+                <li class="rounded-control bg-shade px-3 py-1.5 text-sm text-ink">
                   <span class="font-semibold">{reference.brand}</span>{' '}
                   <span class="spec">{reference.number}</span>
                 </li>
@@ -486,7 +528,20 @@ const thumbFor = (slug: string) => {
     }
   </section>
 
+  {
+    works.length > 0 && (
+      <section class="wrap pb-band md:pb-band-lg">
+        <h2 class="text-section">{copy.worksHeading}</h2>
+        <WorkGrid works={works} class="mt-6" />
+      </section>
+    )
+  }
+
   <PartsInquiryModal />
+  <LeadModal
+    trigger="[data-open-install-modal]"
+    service={installationService(category)}
+  />
 </Shell>
 
 <script>

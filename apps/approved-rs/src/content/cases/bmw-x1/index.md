@@ -32,7 +32,7 @@ translations:
 
       Tokom tog vremena, zahtevi za budući automobil su se promenili. Prvobitno je Viktor razmatrao **Peugeot**, međutim nakon razgovora o svim prednostima i manama odlučio je da obrati pažnju na pouzdaniju opciju — **BMW X1**.
 
-      Zahvaljujući tome što koristimo **officialnu dijagnostiku BMW ISTA**, automobil je pregledan maksimalno detaljno. Dijagnostika je pokazala odlično stanje motora: **lanac razvodnog mehanizma**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normi. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: rasprostranjena i ispitana kombinacija za ovu klasu vozila.
+      Zahvaljujući tome što koristimo **zvaničnu dijagnostiku BMW ISTA**, automobil je pregledan maksimalno detaljno. Dijagnostika je pokazala odlično stanje motora: **lanac razvodnog mehanizma**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normi. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: rasprostranjena i ispitana kombinacija za ovu klasu vozila.
 
       Viktor je preuzeo automobil sa čistom istorijom, znajući tačno stanje motora i menjača do poslednjeg detalja.
   es:
@@ -66,7 +66,7 @@ translatedFrom: 1a6bf85c508a38b7
 
 К нам обратился Виктор еще до получения ВНЖ в Сербии. Мы сразу предупредили, что оформить автомобиль на себя можно только после получения ВНЖ, поэтому подбор пришлось ненадолго отложить. Спустя несколько месяцев, уже в июле 2026 года, после получения документов мы приступили к поиску автомобиля.
 
-За это время требования к будущему автомобилю изменились. Изначально Виктор рассматривал **Peugeot**, однако после обсуждения всех плюсов и минусов решил обратить внимание на более надежный вариант — **BMW X1**.
+За это время требования к будущему автомобилю изменились. Изначально Виктор рассматривал **Peugeot**, однако после обсуждения всех плюсов и минусов решил обратить внимание на более надежный вариант, **BMW X1**.
 
 Благодаря тому, что мы используем **официальную дилерскую диагностику BMW ISTA**, автомобиль был проверен максимально подробно. Диагностика показала отличное состояние двигателя: **цепь ГРМ**, **форсунки**, **система EGR** и остальные параметры соответствовали норме. Автомобиль оснащен надежным **2,0-литровым дизельным двигателем B47** и **8-ступенчатой автоматической коробкой передач Aisin**: распространенное и проверенное сочетание для этого класса машин.
 

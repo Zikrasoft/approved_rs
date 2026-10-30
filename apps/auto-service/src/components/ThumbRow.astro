@@ -1,8 +1,9 @@
 ---
+import type { Thumbnail } from '@/utils/partImages';
 import PartThumb from './PartThumb.astro';
 
 interface Props {
-  thumb: string | null;
+  thumb: Thumbnail | null;
   class?: string;
 }
 
@@ -10,7 +11,7 @@ const { thumb, class: className } = Astro.props;
 ---
 
 <div class="flex items-start gap-3 sm:gap-4">
-  <PartThumb src={thumb} />
+  <PartThumb thumb={thumb} />
   <div class:list={['flex min-w-0 flex-1 flex-col', className ?? 'gap-1.5']}>
     <slot />
   </div>

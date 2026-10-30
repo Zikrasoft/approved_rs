@@ -38,7 +38,8 @@ common:
   priceOnRequest: по запросу
   allServices: Все услуги
   allWorks: Все примеры работ
-  emptyWorks: Примеры работ скоро появятся. Пока что позвоните — расскажем, что делали на похожих машинах.
+  emptyWorks: Примеры работ скоро появятся. Пока что позвоните, расскажем, что делали на похожих машинах.
+  socialHeading: Мы в соцсетях
 channels:
   call: Позвонить
   whatsapp: WhatsApp
@@ -46,7 +47,7 @@ channels:
   telegram: Telegram
 form:
   heading: Записаться в сервис
-  subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовём время и цену.
+  subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовем время и цену.
   nameLabel: Имя (необязательно)
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
@@ -56,16 +57,16 @@ form:
   channelPhone: Звонок
   countryLabel: Код страны
   commentLabel: Машина и что с ней
-  commentPlaceholder: Марка, модель, год — и что беспокоит
+  commentPlaceholder: Марка, модель, год и что беспокоит
   submit: Отправить заявку
   submitting: Отправляем…
   privacyNote: Согласен с
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
-  errorPhone: Проверьте номер — кажется, он введён не полностью
+  errorPhone: Проверьте номер, кажется, он введен не полностью
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorConsent: Без согласия мы не сможем отправить заявку
-  errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
+  errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 cookie:
   notice: Мы используем cookie.
   more: Подробнее в

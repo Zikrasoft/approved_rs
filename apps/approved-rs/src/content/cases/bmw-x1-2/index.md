@@ -3,7 +3,7 @@ title: BMW X1
 car: BMW X1
 year: 2025
 price:
-  value: '46000'
+  value: '47000'
   currency: €
 country: rs
 service: vehicle-import
@@ -28,7 +28,7 @@ translations:
     title: BMW X1
     body: |-
       **BMW X1 iz Nemačke u Srbiju za 47 000 € umesto novog automobila za 49 000 €.**\
-      Mlada par iz Beograda odlučila je da kupi BMW X1. Prvobitno su razmišljali o kupovini novog automobila i čak su posetili ovlašćeni BMW salon u Srbiji. Međutim, nakon što su se upoznali sa ponudom, pitali su se koliko je razumno da izdvoje 49 000 € za novi BMW X1 sa prednjim pogonom.\
+      Mladi par iz Beograda odlučio je da kupi BMW X1. Prvobitno su razmišljali o kupovini novog automobila i čak su posetili ovlašćeni BMW salon u Srbiji. Međutim, nakon što su se upoznali sa ponudom, pitali su se koliko je razumno da izdvoje 49 000 € za novi BMW X1 sa prednjim pogonom.\
       Na kraju su nam se obratili za pomoć u pronalaženju i uvozu automobila iz Nemačke. Pronašli smo im odgovarajući model.\
       **BMW X1 iz 2025. godine, sa prvim registrovanjem 2026. godine, sa malim pređenim kilometrima, dvolitarskim dizel motorom i xDrive pogonom na sve točkove.**\
       Automobil je našim klijentima koštao **47 000 €, već sa svim troškovima transporta iz Nemačke u Srbiju, carinjenja i registracije.**\
@@ -60,6 +60,6 @@ translatedFrom: d099ea97b38451c2
 Молодая пара из Белграда решила купить BMW X1. Изначально ребята рассматривали покупку нового автомобиля и даже посетили официальный дилерский центр BMW в Сербии. Но после знакомства с предложением задумались, насколько разумно отдавать 49 000 € за новый BMW X1 с передним приводом.\
 В итоге они обратились к нам за помощью в подборе и пригоне автомобиля из Германии. Мы нашли для них подходящий вариант.\
 **BMW X1 конца 2025 года, с первой регистрацией в 2026 году, небольшим пробегом, двухлитровым дизельным двигателем и полным приводом xDrive.**\
-Автомобиль обошёлся нашим клиентам в **47 000 €, уже со всеми расходами на доставку из Германии в Сербию, растаможку и оформление.**\
+Автомобиль обошелся нашим клиентам в **47 000 €, уже со всеми расходами на доставку из Германии в Сербию, растаможку и оформление.**\
 Получается, что за меньшие деньги ребята приобрели практически новый BMW X1 с небольшим пробегом, экономичным и тяговитым дизельным мотором 2.0 и полным приводом вместо переднеприводной версии из автосалона.\
 Клиенты довольны покупкой: автомобиль оправдал их ожидания.

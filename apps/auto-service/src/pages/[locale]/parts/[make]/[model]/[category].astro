@@ -15,6 +15,7 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey, linkedVehicles } from '@/utils/cacheKey';
 import type {
   ModelCategoryEntry,
   ModelHubEntry,
@@ -43,6 +44,17 @@ export async function getStaticPaths() {
             category: entry.category.slug,
           },
           props: { hub: model, entry, pages },
+          cacheKey: cacheKey({
+            make: model.make,
+            model: model.model,
+            entry,
+            vehicles: linkedVehicles(
+              pages,
+              entry.parts.flatMap(({ fits }) =>
+                fits.map(({ vehicle }) => vehicle),
+              ),
+            ),
+          }),
         })),
       ),
     ),

@@ -1,0 +1,76 @@
+import type { MedusaContainer } from '@medusajs/framework/types';
+import {
+  checkoutContactSchema,
+  type OrderCaseSummary,
+  type Vehicle,
+} from '@podbor/catalog-contract';
+
+import { CATALOG_MODULE } from '../modules/catalog';
+import type CatalogModuleService from '../modules/catalog/service';
+import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
+import type VinLookupModuleService from '../modules/vin-lookup/service';
+import { listedPartOf, readLine } from './line-metadata';
+import type { LeadOrder } from './order-lead';
+import { listVehicleResponses } from './store-response';
+
+const VIN_YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
+const VIN_YEAR_CYCLES = [1980, 2010, 2040];
+
+const modelYear = (vin: string, { year_from, year_to }: Vehicle) => {
+  const code = VIN_YEAR_CODES.indexOf(vin.charAt(9));
+  if (code < 0 || year_from === null) return null;
+  return (
+    VIN_YEAR_CYCLES.map((cycle) => cycle + code).find(
+      (year) => year >= year_from && year <= (year_to ?? year),
+    ) ?? null
+  );
+};
+
+async function carOf(
+  container: MedusaContainer,
+  vin: string | undefined,
+): Promise<OrderCaseSummary['car']> {
+  if (!vin) return null;
+  const [lookup] = await container
+    .resolve<VinLookupModuleService>(VIN_LOOKUP_MODULE)
+    .listVinLookups({ vin });
+  if (!lookup?.vehicle_id) return null;
+  const [vehicle] = await listVehicleResponses(
+    container.resolve<CatalogModuleService>(CATALOG_MODULE),
+    { id: [lookup.vehicle_id] },
+  );
+  if (!vehicle) return null;
+  const { model } = vehicle;
+  return {
+    make: model.chassis.series.make.name,
+    model: `${model.chassis.series.name} ${model.chassis.code} ${model.name}`,
+    year: modelYear(vin, vehicle),
+  };
+}
+
+export async function orderCaseSummary(
+  container: MedusaContainer,
+  order: LeadOrder,
+): Promise<OrderCaseSummary> {
+  const contact = checkoutContactSchema.safeParse(order.metadata ?? {});
+  const parts = order.items
+    .filter((item) => !readLine(item.metadata).addonKind)
+    .map(({ metadata, title }) => listedPartOf(metadata, title))
+    .filter(({ brand, number }) => brand && number)
+    .map(({ brand, number }) => ({ brand, number }));
+  const total = order.items.reduce(
+    (sum, item) => sum + item.unit_price * item.quantity,
+    0,
+  );
+  return {
+    display_id: order.display_id,
+    car: await carOf(container, contact.data?.vin),
+    parts: parts.filter(
+      (part, index) =>
+        parts.findIndex(
+          ({ brand, number }) => brand === part.brand && number === part.number,
+        ) === index,
+    ),
+    total_rsd: order.currency_code === 'rsd' ? Math.round(total) : null,
+  };
+}

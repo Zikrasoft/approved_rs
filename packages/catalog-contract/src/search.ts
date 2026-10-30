@@ -20,6 +20,7 @@ export const searchResultSchema = brandNumberSchema.extend({
   }),
   offers: z.array(partOfferSchema),
   thumbnail: z.url().nullable(),
+  thumbnail_illustration: z.boolean().nullable().default(null),
 });
 
 const readableCars = z

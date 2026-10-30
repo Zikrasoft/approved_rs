@@ -2,8 +2,7 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import {
-  isKnownCaseDir,
-  isValidSlug,
+  galleryTargetSchema,
   sanitizeFilename,
   dedupeFilename,
   appendGalleryEntries,
@@ -52,15 +51,17 @@ export async function POST({
   }
 
   const form = await request.formData();
-  const dir = form.get('dir')?.toString() ?? '';
-  const slug = form.get('slug')?.toString() ?? '';
+  const target = galleryTargetSchema.safeParse({
+    dir: form.get('dir'),
+    slug: form.get('slug'),
+  });
+  if (!target.success) {
+    return new Response('Bad collection/slug', { status: 400 });
+  }
+  const { dir, slug } = target.data;
   const files = form
     .getAll('photos')
     .filter((f): f is File => f instanceof File && f.size > 0);
-
-  if (!isKnownCaseDir(dir) || !isValidSlug(slug)) {
-    return new Response('Bad collection/slug', { status: 400 });
-  }
   if (files.some((f) => f.size > MAX_PHOTO_BYTES)) {
     return new Response('File too large', { status: 413 });
   }
@@ -71,8 +72,8 @@ export async function POST({
   const indexRelPath = `${dir}/${slug}/index.md`;
   const galleryRelDir = `${dir}/${slug}/gallery`;
 
-  if (import.meta.env.PROD) {
-    const taken = new Set(await listGithubDir(token!, galleryRelDir));
+  if (import.meta.env.PROD && token) {
+    const taken = new Set(await listGithubDir(token, galleryRelDir));
     const photos: { path: string; base64: string }[] = [];
     const newRelPaths: string[] = [];
     for (const file of files) {
@@ -85,7 +86,7 @@ export async function POST({
 
     let indexContent: string;
     try {
-      indexContent = await getGithubFile(token!, indexRelPath);
+      indexContent = await getGithubFile(token, indexRelPath);
     } catch (err) {
       // Only a real 404 means "no such case" — an auth/network/5xx failure
       // here must propagate instead of being reported as "not found".
@@ -95,7 +96,7 @@ export async function POST({
       throw err;
     }
 
-    await commitGalleryPhotos(token!, {
+    await commitGalleryPhotos(token, {
       photos,
       indexPath: indexRelPath,
       indexContent: appendGalleryEntries(indexContent, newRelPaths),

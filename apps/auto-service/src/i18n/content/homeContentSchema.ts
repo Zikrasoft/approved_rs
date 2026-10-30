@@ -32,6 +32,7 @@ export const homeContentSchema = z
       points: z.array(z.string()),
       cta: z.string(),
     }),
+    faqEyebrow: z.string(),
     faq: z.array(z.object({ q: z.string(), a: z.string() }).strict()),
     finalCta: sectionHeadSchema.extend({ cta: z.string() }),
   })

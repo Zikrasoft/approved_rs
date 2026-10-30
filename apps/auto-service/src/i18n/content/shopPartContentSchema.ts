@@ -23,6 +23,7 @@ export const shopPartContentSchema = z
     priceOnRequestHeading: z.string(),
     priceOnRequestBody: z.string(),
     priceOnRequestCta: z.string(),
+    orderBody: z.string(),
     offersHeading: z.string(),
     columns: z
       .object({
@@ -60,7 +61,12 @@ export const shopPartContentSchema = z
     inquiryCta: z.string(),
     photoLabel: z.string(),
     categoryIllustration: z.string(),
+    illustrationLabel: z.string(),
+    installHeading: z.string(),
+    installBody: z.string(),
+    installCta: z.string(),
     crossReferencesHeading: z.string(),
+    worksHeading: z.string(),
     applicabilityHeading: z.string(),
     supplierDataNote: z.string(),
     requirementCarsLabel: z.string(),

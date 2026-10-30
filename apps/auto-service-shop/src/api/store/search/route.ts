@@ -72,9 +72,17 @@ const thumbnail = (
   [supplierImage]: string[],
 ) => {
   const [own] = images.items;
-  if (own) return smallestImage(own);
-  if (supplierImage) return supplierImage;
-  return part.category?.image ? smallestImage(part.category.image) : null;
+  if (own)
+    return { thumbnail: smallestImage(own), thumbnail_illustration: false };
+  if (supplierImage) {
+    return { thumbnail: supplierImage, thumbnail_illustration: false };
+  }
+  return part.category?.image
+    ? {
+        thumbnail: smallestImage(part.category.image),
+        thumbnail_illustration: true,
+      }
+    : { thumbnail: null, thumbnail_illustration: false };
 };
 
 const facetCountsSchema = z
@@ -455,7 +463,7 @@ export async function GET(
       offers: storeOffers(
         offers.filter((offer) => offer.part_identifier_id === hit.id),
       ),
-      thumbnail: thumbnail(hit, supplierData(hit.id).images),
+      ...thumbnail(hit, supplierData(hit.id).images),
       part: {
         id: hit.part.id,
         name: translated(hit.part, 'name', locale),

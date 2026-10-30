@@ -16,7 +16,7 @@ header:
   languageLabel: Язык
   cta: Записаться
 footer:
-  tagline: Студия детейлинга в Белграде. Плёнка, полировка, керамика, кожа.
+  tagline: Студия детейлинга в Белграде. Пленка, полировка, керамика, кожа.
   navHeading: Разделы
   contactHeading: Связаться
   hoursHeading: Часы работы
@@ -42,16 +42,17 @@ common:
   scrollHint: Листайте вниз
   fromPrice: от
   perCar: за автомобиль
-  emptyWorks: Скоро здесь появятся работы. Пока что напишите нам — расскажем и покажем вживую.
+  emptyWorks: Скоро здесь появятся работы. Пока что напишите нам, расскажем и покажем вживую.
 channels:
   call: Позвонить
   whatsapp: Написать в WhatsApp
   viber: Написать в Viber
   telegram: Написать в Telegram
   instagram: Instagram
+  social: Мы в соцсетях
 form:
   heading: Записаться на консультацию
-  subheading: Посмотрим машину, честно скажем, что ей действительно нужно, и назовём точную цену.
+  subheading: Посмотрим машину, честно скажем, что ей действительно нужно, и назовем точную цену.
   nameLabel: Как вас зовут (необязательно)
   namePlaceholder: Имя
   contactChannelLabel: Как с вами связаться
@@ -61,7 +62,7 @@ form:
   contactPlaceholder: 60 123 4567
   telegramPlaceholder: '@username или телефон'
   commentLabel: Комментарий
-  commentPlaceholder: Марка, модель, год — и что хотите сделать
+  commentPlaceholder: Марка, модель, год и что хотите сделать
   submit: Отправить заявку
   submitting: Отправляем…
   privacyNote: Принимаю
@@ -69,7 +70,7 @@ form:
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorPhone: Введите корректный номер телефона
   errorConsent: Отметьте согласие, чтобы отправить заявку
-  errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
+  errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
   modalTitle: Оставить заявку
 cookie:
   notice: Мы используем cookie.

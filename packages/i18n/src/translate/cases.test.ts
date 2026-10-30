@@ -120,6 +120,20 @@ describe('splitFrontmatter', () => {
 });
 
 describe('processFile', () => {
+  it('throws on a translatedFrom that is not a hash before paying for a translation', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = caseFile();
+    rewriteFrontmatter(file, (data) => {
+      data.translatedFrom = 42;
+    });
+    const { processFile } = translator();
+
+    await expect(processFile(file, 'key', {})).rejects.toThrow(
+      /translatedFrom/,
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
   it('translates a case on first run and writes the hash back', async () => {
     stubTranslate((text) => `t:${text}`);
     const file = caseFile();

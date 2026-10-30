@@ -62,6 +62,7 @@ export const siteContentSchema = z
         allServices: z.string(),
         allWorks: z.string(),
         emptyWorks: z.string(),
+        socialHeading: z.string(),
       })
       .strict(),
     channels: z

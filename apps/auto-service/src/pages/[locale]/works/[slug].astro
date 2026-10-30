@@ -8,7 +8,17 @@ import FinalCta from '@/components/FinalCta.astro';
 import PromoBanner from '@/components/PromoBanner.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { localizedWork, publishedWorks } from '@/utils/works';
+import {
+  localizedWork,
+  publishedWorks,
+  sourcedParts,
+  PARTS_SOURCING,
+  workLeadService,
+  workPrice,
+} from '@/utils/works';
+import { partPagesForBuild } from '@/utils/catalogueEnv';
+import { formatMoney } from '@/utils/money';
+import Icon from '@/components/Icon.astro';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { workSchema } from '@/utils/schema';
 import {
@@ -19,15 +29,21 @@ import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   const works = publishedWorks(await getCollection('works'));
+  const pages = await partPagesForBuild().catch(() => []);
   return withLocales(
     works.map((work) => ({
       params: { slug: work.id },
-      props: { work, related: relatedEntries(works, work) },
+      props: {
+        work,
+        related: relatedEntries(works, work),
+        parts: sourcedParts(work, pages),
+      },
     })),
   );
 }
 
-const { work, related } = Astro.props;
+const { work, related, parts } = Astro.props;
+const price = workPrice(work);
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
@@ -39,7 +55,11 @@ const schema = workSchema(work, title);
 const ctaVariantIndex =
   [...work.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
   pages.works.detailCtaVariants.length;
-const ctaVariant = pages.works.detailCtaVariants[ctaVariantIndex];
+const leadService = workLeadService(work);
+const ctaVariant =
+  leadService === PARTS_SOURCING
+    ? pages.works.sourcingCta
+    : pages.works.detailCtaVariants[ctaVariantIndex];
 
 const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   year: 'numeric',
@@ -78,7 +98,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   <div class="wrap" {...{ [DEPTH_SLUG_ATTRIBUTE]: work.id }}>
     <aside
       {...{ [DEPTH_DOOR_ATTRIBUTE]: '' }}
-      class="card hidden data-[revealed=true]:flex mb-8 flex-col gap-5 border-l-4 border-l-signal p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
+      class="card hidden data-[revealed=true]:flex mb-8 flex-col gap-5 border-signal/40 bg-signal/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
     >
       <div>
         <h2 class="text-block font-semibold text-ink">
@@ -93,6 +113,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
         class="btn btn-primary w-full shrink-0 whitespace-nowrap sm:w-fit"
       >
         {pages.works.doorButtonLabel}
+        <Icon name="arrowRight" />
       </a>
     </aside>
   </div>
@@ -127,6 +148,57 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
   }
 
   {
+    (parts.length > 0 || price !== null) && (
+      <section class="wrap pb-8">
+        <div class="flex max-w-2xl flex-col gap-3">
+          {parts.length > 0 && (
+            <>
+              <h2 class="text-section">{pages.works.partsHeading}</h2>
+              <ul class="card divide-y divide-line">
+                {parts.map((part) =>
+                  part.slug ? (
+                    <li>
+                      <a
+                        href={PathBuilder.partNumber(locale, part.slug)}
+                        class="group flex min-h-11 items-center justify-between gap-3 px-5 py-3 text-ink hover:text-signal-ink sm:px-6"
+                      >
+                        <span>
+                          {part.brand}{' '}
+                          <span class="spec font-semibold">{part.number}</span>
+                        </span>
+                        <Icon
+                          name="chevronRight"
+                          size={16}
+                          class="shrink-0 text-muted group-hover:text-signal-ink"
+                        />
+                      </a>
+                    </li>
+                  ) : (
+                    <li class="flex min-h-11 items-center px-5 py-3 text-ink sm:px-6">
+                      <span>
+                        {part.brand}{' '}
+                        <span class="spec font-semibold">{part.number}</span>
+                      </span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </>
+          )}
+          {price !== null && (
+            <p class="flex flex-wrap items-baseline justify-between gap-x-4 text-base">
+              <span class="text-muted">{pages.works.priceLabel}</span>
+              <span class="spec font-semibold text-ink">
+                {formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}
+              </span>
+            </p>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {
     work.data.servicesApplied.length > 0 && (
       <section class="wrap pb-8">
         <p class="spec text-xs text-muted">{site.nav.services}</p>
@@ -138,6 +210,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
                 class="btn btn-secondary w-fit"
               >
                 {services[slug].name}
+                <Icon name="arrowRight" />
               </a>
             </li>
           ))}
@@ -153,6 +226,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
           <span class="eyebrow">{pages.works.eyebrow}</span>
           <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
             {site.common.allWorks}
+            <Icon name="arrowRight" />
           </a>
         </div>
         <WorkGrid works={related} />
@@ -169,7 +243,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     eyebrow={pages.works.eyebrow}
     heading={ctaVariant.heading}
     body={ctaVariant.body}
-    service={work.data.servicesApplied[0]}
+    service={leadService}
   />
   <script>
     import { defineBrowsingDepth } from '@podbor/site-kit/browser';

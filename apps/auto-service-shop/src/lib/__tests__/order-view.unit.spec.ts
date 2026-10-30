@@ -1,5 +1,5 @@
-import type { LeadOrder } from '../order-lead';
-import { carlabOrderView, leadHandoff } from '../order-view';
+import { leadHandoff, type LeadOrder } from '../order-lead';
+import { carlabOrderView } from '../order-view';
 
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
   id: 'order_1',
@@ -74,6 +74,53 @@ describe('carlabOrderView', () => {
         alerted_at: null,
       },
     });
+  });
+
+  it('lists each add-on under its Part, for a beta order carrying both parent keys and a new one alike', () => {
+    const view = carlabOrderView(
+      order({
+        items: [
+          {
+            title: 'Установка в сервисе CarLab',
+            unit_price: 1000,
+            quantity: 1,
+            metadata: {
+              addon_for: 'cali_1',
+              addon_offer_id: 'offer_oil',
+              addon_kind: 'installation',
+            },
+          },
+          {
+            title: 'Varta',
+            unit_price: 10000,
+            quantity: 1,
+            metadata: { offer_id: 'offer_battery' },
+          },
+          {
+            title: 'Регистрация аккумулятора',
+            unit_price: 2500,
+            quantity: 1,
+            metadata: {
+              addon_offer_id: 'offer_battery',
+              addon_kind: 'service',
+            },
+          },
+          {
+            title: 'Oil filter',
+            unit_price: 1850,
+            quantity: 1,
+            metadata: { offer_id: 'offer_oil' },
+          },
+        ],
+      }),
+    );
+
+    expect(view.lines.map(({ title, addon }) => [title, addon])).toEqual([
+      ['Varta', false],
+      ['Регистрация аккумулятора', true],
+      ['Oil filter', false],
+      ['Установка в сервисе CarLab', true],
+    ]);
   });
 
   it('shows no customer for an order placed without the checkout form', () => {

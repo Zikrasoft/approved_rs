@@ -23,5 +23,10 @@ describe('CommonJS build', () => {
         'telegram',
       ),
     ).toBe(true);
+    const {
+      bearerToken,
+      secretMatches,
+    } = require('@podbor/lead-crm/verify-secret');
+    expect(secretMatches(bearerToken('Bearer s3cret'), 's3cret')).toBe(true);
   });
 });

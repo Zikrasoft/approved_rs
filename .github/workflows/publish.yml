@@ -31,6 +31,11 @@ jobs:
           sparse-checkout: .github/scripts
           persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
+      - uses: actions/cache@v4
+        with:
+          path: apps/auto-service/node_modules/.astro
+          key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: astro-carlab-${{ github.ref_name }}-
       - run: pnpm exec vercel pull --yes --environment=production
       - name: Check the shop backend answers
         run: |

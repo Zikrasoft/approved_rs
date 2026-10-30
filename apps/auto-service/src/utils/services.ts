@@ -14,3 +14,14 @@ export const isServiceSlug = (value: string): value is ServiceSlug =>
 
 export const VIN_INQUIRY_SERVICE =
   'vin-parts-inquiry' satisfies LabelledService;
+
+const INSTALLATION_SERVICE_BY_CATEGORY = new Map<string, ServiceSlug>([
+  ['brakes', 'brakes-suspension'],
+  ['suspension', 'brakes-suspension'],
+  ['transmission', 'engine-gearbox'],
+]);
+
+export const installationService = (
+  category: { slug: string } | null,
+): ServiceSlug =>
+  INSTALLATION_SERVICE_BY_CATEGORY.get(category?.slug ?? '') ?? 'servicing';

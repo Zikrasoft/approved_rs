@@ -180,6 +180,27 @@ describe('createBrandBot', () => {
     },
   );
 
+  it.each(['TELEGRAM_OWNER_ID', 'TELEGRAM_ADMIN_ID'])(
+    'names %s when it holds something other than ids',
+    (garbled) => {
+      for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
+      vi.stubEnv(garbled, '1,abc');
+
+      expect(bot).toThrow(`${garbled} must be comma-separated Telegram ids`);
+    },
+  );
+
+  it('reads no ids from an unset owner or admin variable', () => {
+    for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
+    vi.stubEnv('TELEGRAM_OWNER_ID', undefined);
+    vi.stubEnv('TELEGRAM_ADMIN_ID', '');
+
+    const { ownerIds, adminIds } = bot().bot;
+
+    expect(ownerIds).toEqual([]);
+    expect(adminIds).toEqual([]);
+  });
+
   it('reads the group, owner and admin ids', () => {
     for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
 

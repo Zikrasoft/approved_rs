@@ -41,6 +41,7 @@ const response = {
         },
       ],
       thumbnail: 'https://api.carlab.rs/static/parts/a-160.webp',
+      thumbnail_illustration: false,
     },
   ],
   facets: [
@@ -176,6 +177,25 @@ describe('searchResponseSchema', () => {
   it('reads a response from a backend that predates scope pages as not knowing', () => {
     const older = { ...response, scope_pages: undefined };
     expect(searchResponseSchema.parse(older).scope_pages).toBeNull();
+  });
+
+  it('says whether a thumbnail is a Category illustration', () => {
+    const [result] = response.results;
+    const illustrated = {
+      ...response,
+      results: [{ ...result, thumbnail_illustration: true }],
+    };
+    expect(
+      searchResponseSchema.parse(illustrated).results[0].thumbnail_illustration,
+    ).toBe(true);
+  });
+
+  it('reads a thumbnail from a backend that predates illustrations as not knowing', () => {
+    const { thumbnail_illustration: _known, ...result } = response.results[0];
+    const older = { ...response, results: [result] };
+    expect(
+      searchResponseSchema.parse(older).results[0].thumbnail_illustration,
+    ).toBeNull();
   });
 
   it('reads a response from a backend that predates cars as having none', () => {

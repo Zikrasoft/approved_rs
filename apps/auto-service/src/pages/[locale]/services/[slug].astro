@@ -4,11 +4,12 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import FinalCta from '@/components/FinalCta.astro';
+import PartsInquiry from '@/components/PartsInquiry.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { SERVICE_SLUGS } from '@/utils/services';
+import { SERVICE_SLUGS, VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
 import { content } from '@/i18n/content';
@@ -110,7 +111,7 @@ const specs = [
   </section>
 
   <section class="wrap pb-4">
-    <div class="card border-l-4 border-l-signal p-6">
+    <div class="card border-signal/40 bg-signal/5 p-6">
       <h2 class="mb-2 text-base font-semibold text-signal-ink">
         {service.honestHeading}
       </h2>
@@ -136,5 +137,7 @@ const specs = [
     heading={service.name}
     body={service.heroLead}
     service={slug}
-  />
+  >
+    {slug === VIN_INQUIRY_SERVICE && <PartsInquiry slot="form" />}
+  </FinalCta>
 </Shell>

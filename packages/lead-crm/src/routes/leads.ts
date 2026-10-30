@@ -1,5 +1,19 @@
+import { z } from 'zod';
+import {
+  ORDER_CANCELED,
+  ORDER_ID_FIELD,
+  ORDER_OUTCOME_FIELD,
+} from '../fields.ts';
 import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
+import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
+import type { CancelOrderResult } from '../brandBot.ts';
+
+const CANCEL_STATUS: Record<CancelOrderResult, number> = {
+  lost: 204,
+  won: 409,
+  missing: 404,
+};
 
 export interface RouteRequestContext {
   request: Request;
@@ -15,6 +29,28 @@ export interface LeadsRouteOptions<L extends string> {
   localeCookie: string;
   thanksPath: (locale: L) => string;
   missingFieldsMessage: Record<L, string>;
+  orderCanceled?: {
+    secret: string | undefined;
+    cancel: (orderId: string) => Promise<CancelOrderResult>;
+  };
+}
+
+const orderCancelSchema = z.object({
+  [ORDER_ID_FIELD]: z.string().min(1),
+  [ORDER_OUTCOME_FIELD]: z.literal(ORDER_CANCELED),
+});
+
+async function cancelOrder(
+  request: Request,
+  orderId: string,
+  orderCanceled: LeadsRouteOptions<string>['orderCanceled'],
+): Promise<Response> {
+  const bearer = bearerToken(request.headers.get('authorization'));
+  if (!orderCanceled || !secretMatches(bearer, orderCanceled.secret))
+    return new Response(null, { status: 401 });
+  return new Response(null, {
+    status: CANCEL_STATUS[await orderCanceled.cancel(orderId)],
+  });
 }
 
 function refusalPage(locale: string, message: string): Response {
@@ -43,6 +79,7 @@ export function createLeadsRoute<L extends string>({
   localeCookie,
   thanksPath,
   missingFieldsMessage,
+  orderCanceled,
 }: LeadsRouteOptions<L>) {
   return async function POST({
     request,
@@ -50,6 +87,12 @@ export function createLeadsRoute<L extends string>({
     cookies,
   }: RouteRequestContext): Promise<Response> {
     const form = await request.formData().catch(() => new FormData());
+    const canceled = orderCancelSchema.safeParse({
+      [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),
+      [ORDER_OUTCOME_FIELD]: form.get(ORDER_OUTCOME_FIELD),
+    });
+    if (canceled.success)
+      return cancelOrder(request, canceled.data[ORDER_ID_FIELD], orderCanceled);
     const envelope = leadEnvelopeSchema.parse(form);
 
     const requested = envelope.locale || cookies.get(localeCookie)?.value;

@@ -1,6 +1,5 @@
 ---
 import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
-import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
@@ -16,14 +15,9 @@ const site = content(locale).site;
   <button
     type="button"
     data-open-lead-modal
-    class="group inline-flex items-center gap-2.5 rounded-full bg-chalk py-2.5 pl-5 pr-2.5 text-sm font-semibold tracking-tight text-void transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98]"
+    class="inline-flex items-center rounded-full bg-chalk px-5 py-3.5 text-sm font-semibold tracking-tight text-void transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98]"
   >
-    <span>{site.header.cta}</span>
-    <span
-      class="flex h-7 w-7 items-center justify-center rounded-full bg-void/10"
-    >
-      <Icon name="arrow" size={14} />
-    </span>
+    {site.header.cta}
   </button>
 </cta-reveal>
 
