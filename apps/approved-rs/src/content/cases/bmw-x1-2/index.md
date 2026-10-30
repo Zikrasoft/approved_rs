@@ -3,7 +3,7 @@ title: BMW X1
 car: BMW X1
 year: 2025
 price:
-  value: '46000'
+  value: '47000'
   currency: €
 country: rs
 service: vehicle-import
