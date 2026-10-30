@@ -22,6 +22,7 @@ function makeWork(
       car: 'BMW X5',
       servicesApplied: [],
       parts: [],
+      image: { src: '/image.jpg' },
       gallery: [],
       date: new Date('2026-01-01'),
       published: true,
@@ -109,6 +110,10 @@ describe('publishedWorks', () => {
       makeWork({ published: true }),
     ];
     expect(publishedWorks(works)).toHaveLength(1);
+  });
+
+  it('never lists a Work without a photo', () => {
+    expect(publishedWorks([makeWork({ image: undefined })])).toEqual([]);
   });
 
   it('sorts newest first', () => {

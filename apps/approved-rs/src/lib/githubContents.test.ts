@@ -8,11 +8,8 @@ vi.mock('node:fs/promises', () => ({ readdir: vi.fn() }));
 
 import {
   listGithubDir,
-  getGithubFile,
-  getGithubFileBuffer,
   listGalleryFiles,
   commitGalleryPhotos,
-  GithubApiError,
 } from './githubContents';
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
@@ -20,89 +17,6 @@ import { readdir } from 'node:fs/promises';
 function okJson(body: unknown) {
   return { ok: true, status: 200, json: () => Promise.resolve(body) };
 }
-
-describe('listGithubDir', () => {
-  afterEach(() => mockFetch.mockReset());
-
-  it('returns file names from the contents API', async () => {
-    mockFetch.mockResolvedValue(okJson([{ name: '0.jpg' }, { name: '1.jpg' }]));
-    expect(await listGithubDir('tok', 'src/content/cases/bmw/gallery')).toEqual(
-      ['0.jpg', '1.jpg'],
-    );
-  });
-
-  it('treats a 404 (no gallery folder yet) as empty, not an error', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 404,
-      text: () => Promise.resolve(''),
-    });
-    expect(await listGithubDir('tok', 'src/content/cases/bmw/gallery')).toEqual(
-      [],
-    );
-  });
-
-  it('throws on other errors instead of silently returning empty', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: () => Promise.resolve('boom'),
-    });
-    await expect(listGithubDir('tok', 'x')).rejects.toThrow(/500/);
-  });
-});
-
-describe('GithubApiError', () => {
-  afterEach(() => mockFetch.mockReset());
-
-  it('carries the HTTP status so callers can branch on it without parsing the message', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 404,
-      text: () => Promise.resolve('not found'),
-    });
-    await expect(getGithubFile('tok', 'x/index.md')).rejects.toMatchObject({
-      status: 404,
-    });
-  });
-
-  it('is thrown as a real GithubApiError instance', async () => {
-    mockFetch.mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: () => Promise.resolve('boom'),
-    });
-    try {
-      await getGithubFile('tok', 'x/index.md');
-      expect.unreachable();
-    } catch (err) {
-      expect(err).toBeInstanceOf(GithubApiError);
-    }
-  });
-});
-
-describe('getGithubFile', () => {
-  afterEach(() => mockFetch.mockReset());
-
-  it('base64-decodes the contents API response to text', async () => {
-    mockFetch.mockResolvedValue(
-      okJson({ content: Buffer.from('title: BMW').toString('base64') }),
-    );
-    expect(await getGithubFile('tok', 'src/content/cases/bmw/index.md')).toBe(
-      'title: BMW',
-    );
-  });
-});
-
-describe('getGithubFileBuffer', () => {
-  afterEach(() => mockFetch.mockReset());
-
-  it('returns raw bytes without a lossy utf-8 round-trip', async () => {
-    const raw = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG magic bytes, invalid utf-8
-    mockFetch.mockResolvedValue(okJson({ content: raw.toString('base64') }));
-    expect(await getGithubFileBuffer('tok', 'x/gallery/0.jpg')).toEqual(raw);
-  });
-});
 
 describe('listGalleryFiles', () => {
   const originalProd = import.meta.env.PROD;
@@ -260,15 +174,5 @@ describe('commitGalleryPhotos', () => {
     ).rejects.toThrow();
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('listGithubDir response', () => {
-  afterEach(() => mockFetch.mockReset());
-
-  it('refuses a contents response that is not a directory listing', async () => {
-    mockFetch.mockResolvedValue(okJson({ name: 'index.md', content: '' }));
-
-    await expect(listGithubDir('tok', 'x')).rejects.toThrow();
   });
 });

@@ -10,14 +10,7 @@ import { z } from 'zod';
 // entirely when empty — see any src/content/cases/*/index.md), so a couple
 // of targeted line ops cover it without a new dependency.
 
-// Same cookie Keystatic itself sets after a manager completes GitHub OAuth
-// login (see keystatic.config.ts's github storage mode) — not httpOnly,
-// Keystatic's own client reads it directly. Arriving with it set proves the
-// request came from someone who's actually logged into Keystatic; a direct
-// hit on this page with no cookie hasn't. Shared by admin/case-photos.astro
-// (page-level gate) and its API route (write-level gate, and also the
-// GitHub API bearer token in prod — see src/lib/githubContents.ts).
-export const KEYSTATIC_AUTH_COOKIE = 'keystatic-gh-access-token';
+export { KEYSTATIC_AUTH_COOKIE } from '@podbor/site-kit/github-contents';
 
 // `collection` matches the keys exported from src/content.config.ts — the
 // page uses it to call getCollection(); `dir` is the on-disk path the API
