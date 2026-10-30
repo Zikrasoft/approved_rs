@@ -13,7 +13,7 @@ type Group = 'cars' | 'parts' | 'vin';
 
 const ACTIVE_CLASS = 'bg-shade';
 const THUMB_CLASS =
-  'size-9 shrink-0 rounded-md border border-line bg-paper object-contain';
+  'size-9 shrink-0 rounded-control border border-line bg-paper object-contain';
 
 let instances = 0;
 
@@ -73,7 +73,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           anchor.setAttribute('aria-selected', 'false');
           anchor.dataset.group = group;
           anchor.className =
-            'flex min-h-11 items-center gap-3 rounded-field px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
+            'flex min-h-11 items-center gap-3 rounded-control px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
           if ('thumb' in link) {
             const blank = () => {
               const box = document.createElement('span');
@@ -173,7 +173,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           const retry = document.createElement('button');
           retry.type = 'button';
           retry.className =
-            'min-h-11 shrink-0 rounded-field px-3 font-semibold text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
+            'min-h-11 shrink-0 rounded-control px-3 font-semibold text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
           retry.textContent = this.dataset.retryLabel ?? '';
           retry.addEventListener('click', () => {
             input.focus();

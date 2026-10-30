@@ -143,49 +143,51 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 
   {
     (parts.length > 0 || price !== null) && (
-      <section class="wrap flex max-w-2xl flex-col gap-3 pb-8">
-        {parts.length > 0 && (
-          <>
-            <h2 class="text-section">{pages.works.partsHeading}</h2>
-            <ul class="card divide-y divide-line">
-              {parts.map((part) =>
-                part.slug ? (
-                  <li>
-                    <a
-                      href={PathBuilder.partNumber(locale, part.slug)}
-                      class="group flex min-h-11 items-center justify-between gap-3 px-5 py-3 text-ink hover:text-signal-ink sm:px-6"
-                    >
+      <section class="wrap pb-8">
+        <div class="flex max-w-2xl flex-col gap-3">
+          {parts.length > 0 && (
+            <>
+              <h2 class="text-section">{pages.works.partsHeading}</h2>
+              <ul class="card divide-y divide-line">
+                {parts.map((part) =>
+                  part.slug ? (
+                    <li>
+                      <a
+                        href={PathBuilder.partNumber(locale, part.slug)}
+                        class="group flex min-h-11 items-center justify-between gap-3 px-5 py-3 text-ink hover:text-signal-ink sm:px-6"
+                      >
+                        <span>
+                          {part.brand}{' '}
+                          <span class="spec font-semibold">{part.number}</span>
+                        </span>
+                        <Icon
+                          name="chevronRight"
+                          size={16}
+                          class="shrink-0 text-muted group-hover:text-signal-ink"
+                        />
+                      </a>
+                    </li>
+                  ) : (
+                    <li class="flex min-h-11 items-center px-5 py-3 text-ink sm:px-6">
                       <span>
                         {part.brand}{' '}
                         <span class="spec font-semibold">{part.number}</span>
                       </span>
-                      <Icon
-                        name="chevronRight"
-                        size={16}
-                        class="shrink-0 text-muted group-hover:text-signal-ink"
-                      />
-                    </a>
-                  </li>
-                ) : (
-                  <li class="flex min-h-11 items-center px-5 py-3 text-ink sm:px-6">
-                    <span>
-                      {part.brand}{' '}
-                      <span class="spec font-semibold">{part.number}</span>
-                    </span>
-                  </li>
-                ),
-              )}
-            </ul>
-          </>
-        )}
-        {price !== null && (
-          <p class="flex flex-wrap items-baseline justify-between gap-x-4 text-base">
-            <span class="text-muted">{pages.works.priceLabel}</span>
-            <span class="spec font-semibold text-ink">
-              {formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}
-            </span>
-          </p>
-        )}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </>
+          )}
+          {price !== null && (
+            <p class="flex flex-wrap items-baseline justify-between gap-x-4 text-base">
+              <span class="text-muted">{pages.works.priceLabel}</span>
+              <span class="spec font-semibold text-ink">
+                {formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}
+              </span>
+            </p>
+          )}
+        </div>
       </section>
     )
   }

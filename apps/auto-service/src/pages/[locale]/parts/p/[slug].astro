@@ -230,7 +230,7 @@ const thumbFor = (slug: string) => {
                     <li>
                       <a
                         href={PathBuilder.partNumber(locale, number.slug)}
-                        class="group flex min-h-11 items-center justify-between gap-3 rounded-field px-2 text-ink hover:bg-shade hover:text-signal-ink"
+                        class="group flex min-h-11 items-center justify-between gap-3 rounded-control px-2 text-ink hover:bg-shade hover:text-signal-ink"
                       >
                         <span>
                           {number.brand.name}{' '}
@@ -436,7 +436,7 @@ const thumbFor = (slug: string) => {
             <h2 class="text-section">{copy.crossReferencesHeading}</h2>
             <ul class="flex flex-wrap gap-2">
               {crossReferences.map((reference) => (
-                <li class="rounded-field bg-shade px-3 py-1.5 text-sm text-ink">
+                <li class="rounded-control bg-shade px-3 py-1.5 text-sm text-ink">
                   <span class="font-semibold">{reference.brand}</span>{' '}
                   <span class="spec">{reference.number}</span>
                 </li>

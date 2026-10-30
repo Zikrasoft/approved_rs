@@ -10,7 +10,6 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ProcessSteps from '@/components/ProcessSteps.astro';
-import ServiceChips from '@/components/ServiceChips.astro';
 import PriceTable from '@/components/PriceTable.astro';
 import Faq from '@/components/Faq.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -21,13 +20,15 @@ import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
-const HERO_SIZES = '(min-width: 1024px) 35vw, 100vw';
+const HERO_SIZES =
+  '(min-width: 1280px) 20rem, (min-width: 1024px) 18rem, 100vw';
 const heroPicture = await getImage({
   src: heroImage,
   widths: [480, 720, 960],
@@ -38,6 +39,7 @@ const locale = localeFrom(Astro.url.pathname);
 const home = content(locale).home;
 const site = content(locale).site;
 const pages = content(locale).pages;
+const services = content(locale).services;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = faqPageSchema(home.faq);
@@ -58,27 +60,68 @@ const website = websiteSchema({
     sizes: HERO_SIZES,
   }}
 >
-  <ServiceChips />
-
-  <section class="wrap">
+  <section class="wrap pt-3 sm:pt-5">
     <div
-      class="grid overflow-hidden rounded-block bg-panel text-white lg:grid-cols-[1.3fr_0.7fr]"
+      class="grid overflow-hidden rounded-block bg-panel text-white lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem]"
     >
-      <div class="flex flex-col gap-5 p-6 sm:p-8 lg:p-12">
+      <div class="flex flex-col gap-5 p-5 sm:p-8 lg:p-10">
         <h1 class="text-hero max-w-[16ch]">{home.hero.heading}</h1>
+
+        <div class="grid gap-3 md:grid-cols-2" {...contactCta}>
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
+          >
+            <h2 class="text-block font-bold">
+              {content(locale).partsSearch.searchHeading}
+            </h2>
+            <CatalogueSearch hint={false} />
+            <p class="text-sm leading-relaxed text-panel-ink">
+              {content(locale).partsSearch.label}
+            </p>
+          </div>
+
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
+          >
+            <h2 class="text-block font-bold">{home.hero.ctaPrimary}</h2>
+            <nav
+              aria-label={site.nav.services}
+              class="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
+            >
+              {
+                SERVICE_SLUGS.map((slug) => (
+                  <a
+                    href={PathBuilder.service(locale, slug)}
+                    class="chip bg-white/10 text-white hover:bg-white/20"
+                  >
+                    {services[slug].name}
+                  </a>
+                ))
+              }
+            </nav>
+            <div class="mt-auto flex flex-wrap gap-2">
+              <button
+                type="button"
+                data-open-lead-modal
+                class="btn btn-primary flex-1 whitespace-nowrap"
+              >
+                {site.header.cta}
+              </button>
+              <a
+                href={PathBuilder.services(locale)}
+                class="btn btn-on-panel flex-1 whitespace-nowrap"
+              >
+                {home.hero.ctaSecondary}
+              </a>
+            </div>
+          </div>
+        </div>
+
         <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
           {home.hero.lead}
         </p>
-        <div class="flex flex-wrap gap-3 pt-1" {...contactCta}>
-          <button type="button" data-open-lead-modal class="btn btn-primary">
-            {home.hero.ctaPrimary}
-          </button>
-          <a href={PathBuilder.services(locale)} class="btn btn-on-panel">
-            {home.hero.ctaSecondary}
-          </a>
-        </div>
         <ContactChannels placement="hero" tone="panel" />
-        <ul class="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
           {
             home.hero.badges.map((badge) => (
               <li class="flex items-center gap-1.5 text-sm text-panel-ink">
@@ -116,13 +159,6 @@ const website = websiteSchema({
         ))
       }
     </ul>
-  </section>
-
-  <section class="wrap pt-band md:pt-band-lg">
-    <div class="flex max-w-3xl flex-col gap-4">
-      <h2 class="text-section">{content(locale).partsSearch.searchHeading}</h2>
-      <CatalogueSearch large />
-    </div>
   </section>
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">

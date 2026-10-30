@@ -172,7 +172,7 @@ const fields = category.fields
                     <a
                       href={prev}
                       rel="prev"
-                      class="flex min-h-11 items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                      class="flex min-h-11 items-center gap-1.5 rounded-control px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
                     >
                       <Icon name="chevronRight" size={16} class="rotate-180" />
                       {searchCopy.previous}
@@ -192,7 +192,7 @@ const fields = category.fields
                             aria-current={
                               number === listing.number ? 'page' : undefined
                             }
-                            class="spec flex size-11 items-center justify-center rounded-field text-ink hover:bg-shade hover:text-signal-ink aria-[current=page]:bg-ink aria-[current=page]:font-semibold aria-[current=page]:text-paper"
+                            class="spec flex size-11 items-center justify-center rounded-control text-ink hover:bg-shade hover:text-signal-ink aria-[current=page]:bg-ink aria-[current=page]:font-semibold aria-[current=page]:text-paper"
                           >
                             {number}
                           </a>
@@ -204,7 +204,7 @@ const fields = category.fields
                     <a
                       href={next}
                       rel="next"
-                      class="flex min-h-11 max-sm:ml-auto items-center gap-1.5 rounded-field px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                      class="flex min-h-11 max-sm:ml-auto items-center gap-1.5 rounded-control px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
                     >
                       {searchCopy.next}
                       <Icon name="chevronRight" size={16} />
