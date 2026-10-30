@@ -22,6 +22,15 @@ const works = defineCollection({
       car: z.string(),
       year: z.number().optional(),
       servicesApplied: z.array(z.enum(SERVICE_SLUGS)).default([]),
+      parts: z
+        .array(
+          z.object({
+            brand: z.string().trim().min(1),
+            number: z.string().trim().min(1),
+          }),
+        )
+        .default([]),
+      priceRsd: z.number().int().positive().optional(),
       image: image(),
       gallery: z.array(image()).default([]),
       date: z.coerce.date(),
