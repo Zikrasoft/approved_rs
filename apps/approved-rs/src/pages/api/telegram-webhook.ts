@@ -5,6 +5,7 @@ import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
 import { START_COMMAND } from '@podbor/site-kit/contact-links';
+import { requireEnv } from '@podbor/lead-crm';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   afterStatusChange,
@@ -83,8 +84,6 @@ import {
   type PromptKey,
   type StoredLead,
 } from '@/lib/store';
-
-const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 const PHONE_REGION = 'RS';
 
@@ -917,7 +916,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
       request.headers.get('x-telegram-bot-api-secret-token'),
-      WEBHOOK_SECRET,
+      requireEnv('TELEGRAM_WEBHOOK_SECRET'),
     )
   ) {
     return new Response(null, { status: 401 });

@@ -146,6 +146,13 @@ describe('GET /api/reminders', () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it('fails loudly when CRON_SECRET is unset rather than refusing every run', async () => {
+    vi.stubEnv('CRON_SECRET', '');
+
+    await expect(GET(makeCtx())).rejects.toThrow('CRON_SECRET is not set');
+    vi.unstubAllEnvs();
+  });
+
   it.each([
     ['no Authorization header', {}],
     ['the wrong bearer token', { authorization: 'Bearer wrong' }],

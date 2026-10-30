@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { requireEnv } from '@podbor/lead-crm';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
@@ -17,8 +18,6 @@ import {
   afterStatusChange,
   closeLeadTopic,
 } from '@/lib/telegram';
-
-const CRON_SECRET = process.env.CRON_SECRET;
 
 function extractBearer(header: string | null): string | null {
   if (!header?.startsWith('Bearer ')) return null;
@@ -84,7 +83,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
       extractBearer(request.headers.get('authorization')),
-      CRON_SECRET,
+      requireEnv('CRON_SECRET'),
     )
   ) {
     return new Response(null, { status: 401 });
