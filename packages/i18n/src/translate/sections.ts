@@ -2,7 +2,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseDocument } from 'yaml';
 import type { ZodObject } from 'zod';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
-import { getOrCreateTranslationsMap } from './getOrCreateTranslationsMap.ts';
+import { openAiKeySchema } from './openaiChat.ts';
+import {
+  getOrCreateTranslationsMap,
+  translatedDocSchema,
+} from './getOrCreateTranslationsMap.ts';
 import {
   blockIsEmpty,
   DEFAULT_CACHE_PATH,
@@ -102,16 +106,15 @@ export function createSectionTranslator<L extends string>({
     const doc = parseDocument(readFileSync(section.path, 'utf-8'));
     const translationsNode = getOrCreateTranslationsMap(doc, section.path);
 
-    const plain = doc.toJS() as SectionData;
+    const plain = translatedDocSchema.parse(doc.toJS());
     const rawSource: SectionData = {};
     for (const field of section.fields ?? section.schema.keyof().options) {
       if (plain[field] !== undefined) rawSource[field] = plain[field];
     }
     const source = section.schema.parse(rawSource) as SectionData;
     const currentHash = hashSource(source);
-    const storedHash = doc.get('translatedFrom') as string | undefined;
-
-    const committed = plain.translations as Record<string, unknown>;
+    const storedHash = plain.translatedFrom;
+    const committed = plain.translations;
 
     const translationsAreCurrent = storedHash === currentHash;
 
@@ -173,11 +176,12 @@ export function createSectionTranslator<L extends string>({
   }
 
   async function run(sections: readonly Section[]): Promise<number> {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const key = openAiKeySchema.safeParse(process.env.OPENAI_API_KEY);
+    if (!key.success) {
       console.error('Missing env var: OPENAI_API_KEY');
       return 1;
     }
+    const apiKey = key.data;
 
     let cache: CacheFile;
     try {

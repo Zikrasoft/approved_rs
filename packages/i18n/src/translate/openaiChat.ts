@@ -6,6 +6,8 @@ export const DEFAULT_TRANSLATE_MODEL = 'gpt-4o-mini';
 export const OPENAI_TIMEOUT_MS = 60_000;
 export const OPENAI_MAX_RETRIES = 1;
 
+export const openAiKeySchema = z.string().min(1);
+
 const translationSchema = z.record(z.string(), z.string());
 
 export class TranslateResponseError extends Error {

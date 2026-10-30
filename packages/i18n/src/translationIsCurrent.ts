@@ -1,5 +1,5 @@
 import { parseDocument } from 'yaml';
-import type { ZodObject } from 'zod';
+import { z, type ZodObject } from 'zod';
 import { hashSource, type SectionData } from './translate/hashSource.ts';
 
 export function translationIsCurrent(
@@ -7,10 +7,11 @@ export function translationIsCurrent(
   schema: ZodObject,
 ): boolean {
   const doc = parseDocument(fileText);
-  const plain = doc.toJS() as SectionData;
+  const plain = z.record(z.string(), z.unknown()).safeParse(doc.toJS());
+  if (!plain.success) return false;
   const source: SectionData = {};
   for (const field of schema.keyof().options) {
-    if (plain[field] !== undefined) source[field] = plain[field];
+    if (plain.data[field] !== undefined) source[field] = plain.data[field];
   }
   const parsed = schema.safeParse(source);
   if (!parsed.success) return false;
