@@ -98,9 +98,10 @@ describe('defineMyGarage', () => {
     expect(input.value).toBe('');
   });
 
-  it('remembers the typed VIN once the form submits', () => {
+  it('leaves the stored VIN alone when a form submits one the shop never resolved', () => {
+    localStorage.setItem(MY_GARAGE_STORAGE_KEY, 'WBA3B1C50GL123456');
     const { root, input } = mount();
-    input.value = ' wba3b1c50gl123456 ';
+    input.value = 'WBA3B1C50GL654321';
     root.closest('form')!.dispatchEvent(new Event('submit'));
     expect(storedVin()).toBe('WBA3B1C50GL123456');
   });
@@ -117,12 +118,6 @@ describe('defineMyGarage', () => {
     input.value = 'wba35';
     input.dispatchEvent(new Event('input'));
     expect(input.value).toBe('wba35');
-  });
-
-  it('does not remember an empty submission', () => {
-    const { root } = mount();
-    root.closest('form')!.dispatchEvent(new Event('submit'));
-    expect(localStorage.getItem(MY_GARAGE_STORAGE_KEY)).toBeNull();
   });
 
   it('does nothing when the markup carries no VIN input', () => {

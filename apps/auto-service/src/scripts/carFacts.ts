@@ -1,5 +1,6 @@
 import { positionGroups } from '@podbor/catalog-contract/ambiguity';
-import { steeringSide, vinFactsFrom } from '@/utils/carFacts';
+import { rememberVin } from '@podbor/site-kit/browser';
+import { steeringSide, vinFactsFrom, vinFrom } from '@/utils/carFacts';
 
 const fitmentRows = (root: Element) =>
   [...root.querySelectorAll<HTMLElement>('[data-fitment]')].map((element) => ({
@@ -18,6 +19,9 @@ export function defineCarFacts(tagName = 'car-facts'): void {
     tagName,
     class extends HTMLElement {
       connectedCallback(): void {
+        const vin = vinFrom(location.search);
+        if (vin) rememberVin(vin);
+
         const facts = vinFactsFrom(location.search);
         if (!facts.steering) return;
 
