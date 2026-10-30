@@ -10,6 +10,7 @@
     "./contact-links": "./src/contactLinks.ts",
     "./contact-control": "./src/contactControl.ts",
     "./format-phone": "./src/formatPhone.ts",
+    "./github-contents": "./src/githubContents.ts",
     "./contact-preference": "./src/contactPreference.ts",
     "./lead-form": "./src/leadForm.ts",
     "./public-env": "./src/publicEnv.ts",
