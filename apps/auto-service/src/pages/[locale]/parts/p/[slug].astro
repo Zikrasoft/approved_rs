@@ -10,8 +10,11 @@ import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
+import LeadModal from '@/components/LeadModal.astro';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { formatMoney } from '@/utils/money';
+import { installationService } from '@/utils/services';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { fitGroups } from '@/utils/fitGroups';
@@ -144,6 +147,17 @@ const [noticeBefore, noticeAfter] = (
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const equivalents = splitNumbers(page.equivalents);
+const installation = page.part.installation_price;
+const cart = content(locale).shopCart;
+const installPrice =
+  installation === null
+    ? null
+    : installation === 0
+      ? { label: cart.installationFree, price: null }
+      : {
+          label: cart.installationLabel,
+          price: formatMoney(installation, 'RSD', BCP47_BY_LOCALE[locale]),
+        };
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
   return entry ? partThumbnail(entry, entry.category) : null;
@@ -255,6 +269,29 @@ const thumbFor = (slug: string) => {
         pages={[page, ...(successor ? [successor] : [])]}
         installation={{ id: page.id, price: page.part.installation_price }}
       />
+      <div class="card flex flex-col gap-3 p-5 sm:p-6">
+        <h2 class="text-block font-semibold">{copy.installHeading}</h2>
+        {
+          installPrice && (
+            <p class="flex items-baseline justify-between gap-3 text-sm text-ink">
+              <span>{installPrice.label}</span>
+              {installPrice.price && (
+                <span class="spec shrink-0 font-semibold">
+                  {installPrice.price}
+                </span>
+              )}
+            </p>
+          )
+        }
+        <p class="text-sm leading-relaxed text-ink-2">{copy.installBody}</p>
+        <button
+          type="button"
+          data-open-install-modal
+          class="btn btn-secondary mt-1 w-full sm:w-auto sm:self-start"
+        >
+          {copy.installCta}
+        </button>
+      </div>
     </div>
 
     <div class="flex flex-col gap-8 lg:col-start-1">
@@ -484,6 +521,10 @@ const thumbFor = (slug: string) => {
   </section>
 
   <PartsInquiryModal />
+  <LeadModal
+    trigger="[data-open-install-modal]"
+    service={installationService(category)}
+  />
 </Shell>
 
 <script>

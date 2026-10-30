@@ -3,12 +3,19 @@ import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import type { ServiceSlug } from '@/utils/services';
 
+interface Props {
+  trigger?: string;
+  service?: ServiceSlug;
+}
+
+const { trigger = '[data-open-lead-modal]', service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 ---
 
-<carlab-modal trigger="[data-open-lead-modal]">
+<carlab-modal trigger={trigger}>
   <dialog
     aria-label={site.form.modalTitle}
     class="m-0 h-dvh max-h-none w-full max-w-none rounded-none border-0 bg-card p-0 text-ink backdrop:bg-ink/50 sm:m-auto sm:h-fit sm:max-h-[calc(100dvh-4rem)] sm:w-[min(34rem,calc(100vw-2rem))] sm:rounded-block sm:border sm:border-line"
@@ -31,7 +38,7 @@ const site = content(locale).site;
         </button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-        <LeadForm compact />
+        <LeadForm compact service={service} />
       </div>
     </div>
   </dialog>

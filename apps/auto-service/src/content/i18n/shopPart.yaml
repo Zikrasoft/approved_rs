@@ -41,6 +41,9 @@ inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
 illustrationLabel: иллюстрация
+installHeading: Установить у нас
+installBody: Поставим эту запчасть в сервисе CarLab в Белграде. Оставьте контакт, и мы предложим удобное время.
+installCta: Записаться на установку
 crossReferencesHeading: Номера других производителей
 applicabilityHeading: Применимость по данным каталога
 supplierDataNote: Данные каталога. Перед заказом проверим совместимость по VIN.
