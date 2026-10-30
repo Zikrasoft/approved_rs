@@ -32,7 +32,11 @@ export {
   analyticsDeclined,
 } from './consent.ts';
 export { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
-export { MY_GARAGE_VIN_ATTRIBUTE, defineMyGarage } from './myGarage.ts';
+export {
+  MY_GARAGE_VIN_ATTRIBUTE,
+  defineMyGarage,
+  rememberVin,
+} from './myGarage.ts';
 
 export function getOrCreateVisitorId(): string {
   try {
