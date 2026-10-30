@@ -348,6 +348,29 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 | `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail                 |
 | `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
 
+### Shop Orders (ADR-0053)
+
+| Variable             | approved.rs | carlab.rs | details.rs | Without it                                                                  |
+| -------------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------- |
+| `SHOP_ADMIN_URL`     | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order     |
+| `SHOP_ADMIN_API_KEY` | ✅ secret   | no        | no         | same                                                                        |
+| `SHOP_LEAD_SECRET`   | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost |
+
+`SHOP_ADMIN_URL` is the shop's admin origin, `https://admin.carlab.rs`: the
+API host answers 404 on `/admin`. That host also sits behind Caddy's basic_auth,
+so the bot's request must pass it: TODO: decide whether Caddy lets
+`/admin/carlab-orders/*/outcome` through on a Basic secret API key alone, or
+the bot points at an origin without basic_auth. `SHOP_ADMIN_API_KEY` is a
+Medusa secret API key (`sk_…`), created in the shop admin under Settings →
+Secret API Keys; the bot sends it as `Authorization: Basic base64(key:)` to
+`POST /admin/carlab-orders/:id/outcome`. When the bot marks a `parts-order`
+Lead ✅ it completes the Order, ❌ cancels it; a call that fails stays pending
+on the Lead and `/api/reminders` retries it every day until the shop takes it.
+`SHOP_LEAD_SECRET` is one value set twice, on carlab.rs and in the shop's
+`.env` (`openssl rand -hex 32`): the shop's `order.canceled` subscriber posts the
+cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the Lead is
+marked lost.
+
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).
 

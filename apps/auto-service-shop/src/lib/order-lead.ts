@@ -16,7 +16,9 @@ import {
 import {
   AD_SOURCE_FIELD,
   META_IDS_FIELD,
+  ORDER_CANCELED,
   ORDER_ID_FIELD,
+  ORDER_OUTCOME_FIELD,
 } from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
@@ -40,6 +42,8 @@ export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
 export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
 export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
 export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
+export const LEAD_LOST_AT = 'lead_lost_at';
+export const LEAD_LOST_ERROR = 'lead_lost_error';
 
 const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 
@@ -182,10 +186,14 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
 export async function sendOrderLead(
   url: string,
   form: URLSearchParams,
+  secret?: string,
 ): Promise<void> {
   const response = await fetch(url, {
     method: 'POST',
-    headers: { origin: new URL(url).origin },
+    headers: {
+      origin: new URL(url).origin,
+      ...(secret ? { authorization: `Bearer ${secret}` } : {}),
+    },
     body: form,
     redirect: 'manual',
     signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
@@ -291,5 +299,37 @@ export async function handOrderToLeadRoute(
     await recordHandOff(container, id, () => ({
       [LEAD_OWNER_ALERTED_AT]: new Date().toISOString(),
     }));
+  }
+}
+
+export async function handCancelToLeadRoute(
+  container: MedusaContainer,
+  id: string,
+): Promise<void> {
+  const { metadata } = await container.resolve(Modules.ORDER).retrieveOrder(id);
+  if (!metadata?.[LEAD_HANDED_OFF_AT] || metadata[LEAD_LOST_AT]) return;
+  try {
+    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
+    if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
+      throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
+    }
+    await sendOrderLead(
+      LEAD_ROUTE_URL,
+      new URLSearchParams({
+        [ORDER_ID_FIELD]: id,
+        [ORDER_OUTCOME_FIELD]: ORDER_CANCELED,
+      }),
+      SHOP_LEAD_SECRET,
+    );
+    await recordHandOff(container, id, () => ({
+      [LEAD_LOST_AT]: new Date().toISOString(),
+      [LEAD_LOST_ERROR]: '',
+    }));
+  } catch (error) {
+    const reason = errorMessage(error);
+    container
+      .resolve(ContainerRegistrationKeys.LOGGER)
+      .error(`Order ${id} cancel did not reach the lead pipeline: ${reason}`);
+    await recordHandOff(container, id, () => ({ [LEAD_LOST_ERROR]: reason }));
   }
 }

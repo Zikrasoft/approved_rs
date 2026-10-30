@@ -16,6 +16,7 @@ import {
   sendPostponeReminder,
   afterStatusChange,
   closeLeadTopic,
+  settlePendingOrders,
 } from '@/lib/telegram';
 
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -94,6 +95,9 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const expiredGhosts = await expireGhosts(now);
   const closedTopics = await closeIdle(now);
   const digestSent = await postDigest(now);
+  await settlePendingOrders().catch((error: unknown) => {
+    console.error('[reminders] failed to retry shop Order outcomes', { error });
+  });
 
   return new Response(
     JSON.stringify({ expiredGhosts, closedTopics, digestSent }),

@@ -3,7 +3,7 @@ export const prerender = false;
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
-import { notifyLead } from '@/lib/crmBot';
+import { cancelOrderLead, notifyLead } from '@/lib/crmBot';
 import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 
@@ -21,4 +21,8 @@ export const POST = createLeadsRoute({
   localeCookie: LOCALE_COOKIE,
   thanksPath: PathBuilder.thanks,
   missingFieldsMessage: MISSING_FIELDS_MESSAGE,
+  orderCanceled: {
+    secret: process.env.SHOP_LEAD_SECRET,
+    cancel: cancelOrderLead,
+  },
 });

@@ -12,12 +12,17 @@ import type { LeadStore } from './store.ts';
 import { createTelegramClient, parseIds } from './telegram/client.ts';
 import { createFormatter } from './telegram/cards.ts';
 import { createNotifier } from './telegram/notify.ts';
+import { createShopOrders } from './shopOrders.ts';
 
 const required = (name: string) =>
   z.string({ error: `[telegram] ${name} is not set` }).min(1, {
     error: `[telegram] ${name} is not set`,
   });
 const ids = z.string().optional().transform(parseIds);
+const optional = z
+  .string()
+  .optional()
+  .transform((value) => value || undefined);
 
 const BotEnvSchema = z.object({
   TELEGRAM_BOT_TOKEN: required('TELEGRAM_BOT_TOKEN'),
@@ -25,6 +30,8 @@ const BotEnvSchema = z.object({
   TELEGRAM_GROUP_ID: required('TELEGRAM_GROUP_ID'),
   TELEGRAM_OWNER_ID: ids,
   TELEGRAM_ADMIN_ID: ids,
+  SHOP_ADMIN_URL: optional.pipe(z.url().optional()),
+  SHOP_ADMIN_API_KEY: optional,
 });
 
 function readBotEnv() {
@@ -68,19 +75,39 @@ export function createBrandBot({
   const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });
   const closeLeadTopic = createCloseLeadTopic({ store, notifier });
   const dropFromDigest = createDropFromDigest({ store, notifier });
+  const { settleOrder, settlePendingOrders } = createShopOrders({
+    store,
+    shopUrl: env.SHOP_ADMIN_URL,
+    apiKey: env.SHOP_ADMIN_API_KEY,
+  });
+  const afterStatusChange = createAfterStatusChange({
+    ensureLeadCard,
+    ensureLeadTopic,
+    closeLeadTopic,
+    notifier,
+    dropFromDigest,
+    settleOrder,
+  });
+
+  async function cancelOrderLead(orderId: string): Promise<boolean> {
+    const before = (await store.readLeads()).find(
+      (lead) => lead.orderId === orderId,
+    );
+    if (!before) return false;
+    const lost = await store.loseOrderLead(orderId);
+    if (lost && before.status !== 'lost') await afterStatusChange(lost);
+    return true;
+  }
+
   return {
     notifier,
     ensureLeadCard,
     ensureLeadTopic,
     touchLeadTopic: createTouchLeadTopic({ store, notifier }),
     closeLeadTopic,
-    afterStatusChange: createAfterStatusChange({
-      ensureLeadCard,
-      ensureLeadTopic,
-      closeLeadTopic,
-      notifier,
-      dropFromDigest,
-    }),
+    afterStatusChange,
+    settlePendingOrders,
+    cancelOrderLead,
     dropFromDigest,
     notifyLead: createNotifyLead({ store, notifier, brand }),
     client,

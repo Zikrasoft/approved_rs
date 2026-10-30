@@ -1,4 +1,11 @@
+import { z } from 'zod';
+import {
+  ORDER_CANCELED,
+  ORDER_ID_FIELD,
+  ORDER_OUTCOME_FIELD,
+} from '../fields.ts';
 import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
+import { secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 
 export interface RouteRequestContext {
@@ -15,6 +22,27 @@ export interface LeadsRouteOptions<L extends string> {
   localeCookie: string;
   thanksPath: (locale: L) => string;
   missingFieldsMessage: Record<L, string>;
+  orderCanceled?: {
+    secret: string | undefined;
+    cancel: (orderId: string) => Promise<boolean>;
+  };
+}
+
+const orderCancelSchema = z.object({
+  [ORDER_ID_FIELD]: z.string().min(1),
+  [ORDER_OUTCOME_FIELD]: z.literal(ORDER_CANCELED),
+});
+
+async function cancelOrder(
+  request: Request,
+  orderId: string,
+  orderCanceled: LeadsRouteOptions<string>['orderCanceled'],
+): Promise<Response> {
+  const bearer = request.headers.get('authorization')?.replace(/^Bearer /, '');
+  if (!orderCanceled || !secretMatches(bearer, orderCanceled.secret))
+    return new Response(null, { status: 401 });
+  const found = await orderCanceled.cancel(orderId);
+  return new Response(null, { status: found ? 204 : 404 });
 }
 
 function refusalPage(locale: string, message: string): Response {
@@ -43,6 +71,7 @@ export function createLeadsRoute<L extends string>({
   localeCookie,
   thanksPath,
   missingFieldsMessage,
+  orderCanceled,
 }: LeadsRouteOptions<L>) {
   return async function POST({
     request,
@@ -50,6 +79,12 @@ export function createLeadsRoute<L extends string>({
     cookies,
   }: RouteRequestContext): Promise<Response> {
     const form = await request.formData().catch(() => new FormData());
+    const canceled = orderCancelSchema.safeParse({
+      [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),
+      [ORDER_OUTCOME_FIELD]: form.get(ORDER_OUTCOME_FIELD),
+    });
+    if (canceled.success)
+      return cancelOrder(request, canceled.data[ORDER_ID_FIELD], orderCanceled);
     const envelope = leadEnvelopeSchema.parse(form);
 
     const requested = envelope.locale || cookies.get(localeCookie)?.value;

@@ -24,6 +24,7 @@ import {
   AdminLinkVinCode,
   AdminListRequirements,
   AdminMerge,
+  AdminOrderOutcome,
   AdminOrderImages,
   AdminRenameSlug,
   AdminSearchParts,
@@ -208,6 +209,11 @@ export default defineMiddlewares({
       matcher: '/admin/suppliers/:id',
       method: 'POST',
       middlewares: [validateAdminBody(AdminUpdateSupplier)],
+    },
+    {
+      matcher: '/admin/carlab-orders/:id/outcome',
+      method: 'POST',
+      middlewares: [validateAdminBody(AdminOrderOutcome)],
     },
     {
       matcher: '/admin/workshop-quotes',

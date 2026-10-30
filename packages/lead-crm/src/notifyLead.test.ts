@@ -360,6 +360,7 @@ describe('afterStatusChange', () => {
     dropFromDigest: async (leadId) => {
       calls.push(`digest:${leadId}`);
     },
+    settleOrder: async () => {},
   });
 
   beforeEach(() => {

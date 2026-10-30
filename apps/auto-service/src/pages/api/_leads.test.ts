@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PARTS_ORDER_SERVICE, serviceLabel } from '@podbor/brands';
 import { LEADS_PATH } from '@podbor/lead-crm';
-import { ORDER_ID_FIELD } from '@podbor/lead-crm/fields';
+import {
+  ORDER_CANCELED,
+  ORDER_ID_FIELD,
+  ORDER_OUTCOME_FIELD,
+} from '@podbor/lead-crm/fields';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
 
@@ -21,6 +25,10 @@ const memory = vi.hoisted(() => {
 });
 
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
+const SHOP_LEAD_SECRET = vi.hoisted(() => {
+  process.env.SHOP_LEAD_SECRET = 'shop-lead-secret';
+  return process.env.SHOP_LEAD_SECRET;
+});
 
 vi.mock('@podbor/lead-crm/storage/local', () =>
   memory.module('localLeadStorage'),
@@ -56,11 +64,11 @@ const orderForm = () =>
     [ORDER_ID_FIELD]: 'order_1',
   });
 
-const post = (body: URLSearchParams) =>
+const post = (body: URLSearchParams, headers: Record<string, string> = {}) =>
   POST({
     request: new Request('http://localhost/api/leads', {
       method: 'POST',
-      headers: { origin: 'http://localhost' },
+      headers: { origin: 'http://localhost', ...headers },
       body,
     }),
     redirect: (path: string, status = 302) =>
@@ -96,5 +104,27 @@ describe('a placed parts order posted to /api/leads', () => {
       expect.stringContaining(serviceLabel(PARTS_ORDER_SERVICE)),
     );
     expect(cards[0]!.payload.text).toEqual(expect.stringContaining('CarLab'));
+  });
+});
+
+describe('a parts order cancelled in the shop admin', () => {
+  it('marks the order Lead lost once the shop proves who it is', async () => {
+    await post(orderForm());
+    await Promise.all(pending);
+    const cancel = new URLSearchParams({
+      [ORDER_ID_FIELD]: 'order_1',
+      [ORDER_OUTCOME_FIELD]: ORDER_CANCELED,
+    });
+
+    const refused = await post(cancel);
+    const response = await post(cancel, {
+      authorization: `Bearer ${SHOP_LEAD_SECRET}`,
+    });
+
+    expect(refused.status).toBe(401);
+    expect(response.status).toBe(204);
+    expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
+      expect.objectContaining({ orderId: 'order_1', status: 'lost' }),
+    ]);
   });
 });
