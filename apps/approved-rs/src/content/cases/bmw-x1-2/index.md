@@ -28,7 +28,7 @@ translations:
     title: BMW X1
     body: |-
       **BMW X1 iz Nemačke u Srbiju za 47 000 € umesto novog automobila za 49 000 €.**\
-      Mlada par iz Beograda odlučila je da kupi BMW X1. Prvobitno su razmišljali o kupovini novog automobila i čak su posetili ovlašćeni BMW salon u Srbiji. Međutim, nakon što su se upoznali sa ponudom, pitali su se koliko je razumno da izdvoje 49 000 € za novi BMW X1 sa prednjim pogonom.\
+      Mladi par iz Beograda odlučio je da kupi BMW X1. Prvobitno su razmišljali o kupovini novog automobila i čak su posetili ovlašćeni BMW salon u Srbiji. Međutim, nakon što su se upoznali sa ponudom, pitali su se koliko je razumno da izdvoje 49 000 € za novi BMW X1 sa prednjim pogonom.\
       Na kraju su nam se obratili za pomoć u pronalaženju i uvozu automobila iz Nemačke. Pronašli smo im odgovarajući model.\
       **BMW X1 iz 2025. godine, sa prvim registrovanjem 2026. godine, sa malim pređenim kilometrima, dvolitarskim dizel motorom i xDrive pogonom na sve točkove.**\
       Automobil je našim klijentima koštao **47 000 €, već sa svim troškovima transporta iz Nemačke u Srbiju, carinjenja i registracije.**\
