@@ -67,3 +67,11 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
     });
   });
 });
+
+describe('a Part that cannot be bought at once', () => {
+  it('offers «Заказать» on its page and in listings', () => {
+    const { priceOnRequestCta, priceOnRequestTag } = content('ru').shopPart;
+    expect(priceOnRequestCta).toBe('Заказать');
+    expect(priceOnRequestTag).toBe('Заказать');
+  });
+});

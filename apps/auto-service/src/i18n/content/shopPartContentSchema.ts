@@ -23,6 +23,7 @@ export const shopPartContentSchema = z
     priceOnRequestHeading: z.string(),
     priceOnRequestBody: z.string(),
     priceOnRequestCta: z.string(),
+    orderBody: z.string(),
     offersHeading: z.string(),
     columns: z
       .object({
