@@ -88,6 +88,14 @@ _Avoid_: bundle, set, package
 A record of one customer-typed VIN, the Vehicle it resolved to (if any) and what the VIN revealed about that physical car, such as steering side, with the resolving decoder's name and version. It logs which cars customers look for, so unresolved codes show staff which Vehicles to add next. **Not** a VehicleIdentifier: a VIN is one physical car, not a configuration.
 _Avoid_: storing a VIN on Vehicle, treating VinLookup as the canonical vehicle record
 
+**Parts sourcing**:
+The CarLab service of finding the right Parts for one customer's car, usually from its VIN, and selling them. Visitors see it as «Подбор запчастей».
+_Avoid_: VIN inquiry, parts search, подбор (bare)
+
 **Parts inquiry**:
-A customer's request for the Parts they picked (with their contact and, when known, VIN and Vehicle) sent to staff as a Lead, because those Parts have no price yet. Staff answer it with a price by hand. It is not an Order: an Order exists only once Parts carry SupplierOffer prices.
-_Avoid_: Order, quote, price request
+A customer's request for the Parts they picked (with their contact and, when known, VIN and Vehicle) sent to staff as a Lead, because those Parts have no price yet. Staff answer it with a price by hand. It is not an Order: an Order exists only once Parts carry SupplierOffer prices. Visitors start it with «Заказать».
+_Avoid_: Order, quote, price request, «Цена по запросу»
+
+**Completed order**:
+A shop Order the customer has picked up and paid for. It becomes completed when staff mark its Lead won in the CRM bot; marking the Lead lost cancels the Order, and cancelling the Order marks its Lead lost.
+_Avoid_: fulfilled, closed, done

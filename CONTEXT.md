@@ -183,7 +183,9 @@ a site presents by default; that is the site's **primary locale**.
 
 **Case study** — one finished deal shown as proof: the car, the price paid and
 the outcome. Visitors see it as a «реальная сделка»; "case study" is the name in
-code and in this glossary. The brand sites call theirs works.
+code and in this glossary. The brand sites call theirs works. A CarLab Parts
+sourcing case study is drafted from one completed shop Order and shows that
+Order's total; other CarLab works carry no price.
 _Avoid_: case (bare), кейс in visitor copy.
 
 **Browsing depth** — how many distinct Case studies one visitor has opened in
