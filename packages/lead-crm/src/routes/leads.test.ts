@@ -463,7 +463,7 @@ describe('a shop Order cancelled in the shop admin', () => {
     expect(response.status).toBe(409);
   });
 
-  it.each([undefined, 'Bearer wrong'])(
+  it.each([undefined, 'Bearer wrong', 'shop-secret'])(
     'refuses a cancel without the shop secret (%s)',
     async (authorization) => {
       const response = await cancelPOST(cancelCtx(authorization));

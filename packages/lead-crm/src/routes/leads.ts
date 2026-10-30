@@ -5,7 +5,7 @@ import {
   ORDER_OUTCOME_FIELD,
 } from '../fields.ts';
 import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
-import { secretMatches } from '../verifySecret.ts';
+import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
 
@@ -45,7 +45,7 @@ async function cancelOrder(
   orderId: string,
   orderCanceled: LeadsRouteOptions<string>['orderCanceled'],
 ): Promise<Response> {
-  const bearer = request.headers.get('authorization')?.replace(/^Bearer /, '');
+  const bearer = bearerToken(request.headers.get('authorization'));
   if (!orderCanceled || !secretMatches(bearer, orderCanceled.secret))
     return new Response(null, { status: 401 });
   return new Response(null, {
