@@ -7,7 +7,8 @@ import {
   type CataloguePages,
   type VehicleAddress,
 } from './paths';
-import { sourcingWorks, type Work } from './works';
+import type { CollectionEntry } from 'astro:content';
+import { sourcingWorks } from './works';
 
 const plain = (_key: string, value: unknown) =>
   value instanceof Set
@@ -36,7 +37,7 @@ export function partCacheKey(
   }: {
     bySlug: Map<string, PartPageEntry>;
     places: CataloguePages;
-    works: Work[];
+    works: CollectionEntry<'works'>[];
   },
 ): string {
   const { page } = props;

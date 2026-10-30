@@ -9,6 +9,7 @@ vi.mock('astro:content', () => ({
       data: {
         title: 'BMW X5 — плёнка PPF',
         published: true,
+        image: { src: '/image.jpg' },
         date: new Date('2026-01-01'),
         translations: { sr: { title: 'BMW X5 — PPF folija', body: 'Telo.' } },
       },

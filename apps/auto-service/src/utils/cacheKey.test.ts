@@ -33,6 +33,7 @@ const work = (id: string, number: string, title = 'Замена фильтра')
     data: {
       title,
       published: true,
+      image: { src: '/image.jpg' },
       date: new Date('2026-01-01'),
       parts: [{ brand: 'Bosch', number }],
       servicesApplied: [],
