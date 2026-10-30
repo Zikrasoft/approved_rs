@@ -9,11 +9,11 @@ tags sit on `8b46200`.
 
 ## From the owner: data and copy
 
-### Details' contacts
+### Social accounts
 
-`PUBLIC_INSTAGRAM` for Details is unset. The variable is optional in
-`apps/detailing/src/utils/constants.ts`; while it is missing the Instagram tile
-is hidden and the handle stays out of `sameAs`. Setting it is all that is needed.
+The three brands carry no social account URLs yet. Each brand's `social` in
+`packages/brands/src/brands.ts` takes the URLs (Instagram, Facebook, TikTok,
+YouTube); an empty or absent one renders nothing and stays out of `sameAs`.
 
 ### Postcode
 

@@ -213,14 +213,13 @@ Production environment; Preview is unused — there are no preview deploys).
 
 ### Public (contacts, inlined into the HTML)
 
-| Variable                 | approved.rs | carlab.rs   | details.rs  | Default in the schema        | Without it                   |
-| ------------------------ | ----------- | ----------- | ----------- | ---------------------------- | ---------------------------- |
-| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone  |
-| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone  |
-| `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                         | the build fails              |
-| `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                         | the build fails              |
-| `PUBLIC_INSTAGRAM`       | —           | —           | ✅          | none (optional)              | the Instagram tile is hidden |
-| `PUBLIC_TG_MANAGER`      | ✅          | ✅          | ✅          | none (optional)              | see below                    |
+| Variable                 | approved.rs | carlab.rs   | details.rs  | Default in the schema        | Without it                  |
+| ------------------------ | ----------- | ----------- | ----------- | ---------------------------- | --------------------------- |
+| `PUBLIC_WHATSAPP_NUMBER` | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone |
+| `PUBLIC_VIBER_NUMBER`    | ✅ required | ✅          | ✅          | none / `PUBLIC_PHONE_NUMBER` | the build fails / the phone |
+| `PUBLIC_PHONE_NUMBER`    | —           | ✅ required | ✅ required | none                         | the build fails             |
+| `PUBLIC_THREADS_CHANNEL` | ✅ required | —           | —           | none                         | the build fails             |
+| `PUBLIC_TG_MANAGER`      | ✅          | ✅          | ✅          | none (optional)              | see below                   |
 
 `PUBLIC_TG_MANAGER` is the manager's own Telegram handle, without `@`:
 `approvedrs` on approved.rs and details.rs, `carlabrs` on carlab.rs. Each

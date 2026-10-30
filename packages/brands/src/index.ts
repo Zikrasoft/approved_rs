@@ -9,8 +9,15 @@ export {
   developerCreditUrl,
   splitDeveloperCredit,
   isBrandLocale,
+  socialLinks,
 } from './brands.ts';
-export type { Brand, BrandKey, BrandLocale } from './brands.ts';
+export type {
+  Brand,
+  BrandKey,
+  BrandLocale,
+  SocialAccounts,
+  SocialNetwork,
+} from './brands.ts';
 
 export { BRAND_SITES, BRANDS } from './registry.ts';
 
