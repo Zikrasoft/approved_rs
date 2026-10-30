@@ -11,6 +11,7 @@ import ListingBar from '@/components/ListingBar.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
 import {
   categoryListings,
   type CategoryListing,
@@ -34,6 +35,7 @@ export async function getStaticPaths() {
           page: listing.number > 1 ? String(listing.number) : undefined,
         },
         props: { category, listing },
+        cacheKey: cacheKey({ category, listing }),
       })),
     ),
   );

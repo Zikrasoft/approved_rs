@@ -406,6 +406,12 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-pnpm
         if: steps.guard.outputs.deploy == 'true'
+      - uses: actions/cache@v4
+        if: steps.guard.outputs.deploy == 'true' && matrix.app == 'auto-service'
+        with:
+          path: apps/auto-service/node_modules/.astro
+          key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: astro-carlab-${{ github.ref_name }}-
       - run: pnpm exec vercel pull --yes --environment=production
         if: steps.guard.outputs.deploy == 'true'
       - id: backend

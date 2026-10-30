@@ -15,6 +15,7 @@ import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carPagesForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -30,6 +31,7 @@ export async function getStaticPaths() {
         vehicle: car.vehicle.slug ?? car.vehicle.id,
       },
       props: { car },
+      cacheKey: cacheKey(car),
     })),
   );
 }
