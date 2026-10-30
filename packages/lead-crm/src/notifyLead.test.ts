@@ -85,7 +85,7 @@ describe('notifyLead', () => {
     expect(sendLeadNotification).toHaveBeenCalledWith(storedLead);
   });
 
-  it('stores a lead handed to a sister brand under that brand and its rate', async () => {
+  it('stores a lead handed to a sister brand under that brand', async () => {
     await notifyLead(baseData, '[test]', {
       brand: 'Details',
     });

@@ -170,7 +170,6 @@ describe('recordOperation', () => {
     const broken = createLedgerStore({
       storage: {
         read: () => Promise.resolve({ raw: undefined, version: undefined }),
-        exists: () => Promise.resolve(false),
         write: () => Promise.reject(new Error('blob down')),
       },
     });
@@ -203,32 +202,6 @@ describe('recordOperation', () => {
       expect.anything(),
     );
     expect(storage.current()).toEqual({ operations: 'x' });
-  });
-});
-
-describe('the opening operations', () => {
-  it('open a ledger that does not exist yet, once', async () => {
-    const opening = vi.fn(() =>
-      Promise.resolve([{ ...credit(25, 'Перенос'), by: 'admin' as const }]),
-    );
-    ledger = createLedgerStore({ storage, opening });
-    expect(await ledger.readBalance()).toBe(25);
-    await ledger.recordOperation(credit(5));
-    expect(file().operations).toEqual([
-      op(1, { amount: 25, note: 'Перенос', createdBy: 'admin' }),
-      op(2, { amount: 5 }),
-    ]);
-    opening.mockClear();
-    expect(await ledger.readBalance()).toBe(30);
-    expect(opening).not.toHaveBeenCalled();
-  });
-
-  it('skip an opening debit the Balance cannot cover', async () => {
-    ledger = createLedgerStore({
-      storage,
-      opening: () => Promise.resolve([debit(5)]),
-    });
-    expect(await ledger.readOperations()).toEqual([]);
   });
 });
 

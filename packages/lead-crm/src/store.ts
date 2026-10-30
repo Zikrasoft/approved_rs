@@ -111,7 +111,6 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
-  beforeWrite?: () => Promise<void>;
   standaloneServices?: readonly string[];
 }
 
@@ -261,7 +260,6 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
-  beforeWrite,
   standaloneServices = [],
 }: LeadStoreOptions) {
   function standaloneApart(a: LeadInput, b: StoredLead): boolean {
@@ -325,7 +323,6 @@ export function createLeadStore({
       };
       if (JSON.stringify(next) === JSON.stringify(current))
         return { next, unreadable };
-      await beforeWrite?.();
       await storage.write(
         [...next.leads, ...next.digests, ...unreadable],
         version,

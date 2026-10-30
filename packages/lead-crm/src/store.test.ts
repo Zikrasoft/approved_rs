@@ -1585,7 +1585,6 @@ describe('updateLeads — failures that are not write conflicts', () => {
     const boom = new Error('storage is down');
     const failing = {
       read: storage.read,
-      exists: storage.exists,
       write: vi.fn().mockRejectedValue(boom),
     };
     const brokenStore = createLeadStore({
