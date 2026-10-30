@@ -40,6 +40,7 @@ inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
 crossReferencesHeading: Номера других производителей
+worksHeading: Мы уже подбирали эту запчасть
 applicabilityHeading: Применимость по данным каталога
 supplierDataNote: Данные каталога. Перед заказом проверим совместимость по VIN.
 requirementCarsLabel: 'Подходит по допускам для:'
