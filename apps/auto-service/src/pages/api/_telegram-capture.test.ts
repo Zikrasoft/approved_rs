@@ -234,7 +234,7 @@ describe('the CarLab Questionnaire', () => {
     await press('request:ru:diagnostics');
 
     const picker = lastReply().reply_markup.inline_keyboard;
-    expect(picker).toHaveLength(6 + 1);
+    expect(picker).toHaveLength(7 + 1);
     expect(picker[0]).toEqual([
       expect.objectContaining({
         text: expect.stringMatching(/^✅ /),

@@ -16,7 +16,6 @@ const FORM_ONLY_SLUGS = [
   'vehicle-import-eu',
   'vehicle-import-china',
   'parts-order',
-  'vin-parts-inquiry',
 ];
 const LEGACY_SLUGS = ['auto-service-belgrade', 'detailing-belgrade'];
 const PARTNER_SLUGS = Object.values(PARTNER_SERVICE);
@@ -114,6 +113,11 @@ describe('SERVICE_LABELS_RU', () => {
   it('tells a partner slug from a service a brand site offers itself', () => {
     expect(isPartnerService('partner-carlab')).toBe(true);
     expect(isPartnerService('diagnostics')).toBe(false);
+  });
+
+  it('offers Parts sourcing as a CarLab service under its visitor-facing name', () => {
+    expect(isBrandServiceSlug('carlab', 'vin-parts-inquiry')).toBe(true);
+    expect(serviceLabel('vin-parts-inquiry')).toBe('Подбор запчастей');
   });
 
   it('names a shop order the way the owner card should read it', () => {

@@ -8,6 +8,7 @@ describe('sitemapFilter', () => {
     const keep = sitemapFilter(SITE);
     expect(keep(`${SITE}/sr/services/`)).toBe(true);
     expect(keep(`${SITE}/sr/parts/makes/`)).toBe(true);
+    expect(keep(`${SITE}/sr/services/vin-parts-inquiry/`)).toBe(true);
   });
 
   it('never lists the root redirect or the thank-you page', () => {

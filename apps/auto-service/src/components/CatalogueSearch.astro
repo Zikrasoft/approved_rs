@@ -11,6 +11,7 @@ interface Props {
   large?: boolean;
   hint?: boolean;
   autofocus?: boolean;
+  compact?: boolean;
   class?: string;
 }
 
@@ -20,6 +21,7 @@ const {
   large = false,
   hint = large,
   autofocus = false,
+  compact = false,
   class: className,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -70,25 +72,34 @@ const copy = content(locale).partsSearch;
             'field',
             large
               ? 'min-h-14 pl-12 text-base sm:text-lg'
-              : 'min-h-11 py-2 pl-9',
+              : compact
+                ? 'h-10 py-0 pl-9 text-sm'
+                : 'min-h-11 py-2 pl-9',
           ]}
         />
       </label>
-      <button
-        type="submit"
-        class:list={[
-          'btn btn-primary shrink-0',
-          large ? 'min-h-14 px-5 sm:px-7' : 'min-h-11 px-4 py-2',
-        ]}
-      >
-        {copy.submitLabel}
-      </button>
+      {
+        !compact && (
+          <button
+            type="submit"
+            class:list={[
+              'btn btn-primary shrink-0',
+              large ? 'min-h-14 px-5 sm:px-7' : 'min-h-11 px-4 py-2',
+            ]}
+          >
+            {copy.submitLabel}
+          </button>
+        )
+      }
     </form>
     <div
       data-suggestions
       hidden
       aria-label={copy.label}
-      class="absolute inset-x-0 top-full z-40 mt-2 max-h-[min(70vh,30rem)] overflow-y-auto overscroll-contain rounded-field border border-line-strong bg-paper p-1.5 text-left shadow-lg"
+      class:list={[
+        'absolute inset-x-0 top-full z-40 mt-2 max-h-[min(70vh,30rem)] overflow-y-auto overscroll-contain rounded-field border border-line-strong bg-paper p-1.5 text-left shadow-lg',
+        compact && 'w-[max(100%,26rem)]',
+      ]}
     >
     </div>
   </div>
