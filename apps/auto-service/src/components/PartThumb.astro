@@ -11,14 +11,17 @@ interface Props {
 
 const { thumb, class: className } = Astro.props;
 const box =
-  'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-field bg-shade sm:size-16';
+  'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-control bg-shade sm:size-16';
 const label = content(localeFrom(Astro.url.pathname)).shopPart
   .illustrationLabel;
 ---
 
 {
   thumb ? (
-    <part-image class:list={['group/image relative', box, className]}>
+    <part-image
+      class:list={['group/image relative', box, className]}
+      title={thumb.illustration ? label : undefined}
+    >
       <img
         src={thumb.src}
         alt=""
@@ -26,18 +29,17 @@ const label = content(localeFrom(Astro.url.pathname)).shopPart
         height="64"
         loading="lazy"
         decoding="async"
-        class="size-full object-contain mix-blend-multiply group-data-broken/image:hidden"
+        class:list={[
+          'size-full object-contain mix-blend-multiply group-data-broken/image:hidden',
+          thumb.illustration && 'opacity-60 grayscale',
+        ]}
       />
       <Icon
         name="part"
         size={22}
         class="hidden text-line-field group-data-broken/image:block"
       />
-      {thumb.illustration && (
-        <span class="absolute inset-x-0 bottom-0 truncate bg-paper/85 px-0.5 text-center text-[0.625rem] leading-4 tracking-tight text-muted group-data-broken/image:hidden">
-          {label}
-        </span>
-      )}
+      {thumb.illustration && <span class="sr-only">{label}</span>}
     </part-image>
   ) : (
     <span class:list={[box, className]}>

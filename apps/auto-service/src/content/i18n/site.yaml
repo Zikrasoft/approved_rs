@@ -39,6 +39,7 @@ common:
   allServices: Все услуги
   allWorks: Все примеры работ
   emptyWorks: Примеры работ скоро появятся. Пока что позвоните, расскажем, что делали на похожих машинах.
+  socialHeading: Мы в соцсетях
 channels:
   call: Позвонить
   whatsapp: WhatsApp

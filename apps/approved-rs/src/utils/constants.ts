@@ -1,4 +1,4 @@
-import { APPROVED } from '@podbor/brands';
+import { APPROVED, socialLinks } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import { z } from 'zod';
 import type { Locale } from '@/i18n/config';
@@ -38,6 +38,7 @@ export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 export const SOCIAL_SAME_AS = [
   TELEGRAM_BOT_URL,
   `https://www.threads.com/@${THREADS_CHANNEL}`,
+  ...socialLinks(BRAND.social).map((link) => link.url),
 ];
 
 export const CHINA_NAME: Record<Locale, string> = {

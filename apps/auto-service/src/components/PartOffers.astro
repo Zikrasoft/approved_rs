@@ -33,7 +33,7 @@ const priced = page.offers.length > 0;
 {
   (priced || closed) && (
     <part-offers
-      class="card flex flex-col gap-4 border-l-4 border-l-signal p-5 sm:p-6"
+      class="card flex flex-col gap-4 border-signal/40 bg-signal/5 p-5 sm:p-6"
       {...(priced ? {} : { hidden: '' })}
       data-preview={closed ? '' : undefined}
       data-id={page.id}
@@ -92,7 +92,7 @@ const priced = page.offers.length > 0;
     <div
       class:list={[
         'card flex flex-col gap-3 p-5 sm:p-6',
-        !demoted && 'border-l-4 border-l-signal',
+        !demoted && 'border-signal/40 bg-signal/5',
       ]}
     >
       <h2 class="text-block font-semibold">
@@ -112,7 +112,6 @@ const priced = page.offers.length > 0;
           ]}
         >
           {copy.priceOnRequestCta}
-          <Icon name="arrowRight" />
         </a>
       </parts-list-add>
     </div>

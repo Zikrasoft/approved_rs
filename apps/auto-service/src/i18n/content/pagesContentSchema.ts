@@ -25,6 +25,7 @@ export const pagesContentSchema = z
         doorButtonLabel: z.string(),
         partsHeading: z.string(),
         priceLabel: z.string(),
+        sourcingCta: z.object({ heading: z.string(), body: z.string() }),
       })
       .strict(),
     contact: z

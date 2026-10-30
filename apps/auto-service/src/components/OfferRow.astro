@@ -1,4 +1,5 @@
 ---
+import Icon from '@/components/Icon.astro';
 import type { PartOffer } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
@@ -38,7 +39,7 @@ const stockText =
       {offer && formatMoney(offer.price, offer.currency, localeTag)}
     </span>
     <span
-      class="hidden h-4 w-28 animate-pulse rounded-sm bg-shade offers-pending:inline-block motion-reduce:animate-none"
+      class="hidden h-4 w-28 animate-pulse rounded-pill bg-shade offers-pending:inline-block motion-reduce:animate-none"
       aria-hidden="true"></span>
     <span
       class="text-sm text-ink-2 offers-pending:hidden!"
@@ -48,7 +49,7 @@ const stockText =
       {stockText}
     </span>
     <span
-      class="rounded-sm border border-line px-2 py-0.5 text-xs text-ink-2 offers-pending:hidden!"
+      class="rounded-pill border border-line px-2 py-0.5 text-xs text-ink-2 offers-pending:hidden!"
       data-out
       hidden={!unavailable}
     >
@@ -81,5 +82,6 @@ const stockText =
     hidden={buyable}
   >
     {copy.askSupplyCta}
+    <Icon name="arrowRight" />
   </a>
 </li>

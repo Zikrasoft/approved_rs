@@ -7,6 +7,7 @@ import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
+import SocialLinks from './SocialLinks.astro';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 
@@ -15,6 +16,7 @@ const site = content(locale).site;
 const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
 
+const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
 const open = shopOpen();
 const basket = open
@@ -83,9 +85,13 @@ const links = [
         }
       </nav>
 
-      <div class="hidden max-w-72 min-w-0 flex-1 lg:block">
-        <CatalogueSearch compact />
-      </div>
+      {
+        !onHome && (
+          <div class="hidden max-w-72 min-w-0 flex-1 xl:block">
+            <CatalogueSearch compact />
+          </div>
+        )
+      }
 
       <div class="flex items-center gap-1 sm:gap-2">
         <carlab-lang class="hidden items-center gap-1 lg:flex">
@@ -98,7 +104,7 @@ const links = [
                 title={LOCALE_NAME[code]}
                 aria-current={code === locale ? 'true' : undefined}
                 class:list={[
-                  'spec rounded-full px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
+                  'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
                   code === locale
                     ? 'bg-shade text-ink'
                     : 'text-muted hover:text-ink',
@@ -122,7 +128,10 @@ const links = [
           type="button"
           popovertarget="site-search"
           aria-label={searchCopy.openSearch}
-          class="flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade lg:hidden"
+          class:list={[
+            'flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade',
+            !onHome && 'xl:hidden',
+          ]}
         >
           <Icon name="search" size={20} />
         </button>
@@ -139,7 +148,7 @@ const links = [
             <Icon name="cart" size={20} />
             <span class="sr-only">{basket.label}</span>
             <span
-              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1 text-[0.6875rem] font-semibold text-white"
+              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-ink px-1 text-[0.6875rem] font-semibold text-white"
               data-count
               hidden></span>
           </a>
@@ -218,11 +227,12 @@ const links = [
       }
     </nav>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-6 pt-6">
       <ContactControl channel="phone" class="btn btn-secondary w-full">
         <Icon name="phone" />
         <span class="spec">{site.header.phoneLabel}</span>
       </ContactControl>
+      <SocialLinks />
       <carlab-lang class="flex items-center gap-2">
         <span class="text-xs text-muted">{site.header.languageLabel}</span>
         {
@@ -232,7 +242,7 @@ const links = [
               hreflang={code}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               class:list={[
-                'spec rounded-full px-3 py-1 text-xs uppercase tracking-widest',
+                'spec rounded-pill px-3 py-1 text-xs uppercase tracking-widest',
                 code === locale
                   ? 'bg-shade text-ink'
                   : 'text-muted hover:text-ink',

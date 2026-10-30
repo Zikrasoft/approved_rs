@@ -25,7 +25,7 @@ const label = (index: number) =>
   main && (
     <part-gallery class="flex w-full max-w-136 flex-col gap-3">
       <figure class="flex flex-col gap-2">
-        <part-image class="group/image flex aspect-square items-center justify-center overflow-hidden rounded-block bg-shade">
+        <part-image class="group/image flex aspect-[4/3] items-center sm:aspect-square justify-center overflow-hidden rounded-block bg-shade">
           <img
             data-main
             src={main.src}
@@ -56,7 +56,7 @@ const label = (index: number) =>
                 data-srcset={image.srcset}
                 aria-label={label(index)}
                 aria-current={index === 0 ? 'true' : undefined}
-                class="block size-16 overflow-hidden rounded-field border-2 border-transparent bg-shade transition-colors duration-150 hover:border-line-strong focus-visible:border-ink aria-[current]:border-signal sm:size-20"
+                class="block size-16 overflow-hidden rounded-control border-2 border-transparent bg-shade transition-colors duration-150 hover:border-line-strong focus-visible:border-ink aria-[current]:border-signal sm:size-20"
               >
                 <part-image class="group/image flex size-full items-center justify-center">
                   <img

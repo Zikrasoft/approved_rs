@@ -1,16 +1,15 @@
-import { DETAILS, WORKSHOP_ADDRESS } from '@podbor/brands';
-import { instagramLink, telegramBotLink } from '@podbor/site-kit/contact-links';
+import { DETAILS, WORKSHOP_ADDRESS, socialLinks } from '@podbor/brands';
+import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import {
   createPublicEnvSchema,
   withMessengerFallback,
 } from '@podbor/site-kit/public-env';
-import { z } from 'zod';
 
 export const BRAND = DETAILS;
 
-const publicEnvSchema = createPublicEnvSchema({ siteDefault: BRAND.url })
-  .extend({ PUBLIC_INSTAGRAM: z.string().min(1).optional() })
-  .transform(withMessengerFallback);
+const publicEnvSchema = createPublicEnvSchema({
+  siteDefault: BRAND.url,
+}).transform(withMessengerFallback);
 
 export function readPublicEnv(env: Record<string, unknown>) {
   return publicEnvSchema.parse(env);
@@ -41,18 +40,12 @@ export const PHONE_NUMBER = env.PUBLIC_PHONE_NUMBER;
 export const WHATSAPP_NUMBER = env.PUBLIC_WHATSAPP_NUMBER;
 export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
-export const INSTAGRAM =
-  env.PUBLIC_INSTAGRAM === undefined
-    ? undefined
-    : {
-        handle: env.PUBLIC_INSTAGRAM,
-        url: instagramLink(env.PUBLIC_INSTAGRAM),
-      };
-
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
+export const SOCIAL_LINKS = socialLinks(BRAND.social);
+
 export const SOCIAL_SAME_AS = [
-  ...(INSTAGRAM ? [INSTAGRAM.url] : []),
+  ...SOCIAL_LINKS.map((link) => link.url),
   TELEGRAM_BOT_URL,
 ];
 

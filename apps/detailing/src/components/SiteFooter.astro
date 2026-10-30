@@ -5,7 +5,8 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { BRAND, INSTAGRAM, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import { BRAND, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import SocialLinks from './SocialLinks.astro';
 import {
   DEVELOPER,
   developerCreditUrl,
@@ -38,20 +39,7 @@ const messengers = [
         <p class="max-w-xs text-sm leading-relaxed text-mute">
           {site.footer.tagline}
         </p>
-        {
-          INSTAGRAM && (
-            <a
-              href={INSTAGRAM.url}
-              rel="noopener"
-              target="_blank"
-              class="inline-flex min-h-11 items-center gap-2.5 text-sm text-mute transition-colors duration-400 hover:text-champagne"
-            >
-              <Icon name="instagram" size={16} class="shrink-0" />
-              <span class="sr-only">{site.channels.instagram}</span>@
-              {INSTAGRAM.handle}
-            </a>
-          )
-        }
+        <SocialLinks />
       </div>
 
       <nav class="flex flex-col gap-3" aria-label={site.nav.services}>
