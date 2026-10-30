@@ -31,6 +31,17 @@ describe('MANN-FILTER', () => {
     );
   });
 
+  it('reads a page whose product data sits inside a JSON-LD graph', () => {
+    const article = supplierArticleSchema.parse(
+      mannFilter.parse(page('c12006.html.gz')),
+    );
+    expect(article).toMatchObject({
+      article_id: 'C12006_MANN-FILTER',
+      brand: 'MANN-FILTER',
+      number: 'C 12 006',
+    });
+  });
+
   it('reads an oil filter page into an article', () => {
     const article = supplierArticleSchema.parse(
       mannFilter.parse(page('hu816x.html.gz')),

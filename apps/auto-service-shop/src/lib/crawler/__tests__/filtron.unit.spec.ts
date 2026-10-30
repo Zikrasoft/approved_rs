@@ -38,6 +38,17 @@ describe('FILTRON', () => {
     });
   });
 
+  it('reads a page whose product data sits inside a JSON-LD graph', () => {
+    const article = supplierArticleSchema.parse(
+      filtron.parse(page('ad785-6.html.gz')),
+    );
+    expect(article).toMatchObject({
+      article_id: 'AD785/6_FILTRON',
+      brand: 'FILTRON',
+      number: 'AD 785/6',
+    });
+  });
+
   it('reads a cabin filter page into an article', () => {
     const article = supplierArticleSchema.parse(
       filtron.parse(page('k1477.html.gz')),

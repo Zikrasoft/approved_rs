@@ -10,16 +10,25 @@ const productLdSchema = z.object({
   brand: z.object({ name: z.string().trim().min(1) }),
 });
 
+const ldGraphSchema = z.object({ '@graph': z.array(z.unknown()) });
+
 const galleryItemsSchema = z.array(
   z.object({ path: z.url(), type: z.string() }),
 );
 
 type Nodes = ReturnType<CheerioAPI>;
 
+const ldNodes = (json: unknown): unknown[] => {
+  const graph = ldGraphSchema.safeParse(json);
+  return graph.success ? graph.data['@graph'] : [json];
+};
+
 const brandOf = ($: CheerioAPI): string | null => {
   for (const script of each($, $('script[type="application/ld+json"]'))) {
-    const ld = productLdSchema.safeParse(parsedJson(script.text()));
-    if (ld.success) return ld.data.brand.name;
+    for (const node of ldNodes(parsedJson(script.text()))) {
+      const ld = productLdSchema.safeParse(node);
+      if (ld.success) return ld.data.brand.name;
+    }
   }
   return null;
 };
