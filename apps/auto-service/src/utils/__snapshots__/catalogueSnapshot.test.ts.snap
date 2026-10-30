@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`makeHubsFrom > assembles the same hubs for a mixed catalogue 1`] = `
+exports[`makeHubsFrom > groups Parts by Model and Category, fitted before required, in a mixed catalogue 1`] = `
 [
   [
     "audi",

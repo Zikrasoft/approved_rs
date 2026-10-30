@@ -172,7 +172,7 @@ const outline = (hubs: MakeHubEntry[]) =>
   ]);
 
 describe('makeHubsFrom', () => {
-  it('assembles the same hubs for a mixed catalogue', () => {
+  it('groups Parts by Model and Category, fitted before required, in a mixed catalogue', () => {
     expect(outline(makeHubsFrom(syntheticCatalogue(120)))).toMatchSnapshot();
   });
 

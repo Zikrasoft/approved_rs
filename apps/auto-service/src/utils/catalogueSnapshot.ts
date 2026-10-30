@@ -92,11 +92,12 @@ const byName = new Intl.Collator('en', { numeric: true }).compare;
 const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
   const groups = new Map<string, T[]>();
   for (const item of items) {
-    const group = groups.get(key(item));
+    const itemKey = key(item);
+    const group = groups.get(itemKey);
     if (group) {
       group.push(item);
     } else {
-      groups.set(key(item), [item]);
+      groups.set(itemKey, [item]);
     }
   }
   return groups;
