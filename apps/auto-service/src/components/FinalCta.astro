@@ -21,6 +21,8 @@ const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
       <p class="max-w-md text-base leading-relaxed text-muted">{body}</p>
       <ContactChannels class="mt-2" service={service} />
     </div>
-    <LeadForm service={service} commentPlaceholder={commentPlaceholder} />
+    <slot name="form">
+      <LeadForm service={service} commentPlaceholder={commentPlaceholder} />
+    </slot>
   </div>
 </section>

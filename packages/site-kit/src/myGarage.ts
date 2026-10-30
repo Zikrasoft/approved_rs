@@ -33,11 +33,6 @@ export function defineMyGarage(tagName = 'my-garage'): void {
             input.value = input.value.replace(/[\s.-]+/g, '').toUpperCase();
           }
         });
-
-        this.closest('form')?.addEventListener('submit', () => {
-          const value = input.value.trim().toUpperCase();
-          if (value) rememberVin(value);
-        });
       }
     },
   );
