@@ -148,6 +148,44 @@ describe('orderLeadForm', () => {
     ]);
   });
 
+  it('groups add-ons linked only by the parent Offer id like a beta order', () => {
+    const comment =
+      orderLeadForm(
+        order({
+          items: [
+            {
+              title: 'Регистрация аккумулятора',
+              unit_price: 2500,
+              quantity: 1,
+              metadata: {
+                addon_offer_id: 'offer_battery',
+                addon_kind: 'service',
+              },
+            },
+            {
+              title: 'Oil filter',
+              unit_price: 1850,
+              quantity: 1,
+              metadata: { offer_id: 'offer_oil' },
+            },
+            {
+              title: 'Varta',
+              unit_price: 10000,
+              quantity: 1,
+              metadata: { offer_id: 'offer_battery' },
+            },
+          ],
+        }),
+      ).get('comment') ?? '';
+
+    expect(comment.split('\n').slice(3, 7)).toEqual([
+      'Oil filter × 1: 1 850 RSD',
+      'Varta × 1: 10 000 RSD',
+      '+ Регистрация аккумулятора: 2 500 RSD',
+      'Итого: 14 350 RSD',
+    ]);
+  });
+
   it('writes sums with thousands separated for the owner', () => {
     const comment =
       orderLeadForm(

@@ -11,6 +11,9 @@ import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
 import LeadModal from '@/components/LeadModal.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import { getCollection } from 'astro:content';
+import { sourcingWorks } from '@/utils/works';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { formatMoney } from '@/utils/money';
@@ -158,6 +161,7 @@ const installPrice =
           label: cart.installationLabel,
           price: formatMoney(installation, 'RSD', BCP47_BY_LOCALE[locale]),
         };
+const works = sourcingWorks(await getCollection('works'), page);
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
   return entry ? partThumbnail(entry, entry.category) : null;
@@ -519,6 +523,15 @@ const thumbFor = (slug: string) => {
       )
     }
   </section>
+
+  {
+    works.length > 0 && (
+      <section class="wrap pb-band md:pb-band-lg">
+        <h2 class="text-section">{copy.worksHeading}</h2>
+        <WorkGrid works={works} class="mt-6" />
+      </section>
+    )
+  }
 
   <PartsInquiryModal />
   <LeadModal

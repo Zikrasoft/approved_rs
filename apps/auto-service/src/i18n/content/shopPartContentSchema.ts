@@ -66,6 +66,7 @@ export const shopPartContentSchema = z
     installBody: z.string(),
     installCta: z.string(),
     crossReferencesHeading: z.string(),
+    worksHeading: z.string(),
     applicabilityHeading: z.string(),
     supplierDataNote: z.string(),
     requirementCarsLabel: z.string(),
