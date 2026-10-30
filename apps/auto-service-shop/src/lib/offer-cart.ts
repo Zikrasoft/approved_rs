@@ -55,6 +55,7 @@ import {
   listedPartOf,
   offerLineMetadata,
   readinessMetadata,
+  withParentOffers,
   readLine,
 } from './line-metadata';
 import { carLabel } from './order-lead';
@@ -259,10 +260,12 @@ async function ensureCashAtPickupPaymentSession(
   });
 }
 
-const retrieveCart = (scope: MedusaContainer, cartId: string) =>
-  scope
+const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
+  const cart = await scope
     .resolve<ICartModuleService>(Modules.CART)
     .retrieveCart(cartId, { relations: ['items'] });
+  return { ...cart, items: withParentOffers(cart.items ?? []) };
+};
 
 async function syncOfferCart(
   scope: MedusaContainer,
@@ -491,7 +494,7 @@ export async function addLineAddon(
             quantity: Number(line.quantity),
             unit_price: price,
             requires_shipping: false,
-            metadata: addonLineMetadata(offerId, kind),
+            metadata: addonLineMetadata({ lineId: line.id, offerId }, kind),
           },
         ],
       },

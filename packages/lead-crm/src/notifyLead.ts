@@ -194,8 +194,8 @@ export function createAfterStatusChange({
     lead: StoredLead,
     { surface, author }: StatusChangeOptions = {},
   ): Promise<void> {
-    await settleOrder(lead);
     await ensureLeadCard(lead);
+    await settleOrder(lead);
     const current = await refreshTopic(lead);
     if (isClosed(lead)) {
       await notifier.unpinLeadCard(lead);

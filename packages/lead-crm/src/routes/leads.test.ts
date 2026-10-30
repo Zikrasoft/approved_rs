@@ -435,7 +435,7 @@ describe('a shop Order cancelled in the shop admin', () => {
   };
 
   beforeEach(() => {
-    cancelOrder.mockReset().mockResolvedValue(true);
+    cancelOrder.mockReset().mockResolvedValue('lost');
     notifyLead.mockReset();
   });
 
@@ -448,14 +448,22 @@ describe('a shop Order cancelled in the shop admin', () => {
   });
 
   it('answers 404 while no Lead carries the Order, so the shop retries', async () => {
-    cancelOrder.mockResolvedValue(false);
+    cancelOrder.mockResolvedValue('missing');
 
     const response = await cancelPOST(cancelCtx('Bearer shop-secret'));
 
     expect(response.status).toBe(404);
   });
 
-  it.each([undefined, 'Bearer wrong'])(
+  it('answers 409 for a won Lead, so the shop never takes it for lost', async () => {
+    cancelOrder.mockResolvedValue('won');
+
+    const response = await cancelPOST(cancelCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(409);
+  });
+
+  it.each([undefined, 'Bearer wrong', 'shop-secret'])(
     'refuses a cancel without the shop secret (%s)',
     async (authorization) => {
       const response = await cancelPOST(cancelCtx(authorization));

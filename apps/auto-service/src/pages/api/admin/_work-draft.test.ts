@@ -21,6 +21,7 @@ type Call = { url: string; init: RequestInit };
 const calls: Call[] = [];
 let shopAnswer: Response;
 let draftExists = false;
+let tokenCanPush = true;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -32,6 +33,10 @@ const network = vi.fn(async (input: string | URL, init: RequestInit = {}) => {
   const url = String(input);
   calls.push({ url, init });
   if (url.startsWith(SHOP)) return shopAnswer.clone();
+  if (url === REPO)
+    return tokenCanPush
+      ? json({ permissions: { push: true } })
+      : new Response('Bad credentials', { status: 401 });
   if (url.startsWith(`${REPO}/contents/`))
     return draftExists
       ? json({ content: Buffer.from('---\n---\n').toString('base64') })
@@ -52,6 +57,7 @@ beforeEach(() => {
   vi.stubGlobal('fetch', network);
   shopAnswer = json({ summary });
   draftExists = false;
+  tokenCanPush = true;
   calls.length = 0;
 });
 
@@ -158,13 +164,36 @@ describe('POST /api/admin/work-draft', () => {
     expect(calls.some(({ url }) => url.endsWith('/git/trees'))).toBe(false);
   });
 
-  it('passes on the shop refusing an Order that is not completed', async () => {
-    shopAnswer = json({ message: 'not completed' }, 409);
+  it('refuses a cookie GitHub does not accept and asks the shop nothing', async () => {
+    tokenCanPush = false;
+
+    const response = await draft('order_01', 'forged-token');
+
+    expect(response.status).toBe(401);
+    expect(calls.some(({ url }) => url.startsWith(SHOP))).toBe(false);
+    expect(calls.some(({ url }) => url.endsWith('/git/trees'))).toBe(false);
+  });
+
+  it('answers the shop refusing an Order with its own words, not the shop’s', async () => {
+    shopAnswer = json(
+      { message: 'Order order_01 is pending, not completed' },
+      409,
+    );
 
     const response = await draft('order_01', 'staff-token');
 
     expect(response.status).toBe(409);
-    expect(calls.some(({ url }) => url.startsWith(REPO))).toBe(false);
+    expect(await response.text()).not.toContain('pending');
+    expect(calls.some(({ url }) => url.endsWith('/git/trees'))).toBe(false);
+  });
+
+  it('fails loudly without the shop secret instead of sending an empty one', async () => {
+    vi.stubEnv('SHOP_LEAD_SECRET', '');
+
+    await expect(draft('order_01', 'staff-token')).rejects.toThrow(
+      /SHOP_LEAD_SECRET/,
+    );
+    expect(calls.some(({ url }) => url.startsWith(SHOP))).toBe(false);
   });
 
   it('refuses an order id that is not one', async () => {

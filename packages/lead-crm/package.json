@@ -48,6 +48,13 @@
       },
       "default": "./src/phone.ts"
     },
+    "./verify-secret": {
+      "require": {
+        "types": "./dist/cjs/verifySecret.d.ts",
+        "default": "./dist/cjs/verifySecret.js"
+      },
+      "default": "./src/verifySecret.ts"
+    },
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",
     "./phone-kit": "./src/phoneKit.ts",
@@ -72,6 +79,7 @@
     "@vercel/blob": "2.8.0"
   },
   "devDependencies": {
+    "@types/node": "24.13.2",
     "@vercel/blob": "2.8.0",
     "@vitest/coverage-v8": "3.2.6",
     "jsdom": "30.0.1",

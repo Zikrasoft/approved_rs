@@ -2,7 +2,12 @@ import type { BigNumberValue } from '@medusajs/framework/types';
 import { MathBN } from '@medusajs/framework/utils';
 import { orderCap, type CheckoutRefusal } from '@podbor/catalog-contract';
 
-import { type AddonKind, INSTALLATION, readLine } from './line-metadata';
+import {
+  type AddonKind,
+  INSTALLATION,
+  readLine,
+  withParentOffers,
+} from './line-metadata';
 
 export type JudgedItem = {
   id: string;
@@ -62,7 +67,10 @@ export function judgeCheckout(
   quotes: Map<string, Quote>,
   addons: Map<string, AddonPrices>,
 ): { refusal: JudgedRefusal } | { lines: JudgedLine[] } {
-  const read = items.map((item) => ({ item, line: readLine(item.metadata) }));
+  const read = withParentOffers(items).map((item) => ({
+    item,
+    line: readLine(item.metadata),
+  }));
   const offerLines = read.filter(({ line }) => !line.addonKind);
   const addonLines = read.filter(({ line }) => line.addonKind);
   const quantities = new Map(

@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 export const KEYSTATIC_AUTH_COOKIE = 'keystatic-gh-access-token';
 
+export const CONTENT_REPO = {
+  repo: 'Zikrasoft/approved_rs',
+  branch: 'main',
+} as const;
+
 const API = 'https://api.github.com';
 
 export class GithubApiError extends Error {
@@ -136,5 +141,20 @@ export function createGithubContents({
     });
   }
 
-  return { listDir, getFile, getFileBuffer, commitFiles };
+  async function canWrite(token: string): Promise<boolean> {
+    try {
+      const { permissions } = await ghFetch(
+        z.object({ permissions: z.object({ push: z.boolean() }) }),
+        token,
+        '',
+      );
+      return permissions.push;
+    } catch (err) {
+      if (err instanceof GithubApiError && [401, 403, 404].includes(err.status))
+        return false;
+      throw err;
+    }
+  }
+
+  return { listDir, getFile, getFileBuffer, commitFiles, canWrite };
 }

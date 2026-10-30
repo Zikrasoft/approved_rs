@@ -1,9 +1,7 @@
 import { checkoutContactSchema } from '@podbor/catalog-contract';
 import { CASH_AT_PICKUP_METADATA } from './offer-cart';
-import { leadHandoff, readLine, withAddonsUnderParts } from './line-metadata';
-import type { LeadOrder } from './order-lead';
-
-export { leadHandoff };
+import { readLine, withAddonsUnderParts } from './line-metadata';
+import { leadHandoff, type LeadOrder } from './order-lead';
 
 type Metadata = Record<string, unknown> | null | undefined;
 

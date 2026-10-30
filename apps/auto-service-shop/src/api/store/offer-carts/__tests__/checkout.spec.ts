@@ -855,6 +855,49 @@ medusaIntegrationTestRunner({
           expect(again.total).toBe(12500);
         });
 
+        const cartLines = async (cartId: string) =>
+          (
+            await getContainer()
+              .resolve(Modules.CART)
+              .retrieveCart(cartId, { relations: ['items'] })
+          ).items ?? [];
+
+        it('names the parent line on an add-on, so the previous image still reads it', async () => {
+          const cart = await batteryCart();
+
+          const lines = await cartLines(cart.id);
+          const parent = lines.find(({ metadata }) => metadata?.offer_id);
+          const addon = lines.find(({ id }) => id !== parent?.id);
+          expect(addon?.metadata).toMatchObject({
+            addon_for: parent?.id,
+            addon_offer_id: batteryOfferId,
+          });
+        });
+
+        it('keeps an add-on written by the previous image, which names only the parent line', async () => {
+          const cart = await cartWith(1, batteryOfferId);
+          await getContainer()
+            .resolve(Modules.CART)
+            .addLineItems({
+              cart_id: cart.id,
+              title: SERVICE,
+              quantity: 1,
+              unit_price: 2500,
+              requires_shipping: false,
+              metadata: { addon_for: cart.items[0].id },
+            });
+
+          const repriced = (await post(`/store/offer-carts/${cart.id}/reprice`))
+            .data.cart;
+
+          expect(repriced.items[0].addon).toMatchObject({
+            item_id: expect.any(String),
+            unit_price: 2500,
+          });
+          expect(repriced.total).toBe(12500);
+          expect(await cartLines(cart.id)).toHaveLength(2);
+        });
+
         it('charges the add-on for every unit of its line', async () => {
           const two = await cartWith(2, batteryOfferId);
           const added = (await post(addonPath(two))).data.cart;

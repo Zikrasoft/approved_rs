@@ -5,8 +5,15 @@ import {
   ORDER_OUTCOME_FIELD,
 } from '../fields.ts';
 import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
-import { secretMatches } from '../verifySecret.ts';
+import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
+import type { CancelOrderResult } from '../brandBot.ts';
+
+const CANCEL_STATUS: Record<CancelOrderResult, number> = {
+  lost: 204,
+  won: 409,
+  missing: 404,
+};
 
 export interface RouteRequestContext {
   request: Request;
@@ -24,7 +31,7 @@ export interface LeadsRouteOptions<L extends string> {
   missingFieldsMessage: Record<L, string>;
   orderCanceled?: {
     secret: string | undefined;
-    cancel: (orderId: string) => Promise<boolean>;
+    cancel: (orderId: string) => Promise<CancelOrderResult>;
   };
 }
 
@@ -38,11 +45,12 @@ async function cancelOrder(
   orderId: string,
   orderCanceled: LeadsRouteOptions<string>['orderCanceled'],
 ): Promise<Response> {
-  const bearer = request.headers.get('authorization')?.replace(/^Bearer /, '');
+  const bearer = bearerToken(request.headers.get('authorization'));
   if (!orderCanceled || !secretMatches(bearer, orderCanceled.secret))
     return new Response(null, { status: 401 });
-  const found = await orderCanceled.cancel(orderId);
-  return new Response(null, { status: found ? 204 : 404 });
+  return new Response(null, {
+    status: CANCEL_STATUS[await orderCanceled.cancel(orderId)],
+  });
 }
 
 function refusalPage(locale: string, message: string): Response {

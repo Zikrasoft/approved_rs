@@ -1,5 +1,5 @@
-import type { LeadOrder } from '../order-lead';
-import { carlabOrderView, leadHandoff } from '../order-view';
+import { leadHandoff, type LeadOrder } from '../order-lead';
+import { carlabOrderView } from '../order-view';
 
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
   id: 'order_1',

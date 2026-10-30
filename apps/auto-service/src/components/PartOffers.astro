@@ -27,7 +27,7 @@ const part = {
   ...addonDataset(page.category),
 };
 const closed = !shopOpen();
-const priced = page.offers.length > 0;
+const priced = page.offers.length > 0 && !closed;
 ---
 
 {

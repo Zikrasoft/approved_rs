@@ -25,28 +25,36 @@ import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { z } from 'zod';
 
 import { parseEnv } from './env';
-import {
-  handOffAttempts,
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_ATTEMPTS,
-  LEAD_HANDOFF_ERROR,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
-  LEAD_OWNER_ALERTED_AT,
-  readLine,
-  withAddonsUnderParts,
-} from './line-metadata';
+import { filled, readLine, withAddonsUnderParts } from './line-metadata';
 import { errorMessage } from './errors';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
+export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
+export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
+export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
+export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
+export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
 export const LEAD_LOST_AT = 'lead_lost_at';
 export const LEAD_LOST_ERROR = 'lead_lost_error';
+export const LEAD_CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
 
-export {
-  handOffAttempts,
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_ERROR,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
+type Metadata = Record<string, unknown> | null | undefined;
+
+const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
+
+export const handOffAttempts = (metadata: Metadata): number =>
+  attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
+
+export const leadHandoff = (metadata: Metadata) => {
+  const attempts = handOffAttempts(metadata);
+  return {
+    handed_off_at: filled.parse(metadata?.[LEAD_HANDED_OFF_AT]),
+    attempts,
+    error: filled.parse(metadata?.[LEAD_HANDOFF_ERROR]),
+    gave_up: attempts >= LEAD_HANDOFF_MAX_ATTEMPTS,
+    alerted_at: filled.parse(metadata?.[LEAD_OWNER_ALERTED_AT]),
+  };
 };
 
 const amount = z.preprocess(
@@ -148,6 +156,15 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
   });
 }
 
+class LeadRouteRefusal extends Error {
+  status: number;
+
+  constructor(status: number) {
+    super(`The lead route answered ${status}`);
+    this.status = status;
+  }
+}
+
 export async function sendOrderLead(
   url: string,
   form: URLSearchParams,
@@ -165,7 +182,7 @@ export async function sendOrderLead(
   });
   await response.body?.cancel();
   if (response.status >= 400) {
-    throw new Error(`The lead route answered ${response.status}`);
+    throw new LeadRouteRefusal(response.status);
   }
 }
 
@@ -272,7 +289,12 @@ export async function handCancelToLeadRoute(
   id: string,
 ): Promise<void> {
   const { metadata } = await container.resolve(Modules.ORDER).retrieveOrder(id);
-  if (!metadata?.[LEAD_HANDED_OFF_AT] || metadata[LEAD_LOST_AT]) return;
+  if (
+    !metadata?.[LEAD_HANDED_OFF_AT] ||
+    metadata[LEAD_LOST_AT] ||
+    metadata[LEAD_CANCEL_REFUSED_AT]
+  )
+    return;
   try {
     const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
     if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
@@ -291,10 +313,18 @@ export async function handCancelToLeadRoute(
       [LEAD_LOST_ERROR]: '',
     }));
   } catch (error) {
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+    if (error instanceof LeadRouteRefusal && error.status === 409) {
+      logger.warn(`Order ${id} is canceled, but its Lead is already won`);
+      await recordHandOff(container, id, () => ({
+        [LEAD_CANCEL_REFUSED_AT]: new Date().toISOString(),
+      }));
+      return;
+    }
     const reason = errorMessage(error);
-    container
-      .resolve(ContainerRegistrationKeys.LOGGER)
-      .error(`Order ${id} cancel did not reach the lead pipeline: ${reason}`);
+    logger.error(
+      `Order ${id} cancel did not reach the lead pipeline: ${reason}`,
+    );
     await recordHandOff(container, id, () => ({ [LEAD_LOST_ERROR]: reason }));
   }
 }

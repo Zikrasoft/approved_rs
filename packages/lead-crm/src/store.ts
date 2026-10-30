@@ -572,6 +572,16 @@ export function createLeadStore({
       }));
     },
 
+    markOrderConflict(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderConflict: status,
+      }));
+    },
+
     loseOrderLead(orderId: string): Promise<StoredLead | undefined> {
       return updateMatching(
         (l) => l.orderId === orderId && l.status !== 'won',

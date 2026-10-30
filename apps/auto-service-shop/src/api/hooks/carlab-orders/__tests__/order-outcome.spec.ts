@@ -179,6 +179,26 @@ medusaIntegrationTestRunner({
         expect(posts).toHaveLength(2);
       });
 
+      it('stops telling the bot a cancel it refused because the Lead is won', async () => {
+        leadRouteStatus = 409;
+        const order = await placeOrder();
+        const metadataOf = async () =>
+          (await getContainer().resolve(Modules.ORDER).retrieveOrder(order.id))
+            .metadata ?? {};
+
+        await api.post(`/admin/orders/${order.id}/cancel`, {}, adminHeaders);
+        await waitFor(async () => (await metadataOf()).lead_cancel_refused_at);
+        await retryOrderLeadsAt(getContainer(), new Date());
+
+        expect(
+          posts.filter(({ body }) => body.order_id === order.id),
+        ).toHaveLength(1);
+        expect((await metadataOf()).lead_cancel_refused_at).toEqual(
+          expect.any(String),
+        );
+        expect((await metadataOf()).lead_lost_at).toBeUndefined();
+      });
+
       it('tells the bot nothing about an Order whose Lead never reached it', async () => {
         const order = await placeOrder({ lead_handed_off_at: null });
 

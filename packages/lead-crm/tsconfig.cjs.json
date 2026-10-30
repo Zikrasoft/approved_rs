@@ -10,7 +10,7 @@
     "outDir": "dist/cjs",
     "rootDir": "src",
     "lib": ["ES2022"],
-    "types": [],
+    "types": ["node"],
     "strict": true,
     "skipLibCheck": true
   },
@@ -19,6 +19,7 @@
     "src/fields.ts",
     "src/limits.ts",
     "src/partsOrderCopy.ts",
-    "src/phone.ts"
+    "src/phone.ts",
+    "src/verifySecret.ts"
   ]
 }

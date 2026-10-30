@@ -169,3 +169,35 @@ describe('commitFiles', () => {
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('canWrite', () => {
+  it('accepts a token GitHub lets push to the repo', async () => {
+    mockFetch.mockResolvedValue(okJson({ permissions: { push: true } }));
+
+    expect(await github.canWrite('tok')).toBe(true);
+    expect(mockFetch.mock.calls[0][0]).toBe(
+      'https://api.github.com/repos/Zikrasoft/approved_rs',
+    );
+  });
+
+  it('refuses a token that can only read the repo', async () => {
+    mockFetch.mockResolvedValue(okJson({ permissions: { push: false } }));
+
+    expect(await github.canWrite('tok')).toBe(false);
+  });
+
+  it.each([401, 403, 404])(
+    'refuses a token GitHub answers %i for',
+    async (status) => {
+      mockFetch.mockResolvedValue(failing(status));
+
+      expect(await github.canWrite('forged')).toBe(false);
+    },
+  );
+
+  it('throws when GitHub itself fails', async () => {
+    mockFetch.mockResolvedValue(failing(502));
+
+    await expect(github.canWrite('tok')).rejects.toThrow(/502/);
+  });
+});

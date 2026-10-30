@@ -12,18 +12,22 @@ function strings(value: unknown): string[] {
   return [];
 }
 
+const CYRILLIC = /[а-яА-ЯёЁ]/;
+
+function untranslated(yaml: string): string[] {
+  const source = { ...parse(yaml) };
+  delete source.translations;
+  delete source.translatedFrom;
+  return strings(source);
+}
+
 function russianSource(file: string, text: string): string[] {
-  if (!file.endsWith('.md')) {
-    const source = { ...parse(text) };
-    delete source.translations;
-    delete source.translatedFrom;
-    return strings(source);
-  }
+  if (!file.endsWith('.md')) return untranslated(text);
   const [, frontmatter, ...body] = text.split(/^---$/m);
-  const { title } = parse(frontmatter) ?? {};
-  return [...strings(title), ...body.join('---').split(/\n\s*\n/)].map((s) =>
-    s.trim(),
-  );
+  return [
+    ...untranslated(frontmatter).filter((s) => CYRILLIC.test(s)),
+    ...body.join('---').split(/\n\s*\n/),
+  ].map((s) => s.trim());
 }
 
 export function copyTells(file: string, text: string): string[] {

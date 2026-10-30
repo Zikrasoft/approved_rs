@@ -33,9 +33,16 @@ export async function POST(
     await orders.updateOrders(order.id, {
       metadata: { ...order.metadata, [LEAD_LOST_AT]: new Date().toISOString() },
     });
-    await cancelOrderWorkflow(req.scope).run({
-      input: { order_id: order.id },
-    });
+    try {
+      await cancelOrderWorkflow(req.scope).run({
+        input: { order_id: order.id },
+      });
+    } catch (error) {
+      await orders.updateOrders(order.id, {
+        metadata: { ...order.metadata, [LEAD_LOST_AT]: '' },
+      });
+      throw error;
+    }
   }
   res.json({ status: outcome });
 }

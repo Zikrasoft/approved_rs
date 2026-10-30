@@ -18,10 +18,21 @@ test('translations and translatedFrom in YAML are not Russian source', () => {
   assert.deepEqual(copyTells('home.yaml', yaml), []);
 });
 
-test('a Work body and title are Russian source', () => {
+test('every Russian string of a Work is Russian source, its translations are not', () => {
   const md =
-    '---\ntitle: Ремонт — быстро\ncar: Ё-мобиль\ntranslations:\n  en:\n    title: Fix — fast\n---\nТело с ё.\n\nЧисто.\n';
-  assert.deepEqual(copyTells('index.md', md), ['Ремонт — быстро', 'Тело с ё.']);
+    '---\ntitle: Ремонт — быстро\ncar: Ё-мобиль\nseo:\n  description: Всё сделали\nparts:\n  - brand: BOSCH\n    number: 0 242 — 236\ntranslations:\n  en:\n    title: Fix — fast\ntranslatedFrom: ё\n---\nТело с ё.\n\nЧисто.\n';
+  assert.deepEqual(copyTells('index.md', md), [
+    'Ремонт — быстро',
+    'Ё-мобиль',
+    'Всё сделали',
+    'Тело с ё.',
+  ]);
+});
+
+test('slugs, numbers and part numbers of a Work are not Russian source', () => {
+  const md =
+    '---\ntitle: Ок\nslug: bmw—x5\nyear: 2021\nparts:\n  - number: HU 816 — x\n---\nЧисто.\n';
+  assert.deepEqual(copyTells('index.md', md), []);
 });
 
 test('clean copy has no tells', () => {
