@@ -14,15 +14,14 @@ Written after the tests landed (#87, #88, #89), so it describes what is there.
 
 |         |                                                                                        |
 | ------- | -------------------------------------------------------------------------------------- |
-| Seam    | the output of `storedLeadSchema` and `legacyIncomesSchema`, nothing else               |
+| Seam    | the output of `storedLeadSchema`, nothing else                                         |
 | File    | `packages/lead-crm/src/storedLeadHistory.test.ts` (fixture and assertions in one file) |
 | Command | `pnpm --filter @podbor/lead-crm test`                                                  |
 | Cost    | seconds, in CI on every push, under the package's 100% coverage gate                   |
 
 Fifteen historical stored shapes — v0 onward, including the field generations
 since retired and a commission rate over 100% written before the cap landed.
-Each is read as a Lead and as the legacy money the ledger's opening carries
-over. The
+Each is read as a Lead. The
 assertion is that a Lead one
 version wrote is still readable by the version deploying now, because the deploy
 filter ships a changed `@podbor/lead-crm` to all three sites at once and a
@@ -35,25 +34,15 @@ schema is built.
 Two things it establishes that are worth not relearning:
 
 - **No stored shape fails the read.** The Lead schema no longer carries money
-  (ADR-0032), and the Lead store never reads the retired income fields. Only
-  the ledger's opening does: while `data/ledger.json` does not exist,
-  `legacyOwed` in `legacyIncomes.ts` takes every income times its Lead's
-  stored rate, less what was confirmed paid, from the raw `data/leads.json`,
-  totalled across all Leads, rounded to the cent once and never below zero.
-  Money stored without a rate is priced at the former default of 10%, and a
-  rate over 100% is priced as stored, not left out. The ledger opens with one
-  Payout, `Перенос со старой системы`, for that sum — none when it is zero —
-  and no cap on a typed amount applies to it. A record whose money does not
-  parse at all is left out of the sum and logged, never dropped quietly.
+  (ADR-0032), and nothing reads the retired income fields any more: the
+  one-time carry-over into `data/ledger.json` ran in production and its code
+  is gone.
 - **Retired fields are dropped on read, and so on the next write.**
   `baseStoredLeadSchema` is not `.strict()`, so `lastRemindedAt` (v0–v3),
   `customerPaidAt` and the old money fields (`dealAmount`, `commissionPercent`,
   `paidAmount`, `payments`, `incomes`, `pendingCommissionClaim`) are discarded
   by every read, and `store.ts` re-serialises parsed Leads on every write — the
-  first mutation erases them from the blob permanently. The money is not lost:
-  the Lead store's `beforeWrite` hook (`ledgerStore.ensureOpened()`, wired in
-  `brandStore.ts`) writes the ledger blob with its opening Payout before any
-  Lead write goes out.
+  first mutation erases them from the blob permanently.
 
 **What it cannot prove.** Version skew between deployed sites. Two sites on
 different package versions each pass their own copy of this suite; nothing here
@@ -198,7 +187,7 @@ A later change tests at one of these rather than cutting a new one.
 
 | Seam                                                           | Layer    | Shape                                                                                     |
 | -------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `storedLeadSchema` / `legacyIncomesSchema` output              | 1        | pure schemas, parse a stored record with each                                             |
+| `storedLeadSchema` output                                      | 1        | a pure schema, parse a stored record with it                                              |
 | `releaseUncollected(container)`                                | 2        | the job's default export, driven through the Medusa integration runner                    |
 | `createShopOrderHandler({ secret, notifyLead, markers, now })` | unit + 3 | already injectable; the route is thin wiring over it                                      |
 | `createFormatter({ serviceLabel, botUsername })`               | unit     | the owner card's text                                                                     |
