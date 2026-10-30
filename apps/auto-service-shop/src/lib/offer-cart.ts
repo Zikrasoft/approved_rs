@@ -723,5 +723,5 @@ export async function checkout(
     filters: { id: result.id },
     fields: ['id', 'display_id'],
   });
-  return { id: order.id, display_id: order.display_id };
+  return { id: order.id, display_id: Number(order.display_id) };
 }
