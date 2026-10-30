@@ -28,7 +28,7 @@ const addon = (
   id,
   quantity,
   unit_price,
-  metadata: addonLineMetadata(offerId, kind),
+  metadata: addonLineMetadata({ lineId: `line_${offerId}`, offerId }, kind),
 });
 
 const quote = (overrides: Partial<Quote> = {}): Quote => ({

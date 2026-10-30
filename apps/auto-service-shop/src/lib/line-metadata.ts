@@ -47,6 +47,7 @@ const lineSchema = z
     offerId: line.offer_id,
     partIdentifierId: line.part_identifier_id,
     parentOfferId: line.addon_offer_id,
+    parentLineId: line.addon_for,
     addonKind:
       line.addon_kind ??
       (line.addon_offer_id || line.addon_for ? ('service' as const) : null),
@@ -70,10 +71,28 @@ export const offerLineMetadata = (
   part: ListedPart,
 ) => ({ offer_id: offerId, part_identifier_id: partIdentifierId, ...part });
 
-export const addonLineMetadata = (parentOfferId: string, kind: AddonKind) => ({
-  addon_offer_id: parentOfferId,
+export const addonLineMetadata = (
+  parent: { lineId: string; offerId: string },
+  kind: AddonKind,
+) => ({
+  addon_for: parent.lineId,
+  addon_offer_id: parent.offerId,
   addon_kind: kind,
 });
+
+export const withParentOffers = <T extends { id: string; metadata?: Metadata }>(
+  items: T[],
+): T[] =>
+  items.map((item) => {
+    const { parentOfferId, parentLineId } = readLine(item.metadata);
+    const parent = parentOfferId
+      ? undefined
+      : items.find(({ id }) => id === parentLineId);
+    const offerId = parent && readLine(parent.metadata).offerId;
+    return offerId
+      ? { ...item, metadata: { ...item.metadata, addon_offer_id: offerId } }
+      : item;
+  });
 
 export const readinessMetadata = (inStock: boolean, leadTimeDays: number) => ({
   in_stock: inStock,
