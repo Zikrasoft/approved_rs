@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type {
   Category,
   Fitment,
@@ -7,12 +7,12 @@ import type {
 } from '@podbor/catalog-contract';
 import {
   assembleSnapshot,
+  cataloguePagesFrom,
   makeHubsFrom,
   type MakeHubEntry,
 } from './catalogueSnapshot';
 
 const MAKES = ['bmw', 'audi', 'mini', 'lada', 'opel', 'fiat', 'skoda', 'kia'];
-const VEHICLES_PER_PART = 20;
 const CATEGORY_COUNT = 40;
 
 const random = (seed: number) => () => {
@@ -20,7 +20,13 @@ const random = (seed: number) => () => {
   return seed / 2147483648;
 };
 
-function syntheticCatalogue(partCount: number) {
+function syntheticCatalogue(
+  partCount: number,
+  {
+    vehicleCount = Math.max(12, Math.round(partCount * 0.7)),
+    fitsPerPart = 20,
+  } = {},
+) {
   const next = random(partCount);
   const categories = Array.from(
     { length: CATEGORY_COUNT },
@@ -40,7 +46,6 @@ function syntheticCatalogue(partCount: number) {
         fields: [],
       }) as unknown as Category,
   );
-  const vehicleCount = Math.max(12, Math.round(partCount * 0.7));
   const vehicles = Array.from({ length: vehicleCount }, (_, index) => {
     const modelIndex = Math.floor(index / 2);
     const make = MAKES[modelIndex % MAKES.length];
@@ -124,7 +129,7 @@ function syntheticCatalogue(partCount: number) {
       pages.push(page('bosch', `F${index}`));
     }
     const start = Math.floor(next() * vehicleCount);
-    for (let offset = 0; offset < VEHICLES_PER_PART; offset += 1) {
+    for (let offset = 0; offset < fitsPerPart; offset += 1) {
       const vehicle = (start + offset * (1 + (index % 3))) % vehicleCount;
       fitments.push({
         id: `fit_${index}_${offset}`,
@@ -171,8 +176,24 @@ describe('makeHubsFrom', () => {
     expect(outline(makeHubsFrom(syntheticCatalogue(120)))).toMatchSnapshot();
   });
 
+  it('assembles the hubs once per snapshot across module instances, as the config and the pages load apart', async () => {
+    const snapshot = syntheticCatalogue(30);
+    const hubs = makeHubsFrom(snapshot);
+    vi.resetModules();
+    const reloaded = await import('./catalogueSnapshot');
+
+    expect(reloaded.makeHubsFrom).not.toBe(makeHubsFrom);
+    expect(reloaded.makeHubsFrom(snapshot)).toBe(hubs);
+    expect(reloaded.cataloguePagesFrom(snapshot)).toBe(
+      cataloguePagesFrom(snapshot),
+    );
+  });
+
   it('assembles the hubs of a 30,000-part catalogue in linear time', () => {
-    const snapshot = syntheticCatalogue(30_000);
+    const snapshot = syntheticCatalogue(30_000, {
+      vehicleCount: 40_000,
+      fitsPerPart: 30,
+    });
     const started = performance.now();
     const hubs = makeHubsFrom(snapshot);
     const seconds = (performance.now() - started) / 1000;
