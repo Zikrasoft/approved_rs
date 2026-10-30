@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 // Prototype for /admin/case-photos — lets the admin multi-select gallery photos
 // in one native <input multiple>, instead of Keystatic's gallery array field
 // (one file picker per photo, add-item-per-photo). See keystatic.config.ts's
@@ -24,23 +26,28 @@ export const CASE_COLLECTIONS = [
   { collection: 'cases', dir: 'src/content/cases', label: 'Автоподбор' },
 ] as const;
 
-export function isKnownCaseDir(dir: string): boolean {
-  return CASE_COLLECTIONS.some((c) => c.dir === dir);
-}
-
-// Slugs here are always Keystatic-generated folder names (title -> slug),
-// already restricted to this charset — reject anything else rather than
-// trusting a path segment from a form field.
-export function isValidSlug(slug: string): boolean {
-  return /^[a-z0-9-]+$/.test(slug);
-}
-
 // Exactly what sanitizeFilename/dedupeFilename below ever produce — shared
 // by case-photos-image.ts (path-traversal guard on the `file` query param)
 // and case-photos.astro (filters a raw directory listing before turning
 // entries into <img> tags, so a stray .DS_Store or hand-committed file with
 // a weird name doesn't render as a broken thumbnail).
 export const SAFE_GALLERY_FILENAME = /^[a-z0-9-]+\.[a-z0-9]+$/;
+
+export const galleryTargetSchema = z.object({
+  dir: z.literal(CASE_COLLECTIONS.map(({ dir }) => dir)),
+  slug: z.string().regex(/^[a-z0-9-]+$/),
+});
+
+export const galleryPhotoSchema = galleryTargetSchema.extend({
+  file: z.string().regex(SAFE_GALLERY_FILENAME),
+});
+
+export const casePhotosPageSchema = z.object({
+  dir: z.string().catch(''),
+  slug: z.string().catch(''),
+  ok: z.coerce.number().int().positive().optional().catch(undefined),
+  error: z.literal('no-files').optional().catch(undefined),
+});
 
 // Original upload name, stripped to something safe to use as a filename:
 // basename only (no directory components), lowercased extension kept,

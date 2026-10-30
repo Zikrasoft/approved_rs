@@ -1,4 +1,10 @@
 import { isMap, type Document, type YAMLMap } from 'yaml';
+import { z } from 'zod';
+
+export const translatedDocSchema = z.looseObject({
+  translatedFrom: z.string().optional(),
+  translations: z.record(z.string(), z.unknown()),
+});
 
 export function getOrCreateTranslationsMap(
   doc: Document,

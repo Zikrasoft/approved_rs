@@ -2,7 +2,11 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseDocument } from 'yaml';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
-import { getOrCreateTranslationsMap } from './getOrCreateTranslationsMap.ts';
+import { openAiKeySchema } from './openaiChat.ts';
+import {
+  getOrCreateTranslationsMap,
+  translatedDocSchema,
+} from './getOrCreateTranslationsMap.ts';
 import { NO_EM_DASH_RULE } from './promptRules.ts';
 import {
   blockIsEmpty,
@@ -116,10 +120,8 @@ export function createCaseTranslator<L extends string>({
     }
 
     const currentHash = hashSource(source, extras);
-    const storedHash = doc.get('translatedFrom') as string | undefined;
-
-    const committed = (doc.toJS() as { translations: Record<string, unknown> })
-      .translations;
+    const { translatedFrom: storedHash, translations: committed } =
+      translatedDocSchema.parse(doc.toJS());
 
     const translationsAreCurrent = storedHash === currentHash;
 
@@ -175,11 +177,12 @@ export function createCaseTranslator<L extends string>({
   }
 
   async function run(caseDirs: readonly string[]): Promise<number> {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const key = openAiKeySchema.safeParse(process.env.OPENAI_API_KEY);
+    if (!key.success) {
       console.error('Missing env var: OPENAI_API_KEY');
       return 1;
     }
+    const apiKey = key.data;
 
     const files: string[] = [];
     for (const dir of caseDirs) {

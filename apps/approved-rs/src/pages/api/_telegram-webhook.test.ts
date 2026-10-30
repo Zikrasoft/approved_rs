@@ -265,6 +265,15 @@ describe('POST /api/telegram-webhook', () => {
     ledgerStorage().seed({ operations: [], prompts: [] });
   });
 
+  it('fails loudly when TELEGRAM_WEBHOOK_SECRET is unset rather than refusing every update', async () => {
+    vi.stubEnv('TELEGRAM_WEBHOOK_SECRET', '');
+
+    await expect(POST(makeCtx({}))).rejects.toThrow(
+      'TELEGRAM_WEBHOOK_SECRET is not set',
+    );
+    vi.unstubAllEnvs();
+  });
+
   it('rejects a request without the secret token header', async () => {
     const res = await POST(makeCtx({}, {}));
     expect(res.status).toBe(401);

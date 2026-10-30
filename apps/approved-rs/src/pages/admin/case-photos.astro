@@ -20,6 +20,7 @@ import {
   CASE_COLLECTIONS,
   KEYSTATIC_AUTH_COOKIE,
   SAFE_GALLERY_FILENAME,
+  casePhotosPageSchema,
 } from '@/utils/adminGallery';
 import { listGalleryFiles } from '@/lib/githubContents';
 import '@/styles/global.css';
@@ -44,11 +45,12 @@ const groups = await Promise.all(
   })),
 );
 
-const params = Astro.url.searchParams;
-const selectedDir = params.get('dir') ?? '';
-const selectedSlug = params.get('slug') ?? '';
-const ok = params.get('ok');
-const error = params.get('error');
+const {
+  dir: selectedDir,
+  slug: selectedSlug,
+  ok,
+  error,
+} = casePhotosPageSchema.parse(Object.fromEntries(Astro.url.searchParams));
 
 // Arrived via Keystatic's "Preview" button (keystatic.config.ts's
 // previewUrl, one per collection) — dir+slug already name a real case, so

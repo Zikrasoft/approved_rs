@@ -427,6 +427,16 @@ describe('processSection', () => {
     expect(sentPayloads()).toEqual([]);
   });
 
+  it('throws on a translatedFrom that is not a hash before paying for a translation', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = writeSection('home.yaml', RU_NAV, { translatedFrom: 42 });
+    const { processSection } = translator();
+    await expect(processSection(section(file), 'key', {})).rejects.toThrow(
+      /translatedFrom/,
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
   it('regenerates a file whose cache block predates the prompt change', async () => {
     stubTranslate((text) => `t:${text}`);
     const file = writeSection('home.yaml');
