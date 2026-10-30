@@ -9,6 +9,7 @@ import {
 } from '@podbor/catalog-contract';
 import { requireEnv } from '@podbor/lead-crm';
 import {
+  CONTENT_REPO,
   createGithubContents,
   GithubApiError,
   KEYSTATIC_AUTH_COOKIE,
@@ -24,8 +25,7 @@ const SHOP_REFUSALS: Record<number, string> = {
 };
 
 const github = createGithubContents({
-  repo: 'Zikrasoft/approved_rs',
-  branch: 'main',
+  ...CONTENT_REPO,
   appRoot: 'apps/auto-service/',
   userAgent: 'carlab-admin',
 });
@@ -104,7 +104,7 @@ export async function POST({
   return new Response(null, {
     status: 303,
     headers: {
-      location: `/keystatic/branch/main/collection/works/item/${slug}`,
+      location: `/keystatic/branch/${CONTENT_REPO.branch}/collection/works/item/${slug}`,
     },
   });
 }

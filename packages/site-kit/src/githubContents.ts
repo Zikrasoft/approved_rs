@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 export const KEYSTATIC_AUTH_COOKIE = 'keystatic-gh-access-token';
 
+export const CONTENT_REPO = {
+  repo: 'Zikrasoft/approved_rs',
+  branch: 'main',
+} as const;
+
 const API = 'https://api.github.com';
 
 export class GithubApiError extends Error {

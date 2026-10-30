@@ -1,13 +1,15 @@
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { createGithubContents } from '@podbor/site-kit/github-contents';
+import {
+  CONTENT_REPO,
+  createGithubContents,
+} from '@podbor/site-kit/github-contents';
 
 export { GithubApiError } from '@podbor/site-kit/github-contents';
 
 const github = createGithubContents({
-  repo: 'Zikrasoft/approved_rs',
-  branch: 'main',
+  ...CONTENT_REPO,
   appRoot: 'apps/approved-rs/',
   userAgent: 'approved-rs-admin',
 });
