@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /keystatic/
+Disallow: /admin/
 
 Sitemap: https://carlab.rs/sitemap-index.xml

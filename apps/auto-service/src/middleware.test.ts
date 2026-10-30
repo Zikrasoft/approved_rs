@@ -31,6 +31,7 @@ describe('isUnlocalized', () => {
   it.each([
     '/api/leads',
     '/keystatic/collection/works',
+    '/admin/work-draft',
     '/_image?href=x',
     '/robots.txt',
     '/llms.txt',
