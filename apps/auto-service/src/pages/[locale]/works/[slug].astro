@@ -12,6 +12,7 @@ import {
   localizedWork,
   publishedWorks,
   sourcedParts,
+  workLeadService,
   workPrice,
 } from '@/utils/works';
 import { partPagesForBuild } from '@/utils/catalogueEnv';
@@ -232,7 +233,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
     eyebrow={pages.works.eyebrow}
     heading={ctaVariant.heading}
     body={ctaVariant.body}
-    service={work.data.servicesApplied[0]}
+    service={workLeadService(work)}
   />
   <script>
     import { defineBrowsingDepth } from '@podbor/site-kit/browser';

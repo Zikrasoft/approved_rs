@@ -35,6 +35,11 @@ export const sourcingWorks = (works: Work[], page: PartPageEntry): Work[] =>
     work.data.parts.some((part) => sourcedBy(page, part)),
   );
 
+export const workLeadService = ({ data: { servicesApplied } }: Work) =>
+  servicesApplied.includes(PARTS_SOURCING)
+    ? PARTS_SOURCING
+    : servicesApplied[0];
+
 export const workPrice = (work: Work): number | null =>
   work.data.servicesApplied.includes(PARTS_SOURCING)
     ? (work.data.priceRsd ?? null)

@@ -5,6 +5,7 @@ import {
   publishedWorks,
   sourcedParts,
   sourcingWorks,
+  workLeadService,
   workPrice,
   type Work,
 } from './works';
@@ -177,6 +178,24 @@ describe('sourcingWorks', () => {
     });
     const other = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
     expect(sourcingWorks([other, hidden, sourced], page)).toEqual([sourced]);
+  });
+});
+
+describe('workLeadService', () => {
+  it('posts Parts sourcing wherever it sits in servicesApplied', () => {
+    const work = makeWork({
+      servicesApplied: ['servicing', 'vin-parts-inquiry'],
+    });
+    expect(workLeadService(work)).toBe('vin-parts-inquiry');
+  });
+
+  it('posts the first applied service on any other Work', () => {
+    const work = makeWork({ servicesApplied: ['diagnostics', 'servicing'] });
+    expect(workLeadService(work)).toBe('diagnostics');
+  });
+
+  it('posts no service when none is applied', () => {
+    expect(workLeadService(makeWork())).toBeUndefined();
   });
 });
 
