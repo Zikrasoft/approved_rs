@@ -1,21 +1,26 @@
 ---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { Thumbnail } from '@/utils/partImages';
 import Icon from './Icon.astro';
 
 interface Props {
-  src: string | null;
+  thumb: Thumbnail | null;
   class?: string;
 }
 
-const { src, class: className } = Astro.props;
+const { thumb, class: className } = Astro.props;
 const box =
   'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-field bg-shade sm:size-16';
+const label = content(localeFrom(Astro.url.pathname)).shopPart
+  .illustrationLabel;
 ---
 
 {
-  src ? (
-    <part-image class:list={['group/image', box, className]}>
+  thumb ? (
+    <part-image class:list={['group/image relative', box, className]}>
       <img
-        src={src}
+        src={thumb.src}
         alt=""
         width="64"
         height="64"
@@ -28,6 +33,11 @@ const box =
         size={22}
         class="hidden text-line-field group-data-broken/image:block"
       />
+      {thumb.illustration && (
+        <span class="absolute inset-x-0 bottom-0 truncate bg-paper/85 px-0.5 text-center text-[0.625rem] leading-4 tracking-tight text-muted group-data-broken/image:hidden">
+          {label}
+        </span>
+      )}
     </part-image>
   ) : (
     <span class:list={[box, className]}>

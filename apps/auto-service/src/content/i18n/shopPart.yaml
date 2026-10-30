@@ -40,6 +40,7 @@ inquiryNotice: Сейчас не можем подтвердить цену и �
 inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
+illustrationLabel: иллюстрация
 crossReferencesHeading: Номера других производителей
 applicabilityHeading: Применимость по данным каталога
 supplierDataNote: Данные каталога. Перед заказом проверим совместимость по VIN.

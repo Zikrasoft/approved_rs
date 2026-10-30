@@ -20,7 +20,12 @@ import {
   partPagesForBuild,
 } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
-import { imageAlt, partGallery, partThumbnail } from '@/utils/partImages';
+import {
+  imageAlt,
+  partGallery,
+  partPicture,
+  partThumbnail,
+} from '@/utils/partImages';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
@@ -84,23 +89,15 @@ const categoryText = category
   ? paragraphs(translated(category, 'text', locale))
   : [];
 const gallery = partGallery(page);
-const shown =
-  gallery.length > 0
-    ? {
-        images: gallery,
-        alt: imageAlt(page.brand.name, page.value, partName),
-        note: undefined,
-      }
-    : category?.image
-      ? {
-          images: partGallery({
-            images: [category.image],
-            supplier_data: { images: [] },
-          }),
-          alt: translated(category, 'name', locale),
-          note: copy.categoryIllustration,
-        }
-      : null;
+const picture = partPicture(page, category);
+const shown = picture && {
+  images: picture.images,
+  alt:
+    picture.illustration && category
+      ? translated(category, 'name', locale)
+      : imageAlt(page.brand.name, page.value, partName),
+  note: picture.illustration ? copy.categoryIllustration : undefined,
+};
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
   href: pageLinks.vehicle(vehicle),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,

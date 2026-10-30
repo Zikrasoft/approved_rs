@@ -61,6 +61,7 @@ export const shopPartContentSchema = z
     inquiryCta: z.string(),
     photoLabel: z.string(),
     categoryIllustration: z.string(),
+    illustrationLabel: z.string(),
     crossReferencesHeading: z.string(),
     applicabilityHeading: z.string(),
     supplierDataNote: z.string(),

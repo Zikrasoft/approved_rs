@@ -41,19 +41,49 @@ export const partGallery = ({
 
 type Illustrated = { image: Image | null } | null;
 
-const categoryThumbnail = (category: Illustrated) =>
-  category?.image ? smallestImage(category.image) : null;
+export type PartPicture = { images: GalleryImage[]; illustration: boolean };
+
+export type Thumbnail = { src: string; illustration: boolean };
+
+export const partPicture = (
+  page: Pictured,
+  category: Illustrated,
+): PartPicture | null => {
+  const images = partGallery(page);
+  if (images.length > 0) return { images, illustration: false };
+  return category?.image
+    ? {
+        images: partGallery({
+          images: [category.image],
+          supplier_data: { images: [] },
+        }),
+        illustration: true,
+      }
+    : null;
+};
+
+const thumbnailOf = (picture: PartPicture | null): Thumbnail | null =>
+  picture
+    ? { src: picture.images[0].thumb, illustration: picture.illustration }
+    : null;
 
 export const partThumbnail = (
   page: Pictured,
   category: Illustrated,
-): string | null => partGallery(page)[0]?.thumb ?? categoryThumbnail(category);
+): Thumbnail | null => thumbnailOf(partPicture(page, category));
 
 export const pagesThumbnail = (
   pages: (Pictured & { category: Illustrated })[],
-): string | null =>
-  pages.map((page) => partGallery(page)[0]?.thumb).find(Boolean) ??
-  categoryThumbnail(pages[0]?.category ?? null);
+): Thumbnail | null =>
+  thumbnailOf(
+    pages
+      .map((page) => partPicture(page, null))
+      .find((picture) => picture !== null) ??
+      partPicture(
+        { images: [], supplier_data: { images: [] } },
+        pages[0]?.category ?? null,
+      ),
+  );
 
 export const imageAlt = (brand: string, value: string, name: string) =>
   `${brand} ${value}, ${name}`;
