@@ -349,11 +349,11 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                  |
-| --------------------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order     |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                        |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost |
+| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                           |
+| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                              |
+| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                 |
+| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -368,7 +368,12 @@ retries it every day until the shop takes it.
 `SHOP_LEAD_SECRET` is one value set twice, on carlab.rs and in the shop's
 `.env` (`openssl rand -hex 32`): the shop's `order.canceled` subscriber posts the
 cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the Lead is
-marked lost.
+marked lost. The same secret goes the other way for «Сделать кейс»: carlab.rs's
+`/api/admin/work-draft` reads `GET /hooks/carlab-orders/:id/case-summary` from
+`MEDUSA_BACKEND_URL` with it, and the shop answers only with the car, the Parts
+and the RSD total of a completed Order. The draft Work is then committed with
+the staff member's own Keystatic GitHub login; the shop holds no repository
+token.
 
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).

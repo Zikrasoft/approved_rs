@@ -1,96 +1,23 @@
-// Minimal GitHub REST client for writing gallery photos in prod, where the
-// deployed function has no writable/persistent filesystem — Vercel's fs is
-// read-only for anything meant to outlive the request (see
-// admin/case-photos.astro's doc comment). Scoped to exactly the one
-// operation this feature needs: add N new files + update one existing file
-// in a single atomic commit, via the Git Data API (not the simpler Contents
-// API, which would need one commit — and one Vercel deploy, per
-// vercel.json's git.deploymentEnabled.main — per uploaded photo instead of
-// one for the whole batch).
-//
-// Auth: callers pass the same OAuth access token Keystatic itself stores in
-// its `keystatic-gh-access-token` cookie (see adminGallery.ts's
-// KEYSTATIC_AUTH_COOKIE) after a manager logs into Keystatic — same token,
-// same GitHub App permissions Keystatic's own commits already use.
-
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { z } from 'zod';
+import { createGithubContents } from '@podbor/site-kit/github-contents';
 
-const REPO = 'Zikrasoft/approved_rs'; // keep in sync with keystatic.config.ts's storage.repo
-// This app lives in a subdirectory of the repo; GitHub's contents API paths
-// are repo-root relative, so every app-relative path needs this prefix.
-const APP_ROOT = 'apps/approved-rs/';
-const repoPath = (relPath: string) => `${APP_ROOT}${relPath}`;
-const BRANCH = 'main'; // keep in sync with vercel.json's git.deploymentEnabled
-const API = 'https://api.github.com';
+export { GithubApiError } from '@podbor/site-kit/github-contents';
 
-function authHeaders(token: string): HeadersInit {
-  return {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'approved-rs-admin',
-  };
-}
+const github = createGithubContents({
+  repo: 'Zikrasoft/approved_rs',
+  branch: 'main',
+  appRoot: 'apps/approved-rs/',
+  userAgent: 'approved-rs-admin',
+});
 
-// Carries the HTTP status so callers can distinguish "not found" from a
-// real failure without regex-sniffing the error message.
-export class GithubApiError extends Error {
-  constructor(
-    public status: number,
-    path: string,
-    body: string,
-  ) {
-    super(`GitHub API ${path} failed: ${status} ${body}`);
-  }
-}
+export const {
+  listDir: listGithubDir,
+  getFile: getGithubFile,
+  getFileBuffer: getGithubFileBuffer,
+} = github;
 
-const shaSchema = z.object({ sha: z.string().min(1) });
-
-async function ghFetch<T>(
-  schema: z.ZodType<T>,
-  token: string,
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    ...init,
-    headers: { ...authHeaders(token), ...init?.headers },
-  });
-  if (!res.ok) throw new GithubApiError(res.status, path, await res.text());
-  return schema.parse(await res.json());
-}
-
-// 404 means the directory doesn't exist yet (case has no gallery/ folder
-// committed yet) — that's "no files", not an error.
-export async function listGithubDir(
-  token: string,
-  dirPath: string,
-): Promise<string[]> {
-  try {
-    const entries = await ghFetch(
-      z.array(z.object({ name: z.string() })),
-      token,
-      `/repos/${REPO}/contents/${repoPath(dirPath)}?ref=${BRANCH}`,
-    );
-    return entries.map((e) => e.name);
-  } catch (err) {
-    if (err instanceof GithubApiError && err.status === 404) return [];
-    throw err;
-  }
-}
-
-// Dev/prod branch for "what's already in this case's gallery/" — used by
-// case-photos.astro's thumbnail grid, which only reads and must never 500
-// the whole admin page just because a preview grid couldn't load: unlike
-// listGithubDir (which only treats 404 as "empty"), a stale-but-present auth
-// cookie can fail here with a real GitHub error (401/403/5xx), so any
-// failure — not just 404 — degrades to "nothing to show" instead of
-// propagating. Not used by case-photos-upload.ts, whose dev branch also
-// needs to mkdir the gallery/ dir before writing into it — a different job
-// than this read-only listing.
 export async function listGalleryFiles(
   token: string | undefined,
   relDir: string,
@@ -108,26 +35,7 @@ export async function listGalleryFiles(
   return existsSync(dir) ? await readdir(dir) : [];
 }
 
-export async function getGithubFileBuffer(
-  token: string,
-  filePath: string,
-): Promise<Buffer> {
-  const data = await ghFetch(
-    z.object({ content: z.string() }),
-    token,
-    `/repos/${REPO}/contents/${repoPath(filePath)}?ref=${BRANCH}`,
-  );
-  return Buffer.from(data.content, 'base64');
-}
-
-export async function getGithubFile(
-  token: string,
-  filePath: string,
-): Promise<string> {
-  return (await getGithubFileBuffer(token, filePath)).toString('utf-8');
-}
-
-export async function commitGalleryPhotos(
+export const commitGalleryPhotos = (
   token: string,
   opts: {
     photos: { path: string; base64: string }[];
@@ -135,64 +43,11 @@ export async function commitGalleryPhotos(
     indexContent: string;
     message: string;
   },
-): Promise<void> {
-  const ref = await ghFetch(
-    z.object({ object: shaSchema }),
-    token,
-    `/repos/${REPO}/git/ref/heads/${BRANCH}`,
-  );
-  const baseCommitSha = ref.object.sha;
-  const baseCommit = await ghFetch(
-    z.object({ tree: shaSchema }),
-    token,
-    `/repos/${REPO}/git/commits/${baseCommitSha}`,
-  );
-
-  // Binary content (photos) needs its own blob first — Git's tree API only
-  // accepts inline `content` for UTF-8 text, which index.md's new content
-  // (below) qualifies for directly, skipping a blob call for it.
-  const photoEntries = await Promise.all(
-    opts.photos.map(async (photo) => {
-      const blob = await ghFetch(shaSchema, token, `/repos/${REPO}/git/blobs`, {
-        method: 'POST',
-        body: JSON.stringify({ content: photo.base64, encoding: 'base64' }),
-      });
-      return {
-        path: repoPath(photo.path),
-        mode: '100644',
-        type: 'blob',
-        sha: blob.sha,
-      };
-    }),
-  );
-
-  const tree = await ghFetch(shaSchema, token, `/repos/${REPO}/git/trees`, {
-    method: 'POST',
-    body: JSON.stringify({
-      base_tree: baseCommit.tree.sha,
-      tree: [
-        ...photoEntries,
-        {
-          path: repoPath(opts.indexPath),
-          mode: '100644',
-          type: 'blob',
-          content: opts.indexContent,
-        },
-      ],
-    }),
+) =>
+  github.commitFiles(token, {
+    files: [
+      ...opts.photos,
+      { path: opts.indexPath, content: opts.indexContent },
+    ],
+    message: opts.message,
   });
-
-  const commit = await ghFetch(shaSchema, token, `/repos/${REPO}/git/commits`, {
-    method: 'POST',
-    body: JSON.stringify({
-      message: opts.message,
-      tree: tree.sha,
-      parents: [baseCommitSha],
-    }),
-  });
-
-  await ghFetch(z.unknown(), token, `/repos/${REPO}/git/refs/heads/${BRANCH}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ sha: commit.sha }),
-  });
-}

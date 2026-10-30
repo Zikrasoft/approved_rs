@@ -6,13 +6,18 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { byModelName } from '@/utils/carName';
 import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
 import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
   return withLocales(
-    hubs.map((hub) => ({ params: { make: hub.make.slug }, props: { hub } })),
+    hubs.map((hub) => ({
+      params: { make: hub.make.slug },
+      props: { hub },
+      cacheKey: cacheKey(hub),
+    })),
   );
 }
 

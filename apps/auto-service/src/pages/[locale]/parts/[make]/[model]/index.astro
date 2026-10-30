@@ -8,6 +8,7 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey, linkedVehicles } from '@/utils/cacheKey';
 import type { ModelHubEntry } from '@/utils/catalogueSnapshot';
 import type { CataloguePages } from '@/utils/paths';
 import { paragraphs } from '@podbor/site-kit';
@@ -22,6 +23,10 @@ export async function getStaticPaths() {
       hub.models.map((model) => ({
         params: { make: hub.make.slug, model: model.model.slug },
         props: { hub: model, pages },
+        cacheKey: cacheKey({
+          hub: model,
+          vehicles: linkedVehicles(pages, model.vehicles),
+        }),
       })),
     ),
   );

@@ -1,0 +1,58 @@
+---
+export const prerender = false;
+
+import { KEYSTATIC_AUTH_COOKIE } from '@podbor/site-kit/github-contents';
+import { catalogueIdSchema } from '@/utils/catalogue';
+import '@/styles/global.css';
+
+const order = catalogueIdSchema.safeParse(Astro.url.searchParams.get('order'));
+const signedIn = Astro.cookies.has(KEYSTATIC_AUTH_COOKIE);
+---
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Кейс из заказа</title>
+  </head>
+  <body class="min-h-screen bg-neutral-50 p-4 font-sans text-neutral-900">
+    <main class="mx-auto flex max-w-md flex-col gap-4 pt-8">
+      <h1 class="text-xl font-semibold">Кейс из заказа</h1>
+      {
+        !order.success ? (
+          <p class="text-sm">
+            В ссылке нет заказа. Открой ее кнопкой «Сделать кейс» в заказе.
+          </p>
+        ) : !signedIn ? (
+          <p class="text-sm">
+            Сначала войди в{' '}
+            <a href="/keystatic" class="underline">
+              Keystatic
+            </a>
+            , потом снова нажми «Сделать кейс» в заказе.
+          </p>
+        ) : (
+          <form
+            method="post"
+            action="/api/admin/work-draft"
+            class="flex flex-col gap-3"
+          >
+            <p class="text-sm text-neutral-600">
+              Черновик получит автомобиль, запчасти и сумму заказа. VIN, имя и
+              контакт клиента в него не попадут. Черновик не опубликован: текст
+              и фото добавишь в Keystatic.
+            </p>
+            <input type="hidden" name="order" value={order.data} />
+            <button
+              type="submit"
+              class="rounded-sm bg-neutral-900 px-4 py-2 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              Создать черновик
+            </button>
+          </form>
+        )
+      }
+    </main>
+  </body>
+</html>

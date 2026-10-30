@@ -905,6 +905,7 @@
   },
   "order": {
     "heading": "CarLab order",
+    "makeCase": "Make a case study",
     "cashAtPickup": "Cash at pickup",
     "paymentHint": "There is no online payment: the customer pays cash when picking the order up. Medusa's payment statuses on this page (Not paid, Authorized, Pending) only mean the order was placed without prepayment.",
     "name": "Name",
