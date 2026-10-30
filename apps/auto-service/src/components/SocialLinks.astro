@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { SOCIAL_LINKS } from '@/utils/constants';
@@ -21,8 +22,9 @@ const site = content(localeFrom(Astro.url.pathname)).site;
               href={link.url}
               target="_blank"
               rel="noopener"
-              class="chip min-h-11"
+              class="chip min-h-11 gap-2"
             >
+              <Icon name={link.network} size={16} class="shrink-0" />
               {link.name}
             </a>
           </li>

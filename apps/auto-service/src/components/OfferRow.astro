@@ -1,4 +1,5 @@
 ---
+import Icon from '@/components/Icon.astro';
 import type { PartOffer } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
@@ -81,5 +82,6 @@ const stockText =
     hidden={buyable}
   >
     {copy.askSupplyCta}
+    <Icon name="arrowRight" />
   </a>
 </li>

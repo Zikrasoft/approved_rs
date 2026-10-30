@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { SOCIAL_LINKS } from '@/utils/constants';
@@ -23,8 +24,9 @@ const site = content(localeFrom(Astro.url.pathname)).site;
               href={link.url}
               target="_blank"
               rel="noopener"
-              class="inline-flex min-h-11 items-center rounded-full border border-line px-5 text-sm text-chalk transition-all duration-500 ease-spring hover:border-line-strong hover:bg-white/[0.05]"
+              class="inline-flex min-h-11 items-center gap-2 rounded-full border border-line px-5 text-sm text-chalk transition-all duration-500 ease-spring hover:border-line-strong hover:bg-white/[0.05]"
             >
+              <Icon name={link.network} size={16} class="shrink-0" />
               {link.name}
             </a>
           </li>

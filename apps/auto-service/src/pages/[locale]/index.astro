@@ -74,10 +74,7 @@ const website = websiteSchema({
             <h2 class="text-block font-bold">
               {content(locale).partsSearch.searchHeading}
             </h2>
-            <CatalogueSearch hint={false} />
-            <p class="text-sm leading-relaxed text-panel-ink">
-              {content(locale).partsSearch.label}
-            </p>
+            <CatalogueSearch hint={false} class="mt-auto" />
           </div>
 
           <div
@@ -86,8 +83,14 @@ const website = websiteSchema({
             <h2 class="text-block font-bold">{home.hero.ctaPrimary}</h2>
             <nav
               aria-label={site.nav.services}
-              class="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
+              class="-mx-4 flex gap-2 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_80%,transparent)] [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
             >
+              <a
+                href={PathBuilder.services(locale)}
+                class="chip bg-white text-ink hover:bg-shade"
+              >
+                {site.common.allServices}
+              </a>
               {
                 SERVICE_SLUGS.map((slug) => (
                   <a
@@ -99,21 +102,13 @@ const website = websiteSchema({
                 ))
               }
             </nav>
-            <div class="mt-auto flex flex-wrap gap-2">
-              <button
-                type="button"
-                data-open-lead-modal
-                class="btn btn-primary flex-1 whitespace-nowrap"
-              >
-                {site.header.cta}
-              </button>
-              <a
-                href={PathBuilder.services(locale)}
-                class="btn btn-on-panel flex-1 whitespace-nowrap"
-              >
-                {home.hero.ctaSecondary}
-              </a>
-            </div>
+            <button
+              type="button"
+              data-open-lead-modal
+              class="btn btn-primary mt-auto w-full"
+            >
+              {site.header.cta}
+            </button>
           </div>
         </div>
 
@@ -230,6 +225,7 @@ const website = websiteSchema({
           class="btn btn-secondary mt-2 w-fit"
         >
           {home.accident.cta}
+          <Icon name="arrowRight" />
         </a>
       </div>
     </div>
@@ -246,6 +242,7 @@ const website = websiteSchema({
             />
             <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
               {site.common.allWorks}
+              <Icon name="arrowRight" />
             </a>
           </div>
           <WorkGrid works={latestWorks} />
@@ -256,7 +253,7 @@ const website = websiteSchema({
 
   <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">
-      <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
+      <SectionHead eyebrow={home.faqEyebrow} heading={site.common.faqHeading} />
       <Faq items={home.faq} />
     </div>
   </section>
