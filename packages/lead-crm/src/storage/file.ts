@@ -63,8 +63,6 @@ export function createFileStorage({
   return {
     read,
 
-    exists: () => fileExists(file),
-
     async write(leads: unknown, version: string | undefined): Promise<void> {
       await mkdir(dirname(file), { recursive: true });
       const staging = `${file}.${randomUUID()}.tmp`;

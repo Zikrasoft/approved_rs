@@ -96,20 +96,6 @@ describe('createFileStorage', () => {
     await writeFile(join(dir, 'data', 'leads.json'), 'not json');
     await expect(storage().read()).rejects.toThrow(SyntaxError);
   });
-
-  it('says a file exists without reading it', async () => {
-    await expect(storage().exists()).resolves.toBe(false);
-    await mkdir(join(dir, 'data'), { recursive: true });
-    await writeFile(join(dir, 'data', 'leads.json'), 'not json');
-    await expect(storage().exists()).resolves.toBe(true);
-  });
-
-  it('does not take a failed check for a missing file', async () => {
-    await writeFile(join(dir, 'data'), 'a file where the directory should be');
-    await expect(storage().exists()).rejects.toMatchObject({
-      code: 'ENOTDIR',
-    });
-  });
 });
 
 describe('createFileOrderMarkers', () => {
@@ -138,5 +124,14 @@ describe('createFileOrderMarkers', () => {
 
     await expect(markers.has('order_02')).resolves.toBe(false);
     await expect(markers.add('order_02')).resolves.toBeUndefined();
+  });
+
+  it('does not take a failed check for a missing marker', async () => {
+    const blocked = join(dir, 'blocked');
+    await writeFile(blocked, 'a file where the directory should be');
+
+    await expect(
+      createFileOrderMarkers({ dir: blocked }).has('order_03'),
+    ).rejects.toMatchObject({ code: 'ENOTDIR' });
   });
 });

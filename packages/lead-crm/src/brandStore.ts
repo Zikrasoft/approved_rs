@@ -7,10 +7,7 @@ import {
 } from './quarantine.ts';
 import { createLeadStore } from './store.ts';
 import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
-import { legacyOwed } from './legacyIncomes.ts';
-import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
-
-export const OPENING_NOTE = 'Перенос со старой системы';
+import type { LeadStorage } from './storage/types.ts';
 
 type QuarantineNotifier = Awaited<
   ReturnType<QuarantineOptions['getNotifier']>
@@ -31,31 +28,21 @@ export function createBrandStore({
   storageFor,
   getNotifier,
 }: BrandStoreOptions) {
-  const leadsStorage = storageFor(LEADS_PATH);
-  const ledgerStore = createLedgerStore({
-    storage: storageFor(LEDGER_PATH),
-    opening: async () => {
-      const { raw } = await leadsStorage.read();
-      const owed = legacyOwed(storedRecordsSchema.parse(raw ?? []));
-      return owed > 0
-        ? [{ type: 'payout', amount: owed, note: OPENING_NOTE, by: 'owner' }]
-        : [];
-    },
-    onUnreadable: async () => {
-      const { notifier } = await getNotifier();
-      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
-    },
-  });
   const leadStore = createLeadStore({
-    storage: leadsStorage,
+    storage: storageFor(LEADS_PATH),
     schema: storedLeadSchema,
     quarantine: createQuarantine({
       storage: storageFor(QUARANTINE_PATH),
       brand,
       getNotifier,
     }),
-    // TODO: drop beforeWrite, the opening and legacyIncomes.ts once data/ledger.json exists in production.
-    beforeWrite: () => ledgerStore.ensureOpened(),
+  });
+  const ledgerStore = createLedgerStore({
+    storage: storageFor(LEDGER_PATH),
+    onUnreadable: async () => {
+      const { notifier } = await getNotifier();
+      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
+    },
   });
   return { leadStore, ledgerStore };
 }

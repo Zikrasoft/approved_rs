@@ -110,7 +110,6 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
-  beforeWrite?: () => Promise<void>;
 }
 
 const promptedAt =
@@ -259,7 +258,6 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
-  beforeWrite,
 }: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
@@ -314,7 +312,6 @@ export function createLeadStore({
       };
       if (JSON.stringify(next) === JSON.stringify(current))
         return { next, unreadable };
-      await beforeWrite?.();
       await storage.write(
         [...next.leads, ...next.digests, ...unreadable],
         version,

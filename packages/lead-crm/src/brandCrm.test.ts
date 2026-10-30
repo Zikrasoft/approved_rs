@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createBrandStore, OPENING_NOTE } from './brandStore.ts';
+import { createBrandStore } from './brandStore.ts';
 import { createBrandBot } from './brandBot.ts';
 import { LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
 import { LEDGER_PATH } from './ledgerStore.ts';
@@ -53,8 +53,8 @@ describe('createBrandStore', () => {
     expect(() => brandStore()).not.toThrow();
     expect(Object.keys(storages)).toEqual([
       LEADS_PATH,
-      LEDGER_PATH,
       QUARANTINE_PATH,
+      LEDGER_PATH,
     ]);
   });
 
@@ -88,152 +88,40 @@ describe('createBrandStore', () => {
   });
 });
 
-describe('the opening carry-over', () => {
+describe('old money on stored Leads', () => {
   const WON = '2026-01-01T00:00:00.000Z';
-  const legacyLead = (id: number, money: Record<string, unknown>) => ({
+  const OLD_FIELDS = {
+    commissionPercent: 10,
+    dealAmount: 1000,
+    paidAmount: 40,
+    payments: [{ amount: 40, at: WON }],
+    incomes: [{ id: 1, amount: 333, at: WON, paidAt: null }],
+    pendingCommissionClaim: null,
+  };
+  const oldLead = {
     ...submission,
-    id,
+    id: 1,
+    brand: 'CarLab',
     status: 'won',
     statusChangedAt: WON,
     createdAt: WON,
-    ...money,
-  });
-  const owing = [
-    legacyLead(1, {
-      commissionPercent: 10,
-      incomes: [
-        { id: 1, amount: 1000, at: WON, paidAt: WON },
-        { id: 2, amount: 333, at: WON, paidAt: null },
-      ],
-    }),
-    legacyLead(2, {
-      commissionPercent: 50,
-      incomes: [{ id: 1, amount: 100, at: WON, paidAt: null }],
-    }),
-    legacyLead(3, {
-      dealAmount: 1000,
-      paidAmount: 40,
-      payments: [{ amount: 40, at: WON }],
-    }),
-    legacyLead(4, { dealAmount: 300 }),
-  ];
-  const OLD_FIELDS = [
-    'incomes',
-    'payments',
-    'paidAmount',
-    'dealAmount',
-    'commissionPercent',
-  ];
+    ...OLD_FIELDS,
+  };
 
-  function seeded(leads: unknown) {
-    const store = brandStore();
-    storages[LEADS_PATH]!.seed(leads);
-    return store;
-  }
-
-  const ledgerFile = () =>
-    storages[LEDGER_PATH]!.current() as { operations: unknown[] };
-
-  it('opens the Balance with the old owed amount, a missing rate priced at 10%', async () => {
-    const { ledgerStore } = seeded(owing);
-
-    expect(await ledgerStore.readOperations()).toEqual([
-      expect.objectContaining({
-        id: 1,
-        type: 'payout',
-        amount: 173.3,
-        note: OPENING_NOTE,
-        createdBy: 'owner',
-      }),
-    ]);
-    expect(storages[LEDGER_PATH]!.current()).toBeUndefined();
-  });
-
-  it('writes the opening before a Lead write drops the old fields, and never again', async () => {
-    const { leadStore, ledgerStore } = seeded(owing);
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(ledgerFile().operations).toHaveLength(1);
-    for (const lead of storages[LEADS_PATH]!.current() as object[])
-      for (const field of OLD_FIELDS) expect(lead).not.toHaveProperty(field);
-    await brandStore().leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(storages[LEDGER_PATH]!.writeAttempts()).toBe(1);
-    expect(await ledgerStore.readBalance()).toBe(173.3);
-  });
-
-  it('carries an owed amount above what a reply may type, and lets Lead writes through', async () => {
-    const { leadStore, ledgerStore } = seeded([
-      legacyLead(1, { dealAmount: 20_000_000 }),
-    ]);
+  it('neither reaches the Balance nor survives a Lead write', async () => {
+    const { leadStore, ledgerStore } = brandStore();
+    storages[LEADS_PATH]!.seed([oldLead]);
 
     await leadStore.insertLead({ ...submission, brand: 'CarLab' });
 
-    expect(await ledgerStore.readBalance()).toBe(2_000_000);
-  });
-
-  it('opens with no Payout when nothing was owed', async () => {
-    const { leadStore, ledgerStore } = seeded([
-      legacyLead(1, {
-        incomes: [{ id: 1, amount: 100, at: WON, paidAt: WON }],
-      }),
-      { broken: true },
-    ]);
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(ledgerFile()).toEqual({ operations: [], prompts: [] });
     expect(await ledgerStore.readBalance()).toBe(0);
-  });
-
-  it('skips an unparseable legacy record instead of blocking Lead writes', async () => {
-    const { leadStore, ledgerStore } = seeded([
-      ...owing,
-      null,
-      'garbage',
-      legacyLead(9, { incomes: 'not a list', dealAmount: -5 }),
-    ]);
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(await ledgerStore.readBalance()).toBe(173.3);
-  });
-
-  it('opens with no Payout on a fresh store', async () => {
-    const { leadStore } = brandStore();
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(ledgerFile()).toEqual({ operations: [], prompts: [] });
-  });
-
-  it('carries the old amount over exactly once under concurrent first writes', async () => {
-    const [a, b] = [seeded(owing), brandStore()];
-
-    await Promise.all([
-      a.ledgerStore.recordOperation({ type: 'payout', amount: 5, by: 'owner' }),
-      b.ledgerStore.recordOperation({ type: 'payout', amount: 7, by: 'admin' }),
-      a.leadStore.insertLead({ ...submission, brand: 'CarLab' }),
-      b.leadStore.insertLead({ ...submission, brand: 'CarLab' }),
-    ]);
-
-    const notes = (await a.ledgerStore.readOperations()).map((op) => op.note);
-    expect(notes.filter((note) => note === OPENING_NOTE)).toHaveLength(1);
-    expect(await b.ledgerStore.readBalance()).toBe(185.3);
-  });
-
-  it('lets the losing opener go on once another one opened the Balance', async () => {
-    const [a, b] = [seeded(owing), brandStore()];
-
-    await Promise.all([
-      a.ledgerStore.ensureOpened(),
-      b.ledgerStore.ensureOpened(),
-    ]);
-
-    expect(ledgerFile().operations).toHaveLength(1);
-    expect(storages[LEDGER_PATH]!.writeAttempts()).toBe(2);
+    expect(storages[LEDGER_PATH]!.current()).toBeUndefined();
+    expect(storages[QUARANTINE_PATH]!.current()).toBeUndefined();
+    const stored = storages[LEADS_PATH]!.current() as object[];
+    expect(stored).toHaveLength(2);
+    for (const lead of stored)
+      for (const field of Object.keys(OLD_FIELDS))
+        expect(lead).not.toHaveProperty(field);
   });
 
   it('lets Lead writes through over a Balance file that does not parse', async () => {
@@ -244,27 +132,6 @@ describe('the opening carry-over', () => {
 
     expect(storages[LEADS_PATH]!.current()).toHaveLength(1);
     expect(storages[LEDGER_PATH]!.current()).toBe('{corrupt');
-  });
-
-  it('refuses to open from a Lead file it cannot read', async () => {
-    const { ledgerStore } = seeded({ not: 'an array' });
-
-    await expect(ledgerStore.readBalance()).rejects.toThrow();
-  });
-
-  it('retries the opening on the next Lead write when it failed to land', async () => {
-    const { leadStore } = seeded(owing);
-    vi.spyOn(storages[LEDGER_PATH]!, 'write').mockRejectedValueOnce(
-      new Error('blob down'),
-    );
-
-    await expect(
-      leadStore.insertLead({ ...submission, brand: 'CarLab' }),
-    ).rejects.toThrow('blob down');
-    expect(storages[LEDGER_PATH]!.current()).toBeUndefined();
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-    expect(ledgerFile().operations).toHaveLength(1);
   });
 });
 
