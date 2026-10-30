@@ -37,6 +37,7 @@ export const servicesContentSchema = z
     'engine-gearbox': serviceSchema,
     'bodywork-painting': serviceSchema,
     'pre-purchase-inspection': serviceSchema,
+    'vin-parts-inquiry': serviceSchema,
   })
   .strict();
 
