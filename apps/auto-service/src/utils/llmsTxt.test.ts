@@ -40,6 +40,12 @@ describe('generateLlmsTxt', () => {
     }
   });
 
+  it('lists Parts sourcing among the services', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Подбор запчастей](https://carlab.rs/ru/services/vin-parts-inquiry/)',
+    );
+  });
+
   it('links each published work by its localized title, leaving drafts out', async () => {
     const body = await generateLlmsTxt('sr');
     expect(body).toContain(
