@@ -1,12 +1,8 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
-import {
-  handOffAttempts,
-  handOrderToLeadRoute,
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
-} from '../lib/order-lead';
+import { leadHandoff } from '../lib/line-metadata';
+import { handOrderToLeadRoute } from '../lib/order-lead';
 
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
@@ -22,10 +18,8 @@ export async function retryOrderLeadsAt(container: MedusaContainer, now: Date) {
     { select: ['id', 'metadata'] },
   );
   for (const { id, metadata } of orders) {
-    if (
-      !metadata?.[LEAD_HANDED_OFF_AT] &&
-      handOffAttempts(metadata) < LEAD_HANDOFF_MAX_ATTEMPTS
-    ) {
+    const lead = leadHandoff(metadata);
+    if (!lead.handed_off_at && !lead.gave_up) {
       await handOrderToLeadRoute(container, id);
     }
   }

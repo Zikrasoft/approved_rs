@@ -24,28 +24,25 @@ import { z } from 'zod';
 
 import { parseEnv } from './env';
 import {
-  ADDON_FOR_METADATA_KEY,
-  ADDON_OFFER_METADATA_KEY,
-  IN_STOCK_METADATA_KEY,
-  isInstallationLine,
-  LEAD_TIME_METADATA_KEY,
-  OFFER_ID_METADATA_KEY,
-} from './offer-cart';
+  handOffAttempts,
+  LEAD_HANDED_OFF_AT,
+  LEAD_HANDOFF_ATTEMPTS,
+  LEAD_HANDOFF_ERROR,
+  LEAD_HANDOFF_MAX_ATTEMPTS,
+  LEAD_OWNER_ALERTED_AT,
+  readLine,
+  withAddonsUnderParts,
+} from './line-metadata';
 import { errorMessage } from './errors';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
-export const LEAD_HANDOFF_ERROR = 'lead_handoff_error';
-export const LEAD_HANDED_OFF_AT = 'lead_handed_off_at';
-export const LEAD_HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
-export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
-export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
-
-const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
-
-export const handOffAttempts = (
-  metadata: Record<string, unknown> | null | undefined,
-): number => attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
+export {
+  handOffAttempts,
+  LEAD_HANDED_OFF_AT,
+  LEAD_HANDOFF_ERROR,
+  LEAD_HANDOFF_MAX_ATTEMPTS,
+};
 
 const amount = z.preprocess(
   (value) =>
@@ -74,56 +71,23 @@ export const leadOrderSchema = z.object({
 
 export type LeadOrder = z.infer<typeof leadOrderSchema>;
 
-const readinessSchema = z
-  .object({
-    [IN_STOCK_METADATA_KEY]: z.boolean(),
-    [LEAD_TIME_METADATA_KEY]: z.number().int().nonnegative(),
-  })
-  .transform((ready) =>
-    [
-      ready[IN_STOCK_METADATA_KEY] && PARTS_ORDER_COPY.inStock,
-      ready[LEAD_TIME_METADATA_KEY] > 0 &&
-        PARTS_ORDER_COPY.pickupIn(ready[LEAD_TIME_METADATA_KEY]),
-    ]
-      .filter(Boolean)
-      .join(', '),
-  )
-  .catch('');
-
 const withReadiness = (
-  line: string,
+  text: string,
   metadata: Record<string, unknown> | null | undefined,
 ) => {
-  const readiness = readinessSchema.parse(metadata ?? {});
-  return readiness ? `${line}, ${readiness}` : line;
+  const { inStock, leadTimeDays } = readLine(metadata);
+  if (inStock === null || leadTimeDays === null) return text;
+  const readiness = [
+    inStock && PARTS_ORDER_COPY.inStock,
+    leadTimeDays > 0 && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
+  ]
+    .filter(Boolean)
+    .join(', ');
+  return readiness ? `${text}, ${readiness}` : text;
 };
 
 export const carLabel = ({ model, engine }: Vehicle): string =>
   `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
-
-type LeadOrderItem = LeadOrder['items'][number];
-
-const isAddon = (item: LeadOrderItem) =>
-  Boolean(item.metadata?.[ADDON_FOR_METADATA_KEY]);
-
-const byParent = (items: LeadOrderItem[]): LeadOrderItem[] => {
-  const addons = items
-    .filter(isAddon)
-    .sort(
-      (a, b) => Number(isInstallationLine(a)) - Number(isInstallationLine(b)),
-    );
-  const grouped = items
-    .filter((item) => !isAddon(item))
-    .flatMap((parent) => [
-      parent,
-      ...addons.filter(
-        (addon) =>
-          addon.metadata?.[ADDON_OFFER_METADATA_KEY] ===
-          parent.metadata?.[OFFER_ID_METADATA_KEY],
-      ),
-    ]);
-  return [...grouped, ...addons.filter((addon) => !grouped.includes(addon))];
-};
 
 export function orderLeadForm(order: LeadOrder): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
@@ -140,8 +104,8 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
       PARTS_ORDER_COPY.confirm,
       contact.car ?? '',
     ],
-    lines: byParent(order.items).map((item) =>
-      isAddon(item)
+    lines: withAddonsUnderParts(order.items).map((item) =>
+      readLine(item.metadata).addonKind
         ? PARTS_ORDER_COPY.addon(
             item.title,
             item.unit_price === 0
