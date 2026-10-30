@@ -16,6 +16,7 @@
 import { existsSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { z } from 'zod';
 
 const REPO = 'Zikrasoft/approved_rs'; // keep in sync with keystatic.config.ts's storage.repo
 // This app lives in a subdirectory of the repo; GitHub's contents API paths
@@ -46,17 +47,20 @@ export class GithubApiError extends Error {
   }
 }
 
-async function ghFetch(
+const shaSchema = z.object({ sha: z.string().min(1) });
+
+async function ghFetch<T>(
+  schema: z.ZodType<T>,
   token: string,
   path: string,
   init?: RequestInit,
-): Promise<unknown> {
+): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     ...init,
     headers: { ...authHeaders(token), ...init?.headers },
   });
   if (!res.ok) throw new GithubApiError(res.status, path, await res.text());
-  return res.json();
+  return schema.parse(await res.json());
 }
 
 // 404 means the directory doesn't exist yet (case has no gallery/ folder
@@ -66,10 +70,11 @@ export async function listGithubDir(
   dirPath: string,
 ): Promise<string[]> {
   try {
-    const entries = (await ghFetch(
+    const entries = await ghFetch(
+      z.array(z.object({ name: z.string() })),
       token,
       `/repos/${REPO}/contents/${repoPath(dirPath)}?ref=${BRANCH}`,
-    )) as { name: string }[];
+    );
     return entries.map((e) => e.name);
   } catch (err) {
     if (err instanceof GithubApiError && err.status === 404) return [];
@@ -91,8 +96,9 @@ export async function listGalleryFiles(
   relDir: string,
 ): Promise<string[]> {
   if (import.meta.env.PROD) {
+    if (!token) return [];
     try {
-      return await listGithubDir(token!, relDir);
+      return await listGithubDir(token, relDir);
     } catch (err) {
       console.error('listGalleryFiles: failed to list', relDir, err);
       return [];
@@ -106,10 +112,11 @@ export async function getGithubFileBuffer(
   token: string,
   filePath: string,
 ): Promise<Buffer> {
-  const data = (await ghFetch(
+  const data = await ghFetch(
+    z.object({ content: z.string() }),
     token,
     `/repos/${REPO}/contents/${repoPath(filePath)}?ref=${BRANCH}`,
-  )) as { content: string };
+  );
   return Buffer.from(data.content, 'base64');
 }
 
@@ -129,25 +136,27 @@ export async function commitGalleryPhotos(
     message: string;
   },
 ): Promise<void> {
-  const ref = (await ghFetch(
+  const ref = await ghFetch(
+    z.object({ object: shaSchema }),
     token,
     `/repos/${REPO}/git/ref/heads/${BRANCH}`,
-  )) as { object: { sha: string } };
+  );
   const baseCommitSha = ref.object.sha;
-  const baseCommit = (await ghFetch(
+  const baseCommit = await ghFetch(
+    z.object({ tree: shaSchema }),
     token,
     `/repos/${REPO}/git/commits/${baseCommitSha}`,
-  )) as { tree: { sha: string } };
+  );
 
   // Binary content (photos) needs its own blob first — Git's tree API only
   // accepts inline `content` for UTF-8 text, which index.md's new content
   // (below) qualifies for directly, skipping a blob call for it.
   const photoEntries = await Promise.all(
     opts.photos.map(async (photo) => {
-      const blob = (await ghFetch(token, `/repos/${REPO}/git/blobs`, {
+      const blob = await ghFetch(shaSchema, token, `/repos/${REPO}/git/blobs`, {
         method: 'POST',
         body: JSON.stringify({ content: photo.base64, encoding: 'base64' }),
-      })) as { sha: string };
+      });
       return {
         path: repoPath(photo.path),
         mode: '100644',
@@ -157,7 +166,7 @@ export async function commitGalleryPhotos(
     }),
   );
 
-  const tree = (await ghFetch(token, `/repos/${REPO}/git/trees`, {
+  const tree = await ghFetch(shaSchema, token, `/repos/${REPO}/git/trees`, {
     method: 'POST',
     body: JSON.stringify({
       base_tree: baseCommit.tree.sha,
@@ -171,18 +180,18 @@ export async function commitGalleryPhotos(
         },
       ],
     }),
-  })) as { sha: string };
+  });
 
-  const commit = (await ghFetch(token, `/repos/${REPO}/git/commits`, {
+  const commit = await ghFetch(shaSchema, token, `/repos/${REPO}/git/commits`, {
     method: 'POST',
     body: JSON.stringify({
       message: opts.message,
       tree: tree.sha,
       parents: [baseCommitSha],
     }),
-  })) as { sha: string };
+  });
 
-  await ghFetch(token, `/repos/${REPO}/git/refs/heads/${BRANCH}`, {
+  await ghFetch(z.unknown(), token, `/repos/${REPO}/git/refs/heads/${BRANCH}`, {
     method: 'PATCH',
     body: JSON.stringify({ sha: commit.sha }),
   });

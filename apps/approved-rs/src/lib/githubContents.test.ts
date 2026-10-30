@@ -244,4 +244,31 @@ describe('commitGalleryPhotos', () => {
     // Never reached the ref-update step — no dangling commit gets pointed at.
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
+
+  it('refuses a response without a sha instead of committing onto undefined', async () => {
+    mockFetch
+      .mockResolvedValueOnce(okJson({ object: { sha: 'base-commit-sha' } }))
+      .mockResolvedValueOnce(okJson({ tree: {} }));
+
+    await expect(
+      commitGalleryPhotos('tok', {
+        photos: [{ path: 'x/gallery/0.jpg', base64: 'aaaa' }],
+        indexPath: 'x/index.md',
+        indexContent: 'title: X',
+        message: 'msg',
+      }),
+    ).rejects.toThrow();
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('listGithubDir response', () => {
+  afterEach(() => mockFetch.mockReset());
+
+  it('refuses a contents response that is not a directory listing', async () => {
+    mockFetch.mockResolvedValue(okJson({ name: 'index.md', content: '' }));
+
+    await expect(listGithubDir('tok', 'x')).rejects.toThrow();
+  });
 });
