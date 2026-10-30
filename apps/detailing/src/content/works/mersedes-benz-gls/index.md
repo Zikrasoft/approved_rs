@@ -2,62 +2,62 @@
 title: Mercedes-Benz GLS, оклейка сатиновой пленкой
 translations:
   en:
-    title: Mercedes-Benz GLS - Satin Film Wrap
+    title: Mercedes-Benz GLS, satin wrap
     body: |-
-      The new Mercedes-Benz GLS 2026 came to us with two tasks: to protect the body and to change its appearance to satin. Together with the owner, we selected a protective satin film with a thickness of **190 microns**, covering the entire body.
+      The new 2026 Mercedes-Benz GLS arrived at our studio with two tasks in mind: to protect the body and to change its appearance to a satin finish. Together with the owner, we chose a **190-micron** thick protective satin film to wrap the entire vehicle.
 
-      Under the film, the factory paint remains untouched: minor scratches, stone chips, insect residue, chemicals, and road grime no longer reach it. The satin finish alters how the car looks in the light, while the original color remains protected underneath.
+      Under the film, the factory paint remains untouched: minor scratches, stone chips, insect residue, chemicals, and road dirt are no longer a concern. The satin finish alters the way the car reflects light, while the original color stays protected beneath the layer.
 
-      We fold the edges of the parts where it's technically possible: fewer visible edges result in a more cohesive look, and the film lasts longer.
+      We fold the edges of the pieces where technically possible: this reduces visible seams, creates a more cohesive look, and extends the longevity of the covering.
 
-      The film can be repaired locally. If a part gets damaged over time, it's usually unnecessary to rewrap the whole vehicle — just the affected part is replaced.
+      The film can be repaired locally. If one part gets damaged during use, the entire vehicle usually doesn't need to be re-wrapped; only that specific piece will be replaced.
 
-      The benefits of a full wrap include:
+      Benefits of a full wrap include:
 
       <ul class="icon-shield">
-      <li>The factory paint doesn’t accumulate chips or minor scratches</li>
-      <li>Road grime and chemicals stay on the film</li>
-      <li>It’s easier to maintain the body</li>
-      <li>A damaged element can be replaced separately</li>
-      <li>The new car is protected from the first kilometers</li>
-      <li>The preserved paint is noticeable when selling</li>
+      <li>The original paint does not accumulate chips and small scratches</li>
+      <li>Road dirt and chemicals stay on the film</li>
+      <li>Easier maintenance for the body</li>
+      <li>Damaged elements can be re-wrapped individually</li>
+      <li>The new car is protected from the first miles</li>
+      <li>The preserved paint can increase resale value</li>
       <li>Satin appearance without repainting</li>
       </ul>
 
-      We perform PPF wrapping in Belgrade, in the Zvezdara area.
+      We carry out PPF wrapping in Belgrade, in the Zvezdara district.
 
-      You can wrap both a new car and one that has been driven: either completely or just the most vulnerable elements. We'll choose the type of film during the inspection.
+      We can wrap both new vehicles and those that have already been driven: either fully or just the most vulnerable parts. We will select the film option during the inspection.
 
-      We will showcase the result of the full satin film wrap for the GLS once it's completed.
+      We will showcase the result of the full wrap on the GLS with satin film once we complete the project.
     car: Mercedes-Benz GLS
   sr:
-    title: Mercedes-Benz GLS - obloga satenskom folijom
+    title: Mercedes-Benz GLS, oblaganje satinskom folijom
     body: |-
-      Novi Mercedes-Benz GLS 2026 je došao kod nas sa dva zadatka: zaštititi karoseriju i promeniti izgled na satenski. Zajedno sa vlasnikom smo odabrali zaštitnu satensku foliju debljine **190 mikrona**, oblačimo celu karoseriju.
+      Novi Mercedes-Benz GLS 2026 stigao je kod nas sa dva zadatka: zaštita karoserije i promjena izgleda na satinski. Zajedno sa vlasnikom smo odabrali zaštitnu satinsku foliju debljine **190 mikrona**, oblažemo celu karoseriju.
 
-      Pod folijom fabrička lakirna površina ostaje netaknuta: sitne ogrebotine, kamenčići, tragovi insekata, hemikalije i saobraćajna prljavština više ne dospevaju do nje. Satenska folija menja način na koji se auto doživljava na svetlu, dok originalna boja ostaje za zaštitnim slojem.
+      Ispod folije fabrički lak ostaje netaknut: male ogrebotine, kamenčići, tragovi insekata, hemikalije i cestovni prljavština više ne dolaze do njega. Satin menja način na koji se automobil čita na svetlu, dok originalna boja ostaje za zaštitnim slojem.
 
-      Ivica detalja se podvija gde je to tehnički moguće: vidljivih ivica je manje, slika je celovitija, a obloga duže traje.
+      Ivice delova savijamo gde je to tehnički moguće: vidljivih ivica je manje, slika je celovitija, a prekrivanje traje duže.
 
-      Folija se može lokalno popraviti. Ako se tokom korišćenja ošteti jedan deo, obično nije potrebno recimo oblačiti ceo automobil — folija se menja samo na njemu.
+      Foliju je moguće lokalno popraviti. Ako se tokom korišćenja ošteti jedan deo, obično nije potrebno ponovo oblačiti ceo automobil, folija se menja samo na njemu.
 
-      Šta donosi kompletna obloga:
+      Šta donosi potpuno oblaganje:
 
       <ul class="icon-shield">
-      <li>fabrika lak ne skuplja kamenčiće i sitne ogrebotine</li>
-      <li>saobraćajna prljavština i hemikalije ostaju na foliji</li>
+      <li>fabrički lak ne skuplja kamenčiće i male ogrebotine</li>
+      <li>cestovna prljavština i hemikalije ostaju na foliji</li>
       <li>lakše je održavati karoseriju</li>
-      <li>oštećeni element se posebno prekrije</li>
+      <li>oštećeni element se oblači posebno</li>
       <li>nova mašina je zaštićena od prvih kilometara</li>
-      <li>očuvana lakirana površina, koja se vidi prilikom prodaje</li>
-      <li>satenski izgled bez ponovnog farbanja</li>
+      <li> očuvan lak koji se vidi prilikom prodaje</li>
+      <li>satinski izgled bez prefarbanja</li>
       </ul>
 
-      Oblogu PPF folijom radimo u Beogradu, na Zvezdari.
+      Oblaganje PPF folijom radimo u Beogradu, na Zvezdari.
 
-      Može se obložiti i nova mašina, kao i ona koja je već vozila: potpuno ili samo najosetljiviji delovi. Opciju folije ćemo odabrati prilikom pregleda.
+      Obložiti se može i nova mašina, i ona koja je već vozila: potpuno ili samo najranjiviji delovi. Opciju folije ćemo odabrati na pregledu.
 
-      Rezultat kompletne obloge GLS satenskom folijom ćemo pokazati kada završimo.
+      Rezultat potpunog oblaganja GLS satinskom folijom prikazaćemo kada završimo.
     car: Mercedes-Benz GLS
 car: Mercedes-Benz GLS
 year: 2026
@@ -68,7 +68,7 @@ image: image.jpg
 gallery: []
 date: 2026-03-10
 published: true
-translatedFrom: b68a6e7d2498f97c
+translatedFrom: 8fd5dadc5f0e3070
 ---
 
 Новый Mercedes-Benz GLS 2026 приехал к нам с двумя задачами сразу: защитить кузов и сменить вид на сатиновый. Вместе с владельцем выбрали защитную сатиновую пленку толщиной **190 микрон**, оклеиваем кузов целиком.

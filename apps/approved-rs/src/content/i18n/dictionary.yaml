@@ -70,8 +70,8 @@ translations:
       cities: Vehicle Sourcing by City
       vehicleImport: Vehicle Import
     navHint:
-      vehicle-sourcing: We'll find and inspect a car
-      vehicle-import: We'll bring and clear customs for it
+      vehicle-sourcing: We'll find and inspect the car
+      vehicle-import: We'll bring it in and handle customs clearance
       vehicle-buyback: We'll buy back your car
       vehicle-inspection: We'll inspect the one you found
     nav:
@@ -91,7 +91,7 @@ translations:
       servicesHeading: Services
       companyHeading: Company
       privacyLabel: Privacy
-      tagline: We'll source, inspect, and deliver a car from Europe. We handle everything from searching to delivery.
+      tagline: We'll source, inspect, and deliver a car from Europe. We take care of everything, from sourcing to delivery.
       contactManagerLabel: Message the Manager
       hoursLine: Available 24/7
       copyrightSuffix: Vehicle sourcing, inspection, and delivery from Europe
@@ -132,7 +132,7 @@ translations:
       cities: Autopodbor po gradovima
       vehicleImport: Uvoz automobila
     navHint:
-      vehicle-sourcing: Naći ćemo i provere auto
+      vehicle-sourcing: Pronaći ćemo i provere automobila
       vehicle-import: Dovozimo i carinimo
       vehicle-buyback: Otkupićemo vaš auto
       vehicle-inspection: Proverićemo onaj koji ste našli
@@ -153,7 +153,7 @@ translations:
       servicesHeading: Usluge
       companyHeading: Kompanija
       privacyLabel: Privatnost
-      tagline: Podbićemo, proverićemo i dostaviti automobil iz Evrope. Preuzimamo ceo proces - od pretrage do dostave.
+      tagline: Pronaći ćemo, proveriti i dostaviti automobil iz Evrope. Preuzimamo ceo proces, od pretrage do isporuke.
       contactManagerLabel: Pitajte menadžera
       hoursLine: Non-stop, bez slobodnih dana
       copyrightSuffix: Autopodbor, provera i dostava automobila iz Evrope
@@ -194,8 +194,8 @@ translations:
       cities: Selección de coches por ciudades
       vehicleImport: Importación de vehículos
     navHint:
-      vehicle-sourcing: Buscamos y verificamos el coche
-      vehicle-import: Importamos y hacemos la aduana
+      vehicle-sourcing: Encontraremos y revisaremos el coche
+      vehicle-import: Lo traeremos y despacharemos
       vehicle-buyback: Compramos tu coche
       vehicle-inspection: Inspeccionamos el que encontraste
     nav:
@@ -215,7 +215,7 @@ translations:
       servicesHeading: Servicios
       companyHeading: Empresa
       privacyLabel: Privacidad
-      tagline: Buscamos, verificamos y entregamos coches de Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
+      tagline: Buscamos, verificamos y entregamos tu coche desde Europa. Nos encargamos de todo el proceso, desde la búsqueda hasta la entrega.
       contactManagerLabel: Escribir al gerente
       hoursLine: Atención 24/7
       copyrightSuffix: Selección, verificación y entrega de coches de Europa
@@ -256,8 +256,8 @@ translations:
       cities: Fahrzeugauswahl nach Städten
       vehicleImport: Autoimport
     navHint:
-      vehicle-sourcing: Wir finden und prüfen das Auto
-      vehicle-import: Wir bringen und verzollen
+      vehicle-sourcing: Wir finden und prüfen das Fahrzeug
+      vehicle-import: Wir bringen und verzollen das Fahrzeug
       vehicle-buyback: Wir kaufen Ihr Auto
       vehicle-inspection: Wir inspizieren das, was Sie gefunden haben
     nav:
@@ -277,7 +277,7 @@ translations:
       servicesHeading: Dienstleistungen
       companyHeading: Unternehmen
       privacyLabel: Datenschutz
-      tagline: Wir wählen, prüfen und liefern Autos aus Europa. Wir übernehmen den kompletten Prozess - von der Suche bis zur Lieferung.
+      tagline: Wir suchen, prüfen und liefern Autos aus Europa. Wir übernehmen den gesamten Prozess, von der Recherche bis zur Lieferung.
       contactManagerLabel: Manager kontaktieren
       hoursLine: 24 Stunden, ohne Feiertage
       copyrightSuffix: Fahrzeugauswahl, Inspektion und Lieferung von Autos aus Europa
@@ -309,4 +309,4 @@ translations:
         morePhotos: Mehr Fotos
         prev: Vorheriges Foto
         next: Nächstes Foto
-translatedFrom: 726f7c9c392aae79
+translatedFrom: 0a140a1215c7538f

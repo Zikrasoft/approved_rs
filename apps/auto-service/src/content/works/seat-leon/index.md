@@ -4,30 +4,30 @@ translations:
   en:
     title: "Major Service for Seat Leon: Timing Belt, Water Pump, and DSG DQ250"
     body: |-
-      A **190,000 km** Seat Leon came into our Russian car service in Belgrade for a major scheduled maintenance, also known as a major service.
+      A used Seat Leon with a mileage of **190,000 km** arrived at our Russian car service in Belgrade for a major scheduled maintenance, also known as a full service.
 
-      At this mileage, it is best to service the main components all at once, so we performed the following:
+      At this mileage, it's best to service the main components right away, so we performed the following:
 
       - replaced the timing belt kit;
       - replaced the water pump;
       - replaced the coolant;
-      - changed the engine oil;
+      - replaced the engine oil;
       - replaced all necessary filters;
       - replaced the rear shock absorbers;
-      - changed the oil in the DSG DQ250 gearbox.
+      - replaced the oil in the DSG DQ250 gearbox.
 
-      For Seat, Volkswagen, Škoda, and Audi, a major service is key for maintenance. Timely changes of the timing belt, pump, fluids, and consumables can prevent much more expensive problems down the road.
+      For Seat, Volkswagen, Škoda, and Audi, a full service is a key point of maintenance. Timely changes of the timing belt, pump, technical fluids, and consumables help avoid much more expensive issues down the line.
 
-      A note on the **DQ250**: This is a six-speed dual-clutch transmission with wet clutches, and the transmission oil must be changed according to the schedule — this is crucial to its performance.
+      A note on the **DQ250**. This is a six-speed robot with wet clutches, and the transmission oil needs to be replaced as per the maintenance schedule: that’s what keeps the gearbox functioning properly.
     car: SEAT LEON
   sr:
     title: "Veliki servis Seat Leon: GRM, pumpa i DSG DQ250"
     body: |-
-      Seat Leon sa pređenih **190 000 km** došao je u naš nezavisni auto servis u Beogradu na veliko planirano održavanje, poznato kao veliki servis.
+      Seat Leon sa pređenih **190 000 km** stigao je u naš ruski auto servis u Beogradu na veliko planirano održavanje, to jest veliki servis.
 
-      Na ovakvom broju pređenih kilometara najbolje je da se glavni sklopovi odmah servisiraju, pa smo uradili:
+      Na ovakvom pređenom putu osnovne sklopove je bolje servisirati odmah, tako da smo uradili:
 
-      - zamenu kompleta remena GRM;
+      - zamenu kompleta zupčastog remena;
       - zamenu vodene pumpe;
       - zamenu antifriza;
       - zamenu motornog ulja;
@@ -35,9 +35,9 @@ translations:
       - zamenu zadnjih amortizera;
       - zamenu ulja u DSG DQ250 menjaču.
 
-      Za Seat, Volkswagen, Škoda i Audi, veliki servis je osnovna tačka održavanja. Remen GRM, pumpa, tehničke tečnosti i potrošni materijali, koji se menjaju na vreme, sprečavaju mnogo skuplje probleme kasnije.
+      Za Seat, Volkswagen, Škoda i Audi, veliki servis je osnovna tačka održavanja. Zupčasti remen, pumpa, tehničke tečnosti i potrošni delovi, kada se menjaju na vreme, izbegavaju mnogo skuplje neprijatnosti kasnije.
 
-      Posebno o **DQ250**. Ovo je šestostepeni robot sa mokrim spojnicama, a transmisijsko ulje u njemu treba menjati prema propisima — na tom menjaču se i održava.
+      Posebno o **DQ250**. Ovo je šestostepeni robot sa mokrim kvačilima, i menjačko ulje u njemu mora da se menja prema pravilniku: na tome menjač i opstaje.
     car: SEAT LEON
 car: SEAT LEON
 year: 2019
@@ -52,7 +52,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-20
 published: true
-translatedFrom: 8ab7a42bc0bedee4
+translatedFrom: 6ee72bd789965a85
 ---
 
 Seat Leon с пробегом **190 000 км** приехал в наш русский автосервис в Белграде на большое плановое обслуживание, оно же большой сервис.

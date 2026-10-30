@@ -23,7 +23,7 @@ translations:
     headingLine1: We will contact you
     headingEmphasis: within 2 hours
     subtext: Free consultation
-    nameLabel: Your name
+    nameLabel: Your Name (optional)
     namePlaceholder: Ivan
     contactLabel: How can we reach you
     telegramTab: Telegram
@@ -39,12 +39,12 @@ translations:
     submitLabel: Calculate cost
     errorTelegramFormat: 'Format: @username or phone number'
     errorPhoneInvalid: Please check the phone number
-    errorSubmit: The request did not go through. Please check your connection and try again.
+    errorSubmit: Submission failed. Please check your connection and try again.
   sr:
     headingLine1: Javićemo se sa vama
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
-    nameLabel: Vaše ime
+    nameLabel: Vaše ime (nije obavezno)
     namePlaceholder: Ivan
     contactLabel: Kako da vas kontaktiramo
     telegramTab: Telegram
@@ -60,12 +60,12 @@ translations:
     submitLabel: Izračunaj cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
+    errorSubmit: Prijava nije poslata. Proverite vezu i pokušajte ponovo
   es:
     headingLine1: Nos pondremos en contacto contigo
     headingEmphasis: dentro de 2 horas
     subtext: Consulta gratuita
-    nameLabel: Tu nombre
+    nameLabel: Tu nombre (opcional)
     namePlaceholder: Iván
     contactLabel: Cómo contactarte
     telegramTab: Telegram
@@ -81,12 +81,12 @@ translations:
     submitLabel: Calcular costo
     errorTelegramFormat: 'Formato: @usuario o número de teléfono'
     errorPhoneInvalid: Verifica el número de teléfono
-    errorSubmit: La solicitud no se ha enviado. Verifica la conexión y vuelve a intentarlo
+    errorSubmit: La solicitud no se envió. Verifica tu conexión e inténtalo de nuevo
   de:
     headingLine1: Wir kontaktieren Sie
     headingEmphasis: innerhalb von 2 Stunden
     subtext: Kostenlose Beratung
-    nameLabel: Ihr Name
+    nameLabel: Ihr Name (optional)
     namePlaceholder: Ivan
     contactLabel: Wie können wir Sie erreichen
     telegramTab: Telegram
@@ -102,5 +102,5 @@ translations:
     submitLabel: Kosten berechnen
     errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
     errorPhoneInvalid: Überprüfen Sie die Telefonnummer
-    errorSubmit: Die Anfrage wurde nicht gesendet. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut
-translatedFrom: f19e1d1a771f6292
+    errorSubmit: Die Anfrage konnte nicht gesendet werden. Bitte prüfen Sie die Verbindung und versuchen Sie es erneut.
+translatedFrom: 44ffefff4c3c8b69

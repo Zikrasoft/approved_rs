@@ -2,58 +2,58 @@
 title: BMW X5, оклейка PPF и бронирование фар в Белграде
 translations:
   en:
-    title: BMW X5 - PPF Wrap and Headlight Protection in Belgrade
+    title: BMW X5, PPF Wrap and Headlight Protection in Belgrade
     body: |-
-      Another BMW X5 wrapped in transparent **PPF film**.
+      Another BMW X5 wrapped in clear **PPF**.
 
-      The film takes the hit from what would otherwise damage the paint: gravel, sand, bug splatter, and small scratches that accumulate during daily driving.
+      The film protects the paint from what would normally hit it: gravel, sand, bug splatter, and minor scratches accumulated during everyday driving.
 
-      We highly recommend protecting the headlights as well. Here’s what that offers from the front:
+      We highly recommend protecting the headlights as well. Here’s what it offers up front:
 
       <ul class="icon-shield">
       <li>stones and road debris won’t reach the glass</li>
-      <li>No scratches or pitting</li>
-      <li>Ultra-violet rays are blocked by the film, keeping the plastic from yellowing or clouding over time</li>
-      <li>Expensive LED and adaptive optics maintain their factory appearance</li>
+      <li>no scratches or sandblasting</li>
+      <li>ultraviolet rays are blocked by the film, preventing the plastic from yellowing and clouding over time</li>
+      <li>expensive LED and adaptive optics maintain their factory appearance</li>
       </ul>
 
-      The rear is a simpler task:
+      The rear is simpler:
 
       <ul class="icon-shield">
-      <li>No scratches or minor damage</li>
-      <li>Tail lights stay clear and shiny for longer</li>
+      <li>no scratches or minor damage</li>
+      <li>taillights stay clear and shiny longer</li>
       </ul>
 
-      The headlights are one of the most vulnerable parts of a car. Year after year, stones, sand, dust, car wash brushes, and UV rays wear down the surface of the optics. The film provides an additional layer between them and the plastic, absorbing most of the impact.
+      Headlights are one of the most vulnerable parts of a car. Year after year, stones, sand, dust, car wash brushes, and sunlight wear away at the optical surface. The film provides an extra layer between them and the plastic, absorbing most of the impact.
 
-      You can wrap the entire car, just the front, specific body parts, or just the optics.
+      You can wrap the entire car, just the front end, specific body parts, or only the optics.
     car: BMW X5
   sr:
-    title: BMW X5 - aplikacija PPF i zaštita farova u Beogradu
+    title: BMW X5, PPF folija i zaštita farova u Beogradu
     body: |-
       Još jedan BMW X5 pod prozirnom **PPF folijom**.
 
-      Folija preuzima ono što bi na drugačiji način zahvatilo lak: kamenčiće, pesak, tragove insekata i sitne ogrebotine koje vozilo stiče u svakodnevnoj vožnji.
+      Folija preuzima ono što bi inače oštetilo lak: kamenčići, pesak, tragovi insekata i sitne ogrebotine koje auto dobija tokom svakodnevne vožnje.
 
-      Posebno preporučujemo zaštitu farova. Šta to donosi napred:
+      Preporučujemo da posebno zaštitite farove. Šta to donosi sa prednje strane:
 
       <ul class="icon-shield">
       <li>kamenčići i saobraćajni otpad ne dolaze do stakla</li>
       <li>nema ogrebotina i peskarenja</li>
-      <li>ultraljubičaste zrake se zadržavaju folijom, plastika duže ne požuti i ne zamagli</li>
-      <li>skupa LED i adaptivna optika zadržava fabrikaški izgled</li>
+      <li>ultraviolentne zrake se zadržavaju folijom, plastika duže ne žuti i ne mutni</li>
+      <li>skupa LED i adaptivna optika zadržava fabrički izgled</li>
       </ul>
 
       Pozadi je zadatak jednostavniji:
 
       <ul class="icon-shield">
       <li>nema ogrebotina i sitnih oštećenja</li>
-      <li>lampa duže ostaje prozračna i sjajna</li>
+      <li>lampice duže ostaju prozirne i sjajne</li>
       </ul>
 
-      Farovi su jedno od najranjivijih mesta na automobilu. Kamenčići, pesak, prašina, četke na pranju i sunce godina na godine uništavaju površinu optike. Folija stavlja dodatni sloj između njih i plastikom, uzimajući na sebe većinu udarca.
+      Farovi su jedno od najugroženijih mesta na autu. Kamenčići, pesak, prašina, četke na pranju i sunce, iz godine u godinu, oštećuju površinu optike. Folija postavlja dodatni sloj između njih i plastike, i preuzima većinu udarca na sebe.
 
-      Mogu se zaštititi celu vozilo, samo prednji deo, pojedini elementi karoserije ili samo optika.
+      Možete zaštititi celu mašinu, samo prednji deo, pojedine delove karoserije ili samo optiku.
     car: BMW X5
 car: BMW X5
 year: 2026
@@ -63,7 +63,7 @@ image: image.jpg
 gallery: []
 date: 2026-08-26
 published: true
-translatedFrom: 7155b4549dfd6d79
+translatedFrom: c746fd90dbcc580b
 ---
 
 Еще один BMW X5 под прозрачной **PPF-пленкой**.

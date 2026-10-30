@@ -105,10 +105,10 @@ casesShared:
 translations:
   en:
     contacts:
-      metaTitle: Contacts - car sourcing, import and buyback
+      metaTitle: 'Contacts: car sourcing, import, and buyback'
       metaDescription: 'Contact us on Telegram: car sourcing, import, buyback, and inspection. We respond within two hours, 24/7, in Russian and English.'
       heroTitle: Contacts
-      heroSubtitle: Connect via Telegram – fast and convenient
+      heroSubtitle: We work through Telegram, fast and convenient
       info:
         - label: Response time
           value: Within 2 hours
@@ -127,15 +127,15 @@ translations:
         - n: '02'
           text: We discuss your request, clarifying details and criteria
         - n: '03'
-          text: We get to work – sourcing, inspecting, delivering
+          text: We start working, find, check, and deliver
     partners:
       eyebrow: Recommended
       heading: What’s next for your car
       intro: We source and deliver your vehicle. For what happens next, we recommend contacting trusted teams.
       linkLabel: Visit the site
       requestLabel: Submit a request here
-      carlabDescription: Car service in Belgrade - diagnostics, scheduled maintenance, and repairs, including preparation after transportation.
-      detailsDescription: Detailing studio - pre-sale preparation, polishing, interior deep cleaning, and protective coatings.
+      carlabDescription: Auto service in Belgrade. Diagnostics, scheduled servicing, and repairs, including vehicle preparation after transportation.
+      detailsDescription: Detailing studio. Pre-sale preparation, polishing, upholstery cleaning, and protective coatings.
     privacy:
       metaTitle: Privacy Policy
       metaDescription: 'Privacy policy and personal data processing for {siteName}: what data we collect, how we use it, and how to request deletion.'
@@ -145,11 +145,11 @@ translations:
         - title: What data we collect
           text: When submitting a request, we collect your name and contact information (Telegram/phone) entered in the form. We also log the page from which the request was sent.
         - title: How we use data
-          text: The data from your application is used solely for feedback purposes. We do not share your application with third parties or use it for advertising. Separately, web analytics operates — Google and Yandex receive anonymized data regarding page views.
+          text: 'The data from the request is used only for feedback regarding it. We do not share requests with third parties and do not use them for advertising. Web analytics operates separately from requests: Google and Yandex receive anonymized data on page views.'
         - title: Data storage
-          text: Requests are stored in a secure Vercel Blob cloud storage; access is limited to our team. You may request deletion of your data anytime by messaging us on Telegram.
+          text: Requests are stored in a secure Vercel Blob cloud storage; only our team has access. You can request the deletion of your data at any time by writing to us on Telegram.
         - title: Cookies
-          text: The website uses technical cookies, without which it cannot function, and analytical cookies. You can opt out using the banner at the bottom of the screen; your choice is saved in the browser. Yandex.Metrica records sessions (mouse movement, scrolling, and clicks). We have excluded the application form from this recording, so its content is not captured. If you arrived through an advertisement and did not decline analytics, the site remembers this — the source and campaign — for 30 days so we can see which ads lead to applications.
+          text: The site uses technical cookies, without which it does not function, and analytics. You can decline this in the banner at the bottom of the screen; your choice is saved in the browser. Yandex.Metrica records sessions (cursor movement, scrolling, and clicks). We excluded the request form from the recording, its content is not captured. If you arrived through advertising and did not decline analytics, the site remembers this (source and campaign) for 30 days, so we can see which ads lead to requests.
       contactTitle: Contact
       contactBefore: 'For privacy inquiries, reach out to us through '
       contactLinkText: Telegram
@@ -158,7 +158,7 @@ translations:
       metaDescription: Your request has been accepted. We will contact you shortly.
       eyebrow: Request sent
       heading: We’ll be in touch soon
-      body: We have received your request and will contact you within 2 hours. If urgent, message us directly on Telegram.
+      body: We have received your request and will contact you within 2 hours. If it's urgent, message us directly on Telegram.
       ctaLabel: Message directly
       waitLabel: While you wait
       waitCasesLink: Real deals →
@@ -179,14 +179,14 @@ translations:
       contactsText: Messaging apps and ways to contact us are collected on the
       developerCredit: The site was designed and developed by Zikrasoft.
     casesVehicleSourcing:
-      metaTitle: Real car sourcing deals - vehicles, prices, and timelines
-      metaDescription: Actual deals on car sourcing, delivery, buyback, and inspections from Germany, Spain, Serbia, and Switzerland. Vehicle, price, and process details.
+      metaTitle: 'Real car sourcing deals: vehicles, prices, and timelines'
+      metaDescription: Real deals on car sourcing, delivery, buyback, and inspections in Germany, Spain, Serbia, and Switzerland. Vehicle, price, and how it all went.
     casesVehicleBuyback:
       metaTitle: Real car buyback deals
       metaDescription: 'Real buyback deals: Russian plates, expired imports, disputed documents. Vehicle, price, and how the owner received payment on the transaction day.'
     casesVehicleInspection:
       metaTitle: 'Real deals: car inspections before purchase'
-      metaDescription: 'Actual inspections before purchase: vehicle, its price, and inspection results. Some of these stories ended in purchases, others in refusals.'
+      metaDescription: 'Real visits for inspections before purchase: vehicle, its price, and inspection results. Some of these stories ended with a sale, while others with a rejection.'
     casesVehicleImport:
       metaTitle: 'Real deals: turnkey imports from Europe and China'
       metaDescription: 'Real deals on car imports from Europe and China: vehicles and final prices including logistics, duties, and on-site registration.'
@@ -195,20 +195,20 @@ translations:
       emptyState: The first deals will appear here soon.
       tabIntros:
         vehicle-sourcing: Every vehicle on this list was inspected before purchase. Options we rejected along the way are not included here.
-        vehicle-buyback: 'Vehicles that are hard to sell through regular means: Russian plates, expired imports, disputed documents. The owner received payment on the transaction day, and we handled all issues regarding the future of the vehicle.'
-        vehicle-inspection: The client found the vehicle themselves, we went to inspect it. Some stories ended in purchases, others in refusals, and we count refusals as valid outcomes.
-        vehicle-import: 'Turnkey import from Europe and China: from searching in the country of origin to registration. The final price of each deal includes everything: vehicle, logistics, duties, and registration.'
+        vehicle-buyback: "Vehicles that are hard to sell through regular means: Russian plates, expired import, disputed documents. The owner received payment on the day of the deal, while we handled all the hassles regarding the vehicle's future."
+        vehicle-inspection: The client found the vehicle themselves, and we went to inspect it. Some of these stories ended with a purchase, while others with a rejection, which we consider a valid outcome as well.
+        vehicle-import: 'Import from Europe and China turnkey: from searching in the country of origin to registration plates. The final price of each deal includes everything: vehicle, logistics, customs duties, and processing.'
       closingHeading: Similar task?
       closingLine1: Let us know,
-      closingLine2: what you are looking for -
-      closingLine3: we'll source for you too
+      closingLine2: whatever you are looking for,
+      closingLine3: we'll source it for you too
       closingText: Just the make, budget, and a couple of preferences are enough. We'll respond within two hours and let you know if it's feasible for that amount.
   sr:
     contacts:
-      metaTitle: Kontakti — autopodbor, uvoz i otkup automobila
+      metaTitle: 'Kontakti: autotreno, uvoz i otkup automobila'
       metaDescription: 'Povežite se s nama na Telegramu: autopodbor, uvoz, otkup i provera auta. Odgovaramo u roku od dva sata, 24/7, na ruskom i engleskom.'
       heroTitle: Kontakti
-      heroSubtitle: Radimo preko Telegrama — brzo i praktično
+      heroSubtitle: Radimo preko Telegrama, brzo i praktično
       info:
         - label: Vreme odgovora
           value: U roku od 2 sata
@@ -227,15 +227,15 @@ translations:
         - n: '02'
           text: Razgovaramo o vašem zahtevu, pojašnjavamo detalje i kriterijume
         - n: '03'
-          text: Počinjemo rad — nalazimo, proveravamo, uvozimo
+          text: Počinjemo rad, nalazimo, proveravamo, dovozimo
     partners:
       eyebrow: Preporučujemo
       heading: Šta dalje s vozilom
       intro: Nalazimo i uvozimo automobil. Za dalje korake savetujemo da se obratite proverenim timovima.
       linkLabel: Pređite na sajt
       requestLabel: Ostavite zahtev ovde
-      carlabDescription: Autoservis u Beogradu — dijagnostika, redovni servis i popravka, uključujući pripremu vozila nakon prevoza.
-      detailsDescription: Detaljling studio — priprema za prodaju, poliranje, hemijsko čišćenje enterijera i zaštitni premazi.
+      carlabDescription: Autoservis u Beogradu. Dijagnostika, planirano održavanje i popravka, uključujući pripremu automobila posle prevoza.
+      detailsDescription: Detailing-studija. Priprema za prodaju, poliranje, hemijsko čišćenje enterijera i zaštitne prevlake.
     privacy:
       metaTitle: Politika privatnosti
       metaDescription: 'Politika privatnosti i obrade ličnih podataka sajta {siteName}: koje podatke prikupljamo, kako ih koristimo i kako zatražiti brisanje.'
@@ -245,11 +245,11 @@ translations:
         - title: Koje podatke prikupljamo
           text: Kada šaljete zahtev, prikupljamo ime i kontakt podatke (Telegram/telefon) koje unosite u formu. Takođe beležimo stranicu sa koje je zahtev poslat.
         - title: Kako koristimo podatke
-          text: Podaci iz zahteva se koriste isključivo za povratnu informaciju o njemu. Zahtev ne prosleđujemo trećim licima i ne koristimo za oglašavanje. Odvojeno od zahteva funkcioniše veb-analitika – Google i Yandex dobijaju anonimizovane podatke o pregledima stranica.
+          text: 'Podaci iz zahteva se koriste samo za povratnu informaciju o njemu. Zahtev ne predajemo trećim stranama i ne koristimo za reklamu. Odvojeno od zahteva radi veb-analitika: Google i Yandex dobijaju anonimne podatke o pregledima stranica.'
         - title: Skladištenje podataka
-          text: Zahtevi se čuvaju u zaštićenom oblaku Vercel Blob; pristup imaju samo članovi našeg tima. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegram.
+          text: Zahtevi se čuvaju u zaštićenom cloud skladištu Vercel Blob; pristup imaju samo naši članovi tima. Možete zatražiti brisanje vaših podataka u bilo kojem trenutku, pišući nam na Telegram.
         - title: Cookies
-          text: Sajt koristi tehničke kolačiće, bez kojih ne može da funkcioniše, kao i analitičke. U baneru na dnu ekrana možete se odjaviti; izbor se čuva u pregledaču. Yandex.Metrica beleži sesije (kretanje kursora, skrolovanje i klikove). Formular zahteva smo iz te evidencije isključili, njeg sadržaj ne prolazi kroz to. Ako ste došli preko reklame i niste se odjavili od analitike, sajt pamti ovo – izvor i kampanju – 30 dana, tako da možemo videti koja reklama donosi zahteve.
+          text: Sajt koristi tehničke kolačiće bez kojih ne funkcioniše, kao i analitičke. U baneru na dnu ekrana možete se odjaviti; izbor se čuva u pretraživaču. Yandex.Metrica beleži sesije (kretanje kursora, skrolovanje i klikove). Formu zahteva smo isključili iz snimanja, njeni podaci ne ulaze u to. Ako ste došli preko reklame i ne odjavite se od analitike, sajt pamti to (izvor i kampanju) 30 dana, kako bismo videli koja reklama dovodi do zahteva.
       contactTitle: Kontakt
       contactBefore: 'Za pitanja o privatnosti obratite se kroz '
       contactLinkText: Telegram
@@ -258,7 +258,7 @@ translations:
       metaDescription: Vaš zahtev je primljen. Javićemo se uskoro.
       eyebrow: Zahtev poslat
       heading: Uskoro ćemo se javiti
-      body: Primili smo vaš zahtev i javićemo se u roku od 2 sata. Ako je hitno — pišite direktno na Telegram.
+      body: Primili smo vaš zahtev i javićemo se u roku od 2 sata. Ako je hitno, pišite nam direktno na Telegram.
       ctaLabel: Napiši direktno
       waitLabel: Dok čekate
       waitCasesLink: Stvarne transakcije →
@@ -279,14 +279,14 @@ translations:
       contactsText: Međutim, možete nas kontaktirati putem messengera i drugih načina na stranici
       developerCredit: Sajt je projektovan i razvijen u studiju Zikrasoft.
     casesVehicleSourcing:
-      metaTitle: Stvarne transakcije u autopodboru — automobili, cene i rokovi
-      metaDescription: Stvarne transakcije u autopodboru, isporuci, otkupu i provere automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
+      metaTitle: 'Stvarne transakcije po autotrenu: automobili, cene i rokovi'
+      metaDescription: Stvarne transakcije po autotrenu, dostavi, otkupu i provere automobila iz Nemačke, Španije, Srbije i Švajcarske. Automobil, cena i kako je sve prošlo.
     casesVehicleBuyback:
       metaTitle: Stvarne transakcije u otkupu automobila
       metaDescription: 'Stvarne transakcije u otkupu: ruske tablice, istekao uvoz, sporni dokumenti. Automobil, cena i način na koji je vlasnik dobio novac na dan transakcije.'
     casesVehicleInspection:
       metaTitle: 'Stvarne transakcije: provera auta pre kupovine'
-      metaDescription: 'Stvarni izlazi na provere pre kupovine: automobil, njegova cena i rezultat provere. Deo ovih priča završio je kupovinom, deo — odbijanjem.'
+      metaDescription: 'Stvarni izlazi na proveren pre kupovine: automobil, njegova cena i rezultat provere. Deo ovih priča završio je kupovinom, deo odbijanjem.'
     casesVehicleImport:
       metaTitle: 'Stvarne transakcije: auto iz Evrope i Kine po meri'
       metaDescription: 'Stvarne transakcije oko uvoza automobila iz Evrope i Kine: automobil i konačna cena, uključujući logistiku, carine i proveru na licu mesta.'
@@ -295,20 +295,20 @@ translations:
       emptyState: Uskoro će ovde biti prve transakcije.
       tabIntros:
         vehicle-sourcing: Svako vozilo na ovom spisku prošlo je provere pre kupovine. Opcije koje smo odbili tokom procesa ovde nisu navedene.
-        vehicle-buyback: 'Automobili koje je teško prodati na uobičajen način: ruske tablice, istekao uvoz, sporni dokumenti. Vlasnik je dobio novac na dan transakcije, a sve druge obaveze preuzeli smo mi.'
-        vehicle-inspection: Klijent je sam našao auto, mi smo otišli i pogledali. Deo ovih priča završio je kupovinom, deo — odbijanjem, i odbijanje smatramo istim ishodom.
-        vehicle-import: 'Uvoz iz Evrope i Kine po meri: od pretrage u zemlji pošiljatelju do registracije. U konačnu cenu svake transakcije ulazi sve: automobil, logistika, carine i dokumentacija.'
+        vehicle-buyback: 'Automobili koje je teško prodati na uobičajen način: ruske registarske tablice, istegnut uvoz, sporna dokumentacija. Vlasnik je dobio novac na dan transakcije, dok smo se mi bavili svim ostalim problemima vezanim za sudbinu automobila.'
+        vehicle-inspection: Klijent je sam našao automobil, mi smo otišli i proverili. Deo ovih priča završio je kupovinom, deo odbijanjem, a odbijanje smatramo podjednako bitnim ishodom.
+        vehicle-import: 'Uvoz iz Evrope i Kine na ključ: od traženja u zemlji pošiljatelju do registarskih tablica. U konačnu cenu svake transakcije uključeno je sve: automobil, logistika, carine i dokumentacija.'
       closingHeading: Sličan problem?
       closingLine1: Ispričajte nam,
-      closingLine2: šta tražite, —
+      closingLine2: šta tražite,
       closingLine3: pronaći ćemo i za vas
       closingText: Dovoljno je da navedete marku, budžet i nekoliko želja. Odgovaraćemo u roku od dva sata i reći ćemo otvoreno, da li je to moguće za taj novac.
   es:
     contacts:
-      metaTitle: Contactos — selección, importación y recompra de coches
+      metaTitle: 'Contactos: selección de coches, importación y compra'
       metaDescription: 'Contáctanos en Telegram: selección, importación, recompra y verificación de coches. Respondemos en dos horas, 24/7, en ruso e inglés.'
       heroTitle: Contactos
-      heroSubtitle: Trabajamos a través de Telegram, rápido y cómodo
+      heroSubtitle: Trabajamos a través de Telegram, rápido y conveniente
       info:
         - label: Tiempo de respuesta
           value: En un plazo de 2 horas
@@ -327,15 +327,15 @@ translations:
         - n: '02'
           text: Discutimos tu solicitud, aclaramos detalles y criterios
         - n: '03'
-          text: 'Comenzamos el trabajo: encontramos, verificamos, importamos'
+          text: Comenzamos a trabajar, buscamos, revisamos, traemos
     partners:
       eyebrow: Recomendamos
       heading: ¿Qué hacer ahora con el coche?
       intro: Encontramos e importamos tu coche. Para lo que pase después, recomendamos contactar a equipos de confianza.
       linkLabel: Visita el sitio
       requestLabel: Deja tu solicitud aquí
-      carlabDescription: 'Taller en Belgrado: diagnóstico, mantenimiento programado y reparaciones, incluyendo preparación del coche después de la importación.'
-      detailsDescription: 'Estudio de detailing: preparación para la venta, pulido, limpieza química del interior y recubrimientos protectores.'
+      carlabDescription: Servicio de automóviles en Belgrado. Diagnóstico, mantenimiento programado y reparaciones, incluyendo preparación del coche después del traslado.
+      detailsDescription: Estudio de detailing. Preparación para la venta, pulido, limpieza química del interior y recubrimientos protectores.
     privacy:
       metaTitle: Política de privacidad
       metaDescription: 'Política de privacidad y tratamiento de datos personales del sitio {siteName}: qué datos recopilamos, cómo los usamos y cómo solicitar su eliminación.'
@@ -345,11 +345,11 @@ translations:
         - title: Qué datos recopilamos
           text: Al enviar una solicitud, recopilamos tu nombre y datos de contacto (Telegram/teléfono) que introduces en el formulario. También registramos la página desde la que se envió la solicitud.
         - title: Cómo usamos los datos
-          text: 'Los datos de la solicitud se utilizan únicamente para responder a la misma. No compartimos la solicitud con terceros ni la utilizamos para publicidad. Aparte de las solicitudes, utilizamos analítica web: Google y Yandex reciben datos anónimos sobre la visualización de páginas.'
+          text: 'Los datos de la solicitud se utilizan solo para la retroalimentación. No compartimos la solicitud con terceros ni la utilizamos para publicidad. La analítica web opera de forma independiente: Google y Yandex reciben datos anonimizados sobre la visualización de páginas.'
         - title: Almacenamiento de datos
-          text: Las solicitudes se almacenan en un almacenamiento en la nube seguro de Vercel Blob; solo nuestro equipo tiene acceso. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
+          text: Las solicitudes se almacenan en un almacén en la nube protegido Vercel Blob; solo nuestro equipo tiene acceso a ellas. Puede solicitar la eliminación de sus datos en cualquier momento, escribiéndonos por Telegram.
         - title: Cookies
-          text: El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Puedes rechazar en el banner en la parte inferior de la pantalla; tu elección se guarda en el navegador. Yandex.Metrica registra sesiones (movimiento del cursor, desplazamiento y clics). Hemos excluido el formulario de la grabación, su contenido no se incluye. Si llegaste a través de publicidad y no rechazaste la analítica, el sitio recuerda esto, la fuente y la campaña, durante 30 días para que podamos ver qué publicidad genera solicitudes.
+          text: El sitio utiliza cookies técnicas, sin las cuales no funciona, y analíticas. Puede rechazar en el banner en la parte inferior de la pantalla; la selección se guarda en el navegador. Yandex.Metrica registra las sesiones (movimiento del cursor, desplazamiento y clics). Excluimos el formulario de solicitud del registro, su contenido no se guarda allí. Si llegas por publicidad y no rechazas la analítica, el sitio recuerda esto (fuente y campaña) durante 30 días, para que veamos qué publicidad genera solicitudes.
       contactTitle: Contacto
       contactBefore: 'Para cuestiones de privacidad, contáctanos a través de '
       contactLinkText: Telegram
@@ -358,9 +358,9 @@ translations:
       metaDescription: Tu solicitud ha sido recibida. Nos pondremos en contacto contigo en breve.
       eyebrow: Solicitud enviada
       heading: Pronto nos contactaremos
-      body: Hemos recibido tu solicitud y nos pondremos en contacto en un plazo de 2 horas. Si es urgente, escríbenos directamente por Telegram.
+      body: Hemos recibido su solicitud y nos pondremos en contacto en un plazo de 2 horas. Si es urgente, escríbanos directamente por Telegram.
       ctaLabel: Escribir directamente
-      waitLabel: Mientras esperas
+      waitLabel: Mientras espera
       waitCasesLink: Transacciones reales →
       waitSourcingLink: Selección completa →
     about:
@@ -379,14 +379,14 @@ translations:
       contactsText: Los mensajeros y formas de contacto se recopilan en la página
       developerCredit: El sitio fue diseñado y desarrollado en el estudio Zikrasoft.
     casesVehicleSourcing:
-      metaTitle: Transacciones reales de selección de vehículos — coches, precios y plazos
-      metaDescription: Transacciones reales de selección, importación, recompra y verificación de coches de Alemania, España, Serbia y Suiza. Coche, precio y cómo todo ocurrió.
+      metaTitle: 'Transacciones reales de selección de coches: vehículos, precios y plazos'
+      metaDescription: Transacciones reales de selección de coches, entrega, compra e inspección de vehículos de Alemania, España, Serbia y Suiza. Coche, precio y cómo fue todo.
     casesVehicleBuyback:
       metaTitle: Transacciones reales de recompra de coches
       metaDescription: 'Transacciones reales de recompra: matrículas rusas, importación vencida, documentos disputados. Coche, precio y cómo el propietario recibió su dinero el día de la transacción.'
     casesVehicleInspection:
       metaTitle: 'Transacciones reales: verificación de coches antes de la compra'
-      metaDescription: 'Visitas reales para verificación antes de la compra: coche, su precio y resultado de la inspección. Algunas de estas historias terminaron en compra, otras en rechazo.'
+      metaDescription: 'Visitas reales para inspección antes de la compra: coche, su precio y resultado de la inspección. Algunas de estas historias terminaron en compra, otras en rechazo.'
     casesVehicleImport:
       metaTitle: 'Transacciones reales: coches de Europa y China a medida'
       metaDescription: 'Transacciones reales de importación de coches de Europa y China: coche y precio final, incluyendo logística, impuestos y trámites locales.'
@@ -395,20 +395,20 @@ translations:
       emptyState: Las primeras transacciones aparecerán aquí pronto.
       tabIntros:
         vehicle-sourcing: Cada coche en esta lista ha sido inspeccionado antes de la compra. Las opciones que descartamos en el camino no están aquí.
-        vehicle-buyback: 'Coches difíciles de vender de forma convencional: matrículas rusas, importación vencida, documentos disputados. El propietario recibió dinero el día de la transacción, y nosotros nos encargamos de todo lo demás.'
-        vehicle-inspection: El cliente encontró el coche por su cuenta, nosotros fuimos y lo inspeccionamos. Algunas de estas historias terminaron en compra, otras en rechazo, y consideramos el rechazo también como un resultado.
-        vehicle-import: 'Importación de Europa y China a medida: desde la búsqueda en el país de origen hasta la matriculación. El precio total de cada transacción incluye todo: coche, logística, impuestos y trámites.'
+        vehicle-buyback: 'Coches que son difíciles de vender de manera convencional: matrículas rusas, importación caducada, documentos disputados. El propietario recibió el dinero el día de la transacción, y nosotros nos hicimos cargo de todos los aspectos relacionados con el futuro del coche.'
+        vehicle-inspection: El cliente encontró el coche por sí mismo, nosotros fuimos a verlo. Algunas de estas historias terminaron en compra, otras en rechazo, y consideramos el rechazo como un resultado igual.
+        vehicle-import: 'Importación desde Europa y China llave en mano: desde la búsqueda en el país de origen hasta la matrícula. El precio total de cada transacción incluye todo: coche, logística, aranceles y documentación.'
       closingHeading: ¿Tienes una tarea similar?
       closingLine1: Cuéntanos,
-      closingLine2: qué buscas, —
-      closingLine3: te ayudaremos también
+      closingLine2: lo que busca,
+      closingLine3: lo encontraremos para usted
       closingText: Solo necesitamos la marca, el presupuesto y un par de deseos adicionales. Respondemos en dos horas y te decimos honestamente si es viable por ese precio.
   de:
     contacts:
-      metaTitle: Kontakte — Auto-Sourcing, Import und Ankauf
+      metaTitle: 'Kontakt: Autoplenung, Lieferung und Rückkauf von Autos'
       metaDescription: 'Kontaktieren Sie uns über Telegram: Auto-Sourcing, Import, Ankauf und Überprüfung. Wir antworten innerhalb von zwei Stunden, rund um die Uhr, auf Russisch und Englisch.'
       heroTitle: Kontakte
-      heroSubtitle: Wir arbeiten über Telegram — schnell und bequem
+      heroSubtitle: Wir arbeiten über Telegram, schnell und bequem
       info:
         - label: Antwortzeit
           value: Innerhalb von 2 Stunden
@@ -427,15 +427,15 @@ translations:
         - n: '02'
           text: Wir besprechen Ihre Anfrage, klären Details und Kriterien
         - n: '03'
-          text: Wir beginnen zu arbeiten — finden, überprüfen und importieren
+          text: Wir beginnen die Arbeit, finden, prüfen, bringen
     partners:
       eyebrow: Empfehlung
       heading: Was als nächstes mit dem Auto passiert
       intro: Wir finden und importieren das Fahrzeug. Für den weiteren Verlauf empfehlen wir bewährte Teams.
       linkLabel: Zur Webseite wechseln
       requestLabel: Hier Anfrage stellen
-      carlabDescription: Autowerkstatt in Belgrad — Diagnosen, geplante Wartung und Reparaturen, einschließlich der Vorbereitung des Fahrzeugs nach dem Import.
-      detailsDescription: Detailing-Studio — Verkaufsaufbereitung, Politur, Innenreinigung und Schutzbeschichtungen.
+      carlabDescription: Autowerkstatt in Belgrad. Diagnose, planmäßige Wartung und Reparatur, einschließlich Vorbereitung des Fahrzeugs nach der Überführung.
+      detailsDescription: Detailing-Studio. Verkaufsfördernde Vorbereitung, Politur, Innenreinigung und Schutzbeschichtungen.
     privacy:
       metaTitle: Datenschutzrichtlinie
       metaDescription: 'Datenschutzrichtlinie und Verarbeitung der personenbezogenen Daten der Website {siteName}: welche Daten wir sammeln, wie wir sie nutzen und wie Sie deren Löschung anfordern können.'
@@ -445,11 +445,11 @@ translations:
         - title: Welche Daten wir sammeln
           text: Bei der Anfrage sammeln wir den Namen und die Kontaktdaten (Telegram/Telefon), die Sie in das Formular eingeben. Wir protokollieren auch die Seite, von der die Anfrage gesendet wurde.
         - title: Wie wir die Daten verwenden
-          text: Die Daten aus der Anfrage werden nur für die Rückmeldung dazu verwendet. Wir geben die Anfrage nicht an Dritte weiter und nutzen sie nicht für Werbung. Unabhängig von den Anfragen läuft die Webanalyse — Google und Yandex erhalten anonymisierte Daten über die Seitenaufrufe.
+          text: 'Die Daten aus der Anfrage werden nur für die Rückmeldung dazu verwendet. Wir geben die Anfrage nicht an Dritte weiter und nutzen sie nicht für Werbung. Unabhängig von den Anfragen arbeitet die Web-Analyse: Google und Yandex erhalten anonymisierte Daten über Seitenaufrufe.'
         - title: Datenspeicherung
-          text: Anfragen werden in einem geschützten Cloud-Speicher Vercel Blob aufbewahrt; auf sie hat nur unser Team Zugriff. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram kontaktieren.
+          text: Anfragen werden in einem geschützten Cloud-Speicher, Vercel Blob, gespeichert; nur unser Team hat Zugang dazu. Sie können jederzeit die Löschung Ihrer Daten anfordern, indem Sie uns über Telegram schreiben.
         - title: Cookies
-          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische Cookies. Im Banner am unteren Bildschirmrand kann man ablehnen; die Auswahl wird im Browser gespeichert. Yandex.Metrica zeichnet die Sitzungen auf (Mausbewegungen, Scrollen und Klicks). Das Anfrageformular haben wir von der Aufzeichnung ausgeschlossen, dessen Inhalt wird dort nicht erfasst. Wenn Sie über Werbung gekommen sind und nicht von der Analyse abgelehnt haben, merkt sich die Website dies — die Quelle und die Kampagne — für 30 Tage, damit wir sehen, welche Werbung Anfragen generiert.
+          text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie analytische. Im Banner unten auf dem Bildschirm können Sie ablehnen; die Auswahl wird im Browser gespeichert. Yandex.Metrica zeichnet Sitzungen auf (Mausbewegungen, Scrollen und Klicks). Das Formular für die Anfrage haben wir aus der Aufzeichnung ausgeschlossen, dessen Inhalt wird dort nicht erfasst. Wenn Sie über Werbung gekommen sind und nicht von der Analyse abgelehnt haben, merkt sich die Website dies (Quelle und Kampagne) für 30 Tage, damit wir sehen, welche Werbung Anfragen bringt.
       contactTitle: Kontakt
       contactBefore: 'Bei Fragen zur Privatsphäre kontaktieren Sie uns über '
       contactLinkText: Telegram
@@ -458,7 +458,7 @@ translations:
       metaDescription: Ihre Anfrage wurde angenommen. Wir werden uns bald bei Ihnen melden.
       eyebrow: Anfrage gesendet
       heading: Wir melden uns bald
-      body: Wir haben Ihre Anfrage erhalten und werden uns innerhalb von 2 Stunden melden. Bei dringenden Anliegen — schreiben Sie uns direkt über Telegram.
+      body: Wir haben Ihre Anfrage erhalten und melden uns innerhalb von 2 Stunden. Wenn es dringend ist, schreiben Sie direkt über Telegram.
       ctaLabel: Direkt schreiben
       waitLabel: Während Sie warten
       waitCasesLink: Reale Transaktionen →
@@ -479,14 +479,14 @@ translations:
       contactsText: Messengerdienste und Kontaktmöglichkeiten sind auf der Seite gesammelt.
       developerCredit: Die Website wurde von der Agentur Zikrasoft entworfen und entwickelt.
     casesVehicleSourcing:
-      metaTitle: Reale Transaktionen im Auto-Sourcing — Fahrzeuge, Preise und Fristen
-      metaDescription: Reale Transaktionen im Auto-Sourcing, Import, Ankauf und Prüfung von Fahrzeugen aus Deutschland, Spanien, Serbien und der Schweiz. Fahrzeug, Preis und wie alles ablief.
+      metaTitle: 'Echte Deals im Autoplenung: Autos, Preise und Zeiten'
+      metaDescription: Echte Deals in der Autoplenung, Lieferung, Rückkauf und Inspektion von Autos aus Deutschland, Spanien, Serbien und der Schweiz. Auto, Preis und wie es gelaufen ist.
     casesVehicleBuyback:
       metaTitle: Reale Transaktionen beim Fahrzeugankauf
       metaDescription: 'Reale Transaktionen beim Ankauf: russische Nummernschilder, abgelaufene Einfuhr, strittige Dokumente. Fahrzeug, Preis und wie der Eigentümer am Tag der Transaktion Geld erhielt.'
     casesVehicleInspection:
       metaTitle: 'Reale Transaktionen: Fahrzeugüberprüfung vor dem Kauf'
-      metaDescription: 'Echte Fahrten zur Überprüfung vor dem Kauf: Fahrzeug, Preis und das Ergebnis der Inspektion. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung.'
+      metaDescription: 'Echte Einsätze zur Überprüfung vor dem Kauf: Auto, Preis und Ergebnis der Inspektion. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung.'
     casesVehicleImport:
       metaTitle: 'Reale Transaktionen: Autos aus Europa und China schlüsselfertig'
       metaDescription: 'Reale Transaktionen beim Import von Autos aus Europa und China: Fahrzeug und Endpreis, der Logistik, Zölle und vor Ort anfallende Kosten umfasst.'
@@ -495,12 +495,12 @@ translations:
       emptyState: Bald erscheinen hier die ersten Transaktionen.
       tabIntros:
         vehicle-sourcing: Jedes Auto in dieser Liste wurde vor dem Kauf überprüft. Varianten, die wir auf dem Weg ausgesondert haben, sind hier nicht aufgeführt.
-        vehicle-buyback: 'Autos, die sich schwer auf herkömmlichem Weg verkaufen lassen: russische Nummernschilder, abgelaufene Einfuhr, strittige Dokumente. Der Eigentümer erhielt am Tag der Transaktion Geld, und wir kümmerten uns um alle Angelegenheiten zur weiteren Zukunft des Fahrzeugs.'
-        vehicle-inspection: Der Kunde hat das Auto selbst gefunden, wir sind hingefahren und haben es überprüft. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung, und wir betrachten eine Ablehnung ebenso als Ergebnis.
-        vehicle-import: 'Import aus Europa und China schlüsselfertig: von der Suche im Absenderland bis zu den Nummernschildern. Zum endgültigen Preis jeder Transaktion gehört alles: Fahrzeug, Logistik, Zölle und Formalitäten.'
+        vehicle-buyback: 'Autos, die sich nur schwer auf herkömmlichem Wege verkaufen lassen: russische Nummern, abgelaufene Einfuhr, strittige Dokumente. Der Eigentümer erhielt am Tag des Deals Geld, und wir haben uns um alle weiteren Angelegenheiten des Fahrzeugs gekümmert.'
+        vehicle-inspection: Der Kunde hat das Auto selbst gefunden, wir sind hingefahren und haben es angesehen. Einige dieser Geschichten endeten mit einem Kauf, andere mit einer Ablehnung, und wir betrachten Ablehnungen als ebenso wichtiges Ergebnis.
+        vehicle-import: 'Import aus Europa und China schlüsselfertig: vom Suchen im Herkunftsland bis hin zu den Nummernschildern. Im Endpreis jedes Deals sind alle Kosten enthalten: Auto, Logistik, Zölle und Formalitäten.'
       closingHeading: Ähnliches Anliegen?
       closingLine1: Erzählen Sie uns,
-      closingLine2: was Sie suchen —
-      closingLine3: wir finden auch für Sie
+      closingLine2: was Sie suchen,
+      closingLine3: finden wir auch für Sie
       closingText: Es reicht, wenn Sie Marke, Budget und ein paar zusätzliche Wünsche angeben. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob das für diesen Preis realistisch ist.
-translatedFrom: b3c7ab6e93f49c78
+translatedFrom: 88ee4576411331c6

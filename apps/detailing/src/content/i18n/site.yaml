@@ -106,7 +106,7 @@ translations:
       languageLabel: Jezik
       cta: Zakazati
     footer:
-      tagline: Studija detailing-a u Beogradu. Film, poliranje, keramika, koža.
+      tagline: Studio detaljiranja u Beogradu. Folija, poliranje, keramika, koža.
       navHeading: Sekcije
       contactHeading: Kontakt
       hoursHeading: Radno vreme
@@ -132,13 +132,14 @@ translations:
       scrollHint: Pomerite se nadole
       fromPrice: od
       perCar: po automobilu
-      emptyWorks: Ubrzo će ovde biti radova. Dok čekate, javite nam se - ispričaćemo i pokazati uživo.
+      emptyWorks: Uskoro će ovde biti radova. Za sada nam napišite, ispričaćemo i pokazati uživo.
     channels:
       call: Pozvati
       whatsapp: Pisatite na WhatsApp
       viber: Pisatite na Viber
       telegram: Pisatite na Telegram
       instagram: Instagram
+      social: Pratite nas na društvenim mrežama
     telegramChoice:
       heading: Kako je lakše pisati?
       bot: Preko bota
@@ -147,8 +148,8 @@ translations:
       managerHint: Lični chat s menadžerom na Telegramu
     form:
       heading: Zakazivanje konsultacije
-      subheading: Pogledaćemo automobil, iskreno reći šta mu stvarno treba i navesti tačnu cenu.
-      nameLabel: Kako se zovete
+      subheading: Pogledaćemo auto, iskreno reći šta mu zaista treba, i dati tačnu cenu.
+      nameLabel: Kako se zovete (nije obavezno)
       namePlaceholder: Ime
       contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Poziv
@@ -157,7 +158,7 @@ translations:
       contactPlaceholder: 60 123 4567
       telegramPlaceholder: '@username ili telefon'
       commentLabel: Komentar
-      commentPlaceholder: Marka, model, godina – i šta želite da uradite
+      commentPlaceholder: Marka, model, godina i šta želite da uradite
       submit: Pošalji zahtev
       submitting: Šaljemo...
       privacyNote: Prihvatam
@@ -165,7 +166,7 @@ translations:
       errorTelegram: Unesite @username na Telegram-u ili broj telefona
       errorPhone: Unesite ispravan broj telefona
       errorConsent: Ozmarkite saglasnost da biste poslali zahtev
-      errorSubmit: Zahtev nije poslat. Proverite vezu i probajte ponovo
+      errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
       modalTitle: Ostavite zahtev
     cookie:
       notice: Koristimo kolačiće.
@@ -193,7 +194,7 @@ translations:
       languageLabel: Language
       cta: Book Now
     footer:
-      tagline: Detailing Studio in Belgrade. Film, polishing, ceramic, leather.
+      tagline: Premium detailing studio in Belgrade. Film, polishing, ceramic coating, leather.
       navHeading: Sections
       contactHeading: Contact Us
       hoursHeading: Working Hours
@@ -219,13 +220,14 @@ translations:
       scrollHint: Scroll Down
       fromPrice: from
       perCar: per car
-      emptyWorks: Works will appear here soon. For now, contact us - we’ll tell and show you in person.
+      emptyWorks: Work will be here soon. In the meantime, reach out to us and we'll share and show you in person.
     channels:
       call: Call
       whatsapp: Message on WhatsApp
       viber: Message on Viber
       telegram: Message on Telegram
       instagram: Instagram
+      social: Follow us on social media
     telegramChoice:
       heading: How would you prefer to reach out?
       bot: Via the bot
@@ -234,8 +236,8 @@ translations:
       managerHint: Personal chat with the manager on Telegram
     form:
       heading: Book a Consultation
-      subheading: We'll check your car, give honest feedback on its needs, and provide an exact price.
-      nameLabel: What’s your name
+      subheading: We'll inspect your car, honestly tell you what it needs, and provide an exact quote.
+      nameLabel: What is your name (optional)
       namePlaceholder: Name
       contactChannelLabel: How to Contact You
       channelPhone: Call
@@ -244,7 +246,7 @@ translations:
       contactPlaceholder: 60 123 4567
       telegramPlaceholder: '@username or phone number'
       commentLabel: Comment
-      commentPlaceholder: Brand, model, year - and what you want to do
+      commentPlaceholder: Make, model, year and your desired service
       submit: Submit Request
       submitting: Sending...
       privacyNote: I accept
@@ -252,7 +254,7 @@ translations:
       errorTelegram: Please provide @username in Telegram or a phone number
       errorPhone: Enter a valid phone number
       errorConsent: Check consent to submit your request
-      errorSubmit: Request did not go through. Check connection and try again
+      errorSubmit: Submission failed. Please check your connection and try again.
       modalTitle: Leave a Request
     cookie:
       notice: We use cookies.
@@ -261,4 +263,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie Settings
-translatedFrom: cb78964604e64ea0
+translatedFrom: e79491ba29072887

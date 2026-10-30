@@ -14,38 +14,38 @@ translations:
   en:
     title: Oil Change for DSG DQ381 on Skoda Octavia
     body: |-
-      Changing oil in the **DSG DQ381** is an important part of transmission maintenance that should not be overlooked.
+      Changing the oil in a **DSG DQ381** is an essential part of maintaining the transmission that should not be overlooked.
 
-      This time we performed a scheduled oil change: the client chose **MEYLE** oil, we filled it up and completed the rest of the necessary service.
+      This time we performed a scheduled oil change: the client chose **MEYLE** oil, which we poured in, and we completed the rest of the necessary maintenance.
 
-      The DQ381 is a modern seven-speed DSG automatic transmission with wet clutches, used in many Volkswagen, Audi, Škoda, and SEAT models. When maintained on time, this transmission lasts long and without serious issues.
+      The DQ381 is a modern seven-speed DSG transmission with wet clutches, used in many Volkswagen, Audi, Škoda, and SEAT models. When serviced on time, this type of transmission can last a long time without serious issues.
 
-      The same goes for other common DSG models, the DQ250 and DQ200. While they differ in design and specifications, the condition of the oil and timely maintenance directly influence the longevity of the transmission, the function of the mechatronics, and the clutches.
+      The same story applies to other common DSG models, such as the DQ250 and DQ200. While their designs and specifications may differ, the condition of the oil and timely maintenance are crucial for the longevity of the transmission, the functioning of the mechatronics, and the clutches.
 
-      We recommend considering not only the formal maintenance schedule but also the actual operating conditions. If the maintenance history is unknown, it is definitely not advisable to run the oil for 100,000–150,000 kilometers. At **100,000 km**, it makes sense to at least check when and how the transmission was serviced, and for both the DQ381 and DQ250, the oil usually should be changed much sooner.
+      We recommend not only following the formal maintenance schedule but also considering the actual driving conditions. If the service history is unknown, it is definitely not advisable to run one type of oil for 100,000 to 150,000 kilometers. After every **100,000 km**, it's worthwhile to at least check when and how the transmission was serviced, and for the DQ381 and DQ250, the oil typically should be changed much sooner.
 
-      Fresh, high-quality oil maintains its essential properties under various temperatures and loads, lubricates, and dissipates heat. This helps to avoid costly repairs in the long run.
+      Fresh, high-quality oil maintains its necessary properties under various temperatures and loads, lubricates, and dissipates heat. This helps in postponing costly repairs.
 
-      If you purchased a used car and are unsure when the DSG DQ381, DQ250, or DQ200 was last serviced, check the condition of the transmission and its service history in advance.
+      Have you purchased a used vehicle and are unsure when the DSG DQ381, DQ250, or DQ200 was last serviced? Check the state of the transmission and its history in advance.
     car: Skoda Octavia
   sr:
     title: Zamena ulja u DSG DQ381 na Skoda Octavia
     body: |-
-      Zamena ulja u **DSG DQ381** je deo servisa menjača koji nikako ne bi trebalo zanemariti.
+      Zamena ulja u **DSG DQ381** je deo održavanja menjača koji ne treba zanemariti.
 
-      Ovaj put smo radili redovnu zamenu: klijent je izabrao ulje **MEYLE**, sipali smo ga i izvršili ostale potrebne servise.
+      Ovog puta smo obavili redovnu zamenu: klijent je odabrao ulje **MEYLE**, sipali smo ga i izvršili ostalo potrebno održavanje.
 
-      DQ381 je moderni sedmostepeni DSG menjač sa mokrim kuplungom, koji se koristi u mnogim Volkswagen, Audi, Škoda i SEAT modelima. Ako se redovno servisira, ovaj menjač traje dugo i bez ozbiljnih problema.
+      DQ381 je savremeni sedmostepeni robotizovani menjač DSG sa mokrim spojkama, koji se koristi u mnogim Volkswagen, Audi, Škoda i SEAT vozilima. Ako se redovno održava, takav menjač traje dugo i bez ozbiljnih problema.
 
-      Sa drugim popularnim DSG menjačima, DQ250 i DQ200, situacija je slična. Iako imaju različitu konstrukciju i propise, stanje ulja i pravovremeni servis direktno utiču na životni vek menjača, rad mehatronike i kuplunga.
+      Sa drugim uobičajenim DSG menjačima, DQ250 i DQ200, situacija je ista. Njihova konstrukcija i propisi se razlikuju, ali stanje ulja i pravovremeno održavanje direktno utiču na životni vek menjača, rad mehatronike i spojki.
 
-      Preporučujemo da se orijentišete ne samo na formalne servise, već i na stvarne uslove korišćenja. Ako ne znate istoriju servisa vozila, ne bi trebalo voziti na istom ulju 100–150 hiljada kilometara. Svakih **100 000 km** ima smisla proveriti kada i kako je menjač servisiran, a za DQ381 i DQ250 ulje obično treba menjati znatno ranije.
+      Preporučujemo da se ne oslanjate samo na formalne propise, već i na stvarne uslove eksploatacije. Ako ne znate istoriju održavanja, sigurno nije pametno voziti na istom ulju 100-150 hiljada kilometara. Svakih **100 000 km** ima smisla proveriti kada i kako je menjač servisiran, a za DQ381 i DQ250 ulje obično treba menjati znatno ranije.
 
-      Sveže, kvalitetno ulje održava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Na taj način se skupi popravak odlaže.
+      Sveže, kvalitetno ulje održava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Zbog toga se skupi popravak odlaže.
 
-      Kupili ste polovni automobil i ne znate kada je poslednji put servisiran DSG DQ381, DQ250 ili DQ200 — proverite stanje menjača i njegovu istoriju unapred.
+      Kupili ste polovno vozilo i ne znate kada je poslednji put servisiran DSG DQ381, DQ250 ili DQ200? Proverite stanje menjača i njegovu istoriju unapred.
     car: Skoda Octavia
-translatedFrom: b0a31e4f03573dff
+translatedFrom: 7043d2285d2eddaf
 ---
 
 Замена масла в **DSG DQ381** это та часть обслуживания коробки, которой лучше не пренебрегать.

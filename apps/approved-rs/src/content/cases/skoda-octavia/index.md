@@ -4,51 +4,51 @@ translations:
   en:
     title: Skoda Octavia
     body: |-
-      Roman reached out to us for help in finding a car in Serbia. He previously lived in Bishkek, and now that his family is growing, he needs a spacious, reliable, and practical vehicle.
+      Roman reached out to us for assistance in finding a car in Serbia. He used to live in Bishkek, and now with his family expanding, he needed a spacious, reliable, and practical vehicle.
 
-      We decided to focus on the **Škoda Octavia** as the main option.
+      We decided on the **Škoda Octavia** as the primary option.
 
-      We examined three cars and eventually found a truly excellent model: **2.0 TDI, wet DSG DQ381 transmission with around 150,000 km** on the clock.
+      We inspected three cars and ultimately found a truly outstanding example: **2.0 TDI, wet DSG DQ381, and mileage of around 150,000 km**.
 
-      The car's configuration is quite basic, but its technical condition is practically perfect. After choosing the vehicle, we took it to a lift for a thorough inspection. We checked the undercarriage, suspension, shock absorbers, and essential components underneath — everything is in excellent shape, with no unpleasant surprises.
+      The car's trim is quite basic, but its technical condition is nearly perfect. After selecting the vehicle, we put it on a lift for further inspection. We checked the undercarriage, suspension, shock absorbers, and key components underneath: everything was in excellent condition, with no unpleasant surprises.
 
-      In the end, Roman got exactly the car he was looking for: without overpaying for an extensive package, but with outstanding technical condition and a good reserve of resources.
+      As a result, Roman got exactly the car he was looking for: without overpaying for extra features, but with excellent technical condition and a good reserve of resources.
   sr:
     title: Škoda Octavia
     body: |-
-      Roman se obratio nama za pomoć u odabiru automobila u Srbiji. Ranije je živeo u Biškeku, a sada planira širenje porodice, tako da se pojavila potreba da pronađe prostran, pouzdan i praktičan automobil.
+      Roman se obratio nama za pomoć u pronalaženju automobila u Srbiji. Pre je živeo u Biškeku, a sada planira proširenje porodice, pa je bilo potrebno pronaći prostran, pouzdan i praktičan automobil.
 
       Kao glavni izbor odabrali smo **Škoda Octavia**.
 
-      Pogledali smo tri automobila i na kraju našli zaista sjajan primerak: **2.0 TDI, mokri robot DSG DQ381 i prešao oko 150 000 km**.
+      Pogledali smo tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI, mokri robot DSG DQ381 i prešao oko 150 000 km**.
 
-      Oprema automobila je prilično skromna, ali je tehničko stanje - gotovo savršeno. Nakon što smo izabrali automobil, dodatno smo ga odvezli na dizalicu. Obavili smo provere: ispod vozila, suspensions, amortizere i osnovne elemente - sve je u odličnom stanju, bez neprijatnih iznenađenja.
+      Opremanje automobila je dovoljno jednostavno, ali je tehničko stanje gotovo savršeno. Nakon što smo izabrali automobil, dodatno smo ga poslali na dijagnostiku. Uradili smo proveru auta pre kupovine, proverili donji deo, suspenziju, amortizere i osnovne elemente ispod: sve je u odličnom stanju, bez neprijatnih iznenađenja.
 
-      Na kraju je Roman dobio upravo onakav automobil kakav je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim rezervama.
+      Na kraju, Roman je dobio upravo onaj automobil koji je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim zalihama.
   es:
     title: Škoda Octavia
     body: |-
-      Román se puso en contacto con nosotros para que le ayudáramos a encontrar un automóvil en Serbia. Anteriormente vivía en Bishkek y ahora está planeando expandir su familia, por lo que necesita un vehículo espacioso, confiable y práctico.
+      Román se puso en contacto con nosotros para ayudarle a encontrar un coche en Serbia. Anteriormente vivía en Bishkek, y ahora que está por expandir su familia, necesita un vehículo espacioso, fiable y práctico.
 
-      Elegimos como opción principal el **Škoda Octavia**.
+      El principal candidato elegido fue el **Škoda Octavia**.
 
-      Inspeccionamos tres automóviles y al final encontramos un ejemplar realmente excelente: **2.0 TDI, caja automática DSG DQ381 y un kilometraje de alrededor de 150 000 km**.
+      Inspeccionamos tres vehículos y al final encontramos una verdadera joya: **2.0 TDI, con transmisión automática DSG DQ381 y un kilometraje de alrededor de 150,000 km**.
 
-      La configuración del vehículo es bastante básica, pero su estado técnico es prácticamente ideal. Después de elegir el automóvil, lo sometimos a una revisión en un elevador. Verificamos el chasis, la suspensión, los amortiguadores y los elementos principales por debajo - todo en excelente estado, sin sorpresas desagradables.
+      La equipación de este coche es bastante sencilla, pero su estado técnico es prácticamente perfecto. Después de elegir el vehículo, lo llevamos a un elevador. Revisamos el chasis, la suspensión, los amortiguadores y los componentes principales por debajo: todo estaba en excelente estado, sin sorpresas desagradables.
 
-      Al final, Román obtuvo exactamente el automóvil que estaba buscando: sin sobreprecio por una configuración lujosa, pero con un estado técnico excepcional y un buen margen de vida útil.
+      Al final, Román recibió exactamente el coche que buscaba: sin sobrecostos por una equipación lujosa, pero con un excelente estado técnico y un buen margen de uso.
   de:
     title: Škoda Octavia
     body: |-
-      Roman wandte sich an uns, um Unterstützung bei der Autosuche in Serbien zu erhalten. Zuvor lebte er in Bischkek, und da er nun ein Familienzuwachs plant, entstand die Notwendigkeit, ein geräumiges, zuverlässiges und praktisches Fahrzeug zu finden.
+      Roman wandte sich an uns, um Hilfe bei der Fahrzeugauswahl in Serbien zu erhalten. Zuvor lebte er in Bischkek, und da seine Familie nun wachsen wird, benötigte er ein geräumiges, zuverlässiges und praktisches Auto.
 
-      Als Hauptoption wählten wir die **Škoda Octavia**.
+      Als Hauptoption haben wir die **Škoda Octavia** gewählt.
 
-      Wir haben drei Fahrzeuge besichtigt und letztendlich ein wirklich herausragendes Exemplar gefunden: **2.0 TDI, DQ381 DSG Automatikgetriebe und eine Laufleistung von etwa 150.000 km**.
+      Wir haben drei Fahrzeuge inspiziert und letztendlich ein wirklich hervorragendes Modell gefunden: **2.0 TDI, feuchter DSG DQ381 und eine Laufleistung von etwa 150 000 km**.
 
-      Die Ausstattung des Fahrzeugs ist recht einfach, jedoch ist der technische Zustand nahezu perfekt. Nach der Fahrzeugauswahl haben wir es zusätzlich auf eine Hebebühne gefahren. Wir haben den Unterboden, die Aufhängung, die Stoßdämpfer und die Hauptkomponenten von unten überprüft – alles in einwandfreiem Zustand, ohne unangenehme Überraschungen.
+      Die Ausstattung des Fahrzeugs ist recht einfach, jedoch ist der technische Zustand nahezu perfekt. Nach der Auswahl des Fahrzeugs haben wir es zusätzlich auf die Hebebühne gefahren. Wir haben den Unterboden, die Aufhängung, die Stoßdämpfer sowie die wesentlichen Elemente unten überprüft: alles in ausgezeichnetem Zustand, ohne unangenehme Überraschungen.
 
-      Am Ende erhielt Roman genau das Fahrzeug, das er suchte: ohne Aufpreis für eine luxuriöse Ausstattung, aber mit ausgezeichnetem technischen Zustand und einem guten Ressourcenvorrat.
+      Letztlich erhielt Roman genau das Fahrzeug, das er suchte: ohne Aufpreis für eine reichhaltige Ausstattung, aber mit einem hervorragenden technischen Zustand und einem guten Restwert.
 car: Skoda Octavia
 year: 2020
 price:
@@ -62,7 +62,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-07-27
 published: true
-translatedFrom: 404c043624bb10ff
+translatedFrom: befaa6dd202ef33c
 ---
 
 Роман обратился к нам за помощью в подборе автомобиля в Сербии. Раньше он жил в Бишкеке, а сейчас у него планируется увеличение семьи, поэтому появилась необходимость подобрать просторный, надежный и практичный автомобиль.

@@ -4,21 +4,21 @@ translations:
   en:
     title: Cooling System and Swirl Flaps for BMW
     body: |-
-      A BMW came into our independent car service in Belgrade for maintenance of the cooling system and engine preventative care.
+      A BMW came into our Russian car service in Belgrade for maintenance of the cooling system and engine preventive care.
 
-      We performed a partial coolant replacement. On **B47** engines, a partial replacement typically requires **5–7 liters**. This time, we used Valvoline's green HT-12 coolant.
+      We performed a partial replacement of the coolant. Typically, a partial change on **B47** engines requires about **5–7 liters**. This time, we used Valvoline's green HT-12.
 
-      We also cleaned the swirl flaps and the intake system. Over time, diesel engines accumulate carbon deposits in the intake and on the flaps, which can hinder engine performance.
+      We also cleaned the swirl flaps and the intake system. Over time, deposits build up on the intake and the flaps in diesel engines, which can hinder engine performance.
     car: BMW
 
   sr:
     title: Hladni sistem i vortex zaklopke za BMW
     body: |-
-      BMW je došao u naš nezavisni auto servis u Beogradu na servisiranje hladnog sistema i preventivnu proveru motora.
+      BMW je stigla u naš auto servis u Beogradu na servis sistema hlađenja i preventivu motora.
 
-      Izvršena je delimična zamena rashladne tečnosti. Na motorima **B47** obično je potrebno **5–7 litara** pri delimičnoj zameni. Ovaj put smo sipali zelenu HT-12 od Valvoline.
+      Urađena je delimična zamena rashladne tečnosti. Na motorima **B47** obično se pri delimičnoj zameni koristi **5–7 litara**. Ovog puta smo sipali zelenu HT-12 od Valvoline.
 
-      Pored toga, očišćene su vortex zaklopke i usisni sistem. Na dizel motorima vremenom se nakuplja čađa u usisnom sistemu i na zaklopkama, što otežava rad motora.
+      Pored toga, očistili smo vortex klapne i usisni sistem. Kod dizel motora, tokom vremena dolazi do taloženja čađi u usisnom sistemu i na klapnama, što otežava rad motora.
     car: BMW
 car: BMW
 year: 2020
@@ -30,7 +30,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-08-12
 published: true
-translatedFrom: 9064e194dfd6398f
+translatedFrom: 9bd2adcb3e202aff
 ---
 
 BMW приехала в наш русский автосервис в Белграде на обслуживание системы охлаждения и профилактику по двигателю.

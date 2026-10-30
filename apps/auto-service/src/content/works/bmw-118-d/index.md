@@ -17,34 +17,34 @@ translations:
   en:
     title: Comprehensive Service for BMW 118d N47 After Purchase
     body: |-
-      A BMW 118d with an N47 diesel engine and a mileage of around **380,000 km** arrived at our car service in Belgrade. The vehicle was brought from Denmark, and the owner recently purchased it, starting off with a complete service and addressing existing issues. This is the right course of action after a purchase.
+      A BMW 118d with a N47 diesel engine and approximately **380,000 km** arrived at our car service in Belgrade. The vehicle was brought in from Denmark; the owner recently purchased it and began with comprehensive servicing and addressing the issues that had already arisen. This is the right course of action after a purchase.
 
-      We began with a full minor service: motor oil and all filters - oil, air, cabin, and fuel. The fuel filter for the N47 is a separate matter; the condition of the fuel system directly affects how smoothly the engine operates and how long its components will last.
+      We started with a complete minor service: engine oil and all filters (oil, air, cabin, and fuel). The fuel filter for the N47 is a separate matter: the condition of the fuel system directly affects how smoothly the engine runs and how long its components will last.
 
-      Next, we focused on the suspension and brakes. We replaced the flexible gaiters, brake discs, and pads. For a used car with high mileage, brakes are checked first, and in this case, the worn components had to be replaced to ensure safe driving.
+      Next up were the suspension and brakes. We replaced the flexible boots, brake discs, and pads. On a used car with high mileage, brakes are checked first, and here the worn components had to be replaced to ensure safe driving.
 
-      We found a leak in the rear differential, replaced the seal, and stopped the loss of lubricant. Vehicles with such mileage require special attention to the differential, seals, and the rest of the transmission.
+      We discovered a leak from the rear differential, replaced the seal, and stopped the loss of lubrication. For vehicles with such mileage, the differential, seals, and the rest of the transmission require special attention.
 
-      At 380,000 km, the list of services cannot be completed in one visit. We will bring the car up to standard gradually: a full diagnostic, setting priorities, then tackling the engine, braking system, suspension, and transmission in turn. This is precisely how we recommend proceeding after purchasing a used car.
+      At 380,000 km, the list of required work cannot be completed in a single visit. We will be bringing the car back to order gradually: a full diagnosis, prioritizing tasks, and then addressing the engine, braking system, suspension, and transmission in that order. This is precisely how we advise proceeding after purchasing a used car.
 
-      Our technicians are well-acquainted with N47 diesels. With proper maintenance, such mileage is not a death sentence for the engine, but it is crucial to address any issues found without delay and adhere to maintenance intervals.
+      Our technicians are familiar with the N47 diesels. With proper maintenance, such mileage is not a death sentence for the engine, but it is vital not to delay addressing identified issues and to avoid skipping service intervals.
     car: BMW 118D
   sr:
     title: Kompleksno održavanje BMW 118d N47 nakon kupovine
     body: |-
-      BMW 118d sa dizel motorom N47 i pređenih oko **380 000 km** stigao je u naš autoservis u Beogradu. Kao što je vlasnik kupio auto u Danskoj, odmah je započeo sa kompletnim servisom i rešavanjem problema koji su se već pojavili. Ovo je pravi redosled akcija nakon kupovine.
+      BMW 118d sa dizel motorom N47 i pređenih oko **380 000 km** stigao je u naš auto servis u Beogradu. Automobil je donet iz Danske, vlasnik ga je nedavno kupio i započeo je sa sveobuhvatnom uslugom i rešavanjem trenutnih problema. Nakon kupovine, ovo je pravi redosled postupaka.
 
-      Započeli smo s celokupnim malim servisom: motorno ulje i svi filteri - filter za ulje, vazduh, kabinu i gorivo. Za N47, filter goriva je posebna priča: stanje gorivne jedinice direktno utiče na to koliko ravno motor radi i koliko će trajati njegovi sastavni delovi.
+      Započeli smo sa kompletnim malim servisom: motorno ulje i svi filteri (uljni, vazdušni, kabinski i gorivni). Za N47, gorivni filter je posebna priča: od stanja gorivne sisteme zavisi koliko glatko motor radi i koliko će trajati njeni komponente.
 
-      Nakon toga, proverili smo ovjes i kočnice. Zamenili smo elastične manžete, kočione diskove i pločice. Na polovnom automobilu sa velikim prevoženim kilometrima, kočnice su na prvom mestu za proverenje, i ovde je bilo potrebno da zamenimo istrošene delove kako bismo omogućili mirnu vožnju.
+      Nakon toga, oslonac i kočnice. Zamenili smo elastične manžete, kočione diskove i pločice. Na polovnom automobilu sa velikim pređenim kilometrima, kočnice se prvo proveravaju, i ovde je bilo potrebno zameniti istrošene kako bi se mogao mirno voziti.
 
-      Otkrili smo curenje na zadnjem diferencialu, zamenili brtvu i zaustavili gubitak podmazivanja. Na automobilima s ovakvim pređenim kilometrima, diferencijal, brtve i ostatak prenosa zahtevaju posebnu pažnju.
+      Pronašli smo curenje na zadnjem diferencijalu, zamenili smo semering i zaustavili gubitak podmazivanja. Automobili sa ovakvim pređenim kilometrima zahtevaju posebnu pažnju na diferencijale, zaptivke i ostalu transmisiju.
 
-      Na 380 000 km, lista radova se ne završava jednim posetom. Auto ćemo postepeno dovoditi u red: potpuna dijagnostika, određivanje prioriteta, zatim redom motor, kočioni sistem, ovjes i prenos. Ovo je postupak koji savetujemo nakon kupovine polovnog automobila.
+      Na 380 000 km, lista radova se ne zatvara jednim posetom. Automobil ćemo postepeno doterivati: potpuno dijagnostikovanje, postavljanje prioriteta, pa redom motor, kočioni sistem, suspenzija i transmisija. Tako savetujemo da se postupa nakon kupovine polovnog automobila.
 
-      Dizeli N47 su našim majstorima dobro poznati. Uz redovno održavanje, ovakva kilometraža za motor nije kraj, ali nije dopušteno odlagati otkrivene probleme i preskočiti intervale.
+      Dizeli N47 su poznati našim majstorima. Uz normalno održavanje, takav pređeni put za motor nije smrtnosna presuda, ali ne sme se odlagati otkriveno i propuštati intervali.
     car: BMW 118D
-translatedFrom: c3fa21c2a0061f31
+translatedFrom: e44c540b7ec1a3dc
 ---
 
 BMW 118d с дизелем N47 и пробегом около **380 000 км** приехала в наш автосервис в Белграде. Машину привезли из Дании, владелец купил ее недавно и начал с комплексного обслуживания и устранения того, что уже вылезло. После покупки это правильный порядок действий.

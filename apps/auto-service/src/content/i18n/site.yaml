@@ -123,7 +123,8 @@ translations:
       priceOnRequest: na zahtev
       allServices: Sve usluge
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova uskoro dolaze. Za sada pozovite - ispričaćemo vam šta smo radili na sličnim vozilima.
+      emptyWorks: Primeri radova će uskoro biti dostupni. Do tada nas pozovite, ispričaćemo vam šta smo radili na sličnim vozilima.
+      socialHeading: Mi smo na društvenim mrežama
     channels:
       call: Pozovite
       whatsapp: WhatsApp
@@ -137,8 +138,8 @@ translations:
       managerHint: Lični chat sa menadžerom na Telegramu
     form:
       heading: Zakažite uslugu
-      subheading: Opišite šta je sa autom. Nazvaćemo vas, razjasnićemo detalje i javiti vreme i cenu.
-      nameLabel: Ime
+      subheading: Opišite problem sa automobilom. Javićemo vam se da razjasnimo detalje i kažemo vreme i cenu.
+      nameLabel: Ime (nije obavezno)
       namePlaceholder: Kako da vas zovem
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
@@ -147,16 +148,16 @@ translations:
       channelPhone: Poziv
       countryLabel: Kod države
       commentLabel: Auto i šta mu je
-      commentPlaceholder: Marka, model, godina - i šta vas muči
+      commentPlaceholder: Marka, model, godina i šta vas muči
       submit: Pošaljite zahtev
       submitting: Šaljemo...
       privacyNote: Slažem se sa
       privacyLinkText: politikom privatnosti
       modalTitle: Zakažite uslugu
-      errorPhone: Proverite broj - izgleda da nije unet potpuno
+      errorPhone: Proverite broj, čini se da nije unet potpuno
       errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorConsent: Bez saglasnosti ne možemo da pošaljemo zahtev
-      errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
+      errorSubmit: Prijava nije poslata. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće.
       more: Više o tome u
@@ -205,7 +206,8 @@ translations:
       priceOnRequest: upon request
       allServices: All services
       allWorks: All work examples
-      emptyWorks: Work examples coming soon. For now, call us to hear what we've done on similar cars.
+      emptyWorks: Examples of our work coming soon. In the meantime, feel free to call us for details on similar vehicles we have serviced.
+      socialHeading: Follow us on social media
     channels:
       call: Call
       whatsapp: WhatsApp
@@ -219,8 +221,8 @@ translations:
       managerHint: Personal chat with the manager on Telegram
     form:
       heading: Book a service
-      subheading: Describe the issue with your car. We'll call you back to clarify details and provide time and price.
-      nameLabel: Name
+      subheading: Tell us about your car. We will call you back to confirm details, pricing, and timing.
+      nameLabel: Name (optional)
       namePlaceholder: How should we address you
       contactLabel: Phone
       contactPlaceholder: +381 11 000 0000
@@ -229,16 +231,16 @@ translations:
       channelPhone: Call
       countryLabel: Country code
       commentLabel: Car and the issue
-      commentPlaceholder: Make, model, year — and what's bothering you
+      commentPlaceholder: Make, model, year, and the issue you are experiencing
       submit: Submit request
       submitting: Submitting…
       privacyNote: I agree with
       privacyLinkText: the privacy policy
       modalTitle: Book a service
-      errorPhone: Please check the number — it seems incomplete
+      errorPhone: Please check the number, it seems it's incomplete
       errorTelegram: Please provide @username in Telegram or a phone number
       errorConsent: Without consent, we cannot submit the request
-      errorSubmit: The request was not sent. Please check your connection and try again
+      errorSubmit: Application not submitted. Please check your connection and try again
     cookie:
       notice: We use cookies.
       more: Learn more in
@@ -246,4 +248,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie settings
-translatedFrom: 1999abed24fe6a47
+translatedFrom: 8520364dd5914647

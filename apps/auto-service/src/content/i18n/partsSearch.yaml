@@ -43,20 +43,20 @@ suggestRetry: Повторить
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: a3fe3b94b9ddbdd2
+translatedFrom: 8ae87bb3ea857f02
 translations:
   sr:
-    searchHeading: Pretraga po broju ili nazivu
-    searchLead: Broj možete unositi sa razmakom, tačkama ili bez njih.
-    label: Broj ili naziv delova
-    placeholder: Broj ili naziv
+    searchHeading: Pronađite delove
+    searchLead: Unesite VIN, broj dela u bilo kojem formatu, naziv ili marku i model automobila.
+    label: VIN, broj, naziv dela ili automobil
+    placeholder: VIN ili broj
     submitLabel: Pronađi
     metaTitle: Pretraga delova u CarLab
-    metaDescription: Pronađite deo po fabričkom broju ili nazivu u CarLab katalogu.
+    metaDescription: Pronađite deo po VIN-u, broju proizvođača, nazivu ili automobilu u katalogu CarLab.
     eyebrow: Katalog delova
     heading: Pretraga delova
     found: 'Pronađeno: {count}'
-    emptyQuery: Unesite broj dela ili njegov naziv, na primer HU 816 x ili filter ulja.
+    emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model, na primer HU 816 x, filter za ulje ili BMW X3.
     noResults: Za pretragu „{q}“ nije pronađeno ništa. Proverite broj ili pošaljite zahtev, menadžer će ručno pronaći deo.
     unavailable: Pretraga trenutno nije dostupna. Pošaljite zahtev, menadžer će ručno pronaći deo.
     filtersHeading: Filteri
@@ -83,18 +83,26 @@ translations:
     formHeading: Zahtev za delove
     notFoundQuestion: Niste našli šta vam treba?
     notFoundLink: Ostavite zahtev, pronaći ćemo
+    carsGroup: Automobili
+    partsGroup: Delovi
+    vinOption: Odaberite delove po VIN-u
+    suggestFailed: Predlozi nisu učitani
+    suggestRetry: Ponovo pokušajte
+    openSearch: Pretraži katalog
+    closeSearch: Zatvori pretragu
+    llmsSearch: 'Jedna pretraga kroz ceo katalog: VIN, broj dela u bilo kojem formatu, naziv, marka, model, kod karoserije ili motora, uključujući zajedno, na primer ‘filter za ulje bmw x3’. Upit se šalje u parametru q: {example}'
   en:
-    searchHeading: Search by part number or name
-    searchLead: You can enter the number with spaces, dots, or without them.
-    label: Part number or name
-    placeholder: Number or name
+    searchHeading: Find a part
+    searchLead: Enter VIN, part number in any format, its name, or car make and model.
+    label: VIN, number, part name, or vehicle
+    placeholder: VIN or number
     submitLabel: Find
     metaTitle: Parts search at CarLab
-    metaDescription: Find a part by part number or name in the CarLab catalog.
+    metaDescription: Find a part by VIN, manufacturer number, name, or vehicle in the CarLab catalog.
     eyebrow: Parts catalog
     heading: Parts search
     found: 'Found: {count}'
-    emptyQuery: Enter the part number or name, for example HU 816 x or oil filter.
+    emptyQuery: Enter VIN, number, or part name, or make and model, for example HU 816 x, oil filter, or BMW X3.
     noResults: No results found for “{q}”. Check the number or submit an inquiry, and our manager will find the part manually.
     unavailable: The search is currently unresponsive. Submit an inquiry, and our manager will find the part manually.
     filtersHeading: Filters
@@ -121,3 +129,11 @@ translations:
     formHeading: Parts inquiry
     notFoundQuestion: Couldn't find what you need?
     notFoundLink: Submit an inquiry, and we will find it for you.
+    carsGroup: Cars
+    partsGroup: Parts
+    vinOption: Find parts by VIN
+    suggestFailed: Suggestions failed to load
+    suggestRetry: Try again
+    openSearch: Search the catalog
+    closeSearch: Close search
+    llmsSearch: "One search across the entire catalog: VIN, part number in any format, name, make, model, body or engine code, including combinations like 'oil filter bmw x3'. The query is sent with the parameter q: {example}"

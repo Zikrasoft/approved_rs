@@ -42,7 +42,7 @@ profile:
 translations:
   sr:
     greeting: Zdravo! Hvala što ste se javili. Vaša prijava je primljena, menadžer će uskoro odgovoriti.
-    lookingFor: Recite nam koja je vaša mašina — marka, model, godina — i šta se desilo ili koje radove treba izvršiti.
+    lookingFor: Recite nam koju imate auto (marka, model, godina) i šta mu se desilo ili koje radove želite.
     phoneAsk: Nemate korisničko ime u Telegramu, tako da menadžer ne može da vam piše. Ostavite broj telefona da možemo da vas kontaktiramo.
     phoneButton: 📱 Podeli broj
     thanks: Hvala! Preneli smo menadžeru, uskoro će vas kontaktirati.
@@ -52,7 +52,7 @@ translations:
       back: « Nazad
     services:
       button: Usluge
-      text: Evo šta radimo u servisu. Izaberite uslugu — prikazaćemo cenu, rokove i šta je uključeno.
+      text: Evo šta radimo u servisu. Izaberite uslugu, i prikazaćemo cenu, rokove i šta je uključeno.
     card:
       request: 📝 Ostavite prijavu
       site: Više na sajtu
@@ -67,7 +67,7 @@ translations:
       chat: Otvorite čat s menadžerom ↗
     partners:
       button: Partneri
-      text: Naši partneri — izaberite kome da pišete.
+      text: Naši partneri. Izaberite kome da se obratite.
     request:
       button: 📝 Ostavite prijavu
       car: Koja je vaša mašina? Napišite marku, model i godinu.
@@ -84,7 +84,7 @@ translations:
       langCommand: Promeni jezik
   en:
     greeting: Hello! Thank you for reaching out. We've received your request, and a manager will respond shortly.
-    lookingFor: Please tell us about your car — make, model, year — and what happened or what services you need.
+    lookingFor: Tell me about your car (make, model, year) and what happened to it or what work you need.
     phoneAsk: We can't find your username (username) on Telegram, so the manager won't be able to message you. Please share your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
     thanks: Thank you! We've passed your information to the manager, and they will contact you soon.
@@ -94,13 +94,13 @@ translations:
       back: « Back
     services:
       button: Services
-      text: Here’s what we do at the service. Choose a service, and we'll show you the price, timeline, and what's included.
+      text: Here's what we do at the shop. Select a service, and we'll show you the price, time, and what's included.
     card:
       request: 📝 Make a request
       site: More details on the website
     contacts:
       button: Contacts
-      text: We're in Belgrade, looking forward to seeing you at the service.
+      text: We're located in Belgrade and look forward to seeing you at the shop.
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
     manager:
       button: 👤 Message the manager
@@ -109,7 +109,7 @@ translations:
       chat: Open chat with the manager ↗
     partners:
       button: Partners
-      text: Our partners — choose who to contact.
+      text: Our partners. Choose who to contact.
     request:
       button: 📝 Make a request
       car: What car do you have? Please provide the make, model, and year.
@@ -124,4 +124,4 @@ translations:
       shortDescription: 'Car service in Belgrade: diagnostics, repairs, maintenance. Manager: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 09fa7161aefbbff8
+translatedFrom: 170cdfa82beb5767

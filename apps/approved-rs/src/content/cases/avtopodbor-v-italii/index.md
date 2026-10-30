@@ -16,208 +16,208 @@ translations:
   en:
     title: Car Sourcing in Italy
     body: |-
-      # Car Sourcing in Italy: How We Found a Mercedes-Benz GLE for Our Client from Rome
+      # Car Sourcing in Italy: How We Searched for a Mercedes-Benz GLE for Our Client from Rome
 
-      Recently, our team was tasked with sourcing a Mercedes-Benz GLE in Italy for our client, Peter, from Rome. Peter had long wanted to purchase a **Mercedes-Benz GLE** – a powerful and spacious SUV. However, finding a truly good vehicle on the used car market in Europe is not as easy as it might seem at first glance.
+      Recently, our team was tasked with sourcing a Mercedes-Benz GLE in Italy for our client Peter from Rome. Peter had long wanted to buy a **Mercedes-Benz GLE** - a powerful and spacious SUV. However, finding a truly good vehicle on the European used car market is not as straightforward as it might seem at first glance.
 
-      We traveled to Turin, where we reviewed several listings for Mercedes-Benz GLEs. Each vehicle underwent a thorough inspection of its technical condition, electronic systems, bodywork, and service history.
+      We traveled to Turin, where we reviewed several listings for the sale of Mercedes-Benz GLEs. Each vehicle underwent a thorough inspection of its technical condition, electronic systems, bodywork, and utilization history.
 
-      ## Mercedes-Benz GLE Inspection in Turin: AdBlue Error Discovered
+      ## Inspection of the Mercedes-Benz GLE in Turin: AdBlue Error Discovered
 
-      One of the cars you see in the pictures initially appeared to be an attractive purchase option. However, during a professional diagnostic check of the Mercedes-Benz GLE, we uncovered a problem with the AdBlue system.
+      One of the cars you see in the photos initially seemed like a sufficiently attractive option for purchase. However, during a professional diagnostics check of the Mercedes-Benz GLE, we uncovered an issue with the AdBlue system.
 
-      **AdBlue system malfunctions are a well-known issue with diesel Mercedes-Benz vehicles.** The reasons can vary: faulty NOx sensors, issues with the AdBlue pump, injectors, heating elements, or other components of the SCR system.
+      **Failures related to the AdBlue system are one of the known issues with diesel Mercedes-Benz vehicles.** The causes can vary: malfunctioning NOx sensors, problems with the AdBlue pump, injectors, heating elements, or other components of the SCR system.
 
-      Such errors cannot be ignored. Depending on the issue, repairs can be costly, and in some cases, the system restricts the engine's ability to restart after a certain mileage.
+      Such errors cannot be ignored. Depending on the issue, repairs may prove costly and, in some cases, the system restricts the engine's ability to restart after a certain mileage.
 
-      That is why we always recommend a full computer diagnostic check of a Mercedes-Benz before purchase, even if the car looks perfect on the outside, has low mileage, and a good specification.
+      This is why we always recommend a full computer diagnostic check of a Mercedes-Benz before purchase, even if the car looks perfect on the outside, has low mileage, and comes with good options.
 
-      After discovering the AdBlue error, we decided not to recommend this Mercedes-Benz GLE to our client and continued the search for a more suitable vehicle.
+      After discovering the AdBlue error, we chose not to recommend this Mercedes-Benz GLE to our client and continued searching for a more suitable vehicle.
 
       ## How We Found a Good Mercedes-Benz GLE for Peter
 
-      We continued our car sourcing efforts in Italy, exploring other listings and checking several vehicles. While price was important, the main criterion remained the technical condition: we wanted to ensure the client received a reliable vehicle without unpleasant surprises after the purchase.
+      We continued our car sourcing efforts in Italy, exploring other offers and checking several vehicles. Price was important, but the main criterion remained the technical condition, ensuring our client received a reliable vehicle without any unpleasant surprises post-purchase.
 
-      As a result, we found a worthy Mercedes-Benz GLE that met both Peter's requirements and its condition. The purchase was successful, and now Peter enjoys driving his car on the roads of Italy.
+      As a result, we found a worthy Mercedes-Benz GLE that met Peter's standards and requirements. The purchase was successful, and now Peter enjoys driving his car on the roads of Italy.
 
       ## What Does Professional Car Sourcing Include?
 
-      When inspecting a vehicle before purchase, we pay attention to all critical details:
+      When inspecting a vehicle before purchase, we pay attention to all important details:
 
       <ul class="icon-check">
-      <li>checking the vehicle's history and reported mileage;</li>
+      <li>checking the vehicle's history and claimed mileage;</li>
       <li>examining the body, paintwork, and looking for signs of accidents;</li>
-      <li>conducting computer diagnostics on the engine, transmission, and electronic systems;</li>
-      <li>evaluating the technical condition of key components and assemblies;</li>
-      <li>analyzing the service history and documentation of the vehicle;</li>
-      <li>identifying hidden faults and potentially expensive repairs;</li>
+      <li>computer diagnostics of the engine, transmission, and electronic systems;</li>
+      <li>checking the technical condition of key components and assemblies;</li>
+      <li>analyzing the service history and vehicle documents;</li>
+      <li>identifying hidden defects and potentially costly repairs;</li>
       <li>assessing the price in relation to the actual condition of the vehicle;</li>
-      <li>providing assistance in negotiations with the seller and supporting the purchase.</li>
+      <li>assisting in negotiations with the seller and supporting the purchase process.</li>
       </ul>
 
-      We work in the buyer's best interest. If the vehicle has serious shortcomings or the purchase involves unreasonable risks, we clearly communicate this to the client and recommend continuing the search.
+      We operate in the interests of the buyer. If a vehicle has serious deficiencies or its purchase involves unjustifiable risks, we directly inform the client and advise them to continue their search.
 
-      ## Why Should You Order Car Sourcing Before Purchasing?
+      ## Why Is It Worth Ordering Car Sourcing Before Purchase?
 
-      Buying a used car in Europe always requires careful consideration. Even an expensive **Mercedes-Benz GLE** with appealing photos and a good description may have hidden technical issues.
+      Buying a used car in Europe always requires careful consideration. Even an expensive **Mercedes-Benz GLE** with attractive photos and a solid description may have hidden technical issues.
 
-      The story of sourcing a car for Peter from Rome clearly illustrates the importance of professional diagnostics: thanks to our checks, we detected the AdBlue malfunction, dismissed a questionable option, and continued our search until we found a suitable vehicle.
+      The story of sourcing a vehicle for Peter from Rome clearly illustrates how vital professional diagnostics are: thanks to our inspection, we identified the AdBlue malfunction, decided against a questionable option, and continued searching until we found a suitable vehicle.
 
-      If you need car sourcing in Italy, Germany, France, Portugal, or another European country, feel free to reach out to us: we'll help you choose a worthy vehicle and avoid costly mistakes.
+      If you need car sourcing in Italy, Germany, France, Portugal, or any other European country, reach out to us: we will help you choose a worthy vehicle and avoid costly mistakes.
   sr:
     title: Autoizbor u Italiji
     body: |-
-      # Autoizbor u Italiji: kako smo tražili Mercedes-Benz GLE za klijenta iz Rima
+      # Autoprodaja u Italiji: kako smo tražili Mercedes-Benz GLE za klijenta iz Rima
 
-      Nedavno je naš tim radio na izboru Mercedes-Benz GLE u Italiji za našeg klijenta Petra iz Rima. Petar je dugo želeo da kupi **Mercedes-Benz GLE** - moćan i prostran SUV. Međutim, pronaći zaista dobar automobil na sekundarnom tržištu Evrope nije tako lako kao što se na prvi pogled može činiti.
+      Nedavno je naš tim radio na pronalaženju Mercedes-Benz GLE u Italiji za našeg klijenta Petra iz Rima. Petar je dugo želeo da kupi **Mercedes-Benz GLE** - moćan i prostran SUV. Međutim, pronalaženje zaista dobrog automobila na sekundarnom tržištu Evrope nije tako jednostavno kako se na prvi pogled čini.
 
-      Otputovali smo u Turin, gde smo razmotrili nekoliko ponuda za prodaju Mercedes-Benz GLE. Svaki automobil je prošao detaljnu proveru tehničkog stanja, elektronskih sistema, karoserije i istorije korišćenja.
+      Otišli smo u Turin, gde smo razmotrili nekoliko ponuda za prodaju Mercedes-Benz GLE. Svaki automobil je prolazio temeljnu provere tehničkog stanja, elektronskih sistema, karoserije i istorije korišćenja.
 
-      ## Provera Mercedes-Benz GLE u Torinu: otkrivena greška AdBlue
+      ## Provera Mercedes-Benz GLE u Turinu: otkrivena greška AdBlue
 
-      Jedan od automobila koji vidite na fotografijama je initialno izgledao kao privlačna opcija za kupovinu. Međutim, tokom profesionalne dijagnostike Mercedes-Benz GLE, otkrili smo problem sa AdBlue sistemom.
+      Jedan od automobila, koji vidite na fotografijama, u početku je izgledao kao dovoljno atraktivan izbor za kupovinu. Međutim, tokom profesionalne dijagnostike Mercedes-Benz GLE otkrili smo problem sa sistemom AdBlue.
 
-      **Kvarovi AdBlue sistema su jedan od poznatih problema dizel automobila Mercedes-Benz.** Razlozi mogu biti različiti: kvarovi NOx senzora, problemi sa AdBlue pumpom, brizgaljkama, grejačima ili drugim komponentama SCR sistema.
+      **Neispravnosti sistema AdBlue su jedna od poznatih problema dizel automobila Mercedes-Benz.** Razlozi mogu biti različiti: neispravnost NOx senzora, problemi sa AdBlue pumpom, brizgaljkama, grejnim elementima ili drugim komponentama SCR sistema.
 
-      Ovakve greške se ne smeju ignorisati. U zavisnosti od kvara, popravka može biti skupa i u nekim slučajevima sistem može ograničiti mogućnost ponovnog pokretanja motora nakon određenog pređenog puta.
+      Slične greške se ne mogu ignorisati. U zavisnosti od neispravnosti, popravka može biti skupa, a u nekim slučajevima sistem ograničava mogućnost ponovnog pokretanja motora nakon određenog pređenog broja kilometara.
 
-      Zbog toga uvek preporučujemo da se uradi kompletna kompjuterska dijagnostika Mercedes-Benz pre kupovine, čak i ako automobil spolja izgleda savršeno, ima mali pređeni put i dobru opremu.
+      Zbog toga uvek preporučujemo da se uradi puna kompjuterska dijagnostika Mercedes-Benz pre kupovine, čak iako automobil spolja izgleda savršeno, ima mali pređeni broj kilometara i dobru opremu.
 
-      Nakon otkrivanja greške AdBlue, odlučili smo da ne preporučimo ovaj Mercedes-Benz GLE našem klijentu i nastavili smo potragu za prikladnijim automobilom.
+      Nakon otkrivanja greške AdBlue, odlučili smo da ne preporučujemo ovaj Mercedes-Benz GLE našem klijentu i nastavili smo potragu za pogodnijim automobilom.
 
       ## Kako smo pronašli dobar Mercedes-Benz GLE za Petra
 
-      Nastavili smo autoizbor u Italiji, proučili druge ponude i pregledali nekoliko automobila. Cena je bila važna, ali glavni kriterijum je bilo tehničko stanje: kako bi klijent dobio ispravan automobil bez neprijatnih iznenađenja nakon kupovine.
+      Nastavili smo autoprodaju u Italiji, proučili druge ponude i proverili nekoliko automobila. Cena je bila važna, ali glavni kriterijum je bilo tehničko stanje: da klijent dobije ispravan automobil bez neprijatnih iznenađenja nakon kupovine.
 
-      U rezultatu smo pronašli dostojan Mercedes-Benz GLE koji je odgovarao Petrovim zahtevima i stanju. Kupovina je uspešno realizovana i sada Petar sa zadovoljstvom vozi svoj automobil po putevima Italije.
+      Kao rezultat, pronašli smo dostojan Mercedes-Benz GLE, koji je odgovarao Petrovim zahtevima i stanju. Kupovina je uspešno realizovana i sada Petar sa zadovoljstvom vozi svoj automobil po putevima Italije.
 
-      ## Šta uključuje profesionalni autoizbor?
+      ## Šta uključuje profesionalna autoprodaja?
 
-      Tokom provere automobila pre kupovine, obraćamo pažnju na sve važne detalje:
+      Tokom provere automobila pre kupovine obraćamo pažnju na sve važne detalje:
 
       <ul class="icon-check">
-      <li>provera istorije automobila i deklarisanog broja pređenih kilometara;</li>
-      <li>pregled karoserije, lakirnih površina i potraga za tragovima saobraćajnih nezgoda;</li>
-      <li>kompjuterska dijagnostika motora, menjača i elektronskih sistema;</li>
+      <li>provera istorije automobila i navedenog broja pređenih kilometara;</li>
+      <li>inspekcija karoserije, farbe i traženje tragova sudara;</li>
+      <li>kompjutorska dijagnostika motora, menjača i elektronskih sistema;</li>
       <li>provera tehničkog stanja glavnih sklopova i komponenti;</li>
-      <li>analiza servisne istorije i dokumentacije automobila;</li>
-      <li>otkrivanje skrivenih kvarova i potencijalno skupih popravki;</li>
-      <li>ocena usklađenosti cene sa stvarnim stanjem automobila;</li>
-      <li>pomoć u pregovorima sa prodavcem i pratnja prilikom kupovine.</li>
+      <li>analiza servisne istorije i dokumenata automobila;</li>
+      <li>otkrivanje skrivenih neispravnosti i potencijalno skupih popravki;</li>
+      <li>procena usklađenosti cene sa stvarnim stanjem automobila;</li>
+      <li>pomoć u pregovorima sa prodavcem i podrška prilikom kupovine.</li>
       </ul>
 
-      Radimo u interesu kupca. Ako automobil ima ozbiljne nedostatke ili je njegova kupovina povezana sa neopravdanim rizicima, direktno izveštavamo klijenta i preporučujemo da nastavi sa potragom.
+      Radimo u interesu kupca. Ako automobil ima ozbiljne nedostatke ili je kupovina povezana sa neopravdanim rizicima, direktno obaveštavamo klijenta i preporučujemo nastavak potrage.
 
-      ## Zašto je dobro naručiti autoizbor pre kupovine?
+      ## Zašto je važno naručiti autoprodaju pre kupovine?
 
-      Kupovina polovnog automobila u Evropi uvek zahteva pažljiv pristup. Čak i skup **Mercedes-Benz GLE** sa privlačnim fotografijama i dobrim opisom može imati skrivene tehničke probleme.
+      Kupovina polovnog automobila u Evropi uvek zahteva pažljiv pristup. Čak i skuplji **Mercedes-Benz GLE** sa atraktivnim fotografijama i dobrim opisom može imati skrivene tehničke probleme.
 
-      Priča o izboru automobila za Petra iz Rima jasno pokazuje koliko je važna profesionalna dijagnostika: zahvaljujući provere, otkrili smo grešku AdBlue, odustali smo od sumnjive opcije i nastavili potragu dok nismo našli odgovarajući automobil.
+      Priča o pronalasku automobila za Petra iz Rima jasno pokazuje koliko je važna profesionalna dijagnostika: zahvaljujući proveri otkrili smo neispravnost AdBlue, odbili sumnjivu opciju i nastavili tražiti dok nismo pronašli odgovarajući automobil.
 
-      Ako vam je potreban autoizbor u Italiji, Nemačkoj, Francuskoj, Portugalu ili drugoj evropskoj zemlji, obratite se: pomoći ćemo u odabiru dostojnog automobila i izbeći skupe greške.
+      Ako vam je potrebna autoprodaja u Italiji, Nemačkoj, Francuskoj, Portugalu ili drugoj evropskoj zemlji, obratite se: pomoći ćemo vam da pronađete dostojan automobil i izbegnete skupe greške.
   es:
     title: Selección de automóviles en Italia
     body: |-
-      # Selección de automóviles en Italia: cómo buscamos un Mercedes-Benz GLE para un cliente en Roma
+      # Búsqueda de coches en Italia: cómo encontramos un Mercedes-Benz GLE para un cliente de Roma
 
-      Recientemente, nuestro equipo se dedicó a encontrar un Mercedes-Benz GLE en Italia para nuestro cliente Pedro, de Roma. Pedro había querido comprar un **Mercedes-Benz GLE** - un SUV poderoso y espacioso - durante mucho tiempo. Pero encontrar un automóvil realmente bueno en el mercado de segunda mano en Europa no es tan sencillo como parece a simple vista.
+      Recientemente, nuestro equipo se encargó de buscar un Mercedes-Benz GLE en Italia para nuestro cliente Pedro de Roma. Pedro había estado deseando comprar un **Mercedes-Benz GLE** - un SUV potente y espacioso. Sin embargo, encontrar un buen coche en el mercado de segunda mano en Europa no es tan sencillo como podría parecer a simple vista.
 
-      Viajamos a Turín, donde examinamos varias ofertas de venta de Mercedes-Benz GLE. Cada automóvil pasaba por una minuciosa revisión del estado técnico, sistemas electrónicos, carrocería e historial de uso.
+      Nos dirigimos a Turín, donde revisamos varias ofertas de venta de Mercedes-Benz GLE. Cada vehículo pasaba por una rigurosa inspección de su estado técnico, sistemas electrónicos, carrocería e historial de uso.
 
-      ## Inspección del Mercedes-Benz GLE en Turín: error de AdBlue detectado
+      ## Inspección del Mercedes-Benz GLE en Turín: se detectó un error en el AdBlue
 
-      Uno de los automóviles que ves en las fotos parecía inicialmente una opción bastante atractiva para la compra. Sin embargo, durante la diagnosis profesional del Mercedes-Benz GLE, detectamos un problema con el sistema de AdBlue.
+      Uno de los coches que ves en las fotografías inicialmente parecía una opción atractiva para la compra. Sin embargo, durante el diagnóstico profesional del Mercedes-Benz GLE, descubrimos un problema con el sistema de AdBlue.
 
-      **Las averías del sistema de AdBlue son uno de los problemas conocidos en los automóviles diésel de Mercedes-Benz.** Las causas pueden ser variadas: fallos en los sensores de NOx, problemas con la bomba de AdBlue, el inyector, los elementos calefactores o otros componentes del sistema SCR.
+      **Las fallas en el sistema de AdBlue son uno de los problemas conocidos en los vehículos diésel de Mercedes-Benz.** Las causas pueden variar: fallos en los sensores de NOx, problemas con la bomba de AdBlue, inyectores, elementos calefactores u otros componentes del sistema SCR.
 
-      No se pueden ignorar estos errores. Dependiendo de la avería, la reparación puede resultar costosa y, en algunos casos, el sistema limita la posibilidad de reiniciar el motor después de cierto kilometraje.
+      Estos errores no se pueden ignorar. Dependiendo de la falla, la reparación puede resultar costosa y, en algunos casos, el sistema limita la posibilidad de reiniciar el motor después de cierto kilometraje.
 
-      Es por eso que siempre recomendamos realizar una diagnosis computarizada completa del Mercedes-Benz antes de la compra, incluso si el automóvil parece estar en perfectas condiciones, con poco kilometraje y un buen equipamiento.
+      Por esta razón, siempre recomendamos realizar un diagnóstico completo por ordenador del Mercedes-Benz antes de la compra, incluso si el coche aparenta estar en perfectas condiciones, tiene bajo kilometraje y buena equipación.
 
-      Después de detectar el error de AdBlue, decidimos no recomendar este Mercedes-Benz GLE a nuestro cliente y continuamos la búsqueda de un automóvil más adecuado.
+      Tras detectar el error en el AdBlue, decidimos no recomendar este Mercedes-Benz GLE a nuestro cliente y continuamos la búsqueda de un vehículo más adecuado.
 
       ## Cómo encontramos un buen Mercedes-Benz GLE para Pedro
 
-      Continuamos la selección de automóviles en Italia, exploramos otras ofertas y verificamos varios vehículos. El precio era importante, pero el principal criterio seguía siendo el estado técnico: asegurarnos de que el cliente recibiera un automóvil en buen estado sin sorpresas desagradables tras la compra.
+      Continuamos la búsqueda de coches en Italia, estudiamos otras ofertas y revisamos varios vehículos. El precio era importante, pero el principal criterio seguía siendo el estado técnico: para que el cliente obtuviera un coche en buen estado, sin sorpresas desagradables tras la compra.
 
-      Como resultado, encontramos un digno Mercedes-Benz GLE que cumplía con las condiciones y requisitos de Pedro. La compra se realizó con éxito y ahora Pedro conduce con gusto su automóvil por las carreteras de Italia.
+      Como resultado, encontramos un digno Mercedes-Benz GLE que cumplía con las expectativas de Pedro en cuanto a estado y requisitos. La compra se realizó con éxito, y ahora Pedro disfruta conduciendo su coche por las carreteras de Italia.
 
-      ## ¿Qué incluye la selección profesional de automóviles?
+      ## ¿Qué incluye una búsqueda profesional de coches?
 
-      Al revisar un automóvil antes de la compra, prestamos atención a todos los detalles importantes:
+      Al revisar un vehículo antes de la compra, ponemos atención a todos los detalles importantes:
 
       <ul class="icon-check">
-      <li>verificación del historial del vehículo y del kilometraje declarado;</li>
+      <li>revisión del historial del coche y del kilometraje declarado;</li>
       <li>inspección de la carrocería, pintura y búsqueda de señales de accidentes;</li>
-      <li>diagnóstico computarizado del motor, transmisión y sistemas electrónicos;</li>
-      <li>revisión del estado técnico de los componentes principales;</li>
-      <li>análisis del historial de servicios y documentación del automóvil;</li>
+      <li>diagnóstico por ordenador del motor, transmisión y sistemas electrónicos;</li>
+      <li>evaluación del estado técnico de los componentes y sistemas principales;</li>
+      <li>análisis del historial de servicio y documentos del coche;</li>
       <li>identificación de fallas ocultas y reparaciones potencialmente costosas;</li>
-      <li>evaluación de la correspondencia del precio con el estado real del vehículo;</li>
-      <li>asistencia en la negociación con el vendedor y acompañamiento en la compra.</li>
+      <li>evaluación del precio en relación con el estado real del vehículo;</li>
+      <li>ayuda en las negociaciones con el vendedor y acompañamiento en la compra.</li>
       </ul>
 
-      Trabajamos en interés del comprador. Si un automóvil presenta fallas graves o su compra implica riesgos injustificados, lo comunicamos directamente al cliente y recomendamos continuar la búsqueda.
+      Trabajamos en interés del comprador. Si un vehículo presenta defectos graves o su compra implica riesgos injustificables, lo comunicamos directamente al cliente y recomendamos continuar la búsqueda.
 
-      ## ¿Por qué es recomendable solicitar una selección de automóviles antes de comprar?
+      ## ¿Por qué deberías encargar una búsqueda de coches antes de comprar?
 
-      La compra de un automóvil usado en Europa siempre requiere un enfoque cuidadoso. Incluso un caro **Mercedes-Benz GLE** con fotos atractivas y una buena descripción puede tener problemas técnicos ocultos.
+      Comprar un coche de segunda mano en Europa siempre requiere un enfoque cuidadoso. Incluso un caro **Mercedes-Benz GLE** con fotos atractivas y buena descripción puede tener problemas técnicos ocultos.
 
-      La experiencia de seleccionar un automóvil para Pedro en Roma demuestra claramente la importancia de un diagnóstico profesional: gracias a la revisión, detectamos la avería de AdBlue, descartamos una opción dudosa y continuamos buscando hasta encontrar el automóvil adecuado.
+      La experiencia de selección de automóvil para Pedro en Roma muestra claramente cuán importante es un diagnóstico profesional: gracias a la inspección, descubrimos la falla en el AdBlue, descartamos una opción dudosa y seguimos buscando hasta que encontramos el vehículo adecuado.
 
-      Si necesitas una selección de automóviles en Italia, Alemania, Francia, Portugal u otro país europeo, no dudes en ponerte en contacto con nosotros: te ayudaremos a elegir un automóvil digno y a evitar errores costosos.
+      Si necesitas una búsqueda de coches en Italia, Alemania, Francia, Portugal u otro país europeo, no dudes en contactarnos: te ayudaremos a elegir un coche digno y evitar errores costosos.
   de:
     title: Fahrzeugauswahl in Italien
     body: |-
-      # Fahrzeugauswahl in Italien: wie wir einen Mercedes-Benz GLE für einen Kunden aus Rom gesucht haben
+      # Fahrzeugauswahl in Italien: Wie wir einen Mercedes-Benz GLE für einen Kunden aus Rom gesucht haben
 
-      Kürzlich hat unser Team in Italien einen Mercedes-Benz GLE für unseren Kunden Peter aus Rom gesucht. Peter wollte schon lange einen **Mercedes-Benz GLE** kaufen - ein kraftvoller und geräumiger SUV. Allerdings ist es nicht so einfach, ein wirklich gutes Fahrzeug auf dem Gebrauchtmarkt in Europa zu finden, wie man auf den ersten Blick denken könnte.
+      Kürzlich war unser Team in Italien auf der Suche nach einem Mercedes-Benz GLE für unseren Kunden Peter aus Rom. Peter hatte schon lange den Wunsch, einen **Mercedes-Benz GLE** zu kaufen - ein kraftvoller und geräumiger SUV. Doch ein wirklich gutes Fahrzeug auf dem Gebrauchtmarkt in Europa zu finden, ist nicht so einfach, wie es auf den ersten Blick scheint.
 
-      Wir reisten nach Turin, wo wir mehrere Angebote für den Verkauf eines Mercedes-Benz GLE betrachteten. Jedes Fahrzeug wurde sorgfältig auf den technischen Zustand, die elektronischen Systeme, die Karosserie und die Nutzungsgeschichte geprüft.
+      Wir reisten nach Turin, wo wir mehrere Verkaufsangebote für den Mercedes-Benz GLE betrachteten. Jedes Fahrzeug durchlief eine gründliche Überprüfung des technischen Zustands, der elektronischen Systeme, der Karosserie und der Nutzungsgeschichte.
 
       ## Überprüfung des Mercedes-Benz GLE in Turin: AdBlue-Fehler entdeckt
 
-      Eines der Fahrzeuge, das Sie auf den Fotos sehen, schien zunächst ein recht attraktives Kaufangebot zu sein. Doch bei der professionellen Diagnose des Mercedes-Benz GLE entdeckten wir ein Problem mit dem AdBlue-System.
+      Eines der Fahrzeuge, das Sie auf den Fotos sehen, schien zunächst eine attraktive Kaufoption zu sein. Während der professionellen Diagnose des Mercedes-Benz GLE entdeckten wir jedoch ein Problem mit dem AdBlue-System.
 
-      **Fehler im AdBlue-System gehören zu den bekannten Problemen von Dieselautos der Marke Mercedes-Benz.** Die Ursachen können vielfältig sein: defekte NOx-Sensoren, Probleme mit der AdBlue-Pumpe, der Einspritzdüse, den Heizelementen oder anderen Komponenten des SCR-Systems.
+      **Fehler im AdBlue-System gehören zu den bekannten Problemen von Diesel-Fahrzeugen der Marke Mercedes-Benz.** Die Ursachen können vielfältig sein: defekte NOx-Sensoren, Probleme mit der AdBlue-Pumpe, den Einspritzdüsen, Heizelementen oder anderen Komponenten des SCR-Systems.
 
-      Solche Fehler dürfen nicht ignoriert werden. Je nach Art des Fehlers kann die Reparatur kostspielig sein, und in einigen Fällen schränkt das System die Möglichkeit ein, den Motor nach einer bestimmten Laufleistung erneut zu starten.
+      Solche Fehler sollten nicht ignoriert werden. Je nach Art des Fehlers können die Reparaturkosten hoch sein, und in einigen Fällen schränkt das System die Möglichkeit ein, den Motor nach einer bestimmten Laufleistung wieder zu starten.
 
-      Deshalb empfehlen wir immer, eine umfassende Computerdiagnose bei Mercedes-Benz vor dem Kauf durchzuführen, auch wenn das Auto äußerlich perfekt aussieht, eine geringe Laufleistung hat und gut ausgestattet ist.
+      Deshalb empfehlen wir immer, vor dem Kauf eine vollständige computergestützte Diagnose des Mercedes-Benz durchzuführen, selbst wenn das Auto äußerlich perfekt aussieht, eine geringe Laufleistung und eine gute Ausstattung hat.
 
-      Nach der Entdeckung des AdBlue-Fehlers entschieden wir uns, diesem Mercedes-Benz GLE unserem Kunden nicht zu empfehlen, und setzten die Suche nach einem passenderen Fahrzeug fort.
+      Nachdem wir den AdBlue-Fehler entdeckt hatten, entschieden wir uns, diesem Mercedes-Benz GLE unserem Kunden nicht zu empfehlen, und setzten die Suche nach einem geeigneteren Fahrzeug fort.
 
       ## Wie wir einen guten Mercedes-Benz GLE für Peter gefunden haben
 
-      Wir setzten die Fahrzeugauswahl in Italien fort, prüften weitere Angebote und kontrollierten mehrere Autos. Der Preis war wichtig, aber das Hauptkriterium blieb der technische Zustand: Unser Ziel war es, dem Kunden ein funktionsfähiges Fahrzeug ohne unangenehme Überraschungen nach dem Kauf zu bieten.
+      Wir setzten die Fahrzeugauswahl in Italien fort, studierten andere Angebote und prüften mehrere Fahrzeuge. Der Preis war wichtig, doch das Hauptkriterium blieb der technische Zustand: der Kunde sollte ein funktionstüchtiges Fahrzeug ohne unangenehme Überraschungen nach dem Kauf erhalten.
 
-      Schließlich fanden wir einen ausgezeichneten Mercedes-Benz GLE, der Peters Anforderungen und dem Zustand entsprach. Der Kauf verlief erfolgreich, und jetzt fährt Peter mit Freude in seinem Auto auf den Straßen Italiens.
+      Schließlich fanden wir einen hervorragenden Mercedes-Benz GLE, der Peters Anforderungen entsprach und in gutem Zustand war. Der Kauf wurde erfolgreich abgeschlossen und jetzt fährt Peter mit Freude mit seinem Auto durch die Straßen Italiens.
 
-      ## Was gehört zu einer professionellen Fahrzeugauswahl?
+      ## Was gehört zur professionellen Fahrzeugauswahl?
 
       Bei der Überprüfung eines Fahrzeugs vor dem Kauf achten wir auf alle wichtigen Details:
 
       <ul class="icon-check">
-      <li>Überprüfung der Fahrzeughistorie und der angegebenen Kilometerleistung;</li>
-      <li>Inspektion der Karosserie, der Lackierung und Suche nach Unfallspuren;</li>
-      <li>Computerdiagnose des Motors, des Getriebes und der elektrischen Systeme;</li>
-      <li>Überprüfung des technischen Zustands der Hauptkomponenten und Aggregate;</li>
+      <li>Überprüfung der Fahrzeughistorie und der angegebenen Laufleistung;</li>
+      <li>Inspektion der Karosserie, der Lackierung und Suche nach UnfallSpuren;</li>
+      <li>computergestützte Diagnose des Motors, des Getriebes und der elektronischen Systeme;</li>
+      <li>Überprüfung des technischen Zustands der Hauptkomponenten und -systeme;</li>
       <li>Analyse der Servicehistorie und der Fahrzeugdokumente;</li>
-      <li>Erkennung versteckter Mängel und potenziell teurer Reparaturen;</li>
-      <li>Bewertung der Preis-Leistungs-Verhältnisses des Fahrzeugs;</li>
-      <li>Hilfe bei den Verhandlungen mit dem Verkäufer und Begleitung des Kaufs.</li>
+      <li>Erkennung versteckter Mängel und potenziell kostspieliger Reparaturen;</li>
+      <li>Bewertung der Preis-Leistungs-Verhältnisse im Hinblick auf den tatsächlichen Zustand des Fahrzeugs;</li>
+      <li>Unterstützung bei den Verhandlungen mit dem Verkäufer und Begleitung des Kaufs.</li>
       </ul>
 
-      Wir arbeiten im Interesse des Käufers. Wenn das Fahrzeug ernsthafte Mängel aufweist oder der Kauf mit unvertretbaren Risiken verbunden ist, informieren wir den Kunden direkt und empfehlen, die Suche fortzusetzen.
+      Wir arbeiten im Interesse des Käufers. Wenn das Fahrzeug ernsthafte Mängel aufweist oder der Kauf mit unangemessenen Risiken verbunden ist, informieren wir den Kunden direkt darüber und empfehlen, die Suche fortzusetzen.
 
-      ## Warum es sinnvoll ist, eine Fahrzeugauswahl vor dem Kauf in Anspruch zu nehmen
+      ## Warum sollte man vor dem Kauf eine Fahrzeugauswahl in Anspruch nehmen?
 
-      Der Kauf eines gebrauchten Fahrzeugs in Europa erfordert stets einen sorgfältigen Ansatz. Selbst ein teurer **Mercedes-Benz GLE** mit ansprechenden Fotos und einer guten Beschreibung kann versteckte technische Probleme haben.
+      Der Kauf eines gebrauchten Fahrzeugs in Europa erfordert immer eine sorgfältige Vorgehensweise. Selbst ein teurer **Mercedes-Benz GLE** mit ansprechenden Fotos und einer guten Beschreibung kann versteckte technische Probleme aufweisen.
 
-      Die Geschichte über die Fahrzeugauswahl für Peter aus Rom zeigt anschaulich, wie wichtig eine professionelle Diagnose ist: Durch die Überprüfung entdeckten wir den AdBlue-Fehler, lehnten eine fragwürdige Option ab und setzten die Suche fort, bis wir das passende Fahrzeug fanden.
+      Die Geschichte der Fahrzeugauswahl für Peter aus Rom zeigt eindrucksvoll, wie wichtig eine professionelle Diagnose ist: Aufgrund der Überprüfung fanden wir den AdBlue-Fehler, lehnten die fragwürdige Option ab und setzten die Suche fort, bis wir ein passendes Fahrzeug fanden.
 
-      Wenn Sie eine Fahrzeugauswahl in Italien, Deutschland, Frankreich, Portugal oder einem anderen europäischen Land benötigen, kontaktieren Sie uns: Wir helfen Ihnen, ein geeignetes Fahrzeug auszuwählen und kostspielige Fehler zu vermeiden.
-translatedFrom: 767c134839c0ae53
+      Wenn Sie eine Fahrzeugauswahl in Italien, Deutschland, Frankreich, Portugal oder einem anderen europäischen Land benötigen, wenden Sie sich an uns: Wir helfen Ihnen, ein geeignetes Fahrzeug auszuwählen und kostspielige Fehler zu vermeiden.
+translatedFrom: 61802cfc118a0ead
 ---
 # Автоподбор в Италии: как мы искали Mercedes-Benz GLE для клиента из Рима
 

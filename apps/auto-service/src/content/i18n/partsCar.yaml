@@ -102,7 +102,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: fadb45b2314d83aa
+translatedFrom: ec4fbbdec529faf0
 translations:
   sr:
     vin:
@@ -180,8 +180,16 @@ translations:
       builtFrom: proizvodnja od {date}
       builtTo: proizvodnja do {date}
       partFitsHeading: Prikladno za automobile
+      modelLink: Sve delove za {model}
     hubs:
       indexHeading: Delovi po marki
+      allMakesLink: Sve marke
+      makes:
+        metaTitle: Sve marke automobila u katalogu delova CarLab
+        metaDescription: 'Marke automobila u katalogu CarLab: odaberite svoju da biste pronašli delove po modelu, sa pretragom po VIN-u i ugradnjom u servisu u Beogradu.'
+        heading: Sve marke
+        lead: Odaberite marku da biste prešli na njene modele i delove.
+        lettersLabel: Marke po prvoj litera
       make:
         metaTitle: '{make}: delovi po modelima u CarLab'
         metaDescription: 'Delovi za {make} po modelima: filteri, kočnice i potrošni materijal sa izborom po VIN-u i postavljanjem u servisu CarLab u Beogradu.'
@@ -277,8 +285,16 @@ translations:
       builtFrom: produced from {date}
       builtTo: produced until {date}
       partFitsHeading: Fits these cars
+      modelLink: All parts for {model}
     hubs:
       indexHeading: Parts by brand
+      allMakesLink: All makes
+      makes:
+        metaTitle: All car makes in CarLab parts catalog
+        metaDescription: 'Car makes in CarLab catalog: select yours to find parts by model, with VIN lookup and installation in our Belgrade service.'
+        heading: All makes
+        lead: Select a make to view its models and parts.
+        lettersLabel: Makes by the first letter
       make:
         metaTitle: '{make}: model parts at CarLab'
         metaDescription: 'Parts for {make} by model: filters, brakes, and consumables with compatibility by VIN and installation at CarLab in Belgrade.'
