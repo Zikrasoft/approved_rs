@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { localizedWork, publishedWorks, type Work } from './works';
+import type { PartPageEntry } from './catalogueSnapshot';
+import {
+  localizedWork,
+  publishedWorks,
+  sourcedParts,
+  sourcingWorks,
+  workLeadService,
+  workPrice,
+  type Work,
+} from './works';
 
 function makeWork(
   overrides: Partial<Work['data']> = {},
@@ -12,6 +21,7 @@ function makeWork(
       title: 'BMW X5 — замена сцепления',
       car: 'BMW X5',
       servicesApplied: [],
+      parts: [],
       gallery: [],
       date: new Date('2026-01-01'),
       published: true,
@@ -113,5 +123,99 @@ describe('publishedWorks', () => {
     const input = [older, newer];
     publishedWorks(input);
     expect(input[0]).toBe(older);
+  });
+});
+
+const partPage = (brand: string, value: string, normalized: string) =>
+  ({
+    slug: `${brand.toLowerCase()}-${normalized.toLowerCase()}`,
+    value,
+    normalized_value: normalized,
+    brand: { name: brand, slug: brand.toLowerCase() },
+  }) as unknown as PartPageEntry;
+
+describe('sourcedParts', () => {
+  const pages = [partPage('MANN-FILTER', 'HU 816 x', 'HU816X')];
+
+  it('links a Part that has a Part page, matching brand and number loosely', () => {
+    const work = makeWork({
+      parts: [{ brand: 'Mann-Filter', number: 'hu-816 x' }],
+    });
+    expect(sourcedParts(work, pages)).toEqual([
+      { brand: 'Mann-Filter', number: 'hu-816 x', slug: 'mann-filter-hu816x' },
+    ]);
+  });
+
+  it('shows a Part without a page as brand and number only', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: '0 986 4' }] });
+    expect(sourcedParts(work, pages)).toEqual([
+      { brand: 'Bosch', number: '0 986 4', slug: null },
+    ]);
+  });
+
+  it('does not link the same number under another brand', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
+    expect(sourcedParts(work, pages)[0].slug).toBeNull();
+  });
+
+  it('renders every Part as text when the catalogue is missing', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: '1' }] });
+    expect(sourcedParts(work, [])).toEqual([
+      { brand: 'Bosch', number: '1', slug: null },
+    ]);
+  });
+});
+
+describe('sourcingWorks', () => {
+  it('lists the published Works that sourced a Part page', () => {
+    const page = partPage('MANN-FILTER', 'HU 816 x', 'HU816X');
+    const sourced = makeWork({
+      parts: [{ brand: 'mann-filter', number: 'HU816X' }],
+    });
+    const hidden = makeWork({
+      published: false,
+      parts: [{ brand: 'mann-filter', number: 'HU816X' }],
+    });
+    const other = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
+    expect(sourcingWorks([other, hidden, sourced], page)).toEqual([sourced]);
+  });
+});
+
+describe('workLeadService', () => {
+  it('posts Parts sourcing wherever it sits in servicesApplied', () => {
+    const work = makeWork({
+      servicesApplied: ['servicing', 'vin-parts-inquiry'],
+    });
+    expect(workLeadService(work)).toBe('vin-parts-inquiry');
+  });
+
+  it('posts the first applied service on any other Work', () => {
+    const work = makeWork({ servicesApplied: ['diagnostics', 'servicing'] });
+    expect(workLeadService(work)).toBe('diagnostics');
+  });
+
+  it('posts no service when none is applied', () => {
+    expect(workLeadService(makeWork())).toBeUndefined();
+  });
+});
+
+describe('workPrice', () => {
+  it('shows the RSD price on a Parts sourcing Work', () => {
+    const work = makeWork({
+      servicesApplied: ['vin-parts-inquiry'],
+      priceRsd: 12500,
+    });
+    expect(workPrice(work)).toBe(12500);
+  });
+
+  it('hides the price on any other Work', () => {
+    const work = makeWork({ servicesApplied: ['servicing'], priceRsd: 12500 });
+    expect(workPrice(work)).toBeNull();
+  });
+
+  it('has no price when none is set', () => {
+    expect(
+      workPrice(makeWork({ servicesApplied: ['vin-parts-inquiry'] })),
+    ).toBeNull();
   });
 });

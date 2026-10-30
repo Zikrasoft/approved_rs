@@ -23,6 +23,8 @@ export const pagesContentSchema = z
         doorHeading: z.string(),
         doorText: z.string(),
         doorButtonLabel: z.string(),
+        partsHeading: z.string(),
+        priceLabel: z.string(),
       })
       .strict(),
     contact: z
