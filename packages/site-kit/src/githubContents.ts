@@ -136,5 +136,20 @@ export function createGithubContents({
     });
   }
 
-  return { listDir, getFile, getFileBuffer, commitFiles };
+  async function canWrite(token: string): Promise<boolean> {
+    try {
+      const { permissions } = await ghFetch(
+        z.object({ permissions: z.object({ push: z.boolean() }) }),
+        token,
+        '',
+      );
+      return permissions.push;
+    } catch (err) {
+      if (err instanceof GithubApiError && [401, 403, 404].includes(err.status))
+        return false;
+      throw err;
+    }
+  }
+
+  return { listDir, getFile, getFileBuffer, commitFiles, canWrite };
 }
