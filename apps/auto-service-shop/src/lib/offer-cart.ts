@@ -11,6 +11,7 @@ import {
 } from '@medusajs/framework/utils';
 import {
   addToCartWorkflow,
+  createCartWorkflow,
   createPaymentCollectionForCartWorkflow,
   createPaymentSessionsWorkflow,
   deleteLineItemsWorkflow,
@@ -221,7 +222,7 @@ const stampReadiness = async (
   return readiness;
 };
 
-export async function ensureCashAtPickupPaymentSession(
+async function ensureCashAtPickupPaymentSession(
   container: MedusaContainer,
   cartId: string,
 ): Promise<void> {
@@ -257,7 +258,7 @@ const retrieveCart = (scope: MedusaContainer, cartId: string) =>
     .resolve<ICartModuleService>(Modules.CART)
     .retrieveCart(cartId, { relations: ['items'] });
 
-export async function syncOfferCart(
+async function syncOfferCart(
   scope: MedusaContainer,
   cartId: string,
   changed = false,
@@ -403,7 +404,7 @@ export async function removeOfferLine(
   scope: MedusaContainer,
   cartId: string,
   itemId: string,
-): Promise<void> {
+): Promise<OfferCart> {
   const cart = await openCart(scope, cartId);
   const items = cart.items ?? [];
   const line = items.find((item) => item.id === itemId);
@@ -428,6 +429,7 @@ export async function removeOfferLine(
       ],
     },
   });
+  return syncOfferCart(scope, cartId, true);
 }
 
 const offerLine = async (
@@ -459,7 +461,7 @@ export async function addLineAddon(
   cartId: string,
   itemId: string,
   kind: AddonKind = 'service',
-): Promise<void> {
+): Promise<OfferCart> {
   const { line, addonLines } = await offerLine(scope, cartId, itemId, kind);
   const offerId = offerIdOf(line)!;
   const lineServices = (await servicesOf(scope, [line])).get(offerId);
@@ -470,26 +472,26 @@ export async function addLineAddon(
       `Line ${itemId} has no ${kind} add-on`,
     );
   }
-  if (addonLines.length) {
-    return;
+  if (!addonLines.length) {
+    await addToCartWorkflow(scope).run({
+      input: {
+        cart_id: cartId,
+        items: [
+          {
+            title:
+              kind === INSTALLATION
+                ? PARTS_ORDER_COPY.installation
+                : lineServices!.service!.label,
+            quantity: Number(line.quantity),
+            unit_price: price,
+            requires_shipping: false,
+            metadata: addonLineMetadata(offerId, kind),
+          },
+        ],
+      },
+    });
   }
-  await addToCartWorkflow(scope).run({
-    input: {
-      cart_id: cartId,
-      items: [
-        {
-          title:
-            kind === INSTALLATION
-              ? PARTS_ORDER_COPY.installation
-              : lineServices!.service!.label,
-          quantity: Number(line.quantity),
-          unit_price: price,
-          requires_shipping: false,
-          metadata: addonLineMetadata(offerId, kind),
-        },
-      ],
-    },
-  });
+  return syncOfferCart(scope, cartId, true);
 }
 
 export async function removeLineAddon(
@@ -497,16 +499,17 @@ export async function removeLineAddon(
   cartId: string,
   itemId: string,
   kind: AddonKind = 'service',
-): Promise<void> {
+): Promise<OfferCart> {
   const { addonLines } = await offerLine(scope, cartId, itemId, kind);
   if (addonLines.length) {
     await deleteLineItemsWorkflow(scope).run({
       input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
     });
   }
+  return syncOfferCart(scope, cartId, true);
 }
 
-export async function sellableOffer(
+async function sellableOffer(
   scope: MedusaContainer,
   offerId: string,
   quantity: number,
@@ -521,7 +524,7 @@ export async function sellableOffer(
   return offer;
 }
 
-export async function addOffer(
+async function putOffer(
   scope: MedusaContainer,
   cartId: string,
   offerId: string,
@@ -570,12 +573,47 @@ export async function addOffer(
   });
 }
 
+export async function addOffer(
+  scope: MedusaContainer,
+  cartId: string,
+  offerId: string,
+  quantity: number,
+): Promise<OfferCart> {
+  await putOffer(scope, cartId, offerId, quantity);
+  return syncOfferCart(scope, cartId, true);
+}
+
+export async function createOfferCart(
+  scope: MedusaContainer,
+  {
+    email,
+    offer_id,
+    quantity,
+  }: { email?: string; offer_id?: string; quantity: number },
+): Promise<OfferCart> {
+  if (offer_id) {
+    await sellableOffer(scope, offer_id, quantity);
+  }
+  const { result } = await createCartWorkflow(scope).run({
+    input: { email, metadata: CASH_AT_PICKUP_METADATA },
+  });
+  if (offer_id) {
+    await putOffer(scope, result.id, offer_id, quantity);
+  }
+  return syncOfferCart(scope, result.id, Boolean(offer_id));
+}
+
+export const readOfferCart = (
+  scope: MedusaContainer,
+  cartId: string,
+): Promise<OfferCart> => syncOfferCart(scope, cartId);
+
 export async function setOfferQuantity(
   scope: MedusaContainer,
   cartId: string,
   itemId: string,
   quantity: number,
-): Promise<void> {
+): Promise<OfferCart> {
   const cart = await retrieveCart(scope, cartId);
   const line = (cart.items ?? []).find((item) => item.id === itemId);
   const offerId = line && offerIdOf(line);
@@ -593,6 +631,7 @@ export async function setOfferQuantity(
       update: { quantity, unit_price: priceOf(offer) },
     },
   });
+  return syncOfferCart(scope, cartId, true);
 }
 
 export async function checkoutRefusal(
