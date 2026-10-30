@@ -32,7 +32,7 @@ translations:
 
       Tokom tog vremena, zahtevi za budući automobil su se promenili. Prvobitno je Viktor razmatrao **Peugeot**, međutim nakon razgovora o svim prednostima i manama odlučio je da obrati pažnju na pouzdaniju opciju — **BMW X1**.
 
-      Zahvaljujući tome što koristimo **officialnu dijagnostiku BMW ISTA**, automobil je pregledan maksimalno detaljno. Dijagnostika je pokazala odlično stanje motora: **lanac razvodnog mehanizma**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normi. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: rasprostranjena i ispitana kombinacija za ovu klasu vozila.
+      Zahvaljujući tome što koristimo **zvaničnu dijagnostiku BMW ISTA**, automobil je pregledan maksimalno detaljno. Dijagnostika je pokazala odlično stanje motora: **lanac razvodnog mehanizma**, **mlaznice**, **EGR sistem** i ostali parametri su bili u normi. Automobil je opremljen pouzdanim **2,0-litarskim dizel motorom B47** i **8-stepenom automatskom transmisijom Aisin**: rasprostranjena i ispitana kombinacija za ovu klasu vozila.
 
       Viktor je preuzeo automobil sa čistom istorijom, znajući tačno stanje motora i menjača do poslednjeg detalja.
   es:

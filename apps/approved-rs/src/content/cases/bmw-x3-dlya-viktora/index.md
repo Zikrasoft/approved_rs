@@ -53,13 +53,13 @@ translations:
       <ul class="icon-check">
       <li>proveri stvarnog pređenog broja kilometara i upoređivanju podataka iz elektronskih blokova;</li>
       <li>dijagnostici motora i elektronskih sistema kroz BMW ISTA;</li>
-      <li>proveri stanja lanca razdvajanja;</li>
+      <li>proveri stanja lanca razvodnog mehanizma;</li>
       <li>proveri EGR sistema;</li>
       <li>analizi grešaka, tehničkih parametara i stanja osnovnih sklopova automobila;</li>
       <li>generalnoj proceni tehničkog stanja pre kupovine.</li>
       </ul>
 
-      Rezultati provere su nas obradovali. **Pređeni broj kilometara se pokazao kao originalan, bez znakova prepravke, lanac razdvajanja je bio u dobrom stanju, a provere EGR i drugih važnih sistema nisu otkrile kritične probleme.**\
+      Rezultati provere su nas obradovali. **Pređeni broj kilometara se pokazao kao originalan, bez znakova prepravke, lanac razvodnog mehanizma je bio u dobrom stanju, a provere EGR i drugih važnih sistema nisu otkrile kritične probleme.**\
       Pritom, posebnu pažnju prilikom auto-sourcinga posvećujemo i pregledu automobila sa donje strane. Gotovo svi automobili koje razmatramo za kupovinu proveravamo na dizalici. To omogućava da se proceni stanje ogibljenja, podvozja, prisustvo curenja ulja i tehničkih tečnosti, oštećenja i drugih nedostataka koje nije moguće potpuno uočiti tokom običnog pregleda.\
       **Zaključak našeg izbora za Viktora: BMW X3, 2.0 dizel, lepa siva boja, originalni pređeni kilometri i dobro tehničko stanje.**\
       Čestitamo Viktoru na kupovini i želimo mu uživanje u svakoj vožnji!\
