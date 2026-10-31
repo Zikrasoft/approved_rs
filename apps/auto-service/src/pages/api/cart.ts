@@ -42,10 +42,13 @@ const catalogue = (request: Request) =>
     preview: previewRequested(request),
   });
 
+const BAD_REQUEST = () =>
+  Response.json({ error: 'bad request' }, { status: 400 });
+
 const respond = async (
   outcome: (() => Promise<CartOutcome> | undefined) | null,
 ) => {
-  if (!outcome) return Response.json(EMPTY);
+  if (!outcome) return BAD_REQUEST();
   return Response.json((await outcome()) ?? INQUIRY);
 };
 
@@ -53,9 +56,8 @@ const body = (request: Request) => request.json().catch(() => null);
 
 export const GET: APIRoute = ({ url, request }) => {
   const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));
-  return respond(
-    id.success ? () => catalogue(request)?.viewCart(id.data) : null,
-  );
+  if (!id.success) return Response.json(EMPTY);
+  return respond(() => catalogue(request)?.viewCart(id.data));
 };
 
 export const POST: APIRoute = async ({ request }) => {

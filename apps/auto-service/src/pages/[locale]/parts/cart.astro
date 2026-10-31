@@ -69,6 +69,7 @@ const stepper =
       data-order-template={copy.orderNumberTemplate}
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
+      data-lower-template={copy.lowerToTemplate}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
       data-preview={shopOpen() ? undefined : ''}
       data-availability={JSON.stringify(availability)}
@@ -86,6 +87,20 @@ const stepper =
         >
           {copy.notices.expired}
         </p>
+        <div
+          data-empty-notice="moved"
+          hidden
+          class="flex flex-col gap-3 rounded-control bg-signal/8 p-4"
+        >
+          <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            class="btn btn-primary w-full sm:w-auto sm:self-start"
+          >
+            {copy.notices.movedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
         <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
         <a
           href={PathBuilder.parts(locale)}
@@ -303,6 +318,11 @@ const stepper =
               </div>
               <CartAddonToggle hook="data-addon" />
               <CartAddonToggle hook="data-installation" />
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-lower
+                hidden></button>
               <button
                 type="button"
                 class="btn btn-secondary w-full sm:w-auto sm:self-start"
