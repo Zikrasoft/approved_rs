@@ -14,7 +14,12 @@ type Result = {
   thumbnail: string | null;
   thumbnail_illustration: boolean | null;
   brand: { slug: string };
-  part: { id: string; name: string; category: { name: string } | null };
+  part: {
+    id: string;
+    name: string;
+    category: { name: string } | null;
+    attributes: Record<string, unknown> | null;
+  };
 };
 
 medusaIntegrationTestRunner({
@@ -389,6 +394,11 @@ medusaIntegrationTestRunner({
         expect(
           response.data.facets.map(({ key }: { key: string }) => key),
         ).toEqual(['viscosity']);
+        expect(
+          response.data.results.find(
+            ({ part }: Result) => part.id === thinOilId,
+          ).part.attributes,
+        ).toEqual({ viscosity: '0w-20', volume: 5 });
       });
 
       it('narrows a Category to a range of numbers, listed in numeric order', async () => {

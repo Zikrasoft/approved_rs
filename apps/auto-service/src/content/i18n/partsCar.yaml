@@ -100,6 +100,8 @@ hubs:
     noCategories: Каталог для этой модели пополняется. Оставьте заявку, и мы подберем запчасти по VIN.
     carsHeading: Модификации
     carsLead: Откройте свою модификацию, чтобы увидеть запчасти именно для нее.
+    singleCarLabel: Модификация в каталоге
+    singleCarLead: Комплект для ТО, расходники по допускам и все подходящие запчасти
   modelCategory:
     metaTitle: '{category} для {model} в CarLab'
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'

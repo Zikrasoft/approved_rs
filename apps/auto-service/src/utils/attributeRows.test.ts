@@ -130,4 +130,10 @@ describe('keySpecs', () => {
   it('is empty for a part with no filled fields', () => {
     expect(keySpecs(oil, {}, 'ru')).toBe('');
   });
+
+  it('leaves out the fields the row already says', () => {
+    expect(
+      keySpecs(oil, { viscosity: '5w-30', volume: 5 }, 'ru', [], ['viscosity']),
+    ).toBe('5 л');
+  });
 });

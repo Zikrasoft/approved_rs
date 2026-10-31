@@ -65,6 +65,7 @@ export const keySpecs = (
   values: AttributeValues,
   locale: Locale,
   listing: AttributeValues[] = [],
+  omit: string[] = [],
 ): string =>
   attributeRows(
     {
@@ -72,6 +73,7 @@ export const keySpecs = (
       fields: category.fields.filter(
         ({ key, type }) =>
           type !== 'boolean' &&
+          !omit.includes(key) &&
           !(
             listing.length > 1 &&
             listing.every((other) => isDeepStrictEqual(other[key], values[key]))
