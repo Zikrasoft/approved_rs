@@ -363,7 +363,9 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat. **Every site has a `/thanks/`
+  second, unmergeable card in the chat. The same holds on every channel: a
+  tap with no visitor id beacons nothing, and `/api/contact-click` stores no
+  Lead for one, so an anonymous beacon cannot flood the chat. **Every site has a `/thanks/`
   human-account carve-out, and approved.rs a second one.** The first is
   `/thanks/`: the visitor there has just sent the form, so its Telegram tile
   opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and

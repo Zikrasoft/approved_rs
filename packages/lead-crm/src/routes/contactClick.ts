@@ -42,6 +42,8 @@ export function createContactClickRoute({
     if (!form) {
       return new Response(null, { status: 400 });
     }
+    const visitorId = visitorIdSchema.parse(form.get('visitor_id'));
+    if (!visitorId) return new Response(null, { status: 204 });
     const channel = clickedChannelSchema.parse(form.get('channel'));
     const sourceUrl = siteUrl(
       form.get('source_url'),
@@ -58,7 +60,7 @@ export function createContactClickRoute({
           contactChannel: channel,
           comment: '',
           source_url: sourceUrl,
-          visitorId: visitorIdSchema.parse(form.get('visitor_id')),
+          visitorId,
           adSource: adSourceFieldSchema.parse(form.get(AD_SOURCE_FIELD)),
           metaIds: metaIdsFieldSchema.parse(form.get(META_IDS_FIELD)),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,
