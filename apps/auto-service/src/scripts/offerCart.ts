@@ -1063,6 +1063,24 @@ export function defineKitCart(tagName = 'kit-cart'): void {
         }
         const buyable = items.every((item) => item.dataset.offerId);
         this.hidden = !buyable;
+        const tags = items.map(
+          (item) =>
+            item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset ?? {},
+        );
+        const total = this.querySelector('[data-kit-total]');
+        if (total && buyable) {
+          total.textContent = ` · ${formatMoney(
+            items.reduce(
+              (sum, item, index) =>
+                sum +
+                Number(tags[index].kitPrice) *
+                  (Number(item.dataset.quantity) || 1),
+              0,
+            ),
+            tags[0]?.kitCurrency ?? 'RSD',
+            this.dataset.localeTag ?? 'sr',
+          )}`;
+        }
         const ask = kit?.querySelector('[data-add-all]');
         ask?.classList.toggle('btn-secondary', buyable);
         ask?.classList.toggle('btn-primary', !buyable);
@@ -1094,11 +1112,19 @@ export function defineKitCart(tagName = 'kit-cart'): void {
           moved = true;
         }
         const href = this.dataset.cartHref ?? '';
-        location.assign(
-          moved
-            ? `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`
-            : href,
-        );
+        if (moved) {
+          location.assign(
+            `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`,
+          );
+          return;
+        }
+        const added = kit?.querySelector<HTMLElement>('[data-kit-added]');
+        if (!added) {
+          location.assign(href);
+          return;
+        }
+        this.hidden = true;
+        added.hidden = false;
       }
     },
   );

@@ -53,6 +53,8 @@ const availability =
     <span
       class:list={['flex flex-col items-end text-right', className]}
       data-kit-offer={picked?.id}
+      data-kit-price={picked?.price}
+      data-kit-currency={picked?.currency}
     >
       <span class="spec text-sm font-semibold whitespace-nowrap text-ink">
         {onlyPrice ? price : copy.fromPrice.replace('{price}', price)}
