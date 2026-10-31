@@ -28,6 +28,12 @@ moreOffersSeveral:
   few: 'Еще {count} предложения, от {price}'
   many: 'Еще {count} предложений, от {price}'
   other: 'Еще {count} предложения, от {price}'
+offerTomorrow: завтра
+offerDays:
+  one: 'через {days} день'
+  few: 'через {days} дня'
+  many: 'через {days} дней'
+  other: 'через {days} дня'
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии

@@ -49,9 +49,13 @@ const localeTag = BCP47_BY_LOCALE[locale];
       data-availability={JSON.stringify(copy.leadTime)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
-      data-more-label={copy.moreOffers}
-      data-more-cheaper-label={copy.moreOffersCheaper}
-      data-more-several={JSON.stringify(copy.moreOffersSeveral)}
+      data-more-copy={JSON.stringify({
+        moreOffers: copy.moreOffers,
+        moreOffersCheaper: copy.moreOffersCheaper,
+        moreOffersSeveral: copy.moreOffersSeveral,
+        offerTomorrow: copy.offerTomorrow,
+        offerDays: copy.offerDays,
+      })}
       {...part}
     >
       <h2 class="text-block font-semibold">

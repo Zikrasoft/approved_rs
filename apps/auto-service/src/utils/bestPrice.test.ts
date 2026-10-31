@@ -121,13 +121,8 @@ describe('moreOffersLabel', () => {
       many: 'Еще {count} предложений, от {price}',
       other: 'Еще {count} предложения, от {price}',
     },
-    leadTime: {
-      inStock: 'В наличии',
-      inStockTomorrow: 'В наличии, забрать завтра',
-      inStockDays: { other: 'В наличии, забрать через {days} дня' },
-      tomorrow: 'Забрать завтра',
-      days: { other: 'Забрать через {days} дня' },
-    },
+    offerTomorrow: 'завтра',
+    offerDays: { other: 'через {days} дня' },
   };
   const money = ({ price }: { price: number }) => `${price} RSD`;
   const label = (offers: ReturnType<typeof offer>[]) =>
@@ -135,13 +130,13 @@ describe('moreOffersLabel', () => {
 
   it('names the one cheaper offer with its price and when it can be collected', () => {
     expect(label([offer(1200, 4), offer(990, 0, 2)])).toBe(
-      'Есть дешевле: 990 RSD, забрать через 2 дня',
+      'Есть дешевле: 990 RSD, через 2 дня',
     );
   });
 
   it('names the one other offer when it is not cheaper', () => {
     expect(label([offer(1200, 0, 2), offer(1500, 0, 1)])).toBe(
-      'Еще одно предложение: 1500 RSD, забрать завтра',
+      'Еще одно предложение: 1500 RSD, завтра',
     );
   });
 
