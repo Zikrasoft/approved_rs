@@ -3,6 +3,7 @@ import {
   checkoutContactSchema,
   type OrderCaseSummary,
   type Vehicle,
+  vehicleName,
 } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -40,10 +41,10 @@ async function carOf(
     { id: [lookup.vehicle_id] },
   );
   if (!vehicle) return null;
-  const { model } = vehicle;
+  const { make, model } = vehicleName(vehicle.model);
   return {
-    make: model.chassis.series.make.name,
-    model: `${model.chassis.series.name} ${model.chassis.code} ${model.name}`,
+    make,
+    model,
     year: modelYear(vin, vehicle),
   };
 }
