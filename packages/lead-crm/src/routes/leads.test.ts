@@ -76,6 +76,23 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
+  it('hands the submitted service to thanksPath, so a site can thank per service', async () => {
+    const thanksPath = vi.fn(() => '/ru/thanks/parts/');
+    const route = createLeadsRoute<Locale>({
+      notifyLead,
+      waitUntil,
+      isLocale: (value): value is Locale => LOCALES.includes(value),
+      defaultLocale: 'ru',
+      localeCookie: 'lang',
+      thanksPath,
+      missingFieldsMessage: { ru: '', en: '', sr: '' },
+    });
+    const ctx = makeCtx(valid({ service: 'vehicle-sourcing' }));
+    await route(ctx);
+    expect(thanksPath).toHaveBeenCalledWith('ru', 'vehicle-sourcing');
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/parts/', 302);
+  });
+
   it('answers a body that is not a form with the refusal page, not a crash', async () => {
     const ctx = {
       ...makeCtx({}),

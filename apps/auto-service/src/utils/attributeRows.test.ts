@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Category } from '@podbor/catalog-contract';
-import { attributeRows } from './attributeRows';
+import { attributeRows, keySpecs } from './attributeRows';
 
 const field = {
   unit: null,
@@ -89,5 +89,27 @@ describe('attributeRows', () => {
     expect(
       attributeRows(oil, { viscosity: '0w-20' }, 'ru', { yes: '', no: '' }),
     ).toEqual([{ label: 'Вязкость', value: '0w-20' }]);
+  });
+});
+
+describe('keySpecs', () => {
+  it('lines up the first three filled values, skipping yes/no fields', () => {
+    expect(
+      keySpecs(
+        oil,
+        {
+          synthetic: true,
+          viscosity: '5w-30',
+          volume: 5,
+          weight: 4.4,
+          code: 'X',
+        },
+        'ru',
+      ),
+    ).toBe('5W-30 · 5 l · 4.4');
+  });
+
+  it('is empty for a part with no filled fields', () => {
+    expect(keySpecs(oil, {}, 'ru')).toBe('');
   });
 });
