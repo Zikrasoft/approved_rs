@@ -24,7 +24,7 @@ const POST = createShopOrdersRoute({
 
 const call = (body: unknown, authorization = 'Bearer shop-secret') =>
   POST({
-    request: new Request('http://localhost/api/shop-orders', {
+    request: new Request('https://carlab.rs/api/shop-orders', {
       method: 'POST',
       headers: { authorization, 'content-type': 'application/json' },
       body: typeof body === 'string' ? body : JSON.stringify(body),
@@ -55,6 +55,21 @@ describe('createShopOrdersRoute', () => {
       expect(notifyLead).not.toHaveBeenCalled();
     },
   );
+
+  it('refuses an oversized body before reading it', async () => {
+    const response = await POST({
+      request: new Request('https://carlab.rs/api/shop-orders', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer shop-secret',
+          'content-length': '70000',
+        },
+        body: JSON.stringify(placed()),
+      }),
+    });
+    expect(response.status).toBe(413);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
 
   it.each(['not json', { event: 'placed', order_id: 'order_1' }])(
     'refuses a body that is not a shop order event (%j)',
@@ -113,6 +128,18 @@ describe('createShopOrdersRoute', () => {
       '[shop-orders]',
     );
   });
+
+  it.each(['javascript:alert(1)', 'https://evil.example/sr/parts/cart/'])(
+    'stores no page for a source_url %s off the site',
+    async (source_url) => {
+      await call(placed({ source_url }));
+
+      expect(notifyLead).toHaveBeenCalledWith(
+        expect.objectContaining({ source_url: null }),
+        '[shop-orders]',
+      );
+    },
+  );
 
   it('answers 201 for a Lead delivered but not stored', async () => {
     notifyLead.mockResolvedValue({ stored: false, delivered: true });

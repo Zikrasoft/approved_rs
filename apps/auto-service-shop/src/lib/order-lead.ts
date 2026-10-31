@@ -13,7 +13,11 @@ import {
   ORDER_OUTCOME_FIELD,
 } from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
-import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
+import {
+  orderLineText,
+  orderMoney,
+  PARTS_ORDER_COPY,
+} from '@podbor/lead-crm/parts-order-copy';
 import {
   SHOP_ORDERS_PATH,
   type OrderLead,
@@ -23,7 +27,7 @@ import { z } from 'zod';
 
 import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
 import { parseEnv } from './env';
-import { readPlacedOrder, type PlacedOrder } from './placed-order';
+import { readPlacedOrder } from './placed-order';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
@@ -54,20 +58,6 @@ export const leadOrderSchema = z.object({
 
 export type LeadOrder = z.infer<typeof leadOrderSchema>;
 
-const withReadiness = (
-  text: string,
-  { inStock, leadTimeDays, supplier }: PlacedOrder['lines'][number],
-) => {
-  const readiness = [
-    inStock && PARTS_ORDER_COPY.inStock,
-    leadTimeDays && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
-    supplier === MANUAL_SOURCE ? PARTS_ORDER_COPY.manualOffer : supplier,
-  ]
-    .filter(Boolean)
-    .join(', ');
-  return readiness ? `${text}, ${readiness}` : text;
-};
-
 export function orderLeadPayload(
   order: LeadOrder,
   adminOrigin: string,
@@ -76,9 +66,7 @@ export function orderLeadPayload(
   if (!contact) {
     throw new Error(`Order ${order.id} has no contact`);
   }
-  const currency = order.currency_code.toUpperCase();
-  const money = (amount: number) =>
-    `${amount.toLocaleString('ru-RU')} ${currency}`;
+  const currency = order.currency_code;
   const summary = fitComment({
     head: [
       PARTS_ORDER_COPY.heading(order.display_id),
@@ -86,17 +74,18 @@ export function orderLeadPayload(
       contact.car ?? '',
     ],
     lines: lines.map((line) =>
-      line.addon
-        ? PARTS_ORDER_COPY.addon(
-            line.title,
-            line.unitPrice === 0 ? PARTS_ORDER_COPY.free : money(line.total),
-          )
-        : withReadiness(
-            PARTS_ORDER_COPY.line(line.title, line.quantity, money(line.total)),
-            line,
-          ),
+      orderLineText(
+        {
+          ...line,
+          source:
+            line.supplier === MANUAL_SOURCE
+              ? PARTS_ORDER_COPY.manualOffer
+              : line.supplier,
+        },
+        currency,
+      ),
     ),
-    tail: [PARTS_ORDER_COPY.total(money(total))],
+    tail: [PARTS_ORDER_COPY.total(orderMoney(total, currency))],
     note: contact.comment ?? '',
     limit: MAX_COMMENT_LENGTH,
     more: (count) =>

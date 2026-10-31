@@ -64,6 +64,13 @@
         "default": "./dist/cjs/preview.js"
       },
       "default": "./src/preview.ts"
+    },
+    "./part-number": {
+      "require": {
+        "types": "./dist/cjs/partNumber.d.ts",
+        "default": "./dist/cjs/partNumber.js"
+      },
+      "default": "./src/partNumber.ts"
     }
   },
   "scripts": {

@@ -1,10 +1,14 @@
+import { logError } from './logError.ts';
 import { isClosed, type StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Notifier } from './telegram/notify.ts';
-import { orderOutcomePath, type OrderOutcome } from './shopOrdersWire.ts';
+import {
+  orderOutcomePath,
+  outcomeRefused,
+  type OrderOutcome,
+} from './shopOrdersWire.ts';
 
 const SHOP_TIMEOUT_MS = 15_000;
-const FINAL_REFUSALS = new Set([404, 409]);
 
 const ORDER_OUTCOME = {
   won: 'completed',
@@ -54,8 +58,8 @@ export function createShopOrders({
         signal: AbortSignal.timeout(SHOP_TIMEOUT_MS),
       },
     );
-    await response.body?.cancel();
-    if (FINAL_REFUSALS.has(response.status)) return 'conflict';
+    const body: unknown = await response.json().catch(() => null);
+    if (outcomeRefused(response.status, body)) return 'conflict';
     if (!response.ok) throw new Error(`The shop answered ${response.status}`);
     return 'settled';
   }
@@ -82,8 +86,7 @@ export function createShopOrders({
       if ((await tellShop(lead)) === 'conflict') await recordConflict(lead);
       else await store.settleOrder(lead.id, lead.status);
     } catch (error) {
-      console.error('[lead-crm] the shop did not take the order outcome', {
-        error,
+      logError('[lead-crm] the shop did not take the order outcome', error, {
         leadId: lead.id,
         orderId: lead.orderId,
       });

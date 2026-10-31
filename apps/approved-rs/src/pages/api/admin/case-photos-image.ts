@@ -2,31 +2,19 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import {
+  galleryImageType,
   galleryPhotoSchema,
   KEYSTATIC_AUTH_COOKIE,
 } from '@/utils/adminGallery';
 import { getGithubFileBuffer, GithubApiError } from '@/lib/githubContents';
 
-const MIME_BY_EXT: Record<string, string> = {
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  png: 'image/png',
-  webp: 'image/webp',
-  gif: 'image/gif',
-};
-
-// Serves one gallery photo back to the admin/case-photos.astro preview grid.
-// Dev reads straight off disk (same fs case-photos-upload.ts writes to);
-// prod fetches it from GitHub through the same auth-cookie gate as the rest
-// of this tool, since Vercel's fs never has these files.
 export async function GET({ request, cookies }: APIContext): Promise<Response> {
   const query = galleryPhotoSchema.safeParse(
     Object.fromEntries(new URL(request.url).searchParams),
   );
   if (!query.success) return new Response('Bad request', { status: 400 });
   const { dir, slug, file } = query.data;
-  const ext = file.slice(file.lastIndexOf('.') + 1);
-  const contentType = MIME_BY_EXT[ext];
+  const contentType = galleryImageType(file);
   if (!contentType) {
     return new Response('Unsupported type', { status: 400 });
   }

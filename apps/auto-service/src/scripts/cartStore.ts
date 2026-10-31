@@ -4,6 +4,12 @@ import {
   type OfferCart,
   type OfferCartLine as CartLine,
 } from '@podbor/catalog-contract/cart-wire';
+import { orderLineTitle } from '@podbor/catalog-contract/part-number';
+import {
+  orderLineText,
+  orderMoney,
+  PARTS_ORDER_COPY,
+} from '@podbor/lead-crm/parts-order-copy';
 import type { CartOutcome } from '@/utils/catalogueWire';
 import {
   forgetStored,
@@ -50,6 +56,44 @@ export const listedLine = ({
     with_addon: addon.item_id !== null,
   }),
 });
+
+const lineAddons = ({ addon, installation }: CartLine) => [
+  ...(addon?.item_id
+    ? [{ title: addon.label, unitPrice: addon.unit_price }]
+    : []),
+  ...(installation?.item_id
+    ? [
+        {
+          title: PARTS_ORDER_COPY.installation,
+          unitPrice: installation.unit_price,
+        },
+      ]
+    : []),
+];
+
+export const orderLines = ({ items, total, currency }: OfferCart): string =>
+  [
+    ...items.flatMap((line) => [
+      orderLineText(
+        {
+          title: orderLineTitle(line.part),
+          quantity: line.quantity,
+          unitPrice: line.unit_price,
+          addon: false,
+          inStock: line.in_stock,
+          leadTimeDays: line.lead_time_days,
+        },
+        currency,
+      ),
+      ...lineAddons(line).map((added) =>
+        orderLineText(
+          { ...added, quantity: line.quantity, addon: true },
+          currency,
+        ),
+      ),
+    ]),
+    PARTS_ORDER_COPY.total(orderMoney(total, currency)),
+  ].join('\n');
 
 export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
   writeCart(

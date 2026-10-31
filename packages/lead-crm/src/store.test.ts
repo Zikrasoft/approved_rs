@@ -640,12 +640,15 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('keeps two orders from one visitor as two Leads', async () => {
+  it('merges a second failed checkout of one visitor under its new contact', async () => {
     await store.insertOrMergeLead(order('+381602222222'));
-    const { merged } = await store.insertOrMergeLead(order('+381603333333'));
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381603333333'),
+    );
 
-    expect(merged).toBe(false);
-    expect(await store.readLeads()).toHaveLength(2);
+    expect(merged).toBe(true);
+    expect(lead.contact).toBe('+381603333333');
+    expect(await store.readLeads()).toHaveLength(1);
   });
 
   it('merges a checkout that failed again for the same contact into its Lead', async () => {
@@ -664,12 +667,92 @@ describe('insertOrMergeLead with standalone services', () => {
     );
   });
 
-  it('keeps a placed order apart from the failed checkout before it', async () => {
+  it('lets a placed order absorb the failed checkout before it', async () => {
+    const { lead: failed } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      comment: 'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1',
+    });
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...order('+381603333333'),
+      name: 'Петр',
+      orderId: 'order_1',
+      comment: 'VARTA 580901080 × 1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(failed.id);
+    expect(lead.orderId).toBe('order_1');
+    expect(lead.contact).toBe('+381603333333');
+    expect(lead.name).toBe('Петр');
+    expect(lead.comment).toBe(
+      'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1\nVARTA 580901080 × 1',
+    );
+    expect(await store.readLeads()).toHaveLength(1);
+  });
+
+  it('finds the failed checkout by contact when the visitor id differs', async () => {
     await store.insertOrMergeLead(order('+381602222222'));
     const { merged } = await store.insertOrMergeLead({
       ...order('+381602222222'),
+      visitorId: 'visitor-2',
       orderId: 'order_1',
     });
+
+    expect(merged).toBe(true);
+  });
+
+  it('merges failed checkouts of a visitor without an id on the same contact', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const other = await store.insertOrMergeLead({
+      ...order('+381603333333'),
+      visitorId: null,
+    });
+
+    expect(merged).toBe(true);
+    expect(other.merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps a failed checkout older than the merge window apart', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-10-11T10:00:00.000Z'));
+      await store.insertOrMergeLead(order('+381602222222'));
+      vi.setSystemTime(new Date('2026-10-11T12:00:00.000Z'));
+      const { merged } = await store.insertOrMergeLead({
+        ...order('+381602222222'),
+        orderId: 'order_1',
+      });
+
+      expect(merged).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps a closed failed checkout apart', async () => {
+    const { lead: failed } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+    await store.setStatus(failed.id, 'lost');
+    const { merged } = await store.insertOrMergeLead(order('+381602222222'));
+
+    expect(merged).toBe(false);
+  });
+
+  it('keeps a failed checkout after a placed order apart from it', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    const { merged } = await store.insertOrMergeLead(order('+381602222222'));
 
     expect(merged).toBe(false);
   });
@@ -745,6 +828,40 @@ describe('insertOrMergeLead with standalone services', () => {
     });
 
     expect(merged).toBe(true);
+  });
+
+  describe('failedCheckoutCapped', () => {
+    let id = 0;
+    const failedAt = (contact: string, ago: number, extra = {}) => ({
+      ...order(contact),
+      id: ++id,
+      status: 'lost',
+      createdAt: new Date(Date.now() - ago).toISOString(),
+      statusChangedAt: new Date().toISOString(),
+      ...extra,
+    });
+    const CONTACT = '+381602222222';
+    const MINUTE = 60 * 1000;
+
+    it('caps a contact once it has three failed checkouts within the hour', async () => {
+      storage.seed([1, 2, 3].map((at) => failedAt(CONTACT, at * MINUTE)));
+      expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(true);
+    });
+
+    it.each([
+      ['an older one', failedAt(CONTACT, 61 * MINUTE)],
+      ['a placed order', failedAt(CONTACT, MINUTE, { orderId: 'order_1' })],
+      ['another contact', failedAt('+381603333333', MINUTE)],
+      ['another brand', failedAt(CONTACT, MINUTE, { brand: 'Other' })],
+      ['another service', failedAt(CONTACT, MINUTE, { service: 'brakes' })],
+    ])('does not count %s', async (_, third) => {
+      storage.seed([
+        failedAt(CONTACT, MINUTE),
+        failedAt(CONTACT, 2 * MINUTE),
+        third,
+      ]);
+      expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(false);
+    });
   });
 });
 
@@ -2309,5 +2426,61 @@ describe('hasRealContact', () => {
     ['petr@mail.rs', true],
   ])('%j → %s', (contact, real) => {
     expect(hasRealContact(contact)).toBe(real);
+  });
+});
+
+describe('the Lead count alert', () => {
+  const alertLeadCount = vi.fn();
+  const createdAt = new Date().toISOString();
+  const seedLeads = (count: number) =>
+    storage.seed(
+      Array.from({ length: count }, (_, at) => ({
+        ...baseData,
+        contact: `@seed${at}`,
+        id: at + 1,
+        status: 'won',
+        createdAt,
+        statusChangedAt: createdAt,
+      })),
+    );
+
+  beforeEach(() => {
+    alertLeadCount.mockReset().mockResolvedValue(undefined);
+    store = createLeadStore({
+      storage,
+      schema: storedLeadSchema,
+      alertLeadCount,
+    });
+  });
+
+  it.each([4999, 9999])(
+    'tells once the new Lead after %i stored ones reaches a threshold',
+    async (stored) => {
+      seedLeads(stored);
+      await store.insertOrMergeLead({ ...baseData, contact: '@fresh' });
+      expect(alertLeadCount).toHaveBeenCalledExactlyOnceWith(stored + 1);
+    },
+  );
+
+  it('stays quiet past a threshold and on a merge', async () => {
+    seedLeads(5000);
+    await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
+    await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
+    expect(alertLeadCount).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Lead when the alert fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    alertLeadCount.mockRejectedValue(new Error('down'));
+    seedLeads(4999);
+    const { lead } = await store.insertOrMergeLead({
+      ...baseData,
+      contact: '@fresh',
+    });
+    expect(lead.id).toBe(5000);
+    expect(console.error).toHaveBeenCalledWith(
+      '[lead-crm] could not send the Lead count alert',
+      { count: 5000, error: { name: 'Error', message: 'down' } },
+    );
   });
 });

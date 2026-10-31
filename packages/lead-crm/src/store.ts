@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { serviceLabel } from '@podbor/brands';
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
@@ -111,8 +112,15 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
+  alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
 }
+
+export const FAILED_CHECKOUTS_PER_HOUR = 3;
+
+const HOUR_MS = 60 * 60 * 1000;
+
+export const LEAD_COUNT_ALERTS: readonly number[] = [5000, 10000];
 
 const promptedAt =
   ({ chatId, messageId }: PromptKey) =>
@@ -130,6 +138,67 @@ export const TOPIC_IDLE_MS = DAY_MS;
 
 function untouched(lead: StoredLead): boolean {
   return lead.status === 'new' && lead.lastActivityAt == null;
+}
+
+type MergeTarget =
+  | { kind: 'same-order'; lead: StoredLead }
+  | { kind: 'failed-checkout'; lead: StoredLead }
+  | { kind: 'merge'; lead: StoredLead }
+  | { kind: 'new' };
+
+function isFailedCheckoutOf(
+  lead: LeadInput,
+  standaloneServices: readonly string[],
+): boolean {
+  return standaloneServices.includes(lead.service) && !lead.orderId;
+}
+
+function mergeTarget(
+  data: LeadInput,
+  leads: StoredLead[],
+  now: number,
+  standaloneServices: readonly string[],
+): MergeTarget {
+  const isStandalone = (service: string) =>
+    standaloneServices.includes(service);
+  const isFailedCheckout = (lead: LeadInput) =>
+    isFailedCheckoutOf(lead, standaloneServices);
+  const ours = leads.filter((l) => l.brand === data.brand);
+
+  const placed = data.orderId
+    ? ours.find((l) => l.orderId === data.orderId)
+    : undefined;
+  if (placed) return { kind: 'same-order', lead: placed };
+
+  const failed = isStandalone(data.service)
+    ? ours
+        .filter(
+          (l) =>
+            isFailedCheckout(l) &&
+            !isClosed(l) &&
+            isFreshLead(l, now) &&
+            ((data.visitorId != null && l.visitorId === data.visitorId) ||
+              (hasRealContact(data.contact) && l.contact === data.contact)),
+        )
+        .at(-1)
+    : undefined;
+  if (failed) return { kind: 'failed-checkout', lead: failed };
+
+  const apart = (l: StoredLead) =>
+    [data.service, l.service].some(isStandalone) &&
+    !isPlaceholderContact(data.contact) &&
+    !isPlaceholderContact(l.contact);
+  const visited = data.visitorId
+    ? ours.find(
+        (l) =>
+          l.visitorId === data.visitorId &&
+          untouched(l) &&
+          isFreshLead(l, now) &&
+          (data.telegramId == null || isPlaceholderContact(l.contact)) &&
+          !apart(l),
+      )
+    : undefined;
+  return visited ? { kind: 'merge', lead: visited } : { kind: 'new' };
 }
 
 function isIdleTopic(lead: StoredLead, now: Date): boolean {
@@ -272,22 +341,9 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
+  alertLeadCount,
   standaloneServices = [],
 }: LeadStoreOptions) {
-  function standaloneApart(a: LeadInput, b: StoredLead): boolean {
-    const retried =
-      a.service === b.service &&
-      a.contact === b.contact &&
-      !a.orderId &&
-      !b.orderId;
-    return (
-      [a.service, b.service].some((s) => standaloneServices.includes(s)) &&
-      !retried &&
-      !isPlaceholderContact(a.contact) &&
-      !isPlaceholderContact(b.contact)
-    );
-  }
-
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
@@ -409,9 +465,19 @@ export function createLeadStore({
     try {
       await quarantine(entries);
     } catch (error) {
-      console.error('[lead-crm] could not copy the unreadable records', {
+      logError('[lead-crm] could not copy the unreadable records', error, {
         count: entries.length,
-        error,
+      });
+    }
+  }
+
+  async function alertOnThreshold(count: number): Promise<void> {
+    if (!alertLeadCount || !LEAD_COUNT_ALERTS.includes(count)) return;
+    try {
+      await alertLeadCount(count);
+    } catch (error) {
+      logError('[lead-crm] could not send the Lead count alert', error, {
+        count,
       });
     }
   }
@@ -435,38 +501,43 @@ export function createLeadStore({
       return inserted;
     },
 
+    async failedCheckoutCapped(
+      brand: string,
+      contact: string,
+    ): Promise<boolean> {
+      const since = Date.now() - HOUR_MS;
+      const recent = (await readLeads()).filter(
+        (lead) =>
+          lead.brand === brand &&
+          lead.contact === contact &&
+          isFailedCheckoutOf(lead, standaloneServices) &&
+          Date.parse(lead.createdAt) >= since,
+      );
+      return recent.length >= FAILED_CHECKOUTS_PER_HOUR;
+    },
+
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
+      let count = 0;
       await updateLeads((leads, idFloor) => {
-        const placed = data.orderId
-          ? leads.find(
-              (l) => l.orderId === data.orderId && l.brand === data.brand,
-            )
-          : undefined;
-        if (placed) {
-          outcome = { lead: placed, merged: true, before: placed };
+        count = 0;
+        const now = Date.now();
+        const target = mergeTarget(data, leads, now, standaloneServices);
+        if (target.kind === 'same-order') {
+          outcome = { lead: target.lead, merged: true, before: target.lead };
           return leads;
         }
-        const now = Date.now();
-        const existing = data.visitorId
-          ? leads.find(
-              (l) =>
-                l.visitorId === data.visitorId &&
-                l.brand === data.brand &&
-                untouched(l) &&
-                isFreshLead(l, now) &&
-                (data.telegramId == null || isPlaceholderContact(l.contact)) &&
-                !standaloneApart(data, l),
-            )
-          : undefined;
-
-        if (!existing) {
+        if (target.kind === 'new') {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
+          count = leads.length + 1;
           return supersede([...leads, inserted], inserted);
         }
+        const existing = target.lead;
+        const absorbsFailedCheckout = target.kind === 'failed-checkout';
 
         const upgradeContact =
+          absorbsFailedCheckout ||
           contactRank(data.contact) > contactRank(existing.contact);
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
@@ -494,6 +565,7 @@ export function createLeadStore({
               }
             : {}),
           source_url: existing.source_url ?? data.source_url,
+          orderId: existing.orderId ?? data.orderId,
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
           adSource: existing.adSource ?? data.adSource ?? null,
@@ -508,7 +580,9 @@ export function createLeadStore({
             [
               clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
               tried ? `Также пробовал: ${tried}` : '',
-              ...newLines(existing.comment, data.comment),
+              ...(data.orderId
+                ? [data.comment ?? '']
+                : newLines(existing.comment, data.comment)),
             ]
               .filter(Boolean)
               .join('\n'),
@@ -518,6 +592,7 @@ export function createLeadStore({
         const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
         return data.telegramId == null ? replaced : supersede(replaced, merged);
       });
+      await alertOnThreshold(count);
       return outcome;
     },
 

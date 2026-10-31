@@ -14,6 +14,12 @@ Metrika came back beside GA4 on 2026-10-23
 under the same identifier, and Webvisor records sessions again with the lead
 forms masked by `METRIKA_MASK_CLASS` from `@podbor/site-kit/browser`.
 
+No VIN reaches a tag through the page URL. On a page whose address or referrer
+carries a VIN-shaped value, or a parameter the site lists in `privateParams`
+(carlab.rs: the ordered cart id), GA4 gets a clean `page_location` and
+`page_referrer`, Metrika a clean deferred hit with Webvisor off, and the Pixel,
+which takes no URL override, does not load at all.
+
 Exclusions from the sample (our own visits, Russia) are in
 [analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion
 figure is roughly doubled.

@@ -117,6 +117,13 @@ medusaIntegrationTestRunner({
         expect(posts).toEqual([]);
       });
 
+      it('says an Order it does not know is missing, so the CRM stops asking', async () => {
+        const response = await decide('order_unknown', 'completed');
+
+        expect(response.status).toBe(404);
+        expect(response.data.type).toBe('order_missing');
+      });
+
       it('refuses the other outcome once one is set', async () => {
         const order = await placeOrder();
         await decide(order.id, 'completed');

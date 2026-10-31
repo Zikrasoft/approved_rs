@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
@@ -156,9 +157,7 @@ export function createLedgerStore({
     if (alerted) return;
     alerted = true;
     await onUnreadable?.().catch((error: unknown) => {
-      console.error('[lead-crm] could not tell the admin about the ledger', {
-        error,
-      });
+      logError('[lead-crm] could not tell the admin about the ledger', error);
     });
   }
 

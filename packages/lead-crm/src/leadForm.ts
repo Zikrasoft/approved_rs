@@ -13,6 +13,7 @@ import {
   showContactValue,
 } from './phoneKit.ts';
 import { submitLeadForm } from './submitLeadForm.ts';
+import { CONTACT_INPUT_FIELDS } from './fields.ts';
 
 export interface LeadFormDeps {
   visitorId: () => string;
@@ -55,10 +56,10 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   const phone = pick<HTMLInputElement>('[data-phone]');
   const consent = pick<HTMLInputElement>('[data-consent]');
   const contact = pick<HTMLInputElement>(
-    'input[type="hidden"][name="contact"]',
+    `input[type="hidden"][name="${CONTACT_INPUT_FIELDS.contact}"]`,
   );
   const channelField = pick<HTMLInputElement>(
-    'input[type="hidden"][name="contact_channel"]',
+    `input[type="hidden"][name="${CONTACT_INPUT_FIELDS.channel}"]`,
   );
   const button = pick<HTMLButtonElement>('button[type="submit"]');
   const submitLabel = pick('[data-submit-label]');

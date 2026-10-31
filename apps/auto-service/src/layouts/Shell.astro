@@ -207,6 +207,7 @@ const businessSchema = localBusinessSchema({
         META_PIXEL_ID,
         YM_COUNTER_ID,
       } from '@/utils/analytics';
+      import { ORDERED_CART_PARAM } from '@/utils/cartNotice';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
@@ -214,6 +215,7 @@ const businessSchema = localBusinessSchema({
         metaPixelId: META_PIXEL_ID,
         googleAdsId: GOOGLE_ADS_ID,
         googleConversionLabels: GOOGLE_CONVERSION_LABELS,
+        privateParams: [ORDERED_CART_PARAM],
         analytics: !import.meta.env.DEV,
       });
       defineSiteLeadForm();

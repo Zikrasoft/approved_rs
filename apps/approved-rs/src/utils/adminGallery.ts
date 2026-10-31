@@ -19,12 +19,18 @@ export const CASE_COLLECTIONS = [
   { collection: 'cases', dir: 'src/content/cases', label: 'Автоподбор' },
 ] as const;
 
-// Exactly what sanitizeFilename/dedupeFilename below ever produce — shared
-// by case-photos-image.ts (path-traversal guard on the `file` query param)
-// and case-photos.astro (filters a raw directory listing before turning
-// entries into <img> tags, so a stray .DS_Store or hand-committed file with
-// a weird name doesn't render as a broken thumbnail).
 export const SAFE_GALLERY_FILENAME = /^[a-z0-9-]+\.[a-z0-9]+$/;
+
+export const GALLERY_IMAGE_TYPES: Readonly<Record<string, string>> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+};
+
+export const galleryImageType = (filename: string): string | undefined =>
+  GALLERY_IMAGE_TYPES[filename.slice(filename.lastIndexOf('.') + 1)];
 
 export const galleryTargetSchema = z.object({
   dir: z.literal(CASE_COLLECTIONS.map(({ dir }) => dir)),

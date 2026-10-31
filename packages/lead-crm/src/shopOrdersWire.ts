@@ -97,3 +97,22 @@ export const shopOrderEventSchema = z.discriminatedUnion('event', [
 export type OrderContact = z.output<typeof orderContactSchema>;
 export type OrderLead = z.input<typeof orderLeadSchema>;
 export type ShopOrderEvent = z.input<typeof shopOrderEventSchema>;
+
+export const ORDER_MISSING = 'order_missing';
+const SHOP_ORDER_UNKNOWN = 404;
+const SHOP_ORDER_CONFLICT = 409;
+const orderMissingSchema = z.object({ type: z.literal(ORDER_MISSING) });
+
+export const outcomeRefused = (status: number, body: unknown): boolean =>
+  status === SHOP_ORDER_CONFLICT ||
+  (status === SHOP_ORDER_UNKNOWN && orderMissingSchema.safeParse(body).success);
+
+export const LEAD_WON = 409;
+export const LEAD_MISSING = 410;
+// TODO: drop LEGACY_LEAD_MISSING together with the /api/leads fallback in the shop's sendShopOrderEvent; only that legacy route answers 404 for a missing Lead, and once it is gone a 404 means the route itself is missing.
+const LEGACY_LEAD_MISSING = 404;
+
+export const cancelRefused = (status: number): boolean =>
+  status === LEAD_WON ||
+  status === LEAD_MISSING ||
+  status === LEGACY_LEAD_MISSING;

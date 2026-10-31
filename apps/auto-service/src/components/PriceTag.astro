@@ -5,7 +5,7 @@ import { content } from '@/i18n/content';
 import { bestPrice } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { kitPick } from '@/utils/kitPick';
-import { pickupTime } from '@/utils/leadTime';
+import { offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import PriceSlot from './PriceSlot.astro';
 
@@ -27,13 +27,15 @@ const picked = kit
 const best = bestPrice(picked ? [{ offers: [picked] }] : pages);
 const price = best ? formatMoney(best.price, best.currency, localeTag) : '';
 const onlyPrice = picked || !best?.startsFrom;
-const availability =
+const told =
   best &&
-  (best.inStock
-    ? copy.leadTime.inStock
-    : best.leadDays > 0
-      ? pickupTime(best.leadDays, copy.leadTime, localeTag)
-      : copy.outOfStock);
+  offerAvailability(
+    { in_stock: best.inStock, lead_time_days: best.leadDays },
+    copy.leadTime,
+    localeTag,
+    { short: true },
+  );
+const availability = told && (told.stock ?? told.lead ?? copy.outOfStock);
 ---
 
 {

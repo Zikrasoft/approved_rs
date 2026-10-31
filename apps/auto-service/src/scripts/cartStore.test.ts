@@ -11,6 +11,7 @@ import {
   rememberCart,
   rememberReceipt,
   priceChanges,
+  orderLines,
 } from './cartStore';
 import { cartCount } from './cartBadge';
 import { readPartsList } from './partsList';
@@ -70,6 +71,38 @@ const SERVICE = {
   translations: null,
   unit_price: 2500,
 };
+
+describe('the cart lines a failed checkout keeps', () => {
+  it('prices every line and add-on as the order Lead does, with the total', () => {
+    expect(
+      orderLines({
+        ...cart,
+        total: 9600,
+        items: [
+          {
+            ...cart.items[0]!,
+            quantity: 2,
+            in_stock: false,
+            lead_time_days: 1,
+            addon: { ...SERVICE, item_id: 'item_2' },
+            installation: { item_id: 'item_3', unit_price: 0 },
+          },
+          {
+            ...cart.items[0]!,
+            id: 'item_4',
+            addon: { ...SERVICE, item_id: null },
+          },
+        ],
+      }).split('\n'),
+    ).toEqual([
+      'Масляный фильтр (BMW 11 42 8575211) × 2: 3 700 RSD, забрать завтра',
+      '+ Регистрация аккумулятора: 5 000 RSD',
+      '+ Установка в сервисе CarLab: бесплатно',
+      'Масляный фильтр (BMW 11 42 8575211) × 1: 1 850 RSD, в наличии',
+      'Итого: 9 600 RSD',
+    ]);
+  });
+});
 
 describe('the order receipt', () => {
   it('comes back only for the cart that became the order', () => {

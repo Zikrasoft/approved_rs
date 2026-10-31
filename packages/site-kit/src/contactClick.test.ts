@@ -79,16 +79,14 @@ describe('defineContactClickTracking', () => {
     document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   });
 
-  it('carries no Meta ids once analytics was declined', () => {
-    document.cookie = '_fbp=fb.1.1596403881668.1116446470';
+  it('beacons nothing once analytics was declined, as no visitor id exists', () => {
     localStorage.setItem(
       'cookie_consent',
       JSON.stringify({ analytics: false }),
     );
     track();
     click('viber');
-    expect(sent[0]![1].get('meta_ids')).toBe('');
-    document.cookie = '_fbp=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    expect(sent).toHaveLength(0);
   });
 
   it('reuses the visitor id a previous click already minted', () => {

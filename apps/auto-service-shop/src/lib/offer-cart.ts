@@ -23,6 +23,7 @@ import {
   cartTotals,
   checkoutContactSchema,
   orderCap,
+  orderLineTitle,
   partPageSlug,
   translationsSchema,
   type AddonKind,
@@ -53,22 +54,20 @@ import { installationPrice } from './installation';
 import {
   addonLineMetadata,
   offerLineMetadata,
-  offerLineTitle,
   withParentOffers,
   readLine,
 } from './line-metadata';
-import { sellingOffers } from './suppliers/live-quote';
+import { liveOffers, sellingOffers } from './suppliers/live-quote';
+import { storeOffers } from '../modules/supplier/pricing';
 import { carFor } from './vin/car-for';
 
-type OfferCartLineItem = CartItem;
-
-const offerIdOf = (item: OfferCartLineItem) =>
+const offerIdOf = (item: CartItem) =>
   readLine(item.metadata).offerId ?? undefined;
 
-const parentOfferIdOf = (item: OfferCartLineItem) =>
+const parentOfferIdOf = (item: CartItem) =>
   readLine(item.metadata).parentOfferId;
 
-const kindOf = (item: OfferCartLineItem) => readLine(item.metadata).addonKind;
+const kindOf = (item: CartItem) => readLine(item.metadata).addonKind;
 
 type CategoryAddon = NonNullable<AddonPrices['service']>;
 
@@ -102,7 +101,7 @@ const categoryAddon = (
 
 const servicesOf = async (
   scope: MedusaContainer,
-  items: OfferCartLineItem[],
+  items: CartItem[],
 ): Promise<Map<string, AddonPrices>> => {
   const lines = items.flatMap((item) => {
     const { offerId, partIdentifierId } = readLine(item.metadata);
@@ -141,7 +140,7 @@ export const refuse = (code: CheckoutRefusal, message: string): never => {
 
 const quotesOf = async (
   scope: MedusaContainer,
-  items: OfferCartLineItem[],
+  items: CartItem[],
 ): Promise<Map<string, Quote>> => {
   const ids = items.map(offerIdOf).filter((id) => id !== undefined);
   const offers = ids.length ? await sellingOffers(scope, { id: ids }) : [];
@@ -186,7 +185,7 @@ const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
   return { ...cart, items: withParentOffers(cart.items ?? []) };
 };
 
-const planOf = async (scope: MedusaContainer, items: OfferCartLineItem[]) => {
+const planOf = async (scope: MedusaContainer, items: CartItem[]) => {
   const offerItems = items.filter((item) => !kindOf(item));
   return planCart(
     items,
@@ -385,14 +384,19 @@ async function sellableOffer(
   offerId: string,
   quantity: number,
 ) {
-  const [offer] = await sellingOffers(scope, { id: [offerId] });
-  if (!offer) {
+  const [row] = await liveOffers(scope, { id: [offerId] });
+  const [offer] = row ? storeOffers([row]) : [];
+  if (!row || !offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }
   if (orderCap(offer) < quantity) {
     return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
   }
-  return offer;
+  return {
+    ...offer,
+    part_identifier_id: row.part_identifier_id,
+    supplierName: row.supplier.name,
+  };
 }
 
 async function putOffer(
@@ -431,7 +435,7 @@ async function putOffer(
       cart_id: cartId,
       items: [
         {
-          title: offerLineTitle(part),
+          title: orderLineTitle(part),
           quantity,
           unit_price: offer.price,
           requires_shipping: false,
@@ -439,7 +443,7 @@ async function putOffer(
             offer.id,
             identifier.id,
             part,
-            offer.supplier.name,
+            offer.supplierName,
           ),
         },
       ],
@@ -518,19 +522,33 @@ const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
     'The price changed for a line in the cart. Reprice the cart before completing checkout.',
 };
 
+async function judgedPlan(
+  scope: MedusaContainer,
+  items: CartItem[],
+): Promise<CartPlan> {
+  const plan = await planOf(scope, items);
+  const refusal = checkoutRefusal(plan);
+  if (refusal) {
+    refuse(refusal, REFUSAL_MESSAGES[refusal]);
+  }
+  return plan;
+}
+
+const judgedCarts = new Set<string>();
+
 export async function refuseCheckout(
   scope: MedusaContainer,
-  cart: { metadata?: Record<string, unknown> | null; items?: unknown[] | null },
+  cart: {
+    id: string;
+    metadata?: Record<string, unknown> | null;
+    items?: unknown[] | null;
+  },
 ): Promise<void> {
   if (!checkoutContactSchema.safeParse(cart.metadata ?? {}).success) {
     refuse('CONTACT_MISSING', 'The order has no contact.');
   }
-  const refusal = checkoutRefusal(
-    await planOf(scope, (cart.items ?? []) as OfferCartLineItem[]),
-  );
-  if (refusal) {
-    refuse(refusal, REFUSAL_MESSAGES[refusal]);
-  }
+  if (judgedCarts.has(cart.id)) return;
+  await judgedPlan(scope, (cart.items ?? []) as CartItem[]);
 }
 
 export const checkout = locked(
@@ -554,7 +572,7 @@ export const checkout = locked(
       refuse('CART_CHANGED', 'The cart changed since it was shown.');
     }
     if (!cart.completed_at) {
-      await applyStamps(scope, (await planOf(scope, cart.items)).stamps);
+      await applyStamps(scope, (await judgedPlan(scope, cart.items)).stamps);
       const car = await carFor(scope, contact.vin);
       await scope
         .resolve<ICartModuleService>(Modules.CART)
@@ -562,9 +580,10 @@ export const checkout = locked(
           metadata: { ...cart.metadata, ...contact, car },
         });
     }
-    const { result } = await completeCartWorkflow(scope).run({
-      input: { id: cartId },
-    });
+    judgedCarts.add(cartId);
+    const { result } = await completeCartWorkflow(scope)
+      .run({ input: { id: cartId } })
+      .finally(() => judgedCarts.delete(cartId));
     const {
       data: [order],
     } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({

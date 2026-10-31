@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 
@@ -57,9 +58,8 @@ export function createQuarantine({
       const { notifier } = await getNotifier();
       await notifier.sendQuarantinedLeadsToAdmin(count, QUARANTINE_PATH, brand);
     } catch (error) {
-      console.error('[lead-crm] could not tell the admin about the copy', {
+      logError('[lead-crm] could not tell the admin about the copy', error, {
         count,
-        error,
       });
     }
   };

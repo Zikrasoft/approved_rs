@@ -58,6 +58,7 @@ const {
   sendOperationNotice,
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
+  sendLeadCountAlert,
   sendStatusChange,
   sendFieldChange,
   sendNoteNotice,
@@ -862,6 +863,21 @@ describe('sendUnreadableLedgerToAdmin', () => {
   });
 });
 
+describe('sendLeadCountAlert', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the owner and the admin how many Leads the file holds', async () => {
+    await sendLeadCountAlert(5000, '<i>Brand</i>');
+    const bodies = mockFetch.mock.calls.map(([, init]) =>
+      JSON.parse(init.body),
+    );
+    expect(bodies.map((body) => body.chat_id)).toEqual([111, 222]);
+    expect(bodies[0].text).toContain('Заявок в базе: 5000');
+    expect(bodies[0].text).toContain('&lt;i&gt;');
+  });
+});
+
 describe('buildSearchResults', () => {
   it('renders each match as a tappable button: status emoji, id, name, contact', () => {
     const { reply_markup } = buildSearchResults([
@@ -1628,6 +1644,22 @@ describe('the Lead topic', () => {
     ]) {
       expect(text).toContain('📣 Реклама: Instagram · spring');
       expect(text).toContain('#заявка #реклама');
+    }
+  });
+
+  it('names only a page a visitor could stand on, in the summary and the DM detail', () => {
+    for (const [source_url, shown] of [
+      ['https://carlab.rs/ru/parts/', true],
+      ['/ru/parts/', true],
+      ['javascript:alert(1)', false],
+    ] as const) {
+      const lead = makeLead({ source_url });
+      for (const text of [
+        formatter.topicSummaryText(lead),
+        buildLeadDetail(lead, 'owner').text,
+      ]) {
+        expect(text.includes(`Страница: ${source_url}`)).toBe(shown);
+      }
     }
   });
 
