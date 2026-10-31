@@ -17,7 +17,6 @@ import {
   type SteeringSide,
   type VEHICLE_DRIVES,
   normalizePartNumber,
-  partPageSlug,
   requirementErrors,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -53,17 +52,18 @@ import {
   type SourceCount,
   sourcedRowsOf,
 } from './by-source';
+import { mergeMakes, type MergeSteps } from './merge';
 import {
   identifierStatusRows,
   type IdentifierStatusFilters,
 } from './identifier-status';
-import { WORKSHOP_QUOTE_SOURCE } from './models/provenance';
 import {
   SLUG_COLUMNS,
   RETIRING_DELETES,
   scopedKind,
   slugScopeOf,
-  MODELS_FOLLOW_THEIR_MAKE,
+  MODELS_LEAVING_THEIR_MAKE,
+  type MovedModel,
   slugInUse,
   reservedSection,
   refuseReservedSection,
@@ -72,9 +72,10 @@ import {
   type SluggedRow,
   type Retirement,
   type RetiringTable,
+  retirementOf,
 } from './slugs';
 
-type Provenance = {
+export type Provenance = {
   source?: string;
   created_by?: string | null;
   updated_by?: string | null;
@@ -209,26 +210,6 @@ export type FoundPart = {
   created: boolean;
 };
 
-export type WorkshopQuoteLine = {
-  name: string;
-  number: string;
-  quantity: number;
-  brand: string;
-  category_id: string | null;
-};
-
-export type WorkshopQuoteResult = {
-  lines: { part_id: string; reused: boolean }[];
-  fitments: number;
-};
-
-type QuoteBrand = {
-  id: string;
-  name: string;
-  slug: string;
-  spellings: { value_key: string }[];
-};
-
 const FLAG_UNLISTED_PARTS = `
   with listed as (
     select p.id, p.source_url, p.source_missing_since is not null as flagged,
@@ -280,7 +261,6 @@ const withValueKey = (row: SpellingInput) => ({
   value_key: spellingKey(row.value),
 });
 
-// TODO: the class still mixes the make/series/chassis/model merges (mergeMakes to deleteRetiring) and createFromWorkshopQuote with data access; move the merges to merge.ts over the façade and the workshop quote into a lib/workshop-quote.ts workflow step.
 class CatalogModuleService extends CatalogModuleBase {
   private sluggedRows(kind: SluggedKind) {
     const rows = {
@@ -463,10 +443,46 @@ class CatalogModuleService extends CatalogModuleBase {
       ) => Promise<unknown>
     ).call(this, data, sharedContext);
     await this.flush(sharedContext);
-    await (sharedContext.transactionManager as SqlEntityManager).execute(
-      MODELS_FOLLOW_THEIR_MAKE,
+    const ids = [updated].flat().map((row) => (row as { id: string }).id);
+    const { rows }: { rows: MovedModel[] } = await runBoundSql(
+      sharedContext,
+      MODELS_LEAVING_THEIR_MAKE[method],
+      [ids],
     );
+    for (const model of rows) {
+      await this.moveModel(model, sharedContext);
+    }
     return updated;
+  }
+
+  private async moveModel(
+    { id, slug, chassis_id, name, from_make, to_make }: MovedModel,
+    context: Context,
+  ): Promise<void> {
+    const moved = { chassis_id, name, make_id: to_make };
+    const free = !(await this.slugTaken('model', slug, to_make, context));
+    await CatalogModuleBase.prototype.updateVehicleModels.call(
+      this,
+      {
+        id,
+        make_id: to_make,
+        slug: free
+          ? slug
+          : await this.slugFor('model', moved, new Set(), context),
+      },
+      context,
+    );
+    await this.createSlugRedirects(
+      {
+        kind: 'model',
+        from_id: id,
+        from_slug: slug,
+        scope_id: from_make,
+        target_kind: 'model',
+        target_id: id,
+      },
+      context,
+    );
   }
 
   override updateSeries = ((data: unknown, context?: Context) =>
@@ -619,6 +635,28 @@ class CatalogModuleService extends CatalogModuleBase {
     );
   }
 
+  private mergeSteps(): MergeSteps {
+    return {
+      catalog: this,
+      retireSlugs: (kind, retired, context, provenance) =>
+        this.retireSlugs(kind, retired, context, provenance),
+      vehicleSlugIn: async (vehicle, modelId, context) =>
+        (await this.slugTaken('vehicle', vehicle.slug, modelId, context))
+          ? this.slugFor(
+              'vehicle',
+              { ...vehicle, slug: undefined, model_id: modelId },
+              new Set(),
+              context,
+            )
+          : vehicle.slug,
+      flush: (context) => this.flush(context),
+      purgeMake: (id, context) =>
+        CatalogModuleBase.prototype.deleteMakes.call(this, id, context),
+      purgeModel: (id, context) =>
+        CatalogModuleBase.prototype.deleteVehicleModels.call(this, id, context),
+    };
+  }
+
   @InjectTransactionManager()
   async mergeMakes(
     sourceId: string,
@@ -626,262 +664,12 @@ class CatalogModuleService extends CatalogModuleBase {
     provenance: Provenance,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    if (sourceId === targetId) {
-      throw adminError(
-        MedusaError.Types.INVALID_DATA,
-        'MERGE_INTO_SELF',
-        'A Make cannot be merged into itself',
-      );
-    }
-    const source = await this.retrieveMake(
+    await mergeMakes(
+      this.mergeSteps(),
       sourceId,
-      { select: ['id', 'slug'] },
-      sharedContext,
-    );
-    await this.retrieveMake(targetId, { select: ['id'] }, sharedContext);
-    const spellingsOf = (make_id: string) =>
-      this.listMakeSpellings(
-        { make_id },
-        { select: ['id', 'supplier_id', 'value_key'], take: null },
-        sharedContext,
-      );
-    const seriesOf = (make_id: string) =>
-      this.listSeries(
-        { make_id },
-        { select: ['id', 'name'], take: null },
-        sharedContext,
-      );
-    const spelled = new Set(
-      (await spellingsOf(targetId)).map(({ supplier_id, value_key }) =>
-        JSON.stringify([supplier_id, value_key]),
-      ),
-    );
-    for (const { id, supplier_id, value_key } of await spellingsOf(sourceId)) {
-      if (spelled.has(JSON.stringify([supplier_id, value_key]))) {
-        await this.deleteMakeSpellings(id, sharedContext);
-      } else {
-        await this.updateMakeSpellings(
-          { id, make_id: targetId },
-          sharedContext,
-        );
-      }
-    }
-    const targetSeries = await seriesOf(targetId);
-    for (const series of await seriesOf(sourceId)) {
-      const same = targetSeries.find(
-        ({ name }) => spellingKey(name) === spellingKey(series.name),
-      );
-      if (same) {
-        await this.mergeSeries(
-          series.id,
-          same.id,
-          targetId,
-          provenance,
-          sharedContext,
-        );
-      } else {
-        await this.updateSeries(
-          { id: series.id, make_id: targetId },
-          sharedContext,
-        );
-      }
-    }
-    await this.updateSlugRedirects(
-      {
-        selector: { kind: 'model', scope_id: sourceId },
-        data: { scope_id: targetId },
-      },
-      sharedContext,
-    );
-    await this.retireSlugs(
-      'make',
-      [
-        {
-          id: sourceId,
-          slug: source.slug,
-          scope_id: null,
-          target_kind: 'make',
-          target_id: targetId,
-        },
-      ],
-      sharedContext,
+      targetId,
       provenance,
-    );
-    await this.flush(sharedContext);
-    await CatalogModuleBase.prototype.deleteMakes.call(
-      this,
-      sourceId,
       sharedContext,
-    );
-  }
-
-  private async mergeSeries(
-    sourceId: string,
-    targetId: string,
-    makeId: string,
-    provenance: Provenance,
-    context: Context,
-  ): Promise<void> {
-    const targets = await this.listChassis(
-      { series_id: targetId },
-      { take: null },
-      context,
-    );
-    for (const chassis of await this.listChassis(
-      { series_id: sourceId },
-      { take: null },
-      context,
-    )) {
-      const same = targets.find(({ code }) => code === chassis.code);
-      if (same) {
-        await this.mergeChassis(
-          chassis.id,
-          same.id,
-          makeId,
-          provenance,
-          context,
-        );
-      } else {
-        await this.updateChassis(
-          { id: chassis.id, series_id: targetId },
-          context,
-        );
-      }
-    }
-    await this.flush(context);
-    await this.deleteSeries(sourceId, context);
-  }
-
-  private async mergeChassis(
-    sourceId: string,
-    targetId: string,
-    makeId: string,
-    provenance: Provenance,
-    context: Context,
-  ): Promise<void> {
-    const targets = await this.listVehicleModels(
-      { chassis_id: targetId },
-      { take: null },
-      context,
-    );
-    for (const model of await this.listVehicleModels(
-      { chassis_id: sourceId },
-      { take: null },
-      context,
-    )) {
-      const same = targets.find(
-        ({ name }) => spellingKey(name) === spellingKey(model.name),
-      );
-      if (same) {
-        await this.mergeModels(model, same.id, makeId, provenance, context);
-      } else {
-        await this.updateVehicleModels(
-          { id: model.id, chassis_id: targetId },
-          context,
-        );
-      }
-    }
-    const required = new Set(
-      (
-        await this.listRequirements(
-          { chassis_id: targetId },
-          { select: ['field_id'], take: null },
-          context,
-        )
-      ).map(({ field_id }) => field_id),
-    );
-    const movable = (
-      await this.listRequirements(
-        { chassis_id: sourceId },
-        { select: ['id', 'field_id'], take: null },
-        context,
-      )
-    ).filter(({ field_id }) => !required.has(field_id));
-    if (movable.length) {
-      await this.updateRequirements(
-        {
-          selector: { id: movable.map(({ id }) => id) },
-          data: { chassis_id: targetId },
-        },
-        context,
-      );
-    }
-    await this.flush(context);
-    await this.deleteChassis(sourceId, context);
-  }
-
-  private async mergeModels(
-    source: { id: string; slug: string },
-    targetId: string,
-    makeId: string,
-    provenance: Provenance,
-    context: Context,
-  ): Promise<void> {
-    const renamed: { id: string; slug: string }[] = [];
-    for (const vehicle of await this.listVehicles(
-      { model_id: source.id },
-      { select: ['id', 'slug', 'engine_id', 'power_kw'], take: null },
-      context,
-    )) {
-      const slug = (await this.slugTaken(
-        'vehicle',
-        vehicle.slug,
-        targetId,
-        context,
-      ))
-        ? await this.slugFor(
-            'vehicle',
-            { ...vehicle, slug: undefined, model_id: targetId },
-            new Set(),
-            context,
-          )
-        : vehicle.slug;
-      if (slug !== vehicle.slug) renamed.push(vehicle);
-      await this.updateVehicles(
-        { id: vehicle.id, model_id: targetId, slug },
-        context,
-      );
-    }
-    await this.updateSlugRedirects(
-      {
-        selector: { kind: 'vehicle', scope_id: source.id },
-        data: { scope_id: targetId },
-      },
-      context,
-    );
-    if (renamed.length) {
-      await this.createSlugRedirects(
-        renamed.map(({ id, slug }) => ({
-          kind: 'vehicle' as const,
-          from_id: id,
-          from_slug: slug,
-          scope_id: source.id,
-          target_kind: 'vehicle' as const,
-          target_id: id,
-          ...provenance,
-        })),
-        context,
-      );
-    }
-    await this.retireSlugs(
-      'model',
-      [
-        {
-          id: source.id,
-          slug: source.slug,
-          scope_id: makeId,
-          target_kind: 'model',
-          target_id: targetId,
-        },
-      ],
-      context,
-      provenance,
-    );
-    await this.flush(context);
-    await CatalogModuleBase.prototype.deleteVehicleModels.call(
-      this,
-      source.id,
-      context,
     );
   }
 
@@ -896,13 +684,7 @@ class CatalogModuleService extends CatalogModuleBase {
         { relations: ['brand', 'part'], take: null },
         context,
       );
-      return identifiers.map(({ id, brand, normalized_value, part }) => ({
-        id,
-        slug: partPageSlug(brand.slug, normalized_value),
-        scope_id: null,
-        target_kind: part.category_id ? 'category' : null,
-        target_id: part.category_id ?? null,
-      }));
+      return identifiers.map(retirementOf.part);
     }
     if (table === 'vehicle') {
       const vehicles = await this.listVehicles(
@@ -910,13 +692,7 @@ class CatalogModuleService extends CatalogModuleBase {
         { select: ['id', 'slug', 'model_id'], take: null },
         context,
       );
-      return vehicles.map(({ id, slug, model_id }) => ({
-        id,
-        slug,
-        scope_id: model_id,
-        target_kind: 'model',
-        target_id: model_id,
-      }));
+      return vehicles.map(retirementOf.vehicle);
     }
     if (table === 'model') {
       const models = await this.listVehicleModels(
@@ -924,22 +700,10 @@ class CatalogModuleService extends CatalogModuleBase {
         { select: ['id', 'slug', 'make_id'], take: null },
         context,
       );
-      return models.map(({ id, slug, make_id }) => ({
-        id,
-        slug,
-        scope_id: make_id,
-        target_kind: 'make',
-        target_id: make_id,
-      }));
+      return models.map(retirementOf.model);
     }
     const rows = await this.sluggedRows(table).list({ id: ids }, context);
-    return rows.map(({ id, slug }) => ({
-      id,
-      slug,
-      scope_id: null,
-      target_kind: null,
-      target_id: null,
-    }));
+    return rows.map(retirementOf.unscoped);
   }
 
   @InjectTransactionManager()
@@ -1091,93 +855,11 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectTransactionManager()
-  async createFromWorkshopQuote(
-    lines: WorkshopQuoteLine[],
-    vehicleId: string | null,
-    provenance: Provenance,
+  async transaction<T>(
+    work: (context: Context) => Promise<T>,
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<WorkshopQuoteResult> {
-    const brands = await this.listBrands(
-      {},
-      { relations: ['spellings'], take: null },
-      sharedContext,
-    );
-    const result: WorkshopQuoteResult = { lines: [], fitments: 0 };
-    for (const line of lines) {
-      const brandId = await this.quoteBrand(
-        line.brand,
-        brands,
-        provenance,
-        sharedContext,
-      );
-      const { part_id: partId, created: newPart } = await this.findOrCreatePart(
-        {
-          name: line.name,
-          identifier: {
-            type: 'manufacturer-number',
-            brand_id: brandId,
-            value: line.number,
-          },
-          category_id: await this.quoteCategory(
-            line.category_id,
-            sharedContext,
-          ),
-          ...provenance,
-          source: WORKSHOP_QUOTE_SOURCE,
-        },
-        sharedContext,
-      );
-      if (vehicleId) {
-        const { created } = await this.attachPartToVehicles(
-          partId,
-          { vehicle_id: vehicleId },
-          { quantity: line.quantity, ...provenance },
-          sharedContext,
-        );
-        result.fitments += created.length;
-      }
-      result.lines.push({ part_id: partId, reused: !newPart });
-    }
-    return result;
-  }
-
-  private async quoteBrand(
-    name: string,
-    brands: QuoteBrand[],
-    provenance: Provenance,
-    sharedContext: Context,
-  ): Promise<string> {
-    const key = spellingKey(name);
-    const slug = slugOf(name);
-    const known = brands.find(
-      (brand) =>
-        spellingKey(brand.name) === key ||
-        brand.slug === slug ||
-        brand.spellings.some(({ value_key }) => value_key === key),
-    );
-    if (known) return known.id;
-    if (!slug) {
-      throw adminError(
-        MedusaError.Types.INVALID_DATA,
-        'INVALID_BRAND',
-        `Brand ${name} has no Latin letters for its slug`,
-      );
-    }
-    const created = await this.createBrands(
-      { name: name.trim(), ...provenance },
-      sharedContext,
-    );
-    brands.push({ ...created, spellings: [] });
-    return created.id;
-  }
-
-  private async quoteCategory(
-    categoryId: string | null,
-    sharedContext: Context,
-  ): Promise<string | null> {
-    if (!categoryId) return null;
-    const fields = await this.categoryDefinition(categoryId, sharedContext);
-    return fields.some(({ required }) => required) ? null : categoryId;
+  ): Promise<T> {
+    return work(sharedContext);
   }
 
   override createBrandSpellings = ((

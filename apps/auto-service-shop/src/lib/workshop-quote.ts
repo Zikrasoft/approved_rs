@@ -1,16 +1,16 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
-import type { MedusaContainer } from '@medusajs/framework/types';
+import type { Context, MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 import type { Vehicle } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
-import type {
-  WorkshopQuoteLine,
-  WorkshopQuoteResult,
-} from '../modules/catalog/service';
+import type { Provenance } from '../modules/catalog/service';
+import { WORKSHOP_QUOTE_SOURCE } from '../modules/catalog/models/provenance';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import { adminError } from '../modules/_shared/admin-error';
+import { slugOf } from '../modules/_shared/slug';
+import { spellingKey } from '../modules/_shared/spelling';
 import { shopAi, type CategoryChoice } from './ai';
 import { readCapped, uploadType } from './uploads';
 import { vinDecoders } from './vin/chain';
@@ -71,6 +71,121 @@ async function quoteVehicle(
   return lookup.resolved ? lookup.vehicle : null;
 }
 
+export type WorkshopQuoteLine = {
+  name: string;
+  number: string;
+  quantity: number;
+  brand: string;
+  category_id: string | null;
+};
+
+export type WorkshopQuoteResult = {
+  lines: { part_id: string; reused: boolean }[];
+  fitments: number;
+};
+
+type QuoteBrand = {
+  id: string;
+  name: string;
+  slug: string;
+  spellings: { value_key: string }[];
+};
+
+async function quoteBrand(
+  catalog: CatalogModuleService,
+  name: string,
+  brands: QuoteBrand[],
+  provenance: Provenance,
+  context: Context,
+): Promise<string> {
+  const key = spellingKey(name);
+  const slug = slugOf(name);
+  const known = brands.find(
+    (brand) =>
+      spellingKey(brand.name) === key ||
+      brand.slug === slug ||
+      brand.spellings.some(({ value_key }) => value_key === key),
+  );
+  if (known) return known.id;
+  if (!slug) {
+    throw adminError(
+      MedusaError.Types.INVALID_DATA,
+      'INVALID_BRAND',
+      `Brand ${name} has no Latin letters for its slug`,
+    );
+  }
+  const created = await catalog.createBrands(
+    { name: name.trim(), ...provenance },
+    context,
+  );
+  brands.push({ ...created, spellings: [] });
+  return created.id;
+}
+
+async function quoteCategory(
+  catalog: CatalogModuleService,
+  categoryId: string | null,
+  context: Context,
+): Promise<string | null> {
+  if (!categoryId) return null;
+  const fields = await catalog.categoryDefinition(categoryId, context);
+  return fields.some(({ required }) => required) ? null : categoryId;
+}
+
+const createFromWorkshopQuote = (
+  catalog: CatalogModuleService,
+  lines: WorkshopQuoteLine[],
+  vehicleId: string | null,
+  provenance: Provenance,
+): Promise<WorkshopQuoteResult> =>
+  catalog.transaction(async (context) => {
+    const brands = await catalog.listBrands(
+      {},
+      { relations: ['spellings'], take: null },
+      context,
+    );
+    const result: WorkshopQuoteResult = { lines: [], fitments: 0 };
+    for (const line of lines) {
+      const brandId = await quoteBrand(
+        catalog,
+        line.brand,
+        brands,
+        provenance,
+        context,
+      );
+      const { part_id: partId, created: newPart } =
+        await catalog.findOrCreatePart(
+          {
+            name: line.name,
+            identifier: {
+              type: 'manufacturer-number',
+              brand_id: brandId,
+              value: line.number,
+            },
+            category_id: await quoteCategory(
+              catalog,
+              line.category_id,
+              context,
+            ),
+            ...provenance,
+            source: WORKSHOP_QUOTE_SOURCE,
+          },
+          context,
+        );
+      if (vehicleId) {
+        const { created } = await catalog.attachPartToVehicles(
+          partId,
+          { vehicle_id: vehicleId },
+          { quantity: line.quantity, ...provenance },
+          context,
+        );
+        result.fitments += created.length;
+      }
+      result.lines.push({ part_id: partId, reused: !newPart });
+    }
+    return result;
+  });
+
 export type ConfirmedQuote = WorkshopQuoteResult & { vehicle: Vehicle | null };
 
 export async function confirmQuote(
@@ -80,7 +195,8 @@ export async function confirmQuote(
 ): Promise<ConfirmedQuote> {
   const vehicle = await quoteVehicle(scope, vin);
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const created = await catalog.createFromWorkshopQuote(
+  const created = await createFromWorkshopQuote(
+    catalog,
     lines,
     vehicle?.id ?? null,
     editor,
