@@ -68,6 +68,7 @@ const stepper =
       data-order-template={copy.orderNumberTemplate}
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
+      data-lower-template={copy.lowerToTemplate}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
       data-preview={shopOpen() ? undefined : ''}
       data-availability={JSON.stringify(availability)}
@@ -298,6 +299,11 @@ const stepper =
               </div>
               <CartAddonToggle hook="data-addon" />
               <CartAddonToggle hook="data-installation" />
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-lower
+                hidden></button>
               <button
                 type="button"
                 class="btn btn-secondary w-full sm:w-auto sm:self-start"

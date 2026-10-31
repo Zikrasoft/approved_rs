@@ -15,6 +15,7 @@ const CART = {
       available: true,
       in_stock: true,
       lead_time_days: 0,
+      max_quantity: 4,
       addon: null,
       installation: null,
       part: {

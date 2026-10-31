@@ -74,6 +74,7 @@ const offerCartSchema = z.object({
       available: z.boolean(),
       in_stock: z.boolean(),
       lead_time_days: z.number(),
+      max_quantity: z.optional(z.nullable(z.number())),
       addon: z.nullable(
         z.object({
           item_id: z.nullable(z.string()),
@@ -541,6 +542,17 @@ export function definePartOffers(tagName = 'part-offers'): void {
 
 const STEP_SETTLE_MS = 400;
 
+export function stepTarget(
+  current: number,
+  delta: number,
+  cap: number | null,
+): { quantity: number; capped: boolean } {
+  const wanted = Math.max(1, current + delta);
+  return cap !== null && wanted > cap
+    ? { quantity: Math.max(1, cap), capped: true }
+    : { quantity: wanted, capped: false };
+}
+
 export function defineOfferCart(tagName = 'offer-cart'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
@@ -829,10 +841,14 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       step(line: CartLine, delta: number, row: HTMLElement): void {
-        const target = Math.max(
-          1,
-          (this.targets.get(line.id) ?? line.quantity) + delta,
+        const current = this.targets.get(line.id) ?? line.quantity;
+        const { quantity: target, capped } = stepTarget(
+          current,
+          delta,
+          line.max_quantity ?? null,
         );
+        if (capped) showOnly(this, 'data-notice', 'stock-limit');
+        if (target === current) return;
         this.targets.set(line.id, target);
         fill(row, '[data-quantity]', String(target));
         row.setAttribute('aria-busy', 'true');
@@ -925,6 +941,18 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           );
         });
         if (toInquiry) toInquiry.hidden = line.available;
+        const cap = line.max_quantity ?? 0;
+        fill(
+          row,
+          '[data-lower]',
+          (this.dataset.lowerTemplate ?? '').replace('{count}', String(cap)),
+        );
+        const lower = act('[data-lower]', () =>
+          this.change('PATCH', { ...lineBody, quantity: cap }),
+        );
+        if (lower) {
+          lower.hidden = line.available || cap < 1 || cap >= line.quantity;
+        }
         const { locale = '', installationLabel = '' } = this.dataset;
         const toggles = { money, unitTemplate };
         if (line.addon) {
