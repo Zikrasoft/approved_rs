@@ -194,6 +194,7 @@ medusaIntegrationTestRunner({
         ['a zero quantity', { quantity: 0 }],
         ['a fractional quantity', { quantity: 1.5 }],
         ['no offer', { offer_id: undefined }],
+        ['an offer id no offer has', { offer_id: 'x'.repeat(65) }],
       ])('returns a 400 when adding an item with %s', async (_, override) => {
         const {
           data: { cart },
@@ -539,6 +540,29 @@ medusaIntegrationTestRunner({
         ).toBe(true);
       });
 
+      it('never orders a line added while the checkout runs', async () => {
+        for (let run = 0; run < 3; run += 1) {
+          const cart = await cartWith(1);
+
+          const [placed] = await Promise.all([
+            complete(cart),
+            post(`/store/offer-carts/${cart.id}/items`, {
+              offer_id: warehouseOfferId,
+              quantity: 1,
+            }),
+          ]);
+
+          if (placed.status === 200) {
+            const order = await getContainer()
+              .resolve(Modules.ORDER)
+              .retrieveOrder(placed.data.order.id, { relations: ['items'] });
+            expect(order.items).toHaveLength(1);
+          } else {
+            expect(placed.data.code).toBe('CART_CHANGED');
+          }
+        }
+      });
+
       it('refuses checkout without the fingerprint of the cart the visitor saw', async () => {
         const cart = await cartWith(1);
 
@@ -715,6 +739,35 @@ medusaIntegrationTestRunner({
         },
       );
 
+      it('refuses a cart for an email whose local part is longer than 64 characters', async () => {
+        const response = await post('/store/offer-carts', {
+          email: `${'a'.repeat(65)}@b.co`,
+        });
+
+        expect(response.status).toBe(400);
+      });
+
+      it('refuses the stock Medusa routes a shop without accounts or returns never uses', async () => {
+        const cart = await cartWith(1);
+
+        const refused = await Promise.all(
+          [
+            api.get(`/store/carts/${cart.id}`, storeHeaders),
+            api.post('/store/returns', {}, storeHeaders),
+            api.get('/store/customers/me', storeHeaders),
+            api.post('/store/customers', {}, storeHeaders),
+            api.post('/auth/customer/emailpass/register', {
+              email: 'spam@example.com',
+              password: 'spam-spam-spam',
+            }),
+          ].map((request) => request.catch((error) => error.response)),
+        );
+
+        expect(refused.map(({ status }) => status)).toEqual([
+          404, 404, 404, 404, 404,
+        ]);
+      });
+
       it('answers 404 for a line removed from an unknown cart', async () => {
         const response = await api
           .delete('/store/offer-carts/cart_DOESNOTEXIST/items/x', storeHeaders)
@@ -804,7 +857,7 @@ medusaIntegrationTestRunner({
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, Intercars',
             'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
@@ -823,7 +876,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
         );
       });
 
@@ -1074,7 +1127,7 @@ medusaIntegrationTestRunner({
             ),
           );
           expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
-            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии',
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, Battery shop',
             `+ ${SERVICE}: 2\u00a0500 RSD`,
             'Итого: 12\u00a0500 RSD',
           ]);

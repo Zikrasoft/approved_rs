@@ -40,6 +40,7 @@ const lineSchema = z
       .nullish()
       .catch(null)
       .transform((value) => value ?? null),
+    supplier: filled,
   })
   .transform((line) => ({
     offerId: line.offer_id,
@@ -51,6 +52,7 @@ const lineSchema = z
       (line.addon_offer_id || line.addon_for ? ('service' as const) : null),
     inStock: line.in_stock,
     leadTimeDays: line.lead_time_days,
+    supplier: line.supplier,
   }));
 
 export type Line = z.output<typeof lineSchema>;
@@ -67,7 +69,13 @@ export const offerLineMetadata = (
   offerId: string,
   partIdentifierId: string,
   part: ListedPart,
-) => ({ offer_id: offerId, part_identifier_id: partIdentifierId, ...part });
+  supplier: string,
+) => ({
+  offer_id: offerId,
+  part_identifier_id: partIdentifierId,
+  supplier,
+  ...part,
+});
 
 export const offerLineTitle = ({ name, brand, number }: ListedPart) =>
   normalizePartNumber(name).includes(normalizePartNumber(number))

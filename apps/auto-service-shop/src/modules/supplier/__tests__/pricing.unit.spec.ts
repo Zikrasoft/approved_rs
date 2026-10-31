@@ -92,4 +92,12 @@ describe('storeOffers', () => {
       ]).map(({ id }) => id),
     ).toEqual(['dinar']);
   });
+
+  it('leaves out an offer that would sell for nothing', () => {
+    expect(
+      storeOffers([offer('free', 0.4, 5, 0), offer('paid', 1000, 1, 0)]).map(
+        ({ id }) => id,
+      ),
+    ).toEqual(['paid']);
+  });
 });

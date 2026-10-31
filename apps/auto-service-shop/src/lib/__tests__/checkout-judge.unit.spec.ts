@@ -85,6 +85,16 @@ describe('judgeCheckout', () => {
     });
   });
 
+  it('refuses an Offer that sells for nothing, even at the price the visitor saw', () => {
+    expect(
+      judgeCheckout(
+        [part('l1', 'o1', 1, 0)],
+        quotes({ o1: quote({ unit_price: 0 }) }),
+        addons(),
+      ),
+    ).toEqual({ refusal: 'OFFER_MISSING' });
+  });
+
   it('refuses more than the supplier has in stock', () => {
     expect(
       judgeCheckout(

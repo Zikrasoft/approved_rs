@@ -91,6 +91,29 @@ medusaIntegrationTestRunner({
           expect(response.status).toBe(400);
         });
 
+        it('returns a 400 for a search query longer than a part name', async () => {
+          const response = await api
+            .get(`/admin/parts?q=${'a'.repeat(201)}`, adminHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+        });
+
+        it('returns at most a page of parts for a loose query', async () => {
+          await catalog.createParts(
+            Array.from({ length: 51 }, (_, index) => ({
+              name: `Admin-test bulk part ${index}`,
+            })),
+          );
+
+          const response = await api.get(
+            '/admin/parts?q=bulk%20part',
+            adminHeaders,
+          );
+
+          expect(response.data.parts).toHaveLength(50);
+        });
+
         it('returns no parts for a number nothing matches', async () => {
           const response = await api.get(
             '/admin/parts?q=NOTHING-MATCHES-THIS-1',

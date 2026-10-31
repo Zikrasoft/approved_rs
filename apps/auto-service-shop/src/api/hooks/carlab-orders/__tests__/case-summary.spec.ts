@@ -146,6 +146,9 @@ medusaIntegrationTestRunner({
         const response = await summarise(order.id);
 
         expect(response.status).toBe(409);
+        expect(response.data.message).toBe(
+          `Order ${order.id} is pending, not completed`,
+        );
       });
 
       it.each([

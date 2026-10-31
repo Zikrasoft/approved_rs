@@ -28,7 +28,12 @@ describe('a CRM loss the shop cannot cancel', () => {
     const req = {
       validatedBody: { outcome: 'canceled' },
       params: { id: 'order_1' },
-      scope: { resolve: () => orders },
+      scope: {
+        resolve: (key: string) =>
+          key === 'locking'
+            ? { execute: (_key: string, job: () => unknown) => job() }
+            : orders,
+      },
     } as unknown as MedusaRequest<{ outcome: 'canceled' }>;
 
     await expect(POST(req, {} as MedusaResponse)).rejects.toThrow(

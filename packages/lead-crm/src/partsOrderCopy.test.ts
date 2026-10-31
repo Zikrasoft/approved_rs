@@ -25,7 +25,11 @@ describe('PARTS_ORDER_COPY', () => {
       '+ Mounting: 50 RSD',
     );
     expect(PARTS_ORDER_COPY.total('250 RSD')).toBe('Итого: 250 RSD');
-    expect(PARTS_ORDER_COPY.leftOut(3)).toBe('Не поместилось позиций: 3');
+    expect(
+      PARTS_ORDER_COPY.leftOut(3, 'https://admin.carlab.rs/app/orders/o1'),
+    ).toBe(
+      'Не поместилось позиций: 3, весь заказ: https://admin.carlab.rs/app/orders/o1',
+    );
   });
 
   it('names installation at CarLab and says when it is free', () => {

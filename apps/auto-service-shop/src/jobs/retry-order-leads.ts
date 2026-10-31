@@ -2,6 +2,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
 import {
+  alertUndeliveredOrder,
   handCancelToLeadRoute,
   handOrderToLeadRoute,
   leadHandoff,
@@ -23,9 +24,12 @@ export async function retryOrderLeadsAt(container: MedusaContainer, now: Date) {
   );
   for (const { id, status, metadata } of orders) {
     const lead = leadHandoff(metadata);
-    if (status !== 'canceled' && !lead.handed_off_at && !lead.gave_up) {
-      await handOrderToLeadRoute(container, id);
+    if (status === 'canceled' || lead.handed_off_at || lead.alerted_at) {
+      continue;
     }
+    await (lead.gave_up
+      ? alertUndeliveredOrder(container, id)
+      : handOrderToLeadRoute(container, id));
   }
   const touched = await orderModule.listOrders(
     {

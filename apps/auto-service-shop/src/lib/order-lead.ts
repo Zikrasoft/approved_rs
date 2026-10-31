@@ -39,6 +39,7 @@ export const LEAD_LOST_AT = 'lead_lost_at';
 export const LEAD_LOST_ERROR = 'lead_lost_error';
 export const LEAD_LOST_ATTEMPTS = 'lead_lost_attempts';
 export const LEAD_CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
+export const LEAD_CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -92,11 +93,11 @@ const withReadiness = (
   text: string,
   metadata: Record<string, unknown> | null | undefined,
 ) => {
-  const { inStock, leadTimeDays } = readLine(metadata);
-  if (inStock === null || leadTimeDays === null) return text;
+  const { inStock, leadTimeDays, supplier } = readLine(metadata);
   const readiness = [
     inStock && PARTS_ORDER_COPY.inStock,
-    leadTimeDays > 0 && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
+    leadTimeDays && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
+    supplier,
   ]
     .filter(Boolean)
     .join(', ');
@@ -106,7 +107,10 @@ const withReadiness = (
 export const carLabel = ({ model, engine }: Vehicle): string =>
   `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
 
-export function orderLeadForm(order: LeadOrder): URLSearchParams {
+export function orderLeadForm(
+  order: LeadOrder,
+  adminOrigin: string,
+): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
   const currency = order.currency_code.toUpperCase();
   const money = (amount: number) =>
@@ -141,7 +145,8 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     tail: [PARTS_ORDER_COPY.total(money(total))],
     note: contact.comment ?? '',
     limit: MAX_COMMENT_LENGTH,
-    more: PARTS_ORDER_COPY.leftOut,
+    more: (count) =>
+      PARTS_ORDER_COPY.leftOut(count, `${adminOrigin}/app/orders/${order.id}`),
   });
   return new URLSearchParams({
     contact: contact.contact,
@@ -254,13 +259,19 @@ export async function handOrderToLeadRoute(
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let displayId: number | string = id;
   try {
-    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
+    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET, ADMIN_CORS } = parseEnv(
+      process.env,
+    );
     if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
       throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
     }
     const order = await readLeadOrder(container, id);
     displayId = order.display_id;
-    await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order), SHOP_LEAD_SECRET);
+    await sendOrderLead(
+      LEAD_ROUTE_URL,
+      orderLeadForm(order, ADMIN_CORS.split(',')[0]),
+      SHOP_LEAD_SECRET,
+    );
     logger.info(`Order ${id} handed to the lead pipeline`);
     await recordHandOff(container, id, () => ({
       [LEAD_HANDED_OFF_AT]: new Date().toISOString(),
@@ -275,17 +286,48 @@ export async function handOrderToLeadRoute(
       [LEAD_HANDOFF_ATTEMPTS]: handOffAttempts(metadata) + 1,
     }));
     if (handOffAttempts(recorded) < LEAD_HANDOFF_MAX_ATTEMPTS) return;
-    const alerted = await alertOwner(
+    await alertOwnerOnce(
+      container,
+      id,
+      LEAD_OWNER_ALERTED_AT,
       PARTS_ORDER_COPY.undelivered(displayId, reason),
     );
-    if (!alerted) {
-      logger.error(`Order ${id} gave up on the lead pipeline, nobody alerted`);
-      return;
-    }
-    await recordHandOff(container, id, () => ({
-      [LEAD_OWNER_ALERTED_AT]: new Date().toISOString(),
-    }));
   }
+}
+
+async function alertOwnerOnce(
+  container: MedusaContainer,
+  id: string,
+  stamp: string,
+  text: string,
+): Promise<void> {
+  if (!(await alertOwner(text))) {
+    container
+      .resolve(ContainerRegistrationKeys.LOGGER)
+      .error(`Order ${id} gave up on the lead pipeline, nobody alerted yet`);
+    return;
+  }
+  await recordHandOff(container, id, () => ({
+    [stamp]: new Date().toISOString(),
+  }));
+}
+
+export async function alertUndeliveredOrder(
+  container: MedusaContainer,
+  id: string,
+): Promise<void> {
+  const { metadata, display_id } = await container
+    .resolve(Modules.ORDER)
+    .retrieveOrder(id);
+  await alertOwnerOnce(
+    container,
+    id,
+    LEAD_OWNER_ALERTED_AT,
+    PARTS_ORDER_COPY.undelivered(
+      display_id ?? id,
+      String(metadata?.[LEAD_HANDOFF_ERROR] ?? ''),
+    ),
+  );
 }
 
 export async function handCancelToLeadRoute(
@@ -299,9 +341,20 @@ export async function handCancelToLeadRoute(
     !metadata?.[LEAD_HANDED_OFF_AT] ||
     metadata[LEAD_LOST_AT] ||
     metadata[LEAD_CANCEL_REFUSED_AT] ||
-    attemptsAt(metadata, LEAD_LOST_ATTEMPTS) >= LEAD_HANDOFF_MAX_ATTEMPTS
+    metadata[LEAD_CANCEL_ALERTED_AT]
   )
     return;
+  const alertUndelivered = (reason: string) =>
+    alertOwnerOnce(
+      container,
+      id,
+      LEAD_CANCEL_ALERTED_AT,
+      PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
+    );
+  if (attemptsAt(metadata, LEAD_LOST_ATTEMPTS) >= LEAD_HANDOFF_MAX_ATTEMPTS) {
+    await alertUndelivered(String(metadata[LEAD_LOST_ERROR] ?? ''));
+    return;
+  }
   try {
     const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
     if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
@@ -321,8 +374,13 @@ export async function handCancelToLeadRoute(
     }));
   } catch (error) {
     const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-    if (error instanceof LeadRouteRefusal && error.status === 409) {
-      logger.warn(`Order ${id} is canceled, but its Lead is already won`);
+    if (
+      error instanceof LeadRouteRefusal &&
+      (error.status === 409 || error.status === 404)
+    ) {
+      logger.warn(
+        `Order ${id} is canceled, but the CRM refused it (${error.status}: its Lead is won or deleted)`,
+      );
       await recordHandOff(container, id, () => ({
         [LEAD_CANCEL_REFUSED_AT]: new Date().toISOString(),
       }));
@@ -338,11 +396,6 @@ export async function handCancelToLeadRoute(
     }));
     if (attemptsAt(recorded, LEAD_LOST_ATTEMPTS) < LEAD_HANDOFF_MAX_ATTEMPTS)
       return;
-    if (
-      !(await alertOwner(
-        PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
-      ))
-    )
-      logger.error(`Order ${id} gave up on its cancel, nobody alerted`);
+    await alertUndelivered(reason);
   }
 }

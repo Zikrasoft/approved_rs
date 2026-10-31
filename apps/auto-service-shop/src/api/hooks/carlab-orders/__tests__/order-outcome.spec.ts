@@ -124,7 +124,40 @@ medusaIntegrationTestRunner({
         const response = await decide(order.id, 'canceled');
 
         expect(response.status).toBe(409);
+        expect(response.data.message).toBe(
+          `Order ${order.id} is already completed`,
+        );
         expect(await statusOf(order.id)).toBe('completed');
+      });
+
+      it('settles opposite outcomes sent at once as one, refusing the other', async () => {
+        const order = await placeOrder();
+
+        const answers = await Promise.all([
+          decide(order.id, 'completed'),
+          decide(order.id, 'canceled'),
+        ]);
+
+        const settled = answers.find(({ status }) => status === 200);
+        expect(answers.map(({ status }) => status).sort()).toEqual([200, 409]);
+        expect(await statusOf(order.id)).toBe(settled.data.status);
+      });
+
+      it('cancels once for the same loss sent three times at once, and keeps the lost mark', async () => {
+        const order = await placeOrder();
+
+        const answers = await Promise.all(
+          Array.from({ length: 3 }, () => decide(order.id, 'canceled')),
+        );
+
+        expect(answers.map(({ status }) => status)).toEqual([200, 200, 200]);
+        const stored = await getContainer()
+          .resolve(Modules.ORDER)
+          .retrieveOrder(order.id);
+        expect(stored.status).toBe('canceled');
+        expect(stored.metadata?.lead_lost_at).toBeTruthy();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        expect(posts).toEqual([]);
       });
 
       it.each([
@@ -180,50 +213,58 @@ medusaIntegrationTestRunner({
         expect(posts).toHaveLength(2);
       });
 
-      it('stops telling the bot a cancel it refused because the Lead is won', async () => {
-        leadRouteStatus = 409;
-        const order = await placeOrder();
-        const metadataOf = async () =>
-          (await getContainer().resolve(Modules.ORDER).retrieveOrder(order.id))
-            .metadata ?? {};
-
-        await api.post(`/admin/orders/${order.id}/cancel`, {}, adminHeaders);
-        await waitFor(async () => (await metadataOf()).lead_cancel_refused_at);
-        await retryOrderLeadsAt(getContainer(), new Date());
-
-        expect(
-          posts.filter(({ body }) => body.order_id === order.id),
-        ).toHaveLength(1);
-        expect((await metadataOf()).lead_cancel_refused_at).toEqual(
-          expect.any(String),
-        );
-        expect((await metadataOf()).lead_lost_at).toBeUndefined();
-      });
-
-      it.each([503, 404])(
-        'gives up on a cancel the bot keeps answering %s',
+      it.each([
+        [409, 'won'],
+        [404, 'deleted'],
+      ])(
+        'stops telling the bot a cancel it answered %s, as its Lead is %s',
         async (status) => {
           leadRouteStatus = status;
           const order = await placeOrder();
+          const metadataOf = async () =>
+            (
+              await getContainer()
+                .resolve(Modules.ORDER)
+                .retrieveOrder(order.id)
+            ).metadata ?? {};
+
           await api.post(`/admin/orders/${order.id}/cancel`, {}, adminHeaders);
           await waitFor(
-            async () =>
-              (
-                await getContainer()
-                  .resolve(Modules.ORDER)
-                  .retrieveOrder(order.id)
-              ).metadata?.lead_lost_attempts,
+            async () => (await metadataOf()).lead_cancel_refused_at,
           );
-
-          for (let run = 0; run < 15; run += 1) {
-            await retryOrderLeadsAt(getContainer(), new Date());
-          }
+          await retryOrderLeadsAt(getContainer(), new Date());
 
           expect(
             posts.filter(({ body }) => body.order_id === order.id),
-          ).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
+          ).toHaveLength(1);
+          expect((await metadataOf()).lead_cancel_refused_at).toEqual(
+            expect.any(String),
+          );
+          expect((await metadataOf()).lead_lost_at).toBeUndefined();
         },
       );
+
+      it('gives up on a cancel the bot keeps answering 503', async () => {
+        leadRouteStatus = 503;
+        const order = await placeOrder();
+        await api.post(`/admin/orders/${order.id}/cancel`, {}, adminHeaders);
+        await waitFor(
+          async () =>
+            (
+              await getContainer()
+                .resolve(Modules.ORDER)
+                .retrieveOrder(order.id)
+            ).metadata?.lead_lost_attempts,
+        );
+
+        for (let run = 0; run < 15; run += 1) {
+          await retryOrderLeadsAt(getContainer(), new Date());
+        }
+
+        expect(
+          posts.filter(({ body }) => body.order_id === order.id),
+        ).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
+      });
 
       it('hands a canceled Order that never reached the bot to nobody', async () => {
         const order = await placeOrder({ lead_handed_off_at: null });

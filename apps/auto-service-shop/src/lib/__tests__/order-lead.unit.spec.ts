@@ -10,6 +10,8 @@ import {
   sendOrderLead,
 } from '../order-lead';
 
+const ADMIN = 'https://admin.carlab.rs';
+
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
   id: 'order_1',
   display_id: 12,
@@ -28,7 +30,7 @@ const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
 
 describe('orderLeadForm', () => {
   it('puts the car before the lines and the total and note after them', () => {
-    const form = orderLeadForm(order());
+    const form = orderLeadForm(order(), ADMIN);
 
     expect(form.get('service')).toBe('parts-order');
     expect(form.get('order_id')).toBe('order_1');
@@ -56,6 +58,7 @@ describe('orderLeadForm', () => {
           meta_ids: '{"fbp":"fb.1.1.1"}',
         },
       }),
+      ADMIN,
     );
 
     expect(Object.fromEntries(form)).toMatchObject({
@@ -78,6 +81,7 @@ describe('orderLeadForm', () => {
         order({
           items: [line(true, 0), line(true, 2), line(false, 1), line(false, 5)],
         }),
+        ADMIN,
       ).get('comment') ?? '';
 
     expect(comment.split('\n').slice(3, 7)).toEqual([
@@ -85,6 +89,25 @@ describe('orderLeadForm', () => {
       'Oil × 1: 100 RSD, в наличии, забрать через 2 дня',
       'Oil × 1: 100 RSD, забрать через 1 день',
       'Oil × 1: 100 RSD, забрать через 5 дней',
+    ]);
+  });
+
+  it('names the supplier, so two lines of one part from two suppliers differ', () => {
+    const line = (supplier: string) => ({
+      title: 'Pads',
+      unit_price: 100,
+      quantity: 1,
+      metadata: { in_stock: true, lead_time_days: 0, supplier },
+    });
+    const comment =
+      orderLeadForm(
+        order({ items: [line('Intercars'), line('Autodelovi')] }),
+        ADMIN,
+      ).get('comment') ?? '';
+
+    expect(comment.split('\n').slice(3, 5)).toEqual([
+      'Pads × 1: 100 RSD, в наличии, Intercars',
+      'Pads × 1: 100 RSD, в наличии, Autodelovi',
     ]);
   });
 
@@ -136,6 +159,7 @@ describe('orderLeadForm', () => {
             },
           ],
         }),
+        ADMIN,
       ).get('comment') ?? '';
 
     expect(comment.split('\n').slice(3, 9)).toEqual([
@@ -176,6 +200,7 @@ describe('orderLeadForm', () => {
             },
           ],
         }),
+        ADMIN,
       ).get('comment') ?? '';
 
     expect(comment.split('\n').slice(3, 7)).toEqual([
@@ -190,6 +215,7 @@ describe('orderLeadForm', () => {
     const comment =
       orderLeadForm(
         order({ items: [{ title: 'Oil', unit_price: 2400, quantity: 1 }] }),
+        ADMIN,
       ).get('comment') ?? '';
 
     expect(comment).toContain('Итого: 2\u00a0400 RSD');
@@ -202,11 +228,11 @@ describe('orderLeadForm', () => {
       quantity: 1,
     }));
 
-    const comment = orderLeadForm(order({ items })).get('comment') ?? '';
+    const comment = orderLeadForm(order({ items }), ADMIN).get('comment') ?? '';
 
     expect(comment.length).toBeLessThanOrEqual(MAX_COMMENT_LENGTH);
     expect(comment).toMatch(
-      /\nНе поместилось позиций: \d+\nИтого: 20\u00a0000 RSD\n/,
+      /\nНе поместилось позиций: \d+, весь заказ: https:\/\/admin\.carlab\.rs\/app\/orders\/order_1\nИтого: 20\u00a0000 RSD\n/,
     );
     expect(comment.endsWith('Pozvati posle 17h')).toBe(true);
   });
