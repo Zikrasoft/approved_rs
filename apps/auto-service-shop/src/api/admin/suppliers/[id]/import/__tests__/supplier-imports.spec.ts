@@ -22,10 +22,8 @@ import { publishAllNumbers } from '../../../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
 import type { ImportSummary } from '../../../../../../lib/suppliers/import';
-import {
-  IMAGE_LOOKUP_REGISTRATION,
-  publicLookup,
-} from '../../../../../../lib/suppliers/mirrored-images';
+import { publicLookup } from '../../../../../../lib/private-address';
+import { IMAGE_LOOKUP_REGISTRATION } from '../../../../../../lib/suppliers/mirrored-images';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../../modules/publish';

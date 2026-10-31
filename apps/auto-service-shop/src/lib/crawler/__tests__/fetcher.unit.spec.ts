@@ -207,6 +207,27 @@ describe('crawleeFetcher', () => {
     expect(web.hits('/p/1')[0].headers['accept-language']).toBe('sr-RS');
   });
 
+  const redirectTo =
+    (location: () => string): Handler =>
+    (_request, response) =>
+      response.writeHead(302, { location: location() }).end();
+
+  it('refuses a redirect to a private address without following it', async () => {
+    web = await site({
+      '/hop': redirectTo(() => web.url('/p/1')),
+      '/p/1': html('<html>inside</html>'),
+    });
+    open();
+
+    const fetched = await get('/hop');
+
+    expect(fetched).toMatchObject({
+      kind: 'error',
+      reason: expect.stringContaining('is a private address'),
+    });
+    expect(web.hits('/p/1')).toHaveLength(0);
+  });
+
   it('reports a host that does not answer as an error', async () => {
     web = await site({});
     const url = web.url('/p/1');
@@ -233,6 +254,25 @@ describe('crawleeFetcher', () => {
 
       expect(fetched).toMatchObject({ kind: 'blocked' });
       expect(web.hits('/p/1')).toHaveLength(4);
+    },
+  );
+
+  withBrowser(
+    'refuses a page the browser reached through a redirect to a private address',
+    async () => {
+      web = await site({
+        '/hop': redirectTo(() =>
+          web.url('/p/1').replace('127.0.0.1', 'localhost'),
+        ),
+        '/p/1': html('<html>inside</html>'),
+      });
+      open('browser');
+
+      const fetched = await get('/hop');
+
+      expect(fetched).toMatchObject({
+        reason: expect.stringContaining('is a private address'),
+      });
     },
   );
 
