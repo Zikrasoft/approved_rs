@@ -1,4 +1,5 @@
-import { leadHandoff, type LeadOrder } from '../order-lead';
+import type { LeadOrder } from '../order-lead';
+import { orderLeadStatus } from '../order-lead-sync';
 import { carlabOrderView } from '../order-view';
 
 const order = (overrides: Partial<LeadOrder> = {}): LeadOrder => ({
@@ -131,10 +132,10 @@ describe('carlabOrderView', () => {
   });
 });
 
-describe('leadHandoff', () => {
+describe('orderLeadStatus', () => {
   it('reads a handed off lead', () => {
     expect(
-      leadHandoff({
+      orderLeadStatus({
         lead_handed_off_at: '2026-10-22T19:35:12.000Z',
         lead_handoff_error: '',
         lead_handoff_attempts: '',
@@ -150,7 +151,7 @@ describe('leadHandoff', () => {
 
   it('reads a lead the route kept refusing until the owner was alerted', () => {
     expect(
-      leadHandoff({
+      orderLeadStatus({
         lead_handoff_error: 'The lead route answered 500',
         lead_handoff_attempts: 6,
         lead_owner_alerted_at: '2026-10-22T20:35:12.000Z',

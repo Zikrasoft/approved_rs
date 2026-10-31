@@ -31,5 +31,10 @@ describe('CommonJS build', () => {
     expect(require('@podbor/lead-crm/vin').vinOf('wва35вg070n074158')).toBe(
       'WBA35BG070N074158',
     );
+    const wire = require('@podbor/lead-crm/shop-orders-wire');
+    expect(wire.ORDER_OUTCOMES).toEqual(['completed', 'canceled']);
+    expect(
+      wire.shopOrderEventSchema.parse({ event: 'canceled', order_id: 'o_1' }),
+    ).toEqual({ event: 'canceled', order_id: 'o_1' });
   });
 });

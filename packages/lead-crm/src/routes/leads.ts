@@ -29,6 +29,7 @@ export interface LeadsRouteOptions<L extends string> {
   localeCookie: string;
   thanksPath: (locale: L, service?: string) => string;
   missingFieldsMessage: Record<L, string>;
+  // TODO: drop orderCanceled and both shop branches below one release after createShopOrdersRoute ships, once no deployed shop posts orders here.
   orderCanceled?: {
     secret: string | undefined;
     cancel: (orderId: string) => Promise<CancelOrderResult>;
@@ -108,14 +109,20 @@ export function createLeadsRoute<L extends string>({
     if (!submission.success) {
       return refusalPage(locale, missingFieldsMessage[locale]);
     }
-    if (
-      submission.data.orderId &&
-      !secretMatches(
-        bearerToken(request.headers.get('authorization')),
-        orderCanceled?.secret,
+    if (submission.data.orderId) {
+      if (
+        !secretMatches(
+          bearerToken(request.headers.get('authorization')),
+          orderCanceled?.secret,
+        )
       )
-    )
-      return new Response(null, { status: 401 });
+        return new Response(null, { status: 401 });
+      const { stored, delivered } = await notifyLead(
+        { ...submission.data, locale },
+        '[leads]',
+      );
+      return new Response(null, { status: stored || delivered ? 201 : 503 });
+    }
 
     waitUntil(notifyLead({ ...submission.data, locale }, '[leads]'));
 

@@ -1,10 +1,14 @@
 import { isClosed, type StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Notifier } from './telegram/notify.ts';
+import { orderOutcomePath, type OrderOutcome } from './shopOrdersWire.ts';
 
 const SHOP_TIMEOUT_MS = 15_000;
 
-const ORDER_OUTCOME = { won: 'completed', lost: 'canceled' } as const;
+const ORDER_OUTCOME = {
+  won: 'completed',
+  lost: 'canceled',
+} as const satisfies Record<string, OrderOutcome>;
 
 type ClosedLead = StoredLead & {
   orderId: string;
@@ -38,10 +42,7 @@ export function createShopOrders({
 }: ShopOrdersOptions) {
   async function tellShop(lead: ClosedLead): Promise<'settled' | 'conflict'> {
     const response = await fetch(
-      new URL(
-        `/hooks/carlab-orders/${encodeURIComponent(lead.orderId)}/outcome`,
-        shopUrl,
-      ),
+      new URL(orderOutcomePath(lead.orderId), shopUrl),
       {
         method: 'POST',
         headers: {

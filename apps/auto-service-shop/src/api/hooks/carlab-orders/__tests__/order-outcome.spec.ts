@@ -6,7 +6,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { retryOrderLeadsAt } from '../../../../jobs/retry-order-leads';
-import { LEAD_HANDOFF_MAX_ATTEMPTS } from '../../../../lib/order-lead';
+import { MAX_HANDOFF_ATTEMPTS } from '../../../../lib/order-lead-sync';
 
 const SHOP_LEAD_SECRET = 'shop-lead-secret';
 const SHOP_ORDER_OUTCOME_SECRET = 'shop-order-outcome-secret';
@@ -20,7 +20,7 @@ medusaIntegrationTestRunner({
       };
       let leadRoute: Server;
       let leadRouteStatus = 204;
-      const posts: { authorization?: string; body: Record<string, string> }[] =
+      const posts: { authorization?: string; body: Record<string, unknown> }[] =
         [];
 
       const placeOrder = (metadata: Record<string, unknown> = {}) =>
@@ -66,7 +66,7 @@ medusaIntegrationTestRunner({
           request.on('end', () => {
             posts.push({
               authorization: request.headers.authorization,
-              body: Object.fromEntries(new URLSearchParams(body)),
+              body: JSON.parse(body),
             });
             response.writeHead(leadRouteStatus).end();
           });
@@ -195,7 +195,7 @@ medusaIntegrationTestRunner({
         expect(posts).toEqual([
           {
             authorization: `Bearer ${SHOP_LEAD_SECRET}`,
-            body: { order_id: order.id, order_outcome: 'canceled' },
+            body: { event: 'canceled', order_id: order.id },
           },
         ]);
       });
@@ -215,7 +215,7 @@ medusaIntegrationTestRunner({
 
       it.each([
         [409, 'won'],
-        [404, 'deleted'],
+        [410, 'deleted'],
       ])(
         'stops telling the bot a cancel it answered %s, as its Lead is %s',
         async (status) => {
@@ -263,7 +263,7 @@ medusaIntegrationTestRunner({
 
         expect(
           posts.filter(({ body }) => body.order_id === order.id),
-        ).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
+        ).toHaveLength(MAX_HANDOFF_ATTEMPTS);
       });
 
       it('hands a canceled Order that never reached the bot to nobody', async () => {
