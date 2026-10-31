@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
-import { slugOf } from '../../../lib/slug';
+import { slugOf } from '../../../modules/_shared/slug';
 import { EditedBy } from '../../components/edited-by';
 import {
   LIST_TABLE,

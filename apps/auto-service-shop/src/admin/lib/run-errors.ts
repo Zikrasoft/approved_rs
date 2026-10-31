@@ -1,4 +1,7 @@
-import { ABANDONED, INTERRUPTED_BY_RESTART } from '../../lib/run-errors';
+import {
+  ABANDONED,
+  INTERRUPTED_BY_RESTART,
+} from '../../modules/_shared/run-errors';
 
 const KNOWN_ERRORS: Record<string, string> = {
   'OPENAI_API_KEY is not set': 'publish.knownErrors.openAiKey',

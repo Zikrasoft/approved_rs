@@ -3,7 +3,10 @@ import { CARLAB } from '@podbor/brands';
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-import { adminError, type AdminErrorCode } from '../admin-errors';
+import {
+  adminError,
+  type AdminErrorCode,
+} from '../../modules/_shared/admin-error';
 import {
   articleAnswerSchema,
   type CategoryChoice,

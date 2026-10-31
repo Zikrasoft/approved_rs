@@ -3,10 +3,10 @@ import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
 import { conflictingVehicles } from '../fitment-conflicts';
-import { slugOf, withoutCodeLists } from '../slug';
+import { slugOf, withoutCodeLists } from '../../modules/_shared/slug';
 import type { VehicleFacts } from './adapter';
 import { carMakeName } from './makes';
-import { spellingKey } from './spelling';
+import { spellingKey } from '../../modules/_shared/spelling';
 
 type Years = { year_from: number | null; year_to: number | null };
 

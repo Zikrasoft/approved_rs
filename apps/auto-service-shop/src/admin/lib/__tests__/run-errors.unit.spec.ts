@@ -1,4 +1,7 @@
-import { ABANDONED, INTERRUPTED_BY_RESTART } from '../../../lib/run-errors';
+import {
+  ABANDONED,
+  INTERRUPTED_BY_RESTART,
+} from '../../../modules/_shared/run-errors';
 import { knownError } from '../run-errors';
 
 describe('knownError', () => {

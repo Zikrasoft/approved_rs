@@ -12,7 +12,7 @@ import { imageSchema } from '@podbor/catalog-contract';
 import sharp from 'sharp';
 import { z } from 'zod';
 
-import { adminError } from './admin-errors';
+import { adminError } from '../modules/_shared/admin-error';
 import { readUpload, uploadType } from './uploads';
 import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
 import type CatalogModuleService from '../modules/catalog/service';

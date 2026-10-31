@@ -16,7 +16,7 @@ import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { AdminListPartIdentifiersType } from '../validators';
-import { literalLike } from '../../../lib/like';
+import { literalLike } from '../../../modules/_shared/like';
 
 const statusRowSchema = z.object({
   id: z.string(),

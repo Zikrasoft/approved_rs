@@ -14,7 +14,7 @@ import {
   adminPart,
   adminPartSchema,
 } from '../../../lib/admin-part';
-import { literalLike } from '../../../lib/like';
+import { literalLike } from '../../../modules/_shared/like';
 
 const PART_SEARCH_LIMIT = 50;
 

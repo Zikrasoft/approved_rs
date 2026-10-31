@@ -1,6 +1,6 @@
 import en from '../../admin/i18n/translations/en.json';
 import ru from '../../admin/i18n/translations/ru.json';
-import { ADMIN_ERROR_CODES } from '../admin-errors';
+import { ADMIN_ERROR_CODES } from '../../modules/_shared/admin-error';
 
 describe('admin error codes', () => {
   it.each([

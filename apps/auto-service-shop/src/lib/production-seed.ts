@@ -9,9 +9,9 @@ import {
 } from '@podbor/catalog-contract';
 
 import type { SupplierAdapterName } from './env';
-import { slugOf } from './slug';
+import { slugOf } from '../modules/_shared/slug';
 import { MAKE_ALIASES } from './suppliers/makes';
-import { spellingKey } from './suppliers/spelling';
+import { spellingKey } from '../modules/_shared/spelling';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';

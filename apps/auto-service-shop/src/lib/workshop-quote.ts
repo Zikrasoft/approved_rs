@@ -10,7 +10,7 @@ import type {
   WorkshopQuoteResult,
 } from '../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
-import { adminError } from './admin-errors';
+import { adminError } from '../modules/_shared/admin-error';
 import { shopAi, type CategoryChoice } from './ai';
 import { readUpload, uploadType } from './uploads';
 import { vinDecoders } from './vin/chain';

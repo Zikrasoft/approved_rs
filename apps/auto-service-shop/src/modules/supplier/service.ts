@@ -9,8 +9,8 @@ import {
 } from '@medusajs/framework/utils';
 import type { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
-import { runBoundSql } from '../../lib/bound-sql';
-import { spellingKey } from '../../lib/suppliers/spelling';
+import { runBoundSql } from '../_shared/bound-sql';
+import { spellingKey } from '../_shared/spelling';
 
 import StagedRecord from './models/staged-record';
 import Supplier from './models/supplier';

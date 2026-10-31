@@ -16,7 +16,7 @@ import { memoryStorage } from '../../../../../../../integration-tests/fakeStorag
 import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
 import { importRuns } from '../../../../../../../integration-tests/importRuns';
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
-import { adminError } from '../../../../../../lib/admin-errors';
+import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
 import { publishAllNumbers } from '../../../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
@@ -28,7 +28,7 @@ import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../../modules/publish';
 import type PublishModuleService from '../../../../../../modules/publish/service';
-import { INTERRUPTED_BY_RESTART } from '../../../../../../lib/run-errors';
+import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/_shared/run-errors';
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 

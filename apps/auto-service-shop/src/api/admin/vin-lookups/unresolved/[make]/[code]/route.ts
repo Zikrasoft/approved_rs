@@ -5,7 +5,7 @@ import type {
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
 
-import { adminError } from '../../../../../../lib/admin-errors';
+import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { createdBy } from '../../../../../../lib/editors';
 import { LINKABLE_CODE_TYPES } from '../../../../../../lib/vin/linkable';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';

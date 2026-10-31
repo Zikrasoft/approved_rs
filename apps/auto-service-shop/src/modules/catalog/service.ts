@@ -43,10 +43,10 @@ import SlugRedirect, { type SlugKind } from './models/slug-redirect';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
-import { adminError, alreadyExists } from '../../lib/admin-errors';
-import { runBoundSql } from '../../lib/bound-sql';
-import { modelSlugOf, slugOf, vehicleSlugOf } from '../../lib/slug';
-import { spellingKey } from '../../lib/suppliers/spelling';
+import { adminError, alreadyExists } from '../_shared/admin-error';
+import { runBoundSql } from '../_shared/bound-sql';
+import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
+import { spellingKey } from '../_shared/spelling';
 import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
 
 type Provenance = {
