@@ -116,6 +116,8 @@ export const partsCarContentSchema = z
             noCategories: z.string(),
             carsHeading: z.string(),
             carsLead: z.string(),
+            singleCarLabel: z.string(),
+            singleCarLead: z.string(),
           })
           .strict(),
         modelCategory: z
