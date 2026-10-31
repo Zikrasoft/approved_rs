@@ -30,13 +30,6 @@
       },
       "default": "./src/steering.ts"
     },
-    "./vin": {
-      "require": {
-        "types": "./dist/cjs/vin.d.ts",
-        "default": "./dist/cjs/vin.js"
-      },
-      "default": "./src/vin.ts"
-    },
     "./fingerprint": {
       "require": {
         "types": "./dist/cjs/fingerprint.d.ts",

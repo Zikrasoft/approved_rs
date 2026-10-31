@@ -6,7 +6,7 @@ import {
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { offerCartSchema } from './cart-wire.ts';
-import { vinOf } from './vin.ts';
+import { vinOf } from '@podbor/lead-crm/vin';
 
 export * from './cart-wire.ts';
 

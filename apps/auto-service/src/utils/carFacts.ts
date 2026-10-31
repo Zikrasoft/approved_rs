@@ -1,6 +1,6 @@
 import type { VinFacts } from '@podbor/catalog-contract';
 import { STEERING_SIDES } from '@podbor/catalog-contract/steering';
-import { vinOf } from '@podbor/catalog-contract/vin';
+import { vinOf } from '@podbor/lead-crm/vin';
 
 const STEERING_PARAM = 'steering';
 const VIN_PARAM = 'vin';
