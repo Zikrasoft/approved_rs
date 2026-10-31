@@ -75,7 +75,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 93a79daa86a8da2f
+translatedFrom: 4afd29bf7082c7be
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -96,7 +96,7 @@ translations:
     attributeYes: Da
     attributeNo: Ne
     categoryLink: Svi delovi iz kategorije
-    priceOnRequestHeading: Po porudžbini
+    priceOnRequestHeading: Cena na upit
     priceOnRequestBody: 'U katalogu ima previše delova da bismo stalno ažurirali sve cene. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
     priceOnRequestCta: Saznajte cenu i rok isporuke
     orderBody: Proverićemo kod dobavljača i poslati vam cenu i rok isporuke, obično u roku od sat vremena.
@@ -131,11 +131,11 @@ translations:
     buyButtonLabel: U korpu
     addedLabel: U korpi
     outOfStock: Nema na stanju
-    askSupplyCta: Poručite preko prodavca
+    askSupplyCta: Saznajte cenu i rok isporuke
     askedNotice: Dodato u upit. Proverićemo cenu i rok preuzimanja i javiti vam se.
     stockLimitNotice: Trenutno nema više komada ovog dela, svi dostupni su već u korpi.
     fromPrice: od {price}
-    priceOnRequestTag: Poručite
+    priceOnRequestTag: Cena na upit
     addedNotice: Dodato u korpu. Cenu ćemo još jednom proveriti prilikom potvrde porudžbine.
     addedCta: Otvorite korpu
     inquiryNotice: Trenutno ne možemo da potvrdimo cenu i dostupnost, pa smo deo dodali u upit. Javićemo vam cenu.
@@ -146,6 +146,9 @@ translations:
     installHeading: Ugradnja kod nas
     installBody: Ugradićemo ovaj deo u servisu CarLab u Beogradu. Ostavite kontakt i predložićemo vam termin koji vam odgovara.
     installCta: Zakažite ugradnju
+    askAboutPart: Pitajte za ovaj deo
+    askAboutPartMessage: '{part}: da li odgovara mom automobilu?'
+    askAboutPartVin: 'VIN: {vin}'
     crossReferencesHeading: Brojevi drugih proizvođača
     worksHeading: Već smo pronalazili ovaj deo za klijente
     applicabilityHeading: Odgovara vozilima prema podacima iz kataloga
@@ -171,7 +174,7 @@ translations:
     attributeYes: Yes
     attributeNo: No
     categoryLink: All parts in this category
-    priceOnRequestHeading: Available to order
+    priceOnRequestHeading: Price on request
     priceOnRequestBody: "Our catalogue has too many parts to keep every price up to date. Send an enquiry: we'll check fitment using your VIN and find the best price."
     priceOnRequestCta: Check price and lead time
     orderBody: We'll check with our suppliers and send you a price and lead time, usually within an hour.
@@ -206,11 +209,11 @@ translations:
     buyButtonLabel: Add to basket
     addedLabel: In basket
     outOfStock: Out of stock
-    askSupplyCta: Order through our team
+    askSupplyCta: Check price and lead time
     askedNotice: Added to your enquiry. We'll check the price and collection time and get back to you.
     stockLimitNotice: All available stock of this part is already in your basket.
     fromPrice: from {price}
-    priceOnRequestTag: Request a quote
+    priceOnRequestTag: Price on request
     addedNotice: Added to your basket. We'll confirm the price when you place your order.
     addedCta: View basket
     inquiryNotice: We can't confirm the price or availability right now, so we've added this part to your enquiry. We'll get back to you with a price.
@@ -221,6 +224,9 @@ translations:
     installHeading: Have it fitted by us
     installBody: We can fit this part at the CarLab workshop in Belgrade. Leave your contact details and we'll arrange a convenient time.
     installCta: Book fitting
+    askAboutPart: Ask about this part
+    askAboutPartMessage: '{part}: will it fit my car?'
+    askAboutPartVin: 'VIN: {vin}'
     crossReferencesHeading: Other manufacturers' part numbers
     worksHeading: We've sourced this part before
     applicabilityHeading: Vehicle fitment from catalogue data
