@@ -1,7 +1,8 @@
+import { PLACEHOLDER } from '../withPlaceholder.ts';
+
 const HTML_TAG = /<[a-zA-Z/!]/;
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
-const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
 
 function tagNamesOf(text: string): Set<string> {
   return new Set(

@@ -8,7 +8,7 @@ import { formatPhone } from '@podbor/site-kit/format-phone';
 import { notifyLead } from '@/lib/notifyLead';
 import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { PHONE_NUMBER, WHATSAPP_NUMBER } from '@/utils/constants';
+import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
@@ -29,6 +29,13 @@ export const POST = createLeadsRoute({
   refusalCopy: (locale) => {
     const form = content(locale).leadForm;
     return {
+      brand: {
+        name: SITE_NAME,
+        background: '#0a0b0c',
+        text: '#f5f3ef',
+        accent: '#ef6247',
+        onAccent: '#ffffff',
+      },
       reasons: {
         'missing-contact': MISSING_FIELDS_MESSAGE[locale],
         'invalid-phone': form.errorPhoneInvalid,

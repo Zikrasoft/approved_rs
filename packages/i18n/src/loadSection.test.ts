@@ -257,4 +257,94 @@ translations:
 
     expect(get('constructor' as 'en')).toEqual(get('ru'));
   });
+  it('serves the source string where a stale translation carries other placeholders', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const shaped = z.object({
+      offer: z.string(),
+      rows: z.array(z.object({ label: z.string() })),
+      tags: z.array(z.string()),
+      note: z.object({ text: z.string() }).optional(),
+      total: z.number(),
+    });
+    const get = loadSection(
+      shaped,
+      `
+offer: 'Есть дешевле: {offer}'
+rows:
+  - label: '{count} шт.'
+tags:
+  - Новый
+total: 3
+translations:
+  en:
+    offer: 'Other offers ({count}), from {price}'
+    rows:
+      - label: '{count} pcs'
+      - label: Extra
+    tags:
+      - New
+      - '{extra}'
+    note:
+      text: '{orphan}'
+    total: 3
+`,
+    );
+
+    expect(get('en')).toEqual({
+      offer: 'Есть дешевле: {offer}',
+      rows: [{ label: '{count} pcs' }, { label: 'Extra' }],
+      tags: ['New', '{extra}'],
+      note: { text: '{orphan}' },
+      total: 3,
+    });
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn).toHaveBeenCalledWith(
+      '[i18n] en: placeholders differ from ru, serving ru for',
+      'offer',
+    );
+    warn.mockRestore();
+  });
+
+  it('accepts placeholders in another order or repeated', () => {
+    const get = loadSection(
+      schema,
+      `
+title: '{a} и {b}'
+cta: '{a}'
+translations:
+  en:
+    title: '{b} and {a}'
+    cta: '{a}, {a}'
+`,
+    );
+
+    expect(get('en')).toEqual({ title: '{b} and {a}', cta: '{a}, {a}' });
+  });
+
+  it('names nested and listed paths whose placeholders moved', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const nested = z.object({
+      hero: z.object({ steps: z.array(z.string()) }),
+    });
+    const get = loadSection(
+      nested,
+      `
+hero:
+  steps:
+    - '{price}'
+translations:
+  sr:
+    hero:
+      steps:
+        - '{cena}'
+`,
+    );
+
+    expect(get('sr')).toEqual({ hero: { steps: ['{price}'] } });
+    expect(warn).toHaveBeenCalledWith(
+      '[i18n] sr: placeholders differ from ru, serving ru for',
+      'hero.steps[0]',
+    );
+    warn.mockRestore();
+  });
 });
