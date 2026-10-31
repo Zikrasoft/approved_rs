@@ -58,7 +58,7 @@ import {
   type CheckoutContactFields,
 } from './order-metadata';
 import { liveOffers, sellingOffers } from './suppliers/live-quote';
-import { storeOffers } from '../modules/supplier';
+import { storeOffer } from '../modules/supplier';
 import { carFor } from './vin/car-for';
 
 const offerIdOf = (item: CartItem) =>
@@ -383,7 +383,7 @@ async function sellableOffer(
   quantity: number,
 ) {
   const [row] = await liveOffers(scope, { id: [offerId] });
-  const [offer] = row ? storeOffers([row]) : [];
+  const offer = row && storeOffer(row);
   if (!row || !offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }

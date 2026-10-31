@@ -32,24 +32,29 @@ export const isSellable = (row: PricedRow): boolean =>
   inShopCurrency(row) &&
   sellPrice(row.cost_price, row.supplier.markup_percentage) > 0;
 
-const sellingRows = <Row extends PricedOfferRow>(
-  rows: Row[],
-): (Row & { price: number })[] =>
-  rows
-    .filter(isSellable)
-    .map((row) => ({
-      ...row,
-      price: sellPrice(row.cost_price, row.supplier.markup_percentage),
-    }))
-    .sort(compareOffers);
+export const storeOffer = (row: PricedOfferRow): PartOffer | null =>
+  isSellable(row)
+    ? {
+        id: row.id,
+        price: sellPrice(row.cost_price, row.supplier.markup_percentage),
+        currency: row.currency,
+        stock_quantity: row.stock_quantity,
+        lead_time_days: row.lead_time_days,
+      }
+    : null;
 
 export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
-  sellingRows(rows).map(
-    ({ id, price, currency, stock_quantity, lead_time_days }) => ({
-      id,
-      price,
-      currency,
-      stock_quantity,
-      lead_time_days,
-    }),
-  );
+  rows.flatMap((row) => storeOffer(row) ?? []).sort(compareOffers);
+
+export const offersByIdentifier = (
+  rows: (PricedOfferRow & { part_identifier_id: string })[],
+): Map<string, PartOffer[]> => {
+  const grouped = new Map<string, PricedOfferRow[]>();
+  for (const row of rows) {
+    grouped.set(row.part_identifier_id, [
+      ...(grouped.get(row.part_identifier_id) ?? []),
+      row,
+    ]);
+  }
+  return new Map([...grouped].map(([id, offers]) => [id, storeOffers(offers)]));
+};

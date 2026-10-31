@@ -14,5 +14,7 @@ export {
   type PricedOfferRow,
   sellPrice,
   SHOP_CURRENCY,
+  storeOffer,
   storeOffers,
+  offersByIdentifier,
 } from './pricing';

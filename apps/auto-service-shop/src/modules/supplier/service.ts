@@ -17,7 +17,7 @@ import StagedRecord from './models/staged-record';
 import Supplier from './models/supplier';
 import SupplierCategory from './models/supplier-category';
 import SupplierOffer from './models/supplier-offer';
-import { storeOffers } from './pricing';
+import { offersByIdentifier } from './pricing';
 
 const SupplierModuleBase = MedusaService({
   Supplier,
@@ -139,12 +139,8 @@ class SupplierModuleService extends SupplierModuleBase {
           sharedContext,
         )
       : [];
-    return new Map(
-      identifierIds.map((id) => [
-        id,
-        storeOffers(rows.filter((row) => row.part_identifier_id === id)),
-      ]),
-    );
+    const offers = offersByIdentifier(rows);
+    return new Map(identifierIds.map((id) => [id, offers.get(id) ?? []]));
   }
 
   private async lockKey(key: unknown, sharedContext: Context): Promise<void> {
