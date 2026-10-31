@@ -72,7 +72,7 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: 12e67d2cab7d3c0f
+translatedFrom: 8869d5cf028acdb2
 translations:
   sr:
     metaTitle: Korpa, CarLab
@@ -118,14 +118,17 @@ translations:
     submitLabel: Pošalji porudžbinu
     consentError: Bez saglasnosti ne možemo da prihvatimo porudžbinu
     submitError: Porudžbina nije poslata. Proverite vezu i pokušajte ponovo
+    submitErrorContacts: 'Ili pošaljite porudžbinu porukom, spisak je već u njoj:'
+    orderMessage: 'Dobar dan! Želim da poručim:'
     checkoutBlocked: 'Trenutno nije moguće kupiti: {names}. Uklonite stavku ili pošaljite upit za nju da biste mogli da pošaljete porudžbinu.'
     notices:
-      priceChanged: Cena se promenila dok ste popunjavali porudžbinu. Ažurirali smo korpu. Proverite iznos i ponovo pošaljite porudžbinu.
-      unavailable: Za jednu stavku više nema dovoljno komada na stanju. Uklonite je i ponovo pošaljite porudžbinu.
-      unreachable: Slanje porudžbine nije uspelo. Pokušajte ponovo za minut.
-      expired: Ova korpa više nije aktuelna i porudžbina nije poslata. Ponovo dodajte delove sa stranica kataloga.
+      priceChanged: Cena se promenila dok ste popunjavali porudžbinu. Ažurirali smo korpu, proverite ukupan iznos i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
+      unavailable: Jedan od artikala više nije dostupan u traženoj količini. Uklonite ga i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
+      unreachable: Slanje porudžbine nije uspelo. Pokušajte ponovo za minut. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
+      expired: Ova korpa je zastarela i porudžbina nije poslata. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
+      gone: Ova korpa je zastarela. Ponovo dodajte delove sa stranica kataloga.
       invalid: Kontakt nije prepoznat. Unesite broj telefona ili korisničko ime na Telegramu i ponovo pošaljite porudžbinu.
-      cartChanged: Sadržaj korpe je promenjen. Proverite stavke i ukupan iznos, pa ponovo pošaljite porudžbinu.
+      cartChanged: Sadržaj korpe se promenio. Proverite artikle i ukupan iznos i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
       repriced: Cena se promenila od vaše poslednje posete. Proverite iznos pre slanja porudžbine.
       offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
       stockLimit: Nema više komada ovog dela na stanju. U korpi je već cela dostupna količina.
@@ -136,6 +139,8 @@ translations:
     orderedBody: Naš saradnik će proveriti dostupnost, a zatim vam poslati poruku ili vas pozvati da potvrdi porudžbinu i termin preuzimanja. Plaćanje gotovinom pri preuzimanju.
     orderNumberTemplate: 'Broj porudžbine: {number}'
     orderedNext: Potvrdićemo dostupnost i vreme preuzimanja, obično u roku od sat vremena tokom radnog vremena.
+    orderedContact: 'Poslaćemo vam poruku putem {channel}: {contact}'
+    orderedCall: 'Pozvaćemo vas: {contact}'
     orderedCta: Nazad na katalog
     receiptQuantityTemplate: '{count} kom.'
     stickyCta: Nastavi na poručivanje
@@ -188,14 +193,17 @@ translations:
     submitLabel: Place order
     consentError: We need your consent to place the order
     submitError: Your order wasn't sent. Check your connection and try again
+    submitErrorContacts: 'Or send your order as a message. Your items are already included:'
+    orderMessage: "Hi! I'd like to order:"
     checkoutBlocked: 'Currently unavailable to buy: {names}. Remove the item or move it to a parts enquiry to place your order.'
     notices:
-      priceChanged: A price changed while you were checking out. We've updated your cart. Check the total and place your order again.
-      unavailable: The quantity requested for one of your items is no longer available. Remove it and place your order again.
-      unreachable: We couldn't place your order. Please try again in a minute.
-      expired: This cart has expired and no order was placed. Please add the parts again from the catalogue.
+      priceChanged: The price changed while you were placing your order. We've updated your cart. Please check the total and place your order again. We have your contact details and item list, and our team will message you.
+      unavailable: One of your items is no longer available in the quantity you need. Please remove it and place your order again. We have your contact details and item list, and our team will message you.
+      unreachable: We couldn't place your order. Please try again in a minute. We have your contact details and item list, and our team will message you.
+      expired: This cart has expired, and no order was placed. We have your contact details and item list, and our team will message you.
+      gone: This cart has expired. Please add your parts again from the catalogue.
       invalid: We couldn't recognise your contact details. Enter a phone number or Telegram username and place your order again.
-      cartChanged: Your cart has changed. Check the items and total, then place your order again.
+      cartChanged: Your cart has changed. Please check the items and total, then place your order again. We have your contact details and item list, and our team will message you.
       repriced: A price has changed since your last visit. Check the total before placing your order.
       offline: The shop didn't respond. Your cart hasn't changed. Please try again in a minute.
       stockLimit: There are no more of this part available right now. Your cart already contains all available stock.
@@ -206,6 +214,8 @@ translations:
     orderedBody: Our team will check availability, then message or call you to confirm your order and collection time. Pay cash on collection.
     orderNumberTemplate: 'Order number: {number}'
     orderedNext: We'll confirm availability and when you can collect, usually within an hour during business hours.
+    orderedContact: "We'll message you on {channel}: {contact}"
+    orderedCall: "We'll call you: {contact}"
     orderedCta: Back to catalogue
     receiptQuantityTemplate: 'Qty: {count}'
     stickyCta: Checkout
