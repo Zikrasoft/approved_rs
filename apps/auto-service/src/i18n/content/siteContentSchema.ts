@@ -31,6 +31,7 @@ export const siteContentSchema = z
         menuCloseLabel: z.string(),
         languageLabel: z.string(),
         cta: z.string(),
+        partsCta: z.string(),
         phoneLabel: z.string(),
       })
       .strict(),

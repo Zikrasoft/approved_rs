@@ -14,6 +14,7 @@ header:
   menuCloseLabel: Закрыть меню
   languageLabel: Язык
   cta: Записаться
+  partsCta: Подобрать
   phoneLabel: Позвонить
 footer:
   tagline: Автосервис в Белграде. Диагностика, ремонт, кузов и покраска, подбор запчастей.
