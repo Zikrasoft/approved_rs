@@ -66,6 +66,7 @@
   --color-line-strong: #cacace;
   --color-line-field: #919199;
   --color-signal: #fa6610;
+  --color-signal-hover: #e85e0e;
   --color-signal-ink: #bc4d0c;
   --color-signal-dark: #9e400a;
   --color-go: #18814d;
@@ -127,8 +128,8 @@
   }
 
   ::selection {
-    background: var(--color-signal-ink);
-    color: #fff;
+    background: var(--color-signal);
+    color: var(--color-ink);
   }
 
   :focus-visible {
@@ -216,12 +217,12 @@
   }
 
   .btn-primary {
-    background-color: var(--color-signal-ink);
-    color: #fff;
+    background-color: var(--color-signal);
+    color: var(--color-ink);
   }
 
   .btn-primary:hover {
-    background-color: var(--color-signal-dark);
+    background-color: var(--color-signal-hover);
   }
 
   .btn-secondary {
@@ -291,12 +292,12 @@
   }
 
   .chip-accent {
-    background-color: var(--color-signal-ink);
-    color: #fff;
+    background-color: var(--color-signal);
+    color: var(--color-ink);
   }
 
   .chip-accent:hover {
-    background-color: var(--color-signal-dark);
+    background-color: var(--color-signal-hover);
   }
 
   .link-muted {
