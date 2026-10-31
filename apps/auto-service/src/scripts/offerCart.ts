@@ -52,6 +52,11 @@ export function stepTarget(
     : { quantity: wanted, capped: false };
 }
 
+export const capNotice = ({
+  lead_time_days,
+}: Pick<CartLine, 'lead_time_days'>): string =>
+  lead_time_days > 0 ? 'order-limit' : 'stock-limit';
+
 export function defineOfferCart(tagName = 'offer-cart'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
@@ -370,7 +375,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           line.max_quantity ?? null,
         );
         if (capped) {
-          this.stepNotice = 'stock-limit';
+          this.stepNotice = capNotice(line);
           showOnly(this, 'data-notice', this.stepNotice);
         }
         if (target === current) return;
