@@ -277,7 +277,7 @@ export function statusChangeText(lead: StoredLead, by: Role): string {
 
 export function orderConflictText(lead: StoredLead & { orderId: string }) {
   return [
-    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе.`,
+    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
     `Сверь заказ в админке магазина: сами они не сойдутся.`,
   ].join('\n');
 }
