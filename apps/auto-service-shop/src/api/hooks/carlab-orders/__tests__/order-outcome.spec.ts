@@ -124,7 +124,40 @@ medusaIntegrationTestRunner({
         const response = await decide(order.id, 'canceled');
 
         expect(response.status).toBe(409);
+        expect(response.data.message).toBe(
+          `Order ${order.id} is already completed`,
+        );
         expect(await statusOf(order.id)).toBe('completed');
+      });
+
+      it('settles opposite outcomes sent at once as one, refusing the other', async () => {
+        const order = await placeOrder();
+
+        const answers = await Promise.all([
+          decide(order.id, 'completed'),
+          decide(order.id, 'canceled'),
+        ]);
+
+        const settled = answers.find(({ status }) => status === 200);
+        expect(answers.map(({ status }) => status).sort()).toEqual([200, 409]);
+        expect(await statusOf(order.id)).toBe(settled.data.status);
+      });
+
+      it('cancels once for the same loss sent three times at once, and keeps the lost mark', async () => {
+        const order = await placeOrder();
+
+        const answers = await Promise.all(
+          Array.from({ length: 3 }, () => decide(order.id, 'canceled')),
+        );
+
+        expect(answers.map(({ status }) => status)).toEqual([200, 200, 200]);
+        const stored = await getContainer()
+          .resolve(Modules.ORDER)
+          .retrieveOrder(order.id);
+        expect(stored.status).toBe('canceled');
+        expect(stored.metadata?.lead_lost_at).toBeTruthy();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        expect(posts).toEqual([]);
       });
 
       it.each([
