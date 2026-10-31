@@ -54,7 +54,13 @@ const slotSchema = z.discriminatedUnion('kind', [
         }
       })
       .pipe(
-        z.object({ category: keySchema, model: keySchema.optional() }).strict(),
+        z
+          .object({
+            category: keySchema,
+            make: keySchema.optional(),
+            model: keySchema.optional(),
+          })
+          .strict(),
       ),
     count: z.coerce.number().int().nonnegative().optional(),
   }),

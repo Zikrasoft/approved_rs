@@ -323,7 +323,7 @@ export function createCatalogue({
         ...(q ? { q: latinBrands(q) } : {}),
         locale,
         ...(category ? { category } : {}),
-        ...(model ? { ...(make && { make }), model } : {}),
+        ...(make && model ? { make, model } : {}),
       });
       for (const facet of facets) {
         params.append('facets', facet);
