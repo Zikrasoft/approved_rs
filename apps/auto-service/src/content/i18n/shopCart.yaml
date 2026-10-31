@@ -64,7 +64,7 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: e126932fcae75de7
+translatedFrom: 060ead52657eb358
 translations:
   sr:
     metaTitle: Korpa, CarLab
@@ -76,6 +76,8 @@ translations:
     emptyHeading: Korpa je prazna
     emptyBody: Otvorite stranicu dela u katalogu i kliknite na „U korpu“.
     emptyCta: Na katalog delova
+    emptyInquiry: Niste pronašli deo koji vam treba? Pošaljite upit i pronaći ćemo odgovarajući deo za vas.
+    emptyInquiryCta: Pošalji upit
     unitTemplate: '{price} po kom.'
     increaseLabel: Dodaj još jedan
     decreaseLabel: Smanji za jedan
@@ -115,7 +117,7 @@ translations:
       unreachable: Slanje porudžbine nije uspelo. Pokušajte ponovo za minut.
       expired: Ova korpa više nije aktuelna i porudžbina nije poslata. Ponovo dodajte delove sa stranica kataloga.
       invalid: Kontakt nije prepoznat. Unesite broj telefona ili korisničko ime na Telegramu i ponovo pošaljite porudžbinu.
-      cartChanged: Korpa je izmenjena u drugoj kartici. Proverite stavke i iznos, pa ponovo pošaljite porudžbinu.
+      cartChanged: Sadržaj korpe je promenjen. Proverite stavke i ukupan iznos, pa ponovo pošaljite porudžbinu.
       repriced: Cena se promenila od vaše poslednje posete. Proverite iznos pre slanja porudžbine.
       offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
       stockLimit: Nema više komada ovog dela na stanju. U korpi je već cela dostupna količina.
@@ -141,6 +143,8 @@ translations:
     emptyHeading: Your cart is empty
     emptyBody: Open a part in the catalogue and click "Add to cart".
     emptyCta: Browse parts
+    emptyInquiry: Can't find the part you need? Send us an inquiry and we'll help you find it.
+    emptyInquiryCta: Send an inquiry
     unitTemplate: '{price} each'
     increaseLabel: Add one more
     decreaseLabel: Remove one
@@ -180,7 +184,7 @@ translations:
       unreachable: We couldn't place your order. Please try again in a minute.
       expired: This cart has expired and no order was placed. Please add the parts again from the catalogue.
       invalid: We couldn't recognise your contact details. Enter a phone number or Telegram username and place your order again.
-      cartChanged: Your cart was changed in another tab. Check the items and total, then place your order again.
+      cartChanged: Your cart has changed. Check the items and total, then place your order again.
       repriced: A price has changed since your last visit. Check the total before placing your order.
       offline: The shop didn't respond. Your cart hasn't changed. Please try again in a minute.
       stockLimit: There are no more of this part available right now. Your cart already contains all available stock.

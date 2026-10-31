@@ -108,7 +108,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: dfd1fe1962c5072a
+translatedFrom: 1603c864900d2fed
 translations:
   sr:
     vin:
@@ -119,6 +119,7 @@ translations:
       submitLabel: Pronađi automobil
       invalid: 'VIN ima 17 znakova: latinična slova i cifre, bez slova I, O i Q.'
       unresolved: Nismo uspeli da automatski prepoznamo automobil na osnovu ovog VIN-a. Pošaljite upit ispod i naš savetnik će ručno pronaći odgovarajuće delove.
+      recognised: 'Identifikovali smo vozilo na osnovu VIN-a: {car}. Stranica sa delovima za ovo vozilo još nije dostupna. Pošaljite upit ispod, a naš prodavac će pronaći odgovarajuće delove.'
       chooseMake: Izaberite model {make}
     car:
       metaTitle: '{car}: auto-delovi u CarLab'
@@ -174,6 +175,7 @@ translations:
         right: desni
     fitment:
       quantity: '{count} kom.'
+      quantityOne: '{count} komad'
       axle:
         front: prednja osovina
         rear: zadnja osovina
@@ -212,6 +214,8 @@ translations:
         noCategories: Katalog za ovaj model se dopunjuje. Pošaljite upit i pronaći ćemo delove po VIN-u.
         carsHeading: Verzije
         carsLead: Otvorite svoju verziju automobila da biste videli delove koji joj odgovaraju.
+        singleCarLabel: Verzija vozila u katalogu
+        singleCarLead: Komplet za redovan servis, potrošni materijal po propisanim specifikacijama i svi odgovarajući delovi
       modelCategory:
         metaTitle: '{category} za {model} u CarLab'
         metaDescription: '{category} za {model}: odgovarajući kataloški brojevi, količina i mesto ugradnje. Izbor po VIN-u i ugradnja u servisu CarLab.'
@@ -226,6 +230,7 @@ translations:
       submitLabel: Find my car
       invalid: 'A VIN has 17 characters: Latin letters and numbers, excluding I, O and Q.'
       unresolved: We couldn't identify your car automatically using this VIN. Submit a request below and our team will find the right parts manually.
+      recognised: "We identified your car by VIN: {car}. We don't have a parts page for it yet. Submit a request below and our team will find the right parts for you."
       chooseMake: Select a {make} model
     car:
       metaTitle: '{car}: parts at CarLab'
@@ -281,6 +286,7 @@ translations:
         right: right-hand
     fitment:
       quantity: '{count} pcs'
+      quantityOne: '{count} piece'
       axle:
         front: front axle
         rear: rear axle
@@ -319,6 +325,8 @@ translations:
         noCategories: We're still adding parts for this model. Submit a request and we'll find the right parts by VIN.
         carsHeading: Variants
         carsLead: Select your variant to see parts specifically for it.
+        singleCarLabel: Vehicle variant in our catalogue
+        singleCarLead: Service kits, consumables that meet manufacturer specifications, and all compatible parts
       modelCategory:
         metaTitle: '{category} for {model} at CarLab'
         metaDescription: '{category} for {model}: compatible part numbers, quantities and fitting positions. VIN matching and fitting at CarLab.'

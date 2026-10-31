@@ -39,6 +39,7 @@ translations:
     consentError: Your consent is required
     submitLabel: Get a quote
     errorTelegramFormat: Enter an @username or phone number
+    errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers, and _'
     errorPhoneInvalid: Please check your phone number
     errorSubmit: Your request wasn't sent. Check your connection and try again.
   sr:
@@ -60,6 +61,7 @@ translations:
     consentError: Potrebna je vaša saglasnost
     submitLabel: Izračunajte cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
+    errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
     errorPhoneInvalid: Proverite broj telefona
     errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
   es:
@@ -81,6 +83,7 @@ translations:
     consentError: Debes dar tu consentimiento
     submitLabel: Calcular el coste
     errorTelegramFormat: 'Formato: @username o número de teléfono'
+    errorTelegramHandle: 'Revisa el @username: mínimo 3 caracteres, solo letras latinas, números y _'
     errorPhoneInvalid: Comprueba el número de teléfono
     errorSubmit: No se ha podido enviar la solicitud. Comprueba tu conexión e inténtalo de nuevo
   de:
@@ -102,6 +105,7 @@ translations:
     consentError: Bitte stimmen Sie der Datenschutzerklärung zu
     submitLabel: Kosten berechnen
     errorTelegramFormat: 'Format: @username oder Telefonnummer'
+    errorTelegramHandle: 'Bitte prüfe deinen @username: mindestens 3 Zeichen, nur lateinische Buchstaben, Ziffern und _'
     errorPhoneInvalid: Bitte überprüfen Sie die Telefonnummer
     errorSubmit: Ihre Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
-translatedFrom: 44ffefff4c3c8b69
+translatedFrom: a07eddcff3dabc9f

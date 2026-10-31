@@ -47,7 +47,7 @@ suggestRetry: Повторить
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: 9db6544883611fde
+translatedFrom: e8f16b1a99edaa1d
 translations:
   sr:
     searchHeading: Pronađite deo
@@ -88,7 +88,8 @@ translations:
     formHeading: Upit za auto-delove
     notFoundQuestion: Niste pronašli ono što tražite?
     notFoundLink: Pošaljite upit, pronaći ćemo odgovarajući deo
-    numberNotFound: Broj „{q}“ nije u katalogu, proverićemo ga kod dobavljača.
+    numberNotFound: U katalogu nema dela sa tačnim brojem „{q}“, možda ste tražili neki od sličnih u nastavku.
+    numberComment: Broj {q}
     similarNumbers: Slični brojevi
     carsGroup: Automobili
     partsGroup: Auto-delovi
@@ -137,7 +138,8 @@ translations:
     formHeading: Parts enquiry
     notFoundQuestion: Can't find what you need?
     notFoundLink: Send an enquiry and we'll find it
-    numberNotFound: Part number "{q}" isn't in our catalogue. We'll check with our suppliers.
+    numberNotFound: No exact match for "{q}" in the catalogue. You may be looking for one of the similar parts below.
+    numberComment: Part number {q}
     similarNumbers: Similar part numbers
     carsGroup: Vehicles
     partsGroup: Parts

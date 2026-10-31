@@ -102,6 +102,7 @@ translations:
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
       cta: Zakažite termin
+      partsCta: Pronađi deo
       phoneLabel: Pozovite
     footer:
       tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
@@ -160,6 +161,7 @@ translations:
       errorPhone: Proverite broj telefona, izgleda da nije unet do kraja
       errorPhoneTooLong: Proverite broj telefona, ima previše cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
+      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, brojevi i _'
       errorConsent: Bez vaše saglasnosti ne možemo da pošaljemo zahtev
       errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
@@ -186,6 +188,7 @@ translations:
       menuCloseLabel: Close menu
       languageLabel: Language
       cta: Book an appointment
+      partsCta: Find parts
       phoneLabel: Call us
     footer:
       tagline: Independent car service in Belgrade. Diagnostics, repairs, bodywork and respraying, plus help finding the right parts.
@@ -244,6 +247,7 @@ translations:
       errorPhone: Please check your phone number. It looks incomplete
       errorPhoneTooLong: Check your phone number, it has too many digits.
       errorTelegram: Enter your Telegram @username or phone number
+      errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
       errorConsent: Please give your consent before sending your request
       errorSubmit: Your request wasn't sent. Check your connection and try again
     cookie:
@@ -253,4 +257,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie settings
-translatedFrom: 613b1ead372e6b52
+translatedFrom: 054b3796653e1aa4
