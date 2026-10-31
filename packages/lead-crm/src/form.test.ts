@@ -14,7 +14,6 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
   MAX_SERVICES,
-  MAX_URL_LENGTH,
   PHONE_COUNTRIES,
   phoneCountryOptions,
 } from './form.ts';
