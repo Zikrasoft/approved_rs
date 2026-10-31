@@ -7,11 +7,13 @@ import {
   vinSchema,
 } from '@podbor/catalog-contract';
 
+const recordId = z.string().min(1).max(64);
+
 export const StoreSearchParts = z
   .object({
     q: z.string().trim().min(1).max(200).optional(),
     category: z.string().regex(CATALOG_KEY_PATTERN).optional(),
-    vehicle_id: z.string().min(1).optional(),
+    vehicle_id: recordId.optional(),
     model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     facets: z
       .union([z.string(), z.array(z.string())])
@@ -50,10 +52,9 @@ export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 export const StoreCreateVinLookup = z.object({ vin: vinSchema });
 export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
 
-const MAX_OFFER_ID_LENGTH = 64;
 const MAX_EMAIL_LOCAL_PART = 64;
 
-const offerId = z.string().min(1).max(MAX_OFFER_ID_LENGTH);
+const offerId = recordId;
 
 export const StoreCreateOfferCart = z.object({
   email: z

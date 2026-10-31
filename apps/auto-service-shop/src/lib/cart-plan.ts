@@ -172,8 +172,10 @@ export function planCart(
     const parent = line.parentOfferId;
     const price = parent ? priceFor(addons.get(parent), line.addonKind!) : null;
     const quantity = parent ? quantities.get(parent) : undefined;
-    if (parent === null || price === null || quantity === undefined) {
+    if (parent === null || quantity === undefined) {
       remove(item.id, 'OFFER_MISSING');
+    } else if (price === null) {
+      remove(item.id, 'OFFER_PRICE_CHANGED');
     } else if (kept.get(addonKey(parent, line.addonKind)) !== item) {
       remove(item.id, 'OFFER_PRICE_CHANGED');
     } else if (

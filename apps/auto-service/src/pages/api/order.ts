@@ -6,11 +6,17 @@ import {
   CART_FINGERPRINT_FIELD,
   checkoutContactSchema,
 } from '@podbor/catalog-contract';
-import { HONEYPOT_FIELD } from '@podbor/lead-crm';
+import { waitUntil } from '@vercel/functions';
+import { HONEYPOT_FIELD, orderLeadSubmission } from '@podbor/lead-crm';
+import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
+import { plainText } from '@podbor/lead-crm/phone';
+import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
+import { notifyLead } from '@/lib/crm';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import {
+  CART_LINES_FIELD,
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
@@ -19,6 +25,13 @@ import {
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
 import { previewRequested } from '@/utils/shopPreview';
+
+const cartLinesSchema = z
+  .string()
+  .max(MAX_COMMENT_LENGTH)
+  .transform(plainText)
+  .optional()
+  .catch(undefined);
 
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,
@@ -52,17 +65,30 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     contact.data,
     order.data[CART_FINGERPRINT_FIELD],
   );
-  switch (outcome?.kind) {
-    case 'order':
-      return toCart('ordered', {
-        [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
-        [ORDERED_CART_PARAM]: order.data.cart_id,
-      });
-    case 'refused':
-      return toCart(refusalNotice(outcome.code));
-    case 'empty':
-      return toCart('expired');
-    default:
-      return toCart('unreachable');
+  if (outcome?.kind === 'order') {
+    return toCart('ordered', {
+      [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
+      [ORDERED_CART_PARAM]: order.data.cart_id,
+    });
   }
+  const notice =
+    outcome?.kind === 'refused'
+      ? refusalNotice(outcome.code)
+      : outcome?.kind === 'empty'
+        ? 'expired'
+        : 'unreachable';
+  const summary = [
+    PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason[notice]),
+    cartLinesSchema.parse(form[CART_LINES_FIELD]),
+    contact.data.comment,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  waitUntil(
+    notifyLead(
+      orderLeadSubmission(null, { ...contact.data, locale }, summary, locale),
+      '[order]',
+    ),
+  );
+  return toCart(notice);
 };

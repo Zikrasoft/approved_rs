@@ -207,19 +207,19 @@ describe('checkoutRefusal over planCart', () => {
       });
     });
 
-    it('refuses an Add-on the Category no longer sells', () => {
+    it('drops an Add-on the Category no longer sells as a cart change, not a missing part', () => {
       expect(
         judge([addon('a1', 'o1', 'service', 2)], {
           service: null,
           installation: 1200,
         }),
-      ).toEqual({ refusal: 'OFFER_MISSING' });
+      ).toEqual({ refusal: 'OFFER_PRICE_CHANGED' });
       expect(
         judge([addon('a1', 'o1', INSTALLATION, 2, 1200)], {
           service: SERVICE_AND_INSTALLATION.service,
           installation: null,
         }),
-      ).toEqual({ refusal: 'OFFER_MISSING' });
+      ).toEqual({ refusal: 'OFFER_PRICE_CHANGED' });
     });
 
     it('refuses an Add-on whose line is not in the cart', () => {

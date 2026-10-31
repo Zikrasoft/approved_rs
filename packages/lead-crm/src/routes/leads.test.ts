@@ -292,6 +292,45 @@ describe('createLeadsRoute', () => {
     expect(body).toContain('name="viewport"');
   });
 
+  it('renders the form again with what the visitor sent, asking only for the contact', async () => {
+    const ctx = makeCtx({
+      name: 'Иван "<b>"',
+      phone_number: '12',
+      contact_channel: 'whatsapp',
+      service: 'vin-parts-inquiry',
+      consent: 'on',
+    });
+    ctx.request.headers.set('referer', 'https://carlab.rs/ru/parts/');
+
+    const body = await (await POST(ctx)).text();
+
+    expect(body).toContain('<form method="POST" action="/api/leads">');
+    expect(body).toContain('name="contact" required');
+    expect(body).toContain(
+      '<input type="hidden" name="name" value="Иван &quot;&lt;b&gt;&quot;" />',
+    );
+    expect(body).toContain(
+      '<input type="hidden" name="service" value="vin-parts-inquiry" />',
+    );
+    expect(body).toContain(
+      '<input type="hidden" name="source_url" value="https://carlab.rs/ru/parts/" />',
+    );
+    expect(body).not.toContain('name="phone_number"');
+    expect(body).not.toContain('name="contact_channel"');
+  });
+
+  it('takes the page from the Referer when a form without JavaScript sent none', async () => {
+    const ctx = makeCtx(valid());
+    ctx.request.headers.set('referer', 'https://carlab.rs/sr/parts/');
+
+    await POST(ctx);
+
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ source_url: 'https://carlab.rs/sr/parts/' }),
+      '[leads]',
+    );
+  });
+
   it('answers the 400 in the default locale for a prototype-key cookie value', async () => {
     const res = await POST(makeCtx({ name: '' }, 'constructor'));
     await expect(res.text()).resolves.toContain('<p>Укажите контакт</p>');

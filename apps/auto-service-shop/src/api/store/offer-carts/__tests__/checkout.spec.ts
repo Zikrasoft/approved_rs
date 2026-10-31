@@ -913,6 +913,22 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('tells the owner how soon a line is ready at checkout, not at the last cart read', async () => {
+        const cart = await cartWith(2);
+        quote(1542, 0, 4);
+
+        const placed = await complete(cart);
+
+        const lead = await waitFor(() =>
+          leads.find(({ comment }) =>
+            comment.startsWith(`Заказ #${placed.data.order.display_id},`),
+          ),
+        );
+        expect(lead?.comment.split('\n')[3]).toBe(
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
+        );
+      });
+
       describe('an add-on service sold with a line', () => {
         const SERVICE = 'Регистрация аккумулятора в блоке управления';
         let batteryOfferId: string;
@@ -1143,7 +1159,7 @@ medusaIntegrationTestRunner({
 
           const refused = await complete(cart);
 
-          expect(refused.data.code).toBe('OFFER_MISSING');
+          expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
           const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
           expect(repriced.data.cart.items[0].addon).toBeNull();
           expect(repriced.data.cart.total).toBe(10000);
@@ -1267,7 +1283,9 @@ medusaIntegrationTestRunner({
             ).data.cart;
             await setPart({ no_installation: true });
 
-            expect((await complete(cart)).data.code).toBe('OFFER_MISSING');
+            expect((await complete(cart)).data.code).toBe(
+              'OFFER_PRICE_CHANGED',
+            );
             const repriced = await post(
               `/store/offer-carts/${cart.id}/reprice`,
             );

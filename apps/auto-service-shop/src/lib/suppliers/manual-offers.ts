@@ -19,8 +19,9 @@ export const manualOfferSchema = z
   .strictObject({
     cost_price: z
       .number()
-      .transform(Math.round)
-      .pipe(z.number().min(1).max(MAX_MANUAL_COST_PRICE)),
+      .min(1)
+      .max(MAX_MANUAL_COST_PRICE)
+      .transform(Math.round),
     stock_quantity: z.number().int().min(0).max(MAX_MANUAL_STOCK),
     lead_time_days: z.number().int().min(0).max(MAX_LEAD_TIME_DAYS),
   })

@@ -31,13 +31,17 @@ function memorySync(seed: SyncOrder[]) {
     alerts,
     answer: (_event: ShopOrderEvent): Promise<void> => Promise.resolve(),
     alertDelivers: true,
+    unreadable: new Set<string>(),
     cancel: async (id: string) => {
       rows.get(id)!.status = 'canceled';
     },
   };
   const sync = createOrderLeadSync({
     orders: {
-      retrieve: async (id) => ({ ...rows.get(id)! }),
+      retrieve: async (id) => {
+        if (fakes.unreadable.has(id)) throw new Error('database gone');
+        return { ...rows.get(id)! };
+      },
       async patch(id, fields) {
         const row = rows.get(id)!;
         row.metadata = { ...row.metadata, ...fields };
@@ -249,5 +253,25 @@ describe('createOrderLeadSync', () => {
       lead_lost_at: '',
     });
     expect(fakes.rows.get('order_1')!.status).toBe('pending');
+  });
+
+  it('retries every other Order when one of them throws', async () => {
+    const { sync, fakes } = memorySync([
+      { ...pending(), id: 'order_broken' },
+      pending(),
+      {
+        ...pending({ lead_handed_off_at: NOW.toISOString() }),
+        id: 'order_canceled',
+        status: 'canceled',
+      },
+    ]);
+    fakes.unreadable.add('order_broken');
+
+    await sync.retryDue(NOW);
+
+    expect(fakes.sent).toEqual([
+      expect.objectContaining({ event: 'placed', order_id: 'order_1' }),
+      { event: 'canceled', order_id: 'order_canceled' },
+    ]);
   });
 });

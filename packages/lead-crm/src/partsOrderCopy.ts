@@ -14,6 +14,7 @@ export const PARTS_ORDER_COPY = {
   line: (title: string, quantity: number, sum: string) =>
     `${title} × ${quantity}: ${sum}`,
   inStock: 'в наличии',
+  manualOffer: 'ручное предложение',
   pickupIn: (days: number) =>
     days === 1 ? 'забрать завтра' : `забрать через ${days} ${dayWord(days)}`,
   addon: (title: string, sum: string) => `+ ${title}: ${sum}`,
@@ -22,6 +23,15 @@ export const PARTS_ORDER_COPY = {
   total: (sum: string) => `Итого: ${sum}`,
   leftOut: (count: number, orderUrl: string) =>
     `Не поместилось позиций: ${count}, весь заказ: ${orderUrl}`,
+  notPlaced: (reason: string) =>
+    `Заказ не оформлен: ${reason}. Свяжитесь с клиентом`,
+  notPlacedReason: {
+    'price-changed': 'цена изменилась',
+    unavailable: 'позиции нет в нужном количестве',
+    'cart-changed': 'корзина изменилась в другой вкладке',
+    expired: 'корзина устарела',
+    unreachable: 'магазин не ответил',
+  },
   undelivered: (order: number | string, reason: string) =>
     `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
   cancelUndelivered: (order: number | string, reason: string) =>

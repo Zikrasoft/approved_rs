@@ -217,6 +217,27 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('repeats neither the service the lead has nor a line it already holds', async () => {
+    const inquiry = {
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'polishing',
+      services: ['polishing'],
+      comment: 'VIN: WBA35BG070N074158',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    };
+    await store.insertOrMergeLead(inquiry);
+    await store.insertOrMergeLead(inquiry);
+    const { lead } = await store.insertOrMergeLead({
+      ...inquiry,
+      comment: 'VIN: WBA35BG070N074158\nНужен масляный фильтр',
+    });
+
+    expect(lead.comment).toBe('VIN: WBA35BG070N074158\nНужен масляный фильтр');
+  });
+
   it('writes no note for a click whose channel never reached the record', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { lead } = await store.insertOrMergeLead({
@@ -625,6 +646,32 @@ describe('insertOrMergeLead with standalone services', () => {
 
     expect(merged).toBe(false);
     expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('merges a checkout that failed again for the same contact into its Lead', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      comment: 'Заказ не оформлен\nVARTA 580901080 × 1',
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      comment: 'Заказ не оформлен\nVARTA 580901080 × 2',
+    });
+
+    expect(merged).toBe(true);
+    expect((await store.readLeads())[0]?.comment).toBe(
+      'Заказ не оформлен\nVARTA 580901080 × 1\nVARTA 580901080 × 2',
+    );
+  });
+
+  it('keeps a placed order apart from the failed checkout before it', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+
+    expect(merged).toBe(false);
   });
 
   it('keeps an inquiry sent after an order apart from it', async () => {

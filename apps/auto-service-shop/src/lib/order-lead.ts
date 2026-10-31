@@ -21,6 +21,7 @@ import {
 } from '@podbor/lead-crm/shop-orders-wire';
 import { z } from 'zod';
 
+import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
 import { parseEnv } from './env';
 import { readPlacedOrder, type PlacedOrder } from './placed-order';
 
@@ -60,7 +61,7 @@ const withReadiness = (
   const readiness = [
     inStock && PARTS_ORDER_COPY.inStock,
     leadTimeDays && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
-    supplier,
+    supplier === MANUAL_SOURCE ? PARTS_ORDER_COPY.manualOffer : supplier,
   ]
     .filter(Boolean)
     .join(', ');

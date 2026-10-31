@@ -41,6 +41,7 @@ import {
   priceFor,
   type AddonPrices,
   type CartItem,
+  type CartPlan,
   type CartRefusal,
   type Quote,
 } from './cart-plan';
@@ -185,6 +186,26 @@ const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
   return { ...cart, items: withParentOffers(cart.items ?? []) };
 };
 
+const planOf = async (scope: MedusaContainer, items: OfferCartLineItem[]) => {
+  const offerItems = items.filter((item) => !kindOf(item));
+  return planCart(
+    items,
+    await quotesOf(scope, offerItems),
+    await servicesOf(scope, offerItems),
+  );
+};
+
+const applyStamps = async (
+  scope: MedusaContainer,
+  stamps: CartPlan['stamps'],
+) => {
+  for (const { itemId, metadata } of stamps) {
+    await scope
+      .resolve<ICartModuleService>(Modules.CART)
+      .updateLineItems(itemId, { metadata });
+  }
+};
+
 async function syncOfferCart(
   scope: MedusaContainer,
   cartId: string,
@@ -200,11 +221,7 @@ async function syncOfferCart(
       new Date(a.created_at ?? 0).getTime() -
         new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id),
   );
-  const { lines, fixes, stamps } = planCart(
-    items,
-    await quotesOf(scope, items),
-    await servicesOf(scope, items),
-  );
+  const { lines, fixes, stamps } = await planOf(scope, items);
   if (fixes.remove.length) {
     await deleteLineItemsWorkflow(scope).run({
       input: { cart_id: cartId, ids: fixes.remove.map(({ itemId }) => itemId) },
@@ -215,11 +232,7 @@ async function syncOfferCart(
       input: { cart_id: cartId, item_id: itemId, update },
     });
   }
-  for (const { itemId, metadata } of stamps) {
-    await scope
-      .resolve<ICartModuleService>(Modules.CART)
-      .updateLineItems(itemId, { metadata });
-  }
+  await applyStamps(scope, stamps);
   if ((changed || fixes.remove.length || fixes.update.length) && items.length) {
     await ensureCashAtPickupPaymentSession(scope, cartId);
   }
@@ -512,14 +525,8 @@ export async function refuseCheckout(
   if (!checkoutContactSchema.safeParse(cart.metadata ?? {}).success) {
     refuse('CONTACT_MISSING', 'The order has no contact.');
   }
-  const items = (cart.items ?? []) as OfferCartLineItem[];
-  const offerItems = items.filter((item) => !kindOf(item));
   const refusal = checkoutRefusal(
-    planCart(
-      items,
-      await quotesOf(scope, offerItems),
-      await servicesOf(scope, offerItems),
-    ),
+    await planOf(scope, (cart.items ?? []) as OfferCartLineItem[]),
   );
   if (refusal) {
     refuse(refusal, REFUSAL_MESSAGES[refusal]);
@@ -547,6 +554,7 @@ export const checkout = locked(
       refuse('CART_CHANGED', 'The cart changed since it was shown.');
     }
     if (!cart.completed_at) {
+      await applyStamps(scope, (await planOf(scope, cart.items)).stamps);
       const car = await carFor(scope, contact.vin);
       await scope
         .resolve<ICartModuleService>(Modules.CART)

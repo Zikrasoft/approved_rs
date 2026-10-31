@@ -89,7 +89,7 @@ describe('orderLeadPayload', () => {
     expect(comment.split('\n').slice(3, 7)).toEqual([
       'Oil × 1: 100 RSD, в наличии',
       'Oil × 1: 100 RSD, в наличии, забрать через 2 дня',
-      'Oil × 1: 100 RSD, забрать через 1 день',
+      'Oil × 1: 100 RSD, забрать завтра',
       'Oil × 1: 100 RSD, забрать через 5 дней',
     ]);
   });
@@ -102,12 +102,15 @@ describe('orderLeadPayload', () => {
       metadata: { in_stock: true, lead_time_days: 0, supplier },
     });
     const comment = summaryOf(
-      order({ items: [line('Intercars'), line('Autodelovi')] }),
+      order({
+        items: [line('Intercars'), line('Autodelovi'), line('manual')],
+      }),
     );
 
-    expect(comment.split('\n').slice(3, 5)).toEqual([
+    expect(comment.split('\n').slice(3, 6)).toEqual([
       'Pads × 1: 100 RSD, в наличии, Intercars',
       'Pads × 1: 100 RSD, в наличии, Autodelovi',
+      'Pads × 1: 100 RSD, в наличии, ручное предложение',
     ]);
   });
 

@@ -110,7 +110,9 @@ export function definePartOffers(tagName = 'part-offers'): void {
         fill(row, '[data-stock]', stock);
         fill(row, '[data-lead]', lead);
         row.querySelector<HTMLElement>('[data-out]')!.hidden = buyable;
-        row.querySelector<HTMLElement>('[data-ask]')!.hidden = buyable;
+        row
+          .querySelector<HTMLElement>('[data-ask]')!
+          .classList.toggle('hidden', buyable);
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
         buy.hidden = !buyable;
         buy.setAttribute('data-offer-id', offer.id);

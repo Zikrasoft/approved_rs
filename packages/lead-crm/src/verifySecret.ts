@@ -1,9 +1,9 @@
 import { timingSafeEqual } from 'node:crypto';
 
-const BEARER = 'Bearer ';
+const BEARER = /^bearer /i;
 
 export const bearerToken = (header: string | null | undefined): string =>
-  header?.startsWith(BEARER) ? header.slice(BEARER.length) : '';
+  header && BEARER.test(header) ? header.replace(BEARER, '') : '';
 
 export function secretMatches(
   received: string | null | undefined,

@@ -1,9 +1,16 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { z } from 'zod';
 
+import { CATALOG_MODULE } from '../../modules/catalog';
+import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
-import { inShopCurrency, sellingRows } from '../../modules/supplier/pricing';
+import {
+  inShopCurrency,
+  sellingRows,
+  sellPrice,
+} from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
+import { emitIndexChanges } from '../index-changes';
 import { supplierAdapters, supplierQuoteSchema } from './adapter';
 
 type Quote = z.output<typeof supplierQuoteSchema>;
@@ -45,6 +52,30 @@ async function liveQuotes(
   }
 }
 
+const SELLING_FIELDS = [
+  'cost_price',
+  'currency',
+  'stock_quantity',
+  'lead_time_days',
+] as const;
+
+async function reindexIdentifiers(
+  scope: MedusaContainer,
+  identifierIds: Set<string>,
+): Promise<void> {
+  if (!identifierIds.size) {
+    return;
+  }
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const identifiers = await catalog.listPartIdentifiers(
+    { id: [...identifierIds] },
+    { select: ['part_id'], take: null },
+  );
+  await emitIndexChanges(scope, {
+    partIds: identifiers.map(({ part_id }) => part_id),
+  });
+}
+
 // TODO: every page view and cart action calls the supplier; cache quotes for a short window once the Inter Cars rate limits are known (#328).
 async function requoteOffers<T extends QuotedOffer>(
   scope: MedusaContainer,
@@ -53,6 +84,7 @@ async function requoteOffers<T extends QuotedOffer>(
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const adapters = supplierAdapters(scope);
   const live: T[] = [];
+  const moved = new Set<string>();
   for (const name of new Set(offers.map(({ supplier }) => supplier.name))) {
     const own = offers.filter(({ supplier }) => supplier.name === name);
     const adapter = adapters.find((candidate) => candidate.name === name);
@@ -66,14 +98,21 @@ async function requoteOffers<T extends QuotedOffer>(
     );
     for (const offer of own) {
       const quote = quotes.get(offer.supplier_article_id);
-      if (!quote) {
+      if (
+        !quote ||
+        sellPrice(quote.cost_price, offer.supplier.markup_percentage) <= 0
+      ) {
         continue;
       }
       const fields = quotedFields(quote);
-      await suppliers.updateSupplierOffers({ id: offer.id, ...fields });
+      if (SELLING_FIELDS.some((field) => offer[field] !== fields[field])) {
+        await suppliers.updateSupplierOffers({ id: offer.id, ...fields });
+        moved.add(offer.part_identifier_id);
+      }
       live.push({ ...offer, ...fields });
     }
   }
+  await reindexIdentifiers(scope, moved);
   return live;
 }
 

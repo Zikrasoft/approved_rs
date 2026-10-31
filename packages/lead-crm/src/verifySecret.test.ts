@@ -2,11 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { bearerToken, secretMatches } from './verifySecret.ts';
 
 describe('bearerToken', () => {
-  it('takes the token after the Bearer scheme', () => {
-    expect(bearerToken('Bearer s3cret')).toBe('s3cret');
-  });
+  it.each(['Bearer s3cret', 'bearer s3cret', 'BEARER s3cret'])(
+    'takes the token after the Bearer scheme in any case: %s',
+    (header) => {
+      expect(bearerToken(header)).toBe('s3cret');
+    },
+  );
 
-  it.each([null, undefined, '', 's3cret', 'bearer s3cret', 'Basic s3cret'])(
+  it.each([null, undefined, '', 's3cret', 'Bearers3cret', 'Basic s3cret'])(
     'reads no token from %s',
     (header) => {
       expect(bearerToken(header)).toBe('');

@@ -156,27 +156,32 @@ describe('a shop Order decided in the CRM bot', () => {
     expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
   });
 
-  it('records a shop holding the other outcome as a conflict, tells staff once and stops asking', async () => {
-    const { leadStore, bot } = crm();
-    const lead = await leadStore.insertLead(order);
-    shopAnswers = [409];
+  it.each([409, 404])(
+    'records a shop answering %i as a conflict, tells staff once and stops asking',
+    async (status) => {
+      const { leadStore, bot } = crm();
+      const lead = await leadStore.insertLead(order);
+      shopAnswers = [status];
 
-    await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'lost'))!);
+      await bot.afterStatusChange(
+        (await leadStore.setStatus(lead.id, 'lost'))!,
+      );
 
-    expect(await leadStore.getLead(lead.id)).toMatchObject({
-      orderConflict: 'lost',
-    });
-    expect((await leadStore.getLead(lead.id))?.orderSettled).toBeUndefined();
-    expect(await bot.settlePendingOrders()).toBe(0);
-    expect(shopCalls).toHaveLength(1);
-    const notices = api
-      .callsTo('sendMessage')
-      .filter(({ payload }) => String(payload.text).includes('order_01'));
-    expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
-      1, 3,
-    ]);
-    expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
-  });
+      expect(await leadStore.getLead(lead.id)).toMatchObject({
+        orderConflict: 'lost',
+      });
+      expect((await leadStore.getLead(lead.id))?.orderSettled).toBeUndefined();
+      expect(await bot.settlePendingOrders()).toBe(0);
+      expect(shopCalls).toHaveLength(1);
+      const notices = api
+        .callsTo('sendMessage')
+        .filter(({ payload }) => String(payload.text).includes('order_01'));
+      expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
+        1, 3,
+      ]);
+      expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
+    },
+  );
 
   it('draws the card before asking the shop, so a slow shop never delays it', async () => {
     const { leadStore, bot } = crm();

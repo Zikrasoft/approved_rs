@@ -5,6 +5,7 @@ import {
   ORDER_OUTCOME_FIELD,
 } from '../fields.ts';
 import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
+import { escapeHtml } from '../telegram/markup.ts';
 import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
@@ -54,7 +55,31 @@ async function cancelOrder(
   });
 }
 
-function refusalPage(locale: string, message: string): Response {
+const RETYPED_FIELDS = new Set([
+  'contact',
+  'contact_channel',
+  'phone_number',
+  'phone_country',
+  'telegram',
+]);
+
+const attribute = (text: string): string =>
+  escapeHtml(text).replace(/"/g, '&quot;');
+
+function refusalPage(
+  locale: string,
+  message: string,
+  form: FormData,
+  action: string,
+): Response {
+  const kept: string[] = [];
+  form.forEach((value, name) => {
+    if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {
+      kept.push(
+        `      <input type="hidden" name="${attribute(name)}" value="${attribute(value)}" />`,
+      );
+    }
+  });
   return new Response(
     `<!doctype html>
 <html lang="${locale}">
@@ -65,6 +90,11 @@ function refusalPage(locale: string, message: string): Response {
   </head>
   <body>
     <p>${message}</p>
+    <form method="POST" action="${attribute(action)}">
+      <input name="contact" required autocomplete="tel" aria-label="${message}" />
+${kept.join('\n')}
+      <input type="submit" />
+    </form>
   </body>
 </html>
 `,
@@ -105,9 +135,17 @@ export function createLeadsRoute<L extends string>({
       return redirect(thanksPath(locale), 302);
     }
 
+    if (!form.get('source_url')) {
+      form.set('source_url', request.headers.get('referer') ?? '');
+    }
     const submission = leadSubmissionSchema.safeParse(form);
     if (!submission.success) {
-      return refusalPage(locale, missingFieldsMessage[locale]);
+      return refusalPage(
+        locale,
+        missingFieldsMessage[locale],
+        form,
+        new URL(request.url).pathname,
+      );
     }
     if (submission.data.orderId) {
       if (

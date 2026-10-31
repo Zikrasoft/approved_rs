@@ -124,6 +124,13 @@ describe('defineMyGarage', () => {
     expect(input.value).toBe('WBA35BG070N074158');
   });
 
+  it('spells a VIN typed on a Cyrillic layout in Latin once the field is left', () => {
+    const { input } = mount();
+    input.value = 'wва35вg070n074158';
+    input.dispatchEvent(new Event('blur'));
+    expect(input.value).toBe('WBA35BG070N074158');
+  });
+
   it('leaves a VIN being typed without separators untouched', () => {
     const { input } = mount();
     input.value = 'wba35';
