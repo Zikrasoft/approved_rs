@@ -39,6 +39,15 @@ const notices = [
   { key: 'gone', text: copy.notices.gone },
   { key: 'invalid', text: copy.notices.invalid },
 ];
+const orderedContact = {
+  phone: copy.orderedCall,
+  ...Object.fromEntries(
+    (['whatsapp', 'viber', 'telegram'] as const).map((channel) => [
+      channel,
+      copy.orderedContact.replace('{channel}', site.channels[channel]),
+    ]),
+  ),
+};
 const stepper =
   'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
@@ -68,6 +77,7 @@ const stepper =
       data-count-template={copy.summaryCountTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
+      data-ordered-contact={JSON.stringify(orderedContact)}
       data-order-template={copy.orderNumberTemplate}
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
@@ -166,6 +176,12 @@ const stepper =
             >
             </p>
             <p class="text-sm leading-relaxed text-ink-2">{copy.orderedNext}</p>
+            <p
+              class="text-sm leading-relaxed font-semibold text-ink"
+              data-ordered-contact
+              hidden
+            >
+            </p>
           </div>
         </div>
         <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
@@ -225,10 +241,6 @@ const stepper =
               <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
             </section>
           </div>
-          <p class="flex items-start gap-2 text-sm leading-relaxed text-ink-2">
-            <Icon name="info" size={16} class="mt-0.5 shrink-0 text-muted" />
-            <span>{copy.submitNote}</span>
-          </p>
         </div>
         <div class="flex flex-col gap-3">
           <span class="text-xs text-muted">{site.footer.contactHeading}</span>

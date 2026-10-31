@@ -16,6 +16,7 @@ const REMEMBERED_FIELDS = [
   '[name="vin"]',
   '[name="comment"]',
   '[data-consent]',
+  '[name="contact"]',
 ] as const;
 
 const fieldIn = (form: HTMLFormElement, selector: string) =>
@@ -59,6 +60,14 @@ export function rememberCheckout(
       form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
       '',
   });
+}
+
+export function checkoutContact(
+  storage: CartStorage = sessionStorage,
+): { channel: string; contact: string } | null {
+  const memory = readMemory(storage, CHECKOUT_MEMORY_KEY);
+  const contact = memory?.values['[name="contact"]'];
+  return memory && contact ? { channel: memory.channel, contact } : null;
 }
 
 export function forgetCheckout(

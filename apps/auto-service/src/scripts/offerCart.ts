@@ -32,6 +32,7 @@ import {
   type PriceChange,
 } from './cartStore';
 import {
+  checkoutContact,
   forgetCheckout,
   rememberCheckout,
   restoreCheckout,
@@ -85,8 +86,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           params.get(ORDER_NUMBER_PARAM),
         );
         if (receipt || orderNumber) {
+          const contact = checkoutContact();
           forgetCheckout();
-          this.showOrdered(orderNumber, receipt);
+          this.showOrdered(orderNumber, receipt, contact);
           return;
         }
         if (notice) {
@@ -115,6 +117,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           });
           this.watchCheckoutBar(form);
           form.addEventListener('formdata', (event) => {
+            rememberCheckout(form);
             if (!this.cart) return;
             event.formData.set('cart_id', this.cart.id);
             event.formData.set(
@@ -177,8 +180,23 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         showOnly(this, 'data-state', state);
       }
 
-      showOrdered(orderNumber: string | null, receipt: OfferCart | null): void {
+      showOrdered(
+        orderNumber: string | null,
+        receipt: OfferCart | null,
+        contact: ReturnType<typeof checkoutContact>,
+      ): void {
         const { orderedHeading, orderTemplate = '' } = this.dataset;
+        const contactTemplates = JSON.parse(
+          this.dataset.orderedContact ?? '{}',
+        ) as Record<string, string>;
+        const contactTemplate = contact && contactTemplates[contact.channel];
+        fill(
+          this,
+          '[data-ordered-contact]',
+          contactTemplate
+            ? contactTemplate.replace('{contact}', contact.contact)
+            : null,
+        );
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
         fill(
