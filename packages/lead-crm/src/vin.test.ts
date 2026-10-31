@@ -42,6 +42,15 @@ describe('vinOf', () => {
     expect(vinOf('WBA35BG070N074158🚗')).toBe('WBA35BG070N074158');
   });
 
+  it('keeps a Cyrillic У right after the VIN prefix as the Y it looks like', () => {
+    expect(vinOf('vin: УВА8Е31000А000001')).toBe('YBA8E31000A000001');
+  });
+
+  it('refuses seventeen digits, which no VIN is', () => {
+    expect(vinOf('12345678901234567')).toBeNull();
+    expect(VIN_PATTERN.test('12345678901234567')).toBe(false);
+  });
+
   it('refuses text that only holds a VIN-length run of other words', () => {
     expect(vinOf('HU 816 x, OX 404 D')).toBeNull();
   });
