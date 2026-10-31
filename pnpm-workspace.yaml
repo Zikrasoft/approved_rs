@@ -34,3 +34,5 @@ packageExtensions:
 overrides:
   zod@4: 4.6.7
   devalue@5: 5.9.4
+  body-parser@1: 1.20.9
+  multer@2: 2.5.0
