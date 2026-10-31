@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { VIN_INPUT_PATTERN, VIN_PATTERN, vinOf, vinText } from './vin.ts';
+import { VIN_PATTERN, vinOf, vinText, vinWhileTyping } from './vin.ts';
 
 describe('VIN patterns', () => {
   it('accepts seventeen VIN characters and refuses I, O and Q', () => {
@@ -8,11 +8,17 @@ describe('VIN patterns', () => {
     expect(VIN_PATTERN.test('wba8e9g50gnu12345')).toBe(false);
   });
 
-  it('lets the HTML field take the same VIN in either case', () => {
-    const field = new RegExp(`^(?:${VIN_INPUT_PATTERN})$`, 'v');
-    expect(field.test('wba8e9g50gnu12345')).toBe(true);
-    expect(field.test('WBA8E9G50GNU12345')).toBe(true);
-    expect(field.test('wba8e9g50gnu1234q')).toBe(false);
+  it.each([
+    ['1234567890123456Z', 'a maker code of digits only'],
+    ['YYYYYYYYYYYYYYYYY', 'no digit at all'],
+  ])('refuses %s, which has %s', (text) => {
+    expect(VIN_PATTERN.test(text)).toBe(false);
+    expect(vinOf(text)).toBeNull();
+  });
+
+  it('accepts a maker code that mixes digits and a letter', () => {
+    expect(VIN_PATTERN.test('1G1ZT51816F100001')).toBe(true);
+    expect(VIN_PATTERN.test('9BWZZZ377VT004251')).toBe(true);
   });
 });
 
@@ -46,6 +52,10 @@ describe('vinOf', () => {
     expect(vinOf('vin: УВА8Е31000А000001')).toBe('YBA8E31000A000001');
   });
 
+  it('refuses an all-У string, though it reads as Latin', () => {
+    expect(vinOf('УУУУУУУУУУУУУУУУУ')).toBeNull();
+  });
+
   it('refuses seventeen digits, which no VIN is', () => {
     expect(vinOf('12345678901234567')).toBeNull();
     expect(VIN_PATTERN.test('12345678901234567')).toBe(false);
@@ -59,5 +69,11 @@ describe('vinOf', () => {
 describe('vinText', () => {
   it('spells typed text the way a VIN is read, whether or not it is one', () => {
     expect(vinText('vin: wва 35вg-07.0n0741')).toBe('WBA35BG070N0741');
+  });
+});
+
+describe('vinWhileTyping', () => {
+  it('drops separators and capitalises, but leaves the prefix and Cyrillic to the blur', () => {
+    expect(vinWhileTyping('vin wва-35')).toBe('VINWВА35');
   });
 });

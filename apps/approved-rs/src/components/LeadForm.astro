@@ -1,4 +1,5 @@
 ---
+import { CONSENT_FIELD, CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import FormField from './FormField.astro';
 import Button from './Button.astro';
@@ -166,7 +167,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
         <div id={panelIds.telegram} data-panel="telegram" role="tabpanel">
           <input
             type="text"
-            name="telegram"
+            name={CONTACT_INPUT_FIELDS.telegram}
             data-telegram
             data-field="telegram"
             autocomplete="username"
@@ -190,7 +191,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
           <div class="flex gap-2">
             <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
               <select
-                name="phone_country"
+                name={CONTACT_INPUT_FIELDS.phoneCountry}
                 data-country
                 data-display-locale={displayLocale}
                 class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
@@ -215,7 +216,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
             </div>
             <input
               type="tel"
-              name="phone_number"
+              name={CONTACT_INPUT_FIELDS.phoneNumber}
               autocomplete="tel"
               data-phone
               data-field="phone"
@@ -236,8 +237,12 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
           </p>
         </div>
 
-        <input type="hidden" name="contact" />
-        <input type="hidden" name="contact_channel" value="telegram" />
+        <input type="hidden" name={CONTACT_INPUT_FIELDS.contact} />
+        <input
+          type="hidden"
+          name={CONTACT_INPUT_FIELDS.channel}
+          value="telegram"
+        />
       </div>
 
       <FormField
@@ -259,7 +264,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
         <label class="flex items-start gap-3 mb-3 cursor-pointer text-muted">
           <input
             type="checkbox"
-            name="consent"
+            name={CONSENT_FIELD}
             required
             aria-describedby={errorIds.consent}
             data-consent

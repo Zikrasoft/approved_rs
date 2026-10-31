@@ -1,6 +1,61 @@
 import { describe, expect, it } from 'vitest';
 
-import { dayWord, PARTS_ORDER_COPY } from './partsOrderCopy.ts';
+import {
+  dayWord,
+  orderLineText,
+  orderMoney,
+  PARTS_ORDER_COPY,
+} from './partsOrderCopy.ts';
+
+describe('orderLineText', () => {
+  const line = { title: 'Аккумулятор (VARTA 580901080)', quantity: 2 };
+
+  it('prices a part line and says when it can be picked up and from whom', () => {
+    expect(
+      orderLineText(
+        {
+          ...line,
+          unitPrice: 1850,
+          addon: false,
+          inStock: false,
+          leadTimeDays: 3,
+          source: 'Intercars',
+        },
+        'rsd',
+      ),
+    ).toBe(
+      'Аккумулятор (VARTA 580901080) × 2: 3 700 RSD, забрать через 3 дня, Intercars',
+    );
+    expect(
+      orderLineText({ ...line, unitPrice: 1850, addon: false }, 'RSD'),
+    ).toBe('Аккумулятор (VARTA 580901080) × 2: 3 700 RSD');
+    expect(
+      orderLineText(
+        { ...line, unitPrice: 1850, addon: false, inStock: true },
+        'RSD',
+      ),
+    ).toBe('Аккумулятор (VARTA 580901080) × 2: 3 700 RSD, в наличии');
+  });
+
+  it('prices an add-on for every unit, or calls it free', () => {
+    expect(
+      orderLineText(
+        { title: 'Регистрация', quantity: 2, unitPrice: 700, addon: true },
+        'RSD',
+      ),
+    ).toBe('+ Регистрация: 1 400 RSD');
+    expect(
+      orderLineText(
+        { title: 'Установка', quantity: 2, unitPrice: 0, addon: true },
+        'RSD',
+      ),
+    ).toBe('+ Установка: бесплатно');
+  });
+
+  it('writes money the same way everywhere', () => {
+    expect(orderMoney(75220, 'rsd')).toBe('75 220 RSD');
+  });
+});
 
 describe('dayWord', () => {
   it.each([
@@ -54,5 +109,11 @@ describe('PARTS_ORDER_COPY', () => {
     expect(
       PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason.unreachable),
     ).toBe('Заказ не оформлен: магазин не ответил. Свяжитесь с клиентом');
+  });
+
+  it('counts the cart lines a failed checkout could not fit', () => {
+    expect(PARTS_ORDER_COPY.notPlacedLeftOut(3)).toBe(
+      'Не поместилось позиций: 3',
+    );
   });
 });

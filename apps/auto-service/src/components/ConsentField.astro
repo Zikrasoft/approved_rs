@@ -1,4 +1,5 @@
 ---
+import { CONSENT_FIELD } from '@podbor/lead-crm/fields';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -20,7 +21,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
   <label class="relative flex min-h-11 items-start gap-3 py-1.5">
     <input
       type="checkbox"
-      name="consent"
+      name={CONSENT_FIELD}
       value="1"
       required
       aria-describedby={`consent-error-${uid}`}

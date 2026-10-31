@@ -40,7 +40,7 @@ const years = (
   return year_to ? t('vehicleLabel.until', { to: year_to }) : null;
 };
 
-export const vehicleLabel = (t: TFunction, vehicle: LabelledVehicle) => {
+export const vehicleSpecLabel = (t: TFunction, vehicle: LabelledVehicle) => {
   const { model, engine, power_kw, steering } = vehicle;
   return [
     vehicleName(model).full,

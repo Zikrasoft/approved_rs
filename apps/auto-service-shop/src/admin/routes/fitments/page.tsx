@@ -47,7 +47,7 @@ import {
   labelledVehicleSchema,
   referenceLabel,
   type ReferenceRow,
-  vehicleLabel,
+  vehicleSpecLabel,
 } from '../../lib/vehicle-label';
 
 const brandSchema = z.object({ id: z.string(), name: z.string() });
@@ -645,13 +645,13 @@ const FitmentsPage = () => {
   const pickerLabel = (collection: string, row: ReferenceRow) => {
     const vehicle = labelledVehicleSchema.safeParse(row);
     return collection === 'vehicles' && vehicle.success
-      ? vehicleLabel(t, vehicle.data)
+      ? vehicleSpecLabel(t, vehicle.data)
       : referenceLabel(collection, row);
   };
 
   const vehicleTitle = (fitment: Fitment) => {
     const vehicle = vehicleById.get(fitment.vehicle_id);
-    return vehicle ? vehicleLabel(t, vehicle) : fitment.vehicle_id;
+    return vehicle ? vehicleSpecLabel(t, vehicle) : fitment.vehicle_id;
   };
 
   const quantityOk = quantityValid(conditions.quantity);

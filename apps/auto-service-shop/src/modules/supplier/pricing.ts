@@ -25,7 +25,7 @@ export type PricedOfferRow = {
   supplier: { markup_percentage: number };
 };
 
-export const sellingRows = <Row extends PricedOfferRow>(
+const sellingRows = <Row extends PricedOfferRow>(
   rows: Row[],
 ): (Row & { price: number })[] =>
   rows

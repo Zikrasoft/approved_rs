@@ -9,9 +9,10 @@ import {
   completeOrderWorkflow,
 } from '@medusajs/medusa/core-flows';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
-import type {
-  OrderOutcome,
-  ShopOrderEvent,
+import {
+  cancelRefused,
+  type OrderOutcome,
+  type ShopOrderEvent,
 } from '@podbor/lead-crm/shop-orders-wire';
 import { z } from 'zod';
 
@@ -42,8 +43,6 @@ const CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
-// TODO: drop 404 together with the /api/leads fallback in sendShopOrderEvent; only that legacy route answers 404 for a missing Lead, and once it is gone a 404 means the route itself is missing.
-const CANCEL_REFUSALS = new Set([404, 409, 410]);
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -176,10 +175,7 @@ export function createOrderLeadSync({
       await send({ event: 'canceled', order_id: id });
       await orders.patch(id, { [LOST_AT]: now(), [LOST_ERROR]: '' });
     } catch (error) {
-      if (
-        error instanceof LeadRouteRefusal &&
-        CANCEL_REFUSALS.has(error.status)
-      ) {
+      if (error instanceof LeadRouteRefusal && cancelRefused(error.status)) {
         logger.warn(
           `Order ${id} is canceled, but the CRM refused it (${error.status}: its Lead is won or deleted)`,
         );

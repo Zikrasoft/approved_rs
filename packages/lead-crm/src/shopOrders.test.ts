@@ -25,7 +25,7 @@ const order = {
   orderId: 'order_01',
 };
 
-let shopAnswers: number[];
+let shopAnswers: (number | { status: number; body: unknown })[];
 let shopCalls: { url: string; init: RequestInit }[];
 let api: ReturnType<typeof recordBotApi>;
 
@@ -62,9 +62,11 @@ beforeEach(() => {
       const url = String(input);
       if (!url.startsWith(SHOP)) return api.fetch(input, init);
       shopCalls.push({ url, init });
-      const status = shopAnswers.shift() ?? 200;
+      const answer = shopAnswers.shift() ?? 200;
+      const { status, body } =
+        typeof answer === 'number' ? { status: answer, body: {} } : answer;
       if (status === 0) throw new TypeError('fetch failed');
-      return new Response('{}', { status });
+      return new Response(JSON.stringify(body), { status });
     },
   );
 });
@@ -134,6 +136,18 @@ describe('a shop Order decided in the CRM bot', () => {
     });
   });
 
+  it('keeps asking a shop whose 404 does not say the Order is missing', async () => {
+    const { leadStore, bot } = crm();
+    const lead = await leadStore.insertLead(order);
+    shopAnswers = [{ status: 404, body: 'Cannot POST' }];
+
+    await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'won'))!);
+
+    expect((await leadStore.getLead(lead.id))?.orderConflict).toBeUndefined();
+    expect(await bot.settlePendingOrders()).toBe(0);
+    expect(shopCalls).toHaveLength(2);
+  });
+
   it('tells staff once that the shop does not take an outcome, and keeps asking', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
@@ -156,12 +170,15 @@ describe('a shop Order decided in the CRM bot', () => {
     expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
   });
 
-  it.each([409, 404])(
-    'records a shop answering %i as a conflict, tells staff once and stops asking',
-    async (status) => {
+  it.each([
+    [409, {}],
+    [404, { type: 'order_missing' }],
+  ])(
+    'records a shop answering %i %j as a conflict, tells staff once and stops asking',
+    async (status, body) => {
       const { leadStore, bot } = crm();
       const lead = await leadStore.insertLead(order);
-      shopAnswers = [status];
+      shopAnswers = [{ status, body }];
 
       await bot.afterStatusChange(
         (await leadStore.setStatus(lead.id, 'lost'))!,

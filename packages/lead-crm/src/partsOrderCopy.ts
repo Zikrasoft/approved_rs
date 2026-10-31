@@ -26,14 +26,50 @@ export const PARTS_ORDER_COPY = {
   notPlaced: (reason: string) =>
     `Заказ не оформлен: ${reason}. Свяжитесь с клиентом`,
   notPlacedReason: {
-    'price-changed': 'цена изменилась',
-    unavailable: 'позиции нет в нужном количестве',
-    'cart-changed': 'корзина изменилась в другой вкладке',
+    price: 'цена изменилась',
+    stock: 'позиции нет в нужном количестве',
+    offer: 'позицию больше не продают',
+    contact: 'магазин не принял контакт',
+    cart: 'корзина изменилась в другой вкладке',
     expired: 'корзина устарела',
     unreachable: 'магазин не ответил',
   },
+  notPlacedLeftOut: (count: number) => `Не поместилось позиций: ${count}`,
   undelivered: (order: number | string, reason: string) =>
     `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
   cancelUndelivered: (order: number | string, reason: string) =>
     `Заказ #${order} отменен в магазине, но CRM не отметила его Лид после всех попыток. Отметьте Лид ❌ сами. Причина: ${reason}`,
 };
+
+export type NotPlacedReason = keyof typeof PARTS_ORDER_COPY.notPlacedReason;
+
+export const orderMoney = (amount: number, currency: string): string =>
+  `${amount.toLocaleString('ru-RU')} ${currency.toUpperCase()}`;
+
+export type OrderLine = {
+  title: string;
+  quantity: number;
+  unitPrice: number;
+  addon: boolean;
+  inStock?: boolean | null;
+  leadTimeDays?: number | null;
+  source?: string | null;
+};
+
+export function orderLineText(line: OrderLine, currency: string): string {
+  const sum = orderMoney(line.unitPrice * line.quantity, currency);
+  if (line.addon)
+    return PARTS_ORDER_COPY.addon(
+      line.title,
+      line.unitPrice === 0 ? PARTS_ORDER_COPY.free : sum,
+    );
+  const readiness = [
+    line.inStock && PARTS_ORDER_COPY.inStock,
+    line.leadTimeDays && PARTS_ORDER_COPY.pickupIn(line.leadTimeDays),
+    line.source,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const text = PARTS_ORDER_COPY.line(line.title, line.quantity, sum);
+  return readiness ? `${text}, ${readiness}` : text;
+}

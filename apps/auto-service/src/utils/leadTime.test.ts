@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  leadTimeCopyFrom,
   offerAvailability,
   pickupTime,
   plural,
@@ -105,6 +106,33 @@ describe('offerAvailability', () => {
       'Ready tomorrow',
       'Ready in 2 days',
     ]);
+  });
+
+  it('words a cart line, which knows only whether it is in stock, the same way', () => {
+    expect(
+      offerAvailability({ in_stock: true, lead_time_days: 2 }, ru, 'ru-RU'),
+    ).toEqual(
+      offerAvailability({ stock_quantity: 3, lead_time_days: 2 }, ru, 'ru-RU'),
+    );
+    expect(
+      offerAvailability({ in_stock: false, lead_time_days: 0 }, ru, 'ru-RU')
+        .buyable,
+    ).toBe(false);
+  });
+
+  it('drops the pickup tail from a stock line when asked to be short', () => {
+    expect(
+      offerAvailability({ stock_quantity: 3, lead_time_days: 2 }, ru, 'ru-RU', {
+        short: true,
+      }).stock,
+    ).toBe('В наличии');
+  });
+
+  it('reads the copy a page hands its element, and nothing else', () => {
+    expect(leadTimeCopyFrom(JSON.stringify(ru))).toEqual(ru);
+    expect(leadTimeCopyFrom('{"inStock":1}')).toBeNull();
+    expect(leadTimeCopyFrom('not json')).toBeNull();
+    expect(leadTimeCopyFrom(undefined)).toBeNull();
   });
 });
 

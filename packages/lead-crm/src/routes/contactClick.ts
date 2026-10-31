@@ -4,7 +4,7 @@ import {
   contactChannelSchema,
   META_IDS_FIELD,
   metaIdsFieldSchema,
-  sourceUrlSchema,
+  siteUrl,
   visitorIdSchema,
 } from '../form.ts';
 import type { NotifyLead } from '../notifyLead.ts';
@@ -23,12 +23,8 @@ export function localeFromUrl(
   isLocale: (value: string) => boolean,
 ): string | null {
   if (!url) return null;
-  try {
-    const first = new URL(url).pathname.split('/').filter(Boolean)[0];
-    return first && isLocale(first) ? first : null;
-  } catch {
-    return null;
-  }
+  const first = new URL(url).pathname.split('/').filter(Boolean)[0];
+  return first && isLocale(first) ? first : null;
 }
 
 export function createContactClickRoute({
@@ -47,7 +43,10 @@ export function createContactClickRoute({
       return new Response(null, { status: 400 });
     }
     const channel = clickedChannelSchema.parse(form.get('channel'));
-    const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
+    const sourceUrl = siteUrl(
+      form.get('source_url'),
+      new URL(request.url).origin,
+    );
 
     waitUntil(
       notifyLead(

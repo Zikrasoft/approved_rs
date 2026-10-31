@@ -640,12 +640,15 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('keeps two orders from one visitor as two Leads', async () => {
+  it('merges a second failed checkout of one visitor under its new contact', async () => {
     await store.insertOrMergeLead(order('+381602222222'));
-    const { merged } = await store.insertOrMergeLead(order('+381603333333'));
+    const { lead, merged } = await store.insertOrMergeLead(
+      order('+381603333333'),
+    );
 
-    expect(merged).toBe(false);
-    expect(await store.readLeads()).toHaveLength(2);
+    expect(merged).toBe(true);
+    expect(lead.contact).toBe('+381603333333');
+    expect(await store.readLeads()).toHaveLength(1);
   });
 
   it('merges a checkout that failed again for the same contact into its Lead', async () => {
@@ -664,12 +667,92 @@ describe('insertOrMergeLead with standalone services', () => {
     );
   });
 
-  it('keeps a placed order apart from the failed checkout before it', async () => {
+  it('lets a placed order absorb the failed checkout before it', async () => {
+    const { lead: failed } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      comment: 'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1',
+    });
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...order('+381603333333'),
+      name: 'Петр',
+      orderId: 'order_1',
+      comment: 'VARTA 580901080 × 1',
+    });
+
+    expect(merged).toBe(true);
+    expect(lead.id).toBe(failed.id);
+    expect(lead.orderId).toBe('order_1');
+    expect(lead.contact).toBe('+381603333333');
+    expect(lead.name).toBe('Петр');
+    expect(lead.comment).toBe(
+      'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1\nVARTA 580901080 × 1',
+    );
+    expect(await store.readLeads()).toHaveLength(1);
+  });
+
+  it('finds the failed checkout by contact when the visitor id differs', async () => {
     await store.insertOrMergeLead(order('+381602222222'));
     const { merged } = await store.insertOrMergeLead({
       ...order('+381602222222'),
+      visitorId: 'visitor-2',
       orderId: 'order_1',
     });
+
+    expect(merged).toBe(true);
+  });
+
+  it('merges failed checkouts of a visitor without an id on the same contact', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const other = await store.insertOrMergeLead({
+      ...order('+381603333333'),
+      visitorId: null,
+    });
+
+    expect(merged).toBe(true);
+    expect(other.merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps a failed checkout older than the merge window apart', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-10-11T10:00:00.000Z'));
+      await store.insertOrMergeLead(order('+381602222222'));
+      vi.setSystemTime(new Date('2026-10-11T12:00:00.000Z'));
+      const { merged } = await store.insertOrMergeLead({
+        ...order('+381602222222'),
+        orderId: 'order_1',
+      });
+
+      expect(merged).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps a closed failed checkout apart', async () => {
+    const { lead: failed } = await store.insertOrMergeLead(
+      order('+381602222222'),
+    );
+    await store.setStatus(failed.id, 'lost');
+    const { merged } = await store.insertOrMergeLead(order('+381602222222'));
+
+    expect(merged).toBe(false);
+  });
+
+  it('keeps a failed checkout after a placed order apart from it', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+    });
+    const { merged } = await store.insertOrMergeLead(order('+381602222222'));
 
     expect(merged).toBe(false);
   });

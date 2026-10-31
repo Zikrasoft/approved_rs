@@ -2,6 +2,7 @@ import { asValue } from '@medusajs/framework/awilix';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
+import { VIN_REFUSAL } from '@podbor/catalog-contract';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
@@ -422,11 +423,15 @@ medusaIntegrationTestRunner({
       });
 
       it('returns a 400 for a VIN that is not 17 structurally valid characters', async () => {
-        const response = await api
-          .post('/store/vin-lookups', { vin: 'TOO-SHORT' }, storeHeaders)
-          .catch((error) => error.response);
+        for (const vin of ['TOO-SHORT', 'ЖЖЖ123', '12345678901234567', ' ']) {
+          const response = await api
+            .post('/store/vin-lookups', { vin }, storeHeaders)
+            .catch((error) => error.response);
 
-        expect(response.status).toBe(400);
+          expect(response.status).toBe(400);
+          expect(response.data.message).toContain(VIN_REFUSAL);
+          expect(response.data.message).not.toContain('Expected type');
+        }
       });
     });
   },
