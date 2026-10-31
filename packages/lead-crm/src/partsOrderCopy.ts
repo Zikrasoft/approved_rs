@@ -26,11 +26,11 @@ export const PARTS_ORDER_COPY = {
   notPlaced: (reason: string) =>
     `Заказ не оформлен: ${reason}. Свяжитесь с клиентом`,
   notPlacedReason: {
-    price: 'цена изменилась',
-    stock: 'позиции нет в нужном количестве',
-    offer: 'позицию больше не продают',
-    contact: 'магазин не принял контакт',
-    cart: 'корзина изменилась в другой вкладке',
+    OFFER_PRICE_CHANGED: 'цена изменилась',
+    OFFER_OUT_OF_STOCK: 'позиции нет в нужном количестве',
+    OFFER_MISSING: 'позицию больше не продают',
+    CONTACT_MISSING: 'магазин не принял контакт',
+    CART_CHANGED: 'корзина изменилась в другой вкладке',
     expired: 'корзина устарела',
     unreachable: 'магазин не ответил',
   },
