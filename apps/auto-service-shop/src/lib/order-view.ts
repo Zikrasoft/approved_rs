@@ -1,7 +1,8 @@
 import { checkoutContactSchema } from '@podbor/catalog-contract';
 import { CASH_AT_PICKUP_METADATA } from './commerce-defaults';
 import { orderTotal, readLine, withAddonsUnderParts } from './line-metadata';
-import { leadHandoff, type LeadOrder } from './order-lead';
+import type { LeadOrder } from './order-lead';
+import { orderLeadStatus } from './order-lead-sync';
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -51,7 +52,7 @@ export function carlabOrderView(order: LeadOrder) {
     customer: customerOf(order.metadata),
     lines,
     total: orderTotal(order.items),
-    lead: leadHandoff(order.metadata),
+    lead: orderLeadStatus(order.metadata),
   };
 }
 

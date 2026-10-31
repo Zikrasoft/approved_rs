@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { Modules } from '@medusajs/framework/utils';
 
-import { leadHandoff } from '../../../lib/order-lead';
+import { orderLeadStatus } from '../../../lib/order-lead-sync';
 import { isCashAtPickup } from '../../../lib/order-view';
 
 const RECENT_MS = 7 * 24 * 60 * 60 * 1000;
@@ -29,7 +29,7 @@ export async function GET(
         id,
         display_id,
         created_at,
-        lead: leadHandoff(metadata),
+        lead: orderLeadStatus(metadata),
       }))
       .filter(({ lead }) => !lead.handed_off_at),
   });

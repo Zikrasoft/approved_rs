@@ -209,8 +209,8 @@ Approved's trust/verification semantics.
   `require` condition.** `apps/auto-service-shop` is CommonJS and consumes
   `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
   `./translate/core` and `./section`, and `@podbor/lead-crm`'s
-  `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy`, `./phone`
-  and `./vin`; they export
+  `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy`, `./phone`,
+  `./vin`, `./verify-secret` and `./shop-orders-wire`; they export
   `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task

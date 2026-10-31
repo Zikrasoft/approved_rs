@@ -96,7 +96,7 @@ describe('a placed parts order posted to /api/leads', () => {
     const response = await post(orderForm(), shop);
     await Promise.all(pending);
 
-    expect(response.status).toBe(302);
+    expect(response.status).toBe(201);
     expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
       expect.objectContaining({
         brand: 'CarLab',

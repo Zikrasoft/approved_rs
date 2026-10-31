@@ -46,6 +46,9 @@ export {
   SERVICE_FIELD,
 } from './fields.ts';
 
+export const vinNote = (vin: string): string =>
+  `VIN: ${vinOf(vin) ?? vin.toUpperCase()}`;
+
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
 export const serviceSlugSchema = z.enum(
@@ -147,9 +150,7 @@ const submissionObject = z
       0,
       MAX_SERVICES,
     );
-    const vin = value.vin
-      ? `VIN: ${vinOf(value.vin) ?? value.vin.toUpperCase()}`
-      : null;
+    const vin = value.vin ? vinNote(value.vin) : null;
     const comment = [vin, value.car, value.comment]
       .filter(Boolean)
       .join('\n')

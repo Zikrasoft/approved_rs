@@ -467,6 +467,7 @@ describe('a shop Order cancelled in the shop admin', () => {
   beforeEach(() => {
     cancelOrder.mockReset().mockResolvedValue('lost');
     notifyLead.mockReset();
+    waitUntil.mockReset();
   });
 
   it('marks the Lead lost when the shop proves who it is', async () => {
@@ -509,16 +510,27 @@ describe('a shop Order cancelled in the shop admin', () => {
     return ctx;
   };
 
-  it('stores the Lead of a placed Order the shop proves it sent', async () => {
+  it('answers 201 only once the Lead of a placed Order is stored', async () => {
+    notifyLead.mockResolvedValue({ stored: true, delivered: false });
     const ctx = orderLeadCtx('Bearer shop-secret');
 
-    await cancelPOST(ctx);
+    const response = await cancelPOST(ctx);
 
-    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+    expect(response.status).toBe(201);
+    expect(ctx.redirect).not.toHaveBeenCalled();
+    expect(waitUntil).not.toHaveBeenCalled();
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ orderId: 'order_01' }),
       '[leads]',
     );
+  });
+
+  it('answers 503 when the Lead of a placed Order was neither stored nor delivered, so the shop retries', async () => {
+    notifyLead.mockResolvedValue({ stored: false, delivered: false });
+
+    const response = await cancelPOST(orderLeadCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(503);
   });
 
   it.each([undefined, 'Bearer wrong'])(
