@@ -2,13 +2,15 @@
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 import { contactCta } from '@podbor/site-kit/contact-control';
 
 const locale = localeFrom(Astro.url.pathname);
-const { pages, site } = content(locale);
+const { pages, shopCart } = content(locale);
 ---
 
 <Shell
@@ -38,9 +40,9 @@ const { pages, site } = content(locale);
         href={PathBuilder.partsInquiry(locale)}
         class="btn btn-secondary w-fit"
       >
-        {site.header.partsCta}
-        <Icon name="arrowRight" />
+        {shopCart.emptyInquiryCta}
       </a>
+      <ContactChannels service={VIN_INQUIRY_SERVICE} class="max-w-xl" />
     </div>
     <a href={PathBuilder.home(locale)} class="btn btn-secondary mt-2 w-fit">
       {pages.notFound.cta}
