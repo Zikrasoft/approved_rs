@@ -104,6 +104,14 @@ export type AdminUpdatePartIdentifierType = z.infer<
   typeof AdminUpdatePartIdentifier
 >;
 
+export const AdminListUnresolvedVinCodes = z.object({
+  offset: z.coerce.number().int().nonnegative().default(0),
+  limit: z.coerce.number().int().positive().max(200).default(50),
+});
+export type AdminListUnresolvedVinCodesType = z.infer<
+  typeof AdminListUnresolvedVinCodes
+>;
+
 export const AdminListPartIdentifiers = z.object({
   enriched: z
     .enum(['true', 'false'])
