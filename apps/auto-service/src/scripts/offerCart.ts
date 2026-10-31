@@ -189,13 +189,19 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           this.dataset.orderedContact ?? '{}',
         ) as Record<string, string>;
         const contactTemplate = contact && contactTemplates[contact.channel];
-        fill(
-          this,
-          '[data-ordered-contact]',
-          contactTemplate
-            ? contactTemplate.replace('{contact}', contact.contact)
-            : null,
-        );
+        const showContact = (shown: string | null) =>
+          fill(
+            this,
+            '[data-ordered-contact]',
+            shown && contactTemplate
+              ? contactTemplate.replace('{contact}', shown)
+              : null,
+          );
+        if (contact?.channel === 'phone') {
+          void import('@podbor/site-kit/format-phone').then(({ formatPhone }) =>
+            showContact(formatPhone(contact.contact.replace(/\D/g, ''))),
+          );
+        } else showContact(contact?.contact ?? null);
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
         fill(
