@@ -153,7 +153,7 @@ const specsSummary = [
       empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
     ]}
   >
-    <div class="flex flex-col gap-6">
+    <div class="flex min-w-0 flex-col gap-6">
       {
         kit.length > 0 && (
           <parts-list-add-all
@@ -167,7 +167,7 @@ const specsSummary = [
             <ul class="flex flex-col divide-y divide-line">
               {kit.map((item) => (
                 <li
-                  class="flex items-baseline justify-between gap-4 py-3 first:pt-0"
+                  class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 py-3 first:pt-0"
                   data-kit-part={item.part.id}
                   data-slug={item.page.slug}
                   data-brand={item.page.brand.name}
@@ -176,22 +176,28 @@ const specsSummary = [
                   data-offer-id={item.offer?.id}
                   data-quantity={item.quantity}
                 >
-                  <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
-                    {!translated(item.part, 'name', locale)
-                      .toLowerCase()
-                      .startsWith(
-                        translated(item.category, 'name', locale).toLowerCase(),
-                      ) && (
-                      <span class="text-xs text-muted">
-                        {translated(item.category, 'name', locale)}
+                  <div class="min-w-0 grow basis-48">
+                    <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
+                      {!translated(item.part, 'name', locale)
+                        .toLowerCase()
+                        .startsWith(
+                          translated(
+                            item.category,
+                            'name',
+                            locale,
+                          ).toLowerCase(),
+                        ) && (
+                        <span class="text-xs text-muted">
+                          {translated(item.category, 'name', locale)}
+                        </span>
+                      )}
+                      <span class="text-sm text-ink">
+                        {translated(item.part, 'name', locale)}
                       </span>
-                    )}
-                    <span class="text-sm text-ink">
-                      {translated(item.part, 'name', locale)}
-                    </span>
-                    <PartNumbers pages={item.pages} first={item.page} />
-                  </ThumbRow>
-                  <span class="flex shrink-0 flex-col items-end gap-1">
+                      <PartNumbers pages={item.pages} first={item.page} />
+                    </ThumbRow>
+                  </div>
+                  <span class="ml-auto flex shrink-0 flex-col items-end gap-1">
                     <span class="spec text-sm text-ink">
                       {quantity(item.quantity)}
                     </span>
