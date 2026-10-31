@@ -8,6 +8,7 @@ import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { contactCta } from '@podbor/site-kit/contact-control';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { PHONE_NUMBER } from '@/utils/constants';
@@ -30,7 +31,7 @@ const availability = {
 };
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
-  'card mb-4 flex items-start gap-3 border-signal/30 bg-signal/8 p-4 text-sm leading-relaxed text-ink';
+  'card mb-4 flex items-start gap-3 border-transparent bg-shade p-4 text-sm leading-relaxed text-ink';
 const notices = [
   { key: 'price-changed', text: copy.notices.priceChanged },
   { key: 'unavailable', text: copy.notices.unavailable },
@@ -43,7 +44,7 @@ const notices = [
   { key: 'invalid', text: copy.notices.invalid },
 ];
 const stepper =
-  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-signal disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
@@ -83,19 +84,19 @@ const stepper =
         {copy.loading}
       </p>
 
-      <div data-state="empty" hidden class={panel}>
+      <div data-state="empty" hidden class={panel} {...contactCta}>
         <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
         <p
           data-empty-notice="expired"
           hidden
-          class="text-sm leading-relaxed text-signal-dark"
+          class="text-sm leading-relaxed text-danger"
         >
           {copy.notices.expired}
         </p>
         <div
           data-empty-notice="moved"
           hidden
-          class="flex flex-col gap-3 rounded-control bg-signal/8 p-4"
+          class="flex flex-col gap-3 rounded-control bg-shade p-4"
         >
           <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
           <a
@@ -296,7 +297,7 @@ const stepper =
                 </div>
                 <button
                   type="button"
-                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-signal aria-busy:opacity-40"
+                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
                   aria-label={copy.removeLabel}
                   data-remove
                 >
@@ -304,7 +305,7 @@ const stepper =
                 </button>
               </div>
               <p
-                class="flex items-start gap-2 text-sm leading-relaxed text-signal-dark"
+                class="flex items-start gap-2 text-sm leading-relaxed text-danger"
                 data-unavailable
                 hidden
               >

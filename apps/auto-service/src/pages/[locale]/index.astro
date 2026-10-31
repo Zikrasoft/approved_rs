@@ -62,7 +62,7 @@ const website = websiteSchema({
 >
   <section class="wrap pt-3 sm:pt-5">
     <div
-      class="grid overflow-hidden rounded-block bg-panel text-white lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem]"
+      class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem]"
     >
       <div class="flex flex-col gap-5 p-5 sm:p-8 lg:p-10">
         <h1 class="text-hero max-w-[16ch]">{home.hero.heading}</h1>
@@ -74,7 +74,7 @@ const website = websiteSchema({
             <h2 class="text-block font-bold">
               {content(locale).partsSearch.searchHeading}
             </h2>
-            <CatalogueSearch hint={false} class="mt-auto" />
+            <CatalogueSearch hint={false} onPanel class="mt-auto" />
           </div>
 
           <div
@@ -87,7 +87,7 @@ const website = websiteSchema({
             >
               <a
                 href={PathBuilder.services(locale)}
-                class="chip bg-white text-ink hover:bg-shade"
+                class="chip bg-panel-fg text-ink hover:bg-shade"
               >
                 {site.common.allServices}
               </a>
@@ -95,7 +95,7 @@ const website = websiteSchema({
                 SERVICE_SLUGS.map((slug) => (
                   <a
                     href={PathBuilder.service(locale, slug)}
-                    class="chip bg-white/10 text-white hover:bg-white/20"
+                    class="chip bg-panel-fg/10 text-panel-fg hover:bg-panel-fg/20"
                   >
                     {services[slug].name}
                   </a>

@@ -9,7 +9,10 @@ import {
 } from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
-import { contactRegion } from '@podbor/site-kit/contact-control';
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
 import SocialLinks from './SocialLinks.astro';
@@ -57,7 +60,7 @@ const links = [
   {...contactRegion('header')}
 >
   <header
-    class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur print:hidden"
+    class="sticky top-0 z-30 border-b border-panel-line bg-panel text-panel-fg print:hidden"
   >
     <div
       class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
@@ -67,7 +70,7 @@ const links = [
         class="shrink-0"
         aria-label={site.common.homeLabel}
       >
-        <Wordmark />
+        <Wordmark onPanel />
       </a>
 
       <nav
@@ -83,8 +86,8 @@ const links = [
               class:list={[
                 'relative text-sm font-medium transition-colors duration-150',
                 link.current
-                  ? 'text-ink after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
-                  : 'text-muted hover:text-ink',
+                  ? 'text-panel-fg after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
+                  : 'text-panel-ink hover:text-panel-fg',
               ]}
             >
               {link.label}
@@ -114,8 +117,8 @@ const links = [
                 class:list={[
                   'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
                   code === locale
-                    ? 'bg-shade text-ink'
-                    : 'text-muted hover:text-ink',
+                    ? 'bg-panel-2 text-panel-fg'
+                    : 'text-panel-ink hover:text-panel-fg',
                 ]}
               >
                 {code}
@@ -126,7 +129,7 @@ const links = [
 
         <ContactControl
           channel="phone"
-          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
+          class="btn btn-on-panel hidden h-10 py-0 lg:inline-flex"
         >
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
@@ -137,7 +140,7 @@ const links = [
           popovertarget="site-search"
           aria-label={searchCopy.openSearch}
           class:list={[
-            'flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade',
+            'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
             !onHome && 'xl:hidden',
           ]}
         >
@@ -151,36 +154,42 @@ const links = [
         >
           <a
             href={basket.href}
-            class="relative flex size-11 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+            class="relative flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2"
           >
             <Icon name="cart" size={20} />
             <span class="sr-only">{basket.label}</span>
             <span
-              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-ink px-1 text-[0.6875rem] font-semibold text-white"
+              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-panel-fg px-1 text-[0.6875rem] font-semibold text-ink"
               data-count
               hidden></span>
           </a>
         </cart-badge>
 
-        {
-          onParts ? (
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-              class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
-            >
-              {site.header.partsCta}
-            </a>
-          ) : (
-            <button
-              type="button"
-              data-open-lead-modal
-              class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
-            >
-              {site.header.cta}
-            </button>
-          )
-        }
+        <cta-reveal
+          data-revealed="true"
+          watch={CONTACT_CTA_SELECTOR}
+          class="flex max-md:data-[revealed=false]:hidden"
+        >
+          {
+            onParts ? (
+              <a
+                href={PathBuilder.partsInquiry(locale)}
+                {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
+              >
+                {site.header.partsCta}
+              </a>
+            ) : (
+              <button
+                type="button"
+                data-open-lead-modal
+                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
+              >
+                {site.header.cta}
+              </button>
+            )
+          }
+        </cta-reveal>
 
         <button
           type="button"
@@ -189,7 +198,7 @@ const links = [
           aria-controls="site-menu"
           aria-label={site.header.menuOpenLabel}
           data-close-label={site.header.menuCloseLabel}
-          class="flex h-10 w-10 items-center justify-center rounded-control border border-line-strong text-ink md:hidden"
+          class="flex h-10 w-10 items-center justify-center rounded-control border border-panel-line-strong text-panel-fg md:hidden"
         >
           <span class="relative block h-3 w-4" aria-hidden="true">
             <span
@@ -279,6 +288,7 @@ const links = [
 
 <script>
   import {
+    defineCtaReveal,
     defineLocaleChoice,
     defineMenuToggle,
   } from '@podbor/site-kit/browser';
@@ -286,6 +296,7 @@ const links = [
   import { defineCartBadge } from '@/scripts/cartBadge';
 
   defineCartBadge();
+  defineCtaReveal();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
 </script>

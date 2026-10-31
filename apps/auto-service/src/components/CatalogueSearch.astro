@@ -12,6 +12,7 @@ interface Props {
   hint?: boolean;
   autofocus?: boolean;
   compact?: boolean;
+  onPanel?: boolean;
   class?: string;
 }
 
@@ -22,6 +23,7 @@ const {
   hint = large,
   autofocus = false,
   compact = false,
+  onPanel = false,
   class: className,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -83,7 +85,8 @@ const copy = content(locale).partsSearch;
           <button
             type="submit"
             class:list={[
-              'btn btn-primary shrink-0',
+              'btn shrink-0',
+              onPanel ? 'btn-on-panel' : 'btn-primary',
               large ? 'min-h-14 px-5 sm:px-7' : 'min-h-11 px-4 py-2',
             ]}
           >
@@ -97,7 +100,7 @@ const copy = content(locale).partsSearch;
       hidden
       aria-label={copy.label}
       class:list={[
-        'absolute inset-x-0 top-full z-40 mt-2 max-h-[min(70vh,30rem)] overflow-y-auto overscroll-contain rounded-control border border-line-strong bg-paper p-1.5 text-left shadow-lg',
+        'absolute inset-x-0 top-full z-40 mt-2 max-h-[min(70vh,30rem)] overflow-y-auto overscroll-contain rounded-control border border-line-strong bg-paper p-1.5 text-left text-ink shadow-lg',
         compact && 'w-[max(100%,26rem)]',
       ]}
     >
