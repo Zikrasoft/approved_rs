@@ -42,11 +42,7 @@ const { pages, site } = content(locale);
         <Icon name="arrowRight" />
       </a>
     </div>
-    <a
-      href={PathBuilder.home(locale)}
-      class="btn btn-primary mt-2 w-fit"
-      data-home
-    >
+    <a href={PathBuilder.home(locale)} class="btn btn-secondary mt-2 w-fit">
       {pages.notFound.cta}
       <Icon name="arrowRight" />
     </a>
@@ -57,8 +53,5 @@ const { pages, site } = content(locale);
   if (/^\/[^/]+\/parts\//.test(location.pathname)) {
     document.querySelector<HTMLElement>('[data-parts-404]')!.hidden = false;
     document.querySelector<HTMLElement>('[data-site-body]')!.hidden = true;
-    document
-      .querySelector('[data-home]')!
-      .classList.replace('btn-primary', 'btn-secondary');
   }
 </script>
