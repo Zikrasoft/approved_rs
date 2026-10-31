@@ -2,7 +2,14 @@ import * as z from 'zod/mini';
 import {
   CART_FINGERPRINT_FIELD,
   cartFingerprint,
+  cartTotals,
 } from '@podbor/catalog-contract/fingerprint';
+import {
+  offerCartSchema,
+  type AddonKind,
+  type OfferCart,
+  type OfferCartLine as CartLine,
+} from '@podbor/catalog-contract/cart-wire';
 import {
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,
@@ -15,7 +22,6 @@ import {
   type AvailabilityCopy,
 } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
-import type { LineAddonKind } from '@/utils/catalogue';
 import { vinFrom } from '@/utils/carFacts';
 import {
   forgetStored,
@@ -60,42 +66,6 @@ const offersOutcomeSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('offers'), offers: z.array(offerSchema) }),
   inquirySchema,
 ]);
-
-const offerCartSchema = z.object({
-  id: z.string(),
-  currency: z.string(),
-  total: z.number(),
-  items: z.array(
-    z.object({
-      id: z.string(),
-      quantity: z.number(),
-      unit_price: z.number(),
-      available: z.boolean(),
-      in_stock: z.boolean(),
-      lead_time_days: z.number(),
-      max_quantity: z.optional(z.nullable(z.number())),
-      addon: z.nullable(
-        z.object({
-          item_id: z.nullable(z.string()),
-          label: z.string(),
-          translations: z.nullable(
-            z.record(z.string(), z.record(z.string(), z.string())),
-          ),
-          unit_price: z.number(),
-        }),
-      ),
-      installation: z.optional(
-        z.nullable(
-          z.object({ item_id: z.nullable(z.string()), unit_price: z.number() }),
-        ),
-      ),
-      part: listedPartSchema,
-    }),
-  ),
-});
-
-type OfferCart = z.infer<typeof offerCartSchema>;
-type CartLine = OfferCart['items'][number];
 
 const cartOutcomeSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('cart'), cart: offerCartSchema }),
@@ -214,25 +184,7 @@ export const priceChanges = (
       : [];
   });
 
-export function orderSummary(cart: OfferCart) {
-  const sold = cart.items.filter(({ available }) => available);
-  const count = sold.reduce((sum, { quantity }) => sum + quantity, 0);
-  const parts = sold.reduce(
-    (sum, { unit_price, quantity }) => sum + unit_price * quantity,
-    0,
-  );
-  const addons = sold.reduce(
-    (sum, { addon, installation, quantity }) =>
-      sum +
-      [addon, installation].reduce(
-        (added, extra) =>
-          added + (extra?.item_id ? extra.unit_price * quantity : 0),
-        0,
-      ),
-    0,
-  );
-  return { count, parts, addons, total: parts + addons };
-}
+export const orderSummary = (cart: OfferCart) => cartTotals(cart.items);
 
 const RECEIPT_KEY = 'carlab_order_receipt';
 
@@ -965,7 +917,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               line.addon.translations,
               locale,
             ),
-            kind: 'addon',
+            kind: 'service',
           });
         }
         if (line.installation) {
@@ -991,7 +943,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           label: string;
           item_id: string | null;
           unit_price: number;
-          kind: LineAddonKind;
+          kind: AddonKind;
         },
       ): void {
         const box = row.querySelector<HTMLElement>(selector);

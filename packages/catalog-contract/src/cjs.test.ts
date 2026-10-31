@@ -113,6 +113,19 @@ describe('CommonJS build', () => {
     ).toBe('item_1:2:50');
   });
 
+  it('serves the zod/mini cart wire subpath to require()', () => {
+    const wire = require('@podbor/catalog-contract/cart-wire');
+    expect(wire.ADDON_KINDS).toEqual(['service', 'installation']);
+    expect(
+      wire.listedPartSchema.safeParse({
+        slug: 's',
+        brand: 'b',
+        number: 'n',
+        name: 'p',
+      }).success,
+    ).toBe(true);
+  });
+
   it('serves the zod-free offer availability subpath to require()', () => {
     expect(
       require('@podbor/catalog-contract/availability').orderCap({

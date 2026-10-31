@@ -1,6 +1,6 @@
 import { checkoutContactSchema } from '@podbor/catalog-contract';
-import { CASH_AT_PICKUP_METADATA } from './offer-cart';
-import { readLine, withAddonsUnderParts } from './line-metadata';
+import { CASH_AT_PICKUP_METADATA } from './commerce-defaults';
+import { orderTotal, readLine, withAddonsUnderParts } from './line-metadata';
 import type { LeadOrder } from './order-lead';
 import { orderLeadStatus } from './order-lead-sync';
 
@@ -51,7 +51,7 @@ export function carlabOrderView(order: LeadOrder) {
     cash_at_pickup: isCashAtPickup(order.metadata),
     customer: customerOf(order.metadata),
     lines,
-    total: lines.reduce((sum, line) => sum + line.total, 0),
+    total: orderTotal(order.items),
     lead: orderLeadStatus(order.metadata),
   };
 }

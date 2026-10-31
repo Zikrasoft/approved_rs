@@ -27,7 +27,7 @@ import {
 import { z } from 'zod';
 
 import { parseEnv } from './env';
-import { readLine, withAddonsUnderParts } from './line-metadata';
+import { orderTotal, readLine, withAddonsUnderParts } from './line-metadata';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
@@ -84,10 +84,7 @@ export function orderLeadPayload(
   const currency = order.currency_code.toUpperCase();
   const money = (amount: number) =>
     `${amount.toLocaleString('ru-RU')} ${currency}`;
-  const total = order.items.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0,
-  );
+  const total = orderTotal(order.items);
   const summary = fitComment({
     head: [
       PARTS_ORDER_COPY.heading(order.display_id),

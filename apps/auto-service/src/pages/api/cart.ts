@@ -3,11 +3,8 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { previewRequested } from '@/utils/shopPreview';
-import {
-  catalogueIdSchema,
-  LINE_ADDON_KINDS,
-  type CartOutcome,
-} from '@/utils/catalogue';
+import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
+import { catalogueIdSchema, type CartOutcome } from '@/utils/catalogue';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
@@ -27,7 +24,7 @@ const addonSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
   addon: z.boolean(),
-  kind: z.enum(LINE_ADDON_KINDS).default('addon'),
+  kind: z.enum(ADDON_KINDS).default('service'),
 });
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,

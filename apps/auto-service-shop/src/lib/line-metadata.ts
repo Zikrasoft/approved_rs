@@ -1,12 +1,11 @@
 import {
+  ADDON_KINDS,
   listedPartSchema,
   normalizePartNumber,
+  type AddonKind,
   type ListedPart,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
-
-export const INSTALLATION = 'installation';
-export type AddonKind = 'service' | typeof INSTALLATION;
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -24,7 +23,7 @@ const lineSchema = z
     addon_offer_id: filled,
     addon_for: filled,
     addon_kind: z
-      .enum(['service', INSTALLATION])
+      .enum(ADDON_KINDS)
       .nullish()
       .catch(null)
       .transform((value) => value ?? null),
@@ -60,10 +59,12 @@ export type Line = z.output<typeof lineSchema>;
 export const readLine = (metadata: Metadata): Line =>
   lineSchema.parse(metadata ?? {});
 
-export const listedPartOf = (metadata: Metadata, title: string): ListedPart =>
-  listedPartSchema
-    .catch({ slug: '', brand: '', number: '', name: title })
-    .parse(metadata);
+export const listedPartOf = (metadata: Metadata, title: string): ListedPart => {
+  const part = listedPartSchema.safeParse(metadata);
+  return part.success
+    ? part.data
+    : { slug: '', brand: '', number: '', name: title };
+};
 
 export const offerLineMetadata = (
   offerId: string,
@@ -118,8 +119,8 @@ export const withAddonsUnderParts = <T extends { metadata?: Metadata }>(
     .filter(({ line }) => line.addonKind)
     .sort(
       (a, b) =>
-        Number(a.line.addonKind === INSTALLATION) -
-        Number(b.line.addonKind === INSTALLATION),
+        Number(a.line.addonKind === 'installation') -
+        Number(b.line.addonKind === 'installation'),
     );
   const grouped = lines
     .filter(({ line }) => !line.addonKind)
@@ -135,3 +136,8 @@ export const withAddonsUnderParts = <T extends { metadata?: Metadata }>(
     ...addons.filter((addon) => !grouped.includes(addon)),
   ].map(({ item }) => item);
 };
+
+export const orderTotal = (
+  items: { unit_price: number; quantity: number }[],
+): number =>
+  items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);

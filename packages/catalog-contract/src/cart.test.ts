@@ -10,7 +10,7 @@ import {
   orderCaseSummaryResponseSchema,
   placedOrderResponseSchema,
 } from './cart.ts';
-import { cartFingerprint } from './fingerprint.ts';
+import { billedRows, cartFingerprint, cartTotals } from './fingerprint.ts';
 
 const cart = {
   id: 'cart_1',
@@ -346,5 +346,59 @@ describe('orderCaseSummaryResponseSchema', () => {
         summary: { display_id: 7, parts: [] },
       }).summary,
     ).toEqual({ display_id: 7, car: null, parts: [], total_rsd: null });
+  });
+});
+
+describe('billedRows', () => {
+  it('bills an added service and installation per unit of their line', () => {
+    expect(
+      billedRows([
+        {
+          id: 'a',
+          quantity: 2,
+          unit_price: 50,
+          addon: { item_id: 'b', unit_price: 2500 },
+          installation: { item_id: 'c', unit_price: 0 },
+        },
+        {
+          id: 'd',
+          quantity: 1,
+          unit_price: 70,
+          addon: { item_id: null, unit_price: 2500 },
+        },
+      ]),
+    ).toEqual([
+      { id: 'a', quantity: 2, unit_price: 50, kind: 'part' },
+      { id: 'b', quantity: 2, unit_price: 2500, kind: 'service' },
+      { id: 'c', quantity: 2, unit_price: 0, kind: 'installation' },
+      { id: 'd', quantity: 1, unit_price: 70, kind: 'part' },
+    ]);
+  });
+});
+
+describe('cartTotals', () => {
+  it('sums the parts and the added services of the lines that can be sold', () => {
+    expect(
+      cartTotals([
+        {
+          id: 'a',
+          quantity: 2,
+          unit_price: 50,
+          available: true,
+          addon: { item_id: 'b', unit_price: 2500 },
+          installation: { item_id: 'c', unit_price: 300 },
+        },
+        { id: 'd', quantity: 3, unit_price: 70, available: false },
+      ]),
+    ).toEqual({ count: 2, parts: 100, addons: 5600, total: 5700 });
+  });
+
+  it('totals an empty cart at zero', () => {
+    expect(cartTotals([])).toEqual({
+      count: 0,
+      parts: 0,
+      addons: 0,
+      total: 0,
+    });
   });
 });

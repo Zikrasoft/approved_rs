@@ -4,7 +4,6 @@ import {
   CATALOG_KEY_PATTERN,
   checkoutContactSchema,
   parseRangeFilter,
-  STEERING_SIDES,
   vinSchema,
 } from '@podbor/catalog-contract';
 
@@ -122,8 +121,3 @@ export const StoreListVehicles = StoreListPartPages.extend({
   model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
 });
 export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;
-
-export const StoreVehicleParts = z.object({
-  steering: z.enum(STEERING_SIDES).optional(),
-});
-export type StoreVehiclePartsType = z.infer<typeof StoreVehicleParts>;
