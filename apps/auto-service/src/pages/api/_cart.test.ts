@@ -36,6 +36,20 @@ const call = (
 const outcome = async (response: Promise<Response>) => (await response).json();
 
 describe('/api/cart', () => {
+  it.each([
+    ['a cart id that cannot be one', '?id=../admin'],
+    ['a cart the shop does not answer for', '?id=cart_1'],
+  ])(
+    'keeps %s out of the browser cache, so Back never shows a stale cart',
+    async (_, query) => {
+      backend.mockRejectedValue(new Error('down'));
+
+      const response = await call(GET, { query });
+
+      expect(response.headers.get('cache-control')).toBe('no-store');
+    },
+  );
+
   it('answers a cart id that cannot be one with an empty cart, not the inquiry', async () => {
     expect(await outcome(call(GET, { query: '?id=../admin' }))).toEqual({
       kind: 'empty',

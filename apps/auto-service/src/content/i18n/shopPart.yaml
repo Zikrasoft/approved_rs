@@ -18,11 +18,22 @@ attributeNo: Нет
 categoryLink: Все запчасти категории
 priceOnRequestHeading: Под заказ
 priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что деталь подходит, и найдем лучшую цену.'
-priceOnRequestCta: Заказать
-orderBody: 'Магазин новый, и мы работаем напрямую с лучшими поставщиками, чтобы держать хорошие цены. Скорее всего, эта запчасть есть, но наличие нужно проверить. Оставьте контакт: купим ее для вас или предложим аналог.'
+priceOnRequestCta: Узнать цену и срок
+orderBody: Проверим у поставщиков и пришлем цену и срок, обычно в течение часа.
 offersHeading: Цена и наличие
-moreOffers: Другие предложения ({count})
-moreOffersCheaper: Другие предложения ({count}), дешевле от {price}
+moreOffers: 'Еще одно предложение: {offer}'
+moreOffersCheaper: 'Есть дешевле: {offer}'
+moreOffersSeveral:
+  one: 'Еще {count} предложение, от {price}'
+  few: 'Еще {count} предложения, от {price}'
+  many: 'Еще {count} предложений, от {price}'
+  other: 'Еще {count} предложения, от {price}'
+offerTomorrow: завтра
+offerDays:
+  one: 'через {days} день'
+  few: 'через {days} дня'
+  many: 'через {days} дней'
+  other: 'через {days} дня'
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
@@ -61,7 +72,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 51fe8e1507248588
+translatedFrom: d128f27c6c02ce0d
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -88,14 +99,21 @@ translations:
     orderBody: 'Prodavnica je nova i sarađujemo direktno sa najboljim dobavljačima kako bismo ponudili povoljne cene. Ovaj deo je verovatno dostupan, ali moramo da proverimo stanje. Ostavite kontakt: nabavićemo ga za vas ili ponuditi zamenu.'
     offersHeading: Cena i dostupnost
     moreOffers: Ostale ponude ({count})
+    moreOffersCheaper: Ostale ponude ({count}), povoljnije od {price}
     leadTime:
       inStock: Na stanju
-      tomorrow: sutra
+      inStockTomorrow: Na stanju, preuzimanje sutra
+      inStockDays:
+        one: Na stanju, preuzimanje za {days} dan
+        few: Na stanju, preuzimanje za {days} dana
+        many: Na stanju, preuzimanje za {days} dana
+        other: Na stanju, preuzimanje za {days} dana
+      tomorrow: Preuzimanje sutra
       days:
-        one: za {days} dan
-        few: za {days} dana
-        many: za {days} dana
-        other: za {days} dana
+        one: Preuzimanje za {days} dan
+        few: Preuzimanje za {days} dana
+        many: Preuzimanje za {days} dana
+        other: Preuzimanje za {days} dana
     buyButtonLabel: U korpu
     addedLabel: U korpi
     outOfStock: Nema na stanju
@@ -145,14 +163,21 @@ translations:
     orderBody: Our shop is new, and we work directly with leading suppliers to keep prices competitive. This part is likely available, but we need to check stock. Leave your contact details and we'll source it for you or suggest an equivalent.
     offersHeading: Price and availability
     moreOffers: More offers ({count})
+    moreOffersCheaper: Other offers ({count}), from {price}
     leadTime:
       inStock: In stock
-      tomorrow: tomorrow
+      inStockTomorrow: In stock, collect tomorrow
+      inStockDays:
+        one: In stock, collect in {days} day
+        few: In stock, collect in {days} days
+        many: In stock, collect in {days} days
+        other: In stock, collect in {days} days
+      tomorrow: Collect tomorrow
       days:
-        one: in {days} day
-        few: in {days} days
-        many: in {days} days
-        other: in {days} days
+        one: Collect in {days} day
+        few: Collect in {days} days
+        many: Collect in {days} days
+        other: Collect in {days} days
     buyButtonLabel: Add to basket
     addedLabel: In basket
     outOfStock: Out of stock

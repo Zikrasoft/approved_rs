@@ -1,5 +1,9 @@
 import type { PartOffer } from '@podbor/catalog-contract/cart-wire';
-import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
+import {
+  moreOffersCopyFrom,
+  moreOffersLabel,
+  offerSummary,
+} from '@/utils/bestPrice';
 import { leadTimeCopyFrom, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
@@ -61,18 +65,18 @@ export function definePartOffers(tagName = 'part-offers'): void {
         const more = this.querySelector<HTMLElement>('[data-more]');
         if (more) more.hidden = others.length === 0;
         const { localeTag = 'sr' } = this.dataset;
-        fill(
-          this,
-          '[data-more-count]',
-          moreOffersLabel(
-            summary,
-            {
-              moreOffers: this.dataset.moreLabel ?? '',
-              moreOffersCheaper: this.dataset.moreCheaperLabel ?? '',
-            },
-            (offer) => formatMoney(offer.price, offer.currency, localeTag),
-          ),
-        );
+        const moreCopy = moreOffersCopyFrom(this.dataset.moreCopy);
+        if (moreCopy)
+          fill(
+            this,
+            '[data-more-count]',
+            moreOffersLabel(
+              summary,
+              moreCopy,
+              (offer) => formatMoney(offer.price, offer.currency, localeTag),
+              localeTag,
+            ),
+          );
         if (this.hidden) {
           this.hidden = false;
           (this.nextElementSibling as HTMLElement | null)?.setAttribute(
@@ -153,6 +157,10 @@ export function definePartOffers(tagName = 'part-offers'): void {
           return;
         }
         if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
+        button.hidden = true;
+        button.parentElement
+          ?.querySelector('[data-ask]')
+          ?.classList.remove('hidden');
         this.addToInquiry();
         showOnly(this, 'data-status', 'inquiry');
       }

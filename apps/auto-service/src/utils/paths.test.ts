@@ -51,6 +51,13 @@ describe('PathBuilder', () => {
     });
   });
 
+  it('carries a part into the inquiry URL, so a no-JS Lead keeps it on its page', () => {
+    expect(PathBuilder.partsInquiry('ru')).toBe('/ru/parts/#inquiry');
+    expect(PathBuilder.partsInquiry('ru', 'VARTA 580901080')).toBe(
+      '/ru/parts/?part=VARTA+580901080#inquiry',
+    );
+  });
+
   it.each(SERVICE_SLUGS)('builds a service URL for %s', (slug) => {
     expect(PathBuilder.service('ru', slug)).toBe(`/ru/services/${slug}/`);
   });
@@ -122,7 +129,7 @@ describe('reserved parts segments', () => {
       )
       .filter((path) => path.startsWith('/sr/parts/'))
       .map((path) => path.split('/')[3])
-      .filter((segment) => segment && !/^[$#]/.test(segment));
+      .filter((segment) => segment && !/^[$#?]/.test(segment));
     expect(segments).toContain('car');
     expect(segments.filter((segment) => !reserved.includes(segment))).toEqual(
       [],

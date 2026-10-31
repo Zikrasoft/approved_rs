@@ -59,7 +59,12 @@ const unresolvedCodeSchema = z.object({
 
 type UnresolvedCode = z.infer<typeof unresolvedCodeSchema>;
 
-const codesSchema = z.object({ codes: z.array(unresolvedCodeSchema) });
+const codesSchema = z.object({
+  codes: z.array(unresolvedCodeSchema),
+  count: z.number(),
+});
+
+const PAGE_SIZE = 50;
 
 const linkableVehicleSchema = labelledVehicleSchema.extend({
   model: labelledVehicleSchema.shape.model.extend({
@@ -283,16 +288,32 @@ const VinLookupsPage = () => {
   const confirmed = useConfirmed();
   const writing = useWriting();
   const [codes, setCodes] = useState<UnresolvedCode[] | null>(null);
+  const [count, setCount] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const [linking, setLinking] = useState<UnresolvedCode | null>(null);
 
   const load = () =>
-    adminFetch('/admin/vin-lookups/unresolved', codesSchema).then((data) => {
-      if (data) setCodes(data.codes);
+    adminFetch(
+      `/admin/vin-lookups/unresolved?${new URLSearchParams({
+        offset: String(pageIndex * PAGE_SIZE),
+        limit: String(PAGE_SIZE),
+      })}`,
+      codesSchema,
+    ).then((data) => {
+      if (!data) return;
+      if (data.codes.length === 0 && pageIndex > 0) {
+        setPageIndex(pageIndex - 1);
+        return;
+      }
+      setCodes(data.codes);
+      setCount(data.count);
     });
 
   useEffect(() => {
     load();
-  }, []);
+  }, [pageIndex]);
+
+  const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   const dismiss = async ({ make, code }: UnresolvedCode) => {
     if (
@@ -322,87 +343,110 @@ const VinLookupsPage = () => {
       ) : codes.length === 0 ? (
         <Text>{t('vinLookups.empty')}</Text>
       ) : (
-        <ScrollArea pinnedEnd>
-          <Table className={PINNED_ACTIONS}>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>
-                  {t('vinLookups.columns.make')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('vinLookups.columns.code')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('vinLookups.columns.openData')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('vinLookups.columns.count')}
-                </Table.HeaderCell>
-                <Table.HeaderCell>
-                  {t('vinLookups.columns.lastSeen')}
-                </Table.HeaderCell>
-                <Table.HeaderCell />
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {codes.map((entry) => (
-                <Table.Row key={`${entry.make}-${entry.code}`}>
-                  <Table.Cell>
-                    {t(`vinLookups.makes.${entry.make}`, {
-                      defaultValue: entry.make,
-                    })}
-                  </Table.Cell>
-                  <Table.Cell className="font-medium">{entry.code}</Table.Cell>
-                  <Table.Cell className="max-w-[18rem] whitespace-normal break-words">
-                    {entry.reference ? (
-                      referenceLine(t, entry.reference)
-                    ) : (
-                      <span className="text-ui-fg-muted">
-                        {t('vinLookups.notInOpenData')}
-                      </span>
-                    )}
-                  </Table.Cell>
-                  <Table.Cell className="tabular-nums">
-                    {entry.count.toLocaleString(i18n.language)}
-                  </Table.Cell>
-                  <Table.Cell className="tabular-nums">
-                    {new Date(entry.last_seen).toLocaleDateString(
-                      i18n.language,
-                    )}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="flex items-center justify-end gap-x-2">
-                      {LINKABLE_CODE_TYPES[entry.make] && (
+        <>
+          <ScrollArea pinnedEnd>
+            <Table className={PINNED_ACTIONS}>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.make')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.code')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.openData')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.count')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.lastSeen')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell />
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {codes.map((entry) => (
+                  <Table.Row key={`${entry.make}-${entry.code}`}>
+                    <Table.Cell>
+                      {t(`vinLookups.makes.${entry.make}`, {
+                        defaultValue: entry.make,
+                      })}
+                    </Table.Cell>
+                    <Table.Cell className="font-medium">
+                      {entry.code}
+                    </Table.Cell>
+                    <Table.Cell className="max-w-[18rem] whitespace-normal break-words">
+                      {entry.reference ? (
+                        referenceLine(t, entry.reference)
+                      ) : (
+                        <span className="text-ui-fg-muted">
+                          {t('vinLookups.notInOpenData')}
+                        </span>
+                      )}
+                    </Table.Cell>
+                    <Table.Cell className="tabular-nums">
+                      {entry.count.toLocaleString(i18n.language)}
+                    </Table.Cell>
+                    <Table.Cell className="tabular-nums">
+                      {new Date(entry.last_seen).toLocaleDateString(
+                        i18n.language,
+                      )}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div className="flex items-center justify-end gap-x-2">
+                        {LINKABLE_CODE_TYPES[entry.make] && (
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            aria-label={t('vinLookups.link.action', {
+                              code: entry.code,
+                            })}
+                            disabled={writing}
+                            onClick={() => setLinking(entry)}
+                          >
+                            {t('vinLookups.link.button')}
+                          </Button>
+                        )}
                         <Button
                           size="small"
-                          variant="secondary"
-                          aria-label={t('vinLookups.link.action', {
+                          variant="transparent"
+                          aria-label={t('vinLookups.dismissCode', {
                             code: entry.code,
                           })}
                           disabled={writing}
-                          onClick={() => setLinking(entry)}
+                          onClick={() => dismiss(entry)}
                         >
-                          {t('vinLookups.link.button')}
+                          {t('vinLookups.dismiss')}
                         </Button>
-                      )}
-                      <Button
-                        size="small"
-                        variant="transparent"
-                        aria-label={t('vinLookups.dismissCode', {
-                          code: entry.code,
-                        })}
-                        disabled={writing}
-                        onClick={() => dismiss(entry)}
-                      >
-                        {t('vinLookups.dismiss')}
-                      </Button>
-                    </div>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </ScrollArea>
+                      </div>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </ScrollArea>
+          {count > PAGE_SIZE && (
+            <Table.Pagination
+              count={count}
+              pageSize={PAGE_SIZE}
+              pageIndex={pageIndex}
+              pageCount={pageCount}
+              canPreviousPage={pageIndex > 0}
+              canNextPage={pageIndex + 1 < pageCount}
+              previousPage={() => setPageIndex(pageIndex - 1)}
+              nextPage={() => setPageIndex(pageIndex + 1)}
+              translations={{
+                of: t('parts.pagination.of'),
+                results: t('vehicles.results'),
+                pages: t('parts.pagination.pages'),
+                prev: t('parts.pagination.prev'),
+                next: t('parts.pagination.next'),
+              }}
+            />
+          )}
+        </>
       )}
       <LinkDrawer
         entry={linking}

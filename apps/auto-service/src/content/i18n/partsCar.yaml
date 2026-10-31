@@ -109,7 +109,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: 1603c864900d2fed
+translatedFrom: 88e37203d56c03aa
 translations:
   sr:
     vin:
@@ -151,6 +151,7 @@ translations:
       kitLead: Po jedan odgovarajući deo za svaku stavku redovnog servisa, uz količinu potrebnu za jednu zamenu.
       kitAdd: Proveri sa savetnikom po VIN-u
       kitCart: Dodaj komplet u korpu
+      kitAdding: Dodajemo u korpu…
       matchesHeading: Potrošni materijal prema specifikacijama proizvođača
       matchesLead: Ulja, sijalice i metlice brisača koje odgovaraju zahtevima motora i karoserije ovog automobila.
       fuel:
@@ -262,6 +263,7 @@ translations:
       kitLead: One compatible part for each routine service item, with the quantity needed for one service.
       kitAdd: Ask our team to check by VIN
       kitCart: Add kit to basket
+      kitAdding: Adding to basket…
       matchesHeading: Consumables meeting manufacturer specifications
       matchesLead: Oils, bulbs and wiper blades that meet the requirements for this car's engine and body.
       fuel:

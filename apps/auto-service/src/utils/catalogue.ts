@@ -48,7 +48,7 @@ import type { CartOutcome, OffersOutcome } from './catalogueWire';
 export type { Vehicle, VinFacts };
 
 export const CATALOGUE_TIMEOUT_MS = 10_000;
-export const ORDER_TIMEOUT_MS = 25_000;
+export const ORDER_TIMEOUT_MS = 15_000;
 const PAGE_BATCH = 1000;
 const OFFERS_BATCH = 100;
 
@@ -122,7 +122,7 @@ export function createCatalogue({
     path: string,
     method = 'GET',
     body?: unknown,
-    timeout = timeoutMs,
+    signal = AbortSignal.timeout(timeoutMs),
   ) =>
     fetch(`${backendUrl}${path}`, {
       method,
@@ -132,7 +132,7 @@ export function createCatalogue({
         ...(body !== undefined && { 'content-type': 'application/json' }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),
-      signal: AbortSignal.timeout(timeout),
+      signal,
     });
 
   const request = async (path: string, body?: unknown): Promise<unknown> => {
@@ -517,12 +517,13 @@ export function createCatalogue({
       contact: CheckoutContact,
       fingerprint: string,
     ): Promise<CheckoutOutcome> {
+      const deadline = AbortSignal.timeout(ORDER_TIMEOUT_MS);
       const complete = () =>
         send(
           `/store/offer-carts/${segment(cartId)}/complete`,
           'POST',
           { ...contact, [CART_FINGERPRINT_FIELD]: fingerprint },
-          ORDER_TIMEOUT_MS,
+          deadline,
         );
       try {
         const response = await complete().catch(complete);

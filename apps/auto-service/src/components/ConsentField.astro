@@ -53,7 +53,8 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
   >
     {error ?? site.form.errorConsent}
   </p>
-  <p class={errorText} role="alert" data-error-submit hidden>
-    {submitError ?? site.form.errorSubmit}
-  </p>
+  <div role="alert" data-error-submit hidden>
+    <p class={errorText}>{submitError ?? site.form.errorSubmit}</p>
+    <slot />
+  </div>
 </div>

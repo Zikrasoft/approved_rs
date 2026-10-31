@@ -268,13 +268,17 @@ const thumbFor = (slug: string) => {
           <PartOffers page={page} demoted={Boolean(successor)} />
         )
       }
-      <a
-        href={works.length > 0 ? '#works' : PathBuilder.works(locale)}
-        class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-      >
-        {works.length > 0 ? copy.worksHeading : site.nav.works}
-        <Icon name="chevronRight" size={14} />
-      </a>
+      {
+        works.length > 0 && (
+          <a
+            href="#works"
+            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+          >
+            {copy.worksHeading}
+            <Icon name="chevronRight" size={14} />
+          </a>
+        )
+      }
       <AddonNote
         category={category}
         pages={[page, ...(successor ? [successor] : [])]}

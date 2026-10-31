@@ -265,6 +265,34 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('pages the unresolved codes and counts them all', async () => {
+        await lookUp('WBA44CC070N000013');
+        await lookUp('WBA45CD070N000014');
+        await lookUp('WBA46CE070N000015');
+        const { codes: all } = (
+          await api.get('/admin/vin-lookups/unresolved', adminHeaders)
+        ).data;
+
+        const { data } = await api.get(
+          '/admin/vin-lookups/unresolved?offset=1&limit=1',
+          adminHeaders,
+        );
+
+        expect(data).toMatchObject({
+          codes: [all[1]],
+          count: all.length,
+          offset: 1,
+          limit: 1,
+        });
+        expect(
+          (
+            await api
+              .get('/admin/vin-lookups/unresolved?limit=0', adminHeaders)
+              .catch((error) => error.response)
+          ).status,
+        ).toBe(400);
+      });
+
       it('says when an unresolved code was last searched and what the open data calls it', async () => {
         const before = Date.now();
         await lookUp('WBA3K11070N000020');

@@ -69,9 +69,9 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
 });
 
 describe('a Part that cannot be bought at once', () => {
-  it('offers «Заказать» on its page and in listings', () => {
+  it('asks for the price and lead time on its page and tags «Заказать» in listings', () => {
     const { priceOnRequestCta, priceOnRequestTag } = content('ru').shopPart;
-    expect(priceOnRequestCta).toBe('Заказать');
+    expect(priceOnRequestCta).toBe('Узнать цену и срок');
     expect(priceOnRequestTag).toBe('Заказать');
   });
 });

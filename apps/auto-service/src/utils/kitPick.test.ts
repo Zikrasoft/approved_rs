@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PartOffer } from '@podbor/catalog-contract';
-import { kitPick, kitTotal } from './kitPick';
+import { kitPick, kitTotal, nameRepeatsCategory } from './kitPick';
 
 const offer = (
   id: string,
@@ -58,5 +58,23 @@ describe('kitTotal', () => {
         { price: 900, quantity: 1 },
       ]),
     ).toBe(4600);
+  });
+});
+
+describe('nameRepeatsCategory', () => {
+  it('sees a singular name repeat its plural category', () => {
+    expect(nameRepeatsCategory('Масляный фильтр', 'Масляные фильтры')).toBe(
+      true,
+    );
+    expect(
+      nameRepeatsCategory('Тормозные колодки задние', 'Тормозные колодки'),
+    ).toBe(true);
+  });
+
+  it('keeps a category the name does not repeat', () => {
+    expect(nameRepeatsCategory('Фильтр масляный', 'Фильтры воздушные')).toBe(
+      false,
+    );
+    expect(nameRepeatsCategory('Масло', 'Моторные масла')).toBe(false);
   });
 });

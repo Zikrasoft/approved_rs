@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
 import { definePartOffers } from './partOffers';
+import { readPartsList } from './partsList';
 
 definePartOffers();
 
@@ -30,7 +31,11 @@ const offer = (id: string, price: number, stock_quantity: number) => ({
   lead_time_days: stock_quantity ? 0 : 3,
 });
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  document.body.replaceChildren();
+  localStorage.clear();
+});
 
 describe('<part-offers> live refresh', () => {
   it('fills the best row in place, so the in-flow contact marker the sticky bar watches survives', async () => {
@@ -66,5 +71,42 @@ describe('<part-offers> live refresh', () => {
         .querySelector('[data-more-offers] [data-buy]')
         ?.getAttribute('data-offer-id'),
     ).toBe('later');
+  });
+});
+
+describe('<part-offers> when the shop refuses the add', () => {
+  it('swaps the dead buy button for the inquiry and keeps the part in it', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ kind: 'refused', code: 'OFFER_MISSING' }),
+        ),
+    );
+    document.body.innerHTML = `
+      <part-offers data-preview data-slug="knecht-ox371d" data-brand="Knecht"
+        data-number="OX 371D" data-name="Масляный фильтр">
+        <ul data-offers><li>
+          <button data-buy data-offer-id="offer_1">В корзину</button>
+          <a href="/ru/parts/#parts-inquiry" class="hidden" data-ask>Заказать через менеджера</a>
+        </li></ul>
+        <p data-status="inquiry" hidden></p>
+      </part-offers>`;
+
+    document.querySelector<HTMLButtonElement>('[data-buy]')!.click();
+    await vi.waitFor(() =>
+      expect(
+        document.querySelector<HTMLElement>('[data-status="inquiry"]')!.hidden,
+      ).toBe(false),
+    );
+
+    expect(document.querySelector<HTMLElement>('[data-buy]')!.hidden).toBe(
+      true,
+    );
+    expect(
+      document.querySelector('[data-ask]')!.classList.contains('hidden'),
+    ).toBe(false);
+    expect(readPartsList().map((part) => part.number)).toEqual(['OX 371D']);
   });
 });

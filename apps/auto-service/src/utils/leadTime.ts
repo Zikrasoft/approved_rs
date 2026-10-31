@@ -1,5 +1,6 @@
 import type { SchemaAvailability } from '@podbor/site-kit';
 import * as z from 'zod/mini';
+import type { ZodMiniType } from 'zod/mini';
 import {
   isBuyable,
   type OfferAvailability,
@@ -71,7 +72,7 @@ export function offerAvailability(
   };
 }
 
-const pluralFormsSchema = z.object({
+export const pluralFormsSchema = z.object({
   zero: z.optional(z.string()),
   one: z.optional(z.string()),
   two: z.optional(z.string()),
@@ -88,13 +89,17 @@ const leadTimeCopySchema = z.object({
   days: pluralFormsSchema,
 });
 
-export function leadTimeCopyFrom(
+export function copyFrom<T>(
+  schema: ZodMiniType<T>,
   json: string | undefined,
-): LeadTimeCopy | null {
+): T | null {
   try {
-    const parsed = leadTimeCopySchema.safeParse(JSON.parse(json ?? ''));
+    const parsed = schema.safeParse(JSON.parse(json ?? ''));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 }
+
+export const leadTimeCopyFrom = (json: string | undefined) =>
+  copyFrom<LeadTimeCopy>(leadTimeCopySchema, json);
