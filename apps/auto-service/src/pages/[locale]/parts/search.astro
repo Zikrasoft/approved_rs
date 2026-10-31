@@ -27,6 +27,7 @@ import {
   appendRange,
   chosenFilters,
   partsQuery,
+  filtersWithinCap,
   rangesFromParams,
   withFacetCopy,
 } from '@/utils/partsSearch';
@@ -58,8 +59,12 @@ const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
 const makeParam = params.get('make') ?? '';
 const make =
   model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
-const chosen = params.getAll('facets');
-const ranges = rangesFromParams(params);
+const requestedFacets = params.getAll('facets');
+const requestedRanges = rangesFromParams(params);
+const { facets: chosen, ranges } = filtersWithinCap(
+  requestedFacets,
+  requestedRanges,
+);
 const offset = Math.max(
   0,
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
@@ -129,6 +134,12 @@ const searchHref = (
   }
   return `${PathBuilder.partsSearch(locale)}?${next}`;
 };
+if (
+  chosen.length !== requestedFacets.length ||
+  ranges.length !== requestedRanges.length
+) {
+  return Astro.redirect(searchHref(chosen, ranges, offset), 302);
+}
 if (found && offset > lastPage) {
   return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }

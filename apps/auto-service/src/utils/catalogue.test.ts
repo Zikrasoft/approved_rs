@@ -1527,6 +1527,21 @@ describe('catalogue.search', () => {
     expect(suggested?.cars).toEqual([car]);
   });
 
+  it('spells a brand typed in Cyrillic the way the catalogue does', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      q: 'Варта 74',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?q=varta+74&locale=ru',
+      expect.anything(),
+    );
+  });
+
   it('lists every match with a link slug to its brand-number page', async () => {
     const result = await catalog(answer(found)).search({
       q: 'hu816x',
