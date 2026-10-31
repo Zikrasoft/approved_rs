@@ -223,17 +223,22 @@ export function createOrderLeadSync({
   const placed = locked(handOff);
   const canceled = locked(handCancel);
 
+  const retry = (job: (id: string) => Promise<void>, id: string) =>
+    job(id).catch((error) =>
+      logger.error(`Order ${id} retry failed: ${errorMessage(error)}`),
+    );
+
   async function retryDue(at: Date): Promise<void> {
     const recent = await orders.createdBetween(
       new Date(at.getTime() - RETRY_WINDOW_MS),
       new Date(at.getTime() - SUBSCRIBER_GRACE_MS),
     );
-    for (const { id } of recent) await placed(id);
+    for (const { id } of recent) await retry(placed, id);
     const touched = await orders.updatedSince(
       new Date(at.getTime() - RETRY_WINDOW_MS),
     );
     for (const { id, status } of touched) {
-      if (status === 'canceled') await canceled(id);
+      if (status === 'canceled') await retry(canceled, id);
     }
   }
 
