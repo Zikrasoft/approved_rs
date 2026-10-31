@@ -8,10 +8,9 @@ import { addonDataset } from '@/utils/categoryAddon';
 import { PathBuilder } from '@/utils/paths';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
-import { mapPlaceUrl } from '@podbor/site-kit';
-import { GARAGE_ADDRESS } from '@/utils/constants';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
+import PickupLine from './PickupLine.astro';
 import { formatMoney } from '@/utils/money';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 
@@ -24,7 +23,6 @@ const { page, demoted = false } = Astro.props;
 const ownHeading = Astro.slots.has('heading');
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
-const { pickupMethod } = content(locale).shopCart;
 const status = 'flex flex-col gap-3 text-sm leading-relaxed text-ink-2';
 const part = {
   'data-slug': page.slug,
@@ -51,8 +49,13 @@ const localeTag = BCP47_BY_LOCALE[locale];
       data-availability={JSON.stringify(copy.leadTime)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
-      data-more-label={copy.moreOffers}
-      data-more-cheaper-label={copy.moreOffersCheaper}
+      data-more-copy={JSON.stringify({
+        moreOffers: copy.moreOffers,
+        moreOffersCheaper: copy.moreOffersCheaper,
+        moreOffersSeveral: copy.moreOffersSeveral,
+        offerTomorrow: copy.offerTomorrow,
+        offerDays: copy.offerDays,
+      })}
       {...part}
     >
       <h2 class="text-block font-semibold">
@@ -61,22 +64,15 @@ const localeTag = BCP47_BY_LOCALE[locale];
       <ul class="flex flex-col" data-offers>
         {best && <OfferRow offer={best} inFlow />}
       </ul>
-      <p class="flex flex-col text-sm leading-relaxed text-ink-2">
-        <span>{pickupMethod}</span>
-        <a
-          href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
-          target="_blank"
-          rel="noopener"
-          class="self-start font-semibold text-ink underline underline-offset-2 hover:text-signal-ink"
-        >
-          {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}
-        </a>
-      </p>
+      <PickupLine />
       <details class="group/more" data-more hidden={others.length === 0}>
         <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
           <span data-more-count>
-            {moreOffersLabel(summary, copy, (offer) =>
-              formatMoney(offer.price, offer.currency, localeTag),
+            {moreOffersLabel(
+              summary,
+              copy,
+              (offer) => formatMoney(offer.price, offer.currency, localeTag),
+              localeTag,
             )}
           </span>
           <Icon
@@ -153,6 +149,7 @@ const localeTag = BCP47_BY_LOCALE[locale];
           {copy.priceOnRequestCta}
         </a>
       </parts-list-add>
+      {!demoted && <PickupLine />}
     </div>
   )
 }

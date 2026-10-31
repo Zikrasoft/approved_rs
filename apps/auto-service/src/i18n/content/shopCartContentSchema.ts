@@ -45,6 +45,8 @@ export const shopCartContentSchema = z
     submitLabel: z.string(),
     consentError: z.string(),
     submitError: z.string(),
+    submitErrorContacts: z.string(),
+    orderMessage: z.string(),
     checkoutBlocked: z.string(),
     notices: z
       .object({
@@ -52,6 +54,7 @@ export const shopCartContentSchema = z
         unavailable: z.string(),
         unreachable: z.string(),
         expired: z.string(),
+        gone: z.string(),
         invalid: z.string(),
         cartChanged: z.string(),
         repriced: z.string(),
@@ -66,6 +69,8 @@ export const shopCartContentSchema = z
     orderedBody: z.string(),
     orderNumberTemplate: z.string(),
     orderedNext: z.string(),
+    orderedContact: z.string(),
+    orderedCall: z.string(),
     orderedCta: z.string(),
     receiptQuantityTemplate: z.string(),
     stickyCta: z.string(),

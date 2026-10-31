@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import {
+  checkoutContact,
   forgetCheckout,
   rememberCheckout,
   restoreCheckout,
@@ -18,6 +19,7 @@ const memoryStorage = () => {
 const checkoutForm = () => {
   const form = document.createElement('form');
   form.innerHTML = `
+    <input type="hidden" name="contact" />
     <input type="hidden" name="contact_channel" value="whatsapp" />
     <input data-phone />
     <input name="name" />
@@ -111,5 +113,23 @@ describe('the checkout form', () => {
     restoreCheckout(form, blocked);
 
     expect(field(form, '[data-phone]').value).toBe('');
+  });
+});
+
+describe('the contact an order was sent with', () => {
+  it('names the channel and the contact the form composed', () => {
+    const storage = memoryStorage();
+    const sent = checkoutForm();
+    field(sent, '[name="contact"]').value = '+381641234567';
+    rememberCheckout(sent, storage);
+
+    expect(checkoutContact(storage)).toEqual({
+      channel: 'whatsapp',
+      contact: '+381641234567',
+    });
+  });
+
+  it('is unknown before anything was sent', () => {
+    expect(checkoutContact(memoryStorage())).toBeNull();
   });
 });

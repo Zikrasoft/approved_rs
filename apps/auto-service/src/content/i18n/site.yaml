@@ -71,11 +71,11 @@ form:
   errorConsent: Без согласия мы не сможем отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 cookie:
-  notice: Мы используем cookie.
+  notice: Мы используем cookie
   more: Подробнее в
   policyLink: политике конфиденциальности
-  accept: Принять
-  decline: Отклонить
+  accept: Ок
+  decline: Нет
   settings: Настройки cookie
 
 telegramChoice:
