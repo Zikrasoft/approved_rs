@@ -12,6 +12,7 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
   channel: TrackedContactChannel;
   region?: 'contacts';
   service?: ServiceSlug;
+  prefill?: string;
   plainClass?: string;
   listItem?: boolean;
 }
@@ -20,6 +21,7 @@ const {
   channel,
   region,
   service,
+  prefill,
   plainClass,
   listItem = false,
   class: className,
@@ -32,6 +34,7 @@ const control = contactControl({
   region,
   locale,
   service,
+  prefill,
 });
 const coarseOnly = control.pointer === 'coarse-only';
 const Item = listItem ? 'li' : Fragment;

@@ -111,6 +111,18 @@ describe('createContactControls', () => {
     );
   });
 
+  it('lets a call site name its own WhatsApp message over the brand one', () => {
+    const request = {
+      channel: 'whatsapp',
+      onThanks: false,
+      locale: 'en',
+      prefill: 'Ищу: HU 816 x',
+    } as const;
+    const ownMessage = `https://wa.me/381601111111?text=${encodeURIComponent('Ищу: HU 816 x')}`;
+    expect(full(request).href).toBe(ownMessage);
+    expect(bare(request).href).toBe(ownMessage);
+  });
+
   it('marks the phone coarse-only and every messenger any-pointer', () => {
     for (const channel of TRACKED_CONTACT_CHANNELS)
       expect(bare({ channel, onThanks: false, locale: 'ru' }).pointer).toBe(

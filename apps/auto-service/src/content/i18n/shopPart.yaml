@@ -52,6 +52,9 @@ illustrationLabel: иллюстрация
 installHeading: Установить у нас
 installBody: Поставим эту запчасть в сервисе CarLab в Белграде. Оставьте контакт, и мы предложим удобное время.
 installCta: Записаться на установку
+askAboutPart: Спросить про эту деталь
+askAboutPartMessage: '{part}: подойдет на мою машину?'
+askAboutPartVin: 'VIN: {vin}'
 crossReferencesHeading: Номера других производителей
 worksHeading: Мы уже подбирали эту запчасть
 applicabilityHeading: Применимость по данным каталога

@@ -11,6 +11,7 @@ import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 import PickupLine from './PickupLine.astro';
+import ContactChannels from './ContactChannels.astro';
 import { formatMoney } from '@/utils/money';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 
@@ -69,6 +70,19 @@ const askHref = PathBuilder.partsInquiry(
         {best && <OfferRow offer={best} inFlow askHref={askHref} />}
       </ul>
       <PickupLine />
+      <div class="flex flex-col gap-2 border-t border-line pt-4">
+        <p class="text-sm font-semibold text-ink">{copy.askAboutPart}</p>
+        <vin-prefill class="block" data-template={copy.askAboutPartVin}>
+          <ContactChannels
+            only={['whatsapp', 'telegram']}
+            prefill={copy.askAboutPartMessage.replace(
+              '{part}',
+              `${page.brand.name} ${page.value}`,
+            )}
+            class="grid-cols-2"
+          />
+        </vin-prefill>
+      </div>
       <details class="group/more" data-more hidden={others.length === 0}>
         <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
           <span data-more-count>
@@ -126,6 +140,11 @@ const askHref = PathBuilder.partsInquiry(
     </part-offers>
   )
 }
+<script>
+  import { defineVinPrefill } from '@/scripts/vinPrefill';
+
+  defineVinPrefill();
+</script>
 <script is:inline>
   setTimeout(() => {
     document.documentElement.dataset.offersLate = '';

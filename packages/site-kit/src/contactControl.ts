@@ -24,6 +24,7 @@ export type ContactControlRequest = {
   region?: 'contacts';
   locale: string;
   service?: string;
+  prefill?: string;
 };
 
 export type ContactControl = {
@@ -48,6 +49,7 @@ export const createContactControls =
     region,
     locale,
     service,
+    prefill,
   }: ContactControlRequest): ContactControl => {
     const channelAttr = { 'data-contact-channel': channel };
     if (channel === 'phone')
@@ -73,7 +75,10 @@ export const createContactControls =
     }
     const href =
       channel === 'whatsapp'
-        ? whatsappLink(brand.whatsapp, brand.prefill?.(locale, service))
+        ? whatsappLink(
+            brand.whatsapp,
+            prefill ?? brand.prefill?.(locale, service),
+          )
         : viberLink(brand.viber);
     return { href, attrs, pointer };
   };
