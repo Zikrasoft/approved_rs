@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   dayWord,
+  notPlacedReasonOf,
   orderLineText,
   orderMoney,
   PARTS_ORDER_COPY,
@@ -109,6 +110,16 @@ describe('PARTS_ORDER_COPY', () => {
     expect(
       PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason.unreachable),
     ).toBe('Заказ не оформлен: магазин не ответил. Свяжитесь с клиентом');
+  });
+
+  it('reads the reason back out of a failed checkout line', () => {
+    const line = PARTS_ORDER_COPY.notPlaced('цена изменилась');
+
+    expect(notPlacedReasonOf(line)).toBe('цена изменилась');
+    expect(notPlacedReasonOf('Итого: 1 430 RSD')).toBeUndefined();
+    expect(PARTS_ORDER_COPY.earlierNotPlaced('цена изменилась')).toBe(
+      'Сначала не оформился: цена изменилась',
+    );
   });
 
   it('counts the cart lines a failed checkout could not fit', () => {

@@ -34,12 +34,23 @@ export const PARTS_ORDER_COPY = {
     expired: 'корзина устарела',
     unreachable: 'магазин не ответил',
   },
+  earlierNotPlaced: (reason: string) => `Сначала не оформился: ${reason}`,
   notPlacedLeftOut: (count: number) => `Не поместилось позиций: ${count}`,
   undelivered: (order: number | string, reason: string) =>
     `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
   cancelUndelivered: (order: number | string, reason: string) =>
     `Заказ #${order} отменен в магазине, но CRM не отметила его Лид после всех попыток. Отметьте Лид ❌ сами. Причина: ${reason}`,
 };
+
+const [NOT_PLACED_HEAD, NOT_PLACED_TAIL] = PARTS_ORDER_COPY.notPlaced(
+  '\n',
+).split('\n') as [string, string];
+
+export function notPlacedReasonOf(line: string): string | undefined {
+  return line.startsWith(NOT_PLACED_HEAD) && line.endsWith(NOT_PLACED_TAIL)
+    ? line.slice(NOT_PLACED_HEAD.length, -NOT_PLACED_TAIL.length)
+    : undefined;
+}
 
 export type NotPlacedReason = keyof typeof PARTS_ORDER_COPY.notPlacedReason;
 
