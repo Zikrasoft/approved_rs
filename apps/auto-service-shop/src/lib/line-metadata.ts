@@ -1,4 +1,8 @@
-import { listedPartSchema, type ListedPart } from '@podbor/catalog-contract';
+import {
+  listedPartSchema,
+  normalizePartNumber,
+  type ListedPart,
+} from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 export const INSTALLATION = 'installation';
@@ -64,6 +68,11 @@ export const offerLineMetadata = (
   partIdentifierId: string,
   part: ListedPart,
 ) => ({ offer_id: offerId, part_identifier_id: partIdentifierId, ...part });
+
+export const offerLineTitle = ({ name, brand, number }: ListedPart) =>
+  normalizePartNumber(name).includes(normalizePartNumber(number))
+    ? name
+    : `${name} (${brand} ${number})`;
 
 export const addonLineMetadata = (
   parent: { lineId: string; offerId: string },

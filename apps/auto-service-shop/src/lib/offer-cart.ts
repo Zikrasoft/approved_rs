@@ -54,6 +54,7 @@ import {
   INSTALLATION,
   listedPartOf,
   offerLineMetadata,
+  offerLineTitle,
   readinessMetadata,
   withParentOffers,
   readLine,
@@ -558,24 +559,22 @@ async function putOffer(
     offer.part_identifier_id,
     { relations: ['part', 'brand'] },
   );
+  const part = {
+    slug: partPageSlug(identifier.brand.slug, identifier.normalized_value),
+    brand: identifier.brand.name,
+    number: identifier.value,
+    name: identifier.part.name,
+  };
   await addToCartWorkflow(scope).run({
     input: {
       cart_id: cartId,
       items: [
         {
-          title: `${identifier.part.name} (${identifier.brand.name} ${identifier.value})`,
+          title: offerLineTitle(part),
           quantity,
           unit_price: priceOf(offer),
           requires_shipping: false,
-          metadata: offerLineMetadata(offer.id, identifier.id, {
-            slug: partPageSlug(
-              identifier.brand.slug,
-              identifier.normalized_value,
-            ),
-            brand: identifier.brand.name,
-            number: identifier.value,
-            name: identifier.part.name,
-          }),
+          metadata: offerLineMetadata(offer.id, identifier.id, part),
         },
       ],
     },
