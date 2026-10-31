@@ -328,6 +328,22 @@ describe('leadSubmissionSchema', () => {
     );
   });
 
+  it('writes a VIN typed with Cyrillic look-alikes in Latin letters', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WВА 35ВG070N074158',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158',
+    );
+  });
+
+  it('keeps what was typed in the VIN field when it is not a VIN', () => {
+    const parsed = submit({ name: '', contact: '+381641234567', vin: 'wba35' });
+    expect(parsed.success && parsed.data.comment).toBe('VIN: WBA35');
+  });
+
   it('carries the shop order the Lead was placed for', () => {
     const parsed = submit({
       name: '',

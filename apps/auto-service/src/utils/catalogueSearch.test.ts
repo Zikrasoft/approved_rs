@@ -71,6 +71,7 @@ describe('nearVin', () => {
 
   it('spots a VIN with a letter a VIN never uses', () => {
     expect(nearVin('WBA35BG070NO74158')).toBe(true);
+    expect(nearVin('WВА35ВG070NО74158')).toBe(true);
   });
 
   it('leaves part numbers and words alone', () => {

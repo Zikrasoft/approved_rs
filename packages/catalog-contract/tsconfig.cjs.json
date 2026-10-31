@@ -25,6 +25,9 @@
       ],
       "@podbor/lead-crm/phone": [
         "./node_modules/@podbor/lead-crm/dist/cjs/phone.d.ts"
+      ],
+      "@podbor/lead-crm/vin": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/vin.d.ts"
       ]
     }
   },

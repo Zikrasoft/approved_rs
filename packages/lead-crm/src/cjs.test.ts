@@ -28,5 +28,8 @@ describe('CommonJS build', () => {
       secretMatches,
     } = require('@podbor/lead-crm/verify-secret');
     expect(secretMatches(bearerToken('Bearer s3cret'), 's3cret')).toBe(true);
+    expect(require('@podbor/lead-crm/vin').vinOf('wва35вg070n074158')).toBe(
+      'WBA35BG070N074158',
+    );
   });
 });

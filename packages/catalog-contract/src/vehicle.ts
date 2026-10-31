@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { displayEnum } from './displayEnum.ts';
 import { requirementSchema } from './attributes.ts';
 import { STEERING_SIDES } from './steering.ts';
-import { VIN_PATTERN } from './vin.ts';
+import { vinOf } from './vin.ts';
 
 export { STEERING_SIDES, type SteeringSide } from './steering.ts';
 export { VIN_PATTERN } from './vin.ts';
@@ -83,36 +83,7 @@ export const vehiclesResponseSchema = z.object({
   limit: z.number().int().positive().nullable().default(null),
 });
 
-const LATIN_LOOKALIKES: Record<string, string> = {
-  А: 'A',
-  В: 'B',
-  Е: 'E',
-  К: 'K',
-  М: 'M',
-  Н: 'H',
-  О: 'O',
-  Р: 'P',
-  С: 'C',
-  Т: 'T',
-  Х: 'X',
-};
-
-const typedVin = (value: string): string => {
-  const text = value
-    .toUpperCase()
-    .replace(/[АВЕКМНОРСТХ]/g, (letter) => LATIN_LOOKALIKES[letter]!)
-    .replace(/^\s*VIN\b\W*/, '');
-  const whole = text.replace(/[\s.-]+/g, '');
-  const words = text
-    .split(/[^A-Z0-9.-]+/)
-    .map((word) => word.replace(/[.-]+/g, ''));
-  return [whole, ...words].find((word) => VIN_PATTERN.test(word)) ?? whole;
-};
-
-export const vinSchema = z
-  .string()
-  .transform(typedVin)
-  .pipe(z.string().regex(VIN_PATTERN));
+export const vinSchema = z.string().transform(vinOf).pipe(z.string());
 
 export const vinFactsSchema = z.object({
   steering: z.enum(STEERING_SIDES).optional().catch(undefined),
