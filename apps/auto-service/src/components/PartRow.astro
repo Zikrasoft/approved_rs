@@ -14,14 +14,25 @@ interface Props {
   brand: string;
   value: string;
   name?: string;
+  specs?: string;
   detail?: string;
   superseded?: boolean;
   current?: { slug: string; brand: { name: string }; value: string } | null;
   priced?: { id: string; offers: PartOffer[] };
 }
 
-const { thumb, slug, brand, value, name, detail, superseded, current, priced } =
-  Astro.props;
+const {
+  thumb,
+  slug,
+  brand,
+  value,
+  name,
+  specs,
+  detail,
+  superseded,
+  current,
+  priced,
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 ---
@@ -42,6 +53,7 @@ const copy = content(locale).shopPart;
         <span class="spec text-sm whitespace-nowrap">{value}</span>
       </a>
       {name && <span class="text-sm text-ink-2">{name}</span>}
+      {specs && <span class="spec text-xs text-muted">{specs}</span>}
       {detail && <span class="text-xs text-muted">{detail}</span>}
       {
         superseded && (

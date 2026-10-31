@@ -17,6 +17,7 @@ import {
   type CategoryListing,
   type CategoryPageEntry,
 } from '@/utils/catalogueSnapshot';
+import { keySpecs } from '@/utils/attributeRows';
 import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder, withLocales } from '@/utils/paths';
@@ -159,6 +160,7 @@ const fields = category.fields
                     brand={page.brand.name}
                     value={page.value}
                     name={translated(page.part, 'name', locale)}
+                    specs={keySpecs(category, page.part.attributes, locale)}
                     superseded={page.superseded}
                     current={partSuccessor(page, bySlug)}
                     priced={page}
