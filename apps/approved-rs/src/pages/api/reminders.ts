@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import { logError, requireEnv } from '@podbor/lead-crm';
-import { secretMatches } from '@/lib/verifySecret';
+import { bearerToken, secretMatches } from '@podbor/lead-crm/verify-secret';
 import {
   claimDigest,
   findIdleTopics,
@@ -19,11 +19,6 @@ import {
   closeLeadTopic,
   settlePendingOrders,
 } from '@/lib/telegram';
-
-function extractBearer(header: string | null): string | null {
-  if (!header?.startsWith('Bearer ')) return null;
-  return header.slice('Bearer '.length);
-}
 
 async function expireGhosts(now: Date): Promise<number> {
   const expired = await expireGhostLeads(now);
@@ -79,7 +74,7 @@ async function postDigest(now: Date): Promise<boolean> {
 export async function GET({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
-      extractBearer(request.headers.get('authorization')),
+      bearerToken(request.headers.get('authorization')),
       requireEnv('CRON_SECRET'),
     )
   ) {
