@@ -76,6 +76,23 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
   });
 
+  it('hands the submitted service to thanksPath, so a site can thank per service', async () => {
+    const thanksPath = vi.fn(() => '/ru/thanks/parts/');
+    const route = createLeadsRoute<Locale>({
+      notifyLead,
+      waitUntil,
+      isLocale: (value): value is Locale => LOCALES.includes(value),
+      defaultLocale: 'ru',
+      localeCookie: 'lang',
+      thanksPath,
+      missingFieldsMessage: { ru: '', en: '', sr: '' },
+    });
+    const ctx = makeCtx(valid({ service: 'vehicle-sourcing' }));
+    await route(ctx);
+    expect(thanksPath).toHaveBeenCalledWith('ru', 'vehicle-sourcing');
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/parts/', 302);
+  });
+
   it('answers a body that is not a form with the refusal page, not a crash', async () => {
     const ctx = {
       ...makeCtx({}),
@@ -230,6 +247,15 @@ describe('createLeadsRoute', () => {
     );
   });
 
+  it('takes a lead from a form that has no name field at all', async () => {
+    const res = await POST(makeCtx({ contact: RS_PHONE, consent: 'on' }));
+    expect(res.status).toBe(302);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ name: '' }),
+      '[leads]',
+    );
+  });
+
   it('returns 400 when contact is missing', async () => {
     const res = await POST(makeCtx({ name: 'Иван' }));
     expect(res.status).toBe(400);
@@ -367,16 +393,20 @@ describe('createLeadsRoute', () => {
   });
 
   it.each(Object.entries(SERVICE_SLUGS_BY_BRAND))(
-    'accepts every %s slug and refuses one outside the enum with a 400',
+    'accepts every %s slug and keeps the contact of one outside the enum, without its service',
     async (brand, slugs) => {
       for (const slug of slugs) {
         const ctx = makeCtx(valid({ service: slug }));
         await POST(ctx);
         expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
       }
-      const res = await POST(makeCtx(valid({ service: `${brand}-no-such` })));
-      expect(res.status).toBe(400);
-      expect(notifyLead).toHaveBeenCalledTimes(slugs.length);
+      const ctx = makeCtx(valid({ service: [`${brand}-no-such`, slugs[0]] }));
+      await POST(ctx);
+      expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+      expect(notifyLead).toHaveBeenLastCalledWith(
+        expect.objectContaining({ service: slugs[0], services: [slugs[0]] }),
+        '[leads]',
+      );
     },
   );
 
@@ -472,6 +502,41 @@ describe('a shop Order cancelled in the shop admin', () => {
       expect(cancelOrder).not.toHaveBeenCalled();
     },
   );
+
+  const orderLeadCtx = (authorization?: string) => {
+    const ctx = makeCtx(valid({ [ORDER_ID_FIELD]: 'order_01' }));
+    if (authorization) ctx.request.headers.set('authorization', authorization);
+    return ctx;
+  };
+
+  it('stores the Lead of a placed Order the shop proves it sent', async () => {
+    const ctx = orderLeadCtx('Bearer shop-secret');
+
+    await cancelPOST(ctx);
+
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+    expect(notifyLead).toHaveBeenCalledWith(
+      expect.objectContaining({ orderId: 'order_01' }),
+      '[leads]',
+    );
+  });
+
+  it.each([undefined, 'Bearer wrong'])(
+    'refuses a Lead naming an Order without the shop secret (%s)',
+    async (authorization) => {
+      const response = await cancelPOST(orderLeadCtx(authorization));
+
+      expect(response.status).toBe(401);
+      expect(notifyLead).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses a Lead naming an Order on a site that takes none', async () => {
+    const response = await POST(orderLeadCtx('Bearer shop-secret'));
+
+    expect(response.status).toBe(401);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
 
   it('refuses a cancel on a site that takes none', async () => {
     const response = await POST(cancelCtx('Bearer shop-secret'));

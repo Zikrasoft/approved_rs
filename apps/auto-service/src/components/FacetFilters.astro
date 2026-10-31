@@ -10,7 +10,10 @@ import PriceSlot from './PriceSlot.astro';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { FILTERS_SUBMIT_ATTRIBUTE } from '@/scripts/filterSheet';
+import {
+  FILTERS_COUNT_ATTRIBUTE,
+  FILTERS_SUBMIT_ATTRIBUTE,
+} from '@/scripts/filterSheet';
 import {
   facetValueLabel,
   numberBounds,
@@ -113,7 +116,10 @@ const legend = (facet: SearchFacet) =>
       {Object.entries(hidden).map(([name, value]) => (
         <input type="hidden" name={name} value={value} />
       ))}
-      <filter-sheet class="group/sheet block">
+      <filter-sheet
+        class="group/sheet block"
+        data-count-url={`/api/search-count?locale=${locale}`}
+      >
         <details
           class="group/details max-lg:card max-lg:group-[:defined]/sheet:border-0 max-lg:group-[:defined]/sheet:bg-transparent lg:[&::details-content]:block lg:[&::details-content]:[content-visibility:visible]"
           open={active > 0}
@@ -193,6 +199,7 @@ const legend = (facet: SearchFacet) =>
                               <input
                                 type="number"
                                 inputmode="decimal"
+                                min="0"
                                 step="any"
                                 name={input.name}
                                 value={input.value}
@@ -216,7 +223,7 @@ const legend = (facet: SearchFacet) =>
                           >
                             {items.map((value) =>
                               pills ? (
-                                <label class="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-signal has-checked:bg-signal/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-signal has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
+                                <label class="relative inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-signal has-checked:bg-signal/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-signal has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
                                   <input
                                     type="checkbox"
                                     name="facets"
@@ -277,8 +284,11 @@ const legend = (facet: SearchFacet) =>
               <div class="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-5 py-3 group-[:defined:not([data-dirty])]/sheet:lg:hidden before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8 before:bg-linear-to-t before:from-card before:to-transparent max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <button
                   type="submit"
-                  class="btn btn-primary flex-1"
-                  {...{ [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters }}
+                  class="btn btn-primary flex-1 aria-busy:opacity-60"
+                  {...{
+                    [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters,
+                    [FILTERS_COUNT_ATTRIBUTE]: copy.showResults,
+                  }}
                 >
                   {showLabel}
                 </button>

@@ -25,6 +25,7 @@ const cart = {
       available: true,
       in_stock: true,
       lead_time_days: 0,
+      max_quantity: 4,
       addon: null,
       installation: null,
       part: {
@@ -68,6 +69,14 @@ describe('offerCartResponseSchema', () => {
       offerCartResponseSchema.parse({ cart: { ...cart, items } }).cart.items[0]
         .installation,
     ).toEqual({ item_id: 'item_3', unit_price: 0 });
+  });
+
+  it('reads a line from a shop that does not send the cap yet as uncapped', () => {
+    const { max_quantity: _, ...line } = cart.items[0]!;
+    expect(
+      offerCartResponseSchema.parse({ cart: { ...cart, items: [line] } }).cart
+        .items[0]?.max_quantity,
+    ).toBeNull();
   });
 
   it('refuses a line without a quantity', () => {

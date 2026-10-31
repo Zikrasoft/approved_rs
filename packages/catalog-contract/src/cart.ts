@@ -50,6 +50,7 @@ export const offerCartLineSchema = z.object({
   available: z.boolean(),
   in_stock: z.boolean(),
   lead_time_days: z.number().int().nonnegative(),
+  max_quantity: z.number().int().nonnegative().nullable().default(null),
   addon: lineAddonSchema.nullable(),
   installation: lineInstallationSchema.nullable().default(null),
   part: listedPartSchema,

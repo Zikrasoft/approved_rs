@@ -1,4 +1,5 @@
 ---
+import { translated } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
@@ -23,7 +24,7 @@ const part = {
   'data-slug': page.slug,
   'data-brand': page.brand.name,
   'data-number': page.value,
-  'data-name': page.part.name,
+  'data-name': translated(page.part, 'name', locale),
   ...addonDataset(page.category),
 };
 const closed = !shopOpen();

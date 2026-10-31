@@ -27,7 +27,7 @@ export interface LeadsRouteOptions<L extends string> {
   isLocale: (value: string) => value is L;
   defaultLocale: L;
   localeCookie: string;
-  thanksPath: (locale: L) => string;
+  thanksPath: (locale: L, service?: string) => string;
   missingFieldsMessage: Record<L, string>;
   orderCanceled?: {
     secret: string | undefined;
@@ -108,9 +108,17 @@ export function createLeadsRoute<L extends string>({
     if (!submission.success) {
       return refusalPage(locale, missingFieldsMessage[locale]);
     }
+    if (
+      submission.data.orderId &&
+      !secretMatches(
+        bearerToken(request.headers.get('authorization')),
+        orderCanceled?.secret,
+      )
+    )
+      return new Response(null, { status: 401 });
 
     waitUntil(notifyLead({ ...submission.data, locale }, '[leads]'));
 
-    return redirect(thanksPath(locale), 302);
+    return redirect(thanksPath(locale, submission.data.service), 302);
   };
 }

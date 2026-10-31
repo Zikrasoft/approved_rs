@@ -13,19 +13,28 @@ type NamedModel = {
   };
 };
 
-export function carName({ name, chassis }: NamedModel, locale: Locale): string {
-  const { series } = chassis;
+const joined = (words: string[]): string =>
+  words
+    .filter(Boolean)
+    .filter((word, index, all) => !all[index + 1]?.startsWith(`${word} `))
+    .join(' ');
+
+export function modelName(
+  { name, chassis }: NamedModel,
+  locale: Locale,
+): string {
+  const { series, code } = chassis;
   const seriesName =
     (locale !== 'ru' && series.translations?.[locale]) || series.name;
-  const words = [
-    series.make.name,
+  return joined([
     seriesName,
-    chassis.code === series.name ? '' : chassis.code,
+    code === series.name || name.includes(code) ? '' : code,
     name,
-  ].filter(Boolean);
-  return words
-    .filter((word, index) => !words[index + 1]?.startsWith(`${word} `))
-    .join(' ');
+  ]);
+}
+
+export function carName(model: NamedModel, locale: Locale): string {
+  return joined([model.chassis.series.make.name, modelName(model, locale)]);
 }
 
 const naturally = new Intl.Collator('en', { numeric: true }).compare;

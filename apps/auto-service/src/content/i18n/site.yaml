@@ -51,7 +51,7 @@ form:
   nameLabel: Имя (необязательно)
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
-  contactPlaceholder: +381 11 000 0000
+  contactPlaceholder: 64 123 4567
   telegramPlaceholder: '@username или телефон'
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок
@@ -64,6 +64,7 @@ form:
   privacyLinkText: политикой конфиденциальности
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер, кажется, он введен не полностью
+  errorPhoneTooLong: Проверьте номер, в нем лишние цифры
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorConsent: Без согласия мы не сможем отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз

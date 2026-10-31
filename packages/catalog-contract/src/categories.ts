@@ -6,6 +6,7 @@ import { translationsSchema } from './translations.ts';
 
 export {
   CATALOG_TRANSLATION_LOCALES,
+  localizedUnit,
   translated,
   translationsSchema,
 } from './translations.ts';

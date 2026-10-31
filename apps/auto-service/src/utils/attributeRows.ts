@@ -1,4 +1,5 @@
 import {
+  localizedUnit,
   translated,
   type AttributeValues,
   type Category,
@@ -27,7 +28,9 @@ const displayValue = (
     case 'single-select':
       return option(String(value));
     case 'number':
-      return field.unit ? `${value} ${field.unit}` : String(value);
+      return field.unit
+        ? `${value} ${localizedUnit(field.unit, locale)}`
+        : String(value);
     case 'text':
       return String(value);
   }
@@ -49,3 +52,21 @@ export const attributeRows = (
           },
         ],
   );
+
+export const keySpecs = (
+  category: Category,
+  values: AttributeValues,
+  locale: string,
+): string =>
+  attributeRows(
+    {
+      ...category,
+      fields: category.fields.filter(({ type }) => type !== 'boolean'),
+    },
+    values,
+    locale,
+    { yes: '', no: '' },
+  )
+    .slice(0, 3)
+    .map(({ value }) => value)
+    .join(' · ');

@@ -3,6 +3,7 @@ import { CATEGORY_FIELD_TYPES } from './attributes.ts';
 import {
   CATALOG_TRANSLATION_LOCALES,
   type CategoryField,
+  localizedUnit,
   translated,
 } from './categories.ts';
 import { brandNumberSchema, partOfferSchema } from './partPages.ts';
@@ -74,7 +75,7 @@ export const describeFacet = (
     key: field.key,
     type: field.type,
     label: translated(field, 'label', locale),
-    unit: field.unit,
+    unit: localizedUnit(field.unit, locale),
     values: values
       .slice()
       .sort(

@@ -17,6 +17,7 @@ import {
   IN_STOCK,
   IN_STOCK_FACET,
   inRange,
+  partNumberQuery,
   PRICE_FACET,
   type RangeFilter,
   searchableQuery,
@@ -300,11 +301,12 @@ export async function GET(
         }
       : null;
 
+  const number = partNumberQuery(q);
   const cars: CarMatch =
-    searchableQuery(q) && !found && !vehicleModel && !vehicle_id
+    searchableQuery(q) && !number && !found && !vehicleModel && !vehicle_id
       ? await matchCars(req.scope.resolve(Modules.SEARCH), q)
       : { cars: [], keys: [], rest: [] };
-  const partQuery = cars.keys.length ? cars.rest.join(' ') : q;
+  const partQuery = number ?? (cars.keys.length ? cars.rest.join(' ') : q);
   const filters: SearchFilters = searchableQuery(partQuery)
     ? { q: partQuery.toLowerCase() }
     : {};

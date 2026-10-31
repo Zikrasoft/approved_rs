@@ -8,6 +8,7 @@ export interface PhoneKit {
   parse: typeof import('libphonenumber-js/min').parsePhoneNumberFromString;
   isValidContact: typeof import('./phone.ts').isValidContact;
   countryOptions: typeof import('./phone.ts').phoneCountryOptions;
+  tooLong: (value: string) => boolean;
 }
 
 // A stalled request is not a rejected one: the module can hang on a flaky
@@ -68,6 +69,8 @@ export function loadPhoneKit(): Promise<void> {
         parse: phone.parsePhoneNumberFromString,
         isValidContact: crm.isValidContact,
         countryOptions: crm.phoneCountryOptions,
+        tooLong: (value) =>
+          phone.validatePhoneNumberLength(value) === 'TOO_LONG',
       };
     })
     .catch(() => {

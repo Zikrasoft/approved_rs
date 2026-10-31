@@ -346,13 +346,8 @@
       "permanent": true
     },
     {
-      "source": "/thanks",
-      "destination": "/sr/thanks/",
-      "permanent": true
-    },
-    {
-      "source": "/thanks/",
-      "destination": "/sr/thanks/",
+      "source": "/thanks/:path*",
+      "destination": "/sr/thanks/:path*",
       "permanent": true
     },
     {

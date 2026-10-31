@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Category } from '@podbor/catalog-contract';
-import { attributeRows } from './attributeRows';
+import { attributeRows, keySpecs } from './attributeRows';
 
 const field = {
   unit: null,
@@ -48,7 +48,7 @@ const oil: Category = {
         { key: 'mb-229-51', label: 'MB 229.51', translations: null, rank: 1 },
       ],
     },
-    { ...field, key: 'volume', type: 'number', unit: 'l', label: 'Объем' },
+    { ...field, key: 'volume', type: 'number', unit: 'л', label: 'Объем' },
     { ...field, key: 'weight', type: 'number', label: 'Вес' },
     { ...field, key: 'synthetic', type: 'boolean', label: 'Синтетика' },
     { ...field, key: 'eco', type: 'boolean', label: 'Эко' },
@@ -89,5 +89,27 @@ describe('attributeRows', () => {
     expect(
       attributeRows(oil, { viscosity: '0w-20' }, 'ru', { yes: '', no: '' }),
     ).toEqual([{ label: 'Вязкость', value: '0w-20' }]);
+  });
+});
+
+describe('keySpecs', () => {
+  it('lines up the first three filled values, skipping yes/no fields', () => {
+    expect(
+      keySpecs(
+        oil,
+        {
+          synthetic: true,
+          viscosity: '5w-30',
+          volume: 5,
+          weight: 4.4,
+          code: 'X',
+        },
+        'ru',
+      ),
+    ).toBe('5W-30 · 5 л · 4.4');
+  });
+
+  it('is empty for a part with no filled fields', () => {
+    expect(keySpecs(oil, {}, 'ru')).toBe('');
   });
 });

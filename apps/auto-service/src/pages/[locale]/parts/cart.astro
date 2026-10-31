@@ -3,6 +3,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import CartAddonToggle from '@/components/CartAddonToggle.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
 import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
@@ -54,7 +55,7 @@ const stepper =
 
   <section class="wrap py-6 md:py-band-lg">
     <offer-cart
-      class="block"
+      class="block min-h-svh"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
       data-locale={locale}
       data-addon-template={copy.addonTemplate}
@@ -68,6 +69,7 @@ const stepper =
       data-order-template={copy.orderNumberTemplate}
       data-quantity-template={copy.receiptQuantityTemplate}
       data-blocked-template={copy.checkoutBlocked}
+      data-lower-template={copy.lowerToTemplate}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
       data-preview={shopOpen() ? undefined : ''}
       data-availability={JSON.stringify(availability)}
@@ -85,6 +87,20 @@ const stepper =
         >
           {copy.notices.expired}
         </p>
+        <div
+          data-empty-notice="moved"
+          hidden
+          class="flex flex-col gap-3 rounded-control bg-signal/8 p-4"
+        >
+          <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            class="btn btn-primary w-full sm:w-auto sm:self-start"
+          >
+            {copy.notices.movedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
         <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
         <a
           href={PathBuilder.parts(locale)}
@@ -171,9 +187,13 @@ const stepper =
             <span>{copy.submitNote}</span>
           </p>
         </div>
+        <div class="flex flex-col gap-3">
+          <span class="text-xs text-muted">{site.footer.contactHeading}</span>
+          <ContactChannels />
+        </div>
         <a
           href={PathBuilder.parts(locale)}
-          class="btn btn-primary w-full sm:w-auto sm:self-start"
+          class="btn btn-secondary w-full sm:w-auto sm:self-start"
         >
           {copy.orderedCta}
           <Icon name="arrowRight" />
@@ -298,6 +318,11 @@ const stepper =
               </div>
               <CartAddonToggle hook="data-addon" />
               <CartAddonToggle hook="data-installation" />
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-lower
+                hidden></button>
               <button
                 type="button"
                 class="btn btn-secondary w-full sm:w-auto sm:self-start"

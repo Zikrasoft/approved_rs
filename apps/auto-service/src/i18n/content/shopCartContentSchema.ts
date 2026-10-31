@@ -14,6 +14,7 @@ export const shopCartContentSchema = z
     increaseLabel: z.string(),
     decreaseLabel: z.string(),
     toInquiryLabel: z.string(),
+    lowerToTemplate: z.string(),
     unavailableTag: z.string(),
     removeLabel: z.string(),
     totalLabel: z.string(),

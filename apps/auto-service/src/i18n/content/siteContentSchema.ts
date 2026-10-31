@@ -102,6 +102,7 @@ export const siteContentSchema = z
         privacyLinkText: z.string(),
         modalTitle: z.string(),
         errorPhone: z.string(),
+        errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
         errorConsent: z.string(),
         errorSubmit: z.string(),
