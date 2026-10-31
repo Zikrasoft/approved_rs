@@ -3,7 +3,8 @@ import { fitComment } from '@podbor/catalog-contract/comment';
 import { partTitle } from '@podbor/catalog-contract/part-number';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { vinFrom } from '@/utils/carFacts';
-import { formatMoney } from '@/utils/money';
+import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
+import { localeTagOf } from './localeTag';
 import {
   forgetStored,
   readStoredJson,
@@ -280,27 +281,38 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           remove?.addEventListener('click', () =>
             removeFromPartsList(part.slug),
           );
-          const quantity = item.querySelector<HTMLInputElement>(
-            '[data-part-quantity]',
-          );
-          if (quantity) {
-            quantity.value = String(part.quantity ?? 1);
-            quantity.addEventListener('change', () => {
-              const wanted = wantedQuantity(quantity.valueAsNumber);
-              quantity.value = String(wanted);
-              setPartQuantity(part.slug, wanted);
-            });
+          const stepper = item.querySelector('[data-part-quantity]');
+          if (stepper) {
+            const shown = stepper.querySelector('[data-quantity]')!;
+            const steps = [
+              ['[data-decrease]', -1, 1],
+              ['[data-increase]', 1, MAX_PART_QUANTITY],
+            ] as const;
+            const buttons = steps.map(([hook]) =>
+              stepper.querySelector<HTMLButtonElement>(hook)!,
+            );
+            let count = part.quantity ?? 1;
+            const show = () => {
+              shown.textContent = String(count);
+              steps.forEach(([, , edge], index) => {
+                buttons[index].disabled = count === edge;
+              });
+            };
+            steps.forEach(([, step], index) =>
+              buttons[index].addEventListener('click', () => {
+                count = wantedQuantity(count + step);
+                setPartQuantity(part.slug, count);
+                show();
+              }),
+            );
+            show();
           }
           const addon = item.querySelector<HTMLElement>('[data-part-addon]');
           const toggle = addon?.querySelector<HTMLInputElement>(
             '[data-part-addon-toggle]',
           );
           if (addon && toggle && part.addon) {
-            const {
-              addonTemplate = '{service}',
-              locale = '',
-              localeTag = 'sr',
-            } = this.dataset;
+            const { addonTemplate = '{service}', locale = '' } = this.dataset;
             addon.hidden = false;
             addon.querySelector('[data-part-addon-label]')!.textContent =
               addonTemplate.replace(
@@ -310,7 +322,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             addon.querySelector('[data-part-addon-price]')!.textContent =
               part.addon_price === undefined
                 ? ''
-                : `+${formatMoney(part.addon_price, 'RSD', localeTag)}`;
+                : `+${formatMoney(part.addon_price, PRICE_CURRENCY, localeTagOf(this))}`;
             toggle.checked = Boolean(part.with_addon);
             toggle.addEventListener('change', () =>
               setPartAddon(part.slug, toggle.checked),

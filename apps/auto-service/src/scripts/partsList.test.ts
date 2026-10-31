@@ -346,7 +346,7 @@ describe('Подобрать on a part page', () => {
           <parts-inquiry>
             <div data-parts-list-block hidden>
               <ul data-parts-list></ul>
-              <template data-parts-item><li><a data-part-link></a><input type="number" min="1" max="99" data-part-quantity aria-label="Количество" /></li></template>
+              <template data-parts-item><li><a data-part-link></a><div role="group" aria-label="Количество" data-part-quantity><button type="button" data-decrease></button><span data-quantity></span><button type="button" data-increase></button></div></li></template>
             </div>
             <form>
               <input name="contact" value="+381601234567" />
@@ -393,29 +393,32 @@ describe('Подобрать on a part page', () => {
   it('sends how many of a part the visitor wants, at least one', () => {
     const { button, dialog, form } = partPage();
     button.click();
-    const quantity = dialog.querySelector<HTMLInputElement>(
-      '[data-part-quantity]',
-    )!;
+    const group = () =>
+      dialog.querySelector<HTMLElement>('[data-part-quantity]')!;
+    const shown = () => group().querySelector('[data-quantity]')!.textContent;
+    const press = (hook: string) =>
+      group().querySelector<HTMLButtonElement>(hook)!.click();
 
-    expect(quantity.value).toBe('1');
-    expect(quantity.getAttribute('aria-label')).toBe(
+    expect(shown()).toBe('1');
+    expect(group().getAttribute('aria-label')).toBe(
       'Количество: Mann-Filter HU 816 x, Масляный фильтр',
     );
-    quantity.value = '3';
-    quantity.dispatchEvent(new Event('change'));
+    expect(
+      group().querySelector<HTMLButtonElement>('[data-decrease]')!.disabled,
+    ).toBe(true);
+    press('[data-increase]');
+    press('[data-increase]');
     const formData = new FormData(form);
     form.dispatchEvent(Object.assign(new Event('formdata'), { formData }));
 
+    expect(shown()).toBe('3');
     expect(readPartsList()).toEqual([{ ...mannOil, quantity: 3 }]);
     expect(formData.get('comment')).toBe(
       'Mann-Filter HU 816 x, Масляный фильтр × 3',
     );
 
-    quantity.value = '0';
-    quantity.dispatchEvent(new Event('change'));
-
-    expect(quantity.value).toBe('1');
-    expect(readPartsList()).toEqual([{ ...mannOil, quantity: 1 }]);
+    press('[data-decrease]');
+    expect(readPartsList()).toEqual([{ ...mannOil, quantity: 2 }]);
   });
 
   it('sends the listed parts with only a contact and no VIN', () => {

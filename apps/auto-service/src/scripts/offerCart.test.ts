@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { readCart, rememberCart } from './cartStore';
 import { capNotice, defineOfferCart, stepTarget } from './offerCart';
 import { readPartsList } from './partsList';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 
 describe('stepping a line quantity', () => {
   it('clamps a burst of taps past the cap to the cap and says so', () => {
@@ -102,4 +103,39 @@ describe('the confirmation opened from a link alone', () => {
     expect(shown('[data-order-number]')).toBe(false);
     expect(shown('[data-order-date]')).toBe(false);
   });
+});
+
+describe('the contact on the confirmation', () => {
+  it.each([
+    ['whatsapp', 'WhatsApp: '],
+    ['viber', 'Viber: '],
+    ['phone', 'Call: '],
+  ])(
+    'groups a %s number the way the phone is shown',
+    async (channel, label) => {
+      sessionStorage.setItem(
+        'carlab_checkout_form',
+        JSON.stringify({
+          values: { '[name="contact"]': '+381641213188' },
+          channel,
+        }),
+      );
+      history.replaceState(null, '', '/ru/parts/cart/?notice=ordered&order=14');
+      defineOfferCart();
+      document.body.innerHTML = `
+      <offer-cart data-ordered-contact='${JSON.stringify({
+        phone: 'Call: {contact}',
+        whatsapp: 'WhatsApp: {contact}',
+        viber: 'Viber: {contact}',
+      })}'>
+        <div data-state="ordered" hidden><p data-ordered-contact hidden></p></div>
+      </offer-cart>`;
+
+      await vi.waitFor(() =>
+        expect(
+          document.querySelector('p[data-ordered-contact]')!.textContent,
+        ).toBe(`${label}${formatPhone('381641213188')}`),
+      );
+    },
+  );
 });

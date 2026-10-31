@@ -1,0 +1,38 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import ContactChannels from './ContactChannels.astro';
+
+interface Props {
+  part: string;
+  question: string;
+  replaced?: string;
+}
+
+const { part, question, replaced } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).shopPart;
+const named = replaced
+  ? copy.askAboutReplacedPart
+      .replace('{replaced}', replaced)
+      .replace('{part}', part)
+  : part;
+---
+
+<div class="flex flex-col gap-2 border-t border-line pt-4">
+  <p class="text-sm font-semibold text-ink">{copy.askAboutPart}</p>
+  <vin-prefill class="block" data-template={copy.askAboutPartVin}>
+    <ContactChannels
+      only={['whatsapp', 'telegram']}
+      service={VIN_INQUIRY_SERVICE}
+      prefill={question.replace('{part}', named)}
+      class="grid-cols-2"
+    />
+  </vin-prefill>
+</div>
+
+<script>
+  import { defineVinPrefill } from '@/scripts/vinPrefill';
+
+  defineVinPrefill();
+</script>

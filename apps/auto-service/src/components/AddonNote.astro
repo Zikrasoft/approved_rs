@@ -5,7 +5,7 @@ import { content } from '@/i18n/content';
 import { bestPrice } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
-import { formatMoney } from '@/utils/money';
+import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import Icon from './Icon.astro';
 import PriceSlot from './PriceSlot.astro';
 
@@ -42,7 +42,7 @@ const {
   installationInCart,
 } = content(locale).shopCart;
 const money = (price: number) =>
-  `+${formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}`;
+  `+${formatMoney(price, PRICE_CURRENCY, BCP47_BY_LOCALE[locale])}`;
 const rows = [
   ...(addon?.note ? [{ label: addon.label, price: money(addon.price) }] : []),
   ...(installPrice === null

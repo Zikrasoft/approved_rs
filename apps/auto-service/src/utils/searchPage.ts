@@ -11,6 +11,7 @@ import {
   searchIntent,
   vinDestination,
 } from './catalogueSearch';
+import { searchEitherLayout } from './keyboardLayout';
 import { PathBuilder } from './paths';
 import {
   appendRange,
@@ -46,7 +47,7 @@ export async function planSearch({
   locale: Locale;
   catalogue: SearchCatalogue | null;
 }) {
-  const q = partsQuery(params.get('q') ?? '');
+  const typed = partsQuery(params.get('q') ?? '');
   const category = catalogKey(params.get('category'));
   const model = catalogKey(params.get('model'));
   const make = model ? catalogKey(params.get('make')) : undefined;
@@ -59,6 +60,31 @@ export async function planSearch({
   const offset = Math.max(
     0,
     Number.parseInt(params.get('offset') ?? '0', 10) || 0,
+  );
+
+  const intent = searchIntent(typed);
+  const vin = intent.kind === 'vin' ? intent.vin : null;
+  const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
+  const destination =
+    vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
+  if (destination) {
+    return redirectTo(destination, 303);
+  }
+
+  const searchable = !vin && (searchableQuery(typed) || Boolean(category));
+  const { q, found } = await searchEitherLayout(typed, async (query) =>
+    searchable && catalogue
+      ? catalogue.search({
+          q: query,
+          category,
+          make,
+          model,
+          locale,
+          facets: chosen,
+          ranges,
+          offset,
+        })
+      : null,
   );
 
   const searchHref = (
@@ -83,30 +109,6 @@ export async function planSearch({
     }
     return `${PathBuilder.partsSearch(locale)}?${next}`;
   };
-
-  const intent = searchIntent(q);
-  const vin = intent.kind === 'vin' ? intent.vin : null;
-  const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
-  const destination =
-    vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
-  if (destination) {
-    return redirectTo(destination, 303);
-  }
-
-  const searchable = !vin && (searchableQuery(q) || Boolean(category));
-  const found =
-    searchable && catalogue
-      ? await catalogue.search({
-          q,
-          category,
-          make,
-          model,
-          locale,
-          facets: chosen,
-          ranges,
-          offset,
-        })
-      : null;
 
   if (
     chosen.length !== requestedFacets.length ||
@@ -146,7 +148,7 @@ export async function planSearch({
       ranges,
       offset,
       vin,
-      vinHint: !vin && nearVin(q),
+      vinHint: !vin && nearVin(typed),
       vinOutcome,
       searchable,
       found,

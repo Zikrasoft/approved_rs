@@ -103,6 +103,30 @@ describe('planSearch', () => {
     });
   });
 
+  it('searches a query typed in the wrong keyboard layout as meant', async () => {
+    const search = vi.fn(async ({ q }: { q: string }) =>
+      q === 'oil filter'
+        ? found(2, [result('A', 'a'), result('B', 'b')])
+        : found(0, []),
+    );
+    const planned = await plan('q=щшд ашдеук', fakeCatalogue({ search }));
+
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(planned).toMatchObject({ view: { q: 'oil filter' } });
+    expect('view' in planned && planned.view.found?.count).toBe(2);
+    expect('view' in planned && planned.view.searchHref([], [])).toBe(
+      '/ru/parts/search/?q=oil+filter',
+    );
+  });
+
+  it('keeps the typed query when the other layout finds nothing either', async () => {
+    const search = vi.fn(async () => found(0, []));
+    const planned = await plan('q=zzzz', fakeCatalogue({ search }));
+
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(planned).toMatchObject({ view: { q: 'zzzz' } });
+  });
+
   it('opens the one part whose number was searched', async () => {
     expect(await plan('q=W 712/83')).toEqual({
       redirect: '/ru/parts/p/w-712-83/',

@@ -23,6 +23,7 @@ import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { carLink, listingCrumbs, missingNumber } from '@/utils/catalogueSearch';
 import { planSearch } from '@/utils/searchPage';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -93,7 +94,12 @@ const emptyMessage = q
 const zeroFound =
   found?.results.length === 0 && chips.length === 0 && !modelName;
 const deadEnd = Boolean(vin) || unavailable || unknownScope || zeroFound;
-const asked = vin ?? q;
+const DeadEndPrefill = vin ? 'div' : 'vin-prefill';
+const deadEndPrefill = vin
+  ? copy.lookingForVin.replace('{vin}', vin)
+  : q
+    ? copy.lookingFor.replace('{q}', q)
+    : undefined;
 const inquiryTopic = [
   modelName,
   narrowedTo?.name,
@@ -199,14 +205,21 @@ const scopeHidden = {
     {
       deadEnd && (
         <>
-          <ContactChannels
-            class="max-w-2xl"
-            prefill={asked ? copy.lookingFor.replace('{q}', asked) : undefined}
-          />
-          <VinInquiryCard {...inquiryCard} />
+          <DeadEndPrefill
+            class="block max-w-2xl"
+            data-template={content(locale).shopPart.askAboutPartVin}
+          >
+            <ContactChannels
+              lead="whatsapp"
+              leadPrimary
+              service={VIN_INQUIRY_SERVICE}
+              prefill={deadEndPrefill}
+            />
+          </DeadEndPrefill>
           <div class="max-w-2xl" {...contactCta}>
             <CatalogueSearch query={q} category={category} secondary />
           </div>
+          <VinInquiryCard {...inquiryCard} />
         </>
       )
     }
@@ -260,7 +273,7 @@ const scopeHidden = {
               </section>
             )}
             <ListingBar
-              count={found.count}
+              count={looseNumbers ? null : found.count}
               filters={facets.length > 0}
               active={chips.length}
             />
@@ -362,3 +375,9 @@ const scopeHidden = {
     }
   </section>
 </Shell>
+
+<script>
+  import { defineVinPrefill } from '@/scripts/vinPrefill';
+
+  defineVinPrefill();
+</script>

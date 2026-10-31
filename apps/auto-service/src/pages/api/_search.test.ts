@@ -56,6 +56,17 @@ describe('/api/search', () => {
     );
   });
 
+  it('asks again in the other keyboard layout when the typed query finds nothing', async () => {
+    backend
+      .mockResolvedValueOnce(Response.json({ ...answer, cars: [] }))
+      .mockResolvedValueOnce(Response.json(answer));
+
+    expect(await suggest('q=%2Cvd&locale=ru')).toMatchObject({
+      cars: [{ href: '/ru/parts/bmw/', label: 'BMW' }],
+    });
+    expect(backend).toHaveBeenCalledTimes(2);
+  });
+
   it('offers the VIN lookup for a VIN without asking the shop', async () => {
     expect(await suggest('q=WBA35BG070N074158&locale=ru')).toEqual({
       vin: true,

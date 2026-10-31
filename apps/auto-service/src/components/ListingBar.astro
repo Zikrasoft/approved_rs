@@ -5,7 +5,7 @@ import { content } from '@/i18n/content';
 import { FILTERS_OPEN_ATTRIBUTE } from '@/scripts/filterSheet';
 
 interface Props {
-  count: number;
+  count: number | null;
   filters: boolean;
   active?: number;
 }
@@ -18,7 +18,7 @@ const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
   class="flex min-h-11 items-center justify-between gap-4 max-lg:sticky max-lg:top-[calc(4.5rem+1px)] max-lg:z-20 max-lg:-mx-5 max-lg:border-b max-lg:border-line max-lg:bg-paper/95 max-lg:px-5 max-lg:py-2 max-lg:backdrop-blur"
 >
   <p class="spec text-sm text-muted" aria-live="polite">
-    {copy.found.replace('{count}', String(count))}
+    {count !== null && copy.found.replace('{count}', String(count))}
   </p>
   {
     filters && (

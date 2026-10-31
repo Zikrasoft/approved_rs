@@ -11,7 +11,7 @@ import {
   shopOpen,
 } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
-import { formatMoney } from '@/utils/money';
+import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
@@ -72,7 +72,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           ...categories.map((category) => {
             const addon = categoryAddon(category, locale);
             const money = (price: number) =>
-              formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale]);
+              formatMoney(price, PRICE_CURRENCY, BCP47_BY_LOCALE[locale]);
             const { installationLabel, installationFree } =
               content(locale).shopCart;
             return {

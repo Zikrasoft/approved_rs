@@ -89,10 +89,12 @@ and the Pixel beside `'self'` and the inline Astro scripts. The `headers` key is
 generated with the redirects from `SECURITY_HEADERS` in `packages/site-kit`,
 whose CSP takes the tag hosts from the analytics module; change it there and
 rerun each app's `scripts/redirects.ts`. `.github/scripts/redirects-drift.sh`
-fails `check` on a hand edit.
+fails `check` on a hand edit. Its `report-uri` is each site's `/api/csp-report`,
+which logs one `[csp] <directive> <blocked host>` line per violation and nothing
+about the visitor.
 
-TODO: enforce the script CSP once a week of browser consoles on all three sites
-shows no violation from the analytics scripts or the map embed.
+TODO: enforce the script CSP once a week of `[csp]` lines in the Vercel logs of
+all three sites shows no violation from the analytics scripts or the map embed.
 
 ### Job order
 

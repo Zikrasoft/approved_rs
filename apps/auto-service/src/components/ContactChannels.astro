@@ -7,6 +7,8 @@ import type { ContactPlacement } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { content } from '@/i18n/content';
+import { navCurrent } from '@podbor/site-kit';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   class?: string;
@@ -14,6 +16,7 @@ interface Props {
   tone?: 'card' | 'panel';
   service?: ServiceSlug;
   lead?: TrackedContactChannel;
+  leadPrimary?: boolean;
   only?: readonly TrackedContactChannel[];
   prefill?: string;
 }
@@ -24,6 +27,7 @@ const {
   tone = 'card',
   service,
   lead,
+  leadPrimary = false,
   only,
   prefill,
 } = Astro.props;
@@ -78,11 +82,24 @@ const offered = only ?? variant.channels;
 const channels = lead
   ? [lead, ...offered.filter((channel) => channel !== lead)]
   : offered;
-const { surface, icon: iconTone } = TONE[tone];
+const PRIMARY = {
+  surface: 'border-signal bg-signal text-ink hover:bg-signal-hover',
+  icon: 'text-ink',
+};
+const toneOf = (channel: TrackedContactChannel) =>
+  leadPrimary && channel === lead ? PRIMARY : TONE[tone];
+const onThanks = Boolean(
+  navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)),
+);
+const onMouse = channels.filter(
+  (channel) => onThanks || channel !== 'phone',
+).length;
+const columns =
+  placement !== 'hero' && onMouse === 3 ? 'pointer-fine:sm:grid-cols-3' : '';
 ---
 
 <ul
-  class={`${variant.list} ${className}`}
+  class={`${variant.list} ${columns} ${className}`}
   data-contact-order={lead ? undefined : ''}
   {...contactRegion(placement)}
 >
@@ -94,13 +111,18 @@ const { surface, icon: iconTone } = TONE[tone];
         service={service}
         prefill={prefill}
         listItem
-        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
+        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${toneOf(channel).surface}`}
         plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-2.5"
       >
         <Icon
           name={CHANNEL[channel].icon}
           size={variant.iconSize}
-          class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
+          class:list={[
+            'shrink-0 transition-colors duration-150',
+            toneOf(channel) === PRIMARY
+              ? PRIMARY.icon
+              : `group-hover:text-signal group-focus-visible:text-signal ${TONE[tone].icon}`,
+          ]}
         />
         <span class:list={['spec whitespace-nowrap', variant.label]}>
           {CHANNEL[channel].label}

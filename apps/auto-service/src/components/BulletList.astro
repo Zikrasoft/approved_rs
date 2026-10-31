@@ -16,10 +16,7 @@ const { items, marker = 'dot' } = Astro.props;
         {marker === 'check' ? (
           <Icon name="check" size={13} class="mt-1 shrink-0 text-go" />
         ) : (
-          <span
-            class="mt-2 h-1.5 w-1.5 shrink-0 bg-signal"
-            aria-hidden="true"
-          />
+          <span class="mt-2 h-1.5 w-1.5 shrink-0 bg-ink" aria-hidden="true" />
         )}
         {item}
       </li>
