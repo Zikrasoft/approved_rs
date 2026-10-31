@@ -39,6 +39,7 @@ export const LEAD_LOST_AT = 'lead_lost_at';
 export const LEAD_LOST_ERROR = 'lead_lost_error';
 export const LEAD_LOST_ATTEMPTS = 'lead_lost_attempts';
 export const LEAD_CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
+export const LEAD_CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -285,17 +286,48 @@ export async function handOrderToLeadRoute(
       [LEAD_HANDOFF_ATTEMPTS]: handOffAttempts(metadata) + 1,
     }));
     if (handOffAttempts(recorded) < LEAD_HANDOFF_MAX_ATTEMPTS) return;
-    const alerted = await alertOwner(
+    await alertOwnerOnce(
+      container,
+      id,
+      LEAD_OWNER_ALERTED_AT,
       PARTS_ORDER_COPY.undelivered(displayId, reason),
     );
-    if (!alerted) {
-      logger.error(`Order ${id} gave up on the lead pipeline, nobody alerted`);
-      return;
-    }
-    await recordHandOff(container, id, () => ({
-      [LEAD_OWNER_ALERTED_AT]: new Date().toISOString(),
-    }));
   }
+}
+
+async function alertOwnerOnce(
+  container: MedusaContainer,
+  id: string,
+  stamp: string,
+  text: string,
+): Promise<void> {
+  if (!(await alertOwner(text))) {
+    container
+      .resolve(ContainerRegistrationKeys.LOGGER)
+      .error(`Order ${id} gave up on the lead pipeline, nobody alerted yet`);
+    return;
+  }
+  await recordHandOff(container, id, () => ({
+    [stamp]: new Date().toISOString(),
+  }));
+}
+
+export async function alertUndeliveredOrder(
+  container: MedusaContainer,
+  id: string,
+): Promise<void> {
+  const { metadata, display_id } = await container
+    .resolve(Modules.ORDER)
+    .retrieveOrder(id);
+  await alertOwnerOnce(
+    container,
+    id,
+    LEAD_OWNER_ALERTED_AT,
+    PARTS_ORDER_COPY.undelivered(
+      display_id ?? id,
+      String(metadata?.[LEAD_HANDOFF_ERROR] ?? ''),
+    ),
+  );
 }
 
 export async function handCancelToLeadRoute(
@@ -309,9 +341,20 @@ export async function handCancelToLeadRoute(
     !metadata?.[LEAD_HANDED_OFF_AT] ||
     metadata[LEAD_LOST_AT] ||
     metadata[LEAD_CANCEL_REFUSED_AT] ||
-    attemptsAt(metadata, LEAD_LOST_ATTEMPTS) >= LEAD_HANDOFF_MAX_ATTEMPTS
+    metadata[LEAD_CANCEL_ALERTED_AT]
   )
     return;
+  const alertUndelivered = (reason: string) =>
+    alertOwnerOnce(
+      container,
+      id,
+      LEAD_CANCEL_ALERTED_AT,
+      PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
+    );
+  if (attemptsAt(metadata, LEAD_LOST_ATTEMPTS) >= LEAD_HANDOFF_MAX_ATTEMPTS) {
+    await alertUndelivered(String(metadata[LEAD_LOST_ERROR] ?? ''));
+    return;
+  }
   try {
     const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
     if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
@@ -331,8 +374,13 @@ export async function handCancelToLeadRoute(
     }));
   } catch (error) {
     const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-    if (error instanceof LeadRouteRefusal && error.status === 409) {
-      logger.warn(`Order ${id} is canceled, but its Lead is already won`);
+    if (
+      error instanceof LeadRouteRefusal &&
+      (error.status === 409 || error.status === 404)
+    ) {
+      logger.warn(
+        `Order ${id} is canceled, but the CRM refused it (${error.status}: its Lead is won or deleted)`,
+      );
       await recordHandOff(container, id, () => ({
         [LEAD_CANCEL_REFUSED_AT]: new Date().toISOString(),
       }));
@@ -348,11 +396,6 @@ export async function handCancelToLeadRoute(
     }));
     if (attemptsAt(recorded, LEAD_LOST_ATTEMPTS) < LEAD_HANDOFF_MAX_ATTEMPTS)
       return;
-    if (
-      !(await alertOwner(
-        PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
-      ))
-    )
-      logger.error(`Order ${id} gave up on its cancel, nobody alerted`);
+    await alertUndelivered(reason);
   }
 }
