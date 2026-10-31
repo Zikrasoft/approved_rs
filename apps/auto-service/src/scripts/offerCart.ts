@@ -283,6 +283,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {
+        if (outcome?.kind === 'empty' && goneNotice === 'gone')
+          moveCartToInquiry();
         const state = settleCart(outcome);
         if (state === 'gone') {
           this.cart = null;
