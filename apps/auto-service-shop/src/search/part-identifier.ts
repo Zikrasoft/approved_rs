@@ -20,12 +20,13 @@ import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
 import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
 import {
   PART_CHANGED_EVENT,
+  PART_IDENTIFIER_INDEX,
   PART_IDENTIFIERS_DELETED_EVENT,
   partChangedEventSchema,
   partIdentifiersDeletedEventSchema,
 } from './part-changed-event';
 
-export const PART_IDENTIFIER_INDEX = 'part_identifier';
+export { PART_IDENTIFIER_INDEX };
 
 type Translations = Partial<Record<string, Record<string, string>>> | null;
 
