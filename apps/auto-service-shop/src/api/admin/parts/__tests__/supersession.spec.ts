@@ -3,7 +3,8 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -33,7 +34,9 @@ medusaIntegrationTestRunner({
           .catch((error) => error.response);
 
       const pageFor = async (normalizedValue: string) => {
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         const response = await api.get(
           '/store/part-pages?limit=5000',
           storeHeaders,

@@ -2,7 +2,8 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -98,7 +99,9 @@ medusaIntegrationTestRunner({
           lead_time_days: 1,
           part_identifier_id: mannOil.id,
         });
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
       });
 
       const get = (query = '') =>

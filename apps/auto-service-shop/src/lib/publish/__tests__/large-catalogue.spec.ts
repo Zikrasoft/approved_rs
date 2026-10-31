@@ -4,12 +4,13 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { PUBLISH_MODULE } from '../../../modules/publish';
+import type PublishModuleService from '../../../modules/publish/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import { VIN_LOOKUP_MODULE } from '../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../modules/vin-lookup/service';
 import { sweepOrphans } from '../orphans';
-import { publishAllNumbers, unmarkNumbersPublished } from '../published';
 
 const PAST_THE_BIND_LIMIT = 70_000;
 
@@ -21,6 +22,8 @@ medusaIntegrationTestRunner({
       getContainer().resolve(ContainerRegistrationKeys.PG_CONNECTION);
     const catalog = (): CatalogModuleService =>
       getContainer().resolve(CATALOG_MODULE);
+    const publish = (): PublishModuleService =>
+      getContainer().resolve(PUBLISH_MODULE);
     const countOf = async (table: string) =>
       Number((await pg()(table).count({ count: '*' }))[0].count);
 
@@ -35,11 +38,11 @@ medusaIntegrationTestRunner({
           [brand.id, part.id, PAST_THE_BIND_LIMIT],
         );
 
-        const fresh = await publishAllNumbers(getContainer());
+        const fresh = await publish().publishAll();
 
         expect(fresh).toHaveLength(PAST_THE_BIND_LIMIT);
-        expect(await publishAllNumbers(getContainer())).toEqual([]);
-        await unmarkNumbersPublished(getContainer(), fresh);
+        expect(await publish().publishAll()).toEqual([]);
+        await publish().unpublish(fresh);
         expect(await countOf('published_number')).toBe(0);
       });
 

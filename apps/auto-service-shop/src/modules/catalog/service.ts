@@ -47,6 +47,10 @@ import { adminError, alreadyExists } from '../_shared/admin-error';
 import { runBoundSql } from '../_shared/bound-sql';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { spellingKey } from '../_shared/spelling';
+import {
+  identifierStatusRows,
+  type IdentifierStatusFilters,
+} from './identifier-status';
 import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
 
 type Provenance = {
@@ -1769,6 +1773,20 @@ class CatalogModuleService extends CatalogModuleBase {
         remove: (ids, context) => this.deleteBrands(ids, context),
       },
     ];
+  }
+
+  @InjectManager()
+  async identifierStatusRows(
+    filters: IdentifierStatusFilters,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    return identifierStatusRows(
+      (
+        (sharedContext.transactionManager ??
+          sharedContext.manager) as SqlEntityManager
+      ).getKnex(),
+      filters,
+    );
   }
 
   @InjectManager()

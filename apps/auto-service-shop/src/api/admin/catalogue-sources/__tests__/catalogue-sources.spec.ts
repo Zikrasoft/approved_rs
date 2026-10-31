@@ -5,7 +5,8 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 
 medusaIntegrationTestRunner({
   moduleName: 'catalogue-sources',
@@ -25,7 +26,9 @@ medusaIntegrationTestRunner({
         ).data;
 
       const reindex = async () => {
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });

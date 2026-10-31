@@ -2,7 +2,8 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -210,7 +211,9 @@ medusaIntegrationTestRunner({
           },
         ]);
 
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -600,7 +603,9 @@ medusaIntegrationTestRunner({
           id: identifier.id,
           superseded: true,
         });
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -643,7 +648,9 @@ medusaIntegrationTestRunner({
         await new Promise((resolve) => setTimeout(resolve, 1100));
         const startedAt = Math.floor(Date.now() / 1000);
 
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -674,7 +681,9 @@ medusaIntegrationTestRunner({
 
         await reindex();
         const unpublished = await search({ q: 'WK 820', locale: 'ru' });
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await reindex();
         const published = await search({ q: 'WK 820', locale: 'ru' });
 
@@ -727,7 +736,9 @@ medusaIntegrationTestRunner({
             lead_time_days,
           })),
         );
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
@@ -777,7 +788,9 @@ medusaIntegrationTestRunner({
           stock_quantity: 3,
           lead_time_days: 0,
         });
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });

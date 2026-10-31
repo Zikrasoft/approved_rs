@@ -1,10 +1,5 @@
 import { container } from '@medusajs/framework';
-import type { Knex } from '@medusajs/framework/mikro-orm/knex';
-import {
-  ContainerRegistrationKeys,
-  defineSearchIndex,
-  search,
-} from '@medusajs/framework/utils';
+import { defineSearchIndex, search } from '@medusajs/framework/utils';
 import type {
   ISearchModuleService,
   SearchTypes,
@@ -25,6 +20,9 @@ import {
   vehicleKey,
 } from '../lib/car-pages';
 import { serbianScripts } from '../lib/serbian';
+import { PUBLISH_MODULE } from '../modules/publish';
+import type PublishModuleService from '../modules/publish/service';
+import type { ListedPartCount } from '../modules/publish/service';
 
 const MAX_QUERY_TOKENS = 8;
 const HITS_PER_TOKEN = 100;
@@ -258,30 +256,7 @@ const VEHICLE_FIELDS = [
   'model.chassis.series.make.spellings.value',
 ];
 
-const LISTED_PART_COUNTS = `
-  with published_parts as (
-    select distinct pi.part_id from part_identifier pi
-    join published_number pn on pn.id = pi.id and pn.deleted_at is null
-    where pi.deleted_at is null
-  ), listed as (
-    select p.id from part p
-    join published_parts pp on pp.part_id = p.id
-    where p.deleted_at is null and (
-      p.replaced_by_id is null
-      or p.replaced_by_id not in (select part_id from published_parts)
-    )
-  )
-  select v.model_id, f.vehicle_id, count(distinct f.part_id)::int as parts
-  from fitment f
-  join listed l on l.id = f.part_id
-  join vehicle v on v.id = f.vehicle_id and v.deleted_at is null
-  where f.deleted_at is null
-  group by grouping sets ((v.model_id, f.vehicle_id), (v.model_id))`;
-
-type CountRow = { model_id: string; vehicle_id: string | null; parts: number };
-
-export async function listedPartCounts(pg: Knex): Promise<PartCounts> {
-  const { rows } = await pg.raw<{ rows: CountRow[] }>(LISTED_PART_COUNTS);
+function partCountsOf(rows: ListedPartCount[]): PartCounts {
   const counts: PartCounts = { vehicles: new Map(), models: new Map() };
   for (const { model_id, vehicle_id, parts } of rows) {
     if (vehicle_id) counts.vehicles.set(vehicle_id, parts);
@@ -299,9 +274,10 @@ async function* seed({
   }
   const [{ data: vehicles }, counts] = await Promise.all([
     query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    listedPartCounts(
-      container.resolve(ContainerRegistrationKeys.PG_CONNECTION),
-    ),
+    container
+      .resolve<PublishModuleService>(PUBLISH_MODULE)
+      .listedPartCounts()
+      .then(partCountsOf),
   ]);
   const documents = carDocuments(vehicles as VehicleRow[], counts);
   if (documents.length) {

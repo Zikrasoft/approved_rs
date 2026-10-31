@@ -1,12 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
 import { installationPrice } from '../../../lib/installation';
 import { pricesShown } from '../../../lib/shop-gate';
+import { nextCursor } from '../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { PUBLISH_MODULE } from '../../../modules/publish';
+import type PublishModuleService from '../../../modules/publish/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
@@ -73,19 +75,10 @@ export async function GET(
   const { after, limit } = req.validatedQuery as StoreListPartPagesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
-  const db = req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION);
-  const pageIds = (
-    await db('published_number as pn')
-      .join('part_identifier as pi', 'pi.id', 'pn.id')
-      .whereNull('pn.deleted_at')
-      .whereNull('pi.deleted_at')
-      .modify((page) => {
-        if (after) page.where('pn.id', '>', after);
-      })
-      .select<{ id: string }[]>('pn.id')
-      .orderBy('pn.id')
-      .limit(limit)
-  ).map(({ id }) => id);
+  const published = await req.scope
+    .resolve<PublishModuleService>(PUBLISH_MODULE)
+    .publishedPage({ after, limit });
+  const pageIds = published.map(({ id }) => id);
   const identifiers = pageIds.length
     ? await catalog.listPartIdentifiers(
         { id: pageIds },
@@ -154,7 +147,7 @@ export async function GET(
     partPagesResponseSchema.parse({
       pages,
       limit,
-      next: pageIds.length === limit ? pageIds[pageIds.length - 1] : null,
+      next: nextCursor(published, limit),
     }),
   );
 }

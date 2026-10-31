@@ -6,7 +6,8 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 
 const ADMIN_EMAIL = 'admin@suppliers-tests.local';
 const ADMIN_PASSWORD = 'supersecret';
@@ -282,7 +283,9 @@ medusaIntegrationTestRunner({
         await call('post', `/admin/suppliers/${supplierId}`, {
           markup_percentage: 10,
         });
-        await publishAllNumbers(container);
+        await container
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await container
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });

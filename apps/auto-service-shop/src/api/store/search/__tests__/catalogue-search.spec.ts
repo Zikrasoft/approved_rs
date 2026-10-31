@@ -3,7 +3,8 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -186,7 +187,9 @@ medusaIntegrationTestRunner({
           },
         ]);
 
-        await publishAllNumbers(container);
+        await container
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await part('Щетка', '31 003', [f30.vehicle.id]);
         await container.resolve(Modules.SEARCH).reindex();
       });

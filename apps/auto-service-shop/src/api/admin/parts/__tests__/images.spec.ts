@@ -5,7 +5,8 @@ import sharp from 'sharp';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { MAX_IMAGE_BYTES } from '../../../../lib/images';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -222,7 +223,9 @@ medusaIntegrationTestRunner({
 
       it('shows the photos only on their own brand-number page, in order, without stored files or provenance', async () => {
         const [first, second] = await uploadTwo();
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
 
         const response = await api.get('/store/part-pages', storeHeaders);
         const page = (id: string) =>

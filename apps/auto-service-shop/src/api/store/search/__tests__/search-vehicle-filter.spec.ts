@@ -8,7 +8,8 @@ import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 
 medusaIntegrationTestRunner({
   moduleName: 'catalog',
@@ -109,7 +110,9 @@ medusaIntegrationTestRunner({
           },
         ]);
 
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         const searchModuleService = getContainer().resolve(Modules.SEARCH);
         await searchModuleService.reindex({ index: 'part_identifier' });
       });

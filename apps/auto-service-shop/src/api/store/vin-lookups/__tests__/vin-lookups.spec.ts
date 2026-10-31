@@ -6,7 +6,8 @@ import { VIN_REFUSAL } from '@podbor/catalog-contract';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { publishAllNumbers } from '../../../../lib/publish/published';
+import { PUBLISH_MODULE } from '../../../../modules/publish';
+import type PublishModuleService from '../../../../modules/publish/service';
 import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
 import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
 import type { VinDecoder } from '../../../../lib/vin/decoder';
@@ -143,7 +144,9 @@ medusaIntegrationTestRunner({
             });
           }
         }
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer().resolve(Modules.SEARCH).reindex();
 
         expect((await lookUp(OWNER_VIN)).data.place).toMatchObject({

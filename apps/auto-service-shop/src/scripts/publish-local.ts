@@ -6,7 +6,8 @@ import {
   holdCatalogueWriter,
 } from '../lib/catalogue-writer';
 import { parseEnv } from '../lib/env';
-import { publishAllNumbers } from '../lib/publish/published';
+import { PUBLISH_MODULE } from '../modules/publish';
+import type PublishModuleService from '../modules/publish/service';
 import { translateCatalogue } from '../lib/publish/translate';
 import { CATALOG_MODULE } from '../modules/catalog';
 
@@ -28,7 +29,7 @@ export default async function publishLocal({ container }: ExecArgs) {
     } else {
       logger.info('OPENAI_API_KEY is not set, skipped translate.');
     }
-    await publishAllNumbers(container);
+    await container.resolve<PublishModuleService>(PUBLISH_MODULE).publishAll();
     await container
       .resolve<ISearchModuleService>(Modules.SEARCH)
       .reindex({ strategy: 'swap' });

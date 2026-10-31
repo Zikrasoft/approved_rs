@@ -18,7 +18,6 @@ import { importRuns } from '../../../../../../../integration-tests/importRuns';
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
 import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
-import { publishAllNumbers } from '../../../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
 import type { ImportSummary } from '../../../../../../lib/suppliers/import';
@@ -231,7 +230,9 @@ medusaIntegrationTestRunner({
       };
 
       const pages = async (): Promise<Page[]> => {
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         return (await api.get('/store/part-pages', storeHeaders)).data.pages;
       };
 
@@ -352,7 +353,9 @@ medusaIntegrationTestRunner({
         await runImport();
         await new Promise((resolve) => setTimeout(resolve, 1000));
         const beforePublish = await found();
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });
