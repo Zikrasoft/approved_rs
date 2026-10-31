@@ -1,3 +1,4 @@
+import { keySpecs } from './attributeRows';
 import { z } from 'zod';
 import {
   CART_FINGERPRINT_FIELD,
@@ -62,7 +63,7 @@ export type SearchQuery = {
 };
 
 export type SearchOutcome = Omit<SearchResponse, 'results'> & {
-  results: (SearchResult & { slug: string })[];
+  results: (SearchResult & { slug: string; specs: string })[];
 };
 
 export const LINE_ADDON_KINDS = ['addon', 'installation'] as const;
@@ -333,6 +334,21 @@ export function createCatalogue({
         const found = searchResponseSchema.parse(
           await request(`/store/search?${params}`),
         );
+        const described = found.results.some(({ part }) => part.attributes);
+        const bySlug = new Map(
+          described
+            ? (await categories().catch(() => [])).map((named) => [
+                named.slug,
+                named,
+              ])
+            : [],
+        );
+        const specs = ({ part }: SearchResult) => {
+          const named = bySlug.get(part.category?.slug ?? '');
+          return named && part.attributes
+            ? keySpecs(named, part.attributes, locale)
+            : '';
+        };
         return {
           ...found,
           facets: pricesHidden
@@ -341,6 +357,7 @@ export function createCatalogue({
           results: found.results.map((result) => ({
             ...unpriced(result),
             slug: partPageSlug(result.brand.slug, result.normalized_value),
+            specs: specs(result),
           })),
         };
       } catch (error) {

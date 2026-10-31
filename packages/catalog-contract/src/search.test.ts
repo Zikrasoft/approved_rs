@@ -30,6 +30,7 @@ const response = {
         id: 'part_1',
         name: 'Filter ulja',
         category: { slug: 'oil-filters', name: 'Filteri ulja' },
+        attributes: null,
       },
       offers: [
         {
@@ -195,6 +196,26 @@ describe('searchResponseSchema', () => {
     const older = { ...response, results: [result] };
     expect(
       searchResponseSchema.parse(older).results[0].thumbnail_illustration,
+    ).toBeNull();
+  });
+
+  it('carries the attributes of a result Part for its key specs', () => {
+    const [result] = response.results;
+    const described = {
+      ...response,
+      results: [
+        { ...result, part: { ...result.part, attributes: { volume: 5 } } },
+      ],
+    };
+    expect(
+      searchResponseSchema.parse(described).results[0].part.attributes,
+    ).toEqual({
+      volume: 5,
+    });
+    const { attributes: _known, ...part } = result.part;
+    const older = { ...response, results: [{ ...result, part }] };
+    expect(
+      searchResponseSchema.parse(older).results[0].part.attributes,
     ).toBeNull();
   });
 

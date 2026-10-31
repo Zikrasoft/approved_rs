@@ -6,6 +6,7 @@ import {
 } from '@medusajs/framework/utils';
 import type { SearchFilters } from '@medusajs/framework/types';
 import {
+  attributeValuesSchema,
   BRAND_FACET,
   brandNumberSchema,
   CATALOG_LOCALES,
@@ -62,6 +63,7 @@ const hitSchema = brandNumberSchema.extend({
   images: imagesSchema,
   part: named.extend({
     id: z.string(),
+    attributes: attributeValuesSchema.nullable().catch(null),
     category: named
       .extend({ slug: z.string(), image: imageSchema.nullable() })
       .nullable(),
@@ -430,6 +432,7 @@ export async function GET(
       'part.id',
       'part.name',
       'part.translations',
+      'part.attributes',
       'part.category.slug',
       'part.category.name',
       'part.category.translations',
@@ -469,6 +472,7 @@ export async function GET(
       part: {
         id: hit.part.id,
         name: translated(hit.part, 'name', locale),
+        attributes: hit.part.attributes,
         category: hit.part.category && {
           slug: hit.part.category.slug,
           name: translated(hit.part.category, 'name', locale),
