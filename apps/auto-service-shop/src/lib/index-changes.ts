@@ -1,10 +1,22 @@
-import type { MedusaContainer } from '@medusajs/framework/types';
+import type {
+  ISearchModuleService,
+  MedusaContainer,
+} from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
 import {
   PART_CHANGED_EVENT,
+  PART_IDENTIFIER_INDEX,
   PART_IDENTIFIERS_DELETED_EVENT,
 } from '../search/part-changed-event';
+
+const hasNoActiveVersion = async (scope: MedusaContainer) =>
+  (
+    await scope.resolve<ISearchModuleService>(Modules.SEARCH).listIndexes()
+  ).some(
+    ({ name, status }) =>
+      name === PART_IDENTIFIER_INDEX && status === 'pending',
+  );
 
 export async function emitIndexChanges(
   scope: MedusaContainer,
@@ -27,7 +39,7 @@ export async function emitIndexChanges(
       data: { part_id },
     })),
   ];
-  if (messages.length) {
+  if (messages.length && !(await hasNoActiveVersion(scope))) {
     await scope
       .resolve(Modules.EVENT_BUS)
       .emit<{ part_id?: string; ids?: string[] }>(messages);

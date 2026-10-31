@@ -42,7 +42,7 @@ export const StoreSearchParts = z
           .max(10),
       )
       .default([]),
-    offset: z.coerce.number().int().nonnegative().default(0),
+    offset: z.coerce.number().int().nonnegative().max(10_000).default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),
   })
   .refine(({ q, category }) => q || category, 'q or category is required');

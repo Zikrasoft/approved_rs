@@ -21,6 +21,7 @@ import {
 } from '@medusajs/medusa/core-flows';
 
 import { seedCashAtPickupCommerceDefaults } from '../lib/commerce-defaults';
+import { parseEnv } from '../lib/env';
 import {
   BATTERY_CATEGORY,
   BATTERY_FIELDS,
@@ -31,6 +32,7 @@ import {
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
+import type { NewPart } from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { seedDemoImages } from './seed-demo-images';
@@ -109,7 +111,7 @@ function writeStorefrontEnv(token: string, logger: Logger) {
     return;
   }
   const wanted: Record<string, string> = {
-    MEDUSA_BACKEND_URL: 'http://localhost:9009',
+    MEDUSA_BACKEND_URL: `http://localhost:${parseEnv(process.env).PORT}`,
     MEDUSA_PUBLISHABLE_KEY: token,
   };
   const current = existsSync(STOREFRONT_ENV)
@@ -143,141 +145,251 @@ const BRANDS = [
 
 type Ids = Record<string, string>;
 
+async function reuse<Data extends object, Row>(
+  wanted: Data[],
+  key: (keyof Data)[],
+  list: (filter: Partial<Data>) => Promise<Row[]>,
+  create: (data: Data) => Promise<Row>,
+): Promise<Row[]> {
+  const rows: Row[] = [];
+  for (const data of wanted) {
+    const filter: Partial<Data> = {};
+    for (const column of key) filter[column] = data[column] ?? undefined;
+    const [found] = await list(filter);
+    rows.push(found ?? (await create(data)));
+  }
+  return rows;
+}
+
+const reuseBrands = async (
+  catalog: CatalogModuleService,
+  wanted: { slug: string; name: string }[],
+): Promise<Ids> =>
+  Object.fromEntries(
+    (
+      await reuse(
+        wanted,
+        ['slug'],
+        (filter) => catalog.listBrands(filter),
+        (data) => catalog.createBrands(data),
+      )
+    ).map(({ slug, id }) => [slug, id]),
+  );
+
+async function seedPart(
+  catalog: CatalogModuleService,
+  part: NewPart,
+): Promise<string> {
+  const free: NewPart['identifiers'] = [];
+  let taken: string | undefined;
+  for (const identifier of part.identifiers) {
+    const [found] = await catalog.listPartIdentifiers({
+      brand_id: identifier.brand_id,
+      normalized_value: normalizePartNumber(identifier.value),
+    });
+    if (found) taken ??= found.part_id;
+    else free.push(identifier);
+  }
+  if (!taken) return catalog.createPartWithIdentifiers(part);
+  for (const identifier of free) {
+    await catalog.addPartIdentifier(taken, identifier, {});
+  }
+  await catalog.classifyPart(taken, {
+    category_id: part.category_id ?? null,
+    attributes: part.attributes ?? {},
+  });
+  return taken;
+}
+
 async function seedVehicles(catalog: CatalogModuleService) {
-  const [bmw, mercedes] = await catalog.createMakes([
-    { slug: 'bmw', name: 'BMW' },
-    { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
-  ]);
-  const [series3, series5, eClass] = await catalog.createSeries([
-    {
-      make_id: bmw.id,
-      name: '3 серия',
-      translations: { sr: 'Serija 3', en: '3 Series' },
-    },
-    {
-      make_id: bmw.id,
-      name: '5 серия',
-      translations: { sr: 'Serija 5', en: '5 Series' },
-    },
-    {
-      make_id: mercedes.id,
-      name: 'E-класс',
-      translations: { sr: 'E-klasa', en: 'E-Class' },
-    },
-  ]);
-  const [f30, g30, w213] = await catalog.createChassis([
-    {
-      series_id: series3.id,
-      code: 'F30',
-      body_style: 'sedan',
-      year_from: 2011,
-      year_to: 2019,
-    },
-    {
-      series_id: series5.id,
-      code: 'G30',
-      body_style: 'sedan',
-      year_from: 2016,
-      year_to: 2023,
-    },
-    {
-      series_id: eClass.id,
-      code: 'W213',
-      body_style: 'sedan',
-      year_from: 2016,
-      year_to: 2023,
-    },
-  ]);
-  const [m320d, m320i, m520d, e220d] = await catalog.createVehicleModels([
-    { chassis_id: f30.id, slug: 'f30-320d', name: '320d' },
-    { chassis_id: f30.id, slug: 'f30-320i', name: '320i' },
-    { chassis_id: g30.id, slug: 'g30-520d', name: '520d' },
-    { chassis_id: w213.id, slug: 'w213-e220d', name: 'E 220 d' },
-  ]);
-  const [b47, b48, om654] = await catalog.createEngines([
-    { code: 'B47D20', family: 'B47', fuel: 'diesel', displacement_cc: 1995 },
-    { code: 'B48B20', family: 'B48', fuel: 'petrol', displacement_cc: 1998 },
-    {
-      code: 'OM654.920',
-      family: 'OM654',
-      fuel: 'diesel',
-      displacement_cc: 1950,
-    },
-  ]);
-  const vehicles = await catalog.createVehicles([
-    {
-      model_id: m320d.id,
-      engine_id: b47.id,
-      power_kw: 140,
-      drive: 'rwd',
-      market: 'EU',
-      year_from: 2015,
-      year_to: 2019,
-      steering: 'left',
-    },
-    {
-      model_id: m320i.id,
-      engine_id: b48.id,
-      power_kw: 135,
-      drive: 'rwd',
-      market: 'EU',
-      year_from: 2015,
-      year_to: 2019,
-      steering: 'left',
-    },
-    {
-      model_id: m520d.id,
-      engine_id: b47.id,
-      power_kw: 140,
-      drive: 'rwd',
-      market: 'EU',
-      year_from: 2017,
-      year_to: 2023,
-      steering: 'left',
-    },
-    {
-      model_id: e220d.id,
-      engine_id: om654.id,
-      power_kw: 143,
-      drive: 'rwd',
-      market: 'EU',
-      year_from: 2016,
-      year_to: 2023,
-    },
-  ]);
+  const [bmw, mercedes] = await reuse(
+    [
+      { slug: 'bmw', name: 'BMW' },
+      { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
+    ],
+    ['slug'],
+    (filter) => catalog.listMakes(filter),
+    (data) => catalog.createMakes(data),
+  );
+  const [series3, series5, eClass] = await reuse(
+    [
+      {
+        make_id: bmw.id,
+        name: '3 серия',
+        translations: { sr: 'Serija 3', en: '3 Series' },
+      },
+      {
+        make_id: bmw.id,
+        name: '5 серия',
+        translations: { sr: 'Serija 5', en: '5 Series' },
+      },
+      {
+        make_id: mercedes.id,
+        name: 'E-класс',
+        translations: { sr: 'E-klasa', en: 'E-Class' },
+      },
+    ],
+    ['make_id', 'name'],
+    (filter) => catalog.listSeries(filter),
+    (data) => catalog.createSeries(data),
+  );
+  const [f30, g30, w213] = await reuse(
+    [
+      {
+        series_id: series3.id,
+        code: 'F30',
+        body_style: 'sedan' as const,
+        year_from: 2011,
+        year_to: 2019,
+      },
+      {
+        series_id: series5.id,
+        code: 'G30',
+        body_style: 'sedan' as const,
+        year_from: 2016,
+        year_to: 2023,
+      },
+      {
+        series_id: eClass.id,
+        code: 'W213',
+        body_style: 'sedan' as const,
+        year_from: 2016,
+        year_to: 2023,
+      },
+    ],
+    ['series_id', 'code'],
+    (filter) => catalog.listChassis(filter),
+    (data) => catalog.createChassis(data),
+  );
+  const [m320d, m320i, m520d, e220d] = await reuse(
+    [
+      { chassis_id: f30.id, slug: 'f30-320d', name: '320d' },
+      { chassis_id: f30.id, slug: 'f30-320i', name: '320i' },
+      { chassis_id: g30.id, slug: 'g30-520d', name: '520d' },
+      { chassis_id: w213.id, slug: 'w213-e220d', name: 'E 220 d' },
+    ],
+    ['slug'],
+    (filter) => catalog.listVehicleModels(filter),
+    (data) => catalog.createVehicleModels(data),
+  );
+  const [b47, b48, om654] = await reuse(
+    [
+      {
+        code: 'B47D20',
+        family: 'B47',
+        fuel: 'diesel' as const,
+        displacement_cc: 1995,
+      },
+      {
+        code: 'B48B20',
+        family: 'B48',
+        fuel: 'petrol' as const,
+        displacement_cc: 1998,
+      },
+      {
+        code: 'OM654.920',
+        family: 'OM654',
+        fuel: 'diesel' as const,
+        displacement_cc: 1950,
+      },
+    ],
+    ['code'],
+    (filter) => catalog.listEngines(filter),
+    (data) => catalog.createEngines(data),
+  );
+  const vehicles = await reuse(
+    [
+      {
+        model_id: m320d.id,
+        engine_id: b47.id,
+        power_kw: 140,
+        drive: 'rwd' as const,
+        market: 'EU',
+        year_from: 2015,
+        year_to: 2019,
+        steering: 'left' as const,
+      },
+      {
+        model_id: m320i.id,
+        engine_id: b48.id,
+        power_kw: 135,
+        drive: 'rwd' as const,
+        market: 'EU',
+        year_from: 2015,
+        year_to: 2019,
+        steering: 'left' as const,
+      },
+      {
+        model_id: m520d.id,
+        engine_id: b47.id,
+        power_kw: 140,
+        drive: 'rwd' as const,
+        market: 'EU',
+        year_from: 2017,
+        year_to: 2023,
+        steering: 'left' as const,
+      },
+      {
+        model_id: e220d.id,
+        engine_id: om654.id,
+        power_kw: 143,
+        drive: 'rwd' as const,
+        market: 'EU',
+        year_from: 2016,
+        year_to: 2023,
+      },
+    ],
+    ['model_id', 'engine_id', 'power_kw'],
+    (filter) => catalog.listVehicles(filter),
+    (data) => catalog.createVehicles(data),
+  );
   const [v320d, v320i, v520d, vE220d] = vehicles;
-  await catalog.createVehicleIdentifiers([
-    { vehicle_id: v320d.id, type: 'bmw-type-code', value: '35BG' },
-    { vehicle_id: v320i.id, type: 'bmw-type-code', value: '8E31' },
-    { vehicle_id: v520d.id, type: 'bmw-type-code', value: 'JA31' },
-    { vehicle_id: vE220d.id, type: 'mercedes-baumuster', value: '213004' },
-  ]);
+  await reuse(
+    [
+      { vehicle_id: v320d.id, type: 'bmw-type-code' as const, value: '35BG' },
+      { vehicle_id: v320i.id, type: 'bmw-type-code' as const, value: '8E31' },
+      { vehicle_id: v520d.id, type: 'bmw-type-code' as const, value: 'JA31' },
+      {
+        vehicle_id: vE220d.id,
+        type: 'mercedes-baumuster' as const,
+        value: '213004',
+      },
+    ],
+    ['vehicle_id', 'type', 'value'],
+    (filter) => catalog.listVehicleIdentifiers(filter),
+    (data) => catalog.createVehicleIdentifiers(data),
+  );
   return { b47, om654, v320d, v320i, v520d, vE220d };
 }
 
 async function seedCategories(catalog: CatalogModuleService) {
-  await catalog.createCategories(CATEGORIES);
-  const [oil, filters, pads] = await catalog.createCategories([
-    {
-      slug: 'engine-oil',
-      name: 'Моторное масло',
-      text: 'Масло под допуск производителя и вязкость вашего двигателя.',
-      maintenance_kit: true,
-      kit_rank: 0,
-    },
-    {
-      slug: 'oil-filters',
-      name: 'Масляные фильтры',
-      text: 'Масляные фильтры под двигатель вашего автомобиля.',
-      maintenance_kit: true,
-      kit_rank: 1,
-    },
-    {
-      slug: 'brake-pads',
-      name: 'Тормозные колодки',
-      text: 'Передние и задние колодки под ваш автомобиль.',
-    },
-  ]);
+  const [oil, filters, pads] = await reuse(
+    [
+      {
+        slug: 'engine-oil',
+        name: 'Моторное масло',
+        text: 'Масло под допуск производителя и вязкость вашего двигателя.',
+        maintenance_kit: true,
+        kit_rank: 0,
+      },
+      {
+        slug: 'oil-filters',
+        name: 'Масляные фильтры',
+        text: 'Масляные фильтры под двигатель вашего автомобиля.',
+        maintenance_kit: true,
+        kit_rank: 1,
+      },
+      {
+        slug: 'brake-pads',
+        name: 'Тормозные колодки',
+        text: 'Передние и задние колодки под ваш автомобиль.',
+      },
+      ...CATEGORIES,
+    ],
+    ['slug'],
+    (filter) => catalog.listCategories(filter),
+    (data) => catalog.createCategories(data),
+  );
   const [viscosity, approvals, volume, filterType, axle] =
     await catalog.createCategoryFields([
       {
@@ -365,7 +477,7 @@ async function seedParts(
     attributes: Record<string, unknown>,
     identifiers: [string, 'oem' | 'manufacturer-number', string][],
   ) =>
-    catalog.createPartWithIdentifiers({
+    seedPart(catalog, {
       name,
       category_id: categoryId,
       attributes,
@@ -387,7 +499,7 @@ async function seedParts(
     ],
   );
   const [superseded] = await catalog.listPartIdentifiers({
-    part_id: b47OilFilter,
+    brand_id: brand.bmw,
     normalized_value: '11428507683',
   });
   await catalog.updatePartIdentifiers({ id: superseded.id, superseded: true });
@@ -479,8 +591,7 @@ async function seedParts(
 }
 
 async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
-  const brands = await catalog.createBrands(BRANDS);
-  const brand: Ids = Object.fromEntries(brands.map((b) => [b.slug, b.id]));
+  const brand = await reuseBrands(catalog, BRANDS);
   const { b47, om654, v320d, v320i, v520d, vE220d } =
     await seedVehicles(catalog);
   const { viscosity, approvals, ...made } = await seedCategories(catalog);
@@ -636,18 +747,20 @@ const BATTERIES: {
 ];
 
 async function seedBatteries(catalog: CatalogModuleService, logger: Logger) {
-  const brands = await catalog.createBrands([
+  const brand = await reuseBrands(catalog, [
     { slug: 'varta', name: 'Varta' },
     { slug: 'exide', name: 'Exide' },
+    { slug: 'bosch', name: 'Bosch' },
   ]);
-  const [bosch] = await catalog.listBrands({ slug: 'bosch' });
-  const brand: Ids = Object.fromEntries(
-    [...brands, bosch].map((b) => [b.slug, b.id]),
+  const [category] = await reuse(
+    [BATTERY_CATEGORY],
+    ['slug'],
+    (filter) => catalog.listCategories(filter),
+    (data) => catalog.createCategories(data),
   );
-  const category = await catalog.createCategories(BATTERY_CATEGORY);
   const field = await seedCategoryFields(catalog, category.id, BATTERY_FIELDS);
   for (const { name, brand: slug, number, attributes } of BATTERIES) {
-    await catalog.createPartWithIdentifiers({
+    await seedPart(catalog, {
       name,
       category_id: category.id,
       attributes: { voltage: 12, width: 175, ...attributes },
@@ -845,12 +958,7 @@ async function seedFilterVariety(
   catalog: CatalogModuleService,
   logger: Logger,
 ) {
-  const known = new Set(
-    (await catalog.listBrands({}, { take: null })).map(({ slug }) => slug),
-  );
-  await catalog.createBrands(
-    VARIETY_BRANDS.filter(({ slug }) => !known.has(slug)),
-  );
+  await reuseBrands(catalog, VARIETY_BRANDS);
   const brand: Ids = Object.fromEntries(
     (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
   );
@@ -1007,7 +1115,7 @@ export default async function seedDemo({ container }: ExecArgs) {
   } else {
     await seedCatalogue(catalog, logger);
   }
-  if ((await catalog.listCategories({ slug: 'batteries' })).length) {
+  if ((await catalog.listBrands({ slug: 'exide' })).length) {
     logger.info('Demo batteries already seeded, skipping.');
   } else {
     await seedBatteries(catalog, logger);

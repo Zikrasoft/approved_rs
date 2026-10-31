@@ -30,9 +30,12 @@ import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 import {
   labelledVehicleSchema,
+  referenceLabel,
+  type ReferenceRow,
   type TFunction,
   vehicleLabel,
 } from '../../lib/vehicle-label';
+import { ReferencePicker } from '../../components/reference-picker';
 import { type Category, categoriesSchema } from '../../lib/categories';
 
 const OWNERS = [
@@ -42,12 +45,6 @@ const OWNERS = [
 ] as const;
 
 type OwnerKey = (typeof OWNERS)[number]['key'];
-
-const ownerRowSchema = z
-  .object({ id: z.string(), code: z.string().optional() })
-  .loose();
-
-type OwnerRow = z.infer<typeof ownerRowSchema>;
 
 const requirementSchema = editedBySchema.extend({
   id: z.string(),
@@ -65,7 +62,6 @@ const requirementSchema = editedBySchema.extend({
 
 type Requirement = z.infer<typeof requirementSchema>;
 
-const ownersSchema = z.record(z.string(), z.array(ownerRowSchema));
 const requirementsSchema = z.object({
   requirements: z.array(requirementSchema),
 });
@@ -90,9 +86,11 @@ const EMPTY_DRAFT: Draft = {
   quantity: '1',
 };
 
-const ownerLabel = (t: TFunction, row: OwnerRow) => {
+const ownerLabel = (t: TFunction, collection: string, row: ReferenceRow) => {
   const vehicle = labelledVehicleSchema.safeParse(row);
-  return vehicle.success ? vehicleLabel(t, vehicle.data) : (row.code ?? row.id);
+  return collection === 'vehicles' && vehicle.success
+    ? vehicleLabel(t, vehicle.data)
+    : referenceLabel(collection, row);
 };
 
 const numberOrNull = (value: string) =>
@@ -105,20 +103,14 @@ const RequirementsPage = () => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
   const [ownerKey, setOwnerKey] = useState<OwnerKey>('engine_id');
-  const [owners, setOwners] = useState<Record<string, OwnerRow[]>>({});
   const [ownerId, setOwnerId] = useState('');
+  const [ownerName, setOwnerName] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loadedOwner, setLoadedOwner] = useState('');
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
 
   useEffect(() => {
-    Promise.all(
-      OWNERS.map(async ({ path, collection }) => [
-        collection,
-        (await adminFetch(`/admin/${path}`, ownersSchema))?.[collection] ?? [],
-      ]),
-    ).then((loaded) => setOwners(Object.fromEntries(loaded)));
     adminFetch('/admin/categories', categoriesSchema).then(
       (data) => data && setCategories(data.categories),
     );
@@ -253,22 +245,21 @@ const RequirementsPage = () => {
             </Select.Content>
           </Select>
         </div>
-        <div className="flex flex-col gap-y-1">
+        <div className="flex w-full flex-col gap-y-1 sm:w-96">
           <Label size="xsmall">
             {t(`requirements.ownerKinds.${ownerKey}`)}
           </Label>
-          <Select value={ownerId} onValueChange={setOwnerId}>
-            <Select.Trigger>
-              <Select.Value placeholder={t('requirements.ownerPlaceholder')} />
-            </Select.Trigger>
-            <Select.Content>
-              {(owners[owner.collection] ?? []).map((row) => (
-                <Select.Item key={row.id} value={row.id}>
-                  {ownerLabel(t, row)}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
+          <ReferencePicker
+            name={t(`requirements.ownerKinds.${ownerKey}`)}
+            path={owner.path}
+            collection={owner.collection}
+            label={ownerId ? ownerName : ''}
+            optionLabel={(row) => ownerLabel(t, owner.collection, row)}
+            onChange={(id, label) => {
+              setOwnerId(id);
+              setOwnerName(label);
+            }}
+          />
         </div>
       </div>
 

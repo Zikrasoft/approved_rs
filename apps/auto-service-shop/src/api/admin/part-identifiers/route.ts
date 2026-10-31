@@ -16,6 +16,7 @@ import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { AdminListPartIdentifiersType } from '../validators';
+import { literalLike } from '../../../lib/like';
 
 const statusRowSchema = z.object({
   id: z.string(),
@@ -36,8 +37,6 @@ const statusRowSchema = z.object({
   updated_by: z.string().nullable(),
   updated_at: z.coerce.date(),
 });
-
-const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
 
 const statusRows = async (
   db: Knex,

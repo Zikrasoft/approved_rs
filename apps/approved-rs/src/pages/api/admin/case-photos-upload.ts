@@ -37,10 +37,6 @@ function backToForm(
   );
 }
 
-// Dev writes straight to disk (same as Keystatic's own local storage mode);
-// prod commits via GitHub's API instead (src/lib/githubContents.ts) — see
-// admin/case-photos.astro's doc comment for why, and for the auth-cookie
-// gate this shares with the page.
 export async function POST({
   request,
   cookies,
@@ -50,7 +46,7 @@ export async function POST({
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
   }
 
-  const form = await request.formData();
+  const form = await request.formData().catch(() => new FormData());
   const target = galleryTargetSchema.safeParse({
     dir: form.get('dir'),
     slug: form.get('slug'),
@@ -88,8 +84,6 @@ export async function POST({
     try {
       indexContent = await getGithubFile(token, indexRelPath);
     } catch (err) {
-      // Only a real 404 means "no such case" — an auth/network/5xx failure
-      // here must propagate instead of being reported as "not found".
       if (err instanceof GithubApiError && err.status === 404) {
         return new Response('Case not found', { status: 404 });
       }

@@ -82,6 +82,7 @@ const vehiclesSchema = z.object({
       return vehicle.success ? [vehicle.data] : [];
     }),
   ),
+  count: z.number(),
 });
 
 const linkedSchema = z.object({ linked: z.number() });
@@ -117,34 +118,49 @@ const LinkDrawer = ({
 }) => {
   const { t } = useTranslation('carlabAdmin');
   const writing = useWriting();
-  const [vehicles, setVehicles] = useState<LinkableVehicle[] | null>(null);
+  const [found, setFound] = useState<{
+    vehicles: LinkableVehicle[];
+    count: number;
+  } | null>(null);
   const [query, setQuery] = useState('');
-  const [chosen, setChosen] = useState<Set<string>>(new Set());
+  const [chosen, setChosen] = useState<Map<string, string>>(new Map());
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!entry) return;
     setQuery(entry.reference?.chassis ?? '');
-    setChosen(new Set());
-    adminFetch('/admin/vehicles', vehiclesSchema).then((data) => {
-      if (data) setVehicles(data.vehicles);
-    });
+    setChosen(new Map());
+    setFound(null);
   }, [entry]);
 
-  const labelled = (vehicles ?? [])
+  useEffect(() => {
+    if (!entry) return;
+    const timer = setTimeout(() => {
+      const search = new URLSearchParams({
+        q: `${entry.make} ${query}`,
+        limit: String(SHOWN_VEHICLES),
+      });
+      adminFetch(`/admin/vehicles?${search}`, vehiclesSchema).then((data) => {
+        if (data) setFound(data);
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [entry, query]);
+
+  const labelled = (found?.vehicles ?? [])
     .filter(({ model }) => model.chassis.series.make.slug === entry?.make)
     .map((vehicle) => ({ id: vehicle.id, label: vehicleLabel(t, vehicle) }));
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  const matching = labelled.filter(
-    ({ id, label }) =>
-      chosen.has(id) ||
-      words.every((word) => label.toLowerCase().includes(word)),
-  );
+  const matching = [
+    ...[...chosen]
+      .filter(([id]) => !labelled.some((vehicle) => vehicle.id === id))
+      .map(([id, label]) => ({ id, label })),
+    ...labelled,
+  ];
 
-  const toggle = (id: string) =>
+  const toggle = (id: string, label: string) =>
     setChosen((current) => {
-      const next = new Set(current);
-      if (!next.delete(id)) next.add(id);
+      const next = new Map(current);
+      if (!next.delete(id)) next.set(id, label);
       return next;
     });
 
@@ -157,7 +173,7 @@ const LinkDrawer = ({
       linkedSchema,
       {
         method: 'POST',
-        body: JSON.stringify({ vehicle_ids: [...chosen] }),
+        body: JSON.stringify({ vehicle_ids: [...chosen.keys()] }),
       },
     );
     setSaving(false);
@@ -204,13 +220,13 @@ const LinkDrawer = ({
                 onChange={(event) => setQuery(event.target.value)}
               />
             </Label>
-            {vehicles === null ? (
+            {found === null ? (
               <ListLoading />
             ) : matching.length === 0 ? (
               <Text size="small">{t('vinLookups.link.noVehicles')}</Text>
             ) : (
               <ul className="flex flex-col gap-y-1">
-                {matching.slice(0, SHOWN_VEHICLES).map(({ id, label }) => (
+                {matching.map(({ id, label }) => (
                   <li key={id}>
                     <Label
                       size="small"
@@ -222,7 +238,7 @@ const LinkDrawer = ({
                         disabled={
                           !chosen.has(id) && chosen.size >= MAX_LINKED_VEHICLES
                         }
-                        onCheckedChange={() => toggle(id)}
+                        onCheckedChange={() => toggle(id, label)}
                       />
                       <span>{label}</span>
                     </Label>
@@ -230,10 +246,10 @@ const LinkDrawer = ({
                 ))}
               </ul>
             )}
-            {matching.length > SHOWN_VEHICLES && (
+            {found && found.count > found.vehicles.length && (
               <Text size="small" className="text-ui-fg-subtle">
                 {t('vinLookups.link.more', {
-                  count: matching.length - SHOWN_VEHICLES,
+                  count: found.count - found.vehicles.length,
                 })}
               </Text>
             )}

@@ -57,20 +57,22 @@ export const vehicleLabel = (t: TFunction, vehicle: LabelledVehicle) => {
 
 export type ReferenceRow = { id: string } & Record<string, unknown>;
 
-const PARENTS: Record<string, [key: string, collection: string]> = {
-  series: ['make_id', 'makes'],
-  chassis: ['series_id', 'series'],
-  vehicle_models: ['chassis_id', 'chassis'],
+const referenceRowSchema = z.object({ id: z.string() }).loose();
+
+const PARENTS: Record<string, [relation: string, collection: string]> = {
+  series: ['make', 'makes'],
+  chassis: ['series', 'series'],
+  vehicle_models: ['chassis', 'chassis'],
 };
 
 export const referenceLabel = (
-  rows: Record<string, ReferenceRow[] | undefined>,
   collection: string,
   row: ReferenceRow,
 ): string => {
   const own = String(row.name ?? row.code ?? row.value ?? row.id);
-  const [key, parents] = PARENTS[collection] ?? [];
-  const parent =
-    key && parents && rows[parents]?.find(({ id }) => id === row[key]);
-  return parent ? `${referenceLabel(rows, parents, parent)} ${own}` : own;
+  const [relation, parents] = PARENTS[collection] ?? [];
+  const parent = relation && referenceRowSchema.safeParse(row[relation]);
+  return parent && parent.success && parents
+    ? `${referenceLabel(parents, parent.data)} ${own}`
+    : own;
 };

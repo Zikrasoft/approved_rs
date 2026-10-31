@@ -86,6 +86,24 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('points the case draft at the storefront the Lead route names, else at carlab.rs', async () => {
+        const storefront = async () =>
+          (
+            await api.get(
+              `/admin/carlab-orders/${placed.failing.id}`,
+              adminHeaders,
+            )
+          ).data.storefront_url;
+
+        expect(await storefront()).toBe('https://carlab.rs');
+        process.env.LEAD_ROUTE_URL = 'http://127.0.0.1:4331/api/leads';
+        try {
+          expect(await storefront()).toBe('http://127.0.0.1:4331');
+        } finally {
+          delete process.env.LEAD_ROUTE_URL;
+        }
+      });
+
       it('lists only the shop orders whose Lead has not reached the CRM', async () => {
         const { data } = await api.get('/admin/carlab-orders', adminHeaders);
 

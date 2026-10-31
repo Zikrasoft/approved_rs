@@ -9,7 +9,6 @@ import {
   StatusBadge,
   Text,
 } from '@medusajs/ui';
-import { CARLAB } from '@podbor/brands';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -45,6 +44,7 @@ const orderSchema = z.object({
     total: z.number(),
     lead: leadSchema,
   }),
+  storefront_url: z.string(),
 });
 
 type CarlabOrder = z.infer<typeof orderSchema>['order'];
@@ -90,11 +90,14 @@ const Readiness = ({ line }: { line: Line }) => {
 const CarlabOrderWidget = ({ data }: DetailWidgetProps<AdminOrder>) => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const [order, setOrder] = useState<CarlabOrder | null>(null);
+  const [storefront, setStorefront] = useState('');
 
   useEffect(() => {
-    adminFetch(`/admin/carlab-orders/${data.id}`, orderSchema).then(
-      (found) => found && setOrder(found.order),
-    );
+    adminFetch(`/admin/carlab-orders/${data.id}`, orderSchema).then((found) => {
+      if (!found) return;
+      setOrder(found.order);
+      setStorefront(found.storefront_url);
+    });
   }, [data.id]);
 
   if (!order || (!order.customer && !order.cash_at_pickup)) {
@@ -116,7 +119,7 @@ const CarlabOrderWidget = ({ data }: DetailWidgetProps<AdminOrder>) => {
         <div className="px-6 py-4">
           <Button size="small" variant="secondary" asChild>
             <a
-              href={`${CARLAB.url}/admin/work-draft?${new URLSearchParams({ order: data.id })}`}
+              href={`${storefront}/admin/work-draft?${new URLSearchParams({ order: data.id })}`}
               target="_blank"
               rel="noreferrer"
             >
