@@ -202,4 +202,18 @@ describe('POST /api/admin/work-draft', () => {
     expect(response.status).toBe(400);
     expect(calls).toEqual([]);
   });
+
+  it('refuses a body that is not a form with 400', async () => {
+    const response = await POST({
+      request: new Request('http://localhost/api/admin/work-draft', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ order: 'order_01' }),
+      }),
+      cookies: { get: () => ({ value: 'staff-token' }) },
+    } as unknown as APIContext);
+
+    expect(response.status).toBe(400);
+    expect(calls).toEqual([]);
+  });
 });

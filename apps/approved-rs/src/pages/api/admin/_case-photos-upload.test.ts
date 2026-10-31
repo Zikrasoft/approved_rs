@@ -176,4 +176,17 @@ describe('POST /api/admin/case-photos-upload', () => {
     const res = await POST(ctx);
     expect(res.status).toBe(413);
   });
+
+  it('rejects a body that is not a form with 400', async () => {
+    import.meta.env.PROD = false;
+    const res = await POST({
+      request: new Request('http://localhost/api/admin/case-photos-upload', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+      }),
+      cookies: { get: () => undefined },
+    } as unknown as APIContext);
+    expect(res.status).toBe(400);
+  });
 });
