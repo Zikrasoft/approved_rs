@@ -25,8 +25,8 @@ export interface ShopOrdersRouteOptions {
   defaultLocale: string;
 }
 
-const orderLeadSubmission = (
-  orderId: string,
+export const orderLeadSubmission = (
+  orderId: string | null,
   contact: OrderContact,
   summary: string,
   locale: string,

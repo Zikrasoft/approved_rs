@@ -9,6 +9,7 @@ import type {
   OfferCartLine as CartLine,
 } from '@podbor/catalog-contract/cart-wire';
 import {
+  CART_LINES_FIELD,
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
@@ -37,7 +38,7 @@ import {
 } from './checkoutMemory';
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
 import { shopPreview } from './shopPreview';
-import { addonLabel, addToPartsList } from './partsList';
+import { addonLabel, addToPartsList, partLine } from './partsList';
 
 const STEP_SETTLE_MS = 400;
 
@@ -113,6 +114,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             event.formData.set(
               CART_FINGERPRINT_FIELD,
               cartFingerprint(this.cart.items),
+            );
+            event.formData.set(
+              CART_LINES_FIELD,
+              this.cart.items.map(listedLine).map(partLine).join('\n'),
             );
           });
         }

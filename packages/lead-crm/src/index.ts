@@ -98,7 +98,10 @@ export {
 } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
-export { createShopOrdersRoute } from './routes/shopOrders.ts';
+export {
+  createShopOrdersRoute,
+  orderLeadSubmission,
+} from './routes/shopOrders.ts';
 
 export { requireEnv } from './requireEnv.ts';
 

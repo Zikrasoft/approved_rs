@@ -48,4 +48,10 @@ describe('PARTS_ORDER_COPY', () => {
       /^Заказ #12 отменен в магазине.*Причина: timeout$/,
     );
   });
+
+  it('says why a checkout did not become an order', () => {
+    expect(
+      PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason.unreachable),
+    ).toBe('Заказ не оформлен: магазин не ответил. Свяжитесь с клиентом');
+  });
 });

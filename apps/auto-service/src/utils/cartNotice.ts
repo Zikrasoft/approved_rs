@@ -1,6 +1,7 @@
 import type { CheckoutRefusal } from '@podbor/catalog-contract';
 
 export const CART_NOTICE_PARAM = 'notice';
+export const CART_LINES_FIELD = 'cart_lines';
 export const ORDER_NUMBER_PARAM = 'order';
 export const ORDERED_CART_PARAM = 'cart';
 

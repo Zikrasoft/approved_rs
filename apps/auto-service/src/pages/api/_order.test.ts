@@ -1,5 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { APIContext } from 'astro';
+import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
+
+const notifyLead = vi.hoisted(() =>
+  vi.fn(async () => ({ stored: true, delivered: true })),
+);
+const pending = vi.hoisted(() => [] as Promise<unknown>[]);
+
+vi.mock('@/lib/crm', () => ({ notifyLead }));
+vi.mock('@vercel/functions', () => ({
+  waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+}));
+
 import { POST } from './order';
 
 const backend = vi.fn();
@@ -14,6 +26,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   backend.mockReset();
+  notifyLead.mockClear();
+  pending.length = 0;
 });
 
 const answer = (status: number, body: unknown) =>
@@ -126,5 +140,66 @@ describe('POST /api/order', () => {
     expect(location(response)).toContain('notice=ordered');
     const [, init] = backend.mock.calls[0] as [string, RequestInit];
     expect(init.headers).toMatchObject({ 'x-shop-preview': '1' });
+  });
+
+  describe('a checkout that does not become an order', () => {
+    const VISITOR = '0f8fad5b-d9cb-469f-a165-70867728950e';
+    const failedCheckout = () =>
+      checkout({
+        name: 'Ana',
+        comment: 'Posle 17h',
+        cart_lines: 'VARTA 580901080, Akumulator × 2',
+        visitor_id: VISITOR,
+      });
+    const keptLead = () => notifyLead.mock.calls[0]?.[0];
+
+    it('keeps the contact and the cart as a Lead when the shop is down', async () => {
+      backend.mockRejectedValue(new TypeError('fetch failed'));
+
+      const response = await failedCheckout();
+
+      expect(location(response)).toBe('/ru/parts/cart/?notice=unreachable');
+      expect(pending).toHaveLength(1);
+      expect(keptLead()).toMatchObject({
+        name: 'Ana',
+        contact: '+381601234567',
+        contactChannel: 'whatsapp',
+        service: 'parts-order',
+        services: ['parts-order'],
+        visitorId: VISITOR,
+        orderId: null,
+        locale: 'ru',
+        comment: [
+          PARTS_ORDER_COPY.notPlaced('магазин не ответил'),
+          'VARTA 580901080, Akumulator × 2',
+          'Posle 17h',
+        ].join('\n'),
+      });
+    });
+
+    it.each([
+      [400, { code: 'OFFER_PRICE_CHANGED' }, 'цена изменилась'],
+      [400, { code: 'OFFER_OUT_OF_STOCK' }, 'позиции нет в нужном количестве'],
+      [404, { type: 'not_found' }, 'корзина устарела'],
+    ])(
+      'keeps the contact when the shop answers %i %o',
+      async (status, body, reason) => {
+        answer(status, body);
+
+        await failedCheckout();
+
+        expect(keptLead()?.comment).toContain(
+          PARTS_ORDER_COPY.notPlaced(reason),
+        );
+      },
+    );
+
+    it('keeps no Lead for an order placed', async () => {
+      answer(200, { order: { id: 'order_1', display_id: 42 } });
+
+      await failedCheckout();
+
+      expect(notifyLead).not.toHaveBeenCalled();
+    });
   });
 });

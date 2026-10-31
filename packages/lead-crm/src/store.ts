@@ -275,8 +275,14 @@ export function createLeadStore({
   standaloneServices = [],
 }: LeadStoreOptions) {
   function standaloneApart(a: LeadInput, b: StoredLead): boolean {
+    const retried =
+      a.service === b.service &&
+      a.contact === b.contact &&
+      !a.orderId &&
+      !b.orderId;
     return (
       [a.service, b.service].some((s) => standaloneServices.includes(s)) &&
+      !retried &&
       !isPlaceholderContact(a.contact) &&
       !isPlaceholderContact(b.contact)
     );
