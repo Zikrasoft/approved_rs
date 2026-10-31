@@ -29,20 +29,20 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       data-field="consent"
     />
     <span
-      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal-ink peer-checked:bg-signal-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-ink transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
     >
       <Icon name="check" size={10} />
     </span>
     <span class="text-xs leading-relaxed text-muted">
-      {site.form.privacyNote}{' '}
-      <a
-        href={PathBuilder.privacy(locale)}
-        target="_blank"
-        class="underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
-        >{site.form.privacyLinkText}</a
-      >.
+      {`${site.form.privacyNote} ${site.form.privacyLinkText}.`}
     </span>
   </label>
+  <a
+    href={PathBuilder.privacy(locale)}
+    target="_blank"
+    class="-mt-1 ml-8 inline-block py-1 text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
+    >{site.footer.privacyLabel}</a
+  >
   <p
     id={`consent-error-${uid}`}
     class={errorText}

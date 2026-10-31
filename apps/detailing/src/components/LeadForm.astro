@@ -135,6 +135,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             placeholder={site.form.telegramPlaceholder}
             aria-describedby={errorId.telegram}
             class={field}
+            name="telegram"
             data-telegram
             data-field="telegram"
           />
@@ -144,6 +145,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
           class={errorText}
           aria-live="polite"
           data-error-telegram
+          data-bad-handle={site.form.errorTelegramHandle}
           hidden
         >
           {site.form.errorTelegram}
@@ -156,6 +158,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             <select
               aria-label={site.form.countryLabel}
               class={`${field} max-w-full appearance-none overflow-hidden text-ellipsis px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
+              name="phone_country"
               data-country
               data-display-locale={displayLocale}
             >
@@ -246,15 +249,15 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             <Icon name="check" size={10} />
           </span>
           <span class="text-xs leading-relaxed text-mute">
-            {site.form.privacyNote}{' '}
-            <a
-              href={PathBuilder.privacy(locale)}
-              target="_blank"
-              class="text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
-              >{site.form.privacyLinkText}</a
-            >
+            {`${site.form.privacyNote} ${site.form.privacyLinkText}`}
           </span>
         </label>
+        <a
+          href={PathBuilder.privacy(locale)}
+          target="_blank"
+          class="-mt-1 ml-8 inline-block py-1 text-xs text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
+          >{site.footer.privacyLabel}</a
+        >
         <p
           id={errorId.consent}
           class={errorText}

@@ -938,13 +938,8 @@ h4 {
   }
   @media (prefers-reduced-motion: reduce) {
     dialog,
-    dialog[open] {
-      translate: 0 0;
-    }
-    @starting-style {
-      dialog[open] {
-        translate: 0 0;
-      }
+    dialog::backdrop {
+      transition: none;
     }
   }
 

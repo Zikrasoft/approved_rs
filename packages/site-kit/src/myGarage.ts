@@ -10,6 +10,11 @@ export const storedVin = (storage?: VinStorage): string =>
 
 export function rememberVin(vin: string, storage?: VinStorage): void {
   writeStored(MY_GARAGE_STORAGE_KEY, vin, storage);
+  for (const input of document.querySelectorAll<HTMLInputElement>(
+    `[${MY_GARAGE_VIN_ATTRIBUTE}]`,
+  )) {
+    if (!input.value) input.value = vin;
+  }
 }
 
 export function defineMyGarage(tagName = 'my-garage'): void {

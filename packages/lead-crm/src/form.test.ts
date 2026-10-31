@@ -527,3 +527,89 @@ describe('leadSubmissionSchema', () => {
     expect(parsed.data?.services).toEqual([]);
   });
 });
+
+describe('leadSubmissionSchema text hygiene', () => {
+  const parsed = (fields: Record<string, string>) => {
+    const result = submit(fields);
+    if (!result.success) throw result.error;
+    return result.data;
+  };
+
+  it('keeps the name on one line, without bidi or other control characters', () => {
+    expect(
+      parsed({
+        name: '<b>Ivan</b>\nЗаказ #999\tоплачен \u202eevil\u0000',
+        contact: '+381601234567',
+      }).name,
+    ).toBe('<b>Ivan</b> Заказ #999 оплачен evil');
+  });
+
+  it('keeps the joiners an emoji or a script needs', () => {
+    expect(
+      parsed({ name: 'Ана 👨\u200d👩\u200d👧', contact: '+381601234567' }).name,
+    ).toBe('Ана 👨\u200d👩\u200d👧');
+  });
+
+  it('stores a valid phone in E.164 whatever digits and spaces it was typed with', () => {
+    expect(parsed({ contact: '+381 60 123 4567\u202e' }).contact).toBe(
+      '+381601234567',
+    );
+    expect(parsed({ contact: '+٣٨١٦٠١٢٣٤٥٦٧' }).contact).toBe('+381601234567');
+  });
+
+  it('keeps a Telegram handle as typed', () => {
+    expect(
+      parsed({ contact: '@ivan_p', contact_channel: 'telegram' }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('keeps the comment lines but drops bidi controls', () => {
+    expect(
+      parsed({ contact: '+381601234567', comment: 'a\u202e\nb\u0007' }).comment,
+    ).toBe('a\nb');
+  });
+
+  it('composes the contact from the phone a form without JavaScript posts', () => {
+    expect(
+      parsed({ phone_number: '060 123 4567', phone_country: 'RS' }).contact,
+    ).toBe('+381601234567');
+  });
+
+  it('reads a number typed internationally without a known country', () => {
+    expect(
+      parsed({ phone_number: '+381 60 123 4567', phone_country: 'XX' }).contact,
+    ).toBe('+381601234567');
+  });
+
+  it('composes the contact from the Telegram field on the Telegram channel', () => {
+    expect(
+      parsed({
+        contact_channel: 'telegram',
+        telegram: 't.me/ivan_p',
+        phone_number: '060 123 4567',
+        phone_country: 'RS',
+      }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('falls back to the Telegram field when no phone was typed', () => {
+    expect(
+      parsed({ contact_channel: 'telegram', telegram: '@ivan_p' }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('prefers the contact a script already composed', () => {
+    expect(
+      parsed({ contact: '+381611111111', phone_number: '060 123 4567' })
+        .contact,
+    ).toBe('+381611111111');
+  });
+
+  it('still asks for a contact when nothing was typed', () => {
+    expect(submit({ phone_number: '', telegram: '' }).success).toBe(false);
+  });
+
+  it('refuses a body that is not a form', () => {
+    expect(leadSubmissionSchema.safeParse('contact=1').success).toBe(false);
+  });
+});

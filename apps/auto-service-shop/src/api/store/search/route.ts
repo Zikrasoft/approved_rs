@@ -6,6 +6,7 @@ import {
 } from '@medusajs/framework/utils';
 import type { SearchFilters } from '@medusajs/framework/types';
 import {
+  attributeValuesSchema,
   BRAND_FACET,
   brandNumberSchema,
   CATALOG_LOCALES,
@@ -62,6 +63,7 @@ const hitSchema = brandNumberSchema.extend({
   images: imagesSchema,
   part: named.extend({
     id: z.string(),
+    attributes: attributeValuesSchema.nullable().catch(null),
     category: named
       .extend({ slug: z.string(), image: imageSchema.nullable() })
       .nullable(),
@@ -238,7 +240,7 @@ export async function GET(
     category,
     vehicle_id,
     model,
-    facets,
+    facets: requestedFacets,
     range: requestedRanges,
     offset,
     limit,
@@ -310,6 +312,23 @@ export async function GET(
   const filters: SearchFilters = searchableQuery(partQuery)
     ? { q: partQuery.toLowerCase() }
     : {};
+  const fieldKeys = [...facetGroups(requestedFacets).keys()].filter(
+    (key) => !isUniversal(key),
+  );
+  const knownKeys = new Set(
+    fieldKeys.length
+      ? (
+          await catalog.listCategoryFields(
+            { facet: true, key: fieldKeys },
+            { select: ['key'], take: null },
+          )
+        ).map(({ key }) => key)
+      : [],
+  );
+  const facets = requestedFacets.filter((facet) => {
+    const { key } = splitFacet(facet);
+    return isUniversal(key) || knownKeys.has(key);
+  });
   const groups = facetGroups(facets);
   const scope: SearchFilters[] = [{ published: true }];
   const nothing = () =>
@@ -430,6 +449,7 @@ export async function GET(
       'part.id',
       'part.name',
       'part.translations',
+      'part.attributes',
       'part.category.slug',
       'part.category.name',
       'part.category.translations',
@@ -469,6 +489,7 @@ export async function GET(
       part: {
         id: hit.part.id,
         name: translated(hit.part, 'name', locale),
+        attributes: hit.part.attributes,
         category: hit.part.category && {
           slug: hit.part.category.slug,
           name: translated(hit.part.category, 'name', locale),

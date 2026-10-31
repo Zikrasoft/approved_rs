@@ -47,6 +47,15 @@ describe('formatLeadTime', () => {
     expect(formatLeadTime(21, copy, 'ru-RU')).toBe('21 день');
   });
 
+  it('says tomorrow for a one-day lead time where the copy has the word', () => {
+    expect(formatLeadTime(1, { ...copy, tomorrow: 'завтра' }, 'ru-RU')).toBe(
+      'завтра',
+    );
+    expect(formatLeadTime(21, { ...copy, tomorrow: 'завтра' }, 'ru-RU')).toBe(
+      '21 день',
+    );
+  });
+
   it('falls back to the other form when a language has no such form', () => {
     expect(
       formatLeadTime(
@@ -61,11 +70,16 @@ describe('formatLeadTime', () => {
 describe('availabilityText', () => {
   const copy = {
     stock: 'В наличии',
-    leadTime: 'Можно забрать через',
-    inStockPickup: 'В наличии, забрать через {days}',
+    leadTime: 'Забрать',
+    inStockPickup: 'В наличии, забрать {days}',
     days: {
       inStock: 'В наличии',
-      days: { one: '{days} день', few: '{days} дня', other: '{days} дней' },
+      tomorrow: 'завтра',
+      days: {
+        one: 'через {days} день',
+        few: 'через {days} дня',
+        other: 'через {days} дней',
+      },
     },
   };
 
@@ -79,12 +93,15 @@ describe('availabilityText', () => {
     expect(
       availabilityText({ in_stock: true, lead_time_days: 2 }, copy, 'ru-RU'),
     ).toBe('В наличии, забрать через 2 дня');
+    expect(
+      availabilityText({ in_stock: true, lead_time_days: 1 }, copy, 'ru-RU'),
+    ).toBe('В наличии, забрать завтра');
   });
 
   it('says when a part without stock can be picked up', () => {
     expect(
       availabilityText({ in_stock: false, lead_time_days: 4 }, copy, 'ru-RU'),
-    ).toBe('Можно забрать через 4 дня');
+    ).toBe('Забрать через 4 дня');
   });
 
   it('says nothing for a part with neither stock nor a pickup time', () => {

@@ -195,6 +195,16 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('ignores a facet no Category field offers instead of finding nothing', async () => {
+        const plain = await search({});
+        const bogus = await search({ facets: ['bogus:x', 'brand:mahle'] });
+
+        expect(partIds(bogus)).toEqual([part.mahle]);
+        expect((await search({ facets: 'bogus:x' })).data.count).toBe(
+          plain.data.count,
+        );
+      });
+
       it('keeps only Parts with an in-stock offer', async () => {
         const response = await search({ facets: 'in-stock:true' });
 

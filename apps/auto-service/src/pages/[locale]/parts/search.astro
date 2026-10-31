@@ -23,18 +23,19 @@ import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
   chosenFilters,
-  PARTS_QUERY_MAX_LENGTH,
+  partsQuery,
   rangesFromParams,
   withFacetCopy,
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
-import { carName } from '@/utils/carName';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import {
   carLink,
   exactPart,
   listingCrumbs,
   missingNumber,
+  nearVin,
   searchIntent,
   vinDestination,
 } from '@/utils/catalogueSearch';
@@ -45,7 +46,7 @@ const copy = content(locale).partsSearch;
 const partsInquiry = content(locale).pages.partsInquiry;
 
 const params = Astro.url.searchParams;
-const q = (params.get('q') ?? '').trim().slice(0, PARTS_QUERY_MAX_LENGTH);
+const q = partsQuery(params.get('q') ?? '');
 const categoryParam = params.get('category') ?? '';
 const category = CATALOG_KEY_PATTERN.test(categoryParam)
   ? categoryParam
@@ -64,6 +65,7 @@ const catalogue = catalogueFromEnv(siteEnv(), {
 });
 const intent = searchIntent(q);
 const vin = intent.kind === 'vin' ? intent.vin : null;
+const vinHint = !vin && nearVin(q);
 const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
 const destination =
   vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
@@ -72,6 +74,16 @@ if (destination) {
 }
 const vinMake =
   vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
+const vinCar =
+  vinOutcome?.kind === 'vehicle'
+    ? [
+        carName(vinOutcome.vehicle.model, locale),
+        vehicleVariant(vinOutcome.vehicle, locale),
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : null;
+const vinTopic = vinCar ?? vinMake?.label;
 const searchable = !vin && (searchableQuery(q) || Boolean(category));
 const found =
   searchable && catalogue
@@ -124,7 +136,9 @@ if (exact) {
   return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
 }
 const numberMissing =
-  found && !category && !offset ? missingNumber(q, found.results) : false;
+  found && !category && !offset && found.cars.length === 0
+    ? missingNumber(q, found.results)
+    : false;
 const looseNumbers = numberMissing && Boolean(found?.results.length);
 const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const scope =
@@ -156,7 +170,11 @@ const emptyMessage = q
   : chips.length > 0
     ? copy.noFilteredResults
     : partsInquiry.category.noParts;
-const inquiryTopic = [modelName, narrowedTo?.name, q]
+const inquiryTopic = [
+  modelName,
+  narrowedTo?.name,
+  numberMissing ? copy.numberComment.replace('{q}', q) : q,
+]
   .filter(Boolean)
   .join(', ');
 const scopeHidden = {
@@ -216,7 +234,9 @@ const scopeHidden = {
           role="status"
           class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
         >
-          {content(locale).partsCar.vin.unresolved}
+          {vinCar
+            ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
+            : content(locale).partsCar.vin.unresolved}
           {vinMake && (
             <>
               {' '}
@@ -231,6 +251,17 @@ const scopeHidden = {
               </a>
             </>
           )}
+        </p>
+      )
+    }
+
+    {
+      vinHint && (
+        <p
+          role="status"
+          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
+        >
+          {content(locale).partsCar.vin.invalid}
         </p>
       )
     }
@@ -351,7 +382,7 @@ const scopeHidden = {
                   {copy.numberNotFound.replace('{q}', q)}{' '}
                   <a
                     href="#lead"
-                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                    class="font-semibold text-signal-dark underline underline-offset-2 hover:text-ink"
                   >
                     {copy.notFoundLink}
                   </a>
@@ -382,6 +413,7 @@ const scopeHidden = {
                     brand={result.brand.name}
                     value={result.value}
                     name={result.part.name}
+                    specs={result.specs}
                     detail={category ? undefined : result.part.category?.name}
                     superseded={result.superseded}
                     current={currentNumber(result, found.results)}
@@ -458,7 +490,13 @@ const scopeHidden = {
               value: vin ?? undefined,
             }}
             comment={
-              vin ? (vinMake ? `${vinMake.label}: ` : '') : `${inquiryTopic}: `
+              vin
+                ? vinTopic
+                  ? `${vinTopic}: `
+                  : ''
+                : numberMissing
+                  ? inquiryTopic
+                  : `${inquiryTopic}: `
             }
             commentLabel={partsInquiry.commentLabel}
             commentPlaceholder={partsInquiry.commentPlaceholder}

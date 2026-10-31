@@ -16,6 +16,7 @@ consentLinkText: политикой конфиденциальности
 consentError: Необходимо ваше согласие
 submitLabel: Рассчитать стоимость
 errorTelegramFormat: 'Формат: @username или номер телефона'
+errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
 errorPhoneInvalid: Проверьте номер телефона
 errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 translations:

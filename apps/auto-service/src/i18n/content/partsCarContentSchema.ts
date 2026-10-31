@@ -30,6 +30,7 @@ export const partsCarContentSchema = z
         submitLabel: z.string(),
         invalid: z.string(),
         unresolved: z.string(),
+        recognised: z.string(),
         chooseMake: z.string(),
       })
       .strict(),
@@ -74,6 +75,7 @@ export const partsCarContentSchema = z
     fitment: z
       .object({
         quantity: z.string(),
+        quantityOne: z.string(),
         axle: labels(FITMENT_AXLES),
         side: labels(FITMENT_SIDES),
         gearbox: labels(GEARBOX_TYPES),
@@ -116,6 +118,8 @@ export const partsCarContentSchema = z
             noCategories: z.string(),
             carsHeading: z.string(),
             carsLead: z.string(),
+            singleCarLabel: z.string(),
+            singleCarLead: z.string(),
           })
           .strict(),
         modelCategory: z

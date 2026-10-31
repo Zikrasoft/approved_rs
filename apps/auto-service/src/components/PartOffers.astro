@@ -7,6 +7,7 @@ import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { addonDataset } from '@/utils/categoryAddon';
 import { PathBuilder } from '@/utils/paths';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 
@@ -43,6 +44,7 @@ const priced = page.offers.length > 0 && !closed;
       data-lead-label={copy.columns.leadTime}
       data-stock-pickup={copy.columns.inStockPickup}
       data-in-stock={copy.leadTime.inStock}
+      data-tomorrow={copy.leadTime.tomorrow}
       data-days={JSON.stringify(copy.leadTime.days)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
@@ -59,7 +61,7 @@ const priced = page.offers.length > 0 && !closed;
       <template data-offer>
         <OfferRow />
       </template>
-      <div aria-live="polite">
+      <div aria-live="polite" {...contactCta}>
         <div data-status="added" hidden class={status}>
           <p>{copy.addedNotice}</p>
           <a
@@ -103,7 +105,7 @@ const priced = page.offers.length > 0 && !closed;
         <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
       )}
       <p class="text-sm leading-relaxed text-ink-2">{copy.orderBody}</p>
-      <parts-list-add class="mt-1 block" {...part}>
+      <parts-list-add class="mt-1 block" {...part} {...contactCta}>
         <a
           href={PathBuilder.partsInquiry(locale)}
           {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}

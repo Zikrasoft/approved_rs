@@ -4,7 +4,8 @@ import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import LeadForm from '@/components/LeadForm.astro';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { formatMoney } from '@/utils/money';
 import { content } from '@/i18n/content';
 import FitLine from '@/components/FitLine.astro';
 import AddonNote from '@/components/AddonNote.astro';
@@ -42,8 +43,13 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const partsInquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.car;
+const shopPart = content(locale).shopPart;
+const { fitment } = content(locale).partsCar;
 const quantity = (count: number) =>
-  content(locale).partsCar.fitment.quantity.replace('{count}', String(count));
+  (new Intl.PluralRules(BCP47_BY_LOCALE[locale]).select(count) === 'one'
+    ? fitment.quantityOne
+    : fitment.quantity
+  ).replace('{count}', count.toLocaleString(BCP47_BY_LOCALE[locale]));
 const variant = vehicleVariant(vehicle, locale);
 const name = `${carName(vehicle.model, locale)}, ${variant}`;
 const { engine, model } = vehicle;
@@ -62,6 +68,13 @@ const blocks = [...byCategory.values()].map((groups) => ({
 
 const kit = car.kit.map((item) => ({ ...item, ...kitPick(item.pages) }));
 const kitBuyable = kit.length > 0 && kit.every(({ offer }) => offer);
+const kitTotal =
+  kitBuyable &&
+  formatMoney(
+    kit.reduce((sum, { offer, quantity }) => sum + offer!.price * quantity, 0),
+    kit[0].offer!.currency,
+    BCP47_BY_LOCALE[locale],
+  );
 
 const empty =
   kit.length === 0 && blocks.length === 0 && car.matches.length === 0;
@@ -115,8 +128,10 @@ const specsSummary = [
 >
   <PageHero
     actions={false}
+    compact
     eyebrow={copy.eyebrow}
-    heading={name}
+    heading={carName(model, locale)}
+    lead={variant}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
@@ -130,7 +145,7 @@ const specsSummary = [
 
   <car-facts
     class:list={[
-      'wrap grid gap-6 py-band md:py-band-lg',
+      'wrap grid gap-6 pt-6 pb-band md:pt-band md:pb-band-lg',
       empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
     ]}
   >
@@ -177,15 +192,34 @@ const specsSummary = [
             </ul>
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <kit-cart
-                class="contents"
+                class="contents noscript:hidden!"
                 {...(kitBuyable ? {} : { hidden: '' })}
                 data-cart-href={PathBuilder.partsCart(locale)}
+                data-locale-tag={BCP47_BY_LOCALE[locale]}
               >
                 <button type="button" class="btn btn-primary w-full sm:w-auto">
-                  {copy.kitCart}
-                  <Icon name="arrowRight" />
+                  <span>
+                    {copy.kitCart}
+                    <span class="spec whitespace-nowrap" data-kit-total>
+                      {kitTotal && ` · ${kitTotal}`}
+                    </span>
+                  </span>
                 </button>
               </kit-cart>
+              <div
+                data-kit-added
+                hidden
+                class="flex w-full flex-col gap-3 text-sm leading-relaxed text-ink-2"
+              >
+                <p>{shopPart.addedNotice}</p>
+                <a
+                  href={PathBuilder.partsCart(locale)}
+                  class="btn btn-primary w-full sm:w-auto sm:self-start"
+                >
+                  {shopPart.addedCta}
+                  <Icon name="arrowRight" />
+                </a>
+              </div>
               <a
                 href={PathBuilder.partsInquiry(locale)}
                 class:list={[

@@ -8,9 +8,12 @@ import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { PHONE_NUMBER } from '@/utils/constants';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { localePaths, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = localePaths;
@@ -55,22 +58,7 @@ const stepper =
     ]}
   />
 
-  <section class="wrap py-6 md:py-band-lg">
-    <cart-badge
-      data-parts-list
-      data-reveal-when-filled
-      hidden
-      class={`${notice} max-w-2xl flex-col sm:flex-row sm:items-center sm:justify-between`}
-    >
-      <p>{copy.partsListNote}</p>
-      <a
-        href={PathBuilder.partsInquiry(locale)}
-        {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-        class="btn btn-secondary w-full shrink-0 sm:w-auto"
-      >
-        {copy.notices.movedCta}
-      </a>
-    </cart-badge>
+  <section class="group/cart wrap py-6 md:py-band-lg">
     <offer-cart
       class="block min-h-svh"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
@@ -112,20 +100,37 @@ const stepper =
           <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
           <a
             href={PathBuilder.partsInquiry(locale)}
+            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
             class="btn btn-primary w-full sm:w-auto sm:self-start"
           >
             {copy.notices.movedCta}
             <Icon name="arrowRight" />
           </a>
         </div>
-        <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
-        <a
-          href={PathBuilder.parts(locale)}
-          class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+        <div
+          class="flex flex-col gap-3 group-has-[cart-badge:not([hidden])]/cart:hidden"
         >
-          {copy.emptyCta}
-          <Icon name="arrowRight" />
-        </a>
+          <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
+          <a
+            href={PathBuilder.parts(locale)}
+            class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+          >
+            {copy.emptyCta}
+            <Icon name="arrowRight" />
+          </a>
+          <p
+            class="mt-2 border-t border-line pt-4 text-sm leading-relaxed text-ink-2"
+          >
+            {copy.emptyInquiry}
+          </p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+            class="btn btn-secondary w-full sm:w-auto sm:self-start"
+          >
+            {copy.emptyInquiryCta}
+          </a>
+        </div>
       </div>
 
       <div data-state="ordered" hidden class={`${panel} gap-5`}>
@@ -206,11 +211,14 @@ const stepper =
         </div>
         <div class="flex flex-col gap-3">
           <span class="text-xs text-muted">{site.footer.contactHeading}</span>
-          <ContactChannels />
+          <ContactChannels service={VIN_INQUIRY_SERVICE} class="print:hidden" />
+          <p class="spec hidden text-base font-semibold text-ink print:block">
+            {formatPhone(PHONE_NUMBER)}
+          </p>
         </div>
         <a
           href={PathBuilder.parts(locale)}
-          class="btn btn-secondary w-full sm:w-auto sm:self-start"
+          class="btn btn-secondary w-full sm:w-auto sm:self-start print:hidden"
         >
           {copy.orderedCta}
           <Icon name="arrowRight" />
@@ -259,6 +267,7 @@ const stepper =
                 {copy.notices.moved}{' '}
                 <a
                   href={PathBuilder.partsInquiry(locale)}
+                  {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
                   class="font-semibold text-signal-ink underline underline-offset-2"
                 >
                   {copy.notices.movedCta}
@@ -369,7 +378,23 @@ const stepper =
         </div>
       </div>
     </offer-cart>
+    <cart-badge
+      data-parts-list
+      data-reveal-when-filled
+      hidden
+      class={`${notice} mt-6 mb-0 max-w-2xl flex-col sm:flex-row sm:items-center sm:justify-between`}
+    >
+      <p>{copy.partsListNote}</p>
+      <a
+        href={PathBuilder.partsInquiry(locale)}
+        {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+        class="btn btn-primary w-full shrink-0 sm:w-auto"
+      >
+        {copy.notices.movedCta}
+      </a>
+    </cart-badge>
   </section>
+  <PartsInquiryModal />
 </Shell>
 
 <script>

@@ -5,13 +5,13 @@ import { CATALOG_KEY_PATTERN, searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
-import { PARTS_QUERY_MAX_LENGTH, rangesFromParams } from '@/utils/partsSearch';
+import { partsQuery, rangesFromParams } from '@/utils/partsSearch';
 import { previewRequested } from '@/utils/shopPreview';
 
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN).optional();
 
 const querySchema = z.object({
-  q: z.string().trim().max(PARTS_QUERY_MAX_LENGTH).catch(''),
+  q: z.string().transform(partsQuery).catch(''),
   category: catalogKey,
   model: catalogKey,
   locale: localeFieldSchema,

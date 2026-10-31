@@ -167,6 +167,12 @@ export function forgetOrderedCart(
   if (orderedId && readCart(storage)?.id === orderedId) forgetCart(storage);
 }
 
+export const orderedNumber = (
+  notice: string,
+  number: string | null,
+): string | null =>
+  notice === 'ordered' && number && /^\d+$/.test(number) ? number : null;
+
 export const unavailableNames = (cart: OfferCart): string[] =>
   cart.items.filter(({ available }) => !available).map(({ part }) => part.name);
 
@@ -437,6 +443,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
           leadLabel = '',
           stockPickup = '',
           inStock = '',
+          tomorrow = '',
           days = '{}',
         } = this.dataset;
         const template = this.querySelector<HTMLTemplateElement>(
@@ -453,7 +460,11 @@ export function definePartOffers(tagName = 'part-offers'): void {
           offer.lead_time_days > 0
             ? formatLeadTime(
                 offer.lead_time_days,
-                { inStock, days: JSON.parse(days) as LeadTimeCopy['days'] },
+                {
+                  inStock,
+                  tomorrow,
+                  days: JSON.parse(days) as LeadTimeCopy['days'],
+                },
                 localeTag,
               )
             : null;
@@ -544,6 +555,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       cart: OfferCart | null = null;
       targets = new Map<string, number>();
       settle: ReturnType<typeof setTimeout> | undefined;
+      stepNotice = '';
       queue: Promise<void> = Promise.resolve();
 
       connectedCallback(): void {
@@ -556,9 +568,13 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         const orderedId = params.get(ORDERED_CART_PARAM);
         if (notice === 'ordered') forgetOrderedCart(orderedId);
         const receipt = notice === 'ordered' ? readReceipt(orderedId) : null;
-        if (receipt) {
+        const orderNumber = orderedNumber(
+          notice,
+          params.get(ORDER_NUMBER_PARAM),
+        );
+        if (receipt || orderNumber) {
           forgetCheckout();
-          this.showOrdered(params.get(ORDER_NUMBER_PARAM), receipt);
+          this.showOrdered(orderNumber, receipt);
           return;
         }
         if (notice) {
@@ -572,6 +588,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           }
           history.replaceState(history.state, '', url);
         }
+        window.addEventListener('pageshow', (event) => {
+          if (event.persisted) location.reload();
+        });
         const form = this.querySelector('form');
         if (form) {
           void customElements
@@ -638,18 +657,16 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         showOnly(this, 'data-state', state);
       }
 
-      showOrdered(orderNumber: string | null, receipt: OfferCart): void {
+      showOrdered(orderNumber: string | null, receipt: OfferCart | null): void {
         const { orderedHeading, orderTemplate = '' } = this.dataset;
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
         fill(
           this,
           '[data-order-number]',
-          orderNumber && /^\d+$/.test(orderNumber)
-            ? orderTemplate.replace('{number}', orderNumber)
-            : null,
+          orderNumber && orderTemplate.replace('{number}', orderNumber),
         );
-        this.receipt(receipt);
+        if (receipt) this.receipt(receipt);
         this.show('ordered');
       }
 
@@ -825,9 +842,13 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
       }
 
-      change(method: string, body: Record<string, unknown>): Promise<void> {
+      change(
+        method: string,
+        body: Record<string, unknown>,
+        notice = '',
+      ): Promise<void> {
         this.queue = this.queue.then(async () =>
-          this.render(await sendJson(method, body)),
+          this.render(await sendJson(method, body), notice),
         );
         return this.queue;
       }
@@ -839,19 +860,24 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           delta,
           line.max_quantity ?? null,
         );
-        if (capped) showOnly(this, 'data-notice', 'stock-limit');
+        if (capped) {
+          this.stepNotice = 'stock-limit';
+          showOnly(this, 'data-notice', this.stepNotice);
+        }
         if (target === current) return;
         this.targets.set(line.id, target);
         fill(row, '[data-quantity]', String(target));
         row.setAttribute('aria-busy', 'true');
         clearTimeout(this.settle);
         this.settle = setTimeout(() => {
+          const notice = this.stepNotice;
+          this.stepNotice = '';
           for (const [itemId, quantity] of this.targets) {
-            void this.change('PATCH', {
-              cart_id: this.cart?.id,
-              item_id: itemId,
-              quantity,
-            });
+            void this.change(
+              'PATCH',
+              { cart_id: this.cart?.id, item_id: itemId, quantity },
+              notice,
+            );
           }
         }, STEP_SETTLE_MS);
       }
@@ -1055,6 +1081,24 @@ export function defineKitCart(tagName = 'kit-cart'): void {
         }
         const buyable = items.every((item) => item.dataset.offerId);
         this.hidden = !buyable;
+        const tags = items.map(
+          (item) =>
+            item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset ?? {},
+        );
+        const total = this.querySelector('[data-kit-total]');
+        if (total && buyable) {
+          total.textContent = ` · ${formatMoney(
+            items.reduce(
+              (sum, item, index) =>
+                sum +
+                Number(tags[index].kitPrice) *
+                  (Number(item.dataset.quantity) || 1),
+              0,
+            ),
+            tags[0]?.kitCurrency ?? 'RSD',
+            this.dataset.localeTag ?? 'sr',
+          )}`;
+        }
         const ask = kit?.querySelector('[data-add-all]');
         ask?.classList.toggle('btn-secondary', buyable);
         ask?.classList.toggle('btn-primary', !buyable);
@@ -1086,11 +1130,19 @@ export function defineKitCart(tagName = 'kit-cart'): void {
           moved = true;
         }
         const href = this.dataset.cartHref ?? '';
-        location.assign(
-          moved
-            ? `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`
-            : href,
-        );
+        if (moved) {
+          location.assign(
+            `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`,
+          );
+          return;
+        }
+        const added = kit?.querySelector<HTMLElement>('[data-kit-added]');
+        if (!added) {
+          location.assign(href);
+          return;
+        }
+        this.hidden = true;
+        added.hidden = false;
       }
     },
   );

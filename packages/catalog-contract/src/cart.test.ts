@@ -135,7 +135,21 @@ describe('checkoutContactSchema', () => {
         vin: null,
         comment: '  ',
       }),
-    ).toEqual({ contact: '+381 64 1234567', contact_channel: 'whatsapp' });
+    ).toEqual({ contact: '+381641234567', contact_channel: 'whatsapp' });
+  });
+
+  it('keeps names on one line and drops bidi controls from every field', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: '+381 64 1234567\u202e',
+        name: 'Ivan\nЗаказ оплачен \u202eevil',
+        comment: 'a\u2066\nb',
+      }),
+    ).toEqual({
+      contact: '+381641234567',
+      name: 'Ivan Заказ оплачен evil',
+      comment: 'a\nb',
+    });
   });
 
   it('checks the contact the way the lead route does', () => {

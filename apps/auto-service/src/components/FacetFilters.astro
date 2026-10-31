@@ -1,4 +1,5 @@
 ---
+import { MODAL_FOCUS_ATTRIBUTE } from '@podbor/site-kit/browser';
 import {
   BRAND_FACET,
   facetFilter,
@@ -143,7 +144,11 @@ const legend = (facet: SearchFacet) =>
               class="group/dialog static m-0 block h-auto max-h-none w-full max-w-none border-0 bg-transparent p-0 text-ink max-lg:group-[:defined]/sheet:not-open:hidden max-lg:open:fixed max-lg:open:inset-x-0 max-lg:open:top-auto max-lg:open:bottom-0 max-lg:open:flex max-lg:open:max-h-[88dvh] max-lg:open:flex-col max-lg:open:overflow-hidden max-lg:open:rounded-t-block md:open:mx-auto md:open:max-w-lg max-lg:open:bg-card max-lg:open:shadow-2xl pointer-events-auto translate-none opacity-100 max-lg:open:duration-200 max-lg:open:starting:translate-y-full motion-reduce:transition-none backdrop:bg-ink/50"
             >
               <div class="hidden items-center justify-between gap-4 border-b border-line px-5 py-3 group-open/dialog:flex lg:flex">
-                <h2 class="text-base font-semibold text-ink">
+                <h2
+                  {...{ [MODAL_FOCUS_ATTRIBUTE]: '' }}
+                  tabindex="-1"
+                  class="text-base font-semibold text-ink focus:outline-none"
+                >
                   {copy.filtersHeading}
                   {active > 0 && (
                     <span class="spec font-normal text-muted"> · {active}</span>

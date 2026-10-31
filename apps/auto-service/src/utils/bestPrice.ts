@@ -2,8 +2,10 @@ import type { PartOffer } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 
 export type BestPrice = {
+  id: string;
   price: number;
   currency: string;
+  startsFrom: boolean;
   inStock: boolean;
   buyable: boolean;
   leadDays: number;
@@ -21,8 +23,11 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
     (a, b) => Number(inStock(b)) - Number(inStock(a)) || a.price - b.price,
   );
   return {
+    id: picked.id,
     price: picked.price,
     currency: picked.currency,
+    startsFrom:
+      offers.length > 1 && offers.every(({ price }) => price >= picked.price),
     inStock: inStock(picked),
     buyable: buyable.length > 0,
     leadDays: picked.lead_time_days,
