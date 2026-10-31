@@ -57,11 +57,14 @@ export const keySpecs = (
   category: Category,
   values: AttributeValues,
   locale: string,
+  omit: string[] = [],
 ): string =>
   attributeRows(
     {
       ...category,
-      fields: category.fields.filter(({ type }) => type !== 'boolean'),
+      fields: category.fields.filter(
+        ({ type, key }) => type !== 'boolean' && !omit.includes(key),
+      ),
     },
     values,
     locale,

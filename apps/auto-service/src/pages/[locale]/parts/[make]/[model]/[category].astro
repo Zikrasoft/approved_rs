@@ -88,6 +88,7 @@ const facets = withFacetCopy(
 const filtered = !empty && facets.length > 0;
 const fill = (template: string) =>
   template.replace('{category}', categoryName).replace('{model}', name);
+const SAID_BY_FIT = ['axle'];
 ---
 
 <Shell title={fill(copy.metaTitle)} description={fill(copy.metaDescription)}>
@@ -147,9 +148,19 @@ const fill = (template: string) =>
                       <h3 class="font-semibold text-ink">
                         {translated(part, 'name', locale)}
                       </h3>
-                      {keySpecs(category, part.attributes, locale) && (
+                      {keySpecs(
+                        category,
+                        part.attributes,
+                        locale,
+                        SAID_BY_FIT,
+                      ) && (
                         <p class="spec text-xs text-muted">
-                          {keySpecs(category, part.attributes, locale)}
+                          {keySpecs(
+                            category,
+                            part.attributes,
+                            locale,
+                            SAID_BY_FIT,
+                          )}
                         </p>
                       )}
                     </div>
