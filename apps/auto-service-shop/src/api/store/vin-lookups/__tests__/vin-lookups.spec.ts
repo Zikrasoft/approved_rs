@@ -214,6 +214,18 @@ medusaIntegrationTestRunner({
           model_slug: null,
           vehicle_ids: [],
         });
+        expect(
+          await vinLookups.listVinLookups({ vin: '1HGCM82633A004352' }),
+        ).toEqual([]);
+      });
+
+      it('records one lookup for the same VIN sent twice at once', async () => {
+        const vin = 'WBA77EE070N000030';
+
+        const answers = await Promise.all([lookUp(vin), lookUp(vin)]);
+
+        expect(answers.map(({ status }) => status)).toEqual([200, 200]);
+        expect(await vinLookups.listVinLookups({ vin })).toHaveLength(1);
       });
 
       it('resolves again a lookup recorded by an older decoder version', async () => {
