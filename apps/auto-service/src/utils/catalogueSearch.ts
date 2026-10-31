@@ -28,7 +28,7 @@ export const vinDestination = (
   locale: Locale,
 ): string | null => {
   const { place } = outcome;
-  if (!place || (outcome.kind === 'inquiry' && place.kind === 'make')) {
+  if (!place || place.kind === 'make') {
     return null;
   }
   const { href } = carLink(place, locale);

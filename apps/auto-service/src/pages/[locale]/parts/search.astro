@@ -28,7 +28,7 @@ import {
   withFacetCopy,
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
-import { carName } from '@/utils/carName';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import {
   carLink,
@@ -72,6 +72,16 @@ if (destination) {
 }
 const vinMake =
   vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
+const vinCar =
+  vinOutcome?.kind === 'vehicle'
+    ? [
+        carName(vinOutcome.vehicle.model, locale),
+        vehicleVariant(vinOutcome.vehicle, locale),
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : null;
+const vinTopic = vinCar ?? vinMake?.label;
 const searchable = !vin && (searchableQuery(q) || Boolean(category));
 const found =
   searchable && catalogue
@@ -216,7 +226,9 @@ const scopeHidden = {
           role="status"
           class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
         >
-          {content(locale).partsCar.vin.unresolved}
+          {vinCar
+            ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
+            : content(locale).partsCar.vin.unresolved}
           {vinMake && (
             <>
               {' '}
@@ -458,7 +470,7 @@ const scopeHidden = {
               value: vin ?? undefined,
             }}
             comment={
-              vin ? (vinMake ? `${vinMake.label}: ` : '') : `${inquiryTopic}: `
+              vin ? (vinTopic ? `${vinTopic}: ` : '') : `${inquiryTopic}: `
             }
             commentLabel={partsInquiry.commentLabel}
             commentPlaceholder={partsInquiry.commentPlaceholder}

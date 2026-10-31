@@ -79,10 +79,8 @@ describe('vinDestination', () => {
     );
   });
 
-  it('opens the Make page when neither the Vehicle nor the Model has one', () => {
-    expect(vinDestination(resolved(makePlace), VIN, 'ru')).toBe(
-      '/ru/parts/bmw/',
-    );
+  it('stays on the inquiry when only the Make of a resolved VIN has a page', () => {
+    expect(vinDestination(resolved(makePlace), VIN, 'ru')).toBeNull();
   });
 
   it('opens nothing when no place of the car has a page', () => {

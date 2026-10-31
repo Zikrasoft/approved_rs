@@ -239,7 +239,10 @@ Useful pages:
   redirects to, `/ru/parts/bmw/f30-320d/m/b47d20-140kw/?vin=…`. A Vehicle gets
   a page from three fitted Parts, also as the only Vehicle of its Model; the
   page shows the maintenance kit, the Requirements and the car facts, and
-  stores the VIN in My garage.
+  stores the VIN in My garage. `WBA8E31000A123456` (320i) and
+  `WBAJA31000A123456` (520d) resolve too, but fit fewer than three Parts, so
+  they have no page: the search names the car and opens the inquiry with the
+  VIN.
 - E-class: `WDD2130041A123456` (left-hand drive) and `WDD2130042A123456`
   (right-hand drive; the redirect to
   `/ru/parts/mercedes-benz/w213-e220d/m/om654-920-143kw/` carries
