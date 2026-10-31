@@ -106,7 +106,7 @@ describe('keySpecs', () => {
         },
         'ru',
       ),
-    ).toBe('5W-30 · 5 l · 4.4');
+    ).toBe('5W-30 · 5 л · 4.4');
   });
 
   it('is empty for a part with no filled fields', () => {
