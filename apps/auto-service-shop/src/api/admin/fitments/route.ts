@@ -12,7 +12,7 @@ import type {
   AdminCreateFitmentType,
   AdminListFitmentsType,
 } from '../validators';
-import { adminError } from '../../../lib/admin-errors';
+import { adminError } from '../../../modules/_shared/admin-error';
 import { createdBy, withEditors } from '../../../lib/editors';
 import { refuseConflictingFitment } from '../../../lib/fitment-conflicts';
 

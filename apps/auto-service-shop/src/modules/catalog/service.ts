@@ -19,7 +19,6 @@ import {
   normalizePartNumber,
   partPageSlug,
   requirementErrors,
-  RESERVED_PARTS_SEGMENTS,
   validateAttributes,
 } from '@podbor/catalog-contract';
 
@@ -43,11 +42,37 @@ import SlugRedirect, { type SlugKind } from './models/slug-redirect';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
-import { adminError, alreadyExists } from '../../lib/admin-errors';
-import { runBoundSql } from '../../lib/bound-sql';
-import { modelSlugOf, slugOf, vehicleSlugOf } from '../../lib/slug';
-import { spellingKey } from '../../lib/suppliers/spelling';
-import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
+import { adminError, alreadyExists } from '../_shared/admin-error';
+import { runBoundSql } from '../_shared/bound-sql';
+import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
+import { spellingKey } from '../_shared/spelling';
+import {
+  chunksOf,
+  countRowsBySource,
+  deleteRowsBySource,
+  type SourceCount,
+  sourcedRowsOf,
+} from './by-source';
+import {
+  identifierStatusRows,
+  type IdentifierStatusFilters,
+} from './identifier-status';
+import { WORKSHOP_QUOTE_SOURCE } from './models/provenance';
+import {
+  SLUG_COLUMNS,
+  RETIRING_DELETES,
+  scopedKind,
+  slugScopeOf,
+  MODELS_FOLLOW_THEIR_MAKE,
+  slugInUse,
+  reservedSection,
+  refuseReservedSection,
+  type SluggedKind,
+  type SlugInput,
+  type SluggedRow,
+  type Retirement,
+  type RetiringTable,
+} from './slugs';
 
 type Provenance = {
   source?: string;
@@ -204,25 +229,6 @@ type QuoteBrand = {
   spellings: { value_key: string }[];
 };
 
-type SourcedRows = {
-  entity: string;
-  list: (filters: { source: string }, context: Context) => Promise<Row[]>;
-  remove: (ids: string[], context: Context) => Promise<void>;
-};
-
-type Row = { id: string };
-
-export type SourceCount = { source: string; rows: number };
-
-const DELETE_CHUNK = 2000;
-
-const CHUNK_COLUMNS = { select: ['id'], take: DELETE_CHUNK };
-
-const chunksOf = <T>(items: T[], size = DELETE_CHUNK): T[][] =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
-    items.slice(index * size, (index + 1) * size),
-  );
-
 const FLAG_UNLISTED_PARTS = `
   with listed as (
     select p.id, p.source_url, p.source_missing_since is not null as flagged,
@@ -243,14 +249,6 @@ const FLAG_UNLISTED_PARTS = `
       else not (l.source_url = any(?::text[]))
     end
   )`;
-
-const sourceInUse = (source: string, details: Record<string, unknown>) =>
-  adminError(
-    MedusaError.Types.NOT_ALLOWED,
-    'SOURCE_IN_USE',
-    `Rows of other sources still use rows of ${source}`,
-    details,
-  );
 
 const CatalogModuleBase = MedusaService({
   Brand,
@@ -282,70 +280,7 @@ const withValueKey = (row: SpellingInput) => ({
   value_key: spellingKey(row.value),
 });
 
-export type SluggedKind = Exclude<SlugKind, 'part'>;
-
-type SlugInput = Record<string, unknown> & { slug?: string };
-
-type SluggedRow = { id: string; slug: string };
-
-type Retirement = {
-  id: string;
-  slug: string;
-  scope_id: string | null;
-  target_kind: SlugKind | null;
-  target_id: string | null;
-};
-
-const SLUG_COLUMNS = { select: ['id', 'slug'], take: null };
-
-const RETIRING_DELETES = {
-  part_identifier: 'deletePartIdentifiers',
-  part: 'deleteParts',
-  vehicle: 'deleteVehicles',
-  model: 'deleteVehicleModels',
-  make: 'deleteMakes',
-  brand: 'deleteBrands',
-  category: 'deleteCategories',
-} as const;
-
-type RetiringTable = keyof typeof RETIRING_DELETES;
-
-const scopedKind = (kind: SluggedKind) =>
-  kind === 'vehicle' || kind === 'model';
-
-const slugScopeOf = (kind: SluggedKind, row: SlugInput): string | null =>
-  kind === 'vehicle'
-    ? String(row.model_id)
-    : kind === 'model'
-      ? String(row.make_id)
-      : null;
-
-// TODO: a move that lands a Model in a Make already holding its slug fails on the unique index; re-slug it as mergeModels does for Vehicles if staff hit it.
-const MODELS_FOLLOW_THEIR_MAKE = `update vehicle_model m set make_id = s.make_id
-  from chassis c join series s on s.id = c.series_id
-  where c.id = m.chassis_id and m.make_id <> s.make_id`;
-
-const slugInUse = () =>
-  adminError(
-    MedusaError.Types.CONFLICT,
-    'SLUG_TAKEN',
-    'This slug is taken or was used before',
-  );
-
-const reservedSection = (kind: SluggedKind, slug: string) =>
-  kind === 'make' &&
-  RESERVED_PARTS_SEGMENTS.some((segment) => segment === slug);
-
-const refuseReservedSection = (kind: SluggedKind, slug: string) => {
-  if (reservedSection(kind, slug)) {
-    throw adminError(
-      MedusaError.Types.INVALID_DATA,
-      'SLUG_RESERVED',
-      'This slug is a storefront section',
-    );
-  }
-};
-
+// TODO: the class still mixes the make/series/chassis/model merges (mergeMakes to deleteRetiring) and createFromWorkshopQuote with data access; move the merges to merge.ts over the façade and the workshop quote into a lib/workshop-quote.ts workflow step.
 class CatalogModuleService extends CatalogModuleBase {
   private sluggedRows(kind: SluggedKind) {
     const rows = {
@@ -1664,130 +1599,29 @@ class CatalogModuleService extends CatalogModuleBase {
     }
   }
 
-  private sourcedRows(): SourcedRows[] {
-    return [
-      {
-        entity: 'requirement',
-        list: (filters, context) =>
-          this.listRequirements(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteRequirements(ids, context),
-      },
-      {
-        entity: 'fitment',
-        list: (filters, context) =>
-          this.listFitments(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteFitments(ids, context),
-      },
-      {
-        entity: 'vehicle_identifier',
-        list: (filters, context) =>
-          this.listVehicleIdentifiers(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteVehicleIdentifiers(ids, context),
-      },
-      {
-        entity: 'brand_spelling',
-        list: (filters, context) =>
-          this.listBrandSpellings(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteBrandSpellings(ids, context),
-      },
-      {
-        entity: 'make_spelling',
-        list: (filters, context) =>
-          this.listMakeSpellings(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteMakeSpellings(ids, context),
-      },
-      {
-        entity: 'part_identifier',
-        list: (filters, context) =>
-          this.listPartIdentifiers(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deletePartIdentifiers(ids, context),
-      },
-      {
-        entity: 'part',
-        list: (filters, context) =>
-          this.listParts(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteParts(ids, context),
-      },
-      {
-        entity: 'vehicle',
-        list: (filters, context) =>
-          this.listVehicles(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteVehicles(ids, context),
-      },
-      {
-        entity: 'category_field_option',
-        list: (filters, context) =>
-          this.listCategoryFieldOptions(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteCategoryFieldOptions(ids, context),
-      },
-      {
-        entity: 'category_field',
-        list: (filters, context) =>
-          this.listCategoryFields(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteCategoryFields(ids, context),
-      },
-      {
-        entity: 'category',
-        list: (filters, context) =>
-          this.listCategories(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteCategories(ids, context),
-      },
-      {
-        entity: 'vehicle_model',
-        list: (filters, context) =>
-          this.listVehicleModels(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteVehicleModels(ids, context),
-      },
-      {
-        entity: 'engine',
-        list: (filters, context) =>
-          this.listEngines(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteEngines(ids, context),
-      },
-      {
-        entity: 'chassis',
-        list: (filters, context) =>
-          this.listChassis(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteChassis(ids, context),
-      },
-      {
-        entity: 'series',
-        list: (filters, context) =>
-          this.listSeries(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteSeries(ids, context),
-      },
-      {
-        entity: 'make',
-        list: (filters, context) =>
-          this.listMakes(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteMakes(ids, context),
-      },
-      {
-        entity: 'brand',
-        list: (filters, context) =>
-          this.listBrands(filters, CHUNK_COLUMNS, context),
-        remove: (ids, context) => this.deleteBrands(ids, context),
-      },
-    ];
+  @InjectManager()
+  async identifierStatusRows(
+    filters: IdentifierStatusFilters,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    return identifierStatusRows(
+      (
+        (sharedContext.transactionManager ??
+          sharedContext.manager) as SqlEntityManager
+      ).getKnex(),
+      filters,
+    );
   }
 
   @InjectManager()
   async countRowsBySource(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<SourceCount[]> {
-    const perTable = this.sourcedRows().map(
-      ({ entity }) =>
-        `select source, count(*) as rows from "${entity}" where deleted_at is null group by source`,
-    );
-    const counts: { source: string; rows: string }[] = await (
+    return countRowsBySource(
       (sharedContext.transactionManager ??
-        sharedContext.manager) as SqlEntityManager
-    ).execute(
-      `select source, sum(rows) as rows from (${perTable.join(' union all ')}) counted group by source`,
+        sharedContext.manager) as SqlEntityManager,
+      sourcedRowsOf(this),
     );
-    return counts
-      .map(({ source, rows }) => ({ source, rows: Number(rows) }))
-      .sort((a, b) => a.source.localeCompare(b.source));
   }
 
   @InjectTransactionManager()
@@ -1795,42 +1629,11 @@ class CatalogModuleService extends CatalogModuleBase {
     source: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
-    if (source === MANUAL_SOURCE) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'MANUAL_SOURCE',
-        'Rows typed in by hand are never deleted by source',
-      );
-    }
-    const before = await this.countRowsBySource(sharedContext);
-    let deleted = 0;
-    for (const { entity, list, remove } of this.sourcedRows()) {
-      for (;;) {
-        const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
-        if (!ids.length) break;
-        await remove(ids, sharedContext).catch((error: unknown) => {
-          throw MedusaError.isMedusaError(error) &&
-            error.type === MedusaError.Types.NOT_FOUND
-            ? sourceInUse(source, { blocked: entity })
-            : error;
-        });
-        deleted += ids.length;
-      }
-    }
-    await this.flush(sharedContext);
-    const after = await this.countRowsBySource(sharedContext);
-    const holders = before
-      .filter((count) => count.source !== source)
-      .map(({ source: holder, rows }) => ({
-        source: holder,
-        rows:
-          rows - (after.find((count) => count.source === holder)?.rows ?? 0),
-      }))
-      .filter(({ rows }) => rows > 0);
-    if (holders.length) {
-      throw sourceInUse(source, { holders });
-    }
-    return deleted;
+    return deleteRowsBySource(source, sourcedRowsOf(this), {
+      count: () => this.countRowsBySource(sharedContext),
+      flush: () => this.flush(sharedContext),
+      context: sharedContext,
+    });
   }
 
   @InjectManager()

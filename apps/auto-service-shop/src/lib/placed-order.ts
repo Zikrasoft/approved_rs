@@ -1,5 +1,3 @@
-import { checkoutContactSchema } from '@podbor/catalog-contract';
-
 import {
   listedPartOf,
   orderTotal,
@@ -7,11 +5,11 @@ import {
   withAddonsUnderParts,
 } from './line-metadata';
 import type { LeadOrder } from './order-lead';
+import { readOrder } from './order-metadata';
 
 export function readPlacedOrder(order: LeadOrder) {
-  const contact = checkoutContactSchema.safeParse(order.metadata ?? {});
   return {
-    contact: contact.success ? contact.data : null,
+    contact: readOrder(order.metadata).contact,
     lines: withAddonsUnderParts(order.items).map((item) => {
       const line = readLine(item.metadata);
       return {

@@ -30,7 +30,7 @@ const catalogueEnvKeys = [
 ] as const;
 
 export type CatalogueEnv = Partial<
-  Record<(typeof catalogueEnvKeys)[number], string>
+  Record<(typeof catalogueEnvKeys)[number] | 'SHOP_LEAD_SECRET', string>
 >;
 
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
@@ -41,10 +41,16 @@ const catalogueEnvSchema = z
     MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
     MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
     SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema),
+    SHOP_LEAD_SECRET: unsetWhenEmpty(z.string()),
   })
   .transform(
     (
-      { MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY, SHOP_PREVIEW_TOKEN },
+      {
+        MEDUSA_BACKEND_URL,
+        MEDUSA_PUBLISHABLE_KEY,
+        SHOP_PREVIEW_TOKEN,
+        SHOP_LEAD_SECRET,
+      },
       context,
     ) => {
       if (!MEDUSA_BACKEND_URL) {
@@ -62,6 +68,7 @@ const catalogueEnvSchema = z
         backendUrl: MEDUSA_BACKEND_URL,
         publishableKey: MEDUSA_PUBLISHABLE_KEY,
         previewToken: SHOP_PREVIEW_TOKEN,
+        clientSecret: SHOP_LEAD_SECRET,
       };
     },
   );
@@ -89,18 +96,36 @@ export const previewRequested = (
 ): boolean =>
   previewTokenMatches(previewTokenFrom(request.headers.get('cookie')), env);
 
+const visitorAddressSchema = z.union([z.ipv4(), z.ipv6()]);
+
+export const visitorAddress = (request: Request): string | undefined =>
+  visitorAddressSchema.safeParse(
+    request.headers.get('x-real-ip') ??
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+  ).data;
+
 export function catalogueFromEnv(
   env: CatalogueEnv,
-  { preview = false }: { preview?: boolean } = {},
+  { preview = false, visitor }: { preview?: boolean; visitor?: Request } = {},
 ) {
   const config = catalogueEnvSchema.parse(env);
-  return config
-    ? createCatalogue({ ...config, shopOpen: shopOpen(env), preview })
-    : null;
+  if (!config) return null;
+  const { clientSecret, ...shop } = config;
+  const address = visitor && visitorAddress(visitor);
+  return createCatalogue({
+    ...shop,
+    shopOpen: shopOpen(env),
+    preview,
+    client:
+      address && clientSecret ? { address, secret: clientSecret } : undefined,
+  });
 }
 
 export const catalogueFor = (request: Request) =>
-  catalogueFromEnv(siteEnv(), { preview: previewRequested(request) });
+  catalogueFromEnv(siteEnv(), {
+    preview: previewRequested(request),
+    visitor: request,
+  });
 
 export const uncachedJson = (body: unknown, init?: ResponseInit) =>
   Response.json(body, {
@@ -113,6 +138,7 @@ export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
   SHOP_PREVIEW_TOKEN: import.meta.env.SHOP_PREVIEW_TOKEN,
+  SHOP_LEAD_SECRET: process.env.SHOP_LEAD_SECRET,
   VERCEL: import.meta.env.VERCEL,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
 });

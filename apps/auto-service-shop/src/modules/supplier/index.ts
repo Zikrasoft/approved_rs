@@ -7,3 +7,12 @@ export const SUPPLIER_MODULE = 'supplier';
 export default Module(SUPPLIER_MODULE, {
   service: SupplierModuleService,
 });
+
+export {
+  inShopCurrency,
+  isSellable,
+  type PricedOfferRow,
+  sellPrice,
+  SHOP_CURRENCY,
+  storeOffers,
+} from './pricing';

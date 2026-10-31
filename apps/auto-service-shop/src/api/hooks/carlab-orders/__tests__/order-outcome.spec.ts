@@ -6,7 +6,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { retryOrderLeadsAt } from '../../../../jobs/retry-order-leads';
-import { MAX_HANDOFF_ATTEMPTS } from '../../../../lib/order-lead-sync';
+import { MAX_HANDOFF_ATTEMPTS } from '../../../../lib/order-metadata';
 
 const SHOP_LEAD_SECRET = 'shop-lead-secret';
 const SHOP_ORDER_OUTCOME_SECRET = 'shop-order-outcome-secret';

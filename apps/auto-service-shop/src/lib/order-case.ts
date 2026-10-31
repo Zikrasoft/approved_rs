@@ -5,6 +5,7 @@ import {
   vehicleName,
 } from '@podbor/catalog-contract';
 
+import { inShopCurrency } from '../modules/supplier';
 import type { LeadOrder } from './order-lead';
 import { readPlacedOrder } from './placed-order';
 import { vehicleForVin } from './vin/car-for';
@@ -49,6 +50,8 @@ export async function orderCaseSummary(
           ({ brand, number }) => brand === part.brand && number === part.number,
         ) === index,
     ),
-    total_rsd: order.currency_code === 'rsd' ? Math.round(placed.total) : null,
+    total_rsd: inShopCurrency({ currency: order.currency_code })
+      ? Math.round(placed.total)
+      : null,
   };
 }

@@ -7,9 +7,10 @@ import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
-import { adminError, parseAdminBody } from '../../lib/admin-errors';
+import { parseAdminBody } from '../../lib/admin-errors';
+import { adminError } from '../../modules/_shared/admin-error';
 import { createdBy, updatedBy, withEditors } from '../../lib/editors';
-import { literalLike } from '../../lib/like';
+import { literalLike } from '../../modules/_shared/like';
 import { STORED_ROW_RULES } from './vehicle-validators';
 
 const editedRowSchema = z.object({ updated_by: z.string().nullable() }).loose();

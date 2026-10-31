@@ -4,7 +4,7 @@ import type {
 } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
 
-import { adminError } from '../../../../../lib/admin-errors';
+import { adminError } from '../../../../../modules/_shared/admin-error';
 import { emitIndexChanges } from '../../../../../lib/index-changes';
 import { MANUAL_SUPPLIER } from '../../../../../lib/suppliers/manual-offers';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';

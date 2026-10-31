@@ -1,4 +1,4 @@
-import { spellingKey } from './spelling';
+import { spellingKey } from '../../modules/_shared/spelling';
 
 export const CAR_MAKES: Record<string, string[]> = {
   'Alfa Romeo': [],

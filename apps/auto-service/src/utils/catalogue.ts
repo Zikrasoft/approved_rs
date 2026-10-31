@@ -31,8 +31,13 @@ import {
   type SearchResult,
   type Vehicle,
   type VinFacts,
+  CATALOGUE_ID_PATTERN,
 } from '@podbor/catalog-contract';
-import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
+import {
+  SHOP_CLIENT_HEADER,
+  SHOP_CLIENT_SECRET_HEADER,
+  SHOP_PREVIEW_HEADER,
+} from '@podbor/catalog-contract/preview';
 import {
   assembleSnapshot,
   carPagesFrom,
@@ -93,11 +98,7 @@ export type CheckoutOutcome =
   | { kind: 'empty' }
   | { kind: 'inquiry' };
 
-export const catalogueIdSchema = z
-  .string()
-  .trim()
-  .max(100)
-  .regex(/^[\w-]+$/);
+export const catalogueIdSchema = z.string().trim().regex(CATALOGUE_ID_PATTERN);
 
 export type CatalogueConfig = {
   backendUrl: string;
@@ -107,6 +108,7 @@ export type CatalogueConfig = {
   shopOpen?: boolean;
   preview?: boolean;
   previewToken?: string;
+  client?: { address: string; secret: string };
 };
 
 export function createCatalogue({
@@ -117,6 +119,7 @@ export function createCatalogue({
   shopOpen = true,
   preview = false,
   previewToken,
+  client,
 }: CatalogueConfig) {
   const pricesHidden = !shopOpen && !preview;
   const unpriced = <T extends { offers: PartOffer[] }>(item: T): T =>
@@ -134,6 +137,10 @@ export function createCatalogue({
         ...((preview || shopOpen) &&
           previewToken && { [SHOP_PREVIEW_HEADER]: previewToken }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
+        ...(client && {
+          [SHOP_CLIENT_HEADER]: client.address,
+          [SHOP_CLIENT_SECRET_HEADER]: client.secret,
+        }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),
       signal,

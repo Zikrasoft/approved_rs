@@ -1,6 +1,6 @@
 import { MedusaError } from '@medusajs/framework/utils';
 
-import { adminError, alreadyExists } from './admin-errors';
+import { adminError, alreadyExists } from '../modules/_shared/admin-error';
 import type CatalogModuleService from '../modules/catalog/service';
 
 export const CATEGORY_RELATIONS = ['fields', 'fields.options'];

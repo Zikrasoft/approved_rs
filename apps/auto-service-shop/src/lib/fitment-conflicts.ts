@@ -10,7 +10,7 @@ import { z } from 'zod';
 
 import { matchesFilter, type VehicleFilter } from '../modules/catalog/service';
 import type CatalogModuleService from '../modules/catalog/service';
-import { adminError } from './admin-errors';
+import { adminError } from '../modules/_shared/admin-error';
 import { listVehicleResponses } from './store-response';
 
 type AttributeValue = AttributeValues[string];

@@ -10,7 +10,6 @@ import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
 import { deploySite } from './deploy';
 import { sweepOrphans } from './orphans';
-import { publishAllNumbers, unmarkNumbersPublished } from './published';
 import { translateCatalogue } from './translate';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
@@ -42,11 +41,12 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
   {
     name: 'deploy',
     run: async () => {
-      const fresh = await publishAllNumbers(scope);
+      const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
+      const fresh = await publish.publishAll();
       try {
         await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
       } catch (error) {
-        await unmarkNumbersPublished(scope, fresh);
+        await publish.unpublish(fresh);
         throw error;
       }
     },

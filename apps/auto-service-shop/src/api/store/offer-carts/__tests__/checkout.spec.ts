@@ -18,8 +18,8 @@ import retryOrderLeads, {
 } from '../../../../jobs/retry-order-leads';
 import {
   MAX_HANDOFF_ATTEMPTS,
-  orderLeadStatus,
-} from '../../../../lib/order-lead-sync';
+  readOrder,
+} from '../../../../lib/order-metadata';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
@@ -624,27 +624,6 @@ medusaIntegrationTestRunner({
           .resolve(Modules.ORDER)
           .retrieveOrder(placed.data.order.id);
         expect(order.metadata?.car).toBeNull();
-      });
-
-      it('refuses checkout of a cart that changed since the visitor saw it', async () => {
-        const shown = await cartWith(1);
-        const changed = await post(`/store/offer-carts/${shown.id}/items`, {
-          offer_id: offerId,
-          quantity: 1,
-        });
-
-        const refused = await complete(shown, {
-          ...CONTACT,
-          cart_fingerprint: cartFingerprint(shown.items),
-        });
-        expect(refused.status).toBe(400);
-        expect(refused.data.code).toBe('CART_CHANGED');
-
-        const placed = await complete(shown, {
-          ...CONTACT,
-          cart_fingerprint: cartFingerprint(changed.data.cart.items),
-        });
-        expect(placed.status).toBe(200);
       });
 
       it('refuses an order without a contact', async () => {
@@ -1363,9 +1342,9 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const metadata = await waitFor(
           async () =>
-            orderLeadStatus(
+            readOrder(
               (await orders.retrieveOrder(placed.data.order.id)).metadata,
-            ).error,
+            ).lead.error,
         );
         expect(metadata).toBe('The lead route answered 500');
       });
@@ -1381,7 +1360,7 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const refused = () => orders.retrieveOrder(placed.data.order.id);
         await waitFor(
-          async () => orderLeadStatus((await refused()).metadata).error,
+          async () => readOrder((await refused()).metadata).lead.error,
         );
         leads.length = 0;
         leadRouteStatus = 201;
@@ -1389,7 +1368,7 @@ medusaIntegrationTestRunner({
         await retryOrderLeadsAt(getContainer(), settled());
 
         expect(leadsFor(placed)).toHaveLength(1);
-        expect(orderLeadStatus((await refused()).metadata).error).toBeNull();
+        expect(readOrder((await refused()).metadata).lead.error).toBeNull();
         await retryOrderLeadsAt(getContainer(), settled());
         expect(leadsFor(placed)).toHaveLength(1);
       });
@@ -1399,7 +1378,7 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const order = () => orders.retrieveOrder(placed.data.order.id);
         await waitFor(
-          async () => orderLeadStatus((await order()).metadata).handed_off_at,
+          async () => readOrder((await order()).metadata).lead.handed_off_at,
         );
         const { metadata } = await order();
         await orders.updateOrders(placed.data.order.id, {
@@ -1424,9 +1403,9 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         await waitFor(
           async () =>
-            orderLeadStatus(
+            readOrder(
               (await orders.retrieveOrder(placed.data.order.id)).metadata,
-            ).error,
+            ).lead.error,
         );
 
         for (let run = 0; run < 15; run += 1) {

@@ -3,12 +3,13 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { readJson } from '@podbor/lead-crm';
-import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
+import {
+  ADDON_KINDS,
+  MAX_LINE_QUANTITY,
+} from '@podbor/catalog-contract/cart-wire';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { CartOutcome } from '@/utils/catalogueWire';
 import { catalogueFor, uncachedJson } from '@/utils/catalogueEnv';
-
-export const MAX_LINE_QUANTITY = 999;
 
 const addSchema = z.object({
   cart_id: catalogueIdSchema.nullable(),

@@ -1,12 +1,6 @@
-import { CASH_AT_PICKUP_METADATA } from './commerce-defaults';
 import type { LeadOrder } from './order-lead';
-import { orderLeadStatus } from './order-lead-sync';
+import { readOrder } from './order-metadata';
 import { readPlacedOrder, type PlacedOrder } from './placed-order';
-
-type Metadata = Record<string, unknown> | null | undefined;
-
-export const isCashAtPickup = (metadata: Metadata) =>
-  metadata?.fulfillment === CASH_AT_PICKUP_METADATA.fulfillment;
 
 const customerOf = (contact: PlacedOrder['contact']) =>
   contact && {
@@ -20,11 +14,12 @@ const customerOf = (contact: PlacedOrder['contact']) =>
 
 export function carlabOrderView(order: LeadOrder) {
   const placed = readPlacedOrder(order);
+  const { cashAtPickup, lead } = readOrder(order.metadata);
   return {
     id: order.id,
     display_id: order.display_id,
     currency: order.currency_code.toUpperCase(),
-    cash_at_pickup: isCashAtPickup(order.metadata),
+    cash_at_pickup: cashAtPickup,
     customer: customerOf(placed.contact),
     lines: placed.lines.map((line) => ({
       title: line.title,
@@ -35,7 +30,7 @@ export function carlabOrderView(order: LeadOrder) {
       lead_time_days: line.leadTimeDays,
     })),
     total: placed.total,
-    lead: orderLeadStatus(order.metadata),
+    lead,
   };
 }
 

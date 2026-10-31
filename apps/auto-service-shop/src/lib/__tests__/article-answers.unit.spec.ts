@@ -2,7 +2,7 @@ import { createFakeShopAi } from '../../../integration-tests/fakeShopAi';
 import { memoryBucket } from '../../../integration-tests/fakeStorage';
 import { MedusaError } from '@medusajs/framework/utils';
 
-import { adminError } from '../admin-errors';
+import { adminError } from '../../modules/_shared/admin-error';
 import { cachedArticleAnswer } from '../ai/cache';
 
 const article = {

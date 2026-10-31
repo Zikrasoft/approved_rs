@@ -3,13 +3,13 @@ import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../modules/supplier';
-import type { PartOffer } from '@podbor/catalog-contract';
 import {
   inShopCurrency,
-  sellPrice,
+  isSellable,
   storeOffers,
-} from '../../modules/supplier/pricing';
+  SUPPLIER_MODULE,
+} from '../../modules/supplier';
+import type { PartOffer } from '@podbor/catalog-contract';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { parseEnv } from '../env';
 import { emitIndexChanges } from '../index-changes';
@@ -140,10 +140,7 @@ async function requoteOffers<T extends QuotedOffer>(
     );
     for (const offer of own) {
       const quote = quotes.get(offer.id);
-      if (
-        !quote ||
-        sellPrice(quote.cost_price, offer.supplier.markup_percentage) <= 0
-      ) {
+      if (!quote || !isSellable({ ...quote, supplier: offer.supplier })) {
         continue;
       }
       const fields = quotedFields(quote);

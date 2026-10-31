@@ -30,14 +30,14 @@ import {
   universalFacets,
   usefulFacets,
   vehicleSchema,
+  type PartOffer,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { imagesSchema } from '../../../lib/images';
 import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
-import { SUPPLIER_MODULE } from '../../../modules/supplier';
-import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
+import { SHOP_CURRENCY, SUPPLIER_MODULE } from '../../../modules/supplier';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
@@ -439,11 +439,8 @@ export async function GET(
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const offers =
     shown && hits.length
-      ? await suppliers.listSupplierOffers(
-          { part_identifier_id: hits.map(({ id }) => id) },
-          { relations: ['supplier'], take: null },
-        )
-      : [];
+      ? await suppliers.storeOffersFor(hits.map(({ id }) => id))
+      : new Map<string, PartOffer[]>();
   const supplierData = await releasedSupplierData(
     suppliers,
     hits.map(({ id }) => id),
@@ -452,9 +449,7 @@ export async function GET(
     .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0))
     .map((hit) => ({
       ...brandNumberSchema.parse(hit),
-      offers: storeOffers(
-        offers.filter((offer) => offer.part_identifier_id === hit.id),
-      ),
+      offers: offers.get(hit.id) ?? [],
       ...thumbnail(hit, supplierData(hit.id).images),
       part: {
         id: hit.part.id,

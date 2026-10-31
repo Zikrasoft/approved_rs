@@ -9,6 +9,7 @@ import { errorMessage } from '../errors';
 import { IMAGE_TYPES, MAX_IMAGE_BYTES } from '../images';
 import { publicLookup, refusePrivateHost } from '../private-address';
 import type { ShopStorage } from '../storage';
+import { readCapped } from '../uploads';
 
 export const IMAGE_LOOKUP_REGISTRATION = 'supplierImageLookup';
 
@@ -55,17 +56,12 @@ async function download(
     response.destroy();
     throw new Error(`HTTP ${response.statusCode}, ${contentType || 'no type'}`);
   }
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of response) {
-    size += chunk.length;
-    if (size > MAX_IMAGE_BYTES) {
-      response.destroy();
-      throw new Error(`over ${MAX_IMAGE_BYTES} bytes`);
-    }
-    chunks.push(chunk);
-  }
-  return { body: Buffer.concat(chunks), contentType };
+  const body = await readCapped(
+    response,
+    MAX_IMAGE_BYTES,
+    () => new Error(`over ${MAX_IMAGE_BYTES} bytes`),
+  );
+  return { body, contentType };
 }
 
 const sha256 = (data: string | Buffer) =>

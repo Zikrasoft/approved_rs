@@ -29,7 +29,6 @@ import {
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
   refusalNotice,
-  refusalReason,
   type CartNotice,
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
@@ -86,7 +85,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     outcome?.kind === 'refused'
       ? {
           notice: refusalNotice(outcome.code),
-          reason: refusalReason(outcome.code),
+          reason: outcome.code,
         }
       : outcome?.kind === 'empty'
         ? { notice: 'expired', reason: 'expired' }

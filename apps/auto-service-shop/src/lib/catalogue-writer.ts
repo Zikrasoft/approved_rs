@@ -7,9 +7,9 @@ import {
 import { PUBLISH_MODULE } from '../modules/publish';
 import type { CATALOGUE_RUN_KINDS } from '../modules/publish/models/catalogue-run';
 import type PublishModuleService from '../modules/publish/service';
-import { adminError } from './admin-errors';
+import { adminError } from '../modules/_shared/admin-error';
 import { errorMessage } from './errors';
-import { ABANDONED } from './run-errors';
+import { ABANDONED } from '../modules/_shared/run-errors';
 
 export const HEARTBEAT_MS = 30_000;
 export const STALE_HEARTBEAT_MS = 5 * 60_000;

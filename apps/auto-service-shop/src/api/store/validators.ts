@@ -2,12 +2,14 @@ import { z } from '@medusajs/framework/zod';
 import {
   CART_FINGERPRINT_FIELD,
   CATALOG_KEY_PATTERN,
+  CATALOGUE_ID_PATTERN,
   checkoutContactSchema,
+  MAX_LINE_QUANTITY,
   parseRangeFilter,
   vinSchema,
 } from '@podbor/catalog-contract';
 
-const recordId = z.string().regex(/^[\w-]{1,64}$/);
+const recordId = z.string().regex(CATALOGUE_ID_PATTERN);
 
 const MAX_FILTERED_KEYS = 8;
 
@@ -67,8 +69,7 @@ const MAX_EMAIL_LOCAL_PART = 64;
 
 const offerId = recordId;
 
-const MAX_CART_QUANTITY = 999;
-const quantity = z.number().int().positive().max(MAX_CART_QUANTITY);
+const quantity = z.number().int().positive().max(MAX_LINE_QUANTITY);
 
 export const StoreCreateOfferCart = z.object({
   email: z

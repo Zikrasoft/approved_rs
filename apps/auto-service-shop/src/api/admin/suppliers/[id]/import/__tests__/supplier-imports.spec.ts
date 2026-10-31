@@ -16,9 +16,8 @@ import { memoryStorage } from '../../../../../../../integration-tests/fakeStorag
 import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
 import { importRuns } from '../../../../../../../integration-tests/importRuns';
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
-import { adminError } from '../../../../../../lib/admin-errors';
+import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
-import { publishAllNumbers } from '../../../../../../lib/publish/published';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
 import type { ImportSummary } from '../../../../../../lib/suppliers/import';
@@ -28,7 +27,7 @@ import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../../modules/publish';
 import type PublishModuleService from '../../../../../../modules/publish/service';
-import { INTERRUPTED_BY_RESTART } from '../../../../../../lib/run-errors';
+import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/_shared/run-errors';
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
@@ -231,7 +230,9 @@ medusaIntegrationTestRunner({
       };
 
       const pages = async (): Promise<Page[]> => {
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         return (await api.get('/store/part-pages', storeHeaders)).data.pages;
       };
 
@@ -352,7 +353,9 @@ medusaIntegrationTestRunner({
         await runImport();
         await new Promise((resolve) => setTimeout(resolve, 1000));
         const beforePublish = await found();
-        await publishAllNumbers(getContainer());
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
         await getContainer()
           .resolve(Modules.SEARCH)
           .reindex({ index: 'part_identifier' });

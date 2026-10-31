@@ -1,9 +1,16 @@
 import { clientAddress, rateLimit } from '../rate-limit';
 
-const request = (peer: string, forwarded = peer) => ({
+const request = (
+  peer: string,
+  forwarded = peer,
+  headers: Record<string, string> = {},
+) => ({
   ip: forwarded,
   socket: { remoteAddress: peer },
+  headers,
 });
+
+const STOREFRONT_SECRET = 'storefront-secret-0123456789abcdef';
 
 describe('clientAddress', () => {
   it('trusts the forwarded address only from a proxy on a private network', () => {
@@ -13,6 +20,44 @@ describe('clientAddress', () => {
     expect(clientAddress(request('198.51.100.7', '203.0.113.9') as never)).toBe(
       '198.51.100.7',
     );
+  });
+});
+
+describe('the storefront visitor', () => {
+  const storefront = '198.51.100.20';
+
+  beforeEach(() => {
+    process.env.SHOP_LEAD_SECRET = STOREFRONT_SECRET;
+  });
+
+  afterEach(() => {
+    delete process.env.SHOP_LEAD_SECRET;
+  });
+
+  it('keys a storefront call on the visitor it vouches for with the shop secret', () => {
+    expect(
+      clientAddress(
+        request(storefront, storefront, {
+          'x-shop-client': '203.0.113.5',
+          'x-shop-client-secret': STOREFRONT_SECRET,
+        }) as never,
+      ),
+    ).toBe('203.0.113.5');
+  });
+
+  it('ignores a visitor header without the secret, with a wrong one, or that is no address', () => {
+    for (const headers of <Record<string, string>[]>[
+      { 'x-shop-client': '203.0.113.5' },
+      { 'x-shop-client': '203.0.113.5', 'x-shop-client-secret': 'guess' },
+      {
+        'x-shop-client': 'everyone',
+        'x-shop-client-secret': STOREFRONT_SECRET,
+      },
+    ]) {
+      expect(
+        clientAddress(request(storefront, storefront, headers) as never),
+      ).toBe(storefront);
+    }
   });
 });
 

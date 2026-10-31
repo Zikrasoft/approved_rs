@@ -3,19 +3,21 @@ import { isDeepStrictEqual } from 'node:util';
 import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
+  InjectManager,
   InjectTransactionManager,
   MedusaContext,
   MedusaService,
 } from '@medusajs/framework/utils';
-import type { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
+import type { PartOffer, STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
-import { runBoundSql } from '../../lib/bound-sql';
-import { spellingKey } from '../../lib/suppliers/spelling';
+import { runBoundSql } from '../_shared/bound-sql';
+import { spellingKey } from '../_shared/spelling';
 
 import StagedRecord from './models/staged-record';
 import Supplier from './models/supplier';
 import SupplierCategory from './models/supplier-category';
 import SupplierOffer from './models/supplier-offer';
+import { storeOffers } from './pricing';
 
 const SupplierModuleBase = MedusaService({
   Supplier,
@@ -123,6 +125,26 @@ class SupplierModuleService extends SupplierModuleBase {
       [json, existing.id, json],
     );
     return this.retrieveStagedRecord(existing.id, {}, sharedContext);
+  }
+
+  @InjectManager()
+  async storeOffersFor(
+    identifierIds: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<Map<string, PartOffer[]>> {
+    const rows = identifierIds.length
+      ? await this.listSupplierOffers(
+          { part_identifier_id: identifierIds },
+          { relations: ['supplier'], take: null },
+          sharedContext,
+        )
+      : [];
+    return new Map(
+      identifierIds.map((id) => [
+        id,
+        storeOffers(rows.filter((row) => row.part_identifier_id === id)),
+      ]),
+    );
   }
 
   private async lockKey(key: unknown, sharedContext: Context): Promise<void> {

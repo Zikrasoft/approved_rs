@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { MedusaError } from '@medusajs/framework/utils';
 import { z } from 'zod';
 
-import { adminError } from '../admin-errors';
+import { adminError } from '../../modules/_shared/admin-error';
 import type { Bucket } from '../storage';
 import {
   type ArticleAnswer,

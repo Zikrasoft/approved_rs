@@ -1,6 +1,7 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
 import { z } from '@medusajs/framework/zod';
+import { CATALOGUE_ID_PATTERN } from '@podbor/catalog-contract';
 
 export const PUBLIC_ROUTE_PREFIXES = ['/store', '/auth'] as const;
 
@@ -65,7 +66,7 @@ export const refuseUnlistedRoute = (
     ? next()
     : next(new MedusaError(MedusaError.Types.NOT_FOUND, 'No such route'));
 
-const pathSegmentsSchema = z.array(z.string().regex(/^[\w-]{1,64}$/));
+const pathSegmentsSchema = z.array(z.string().regex(CATALOGUE_ID_PATTERN));
 
 export const refuseMalformedPath = (
   req: Pick<MedusaRequest, 'originalUrl'>,

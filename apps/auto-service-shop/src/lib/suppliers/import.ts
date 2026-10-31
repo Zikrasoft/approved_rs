@@ -17,8 +17,7 @@ import type {
   FoundPart,
   PartClassification,
 } from '../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../modules/supplier';
-import { inShopCurrency } from '../../modules/supplier/pricing';
+import { inShopCurrency, SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
   type ArticleAnswer,
@@ -43,7 +42,7 @@ import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
-import { spellingKey } from './spelling';
+import { spellingKey } from '../../modules/_shared/spelling';
 import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];

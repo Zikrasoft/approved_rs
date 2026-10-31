@@ -1,6 +1,5 @@
 import type {
   ICartModuleService,
-  ILockingModule,
   MedusaContainer,
 } from '@medusajs/framework/types';
 import {
@@ -21,7 +20,6 @@ import {
   CATALOG_TRANSLATION_LOCALES,
   cartFingerprint,
   cartTotals,
-  checkoutContactSchema,
   orderCap,
   orderLineTitle,
   partPageSlug,
@@ -31,8 +29,6 @@ import {
   type OfferCart,
 } from '@podbor/catalog-contract';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
-
-import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -46,19 +42,23 @@ import {
   type CartRefusal,
   type Quote,
 } from './cart-plan';
-import {
-  CASH_AT_PICKUP_METADATA,
-  CASH_AT_PICKUP_PROVIDER_ID,
-} from './commerce-defaults';
+import { CASH_AT_PICKUP_PROVIDER_ID } from './commerce-defaults';
 import { installationPrice } from './installation';
+import { type Lock, lockedBy, lockOf } from './lock';
 import {
   addonLineMetadata,
   offerLineMetadata,
   withParentOffers,
   readLine,
 } from './line-metadata';
+import {
+  cashAtPickupMetadata,
+  checkoutMetadata,
+  readOrder,
+  type CheckoutContactFields,
+} from './order-metadata';
 import { liveOffers, sellingOffers } from './suppliers/live-quote';
-import { storeOffers } from '../modules/supplier/pricing';
+import { storeOffers } from '../modules/supplier';
 import { carFor } from './vin/car-for';
 
 const offerIdOf = (item: CartItem) =>
@@ -255,18 +255,16 @@ const openCart = async (scope: MedusaContainer, cartId: string) => {
   return cart;
 };
 
-const CART_LOCK_TIMEOUT_SECONDS = 30;
+const CART_LOCK = 'offer-cart';
 
 const locked =
   <Args extends unknown[], T>(
     job: (scope: MedusaContainer, cartId: string, ...args: Args) => Promise<T>,
   ) =>
   (scope: MedusaContainer, cartId: string, ...args: Args): Promise<T> =>
-    scope
-      .resolve<ILockingModule>(Modules.LOCKING)
-      .execute(`offer-cart:${cartId}`, () => job(scope, cartId, ...args), {
-        timeout: CART_LOCK_TIMEOUT_SECONDS,
-      });
+    lockedBy(lockOf(scope), CART_LOCK)((id: string) => job(scope, id, ...args))(
+      cartId,
+    );
 
 export const removeOfferLine = locked(
   async (scope, cartId, itemId: string): Promise<OfferCart> => {
@@ -475,7 +473,7 @@ export async function createOfferCart(
     await sellableOffer(scope, offer_id, quantity);
   }
   const { result } = await createCartWorkflow(scope).run({
-    input: { email, metadata: CASH_AT_PICKUP_METADATA },
+    input: { email, metadata: cashAtPickupMetadata() },
   });
   if (offer_id) {
     await putOffer(scope, result.id, offer_id, quantity);
@@ -522,75 +520,121 @@ const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
     'The price changed for a line in the cart. Reprice the cart before completing checkout.',
 };
 
-async function judgedPlan(
-  scope: MedusaContainer,
-  items: CartItem[],
-): Promise<CartPlan> {
-  const plan = await planOf(scope, items);
-  const refusal = checkoutRefusal(plan);
-  if (refusal) {
-    refuse(refusal, REFUSAL_MESSAGES[refusal]);
-  }
-  return plan;
+const fingerprintOf = (items: CartItem[]) =>
+  cartFingerprint(
+    items.map((item) => ({
+      id: item.id,
+      quantity: Number(item.quantity),
+      unit_price: Number(item.unit_price),
+    })),
+  );
+
+type CheckoutCart = {
+  id: string;
+  completed_at?: unknown;
+  metadata?: Record<string, unknown> | null;
+  items?: CartItem[] | null;
+};
+
+export type PlacedOrderId = { id: string; display_id: number };
+
+export interface CheckoutDeps {
+  lock: Lock;
+  cart: (cartId: string) => Promise<CheckoutCart>;
+  plan: (items: CartItem[]) => Promise<CartPlan>;
+  stamp: (stamps: CartPlan['stamps']) => Promise<void>;
+  carFor: (vin: string | undefined) => Promise<string | null>;
+  saveMetadata: (
+    cartId: string,
+    metadata: Record<string, unknown>,
+  ) => Promise<void>;
+  complete: (cartId: string) => Promise<PlacedOrderId>;
 }
 
-const judgedCarts = new Set<string>();
-
-export async function refuseCheckout(
-  scope: MedusaContainer,
-  cart: {
-    id: string;
-    metadata?: Record<string, unknown> | null;
-    items?: unknown[] | null;
-  },
-): Promise<void> {
-  if (!checkoutContactSchema.safeParse(cart.metadata ?? {}).success) {
-    refuse('CONTACT_MISSING', 'The order has no contact.');
+export function createCheckout({
+  lock,
+  cart: cartOf,
+  plan,
+  stamp,
+  carFor: carOf,
+  saveMetadata,
+  complete,
+}: CheckoutDeps) {
+  async function judgedPlan(items: CartItem[]): Promise<CartPlan> {
+    const judged = await plan(items);
+    const refusal = checkoutRefusal(judged);
+    if (refusal) {
+      refuse(refusal, REFUSAL_MESSAGES[refusal]);
+    }
+    return judged;
   }
-  if (judgedCarts.has(cart.id)) return;
-  await judgedPlan(scope, (cart.items ?? []) as CartItem[]);
-}
 
-export const checkout = locked(
-  async (
-    scope,
+  async function refuseCheckout(cart: CheckoutCart): Promise<void> {
+    const { contact, plannedFingerprint } = readOrder(cart.metadata);
+    if (!contact) {
+      refuse('CONTACT_MISSING', 'The order has no contact.');
+    }
+    const items = cart.items ?? [];
+    if (plannedFingerprint === fingerprintOf(items)) return;
+    await judgedPlan(items);
+  }
+
+  const checkout = lockedBy(
+    lock,
+    CART_LOCK,
+  )(async (
     cartId,
     {
       contact,
       fingerprint,
-    }: { contact: z.output<typeof checkoutContactSchema>; fingerprint: string },
-  ): Promise<{ id: string; display_id: number }> => {
-    const cart = await retrieveCart(scope, cartId);
-    const current = cartFingerprint(
-      (cart.items ?? []).map((item) => ({
-        id: item.id,
-        quantity: Number(item.quantity),
-        unit_price: Number(item.unit_price),
-      })),
-    );
-    if (fingerprint !== current) {
+    }: { contact: CheckoutContactFields; fingerprint: string },
+  ): Promise<PlacedOrderId> => {
+    const cart = await cartOf(cartId);
+    const items = cart.items ?? [];
+    if (fingerprint !== fingerprintOf(items)) {
       refuse('CART_CHANGED', 'The cart changed since it was shown.');
     }
     if (!cart.completed_at) {
-      await applyStamps(scope, (await judgedPlan(scope, cart.items)).stamps);
-      const car = await carFor(scope, contact.vin);
+      await stamp((await judgedPlan(items)).stamps);
+      await saveMetadata(
+        cartId,
+        checkoutMetadata(
+          cart.metadata,
+          contact,
+          await carOf(contact.vin),
+          fingerprint,
+        ),
+      );
+    }
+    return complete(cartId);
+  });
+
+  return { checkout, refuseCheckout };
+}
+
+export const offerCheckout = (scope: MedusaContainer) =>
+  createCheckout({
+    lock: lockOf(scope),
+    cart: (cartId) => retrieveCart(scope, cartId),
+    plan: (items) => planOf(scope, items),
+    stamp: (stamps) => applyStamps(scope, stamps),
+    carFor: (vin) => carFor(scope, vin),
+    async saveMetadata(cartId, metadata) {
       await scope
         .resolve<ICartModuleService>(Modules.CART)
-        .updateCarts(cartId, {
-          metadata: { ...cart.metadata, ...contact, car },
-        });
-    }
-    judgedCarts.add(cartId);
-    const { result } = await completeCartWorkflow(scope)
-      .run({ input: { id: cartId } })
-      .finally(() => judgedCarts.delete(cartId));
-    const {
-      data: [order],
-    } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: 'order',
-      filters: { id: result.id },
-      fields: ['id', 'display_id'],
-    });
-    return { id: order.id, display_id: Number(order.display_id) };
-  },
-);
+        .updateCarts(cartId, { metadata });
+    },
+    async complete(cartId) {
+      const { result } = await completeCartWorkflow(scope).run({
+        input: { id: cartId },
+      });
+      const {
+        data: [order],
+      } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: 'order',
+        filters: { id: result.id },
+        fields: ['id', 'display_id'],
+      });
+      return { id: order.id, display_id: Number(order.display_id) };
+    },
+  });
