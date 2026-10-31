@@ -221,6 +221,18 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(404);
       });
+
+      it('refuses a vehicle_id longer than any id without echoing it', async () => {
+        const response = await api
+          .get(
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&vehicle_id=${'x'.repeat(5000)}`,
+            storeHeaders,
+          )
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
+        expect(JSON.stringify(response.data)).not.toContain('x'.repeat(65));
+      });
     });
   },
 });
