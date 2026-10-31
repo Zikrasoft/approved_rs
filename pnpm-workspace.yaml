@@ -33,3 +33,4 @@ packageExtensions:
       uuid: 11.1.1
 overrides:
   zod@4: 4.6.7
+  devalue@5: 5.9.4
