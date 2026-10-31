@@ -4,6 +4,8 @@ import {
   YANDEX_METRIKA_ORIGIN,
 } from './analyticsHosts.ts';
 
+const CSP_REPORT_PATH = '/api/csp-report';
+
 const directives: Record<string, string[]> = {
   'default-src': ["'self'"],
   'script-src': [
@@ -46,6 +48,7 @@ const directives: Record<string, string[]> = {
   'object-src': ["'none'"],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
+  'report-uri': [CSP_REPORT_PATH],
 };
 
 export const CONTENT_SECURITY_POLICY = Object.entries(directives)
