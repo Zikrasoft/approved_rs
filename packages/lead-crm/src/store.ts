@@ -189,19 +189,31 @@ function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
 
 const MAX_STORED_COMMENT_LENGTH = 4000;
 
-function triedLabel(data: LeadInput): string {
-  if (data.services?.length) return data.services.map(serviceLabel).join(', ');
-  if (data.service) return serviceLabel(data.service);
+function triedLabel(data: LeadInput, existing: StoredLead): string {
+  const had = new Set([existing.service, ...existing.services]);
+  const services = (data.services?.length ? data.services : [data.service])
+    .filter(Boolean)
+    .filter((service) => !had.has(service));
+  if (services.length) return services.map(serviceLabel).join(', ');
+  if (data.service) return '';
   return data.kind === 'call_click' && data.contactChannel
     ? channelLabel(data.contactChannel)
     : '';
 }
 
+const newLines = (
+  comment: string | null | undefined,
+  added: string | null | undefined,
+): string[] => {
+  const held = new Set(comment?.split('\n'));
+  return (added?.trim().split('\n') ?? []).filter((line) => !held.has(line));
+};
+
 export function appendNote(
   comment: string | null | undefined,
   note: string,
 ): string {
-  const next = comment ? `${comment}\n${note}` : note;
+  const next = comment && note ? `${comment}\n${note}` : comment || note;
   return next.slice(-MAX_STORED_COMMENT_LENGTH);
 }
 
@@ -453,7 +465,7 @@ export function createLeadStore({
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
           data.contactChannel === existing.contactChannel;
-        const tried = botHandOff ? '' : triedLabel(data);
+        const tried = botHandOff ? '' : triedLabel(data, existing);
         const clickedFirst =
           upgradeContact &&
           !botHandOff &&
@@ -490,7 +502,7 @@ export function createLeadStore({
             [
               clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
               tried ? `Также пробовал: ${tried}` : '',
-              data.comment?.trim(),
+              ...newLines(existing.comment, data.comment),
             ]
               .filter(Boolean)
               .join('\n'),

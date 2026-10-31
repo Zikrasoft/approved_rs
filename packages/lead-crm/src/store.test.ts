@@ -217,6 +217,27 @@ describe('insertOrMergeLead', () => {
     expect(lead.comment).not.toContain('Также пробовал');
   });
 
+  it('repeats neither the service the lead has nor a line it already holds', async () => {
+    const inquiry = {
+      brand: 'Test',
+      name: 'Иван',
+      contact: '@ivan',
+      service: 'polishing',
+      services: ['polishing'],
+      comment: 'VIN: WBA35BG070N074158',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    };
+    await store.insertOrMergeLead(inquiry);
+    await store.insertOrMergeLead(inquiry);
+    const { lead } = await store.insertOrMergeLead({
+      ...inquiry,
+      comment: 'VIN: WBA35BG070N074158\nНужен масляный фильтр',
+    });
+
+    expect(lead.comment).toBe('VIN: WBA35BG070N074158\nНужен масляный фильтр');
+  });
+
   it('writes no note for a click whose channel never reached the record', async () => {
     await store.insertOrMergeLead(clickData('telegram'));
     const { lead } = await store.insertOrMergeLead({
