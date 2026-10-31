@@ -7,7 +7,6 @@ import {
   type CarHit,
   type CarKind,
   makeHasPage,
-  MIN_PARTS_FOR_PAGE,
   modelHasPage,
   vehicleHasPage,
 } from '@podbor/catalog-contract';
@@ -143,16 +142,8 @@ export function carsWithPages(
     models: models.map(([row]) => row),
     vehicles: models.flatMap((rows) => {
       const modelParts = partsFitting(rows);
-      const parts = rows.map((row) => partsFitting([row]));
-      const modelVehiclesWithEnoughParts = parts.filter(
-        (count) => count >= MIN_PARTS_FOR_PAGE,
-      ).length;
-      return rows.filter((_, index) =>
-        vehicleHasPage({
-          parts: parts[index],
-          modelParts,
-          modelVehiclesWithEnoughParts,
-        }),
+      return rows.filter((row) =>
+        vehicleHasPage({ parts: partsFitting([row]), modelParts }),
       );
     }),
   };

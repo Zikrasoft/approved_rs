@@ -864,7 +864,7 @@ describe('which catalogue places get a page', () => {
     ).toEqual([['bmw', ['f30-320d']]]);
   });
 
-  it('gives a Vehicle a page only beside another Vehicle of its Model that has one', async () => {
+  it('gives a Vehicle a page from three Parts, alone in its Model too', async () => {
     const parts = filters('C', 3);
     const f30a = car('veh_f30a');
     const f30b = car('veh_f30b');
@@ -884,6 +884,7 @@ describe('which catalogue places get a page', () => {
     expect((await shop.carPages()).map(({ vehicle }) => vehicle.id)).toEqual([
       'veh_f30a',
       'veh_f30b',
+      'veh_g20',
     ]);
     expect(
       (await shop.makeHubs())[0].models.map(({ model }) => model.slug),
@@ -917,7 +918,7 @@ describe('which catalogue places get a page', () => {
     expect(links.model(e90.model)).toBeNull();
     expect(links.vehicle(f30a)).toBe('/sr/parts/bmw/f30-320d/m/veh_f30a-kw/');
     expect(links.vehicle(f30thin)).toBeNull();
-    expect(links.vehicle(g20)).toBeNull();
+    expect(links.vehicle(g20)).toBe('/sr/parts/bmw/g20-320d/m/veh_g20-kw/');
   });
 
   it('keeps a Make without a Model page off, and names the rest in display-name order', async () => {

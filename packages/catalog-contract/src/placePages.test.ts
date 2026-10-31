@@ -16,19 +16,10 @@ describe('which catalogue places get a page', () => {
     expect(modelHasPage(2)).toBe(false);
   });
 
-  it('gives a Vehicle a page with three Parts beside another such Vehicle of a Model with a page', () => {
-    const vehicle = {
-      parts: 3,
-      modelParts: 4,
-      modelVehiclesWithEnoughParts: 2,
-    };
-
-    expect(vehicleHasPage(vehicle)).toBe(true);
-    expect(vehicleHasPage({ ...vehicle, parts: 2 })).toBe(false);
-    expect(
-      vehicleHasPage({ ...vehicle, modelVehiclesWithEnoughParts: 1 }),
-    ).toBe(false);
-    expect(vehicleHasPage({ ...vehicle, modelParts: 2 })).toBe(false);
+  it('gives a Vehicle a page from three Parts, alone in its Model too', () => {
+    expect(vehicleHasPage({ parts: 3, modelParts: 3 })).toBe(true);
+    expect(vehicleHasPage({ parts: 2, modelParts: 4 })).toBe(false);
+    expect(vehicleHasPage({ parts: 3, modelParts: 2 })).toBe(false);
   });
 
   it('gives a Make a page while one of its Models has one', () => {
