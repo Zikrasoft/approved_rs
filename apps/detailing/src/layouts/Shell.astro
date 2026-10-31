@@ -174,7 +174,9 @@ const businessSchema = localBusinessSchema({
     >
     <SiteHeader />
     <main id="main">
-      <slot />
+      <scroll-reveal class="contents">
+        <slot />
+      </scroll-reveal>
     </main>
     <SiteFooter />
     <LeadModal />
@@ -183,37 +185,10 @@ const businessSchema = localBusinessSchema({
     <CookieConsent />
 
     <script>
-      const reduced = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches;
-      const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
-
-      if (reduced || !('IntersectionObserver' in window)) {
-        targets.forEach((el) => el.classList.add('is-in'));
-      } else {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              const el = entry.target as HTMLElement;
-              const delay = Number(el.dataset.revealDelay ?? 0);
-              window.setTimeout(() => el.classList.add('is-in'), delay);
-              observer.unobserve(el);
-            });
-          },
-          { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
-        );
-        targets.forEach((el) => observer.observe(el));
-
-        window.setTimeout(() => {
-          if (document.querySelector('[data-reveal].is-in')) return;
-          targets.forEach((el) => el.classList.add('is-in'));
-        }, 2000);
-      }
-    </script>
-
-    <script>
-      import { bootSiteKit } from '@podbor/site-kit/browser';
+      import {
+        bootSiteKit,
+        defineScrollReveal,
+      } from '@podbor/site-kit/browser';
       import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import {
         GA_MEASUREMENT_ID,
@@ -228,6 +203,7 @@ const businessSchema = localBusinessSchema({
         analytics: !import.meta.env.DEV,
       });
       defineSiteLeadForm();
+      defineScrollReveal();
     </script>
   </body>
 </html>
