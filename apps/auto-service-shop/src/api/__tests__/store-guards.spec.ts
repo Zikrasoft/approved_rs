@@ -2,6 +2,8 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+process.env.STORE_WRITES_PER_MINUTE = '120';
+
 medusaIntegrationTestRunner({
   moduleName: 'store-guards',
   dbName: 'medusa-store-guards',

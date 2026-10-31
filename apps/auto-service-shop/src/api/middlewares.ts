@@ -39,6 +39,7 @@ import {
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
+import { parseEnv } from '../lib/env';
 import { rateLimit } from '../lib/rate-limit';
 import { refuseClosedShop } from '../lib/shop-gate';
 import {
@@ -68,8 +69,17 @@ import {
 
 const STORE_BODY_LIMIT = '32kb';
 const MINUTE_MS = 60_000;
-const storeWrites = rateLimit({ limit: 120, windowMs: MINUTE_MS });
-const storeSearches = rateLimit({ limit: 600, windowMs: MINUTE_MS });
+const { STORE_WRITES_PER_MINUTE, STORE_SEARCHES_PER_MINUTE } = parseEnv(
+  process.env,
+);
+const storeWrites = rateLimit({
+  limit: STORE_WRITES_PER_MINUTE,
+  windowMs: MINUTE_MS,
+});
+const storeSearches = rateLimit({
+  limit: STORE_SEARCHES_PER_MINUTE,
+  windowMs: MINUTE_MS,
+});
 
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,

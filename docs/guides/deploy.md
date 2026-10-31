@@ -898,7 +898,10 @@ number gets its CI value in that script. The non-obvious parts:
   how many articles are asked at once; vehicle fitting still runs one article
   at a time. `LIVE_QUOTE_CACHE_SECONDS` (empty means 60, 0 turns it off) is how
   long a part's offer view reuses a supplier's live quote; the cart and checkout
-  always quote afresh. An answer's attributes that do not fit its Category are dropped one
+  always quote afresh. `STORE_WRITES_PER_MINUTE` (empty means 120) and
+  `STORE_SEARCHES_PER_MINUTE` (empty means 600) are the per-client limits on
+  store cart/VIN writes and on search; storefront traffic arrives from Vercel's
+  shared egress, so they are an aggregate ceiling there. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in

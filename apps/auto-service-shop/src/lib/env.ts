@@ -80,6 +80,12 @@ const envFields = z.object({
   IMPORT_CONCURRENCY: optionalValue
     .transform((articles) => Number(articles ?? 4))
     .pipe(z.number().int().positive()),
+  STORE_WRITES_PER_MINUTE: optionalValue
+    .transform((count) => Number(count ?? 120))
+    .pipe(z.number().int().positive()),
+  STORE_SEARCHES_PER_MINUTE: optionalValue
+    .transform((count) => Number(count ?? 600))
+    .pipe(z.number().int().positive()),
   LIVE_QUOTE_CACHE_SECONDS: optionalValue
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
