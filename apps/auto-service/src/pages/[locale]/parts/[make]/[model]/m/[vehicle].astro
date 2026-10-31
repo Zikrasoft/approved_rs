@@ -177,9 +177,15 @@ const specsSummary = [
                   data-quantity={item.quantity}
                 >
                   <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
-                    <span class="text-xs text-muted">
-                      {translated(item.category, 'name', locale)}
-                    </span>
+                    {!translated(item.part, 'name', locale)
+                      .toLowerCase()
+                      .startsWith(
+                        translated(item.category, 'name', locale).toLowerCase(),
+                      ) && (
+                      <span class="text-xs text-muted">
+                        {translated(item.category, 'name', locale)}
+                      </span>
+                    )}
                     <span class="text-sm text-ink">
                       {translated(item.part, 'name', locale)}
                     </span>
