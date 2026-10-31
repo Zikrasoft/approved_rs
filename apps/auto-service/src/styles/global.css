@@ -5,7 +5,16 @@
 
 @custom-variant offers-pending {
   @media (scripting: enabled) {
-    part-offers:is(:not(:defined), [aria-busy='true']) & {
+    :root:not([data-offers-late]) part-offers:not(:defined) &,
+    part-offers[aria-busy='true'] & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant offers-late {
+  @media (scripting: enabled) {
+    :root[data-offers-late] part-offers:not(:defined) & {
       @slot;
     }
   }

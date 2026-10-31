@@ -182,7 +182,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         receipt: OfferCart | null,
         contact: ReturnType<typeof checkoutContact>,
       ): void {
-        const { orderedHeading, orderTemplate = '' } = this.dataset;
+        const {
+          orderedHeading,
+          orderTemplate = '',
+          localeTag = 'sr',
+        } = this.dataset;
         const contactTemplates = JSON.parse(
           this.dataset.orderedContact ?? '{}',
         ) as Record<string, string>;
@@ -200,6 +204,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           this,
           '[data-order-number]',
           orderNumber && orderTemplate.replace('{number}', orderNumber),
+        );
+        fill(
+          this,
+          '[data-order-date]',
+          new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
         );
         if (receipt) this.receipt(receipt);
         this.show('ordered');

@@ -347,6 +347,21 @@ describe('catalogue.placeOrder', () => {
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
+  it('gives both attempts one deadline, so a hanging shop holds checkout once', async () => {
+    const fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockImplementation(() => status(500));
+
+    await catalog(fetch).placeOrder('cart_1', contact, SEEN);
+
+    const [first, second] = fetch.mock.calls.map(
+      (call: unknown[]) => (call[1] as RequestInit).signal,
+    );
+    expect(first).toBeInstanceOf(AbortSignal);
+    expect(second).toBe(first);
+  });
+
   it.each([
     ['an unexplained error', () => vi.fn(() => status(500))],
     ['an unreachable backend', unreachable],

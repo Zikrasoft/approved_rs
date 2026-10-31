@@ -36,6 +36,10 @@ const priced = page.offers.length > 0 && !closed;
 const summary = offerSummary(page.offers);
 const { best, others } = summary;
 const localeTag = BCP47_BY_LOCALE[locale];
+const askHref = PathBuilder.partsInquiry(
+  locale,
+  `${page.brand.name} ${page.value}`,
+);
 ---
 
 {
@@ -62,7 +66,7 @@ const localeTag = BCP47_BY_LOCALE[locale];
         <slot name="heading">{copy.offersHeading}</slot>
       </h2>
       <ul class="flex flex-col" data-offers>
-        {best && <OfferRow offer={best} inFlow />}
+        {best && <OfferRow offer={best} inFlow askHref={askHref} />}
       </ul>
       <PickupLine />
       <details class="group/more" data-more hidden={others.length === 0}>
@@ -86,12 +90,12 @@ const localeTag = BCP47_BY_LOCALE[locale];
           data-more-offers
         >
           {others.map((offer) => (
-            <OfferRow offer={offer} secondary />
+            <OfferRow offer={offer} secondary askHref={askHref} />
           ))}
         </ul>
       </details>
       <template data-offer>
-        <OfferRow />
+        <OfferRow askHref={askHref} />
       </template>
       <div aria-live="polite">
         <div data-status="added" hidden class={status}>
@@ -122,6 +126,11 @@ const localeTag = BCP47_BY_LOCALE[locale];
     </part-offers>
   )
 }
+<script is:inline>
+  setTimeout(() => {
+    document.documentElement.dataset.offersLate = '';
+  }, 4000);
+</script>
 {
   !priced && (
     <div
@@ -139,7 +148,7 @@ const localeTag = BCP47_BY_LOCALE[locale];
       <p class="text-sm leading-relaxed text-ink-2">{copy.orderBody}</p>
       <parts-list-add class="mt-1 block" {...part} {...contactCta}>
         <a
-          href={PathBuilder.partsInquiry(locale)}
+          href={askHref}
           {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
           class:list={[
             'btn w-full sm:w-auto',

@@ -156,6 +156,10 @@ export function definePartOffers(tagName = 'part-offers'): void {
           return;
         }
         if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
+        button.hidden = true;
+        button.parentElement
+          ?.querySelector('[data-ask]')
+          ?.classList.remove('hidden');
         this.addToInquiry();
         showOnly(this, 'data-status', 'inquiry');
       }

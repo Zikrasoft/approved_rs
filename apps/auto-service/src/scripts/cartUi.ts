@@ -7,7 +7,7 @@ export const getJson = async <T>(
   init?: RequestInit,
 ): Promise<T | null> => {
   try {
-    const response = await fetch(url, init);
+    const response = await fetch(url, { cache: 'no-store', ...init });
     if (!response.ok) return null;
     const parsed = schema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;

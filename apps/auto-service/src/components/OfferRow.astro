@@ -5,17 +5,17 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
-import { PathBuilder } from '@/utils/paths';
 import { contactCta } from '@podbor/site-kit/contact-control';
 
 interface Props {
   offer?: PartOffer;
   secondary?: boolean;
   inFlow?: boolean;
+  askHref: string;
 }
 
-const { offer, secondary = false, inFlow = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
+const { offer, secondary = false, inFlow = false, askHref } = Astro.props;
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const { stock, lead, buyable } = offer
@@ -62,7 +62,7 @@ const { stock, lead, buyable } = offer
     <button
       type="button"
       class:list={[
-        'btn w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
+        'btn w-full offers-pending:hidden! offers-late:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
         secondary ? 'btn-secondary' : 'btn-primary',
       ]}
       data-buy
@@ -72,9 +72,9 @@ const { stock, lead, buyable } = offer
       <span data-label>{copy.buyButtonLabel}</span>
     </button>
     <a
-      href={PathBuilder.partsInquiry(locale)}
+      href={askHref}
       class:list={[
-        'btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!',
+        'btn btn-secondary w-full offers-pending:hidden! offers-late:inline-flex! noscript:inline-flex!',
         buyable && 'hidden',
       ]}
       data-ask

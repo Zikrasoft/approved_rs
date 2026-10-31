@@ -66,6 +66,12 @@ export function catalogueFromEnv(
     : null;
 }
 
+export const uncachedJson = (body: unknown, init?: ResponseInit) =>
+  Response.json(body, {
+    ...init,
+    headers: { 'cache-control': 'no-store' },
+  });
+
 export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,

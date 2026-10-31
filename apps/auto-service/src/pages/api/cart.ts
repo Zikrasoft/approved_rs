@@ -6,7 +6,7 @@ import { previewRequested } from '@/utils/shopPreview';
 import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { CartOutcome } from '@/utils/catalogueWire';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import { catalogueFromEnv, siteEnv, uncachedJson } from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
 
@@ -41,20 +41,20 @@ const catalogue = (request: Request) =>
   });
 
 const BAD_REQUEST = () =>
-  Response.json({ error: 'bad request' }, { status: 400 });
+  uncachedJson({ error: 'bad request' }, { status: 400 });
 
 const respond = async (
   outcome: (() => Promise<CartOutcome> | undefined) | null,
 ) => {
   if (!outcome) return BAD_REQUEST();
-  return Response.json((await outcome()) ?? INQUIRY);
+  return uncachedJson((await outcome()) ?? INQUIRY);
 };
 
 const body = (request: Request) => request.json().catch(() => null);
 
 export const GET: APIRoute = ({ url, request }) => {
   const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));
-  if (!id.success) return Response.json(EMPTY);
+  if (!id.success) return uncachedJson(EMPTY);
   return respond(() => catalogue(request)?.viewCart(id.data));
 };
 
@@ -75,7 +75,7 @@ export const POST: APIRoute = async ({ request }) => {
 export const PATCH: APIRoute = async ({ request }) => {
   const change = quantitySchema.safeParse(await body(request));
   if (change.success && change.data.quantity > MAX_LINE_QUANTITY) {
-    return Response.json({
+    return uncachedJson({
       kind: 'refused',
       code: 'OFFER_OUT_OF_STOCK',
       cartId: change.data.cart_id,

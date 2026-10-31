@@ -52,7 +52,13 @@ const { pages, shopCart } = content(locale);
 </Shell>
 
 <script>
-  if (/^\/[^/]+\/parts\//.test(location.pathname)) {
+  const { pathname, search, hash } = location;
+  if (
+    /^\/[^/]+\/parts\/p\//i.test(pathname) &&
+    pathname !== pathname.toLowerCase()
+  ) {
+    location.replace(`${pathname.toLowerCase()}${search}${hash}`);
+  } else if (/^\/[^/]+\/parts\//.test(pathname)) {
     document.querySelector<HTMLElement>('[data-parts-404]')!.hidden = false;
     document.querySelector<HTMLElement>('[data-site-body]')!.hidden = true;
   }
