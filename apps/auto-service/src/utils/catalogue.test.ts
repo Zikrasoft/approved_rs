@@ -1324,6 +1324,57 @@ describe('catalogueFromEnv', () => {
   ])('refuses a backend configured %s', (_, env) => {
     expect(() => catalogueFromEnv(env)).toThrow();
   });
+
+  describe('the visitor behind a call', () => {
+    const SHOP = {
+      MEDUSA_BACKEND_URL: 'http://shop.test',
+      MEDUSA_PUBLISHABLE_KEY: 'pk_test',
+    };
+    const visitor = new Request('https://carlab.rs/api/cart', {
+      headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' },
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    const headersSent = async (env: CatalogueEnv, request?: Request) => {
+      const fetch = vi.fn((_url: string, _init?: RequestInit) =>
+        respond({ vehicles: [], next: null }),
+      );
+      vi.stubGlobal('fetch', fetch);
+      await catalogueFromEnv(env, { visitor: request })
+        ?.resolveVin(VIN)
+        .catch(() => undefined);
+      return new Headers(fetch.mock.calls[0]?.[1]?.headers);
+    };
+
+    it('names the visitor to the shop, vouched for with the shop secret', async () => {
+      const headers = await headersSent(
+        { ...SHOP, SHOP_LEAD_SECRET: 'secret' },
+        visitor,
+      );
+
+      expect(headers.get('x-shop-client')).toBe('203.0.113.5');
+      expect(headers.get('x-shop-client-secret')).toBe('secret');
+    });
+
+    it('names nobody without the secret, without a visitor, or for an address that is none', async () => {
+      for (const sent of [
+        await headersSent(SHOP, visitor),
+        await headersSent({ ...SHOP, SHOP_LEAD_SECRET: 'secret' }),
+        await headersSent(
+          { ...SHOP, SHOP_LEAD_SECRET: 'secret' },
+          new Request('https://carlab.rs/', {
+            headers: { 'x-real-ip': 'everyone' },
+          }),
+        ),
+      ]) {
+        expect(sent.has('x-shop-client')).toBe(false);
+        expect(sent.has('x-shop-client-secret')).toBe(false);
+      }
+    });
+  });
 });
 
 describe('catalogue.resolveVin', () => {

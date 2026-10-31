@@ -17,6 +17,7 @@ export const GET: APIRoute = async ({ url, request }) => {
   const outcome = id.success
     ? await catalogueFromEnv(siteEnv(), {
         preview: previewRequested(request),
+        visitor: request,
       })?.liveOffers(id.data)
     : undefined;
   return uncachedJson(outcome ?? INQUIRY);

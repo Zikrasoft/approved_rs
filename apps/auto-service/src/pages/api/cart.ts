@@ -44,6 +44,7 @@ const EMPTY: CartOutcome = { kind: 'empty' };
 const catalogue = (request: Request) =>
   catalogueFromEnv(siteEnv(), {
     preview: previewRequested(request),
+    visitor: request,
   });
 
 const BAD_REQUEST = () =>

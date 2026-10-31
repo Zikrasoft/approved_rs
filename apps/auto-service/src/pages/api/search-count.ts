@@ -36,7 +36,10 @@ export const GET: APIRoute = async ({ url, request }) => {
       parsed.data.category ||
       parsed.data.model);
   const catalogue = scoped
-    ? catalogueFromEnv(siteEnv(), { preview: previewRequested(request) })
+    ? catalogueFromEnv(siteEnv(), {
+        preview: previewRequested(request),
+        visitor: request,
+      })
     : null;
   if (!parsed.success || !catalogue) {
     return Response.json({ count: null });

@@ -2,6 +2,10 @@ import { z } from 'zod';
 
 export const SHOP_PREVIEW_HEADER = 'x-shop-preview';
 
+export const SHOP_CLIENT_HEADER = 'x-shop-client';
+
+export const SHOP_CLIENT_SECRET_HEADER = 'x-shop-client-secret';
+
 export const shopPreviewTokenSchema = z
   .string()
   .regex(

@@ -30,7 +30,10 @@ export const GET: APIRoute = async ({ url, request }) => {
     return Response.json({ ...NOTHING, vin: true });
   }
   const catalogue = searchableQuery(q)
-    ? catalogueFromEnv(siteEnv(), { preview: previewRequested(request) })
+    ? catalogueFromEnv(siteEnv(), {
+        preview: previewRequested(request),
+        visitor: request,
+      })
     : null;
   if (!catalogue) {
     return Response.json(NOTHING);

@@ -359,11 +359,11 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
-| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                    |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                                                                 |
+| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                                                                    |
+| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                                                                       |
+| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401, all shoppers share one store rate-limit bucket |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -382,7 +382,10 @@ refuses any Lead naming an Order without it, so a visitor cannot attach a Lead
 to someone else's Order. The same secret goes the other way for «Сделать кейс»: carlab.rs's
 `/api/admin/work-draft` reads `GET /hooks/carlab-orders/:id/case-summary` from
 `MEDUSA_BACKEND_URL` with it, and the shop answers only with the car, the Parts
-and the RSD total of a completed Order. The draft Work is then committed with
+and the RSD total of a completed Order. Every catalogue call carlab.rs makes
+for a visitor carries it too, in `x-shop-client-secret`, so the shop's store
+rate limits count the visitor named in `x-shop-client` instead of Vercel's
+egress. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
 
@@ -900,8 +903,13 @@ number gets its CI value in that script. The non-obvious parts:
   long a part's offer view reuses a supplier's live quote; the cart and checkout
   always quote afresh. `STORE_WRITES_PER_MINUTE` (empty means 120) and
   `STORE_SEARCHES_PER_MINUTE` (empty means 600) are the per-client limits on
-  store cart/VIN writes and on search; storefront traffic arrives from Vercel's
-  shared egress, so they are an aggregate ceiling there. An answer's attributes that do not fit its Category are dropped one
+  store cart/VIN writes and on search. Storefront traffic arrives from Vercel's
+  shared egress, so carlab.rs names the visitor behind each call: its
+  server-side catalogue sends the visitor's address (`x-real-ip`, else the
+  first `x-forwarded-for` hop) as `x-shop-client` beside
+  `x-shop-client-secret: $SHOP_LEAD_SECRET`, and the shop counts that visitor
+  only when the secret matches `SHOP_LEAD_SECRET` or `SHOP_LEAD_SECRET_PREVIOUS`.
+  Without the secret on both sides every shopper shares one bucket again. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in

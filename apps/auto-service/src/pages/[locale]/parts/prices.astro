@@ -84,7 +84,9 @@ if (!body?.success) {
   return new Response(null, { status: 400 });
 }
 const catalogue =
-  preview || shopOpen() ? catalogueFromEnv(siteEnv(), { preview }) : null;
+  preview || shopOpen()
+    ? catalogueFromEnv(siteEnv(), { preview, visitor: Astro.request })
+    : null;
 if (!catalogue) {
   return new Response(null, { status: 204 });
 }

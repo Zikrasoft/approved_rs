@@ -77,6 +77,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   const outcome = order.success
     ? await catalogueFromEnv(siteEnv(), {
         preview: previewRequested(request),
+        visitor: request,
       })?.placeOrder(
         order.data.cart_id,
         contact.data,
