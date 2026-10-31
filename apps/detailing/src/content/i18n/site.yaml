@@ -68,6 +68,7 @@ form:
   privacyNote: Принимаю
   privacyLinkText: политику конфиденциальности
   errorTelegram: Укажите @username в Telegram или номер телефона
+  errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
   errorPhone: Введите корректный номер телефона
   errorConsent: Отметьте согласие, чтобы отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз

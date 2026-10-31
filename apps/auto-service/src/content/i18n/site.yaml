@@ -66,6 +66,7 @@ form:
   errorPhone: Проверьте номер, кажется, он введен не полностью
   errorPhoneTooLong: Проверьте номер, в нем лишние цифры
   errorTelegram: Укажите @username в Telegram или номер телефона
+  errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
   errorConsent: Без согласия мы не сможем отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 cookie:

@@ -98,6 +98,7 @@ const formSchema = z
     privacyNote: z.string(),
     privacyLinkText: z.string(),
     errorTelegram: z.string(),
+    errorTelegramHandle: z.string(),
     errorPhone: z.string(),
     errorConsent: z.string(),
     errorSubmit: z.string(),

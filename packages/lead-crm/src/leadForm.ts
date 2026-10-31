@@ -1,5 +1,6 @@
 import type { CountryCode } from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
+import { typedAsPhone } from './contactShape.ts';
 import {
   bindPhoneCountry,
   fillCountrySelect,
@@ -75,6 +76,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   };
 
   const phoneErrorText = errors.phone.textContent;
+  const telegramErrorText = errors.telegram.textContent;
   let channel = channelField.value as TrackedContactChannel;
   const contactField = (): ValidatedField =>
     channel === 'telegram' ? 'telegram' : 'phone';
@@ -195,6 +197,10 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       (!contactValid && kit?.tooLong(contact.value)
         ? errors.phone.dataset.tooLong
         : null) ?? phoneErrorText;
+    errors.telegram.textContent =
+      (typed && !typedAsPhone(typed)
+        ? errors.telegram.dataset.badHandle
+        : null) ?? telegramErrorText;
     mark(field, contactValid);
     mark('consent', consent.checked);
 
