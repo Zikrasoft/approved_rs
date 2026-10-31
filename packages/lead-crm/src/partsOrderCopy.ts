@@ -19,7 +19,8 @@ export const PARTS_ORDER_COPY = {
   installation: 'Установка в сервисе CarLab',
   free: 'бесплатно',
   total: (sum: string) => `Итого: ${sum}`,
-  leftOut: (count: number) => `Не поместилось позиций: ${count}`,
+  leftOut: (count: number, orderUrl: string) =>
+    `Не поместилось позиций: ${count}, весь заказ: ${orderUrl}`,
   undelivered: (order: number | string, reason: string) =>
     `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
   cancelUndelivered: (order: number | string, reason: string) =>

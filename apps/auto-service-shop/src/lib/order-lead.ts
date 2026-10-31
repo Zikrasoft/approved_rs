@@ -106,7 +106,10 @@ const withReadiness = (
 export const carLabel = ({ model, engine }: Vehicle): string =>
   `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
 
-export function orderLeadForm(order: LeadOrder): URLSearchParams {
+export function orderLeadForm(
+  order: LeadOrder,
+  adminOrigin: string,
+): URLSearchParams {
   const contact = checkoutContactSchema.parse(order.metadata ?? {});
   const currency = order.currency_code.toUpperCase();
   const money = (amount: number) =>
@@ -141,7 +144,8 @@ export function orderLeadForm(order: LeadOrder): URLSearchParams {
     tail: [PARTS_ORDER_COPY.total(money(total))],
     note: contact.comment ?? '',
     limit: MAX_COMMENT_LENGTH,
-    more: PARTS_ORDER_COPY.leftOut,
+    more: (count) =>
+      PARTS_ORDER_COPY.leftOut(count, `${adminOrigin}/app/orders/${order.id}`),
   });
   return new URLSearchParams({
     contact: contact.contact,
@@ -254,13 +258,19 @@ export async function handOrderToLeadRoute(
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let displayId: number | string = id;
   try {
-    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
+    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET, ADMIN_CORS } = parseEnv(
+      process.env,
+    );
     if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
       throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
     }
     const order = await readLeadOrder(container, id);
     displayId = order.display_id;
-    await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order), SHOP_LEAD_SECRET);
+    await sendOrderLead(
+      LEAD_ROUTE_URL,
+      orderLeadForm(order, ADMIN_CORS.split(',')[0]),
+      SHOP_LEAD_SECRET,
+    );
     logger.info(`Order ${id} handed to the lead pipeline`);
     await recordHandOff(container, id, () => ({
       [LEAD_HANDED_OFF_AT]: new Date().toISOString(),
