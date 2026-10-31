@@ -7,6 +7,8 @@ loading: Проверяем цены и наличие
 emptyHeading: В корзине пусто
 emptyBody: Откройте страницу запчасти в каталоге и нажмите «В корзину».
 emptyCta: В каталог запчастей
+emptyInquiry: Не нашли нужную запчасть? Отправьте заявку, и мы подберем.
+emptyInquiryCta: Отправить заявку
 unitTemplate: '{price} за шт.'
 increaseLabel: Добавить еще одну
 decreaseLabel: Убрать одну

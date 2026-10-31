@@ -3,6 +3,7 @@ import {
   settleCart,
   forgetCart,
   forgetOrderedCart,
+  orderedNumber,
   unavailableNames,
   moveCartToInquiry,
   orderSummary,
@@ -84,6 +85,18 @@ describe('the order receipt', () => {
     rememberReceipt(cart, blockedStorage);
 
     expect(readReceipt('cart_1', blockedStorage)).toBeNull();
+  });
+});
+
+describe('the order number in the link', () => {
+  it('keeps a plain number, so a reload still confirms the order', () => {
+    expect(orderedNumber('ordered', '23')).toBe('23');
+  });
+
+  it('drops anything else', () => {
+    expect(orderedNumber('ordered', '23<b>')).toBeNull();
+    expect(orderedNumber('ordered', null)).toBeNull();
+    expect(orderedNumber('expired', '23')).toBeNull();
   });
 });
 
