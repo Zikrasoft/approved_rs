@@ -3,11 +3,10 @@ import type { ShopOrderEvent } from '@podbor/lead-crm/shop-orders-wire';
 import { LeadRouteRefusal, type LeadOrder } from '../order-lead';
 import {
   createOrderLeadSync,
-  MAX_HANDOFF_ATTEMPTS,
   MAX_HANDOFFS_PER_CONTACT_HOUR,
-  orderLeadStatus,
   type SyncOrder,
 } from '../order-lead-sync';
+import { MAX_HANDOFF_ATTEMPTS, readOrder } from '../order-metadata';
 
 const NOW = new Date('2026-10-31T12:00:00.000Z');
 
@@ -96,7 +95,7 @@ describe('createOrderLeadSync', () => {
     expect(fakes.sent).toEqual([
       expect.objectContaining({ event: 'placed', order_id: 'order_1' }),
     ]);
-    expect(orderLeadStatus(metadataOf('order_1'))).toMatchObject({
+    expect(readOrder(metadataOf('order_1')).lead).toMatchObject({
       handed_off_at: expect.any(String),
       attempts: 0,
       error: null,
@@ -125,7 +124,7 @@ describe('createOrderLeadSync', () => {
       'order_other',
     ]);
     expect(
-      orderLeadStatus(metadataOf(flood[flood.length - 1].id)).handed_off_at,
+      readOrder(metadataOf(flood[flood.length - 1].id)).lead.handed_off_at,
     ).toBeNull();
   });
 
@@ -140,7 +139,7 @@ describe('createOrderLeadSync', () => {
     expect(fakes.alerts).toEqual([
       expect.stringContaining('The lead route answered 503'),
     ]);
-    expect(orderLeadStatus(metadataOf('order_1'))).toMatchObject({
+    expect(readOrder(metadataOf('order_1')).lead).toMatchObject({
       gave_up: true,
       alerted_at: expect.any(String),
     });

@@ -15,7 +15,6 @@ import { CARLAB } from '@podbor/brands';
 
 import { SHOP_CURRENCY } from '../modules/supplier/pricing';
 export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
-export const CASH_AT_PICKUP_METADATA = { fulfillment: 'cash_at_pickup' };
 
 const SALES_CHANNEL_NAME = `${CARLAB.name} parts shop`;
 const REGION_NAME = 'Serbia';

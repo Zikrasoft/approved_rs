@@ -14,11 +14,8 @@ import {
   type OrderOutcome,
   type ShopOrderEvent,
 } from '@podbor/lead-crm/shop-orders-wire';
-import { z } from 'zod';
-
 import { parseEnv } from './env';
 import { errorMessage } from './errors';
-import { filled } from './line-metadata';
 import {
   alertOwner,
   LeadRouteRefusal,
@@ -27,19 +24,9 @@ import {
   readLeadOrder,
   sendShopOrderEvent,
 } from './order-lead';
+import { leadStamp, MAX_HANDOFF_ATTEMPTS, readOrder } from './order-metadata';
 
-export const MAX_HANDOFF_ATTEMPTS = 6;
 export const MAX_HANDOFFS_PER_CONTACT_HOUR = 3;
-
-const HANDED_OFF_AT = 'lead_handed_off_at';
-const HANDOFF_ERROR = 'lead_handoff_error';
-const HANDOFF_ATTEMPTS = 'lead_handoff_attempts';
-const OWNER_ALERTED_AT = 'lead_owner_alerted_at';
-const LOST_AT = 'lead_lost_at';
-const LOST_ERROR = 'lead_lost_error';
-const LOST_ATTEMPTS = 'lead_lost_attempts';
-const CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
-const CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 
 const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
@@ -47,30 +34,6 @@ const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 
 type Metadata = Record<string, unknown> | null | undefined;
-
-const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
-
-const attemptsAt = (metadata: Metadata, key: string): number =>
-  attemptsSchema.parse(metadata?.[key] ?? 0);
-
-export const orderLeadStatus = (metadata: Metadata) => {
-  const attempts = attemptsAt(metadata, HANDOFF_ATTEMPTS);
-  return {
-    handed_off_at: filled.parse(metadata?.[HANDED_OFF_AT]),
-    attempts,
-    error: filled.parse(metadata?.[HANDOFF_ERROR]),
-    gave_up: attempts >= MAX_HANDOFF_ATTEMPTS,
-    alerted_at: filled.parse(metadata?.[OWNER_ALERTED_AT]),
-  };
-};
-
-const cancelStatus = (metadata: Metadata) => ({
-  lost_at: filled.parse(metadata?.[LOST_AT]),
-  error: filled.parse(metadata?.[LOST_ERROR]),
-  attempts: attemptsAt(metadata, LOST_ATTEMPTS),
-  refused_at: filled.parse(metadata?.[CANCEL_REFUSED_AT]),
-  alerted_at: filled.parse(metadata?.[CANCEL_ALERTED_AT]),
-});
 
 export interface SyncOrder {
   id: string;
@@ -115,18 +78,22 @@ export function createOrderLeadSync({
 
   const now = () => new Date().toISOString();
 
-  async function alertOnce(id: string, stamp: string, text: string) {
+  async function alertOnce(
+    id: string,
+    stamp: (at: string) => Record<string, unknown>,
+    text: string,
+  ) {
     if (!(await alert(text))) {
       logger.error(
         `Order ${id} gave up on the lead pipeline, nobody alerted yet`,
       );
       return;
     }
-    await orders.patch(id, { [stamp]: now() });
+    await orders.patch(id, stamp(now()));
   }
 
   async function contactHandedOffThisHour(id: string, metadata: Metadata) {
-    const contact = filled.parse(metadata?.contact);
+    const contact = readOrder(metadata).contact?.contact;
     if (!contact) return false;
     const at = new Date();
     const recent = await orders.createdBetween(
@@ -136,15 +103,15 @@ export function createOrderLeadSync({
     const handedOff = recent.filter(
       (order) =>
         order.id !== id &&
-        filled.parse(order.metadata?.contact) === contact &&
-        orderLeadStatus(order.metadata).handed_off_at,
+        readOrder(order.metadata).contact?.contact === contact &&
+        readOrder(order.metadata).lead.handed_off_at,
     );
     return handedOff.length >= MAX_HANDOFFS_PER_CONTACT_HOUR;
   }
 
   async function handOff(id: string): Promise<void> {
     const { status, metadata, display_id } = await orders.retrieve(id);
-    const lead = orderLeadStatus(metadata);
+    const { lead } = readOrder(metadata);
     if (status === 'canceled' || lead.handed_off_at || lead.alerted_at) return;
     if (await contactHandedOffThisHour(id, metadata)) {
       logger.warn(
@@ -155,34 +122,30 @@ export function createOrderLeadSync({
     const undelivered = (reason: string) =>
       alertOnce(
         id,
-        OWNER_ALERTED_AT,
+        leadStamp.ownerAlerted,
         PARTS_ORDER_COPY.undelivered(display_id ?? id, reason),
       );
     if (lead.gave_up) return undelivered(lead.error ?? '');
     try {
       await send(orderLeadPayload(await orders.leadOrder(id), adminOrigin));
       logger.info(`Order ${id} handed to the lead pipeline`);
-      await orders.patch(id, {
-        [HANDED_OFF_AT]: now(),
-        [HANDOFF_ERROR]: '',
-        [HANDOFF_ATTEMPTS]: '',
-      });
+      await orders.patch(id, leadStamp.handedOff(now()));
     } catch (error) {
       const reason = errorMessage(error);
       logger.error(`Order ${id} did not reach the lead pipeline: ${reason}`);
-      const recorded = await orders.patch(id, {
-        [HANDOFF_ERROR]: reason,
-        [HANDOFF_ATTEMPTS]: lead.attempts + 1,
-      });
-      if (orderLeadStatus(recorded).gave_up) await undelivered(reason);
+      const recorded = await orders.patch(
+        id,
+        leadStamp.handOffFailed(reason, lead.attempts + 1),
+      );
+      if (readOrder(recorded).lead.gave_up) await undelivered(reason);
     }
   }
 
   async function handCancel(id: string): Promise<void> {
     const { metadata, display_id } = await orders.retrieve(id);
-    const lost = cancelStatus(metadata);
+    const { lead, cancel: lost } = readOrder(metadata);
     if (
-      !orderLeadStatus(metadata).handed_off_at ||
+      !lead.handed_off_at ||
       lost.lost_at ||
       lost.refused_at ||
       lost.alerted_at
@@ -191,30 +154,27 @@ export function createOrderLeadSync({
     const undelivered = (reason: string) =>
       alertOnce(
         id,
-        CANCEL_ALERTED_AT,
+        leadStamp.cancelAlerted,
         PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
       );
     const { attempts } = lost;
     if (attempts >= MAX_HANDOFF_ATTEMPTS) return undelivered(lost.error ?? '');
     try {
       await send({ event: 'canceled', order_id: id });
-      await orders.patch(id, { [LOST_AT]: now(), [LOST_ERROR]: '' });
+      await orders.patch(id, leadStamp.lost(now()));
     } catch (error) {
       if (error instanceof LeadRouteRefusal && cancelRefused(error.status)) {
         logger.warn(
           `Order ${id} is canceled, but the CRM refused it (${error.status}: its Lead is won or deleted)`,
         );
-        await orders.patch(id, { [CANCEL_REFUSED_AT]: now() });
+        await orders.patch(id, leadStamp.cancelRefused(now()));
         return;
       }
       const reason = errorMessage(error);
       logger.error(
         `Order ${id} cancel did not reach the lead pipeline: ${reason}`,
       );
-      await orders.patch(id, {
-        [LOST_ERROR]: reason,
-        [LOST_ATTEMPTS]: attempts + 1,
-      });
+      await orders.patch(id, leadStamp.lostFailed(reason, attempts + 1));
       if (attempts + 1 >= MAX_HANDOFF_ATTEMPTS) await undelivered(reason);
     }
   }
@@ -231,11 +191,11 @@ export function createOrderLeadSync({
       await orders.complete(id);
       return { settled: outcome };
     }
-    await orders.patch(id, { [LOST_AT]: now() });
+    await orders.patch(id, leadStamp.lost(now()));
     try {
       await orders.cancel(id);
     } catch (error) {
-      await orders.patch(id, { [LOST_AT]: '' });
+      await orders.patch(id, leadStamp.lostUndone());
       throw error;
     }
     return { settled: outcome };

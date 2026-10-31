@@ -21,7 +21,6 @@ import {
   CATALOG_TRANSLATION_LOCALES,
   cartFingerprint,
   cartTotals,
-  checkoutContactSchema,
   orderCap,
   orderLineTitle,
   partPageSlug,
@@ -31,8 +30,6 @@ import {
   type OfferCart,
 } from '@podbor/catalog-contract';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
-
-import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -46,10 +43,7 @@ import {
   type CartRefusal,
   type Quote,
 } from './cart-plan';
-import {
-  CASH_AT_PICKUP_METADATA,
-  CASH_AT_PICKUP_PROVIDER_ID,
-} from './commerce-defaults';
+import { CASH_AT_PICKUP_PROVIDER_ID } from './commerce-defaults';
 import { installationPrice } from './installation';
 import {
   addonLineMetadata,
@@ -57,6 +51,12 @@ import {
   withParentOffers,
   readLine,
 } from './line-metadata';
+import {
+  cashAtPickupMetadata,
+  checkoutMetadata,
+  readOrder,
+  type CheckoutContactFields,
+} from './order-metadata';
 import { liveOffers, sellingOffers } from './suppliers/live-quote';
 import { storeOffers } from '../modules/supplier/pricing';
 import { carFor } from './vin/car-for';
@@ -475,7 +475,7 @@ export async function createOfferCart(
     await sellableOffer(scope, offer_id, quantity);
   }
   const { result } = await createCartWorkflow(scope).run({
-    input: { email, metadata: CASH_AT_PICKUP_METADATA },
+    input: { email, metadata: cashAtPickupMetadata() },
   });
   if (offer_id) {
     await putOffer(scope, result.id, offer_id, quantity);
@@ -544,7 +544,7 @@ export async function refuseCheckout(
     items?: unknown[] | null;
   },
 ): Promise<void> {
-  if (!checkoutContactSchema.safeParse(cart.metadata ?? {}).success) {
+  if (!readOrder(cart.metadata).contact) {
     refuse('CONTACT_MISSING', 'The order has no contact.');
   }
   if (judgedCarts.has(cart.id)) return;
@@ -558,7 +558,7 @@ export const checkout = locked(
     {
       contact,
       fingerprint,
-    }: { contact: z.output<typeof checkoutContactSchema>; fingerprint: string },
+    }: { contact: CheckoutContactFields; fingerprint: string },
   ): Promise<{ id: string; display_id: number }> => {
     const cart = await retrieveCart(scope, cartId);
     const current = cartFingerprint(
@@ -577,7 +577,7 @@ export const checkout = locked(
       await scope
         .resolve<ICartModuleService>(Modules.CART)
         .updateCarts(cartId, {
-          metadata: { ...cart.metadata, ...contact, car },
+          metadata: checkoutMetadata(cart.metadata, contact, car),
         });
     }
     judgedCarts.add(cartId);
