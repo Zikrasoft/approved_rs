@@ -85,8 +85,11 @@ The same file sets the security headers on every path: `frame-ancestors 'self'`,
 `nosniff`, `strict-origin-when-cross-origin`, a `Permissions-Policy` with the
 camera, microphone and geolocation off, HSTS, and a script CSP in
 `Content-Security-Policy-Report-Only` that allowlists GA4, Google Ads, Metrika
-and the Pixel beside `'self'` and the inline Astro scripts. The three copies are
-identical; change them together.
+and the Pixel beside `'self'` and the inline Astro scripts. The `headers` key is
+generated with the redirects from `SECURITY_HEADERS` in `packages/site-kit`,
+whose CSP takes the tag hosts from the analytics module; change it there and
+rerun each app's `scripts/redirects.ts`. `.github/scripts/redirects-drift.sh`
+fails `check` on a hand edit.
 
 TODO: enforce the script CSP once a week of browser consoles on all three sites
 shows no violation from the analytics scripts or the map embed.
