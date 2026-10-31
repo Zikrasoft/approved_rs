@@ -10,6 +10,7 @@ import {
   sellPrice,
 } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
+import { parseEnv } from '../env';
 import { emitIndexChanges } from '../index-changes';
 import { supplierAdapters, supplierQuoteSchema } from './adapter';
 
@@ -76,15 +77,54 @@ async function reindexIdentifiers(
   });
 }
 
-// TODO: every page view and cart action calls the supplier; cache quotes for a short window once the Inter Cars rate limits are known (#328).
+// TODO: in-process, so each server process quotes on its own and a restart forgets every quote; move it to Redis with the server/worker split or once a supplier rate limit needs one shared window (#328).
+const recentQuotes = new Map<string, { at: number; quote: Quote | null }>();
+
+const forgetQuotesOlderThan = (cutoff: number) => {
+  for (const [offerId, { at }] of recentQuotes) {
+    if (at < cutoff) recentQuotes.delete(offerId);
+  }
+};
+
+async function quotesFor<T extends QuotedOffer>(
+  quote: (articleIds: string[]) => Promise<unknown>,
+  offers: T[],
+  reuseSince: number | null,
+): Promise<Map<string, Quote | null>> {
+  const stale = offers.filter(
+    ({ id }) =>
+      reuseSince === null || (recentQuotes.get(id)?.at ?? -1) < reuseSince,
+  );
+  if (stale.length) {
+    const quotes = await liveQuotes(
+      quote,
+      stale.map(({ supplier_article_id }) => supplier_article_id),
+    );
+    const at = Date.now();
+    for (const { id, supplier_article_id } of stale) {
+      recentQuotes.set(id, {
+        at,
+        quote: quotes.get(supplier_article_id) ?? null,
+      });
+    }
+  }
+  return new Map(
+    offers.map(({ id }) => [id, recentQuotes.get(id)?.quote ?? null]),
+  );
+}
+
 async function requoteOffers<T extends QuotedOffer>(
   scope: MedusaContainer,
   offers: T[],
+  reuseRecent: boolean,
 ): Promise<T[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const adapters = supplierAdapters(scope);
   const live: T[] = [];
   const moved = new Set<string>();
+  const window = parseEnv(process.env).LIVE_QUOTE_CACHE_SECONDS * 1000;
+  const reuseSince = Date.now() - window;
+  forgetQuotesOlderThan(reuseSince);
   for (const name of new Set(offers.map(({ supplier }) => supplier.name))) {
     const own = offers.filter(({ supplier }) => supplier.name === name);
     const adapter = adapters.find((candidate) => candidate.name === name);
@@ -92,12 +132,13 @@ async function requoteOffers<T extends QuotedOffer>(
       live.push(...own);
       continue;
     }
-    const quotes = await liveQuotes(
+    const quotes = await quotesFor(
       adapter.quote,
-      own.map(({ supplier_article_id }) => supplier_article_id),
+      own,
+      reuseRecent && window > 0 ? reuseSince : null,
     );
     for (const offer of own) {
-      const quote = quotes.get(offer.supplier_article_id);
+      const quote = quotes.get(offer.id);
       if (
         !quote ||
         sellPrice(quote.cost_price, offer.supplier.markup_percentage) <= 0
@@ -119,16 +160,18 @@ async function requoteOffers<T extends QuotedOffer>(
 export async function liveOffers(
   scope: MedusaContainer,
   filters: { id?: string[]; part_identifier_id?: string },
+  { reuseRecent = false }: { reuseRecent?: boolean } = {},
 ) {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const offers = await suppliers.listSupplierOffers(filters, {
     relations: ['supplier'],
     take: null,
   });
-  return requoteOffers(scope, offers);
+  return requoteOffers(scope, offers, reuseRecent);
 }
 
 export const sellingOffers = async (
   scope: MedusaContainer,
   filters: { id?: string[]; part_identifier_id?: string },
-) => sellingRows(await liveOffers(scope, filters));
+  options: { reuseRecent?: boolean } = {},
+) => sellingRows(await liveOffers(scope, filters, options));

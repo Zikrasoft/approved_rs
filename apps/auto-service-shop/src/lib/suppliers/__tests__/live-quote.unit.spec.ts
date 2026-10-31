@@ -84,4 +84,42 @@ describe('liveOffers', () => {
     expect(updateSupplierOffers).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
   });
+
+  describe('for repeated offer views', () => {
+    beforeEach(() => jest.useFakeTimers({ now: Date.parse('2026-11-01') }));
+    afterEach(() => jest.useRealTimers());
+
+    const quotedTimes = (scope: MedusaContainer) => {
+      const [adapter] = scope.resolve<{ quote: jest.Mock }[]>(
+        SUPPLIER_ADAPTERS_REGISTRATION,
+      );
+      return adapter.quote.mock.calls.length;
+    };
+
+    const spiedScope = () => {
+      const quoting = scopeQuoting(1000, 4);
+      const [adapter] = quoting.scope.resolve<{ quote: () => unknown }[]>(
+        SUPPLIER_ADAPTERS_REGISTRATION,
+      );
+      adapter.quote = jest.fn(adapter.quote);
+      return quoting.scope;
+    };
+
+    it('asks the supplier once a minute and quotes every cart action afresh', async () => {
+      const scope = spiedScope();
+      const view = () =>
+        liveOffers(scope, { id: ['offer_1'] }, { reuseRecent: true });
+
+      await view();
+      await view();
+      expect(quotedTimes(scope)).toBe(1);
+
+      await liveOffers(scope, { id: ['offer_1'] });
+      expect(quotedTimes(scope)).toBe(2);
+
+      jest.advanceTimersByTime(61_000);
+      expect(await view()).toHaveLength(1);
+      expect(quotedTimes(scope)).toBe(3);
+    });
+  });
 });

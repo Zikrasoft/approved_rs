@@ -64,6 +64,17 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '0' })).toThrow();
   });
 
+  it('reuses a live quote for a minute unless another window is set', () => {
+    expect(parseEnv(VALID_ENV).LIVE_QUOTE_CACHE_SECONDS).toBe(60);
+    expect(
+      parseEnv({ ...VALID_ENV, LIVE_QUOTE_CACHE_SECONDS: '0' })
+        .LIVE_QUOTE_CACHE_SECONDS,
+    ).toBe(0);
+    expect(() =>
+      parseEnv({ ...VALID_ENV, LIVE_QUOTE_CACHE_SECONDS: '-1' }),
+    ).toThrow();
+  });
+
   it('reads an empty publish secret as unset', () => {
     const env = parseEnv({
       ...VALID_ENV,

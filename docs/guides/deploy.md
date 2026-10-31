@@ -868,7 +868,9 @@ number gets its CI value in that script. The non-obvious parts:
   failure too and listed in the Import report, so a rerun does not pay for it
   again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
   how many articles are asked at once; vehicle fitting still runs one article
-  at a time. An answer's attributes that do not fit its Category are dropped one
+  at a time. `LIVE_QUOTE_CACHE_SECONDS` (empty means 60, 0 turns it off) is how
+  long a part's offer view reuses a supplier's live quote; the cart and checkout
+  always quote afresh. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.
 - `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
