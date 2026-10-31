@@ -8,7 +8,9 @@ import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { PHONE_NUMBER } from '@/utils/constants';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { localePaths, PathBuilder } from '@/utils/paths';
@@ -206,11 +208,14 @@ const stepper =
         </div>
         <div class="flex flex-col gap-3">
           <span class="text-xs text-muted">{site.footer.contactHeading}</span>
-          <ContactChannels />
+          <ContactChannels class="print:hidden" />
+          <p class="spec hidden text-base font-semibold text-ink print:block">
+            {formatPhone(PHONE_NUMBER)}
+          </p>
         </div>
         <a
           href={PathBuilder.parts(locale)}
-          class="btn btn-secondary w-full sm:w-auto sm:self-start"
+          class="btn btn-secondary w-full sm:w-auto sm:self-start print:hidden"
         >
           {copy.orderedCta}
           <Icon name="arrowRight" />

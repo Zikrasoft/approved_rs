@@ -56,7 +56,7 @@ const links = [
   {...contactRegion('header')}
 >
   <header
-    class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur"
+    class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur print:hidden"
   >
     <div
       class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
@@ -164,7 +164,7 @@ const links = [
         <button
           type="button"
           data-open-lead-modal
-          class="btn btn-primary h-10 py-0 max-sm:px-4"
+          class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
         >
           {site.header.cta}
         </button>
