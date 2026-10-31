@@ -81,9 +81,15 @@ unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
 `pnpm db:migrate` and `pnpm seed:demo` in `apps/auto-service-shop`. `seed:demo` is
 idempotent per part: rerunning it keeps the admin, reuses the key, skips
 the catalogue once the demo suppliers exist, skips the batteries once the
-`batteries` Category exists, skips the filter variety once `oil-filters` has a
+`exide` Brand exists, skips the filter variety once `oil-filters` has a
 `height` field, and adds any supplier category mapping or brand spelling the
-demo catalogue gained since. An existing demo database picks up the batteries
+demo catalogue gained since. It also runs on a database the production seed or
+an import already filled: it reuses a Brand, Make or Category by slug, a
+Series by make and name, a Chassis by series and code, a Model by slug, an
+Engine by code, a Vehicle by model, engine and power, and a type code as it
+is. A demo number an imported Part already carries joins that Part (the
+demo's other numbers are added to it and it takes the demo Category and
+attributes) instead of a second Part. An existing demo database picks up the batteries
 and the filter variety on the next `pnpm dev:shop`; a part the import already
 created under one of the variety's numbers is classified rather than created
 twice.
@@ -93,8 +99,9 @@ What it creates:
 - Admin `admin@carlab.local` / `carlab-demo` (printed to the terminal; a local
   demo credential, nothing else uses it).
 - A publishable key, written as `MEDUSA_PUBLISHABLE_KEY` (plus
-  `MEDUSA_BACKEND_URL`) into `apps/auto-service/.env.local`, only because that
-  file is gitignored. Other lines in the file are kept.
+  `MEDUSA_BACKEND_URL`, `http://localhost:` and the backend's `PORT`, 9009
+  when unset) into `apps/auto-service/.env.local`, only because that file is
+  gitignored. Other lines in the file are kept.
 - BMW: 3 and 5 series, F30 and G30, 320d (B47), 320i (B48), 520d (B47), with
   type codes `35BG`, `8E31`, `JA31`. Mercedes-Benz: E-class W213 E 220 d
   (OM654), Baumuster `213004`.
