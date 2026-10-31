@@ -104,14 +104,14 @@ const specs = [
 
     <aside class="flex flex-col gap-4">
       <div class="card flex flex-col gap-3 p-5">
-        <h2 class="text-base font-semibold text-ink">
+        <h2 class="text-block font-semibold">
           {service.includesHeading}
         </h2>
         <BulletList items={service.includes} marker="check" />
       </div>
 
       <div class="card flex flex-col gap-3 p-5">
-        <h2 class="text-base font-semibold text-ink">{service.signsHeading}</h2>
+        <h2 class="text-block font-semibold">{service.signsHeading}</h2>
         <BulletList items={service.signs} />
       </div>
     </aside>
@@ -119,7 +119,7 @@ const specs = [
 
   <section class="wrap pb-4">
     <div class="card border-transparent bg-shade p-6">
-      <h2 class="mb-2 text-base font-semibold text-signal-ink">
+      <h2 class="mb-2 text-block font-semibold text-signal-ink">
         {service.honestHeading}
       </h2>
       <p class="max-w-3xl text-sm leading-relaxed text-ink-2 sm:text-base">
@@ -131,9 +131,7 @@ const specs = [
   {
     related.length > 0 && (
       <section class="wrap mt-band">
-        <h2 class="text-xl font-semibold text-ink sm:text-2xl">
-          {pages.works.eyebrow}
-        </h2>
+        <h2 class="text-section">{pages.works.eyebrow}</h2>
         <WorkGrid works={related.slice(0, 3)} />
       </section>
     )

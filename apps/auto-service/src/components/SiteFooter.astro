@@ -29,6 +29,8 @@ const channels = [
   { icon: 'telegram', label: site.channels.telegram, track: 'telegram' },
 ] as const;
 const eyebrow = 'spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted';
+const navList = 'flex flex-col gap-1 md:gap-2.5';
+const navLink = 'link-muted py-1.5 md:py-0';
 ---
 
 <footer class="mt-20 border-t border-line bg-card print:hidden">
@@ -40,40 +42,38 @@ const eyebrow = 'spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted';
       </p>
     </div>
 
-    <nav class="flex flex-col gap-2.5" aria-label={site.footer.servicesHeading}>
+    <nav class={navList} aria-label={site.footer.servicesHeading}>
       <span class={eyebrow}>
         {site.footer.servicesHeading}
       </span>
       {
         SERVICE_SLUGS.map((slug) => (
-          <a href={PathBuilder.service(locale, slug)} class="link-muted">
+          <a href={PathBuilder.service(locale, slug)} class={navLink}>
             {services[slug].name}
           </a>
         ))
       }
     </nav>
 
-    <nav class="flex flex-col gap-2.5" aria-label={site.footer.companyHeading}>
+    <nav class={navList} aria-label={site.footer.companyHeading}>
       <span class={eyebrow}>
         {site.footer.companyHeading}
       </span>
-      <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
-      >
-      <a href={PathBuilder.parts(locale)} class="link-muted">{site.nav.parts}</a
-      >
-      <a href={PathBuilder.contact(locale)} class="link-muted"
+      <a href={PathBuilder.works(locale)} class={navLink}>{site.nav.works}</a>
+      <a href={PathBuilder.parts(locale)} class={navLink}>{site.nav.parts}</a>
+      <a href={PathBuilder.contact(locale)} class={navLink}
         >{site.nav.contact}</a
       >
-      <a href={PathBuilder.about(locale)} class="link-muted"
+      <a href={PathBuilder.about(locale)} class={navLink}
         >{site.footer.aboutLabel}</a
       >
-      <a href={PathBuilder.privacy(locale)} class="link-muted"
+      <a href={PathBuilder.privacy(locale)} class={navLink}
         >{site.footer.privacyLabel}</a
       >
       <button
         type="button"
         data-cookie-settings
-        class="link-muted w-fit text-left">{site.cookie.settings}</button
+        class={`${navLink} w-fit text-left`}>{site.cookie.settings}</button
       >
     </nav>
 
