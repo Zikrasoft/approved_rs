@@ -203,20 +203,24 @@ type QuoteBrand = {
   spellings: { value_key: string }[];
 };
 
-type SourcedRow = { id: string; source: string };
-
 type SourcedRows = {
   entity: string;
-  list: (
-    filters: { source?: string },
-    context: Context,
-  ) => Promise<SourcedRow[]>;
+  list: (filters: { source: string }, context: Context) => Promise<Row[]>;
   remove: (ids: string[], context: Context) => Promise<void>;
 };
 
+type Row = { id: string };
+
 export type SourceCount = { source: string; rows: number };
 
-const SOURCE_COLUMNS = { select: ['id', 'source'], take: null };
+const DELETE_CHUNK = 2000;
+
+const CHUNK_COLUMNS = { select: ['id'], take: DELETE_CHUNK };
+
+const chunksOf = <T>(items: T[], size = DELETE_CHUNK): T[][] =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size),
+  );
 
 const sourceInUse = (source: string, details: Record<string, unknown>) =>
   adminError(
@@ -987,17 +991,18 @@ class CatalogModuleService extends CatalogModuleBase {
     ids: string | string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    const list = [ids].flat();
-    await this.retireSlugs(
-      table === 'part_identifier' ? 'part' : table,
-      await this.retirementsOf(table, list, sharedContext),
-      sharedContext,
-    );
-    await CatalogModuleBase.prototype[RETIRING_DELETES[table]].call(
-      this,
-      list,
-      sharedContext,
-    );
+    for (const chunk of chunksOf([ids].flat())) {
+      await this.retireSlugs(
+        table === 'part_identifier' ? 'part' : table,
+        await this.retirementsOf(table, chunk, sharedContext),
+        sharedContext,
+      );
+      await CatalogModuleBase.prototype[RETIRING_DELETES[table]].call(
+        this,
+        chunk,
+        sharedContext,
+      );
+    }
   }
 
   override deletePartIdentifiers = ((
@@ -1469,6 +1474,9 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     await this.retrievePart(partId, {}, sharedContext);
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      "select pg_advisory_xact_lock(hashtextextended('part-replacement', 0))",
+    );
     for (let next = replacedById; next;) {
       if (next === partId) {
         throw adminError(
@@ -1624,103 +1632,103 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         entity: 'requirement',
         list: (filters, context) =>
-          this.listRequirements(filters, SOURCE_COLUMNS, context),
+          this.listRequirements(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteRequirements(ids, context),
       },
       {
         entity: 'fitment',
         list: (filters, context) =>
-          this.listFitments(filters, SOURCE_COLUMNS, context),
+          this.listFitments(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteFitments(ids, context),
       },
       {
         entity: 'vehicle_identifier',
         list: (filters, context) =>
-          this.listVehicleIdentifiers(filters, SOURCE_COLUMNS, context),
+          this.listVehicleIdentifiers(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleIdentifiers(ids, context),
       },
       {
         entity: 'brand_spelling',
         list: (filters, context) =>
-          this.listBrandSpellings(filters, SOURCE_COLUMNS, context),
+          this.listBrandSpellings(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteBrandSpellings(ids, context),
       },
       {
         entity: 'make_spelling',
         list: (filters, context) =>
-          this.listMakeSpellings(filters, SOURCE_COLUMNS, context),
+          this.listMakeSpellings(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteMakeSpellings(ids, context),
       },
       {
         entity: 'part_identifier',
         list: (filters, context) =>
-          this.listPartIdentifiers(filters, SOURCE_COLUMNS, context),
+          this.listPartIdentifiers(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deletePartIdentifiers(ids, context),
       },
       {
         entity: 'part',
         list: (filters, context) =>
-          this.listParts(filters, SOURCE_COLUMNS, context),
+          this.listParts(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteParts(ids, context),
       },
       {
         entity: 'vehicle',
         list: (filters, context) =>
-          this.listVehicles(filters, SOURCE_COLUMNS, context),
+          this.listVehicles(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicles(ids, context),
       },
       {
         entity: 'category_field_option',
         list: (filters, context) =>
-          this.listCategoryFieldOptions(filters, SOURCE_COLUMNS, context),
+          this.listCategoryFieldOptions(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFieldOptions(ids, context),
       },
       {
         entity: 'category_field',
         list: (filters, context) =>
-          this.listCategoryFields(filters, SOURCE_COLUMNS, context),
+          this.listCategoryFields(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteCategoryFields(ids, context),
       },
       {
         entity: 'category',
         list: (filters, context) =>
-          this.listCategories(filters, SOURCE_COLUMNS, context),
+          this.listCategories(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteCategories(ids, context),
       },
       {
         entity: 'vehicle_model',
         list: (filters, context) =>
-          this.listVehicleModels(filters, SOURCE_COLUMNS, context),
+          this.listVehicleModels(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteVehicleModels(ids, context),
       },
       {
         entity: 'engine',
         list: (filters, context) =>
-          this.listEngines(filters, SOURCE_COLUMNS, context),
+          this.listEngines(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteEngines(ids, context),
       },
       {
         entity: 'chassis',
         list: (filters, context) =>
-          this.listChassis(filters, SOURCE_COLUMNS, context),
+          this.listChassis(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteChassis(ids, context),
       },
       {
         entity: 'series',
         list: (filters, context) =>
-          this.listSeries(filters, SOURCE_COLUMNS, context),
+          this.listSeries(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteSeries(ids, context),
       },
       {
         entity: 'make',
         list: (filters, context) =>
-          this.listMakes(filters, SOURCE_COLUMNS, context),
+          this.listMakes(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteMakes(ids, context),
       },
       {
         entity: 'brand',
         list: (filters, context) =>
-          this.listBrands(filters, SOURCE_COLUMNS, context),
+          this.listBrands(filters, CHUNK_COLUMNS, context),
         remove: (ids, context) => this.deleteBrands(ids, context),
       },
     ];
@@ -1730,18 +1738,21 @@ class CatalogModuleService extends CatalogModuleBase {
   async countRowsBySource(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<SourceCount[]> {
-    const counts = new Map<string, number>();
-    for (const { list } of this.sourcedRows()) {
-      for (const { source } of await list({}, sharedContext)) {
-        counts.set(source, (counts.get(source) ?? 0) + 1);
-      }
-    }
-    return [...counts]
-      .map(([source, rows]) => ({ source, rows }))
+    const perTable = this.sourcedRows().map(
+      ({ entity }) =>
+        `select source, count(*) as rows from "${entity}" where deleted_at is null group by source`,
+    );
+    const counts: { source: string; rows: string }[] = await (
+      (sharedContext.transactionManager ??
+        sharedContext.manager) as SqlEntityManager
+    ).execute(
+      `select source, sum(rows) as rows from (${perTable.join(' union all ')}) counted group by source`,
+    );
+    return counts
+      .map(({ source, rows }) => ({ source, rows: Number(rows) }))
       .sort((a, b) => a.source.localeCompare(b.source));
   }
 
-  // TODO: counts every catalogue row twice; count per table in SQL once catalogues reach hundreds of thousands of rows.
   @InjectTransactionManager()
   async deleteRowsBySource(
     source: string,
@@ -1757,8 +1768,9 @@ class CatalogModuleService extends CatalogModuleBase {
     const before = await this.countRowsBySource(sharedContext);
     let deleted = 0;
     for (const { entity, list, remove } of this.sourcedRows()) {
-      const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
-      if (ids.length) {
+      for (;;) {
+        const ids = (await list({ source }, sharedContext)).map(({ id }) => id);
+        if (!ids.length) break;
         await remove(ids, sharedContext).catch((error: unknown) => {
           throw MedusaError.isMedusaError(error) &&
             error.type === MedusaError.Types.NOT_FOUND
@@ -1768,6 +1780,7 @@ class CatalogModuleService extends CatalogModuleBase {
         deleted += ids.length;
       }
     }
+    await this.flush(sharedContext);
     const after = await this.countRowsBySource(sharedContext);
     const holders = before
       .filter((count) => count.source !== source)

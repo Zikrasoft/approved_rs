@@ -1,34 +1,19 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 
-import { CATALOG_MODULE } from '../../modules/catalog';
-import type CatalogModuleService from '../../modules/catalog/service';
-import { PUBLISH_MODULE } from '../../modules/publish';
-import type PublishModuleService from '../../modules/publish/service';
+const pgOf = (scope: MedusaContainer) =>
+  scope.resolve(ContainerRegistrationKeys.PG_CONNECTION);
 
-export async function partNumberIds(scope: MedusaContainer): Promise<string[]> {
-  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const identifiers = await catalog.listPartIdentifiers(
-    {},
-    { select: ['id'], take: null },
-  );
-  return identifiers.map(({ id }) => id);
-}
-
-export async function markNumbersPublished(
+export async function publishAllNumbers(
   scope: MedusaContainer,
-  ids: string[],
 ): Promise<string[]> {
-  const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
-  const known = new Set(
-    (await publish.listPublishedNumbers({ id: ids }, { take: null })).map(
-      ({ id }) => id,
-    ),
+  const { rows } = await pgOf(scope).raw<{ rows: { id: string }[] }>(
+    `insert into published_number (id)
+     select id from part_identifier where deleted_at is null
+     on conflict (id) do nothing
+     returning id`,
   );
-  const fresh = ids.filter((id) => !known.has(id));
-  if (fresh.length) {
-    await publish.createPublishedNumbers(fresh.map((id) => ({ id })));
-  }
-  return fresh;
+  return rows.map(({ id }) => id);
 }
 
 export async function unmarkNumbersPublished(
@@ -36,10 +21,8 @@ export async function unmarkNumbersPublished(
   ids: string[],
 ): Promise<void> {
   if (ids.length) {
-    const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
-    await publish.deletePublishedNumbers(ids);
+    await pgOf(scope).raw('delete from published_number where id = any(?)', [
+      ids,
+    ]);
   }
 }
-
-export const publishAllNumbers = async (scope: MedusaContainer) =>
-  markNumbersPublished(scope, await partNumberIds(scope));

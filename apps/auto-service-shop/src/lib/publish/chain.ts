@@ -9,11 +9,8 @@ import { PUBLISH_MODULE } from '../../modules/publish';
 import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
 import { deploySite } from './deploy';
-import {
-  markNumbersPublished,
-  partNumberIds,
-  unmarkNumbersPublished,
-} from './published';
+import { sweepOrphans } from './orphans';
+import { publishAllNumbers, unmarkNumbersPublished } from './published';
 import { translateCatalogue } from './translate';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
@@ -33,6 +30,7 @@ const reindex = (scope: MedusaContainer): Reindex =>
           .reindex({ strategy: 'swap' });
 
 const publishSteps = (scope: MedusaContainer): PublishStep[] => [
+  { name: 'sweep', run: () => sweepOrphans(scope) },
   {
     name: 'translate',
     run: () =>
@@ -44,10 +42,7 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
   {
     name: 'deploy',
     run: async () => {
-      const fresh = await markNumbersPublished(
-        scope,
-        await partNumberIds(scope),
-      );
+      const fresh = await publishAllNumbers(scope);
       try {
         await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
       } catch (error) {
