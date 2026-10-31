@@ -45,6 +45,8 @@ export const shopCartContentSchema = z
     submitLabel: z.string(),
     consentError: z.string(),
     submitError: z.string(),
+    submitErrorContacts: z.string(),
+    orderMessage: z.string(),
     checkoutBlocked: z.string(),
     notices: z
       .object({

@@ -37,6 +37,7 @@ import {
   restoreCheckout,
 } from './checkoutMemory';
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
+import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
 import { addonLabel, addToPartsList, partLine } from './partsList';
 
@@ -292,6 +293,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           ...cart.items.map((line) => this.line(line, cart, localeTag)),
         );
         this.summarize(cart, localeTag);
+        this.prefillOrderMessage(cart);
         showOnly(
           this,
           'data-notice',
@@ -300,6 +302,24 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         this.listChanges(changes, cart, localeTag);
         this.block(unavailableNames(cart));
         this.show('cart');
+      }
+
+      prefillOrderMessage(cart: OfferCart): void {
+        const box = this.querySelector<HTMLElement>('[data-order-message]');
+        const whatsapp = box?.querySelector<HTMLAnchorElement>(
+          '[data-contact-channel="whatsapp"]',
+        );
+        if (!box || !whatsapp) return;
+        whatsapp.href = whatsappLink(
+          box.dataset.whatsapp ?? '',
+          [
+            box.dataset.orderMessage,
+            ...cart.items
+              .filter(({ available }) => available)
+              .map(listedLine)
+              .map(partLine),
+          ].join('\n'),
+        );
       }
 
       listChanges(
