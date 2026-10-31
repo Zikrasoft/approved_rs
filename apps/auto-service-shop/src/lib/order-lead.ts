@@ -25,7 +25,7 @@ import {
 } from '@podbor/lead-crm/shop-orders-wire';
 import { z } from 'zod';
 
-import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
+import { MANUAL_SUPPLIER } from './suppliers/manual-offers';
 import { parseEnv } from './env';
 import { readPlacedOrder } from './placed-order';
 
@@ -78,7 +78,7 @@ export function orderLeadPayload(
         {
           ...line,
           source:
-            line.supplier === MANUAL_SOURCE
+            line.supplier === MANUAL_SUPPLIER
               ? PARTS_ORDER_COPY.manualOffer
               : line.supplier,
         },

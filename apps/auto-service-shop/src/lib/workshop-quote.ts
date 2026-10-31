@@ -3,10 +3,9 @@ import type { Context, MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 import type { Vehicle } from '@podbor/catalog-contract';
 
-import { CATALOG_MODULE } from '../modules/catalog';
+import { CATALOG_MODULE, WORKSHOP_QUOTE_SOURCE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import type { Provenance } from '../modules/catalog/service';
-import { WORKSHOP_QUOTE_SOURCE } from '../modules/catalog/models/provenance';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import { adminError } from '../modules/_shared/admin-error';
 import { slugOf } from '../modules/_shared/slug';

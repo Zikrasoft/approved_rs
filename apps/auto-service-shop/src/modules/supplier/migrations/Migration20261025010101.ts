@@ -6,6 +6,9 @@ export class Migration20261025010101 extends Migration {
       `ALTER TABLE "supplier" ALTER COLUMN "markup_percentage" TYPE numeric(5, 2);`,
     );
     this.addSql(
+      `ALTER TABLE "supplier" DROP CONSTRAINT "supplier_markup_percentage", ADD CONSTRAINT "supplier_markup_percentage" CHECK ("markup_percentage" >= 0);`,
+    );
+    this.addSql(
       `CREATE TABLE IF NOT EXISTS "crawl_run" ("site" text NOT NULL PRIMARY KEY, "status" text NOT NULL CHECK ("status" IN ('queued', 'running', 'paused', 'done')), "paused_reason" text NULL, "seeded" boolean NOT NULL DEFAULT false, "pages_left" integer NULL, "queued_at" timestamptz NULL, "started_at" timestamptz NOT NULL, "heartbeat_at" timestamptz NULL, "finished_at" timestamptz NULL);`,
     );
     this.addSql(

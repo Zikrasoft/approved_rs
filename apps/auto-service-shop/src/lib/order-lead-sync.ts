@@ -92,12 +92,14 @@ export function createOrderLeadSync({
       new Date(at.getTime() - HOUR_MS),
       at,
     );
-    const handedOff = recent.filter(
-      (order) =>
+    const handedOff = recent.filter((order) => {
+      const read = readOrder(order.metadata);
+      return (
         order.id !== id &&
-        readOrder(order.metadata).contact?.contact === contact &&
-        readOrder(order.metadata).lead.handed_off_at,
-    );
+        read.contact?.contact === contact &&
+        read.lead.handed_off_at
+      );
+    });
     return handedOff.length >= SHOP_HANDOFFS_PER_CONTACT_HOUR;
   }
 

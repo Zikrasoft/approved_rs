@@ -169,6 +169,15 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('checks the Supplier markup on the decimal itself', async () => {
+        const { rows } = await pg().raw(
+          `select pg_get_constraintdef(oid) as definition from pg_constraint where conname = 'supplier_markup_percentage'`,
+        );
+        expect(rows[0]?.definition).toBe(
+          'CHECK ((markup_percentage >= (0)::numeric))',
+        );
+      });
+
       it.each(['production_from', 'production_to'])(
         'keeps the Fitment %s a calendar date',
         async (column) => {
