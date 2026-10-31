@@ -14,7 +14,9 @@ describe('the in-flow contact marker on a priced part', () => {
 
   it('sits on the best offer buttons only', () => {
     expect(partOffers.match(/inFlow/g)).toHaveLength(1);
-    expect(partOffers).toContain('<OfferRow offer={best} inFlow />');
+    expect(partOffers).toContain(
+      '<OfferRow offer={best} inFlow askHref={askHref} />',
+    );
     expect(offerRow).toMatch(/\{\.\.\.\(?inFlow && contactCta\)?\}/);
   });
 
