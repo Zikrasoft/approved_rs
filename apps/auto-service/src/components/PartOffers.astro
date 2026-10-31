@@ -10,6 +10,7 @@ import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
+import { rankOffers } from '@/utils/rankOffers';
 
 interface Props {
   page: PartPageEntry;
@@ -30,13 +31,15 @@ const part = {
 };
 const closed = !shopOpen();
 const priced = page.offers.length > 0 && !closed;
+const [best, ...others] = rankOffers(page.offers);
 ---
 
 {
   (priced || closed) && (
     <part-offers
-      class="card flex flex-col gap-4 border-signal/40 bg-signal/5 p-5 sm:p-6"
+      class="card flex flex-col gap-4 border-transparent bg-shade p-5 sm:p-6"
       {...(priced ? {} : { hidden: '' })}
+      {...contactCta}
       data-preview={closed ? '' : undefined}
       data-id={page.id}
       data-locale-tag={BCP47_BY_LOCALE[locale]}
@@ -48,20 +51,39 @@ const priced = page.offers.length > 0 && !closed;
       data-days={JSON.stringify(copy.leadTime.days)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
+      data-more-label={copy.moreOffers}
       {...part}
     >
       <h2 class="text-block font-semibold">
         <slot name="heading">{copy.offersHeading}</slot>
       </h2>
-      <ul class="flex flex-col divide-y divide-line" data-offers>
-        {page.offers.map((offer) => (
-          <OfferRow offer={offer} />
-        ))}
+      <ul class="flex flex-col" data-offers>
+        {best && <OfferRow offer={best} />}
       </ul>
+      <details class="group/more" data-more hidden={others.length === 0}>
+        <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+          <span data-more-count>
+            {copy.moreOffers.replace('{count}', String(others.length))}
+          </span>
+          <Icon
+            name="chevronDown"
+            size={16}
+            class="transition-transform duration-150 group-open/more:rotate-180 motion-reduce:transition-none"
+          />
+        </summary>
+        <ul
+          class="mt-2 flex flex-col divide-y divide-line border-t border-line pt-4"
+          data-more-offers
+        >
+          {others.map((offer) => (
+            <OfferRow offer={offer} secondary />
+          ))}
+        </ul>
+      </details>
       <template data-offer>
         <OfferRow />
       </template>
-      <div aria-live="polite" {...contactCta}>
+      <div aria-live="polite">
         <div data-status="added" hidden class={status}>
           <p>{copy.addedNotice}</p>
           <a
@@ -95,7 +117,7 @@ const priced = page.offers.length > 0 && !closed;
     <div
       class:list={[
         'card flex flex-col gap-3 p-5 sm:p-6',
-        !demoted && 'border-signal/40 bg-signal/5',
+        !demoted && 'border-transparent bg-shade',
       ]}
     >
       <h2 class="text-block font-semibold">

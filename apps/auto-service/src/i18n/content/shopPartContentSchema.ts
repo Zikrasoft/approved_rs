@@ -25,6 +25,7 @@ export const shopPartContentSchema = z
     priceOnRequestCta: z.string(),
     orderBody: z.string(),
     offersHeading: z.string(),
+    moreOffers: z.string(),
     columns: z
       .object({
         stock: z.string(),

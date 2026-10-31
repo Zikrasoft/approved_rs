@@ -16,6 +16,7 @@ import {
   type LeadTimeCopy,
 } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
+import { rankOffers } from '@/utils/rankOffers';
 import type { LineAddonKind } from '@/utils/catalogue';
 import { vinFrom } from '@/utils/carFacts';
 import {
@@ -424,8 +425,20 @@ export function definePartOffers(tagName = 'part-offers'): void {
         );
         this.removeAttribute('aria-busy');
         if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
-        this.querySelector('[data-offers]')?.replaceChildren(
-          ...outcome.offers.map((offer) => this.row(offer)),
+        const [best, ...others] = rankOffers(outcome.offers);
+        this.querySelector('[data-offers]')?.replaceChildren(this.row(best));
+        this.querySelector('[data-more-offers]')?.replaceChildren(
+          ...others.map((offer) => this.row(offer, true)),
+        );
+        const more = this.querySelector<HTMLElement>('[data-more]');
+        if (more) more.hidden = others.length === 0;
+        fill(
+          this,
+          '[data-more-count]',
+          (this.dataset.moreLabel ?? '').replace(
+            '{count}',
+            String(others.length),
+          ),
         );
         if (this.hidden) {
           this.hidden = false;
@@ -436,7 +449,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         }
       }
 
-      row(offer: PartOffer): Node {
+      row(offer: PartOffer, secondary = false): Node {
         const {
           localeTag = 'sr',
           stockLabel = '',
@@ -488,6 +501,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
         buy.hidden = !isBuyable(offer);
         buy.setAttribute('data-offer-id', offer.id);
+        if (secondary) buy.classList.replace('btn-primary', 'btn-secondary');
         return row;
       }
 
