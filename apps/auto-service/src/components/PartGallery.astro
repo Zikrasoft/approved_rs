@@ -25,7 +25,7 @@ const label = (index: number) =>
   main && (
     <part-gallery class="flex w-full max-w-136 flex-col gap-3">
       <figure class="flex flex-col gap-2">
-        <part-image class="group/image flex aspect-[4/3] items-center sm:aspect-square justify-center overflow-hidden rounded-block bg-shade">
+        <part-image class="group/image flex aspect-[4/3] max-h-[35svh] items-center justify-center sm:aspect-square sm:max-h-none overflow-hidden rounded-block bg-shade">
           <img
             data-main
             src={main.src}
