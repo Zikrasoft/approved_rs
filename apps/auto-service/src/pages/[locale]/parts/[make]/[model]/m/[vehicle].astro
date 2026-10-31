@@ -200,7 +200,7 @@ const specsSummary = [
             >
               <kit-cart
                 class="contents noscript:hidden!"
-                {...(kitBuyable ? {} : { hidden: '' })}
+                {...(kitBuyable ? { 'data-buyable': '' } : { hidden: '' })}
                 data-cart-href={PathBuilder.partsCart(locale)}
                 data-locale-tag={BCP47_BY_LOCALE[locale]}
               >
@@ -235,10 +235,7 @@ const specsSummary = [
               </div>
               <a
                 href={PathBuilder.partsInquiry(locale)}
-                class:list={[
-                  'btn w-full sm:w-auto',
-                  kitBuyable ? 'btn-secondary' : 'btn-primary',
-                ]}
+                class="btn btn-after-kit w-full sm:w-auto"
                 data-add-all
               >
                 {copy.kitAdd}

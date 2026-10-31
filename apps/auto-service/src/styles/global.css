@@ -231,12 +231,14 @@
       color 160ms ease-out;
   }
 
-  .btn-primary {
+  .btn-primary,
+  .btn-after-kit {
     background-color: var(--color-signal);
     color: var(--color-ink);
   }
 
-  .btn-secondary {
+  .btn-secondary,
+  kit-cart[data-buyable] ~ .btn-after-kit {
     border: 1px solid var(--color-line-strong);
     background-color: var(--color-card);
     color: var(--color-ink);
@@ -313,11 +315,13 @@
   }
 
   @media (hover: hover) {
-    .btn-primary:hover {
+    .btn-primary:hover,
+    .btn-after-kit:hover {
       background-color: var(--color-signal-hover);
     }
 
-    .btn-secondary:hover {
+    .btn-secondary:hover,
+    kit-cart[data-buyable] ~ .btn-after-kit:hover {
       border-color: var(--color-ink);
       background-color: var(--color-shade);
     }
