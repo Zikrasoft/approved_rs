@@ -24,6 +24,16 @@ const INSTALLATION_SERVICE_BY_CATEGORY = new Map<string, ServiceSlug>([
   ['body-parts', 'bodywork-painting'],
 ]);
 
+export const partsCategoryFor = (
+  service: ServiceSlug,
+  categories: { slug: string; pages: unknown[] }[],
+): string | null =>
+  categories.find(
+    ({ slug, pages }) =>
+      pages.length > 0 &&
+      INSTALLATION_SERVICE_BY_CATEGORY.get(slug) === service,
+  )?.slug ?? null;
+
 export const installationService = (
   category: { slug: string } | null,
 ): ServiceSlug =>

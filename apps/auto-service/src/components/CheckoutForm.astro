@@ -1,4 +1,5 @@
 ---
+import { contactCta } from '@podbor/site-kit/contact-control';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import Icon from './Icon.astro';
 import PickupDetails from './PickupDetails.astro';
@@ -25,7 +26,7 @@ const stepNumber =
 const summaryRow = 'flex items-baseline justify-between gap-4';
 ---
 
-<div class="card scroll-mt-24 overflow-hidden" id="checkout">
+<div class="card scroll-mt-24 overflow-hidden" id="checkout" {...contactCta}>
   <section
     class="flex flex-col gap-2 border-b border-line bg-shade px-5 py-4 sm:px-6"
     aria-labelledby={`summary-${uid}`}

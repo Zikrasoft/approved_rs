@@ -22,7 +22,7 @@ export const getStaticPaths = localePaths;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopCart;
-const { columns, leadTime } = content(locale).shopPart;
+const { leadTime } = content(locale).shopPart;
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
   'card mb-4 flex items-start gap-3 border-transparent bg-shade p-4 text-sm leading-relaxed text-ink';
@@ -32,6 +32,7 @@ const notices = [
   { key: 'cart-changed', text: copy.notices.cartChanged },
   { key: 'repriced', text: copy.notices.repriced },
   { key: 'stock-limit', text: copy.notices.stockLimit },
+  { key: 'order-limit', text: copy.notices.orderLimit },
   { key: 'unreachable', text: copy.notices.unreachable },
   { key: 'offline', text: copy.notices.offline },
   { key: 'expired', text: copy.notices.expired },
@@ -72,7 +73,7 @@ const stepper =
       data-lower-template={copy.lowerToTemplate}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
       data-preview={shopOpen() ? undefined : ''}
-      data-availability={JSON.stringify({ columns, leadTime })}
+      data-availability={JSON.stringify(leadTime)}
     >
       <p
         data-state="loading"
@@ -146,18 +147,21 @@ const stepper =
       </div>
 
       <div data-state="ordered" hidden class={`${panel} gap-5`}>
-        <div class="flex items-center gap-3">
+        <div class="flex items-start gap-3">
           <span
             class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-go/10 text-go"
           >
             <Icon name="check" size={18} />
           </span>
-          <p
-            class="spec text-lg font-semibold text-ink"
-            data-order-number
-            hidden
-          >
-          </p>
+          <div class="flex flex-col gap-1">
+            <p
+              class="spec text-lg font-semibold text-ink"
+              data-order-number
+              hidden
+            >
+            </p>
+            <p class="text-sm leading-relaxed text-ink-2">{copy.orderedNext}</p>
+          </div>
         </div>
         <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
           {copy.orderedBody}
@@ -263,18 +267,14 @@ const stepper =
                   <Icon
                     name="warning"
                     size={16}
-                    class="mt-0.5 shrink-0 text-signal-ink"
+                    class="mt-0.5 shrink-0 text-ink"
                   />
                   <span>{text}</span>
                 </p>
               ))
             }
             <p data-notice="moved" hidden class={notice}>
-              <Icon
-                name="warning"
-                size={16}
-                class="mt-0.5 shrink-0 text-signal-ink"
-              />
+              <Icon name="warning" size={16} class="mt-0.5 shrink-0 text-ink" />
               <span>
                 {copy.notices.moved}{' '}
                 <a

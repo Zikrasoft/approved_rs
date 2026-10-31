@@ -227,30 +227,16 @@
     color: var(--color-ink);
   }
 
-  .btn-primary:hover {
-    background-color: var(--color-signal-hover);
-  }
-
   .btn-secondary {
     border: 1px solid var(--color-line-strong);
     background-color: var(--color-card);
     color: var(--color-ink);
   }
 
-  .btn-secondary:hover {
-    border-color: var(--color-ink);
-    background-color: var(--color-shade);
-  }
-
   .btn-on-panel {
     border: 1px solid var(--color-panel-line-strong);
     background-color: transparent;
     color: var(--color-panel-fg);
-  }
-
-  .btn-on-panel:hover {
-    border-color: var(--color-panel-ink);
-    background-color: var(--color-panel-2);
   }
 
   .btn:active {
@@ -297,17 +283,9 @@
     transition: background-color 160ms ease-out;
   }
 
-  .chip:hover {
-    background-color: var(--color-shade-strong);
-  }
-
   .chip-accent {
     background-color: var(--color-signal);
     color: var(--color-ink);
-  }
-
-  .chip-accent:hover {
-    background-color: var(--color-signal-hover);
   }
 
   .link-muted {
@@ -316,8 +294,32 @@
     transition: color 150ms ease-out;
   }
 
-  .link-muted:hover {
-    color: var(--color-signal-ink);
+  @media (hover: hover) {
+    .btn-primary:hover {
+      background-color: var(--color-signal-hover);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-ink);
+      background-color: var(--color-shade);
+    }
+
+    .btn-on-panel:hover {
+      border-color: var(--color-panel-ink);
+      background-color: var(--color-panel-2);
+    }
+
+    .chip:hover {
+      background-color: var(--color-shade-strong);
+    }
+
+    .chip-accent:hover {
+      background-color: var(--color-signal-hover);
+    }
+
+    .link-muted:hover {
+      color: var(--color-signal-ink);
+    }
   }
 
   .field-label {

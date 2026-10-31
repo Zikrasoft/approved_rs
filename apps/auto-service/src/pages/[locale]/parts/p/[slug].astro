@@ -204,14 +204,6 @@ const thumbFor = (slug: string) => {
   <section
     class="wrap grid gap-6 pt-6 md:pt-band lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start lg:gap-x-10 lg:gap-y-10"
   >
-    {
-      shown && (
-        <div class="lg:col-start-1 lg:row-start-1">
-          <PartGallery {...shown} />
-        </div>
-      )
-    }
-
     <div
       id="offers"
       class="flex scroll-mt-24 flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1"
@@ -276,6 +268,13 @@ const thumbFor = (slug: string) => {
           <PartOffers page={page} demoted={Boolean(successor)} />
         )
       }
+      <a
+        href={works.length > 0 ? '#works' : PathBuilder.works(locale)}
+        class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+      >
+        {works.length > 0 ? copy.worksHeading : site.nav.works}
+        <Icon name="chevronRight" size={14} />
+      </a>
       <AddonNote
         category={category}
         pages={[page, ...(successor ? [successor] : [])]}
@@ -311,6 +310,14 @@ const thumbFor = (slug: string) => {
         </a>
       </div>
     </div>
+
+    {
+      shown && (
+        <div class="lg:col-start-1 lg:row-start-1">
+          <PartGallery {...shown} />
+        </div>
+      )
+    }
 
     <div class="flex flex-col gap-8 lg:col-start-1">
       {
@@ -568,7 +575,7 @@ const thumbFor = (slug: string) => {
 
   {
     works.length > 0 && (
-      <section class="wrap pb-band md:pb-band-lg">
+      <section id="works" class="wrap scroll-mt-24 pb-band md:pb-band-lg">
         <h2 class="text-section">{copy.worksHeading}</h2>
         <WorkGrid works={works} class="mt-6" />
       </section>

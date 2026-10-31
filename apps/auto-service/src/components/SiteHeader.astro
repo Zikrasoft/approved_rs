@@ -60,7 +60,7 @@ const links = [
   {...contactRegion('header')}
 >
   <header
-    class="sticky top-0 z-30 border-b border-panel-line bg-panel text-panel-fg print:hidden"
+    class="sticky top-0 z-30 border-b border-panel-line bg-panel text-panel-fg group-data-[open]:z-50 short:not-group-data-[open]:static print:hidden"
   >
     <div
       class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
@@ -168,7 +168,7 @@ const links = [
         <cta-reveal
           data-revealed="true"
           watch={CONTACT_CTA_SELECTOR}
-          class="flex max-md:data-[revealed=false]:hidden"
+          class="flex data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden"
         >
           {
             onParts ? (
@@ -235,7 +235,7 @@ const links = [
   <div
     id="site-menu"
     data-menu
-    class="invisible fixed inset-0 z-25 flex flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
+    class="invisible fixed inset-0 z-25 flex group-data-[open]:z-45 flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
     inert
   >
     <nav class="flex flex-col" aria-label={site.common.mobileNavLabel}>

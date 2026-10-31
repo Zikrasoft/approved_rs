@@ -154,8 +154,28 @@ export function forgetListCar(storage?: ListStorage): void {
   );
 }
 
-const partTitle = ({ brand, number, name }: ListedPart): string =>
-  `${brand} ${number}, ${name}`;
+const bare = (text: string) =>
+  text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+
+const nameWithoutNumber = ({
+  brand,
+  number,
+  name,
+}: Pick<ListedPart, 'brand' | 'number' | 'name'>): string => {
+  const words = name.split(/\s+/);
+  const own = bare(`${brand}${number}`);
+  for (let tail = 1; tail < words.length; tail++) {
+    if (bare(words.slice(-tail).join('')) === own)
+      return words
+        .slice(0, -tail)
+        .join(' ')
+        .replace(/[\s,]+$/, '');
+  }
+  return name;
+};
+
+const partTitle = (part: ListedPart): string =>
+  `${part.brand} ${part.number}, ${nameWithoutNumber(part)}`;
 
 export const partLine = (part: ListedPart): string => {
   const { quantity = 1 } = part;
@@ -255,7 +275,11 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             const number = document.createElement('span');
             number.className = 'spec font-semibold';
             number.textContent = part.number.replaceAll(' ', '\u00a0');
-            link.replaceChildren(`${part.brand} `, number, `, ${part.name}`);
+            link.replaceChildren(
+              `${part.brand} `,
+              number,
+              `, ${nameWithoutNumber(part)}`,
+            );
             link.href = (this.dataset.partHref ?? '').replace(
               '{slug}',
               part.slug,

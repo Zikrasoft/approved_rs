@@ -21,6 +21,7 @@ describe('PARTS_ORDER_COPY', () => {
     );
     expect(PARTS_ORDER_COPY.line('Oil', 2, '200 RSD')).toBe('Oil × 2: 200 RSD');
     expect(PARTS_ORDER_COPY.pickupIn(5)).toBe('забрать через 5 дней');
+    expect(PARTS_ORDER_COPY.pickupIn(1)).toBe('забрать завтра');
     expect(PARTS_ORDER_COPY.addon('Mounting', '50 RSD')).toBe(
       '+ Mounting: 50 RSD',
     );

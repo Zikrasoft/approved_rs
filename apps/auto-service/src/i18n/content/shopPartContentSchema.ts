@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+const pluralForms = z
+  .object({
+    one: z.string().optional(),
+    two: z.string().optional(),
+    few: z.string().optional(),
+    many: z.string().optional(),
+    other: z.string(),
+  })
+  .strict();
+
 export const shopPartContentSchema = z
   .object({
     metaTitleSuffix: z.string(),
@@ -26,27 +36,14 @@ export const shopPartContentSchema = z
     orderBody: z.string(),
     offersHeading: z.string(),
     moreOffers: z.string(),
-    columns: z
-      .object({
-        stock: z.string(),
-        leadTime: z.string(),
-        leadTimeShort: z.string(),
-        inStockPickup: z.string(),
-      })
-      .strict(),
+    moreOffersCheaper: z.string(),
     leadTime: z
       .object({
         inStock: z.string(),
+        inStockTomorrow: z.string(),
+        inStockDays: pluralForms,
         tomorrow: z.string(),
-        days: z
-          .object({
-            one: z.string().optional(),
-            two: z.string().optional(),
-            few: z.string().optional(),
-            many: z.string().optional(),
-            other: z.string(),
-          })
-          .strict(),
+        days: pluralForms,
       })
       .strict(),
     buyButtonLabel: z.string(),

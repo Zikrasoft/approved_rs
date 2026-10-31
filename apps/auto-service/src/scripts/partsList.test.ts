@@ -180,6 +180,28 @@ describe('parts list', () => {
   });
 });
 
+describe('partLine', () => {
+  it('does not repeat a brand and number the part name already ends with', () => {
+    expect(
+      partLine({
+        slug: 'brembo-p06087',
+        brand: 'Brembo',
+        number: 'P 06 087',
+        name: 'Тормозные колодки задние Brembo P 06 087',
+      }),
+    ).toBe('Brembo P 06 087, Тормозные колодки задние');
+    expect(
+      partLine({ ...mannOil, name: 'Масляный фильтр MANN-FILTER HU816x' }),
+    ).toBe('Mann-Filter HU 816 x, Масляный фильтр');
+  });
+
+  it('keeps a name that is only the brand and number', () => {
+    expect(partLine({ ...mannOil, name: 'Mann-Filter HU 816 x' })).toBe(
+      'Mann-Filter HU 816 x, Mann-Filter HU 816 x',
+    );
+  });
+});
+
 describe('inquiryComment', () => {
   const more = (count: number) => `+${count} не поместились`;
 

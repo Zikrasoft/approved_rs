@@ -337,14 +337,34 @@ export function createCatalogue({
               ])
             : [],
         );
-        const specs = ({ part }: SearchResult) => {
-          const named = bySlug.get(part.category?.slug ?? '');
-          const listing = found.results.flatMap((other) =>
-            other.part.attributes &&
-            other.part.category?.slug === part.category?.slug
+        const sameCategory = (results: SearchResult[], slug?: string) =>
+          results.flatMap((other) =>
+            other.part.attributes && other.part.category?.slug === slug
               ? [other.part.attributes]
               : [],
           );
+        const lone = [...bySlug.keys()].filter(
+          (slug) =>
+            found.results.some(({ part }) => part.category?.slug === slug) &&
+            sameCategory(found.results, slug).length < 2,
+        );
+        const peers = new Map(
+          await Promise.all(
+            lone.map(async (slug) => {
+              const listed = await request(
+                `/store/search?${new URLSearchParams({ locale, category: slug, limit: '100' })}`,
+              )
+                .then((body) => searchResponseSchema.parse(body).results)
+                .catch(() => []);
+              return [slug, sameCategory(listed, slug)] as const;
+            }),
+          ),
+        );
+        const specs = ({ part }: SearchResult) => {
+          const slug = part.category?.slug;
+          const named = bySlug.get(slug ?? '');
+          const listing =
+            peers.get(slug ?? '') ?? sameCategory(found.results, slug);
           return named && part.attributes
             ? keySpecs(named, part.attributes, locale, listing)
             : '';

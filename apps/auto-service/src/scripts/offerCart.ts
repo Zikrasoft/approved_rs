@@ -15,7 +15,7 @@ import {
   ORDERED_CART_PARAM,
 } from '@/utils/cartNotice';
 import { cartOutcomeSchema, type CartOutcome } from '@/utils/catalogueWire';
-import { offerAvailability, type AvailabilityCopy } from '@/utils/leadTime';
+import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import {
   forgetOrderedCart,
@@ -52,6 +52,11 @@ export function stepTarget(
     ? { quantity: Math.max(1, cap), capped: true }
     : { quantity: wanted, capped: false };
 }
+
+export const capNotice = ({
+  lead_time_days,
+}: Pick<CartLine, 'lead_time_days'>): string =>
+  lead_time_days > 0 ? 'order-limit' : 'stock-limit';
 
 export function defineOfferCart(tagName = 'offer-cart'): void {
   if (customElements.get(tagName)) return;
@@ -244,7 +249,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         try {
           const { stock, lead } = offerAvailability(
             { stock_quantity: Number(in_stock), lead_time_days },
-            JSON.parse(this.dataset.availability ?? '') as AvailabilityCopy,
+            JSON.parse(this.dataset.availability ?? '') as LeadTimeCopy,
             localeTag,
           );
           return stock ?? lead;
@@ -375,7 +380,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           line.max_quantity ?? null,
         );
         if (capped) {
-          this.stepNotice = 'stock-limit';
+          this.stepNotice = capNotice(line);
           showOnly(this, 'data-notice', this.stepNotice);
         }
         if (target === current) return;

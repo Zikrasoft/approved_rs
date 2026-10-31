@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  formatLeadTime,
   offerAvailability,
+  pickupTime,
   plural,
   schemaAvailability,
 } from './leadTime';
@@ -26,48 +26,6 @@ describe('schemaAvailability', () => {
   });
 });
 
-describe('formatLeadTime', () => {
-  const copy = {
-    inStock: 'В наличии',
-    days: {
-      one: '{days} день',
-      few: '{days} дня',
-      many: '{days} дней',
-      other: '{days} дня',
-    },
-  };
-
-  it('says in stock for an offer ready today', () => {
-    expect(formatLeadTime(0, copy, 'ru-RU')).toBe('В наличии');
-  });
-
-  it('counts the days to delivery in the plural form the language needs', () => {
-    expect(formatLeadTime(1, copy, 'ru-RU')).toBe('1 день');
-    expect(formatLeadTime(3, copy, 'ru-RU')).toBe('3 дня');
-    expect(formatLeadTime(5, copy, 'ru-RU')).toBe('5 дней');
-    expect(formatLeadTime(21, copy, 'ru-RU')).toBe('21 день');
-  });
-
-  it('says tomorrow for a one-day lead time where the copy has the word', () => {
-    expect(formatLeadTime(1, { ...copy, tomorrow: 'завтра' }, 'ru-RU')).toBe(
-      'завтра',
-    );
-    expect(formatLeadTime(21, { ...copy, tomorrow: 'завтра' }, 'ru-RU')).toBe(
-      '21 день',
-    );
-  });
-
-  it('falls back to the other form when a language has no such form', () => {
-    expect(
-      formatLeadTime(
-        2,
-        { inStock: '', days: { one: '{days} day', other: '{days} days' } },
-        'en-GB',
-      ),
-    ).toBe('2 days');
-  });
-});
-
 describe('plural', () => {
   const forms = { one: '{n} деталь', few: '{n} детали', other: '{n} деталей' };
 
@@ -85,25 +43,25 @@ describe('plural', () => {
 });
 
 describe('offerAvailability', () => {
-  const copy = {
-    columns: {
-      stock: 'В наличии',
-      leadTime: 'Забрать',
-      inStockPickup: 'В наличии, забрать {days}',
+  const ru = {
+    inStock: 'В наличии',
+    inStockTomorrow: 'В наличии, забрать завтра',
+    inStockDays: {
+      one: 'В наличии, забрать через {days} день',
+      few: 'В наличии, забрать через {days} дня',
+      other: 'В наличии, забрать через {days} дней',
     },
-    leadTime: {
-      inStock: 'В наличии',
-      tomorrow: 'завтра',
-      days: {
-        one: 'через {days} день',
-        few: 'через {days} дня',
-        other: 'через {days} дней',
-      },
+    tomorrow: 'Забрать завтра',
+    days: {
+      one: 'Забрать через {days} день',
+      few: 'Забрать через {days} дня',
+      other: 'Забрать через {days} дней',
     },
   };
 
   it.each([
     [3, 0, { stock: 'В наличии', lead: null, buyable: true }],
+    [3, 1, { stock: 'В наличии, забрать завтра', lead: null, buyable: true }],
     [
       3,
       2,
@@ -111,13 +69,58 @@ describe('offerAvailability', () => {
     ],
     [0, 1, { stock: null, lead: 'Забрать завтра', buyable: true }],
     [0, 5, { stock: null, lead: 'Забрать через 5 дней', buyable: true }],
+    [0, 21, { stock: null, lead: 'Забрать через 21 день', buyable: true }],
     [0, 0, { stock: null, lead: null, buyable: false }],
   ])(
     'words stock %i with lead time %i',
     (stock_quantity, lead_time_days, said) => {
       expect(
-        offerAvailability({ stock_quantity, lead_time_days }, copy, 'ru-RU'),
+        offerAvailability({ stock_quantity, lead_time_days }, ru, 'ru-RU'),
       ).toEqual(said);
     },
   );
+
+  it('takes every phrase whole from the copy, so no language gets a stitched preposition', () => {
+    const en = {
+      inStock: 'In stock',
+      inStockTomorrow: 'In stock, ready tomorrow',
+      inStockDays: {
+        one: 'In stock, ready in {days} day',
+        other: 'In stock, ready in {days} days',
+      },
+      tomorrow: 'Ready tomorrow',
+      days: { one: 'Ready in {days} day', other: 'Ready in {days} days' },
+    };
+    const said = [
+      [3, 1],
+      [3, 2],
+      [0, 1],
+      [0, 2],
+    ].map(([stock_quantity, lead_time_days]) =>
+      offerAvailability({ stock_quantity, lead_time_days }, en, 'en-GB'),
+    );
+    expect(said.map(({ stock, lead }) => stock ?? lead)).toEqual([
+      'In stock, ready tomorrow',
+      'In stock, ready in 2 days',
+      'Ready tomorrow',
+      'Ready in 2 days',
+    ]);
+  });
+});
+
+describe('pickupTime', () => {
+  it('says tomorrow for one day and counts the days otherwise', () => {
+    const copy = {
+      inStock: '',
+      inStockTomorrow: '',
+      inStockDays: { other: '' },
+      tomorrow: 'Забрать завтра',
+      days: {
+        one: 'Забрать через {days} день',
+        other: 'Забрать через {days} дня',
+      },
+    };
+    expect(pickupTime(1, copy, 'ru-RU')).toBe('Забрать завтра');
+    expect(pickupTime(3, copy, 'ru-RU')).toBe('Забрать через 3 дня');
+  });
 });
