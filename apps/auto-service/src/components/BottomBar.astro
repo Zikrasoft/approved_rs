@@ -1,0 +1,27 @@
+---
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
+
+interface Props {
+  region?: Parameters<typeof contactRegion>[0];
+}
+
+const { region } = Astro.props;
+---
+
+<cta-reveal
+  data-revealed="false"
+  watch={CONTACT_CTA_SELECTOR}
+  class="fixed inset-x-0 bottom-[var(--cookie-consent-height,0px)] z-40 border-t border-line bg-paper transition-[translate,visibility] duration-250 data-[revealed=false]:invisible data-[revealed=false]:translate-y-full motion-reduce:transition-none lg:hidden print:hidden"
+  {...region ? contactRegion(region) : {}}
+>
+  <slot />
+</cta-reveal>
+
+<script>
+  import { defineCtaReveal } from '@podbor/site-kit/browser';
+
+  defineCtaReveal();
+</script>
