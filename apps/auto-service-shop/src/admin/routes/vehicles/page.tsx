@@ -37,6 +37,10 @@ import {
   RowActions,
 } from '../../components/list';
 import { DrawerHeader, ModalHeader } from '../../components/dialog-header';
+import {
+  listingSchema,
+  ReferencePicker,
+} from '../../components/reference-picker';
 import { ScrollArea } from '../../components/scroll-area';
 import { SlugRename } from '../../components/slug-rename';
 import {
@@ -57,17 +61,19 @@ import { useConfirmed } from '../../lib/confirm';
 import {
   labelledVehicleSchema,
   referenceLabel,
+  type ReferenceRow,
   type TFunction,
   vehicleLabel,
 } from '../../lib/vehicle-label';
 
+const PAGE_SIZE = 50;
+
+const targetSchema = z.object({ id: z.string() }).loose();
+
 const rowSchema = editedBySchema.extend({ id: z.string() }).loose();
 
 type Row = z.infer<typeof rowSchema>;
-type Rows = Record<string, Row[]>;
-
-const rowsSchema = z.record(z.string(), z.array(rowSchema));
-type Option = { value: string; label: string };
+type Listing = { rows: Row[]; count: number };
 
 type Field =
   | { key: string; kind: 'text' | 'number' }
@@ -192,6 +198,12 @@ const ENTITIES: Entity[] = [
 
 const WIDE_FORM_FIELDS = 6;
 
+const PATHS = Object.fromEntries(
+  ENTITIES.map(({ collection, path }) => [collection, path]),
+);
+
+const relationOf = (field: Field) => field.key.replace(/_id$/, '');
+
 const SLUG_KINDS: Record<string, 'make' | 'model'> = {
   make: 'make',
   vehicle_model: 'model',
@@ -202,15 +214,23 @@ const formFields = (entity: Entity, row: Row | null) =>
 
 const rowLabel = (
   t: TFunction,
-  rows: Rows,
   collection: string,
-  row: Row,
+  row: ReferenceRow,
 ): string => {
   const vehicle = labelledVehicleSchema.safeParse(row);
   if (collection === 'vehicles' && vehicle.success) {
     return vehicleLabel(t, vehicle.data);
   }
-  return referenceLabel(rows, collection, row);
+  return referenceLabel(collection, row);
+};
+
+const refLabel = (t: TFunction, field: Field, row: Row): string => {
+  const target = targetSchema.safeParse(row[relationOf(field)]);
+  if (field.kind !== 'ref' || !target.success) return '';
+  if (field.ownName && target.data.name != null) {
+    return String(target.data.name);
+  }
+  return rowLabel(t, field.collection, target.data);
 };
 
 const toBody = (fields: Field[], draft: Record<string, string>) =>
@@ -229,32 +249,19 @@ const fromRow = (fields: Field[], row: Row): Record<string, string> =>
     fields.map(({ key }) => [key, row[key] == null ? '' : String(row[key])]),
   );
 
-const optionsOf = (t: TFunction, rows: Rows, field: Field): Option[] => {
-  if (field.kind === 'enum') {
-    return field.values.map((value) => ({
-      value,
-      label: t(`vehicles.values.${field.key}.${value}`),
-    }));
-  }
-  if (field.kind === 'ref') {
-    return (rows[field.collection] ?? []).map((row) => ({
-      value: row.id,
-      label: rowLabel(t, rows, field.collection, row),
-    }));
-  }
-  return [];
-};
+const enumLabel = (t: TFunction, field: Field, value: unknown) =>
+  t(`vehicles.values.${field.key}.${String(value)}`);
 
 const EntityTable = ({
   entity,
-  rows,
+  list,
   suppliers,
   reload,
   onEdit,
   onMerge,
 }: {
   entity: Entity;
-  rows: Rows;
+  list: Row[] | null;
   suppliers: Supplier[];
   reload: () => Promise<void>;
   onEdit: (row: Row) => void;
@@ -263,24 +270,17 @@ const EntityTable = ({
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const confirmed = useConfirmed();
-  const list = rows[entity.collection];
 
   const cell = (field: Field, row: Row): string => {
     const value = row[field.key];
     if (value == null || value === '') return '-';
     if (field.kind === 'text' || field.kind === 'number') return String(value);
-    if (field.kind === 'ref' && field.ownName) {
-      const target = rows[field.collection]?.find(({ id }) => id === value);
-      if (target?.name != null) return String(target.name);
-    }
-    return (
-      optionsOf(t, rows, field).find((option) => option.value === value)
-        ?.label ?? String(value)
-    );
+    if (field.kind === 'enum') return enumLabel(t, field, value);
+    return refLabel(t, field, row) || String(value);
   };
 
   const remove = async (row: Row) => {
-    const name = rowLabel(t, rows, entity.collection, row);
+    const name = rowLabel(t, entity.collection, row);
     if (
       await confirmed({
         title: t('vehicles.confirmTitle', { name }),
@@ -341,7 +341,7 @@ const EntityTable = ({
                       kind={SLUG_KINDS[entity.object]}
                       id={row.id}
                       slug={String(row.slug)}
-                      name={rowLabel(t, rows, entity.collection, row)}
+                      name={rowLabel(t, entity.collection, row)}
                       reload={reload}
                     />
                   ) : (
@@ -374,7 +374,7 @@ const EntityTable = ({
                   )}
                   <RowActions
                     label={t('common.actionsFor', {
-                      name: rowLabel(t, rows, entity.collection, row),
+                      name: rowLabel(t, entity.collection, row),
                     })}
                     disabled={writing}
                     onEdit={() => onEdit(row)}
@@ -396,14 +396,12 @@ const EntityTable = ({
 
 const EntityForm = ({
   entity,
-  rows,
   row,
   open,
   onOpenChange,
   reload,
 }: {
   entity: Entity;
-  rows: Rows;
   row: Row | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -412,12 +410,21 @@ const EntityForm = ({
   const writing = useWriting();
   const { t } = useTranslation('carlabAdmin');
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [picked, setPicked] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const shown = formFields(entity, row);
   const wide = shown.length >= WIDE_FORM_FIELDS;
 
   useEffect(() => {
-    if (open) setDraft(row ? fromRow(formFields(entity, row), row) : {});
+    if (!open) return;
+    setDraft(row ? fromRow(formFields(entity, row), row) : {});
+    setPicked(
+      row
+        ? Object.fromEntries(
+            entity.fields.map((field) => [field.key, refLabel(t, field, row)]),
+          )
+        : {},
+    );
   }, [open, row, entity]);
 
   const hasSlug = shown.some(({ key }) => key === 'slug');
@@ -476,6 +483,18 @@ const EntityForm = ({
                 value={draft[field.key] ?? ''}
                 onChange={(event) => setText(field.key, event.target.value)}
               />
+            ) : field.kind === 'ref' ? (
+              <ReferencePicker
+                id={id}
+                path={PATHS[field.collection]}
+                collection={field.collection}
+                label={picked[field.key] ?? ''}
+                optionLabel={(option) => rowLabel(t, field.collection, option)}
+                onChange={(value, label) => {
+                  setDraft((current) => ({ ...current, [field.key]: value }));
+                  setPicked((current) => ({ ...current, [field.key]: label }));
+                }}
+              />
             ) : (
               <Select
                 value={draft[field.key] ?? ''}
@@ -487,9 +506,9 @@ const EntityForm = ({
                   <Select.Value placeholder={t('vehicles.choose')} />
                 </Select.Trigger>
                 <Select.Content>
-                  {optionsOf(t, rows, field).map((option) => (
-                    <Select.Item key={option.value} value={option.value}>
-                      {option.label}
+                  {(field.kind === 'enum' ? field.values : []).map((value) => (
+                    <Select.Item key={value} value={value}>
+                      {enumLabel(t, field, value)}
                     </Select.Item>
                   ))}
                 </Select.Content>
@@ -579,25 +598,22 @@ const EntityForm = ({
 };
 
 const MergeMakeDrawer = ({
-  rows,
   make,
   onClose,
   reload,
 }: {
-  rows: Rows;
   make: Row | null;
   onClose: () => void;
   reload: () => Promise<void>;
 }) => {
   const { t } = useTranslation('carlabAdmin');
   const writing = useWriting();
-  const [into, setInto] = useState('');
+  const [into, setInto] = useState({ id: '', name: '' });
   const [saving, setSaving] = useState(false);
   const name = String(make?.name ?? '');
-  const others = (rows.makes ?? []).filter(({ id }) => id !== make?.id);
 
   useEffect(() => {
-    if (make) setInto('');
+    if (make) setInto({ id: '', name: '' });
   }, [make]);
 
   const merge = async (event: FormEvent) => {
@@ -607,14 +623,11 @@ const MergeMakeDrawer = ({
     const merged = await adminFetch(
       `/admin/makes/${make.id}/merge`,
       acknowledged,
-      { method: 'POST', body: JSON.stringify({ into }) },
+      { method: 'POST', body: JSON.stringify({ into: into.id }) },
     );
     setSaving(false);
     if (merged) {
-      const target = others.find(({ id }) => id === into);
-      toast.success(
-        t('vehicles.merge.merged', { name, into: String(target?.name ?? '') }),
-      );
+      toast.success(t('vehicles.merge.merged', { name, into: into.name }));
       onClose();
       await reload();
     }
@@ -636,18 +649,15 @@ const MergeMakeDrawer = ({
             <Label size="small" weight="plus" htmlFor="merge-make-into">
               {t('vehicles.merge.into')}
             </Label>
-            <Select value={into} onValueChange={setInto}>
-              <Select.Trigger id="merge-make-into">
-                <Select.Value placeholder={t('vehicles.choose')} />
-              </Select.Trigger>
-              <Select.Content>
-                {others.map((other) => (
-                  <Select.Item key={other.id} value={other.id}>
-                    {String(other.name)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select>
+            <ReferencePicker
+              id="merge-make-into"
+              path="makes"
+              collection="makes"
+              label={into.name}
+              exclude={make?.id}
+              optionLabel={(option) => String(option.name)}
+              onChange={(id, label) => setInto({ id, name: label })}
+            />
           </Drawer.Body>
           <Drawer.Footer>
             <Drawer.Close asChild>
@@ -660,7 +670,7 @@ const MergeMakeDrawer = ({
               type="submit"
               variant="danger"
               isLoading={saving}
-              disabled={writing || !into}
+              disabled={writing || !into.id}
             >
               {t('vehicles.merge.save')}
             </Button>
@@ -674,7 +684,7 @@ const MergeMakeDrawer = ({
 const VehiclesPage = () => {
   const { t } = useTranslation('carlabAdmin');
   const writing = useWriting();
-  const [rows, setRows] = useState<Rows>({});
+  const [listing, setListing] = useState<Listing | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [form, setForm] = useState<{ open: boolean; row: Row | null }>({
     open: false,
@@ -682,19 +692,54 @@ const VehiclesPage = () => {
   });
   const [merging, setMerging] = useState<Row | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const active =
+    ENTITIES.find(({ path }) => path === searchParams.get('tab')) ??
+    ENTITIES[0];
+  const q = searchParams.get('q') ?? '';
+  const pageIndex = Math.max(0, Number(searchParams.get('page')) || 0);
+  const [query, setQuery] = useState(q);
+
+  const update = (changes: Record<string, string>) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries({ page: '', ...changes })) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const reload = async () => {
-    const loaded = await Promise.all(
-      ENTITIES.map(async ({ collection, path }) => {
-        const data = await adminFetch(`/admin/${path}`, rowsSchema);
-        return [collection, data?.[collection] ?? []] as const;
-      }),
+    const search = new URLSearchParams({
+      offset: String(pageIndex * PAGE_SIZE),
+      limit: String(PAGE_SIZE),
+    });
+    if (q) search.set('q', q);
+    const data = await adminFetch(
+      `/admin/${active.path}?${search}`,
+      listingSchema(active.collection),
     );
-    setRows(Object.fromEntries(loaded));
+    if (data) {
+      setListing({
+        rows: z.array(rowSchema).parse(data.rows),
+        count: data.count,
+      });
+    }
   };
 
   useEffect(() => {
+    setListing(null);
     reload();
+  }, [active.path, q, pageIndex]);
+
+  useEffect(() => {
+    const typed = query.trim();
+    if (typed === q) return;
+    const timer = setTimeout(() => update({ q: typed }), 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
     adminFetch('/admin/suppliers', suppliersSchema).then((data) => {
       if (data) setSuppliers(data.suppliers);
     });
@@ -703,18 +748,16 @@ const VehiclesPage = () => {
       ?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
   }, []);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const active =
-    ENTITIES.find(({ path }) => path === searchParams.get('tab')) ??
-    ENTITIES[0];
+  const pageCount = Math.max(1, Math.ceil((listing?.count ?? 0) / PAGE_SIZE));
 
   return (
     <Container className="overflow-hidden p-0">
       <Tabs
         value={active.path}
-        onValueChange={(next) =>
-          setSearchParams({ tab: next }, { replace: true })
-        }
+        onValueChange={(next) => {
+          setQuery('');
+          setSearchParams({ tab: next }, { replace: true });
+        }}
         className="divide-y"
       >
         <ListHeader
@@ -731,7 +774,7 @@ const VehiclesPage = () => {
             </Button>
           }
         >
-          <div ref={tabsRef}>
+          <div ref={tabsRef} className="flex flex-col gap-3">
             <ScrollArea>
               <Tabs.List
                 aria-label={t('vehicles.sections')}
@@ -745,37 +788,66 @@ const VehiclesPage = () => {
                   >
                     {t(`vehicles.entities.${entity.object}`)}
                     <span className="text-ui-fg-muted inline-block min-w-[1ch] tabular-nums">
-                      {rows[entity.collection]?.length}
+                      {entity === active ? listing?.count : null}
                     </span>
                   </Tabs.Trigger>
                 ))}
               </Tabs.List>
             </ScrollArea>
+            <Input
+              type="search"
+              className="sm:w-80"
+              aria-label={t('vehicles.searchLabel')}
+              placeholder={t('vehicles.searchPlaceholder')}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
           </div>
         </ListHeader>
         {ENTITIES.map((entity) => (
           <Tabs.Content key={entity.path} value={entity.path}>
-            <EntityTable
-              entity={entity}
-              rows={rows}
-              suppliers={suppliers}
-              reload={reload}
-              onEdit={(row) => setForm({ open: true, row })}
-              onMerge={setMerging}
-            />
+            {entity === active && (
+              <>
+                <EntityTable
+                  entity={entity}
+                  list={listing?.rows ?? null}
+                  suppliers={suppliers}
+                  reload={reload}
+                  onEdit={(row) => setForm({ open: true, row })}
+                  onMerge={setMerging}
+                />
+                {listing && listing.count > PAGE_SIZE && (
+                  <Table.Pagination
+                    count={listing.count}
+                    pageSize={PAGE_SIZE}
+                    pageIndex={pageIndex}
+                    pageCount={pageCount}
+                    canPreviousPage={pageIndex > 0}
+                    canNextPage={pageIndex + 1 < pageCount}
+                    previousPage={() => update({ page: String(pageIndex - 1) })}
+                    nextPage={() => update({ page: String(pageIndex + 1) })}
+                    translations={{
+                      of: t('parts.pagination.of'),
+                      results: t('vehicles.results'),
+                      pages: t('parts.pagination.pages'),
+                      prev: t('parts.pagination.prev'),
+                      next: t('parts.pagination.next'),
+                    }}
+                  />
+                )}
+              </>
+            )}
           </Tabs.Content>
         ))}
       </Tabs>
       <EntityForm
         entity={active}
-        rows={rows}
         row={form.row}
         open={form.open}
         onOpenChange={(open) => setForm((current) => ({ ...current, open }))}
         reload={reload}
       />
       <MergeMakeDrawer
-        rows={rows}
         make={merging}
         onClose={() => setMerging(null)}
         reload={reload}

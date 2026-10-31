@@ -419,6 +419,81 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(400);
       });
+
+      it('lists one page at a time with the total, newest last', async () => {
+        for (const code of ['PG01', 'PG02', 'PG03']) {
+          await catalog.createEngines({ code, family: 'PG', fuel: 'diesel' });
+        }
+        const page = async (query: string) =>
+          (await api.get(`/admin/engines?${query}`, adminHeaders)).data;
+
+        const first = await page('q=pg0&limit=2');
+        const second = await page('q=pg0&limit=2&offset=2');
+
+        expect(first.count).toBe(3);
+        expect(first.engines.map(({ code }: { code: string }) => code)).toEqual(
+          ['PG01', 'PG02'],
+        );
+        expect(
+          second.engines.map(({ code }: { code: string }) => code),
+        ).toEqual(['PG03']);
+        expect((await page('')).engines.length).toBeLessThanOrEqual(50);
+        const refused = await api
+          .get('/admin/engines?limit=100000', adminHeaders)
+          .catch((error) => error.response);
+        expect(refused.status).toBe(400);
+      });
+
+      it('finds a Vehicle by every word of its make, chassis, model and engine', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          make: { slug: 'alfa-romeo', name: 'Alfa Romeo' },
+          typeCode: 'SRCH',
+          modelSlug: 'srch-159',
+          modelName: '159 JTDm',
+          chassisCode: 'T939',
+          engineCode: 'SRCH939A',
+        });
+        const found = async (q: string) =>
+          (
+            await api.get(
+              `/admin/vehicles?q=${encodeURIComponent(q)}`,
+              adminHeaders,
+            )
+          ).data.vehicles.map(({ id }: { id: string }) => id);
+
+        expect(await found('alfa t939 jtdm')).toEqual([vehicle.id]);
+        expect(await found('alfa-romeo srch939a')).toEqual([vehicle.id]);
+        expect(await found('alfa t939 g30')).toEqual([]);
+        expect(
+          (
+            await api.get(`/admin/vehicles?id=${vehicle.id}`, adminHeaders)
+          ).data.vehicles.map(({ id }: { id: string }) => id),
+        ).toEqual([vehicle.id]);
+      });
+
+      it('names each reference row’s parents so a page can label it alone', async () => {
+        await createVehicleFixture(catalog, {
+          typeCode: 'PRNT',
+          modelSlug: 'prnt-320d',
+          chassisCode: 'PRNT',
+          engineCode: 'PRNT0',
+        });
+        const [model] = (
+          await api.get('/admin/vehicle-models?q=prnt-320d', adminHeaders)
+        ).data.vehicle_models;
+        const [identifier] = (
+          await api.get('/admin/vehicle-identifiers?q=PRNT', adminHeaders)
+        ).data.vehicle_identifiers;
+
+        expect(model.chassis).toMatchObject({
+          code: 'PRNT',
+          series: { name: '3 серия', make: { name: 'BMW' } },
+        });
+        expect(identifier.vehicle).toMatchObject({
+          engine: { code: 'PRNT0' },
+          model: { chassis: { code: 'PRNT' } },
+        });
+      });
     });
   },
 });

@@ -30,6 +30,7 @@ import { z } from 'zod';
 import { EditedBy } from '../../components/edited-by';
 import { PartEnrichment } from '../../components/enrichment';
 import { PINNED_ACTIONS } from '../../components/list';
+import { ReferencePicker } from '../../components/reference-picker';
 import { ScrollArea } from '../../components/scroll-area';
 import { TranslationsDrawer } from '../../components/translations-drawer';
 import {
@@ -45,6 +46,7 @@ import {
   type LabelledVehicle,
   labelledVehicleSchema,
   referenceLabel,
+  type ReferenceRow,
   vehicleLabel,
 } from '../../lib/vehicle-label';
 
@@ -89,13 +91,8 @@ const fitmentSchema = editedBySchema.extend({
 
 type Fitment = z.infer<typeof fitmentSchema>;
 
-const referenceSchema = z.object({ id: z.string() }).loose();
-
-type Reference = z.infer<typeof referenceSchema>;
-
 const vehiclesSchema = z.object({ vehicles: z.array(labelledVehicleSchema) });
 const brandsSchema = z.object({ brands: z.array(brandSchema) });
-const referencesSchema = z.record(z.string(), z.array(referenceSchema));
 const fitmentsSchema = z.object({ fitments: z.array(fitmentSchema) });
 const partsSchema = z.object({
   parts: z.array(partSchema.extend(editedBySchema.shape)),
@@ -105,6 +102,8 @@ const bulkSchema = z.object({ matched: z.number(), created: z.number() });
 const detachedSchema = z.object({ matched: z.number(), deleted: z.number() });
 
 const ANY = 'any';
+
+const VEHICLE_BATCH = 200;
 
 const REFERENCE_FILTERS = [
   { key: 'make_id', path: 'makes', collection: 'makes', label: 'make' },
@@ -322,8 +321,8 @@ const FitmentsPage = () => {
   const [newValue, setNewValue] = useState('');
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [references, setReferences] = useState<Record<string, Reference[]>>({});
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filterLabels, setFilterLabels] = useState<Record<string, string>>({});
 
   const [conditions, setConditions] = useState<Conditions>(EMPTY_CONDITIONS);
   const [editing, setEditing] = useState<Fitment | null>(null);
@@ -337,27 +336,28 @@ const FitmentsPage = () => {
   ) => setConditions((current) => ({ ...current, [key]: value }));
 
   useEffect(() => {
-    adminFetch('/admin/vehicles', vehiclesSchema).then((data) => {
-      if (data) {
-        setVehicles(data.vehicles);
-      }
-    });
     adminFetch('/admin/brands', brandsSchema).then((data) => {
       if (data) {
         setBrands(data.brands);
       }
     });
-    for (const { path, collection } of REFERENCE_FILTERS) {
-      adminFetch(`/admin/${path}`, referencesSchema).then((data) => {
-        if (data) {
-          setReferences((current) => ({
-            ...current,
-            [collection]: data[collection],
-          }));
-        }
-      });
-    }
   }, []);
+
+  const loadVehicles = async (ids: string[]) => {
+    const loaded: Vehicle[] = [];
+    for (let start = 0; start < ids.length; start += VEHICLE_BATCH) {
+      const search = new URLSearchParams({ limit: String(VEHICLE_BATCH) });
+      for (const id of ids.slice(start, start + VEHICLE_BATCH)) {
+        search.append('id', id);
+      }
+      const data = await adminFetch(
+        `/admin/vehicles?${search}`,
+        vehiclesSchema,
+      );
+      loaded.push(...(data?.vehicles ?? []));
+    }
+    setVehicles(loaded);
+  };
 
   const loadFitments = async (partId: string) => {
     const data = await adminFetch(
@@ -366,6 +366,9 @@ const FitmentsPage = () => {
     );
     if (data) {
       setFitments(data.fitments);
+      await loadVehicles([
+        ...new Set(data.fitments.map(({ vehicle_id }) => vehicle_id)),
+      ]);
     }
   };
 
@@ -638,6 +641,13 @@ const FitmentsPage = () => {
   };
 
   const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+
+  const pickerLabel = (collection: string, row: ReferenceRow) => {
+    const vehicle = labelledVehicleSchema.safeParse(row);
+    return collection === 'vehicles' && vehicle.success
+      ? vehicleLabel(t, vehicle.data)
+      : referenceLabel(collection, row);
+  };
 
   const vehicleTitle = (fitment: Fitment) => {
     const vehicle = vehicleById.get(fitment.vehicle_id);
@@ -939,26 +949,33 @@ const FitmentsPage = () => {
             {t('fitments.step2Hint')}
           </Text>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-            <OptionSelect
-              value={filters.vehicle_id ?? ''}
-              onChange={setFilter('vehicle_id')}
-              placeholder={t('fitments.filters.vehicle')}
-              options={vehicles.map((vehicle) => ({
-                value: vehicle.id,
-                label: vehicleLabel(t, vehicle),
-              }))}
-            />
-            {REFERENCE_FILTERS.map(({ key, collection, label }) => (
-              <OptionSelect
-                key={key}
-                value={filters[key] ?? ''}
-                onChange={setFilter(key)}
-                placeholder={t(`fitments.filters.${label}`)}
-                options={(references[collection] ?? []).map((row) => ({
-                  value: row.id,
-                  label: referenceLabel(references, collection, row),
-                }))}
-              />
+            {[
+              {
+                key: 'vehicle_id',
+                path: 'vehicles',
+                collection: 'vehicles',
+                label: 'vehicle',
+              },
+              ...REFERENCE_FILTERS,
+            ].map(({ key, path, collection, label }) => (
+              <div key={key} className="flex flex-col gap-y-1">
+                <Text size="small">{t(`fitments.filters.${label}`)}</Text>
+                <ReferencePicker
+                  name={t(`fitments.filters.${label}`)}
+                  path={path}
+                  collection={collection}
+                  label={filters[key] ? (filterLabels[key] ?? '') : ''}
+                  optionLabel={(row) => pickerLabel(collection, row)}
+                  onChange={(id, chosen) => {
+                    setFilter(key)(id);
+                    setFilterLabels((current) => ({
+                      ...current,
+                      [key]: chosen,
+                    }));
+                  }}
+                  onClear={() => setFilter(key)('')}
+                />
+              </div>
             ))}
             <Label className="flex flex-col gap-y-1">
               <Text size="small">{t('fitments.filters.engineFamily')}</Text>

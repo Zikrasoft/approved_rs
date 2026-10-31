@@ -14,8 +14,7 @@ import {
   adminPart,
   adminPartSchema,
 } from '../../../lib/admin-part';
-
-const literalLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
+import { literalLike } from '../../../lib/like';
 
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminSearchPartsType>,
