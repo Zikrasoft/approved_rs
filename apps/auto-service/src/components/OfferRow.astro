@@ -62,7 +62,7 @@ const { stock, lead, buyable } = offer
     <button
       type="button"
       class:list={[
-        'btn w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
+        'btn w-full offers-pending:hidden! offers-late:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
         secondary ? 'btn-secondary' : 'btn-primary',
       ]}
       data-buy
@@ -74,7 +74,7 @@ const { stock, lead, buyable } = offer
     <a
       href={askHref}
       class:list={[
-        'btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!',
+        'btn btn-secondary w-full offers-pending:hidden! offers-late:inline-flex! noscript:inline-flex!',
         buyable && 'hidden',
       ]}
       data-ask

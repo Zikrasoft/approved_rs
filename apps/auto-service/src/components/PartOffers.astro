@@ -130,6 +130,11 @@ const askHref = PathBuilder.partsInquiry(
     </part-offers>
   )
 }
+<script is:inline>
+  setTimeout(() => {
+    document.documentElement.dataset.offersLate = '';
+  }, 4000);
+</script>
 {
   !priced && (
     <div
