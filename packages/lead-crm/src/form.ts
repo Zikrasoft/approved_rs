@@ -6,7 +6,15 @@ import {
   MAX_FIELD_LENGTH,
   MAX_URL_LENGTH,
 } from './limits.ts';
-import { isValidContact } from './phone.ts';
+import {
+  isValidContact,
+  PHONE_COUNTRIES,
+  plainText,
+  singleLine,
+  storedContact,
+  typedContact,
+  type PhoneRegion,
+} from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
 import {
   AD_SOURCE_FIELD,
@@ -56,22 +64,16 @@ export const visitorIdSchema = z
 const cappedText = (max: number) =>
   z
     .string()
-    .trim()
+    .transform(singleLine)
     .transform((value) => value.slice(0, max));
 
-const requiredText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .min(1)
-    .transform((value) => value.slice(0, max));
+const requiredText = (max: number) => cappedText(max).pipe(z.string().min(1));
 
-const optionalText = (max: number) =>
+const optionalText = (max: number, clean = singleLine) =>
   z
     .string()
-    .trim()
     .nullish()
-    .transform((value) => value?.slice(0, max) || null)
+    .transform((value) => (value ? clean(value).slice(0, max) : '') || null)
     .catch(null);
 
 export const sourceUrlSchema = optionalText(MAX_URL_LENGTH);
@@ -126,7 +128,7 @@ const submissionObject = z
     // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     vin: optionalText(MAX_FIELD_LENGTH),
-    comment: optionalText(MAX_COMMENT_LENGTH),
+    comment: optionalText(MAX_COMMENT_LENGTH, plainText),
     country: optionalText(MAX_FIELD_LENGTH),
     source_url: sourceUrlSchema,
     visitor_id: visitorIdSchema,
@@ -148,7 +150,7 @@ const submissionObject = z
       .replace(/\r\n?/g, '\n');
     return {
       name: value.name,
-      contact: value.contact,
+      contact: storedContact(value.contact),
       contactChannel: value.contact_channel,
       service: services[0] ?? '',
       services,
@@ -162,6 +164,40 @@ const submissionObject = z
     };
   });
 
-export const leadSubmissionSchema = z.preprocess(formRecord, submissionObject);
+const typedContactSchema = z.object({
+  contact: cappedText(MAX_FIELD_LENGTH).catch(''),
+  contact_channel: contactChannelSchema.nullable().catch(null),
+  phone_number: cappedText(MAX_FIELD_LENGTH).catch(''),
+  phone_country: z
+    .enum(
+      PHONE_COUNTRIES.map(({ iso }) => iso) as [PhoneRegion, ...PhoneRegion[]],
+    )
+    .optional()
+    .catch(undefined),
+  telegram: cappedText(MAX_FIELD_LENGTH).catch(''),
+});
+
+const formFields = z.record(z.string(), z.unknown());
+
+function withTypedContact(value: unknown): unknown {
+  const record = formFields.safeParse(value);
+  if (!record.success) return value;
+  const typed = typedContactSchema.parse(record.data);
+  if (typed.contact) return record.data;
+  return {
+    ...record.data,
+    contact: typedContact({
+      channel: typed.contact_channel,
+      phone: typed.phone_number,
+      country: typed.phone_country,
+      telegram: typed.telegram,
+    }),
+  };
+}
+
+export const leadSubmissionSchema = z.preprocess(
+  formRecord,
+  z.preprocess(withTypedContact, submissionObject),
+);
 
 export type LeadFormSubmission = z.infer<typeof leadSubmissionSchema>;

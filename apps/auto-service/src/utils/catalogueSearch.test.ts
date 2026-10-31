@@ -5,6 +5,7 @@ import {
   exactPart,
   listingCrumbs,
   missingNumber,
+  nearVin,
   vinDestination,
   searchIntent,
   suggestionsFrom,
@@ -62,6 +63,23 @@ describe('searchIntent', () => {
   });
 });
 
+describe('nearVin', () => {
+  it('spots a VIN one character short or long', () => {
+    expect(nearVin('WBA35BG070N07415')).toBe(true);
+    expect(nearVin('wba 35bg070n0741588')).toBe(true);
+  });
+
+  it('spots a VIN with a letter a VIN never uses', () => {
+    expect(nearVin('WBA35BG070NO74158')).toBe(true);
+  });
+
+  it('leaves part numbers and words alone', () => {
+    expect(nearVin('HU 816 x')).toBe(false);
+    expect(nearVin('11 42 8 575 211')).toBe(false);
+    expect(nearVin('масляный фильтр bmw')).toBe(false);
+  });
+});
+
 describe('vinDestination', () => {
   const VIN = 'WBA35BG070N074158';
   const vehiclePlace: CarHit = { kind: 'vehicle', make, model, vehicle };
@@ -85,10 +103,8 @@ describe('vinDestination', () => {
     );
   });
 
-  it('opens the Make page when neither the Vehicle nor the Model has one', () => {
-    expect(vinDestination(resolved(makePlace), VIN, 'ru')).toBe(
-      '/ru/parts/bmw/',
-    );
+  it('stays on the inquiry when only the Make of a resolved VIN has a page', () => {
+    expect(vinDestination(resolved(makePlace), VIN, 'ru')).toBeNull();
   });
 
   it('opens nothing when no place of the car has a page', () => {
@@ -146,6 +162,17 @@ describe('missingNumber', () => {
 
   it('flags nothing for a name', () => {
     expect(missingNumber('масляный фильтр', [])).toBe(false);
+  });
+
+  it('flags a short number led by letters, the way it flags a long one', () => {
+    expect(missingNumber('HU816', [hu816])).toBe(true);
+    expect(missingNumber('OX 404', [hu816])).toBe(true);
+    expect(missingNumber('hu 81', [hu816])).toBe(true);
+  });
+
+  it('flags nothing for a word with a short number in it', () => {
+    expect(missingNumber('bmw 320', [hu816])).toBe(false);
+    expect(missingNumber('E 220 d', [hu816])).toBe(false);
   });
 });
 

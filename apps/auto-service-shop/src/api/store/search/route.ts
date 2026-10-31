@@ -240,7 +240,7 @@ export async function GET(
     category,
     vehicle_id,
     model,
-    facets,
+    facets: requestedFacets,
     range: requestedRanges,
     offset,
     limit,
@@ -312,6 +312,23 @@ export async function GET(
   const filters: SearchFilters = searchableQuery(partQuery)
     ? { q: partQuery.toLowerCase() }
     : {};
+  const fieldKeys = [...facetGroups(requestedFacets).keys()].filter(
+    (key) => !isUniversal(key),
+  );
+  const knownKeys = new Set(
+    fieldKeys.length
+      ? (
+          await catalog.listCategoryFields(
+            { facet: true, key: fieldKeys },
+            { select: ['key'], take: null },
+          )
+        ).map(({ key }) => key)
+      : [],
+  );
+  const facets = requestedFacets.filter((facet) => {
+    const { key } = splitFacet(facet);
+    return isUniversal(key) || knownKeys.has(key);
+  });
   const groups = facetGroups(facets);
   const scope: SearchFilters[] = [{ published: true }];
   const nothing = () =>

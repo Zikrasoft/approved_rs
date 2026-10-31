@@ -5,10 +5,21 @@ import {
   chosenFilters,
   facetValueLabel,
   numberBounds,
+  partsQuery,
   rangesFromParams,
   rangeText,
   withFacetCopy,
 } from './partsSearch';
+
+describe('partsQuery', () => {
+  it('drops the bidi controls a crafted link could flip the page with', () => {
+    expect(partsQuery(' \u202eHU816x\u2066 abc\n')).toBe('HU816x abc');
+  });
+
+  it('clamps the query to the field length', () => {
+    expect(partsQuery('x'.repeat(300))).toHaveLength(100);
+  });
+});
 
 const copy = {
   booleanTrue: 'да',

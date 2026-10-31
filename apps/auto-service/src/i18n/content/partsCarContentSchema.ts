@@ -30,6 +30,7 @@ export const partsCarContentSchema = z
         submitLabel: z.string(),
         invalid: z.string(),
         unresolved: z.string(),
+        recognised: z.string(),
         chooseMake: z.string(),
       })
       .strict(),

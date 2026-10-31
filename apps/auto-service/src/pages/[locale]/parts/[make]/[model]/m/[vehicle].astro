@@ -192,7 +192,7 @@ const specsSummary = [
             </ul>
             <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <kit-cart
-                class="contents"
+                class="contents noscript:hidden!"
                 {...(kitBuyable ? {} : { hidden: '' })}
                 data-cart-href={PathBuilder.partsCart(locale)}
                 data-locale-tag={BCP47_BY_LOCALE[locale]}
