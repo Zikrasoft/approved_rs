@@ -8,6 +8,7 @@ import {
   cancelOrderWorkflow,
   completeOrderWorkflow,
 } from '@medusajs/medusa/core-flows';
+import { SHOP_HANDOFFS_PER_CONTACT_HOUR } from '@podbor/lead-crm/limits';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import {
   cancelRefused,
@@ -25,8 +26,6 @@ import {
   sendShopOrderEvent,
 } from './order-lead';
 import { leadStamp, MAX_HANDOFF_ATTEMPTS, readOrder } from './order-metadata';
-
-export const MAX_HANDOFFS_PER_CONTACT_HOUR = 3;
 
 const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
@@ -106,7 +105,7 @@ export function createOrderLeadSync({
         readOrder(order.metadata).contact?.contact === contact &&
         readOrder(order.metadata).lead.handed_off_at,
     );
-    return handedOff.length >= MAX_HANDOFFS_PER_CONTACT_HOUR;
+    return handedOff.length >= SHOP_HANDOFFS_PER_CONTACT_HOUR;
   }
 
   async function handOff(id: string): Promise<void> {
@@ -115,7 +114,7 @@ export function createOrderLeadSync({
     if (status === 'canceled' || lead.handed_off_at || lead.alerted_at) return;
     if (await contactHandedOffThisHour(id, metadata)) {
       logger.warn(
-        `Order ${id} waits for a later retry: its contact reached the CRM ${MAX_HANDOFFS_PER_CONTACT_HOUR} times this hour`,
+        `Order ${id} waits for a later retry: its contact reached the CRM ${SHOP_HANDOFFS_PER_CONTACT_HOUR} times this hour`,
       );
       return;
     }

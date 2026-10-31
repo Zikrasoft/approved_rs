@@ -1,5 +1,9 @@
 import * as z from 'zod/mini';
 
+export const MAX_LINE_QUANTITY = 999;
+
+export const CATALOGUE_ID_PATTERN = /^[\w-]{1,64}$/;
+
 export const ADDON_KINDS = ['service', 'installation'] as const;
 export type AddonKind = (typeof ADDON_KINDS)[number];
 

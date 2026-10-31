@@ -16,6 +16,7 @@ import type { PromptKey } from './promptKey.ts';
 import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
+import { FAILED_CHECKOUTS_PER_CONTACT_HOUR } from './limits.ts';
 import { LEADS_PATH } from './quarantine.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
 
@@ -115,8 +116,6 @@ export interface LeadStoreOptions {
   alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
 }
-
-export const FAILED_CHECKOUTS_PER_HOUR = 3;
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -513,7 +512,7 @@ export function createLeadStore({
           isFailedCheckoutOf(lead, standaloneServices) &&
           Date.parse(lead.createdAt) >= since,
       );
-      return recent.length >= FAILED_CHECKOUTS_PER_HOUR;
+      return recent.length >= FAILED_CHECKOUTS_PER_CONTACT_HOUR;
     },
 
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {

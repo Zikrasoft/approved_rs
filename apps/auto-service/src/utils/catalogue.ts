@@ -31,6 +31,7 @@ import {
   type SearchResult,
   type Vehicle,
   type VinFacts,
+  CATALOGUE_ID_PATTERN,
 } from '@podbor/catalog-contract';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import {
@@ -93,11 +94,7 @@ export type CheckoutOutcome =
   | { kind: 'empty' }
   | { kind: 'inquiry' };
 
-export const catalogueIdSchema = z
-  .string()
-  .trim()
-  .max(100)
-  .regex(/^[\w-]+$/);
+export const catalogueIdSchema = z.string().trim().regex(CATALOGUE_ID_PATTERN);
 
 export type CatalogueConfig = {
   backendUrl: string;

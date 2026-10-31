@@ -1,11 +1,9 @@
 import type { ShopOrderEvent } from '@podbor/lead-crm/shop-orders-wire';
 
 import { LeadRouteRefusal, type LeadOrder } from '../order-lead';
-import {
-  createOrderLeadSync,
-  MAX_HANDOFFS_PER_CONTACT_HOUR,
-  type SyncOrder,
-} from '../order-lead-sync';
+import { SHOP_HANDOFFS_PER_CONTACT_HOUR } from '@podbor/lead-crm/limits';
+
+import { createOrderLeadSync, type SyncOrder } from '../order-lead-sync';
 import { MAX_HANDOFF_ATTEMPTS, readOrder } from '../order-metadata';
 
 const NOW = new Date('2026-10-31T12:00:00.000Z');
@@ -108,7 +106,7 @@ describe('createOrderLeadSync', () => {
       id,
     });
     const flood = Array.from(
-      { length: MAX_HANDOFFS_PER_CONTACT_HOUR + 1 },
+      { length: SHOP_HANDOFFS_PER_CONTACT_HOUR + 1 },
       (_, index) => order(`order_${index}`, '+381601234567'),
     );
     const { sync, fakes, metadataOf } = memorySync([

@@ -61,6 +61,13 @@ who already ordered
 ([ADR-0056](docs/adr/0056-a-placed-order-absorbs-the-failed-checkout.md)).
 A contact that already has three Failed checkouts from the last hour gets no
 fourth (`failedCheckoutCapped`), so a scripted checkout cannot flood the chat.
+The shop keeps a cap of its own: a placed Order whose contact the shop already
+handed to the CRM three times this hour waits for a later retry. The two caps
+sit side by side in `@podbor/lead-crm/limits`
+(`FAILED_CHECKOUTS_PER_CONTACT_HOUR`, `SHOP_HANDOFFS_PER_CONTACT_HOUR`) and are
+separate budgets on purpose: one guards the chat against failed checkouts, the
+other the CRM against a flood of shop hand-offs. They count different records,
+so one contact can reach three of each in an hour.
 _Avoid_: abandoned cart, failed order
 
 **Visitor activity** — the last time the visitor did something on a Lead
