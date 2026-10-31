@@ -31,6 +31,7 @@ export const POST = createLeadsRoute({
     return {
       brand: {
         name: SITE_NAME,
+        home: PathBuilder.home(locale),
         background: '#0a0b0c',
         text: '#f5f3ef',
         accent: '#ef6247',
