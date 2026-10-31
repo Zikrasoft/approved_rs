@@ -37,6 +37,7 @@ export const partsSearchContentSchema = z
     booleanFalse: z.string(),
     previous: z.string(),
     next: z.string(),
+    pagination: z.string(),
     formHeading: z.string(),
     notFoundQuestion: z.string(),
     notFoundLink: z.string(),

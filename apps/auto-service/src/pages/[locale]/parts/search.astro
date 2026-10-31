@@ -16,6 +16,7 @@ import ListingBar from '@/components/ListingBar.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
+import Pagination from '@/components/Pagination.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
@@ -429,30 +430,23 @@ const scopeHidden = {
             )}
 
             {(offset > 0 || offset + found.limit < found.count) && (
-              <nav class="flex justify-between gap-4 pt-2 text-sm">
-                {offset > 0 ? (
-                  <a
-                    href={searchHref(
-                      chosen,
-                      ranges,
-                      Math.max(0, offset - found.limit),
-                    )}
-                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
-                  >
-                    {copy.previous}
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {offset + found.limit < found.count && (
-                  <a
-                    href={searchHref(chosen, ranges, offset + found.limit)}
-                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
-                  >
-                    {copy.next}
-                  </a>
-                )}
-              </nav>
+              <Pagination
+                label={copy.pagination}
+                prev={
+                  offset > 0
+                    ? searchHref(
+                        chosen,
+                        ranges,
+                        Math.max(0, offset - found.limit),
+                      )
+                    : null
+                }
+                next={
+                  offset + found.limit < found.count
+                    ? searchHref(chosen, ranges, offset + found.limit)
+                    : null
+                }
+              />
             )}
 
             {found.results.length > 0 && !looseNumbers && (

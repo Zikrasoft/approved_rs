@@ -33,6 +33,7 @@ booleanTrue: да
 booleanFalse: нет
 previous: Назад
 next: Дальше
+pagination: Страницы результатов
 formHeading: Заявка на запчасти
 notFoundQuestion: Не нашли нужное?
 notFoundLink: Оставьте заявку, подберем
