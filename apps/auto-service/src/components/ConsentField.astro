@@ -34,14 +34,13 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       <Icon name="check" size={10} />
     </span>
     <span class="text-xs leading-relaxed text-muted">
-      {site.form.privacyNote}
-      {site.form.privacyLinkText}.
+      {`${site.form.privacyNote} ${site.form.privacyLinkText}.`}
     </span>
   </label>
   <a
     href={PathBuilder.privacy(locale)}
     target="_blank"
-    class="ml-8 inline-block py-1 text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
+    class="-mt-1 ml-8 inline-block py-1 text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
     >{site.footer.privacyLabel}</a
   >
   <p
