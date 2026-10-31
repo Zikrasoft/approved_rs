@@ -13,6 +13,7 @@ export { CONSENT_EVENT, type ConsentDetail };
 const CONSENT_SETTINGS_ATTRIBUTE = 'data-cookie-settings';
 const CONSENT_ACCEPT_ATTRIBUTE = 'data-consent-accept';
 const CONSENT_DECLINE_ATTRIBUTE = 'data-consent-decline';
+export const COOKIE_CONSENT_HEIGHT_VAR = '--cookie-consent-height';
 
 export function readConsent(version: string): Consent | null {
   try {
@@ -38,10 +39,19 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
     tagName,
     class extends HTMLElement {
       private controller?: AbortController;
+      private resizes?: ResizeObserver;
 
       connectedCallback(): void {
         this.controller?.abort();
         this.controller = new AbortController();
+        this.resizes?.disconnect();
+        this.resizes = new ResizeObserver(() =>
+          document.documentElement.style.setProperty(
+            COOKIE_CONSENT_HEIGHT_VAR,
+            `${this.offsetHeight}px`,
+          ),
+        );
+        this.resizes.observe(this);
         const { signal } = this.controller;
         const version = this.dataset.policyVersion ?? '';
 
@@ -120,6 +130,11 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
       disconnectedCallback(): void {
         this.controller?.abort();
         this.controller = undefined;
+        this.resizes?.disconnect();
+        this.resizes = undefined;
+        document.documentElement.style.removeProperty(
+          COOKIE_CONSENT_HEIGHT_VAR,
+        );
       }
     },
   );
