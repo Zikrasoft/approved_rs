@@ -25,8 +25,7 @@ const {
   ...rest
 } = Astro.props;
 const linked = variant !== 'readonly';
-const nameClass =
-  'leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline';
+const nameClass = 'leading-snug font-semibold text-ink link-quiet';
 ---
 
 <li class:list={['flex flex-col gap-3', className]} {...rest}>

@@ -170,10 +170,7 @@ const scopeHidden = {
           {vinMake && (
             <>
               {' '}
-              <a
-                href={vinMake.href}
-                class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-              >
+              <a href={vinMake.href} class="link font-semibold">
                 {content(locale).partsCar.vin.chooseMake.replace(
                   '{make}',
                   vinMake.label,
@@ -292,10 +289,7 @@ const scopeHidden = {
               <>
                 <StatusNote>
                   {copy.numberNotFound.replace('{q}', q)}{' '}
-                  <a
-                    href="#lead"
-                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-                  >
+                  <a href="#lead" class="link font-semibold">
                     {copy.notFoundLink}
                   </a>
                 </StatusNote>
