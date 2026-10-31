@@ -10,12 +10,13 @@ import {
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
-import Icon from '@/components/Icon.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
+import FilterChips from '@/components/FilterChips.astro';
+import StatusNote from '@/components/StatusNote.astro';
 import Pagination from '@/components/Pagination.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -234,10 +235,7 @@ const scopeHidden = {
 
     {
       vin && (
-        <p
-          role="status"
-          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
-        >
+        <StatusNote>
           {vinCar
             ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
             : content(locale).partsCar.vin.unresolved}
@@ -255,20 +253,11 @@ const scopeHidden = {
               </a>
             </>
           )}
-        </p>
+        </StatusNote>
       )
     }
 
-    {
-      vinHint && (
-        <p
-          role="status"
-          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
-        >
-          {content(locale).partsCar.vin.invalid}
-        </p>
-      )
-    }
+    {vinHint && <StatusNote>{content(locale).partsCar.vin.invalid}</StatusNote>}
 
     {
       !searchable && !vin && (
@@ -337,8 +326,8 @@ const scopeHidden = {
             />
 
             {(chips.length > 0 || modelName) && (
-              <ul class="flex flex-wrap gap-2">
-                {[
+              <FilterChips
+                chips={[
                   ...(modelName
                     ? [
                         {
@@ -351,40 +340,14 @@ const scopeHidden = {
                     label: chip.label,
                     href: searchHref(chip.facets, chip.ranges),
                   })),
-                ].map((chip) => (
-                  <li class="shrink-0">
-                    <a
-                      href={chip.href}
-                      aria-label={copy.removeFilter.replace(
-                        '{label}',
-                        chip.label,
-                      )}
-                      class="inline-flex min-h-11 max-w-full items-center gap-2 rounded-pill border border-line bg-paper px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
-                    >
-                      {chip.label}
-                      <Icon name="close" size={12} class="text-muted" />
-                    </a>
-                  </li>
-                ))}
-                {chips.length > 0 && (
-                  <li class="shrink-0">
-                    <a
-                      href={searchHref([], [])}
-                      class="inline-flex min-h-11 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-                    >
-                      {copy.resetAllFilters}
-                    </a>
-                  </li>
-                )}
-              </ul>
+                ]}
+                resetHref={chips.length > 0 ? searchHref([], []) : undefined}
+              />
             )}
 
             {looseNumbers && (
               <>
-                <p
-                  role="status"
-                  class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed break-words text-ink"
-                >
+                <StatusNote>
                   {copy.numberNotFound.replace('{q}', q)}{' '}
                   <a
                     href="#lead"
@@ -392,7 +355,7 @@ const scopeHidden = {
                   >
                     {copy.notFoundLink}
                   </a>
-                </p>
+                </StatusNote>
                 <h2 class="pt-1 text-base font-semibold text-ink">
                   {copy.similarNumbers}
                 </h2>

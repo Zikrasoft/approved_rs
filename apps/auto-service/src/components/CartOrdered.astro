@@ -1,0 +1,110 @@
+---
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PHONE_NUMBER } from '@/utils/constants';
+import { PathBuilder } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import ContactChannels from './ContactChannels.astro';
+import Icon from './Icon.astro';
+import PickupDetails from './PickupDetails.astro';
+
+interface Props {
+  class: string;
+}
+
+const { class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).shopCart;
+---
+
+<div data-state="ordered" hidden class={className} {...contactCta}>
+  <div class="flex items-start gap-3">
+    <span
+      class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-go/10 text-go"
+    >
+      <Icon name="check" size={18} />
+    </span>
+    <div class="flex flex-col gap-1">
+      <p class="spec text-lg font-semibold text-ink" data-order-number hidden>
+      </p>
+      <p class="text-sm text-muted" data-order-date></p>
+      <p class="text-sm leading-relaxed text-ink-2">{copy.orderedNext}</p>
+      <p
+        class="text-sm leading-relaxed font-semibold text-ink"
+        data-ordered-contact
+        hidden
+      >
+      </p>
+    </div>
+  </div>
+  <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
+    {copy.orderedBody}
+  </p>
+  <div class="flex flex-col gap-5" data-receipt hidden>
+    <section class="flex flex-col gap-1">
+      <h2 class="text-block font-semibold">{copy.summaryHeading}</h2>
+      <ul class="divide-y divide-line" data-receipt-lines></ul>
+      <template data-receipt-line>
+        <li class="flex items-start justify-between gap-4 py-3">
+          <div class="flex min-w-0 flex-col gap-0.5">
+            <span class="leading-snug font-semibold text-ink" data-name></span>
+            <span class="spec text-sm text-muted" data-number></span>
+            <span class="text-sm text-ink-2" data-ready hidden></span>
+            <span class="text-sm text-ink-2" data-addon hidden></span>
+            <span class="text-sm text-ink-2" data-installation hidden></span>
+          </div>
+          <div class="flex shrink-0 flex-col items-end text-right">
+            <span class="spec font-semibold text-ink" data-price></span>
+            <span class="text-xs text-muted" data-quantity></span>
+          </div>
+        </li>
+      </template>
+      <dl class="flex flex-col gap-1.5 border-t border-line pt-3 text-sm">
+        <div
+          class="flex items-baseline justify-between gap-4 text-ink-2"
+          data-receipt-addon-row
+          hidden
+        >
+          <dt>{copy.summaryAddons}</dt>
+          <dd class="spec text-ink" data-receipt-addons></dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4">
+          <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+          <dd class="spec text-xl font-semibold text-ink" data-receipt-total>
+          </dd>
+        </div>
+      </dl>
+    </section>
+    <div class="grid gap-5 rounded-control bg-shade p-4 sm:grid-cols-2">
+      <section class="flex flex-col gap-1.5">
+        <h3 class="text-sm font-semibold text-muted">
+          {copy.pickupStep}
+        </h3>
+        <PickupDetails />
+      </section>
+      <section class="flex flex-col gap-1.5">
+        <h3 class="text-sm font-semibold text-muted">
+          {copy.paymentStep}
+        </h3>
+        <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
+      </section>
+    </div>
+  </div>
+  <div class="flex flex-col gap-3">
+    <span class="text-xs text-muted">{site.footer.contactHeading}</span>
+    <ContactChannels service={VIN_INQUIRY_SERVICE} class="print:hidden" />
+    <p class="spec hidden text-base font-semibold text-ink print:block">
+      {formatPhone(PHONE_NUMBER)}
+    </p>
+  </div>
+  <a
+    href={PathBuilder.parts(locale)}
+    class="btn btn-secondary w-full sm:w-auto sm:self-start print:hidden"
+  >
+    {copy.orderedCta}
+    <Icon name="arrowRight" />
+  </a>
+</div>

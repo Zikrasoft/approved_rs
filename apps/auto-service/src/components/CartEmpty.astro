@@ -1,0 +1,70 @@
+---
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { PathBuilder } from '@/utils/paths';
+import Icon from './Icon.astro';
+
+interface Props {
+  class: string;
+}
+
+const { class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopCart;
+---
+
+<div data-state="empty" hidden class={className} {...contactCta}>
+  <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
+  {
+    (['expired', 'gone'] as const).map((key) => (
+      <p
+        data-empty-notice={key}
+        hidden
+        class="text-sm leading-relaxed text-danger"
+      >
+        {copy.notices[key]}
+      </p>
+    ))
+  }
+  <div
+    data-empty-notice="moved"
+    hidden
+    class="flex flex-col gap-3 rounded-control bg-shade p-4"
+  >
+    <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
+    <a
+      href={PathBuilder.partsInquiry(locale)}
+      {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+      class="btn btn-primary w-full sm:w-auto sm:self-start"
+    >
+      {copy.notices.movedCta}
+      <Icon name="arrowRight" />
+    </a>
+  </div>
+  <div
+    class="flex flex-col gap-3 group-has-[cart-badge:not([hidden])]/cart:hidden"
+  >
+    <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
+    <a
+      href={PathBuilder.parts(locale)}
+      class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+    >
+      {copy.emptyCta}
+      <Icon name="arrowRight" />
+    </a>
+    <p
+      class="mt-2 border-t border-line pt-4 text-sm leading-relaxed text-ink-2"
+    >
+      {copy.emptyInquiry}
+    </p>
+    <a
+      href={PathBuilder.partsInquiry(locale)}
+      {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+      class="btn btn-secondary w-full sm:w-auto sm:self-start"
+    >
+      {copy.emptyInquiryCta}
+    </a>
+  </div>
+</div>
