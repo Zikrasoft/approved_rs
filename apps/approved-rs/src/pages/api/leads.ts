@@ -36,6 +36,10 @@ export const POST = createLeadsRoute({
         'missing-consent': form.consentError,
       },
       consent: `${form.consentBefore}${form.consentLinkText}`,
+      privacy: {
+        label: content(locale).dictionary.footer.privacyLabel,
+        href: PathBuilder.privacy(locale),
+      },
       submit: form.submitLabel,
       links: [
         { label: formatPhone(PHONE_NUMBER), href: phoneLink(PHONE_NUMBER) },

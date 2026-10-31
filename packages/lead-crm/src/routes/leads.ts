@@ -33,6 +33,7 @@ export interface RouteRequestContext {
 export interface RefusalCopy {
   reasons: Record<LeadRefusal, string>;
   consent: string;
+  privacy: { label: string; href: string };
   submit: string;
   links: { label: string; href: string }[];
 }
@@ -100,7 +101,8 @@ function refusalPage(
   const consentBox = form.get(CONSENT_FIELD)
     ? ''
     : `
-      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required />${escapeHtml(copy.consent)}</label>`;
+      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required />${escapeHtml(copy.consent)}</label>
+      <p><a href="${attribute(copy.privacy.href)}" target="_blank">${escapeHtml(copy.privacy.label)}</a></p>`;
   const kept: string[] = [];
   form.forEach((value, name) => {
     if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {

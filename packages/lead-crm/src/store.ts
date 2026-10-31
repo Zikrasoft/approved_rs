@@ -156,14 +156,16 @@ function mergeTarget(
   if (placed) return { kind: 'same-order', lead: placed };
 
   const failed = isStandalone(data.service)
-    ? ours.findLast(
-        (l) =>
-          isFailedCheckout(l) &&
-          !isClosed(l) &&
-          isFreshLead(l, now) &&
-          ((data.visitorId != null && l.visitorId === data.visitorId) ||
-            (hasRealContact(data.contact) && l.contact === data.contact)),
-      )
+    ? ours
+        .filter(
+          (l) =>
+            isFailedCheckout(l) &&
+            !isClosed(l) &&
+            isFreshLead(l, now) &&
+            ((data.visitorId != null && l.visitorId === data.visitorId) ||
+              (hasRealContact(data.contact) && l.contact === data.contact)),
+        )
+        .at(-1)
     : undefined;
   if (failed) return { kind: 'failed-checkout', lead: failed };
 

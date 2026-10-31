@@ -25,6 +25,7 @@ const refusalCopy = (locale: string) => ({
     'missing-consent': `${locale}: missing consent`,
   },
   consent: 'Согласен на обработку данных',
+  privacy: { label: 'Политика конфиденциальности', href: '/ru/privacy/' },
   submit: 'Отправить',
   links: [
     { label: '+381 60 123 4567', href: 'tel:+381601234567' },
@@ -380,6 +381,9 @@ describe('createLeadsRoute', () => {
     expect(withConsent).not.toContain('type="checkbox"');
     expect(without).toContain(
       '<label><input type="checkbox" name="consent" value="1" required />Согласен на обработку данных</label>',
+    );
+    expect(without).toContain(
+      '<a href="/ru/privacy/" target="_blank">Политика конфиденциальности</a>',
     );
   });
 
