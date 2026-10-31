@@ -49,7 +49,7 @@ lead retires itself — the daily digest cron marks it lost
 ([ADR-0029](docs/adr/0029-ghost-leads-retire-themselves.md)). Because the sweep
 runs daily against a 24-hour window, a Ghost lead actually lives 24 to 48 hours.
 
-**Failed checkout** — a `parts-order` Lead with no order id: carlab.rs's
+**Failed checkout**: a `parts-order` Lead with no order id: carlab.rs's
 checkout refused the cart or could not reach the shop, so it stores the
 contact, the reason («Заказ не оформлен: …») and the cart lines instead of an
 Order. Every refusal stores one, even one the visitor fixes on the same page.
