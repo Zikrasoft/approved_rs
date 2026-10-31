@@ -31,7 +31,7 @@
     "libphonenumber-js": "1.13.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "4.5.4"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
