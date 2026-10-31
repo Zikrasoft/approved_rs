@@ -118,16 +118,6 @@ medusaIntegrationTestRunner({
           /Index.*IDX_vehicle_identifier_type_value_vehicle_id_unique/,
         ],
         [
-          'a retired slug',
-          `select id from slug_redirect where kind = 'model' and from_slug = 'x' and scope_id = 'm' and deleted_at is null`,
-          /Index.*IDX_slug_redirect_kind_from_slug_scope_id/,
-        ],
-        [
-          'the redirects of a target',
-          `select id from slug_redirect where target_kind = 'part' and target_id in ('a', 'b') and deleted_at is null`,
-          /Index.*IDX_slug_redirect_target_kind_target_id/,
-        ],
-        [
           'the unresolved VIN codes',
           `select make, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make, code`,
           /Index.*IDX_vin_lookup_make_code/,

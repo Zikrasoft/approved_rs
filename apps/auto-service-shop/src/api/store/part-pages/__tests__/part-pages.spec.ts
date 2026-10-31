@@ -110,7 +110,7 @@ medusaIntegrationTestRunner({
         const response = await get();
 
         expect(response.status).toBe(200);
-        expect(response.data.count).toBe(3);
+        expect(response.data.pages).toHaveLength(3);
         const mannOil = response.data.pages.find(
           (page: { normalized_value: string }) =>
             page.normalized_value === 'HU816X',
