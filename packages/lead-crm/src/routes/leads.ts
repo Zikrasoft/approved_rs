@@ -72,16 +72,14 @@ function refusalPage(
   form: FormData,
   action: string,
 ): Response {
-  const kept = [...form]
-    .filter(
-      (entry): entry is [string, string] =>
-        typeof entry[1] === 'string' && !RETYPED_FIELDS.has(entry[0]),
-    )
-    .map(
-      ([name, value]) =>
+  const kept: string[] = [];
+  form.forEach((value, name) => {
+    if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {
+      kept.push(
         `      <input type="hidden" name="${attribute(name)}" value="${attribute(value)}" />`,
-    )
-    .join('\n');
+      );
+    }
+  });
   return new Response(
     `<!doctype html>
 <html lang="${locale}">
@@ -94,7 +92,7 @@ function refusalPage(
     <p>${message}</p>
     <form method="POST" action="${attribute(action)}">
       <input name="contact" required autocomplete="tel" aria-label="${message}" />
-${kept}
+${kept.join('\n')}
       <input type="submit" />
     </form>
   </body>
