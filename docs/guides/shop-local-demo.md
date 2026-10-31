@@ -32,7 +32,11 @@ workspace packages, then `shop:prepare` (`apps/auto-service-shop/scripts/shop-pr
   from a hand-run `docker run`;
 - drops and recreates the demo database once if it still carries the shop
   modules' pre-squash migration history (each module now has a single initial
-  migration, and the old history cannot be migrated forward);
+  migration, and the old history cannot be migrated forward), or if it ran
+  supplier's hand-written `Migration20261025010101` before the crawl tables
+  were folded into it and so has no `crawl_run`. A database that also recorded
+  the old `Migration20261025160000` needs nothing: the row is ignored and the
+  tables are already there;
 - runs `db:migrate`, `seed:demo`, `import:local` and `publish:local`, all safe
   to rerun.
 
