@@ -4,7 +4,7 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { bestPrice, priceLabel } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
-import BottomBar from './BottomBar.astro';
+import BottomActionBar from './BottomActionBar.astro';
 
 interface Props {
   page: PartPageEntry;
@@ -17,33 +17,28 @@ const copy = content(locale).shopPart;
 const best = shopOpen() ? bestPrice([page]) : null;
 ---
 
-<BottomBar>
-  <div class="wrap flex min-h-14 items-center justify-between gap-4 py-1.5">
-    <span class="flex min-w-0 flex-col">
-      <span class="truncate text-xs text-muted">
-        {page.brand.name}{' '}
-        <span class="spec">{page.value}</span>
-      </span>
-      <span class="spec font-semibold text-ink">
-        {
-          best
-            ? priceLabel(best, copy, BCP47_BY_LOCALE[locale])
-            : copy.priceOnRequestHeading
-        }
-      </span>
-    </span>
-    <part-cta-forward
-      class="shrink-0"
-      data-to={best
-        ? `#${target} [data-buy][data-offer-id="${best.id}"]`
-        : `#${target} parts-list-add a`}
-    >
-      <a href={`#${target}`} class="btn btn-primary">
-        {best ? copy.buyButtonLabel : copy.priceOnRequestCta}
-      </a>
-    </part-cta-forward>
-  </div>
-</BottomBar>
+<BottomActionBar>
+  <Fragment slot="caption">
+    {page.brand.name}{' '}<span class="spec">{page.value}</span>
+  </Fragment>
+  <Fragment slot="value">
+    {
+      best
+        ? priceLabel(best, copy, BCP47_BY_LOCALE[locale])
+        : copy.priceOnRequestHeading
+    }
+  </Fragment>
+  <part-cta-forward
+    class="shrink-0"
+    data-to={best
+      ? `#${target} [data-buy][data-offer-id="${best.id}"]`
+      : `#${target} parts-list-add a`}
+  >
+    <a href={`#${target}`} class="btn btn-primary">
+      {best ? copy.buyButtonLabel : copy.priceOnRequestCta}
+    </a>
+  </part-cta-forward>
+</BottomActionBar>
 
 <script>
   import { definePartCtaForward } from '@/scripts/partCtaForward';

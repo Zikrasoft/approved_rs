@@ -142,7 +142,7 @@ const SAID_BY_FIT = ['axle'];
         <ul class="flex flex-col gap-4">
           {
             entry.parts.map(({ part, pages, fits }) => (
-              <li class="card flex flex-col gap-3 p-5 sm:p-6">
+              <li class="card flex flex-col gap-3 p-5">
                 <FittedPart
                   pages={pages}
                   name={translated(part, 'name', locale)}

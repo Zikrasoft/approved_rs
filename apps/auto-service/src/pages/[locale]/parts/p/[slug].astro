@@ -205,7 +205,7 @@ const thumbFor = (slug: string) => {
     >
       {
         (replacement || page.superseded) && (
-          <div class="card flex flex-col gap-3 border-transparent bg-shade p-5 sm:p-6">
+          <div class="card flex flex-col gap-3 border-transparent bg-shade p-5">
             <p class="text-base leading-snug text-ink">
               {noticeBefore}
               <span class="font-semibold whitespace-nowrap">
@@ -279,7 +279,7 @@ const thumbFor = (slug: string) => {
         pages={[page, ...(successor ? [successor] : [])]}
         installation={{ id: page.id, price: page.part.installation_price }}
       />
-      <div class="card flex flex-col gap-3 p-5 sm:p-6">
+      <div class="card flex flex-col gap-3 border-transparent bg-shade p-5">
         <h2 class="text-block font-semibold">{copy.installHeading}</h2>
         {
           installPrice && (

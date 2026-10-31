@@ -116,7 +116,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             rememberCheckout(form);
             if (this.cart) rememberReceipt(this.cart);
           });
-          this.watchCheckoutBar(form);
           form.addEventListener('formdata', (event) => {
             rememberCheckout(form);
             if (!this.cart) return;
@@ -161,18 +160,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
       }
 
-      watchCheckoutBar(form: HTMLFormElement): void {
-        const bar = this.querySelector<HTMLElement>('[data-checkout-bar]');
-        if (!bar) return;
-        new IntersectionObserver(([entry]) => {
-          bar.hidden =
-            entry!.isIntersecting || entry!.boundingClientRect.top < 0;
-          document.body.toggleAttribute('data-sticky-bar', !bar.hidden);
-        }).observe(form);
-      }
-
       show(state: string): void {
         showOnly(this, 'data-state', state);
+        document.body.toggleAttribute('data-sticky-bar', state === 'cart');
       }
 
       showOrdered(

@@ -46,7 +46,7 @@ const askHref = PathBuilder.partsInquiry(
 {
   (priced || closed) && (
     <part-offers
-      class="card flex flex-col gap-4 border-transparent bg-shade p-5 sm:p-6"
+      class="card flex flex-col gap-4 border-transparent bg-shade p-5"
       {...(priced ? {} : { hidden: '' })}
       data-preview={closed ? '' : undefined}
       data-id={page.id}
@@ -154,7 +154,7 @@ const askHref = PathBuilder.partsInquiry(
   !priced && (
     <div
       class:list={[
-        'card flex flex-col gap-3 p-5 sm:p-6',
+        'card flex flex-col gap-3 p-5',
         !demoted && 'border-transparent bg-shade',
       ]}
     >
