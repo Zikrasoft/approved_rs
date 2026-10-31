@@ -21,7 +21,7 @@ import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
-import { kitPick, kitTotal } from '@/utils/kitPick';
+import { kitPick, kitTotal, nameRepeatsCategory } from '@/utils/kitPick';
 import { plural } from '@/utils/leadTime';
 
 export async function getStaticPaths() {
@@ -179,15 +179,10 @@ const specsSummary = [
                 >
                   <div class="min-w-0 grow basis-48">
                     <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
-                      {!translated(item.part, 'name', locale)
-                        .toLowerCase()
-                        .startsWith(
-                          translated(
-                            item.category,
-                            'name',
-                            locale,
-                          ).toLowerCase(),
-                        ) && (
+                      {!nameRepeatsCategory(
+                        translated(item.part, 'name', locale),
+                        translated(item.category, 'name', locale),
+                      ) && (
                         <span class="text-xs text-muted">
                           {translated(item.category, 'name', locale)}
                         </span>
@@ -195,7 +190,17 @@ const specsSummary = [
                       <span class="text-sm text-ink">
                         {translated(item.part, 'name', locale)}
                       </span>
-                      <PartNumbers pages={item.pages} first={item.page} />
+                      <a
+                        href={PathBuilder.partNumber(locale, item.page.slug)}
+                        class="self-start text-sm text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                      >
+                        <span class="font-semibold">
+                          {item.page.brand.name}
+                        </span>{' '}
+                        <span class="spec whitespace-nowrap">
+                          {item.page.value}
+                        </span>
+                      </a>
                     </ThumbRow>
                   </div>
                   <span class="ml-auto flex shrink-0 flex-col items-end gap-1">

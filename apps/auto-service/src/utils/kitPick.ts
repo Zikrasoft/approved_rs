@@ -18,3 +18,12 @@ export function kitPick<Page extends KitPage>(
 
 export const kitTotal = (lines: { price: number; quantity: number }[]) =>
   lines.reduce((sum, { price, quantity }) => sum + price * quantity, 0);
+
+const words = (text: string) => text.toLowerCase().split(/\s+/);
+
+export const nameRepeatsCategory = (name: string, category: string) => {
+  const named = words(name);
+  return words(category).every((word, index) =>
+    named[index]?.startsWith(word.slice(0, Math.max(3, word.length - 2))),
+  );
+};
