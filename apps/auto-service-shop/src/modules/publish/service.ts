@@ -40,7 +40,9 @@ const LISTED_PART_COUNTS = `
     join published_parts pp on pp.part_id = p.id
     where p.deleted_at is null and (
       p.replaced_by_id is null
-      or p.replaced_by_id not in (select part_id from published_parts)
+      or not exists (
+        select 1 from published_parts r where r.part_id = p.replaced_by_id
+      )
     )
   )
   select v.model_id, f.vehicle_id, count(distinct f.part_id)::int as parts
