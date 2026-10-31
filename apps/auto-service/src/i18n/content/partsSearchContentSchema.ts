@@ -15,6 +15,7 @@ export const partsSearchContentSchema = z
     emptyQuery: z.string(),
     noResults: z.string(),
     unavailable: z.string(),
+    unknownScope: z.string(),
     filtersHeading: z.string(),
     applyFilters: z.string(),
     showResults: z.string(),

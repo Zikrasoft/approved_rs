@@ -23,3 +23,28 @@ export const translated = <Column extends string>(
   row.translations?.[locale as (typeof CATALOG_TRANSLATION_LOCALES)[number]]?.[
     column
   ] || row[column];
+
+const LATIN_UNITS: Record<string, string> = {
+  'А·ч': 'Ah',
+  'А*ч': 'Ah',
+  Ач: 'Ah',
+  А: 'A',
+  В: 'V',
+  Вт: 'W',
+  кВт: 'kW',
+  мм: 'mm',
+  см: 'cm',
+  м: 'm',
+  л: 'l',
+  мл: 'ml',
+  кг: 'kg',
+  г: 'g',
+  Нм: 'Nm',
+  'Н·м': 'Nm',
+};
+
+export const localizedUnit = (
+  unit: string | null,
+  locale: string,
+): string | null =>
+  unit && locale !== 'ru' ? (LATIN_UNITS[unit.trim()] ?? unit) : unit;

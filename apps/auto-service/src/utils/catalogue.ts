@@ -346,7 +346,10 @@ export function createCatalogue({
     async listingScope(
       { category, model }: Pick<SearchQuery, 'category' | 'model'>,
       locale: CatalogLocale,
-    ): Promise<Pick<SearchResponse, 'category' | 'model' | 'scope_pages'>> {
+    ): Promise<Pick<
+      SearchResponse,
+      'category' | 'model' | 'scope_pages'
+    > | null> {
       try {
         const [allCategories, namedModel] = await Promise.all([
           category ? categories() : [],
@@ -361,7 +364,7 @@ export function createCatalogue({
           scope_pages: null,
         };
       } catch {
-        return { category: null, model: null, scope_pages: null };
+        return null;
       }
     },
 

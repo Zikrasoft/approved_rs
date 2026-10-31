@@ -85,7 +85,7 @@ const found =
         offset,
       })
     : null;
-const unavailable = searchable && !found;
+
 const lastPage =
   found && found.count > 0
     ? Math.floor((found.count - 1) / found.limit) * found.limit
@@ -132,7 +132,15 @@ const scope =
   (catalogue && (category || model)
     ? await catalogue.listingScope({ category, model }, locale)
     : null);
+const unknownScope =
+  !found &&
+  scope !== null &&
+  Boolean((category && !scope.category) || (model && !scope.model));
+if (unknownScope) {
+  Astro.response.status = 404;
+}
 const narrowedTo = scope?.category;
+const unavailable = searchable && !found && !unknownScope;
 const scopedTo = scope?.model;
 const modelName = scopedTo && carName(scopedTo, locale);
 const modelCopy = content(locale).partsCar.hubs.modelCategory;
@@ -427,7 +435,19 @@ const scopeHidden = {
     }
 
     {
-      (vin || unavailable || numberMissing || found?.results.length === 0) && (
+      unknownScope && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.unknownScope}
+        </p>
+      )
+    }
+
+    {
+      (vin ||
+        unavailable ||
+        unknownScope ||
+        numberMissing ||
+        found?.results.length === 0) && (
         <div id="lead" class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6">
           <h2 class="text-block font-semibold">{copy.formHeading}</h2>
           <LeadForm

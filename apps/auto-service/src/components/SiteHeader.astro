@@ -1,7 +1,12 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
+import {
+  localeFrom,
+  SUPPORTED_LOCALES,
+  LOCALE_NAME,
+  type Locale,
+} from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
@@ -15,6 +20,8 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
+const inLocale = (code: Locale) =>
+  `${swapLocale(pathname, code)}${Astro.url.search}`;
 
 const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
@@ -98,7 +105,7 @@ const links = [
           {
             SUPPORTED_LOCALES.map((code) => (
               <a
-                href={swapLocale(pathname, code)}
+                href={inLocale(code)}
                 hreflang={code}
                 {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
                 title={LOCALE_NAME[code]}
@@ -238,7 +245,7 @@ const links = [
         {
           SUPPORTED_LOCALES.map((code) => (
             <a
-              href={swapLocale(pathname, code)}
+              href={inLocale(code)}
               hreflang={code}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               class:list={[
