@@ -52,8 +52,8 @@ partsInquiry:
   commentLabel: Какие запчасти нужны? (необязательно)
   commentPlaceholder: Напишите, что нужно, если знаете
   commentNote: Не обязательно знать точное название детали, мы свяжемся с вами и вместе разберемся, что нужно.
-  listHeading: Корзина
-  listRemoveLabel: Убрать из корзины
+  listHeading: Запчасти в заявке
+  listRemoveLabel: Убрать из заявки
   listQuantityLabel: Количество
   listCarRemoveLabel: Не привязывать заявку к этой машине
   listMoreTemplate: 'Не поместилось позиций: {count}'
