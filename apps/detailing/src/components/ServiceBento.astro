@@ -1,4 +1,5 @@
 ---
+import BulletList from './BulletList.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
@@ -70,17 +71,10 @@ const specsOf = (slug: (typeof SERVICE_SLUGS)[number]) => [
                 <h4 class="text-[0.6875rem] uppercase tracking-[0.2em] text-mute-2">
                   {service.includesHeading}
                 </h4>
-                <ul class="flex flex-col gap-2.5">
-                  {service.includes.map((item) => (
-                    <li class="flex gap-3 text-sm leading-relaxed text-mute">
-                      <span
-                        class="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
-                        aria-hidden="true"
-                      />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                <BulletList
+                  items={service.includes}
+                  class="flex flex-col gap-2.5"
+                />
               </div>
             )}
 

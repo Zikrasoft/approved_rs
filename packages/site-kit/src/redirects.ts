@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { compile, pathToRegexp, type Key } from 'path-to-regexp';
+import { SECURITY_HEADERS } from './securityHeaders.ts';
 
 export interface Redirect {
   source: string;
@@ -44,20 +45,25 @@ export function createRedirectMatcher(
   };
 }
 
-export function withRedirects(
+export function withVercelConfig(
   vercelJson: string,
   redirects: readonly Redirect[],
 ): string {
-  return `${JSON.stringify({ ...JSON.parse(vercelJson), redirects }, null, 2)}\n`;
+  const config = {
+    ...JSON.parse(vercelJson),
+    redirects,
+    headers: SECURITY_HEADERS,
+  };
+  return `${JSON.stringify(config, null, 2)}\n`;
 }
 
-export function writeRedirects(
+export function writeVercelConfig(
   vercelJson: URL,
   redirects: readonly Redirect[],
 ): void {
   writeFileSync(
     vercelJson,
-    withRedirects(readFileSync(vercelJson, 'utf8'), redirects),
+    withVercelConfig(readFileSync(vercelJson, 'utf8'), redirects),
   );
 }
 

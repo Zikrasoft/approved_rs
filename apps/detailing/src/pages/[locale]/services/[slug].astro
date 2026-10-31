@@ -1,5 +1,5 @@
 ---
-import Icon from '@/components/Icon.astro';
+import BulletList from '@/components/BulletList.astro';
 import { getCollection } from 'astro:content';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -91,19 +91,7 @@ const specs = [
             <h3 class="text-lg font-display tracking-tight">
               {service.includesHeading}
             </h3>
-            <ul class="flex flex-col gap-3">
-              {
-                service.includes.map((item) => (
-                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
-                    <Icon
-                      name="check"
-                      class="mt-1 shrink-0 text-champagne-dim"
-                    />
-                    {item}
-                  </li>
-                ))
-              }
-            </ul>
+            <BulletList items={service.includes} marker="check" />
           </div>
         </div>
 
@@ -112,19 +100,7 @@ const specs = [
             <h3 class="text-lg font-display tracking-tight">
               {service.forWhomHeading}
             </h3>
-            <ul class="flex flex-col gap-3">
-              {
-                service.forWhom.map((item) => (
-                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
-                    <span
-                      class="mt-2 h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
-                      aria-hidden="true"
-                    />
-                    {item}
-                  </li>
-                ))
-              }
-            </ul>
+            <BulletList items={service.forWhom} />
           </div>
         </div>
       </aside>

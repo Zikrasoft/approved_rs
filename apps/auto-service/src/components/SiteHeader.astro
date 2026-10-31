@@ -51,6 +51,7 @@ const links = [
   },
   { href: PathBuilder.contact(locale), label: site.nav.contact, attrs: {} },
 ].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
+const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
 ---
 
 <carlab-menu
@@ -175,16 +176,12 @@ const links = [
               <a
                 href={PathBuilder.partsInquiry(locale)}
                 {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
+                class={cta}
               >
                 {site.header.partsCta}
               </a>
             ) : (
-              <button
-                type="button"
-                data-open-lead-modal
-                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
-              >
+              <button type="button" data-open-lead-modal class={cta}>
                 {site.header.cta}
               </button>
             )

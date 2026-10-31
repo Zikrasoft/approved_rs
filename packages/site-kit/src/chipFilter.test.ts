@@ -50,6 +50,16 @@ describe('defineChipFilter', () => {
     ).toEqual(['false', 'true']);
   });
 
+  it('matches an item listed under several space-separated groups', () => {
+    const root = mount(
+      `<button data-filter-chip data-group="polish" aria-pressed="true">polish</button>
+       <div data-filter-item data-group="ceramic polish" data-name="both"></div>
+       <div data-filter-item data-group="ceramic" data-name="ceramic"></div>
+       <div data-filter-item data-name="none"></div>`,
+    );
+    expect(shown(root)).toEqual(['both']);
+  });
+
   it('starts on the group its chip preselects', () => {
     const root = mount(
       `<button data-filter-chip data-group="es" aria-pressed="true">es</button>

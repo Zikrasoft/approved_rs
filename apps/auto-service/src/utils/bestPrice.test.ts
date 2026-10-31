@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { bestPrice, moreOffersLabel, offerSummary } from './bestPrice';
+import {
+  bestPrice,
+  moreOffersLabel,
+  offerSummary,
+  priceLabel,
+} from './bestPrice';
 
 const offer = (price: number, stock_quantity: number, lead_time_days = 0) => ({
   id: `offer_${price}`,
@@ -150,5 +155,29 @@ describe('moreOffersLabel', () => {
         ...[1, 2, 3, 4, 5].map((days) => offer(1900 - days * 100, 0, days)),
       ]),
     ).toBe('Еще 5 предложений, от 1400 RSD');
+  });
+});
+
+describe('priceLabel', () => {
+  const copy = { fromPrice: 'от {price}' };
+
+  it('gives the exact price when no other offer costs more', () => {
+    expect(
+      priceLabel(
+        { price: 1850, currency: 'RSD', startsFrom: false },
+        copy,
+        'en',
+      ),
+    ).toBe('1,850 RSD');
+  });
+
+  it('prefixes the price when the other offers cost more', () => {
+    expect(
+      priceLabel(
+        { price: 1850, currency: 'RSD', startsFrom: true },
+        copy,
+        'en',
+      ),
+    ).toBe('от 1,850 RSD');
   });
 });

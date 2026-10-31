@@ -9,17 +9,14 @@ import PriceTag from '@/components/PriceTag.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueIdSchema } from '@/utils/catalogue';
-import {
-  catalogueFromEnv,
-  shopOpen,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor, previewRequested, shopOpen } from '@/utils/catalogueEnv';
 import { NOINDEX } from '@podbor/site-kit';
+import { readJson } from '@podbor/lead-crm';
 import { PathBuilder } from '@/utils/paths';
 import { withFacetCopy } from '@/utils/partsSearch';
 
 const MAX_IDS = 1000;
+const MAX_PRICES_BYTES = 256 * 1024;
 
 const idsSchema = z
   .string()
@@ -78,13 +75,12 @@ const locale = localeFrom(Astro.url.pathname);
 const preview = previewRequested(Astro.request);
 const body =
   Astro.request.method === 'POST'
-    ? bodySchema.safeParse(await Astro.request.json().catch(() => null))
+    ? bodySchema.safeParse(await readJson(Astro.request, MAX_PRICES_BYTES))
     : null;
 if (!body?.success) {
   return new Response(null, { status: 400 });
 }
-const catalogue =
-  preview || shopOpen() ? catalogueFromEnv(siteEnv(), { preview }) : null;
+const catalogue = preview || shopOpen() ? catalogueFor(Astro.request) : null;
 if (!catalogue) {
   return new Response(null, { status: 204 });
 }

@@ -1,0 +1,36 @@
+---
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { pagesThumbnail } from '@/utils/partImages';
+import PartNumbers from './PartNumbers.astro';
+import PriceTag from './PriceTag.astro';
+import ThumbRow from './ThumbRow.astro';
+
+interface Props {
+  pages: PartPageEntry[];
+  name: string;
+  specs?: string | null;
+  heading?: boolean;
+}
+
+const { pages, name, specs, heading = false } = Astro.props;
+---
+
+<ThumbRow thumb={pagesThumbnail(pages)} class={heading ? 'gap-2' : undefined}>
+  <div
+    class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-4"
+  >
+    {
+      heading ? (
+        <div class="flex min-w-0 flex-col gap-0.5">
+          <h3 class="font-semibold text-ink">{name}</h3>
+          {specs && <p class="spec text-xs text-muted">{specs}</p>}
+        </div>
+      ) : (
+        <span class="min-w-0 text-sm text-ink">{name}</span>
+      )
+    }
+    <PriceTag pages={pages} class="max-sm:items-start max-sm:text-left" />
+  </div>
+  <PartNumbers pages={pages} />
+  <slot />
+</ThumbRow>

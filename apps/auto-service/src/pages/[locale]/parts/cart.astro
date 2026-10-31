@@ -1,20 +1,16 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import CartAddonToggle from '@/components/CartAddonToggle.astro';
+import CartEmpty from '@/components/CartEmpty.astro';
+import CartLineTemplate from '@/components/CartLineTemplate.astro';
+import CartOrdered from '@/components/CartOrdered.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
-import ContactChannels from '@/components/ContactChannels.astro';
-import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
-import { contactCta } from '@podbor/site-kit/contact-control';
-import { formatPhone } from '@podbor/site-kit/format-phone';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
-import { PHONE_NUMBER } from '@/utils/constants';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { localePaths, PathBuilder } from '@/utils/paths';
 
 export const getStaticPaths = localePaths;
@@ -48,8 +44,6 @@ const orderedContact = {
     ]),
   ),
 };
-const stepper =
-  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
@@ -100,164 +94,16 @@ const stepper =
         <p class="text-sm leading-relaxed text-ink-2">{copy.noscriptBody}</p>
         <a
           href={PathBuilder.partsInquiry(locale)}
-          class="btn btn-primary w-full sm:w-auto sm:self-start"
+          class="btn btn-primary btn-block"
         >
           {copy.emptyInquiryCta}
           <Icon name="arrowRight" />
         </a>
       </div>
 
-      <div data-state="empty" hidden class={panel} {...contactCta}>
-        <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
-        {
-          (['expired', 'gone'] as const).map((key) => (
-            <p
-              data-empty-notice={key}
-              hidden
-              class="text-sm leading-relaxed text-danger"
-            >
-              {copy.notices[key]}
-            </p>
-          ))
-        }
-        <div
-          data-empty-notice="moved"
-          hidden
-          class="flex flex-col gap-3 rounded-control bg-shade p-4"
-        >
-          <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
-          <a
-            href={PathBuilder.partsInquiry(locale)}
-            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-            class="btn btn-primary w-full sm:w-auto sm:self-start"
-          >
-            {copy.notices.movedCta}
-            <Icon name="arrowRight" />
-          </a>
-        </div>
-        <div
-          class="flex flex-col gap-3 group-has-[cart-badge:not([hidden])]/cart:hidden"
-        >
-          <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
-          <a
-            href={PathBuilder.parts(locale)}
-            class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
-          >
-            {copy.emptyCta}
-            <Icon name="arrowRight" />
-          </a>
-          <p
-            class="mt-2 border-t border-line pt-4 text-sm leading-relaxed text-ink-2"
-          >
-            {copy.emptyInquiry}
-          </p>
-          <a
-            href={PathBuilder.partsInquiry(locale)}
-            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-            class="btn btn-secondary w-full sm:w-auto sm:self-start"
-          >
-            {copy.emptyInquiryCta}
-          </a>
-        </div>
-      </div>
+      <CartEmpty class={panel} />
 
-      <div data-state="ordered" hidden class={`${panel} gap-5`} {...contactCta}>
-        <div class="flex items-start gap-3">
-          <span
-            class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-go/10 text-go"
-          >
-            <Icon name="check" size={18} />
-          </span>
-          <div class="flex flex-col gap-1">
-            <p
-              class="spec text-lg font-semibold text-ink"
-              data-order-number
-              hidden
-            >
-            </p>
-            <p class="text-sm text-muted" data-order-date></p>
-            <p class="text-sm leading-relaxed text-ink-2">{copy.orderedNext}</p>
-            <p
-              class="text-sm leading-relaxed font-semibold text-ink"
-              data-ordered-contact
-              hidden
-            >
-            </p>
-          </div>
-        </div>
-        <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
-          {copy.orderedBody}
-        </p>
-        <div class="flex flex-col gap-5" data-receipt hidden>
-          <section class="flex flex-col gap-1">
-            <h2 class="text-block font-semibold">{copy.summaryHeading}</h2>
-            <ul class="divide-y divide-line" data-receipt-lines></ul>
-            <template data-receipt-line>
-              <li class="flex items-start justify-between gap-4 py-3">
-                <div class="flex min-w-0 flex-col gap-0.5">
-                  <span class="leading-snug font-semibold text-ink" data-name
-                  ></span>
-                  <span class="spec text-sm text-muted" data-number></span>
-                  <span class="text-sm text-ink-2" data-ready hidden></span>
-                  <span class="text-sm text-ink-2" data-addon hidden></span>
-                  <span class="text-sm text-ink-2" data-installation hidden
-                  ></span>
-                </div>
-                <div class="flex shrink-0 flex-col items-end text-right">
-                  <span class="spec font-semibold text-ink" data-price></span>
-                  <span class="text-xs text-muted" data-quantity></span>
-                </div>
-              </li>
-            </template>
-            <dl class="flex flex-col gap-1.5 border-t border-line pt-3 text-sm">
-              <div
-                class="flex items-baseline justify-between gap-4 text-ink-2"
-                data-receipt-addon-row
-                hidden
-              >
-                <dt>{copy.summaryAddons}</dt>
-                <dd class="spec text-ink" data-receipt-addons></dd>
-              </div>
-              <div class="flex items-baseline justify-between gap-4">
-                <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
-                <dd
-                  class="spec text-xl font-semibold text-ink"
-                  data-receipt-total
-                >
-                </dd>
-              </div>
-            </dl>
-          </section>
-          <div class="grid gap-5 rounded-control bg-shade p-4 sm:grid-cols-2">
-            <section class="flex flex-col gap-1.5">
-              <h3 class="text-sm font-semibold text-muted">
-                {copy.pickupStep}
-              </h3>
-              <PickupDetails />
-            </section>
-            <section class="flex flex-col gap-1.5">
-              <h3 class="text-sm font-semibold text-muted">
-                {copy.paymentStep}
-              </h3>
-              <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
-            </section>
-          </div>
-        </div>
-        <div class="flex flex-col gap-3">
-          <span class="text-xs text-muted">{site.footer.contactHeading}</span>
-          <ContactChannels service={VIN_INQUIRY_SERVICE} class="print:hidden" />
-          <p class="spec hidden text-base font-semibold text-ink print:block">
-            {formatPhone(PHONE_NUMBER)}
-          </p>
-        </div>
-        <a
-          href={PathBuilder.parts(locale)}
-          class="btn btn-secondary w-full sm:w-auto sm:self-start print:hidden"
-        >
-          {copy.orderedCta}
-          <Icon name="arrowRight" />
-        </a>
-      </div>
+      <CartOrdered class={`${panel} gap-5`} />
 
       <div data-state="fallback" hidden class={panel}>
         <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
@@ -314,81 +160,7 @@ const stepper =
           </div>
 
           <ul class="card divide-y divide-line" data-lines></ul>
-          <template data-line>
-            <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
-              <div class="flex items-start gap-3">
-                <div class="flex min-w-0 flex-1 flex-col gap-1">
-                  <a
-                    class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-                    data-part-link></a>
-                  <span class="spec text-sm text-muted" data-number></span>
-                  <span class="text-sm text-ink-2" data-ready hidden></span>
-                </div>
-                <button
-                  type="button"
-                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
-                  aria-label={copy.removeLabel}
-                  data-remove
-                >
-                  <Icon name="close" size={16} />
-                </button>
-              </div>
-              <p
-                class="flex items-start gap-2 text-sm leading-relaxed text-danger"
-                data-unavailable
-                hidden
-              >
-                <Icon name="warning" size={16} class="mt-0.5 shrink-0" />
-                <span>{copy.unavailableTag}</span>
-              </p>
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div
-                  class="flex items-center rounded-control border border-line-field"
-                >
-                  <button
-                    type="button"
-                    class={stepper}
-                    aria-label={copy.decreaseLabel}
-                    data-decrease
-                  >
-                    <Icon name="minus" />
-                  </button>
-                  <span
-                    class="spec min-w-8 text-center text-sm font-semibold text-ink"
-                    data-quantity></span>
-                  <button
-                    type="button"
-                    class={stepper}
-                    aria-label={copy.increaseLabel}
-                    data-increase
-                  >
-                    <Icon name="plus" />
-                  </button>
-                </div>
-                <div class="flex flex-col items-end text-right">
-                  <span
-                    class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"
-                    data-price></span>
-                  <span class="text-xs text-muted" data-unit></span>
-                </div>
-              </div>
-              <CartAddonToggle hook="data-addon" />
-              <CartAddonToggle hook="data-installation" />
-              <button
-                type="button"
-                class="btn btn-secondary w-full sm:w-auto sm:self-start"
-                data-lower
-                hidden></button>
-              <button
-                type="button"
-                class="btn btn-secondary w-full sm:w-auto sm:self-start"
-                data-to-inquiry
-                hidden
-              >
-                {copy.toInquiryLabel}
-              </button>
-            </li>
-          </template>
+          <CartLineTemplate />
         </div>
 
         <CheckoutForm />

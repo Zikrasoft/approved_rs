@@ -19,7 +19,7 @@ import {
   secretMatches,
   type AcceptedSecrets,
 } from '../verifySecret.ts';
-import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
+import { readForm } from '../bodySize.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
 
@@ -175,8 +175,9 @@ export function createLeadsRoute<L extends string>({
     redirect,
     cookies,
   }: RouteRequestContext): Promise<Response> {
-    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
-    const form = await request.formData().catch(() => new FormData());
+    const read = await readForm(request);
+    if (read instanceof Response) return read;
+    const form = read ?? new FormData();
     const canceled = orderCancelSchema.safeParse({
       [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),
       [ORDER_OUTCOME_FIELD]: form.get(ORDER_OUTCOME_FIELD),

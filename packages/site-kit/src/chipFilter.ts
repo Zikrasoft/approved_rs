@@ -32,7 +32,8 @@ export function defineChipFilter(tagName = 'chip-filter'): void {
           let shown = 0;
           for (const item of items) {
             const matches =
-              group === ALL_GROUPS || item.dataset.group === group;
+              group === ALL_GROUPS ||
+              (item.dataset.group ?? '').split(' ').includes(group);
             if (matches) shown += 1;
             item.toggleAttribute('hidden', !matches || (capped && shown > cap));
           }
