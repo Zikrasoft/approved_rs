@@ -23,11 +23,7 @@ import {
 import { BRAND, leadStore, notifyLead } from '@/lib/crm';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor } from '@/utils/catalogueEnv';
 import {
   CART_LINES_FIELD,
   CART_NOTICE_PARAM,
@@ -76,9 +72,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
   const order = orderSchema.safeParse(form);
   const outcome = order.success
-    ? await catalogueFromEnv(siteEnv(), {
-        preview: previewRequested(request),
-      })?.placeOrder(
+    ? await catalogueFor(request)?.placeOrder(
         order.data.cart_id,
         contact.data,
         order.data[CART_FINGERPRINT_FIELD],

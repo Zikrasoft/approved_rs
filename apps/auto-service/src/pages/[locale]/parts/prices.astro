@@ -9,12 +9,7 @@ import PriceTag from '@/components/PriceTag.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueIdSchema } from '@/utils/catalogue';
-import {
-  catalogueFromEnv,
-  shopOpen,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor, previewRequested, shopOpen } from '@/utils/catalogueEnv';
 import { NOINDEX } from '@podbor/site-kit';
 import { PathBuilder } from '@/utils/paths';
 import { withFacetCopy } from '@/utils/partsSearch';
@@ -83,8 +78,7 @@ const body =
 if (!body?.success) {
   return new Response(null, { status: 400 });
 }
-const catalogue =
-  preview || shopOpen() ? catalogueFromEnv(siteEnv(), { preview }) : null;
+const catalogue = preview || shopOpen() ? catalogueFor(Astro.request) : null;
 if (!catalogue) {
   return new Response(null, { status: 204 });
 }

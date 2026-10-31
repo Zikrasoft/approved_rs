@@ -6,12 +6,7 @@ import { bodyTooLarge } from '@podbor/lead-crm';
 import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { CartOutcome } from '@/utils/catalogueWire';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  uncachedJson,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor, uncachedJson } from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
 
@@ -40,11 +35,6 @@ const removeSchema = z.object({
 const INQUIRY: CartOutcome = { kind: 'inquiry' };
 const EMPTY: CartOutcome = { kind: 'empty' };
 
-const catalogue = (request: Request) =>
-  catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request),
-  });
-
 const BAD_REQUEST = () =>
   uncachedJson({ error: 'bad request' }, { status: 400 });
 
@@ -61,7 +51,7 @@ const body = (request: Request) =>
 export const GET: APIRoute = ({ url, request }) => {
   const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));
   if (!id.success) return uncachedJson(EMPTY);
-  return respond(() => catalogue(request)?.viewCart(id.data));
+  return respond(() => catalogueFor(request)?.viewCart(id.data));
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -69,7 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
   return respond(
     add.success
       ? () =>
-          catalogue(request)?.addToCart(
+          catalogueFor(request)?.addToCart(
             add.data.cart_id,
             add.data.offer_id,
             add.data.quantity,
@@ -90,7 +80,7 @@ export const PATCH: APIRoute = async ({ request }) => {
   return respond(
     change.success
       ? () =>
-          catalogue(request)?.setQuantity(
+          catalogueFor(request)?.setQuantity(
             change.data.cart_id,
             change.data.item_id,
             change.data.quantity,
@@ -104,7 +94,7 @@ export const PUT: APIRoute = async ({ request }) => {
   return respond(
     change.success
       ? () =>
-          catalogue(request)?.setAddon(
+          catalogueFor(request)?.setAddon(
             change.data.cart_id,
             change.data.item_id,
             change.data.on,
@@ -119,7 +109,7 @@ export const DELETE: APIRoute = async ({ request }) => {
   return respond(
     remove.success
       ? () =>
-          catalogue(request)?.removeFromCart(
+          catalogueFor(request)?.removeFromCart(
             remove.data.cart_id,
             remove.data.item_id,
           )

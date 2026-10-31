@@ -1000,9 +1000,11 @@ carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
 it is unset nobody gets the preview, the open build included.
 
 A closed-beta tester opens `https://carlab.rs/api/shop-preview?token=<token>`
-once. The route keeps the token in the `auto_service_shop_preview` cookie for a
-year and sends the tester to the parts index; a wrong token gets 403 and no
-cookie, and `/api/shop-preview` with no token forgets it. The token travels in
+once. The route keeps the token in the `httpOnly` `auto_service_shop_preview`
+cookie for a year, beside an `auto_service_shop_preview_on=1` flag that page
+scripts read (it holds no secret), and sends the tester to the parts index; a
+wrong token gets 403 and no cookie, and `/api/shop-preview` with no token
+forgets both. A tester whose cookie predates the flag opens the link once more. The token travels in
 that one API request only, never in a page address, so analytics never record
 it. With the cookie the visitor sees the shop as it will look open: the header
 and the parts index show the cart; listings, car and model pages, kits (with

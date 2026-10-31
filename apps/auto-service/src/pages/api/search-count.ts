@@ -4,11 +4,7 @@ import type { APIRoute } from 'astro';
 import { CATALOG_KEY_PATTERN, searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor } from '@/utils/catalogueEnv';
 import { partsQuery, rangesFromParams } from '@/utils/partsSearch';
 
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN).optional();
@@ -35,9 +31,7 @@ export const GET: APIRoute = async ({ url, request }) => {
     (searchableQuery(parsed.data.q) ||
       parsed.data.category ||
       parsed.data.model);
-  const catalogue = scoped
-    ? catalogueFromEnv(siteEnv(), { preview: previewRequested(request) })
-    : null;
+  const catalogue = scoped ? catalogueFor(request) : null;
   if (!parsed.success || !catalogue) {
     return Response.json({ count: null });
   }

@@ -20,11 +20,7 @@ import StatusNote from '@/components/StatusNote.astro';
 import Pagination from '@/components/Pagination.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor } from '@/utils/catalogueEnv';
 import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
@@ -68,9 +64,7 @@ const offset = Math.max(
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
 );
 
-const catalogue = catalogueFromEnv(siteEnv(), {
-  preview: previewRequested(Astro.request),
-});
+const catalogue = catalogueFor(Astro.request);
 const intent = searchIntent(q);
 const vin = intent.kind === 'vin' ? intent.vin : null;
 const vinHint = !vin && nearVin(q);
