@@ -49,6 +49,7 @@ export default defineConfig({
   admin: {
     vite: () => ({ plugins: [adminLanguage()] }),
   },
+  // TODO: no Locking provider is set, so the cart and order-lead locks are in-memory and exclusive only inside one process; configure the Postgres or Redis Locking provider before splitting server and worker (MEDUSA_WORKER_MODE).
   modules: [
     {
       resolve: './src/modules/catalog',

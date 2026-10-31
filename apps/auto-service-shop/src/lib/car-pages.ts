@@ -10,12 +10,12 @@ export type CarAddress = {
 };
 
 export const makeKey = (slug: string) => `make:${slug}`;
-export const modelKey = (slug: string) => `model:${slug}`;
+export const modelKey = (make: string, slug: string) => `model:${make}/${slug}`;
 export const vehicleKey = (id: string) => `vehicle:${id}`;
 
 export const fittedCarKeys = ({ id, model }: CarAddress): string[] => [
   makeKey(model.chassis.series.make.slug),
-  modelKey(model.slug),
+  modelKey(model.chassis.series.make.slug, model.slug),
   vehicleKey(id),
 ];
 
@@ -75,9 +75,11 @@ export const nearestPlace = (
     : undefined) ??
   shared(
     candidates.length
-      ? candidates.map(({ model }) => modelKey(model.slug))
-      : modelSlug
-        ? [modelKey(modelSlug)]
+      ? candidates.map(({ model }) =>
+          modelKey(model.chassis.series.make.slug, model.slug),
+        )
+      : modelSlug && makeSlug
+        ? [modelKey(makeSlug, modelSlug)]
         : [],
     paged,
   ) ??
@@ -99,7 +101,7 @@ export async function nearestPagedPlace(
 ): Promise<CarHit | null> {
   const keys = [
     ...candidates.flatMap(fittedCarKeys),
-    ...(modelSlug ? [modelKey(modelSlug)] : []),
+    ...(modelSlug && makeSlug ? [modelKey(makeSlug, modelSlug)] : []),
     ...(makeSlug ? [makeKey(makeSlug)] : []),
   ];
   return nearestPlace(

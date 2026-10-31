@@ -9,7 +9,11 @@ export async function GET(
   res: MedusaResponse,
 ): Promise<void> {
   const offers = pricesShown(req)
-    ? await sellingOffers(req.scope, { part_identifier_id: req.params.id })
+    ? await sellingOffers(
+        req.scope,
+        { part_identifier_id: req.params.id },
+        { reuseRecent: true },
+      )
     : [];
 
   res.json(partOffersResponseSchema.parse({ offers }));

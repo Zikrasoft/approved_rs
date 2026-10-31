@@ -17,6 +17,8 @@ const VinLookup = model
       on: ['vin'],
       unique: true,
     },
+    { on: ['vehicle_id'] },
+    { on: ['make', 'code'], where: { vehicle_id: null } },
   ]);
 
 export default VinLookup;

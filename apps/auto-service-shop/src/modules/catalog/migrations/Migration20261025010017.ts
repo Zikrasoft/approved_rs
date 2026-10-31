@@ -12,7 +12,7 @@ export class Migration20261025010017 extends Migration {
       `alter table if exists "vehicle" drop constraint if exists "vehicle_model_id_slug_unique";`,
     );
     this.addSql(
-      `alter table if exists "vehicle_model" drop constraint if exists "vehicle_model_slug_unique";`,
+      `alter table if exists "vehicle_model" drop constraint if exists "vehicle_model_make_id_slug_unique";`,
     );
     this.addSql(
       `alter table if exists "chassis" drop constraint if exists "chassis_series_id_code_unique";`,
@@ -212,18 +212,27 @@ export class Migration20261025010017 extends Migration {
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_slug_redirect_deleted_at" ON "slug_redirect" ("deleted_at") WHERE deleted_at IS NULL;`,
     );
-
     this.addSql(
-      `create table if not exists "vehicle_model" ("id" text not null, "slug" text not null, "name" text not null, "chassis_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vehicle_model_pkey" primary key ("id"));`,
+      `CREATE INDEX IF NOT EXISTS "IDX_slug_redirect_kind_from_slug_scope_id" ON "slug_redirect" ("kind", "from_slug", "scope_id") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_model_slug_unique" ON "vehicle_model" ("slug") WHERE deleted_at IS NULL;`,
+      `CREATE INDEX IF NOT EXISTS "IDX_slug_redirect_target_kind_target_id" ON "slug_redirect" ("target_kind", "target_id") WHERE deleted_at IS NULL;`,
+    );
+
+    this.addSql(
+      `create table if not exists "vehicle_model" ("id" text not null, "slug" text not null, "name" text not null, "make_id" text not null, "chassis_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vehicle_model_pkey" primary key ("id"));`,
+    );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_vehicle_model_make_id" ON "vehicle_model" ("make_id") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vehicle_model_chassis_id" ON "vehicle_model" ("chassis_id") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vehicle_model_deleted_at" ON "vehicle_model" ("deleted_at") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vehicle_model_make_id_slug_unique" ON "vehicle_model" ("make_id", "slug") WHERE deleted_at IS NULL;`,
     );
 
     this.addSql(
@@ -329,6 +338,9 @@ export class Migration20261025010017 extends Migration {
     );
 
     this.addSql(
+      `alter table if exists "vehicle_model" add constraint "vehicle_model_make_id_foreign" foreign key ("make_id") references "make" ("id") on update cascade;`,
+    );
+    this.addSql(
       `alter table if exists "vehicle_model" add constraint "vehicle_model_chassis_id_foreign" foreign key ("chassis_id") references "chassis" ("id") on update cascade;`,
     );
 
@@ -403,6 +415,10 @@ export class Migration20261025010017 extends Migration {
 
     this.addSql(
       `alter table if exists "series" drop constraint if exists "series_make_id_foreign";`,
+    );
+
+    this.addSql(
+      `alter table if exists "vehicle_model" drop constraint if exists "vehicle_model_make_id_foreign";`,
     );
 
     this.addSql(

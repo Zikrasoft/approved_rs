@@ -130,7 +130,11 @@ const SAID_BY_FIT = ['axle'];
       filtered && (
         <FacetFilters
           action={PathBuilder.partsSearch(locale)}
-          hidden={{ category: category.slug, model: model.slug }}
+          hidden={{
+            category: category.slug,
+            make: make.slug,
+            model: model.slug,
+          }}
           facets={facets}
         />
       )

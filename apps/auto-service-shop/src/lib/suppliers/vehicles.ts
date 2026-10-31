@@ -2,7 +2,7 @@ import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 
 import type CatalogModuleService from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
-import { fitmentConflicts } from '../fitment-conflicts';
+import { conflictingVehicles } from '../fitment-conflicts';
 import { slugOf, withoutCodeLists } from '../slug';
 import type { VehicleFacts } from './adapter';
 import { carMakeName } from './makes';
@@ -348,14 +348,11 @@ export async function fitVehicles(
       )
     ).map(({ vehicle_id }) => vehicle_id),
   );
-  const fitting: { vehicle_id: string; note: string | null }[] = [];
-  for (const [vehicleId, note] of notes) {
-    if (fitted.has(vehicleId)) continue;
-    const conflicts = await fitmentConflicts(catalog, partId, {
-      vehicle_id: vehicleId,
-    });
-    if (!conflicts.length) fitting.push({ vehicle_id: vehicleId, note });
-  }
+  const unfitted = [...notes.keys()].filter((id) => !fitted.has(id));
+  const conflicting = await conflictingVehicles(catalog, partId, unfitted);
+  const fitting = unfitted
+    .filter((id) => !conflicting.has(id))
+    .map((id) => ({ vehicle_id: id, note: notes.get(id) ?? null }));
   if (fitting.length) {
     await catalog.createFitments(
       fitting.map((fitment) => ({ ...fitment, part_id: partId, source })),

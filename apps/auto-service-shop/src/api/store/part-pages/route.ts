@@ -70,21 +70,20 @@ export async function GET(
   req: MedusaRequest<unknown, StoreListPartPagesType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { offset, limit } = req.validatedQuery as StoreListPartPagesType;
+  const { after, limit } = req.validatedQuery as StoreListPartPagesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
   const db = req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION);
-  const published = () =>
-    db('published_number as pn')
+  const pageIds = (
+    await db('published_number as pn')
       .join('part_identifier as pi', 'pi.id', 'pn.id')
       .whereNull('pn.deleted_at')
-      .whereNull('pi.deleted_at');
-  const [{ count }] = await published().count({ count: '*' });
-  const pageIds = (
-    await published()
+      .whereNull('pi.deleted_at')
+      .modify((page) => {
+        if (after) page.where('pn.id', '>', after);
+      })
       .select<{ id: string }[]>('pn.id')
       .orderBy('pn.id')
-      .offset(offset)
       .limit(limit)
   ).map(({ id }) => id);
   const identifiers = pageIds.length
@@ -154,9 +153,8 @@ export async function GET(
   res.json(
     partPagesResponseSchema.parse({
       pages,
-      count: Number(count),
-      offset,
       limit,
+      next: pageIds.length === limit ? pageIds[pageIds.length - 1] : null,
     }),
   );
 }

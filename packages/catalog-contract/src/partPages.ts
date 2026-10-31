@@ -4,6 +4,7 @@ import { attributeValuesSchema } from './attributes.ts';
 import { imageSchema } from './images.ts';
 import { translationsSchema } from './translations.ts';
 import { partOfferSchema } from './cart-wire.ts';
+import { pageFields } from './page.ts';
 
 export const PART_IDENTIFIER_TYPES = [
   'oem',
@@ -73,9 +74,7 @@ export const partPageSchema = picturedBrandNumberSchema.extend({
 
 export const partPagesResponseSchema = z.object({
   pages: z.array(partPageSchema),
-  count: z.number().int().nonnegative(),
-  offset: z.number().int().nonnegative(),
-  limit: z.number().int().positive(),
+  ...pageFields,
 });
 
 export type BrandNumber = z.infer<typeof brandNumberSchema>;

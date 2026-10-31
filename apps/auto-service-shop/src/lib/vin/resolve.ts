@@ -31,7 +31,12 @@ const identifiedVehicles = async (
   if (!identifiers.length) return [];
   const ids = (
     await catalog.listVehicleIdentifiers(
-      { $or: identifiers },
+      {
+        $or: identifiers.map((identifier) => ({
+          ...identifier,
+          supplier_id: null,
+        })),
+      },
       { select: ['vehicle_id'], take: null },
     )
   ).map(({ vehicle_id }) => vehicle_id);
@@ -101,7 +106,6 @@ export const resolveVin = async (
   | Omit<Extract<VinLookupResponse, { resolved: true }>, 'place'>
   | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
 > => {
-  const [existing] = await vinLookups.listVinLookups({ vin });
   const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
   const vehicle = vehicles.length === 1 ? vehicles[0] : null;
   const record = {
@@ -114,10 +118,8 @@ export const resolveVin = async (
     code: answer?.decode.code ?? answer?.decode.identifiers[0]?.value ?? null,
     vehicle_id: vehicle?.id ?? null,
   };
-  if (existing) {
-    await vinLookups.updateVinLookups({ id: existing.id, ...record });
-  } else {
-    await vinLookups.createVinLookups(record);
+  if (record.make) {
+    await vinLookups.saveLookup(record);
   }
 
   return vehicle

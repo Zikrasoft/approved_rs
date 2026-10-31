@@ -97,26 +97,60 @@ export const listVehicleResponses = async (
 ): Promise<Vehicle[]> =>
   (await vehicleRows(catalog, filters)).map(toVehicleResponse);
 
+export const modelsBySlug = async (
+  catalog: CatalogModuleService,
+  slug: string,
+  makeSlug: string | undefined,
+  config: Parameters<CatalogModuleService['listVehicleModels']>[1] = {},
+) => {
+  const makeIds = makeSlug
+    ? (await catalog.listMakes({ slug: makeSlug }, { select: ['id'] })).map(
+        ({ id }) => id,
+      )
+    : null;
+  return makeIds?.length === 0
+    ? []
+    : catalog.listVehicleModels(
+        { slug, ...(makeIds && { make_id: makeIds }) },
+        config,
+      );
+};
+
 export const listVehiclePage = async (
   catalog: CatalogModuleService,
   {
+    makeSlug,
     modelSlug,
-    offset,
+    after,
     limit,
-  }: { modelSlug?: string; offset: number; limit: number },
-): Promise<{ vehicles: Vehicle[]; count: number }> => {
+  }: {
+    makeSlug?: string;
+    modelSlug?: string;
+    after?: string;
+    limit: number;
+  },
+): Promise<{ vehicles: Vehicle[]; next: string | null }> => {
   const modelIds = modelSlug
-    ? (await catalog.listVehicleModels({ slug: modelSlug })).map(({ id }) => id)
+    ? (await modelsBySlug(catalog, modelSlug, makeSlug)).map(({ id }) => id)
     : null;
   if (modelIds?.length === 0) {
-    return { vehicles: [], count: 0 };
+    return { vehicles: [], next: null };
   }
-  const [rows, count] = await catalog.listAndCountVehicles(
-    modelIds ? { model_id: modelIds } : {},
-    { ...VEHICLE_READ, skip: offset, take: limit },
+  const rows = await catalog.listVehicles(
+    {
+      ...(modelIds && { model_id: modelIds }),
+      ...(after && { id: { $gt: after } }),
+    },
+    { ...VEHICLE_READ, take: limit },
   );
-  return { vehicles: rows.map(toVehicleResponse), count };
+  return {
+    vehicles: rows.map(toVehicleResponse),
+    next: nextCursor(rows, limit),
+  };
 };
+
+export const nextCursor = (rows: { id: string }[], limit: number) =>
+  rows.length === limit ? rows[rows.length - 1].id : null;
 
 const isoDate = z
   .date()

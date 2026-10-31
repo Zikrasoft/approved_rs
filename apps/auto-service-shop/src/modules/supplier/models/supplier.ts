@@ -21,6 +21,12 @@ const Supplier = model
       mappedBy: 'supplier',
     }),
   })
-  .cascades({ delete: ['offers', 'categories', 'staged_records'] });
+  .cascades({ delete: ['offers', 'categories', 'staged_records'] })
+  .checks([
+    {
+      name: 'supplier_markup_percentage',
+      expression: 'markup_percentage >= 0',
+    },
+  ]);
 
 export default Supplier;

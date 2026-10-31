@@ -3,6 +3,8 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 
 type Response = {
   status: number;
@@ -529,6 +531,29 @@ medusaIntegrationTestRunner({
         expect(
           await catalog.listCategoryFields({ category_id: unused.category.id }),
         ).toHaveLength(0);
+      });
+
+      it('refuses deleting a Category a Supplier category code maps to', async () => {
+        const mapped = await createOilCategory();
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const supplier = await suppliers.createSuppliers({
+          name: 'Category mapper',
+          markup_percentage: 0,
+        });
+        await suppliers.createSupplierCategories({
+          supplier_id: supplier.id,
+          code: 'Oil',
+          category_id: mapped.category.id,
+        });
+
+        const refused = await remove(`/admin/categories/${mapped.category.id}`);
+
+        expect(refused.status).toBe(409);
+        expect(refused.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'supplier_category', count: 1 }],
+        });
       });
 
       it('sets, changes and clears the add-on service of a Category', async () => {

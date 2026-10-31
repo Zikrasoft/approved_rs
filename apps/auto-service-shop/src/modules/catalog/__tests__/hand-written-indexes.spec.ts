@@ -32,6 +32,8 @@ const HAND_WRITTEN_TYPES: Record<string, string> = {
   'supplier.markup_percentage': 'numeric',
   'fitment.production_from': 'date',
   'fitment.production_to': 'date',
+  'requirement.min': 'numeric',
+  'requirement.max': 'numeric',
 };
 
 const columnSignature = (type: string, nullable: boolean) =>
@@ -71,6 +73,63 @@ medusaIntegrationTestRunner({
           /^CREATE UNIQUE INDEX .*upper\(regexp_replace\(btrim\(NORMALIZE\(name, NFKC\)\)/,
         );
       });
+
+      it.each(['IDX_fitment_part_vehicle_all', 'IDX_fitment_vehicle_all'])(
+        'keeps %s over tombstoned Fitments too',
+        async (name) => {
+          expect(await definition(name)).toMatch(/^CREATE INDEX .*btree/);
+          expect(await definition(name)).not.toContain('WHERE');
+        },
+      );
+
+      it.each([
+        'IDX_vehicle_model_name_trigram',
+        'IDX_part_name_trigram',
+        'IDX_part_identifier_normalized_value_trigram',
+      ])('keeps %s for substring search', async (name) => {
+        expect(await definition(name)).toMatch(/USING gin .*gin_trgm_ops/);
+      });
+
+      it('finds a Part by its whole description', async () => {
+        expect(await definition('IDX_part_description_hash')).toMatch(
+          /USING hash \(description\)/,
+        );
+      });
+    });
+
+    describe('The hot lookups', () => {
+      const plan = async (sql: string) => {
+        const trx = await pg().transaction();
+        await trx.raw('set local enable_seqscan = off');
+        const { rows } = await trx.raw(`explain ${sql}`);
+        await trx.rollback();
+        return JSON.stringify(rows);
+      };
+
+      it.each([
+        [
+          'a tombstone-aware Fitment',
+          `select id from fitment where part_id = 'p' and vehicle_id in ('v')`,
+          /Index.*IDX_fitment_(part_vehicle|vehicle)_all/,
+        ],
+        [
+          'a decoded Vehicle identifier',
+          `select vehicle_id from vehicle_identifier where type = 'bmw-type-code' and value = 'X' and supplier_id is null and deleted_at is null`,
+          /Index.*IDX_vehicle_identifier_type_value_vehicle_id_unique/,
+        ],
+        [
+          'the unresolved VIN codes',
+          `select make, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make, code`,
+          /Index.*IDX_vin_lookup_make_code/,
+        ],
+        [
+          'the VIN lookups of a Vehicle',
+          `select id from vin_lookup where vehicle_id in ('v') and deleted_at is null`,
+          /Index.*IDX_vin_lookup_vehicle_id/,
+        ],
+      ])('finds %s by an index', async (_, sql, index) => {
+        expect(await plan(sql)).toMatch(index);
+      });
     });
 
     describe('The column types the generator cannot express', () => {
@@ -93,6 +152,13 @@ medusaIntegrationTestRunner({
         'keeps the Fitment %s a calendar date',
         async (column) => {
           expect(await columnType('fitment', column)).toBe('date');
+        },
+      );
+
+      it.each(['min', 'max'])(
+        'keeps the Requirement %s an exact decimal',
+        async (column) => {
+          expect(await columnType('requirement', column)).toBe('numeric');
         },
       );
 
@@ -183,6 +249,13 @@ medusaIntegrationTestRunner({
         expect(await checks('requirement')).toContain(
           'CHECK ((num_nonnulls(engine_id, chassis_id, vehicle_id) = 1))',
         );
+      });
+
+      it('refuses to delete a Category a Part still uses', async () => {
+        const { rows } = await pg().raw(
+          `select confdeltype from pg_constraint where conname = 'part_category_id_foreign'`,
+        );
+        expect(rows).toEqual([{ confdeltype: 'r' }]);
       });
 
       it('keeps a Fitment production range in order', async () => {

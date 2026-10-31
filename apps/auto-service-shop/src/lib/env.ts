@@ -77,6 +77,9 @@ const envFields = z.object({
   IMPORT_CONCURRENCY: optionalValue
     .transform((articles) => Number(articles ?? 4))
     .pipe(z.number().int().positive()),
+  LIVE_QUOTE_CACHE_SECONDS: optionalValue
+    .transform((seconds) => Number(seconds ?? 60))
+    .pipe(z.number().int().nonnegative()),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
   SHOP_LEAD_SECRET: optionalSecret,

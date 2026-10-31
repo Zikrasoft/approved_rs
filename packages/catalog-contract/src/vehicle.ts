@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { displayEnum } from './displayEnum.ts';
 import { requirementSchema } from './attributes.ts';
+import { pageFields } from './page.ts';
 import { STEERING_SIDES } from './steering.ts';
 import { vinOf } from '@podbor/lead-crm/vin';
 
@@ -77,9 +78,7 @@ export type Vehicle = z.infer<typeof vehicleSchema>;
 
 export const vehiclesResponseSchema = z.object({
   vehicles: z.array(vehicleSchema),
-  count: z.number().int().nonnegative().nullable().default(null),
-  offset: z.number().int().nonnegative().nullable().default(null),
-  limit: z.number().int().positive().nullable().default(null),
+  ...pageFields,
 });
 
 export const VIN_REFUSAL =

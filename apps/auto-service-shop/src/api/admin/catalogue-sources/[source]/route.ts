@@ -8,6 +8,7 @@ import {
   holdCatalogueWriter,
 } from '../../../../lib/catalogue-writer';
 import { emitIndexChanges } from '../../../../lib/index-changes';
+import { sweepOrphans } from '../../../../lib/publish/orphans';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
@@ -39,13 +40,8 @@ async function deleteSource(req: AuthenticatedMedusaRequest, source: string) {
   );
   const identifierIds = identifiers.map(({ id }) => id);
   const deleted = await catalog.deleteRowsBySource(source);
+  await sweepOrphans(req.scope);
   if (identifierIds.length) {
-    await suppliers.deleteSupplierOffers({
-      part_identifier_id: identifierIds,
-    });
-    await suppliers.deleteStagedRecords({
-      part_identifier_id: identifierIds,
-    });
     await emitIndexChanges(req.scope, {
       deletedIdentifierIds: identifierIds,
       partIds: identifiers.map(({ part_id }) => part_id),

@@ -41,7 +41,13 @@ import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type CatalogModuleService from '../../../modules/catalog/service';
-import { makeKey, modelKey, pagedCars } from '../../../lib/car-pages';
+import {
+  makeKey,
+  modelKey,
+  pagedCars,
+  vehicleKey,
+} from '../../../lib/car-pages';
+import { modelsBySlug } from '../../../lib/store-response';
 import { type CarMatch, matchCars } from '../../../search/catalogue-car';
 import {
   PART_IDENTIFIER_INDEX,
@@ -139,35 +145,6 @@ const priceFilter = ({ min, max }: RangeFilter): SearchFilters => ({
 const isUniversal = (key: string) =>
   (UNIVERSAL_FACET_KEYS as readonly string[]).includes(key);
 
-async function partIdsForVehicle(
-  catalog: CatalogModuleService,
-  vehicleId: string,
-): Promise<string[]> {
-  await catalog.retrieveVehicle(vehicleId);
-  const fitments = await catalog.listFitments(
-    { vehicle_id: vehicleId },
-    { take: null },
-  );
-  return [...new Set(fitments.map((fitment) => fitment.part_id))];
-}
-
-async function partIdsForModel(
-  catalog: CatalogModuleService,
-  modelId: string,
-): Promise<string[]> {
-  const vehicles = await catalog.listVehicles(
-    { model_id: modelId },
-    { take: null },
-  );
-  const fitments = vehicles.length
-    ? await catalog.listFitments(
-        { vehicle_id: vehicles.map(({ id }) => id) },
-        { take: null },
-      )
-    : [];
-  return [...new Set(fitments.map((fitment) => fitment.part_id))];
-}
-
 async function describeBrands(
   catalog: CatalogModuleService,
   values: { value: string; count: number }[],
@@ -239,6 +216,7 @@ export async function GET(
     q = '',
     category,
     vehicle_id,
+    make,
     model,
     facets: requestedFacets,
     range: requestedRanges,
@@ -273,10 +251,9 @@ export async function GET(
     ? { slug: found.slug, name: translated(found, 'name', locale) }
     : null;
   const [vehicleModel] = model
-    ? await catalog.listVehicleModels(
-        { slug: model },
-        { relations: ['chassis', 'chassis.series', 'chassis.series.make'] },
-      )
+    ? await modelsBySlug(catalog, model, make, {
+        relations: ['chassis', 'chassis.series', 'chassis.series.make'],
+      })
     : [];
   if (model && !vehicleModel) {
     throw new MedusaError(
@@ -288,17 +265,19 @@ export async function GET(
     ? vehicleSchema.shape.model.parse(vehicleModel)
     : null;
   const scopeMake = scopedTo?.chassis.series.make.slug;
+  const scopeModelKey =
+    scopedTo && scopeMake ? modelKey(scopeMake, scopedTo.slug) : null;
   const scopePaged =
-    scopedTo && scopeMake
+    scopeModelKey && scopeMake
       ? await pagedCars(req.scope.resolve(Modules.SEARCH), [
-          modelKey(scopedTo.slug),
+          scopeModelKey,
           makeKey(scopeMake),
         ])
       : null;
   const scopePages =
-    scopedTo && scopeMake && scopePaged
+    scopeModelKey && scopeMake && scopePaged
       ? {
-          model: scopePaged.has(modelKey(scopedTo.slug)),
+          model: scopePaged.has(scopeModelKey),
           make: scopePaged.has(makeKey(scopeMake)),
         }
       : null;
@@ -357,20 +336,11 @@ export async function GET(
     scope.push({ category: found.slug });
   }
   if (vehicle_id) {
-    const partIds = await partIdsForVehicle(catalog, vehicle_id);
-    if (!partIds.length) {
-      nothing();
-      return;
-    }
-    scope.push({ part_id: { $in: partIds } });
+    await catalog.retrieveVehicle(vehicle_id, { select: ['id'] });
+    scope.push({ cars: vehicleKey(vehicle_id) });
   }
-  if (vehicleModel) {
-    const partIds = await partIdsForModel(catalog, vehicleModel.id);
-    if (!partIds.length) {
-      nothing();
-      return;
-    }
-    scope.push({ part_id: { $in: partIds } });
+  if (scopeModelKey) {
+    scope.push({ cars: scopeModelKey });
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);

@@ -16,6 +16,15 @@ const SupplierOffer = model
     created_by: model.text().nullable(),
     updated_by: model.text().nullable(),
   })
-  .indexes([{ on: ['supplier_id', 'supplier_article_id'], unique: true }]);
+  .indexes([{ on: ['supplier_id', 'supplier_article_id'], unique: true }])
+  .checks([
+    { name: 'supplier_offer_cost_price', expression: 'cost_price >= 0' },
+    { name: 'supplier_offer_stock', expression: 'stock_quantity >= 0' },
+    { name: 'supplier_offer_lead_time', expression: 'lead_time_days >= 0' },
+    {
+      name: 'supplier_offer_currency',
+      expression: "currency similar to '[A-Z]{3}'",
+    },
+  ]);
 
 export default SupplierOffer;

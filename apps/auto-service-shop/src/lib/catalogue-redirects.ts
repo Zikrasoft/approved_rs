@@ -41,7 +41,7 @@ export async function catalogueRedirects(
   const models = modelIds.length
     ? await catalog.listVehicleModels(
         { id: modelIds },
-        { relations: ['chassis.series'], take: null },
+        { select: ['id', 'slug', 'make_id'], take: null },
       )
     : [];
   const [makes, categories, brands] = await Promise.all([
@@ -68,7 +68,7 @@ export async function catalogueRedirects(
     }
     if (kind === 'model') {
       const model = modelById.get(id);
-      const make = model && placeOf('make', model.chassis.series.make_id);
+      const make = model && placeOf('make', model.make_id);
       return make && model ? { ...make, model: model.slug } : null;
     }
     if (kind === 'vehicle') {

@@ -54,6 +54,9 @@ const category = CATALOG_KEY_PATTERN.test(categoryParam)
   : undefined;
 const modelParam = params.get('model') ?? '';
 const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
+const makeParam = params.get('make') ?? '';
+const make =
+  model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
 const chosen = params.getAll('facets');
 const ranges = rangesFromParams(params);
 const offset = Math.max(
@@ -91,6 +94,7 @@ const found =
     ? await catalogue.search({
         q,
         category,
+        make,
         model,
         locale,
         facets: chosen,
@@ -113,7 +117,7 @@ const searchHref = (
   const next = new URLSearchParams({
     ...(q ? { q } : {}),
     ...(category ? { category } : {}),
-    ...(scope ? { model: scope } : {}),
+    ...(scope ? { ...(make && { make }), model: scope } : {}),
   });
   for (const facet of facets) {
     next.append('facets', facet);
@@ -145,7 +149,7 @@ const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const scope =
   found ??
   (catalogue && (category || model)
-    ? await catalogue.listingScope({ category, model }, locale)
+    ? await catalogue.listingScope({ category, make, model }, locale)
     : null);
 const unknownScope =
   !found &&
@@ -181,7 +185,7 @@ const inquiryTopic = [
 const scopeHidden = {
   ...(q ? { q } : {}),
   ...(category ? { category } : {}),
-  ...(model ? { model } : {}),
+  ...(model ? { ...(make && { make }), model } : {}),
 };
 ---
 

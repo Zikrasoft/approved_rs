@@ -18,7 +18,7 @@ export class Migration20261025010019 extends Migration {
       `alter table if exists "supplier" drop constraint if exists "supplier_name_unique";`,
     );
     this.addSql(
-      `create table if not exists "supplier" ("id" text not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"));`,
+      `create table if not exists "supplier" ("id" text not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"), constraint supplier_markup_percentage check (markup_percentage >= 0));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_supplier_name_unique" ON "supplier" ("name") WHERE deleted_at IS NULL;`,
@@ -63,7 +63,7 @@ export class Migration20261025010019 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "supplier_offer" ("id" text not null, "supplier_id" text not null, "supplier_article_id" text not null, "cost_price" integer not null, "currency" text not null default 'RSD', "stock_quantity" integer not null, "stock_by_location" jsonb not null default '{}', "lead_time_days" integer not null, "part_identifier_id" text not null, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_offer_pkey" primary key ("id"));`,
+      `create table if not exists "supplier_offer" ("id" text not null, "supplier_id" text not null, "supplier_article_id" text not null, "cost_price" integer not null, "currency" text not null default 'RSD', "stock_quantity" integer not null, "stock_by_location" jsonb not null default '{}', "lead_time_days" integer not null, "part_identifier_id" text not null, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_offer_pkey" primary key ("id"), constraint supplier_offer_cost_price check (cost_price >= 0), constraint supplier_offer_stock check (stock_quantity >= 0), constraint supplier_offer_lead_time check (lead_time_days >= 0), constraint supplier_offer_currency check (currency similar to '[A-Z]{3}'));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_supplier_offer_supplier_id" ON "supplier_offer" ("supplier_id") WHERE deleted_at IS NULL;`,

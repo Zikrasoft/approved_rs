@@ -4,6 +4,8 @@ import type {
 } from '@medusajs/framework/http';
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
+import { SUPPLIER_MODULE } from '../../../../modules/supplier';
+import type SupplierModuleService from '../../../../modules/supplier/service';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import type { AdminUpdateCategoryType } from '../../validators';
 import { updatedBy } from '../../../../lib/editors';
@@ -38,6 +40,13 @@ export async function DELETE(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  await deleteUnlessHeld(req, CATEGORIES, id);
+  const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
+  const [, mappings] = await suppliers.listAndCountSupplierCategories(
+    { category_id: id },
+    { select: ['id'], take: 1 },
+  );
+  await deleteUnlessHeld(req, CATEGORIES, id, [
+    { entity: 'supplier_category', count: mappings },
+  ]);
   res.json({ id, object: 'category', deleted: true });
 }
