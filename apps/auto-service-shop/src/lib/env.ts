@@ -93,6 +93,8 @@ const envFields = z.object({
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
   SHOP_LEAD_SECRET: optionalSecret,
   SHOP_LEAD_SECRET_PREVIOUS: optionalSecret,
+  SHOP_CLIENT_SECRET: optionalSecret,
+  SHOP_CLIENT_SECRET_PREVIOUS: optionalSecret,
   SHOP_ORDER_OUTCOME_SECRET: optionalSecret,
   SHOP_ORDER_OUTCOME_SECRET_PREVIOUS: optionalSecret,
   VIN_DECODERS: z

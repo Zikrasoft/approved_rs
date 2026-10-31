@@ -1351,7 +1351,7 @@ describe('catalogueFromEnv', () => {
 
     it('names the visitor to the shop, vouched for with the shop secret', async () => {
       const headers = await headersSent(
-        { ...SHOP, SHOP_LEAD_SECRET: 'secret' },
+        { ...SHOP, SHOP_CLIENT_SECRET: 'secret' },
         visitor,
       );
 
@@ -1362,9 +1362,9 @@ describe('catalogueFromEnv', () => {
     it('names nobody without the secret, without a visitor, or for an address that is none', async () => {
       for (const sent of [
         await headersSent(SHOP, visitor),
-        await headersSent({ ...SHOP, SHOP_LEAD_SECRET: 'secret' }),
+        await headersSent({ ...SHOP, SHOP_CLIENT_SECRET: 'secret' }),
         await headersSent(
-          { ...SHOP, SHOP_LEAD_SECRET: 'secret' },
+          { ...SHOP, SHOP_CLIENT_SECRET: 'secret' },
           new Request('https://carlab.rs/', {
             headers: { 'x-real-ip': 'everyone' },
           }),

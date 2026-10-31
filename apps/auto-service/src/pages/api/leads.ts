@@ -2,6 +2,7 @@ export const prerender = false;
 
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
+import { acceptedSecrets } from '@podbor/lead-crm/verify-secret';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
 import { formatPhone } from '@podbor/site-kit/format-phone';
@@ -51,10 +52,7 @@ export const POST = createLeadsRoute({
     };
   },
   orderCanceled: {
-    secret: [
-      process.env.SHOP_LEAD_SECRET,
-      process.env.SHOP_LEAD_SECRET_PREVIOUS,
-    ],
+    secret: acceptedSecrets(process.env, 'SHOP_LEAD_SECRET'),
     cancel: async (orderId) =>
       (await import('@/lib/crmBot')).cancelOrderLead(orderId),
   },
