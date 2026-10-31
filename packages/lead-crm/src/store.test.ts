@@ -2394,3 +2394,59 @@ describe('hasRealContact', () => {
     expect(hasRealContact(contact)).toBe(real);
   });
 });
+
+describe('the Lead count alert', () => {
+  const alertLeadCount = vi.fn();
+  const createdAt = new Date().toISOString();
+  const seedLeads = (count: number) =>
+    storage.seed(
+      Array.from({ length: count }, (_, at) => ({
+        ...baseData,
+        contact: `@seed${at}`,
+        id: at + 1,
+        status: 'won',
+        createdAt,
+        statusChangedAt: createdAt,
+      })),
+    );
+
+  beforeEach(() => {
+    alertLeadCount.mockReset().mockResolvedValue(undefined);
+    store = createLeadStore({
+      storage,
+      schema: storedLeadSchema,
+      alertLeadCount,
+    });
+  });
+
+  it.each([4999, 9999])(
+    'tells once the new Lead after %i stored ones reaches a threshold',
+    async (stored) => {
+      seedLeads(stored);
+      await store.insertOrMergeLead({ ...baseData, contact: '@fresh' });
+      expect(alertLeadCount).toHaveBeenCalledExactlyOnceWith(stored + 1);
+    },
+  );
+
+  it('stays quiet past a threshold and on a merge', async () => {
+    seedLeads(5000);
+    await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
+    await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
+    expect(alertLeadCount).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Lead when the alert fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    alertLeadCount.mockRejectedValue(new Error('down'));
+    seedLeads(4999);
+    const { lead } = await store.insertOrMergeLead({
+      ...baseData,
+      contact: '@fresh',
+    });
+    expect(lead.id).toBe(5000);
+    expect(console.error).toHaveBeenCalledWith(
+      '[lead-crm] could not send the Lead count alert',
+      { count: 5000, error: { name: 'Error', message: 'down' } },
+    );
+  });
+});

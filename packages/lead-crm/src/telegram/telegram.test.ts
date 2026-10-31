@@ -58,6 +58,7 @@ const {
   sendOperationNotice,
   sendQuarantinedLeadsToAdmin,
   sendUnreadableLedgerToAdmin,
+  sendLeadCountAlert,
   sendStatusChange,
   sendFieldChange,
   sendNoteNotice,
@@ -859,6 +860,21 @@ describe('sendUnreadableLedgerToAdmin', () => {
     expect(body.chat_id).toBe(222);
     expect(body.text).toContain('data/ledger.json не читается');
     expect(body.text).toContain('&lt;i&gt;');
+  });
+});
+
+describe('sendLeadCountAlert', () => {
+  beforeEach(() => mockFetchOk());
+  afterEach(() => mockFetch.mockReset());
+
+  it('tells the owner and the admin how many Leads the file holds', async () => {
+    await sendLeadCountAlert(5000, '<i>Brand</i>');
+    const bodies = mockFetch.mock.calls.map(([, init]) =>
+      JSON.parse(init.body),
+    );
+    expect(bodies.map((body) => body.chat_id)).toEqual([111, 222]);
+    expect(bodies[0].text).toContain('Заявок в базе: 5000');
+    expect(bodies[0].text).toContain('&lt;i&gt;');
   });
 });
 

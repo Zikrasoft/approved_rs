@@ -283,6 +283,14 @@ export function orderConflictText(lead: StoredLead & { orderId: string }) {
   ].join('\n');
 }
 
+export function leadCountAlertText(count: number, brand: string): string {
+  return [
+    `⚠️ Заявок в базе: ${count}`,
+    ``,
+    `Заметил сайт ${escapeHtml(brand)}. Если это не рост, а наплыв спама, проверь последние заявки и включи лимит запросов в Vercel Firewall.`,
+  ].join('\n');
+}
+
 export function orderStuckText(lead: StoredLead & { orderId: string }) {
   return [
     `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,

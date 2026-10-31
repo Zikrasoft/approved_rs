@@ -112,8 +112,11 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
+  alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
 }
+
+export const LEAD_COUNT_ALERTS: readonly number[] = [5000, 10000];
 
 const promptedAt =
   ({ chatId, messageId }: PromptKey) =>
@@ -327,6 +330,7 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
+  alertLeadCount,
   standaloneServices = [],
 }: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
@@ -456,6 +460,17 @@ export function createLeadStore({
     }
   }
 
+  async function alertOnThreshold(count: number): Promise<void> {
+    if (!alertLeadCount || !LEAD_COUNT_ALERTS.includes(count)) return;
+    try {
+      await alertLeadCount(count);
+    } catch (error) {
+      logError('[lead-crm] could not send the Lead count alert', error, {
+        count,
+      });
+    }
+  }
+
   function nextId(leads: StoredLead[], idFloor: number): number {
     return leads.reduce((max, l) => Math.max(max, l.id), idFloor) + 1;
   }
@@ -477,7 +492,9 @@ export function createLeadStore({
 
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
+      let count = 0;
       await updateLeads((leads, idFloor) => {
+        count = 0;
         const now = Date.now();
         const target = mergeTarget(data, leads, now, standaloneServices);
         if (target.kind === 'same-order') {
@@ -487,6 +504,7 @@ export function createLeadStore({
         if (target.kind === 'new') {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
+          count = leads.length + 1;
           return supersede([...leads, inserted], inserted);
         }
         const existing = target.lead;
@@ -548,6 +566,7 @@ export function createLeadStore({
         const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
         return data.telegramId == null ? replaced : supersede(replaced, merged);
       });
+      await alertOnThreshold(count);
       return outcome;
     },
 
