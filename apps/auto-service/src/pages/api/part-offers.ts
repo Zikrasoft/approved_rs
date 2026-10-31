@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { OffersOutcome } from '@/utils/catalogueWire';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import { catalogueFromEnv, siteEnv, uncachedJson } from '@/utils/catalogueEnv';
 import { previewRequested } from '@/utils/shopPreview';
 
 const INQUIRY: OffersOutcome = { kind: 'inquiry' };
@@ -15,5 +15,5 @@ export const GET: APIRoute = async ({ url, request }) => {
         preview: previewRequested(request),
       })?.liveOffers(id.data)
     : undefined;
-  return Response.json(outcome ?? INQUIRY);
+  return uncachedJson(outcome ?? INQUIRY);
 };
