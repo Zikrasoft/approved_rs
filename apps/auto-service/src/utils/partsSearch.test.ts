@@ -155,6 +155,12 @@ describe('chosenFilters', () => {
   });
 });
 
+describe('chosenFilters for a facet the shop does not know', () => {
+  it('shows no chip for it', () => {
+    expect(chosenFilters([viscosity], ['bogus:x'], [], copy)).toEqual([]);
+  });
+});
+
 describe('withFacetCopy', () => {
   it('names the brand, availability and price facets in the page language', () => {
     const facets = universalFacets({

@@ -141,24 +141,26 @@ export const chosenFilters = (
   copy: FacetCopy & RangeCopy,
   format: (value: number) => string = String,
 ): FilterChip[] => [
-  ...chosen.map((filter) => {
-    const others = {
-      facets: chosen.filter((item) => item !== filter),
-      ranges,
-    };
-    for (const facet of facets) {
-      const value = facet.values.find(
-        (candidate) => facetFilter(facet.key, candidate.value) === filter,
-      );
-      if (value) {
-        return {
-          ...others,
-          label: `${facet.label}: ${facetValueLabel(facet, value, copy)}`,
-        };
+  ...chosen
+    .filter((filter) => facets.some(({ key }) => filter.startsWith(`${key}:`)))
+    .map((filter) => {
+      const others = {
+        facets: chosen.filter((item) => item !== filter),
+        ranges,
+      };
+      for (const facet of facets) {
+        const value = facet.values.find(
+          (candidate) => facetFilter(facet.key, candidate.value) === filter,
+        );
+        if (value) {
+          return {
+            ...others,
+            label: `${facet.label}: ${facetValueLabel(facet, value, copy)}`,
+          };
+        }
       }
-    }
-    return { ...others, label: filter.slice(filter.indexOf(':') + 1) };
-  }),
+      return { ...others, label: filter.slice(filter.indexOf(':') + 1) };
+    }),
   ...ranges.map((range) => {
     const facet = facets.find(({ key }) => key === range.key);
     const text = rangeText(range, facet?.unit ?? null, copy, format);
