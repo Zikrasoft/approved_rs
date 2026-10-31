@@ -51,15 +51,24 @@ export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 export const StoreCreateVinLookup = z.object({ vin: vinSchema });
 export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
 
+const MAX_OFFER_ID_LENGTH = 64;
+const MAX_EMAIL_LOCAL_PART = 64;
+
+const offerId = z.string().min(1).max(MAX_OFFER_ID_LENGTH);
+
 export const StoreCreateOfferCart = z.object({
-  email: z.email().optional(),
-  offer_id: z.string().min(1).optional(),
+  email: z
+    .email()
+    .max(254)
+    .refine((email) => email.indexOf('@') <= MAX_EMAIL_LOCAL_PART)
+    .optional(),
+  offer_id: offerId.optional(),
   quantity: z.number().int().positive().default(1),
 });
 export type StoreCreateOfferCartType = z.infer<typeof StoreCreateOfferCart>;
 
 export const StoreAddOfferCartItem = z.object({
-  offer_id: z.string().min(1),
+  offer_id: offerId,
   quantity: z.number().int().positive().default(1),
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;

@@ -194,6 +194,7 @@ medusaIntegrationTestRunner({
         ['a zero quantity', { quantity: 0 }],
         ['a fractional quantity', { quantity: 1.5 }],
         ['no offer', { offer_id: undefined }],
+        ['an offer id no offer has', { offer_id: 'x'.repeat(65) }],
       ])('returns a 400 when adding an item with %s', async (_, override) => {
         const {
           data: { cart },
@@ -738,6 +739,14 @@ medusaIntegrationTestRunner({
         },
       );
 
+      it('refuses a cart for an email whose local part is longer than 64 characters', async () => {
+        const response = await post('/store/offer-carts', {
+          email: `${'a'.repeat(65)}@b.co`,
+        });
+
+        expect(response.status).toBe(400);
+      });
+
       it('refuses the stock Medusa routes a shop without accounts or returns never uses', async () => {
         const cart = await cartWith(1);
 
@@ -848,7 +857,7 @@ medusaIntegrationTestRunner({
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, Intercars',
             'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
@@ -867,7 +876,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
         );
       });
 
@@ -1118,7 +1127,7 @@ medusaIntegrationTestRunner({
             ),
           );
           expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
-            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии',
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, Battery shop',
             `+ ${SERVICE}: 2\u00a0500 RSD`,
             'Итого: 12\u00a0500 RSD',
           ]);

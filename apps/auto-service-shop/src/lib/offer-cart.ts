@@ -591,7 +591,12 @@ async function putOffer(
           quantity,
           unit_price: priceOf(offer),
           requires_shipping: false,
-          metadata: offerLineMetadata(offer.id, identifier.id, part),
+          metadata: offerLineMetadata(
+            offer.id,
+            identifier.id,
+            part,
+            offer.supplier.name,
+          ),
         },
       ],
     },

@@ -93,11 +93,11 @@ const withReadiness = (
   text: string,
   metadata: Record<string, unknown> | null | undefined,
 ) => {
-  const { inStock, leadTimeDays } = readLine(metadata);
-  if (inStock === null || leadTimeDays === null) return text;
+  const { inStock, leadTimeDays, supplier } = readLine(metadata);
   const readiness = [
     inStock && PARTS_ORDER_COPY.inStock,
-    leadTimeDays > 0 && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
+    leadTimeDays && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
+    supplier,
   ]
     .filter(Boolean)
     .join(', ');

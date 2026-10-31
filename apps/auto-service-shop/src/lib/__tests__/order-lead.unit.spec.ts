@@ -92,6 +92,25 @@ describe('orderLeadForm', () => {
     ]);
   });
 
+  it('names the supplier, so two lines of one part from two suppliers differ', () => {
+    const line = (supplier: string) => ({
+      title: 'Pads',
+      unit_price: 100,
+      quantity: 1,
+      metadata: { in_stock: true, lead_time_days: 0, supplier },
+    });
+    const comment =
+      orderLeadForm(
+        order({ items: [line('Intercars'), line('Autodelovi')] }),
+        ADMIN,
+      ).get('comment') ?? '';
+
+    expect(comment.split('\n').slice(3, 5)).toEqual([
+      'Pads × 1: 100 RSD, в наличии, Intercars',
+      'Pads × 1: 100 RSD, в наличии, Autodelovi',
+    ]);
+  });
+
   it('prints each add-on under its own line, whatever order the order keeps them in', () => {
     const comment =
       orderLeadForm(
