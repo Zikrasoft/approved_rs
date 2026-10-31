@@ -8,7 +8,7 @@ import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import type { CataloguePages } from './paths';
-import { previewTokenFrom } from './shopPreview';
+import { PREVIEW_COOKIE } from './shopPreview';
 import {
   carPagesFrom,
   cataloguePagesFrom,
@@ -85,6 +85,11 @@ export const previewTokenMatches = (
     shopPreviewTokenSchema.safeParse(env.SHOP_PREVIEW_TOKEN).data,
   );
 
+const previewTokenFrom = (cookie: string | null): string =>
+  new URLSearchParams((cookie ?? '').replaceAll(/;\s*/g, '&')).get(
+    PREVIEW_COOKIE,
+  ) ?? '';
+
 export const previewRequested = (
   request: Request,
   env: CatalogueEnv = siteEnv(),
@@ -115,6 +120,12 @@ export function catalogueFromEnv(
       address && clientSecret ? { address, secret: clientSecret } : undefined,
   });
 }
+
+export const catalogueFor = (request: Request) =>
+  catalogueFromEnv(siteEnv(), {
+    preview: previewRequested(request),
+    visitor: request,
+  });
 
 export const uncachedJson = (body: unknown, init?: ResponseInit) =>
   Response.json(body, {

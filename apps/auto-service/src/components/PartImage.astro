@@ -1,0 +1,34 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+
+type Props = HTMLAttributes<'img'> & {
+  frame: string;
+  icon: number;
+  caption?: string;
+};
+
+const { frame, icon, caption, class: className, ...image } = Astro.props;
+---
+
+<part-image class:list={['group/image', frame]} title={caption}>
+  <img
+    {...image}
+    class:list={[
+      'size-full object-contain mix-blend-multiply group-data-broken/image:hidden',
+      className,
+    ]}
+  />
+  <Icon
+    name="part"
+    size={icon}
+    class="hidden text-line-field group-data-broken/image:block"
+  />
+  <slot />
+</part-image>
+
+<script>
+  import { definePartImage } from '@/scripts/partImage';
+
+  definePartImage();
+</script>

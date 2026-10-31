@@ -72,7 +72,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: d128f27c6c02ce0d
+translatedFrom: 93a79daa86a8da2f
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -95,11 +95,22 @@ translations:
     categoryLink: Svi delovi iz kategorije
     priceOnRequestHeading: Po porudžbini
     priceOnRequestBody: 'U katalogu ima previše delova da bismo stalno ažurirali sve cene. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
-    priceOnRequestCta: Poručite
-    orderBody: 'Prodavnica je nova i sarađujemo direktno sa najboljim dobavljačima kako bismo ponudili povoljne cene. Ovaj deo je verovatno dostupan, ali moramo da proverimo stanje. Ostavite kontakt: nabavićemo ga za vas ili ponuditi zamenu.'
+    priceOnRequestCta: Saznajte cenu i rok isporuke
+    orderBody: Proverićemo kod dobavljača i poslati vam cenu i rok isporuke, obično u roku od sat vremena.
     offersHeading: Cena i dostupnost
-    moreOffers: Ostale ponude ({count})
-    moreOffersCheaper: Ostale ponude ({count}), povoljnije od {price}
+    moreOffers: 'Još jedna ponuda: {offer}'
+    moreOffersCheaper: 'Ima i jeftinije: {offer}'
+    moreOffersSeveral:
+      one: Još {count} ponuda, od {price}
+      few: Još {count} ponude, od {price}
+      many: Još {count} ponuda, od {price}
+      other: Još {count} ponude, od {price}
+    offerTomorrow: sutra
+    offerDays:
+      one: za {days} dan
+      few: za {days} dana
+      many: za {days} dana
+      other: za {days} dana
     leadTime:
       inStock: Na stanju
       inStockTomorrow: Na stanju, preuzimanje sutra
@@ -159,11 +170,22 @@ translations:
     categoryLink: All parts in this category
     priceOnRequestHeading: Available to order
     priceOnRequestBody: "Our catalogue has too many parts to keep every price up to date. Send an enquiry: we'll check fitment using your VIN and find the best price."
-    priceOnRequestCta: Request a quote
-    orderBody: Our shop is new, and we work directly with leading suppliers to keep prices competitive. This part is likely available, but we need to check stock. Leave your contact details and we'll source it for you or suggest an equivalent.
+    priceOnRequestCta: Check price and lead time
+    orderBody: We'll check with our suppliers and send you a price and lead time, usually within an hour.
     offersHeading: Price and availability
-    moreOffers: More offers ({count})
-    moreOffersCheaper: Other offers ({count}), from {price}
+    moreOffers: 'Another offer: {offer}'
+    moreOffersCheaper: 'Cheaper option: {offer}'
+    moreOffersSeveral:
+      one: '{count} more offer, from {price}'
+      few: '{count} more offers, from {price}'
+      many: '{count} more offers, from {price}'
+      other: '{count} more offers, from {price}'
+    offerTomorrow: tomorrow
+    offerDays:
+      one: in {days} day
+      few: in {days} days
+      many: in {days} days
+      other: in {days} days
     leadTime:
       inStock: In stock
       inStockTomorrow: In stock, collect tomorrow

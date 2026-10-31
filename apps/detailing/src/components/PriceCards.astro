@@ -1,5 +1,5 @@
 ---
-import Icon from './Icon.astro';
+import BulletList from './BulletList.astro';
 import Cta from './Cta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -28,14 +28,11 @@ const site = content(locale).site;
             <span class="text-xs text-mute-2">{plan.unit}</span>
           </div>
           <div class="hairline" />
-          <ul class="flex flex-1 flex-col gap-3">
-            {plan.features.map((feature) => (
-              <li class="flex gap-3 text-sm leading-relaxed text-mute">
-                <Icon name="check" class="mt-1 shrink-0 text-champagne-dim" />
-                {feature}
-              </li>
-            ))}
-          </ul>
+          <BulletList
+            items={plan.features}
+            marker="check"
+            class="flex flex-1 flex-col gap-3"
+          />
           <Cta label={site.header.cta} openModal variant="ghost" />
         </div>
       </div>

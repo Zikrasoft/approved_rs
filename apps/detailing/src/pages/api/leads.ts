@@ -8,7 +8,7 @@ import { formatPhone } from '@podbor/site-kit/format-phone';
 import { notifyLead } from '@/lib/crm';
 import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { PHONE_NUMBER, WHATSAPP_NUMBER } from '@/utils/constants';
+import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 
 export const POST = createLeadsRoute({
@@ -21,6 +21,13 @@ export const POST = createLeadsRoute({
   refusalCopy: (locale) => {
     const { form, footer } = content(locale).site;
     return {
+      brand: {
+        name: SITE_NAME,
+        background: '#060608',
+        text: '#f2f0ec',
+        accent: '#f2f0ec',
+        onAccent: '#060608',
+      },
       reasons: {
         'missing-contact': form.errorTelegram,
         'invalid-phone': form.errorPhone,

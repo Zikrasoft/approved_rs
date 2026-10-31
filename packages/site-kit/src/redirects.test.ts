@@ -6,10 +6,11 @@ import { describe, expect, it } from 'vitest';
 import {
   createRedirectMatcher,
   unprefixedSectionRedirects,
-  withRedirects,
-  writeRedirects,
+  withVercelConfig,
+  writeVercelConfig,
   type Redirect,
 } from './redirects.ts';
+import { SECURITY_HEADERS } from './securityHeaders.ts';
 
 const rule = (source: string, destination: string): Redirect => ({
   source,
@@ -71,38 +72,46 @@ describe('createRedirectMatcher', () => {
   });
 });
 
-describe('withRedirects', () => {
-  it('replaces only the redirects key and keeps key order', () => {
+describe('withVercelConfig', () => {
+  it('replaces the redirects and headers and keeps key order', () => {
     const before = JSON.stringify({
       framework: 'astro',
       redirects: [rule('/old', '/new')],
       headers: [],
     });
-    const after = withRedirects(before, [rule('/a', '/b')]);
+    const after = withVercelConfig(before, [rule('/a', '/b')]);
     expect(after).toBe(
       `${JSON.stringify(
-        { framework: 'astro', redirects: [rule('/a', '/b')], headers: [] },
+        {
+          framework: 'astro',
+          redirects: [rule('/a', '/b')],
+          headers: SECURITY_HEADERS,
+        },
         null,
         2,
       )}\n`,
     );
   });
 
-  it('adds the key when the file has none', () => {
-    expect(JSON.parse(withRedirects('{}', []))).toEqual({ redirects: [] });
+  it('adds the keys when the file has none', () => {
+    expect(JSON.parse(withVercelConfig('{}', []))).toEqual({
+      redirects: [],
+      headers: SECURITY_HEADERS,
+    });
   });
 });
 
-describe('writeRedirects', () => {
-  it('rewrites the redirects of the file in place', () => {
+describe('writeVercelConfig', () => {
+  it('rewrites the redirects and headers of the file in place', () => {
     const file = pathToFileURL(
       join(mkdtempSync(join(tmpdir(), 'redirects-')), 'vercel.json'),
     );
     writeFileSync(file, '{"framework":"astro"}');
-    writeRedirects(file, [rule('/a', '/b')]);
+    writeVercelConfig(file, [rule('/a', '/b')]);
     expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual({
       framework: 'astro',
       redirects: [rule('/a', '/b')],
+      headers: SECURITY_HEADERS,
     });
   });
 });

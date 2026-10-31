@@ -9,20 +9,18 @@ import {
 } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
-import Icon from '@/components/Icon.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
+import FilterChips from '@/components/FilterChips.astro';
+import StatusNote from '@/components/StatusNote.astro';
+import Pagination from '@/components/Pagination.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor } from '@/utils/catalogueEnv';
 import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
@@ -33,7 +31,6 @@ import {
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import {
   carLink,
   exactPart,
@@ -67,10 +64,7 @@ const offset = Math.max(
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
 );
 
-const catalogue = catalogueFromEnv(siteEnv(), {
-  preview: previewRequested(Astro.request),
-  visitor: Astro.request,
-});
+const catalogue = catalogueFor(Astro.request);
 const intent = searchIntent(q);
 const vin = intent.kind === 'vin' ? intent.vin : null;
 const vinHint = !vin && nearVin(q);
@@ -235,10 +229,7 @@ const scopeHidden = {
 
     {
       vin && (
-        <p
-          role="status"
-          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
-        >
+        <StatusNote>
           {vinCar
             ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
             : content(locale).partsCar.vin.unresolved}
@@ -256,20 +247,11 @@ const scopeHidden = {
               </a>
             </>
           )}
-        </p>
+        </StatusNote>
       )
     }
 
-    {
-      vinHint && (
-        <p
-          role="status"
-          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
-        >
-          {content(locale).partsCar.vin.invalid}
-        </p>
-      )
-    }
+    {vinHint && <StatusNote>{content(locale).partsCar.vin.invalid}</StatusNote>}
 
     {
       !searchable && !vin && (
@@ -338,8 +320,8 @@ const scopeHidden = {
             />
 
             {(chips.length > 0 || modelName) && (
-              <ul class="flex flex-wrap gap-2">
-                {[
+              <FilterChips
+                chips={[
                   ...(modelName
                     ? [
                         {
@@ -352,40 +334,14 @@ const scopeHidden = {
                     label: chip.label,
                     href: searchHref(chip.facets, chip.ranges),
                   })),
-                ].map((chip) => (
-                  <li class="shrink-0">
-                    <a
-                      href={chip.href}
-                      aria-label={copy.removeFilter.replace(
-                        '{label}',
-                        chip.label,
-                      )}
-                      class="inline-flex min-h-11 max-w-full items-center gap-2 rounded-pill border border-line bg-paper px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
-                    >
-                      {chip.label}
-                      <Icon name="close" size={12} class="text-muted" />
-                    </a>
-                  </li>
-                ))}
-                {chips.length > 0 && (
-                  <li class="shrink-0">
-                    <a
-                      href={searchHref([], [])}
-                      class="inline-flex min-h-11 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-                    >
-                      {copy.resetAllFilters}
-                    </a>
-                  </li>
-                )}
-              </ul>
+                ]}
+                resetHref={chips.length > 0 ? searchHref([], []) : undefined}
+              />
             )}
 
             {looseNumbers && (
               <>
-                <p
-                  role="status"
-                  class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed break-words text-ink"
-                >
+                <StatusNote>
                   {copy.numberNotFound.replace('{q}', q)}{' '}
                   <a
                     href="#lead"
@@ -393,7 +349,7 @@ const scopeHidden = {
                   >
                     {copy.notFoundLink}
                   </a>
-                </p>
+                </StatusNote>
                 <h2 class="pt-1 text-base font-semibold text-ink">
                   {copy.similarNumbers}
                 </h2>
@@ -431,30 +387,23 @@ const scopeHidden = {
             )}
 
             {(offset > 0 || offset + found.limit < found.count) && (
-              <nav class="flex justify-between gap-4 pt-2 text-sm">
-                {offset > 0 ? (
-                  <a
-                    href={searchHref(
-                      chosen,
-                      ranges,
-                      Math.max(0, offset - found.limit),
-                    )}
-                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
-                  >
-                    {copy.previous}
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {offset + found.limit < found.count && (
-                  <a
-                    href={searchHref(chosen, ranges, offset + found.limit)}
-                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
-                  >
-                    {copy.next}
-                  </a>
-                )}
-              </nav>
+              <Pagination
+                label={copy.pagination}
+                prev={
+                  offset > 0
+                    ? searchHref(
+                        chosen,
+                        ranges,
+                        Math.max(0, offset - found.limit),
+                      )
+                    : null
+                }
+                next={
+                  offset + found.limit < found.count
+                    ? searchHref(chosen, ranges, offset + found.limit)
+                    : null
+                }
+              />
             )}
 
             {found.results.length > 0 && !looseNumbers && (
@@ -487,34 +436,21 @@ const scopeHidden = {
         unknownScope ||
         numberMissing ||
         found?.results.length === 0) && (
-        <div
+        <VinInquiryCard
           id="lead"
-          class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6"
-          {...contactCta}
-        >
-          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-          <LeadForm
-            service={VIN_INQUIRY_SERVICE}
-            vin={{
-              label: partsInquiry.vinLabel,
-              placeholder: partsInquiry.vinPlaceholder,
-              value: vin ?? undefined,
-            }}
-            comment={
-              vin
-                ? vinTopic
-                  ? `${vinTopic}: `
-                  : ''
-                : numberMissing
-                  ? inquiryTopic
-                  : `${inquiryTopic}: `
-            }
-            commentLabel={partsInquiry.commentLabel}
-            commentPlaceholder={partsInquiry.commentPlaceholder}
-            commentNote={partsInquiry.commentNote}
-            defaultChannel="whatsapp"
-          />
-        </div>
+          class="max-w-2xl"
+          heading={copy.formHeading}
+          vin={vin ?? undefined}
+          comment={
+            vin
+              ? vinTopic
+                ? `${vinTopic}: `
+                : ''
+              : numberMissing
+                ? inquiryTopic
+                : `${inquiryTopic}: `
+          }
+        />
       )
     }
   </section>

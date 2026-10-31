@@ -19,7 +19,7 @@ import {
   secretMatches,
   type AcceptedSecrets,
 } from '../verifySecret.ts';
-import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
+import { readForm } from '../bodySize.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
 
@@ -35,7 +35,16 @@ export interface RouteRequestContext {
   redirect(path: string, status?: number): Response;
 }
 
+export interface RefusalBrand {
+  name: string;
+  background: string;
+  text: string;
+  accent: string;
+  onAccent: string;
+}
+
 export interface RefusalCopy {
+  brand: RefusalBrand;
   reasons: Record<LeadRefusal, string>;
   consent: string;
   privacy: { label: string; href: string };
@@ -86,13 +95,16 @@ const RETYPED_FIELDS = new Set<string>([
 const attribute = (text: string): string =>
   escapeHtml(text).replace(/"/g, '&quot;');
 
-const REFUSAL_STYLE = `body{font:16px/1.5 system-ui,sans-serif;max-width:28rem;margin:0 auto;padding:1.5rem 1rem}
+const refusalStyle = (brand: RefusalBrand): string =>
+  `body{font:16px/1.5 system-ui,sans-serif;max-width:28rem;margin:0 auto;padding:1.5rem 1rem;background:${brand.background};color:${brand.text}}
+h1{font-size:1.25rem;line-height:1.3;margin:0 0 1.5rem}
 label{display:block;margin:0 0 1rem}
-input:not([type=checkbox]){display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem}
-button{min-height:44px;padding:0 1.25rem;font:inherit}
-input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:.5rem}
-ul{list-style:none;padding:0;display:flex;gap:1rem;flex-wrap:wrap}
-a{display:inline-block;min-height:44px;line-height:44px}
+input:not([type=checkbox]){display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem;color:inherit;background:transparent;border:1px solid;border-radius:12px}
+input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin:0 .5rem 0 0;accent-color:${brand.accent}}
+a{color:inherit}
+button{display:block;width:100%;min-height:44px;font:inherit;font-weight:600;border:0;border-radius:12px;background:${brand.accent};color:${brand.onAccent};cursor:pointer}
+ul{list-style:none;padding:0;margin:1.5rem 0 0;display:grid;gap:.5rem}
+li a{display:flex;align-items:center;justify-content:center;min-height:44px;border:1px solid;border-radius:12px;text-decoration:none}
 @media (pointer:fine){.tel{display:none}}`;
 
 function refusalPage(
@@ -128,11 +140,11 @@ function refusalPage(
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
     <title>${escapeHtml(message)}</title>
-    <style>${REFUSAL_STYLE}</style>
+    <style>${refusalStyle(copy.brand)}</style>
   </head>
   <body>
+    <h1>${escapeHtml(copy.brand.name)}</h1>
     <form method="POST" action="${attribute(action)}">
       <label>${escapeHtml(message)}<input name="${CONTACT_INPUT_FIELDS.contact}" value="${attribute(contact)}" required autocomplete="tel" /></label>${consentBox}
 ${kept.join('\n')}
@@ -163,8 +175,9 @@ export function createLeadsRoute<L extends string>({
     redirect,
     cookies,
   }: RouteRequestContext): Promise<Response> {
-    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
-    const form = await request.formData().catch(() => new FormData());
+    const read = await readForm(request);
+    if (read instanceof Response) return read;
+    const form = read ?? new FormData();
     const canceled = orderCancelSchema.safeParse({
       [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),
       [ORDER_OUTCOME_FIELD]: form.get(ORDER_OUTCOME_FIELD),

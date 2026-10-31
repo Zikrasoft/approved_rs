@@ -4,11 +4,7 @@ import type { APIRoute } from 'astro';
 import { searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
-import {
-  catalogueFromEnv,
-  siteEnv,
-  previewRequested,
-} from '@/utils/catalogueEnv';
+import { catalogueFor } from '@/utils/catalogueEnv';
 import { searchIntent, suggestionsFrom } from '@/utils/catalogueSearch';
 import { partsQuery } from '@/utils/partsSearch';
 
@@ -29,12 +25,7 @@ export const GET: APIRoute = async ({ url, request }) => {
   if (searchIntent(q).kind === 'vin') {
     return Response.json({ ...NOTHING, vin: true });
   }
-  const catalogue = searchableQuery(q)
-    ? catalogueFromEnv(siteEnv(), {
-        preview: previewRequested(request),
-        visitor: request,
-      })
-    : null;
+  const catalogue = searchableQuery(q) ? catalogueFor(request) : null;
   if (!catalogue) {
     return Response.json(NOTHING);
   }

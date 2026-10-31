@@ -26,9 +26,9 @@ import {
   buildRemindPicker,
   EDIT_COPY,
   noteLine,
-  extraContactNote,
   reAskEditText,
 } from './cards.ts';
+import { extraContactNote } from '../notes.ts';
 import { formatDateRu, leadDisplayName } from './markup.ts';
 
 const SERVICE_LABELS: Record<string, string> = {

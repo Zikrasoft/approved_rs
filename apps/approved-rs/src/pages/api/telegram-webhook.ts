@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
 import { START_COMMAND } from '@podbor/site-kit/contact-links';
 import { logError, requireEnv } from '@podbor/lead-crm';
-import { secretMatches } from '@/lib/verifySecret';
+import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import {
   afterStatusChange,
   answerCallback,

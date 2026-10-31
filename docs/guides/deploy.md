@@ -85,8 +85,11 @@ The same file sets the security headers on every path: `frame-ancestors 'self'`,
 `nosniff`, `strict-origin-when-cross-origin`, a `Permissions-Policy` with the
 camera, microphone and geolocation off, HSTS, and a script CSP in
 `Content-Security-Policy-Report-Only` that allowlists GA4, Google Ads, Metrika
-and the Pixel beside `'self'` and the inline Astro scripts. The three copies are
-identical; change them together.
+and the Pixel beside `'self'` and the inline Astro scripts. The `headers` key is
+generated with the redirects from `SECURITY_HEADERS` in `packages/site-kit`,
+whose CSP takes the tag hosts from the analytics module; change it there and
+rerun each app's `scripts/redirects.ts`. `.github/scripts/redirects-drift.sh`
+fails `check` on a hand edit.
 
 TODO: enforce the script CSP once a week of browser consoles on all three sites
 shows no violation from the analytics scripts or the map embed.
@@ -1008,9 +1011,11 @@ carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
 it is unset nobody gets the preview, the open build included.
 
 A closed-beta tester opens `https://carlab.rs/api/shop-preview?token=<token>`
-once. The route keeps the token in the `auto_service_shop_preview` cookie for a
-year and sends the tester to the parts index; a wrong token gets 403 and no
-cookie, and `/api/shop-preview` with no token forgets it. The token travels in
+once. The route keeps the token in the `httpOnly` `auto_service_shop_preview`
+cookie for a year, beside an `auto_service_shop_preview_on=1` flag that page
+scripts read (it holds no secret), and sends the tester to the parts index; a
+wrong token gets 403 and no cookie, and `/api/shop-preview` with no token
+forgets both. A tester whose cookie predates the flag opens the link once more. The token travels in
 that one API request only, never in a page address, so analytics never record
 it. With the cookie the visitor sees the shop as it will look open: the header
 and the parts index show the cart; listings, car and model pages, kits (with

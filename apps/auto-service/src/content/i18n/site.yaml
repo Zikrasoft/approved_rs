@@ -165,11 +165,11 @@ translations:
       errorConsent: Bez vaše saglasnosti ne možemo da pošaljemo zahtev
       errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
-      notice: Koristimo kolačiće.
+      notice: Koristimo kolačiće
       more: Više informacija u
       policyLink: politici privatnosti
-      accept: Prihvati
-      decline: Odbij
+      accept: U redu
+      decline: Ne
       settings: Podešavanja kolačića
   en:
     nav:
@@ -251,10 +251,10 @@ translations:
       errorConsent: Please give your consent before sending your request
       errorSubmit: Your request wasn't sent. Check your connection and try again
     cookie:
-      notice: We use cookies.
+      notice: We use cookies
       more: Find out more in our
       policyLink: privacy policy
-      accept: Accept
-      decline: Decline
+      accept: OK
+      decline: No
       settings: Cookie settings
-translatedFrom: 054b3796653e1aa4
+translatedFrom: 4c03e0f91eae364a

@@ -58,7 +58,6 @@ export {
   EDIT_COPY,
   EDIT_FIELD_LABELS,
   noteLine,
-  extraContactNote,
   reAskEditText,
   REPLY_COPY,
   LEAD_ACTION_COPY,
@@ -80,6 +79,7 @@ export {
 } from './telegram/ledger.ts';
 export { buildStats } from './telegram/stats.ts';
 export { escapeHtml, formatDateRu, formatMoney } from './telegram/markup.ts';
+export { extraContactNote } from './notes.ts';
 export type { Btn, Keyboard, Role } from './telegram/markup.ts';
 
 export type {
@@ -105,7 +105,7 @@ export {
 
 export { requireEnv } from './requireEnv.ts';
 export { logError } from './logError.ts';
-export { bodyTooLarge, PAYLOAD_TOO_LARGE } from './bodySize.ts';
+export { MAX_BODY_BYTES, readForm, readJson } from './bodySize.ts';
 
 export { secretMatches } from './verifySecret.ts';
 

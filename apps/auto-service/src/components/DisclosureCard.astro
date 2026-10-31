@@ -1,0 +1,17 @@
+---
+import Icon from './Icon.astro';
+---
+
+<details class="card group p-5 sm:p-6">
+  <summary
+    class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
+  >
+    <slot name="summary" />
+    <Icon
+      name="chevronDown"
+      size={16}
+      class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
+    />
+  </summary>
+  <slot />
+</details>

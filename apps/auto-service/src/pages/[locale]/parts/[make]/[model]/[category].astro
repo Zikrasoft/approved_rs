@@ -2,15 +2,12 @@
 import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import FitLine from '@/components/FitLine.astro';
-import PartNumbers from '@/components/PartNumbers.astro';
-import PriceTag from '@/components/PriceTag.astro';
-import ThumbRow from '@/components/ThumbRow.astro';
+import FittedPart from '@/components/FittedPart.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
-import { pagesThumbnail } from '@/utils/partImages';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -29,7 +26,6 @@ import {
   withLocales,
   type CataloguePages,
 } from '@/utils/paths';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { withFacetCopy } from '@/utils/partsSearch';
 
 export async function getStaticPaths() {
@@ -70,7 +66,6 @@ const { hub, entry, pages } = Astro.props as {
 const locale = localeFrom(Astro.url.pathname);
 const links = catalogueLinks(locale, pages);
 const site = content(locale).site;
-const inquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.hubs.modelCategory;
 const { make, model } = hub;
 const { category } = entry;
@@ -148,37 +143,18 @@ const SAID_BY_FIT = ['axle'];
           {
             entry.parts.map(({ part, pages, fits }) => (
               <li class="card flex flex-col gap-3 p-5 sm:p-6">
-                <ThumbRow thumb={pagesThumbnail(pages)} class="gap-2">
-                  <div class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-4">
-                    <div class="flex min-w-0 flex-col gap-0.5">
-                      <h3 class="font-semibold text-ink">
-                        {translated(part, 'name', locale)}
-                      </h3>
-                      {keySpecs(
-                        category,
-                        part.attributes,
-                        locale,
-                        listingAttributes,
-                        SAID_BY_FIT,
-                      ) && (
-                        <p class="spec text-xs text-muted">
-                          {keySpecs(
-                            category,
-                            part.attributes,
-                            locale,
-                            listingAttributes,
-                            SAID_BY_FIT,
-                          )}
-                        </p>
-                      )}
-                    </div>
-                    <PriceTag
-                      pages={pages}
-                      class="max-sm:items-start max-sm:text-left"
-                    />
-                  </div>
-                  <PartNumbers pages={pages} />
-                </ThumbRow>
+                <FittedPart
+                  pages={pages}
+                  name={translated(part, 'name', locale)}
+                  specs={keySpecs(
+                    category,
+                    part.attributes,
+                    locale,
+                    listingAttributes,
+                    SAID_BY_FIT,
+                  )}
+                  heading
+                />
                 {fits.length > 0 && (
                   <ul class="flex flex-col gap-3 border-t border-line pt-3">
                     {fits.map((fit) => (
@@ -219,24 +195,6 @@ const SAID_BY_FIT = ['axle'];
       </a>
     </div>
 
-    {
-      empty && (
-        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
-          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
-          <LeadForm
-            service={VIN_INQUIRY_SERVICE}
-            vin={{
-              label: inquiry.vinLabel,
-              placeholder: inquiry.vinPlaceholder,
-            }}
-            comment={`${name}, ${categoryName}: `}
-            commentLabel={inquiry.commentLabel}
-            commentPlaceholder={inquiry.commentPlaceholder}
-            commentNote={inquiry.commentNote}
-            defaultChannel="whatsapp"
-          />
-        </div>
-      )
-    }
+    {empty && <VinInquiryCard comment={`${name}, ${categoryName}: `} />}
   </section>
 </Shell>

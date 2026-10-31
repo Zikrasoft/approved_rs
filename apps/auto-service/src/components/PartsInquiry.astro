@@ -2,10 +2,9 @@
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { MAX_PART_QUANTITY } from '@/scripts/partsList';
 import Icon from './Icon.astro';
-import LeadForm from './LeadForm.astro';
+import VinInquiryForm from './VinInquiryForm.astro';
 
 interface Props {
   comment?: string;
@@ -92,19 +91,7 @@ const copy = content(locale).pages.partsInquiry;
       </li>
     </template>
   </div>
-  <LeadForm
-    service={VIN_INQUIRY_SERVICE}
-    vin={{
-      label: copy.vinLabel,
-      placeholder: copy.vinPlaceholder,
-      note: copy.vinNote,
-    }}
-    comment={comment}
-    commentLabel={copy.commentLabel}
-    commentPlaceholder={copy.commentPlaceholder}
-    commentNote={copy.commentNote}
-    defaultChannel="whatsapp"
-  />
+  <VinInquiryForm comment={comment} />
 </parts-inquiry>
 
 <script>

@@ -1,4 +1,9 @@
 import { vinOf } from '@podbor/lead-crm/vin';
+import {
+  GOOGLE_TAG_ORIGIN,
+  META_PIXEL_ORIGIN,
+  YANDEX_METRIKA_ORIGIN,
+} from './analyticsHosts.ts';
 import { GOALS, type Goal } from './goals.ts';
 import {
   analyticsDeclined,
@@ -9,9 +14,9 @@ import {
 
 export const METRIKA_MASK_CLASS = 'ym-hide-content ym-disable-keys';
 
-const YM_TAG_SRC = 'https://mc.yandex.ru/metrika/tag.js?id=';
-const META_PIXEL_SRC = 'https://connect.facebook.net/en_US/fbevents.js';
-const GOOGLE_TAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=';
+const YM_TAG_SRC = `${YANDEX_METRIKA_ORIGIN}/metrika/tag.js?id=`;
+const META_PIXEL_SRC = `${META_PIXEL_ORIGIN}/en_US/fbevents.js`;
+const GOOGLE_TAG_SRC = `${GOOGLE_TAG_ORIGIN}/gtag/js?id=`;
 
 const META_EVENTS: Readonly<Record<string, string>> = {
   [GOALS.formSubmit]: 'Lead',

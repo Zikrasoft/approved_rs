@@ -3,7 +3,7 @@ import { contactCta } from '@podbor/site-kit/contact-control';
 import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import PartsInquiry from '@/components/PartsInquiry.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
@@ -162,14 +162,7 @@ const categories = props.categories.map((category) => ({
         </ol>
       </div>
 
-      <div
-        id={PARTS_INQUIRY_ANCHOR}
-        class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
-        {...contactCta}
-      >
-        <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-        <PartsInquiry />
-      </div>
+      <VinInquiryCard id={PARTS_INQUIRY_ANCHOR} class="scroll-mt-24" list />
     </div>
   </section>
 </Shell>

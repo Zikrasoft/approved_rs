@@ -1,4 +1,5 @@
 ---
+import BulletList from '@/components/BulletList.astro';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -68,19 +69,7 @@ const mapLink = mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid);
             <h2 class="text-lg font-display tracking-tight">
               {pages.contact.arrivalHeading}
             </h2>
-            <ul class="flex flex-col gap-3">
-              {
-                pages.contact.arrival.map((item) => (
-                  <li class="flex gap-3 text-sm leading-relaxed text-mute">
-                    <span
-                      class="mt-2 h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
-                      aria-hidden="true"
-                    />
-                    {item}
-                  </li>
-                ))
-              }
-            </ul>
+            <BulletList items={pages.contact.arrival} />
           </div>
         </div>
       </div>

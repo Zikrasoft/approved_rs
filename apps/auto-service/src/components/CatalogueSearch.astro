@@ -121,12 +121,11 @@ const copy = content(locale).partsSearch;
 </catalogue-search>
 
 <script>
-  const wake = () =>
+  import { wakeOnInteraction } from '@/scripts/wakeOnInteraction';
+
+  wakeOnInteraction('catalogue-search', () =>
     import('@/scripts/catalogueSearch').then(({ defineCatalogueSearch }) =>
       defineCatalogueSearch(),
-    );
-  for (const box of document.querySelectorAll('catalogue-search')) {
-    box.addEventListener('focusin', wake, { once: true });
-    box.addEventListener('pointerdown', wake, { once: true });
-  }
+    ),
+  );
 </script>

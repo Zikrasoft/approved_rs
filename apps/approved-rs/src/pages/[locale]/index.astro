@@ -1,4 +1,5 @@
 ---
+import PageSection from '@/components/PageSection.astro';
 export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEVELOPER } from '@podbor/brands';
@@ -186,102 +187,96 @@ const geoCells = countries.map((country) => ({
     </div>
   </section>
 
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <SectionHeading title={h.journeyHeading} />
-      <p class="text-base max-w-xl mt-4 mb-12 leading-relaxed text-muted">
-        {h.journeySubtext}
-      </p>
+  <PageSection>
+    <SectionHeading title={h.journeyHeading} />
+    <p class="text-base max-w-xl mt-4 mb-12 leading-relaxed text-muted">
+      {h.journeySubtext}
+    </p>
 
-      <div class="border-t border-default">
-        {
-          journey.map((step) => (
-            <a href={step.href} class="svc-row">
-              <span class="svc-name font-display font-bold text-primary">
-                {step.title}
-              </span>
-              <span class="text-[0.97rem] leading-relaxed text-muted max-w-[54ch]">
-                {step.desc}
-              </span>
-              <span class="svc-aside text-sm">{step.aside}</span>
-            </a>
-          ))
-        }
-      </div>
+    <div class="border-t border-default">
+      {
+        journey.map((step) => (
+          <a href={step.href} class="svc-row">
+            <span class="svc-name font-display font-bold text-primary">
+              {step.title}
+            </span>
+            <span class="text-[0.97rem] leading-relaxed text-muted max-w-[54ch]">
+              {step.desc}
+            </span>
+            <span class="svc-aside text-sm">{step.aside}</span>
+          </a>
+        ))
+      }
     </div>
-  </section>
+  </PageSection>
 
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <SectionHeading title={h.origin.heading} />
-      <p class="text-base max-w-xl mt-4 mb-10 leading-relaxed text-muted">
-        {h.origin.note}
-      </p>
+  <PageSection>
+    <SectionHeading title={h.origin.heading} />
+    <p class="text-base max-w-xl mt-4 mb-10 leading-relaxed text-muted">
+      {h.origin.note}
+    </p>
 
-      <div class="grid gap-5 md:grid-cols-2">
-        <article class="origin-card group">
-          <h3
-            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
-          >
-            <CountryPlate code="eu" size="md" />
-            {h.origin.euTitle}
-          </h3>
-          <p class="text-[0.97rem] leading-relaxed text-muted">
-            {h.origin.euText}
-          </p>
-          <p class="flex flex-wrap gap-2">
-            {
-              euSources.map((source) => (
-                <a href={source.href} class="chip">
-                  {source.name}
-                </a>
-              ))
-            }
-          </p>
-          <a
-            href={PathBuilder.vehicleImportSpoke(locale, 'eu')}
-            class="origin-cta text-accent">{h.origin.euCta}</a
-          >
-        </article>
+    <div class="grid gap-5 md:grid-cols-2">
+      <article class="origin-card group">
+        <h3
+          class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+        >
+          <CountryPlate code="eu" size="md" />
+          {h.origin.euTitle}
+        </h3>
+        <p class="text-[0.97rem] leading-relaxed text-muted">
+          {h.origin.euText}
+        </p>
+        <p class="flex flex-wrap gap-2">
+          {
+            euSources.map((source) => (
+              <a href={source.href} class="chip">
+                {source.name}
+              </a>
+            ))
+          }
+        </p>
+        <a
+          href={PathBuilder.vehicleImportSpoke(locale, 'eu')}
+          class="origin-cta text-accent">{h.origin.euCta}</a
+        >
+      </article>
 
-        <article class="origin-card group">
-          <h3
-            class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
-          >
-            <CountryPlate code="cn" size="md" />
-            {h.origin.chinaTitle}
-          </h3>
-          <p class="text-[0.97rem] leading-relaxed text-muted">
-            {h.origin.chinaText}
-          </p>
-          <p class="flex flex-wrap gap-2">
-            {h.origin.chinaTags.map((tag) => <span class="chip">{tag}</span>)}
-          </p>
-          <a
-            href={PathBuilder.vehicleImportSpoke(locale, 'china')}
-            class="origin-cta text-accent">{h.origin.chinaCta}</a
-          >
-        </article>
-      </div>
-
-      <div class="geo-grid mt-5">
-        {
-          geoCells.map((cell) => (
-            <a href={cell.href} class="geo-cell">
-              <span class="font-display font-bold text-primary">
-                {cell.name}
-              </span>
-              {cell.cases > 0 && (
-                <span class="text-sm text-muted tabular-nums">
-                  {cell.cases} <span class="sr-only">{t.nav.cases}</span>
-                </span>
-              )}
-            </a>
-          ))
-        }
-      </div>
+      <article class="origin-card group">
+        <h3
+          class="origin-title font-display font-bold text-primary flex items-center gap-2.5"
+        >
+          <CountryPlate code="cn" size="md" />
+          {h.origin.chinaTitle}
+        </h3>
+        <p class="text-[0.97rem] leading-relaxed text-muted">
+          {h.origin.chinaText}
+        </p>
+        <p class="flex flex-wrap gap-2">
+          {h.origin.chinaTags.map((tag) => <span class="chip">{tag}</span>)}
+        </p>
+        <a
+          href={PathBuilder.vehicleImportSpoke(locale, 'china')}
+          class="origin-cta text-accent">{h.origin.chinaCta}</a
+        >
+      </article>
     </div>
-  </section>
+
+    <div class="geo-grid mt-5">
+      {
+        geoCells.map((cell) => (
+          <a href={cell.href} class="geo-cell">
+            <span class="font-display font-bold text-primary">{cell.name}</span>
+            {cell.cases > 0 && (
+              <span class="text-sm text-muted tabular-nums">
+                {cell.cases} <span class="sr-only">{t.nav.cases}</span>
+              </span>
+            )}
+          </a>
+        ))
+      }
+    </div>
+  </PageSection>
 
   {
     published.length > 0 && (
@@ -300,57 +295,51 @@ const geoCells = countries.map((country) => ({
     ctaHref={PathBuilder.sectionRoot(locale, SLUG.INSPECTION)}
   />
 
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <SectionHeading title={h.testimonialsHeading} />
-      <div class="grid gap-6 md:grid-cols-3 mt-12">
-        {
-          h.testimonials.map((review, i) => (
-            <figure
-              class="glow-border flex flex-col gap-5 rounded-sm border p-7 bg-surface border-default anim-inline"
-              style={`--anim-delay: ${0.08 + i * 0.08}s`}
-            >
-              <blockquote class="flex-1 text-sm leading-relaxed text-secondary">
-                {review.quote}
-              </blockquote>
-              <figcaption class="flex items-center gap-3">
-                <div class="flex size-9 items-center justify-center rounded-full font-display text-sm font-bold bg-accent-subtle text-accent">
-                  {review.name.slice(0, 1)}
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-primary">{review.name}</p>
-                  <p class="text-xs text-muted">{review.caption}</p>
-                </div>
-              </figcaption>
-            </figure>
-          ))
-        }
-      </div>
+  <PageSection>
+    <SectionHeading title={h.testimonialsHeading} />
+    <div class="grid gap-6 md:grid-cols-3 mt-12">
+      {
+        h.testimonials.map((review, i) => (
+          <figure
+            class="glow-border flex flex-col gap-5 rounded-sm border p-7 bg-surface border-default anim-inline"
+            style={`--anim-delay: ${0.08 + i * 0.08}s`}
+          >
+            <blockquote class="flex-1 text-sm leading-relaxed text-secondary">
+              {review.quote}
+            </blockquote>
+            <figcaption class="flex items-center gap-3">
+              <div class="flex size-9 items-center justify-center rounded-full font-display text-sm font-bold bg-accent-subtle text-accent">
+                {review.name.slice(0, 1)}
+              </div>
+              <div>
+                <p class="text-sm font-medium text-primary">{review.name}</p>
+                <p class="text-xs text-muted">{review.caption}</p>
+              </div>
+            </figcaption>
+          </figure>
+        ))
+      }
     </div>
-  </section>
+  </PageSection>
 
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <SectionHeading title={h.whyUsHeading} />
-      <p class="text-base max-w-md text-muted mt-4 mb-12 leading-relaxed">
-        {h.whyUsSubtext}
-      </p>
-      <div class="grid gap-8 md:grid-cols-3 md:gap-10">
-        {
-          h.trustCards.map((card) => (
-            <div class="term">
-              <h3 class="font-display text-lg font-bold mb-2 text-primary">
-                {card.title}
-              </h3>
-              <p class="text-[0.95rem] leading-relaxed text-muted">
-                {card.text}
-              </p>
-            </div>
-          ))
-        }
-      </div>
+  <PageSection>
+    <SectionHeading title={h.whyUsHeading} />
+    <p class="text-base max-w-md text-muted mt-4 mb-12 leading-relaxed">
+      {h.whyUsSubtext}
+    </p>
+    <div class="grid gap-8 md:grid-cols-3 md:gap-10">
+      {
+        h.trustCards.map((card) => (
+          <div class="term">
+            <h3 class="font-display text-lg font-bold mb-2 text-primary">
+              {card.title}
+            </h3>
+            <p class="text-[0.95rem] leading-relaxed text-muted">{card.text}</p>
+          </div>
+        ))
+      }
     </div>
-  </section>
+  </PageSection>
 
   <div class="max-w-6xl mx-auto px-6">
     <PartnerBrands />

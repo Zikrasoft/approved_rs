@@ -2,11 +2,10 @@
 import type { PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { bestPrice } from '@/utils/bestPrice';
+import { bestPrice, priceLabel } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { kitPick } from '@/utils/kitPick';
 import { offerAvailability } from '@/utils/leadTime';
-import { formatMoney } from '@/utils/money';
 import PriceSlot from './PriceSlot.astro';
 
 interface Props {
@@ -25,8 +24,6 @@ const picked = kit
   ? kitPick(pages.map((page) => ({ ...page, superseded: false }))).offer
   : null;
 const best = bestPrice(picked ? [{ offers: [picked] }] : pages);
-const price = best ? formatMoney(best.price, best.currency, localeTag) : '';
-const onlyPrice = picked || !best?.startsFrom;
 const told =
   best &&
   offerAvailability(
@@ -59,7 +56,7 @@ const availability = told && (told.stock ?? told.lead ?? copy.outOfStock);
       data-kit-currency={picked?.currency}
     >
       <span class="spec text-sm font-semibold whitespace-nowrap text-ink">
-        {onlyPrice ? price : copy.fromPrice.replace('{price}', price)}
+        {priceLabel(best, copy, localeTag)}
       </span>
       <span class="text-xs text-ink-2">{availability}</span>
     </span>

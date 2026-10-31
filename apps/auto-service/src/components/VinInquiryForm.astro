@@ -1,0 +1,29 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import LeadForm from './LeadForm.astro';
+
+interface Props {
+  comment?: string;
+  vin?: string;
+}
+
+const { comment, vin } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).pages.partsInquiry;
+---
+
+<LeadForm
+  service={VIN_INQUIRY_SERVICE}
+  vin={{
+    label: copy.vinLabel,
+    placeholder: copy.vinPlaceholder,
+    note: copy.vinNote,
+    value: vin,
+  }}
+  comment={comment}
+  commentLabel={copy.commentLabel}
+  commentPlaceholder={copy.commentPlaceholder}
+  commentNote={copy.commentNote}
+  defaultChannel="whatsapp"
+/>

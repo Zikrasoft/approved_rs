@@ -252,6 +252,15 @@
     transform: translateY(1px);
   }
 
+  .btn-block {
+    width: 100%;
+
+    @variant sm {
+      width: auto;
+      align-self: flex-start;
+    }
+  }
+
   .field {
     width: 100%;
     border-radius: var(--radius-control);

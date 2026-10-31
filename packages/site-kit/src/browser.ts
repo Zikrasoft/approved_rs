@@ -15,6 +15,7 @@ export { defineLocaleChoice } from './localeCookie.ts';
 export { defineTelegramChoice } from './telegramChoice.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { defineChipFilter } from './chipFilter.ts';
+export { defineLightbox } from './lightbox.ts';
 export { defineZoneMap } from './zoneMap.ts';
 export { lockScroll, unlockScroll } from './scrollLock.ts';
 export {

@@ -1,0 +1,81 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import CartAddonToggle from './CartAddonToggle.astro';
+import Icon from './Icon.astro';
+
+const copy = content(localeFrom(Astro.url.pathname)).shopCart;
+const stepper =
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+---
+
+<template data-line>
+  <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
+    <div class="flex items-start gap-3">
+      <div class="flex min-w-0 flex-1 flex-col gap-1">
+        <a
+          class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+          data-part-link></a>
+        <span class="spec text-sm text-muted" data-number></span>
+        <span class="text-sm text-ink-2" data-ready hidden></span>
+      </div>
+      <button
+        type="button"
+        class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
+        aria-label={copy.removeLabel}
+        data-remove
+      >
+        <Icon name="close" size={16} />
+      </button>
+    </div>
+    <p
+      class="flex items-start gap-2 text-sm leading-relaxed text-danger"
+      data-unavailable
+      hidden
+    >
+      <Icon name="warning" size={16} class="mt-0.5 shrink-0" />
+      <span>{copy.unavailableTag}</span>
+    </p>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center rounded-control border border-line-field">
+        <button
+          type="button"
+          class={stepper}
+          aria-label={copy.decreaseLabel}
+          data-decrease
+        >
+          <Icon name="minus" />
+        </button>
+        <span
+          class="spec min-w-8 text-center text-sm font-semibold text-ink"
+          data-quantity></span>
+        <button
+          type="button"
+          class={stepper}
+          aria-label={copy.increaseLabel}
+          data-increase
+        >
+          <Icon name="plus" />
+        </button>
+      </div>
+      <div class="flex flex-col items-end text-right">
+        <span
+          class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"
+          data-price></span>
+        <span class="text-xs text-muted" data-unit></span>
+      </div>
+    </div>
+    <CartAddonToggle hook="data-addon" />
+    <CartAddonToggle hook="data-installation" />
+    <button type="button" class="btn btn-secondary btn-block" data-lower hidden
+    ></button>
+    <button
+      type="button"
+      class="btn btn-secondary btn-block"
+      data-to-inquiry
+      hidden
+    >
+      {copy.toInquiryLabel}
+    </button>
+  </li>
+</template>

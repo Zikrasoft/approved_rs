@@ -171,7 +171,7 @@ describe('the profile script', () => {
     const withBudget = { ...FULL_COPY, budget: 'B' };
     const english = {
       ...withBudget,
-      profile: { ...FULL_COPY.profile, description: 'ENGLISH' },
+      profile: { ...FULL_COPY.profile, description: 'ENGLISH {manager}' },
     };
 
     await runBotProfileScript(
@@ -181,7 +181,7 @@ describe('the profile script', () => {
     );
 
     expect(payloads('setMyDescription')).toContainEqual({
-      description: 'ENGLISH',
+      description: 'ENGLISH @brand_manager',
       language_code: 'en',
     });
     expect(warn).not.toHaveBeenCalled();

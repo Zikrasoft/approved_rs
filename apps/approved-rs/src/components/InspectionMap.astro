@@ -1,4 +1,5 @@
 ---
+import PageSection from './PageSection.astro';
 import { Image } from 'astro:assets';
 import carPhoto from '@/assets/inspection-car.jpg';
 import Button from './Button.astro';
@@ -38,95 +39,91 @@ const SPOTS = [
 ];
 ---
 
-<section class="border-b border-default">
-  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-    <div class="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
-      <div>
-        <SectionHeading title={heading} />
-        <p class="text-base max-w-md mt-4 leading-relaxed text-muted">
-          {subtext}
-        </p>
-        <p
-          class="flex flex-wrap gap-x-7 gap-y-2 mt-6 pt-5 border-t text-sm border-default text-muted"
-        >
-          <span class="font-medium text-primary">{content.pointsLabel}</span>
-          <span>{content.mediaLabel}</span>
-          <span>{content.reportLabel}</span>
-        </p>
-        {
-          ctaHref && (
-            <div class="mt-7">
-              <Button href={ctaHref} class="px-6 py-3">
-                {content.ctaLabel}
-              </Button>
-            </div>
-          )
-        }
-      </div>
-
-      <zone-map class="block">
-        <div class="rounded-sm border border-default bg-surface p-5">
-          <div class="canvas relative">
-            <Image
-              src={carPhoto}
-              alt={heading}
-              widths={[420, 560, 720, 1080]}
-              sizes="(min-width: 1024px) 40vw, 92vw"
-              class="car w-full h-auto rounded-sm"
-            />
-            {
-              content.zones.map((zone, i) => (
-                <button
-                  type="button"
-                  data-zone={String(i)}
-                  aria-pressed={i === 0 ? 'true' : 'false'}
-                  aria-label={zone.title}
-                  class:list={['spot', { finding: zone.finding }]}
-                  style={`left:${SPOTS[i].left};top:${SPOTS[i].top}`}
-                >
-                  <span aria-hidden="true">{i + 1}</span>
-                </button>
-              ))
-            }
+<PageSection>
+  <div class="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
+    <div>
+      <SectionHeading title={heading} />
+      <p class="text-base max-w-md mt-4 leading-relaxed text-muted">
+        {subtext}
+      </p>
+      <p
+        class="flex flex-wrap gap-x-7 gap-y-2 mt-6 pt-5 border-t text-sm border-default text-muted"
+      >
+        <span class="font-medium text-primary">{content.pointsLabel}</span>
+        <span>{content.mediaLabel}</span>
+        <span>{content.reportLabel}</span>
+      </p>
+      {
+        ctaHref && (
+          <div class="mt-7">
+            <Button href={ctaHref} class="px-6 py-3">
+              {content.ctaLabel}
+            </Button>
           </div>
-          <p class="mt-3 text-center text-xs text-muted">{content.hint}</p>
-        </div>
+        )
+      }
+    </div>
 
-        <div class="mt-5">
+    <zone-map class="block">
+      <div class="rounded-sm border border-default bg-surface p-5">
+        <div class="canvas relative">
+          <Image
+            src={carPhoto}
+            alt={heading}
+            widths={[420, 560, 720, 1080]}
+            sizes="(min-width: 1024px) 40vw, 92vw"
+            class="car w-full h-auto rounded-sm"
+          />
           {
             content.zones.map((zone, i) => (
-              <div
-                data-zone-panel={String(i)}
-                hidden={i !== 0}
-                class="rounded-sm border border-default bg-surface-2 p-6"
+              <button
+                type="button"
+                data-zone={String(i)}
+                aria-pressed={i === 0 ? 'true' : 'false'}
+                aria-label={zone.title}
+                class:list={['spot', { finding: zone.finding }]}
+                style={`left:${SPOTS[i].left};top:${SPOTS[i].top}`}
               >
-                <h3 class="font-display text-lg font-bold text-primary">
-                  {zone.title}
-                </h3>
-                <p class="mt-2 text-sm leading-relaxed text-muted">
-                  {zone.text}
-                </p>
-                <ul class="mt-4 grid gap-1 text-sm text-muted">
-                  {zone.points.map((point) => (
-                    <li class="pl-4 -indent-4">
-                      <span class="text-muted">—</span> {point}
-                    </li>
-                  ))}
-                </ul>
-                {zone.finding && (
-                  <p class="finding-note mt-5 px-4 py-3 text-sm text-primary">
-                    <strong class="font-medium">{findingLabel}</strong>{' '}
-                    {zone.finding}
-                  </p>
-                )}
-              </div>
+                <span aria-hidden="true">{i + 1}</span>
+              </button>
             ))
           }
         </div>
-      </zone-map>
-    </div>
+        <p class="mt-3 text-center text-xs text-muted">{content.hint}</p>
+      </div>
+
+      <div class="mt-5">
+        {
+          content.zones.map((zone, i) => (
+            <div
+              data-zone-panel={String(i)}
+              hidden={i !== 0}
+              class="rounded-sm border border-default bg-surface-2 p-6"
+            >
+              <h3 class="font-display text-lg font-bold text-primary">
+                {zone.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{zone.text}</p>
+              <ul class="mt-4 grid gap-1 text-sm text-muted">
+                {zone.points.map((point) => (
+                  <li class="pl-4 -indent-4">
+                    <span class="text-muted">—</span> {point}
+                  </li>
+                ))}
+              </ul>
+              {zone.finding && (
+                <p class="finding-note mt-5 px-4 py-3 text-sm text-primary">
+                  <strong class="font-medium">{findingLabel}</strong>{' '}
+                  {zone.finding}
+                </p>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </zone-map>
   </div>
-</section>
+</PageSection>
 
 <style>
   .canvas {
