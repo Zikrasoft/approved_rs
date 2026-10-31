@@ -4,7 +4,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Icon from '@/components/Icon.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { formatMoney } from '@/utils/money';
 import { content } from '@/i18n/content';
@@ -20,7 +20,6 @@ import { carPagesForBuild } from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { kitPick, kitTotal, nameRepeatsCategory } from '@/utils/kitPick';
 import { plural } from '@/utils/leadTime';
 
@@ -43,7 +42,6 @@ const { car } = Astro.props as { car: CarPageEntry };
 const { vehicle } = car;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
-const partsInquiry = content(locale).pages.partsInquiry;
 const copy = content(locale).partsCar.car;
 const shopPart = content(locale).shopPart;
 const { fitment } = content(locale).partsCar;
@@ -437,22 +435,11 @@ const specsSummary = [
 
     {
       empty && (
-        <div id="lead" class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
-          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-          <LeadForm
-            service={VIN_INQUIRY_SERVICE}
-            vin={{
-              label: partsInquiry.vinLabel,
-              placeholder: partsInquiry.vinPlaceholder,
-              note: partsInquiry.vinNote,
-            }}
-            comment={`${name}: `}
-            commentLabel={partsInquiry.commentLabel}
-            commentPlaceholder={partsInquiry.commentPlaceholder}
-            commentNote={partsInquiry.commentNote}
-            defaultChannel="whatsapp"
-          />
-        </div>
+        <VinInquiryCard
+          id="lead"
+          heading={copy.formHeading}
+          comment={`${name}: `}
+        />
       )
     }
   </car-facts>

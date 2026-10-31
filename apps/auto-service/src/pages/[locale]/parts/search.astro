@@ -9,7 +9,7 @@ import {
 } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
@@ -33,7 +33,6 @@ import {
 } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import {
   carLink,
   exactPart,
@@ -486,34 +485,21 @@ const scopeHidden = {
         unknownScope ||
         numberMissing ||
         found?.results.length === 0) && (
-        <div
+        <VinInquiryCard
           id="lead"
-          class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6"
-          {...contactCta}
-        >
-          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-          <LeadForm
-            service={VIN_INQUIRY_SERVICE}
-            vin={{
-              label: partsInquiry.vinLabel,
-              placeholder: partsInquiry.vinPlaceholder,
-              value: vin ?? undefined,
-            }}
-            comment={
-              vin
-                ? vinTopic
-                  ? `${vinTopic}: `
-                  : ''
-                : numberMissing
-                  ? inquiryTopic
-                  : `${inquiryTopic}: `
-            }
-            commentLabel={partsInquiry.commentLabel}
-            commentPlaceholder={partsInquiry.commentPlaceholder}
-            commentNote={partsInquiry.commentNote}
-            defaultChannel="whatsapp"
-          />
-        </div>
+          class="max-w-2xl"
+          heading={copy.formHeading}
+          vin={vin ?? undefined}
+          comment={
+            vin
+              ? vinTopic
+                ? `${vinTopic}: `
+                : ''
+              : numberMissing
+                ? inquiryTopic
+                : `${inquiryTopic}: `
+          }
+        />
       )
     }
   </section>
