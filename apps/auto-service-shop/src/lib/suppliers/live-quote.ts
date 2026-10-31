@@ -2,7 +2,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { z } from 'zod';
 
 import { SUPPLIER_MODULE } from '../../modules/supplier';
-import { inShopCurrency } from '../../modules/supplier/pricing';
+import { inShopCurrency, sellingRows } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { supplierAdapters, supplierQuoteSchema } from './adapter';
 
@@ -88,3 +88,8 @@ export async function liveOffers(
   });
   return requoteOffers(scope, offers);
 }
+
+export const sellingOffers = async (
+  scope: MedusaContainer,
+  filters: { id?: string[]; part_identifier_id?: string },
+) => sellingRows(await liveOffers(scope, filters));

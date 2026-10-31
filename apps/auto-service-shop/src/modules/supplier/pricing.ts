@@ -25,24 +25,25 @@ export type PricedOfferRow = {
   supplier: { markup_percentage: number };
 };
 
-export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
+export const sellingRows = <Row extends PricedOfferRow>(
+  rows: Row[],
+): (Row & { price: number })[] =>
   rows
     .filter(inShopCurrency)
-    .map(
-      ({
-        id,
-        cost_price,
-        currency,
-        stock_quantity,
-        lead_time_days,
-        supplier,
-      }) => ({
-        id,
-        price: sellPrice(cost_price, supplier.markup_percentage),
-        currency,
-        stock_quantity,
-        lead_time_days,
-      }),
-    )
+    .map((row) => ({
+      ...row,
+      price: sellPrice(row.cost_price, row.supplier.markup_percentage),
+    }))
     .filter(({ price }) => price > 0)
     .sort(compareOffers);
+
+export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
+  sellingRows(rows).map(
+    ({ id, price, currency, stock_quantity, lead_time_days }) => ({
+      id,
+      price,
+      currency,
+      stock_quantity,
+      lead_time_days,
+    }),
+  );

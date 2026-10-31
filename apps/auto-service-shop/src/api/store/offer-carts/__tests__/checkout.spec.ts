@@ -366,6 +366,33 @@ medusaIntegrationTestRunner({
         expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
       });
 
+      it('refuses to add an offer that would sell for nothing, though its id is known', async () => {
+        quote(0.4, 5);
+        const {
+          data: { cart },
+        } = await post('/store/offer-carts');
+
+        const refused = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_MISSING');
+      });
+
+      it('shows a line whose price fell to nothing as unavailable and refuses its checkout', async () => {
+        const cart = await cartWith(1);
+        quote(0.4, 5);
+
+        const read = await post(`/store/offer-carts/${cart.id}/reprice`);
+
+        expect(read.data.cart.items[0].available).toBe(false);
+        expect((await complete(read.data.cart)).data.code).toBe(
+          'OFFER_MISSING',
+        );
+      });
+
       it('sells an offer of a supplier without an adapter at its stored price', async () => {
         const cart = await cartWith(1, warehouseOfferId);
 
