@@ -38,7 +38,7 @@ medusaIntegrationTestRunner({
           .resolve<PublishModuleService>(PUBLISH_MODULE)
           .publishAll();
         const response = await api.get(
-          '/store/part-pages?limit=5000',
+          '/store/part-pages?limit=1000',
           storeHeaders,
         );
         return response.data.pages.find(

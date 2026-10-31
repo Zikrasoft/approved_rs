@@ -6,6 +6,7 @@ import {
   CATALOG_KEY_PATTERN,
   type RangeFilter,
   searchableQuery,
+  filtersWithinCap,
 } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -27,7 +28,6 @@ import {
   appendRange,
   chosenFilters,
   partsQuery,
-  filtersWithinCap,
   rangesFromParams,
   withFacetCopy,
 } from '@/utils/partsSearch';

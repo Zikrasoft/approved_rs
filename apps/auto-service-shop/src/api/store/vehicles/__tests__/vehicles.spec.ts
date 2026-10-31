@@ -216,7 +216,7 @@ medusaIntegrationTestRunner({
           });
 
           const response = await api.get(
-            '/store/fitments?limit=5000',
+            '/store/fitments?limit=1000',
             storeHeaders,
           );
 
@@ -234,7 +234,7 @@ medusaIntegrationTestRunner({
             note: 'Только седан',
             translations: { sr: { note: 'Samo limuzina' } },
           });
-          expect(response.data).toMatchObject({ limit: 5000, next: null });
+          expect(response.data).toMatchObject({ limit: 1000, next: null });
         });
       });
     });

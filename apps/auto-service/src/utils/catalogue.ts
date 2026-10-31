@@ -32,6 +32,8 @@ import {
   type Vehicle,
   type VinFacts,
   CATALOGUE_ID_PATTERN,
+  MAX_OFFER_IDS,
+  MAX_PAGE,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -55,8 +57,6 @@ export type { Vehicle, VinFacts };
 
 export const CATALOGUE_TIMEOUT_MS = 10_000;
 export const ORDER_TIMEOUT_MS = 15_000;
-const PAGE_BATCH = 1000;
-const OFFERS_BATCH = 100;
 
 export type SearchQuery = {
   q?: string;
@@ -203,7 +203,7 @@ export function createCatalogue({
     const all: T[] = [];
     for (let after: string | null = null; ;) {
       const page = new URLSearchParams({
-        limit: String(PAGE_BATCH),
+        limit: String(MAX_PAGE),
         ...(after && { after }),
       });
       const { items, next } = read(await request(`${path}?${page}`));
@@ -434,9 +434,9 @@ export function createCatalogue({
     async offersFor(ids: string[]): Promise<IdentifierPrices> {
       if (pricesHidden) return { offers: {}, installation: {} };
       const batches = Array.from(
-        { length: Math.ceil(ids.length / OFFERS_BATCH) },
+        { length: Math.ceil(ids.length / MAX_OFFER_IDS) },
         (_, index) =>
-          ids.slice(index * OFFERS_BATCH, (index + 1) * OFFERS_BATCH),
+          ids.slice(index * MAX_OFFER_IDS, (index + 1) * MAX_OFFER_IDS),
       );
       const answers = await Promise.all(
         batches.map(async (batch) => {
