@@ -39,6 +39,7 @@ import {
   restoreCheckout,
 } from './checkoutMemory';
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
+import { localeTagOf } from './localeTag';
 import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
 import { addonLabel, addToPartsList } from './partsList';
@@ -170,11 +171,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         receipt: OfferCart | null,
         contact: ReturnType<typeof checkoutContact>,
       ): void {
-        const {
-          orderedHeading,
-          orderTemplate = '',
-          localeTag = 'sr',
-        } = this.dataset;
+        const { orderedHeading, orderTemplate = '' } = this.dataset;
+        const localeTag = localeTagOf(this);
         const contactTemplates = JSON.parse(
           this.dataset.orderedContact ?? '{}',
         ) as Record<string, string>;
@@ -187,7 +185,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               ? contactTemplate.replace('{contact}', shown)
               : null,
           );
-        if (contact?.channel === 'phone') {
+        if (contact && contact.channel !== 'telegram') {
           void import('@podbor/site-kit/format-phone').then(({ formatPhone }) =>
             showContact(formatPhone(contact.contact.replace(/\D/g, ''))),
           );
@@ -210,8 +208,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       receipt(cart: OfferCart): void {
+        const localeTag = localeTagOf(this);
         const {
-          localeTag = 'sr',
           locale = '',
           quantityTemplate = '{count}',
           installationLabel = '',
@@ -303,7 +301,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         for (const { id, quantity } of cart.items) {
           if (this.targets.get(id) === quantity) this.targets.delete(id);
         }
-        const { localeTag = 'sr' } = this.dataset;
+        const localeTag = localeTagOf(this);
         this.querySelector('[data-lines]')?.replaceChildren(
           ...cart.items.map((line) => this.line(line, cart, localeTag)),
         );
