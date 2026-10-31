@@ -55,6 +55,7 @@ const OFFERS_BATCH = 100;
 export type SearchQuery = {
   q?: string;
   category?: string;
+  make?: string;
   model?: string;
   locale: CatalogLocale;
   facets: string[];
@@ -186,18 +187,18 @@ export function createCatalogue({
 
   const paged = async <T>(
     path: string,
-    read: (body: unknown) => { items: T[]; count: number | null },
+    read: (body: unknown) => { items: T[]; next: string | null },
   ): Promise<T[]> => {
     const all: T[] = [];
-    for (let offset = 0; ;) {
-      const { items, count } = read(
-        await request(`${path}?offset=${offset}&limit=${PAGE_BATCH}`),
-      );
+    for (let after: string | null = null; ;) {
+      const page = new URLSearchParams({
+        limit: String(PAGE_BATCH),
+        ...(after && { after }),
+      });
+      const { items, next } = read(await request(`${path}?${page}`));
       all.push(...items);
-      offset += items.length;
-      if (items.length === 0 || count === null || offset >= count) {
-        return all;
-      }
+      if (!next) return all;
+      after = next;
     }
   };
 
@@ -212,15 +213,15 @@ export function createCatalogue({
 
   const vehicles = (): Promise<Vehicle[]> =>
     paged('/store/vehicles', (body) => {
-      const { vehicles, count } = vehiclesResponseSchema.parse(body);
-      return { items: vehicles, count };
+      const { vehicles, next } = vehiclesResponseSchema.parse(body);
+      return { items: vehicles, next };
     });
 
-  const modelNamed = async (slug: string) =>
+  const modelNamed = async (make: string | undefined, slug: string) =>
     vehiclesResponseSchema
       .parse(
         await request(
-          `/store/vehicles?${new URLSearchParams({ model: slug, limit: '1' })}`,
+          `/store/vehicles?${new URLSearchParams({ ...(make && { make }), model: slug, limit: '1' })}`,
         ),
       )
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
@@ -242,7 +243,7 @@ export function createCatalogue({
     const [pages, allCategories, fitments, allVehicles, allRedirects] =
       await Promise.all([
         paged('/store/part-pages', (body) => {
-          const { pages, count } = partPagesResponseSchema.parse(body);
+          const { pages, next } = partPagesResponseSchema.parse(body);
           return {
             items: pages.map((page) =>
               unpriced({
@@ -255,13 +256,13 @@ export function createCatalogue({
                 },
               }),
             ),
-            count,
+            next,
           };
         }),
         categories(),
         paged('/store/fitments', (body) => {
-          const { fitments, count } = fitmentsResponseSchema.parse(body);
-          return { items: fitments, count };
+          const { fitments, next } = fitmentsResponseSchema.parse(body);
+          return { items: fitments, next };
         }),
         vehicles(),
         redirects(),
@@ -299,6 +300,7 @@ export function createCatalogue({
     async search({
       q,
       category,
+      make,
       model,
       locale,
       facets,
@@ -310,7 +312,7 @@ export function createCatalogue({
         ...(q ? { q } : {}),
         locale,
         ...(category ? { category } : {}),
-        ...(model ? { model } : {}),
+        ...(model ? { ...(make && { make }), model } : {}),
       });
       for (const facet of facets) {
         params.append('facets', facet);
@@ -390,7 +392,11 @@ export function createCatalogue({
     },
 
     async listingScope(
-      { category, model }: Pick<SearchQuery, 'category' | 'model'>,
+      {
+        category,
+        make,
+        model,
+      }: Pick<SearchQuery, 'category' | 'make' | 'model'>,
       locale: CatalogLocale,
     ): Promise<Pick<
       SearchResponse,
@@ -399,7 +405,7 @@ export function createCatalogue({
       try {
         const [allCategories, namedModel] = await Promise.all([
           category ? categories() : [],
-          model ? modelNamed(model) : null,
+          model ? modelNamed(make, model) : null,
         ]);
         const named = allCategories.find(({ slug }) => slug === category);
         return {

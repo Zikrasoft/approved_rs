@@ -151,6 +151,24 @@ describe('fitmentsResponseSchema', () => {
     ).toEqual([fitment]);
   });
 
+  it('reads a cursor page without a count, and an offset page without a cursor', () => {
+    expect(
+      fitmentsResponseSchema.parse({
+        fitments: [],
+        limit: 1000,
+        next: 'fit_9',
+      }),
+    ).toMatchObject({ count: null, offset: null, next: 'fit_9' });
+    expect(
+      fitmentsResponseSchema.parse({
+        fitments: [],
+        count: 0,
+        offset: 0,
+        limit: 1000,
+      }),
+    ).toMatchObject({ next: null });
+  });
+
   it('reads a vocabulary value newer than the contract as null', () => {
     expect(
       fitmentsResponseSchema.parse({

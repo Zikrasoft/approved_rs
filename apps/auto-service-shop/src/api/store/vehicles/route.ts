@@ -10,14 +10,16 @@ export async function GET(
   req: MedusaRequest<unknown, StoreListVehiclesType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { offset, limit, model } = req.validatedQuery as StoreListVehiclesType;
+  const { after, limit, make, model } =
+    req.validatedQuery as StoreListVehiclesType;
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
   const page = await listVehiclePage(catalog, {
+    makeSlug: make,
     modelSlug: model,
-    offset,
+    after,
     limit,
   });
 
-  res.json(vehiclesResponseSchema.parse({ ...page, offset, limit }));
+  res.json(vehiclesResponseSchema.parse({ ...page, limit }));
 }

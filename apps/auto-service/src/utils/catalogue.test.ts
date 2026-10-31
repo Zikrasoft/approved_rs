@@ -181,7 +181,7 @@ describe('catalogue.partPages', () => {
     ]);
     expect(pages[0].equivalents).toEqual(oilFilterMann.equivalents);
     expect(fetch).toHaveBeenCalledWith(
-      `${BACKEND_URL}/store/part-pages?offset=0&limit=1000`,
+      `${BACKEND_URL}/store/part-pages?limit=1000`,
       expect.objectContaining({
         headers: { 'x-publishable-api-key': 'pk_test', 'x-shop-preview': '1' },
         signal: expect.any(AbortSignal),
@@ -200,23 +200,13 @@ describe('catalogue.partPages', () => {
     ]);
   });
 
-  it('pages through the backend until the count is reached', async () => {
+  it('pages through the backend until no next cursor is named', async () => {
     const fetch = vi.fn((url: string) => {
-      if (url.endsWith('part-pages?offset=0&limit=1000')) {
-        return respond({
-          pages: [oilFilterMann],
-          count: 2,
-          offset: 0,
-          limit: 1,
-        });
+      if (url.endsWith('part-pages?limit=1000')) {
+        return respond({ pages: [oilFilterMann], limit: 1, next: 'pi_mann' });
       }
-      if (url.endsWith('part-pages?offset=1&limit=1000')) {
-        return respond({
-          pages: [oilFilterBmw],
-          count: 2,
-          offset: 1,
-          limit: 1,
-        });
+      if (url.endsWith('part-pages?limit=1000&after=pi_mann')) {
+        return respond({ pages: [oilFilterBmw], limit: 1, next: null });
       }
       return backend()(url);
     });
@@ -1262,7 +1252,7 @@ describe('catalogue.vehicles', () => {
 
     expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/vehicles?offset=0&limit=1000',
+      'http://shop.test/store/vehicles?limit=1000',
       expect.objectContaining({
         headers: expect.objectContaining({
           'x-publishable-api-key': 'pk_test',
@@ -1271,20 +1261,20 @@ describe('catalogue.vehicles', () => {
     );
   });
 
-  it('pages through the Vehicles until the count is reached', async () => {
+  it('pages through the Vehicles until no next cursor is named', async () => {
     const second = { ...VEHICLE, id: 'veh_2' };
     const fetch = vi.fn((url: string) =>
       respond(
-        url.endsWith('offset=0&limit=1000')
-          ? { vehicles: [VEHICLE], count: 2, offset: 0, limit: 1 }
-          : { vehicles: [second], count: 2, offset: 1, limit: 1 },
+        url.endsWith('vehicles?limit=1000')
+          ? { vehicles: [VEHICLE], limit: 1, next: VEHICLE.id }
+          : { vehicles: [second], limit: 1, next: null },
       ),
     );
 
     expect(await catalog(fetch).vehicles()).toEqual([VEHICLE, second]);
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch).toHaveBeenLastCalledWith(
-      'http://shop.test/store/vehicles?offset=1&limit=1000',
+      `http://shop.test/store/vehicles?limit=1000&after=${VEHICLE.id}`,
       expect.anything(),
     );
   });
@@ -1298,7 +1288,7 @@ describe('catalogue.vehicles', () => {
 
   it('fails the build when the backend answers with an error', async () => {
     await expect(catalog(answer({}, false)).vehicles()).rejects.toThrow(
-      '/store/vehicles?offset=0&limit=1000 answered 503',
+      '/store/vehicles?limit=1000 answered 503',
     );
   });
 
@@ -1480,18 +1470,19 @@ describe('catalogue.search', () => {
     );
   });
 
-  it('scopes a Category listing to one Model', async () => {
+  it('scopes a Category listing to one Model of its Make', async () => {
     const fetch = answer(found);
 
     await catalog(fetch).search({
       category: 'oil-filters',
+      make: 'bmw',
       model: 'f30-320d',
       locale: 'ru',
       facets: [],
     });
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/search?locale=ru&category=oil-filters&model=f30-320d',
+      'http://shop.test/store/search?locale=ru&category=oil-filters&make=bmw&model=f30-320d',
       expect.anything(),
     );
   });
@@ -1844,11 +1835,14 @@ describe('catalogue.listingScope', () => {
   it('asks the shop for the one Model, not every Vehicle', async () => {
     const fetch = backend({ vehicles: [VEHICLE] });
 
-    await catalogueWith(fetch).listingScope({ model: 'f30-320d' }, 'ru');
+    await catalogueWith(fetch).listingScope(
+      { make: 'bmw', model: 'f30-320d' },
+      'ru',
+    );
 
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledWith(
-      `${BACKEND_URL}/store/vehicles?model=f30-320d&limit=1`,
+      `${BACKEND_URL}/store/vehicles?make=bmw&model=f30-320d&limit=1`,
       expect.anything(),
     );
   });

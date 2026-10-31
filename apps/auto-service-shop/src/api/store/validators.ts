@@ -9,11 +9,14 @@ import {
 
 const recordId = z.string().min(1).max(64);
 
+const MAX_FILTERED_KEYS = 8;
+
 export const StoreSearchParts = z
   .object({
     q: z.string().trim().min(1).max(200).optional(),
     category: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     vehicle_id: recordId.optional(),
+    make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
     facets: z
       .union([z.string(), z.array(z.string())])
@@ -46,7 +49,15 @@ export const StoreSearchParts = z
     offset: z.coerce.number().int().nonnegative().max(10_000).default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),
   })
-  .refine(({ q, category }) => q || category, 'q or category is required');
+  .refine(({ q, category }) => q || category, 'q or category is required')
+  .refine(
+    ({ facets, range }) =>
+      new Set([
+        ...facets.map((facet) => facet.slice(0, facet.indexOf(':'))),
+        ...range.map(({ key }) => key),
+      ]).size <= MAX_FILTERED_KEYS,
+    `at most ${MAX_FILTERED_KEYS} filters`,
+  );
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 
 export const StoreCreateVinLookup = z.object({ vin: vinSchema });
@@ -102,7 +113,7 @@ export const StoreCompleteOfferCart = z
 export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
 export const StoreListPartPages = z.object({
-  offset: z.coerce.number().int().nonnegative().default(0),
+  after: recordId.optional(),
   limit: z.coerce.number().int().positive().max(5000).default(1000),
 });
 export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;
@@ -119,6 +130,7 @@ export const StoreListFitments = StoreListPartPages;
 export type StoreListFitmentsType = StoreListPartPagesType;
 
 export const StoreListVehicles = StoreListPartPages.extend({
+  make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
   model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
 });
 export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;

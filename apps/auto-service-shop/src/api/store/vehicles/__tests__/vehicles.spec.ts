@@ -52,7 +52,7 @@ medusaIntegrationTestRunner({
           );
         });
 
-        it('pages through every Vehicle with its count, one row per Vehicle', async () => {
+        it('pages through every Vehicle by cursor, one row per Vehicle', async () => {
           for (let index = 0; index < 3; index += 1) {
             const { vehicle } = await createVehicleFixture(catalog, {
               typeCode: `L${String(index).padStart(3, '0')}`,
@@ -65,22 +65,24 @@ medusaIntegrationTestRunner({
           }
           const total = (await catalog.listVehicles({}, { take: null })).length;
 
-          const page = async (offset: number) =>
+          const page = async (after: string | null) =>
             (
               await api.get(
-                `/store/vehicles?offset=${offset}&limit=2`,
+                `/store/vehicles?limit=2${after ? `&after=${after}` : ''}`,
                 storeHeaders,
               )
             ).data;
-          const pages: { vehicles: { id: string }[] }[] = [];
-          for (let offset = 0; offset < total; offset += 2) {
-            pages.push(await page(offset));
+          const pages: { vehicles: { id: string }[]; next: string | null }[] = [
+            await page(null),
+          ];
+          while (pages[pages.length - 1].next) {
+            pages.push(await page(pages[pages.length - 1].next));
           }
           const ids = pages.flatMap(({ vehicles }) =>
             vehicles.map(({ id }) => id),
           );
 
-          expect(pages[0]).toMatchObject({ count: total, offset: 0, limit: 2 });
+          expect(pages[0]).toMatchObject({ count: null, limit: 2 });
           expect(pages[0].vehicles).toHaveLength(2);
           expect(ids).toHaveLength(total);
           expect(new Set(ids).size).toBe(total);
@@ -89,7 +91,7 @@ medusaIntegrationTestRunner({
         it('answers one default page when no page is asked for', async () => {
           const response = await api.get('/store/vehicles', storeHeaders);
 
-          expect(response.data).toMatchObject({ offset: 0, limit: 1000 });
+          expect(response.data).toMatchObject({ limit: 1000, next: null });
         });
 
         it('refuses a page past the largest limit', async () => {
@@ -169,7 +171,7 @@ medusaIntegrationTestRunner({
           });
 
           const response = await api.get(
-            '/store/fitments?offset=0&limit=5000',
+            '/store/fitments?limit=5000',
             storeHeaders,
           );
 
@@ -187,7 +189,7 @@ medusaIntegrationTestRunner({
             note: 'Только седан',
             translations: { sr: { note: 'Samo limuzina' } },
           });
-          expect(response.data).toMatchObject({ offset: 0, limit: 5000 });
+          expect(response.data).toMatchObject({ limit: 5000, next: null });
         });
       });
     });

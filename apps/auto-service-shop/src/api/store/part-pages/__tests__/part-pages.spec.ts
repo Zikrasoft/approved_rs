@@ -179,11 +179,13 @@ medusaIntegrationTestRunner({
 
       it('pages through the list', async () => {
         const first = await get('?limit=2');
-        const second = await get('?limit=2&offset=2');
+        const second = await get(`?limit=2&after=${first.data.next}`);
 
-        expect(first.data).toMatchObject({ count: 3, offset: 0, limit: 2 });
+        expect(first.data).toMatchObject({ count: null, limit: 2 });
         expect(first.data.pages).toHaveLength(2);
+        expect(first.data.next).toBe(first.data.pages[1].id);
         expect(second.data.pages).toHaveLength(1);
+        expect(second.data.next).toBeNull();
         const ids = [...first.data.pages, ...second.data.pages].map(
           (page: { id: string }) => page.id,
         );
@@ -207,7 +209,7 @@ medusaIntegrationTestRunner({
 
         const response = await get();
 
-        expect(response.data.count).toBe(3);
+        expect(response.data.pages).toHaveLength(3);
         expect(
           response.data.pages.map(
             (page: { normalized_value: string }) => page.normalized_value,
@@ -215,7 +217,7 @@ medusaIntegrationTestRunner({
         ).not.toContain('C30005');
       });
 
-      it.each(['?limit=0', '?limit=5001', '?offset=-1', '?limit=abc'])(
+      it.each(['?limit=0', '?limit=5001', '?after=', '?limit=abc'])(
         'returns a 400 for %s',
         async (query) => {
           expect((await get(query)).status).toBe(400);

@@ -151,7 +151,23 @@ describe('vehiclesResponseSchema', () => {
         offset: 1,
         limit: 1,
       }),
-    ).toEqual({ vehicles: [vehicle], count: 3, offset: 1, limit: 1 });
+    ).toEqual({
+      vehicles: [vehicle],
+      count: 3,
+      offset: 1,
+      limit: 1,
+      next: null,
+    });
+  });
+
+  it('reads a page that names the next cursor', () => {
+    expect(
+      vehiclesResponseSchema.parse({
+        vehicles: [vehicle],
+        limit: 1,
+        next: 'veh_1',
+      }),
+    ).toMatchObject({ count: null, offset: null, next: 'veh_1' });
   });
 
   it('reads the whole list from a shop that does not page it yet', () => {
@@ -160,6 +176,7 @@ describe('vehiclesResponseSchema', () => {
       count: null,
       offset: null,
       limit: null,
+      next: null,
     });
   });
 

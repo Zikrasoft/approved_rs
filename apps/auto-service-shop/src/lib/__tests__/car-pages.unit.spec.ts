@@ -43,7 +43,7 @@ const paged = (...cards: CarHit[]) =>
       card.kind === 'make'
         ? `make:${card.make.slug}`
         : card.kind === 'model'
-          ? `model:${card.model?.slug}`
+          ? `model:bmw/${card.model?.slug}`
           : `vehicle:${card.vehicle?.id}`,
       card,
     ]),
@@ -108,6 +108,6 @@ describe('nearestPlace', () => {
 
   it('is the named Model when no candidate Vehicle is known', () => {
     const f30 = modelCard('f30-320d');
-    expect(nearestPlace([], 'f30-320d', paged(f30))).toBe(f30);
+    expect(nearestPlace([], 'f30-320d', paged(f30), 'bmw')).toBe(f30);
   });
 });

@@ -1,4 +1,10 @@
-import { defineSearchIndex, search } from '@medusajs/framework/utils';
+import { container } from '@medusajs/framework';
+import type { Knex } from '@medusajs/framework/mikro-orm/knex';
+import {
+  ContainerRegistrationKeys,
+  defineSearchIndex,
+  search,
+} from '@medusajs/framework/utils';
 import type {
   ISearchModuleService,
   SearchTypes,
@@ -28,6 +34,7 @@ const BREADTH: Record<CarKind, number> = { make: 2, model: 1, vehicle: 0 };
 type MakeRow = { slug: string; name: string; spellings: { value: string }[] };
 
 type ModelRow = {
+  id: string;
   slug: string;
   name: string;
   chassis: {
@@ -51,7 +58,10 @@ type VehicleRow = {
   model: ModelRow;
 };
 
-type FitmentRow = { part_id: string; vehicle_id: string };
+export type PartCounts = {
+  vehicles: Map<string, number>;
+  models: Map<string, number>;
+};
 
 export const searchTokens = (text: string): string[] =>
   text
@@ -103,7 +113,7 @@ const termsOf = (...texts: (string | null | undefined)[]): string[] =>
   });
 
 const makeOf = ({ model }: VehicleRow) => model.chassis.series.make.slug;
-const modelOf = ({ model }: VehicleRow) => model.slug;
+const modelOf = ({ model }: VehicleRow) => model.id;
 
 const groupBy = (
   vehicles: VehicleRow[],
@@ -116,36 +126,25 @@ const groupBy = (
   return [...groups.values()];
 };
 
-export function carsWithPages(
-  vehicles: VehicleRow[],
-  fitments: FitmentRow[],
-  listedParts: Set<string>,
-) {
-  const partsOf = new Map<string, Set<string>>();
-  for (const { part_id, vehicle_id } of fitments) {
-    if (listedParts.has(part_id)) {
-      partsOf.set(
-        vehicle_id,
-        (partsOf.get(vehicle_id) ?? new Set()).add(part_id),
-      );
-    }
-  }
-  const partsFitting = (rows: VehicleRow[]) =>
-    new Set(rows.flatMap(({ id }) => [...(partsOf.get(id) ?? [])])).size;
+export function carsWithPages(vehicles: VehicleRow[], counts: PartCounts) {
+  const modelParts = ([row]: VehicleRow[]) =>
+    counts.models.get(modelOf(row)) ?? 0;
   const models = groupBy(vehicles, modelOf).filter((rows) =>
-    modelHasPage(partsFitting(rows)),
+    modelHasPage(modelParts(rows)),
   );
   return {
     makes: groupBy(models.flat(), makeOf)
       .filter((rows) => makeHasPage(groupBy(rows, modelOf).length))
       .map(([row]) => row),
     models: models.map(([row]) => row),
-    vehicles: models.flatMap((rows) => {
-      const modelParts = partsFitting(rows);
-      return rows.filter((row) =>
-        vehicleHasPage({ parts: partsFitting([row]), modelParts }),
-      );
-    }),
+    vehicles: models.flatMap((rows) =>
+      rows.filter((row) =>
+        vehicleHasPage({
+          parts: counts.vehicles.get(row.id) ?? 0,
+          modelParts: modelParts(rows),
+        }),
+      ),
+    ),
   };
 }
 
@@ -177,12 +176,8 @@ const document = (
   card: JSON.stringify({ kind, ...card }),
 });
 
-export function carDocuments(
-  vehicles: VehicleRow[],
-  fitments: FitmentRow[],
-  listed: Set<string>,
-) {
-  const paged = carsWithPages(vehicles, fitments, listed);
+export function carDocuments(vehicles: VehicleRow[], counts: PartCounts) {
+  const paged = carsWithPages(vehicles, counts);
   const makeTerms = ({ model }: VehicleRow) => {
     const { make } = model.chassis.series;
     return termsOf(make.name, ...make.spellings.map(({ value }) => value));
@@ -210,11 +205,16 @@ export function carDocuments(
       }),
     ),
     ...paged.models.map((row) =>
-      document(modelKey(modelOf(row)), 'model', modelTerms(row), {
-        make: make(row),
-        model: modelCard(row.model),
-        vehicle: null,
-      }),
+      document(
+        modelKey(makeOf(row), row.model.slug),
+        'model',
+        modelTerms(row),
+        {
+          make: make(row),
+          model: modelCard(row.model),
+          vehicle: null,
+        },
+      ),
     ),
     ...paged.vehicles.map((row) =>
       document(
@@ -246,6 +246,7 @@ const VEHICLE_FIELDS = [
   'year_to',
   'engine.code',
   'engine.family',
+  'model.id',
   'model.slug',
   'model.name',
   'model.chassis.code',
@@ -257,50 +258,52 @@ const VEHICLE_FIELDS = [
   'model.chassis.series.make.spellings.value',
 ];
 
-type NumberRow = { part_id: string; part: { replaced_by_id: string | null } };
+const LISTED_PART_COUNTS = `
+  with published_parts as (
+    select distinct pi.part_id from part_identifier pi
+    join published_number pn on pn.id = pi.id and pn.deleted_at is null
+    where pi.deleted_at is null
+  ), listed as (
+    select p.id from part p
+    join published_parts pp on pp.part_id = p.id
+    where p.deleted_at is null and (
+      p.replaced_by_id is null
+      or p.replaced_by_id not in (select part_id from published_parts)
+    )
+  )
+  select v.model_id, f.vehicle_id, count(distinct f.part_id)::int as parts
+  from fitment f
+  join listed l on l.id = f.part_id
+  join vehicle v on v.id = f.vehicle_id and v.deleted_at is null
+  where f.deleted_at is null
+  group by grouping sets ((v.model_id, f.vehicle_id), (v.model_id))`;
 
-const listedParts = async (
-  query: SearchTypes.SearchContainer['query'],
-): Promise<Set<string>> => {
-  const { data: published } = await query.graph({
-    entity: 'published_number',
-    fields: ['id'],
-  });
-  const { data } = published.length
-    ? await query.graph({
-        entity: 'part_identifier',
-        fields: ['part_id', 'part.replaced_by_id'],
-        filters: { id: published.map(({ id }: { id: string }) => id) },
-      })
-    : { data: [] };
-  const numbers = data as NumberRow[];
-  const parts = new Set(numbers.map(({ part_id }) => part_id));
-  return new Set(
-    numbers
-      .filter(
-        ({ part }) => !part.replaced_by_id || !parts.has(part.replaced_by_id),
-      )
-      .map(({ part_id }) => part_id),
-  );
-};
+type CountRow = { model_id: string; vehicle_id: string | null; parts: number };
 
-async function* seed({ container, catchup }: SearchTypes.SearchSeedContext) {
+export async function listedPartCounts(pg: Knex): Promise<PartCounts> {
+  const { rows } = await pg.raw<{ rows: CountRow[] }>(LISTED_PART_COUNTS);
+  const counts: PartCounts = { vehicles: new Map(), models: new Map() };
+  for (const { model_id, vehicle_id, parts } of rows) {
+    if (vehicle_id) counts.vehicles.set(vehicle_id, parts);
+    else counts.models.set(model_id, parts);
+  }
+  return counts;
+}
+
+async function* seed({
+  container: { query },
+  catchup,
+}: SearchTypes.SearchSeedContext) {
   if (catchup) {
     return;
   }
-  const [{ data: vehicles }, { data: fitments }, listed] = await Promise.all([
-    container.query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    container.query.graph({
-      entity: 'fitment',
-      fields: ['part_id', 'vehicle_id'],
-    }),
-    listedParts(container.query),
+  const [{ data: vehicles }, counts] = await Promise.all([
+    query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
+    listedPartCounts(
+      container.resolve(ContainerRegistrationKeys.PG_CONNECTION),
+    ),
   ]);
-  const documents = carDocuments(
-    vehicles as VehicleRow[],
-    fitments as FitmentRow[],
-    listed,
-  );
+  const documents = carDocuments(vehicles as VehicleRow[], counts);
   if (documents.length) {
     yield [{ action: 'upsert' as const, documents }];
   }

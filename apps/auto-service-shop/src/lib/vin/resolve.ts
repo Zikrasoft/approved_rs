@@ -31,7 +31,12 @@ const identifiedVehicles = async (
   if (!identifiers.length) return [];
   const ids = (
     await catalog.listVehicleIdentifiers(
-      { $or: identifiers },
+      {
+        $or: identifiers.map((identifier) => ({
+          ...identifier,
+          supplier_id: null,
+        })),
+      },
       { select: ['vehicle_id'], take: null },
     )
   ).map(({ vehicle_id }) => vehicle_id);
