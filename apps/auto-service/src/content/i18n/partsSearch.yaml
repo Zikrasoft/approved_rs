@@ -36,7 +36,8 @@ next: Дальше
 formHeading: Заявка на запчасти
 notFoundQuestion: Не нашли нужное?
 notFoundLink: Оставьте заявку, подберем
-numberNotFound: Номера «{q}» в каталоге нет, проверим его у поставщиков.
+numberNotFound: Точного номера «{q}» в каталоге нет, возможно, вы искали один из похожих ниже.
+numberComment: Номер {q}
 similarNumbers: Похожие номера
 carsGroup: Автомобили
 partsGroup: Запчасти

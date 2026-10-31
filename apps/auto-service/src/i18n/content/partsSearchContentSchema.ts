@@ -41,6 +41,7 @@ export const partsSearchContentSchema = z
     notFoundQuestion: z.string(),
     notFoundLink: z.string(),
     numberNotFound: z.string(),
+    numberComment: z.string(),
     similarNumbers: z.string(),
     carsGroup: z.string(),
     partsGroup: z.string(),

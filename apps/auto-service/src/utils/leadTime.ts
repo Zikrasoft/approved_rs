@@ -15,6 +15,7 @@ export const schemaAvailability = (
 
 export type LeadTimeCopy = {
   inStock: string;
+  tomorrow?: string;
   days: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 };
 
@@ -25,6 +26,9 @@ export function formatLeadTime(
 ): string {
   if (days === 0) {
     return copy.inStock;
+  }
+  if (days === 1 && copy.tomorrow) {
+    return copy.tomorrow;
   }
   const form = new Intl.PluralRules(localeTag).select(days);
   return (copy.days[form] ?? copy.days.other).replace('{days}', String(days));
