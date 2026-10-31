@@ -2,6 +2,7 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import {
+  galleryImageType,
   galleryTargetSchema,
   sanitizeFilename,
   dedupeFilename,
@@ -15,11 +16,6 @@ import {
   GithubApiError,
 } from '@/lib/githubContents';
 
-// Guards against an accidentally-huge upload wedging the serverless
-// function (base64-encoded whole into one JSON POST body before GitHub's
-// blob API gets a chance to reject it) — not a hard content limit, just a
-// sanity cap. `accept="image/*"` on the client is trivially bypassable, so
-// this is the only real check.
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
 function backToForm(
@@ -60,6 +56,11 @@ export async function POST({
     .filter((f): f is File => f instanceof File && f.size > 0);
   if (files.some((f) => f.size > MAX_PHOTO_BYTES)) {
     return new Response('File too large', { status: 413 });
+  }
+  if (
+    files.some((f) => galleryImageType(sanitizeFilename(f.name)) !== f.type)
+  ) {
+    return new Response('Unsupported type', { status: 415 });
   }
   if (files.length === 0) {
     return backToForm(request, dir, slug, { error: 'no-files' });
