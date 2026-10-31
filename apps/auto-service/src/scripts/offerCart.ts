@@ -89,7 +89,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (receipt || orderNumber) {
           const contact = checkoutContact();
           forgetCheckout();
-          this.showOrdered(orderNumber, receipt, contact);
+          this.showOrdered(receipt ? orderNumber : null, receipt, contact);
           return;
         }
         if (notice) {
@@ -206,7 +206,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         fill(
           this,
           '[data-order-date]',
-          new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
+          receipt &&
+            new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
         );
         if (receipt) this.receipt(receipt);
         this.show('ordered');
@@ -232,7 +233,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             const row = template.content.cloneNode(true) as DocumentFragment;
             fill(row, '[data-name]', part.name);
             fill(row, '[data-number]', `${part.brand} ${part.number}`);
-            fill(row, '[data-ready]', this.readiness(line, localeTag));
             fill(
               row,
               '[data-quantity]',

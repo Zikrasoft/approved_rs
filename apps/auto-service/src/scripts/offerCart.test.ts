@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { capNotice, stepTarget } from './offerCart';
+import { capNotice, defineOfferCart, stepTarget } from './offerCart';
 
 describe('stepping a line quantity', () => {
   it('clamps a burst of taps past the cap to the cap and says so', () => {
@@ -24,5 +25,25 @@ describe('the notice at a line cap', () => {
 
   it('says the order limit for a part ordered on a lead time', () => {
     expect(capNotice({ lead_time_days: 4 })).toBe('order-limit');
+  });
+});
+
+describe('the confirmation opened from a link alone', () => {
+  it('says the order is taken without a number or date the tab cannot vouch for', () => {
+    history.replaceState(null, '', '/ru/parts/cart/?notice=ordered&order=999');
+    defineOfferCart();
+    document.body.innerHTML = `
+      <offer-cart data-order-template="Номер заказа: {number}">
+        <div data-state="ordered" hidden>
+          <p data-order-number hidden></p>
+          <p data-order-date></p>
+        </div>
+      </offer-cart>`;
+
+    const shown = (selector: string) =>
+      !document.querySelector<HTMLElement>(selector)!.hidden;
+    expect(shown('[data-state="ordered"]')).toBe(true);
+    expect(shown('[data-order-number]')).toBe(false);
+    expect(shown('[data-order-date]')).toBe(false);
   });
 });
