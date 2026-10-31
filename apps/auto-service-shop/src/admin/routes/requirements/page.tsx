@@ -33,7 +33,7 @@ import {
   referenceLabel,
   type ReferenceRow,
   type TFunction,
-  vehicleLabel,
+  vehicleSpecLabel,
 } from '../../lib/vehicle-label';
 import { ReferencePicker } from '../../components/reference-picker';
 import { type Category, categoriesSchema } from '../../lib/categories';
@@ -89,7 +89,7 @@ const EMPTY_DRAFT: Draft = {
 const ownerLabel = (t: TFunction, collection: string, row: ReferenceRow) => {
   const vehicle = labelledVehicleSchema.safeParse(row);
   return collection === 'vehicles' && vehicle.success
-    ? vehicleLabel(t, vehicle.data)
+    ? vehicleSpecLabel(t, vehicle.data)
     : referenceLabel(collection, row);
 };
 

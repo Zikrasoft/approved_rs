@@ -1,10 +1,11 @@
 const VIN_LETTERS = 'A-HJ-NPR-Z';
 
-export const VIN_PATTERN = new RegExp(
-  `^(?=[0-9]*[${VIN_LETTERS}])[${VIN_LETTERS}0-9]{17}$`,
-);
+const MAKER_HAS_A_LETTER = `(?=[0-9]{0,2}[${VIN_LETTERS}])`;
+const HAS_A_DIGIT = '(?=.*[0-9])';
 
-export const VIN_INPUT_PATTERN = `[${VIN_LETTERS}${VIN_LETTERS.toLowerCase()}0-9]{17}`;
+export const VIN_PATTERN = new RegExp(
+  `^${MAKER_HAS_A_LETTER}${HAS_A_DIGIT}[${VIN_LETTERS}0-9]{17}$`,
+);
 
 const LATIN_LOOKALIKES: Record<string, string> = {
   А: 'A',
@@ -27,8 +28,11 @@ const latinText = (text: string): string =>
     .replace(/[АВЕКМНОРСТУХ]/g, (letter) => LATIN_LOOKALIKES[letter]!)
     .replace(/^\s*VIN\b\W*/, '');
 
+export const vinWhileTyping = (text: string): string =>
+  text.replace(/[\s.-]+/g, '').toUpperCase();
+
 export const vinText = (text: string): string =>
-  latinText(text).replace(/[\s.-]+/g, '');
+  vinWhileTyping(latinText(text));
 
 export const vinOf = (text: string): string | null => {
   const words = latinText(text)

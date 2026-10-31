@@ -4,7 +4,13 @@ import {
   rankOffers,
   type RankableOffer,
 } from '@podbor/catalog-contract/availability';
-import { plural, type PluralForms } from './leadTime';
+import * as z from 'zod/mini';
+import {
+  copyFrom,
+  plural,
+  pluralFormsSchema,
+  type PluralForms,
+} from './leadTime';
 
 export type BestPrice = {
   id: string;
@@ -40,6 +46,17 @@ export type MoreOffersCopy = {
   offerTomorrow: string;
   offerDays: PluralForms;
 };
+
+const moreOffersCopySchema = z.object({
+  moreOffers: z.string(),
+  moreOffersCheaper: z.string(),
+  moreOffersSeveral: pluralFormsSchema,
+  offerTomorrow: z.string(),
+  offerDays: pluralFormsSchema,
+});
+
+export const moreOffersCopyFrom = (json: string | undefined) =>
+  copyFrom<MoreOffersCopy>(moreOffersCopySchema, json);
 
 export function moreOffersLabel<Offer extends RankableOffer>(
   { others, cheaper }: { others: Offer[]; cheaper: Offer | null },

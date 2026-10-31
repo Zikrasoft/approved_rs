@@ -4,7 +4,7 @@ import { Modules } from '@medusajs/framework/utils';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../adapter';
-import { liveOffers } from '../live-quote';
+import { liveOffers, sellingOffers } from '../live-quote';
 
 const stored = {
   id: 'offer_1',
@@ -128,5 +128,21 @@ describe('liveOffers', () => {
       expect(await view()).toHaveLength(1);
       expect(quotedTimes(scope)).toBe(3);
     });
+  });
+});
+
+describe('sellingOffers', () => {
+  it('never returns the cost price, the markup or the supplier article', async () => {
+    const { scope } = scopeQuoting(1000, 4);
+
+    expect(await sellingOffers(scope, { id: ['offer_1'] })).toEqual([
+      {
+        id: 'offer_1',
+        price: 1200,
+        currency: 'RSD',
+        stock_quantity: 4,
+        lead_time_days: 1,
+      },
+    ]);
   });
 });

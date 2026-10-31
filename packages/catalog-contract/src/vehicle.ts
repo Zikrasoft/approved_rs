@@ -81,7 +81,15 @@ export const vehiclesResponseSchema = z.object({
   ...pageFields,
 });
 
-export const vinSchema = z.string().transform(vinOf).pipe(z.string());
+export const VIN_REFUSAL =
+  'Not a VIN: 17 Latin letters and digits, without I, O or Q';
+
+export const vinSchema = z.string().transform((text, context) => {
+  const vin = vinOf(text);
+  if (vin) return vin;
+  context.addIssue({ code: 'custom', message: VIN_REFUSAL });
+  return z.NEVER;
+});
 
 export const vinFactsSchema = z.object({
   steering: z.enum(STEERING_SIDES).optional().catch(undefined),

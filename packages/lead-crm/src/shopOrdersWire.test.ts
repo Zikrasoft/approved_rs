@@ -1,5 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { orderOutcomePath, shopOrderEventSchema } from './shopOrdersWire.ts';
+import {
+  cancelRefused,
+  orderOutcomePath,
+  outcomeRefused,
+  shopOrderEventSchema,
+} from './shopOrdersWire.ts';
+
+describe('the final refusals on the shop orders wire', () => {
+  it.each([
+    [404, { type: 'order_missing' }, true],
+    [404, { type: 'not_found' }, false],
+    [404, null, false],
+    [409, null, true],
+    [410, { type: 'order_missing' }, false],
+    [500, null, false],
+  ])(
+    'reads a shop answering %i %j to an outcome as final: %s',
+    (status, body, final) => {
+      expect(outcomeRefused(status, body)).toBe(final);
+    },
+  );
+
+  it.each([
+    [404, true],
+    [409, true],
+    [410, true],
+    [503, false],
+  ])('reads the CRM answering %i to a cancel as final: %s', (status, final) => {
+    expect(cancelRefused(status)).toBe(final);
+  });
+});
 
 describe('the shop orders wire', () => {
   it('escapes the order id in the outcome hook path', () => {

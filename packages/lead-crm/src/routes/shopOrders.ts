@@ -2,10 +2,16 @@ import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   adSourceFieldSchema,
   metaIdsFieldSchema,
+  siteUrl,
   vinNote,
   visitorIdSchema,
 } from '../form.ts';
-import { shopOrderEventSchema, type OrderContact } from '../shopOrdersWire.ts';
+import {
+  LEAD_MISSING,
+  LEAD_WON,
+  shopOrderEventSchema,
+  type OrderContact,
+} from '../shopOrdersWire.ts';
 import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
@@ -13,8 +19,8 @@ import type { LeadSubmission } from '../schema.ts';
 
 const CANCEL_STATUS: Record<CancelOrderResult, number> = {
   lost: 204,
-  won: 409,
-  missing: 410,
+  won: LEAD_WON,
+  missing: LEAD_MISSING,
 };
 
 export interface ShopOrdersRouteOptions {
@@ -30,6 +36,7 @@ export const orderLeadSubmission = (
   contact: OrderContact,
   summary: string,
   locale: string,
+  origin: string,
 ): LeadSubmission => ({
   name: contact.name ?? '',
   contact: contact.contact,
@@ -40,7 +47,7 @@ export const orderLeadSubmission = (
     .filter(Boolean)
     .join('\n'),
   country: null,
-  source_url: contact.source_url ?? null,
+  source_url: siteUrl(contact.source_url, origin),
   visitorId: visitorIdSchema.parse(contact.visitor_id),
   adSource: adSourceFieldSchema.parse(contact.ad_source),
   metaIds: metaIdsFieldSchema.parse(contact.meta_ids),
@@ -78,7 +85,13 @@ export function createShopOrdersRoute({
         ? contact.locale
         : defaultLocale;
     const { stored, delivered } = await notifyLead(
-      orderLeadSubmission(order_id, contact, summary, locale),
+      orderLeadSubmission(
+        order_id,
+        contact,
+        summary,
+        locale,
+        new URL(request.url).origin,
+      ),
       '[shop-orders]',
     );
     return new Response(null, { status: stored || delivered ? 201 : 503 });

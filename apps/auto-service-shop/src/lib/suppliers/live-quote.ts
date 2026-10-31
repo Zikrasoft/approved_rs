@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
+import type { PartOffer } from '@podbor/catalog-contract';
 import {
   inShopCurrency,
-  sellingRows,
   sellPrice,
+  storeOffers,
 } from '../../modules/supplier/pricing';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { parseEnv } from '../env';
@@ -174,4 +175,5 @@ export const sellingOffers = async (
   scope: MedusaContainer,
   filters: { id?: string[]; part_identifier_id?: string },
   options: { reuseRecent?: boolean } = {},
-) => sellingRows(await liveOffers(scope, filters, options));
+): Promise<PartOffer[]> =>
+  storeOffers(await liveOffers(scope, filters, options));

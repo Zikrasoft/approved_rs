@@ -63,7 +63,7 @@ import {
   referenceLabel,
   type ReferenceRow,
   type TFunction,
-  vehicleLabel,
+  vehicleSpecLabel,
 } from '../../lib/vehicle-label';
 
 const PAGE_SIZE = 50;
@@ -219,7 +219,7 @@ const rowLabel = (
 ): string => {
   const vehicle = labelledVehicleSchema.safeParse(row);
   if (collection === 'vehicles' && vehicle.success) {
-    return vehicleLabel(t, vehicle.data);
+    return vehicleSpecLabel(t, vehicle.data);
   }
   return referenceLabel(collection, row);
 };

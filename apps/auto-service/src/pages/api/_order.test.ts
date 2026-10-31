@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { APIContext } from 'astro';
 import type { NotifyLead } from '@podbor/lead-crm';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
+import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 
 const notifyLead = vi.hoisted(() =>
   vi.fn<NotifyLead>(async () => ({ stored: true, delivered: true })),
@@ -113,11 +114,31 @@ describe('POST /api/order', () => {
     expect(location(await checkout())).toBe('/ru/parts/cart/?notice=expired');
   });
 
-  it('refuses a checkout that does not say which cart the visitor saw', async () => {
-    const response = await checkout({ cart_fingerprint: '' });
+  it.each([
+    ['no fingerprint', { cart_fingerprint: '' }],
+    ['a garbled cart id', { cart_id: 'x/../y' }],
+    ['no cart id', { cart_id: '' }],
+  ])(
+    'keeps the contact of a checkout with %s as a Lead, without asking the shop',
+    async (_, fields) => {
+      const response = await checkout(fields);
 
-    expect(location(response)).toBe('/ru/parts/cart/?notice=invalid');
-    expect(backend).not.toHaveBeenCalled();
+      expect(location(response)).toBe('/ru/parts/cart/?notice=expired');
+      expect(backend).not.toHaveBeenCalled();
+      expect(notifyLead.mock.calls[0]?.[0].comment).toContain(
+        PARTS_ORDER_COPY.notPlaced('корзина устарела'),
+      );
+    },
+  );
+
+  it('keeps no Lead for a checkout without a contact or consent', async () => {
+    expect(location(await checkout({ contact: '12' }))).toBe(
+      '/ru/parts/cart/?notice=invalid',
+    );
+    expect(location(await checkout({ consent: '' }))).toBe(
+      '/ru/parts/cart/?notice=invalid',
+    );
+    expect(notifyLead).not.toHaveBeenCalled();
   });
 
   it('answers a body that is not a form with a redirect, not a crash', async () => {
@@ -181,6 +202,7 @@ describe('POST /api/order', () => {
     it.each([
       [400, { code: 'OFFER_PRICE_CHANGED' }, 'цена изменилась'],
       [400, { code: 'OFFER_OUT_OF_STOCK' }, 'позиции нет в нужном количестве'],
+      [400, { code: 'OFFER_MISSING' }, 'позицию больше не продают'],
       [404, { type: 'not_found' }, 'корзина устарела'],
     ])(
       'keeps the contact when the shop answers %i %o',
@@ -194,6 +216,29 @@ describe('POST /api/order', () => {
         );
       },
     );
+
+    it('fits an over-long cart into the Lead and counts what it left out', async () => {
+      backend.mockRejectedValue(new TypeError('fetch failed'));
+      const line = `VARTA 580901080, ${'Akumulator '.repeat(10)}× 1`;
+
+      await checkout({
+        cart_lines: Array.from({ length: 40 }, () => line).join('\n'),
+        comment: 'Posle 17h',
+      });
+
+      const comment = keptLead()?.comment ?? '';
+      expect(comment.length).toBeLessThanOrEqual(MAX_COMMENT_LENGTH);
+      expect(comment).toMatch(/\nНе поместилось позиций: \d+\nPosle 17h$/);
+    });
+
+    it('stores the cart lines with plain line breaks', async () => {
+      backend.mockRejectedValue(new TypeError('fetch failed'));
+
+      await checkout({ cart_lines: 'VARTA × 1\r\nATE × 2\rИтого: 1 RSD' });
+
+      expect(keptLead()?.comment).toContain('VARTA × 1\nATE × 2\nИтого: 1 RSD');
+      expect(keptLead()?.comment).not.toContain('\r');
+    });
 
     it('keeps no Lead for an order placed', async () => {
       answer(200, { order: { id: 'order_1', display_id: 42 } });

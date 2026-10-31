@@ -21,7 +21,10 @@ import { ScrollArea } from '../../components/scroll-area';
 import { adminFetch } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { type Category, categoriesSchema } from '../../lib/categories';
-import { labelledVehicleSchema, vehicleLabel } from '../../lib/vehicle-label';
+import {
+  labelledVehicleSchema,
+  vehicleSpecLabel,
+} from '../../lib/vehicle-label';
 
 const PDF_TYPE = 'application/pdf';
 const MAX_QUOTE_BYTES = 10 * 1024 * 1024;
@@ -243,7 +246,7 @@ const WorkshopQuotesPage = () => {
                 {confirmed.vehicle
                   ? t('workshopQuotes.resultFitmentsOn', {
                       count: confirmed.fitments,
-                      vehicle: vehicleLabel(t, confirmed.vehicle),
+                      vehicle: vehicleSpecLabel(t, confirmed.vehicle),
                     })
                   : confirmed.fitments}
               </Text>
@@ -290,7 +293,7 @@ const WorkshopQuotesPage = () => {
             <Term>{t('workshopQuotes.vehicle')}</Term>
             <dd>
               {draft.vehicle ? (
-                <Text size="small">{vehicleLabel(t, draft.vehicle)}</Text>
+                <Text size="small">{vehicleSpecLabel(t, draft.vehicle)}</Text>
               ) : (
                 <div className="flex flex-col items-start gap-y-1">
                   <Badge size="2xsmall" color="orange">

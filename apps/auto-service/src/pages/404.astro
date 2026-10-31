@@ -4,7 +4,7 @@ import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
-import { localeFrom } from '@/i18n/config';
+import { SUPPORTED_LOCALES, localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 import { contactCta } from '@podbor/site-kit/contact-control';
@@ -18,8 +18,12 @@ const { pages, shopCart } = content(locale);
   description={pages.notFound.body}
   noindex
 >
-  <section
+  <not-found-parts
     class="wrap flex min-h-[60vh] flex-col justify-center gap-4 py-band md:py-band-lg"
+    data-parts-paths={SUPPORTED_LOCALES.map(PathBuilder.parts).join(' ')}
+    data-part-paths={SUPPORTED_LOCALES.map((locale) =>
+      PathBuilder.partNumber(locale, '').slice(0, -1),
+    ).join(' ')}
   >
     <span class="spec text-5xl font-medium text-line-strong">404</span>
     <h1 class="text-hero">{pages.notFound.heading}</h1>
@@ -48,18 +52,11 @@ const { pages, shopCart } = content(locale);
       {pages.notFound.cta}
       <Icon name="arrowRight" />
     </a>
-  </section>
+  </not-found-parts>
 </Shell>
 
 <script>
-  const { pathname, search, hash } = location;
-  if (
-    /^\/[^/]+\/parts\/p\//i.test(pathname) &&
-    pathname !== pathname.toLowerCase()
-  ) {
-    location.replace(`${pathname.toLowerCase()}${search}${hash}`);
-  } else if (/^\/[^/]+\/parts\//.test(pathname)) {
-    document.querySelector<HTMLElement>('[data-parts-404]')!.hidden = false;
-    document.querySelector<HTMLElement>('[data-site-body]')!.hidden = true;
-  }
+  import { defineNotFoundParts } from '@/scripts/notFoundParts';
+
+  defineNotFoundParts();
 </script>

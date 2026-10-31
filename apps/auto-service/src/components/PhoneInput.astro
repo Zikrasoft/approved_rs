@@ -1,4 +1,5 @@
 ---
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import Icon from './Icon.astro';
 import { phoneCountryOptions } from '@podbor/lead-crm/phone';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
@@ -28,7 +29,7 @@ const countryOptions = phoneCountryOptions(displayLocale).filter(
     <select
       aria-label={site.form.countryLabel}
       class="field spec max-w-full appearance-none overflow-hidden text-ellipsis pr-8"
-      name="phone_country"
+      name={CONTACT_INPUT_FIELDS.phoneCountry}
       data-country
       data-display-locale={displayLocale}
     >

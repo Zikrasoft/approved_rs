@@ -132,6 +132,60 @@ function untouched(lead: StoredLead): boolean {
   return lead.status === 'new' && lead.lastActivityAt == null;
 }
 
+type MergeTarget =
+  | { kind: 'same-order'; lead: StoredLead }
+  | { kind: 'failed-checkout'; lead: StoredLead }
+  | { kind: 'merge'; lead: StoredLead }
+  | { kind: 'new' };
+
+function mergeTarget(
+  data: LeadInput,
+  leads: StoredLead[],
+  now: number,
+  standaloneServices: readonly string[],
+): MergeTarget {
+  const isStandalone = (service: string) =>
+    standaloneServices.includes(service);
+  const isFailedCheckout = (lead: LeadInput) =>
+    isStandalone(lead.service) && !lead.orderId;
+  const ours = leads.filter((l) => l.brand === data.brand);
+
+  const placed = data.orderId
+    ? ours.find((l) => l.orderId === data.orderId)
+    : undefined;
+  if (placed) return { kind: 'same-order', lead: placed };
+
+  const failed = isStandalone(data.service)
+    ? ours
+        .filter(
+          (l) =>
+            isFailedCheckout(l) &&
+            !isClosed(l) &&
+            isFreshLead(l, now) &&
+            ((data.visitorId != null && l.visitorId === data.visitorId) ||
+              (hasRealContact(data.contact) && l.contact === data.contact)),
+        )
+        .at(-1)
+    : undefined;
+  if (failed) return { kind: 'failed-checkout', lead: failed };
+
+  const apart = (l: StoredLead) =>
+    [data.service, l.service].some(isStandalone) &&
+    !isPlaceholderContact(data.contact) &&
+    !isPlaceholderContact(l.contact);
+  const visited = data.visitorId
+    ? ours.find(
+        (l) =>
+          l.visitorId === data.visitorId &&
+          untouched(l) &&
+          isFreshLead(l, now) &&
+          (data.telegramId == null || isPlaceholderContact(l.contact)) &&
+          !apart(l),
+      )
+    : undefined;
+  return visited ? { kind: 'merge', lead: visited } : { kind: 'new' };
+}
+
 function isIdleTopic(lead: StoredLead, now: Date): boolean {
   return (
     lead.topicId != null &&
@@ -274,20 +328,6 @@ export function createLeadStore({
   quarantine,
   standaloneServices = [],
 }: LeadStoreOptions) {
-  function standaloneApart(a: LeadInput, b: StoredLead): boolean {
-    const retried =
-      a.service === b.service &&
-      a.contact === b.contact &&
-      !a.orderId &&
-      !b.orderId;
-    return (
-      [a.service, b.service].some((s) => standaloneServices.includes(s)) &&
-      !retried &&
-      !isPlaceholderContact(a.contact) &&
-      !isPlaceholderContact(b.contact)
-    );
-  }
-
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
     return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
@@ -438,35 +478,22 @@ export function createLeadStore({
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
       await updateLeads((leads, idFloor) => {
-        const placed = data.orderId
-          ? leads.find(
-              (l) => l.orderId === data.orderId && l.brand === data.brand,
-            )
-          : undefined;
-        if (placed) {
-          outcome = { lead: placed, merged: true, before: placed };
+        const now = Date.now();
+        const target = mergeTarget(data, leads, now, standaloneServices);
+        if (target.kind === 'same-order') {
+          outcome = { lead: target.lead, merged: true, before: target.lead };
           return leads;
         }
-        const now = Date.now();
-        const existing = data.visitorId
-          ? leads.find(
-              (l) =>
-                l.visitorId === data.visitorId &&
-                l.brand === data.brand &&
-                untouched(l) &&
-                isFreshLead(l, now) &&
-                (data.telegramId == null || isPlaceholderContact(l.contact)) &&
-                !standaloneApart(data, l),
-            )
-          : undefined;
-
-        if (!existing) {
+        if (target.kind === 'new') {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
           return supersede([...leads, inserted], inserted);
         }
+        const existing = target.lead;
+        const absorbsFailedCheckout = target.kind === 'failed-checkout';
 
         const upgradeContact =
+          absorbsFailedCheckout ||
           contactRank(data.contact) > contactRank(existing.contact);
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
@@ -494,6 +521,7 @@ export function createLeadStore({
               }
             : {}),
           source_url: existing.source_url ?? data.source_url,
+          orderId: existing.orderId ?? data.orderId,
           telegramId: data.telegramId ?? existing.telegramId,
           referredBy: data.referredBy ?? existing.referredBy,
           adSource: existing.adSource ?? data.adSource ?? null,
@@ -508,7 +536,9 @@ export function createLeadStore({
             [
               clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
               tried ? `Также пробовал: ${tried}` : '',
-              ...newLines(existing.comment, data.comment),
+              ...(data.orderId
+                ? [data.comment ?? '']
+                : newLines(existing.comment, data.comment)),
             ]
               .filter(Boolean)
               .join('\n'),
