@@ -509,3 +509,76 @@ describe('defineAnalytics with Yandex Metrika', () => {
     expect(ymQueue().at(-1)).toEqual([YM, 'reachGoal', 'scroll_50', undefined]);
   });
 });
+
+const VIN = 'WVWZZZ1JZXW000001';
+
+describe('defineAnalytics on a page whose URL carries a VIN or a private param', () => {
+  const visit = (path: string, referrer = '') => {
+    history.replaceState(null, '', path);
+    Object.defineProperty(document, 'referrer', {
+      value: referrer,
+      configurable: true,
+    });
+  };
+
+  afterEach(() => visit('/'));
+
+  it('hands GA4 the page and the referrer without them', () => {
+    visit(
+      `/sr/parts/search?q=${VIN}&page=2`,
+      `${location.origin}/sr/cars/golf/?vin=${VIN.toLowerCase()}&steering=left`,
+    );
+    defineAnalytics({ gaMeasurementId: GA, privateParams: ['vin'] });
+    expect(dataLayer().find((call) => call[0] === 'config')).toEqual([
+      'config',
+      GA,
+      {
+        page_location: `${location.origin}/sr/parts/search?page=2`,
+        page_referrer: `${location.origin}/sr/cars/golf/?steering=left`,
+      },
+    ]);
+    expect(location.search).toBe(`?q=${VIN}&page=2`);
+  });
+
+  it('sends Metrika its own clean hit and keeps Webvisor off', () => {
+    visit('/sr/parts/cart/?notice=ordered&cart=cart_01ABC');
+    defineAnalytics({ ymCounterId: YM, privateParams: ['cart'] });
+    expect(ymQueue()).toEqual([
+      [
+        YM,
+        'init',
+        {
+          ssr: true,
+          webvisor: false,
+          clickmap: true,
+          accurateTrackBounce: true,
+          trackLinks: true,
+          defer: true,
+        },
+      ],
+      [
+        YM,
+        'hit',
+        `${location.origin}/sr/parts/cart/?notice=ordered`,
+        { referer: '' },
+      ],
+    ]);
+  });
+
+  it('leaves the pixel off, as it cannot be handed a clean URL', () => {
+    visit(`/sr/parts/search?q=${VIN}`);
+    defineAnalytics({ metaPixelId: PIXEL });
+    runIdle();
+    expect(window.fbq).toBeUndefined();
+    expect(srcs()).toEqual([]);
+  });
+
+  it('leaves the tags as they are on a page with nothing to hide', () => {
+    visit('/sr/parts/search?q=brake+pads');
+    defineAnalytics({ gaMeasurementId: GA, privateParams: ['vin'] });
+    expect(dataLayer().find((call) => call[0] === 'config')).toEqual([
+      'config',
+      GA,
+    ]);
+  });
+});
