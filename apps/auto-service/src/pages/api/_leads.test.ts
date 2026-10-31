@@ -64,6 +64,8 @@ const orderForm = () =>
     [ORDER_ID_FIELD]: 'order_1',
   });
 
+const shop = { authorization: `Bearer ${SHOP_LEAD_SECRET}` };
+
 const post = (body: URLSearchParams, headers: Record<string, string> = {}) =>
   POST({
     request: new Request('http://localhost/api/leads', {
@@ -82,8 +84,16 @@ beforeEach(() => {
 });
 
 describe('a placed parts order posted to /api/leads', () => {
-  it('stores the order Lead and posts its card to the CRM group', async () => {
+  it('refuses an order Lead the shop did not prove it sent', async () => {
     const response = await post(orderForm());
+    await Promise.all(pending);
+
+    expect(response.status).toBe(401);
+    expect(memory.storages.get(LEADS_PATH)?.current() ?? []).toEqual([]);
+  });
+
+  it('stores the order Lead and posts its card to the CRM group', async () => {
+    const response = await post(orderForm(), shop);
     await Promise.all(pending);
 
     expect(response.status).toBe(302);
@@ -109,7 +119,7 @@ describe('a placed parts order posted to /api/leads', () => {
 
 describe('a parts order cancelled in the shop admin', () => {
   it('marks the order Lead lost once the shop proves who it is', async () => {
-    await post(orderForm());
+    await post(orderForm(), shop);
     await Promise.all(pending);
     const cancel = new URLSearchParams({
       [ORDER_ID_FIELD]: 'order_1',
@@ -117,9 +127,7 @@ describe('a parts order cancelled in the shop admin', () => {
     });
 
     const refused = await post(cancel);
-    const response = await post(cancel, {
-      authorization: `Bearer ${SHOP_LEAD_SECRET}`,
-    });
+    const response = await post(cancel, shop);
 
     expect(refused.status).toBe(401);
     expect(response.status).toBe(204);

@@ -47,6 +47,8 @@ const CONTACT = {
 
 type LeadPost = Record<string, string>;
 
+const SHOP_LEAD_SECRET = 'shop-lead-secret';
+
 const settled = () => new Date(Date.now() + 5 * 60 * 1000);
 
 medusaIntegrationTestRunner({
@@ -68,6 +70,7 @@ medusaIntegrationTestRunner({
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let leadRoute: Server;
       const leads: LeadPost[] = [];
+      const authorizations: (string | undefined)[] = [];
       let leadRouteStatus = 302;
 
       beforeAll(async () => {
@@ -76,6 +79,7 @@ medusaIntegrationTestRunner({
           request.on('data', (chunk) => (body += chunk));
           request.on('end', () => {
             leads.push(Object.fromEntries(new URLSearchParams(body)));
+            authorizations.push(request.headers.authorization);
             response
               .writeHead(leadRouteStatus, { location: '/sr/thanks/' })
               .end();
@@ -83,6 +87,7 @@ medusaIntegrationTestRunner({
         });
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
         process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
+        process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
 
         const container = getContainer();
         await seedCashAtPickupCommerceDefaults(container);
@@ -143,6 +148,7 @@ medusaIntegrationTestRunner({
         quote(1542, 12);
         leadRouteStatus = 302;
         leads.length = 0;
+        authorizations.length = 0;
       });
 
       const waitFor = async <T>(read: () => Promise<T> | T) => {
@@ -156,6 +162,7 @@ medusaIntegrationTestRunner({
 
       afterAll(async () => {
         delete process.env.LEAD_ROUTE_URL;
+        delete process.env.SHOP_LEAD_SECRET;
         await new Promise((resolve) => leadRoute.close(resolve));
       });
 
@@ -728,6 +735,7 @@ medusaIntegrationTestRunner({
 
         await waitFor(() => leads.length);
         expect(leads).toHaveLength(1);
+        expect(authorizations).toEqual([`Bearer ${SHOP_LEAD_SECRET}`]);
         expect(leads[0]).toMatchObject({
           order_id: placed.data.order.id,
           service: 'parts-order',

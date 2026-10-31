@@ -114,13 +114,15 @@ export const leadEnvelopeSchema = z
 const submissionObject = z
   .object({
     ...envelopeShape,
-    name: cappedText(MAX_FIELD_LENGTH),
+    name: cappedText(MAX_FIELD_LENGTH).default(''),
     contact: requiredText(MAX_FIELD_LENGTH),
     contact_channel: z
       .union([contactChannelSchema, z.literal('')])
       .nullish()
       .transform((value) => value || null),
-    service: z.array(z.union([serviceSlugSchema, z.literal('')])).default([]),
+    service: z
+      .array(z.union([serviceSlugSchema, z.literal('')]).catch(''))
+      .default([]),
     // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     vin: optionalText(MAX_FIELD_LENGTH),

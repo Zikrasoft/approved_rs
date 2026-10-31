@@ -6,6 +6,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { retryOrderLeadsAt } from '../../../../jobs/retry-order-leads';
+import { LEAD_HANDOFF_MAX_ATTEMPTS } from '../../../../lib/order-lead';
 
 const SHOP_LEAD_SECRET = 'shop-lead-secret';
 const SHOP_ORDER_OUTCOME_SECRET = 'shop-order-outcome-secret';
@@ -197,6 +198,47 @@ medusaIntegrationTestRunner({
           expect.any(String),
         );
         expect((await metadataOf()).lead_lost_at).toBeUndefined();
+      });
+
+      it.each([503, 404])(
+        'gives up on a cancel the bot keeps answering %s',
+        async (status) => {
+          leadRouteStatus = status;
+          const order = await placeOrder();
+          await api.post(`/admin/orders/${order.id}/cancel`, {}, adminHeaders);
+          await waitFor(
+            async () =>
+              (
+                await getContainer()
+                  .resolve(Modules.ORDER)
+                  .retrieveOrder(order.id)
+              ).metadata?.lead_lost_attempts,
+          );
+
+          for (let run = 0; run < 15; run += 1) {
+            await retryOrderLeadsAt(getContainer(), new Date());
+          }
+
+          expect(
+            posts.filter(({ body }) => body.order_id === order.id),
+          ).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
+        },
+      );
+
+      it('hands a canceled Order that never reached the bot to nobody', async () => {
+        const order = await placeOrder({ lead_handed_off_at: null });
+        await getContainer()
+          .resolve(Modules.ORDER)
+          .updateOrders(order.id, { status: 'canceled' });
+
+        await retryOrderLeadsAt(
+          getContainer(),
+          new Date(Date.now() + 5 * 60 * 1000),
+        );
+
+        expect(posts.filter(({ body }) => body.order_id === order.id)).toEqual(
+          [],
+        );
       });
 
       it('tells the bot nothing about an Order whose Lead never reached it', async () => {
