@@ -26,8 +26,8 @@ export const sendJson = (method: string, body: unknown) =>
 
 const CART_LOCK = 'carlab-offer-cart';
 
-const withCartLock = <T>(task: () => Promise<T>): Promise<T> =>
-  navigator.locks ? navigator.locks.request(CART_LOCK, task) : task();
+const withCartLock = async <T>(task: () => Promise<T>): Promise<T> =>
+  navigator.locks ? await navigator.locks.request(CART_LOCK, task) : task();
 
 export const addToCart = (line: { offer_id?: string; quantity?: number }) =>
   withCartLock(async () => {
