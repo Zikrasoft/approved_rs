@@ -10,6 +10,7 @@ import {
   isPhoneContact,
   isTelegramIdContact,
   logError,
+  readJson,
   secretMatches,
   isFreshLead,
   managerHandoffText,
@@ -813,14 +814,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     )
       return UNAUTHORIZED;
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return ACK;
-    }
-
-    const update = captureUpdateSchema.safeParse(body);
+    const update = captureUpdateSchema.safeParse(await readJson(request));
     if (!update.success) return ACK;
 
     try {

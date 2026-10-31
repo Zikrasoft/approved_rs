@@ -32,7 +32,22 @@ describe('/api/shop-preview', () => {
     expect(cookies.set).toHaveBeenCalledWith(
       'auto_service_shop_preview',
       TOKEN,
-      expect.objectContaining({ path: '/', secure: true, sameSite: 'lax' }),
+      expect.objectContaining({
+        path: '/',
+        secure: true,
+        sameSite: 'lax',
+        httpOnly: true,
+      }),
+    );
+  });
+
+  it('marks the preview for the page scripts with a flag that holds no secret', async () => {
+    const { cookies } = await open(`?token=${TOKEN}`);
+
+    expect(cookies.set).toHaveBeenCalledWith(
+      'auto_service_shop_preview_on',
+      '1',
+      expect.not.objectContaining({ httpOnly: true }),
     );
   });
 
@@ -50,5 +65,9 @@ describe('/api/shop-preview', () => {
     expect(cookies.delete).toHaveBeenCalledWith('auto_service_shop_preview', {
       path: '/',
     });
+    expect(cookies.delete).toHaveBeenCalledWith(
+      'auto_service_shop_preview_on',
+      { path: '/' },
+    );
   });
 });

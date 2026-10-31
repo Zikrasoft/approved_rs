@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  items: string[];
+  marker?: 'dot' | 'check';
+  class?: string;
+}
+
+const {
+  items,
+  marker = 'dot',
+  class: className = 'flex flex-col gap-3',
+} = Astro.props;
+---
+
+<ul class={className}>
+  {
+    items.map((item) => (
+      <li class="flex gap-3 text-sm leading-relaxed text-mute">
+        {marker === 'check' ? (
+          <Icon name="check" class="mt-1 shrink-0 text-champagne-dim" />
+        ) : (
+          <span
+            class="mt-2 h-1 w-1 shrink-0 rounded-full bg-champagne-dim"
+            aria-hidden="true"
+          />
+        )}
+        {item}
+      </li>
+    ))
+  }
+</ul>

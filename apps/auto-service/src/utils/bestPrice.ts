@@ -5,6 +5,7 @@ import {
   type RankableOffer,
 } from '@podbor/catalog-contract/availability';
 import * as z from 'zod/mini';
+import { formatMoney } from './money';
 import {
   copyFrom,
   plural,
@@ -106,4 +107,13 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
     buyable: isBuyable(best),
     leadDays: best.lead_time_days,
   };
+}
+
+export function priceLabel(
+  best: Pick<BestPrice, 'price' | 'currency' | 'startsFrom'>,
+  copy: { fromPrice: string },
+  localeTag: string,
+): string {
+  const price = formatMoney(best.price, best.currency, localeTag);
+  return best.startsFrom ? copy.fromPrice.replace('{price}', price) : price;
 }

@@ -1,18 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { previewRequested } from './catalogueEnv';
-import { previewTokenFrom } from './shopPreview';
 
 const TOKEN = 'preview-token-0123456789abcdef0123';
-
-describe('previewTokenFrom', () => {
-  it('reads the preview cookie, empty when there is none', () => {
-    expect(
-      previewTokenFrom(`lang=sr; auto_service_shop_preview=${TOKEN}`),
-    ).toBe(TOKEN);
-    expect(previewTokenFrom('lang=sr')).toBe('');
-    expect(previewTokenFrom(null)).toBe('');
-  });
-});
 
 describe('previewRequested', () => {
   const visitor = (cookie?: string) =>
@@ -30,6 +19,20 @@ describe('previewRequested', () => {
       false,
     );
     expect(previewRequested(visitor(), env)).toBe(false);
+  });
+
+  it('finds the token among other cookies, and not in the page flag', () => {
+    const env = { SHOP_PREVIEW_TOKEN: TOKEN };
+
+    expect(
+      previewRequested(
+        visitor(`lang=sr; auto_service_shop_preview=${TOKEN}; theme=dark`),
+        env,
+      ),
+    ).toBe(true);
+    expect(
+      previewRequested(visitor('auto_service_shop_preview_on=1'), env),
+    ).toBe(false);
   });
 
   it('lets nobody in while the site has no valid token', () => {

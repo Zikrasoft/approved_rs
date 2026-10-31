@@ -7,7 +7,7 @@ import {
   orderCaseSummaryResponseSchema,
   type OrderCaseSummary,
 } from '@podbor/catalog-contract';
-import { requireEnv } from '@podbor/lead-crm';
+import { readForm, requireEnv } from '@podbor/lead-crm';
 import {
   CONTENT_REPO,
   createGithubContents,
@@ -65,9 +65,9 @@ export async function POST({
   if (!token) {
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
   }
-  const order = catalogueIdSchema.safeParse(
-    (await request.formData().catch(() => new FormData())).get('order'),
-  );
+  const form = await readForm(request);
+  if (form instanceof Response) return form;
+  const order = catalogueIdSchema.safeParse(form?.get('order'));
   if (!order.success) {
     return new Response('Bad order id', { status: 400 });
   }

@@ -1,0 +1,67 @@
+---
+import { MODAL_FOCUS_ATTRIBUTE } from '@podbor/site-kit/browser';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  trigger: string;
+  label: string;
+  heading: string;
+  subheading?: string;
+}
+
+const { trigger, label, heading, subheading } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
+---
+
+<carlab-modal trigger={trigger}>
+  <dialog
+    aria-label={label}
+    class="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden rounded-none border-0 bg-card p-0 text-ink backdrop:bg-ink/50 card:m-auto card:h-fit card:max-h-[calc(100dvh-4rem)] card:w-[min(34rem,calc(100vw-2rem))] card:rounded-block card:border card:border-line"
+  >
+    <div
+      class="flex h-full flex-col card:h-auto card:max-h-[calc(100dvh-4rem)]"
+    >
+      <div
+        class="flex shrink-0 items-start justify-between gap-6 p-6 pb-4 short:py-3"
+      >
+        <div class="flex flex-col gap-1.5">
+          <h2
+            {...{ [MODAL_FOCUS_ATTRIBUTE]: '' }}
+            tabindex="-1"
+            class="text-block font-semibold focus:outline-none"
+          >
+            {heading}
+          </h2>
+          {
+            subheading && (
+              <p class="hidden text-sm leading-relaxed text-muted sm:block short:hidden">
+                {subheading}
+              </p>
+            )
+          }
+        </div>
+        <button
+          type="button"
+          data-modal-close
+          aria-label={site.common.closeLabel}
+          class="flex size-11 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+        >
+          <Icon name="close" />
+        </button>
+      </div>
+      <div
+        class="min-h-0 flex-1 overflow-y-auto px-6 [&_.lead-submit]:sticky [&_.lead-submit]:bottom-0 [&_.lead-submit]:border-t [&_.lead-submit]:border-line [&_.lead-submit]:bg-card [&_.lead-submit]:pt-4 [&_.lead-submit]:pb-6 short:[&_.lead-submit]:gap-2 short:[&_.lead-submit]:pb-3"
+      >
+        <slot />
+      </div>
+    </div>
+  </dialog>
+</carlab-modal>
+
+<script>
+  import { defineModalDialog } from '@podbor/site-kit/browser';
+
+  defineModalDialog('carlab-modal');
+</script>

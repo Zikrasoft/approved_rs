@@ -87,6 +87,15 @@ describe('/api/cart', () => {
     expect(backend).not.toHaveBeenCalled();
   });
 
+  it('refuses a body past the cap that declares no length', async () => {
+    const response = await call(POST, {
+      body: { cart_id: null, offer_id: 'offer_1', pad: 'x'.repeat(70_000) },
+    });
+
+    expect(response.status).toBe(400);
+    expect(backend).not.toHaveBeenCalled();
+  });
+
   it('refuses a body that is not JSON as a bad request', async () => {
     const response = await PATCH({
       url: new URL('http://localhost/api/cart'),

@@ -21,6 +21,8 @@ const services = content(locale).services;
 const site = content(locale).site;
 const works = publishedWorks(await getCollection('works'));
 
+const CHIP =
+  'rounded-full border border-line px-4 py-2 text-xs tracking-tight text-mute transition-colors duration-400 hover:border-line-strong hover:text-chalk aria-pressed:border-line-strong aria-pressed:bg-white/10 aria-pressed:text-chalk';
 const usedSlugs = SERVICE_SLUGS.filter((slug) =>
   works.some((w) => w.data.servicesApplied.includes(slug)),
 );
@@ -40,7 +42,7 @@ const usedSlugs = SERVICE_SLUGS.filter((slug) =>
         <EmptyState />
       </section>
     ) : (
-      <section class="wrap mt-12">
+      <chip-filter class="wrap mt-12 block">
         {usedSlugs.length > 1 && (
           <div
             class="flex flex-wrap gap-2"
@@ -50,18 +52,19 @@ const usedSlugs = SERVICE_SLUGS.filter((slug) =>
           >
             <button
               type="button"
-              data-filter="all"
+              data-filter-chip
               aria-pressed="true"
-              class="rounded-full border border-line-strong bg-white/10 px-4 py-2 text-xs tracking-tight text-chalk transition-colors duration-400"
+              class={CHIP}
             >
               {pages.works.filterAll}
             </button>
             {usedSlugs.map((slug) => (
               <button
                 type="button"
-                data-filter={slug}
+                data-filter-chip
+                data-group={slug}
                 aria-pressed="false"
-                class="rounded-full border border-line px-4 py-2 text-xs tracking-tight text-mute transition-colors duration-400 hover:border-line-strong hover:text-chalk"
+                class={CHIP}
               >
                 {services[slug].name}
               </button>
@@ -70,7 +73,7 @@ const usedSlugs = SERVICE_SLUGS.filter((slug) =>
         )}
 
         <WorkGrid works={works} eager={3} class="mt-10" />
-      </section>
+      </chip-filter>
     )
   }
 
@@ -82,25 +85,7 @@ const usedSlugs = SERVICE_SLUGS.filter((slug) =>
 </Shell>
 
 <script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-  const cards = document.querySelectorAll<HTMLElement>('[data-work]');
+  import { defineChipFilter } from '@podbor/site-kit/browser';
 
-  buttons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const wanted = button.dataset.filter ?? 'all';
-      buttons.forEach((other) => {
-        const active = other === button;
-        other.setAttribute('aria-pressed', String(active));
-        other.classList.toggle('bg-white/10', active);
-        other.classList.toggle('text-chalk', active);
-        other.classList.toggle('border-line-strong', active);
-        other.classList.toggle('text-mute', !active);
-        other.classList.toggle('border-line', !active);
-      });
-      cards.forEach((card) => {
-        const applied = (card.dataset.services ?? '').split(' ');
-        card.hidden = wanted !== 'all' && !applied.includes(wanted);
-      });
-    });
-  });
+  defineChipFilter();
 </script>
