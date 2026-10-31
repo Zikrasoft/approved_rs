@@ -518,19 +518,33 @@ const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
     'The price changed for a line in the cart. Reprice the cart before completing checkout.',
 };
 
+async function judgedPlan(
+  scope: MedusaContainer,
+  items: OfferCartLineItem[],
+): Promise<CartPlan> {
+  const plan = await planOf(scope, items);
+  const refusal = checkoutRefusal(plan);
+  if (refusal) {
+    refuse(refusal, REFUSAL_MESSAGES[refusal]);
+  }
+  return plan;
+}
+
+const judgedCarts = new Set<string>();
+
 export async function refuseCheckout(
   scope: MedusaContainer,
-  cart: { metadata?: Record<string, unknown> | null; items?: unknown[] | null },
+  cart: {
+    id: string;
+    metadata?: Record<string, unknown> | null;
+    items?: unknown[] | null;
+  },
 ): Promise<void> {
   if (!checkoutContactSchema.safeParse(cart.metadata ?? {}).success) {
     refuse('CONTACT_MISSING', 'The order has no contact.');
   }
-  const refusal = checkoutRefusal(
-    await planOf(scope, (cart.items ?? []) as OfferCartLineItem[]),
-  );
-  if (refusal) {
-    refuse(refusal, REFUSAL_MESSAGES[refusal]);
-  }
+  if (judgedCarts.has(cart.id)) return;
+  await judgedPlan(scope, (cart.items ?? []) as OfferCartLineItem[]);
 }
 
 export const checkout = locked(
@@ -554,7 +568,7 @@ export const checkout = locked(
       refuse('CART_CHANGED', 'The cart changed since it was shown.');
     }
     if (!cart.completed_at) {
-      await applyStamps(scope, (await planOf(scope, cart.items)).stamps);
+      await applyStamps(scope, (await judgedPlan(scope, cart.items)).stamps);
       const car = await carFor(scope, contact.vin);
       await scope
         .resolve<ICartModuleService>(Modules.CART)
@@ -562,9 +576,10 @@ export const checkout = locked(
           metadata: { ...cart.metadata, ...contact, car },
         });
     }
-    const { result } = await completeCartWorkflow(scope).run({
-      input: { id: cartId },
-    });
+    judgedCarts.add(cartId);
+    const { result } = await completeCartWorkflow(scope)
+      .run({ input: { id: cartId } })
+      .finally(() => judgedCarts.delete(cartId));
     const {
       data: [order],
     } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({

@@ -929,6 +929,31 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('quotes the supplier once per checkout and refuses on that quote', async () => {
+        const cart = await cartWith(1);
+        const quoted = jest.spyOn(intercars.adapter, 'quote');
+        try {
+          expect((await complete(cart)).status).toBe(200);
+          expect(quoted).toHaveBeenCalledTimes(1);
+
+          const stale = await cartWith(1);
+          quote(1600, 0, 4);
+          quoted.mockClear();
+          const refused = await complete(stale);
+          expect(refused.data.code).toBe('OFFER_PRICE_CHANGED');
+          expect(quoted).toHaveBeenCalledTimes(1);
+          const [line] =
+            (
+              await getContainer()
+                .resolve(Modules.CART)
+                .retrieveCart(stale.id, { relations: ['items'] })
+            ).items ?? [];
+          expect(line?.metadata).toMatchObject({ lead_time_days: 0 });
+        } finally {
+          quoted.mockRestore();
+        }
+      });
+
       describe('an add-on service sold with a line', () => {
         const SERVICE = 'Регистрация аккумулятора в блоке управления';
         let batteryOfferId: string;
