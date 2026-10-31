@@ -173,13 +173,22 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       showOrdered(orderNumber: string | null, receipt: OfferCart | null): void {
-        const { orderedHeading, orderTemplate = '' } = this.dataset;
+        const {
+          orderedHeading,
+          orderTemplate = '',
+          localeTag = 'sr',
+        } = this.dataset;
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
         fill(
           this,
           '[data-order-number]',
           orderNumber && orderTemplate.replace('{number}', orderNumber),
+        );
+        fill(
+          this,
+          '[data-order-date]',
+          new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
         );
         if (receipt) this.receipt(receipt);
         this.show('ordered');
