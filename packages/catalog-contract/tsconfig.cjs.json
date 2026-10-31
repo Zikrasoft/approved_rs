@@ -16,6 +16,9 @@
     "paths": {
       "@podbor/lead-crm/shop-orders-wire": [
         "./node_modules/@podbor/lead-crm/dist/cjs/shopOrdersWire.d.ts"
+      ],
+      "@podbor/lead-crm/vin": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/vin.d.ts"
       ]
     }
   },

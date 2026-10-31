@@ -25,6 +25,7 @@ export {
 } from './modalDialog.ts';
 export {
   defineCookieConsent,
+  COOKIE_CONSENT_HEIGHT_VAR,
   CONSENT_EVENT,
   type ConsentDetail,
 } from './cookieConsent.ts';

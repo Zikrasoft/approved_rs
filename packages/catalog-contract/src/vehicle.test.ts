@@ -220,34 +220,10 @@ describe('vinLookupResponseSchema', () => {
 });
 
 describe('vinSchema', () => {
-  it('reads a VIN typed in any case with spaces around it', () => {
-    expect(vinSchema.parse(' wba8e9g50gnu12345 ')).toBe('WBA8E9G50GNU12345');
-  });
-
-  it('reads a VIN pasted with spaces, dots or dashes inside', () => {
-    expect(vinSchema.parse('WBA 35BG0-70N.074158')).toBe('WBA35BG070N074158');
-  });
-
-  it('refuses a VIN with I, O or Q or of the wrong length', () => {
-    expect(vinSchema.safeParse('WBA8E9G50GNU1234O').success).toBe(false);
-    expect(vinSchema.safeParse('WBA8E9G50GNU1234').success).toBe(false);
-  });
-
-  it('reads Cyrillic look-alike letters typed on a Russian layout as Latin', () => {
-    expect(vinSchema.parse('WВА35ВG070N074158')).toBe('WBA35BG070N074158');
-    expect(vinSchema.parse('wва35вg070n074158')).toBe('WBA35BG070N074158');
-  });
-
-  it('finds the VIN behind a prefix or among other words', () => {
-    expect(vinSchema.parse('VIN WBA35BG070N074158')).toBe('WBA35BG070N074158');
-    expect(vinSchema.parse('vin: WBA 35BG 070N074158')).toBe(
+  it('parses what vinOf reads and refuses what it does not', () => {
+    expect(vinSchema.parse('vin: wва 35вg070n074158')).toBe(
       'WBA35BG070N074158',
     );
-    expect(vinSchema.parse('WBA35BG070N074158, BMW')).toBe('WBA35BG070N074158');
-    expect(vinSchema.parse('WBA35BG070N074158🚗')).toBe('WBA35BG070N074158');
-  });
-
-  it('refuses text that only holds a VIN-length run of other words', () => {
     expect(vinSchema.safeParse('HU 816 x, OX 404 D').success).toBe(false);
   });
 });

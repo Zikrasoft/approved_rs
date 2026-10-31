@@ -2,6 +2,7 @@ import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   adSourceFieldSchema,
   metaIdsFieldSchema,
+  vinNote,
   visitorIdSchema,
 } from '../form.ts';
 import { shopOrderEventSchema, type OrderContact } from '../shopOrdersWire.ts';
@@ -35,7 +36,7 @@ const orderLeadSubmission = (
   contactChannel: contact.contact_channel ?? null,
   service: PARTS_ORDER_SERVICE,
   services: [PARTS_ORDER_SERVICE],
-  comment: [contact.vin && `VIN: ${contact.vin.toUpperCase()}`, summary]
+  comment: [contact.vin && vinNote(contact.vin), summary]
     .filter(Boolean)
     .join('\n'),
   country: null,

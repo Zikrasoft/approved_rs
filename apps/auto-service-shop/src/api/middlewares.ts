@@ -38,7 +38,8 @@ import {
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
-import { refuseClosedShop, refuseStockCartChange } from '../lib/offer-cart';
+import { refuseClosedShop } from '../lib/offer-cart';
+import { PUBLIC_ROUTE_PREFIXES, refuseUnlistedRoute } from './public-routes';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import { OrderOutcome } from './hooks/validators';
 import {
@@ -63,6 +64,10 @@ import {
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,
   routes: [
+    ...PUBLIC_ROUTE_PREFIXES.map((prefix) => ({
+      matcher: `${prefix}*`,
+      middlewares: [refuseUnlistedRoute],
+    })),
     {
       matcher: '/admin/catalogue-slugs',
       method: 'POST',
@@ -246,29 +251,6 @@ export default defineMiddlewares({
         middlewares: [validateAdminBody(update)],
       },
     ]),
-    ...[
-      '/store/carts',
-      '/store/carts/:id',
-      '/store/carts/:id/line-items',
-      '/store/carts/:id/line-items/:line_id',
-      '/store/carts/:id/promotions',
-      '/store/carts/:id/shipping-methods',
-      '/store/carts/:id/customer',
-      '/store/carts/:id/taxes',
-      '/store/carts/:id/complete',
-      '/store/payment-collections',
-      '/store/payment-collections/:id/payment-sessions',
-    ].map((matcher) => ({
-      matcher,
-      method: ['POST' as const, 'DELETE' as const],
-      middlewares: [refuseStockCartChange],
-    })),
-    ...[
-      '/store/carts/:id',
-      '/store/returns*',
-      '/store/customers*',
-      '/auth/customer/*',
-    ].map((matcher) => ({ matcher, middlewares: [refuseStockCartChange] })),
     {
       matcher: '/store/part-pages',
       method: 'GET',

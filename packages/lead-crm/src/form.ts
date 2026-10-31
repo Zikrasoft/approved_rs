@@ -16,6 +16,7 @@ import {
   type PhoneRegion,
 } from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
+import { vinOf } from './vin.ts';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
@@ -44,6 +45,9 @@ export {
   ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
+
+export const vinNote = (vin: string): string =>
+  `VIN: ${vinOf(vin) ?? vin.toUpperCase()}`;
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
@@ -146,7 +150,7 @@ const submissionObject = z
       0,
       MAX_SERVICES,
     );
-    const vin = value.vin ? `VIN: ${value.vin.toUpperCase()}` : null;
+    const vin = value.vin ? vinNote(value.vin) : null;
     const comment = [vin, value.car, value.comment]
       .filter(Boolean)
       .join('\n')

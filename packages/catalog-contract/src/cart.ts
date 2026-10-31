@@ -6,7 +6,7 @@ import {
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { translationsSchema } from './translations.ts';
-import { vinSchema } from './vehicle.ts';
+import { vinOf } from './vin.ts';
 
 export const CHECKOUT_REFUSALS = [
   'OFFER_PRICE_CHANGED',
@@ -101,7 +101,7 @@ export const identifierOffersResponseSchema = z.object({
 export const checkoutContactSchema = withValidContact(
   orderContactObject.extend({
     vin: orderContactObject.shape.vin.transform(
-      (value) => vinSchema.safeParse(value).data ?? value,
+      (value) => (value && vinOf(value)) || value,
     ),
     locale: z.enum(CATALOG_LOCALES).optional(),
   }),
