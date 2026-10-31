@@ -84,6 +84,15 @@ describe('storeOffers', () => {
     ]);
   });
 
+  it('puts a back order before a cheaper offer nobody can buy', () => {
+    expect(
+      storeOffers([
+        offer('cheap-but-gone', 500, 0, 0),
+        offer('back-order', 1000, 0, 4),
+      ]).map(({ id }) => id),
+    ).toEqual(['back-order', 'cheap-but-gone']);
+  });
+
   it('leaves out an offer in another currency than the shop sells in', () => {
     expect(
       storeOffers([

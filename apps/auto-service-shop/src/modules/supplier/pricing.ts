@@ -1,4 +1,5 @@
 import type { PartOffer } from '@podbor/catalog-contract';
+import { compareOffers } from '@podbor/catalog-contract/availability';
 
 export const SHOP_CURRENCY = 'RSD';
 
@@ -24,8 +25,6 @@ export type PricedOfferRow = {
   supplier: { markup_percentage: number };
 };
 
-const inStock = (offer: PartOffer) => Number(offer.stock_quantity > 0);
-
 export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
   rows
     .filter(inShopCurrency)
@@ -46,9 +45,4 @@ export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
       }),
     )
     .filter(({ price }) => price > 0)
-    .sort(
-      (a, b) =>
-        inStock(b) - inStock(a) ||
-        a.price - b.price ||
-        a.lead_time_days - b.lead_time_days,
-    );
+    .sort(compareOffers);

@@ -1,4 +1,5 @@
 import type { useTranslation } from 'react-i18next';
+import { vehicleName } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 export type TFunction = ReturnType<typeof useTranslation>['t'];
@@ -41,11 +42,8 @@ const years = (
 
 export const vehicleLabel = (t: TFunction, vehicle: LabelledVehicle) => {
   const { model, engine, power_kw, steering } = vehicle;
-  const series = model.chassis?.series;
   return [
-    [series?.make?.name, series?.name, model.chassis?.code, model.name]
-      .filter(Boolean)
-      .join(' '),
+    vehicleName(model).full,
     engine.code,
     power_kw && t('vehicleLabel.kw', { kw: power_kw }),
     years(t, vehicle),

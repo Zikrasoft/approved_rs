@@ -11,6 +11,7 @@ import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   checkoutContactSchema,
   fitComment,
+  vehicleName,
   type Vehicle,
 } from '@podbor/catalog-contract';
 import {
@@ -105,7 +106,7 @@ const withReadiness = (
 };
 
 export const carLabel = ({ model, engine }: Vehicle): string =>
-  `${model.chassis.series.make.name} ${model.chassis.series.name} ${model.chassis.code} ${model.name}, ${engine.code}`;
+  `${vehicleName(model).full}, ${engine.code}`;
 
 export function orderLeadForm(
   order: LeadOrder,

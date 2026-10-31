@@ -1,10 +1,9 @@
 ---
 import Icon from '@/components/Icon.astro';
 import type { PartOffer } from '@podbor/catalog-contract';
-import { isBuyable } from '@podbor/catalog-contract/availability';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { formatLeadTime } from '@/utils/leadTime';
+import { availabilityCopy, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { PathBuilder } from '@/utils/paths';
 
@@ -17,19 +16,9 @@ const { offer, secondary = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
-const stock = offer && offer.stock_quantity > 0 ? offer.stock_quantity : null;
-const outOfStock = offer !== undefined && stock === null;
-const leadDays =
-  offer && offer.lead_time_days > 0 ? offer.lead_time_days : null;
-const unavailable = outOfStock && leadDays === null;
-const buyable = offer !== undefined && isBuyable(offer);
-const leadText =
-  leadDays !== null && formatLeadTime(leadDays, copy.leadTime, localeTag);
-const stockText =
-  stock !== null &&
-  (leadText
-    ? copy.columns.inStockPickup.replace('{days}', leadText)
-    : copy.columns.stock);
+const { stock, lead, buyable } = offer
+  ? offerAvailability(offer, availabilityCopy(copy), localeTag)
+  : { stock: null, lead: null, buyable: false };
 ---
 
 <li
@@ -45,23 +34,23 @@ const stockText =
     <span
       class="text-sm text-ink-2 offers-pending:hidden!"
       data-stock
-      hidden={!stockText}
+      hidden={!stock}
     >
-      {stockText}
+      {stock}
     </span>
     <span
       class="rounded-pill border border-line px-2 py-0.5 text-xs text-ink-2 offers-pending:hidden!"
       data-out
-      hidden={!unavailable}
+      hidden={!offer || buyable}
     >
       {copy.outOfStock}
     </span>
     <span
       class="text-sm text-muted offers-pending:hidden!"
       data-lead
-      hidden={!leadText || !!stockText}
+      hidden={!lead}
     >
-      {leadText && !stockText && `${copy.columns.leadTime} ${leadText}`}
+      {lead}
     </span>
   </div>
   <span

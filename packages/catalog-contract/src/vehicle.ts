@@ -133,3 +133,29 @@ export const vinLookupResponseSchema = z.discriminatedUnion('resolved', [
 ]);
 
 export type VinLookupResponse = z.infer<typeof vinLookupResponseSchema>;
+
+export type NamedModel = {
+  name: string;
+  chassis?: {
+    code: string;
+    series?: { name: string; make?: { name: string } };
+  };
+};
+
+const joined = (words: (string | undefined)[]): string =>
+  words
+    .filter((word) => word)
+    .filter((word, index, all) => !all[index + 1]?.startsWith(`${word} `))
+    .join(' ');
+
+export function vehicleName(
+  { name, chassis }: NamedModel,
+  seriesName = chassis?.series?.name,
+): { make: string; model: string; full: string } {
+  const code = chassis?.code;
+  const make = chassis?.series?.make?.name;
+  const repeated =
+    !code || code === chassis?.series?.name || name.includes(code);
+  const model = joined([seriesName, repeated ? '' : code, name]);
+  return { make: make ?? '', model, full: joined([make, model]) };
+}

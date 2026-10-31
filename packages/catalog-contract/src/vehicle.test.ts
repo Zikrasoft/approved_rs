@@ -3,9 +3,76 @@ import { describe, expect, it } from 'vitest';
 import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
+  vehicleName,
   vinSchema,
   type Vehicle,
 } from './vehicle.ts';
+
+describe('vehicleName', () => {
+  const f30 = {
+    name: '320d',
+    chassis: {
+      code: 'F30',
+      series: { name: '3 серия', make: { name: 'BMW' } },
+    },
+  };
+
+  it('names the make, the series, the chassis and the model', () => {
+    expect(vehicleName(f30)).toEqual({
+      make: 'BMW',
+      model: '3 серия F30 320d',
+      full: 'BMW 3 серия F30 320d',
+    });
+  });
+
+  it('takes the series name it is given', () => {
+    expect(vehicleName(f30, '3 Series').full).toBe('BMW 3 Series F30 320d');
+  });
+
+  it('says a chassis code once when the model name carries it', () => {
+    expect(
+      vehicleName({
+        name: '2.0 d (E83)',
+        chassis: { code: 'E83', series: { name: 'X3', make: { name: 'BMW' } } },
+      }).full,
+    ).toBe('BMW X3 2.0 d (E83)');
+    expect(vehicleName({ ...f30, name: 'F30 320d' }).full).toBe(
+      'BMW 3 серия F30 320d',
+    );
+  });
+
+  it('says a series once when the catalogue reused it as the chassis code and the model name repeats it', () => {
+    expect(
+      vehicleName({
+        name: 'MB 200 DKDL',
+        chassis: {
+          code: 'MB',
+          series: { name: 'MB', make: { name: 'DAF BUS (VDL BUS GROUP)' } },
+        },
+      }).full,
+    ).toBe('DAF BUS (VDL BUS GROUP) MB 200 DKDL');
+    expect(
+      vehicleName({
+        name: '1.6 GDI',
+        chassis: {
+          code: 'Veloster',
+          series: { name: 'Veloster', make: { name: 'HYUNDAI' } },
+        },
+      }).full,
+    ).toBe('HYUNDAI Veloster 1.6 GDI');
+  });
+
+  it('names what it knows of a model the catalogue left half described', () => {
+    expect(vehicleName({ name: '320d' })).toEqual({
+      make: '',
+      model: '320d',
+      full: '320d',
+    });
+    expect(vehicleName({ name: '320d', chassis: { code: 'F30' } }).full).toBe(
+      'F30 320d',
+    );
+  });
+});
 
 const vehicle: Vehicle = {
   id: 'veh_1',

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  availabilityCopy,
   availabilityText,
   formatLeadTime,
+  offerAvailability,
   schemaAvailability,
 } from './leadTime';
 
@@ -109,4 +111,42 @@ describe('availabilityText', () => {
       availabilityText({ in_stock: false, lead_time_days: 0 }, copy, 'ru-RU'),
     ).toBeNull();
   });
+});
+
+describe('offerAvailability', () => {
+  const copy = availabilityCopy({
+    columns: {
+      stock: 'В наличии',
+      leadTime: 'Забрать',
+      inStockPickup: 'В наличии, забрать {days}',
+    },
+    leadTime: {
+      inStock: 'В наличии',
+      tomorrow: 'завтра',
+      days: {
+        one: 'через {days} день',
+        few: 'через {days} дня',
+        other: 'через {days} дней',
+      },
+    },
+  });
+
+  it.each([
+    [3, 0, { stock: 'В наличии', lead: null, buyable: true }],
+    [
+      3,
+      2,
+      { stock: 'В наличии, забрать через 2 дня', lead: null, buyable: true },
+    ],
+    [0, 1, { stock: null, lead: 'Забрать завтра', buyable: true }],
+    [0, 5, { stock: null, lead: 'Забрать через 5 дней', buyable: true }],
+    [0, 0, { stock: null, lead: null, buyable: false }],
+  ])(
+    'words stock %i with lead time %i',
+    (stock_quantity, lead_time_days, said) => {
+      expect(
+        offerAvailability({ stock_quantity, lead_time_days }, copy, 'ru-RU'),
+      ).toEqual(said);
+    },
+  );
 });

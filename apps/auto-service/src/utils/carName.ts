@@ -1,5 +1,6 @@
 import type { Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { vehicleName } from '@podbor/catalog-contract';
 
 type NamedModel = {
   name: string;
@@ -13,29 +14,14 @@ type NamedModel = {
   };
 };
 
-const joined = (words: string[]): string =>
-  words
-    .filter(Boolean)
-    .filter((word, index, all) => !all[index + 1]?.startsWith(`${word} `))
-    .join(' ');
+const seriesIn = ({ chassis: { series } }: NamedModel, locale: Locale) =>
+  (locale !== 'ru' && series.translations?.[locale]) || series.name;
 
-export function modelName(
-  { name, chassis }: NamedModel,
-  locale: Locale,
-): string {
-  const { series, code } = chassis;
-  const seriesName =
-    (locale !== 'ru' && series.translations?.[locale]) || series.name;
-  return joined([
-    seriesName,
-    code === series.name || name.includes(code) ? '' : code,
-    name,
-  ]);
-}
+export const modelName = (model: NamedModel, locale: Locale): string =>
+  vehicleName(model, seriesIn(model, locale)).model;
 
-export function carName(model: NamedModel, locale: Locale): string {
-  return joined([model.chassis.series.make.name, modelName(model, locale)]);
-}
+export const carName = (model: NamedModel, locale: Locale): string =>
+  vehicleName(model, seriesIn(model, locale)).full;
 
 const naturally = new Intl.Collator('en', { numeric: true }).compare;
 

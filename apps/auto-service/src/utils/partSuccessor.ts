@@ -1,21 +1,17 @@
 import { partPageSlug, type BrandNumber } from '@podbor/catalog-contract';
-import { bestPrice } from './bestPrice';
+import { bestOffer } from '@podbor/catalog-contract/availability';
 import type { PartPageEntry } from './catalogueSnapshot';
 
 const slugOf = (number: BrandNumber) =>
   partPageSlug(number.brand.slug, number.normalized_value);
 
-function buyability(page: PartPageEntry): [number, number] {
-  const best = bestPrice([page]);
-  if (!best) return [0, 0];
-  const stocked = page.offers.some(({ stock_quantity }) => stock_quantity > 0);
-  return [stocked ? 2 : 1, -best.price];
-}
-
-const buyableFirst = (a: PartPageEntry, b: PartPageEntry) => {
-  const [rankA, priceA] = buyability(a);
-  const [rankB, priceB] = buyability(b);
-  return rankB - rankA || priceB - priceA;
+const pageWithBestOffer = (pages: PartPageEntry[]) => {
+  const offer = bestOffer(pages.flatMap(({ offers }) => offers));
+  return (
+    pages.find(({ offers }) => offer && offers.includes(offer)) ??
+    pages[0] ??
+    null
+  );
 };
 
 export function partSuccessor(
@@ -28,9 +24,7 @@ export function partSuccessor(
     const numbers = [...bySlug.values()].filter(
       ({ part, superseded }) => part.id === replacement.id && !superseded,
     );
-    return (
-      [...(named ? [named] : []), ...numbers].sort(buyableFirst)[0] ?? null
-    );
+    return pageWithBestOffer([...(named ? [named] : []), ...numbers]);
   }
   if (!page.superseded) {
     return null;
