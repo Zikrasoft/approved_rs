@@ -26,7 +26,7 @@ const picked = kit
   : null;
 const best = bestPrice(picked ? [{ offers: [picked] }] : pages);
 const price = best ? formatMoney(best.price, best.currency, localeTag) : '';
-const onlyPrice = picked || pages.flatMap(({ offers }) => offers).length === 1;
+const onlyPrice = picked || !best?.startsFrom;
 const availability =
   best &&
   (best.inStock
