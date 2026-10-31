@@ -154,7 +154,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           this.render(
             outcome,
             notice,
-            notice || (stored.parts.length > 0 ? 'expired' : ''),
+            notice || (stored.parts.length > 0 ? 'gone' : ''),
           ),
         );
       }

@@ -36,6 +36,7 @@ const notices = [
   { key: 'unreachable', text: copy.notices.unreachable },
   { key: 'offline', text: copy.notices.offline },
   { key: 'expired', text: copy.notices.expired },
+  { key: 'gone', text: copy.notices.gone },
   { key: 'invalid', text: copy.notices.invalid },
 ];
 const stepper =
@@ -98,13 +99,17 @@ const stepper =
 
       <div data-state="empty" hidden class={panel} {...contactCta}>
         <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
-        <p
-          data-empty-notice="expired"
-          hidden
-          class="text-sm leading-relaxed text-danger"
-        >
-          {copy.notices.expired}
-        </p>
+        {
+          (['expired', 'gone'] as const).map((key) => (
+            <p
+              data-empty-notice={key}
+              hidden
+              class="text-sm leading-relaxed text-danger"
+            >
+              {copy.notices[key]}
+            </p>
+          ))
+        }
         <div
           data-empty-notice="moved"
           hidden

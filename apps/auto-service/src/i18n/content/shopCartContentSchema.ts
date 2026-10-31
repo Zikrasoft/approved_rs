@@ -52,6 +52,7 @@ export const shopCartContentSchema = z
         unavailable: z.string(),
         unreachable: z.string(),
         expired: z.string(),
+        gone: z.string(),
         invalid: z.string(),
         cartChanged: z.string(),
         repriced: z.string(),
