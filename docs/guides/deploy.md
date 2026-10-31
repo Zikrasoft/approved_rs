@@ -893,9 +893,12 @@ number gets its CI value in that script. The non-obvious parts:
   build bakes the prices current at that moment into the pages' structured data.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached the storefront after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
 - `ADMIN_HOST` is where staff open the admin (`admin.carlab.rs`): Caddy proxies it to the same Medusa, sends `/` to `/app`, and redirects `api.carlab.rs/app` there. `ADMIN_CORS` and `AUTH_CORS` name that origin; the admin calls the API on its own origin, so `admin.backendUrl` stays unset.
-- `LEAD_ROUTE_URL` names the storefront a placed order goes to: the `order.placed` subscriber
-  posts it to `/api/shop-orders` on that origin as a `parts-order` Lead, which
-  reaches Telegram like every other Lead. Empty, orders are placed but reach
+- `LEAD_ROUTE_URL` is the storefront's `/api/leads` URL, and its origin is where a placed order goes:
+  the `order.placed` subscriber posts it to `/api/shop-orders` on that origin as
+  a `parts-order` Lead, which reaches Telegram like every other Lead. The full
+  `/api/leads` URL is only the fallback for a storefront too old to serve
+  `/api/shop-orders` (it answers 404); once that fallback is dropped (the
+  `TODO:` in `order-lead.ts`) the value becomes the bare origin. Empty, orders are placed but reach
   nobody, and the log says so. A delivered order is stamped
   `lead_handed_off_at`; every 10 minutes `src/jobs/retry-order-leads.ts`
   re-sends each order from the last two days (older than two minutes) that
@@ -1370,7 +1373,8 @@ Check with `curl -k https://localhost:8443/health/ready`.
    «Аккумуляторы» shows its fields, the registration service and a picture, and
    the Suppliers screen lists the four crawled sites.
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
-    `LEAD_ROUTE_URL=https://carlab.rs/api/leads`, `SHOP_OPEN=false` while the shop is
+    `LEAD_ROUTE_URL=https://carlab.rs/api/leads` (orders go to `/api/shop-orders`
+    on its origin, see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.

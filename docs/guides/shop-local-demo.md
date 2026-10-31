@@ -67,6 +67,8 @@ The sections below are what the command does, for reference.
 | `DEMO_SUPPLIER_OVERRIDES` | an absolute path to a JSON file, see step 7           |
 | `LEAD_ROUTE_URL`          | `http://127.0.0.1:4321/api/leads`                     |
 
+Orders go to `/api/shop-orders` on that origin; the `/api/leads` path is only
+the fallback for an older storefront (deploy.md, `LEAD_ROUTE_URL`).
 `LEAD_ROUTE_URL` names `127.0.0.1`, not `localhost`: Node resolves `localhost`
 to `[::1]` first, and anything else listening on IPv6 port 4321 gets the
 order. `shop:prepare` rewrites a `localhost` value left in an existing `.env`.

@@ -5,3 +5,5 @@ A shop Order had no completed state: staff closed its `parts-order` Lead in the 
 ## Consequences
 
 A Parts sourcing case study can only be drafted from a completed Order, so "completed" has one source. The bot calls the shop to complete or cancel an Order, and the shop already posts to the Lead route, so each side needs credentials for the other; a bot change that fails to reach the shop must be retried rather than leave the two out of step.
+
+In the shop, `createOrderLeadSync` in `lib/order-lead-sync.ts` runs every entry point (the placed and canceled subscribers, the retry job and the CRM's outcome call) under one lock, `order-lead:<order id>`, so a retry and a live event never hand the same Order over twice. A cancel that comes from the CRM stamps `lead_lost_at` before it cancels the Order, so the `order.canceled` subscriber finds the Lead already lost and does not echo the cancel back; if cancelling fails, the stamp is cleared again. When the CRM answers a cancel with 404, 409 or 410 (its Lead is won or deleted), the shop records the refusal and stops retrying.

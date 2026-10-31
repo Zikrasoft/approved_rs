@@ -270,4 +270,6 @@ _Avoid_: sync, crawl (a crawl only fetches pages; the Import reads them)
 **Add-on service**: a paid service a Category offers next to each of its
 Parts in the cart, such as registering a battery in the car's control unit.
 Its price is set on the Category, and the order lists it as its own line.
+It is one of the two add-on kinds (`ADDON_KINDS`, kind `service`); the other is
+Installation at CarLab, defined in GLOSSARY.md.
 _Avoid_: upsell, extra, option
