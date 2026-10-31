@@ -27,6 +27,7 @@ export const servicesContentSchema = z
     indexMetaTitle: z.string(),
     indexMetaDescription: z.string(),
     indexEyebrow: z.string(),
+    partsLink: z.string(),
     indexHeading: z.string(),
     indexLead: z.string(),
     specsPriceLabel: z.string(),

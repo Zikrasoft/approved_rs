@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { installationService } from './services';
+import { installationService, partsCategoryFor } from './services';
 
 describe('installationService', () => {
   it.each([
@@ -18,5 +18,23 @@ describe('installationService', () => {
 
   it('books a part without a Category under servicing', () => {
     expect(installationService(null)).toBe('servicing');
+  });
+});
+
+describe('partsCategoryFor', () => {
+  const categories = [
+    { slug: 'brakes', pages: [] },
+    { slug: 'brake-pads', pages: [{}] },
+    { slug: 'engine-oil', pages: [{}] },
+  ];
+
+  it('points a service at the first stocked Category its parts are fitted under', () => {
+    expect(partsCategoryFor('brakes-suspension', categories)).toBe(
+      'brake-pads',
+    );
+  });
+
+  it('points nowhere when no stocked Category maps to the service', () => {
+    expect(partsCategoryFor('engine-gearbox', categories)).toBeNull();
   });
 });
