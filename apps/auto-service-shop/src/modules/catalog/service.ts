@@ -43,10 +43,10 @@ import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
 import { runBoundSql } from '../_shared/bound-sql';
+import { chunksOf } from '../_shared/chunks';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { spellingKey } from '../_shared/spelling';
 import {
-  chunksOf,
   countRowsBySource,
   deleteRowsBySource,
   type SourceCount,

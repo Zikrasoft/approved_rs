@@ -539,7 +539,10 @@ with the index left out of the model so the generator never rewrites it, and
 `src/modules/catalog/__tests__/hand-written-indexes.spec.ts` asserts it
 against `pg_indexes`. The same spec compares a freshly migrated database with
 every `.snapshot-*.json`; a column type only a hand-written migration sets is
-listed there in `HAND_WRITTEN_TYPES`. `check` runs
+listed there in `HAND_WRITTEN_TYPES`. An index on one of Medusa's own tables
+(the `order` time indexes) cannot sit in our modules' migrations, which may run
+before Medusa's; it is a script in `src/migration-scripts/`, which `db:migrate`
+runs once after every module migration. `check` runs
 `.github/scripts/shop-migration-drift.sh`, which fails when `medusa db:generate`
 on a fresh database writes anything.
 
