@@ -7,7 +7,6 @@ import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
-  hasRealContact,
   TOPIC_IDLE_MS,
   isFreshLead,
   postponePatch,
@@ -17,6 +16,7 @@ import {
   type LeadStore,
 } from './store.ts';
 import { createQuarantine, LEADS_PATH } from './quarantine.ts';
+import { hasRealContact } from './leadMerge.ts';
 
 let storage: MemoryStorage;
 let store: LeadStore;

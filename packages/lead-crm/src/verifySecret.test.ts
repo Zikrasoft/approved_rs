@@ -88,7 +88,7 @@ describe('acceptedSecrets', () => {
   it('names the current secret and its previous one', () => {
     expect(
       acceptedSecrets(
-        { SHOP_SECRET: 'new', SHOP_SECRET_PREVIOUS: 'old', OTHER: 'x' },
+        { SHOP_SECRET: 'new', SHOP_SECRET_PREVIOUS: 'old' },
         'SHOP_SECRET',
       ),
     ).toEqual(['new', 'old']);

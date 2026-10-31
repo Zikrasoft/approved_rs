@@ -3,7 +3,8 @@ import { isHandleContact } from '../contactShape.ts';
 import { shownPage } from '../form.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, isInWork, type StoredLead } from '../schema.ts';
-import { isPlaceholderContact, type Digest } from '../store.ts';
+import { isPlaceholderContact } from '../leadMerge.ts';
+import type { Digest } from '../store.ts';
 import { datedNote } from '../notes.ts';
 import {
   escapeHtml,
