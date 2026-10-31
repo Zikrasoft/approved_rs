@@ -2,21 +2,21 @@ import { describe, expect, it } from 'vitest';
 import { installationService } from './services';
 
 describe('installationService', () => {
-  it('books brake and suspension parts under brakes and suspension', () => {
-    expect(installationService({ slug: 'brakes' })).toBe('brakes-suspension');
-    expect(installationService({ slug: 'suspension' })).toBe(
-      'brakes-suspension',
-    );
+  it.each([
+    ['brakes', 'brakes-suspension'],
+    ['brake-pads', 'brakes-suspension'],
+    ['suspension', 'brakes-suspension'],
+    ['engine-parts', 'engine-gearbox'],
+    ['transmission', 'engine-gearbox'],
+    ['body-parts', 'bodywork-painting'],
+    ['oil-filters', 'servicing'],
+    ['engine-oil', 'servicing'],
+    ['batteries', 'servicing'],
+  ])('books a part in %s under %s', (slug, service) => {
+    expect(installationService({ slug })).toBe(service);
   });
 
-  it('books transmission parts under engine and gearbox', () => {
-    expect(installationService({ slug: 'transmission' })).toBe(
-      'engine-gearbox',
-    );
-  });
-
-  it('books every other part, or one without a Category, under servicing', () => {
-    expect(installationService({ slug: 'oil-filters' })).toBe('servicing');
+  it('books a part without a Category under servicing', () => {
     expect(installationService(null)).toBe('servicing');
   });
 });

@@ -25,15 +25,15 @@ describe('bestPrice', () => {
     });
   });
 
-  it('gives the lowest price the visitor can buy, the supplier bringing it in or not', () => {
+  it('names the offer in stock the cart would take over a cheaper one the supplier brings in', () => {
     expect(
-      bestPrice([{ offers: [offer(1200, 4), offer(1125, 0, 2)] }]),
+      bestPrice([{ offers: [offer(1125, 0, 2), offer(1200, 4)] }]),
     ).toEqual({
-      price: 1125,
+      price: 1200,
       currency: 'RSD',
-      inStock: false,
+      inStock: true,
       buyable: true,
-      leadDays: 2,
+      leadDays: 0,
     });
   });
 

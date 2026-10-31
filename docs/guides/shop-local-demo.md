@@ -125,7 +125,8 @@ What it creates:
   `11 42 8 507 683`), the OM654 filter, front pads and M Sport front pads on
   the 320d (two Parts plus a note: an ambiguous position), rear pads, an old
   front pad replaced by the current one, two oils, left- and right-hand-drive
-  wiper sets on the E-class (the steering-specific candidates), and an oil
+  wiper sets on the E-class under `maintenance-consumables` (the
+  steering-specific candidates), and an oil
   pressure sensor with no Category or Fitment (not enriched).
 - Filter variety: the B47 and OM654 oil filters and the four existing pads get
   those attributes, and new Parts without Fitments join them: oil filters Mann
@@ -235,12 +236,19 @@ see new Parts on static pages.
 Useful pages:
 
 - Owner VIN: post `WBA35BG070N074158` in the VIN form, or open the car page it
-  redirects to (`/ru/parts/<make>/<model>/m/<vehicle slug>/`).
+  redirects to, `/ru/parts/bmw/f30-320d/m/b47d20-140kw/?vin=…`. A Vehicle gets
+  a page from three fitted Parts, also as the only Vehicle of its Model; the
+  page shows the maintenance kit, the Requirements and the car facts, and
+  stores the VIN in My garage.
 - E-class: `WDD2130041A123456` (left-hand drive) and `WDD2130042A123456`
-  (right-hand drive; the redirect carries `?steering=right`).
+  (right-hand drive; the redirect to
+  `/ru/parts/mercedes-benz/w213-e220d/m/om654-920-143kw/` carries
+  `?steering=right`).
 - Part page: `/ru/parts/p/mann-filter-hu816x/`; superseded number:
   `/ru/parts/p/bmw-11428507683/`; replaced Part: `/ru/parts/p/ate-13046072172/`.
-- Search: `/ru/parts/search/?q=hu816x`; car hub: `/ru/parts/bmw/f30-320d/`.
+- Search: `/ru/parts/search/?q=hu816x`; model page: `/ru/parts/bmw/f30-320d/`.
+  «Оставьте заявку» on a model, car or Category page opens the parts inquiry
+  in place, its comment starting with the car and Category.
 - Filters: `/ru/parts/c/oil-filters/` and `/ru/parts/c/brake-pads/` offer
   brand, «Только в наличии» and price beside the Category's own fields; a
   filter whose every result shares one value is hidden. Brand, stock and price
@@ -248,7 +256,8 @@ Useful pages:
   (`import:local`, then `publish:local`), not on a live quote.
 - Battery with the registration add-on: `/ru/parts/p/varta-580901080/`; the
   E-class car page lists the matching batteries.
-- Cart: `/ru/parts/cart/`.
+- Cart: `/ru/parts/cart/`. While the parts inquiry holds a Part priced on
+  request, the cart says it stays out of the order and opens the inquiry.
 
 ## 7. Stale price and stock drop
 

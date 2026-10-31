@@ -2,7 +2,6 @@ import {
   enrichmentGaps,
   maintenanceKit,
   makeHasPage,
-  MIN_PARTS_FOR_PAGE,
   modelHasPage,
   partPageSlug,
   positionGroups,
@@ -377,16 +376,8 @@ export function carPagesFrom({
     const modelParts = partsFitting(
       modelCars.map(({ vehicle }) => vehicle),
     ).size;
-    const parts = modelCars.map(({ vehicle }) => partsFitting([vehicle]).size);
-    const modelVehiclesWithEnoughParts = parts.filter(
-      (count) => count >= MIN_PARTS_FOR_PAGE,
-    ).length;
-    return modelCars.filter((_, index) =>
-      vehicleHasPage({
-        parts: parts[index],
-        modelParts,
-        modelVehiclesWithEnoughParts,
-      }),
+    return modelCars.filter(({ vehicle }) =>
+      vehicleHasPage({ parts: partsFitting([vehicle]).size, modelParts }),
     );
   });
 }

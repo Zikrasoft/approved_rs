@@ -6,16 +6,12 @@ export const modelHasPage = (modelParts: number): boolean =>
 export type VehiclePageFacts = {
   parts: number;
   modelParts: number;
-  modelVehiclesWithEnoughParts: number;
 };
 
 export const vehicleHasPage = ({
   parts,
   modelParts,
-  modelVehiclesWithEnoughParts,
 }: VehiclePageFacts): boolean =>
-  parts >= MIN_PARTS_FOR_PAGE &&
-  modelHasPage(modelParts) &&
-  modelVehiclesWithEnoughParts > 1;
+  parts >= MIN_PARTS_FOR_PAGE && modelHasPage(modelParts);
 
 export const makeHasPage = (modelPages: number): boolean => modelPages > 0;

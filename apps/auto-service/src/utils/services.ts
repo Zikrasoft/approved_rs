@@ -17,8 +17,11 @@ export const VIN_INQUIRY_SERVICE =
 
 const INSTALLATION_SERVICE_BY_CATEGORY = new Map<string, ServiceSlug>([
   ['brakes', 'brakes-suspension'],
+  ['brake-pads', 'brakes-suspension'],
   ['suspension', 'brakes-suspension'],
+  ['engine-parts', 'engine-gearbox'],
   ['transmission', 'engine-gearbox'],
+  ['body-parts', 'bodywork-painting'],
 ]);
 
 export const installationService = (

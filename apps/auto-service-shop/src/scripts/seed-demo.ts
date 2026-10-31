@@ -565,13 +565,13 @@ async function seedParts(
   );
   const wipersLeft = await part(
     'Щетки стеклоочистителя, левый руль',
-    category['body-parts'],
+    category['maintenance-consumables'],
     {},
     [['bosch', 'manufacturer-number', '3 397 007 297']],
   );
   const wipersRight = await part(
     'Щетки стеклоочистителя, правый руль',
-    category['body-parts'],
+    category['maintenance-consumables'],
     {},
     [['bosch', 'manufacturer-number', '3 397 007 460']],
   );

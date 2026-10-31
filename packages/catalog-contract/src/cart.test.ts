@@ -159,6 +159,19 @@ describe('checkoutContactSchema', () => {
     ).toBeUndefined();
   });
 
+  it('stores a VIN the way the VIN lookup keys it, and other text as typed', () => {
+    expect(
+      checkoutContactSchema.parse({
+        contact: '+381641234567',
+        vin: ' wba 35bg07-0n074158 ',
+      }).vin,
+    ).toBe('WBA35BG070N074158');
+    expect(
+      checkoutContactSchema.parse({ contact: '+381641234567', vin: 'wba35' })
+        .vin,
+    ).toBe('wba35');
+  });
+
   it('carries the car and the locale', () => {
     expect(
       checkoutContactSchema.parse({

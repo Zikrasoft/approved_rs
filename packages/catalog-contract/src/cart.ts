@@ -10,6 +10,7 @@ import { isValidContact } from '@podbor/lead-crm/phone';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { translationsSchema } from './translations.ts';
+import { vinSchema } from './vehicle.ts';
 
 export const CHECKOUT_REFUSALS = [
   'OFFER_PRICE_CHANGED',
@@ -126,7 +127,9 @@ export const checkoutContactSchema = z
       .optional()
       .catch(undefined),
     name: optionalText(MAX_FIELD_LENGTH),
-    vin: optionalText(MAX_FIELD_LENGTH),
+    vin: optionalText(MAX_FIELD_LENGTH).transform(
+      (value) => vinSchema.safeParse(value).data ?? value,
+    ),
     car: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH),
     locale: z.enum(CATALOG_LOCALES).optional(),

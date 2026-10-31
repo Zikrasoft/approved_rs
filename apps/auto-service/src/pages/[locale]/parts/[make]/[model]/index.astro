@@ -102,7 +102,7 @@ const empty = hub.categories.length === 0;
             <p class="max-w-2xl text-muted">{copy.noCategories}</p>
           )
         }
-        {!empty && <InquiryLink />}
+        {!empty && <InquiryLink topic={name} />}
       </div>
 
       <div class="flex flex-col gap-3">

@@ -21,7 +21,6 @@ const PART_TEMPLATES: Record<string, string[][]> = {
   'brake-pads': [['brake-pad', 'brake-pad-back'], ['brake-pad']],
   batteries: [['battery', 'battery-top'], ['battery']],
   'engine-oil': [['oil-can']],
-  'body-parts': [['wiper']],
 };
 
 const CATEGORY_TEMPLATES: Record<string, string> = {

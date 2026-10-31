@@ -8,9 +8,10 @@ import type { ServiceSlug } from '@/utils/services';
 interface Props {
   trigger?: string;
   service?: ServiceSlug;
+  comment?: string;
 }
 
-const { trigger = '[data-open-lead-modal]', service } = Astro.props;
+const { trigger = '[data-open-lead-modal]', service, comment } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 ---
@@ -38,7 +39,7 @@ const site = content(locale).site;
         </button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-        <LeadForm compact service={service} />
+        <LeadForm compact service={service} comment={comment} />
       </div>
     </div>
   </dialog>

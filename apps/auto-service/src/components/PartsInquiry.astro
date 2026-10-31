@@ -7,6 +7,11 @@ import { MAX_PART_QUANTITY } from '@/scripts/partsList';
 import Icon from './Icon.astro';
 import LeadForm from './LeadForm.astro';
 
+interface Props {
+  comment?: string;
+}
+
+const { comment } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).pages.partsInquiry;
 ---
@@ -94,6 +99,7 @@ const copy = content(locale).pages.partsInquiry;
       placeholder: copy.vinPlaceholder,
       note: copy.vinNote,
     }}
+    comment={comment}
     commentLabel={copy.commentLabel}
     commentPlaceholder={copy.commentPlaceholder}
     commentNote={copy.commentNote}

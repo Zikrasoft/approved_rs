@@ -5,6 +5,11 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 
+interface Props {
+  comment?: string;
+}
+
+const { comment } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).pages.partsInquiry;
 const site = content(locale).site;
@@ -28,7 +33,7 @@ const site = content(locale).site;
         </button>
       </div>
       <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
-        <PartsInquiry />
+        <PartsInquiry comment={comment} />
       </div>
     </div>
   </dialog>
