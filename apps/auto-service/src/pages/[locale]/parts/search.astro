@@ -136,7 +136,9 @@ if (exact) {
   return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
 }
 const numberMissing =
-  found && !category && !offset ? missingNumber(q, found.results) : false;
+  found && !category && !offset && found.cars.length === 0
+    ? missingNumber(q, found.results)
+    : false;
 const looseNumbers = numberMissing && Boolean(found?.results.length);
 const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const scope =

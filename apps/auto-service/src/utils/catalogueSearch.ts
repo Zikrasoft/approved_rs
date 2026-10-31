@@ -56,8 +56,15 @@ export const exactPart = (q: string, results: PartResult[]): string | null => {
   return matching.length === 1 ? matching[0].slug : null;
 };
 
+const LETTER_LED_NUMBER = /^\p{L}{2}\d{2,}\p{L}?$/u;
+
+const letterLedNumber = (q: string): string | null => {
+  const number = normalizePartNumber(q);
+  return LETTER_LED_NUMBER.test(number) ? number : null;
+};
+
 export const missingNumber = (q: string, results: PartResult[]): boolean => {
-  const wanted = partNumberQuery(q);
+  const wanted = partNumberQuery(q) ?? letterLedNumber(q);
   return (
     wanted !== null &&
     !results.some(({ normalized_value }) => normalized_value === wanted)

@@ -157,6 +157,17 @@ describe('missingNumber', () => {
   it('flags nothing for a name', () => {
     expect(missingNumber('масляный фильтр', [])).toBe(false);
   });
+
+  it('flags a short number led by letters, the way it flags a long one', () => {
+    expect(missingNumber('HU816', [hu816])).toBe(true);
+    expect(missingNumber('OX 404', [hu816])).toBe(true);
+    expect(missingNumber('hu 81', [hu816])).toBe(true);
+  });
+
+  it('flags nothing for a word with a short number in it', () => {
+    expect(missingNumber('bmw 320', [hu816])).toBe(false);
+    expect(missingNumber('E 220 d', [hu816])).toBe(false);
+  });
 });
 
 describe('carLink', () => {
