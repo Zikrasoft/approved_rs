@@ -1,57 +1,40 @@
-import { checkoutContactSchema } from '@podbor/catalog-contract';
 import { CASH_AT_PICKUP_METADATA } from './commerce-defaults';
-import { orderTotal, readLine, withAddonsUnderParts } from './line-metadata';
 import type { LeadOrder } from './order-lead';
 import { orderLeadStatus } from './order-lead-sync';
+import { readPlacedOrder, type PlacedOrder } from './placed-order';
 
 type Metadata = Record<string, unknown> | null | undefined;
 
 export const isCashAtPickup = (metadata: Metadata) =>
   metadata?.fulfillment === CASH_AT_PICKUP_METADATA.fulfillment;
 
-const customerOf = (metadata: Metadata) => {
-  const contact = checkoutContactSchema.safeParse(metadata ?? {});
-  if (!contact.success) {
-    return null;
-  }
-  const {
-    name,
-    contact: reach,
-    contact_channel,
-    vin,
-    car,
-    comment,
-  } = contact.data;
-  return {
-    name: name ?? null,
-    contact: reach,
-    contact_channel: contact_channel ?? null,
-    vin: vin ?? null,
-    car: car ?? null,
-    comment: comment ?? null,
+const customerOf = (contact: PlacedOrder['contact']) =>
+  contact && {
+    name: contact.name ?? null,
+    contact: contact.contact,
+    contact_channel: contact.contact_channel ?? null,
+    vin: contact.vin ?? null,
+    car: contact.car ?? null,
+    comment: contact.comment ?? null,
   };
-};
 
 export function carlabOrderView(order: LeadOrder) {
-  const lines = withAddonsUnderParts(order.items).map((item) => {
-    const line = readLine(item.metadata);
-    return {
-      title: item.title,
-      quantity: item.quantity,
-      total: item.unit_price * item.quantity,
-      addon: Boolean(line.addonKind),
-      in_stock: line.inStock,
-      lead_time_days: line.leadTimeDays,
-    };
-  });
+  const placed = readPlacedOrder(order);
   return {
     id: order.id,
     display_id: order.display_id,
     currency: order.currency_code.toUpperCase(),
     cash_at_pickup: isCashAtPickup(order.metadata),
-    customer: customerOf(order.metadata),
-    lines,
-    total: orderTotal(order.items),
+    customer: customerOf(placed.contact),
+    lines: placed.lines.map((line) => ({
+      title: line.title,
+      quantity: line.quantity,
+      total: line.total,
+      addon: line.addon,
+      in_stock: line.inStock,
+      lead_time_days: line.leadTimeDays,
+    })),
+    total: placed.total,
     lead: orderLeadStatus(order.metadata),
   };
 }

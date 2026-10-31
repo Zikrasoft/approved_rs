@@ -11,6 +11,7 @@ import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplie
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
+import { PUBLIC_ROUTES } from '../../../public-routes';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import retryOrderLeads, {
   retryOrderLeadsAt,
@@ -366,6 +367,33 @@ medusaIntegrationTestRunner({
         expect(refused.data.code).toBe('OFFER_OUT_OF_STOCK');
       });
 
+      it('refuses to add an offer that would sell for nothing, though its id is known', async () => {
+        quote(0.4, 5);
+        const {
+          data: { cart },
+        } = await post('/store/offer-carts');
+
+        const refused = await post(`/store/offer-carts/${cart.id}/items`, {
+          offer_id: offerId,
+          quantity: 1,
+        });
+
+        expect(refused.status).toBe(400);
+        expect(refused.data.code).toBe('OFFER_MISSING');
+      });
+
+      it('shows a line whose price fell to nothing as unavailable and refuses its checkout', async () => {
+        const cart = await cartWith(1);
+        quote(0.4, 5);
+
+        const read = await post(`/store/offer-carts/${cart.id}/reprice`);
+
+        expect(read.data.cart.items[0].available).toBe(false);
+        expect((await complete(read.data.cart)).data.code).toBe(
+          'OFFER_MISSING',
+        );
+      });
+
       it('sells an offer of a supplier without an adapter at its stored price', async () => {
         const cart = await cartWith(1, warehouseOfferId);
 
@@ -487,26 +515,32 @@ medusaIntegrationTestRunner({
           expect((await complete(cart)).status).toBe(403);
         });
 
-        it('refuses every change to a cart without the preview flag', async () => {
+        it('refuses every cart route without the preview flag, before reading the body', async () => {
           const {
             data: { cart },
           } = await postPreview('/store/offer-carts', {
             offer_id: offerId,
             quantity: 1,
           });
-          const line = `/store/offer-carts/${cart.id}/items/${cart.items[0].id}`;
-          const remove = (path: string) =>
-            api.delete(path, storeHeaders).catch((error) => error.response);
+          const cartRoutes = PUBLIC_ROUTES.filter((route) =>
+            route.split(' ')[1]!.startsWith('/store/offer-carts'),
+          );
 
-          expect((await post(line, { quantity: 2 })).status).toBe(403);
-          expect((await post(`${line}/addon`)).status).toBe(403);
-          expect((await remove(`${line}/addon`)).status).toBe(403);
-          expect((await post(`${line}/installation`)).status).toBe(403);
-          expect((await remove(`${line}/installation`)).status).toBe(403);
-          expect((await remove(line)).status).toBe(403);
-          expect(
-            (await post(`/store/offer-carts/${cart.id}/reprice`)).status,
-          ).toBe(403);
+          const statuses = await Promise.all(
+            cartRoutes.map((route) => {
+              const [method, path] = route.split(' ');
+              const url = path!
+                .replace(':id', cart.id)
+                .replace(':item_id', cart.items[0].id);
+              return api
+                .request({ method, url, ...storeHeaders })
+                .then(({ status }) => status)
+                .catch((error) => error.response.status);
+            }),
+          );
+
+          expect(cartRoutes).toHaveLength(10);
+          expect(statuses).toEqual(cartRoutes.map(() => 403));
         });
       });
 

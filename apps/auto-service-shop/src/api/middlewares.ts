@@ -68,6 +68,10 @@ export default defineMiddlewares({
       middlewares: [refuseUnlistedRoute],
     })),
     {
+      matcher: '/store/offer-carts*',
+      middlewares: [refuseClosedShop],
+    },
+    {
       matcher: '/admin/catalogue-slugs',
       method: 'POST',
       middlewares: [validateAdminBody(AdminRenameSlug)],
@@ -283,70 +287,32 @@ export default defineMiddlewares({
     {
       matcher: '/store/offer-carts',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreCreateOfferCart),
-      ],
+      middlewares: [validateAndTransformBody(StoreCreateOfferCart)],
     },
     {
       matcher: '/store/offer-carts/:id/items',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreAddOfferCartItem),
-      ],
+      middlewares: [validateAndTransformBody(StoreAddOfferCartItem)],
     },
     {
       matcher: '/store/offer-carts/:id/items/:item_id',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreSetOfferCartItem),
-      ],
+      middlewares: [validateAndTransformBody(StoreSetOfferCartItem)],
     },
     {
       matcher: '/store/offer-carts/:id/items/:item_id/addon',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreAddLineAddon),
-      ],
+      middlewares: [validateAndTransformBody(StoreAddLineAddon)],
     },
     {
       matcher: '/store/offer-carts/:id/items/:item_id/installation',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreAddLineAddon),
-      ],
-    },
-    {
-      matcher: '/store/offer-carts/:id/items/:item_id',
-      method: 'DELETE',
-      middlewares: [refuseClosedShop],
-    },
-    {
-      matcher: '/store/offer-carts/:id/items/:item_id/addon',
-      method: 'DELETE',
-      middlewares: [refuseClosedShop],
-    },
-    {
-      matcher: '/store/offer-carts/:id/items/:item_id/installation',
-      method: 'DELETE',
-      middlewares: [refuseClosedShop],
-    },
-    {
-      matcher: '/store/offer-carts/:id/reprice',
-      method: 'POST',
-      middlewares: [refuseClosedShop],
+      middlewares: [validateAndTransformBody(StoreAddLineAddon)],
     },
     {
       matcher: '/store/offer-carts/:id/complete',
       method: 'POST',
-      middlewares: [
-        refuseClosedShop,
-        validateAndTransformBody(StoreCompleteOfferCart),
-      ],
+      middlewares: [validateAndTransformBody(StoreCompleteOfferCart)],
     },
   ],
 });

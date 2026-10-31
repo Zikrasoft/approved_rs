@@ -3,6 +3,7 @@ import {
   type AttributeValues,
   attributeValuesSchema,
   matchesRequirements,
+  vehicleLabel,
   type VehicleRequirement,
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
@@ -10,7 +11,6 @@ import { z } from 'zod';
 import { matchesFilter, type VehicleFilter } from '../modules/catalog/service';
 import type CatalogModuleService from '../modules/catalog/service';
 import { adminError } from './admin-errors';
-import { carLabel } from './order-lead';
 import { listVehicleResponses } from './store-response';
 
 type AttributeValue = AttributeValues[string];
@@ -133,7 +133,7 @@ export async function fitmentConflicts(
     part,
     z.array(fieldSchema).parse(fields),
     vehicles.map((vehicle) => ({
-      label: carLabel(vehicle),
+      label: vehicleLabel(vehicle),
       requirements: vehicle.requirements,
     })),
   );

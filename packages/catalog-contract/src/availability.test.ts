@@ -60,6 +60,12 @@ describe('offer ranking', () => {
       ['now'],
     ],
     [
+      'breaks a price tie on the shorter wait across currencies',
+      [offer('slow', 6600, 2, 2, 'EUR'), offer('now', 6600, 3)],
+      'now',
+      ['now', 'slow'],
+    ],
+    [
       'keeps the first of two identical offers',
       [offer('a', 1000, 1), offer('b', 1000, 1)],
       'a',

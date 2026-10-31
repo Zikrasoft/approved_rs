@@ -55,4 +55,4 @@ export const rankOffers = <Offer extends RankableOffer>(
 
 export const bestOffer = <Offer extends RankableOffer>(
   offers: Offer[],
-): Offer | null => [...offers].sort(compareOffers)[0] ?? null;
+): Offer | null => rankOffers(offers)[0] ?? null;

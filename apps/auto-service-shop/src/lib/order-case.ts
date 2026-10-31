@@ -1,18 +1,13 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
-  checkoutContactSchema,
   type OrderCaseSummary,
   type Vehicle,
   vehicleName,
 } from '@podbor/catalog-contract';
 
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
-import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
-import type VinLookupModuleService from '../modules/vin-lookup/service';
-import { listedPartOf, orderTotal, readLine } from './line-metadata';
 import type { LeadOrder } from './order-lead';
-import { listVehicleResponses } from './store-response';
+import { readPlacedOrder } from './placed-order';
+import { vehicleForVin } from './vin/car-for';
 
 const VIN_YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
 const VIN_YEAR_CYCLES = [1980, 2010, 2040];
@@ -31,44 +26,29 @@ async function carOf(
   container: MedusaContainer,
   vin: string | undefined,
 ): Promise<OrderCaseSummary['car']> {
-  if (!vin) return null;
-  const [lookup] = await container
-    .resolve<VinLookupModuleService>(VIN_LOOKUP_MODULE)
-    .listVinLookups({ vin });
-  if (!lookup?.vehicle_id) return null;
-  const [vehicle] = await listVehicleResponses(
-    container.resolve<CatalogModuleService>(CATALOG_MODULE),
-    { id: [lookup.vehicle_id] },
-  );
-  if (!vehicle) return null;
+  const vehicle = vin ? await vehicleForVin(container, vin) : null;
+  if (!vin || !vehicle) return null;
   const { make, model } = vehicleName(vehicle.model);
-  return {
-    make,
-    model,
-    year: modelYear(vin, vehicle),
-  };
+  return { make, model, year: modelYear(vin, vehicle) };
 }
 
 export async function orderCaseSummary(
   container: MedusaContainer,
   order: LeadOrder,
 ): Promise<OrderCaseSummary> {
-  const contact = checkoutContactSchema.safeParse(order.metadata ?? {});
-  const parts = order.items
-    .filter((item) => !readLine(item.metadata).addonKind)
-    .map(({ metadata, title }) => listedPartOf(metadata, title))
-    .filter(({ brand, number }) => brand && number)
-    .map(({ brand, number }) => ({ brand, number }));
-  const total = orderTotal(order.items);
+  const placed = readPlacedOrder(order);
+  const parts = placed.lines
+    .filter(({ addon, part }) => !addon && part.brand && part.number)
+    .map(({ part: { brand, number } }) => ({ brand, number }));
   return {
     display_id: order.display_id,
-    car: await carOf(container, contact.data?.vin),
+    car: await carOf(container, placed.contact?.vin),
     parts: parts.filter(
       (part, index) =>
         parts.findIndex(
           ({ brand, number }) => brand === part.brand && number === part.number,
         ) === index,
     ),
-    total_rsd: order.currency_code === 'rsd' ? Math.round(total) : null,
+    total_rsd: order.currency_code === 'rsd' ? Math.round(placed.total) : null,
   };
 }

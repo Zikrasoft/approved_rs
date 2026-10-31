@@ -1,5 +1,6 @@
 ---
 import { partPageSlug, translated } from '@podbor/catalog-contract';
+import { bestOffer } from '@podbor/catalog-contract/availability';
 import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -133,8 +134,8 @@ const fitsByMake = fitGroups(page.fits);
 const singleModel =
   fitsByMake.length === 1 && fitsByMake[0].models.length === 1;
 const { cross_references: crossReferences, applicability } = page.supplier_data;
-const [bestOffer] = page.offers;
-const jsonLd = bestOffer
+const topOffer = bestOffer(page.offers);
+const jsonLd = topOffer
   ? [
       (url: string) =>
         productSchema({
@@ -142,9 +143,9 @@ const jsonLd = bestOffer
           image: gallery[0]?.src,
           brand: page.brand.name,
           description: partName,
-          price: bestOffer.price,
-          currency: bestOffer.currency,
-          availability: schemaAvailability(bestOffer),
+          price: topOffer.price,
+          currency: topOffer.currency,
+          availability: schemaAvailability(topOffer),
           condition: 'NewCondition',
           url,
         }),

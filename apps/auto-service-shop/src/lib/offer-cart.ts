@@ -35,7 +35,6 @@ import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
-import { sellPrice } from '../modules/supplier/pricing';
 import {
   checkoutRefusal,
   planCart,
@@ -57,7 +56,7 @@ import {
   withParentOffers,
   readLine,
 } from './line-metadata';
-import { liveOffers } from './suppliers/live-quote';
+import { sellingOffers } from './suppliers/live-quote';
 import { carFor } from './vin/car-for';
 
 type OfferCartLineItem = CartItem;
@@ -139,19 +138,14 @@ export const refuse = (code: CheckoutRefusal, message: string): never => {
   throw new MedusaError(MedusaError.Types.INVALID_DATA, message, code);
 };
 
-type LiveOffer = Awaited<ReturnType<typeof liveOffers>>[number];
-
-const offersOf = async (
+const quotesOf = async (
   scope: MedusaContainer,
   items: OfferCartLineItem[],
-): Promise<Map<string, LiveOffer>> => {
+): Promise<Map<string, Quote>> => {
   const ids = items.map(offerIdOf).filter((id) => id !== undefined);
-  const offers = ids.length ? await liveOffers(scope, { id: ids }) : [];
+  const offers = ids.length ? await sellingOffers(scope, { id: ids }) : [];
   return new Map(offers.map((offer) => [offer.id, offer]));
 };
-
-const priceOf = (offer: LiveOffer) =>
-  sellPrice(offer.cost_price, offer.supplier.markup_percentage);
 
 async function ensureCashAtPickupPaymentSession(
   container: MedusaContainer,
@@ -191,21 +185,6 @@ const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
   return { ...cart, items: withParentOffers(cart.items ?? []) };
 };
 
-const quotesOf = async (
-  scope: MedusaContainer,
-  items: OfferCartLineItem[],
-): Promise<Map<string, Quote>> =>
-  new Map(
-    [...(await offersOf(scope, items))].map(([id, offer]) => [
-      id,
-      {
-        unit_price: priceOf(offer),
-        stock_quantity: offer.stock_quantity,
-        lead_time_days: offer.lead_time_days,
-      },
-    ]),
-  );
-
 async function syncOfferCart(
   scope: MedusaContainer,
   cartId: string,
@@ -228,7 +207,7 @@ async function syncOfferCart(
   );
   if (fixes.remove.length) {
     await deleteLineItemsWorkflow(scope).run({
-      input: { cart_id: cartId, ids: fixes.remove },
+      input: { cart_id: cartId, ids: fixes.remove.map(({ itemId }) => itemId) },
     });
   }
   for (const { itemId, update } of fixes.update) {
@@ -393,7 +372,7 @@ async function sellableOffer(
   offerId: string,
   quantity: number,
 ) {
-  const [offer] = await liveOffers(scope, { id: [offerId] });
+  const [offer] = await sellingOffers(scope, { id: [offerId] });
   if (!offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }
@@ -418,7 +397,7 @@ async function putOffer(
       input: {
         cart_id: cartId,
         item_id: line.id,
-        update: { quantity: wanted, unit_price: priceOf(offer) },
+        update: { quantity: wanted, unit_price: offer.price },
       },
     });
     return;
@@ -441,7 +420,7 @@ async function putOffer(
         {
           title: offerLineTitle(part),
           quantity,
-          unit_price: priceOf(offer),
+          unit_price: offer.price,
           requires_shipping: false,
           metadata: offerLineMetadata(
             offer.id,
@@ -512,7 +491,7 @@ export const setOfferQuantity = locked(
       input: {
         cart_id: cartId,
         item_id: itemId,
-        update: { quantity, unit_price: priceOf(offer) },
+        update: { quantity, unit_price: offer.price },
       },
     });
     return syncOfferCart(scope, cartId, true);
