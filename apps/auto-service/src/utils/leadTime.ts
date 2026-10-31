@@ -1,4 +1,5 @@
 import type { SchemaAvailability } from '@podbor/site-kit';
+import * as z from 'zod/mini';
 import {
   isBuyable,
   type OfferAvailability,
@@ -48,20 +49,52 @@ export const pickupTime = (
   localeTag: string,
 ): string => sentence(days, copy.tomorrow, copy.days, localeTag);
 
+export type LineAvailability = { in_stock: boolean; lead_time_days: number };
+
 export function offerAvailability(
-  offer: OfferAvailability,
+  offer: OfferAvailability | LineAvailability,
   copy: LeadTimeCopy,
   localeTag: string,
+  { short = false }: { short?: boolean } = {},
 ): { stock: string | null; lead: string | null; buyable: boolean } {
   const days = offer.lead_time_days;
-  const inStock = offer.stock_quantity > 0;
+  const inStock =
+    'in_stock' in offer ? offer.in_stock : offer.stock_quantity > 0;
   return {
     stock: inStock
-      ? days > 0
+      ? days > 0 && !short
         ? sentence(days, copy.inStockTomorrow, copy.inStockDays, localeTag)
         : copy.inStock
       : null,
     lead: !inStock && days > 0 ? pickupTime(days, copy, localeTag) : null,
-    buyable: isBuyable(offer),
+    buyable: inStock || days > 0,
   };
+}
+
+const pluralFormsSchema = z.object({
+  zero: z.optional(z.string()),
+  one: z.optional(z.string()),
+  two: z.optional(z.string()),
+  few: z.optional(z.string()),
+  many: z.optional(z.string()),
+  other: z.string(),
+});
+
+const leadTimeCopySchema = z.object({
+  inStock: z.string(),
+  inStockTomorrow: z.string(),
+  inStockDays: pluralFormsSchema,
+  tomorrow: z.string(),
+  days: pluralFormsSchema,
+});
+
+export function leadTimeCopyFrom(
+  json: string | undefined,
+): LeadTimeCopy | null {
+  try {
+    const parsed = leadTimeCopySchema.safeParse(JSON.parse(json ?? ''));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
 }

@@ -15,7 +15,7 @@ import {
   ORDERED_CART_PARAM,
 } from '@/utils/cartNotice';
 import { cartOutcomeSchema, type CartOutcome } from '@/utils/catalogueWire';
-import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
+import { leadTimeCopyFrom, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import {
   forgetOrderedCart,
@@ -242,20 +242,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         this.querySelector<HTMLElement>('[data-receipt]')!.hidden = false;
       }
 
-      readiness(
-        { in_stock, lead_time_days }: CartLine,
-        localeTag: string,
-      ): string | null {
-        try {
-          const { stock, lead } = offerAvailability(
-            { stock_quantity: Number(in_stock), lead_time_days },
-            JSON.parse(this.dataset.availability ?? '') as LeadTimeCopy,
-            localeTag,
-          );
-          return stock ?? lead;
-        } catch {
-          return null;
-        }
+      readiness(line: CartLine, localeTag: string): string | null {
+        const copy = leadTimeCopyFrom(this.dataset.availability);
+        if (!copy) return null;
+        const { stock, lead } = offerAvailability(line, copy, localeTag);
+        return stock ?? lead;
       }
 
       render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {

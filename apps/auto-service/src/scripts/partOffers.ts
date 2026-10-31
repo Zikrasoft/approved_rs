@@ -1,6 +1,6 @@
 import type { PartOffer } from '@podbor/catalog-contract/cart-wire';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
-import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
+import { leadTimeCopyFrom, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
 import { keepCartId, readCart, rememberCart } from './cartStore';
@@ -96,12 +96,11 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       fillRow(row: ParentNode, offer: PartOffer): void {
-        const { localeTag = 'sr', availability = '' } = this.dataset;
-        const { stock, lead, buyable } = offerAvailability(
-          offer,
-          JSON.parse(availability) as LeadTimeCopy,
-          localeTag,
-        );
+        const { localeTag = 'sr', availability } = this.dataset;
+        const copy = leadTimeCopyFrom(availability);
+        const { stock, lead, buyable } = copy
+          ? offerAvailability(offer, copy, localeTag)
+          : { stock: null, lead: null, buyable: false };
         fill(
           row,
           '[data-price]',
