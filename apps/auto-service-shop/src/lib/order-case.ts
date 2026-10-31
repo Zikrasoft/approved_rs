@@ -1,13 +1,12 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
-  checkoutContactSchema,
   type OrderCaseSummary,
   type Vehicle,
   vehicleName,
 } from '@podbor/catalog-contract';
 
-import { listedPartOf, orderTotal, readLine } from './line-metadata';
 import type { LeadOrder } from './order-lead';
+import { readPlacedOrder } from './placed-order';
 import { vehicleForVin } from './vin/car-for';
 
 const VIN_YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
@@ -37,22 +36,19 @@ export async function orderCaseSummary(
   container: MedusaContainer,
   order: LeadOrder,
 ): Promise<OrderCaseSummary> {
-  const contact = checkoutContactSchema.safeParse(order.metadata ?? {});
-  const parts = order.items
-    .filter((item) => !readLine(item.metadata).addonKind)
-    .map(({ metadata, title }) => listedPartOf(metadata, title))
-    .filter(({ brand, number }) => brand && number)
-    .map(({ brand, number }) => ({ brand, number }));
-  const total = orderTotal(order.items);
+  const placed = readPlacedOrder(order);
+  const parts = placed.lines
+    .filter(({ addon, part }) => !addon && part.brand && part.number)
+    .map(({ part: { brand, number } }) => ({ brand, number }));
   return {
     display_id: order.display_id,
-    car: await carOf(container, contact.data?.vin),
+    car: await carOf(container, placed.contact?.vin),
     parts: parts.filter(
       (part, index) =>
         parts.findIndex(
           ({ brand, number }) => brand === part.brand && number === part.number,
         ) === index,
     ),
-    total_rsd: order.currency_code === 'rsd' ? Math.round(total) : null,
+    total_rsd: order.currency_code === 'rsd' ? Math.round(placed.total) : null,
   };
 }

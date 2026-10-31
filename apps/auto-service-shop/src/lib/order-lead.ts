@@ -4,7 +4,7 @@ import type {
 } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys, MathBN } from '@medusajs/framework/utils';
 import { PARTS_ORDER_SERVICE } from '@podbor/brands';
-import { checkoutContactSchema, fitComment } from '@podbor/catalog-contract';
+import { fitComment } from '@podbor/catalog-contract';
 import {
   AD_SOURCE_FIELD,
   META_IDS_FIELD,
@@ -22,7 +22,7 @@ import {
 import { z } from 'zod';
 
 import { parseEnv } from './env';
-import { orderTotal, readLine, withAddonsUnderParts } from './line-metadata';
+import { readPlacedOrder, type PlacedOrder } from './placed-order';
 
 const LEAD_ROUTE_TIMEOUT_MS = 15_000;
 
@@ -55,9 +55,8 @@ export type LeadOrder = z.infer<typeof leadOrderSchema>;
 
 const withReadiness = (
   text: string,
-  metadata: Record<string, unknown> | null | undefined,
+  { inStock, leadTimeDays, supplier }: PlacedOrder['lines'][number],
 ) => {
-  const { inStock, leadTimeDays, supplier } = readLine(metadata);
   const readiness = [
     inStock && PARTS_ORDER_COPY.inStock,
     leadTimeDays && PARTS_ORDER_COPY.pickupIn(leadTimeDays),
@@ -72,32 +71,28 @@ export function orderLeadPayload(
   order: LeadOrder,
   adminOrigin: string,
 ): OrderLead {
-  const contact = checkoutContactSchema.parse(order.metadata ?? {});
+  const { contact, lines, total } = readPlacedOrder(order);
+  if (!contact) {
+    throw new Error(`Order ${order.id} has no contact`);
+  }
   const currency = order.currency_code.toUpperCase();
   const money = (amount: number) =>
     `${amount.toLocaleString('ru-RU')} ${currency}`;
-  const total = orderTotal(order.items);
   const summary = fitComment({
     head: [
       PARTS_ORDER_COPY.heading(order.display_id),
       PARTS_ORDER_COPY.confirm,
       contact.car ?? '',
     ],
-    lines: withAddonsUnderParts(order.items).map((item) =>
-      readLine(item.metadata).addonKind
+    lines: lines.map((line) =>
+      line.addon
         ? PARTS_ORDER_COPY.addon(
-            item.title,
-            item.unit_price === 0
-              ? PARTS_ORDER_COPY.free
-              : money(item.unit_price * item.quantity),
+            line.title,
+            line.unitPrice === 0 ? PARTS_ORDER_COPY.free : money(line.total),
           )
         : withReadiness(
-            PARTS_ORDER_COPY.line(
-              item.title,
-              item.quantity,
-              money(item.unit_price * item.quantity),
-            ),
-            item.metadata,
+            PARTS_ORDER_COPY.line(line.title, line.quantity, money(line.total)),
+            line,
           ),
     ),
     tail: [PARTS_ORDER_COPY.total(money(total))],
