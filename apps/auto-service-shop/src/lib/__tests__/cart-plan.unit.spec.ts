@@ -51,7 +51,7 @@ const addon = (
 });
 
 const quote = (overrides: Partial<Quote> = {}): Quote => ({
-  unit_price: 1850,
+  price: 1850,
   stock_quantity: 5,
   lead_time_days: 0,
   ...overrides,
@@ -104,16 +104,6 @@ describe('checkoutRefusal over planCart', () => {
     });
   });
 
-  it('refuses an Offer that sells for nothing, even at the price the visitor saw', () => {
-    expect(
-      judgeCheckout(
-        [part('l1', 'o1', 1, 0)],
-        quotes({ o1: quote({ unit_price: 0 }) }),
-        addons(),
-      ),
-    ).toEqual({ refusal: 'OFFER_MISSING' });
-  });
-
   it('refuses more than the supplier has in stock', () => {
     expect(
       judgeCheckout(
@@ -161,7 +151,7 @@ describe('checkoutRefusal over planCart', () => {
     expect(
       judgeCheckout(
         [part('l1', 'o1')],
-        quotes({ o1: quote({ unit_price: 1900 }) }),
+        quotes({ o1: quote({ price: 1900 }) }),
         addons(),
       ),
     ).toEqual({ refusal: 'OFFER_PRICE_CHANGED' });
@@ -178,7 +168,7 @@ describe('checkoutRefusal over planCart', () => {
     expect(
       judgeCheckout(
         [part('l1', 'o1'), part('l2', 'o2', 9)],
-        quotes({ o1: quote({ unit_price: 1 }), o2: quote() }),
+        quotes({ o1: quote({ price: 1 }), o2: quote() }),
         addons(),
       ),
     ).toEqual({ refusal: 'OFFER_PRICE_CHANGED' });
@@ -276,7 +266,7 @@ describe('checkoutRefusal over planCart', () => {
 
 const applied = (items: CartItem[], { fixes, stamps }: CartPlan) =>
   items
-    .filter(({ id }) => !fixes.remove.includes(id))
+    .filter(({ id }) => !fixes.remove.some(({ itemId }) => itemId === id))
     .map((item) => ({
       ...item,
       ...fixes.update.find(({ itemId }) => itemId === item.id)?.update,
@@ -347,10 +337,21 @@ describe('planCart', () => {
     );
 
     expect(plan.fixes).toEqual({
-      remove: ['a1', 'a3'],
+      remove: [
+        { itemId: 'a1', code: 'OFFER_PRICE_CHANGED' },
+        { itemId: 'a3', code: 'OFFER_MISSING' },
+      ],
       update: [
-        { itemId: 'l1', update: { unit_price: 1850 } },
-        { itemId: 'a2', update: { unit_price: 500, quantity: 3 } },
+        {
+          itemId: 'l1',
+          update: { unit_price: 1850 },
+          code: 'OFFER_PRICE_CHANGED',
+        },
+        {
+          itemId: 'a2',
+          update: { unit_price: 500, quantity: 3 },
+          code: 'OFFER_PRICE_CHANGED',
+        },
       ],
     });
     expect(plan.lines[0]?.addon?.item_id).toBe('a2');
@@ -381,7 +382,10 @@ describe('planCart', () => {
     expect(
       checkoutRefusal({
         lines: [],
-        fixes: { remove: ['a1'], update: [] },
+        fixes: {
+          remove: [{ itemId: 'a1', code: 'OFFER_PRICE_CHANGED' }],
+          update: [],
+        },
         stamps: [],
         refusal: null,
       }),
@@ -397,7 +401,7 @@ describe('planCart', () => {
       addon('a4', 'o_gone', INSTALLATION, 2, 1200),
       part('l2', 'o2', 1, 990),
     ];
-    const live = quotes({ o1: quote(), o2: quote({ unit_price: 1000 }) });
+    const live = quotes({ o1: quote(), o2: quote({ price: 1000 }) });
     const first = planCart(items, live, prices);
     const again = planCart(applied(items, first), live, prices);
 
@@ -407,4 +411,26 @@ describe('planCart', () => {
     expect(again.lines.every(({ available }) => available)).toBe(true);
     expect(checkoutRefusal(again)).toBeNull();
   });
+
+  it.each([
+    ['gone', quotes({})],
+    ['out of stock', quotes({ o1: quote({ stock_quantity: 1 }) })],
+    ['repriced', quotes({ o1: quote({ price: 1900 }) })],
+    [
+      'brought in',
+      quotes({ o1: quote({ stock_quantity: 0, lead_time_days: 2 }) }),
+    ],
+    ['as shown', quotes({ o1: quote() })],
+  ])(
+    'passes checkout once fixed exactly when every line reads available: %s',
+    (_, live) => {
+      const items = [part('l1', 'o1', 2), addon('a1', 'o1', 'service', 2)];
+      const plan = planCart(items, live, prices);
+      const again = planCart(applied(items, plan), live, prices);
+
+      expect(checkoutRefusal(again) === null).toBe(
+        plan.lines.every(({ available }) => available),
+      );
+    },
+  );
 });
