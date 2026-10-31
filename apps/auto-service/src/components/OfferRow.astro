@@ -10,9 +10,10 @@ import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   offer?: PartOffer;
+  secondary?: boolean;
 }
 
-const { offer } = Astro.props;
+const { offer, secondary = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
@@ -68,7 +69,10 @@ const stockText =
     aria-hidden="true"></span>
   <button
     type="button"
-    class="btn btn-primary w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60"
+    class:list={[
+      'btn w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
+      secondary ? 'btn-secondary' : 'btn-primary',
+    ]}
     data-buy
     data-offer-id={offer?.id}
     hidden={!buyable}

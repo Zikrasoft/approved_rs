@@ -20,7 +20,10 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   }
   const buyable = offers.filter(isBuyable);
   const [picked] = (buyable.length ? buyable : offers).toSorted(
-    (a, b) => Number(inStock(b)) - Number(inStock(a)) || a.price - b.price,
+    (a, b) =>
+      Number(inStock(b)) - Number(inStock(a)) ||
+      a.price - b.price ||
+      a.lead_time_days - b.lead_time_days,
   );
   return {
     id: picked.id,

@@ -59,6 +59,7 @@
   --color-panel-line: #55555a;
   --color-panel-line-strong: #797980;
   --color-panel-ink: #95959d;
+  --color-panel-fg: #ffffff;
   --color-ink: #222324;
   --color-ink-2: #4a4a4f;
   --color-muted: #636369;
@@ -66,10 +67,11 @@
   --color-line-strong: #cacace;
   --color-line-field: #919199;
   --color-signal: #fa6610;
-  --color-signal-hover: #e85e0e;
+  --color-signal-hover: #ff8540;
   --color-signal-ink: #bc4d0c;
   --color-signal-dark: #9e400a;
   --color-go: #18814d;
+  --color-danger: #de0000;
 
   --radius-block: 1.375rem;
   --radius-control: 0.75rem;
@@ -133,9 +135,13 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-signal);
+    outline: 3px solid var(--color-ink);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  :where(.bg-panel, .bg-panel-2) :focus-visible {
+    outline-color: var(--color-signal);
   }
 
   h1,
@@ -237,13 +243,13 @@
   }
 
   .btn-on-panel {
-    border: 1px solid var(--color-panel-line);
+    border: 1px solid var(--color-panel-line-strong);
     background-color: transparent;
-    color: #fff;
+    color: var(--color-panel-fg);
   }
 
   .btn-on-panel:hover {
-    border-color: var(--color-panel-line-strong);
+    border-color: var(--color-panel-ink);
     background-color: var(--color-panel-2);
   }
 
@@ -267,6 +273,10 @@
 
   .field:focus {
     border-color: var(--color-signal);
+  }
+
+  .field[aria-invalid='true'] {
+    border-color: var(--color-danger);
   }
 
   .field:disabled {

@@ -13,7 +13,7 @@ interface Props {
 const { uid, error, submitError } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
-const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
+const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
 ---
 
 <div>
@@ -29,7 +29,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
       data-field="consent"
     />
     <span
-      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-ink transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-ink transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
     >
       <Icon name="check" size={10} />
     </span>
