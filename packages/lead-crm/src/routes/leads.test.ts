@@ -18,6 +18,13 @@ const notifyLead = vi.fn().mockResolvedValue(undefined);
 const waitUntil = vi.fn();
 
 const refusalCopy = (locale: string) => ({
+  brand: {
+    name: 'CarLab',
+    background: '#ffffff',
+    text: '#222324',
+    accent: '#fa6610',
+    onAccent: '#222324',
+  },
   reasons: {
     'missing-contact': `${locale}: missing contact`,
     'invalid-phone': `${locale}: invalid phone`,
@@ -347,6 +354,8 @@ describe('createLeadsRoute', () => {
       '<input type="hidden" name="source_url" value="https://carlab.rs/ru/parts/" />',
     );
     expect(body).not.toContain('name="phone_number"');
+    expect(body).toContain('<h1>CarLab</h1>');
+    expect(body).toContain('background:#fa6610;color:#222324');
     expect(body).toContain('<button type="submit">Отправить</button>');
     expect(body).toContain(
       '<li class="tel"><a href="tel:+381601234567">+381 60 123 4567</a></li>',
