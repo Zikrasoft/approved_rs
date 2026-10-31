@@ -57,8 +57,8 @@ export function createShopOrders({
         signal: AbortSignal.timeout(SHOP_TIMEOUT_MS),
       },
     );
-    await response.body?.cancel();
-    if (outcomeRefused(response.status)) return 'conflict';
+    const body: unknown = await response.json().catch(() => null);
+    if (outcomeRefused(response.status, body)) return 'conflict';
     if (!response.ok) throw new Error(`The shop answered ${response.status}`);
     return 'settled';
   }

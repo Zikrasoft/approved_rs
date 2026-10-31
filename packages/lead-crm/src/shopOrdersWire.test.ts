@@ -8,14 +8,16 @@ import {
 
 describe('the final refusals on the shop orders wire', () => {
   it.each([
-    [404, true],
-    [409, true],
-    [410, false],
-    [500, false],
+    [404, { type: 'order_missing' }, true],
+    [404, { type: 'not_found' }, false],
+    [404, null, false],
+    [409, null, true],
+    [410, { type: 'order_missing' }, false],
+    [500, null, false],
   ])(
-    'reads a shop answering %i to an outcome as final: %s',
-    (status, final) => {
-      expect(outcomeRefused(status)).toBe(final);
+    'reads a shop answering %i %j to an outcome as final: %s',
+    (status, body, final) => {
+      expect(outcomeRefused(status, body)).toBe(final);
     },
   );
 

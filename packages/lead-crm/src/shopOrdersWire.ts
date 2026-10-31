@@ -98,11 +98,14 @@ export type OrderContact = z.output<typeof orderContactSchema>;
 export type OrderLead = z.input<typeof orderLeadSchema>;
 export type ShopOrderEvent = z.input<typeof shopOrderEventSchema>;
 
+export const ORDER_MISSING = 'order_missing';
 const SHOP_ORDER_UNKNOWN = 404;
 const SHOP_ORDER_CONFLICT = 409;
+const orderMissingSchema = z.object({ type: z.literal(ORDER_MISSING) });
 
-export const outcomeRefused = (status: number): boolean =>
-  status === SHOP_ORDER_UNKNOWN || status === SHOP_ORDER_CONFLICT;
+export const outcomeRefused = (status: number, body: unknown): boolean =>
+  status === SHOP_ORDER_CONFLICT ||
+  (status === SHOP_ORDER_UNKNOWN && orderMissingSchema.safeParse(body).success);
 
 export const LEAD_WON = 409;
 export const LEAD_MISSING = 410;
