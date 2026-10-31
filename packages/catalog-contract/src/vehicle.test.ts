@@ -5,6 +5,7 @@ import {
   vinLookupResponseSchema,
   vehicleLabel,
   vehicleName,
+  VIN_REFUSAL,
   vinSchema,
   type Vehicle,
 } from './vehicle.ts';
@@ -311,4 +312,13 @@ describe('vinSchema', () => {
     );
     expect(vinSchema.safeParse('HU 816 x, OX 404 D').success).toBe(false);
   });
+
+  it.each(['ЖЖЖ123', '12345678901234567', 'WBA35BG07ON074158', ' '])(
+    'refuses %j with a message that says what a VIN is, not what was typed',
+    (text) => {
+      expect(vinSchema.safeParse(text).error?.issues).toEqual([
+        expect.objectContaining({ message: VIN_REFUSAL }),
+      ]);
+    },
+  );
 });

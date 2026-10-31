@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { VIN_INPUT_PATTERN, VIN_PATTERN, vinOf, vinText } from './vin.ts';
+import { VIN_PATTERN, vinOf, vinText } from './vin.ts';
 
 describe('VIN patterns', () => {
   it('accepts seventeen VIN characters and refuses I, O and Q', () => {
@@ -8,11 +8,17 @@ describe('VIN patterns', () => {
     expect(VIN_PATTERN.test('wba8e9g50gnu12345')).toBe(false);
   });
 
-  it('lets the HTML field take the same VIN in either case', () => {
-    const field = new RegExp(`^(?:${VIN_INPUT_PATTERN})$`, 'v');
-    expect(field.test('wba8e9g50gnu12345')).toBe(true);
-    expect(field.test('WBA8E9G50GNU12345')).toBe(true);
-    expect(field.test('wba8e9g50gnu1234q')).toBe(false);
+  it.each([
+    ['1234567890123456Z', 'a maker code of digits only'],
+    ['YYYYYYYYYYYYYYYYY', 'no digit at all'],
+  ])('refuses %s, which has %s', (text) => {
+    expect(VIN_PATTERN.test(text)).toBe(false);
+    expect(vinOf(text)).toBeNull();
+  });
+
+  it('accepts a maker code that mixes digits and a letter', () => {
+    expect(VIN_PATTERN.test('1G1ZT51816F100001')).toBe(true);
+    expect(VIN_PATTERN.test('9BWZZZ377VT004251')).toBe(true);
   });
 });
 
@@ -44,6 +50,10 @@ describe('vinOf', () => {
 
   it('keeps a Cyrillic У right after the VIN prefix as the Y it looks like', () => {
     expect(vinOf('vin: УВА8Е31000А000001')).toBe('YBA8E31000A000001');
+  });
+
+  it('refuses an all-У string, though it reads as Latin', () => {
+    expect(vinOf('УУУУУУУУУУУУУУУУУ')).toBeNull();
   });
 
   it('refuses seventeen digits, which no VIN is', () => {
