@@ -2,8 +2,8 @@
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
-import { MAX_PART_QUANTITY } from '@/scripts/partsList';
 import Icon from './Icon.astro';
+import QuantityStepper from './QuantityStepper.astro';
 import VinInquiryForm from './VinInquiryForm.astro';
 
 interface Props {
@@ -50,13 +50,8 @@ const copy = content(locale).pages.partsInquiry;
         <a
           class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink link-quiet [overflow-wrap:anywhere]"
           data-part-link></a>
-        <input
-          type="number"
-          inputmode="numeric"
-          min="1"
-          max={MAX_PART_QUANTITY}
-          step="1"
-          class="field spec min-h-11 w-14 shrink-0 px-2 py-1.5 text-center"
+        <QuantityStepper
+          role="group"
           aria-label={copy.listQuantityLabel}
           data-part-quantity
         />
