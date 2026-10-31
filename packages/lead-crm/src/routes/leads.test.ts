@@ -161,7 +161,7 @@ describe('createLeadsRoute', () => {
     const lead = notifyLead.mock.calls.at(-1)![0];
     expect(lead.name).toHaveLength(200);
     expect(lead.comment).toHaveLength(2000);
-    expect(lead.source_url).toHaveLength(500);
+    expect(lead.source_url).toBeNull();
   });
 
   it('stores a lead without an ad visit when the field is missing or forged', async () => {
@@ -403,14 +403,29 @@ describe('createLeadsRoute', () => {
     expect(waitUntil).toHaveBeenCalledOnce();
   });
 
+  it.each(['javascript:alert(1)', 'https://evil.example/sr/parts/'])(
+    'stores no page for a forged Referer %s',
+    async (referer) => {
+      const ctx = makeCtx(valid());
+      ctx.request.headers.set('referer', referer);
+
+      await POST(ctx);
+
+      expect(notifyLead).toHaveBeenCalledWith(
+        expect.objectContaining({ source_url: null }),
+        '[leads]',
+      );
+    },
+  );
+
   it('takes the page from the Referer when a form without JavaScript sent none', async () => {
     const ctx = makeCtx(valid());
-    ctx.request.headers.set('referer', 'https://carlab.rs/sr/parts/');
+    ctx.request.headers.set('referer', 'http://localhost/sr/parts/');
 
     await POST(ctx);
 
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ source_url: 'https://carlab.rs/sr/parts/' }),
+      expect.objectContaining({ source_url: 'http://localhost/sr/parts/' }),
       '[leads]',
     );
   });
@@ -431,7 +446,7 @@ describe('createLeadsRoute', () => {
         country: 'de',
         city: 'Belgrade',
         consent: 'on',
-        source_url: '/ru/vehicle-buyback/de/',
+        source_url: 'http://localhost/ru/vehicle-buyback/de/',
         visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
         ad_source: JSON.stringify({
           source: 'facebook',
@@ -454,7 +469,7 @@ describe('createLeadsRoute', () => {
         contactChannel: 'telegram',
         comment: 'BMW X5',
         country: 'de',
-        source_url: '/ru/vehicle-buyback/de/',
+        source_url: 'http://localhost/ru/vehicle-buyback/de/',
         visitorId: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
         adSource: {
           source: 'facebook',

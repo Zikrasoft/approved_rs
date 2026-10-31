@@ -4,6 +4,8 @@ import {
   isValidContact,
   leadEnvelopeSchema,
   leadSubmissionSchema,
+  shownPage,
+  siteUrl,
   sourceUrlSchema,
   serviceSlugSchema,
   visitorIdSchema,
@@ -201,9 +203,18 @@ describe('metaIdsFieldSchema', () => {
 });
 
 describe('sourceUrlSchema', () => {
-  it('truncates an oversized url', () => {
-    expect(sourceUrlSchema.parse(`/ru/${'a'.repeat(9000)}`)).toHaveLength(
-      MAX_URL_LENGTH,
+  it.each([
+    `https://carlab.rs/ru/${'a'.repeat(9000)}`,
+    'javascript:alert(1)',
+    'data:text/html,<b>x</b>',
+    '/ru/parts/',
+  ])('drops %s, which is no page a visitor stood on', (value) => {
+    expect(sourceUrlSchema.parse(value)).toBeNull();
+  });
+
+  it('keeps an http(s) page', () => {
+    expect(sourceUrlSchema.parse(' https://carlab.rs/ru/parts/ ')).toBe(
+      'https://carlab.rs/ru/parts/',
     );
   });
 
@@ -213,6 +224,32 @@ describe('sourceUrlSchema', () => {
 
   it('falls back to null for a value that is not text', () => {
     expect(sourceUrlSchema.parse(new File([], 'x.txt'))).toBeNull();
+  });
+});
+
+describe('siteUrl', () => {
+  it('keeps a page of the site that took the Lead', () => {
+    expect(siteUrl('https://carlab.rs/ru/', 'https://carlab.rs')).toBe(
+      'https://carlab.rs/ru/',
+    );
+  });
+
+  it.each([
+    'https://evil.example/ru/',
+    'http://carlab.rs/ru/',
+    'javascript:alert(1)',
+  ])('drops %s', (value) => {
+    expect(siteUrl(value, 'https://carlab.rs')).toBeNull();
+  });
+});
+
+describe('shownPage', () => {
+  it.each([
+    ['https://carlab.rs/ru/', 'https://carlab.rs/ru/'],
+    ['/ru/parts/', '/ru/parts/'],
+    ['javascript:alert(1)', null],
+  ])('shows %s as %s', (stored, shown) => {
+    expect(shownPage(stored)).toBe(shown);
   });
 });
 

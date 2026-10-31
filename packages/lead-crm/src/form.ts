@@ -83,7 +83,21 @@ const optionalText = (max: number, clean = singleLine) =>
     .transform((value) => (value ? clean(value).slice(0, max) : '') || null)
     .catch(null);
 
-export const sourceUrlSchema = optionalText(MAX_URL_LENGTH);
+export const sourceUrlSchema = z
+  .string()
+  .trim()
+  .max(MAX_URL_LENGTH)
+  .pipe(z.url({ protocol: /^https?$/ }))
+  .nullable()
+  .catch(null);
+
+export const shownPage = (stored: string): string | null =>
+  stored.startsWith('/') || sourceUrlSchema.parse(stored) ? stored : null;
+
+export const siteUrl = (raw: unknown, origin: string): string | null => {
+  const url = sourceUrlSchema.parse(raw);
+  return url && new URL(url).origin === origin ? url : null;
+};
 
 function parseJson(value: unknown): unknown {
   try {

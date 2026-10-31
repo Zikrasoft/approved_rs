@@ -104,7 +104,7 @@ describe('createContactClickRoute', () => {
     await POST(
       makeCtx({
         channel: 'phone',
-        source_url: 'https://example.com/sr/usluge/',
+        source_url: 'http://localhost/sr/usluge/',
       }),
     );
     expect(notifyLead).toHaveBeenCalledWith(
@@ -114,9 +114,7 @@ describe('createContactClickRoute', () => {
   });
 
   it('falls back to the default locale for a source_url with no path at all', async () => {
-    await POST(
-      makeCtx({ channel: 'phone', source_url: 'https://example.com' }),
-    );
+    await POST(makeCtx({ channel: 'phone', source_url: 'http://localhost' }));
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ locale: 'ru' }),
       '[contact-click]',
@@ -178,14 +176,13 @@ describe('createContactClickRoute', () => {
     );
   });
 
-  it('truncates an oversized source_url', async () => {
-    await POST(
-      makeCtx({
-        channel: 'phone',
-        source_url: `/ru/${'a'.repeat(9000)}`,
-      }),
-    );
-    expect(notifyLead.mock.calls.at(-1)![0].source_url).toHaveLength(500);
+  it.each([
+    `http://localhost/ru/${'a'.repeat(9000)}`,
+    'https://evil.example/ru/',
+    'javascript:alert(1)',
+  ])('stores no page for %s', async (source_url) => {
+    await POST(makeCtx({ channel: 'phone', source_url }));
+    expect(notifyLead.mock.calls.at(-1)![0].source_url).toBeNull();
   });
 
   it('drops a visitor id that is not one this site could have issued', async () => {

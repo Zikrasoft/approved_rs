@@ -1631,6 +1631,22 @@ describe('the Lead topic', () => {
     }
   });
 
+  it('names only a page a visitor could stand on, in the summary and the DM detail', () => {
+    for (const [source_url, shown] of [
+      ['https://carlab.rs/ru/parts/', true],
+      ['/ru/parts/', true],
+      ['javascript:alert(1)', false],
+    ] as const) {
+      const lead = makeLead({ source_url });
+      for (const text of [
+        formatter.topicSummaryText(lead),
+        buildLeadDetail(lead, 'owner').text,
+      ]) {
+        expect(text.includes(`Страница: ${source_url}`)).toBe(shown);
+      }
+    }
+  });
+
   it('leaves a phone or an id contact as plain text in the summary', () => {
     expect(
       formatter.topicSummaryText(

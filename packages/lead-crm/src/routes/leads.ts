@@ -10,6 +10,7 @@ import {
   leadEnvelopeSchema,
   leadRefusal,
   leadSubmissionSchema,
+  siteUrl,
   type LeadRefusal,
 } from '../form.ts';
 import { escapeHtml } from '../telegram/markup.ts';
@@ -176,8 +177,8 @@ export function createLeadsRoute<L extends string>({
     if (!form.get('source_url')) {
       form.set('source_url', request.headers.get('referer') ?? '');
     }
-    const submission = leadSubmissionSchema.safeParse(form);
-    if (!submission.success) {
+    const parsed = leadSubmissionSchema.safeParse(form);
+    if (!parsed.success) {
       return refusalPage(
         locale,
         refusalCopy(locale),
@@ -185,7 +186,12 @@ export function createLeadsRoute<L extends string>({
         new URL(request.url).pathname,
       );
     }
-    if (submission.data.orderId) {
+    const submission = {
+      ...parsed.data,
+      source_url: siteUrl(parsed.data.source_url, new URL(request.url).origin),
+      locale,
+    };
+    if (submission.orderId) {
       if (
         !secretMatches(
           bearerToken(request.headers.get('authorization')),
@@ -193,15 +199,12 @@ export function createLeadsRoute<L extends string>({
         )
       )
         return new Response(null, { status: 401 });
-      const { stored, delivered } = await notifyLead(
-        { ...submission.data, locale },
-        '[leads]',
-      );
+      const { stored, delivered } = await notifyLead(submission, '[leads]');
       return new Response(null, { status: stored || delivered ? 201 : 503 });
     }
 
-    waitUntil(notifyLead({ ...submission.data, locale }, '[leads]'));
+    waitUntil(notifyLead(submission, '[leads]'));
 
-    return redirect(thanksPath(locale, submission.data.service), 302);
+    return redirect(thanksPath(locale, submission.service), 302);
   };
 }

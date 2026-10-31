@@ -2,6 +2,7 @@ import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   adSourceFieldSchema,
   metaIdsFieldSchema,
+  siteUrl,
   vinNote,
   visitorIdSchema,
 } from '../form.ts';
@@ -35,6 +36,7 @@ export const orderLeadSubmission = (
   contact: OrderContact,
   summary: string,
   locale: string,
+  origin: string,
 ): LeadSubmission => ({
   name: contact.name ?? '',
   contact: contact.contact,
@@ -45,7 +47,7 @@ export const orderLeadSubmission = (
     .filter(Boolean)
     .join('\n'),
   country: null,
-  source_url: contact.source_url ?? null,
+  source_url: siteUrl(contact.source_url, origin),
   visitorId: visitorIdSchema.parse(contact.visitor_id),
   adSource: adSourceFieldSchema.parse(contact.ad_source),
   metaIds: metaIdsFieldSchema.parse(contact.meta_ids),
@@ -83,7 +85,13 @@ export function createShopOrdersRoute({
         ? contact.locale
         : defaultLocale;
     const { stored, delivered } = await notifyLead(
-      orderLeadSubmission(order_id, contact, summary, locale),
+      orderLeadSubmission(
+        order_id,
+        contact,
+        summary,
+        locale,
+        new URL(request.url).origin,
+      ),
       '[shop-orders]',
     );
     return new Response(null, { status: stored || delivered ? 201 : 503 });
