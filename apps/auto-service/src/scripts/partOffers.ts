@@ -1,6 +1,10 @@
 import type { PartOffer } from '@podbor/catalog-contract/cart-wire';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
-import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
+import {
+  offerAvailability,
+  type LeadTimeCopy,
+  type PluralForms,
+} from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
 import { keepCartId, readCart, rememberCart } from './cartStore';
@@ -60,7 +64,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         );
         const more = this.querySelector<HTMLElement>('[data-more]');
         if (more) more.hidden = others.length === 0;
-        const { localeTag = 'sr' } = this.dataset;
+        const { localeTag = 'sr', availability = '' } = this.dataset;
         fill(
           this,
           '[data-more-count]',
@@ -69,8 +73,13 @@ export function definePartOffers(tagName = 'part-offers'): void {
             {
               moreOffers: this.dataset.moreLabel ?? '',
               moreOffersCheaper: this.dataset.moreCheaperLabel ?? '',
+              moreOffersSeveral: JSON.parse(
+                this.dataset.moreSeveral ?? '',
+              ) as PluralForms,
+              leadTime: JSON.parse(availability) as LeadTimeCopy,
             },
             (offer) => formatMoney(offer.price, offer.currency, localeTag),
+            localeTag,
           ),
         );
         if (this.hidden) {

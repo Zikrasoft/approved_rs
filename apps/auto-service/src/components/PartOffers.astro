@@ -53,6 +53,7 @@ const localeTag = BCP47_BY_LOCALE[locale];
       data-cart-href={PathBuilder.partsCart(locale)}
       data-more-label={copy.moreOffers}
       data-more-cheaper-label={copy.moreOffersCheaper}
+      data-more-several={JSON.stringify(copy.moreOffersSeveral)}
       {...part}
     >
       <h2 class="text-block font-semibold">
@@ -75,8 +76,11 @@ const localeTag = BCP47_BY_LOCALE[locale];
       <details class="group/more" data-more hidden={others.length === 0}>
         <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
           <span data-more-count>
-            {moreOffersLabel(summary, copy, (offer) =>
-              formatMoney(offer.price, offer.currency, localeTag),
+            {moreOffersLabel(
+              summary,
+              copy,
+              (offer) => formatMoney(offer.price, offer.currency, localeTag),
+              localeTag,
             )}
           </span>
           <Icon

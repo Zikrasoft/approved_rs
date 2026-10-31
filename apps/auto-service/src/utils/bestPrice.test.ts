@@ -113,28 +113,47 @@ describe('offerSummary', () => {
 
 describe('moreOffersLabel', () => {
   const copy = {
-    moreOffers: 'Другие предложения ({count})',
-    moreOffersCheaper: 'Другие предложения ({count}), дешевле от {price}',
+    moreOffers: 'Еще одно предложение: {offer}',
+    moreOffersCheaper: 'Есть дешевле: {offer}',
+    moreOffersSeveral: {
+      one: 'Еще {count} предложение, от {price}',
+      few: 'Еще {count} предложения, от {price}',
+      many: 'Еще {count} предложений, от {price}',
+      other: 'Еще {count} предложения, от {price}',
+    },
+    leadTime: {
+      inStock: 'В наличии',
+      inStockTomorrow: 'В наличии, забрать завтра',
+      inStockDays: { other: 'В наличии, забрать через {days} дня' },
+      tomorrow: 'Забрать завтра',
+      days: { other: 'Забрать через {days} дня' },
+    },
   };
   const money = ({ price }: { price: number }) => `${price} RSD`;
+  const label = (offers: ReturnType<typeof offer>[]) =>
+    moreOffersLabel(offerSummary(offers), copy, money, 'ru');
 
-  it('says a folded offer is cheaper and how much it costs', () => {
-    expect(
-      moreOffersLabel(
-        offerSummary([offer(1200, 4), offer(990, 0, 2)]),
-        copy,
-        money,
-      ),
-    ).toBe('Другие предложения (1), дешевле от 990 RSD');
+  it('names the one cheaper offer with its price and when it can be collected', () => {
+    expect(label([offer(1200, 4), offer(990, 0, 2)])).toBe(
+      'Есть дешевле: 990 RSD, забрать через 2 дня',
+    );
   });
 
-  it('only counts the folded offers when none is cheaper', () => {
+  it('names the one other offer when it is not cheaper', () => {
+    expect(label([offer(1200, 0, 2), offer(1500, 0, 1)])).toBe(
+      'Еще одно предложение: 1500 RSD, забрать завтра',
+    );
+  });
+
+  it('counts several offers with a plural and the lowest of their prices', () => {
+    expect(label([offer(1500, 4), offer(1200, 0, 1), offer(990, 0, 3)])).toBe(
+      'Еще 2 предложения, от 990 RSD',
+    );
     expect(
-      moreOffersLabel(
-        offerSummary([offer(1200, 0, 2), offer(1500, 0, 1)]),
-        copy,
-        money,
-      ),
-    ).toBe('Другие предложения (1)');
+      label([
+        offer(2000, 4),
+        ...[1, 2, 3, 4, 5].map((days) => offer(1900 - days * 100, 0, days)),
+      ]),
+    ).toBe('Еще 5 предложений, от 1400 RSD');
   });
 });

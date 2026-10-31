@@ -4,6 +4,12 @@ import {
   rankOffers,
   type RankableOffer,
 } from '@podbor/catalog-contract/availability';
+import {
+  offerAvailability,
+  plural,
+  type LeadTimeCopy,
+  type PluralForms,
+} from './leadTime';
 
 export type BestPrice = {
   id: string;
@@ -32,17 +38,41 @@ export function offerSummary<Offer extends RankableOffer>(offers: Offer[]) {
   };
 }
 
-export type MoreOffersCopy = { moreOffers: string; moreOffersCheaper: string };
+export type MoreOffersCopy = {
+  moreOffers: string;
+  moreOffersCheaper: string;
+  moreOffersSeveral: PluralForms;
+  leadTime: LeadTimeCopy;
+};
 
-export const moreOffersLabel = <Offer extends RankableOffer>(
+const lowerFirst = (text: string, localeTag: string) =>
+  text.charAt(0).toLocaleLowerCase(localeTag) + text.slice(1);
+
+export function moreOffersLabel<Offer extends RankableOffer>(
   { others, cheaper }: { others: Offer[]; cheaper: Offer | null },
   copy: MoreOffersCopy,
   money: (offer: Offer) => string,
-): string =>
-  (cheaper
-    ? copy.moreOffersCheaper.replace('{price}', money(cheaper))
-    : copy.moreOffers
-  ).replace('{count}', String(others.length));
+  localeTag: string,
+): string {
+  const [only, ...rest] = others;
+  if (!only) return '';
+  if (rest.length === 0) {
+    const { stock, lead } = offerAvailability(only, copy.leadTime, localeTag);
+    const when = stock ?? lead;
+    return (cheaper ? copy.moreOffersCheaper : copy.moreOffers).replace(
+      '{offer}',
+      [money(only), when && lowerFirst(when, localeTag)]
+        .filter(Boolean)
+        .join(', '),
+    );
+  }
+  const lowest = others.reduce((low, offer) =>
+    offer.price < low.price ? offer : low,
+  );
+  return plural(others.length, copy.moreOffersSeveral, localeTag)
+    .replace('{count}', String(others.length))
+    .replace('{price}', money(lowest));
+}
 
 export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   const { best, startsFrom } = offerSummary(
