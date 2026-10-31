@@ -47,7 +47,7 @@ import {
   pagedCars,
   vehicleKey,
 } from '../../../lib/car-pages';
-import { modelsBySlug } from '../../../lib/store-response';
+import { modelBySlug } from '../../../lib/store-response';
 import { type CarMatch, matchCars } from '../../../search/catalogue-car';
 import {
   PART_IDENTIFIER_INDEX,
@@ -250,11 +250,12 @@ export async function GET(
   const narrowedTo = found
     ? { slug: found.slug, name: translated(found, 'name', locale) }
     : null;
-  const [vehicleModel] = model
-    ? await modelsBySlug(catalog, model, make, {
-        relations: ['chassis', 'chassis.series', 'chassis.series.make'],
-      })
-    : [];
+  const vehicleModel =
+    make && model
+      ? await modelBySlug(catalog, make, model, {
+          relations: ['chassis', 'chassis.series', 'chassis.series.make'],
+        })
+      : null;
   if (model && !vehicleModel) {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,

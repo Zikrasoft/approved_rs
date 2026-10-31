@@ -1889,7 +1889,10 @@ describe('catalogue.listingScope', () => {
         ],
         vehicles: [VEHICLE],
       }),
-    ).listingScope({ category: 'oil-filters', model: 'f30-320d' }, 'sr');
+    ).listingScope(
+      { category: 'oil-filters', make: 'bmw', model: 'f30-320d' },
+      'sr',
+    );
 
     expect(scope).toEqual({
       category: { slug: 'oil-filters', name: 'Filteri ulja' },
@@ -1922,9 +1925,21 @@ describe('catalogue.listingScope', () => {
 
     const scope = await catalogueWith(
       backend({ vehicles: [other, VEHICLE] }),
-    ).listingScope({ model: 'f30-320d' }, 'ru');
+    ).listingScope({ make: 'bmw', model: 'f30-320d' }, 'ru');
 
     expect(scope?.model).toEqual(VEHICLE.model);
+  });
+
+  it('names no Model without its Make', async () => {
+    const fetch = backend({ vehicles: [VEHICLE] });
+
+    const scope = await catalogueWith(fetch).listingScope(
+      { model: 'f30-320d' },
+      'ru',
+    );
+
+    expect(scope?.model).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('names nothing when the backend cannot answer', async () => {

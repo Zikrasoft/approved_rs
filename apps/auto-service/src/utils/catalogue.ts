@@ -228,11 +228,11 @@ export function createCatalogue({
       return { items: vehicles, next };
     });
 
-  const modelNamed = async (make: string | undefined, slug: string) =>
+  const modelNamed = async (make: string, slug: string) =>
     vehiclesResponseSchema
       .parse(
         await request(
-          `/store/vehicles?${new URLSearchParams({ ...(make && { make }), model: slug, limit: '1' })}`,
+          `/store/vehicles?${new URLSearchParams({ make, model: slug, limit: '1' })}`,
         ),
       )
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
@@ -416,7 +416,7 @@ export function createCatalogue({
       try {
         const [allCategories, namedModel] = await Promise.all([
           category ? categories() : [],
-          model ? modelNamed(make, model) : null,
+          make && model ? modelNamed(make, model) : null,
         ]);
         const named = allCategories.find(({ slug }) => slug === category);
         return {

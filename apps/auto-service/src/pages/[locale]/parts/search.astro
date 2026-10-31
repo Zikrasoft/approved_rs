@@ -55,10 +55,11 @@ const category = CATALOG_KEY_PATTERN.test(categoryParam)
   ? categoryParam
   : undefined;
 const modelParam = params.get('model') ?? '';
-const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
 const makeParam = params.get('make') ?? '';
-const make =
-  model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
+const scoped =
+  CATALOG_KEY_PATTERN.test(modelParam) && CATALOG_KEY_PATTERN.test(makeParam);
+const model = scoped ? modelParam : undefined;
+const make = scoped ? makeParam : undefined;
 const requestedFacets = params.getAll('facets');
 const requestedRanges = rangesFromParams(params);
 const { facets: chosen, ranges } = filtersWithinCap(

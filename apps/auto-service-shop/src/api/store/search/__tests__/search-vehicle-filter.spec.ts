@@ -110,6 +110,11 @@ medusaIntegrationTestRunner({
           },
         ]);
 
+        await createVehicleFixture(catalog, {
+          typeCode: 'A001',
+          make: { slug: 'alpina', name: 'Alpina' },
+        });
+
         await getContainer()
           .resolve<PublishModuleService>(PUBLISH_MODULE)
           .publishAll();
@@ -176,7 +181,7 @@ medusaIntegrationTestRunner({
 
       it('narrows to the Parts fitted to any Vehicle of a Model and names the Model', async () => {
         const response = await api.get(
-          `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=f30-320d`,
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&make=bmw&model=f30-320d`,
           storeHeaders,
         );
 
@@ -194,7 +199,7 @@ medusaIntegrationTestRunner({
 
       it('finds nothing for a Model none of whose Vehicles fits the Part', async () => {
         const response = await api.get(
-          `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=g20-320d`,
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&make=bmw&model=g20-320d`,
           storeHeaders,
         );
 
@@ -203,10 +208,32 @@ medusaIntegrationTestRunner({
         expect(response.data.model.slug).toBe('g20-320d');
       });
 
+      it('scopes to the Model of the Make asked for when two Makes share its slug', async () => {
+        const response = await api.get(
+          `/store/search?q=${encodeURIComponent(q)}&locale=ru&make=alpina&model=f30-320d`,
+          storeHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.results).toEqual([]);
+        expect(response.data.model.chassis.series.make.slug).toBe('alpina');
+      });
+
+      it('refuses a Model without its Make', async () => {
+        const response = await api
+          .get(
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=f30-320d`,
+            storeHeaders,
+          )
+          .catch((error) => error.response);
+
+        expect(response.status).toBe(400);
+      });
+
       it('returns 404 for an unknown model', async () => {
         const response = await api
           .get(
-            `/store/search?q=${encodeURIComponent(q)}&locale=ru&model=missing-model`,
+            `/store/search?q=${encodeURIComponent(q)}&locale=ru&make=bmw&model=missing-model`,
             storeHeaders,
           )
           .catch((error) => error.response);

@@ -16,6 +16,11 @@ import {
 
 const recordId = z.string().regex(CATALOGUE_ID_PATTERN);
 
+const modelHasMake = ({ make, model }: { make?: string; model?: string }) =>
+  !model || Boolean(make);
+
+const MODEL_NEEDS_MAKE = 'model needs make';
+
 export const StoreSearchParts = z
   .object({
     q: z.string().trim().min(1).max(200).optional(),
@@ -59,6 +64,7 @@ export const StoreSearchParts = z
     limit: z.coerce.number().int().positive().max(100).default(20),
   })
   .refine(({ q, category }) => q || category, 'q or category is required')
+  .refine(modelHasMake, MODEL_NEEDS_MAKE)
   .refine(
     ({ facets, range }) =>
       filteredKeyCount(facets, range) <= SEARCH_FILTER_CAPS.keys,
@@ -138,5 +144,5 @@ export type StoreListFitmentsType = StoreListPartPagesType;
 export const StoreListVehicles = StoreListPartPages.extend({
   make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
   model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
-});
+}).refine(modelHasMake, MODEL_NEEDS_MAKE);
 export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;

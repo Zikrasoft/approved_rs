@@ -142,7 +142,7 @@ medusaIntegrationTestRunner({
 
         it('refuses a page past the largest limit', async () => {
           const response = await api
-            .get('/store/vehicles?limit=5001', storeHeaders)
+            .get('/store/vehicles?limit=1001', storeHeaders)
             .catch((error) => error.response);
 
           expect(response.status).toBe(400);
@@ -155,7 +155,7 @@ medusaIntegrationTestRunner({
           });
 
           const response = await api.get(
-            `/store/vehicles?model=${model.slug}&limit=1`,
+            `/store/vehicles?make=bmw&model=${model.slug}&limit=1`,
             storeHeaders,
           );
 
@@ -164,9 +164,17 @@ medusaIntegrationTestRunner({
           ]);
         });
 
+        it('refuses a Model without its Make', async () => {
+          const response = await api
+            .get('/store/vehicles?model=g20-330i', storeHeaders)
+            .catch((error) => error.response);
+
+          expect(response.status).toBe(400);
+        });
+
         it('lists no Vehicle for a Model that does not exist', async () => {
           const response = await api.get(
-            '/store/vehicles?model=no-such-model',
+            '/store/vehicles?make=bmw&model=no-such-model',
             storeHeaders,
           );
 
