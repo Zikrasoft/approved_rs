@@ -29,7 +29,7 @@ value() { sed -n "s/^$1=//p" "$work/env"; }
 
 check "$(value NODE_ENV)" production 'a value the template sets is kept'
 check "$(value STORE_CORS)" https://carlab.rs 'a URL the template sets is kept'
-check "$(value NEW_REQUIRED_SECRET)" ci-placeholder 'an empty value gets a placeholder'
+check "$(value NEW_REQUIRED_SECRET)" ci-placeholder-of-thirty-two-characters 'an empty value gets a placeholder long enough for a production secret'
 check "$(value TYPESENSE_API_KEY)" xyz 'the test stack replaces what it serves'
 check "$(value FILE_URL)" https://carlab-public.s3.eu-central-1.amazonaws.com 'a URL-shaped value gets a URL'
 check "$(value DATABASE_URL)" postgres://postgres:postgres@127.0.0.1:55432/medusa 'what compose adds is added'

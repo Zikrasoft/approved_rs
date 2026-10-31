@@ -83,7 +83,9 @@ const envFields = z.object({
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
   LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
   SHOP_LEAD_SECRET: optionalSecret,
+  SHOP_LEAD_SECRET_PREVIOUS: optionalSecret,
   SHOP_ORDER_OUTCOME_SECRET: optionalSecret,
+  SHOP_ORDER_OUTCOME_SECRET_PREVIOUS: optionalSecret,
   VIN_DECODERS: z
     .string()
     .default(VIN_DECODER_NAMES.join(','))
@@ -117,6 +119,24 @@ const envFields = z.object({
 type S3Fields = { NODE_ENV: string } & Partial<
   Record<S3Name | 'S3_ENDPOINT', string>
 >;
+
+const MIN_PRODUCTION_SECRET_LENGTH = 32;
+
+const requireStrongSecrets = (
+  env: { NODE_ENV: string; JWT_SECRET: string; COOKIE_SECRET: string },
+  context: z.RefinementCtx,
+) => {
+  if (env.NODE_ENV !== 'production') return;
+  for (const name of ['JWT_SECRET', 'COOKIE_SECRET'] as const) {
+    if (env[name].length < MIN_PRODUCTION_SECRET_LENGTH) {
+      context.addIssue({
+        code: 'custom',
+        path: [name],
+        message: `${name} needs at least ${MIN_PRODUCTION_SECRET_LENGTH} characters in production`,
+      });
+    }
+  }
+};
 
 const requireS3 = (env: S3Fields, context: z.RefinementCtx) => {
   const missing = S3_NAMES.filter((name) => !env[name]);
@@ -166,6 +186,7 @@ const envSchema = envFields
     message: 'FILE_URL is required in production',
   })
   .superRefine(requireS3)
+  .superRefine(requireStrongSecrets)
   .transform((env) => ({
     ...env,
     S3: s3ConfigOf(env),

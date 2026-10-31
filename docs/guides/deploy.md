@@ -376,6 +376,22 @@ and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
 
+**Rotating either secret without downtime.** Every side that checks a Bearer
+secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
+`SHOP_ORDER_OUTCOME_SECRET` and `SHOP_LEAD_SECRET`, carlab.rs checks
+`SHOP_LEAD_SECRET`; a side only ever sends the current value.
+
+1. Make a new value (`openssl rand -hex 32`).
+2. On every side that holds the secret, move the old value to
+   `<NAME>_PREVIOUS` and put the new one in `<NAME>`: for
+   `SHOP_LEAD_SECRET` that is carlab.rs and `/srv/carlab/.env`, for
+   `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
+   and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
+   shop (`docker compose up -d medusa`), in any order: while the sides differ,
+   each still takes the other's old or new value.
+3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
+   redeploy or restart again.
+
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).
 
@@ -590,18 +606,18 @@ instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
 transfer, $24 a month), in the same region as the shop's S3 buckets, all
 described in `infra/auto-service-shop/`:
 
-| File                                     | What it is                                                                                                                                                           |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB, basic_auth on the admin host                                         |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                       |
-| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                         |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
-| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
+| File                                     | What it is                                                                                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                                           |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                                                     |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed, basic_auth on the admin host |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                                              |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
+| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                                                     |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -838,6 +854,8 @@ number gets its CI value in that script. The non-obvious parts:
 - do not touch `MEDUSA_TAG` by hand: `deploy.sh` rewrites it.
 - `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`:
   `openssl rand -hex 32`. Hex specifically: compose substitutes `$…` inside `.env`.
+  With `NODE_ENV=production` the shop refuses to start on a `JWT_SECRET` or
+  `COOKIE_SECRET` shorter than 32 characters.
 - `DATABASE_URL` and the `TYPESENSE_HOST`/`PORT`/`PROTOCOL` are not written into
   `.env`: compose assembles them from the service names, `POSTGRES_PASSWORD` and
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.

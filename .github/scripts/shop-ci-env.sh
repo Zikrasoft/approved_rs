@@ -4,7 +4,7 @@ set -eu
 root="$(cd "$(dirname -- "$0")/../.." && pwd)"
 template=${1:-$root/infra/auto-service-shop/production.env.example}
 
-awk -v placeholder=ci-placeholder '
+awk -v placeholder=ci-placeholder-of-thirty-two-characters '
   function split_line(line) {
     key = substr(line, 1, index(line, "=") - 1)
     value = substr(line, index(line, "=") + 1)

@@ -5,7 +5,7 @@ import { notifyLead } from '@/lib/crm';
 import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 
 export const POST = createShopOrdersRoute({
-  secret: process.env.SHOP_LEAD_SECRET,
+  secret: [process.env.SHOP_LEAD_SECRET, process.env.SHOP_LEAD_SECRET_PREVIOUS],
   notifyLead,
   cancelOrder: async (orderId) =>
     (await import('@/lib/crmBot')).cancelOrderLead(orderId),
