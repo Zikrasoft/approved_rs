@@ -135,6 +135,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             placeholder={site.form.telegramPlaceholder}
             aria-describedby={errorId.telegram}
             class={field}
+            name="telegram"
             data-telegram
             data-field="telegram"
           />
@@ -156,6 +157,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             <select
               aria-label={site.form.countryLabel}
               class={`${field} max-w-full appearance-none overflow-hidden text-ellipsis px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
+              name="phone_country"
               data-country
               data-display-locale={displayLocale}
             >

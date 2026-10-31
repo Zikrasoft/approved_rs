@@ -166,6 +166,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
         <div id={panelIds.telegram} data-panel="telegram" role="tabpanel">
           <input
             type="text"
+            name="telegram"
             data-telegram
             data-field="telegram"
             autocomplete="username"
@@ -188,6 +189,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
           <div class="flex gap-2">
             <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
               <select
+                name="phone_country"
                 data-country
                 data-display-locale={displayLocale}
                 class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
