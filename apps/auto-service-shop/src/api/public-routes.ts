@@ -1,5 +1,6 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
+import { z } from '@medusajs/framework/zod';
 
 export const PUBLIC_ROUTE_PREFIXES = ['/store', '/auth'] as const;
 
@@ -63,3 +64,19 @@ export const refuseUnlistedRoute = (
   isPublicRoute(req.method, req.originalUrl)
     ? next()
     : next(new MedusaError(MedusaError.Types.NOT_FOUND, 'No such route'));
+
+const pathSegmentsSchema = z.array(z.string().regex(/^[\w-]{1,64}$/));
+
+export const refuseMalformedPath = (
+  req: Pick<MedusaRequest, 'originalUrl'>,
+  _res: unknown,
+  next: (error?: MedusaError) => void,
+): void => {
+  const [path = '', query = ''] = req.originalUrl.split('?');
+  const segments = path.split('/').filter(Boolean);
+  next(
+    pathSegmentsSchema.safeParse(segments).success && !query.includes('%00')
+      ? undefined
+      : new MedusaError(MedusaError.Types.INVALID_DATA, 'Malformed path'),
+  );
+};
