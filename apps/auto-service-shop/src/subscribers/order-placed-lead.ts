@@ -1,12 +1,12 @@
 import type { SubscriberArgs, SubscriberConfig } from '@medusajs/framework';
 
-import { handOrderToLeadRoute } from '../lib/order-lead';
+import { orderLeadSync } from '../lib/order-lead-sync';
 
 export default async function orderPlacedLead({
   event,
   container,
 }: SubscriberArgs<{ id: string }>) {
-  await handOrderToLeadRoute(container, event.data.id);
+  await orderLeadSync(container).placed(event.data.id);
 }
 
 export const config: SubscriberConfig = {

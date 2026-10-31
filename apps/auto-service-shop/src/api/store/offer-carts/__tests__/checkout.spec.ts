@@ -16,10 +16,9 @@ import retryOrderLeads, {
   retryOrderLeadsAt,
 } from '../../../../jobs/retry-order-leads';
 import {
-  LEAD_HANDED_OFF_AT,
-  LEAD_HANDOFF_ERROR,
-  LEAD_HANDOFF_MAX_ATTEMPTS,
-} from '../../../../lib/order-lead';
+  MAX_HANDOFF_ATTEMPTS,
+  orderLeadStatus,
+} from '../../../../lib/order-lead-sync';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
@@ -78,7 +77,8 @@ medusaIntegrationTestRunner({
           let body = '';
           request.on('data', (chunk) => (body += chunk));
           request.on('end', () => {
-            leads.push(Object.fromEntries(new URLSearchParams(body)));
+            const { contact, summary, ...event } = JSON.parse(body);
+            leads.push({ ...event, ...contact, comment: summary });
             authorizations.push(request.headers.authorization);
             response
               .writeHead(leadRouteStatus, { location: '/sr/thanks/' })
@@ -840,14 +840,13 @@ medusaIntegrationTestRunner({
         expect(leads).toHaveLength(1);
         expect(authorizations).toEqual([`Bearer ${SHOP_LEAD_SECRET}`]);
         expect(leads[0]).toMatchObject({
+          event: 'placed',
           order_id: placed.data.order.id,
-          service: 'parts-order',
           contact: '+381601234567',
           contact_channel: 'whatsapp',
           name: 'Marko',
           vin: 'WBA35BG070N074158',
           locale: 'sr',
-          consent: '1',
           source_url: 'https://carlab.rs/sr/parts/cart/',
           visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
           ad_source: '{"utm_source":"google"}',
@@ -1284,9 +1283,9 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const metadata = await waitFor(
           async () =>
-            (await orders.retrieveOrder(placed.data.order.id)).metadata?.[
-              LEAD_HANDOFF_ERROR
-            ],
+            orderLeadStatus(
+              (await orders.retrieveOrder(placed.data.order.id)).metadata,
+            ).error,
         );
         expect(metadata).toBe('The lead route answered 500');
       });
@@ -1302,7 +1301,7 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const refused = () => orders.retrieveOrder(placed.data.order.id);
         await waitFor(
-          async () => (await refused()).metadata?.[LEAD_HANDOFF_ERROR],
+          async () => orderLeadStatus((await refused()).metadata).error,
         );
         leads.length = 0;
         leadRouteStatus = 201;
@@ -1310,7 +1309,7 @@ medusaIntegrationTestRunner({
         await retryOrderLeadsAt(getContainer(), settled());
 
         expect(leadsFor(placed)).toHaveLength(1);
-        expect((await refused()).metadata?.[LEAD_HANDOFF_ERROR]).toBeFalsy();
+        expect(orderLeadStatus((await refused()).metadata).error).toBeNull();
         await retryOrderLeadsAt(getContainer(), settled());
         expect(leadsFor(placed)).toHaveLength(1);
       });
@@ -1320,11 +1319,11 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         const order = () => orders.retrieveOrder(placed.data.order.id);
         await waitFor(
-          async () => (await order()).metadata?.[LEAD_HANDED_OFF_AT],
+          async () => orderLeadStatus((await order()).metadata).handed_off_at,
         );
         const { metadata } = await order();
         await orders.updateOrders(placed.data.order.id, {
-          metadata: { ...metadata, [LEAD_HANDED_OFF_AT]: '' },
+          metadata: { ...metadata, lead_handed_off_at: '' },
         });
         leads.length = 0;
 
@@ -1345,16 +1344,16 @@ medusaIntegrationTestRunner({
         const orders = getContainer().resolve(Modules.ORDER);
         await waitFor(
           async () =>
-            (await orders.retrieveOrder(placed.data.order.id)).metadata?.[
-              LEAD_HANDOFF_ERROR
-            ],
+            orderLeadStatus(
+              (await orders.retrieveOrder(placed.data.order.id)).metadata,
+            ).error,
         );
 
         for (let run = 0; run < 15; run += 1) {
           await retryOrderLeadsAt(getContainer(), settled());
         }
 
-        expect(leadsFor(placed)).toHaveLength(LEAD_HANDOFF_MAX_ATTEMPTS);
+        expect(leadsFor(placed)).toHaveLength(MAX_HANDOFF_ATTEMPTS);
       });
     });
   },

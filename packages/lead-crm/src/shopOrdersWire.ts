@@ -96,5 +96,4 @@ export const shopOrderEventSchema = z.discriminatedUnion('event', [
 
 export type OrderContact = z.output<typeof orderContactSchema>;
 export type OrderLead = z.input<typeof orderLeadSchema>;
-export type OrderCancel = z.input<typeof orderCancelSchema>;
 export type ShopOrderEvent = z.input<typeof shopOrderEventSchema>;
