@@ -19,7 +19,7 @@ const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const { stock, lead, buyable } = offer
-  ? offerAvailability(offer, copy, localeTag)
+  ? offerAvailability(offer, copy.leadTime, localeTag)
   : { stock: null, lead: null, buyable: false };
 ---
 

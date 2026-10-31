@@ -34,7 +34,10 @@ const { pages, site } = content(locale);
         {pages.notFound.partsBody}
       </p>
       <CatalogueSearch large hint={false} />
-      <a href={PathBuilder.partsInquiry(locale)} class="btn btn-primary w-fit">
+      <a
+        href={PathBuilder.partsInquiry(locale)}
+        class="btn btn-secondary w-fit"
+      >
         {site.header.partsCta}
         <Icon name="arrowRight" />
       </a>
