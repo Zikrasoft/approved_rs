@@ -3,11 +3,15 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { bodyTooLarge } from '@podbor/lead-crm';
-import { previewRequested } from '@/utils/shopPreview';
 import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { CartOutcome } from '@/utils/catalogueWire';
-import { catalogueFromEnv, siteEnv, uncachedJson } from '@/utils/catalogueEnv';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  uncachedJson,
+  previewRequested,
+} from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
 

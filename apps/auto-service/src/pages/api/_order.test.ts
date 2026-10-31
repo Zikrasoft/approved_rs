@@ -22,10 +22,12 @@ vi.mock('@vercel/functions', () => ({
 import { POST } from './order';
 
 const backend = vi.fn();
+const PREVIEW_TOKEN = 'preview-token-0123456789abcdef0123';
 
 beforeEach(() => {
   vi.stubEnv('MEDUSA_BACKEND_URL', 'http://shop.test');
   vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+  vi.stubEnv('SHOP_PREVIEW_TOKEN', PREVIEW_TOKEN);
   vi.stubGlobal('fetch', backend);
 });
 
@@ -191,12 +193,12 @@ describe('POST /api/order', () => {
 
     const response = await checkout(
       {},
-      { cookie: 'auto_service_shop_preview=1' },
+      { cookie: `auto_service_shop_preview=${PREVIEW_TOKEN}` },
     );
 
     expect(location(response)).toContain('notice=ordered');
     const [, init] = backend.mock.calls[0] as [string, RequestInit];
-    expect(init.headers).toMatchObject({ 'x-shop-preview': '1' });
+    expect(init.headers).toMatchObject({ 'x-shop-preview': PREVIEW_TOKEN });
   });
 
   describe('a checkout that does not become an order', () => {

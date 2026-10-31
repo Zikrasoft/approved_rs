@@ -220,13 +220,15 @@ under `astro dev`; a production build writes to Vercel Blob.
 
 To check the build against the demo backend, export the storefront variables
 first: the sitemap reads `MEDUSA_BACKEND_URL` and `MEDUSA_PUBLISHABLE_KEY`
-from the environment (turbo passes only those two and `SHOP_OPEN` through), and
+from the environment (turbo passes only those two, `SHOP_OPEN` and
+`SHOP_PREVIEW_TOKEN` through), and
 without them it lists no part pages.
 
 To see production's closed beta, set `SHOP_OPEN=false` in
 `apps/auto-service/.env.local` (and in `apps/auto-service-shop/.env` for the backend
-gate), restart, and open a page with `?dev=1` to turn the preview on, `?dev=0` to
-turn it off. See
+gate), put one `SHOP_PREVIEW_TOKEN` (`openssl rand -hex 32`) in both files,
+restart, and open `http://127.0.0.1:4321/api/shop-preview?token=<token>` to
+turn the preview on, `/api/shop-preview` without a token to turn it off. See
 [Closed beta](deploy.md#closed-beta-the-preview-flag).
 
 ```bash

@@ -29,6 +29,7 @@ import {
 } from './order-lead';
 
 export const MAX_HANDOFF_ATTEMPTS = 6;
+export const MAX_HANDOFFS_PER_CONTACT_HOUR = 3;
 
 const HANDED_OFF_AT = 'lead_handed_off_at';
 const HANDOFF_ERROR = 'lead_handoff_error';
@@ -43,6 +44,7 @@ const CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 
 type Metadata = Record<string, unknown> | null | undefined;
 
@@ -123,10 +125,33 @@ export function createOrderLeadSync({
     await orders.patch(id, { [stamp]: now() });
   }
 
+  async function contactHandedOffThisHour(id: string, metadata: Metadata) {
+    const contact = filled.parse(metadata?.contact);
+    if (!contact) return false;
+    const at = new Date();
+    const recent = await orders.createdBetween(
+      new Date(at.getTime() - HOUR_MS),
+      at,
+    );
+    const handedOff = recent.filter(
+      (order) =>
+        order.id !== id &&
+        filled.parse(order.metadata?.contact) === contact &&
+        orderLeadStatus(order.metadata).handed_off_at,
+    );
+    return handedOff.length >= MAX_HANDOFFS_PER_CONTACT_HOUR;
+  }
+
   async function handOff(id: string): Promise<void> {
     const { status, metadata, display_id } = await orders.retrieve(id);
     const lead = orderLeadStatus(metadata);
     if (status === 'canceled' || lead.handed_off_at || lead.alerted_at) return;
+    if (await contactHandedOffThisHour(id, metadata)) {
+      logger.warn(
+        `Order ${id} waits for a later retry: its contact reached the CRM ${MAX_HANDOFFS_PER_CONTACT_HOUR} times this hour`,
+      );
+      return;
+    }
     const undelivered = (reason: string) =>
       alertOnce(
         id,

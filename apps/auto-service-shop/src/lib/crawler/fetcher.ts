@@ -11,7 +11,9 @@ import {
   PlaywrightCrawler,
   type PlaywrightCrawlerOptions,
 } from '@crawlee/playwright';
-import type { Page } from 'playwright';
+import type { Page, Request as BrowserRequest } from 'playwright';
+
+import { assertPublicUrl } from '../private-address';
 
 export type FetchMode = 'http' | 'browser';
 
@@ -73,6 +75,31 @@ const refusal = (headers: Record<string, string>, body: Buffer) => {
     ? 'challenge page'
     : null;
 };
+
+const refusePrivateRedirect = async (options: { url?: string | URL }) => {
+  if (options.url) await assertPublicUrl(new URL(options.url));
+};
+
+const guardRedirects = (
+  _context: unknown,
+  gotOptions: { hooks?: Record<string, unknown> },
+) => {
+  gotOptions.hooks = {
+    ...gotOptions.hooks,
+    beforeRedirect: [refusePrivateRedirect],
+  };
+};
+
+const redirectChain = (request: BrowserRequest | null): string[] =>
+  request ? [...redirectChain(request.redirectedFrom()), request.url()] : [];
+
+// TODO: a browser page only gets its redirect hops checked after the fact, and its own scripts may still reach a private address; a proxy that resolves and refuses them would close that.
+const refusePrivateBrowserRedirects = (request: BrowserRequest | null) =>
+  Promise.all(
+    redirectChain(request)
+      .slice(1)
+      .map((url) => assertPublicUrl(new URL(url))),
+  );
 
 class SitemapTolerantHttpCrawler extends HttpCrawler<InternalHttpCrawlingContext> {
   protected override isRequestBlocked(context: InternalHttpCrawlingContext) {
@@ -175,7 +202,7 @@ export const crawleeFetcher = (mode: FetchMode, locale?: string): Fetcher => {
               { length: 100 },
               (_, index) => 500 + index,
             ),
-            preNavigationHooks: [beforeAttempt],
+            preNavigationHooks: [beforeAttempt, guardRedirects],
             postNavigationHooks: [afterAttempt],
             requestHandler: async ({ request, response, body }) =>
               answer(
@@ -198,6 +225,7 @@ export const crawleeFetcher = (mode: FetchMode, locale?: string): Fetcher => {
             ],
             postNavigationHooks: [afterAttempt],
             requestHandler: async ({ request, response, page }) => {
+              await refusePrivateBrowserRedirects(response?.request() ?? null);
               const { waitFor, interact } =
                 pending.get(request.uniqueKey)?.request ?? {};
               if (waitFor) {

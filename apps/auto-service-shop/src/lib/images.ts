@@ -20,7 +20,7 @@ import type CatalogModuleService from '../modules/catalog/service';
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const IMAGE_WIDTHS = [160, 480, 960];
 
-const IMAGE_TYPES: Record<string, string> = {
+export const IMAGE_TYPES: Record<string, string> = {
   'image/jpeg': 'jpeg',
   'image/png': 'png',
   'image/webp': 'webp',

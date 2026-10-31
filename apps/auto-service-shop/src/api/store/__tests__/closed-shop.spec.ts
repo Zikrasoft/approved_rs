@@ -24,7 +24,9 @@ medusaIntegrationTestRunner({
           .get(path, {
             headers: {
               'x-publishable-api-key': publishable,
-              ...(preview && { 'x-shop-preview': '1' }),
+              ...(preview && {
+                'x-shop-preview': process.env.SHOP_PREVIEW_TOKEN,
+              }),
             },
           })
           .catch((error) => error.response);
@@ -165,6 +167,20 @@ medusaIntegrationTestRunner({
         expect(prices([{ offers: batch.data.offers[identifiers[1]] }])).toEqual(
           [2400],
         );
+      });
+
+      it('keeps the prices from a visitor who names a wrong preview token', async () => {
+        const live = await api.get(
+          `/store/part-identifiers/${identifiers[0]}/offers`,
+          {
+            headers: {
+              'x-publishable-api-key': publishable,
+              'x-shop-preview': '1',
+            },
+          },
+        );
+
+        expect(live.data.offers).toEqual([]);
       });
 
       it('refuses a batch of offers without an identifier', async () => {

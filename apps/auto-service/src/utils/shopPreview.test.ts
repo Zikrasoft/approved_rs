@@ -1,30 +1,43 @@
 import { describe, expect, it } from 'vitest';
-import { previewFrom, previewRequested } from './shopPreview';
+import { previewRequested } from './catalogueEnv';
+import { previewTokenFrom } from './shopPreview';
 
-describe('previewFrom', () => {
-  it('reads the flag a server sees: the address first, then the cookie', () => {
-    expect(previewFrom('', 'lang=sr; auto_service_shop_preview=1')).toBe(true);
-    expect(previewFrom('?dev=1', '')).toBe(true);
-    expect(previewFrom('?dev=0', 'auto_service_shop_preview=1')).toBe(false);
-    expect(previewFrom('', 'auto_service_shop_preview=10')).toBe(false);
-    expect(previewFrom('', null)).toBe(false);
+const TOKEN = 'preview-token-0123456789abcdef0123';
+
+describe('previewTokenFrom', () => {
+  it('reads the preview cookie, empty when there is none', () => {
+    expect(
+      previewTokenFrom(`lang=sr; auto_service_shop_preview=${TOKEN}`),
+    ).toBe(TOKEN);
+    expect(previewTokenFrom('lang=sr')).toBe('');
+    expect(previewTokenFrom(null)).toBe('');
   });
 });
 
 describe('previewRequested', () => {
-  it('reads the flag off the request address and cookie', () => {
+  const visitor = (cookie?: string) =>
+    new Request('https://carlab.rs/sr/parts/', {
+      headers: cookie ? { cookie } : {},
+    });
+
+  it('lets in only a cookie holding the site preview token', () => {
+    const env = { SHOP_PREVIEW_TOKEN: TOKEN };
+
     expect(
-      previewRequested(new Request('https://carlab.rs/sr/parts/?dev=1')),
+      previewRequested(visitor(`auto_service_shop_preview=${TOKEN}`), env),
     ).toBe(true);
-    expect(
-      previewRequested(
-        new Request('https://carlab.rs/sr/parts/', {
-          headers: { cookie: 'auto_service_shop_preview=1' },
-        }),
-      ),
-    ).toBe(true);
-    expect(previewRequested(new Request('https://carlab.rs/sr/parts/'))).toBe(
+    expect(previewRequested(visitor('auto_service_shop_preview=1'), env)).toBe(
       false,
     );
+    expect(previewRequested(visitor(), env)).toBe(false);
+  });
+
+  it('lets nobody in while the site has no valid token', () => {
+    const cookie = 'auto_service_shop_preview=short';
+
+    expect(previewRequested(visitor(cookie), {})).toBe(false);
+    expect(
+      previewRequested(visitor(cookie), { SHOP_PREVIEW_TOKEN: 'short' }),
+    ).toBe(false);
   });
 });

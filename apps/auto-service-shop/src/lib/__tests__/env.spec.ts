@@ -24,6 +24,8 @@ const S3_ENV = {
 const PRODUCTION_ENV = {
   ...VALID_ENV,
   ...S3_ENV,
+  JWT_SECRET: 'j'.repeat(32),
+  COOKIE_SECRET: 'c'.repeat(32),
   NODE_ENV: 'production',
   TYPESENSE_API_KEY: 'secret',
   FILE_URL: 'https://carlab-public.s3.eu-central-1.amazonaws.com',
@@ -249,6 +251,33 @@ describe('parseEnv', () => {
         SUPPLIER_ADAPTERS: 'demo',
       }),
     ).toThrow('The demo supplier never runs in production');
+  });
+
+  it('wants JWT and cookie secrets of at least 32 characters in production only', () => {
+    expect(() =>
+      parseEnv({ ...PRODUCTION_ENV, JWT_SECRET: 'supersecret' }),
+    ).toThrow(/JWT_SECRET needs at least 32/);
+    expect(() =>
+      parseEnv({ ...PRODUCTION_ENV, COOKIE_SECRET: 'c'.repeat(31) }),
+    ).toThrow(/COOKIE_SECRET needs at least 32/);
+    expect(parseEnv(PRODUCTION_ENV).JWT_SECRET).toHaveLength(32);
+    expect(
+      parseEnv({ ...VALID_ENV, JWT_SECRET: 'supersecret' }).JWT_SECRET,
+    ).toBe('supersecret');
+  });
+
+  it('takes a preview token of at least 32 characters, empty as unset', () => {
+    const token = 'p'.repeat(32);
+
+    expect(
+      parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: token }).SHOP_PREVIEW_TOKEN,
+    ).toBe(token);
+    expect(
+      parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: '' }).SHOP_PREVIEW_TOKEN,
+    ).toBeUndefined();
+    expect(() => parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: '1' })).toThrow(
+      /SHOP_PREVIEW_TOKEN/,
+    );
   });
 
   it('keeps the shop closed in production and open elsewhere unless SHOP_OPEN says', () => {

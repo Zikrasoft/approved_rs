@@ -23,7 +23,11 @@ import {
 import { BRAND, leadStore, notifyLead } from '@/lib/crm';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  previewRequested,
+} from '@/utils/catalogueEnv';
 import {
   CART_LINES_FIELD,
   CART_NOTICE_PARAM,
@@ -34,7 +38,6 @@ import {
   type CartNotice,
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
-import { previewRequested } from '@/utils/shopPreview';
 
 const MAX_CART_LINES_LENGTH = 20_000;
 

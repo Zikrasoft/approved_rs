@@ -53,7 +53,7 @@ caddy_image=$(jq -r .services.caddy.image "$work/config.json")
 hash=$(docker run --rm "$caddy_image" caddy hash-password --plaintext staff-pass)
 docker network create "$net" >/dev/null
 docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$caddy_image" \
-  caddy respond --listen :9000 upstream >/dev/null
+  caddy respond --listen :9000 '{http.request.body}' >/dev/null
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
   -e ADMIN_BASIC_AUTH_USER=staff -e ADMIN_BASIC_AUTH_HASH="$hash" \
@@ -92,6 +92,11 @@ answers 'the API host closes /admin' 404 api /admin
 answers 'the API host closes the admin API' 404 api /admin/users
 answers 'the API host closes staff login' 404 api /auth/user/emailpass -X POST
 answers 'the API host closes staff login with a bearer token too' 404 api /auth/user/emailpass -X POST -H 'Authorization: Bearer x'
+answers 'the API host closes the payment webhooks' 404 api /hooks/payment/stripe_stripe -X POST
+answers 'the API host still serves the shop hooks' 200 api /hooks/carlab-orders/x/outcome -X POST
+head -c 2000000 /dev/zero >"$work/big"
+answers 'the API host refuses a body over 1 MB' 413 api /store/carts -X POST --data-binary "@$work/big"
+answers 'the admin host takes a large upload' 200 admin /admin/uploads -u staff:staff-pass -X POST --data-binary "@$work/big"
 answers 'the API host sends /app to the admin host' 302 api /app
 answers 'the admin host asks for basic_auth' 401 admin /app
 answers 'the admin host refuses a wrong password' 401 admin /app -u staff:wrong

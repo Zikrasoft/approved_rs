@@ -4,6 +4,7 @@ import {
   AdminCreateCategory,
   AdminCreateFitment,
   AdminCreateRequirement,
+  AdminOrderImages,
   AdminUpdateCategoryField,
 } from '../admin/validators';
 import { VEHICLE_REFERENCE_BODIES } from '../admin/vehicle-validators';
@@ -33,6 +34,17 @@ const number = (type: string, value: string) => ({
 });
 
 describe('admin body limits', () => {
+  it('refuses an image order longer than 200 ids', async () => {
+    const ids = (count: number) =>
+      Array.from({ length: count }, (_, index) => `img_${index}`);
+
+    expect(await refusal(AdminOrderImages, { ids: ids(200) })).toBeNull();
+    expect(await refusal(AdminOrderImages, { ids: ids(201) })).toEqual({
+      code: 'INVALID_FIELD',
+      field: 'ids',
+    });
+  });
+
   it.each(['4006381333931', '96385074', '4006 3813 3393 1'])(
     'accepts the valid EAN %j',
     async (value) => {

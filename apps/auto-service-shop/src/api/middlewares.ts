@@ -39,8 +39,13 @@ import {
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
+import { rateLimit } from '../lib/rate-limit';
 import { refuseClosedShop } from '../lib/shop-gate';
-import { PUBLIC_ROUTE_PREFIXES, refuseUnlistedRoute } from './public-routes';
+import {
+  PUBLIC_ROUTE_PREFIXES,
+  refuseMalformedPath,
+  refuseUnlistedRoute,
+} from './public-routes';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import { OrderOutcome } from './hooks/validators';
 import {
@@ -61,13 +66,41 @@ import {
   StoreSearchParts,
 } from './store/validators';
 
+const STORE_BODY_LIMIT = '32kb';
+const MINUTE_MS = 60_000;
+const storeWrites = rateLimit({ limit: 120, windowMs: MINUTE_MS });
+const storeSearches = rateLimit({ limit: 600, windowMs: MINUTE_MS });
+
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,
   routes: [
+    ...['/store', '/hooks'].map((prefix) => ({
+      matcher: `${prefix}*`,
+      middlewares: [refuseMalformedPath],
+    })),
     ...PUBLIC_ROUTE_PREFIXES.map((prefix) => ({
       matcher: `${prefix}*`,
       middlewares: [refuseUnlistedRoute],
     })),
+    {
+      matcher: '/store*',
+      bodyParser: { sizeLimit: STORE_BODY_LIMIT },
+    },
+    {
+      matcher: '/store/offer-carts*',
+      method: ['POST', 'DELETE'],
+      middlewares: [storeWrites],
+    },
+    {
+      matcher: '/store/vin-lookups',
+      method: 'POST',
+      middlewares: [storeWrites],
+    },
+    {
+      matcher: '/store/search',
+      method: 'GET',
+      middlewares: [storeSearches],
+    },
     {
       matcher: '/store/offer-carts*',
       middlewares: [refuseClosedShop],

@@ -14,7 +14,11 @@ import {
   type LeadRefusal,
 } from '../form.ts';
 import { escapeHtml } from '../telegram/markup.ts';
-import { bearerToken, secretMatches } from '../verifySecret.ts';
+import {
+  bearerToken,
+  secretMatches,
+  type AcceptedSecrets,
+} from '../verifySecret.ts';
 import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
@@ -49,7 +53,7 @@ export interface LeadsRouteOptions<L extends string> {
   refusalCopy: (locale: L) => RefusalCopy;
   // TODO: drop orderCanceled and both shop branches below one release after createShopOrdersRoute ships, once no deployed shop posts orders here.
   orderCanceled?: {
-    secret: string | undefined;
+    secret: AcceptedSecrets;
     cancel: (orderId: string) => Promise<CancelOrderResult>;
   };
 }

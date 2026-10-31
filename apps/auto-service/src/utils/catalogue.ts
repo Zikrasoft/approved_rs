@@ -106,6 +106,7 @@ export type CatalogueConfig = {
   timeoutMs?: number;
   shopOpen?: boolean;
   preview?: boolean;
+  previewToken?: string;
 };
 
 export function createCatalogue({
@@ -115,6 +116,7 @@ export function createCatalogue({
   timeoutMs = CATALOGUE_TIMEOUT_MS,
   shopOpen = true,
   preview = false,
+  previewToken,
 }: CatalogueConfig) {
   const pricesHidden = !shopOpen && !preview;
   const unpriced = <T extends { offers: PartOffer[] }>(item: T): T =>
@@ -129,7 +131,8 @@ export function createCatalogue({
       method,
       headers: {
         'x-publishable-api-key': publishableKey,
-        ...((preview || shopOpen) && { [SHOP_PREVIEW_HEADER]: '1' }),
+        ...((preview || shopOpen) &&
+          previewToken && { [SHOP_PREVIEW_HEADER]: previewToken }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
       },
       ...(body !== undefined && { body: JSON.stringify(body) }),

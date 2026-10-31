@@ -1,9 +1,14 @@
 import { z } from 'zod';
-import { shopOpenSchema } from '@podbor/catalog-contract/preview';
+import {
+  shopOpenSchema,
+  shopPreviewTokenSchema,
+} from '@podbor/catalog-contract/preview';
+import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import type { CataloguePages } from './paths';
+import { previewTokenFrom } from './shopPreview';
 import {
   carPagesFrom,
   cataloguePagesFrom,
@@ -19,6 +24,7 @@ const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
   'MEDUSA_PUBLISHABLE_KEY',
   'SHOP_OPEN',
+  'SHOP_PREVIEW_TOKEN',
   'VERCEL',
   'CATALOGUE_SHRINK_ALLOWED',
 ] as const;
@@ -34,27 +40,49 @@ const catalogueEnvSchema = z
   .object({
     MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
     MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
+    SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema),
   })
-  .transform(({ MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY }, context) => {
-    if (!MEDUSA_BACKEND_URL) {
-      return null;
-    }
-    if (!MEDUSA_PUBLISHABLE_KEY) {
-      context.addIssue({
-        code: 'custom',
-        path: ['MEDUSA_PUBLISHABLE_KEY'],
-        message: 'MEDUSA_PUBLISHABLE_KEY is required with MEDUSA_BACKEND_URL',
-      });
-      return z.NEVER;
-    }
-    return {
-      backendUrl: MEDUSA_BACKEND_URL,
-      publishableKey: MEDUSA_PUBLISHABLE_KEY,
-    };
-  });
+  .transform(
+    (
+      { MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY, SHOP_PREVIEW_TOKEN },
+      context,
+    ) => {
+      if (!MEDUSA_BACKEND_URL) {
+        return null;
+      }
+      if (!MEDUSA_PUBLISHABLE_KEY) {
+        context.addIssue({
+          code: 'custom',
+          path: ['MEDUSA_PUBLISHABLE_KEY'],
+          message: 'MEDUSA_PUBLISHABLE_KEY is required with MEDUSA_BACKEND_URL',
+        });
+        return z.NEVER;
+      }
+      return {
+        backendUrl: MEDUSA_BACKEND_URL,
+        publishableKey: MEDUSA_PUBLISHABLE_KEY,
+        previewToken: SHOP_PREVIEW_TOKEN,
+      };
+    },
+  );
 
 export const shopOpen = (env: CatalogueEnv = siteEnv()): boolean =>
   shopOpenSchema.parse(env.SHOP_OPEN) ?? false;
+
+export const previewTokenMatches = (
+  token: string,
+  env: CatalogueEnv = siteEnv(),
+): boolean =>
+  secretMatches(
+    token,
+    shopPreviewTokenSchema.safeParse(env.SHOP_PREVIEW_TOKEN).data,
+  );
+
+export const previewRequested = (
+  request: Request,
+  env: CatalogueEnv = siteEnv(),
+): boolean =>
+  previewTokenMatches(previewTokenFrom(request.headers.get('cookie')), env);
 
 export function catalogueFromEnv(
   env: CatalogueEnv,
@@ -76,6 +104,7 @@ export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
+  SHOP_PREVIEW_TOKEN: import.meta.env.SHOP_PREVIEW_TOKEN,
   VERCEL: import.meta.env.VERCEL,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
 });

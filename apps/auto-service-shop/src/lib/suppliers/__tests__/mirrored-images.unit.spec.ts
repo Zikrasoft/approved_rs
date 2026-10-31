@@ -1,38 +1,49 @@
-import { publicLookup } from '../mirrored-images';
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo, LookupFunction } from 'node:net';
 
-const resolve = (address: string) =>
-  new Promise<string>((done, fail) =>
-    publicLookup(address, {}, (error, resolved) =>
-      error ? fail(error) : done(String(resolved)),
-    ),
-  );
+import type { Logger, MedusaContainer } from '@medusajs/framework/types';
 
-describe('publicLookup', () => {
-  it.each(['8.8.8.8', '1.1.1.1', '2001:4860:4860::8888'])(
-    'passes the public address %s',
-    async (address) => {
-      await expect(resolve(address)).resolves.toBe(address);
-    },
-  );
+import { memoryStorage } from '../../../../integration-tests/fakeStorage';
+import { mirroredImage } from '../mirrored-images';
 
-  it.each([
-    '0.0.0.0',
-    '10.1.2.3',
-    '100.64.0.1',
-    '127.0.0.1',
-    '169.254.169.254',
-    '172.16.0.1',
-    '192.168.1.1',
-    '224.0.0.1',
-    '::1',
-    '::',
-    'fc00::1',
-    'fe80::1',
-    'ff02::1',
-    '::ffff:10.0.0.1',
-    '::ffff:127.0.0.1',
-    '64:ff9b::a00:1',
-  ])('refuses the private address %s', async (address) => {
-    await expect(resolve(address)).rejects.toThrow('is a private address');
+const toLoopback: LookupFunction = (_hostname, options, callback) =>
+  options.all
+    ? callback(null, [{ address: '127.0.0.1', family: 4 }])
+    : callback(null, '127.0.0.1', 4);
+
+const scope = {
+  hasRegistration: () => true,
+  resolve: () => toLoopback,
+} as unknown as MedusaContainer;
+
+const logger = { warn: jest.fn() } as unknown as Logger;
+
+describe('mirroredImage', () => {
+  let server: Server;
+  let origin: string;
+
+  beforeAll(async () => {
+    server = createServer((request, response) => {
+      const type = request.url === '/a.svg' ? 'image/svg+xml' : 'image/png';
+      response.writeHead(200, { 'content-type': `${type}; charset=binary` });
+      response.end('<svg onload="alert(1)"/>');
+    });
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    origin = `http://images.brand.test:${(server.address() as AddressInfo).port}`;
+  });
+
+  afterAll(() => new Promise((resolve) => server.close(resolve)));
+
+  it('stores a raster image under its bare type and refuses an SVG', async () => {
+    const { storage, images } = memoryStorage();
+
+    const png = await mirroredImage(scope, storage, `${origin}/a.png`, logger);
+    const svg = await mirroredImage(scope, storage, `${origin}/a.svg`, logger);
+
+    expect(png).toEqual(expect.stringContaining('supplier-images/'));
+    expect(svg).toBeNull();
+    expect(
+      [...images.objects.values()].map(({ contentType }) => contentType),
+    ).toEqual(['image/png', 'text/plain']);
   });
 });

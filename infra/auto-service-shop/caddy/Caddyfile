@@ -8,20 +8,20 @@
 		X-Frame-Options "SAMEORIGIN"
 		-Server
 	}
-
-	request_body {
-		max_size 25MB
-	}
 }
 
 {$API_HOST} {
 	import common
 
+	request_body {
+		max_size 1MB
+	}
+
 	redir /app https://{$ADMIN_HOST}/app
 	redir /app/* https://{$ADMIN_HOST}{uri}
 
-	@staff path /admin /admin/* /auth/user /auth/user/*
-	handle @staff {
+	@unexposed path /admin /admin/* /auth/user /auth/user/* /hooks/payment /hooks/payment/*
+	handle @unexposed {
 		respond 404
 	}
 
@@ -34,6 +34,10 @@
 
 {$ADMIN_HOST} {
 	import common
+
+	request_body {
+		max_size 25MB
+	}
 
 	redir / /app
 

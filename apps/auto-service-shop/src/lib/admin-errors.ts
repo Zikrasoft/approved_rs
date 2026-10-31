@@ -102,6 +102,18 @@ const coded = (error: unknown): DetailedError | null => {
 
 const medusaErrorHandler = errorHandler();
 
+const MAX_ERROR_MESSAGE_LENGTH = 300;
+
+const clipMessage = (error: unknown) => {
+  if (
+    MedusaError.isMedusaError(error) &&
+    error.message.length > MAX_ERROR_MESSAGE_LENGTH
+  ) {
+    error.message = `${error.message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}…`;
+  }
+  return error;
+};
+
 export const keepAdminCodes: MedusaErrorHandlerFunction = (
   error,
   req,
@@ -113,7 +125,7 @@ export const keepAdminCodes: MedusaErrorHandlerFunction = (
     if (getHttpResponseFromError(error).statusCode >= 500) {
       captureException(error);
     }
-    return medusaErrorHandler(error, req, res, next);
+    return medusaErrorHandler(clipMessage(error), req, res, next);
   }
   res.status(STATUS[known.type as ErrorType] ?? 400).json({
     ...known.details,

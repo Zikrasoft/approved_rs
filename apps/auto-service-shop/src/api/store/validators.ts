@@ -7,7 +7,7 @@ import {
   vinSchema,
 } from '@podbor/catalog-contract';
 
-const recordId = z.string().min(1).max(64);
+const recordId = z.string().regex(/^[\w-]{1,64}$/);
 
 const MAX_FILTERED_KEYS = 8;
 
@@ -67,6 +67,9 @@ const MAX_EMAIL_LOCAL_PART = 64;
 
 const offerId = recordId;
 
+const MAX_CART_QUANTITY = 999;
+const quantity = z.number().int().positive().max(MAX_CART_QUANTITY);
+
 export const StoreCreateOfferCart = z.object({
   email: z
     .email()
@@ -74,19 +77,17 @@ export const StoreCreateOfferCart = z.object({
     .refine((email) => email.indexOf('@') <= MAX_EMAIL_LOCAL_PART)
     .optional(),
   offer_id: offerId.optional(),
-  quantity: z.number().int().positive().default(1),
+  quantity: quantity.default(1),
 });
 export type StoreCreateOfferCartType = z.infer<typeof StoreCreateOfferCart>;
 
 export const StoreAddOfferCartItem = z.object({
   offer_id: offerId,
-  quantity: z.number().int().positive().default(1),
+  quantity: quantity.default(1),
 });
 export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
 
-export const StoreSetOfferCartItem = z.object({
-  quantity: z.number().int().positive(),
-});
+export const StoreSetOfferCartItem = z.object({ quantity });
 export type StoreSetOfferCartItemType = z.infer<typeof StoreSetOfferCartItem>;
 
 export const StoreAddLineAddon = z.strictObject({});
@@ -122,7 +123,7 @@ export const StoreListOffers = z.object({
   part_identifier_id: z
     .union([z.string(), z.array(z.string())])
     .transform((value) => [value].flat())
-    .pipe(z.array(z.string().min(1).max(100)).min(1).max(200)),
+    .pipe(z.array(recordId).min(1).max(200)),
 });
 export type StoreListOffersType = z.infer<typeof StoreListOffers>;
 

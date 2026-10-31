@@ -10,8 +10,9 @@ import { parseEnv } from './env';
 const requireBearer =
   (name: 'SHOP_ORDER_OUTCOME_SECRET' | 'SHOP_LEAD_SECRET') =>
   (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction): void => {
-    const expected = parseEnv(process.env)[name];
-    if (!secretMatches(bearerToken(req.headers.authorization), expected)) {
+    const env = parseEnv(process.env);
+    const accepted = [env[name], env[`${name}_PREVIOUS`]];
+    if (!secretMatches(bearerToken(req.headers.authorization), accepted)) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
     }

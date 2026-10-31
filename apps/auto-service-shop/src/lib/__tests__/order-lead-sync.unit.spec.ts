@@ -4,6 +4,7 @@ import { LeadRouteRefusal, type LeadOrder } from '../order-lead';
 import {
   createOrderLeadSync,
   MAX_HANDOFF_ATTEMPTS,
+  MAX_HANDOFFS_PER_CONTACT_HOUR,
   orderLeadStatus,
   type SyncOrder,
 } from '../order-lead-sync';
@@ -100,6 +101,32 @@ describe('createOrderLeadSync', () => {
       attempts: 0,
       error: null,
     });
+  });
+
+  it('holds back a contact past its hourly hand-offs and still hands off another contact', async () => {
+    const order = (id: string, contact: string): SyncOrder => ({
+      ...pending({ contact }),
+      id,
+    });
+    const flood = Array.from(
+      { length: MAX_HANDOFFS_PER_CONTACT_HOUR + 1 },
+      (_, index) => order(`order_${index}`, '+381601234567'),
+    );
+    const { sync, fakes, metadataOf } = memorySync([
+      ...flood,
+      order('order_other', '+381609999999'),
+    ]);
+
+    for (const { id } of flood) await sync.placed(id);
+    await sync.placed('order_other');
+
+    expect(fakes.sent.map(({ order_id }) => order_id)).toEqual([
+      ...flood.slice(0, -1).map(({ id }) => id),
+      'order_other',
+    ]);
+    expect(
+      orderLeadStatus(metadataOf(flood[flood.length - 1].id)).handed_off_at,
+    ).toBeNull();
   });
 
   it('alerts the owner exactly once after six refusals', async () => {

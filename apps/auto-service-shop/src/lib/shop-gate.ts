@@ -1,17 +1,23 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
+import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import { z } from 'zod';
 
 import { parseEnv } from './env';
 
-const previewHeaderSchema = z.literal('1');
+const previewHeaderSchema = z.string().catch('');
 
-const shopOpen = (): boolean => parseEnv(process.env).SHOP_OPEN;
-
-export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean =>
-  shopOpen() ||
-  previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success;
+export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean => {
+  const { SHOP_OPEN, SHOP_PREVIEW_TOKEN } = parseEnv(process.env);
+  return (
+    SHOP_OPEN ||
+    secretMatches(
+      previewHeaderSchema.parse(req.headers[SHOP_PREVIEW_HEADER]),
+      SHOP_PREVIEW_TOKEN,
+    )
+  );
+};
 
 export const refuseClosedShop = (
   req: MedusaRequest,

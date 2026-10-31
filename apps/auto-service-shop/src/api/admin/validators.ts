@@ -21,6 +21,7 @@ export const MAX_NAME_LENGTH = 200;
 export const MAX_PART_NUMBER_LENGTH = 50;
 export const MAX_QUANTITY = 100;
 export const MAX_SERVICE_PRICE = 1_000_000;
+export const MAX_LIST_LENGTH = 200;
 
 const INT4 = 2 ** 31 - 1;
 export const int4 = z.number().int().min(-INT4).max(INT4);
@@ -65,7 +66,7 @@ export type AdminAddPartIdentifierType = z.infer<typeof AdminAddPartIdentifier>;
 
 export const AdminCreatePart = z.strictObject({
   name,
-  identifiers: z.array(AdminAddPartIdentifier).min(1),
+  identifiers: z.array(AdminAddPartIdentifier).min(1).max(MAX_LIST_LENGTH),
   category_id: z.string().min(1).nullable().optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
 });
@@ -93,7 +94,7 @@ export const AdminUpdatePart = z.strictObject({
 export type AdminUpdatePartType = z.infer<typeof AdminUpdatePart>;
 
 export const AdminOrderImages = z.strictObject({
-  ids: z.array(z.string().min(1)),
+  ids: z.array(z.string().min(1)).max(MAX_LIST_LENGTH),
 });
 export type AdminOrderImagesType = z.infer<typeof AdminOrderImages>;
 
@@ -268,7 +269,10 @@ export type AdminBulkDetachFitmentsType = z.infer<
 export const AdminUpdateSupplier = z
   .strictObject({
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
-    released_kinds: z.array(z.enum(STAGED_DATA_KINDS)).optional(),
+    released_kinds: z
+      .array(z.enum(STAGED_DATA_KINDS))
+      .max(STAGED_DATA_KINDS.length)
+      .optional(),
     import_enabled: z.boolean().optional(),
   })
   .refine((body) => Object.keys(body).length > 0);
@@ -410,7 +414,11 @@ export const AdminCreateRequirement = z
   .strictObject({
     field_id: z.string().min(1),
     ...requirementOwners,
-    option_keys: z.array(z.string().trim().min(1)).nullable().default(null),
+    option_keys: z
+      .array(z.string().trim().min(1))
+      .max(MAX_LIST_LENGTH)
+      .nullable()
+      .default(null),
     min: z.number().nonnegative().nullable().default(null),
     max: z.number().nonnegative().nullable().default(null),
     quantity: quantity.default(1),
@@ -434,7 +442,8 @@ export const AdminConfirmWorkshopQuote = z.strictObject({
         category_id: z.string().min(1).nullable(),
       }),
     )
-    .min(1),
+    .min(1)
+    .max(MAX_LIST_LENGTH),
 });
 export type AdminConfirmWorkshopQuoteType = z.infer<
   typeof AdminConfirmWorkshopQuote

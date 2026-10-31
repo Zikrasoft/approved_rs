@@ -13,6 +13,7 @@ process.env.STORE_CORS ??= 'http://localhost:4321';
 process.env.ADMIN_CORS ??= 'http://localhost:9000';
 process.env.AUTH_CORS ??= 'http://localhost:9000';
 process.env.LIVE_QUOTE_CACHE_SECONDS ??= '0';
+process.env.SHOP_PREVIEW_TOKEN ??= 'jest-only-shop-preview-token-0123456789';
 
 process.env.TYPESENSE_HOST ??= 'localhost';
 process.env.TYPESENSE_PORT ??= '58108';

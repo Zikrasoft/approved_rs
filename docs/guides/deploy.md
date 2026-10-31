@@ -386,6 +386,22 @@ and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
 
+**Rotating either secret without downtime.** Every side that checks a Bearer
+secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
+`SHOP_ORDER_OUTCOME_SECRET` and `SHOP_LEAD_SECRET`, carlab.rs checks
+`SHOP_LEAD_SECRET`; a side only ever sends the current value.
+
+1. Make a new value (`openssl rand -hex 32`).
+2. On every side that holds the secret, move the old value to
+   `<NAME>_PREVIOUS` and put the new one in `<NAME>`: for
+   `SHOP_LEAD_SECRET` that is carlab.rs and `/srv/carlab/.env`, for
+   `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
+   and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
+   shop (`docker compose up -d medusa`), in any order: while the sides differ,
+   each still takes the other's old or new value.
+3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
+   redeploy or restart again.
+
 **Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
 store is connected to the project (see the next section).
 
@@ -600,18 +616,18 @@ instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
 transfer, $24 a month), in the same region as the shop's S3 buckets, all
 described in `infra/auto-service-shop/`:
 
-| File                                     | What it is                                                                                                                                                           |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 25 MB, basic_auth on the admin host                                         |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                       |
-| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                         |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
-| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
+| File                                     | What it is                                                                                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                                           |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                                                     |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed, basic_auth on the admin host |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                                              |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
+| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                                                     |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -848,6 +864,8 @@ number gets its CI value in that script. The non-obvious parts:
 - do not touch `MEDUSA_TAG` by hand: `deploy.sh` rewrites it.
 - `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`:
   `openssl rand -hex 32`. Hex specifically: compose substitutes `$…` inside `.env`.
+  With `NODE_ENV=production` the shop refuses to start on a `JWT_SECRET` or
+  `COOKIE_SECRET` shorter than 32 characters.
 - `DATABASE_URL` and the `TYPESENSE_HOST`/`PORT`/`PROTOCOL` are not written into
   `.env`: compose assembles them from the service names, `POSTGRES_PASSWORD` and
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.
@@ -961,34 +979,52 @@ number gets its CI value in that script. The non-obvious parts:
 The parts catalogue is public and indexable, but buying is closed until both
 sides say otherwise. Two variables, one per side:
 
-| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                          | `true`                       |
-| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                    | prices and cart for everyone |
-| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview header, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price filter | anyone may buy               |
+| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                         | `true`                       |
+| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                   | prices and cart for everyone |
+| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price filter | anyone may buy               |
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
-is closed. turbo passes `SHOP_OPEN` through to the `@podbor/auto-service`
-build, so a rebuild (`publish.yml` or a deploy) is what applies a change. An
-open build sends the preview header itself, so it builds with prices even if
-the backend is still closed.
+is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
+`@podbor/auto-service` build, so a rebuild (`publish.yml` or a deploy) is what
+applies a change. An open build sends the preview token itself, so it builds
+with prices even if the backend is still closed.
 
-A closed-beta tester opens any carlab.rs page with `?dev=1`. The browser keeps
-the `auto_service_shop_preview=1` cookie for a year, until a page is opened with
-`?dev=0`. With the flag the visitor sees the shop as it will look open: the
-header and the parts index show the cart; listings, car and model pages, kits
-(with their «в корзину» button), add-on prices and the price filter on static
-pages are filled after load by one `POST /{locale}/parts/prices/` per page,
-which renders the same components with prices; a part page fetches its offers
-live from `/api/part-offers`; search renders prices and the price filter on the
-server; the cart and checkout work. carlab.rs reads the cookie (or `?dev=1` on
-the request itself) and passes `x-shop-preview: 1` to Medusa. Without the flag,
-`/parts/cart/` redirects to the inquiry form and nothing above runs.
+The preview is a secret token, `SHOP_PREVIEW_TOKEN`: the same value in the
+carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
+`/srv/carlab/.env`. It is 32 to 256 letters, digits, `_` or `-`; make one with
+`openssl rand -hex 32`. Both sides refuse a shorter value at start, and while
+it is unset nobody gets the preview, the open build included.
 
-This is a soft gate for a closed beta, not security. Anyone who learns `?dev=1`
-can buy and see prices, and anyone can send `x-shop-preview: 1` to the store
-API. Open the shop by setting `SHOP_OPEN=true` on both sides, restarting the
-backend (`deploy.sh` or `docker compose up -d medusa`) and rebuilding
-carlab.rs.
+A closed-beta tester opens `https://carlab.rs/api/shop-preview?token=<token>`
+once. The route keeps the token in the `auto_service_shop_preview` cookie for a
+year and sends the tester to the parts index; a wrong token gets 403 and no
+cookie, and `/api/shop-preview` with no token forgets it. The token travels in
+that one API request only, never in a page address, so analytics never record
+it. With the cookie the visitor sees the shop as it will look open: the header
+and the parts index show the cart; listings, car and model pages, kits (with
+their «в корзину» button), add-on prices and the price filter on static pages
+are filled after load by one `POST /{locale}/parts/prices/` per page, which
+renders the same components with prices; a part page fetches its offers live
+from `/api/part-offers`; search renders prices and the price filter on the
+server; the cart and checkout work. carlab.rs compares the cookie with its own
+`SHOP_PREVIEW_TOKEN` (timing-safe) and sends Medusa `x-shop-preview: <token>`,
+which Medusa compares with its copy. Without the cookie, `/parts/cart/`
+redirects to the inquiry form and nothing above runs.
+
+Anyone holding the token can buy and see prices, so give it only to testers,
+and rotate it by changing both copies when someone should lose access (testers
+then open the link again). Open the shop by setting `SHOP_OPEN=true` on both
+sides, restarting the backend (`deploy.sh` or `docker compose up -d medusa`)
+and rebuilding carlab.rs.
+
+**Rolling out the token.** The two sides deploy separately, and a side that
+does not know the token yet fails closed: the old shop accepts only `1`, the
+new one only the token, so between the two deploys testers see the closed shop
+and nobody else sees more. Set `SHOP_PREVIEW_TOKEN` in both places first,
+deploy the shop, then redeploy carlab.rs, and send testers the new link. A
+shop rollback to an image without the token closes the preview until the shop
+moves forward again.
 
 ### How it ships
 

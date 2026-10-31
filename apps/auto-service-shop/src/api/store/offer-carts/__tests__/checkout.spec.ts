@@ -458,7 +458,10 @@ medusaIntegrationTestRunner({
         const postPreview = (path: string, body: unknown = {}) =>
           api
             .post(path, body, {
-              headers: { ...storeHeaders.headers, 'x-shop-preview': '1' },
+              headers: {
+                ...storeHeaders.headers,
+                'x-shop-preview': process.env.SHOP_PREVIEW_TOKEN,
+              },
             })
             .catch((error) => error.response);
 

@@ -44,7 +44,10 @@ export const POST = createLeadsRoute({
     };
   },
   orderCanceled: {
-    secret: process.env.SHOP_LEAD_SECRET,
+    secret: [
+      process.env.SHOP_LEAD_SECRET,
+      process.env.SHOP_LEAD_SECRET_PREVIOUS,
+    ],
     cancel: async (orderId) =>
       (await import('@/lib/crmBot')).cancelOrderLead(orderId),
   },

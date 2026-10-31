@@ -72,4 +72,14 @@ describe('secretMatches', () => {
     expect(secretMatches(' correct-secret', 'correct-secret')).toBe(false);
     expect(secretMatches('correct-secret ', 'correct-secret')).toBe(false);
   });
+
+  it('accepts the current or the previous secret while one rotates', () => {
+    const accepted = ['new-secret', 'old-secret'];
+
+    expect(secretMatches('new-secret', accepted)).toBe(true);
+    expect(secretMatches('old-secret', accepted)).toBe(true);
+    expect(secretMatches('other-secr', accepted)).toBe(false);
+    expect(secretMatches('new-secret', ['new-secret', undefined])).toBe(true);
+    expect(secretMatches('anything', [undefined, ''])).toBe(false);
+  });
 });

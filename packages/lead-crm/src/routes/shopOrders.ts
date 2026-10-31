@@ -13,7 +13,11 @@ import {
   shopOrderEventSchema,
   type OrderContact,
 } from '../shopOrdersWire.ts';
-import { bearerToken, secretMatches } from '../verifySecret.ts';
+import {
+  bearerToken,
+  secretMatches,
+  type AcceptedSecrets,
+} from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
 import type { LeadSubmission } from '../schema.ts';
@@ -25,7 +29,7 @@ const CANCEL_STATUS: Record<CancelOrderResult, number> = {
 };
 
 export interface ShopOrdersRouteOptions {
-  secret: string | undefined;
+  secret: AcceptedSecrets;
   notifyLead: NotifyLead;
   cancelOrder: (orderId: string) => Promise<CancelOrderResult>;
   isLocale: (value: string) => boolean;
