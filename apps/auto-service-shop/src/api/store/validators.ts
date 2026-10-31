@@ -1,0 +1,137 @@
+import { z } from '@medusajs/framework/zod';
+import {
+  CART_FINGERPRINT_FIELD,
+  CATALOG_KEY_PATTERN,
+  checkoutContactSchema,
+  parseRangeFilter,
+  vinSchema,
+} from '@podbor/catalog-contract';
+
+const recordId = z.string().regex(/^[\w-]{1,64}$/);
+
+const MAX_FILTERED_KEYS = 8;
+
+export const StoreSearchParts = z
+  .object({
+    q: z.string().trim().min(1).max(200).optional(),
+    category: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+    vehicle_id: recordId.optional(),
+    make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+    model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+    facets: z
+      .union([z.string(), z.array(z.string())])
+      .transform((value) => [value].flat())
+      .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
+      .default([]),
+    range: z
+      .union([z.string(), z.array(z.string())])
+      .transform((value) => [value].flat())
+      .pipe(
+        z
+          .array(
+            z.string().transform((text, ctx) => {
+              const range = parseRangeFilter(text);
+              if (
+                !range ||
+                (range.min !== null &&
+                  range.max !== null &&
+                  range.min > range.max)
+              ) {
+                ctx.addIssue({ code: 'custom', message: 'invalid range' });
+                return z.NEVER;
+              }
+              return range;
+            }),
+          )
+          .max(10),
+      )
+      .default([]),
+    offset: z.coerce.number().int().nonnegative().max(10_000).default(0),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+  })
+  .refine(({ q, category }) => q || category, 'q or category is required')
+  .refine(
+    ({ facets, range }) =>
+      new Set([
+        ...facets.map((facet) => facet.slice(0, facet.indexOf(':'))),
+        ...range.map(({ key }) => key),
+      ]).size <= MAX_FILTERED_KEYS,
+    `at most ${MAX_FILTERED_KEYS} filters`,
+  );
+export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
+
+export const StoreCreateVinLookup = z.object({ vin: vinSchema });
+export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
+
+const MAX_EMAIL_LOCAL_PART = 64;
+
+const offerId = recordId;
+
+const MAX_CART_QUANTITY = 999;
+const quantity = z.number().int().positive().max(MAX_CART_QUANTITY);
+
+export const StoreCreateOfferCart = z.object({
+  email: z
+    .email()
+    .max(254)
+    .refine((email) => email.indexOf('@') <= MAX_EMAIL_LOCAL_PART)
+    .optional(),
+  offer_id: offerId.optional(),
+  quantity: quantity.default(1),
+});
+export type StoreCreateOfferCartType = z.infer<typeof StoreCreateOfferCart>;
+
+export const StoreAddOfferCartItem = z.object({
+  offer_id: offerId,
+  quantity: quantity.default(1),
+});
+export type StoreAddOfferCartItemType = z.infer<typeof StoreAddOfferCartItem>;
+
+export const StoreSetOfferCartItem = z.object({ quantity });
+export type StoreSetOfferCartItemType = z.infer<typeof StoreSetOfferCartItem>;
+
+export const StoreAddLineAddon = z.strictObject({});
+
+export const StoreCompleteOfferCart = z
+  .record(z.string(), z.unknown())
+  .transform((body, context) => {
+    const contact = checkoutContactSchema.safeParse(body);
+    if (!contact.success) {
+      context.addIssue({ code: 'custom', message: contact.error.message });
+      return z.NEVER;
+    }
+    const fingerprint = z
+      .string()
+      .min(1)
+      .max(10_000)
+      .safeParse(body[CART_FINGERPRINT_FIELD]);
+    if (!fingerprint.success) {
+      context.addIssue({ code: 'custom', message: fingerprint.error.message });
+      return z.NEVER;
+    }
+    return { contact: contact.data, fingerprint: fingerprint.data };
+  });
+export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
+
+export const StoreListPartPages = z.object({
+  after: recordId.optional(),
+  limit: z.coerce.number().int().positive().max(5000).default(1000),
+});
+export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;
+
+export const StoreListOffers = z.object({
+  part_identifier_id: z
+    .union([z.string(), z.array(z.string())])
+    .transform((value) => [value].flat())
+    .pipe(z.array(recordId).min(1).max(200)),
+});
+export type StoreListOffersType = z.infer<typeof StoreListOffers>;
+
+export const StoreListFitments = StoreListPartPages;
+export type StoreListFitmentsType = StoreListPartPagesType;
+
+export const StoreListVehicles = StoreListPartPages.extend({
+  make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+  model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
+});
+export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;

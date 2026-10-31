@@ -4,11 +4,17 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import FinalCta from '@/components/FinalCta.astro';
+import PartsInquiry from '@/components/PartsInquiry.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { SERVICE_SLUGS } from '@/utils/services';
+import {
+  partsCategoryFor,
+  SERVICE_SLUGS,
+  VIN_INQUIRY_SERVICE,
+} from '@/utils/services';
+import { categoryPagesForBuild } from '@/utils/catalogueEnv';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
 import { content } from '@/i18n/content';
@@ -29,7 +35,18 @@ const related = publishedWorks(await getCollection('works')).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
 
+const partsCategory = partsCategoryFor(slug, await categoryPagesForBuild());
+const partsHref =
+  slug === 'servicing'
+    ? PathBuilder.parts(locale)
+    : partsCategory && PathBuilder.partsCategory(locale, partsCategory);
 const schema = servicePageSchema(service);
+const finalCta = {
+  eyebrow: services.indexEyebrow,
+  heading: service.name,
+  body: service.heroLead,
+  service: slug,
+};
 
 const specs = [
   { label: services.specsPriceLabel, value: service.priceFrom },
@@ -71,6 +88,17 @@ const specs = [
     <div class="flex flex-col gap-5">
       <h2 class="text-section">{service.bodyHeading}</h2>
       <div class="prose-shop" set:html={safeMarkdown(service.body)} />
+      {
+        partsHref && (
+          <a
+            href={partsHref}
+            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-signal-ink hover:underline"
+          >
+            {services.partsLink}
+            <Icon name="chevronRight" size={14} />
+          </a>
+        )
+      }
     </div>
 
     <aside class="flex flex-col gap-4">
@@ -110,7 +138,7 @@ const specs = [
   </section>
 
   <section class="wrap pb-4">
-    <div class="card border-l-4 border-l-signal p-6">
+    <div class="card border-transparent bg-shade p-6">
       <h2 class="mb-2 text-base font-semibold text-signal-ink">
         {service.honestHeading}
       </h2>
@@ -131,10 +159,13 @@ const specs = [
     )
   }
 
-  <FinalCta
-    eyebrow={services.indexEyebrow}
-    heading={service.name}
-    body={service.heroLead}
-    service={slug}
-  />
+  {
+    slug === VIN_INQUIRY_SERVICE ? (
+      <FinalCta {...finalCta}>
+        <PartsInquiry slot="form" />
+      </FinalCta>
+    ) : (
+      <FinalCta {...finalCta} />
+    )
+  }
 </Shell>

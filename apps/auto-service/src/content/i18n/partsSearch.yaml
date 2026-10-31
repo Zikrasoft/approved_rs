@@ -1,0 +1,151 @@
+searchHeading: Найдите запчасть
+searchLead: Вводите VIN, номер запчасти в любом написании, ее название или марку и модель автомобиля.
+label: VIN, номер, название запчасти или автомобиль
+placeholder: VIN или номер
+submitLabel: Найти
+metaTitle: Поиск запчастей в CarLab
+metaDescription: Найдите запчасть по VIN, номеру производителя, названию или автомобилю в каталоге CarLab.
+eyebrow: Каталог запчастей
+heading: Поиск запчастей
+found: 'Найдено: {count}'
+emptyQuery: Введите VIN, номер или название запчасти либо марку и модель, например HU 816 x, масляный фильтр или BMW X3.
+noResults: По запросу «{q}» ничего не нашлось. Проверьте номер или отправьте заявку, и менеджер подберет запчасть вручную.
+unavailable: Поиск сейчас не отвечает. Отправьте заявку, и менеджер подберет запчасть вручную.
+unknownScope: Такого раздела в каталоге нет. Отправьте заявку, и менеджер подберет запчасть вручную.
+filtersHeading: Фильтры
+applyFilters: Показать
+showResults: Показать {count}
+showAllValues: Показать все ({count})
+resetFilters: Сбросить
+resetAllFilters: Сбросить все
+rangeMinLabel: От
+rangeMaxLabel: До
+rangeFrom: от {min}
+rangeTo: до {max}
+rangeBetween: от {min} до {max}
+removeFilter: 'Убрать фильтр: {label}'
+noFilteredResults: С такими характеристиками в категории ничего нет. Уберите часть фильтров или отправьте заявку, и менеджер подберет запчасть вручную.
+brandFacet: Бренд
+availabilityFacet: Наличие
+inStockOnly: Только в наличии
+priceFacet: Цена
+booleanTrue: да
+booleanFalse: нет
+previous: Назад
+next: Дальше
+formHeading: Заявка на запчасти
+notFoundQuestion: Не нашли нужное?
+notFoundLink: Оставьте заявку, подберем
+numberNotFound: Точного номера «{q}» в каталоге нет, возможно, вы искали один из похожих ниже.
+numberComment: Номер {q}
+similarNumbers: Похожие номера
+carsGroup: Автомобили
+partsGroup: Запчасти
+vinOption: Подобрать запчасти по VIN
+suggestFailed: Подсказки не загрузились
+suggestRetry: Повторить
+openSearch: Поиск по каталогу
+closeSearch: Закрыть поиск
+llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
+translatedFrom: e8f16b1a99edaa1d
+translations:
+  sr:
+    searchHeading: Pronađite deo
+    searchLead: Unesite VIN, broj dela u bilo kom formatu, naziv dela ili marku i model automobila.
+    label: VIN, broj ili naziv dela ili automobil
+    placeholder: VIN ili broj dela
+    submitLabel: Pretraži
+    metaTitle: Pretraga auto-delova u CarLab
+    metaDescription: Pronađite deo u CarLab katalogu po VIN-u, kataloškom broju proizvođača, nazivu ili automobilu.
+    eyebrow: Katalog auto-delova
+    heading: Pretraga auto-delova
+    found: 'Pronađeno: {count}'
+    emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model automobila, na primer HU 816 x, filter ulja ili BMW X3.
+    noResults: Nema rezultata za upit „{q}“. Proverite broj dela ili pošaljite upit, pa će naš tim pronaći odgovarajući deo.
+    unavailable: Pretraga trenutno nije dostupna. Pošaljite upit, pa će naš tim pronaći odgovarajući deo.
+    unknownScope: Ova kategorija ne postoji u katalogu. Pošaljite upit i naš saradnik će ručno pronaći odgovarajući deo.
+    filtersHeading: Filteri
+    applyFilters: Prikaži
+    showResults: Prikaži {count}
+    showAllValues: Prikaži sve ({count})
+    resetFilters: Poništi
+    resetAllFilters: Poništi sve
+    rangeMinLabel: Od
+    rangeMaxLabel: Do
+    rangeFrom: od {min}
+    rangeTo: do {max}
+    rangeBetween: od {min} do {max}
+    removeFilter: 'Ukloni filter: {label}'
+    noFilteredResults: U ovoj kategoriji nema delova sa izabranim karakteristikama. Uklonite neke filtere ili pošaljite upit, pa će naš tim pronaći odgovarajući deo.
+    brandFacet: Brend
+    availabilityFacet: Dostupnost
+    inStockOnly: Samo na stanju
+    priceFacet: Cena
+    booleanTrue: da
+    booleanFalse: ne
+    previous: Prethodna
+    next: Sledeća
+    formHeading: Upit za auto-delove
+    notFoundQuestion: Niste pronašli ono što tražite?
+    notFoundLink: Pošaljite upit, pronaći ćemo odgovarajući deo
+    numberNotFound: U katalogu nema dela sa tačnim brojem „{q}“, možda ste tražili neki od sličnih u nastavku.
+    numberComment: Broj {q}
+    similarNumbers: Slični brojevi
+    carsGroup: Automobili
+    partsGroup: Auto-delovi
+    vinOption: Pronađi delove po VIN-u
+    suggestFailed: Predlozi nisu učitani
+    suggestRetry: Pokušaj ponovo
+    openSearch: Pretraga kataloga
+    closeSearch: Zatvori pretragu
+    llmsSearch: 'Jedna pretraga za ceo katalog: VIN, broj dela u bilo kom formatu, naziv, marka, model, oznaka karoserije ili motora, kao i njihove kombinacije, na primer „filter ulja bmw x3“. Upit se prosleđuje kroz parametar q: {example}'
+  en:
+    searchHeading: Find a part
+    searchLead: Enter a VIN, part number in any format, part name, or vehicle make and model.
+    label: VIN, part number, part name or vehicle
+    placeholder: VIN or part number
+    submitLabel: Search
+    metaTitle: CarLab parts search
+    metaDescription: Find parts by VIN, manufacturer part number, part name or vehicle in the CarLab catalogue.
+    eyebrow: Parts catalogue
+    heading: Parts search
+    found: 'Found: {count}'
+    emptyQuery: Enter a VIN, part number, part name, or make and model, for example HU 816 x, oil filter or BMW X3.
+    noResults: No results for "{q}". Check the part number or send a parts enquiry, and our team will find the right part for you.
+    unavailable: Search is currently unavailable. Send a parts enquiry, and our team will find the right part for you.
+    unknownScope: This category isn't in our catalogue. Send a parts enquiry and our team will find the right part for you.
+    filtersHeading: Filters
+    applyFilters: Show results
+    showResults: Show {count}
+    showAllValues: Show all ({count})
+    resetFilters: Reset
+    resetAllFilters: Reset all
+    rangeMinLabel: From
+    rangeMaxLabel: To
+    rangeFrom: from {min}
+    rangeTo: up to {max}
+    rangeBetween: from {min} to {max}
+    removeFilter: 'Remove filter: {label}'
+    noFilteredResults: No parts in this category match these filters. Remove some filters or send a parts enquiry, and our team will find the right part for you.
+    brandFacet: Brand
+    availabilityFacet: Availability
+    inStockOnly: In stock only
+    priceFacet: Price
+    booleanTrue: yes
+    booleanFalse: no
+    previous: Previous
+    next: Next
+    formHeading: Parts enquiry
+    notFoundQuestion: Can't find what you need?
+    notFoundLink: Send an enquiry and we'll find it
+    numberNotFound: No exact match for "{q}" in the catalogue. You may be looking for one of the similar parts below.
+    numberComment: Part number {q}
+    similarNumbers: Similar part numbers
+    carsGroup: Vehicles
+    partsGroup: Parts
+    vinOption: Find parts by VIN
+    suggestFailed: Suggestions couldn't be loaded
+    suggestRetry: Try again
+    openSearch: Search the catalogue
+    closeSearch: Close search
+    llmsSearch: 'Search the entire catalogue by VIN, part number in any format, part name, make, model, body code or engine code. You can also combine terms, for example "oil filter bmw x3". The query is passed in the q parameter: {example}'

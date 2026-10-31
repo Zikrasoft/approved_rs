@@ -29,13 +29,13 @@ function markup(tag: string, selected = 'whatsapp'): string {
     <input type="hidden" name="contact">
     <input type="hidden" name="contact_channel" value="${selected}">
     <div role="tablist">${tabs}</div>
-    <div data-panel="telegram"><input data-telegram><p data-error-telegram hidden></p></div>
+    <div data-panel="telegram"><input data-telegram><p data-error-telegram data-bad-handle="Bad handle" hidden>Empty</p></div>
     <div data-panel="phone">
       <select data-country data-display-locale="en">
         <option value="RS" data-dial="381" selected>RS</option>
         <option value="DE" data-dial="49">DE</option>
       </select>
-      <input data-phone><p data-error-phone hidden></p>
+      <input data-phone><p data-error-phone data-too-long="Too long" hidden>Incomplete</p>
     </div>
     <input type="checkbox" data-consent><p data-error-consent hidden></p>
     <p data-error-submit hidden></p>
@@ -266,6 +266,25 @@ describe('submit', () => {
     expect(f.error('phone').hidden).toBe(false);
   });
 
+  it('says a number is too long rather than incomplete, and back again', () => {
+    const f = mount();
+    f.consent.checked = true;
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Too long');
+    f.phone.value = '12';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
+  });
+
+  it('keeps the one phone error where the form has no too-long copy', () => {
+    const f = mount();
+    f.error('phone').removeAttribute('data-too-long');
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
+  });
+
   it("clears only the typed field's error", () => {
     const f = mount();
     submit(f.form);
@@ -331,6 +350,28 @@ describe('submit', () => {
     submit(f.form);
     expect(f.error('telegram').hidden).toBe(false);
     expect(document.activeElement).toBe(f.telegram);
+  });
+
+  it('says a typed handle is malformed rather than missing, and back again', () => {
+    const f = mount({ selected: 'telegram' });
+    f.consent.checked = true;
+    f.telegram.value = '@qa';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Bad handle');
+    f.telegram.value = '';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
+    f.telegram.value = '+38160';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
+  });
+
+  it('keeps the one Telegram error where the form has no malformed-handle copy', () => {
+    const f = mount({ selected: 'telegram' });
+    f.error('telegram').removeAttribute('data-bad-handle');
+    f.telegram.value = '@qa';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
   });
 
   it('restores the button and shows the submit error when sending fails', async () => {

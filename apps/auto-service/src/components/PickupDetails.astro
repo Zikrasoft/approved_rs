@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+import { mapPlaceUrl } from '@podbor/site-kit';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const { site, shopCart: copy, pages } = content(localeFrom(Astro.url.pathname));
+---
+
+<div class:list={['flex flex-col gap-1 text-sm leading-relaxed', className]}>
+  <p class="font-semibold text-ink">{copy.pickupMethod}</p>
+  <address class="text-ink-2 not-italic">
+    {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}, {GARAGE_ADDRESS.city}
+  </address>
+  <p class="text-muted">{site.footer.hours}</p>
+  <a
+    href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
+    target="_blank"
+    rel="noopener"
+    class="mt-0.5 inline-flex min-h-11 items-center gap-1.5 self-start font-semibold text-signal-ink underline underline-offset-2 sm:min-h-0"
+  >
+    {pages.contact.mapHeading}
+    <Icon name="chevronRight" size={14} />
+  </a>
+</div>

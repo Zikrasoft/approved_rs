@@ -3,6 +3,7 @@ import {
   jsonLdText,
   localBusinessSchema,
   mapPlaceUrl,
+  NOINDEX,
   pageSchema,
   type PageSchema,
 } from '@podbor/site-kit';
@@ -120,7 +121,7 @@ const businessSchema = localBusinessSchema({
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content={NOINDEX} />}
     {
       alternates.map((alt) => (
         <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />

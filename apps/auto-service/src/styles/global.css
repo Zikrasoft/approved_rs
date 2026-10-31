@@ -1,5 +1,25 @@
 @import 'tailwindcss';
 
+@custom-variant card (@media (min-width: 40rem) and (min-height: 31.25rem));
+@custom-variant short (@media (max-height: 31.25rem));
+
+@custom-variant offers-pending {
+  @media (scripting: enabled) {
+    :root:not([data-offers-late]) part-offers:not(:defined) &,
+    part-offers[aria-busy='true'] & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant offers-late {
+  @media (scripting: enabled) {
+    :root[data-offers-late] part-offers:not(:defined) & {
+      @slot;
+    }
+  }
+}
+
 @font-face {
   font-family: 'Onest Variable';
   font-style: normal;
@@ -41,27 +61,30 @@
 
   --color-paper: #ffffff;
   --color-card: #ffffff;
-  --color-shade: #f3f4f6;
-  --color-shade-strong: #e7e9ed;
-  --color-panel: #1e2128;
-  --color-panel-2: #2a2e37;
-  --color-panel-line: #4a505c;
-  --color-panel-line-strong: #6b7280;
-  --color-panel-ink: #a8adb8;
-  --color-ink: #14161a;
-  --color-ink-2: #3b4149;
-  --color-muted: #636875;
-  --color-line: #e3e5e9;
-  --color-line-strong: #d2d6dd;
-  --color-line-field: #c3c7cf;
-  --color-signal: #f4661e;
-  --color-signal-ink: #c94a09;
-  --color-signal-dark: #a93a0f;
-  --color-go: #1a8a52;
+  --color-shade: #f6f6f6;
+  --color-shade-strong: #ececee;
+  --color-panel: #222324;
+  --color-panel-2: #2b2c2e;
+  --color-panel-line: #55555a;
+  --color-panel-line-strong: #797980;
+  --color-panel-ink: #95959d;
+  --color-panel-fg: #ffffff;
+  --color-ink: #222324;
+  --color-ink-2: #4a4a4f;
+  --color-muted: #636369;
+  --color-line: #e5e5e6;
+  --color-line-strong: #cacace;
+  --color-line-field: #919199;
+  --color-signal: #fa6610;
+  --color-signal-hover: #ff8540;
+  --color-signal-ink: #bc4d0c;
+  --color-signal-dark: #9e400a;
+  --color-go: #18814d;
+  --color-danger: #de0000;
 
   --radius-block: 1.375rem;
-  --radius-control: 999px;
-  --radius-field: 0.625rem;
+  --radius-control: 0.75rem;
+  --radius-pill: 999px;
 
   --text-hero: clamp(2rem, 4.6vw, 3.5rem);
   --text-section: clamp(1.5rem, 3vw, 2.3rem);
@@ -116,14 +139,18 @@
   }
 
   ::selection {
-    background: var(--color-signal-ink);
-    color: #fff;
+    background: var(--color-signal);
+    color: var(--color-ink);
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-signal);
+    outline: 3px solid var(--color-ink);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  :where(.bg-panel, .bg-panel-2) :focus-visible {
+    outline-color: var(--color-signal);
   }
 
   h1,
@@ -133,7 +160,7 @@
     line-height: 1.06;
     text-wrap: balance;
     overflow-wrap: break-word;
-    hyphens: auto;
+    hyphens: manual;
   }
 
   h3 {
@@ -165,12 +192,16 @@
 
 @utility eyebrow {
   width: fit-content;
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-pill);
   background-color: var(--color-shade);
   padding: 0.3125rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--color-ink-2);
+}
+
+.bg-shade .eyebrow {
+  background-color: var(--color-card);
 }
 
 @utility spec {
@@ -201,12 +232,8 @@
   }
 
   .btn-primary {
-    background-color: var(--color-signal-ink);
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background-color: var(--color-signal-dark);
+    background-color: var(--color-signal);
+    color: var(--color-ink);
   }
 
   .btn-secondary {
@@ -215,20 +242,10 @@
     color: var(--color-ink);
   }
 
-  .btn-secondary:hover {
-    border-color: var(--color-ink);
-    background-color: var(--color-shade);
-  }
-
   .btn-on-panel {
-    border: 1px solid var(--color-panel-line);
+    border: 1px solid var(--color-panel-line-strong);
     background-color: transparent;
-    color: #fff;
-  }
-
-  .btn-on-panel:hover {
-    border-color: var(--color-panel-line-strong);
-    background-color: var(--color-panel-2);
+    color: var(--color-panel-fg);
   }
 
   .btn:active {
@@ -237,7 +254,7 @@
 
   .field {
     width: 100%;
-    border-radius: var(--radius-field);
+    border-radius: var(--radius-control);
     border: 1px solid var(--color-line-field);
     background-color: var(--color-card);
     padding: 0.75rem 0.875rem;
@@ -253,10 +270,19 @@
     border-color: var(--color-signal);
   }
 
+  .field[aria-invalid='true'] {
+    border-color: var(--color-danger);
+  }
+
+  .field:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   .chip {
     display: inline-flex;
     align-items: center;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-pill);
     background-color: var(--color-shade);
     padding: 0.5rem 1rem;
     font-size: 0.9375rem;
@@ -266,17 +292,9 @@
     transition: background-color 160ms ease-out;
   }
 
-  .chip:hover {
-    background-color: var(--color-shade-strong);
-  }
-
   .chip-accent {
-    background-color: var(--color-signal-ink);
-    color: #fff;
-  }
-
-  .chip-accent:hover {
-    background-color: var(--color-signal-dark);
+    background-color: var(--color-signal);
+    color: var(--color-ink);
   }
 
   .link-muted {
@@ -285,8 +303,32 @@
     transition: color 150ms ease-out;
   }
 
-  .link-muted:hover {
-    color: var(--color-signal-ink);
+  @media (hover: hover) {
+    .btn-primary:hover {
+      background-color: var(--color-signal-hover);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-ink);
+      background-color: var(--color-shade);
+    }
+
+    .btn-on-panel:hover {
+      border-color: var(--color-panel-ink);
+      background-color: var(--color-panel-2);
+    }
+
+    .chip:hover {
+      background-color: var(--color-shade-strong);
+    }
+
+    .chip-accent:hover {
+      background-color: var(--color-signal-hover);
+    }
+
+    .link-muted:hover {
+      color: var(--color-signal-ink);
+    }
   }
 
   .field-label {
@@ -394,7 +436,7 @@
   }
 
   .prose-shop a {
-    color: var(--color-signal);
+    color: var(--color-signal-ink);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
@@ -441,13 +483,8 @@
   }
   @media (prefers-reduced-motion: reduce) {
     dialog,
-    dialog[open] {
-      translate: 0 0;
-    }
-    @starting-style {
-      dialog[open] {
-        translate: 0 0;
-      }
+    dialog::backdrop {
+      transition: none;
     }
   }
 
@@ -462,9 +499,4 @@
       }
     }
   }
-}
-
-html:not([data-dev]) [data-dev-only],
-html[data-dev] [data-dev-hidden] {
-  display: none;
 }

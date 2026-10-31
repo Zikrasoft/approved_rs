@@ -1,0 +1,285 @@
+---
+import { localizedUnit, translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import Icon from '@/components/Icon.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
+import {
+  categoryListings,
+  type CategoryListing,
+  type CategoryPageEntry,
+} from '@/utils/catalogueSnapshot';
+import { keySpecs } from '@/utils/attributeRows';
+import { categoryFacets } from '@/utils/categoryFacets';
+import { paragraphs } from '@podbor/site-kit';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { partThumbnail } from '@/utils/partImages';
+import { partSuccessor } from '@/utils/partSuccessor';
+import { rangeText, withFacetCopy } from '@/utils/partsSearch';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const categories = await categoryPagesForBuild();
+  return withLocales(
+    categories.flatMap((category) =>
+      categoryListings(category).map((listing) => ({
+        params: {
+          slug: category.slug,
+          page: listing.number > 1 ? String(listing.number) : undefined,
+        },
+        props: { category, listing },
+        cacheKey: cacheKey({ category, listing }),
+      })),
+    ),
+  );
+}
+
+const { category, listing } = Astro.props as {
+  category: CategoryPageEntry;
+  listing: CategoryListing;
+};
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = inquiry.category;
+const name = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const empty = category.pages.length === 0;
+const categoryAttributes = category.pages.map(({ part }) => part.attributes);
+const firstPage = listing.number === 1;
+const pageHref = (number: number) =>
+  PathBuilder.partsCategory(locale, category.slug, number);
+const prev = listing.number > 1 ? pageHref(listing.number - 1) : null;
+const next =
+  listing.number < listing.count ? pageHref(listing.number + 1) : null;
+const pageNumbers = Array.from(
+  { length: listing.count },
+  (_, index) => index + 1,
+).filter(
+  (number) =>
+    number === 1 ||
+    number === listing.count ||
+    Math.abs(number - listing.number) <= 1,
+);
+const pageTitle =
+  listing.number > 1
+    ? copy.pageName
+        .replace('{name}', name)
+        .replace('{page}', String(listing.number))
+    : name;
+const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
+const searchCopy = content(locale).partsSearch;
+const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
+const filtered = !empty && facets.length > 0;
+const fields = category.fields
+  .map((field) => {
+    const numbers = category.pages
+      .flatMap(({ part }) => [part.attributes[field.key] ?? []].flat())
+      .map(Number)
+      .filter(Number.isFinite);
+    return {
+      key: field.key,
+      label: [
+        translated(field, 'label', locale),
+        localizedUnit(field.unit, locale),
+      ]
+        .filter(Boolean)
+        .join(', '),
+      values:
+        field.type === 'number'
+          ? numbers.length
+            ? rangeText(
+                { min: Math.min(...numbers), max: Math.max(...numbers) },
+                null,
+                searchCopy,
+                (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
+              )
+            : ''
+          : field.options
+              .map((option) => translated(option, 'label', locale))
+              .join(', '),
+    };
+  })
+  .filter(({ values }) => values);
+---
+
+<Shell
+  title={copy.metaTitleTemplate.replace('{name}', pageTitle)}
+  description={lead ?? inquiry.metaDescription}
+>
+  {prev && <link slot="head" rel="prev" href={prev} />}
+  {next && <link slot="head" rel="next" href={next} />}
+  <PageHero
+    actions={false}
+    compact
+    clampLead
+    eyebrow={copy.eyebrow}
+    heading={pageTitle}
+    lead={firstPage ? lead : undefined}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: pageHref(1), label: name },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 pt-6 pb-band md:py-band-lg lg:items-start',
+      empty
+        ? 'lg:grid-cols-[1.2fr_1fr]'
+        : filtered &&
+          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
+    ]}
+  >
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{ category: category.slug }}
+          facets={facets}
+          count={category.pages.length}
+        />
+      )
+    }
+
+    <div class="flex min-w-0 flex-col gap-10">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
+        {
+          empty ? (
+            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+          ) : (
+            <>
+              <ListingBar count={category.pages.length} filters={filtered} />
+              <ul class="card divide-y divide-line">
+                {listing.pages.map((page) => (
+                  <PartRow
+                    thumb={partThumbnail(page, category)}
+                    slug={page.slug}
+                    brand={page.brand.name}
+                    value={page.value}
+                    name={translated(page.part, 'name', locale)}
+                    specs={keySpecs(
+                      category,
+                      page.part.attributes,
+                      locale,
+                      categoryAttributes,
+                    )}
+                    superseded={page.superseded}
+                    current={partSuccessor(page, bySlug)}
+                    priced={page}
+                  />
+                ))}
+              </ul>
+              {listing.count > 1 && (
+                <nav
+                  aria-label={copy.pagination}
+                  class="flex flex-wrap items-center gap-2 text-sm"
+                >
+                  {prev && (
+                    <a
+                      href={prev}
+                      rel="prev"
+                      class="flex min-h-11 items-center gap-1.5 rounded-control px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                    >
+                      <Icon name="chevronRight" size={16} class="rotate-180" />
+                      {searchCopy.previous}
+                    </a>
+                  )}
+                  <ol class="flex flex-wrap items-center gap-1 max-sm:order-first max-sm:w-full">
+                    {pageNumbers.map((number, index) => (
+                      <>
+                        {index > 0 && number - pageNumbers[index - 1] > 1 && (
+                          <li aria-hidden="true" class="px-1 text-muted">
+                            …
+                          </li>
+                        )}
+                        <li>
+                          <a
+                            href={pageHref(number)}
+                            aria-current={
+                              number === listing.number ? 'page' : undefined
+                            }
+                            class="spec flex size-11 items-center justify-center rounded-control text-ink hover:bg-shade hover:text-signal-ink aria-[current=page]:bg-ink aria-[current=page]:font-semibold aria-[current=page]:text-paper"
+                          >
+                            {number}
+                          </a>
+                        </li>
+                      </>
+                    ))}
+                  </ol>
+                  {next && (
+                    <a
+                      href={next}
+                      rel="next"
+                      class="flex min-h-11 max-sm:ml-auto items-center gap-1.5 rounded-control px-3 font-semibold text-ink hover:bg-shade hover:text-signal-ink"
+                    >
+                      {searchCopy.next}
+                      <Icon name="chevronRight" size={16} />
+                    </a>
+                  )}
+                </nav>
+              )}
+              <InquiryLink topic={name} />
+            </>
+          )
+        }
+      </div>
+
+      {
+        firstPage && (lead || body.length > 0) && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {lead && <p class="sm:hidden">{lead}</p>}
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        firstPage && fields.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.fieldsHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {fields.map((field) => (
+                <div class="flex flex-col gap-1 px-5 py-4 sm:px-6">
+                  <dt class="font-semibold text-ink">{field.label}</dt>
+                  <dd class="spec text-sm text-muted">{field.values}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

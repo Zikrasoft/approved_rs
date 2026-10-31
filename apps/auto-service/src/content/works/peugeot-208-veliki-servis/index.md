@@ -15,28 +15,28 @@ translations:
   sr:
     title: Peugeot 208 veliki servis
     body: |-
-      **Peugeot 208 1.2 PureTech. Veliki i mali servis, zamena ulja u menjaču u Beogradu**\
-      U naš servis na Zvezdari je stigao Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bila potrebna sveobuhvatna tehnička proverka, pa smo obavili veliki servis (veliki servis), mali servis (mali servis) i zamenu ulja u menjaču.\
-      U okviru velikog servisa zamenili smo GRA remen i potrebne delove, kao i vodenu pumpu. Na motoru 1.2 PureTech pumpa se ne pokreće GRA remenom, ali preporučujemo da je zamenite tokom velikog servisa. Ako se odlučite da zadržite staru pumpu, obavezno preporučujemo da zamenite barem mali remen koji je pokreće.\
-      Posebnu pažnju treba obratiti na intervale zamene GRA remena na motorima 1.2 PureTech. Uzimajući u obzir ažurirane preporuke i karakteristike ovih motora, savetujemo da se veliki servis obavlja na svakih 60 000 km, ne čekajući pojavu problema sa remenom. Tačan plan održavanja treba proveriti za konkretni model motora.\
-      Naš servis ima sve neophodne specijalizovane alate za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Svi radovi se izvode uz poštovanje tehnologije postavljanja i fiksiranja faza razvodnog mehanizma.\
-      Dodatno, obavili smo mali servis sa zamenom motornog ulja i filtera, kao i potpunom zamenom ulja u menjaču, koristeći ulje Valvoline.
+      **Peugeot 208 1.2 PureTech. Veliki servis, mali servis i zamena ulja u menjaču u Beogradu**\
+      U naš autoservis na Zvezdari stigao je Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenu ulja u menjaču.\
+      U okviru velikog servisa zamenili smo zupčasti kaiš i prateće delove, kao i vodenu pumpu. Na motoru 1.2 PureTech vodenu pumpu ne pokreće zupčasti kaiš, ali preporučujemo da se i ona zameni prilikom velikog servisa. Ako odlučite da zadržite staru pumpu, svakako preporučujemo da zamenite makar zaseban mali kaiš koji je pokreće.\
+      Posebnu pažnju treba obratiti na intervale zamene zupčastog kaiša kod motora 1.2 PureTech. Uzimajući u obzir ažurirane preporuke i specifičnosti ovih motora, preporučujemo veliki servis na svakih 60 000 km, pre nego što se pojave problemi sa kaišem. Tačan interval održavanja treba proveriti za konkretnu verziju motora.\
+      Naš autoservis poseduje sav potreban specijalni alat za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Sve radove izvodimo uz poštovanje propisanog postupka uzupčenja i blokiranja razvoda.\
+      Pored toga, uradili smo mali servis sa zamenom motornog ulja i filtera, kao i kompletnu zamenu ulja u menjaču, za koju smo koristili ulje Valvoline.
     car: Peugeot 208
   en:
     title: Peugeot 208 veliki servis
     body: |-
-      **Peugeot 208 1.2 PureTech. Major service, minor service, and gearbox oil change in Belgrade**\
-      A Peugeot 208 with a 1.2 PureTech gasoline engine came into our garage in Zvezdara. The vehicle required comprehensive maintenance, so we performed a major service, a minor service, and an oil change for the gearbox.\
-      As part of the major service, we replaced the timing belt and necessary components, as well as the water pump. The 1.2 PureTech engine does not have the water pump driven by the timing belt, but we recommend replacing it during major servicing. If you decide to keep the old pump, we highly recommend at least replacing the smaller belt that drives it.\
-      Particular attention should be paid to the timing belt replacement intervals for the 1.2 PureTech engines. Based on updated recommendations and the characteristics of these engines, we suggest performing a major service every 60,000 km, without waiting for issues with the belt to arise. The exact schedule should be verified for each specific engine modification.\
-      Our garage is equipped with all the necessary specialized tools for properly conducting major services on Peugeot and Citroën 1.2 PureTech engines. All work is performed in accordance with the technology for installing and securing the camshaft timing.\
-      In addition, we conducted a minor service that included an engine oil and filter change, and we completely replaced the gearbox oil using Valvoline oil.
+      **Peugeot 208 1.2 PureTech. Major service, routine service and gearbox oil change in Belgrade**\
+      This Peugeot 208 with a 1.2 PureTech petrol engine came to our workshop in Zvezdara for comprehensive maintenance. We carried out a major service (veliki servis), a routine service (mali servis) and a gearbox oil change.\
+      As part of the major service, we replaced the timing belt and associated components, along with the water pump. On the 1.2 PureTech engine, the water pump is not driven by the timing belt, but we recommend replacing it during a major service. If you choose to keep the existing pump, we strongly recommend replacing at least the separate small belt that drives it.\
+      Timing belt replacement intervals deserve particular attention on 1.2 PureTech engines. Taking updated recommendations and the characteristics of these engines into account, we recommend a major service every 60,000 km rather than waiting for belt problems to develop. The exact maintenance schedule must be checked for the specific engine variant.\
+      Our workshop has all the specialist tools needed to carry out a major service correctly on Peugeot and Citroën 1.2 PureTech engines. All work follows the correct procedures for setting and locking the valve timing.\
+      We also carried out a routine service, replacing the engine oil and filters, and completely changed the gearbox oil using Valvoline oil.
     car: Peugeot 208
-translatedFrom: 9dafa3c7b9ccd8c3
+translatedFrom: 522c98675712bea8
 ---
 **Peugeot 208 1.2 PureTech. Большое ТО, малое ТО и замена масла в коробке передач в Белграде**\
 К нам в автосервис на Звездаре приехал Peugeot 208 с бензиновым двигателем 1.2 PureTech. Автомобилю требовалось комплексное техническое обслуживание, поэтому мы выполнили большое ТО (veliki servis), малое ТО (mali servis) и замену масла в коробке передач.\
-В рамках большого ТО заменили ремень ГРМ и необходимые комплектующие, а также водяную помпу. На двигателе 1.2 PureTech помпа не приводится ремнём ГРМ, но мы рекомендуем менять её во время большого обслуживания. Если вы решили оставить старую помпу, обязательно рекомендуем заменить хотя бы отдельный маленький ремень, который приводит её в движение.\
-Особое внимание стоит уделять интервалам замены ремня ГРМ на двигателях 1.2 PureTech. С учётом обновлённых рекомендаций и особенностей этих моторов мы рекомендуем проводить большое ТО каждые 60 000 км, не дожидаясь появления проблем с ремнём. Точный регламент необходимо проверять по конкретной модификации двигателя.\
+В рамках большого ТО заменили ремень ГРМ и необходимые комплектующие, а также водяную помпу. На двигателе 1.2 PureTech помпа не приводится ремнем ГРМ, но мы рекомендуем менять ее во время большого обслуживания. Если вы решили оставить старую помпу, обязательно рекомендуем заменить хотя бы отдельный маленький ремень, который приводит ее в движение.\
+Особое внимание стоит уделять интервалам замены ремня ГРМ на двигателях 1.2 PureTech. С учетом обновленных рекомендаций и особенностей этих моторов мы рекомендуем проводить большое ТО каждые 60 000 км, не дожидаясь появления проблем с ремнем. Точный регламент необходимо проверять по конкретной модификации двигателя.\
 Наш автосервис располагает всем необходимым специализированным инструментом для правильного проведения большого ТО на двигателях Peugeot и Citroën 1.2 PureTech. Все работы выполняются с соблюдением технологии установки и фиксации фаз газораспределения.\
 Дополнительно мы провели малое ТО с заменой моторного масла и фильтров, а также полностью заменили масло в коробке передач, используя масло Valvoline.

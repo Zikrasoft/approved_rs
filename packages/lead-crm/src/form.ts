@@ -1,12 +1,28 @@
 import { z } from 'zod';
 import { SERVICE_LABELS_RU, type LabelledService } from '@podbor/brands';
 import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
-import { isValidContact } from './phone.ts';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_FIELD_LENGTH,
+  MAX_URL_LENGTH,
+} from './limits.ts';
+import {
+  isValidContact,
+  PHONE_COUNTRIES,
+  plainText,
+  singleLine,
+  storedContact,
+  typedContact,
+  type PhoneRegion,
+} from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
+import { vinOf } from './vin.ts';
+import { typedAsPhone } from './contactShape.ts';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
 
@@ -17,16 +33,24 @@ export {
 } from './phone.ts';
 export type { PhoneCountry, PhoneCountryOption } from './phone.ts';
 
-export const MAX_FIELD_LENGTH = 200;
-export const MAX_COMMENT_LENGTH = 2000;
-export const MAX_URL_LENGTH = 500;
+export {
+  MAX_COMMENT_LENGTH,
+  MAX_FIELD_LENGTH,
+  MAX_URL_LENGTH,
+} from './limits.ts';
 export const MAX_SERVICES = 20;
 export {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
   META_IDS_FIELD,
+  ORDER_ID_FIELD,
   SERVICE_FIELD,
 } from './fields.ts';
+
+export const vinNote = (vin: string): string => {
+  const read = vinOf(vin);
+  return read ? `VIN: ${read}` : `VIN не распознан: ${vin.toUpperCase()}`;
+};
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 
@@ -47,25 +71,33 @@ export const visitorIdSchema = z
 const cappedText = (max: number) =>
   z
     .string()
-    .trim()
+    .transform(singleLine)
     .transform((value) => value.slice(0, max));
 
-const requiredText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .min(1)
-    .transform((value) => value.slice(0, max));
+const requiredText = (max: number) => cappedText(max).pipe(z.string().min(1));
 
-const optionalText = (max: number) =>
+const optionalText = (max: number, clean = singleLine) =>
   z
     .string()
-    .trim()
     .nullish()
-    .transform((value) => value?.slice(0, max) || null)
+    .transform((value) => (value ? clean(value).slice(0, max) : '') || null)
     .catch(null);
 
-export const sourceUrlSchema = optionalText(MAX_URL_LENGTH);
+export const sourceUrlSchema = z
+  .string()
+  .trim()
+  .max(MAX_URL_LENGTH)
+  .pipe(z.url({ protocol: /^https?$/ }))
+  .nullable()
+  .catch(null);
+
+export const shownPage = (stored: string): string | null =>
+  stored.startsWith('/') || sourceUrlSchema.parse(stored) ? stored : null;
+
+export const siteUrl = (raw: unknown, origin: string): string | null => {
+  const url = sourceUrlSchema.parse(raw);
+  return url && new URL(url).origin === origin ? url : null;
+};
 
 function parseJson(value: unknown): unknown {
   try {
@@ -105,22 +137,25 @@ export const leadEnvelopeSchema = z
 const submissionObject = z
   .object({
     ...envelopeShape,
-    name: cappedText(MAX_FIELD_LENGTH),
+    name: cappedText(MAX_FIELD_LENGTH).default(''),
     contact: requiredText(MAX_FIELD_LENGTH),
     contact_channel: z
       .union([contactChannelSchema, z.literal('')])
       .nullish()
       .transform((value) => value || null),
-    service: z.array(z.union([serviceSlugSchema, z.literal('')])).default([]),
+    service: z
+      .array(z.union([serviceSlugSchema, z.literal('')]).catch(''))
+      .default([]),
     // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     vin: optionalText(MAX_FIELD_LENGTH),
-    comment: optionalText(MAX_COMMENT_LENGTH),
+    comment: optionalText(MAX_COMMENT_LENGTH, plainText),
     country: optionalText(MAX_FIELD_LENGTH),
     source_url: sourceUrlSchema,
     visitor_id: visitorIdSchema,
     [AD_SOURCE_FIELD]: adSourceFieldSchema,
     [META_IDS_FIELD]: metaIdsFieldSchema,
+    [ORDER_ID_FIELD]: optionalText(MAX_FIELD_LENGTH),
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
     consent: z.string().trim().min(1),
   })
@@ -128,12 +163,18 @@ const submissionObject = z
     path: ['contact'],
   })
   .transform((value) => {
-    const services = value.service.filter(Boolean).slice(0, MAX_SERVICES);
-    const vin = value.vin ? `VIN: ${value.vin}` : null;
-    const comment = [vin, value.car, value.comment].filter(Boolean).join('\n');
+    const services = [...new Set(value.service.filter(Boolean))].slice(
+      0,
+      MAX_SERVICES,
+    );
+    const vin = value.vin ? vinNote(value.vin) : null;
+    const comment = [vin, value.car, value.comment]
+      .filter(Boolean)
+      .join('\n')
+      .replace(/\r\n?/g, '\n');
     return {
       name: value.name,
-      contact: value.contact,
+      contact: storedContact(value.contact),
       contactChannel: value.contact_channel,
       service: services[0] ?? '',
       services,
@@ -143,9 +184,76 @@ const submissionObject = z
       visitorId: value.visitor_id,
       adSource: value[AD_SOURCE_FIELD],
       metaIds: value[META_IDS_FIELD],
+      orderId: value[ORDER_ID_FIELD],
     };
   });
 
-export const leadSubmissionSchema = z.preprocess(formRecord, submissionObject);
+const typedContactSchema = z.object({
+  contact: cappedText(MAX_FIELD_LENGTH).catch(''),
+  contact_channel: contactChannelSchema.nullable().catch(null),
+  phone_number: cappedText(MAX_FIELD_LENGTH).catch(''),
+  phone_country: z
+    .enum(
+      PHONE_COUNTRIES.map(({ iso }) => iso) as [PhoneRegion, ...PhoneRegion[]],
+    )
+    .optional()
+    .catch(undefined),
+  telegram: cappedText(MAX_FIELD_LENGTH).catch(''),
+});
+
+const formFields = z.record(z.string(), z.unknown());
+
+function withTypedContact(value: unknown): unknown {
+  const record = formFields.safeParse(value);
+  if (!record.success) return value;
+  const typed = typedContactSchema.parse(record.data);
+  if (typed.contact) return record.data;
+  return {
+    ...record.data,
+    contact: typedContact({
+      channel: typed.contact_channel,
+      phone: typed.phone_number,
+      country: typed.phone_country,
+      telegram: typed.telegram,
+    }),
+  };
+}
+
+export const leadSubmissionSchema = z.preprocess(
+  formRecord,
+  z.preprocess(withTypedContact, submissionObject),
+);
 
 export type LeadFormSubmission = z.infer<typeof leadSubmissionSchema>;
+
+export type LeadRefusal =
+  'missing-contact' | 'invalid-phone' | 'invalid-telegram' | 'missing-consent';
+
+const refusalFieldsSchema = z.preprocess(
+  formRecord,
+  z.preprocess(
+    withTypedContact,
+    z.object({
+      contact: cappedText(MAX_FIELD_LENGTH).catch(''),
+      contact_channel: contactChannelSchema.nullable().catch(null),
+      consent: z.string().trim().catch(''),
+    }),
+  ),
+);
+
+export function leadRefusal(form: FormData): {
+  reason: LeadRefusal;
+  contact: string;
+} {
+  const { contact, contact_channel, consent } = refusalFieldsSchema.parse(form);
+  if (!contact) return { reason: 'missing-contact', contact };
+  if (!consent && isValidContact(contact, contact_channel))
+    return { reason: 'missing-consent', contact };
+  return {
+    reason:
+      contact_channel === 'telegram' && !typedAsPhone(contact)
+        ? 'invalid-telegram'
+        : 'invalid-phone',
+    contact,
+  };
+}

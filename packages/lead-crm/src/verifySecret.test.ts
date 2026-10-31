@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { secretMatches } from './verifySecret.ts';
+import { bearerToken, secretMatches } from './verifySecret.ts';
+
+describe('bearerToken', () => {
+  it.each(['Bearer s3cret', 'bearer s3cret', 'BEARER s3cret'])(
+    'takes the token after the Bearer scheme in any case: %s',
+    (header) => {
+      expect(bearerToken(header)).toBe('s3cret');
+    },
+  );
+
+  it.each([null, undefined, '', 's3cret', 'Bearers3cret', 'Basic s3cret'])(
+    'reads no token from %s',
+    (header) => {
+      expect(bearerToken(header)).toBe('');
+    },
+  );
+});
 
 describe('secretMatches', () => {
   it('matches when received equals expected', () => {
@@ -55,5 +71,15 @@ describe('secretMatches', () => {
   it('is sensitive to surrounding whitespace (no implicit trim)', () => {
     expect(secretMatches(' correct-secret', 'correct-secret')).toBe(false);
     expect(secretMatches('correct-secret ', 'correct-secret')).toBe(false);
+  });
+
+  it('accepts the current or the previous secret while one rotates', () => {
+    const accepted = ['new-secret', 'old-secret'];
+
+    expect(secretMatches('new-secret', accepted)).toBe(true);
+    expect(secretMatches('old-secret', accepted)).toBe(true);
+    expect(secretMatches('other-secr', accepted)).toBe(false);
+    expect(secretMatches('new-secret', ['new-secret', undefined])).toBe(true);
+    expect(secretMatches('anything', [undefined, ''])).toBe(false);
   });
 });

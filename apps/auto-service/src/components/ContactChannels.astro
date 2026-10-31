@@ -43,10 +43,10 @@ const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
   thanks: FULL,
   hero: {
     channels: ['phone', 'whatsapp', 'viber', 'telegram'],
-    list: 'grid grid-cols-4 gap-1 pointer-fine:grid-cols-3 sm:flex sm:flex-wrap',
-    tile: 'min-h-11 justify-center gap-1 px-1.5 py-2.5 sm:gap-2 sm:px-5',
+    list: 'grid grid-cols-2 gap-2 sm:flex sm:flex-wrap',
+    tile: 'min-h-11 justify-center gap-2 px-3 py-2.5 sm:px-5',
     iconSize: 14,
-    label: 'text-xs sm:text-[0.8125rem]',
+    label: 'text-[0.8125rem]',
   },
 };
 const TONE = {
@@ -56,7 +56,7 @@ const TONE = {
   },
   panel: {
     surface:
-      'border-panel-line text-white hover:border-panel-line-strong hover:bg-panel-2',
+      'border-panel-line-strong text-panel-fg hover:border-panel-ink hover:bg-panel-2',
     icon: 'text-panel-ink',
   },
 };

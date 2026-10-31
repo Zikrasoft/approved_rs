@@ -1,0 +1,55 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { Thumbnail } from '@/utils/partImages';
+import Icon from './Icon.astro';
+
+interface Props {
+  thumb: Thumbnail | null;
+  class?: string;
+}
+
+const { thumb, class: className } = Astro.props;
+const box =
+  'flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-control bg-shade sm:size-16';
+const label = content(localeFrom(Astro.url.pathname)).shopPart
+  .illustrationLabel;
+---
+
+{
+  thumb ? (
+    <part-image
+      class:list={['group/image relative', box, className]}
+      title={thumb.illustration ? label : undefined}
+    >
+      <img
+        src={thumb.src}
+        alt=""
+        width="64"
+        height="64"
+        loading="lazy"
+        decoding="async"
+        class:list={[
+          'size-full object-contain mix-blend-multiply group-data-broken/image:hidden',
+          thumb.illustration && 'opacity-60 grayscale',
+        ]}
+      />
+      <Icon
+        name="part"
+        size={22}
+        class="hidden text-line-field group-data-broken/image:block"
+      />
+      {thumb.illustration && <span class="sr-only">{label}</span>}
+    </part-image>
+  ) : (
+    <span class:list={[box, className]}>
+      <Icon name="part" size={22} class="text-line-field" />
+    </span>
+  )
+}
+
+<script>
+  import { definePartImage } from '@/scripts/partImage';
+
+  definePartImage();
+</script>

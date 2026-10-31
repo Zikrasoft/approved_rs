@@ -1,0 +1,192 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import Icon from '@/components/Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { carName, vehicleVariant } from '@/utils/carName';
+import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey, linkedVehicles } from '@/utils/cacheKey';
+import type { ModelHubEntry } from '@/utils/catalogueSnapshot';
+import type { CataloguePages } from '@/utils/paths';
+import { paragraphs } from '@podbor/site-kit';
+import { catalogueLinks, PathBuilder, withLocales } from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  const pages = await cataloguePagesForBuild();
+  return withLocales(
+    hubs.flatMap((hub) =>
+      hub.models.map((model) => ({
+        params: { make: hub.make.slug, model: model.model.slug },
+        props: { hub: model, pages },
+        cacheKey: cacheKey({
+          hub: model,
+          vehicles: linkedVehicles(pages, model.vehicles),
+        }),
+      })),
+    ),
+  );
+}
+
+const { hub, pages } = Astro.props as {
+  hub: ModelHubEntry;
+  pages: CataloguePages;
+};
+const locale = localeFrom(Astro.url.pathname);
+const links = catalogueLinks(locale, pages);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = content(locale).partsCar.hubs.model;
+const { make, model } = hub;
+const name = carName(model, locale);
+const empty = hub.categories.length === 0;
+const only = hub.vehicles.length === 1 ? hub.vehicles[0] : null;
+const onlyHref = only && links.vehicle(only);
+---
+
+<Shell
+  title={copy.metaTitle.replace('{model}', name)}
+  description={copy.metaDescription.replace('{model}', name)}
+>
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={name}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        label: name,
+      },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
+  >
+    <div class="flex flex-col gap-8">
+      {
+        only && onlyHref && (
+          <a
+            href={onlyHref}
+            class="group card flex items-center justify-between gap-4 border-transparent bg-shade p-5 transition-colors duration-150 hover:border-ink sm:p-6"
+          >
+            <span class="flex min-w-0 flex-col gap-1">
+              <span class="text-sm text-muted">{copy.singleCarLabel}</span>
+              <span class="spec font-semibold text-ink">
+                {vehicleVariant(only, locale)}
+              </span>
+              <span class="text-sm text-ink-2">{copy.singleCarLead}</span>
+            </span>
+            <Icon
+              name="chevronRight"
+              class="shrink-0 text-signal-ink transition-transform duration-150 group-hover:translate-x-0.5"
+            />
+          </a>
+        )
+      }
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.categoriesHeading}</h2>
+        {
+          !empty ? (
+            <ul class="card divide-y divide-line">
+              {hub.categories.map(({ category }) => {
+                const [lead] = paragraphs(translated(category, 'text', locale));
+                return (
+                  <li>
+                    <a
+                      href={PathBuilder.partsModelCategory(
+                        locale,
+                        make.slug,
+                        model.slug,
+                        category.slug,
+                      )}
+                      class="flex flex-col gap-1 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+                    >
+                      <span class="font-semibold">
+                        {translated(category, 'name', locale)}
+                      </span>
+                      {lead && <span class="text-sm text-muted">{lead}</span>}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p class="max-w-2xl text-muted">{copy.noCategories}</p>
+          )
+        }
+        {!empty && <InquiryLink topic={name} />}
+      </div>
+
+      <div class:list={['flex flex-col gap-3', onlyHref && 'hidden']}>
+        <h2 class="text-section">{copy.carsHeading}</h2>
+        {
+          hub.vehicles.some((vehicle) => links.vehicle(vehicle)) && (
+            <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
+          )
+        }
+        <ul class="card divide-y divide-line">
+          {
+            hub.vehicles.map((vehicle) => {
+              const href = links.vehicle(vehicle);
+              const variant = (
+                <span class="spec text-sm">
+                  {vehicleVariant(vehicle, locale)}
+                </span>
+              );
+              return (
+                <li>
+                  {href ? (
+                    <a
+                      href={href}
+                      class="group flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+                    >
+                      {variant}
+                      <Icon
+                        name="chevronRight"
+                        size={16}
+                        class="shrink-0 text-muted transition-colors duration-150 group-hover:text-ink"
+                      />
+                    </a>
+                  ) : (
+                    <p class="px-5 py-4 text-ink-2 sm:px-6">{variant}</p>
+                  )}
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+    </div>
+
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

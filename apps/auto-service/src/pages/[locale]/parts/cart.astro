@@ -1,0 +1,434 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import CartAddonToggle from '@/components/CartAddonToggle.astro';
+import CheckoutForm from '@/components/CheckoutForm.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import PickupDetails from '@/components/PickupDetails.astro';
+import Icon from '@/components/Icon.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { PHONE_NUMBER } from '@/utils/constants';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).shopCart;
+const { leadTime } = content(locale).shopPart;
+const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
+const notice =
+  'card mb-4 flex items-start gap-3 border-transparent bg-shade p-4 text-sm leading-relaxed text-ink';
+const notices = [
+  { key: 'price-changed', text: copy.notices.priceChanged },
+  { key: 'unavailable', text: copy.notices.unavailable },
+  { key: 'cart-changed', text: copy.notices.cartChanged },
+  { key: 'repriced', text: copy.notices.repriced },
+  { key: 'stock-limit', text: copy.notices.stockLimit },
+  { key: 'order-limit', text: copy.notices.orderLimit },
+  { key: 'unreachable', text: copy.notices.unreachable },
+  { key: 'offline', text: copy.notices.offline },
+  { key: 'expired', text: copy.notices.expired },
+  { key: 'gone', text: copy.notices.gone },
+  { key: 'invalid', text: copy.notices.invalid },
+];
+const orderedContact = {
+  phone: copy.orderedCall,
+  ...Object.fromEntries(
+    (['whatsapp', 'viber', 'telegram'] as const).map((channel) => [
+      channel,
+      copy.orderedContact.replace('{channel}', site.channels[channel]),
+    ]),
+  ),
+};
+const stepper =
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+---
+
+<Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
+  <PageHero
+    actions={false}
+    eyebrow={site.nav.parts}
+    heading={copy.heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCart(locale), label: copy.heading },
+    ]}
+  />
+
+  <section class="group/cart wrap py-6 md:py-band-lg">
+    <offer-cart
+      class="block min-h-svh"
+      data-locale-tag={BCP47_BY_LOCALE[locale]}
+      data-locale={locale}
+      data-addon-template={copy.addonTemplate}
+      data-installation-label={copy.installationLabel}
+      data-installation-free={copy.installationFree}
+      data-free-label={copy.freeLabel}
+      data-unit-template={copy.unitTemplate}
+      data-count-template={copy.summaryCountTemplate}
+      data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+      data-ordered-heading={copy.orderedHeading}
+      data-ordered-contact={JSON.stringify(orderedContact)}
+      data-order-template={copy.orderNumberTemplate}
+      data-quantity-template={copy.receiptQuantityTemplate}
+      data-blocked-template={copy.checkoutBlocked}
+      data-lower-template={copy.lowerToTemplate}
+      data-inquiry-href={PathBuilder.partsInquiry(locale)}
+      data-preview={shopOpen() ? undefined : ''}
+      data-availability={JSON.stringify(leadTime)}
+    >
+      <p
+        data-state="loading"
+        class="text-sm text-muted noscript:hidden!"
+        role="status"
+      >
+        {copy.loading}
+      </p>
+
+      <div
+        class="card hidden max-w-2xl flex-col gap-3 p-5 noscript:flex! sm:p-6"
+      >
+        <p class="text-sm leading-relaxed text-ink-2">{copy.noscriptBody}</p>
+        <a
+          href={PathBuilder.partsInquiry(locale)}
+          class="btn btn-primary w-full sm:w-auto sm:self-start"
+        >
+          {copy.emptyInquiryCta}
+          <Icon name="arrowRight" />
+        </a>
+      </div>
+
+      <div data-state="empty" hidden class={panel} {...contactCta}>
+        <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
+        {
+          (['expired', 'gone'] as const).map((key) => (
+            <p
+              data-empty-notice={key}
+              hidden
+              class="text-sm leading-relaxed text-danger"
+            >
+              {copy.notices[key]}
+            </p>
+          ))
+        }
+        <div
+          data-empty-notice="moved"
+          hidden
+          class="flex flex-col gap-3 rounded-control bg-shade p-4"
+        >
+          <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+            class="btn btn-primary w-full sm:w-auto sm:self-start"
+          >
+            {copy.notices.movedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+        <div
+          class="flex flex-col gap-3 group-has-[cart-badge:not([hidden])]/cart:hidden"
+        >
+          <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
+          <a
+            href={PathBuilder.parts(locale)}
+            class="btn btn-primary mt-1 w-full sm:w-auto sm:self-start"
+          >
+            {copy.emptyCta}
+            <Icon name="arrowRight" />
+          </a>
+          <p
+            class="mt-2 border-t border-line pt-4 text-sm leading-relaxed text-ink-2"
+          >
+            {copy.emptyInquiry}
+          </p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+            class="btn btn-secondary w-full sm:w-auto sm:self-start"
+          >
+            {copy.emptyInquiryCta}
+          </a>
+        </div>
+      </div>
+
+      <div data-state="ordered" hidden class={`${panel} gap-5`} {...contactCta}>
+        <div class="flex items-start gap-3">
+          <span
+            class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-go/10 text-go"
+          >
+            <Icon name="check" size={18} />
+          </span>
+          <div class="flex flex-col gap-1">
+            <p
+              class="spec text-lg font-semibold text-ink"
+              data-order-number
+              hidden
+            >
+            </p>
+            <p class="text-sm text-muted" data-order-date></p>
+            <p class="text-sm leading-relaxed text-ink-2">{copy.orderedNext}</p>
+            <p
+              class="text-sm leading-relaxed font-semibold text-ink"
+              data-ordered-contact
+              hidden
+            >
+            </p>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed text-ink-2" data-ordered-body>
+          {copy.orderedBody}
+        </p>
+        <div class="flex flex-col gap-5" data-receipt hidden>
+          <section class="flex flex-col gap-1">
+            <h2 class="text-block font-semibold">{copy.summaryHeading}</h2>
+            <ul class="divide-y divide-line" data-receipt-lines></ul>
+            <template data-receipt-line>
+              <li class="flex items-start justify-between gap-4 py-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                  <span class="leading-snug font-semibold text-ink" data-name
+                  ></span>
+                  <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
+                  <span class="text-sm text-ink-2" data-addon hidden></span>
+                  <span class="text-sm text-ink-2" data-installation hidden
+                  ></span>
+                </div>
+                <div class="flex shrink-0 flex-col items-end text-right">
+                  <span class="spec font-semibold text-ink" data-price></span>
+                  <span class="text-xs text-muted" data-quantity></span>
+                </div>
+              </li>
+            </template>
+            <dl class="flex flex-col gap-1.5 border-t border-line pt-3 text-sm">
+              <div
+                class="flex items-baseline justify-between gap-4 text-ink-2"
+                data-receipt-addon-row
+                hidden
+              >
+                <dt>{copy.summaryAddons}</dt>
+                <dd class="spec text-ink" data-receipt-addons></dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-4">
+                <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
+                <dd
+                  class="spec text-xl font-semibold text-ink"
+                  data-receipt-total
+                >
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <div class="grid gap-5 rounded-control bg-shade p-4 sm:grid-cols-2">
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.pickupStep}
+              </h3>
+              <PickupDetails />
+            </section>
+            <section class="flex flex-col gap-1.5">
+              <h3 class="text-sm font-semibold text-muted">
+                {copy.paymentStep}
+              </h3>
+              <p class="text-sm font-semibold text-ink">{copy.paymentMethod}</p>
+            </section>
+          </div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <span class="text-xs text-muted">{site.footer.contactHeading}</span>
+          <ContactChannels service={VIN_INQUIRY_SERVICE} class="print:hidden" />
+          <p class="spec hidden text-base font-semibold text-ink print:block">
+            {formatPhone(PHONE_NUMBER)}
+          </p>
+        </div>
+        <a
+          href={PathBuilder.parts(locale)}
+          class="btn btn-secondary w-full sm:w-auto sm:self-start print:hidden"
+        >
+          {copy.orderedCta}
+          <Icon name="arrowRight" />
+        </a>
+      </div>
+
+      <div data-state="fallback" hidden class={panel}>
+        <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.fallbackBody}</p>
+        <div class="mt-1 flex flex-col gap-3 sm:flex-row">
+          <button type="button" class="btn btn-primary" data-retry>
+            {copy.fallbackRetry}
+          </button>
+          <button type="button" class="btn btn-secondary" data-send-inquiry>
+            {copy.fallbackCta}
+          </button>
+        </div>
+      </div>
+
+      <div
+        data-state="cart"
+        hidden
+        class="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
+      >
+        <div class="flex flex-col">
+          <div aria-live="polite">
+            {
+              notices.map(({ key, text }) => (
+                <p data-notice={key} hidden class={notice}>
+                  <Icon
+                    name="warning"
+                    size={16}
+                    class="mt-0.5 shrink-0 text-ink"
+                  />
+                  <span>{text}</span>
+                </p>
+              ))
+            }
+            <p data-notice="moved" hidden class={notice}>
+              <Icon name="warning" size={16} class="mt-0.5 shrink-0 text-ink" />
+              <span>
+                {copy.notices.moved}{' '}
+                <a
+                  href={PathBuilder.partsInquiry(locale)}
+                  {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+                  class="font-semibold text-signal-ink underline underline-offset-2"
+                >
+                  {copy.notices.movedCta}
+                </a>
+              </span>
+            </p>
+            <ul
+              data-price-changes
+              data-template={copy.priceChangeTemplate}
+              hidden
+              class="-mt-2 mb-4 flex flex-col gap-1 border-l-4 border-l-signal/40 pl-4 text-sm leading-relaxed text-ink"
+            >
+            </ul>
+          </div>
+
+          <ul class="card divide-y divide-line" data-lines></ul>
+          <template data-line>
+            <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
+              <div class="flex items-start gap-3">
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <a
+                    class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                    data-part-link></a>
+                  <span class="spec text-sm text-muted" data-number></span>
+                  <span class="text-sm text-ink-2" data-ready hidden></span>
+                </div>
+                <button
+                  type="button"
+                  class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
+                  aria-label={copy.removeLabel}
+                  data-remove
+                >
+                  <Icon name="close" size={16} />
+                </button>
+              </div>
+              <p
+                class="flex items-start gap-2 text-sm leading-relaxed text-danger"
+                data-unavailable
+                hidden
+              >
+                <Icon name="warning" size={16} class="mt-0.5 shrink-0" />
+                <span>{copy.unavailableTag}</span>
+              </p>
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div
+                  class="flex items-center rounded-control border border-line-field"
+                >
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.decreaseLabel}
+                    data-decrease
+                  >
+                    <Icon name="minus" />
+                  </button>
+                  <span
+                    class="spec min-w-8 text-center text-sm font-semibold text-ink"
+                    data-quantity></span>
+                  <button
+                    type="button"
+                    class={stepper}
+                    aria-label={copy.increaseLabel}
+                    data-increase
+                  >
+                    <Icon name="plus" />
+                  </button>
+                </div>
+                <div class="flex flex-col items-end text-right">
+                  <span
+                    class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"
+                    data-price></span>
+                  <span class="text-xs text-muted" data-unit></span>
+                </div>
+              </div>
+              <CartAddonToggle hook="data-addon" />
+              <CartAddonToggle hook="data-installation" />
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-lower
+                hidden></button>
+              <button
+                type="button"
+                class="btn btn-secondary w-full sm:w-auto sm:self-start"
+                data-to-inquiry
+                hidden
+              >
+                {copy.toInquiryLabel}
+              </button>
+            </li>
+          </template>
+        </div>
+
+        <CheckoutForm />
+
+        <div
+          class="sticky bottom-0 -mx-5 -mt-8 flex items-center justify-between gap-4 border-t border-line bg-card px-5 py-3 lg:hidden"
+          data-checkout-bar
+        >
+          <div class="flex flex-col">
+            <span class="text-xs text-muted">{copy.totalLabel}</span>
+            <span class="spec text-lg font-semibold text-ink" data-total></span>
+          </div>
+          <a href="#checkout" class="btn btn-primary">
+            {copy.stickyCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+      </div>
+    </offer-cart>
+    <cart-badge
+      data-parts-list
+      data-reveal-when-filled
+      hidden
+      class={`${notice} mt-6 mb-0 max-w-2xl flex-col sm:flex-row sm:items-center sm:justify-between`}
+    >
+      <p>{copy.partsListNote}</p>
+      <a
+        href={PathBuilder.partsInquiry(locale)}
+        {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+        class="btn btn-primary w-full shrink-0 sm:w-auto"
+      >
+        {copy.notices.movedCta}
+      </a>
+    </cart-badge>
+  </section>
+  <PartsInquiryModal />
+</Shell>
+
+<script>
+  import { defineOfferCart } from '@/scripts/offerCart';
+
+  defineOfferCart();
+</script>

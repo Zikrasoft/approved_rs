@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node10",
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "declaration": true,
+    "outDir": "dist/cjs",
+    "rootDir": "src",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@podbor/lead-crm/shop-orders-wire": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/shopOrdersWire.d.ts"
+      ],
+      "@podbor/lead-crm/vin": [
+        "./node_modules/@podbor/lead-crm/dist/cjs/vin.d.ts"
+      ]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

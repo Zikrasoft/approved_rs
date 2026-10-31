@@ -14,6 +14,12 @@ Metrika came back beside GA4 on 2026-10-23
 under the same identifier, and Webvisor records sessions again with the lead
 forms masked by `METRIKA_MASK_CLASS` from `@podbor/site-kit/browser`.
 
+No VIN reaches a tag through the page URL. On a page whose address or referrer
+carries a VIN-shaped value, or a parameter the site lists in `privateParams`
+(carlab.rs: the ordered cart id), GA4 gets a clean `page_location` and
+`page_referrer`, Metrika a clean deferred hit with Webvisor off, and the Pixel,
+which takes no URL override, does not load at all.
+
 Exclusions from the sample (our own visits, Russia) are in
 [analytics-exclusions.md](analytics-exclusions.md). Without them, any conversion
 figure is roughly doubled.
@@ -48,6 +54,8 @@ Variants go into parameters, not into new names.
 | `brand_link_click`                                               | left for a partner site (approved.rs only)      | `brand`: `details`, `carlab`                      |
 | `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
 | `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
+| `search`                                                         | sent the catalogue search box (carlab.rs only)  | `kind`: `vin`, `query`                            |
+| `search_suggestion_pick`                                         | opened a search suggestion (carlab.rs only)     | `group`: `cars`, `parts`, `vin`                   |
 | `developer_credit_click`                                         | clicked the Zikrasoft credit in the footer      | —                                                 |
 
 `scroll_50`, `form_view` and `form_start` fire once per page rather than once per
@@ -164,17 +172,15 @@ and serves as a cross-check, the same role Metrika's automatic goals played.
 
 ## The CarLab shop
 
-`add_to_cart`, `begin_checkout` and `purchase` are the shop funnel, and they are
-carlab.rs only, using GA4's standard ecommerce schema: an `items[]` array
-(`item_id`, `item_name`, `price`, `quantity`, `item_category` where known) plus
-`value`/`currency` (`rsd`), and `purchase` additionally carries `transaction_id`
-(the order's `display_id`). `cartItems`/`cartLineItem` in
-`apps/auto-service/src/scripts/shop/cart.ts` build the array from the cart's line
-items; `purchase` has to read it before `placeOrder` clears the cart. The events
-are marked as key events in the property when the shop moves to `live`, not
-before: while it is in `preview`, those events are only sent by developers with
-`?dev=true`, and such visits are excluded from samples the same way as everything
-else in `docs/analytics-exclusions.md`.
+carlab.rs sells parts from a live-quoted offer cart
+([ADR-0045](../adr/0045-offer-cart-closed-beta-order-lead.md)), still in closed
+beta. `GOALS.addToCart` / `beginCheckout` / `purchase` (`add_to_cart`,
+`begin_checkout`, `purchase`, GA4's standard ecommerce event names) and their
+row in `META_EVENTS` (`packages/site-kit/src/analytics.ts`) stay in the shared
+vocabulary but are not fired yet: the cart and checkout reach no `reachGoal`.
+When the shop opens (`SHOP_OPEN=true`), wire these same goals from the offer
+cart's `items[]` / `value` / `currency` (`rsd`) rather than invent new event
+names, and mark them as key events in the GA4 property at the same time.
 
 ## Meta Pixel
 

@@ -1,0 +1,101 @@
+---
+import type { Category, PartOffer } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { bestPrice } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { categoryAddon } from '@/utils/categoryAddon';
+import { formatMoney } from '@/utils/money';
+import Icon from './Icon.astro';
+import PriceSlot from './PriceSlot.astro';
+
+interface Props {
+  category: Category | null;
+  pages: { id?: string; offers: PartOffer[] }[];
+  installation?: { id: string; price: number | null };
+  class?: string;
+  live?: boolean;
+}
+
+const {
+  category,
+  pages,
+  installation,
+  class: className,
+  live = false,
+} = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const deferred =
+  !live &&
+  Astro.isPrerendered &&
+  !shopOpen() &&
+  (category?.service_label || installation);
+const buyable = bestPrice(pages)?.buyable;
+const addon = buyable ? categoryAddon(category, locale) : null;
+const installPrice = buyable ? (installation?.price ?? null) : null;
+const {
+  addonPickup: pickup,
+  addonInCart,
+  addonsInCart,
+  installationLabel,
+  installationFree,
+  installationInCart,
+} = content(locale).shopCart;
+const money = (price: number) =>
+  `+${formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}`;
+const rows = [
+  ...(addon?.note ? [{ label: addon.label, price: money(addon.price) }] : []),
+  ...(installPrice === null
+    ? []
+    : [
+        installPrice === 0
+          ? { label: installationFree, price: null }
+          : { label: installationLabel, price: money(installPrice) },
+      ]),
+];
+const lead = addon?.note
+  ? `${addon.note} ${rows.length > 1 ? addonsInCart : addonInCart}`
+  : installPrice !== null
+    ? installationInCart
+    : null;
+---
+
+{
+  deferred && (
+    <PriceSlot
+      kind="addon"
+      fields={{
+        category: category?.id,
+        ids: pages.flatMap(({ id }) => id ?? []).join(','),
+        installation: installation?.id,
+        class: className,
+      }}
+    />
+  )
+}
+{
+  lead && (
+    <div
+      class:list={[
+        'flex items-start gap-2 rounded-control bg-shade p-3 text-sm leading-relaxed text-ink-2',
+        className,
+      ]}
+    >
+      <Icon name="info" size={16} class="mt-1 shrink-0 text-signal-ink" />
+      <div class="flex min-w-0 flex-1 flex-col gap-2">
+        <p>{lead}</p>
+        {rows.map((row) => (
+          <p class="flex items-baseline justify-between gap-3 text-ink">
+            <span class="flex min-w-0 flex-col">
+              <span>{row.label}</span>
+              <span class="text-xs text-muted">{pickup}</span>
+            </span>
+            {row.price && (
+              <span class="spec shrink-0 font-semibold">{row.price}</span>
+            )}
+          </p>
+        ))}
+      </div>
+    </div>
+  )
+}

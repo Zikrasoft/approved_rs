@@ -4,10 +4,11 @@ import {
   contactChannelSchema,
   META_IDS_FIELD,
   metaIdsFieldSchema,
-  sourceUrlSchema,
+  siteUrl,
   visitorIdSchema,
 } from '../form.ts';
 import type { NotifyLead } from '../notifyLead.ts';
+import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
 
 const clickedChannelSchema = contactChannelSchema.catch('phone');
 
@@ -23,12 +24,8 @@ export function localeFromUrl(
   isLocale: (value: string) => boolean,
 ): string | null {
   if (!url) return null;
-  try {
-    const first = new URL(url).pathname.split('/').filter(Boolean)[0];
-    return first && isLocale(first) ? first : null;
-  } catch {
-    return null;
-  }
+  const first = new URL(url).pathname.split('/').filter(Boolean)[0];
+  return first && isLocale(first) ? first : null;
 }
 
 export function createContactClickRoute({
@@ -42,9 +39,18 @@ export function createContactClickRoute({
   }: {
     request: Request;
   }): Promise<Response> {
-    const form = await request.formData();
+    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
+    const form = await request.formData().catch(() => null);
+    if (!form) {
+      return new Response(null, { status: 400 });
+    }
+    const visitorId = visitorIdSchema.parse(form.get('visitor_id'));
+    if (!visitorId) return new Response(null, { status: 204 });
     const channel = clickedChannelSchema.parse(form.get('channel'));
-    const sourceUrl = sourceUrlSchema.parse(form.get('source_url'));
+    const sourceUrl = siteUrl(
+      form.get('source_url'),
+      new URL(request.url).origin,
+    );
 
     waitUntil(
       notifyLead(
@@ -56,7 +62,7 @@ export function createContactClickRoute({
           contactChannel: channel,
           comment: '',
           source_url: sourceUrl,
-          visitorId: visitorIdSchema.parse(form.get('visitor_id')),
+          visitorId,
           adSource: adSourceFieldSchema.parse(form.get(AD_SOURCE_FIELD)),
           metaIds: metaIdsFieldSchema.parse(form.get(META_IDS_FIELD)),
           locale: localeFromUrl(sourceUrl, isLocale) ?? defaultLocale,

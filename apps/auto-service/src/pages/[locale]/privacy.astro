@@ -3,7 +3,6 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { shopBuilt } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -13,10 +12,7 @@ export function getStaticPaths() {
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
-const sections = [
-  ...pages.privacy.sections,
-  ...(shopBuilt() ? pages.privacy.shopSections : []),
-];
+const sections = pages.privacy.sections;
 ---
 
 <Shell

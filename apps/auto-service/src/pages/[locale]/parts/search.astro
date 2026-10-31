@@ -1,0 +1,520 @@
+---
+import { contactCta } from '@podbor/site-kit/contact-control';
+export const prerender = false;
+
+import {
+  CATALOG_KEY_PATTERN,
+  type RangeFilter,
+  searchableQuery,
+} from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import Icon from '@/components/Icon.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  previewRequested,
+} from '@/utils/catalogueEnv';
+import { PathBuilder } from '@/utils/paths';
+import {
+  appendRange,
+  chosenFilters,
+  partsQuery,
+  rangesFromParams,
+  withFacetCopy,
+} from '@/utils/partsSearch';
+import { currentNumber } from '@/utils/partNumbers';
+import { carName, vehicleVariant } from '@/utils/carName';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import {
+  carLink,
+  exactPart,
+  listingCrumbs,
+  missingNumber,
+  nearVin,
+  searchIntent,
+  vinDestination,
+} from '@/utils/catalogueSearch';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsSearch;
+const partsInquiry = content(locale).pages.partsInquiry;
+
+const params = Astro.url.searchParams;
+const q = partsQuery(params.get('q') ?? '');
+const categoryParam = params.get('category') ?? '';
+const category = CATALOG_KEY_PATTERN.test(categoryParam)
+  ? categoryParam
+  : undefined;
+const modelParam = params.get('model') ?? '';
+const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
+const makeParam = params.get('make') ?? '';
+const make =
+  model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
+const chosen = params.getAll('facets');
+const ranges = rangesFromParams(params);
+const offset = Math.max(
+  0,
+  Number.parseInt(params.get('offset') ?? '0', 10) || 0,
+);
+
+const catalogue = catalogueFromEnv(siteEnv(), {
+  preview: previewRequested(Astro.request),
+});
+const intent = searchIntent(q);
+const vin = intent.kind === 'vin' ? intent.vin : null;
+const vinHint = !vin && nearVin(q);
+const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
+const destination =
+  vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
+if (destination) {
+  return Astro.redirect(destination, 303);
+}
+const vinMake =
+  vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
+const vinCar =
+  vinOutcome?.kind === 'vehicle'
+    ? [
+        carName(vinOutcome.vehicle.model, locale),
+        vehicleVariant(vinOutcome.vehicle, locale),
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : null;
+const vinTopic = vinCar ?? vinMake?.label;
+const searchable = !vin && (searchableQuery(q) || Boolean(category));
+const found =
+  searchable && catalogue
+    ? await catalogue.search({
+        q,
+        category,
+        make,
+        model,
+        locale,
+        facets: chosen,
+        ranges,
+        offset,
+      })
+    : null;
+
+const lastPage =
+  found && found.count > 0
+    ? Math.floor((found.count - 1) / found.limit) * found.limit
+    : 0;
+
+const searchHref = (
+  facets: string[],
+  nextRanges: RangeFilter[],
+  nextOffset = 0,
+  scope = model,
+) => {
+  const next = new URLSearchParams({
+    ...(q ? { q } : {}),
+    ...(category ? { category } : {}),
+    ...(scope ? { ...(make && { make }), model: scope } : {}),
+  });
+  for (const facet of facets) {
+    next.append('facets', facet);
+  }
+  for (const range of nextRanges) {
+    appendRange(next, range);
+  }
+  if (nextOffset) {
+    next.set('offset', String(nextOffset));
+  }
+  return `${PathBuilder.partsSearch(locale)}?${next}`;
+};
+if (found && offset > lastPage) {
+  return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
+}
+const exact =
+  found && !category && !model && !chosen.length && !ranges.length && !offset
+    ? exactPart(q, found.results)
+    : null;
+if (exact) {
+  return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
+}
+const numberMissing =
+  found && !category && !offset && found.cars.length === 0
+    ? missingNumber(q, found.results)
+    : false;
+const looseNumbers = numberMissing && Boolean(found?.results.length);
+const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
+const scope =
+  found ??
+  (catalogue && (category || model)
+    ? await catalogue.listingScope({ category, make, model }, locale)
+    : null);
+const unknownScope =
+  !found &&
+  scope !== null &&
+  Boolean((category && !scope.category) || (model && !scope.model));
+if (unknownScope) {
+  Astro.response.status = 404;
+}
+const narrowedTo = scope?.category;
+const unavailable = searchable && !found && !unknownScope;
+const scopedTo = scope?.model;
+const modelName = scopedTo && carName(scopedTo, locale);
+const modelCopy = content(locale).partsCar.hubs.modelCategory;
+const heading = narrowedTo?.name ?? copy.heading;
+const fillModel = (template: string) =>
+  template.replace('{category}', heading).replace('{model}', modelName ?? '');
+const facets = found ? withFacetCopy(found.facets, copy) : [];
+const chips = chosenFilters(facets, chosen, ranges, copy, (value) =>
+  value.toLocaleString(BCP47_BY_LOCALE[locale]),
+);
+const emptyMessage = q
+  ? copy.noResults.replace('{q}', q)
+  : chips.length > 0
+    ? copy.noFilteredResults
+    : partsInquiry.category.noParts;
+const inquiryTopic = [
+  modelName,
+  narrowedTo?.name,
+  numberMissing ? copy.numberComment.replace('{q}', q) : q,
+]
+  .filter(Boolean)
+  .join(', ');
+const scopeHidden = {
+  ...(q ? { q } : {}),
+  ...(category ? { category } : {}),
+  ...(model ? { ...(make && { make }), model } : {}),
+};
+---
+
+<Shell
+  title={modelName
+    ? fillModel(modelCopy.metaTitle)
+    : narrowedTo
+      ? partsInquiry.category.metaTitleTemplate.replace('{name}', heading)
+      : copy.metaTitle}
+  description={copy.metaDescription}
+  noindex
+>
+  <PageHero
+    actions={false}
+    eyebrow={modelName
+      ? fillModel(modelCopy.eyebrow)
+      : narrowedTo
+        ? partsInquiry.category.eyebrow
+        : copy.eyebrow}
+    heading={heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      ...listingCrumbs({
+        locale,
+        model: scopedTo ?? null,
+        modelName: modelName ?? null,
+        category: narrowedTo ?? null,
+        pages: scope?.scope_pages ?? null,
+        searchLabel: copy.heading,
+      }),
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
+    {
+      !found && (
+        <div class="max-w-3xl" {...contactCta}>
+          <CatalogueSearch query={q} category={category} large hint={false} />
+        </div>
+      )
+    }
+
+    {
+      vin && (
+        <p
+          role="status"
+          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
+        >
+          {vinCar
+            ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
+            : content(locale).partsCar.vin.unresolved}
+          {vinMake && (
+            <>
+              {' '}
+              <a
+                href={vinMake.href}
+                class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+              >
+                {content(locale).partsCar.vin.chooseMake.replace(
+                  '{make}',
+                  vinMake.label,
+                )}
+              </a>
+            </>
+          )}
+        </p>
+      )
+    }
+
+    {
+      vinHint && (
+        <p
+          role="status"
+          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
+        >
+          {content(locale).partsCar.vin.invalid}
+        </p>
+      )
+    }
+
+    {
+      !searchable && !vin && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.emptyQuery}
+        </p>
+      )
+    }
+
+    {
+      found && (
+        <div
+          class:list={[
+            'grid gap-6',
+            facets.length > 0 &&
+              'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
+          ]}
+        >
+          {facets.length > 0 && (
+            <FacetFilters
+              action={PathBuilder.partsSearch(locale)}
+              hidden={scopeHidden}
+              facets={facets}
+              chosen={chosen}
+              ranges={ranges}
+              count={found.count}
+              resetHref={searchHref([], [])}
+            />
+          )}
+
+          <div class="flex min-w-0 flex-col gap-3">
+            <div {...contactCta}>
+              <CatalogueSearch query={q} category={category} />
+            </div>
+            {cars.length > 0 && (
+              <section class="flex flex-col gap-2 pt-2">
+                <h2 class="text-base font-semibold text-ink">
+                  {copy.carsGroup}
+                </h2>
+                <ul class="flex flex-wrap gap-2">
+                  {cars.map((car) => (
+                    <li>
+                      <a
+                        href={car.href}
+                        class="flex min-h-11 flex-col justify-center rounded-control border border-line bg-paper px-4 py-2 transition-colors duration-150 hover:border-ink motion-reduce:transition-none"
+                      >
+                        <span class="line-clamp-3 text-sm font-semibold wrap-anywhere text-ink">
+                          {car.label}
+                        </span>
+                        {car.detail && (
+                          <span class="text-xs text-muted">{car.detail}</span>
+                        )}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <h2 class="pt-3 text-base font-semibold text-ink">
+                  {copy.partsGroup}
+                </h2>
+              </section>
+            )}
+            <ListingBar
+              count={found.count}
+              filters={facets.length > 0}
+              active={chips.length}
+            />
+
+            {(chips.length > 0 || modelName) && (
+              <ul class="flex flex-wrap gap-2">
+                {[
+                  ...(modelName
+                    ? [
+                        {
+                          label: modelName,
+                          href: searchHref(chosen, ranges, 0, ''),
+                        },
+                      ]
+                    : []),
+                  ...chips.map((chip) => ({
+                    label: chip.label,
+                    href: searchHref(chip.facets, chip.ranges),
+                  })),
+                ].map((chip) => (
+                  <li class="shrink-0">
+                    <a
+                      href={chip.href}
+                      aria-label={copy.removeFilter.replace(
+                        '{label}',
+                        chip.label,
+                      )}
+                      class="inline-flex min-h-11 max-w-full items-center gap-2 rounded-pill border border-line bg-paper px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+                    >
+                      {chip.label}
+                      <Icon name="close" size={12} class="text-muted" />
+                    </a>
+                  </li>
+                ))}
+                {chips.length > 0 && (
+                  <li class="shrink-0">
+                    <a
+                      href={searchHref([], [])}
+                      class="inline-flex min-h-11 items-center px-2 text-sm font-semibold whitespace-nowrap text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                    >
+                      {copy.resetAllFilters}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            )}
+
+            {looseNumbers && (
+              <>
+                <p
+                  role="status"
+                  class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed break-words text-ink"
+                >
+                  {copy.numberNotFound.replace('{q}', q)}{' '}
+                  <a
+                    href="#lead"
+                    class="font-semibold text-signal-dark underline underline-offset-2 hover:text-ink"
+                  >
+                    {copy.notFoundLink}
+                  </a>
+                </p>
+                <h2 class="pt-1 text-base font-semibold text-ink">
+                  {copy.similarNumbers}
+                </h2>
+              </>
+            )}
+            {found.results.length === 0 ? (
+              <p class="max-w-2xl text-base leading-relaxed break-words text-ink-2">
+                {emptyMessage}
+              </p>
+            ) : (
+              <ul class="card divide-y divide-line">
+                {found.results.map((result) => (
+                  <PartRow
+                    thumb={
+                      result.thumbnail
+                        ? {
+                            src: result.thumbnail,
+                            illustration:
+                              result.thumbnail_illustration === true,
+                          }
+                        : null
+                    }
+                    slug={result.slug}
+                    brand={result.brand.name}
+                    value={result.value}
+                    name={result.part.name}
+                    specs={result.specs}
+                    detail={category ? undefined : result.part.category?.name}
+                    superseded={result.superseded}
+                    current={currentNumber(result, found.results)}
+                    priced={result}
+                  />
+                ))}
+              </ul>
+            )}
+
+            {(offset > 0 || offset + found.limit < found.count) && (
+              <nav class="flex justify-between gap-4 pt-2 text-sm">
+                {offset > 0 ? (
+                  <a
+                    href={searchHref(
+                      chosen,
+                      ranges,
+                      Math.max(0, offset - found.limit),
+                    )}
+                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
+                  >
+                    {copy.previous}
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {offset + found.limit < found.count && (
+                  <a
+                    href={searchHref(chosen, ranges, offset + found.limit)}
+                    class="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-signal-ink"
+                  >
+                    {copy.next}
+                  </a>
+                )}
+              </nav>
+            )}
+
+            {found.results.length > 0 && !looseNumbers && (
+              <InquiryLink class="pt-2" />
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      unavailable && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.unavailable}
+        </p>
+      )
+    }
+
+    {
+      unknownScope && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.unknownScope}
+        </p>
+      )
+    }
+
+    {
+      (vin ||
+        unavailable ||
+        unknownScope ||
+        numberMissing ||
+        found?.results.length === 0) && (
+        <div
+          id="lead"
+          class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6"
+          {...contactCta}
+        >
+          <h2 class="text-block font-semibold">{copy.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: partsInquiry.vinLabel,
+              placeholder: partsInquiry.vinPlaceholder,
+              value: vin ?? undefined,
+            }}
+            comment={
+              vin
+                ? vinTopic
+                  ? `${vinTopic}: `
+                  : ''
+                : numberMissing
+                  ? inquiryTopic
+                  : `${inquiryTopic}: `
+            }
+            commentLabel={partsInquiry.commentLabel}
+            commentPlaceholder={partsInquiry.commentPlaceholder}
+            commentNote={partsInquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

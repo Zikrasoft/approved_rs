@@ -3,8 +3,8 @@ import { detectLocale, isLocale } from './i18n/config';
 import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 
 export const isUnlocalized = createUnlocalizedMatcher({
-  exact: ['/robots.txt', '/llms.txt', '/catalog-version.txt', '/404', '/404/'],
-  prefixes: ['/api/', '/keystatic', '/_image'],
+  exact: ['/robots.txt', '/llms.txt', '/catalogue-build.json', '/404', '/404/'],
+  prefixes: ['/api/', '/admin/', '/keystatic', '/_image', '/.well-known/'],
 });
 
 export const onRequest = defineMiddleware((context, next) => {

@@ -10,10 +10,12 @@
     "./contact-links": "./src/contactLinks.ts",
     "./contact-control": "./src/contactControl.ts",
     "./format-phone": "./src/formatPhone.ts",
+    "./github-contents": "./src/githubContents.ts",
     "./contact-preference": "./src/contactPreference.ts",
     "./lead-form": "./src/leadForm.ts",
     "./public-env": "./src/publicEnv.ts",
     "./redirects": "./src/redirects.ts",
+    "./stored-value": "./src/storedValue.ts",
     "./og": "./src/ogImage.ts"
   },
   "scripts": {
@@ -26,8 +28,8 @@
     "marked": "18.0.11",
     "path-to-regexp": "6.1.0",
     "playwright-core": "1.63.0",
-    "sanitize-html": "2.17.7",
-    "zod": "4.5.4"
+    "sanitize-html": "2.18.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/sanitize-html": "2.16.1",

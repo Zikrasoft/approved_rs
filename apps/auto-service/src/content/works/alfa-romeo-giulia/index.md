@@ -2,39 +2,39 @@
 title: ТО Alfa Romeo Giulia 2021 года в Белграде
 translations:
   en:
-    title: Maintenance for Alfa Romeo Giulia 2021 in Belgrade
+    title: 2021 Alfa Romeo Giulia Scheduled Service in Belgrade
     body: |-
-      The 2021 Alfa Romeo Giulia came to us in Belgrade for scheduled maintenance. We didn't stop at just an oil change; we went through all the consumables and also serviced the automatic transmission.
+      This 2021 Alfa Romeo Giulia came to our workshop in Belgrade for a scheduled service. We went beyond a simple oil change, checking all the routine service items and servicing the automatic transmission as well.
 
       What we did:
 
       - replaced the spark plugs;
-      - replaced the engine oil;
+      - changed the engine oil;
       - replaced the oil filter;
       - replaced the air filter;
       - replaced the cabin filter;
-      - completely replaced the automatic transmission oil pan;
-      - changed the oil in the ZF 8HP transmission.
+      - replaced the complete automatic transmission sump pan;
+      - changed the fluid in the ZF 8HP automatic transmission.
 
-      We paid special attention to the transmission. For **ZF 8HP** automatics, it's essential to monitor the condition of the oil and pan and not delay maintenance: a well-maintained transmission costs considerably less than a repaired one.
+      We paid particular attention to the transmission. On **ZF 8HP** automatics, it is important to monitor the condition of the fluid and sump pan and keep up with servicing. Timely maintenance costs far less than a transmission repair.
     car: ALFA ROMEO GIULIA
 
   sr:
-    title: Planirano servisiranje Alfa Romeo Giulia 2021. u Beogradu
+    title: Redovan servis za Alfa Romeo Giulia 2021. godište u Beogradu
     body: |-
-      Alfa Romeo Giulia 2021. godine je došla kod nas u Beogradu na planirano servisiranje. Nismo se ograničili samo na zamenu ulja: pregledali smo sve potrošne delove i istovremeno obavili servis automatske transmisije.
+      Alfa Romeo Giulia 2021. godište stigla je kod nas u Beograd na redovan servis. Nismo se zadržali samo na zameni ulja: proverili smo sav potrošni materijal i ujedno servisirali automatski menjač.
 
       Šta smo uradili:
 
-      - zamenili sveće;
+      - zamenili svećice;
       - zamenili motorno ulje;
       - zamenili filter ulja;
-      - zamenili vazdušni filter;
-      - zamenili kabinski filter;
-      - potpuno zamenili karter automatske transmisije;
-      - zamenili ulje u automatskoj transmisiji ZF 8HP.
+      - zamenili filter vazduha;
+      - zamenili filter kabine;
+      - zamenili kompletan karter automatskog menjača;
+      - zamenili ulje u automatskom menjaču ZF 8HP.
 
-      Posebnu pažnju smo posvetili transmisiji. Kod automatskih prenosa **ZF 8HP**, stanje ulja i kartera je potrebno držati pod kontrolom i ne odlagati servis: na vreme servisirana transmisija je znatno jeftinija od one koja je kasnije morala da se popravlja.
+      Posebnu pažnju posvetili smo menjaču. Kod automatskih menjača **ZF 8HP** važno je pratiti stanje ulja i kartera i ne odlagati servis: pravovremeno održavanje menjača košta znatno manje od njegove popravke.
     car: ALFA ROMEO GIULIA
 car: ALFA ROMEO GIULIA
 year: 2021

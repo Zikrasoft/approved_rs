@@ -4,67 +4,67 @@ translations:
   en:
     title: Volkswagen Polo GTI
     body: |-
-      ## Volkswagen Polo GTI from Germany to Portugal - selection, purchase, delivery, and registration in Lisbon
+      ## Volkswagen Polo GTI from Germany to Portugal: sourcing, purchase, delivery and registration in Lisbon
 
-      Another car has been successfully delivered from Germany to Portugal - this time it's a **Volkswagen Polo GTI** for our client from **Lisbon**.
+      Another car successfully delivered from Germany to Portugal, this time a **Volkswagen Polo GTI** for our client in **Lisbon**.
 
-      The task was clear: find a good Volkswagen Polo GTI in decent condition in Germany, inspect the car before purchase, and organize the entire process - from selection and payment to delivery and registration in Portugal.
+      The brief was straightforward: find a well-kept Volkswagen Polo GTI in Germany, inspect it before purchase and handle the entire process, from sourcing and payment to delivery and registration in Portugal.
 
-      We found an excellent Volkswagen Polo GTI on the German market, conducted a thorough inspection and check of the vehicle, after which the client, with our assistance, paid for the selected car. Purchasing a vehicle in Germany is particularly appealing due to the wide range of configurations and offers, but with remote buying, it's essential to verify the specific unit in advance and organize the transaction properly.
+      We found an excellent Volkswagen Polo GTI on the German market and carried out a thorough inspection and checks. The client then paid for the car with our assistance. Buying a car in Germany is particularly appealing thanks to the wide choice of specifications and listings, but when buying remotely, it is essential to check the individual car beforehand and manage the transaction properly.
 
-      The chosen Volkswagen Polo GTI is equipped with a **2.0-liter gasoline engine** and a **DSG** automated transmission. It's a compact vehicle perfect for daily commutes around Lisbon.
+      The Volkswagen Polo GTI we selected has a **2.0-litre petrol engine** and a **DSG** dual-clutch transmission. A compact car for everyday driving around Lisbon.
 
-      After the purchase, we arranged for the transport of the vehicle from Germany to Portugal. The Polo GTI was delivered by a shipping company to Lisbon, where our local partner took over. He handled all the necessary paperwork and registration procedures in Portugal.
+      After the purchase, we arranged transport from Germany to Portugal. A transport company delivered the Polo GTI to Lisbon, where our local partner took over. He handled all the paperwork and registration procedures in Portugal.
 
-      Now, the Volkswagen Polo GTI is with its owner, all required procedures are complete, and the client is happily driving their new car around Lisbon.
+      The Volkswagen Polo GTI is now with its owner, all the necessary formalities are complete, and our client is enjoying driving his new car around Lisbon.
   sr:
     title: Volkswagen Polo GTI
     body: |-
-      ## Volkswagen Polo GTI iz Nemačke u Portugal — izbor, kupovina, dostava i registracija u Lisabonu
+      ## Volkswagen Polo GTI iz Nemačke u Portugal: pronalaženje, kupovina, prevoz i registracija u Lisabonu
 
-      Još jedno vozilo uspešno je dostavljeno iz Nemačke u Portugal — ovaj put **Volkswagen Polo GTI** za našeg klijenta iz **Lisabona**.
+      Još jedan automobil uspešno je isporučen iz Nemačke u Portugal, ovog puta **Volkswagen Polo GTI** za našeg klijenta iz **Lisabona**.
 
-      Zadatak je bio jasan: pronaći dobar Volkswagen Polo GTI u Nemačkoj u dobrom stanju, proći kroz provere automobila pre kupovine i organizovati ceo proces — od izbora i plaćanja do dostave i registracije automobila u Portugalu.
+      Zadatak je bio jasan: pronaći u Nemačkoj dobar Volkswagen Polo GTI u očuvanom stanju i organizovati ceo postupak, od pronalaženja vozila i provere auta pre kupovine do plaćanja, prevoza i registracije u Portugalu.
 
-      Na nemačkom tržištu smo pronašli odličan Volkswagen Polo GTI, izvršili provere i pregled auta pre kupovine, nakon čega je klijent uz našu pomoć platio odabrano vozilo. Kupovina automobila u Nemačkoj je posebno interesantna zbog širokog izbora paketa i ponuda, ali prilikom daljinske kupovine je važno unapred proveriti konkretan primerak i pravilno organizovati transakciju.
+      Na nemačkom tržištu pronašli smo odličan Volkswagen Polo GTI. Urađena je provera auta pre kupovine, nakon čega je klijent uz našu pomoć platio odabrani automobil. Kupovina automobila u Nemačkoj posebno je privlačna zbog velikog izbora vozila i paketa opreme, ali je pri kupovini na daljinu važno unapred proveriti konkretan primerak i pravilno organizovati kupoprodaju.
 
-      Odabrani Volkswagen Polo GTI je opremljen **2.0-litarskim benzinskim motorom** i automatskim menjačem **DSG**. Kompaktno vozilo za svakodnevna putovanja po Lisabonu.
+      Odabrani Volkswagen Polo GTI ima **2,0-litarski benzinski motor** i automatski menjač sa dvostrukim kvačilom **DSG**. Kompaktan automobil za svakodnevnu vožnju po Lisabonu.
 
-      Nakon kupovine, organizovali smo transport automobila iz Nemačke u Portugal. Polo GTI je dostavljen prevoznickom kompanijom u Lisabon, gde se našem lokalnom partneru pridružio tim. On je u potpunosti preuzeo registraciju automobila u Portugalu, neophodne dokumente i postupke registracije.
+      Nakon kupovine organizovali smo prevoz automobila iz Nemačke u Portugal. Transportna kompanija isporučila je Polo GTI u Lisabon, gde je posao preuzeo naš lokalni partner. On se pobrinuo za kompletnu proceduru u Portugalu, potrebnu dokumentaciju i registraciju vozila.
 
-      Sada je Volkswagen Polo GTI već kod svog vlasnika, svi potrebni postupci su završeni, a klijent sa zadovoljstvom vozi svoj novi automobil po Lisabonu.
+      Volkswagen Polo GTI je sada kod svog vlasnika, sve potrebne procedure su završene, a klijent sa zadovoljstvom vozi svoj novi automobil ulicama Lisabona.
   es:
     title: Volkswagen Polo GTI
     body: |-
-      ## Volkswagen Polo GTI de Alemania a Portugal - selección, compra, entrega y registro en Lisboa
+      ## Volkswagen Polo GTI de Alemania a Portugal: búsqueda, compra, transporte y matriculación en Lisboa
 
-      Otro automóvil ha sido exitosamente entregado de Alemania a Portugal, esta vez se trata de un **Volkswagen Polo GTI** para nuestro cliente en **Lisboa**.
+      Otro coche entregado con éxito de Alemania a Portugal, esta vez un **Volkswagen Polo GTI** para nuestro cliente de **Lisboa**.
 
-      La tarea era clara: encontrar un buen Volkswagen Polo GTI en Alemania que estuviera en buen estado, verificar el automóvil antes de la compra y organizar todo el proceso - desde la selección y el pago hasta la entrega y el registro del vehículo en Portugal.
+      El encargo estaba claro: encontrar en Alemania un Volkswagen Polo GTI en buen estado, revisarlo antes de la compra y gestionar todo el proceso, desde la búsqueda y el pago hasta el transporte y los trámites en Portugal.
 
-      Encontramos un excelente Volkswagen Polo GTI en el mercado alemán, realizamos una inspección y verificación del automóvil, tras lo cual nuestro cliente, con nuestra ayuda, pagó por el vehículo elegido. Comprar un automóvil en Alemania es especialmente atractivo gracias a la amplia variedad de configuraciones y ofertas disponibles, pero al realizar una compra a distancia, es crucial verificar el vehículo específico con antelación y organizar correctamente la transacción.
+      Encontramos una excelente unidad en el mercado alemán, realizamos la inspección y las comprobaciones pertinentes y, después, el cliente efectuó el pago con nuestra ayuda. Comprar un coche en Alemania resulta especialmente atractivo por la amplia variedad de equipamientos y ofertas disponibles, pero, al comprar a distancia, es fundamental comprobar previamente el estado de la unidad elegida y organizar bien la operación.
 
-      El Volkswagen Polo GTI seleccionado cuenta con un **motor de gasolina de 2.0 litros** y una transmisión automática **DSG**. Un coche compacto ideal para los desplazamientos diarios por Lisboa.
+      El Volkswagen Polo GTI elegido lleva un **motor de gasolina de 2,0 litros** y un cambio automático de doble embrague **DSG**. Un coche compacto para los desplazamientos diarios por Lisboa.
 
-      Tras la compra, organizamos el transporte del automóvil desde Alemania a Portugal. El Polo GTI fue entregado a Lisboa por una empresa de transporte, donde se unió a nuestro socio local. Él se encargó completamente del registro del automóvil en Portugal, así como de la documentación necesaria y los procedimientos de matriculación.
+      Tras la compra, organizamos el transporte del coche de Alemania a Portugal. Una empresa de transporte entregó el Polo GTI en Lisboa, donde nuestro colaborador local tomó el relevo. Se encargó de toda la tramitación en Portugal, incluida la documentación necesaria y la matriculación.
 
-      Ahora, el Volkswagen Polo GTI ya está con su nuevo propietario, todos los procedimientos necesarios han sido completados y nuestro cliente disfruta conduciendo su nuevo coche por Lisboa.
+      El Volkswagen Polo GTI ya está en manos de su propietario, todos los trámites han finalizado y el cliente disfruta de su nuevo coche por las calles de Lisboa.
   de:
     title: Volkswagen Polo GTI
     body: |-
-      ## Volkswagen Polo GTI aus Deutschland nach Portugal – Auswahl, Kauf, Lieferung und Zulassung in Lissabon
+      ## Volkswagen Polo GTI aus Deutschland nach Portugal: Fahrzeugsuche, Kauf, Transport und Zulassung in Lissabon
 
-      Ein weiteres Fahrzeug wurde erfolgreich aus Deutschland nach Portugal geliefert – diesmal ein **Volkswagen Polo GTI** für unseren Kunden aus **Lissabon**.
+      Ein weiteres Fahrzeug wurde erfolgreich von Deutschland nach Portugal geliefert, diesmal ein **Volkswagen Polo GTI** für unseren Kunden aus **Lissabon**.
 
-      Die Aufgabe war klar: einen guten Volkswagen Polo GTI in einem anständigen Zustand in Deutschland zu finden, das Fahrzeug vor dem Kauf zu prüfen und den gesamten Prozess – von der Auswahl und Bezahlung bis zur Lieferung und Zulassung des Fahrzeugs in Portugal – zu organisieren.
+      Der Auftrag war klar: In Deutschland einen guten Volkswagen Polo GTI in gepflegtem Zustand finden, ihn vor dem Kauf prüfen und den gesamten Ablauf organisieren, von der Fahrzeugsuche und Bezahlung bis zum Transport und zur Zulassung in Portugal.
 
-      Wir haben auf dem deutschen Markt einen ausgezeichneten Volkswagen Polo GTI gefunden, den wir inspiziert und geprüft haben. Anschließend hat der Kunde mit unserer Hilfe das ausgewählte Fahrzeug bezahlt. Der Kauf eines Autos in Deutschland ist besonders interessant aufgrund der großen Auswahl an Ausstattungen und Angeboten, aber bei einem Fernkauf ist es wichtig, das konkrete Exemplar im Voraus zu überprüfen und den Vertrag richtig zu organisieren.
+      Auf dem deutschen Markt fanden wir einen hervorragenden Volkswagen Polo GTI und unterzogen ihn einer gründlichen Besichtigung und Prüfung. Anschließend bezahlte der Kunde das ausgewählte Fahrzeug mit unserer Unterstützung. Der Autokauf in Deutschland ist dank der großen Auswahl an Fahrzeugen und Ausstattungsvarianten besonders attraktiv. Gerade beim Kauf aus der Ferne ist es jedoch wichtig, das konkrete Fahrzeug vorab zu prüfen und die Abwicklung sorgfältig zu organisieren.
 
-      Der gewählte Volkswagen Polo GTI ist mit einem **2,0-Liter-Benzinmotor** und einem automatisierten Getriebe **DSG** ausgestattet. Ein kompaktes Fahrzeug für tägliche Fahrten in Lissabon.
+      Der ausgewählte Volkswagen Polo GTI verfügt über einen **2,0-Liter-Benzinmotor** und ein **DSG-Doppelkupplungsgetriebe**. Ein kompaktes Auto für die täglichen Fahrten durch Lissabon.
 
-      Nach dem Kauf haben wir den Transport des Autos von Deutschland nach Portugal organisiert. Der Polo GTI wurde von einer Transportfirma nach Lissabon geliefert, wo sich unser lokaler Partner mit der Arbeit beschäftigt hat. Er hat sich um die Zulassung des Fahrzeugs in Portugal, die notwendigen Dokumente und die Registrierungsverfahren gekümmert.
+      Nach dem Kauf organisierten wir den Transport von Deutschland nach Portugal. Eine Spedition brachte den Polo GTI nach Lissabon, wo unser Partner vor Ort übernahm. Er kümmerte sich um die gesamte Abwicklung in Portugal, einschließlich aller erforderlichen Unterlagen und Zulassungsformalitäten.
 
-      Jetzt ist der Volkswagen Polo GTI bereits bei seinem Besitzer, alle notwendigen Verfahren sind abgeschlossen und der Kunde fährt mit Freude mit seinem neuen Auto durch Lissabon.
+      Inzwischen ist der Volkswagen Polo GTI bei seinem Besitzer, alle Formalitäten sind erledigt und der Kunde genießt die Fahrten mit seinem neuen Auto durch Lissabon.
 car: Volkswagen Polo GTI
 year: 2025
 price:
@@ -78,19 +78,19 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-12
 published: true
-translatedFrom: 24f33dfdb770d54f
+translatedFrom: 33923252c362db66
 ---
 
-## Volkswagen Polo GTI из Германии в Португалию — подбор, покупка, доставка и оформление в Лиссабоне
+## Volkswagen Polo GTI из Германии в Португалию: подбор, покупка, доставка и оформление в Лиссабоне
 
-Ещё один автомобиль успешно доставлен из Германии в Португалию — на этот раз **Volkswagen Polo GTI** для нашего клиента из **Лиссабона**.
+Еще один автомобиль успешно доставлен из Германии в Португалию, на этот раз **Volkswagen Polo GTI** для нашего клиента из **Лиссабона**.
 
-Задача была понятной: найти в Германии хороший Volkswagen Polo GTI в достойном состоянии, проверить автомобиль перед покупкой и организовать весь процесс — от подбора и оплаты до доставки и оформления автомобиля в Португалии.
+Задача была понятной: найти в Германии хороший Volkswagen Polo GTI в достойном состоянии, проверить автомобиль перед покупкой и организовать весь процесс, от подбора и оплаты до доставки и оформления автомобиля в Португалии.
 
 Мы нашли на немецком рынке отличный Volkswagen Polo GTI, провели осмотр и проверку автомобиля, после чего клиент с нашей помощью оплатил выбранную машину. Покупка автомобиля в Германии особенно интересна благодаря большому выбору комплектаций и предложений, но при дистанционной покупке важно заранее проверить конкретный экземпляр и правильно организовать сделку.
 
-Выбранный Volkswagen Polo GTI оснащён **2.0-литровым бензиновым двигателем** и роботизированной коробкой **DSG**. Компактная машина для ежедневных поездок по Лиссабону.
+Выбранный Volkswagen Polo GTI оснащен **2.0-литровым бензиновым двигателем** и роботизированной коробкой **DSG**. Компактная машина для ежедневных поездок по Лиссабону.
 
-После покупки мы организовали транспортировку автомобиля из Германии в Португалию. Polo GTI был доставлен транспортной компанией в Лиссабон, где к работе подключился наш местный партнёр. Он полностью занялся оформлением автомобиля в Португалии, необходимыми документами и регистрационными процедурами.
+После покупки мы организовали транспортировку автомобиля из Германии в Португалию. Polo GTI был доставлен транспортной компанией в Лиссабон, где к работе подключился наш местный партнер. Он полностью занялся оформлением автомобиля в Португалии, необходимыми документами и регистрационными процедурами.
 
 Сейчас Volkswagen Polo GTI уже у своего владельца, все необходимые процедуры завершены, а клиент с удовольствием ездит на своей новой машине по Лиссабону.

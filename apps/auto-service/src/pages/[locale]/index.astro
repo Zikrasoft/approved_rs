@@ -10,24 +10,25 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ProcessSteps from '@/components/ProcessSteps.astro';
-import ServiceChips from '@/components/ServiceChips.astro';
 import PriceTable from '@/components/PriceTable.astro';
 import Faq from '@/components/Faq.astro';
 import LeadForm from '@/components/LeadForm.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { devOnly, shopBuilt, shopIndexed } from '@/utils/shopStatus';
+import { SERVICE_SLUGS } from '@/utils/services';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
-const HERO_SIZES = '(min-width: 1024px) 35vw, 100vw';
+const HERO_SIZES =
+  '(min-width: 1280px) 20rem, (min-width: 1024px) 18rem, 100vw';
 const heroPicture = await getImage({
   src: heroImage,
   widths: [480, 720, 960],
@@ -38,6 +39,7 @@ const locale = localeFrom(Astro.url.pathname);
 const home = content(locale).home;
 const site = content(locale).site;
 const pages = content(locale).pages;
+const services = content(locale).services;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = faqPageSchema(home.faq);
@@ -58,27 +60,63 @@ const website = websiteSchema({
     sizes: HERO_SIZES,
   }}
 >
-  <ServiceChips />
-
-  <section class="wrap">
+  <section class="wrap pt-3 sm:pt-5">
     <div
-      class="grid overflow-hidden rounded-block bg-panel text-white lg:grid-cols-[1.3fr_0.7fr]"
+      class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem]"
     >
-      <div class="flex flex-col gap-5 p-6 sm:p-8 lg:p-12">
+      <div class="flex flex-col gap-5 p-5 sm:p-8 lg:p-10">
         <h1 class="text-hero max-w-[16ch]">{home.hero.heading}</h1>
+
+        <div class="grid gap-3 md:grid-cols-2" {...contactCta}>
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
+          >
+            <h2 class="text-block font-bold">
+              {content(locale).partsSearch.searchHeading}
+            </h2>
+            <CatalogueSearch hint={false} onPanel class="mt-auto" />
+          </div>
+
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
+          >
+            <h2 class="text-block font-bold">{home.hero.ctaPrimary}</h2>
+            <nav
+              aria-label={site.nav.services}
+              class="-mx-4 flex gap-2 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_80%,transparent)] [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
+            >
+              <a
+                href={PathBuilder.services(locale)}
+                class="chip bg-panel-fg text-ink hover:bg-shade"
+              >
+                {site.common.allServices}
+              </a>
+              {
+                SERVICE_SLUGS.map((slug) => (
+                  <a
+                    href={PathBuilder.service(locale, slug)}
+                    class="chip bg-panel-fg/10 text-panel-fg hover:bg-panel-fg/20"
+                  >
+                    {services[slug].name}
+                  </a>
+                ))
+              }
+            </nav>
+            <button
+              type="button"
+              data-open-lead-modal
+              class="btn btn-primary mt-auto w-full"
+            >
+              {site.header.cta}
+            </button>
+          </div>
+        </div>
+
         <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
           {home.hero.lead}
         </p>
-        <div class="flex flex-wrap gap-3 pt-1" {...contactCta}>
-          <button type="button" data-open-lead-modal class="btn btn-primary">
-            {home.hero.ctaPrimary}
-          </button>
-          <a href={PathBuilder.services(locale)} class="btn btn-on-panel">
-            {home.hero.ctaSecondary}
-          </a>
-        </div>
         <ContactChannels placement="hero" tone="panel" />
-        <ul class="flex flex-wrap gap-x-5 gap-y-2 pt-2">
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
           {
             home.hero.badges.map((badge) => (
               <li class="flex items-center gap-1.5 text-sm text-panel-ink">
@@ -167,36 +205,8 @@ const website = websiteSchema({
   </section>
 
   <section class="wrap pb-band md:pb-band-lg">
-    <div
-      class:list={[
-        'card grid gap-6 p-6 lg:p-8',
-        shopIndexed() && 'lg:grid-cols-2',
-      ]}
-    >
-      {
-        shopBuilt() && (
-          <div class="flex flex-col gap-3" {...devOnly()}>
-            <span class="eyebrow">{home.shopTeaser.eyebrow}</span>
-            <h2 class="text-section">{home.shopTeaser.heading}</h2>
-            <p class="text-base leading-relaxed text-muted">
-              {home.shopTeaser.body}
-            </p>
-            <a
-              href={PathBuilder.shop(locale)}
-              class="btn btn-primary mt-2 w-fit"
-            >
-              {home.shopTeaser.cta}
-            </a>
-          </div>
-        )
-      }
-      <div
-        class:list={[
-          'flex flex-col gap-3',
-          shopIndexed() &&
-            'border-t border-line pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0',
-        ]}
-      >
+    <div class="card grid gap-6 p-6 lg:p-8">
+      <div class="flex flex-col gap-3">
         <span class="eyebrow">{home.accident.eyebrow}</span>
         <h2 class="text-section">{home.accident.heading}</h2>
         <p class="text-base leading-relaxed text-muted">{home.accident.body}</p>
@@ -215,6 +225,7 @@ const website = websiteSchema({
           class="btn btn-secondary mt-2 w-fit"
         >
           {home.accident.cta}
+          <Icon name="arrowRight" />
         </a>
       </div>
     </div>
@@ -231,6 +242,7 @@ const website = websiteSchema({
             />
             <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
               {site.common.allWorks}
+              <Icon name="arrowRight" />
             </a>
           </div>
           <WorkGrid works={latestWorks} />
@@ -241,7 +253,7 @@ const website = websiteSchema({
 
   <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">
-      <SectionHead eyebrow="FAQ" heading={site.common.faqHeading} />
+      <SectionHead eyebrow={home.faqEyebrow} heading={site.common.faqHeading} />
       <Faq items={home.faq} />
     </div>
   </section>

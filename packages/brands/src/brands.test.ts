@@ -5,6 +5,7 @@ import {
   developerCreditUrl,
   splitDeveloperCredit,
   isBrandLocale,
+  socialLinks,
   WORKSHOP_ADDRESS,
   type BrandKey,
 } from './brands.ts';
@@ -84,6 +85,33 @@ describe('developerCreditUrl', () => {
     expect(developerCreditUrl({ domain: 'carlab.rs' })).toBe(
       'https://zikrasoft.com/?utm_source=carlab.rs&utm_medium=referral&utm_campaign=footer_credit',
     );
+  });
+});
+
+describe('socialLinks', () => {
+  it('lists the configured accounts in a fixed network order', () => {
+    expect(
+      socialLinks({
+        youtube: 'https://youtube.com/@carlab',
+        instagram: 'https://instagram.com/carlab',
+      }),
+    ).toEqual([
+      {
+        network: 'instagram',
+        name: 'Instagram',
+        url: 'https://instagram.com/carlab',
+      },
+      {
+        network: 'youtube',
+        name: 'YouTube',
+        url: 'https://youtube.com/@carlab',
+      },
+    ]);
+  });
+
+  it('renders nothing for an empty, blank or absent url', () => {
+    expect(socialLinks({ instagram: '', facebook: '  ' })).toEqual([]);
+    expect(socialLinks({})).toEqual([]);
   });
 });
 

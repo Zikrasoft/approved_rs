@@ -1,0 +1,76 @@
+---
+import type { PartOffer } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { bestPrice } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { kitPick } from '@/utils/kitPick';
+import { offerAvailability } from '@/utils/leadTime';
+import { formatMoney } from '@/utils/money';
+import PriceSlot from './PriceSlot.astro';
+
+interface Props {
+  pages: { id?: string; offers: PartOffer[] }[];
+  kit?: boolean;
+  class?: string;
+  live?: boolean;
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const localeTag = BCP47_BY_LOCALE[locale];
+const copy = content(locale).shopPart;
+const { pages, kit = false, class: className, live = false } = Astro.props;
+const deferred = !live && Astro.isPrerendered && (kit || !shopOpen());
+const picked = kit
+  ? kitPick(pages.map((page) => ({ ...page, superseded: false }))).offer
+  : null;
+const best = bestPrice(picked ? [{ offers: [picked] }] : pages);
+const price = best ? formatMoney(best.price, best.currency, localeTag) : '';
+const onlyPrice = picked || !best?.startsFrom;
+const told =
+  best &&
+  offerAvailability(
+    { in_stock: best.inStock, lead_time_days: best.leadDays },
+    copy.leadTime,
+    localeTag,
+    { short: true },
+  );
+const availability = told && (told.stock ?? told.lead ?? copy.outOfStock);
+---
+
+{
+  deferred ? (
+    <PriceSlot
+      kind="tag"
+      fresh={kit && shopOpen()}
+      fields={{
+        ids: pages.flatMap(({ id }) => id ?? []).join(','),
+        kit: kit ? '1' : undefined,
+        class: className,
+      }}
+    >
+      <Astro.self {...Astro.props} live />
+    </PriceSlot>
+  ) : best ? (
+    <span
+      class:list={['flex flex-col items-end text-right', className]}
+      data-kit-offer={picked?.id}
+      data-kit-price={picked?.price}
+      data-kit-currency={picked?.currency}
+    >
+      <span class="spec text-sm font-semibold whitespace-nowrap text-ink">
+        {onlyPrice ? price : copy.fromPrice.replace('{price}', price)}
+      </span>
+      <span class="text-xs text-ink-2">{availability}</span>
+    </span>
+  ) : (
+    <span
+      class:list={[
+        'text-right text-sm font-semibold whitespace-nowrap text-ink-2',
+        className,
+      ]}
+    >
+      {copy.priceOnRequestTag}
+    </span>
+  )
+}

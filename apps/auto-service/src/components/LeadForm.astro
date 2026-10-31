@@ -1,31 +1,25 @@
 ---
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import { localeFrom } from '@/i18n/config';
-import Icon from './Icon.astro';
-import PhoneInput from './PhoneInput.astro';
-import { PathBuilder } from '@/utils/paths';
-import {
-  SHOP_SERVICE,
-  VIN_INQUIRY_SERVICE,
-  type ServiceSlug,
-} from '@/utils/services';
-import {
-  AD_SOURCE_FIELD,
-  HONEYPOT_FIELD,
-  META_IDS_FIELD,
-  SERVICE_FIELD,
-} from '@podbor/lead-crm';
+import LeadFormHidden from './LeadFormHidden.astro';
+import ContactChannelField from './ContactChannelField.astro';
+import ConsentField from './ConsentField.astro';
+import VinField from './VinField.astro';
+import type { ServiceSlug } from '@/utils/services';
+import { SERVICE_FIELD } from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
 
 interface Props {
-  service?: ServiceSlug | typeof SHOP_SERVICE | typeof VIN_INQUIRY_SERVICE;
+  service?: ServiceSlug;
   compact?: boolean;
   comment?: string;
   commentLabel?: string;
   commentPlaceholder?: string;
   commentNote?: string;
-  vin?: { label: string; placeholder: string };
+  vin?: { label: string; placeholder: string; note?: string; value?: string };
   defaultChannel?: 'phone' | 'whatsapp' | 'viber' | 'telegram';
+  action?: string;
+  submitLabel?: string;
   class?: string;
 }
 
@@ -38,157 +32,29 @@ const {
   commentNote,
   vin,
   defaultChannel = 'phone',
+  action = '/api/leads',
+  submitLabel,
   class: className = '',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 
 const uid = crypto.randomUUID().slice(0, 8);
-
-const CHANNELS = [
-  {
-    value: 'phone',
-    icon: 'phone',
-    label: site.form.channelPhone,
-    panel: 'phone',
-  },
-  { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'phone' },
-  { value: 'viber', icon: 'viber', label: 'Viber', panel: 'phone' },
-  { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'telegram' },
-] as const;
-
-const channels = [
-  CHANNELS.find((c) => c.value === defaultChannel)!,
-  ...CHANNELS.filter((c) => c.value !== defaultChannel),
-];
-
-const channelLabelId = `channel-${uid}`;
-const panelId = {
-  telegram: `panel-telegram-${uid}`,
-  phone: `panel-phone-${uid}`,
-};
-
-const chip =
-  'flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 hover:border-ink aria-selected:border-signal aria-selected:bg-signal aria-selected:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal';
-const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
 ---
 
 <lead-form class="contents">
   <form
     method="POST"
-    action="/api/leads"
+    action={action}
     data-lead-form
     data-submitting-label={site.form.submitting}
     class={`${METRIKA_MASK_CLASS} flex flex-col gap-4 ${className}`}
   >
-    <input type="hidden" name="locale" value={locale} />
-    <div class="hidden" aria-hidden="true">
-      <label>
-        {HONEYPOT_FIELD}
-        <input
-          type="text"
-          name={HONEYPOT_FIELD}
-          tabindex="-1"
-          autocomplete="off"
-        />
-      </label>
-    </div>
+    <LeadFormHidden />
 
-    <input type="hidden" name="source_url" data-source-url />
-    <input type="hidden" name="visitor_id" data-visitor-id />
-    <input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
-    <input type="hidden" name={META_IDS_FIELD} data-meta-ids />
+    <ContactChannelField uid={uid} defaultChannel={defaultChannel} />
 
-    <input type="hidden" name="contact" />
-    <input type="hidden" name="contact_channel" value={channels[0].value} />
-
-    <div>
-      <p id={channelLabelId} class="field-label">
-        {site.form.contactChannelLabel}
-      </p>
-
-      <div
-        class="grid grid-cols-2 gap-2 sm:grid-cols-4"
-        role="tablist"
-        aria-labelledby={channelLabelId}
-      >
-        {
-          channels.map((channel, index) => (
-            <button
-              type="button"
-              role="tab"
-              class={chip}
-              data-tab={channel.value}
-              data-panel={channel.panel}
-              aria-selected={index === 0 ? 'true' : 'false'}
-              aria-controls={panelId[channel.panel]}
-            >
-              <Icon name={channel.icon} size={14} />
-              {channel.label}
-            </button>
-          ))
-        }
-      </div>
-
-      <div
-        id={panelId.telegram}
-        class="mt-3"
-        role="tabpanel"
-        data-panel="telegram"
-        hidden
-      >
-        <label class="block">
-          <span class="sr-only">Telegram</span>
-          <input
-            type="text"
-            autocomplete="username"
-            placeholder={site.form.telegramPlaceholder}
-            aria-describedby={`telegram-error-${uid}`}
-            class="field"
-            data-telegram
-            data-field="telegram"
-          />
-        </label>
-        <p
-          id={`telegram-error-${uid}`}
-          class={errorText}
-          aria-live="polite"
-          data-error-telegram
-          hidden
-        >
-          {site.form.errorTelegram}
-        </p>
-      </div>
-
-      <div id={panelId.phone} class="mt-3" role="tabpanel" data-panel="phone">
-        <PhoneInput name="phone_number" errorId={`phone-error-${uid}`} />
-        <p
-          id={`phone-error-${uid}`}
-          class={errorText}
-          aria-live="polite"
-          data-error-phone
-          hidden
-        >
-          {site.form.errorPhone}
-        </p>
-      </div>
-    </div>
-
-    {
-      vin && (
-        <label class="block">
-          <span class="field-label">{vin.label}</span>
-          <input
-            name="vin"
-            type="text"
-            required
-            autocomplete="off"
-            placeholder={vin.placeholder}
-            class="field"
-          />
-        </label>
-      )
-    }
+    {vin && <VinField {...vin} />}
 
     <label class="block">
       <span class="field-label">{site.form.nameLabel}</span>
@@ -215,53 +81,13 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-signal-dark';
     </label>
 
     <div class="lead-submit">
-      <div>
-        <label class="flex min-h-11 items-start gap-3 py-1.5">
-          <input
-            type="checkbox"
-            name="consent"
-            value="1"
-            required
-            aria-describedby={`consent-error-${uid}`}
-            class="peer sr-only"
-            data-consent
-            data-field="consent"
-          />
-          <span
-            class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-white transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
-          >
-            <Icon name="check" size={10} />
-          </span>
-          <span class="text-xs leading-relaxed text-muted">
-            {site.form.privacyNote}{' '}
-            <a
-              href={PathBuilder.privacy(locale)}
-              target="_blank"
-              class="underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
-              >{site.form.privacyLinkText}</a
-            >.
-          </span>
-        </label>
-        <p
-          id={`consent-error-${uid}`}
-          class={errorText}
-          aria-live="polite"
-          data-error-consent
-          hidden
-        >
-          {site.form.errorConsent}
-        </p>
-        <p class={errorText} role="alert" data-error-submit hidden>
-          {site.form.errorSubmit}
-        </p>
-      </div>
+      <ConsentField uid={uid} />
 
       <button
         type="submit"
-        class="btn btn-primary w-full aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
+        class="btn btn-primary w-full disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2 aria-busy:cursor-progress aria-busy:opacity-60 sm:w-auto"
       >
-        <span data-submit-label>{site.form.submit}</span>
-        <Icon name="arrowRight" />
+        <span data-submit-label>{submitLabel ?? site.form.submit}</span>
       </button>
     </div>
   </form>

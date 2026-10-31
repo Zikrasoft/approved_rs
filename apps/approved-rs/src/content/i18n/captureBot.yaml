@@ -1,31 +1,31 @@
-greeting: Здравствуйте! Спасибо, что написали — мы уже видим ваше обращение и скоро ответим.
+greeting: Здравствуйте! Спасибо, что написали. Мы уже видим ваше обращение и скоро ответим.
 lookingFor: Расскажите в двух словах, какая машина вас интересует или с чем нужна помощь.
 budget: И на какой бюджет вы рассчитываете?
 phoneAsk: У вас в Telegram нет имени пользователя (username), поэтому менеджер не сможет вам написать. Оставьте номер телефона, чтобы мы могли связаться.
 phoneButton: 📱 Поделиться номером
-thanks: Спасибо! Передали менеджеру — он скоро с вами свяжется.
+thanks: Спасибо! Передали менеджеру, он скоро с вами свяжется.
 received: Приняли, менеджер увидит ваше сообщение.
 menu:
   text: Чем можем помочь? Выберите, что вас интересует.
   back: « Назад
 services:
   button: Услуги
-  text: Вот с чем мы помогаем. Выберите услугу — расскажем подробнее.
+  text: Вот с чем мы помогаем. Выберите услугу, и мы расскажем подробнее.
 card:
   request: 📝 Оставить заявку
   site: Подробнее на сайте
 contacts:
   button: Контакты
-  text: Мы на связи — пишите или звоните.
+  text: Мы на связи, пишите или звоните.
   hours: Круглосуточно, без выходных
 manager:
   button: 👤 Написать менеджеру
-  text: Напишите ваш вопрос одним сообщением — менеджер ответит здесь же.
-  handoff: Менеджер на связи в Telegram — нажмите, чтобы открыть чат.
+  text: Напишите ваш вопрос одним сообщением, менеджер ответит здесь же.
+  handoff: Менеджер на связи в Telegram. Нажмите, чтобы открыть чат.
   chat: Открыть чат с менеджером ↗
 partners:
-  button: Партнёры
-  text: Ремонт и детейлинг — у партнёров, которым мы доверяем. Выберите, кому написать.
+  button: Партнеры
+  text: Ремонт и детейлинг делают партнеры, которым мы доверяем. Выберите, кому написать.
 request:
   button: 📝 Оставить заявку
   car: Какая у вас машина? Напишите марку, модель и год.
@@ -42,175 +42,175 @@ profile:
   langCommand: Сменить язык
 translations:
   en:
-    greeting: Hello! Thank you for reaching out - we’ve received your message and will reply soon.
-    lookingFor: Could you briefly describe the car you’re interested in or how we can assist you?
-    budget: What’s your budget for this?
-    phoneAsk: You don’t have a username on Telegram, so our manager won’t be able to message you. Please share your phone number so we can get in touch.
+    greeting: Hi! Thanks for getting in touch. We've received your message and will reply soon.
+    lookingFor: Tell us briefly what car you're looking for or what you need help with.
+    budget: And what budget do you have in mind?
+    phoneAsk: You don't have a Telegram username, so our team can't message you directly. Please share your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
-    thanks: Thank you! We’ve passed this on to the manager — they’ll contact you soon.
-    received: Got it, the manager will see your message.
+    thanks: Thanks! We've passed your details on to our team. Someone will be in touch soon.
+    received: Got it! Our team will see your message.
     menu:
-      text: How can we help? Please choose what you’re interested in.
+      text: How can we help? Choose what you're interested in.
       back: « Back
     services:
       button: Services
-      text: Here’s how we can assist you. Choose a service for more details.
+      text: Here's what we can help with. Choose a service to find out more.
     card:
-      request: 📝 Submit a request
-      site: More on the website
+      request: 📝 Send a request
+      site: Learn more on our website
     contacts:
-      button: Contact
-      text: We’re here for you — feel free to message or call us.
-      hours: Available 24/7, no weekends
+      button: Contact us
+      text: We're here to help. Send us a message or give us a call.
+      hours: Available 24/7
     manager:
-      button: 👤 Message the manager
-      text: Send your question in one message — the manager will reply here.
-      handoff: The manager is available on Telegram - click to open the chat.
-      chat: Open chat with manager ↗
+      button: 👤 Message our team
+      text: Send your question in a single message, and someone from our team will reply here.
+      handoff: You can reach our team on Telegram. Tap to open a chat.
+      chat: Chat with our team ↗
     partners:
       button: Partners
-      text: For repairs and detailing — we trust these partners. Choose who to contact.
+      text: We work with trusted partners for repairs and detailing. Choose who you'd like to contact.
     request:
-      button: 📝 Submit a request
-      car: What’s your car? Please provide the brand, model, and year.
-      service: What services are you interested in? Select one or more.
+      button: 📝 Send a request
+      car: What car do you have? Please tell us the make, model and year.
+      service: Which services are you interested in? Select one or more.
       done: Done →
-      unsure: I’m not sure, I need a consultation
+      unsure: I'm not sure, I'd like some advice
     language:
       button: 🌐 Language
-      text: Choose the language you prefer to communicate in.
+      text: Choose the language you're most comfortable with.
     profile:
-      description: "We source and inspect cars in Germany, Spain, Switzerland, and Serbia, bringing them in from Europe and China. Click 'Start' and tell us what kind of car you need, the manager will respond right here. Prefer to skip the bot? Message the manager directly: {manager}"
-      shortDescription: 'Car sourcing, import, and buyback in Europe. Manager: {manager}'
+      description: "We source and inspect cars in Germany, Spain, Switzerland and Serbia, and import from Europe and China. Tap Start and tell us what car you're looking for. Our team will reply right here. Prefer to skip the bot? Message our team directly: {manager}"
+      shortDescription: 'Car sourcing, imports and buybacks in Europe. Contact: {manager}'
       menuCommand: Main menu
       langCommand: Change language
   sr:
-    greeting: Zdravo! Hvala što ste se javili — već smo primili vaš upit i uskoro ćemo odgovoriti.
-    lookingFor: Recite nam u nekoliko reči koju mašinu tražite ili u čemu vam treba pomoć.
-    budget: I koji budžet imate na umu?
-    phoneAsk: Nemate korisničko ime u Telegramu, pa menadžer ne može da vam piše. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
-    phoneButton: 📱 Podeliti broj
-    thanks: Hvala! Prosledili smo menadžeru — uskoro će vas kontaktirati.
-    received: Primljeno, menadžer će videti vašu poruku.
+    greeting: Dobar dan! Hvala što ste nam pisali. Vaša poruka je stigla, uskoro ćemo vam odgovoriti.
+    lookingFor: Recite nam ukratko koji vas auto zanima ili oko čega vam je potrebna pomoć.
+    budget: A koliki vam je budžet?
+    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa naš kolega ne može da vam pošalje poruku. Ostavite broj telefona da bismo mogli da vas kontaktiramo.
+    phoneButton: 📱 Podeli broj telefona
+    thanks: Hvala! Prosledili smo poruku kolegi, uskoro će vam se javiti.
+    received: Poruka je primljena, naš kolega će je videti.
     menu:
-      text: Kako možemo pomoći? Izaberite ono što vas zanima.
+      text: Kako možemo da pomognemo? Izaberite šta vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Evo čime se bavimo. Izaberite uslugu — objasnićemo detaljnije.
+      text: Evo oko čega možemo da pomognemo. Izaberite uslugu za više informacija.
     card:
-      request: 📝 Ostaviti zahtev
+      request: 📝 Pošalji upit
       site: Više na sajtu
     contacts:
-      button: Kontakti
-      text: Tu smo — pišite ili zovite.
-      hours: Non-stop, bez slobodnih dana
+      button: Kontakt
+      text: Tu smo za vas, pišite nam ili nas pozovite.
+      hours: Dostupni smo 24 sata, svakog dana
     manager:
-      button: 👤 Pisati menadžeru
-      text: Postavite vaše pitanje u jednoj poruci — menadžer će ovde odgovoriti.
-      handoff: Menadžer je dostupan na Telegramu — kliknite da otvorite čat.
-      chat: Otvoriti čat sa menadžerom ↗
+      button: 👤 Piši savetniku
+      text: Napišite svoje pitanje u jednoj poruci, naš kolega će vam odgovoriti ovde.
+      handoff: Naš kolega je dostupan na Telegramu. Kliknite da otvorite razgovor.
+      chat: Otvori razgovor sa savetnikom ↗
     partners:
       button: Partneri
-      text: Popravka i detailing — kod partnera kojima verujemo. Izaberite kome da pišete.
+      text: Popravke i detailing rade naši pouzdani partneri. Izaberite kome želite da pišete.
     request:
-      button: 📝 Ostaviti zahtev
-      car: Koju imate mašinu? Napišite marku, model i godinu.
-      service: Koje usluge vas zanimaju? Označite jednu ili više.
+      button: 📝 Pošalji upit
+      car: Koji auto imate? Napišite marku, model i godište.
+      service: Koje usluge vas zanimaju? Izaberite jednu ili više.
       done: Gotovo →
-      unsure: Nisam siguran, treba mi konsultacija
+      unsure: Nisam siguran, potreban mi je savet
     language:
       button: 🌐 Jezik
-      text: Izaberite jezik koji vam više odgovara.
+      text: Izaberite jezik na kom vam najviše odgovara da razgovaramo.
     profile:
-      description: 'Biramo i radimo provere automobila u Nemačkoj, Španiji, Švajcarskoj i Srbiji, donosimo iz Evrope i Kine. Kliknite na „Start“ i recite nam koja vam mašina treba, menadžer će vam odgovoriti ovde. Da li vam je lakše bez bota? Pišite menadžeru direktno: {manager}'
-      shortDescription: 'Odabir automobila, uvoz i otkup vozila u Evropi. Menadžer: {manager}'
+      description: 'Pronalazimo i proveravamo automobile u Nemačkoj, Španiji, Švajcarskoj i Srbiji, uvozimo iz Evrope i Kine. Kliknite na „Start” i recite nam kakav auto tražite, naš kolega će vam odgovoriti ovde. Radije biste bez bota? Pišite kolegi direktno: {manager}'
+      shortDescription: 'Pronalaženje, uvoz i otkup automobila u Evropi. Kontakt: {manager}'
       menuCommand: Glavni meni
-      langCommand: Promeniti jezik
+      langCommand: Promeni jezik
   es:
-    greeting: ¡Hola! Gracias por escribir, ya estamos viendo tu consulta y responderemos pronto.
-    lookingFor: Cuéntame brevemente qué coche te interesa o en qué necesitas ayuda.
-    budget: ¿Y cuál es tu presupuesto?
-    phoneAsk: No tienes un nombre de usuario en Telegram, por lo que el gerente no podrá escribirte. Déjanos tu número de teléfono para que podamos contactarte.
+    greeting: ¡Hola! Gracias por escribirnos. Hemos recibido tu mensaje y te responderemos pronto.
+    lookingFor: Cuéntanos brevemente qué coche buscas o en qué necesitas ayuda.
+    budget: ¿Y qué presupuesto tienes en mente?
+    phoneAsk: No tienes un nombre de usuario (username) en Telegram, así que nuestro asesor no podrá escribirte. Déjanos tu número de teléfono para que podamos contactar contigo.
     phoneButton: 📱 Compartir número
-    thanks: ¡Gracias! Hemos informado al gerente, pronto se pondrá en contacto contigo.
-    received: Recibido, el gerente verá tu mensaje.
+    thanks: ¡Gracias! Le hemos pasado tu consulta a nuestro asesor y se pondrá en contacto contigo pronto.
+    received: Recibido, nuestro asesor verá tu mensaje.
     menu:
-      text: ¿En qué podemos ayudarte? Elige lo que te interesa.
+      text: ¿En qué podemos ayudarte? Elige lo que te interese.
       back: « Volver
     services:
       button: Servicios
-      text: Aquí están los servicios que ofrecemos. Elige uno y te daremos más detalles.
+      text: Estos son nuestros servicios. Elige uno y te contamos más.
     card:
-      request: 📝 Hacer una solicitud
-      site: Más información en el sitio web
+      request: 📝 Enviar solicitud
+      site: Más información en la web
     contacts:
-      button: Contactos
-      text: Estamos en contacto, escríbenos o llámanos.
-      hours: Disponibles las 24 horas, sin días libres
+      button: Contacto
+      text: Estamos disponibles, escríbenos o llámanos.
+      hours: Las 24 horas, todos los días
     manager:
-      button: 👤 Escribir al gerente
-      text: Escribe tu pregunta en un solo mensaje y el gerente responderá aquí mismo.
-      handoff: El gerente está disponible en Telegram, haz clic para abrir el chat.
-      chat: Abrir chat con el gerente ↗
+      button: 👤 Escribir a un asesor
+      text: Escribe tu consulta en un solo mensaje y nuestro asesor te responderá por aquí.
+      handoff: Nuestro asesor está disponible en Telegram. Pulsa para abrir el chat.
+      chat: Abrir chat con un asesor ↗
     partners:
-      button: Socios
-      text: Reparación y detallado con los socios de confianza. Elige a quién escribir.
+      button: Colaboradores
+      text: Para reparaciones y detailing, contamos con colaboradores de confianza. Elige a quién quieres escribir.
     request:
-      button: 📝 Hacer una solicitud
-      car: ¿Qué coche tienes? Escribe la marca, modelo y año.
-      service: ¿Qué servicios te interesan? Marca uno o varios.
+      button: 📝 Enviar solicitud
+      car: ¿Qué coche tienes? Indica la marca, el modelo y el año.
+      service: ¿Qué servicios te interesan? Selecciona uno o varios.
       done: Listo →
-      unsure: No lo sé, necesito una consulta
+      unsure: No lo tengo claro, necesito asesoramiento
     language:
       button: 🌐 Idioma
-      text: Elige el idioma con el que te sientas más cómodo para comunicarte.
+      text: Elige el idioma en el que prefieras comunicarte.
     profile:
-      description: 'Seleccionamos y revisamos coches en Alemania, España, Suiza y Serbia, los traemos de Europa y China. Haz clic en «Inicio» y cuéntanos qué coche necesitas, el gerente responderá aquí mismo. ¿Prefieres comunicarte directamente? Escribe al gerente: {manager}'
-      shortDescription: 'Selección de coches, importación y compra de autos en Europa. Gerente: {manager}'
+      description: 'Buscamos y revisamos coches en Alemania, España, Suiza y Serbia, e importamos de Europa y China. Pulsa «Iniciar» y dinos qué coche buscas. Te responderemos aquí. ¿Prefieres hablar sin bot? Escribe a nuestro asesor: {manager}'
+      shortDescription: 'Búsqueda, importación y compra de coches en Europa. Asesor: {manager}'
       menuCommand: Menú principal
       langCommand: Cambiar idioma
   de:
-    greeting: Hallo! Vielen Dank für Ihre Nachricht, wir haben Ihr Anliegen bereits gesehen und werden bald antworten.
-    lookingFor: Erzählen Sie in wenigen Worten, welches Auto Sie interessiert oder wobei Sie Hilfe benötigen.
-    budget: Und welches Budget haben Sie eingeplant?
-    phoneAsk: Ihrem Telegram-Konto fehlt ein Benutzername, daher kann der Manager Ihnen nicht schreiben. Bitte hinterlassen Sie Ihre Telefonnummer, damit wir Sie kontaktieren können.
-    phoneButton: 📱 Nummer teilen
-    thanks: Danke! Wir haben es dem Manager weitergeleitet – er wird sich bald bei Ihnen melden.
-    received: Wir haben es erhalten, der Manager wird Ihre Nachricht sehen.
+    greeting: Guten Tag! Vielen Dank für Ihre Nachricht. Ihre Anfrage ist angekommen, wir melden uns in Kürze.
+    lookingFor: Erzählen Sie uns kurz, welches Auto Sie suchen oder wobei Sie Hilfe brauchen.
+    budget: Welches Budget haben Sie eingeplant?
+    phoneAsk: Sie haben bei Telegram keinen Benutzernamen (Username), deshalb kann unser Ansprechpartner Ihnen nicht direkt schreiben. Hinterlassen Sie bitte Ihre Telefonnummer, damit wir Sie erreichen können.
+    phoneButton: 📱 Telefonnummer teilen
+    thanks: Vielen Dank! Wir haben Ihre Anfrage weitergeleitet. Unser Ansprechpartner meldet sich in Kürze bei Ihnen.
+    received: Angekommen! Unser Ansprechpartner bekommt Ihre Nachricht.
     menu:
-      text: Wie können wir helfen? Wählen Sie, was Sie interessiert.
+      text: Wie können wir Ihnen helfen? Wählen Sie aus, was Sie interessiert.
       back: « Zurück
     services:
-      button: Dienstleistungen
-      text: Hierbei helfen wir Ihnen. Wählen Sie eine Dienstleistung – wir erzählen Ihnen mehr.
+      button: Leistungen
+      text: Dabei können wir Ihnen helfen. Wählen Sie eine Leistung, um mehr zu erfahren.
     card:
-      request: 📝 Anfrage stellen
-      site: Mehr auf der Website
+      request: 📝 Anfrage senden
+      site: Mehr auf unserer Website
     contacts:
       button: Kontakt
-      text: Wir sind erreichbar – schreiben oder rufen Sie an.
-      hours: Rund um die Uhr, ohne Feiertage
+      text: Wir sind für Sie da. Schreiben Sie uns oder rufen Sie an.
+      hours: Rund um die Uhr, auch am Wochenende
     manager:
-      button: 👤 Manager kontaktieren
-      text: Schreiben Sie Ihre Frage in einer Nachricht – der Manager wird hier antworten.
-      handoff: Der Manager ist in Telegram erreichbar – klicken Sie, um den Chat zu öffnen.
-      chat: Chat mit dem Manager öffnen ↗
+      button: 👤 Ansprechpartner anschreiben
+      text: Schreiben Sie Ihre Frage in einer Nachricht. Unser Ansprechpartner antwortet Ihnen direkt hier.
+      handoff: Unser Ansprechpartner ist über Telegram erreichbar. Tippen Sie hier, um den Chat zu öffnen.
+      chat: Chat mit Ansprechpartner öffnen ↗
     partners:
       button: Partner
-      text: Reparaturen und Detailing – bei Partnern, denen wir vertrauen. Wählen Sie, wem Sie schreiben möchten.
+      text: Reparaturen und Fahrzeugaufbereitung übernehmen Partner, denen wir vertrauen. Wählen Sie aus, wem Sie schreiben möchten.
     request:
-      button: 📝 Anfrage stellen
-      car: Welches Auto haben Sie? Schreiben Sie Marke, Modell und Jahr.
-      service: Welche Dienstleistungen interessieren Sie? Wählen Sie eine oder mehrere.
+      button: 📝 Anfrage senden
+      car: Welches Auto fahren Sie? Nennen Sie uns bitte Marke, Modell und Baujahr.
+      service: Welche Leistungen interessieren Sie? Wählen Sie eine oder mehrere aus.
       done: Fertig →
-      unsure: Ich weiß nicht, ich benötige eine Beratung
+      unsure: Ich bin unsicher und brauche Beratung
     language:
       button: 🌐 Sprache
-      text: Wählen Sie die Sprache, in der Sie sich am wohlsten fühlen.
+      text: Wählen Sie die Sprache, in der Sie sich am liebsten mit uns austauschen möchten.
     profile:
-      description: 'Wir suchen und prüfen Autos in Deutschland, Spanien, der Schweiz und Serbien, bringen sie aus Europa und China. Klicken Sie auf „Start“ und erzählen Sie uns, welches Auto Sie benötigen, der Manager wird hier antworten. Bequemer ohne Bot? Schreiben Sie direkt an den Manager: {manager}'
-      shortDescription: 'Autoauswahl, Import und Rückkauf von Autos in Europa. Manager: {manager}'
+      description: 'Wir finden und prüfen Autos und importieren aus Europa und China. Tippen Sie auf „Start“ oder schreiben Sie direkt an: {manager}'
+      shortDescription: 'Autosuche, Import und Ankauf in Europa. Ihr Ansprechpartner: {manager}'
       menuCommand: Hauptmenü
-      langCommand: Sprache wechseln
-translatedFrom: edb6a2d2dc324893
+      langCommand: Sprache ändern
+translatedFrom: 2868349efedbb72e

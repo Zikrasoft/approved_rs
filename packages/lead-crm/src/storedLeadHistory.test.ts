@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BRANDS } from '@podbor/brands';
-import { legacyIncomesSchema, type LegacyIncomes } from './legacyIncomes.ts';
 import { storedLeadSchema, type StoredLead } from './schema.ts';
 
 interface StoredShape {
   label: string;
   record: unknown;
   keeps: Partial<StoredLead>;
-  incomes?: LegacyIncomes['incomes'];
 }
 
 const HISTORY: StoredShape[] = [
@@ -259,18 +257,10 @@ const HISTORY: StoredShape[] = [
       pendingCommissionClaim: null,
     },
     keeps: { id: 7 },
-    incomes: [
-      {
-        id: 1,
-        amount: 300,
-        at: '2026-03-14T10:00:00.000Z',
-        paidAt: '2026-03-15T10:00:00.000Z',
-      },
-    ],
   },
   {
     label:
-      'pre-v10 money, part paid: one deal splits into a settled and an unsettled income',
+      'pre-v10 money, part paid: a deal amount with only some of its commission confirmed',
     record: {
       id: 8,
       brand: 'Approved.rs',
@@ -294,15 +284,6 @@ const HISTORY: StoredShape[] = [
       pendingCommissionClaim: null,
     },
     keeps: { id: 8 },
-    incomes: [
-      {
-        id: 1,
-        amount: 120,
-        at: '2026-03-14T10:00:00.000Z',
-        paidAt: '2026-03-16T10:00:00.000Z',
-      },
-      { id: 2, amount: 180, at: '2026-03-14T10:00:00.000Z', paidAt: null },
-    ],
   },
   {
     label:
@@ -343,15 +324,6 @@ const HISTORY: StoredShape[] = [
       },
     },
     keeps: { id: 9, brand: 'CarLab' },
-    incomes: [
-      {
-        id: 1,
-        amount: 200,
-        at: '2026-03-18T10:00:00.000Z',
-        paidAt: '2026-03-19T10:00:00.000Z',
-      },
-      { id: 2, amount: 300, at: '2026-03-20T10:00:00.000Z', paidAt: null },
-    ],
   },
   {
     label: 'v12: a postponed lead remembering the status it was postponed from',
@@ -475,7 +447,7 @@ const HISTORY: StoredShape[] = [
     },
   },
   {
-    label: 'money with no stored rate, priced at the former 10% default',
+    label: 'a deal amount stored with no commissionPercent beside it',
     record: {
       id: 15,
       name: 'Luka',
@@ -488,13 +460,10 @@ const HISTORY: StoredShape[] = [
       createdAt: '2026-03-03T10:00:00.000Z',
     },
     keeps: { id: 15, brand: 'Approved.rs', status: 'won' },
-    incomes: [
-      { id: 1, amount: 300, at: '2026-03-17T10:00:00.000Z', paidAt: null },
-    ],
   },
   {
     label:
-      'a commission rate worth more than the deal, writable before the cap landed, carried at that rate',
+      'a commission rate worth more than the deal, writable before the cap landed',
     record: {
       id: 12,
       brand: 'Approved.rs',
@@ -517,9 +486,6 @@ const HISTORY: StoredShape[] = [
       pendingCommissionClaim: null,
     },
     keeps: { id: 12, brand: 'Approved.rs', status: 'won' },
-    incomes: [
-      { id: 1, amount: 300, at: '2026-03-17T10:00:00.000Z', paidAt: null },
-    ],
   },
   {
     label: 'v5: the four-status set, where every pre-outcome Lead was open',
@@ -559,15 +525,11 @@ describe('every stored lead shape the system has written', () => {
     }
   });
 
-  it.each(HISTORY)(
-    '$label is still readable',
-    ({ record, keeps, incomes = [] }) => {
-      const parsed = storedLeadSchema.safeParse(record);
-      expect(parsed.success).toBe(true);
-      expect(parsed.data).toMatchObject(keeps);
-      expect(legacyIncomesSchema.parse(record).incomes).toEqual(incomes);
-    },
-  );
+  it.each(HISTORY)('$label is still readable', ({ record, keeps }) => {
+    const parsed = storedLeadSchema.safeParse(record);
+    expect(parsed.success).toBe(true);
+    expect(parsed.data).toMatchObject(keeps);
+  });
 
   it('writes none of the retired money fields back', () => {
     for (const { record } of HISTORY) {

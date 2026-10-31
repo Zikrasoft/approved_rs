@@ -4,7 +4,7 @@ status: accepted
 
 # Medusa owns the Order; the Telegram bot only notifies
 
-Decided 2026-09-30 while grilling the shop spec (issue #77), before branch `feat/carlab-shop` was merged.
+Decided 2026-09-30 while grilling the shop spec (issue #77), before the shop feature branch was merged.
 
 A shop order exists in two stores at once and nothing reconciles them. Medusa holds the Order with its own status and fulfillment; the lead store holds a Lead whose vocabulary is a sales pipeline — `new`, `negotiations`, `in_progress`, `won`, `lost`, `postponed`. The operator presses «Завершить» on the bot card and the Medusa order stays `pending` forever, keeping its inventory reservation. No code writes back to Medusa from either the bot or the storefront.
 

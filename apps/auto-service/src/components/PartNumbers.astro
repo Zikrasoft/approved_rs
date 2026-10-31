@@ -1,0 +1,63 @@
+---
+import type { BrandNumber } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { splitNumbers } from '@/utils/partNumbers';
+
+type Numbered = Pick<BrandNumber, 'type' | 'superseded' | 'value'> & {
+  slug: string;
+  brand: { name: string };
+};
+
+interface Props {
+  pages: Numbered[];
+  first?: Numbered;
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const { current, previous } = splitNumbers(
+  Astro.props.pages,
+  Astro.props.first,
+);
+---
+
+<div class="flex flex-col gap-1">
+  {
+    current.length > 0 && (
+      <ul class="flex flex-wrap gap-x-4 gap-y-1">
+        {current.map((page) => (
+          <li>
+            <a
+              href={PathBuilder.partNumber(locale, page.slug)}
+              class="text-sm text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+            >
+              <span class="font-semibold">{page.brand.name}</span>{' '}
+              <span class="spec whitespace-nowrap">{page.value}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    previous.length > 0 && (
+      <p class="text-xs text-muted">
+        {copy.earlierNumbers}{' '}
+        {previous.map((page, index) => (
+          <>
+            {index > 0 && ', '}
+            <a
+              href={PathBuilder.partNumber(locale, page.slug)}
+              class="underline-offset-2 hover:text-signal-ink hover:underline"
+            >
+              {page.brand.name}{' '}
+              <span class="spec whitespace-nowrap">{page.value}</span>
+            </a>
+          </>
+        ))}
+      </p>
+    )
+  }
+</div>

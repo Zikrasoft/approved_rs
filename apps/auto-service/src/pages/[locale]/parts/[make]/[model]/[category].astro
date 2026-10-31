@@ -1,0 +1,242 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import LeadForm from '@/components/LeadForm.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import FitLine from '@/components/FitLine.astro';
+import PartNumbers from '@/components/PartNumbers.astro';
+import PriceTag from '@/components/PriceTag.astro';
+import ThumbRow from '@/components/ThumbRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import { pagesThumbnail } from '@/utils/partImages';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { carName, vehicleVariant } from '@/utils/carName';
+import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey, linkedVehicles } from '@/utils/cacheKey';
+import type {
+  ModelCategoryEntry,
+  ModelHubEntry,
+} from '@/utils/catalogueSnapshot';
+import { keySpecs } from '@/utils/attributeRows';
+import { categoryFacets } from '@/utils/categoryFacets';
+import { paragraphs } from '@podbor/site-kit';
+import {
+  catalogueLinks,
+  PathBuilder,
+  withLocales,
+  type CataloguePages,
+} from '@/utils/paths';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { withFacetCopy } from '@/utils/partsSearch';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  const pages = await cataloguePagesForBuild();
+  return withLocales(
+    hubs.flatMap((hub) =>
+      hub.models.flatMap((model) =>
+        model.categories.map((entry) => ({
+          params: {
+            make: hub.make.slug,
+            model: model.model.slug,
+            category: entry.category.slug,
+          },
+          props: { hub: model, entry, pages },
+          cacheKey: cacheKey({
+            make: model.make,
+            model: model.model,
+            entry,
+            vehicles: linkedVehicles(
+              pages,
+              entry.parts.flatMap(({ fits }) =>
+                fits.map(({ vehicle }) => vehicle),
+              ),
+            ),
+          }),
+        })),
+      ),
+    ),
+  );
+}
+
+const { hub, entry, pages } = Astro.props as {
+  hub: ModelHubEntry;
+  entry: ModelCategoryEntry;
+  pages: CataloguePages;
+};
+const locale = localeFrom(Astro.url.pathname);
+const links = catalogueLinks(locale, pages);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = content(locale).partsCar.hubs.modelCategory;
+const { make, model } = hub;
+const { category } = entry;
+const name = carName(model, locale);
+const empty = entry.parts.length === 0;
+const listingAttributes = entry.parts.map(({ part }) => part.attributes);
+const categoryName = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const facets = withFacetCopy(
+  categoryFacets(
+    { ...category, pages: entry.parts.flatMap(({ pages }) => pages) },
+    locale,
+  ),
+  content(locale).partsSearch,
+);
+const filtered = !empty && facets.length > 0;
+const fill = (template: string) =>
+  template.replace('{category}', categoryName).replace('{model}', name);
+const SAID_BY_FIT = ['axle'];
+---
+
+<Shell title={fill(copy.metaTitle)} description={fill(copy.metaDescription)}>
+  <PageHero
+    actions={false}
+    eyebrow={fill(copy.eyebrow)}
+    heading={categoryName}
+    lead={lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        label: name,
+      },
+      {
+        href: PathBuilder.partsModelCategory(
+          locale,
+          make.slug,
+          model.slug,
+          category.slug,
+        ),
+        label: categoryName,
+      },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
+      empty
+        ? 'lg:grid-cols-[1.2fr_1fr]'
+        : filtered &&
+          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
+    ]}
+  >
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{
+            category: category.slug,
+            make: make.slug,
+            model: model.slug,
+          }}
+          facets={facets}
+        />
+      )
+    }
+
+    <div class="flex min-w-0 flex-col gap-8">
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.partsHeading}</h2>
+        {!empty && <ListingBar count={entry.parts.length} filters={filtered} />}
+        <ul class="flex flex-col gap-4">
+          {
+            entry.parts.map(({ part, pages, fits }) => (
+              <li class="card flex flex-col gap-3 p-5 sm:p-6">
+                <ThumbRow thumb={pagesThumbnail(pages)} class="gap-2">
+                  <div class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-4">
+                    <div class="flex min-w-0 flex-col gap-0.5">
+                      <h3 class="font-semibold text-ink">
+                        {translated(part, 'name', locale)}
+                      </h3>
+                      {keySpecs(
+                        category,
+                        part.attributes,
+                        locale,
+                        listingAttributes,
+                        SAID_BY_FIT,
+                      ) && (
+                        <p class="spec text-xs text-muted">
+                          {keySpecs(
+                            category,
+                            part.attributes,
+                            locale,
+                            listingAttributes,
+                            SAID_BY_FIT,
+                          )}
+                        </p>
+                      )}
+                    </div>
+                    <PriceTag
+                      pages={pages}
+                      class="max-sm:items-start max-sm:text-left"
+                    />
+                  </div>
+                  <PartNumbers pages={pages} />
+                </ThumbRow>
+                {fits.length > 0 && (
+                  <ul class="flex flex-col gap-3 border-t border-line pt-3">
+                    {fits.map((fit) => (
+                      <li>
+                        <FitLine
+                          fit={fit}
+                          car={{
+                            href: links.vehicle(fit.vehicle),
+                            label: vehicleVariant(fit.vehicle, locale),
+                          }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+        {!empty && <InquiryLink topic={`${name}, ${categoryName}`} />}
+      </div>
+
+      {
+        body.length > 0 && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        )
+      }
+
+      <a
+        href={PathBuilder.partsCategory(locale, category.slug)}
+        class="text-sm font-semibold text-signal-ink hover:underline"
+      >
+        {content(locale).shopPart.categoryLink}
+      </a>
+    </div>
+
+    {
+      empty && (
+        <div class="card flex h-fit flex-col gap-4 p-5 sm:p-6">
+          <h2 class="text-block font-semibold">{inquiry.formHeading}</h2>
+          <LeadForm
+            service={VIN_INQUIRY_SERVICE}
+            vin={{
+              label: inquiry.vinLabel,
+              placeholder: inquiry.vinPlaceholder,
+            }}
+            comment={`${name}, ${categoryName}: `}
+            commentLabel={inquiry.commentLabel}
+            commentPlaceholder={inquiry.commentPlaceholder}
+            commentNote={inquiry.commentNote}
+            defaultChannel="whatsapp"
+          />
+        </div>
+      )
+    }
+  </section>
+</Shell>

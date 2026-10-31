@@ -1,3 +1,4 @@
+import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import { createBrandStore, type LeadStorage } from '@podbor/lead-crm';
 import { localLeadStorage } from '@podbor/lead-crm/storage/local';
 import { createVercelBlobStorage } from '@podbor/lead-crm/storage/vercel-blob';
@@ -10,8 +11,9 @@ const storageFor = (path: string): LeadStorage => {
   return createVercelBlobStorage({ path });
 };
 
-export const { leadStore } = createBrandStore({
+export const { leadStore, notifyLead } = createBrandStore({
   brand: BRAND,
   storageFor,
   getNotifier: () => import('./crmBot'),
+  standaloneServices: [PARTS_ORDER_SERVICE],
 });

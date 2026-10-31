@@ -176,4 +176,41 @@ describe('POST /api/admin/case-photos-upload', () => {
     const res = await POST(ctx);
     expect(res.status).toBe(413);
   });
+
+  it.each([
+    ['page.html', 'text/html'],
+    ['logo.svg', 'image/svg+xml'],
+    ['photo.jpg', 'text/html'],
+    ['photo.png', 'image/jpeg'],
+  ])('rejects %s sent as %s with 415, writing nothing', async (name, type) => {
+    import.meta.env.PROD = false;
+    const form = new FormData();
+    form.set('dir', 'src/content/cases');
+    form.set('slug', 'bmw-320');
+    form.append('photos', new File(['x'], name, { type }));
+
+    const res = await POST({
+      request: new Request('http://localhost/api/admin/case-photos-upload', {
+        method: 'POST',
+        body: form,
+      }),
+      cookies: { get: () => undefined },
+    } as unknown as APIContext);
+
+    expect(res.status).toBe(415);
+    expect(writeFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects a body that is not a form with 400', async () => {
+    import.meta.env.PROD = false;
+    const res = await POST({
+      request: new Request('http://localhost/api/admin/case-photos-upload', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+      }),
+      cookies: { get: () => undefined },
+    } as unknown as APIContext);
+    expect(res.status).toBe(400);
+  });
 });

@@ -1,0 +1,242 @@
+import { z } from 'zod';
+import {
+  shopOpenSchema,
+  shopPreviewTokenSchema,
+} from '@podbor/catalog-contract/preview';
+import { secretMatches } from '@podbor/lead-crm/verify-secret';
+import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
+import { CARLAB } from '@podbor/brands';
+import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
+import type { CataloguePages } from './paths';
+import { previewTokenFrom } from './shopPreview';
+import {
+  carPagesFrom,
+  cataloguePagesFrom,
+  categoryPagesFrom,
+  makeHubsFrom,
+  type CarPageEntry,
+  type CategoryPageEntry,
+  type MakeHubEntry,
+  type PartPageEntry,
+} from './catalogueSnapshot';
+
+const catalogueEnvKeys = [
+  'MEDUSA_BACKEND_URL',
+  'MEDUSA_PUBLISHABLE_KEY',
+  'SHOP_OPEN',
+  'SHOP_PREVIEW_TOKEN',
+  'VERCEL',
+  'CATALOGUE_SHRINK_ALLOWED',
+] as const;
+
+export type CatalogueEnv = Partial<
+  Record<(typeof catalogueEnvKeys)[number], string>
+>;
+
+const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => value || undefined, schema.optional());
+
+const catalogueEnvSchema = z
+  .object({
+    MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
+    MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
+    SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema),
+  })
+  .transform(
+    (
+      { MEDUSA_BACKEND_URL, MEDUSA_PUBLISHABLE_KEY, SHOP_PREVIEW_TOKEN },
+      context,
+    ) => {
+      if (!MEDUSA_BACKEND_URL) {
+        return null;
+      }
+      if (!MEDUSA_PUBLISHABLE_KEY) {
+        context.addIssue({
+          code: 'custom',
+          path: ['MEDUSA_PUBLISHABLE_KEY'],
+          message: 'MEDUSA_PUBLISHABLE_KEY is required with MEDUSA_BACKEND_URL',
+        });
+        return z.NEVER;
+      }
+      return {
+        backendUrl: MEDUSA_BACKEND_URL,
+        publishableKey: MEDUSA_PUBLISHABLE_KEY,
+        previewToken: SHOP_PREVIEW_TOKEN,
+      };
+    },
+  );
+
+export const shopOpen = (env: CatalogueEnv = siteEnv()): boolean =>
+  shopOpenSchema.parse(env.SHOP_OPEN) ?? false;
+
+export const previewTokenMatches = (
+  token: string,
+  env: CatalogueEnv = siteEnv(),
+): boolean =>
+  secretMatches(
+    token,
+    shopPreviewTokenSchema.safeParse(env.SHOP_PREVIEW_TOKEN).data,
+  );
+
+export const previewRequested = (
+  request: Request,
+  env: CatalogueEnv = siteEnv(),
+): boolean =>
+  previewTokenMatches(previewTokenFrom(request.headers.get('cookie')), env);
+
+export function catalogueFromEnv(
+  env: CatalogueEnv,
+  { preview = false }: { preview?: boolean } = {},
+) {
+  const config = catalogueEnvSchema.parse(env);
+  return config
+    ? createCatalogue({ ...config, shopOpen: shopOpen(env), preview })
+    : null;
+}
+
+export const uncachedJson = (body: unknown, init?: ResponseInit) =>
+  Response.json(body, {
+    ...init,
+    headers: { 'cache-control': 'no-store' },
+  });
+
+export const siteEnv = (): CatalogueEnv => ({
+  MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+  MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
+  SHOP_OPEN: import.meta.env.SHOP_OPEN,
+  SHOP_PREVIEW_TOKEN: import.meta.env.SHOP_PREVIEW_TOKEN,
+  VERCEL: import.meta.env.VERCEL,
+  CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
+});
+
+export const PREVIOUS_BUILD_URL = `${CARLAB.url}/catalogue-build.json`;
+
+const SHRINK_FLOOR = 0.5;
+
+const previousBuildSchema = z.object({
+  partPages: z.number().int().nonnegative(),
+});
+
+async function livePartPages(): Promise<number> {
+  const response = await fetch(PREVIOUS_BUILD_URL, {
+    signal: AbortSignal.timeout(CATALOGUE_TIMEOUT_MS),
+  });
+  if (response.status === 404) {
+    return 0;
+  }
+  if (!response.ok) {
+    throw new Error(`${PREVIOUS_BUILD_URL} answered ${response.status}`);
+  }
+  return previousBuildSchema.parse(await response.json()).partPages;
+}
+
+async function loadSnapshot(env: CatalogueEnv) {
+  const live = env.VERCEL === '1' ? await livePartPages() : 0;
+  const catalogue = catalogueFromEnv(env);
+  if (!catalogue) {
+    if (live > 0) {
+      throw new Error(
+        `MEDUSA_BACKEND_URL is not set, but ${CARLAB.url} serves ${live} part pages`,
+      );
+    }
+    return null;
+  }
+  const snapshot = await catalogue.snapshot();
+  const built = snapshot.entries.length;
+  const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
+  const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
+  if (live > 0 && (built === 0 || shrunk)) {
+    throw new Error(
+      `The shop gives ${built} part pages, but ${CARLAB.url} serves ${live}; set CATALOGUE_SHRINK_ALLOWED=true for one build if that is intended`,
+    );
+  }
+  return snapshot;
+}
+
+const BUILD_SNAPSHOTS = Symbol.for('carlab.buildSnapshots');
+
+export const DEV_SNAPSHOT_FRESH_MS = 30_000;
+
+type SnapshotMemo = Map<
+  string,
+  { loading: ReturnType<typeof loadSnapshot>; at: number }
+>;
+
+function snapshotForBuild(env: CatalogueEnv) {
+  const holder = globalThis as { [BUILD_SNAPSHOTS]?: SnapshotMemo };
+  const memo = (holder[BUILD_SNAPSHOTS] ??= new Map());
+  const key = JSON.stringify(catalogueEnvKeys.map((name) => env[name]));
+  const cached = memo.get(key);
+  const stale =
+    cached &&
+    import.meta.env?.MODE === 'development' &&
+    Date.now() - cached.at >= DEV_SNAPSHOT_FRESH_MS;
+  if (cached && !stale) {
+    return cached.loading;
+  }
+  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).catch(
+    (error: unknown) => {
+      if (memo.get(key)?.loading === loading) {
+        memo.delete(key);
+      }
+      throw error;
+    },
+  );
+  memo.set(key, { loading, at: Date.now() });
+  return loading;
+}
+
+export async function partPagesForBuild(
+  env = siteEnv(),
+): Promise<PartPageEntry[]> {
+  return (await snapshotForBuild(env))?.entries ?? [];
+}
+
+export async function categoriesForBuild(env = siteEnv()): Promise<Category[]> {
+  return (await snapshotForBuild(env))?.categories ?? [];
+}
+
+export async function categoryPagesForBuild(
+  env = siteEnv(),
+): Promise<CategoryPageEntry[]> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? categoryPagesFrom(snapshot) : [];
+}
+
+export async function carPagesForBuild(
+  env = siteEnv(),
+): Promise<CarPageEntry[]> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? carPagesFrom(snapshot) : [];
+}
+
+export async function vehiclesForBuild(env = siteEnv()) {
+  return (await snapshotForBuild(env))?.vehicles ?? [];
+}
+
+export async function cataloguePagesForBuild(
+  env = siteEnv(),
+): Promise<CataloguePages> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot
+    ? cataloguePagesFrom(snapshot)
+    : {
+        makes: new Set(),
+        models: new Set(),
+        categories: new Set(),
+        vehicles: new Set(),
+      };
+}
+
+export async function makeHubsForBuild(
+  env = siteEnv(),
+): Promise<MakeHubEntry[]> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? makeHubsFrom(snapshot) : [];
+}
+
+export async function redirectsForBuild(
+  env = siteEnv(),
+): Promise<CatalogueRedirect[]> {
+  return (await snapshotForBuild(env))?.redirects ?? [];
+}

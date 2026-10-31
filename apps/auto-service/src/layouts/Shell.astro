@@ -16,6 +16,7 @@ import TelegramChoice from '@/components/TelegramChoice.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
+import { NOINDEX } from '@podbor/site-kit';
 import { pageHead } from '@/utils/pageHead';
 import { BUSINESS_ID } from '@/utils/schema';
 import {
@@ -27,15 +28,16 @@ import {
   SITE_URL,
   SOCIAL_SAME_AS,
 } from '@/utils/constants';
-import { DEV_MODE_INLINE } from '@/scripts/devMode';
-import { SHOP_STATUS } from '@/utils/shopStatus';
 import type { ServiceSlug } from '@/utils/services';
 import { content } from '@/i18n/content';
+import { navCurrent } from '@podbor/site-kit';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  canonicalPath?: string;
   jsonLd?: PageSchema[];
   stickyContact?: boolean;
   service?: ServiceSlug;
@@ -47,16 +49,20 @@ const {
   description,
   preloadImage,
   noindex = false,
+  canonicalPath,
   jsonLd = [],
-  stickyContact = true,
+  stickyContact: stickyRequested = true,
   service,
 } = Astro.props;
 
 const locale = localeFrom(Astro.url.pathname);
+const stickyContact =
+  stickyRequested &&
+  navCurrent(Astro.url.pathname, PathBuilder.parts(locale)) === undefined;
 const site = content(locale).site;
 const { canonical, alternates, ogLocale, ogImage } = pageHead(
   locale,
-  Astro.url.pathname,
+  canonicalPath ?? Astro.url.pathname,
   { title, description },
 );
 const fontUrl = locale === 'ru' ? cyrillicFontUrl : latinFontUrl;
@@ -87,12 +93,7 @@ const businessSchema = localBusinessSchema({
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {
-      SHOP_STATUS === 'preview' && (
-        <script is:inline set:html={DEV_MODE_INLINE} />
-      )
-    }
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#222324" />
     {
       preloadImage && (
         <link
@@ -115,7 +116,8 @@ const businessSchema = localBusinessSchema({
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content={NOINDEX} />}
+    <slot name="head" />
     {
       alternates.map((alt) => (
         <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
@@ -153,17 +155,23 @@ const businessSchema = localBusinessSchema({
   <body
     class:list={[
       'flex min-h-screen flex-col lg:pb-0',
-      stickyContact && 'pb-[calc(3.5rem+1px)]',
+      (stickyContact || Astro.slots.has('sticky')) && 'pb-[calc(3.5rem+1px)]',
     ]}
+    data-sticky-bar={stickyContact || Astro.slots.has('sticky')
+      ? ''
+      : undefined}
   >
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink"
       >{site.common.skipToContent}</a
     >
     <SiteHeader />
-    <language-suggestion hidden>
-      <div class="bg-ink text-paper">
+    <language-suggestion
+      hidden
+      class="max-lg:in-[body:has(cookie-consent:not([hidden]))]:hidden"
+    >
+      <div class="bg-ink text-paper print:hidden">
         <div class="wrap flex items-center gap-3 py-2">
           <a
             data-lang-link
@@ -184,7 +192,8 @@ const businessSchema = localBusinessSchema({
     </main>
     <SiteFooter />
     {stickyContact && <StickyContactBar service={service} />}
-    <LeadModal />
+    <slot name="sticky" />
+    <LeadModal service={service} />
     <TelegramChoice />
     <CookieConsent />
 
@@ -198,6 +207,7 @@ const businessSchema = localBusinessSchema({
         META_PIXEL_ID,
         YM_COUNTER_ID,
       } from '@/utils/analytics';
+      import { ORDERED_CART_PARAM } from '@/utils/cartNotice';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
@@ -205,6 +215,7 @@ const businessSchema = localBusinessSchema({
         metaPixelId: META_PIXEL_ID,
         googleAdsId: GOOGLE_ADS_ID,
         googleConversionLabels: GOOGLE_CONVERSION_LABELS,
+        privateParams: [ORDERED_CART_PARAM],
         analytics: !import.meta.env.DEV,
       });
       defineSiteLeadForm();

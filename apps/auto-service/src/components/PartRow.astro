@@ -1,0 +1,92 @@
+---
+import type { PartOffer } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import Icon from './Icon.astro';
+import type { Thumbnail } from '@/utils/partImages';
+import PartThumb from './PartThumb.astro';
+import PriceTag from './PriceTag.astro';
+
+interface Props {
+  thumb: Thumbnail | null;
+  slug: string;
+  brand: string;
+  value: string;
+  name?: string;
+  specs?: string;
+  detail?: string;
+  superseded?: boolean;
+  current?: { slug: string; brand: { name: string }; value: string } | null;
+  priced?: { id: string; offers: PartOffer[] };
+}
+
+const {
+  thumb,
+  slug,
+  brand,
+  value,
+  name,
+  specs,
+  detail,
+  superseded,
+  current,
+  priced,
+} = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+---
+
+<li
+  class="group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 first:rounded-t-[inherit] last:rounded-b-[inherit] hover:bg-shade sm:gap-4 sm:px-6 sm:py-4"
+>
+  <PartThumb thumb={thumb} class="group-hover:bg-paper" />
+  <span
+    class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
+  >
+    <span class="flex min-w-0 flex-1 flex-col gap-1">
+      <a
+        href={PathBuilder.partNumber(locale, slug)}
+        class="text-ink after:absolute after:inset-0 after:rounded-[inherit]"
+      >
+        <span class="font-semibold">{brand}</span>{' '}
+        <span class="spec text-sm whitespace-nowrap">{value}</span>
+      </a>
+      {name && <span class="text-sm text-ink-2">{name}</span>}
+      {specs && <span class="spec text-xs text-muted">{specs}</span>}
+      {detail && <span class="text-xs text-muted">{detail}</span>}
+      {
+        superseded && (
+          <span class="text-xs text-muted">
+            {current ? (
+              <>
+                {copy.previousNumberCurrent}{' '}
+                <a
+                  href={PathBuilder.partNumber(locale, current.slug)}
+                  class="relative text-ink-2 underline underline-offset-2 hover:text-signal-ink"
+                >
+                  {current.brand.name} <span class="spec">{current.value}</span>
+                </a>
+              </>
+            ) : (
+              copy.previousNumber
+            )}
+          </span>
+        )
+      }
+    </span>
+    {
+      priced && (
+        <PriceTag
+          pages={[priced]}
+          class="max-sm:flex-row max-sm:flex-wrap max-sm:items-baseline max-sm:gap-x-2 max-sm:text-left"
+        />
+      )
+    }
+  </span>
+  <Icon
+    name="chevronRight"
+    size={16}
+    class="shrink-0 text-muted transition-colors duration-150 group-hover:text-ink"
+  />
+</li>

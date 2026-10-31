@@ -57,17 +57,21 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
     const services = content(locale).services;
     const descriptions = [
       content(locale).home.meta.description,
-      content(locale).shop.metaDescription,
       content(locale).pages.works.metaDescription,
       content(locale).pages.contact.metaDescription,
       ...SERVICE_SLUGS.map((slug) => services[slug].metaDescription),
-      ...Object.values(content(locale).shop.types).map(
-        (type) => type.metaDescription,
-      ),
     ];
     descriptions.forEach((description) => {
       expect(description.length).toBeGreaterThan(70);
       expect(description.length).toBeLessThanOrEqual(200);
     });
+  });
+});
+
+describe('a Part that cannot be bought at once', () => {
+  it('asks for the price and lead time on its page and tags «Заказать» in listings', () => {
+    const { priceOnRequestCta, priceOnRequestTag } = content('ru').shopPart;
+    expect(priceOnRequestCta).toBe('Узнать цену и срок');
+    expect(priceOnRequestTag).toBe('Заказать');
   });
 });

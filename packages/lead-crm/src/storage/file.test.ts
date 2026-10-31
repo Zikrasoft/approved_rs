@@ -1,4 +1,11 @@
-import { chmod, mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
+import {
+  chmod,
+  mkdir,
+  mkdtemp,
+  readdir,
+  utimes,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -80,6 +87,56 @@ describe('createFileStorage', () => {
     expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
   });
 
+  it('lets exactly one of two writers against the same version win', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+
+    const outcomes = await Promise.allSettled(
+      Array.from({ length: 5 }, (_, index) =>
+        store.write([{ id: String(index) }], version),
+      ),
+    );
+
+    expect(
+      outcomes.filter(({ status }) => status === 'fulfilled'),
+    ).toHaveLength(1);
+    for (const outcome of outcomes) {
+      if (outcome.status === 'rejected') {
+        expect(outcome.reason).toBeInstanceOf(StorageConflictError);
+      }
+    }
+    expect(await readdir(join(dir, 'data'))).toEqual(['leads.json']);
+  });
+
+  it('waits out a writer that holds the file', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+    await writeFile(join(dir, 'data', 'leads.json.lock'), '');
+
+    await expect(store.write([{ id: 'a' }], version)).rejects.toThrow(
+      StorageConflictError,
+    );
+  });
+
+  it('takes over from a writer that died holding the file', async () => {
+    const store = storage();
+    await store.write([], undefined);
+    const { version } = await store.read();
+    const lock = join(dir, 'data', 'leads.json.lock');
+    await writeFile(lock, '');
+    const longAgo = new Date(Date.now() - 60_000);
+    await utimes(lock, longAgo, longAgo);
+
+    await expect(store.write([{ id: 'a' }], version)).rejects.toThrow(
+      StorageConflictError,
+    );
+    await store.write([{ id: 'a' }], version);
+
+    await expect(store.read()).resolves.toMatchObject({ raw: [{ id: 'a' }] });
+  });
+
   it('lets any other create failure through', async () => {
     await mkdir(join(dir, 'data'), { recursive: true });
     await chmod(join(dir, 'data'), 0o500);
@@ -95,20 +152,6 @@ describe('createFileStorage', () => {
     await mkdir(join(dir, 'data'), { recursive: true });
     await writeFile(join(dir, 'data', 'leads.json'), 'not json');
     await expect(storage().read()).rejects.toThrow(SyntaxError);
-  });
-
-  it('says a file exists without reading it', async () => {
-    await expect(storage().exists()).resolves.toBe(false);
-    await mkdir(join(dir, 'data'), { recursive: true });
-    await writeFile(join(dir, 'data', 'leads.json'), 'not json');
-    await expect(storage().exists()).resolves.toBe(true);
-  });
-
-  it('does not take a failed check for a missing file', async () => {
-    await writeFile(join(dir, 'data'), 'a file where the directory should be');
-    await expect(storage().exists()).rejects.toMatchObject({
-      code: 'ENOTDIR',
-    });
   });
 });
 
@@ -138,5 +181,14 @@ describe('createFileOrderMarkers', () => {
 
     await expect(markers.has('order_02')).resolves.toBe(false);
     await expect(markers.add('order_02')).resolves.toBeUndefined();
+  });
+
+  it('does not take a failed check for a missing marker', async () => {
+    const blocked = join(dir, 'blocked');
+    await writeFile(blocked, 'a file where the directory should be');
+
+    await expect(
+      createFileOrderMarkers({ dir: blocked }).has('order_03'),
+    ).rejects.toMatchObject({ code: 'ENOTDIR' });
   });
 });

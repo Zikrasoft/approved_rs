@@ -14,75 +14,75 @@ translations:
   en:
     title: BMW 520 F10
     body: |-
-      ## Car Sourcing in Serbia: BMW 520 F10 with One Owner and Complete History
+      ## Car Sourcing in Serbia: A One-Owner BMW 520 F10 with a Full Service History
 
-      Alexey reached out to us with a request for a **BMW 420** or **BMW 520 in the F10 body style**. Right from the start, during our discussion of the criteria, we made it clear that we would only consider cars manufactured after **2015**, as this was when BMW began to extensively utilize the **B47** engine, which, in our opinion, is a more reliable solution compared to the earlier **N47**. This new engine addressed several of the previous model's weaknesses, including the timing chain issue.
+      Alexey came to us looking for a **BMW 420** or a **BMW 520 F10**. When discussing his requirements, we explained that we would only consider cars built after **2015**, as this was when BMW began widely using the **B47** engine. In our view, it is a better choice than the earlier **N47**, with significant improvements to its main weak points, including the timing chain issue.
 
-      As a result of our search, we found an excellent option—a **2016 BMW** with just **140,000 km** on the clock, which is a great mileage for this type of vehicle. The car had a **full dealer service history**, was imported to Serbia in 2018, and had been with **one owner** the entire time.
+      Our search turned up an excellent example: a **2016 BMW** with just **140,000 km** on the clock, a very reasonable mileage for a car like this. It had a **full BMW dealer service history**, had been imported into Serbia in 2018, and had stayed with **one owner** throughout.
 
-      Moreover, this owner was very meticulous: an elderly individual who drove very little, and in the last few years hardly used the car at all, as his son already owned a **BMW 320 G20**.
+      The owner had also taken great care of it. He was an older gentleman who drove very little and had barely used the car in recent years, as his son already had a **BMW 320 G20** of his own.
 
-      Upon inspection, the car showed itself to be in excellent condition: **not a single painted panel**, with a transparent history and outstanding technical condition.
+      The car checked out exceptionally well: **all original paintwork**, a clear history, and excellent mechanical condition.
 
-      For diagnosing BMWs, we use **official BMW ISTA dealer equipment**, which allows us to thoroughly check the vehicle's electronic control units, engine parameters, system status, and reveal any potential hidden issues before the purchase.
+      For BMW diagnostics, we use **BMW ISTA, the official dealer diagnostic system**. This allows us to carry out in-depth checks of the car's electronic control units, engine parameters, and other systems, helping us identify potential hidden issues before purchase.
 
-      In the end, Alexey got exactly the car he was looking for—a well-maintained BMW with a good history and no unpleasant surprises.
+      In the end, Alexey got exactly what he was looking for: a well-maintained BMW with a solid history and no unpleasant surprises.
   sr:
     title: BMW 520 F10
     body: |-
-      ## Autopodbor u Srbiji: BMW 520 F10 sa jednim vlasnikom i potpunom istorijom
+      ## Pronalaženje automobila u Srbiji: BMW 520 F10 sa jednim vlasnikom i kompletnom servisnom istorijom
 
-      Obratio nam se Aleksej sa zahtevom za **BMW 420** ili **BMW 520 u F10 karoseriji**. Odmah prilikom razgovora o kriterijumima objasnili smo da ćemo razmatrati automobile samo posle **2015. godine**, jer je upravo u tom periodu BMW počeo aktivno da koristi motor **B47**, koji smatramo uspešnijim rešenjem u poređenju sa prethodnim **N47**. U njemu su značajno unapređene glavne slabosti, uključujući problem sa lancem razvodnika.
+      Obratio nam se Aleksej, koji je tražio **BMW 420** ili **BMW 520 u karoseriji F10**. Već tokom razgovora o kriterijumima objasnili smo da ćemo razmatrati samo automobile proizvedene **posle 2015. godine**, jer je BMW u tom periodu počeo da sve više koristi motor **B47**, koji je, po našem mišljenju, bolje rešenje od prethodnog **N47**. Kod njega su značajno unapređene glavne slabe tačke prethodnika, uključujući problem sa razvodnim lancem.
 
-      U rezultatima pretrage pronađen je odličan model — **BMW iz 2016. godine** sa pređenih samo **140 000 km**, što je veoma dobar pokazatelj za ovakav automobil. Vozilo je imalo **potpunu istoriju servisa kod dilera**, uvezeno je u Srbiju 2018. godine i sve vreme je bilo kod **jednog vlasnika**.
+      Tokom potrage pronašli smo odličan primerak: **BMW iz 2016. godine** sa svega **140.000 km**, što je za ovakav automobil veoma dobra kilometraža. Automobil je imao **kompletnu servisnu istoriju iz ovlašćenih servisa**, uvezen je u Srbiju 2018. godine i sve vreme je bio kod **jednog vlasnika**.
 
-      Vlasnik je bio veoma pažljiv: starija osoba koja je malo vozila, a poslednjih godina gotovo nije koristila automobil, pošto je njen sin već imao svoj **BMW 320 G20**.
+      Vlasnik je pritom bio veoma pažljiv: stariji čovek koji je malo vozio, a poslednjih godina automobil gotovo da nije ni koristio, jer je njegov sin već imao svoj **BMW 320 G20**.
 
-      Prilikom provere, automobil se pokazao odlično: **bez ijednog farbanog dela**, sa transparentnom istorijom i odličnim tehničkim stanjem.
+      Naša provera auta pre kupovine pokazala je da je automobil u odličnom stanju: **bez ijednog naknadno farbanog dela karoserije**, sa jasnom istorijom i u odličnom tehničkom stanju.
 
-      Za dijagnostiku BMW koristimo **službenu BMW ISTA opremu**, koja omogućava detaljnu proveru elektronskih blokova vozila, parametara motora, stanja sistema i otkrivanje mogućih skrivenih problema pre kupovine.
+      Za dijagnostiku BMW vozila koristimo **zvaničnu BMW ISTA dijagnostiku**, koju koriste i ovlašćeni servisi. Ona omogućava detaljnu proveru elektronskih upravljačkih jedinica, parametara motora i stanja sistema, kao i otkrivanje mogućih skrivenih problema pre kupovine.
 
-      Na kraju, Aleksej je dobio upravo onaj automobil koji je tražio — negovan BMW sa dobrom istorijom i bez neprijatnih iznenađenja.
+      Na kraju je Aleksej dobio upravo automobil koji je tražio: održavan BMW sa urednom istorijom i bez neprijatnih iznenađenja.
   es:
     title: BMW 520 F10
     body: |-
-      ## Búsqueda de Automóviles en Serbia: BMW 520 F10 con un solo propietario y un historial completo
+      ## Búsqueda de coches en Serbia: BMW 520 F10 con un solo propietario e historial completo
 
-      Alexey se puso en contacto con nosotros para solicitar un **BMW 420** o un **BMW 520 en carrocería F10**. Al discutir los criterios de búsqueda, le explicamos que solo consideraríamos vehículos de **2015 en adelante**, ya que fue en este período cuando BMW comenzó a utilizar activamente el motor **B47**, que a nuestro juicio es una opción más confiable en comparación con el anterior **N47**. Se mejoraron considerablemente los puntos débiles, incluido el problema con la cadena de distribución.
+      Alexéi acudió a nosotros buscando un **BMW 420** o un **BMW 520 con carrocería F10**. Al definir los criterios, le explicamos que solo valoraríamos coches posteriores a **2015**, ya que fue entonces cuando BMW empezó a incorporar de forma generalizada el motor **B47**, que, en nuestra opinión, es una opción más acertada que el anterior **N47**. En este motor se corrigieron notablemente los principales puntos débiles, incluido el problema de la cadena de distribución.
 
-      Como resultado de la búsqueda, encontramos una excelente opción: un **BMW de 2016** con solo **140 000 km** de recorrido, lo cual es un muy buen indicador para este tipo de vehículo. Este automóvil tenía un **historial completo de servicio de concesionario**, fue importado a Serbia en 2018 y siempre estuvo en manos de **un solo propietario**.
+      Durante la búsqueda encontramos una excelente opción: un **BMW de 2016** con solo **140 000 km**, un kilometraje muy bueno para un coche de estas características. Contaba con un **historial completo de mantenimiento en concesionario oficial**, se había importado a Serbia en 2018 y había estado siempre en manos de **un único propietario**.
 
-      Además, se trataba de un propietario muy cuidadoso: un hombre de edad avanzada que había utilizado poco el coche, y en los últimos años prácticamente no lo usó, ya que su hijo ya tenía su propio **BMW 320 G20**.
+      Además, su propietario lo había cuidado con mucho esmero. Era una persona mayor que conducía poco y que en los últimos años apenas había utilizado el coche, ya que su hijo tenía su propio **BMW 320 G20**.
 
-      Durante la revisión, el vehículo demostró estar en perfectas condiciones: **sin ningún elemento pintado**, con un historial claro y un excelente estado técnico.
+      La inspección confirmó su excelente estado: **ni una sola pieza de la carrocería repintada**, un historial claro y un estado mecánico impecable.
 
-      Para la diagnóstico de BMW, utilizamos **el equipo oficial de concesionario BMW ISTA**, que permite verificar a fondo los bloques electrónicos del automóvil, los parámetros del motor, el estado de los sistemas y detectar posibles problemas ocultos antes de la compra.
+      Para el diagnóstico de los BMW utilizamos el **equipo de diagnóstico oficial BMW ISTA**, que permite revisar a fondo las unidades de control, los parámetros del motor y el estado de los distintos sistemas, así como detectar posibles problemas ocultos antes de la compra.
 
-      Al final, Alexey obtuvo exactamente el automóvil que buscaba: un BMW bien cuidado, con un buen historial y sin sorpresas desagradables.
+      Al final, Alexéi consiguió exactamente el coche que buscaba: un BMW bien cuidado, con un buen historial y sin sorpresas desagradables.
   de:
     title: BMW 520 F10
     body: |-
-      ## Fahrzeugbeschaffung in Serbien: BMW 520 F10 mit einem Vorbesitzer und vollständiger Historie
+      ## Autosuche in Serbien: BMW 520 F10 aus einer Hand mit lückenloser Historie
 
-      Alexey wandte sich an uns mit der Anfrage nach einem **BMW 420** oder **BMW 520 im F10-Format**. Bereits bei der Besprechung der Kriterien erklärten wir, dass wir nur Fahrzeuge aus dem Jahr **2015** oder später berücksichtigen würden, da BMW in diesem Zeitraum aktiv den Motor **B47** einführte, der unserer Meinung nach eine bessere Lösung im Vergleich zu dem vorherigen **N47** darstellt. Die wichtigsten Schwachstellen wurden dabei deutlich verbessert, einschließlich des Problems mit der Steuerkette.
+      Alexey wandte sich an uns, weil er einen **BMW 420** oder einen **BMW 520 der Baureihe F10** suchte. Schon bei der Besprechung seiner Anforderungen erklärten wir, dass wir nur Fahrzeuge **ab Baujahr 2015** in Betracht ziehen würden. Ab diesem Zeitraum setzte BMW verstärkt den Motor **B47** ein, den wir gegenüber seinem Vorgänger **N47** für die bessere Wahl halten. Bei ihm wurden die wesentlichen Schwachstellen deutlich überarbeitet, darunter auch die Steuerkettenproblematik.
 
-      Im Verlauf der Suche entdeckten wir eine hervorragende Option — einen **BMW aus dem Jahr 2016** mit einer Laufleistung von nur **140.000 km**, was für ein Fahrzeug dieser Art ein sehr guter Wert ist. Das Auto hatte eine **vollständige Händlerwartungshistorie**, wurde 2018 nach Serbien importiert und war immer im Besitz **eines einzigen Eigentümers**.
+      Bei der Suche fanden wir ein hervorragendes Exemplar: einen **BMW von 2016** mit gerade einmal **140.000 km** Laufleistung, ein sehr guter Wert für ein solches Fahrzeug. Der Wagen hatte eine **lückenlose Wartungshistorie bei BMW-Vertragspartnern**, war 2018 nach Serbien importiert worden und befand sich seitdem durchgehend **in einer Hand**.
 
-      Der Vorbesitzer war zudem sehr sorgfältig: ein älterer Herr, der das Fahrzeug wenig fuhr und es in den letzten Jahren praktisch nicht mehr nutzte, da sein Sohn bereits einen eigenen **BMW 320 G20** hatte.
+      Der Besitzer war zudem ausgesprochen sorgfältig mit dem Auto umgegangen: ein älterer Herr, der wenig fuhr und den Wagen in den letzten Jahren kaum noch nutzte, da sein Sohn bereits einen eigenen **BMW 320 G20** hatte.
 
-      Bei der Überprüfung zeigte sich das Fahrzeug in exzellentem Zustand: **ohne ein einziges lackiertes Teil**, mit transparenter Geschichte und ausgezeichnetem technischen Zustand.
+      Bei unserer Prüfung überzeugte das Fahrzeug auf ganzer Linie: **kein einziges nachlackiertes Karosserieteil**, eine nachvollziehbare Historie und ein hervorragender technischer Zustand.
 
-      Für die Diagnose von BMW nutzen wir **offizielles BMW Händler-Equipment wie ISTA**, das es ermöglicht, die elektrischen Steuergeräte des Fahrzeugs, die Motorparameter und den Zustand der Systeme gründlich zu überprüfen und mögliche versteckte Probleme vor dem Kauf zu identifizieren.
+      Für die BMW-Diagnose verwenden wir das **offizielle BMW-Diagnosesystem ISTA**. Damit können wir die Steuergeräte, Motorparameter und Fahrzeugsysteme eingehend prüfen und mögliche versteckte Probleme bereits vor dem Kauf erkennen.
 
-      Am Ende erhielt Alexey genau das Fahrzeug, das er suchte — einen gepflegten BMW mit guter Historie und ohne unangenehme Überraschungen.
-translatedFrom: 6371a9ae3cf21fdd
+      So bekam Alexey genau das Auto, das er gesucht hatte: einen gepflegten BMW mit sauberer Historie und ohne böse Überraschungen.
+translatedFrom: 8296b3198cc5c3b7
 ---
 
 ## Автоподбор в Сербии: BMW 520 F10 с одним владельцем и полной историей
 
 К нам обратился Алексей с запросом на **BMW 420** или **BMW 520 в кузове F10**. Сразу при обсуждении критериев мы объяснили, что будем рассматривать автомобили только после **2015 года**, так как именно в этот период BMW начали активно использовать двигатель **B47**, который, на наш взгляд, является более удачным решением по сравнению с предыдущим **N47**. В нем были значительно доработаны основные слабые места, включая проблему с цепью ГРМ.
 
-В результате поиска был найден отличный вариант — **BMW 2016 года** с пробегом всего **140 000 км**, что для такого автомобиля является очень хорошим показателем. Автомобиль имел **полную дилерскую историю обслуживания**, был пригнан в Сербию в 2018 году и все время находился у **одного владельца**.
+В результате поиска нашелся отличный вариант: **BMW 2016 года** с пробегом всего **140 000 км**, что для такого автомобиля является очень хорошим показателем. Автомобиль имел **полную дилерскую историю обслуживания**, был пригнан в Сербию в 2018 году и все время находился у **одного владельца**.
 
 Причем это был очень аккуратный собственник: человек пожилого возраста, который ездил мало, а последние годы практически не использовал автомобиль, так как у сына уже был собственный **BMW 320 G20**.
 
@@ -90,4 +90,4 @@ translatedFrom: 6371a9ae3cf21fdd
 
 Для диагностики BMW мы используем **официальное дилерское оборудование BMW ISTA**, которое позволяет глубоко проверить электронные блоки автомобиля, параметры двигателя, состояние систем и выявить возможные скрытые проблемы до покупки.
 
-В итоге Алексей получил именно тот автомобиль, который искал — ухоженный BMW с хорошей историей и без неприятных сюрпризов.
+В итоге Алексей получил именно тот автомобиль, который искал: ухоженный BMW с хорошей историей и без неприятных сюрпризов.

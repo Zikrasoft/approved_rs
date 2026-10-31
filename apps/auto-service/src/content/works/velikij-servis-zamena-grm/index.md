@@ -13,13 +13,13 @@ date: 2026-09-11
 published: true
 translations:
   en:
-    title: "Major Service for Skoda Octavia 2.0 TDI: Timing Belt Replacement"
+    title: "Skoda Octavia 2.0 TDI major service: timing belt replacement"
     body: |-
-      At our car service in Belgrade, we performed a major service on a **Skoda Octavia 2.0 TDI**. In Serbia, this type of service is referred to as *veliki servis*.
+      We carried out a major service on a **Skoda Octavia 2.0 TDI** at our workshop in Belgrade. In Serbia, this service is known as *veliki servis*.
 
-      This diesel engine is equipped with a timing belt that needs to be replaced as per regulations. Failing to replace the belt or other drive components can lead to serious engine failure and costly repairs.
+      This diesel engine uses a timing belt, which needs to be replaced at the specified intervals. Failing to replace the belt or other timing system components on time can lead to serious engine damage and costly repairs.
 
-      We installed a complete **Continental** timing belt set - everything in one go:
+      We fitted a complete **Continental** timing belt kit, replacing all of the following in one visit:
 
       <ul class="icon-check">
       <li>timing belt</li>
@@ -27,33 +27,33 @@ translations:
       <li>water pump</li>
       </ul>
 
-      Typically, such maintenance is necessary after purchasing a used car when there's no reliable information about the previous replacement of the belt, pump, and rollers.
+      This service is often needed after buying a used car when there is no reliable record of when the timing belt, water pump and pulleys were last replaced.
     car: Skoda Octavia
   sr:
-    title: "Veliki servis Skoda Octavia 2.0 TDI: zamena GRM"
+    title: "Veliki servis Skoda Octavia 2.0 TDI: zamena zupčastog kaiša"
     body: |-
-      U našoj auto-servisnoj radnji u Beogradu izvršen je veliki redovni servis na **Skoda Octavia 2.0 TDI**. U Srbiji se ovakav paket radova naziva *veliki servis*.
+      U našem autoservisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. Ovaj obim radova u Srbiji se naziva *veliki servis*.
 
-      Na ovom dizelu se nalazi zupčasti kaiš GRM, i treba ga menjati prema propisima. Propuštena zamena kaiša ili drugih delova pogona dovodi do ozbiljnih kvarova motora i skupih popravki.
+      Ovaj dizel motor ima zupčasti kaiš koji se mora menjati u propisanim intervalima. Ako se zamena kaiša ili drugih delova razvodnog mehanizma preskoči, može doći do ozbiljnog oštećenja motora i skupe popravke.
 
-      Postavljen je kompletan set GRM **Continental** — sve u jednom potezu:
+      Ugradili smo komplet **Continental** i u okviru istog servisa zamenili:
 
       <ul class="icon-check">
-      <li>kaiš GRM</li>
-      <li>napenjač</li>
-      <li>vodena pumpa</li>
+      <li>zupčasti kaiš</li>
+      <li>španer</li>
+      <li>vodenu pumpu</li>
       </ul>
 
-      Najčešće je ovakav redovni servis potreban nakon kupovine polovnog automobila, kada se ništa pouzdano ne zna o prethodnoj zameni kaiša, pumpe i valjaka.
+      Ovakav servis najčešće je potreban nakon kupovine polovnog automobila, kada nema pouzdanih podataka o tome kada su prethodno menjani kaiš, pumpa i roleri.
     car: Skoda Octavia
-translatedFrom: 0c126a043c3447d4
+translatedFrom: e8442372f6e62da7
 ---
 
 В нашем автосервисе в Белграде сделали большое ТО на **Skoda Octavia 2.0 TDI**. В Сербии такой набор работ называют *veliki servis*.
 
-На этом дизеле стоит зубчатый ремень ГРМ, и менять его надо по регламенту. Пропущенная замена ремня или других элементов привода заканчивается серьёзной поломкой двигателя и дорогим ремонтом.
+На этом дизеле стоит зубчатый ремень ГРМ, и менять его надо по регламенту. Пропущенная замена ремня или других элементов привода заканчивается серьезной поломкой двигателя и дорогим ремонтом.
 
-Поставили полный комплект ГРМ **Continental** — всё за один заход:
+Поставили полный комплект ГРМ **Continental**, все за один заход:
 
 <ul class="icon-check">
 <li>ремень ГРМ</li>

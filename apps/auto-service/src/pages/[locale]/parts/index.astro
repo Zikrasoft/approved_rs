@@ -1,82 +1,142 @@
 ---
-import { Image } from 'astro:assets';
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import PartsInquiry from '@/components/PartsInquiry.astro';
+import Icon from '@/components/Icon.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
-import { localePaths, PathBuilder } from '@/utils/paths';
 import {
-  PARTS_CATEGORY_IMAGES,
-  PARTS_CATEGORY_SLUGS,
-} from '@/utils/partsCatalog';
-import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+  categoriesForBuild,
+  makeHubsForBuild,
+  shopOpen,
+} from '@/utils/catalogueEnv';
+import { paragraphs } from '@podbor/site-kit';
+import { TOP_MAKES, topMakes } from '@/utils/makeIndex';
+import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
-export function getStaticPaths() {
-  return localePaths();
+export async function getStaticPaths() {
+  const categories = await categoriesForBuild();
+  const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
+    ({ make }) => make,
+  );
+  return localePaths().map((path) => ({
+    ...path,
+    props: { categories, makes },
+  }));
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
-const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
-  slug,
-  ...copy.categories[slug],
+const props = Astro.props as {
+  categories: Category[];
+  makes: { slug: string; name: string }[];
+};
+const hubsCopy = content(locale).partsCar.hubs;
+const categories = props.categories.map((category) => ({
+  slug: category.slug,
+  name: translated(category, 'name', locale),
+  lead: paragraphs(translated(category, 'text', locale))[0],
 }));
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
   <PageHero
+    actions={false}
     eyebrow={copy.eyebrow}
     heading={copy.heading}
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
-  />
+  >
+    <div class="max-w-3xl pt-2" {...contactCta}>
+      <CatalogueSearch large />
+    </div>
+  </PageHero>
 
-  <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
+  <section class="wrap flex flex-col gap-6 pt-8 pb-band md:pt-10 md:pb-band-lg">
     <p class="max-w-2xl text-base leading-relaxed text-ink-2">
       {copy.sourcingNote}
     </p>
 
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-col gap-1">
-        <h2 class="text-section">{copy.categoriesHeading}</h2>
-        <p class="max-w-2xl text-sm leading-relaxed text-muted">
-          {copy.categoriesLead}
-        </p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          categories.map((category) => (
-            <a
-              href={PathBuilder.partsCategory(locale, category.slug)}
-              class="card group flex flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
-            >
-              <Image
-                src={PARTS_CATEGORY_IMAGES[category.slug]}
-                alt={category.name}
-                widths={[320, 480, 640]}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
-                loading="lazy"
-                class="aspect-[4/3] w-full object-cover"
-              />
-              <div class="flex flex-1 flex-col gap-2 border-t border-line p-5">
+    <cart-badge
+      class="self-start"
+      hidden
+      data-reveal-when-filled
+      {...shopOpen() ? {} : { 'data-preview-only': '' }}
+    >
+      <a
+        href={PathBuilder.partsCart(locale)}
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+      >
+        {content(locale).shopCart.cartLink}
+        <Icon name="arrowRight" />
+      </a>
+    </cart-badge>
+
+    {
+      categories.length > 0 && (
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-section">{copy.categoriesHeading}</h2>
+            <p class="max-w-2xl text-sm leading-relaxed text-muted">
+              {copy.categoriesLead}
+            </p>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category) => (
+              <a
+                href={PathBuilder.partsCategory(locale, category.slug)}
+                class="card group flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
+              >
                 <h3 class="text-base font-semibold text-ink">
                   {category.name}
                 </h3>
-                <p class="text-sm leading-relaxed text-ink-2">
-                  {category.lead}
-                </p>
-                <span class="spec mt-auto pt-2 text-xs text-signal-ink">
-                  {copy.categoryCta} →
+                {category.lead && (
+                  <p class="text-sm leading-relaxed text-ink-2">
+                    {category.lead}
+                  </p>
+                )}
+                <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
+                  {copy.categoryCta}
+                  <Icon name="arrowRight" />
                 </span>
-              </div>
-            </a>
-          ))
-        }
-      </div>
-    </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      props.makes.length > 0 && (
+        <div class="flex flex-col gap-4">
+          <h2 class="text-section">{hubsCopy.indexHeading}</h2>
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {props.makes.map((make) => (
+              <li>
+                <a
+                  href={PathBuilder.partsMake(locale, make.slug)}
+                  class="card flex min-h-20 items-end p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
+                >
+                  {make.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={PathBuilder.partsMakes(locale)}
+            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+          >
+            {hubsCopy.allMakesLink}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+      )
+    }
 
     <div class="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
       <div class="card flex flex-col gap-3 p-5">
@@ -85,7 +145,7 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
           {
             copy.steps.map((step, i) => (
               <li class="flex gap-3">
-                <span class="spec mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-shade text-xs">
+                <span class="spec mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-shade text-xs">
                   {i + 1}
                 </span>
                 <div class="flex flex-col gap-0.5">
@@ -102,16 +162,13 @@ const categories = PARTS_CATEGORY_SLUGS.map((slug) => ({
         </ol>
       </div>
 
-      <div id="lead" class="card flex flex-col gap-4 p-5 sm:p-6">
+      <div
+        id={PARTS_INQUIRY_ANCHOR}
+        class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
+        {...contactCta}
+      >
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
-        <LeadForm
-          service={VIN_INQUIRY_SERVICE}
-          vin={{ label: copy.vinLabel, placeholder: copy.vinPlaceholder }}
-          commentLabel={copy.commentLabel}
-          commentPlaceholder={copy.commentPlaceholder}
-          commentNote={copy.commentNote}
-          defaultChannel="whatsapp"
-        />
+        <PartsInquiry />
       </div>
     </div>
   </section>

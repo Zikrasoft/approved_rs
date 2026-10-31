@@ -7,10 +7,8 @@ import {
 } from './quarantine.ts';
 import { createLeadStore } from './store.ts';
 import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
-import { legacyOwed } from './legacyIncomes.ts';
-import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
-
-export const OPENING_NOTE = 'Перенос со старой системы';
+import type { LeadStorage } from './storage/types.ts';
+import { createNotifyLead, type NotifyLeadOptions } from './notifyLead.ts';
 
 type QuarantineNotifier = Awaited<
   ReturnType<QuarantineOptions['getNotifier']>
@@ -19,10 +17,13 @@ type QuarantineNotifier = Awaited<
 export interface BrandStoreOptions {
   brand: string;
   storageFor: (path: string) => LeadStorage;
+  standaloneServices?: readonly string[];
   getNotifier: () => Promise<{
-    notifier: QuarantineNotifier & {
-      sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
-    };
+    notifier: QuarantineNotifier &
+      NotifyLeadOptions['notifier'] & {
+        sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
+        sendLeadCountAlert(count: number, brand: string): Promise<void>;
+      };
   }>;
 }
 
@@ -30,32 +31,36 @@ export function createBrandStore({
   brand,
   storageFor,
   getNotifier,
+  standaloneServices,
 }: BrandStoreOptions) {
-  const leadsStorage = storageFor(LEADS_PATH);
-  const ledgerStore = createLedgerStore({
-    storage: storageFor(LEDGER_PATH),
-    opening: async () => {
-      const { raw } = await leadsStorage.read();
-      const owed = legacyOwed(storedRecordsSchema.parse(raw ?? []));
-      return owed > 0
-        ? [{ type: 'payout', amount: owed, note: OPENING_NOTE, by: 'owner' }]
-        : [];
-    },
-    onUnreadable: async () => {
-      const { notifier } = await getNotifier();
-      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
-    },
-  });
   const leadStore = createLeadStore({
-    storage: leadsStorage,
+    storage: storageFor(LEADS_PATH),
     schema: storedLeadSchema,
+    standaloneServices,
+    alertLeadCount: async (count) =>
+      (await getNotifier()).notifier.sendLeadCountAlert(count, brand),
     quarantine: createQuarantine({
       storage: storageFor(QUARANTINE_PATH),
       brand,
       getNotifier,
     }),
-    // TODO: drop beforeWrite, the opening and legacyIncomes.ts once data/ledger.json exists in production.
-    beforeWrite: () => ledgerStore.ensureOpened(),
   });
-  return { leadStore, ledgerStore };
+  const ledgerStore = createLedgerStore({
+    storage: storageFor(LEDGER_PATH),
+    onUnreadable: async () => {
+      const { notifier } = await getNotifier();
+      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
+    },
+  });
+  const notifyLead = createNotifyLead({
+    store: leadStore,
+    brand,
+    notifier: {
+      sendLeadNotification: async (lead) =>
+        (await getNotifier()).notifier.sendLeadNotification(lead),
+      refreshLeadCard: async (lead) =>
+        (await getNotifier()).notifier.refreshLeadCard(lead),
+    },
+  });
+  return { leadStore, ledgerStore, notifyLead };
 }

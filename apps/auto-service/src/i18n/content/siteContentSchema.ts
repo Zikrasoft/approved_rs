@@ -31,6 +31,7 @@ export const siteContentSchema = z
         menuCloseLabel: z.string(),
         languageLabel: z.string(),
         cta: z.string(),
+        partsCta: z.string(),
         phoneLabel: z.string(),
       })
       .strict(),
@@ -60,9 +61,9 @@ export const siteContentSchema = z
         fromPrice: z.string(),
         priceOnRequest: z.string(),
         allServices: z.string(),
-        backToShop: z.string(),
         allWorks: z.string(),
         emptyWorks: z.string(),
+        socialHeading: z.string(),
       })
       .strict(),
     channels: z
@@ -102,7 +103,9 @@ export const siteContentSchema = z
         privacyLinkText: z.string(),
         modalTitle: z.string(),
         errorPhone: z.string(),
+        errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
+        errorTelegramHandle: z.string(),
         errorConsent: z.string(),
         errorSubmit: z.string(),
       })

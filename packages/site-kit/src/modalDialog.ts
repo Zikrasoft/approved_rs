@@ -1,6 +1,7 @@
 import { lockScroll, unlockScroll } from './scrollLock.ts';
 
 export const MODAL_OPEN_EVENT = 'modal:open';
+export const MODAL_FOCUS_ATTRIBUTE = 'data-modal-focus';
 
 export interface ModalOpenDetail {
   trigger: HTMLElement;
@@ -34,6 +35,9 @@ export function defineModalDialog(tagName = 'modal-dialog'): void {
               if (!trigger || dialog.open) return;
               event.preventDefault();
               dialog.showModal();
+              dialog
+                .querySelector<HTMLElement>(`[${MODAL_FOCUS_ATTRIBUTE}]`)
+                ?.focus();
               this.#hold(true);
               this.dispatchEvent(
                 new CustomEvent<ModalOpenDetail>(MODAL_OPEN_EVENT, {

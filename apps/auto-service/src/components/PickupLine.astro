@@ -1,0 +1,21 @@
+---
+import { mapPlaceUrl } from '@podbor/site-kit';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+
+const { shopCart, site } = content(localeFrom(Astro.url.pathname));
+---
+
+<p class="flex flex-col text-sm leading-relaxed text-ink-2">
+  <span>{shopCart.pickupMethod}</span>
+  <a
+    href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
+    target="_blank"
+    rel="noopener"
+    class="self-start font-semibold text-ink underline underline-offset-2 hover:text-signal-ink"
+  >
+    {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}
+  </a>
+  <span class="text-muted">{site.footer.hours}</span>
+</p>

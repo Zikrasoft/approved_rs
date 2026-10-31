@@ -1,7 +1,35 @@
+import { readdirSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { PathBuilder, swapLocale, withLocales } from './paths';
+import { RESERVED_PARTS_SEGMENTS } from '@podbor/catalog-contract';
+import { PathBuilder, swapLocale, vehiclePath, withLocales } from './paths';
 import { SERVICE_SLUGS } from './services';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
+
+describe('vehiclePath', () => {
+  const vehicle = {
+    id: 'veh_1',
+    slug: 'b47d20o0-140kw',
+    model: {
+      slug: '3-series-f30-320d',
+      chassis: { series: { make: { slug: 'bmw' } } },
+    },
+  };
+
+  it.each(SUPPORTED_LOCALES)(
+    'puts a %s Vehicle page under its Model',
+    (locale) => {
+      expect(vehiclePath(locale, vehicle)).toBe(
+        `/${locale}/parts/bmw/3-series-f30-320d/m/b47d20o0-140kw/`,
+      );
+    },
+  );
+
+  it('falls back to the id for a shop that has not shipped Vehicle slugs', () => {
+    expect(vehiclePath('sr', { ...vehicle, slug: null })).toBe(
+      '/sr/parts/bmw/3-series-f30-320d/m/veh_1/',
+    );
+  });
+});
 
 describe('PathBuilder', () => {
   it('prefixes every path with the locale and ends with a slash', () => {
@@ -11,11 +39,6 @@ describe('PathBuilder', () => {
       PathBuilder.service('sr', 'diagnostics'),
       PathBuilder.works('sr'),
       PathBuilder.work('sr', 'bmw-x5'),
-      PathBuilder.shop('sr'),
-      PathBuilder.shopType('sr', 'batteries'),
-      PathBuilder.shopProduct('sr', 'batteries', 'bosch-s4-024'),
-      PathBuilder.shopLanding('sr', 'batteries', '60ah'),
-      PathBuilder.cart('sr'),
       PathBuilder.contact('sr'),
       PathBuilder.thanks('sr'),
       PathBuilder.privacy('sr'),
@@ -28,25 +51,36 @@ describe('PathBuilder', () => {
     });
   });
 
+  it('carries a part into the inquiry URL, so a no-JS Lead keeps it on its page', () => {
+    expect(PathBuilder.partsInquiry('ru')).toBe('/ru/parts/#inquiry');
+    expect(PathBuilder.partsInquiry('ru', 'VARTA 580901080')).toBe(
+      '/ru/parts/?part=VARTA+580901080#inquiry',
+    );
+  });
+
   it.each(SERVICE_SLUGS)('builds a service URL for %s', (slug) => {
     expect(PathBuilder.service('ru', slug)).toBe(`/ru/services/${slug}/`);
   });
 
-  it('nests products and facet landings under their type', () => {
-    expect(PathBuilder.shopProduct('en', 'motor-oils', 'castrol-edge')).toBe(
-      '/en/shop/motor-oils/castrol-edge/',
-    );
-    expect(PathBuilder.shopLanding('ru', 'motor-oils', '5w-30')).toBe(
-      '/ru/shop/motor-oils/f/5w-30/',
-    );
-  });
+  it.each(SUPPORTED_LOCALES)(
+    'puts a %s Category page past the first under its number',
+    (locale) => {
+      expect(PathBuilder.partsCategory(locale, 'oil-filters')).toBe(
+        `/${locale}/parts/c/oil-filters/`,
+      );
+      expect(PathBuilder.partsCategory(locale, 'oil-filters', 1)).toBe(
+        `/${locale}/parts/c/oil-filters/`,
+      );
+      expect(PathBuilder.partsCategory(locale, 'oil-filters', 2)).toBe(
+        `/${locale}/parts/c/oil-filters/2/`,
+      );
+    },
+  );
 });
 
 describe('swapLocale', () => {
   it('replaces the locale segment and keeps the rest of the path', () => {
-    expect(swapLocale('/ru/shop/battery-60/', 'en')).toBe(
-      '/en/shop/battery-60/',
-    );
+    expect(swapLocale('/ru/works/bmw-x5/', 'en')).toBe('/en/works/bmw-x5/');
   });
 
   it('maps a bare locale root to the other locale root', () => {
@@ -72,5 +106,33 @@ describe('withLocales', () => {
       [...SUPPORTED_LOCALES].sort(),
     );
     paths.forEach((p) => expect(p.params.slug).toBe('a'));
+  });
+});
+
+describe('reserved parts segments', () => {
+  const reserved: readonly string[] = RESERVED_PARTS_SEGMENTS;
+
+  it('reserves every section page under /parts/ a Make slug could shadow', () => {
+    const sections = readdirSync(
+      new URL('../pages/[locale]/parts/', import.meta.url),
+    )
+      .map((entry) => entry.replace(/\.astro$/, ''))
+      .filter((entry) => entry !== 'index' && !entry.startsWith('['));
+    expect(sections.length).toBeGreaterThan(0);
+    expect(sections.filter((entry) => !reserved.includes(entry))).toEqual([]);
+  });
+
+  it('reserves every fixed segment a PathBuilder link puts under /parts/', () => {
+    const segments = Object.values(PathBuilder)
+      .map((build) =>
+        (build as (...args: string[]) => string)('sr', '$a', '$b', '$c', '$d'),
+      )
+      .filter((path) => path.startsWith('/sr/parts/'))
+      .map((path) => path.split('/')[3])
+      .filter((segment) => segment && !/^[$#?]/.test(segment));
+    expect(segments).toContain('car');
+    expect(segments.filter((segment) => !reserved.includes(segment))).toEqual(
+      [],
+    );
   });
 });

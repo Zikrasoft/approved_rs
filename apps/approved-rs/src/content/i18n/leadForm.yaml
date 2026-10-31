@@ -1,7 +1,7 @@
 headingLine1: Свяжемся с вами
 headingEmphasis: в течение 2 часов
 subtext: Бесплатная консультация
-nameLabel: Ваше имя
+nameLabel: Ваше имя (необязательно)
 namePlaceholder: Иван
 contactLabel: Как с вами связаться
 telegramTab: Telegram
@@ -16,91 +16,96 @@ consentLinkText: политикой конфиденциальности
 consentError: Необходимо ваше согласие
 submitLabel: Рассчитать стоимость
 errorTelegramFormat: 'Формат: @username или номер телефона'
+errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
 errorPhoneInvalid: Проверьте номер телефона
-errorSubmit: Заявка не ушла. Проверьте связь и попробуйте ещё раз
+errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 translations:
   en:
-    headingLine1: We will contact you
+    headingLine1: We'll get in touch
     headingEmphasis: within 2 hours
     subtext: Free consultation
-    nameLabel: Your name
+    nameLabel: Your name (optional)
     namePlaceholder: Ivan
-    contactLabel: How can we reach you
+    contactLabel: How can we reach you?
     telegramTab: Telegram
-    telegramPlaceholder: '@username or phone'
+    telegramPlaceholder: '@username or phone number'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Phone
     commentLabel: Make, model, budget
-    commentPlaceholder: BMW 3, 2020–2022, up to €25,000…
-    consentBefore: 'I agree with '
-    consentLinkText: the privacy policy
+    commentPlaceholder: BMW 3 Series, 2020–2022, up to €25,000…
+    consentBefore: 'I agree to the '
+    consentLinkText: privacy policy
     consentError: Your consent is required
-    submitLabel: Calculate cost
-    errorTelegramFormat: 'Format: @username or phone number'
-    errorPhoneInvalid: Please check the phone number
-    errorSubmit: The request did not go through. Please check your connection and try again.
+    submitLabel: Get a quote
+    errorTelegramFormat: Enter an @username or phone number
+    errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers, and _'
+    errorPhoneInvalid: Please check your phone number
+    errorSubmit: Your request wasn't sent. Check your connection and try again.
   sr:
-    headingLine1: Javićemo se sa vama
+    headingLine1: Javićemo vam se
     headingEmphasis: u roku od 2 sata
     subtext: Besplatna konsultacija
-    nameLabel: Vaše ime
+    nameLabel: Vaše ime (nije obavezno)
     namePlaceholder: Ivan
     contactLabel: Kako da vas kontaktiramo
     telegramTab: Telegram
-    telegramPlaceholder: '@username ili telefon'
+    telegramPlaceholder: '@username ili broj telefona'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
-    commentPlaceholder: BMW 3, 2020–2022, do €25 000…
-    consentBefore: 'Saglasan sam sa '
+    commentPlaceholder: BMW 3, 2020–2022, do 25.000 €…
+    consentBefore: 'Slažem se sa '
     consentLinkText: politikom privatnosti
-    consentError: Neophodna je vaša saglasnost
-    submitLabel: Izračunaj cenu
+    consentError: Potrebna je vaša saglasnost
+    submitLabel: Izračunajte cenu
     errorTelegramFormat: 'Format: @username ili broj telefona'
+    errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
     errorPhoneInvalid: Proverite broj telefona
-    errorSubmit: Zahtev nije otišao. Proverite vezu i pokušajte ponovo
+    errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
   es:
-    headingLine1: Nos pondremos en contacto contigo
-    headingEmphasis: dentro de 2 horas
-    subtext: Consulta gratuita
-    nameLabel: Tu nombre
+    headingLine1: Te contactaremos
+    headingEmphasis: en un plazo de 2 horas
+    subtext: Asesoramiento gratuito
+    nameLabel: Tu nombre (opcional)
     namePlaceholder: Iván
-    contactLabel: Cómo contactarte
+    contactLabel: Cómo podemos contactarte
     telegramTab: Telegram
-    telegramPlaceholder: '@usuario o teléfono'
+    telegramPlaceholder: '@username o teléfono'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Teléfono
-    commentLabel: Marca, modelo, presupuesto
-    commentPlaceholder: BMW 3, 2020–2022, hasta €25 000…
+    commentLabel: Marca, modelo y presupuesto
+    commentPlaceholder: BMW Serie 3, 2020–2022, hasta 25 000 €…
     consentBefore: 'Acepto la '
     consentLinkText: política de privacidad
-    consentError: Se requiere tu consentimiento
-    submitLabel: Calcular costo
-    errorTelegramFormat: 'Formato: @usuario o número de teléfono'
-    errorPhoneInvalid: Verifica el número de teléfono
-    errorSubmit: La solicitud no se ha enviado. Verifica la conexión y vuelve a intentarlo
+    consentError: Debes dar tu consentimiento
+    submitLabel: Calcular el coste
+    errorTelegramFormat: 'Formato: @username o número de teléfono'
+    errorTelegramHandle: 'Revisa el @username: mínimo 3 caracteres, solo letras latinas, números y _'
+    errorPhoneInvalid: Comprueba el número de teléfono
+    errorSubmit: No se ha podido enviar la solicitud. Comprueba tu conexión e inténtalo de nuevo
   de:
-    headingLine1: Wir kontaktieren Sie
+    headingLine1: Wir melden uns bei Ihnen
     headingEmphasis: innerhalb von 2 Stunden
     subtext: Kostenlose Beratung
-    nameLabel: Ihr Name
-    namePlaceholder: Ivan
-    contactLabel: Wie können wir Sie erreichen
+    nameLabel: Ihr Name (optional)
+    namePlaceholder: Iwan
+    contactLabel: Wie können wir Sie erreichen?
     telegramTab: Telegram
-    telegramPlaceholder: '@Benutzername oder Telefon'
+    telegramPlaceholder: '@username oder Telefonnummer'
     whatsappTab: WhatsApp
     viberTab: Viber
     phoneTab: Telefon
     commentLabel: Marke, Modell, Budget
-    commentPlaceholder: BMW 3, 2020–2022, bis €25.000…
+    commentPlaceholder: BMW 3er, 2020–2022, bis 25.000 €…
     consentBefore: 'Ich stimme der '
-    consentLinkText: Datenschutzrichtlinie zu
-    consentError: Ihre Zustimmung ist erforderlich
+    consentLinkText: Datenschutzerklärung zu
+    consentError: Bitte stimmen Sie der Datenschutzerklärung zu
     submitLabel: Kosten berechnen
-    errorTelegramFormat: 'Format: @Benutzername oder Telefonnummer'
-    errorPhoneInvalid: Überprüfen Sie die Telefonnummer
-    errorSubmit: Die Anfrage wurde nicht gesendet. Bitte überprüfen Sie die Verbindung und versuchen Sie es erneut
-translatedFrom: f19e1d1a771f6292
+    errorTelegramFormat: 'Format: @username oder Telefonnummer'
+    errorTelegramHandle: 'Bitte prüfe deinen @username: mindestens 3 Zeichen, nur lateinische Buchstaben, Ziffern und _'
+    errorPhoneInvalid: Bitte überprüfen Sie die Telefonnummer
+    errorSubmit: Ihre Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
+translatedFrom: a07eddcff3dabc9f

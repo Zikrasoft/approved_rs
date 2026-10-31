@@ -1,4 +1,4 @@
-import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
+import { CARLAB, WORKSHOP_ADDRESS, socialLinks } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import {
   createPublicEnvSchema,
@@ -38,7 +38,12 @@ export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
-export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
+export const SOCIAL_LINKS = socialLinks(BRAND.social);
+
+export const SOCIAL_SAME_AS = [
+  TELEGRAM_BOT_URL,
+  ...SOCIAL_LINKS.map((link) => link.url),
+];
 
 export const COOKIE_POLICY_VERSION = '2026-10-23';
 

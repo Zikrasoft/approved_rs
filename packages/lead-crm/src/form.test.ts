@@ -4,6 +4,8 @@ import {
   isValidContact,
   leadEnvelopeSchema,
   leadSubmissionSchema,
+  shownPage,
+  siteUrl,
   sourceUrlSchema,
   serviceSlugSchema,
   visitorIdSchema,
@@ -12,7 +14,6 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_FIELD_LENGTH,
   MAX_SERVICES,
-  MAX_URL_LENGTH,
   PHONE_COUNTRIES,
   phoneCountryOptions,
 } from './form.ts';
@@ -201,9 +202,18 @@ describe('metaIdsFieldSchema', () => {
 });
 
 describe('sourceUrlSchema', () => {
-  it('truncates an oversized url', () => {
-    expect(sourceUrlSchema.parse(`/ru/${'a'.repeat(9000)}`)).toHaveLength(
-      MAX_URL_LENGTH,
+  it.each([
+    `https://carlab.rs/ru/${'a'.repeat(9000)}`,
+    'javascript:alert(1)',
+    'data:text/html,<b>x</b>',
+    '/ru/parts/',
+  ])('drops %s, which is no page a visitor stood on', (value) => {
+    expect(sourceUrlSchema.parse(value)).toBeNull();
+  });
+
+  it('keeps an http(s) page', () => {
+    expect(sourceUrlSchema.parse(' https://carlab.rs/ru/parts/ ')).toBe(
+      'https://carlab.rs/ru/parts/',
     );
   });
 
@@ -213,6 +223,32 @@ describe('sourceUrlSchema', () => {
 
   it('falls back to null for a value that is not text', () => {
     expect(sourceUrlSchema.parse(new File([], 'x.txt'))).toBeNull();
+  });
+});
+
+describe('siteUrl', () => {
+  it('keeps a page of the site that took the Lead', () => {
+    expect(siteUrl('https://carlab.rs/ru/', 'https://carlab.rs')).toBe(
+      'https://carlab.rs/ru/',
+    );
+  });
+
+  it.each([
+    'https://evil.example/ru/',
+    'http://carlab.rs/ru/',
+    'javascript:alert(1)',
+  ])('drops %s', (value) => {
+    expect(siteUrl(value, 'https://carlab.rs')).toBeNull();
+  });
+});
+
+describe('shownPage', () => {
+  it.each([
+    ['https://carlab.rs/ru/', 'https://carlab.rs/ru/'],
+    ['/ru/parts/', '/ru/parts/'],
+    ['javascript:alert(1)', null],
+  ])('shows %s as %s', (stored, shown) => {
+    expect(shownPage(stored)).toBe(shown);
   });
 });
 
@@ -303,6 +339,65 @@ describe('leadSubmissionSchema', () => {
     const parsed = submit({ name: '  ', contact: '+381641234567' });
     expect(parsed.success).toBe(true);
     if (parsed.success) expect(parsed.data.name).toBe('');
+  });
+
+  it('keeps every line of the comment on a plain line break', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WBA35BG070N074158',
+      comment: 'BMW 320d\r\nMann HU 816 x\rNote',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158\nBMW 320d\nMann HU 816 x\nNote',
+    );
+  });
+
+  it('writes a VIN typed in lower case as the upper-case VIN it is', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'wba35bg070n074158',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158',
+    );
+  });
+
+  it('writes a VIN typed with Cyrillic look-alikes in Latin letters', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WВА 35ВG070N074158',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158',
+    );
+  });
+
+  it('keeps what was typed in the VIN field, but never passes it off as a VIN', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'жжж123',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN не распознан: ЖЖЖ123',
+    );
+  });
+
+  it('carries the shop order the Lead was placed for', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      order_id: ' order_01J ',
+    });
+    expect(parsed.success && parsed.data.orderId).toBe('order_01J');
+  });
+
+  it('leaves a form Lead without an order', () => {
+    const parsed = submit({ name: '', contact: '+381641234567' });
+    expect(parsed.success && parsed.data.orderId).toBeNull();
   });
 
   it('rejects a missing contact', () => {
@@ -407,10 +502,10 @@ describe('leadSubmissionSchema', () => {
   });
 
   it.each(Object.keys(SERVICE_SLUGS_BY_BRAND))(
-    'rejects a service outside the enum on a %s form',
+    'keeps the lead but drops a service outside the enum on a %s form',
     (brand) => {
       const parsed = phone('+381641234567', `${brand}-no-such-service`);
-      expect(parsed.success).toBe(false);
+      expect(parsed.success && parsed.data.services).toEqual([]);
     },
   );
 
@@ -456,18 +551,27 @@ describe('leadSubmissionSchema', () => {
       service: Array.from({ length: 10_000 }, () => 'vehicle-sourcing'),
     });
     expect(parsed.success).toBe(true);
-    expect(parsed.data?.services).toHaveLength(MAX_SERVICES);
+    expect(parsed.data?.services.length).toBeLessThanOrEqual(MAX_SERVICES);
     expect(parsed.data?.service).toBe('vehicle-sourcing');
   });
 
-  it('rejects the lead when the service list is not an array of text at all', () => {
+  it('stores a service posted twice once', () => {
+    const parsed = submit({
+      name: 'Иван',
+      contact: '+381641234567',
+      service: Array.from({ length: 20 }, () => 'vehicle-sourcing'),
+    });
+    expect(parsed.data?.services).toEqual(['vehicle-sourcing']);
+  });
+
+  it('keeps the lead but drops a service that is not text at all', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
       consent: 'on',
       service: [{ nope: true }],
     });
-    expect(parsed.success).toBe(false);
+    expect(parsed.success && parsed.data.services).toEqual([]);
   });
 
   it('keeps the first value when the same field is submitted twice', () => {
@@ -488,5 +592,91 @@ describe('leadSubmissionSchema', () => {
     });
     expect(parsed.success).toBe(true);
     expect(parsed.data?.services).toEqual([]);
+  });
+});
+
+describe('leadSubmissionSchema text hygiene', () => {
+  const parsed = (fields: Record<string, string>) => {
+    const result = submit(fields);
+    if (!result.success) throw result.error;
+    return result.data;
+  };
+
+  it('keeps the name on one line, without bidi or other control characters', () => {
+    expect(
+      parsed({
+        name: '<b>Ivan</b>\nЗаказ #999\tоплачен \u202eevil\u0000',
+        contact: '+381601234567',
+      }).name,
+    ).toBe('<b>Ivan</b> Заказ #999 оплачен evil');
+  });
+
+  it('keeps the joiners an emoji or a script needs', () => {
+    expect(
+      parsed({ name: 'Ана 👨\u200d👩\u200d👧', contact: '+381601234567' }).name,
+    ).toBe('Ана 👨\u200d👩\u200d👧');
+  });
+
+  it('stores a valid phone in E.164 whatever digits and spaces it was typed with', () => {
+    expect(parsed({ contact: '+381 60 123 4567\u202e' }).contact).toBe(
+      '+381601234567',
+    );
+    expect(parsed({ contact: '+٣٨١٦٠١٢٣٤٥٦٧' }).contact).toBe('+381601234567');
+  });
+
+  it('keeps a Telegram handle as typed', () => {
+    expect(
+      parsed({ contact: '@ivan_p', contact_channel: 'telegram' }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('keeps the comment lines but drops bidi controls', () => {
+    expect(
+      parsed({ contact: '+381601234567', comment: 'a\u202e\nb\u0007' }).comment,
+    ).toBe('a\nb');
+  });
+
+  it('composes the contact from the phone a form without JavaScript posts', () => {
+    expect(
+      parsed({ phone_number: '060 123 4567', phone_country: 'RS' }).contact,
+    ).toBe('+381601234567');
+  });
+
+  it('reads a number typed internationally without a known country', () => {
+    expect(
+      parsed({ phone_number: '+381 60 123 4567', phone_country: 'XX' }).contact,
+    ).toBe('+381601234567');
+  });
+
+  it('composes the contact from the Telegram field on the Telegram channel', () => {
+    expect(
+      parsed({
+        contact_channel: 'telegram',
+        telegram: 't.me/ivan_p',
+        phone_number: '060 123 4567',
+        phone_country: 'RS',
+      }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('falls back to the Telegram field when no phone was typed', () => {
+    expect(
+      parsed({ contact_channel: 'telegram', telegram: '@ivan_p' }).contact,
+    ).toBe('@ivan_p');
+  });
+
+  it('prefers the contact a script already composed', () => {
+    expect(
+      parsed({ contact: '+381611111111', phone_number: '060 123 4567' })
+        .contact,
+    ).toBe('+381611111111');
+  });
+
+  it('still asks for a contact when nothing was typed', () => {
+    expect(submit({ phone_number: '', telegram: '' }).success).toBe(false);
+  });
+
+  it('refuses a body that is not a form', () => {
+    expect(leadSubmissionSchema.safeParse('contact=1').success).toBe(false);
   });
 });

@@ -98,8 +98,14 @@ export {
 } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
+export {
+  createShopOrdersRoute,
+  orderLeadSubmission,
+} from './routes/shopOrders.ts';
 
 export { requireEnv } from './requireEnv.ts';
+export { logError } from './logError.ts';
+export { bodyTooLarge, PAYLOAD_TOO_LARGE } from './bodySize.ts';
 
 export { secretMatches } from './verifySecret.ts';
 

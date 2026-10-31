@@ -59,6 +59,8 @@ export function citySchema(name: string) {
   return { '@type': 'City', name };
 }
 
+export type SchemaAvailability = 'InStock' | 'BackOrder' | 'OutOfStock';
+
 export function productSchema(options: {
   name: string;
   image?: string;
@@ -66,11 +68,12 @@ export function productSchema(options: {
   description: string;
   price: number;
   currency: string;
-  inStock: boolean;
+  availability: SchemaAvailability;
   condition: string;
   url: string;
 }) {
-  const { name, image, brand, description, price, currency, inStock } = options;
+  const { name, image, brand, description, price, currency, availability } =
+    options;
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -82,7 +85,7 @@ export function productSchema(options: {
       '@type': 'Offer',
       price,
       priceCurrency: currency,
-      availability: `https://schema.org/${inStock ? 'InStock' : 'OutOfStock'}`,
+      availability: `https://schema.org/${availability}`,
       itemCondition: `https://schema.org/${options.condition}`,
       url: options.url,
     },

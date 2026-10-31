@@ -12,6 +12,7 @@ import {
 } from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
+import SocialLinks from './SocialLinks.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
 
@@ -29,7 +30,7 @@ const channels = [
 ] as const;
 ---
 
-<footer class="mt-20 border-t border-line bg-card">
+<footer class="mt-20 border-t border-line bg-card print:hidden">
   <div class="wrap grid gap-10 py-band md:grid-cols-4">
     <div class="flex flex-col gap-4">
       <Wordmark />
@@ -112,6 +113,7 @@ const channels = [
         <span class="block text-xs text-ink-2">{site.footer.hoursHeading}</span>
         {site.footer.hours}
       </p>
+      <SocialLinks class="mt-2" />
     </div>
   </div>
 

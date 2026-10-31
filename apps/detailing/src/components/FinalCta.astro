@@ -2,6 +2,7 @@
 import { contactCta } from '@podbor/site-kit/contact-control';
 import LeadForm from './LeadForm.astro';
 import ContactChannels from './ContactChannels.astro';
+import SocialLinks from './SocialLinks.astro';
 import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
@@ -29,6 +30,7 @@ const { eyebrow, heading, body, service } = Astro.props;
         <h2 class="text-giant">{heading}</h2>
         <p class="max-w-md text-base leading-relaxed text-mute">{body}</p>
         <ContactChannels class="mt-2" service={service} />
+        <SocialLinks class="mt-2" />
       </div>
       <LeadForm service={service} />
     </div>

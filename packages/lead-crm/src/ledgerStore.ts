@@ -1,9 +1,10 @@
+import { logError } from './logError.ts';
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
 import type { PromptKey } from './promptKey.ts';
 import { retryOnConflict } from './storage/retry.ts';
-import { StorageConflictError, type LeadStorage } from './storage/types.ts';
+import type { LeadStorage } from './storage/types.ts';
 
 export const LEDGER_PATH = 'data/ledger.json';
 const MAX_OPERATION_NOTE = 500;
@@ -61,7 +62,6 @@ export type RecordOutcome =
 
 export interface LedgerStoreOptions {
   storage: LeadStorage;
-  opening?: () => Promise<OperationInput[]>;
   onUnreadable?: () => Promise<void>;
 }
 
@@ -149,7 +149,6 @@ function appended(
 
 export function createLedgerStore({
   storage,
-  opening,
   onUnreadable,
 }: LedgerStoreOptions) {
   let alerted = false;
@@ -158,18 +157,8 @@ export function createLedgerStore({
     if (alerted) return;
     alerted = true;
     await onUnreadable?.().catch((error: unknown) => {
-      console.error('[lead-crm] could not tell the admin about the ledger', {
-        error,
-      });
+      logError('[lead-crm] could not tell the admin about the ledger', error);
     });
-  }
-
-  async function openingFile(): Promise<LedgerFile> {
-    let file: LedgerFile = { operations: [], prompts: [] };
-    for (const input of (await opening?.()) ?? []) {
-      file = appended(file, input).next ?? file;
-    }
-    return file;
   }
 
   async function read(): Promise<{
@@ -177,7 +166,8 @@ export function createLedgerStore({
     version: string | undefined;
   }> {
     const { raw, version } = await storage.read();
-    if (raw === undefined) return { file: await openingFile(), version };
+    if (raw === undefined)
+      return { file: { operations: [], prompts: [] }, version };
     const parsed = ledgerFileSchema.safeParse(raw);
     if (!parsed.success) {
       console.error('[lead-crm] the ledger file does not parse', {
@@ -205,27 +195,8 @@ export function createLedgerStore({
     return (await read()).file.operations;
   }
 
-  async function createIfMissing(): Promise<void> {
-    if (await storage.exists()) return;
-    await storage
-      .write(await openingFile(), undefined)
-      .catch((error: unknown) => {
-        if (!(error instanceof StorageConflictError)) throw error;
-      });
-  }
-
-  let opened: Promise<void> | undefined;
-
   return {
     readOperations,
-
-    ensureOpened(): Promise<void> {
-      opened ??= createIfMissing().catch((error: unknown) => {
-        opened = undefined;
-        throw error;
-      });
-      return opened;
-    },
 
     async readBalance(): Promise<number> {
       return balanceOf(await readOperations());

@@ -1,0 +1,73 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { modelName } from '@/utils/carName';
+import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
+import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
+import { PathBuilder, withLocales } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  return withLocales(
+    hubs.map((hub) => ({
+      params: { make: hub.make.slug },
+      props: { hub },
+      cacheKey: cacheKey(hub),
+    })),
+  );
+}
+
+const { hub } = Astro.props as { hub: MakeHubEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsCar.hubs.make;
+const { make } = hub;
+const models = hub.models
+  .map((entry) => ({ ...entry, label: modelName(entry.model, locale) }))
+  .toSorted((a, b) => a.label.localeCompare(b.label, 'en', { numeric: true }));
+---
+
+<Shell
+  title={copy.metaTitle.replace('{make}', make.name)}
+  description={copy.metaDescription.replace('{make}', make.name)}
+>
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={make.name}
+    lead={copy.lead}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-4 py-band md:pt-band-lg">
+    <h2 class="text-section">{copy.modelsHeading}</h2>
+    <ul class="card divide-y divide-line">
+      {
+        models.map(({ model, label, categories }) => (
+          <li>
+            <a
+              href={PathBuilder.partsModel(locale, make.slug, model.slug)}
+              class="flex flex-col gap-1 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
+            >
+              <span class="font-semibold">{label}</span>
+              {categories.length > 0 && (
+                <span class="text-sm text-muted">
+                  {categories
+                    .map(({ category }) => translated(category, 'name', locale))
+                    .join(', ')}
+                </span>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Shell>

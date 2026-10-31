@@ -1,0 +1,31 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { PathBuilder } from '@/utils/paths';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import PartsInquiryModal from './PartsInquiryModal.astro';
+
+interface Props {
+  class?: string;
+  topic?: string;
+}
+
+const { class: className, topic } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+const priceNote = shopOpen() ? null : content(locale).shopPart.orderBody;
+---
+
+<p class:list={['text-sm leading-relaxed text-muted', className]}>
+  {priceNote && <span class="mb-1 block">{priceNote}</span>}
+  {copy.notFoundQuestion}{' '}
+  <a
+    href={PathBuilder.partsInquiry(locale)}
+    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+    {...topic && { [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+  >
+    {copy.notFoundLink}
+  </a>
+</p>
+{topic && <PartsInquiryModal comment={`${topic}: `} />}

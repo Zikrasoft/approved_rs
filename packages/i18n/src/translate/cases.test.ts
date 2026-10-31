@@ -120,6 +120,20 @@ describe('splitFrontmatter', () => {
 });
 
 describe('processFile', () => {
+  it('throws on a translatedFrom that is not a hash before paying for a translation', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = caseFile();
+    rewriteFrontmatter(file, (data) => {
+      data.translatedFrom = 42;
+    });
+    const { processFile } = translator();
+
+    await expect(processFile(file, 'key', {})).rejects.toThrow(
+      /translatedFrom/,
+    );
+    expect(sentPayloads()).toEqual([]);
+  });
+
   it('translates a case on first run and writes the hash back', async () => {
     stubTranslate((text) => `t:${text}`);
     const file = caseFile();
@@ -130,8 +144,8 @@ describe('processFile', () => {
     const written = frontmatterOf(file);
     expect(written.translatedFrom).toBe(hashSource(RU_CASE));
     expect(written.translations).toEqual({
-      en: { title: 't:Хонда Аккорд', body: 't:Полное описание кейса.' },
-      sr: { title: 't:Хонда Аккорд', body: 't:Полное описание кейса.' },
+      en: { title: 't:Honda Akkord', body: 't:Polnoe opisanie keisa.' },
+      sr: { title: 't:Honda Akkord', body: 't:Polnoe opisanie keisa.' },
     });
     expect(readFileSync(file, 'utf-8')).toContain(`\n---\n${RU_CASE.body}\n`);
   });
@@ -191,14 +205,14 @@ describe('processFile', () => {
     await processFile(file, 'key', cache);
     expect(Object.keys(cache[file] as object)).toHaveLength(4);
     expect(Object.values(cache[file] as object)).not.toContain(
-      't:Хонда Аккорд',
+      't:Honda Akkord',
     );
   });
 
   it('adopts what is committed when it first meets a case with a current hash', async () => {
     stubTranslate((text) => `t:${text}`);
     const translated = {
-      title: 'Хонда Аккорд',
+      title: 'Honda Accord',
       body: 'Full case description.',
     };
     const file = caseFile('honda-accord', {
@@ -255,7 +269,7 @@ describe('processFile', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { title: string }>).en
         ?.title,
-    ).toBe('v2:Хонда Аккорд');
+    ).toBe('v2:Honda Akkord');
   });
 
   it('keeps paid-for entries when a later locale fails', async () => {
@@ -275,7 +289,7 @@ describe('processFile', () => {
     const cache: CacheFile = {};
 
     await expect(translator().processFile(file, 'key', cache)).rejects.toThrow(
-      'mixes Latin and Cyrillic',
+      'contains Cyrillic letters',
     );
     expect(Object.values(cache[file] ?? {})).toContain('en');
   });
@@ -302,7 +316,7 @@ describe('processFile', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { title: string }>).en
         ?.title,
-    ).toBe('t:Хонда Аккорд');
+    ).toBe('t:Honda Akkord');
   });
 
   it('discards a cache entry that would not have passed as a fresh one', async () => {
@@ -364,7 +378,7 @@ describe('extraFields', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { car: string }>).en
         ?.car,
-    ).toBe('t:БМВ Х3');
+    ).toBe('t:BMV H3');
   });
 
   it('explains the car field in the prompt', async () => {
@@ -421,7 +435,7 @@ describe('extraFields', () => {
     expect(
       (frontmatterOf(file).translations as Record<string, { car: string }>).en
         ?.car,
-    ).toBe('t:БМВ Х3');
+    ).toBe('t:BMV H3');
   });
 
   it('copies a Latin-only extra verbatim instead of asking the model', async () => {

@@ -2,8 +2,8 @@ export const prerender = false;
 
 import type { APIContext } from 'astro';
 import {
-  isKnownCaseDir,
-  isValidSlug,
+  galleryImageType,
+  galleryTargetSchema,
   sanitizeFilename,
   dedupeFilename,
   appendGalleryEntries,
@@ -16,11 +16,6 @@ import {
   GithubApiError,
 } from '@/lib/githubContents';
 
-// Guards against an accidentally-huge upload wedging the serverless
-// function (base64-encoded whole into one JSON POST body before GitHub's
-// blob API gets a chance to reject it) — not a hard content limit, just a
-// sanity cap. `accept="image/*"` on the client is trivially bypassable, so
-// this is the only real check.
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 
 function backToForm(
@@ -38,10 +33,6 @@ function backToForm(
   );
 }
 
-// Dev writes straight to disk (same as Keystatic's own local storage mode);
-// prod commits via GitHub's API instead (src/lib/githubContents.ts) — see
-// admin/case-photos.astro's doc comment for why, and for the auth-cookie
-// gate this shares with the page.
 export async function POST({
   request,
   cookies,
@@ -51,18 +42,25 @@ export async function POST({
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
   }
 
-  const form = await request.formData();
-  const dir = form.get('dir')?.toString() ?? '';
-  const slug = form.get('slug')?.toString() ?? '';
+  const form = await request.formData().catch(() => new FormData());
+  const target = galleryTargetSchema.safeParse({
+    dir: form.get('dir'),
+    slug: form.get('slug'),
+  });
+  if (!target.success) {
+    return new Response('Bad collection/slug', { status: 400 });
+  }
+  const { dir, slug } = target.data;
   const files = form
     .getAll('photos')
     .filter((f): f is File => f instanceof File && f.size > 0);
-
-  if (!isKnownCaseDir(dir) || !isValidSlug(slug)) {
-    return new Response('Bad collection/slug', { status: 400 });
-  }
   if (files.some((f) => f.size > MAX_PHOTO_BYTES)) {
     return new Response('File too large', { status: 413 });
+  }
+  if (
+    files.some((f) => galleryImageType(sanitizeFilename(f.name)) !== f.type)
+  ) {
+    return new Response('Unsupported type', { status: 415 });
   }
   if (files.length === 0) {
     return backToForm(request, dir, slug, { error: 'no-files' });
@@ -71,8 +69,8 @@ export async function POST({
   const indexRelPath = `${dir}/${slug}/index.md`;
   const galleryRelDir = `${dir}/${slug}/gallery`;
 
-  if (import.meta.env.PROD) {
-    const taken = new Set(await listGithubDir(token!, galleryRelDir));
+  if (import.meta.env.PROD && token) {
+    const taken = new Set(await listGithubDir(token, galleryRelDir));
     const photos: { path: string; base64: string }[] = [];
     const newRelPaths: string[] = [];
     for (const file of files) {
@@ -85,17 +83,15 @@ export async function POST({
 
     let indexContent: string;
     try {
-      indexContent = await getGithubFile(token!, indexRelPath);
+      indexContent = await getGithubFile(token, indexRelPath);
     } catch (err) {
-      // Only a real 404 means "no such case" — an auth/network/5xx failure
-      // here must propagate instead of being reported as "not found".
       if (err instanceof GithubApiError && err.status === 404) {
         return new Response('Case not found', { status: 404 });
       }
       throw err;
     }
 
-    await commitGalleryPhotos(token!, {
+    await commitGalleryPhotos(token, {
       photos,
       indexPath: indexRelPath,
       indexContent: appendGalleryEntries(indexContent, newRelPaths),

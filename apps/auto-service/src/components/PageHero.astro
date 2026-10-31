@@ -13,9 +13,21 @@ interface Props {
   lead?: string;
   crumbs?: { href: string; label: string }[];
   service?: ServiceSlug;
+  actions?: boolean;
+  compact?: boolean;
+  clampLead?: boolean;
 }
 
-const { eyebrow, heading, lead, crumbs = [], service } = Astro.props;
+const {
+  eyebrow,
+  heading,
+  lead,
+  crumbs = [],
+  service,
+  actions = true,
+  compact = false,
+  clampLead = false,
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const trail = [
@@ -28,7 +40,12 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
 <script type="application/ld+json" set:html={jsonLdText(breadcrumbSchema)} />
 
 <section class="border-b border-line bg-card">
-  <div class="wrap flex flex-col gap-4 py-band md:py-band-lg">
+  <div
+    class:list={[
+      'wrap flex flex-col gap-4 pt-6 md:pt-band',
+      compact ? 'pb-6 md:pb-band' : 'pb-band md:pb-band-lg',
+    ]}
+  >
     <nav aria-label={site.common.breadcrumbLabel}>
       <ol class="flex flex-wrap items-center gap-2 text-xs text-muted">
         {
@@ -46,22 +63,32 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
         }
       </ol>
     </nav>
-    <span class="eyebrow">{eyebrow}</span>
-    <h1 class="text-hero max-w-3xl">{heading}</h1>
+    {!compact && <span class="eyebrow">{eyebrow}</span>}
+    <h1 class="text-hero max-w-3xl break-words" data-hero-heading>
+      {heading}
+    </h1>
     {
       lead && (
-        <p class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+        <p
+          class:list={[
+            'max-w-2xl text-base leading-relaxed text-muted sm:text-lg',
+            clampLead && 'max-sm:line-clamp-2',
+          ]}
+        >
           {lead}
         </p>
       )
     }
-    <div
-      class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center"
-    >
-      <button type="button" data-open-lead-modal class="btn btn-primary">
-        {site.header.cta}
-      </button>
-      <ContactChannels placement="hero" service={service} />
-    </div>
+    {
+      actions && (
+        <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <button type="button" data-open-lead-modal class="btn btn-primary">
+            {site.header.cta}
+          </button>
+          <ContactChannels placement="hero" service={service} />
+        </div>
+      )
+    }
+    <slot />
   </div>
 </section>

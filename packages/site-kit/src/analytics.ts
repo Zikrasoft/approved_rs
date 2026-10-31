@@ -1,3 +1,4 @@
+import { vinOf } from '@podbor/lead-crm/vin';
 import { GOALS, type Goal } from './goals.ts';
 import {
   analyticsDeclined,
@@ -26,6 +27,12 @@ export interface AnalyticsConfig {
   googleAdsId?: string;
   gaMeasurementId?: string;
   googleConversionLabels?: Partial<Record<Goal, string>>;
+  privateParams?: readonly string[];
+}
+
+interface CleanPage {
+  location: string;
+  referrer: string;
 }
 
 type YmQueue = ((...args: unknown[]) => void) & { a?: unknown[][]; l?: number };
@@ -78,15 +85,43 @@ function stubYm(): void {
   window.ym = ym;
 }
 
-function startYm(ymCounterId: number): void {
+function withoutPrivateParams(
+  href: string,
+  privateParams: readonly string[],
+): string {
+  if (!href) return href;
+  const url = new URL(href);
+  for (const [name, value] of [...url.searchParams])
+    if (privateParams.includes(name) || vinOf(value))
+      url.searchParams.delete(name);
+  return url.href;
+}
+
+function cleanPage(privateParams: readonly string[]): CleanPage | null {
+  const clean = {
+    location: withoutPrivateParams(location.href, privateParams),
+    referrer: withoutPrivateParams(document.referrer, privateParams),
+  };
+  return clean.location === location.href &&
+    clean.referrer === document.referrer
+    ? null
+    : clean;
+}
+
+function startYm(ymCounterId: number, clean: CleanPage | null): void {
   stubYm();
   window.ym?.(ymCounterId, 'init', {
     ssr: true,
-    webvisor: true,
+    webvisor: !clean,
     clickmap: true,
     accurateTrackBounce: true,
     trackLinks: true,
+    ...(clean && { defer: true }),
   });
+  if (clean)
+    window.ym?.(ymCounterId, 'hit', clean.location, {
+      referer: clean.referrer,
+    });
   whenIdle(() => loadOnce(`${YM_TAG_SRC}${ymCounterId}`));
 }
 
@@ -144,12 +179,21 @@ function trackMetaGoal(goal: string, params?: Record<string, unknown>): void {
   else window.fbq?.('track', event);
 }
 
-function startGoogleTag(googleAdsId?: string, gaMeasurementId?: string): void {
+function startGoogleTag(
+  clean: CleanPage | null,
+  googleAdsId?: string,
+  gaMeasurementId?: string,
+): void {
   const id = googleAdsId ?? gaMeasurementId;
   if (!id) return;
   stubGtag();
   window.gtag?.('js', new Date());
-  window.gtag?.('config', id);
+  if (clean)
+    window.gtag?.('config', id, {
+      page_location: clean.location,
+      page_referrer: clean.referrer,
+    });
+  else window.gtag?.('config', id);
   whenIdle(() => loadOnce(`${GOOGLE_TAG_SRC}${id}`));
 }
 
@@ -200,6 +244,7 @@ export function defineAnalytics({
   googleAdsId,
   gaMeasurementId,
   googleConversionLabels,
+  privateParams = [],
 }: AnalyticsConfig): void {
   if (window.loadAnalytics) return;
 
@@ -220,9 +265,10 @@ export function defineAnalytics({
   const start = (): void => {
     if (started) return;
     started = true;
-    if (ymCounterId) startYm(ymCounterId);
-    if (metaPixelId) startMetaPixel(metaPixelId);
-    startGoogleTag(googleAdsId, gaMeasurementId);
+    const clean = cleanPage(privateParams);
+    if (ymCounterId) startYm(ymCounterId, clean);
+    if (metaPixelId && !clean) startMetaPixel(metaPixelId);
+    startGoogleTag(clean, googleAdsId, gaMeasurementId);
   };
   window.loadAnalytics = start;
   pendingStart = start;

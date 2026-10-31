@@ -1,18 +1,44 @@
 ---
 import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
-import CartButton from './CartButton.astro';
-import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
+import {
+  localeFrom,
+  SUPPORTED_LOCALES,
+  LOCALE_NAME,
+  type Locale,
+} from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
-import { contactRegion } from '@podbor/site-kit/contact-control';
+import {
+  contactRegion,
+  CONTACT_CTA_SELECTOR,
+} from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
-import { devOnly, shopBuilt } from '@/utils/shopStatus';
+import CatalogueSearch from './CatalogueSearch.astro';
+import SocialLinks from './SocialLinks.astro';
 import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
+const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
+const inLocale = (code: Locale) =>
+  `${swapLocale(pathname, code)}${Astro.url.search}`;
+
+const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
+const onParts = pathname.startsWith(PathBuilder.parts(locale));
+const open = shopOpen();
+const basket = open
+  ? {
+      href: PathBuilder.partsCart(locale),
+      label: content(locale).shopCart.cartLink,
+    }
+  : {
+      href: PathBuilder.partsInquiry(locale),
+      label: content(locale).pages.partsInquiry.listHeading,
+    };
 
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
@@ -34,15 +60,17 @@ const links = [
   {...contactRegion('header')}
 >
   <header
-    class="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur"
+    class="sticky top-0 z-30 border-b border-panel-line bg-panel text-panel-fg group-data-[open]:z-50 short:not-group-data-[open]:static print:hidden"
   >
-    <div class="wrap flex h-[4.5rem] items-center justify-between gap-4">
+    <div
+      class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
+    >
       <a
         href={PathBuilder.home(locale)}
         class="shrink-0"
         aria-label={site.common.homeLabel}
       >
-        <Wordmark />
+        <Wordmark onPanel />
       </a>
 
       <nav
@@ -58,8 +86,8 @@ const links = [
               class:list={[
                 'relative text-sm font-medium transition-colors duration-150',
                 link.current
-                  ? 'text-ink after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
-                  : 'text-muted hover:text-ink',
+                  ? 'text-panel-fg after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
+                  : 'text-panel-ink hover:text-panel-fg',
               ]}
             >
               {link.label}
@@ -68,21 +96,29 @@ const links = [
         }
       </nav>
 
-      <div class="flex items-center gap-2">
+      {
+        !onHome && (
+          <div class="hidden max-w-72 min-w-0 flex-1 xl:block">
+            <CatalogueSearch compact />
+          </div>
+        )
+      }
+
+      <div class="flex items-center gap-1 sm:gap-2">
         <carlab-lang class="hidden items-center gap-1 lg:flex">
           {
             SUPPORTED_LOCALES.map((code) => (
               <a
-                href={swapLocale(pathname, code)}
+                href={inLocale(code)}
                 hreflang={code}
                 {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
                 title={LOCALE_NAME[code]}
                 aria-current={code === locale ? 'true' : undefined}
                 class:list={[
-                  'spec rounded-full px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
+                  'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
                   code === locale
-                    ? 'bg-shade text-ink'
-                    : 'text-muted hover:text-ink',
+                    ? 'bg-panel-2 text-panel-fg'
+                    : 'text-panel-ink hover:text-panel-fg',
                 ]}
               >
                 {code}
@@ -91,17 +127,9 @@ const links = [
           }
         </carlab-lang>
 
-        {
-          shopBuilt() && (
-            <span class="contents" {...devOnly()}>
-              <CartButton />
-            </span>
-          )
-        }
-
         <ContactControl
           channel="phone"
-          class="btn btn-secondary hidden h-10 py-0 lg:inline-flex"
+          class="btn btn-on-panel hidden h-10 py-0 lg:inline-flex"
         >
           <Icon name="phone" />
           <span class="spec text-xs">{site.header.phoneLabel}</span>
@@ -109,11 +137,59 @@ const links = [
 
         <button
           type="button"
-          data-open-lead-modal
-          class="btn btn-primary h-10 py-0"
+          popovertarget="site-search"
+          aria-label={searchCopy.openSearch}
+          class:list={[
+            'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
+            !onHome && 'xl:hidden',
+          ]}
         >
-          {site.header.cta}
+          <Icon name="search" size={20} />
         </button>
+
+        <cart-badge
+          class="block"
+          {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
+          data-parts-list={open ? undefined : ''}
+        >
+          <a
+            href={basket.href}
+            class="relative flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2"
+          >
+            <Icon name="cart" size={20} />
+            <span class="sr-only">{basket.label}</span>
+            <span
+              class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-panel-fg px-1 text-[0.6875rem] font-semibold text-ink"
+              data-count
+              hidden></span>
+          </a>
+        </cart-badge>
+
+        <cta-reveal
+          data-revealed="true"
+          watch={CONTACT_CTA_SELECTOR}
+          class="flex data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden"
+        >
+          {
+            onParts ? (
+              <a
+                href={PathBuilder.partsInquiry(locale)}
+                {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
+              >
+                {site.header.partsCta}
+              </a>
+            ) : (
+              <button
+                type="button"
+                data-open-lead-modal
+                class="btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!"
+              >
+                {site.header.cta}
+              </button>
+            )
+          }
+        </cta-reveal>
 
         <button
           type="button"
@@ -122,14 +198,14 @@ const links = [
           aria-controls="site-menu"
           aria-label={site.header.menuOpenLabel}
           data-close-label={site.header.menuCloseLabel}
-          class="flex h-10 w-10 items-center justify-center rounded-control border border-line-strong text-ink md:hidden"
+          class="flex h-10 w-10 items-center justify-center rounded-control border border-panel-line-strong text-panel-fg md:hidden"
         >
           <span class="relative block h-3 w-4" aria-hidden="true">
             <span
-              class="absolute left-0 top-0 h-0.5 w-full bg-current transition-transform duration-200 group-data-[open]:translate-y-[5px] group-data-[open]:rotate-45"
+              class="absolute left-0 top-0 h-0.5 w-full bg-current transition-transform duration-200 motion-reduce:transition-none group-data-[open]:translate-y-[5px] group-data-[open]:rotate-45"
             ></span>
             <span
-              class="absolute bottom-0 left-0 h-0.5 w-full bg-current transition-transform duration-200 group-data-[open]:-translate-y-[5px] group-data-[open]:-rotate-45"
+              class="absolute bottom-0 left-0 h-0.5 w-full bg-current transition-transform duration-200 motion-reduce:transition-none group-data-[open]:-translate-y-[5px] group-data-[open]:-rotate-45"
             ></span>
           </span>
         </button>
@@ -138,9 +214,28 @@ const links = [
   </header>
 
   <div
+    id="site-search"
+    popover
+    class="inset-x-0 top-0 bottom-auto m-0 w-full max-w-none overflow-visible border-0 border-b border-line bg-paper p-0 text-ink shadow-lg backdrop:bg-ink/20"
+  >
+    <div class="wrap flex items-start gap-2 py-3">
+      <CatalogueSearch class="min-w-0 flex-1" autofocus />
+      <button
+        type="button"
+        popovertarget="site-search"
+        popovertargetaction="hide"
+        aria-label={searchCopy.closeSearch}
+        class="flex size-11 shrink-0 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
+      >
+        <Icon name="close" size={16} />
+      </button>
+    </div>
+  </div>
+
+  <div
     id="site-menu"
     data-menu
-    class="invisible fixed inset-0 z-20 flex flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
+    class="invisible fixed inset-0 z-25 flex group-data-[open]:z-45 flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
     inert
   >
     <nav class="flex flex-col" aria-label={site.common.mobileNavLabel}>
@@ -161,21 +256,22 @@ const links = [
       }
     </nav>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-6 pt-6">
       <ContactControl channel="phone" class="btn btn-secondary w-full">
         <Icon name="phone" />
         <span class="spec">{site.header.phoneLabel}</span>
       </ContactControl>
+      <SocialLinks />
       <carlab-lang class="flex items-center gap-2">
         <span class="text-xs text-muted">{site.header.languageLabel}</span>
         {
           SUPPORTED_LOCALES.map((code) => (
             <a
-              href={swapLocale(pathname, code)}
+              href={inLocale(code)}
               hreflang={code}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               class:list={[
-                'spec rounded-full px-3 py-1 text-xs uppercase tracking-widest',
+                'spec rounded-pill px-3 py-1 text-xs uppercase tracking-widest',
                 code === locale
                   ? 'bg-shade text-ink'
                   : 'text-muted hover:text-ink',
@@ -192,10 +288,15 @@ const links = [
 
 <script>
   import {
+    defineCtaReveal,
     defineLocaleChoice,
     defineMenuToggle,
   } from '@podbor/site-kit/browser';
 
+  import { defineCartBadge } from '@/scripts/cartBadge';
+
+  defineCartBadge();
+  defineCtaReveal();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
 </script>

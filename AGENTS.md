@@ -11,15 +11,15 @@ pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/
 ```
 apps/approved-rs/     Approved.rs, the approved.rs site (Astro) — most of this document describes it
 apps/detailing/       Details, the detailing studio site — details.rs
-apps/auto-service/    CarLab, the car service site + parts shop — carlab.rs
-apps/medusa/          CarLab shop backend — Medusa 2.19, CommonJS, api.carlab.rs
-infra/medusa/         CarLab shop production: image, compose (postgres, redis, medusa, caddy), host scripts — one Hetzner VPS
+apps/auto-service/    CarLab, the car service site: carlab.rs
+apps/auto-service-shop/     the VIN parts shop backend for carlab.rs: Medusa 2.21.x, CommonJS
+infra/auto-service-shop/    its production: image, compose (postgres, typesense, medusa, caddy), host scripts; one VPS, docs/guides/deploy.md
 packages/lead-crm/    lead store, Telegram bot, and the lead/contact-click routes
 packages/lead-capture/ the capture bots' webhook route: the /start dialog that turns a Telegram tap into a Lead
 packages/i18n/        locale set, YAML/zod section loader, auto-translate runners
 packages/site-kit/    brand-agnostic mechanics, never anything visual
 packages/brands/      the three brands: domains, names, locale mapping, service labels, the shared address
-packages/shop-catalog/ CarLab shop machinery (dual ESM/CJS, because Medusa consumes it)
+packages/catalog-contract/ what auto-service-shop and the carlab.rs storefront agree on: part numbers, response schemas, attributes, the ambiguity rule (dual ESM/CJS)
 ```
 
 A package's contents are an `ls` away and go stale in a document, so this lists
@@ -35,12 +35,24 @@ depth on case and work pages), `data-contact-channel` /
 `data-contact-cta` (in-flow contact regions the floating CTA's `watch`
 selector hides behind — stamp it with `contactRegion`, `contactCta` and
 `CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
-literal) and `METRIKA_MASK_CLASS` (on every form that takes a contact, keeping
-its fields out of Webvisor recordings as the privacy copy promises; from
-`@podbor/site-kit/browser`, never a literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+literal), `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
+`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal) and
+`METRIKA_MASK_CLASS` (on every form that takes a contact, keeping its fields out
+of Webvisor recordings as the privacy copy promises; from
+`@podbor/site-kit/browser`, never a literal) and `--cookie-consent-height`
+(`COOKIE_CONSENT_HEIGHT_VAR` from `@podbor/site-kit/browser`, the banner's
+height that `<cookie-consent>` sets on `<html>` and every bar fixed to the
+bottom of the screen rises by; Tailwind classes and scoped CSS cannot import
+it, so they spell it out and each app's `cookieConsentLift.test.ts` counts the
+spellings against the constant). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
-`data-consent`, the hidden `contact` and `contact_channel` inputs,
+`data-consent`, the hidden `contact` and `contact_channel` inputs
+(every contact input and the consent box are named from
+`CONTACT_INPUT_FIELDS` and `CONSENT_FIELD` in `@podbor/lead-crm/fields`,
+never a literal: the no-JS refusal page `createLeadsRoute` renders re-posts
+every other field as hidden and asks for these again, the consent box only
+when it never arrived),
 `data-source-url`, `data-visitor-id`, `data-ad-source` (the hidden
 `name={AD_SOURCE_FIELD}` input the Ad visit rides in — the contact-click
 beacon posts the same field), `data-meta-ids` (the hidden
@@ -53,10 +65,8 @@ button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
 `aria-busy`, which the apps' spinner CSS keys on.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
-`vercel.json` and `vitest.config.ts`; every workspace app, `apps/medusa`
-included, has its own `tsconfig.json` and `.env*` (`apps/medusa` uses jest
-instead of vitest and is not a Vercel deploy, so it has neither `vercel.json`
-nor `vitest.config.ts`). Lint/format configs and the
+`vercel.json`, `vitest.config.ts` and `tsconfig.json`, and its own `.env*`.
+Lint/format configs and the
 lockfile stay at the repo root and cover every workspace. The root
 `vercel.json` holds `git.deploymentEnabled: false` — without it every branch
 push triggers a failing preview build. **The same block is now duplicated into
@@ -91,7 +101,8 @@ three sites, and nothing carrying Approved's trust/verification semantics.
 each.** Telegram allows a single webhook URL per bot, so the CRM bot's
 `api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
 `apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
-and their own capture bot's `/api/telegram-capture`. All three write to the same `data/leads.json` on the
+and their own capture bot's `/api/telegram-capture`, and carlab.rs also
+`/api/shop-orders`, where the shop hands over its placed and canceled orders. All three write to the same `data/leads.json` on the
 same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createBrandBot({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.
@@ -108,8 +119,7 @@ to approved.rs itself.
 **A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
-`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once.
-CI no longer builds, tests or deploys `apps/medusa`. All
+`@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once. All
 three write the same `data/leads.json` blob, so shipping a changed package to
 one site and not the others puts two versions of the lead schema on one file:
 one site writes records another cannot parse, and they land in
@@ -198,25 +208,32 @@ Approved's trust/verification semantics.
   because two sites must not resemble each other, but because a shared token
   makes every brand's look a change to one file, and each brand owns its own.
 - Client-side imports go through a narrow subpath export
-  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`,
-  `@podbor/shop-catalog/browser`), never the package root: the root barrel
-  pulls zod, date-fns and the Telegram client into the browser bundle.
-- **A package Medusa consumes ships a CommonJS build behind a `require`
-  condition.** `apps/medusa` is CommonJS and cannot load the `.ts` sources the
-  other workspaces import. `packages/shop-catalog` (`.`, `./browser`,
-  `./order-hook`), `packages/brands` and `@podbor/i18n`'s `./translate/core` and
-  `./section` export `{ "require": dist/cjs…, "default": src/….ts }`, build with
+  (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
+  package root: the root barrel pulls zod, date-fns and the Telegram client
+  into the browser bundle.
+- **A package built for a CommonJS consumer ships a CommonJS build behind a
+  `require` condition.** `apps/auto-service-shop` is CommonJS and consumes
+  `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
+  `./translate/core` and `./section`, and `@podbor/lead-crm`'s
+  `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy`, `./phone`,
+  `./vin`, `./verify-secret` and `./shop-orders-wire`; they export
+  `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
   depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
   the result — so run such a package's tests through turbo
   (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
   finds no `dist/`.
-- **Two slug helpers on purpose.** Medusa product handles use
-  `apps/medusa/src/lib/translit.ts` (slugify, Russian transliteration:
-  `Аккумулятор тест` → `akkumulyator-test`); storefront landing slugs use
-  `landingSlug` in `@podbor/shop-catalog` (ASCII-folds spec values such as
-  `5W-30` or `60 Ah`). Different inputs, different jobs — do not merge them.
+- **A `packages/catalog-contract` response schema tolerates a shop ahead of or
+  behind the storefront.** The shop deploys on its own VPS and can roll back,
+  so the storefront build parses responses from a newer or older shop. Response
+  schemas are `z.object` (unknown keys strip, never `z.strictObject`), a display
+  vocabulary (fuel, body style, identifier type, position) is `displayEnum`, so
+  a value newer than the contract reads as `null`, and **every field added from
+  now on is `.nullable().default(null)`** (or `.catch(null)`), so a shop that
+  has not shipped it yet still parses. A field becomes required only once every
+  deployed shop sends it. The contract tests pin this with an extra key, an
+  unknown enum value and a missing new field.
 - **A helper a lazily-loaded path depends on must live in a module that imports
   nothing heavy.** Rollup cannot code-split a module that is also statically
   imported, so putting such a helper beside a static `libphonenumber-js` import
@@ -260,9 +277,9 @@ Both new apps follow the same shape, and a third should too:
   shorter form converts better, and a lead is answerable without a name. The
   same reasoning removed the service picker from the brand forms. What posts a
   slug now is the page, through a hidden `SERVICE_FIELD` input: the service
-  pages, CarLab's cart (`parts-order`) and Details' work pages
-  (`servicesApplied[0]`). Everywhere else — the modal, the contact page, the
-  homepage forms — a lead carries no service **by design**, and the owner
+  pages, CarLab's VIN-inquiry parts pages (`vin-parts-inquiry`) and Details'
+  work pages (`servicesApplied[0]`). Everywhere else (the modal, the contact page, the
+  homepage forms) a lead carries no service **by design**, and the owner
   card renders `—` for it with the visited page on the `Страница:` line. A
   contact click renders `Клик: <канал>` instead: the click has a channel worth
   naming, a form lead does not. The
@@ -346,7 +363,9 @@ Both new apps follow the same shape, and a third should too:
   and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
   carry the id (analytics declined, or a payload past 64 characters) beacons
   nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat. **Every site has a `/thanks/`
+  second, unmergeable card in the chat. The same holds on every channel: a
+  tap with no visitor id beacons nothing, and `/api/contact-click` stores no
+  Lead for one, so an anonymous beacon cannot flood the chat. **Every site has a `/thanks/`
   human-account carve-out, and approved.rs a second one.** The first is
   `/thanks/`: the visitor there has just sent the form, so its Telegram tile
   opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
@@ -413,8 +432,8 @@ Both new apps follow the same shape, and a third should too:
   Russian in another. The job logs `overwriting hand-written <path>` for each
   dropped translation whose own Russian is unchanged — the one whose Russian you
   just edited is replaced without a line in the log, because there is no cache
-  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, a Latin stem on a
-  Cyrillic ending, a blank — is refused with a warning; the cached translation
+  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, any Cyrillic
+  letter, a blank — is refused with a warning; the cached translation
   is served instead, or the string is retranslated if there is none. Adopting
   it would fail the whole-file guard on every subsequent run and wedge the
   pipeline. **Never hand-compute a matching `translatedFrom` yourself to quiet
@@ -449,18 +468,6 @@ pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # singl
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
 
-**The shop funnel walk is local-only and never a CI job.** `pnpm --filter
-@podbor/auto-service funnel` drives a browser through card → cart → checkout
-against a local Medusa and then reads the Leads and Order markers the system
-wrote; it needs the whole backend up and the env exported first. Prerequisites,
-assertions and what the layer cannot prove are in
-`apps/auto-service/funnel/README.md`. Its specs ride along in the app's existing
-`astro check`, which is CI's only involvement — do not add a workflow step and
-do not install browser binaries in CI. The four test layers the shop funnel has,
-what each one proves, what none of them prove and the standing checklists are in
-`docs/guides/shop-funnel-testing.md` — add to a layer there rather than cutting a
-fifth seam.
-
 The translate scripts resolve content paths relative to the process's working
 directory, so they must run from inside the app:
 
@@ -486,14 +493,6 @@ deployed function (`.git`, `.env*` and every other app included; it was 353 MB
 before this was fixed, 32 MB after). See `src/pages/api/admin/case-photos-*.ts`
 for the shape.
 
-**`pnpm build` for `@podbor/auto-service` needs the local Medusa up.** Its shop
-routes fetch the catalog while prerendering, so with nothing on :9009 the build
-dies at `prerendering static routes` with a bare `fetch failed` and a
-`node:net` stack — which looks like the change under test and is not. Start the
-backend first (`pnpm --filter @podbor/medusa develop`), or build the other two
-sites alone (`--filter=@podbor/approved-rs --filter=@podbor/detailing`), which
-need no backend.
-
 `pnpm build` may finish rendering every page and only then fail at the
 `@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
 — that's a local-machine artifact unrelated to code changes, not a real build
@@ -518,17 +517,31 @@ than once over the combined diff — a diff too large to judge is a review that
 finds nothing. This is not enforced by a git hook on purpose: a hook can block
 a commit but cannot run the review itself.
 
-## Medusa backend (`apps/medusa`)
+## Shop migrations
 
-CommonJS, jest not vitest, its own `.env`, port 9009 locally
-(`pnpm --filter @podbor/medusa develop` — not `dev`, so the root `pnpm dev`
-leaves it alone), and production is one Hetzner VPS deployed from
-`infra/medusa`. The rules that cost a bug — the translation module's two
-switches, read-merge-write `metadata`, workflow events, the admin write guards,
-the release job's in-memory filtering, exact express path matchers, the fan-out
-on `order.placed`, how the image and the compose stack ship — are in
-[`docs/guides/medusa.md`](docs/guides/medusa.md). Read it before touching
-anything under `apps/medusa/` or `infra/medusa/`.
+`apps/auto-service-shop` migrates its Postgres while the previous image is still
+serving, and a rollback brings that image back over the new schema (deploy
+order in `docs/guides/deploy.md`). So every shop migration is **additive**:
+add a column nullable or with a default, add a table or an index. A rename or a
+drop ships in two deploys, first the code that stops reading the old shape,
+then the migration that removes it.
+
+The one sanctioned exception is the pre-launch squash of spec #404: before the
+shop's first production deploy each module's history was folded into a single
+initial migration, and changes were folded into it until launch. From the first
+production deploy on, every schema change is a new additive migration beside
+the initial one; never edit a migration a production database has run.
+
+Generate a module's migration with `medusa db:generate <module>` and leave the
+generated file as it comes. SQL the model DSL cannot express (`NULLS NOT
+DISTINCT`, an expression index) lives in a hand-written migration of its own,
+with the index left out of the model so the generator never rewrites it, and
+`src/modules/catalog/__tests__/hand-written-indexes.spec.ts` asserts it
+against `pg_indexes`. The same spec compares a freshly migrated database with
+every `.snapshot-*.json`; a column type only a hand-written migration sets is
+listed there in `HAND_WRITTEN_TYPES`. `check` runs
+`.github/scripts/shop-migration-drift.sh`, which fails when `medusa db:generate`
+on a fresh database writes anything.
 
 ## Architecture
 
@@ -543,7 +556,7 @@ anything under `apps/medusa/` or `infra/medusa/`.
 
 **Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push (any branch, so translations land in a feature branch before merge, not after) and commits the result back. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Deploy filtering is a separate step** (`scope` in `verify`, against per-app `refs/tags/deployed/<app>` tags) — why: `docs/adr/0008-deploy-only-what-is-stale-in-production.md`. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. It must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. The prompt names the target language, so the fingerprint is per locale, and `localeGuidance` on either translator (approved.rs's `LOCALE_GUIDANCE` in `translateConfig.ts`, the Serbian search phrase) is how one locale's wording is steered and regenerated without touching the other three. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
 
-**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`) and call-button clicks (`api/contact-click.ts`) both funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist, the ledger opens with one Payout, `Перенос со старой системы`, for what the old income × rate model left owed (`legacyOwed` over the raw Lead file), and the Lead store's `beforeWrite` hook creates the blob before any Lead write can strip those old money fields. Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card in the group is ordinary discussion and stores nothing — notes go in only through the DM detail's 📝 Заметка, and the DM detail edits a Lead's name or gives a Lead without a real contact one (`pendingPrompt` `edit_*`, telling the other role what changed; a contact typed for a Lead that already has a real one — `hasRealContact` — is appended as a note, never written over it) or appends a 📝 note signed with author and date, which the other role is told about too. The owner and the admin both change statuses on the card and the DM detail, and `afterStatusChange`'s `author` sends the other role the notice (`sendStatusChange`, never to the author). The digest has no buttons and only links each Lead. `dropFromDigest` redraws it without a Lead from the ids its `digest` record keeps, also forgetting Leads closed or deleted since; it runs from `afterStatusChange` when an `author` is set, and directly from the webhook for 🔵 on a Lead already in progress and for a deletion. The cron's own resume of due postponed Leads has no author and leaves the digest alone. A status move into work (🗣, 🔵) never reopens a won or lost Lead — `setStatus` refuses it, and leaving `postponed` clears the reminder. The visitor's comment is read-only — staff text goes in only as a note. **Every Lead the site creates carries the Ad visit** (CONTEXT.md): `bootSiteKit` remembers a paid landing in `localStorage` for 30 days under the visitor id's consent, the form and the click beacon post it as `AD_SOURCE_FIELD` (JSON), `adSourceFieldSchema` validates it in both routes, and it lands as `adSource` on the Lead, `null` when absent or unreadable. `insertOrMergeLead` keeps the first one, so a Capture bot Lead absorbing a Telegram click inherits it; the card, the DM detail and the Topic summary show «📣 Реклама» and `#реклама`. **A Topic exists only for a Lead that came through a Capture bot in Telegram** — WhatsApp, Viber, phone and form Leads have none, so a Lead feature must work on the card and the DM detail and never assume a Topic. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
+**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`), call-button clicks (`api/contact-click.ts`) and, on carlab.rs, placed shop orders (`api/shop-orders.ts`) and Failed checkouts (`api/order.ts`, CONTEXT.md) all funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist the Balance reads as zero; nothing in the Lead file is ever carried into it (the one-time carry-over is gone, ADR-0032). Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card in the group is ordinary discussion and stores nothing — notes go in only through the DM detail's 📝 Заметка, and the DM detail edits a Lead's name or gives a Lead without a real contact one (`pendingPrompt` `edit_*`, telling the other role what changed; a contact typed for a Lead that already has a real one — `hasRealContact` — is appended as a note, never written over it) or appends a 📝 note signed with author and date, which the other role is told about too. The owner and the admin both change statuses on the card and the DM detail, and `afterStatusChange`'s `author` sends the other role the notice (`sendStatusChange`, never to the author). The digest has no buttons and only links each Lead. `dropFromDigest` redraws it without a Lead from the ids its `digest` record keeps, also forgetting Leads closed or deleted since; it runs from `afterStatusChange` when an `author` is set, and directly from the webhook for 🔵 on a Lead already in progress and for a deletion. The cron's own resume of due postponed Leads has no author and leaves the digest alone. A status move into work (🗣, 🔵) never reopens a won or lost Lead — `setStatus` refuses it, and leaving `postponed` clears the reminder. The visitor's comment is read-only — staff text goes in only as a note. **Every Lead the site creates carries the Ad visit** (CONTEXT.md): `bootSiteKit` remembers a paid landing in `localStorage` for 30 days under the visitor id's consent, the form and the click beacon post it as `AD_SOURCE_FIELD` (JSON), `adSourceFieldSchema` validates it in both routes, and it lands as `adSource` on the Lead, `null` when absent or unreadable. `insertOrMergeLead` keeps the first one, so a Capture bot Lead absorbing a Telegram click inherits it; the card, the DM detail and the Topic summary show «📣 Реклама» and `#реклама`. **A Topic exists only for a Lead that came through a Capture bot in Telegram** — WhatsApp, Viber, phone and form Leads have none, so a Lead feature must work on the card and the DM detail and never assume a Topic. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
 
 The binding is split in two on purpose: `src/lib/crm.ts` builds the store and needs no Telegram credentials, while `src/lib/crmBot.ts` builds the bot and reads `TELEGRAM_*` at module load. Importing the store therefore cannot fail a build over a missing bot token. `src/lib/store.ts`, `src/lib/telegram/index.ts` and `src/lib/notifyLead.ts` are thin re-exports over those two.
 
@@ -575,9 +588,9 @@ Event names live once in `packages/site-kit/src/goals.ts` and are fired through
 reaches Google Ads conversions where `GOOGLE_ADS_ID`/`GOOGLE_CONVERSION_LABELS`
 are set. Every event must also be marked a key event in **all three** GA4
 properties — one fired in code but not marked there is silently excluded from
-conversion reporting. The shop funnel (`add_to_cart`, `begin_checkout`,
-`purchase`) is the exception: carlab.rs only, created when the shop goes live
-— see `docs/guides/analytics.md`. The vocabulary, the
+conversion reporting. The shop funnel goals (`add_to_cart`, `begin_checkout`,
+`purchase`) are the exception: carlab.rs only, not fired by the offer cart
+until the shop opens (ADR-0045); see `docs/guides/analytics.md`. The vocabulary, the
 markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 `data-brand-link`, `aria-invalid`) and how to add one are in `docs/guides/analytics.md`;
 whose visits to exclude before drawing any conclusion is in
@@ -588,7 +601,7 @@ whose visits to exclude before drawing any conclusion is in
 Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
 regex checks, string slicing or bare `as` casts at a trust boundary. `zod` is
 already pinned at the same exact version in `packages/lead-crm`, `packages/i18n`
-and all four apps (`apps/medusa` included), and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
+and all three apps, and the content-schema loaders (`src/i18n/content/*ContentSchema.ts`
 through `createSectionLoader`) are the pattern to copy: `z.object({…}).strict()`,
 `parse` where a failure should be loud, `safeParse` where a fallback exists.
 

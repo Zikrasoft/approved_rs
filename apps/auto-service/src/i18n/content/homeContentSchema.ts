@@ -28,11 +28,11 @@ export const homeContentSchema = z
         z.object({ title: z.string(), text: z.string() }).strict(),
       ),
     }),
-    shopTeaser: sectionHeadSchema.extend({ cta: z.string() }),
     accident: sectionHeadSchema.extend({
       points: z.array(z.string()),
       cta: z.string(),
     }),
+    faqEyebrow: z.string(),
     faq: z.array(z.object({ q: z.string(), a: z.string() }).strict()),
     finalCta: sectionHeadSchema.extend({ cta: z.string() }),
   })

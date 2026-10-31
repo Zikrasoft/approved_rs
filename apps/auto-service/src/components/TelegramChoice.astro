@@ -18,7 +18,7 @@ const options = [
     href: tile.href,
     title: copy.bot,
     hint: copy.botHint,
-    tone: 'border-signal/40 bg-signal/5',
+    tone: 'border-transparent bg-shade',
   },
   {
     attribute: 'data-telegram-choice-manager',
@@ -61,7 +61,7 @@ const options = [
                 data-modal-close
                 class:list={[
                   tone,
-                  'flex min-h-11 flex-col gap-1 rounded-field border px-4 py-3 transition-colors duration-150 hover:border-ink focus-visible:border-ink',
+                  'flex min-h-11 flex-col gap-1 rounded-control border px-4 py-3 transition-colors duration-150 hover:border-ink focus-visible:border-ink',
                 ]}
               >
                 <span class="font-medium">{title}</span>

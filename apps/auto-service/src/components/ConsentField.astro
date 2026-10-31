@@ -1,0 +1,60 @@
+---
+import { CONSENT_FIELD } from '@podbor/lead-crm/fields';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  uid: string;
+  error?: string;
+  submitError?: string;
+}
+
+const { uid, error, submitError } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
+---
+
+<div>
+  <label class="relative flex min-h-11 items-start gap-3 py-1.5">
+    <input
+      type="checkbox"
+      name={CONSENT_FIELD}
+      value="1"
+      required
+      aria-describedby={`consent-error-${uid}`}
+      class="peer sr-only"
+      data-consent
+      data-field="consent"
+    />
+    <span
+      class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-[3px] border border-line-field bg-card text-ink transition-colors duration-150 peer-checked:border-signal peer-checked:bg-signal peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+    >
+      <Icon name="check" size={10} />
+    </span>
+    <span class="text-xs leading-relaxed text-muted">
+      {`${site.form.privacyNote} ${site.form.privacyLinkText}.`}
+    </span>
+  </label>
+  <a
+    href={PathBuilder.privacy(locale)}
+    target="_blank"
+    class="-mt-1 ml-8 inline-block py-1 text-xs text-muted underline underline-offset-2 transition-colors duration-150 hover:text-signal-ink"
+    >{site.footer.privacyLabel}</a
+  >
+  <p
+    id={`consent-error-${uid}`}
+    class={errorText}
+    aria-live="polite"
+    data-error-consent
+    hidden
+  >
+    {error ?? site.form.errorConsent}
+  </p>
+  <div role="alert" data-error-submit hidden>
+    <p class={errorText}>{submitError ?? site.form.errorSubmit}</p>
+    <slot />
+  </div>
+</div>

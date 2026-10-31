@@ -1,35 +1,35 @@
 ---
-title: Toyota Yaris GR Sport — полная оклейка кузова PPF
+title: Toyota Yaris GR Sport, полная оклейка кузова PPF
 translations:
   en:
-    title: Toyota Yaris GR Sport - Complete PPF Wrap
+    title: Toyota Yaris GR Sport, full-body PPF installation
     body: |-
-      This is a Toyota Yaris GR Sport belonging to our client from Belgrade. The car was purchased used but is in excellent condition, and the new owner decided not to wait for the first city marks and to protect the body right away.
+      This Toyota Yaris GR Sport belongs to a client from Belgrade. She bought it used but in excellent condition and decided to protect the bodywork straight away rather than wait for city driving to leave its first marks.
 
-      The Yaris is a compact city car, and in the city, the body takes the most beating: tight parking spaces near shops and malls, neighboring vehicles, doors carelessly opened, supermarket trolleys, branches, and stones kicked up from the road. It’s especially frustrating to get a dent or chip simply because the neighboring car door was opened a bit wider than it should have been.
+      The Yaris is a compact car built for the city, but that is also where its bodywork takes the most punishment: tight parking spaces at shops and shopping centres, neighbouring cars, carelessly opened doors, supermarket trolleys, branches and stones kicked up by tyres. Few things are more frustrating than finding a dent or paint chip simply because someone parked next to you opened their door a little too wide.
 
-      That’s why the entire body was covered with a protective polyurethane film that is **190 microns** thick.
+      We covered the entire body in **190-micron** polyurethane paint protection film.
 
-      The PPF adds a robust transparent layer on top of the paint, absorbing fine scratches, scuffs, marks from light parking contacts, road sand, and stones. This is particularly important for doors, fenders, bumpers, and mirrors, which are always at risk. A good transparent film is nearly invisible, allowing the color, shine, and appearance of the car to remain unchanged.
+      PPF adds a tough, transparent layer over the clear coat, taking the brunt of minor scratches, scuffs, light parking scrapes, road grit and stone chips. Doors, wings, bumpers and mirrors benefit most, as they are constantly exposed. A quality clear film is almost invisible, preserving the car's original colour, gloss and appearance.
 
-      While PPF doesn’t turn the car into an armored vehicle, and it won’t protect against serious impacts or deep dents, it does shield the vehicle from common urban damage that can wear down the paint over a couple of years.
+      PPF does not make a car armoured and will not prevent damage from a heavy impact or a deep dent. But it does protect against the everyday wear that can leave paintwork looking tired after a couple of years in the city.
 
-      The Yaris left in its factory condition, but now the body is much better prepared for the rigors of daily city life.
+      The Yaris left looking just as it did from the factory, only now its bodywork is far better prepared for daily city life.
     car: Toyota Yaris GR Sport
   sr:
-    title: Toyota Yaris GR Sport - kompletna zaštita karoserije PPF
+    title: Toyota Yaris GR Sport, zaštita cele karoserije PPF folijom
     body: |-
-      Toyota Yaris GR Sport naše klijentkinje iz Beograda. Automobil je kupljen korišćen, ali u odličnom stanju, a nova vlasnica je odlučila da ne čeka prve gradske ožiljke, već da zaštiti karoseriju odmah.
+      Toyota Yaris GR Sport naše klijentkinje iz Beograda. Automobil je kupljen polovan, ali u odličnom stanju, pa je nova vlasnica odlučila da odmah zaštiti karoseriju, pre nego što gradska vožnja ostavi prve tragove.
 
-      Yaris je kompaktan automobil pogodan za grad, a u gradu karoserija najviše trpi: uska parking mesta ispred prodavnica i tržnih centara, susedni automobili, nepažljivo otvorena vrata, kolica iz supermarketa, grančice i kamenčići sa puta. Najgore je dobiti udubljenje ili ogrebotinu samo zato što je komšija na parkingu otvorio vrata malo šire nego što bi trebalo.
+      Yaris je kompaktan automobil za grad, a upravo u gradu karoserija najviše strada: tesna parking mesta kod prodavnica i tržnih centara, susedni automobili, neoprezno otvaranje vrata, kolica iz supermarketa, grane i kamenčići koje podižu točkovi. Posebno je neprijatno kada udubljenje ili oštećenje laka nastane samo zato što je neko na susednom parking mestu otvorio vrata malo više nego što je trebalo.
 
-      Zbog toga je karoserija oblepljena u potpunosti - zaštitnom poliuretanskom folijom debljine **190 mikrona**.
+      Zato smo celu karoseriju oblepili zaštitnom poliuretanskom folijom debljine **190 mikrona**.
 
-      PPF postavlja čvrst proziran sloj na lak i upija male ogrebotine, strugotine, tragove lakih kontakata pri parkiranju, kao i prašinu i kamenčiće sa puta. Ovo je najpotrebnije za vrata, krila, branike i retrovizore: oni su neprekidno u riziku. Dobra prozirna folija gotovo da se ne primećuje - boja, sjaj i izgled karoserije ostaju isti.
+      PPF preko laka stvara čvrst, providan zaštitni sloj koji preuzima sitne ogrebotine, tragove trenja i lakših kontakata na parkingu, kao i udarce peska i kamenčića sa puta. Ova zaštita je posebno važna za vrata, blatobrane, branike i retrovizore, jer su stalno izloženi. Kvalitetna providna folija pritom je gotovo neprimetna, pa boja, sjaj i izgled karoserije ostaju nepromenjeni.
 
-      PPF ne pretvara automobil u oklopno vozilo i ne štiti od ozbiljnih udaraca ili dubokih udubljenja. Ipak, redovne gradske oštećenja, koja se vremenom akumuliraju na umornom laku, ona drži pod kontrolom.
+      PPF ne pretvara automobil u oklopno vozilo i neće ga sačuvati od jakog udarca ili dubokog udubljenja. Ali štiti od svakodnevnih gradskih oštećenja zbog kojih lak već posle nekoliko godina izgleda istrošeno.
 
-      Yaris je otišao u svom fabričkom izdanju, samo što je sada karoserija mnogo bolje pripremljena za svakodnevni gradski život.
+      Yaris je iz našeg studija izašao sa istim fabričkim izgledom, ali sa karoserijom koja je sada mnogo spremnija za svakodnevni život u gradu.
     car: Toyota Yaris GR Sport
 car: Toyota Yaris GR Sport
 year: 2026
@@ -39,17 +39,17 @@ image: image.jpg
 gallery: []
 date: 2026-08-15
 published: true
-translatedFrom: 96fd9e1b4d08483f
+translatedFrom: 8922cf56af91faf9
 ---
 
 Toyota Yaris GR Sport нашей клиентки из Белграда. Машина куплена подержанной, но в отличном состоянии, и новая владелица решила не ждать первых городских отметин, а закрыть кузов сразу.
 
-Yaris — компактная машина под город, и в городе же кузову достаётся больше всего: тесные парковки у магазинов и торговых центров, соседние автомобили, неосторожно открытые двери, тележки из супермаркета, ветки и камни из-под колёс. Обиднее всего получить вмятину или скол просто потому, что сосед по парковке открыл дверь чуть шире, чем следовало.
+Yaris это компактная машина под город, и в городе же кузову достается больше всего: тесные парковки у магазинов и торговых центров, соседние автомобили, неосторожно открытые двери, тележки из супермаркета, ветки и камни из-под колес. Обиднее всего получить вмятину или скол просто потому, что сосед по парковке открыл дверь чуть шире, чем следовало.
 
-Поэтому кузов оклеили целиком — защитной полиуретановой плёнкой толщиной **190 микрон**.
+Поэтому кузов оклеили целиком защитной полиуретановой пленкой толщиной **190 микрон**.
 
-PPF кладёт на лак прочный прозрачный слой и забирает на себя мелкие царапины, потёртости, следы лёгких парковочных контактов, дорожный песок и камни. Больше всего это нужно дверям, крыльям, бамперам и зеркалам: они в зоне риска постоянно. Хорошая прозрачная плёнка при этом почти не видна — цвет, блеск и вид кузова остаются прежними.
+PPF кладет на лак прочный прозрачный слой и забирает на себя мелкие царапины, потертости, следы легких парковочных контактов, дорожный песок и камни. Больше всего это нужно дверям, крыльям, бамперам и зеркалам: они в зоне риска постоянно. Хорошая прозрачная пленка при этом почти не видна, цвет, блеск и вид кузова остаются прежними.
 
-PPF не превращает машину в броневик и от серьёзного удара или глубокой вмятины не спасёт. Но обычные городские повреждения, из которых за пару лет складывается уставший лак, она держит.
+PPF не превращает машину в броневик и от серьезного удара или глубокой вмятины не спасет. Но обычные городские повреждения, из которых за пару лет складывается уставший лак, она держит.
 
-Yaris уехал в своём заводском виде, только теперь кузов куда лучше готов к ежедневной городской жизни.
+Yaris уехал в своем заводском виде, только теперь кузов куда лучше готов к ежедневной городской жизни.

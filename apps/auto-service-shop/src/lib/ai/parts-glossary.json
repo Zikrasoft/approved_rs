@@ -1,0 +1,121 @@
+[
+  { "sr": "amortizer", "ru": "амортизатор" },
+  { "sr": "opružna noga, amortizerska noga", "ru": "амортизационная стойка" },
+  { "sr": "šolja amortizera, nosač amortizera", "ru": "опора амортизатора" },
+  { "sr": "potporni ležaj opružne noge", "ru": "опорный подшипник стойки" },
+  { "sr": "odbojnik, odbojna guma", "ru": "отбойник" },
+  { "sr": "zaštitna manžetna, prašnik", "ru": "пыльник" },
+  { "sr": "opruga, opruga šasije", "ru": "пружина подвески" },
+  { "sr": "rame, poprečno rame, vodjica", "ru": "рычаг подвески" },
+  {
+    "sr": "rame sa ležajevima, rame sa ležištem",
+    "ru": "рычаг подвески с сайлентблоками"
+  },
+  {
+    "sr": "nosač ramena, ležište ramena, gumeni ležaj",
+    "ru": "сайлентблок рычага"
+  },
+  {
+    "sr": "nosač stabilizatora, guma stabilizatora",
+    "ru": "втулка стабилизатора"
+  },
+  {
+    "sr": "spona stabilizatora, štangla stabilizatora, šipka stabilizatora",
+    "ru": "стойка стабилизатора"
+  },
+  { "sr": "kugla, kuglasti zglob, noseći zglob", "ru": "шаровая опора" },
+  { "sr": "spona, poprečna spona", "ru": "рулевая тяга" },
+  { "sr": "kraj spone", "ru": "наконечник рулевой тяги" },
+  { "sr": "aksijalni zglob", "ru": "рулевая тяга (осевой шарнир)" },
+  { "sr": "glavčina točka", "ru": "ступица колеса" },
+  { "sr": "ležaj točka", "ru": "подшипник ступицы" },
+  {
+    "sr": "ležaj, kuglični ležaj, kuglasti ležaj",
+    "ru": "подшипник, шариковый подшипник"
+  },
+  { "sr": "ležište motora, nosač motora", "ru": "опора двигателя" },
+  { "sr": "ležište menjača, nosač menjača", "ru": "опора КПП" },
+  { "sr": "krunasta navrtka", "ru": "корончатая гайка" },
+  { "sr": "rascepka", "ru": "шплинт" },
+  {
+    "sr": "sigurnosna navrtka, sigurnosna matica",
+    "ru": "самоконтрящаяся гайка"
+  },
+  { "sr": "zavrtanj", "ru": "болт" },
+  {
+    "sr": "montažni materijal, materijal za ugradnju",
+    "ru": "монтажный комплект"
+  },
+  { "sr": "komplet, set, garnitura", "ru": "комплект" },
+  { "sr": "kočioni disk", "ru": "тормозной диск" },
+  { "sr": "doboš kočnice, kočioni doboš", "ru": "тормозной барабан" },
+  { "sr": "kočiona čeljust, kočiona klješta", "ru": "тормозной суппорт" },
+  {
+    "sr": "kočiona obloga, set kočionih obloga, pločice",
+    "ru": "тормозные колодки"
+  },
+  {
+    "sr": "kočiona papuča, set kočionih papuča",
+    "ru": "барабанные тормозные колодки"
+  },
+  {
+    "sr": "kontakt istrošenosti, senzor habanja",
+    "ru": "датчик износа тормозных колодок"
+  },
+  { "sr": "kočioni cilindar točka", "ru": "колесный тормозной цилиндр" },
+  { "sr": "glavni kočioni cilindar", "ru": "главный тормозной цилиндр" },
+  { "sr": "kočiono crevo", "ru": "тормозной шланг" },
+  { "sr": "sajla ručne kočnice", "ru": "трос стояночного тормоза" },
+  { "sr": "ručna kočnica", "ru": "стояночный тормоз" },
+  { "sr": "filter ulja, uljni filter", "ru": "масляный фильтр" },
+  {
+    "sr": "filter ulja za menjač, filter automatskog menjača",
+    "ru": "фильтр АКПП"
+  },
+  { "sr": "vazdušni filter, filter vazduha", "ru": "воздушный фильтр" },
+  {
+    "sr": "filter kabine, unutrašnji filter, filter polena",
+    "ru": "салонный фильтр"
+  },
+  { "sr": "filter goriva", "ru": "топливный фильтр" },
+  { "sr": "filter hidraulike", "ru": "гидравлический фильтр" },
+  {
+    "sr": "filter za odvajanje partikala, filter čestica",
+    "ru": "сажевый фильтр"
+  },
+  { "sr": "aktivni ugalj", "ru": "с активированным углем" },
+  { "sr": "kućište filtera", "ru": "корпус фильтра" },
+  { "sr": "hladnjak ulja", "ru": "масляный радиатор" },
+  { "sr": "korito za ulje, karter", "ru": "масляный поддон" },
+  {
+    "sr": "zaptivka, zaptivni prsten, zaptivanje",
+    "ru": "прокладка, уплотнительное кольцо"
+  },
+  { "sr": "zupčasti kaiš", "ru": "ремень ГРМ" },
+  {
+    "sr": "garnitura zupčastih kaiševa, komplet zupčastog kaiša",
+    "ru": "комплект ремня ГРМ"
+  },
+  { "sr": "kanalni kaiš, klinasti rebrasti kaiš", "ru": "поликлиновой ремень" },
+  { "sr": "klinasti kaiš", "ru": "клиновой ремень" },
+  { "sr": "španer, zatezač, zatezni valjak", "ru": "натяжитель ремня" },
+  { "sr": "vodeći valjak, skretni valjak", "ru": "обводной ролик" },
+  { "sr": "bregasta osovina", "ru": "распределительный вал" },
+  { "sr": "kompenzaciona osovina", "ru": "балансирный вал" },
+  { "sr": "pumpa za vodu, vodena pumpa", "ru": "водяной насос" },
+  { "sr": "termostat", "ru": "термостат" },
+  { "sr": "svećica", "ru": "свеча зажигания" },
+  { "sr": "grejač, grejna svećica", "ru": "свеча накаливания" },
+  { "sr": "bobina, indukcioni kalem", "ru": "катушка зажигания" },
+  { "sr": "metlica brisača, brisač", "ru": "щетка стеклоочистителя" },
+  { "sr": "akumulator", "ru": "аккумулятор" },
+  { "sr": "kvačilo, komplet kvačila", "ru": "сцепление, комплект сцепления" },
+  { "sr": "zamajac", "ru": "маховик" },
+  { "sr": "poluosovina, pogonsko vratilo", "ru": "приводной вал" },
+  { "sr": "zglob poluosovine, homokinetički zglob", "ru": "ШРУС" },
+  { "sr": "senzor, davač", "ru": "датчик" },
+  { "sr": "prednja osovina", "ru": "передняя ось" },
+  { "sr": "zadnja osovina", "ru": "задняя ось" },
+  { "sr": "levo, desno, gore, dole", "ru": "левый, правый, верхний, нижний" },
+  { "sr": "menjač, automatski menjač", "ru": "КПП, АКПП" }
+]

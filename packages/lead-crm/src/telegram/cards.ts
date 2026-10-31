@@ -1,5 +1,6 @@
 import { channelLabel } from '../channelLabels.ts';
 import { isHandleContact } from '../contactShape.ts';
+import { shownPage } from '../form.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
@@ -275,6 +276,28 @@ export function statusChangeText(lead: StoredLead, by: Role): string {
   return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
 }
 
+export function orderConflictText(lead: StoredLead & { orderId: string }) {
+  return [
+    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
+    `Сверь заказ в админке магазина: сами они не сойдутся.`,
+  ].join('\n');
+}
+
+export function leadCountAlertText(count: number, brand: string): string {
+  return [
+    `⚠️ Заявок в базе: ${count}`,
+    ``,
+    `Заметил сайт ${escapeHtml(brand)}. Если это не рост, а наплыв спама, проверь последние заявки и включи лимит запросов в Vercel Firewall.`,
+  ].join('\n');
+}
+
+export function orderStuckText(lead: StoredLead & { orderId: string }) {
+  return [
+    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
+    `Бот будет пробовать каждый день. Закрой заказ в админке магазина сам или проверь секрет магазина.`,
+  ].join('\n');
+}
+
 export function createFormatter({
   serviceLabel,
   botUsername,
@@ -324,7 +347,8 @@ export function createFormatter({
     if (lead.country)
       lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
     if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
-    if (lead.source_url) lines.push(`Страница: ${escapeHtml(lead.source_url)}`);
+    const page = lead.source_url && shownPage(lead.source_url);
+    if (page) lines.push(`Страница: ${escapeHtml(page)}`);
     if (lead.visitorId)
       lines.push(`ID посетителя: ${escapeHtml(lead.visitorId.slice(0, 100))}`);
     lines.push(``, `#заявка${adHashtag(lead, ' ')}`);

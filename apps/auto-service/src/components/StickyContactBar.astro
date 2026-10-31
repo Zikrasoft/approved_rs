@@ -23,7 +23,7 @@ const cell =
 
 <cta-reveal
   data-revealed="false"
-  class="sticky-contact fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm lg:hidden"
+  class="sticky-contact fixed inset-x-0 bottom-[var(--cookie-consent-height,0px)] z-40 border-t border-line bg-paper lg:hidden print:hidden"
   watch={CONTACT_CTA_SELECTOR}
   {...contactRegion('floating')}
 >
@@ -58,7 +58,7 @@ const cell =
     <button
       type="button"
       data-open-lead-modal
-      class="flex min-h-14 flex-col items-center justify-center gap-1 bg-signal text-paper"
+      class="flex min-h-14 flex-col items-center justify-center gap-1 bg-signal text-ink"
     >
       <Icon name="calendar" />
       <span class="spec text-[0.6875rem]">{site.header.cta}</span>
