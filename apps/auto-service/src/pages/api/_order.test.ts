@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { APIContext } from 'astro';
+import type { NotifyLead } from '@podbor/lead-crm';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 
 const notifyLead = vi.hoisted(() =>
-  vi.fn(async () => ({ stored: true, delivered: true })),
+  vi.fn<NotifyLead>(async () => ({ stored: true, delivered: true })),
 );
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
 

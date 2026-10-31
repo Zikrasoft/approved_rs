@@ -86,7 +86,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     .join('\n');
   waitUntil(
     notifyLead(
-      orderLeadSubmission(null, contact.data, summary, locale),
+      orderLeadSubmission(null, { ...contact.data, locale }, summary, locale),
       '[order]',
     ),
   );

@@ -14,10 +14,15 @@ export type CartNotice =
   | 'expired'
   | 'invalid';
 
-const REFUSAL_NOTICE: Partial<Record<CheckoutRefusal, CartNotice>> = {
+type RefusalNotice = Extract<
+  CartNotice,
+  'price-changed' | 'cart-changed' | 'unavailable'
+>;
+
+const REFUSAL_NOTICE: Partial<Record<CheckoutRefusal, RefusalNotice>> = {
   OFFER_PRICE_CHANGED: 'price-changed',
   CART_CHANGED: 'cart-changed',
 };
 
-export const refusalNotice = (code: CheckoutRefusal): CartNotice =>
+export const refusalNotice = (code: CheckoutRefusal): RefusalNotice =>
   REFUSAL_NOTICE[code] ?? 'unavailable';
