@@ -17,7 +17,10 @@ export const MAX_LEAD_TIME_DAYS = 365;
 
 export const manualOfferSchema = z
   .strictObject({
-    cost_price: z.number().positive().max(MAX_MANUAL_COST_PRICE),
+    cost_price: z
+      .number()
+      .transform(Math.round)
+      .pipe(z.number().min(1).max(MAX_MANUAL_COST_PRICE)),
     stock_quantity: z.number().int().min(0).max(MAX_MANUAL_STOCK),
     lead_time_days: z.number().int().min(0).max(MAX_LEAD_TIME_DAYS),
   })

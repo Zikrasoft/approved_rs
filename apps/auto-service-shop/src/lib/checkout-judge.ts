@@ -51,7 +51,7 @@ const offerRefusal = (
   item: JudgedItem,
   quote: Quote | undefined,
 ): JudgedRefusal | null => {
-  if (!quote) {
+  if (!quote || quote.unit_price <= 0) {
     return 'OFFER_MISSING';
   }
   if (orderCap(quote) < Number(item.quantity)) {

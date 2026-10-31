@@ -32,7 +32,7 @@ const EMPTY: Draft = { cost_price: '', stock_quantity: '', lead_time_days: '' };
 
 const INPUT_LIMITS: Record<Field, { min: number; max: number; step: number }> =
   {
-    cost_price: { min: 0.01, max: 10_000_000, step: 0.01 },
+    cost_price: { min: 1, max: 10_000_000, step: 1 },
     stock_quantity: { min: 0, max: 100_000, step: 1 },
     lead_time_days: { min: 0, max: 365, step: 1 },
   };

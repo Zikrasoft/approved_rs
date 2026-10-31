@@ -45,6 +45,7 @@ export const storeOffers = (rows: PricedOfferRow[]): PartOffer[] =>
         lead_time_days,
       }),
     )
+    .filter(({ price }) => price > 0)
     .sort(
       (a, b) =>
         inStock(b) - inStock(a) ||
