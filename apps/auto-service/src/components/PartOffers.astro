@@ -10,7 +10,8 @@ import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
-import { rankOffers } from '@podbor/catalog-contract/availability';
+import { formatMoney } from '@/utils/money';
+import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 
 interface Props {
   page: PartPageEntry;
@@ -31,7 +32,9 @@ const part = {
 };
 const closed = !shopOpen();
 const priced = page.offers.length > 0 && !closed;
-const [best, ...others] = rankOffers(page.offers);
+const summary = offerSummary(page.offers);
+const { best, others } = summary;
+const localeTag = BCP47_BY_LOCALE[locale];
 ---
 
 {
@@ -39,26 +42,28 @@ const [best, ...others] = rankOffers(page.offers);
     <part-offers
       class="card flex flex-col gap-4 border-transparent bg-shade p-5 sm:p-6"
       {...(priced ? {} : { hidden: '' })}
-      {...contactCta}
       data-preview={closed ? '' : undefined}
       data-id={page.id}
-      data-locale-tag={BCP47_BY_LOCALE[locale]}
+      data-locale-tag={localeTag}
       data-availability={JSON.stringify(copy.leadTime)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
       data-more-label={copy.moreOffers}
+      data-more-cheaper-label={copy.moreOffersCheaper}
       {...part}
     >
       <h2 class="text-block font-semibold">
         <slot name="heading">{copy.offersHeading}</slot>
       </h2>
       <ul class="flex flex-col" data-offers>
-        {best && <OfferRow offer={best} />}
+        {best && <OfferRow offer={best} inFlow />}
       </ul>
       <details class="group/more" data-more hidden={others.length === 0}>
         <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
           <span data-more-count>
-            {copy.moreOffers.replace('{count}', String(others.length))}
+            {moreOffersLabel(summary, copy, (offer) =>
+              formatMoney(offer.price, offer.currency, localeTag),
+            )}
           </span>
           <Icon
             name="chevronDown"

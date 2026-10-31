@@ -1,5 +1,9 @@
 import type { PartOffer } from '@podbor/catalog-contract';
-import { bestOffer, isBuyable } from '@podbor/catalog-contract/availability';
+import {
+  isBuyable,
+  rankOffers,
+  type RankableOffer,
+} from '@podbor/catalog-contract/availability';
 
 export type BestPrice = {
   id: string;
@@ -11,20 +15,49 @@ export type BestPrice = {
   leadDays: number;
 };
 
+export function offerSummary<Offer extends RankableOffer>(offers: Offer[]) {
+  const [best = null, ...others] = rankOffers(offers);
+  const cheaper =
+    others
+      .filter((offer) => isBuyable(offer) && best && offer.price < best.price)
+      .sort((a, b) => a.price - b.price)[0] ?? null;
+  return {
+    best,
+    others,
+    cheaper,
+    startsFrom:
+      best !== null &&
+      others.every(({ price }) => price >= best.price) &&
+      others.some(({ price }) => price > best.price),
+  };
+}
+
+export type MoreOffersCopy = { moreOffers: string; moreOffersCheaper: string };
+
+export const moreOffersLabel = <Offer extends RankableOffer>(
+  { others, cheaper }: { others: Offer[]; cheaper: Offer | null },
+  copy: MoreOffersCopy,
+  money: (offer: Offer) => string,
+): string =>
+  (cheaper
+    ? copy.moreOffersCheaper.replace('{price}', money(cheaper))
+    : copy.moreOffers
+  ).replace('{count}', String(others.length));
+
 export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
-  const offers = pages.flatMap(({ offers }) => offers);
-  const picked = bestOffer(offers);
-  if (!picked) {
+  const { best, startsFrom } = offerSummary(
+    pages.flatMap(({ offers }) => offers),
+  );
+  if (!best) {
     return null;
   }
   return {
-    id: picked.id,
-    price: picked.price,
-    currency: picked.currency,
-    startsFrom:
-      offers.length > 1 && offers.every(({ price }) => price >= picked.price),
-    inStock: picked.stock_quantity > 0,
-    buyable: isBuyable(picked),
-    leadDays: picked.lead_time_days,
+    id: best.id,
+    price: best.price,
+    currency: best.currency,
+    startsFrom,
+    inStock: best.stock_quantity > 0,
+    buyable: isBuyable(best),
+    leadDays: best.lead_time_days,
   };
 }

@@ -1,5 +1,5 @@
 import type { PartOffer } from '@podbor/catalog-contract/cart-wire';
-import { rankOffers } from '@podbor/catalog-contract/availability';
+import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
@@ -47,20 +47,30 @@ export function definePartOffers(tagName = 'part-offers'): void {
           { signal: AbortSignal.timeout(OFFERS_TIMEOUT_MS) },
         );
         this.removeAttribute('aria-busy');
-        if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
-        const [best, ...others] = rankOffers(outcome.offers);
-        this.querySelector('[data-offers]')?.replaceChildren(this.row(best));
+        if (outcome?.kind !== 'offers') return;
+        const summary = offerSummary(outcome.offers);
+        const { best, others } = summary;
+        if (!best) return;
+        const shown = this.querySelector('[data-offers] > li');
+        if (shown) this.fillRow(shown, best);
+        else
+          this.querySelector('[data-offers]')?.replaceChildren(this.row(best));
         this.querySelector('[data-more-offers]')?.replaceChildren(
           ...others.map((offer) => this.row(offer, true)),
         );
         const more = this.querySelector<HTMLElement>('[data-more]');
         if (more) more.hidden = others.length === 0;
+        const { localeTag = 'sr' } = this.dataset;
         fill(
           this,
           '[data-more-count]',
-          (this.dataset.moreLabel ?? '').replace(
-            '{count}',
-            String(others.length),
+          moreOffersLabel(
+            summary,
+            {
+              moreOffers: this.dataset.moreLabel ?? '',
+              moreOffersCheaper: this.dataset.moreCheaperLabel ?? '',
+            },
+            (offer) => formatMoney(offer.price, offer.currency, localeTag),
           ),
         );
         if (this.hidden) {
@@ -73,11 +83,20 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       row(offer: PartOffer, secondary = false): Node {
-        const { localeTag = 'sr', availability = '' } = this.dataset;
         const template = this.querySelector<HTMLTemplateElement>(
           'template[data-offer]',
         )!;
         const row = template.content.cloneNode(true) as DocumentFragment;
+        this.fillRow(row, offer);
+        if (secondary)
+          row
+            .querySelector('[data-buy]')
+            ?.classList.replace('btn-primary', 'btn-secondary');
+        return row;
+      }
+
+      fillRow(row: ParentNode, offer: PartOffer): void {
+        const { localeTag = 'sr', availability = '' } = this.dataset;
         const { stock, lead, buyable } = offerAvailability(
           offer,
           JSON.parse(availability) as LeadTimeCopy,
@@ -95,8 +114,6 @@ export function definePartOffers(tagName = 'part-offers'): void {
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
         buy.hidden = !buyable;
         buy.setAttribute('data-offer-id', offer.id);
-        if (secondary) buy.classList.replace('btn-primary', 'btn-secondary');
-        return row;
       }
 
       linkToCart(button: HTMLButtonElement): void {
