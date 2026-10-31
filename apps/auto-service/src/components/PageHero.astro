@@ -15,7 +15,7 @@ interface Props {
   service?: ServiceSlug;
   actions?: boolean;
   compact?: boolean;
-  clampLead?: boolean;
+  desktopLead?: boolean;
 }
 
 const {
@@ -26,7 +26,7 @@ const {
   service,
   actions = true,
   compact = false,
-  clampLead = false,
+  desktopLead = false,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -72,7 +72,7 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
         <p
           class:list={[
             'max-w-2xl text-base leading-relaxed text-muted sm:text-lg',
-            clampLead && 'max-sm:line-clamp-2',
+            desktopLead && 'max-sm:hidden',
           ]}
         >
           {lead}
