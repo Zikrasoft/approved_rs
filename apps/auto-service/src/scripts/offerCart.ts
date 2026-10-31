@@ -169,10 +169,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         new IntersectionObserver(([entry]) => {
           bar.hidden =
             entry!.isIntersecting || entry!.boundingClientRect.top < 0;
-          document.body.toggleAttribute(
-            'data-sticky-bar',
-            !bar.hidden && entry!.boundingClientRect.height > 0,
-          );
+          document.body.toggleAttribute('data-sticky-bar', !bar.hidden);
         }).observe(form);
       }
 
