@@ -231,8 +231,8 @@ medusaIntegrationTestRunner({
         expect(await cars('N47')).toEqual(['vehicle:N47D20A']);
       });
 
-      it('offers no page for a solitary Vehicle', async () => {
-        expect(await cars('e90')).not.toContain('vehicle:M47D20');
+      it('offers a page for a solitary Vehicle with enough Parts', async () => {
+        expect(await cars('e90')).toContain('vehicle:M47D20');
       });
 
       it('offers no page for fewer than three published Parts', async () => {
@@ -240,8 +240,11 @@ medusaIntegrationTestRunner({
         expect(await cars('audi')).toEqual([]);
       });
 
-      it('offers no Vehicle page when no other Vehicle of its Model has enough Parts', async () => {
-        expect(await cars('g20')).toEqual(['model:g20-320d']);
+      it('offers a Vehicle page only to a Vehicle with enough Parts of its own', async () => {
+        expect(await cars('g20')).toEqual([
+          'model:g20-320d',
+          'vehicle:B47D20B',
+        ]);
       });
 
       it('says whether the Model a listing is scoped to, and its Make, have a page', async () => {
