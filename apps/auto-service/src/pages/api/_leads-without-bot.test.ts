@@ -61,7 +61,12 @@ describe('a Lead posted while the CRM bot is misconfigured', () => {
       cookies: { get: () => undefined },
     } as unknown as Parameters<typeof leads>[0]);
     await contactClick({
-      request: request(new URLSearchParams({ channel: 'whatsapp' })),
+      request: request(
+        new URLSearchParams({
+          channel: 'whatsapp',
+          visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
+        }),
+      ),
     } as unknown as Parameters<typeof contactClick>[0]);
     await Promise.all(pending);
 
