@@ -1,3 +1,5 @@
+import { fromRussianLayout } from './keyboardLayout.ts';
+
 const VIN_LETTERS = 'A-HJ-NPR-Z';
 
 const MAKER_HAS_A_LETTER = `(?=[0-9]{0,2}[${VIN_LETTERS}])`;
@@ -27,14 +29,6 @@ const latinText = (text: string): string =>
     .toUpperCase()
     .replace(/[АВЕКМНОРСТУХ]/g, (letter) => LATIN_LOOKALIKES[letter]!)
     .replace(/^\s*VIN(?:\b\W*|(?=[A-Z0-9]{17}\s*$))/, '');
-
-const RUSSIAN_KEYS = 'йцукенгшщзфывапролдячсмить';
-const LATIN_KEYS = 'qwertyuiopasdfghjklzxcvbnm';
-
-const fromRussianLayout = (text: string): string =>
-  text
-    .toLowerCase()
-    .replace(/[а-я]/g, (key) => LATIN_KEYS[RUSSIAN_KEYS.indexOf(key)] ?? key);
 
 export const vinWhileTyping = (text: string): string =>
   text.replace(/[\s.-]+/g, '').toUpperCase();

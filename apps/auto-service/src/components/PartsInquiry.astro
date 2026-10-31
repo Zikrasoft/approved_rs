@@ -2,8 +2,8 @@
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
-import { MAX_PART_QUANTITY } from '@/scripts/partsList';
 import Icon from './Icon.astro';
+import QuantityStepper from './QuantityStepper.astro';
 import VinInquiryForm from './VinInquiryForm.astro';
 
 interface Props {
@@ -37,7 +37,7 @@ const copy = content(locale).pages.partsInquiry;
       <span data-parts-car-name></span>
       <button
         type="button"
-        class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink"
+        class="btn-icon -mr-2"
         aria-label={copy.listCarRemoveLabel}
         data-parts-car-remove
       >
@@ -48,21 +48,16 @@ const copy = content(locale).pages.partsInquiry;
     <template data-parts-item>
       <li class="flex flex-wrap items-center justify-between gap-x-2">
         <a
-          class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink underline-offset-2 [overflow-wrap:anywhere] hover:text-signal-ink hover:underline"
+          class="min-w-0 flex-1 py-2 text-sm leading-snug text-ink link-quiet [overflow-wrap:anywhere]"
           data-part-link></a>
-        <input
-          type="number"
-          inputmode="numeric"
-          min="1"
-          max={MAX_PART_QUANTITY}
-          step="1"
-          class="field spec min-h-11 w-14 shrink-0 px-2 py-1.5 text-center"
+        <QuantityStepper
+          role="group"
           aria-label={copy.listQuantityLabel}
           data-part-quantity
         />
         <button
           type="button"
-          class="-mr-2 flex size-11 shrink-0 items-center justify-center text-muted transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink"
+          class="btn-icon -mr-2"
           aria-label={copy.listRemoveLabel}
           data-part-remove
         >

@@ -4,10 +4,9 @@ import { content } from '@/i18n/content';
 import CartAddonToggle from './CartAddonToggle.astro';
 import Icon from './Icon.astro';
 import LineItem from './LineItem.astro';
+import QuantityStepper from './QuantityStepper.astro';
 
 const copy = content(localeFrom(Astro.url.pathname)).shopCart;
-const stepper =
-  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
 
 <template data-line>
@@ -16,7 +15,7 @@ const stepper =
     <button
       slot="aside"
       type="button"
-      class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
+      class="btn-icon -my-2 text-ink-2 aria-busy:opacity-40"
       aria-label={copy.removeLabel}
       data-remove
     >
@@ -31,27 +30,7 @@ const stepper =
       <span>{copy.unavailableTag}</span>
     </p>
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center rounded-control border border-line-field">
-        <button
-          type="button"
-          class={stepper}
-          aria-label={copy.decreaseLabel}
-          data-decrease
-        >
-          <Icon name="minus" />
-        </button>
-        <span
-          class="spec min-w-8 text-center text-sm font-semibold text-ink"
-          data-quantity></span>
-        <button
-          type="button"
-          class={stepper}
-          aria-label={copy.increaseLabel}
-          data-increase
-        >
-          <Icon name="plus" />
-        </button>
-      </div>
+      <QuantityStepper />
       <div class="flex flex-col items-end text-right">
         <span
           class="spec font-semibold text-ink transition-opacity group-aria-busy:opacity-40"

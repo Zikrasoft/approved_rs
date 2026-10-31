@@ -65,9 +65,9 @@ export async function POST({
   if (!token) {
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
   }
-  const form = await readForm(request);
-  if (form instanceof Response) return form;
-  const order = catalogueIdSchema.safeParse(form?.get('order'));
+  const read = await readForm(request);
+  if ('response' in read) return read.response;
+  const order = catalogueIdSchema.safeParse(read.value?.get('order'));
   if (!order.success) {
     return new Response('Bad order id', { status: 400 });
   }

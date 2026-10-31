@@ -6,7 +6,7 @@ const lifts = (source: string) =>
   source.split(`var(${COOKIE_CONSENT_HEIGHT_VAR},`).length - 1;
 
 describe('bars fixed to the bottom of the screen', () => {
-  it.each([['FloatingContactWidget', floatingContactWidget, 1]])(
+  it.each([['FloatingContactWidget', floatingContactWidget, 2]])(
     '%s rises above the cookie banner',
     (_, source, sites) => {
       expect(lifts(source)).toBe(sites);

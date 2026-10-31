@@ -79,7 +79,7 @@ const { stock, lead, buyable } = offer
       ]}
       data-ask
     >
-      {copy.askSupplyCta}
+      {buyable ? copy.orderViaManagerCta : copy.askSupplyCta}
       <Icon name="arrowRight" />
     </a>
   </div>

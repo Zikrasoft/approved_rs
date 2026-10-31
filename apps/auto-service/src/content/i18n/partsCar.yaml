@@ -36,7 +36,7 @@ car:
   kitHeading: Комплект для ТО
   kitLead: Детали на одно ТО в нужном количестве.
   kitAdd: Уточнить у менеджера по VIN
-  kitCart: Добавить комплект в корзину
+  kitCart: Комплект в корзину
   kitAdding: Добавляем в корзину…
   matchesHeading: Расходники по допускам производителя
   matchesLead: Масла, лампы и щетки, которые соответствуют требованиям к двигателю и кузову этого автомобиля.
@@ -109,7 +109,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: 88e37203d56c03aa
+translatedFrom: 1bc476617b08137d
 translations:
   sr:
     vin:
@@ -148,7 +148,7 @@ translations:
       notYourCar: Ovo nije vaš automobil? Proverite VIN ili pošaljite upit i proverićemo ručno.
       vinSteering: Prema VIN-u, vaš automobil ima {side} volan, pa su delovi za drugi položaj volana sakriveni.
       kitHeading: Komplet za redovan servis
-      kitLead: Po jedan odgovarajući deo za svaku stavku redovnog servisa, uz količinu potrebnu za jednu zamenu.
+      kitLead: Delovi za jedan redovan servis u potrebnoj količini.
       kitAdd: Proveri sa savetnikom po VIN-u
       kitCart: Dodaj komplet u korpu
       kitAdding: Dodajemo u korpu…
@@ -177,7 +177,7 @@ translations:
         right: desni
     fitment:
       quantity: '{count} kom.'
-      quantityOne: '{count} komad'
+      quantityOne: '{count} kom.'
       axle:
         front: prednja osovina
         rear: zadnja osovina
@@ -260,7 +260,7 @@ translations:
       notYourCar: Not your car? Check the VIN or submit a request and we'll look into it manually.
       vinSteering: Your VIN identifies your car as {side} drive, so parts for the opposite steering position are hidden.
       kitHeading: Service kit
-      kitLead: One compatible part for each routine service item, with the quantity needed for one service.
+      kitLead: The parts you need for one service, in the right quantities.
       kitAdd: Ask our team to check by VIN
       kitCart: Add kit to basket
       kitAdding: Adding to basket…
@@ -289,7 +289,7 @@ translations:
         right: right-hand
     fitment:
       quantity: '{count} pcs'
-      quantityOne: '{count} piece'
+      quantityOne: '{count} pcs'
       axle:
         front: front axle
         rear: rear axle

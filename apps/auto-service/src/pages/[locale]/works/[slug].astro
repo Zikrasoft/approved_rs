@@ -17,7 +17,7 @@ import {
   workPrice,
 } from '@/utils/works';
 import { partPagesForBuild } from '@/utils/catalogueEnv';
-import { formatMoney } from '@/utils/money';
+import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import Icon from '@/components/Icon.astro';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { workSchema } from '@/utils/schema';
@@ -68,7 +68,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
 ---
 
 <Shell
-  title={`${title} — ${pages.works.detailMetaSuffix}`}
+  title={`${title}, ${pages.works.detailMetaSuffix}`}
   description={`${title}. ${pages.works.metaDescription}`}
   jsonLd={[schema]}
 >
@@ -134,7 +134,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
             <li>
               <Image
                 src={image}
-                alt={`${title} — ${i + 1}`}
+                alt={`${title}, ${i + 1}`}
                 widths={[400, 600, 900]}
                 sizes="(min-width: 640px) 45vw, calc(100vw - 2.5rem)"
                 loading="lazy"
@@ -189,7 +189,7 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
             <p class="flex flex-wrap items-baseline justify-between gap-x-4 text-base">
               <span class="text-muted">{pages.works.priceLabel}</span>
               <span class="spec font-semibold text-ink">
-                {formatMoney(price, 'RSD', BCP47_BY_LOCALE[locale])}
+                {formatMoney(price, PRICE_CURRENCY, BCP47_BY_LOCALE[locale])}
               </span>
             </p>
           )}

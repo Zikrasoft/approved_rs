@@ -2,7 +2,7 @@ metaTitle: Корзина, CarLab
 metaDescription: Запчасти, которые вы выбрали в каталоге CarLab. Оплата наличными при получении на СТО в Белграде.
 heading: Корзина
 cartLink: Корзина
-partsListNote: Запчасти без цены лежат в заявке и в этот заказ не попадут. Отправьте заявку отдельно, и мы сообщим цену и срок.
+partsListNote: Запчасти без цены лежат в заявке, отдельно от корзины. Отправьте заявку, и мы сообщим цену и срок.
 loading: Проверяем цены и наличие
 emptyHeading: В корзине пусто
 emptyBody: Откройте страницу запчасти в каталоге и нажмите «В корзину».
@@ -32,17 +32,17 @@ commentPlaceholder: Например, когда удобно забрать
 submitLabel: Оформить заказ
 consentError: Без согласия мы не сможем оформить заказ
 submitError: Заказ не отправился. Проверьте связь и попробуйте еще раз
-submitErrorContacts: 'Или отправьте заказ в WhatsApp, список уже в сообщении. Можно и позвонить или написать в другой мессенджер:'
+submitErrorContacts: 'Или отправьте заказ в WhatsApp, список уже в сообщении. Еще можно позвонить или написать в другой мессенджер:'
 orderMessage: 'Здравствуйте! Хочу заказать:'
 checkoutBlocked: 'Сейчас нельзя купить: {names}. Уберите позицию или отправьте ее заявкой, и заказ можно будет оформить.'
 notices:
-  priceChanged: 'Ваш контакт и список у нас: менеджер напишет сам. Пока вы оформляли заказ, цена изменилась, и мы обновили корзину. Можно и оформить заново, проверив сумму.'
-  unavailable: 'Ваш контакт и список у нас: менеджер напишет сам. Одной из позиций больше нет в нужном количестве. Можно и убрать ее и оформить заказ заново.'
-  unreachable: 'Ваш контакт и список у нас: менеджер напишет сам. Заказ сейчас не оформился. Можно и попробовать еще раз через минуту.'
+  priceChanged: 'Ваш контакт и список у нас: менеджер напишет сам. Пока вы оформляли заказ, цена изменилась, и мы обновили корзину. Проверьте сумму и оформите заказ заново.'
+  unavailable: 'Ваш контакт и список у нас: менеджер напишет сам. Одной из позиций больше нет в нужном количестве. Уберите ее и оформите заказ заново.'
+  unreachable: 'Ваш контакт и список у нас: менеджер напишет сам. Заказ сейчас не оформился. Попробуйте еще раз через минуту.'
   expired: 'Ваш контакт и список у нас: менеджер напишет сам. Эта корзина устарела, и заказ по ней не оформлен.'
   gone: Эта корзина устарела, поэтому мы перенесли ее запчасти в заявку. Отправьте заявку, и мы сообщим цену и срок.
   invalid: Не получилось распознать контакт. Укажите номер телефона или ник в Telegram и оформите заказ еще раз.
-  cartChanged: 'Ваш контакт и список у нас: менеджер напишет сам. Корзина изменилась в другой вкладке. Можно и оформить заново, проверив позиции и сумму.'
+  cartChanged: 'Ваш контакт и список у нас: менеджер напишет сам. Корзина изменилась в другой вкладке. Проверьте позиции и сумму и оформите заказ заново.'
   repriced: С прошлого раза цена изменилась. Проверьте сумму перед оформлением.
   offline: Магазин не ответил, корзина осталась как была. Попробуйте еще раз через минуту.
   stockLimit: Больше этой запчасти сейчас нет. В корзине уже все, что есть.
@@ -64,7 +64,7 @@ fallbackRetry: Попробовать еще раз
 fallbackCta: Отправить заявкой
 noscriptBody: Корзина работает только с включенным JavaScript. Отправьте заявку, и мы сами сообщим цену и срок.
 addonTemplate: 'Добавить: {service}'
-addonPickup: Делаем при выдаче в сервисе CarLab
+addonPickup: Сделаем в сервисе CarLab, когда приедете за заказом
 addonInCart: Услугу можно добавить в корзине.
 installationLabel: Установка в сервисе CarLab
 installationFree: Установка бесплатно
@@ -72,7 +72,7 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: 8869d5cf028acdb2
+translatedFrom: e234dba9c373a9ee
 translations:
   sr:
     metaTitle: Korpa, CarLab
@@ -118,17 +118,17 @@ translations:
     submitLabel: Pošalji porudžbinu
     consentError: Bez saglasnosti ne možemo da prihvatimo porudžbinu
     submitError: Porudžbina nije poslata. Proverite vezu i pokušajte ponovo
-    submitErrorContacts: 'Ili pošaljite porudžbinu porukom, spisak je već u njoj:'
+    submitErrorContacts: 'Ili pošaljite porudžbinu putem WhatsApp-a, spisak je već u poruci. Možete nas i pozvati ili nam pisati preko druge aplikacije:'
     orderMessage: 'Dobar dan! Želim da poručim:'
     checkoutBlocked: 'Trenutno nije moguće kupiti: {names}. Uklonite stavku ili pošaljite upit za nju da biste mogli da pošaljete porudžbinu.'
     notices:
-      priceChanged: Cena se promenila dok ste popunjavali porudžbinu. Ažurirali smo korpu, proverite ukupan iznos i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
-      unavailable: Jedan od artikala više nije dostupan u traženoj količini. Uklonite ga i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
-      unreachable: Slanje porudžbine nije uspelo. Pokušajte ponovo za minut. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
-      expired: Ova korpa je zastarela i porudžbina nije poslata. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
-      gone: Ova korpa je zastarela. Ponovo dodajte delove sa stranica kataloga.
+      priceChanged: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Dok ste slali porudžbinu, cena se promenila, pa smo ažurirali korpu. Možete i da proverite ukupan iznos i ponovo pošaljete porudžbinu.
+      unavailable: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Jedan od artikala više nije dostupan u traženoj količini. Možete i da ga uklonite i ponovo pošaljete porudžbinu.
+      unreachable: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Porudžbina trenutno nije uspela. Možete i da pokušate ponovo za minut.
+      expired: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Ova korpa više nije važeća i porudžbina nije poslata.
+      gone: Ova korpa više nije važeća, pa smo delove iz nje prebacili u upit. Pošaljite upit, a mi ćemo vam javiti cenu i rok nabavke.
       invalid: Kontakt nije prepoznat. Unesite broj telefona ili korisničko ime na Telegramu i ponovo pošaljite porudžbinu.
-      cartChanged: Sadržaj korpe se promenio. Proverite artikle i ukupan iznos i ponovo pošaljite porudžbinu. Imamo vaš kontakt i spisak, naš saradnik će vam se javiti.
+      cartChanged: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Korpa je izmenjena u drugoj kartici pregledača. Možete i da proverite artikle i ukupan iznos i ponovo pošaljete porudžbinu.
       repriced: Cena se promenila od vaše poslednje posete. Proverite iznos pre slanja porudžbine.
       offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
       stockLimit: Nema više komada ovog dela na stanju. U korpi je već cela dostupna količina.
@@ -193,17 +193,17 @@ translations:
     submitLabel: Place order
     consentError: We need your consent to place the order
     submitError: Your order wasn't sent. Check your connection and try again
-    submitErrorContacts: 'Or send your order as a message. Your items are already included:'
+    submitErrorContacts: 'Or send your order via WhatsApp. Your parts list is already in the message. You can also call us or use another messaging app:'
     orderMessage: "Hi! I'd like to order:"
     checkoutBlocked: 'Currently unavailable to buy: {names}. Remove the item or move it to a parts enquiry to place your order.'
     notices:
-      priceChanged: The price changed while you were placing your order. We've updated your cart. Please check the total and place your order again. We have your contact details and item list, and our team will message you.
-      unavailable: One of your items is no longer available in the quantity you need. Please remove it and place your order again. We have your contact details and item list, and our team will message you.
-      unreachable: We couldn't place your order. Please try again in a minute. We have your contact details and item list, and our team will message you.
-      expired: This cart has expired, and no order was placed. We have your contact details and item list, and our team will message you.
-      gone: This cart has expired. Please add your parts again from the catalogue.
+      priceChanged: We have your contact details and parts list, and our team will get in touch. A price changed while you were placing your order, so we've updated your cart. You can also check the total and place your order again.
+      unavailable: We have your contact details and parts list, and our team will get in touch. One item is no longer available in the quantity you need. You can also remove it and place your order again.
+      unreachable: We have your contact details and parts list, and our team will get in touch. Your order couldn't be placed just now. You can also try again in a minute.
+      expired: We have your contact details and parts list, and our team will get in touch. This cart has expired, and the order hasn't been placed.
+      gone: This cart has expired, so we've moved the parts to an inquiry. Send the inquiry, and we'll confirm the price and lead time.
       invalid: We couldn't recognise your contact details. Enter a phone number or Telegram username and place your order again.
-      cartChanged: Your cart has changed. Please check the items and total, then place your order again. We have your contact details and item list, and our team will message you.
+      cartChanged: We have your contact details and parts list, and our team will get in touch. Your cart was changed in another tab. You can also check the items and total and place your order again.
       repriced: A price has changed since your last visit. Check the total before placing your order.
       offline: The shop didn't respond. Your cart hasn't changed. Please try again in a minute.
       stockLimit: There are no more of this part available right now. Your cart already contains all available stock.

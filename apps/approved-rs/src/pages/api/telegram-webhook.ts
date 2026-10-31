@@ -917,9 +917,12 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  const body = await readJson(request);
-  if ('response' in body) return ACK;
-  const parsed = updateSchema.safeParse(body.value);
+  const read = await readJson(request);
+  if ('response' in read) {
+    console.warn('[telegram-webhook] ignoring an update past the size cap');
+    return ACK;
+  }
+  const parsed = updateSchema.safeParse(read.value);
   if (!parsed.success) {
     console.warn('[telegram-webhook] ignoring unparseable update', {
       issues: parsed.error.issues,

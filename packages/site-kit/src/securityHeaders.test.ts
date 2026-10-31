@@ -17,6 +17,10 @@ describe('the content security policy', () => {
     },
   );
 
+  it('sends violations to the site report route', () => {
+    expect(sources('report-uri')).toEqual(['/api/csp-report']);
+  });
+
   it('keeps plugins out and the base and form targets on the site', () => {
     expect(sources('object-src')).toEqual(["'none'"]);
     expect(sources('base-uri')).toEqual(["'self'"]);

@@ -1,6 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
+import { readForm } from '@podbor/lead-crm';
 import {
   galleryImageType,
   galleryTargetSchema,
@@ -17,6 +18,7 @@ import {
 } from '@/lib/githubContents';
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 10 * MAX_PHOTO_BYTES;
 
 function backToForm(
   request: Request,
@@ -42,7 +44,9 @@ export async function POST({
     return new Response('Открой эту страницу через Keystatic', { status: 401 });
   }
 
-  const form = await request.formData().catch(() => new FormData());
+  const read = await readForm(request, MAX_UPLOAD_BYTES);
+  if ('response' in read) return read.response;
+  const form = read.value ?? new FormData();
   const target = galleryTargetSchema.safeParse({
     dir: form.get('dir'),
     slug: form.get('slug'),

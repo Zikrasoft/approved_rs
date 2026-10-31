@@ -11,16 +11,17 @@ import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 import PickupLine from './PickupLine.astro';
-import ContactChannels from './ContactChannels.astro';
+import PartAskRow from './PartAskRow.astro';
 import { formatMoney } from '@/utils/money';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 
 interface Props {
   page: PartPageEntry;
   demoted?: boolean;
+  replaced?: string;
 }
 
-const { page, demoted = false } = Astro.props;
+const { page, demoted = false, replaced } = Astro.props;
 const ownHeading = Astro.slots.has('heading');
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
@@ -37,10 +38,8 @@ const priced = page.offers.length > 0 && !closed;
 const summary = offerSummary(page.offers);
 const { best, others } = summary;
 const localeTag = BCP47_BY_LOCALE[locale];
-const askHref = PathBuilder.partsInquiry(
-  locale,
-  `${page.brand.name} ${page.value}`,
-);
+const named = `${page.brand.name} ${page.value}`;
+const askHref = PathBuilder.partsInquiry(locale, named);
 ---
 
 {
@@ -69,20 +68,38 @@ const askHref = PathBuilder.partsInquiry(
       <ul class="flex flex-col" data-offers>
         {best && <OfferRow offer={best} inFlow askHref={askHref} />}
       </ul>
-      <PickupLine />
-      <div class="flex flex-col gap-2 border-t border-line pt-4">
-        <p class="text-sm font-semibold text-ink">{copy.askAboutPart}</p>
-        <vin-prefill class="block" data-template={copy.askAboutPartVin}>
-          <ContactChannels
-            only={['whatsapp', 'telegram']}
-            prefill={copy.askAboutPartMessage.replace(
-              '{part}',
-              `${page.brand.name} ${page.value}`,
-            )}
-            class="grid-cols-2"
-          />
-        </vin-prefill>
+      <div aria-live="polite">
+        <div data-status="added" hidden class={status}>
+          <p>{copy.addedNotice}</p>
+          <a
+            href={PathBuilder.partsCart(locale)}
+            class="btn btn-primary btn-block"
+          >
+            {copy.addedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+        <p data-status="stock-limit" hidden class={status}>
+          {copy.stockLimitNotice}
+        </p>
+        <p data-status="inquiry" hidden class={status}>
+          <span>
+            {copy.inquiryNotice}{' '}
+            <a
+              href={PathBuilder.partsInquiry(locale)}
+              class="link font-semibold"
+            >
+              {copy.inquiryCta}
+            </a>
+          </span>
+        </p>
       </div>
+      <PickupLine />
+      <PartAskRow
+        part={named}
+        question={copy.askAboutPartMessage}
+        replaced={replaced}
+      />
       <details class="group/more" data-more hidden={others.length === 0}>
         <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
           <span data-more-count>
@@ -111,40 +128,9 @@ const askHref = PathBuilder.partsInquiry(
       <template data-offer>
         <OfferRow askHref={askHref} />
       </template>
-      <div aria-live="polite">
-        <div data-status="added" hidden class={status}>
-          <p>{copy.addedNotice}</p>
-          <a
-            href={PathBuilder.partsCart(locale)}
-            class="btn btn-primary btn-block"
-          >
-            {copy.addedCta}
-            <Icon name="arrowRight" />
-          </a>
-        </div>
-        <p data-status="stock-limit" hidden class={status}>
-          {copy.stockLimitNotice}
-        </p>
-        <p data-status="inquiry" hidden class={status}>
-          <span>
-            {copy.inquiryNotice}{' '}
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              class="font-semibold text-signal-ink underline underline-offset-2"
-            >
-              {copy.inquiryCta}
-            </a>
-          </span>
-        </p>
-      </div>
     </part-offers>
   )
 }
-<script>
-  import { defineVinPrefill } from '@/scripts/vinPrefill';
-
-  defineVinPrefill();
-</script>
 <script is:inline>
   setTimeout(() => {
     document.documentElement.dataset.offersLate = '';
@@ -169,15 +155,21 @@ const askHref = PathBuilder.partsInquiry(
         <a
           href={askHref}
           {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-          class:list={[
-            'btn w-full sm:w-auto',
-            demoted ? 'btn-secondary' : 'btn-primary',
-          ]}
+          class:list={['btn w-full', demoted ? 'btn-secondary' : 'btn-primary']}
         >
           {copy.priceOnRequestCta}
         </a>
       </parts-list-add>
-      {!demoted && <PickupLine />}
+      {!demoted && (
+        <>
+          <PickupLine />
+          <PartAskRow
+            part={named}
+            question={copy.askAboutPriceMessage}
+            replaced={replaced}
+          />
+        </>
+      )}
     </div>
   )
 }

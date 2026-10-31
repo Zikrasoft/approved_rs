@@ -403,8 +403,12 @@ Both new apps follow the same shape, and a third should too:
   which merges into the form Lead on the visitor id.
 - **The lead modal takes its service from the trigger.** `data-lead-service` on
   a button sets the form's `service` when the modal opens; `data-default-service`
-  on the form is what it resets to when the trigger names none. Both constants
-  live in `src/utils/contactChannel.ts`. The second attribute is not redundant:
+  on the form is what it resets to when the trigger names none. The same
+  opening picks the tab the trigger's `data-open-lead-modal` names, focuses
+  the form's first field (unless the modal marks a `data-modal-focus` target)
+  and fires `lead_modal_open`; all of it is `defineLeadModal(tagName)` from
+  `@podbor/site-kit/lead-form`, which every app's lead modal is defined with,
+  and the attribute constants live there too. The second attribute is not redundant:
   for an `<input type="hidden">` the `value` IDL attribute reflects the content
   attribute, so assigning `.value` moves `defaultValue` with it and the slug
   would stick between openings of the same modal.

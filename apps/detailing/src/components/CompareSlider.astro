@@ -18,10 +18,9 @@ const site = content(locale).site;
 ---
 
 <div class={`shell ${className}`}>
-  <div
-    class="core group relative isolate overflow-hidden"
+  <compare-slider
+    class="core group relative isolate block overflow-hidden"
     style="--split:50%"
-    data-compare
   >
     <Image
       src={after}
@@ -34,7 +33,6 @@ const site = content(locale).site;
     <div
       class="absolute inset-0"
       style="clip-path:inset(0 calc(100% - var(--split)) 0 0)"
-      data-compare-before
     >
       <Image
         src={before}
@@ -79,17 +77,12 @@ const site = content(locale).site;
       step="1"
       aria-label={site.common.dragHint}
       class="absolute inset-0 h-full w-full cursor-ew-resize appearance-none bg-transparent opacity-0"
-      data-compare-input
     />
-  </div>
+  </compare-slider>
 </div>
 
 <script>
-  document.querySelectorAll<HTMLElement>('[data-compare]').forEach((root) => {
-    const input = root.querySelector<HTMLInputElement>('[data-compare-input]');
-    if (!input) return;
-    const apply = () => root.style.setProperty('--split', `${input.value}%`);
-    input.addEventListener('input', apply);
-    apply();
-  });
+  import { defineCompareSlider } from '@podbor/site-kit/browser';
+
+  defineCompareSlider();
 </script>

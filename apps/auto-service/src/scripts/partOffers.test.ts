@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
 import { definePartOffers } from './partOffers';
 import { readPartsList } from './partsList';
+import { PART_ADDED_EVENT } from './partCtaForward';
 
 definePartOffers();
 
@@ -115,5 +116,32 @@ describe('<part-offers> when the shop refuses the add', () => {
     expect(document.querySelector<HTMLElement>('[data-lead]')!.hidden).toBe(
       true,
     );
+  });
+
+  it('tells the page a part was added, so the sticky bar can open the cart', async () => {
+    const cart = {
+      id: 'cart_1',
+      completed: false,
+      currency: 'RSD',
+      total: 0,
+      items: [],
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ kind: 'cart', cart })),
+    );
+    document.body.innerHTML = `
+      <part-offers data-preview data-cart-href="/ru/parts/cart/">
+        <ul data-offers><li>
+          <button data-buy data-offer-id="offer_1" class="btn-primary"><span data-label></span></button>
+        </li></ul>
+        <div data-status="added" hidden></div>
+      </part-offers>`;
+    const added = vi.fn();
+    document.addEventListener(PART_ADDED_EVENT, added);
+
+    document.querySelector<HTMLButtonElement>('[data-buy]')!.click();
+    await vi.waitFor(() => expect(added).toHaveBeenCalledTimes(1));
+    document.removeEventListener(PART_ADDED_EVENT, added);
   });
 });

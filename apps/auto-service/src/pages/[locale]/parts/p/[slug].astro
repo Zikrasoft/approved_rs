@@ -20,7 +20,7 @@ import { sourcingWorks } from '@/utils/works';
 import { partCacheKey } from '@/utils/cacheKey';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
-import { formatMoney } from '@/utils/money';
+import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { installationService } from '@/utils/services';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
@@ -161,7 +161,11 @@ const installPrice =
       ? { label: cart.installationFree, price: null }
       : {
           label: cart.installationLabel,
-          price: formatMoney(installation, 'RSD', BCP47_BY_LOCALE[locale]),
+          price: formatMoney(
+            installation,
+            PRICE_CURRENCY,
+            BCP47_BY_LOCALE[locale],
+          ),
         };
 const works = sourcingWorks(await getCollection('works'), page);
 const thumbFor = (slug: string) => {
@@ -247,7 +251,7 @@ const thumbFor = (slug: string) => {
       }
       {
         successor && (
-          <PartOffers page={successor}>
+          <PartOffers page={successor} replaced={heading}>
             <Fragment slot="heading">
               {copy.successorOffersHeading}
               <span class="mt-1 block text-sm font-normal text-muted">
@@ -267,7 +271,7 @@ const thumbFor = (slug: string) => {
         works.length > 0 && (
           <a
             href="#works"
-            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink link-quiet"
           >
             {copy.worksHeading}
             <Icon name="chevronRight" size={14} />
@@ -376,7 +380,7 @@ const thumbFor = (slug: string) => {
                     link.href ? (
                       <a
                         href={link.href}
-                        class="font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                        class="font-semibold text-ink link-quiet"
                       >
                         {link.label}
                       </a>
@@ -464,7 +468,7 @@ const thumbFor = (slug: string) => {
                     locale,
                     equivalentSlug(equivalent),
                   )}
-                  class="text-ink-2 underline-offset-2 hover:text-signal-ink hover:underline"
+                  class="text-ink-2 link-quiet"
                 >
                   {equivalent.brand.name}{' '}
                   <span class="spec">{equivalent.value}</span>

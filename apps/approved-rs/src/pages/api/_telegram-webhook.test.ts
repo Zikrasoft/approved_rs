@@ -293,12 +293,17 @@ describe('POST /api/telegram-webhook', () => {
     expect(api.calls).toEqual([]);
   });
 
-  it('acks an update past the body cap without reading it', async () => {
+  it('acks a body past the size cap without handling it, and says so', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const res = await POST(
       makeCtx({ update_id: 1, padding: 'a'.repeat(70_000) }),
     );
     expect(res.status).toBe(200);
     expect(api.calls).toEqual([]);
+    expect(warn).toHaveBeenCalledWith(
+      '[telegram-webhook] ignoring an update past the size cap',
+    );
+    warn.mockRestore();
   });
 
   it.each([

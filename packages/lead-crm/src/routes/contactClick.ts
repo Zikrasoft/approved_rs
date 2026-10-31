@@ -39,8 +39,9 @@ export function createContactClickRoute({
   }: {
     request: Request;
   }): Promise<Response> {
-    const form = await readForm(request);
-    if (form instanceof Response) return form;
+    const read = await readForm(request);
+    if ('response' in read) return read.response;
+    const form = read.value;
     if (!form) {
       return new Response(null, { status: 400 });
     }

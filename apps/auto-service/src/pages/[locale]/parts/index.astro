@@ -70,7 +70,7 @@ const categories = props.categories.map((category) => ({
     >
       <a
         href={PathBuilder.partsCart(locale)}
-        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink link-quiet"
       >
         {content(locale).shopCart.cartLink}
         <Icon name="arrowRight" />
@@ -129,7 +129,7 @@ const categories = props.categories.map((category) => ({
           </ul>
           <a
             href={PathBuilder.partsMakes(locale)}
-            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink underline-offset-2 hover:underline"
+            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink link-quiet"
           >
             {hubsCopy.allMakesLink}
             <Icon name="arrowRight" />

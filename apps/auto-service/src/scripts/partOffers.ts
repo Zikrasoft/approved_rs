@@ -8,6 +8,8 @@ import { leadTimeCopyFrom, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
 import { addToCart, busy, fill, getJson, isBusy, showOnly } from './cartUi';
+import { localeTagOf } from './localeTag';
+import { PART_ADDED_EVENT } from './partCtaForward';
 import { shopPreview } from './shopPreview';
 import {
   addToPartsList,
@@ -63,7 +65,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         );
         const more = this.querySelector<HTMLElement>('[data-more]');
         if (more) more.hidden = others.length === 0;
-        const { localeTag = 'sr' } = this.dataset;
+        const localeTag = localeTagOf(this);
         const moreCopy = moreOffersCopyFrom(this.dataset.moreCopy);
         if (moreCopy)
           fill(
@@ -99,7 +101,8 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       fillRow(row: ParentNode, offer: PartOffer): void {
-        const { localeTag = 'sr', availability } = this.dataset;
+        const localeTag = localeTagOf(this);
+        const { availability } = this.dataset;
         const copy = leadTimeCopyFrom(availability);
         const { stock, lead, buyable } = copy
           ? offerAvailability(offer, copy, localeTag)
@@ -141,6 +144,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         if (outcome?.kind === 'cart') {
           this.linkToCart(button);
           showOnly(this, 'data-status', 'added');
+          this.dispatchEvent(new Event(PART_ADDED_EVENT, { bubbles: true }));
           return;
         }
         if (

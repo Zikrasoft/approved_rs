@@ -35,12 +35,15 @@ export function defineKitCart(tagName = 'kit-cart'): void {
         }
         const buyable = items.every((item) => item.dataset.offerId);
         this.hidden = !buyable;
+        this.toggleAttribute('data-buyable', buyable);
         const tags = items.map(
           (item) =>
             item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset ?? {},
         );
         const total = this.querySelector('[data-kit-total]');
-        if (total && buyable) {
+        const currency = tags[0]?.kitCurrency;
+        const { localeTag } = this.dataset;
+        if (total && buyable && currency && localeTag) {
           total.textContent = ` · ${formatMoney(
             kitTotal(
               items.map((item, index) => ({
@@ -48,13 +51,10 @@ export function defineKitCart(tagName = 'kit-cart'): void {
                 quantity: Number(item.dataset.quantity) || 1,
               })),
             ),
-            tags[0]?.kitCurrency ?? 'RSD',
-            this.dataset.localeTag ?? 'sr',
+            currency,
+            localeTag,
           )}`;
         }
-        const ask = kit?.querySelector('[data-add-all]');
-        ask?.classList.toggle('btn-secondary', buyable);
-        ask?.classList.toggle('btn-primary', !buyable);
       }
 
       async addKit(): Promise<void> {
