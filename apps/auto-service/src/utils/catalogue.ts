@@ -345,8 +345,14 @@ export function createCatalogue({
         );
         const specs = ({ part }: SearchResult) => {
           const named = bySlug.get(part.category?.slug ?? '');
+          const listing = found.results.flatMap((other) =>
+            other.part.attributes &&
+            other.part.category?.slug === part.category?.slug
+              ? [other.part.attributes]
+              : [],
+          );
           return named && part.attributes
-            ? keySpecs(named, part.attributes, locale)
+            ? keySpecs(named, part.attributes, locale, listing)
             : '';
         };
         return {

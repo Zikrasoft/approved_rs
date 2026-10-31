@@ -76,6 +76,7 @@ const { make, model } = hub;
 const { category } = entry;
 const name = carName(model, locale);
 const empty = entry.parts.length === 0;
+const listingAttributes = entry.parts.map(({ part }) => part.attributes);
 const categoryName = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const facets = withFacetCopy(
@@ -152,6 +153,7 @@ const SAID_BY_FIT = ['axle'];
                         category,
                         part.attributes,
                         locale,
+                        listingAttributes,
                         SAID_BY_FIT,
                       ) && (
                         <p class="spec text-xs text-muted">
@@ -159,6 +161,7 @@ const SAID_BY_FIT = ['axle'];
                             category,
                             part.attributes,
                             locale,
+                            listingAttributes,
                             SAID_BY_FIT,
                           )}
                         </p>

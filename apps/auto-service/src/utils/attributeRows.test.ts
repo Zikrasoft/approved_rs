@@ -78,7 +78,7 @@ describe('attributeRows', () => {
       { label: 'Viskozitet', value: '5W-30' },
       { label: 'Допуски', value: 'BMW Longlife-04, MB 229.51' },
       { label: 'Объем', value: '5 l' },
-      { label: 'Вес', value: '4.4' },
+      { label: 'Вес', value: '4,4' },
       { label: 'Синтетика', value: 'Da' },
       { label: 'Эко', value: 'Ne' },
       { label: 'Код', value: 'C3' },
@@ -106,7 +106,25 @@ describe('keySpecs', () => {
         },
         'ru',
       ),
-    ).toBe('5W-30 · 5 л · 4.4');
+    ).toBe('5W-30 · 5 л · 4,4');
+  });
+
+  it('formats decimals for the locale', () => {
+    expect(keySpecs(oil, { volume: 1.5 }, 'en')).toBe('1.5 l');
+    expect(keySpecs(oil, { volume: 1.5 }, 'sr')).toBe('1,5 l');
+  });
+
+  it('skips a value every part in the listing shares', () => {
+    const listing = [
+      { viscosity: '5w-30', volume: 5, weight: 4.4, code: 'X' },
+      { viscosity: '5w-30', volume: 4, weight: 4.4, code: 'Y' },
+    ];
+    expect(keySpecs(oil, listing[0], 'ru', listing)).toBe('5 л · X');
+  });
+
+  it('keeps every value when the listing has a single part', () => {
+    const only = { viscosity: '5w-30', volume: 5 };
+    expect(keySpecs(oil, only, 'ru', [only])).toBe('5W-30 · 5 л');
   });
 
   it('is empty for a part with no filled fields', () => {
@@ -115,7 +133,7 @@ describe('keySpecs', () => {
 
   it('leaves out the fields the row already says', () => {
     expect(
-      keySpecs(oil, { viscosity: '5w-30', volume: 5 }, 'ru', ['viscosity']),
+      keySpecs(oil, { viscosity: '5w-30', volume: 5 }, 'ru', [], ['viscosity']),
     ).toBe('5 л');
   });
 });

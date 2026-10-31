@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import {
   localizedUnit,
   translated,
@@ -5,6 +6,7 @@ import {
   type Category,
   type CategoryField,
 } from '@podbor/catalog-contract';
+import { BCP47_BY_LOCALE, type Locale } from '@/i18n/config';
 
 export type AttributeRow = { label: string; value: string };
 
@@ -13,7 +15,7 @@ type Booleans = { yes: string; no: string };
 const displayValue = (
   field: CategoryField,
   value: AttributeValues[string],
-  locale: string,
+  locale: Locale,
   { yes, no }: Booleans,
 ): string => {
   const option = (key: string) => {
@@ -27,10 +29,15 @@ const displayValue = (
       return [value].flat().map(String).map(option).join(', ');
     case 'single-select':
       return option(String(value));
-    case 'number':
+    case 'number': {
+      const number =
+        typeof value === 'number'
+          ? value.toLocaleString(BCP47_BY_LOCALE[locale])
+          : String(value);
       return field.unit
-        ? `${value} ${localizedUnit(field.unit, locale)}`
-        : String(value);
+        ? `${number} ${localizedUnit(field.unit, locale)}`
+        : number;
+    }
     case 'text':
       return String(value);
   }
@@ -39,7 +46,7 @@ const displayValue = (
 export const attributeRows = (
   category: Category,
   values: AttributeValues,
-  locale: string,
+  locale: Locale,
   booleans: Booleans,
 ): AttributeRow[] =>
   category.fields.flatMap((field) =>
@@ -56,14 +63,21 @@ export const attributeRows = (
 export const keySpecs = (
   category: Category,
   values: AttributeValues,
-  locale: string,
+  locale: Locale,
+  listing: AttributeValues[] = [],
   omit: string[] = [],
 ): string =>
   attributeRows(
     {
       ...category,
       fields: category.fields.filter(
-        ({ type, key }) => type !== 'boolean' && !omit.includes(key),
+        ({ key, type }) =>
+          type !== 'boolean' &&
+          !omit.includes(key) &&
+          !(
+            listing.length > 1 &&
+            listing.every((other) => isDeepStrictEqual(other[key], values[key]))
+          ),
       ),
     },
     values,

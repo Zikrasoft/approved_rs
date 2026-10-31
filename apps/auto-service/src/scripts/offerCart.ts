@@ -443,6 +443,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
           leadLabel = '',
           stockPickup = '',
           inStock = '',
+          tomorrow = '',
           days = '{}',
         } = this.dataset;
         const template = this.querySelector<HTMLTemplateElement>(
@@ -459,7 +460,11 @@ export function definePartOffers(tagName = 'part-offers'): void {
           offer.lead_time_days > 0
             ? formatLeadTime(
                 offer.lead_time_days,
-                { inStock, days: JSON.parse(days) as LeadTimeCopy['days'] },
+                {
+                  inStock,
+                  tomorrow,
+                  days: JSON.parse(days) as LeadTimeCopy['days'],
+                },
                 localeTag,
               )
             : null;

@@ -19,6 +19,7 @@ export { defineZoneMap } from './zoneMap.ts';
 export { lockScroll, unlockScroll } from './scrollLock.ts';
 export {
   defineModalDialog,
+  MODAL_FOCUS_ATTRIBUTE,
   MODAL_OPEN_EVENT,
   type ModalOpenDetail,
 } from './modalDialog.ts';

@@ -64,13 +64,14 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: 152e680446f5b1a6
+translatedFrom: e126932fcae75de7
 translations:
   sr:
     metaTitle: Korpa, CarLab
     metaDescription: Delovi koje ste izabrali u katalogu CarLab. Plaćanje gotovinom pri preuzimanju u servisu u Beogradu.
     heading: Korpa
     cartLink: Korpa
+    partsListNote: Delovi bez cene su u upitu i neće biti uključeni u ovu porudžbinu. Pošaljite upit zasebno, pa ćemo vam javiti cenu i rok isporuke.
     loading: Proveravamo cene i dostupnost
     emptyHeading: Korpa je prazna
     emptyBody: Otvorite stranicu dela u katalogu i kliknite na „U korpu“.
@@ -79,7 +80,8 @@ translations:
     increaseLabel: Dodaj još jedan
     decreaseLabel: Smanji za jedan
     toInquiryLabel: Pošalji upit
-    unavailableTag: Trenutno nema dovoljno na stanju. Uklonite stavku ili pošaljite upit za nju.
+    lowerToTemplate: Ostavi {count} kom.
+    unavailableTag: Trenutno nema dovoljno komada. Smanjite količinu, uklonite artikal ili pošaljite upit za njega.
     removeLabel: Ukloni iz korpe
     totalLabel: Ukupno
     addonTemplate: 'Dodaj: {service}'
@@ -134,6 +136,7 @@ translations:
     metaDescription: Parts you've selected from the CarLab catalogue. Pay cash on collection at our workshop in Belgrade.
     heading: Your cart
     cartLink: Your cart
+    partsListNote: Parts without a price are in your inquiry and won't be included in this order. Send the inquiry separately and we'll confirm pricing and availability.
     loading: Checking prices and availability
     emptyHeading: Your cart is empty
     emptyBody: Open a part in the catalogue and click "Add to cart".
@@ -142,7 +145,8 @@ translations:
     increaseLabel: Add one more
     decreaseLabel: Remove one
     toInquiryLabel: Move to parts enquiry
-    unavailableTag: The quantity you need isn't available right now. Remove this item or move it to a parts enquiry.
+    lowerToTemplate: Keep {count}
+    unavailableTag: The requested quantity isn't available right now. Reduce the quantity, remove the item or send an inquiry for it.
     removeLabel: Remove from cart
     totalLabel: Total
     addonTemplate: 'Add: {service}'

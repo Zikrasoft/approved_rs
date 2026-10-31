@@ -196,6 +196,9 @@ translations:
       body: Pozvaćemo vas tokom radnog vremena, obično u roku od sat vremena. Ako automobil nije u voznom stanju, javite nam porukom, posavetovaćemo vas oko šlep-službe.
       note: Ako vas ne dobijemo posle dva poziva, poslaćemo vam poruku. Pratite poruke.
       cta: Povratak na početnu
+    thanksParts:
+      body: Proverićemo dostupnost i cenu i javiti vam se putem izabrane aplikacije za poruke ili vas pozvati, obično u roku od sat vremena tokom radnog vremena.
+      cta: Nazad na rezervne delove
     privacy:
       metaTitle: Politika privatnosti | CarLab
       metaDescription: Koje podatke prikuplja sajt auto-servisa CarLab, zašto ih prikuplja i koliko dugo ih čuva.
@@ -250,8 +253,8 @@ translations:
       commentLabel: Koji delovi su vam potrebni? (opciono)
       commentPlaceholder: Napišite šta vam treba, ako znate
       commentNote: Ne morate znati tačan naziv dela. Kontaktiraćemo vas i zajedno utvrditi šta vam je potrebno.
-      listHeading: Korpa
-      listRemoveLabel: Ukloni iz korpe
+      listHeading: Rezervni delovi u upitu
+      listRemoveLabel: Ukloni iz upita
       listQuantityLabel: Količina
       listCarRemoveLabel: Ne povezuj upit sa ovim automobilom
       listMoreTemplate: 'Broj stavki koje nisu prikazane: {count}'
@@ -342,6 +345,9 @@ translations:
       body: We'll call you back during opening hours, usually within an hour. If your car can't be driven, send us a message and we'll advise on recovery.
       note: If we can't reach you after two calls, we'll send you a message. Keep an eye out.
       cta: Back to home
+    thanksParts:
+      body: We'll check availability and pricing, then reply via your chosen messaging app or call you back, usually within an hour during business hours.
+      cta: Back to parts
     privacy:
       metaTitle: Privacy policy | CarLab
       metaDescription: What data the CarLab workshop website collects, why we collect it and how long we keep it.
@@ -396,8 +402,8 @@ translations:
       commentLabel: Which parts do you need? (optional)
       commentPlaceholder: Tell us what you need, if you know
       commentNote: You don't need to know the exact part name. We'll contact you and work out what you need together.
-      listHeading: Basket
-      listRemoveLabel: Remove from basket
+      listHeading: Parts in your enquiry
+      listRemoveLabel: Remove from enquiry
       listQuantityLabel: Quantity
       listCarRemoveLabel: Don't link this enquiry to this car
       listMoreTemplate: 'Items not shown: {count}'
@@ -439,4 +445,4 @@ translations:
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and let you know what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: 019eba9af7967f37
+translatedFrom: a52976fc58c8e7b2

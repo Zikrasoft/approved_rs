@@ -53,6 +53,7 @@ const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const empty = category.pages.length === 0;
+const categoryAttributes = category.pages.map(({ part }) => part.attributes);
 const firstPage = listing.number === 1;
 const pageHref = (number: number) =>
   PathBuilder.partsCategory(locale, category.slug, number);
@@ -165,7 +166,12 @@ const fields = category.fields
                     brand={page.brand.name}
                     value={page.value}
                     name={translated(page.part, 'name', locale)}
-                    specs={keySpecs(category, page.part.attributes, locale)}
+                    specs={keySpecs(
+                      category,
+                      page.part.attributes,
+                      locale,
+                      categoryAttributes,
+                    )}
                     superseded={page.superseded}
                     current={partSuccessor(page, bySlug)}
                     priced={page}

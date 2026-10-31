@@ -20,6 +20,7 @@ export const leadFormContentSchema = z
     consentError: z.string(),
     submitLabel: z.string(),
     errorTelegramFormat: z.string(),
+    errorTelegramHandle: z.string(),
     errorPhoneInvalid: z.string(),
     errorSubmit: z.string(),
   })
