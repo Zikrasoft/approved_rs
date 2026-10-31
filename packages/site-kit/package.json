@@ -28,7 +28,7 @@
     "marked": "18.0.11",
     "path-to-regexp": "6.1.0",
     "playwright-core": "1.63.0",
-    "sanitize-html": "2.17.7",
+    "sanitize-html": "2.18.1",
     "zod": "4.6.7"
   },
   "devDependencies": {
