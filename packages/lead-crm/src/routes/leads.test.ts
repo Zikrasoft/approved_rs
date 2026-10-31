@@ -17,6 +17,21 @@ const RS_PHONE = '+381641234567';
 const notifyLead = vi.fn().mockResolvedValue(undefined);
 const waitUntil = vi.fn();
 
+const refusalCopy = (locale: string) => ({
+  reasons: {
+    'missing-contact': `${locale}: missing contact`,
+    'invalid-phone': `${locale}: invalid phone`,
+    'invalid-telegram': `${locale}: invalid telegram`,
+    'missing-consent': `${locale}: missing consent`,
+  },
+  consent: 'Согласен на обработку данных',
+  submit: 'Отправить',
+  links: [
+    { label: '+381 60 123 4567', href: 'tel:+381601234567' },
+    { label: 'WhatsApp', href: 'https://wa.me/381601234567' },
+  ],
+});
+
 const POST = createLeadsRoute<Locale>({
   notifyLead,
   waitUntil,
@@ -24,14 +39,7 @@ const POST = createLeadsRoute<Locale>({
   defaultLocale: 'ru',
   localeCookie: 'lang',
   thanksPath: (locale) => `/${locale}/thanks/`,
-  refusalCopy: (locale) => ({
-    message: {
-      ru: 'Укажите контакт',
-      en: 'Please enter a contact',
-      sr: 'Unesite kontakt',
-    }[locale],
-    consent: 'Согласен на обработку данных',
-  }),
+  refusalCopy,
 });
 
 type Field = string | File;
@@ -88,7 +96,7 @@ describe('createLeadsRoute', () => {
       defaultLocale: 'ru',
       localeCookie: 'lang',
       thanksPath,
-      refusalCopy: () => ({ message: '', consent: '' }),
+      refusalCopy,
     });
     const ctx = makeCtx(valid({ service: 'vehicle-sourcing' }));
     await route(ctx);
@@ -277,7 +285,8 @@ describe('createLeadsRoute', () => {
     expect(res.status).toBe(400);
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
     const body = await res.text();
-    expect(body).toContain('<label>Укажите контакт <input');
+    expect(body).toContain('<label>ru: invalid phone<input');
+    expect(body).toContain('value="asdf"');
     expect(body).not.toMatch(/zod|invalid_type|path/i);
   });
 
@@ -291,7 +300,7 @@ describe('createLeadsRoute', () => {
     const res = await POST(makeCtx({ name: '' }, 'sr'));
     const body = await res.text();
     expect(body).toContain('<html lang="sr">');
-    expect(body).toContain('<label>Unesite kontakt <input');
+    expect(body).toContain('<label>sr: missing contact<input');
     expect(body).toContain('name="viewport"');
   });
 
@@ -308,9 +317,14 @@ describe('createLeadsRoute', () => {
     const body = await (await POST(ctx)).text();
 
     expect(body).toContain('<form method="POST" action="/api/leads">');
-    expect(body).toContain('name="contact" required');
+    expect(body).toContain(
+      '<label>ru: invalid phone<input name="contact" value="12" required',
+    );
     expect(body).toContain(
       '<input type="hidden" name="name" value="Иван &quot;&lt;b&gt;&quot;" />',
+    );
+    expect(body).toContain(
+      '<input type="hidden" name="contact_channel" value="whatsapp" />',
     );
     expect(body).toContain(
       '<input type="hidden" name="service" value="vin-parts-inquiry" />',
@@ -319,7 +333,42 @@ describe('createLeadsRoute', () => {
       '<input type="hidden" name="source_url" value="https://carlab.rs/ru/parts/" />',
     );
     expect(body).not.toContain('name="phone_number"');
-    expect(body).not.toContain('name="contact_channel"');
+    expect(body).toContain('<button type="submit">Отправить</button>');
+    expect(body).toContain(
+      '<li class="tel"><a href="tel:+381601234567">+381 60 123 4567</a></li>',
+    );
+    expect(body).toContain(
+      '<li><a href="https://wa.me/381601234567">WhatsApp</a></li>',
+    );
+  });
+
+  it.each([
+    [{ contact: RS_PHONE }, 'ru: missing consent'],
+    [
+      { telegram: '@ab', contact_channel: 'telegram', consent: 'on' },
+      'ru: invalid telegram',
+    ],
+    [
+      { contact: '+38160', contact_channel: 'telegram', consent: 'on' },
+      'ru: invalid phone',
+    ],
+    [
+      { contact: RS_PHONE, contact_channel: 'sms', consent: 'on' },
+      'ru: invalid phone',
+    ],
+  ])('names what is wrong with %j', async (fields, message) => {
+    const body = await (await POST(makeCtx(fields))).text();
+    expect(body).toContain(`<title>${message}</title>`);
+  });
+
+  it('echoes a Telegram username and keeps its channel for the retry', async () => {
+    const page = await (
+      await POST(
+        makeCtx({ telegram: 'ivan_petrov', contact_channel: 'telegram' }),
+      )
+    ).text();
+    expect(page).toContain('value="@ivan_petrov"');
+    expect(page).toContain('name="contact_channel" value="telegram"');
   });
 
   it('asks for consent again only when it never arrived', async () => {
@@ -330,7 +379,7 @@ describe('createLeadsRoute', () => {
 
     expect(withConsent).not.toContain('type="checkbox"');
     expect(without).toContain(
-      '<label><input type="checkbox" name="consent" value="1" required /> Согласен на обработку данных</label>',
+      '<label><input type="checkbox" name="consent" value="1" required />Согласен на обработку данных</label>',
     );
   });
 
@@ -342,7 +391,7 @@ describe('createLeadsRoute', () => {
       /<input type="hidden" name="([^"]+)" value="([^"]*)" \/>/g,
     ))
       resent[name!] = value!;
-    expect(page).toContain('name="contact" required');
+    expect(page).toContain('name="contact" value="" required');
     expect(page).toContain('name="consent"');
     resent.contact = RS_PHONE;
     resent.consent = '1';
@@ -368,9 +417,7 @@ describe('createLeadsRoute', () => {
 
   it('answers the 400 in the default locale for a prototype-key cookie value', async () => {
     const res = await POST(makeCtx({ name: '' }, 'constructor'));
-    await expect(res.text()).resolves.toContain(
-      '<label>Укажите контакт <input',
-    );
+    await expect(res.text()).resolves.toContain('ru: missing contact');
   });
 
   it('dispatches notifyLead via waitUntil with the parsed form fields', async () => {
@@ -527,7 +574,7 @@ describe('a shop Order cancelled in the shop admin', () => {
     defaultLocale: 'ru',
     localeCookie: 'lang',
     thanksPath: (locale) => `/${locale}/thanks/`,
-    refusalCopy: (locale) => ({ message: locale, consent: locale }),
+    refusalCopy,
     orderCanceled: { secret: 'shop-secret', cancel: cancelOrder },
   });
 

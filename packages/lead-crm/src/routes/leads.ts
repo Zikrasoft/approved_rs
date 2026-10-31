@@ -6,7 +6,12 @@ import {
   ORDER_ID_FIELD,
   ORDER_OUTCOME_FIELD,
 } from '../fields.ts';
-import { leadEnvelopeSchema, leadSubmissionSchema } from '../form.ts';
+import {
+  leadEnvelopeSchema,
+  leadRefusal,
+  leadSubmissionSchema,
+  type LeadRefusal,
+} from '../form.ts';
 import { escapeHtml } from '../telegram/markup.ts';
 import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
@@ -25,8 +30,10 @@ export interface RouteRequestContext {
 }
 
 export interface RefusalCopy {
-  message: string;
+  reasons: Record<LeadRefusal, string>;
   consent: string;
+  submit: string;
+  links: { label: string; href: string }[];
 }
 
 export interface LeadsRouteOptions<L extends string> {
@@ -62,21 +69,37 @@ async function cancelOrder(
   });
 }
 
-const RETYPED_FIELDS = new Set<string>(Object.values(CONTACT_INPUT_FIELDS));
+const RETYPED_FIELDS = new Set<string>([
+  CONTACT_INPUT_FIELDS.contact,
+  CONTACT_INPUT_FIELDS.phoneNumber,
+  CONTACT_INPUT_FIELDS.phoneCountry,
+  CONTACT_INPUT_FIELDS.telegram,
+]);
 
 const attribute = (text: string): string =>
   escapeHtml(text).replace(/"/g, '&quot;');
 
+const REFUSAL_STYLE = `body{font:16px/1.5 system-ui,sans-serif;max-width:28rem;margin:0 auto;padding:1.5rem 1rem}
+label{display:block;margin:0 0 1rem}
+input:not([type=checkbox]){display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem}
+button{min-height:44px;padding:0 1.25rem;font:inherit}
+input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin-right:.5rem}
+ul{list-style:none;padding:0;display:flex;gap:1rem;flex-wrap:wrap}
+a{display:inline-block;min-height:44px;line-height:44px}
+@media (pointer:fine){.tel{display:none}}`;
+
 function refusalPage(
   locale: string,
-  { message, consent }: RefusalCopy,
+  copy: RefusalCopy,
   form: FormData,
   action: string,
 ): Response {
+  const { reason, contact } = leadRefusal(form);
+  const message = copy.reasons[reason];
   const consentBox = form.get(CONSENT_FIELD)
     ? ''
     : `
-      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required /> ${consent}</label>`;
+      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required />${escapeHtml(copy.consent)}</label>`;
   const kept: string[] = [];
   form.forEach((value, name) => {
     if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {
@@ -85,20 +108,31 @@ function refusalPage(
       );
     }
   });
+  const links = copy.links
+    .map(
+      ({ label, href }) =>
+        `      <li${href.startsWith('tel:') ? ' class="tel"' : ''}><a href="${attribute(href)}">${escapeHtml(label)}</a></li>`,
+    )
+    .join('\n');
   return new Response(
     `<!doctype html>
 <html lang="${locale}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${message}</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>${escapeHtml(message)}</title>
+    <style>${REFUSAL_STYLE}</style>
   </head>
   <body>
     <form method="POST" action="${attribute(action)}">
-      <label>${message} <input name="${CONTACT_INPUT_FIELDS.contact}" required autocomplete="tel" /></label>${consentBox}
+      <label>${escapeHtml(message)}<input name="${CONTACT_INPUT_FIELDS.contact}" value="${attribute(contact)}" required autocomplete="tel" /></label>${consentBox}
 ${kept.join('\n')}
-      <input type="submit" />
+      <button type="submit">${escapeHtml(copy.submit)}</button>
     </form>
+    <ul>
+${links}
+    </ul>
   </body>
 </html>
 `,
