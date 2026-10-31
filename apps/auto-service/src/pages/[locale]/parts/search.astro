@@ -34,6 +34,7 @@ import {
   carLink,
   exactPart,
   listingCrumbs,
+  missingNumber,
   searchIntent,
   vinDestination,
 } from '@/utils/catalogueSearch';
@@ -124,6 +125,9 @@ const exact =
 if (exact) {
   return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
 }
+const numberMissing =
+  found && !category && !offset ? missingNumber(q, found.results) : false;
+const looseNumbers = numberMissing && Boolean(found?.results.length);
 const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const scope =
   found ??
@@ -318,6 +322,25 @@ const scopeHidden = {
               </ul>
             )}
 
+            {looseNumbers && (
+              <>
+                <p
+                  role="status"
+                  class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed break-words text-ink"
+                >
+                  {copy.numberNotFound.replace('{q}', q)}{' '}
+                  <a
+                    href="#lead"
+                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                  >
+                    {copy.notFoundLink}
+                  </a>
+                </p>
+                <h2 class="pt-1 text-base font-semibold text-ink">
+                  {copy.similarNumbers}
+                </h2>
+              </>
+            )}
             {found.results.length === 0 ? (
               <p class="max-w-2xl text-base leading-relaxed break-words text-ink-2">
                 {emptyMessage}
@@ -375,7 +398,9 @@ const scopeHidden = {
               </nav>
             )}
 
-            {found.results.length > 0 && <InquiryLink class="pt-2" />}
+            {found.results.length > 0 && !looseNumbers && (
+              <InquiryLink class="pt-2" />
+            )}
           </div>
         </div>
       )
@@ -390,7 +415,7 @@ const scopeHidden = {
     }
 
     {
-      (vin || unavailable || found?.results.length === 0) && (
+      (vin || unavailable || numberMissing || found?.results.length === 0) && (
         <div id="lead" class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6">
           <h2 class="text-block font-semibold">{copy.formHeading}</h2>
           <LeadForm

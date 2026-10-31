@@ -1,5 +1,6 @@
 import {
   normalizePartNumber,
+  partNumberQuery,
   vinSchema,
   type CarHit,
   type VinFacts,
@@ -42,6 +43,14 @@ export const exactPart = (q: string, results: PartResult[]): string | null => {
     ({ normalized_value }) => normalized_value === wanted,
   );
   return matching.length === 1 ? matching[0].slug : null;
+};
+
+export const missingNumber = (q: string, results: PartResult[]): boolean => {
+  const wanted = partNumberQuery(q);
+  return (
+    wanted !== null &&
+    !results.some(({ normalized_value }) => normalized_value === wanted)
+  );
 };
 
 export type SearchLink = { href: string; label: string; detail?: string };

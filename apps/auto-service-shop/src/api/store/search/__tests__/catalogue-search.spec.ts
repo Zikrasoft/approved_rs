@@ -220,6 +220,13 @@ medusaIntegrationTestRunner({
         expect(results.map(({ value }) => value)).toEqual(['3 160 000']);
       });
 
+      it('finds no car in a number typed with separators that starts like a chassis code', async () => {
+        expect(await search('E90-123-4')).toMatchObject({
+          cars: [],
+          results: [],
+        });
+      });
+
       it('finds a Vehicle by its engine code', async () => {
         expect(await cars('N47')).toEqual(['vehicle:N47D20A']);
       });

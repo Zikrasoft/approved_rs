@@ -4,6 +4,7 @@ import {
   carLink,
   exactPart,
   listingCrumbs,
+  missingNumber,
   vinDestination,
   searchIntent,
   suggestionsFrom,
@@ -116,6 +117,23 @@ describe('exactPart', () => {
   it('opens nothing when two brands share the number', () => {
     const twin = { ...hu816, slug: 'febi-hu816x' };
     expect(exactPart('HU 816 x', [hu816, twin])).toBeNull();
+  });
+});
+
+describe('missingNumber', () => {
+  const hu816 = result('HU 816 x', 'HU816X', 'mann-filter-hu816x');
+
+  it('flags a number the results do not hold', () => {
+    expect(missingNumber('hu 816-y', [hu816])).toBe(true);
+    expect(missingNumber('11 42 8 507 683', [])).toBe(true);
+  });
+
+  it('flags nothing when the number is among the results', () => {
+    expect(missingNumber('hu  816-x', [hu816])).toBe(false);
+  });
+
+  it('flags nothing for a name', () => {
+    expect(missingNumber('масляный фильтр', [])).toBe(false);
   });
 });
 
