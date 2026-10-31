@@ -40,23 +40,23 @@ separately in `contactClick.ts`, because they also write a lead to the server.
 Names follow the GA4 convention — a verb about what the person did, in snake_case.
 Variants go into parameters, not into new names.
 
-| identifier                                                       | when                                            | parameters                                        |
-| ---------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
-| `scroll_50`                                                      | scrolled half the page                          | —                                                 |
-| `scroll_90`                                                      | read to the end of the page                     | —                                                 |
-| `form_view`                                                      | the form entered the viewport                   | —                                                 |
-| `form_start`                                                     | first input into the form                       | —                                                 |
-| `form_error`                                                     | the submission was rejected                     | `field`: `telegram`, `phone`, `consent`, `server` |
-| `form_submit`                                                    | the server took the lead                        | `service`                                         |
-| `contact_click`                                                  | clicked a phone number or a messenger           | `channel`, `placement`                            |
-| `lead_modal_open`                                                | opened the form in the modal (approved.rs only) | `tab`, `service`                                  |
-| `telegram_choice`                                                | picked bot or manager after a Telegram tap      | `option`: `bot`, `manager`                        |
-| `brand_link_click`                                               | left for a partner site (approved.rs only)      | `brand`: `details`, `carlab`                      |
-| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                      | `from`, `to`                                      |
-| `case_view`                                                      | opened a Case study                             | `depth`: Case studies opened this visit           |
-| `search`                                                         | sent the catalogue search box (carlab.rs only)  | `kind`: `vin`, `query`                            |
-| `search_suggestion_pick`                                         | opened a search suggestion (carlab.rs only)     | `group`: `cars`, `parts`, `vin`                   |
-| `developer_credit_click`                                         | clicked the Zikrasoft credit in the footer      | —                                                 |
+| identifier                                                       | when                                           | parameters                                        |
+| ---------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| `scroll_50`                                                      | scrolled half the page                         | —                                                 |
+| `scroll_90`                                                      | read to the end of the page                    | —                                                 |
+| `form_view`                                                      | the form entered the viewport                  | —                                                 |
+| `form_start`                                                     | first input into the form                      | —                                                 |
+| `form_error`                                                     | the submission was rejected                    | `field`: `telegram`, `phone`, `consent`, `server` |
+| `form_submit`                                                    | the server took the lead                       | `service`                                         |
+| `contact_click`                                                  | clicked a phone number or a messenger          | `channel`, `placement`                            |
+| `lead_modal_open`                                                | opened the form in the modal                   | `tab`, `service`                                  |
+| `telegram_choice`                                                | picked bot or manager after a Telegram tap     | `option`: `bot`, `manager`                        |
+| `brand_link_click`                                               | left for a partner site (approved.rs only)     | `brand`: `details`, `carlab`                      |
+| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                     | `from`, `to`                                      |
+| `case_view`                                                      | opened a Case study                            | `depth`: Case studies opened this visit           |
+| `search`                                                         | sent the catalogue search box (carlab.rs only) | `kind`: `vin`, `query`                            |
+| `search_suggestion_pick`                                         | opened a search suggestion (carlab.rs only)    | `group`: `cars`, `parts`, `vin`                   |
+| `developer_credit_click`                                         | clicked the Zikrasoft credit in the footer     | —                                                 |
 
 `scroll_50`, `form_view` and `form_start` fire once per page rather than once per
 form: the approved.rs homepage has three forms, and counting them separately would
