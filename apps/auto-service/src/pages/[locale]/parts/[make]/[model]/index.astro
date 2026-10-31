@@ -107,7 +107,11 @@ const empty = hub.categories.length === 0;
 
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.carsHeading}</h2>
-        <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
+        {
+          hub.vehicles.some((vehicle) => links.vehicle(vehicle)) && (
+            <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
+          )
+        }
         <ul class="card divide-y divide-line">
           {
             hub.vehicles.map((vehicle) => {

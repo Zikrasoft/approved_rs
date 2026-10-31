@@ -317,6 +317,17 @@ describe('leadSubmissionSchema', () => {
     );
   });
 
+  it('writes a VIN typed in lower case as the upper-case VIN it is', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'wba35bg070n074158',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158',
+    );
+  });
+
   it('carries the shop order the Lead was placed for', () => {
     const parsed = submit({
       name: '',

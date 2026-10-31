@@ -139,13 +139,15 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
         const show = (q: string, found: Suggestions) => {
           const groups = found.vin
             ? [
-                group('vin', this.dataset.vinLabel ?? '', [
+                option(
                   {
                     href: `${form.getAttribute('action')}?${new URLSearchParams({ q })}`,
                     label: this.dataset.vinLabel ?? '',
                     detail: q,
                   },
-                ]),
+                  'vin',
+                  0,
+                ),
               ]
             : [
                 ...(found.cars.length

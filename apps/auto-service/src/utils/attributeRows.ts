@@ -1,4 +1,5 @@
 import {
+  localizedUnit,
   translated,
   type AttributeValues,
   type Category,
@@ -27,7 +28,9 @@ const displayValue = (
     case 'single-select':
       return option(String(value));
     case 'number':
-      return field.unit ? `${value} ${field.unit}` : String(value);
+      return field.unit
+        ? `${value} ${localizedUnit(field.unit, locale)}`
+        : String(value);
     case 'text':
       return String(value);
   }

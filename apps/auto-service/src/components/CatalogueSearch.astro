@@ -69,7 +69,7 @@ const copy = content(locale).partsSearch;
           autofocus={autofocus}
           placeholder={copy.placeholder}
           class:list={[
-            'field',
+            'field [&::-webkit-search-cancel-button]:appearance-none',
             large
               ? 'min-h-14 pl-12 text-base sm:text-lg'
               : compact

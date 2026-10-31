@@ -128,6 +128,7 @@ const carLists = [
       .map(carLink),
   }))
   .filter(({ links }) => links.length > 0);
+const VISIBLE_MODELS = 5;
 const fitmentCopy = content(locale).partsCar.fitment;
 const fitsByMake = fitGroups(page.fits);
 const singleModel =
@@ -357,56 +358,84 @@ const thumbFor = (slug: string) => {
               {fitsByMake.map(({ make, models }) => (
                 <section class="flex flex-col gap-2">
                   <h3 class="text-sm font-semibold text-muted">{make.name}</h3>
-                  <ul class="card divide-y divide-line">
-                    {models.map(({ model, fits }) => (
-                      <li>
-                        <details class="group" open={singleModel}>
-                          <summary class="flex min-h-11 cursor-pointer list-none items-center gap-3 px-5 py-3 marker:hidden sm:px-6 [&::-webkit-details-marker]:hidden">
-                            <span class="min-w-0 flex-1 font-semibold text-ink">
-                              {carName(model, locale)}
-                            </span>
-                            <span class="spec shrink-0 text-sm text-muted">
-                              {fits.length}
-                            </span>
-                            <Icon
-                              name="chevronDown"
-                              size={16}
-                              class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
-                            />
-                          </summary>
-                          <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6 pointer-coarse:gap-1">
-                            {pageLinks.model(model) && (
-                              <a
-                                href={pageLinks.model(model)}
-                                class="flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
-                              >
-                                {fitmentCopy.modelLink.replace(
-                                  '{model}',
-                                  carName(model, locale),
-                                )}
-                              </a>
-                            )}
-                            <ul class="flex flex-col gap-3 border-l-2 border-line pl-4 pointer-coarse:gap-1">
-                              {fits.map((fit) => (
-                                <li>
-                                  <FitLine
-                                    fit={fit}
-                                    car={{
-                                      href: pageLinks.vehicle(fit.vehicle),
-                                      label: vehicleVariant(
-                                        fit.vehicle,
-                                        locale,
-                                      ),
-                                    }}
+                  {[
+                    models.slice(0, VISIBLE_MODELS),
+                    models.slice(VISIBLE_MODELS),
+                  ]
+                    .filter((chunk) => chunk.length > 0)
+                    .map((chunk, index) => {
+                      const list = (
+                        <ul class="card divide-y divide-line">
+                          {chunk.map(({ model, fits }) => (
+                            <li>
+                              <details class="group" open={singleModel}>
+                                <summary class="flex min-h-11 cursor-pointer list-none items-center gap-3 px-5 py-3 marker:hidden sm:px-6 [&::-webkit-details-marker]:hidden">
+                                  <span class="min-w-0 flex-1 font-semibold text-ink">
+                                    {carName(model, locale)}
+                                  </span>
+                                  <span class="spec shrink-0 text-sm text-muted">
+                                    {fitmentCopy.variants.replace(
+                                      '{count}',
+                                      String(fits.length),
+                                    )}
+                                  </span>
+                                  <Icon
+                                    name="chevronDown"
+                                    size={16}
+                                    class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
                                   />
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                                </summary>
+                                <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6 pointer-coarse:gap-1">
+                                  {pageLinks.model(model) && (
+                                    <a
+                                      href={pageLinks.model(model)}
+                                      class="flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
+                                    >
+                                      {fitmentCopy.modelLink.replace(
+                                        '{model}',
+                                        carName(model, locale),
+                                      )}
+                                    </a>
+                                  )}
+                                  <ul class="flex flex-col gap-3 border-l-2 border-line pl-4 pointer-coarse:gap-1">
+                                    {fits.map((fit) => (
+                                      <li>
+                                        <FitLine
+                                          fit={fit}
+                                          car={{
+                                            href: pageLinks.vehicle(
+                                              fit.vehicle,
+                                            ),
+                                            label: vehicleVariant(
+                                              fit.vehicle,
+                                              locale,
+                                            ),
+                                          }}
+                                        />
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </details>
+                            </li>
+                          ))}
+                        </ul>
+                      );
+                      return index === 0 ? (
+                        list
+                      ) : (
+                        <details class="group/more">
+                          <summary class="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-signal-ink group-open/more:hidden hover:text-signal-dark [&::-webkit-details-marker]:hidden">
+                            {content(locale).partsSearch.showAllValues.replace(
+                              '{count}',
+                              String(models.length),
+                            )}
+                            <Icon name="chevronDown" size={12} />
+                          </summary>
+                          {list}
                         </details>
-                      </li>
-                    ))}
-                  </ul>
+                      );
+                    })}
                 </section>
               ))}
             </div>

@@ -173,13 +173,18 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('records an unknown type code as unresolved and resolves it once staff add the Vehicle', async () => {
+      it('records an unknown type code as unresolved, places it on its Make, and resolves it once staff add the Vehicle', async () => {
         const vin = 'WBA99ZZ070N000002';
 
         const before = await lookUp(vin);
         expect(before.data).toEqual({
           resolved: false,
-          place: null,
+          place: {
+            kind: 'make',
+            make: { slug: 'bmw', name: 'BMW' },
+            model: null,
+            vehicle: null,
+          },
           make: 'bmw',
           code: '99ZZ',
           model_slug: null,

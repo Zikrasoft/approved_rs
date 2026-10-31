@@ -48,7 +48,7 @@ const oil: Category = {
         { key: 'mb-229-51', label: 'MB 229.51', translations: null, rank: 1 },
       ],
     },
-    { ...field, key: 'volume', type: 'number', unit: 'l', label: 'Объем' },
+    { ...field, key: 'volume', type: 'number', unit: 'л', label: 'Объем' },
     { ...field, key: 'weight', type: 'number', label: 'Вес' },
     { ...field, key: 'synthetic', type: 'boolean', label: 'Синтетика' },
     { ...field, key: 'eco', type: 'boolean', label: 'Эко' },
@@ -106,7 +106,7 @@ describe('keySpecs', () => {
         },
         'ru',
       ),
-    ).toBe('5W-30 · 5 l · 4.4');
+    ).toBe('5W-30 · 5 л · 4.4');
   });
 
   it('is empty for a part with no filled fields', () => {

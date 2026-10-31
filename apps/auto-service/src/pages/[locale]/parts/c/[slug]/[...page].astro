@@ -1,5 +1,5 @@
 ---
-import { translated } from '@podbor/catalog-contract';
+import { localizedUnit, translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -86,7 +86,10 @@ const fields = category.fields
       .filter(Number.isFinite);
     return {
       key: field.key,
-      label: [translated(field, 'label', locale), field.unit]
+      label: [
+        translated(field, 'label', locale),
+        localizedUnit(field.unit, locale),
+      ]
         .filter(Boolean)
         .join(', '),
       values:

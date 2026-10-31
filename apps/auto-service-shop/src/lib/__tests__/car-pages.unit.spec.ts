@@ -101,6 +101,11 @@ describe('nearestPlace', () => {
     ).toBe(makeCard);
   });
 
+  it('is the decoded Make when neither a Vehicle nor a Model is known', () => {
+    expect(nearestPlace([], null, paged(makeCard), 'bmw')).toBe(makeCard);
+    expect(nearestPlace([], null, paged(), 'bmw')).toBeNull();
+  });
+
   it('is the named Model when no candidate Vehicle is known', () => {
     const f30 = modelCard('f30-320d');
     expect(nearestPlace([], 'f30-320d', paged(f30))).toBe(f30);

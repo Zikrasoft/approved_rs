@@ -68,6 +68,7 @@ export const nearestPlace = (
   candidates: CarAddress[],
   modelSlug: string | null,
   paged: PagedCars,
+  makeSlug: string | null = null,
 ): CarHit | null =>
   (candidates.length === 1
     ? paged.get(vehicleKey(candidates[0].id))
@@ -81,7 +82,11 @@ export const nearestPlace = (
     paged,
   ) ??
   shared(
-    candidates.map(({ model }) => makeKey(model.chassis.series.make.slug)),
+    candidates.length
+      ? candidates.map(({ model }) => makeKey(model.chassis.series.make.slug))
+      : makeSlug
+        ? [makeKey(makeSlug)]
+        : [],
     paged,
   ) ??
   null;
@@ -90,14 +95,17 @@ export async function nearestPagedPlace(
   searchModule: ISearchModuleService,
   candidates: CarAddress[],
   modelSlug: string | null = null,
+  makeSlug: string | null = null,
 ): Promise<CarHit | null> {
   const keys = [
     ...candidates.flatMap(fittedCarKeys),
     ...(modelSlug ? [modelKey(modelSlug)] : []),
+    ...(makeSlug ? [makeKey(makeSlug)] : []),
   ];
   return nearestPlace(
     candidates,
     modelSlug,
     await pagedCars(searchModule, keys),
+    makeSlug,
   );
 }

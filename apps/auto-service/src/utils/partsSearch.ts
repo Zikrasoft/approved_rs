@@ -64,7 +64,7 @@ export const rangeMaxName = (key: string): string => `${RANGE_MAX}${key}`;
 const bound = (text: string | null): number | null => {
   const trimmed = text?.trim() ?? '';
   const number = Number(trimmed.replace(',', '.'));
-  return trimmed && Number.isFinite(number) ? number : null;
+  return trimmed && Number.isFinite(number) && number >= 0 ? number : null;
 };
 
 export const rangesFromParams = (params: URLSearchParams): RangeFilter[] => {

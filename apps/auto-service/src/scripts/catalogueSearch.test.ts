@@ -187,6 +187,7 @@ describe('the catalogue search box', () => {
     const [option] =
       panel.querySelectorAll<HTMLAnchorElement>('[role="option"]');
     expect(option.textContent).toContain('Подобрать по VIN');
+    expect(panel.textContent?.split('Подобрать по VIN')).toHaveLength(2);
     expect(option.getAttribute('href')).toBe(
       '/ru/parts/search/?q=WBA35BG070N074158',
     );

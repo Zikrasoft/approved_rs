@@ -30,6 +30,7 @@ export const partsCarContentSchema = z
         submitLabel: z.string(),
         invalid: z.string(),
         unresolved: z.string(),
+        chooseMake: z.string(),
       })
       .strict(),
     car: z
@@ -81,6 +82,7 @@ export const partsCarContentSchema = z
         builtTo: z.string(),
         partFitsHeading: z.string(),
         modelLink: z.string().includes('{model}'),
+        variants: z.string().includes('{count}'),
       })
       .strict(),
     hubs: z
