@@ -17,17 +17,14 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
     return null;
   }
   const buyable = offers.filter(isBuyable);
-  const cheapest = (buyable.length ? buyable : offers).reduce((best, offer) =>
-    offer.price < best.price ||
-    (offer.price === best.price && inStock(offer) && !inStock(best))
-      ? offer
-      : best,
+  const [picked] = (buyable.length ? buyable : offers).toSorted(
+    (a, b) => Number(inStock(b)) - Number(inStock(a)) || a.price - b.price,
   );
   return {
-    price: cheapest.price,
-    currency: cheapest.currency,
-    inStock: inStock(cheapest),
+    price: picked.price,
+    currency: picked.currency,
+    inStock: inStock(picked),
     buyable: buyable.length > 0,
-    leadDays: cheapest.lead_time_days,
+    leadDays: picked.lead_time_days,
   };
 }
