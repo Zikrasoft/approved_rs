@@ -32,6 +32,8 @@ const HAND_WRITTEN_TYPES: Record<string, string> = {
   'supplier.markup_percentage': 'numeric',
   'fitment.production_from': 'date',
   'fitment.production_to': 'date',
+  'requirement.min': 'numeric',
+  'requirement.max': 'numeric',
 };
 
 const columnSignature = (type: string, nullable: boolean) =>
@@ -71,6 +73,34 @@ medusaIntegrationTestRunner({
           /^CREATE UNIQUE INDEX .*upper\(regexp_replace\(btrim\(NORMALIZE\(name, NFKC\)\)/,
         );
       });
+
+      it.each(['IDX_fitment_part_vehicle_all', 'IDX_fitment_vehicle_all'])(
+        'keeps %s over tombstoned Fitments too',
+        async (name) => {
+          expect(await definition(name)).toMatch(/^CREATE INDEX .*btree/);
+          expect(await definition(name)).not.toContain('WHERE');
+        },
+      );
+
+      it.each([
+        'IDX_vehicle_model_name_trigram',
+        'IDX_part_name_trigram',
+        'IDX_part_identifier_normalized_value_trigram',
+      ])('keeps %s for substring search', async (name) => {
+        expect(await definition(name)).toMatch(/USING gin .*gin_trgm_ops/);
+      });
+
+      it('finds a tombstone-aware Fitment by an index', async () => {
+        const trx = await pg().transaction();
+        await trx.raw('set local enable_seqscan = off');
+        const plan = await trx.raw(
+          `explain select id from fitment where part_id = 'p' and vehicle_id in ('v')`,
+        );
+        await trx.rollback();
+        expect(JSON.stringify(plan.rows)).toMatch(
+          /Index.*IDX_fitment_(part_vehicle|vehicle)_all/,
+        );
+      });
     });
 
     describe('The column types the generator cannot express', () => {
@@ -93,6 +123,13 @@ medusaIntegrationTestRunner({
         'keeps the Fitment %s a calendar date',
         async (column) => {
           expect(await columnType('fitment', column)).toBe('date');
+        },
+      );
+
+      it.each(['min', 'max'])(
+        'keeps the Requirement %s an exact decimal',
+        async (column) => {
+          expect(await columnType('requirement', column)).toBe('numeric');
         },
       );
 
@@ -183,6 +220,13 @@ medusaIntegrationTestRunner({
         expect(await checks('requirement')).toContain(
           'CHECK ((num_nonnulls(engine_id, chassis_id, vehicle_id) = 1))',
         );
+      });
+
+      it('refuses to delete a Category a Part still uses', async () => {
+        const { rows } = await pg().raw(
+          `select confdeltype from pg_constraint where conname = 'part_category_id_foreign'`,
+        );
+        expect(rows).toEqual([{ confdeltype: 'r' }]);
       });
 
       it('keeps a Fitment production range in order', async () => {

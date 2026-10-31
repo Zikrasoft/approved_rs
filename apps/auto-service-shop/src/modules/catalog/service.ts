@@ -284,6 +284,21 @@ const RETIRING_DELETES = {
 
 type RetiringTable = keyof typeof RETIRING_DELETES;
 
+const scopedKind = (kind: SluggedKind) =>
+  kind === 'vehicle' || kind === 'model';
+
+const slugScopeOf = (kind: SluggedKind, row: SlugInput): string | null =>
+  kind === 'vehicle'
+    ? String(row.model_id)
+    : kind === 'model'
+      ? String(row.make_id)
+      : null;
+
+// TODO: a move that lands a Model in a Make already holding its slug fails on the unique index; re-slug it as mergeModels does for Vehicles if staff hit it.
+const MODELS_FOLLOW_THEIR_MAKE = `update vehicle_model m set make_id = s.make_id
+  from chassis c join series s on s.id = c.series_id
+  where c.id = m.chassis_id and m.make_id <> s.make_id`;
+
 const slugInUse = () =>
   adminError(
     MedusaError.Types.CONFLICT,
@@ -355,7 +370,7 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         kind,
         from_slug: slug,
-        ...(kind === 'vehicle' && { scope_id: scopeId }),
+        ...(scopedKind(kind) && { scope_id: scopeId }),
       },
       { select: ['id'], take: 1 },
       context,
@@ -369,7 +384,12 @@ class CatalogModuleService extends CatalogModuleBase {
     scopeId: string | null,
     context: Context,
   ): Promise<boolean> {
-    const scope = kind === 'vehicle' ? { model_id: scopeId } : {};
+    const scope =
+      kind === 'vehicle'
+        ? { model_id: scopeId }
+        : kind === 'model'
+          ? { make_id: scopeId }
+          : {};
     const live = await this.sluggedRows(kind).list({ slug, ...scope }, context);
     return (
       live.length > 0 || (await this.slugRetired(kind, slug, scopeId, context))
@@ -414,7 +434,7 @@ class CatalogModuleService extends CatalogModuleBase {
     reserved: Set<string>,
     context: Context,
   ): Promise<string> {
-    const scope = kind === 'vehicle' ? String(row.model_id) : null;
+    const scope = slugScopeOf(kind, row);
     const free = async (slug: string) =>
       !reserved.has(`${scope}/${slug}`) &&
       !reservedSection(kind, slug) &&
@@ -447,15 +467,67 @@ class CatalogModuleService extends CatalogModuleBase {
   ): Promise<Data> {
     const reserved = new Set<string>();
     const slugged: SlugInput[] = [];
-    for (const row of [data].flat()) {
+    for (const input of [data].flat()) {
+      const row =
+        kind === 'model' ? await this.withModelMake(input, context) : input;
       const slug = await this.slugFor(kind, row, reserved, context);
-      reserved.add(
-        `${kind === 'vehicle' ? String(row.model_id) : null}/${slug}`,
-      );
+      reserved.add(`${slugScopeOf(kind, row)}/${slug}`);
       slugged.push({ ...row, slug });
     }
     return (Array.isArray(data) ? slugged : slugged[0]) as Data;
   }
+
+  private async withModelMake(
+    row: SlugInput,
+    context: Context,
+  ): Promise<SlugInput> {
+    const chassis = await this.retrieveChassis(
+      String(row.chassis_id),
+      { relations: ['series'] },
+      context,
+    );
+    return { ...row, make_id: chassis.series.make_id };
+  }
+
+  @InjectTransactionManager()
+  private async updateFollowingMakes(
+    method: 'updateSeries' | 'updateChassis' | 'updateVehicleModels',
+    data: unknown,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<unknown> {
+    const updated: unknown = await (
+      CatalogModuleBase.prototype[method] as (
+        data: unknown,
+        context: Context,
+      ) => Promise<unknown>
+    ).call(this, data, sharedContext);
+    await this.flush(sharedContext);
+    await (sharedContext.transactionManager as SqlEntityManager).execute(
+      MODELS_FOLLOW_THEIR_MAKE,
+    );
+    return updated;
+  }
+
+  override updateSeries = ((data: unknown, context?: Context) =>
+    this.updateFollowingMakes(
+      'updateSeries',
+      data,
+      context,
+    )) as CatalogModuleBase['updateSeries'];
+
+  override updateChassis = ((data: unknown, context?: Context) =>
+    this.updateFollowingMakes(
+      'updateChassis',
+      data,
+      context,
+    )) as CatalogModuleBase['updateChassis'];
+
+  override updateVehicleModels = ((data: unknown, context?: Context) =>
+    this.updateFollowingMakes(
+      'updateVehicleModels',
+      data,
+      context,
+    )) as CatalogModuleBase['updateVehicleModels'];
 
   override createBrands = ((data: SlugInput | SlugInput[], context?: Context) =>
     this.withSlugs('brand', data, context).then((slugged) =>
@@ -501,12 +573,9 @@ class CatalogModuleService extends CatalogModuleBase {
     context: Context,
   ): Promise<string | null> {
     if (kind === 'model') {
-      const model = await this.retrieveVehicleModel(
-        id,
-        { relations: ['chassis.series'] },
-        context,
-      );
-      return model.chassis.series.make_id;
+      return (
+        await this.retrieveVehicleModel(id, { select: ['make_id'] }, context)
+      ).make_id;
     }
     if (kind === 'vehicle') {
       return (await this.retrieveVehicle(id, { select: ['model_id'] }, context))
@@ -891,15 +960,15 @@ class CatalogModuleService extends CatalogModuleBase {
     if (table === 'model') {
       const models = await this.listVehicleModels(
         { id: ids },
-        { relations: ['chassis.series'], take: null },
+        { select: ['id', 'slug', 'make_id'], take: null },
         context,
       );
-      return models.map(({ id, slug, chassis }) => ({
+      return models.map(({ id, slug, make_id }) => ({
         id,
         slug,
-        scope_id: chassis.series.make_id,
+        scope_id: make_id,
         target_kind: 'make',
-        target_id: chassis.series.make_id,
+        target_id: make_id,
       }));
     }
     const rows = await this.sluggedRows(table).list({ id: ids }, context);

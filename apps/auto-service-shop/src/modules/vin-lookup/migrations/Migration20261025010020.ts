@@ -14,6 +14,12 @@ export class Migration20261025010020 extends Migration {
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_vin_lookup_vin_unique" ON "vin_lookup" ("vin") WHERE deleted_at IS NULL;`,
     );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_vehicle_id" ON "vin_lookup" ("vehicle_id") WHERE deleted_at IS NULL;`,
+    );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_make_code" ON "vin_lookup" ("make", "code") WHERE vehicle_id IS NULL AND deleted_at IS NULL;`,
+    );
   }
 
   override async down(): Promise<void> {

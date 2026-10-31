@@ -195,7 +195,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "supplier_markup_percentage",
+          "expression": "markup_percentage >= 0",
+          "definition": "check ((markup_percentage >= 0))"
+        }
+      ],
       "foreignKeys": {},
       "nativeEnums": {}
     },
@@ -901,7 +907,28 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "supplier_offer_cost_price",
+          "expression": "cost_price >= 0",
+          "definition": "check ((cost_price >= 0))"
+        },
+        {
+          "name": "supplier_offer_stock",
+          "expression": "stock_quantity >= 0",
+          "definition": "check ((stock_quantity >= 0))"
+        },
+        {
+          "name": "supplier_offer_lead_time",
+          "expression": "lead_time_days >= 0",
+          "definition": "check ((lead_time_days >= 0))"
+        },
+        {
+          "name": "supplier_offer_currency",
+          "expression": "currency similar to '[A-Z]{3}'",
+          "definition": "check ((currency similar to '[A-Z]{3}'))"
+        }
+      ],
       "foreignKeys": {
         "supplier_offer_supplier_id_foreign": {
           "constraintName": "supplier_offer_supplier_id_foreign",
