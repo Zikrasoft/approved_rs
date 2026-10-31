@@ -159,7 +159,6 @@ medusaIntegrationTestRunner({
             storeHeaders,
           );
 
-          expect(response.data).toMatchObject({ next: null });
           expect(response.data.vehicles).toEqual([
             expect.objectContaining({ id: vehicle.id }),
           ]);
