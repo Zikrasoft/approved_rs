@@ -64,6 +64,7 @@ export const shopCartContentSchema = z
     orderedHeading: z.string(),
     orderedBody: z.string(),
     orderNumberTemplate: z.string(),
+    orderedNext: z.string(),
     orderedCta: z.string(),
     receiptQuantityTemplate: z.string(),
     stickyCta: z.string(),
