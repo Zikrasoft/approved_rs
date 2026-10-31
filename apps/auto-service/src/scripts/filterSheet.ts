@@ -1,5 +1,8 @@
 export const FILTERS_OPEN_ATTRIBUTE = 'data-filters-open';
 export const FILTERS_SUBMIT_ATTRIBUTE = 'data-filters-submit';
+export const FILTERS_COUNT_ATTRIBUTE = 'data-filters-count';
+
+const RECOUNT_DELAY_MS = 300;
 
 export function defineFilterSheet(
   tagName = 'filter-sheet',
@@ -10,6 +13,8 @@ export function defineFilterSheet(
     tagName,
     class extends HTMLElement {
       #wiring: AbortController | undefined;
+      #recount: AbortController | undefined;
+      #timer: ReturnType<typeof setTimeout> | undefined;
 
       connectedCallback(): void {
         this.#wiring = new AbortController();
@@ -22,16 +27,16 @@ export function defineFilterSheet(
           trigger.hidden = false;
         }
         const submit = this.querySelector(`[${FILTERS_SUBMIT_ATTRIBUTE}]`);
+        const form = this.closest('form');
         this.addEventListener(
-          'change',
+          'input',
           () => {
             this.toggleAttribute('data-dirty', true);
-            const label = submit?.getAttribute(FILTERS_SUBMIT_ATTRIBUTE);
-            if (submit && label) submit.textContent = label;
+            if (submit && form) this.#schedule(form, submit);
           },
           { signal },
         );
-        this.closest('form')?.addEventListener(
+        form?.addEventListener(
           'formdata',
           ({ formData }) => {
             const kept = [...formData].filter(([, value]) => value !== '');
@@ -52,6 +57,40 @@ export function defineFilterSheet(
 
       disconnectedCallback(): void {
         this.#wiring?.abort();
+        this.#recount?.abort();
+        clearTimeout(this.#timer);
+      }
+
+      #schedule(form: HTMLFormElement, submit: Element): void {
+        const plain = submit.getAttribute(FILTERS_SUBMIT_ATTRIBUTE) ?? '';
+        const template = submit.getAttribute(FILTERS_COUNT_ATTRIBUTE);
+        const url = this.dataset.countUrl;
+        this.#recount?.abort();
+        clearTimeout(this.#timer);
+        if (!template || !url) {
+          submit.textContent = plain;
+          return;
+        }
+        submit.setAttribute('aria-busy', 'true');
+        const recount = new AbortController();
+        this.#recount = recount;
+        this.#timer = setTimeout(() => {
+          const params = new URLSearchParams();
+          for (const [name, value] of new FormData(form)) {
+            if (typeof value === 'string' && value) params.append(name, value);
+          }
+          fetch(`${url}&${params}`, { signal: recount.signal })
+            .then((response) => (response.ok ? response.json() : null))
+            .catch(() => null)
+            .then((body: { count?: unknown } | null) => {
+              if (recount.signal.aborted) return;
+              submit.removeAttribute('aria-busy');
+              submit.textContent =
+                typeof body?.count === 'number'
+                  ? template.replace('{count}', String(body.count))
+                  : plain;
+            });
+        }, RECOUNT_DELAY_MS);
       }
     },
   );

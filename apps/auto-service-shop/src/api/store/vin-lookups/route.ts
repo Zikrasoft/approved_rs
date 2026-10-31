@@ -33,6 +33,7 @@ export async function POST(
       req.scope.resolve(Modules.SEARCH),
       candidates,
       lookup.resolved ? null : lookup.model_slug,
+      lookup.resolved ? null : lookup.make,
     ),
   });
 }

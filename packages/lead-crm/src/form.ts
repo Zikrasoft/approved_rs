@@ -141,7 +141,7 @@ const submissionObject = z
   })
   .transform((value) => {
     const services = value.service.filter(Boolean).slice(0, MAX_SERVICES);
-    const vin = value.vin ? `VIN: ${value.vin}` : null;
+    const vin = value.vin ? `VIN: ${value.vin.toUpperCase()}` : null;
     const comment = [vin, value.car, value.comment]
       .filter(Boolean)
       .join('\n')

@@ -340,6 +340,12 @@ medusaIntegrationTestRunner({
         expect(dotted.value).toBe('11 42 8575211');
       });
 
+      it('finds nothing for a spaced number it does not hold, rather than its fragments', async () => {
+        expect(await results({ q: '11 42 8 575 299', locale: 'ru' })).toEqual(
+          [],
+        );
+      });
+
       it('builds facets from the Category field definitions', async () => {
         const response = await search({ q: 'castrol', locale: 'sr' });
 

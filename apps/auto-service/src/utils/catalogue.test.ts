@@ -1752,7 +1752,7 @@ describe('catalogue.listingScope', () => {
       backend({ vehicles: [other, VEHICLE] }),
     ).listingScope({ model: 'f30-320d' }, 'ru');
 
-    expect(scope.model).toEqual(VEHICLE.model);
+    expect(scope?.model).toEqual(VEHICLE.model);
   });
 
   it('names nothing when the backend cannot answer', async () => {
@@ -1760,7 +1760,7 @@ describe('catalogue.listingScope', () => {
       vi.fn(() => respond({}, false)),
     ).listingScope({ category: 'oil-filters' }, 'ru');
 
-    expect(scope).toEqual({ category: null, model: null, scope_pages: null });
+    expect(scope).toBeNull();
   });
 });
 
