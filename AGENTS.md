@@ -39,7 +39,12 @@ literal), `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
 `MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal) and
 `METRIKA_MASK_CLASS` (on every form that takes a contact, keeping its fields out
 of Webvisor recordings as the privacy copy promises; from
-`@podbor/site-kit/browser`, never a literal). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
+`@podbor/site-kit/browser`, never a literal) and `--cookie-consent-height`
+(`COOKIE_CONSENT_HEIGHT_VAR` from `@podbor/site-kit/browser`, the banner's
+height that `<cookie-consent>` sets on `<html>` and every bar fixed to the
+bottom of the screen rises by; Tailwind classes and scoped CSS cannot import
+it, so they spell it out and each app's `cookieConsentLift.test.ts` counts the
+spellings against the constant). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
 `data-consent`, the hidden `contact` and `contact_channel` inputs,
