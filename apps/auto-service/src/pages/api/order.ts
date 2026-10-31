@@ -6,11 +6,15 @@ import {
   CART_FINGERPRINT_FIELD,
   checkoutContactSchema,
 } from '@podbor/catalog-contract';
+import { fitComment } from '@podbor/catalog-contract/comment';
 import { waitUntil } from '@vercel/functions';
 import { HONEYPOT_FIELD, orderLeadSubmission } from '@podbor/lead-crm';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { plainText } from '@podbor/lead-crm/phone';
-import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
+import {
+  PARTS_ORDER_COPY,
+  type NotPlacedReason,
+} from '@podbor/lead-crm/parts-order-copy';
 import { notifyLead } from '@/lib/crm';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
@@ -21,14 +25,17 @@ import {
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
   refusalNotice,
+  refusalReason,
   type CartNotice,
 } from '@/utils/cartNotice';
 import { PathBuilder } from '@/utils/paths';
 import { previewRequested } from '@/utils/shopPreview';
 
+const MAX_CART_LINES_LENGTH = 20_000;
+
 const cartLinesSchema = z
   .string()
-  .max(MAX_COMMENT_LENGTH)
+  .max(MAX_CART_LINES_LENGTH)
   .transform(plainText)
   .optional()
   .catch(undefined);
@@ -71,19 +78,26 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       [ORDERED_CART_PARAM]: order.data.cart_id,
     });
   }
-  const notice =
+  const { notice, reason }: { notice: CartNotice; reason: NotPlacedReason } =
     outcome?.kind === 'refused'
-      ? refusalNotice(outcome.code)
+      ? {
+          notice: refusalNotice(outcome.code),
+          reason: refusalReason(outcome.code),
+        }
       : outcome?.kind === 'empty'
-        ? 'expired'
-        : 'unreachable';
-  const summary = [
-    PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason[notice]),
-    cartLinesSchema.parse(form[CART_LINES_FIELD]),
-    contact.data.comment,
-  ]
-    .filter(Boolean)
-    .join('\n');
+        ? { notice: 'expired', reason: 'expired' }
+        : { notice: 'unreachable', reason: 'unreachable' };
+  const summary = fitComment({
+    head: [
+      PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason[reason]),
+    ],
+    lines: (cartLinesSchema.parse(form[CART_LINES_FIELD]) ?? '')
+      .split('\n')
+      .filter(Boolean),
+    note: contact.data.comment ?? '',
+    limit: MAX_COMMENT_LENGTH,
+    more: PARTS_ORDER_COPY.notPlacedLeftOut,
+  });
   waitUntil(
     notifyLead(
       orderLeadSubmission(null, { ...contact.data, locale }, summary, locale),

@@ -55,4 +55,10 @@ describe('PARTS_ORDER_COPY', () => {
       PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason.unreachable),
     ).toBe('Заказ не оформлен: магазин не ответил. Свяжитесь с клиентом');
   });
+
+  it('counts the cart lines a failed checkout could not fit', () => {
+    expect(PARTS_ORDER_COPY.notPlacedLeftOut(3)).toBe(
+      'Не поместилось позиций: 3',
+    );
+  });
 });
