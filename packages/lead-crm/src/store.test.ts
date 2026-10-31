@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   createMemoryStorage,
   type MemoryStorage,
@@ -600,6 +600,77 @@ describe('insertOrMergeLead', () => {
     });
     expect(merged).toBe(false);
   });
+
+  describe('a second form with a different real contact', () => {
+    const inquiry = (contact: string, name: string): LeadInput => ({
+      brand: 'Test',
+      name,
+      contact,
+      contactChannel: 'whatsapp',
+      service: 'vin-parts-inquiry',
+      visitorId: 'visitor-1',
+      locale: 'ru',
+    });
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-11-01T10:00:00.000Z'));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('keeps the first contact and notes the corrected one from the visitor', async () => {
+      await store.insertOrMergeLead(inquiry('+381641299000', 'QA r6 typo'));
+      const { lead, merged } = await store.insertOrMergeLead({
+        ...inquiry('+381641298000', 'QA r6 corrected'),
+        comment: 'номер выше с ошибкой, правильный этот',
+      });
+
+      expect(merged).toBe(true);
+      expect(lead.contact).toBe('+381641299000');
+      expect(lead.name).toBe('QA r6 typo');
+      expect(lead.comment).toBe(
+        [
+          'номер выше с ошибкой, правильный этот',
+          '01.11.2026 · Клиент (WhatsApp): Доп. контакт: +381641298000',
+          '01.11.2026 · Клиент (WhatsApp): Другое имя: QA r6 corrected',
+        ].join('\n'),
+      );
+    });
+
+    it('notes nothing when the contact and the name repeat', async () => {
+      await store.insertOrMergeLead(inquiry('+381641299000', 'Иван'));
+      const { lead } = await store.insertOrMergeLead(
+        inquiry('+381641299000', 'Иван'),
+      );
+
+      expect(lead.comment).toBe('');
+    });
+
+    it('fills a missing name in instead of noting it', async () => {
+      await store.insertOrMergeLead(inquiry('+381641299000', ''));
+      const { lead } = await store.insertOrMergeLead({
+        ...inquiry('+381641299000', 'Иван'),
+        contactChannel: null,
+      });
+
+      expect(lead.name).toBe('Иван');
+      expect(lead.comment).toBe('');
+    });
+
+    it('signs the note without a channel when the form names none', async () => {
+      await store.insertOrMergeLead(inquiry('+381641299000', 'Иван'));
+      const { lead } = await store.insertOrMergeLead({
+        ...inquiry('+381641298000', ''),
+        contactChannel: null,
+      });
+
+      expect(lead.comment).toBe(
+        '01.11.2026 · Клиент: Доп. контакт: +381641298000',
+      );
+    });
+  });
 });
 
 describe('insertOrMergeLead with standalone services', () => {
@@ -640,14 +711,17 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(await store.readLeads()).toHaveLength(2);
   });
 
-  it('merges a second failed checkout of one visitor under its new contact', async () => {
+  it('merges a second failed checkout of one visitor and notes its new contact', async () => {
     await store.insertOrMergeLead(order('+381602222222'));
     const { lead, merged } = await store.insertOrMergeLead(
       order('+381603333333'),
     );
 
     expect(merged).toBe(true);
-    expect(lead.contact).toBe('+381603333333');
+    expect(lead.contact).toBe('+381602222222');
+    expect(lead.comment).toMatch(
+      /^\d{2}\.\d{2}\.\d{4} · Клиент: Доп\. контакт: \+381603333333$/,
+    );
     expect(await store.readLeads()).toHaveLength(1);
   });
 
@@ -668,26 +742,73 @@ describe('insertOrMergeLead with standalone services', () => {
   });
 
   it('lets a placed order absorb the failed checkout before it', async () => {
-    const { lead: failed } = await store.insertOrMergeLead({
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(new Date('2026-11-01T10:00:00.000Z'));
+      const { lead: failed } = await store.insertOrMergeLead({
+        ...order('+381602222222'),
+        contactChannel: 'whatsapp',
+        comment: [
+          'Заказ не оформлен: цена изменилась. Свяжитесь с клиентом',
+          'Knecht OX 371D × 1: 1 430 RSD',
+          'Итого: 1 430 RSD',
+        ].join('\n'),
+      });
+      await store.insertOrMergeLead({
+        ...order('+381602222222'),
+        comment: [
+          'Заказ не оформлен: цена изменилась. Свяжитесь с клиентом',
+          'Knecht OX 371D × 1: 1 650 RSD',
+          'Итого: 1 650 RSD',
+        ].join('\n'),
+      });
+      await store.updateLeads((leads) =>
+        leads.map((l) => ({
+          ...l,
+          comment: `${l.comment}\n31.10.2026 · Владелец: перезвонить`,
+        })),
+      );
+      const { lead, merged } = await store.insertOrMergeLead({
+        ...order('+381603333333'),
+        name: 'Петр',
+        orderId: 'order_1',
+        comment: [
+          'Заказ #5, самовывоз, оплата при получении',
+          'Knecht OX 371D × 1: 1 430 RSD',
+          'Итого: 1 430 RSD',
+        ].join('\n'),
+      });
+
+      expect(merged).toBe(true);
+      expect(lead.id).toBe(failed.id);
+      expect(lead.orderId).toBe('order_1');
+      expect(lead.contact).toBe('+381603333333');
+      expect(lead.name).toBe('Петр');
+      expect(lead.comment).toBe(
+        [
+          'Заказ #5, самовывоз, оплата при получении',
+          'Knecht OX 371D × 1: 1 430 RSD',
+          'Итого: 1 430 RSD',
+          '01.11.2026 · Сначала не оформился: цена изменилась',
+          '31.10.2026 · Владелец: перезвонить',
+          '01.11.2026 · Клиент (WhatsApp): Доп. контакт: +381602222222',
+          '01.11.2026 · Клиент (WhatsApp): Другое имя: Иван',
+        ].join('\n'),
+      );
+      expect(await store.readLeads()).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('absorbs a failed checkout that carried no comment', async () => {
+    await store.insertOrMergeLead(order('+381602222222'));
+    const { lead } = await store.insertOrMergeLead({
       ...order('+381602222222'),
-      comment: 'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1',
-    });
-    const { lead, merged } = await store.insertOrMergeLead({
-      ...order('+381603333333'),
-      name: 'Петр',
       orderId: 'order_1',
-      comment: 'VARTA 580901080 × 1',
     });
 
-    expect(merged).toBe(true);
-    expect(lead.id).toBe(failed.id);
-    expect(lead.orderId).toBe('order_1');
-    expect(lead.contact).toBe('+381603333333');
-    expect(lead.name).toBe('Петр');
-    expect(lead.comment).toBe(
-      'Заказ не оформлен: цена изменилась\nVARTA 580901080 × 1\nVARTA 580901080 × 1',
-    );
-    expect(await store.readLeads()).toHaveLength(1);
+    expect(lead.comment).toBe('');
   });
 
   it('finds the failed checkout by contact when the visitor id differs', async () => {
@@ -776,14 +897,23 @@ describe('insertOrMergeLead with standalone services', () => {
       locale: 'ru',
       kind: 'call_click',
     });
-    const { lead, merged } = await store.insertOrMergeLead(
-      order('+381602222222'),
-    );
+    const { lead, merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      orderId: 'order_1',
+      comment: 'Заказ #5, самовывоз, оплата при получении',
+    });
 
     expect(merged).toBe(true);
     expect(lead.id).toBe(clicked.id);
     expect(lead.contact).toBe('+381602222222');
     expect(lead.service).toBe('parts-order');
+    expect(lead.comment).toBe(
+      [
+        'Сначала кликнул: звонок',
+        'Также пробовал: Заказ из магазина',
+        'Заказ #5, самовывоз, оплата при получении',
+      ].join('\n'),
+    );
   });
 
   it('answers a resent order with the Lead it already made, untouched', async () => {
