@@ -186,6 +186,45 @@ describe('catalogue.removeFromCart', () => {
   });
 });
 
+describe('a line the shop no longer has', () => {
+  const lineGone = (cartAfter: () => Promise<unknown>) =>
+    vi
+      .fn()
+      .mockImplementationOnce(() => status(404))
+      .mockImplementationOnce(cartAfter);
+
+  it.each([
+    [
+      'removing',
+      (c: ReturnType<typeof catalog>) => c.removeFromCart('cart_1', 'item_9'),
+    ],
+    [
+      'setting the quantity of',
+      (c: ReturnType<typeof catalog>) => c.setQuantity('cart_1', 'item_9', 2),
+    ],
+    [
+      'toggling the add-on of',
+      (c: ReturnType<typeof catalog>) => c.setAddon('cart_1', 'item_9', true),
+    ],
+  ])('keeps the rest of the cart after %s it', async (_, act) => {
+    const fetch = lineGone(() => status(200, { cart: CART }));
+
+    expect(await act(catalog(fetch))).toEqual({ kind: 'cart', cart: CART });
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://shop.test/store/offer-carts/cart_1/reprice',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('says the cart is gone only when the cart itself is', async () => {
+    const fetch = lineGone(() => status(404));
+
+    expect(await catalog(fetch).removeFromCart('cart_1', 'item_9')).toEqual({
+      kind: 'empty',
+    });
+  });
+});
+
 describe('catalogue.setAddon', () => {
   it.each([
     [true, 'POST'],
