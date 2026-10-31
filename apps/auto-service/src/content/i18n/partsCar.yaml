@@ -104,7 +104,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: ec4fbbdec529faf0
+translatedFrom: dfd1fe1962c5072a
 translations:
   sr:
     vin:
@@ -115,6 +115,7 @@ translations:
       submitLabel: Pronađi automobil
       invalid: 'VIN ima 17 znakova: latinična slova i cifre, bez slova I, O i Q.'
       unresolved: Nismo uspeli da automatski prepoznamo automobil na osnovu ovog VIN-a. Pošaljite upit ispod i naš savetnik će ručno pronaći odgovarajuće delove.
+      chooseMake: Izaberite model {make}
     car:
       metaTitle: '{car}: auto-delovi u CarLab'
       metaDescription: 'Delovi za {car}: pronalazimo ih po VIN-u, nabavljamo i ugrađujemo u servisu CarLab u Beogradu.'
@@ -183,6 +184,7 @@ translations:
       builtTo: proizvodnja do {date}
       partFitsHeading: Odgovara sledećim automobilima
       modelLink: Svi delovi za {model}
+      variants: '{count} verz.'
     hubs:
       indexHeading: Delovi po marki
       allMakesLink: Sve marke
@@ -220,6 +222,7 @@ translations:
       submitLabel: Find my car
       invalid: 'A VIN has 17 characters: Latin letters and numbers, excluding I, O and Q.'
       unresolved: We couldn't identify your car automatically using this VIN. Submit a request below and our team will find the right parts manually.
+      chooseMake: Select a {make} model
     car:
       metaTitle: '{car}: parts at CarLab'
       metaDescription: 'Parts for {car}: matched by VIN, ordered and fitted at CarLab in Belgrade.'
@@ -288,6 +291,7 @@ translations:
       builtTo: built up to {date}
       partFitsHeading: Fits these cars
       modelLink: All parts for {model}
+      variants: '{count} variants'
     hubs:
       indexHeading: Parts by make
       allMakesLink: All makes
