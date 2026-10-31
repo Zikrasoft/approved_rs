@@ -1,4 +1,4 @@
-import { PLACEHOLDER } from '../withPlaceholder.ts';
+import { placeholderDiff } from '../withPlaceholder.ts';
 
 const HTML_TAG = /<[a-zA-Z/!]/;
 const CYRILLIC = /\p{Script=Cyrillic}/u;
@@ -45,17 +45,12 @@ export function assertSafeTranslation(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
       );
     }
-    const dropped = [...new Set(source.match(PLACEHOLDER) ?? [])].filter(
-      (token) => !translated.includes(token),
-    );
+    const { dropped, invented } = placeholderDiff(source, translated);
     if (dropped.length > 0) {
       throw new Error(
         `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
-    const invented = [...new Set(translated.match(PLACEHOLDER) ?? [])].filter(
-      (token) => !source.includes(token),
-    );
     if (invented.length > 0) {
       throw new Error(
         `translated response for "${path}" invented placeholder tokens (${invented.join(' ')}): ${translated}`,

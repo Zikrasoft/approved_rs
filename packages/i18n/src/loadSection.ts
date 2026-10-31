@@ -2,7 +2,7 @@ import { parse as parseYaml } from 'yaml';
 import type { ZodObject, z } from 'zod';
 import { isPlainObject } from './isPlainObject.ts';
 import { SOURCE_LOCALE } from './locales.ts';
-import { PLACEHOLDER } from './withPlaceholder.ts';
+import { placeholderDiff } from './withPlaceholder.ts';
 
 function mergeOverSource(source: unknown, translation: unknown): unknown {
   if (!isPlainObject(source) || !isPlainObject(translation)) return translation;
@@ -14,8 +14,10 @@ function mergeOverSource(source: unknown, translation: unknown): unknown {
   return Object.fromEntries(merged);
 }
 
-const placeholdersOf = (text: string): string =>
-  [...new Set(text.match(PLACEHOLDER))].sort().join(' ');
+const samePlaceholders = (source: string, translated: string): boolean => {
+  const { dropped, invented } = placeholderDiff(source, translated);
+  return !dropped.length && !invented.length;
+};
 
 function keepSourcePlaceholders(
   source: unknown,
@@ -24,10 +26,7 @@ function keepSourcePlaceholders(
   mismatched: string[],
 ): unknown {
   if (typeof translated === 'string') {
-    if (
-      typeof source !== 'string' ||
-      placeholdersOf(source) === placeholdersOf(translated)
-    ) {
+    if (typeof source !== 'string' || samePlaceholders(source, translated)) {
       return translated;
     }
     mismatched.push(path);
