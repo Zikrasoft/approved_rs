@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-export const DEFAULT_TRANSLATE_MODEL = 'gpt-4o-mini';
+export const DEFAULT_TRANSLATE_MODEL = 'gpt-6.1-sol';
 
 export const OPENAI_TIMEOUT_MS = 60_000;
 export const OPENAI_MAX_RETRIES = 1;
@@ -41,6 +41,7 @@ export async function callOpenAiJson(params: {
   });
   const response = await client.chat.completions.create({
     model,
+    reasoning_effort: 'low',
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: systemPrompt },

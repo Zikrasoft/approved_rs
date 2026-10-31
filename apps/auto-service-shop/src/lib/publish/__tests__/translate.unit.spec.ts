@@ -24,8 +24,10 @@ const openAi = () => {
   const requests: Record<string, string>[] = [];
   globalThis.fetch = jest.fn(async (_input, init) => {
     const body = JSON.parse(String(init?.body)) as {
+      model: string;
       messages: { content: string }[];
     };
+    expect(body.model).toBe('gpt-6.1-terra');
     const fields = JSON.parse(body.messages[1].content) as Record<
       string,
       string

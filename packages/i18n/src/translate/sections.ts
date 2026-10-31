@@ -17,7 +17,7 @@ import {
   type CacheFile,
 } from './leafCache.ts';
 import { hashSource, type SectionData } from './hashSource.ts';
-import { NO_EM_DASH_RULE } from './promptRules.ts';
+import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
 import { translateLeaves } from './translateLeaves.ts';
 import { errorMessage } from './errorMessage.ts';
 
@@ -68,8 +68,7 @@ export function buildSectionPrompt(
     'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
     'it, never a literal word-for-word translation. Keep any markdown formatting intact. ' +
     placeholderRule +
-    'Copy personal names exactly as written too, keeping their original script, never transliterate ' +
-    'or localise them. ' +
+    'Copy personal names already in Latin script exactly as written, never localise them. ' +
     'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
     'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
     'run longer than the Russian, so drop a detail rather than going over, but never drop a ' +
@@ -78,7 +77,7 @@ export function buildSectionPrompt(
     'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
     'Spanish, never baterija, Batterie or pila on their own. The same holds for the rest ' +
     'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
-    `${NO_EM_DASH_RULE} ` +
+    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ` +
     'The input is a flat JSON object whose keys are field paths and whose values are the strings to ' +
     'translate. Respond with a JSON object having EXACTLY the same keys, with each value translated. ' +
     'A key like meta.metaTitle or steps[2].title tells you what the string is for, never translate ' +

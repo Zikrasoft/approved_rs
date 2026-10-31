@@ -7,7 +7,7 @@ import {
   getOrCreateTranslationsMap,
   translatedDocSchema,
 } from './getOrCreateTranslationsMap.ts';
-import { NO_EM_DASH_RULE } from './promptRules.ts';
+import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
 import {
   blockIsEmpty,
   DEFAULT_CACHE_PATH,
@@ -88,7 +88,7 @@ export function createCaseTranslator<L extends string>({
       'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
       'this case study, never a literal word-for-word translation. Keep markdown formatting (headings, ' +
       'bold, lists) intact. Keep car makes/models, prices, and place names as they would normally appear ' +
-      `in the target language.${guidance} ${NO_EM_DASH_RULE} The input is a flat JSON object whose keys are field names ` +
+      `in the target language.${guidance} ${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} The input is a flat JSON object whose keys are field names ` +
       'and whose values are the strings to translate. Respond with a JSON object having EXACTLY the ' +
       'same keys, with each value translated, never translate the keys themselves.' +
       (localeNote ? ` ${localeNote}` : '')

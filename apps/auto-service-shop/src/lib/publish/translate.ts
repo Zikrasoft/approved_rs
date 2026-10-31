@@ -15,6 +15,8 @@ const LANGUAGE_NAME: Record<TargetLocale, string> = {
 
 const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
 
+const CATALOG_TRANSLATE_MODEL = 'gpt-6.1-terra';
+
 const ROWS_PER_REQUEST = 50;
 const CHARS_PER_REQUEST = 4_000;
 
@@ -285,6 +287,7 @@ async function translateLocale(
       businessDescription: BUSINESS_DESCRIPTION,
       subject: entity.subject,
       apiKey: apiKey ?? '',
+      model: CATALOG_TRANSLATE_MODEL,
     });
     await entity.update(
       catalog,

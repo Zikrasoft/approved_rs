@@ -37,7 +37,8 @@ describe('callOpenAiJson', () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toBe('https://api.openai.com/v1/chat/completions');
     const body = JSON.parse(init.body as string);
-    expect(body.model).toBe('gpt-4o-mini');
+    expect(body.model).toBe('gpt-6.1-sol');
+    expect(body.reasoning_effort).toBe('low');
     expect(body.response_format).toEqual({ type: 'json_object' });
     expect(body.messages).toEqual([
       { role: 'system', content: 'sys' },
