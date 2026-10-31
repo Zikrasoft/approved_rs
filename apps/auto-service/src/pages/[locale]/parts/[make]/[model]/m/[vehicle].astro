@@ -1,4 +1,5 @@
 ---
+import DisclosureCard from '@/components/DisclosureCard.astro';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -243,7 +244,7 @@ const specsSummary = [
                 <p>{shopPart.addedNotice}</p>
                 <a
                   href={PathBuilder.partsCart(locale)}
-                  class="btn btn-primary w-full sm:w-auto sm:self-start"
+                  class="btn btn-primary btn-block"
                 >
                   {shopPart.addedCta}
                   <Icon name="arrowRight" />
@@ -380,22 +381,12 @@ const specsSummary = [
 
       {!empty && <InquiryLink topic={name} />}
 
-      <details class="card group p-5 sm:p-6">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
-        >
-          <span class="flex flex-col gap-0.5">
-            {copy.specsHeading}
-            <span class="spec text-sm font-normal text-muted"
-              >{specsSummary}</span
-            >
-          </span>
-          <Icon
-            name="chevronDown"
-            size={16}
-            class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
-          />
-        </summary>
+      <DisclosureCard>
+        <span slot="summary" class="flex flex-col gap-0.5">
+          {copy.specsHeading}
+          <span class="spec text-sm font-normal text-muted">{specsSummary}</span
+          >
+        </span>
         <dl class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {
             specs.map((spec) => (
@@ -406,7 +397,7 @@ const specsSummary = [
             ))
           }
         </dl>
-      </details>
+      </DisclosureCard>
 
       <p class="text-sm leading-relaxed text-muted">
         <a

@@ -1,4 +1,5 @@
 ---
+import PageSection from '@/components/PageSection.astro';
 import { getCollection } from 'astro:content';
 import { DEVELOPER, splitDeveloperCredit } from '@podbor/brands';
 import { aboutPageSchema } from '@podbor/site-kit';
@@ -46,18 +47,16 @@ const link = 'underline transition-colors text-accent';
   description={about.metaDescription}
   schema={schema}
 >
-  <section class="border-b border-default">
-    <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-      <Breadcrumbs items={[{ label: t.footer.aboutLabel }]} />
-      <span class="accent-line"></span>
-      <h1 class="font-display text-[clamp(1.95rem,5vw,3.7rem)] font-bold mb-3">
-        {about.heading}
-      </h1>
-      <p class="max-w-2xl text-base leading-relaxed text-muted">
-        {about.lead}
-      </p>
-    </div>
-  </section>
+  <PageSection>
+    <Breadcrumbs items={[{ label: t.footer.aboutLabel }]} />
+    <span class="accent-line"></span>
+    <h1 class="font-display text-[clamp(1.95rem,5vw,3.7rem)] font-bold mb-3">
+      {about.heading}
+    </h1>
+    <p class="max-w-2xl text-base leading-relaxed text-muted">
+      {about.lead}
+    </p>
+  </PageSection>
 
   <section class="max-w-3xl mx-auto px-6 py-band md:py-band-lg">
     <div class="space-y-10">

@@ -1,4 +1,5 @@
 ---
+import DisclosureCard from '@/components/DisclosureCard.astro';
 import { partPageSlug, translated } from '@podbor/catalog-contract';
 import { bestOffer } from '@podbor/catalog-contract/availability';
 import { productSchema } from '@podbor/site-kit';
@@ -404,27 +405,20 @@ const thumbFor = (slug: string) => {
       }
       {
         applicability.length > 0 && (
-          <details class="card group p-5 sm:p-6">
-            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden">
-              <span>
-                {copy.applicabilityHeading}{' '}
-                <span class="spec font-normal text-muted">
-                  {applicability.length}
-                </span>
+          <DisclosureCard>
+            <span slot="summary">
+              {copy.applicabilityHeading}{' '}
+              <span class="spec font-normal text-muted">
+                {applicability.length}
               </span>
-              <Icon
-                name="chevronDown"
-                size={16}
-                class="shrink-0 text-muted transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none"
-              />
-            </summary>
+            </span>
             <ul class="mt-4 flex flex-col gap-2 text-sm text-ink-2">
               {applicability.map((line) => (
                 <li class="spec">{line}</li>
               ))}
             </ul>
             <p class="mt-4 text-xs text-muted">{copy.supplierDataNote}</p>
-          </details>
+          </DisclosureCard>
         )
       }
     </div>

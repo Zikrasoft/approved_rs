@@ -1,4 +1,5 @@
 ---
+import LinkRow from '@/components/LinkRow.astro';
 import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -51,21 +52,13 @@ const models = hub.models
     <ul class="card divide-y divide-line">
       {
         models.map(({ model, label, categories }) => (
-          <li>
-            <a
-              href={PathBuilder.partsModel(locale, make.slug, model.slug)}
-              class="flex flex-col gap-1 px-5 py-4 transition-colors duration-150 hover:text-signal-ink sm:px-6"
-            >
-              <span class="font-semibold">{label}</span>
-              {categories.length > 0 && (
-                <span class="text-sm text-muted">
-                  {categories
-                    .map(({ category }) => translated(category, 'name', locale))
-                    .join(', ')}
-                </span>
-              )}
-            </a>
-          </li>
+          <LinkRow
+            href={PathBuilder.partsModel(locale, make.slug, model.slug)}
+            label={label}
+            detail={categories
+              .map(({ category }) => translated(category, 'name', locale))
+              .join(', ')}
+          />
         ))
       }
     </ul>
