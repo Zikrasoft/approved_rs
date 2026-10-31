@@ -4,12 +4,7 @@ import type {
 } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys, MathBN } from '@medusajs/framework/utils';
 import { PARTS_ORDER_SERVICE } from '@podbor/brands';
-import {
-  checkoutContactSchema,
-  fitComment,
-  vehicleName,
-  type Vehicle,
-} from '@podbor/catalog-contract';
+import { checkoutContactSchema, fitComment } from '@podbor/catalog-contract';
 import {
   AD_SOURCE_FIELD,
   META_IDS_FIELD,
@@ -72,9 +67,6 @@ const withReadiness = (
     .join(', ');
   return readiness ? `${text}, ${readiness}` : text;
 };
-
-export const carLabel = ({ model, engine }: Vehicle): string =>
-  `${vehicleName(model).full}, ${engine.code}`;
 
 export function orderLeadPayload(
   order: LeadOrder,

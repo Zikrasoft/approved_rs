@@ -3,10 +3,28 @@ import { describe, expect, it } from 'vitest';
 import {
   vehiclesResponseSchema,
   vinLookupResponseSchema,
+  vehicleLabel,
   vehicleName,
   vinSchema,
   type Vehicle,
 } from './vehicle.ts';
+
+describe('vehicleLabel', () => {
+  it('names the car with its engine code', () => {
+    expect(
+      vehicleLabel({
+        model: {
+          name: '320d',
+          chassis: {
+            code: 'F30',
+            series: { name: '3 серия', make: { name: 'BMW' } },
+          },
+        },
+        engine: { code: 'N47D20' },
+      }),
+    ).toBe('BMW 3 серия F30 320d, N47D20');
+  });
+});
 
 describe('vehicleName', () => {
   const f30 = {

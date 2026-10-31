@@ -159,3 +159,11 @@ export function vehicleName(
   const model = joined([seriesName, repeated ? '' : code, name]);
   return { make: make ?? '', model, full: joined([make, model]) };
 }
+
+export const vehicleLabel = ({
+  model,
+  engine,
+}: {
+  model: NamedModel;
+  engine: { code: string };
+}): string => `${vehicleName(model).full}, ${engine.code}`;

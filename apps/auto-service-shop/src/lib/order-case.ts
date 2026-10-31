@@ -6,13 +6,9 @@ import {
   vehicleName,
 } from '@podbor/catalog-contract';
 
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
-import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
-import type VinLookupModuleService from '../modules/vin-lookup/service';
 import { listedPartOf, orderTotal, readLine } from './line-metadata';
 import type { LeadOrder } from './order-lead';
-import { listVehicleResponses } from './store-response';
+import { vehicleForVin } from './vin/car-for';
 
 const VIN_YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
 const VIN_YEAR_CYCLES = [1980, 2010, 2040];
@@ -31,22 +27,10 @@ async function carOf(
   container: MedusaContainer,
   vin: string | undefined,
 ): Promise<OrderCaseSummary['car']> {
-  if (!vin) return null;
-  const [lookup] = await container
-    .resolve<VinLookupModuleService>(VIN_LOOKUP_MODULE)
-    .listVinLookups({ vin });
-  if (!lookup?.vehicle_id) return null;
-  const [vehicle] = await listVehicleResponses(
-    container.resolve<CatalogModuleService>(CATALOG_MODULE),
-    { id: [lookup.vehicle_id] },
-  );
-  if (!vehicle) return null;
+  const vehicle = vin ? await vehicleForVin(container, vin) : null;
+  if (!vin || !vehicle) return null;
   const { make, model } = vehicleName(vehicle.model);
-  return {
-    make,
-    model,
-    year: modelYear(vin, vehicle),
-  };
+  return { make, model, year: modelYear(vin, vehicle) };
 }
 
 export async function orderCaseSummary(
