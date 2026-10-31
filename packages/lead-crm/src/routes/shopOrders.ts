@@ -77,8 +77,8 @@ export function createShopOrdersRoute({
     )
       return new Response(null, { status: 401 });
     const body = await readJson(request);
-    if (body instanceof Response) return body;
-    const event = shopOrderEventSchema.safeParse(body);
+    if ('response' in body) return body.response;
+    const event = shopOrderEventSchema.safeParse(body.value);
     if (!event.success) return new Response(null, { status: 400 });
     if (event.data.event === 'canceled')
       return new Response(null, {

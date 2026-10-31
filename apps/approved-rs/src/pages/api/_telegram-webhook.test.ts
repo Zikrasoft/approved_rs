@@ -293,6 +293,14 @@ describe('POST /api/telegram-webhook', () => {
     expect(api.calls).toEqual([]);
   });
 
+  it('acks an update past the body cap without reading it', async () => {
+    const res = await POST(
+      makeCtx({ update_id: 1, padding: 'a'.repeat(70_000) }),
+    );
+    expect(res.status).toBe(200);
+    expect(api.calls).toEqual([]);
+  });
+
   it.each([
     ['wrong field types', { update_id: 'x', message: 5 }],
     ['a non-object', JSON.stringify('just a string')],

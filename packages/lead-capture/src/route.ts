@@ -814,7 +814,9 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     )
       return UNAUTHORIZED;
 
-    const update = captureUpdateSchema.safeParse(await readJson(request));
+    const body = await readJson(request);
+    if ('response' in body) return ACK;
+    const update = captureUpdateSchema.safeParse(body.value);
     if (!update.success) return ACK;
 
     try {

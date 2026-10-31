@@ -5,7 +5,7 @@ import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
 import { START_COMMAND } from '@podbor/site-kit/contact-links';
-import { logError, requireEnv } from '@podbor/lead-crm';
+import { logError, readJson, requireEnv } from '@podbor/lead-crm';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import {
   afterStatusChange,
@@ -917,9 +917,9 @@ export async function POST({ request }: APIContext): Promise<Response> {
     return new Response(null, { status: 401 });
   }
 
-  const parsed = updateSchema.safeParse(
-    await request.json().catch(() => undefined),
-  );
+  const body = await readJson(request);
+  if ('response' in body) return ACK;
+  const parsed = updateSchema.safeParse(body.value);
   if (!parsed.success) {
     console.warn('[telegram-webhook] ignoring unparseable update', {
       issues: parsed.error.issues,

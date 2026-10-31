@@ -47,8 +47,8 @@ const respond = async (
 };
 
 const body = async (request: Request) => {
-  const json = await readJson(request);
-  return json instanceof Response ? null : json;
+  const read = await readJson(request);
+  return 'value' in read ? read.value : null;
 };
 
 export const GET: APIRoute = ({ url, request }) => {

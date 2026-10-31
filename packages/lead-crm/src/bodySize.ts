@@ -44,15 +44,17 @@ export async function readForm(
     .catch(() => null);
 }
 
+export type JsonRead = { value: unknown } | { response: Response };
+
 export async function readJson(
   request: Request,
   maxBytes = MAX_BODY_BYTES,
-): Promise<unknown> {
+): Promise<JsonRead> {
   const body = await readCapped(request, maxBytes);
-  if (!(body instanceof Blob)) return body;
+  if (body instanceof Response) return { response: body };
   try {
-    return JSON.parse(await body.text());
+    return { value: JSON.parse(await (body ?? new Blob()).text()) };
   } catch {
-    return null;
+    return { value: null };
   }
 }

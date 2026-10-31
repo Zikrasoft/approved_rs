@@ -93,22 +93,25 @@ describe('readForm', () => {
 
 describe('readJson', () => {
   it('reads JSON under the cap, chunked or not', async () => {
-    expect(await readJson(post('{"cart_id":"c1"}'))).toEqual({ cart_id: 'c1' });
-    expect(await readJson(post(chunked('{"a":', '1}')))).toEqual({ a: 1 });
+    expect(await readJson(post('{"cart_id":"c1"}'))).toEqual({
+      value: { cart_id: 'c1' },
+    });
+    expect(await readJson(post(chunked('{"a":', '1}')))).toEqual({
+      value: { a: 1 },
+    });
   });
 
   it('refuses JSON past the cap', async () => {
-    expect(
-      status(
-        await readJson(post(chunked('"', 'a'.repeat(MAX_BODY_BYTES), '"'))),
-      ),
-    ).toBe(413);
+    const read = await readJson(
+      post(chunked('"', 'a'.repeat(MAX_BODY_BYTES), '"')),
+    );
+    expect('response' in read && read.response.status).toBe(413);
   });
 
   it.each([
     ['malformed JSON', post('{')],
     ['a body that breaks off', post(failing())],
   ])('gives nothing for %s', async (_, request) => {
-    expect(await readJson(request)).toBeNull();
+    expect(await readJson(request)).toEqual({ value: null });
   });
 });
