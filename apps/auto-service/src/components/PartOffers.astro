@@ -43,6 +43,7 @@ const priced = page.offers.length > 0 && !closed;
       data-lead-label={copy.columns.leadTime}
       data-stock-pickup={copy.columns.inStockPickup}
       data-in-stock={copy.leadTime.inStock}
+      data-tomorrow={copy.leadTime.tomorrow}
       data-days={JSON.stringify(copy.leadTime.days)}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}

@@ -23,9 +23,9 @@ orderBody: 'Магазин новый, и мы работаем напрямую
 offersHeading: Цена и наличие
 columns:
   stock: В наличии
-  leadTime: Можно забрать через
-  leadTimeShort: Через
-  inStockPickup: В наличии, забрать через {days}
+  leadTime: Забрать
+  leadTimeShort: Забрать
+  inStockPickup: В наличии, забрать {days}
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
@@ -52,11 +52,12 @@ requirementCarsLabel: 'Подходит по допускам для:'
 kitCarsLabel: 'Входит в комплект ТО для:'
 leadTime:
   inStock: В наличии
+  tomorrow: завтра
   days:
-    one: '{days} день'
-    few: '{days} дня'
-    many: '{days} дней'
-    other: '{days} дня'
+    one: 'через {days} день'
+    few: 'через {days} дня'
+    many: 'через {days} дней'
+    other: 'через {days} дня'
 translatedFrom: 3bd8fd30f6cd2fdb
 translations:
   sr:
