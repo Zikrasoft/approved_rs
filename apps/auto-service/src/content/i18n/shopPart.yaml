@@ -16,7 +16,7 @@ attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
-priceOnRequestHeading: Под заказ
+priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что деталь подходит, и найдем лучшую цену.'
 priceOnRequestCta: Узнать цену и срок
 orderBody: Проверим у поставщиков и пришлем цену и срок, обычно в течение часа.
@@ -37,11 +37,11 @@ offerDays:
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
-askSupplyCta: Заказать через менеджера
+askSupplyCta: Узнать цену и срок
 askedNotice: Добавили в заявку. Уточним цену и когда можно забрать, и напишем вам.
 stockLimitNotice: Больше этой запчасти сейчас нет, все доступные уже в корзине.
 fromPrice: от {price}
-priceOnRequestTag: Заказать
+priceOnRequestTag: Цена по запросу
 addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
 addedCta: Открыть корзину
 inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.

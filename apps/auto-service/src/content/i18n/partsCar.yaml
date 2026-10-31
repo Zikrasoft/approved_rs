@@ -63,7 +63,7 @@ car:
     right: правый
 fitment:
   quantity: '{count} шт.'
-  quantityOne: '{count} штука'
+  quantityOne: '{count} шт.'
   axle:
     front: передняя ось
     rear: задняя ось
