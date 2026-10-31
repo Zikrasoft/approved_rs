@@ -6,8 +6,12 @@ import {
   type RangeFilter,
   type SearchFacet,
 } from '@podbor/catalog-contract';
+import { singleLine } from '@podbor/lead-crm/phone';
 
 export const PARTS_QUERY_MAX_LENGTH = 100;
+
+export const partsQuery = (raw: string): string =>
+  singleLine(raw).slice(0, PARTS_QUERY_MAX_LENGTH);
 
 const RANGE_MIN = 'min.';
 const RANGE_MAX = 'max.';

@@ -45,6 +45,17 @@ const blocked = {
 };
 
 describe('storedVin / rememberVin', () => {
+  it('fills the empty VIN fields already on the page, leaving typed ones', () => {
+    const { input } = mount();
+    const typed = document.createElement('input');
+    typed.setAttribute('data-vin-input', '');
+    typed.value = 'WDD2130041A123456';
+    document.body.append(typed);
+    rememberVin('WBA3B1C50GL123456', memoryStorage().storage);
+    expect(input.value).toBe('WBA3B1C50GL123456');
+    expect(typed.value).toBe('WDD2130041A123456');
+  });
+
   it('remembers a VIN and hands it back', () => {
     const { storage } = memoryStorage();
     rememberVin('WBA3B1C50GL123456', storage);

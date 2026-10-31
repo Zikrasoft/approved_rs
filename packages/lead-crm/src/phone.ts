@@ -5,7 +5,11 @@ import {
   type CountryCode,
 } from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
-import { TELEGRAM_HANDLE, typedAsPhone } from './contactShape.ts';
+import {
+  TELEGRAM_HANDLE,
+  telegramContact,
+  typedAsPhone,
+} from './contactShape.ts';
 
 export { composeE164 } from './composeE164.ts';
 
@@ -84,4 +88,43 @@ export function isValidContact(
   if (channel === 'telegram' && !typedAsPhone(contact))
     return TELEGRAM_HANDLE.test(contact.trim());
   return parsePhoneNumberFromString(contact)?.isValid() ?? false;
+}
+
+const INVISIBLE_FORMAT = /(?![\u200c\u200d])\p{Cf}/gu;
+const LINE_CONTROL = /(?![\n\r\t])\p{Cc}/gu;
+
+export const singleLine = (text: string): string =>
+  text
+    .replace(INVISIBLE_FORMAT, '')
+    .replace(/[\p{Cc}\p{Z}\s]+/gu, ' ')
+    .trim();
+
+export const plainText = (text: string): string =>
+  text
+    .replace(INVISIBLE_FORMAT, '')
+    .replace(LINE_CONTROL, '')
+    .replace(/[\u2028\u2029]/g, '\n')
+    .trim();
+
+export const storedContact = (contact: string): string => {
+  const phone = parsePhoneNumberFromString(contact);
+  return phone?.isValid() ? phone.number : contact;
+};
+
+export interface TypedContact {
+  channel: TrackedContactChannel | null;
+  phone: string;
+  country: PhoneRegion | undefined;
+  telegram: string;
+}
+
+export function typedContact({
+  channel,
+  phone,
+  country,
+  telegram,
+}: TypedContact): string {
+  if (telegram && (channel === 'telegram' || !phone))
+    return telegramContact(telegram);
+  return parsePhoneNumberFromString(phone, country)?.number ?? phone;
 }

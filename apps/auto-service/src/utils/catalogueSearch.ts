@@ -18,6 +18,15 @@ export const searchIntent = (q: string): SearchIntent => {
   return vin.success ? { kind: 'vin', vin: vin.data } : { kind: 'query' };
 };
 
+export const nearVin = (q: string): boolean => {
+  const compact = q.replace(/[\s.-]+/g, '').toUpperCase();
+  return (
+    /^[A-Z0-9]{16,18}$/.test(compact) &&
+    /[A-Z]/.test(compact) &&
+    /\d/.test(compact)
+  );
+};
+
 type ResolvedVin =
   | { kind: 'vehicle'; facts: VinFacts; place: CarHit | null }
   | { kind: 'inquiry'; place: CarHit | null };
@@ -28,7 +37,7 @@ export const vinDestination = (
   locale: Locale,
 ): string | null => {
   const { place } = outcome;
-  if (!place || (outcome.kind === 'inquiry' && place.kind === 'make')) {
+  if (!place || place.kind === 'make') {
     return null;
   }
   const { href } = carLink(place, locale);
@@ -47,8 +56,15 @@ export const exactPart = (q: string, results: PartResult[]): string | null => {
   return matching.length === 1 ? matching[0].slug : null;
 };
 
+const LETTER_LED_NUMBER = /^\p{L}{2}\d{2,}\p{L}?$/u;
+
+const letterLedNumber = (q: string): string | null => {
+  const number = normalizePartNumber(q);
+  return LETTER_LED_NUMBER.test(number) ? number : null;
+};
+
 export const missingNumber = (q: string, results: PartResult[]): boolean => {
-  const wanted = partNumberQuery(q);
+  const wanted = partNumberQuery(q) ?? letterLedNumber(q);
   return (
     wanted !== null &&
     !results.some(({ normalized_value }) => normalized_value === wanted)

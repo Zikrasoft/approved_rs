@@ -6,7 +6,12 @@ import {
   MAX_FIELD_LENGTH,
   MAX_URL_LENGTH,
 } from '@podbor/lead-crm/limits';
-import { isValidContact } from '@podbor/lead-crm/phone';
+import {
+  isValidContact,
+  plainText,
+  singleLine,
+  storedContact,
+} from '@podbor/lead-crm/phone';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { translationsSchema } from './translations.ts';
@@ -111,17 +116,20 @@ const attribution = (max: number) =>
     .catch(undefined)
     .transform((value) => value || undefined);
 
-const optionalText = (max: number) =>
+const optionalText = (max: number, clean = singleLine) =>
   z
     .string()
-    .trim()
-    .max(max)
+    .transform(clean)
+    .pipe(z.string().max(max))
     .nullish()
     .transform((value) => value || undefined);
 
 export const checkoutContactSchema = z
   .object({
-    contact: z.string().trim().min(1).max(MAX_FIELD_LENGTH),
+    contact: z
+      .string()
+      .transform(singleLine)
+      .pipe(z.string().min(1).max(MAX_FIELD_LENGTH)),
     contact_channel: z
       .enum(TRACKED_CONTACT_CHANNELS)
       .optional()
@@ -131,7 +139,7 @@ export const checkoutContactSchema = z
       (value) => vinSchema.safeParse(value).data ?? value,
     ),
     car: optionalText(MAX_FIELD_LENGTH),
-    comment: optionalText(MAX_COMMENT_LENGTH),
+    comment: optionalText(MAX_COMMENT_LENGTH, plainText),
     locale: z.enum(CATALOG_LOCALES).optional(),
     source_url: attribution(MAX_URL_LENGTH),
     visitor_id: attribution(MAX_FIELD_LENGTH),
@@ -140,7 +148,8 @@ export const checkoutContactSchema = z
   })
   .refine(({ contact, contact_channel }) =>
     isValidContact(contact, contact_channel ?? null),
-  );
+  )
+  .transform((value) => ({ ...value, contact: storedContact(value.contact) }));
 
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];

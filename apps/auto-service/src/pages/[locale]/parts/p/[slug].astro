@@ -298,10 +298,16 @@ const thumbFor = (slug: string) => {
         <button
           type="button"
           data-open-install-modal
-          class="btn btn-secondary mt-1 w-full sm:w-auto sm:self-start"
+          class="btn btn-secondary mt-1 w-full noscript:hidden! sm:w-auto sm:self-start"
         >
           {copy.installCta}
         </button>
+        <a
+          href={PathBuilder.partsInquiry(locale)}
+          class="btn btn-secondary mt-1 hidden w-full noscript:inline-flex! sm:w-auto sm:self-start"
+        >
+          {copy.installCta}
+        </a>
       </div>
     </div>
 

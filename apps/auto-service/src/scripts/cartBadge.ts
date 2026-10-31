@@ -39,6 +39,7 @@ export function defineCartBadge(tagName = 'cart-badge'): void {
         };
         update();
         window.addEventListener('storage', update);
+        window.addEventListener('pageshow', update);
         window.addEventListener(
           partsList ? PARTS_LIST_CHANGED_EVENT : CART_CHANGED_EVENT,
           update,
