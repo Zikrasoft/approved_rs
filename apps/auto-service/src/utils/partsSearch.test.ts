@@ -76,6 +76,12 @@ describe('number ranges in the page address', () => {
     ).toEqual([]);
   });
 
+  it('ignores a negative bound, which no part attribute has', () => {
+    expect(
+      rangesFromParams(new URLSearchParams('min.capacity=-5&max.length=-1')),
+    ).toEqual([]);
+  });
+
   it('writes a range back as the bounds it has', () => {
     const params = new URLSearchParams();
     appendRange(params, { key: 'capacity', min: 70, max: null });
