@@ -1,4 +1,4 @@
-import { VIN_PATTERN } from '@podbor/catalog-contract/vin';
+import { vinOf } from '@podbor/catalog-contract/vin';
 import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 
 export const SUGGEST_DELAY_MS = 200;
@@ -264,7 +264,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
         });
         form.addEventListener('submit', () => {
           reachGoal(GOALS.search, {
-            kind: VIN_PATTERN.test(compact(input.value)) ? 'vin' : 'query',
+            kind: vinOf(input.value) ? 'vin' : 'query',
           });
         });
 

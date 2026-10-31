@@ -154,6 +154,17 @@ describe('the catalogue search box', () => {
     expect(trackGoal).toHaveBeenCalledWith(GOALS.search, { kind: 'query' });
   });
 
+  it('counts a VIN typed with Cyrillic look-alikes as a VIN search', () => {
+    const { input } = mount();
+    input.value = 'WВА 35ВG070N074158';
+    const form = document.querySelector('form')!;
+    form.addEventListener('submit', (event) => event.preventDefault());
+
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+
+    expect(trackGoal).toHaveBeenCalledWith(GOALS.search, { kind: 'vin' });
+  });
+
   it('keeps the field focused while a suggestion is pressed, so the tap lands', async () => {
     const { input, panel } = mount();
     await type(input, 'bmw x3');

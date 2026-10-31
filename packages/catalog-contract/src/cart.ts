@@ -15,7 +15,7 @@ import {
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { translationsSchema } from './translations.ts';
-import { vinSchema } from './vehicle.ts';
+import { vinOf } from './vin.ts';
 
 export const CHECKOUT_REFUSALS = [
   'OFFER_PRICE_CHANGED',
@@ -136,7 +136,7 @@ export const checkoutContactSchema = z
       .catch(undefined),
     name: optionalText(MAX_FIELD_LENGTH),
     vin: optionalText(MAX_FIELD_LENGTH).transform(
-      (value) => vinSchema.safeParse(value).data ?? value,
+      (value) => (value && vinOf(value)) || value,
     ),
     car: optionalText(MAX_FIELD_LENGTH),
     comment: optionalText(MAX_COMMENT_LENGTH, plainText),

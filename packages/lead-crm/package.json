@@ -48,6 +48,13 @@
       },
       "default": "./src/phone.ts"
     },
+    "./vin": {
+      "require": {
+        "types": "./dist/cjs/vin.d.ts",
+        "default": "./dist/cjs/vin.js"
+      },
+      "default": "./src/vin.ts"
+    },
     "./verify-secret": {
       "require": {
         "types": "./dist/cjs/verifySecret.d.ts",

@@ -29,4 +29,8 @@ describe('VIN facts on the car page address', () => {
     expect(vinFrom('')).toBe('');
     expect(vinFrom('?vin=WBA35')).toBe('');
   });
+
+  it('reads a VIN the address carries in lower case or Cyrillic look-alikes', () => {
+    expect(vinFrom('?vin=w%D0%B2a35bg070n074158')).toBe('WBA35BG070N074158');
+  });
 });

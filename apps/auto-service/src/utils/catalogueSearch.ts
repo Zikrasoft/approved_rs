@@ -1,10 +1,10 @@
 import {
   normalizePartNumber,
   partNumberQuery,
-  vinSchema,
   type CarHit,
   type VinFacts,
 } from '@podbor/catalog-contract';
+import { vinOf, vinText } from '@podbor/catalog-contract/vin';
 import type { Locale } from '@/i18n/config';
 import { carName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';
@@ -14,12 +14,12 @@ import { PathBuilder, vehiclePath } from './paths';
 export type SearchIntent = { kind: 'vin'; vin: string } | { kind: 'query' };
 
 export const searchIntent = (q: string): SearchIntent => {
-  const vin = vinSchema.safeParse(q);
-  return vin.success ? { kind: 'vin', vin: vin.data } : { kind: 'query' };
+  const vin = vinOf(q);
+  return vin ? { kind: 'vin', vin } : { kind: 'query' };
 };
 
 export const nearVin = (q: string): boolean => {
-  const compact = q.replace(/[\s.-]+/g, '').toUpperCase();
+  const compact = vinText(q);
   return (
     /^[A-Z0-9]{16,18}$/.test(compact) &&
     /[A-Z]/.test(compact) &&

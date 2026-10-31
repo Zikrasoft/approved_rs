@@ -16,6 +16,7 @@ import {
   type PhoneRegion,
 } from './phone.ts';
 import { adSourceSchema, metaIdsSchema } from './schema.ts';
+import { vinOf } from './vin.ts';
 import {
   AD_SOURCE_FIELD,
   HONEYPOT_FIELD,
@@ -146,7 +147,9 @@ const submissionObject = z
       0,
       MAX_SERVICES,
     );
-    const vin = value.vin ? `VIN: ${value.vin.toUpperCase()}` : null;
+    const vin = value.vin
+      ? `VIN: ${vinOf(value.vin) ?? value.vin.toUpperCase()}`
+      : null;
     const comment = [vin, value.car, value.comment]
       .filter(Boolean)
       .join('\n')

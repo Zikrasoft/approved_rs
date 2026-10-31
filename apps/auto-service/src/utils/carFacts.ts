@@ -1,6 +1,6 @@
 import type { VinFacts } from '@podbor/catalog-contract';
 import { STEERING_SIDES } from '@podbor/catalog-contract/steering';
-import { VIN_PATTERN } from '@podbor/catalog-contract/vin';
+import { vinOf } from '@podbor/catalog-contract/vin';
 
 const STEERING_PARAM = 'steering';
 const VIN_PARAM = 'vin';
@@ -16,10 +16,8 @@ export const carFactsQuery = ({ steering }: VinFacts, vin = ''): string => {
   return query.size ? `?${query}` : '';
 };
 
-export const vinFrom = (search: string): string => {
-  const vin = new URLSearchParams(search).get(VIN_PARAM) ?? '';
-  return VIN_PATTERN.test(vin) ? vin : '';
-};
+export const vinFrom = (search: string): string =>
+  vinOf(new URLSearchParams(search).get(VIN_PARAM) ?? '') ?? '';
 
 export const vinFactsFrom = (search: string): VinFacts => {
   const steering = steeringSide(
