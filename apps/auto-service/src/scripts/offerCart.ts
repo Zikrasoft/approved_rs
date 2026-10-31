@@ -8,15 +8,13 @@ import {
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
 } from '@/utils/cartNotice';
-import { isBuyable } from '@podbor/catalog-contract/availability';
+import { rankOffers } from '@podbor/catalog-contract/availability';
 import {
   availabilityText,
-  formatLeadTime,
+  offerAvailability,
   type AvailabilityCopy,
-  type LeadTimeCopy,
 } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
-import { rankOffers } from '@/utils/rankOffers';
 import type { LineAddonKind } from '@/utils/catalogue';
 import { vinFrom } from '@/utils/carFacts';
 import {
@@ -450,56 +448,27 @@ export function definePartOffers(tagName = 'part-offers'): void {
       }
 
       row(offer: PartOffer, secondary = false): Node {
-        const {
-          localeTag = 'sr',
-          stockLabel = '',
-          leadLabel = '',
-          stockPickup = '',
-          inStock = '',
-          tomorrow = '',
-          days = '{}',
-        } = this.dataset;
+        const { localeTag = 'sr', availability = '' } = this.dataset;
         const template = this.querySelector<HTMLTemplateElement>(
           'template[data-offer]',
         )!;
         const row = template.content.cloneNode(true) as DocumentFragment;
-        const inStockNow = offer.stock_quantity > 0;
+        const { stock, lead, buyable } = offerAvailability(
+          offer,
+          JSON.parse(availability) as AvailabilityCopy,
+          localeTag,
+        );
         fill(
           row,
           '[data-price]',
           formatMoney(offer.price, offer.currency, localeTag),
         );
-        const leadText =
-          offer.lead_time_days > 0
-            ? formatLeadTime(
-                offer.lead_time_days,
-                {
-                  inStock,
-                  tomorrow,
-                  days: JSON.parse(days) as LeadTimeCopy['days'],
-                },
-                localeTag,
-              )
-            : null;
-        fill(
-          row,
-          '[data-stock]',
-          inStockNow
-            ? leadText
-              ? stockPickup.replace('{days}', leadText)
-              : stockLabel
-            : null,
-        );
-        fill(
-          row,
-          '[data-lead]',
-          !inStockNow && leadText ? `${leadLabel} ${leadText}` : null,
-        );
-        row.querySelector<HTMLElement>('[data-out]')!.hidden =
-          inStockNow || offer.lead_time_days > 0;
-        row.querySelector<HTMLElement>('[data-ask]')!.hidden = isBuyable(offer);
+        fill(row, '[data-stock]', stock);
+        fill(row, '[data-lead]', lead);
+        row.querySelector<HTMLElement>('[data-out]')!.hidden = buyable;
+        row.querySelector<HTMLElement>('[data-ask]')!.hidden = buyable;
         const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
-        buy.hidden = !isBuyable(offer);
+        buy.hidden = !buyable;
         buy.setAttribute('data-offer-id', offer.id);
         if (secondary) buy.classList.replace('btn-primary', 'btn-secondary');
         return row;

@@ -41,17 +41,49 @@ export type AvailabilityCopy = {
   days: LeadTimeCopy;
 };
 
+export const availabilityCopy = ({
+  columns,
+  leadTime,
+}: {
+  columns: { stock: string; leadTime: string; inStockPickup: string };
+  leadTime: LeadTimeCopy;
+}): AvailabilityCopy => ({
+  stock: columns.stock,
+  leadTime: columns.leadTime,
+  inStockPickup: columns.inStockPickup,
+  days: leadTime,
+});
+
+export function offerAvailability(
+  offer: OfferAvailability,
+  copy: AvailabilityCopy,
+  localeTag: string,
+): { stock: string | null; lead: string | null; buyable: boolean } {
+  const days =
+    offer.lead_time_days > 0
+      ? formatLeadTime(offer.lead_time_days, copy.days, localeTag)
+      : null;
+  const inStock = offer.stock_quantity > 0;
+  return {
+    stock: inStock
+      ? days
+        ? copy.inStockPickup.replace('{days}', days)
+        : copy.stock
+      : null,
+    lead: !inStock && days ? `${copy.leadTime} ${days}` : null,
+    buyable: isBuyable(offer),
+  };
+}
+
 export function availabilityText(
   { in_stock, lead_time_days }: { in_stock: boolean; lead_time_days: number },
   copy: AvailabilityCopy,
   localeTag: string,
 ): string | null {
-  const days =
-    lead_time_days > 0
-      ? formatLeadTime(lead_time_days, copy.days, localeTag)
-      : null;
-  if (in_stock) {
-    return days ? copy.inStockPickup.replace('{days}', days) : copy.stock;
-  }
-  return days && `${copy.leadTime} ${days}`;
+  const { stock, lead } = offerAvailability(
+    { stock_quantity: Number(in_stock), lead_time_days },
+    copy,
+    localeTag,
+  );
+  return stock ?? lead;
 }

@@ -5,6 +5,7 @@ import {
   type CatalogLocale,
   type SearchFacet,
 } from '@podbor/catalog-contract';
+import { bestOffer } from '@podbor/catalog-contract/availability';
 import type { CategoryPageEntry } from './catalogueSnapshot';
 
 const tally = (values: string[]) => {
@@ -20,7 +21,7 @@ export function categoryFacets(
   locale: CatalogLocale,
 ): SearchFacet[] {
   const { pages } = category;
-  const best = pages.flatMap(({ offers }) => offers.slice(0, 1));
+  const best = pages.flatMap(({ offers }) => bestOffer(offers) ?? []);
   const prices = best.map(({ price }) => price);
   const brandName = new Map(pages.map(({ brand }) => [brand.slug, brand.name]));
   const universal = universalFacets({

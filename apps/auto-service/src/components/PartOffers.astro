@@ -5,12 +5,13 @@ import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { addonDataset } from '@/utils/categoryAddon';
+import { availabilityCopy } from '@/utils/leadTime';
 import { PathBuilder } from '@/utils/paths';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
-import { rankOffers } from '@/utils/rankOffers';
+import { rankOffers } from '@podbor/catalog-contract/availability';
 
 interface Props {
   page: PartPageEntry;
@@ -43,12 +44,7 @@ const [best, ...others] = rankOffers(page.offers);
       data-preview={closed ? '' : undefined}
       data-id={page.id}
       data-locale-tag={BCP47_BY_LOCALE[locale]}
-      data-stock-label={copy.columns.stock}
-      data-lead-label={copy.columns.leadTime}
-      data-stock-pickup={copy.columns.inStockPickup}
-      data-in-stock={copy.leadTime.inStock}
-      data-tomorrow={copy.leadTime.tomorrow}
-      data-days={JSON.stringify(copy.leadTime.days)}
+      data-availability={JSON.stringify(availabilityCopy(copy))}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
       data-more-label={copy.moreOffers}
