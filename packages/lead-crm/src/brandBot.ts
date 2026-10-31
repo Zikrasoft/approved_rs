@@ -5,7 +5,6 @@ import {
   createCloseLeadTopic,
   createEnsureLeadCard,
   createEnsureLeadTopic,
-  createNotifyLead,
   createTouchLeadTopic,
 } from './notifyLead.ts';
 import type { LeadStore } from './store.ts';
@@ -57,15 +56,10 @@ export type CancelOrderResult = 'lost' | 'won' | 'missing';
 
 export interface BrandBotOptions {
   store: LeadStore;
-  brand: string;
   serviceLabel: (slug: string) => string;
 }
 
-export function createBrandBot({
-  store,
-  brand,
-  serviceLabel,
-}: BrandBotOptions) {
+export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
   const env = readBotEnv();
   const ownerIds = env.TELEGRAM_OWNER_ID;
   const adminIds = env.TELEGRAM_ADMIN_ID;
@@ -130,7 +124,6 @@ export function createBrandBot({
     settlePendingOrders,
     cancelOrderLead,
     dropFromDigest,
-    notifyLead: createNotifyLead({ store, notifier, brand }),
     client,
     formatter,
     groupId: env.TELEGRAM_GROUP_ID,

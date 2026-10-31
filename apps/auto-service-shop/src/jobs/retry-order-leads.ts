@@ -19,11 +19,11 @@ export async function retryOrderLeadsAt(container: MedusaContainer, now: Date) {
         $lte: new Date(now.getTime() - SUBSCRIBER_GRACE_MS).toISOString(),
       },
     },
-    { select: ['id', 'metadata'] },
+    { select: ['id', 'status', 'metadata'] },
   );
-  for (const { id, metadata } of orders) {
+  for (const { id, status, metadata } of orders) {
     const lead = leadHandoff(metadata);
-    if (!lead.handed_off_at && !lead.gave_up) {
+    if (status !== 'canceled' && !lead.handed_off_at && !lead.gave_up) {
       await handOrderToLeadRoute(container, id);
     }
   }

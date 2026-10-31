@@ -95,6 +95,55 @@ describe('createBrandStore', () => {
     expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
   });
 
+  it('stamps its own brand over whatever the submission carries, and posts the card', async () => {
+    for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
+    const api = recordBotApi();
+    vi.stubGlobal('fetch', api.fetch);
+    const { leadStore, notifyLead } = brandStore(
+      vi.fn(async () =>
+        createBrandBot({ store: leadStore, serviceLabel: (slug) => slug }),
+      ),
+    );
+    const forged = { ...submission, brand: 'Approved.rs' };
+
+    const result = await notifyLead(forged, '[test]');
+
+    expect(result).toEqual({ stored: true, delivered: true });
+    const [lead] = await leadStore.readLeads();
+    expect(lead?.brand).toBe('CarLab');
+    expect(api.callsTo('sendMessage', ENV.TELEGRAM_BOT_TOKEN)).toHaveLength(1);
+  });
+
+  it('stores the Lead even when the bot cannot load', async () => {
+    const { leadStore, notifyLead } = brandStore(
+      vi
+        .fn()
+        .mockRejectedValue(
+          new Error('[telegram] TELEGRAM_BOT_TOKEN is not set'),
+        ),
+    );
+
+    const result = await notifyLead(submission, '[test]');
+
+    expect(result).toEqual({ stored: true, delivered: false });
+    expect(await leadStore.readLeads()).toEqual([
+      expect.objectContaining({ contact: '@ivan', brand: 'CarLab' }),
+    ]);
+  });
+
+  it('refreshes the card of a merged Lead through the bot it loads', async () => {
+    const refreshLeadCard = vi.fn().mockResolvedValue(undefined);
+    const { notifyLead } = brandStore(
+      vi.fn().mockResolvedValue({ notifier: { refreshLeadCard } }),
+    );
+    const click = { ...submission, visitorId: 'visitor-1' };
+
+    await notifyLead({ ...click, contact: '—', name: '' }, '[test]');
+    await notifyLead(click, '[test]');
+
+    expect(refreshLeadCard).toHaveBeenCalledOnce();
+  });
+
   it('tells the admin once that the ledger does not parse', async () => {
     const send = vi.fn().mockResolvedValue(undefined);
     const { ledgerStore } = brandStore(
@@ -164,7 +213,6 @@ describe('createBrandBot', () => {
       leadStore,
       bot: createBrandBot({
         store: leadStore,
-        brand: 'CarLab',
         serviceLabel: (slug) => slug,
       }),
     };
@@ -210,19 +258,6 @@ describe('createBrandBot', () => {
     expect(ownerIds).toEqual([1, 2]);
     expect(adminIds).toEqual([3]);
   });
-
-  it('stamps its own brand over whatever the submission carries', async () => {
-    for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
-    vi.stubGlobal('fetch', recordBotApi().fetch);
-    const { leadStore, bot: crm } = bot();
-    const forged = { ...submission, brand: 'Approved.rs' };
-
-    const result = await crm.notifyLead(forged, '[test]');
-
-    expect(result.stored).toBe(true);
-    const [lead] = await leadStore.readLeads();
-    expect(lead?.brand).toBe('CarLab');
-  });
 });
 
 describe('the Lead topic lifecycle', () => {
@@ -235,7 +270,6 @@ describe('the Lead topic lifecycle', () => {
     const { leadStore } = brandStore();
     const crm = createBrandBot({
       store: leadStore,
-      brand: 'CarLab',
       serviceLabel: (slug) => slug,
     });
     const lead = await leadStore.insertLead({

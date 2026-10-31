@@ -366,9 +366,10 @@ value set twice, on approved.rs and in the shop's `.env`
 everyone. A call that fails stays pending on the Lead and `/api/reminders`
 retries it every day until the shop takes it.
 `SHOP_LEAD_SECRET` is one value set twice, on carlab.rs and in the shop's
-`.env` (`openssl rand -hex 32`): the shop's `order.canceled` subscriber posts the
-cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the Lead is
-marked lost. The same secret goes the other way for «Сделать кейс»: carlab.rs's
+`.env` (`openssl rand -hex 32`): the shop posts every placed Order and every
+cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the route
+refuses any Lead naming an Order without it, so a visitor cannot attach a Lead
+to someone else's Order. The same secret goes the other way for «Сделать кейс»: carlab.rs's
 `/api/admin/work-draft` reads `GET /hooks/carlab-orders/:id/case-summary` from
 `MEDUSA_BACKEND_URL` with it, and the shop answers only with the car, the Parts
 and the RSD total of a completed Order. The draft Work is then committed with

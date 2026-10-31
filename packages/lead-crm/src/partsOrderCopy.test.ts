@@ -38,4 +38,10 @@ describe('PARTS_ORDER_COPY', () => {
       /^Заказ #12 не дошел до CRM.*Причина: timeout$/,
     );
   });
+
+  it('names the canceled order whose Lead the CRM never marked, and why', () => {
+    expect(PARTS_ORDER_COPY.cancelUndelivered(12, 'timeout')).toMatch(
+      /^Заказ #12 отменен в магазине.*Причина: timeout$/,
+    );
+  });
 });

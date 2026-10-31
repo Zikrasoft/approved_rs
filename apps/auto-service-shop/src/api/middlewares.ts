@@ -255,6 +255,9 @@ export default defineMiddlewares({
       '/store/carts/:id/shipping-methods',
       '/store/carts/:id/customer',
       '/store/carts/:id/taxes',
+      '/store/carts/:id/complete',
+      '/store/payment-collections',
+      '/store/payment-collections/:id/payment-sessions',
     ].map((matcher) => ({
       matcher,
       method: ['POST' as const, 'DELETE' as const],

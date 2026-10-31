@@ -41,7 +41,6 @@ function crm() {
   });
   const bot = createBrandBot({
     store: leadStore,
-    brand: 'CarLab',
     serviceLabel: (slug) => slug,
   });
   return { leadStore, bot };

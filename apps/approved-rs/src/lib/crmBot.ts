@@ -1,6 +1,6 @@
 import { createBrandBot } from '@podbor/lead-crm';
 import { serviceLabel } from '@podbor/brands';
-import { BRAND, leadStore } from './crm';
+import { leadStore } from './crm';
 
 export const {
   notifier,
@@ -11,7 +11,6 @@ export const {
   afterStatusChange,
   settlePendingOrders,
   dropFromDigest,
-  notifyLead,
   client,
   formatter,
   groupId,
@@ -19,6 +18,5 @@ export const {
   adminIds,
 } = createBrandBot({
   store: leadStore,
-  brand: BRAND,
   serviceLabel,
 });

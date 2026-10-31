@@ -37,14 +37,18 @@ export const LEAD_HANDOFF_MAX_ATTEMPTS = 6;
 export const LEAD_OWNER_ALERTED_AT = 'lead_owner_alerted_at';
 export const LEAD_LOST_AT = 'lead_lost_at';
 export const LEAD_LOST_ERROR = 'lead_lost_error';
+export const LEAD_LOST_ATTEMPTS = 'lead_lost_attempts';
 export const LEAD_CANCEL_REFUSED_AT = 'lead_cancel_refused_at';
 
 type Metadata = Record<string, unknown> | null | undefined;
 
 const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 
+const attemptsAt = (metadata: Metadata, key: string): number =>
+  attemptsSchema.parse(metadata?.[key] ?? 0);
+
 export const handOffAttempts = (metadata: Metadata): number =>
-  attemptsSchema.parse(metadata?.[LEAD_HANDOFF_ATTEMPTS] ?? 0);
+  attemptsAt(metadata, LEAD_HANDOFF_ATTEMPTS);
 
 export const leadHandoff = (metadata: Metadata) => {
   const attempts = handOffAttempts(metadata);
@@ -250,13 +254,13 @@ export async function handOrderToLeadRoute(
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   let displayId: number | string = id;
   try {
-    const { LEAD_ROUTE_URL } = parseEnv(process.env);
-    if (!LEAD_ROUTE_URL) {
-      throw new Error('LEAD_ROUTE_URL is not set');
+    const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET } = parseEnv(process.env);
+    if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET) {
+      throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
     }
     const order = await readLeadOrder(container, id);
     displayId = order.display_id;
-    await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order));
+    await sendOrderLead(LEAD_ROUTE_URL, orderLeadForm(order), SHOP_LEAD_SECRET);
     logger.info(`Order ${id} handed to the lead pipeline`);
     await recordHandOff(container, id, () => ({
       [LEAD_HANDED_OFF_AT]: new Date().toISOString(),
@@ -288,11 +292,14 @@ export async function handCancelToLeadRoute(
   container: MedusaContainer,
   id: string,
 ): Promise<void> {
-  const { metadata } = await container.resolve(Modules.ORDER).retrieveOrder(id);
+  const { metadata, display_id } = await container
+    .resolve(Modules.ORDER)
+    .retrieveOrder(id);
   if (
     !metadata?.[LEAD_HANDED_OFF_AT] ||
     metadata[LEAD_LOST_AT] ||
-    metadata[LEAD_CANCEL_REFUSED_AT]
+    metadata[LEAD_CANCEL_REFUSED_AT] ||
+    attemptsAt(metadata, LEAD_LOST_ATTEMPTS) >= LEAD_HANDOFF_MAX_ATTEMPTS
   )
     return;
   try {
@@ -325,6 +332,17 @@ export async function handCancelToLeadRoute(
     logger.error(
       `Order ${id} cancel did not reach the lead pipeline: ${reason}`,
     );
-    await recordHandOff(container, id, () => ({ [LEAD_LOST_ERROR]: reason }));
+    const recorded = await recordHandOff(container, id, (metadata) => ({
+      [LEAD_LOST_ERROR]: reason,
+      [LEAD_LOST_ATTEMPTS]: attemptsAt(metadata, LEAD_LOST_ATTEMPTS) + 1,
+    }));
+    if (attemptsAt(recorded, LEAD_LOST_ATTEMPTS) < LEAD_HANDOFF_MAX_ATTEMPTS)
+      return;
+    if (
+      !(await alertOwner(
+        PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
+      ))
+    )
+      logger.error(`Order ${id} gave up on its cancel, nobody alerted`);
   }
 }

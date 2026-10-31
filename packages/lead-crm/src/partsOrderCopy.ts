@@ -22,4 +22,6 @@ export const PARTS_ORDER_COPY = {
   leftOut: (count: number) => `Не поместилось позиций: ${count}`,
   undelivered: (order: number | string, reason: string) =>
     `Заказ #${order} не дошел до CRM после всех попыток. Найдите его в админке магазина и свяжитесь с клиентом. Причина: ${reason}`,
+  cancelUndelivered: (order: number | string, reason: string) =>
+    `Заказ #${order} отменен в магазине, но CRM не отметила его Лид после всех попыток. Отметьте Лид ❌ сами. Причина: ${reason}`,
 };

@@ -433,10 +433,10 @@ describe('leadSubmissionSchema', () => {
   });
 
   it.each(Object.keys(SERVICE_SLUGS_BY_BRAND))(
-    'rejects a service outside the enum on a %s form',
+    'keeps the lead but drops a service outside the enum on a %s form',
     (brand) => {
       const parsed = phone('+381641234567', `${brand}-no-such-service`);
-      expect(parsed.success).toBe(false);
+      expect(parsed.success && parsed.data.services).toEqual([]);
     },
   );
 
@@ -486,14 +486,14 @@ describe('leadSubmissionSchema', () => {
     expect(parsed.data?.service).toBe('vehicle-sourcing');
   });
 
-  it('rejects the lead when the service list is not an array of text at all', () => {
+  it('keeps the lead but drops a service that is not text at all', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
       consent: 'on',
       service: [{ nope: true }],
     });
-    expect(parsed.success).toBe(false);
+    expect(parsed.success && parsed.data.services).toEqual([]);
   });
 
   it('keeps the first value when the same field is submitted twice', () => {

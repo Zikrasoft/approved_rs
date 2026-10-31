@@ -1,6 +1,7 @@
 import type {
   BigNumberValue,
   ICartModuleService,
+  ILockingModule,
   MedusaContainer,
 } from '@medusajs/framework/types';
 import {
@@ -534,6 +535,8 @@ async function sellableOffer(
   return offer;
 }
 
+const ADD_LOCK_TIMEOUT_SECONDS = 30;
+
 async function putOffer(
   scope: MedusaContainer,
   cartId: string,
@@ -589,8 +592,14 @@ export async function addOffer(
   offerId: string,
   quantity: number,
 ): Promise<OfferCart> {
-  await putOffer(scope, cartId, offerId, quantity);
-  return syncOfferCart(scope, cartId, true);
+  return scope.resolve<ILockingModule>(Modules.LOCKING).execute(
+    `offer-cart:${cartId}`,
+    async () => {
+      await putOffer(scope, cartId, offerId, quantity);
+      return syncOfferCart(scope, cartId, true);
+    },
+    { timeout: ADD_LOCK_TIMEOUT_SECONDS },
+  );
 }
 
 export async function createOfferCart(
@@ -713,10 +722,12 @@ export async function checkout(
   if (fingerprint !== current) {
     refuse('CART_CHANGED', 'The cart changed since it was shown.');
   }
-  const car = await carFor(scope, contact.vin);
-  await scope
-    .resolve<ICartModuleService>(Modules.CART)
-    .updateCarts(cartId, { metadata: { ...cart.metadata, ...contact, car } });
+  if (!cart.completed_at) {
+    const car = await carFor(scope, contact.vin);
+    await scope
+      .resolve<ICartModuleService>(Modules.CART)
+      .updateCarts(cartId, { metadata: { ...cart.metadata, ...contact, car } });
+  }
   const { result } = await completeCartWorkflow(scope).run({
     input: { id: cartId },
   });
