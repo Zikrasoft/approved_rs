@@ -31,7 +31,8 @@ export const PathBuilder = {
   ) => `/${locale}/parts/${make}/${model}/m/${vehicle}/`,
   partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
   partsPrices: (locale: Locale) => `/${locale}/parts/prices/`,
-  partsInquiry: (locale: Locale) => `/${locale}/parts/#${PARTS_INQUIRY_ANCHOR}`,
+  partsInquiry: (locale: Locale, part?: string) =>
+    `/${locale}/parts/${part ? `?${new URLSearchParams({ part })}` : ''}#${PARTS_INQUIRY_ANCHOR}`,
   partsCar: (locale: Locale, vehicleId: string) =>
     `/${locale}/parts/car/${vehicleId}/`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
