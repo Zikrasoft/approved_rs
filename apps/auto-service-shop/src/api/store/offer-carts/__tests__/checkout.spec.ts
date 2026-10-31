@@ -290,6 +290,27 @@ medusaIntegrationTestRunner({
         expect(response.data.cart.items[0].quantity).toBe(3);
       });
 
+      it('takes a double tap on add as two adds, not an error', async () => {
+        const {
+          data: { cart },
+        } = await post('/store/offer-carts');
+
+        const added = await Promise.all(
+          Array.from({ length: 4 }, () =>
+            post(`/store/offer-carts/${cart.id}/items`, {
+              offer_id: offerId,
+              quantity: 1,
+            }),
+          ),
+        );
+
+        expect(added.map(({ status }) => status)).toEqual([200, 200, 200, 200]);
+        const repriced = await post(`/store/offer-carts/${cart.id}/reprice`);
+        expect(repriced.data.cart.items).toEqual([
+          expect.objectContaining({ offer_id: offerId, quantity: 4 }),
+        ]);
+      });
+
       it('refuses to add more than the supplier has in stock', async () => {
         quote(1542, 1);
         const {
@@ -714,13 +735,41 @@ medusaIntegrationTestRunner({
         expect(response.status).toBe(404);
       });
 
-      it('refuses the stock Medusa checkout of a cart without a contact', async () => {
+      it('refuses the stock Medusa checkout, which skips the fingerprint and the closed shop', async () => {
         const cart = await cartWith(1);
+        const carts = getContainer().resolve(Modules.CART);
+        await carts.updateCarts(cart.id, {
+          metadata: { ...CONTACT, fulfillment: 'cash_at_pickup' },
+        });
 
         const refused = await post(`/store/carts/${cart.id}/complete`);
+        const collection = await post('/store/payment-collections', {
+          cart_id: cart.id,
+        });
 
-        expect(refused.status).toBe(400);
-        expect(refused.data.code).toBe('CONTACT_MISSING');
+        expect([refused.status, collection.status]).toEqual([404, 404]);
+        expect((await carts.retrieveCart(cart.id)).completed_at).toBeFalsy();
+      });
+
+      it('keeps the contact of a placed order when its cart is checked out again', async () => {
+        const cart = await cartWith(1);
+        const placed = await complete(cart);
+
+        const again = await complete(cart, {
+          ...CONTACT,
+          contact: '+381609999999',
+          name: 'Second',
+        });
+
+        expect(again.status).toBe(200);
+        expect(again.data.order.id).toBe(placed.data.order.id);
+        const { metadata } = await getContainer()
+          .resolve(Modules.CART)
+          .retrieveCart(cart.id);
+        expect(metadata).toMatchObject({
+          contact: CONTACT.contact,
+          name: CONTACT.name,
+        });
       });
 
       it('hands a placed order to the lead pipeline', async () => {
