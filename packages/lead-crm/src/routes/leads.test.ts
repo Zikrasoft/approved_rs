@@ -118,6 +118,13 @@ describe('createLeadsRoute', () => {
     expect(waitUntil).not.toHaveBeenCalled();
   });
 
+  it('refuses a body that grows past the cap with no length declared', async () => {
+    const ctx = makeCtx(valid({ comment: 'c'.repeat(70_000) }));
+    expect(ctx.request.headers.get('content-length')).toBeNull();
+    expect((await POST(ctx)).status).toBe(413);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('answers a body that is not a form with the refusal page, not a crash', async () => {
     const ctx = {
       ...makeCtx({}),
@@ -538,7 +545,7 @@ describe('createLeadsRoute', () => {
     await POST(
       makeCtx(
         valid({
-          service: Array.from({ length: 10_000 }, () => 'vehicle-sourcing'),
+          service: Array.from({ length: 400 }, () => 'vehicle-sourcing'),
         }),
       ),
     );

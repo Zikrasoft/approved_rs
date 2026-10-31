@@ -9,10 +9,9 @@ import {
 import { fitComment } from '@podbor/catalog-contract/comment';
 import { waitUntil } from '@vercel/functions';
 import {
-  bodyTooLarge,
+  readForm,
   HONEYPOT_FIELD,
   orderLeadSubmission,
-  PAYLOAD_TOO_LARGE,
 } from '@podbor/lead-crm';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { plainText } from '@podbor/lead-crm/phone';
@@ -52,10 +51,9 @@ const orderSchema = z.object({
 const consentSchema = z.object({ consent: z.string().min(1) });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
-  if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
-  const form = Object.fromEntries(
-    await request.formData().catch(() => new FormData()),
-  );
+  const read = await readForm(request);
+  if (read instanceof Response) return read;
+  const form = Object.fromEntries(read ?? new FormData());
   const locale = localeFieldSchema.parse(form.locale);
   const toCart = (notice: CartNotice, extra: Record<string, string> = {}) =>
     redirect(
