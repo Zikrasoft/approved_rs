@@ -1,8 +1,8 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { requireEnv } from '@podbor/lead-crm';
-import { secretMatches } from '@/lib/verifySecret';
+import { logError, requireEnv } from '@podbor/lead-crm';
+import { bearerToken, secretMatches } from '@podbor/lead-crm/verify-secret';
 import {
   claimDigest,
   findIdleTopics,
@@ -20,19 +20,13 @@ import {
   settlePendingOrders,
 } from '@/lib/telegram';
 
-function extractBearer(header: string | null): string | null {
-  if (!header?.startsWith('Bearer ')) return null;
-  return header.slice('Bearer '.length);
-}
-
 async function expireGhosts(now: Date): Promise<number> {
   const expired = await expireGhostLeads(now);
   for (const lead of expired) {
     try {
       await afterStatusChange(lead);
     } catch (err) {
-      console.error('[reminders] failed to refresh an expired ghost card', {
-        error: err,
+      logError('[reminders] failed to refresh an expired ghost card', err, {
         leadId: lead.id,
       });
     }
@@ -54,15 +48,13 @@ async function postDigest(now: Date): Promise<boolean> {
   try {
     posted = await sendDigest(digest);
   } catch (err) {
-    console.error('[reminders] failed to send the digest', { error: err });
+    logError('[reminders] failed to send the digest', err);
     await releaseDigest(now);
     return false;
   }
   if (posted)
     await recordDigestMessage(now, posted).catch((err: unknown) => {
-      console.error('[reminders] failed to remember the digest', {
-        error: err,
-      });
+      logError('[reminders] failed to remember the digest', err);
     });
   for (const lead of digest.due) {
     try {
@@ -71,8 +63,7 @@ async function postDigest(now: Date): Promise<boolean> {
       await sendPostponeReminder(resumed);
       await afterStatusChange(resumed);
     } catch (err) {
-      console.error('[reminders] failed to resume a due postponed lead', {
-        error: err,
+      logError('[reminders] failed to resume a due postponed lead', err, {
         leadId: lead.id,
       });
     }
@@ -83,7 +74,7 @@ async function postDigest(now: Date): Promise<boolean> {
 export async function GET({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
-      extractBearer(request.headers.get('authorization')),
+      bearerToken(request.headers.get('authorization')),
       requireEnv('CRON_SECRET'),
     )
   ) {
@@ -95,7 +86,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const closedTopics = await closeIdle(now);
   const digestSent = await postDigest(now);
   await settlePendingOrders().catch((error: unknown) => {
-    console.error('[reminders] failed to retry shop Order outcomes', { error });
+    logError('[reminders] failed to retry shop Order outcomes', error);
   });
 
   return new Response(

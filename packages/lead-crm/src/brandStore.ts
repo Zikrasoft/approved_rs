@@ -22,6 +22,7 @@ export interface BrandStoreOptions {
     notifier: QuarantineNotifier &
       NotifyLeadOptions['notifier'] & {
         sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
+        sendLeadCountAlert(count: number, brand: string): Promise<void>;
       };
   }>;
 }
@@ -36,6 +37,8 @@ export function createBrandStore({
     storage: storageFor(LEADS_PATH),
     schema: storedLeadSchema,
     standaloneServices,
+    alertLeadCount: async (count) =>
+      (await getNotifier()).notifier.sendLeadCountAlert(count, brand),
     quarantine: createQuarantine({
       storage: storageFor(QUARANTINE_PATH),
       brand,

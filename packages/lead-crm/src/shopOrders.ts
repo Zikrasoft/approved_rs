@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { isClosed, type StoredLead } from './schema.ts';
 import type { LeadStore } from './store.ts';
 import type { Notifier } from './telegram/notify.ts';
@@ -85,8 +86,7 @@ export function createShopOrders({
       if ((await tellShop(lead)) === 'conflict') await recordConflict(lead);
       else await store.settleOrder(lead.id, lead.status);
     } catch (error) {
-      console.error('[lead-crm] the shop did not take the order outcome', {
-        error,
+      logError('[lead-crm] the shop did not take the order outcome', error, {
         leadId: lead.id,
         orderId: lead.orderId,
       });

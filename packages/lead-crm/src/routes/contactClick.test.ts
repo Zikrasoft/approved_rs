@@ -11,9 +11,13 @@ const POST = createContactClickRoute({
   defaultLocale: 'ru',
 });
 
+const VISITOR_ID = '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11';
+
 function makeCtx(fields: Record<string, string>) {
   const formData = new FormData();
-  Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+  Object.entries({ visitor_id: VISITOR_ID, ...fields }).forEach(([k, v]) =>
+    formData.append(k, v),
+  );
   return {
     request: new Request('http://localhost/api/contact-click', {
       method: 'POST',
@@ -31,6 +35,18 @@ describe('createContactClickRoute', () => {
   it('returns 204', async () => {
     const res = await POST(makeCtx({ channel: 'phone', source_url: '/ru/' }));
     expect(res.status).toBe(204);
+  });
+
+  it('refuses an oversized body before reading it', async () => {
+    const response = await POST({
+      request: new Request('http://localhost/api/contact-click', {
+        method: 'POST',
+        headers: { 'content-length': '70000' },
+        body: 'x',
+      }),
+    });
+    expect(response.status).toBe(413);
+    expect(notifyLead).not.toHaveBeenCalled();
   });
 
   it('refuses a body that is not a form without storing a click', async () => {
@@ -122,17 +138,9 @@ describe('createContactClickRoute', () => {
   });
 
   it('passes visitor_id through as visitorId', async () => {
-    await POST(
-      makeCtx({
-        channel: 'phone',
-        source_url: '/ru/',
-        visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
-      }),
-    );
+    await POST(makeCtx({ channel: 'phone', source_url: '/ru/' }));
     expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({
-        visitorId: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
-      }),
+      expect.objectContaining({ visitorId: VISITOR_ID }),
       '[contact-click]',
     );
   });
@@ -168,7 +176,6 @@ describe('createContactClickRoute', () => {
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
         source_url: null,
-        visitorId: null,
         adSource: null,
         metaIds: null,
       }),
@@ -185,13 +192,14 @@ describe('createContactClickRoute', () => {
     expect(notifyLead.mock.calls.at(-1)![0].source_url).toBeNull();
   });
 
-  it('drops a visitor id that is not one this site could have issued', async () => {
-    await POST(makeCtx({ channel: 'phone', visitor_id: 'b'.repeat(5000) }));
-    expect(notifyLead).toHaveBeenCalledWith(
-      expect.objectContaining({ visitorId: null }),
-      '[contact-click]',
-    );
-  });
+  it.each(['', 'b'.repeat(5000)])(
+    'stores no click without a visitor id this site could have issued (%#)',
+    async (visitor_id) => {
+      const response = await POST(makeCtx({ channel: 'phone', visitor_id }));
+      expect(response.status).toBe(204);
+      expect(notifyLead).not.toHaveBeenCalled();
+    },
+  );
 
   it('returns 204 without waiting for notifyLead to resolve', async () => {
     let resolveNotify!: () => void;

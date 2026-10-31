@@ -12,6 +12,7 @@ export interface SiteKitConfig {
   googleAdsId?: string;
   gaMeasurementId?: string;
   googleConversionLabels?: Partial<Record<Goal, string>>;
+  privateParams?: readonly string[];
   analytics: boolean;
 }
 
@@ -23,6 +24,7 @@ export function bootSiteKit({
   googleAdsId,
   gaMeasurementId,
   googleConversionLabels,
+  privateParams,
   analytics,
 }: SiteKitConfig): void {
   if (booted) return;
@@ -34,6 +36,7 @@ export function bootSiteKit({
       googleAdsId,
       gaMeasurementId,
       googleConversionLabels,
+      privateParams,
     });
   rememberAdTouch();
   defineContactClickTracking();

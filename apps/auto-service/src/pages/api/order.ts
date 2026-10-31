@@ -8,14 +8,19 @@ import {
 } from '@podbor/catalog-contract';
 import { fitComment } from '@podbor/catalog-contract/comment';
 import { waitUntil } from '@vercel/functions';
-import { HONEYPOT_FIELD, orderLeadSubmission } from '@podbor/lead-crm';
+import {
+  bodyTooLarge,
+  HONEYPOT_FIELD,
+  orderLeadSubmission,
+  PAYLOAD_TOO_LARGE,
+} from '@podbor/lead-crm';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { plainText } from '@podbor/lead-crm/phone';
 import {
   PARTS_ORDER_COPY,
   type NotPlacedReason,
 } from '@podbor/lead-crm/parts-order-copy';
-import { notifyLead } from '@/lib/crm';
+import { BRAND, leadStore, notifyLead } from '@/lib/crm';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
@@ -48,6 +53,7 @@ const orderSchema = z.object({
 const consentSchema = z.object({ consent: z.string().min(1) });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
+  if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
   const form = Object.fromEntries(
     await request.formData().catch(() => new FormData()),
   );
@@ -90,6 +96,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       : outcome?.kind === 'empty'
         ? { notice: 'expired', reason: 'expired' }
         : { notice: 'unreachable', reason: 'unreachable' };
+  const capped = await leadStore
+    .failedCheckoutCapped(BRAND, contact.data.contact)
+    .catch(() => false);
+  if (capped) return toCart(notice);
   const summary = fitComment({
     head: [
       PARTS_ORDER_COPY.notPlaced(PARTS_ORDER_COPY.notPlacedReason[reason]),

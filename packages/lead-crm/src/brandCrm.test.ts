@@ -95,6 +95,29 @@ describe('createBrandStore', () => {
     expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
   });
 
+  it('alerts through the notifier once the stored Leads reach a threshold', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
+    const { leadStore } = brandStore(
+      vi.fn().mockResolvedValue({ notifier: { sendLeadCountAlert: send } }),
+    );
+    const createdAt = new Date().toISOString();
+    storages[LEADS_PATH]!.seed(
+      Array.from({ length: 4999 }, (_, at) => ({
+        ...submission,
+        brand: 'CarLab',
+        contact: `@seed${at}`,
+        id: at + 1,
+        status: 'won',
+        createdAt,
+        statusChangedAt: createdAt,
+      })),
+    );
+
+    await leadStore.insertOrMergeLead({ ...submission, brand: 'CarLab' });
+
+    expect(send).toHaveBeenCalledWith(5000, 'CarLab');
+  });
+
   it('stamps its own brand over whatever the submission carries, and posts the card', async () => {
     for (const [name, value] of Object.entries(ENV)) vi.stubEnv(name, value);
     const api = recordBotApi();

@@ -59,6 +59,8 @@ taking the order id, the contact and the summary, with the reason left above
 as a note. So a retry never leaves a second card asking staff to call someone
 who already ordered
 ([ADR-0056](docs/adr/0056-a-placed-order-absorbs-the-failed-checkout.md)).
+A contact that already has three Failed checkouts from the last hour gets no
+fourth (`failedCheckoutCapped`), so a scripted checkout cannot flood the chat.
 _Avoid_: abandoned cart, failed order
 
 **Visitor activity** — the last time the visitor did something on a Lead
