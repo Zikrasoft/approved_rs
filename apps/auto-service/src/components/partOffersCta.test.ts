@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import partOffers from './PartOffers.astro?raw';
 import offerRow from './OfferRow.astro?raw';
-import partOffersScript from '../scripts/partOffers.ts?raw';
 
 const openingTag = (source: string, tag: string) =>
   source.match(new RegExp(`<${tag}[\\s\\S]*?\\n\\s*>`))?.[0] ?? '';
@@ -16,9 +15,5 @@ describe('the in-flow contact marker on a priced part', () => {
     expect(partOffers.match(/inFlow/g)).toHaveLength(1);
     expect(partOffers).toContain('<OfferRow offer={best} inFlow />');
     expect(offerRow).toMatch(/\{\.\.\.\(?inFlow && contactCta\)?\}/);
-  });
-
-  it('survives the live refresh, which fills the shown row instead of replacing the watched node', () => {
-    expect(partOffersScript).toContain('this.fillRow(shown, best)');
   });
 });

@@ -14,7 +14,8 @@ _Avoid_: part number (ambiguous about whose number), supplier SKU (that's Suppli
 
 **SupplierOffer**:
 One supplier's or warehouse's sellable line for a specific `PartIdentifier` (brand-variant) of a Part: their own article id, price, stock quantity, and lead-time tier (in-stock / N-days / etc, broken out per physical warehouse where the supplier's own stock feed does that). A supplier selling both the Mann-Filter and the Bosch version of the same Part creates two SupplierOffers, one per `PartIdentifier`, each its own purchasable line and its own price; the storefront never hides which brand-variant it's selling behind one generic "buy" button. Our own warehouse is a supplier like any other for this purpose.
-_Avoid_: Listing, Offer (bare); always qualify with "supplier" or "warehouse"
+The bare word **Offer** (CONTEXT.md, `PartOffer` in `@podbor/catalog-contract`'s cart wire) means the same thing seen by the customer: its sell price, currency, stock and lead time, without the purchase price, the Markup or the supplier's article id. A Part page or listing shows the Offer as stored at the last Publish or live quote; the part page and the cart re-quote it live, so a listing can briefly show a price the live quote has since moved or dropped.
+_Avoid_: Listing
 
 **Brand**:
 A manufacturer whose part numbers we list (BMW for genuine parts, Mann-Filter, Mahle, Bosch), kept as one canonical name with each supplier's spellings as aliases. A PartIdentifier's brand is always one of these.
