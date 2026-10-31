@@ -196,9 +196,13 @@ export const deleteUnlessHeld = async (
     holders = [],
   }: Pick<ReferenceEntity, 'singular' | 'plural' | 'object' | 'holders'>,
   id: string,
+  heldElsewhere: { entity: string; count: number }[] = [],
 ) => {
   await service(req, `retrieve${singular}`)(id);
-  const held = await countHolders(req, id, holders);
+  const held = [
+    ...(await countHolders(req, id, holders)),
+    ...heldElsewhere.filter(({ count }) => count > 0),
+  ];
   if (held.length) {
     throw adminError(
       MedusaError.Types.CONFLICT,

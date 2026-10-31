@@ -8,6 +8,8 @@ const SWEEPS = [
   `delete from supplier_offer o where ${missingIdentifier('o.part_identifier_id')}`,
   `delete from staged_record r where ${missingIdentifier('r.part_identifier_id')}`,
   `delete from published_number n where ${missingIdentifier('n.id')}`,
+  `delete from supplier_category s where not exists
+   (select 1 from category c where c.id = s.category_id and c.deleted_at is null)`,
   `update vin_lookup l set vehicle_id = null where vehicle_id is not null
    and not exists (select 1 from vehicle v where v.id = l.vehicle_id and v.deleted_at is null)`,
 ];

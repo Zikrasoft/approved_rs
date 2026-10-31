@@ -65,7 +65,7 @@ medusaIntegrationTestRunner({
     });
 
     describe('the orphan sweep', () => {
-      it('drops supplier rows and Published marks of deleted numbers and unlinks VINs of deleted Vehicles', async () => {
+      it('drops supplier rows of deleted numbers and Categories, Published marks of deleted numbers, and unlinks VINs of deleted Vehicles', async () => {
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         const vinLookups: VinLookupModuleService =
@@ -89,6 +89,11 @@ medusaIntegrationTestRunner({
           payload: {},
         });
         await pg()('published_number').insert({ id: 'pi_gone' });
+        await suppliers.createSupplierCategories({
+          supplier_id: supplier.id,
+          code: 'Gone',
+          category_id: 'cat_gone',
+        });
         await vinLookups.createVinLookups({
           vin: 'WBA00000000000001',
           facts: {},
@@ -100,6 +105,7 @@ medusaIntegrationTestRunner({
         expect(await countOf('supplier_offer')).toBe(0);
         expect(await countOf('staged_record')).toBe(0);
         expect(await countOf('published_number')).toBe(0);
+        expect(await countOf('supplier_category')).toBe(0);
         expect(
           (await vinLookups.listVinLookups({ vin: 'WBA00000000000001' }))[0],
         ).toMatchObject({ vehicle_id: null });
