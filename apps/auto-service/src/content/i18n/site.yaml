@@ -51,7 +51,7 @@ form:
   nameLabel: Имя (необязательно)
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
-  contactPlaceholder: +381 11 000 0000
+  contactPlaceholder: 64 123 4567
   telegramPlaceholder: '@username или телефон'
   contactChannelLabel: Как с вами связаться
   channelPhone: Звонок

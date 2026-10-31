@@ -38,6 +38,7 @@ export const PathBuilder = {
   bmw: (locale: Locale) => `/${locale}/bmw/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
+  partsThanks: (locale: Locale) => `/${locale}/thanks/parts/`,
   privacy: (locale: Locale) => `/${locale}/privacy/`,
   about: (locale: Locale) => `/${locale}/about/`,
 };

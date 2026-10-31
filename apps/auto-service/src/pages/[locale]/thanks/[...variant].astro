@@ -7,31 +7,33 @@ import { localePaths, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
-  return localePaths();
+  return localePaths().flatMap(({ params }) => [
+    { params: { ...params, variant: undefined } },
+    { params: { ...params, variant: 'parts' } },
+  ]);
 }
 
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
+const parts = Astro.params.variant === 'parts';
+const copy = parts ? { ...pages.thanks, ...pages.thanksParts } : pages.thanks;
+const back = parts ? PathBuilder.parts(locale) : PathBuilder.home(locale);
 ---
 
-<Shell
-  title={pages.thanks.metaTitle}
-  description={pages.thanks.metaDescription}
-  noindex
->
+<Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
   <section
     class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
   >
     <div class="flex flex-col gap-4">
-      <span class="eyebrow">{pages.thanks.eyebrow}</span>
-      <h1 class="text-hero">{pages.thanks.heading}</h1>
+      <span class="eyebrow">{copy.eyebrow}</span>
+      <h1 class="text-hero">{copy.heading}</h1>
       <p class="max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-        {pages.thanks.body}
+        {copy.body}
       </p>
-      <p class="max-w-xl text-sm text-muted">{pages.thanks.note}</p>
-      <a href={PathBuilder.home(locale)} class="btn btn-primary mt-2 w-fit">
-        {pages.thanks.cta}
+      {!parts && <p class="max-w-xl text-sm text-muted">{copy.note}</p>}
+      <a href={back} class="btn btn-primary mt-2 w-fit">
+        {copy.cta}
         <Icon name="arrowRight" />
       </a>
     </div>

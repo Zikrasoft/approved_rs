@@ -49,3 +49,21 @@ export const attributeRows = (
           },
         ],
   );
+
+export const keySpecs = (
+  category: Category,
+  values: AttributeValues,
+  locale: string,
+): string =>
+  attributeRows(
+    {
+      ...category,
+      fields: category.fields.filter(({ type }) => type !== 'boolean'),
+    },
+    values,
+    locale,
+    { yes: '', no: '' },
+  )
+    .slice(0, 3)
+    .map(({ value }) => value)
+    .join(' · ');

@@ -155,7 +155,7 @@ const businessSchema = localBusinessSchema({
   <body
     class:list={[
       'flex min-h-screen flex-col lg:pb-0',
-      stickyContact && 'pb-[calc(3.5rem+1px)]',
+      (stickyContact || Astro.slots.has('sticky')) && 'pb-[calc(3.5rem+1px)]',
     ]}
   >
     <a
@@ -186,6 +186,7 @@ const businessSchema = localBusinessSchema({
     </main>
     <SiteFooter />
     {stickyContact && <StickyContactBar service={service} />}
+    <slot name="sticky" />
     <LeadModal service={service} />
     <TelegramChoice />
     <CookieConsent />

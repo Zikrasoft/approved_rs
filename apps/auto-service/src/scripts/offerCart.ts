@@ -627,12 +627,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
 
       watchCheckoutBar(form: HTMLFormElement): void {
         const bar = this.querySelector<HTMLElement>('[data-checkout-bar]');
-        const submit = form.querySelector('[type="submit"]');
-        if (!bar || !submit) return;
+        if (!bar) return;
         new IntersectionObserver(([entry]) => {
           bar.hidden =
             entry!.isIntersecting || entry!.boundingClientRect.top < 0;
-        }).observe(submit);
+        }).observe(form);
       }
 
       show(state: string): void {
