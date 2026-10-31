@@ -54,3 +54,12 @@ export const partTitle = ({
       : `${brand} ${number}`,
   };
 };
+
+export const orderLineTitle = (part: {
+  brand: string;
+  number: string;
+  name: string;
+}): string => {
+  const { name, number } = partTitle(part);
+  return number ? `${name} (${number})` : name;
+};

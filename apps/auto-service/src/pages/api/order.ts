@@ -36,15 +36,16 @@ const MAX_CART_LINES_LENGTH = 20_000;
 const cartLinesSchema = z
   .string()
   .max(MAX_CART_LINES_LENGTH)
-  .transform(plainText)
+  .transform((text) => plainText(text).replace(/\r\n?/g, '\n'))
   .optional()
   .catch(undefined);
 
 const orderSchema = z.object({
   cart_id: catalogueIdSchema,
-  consent: z.string().min(1),
   [CART_FINGERPRINT_FIELD]: z.string().min(1).max(10_000),
 });
+
+const consentSchema = z.object({ consent: z.string().min(1) });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const form = Object.fromEntries(
@@ -60,19 +61,21 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   if (form[HONEYPOT_FIELD]) {
     return toCart('ordered');
   }
-  const order = orderSchema.safeParse(form);
   const contact = checkoutContactSchema.safeParse({ ...form, locale });
-  if (!order.success || !contact.success) {
+  if (!contact.success || !consentSchema.safeParse(form).success) {
     return toCart('invalid');
   }
-  const outcome = await catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request),
-  })?.placeOrder(
-    order.data.cart_id,
-    contact.data,
-    order.data[CART_FINGERPRINT_FIELD],
-  );
-  if (outcome?.kind === 'order') {
+  const order = orderSchema.safeParse(form);
+  const outcome = order.success
+    ? await catalogueFromEnv(siteEnv(), {
+        preview: previewRequested(request),
+      })?.placeOrder(
+        order.data.cart_id,
+        contact.data,
+        order.data[CART_FINGERPRINT_FIELD],
+      )
+    : ({ kind: 'empty' } as const);
+  if (outcome?.kind === 'order' && order.success) {
     return toCart('ordered', {
       [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
       [ORDERED_CART_PARAM]: order.data.cart_id,

@@ -701,6 +701,25 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(merged).toBe(true);
   });
 
+  it('merges failed checkouts of a visitor without an id on the same contact', async () => {
+    await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const { merged } = await store.insertOrMergeLead({
+      ...order('+381602222222'),
+      visitorId: null,
+    });
+    const other = await store.insertOrMergeLead({
+      ...order('+381603333333'),
+      visitorId: null,
+    });
+
+    expect(merged).toBe(true);
+    expect(other.merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
   it('keeps a failed checkout older than the merge window apart', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     try {

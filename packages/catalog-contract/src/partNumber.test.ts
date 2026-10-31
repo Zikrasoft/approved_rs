@@ -3,6 +3,7 @@ import {
   normalizePartNumber,
   partNumberQuery,
   partPageSlug,
+  orderLineTitle,
   partTitle,
 } from './partNumber.ts';
 
@@ -81,5 +82,27 @@ describe('partTitle', () => {
     ],
   ])('splits %j', (part, title) => {
     expect(partTitle(part)).toEqual(title);
+  });
+});
+
+describe('orderLineTitle', () => {
+  it('brackets the brand and number after the name', () => {
+    expect(
+      orderLineTitle({
+        brand: 'MANN-FILTER',
+        number: 'W 712/66',
+        name: 'Масляный фильтр MANN-FILTER W 712/66',
+      }),
+    ).toBe('Масляный фильтр (MANN-FILTER W 712/66)');
+  });
+
+  it('keeps a name that already carries the number', () => {
+    expect(
+      orderLineTitle({
+        brand: 'Mann-Filter',
+        number: 'HU 816 x',
+        name: 'Mann-Filter HU 816 x',
+      }),
+    ).toBe('Mann-Filter HU 816 x');
   });
 });

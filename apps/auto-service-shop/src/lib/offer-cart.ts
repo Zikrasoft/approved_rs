@@ -23,6 +23,7 @@ import {
   cartTotals,
   checkoutContactSchema,
   orderCap,
+  orderLineTitle,
   partPageSlug,
   translationsSchema,
   type AddonKind,
@@ -53,7 +54,6 @@ import { installationPrice } from './installation';
 import {
   addonLineMetadata,
   offerLineMetadata,
-  offerLineTitle,
   withParentOffers,
   readLine,
 } from './line-metadata';
@@ -437,7 +437,7 @@ async function putOffer(
       cart_id: cartId,
       items: [
         {
-          title: offerLineTitle(part),
+          title: orderLineTitle(part),
           quantity,
           unit_price: offer.price,
           requires_shipping: false,

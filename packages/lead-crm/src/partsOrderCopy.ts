@@ -42,3 +42,34 @@ export const PARTS_ORDER_COPY = {
 };
 
 export type NotPlacedReason = keyof typeof PARTS_ORDER_COPY.notPlacedReason;
+
+export const orderMoney = (amount: number, currency: string): string =>
+  `${amount.toLocaleString('ru-RU')} ${currency.toUpperCase()}`;
+
+export type OrderLine = {
+  title: string;
+  quantity: number;
+  unitPrice: number;
+  addon: boolean;
+  inStock?: boolean | null;
+  leadTimeDays?: number | null;
+  source?: string | null;
+};
+
+export function orderLineText(line: OrderLine, currency: string): string {
+  const sum = orderMoney(line.unitPrice * line.quantity, currency);
+  if (line.addon)
+    return PARTS_ORDER_COPY.addon(
+      line.title,
+      line.unitPrice === 0 ? PARTS_ORDER_COPY.free : sum,
+    );
+  const readiness = [
+    line.inStock && PARTS_ORDER_COPY.inStock,
+    line.leadTimeDays && PARTS_ORDER_COPY.pickupIn(line.leadTimeDays),
+    line.source,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const text = PARTS_ORDER_COPY.line(line.title, line.quantity, sum);
+  return readiness ? `${text}, ${readiness}` : text;
+}

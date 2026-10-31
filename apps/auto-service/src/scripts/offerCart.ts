@@ -20,6 +20,7 @@ import { formatMoney } from '@/utils/money';
 import {
   forgetOrderedCart,
   listedLine,
+  orderLines,
   moveCartToInquiry,
   orderedNumber,
   priceChanges,
@@ -38,7 +39,7 @@ import {
 } from './checkoutMemory';
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
 import { shopPreview } from './shopPreview';
-import { addonLabel, addToPartsList, partLine } from './partsList';
+import { addonLabel, addToPartsList } from './partsList';
 
 const STEP_SETTLE_MS = 400;
 
@@ -120,10 +121,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
               CART_FINGERPRINT_FIELD,
               cartFingerprint(this.cart.items),
             );
-            event.formData.set(
-              CART_LINES_FIELD,
-              this.cart.items.map(listedLine).map(partLine).join('\n'),
-            );
+            event.formData.set(CART_LINES_FIELD, orderLines(this.cart));
           });
         }
         this.querySelector('[data-retry]')?.addEventListener('click', () =>

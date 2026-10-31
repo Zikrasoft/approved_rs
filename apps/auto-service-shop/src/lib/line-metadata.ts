@@ -1,7 +1,6 @@
 import {
   ADDON_KINDS,
   listedPartSchema,
-  partTitle,
   type AddonKind,
   type ListedPart,
 } from '@podbor/catalog-contract';
@@ -78,11 +77,6 @@ export const offerLineMetadata = (
   supplier,
   ...part,
 });
-
-export const offerLineTitle = (part: ListedPart) => {
-  const { name, number } = partTitle(part);
-  return number ? `${name} (${number})` : name;
-};
 
 export const addonLineMetadata = (
   parent: { lineId: string; offerId: string },
