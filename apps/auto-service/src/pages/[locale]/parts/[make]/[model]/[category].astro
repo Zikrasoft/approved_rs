@@ -122,7 +122,8 @@ const SAID_BY_FIT = ['axle'];
       'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
       empty
         ? 'lg:grid-cols-[1.2fr_1fr]'
-        : filtered && 'lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
+        : filtered &&
+          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
     ]}
   >
     {
