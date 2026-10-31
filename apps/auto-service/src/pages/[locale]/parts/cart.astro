@@ -3,6 +3,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import CartAddonToggle from '@/components/CartAddonToggle.astro';
 import CheckoutForm from '@/components/CheckoutForm.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
 import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
@@ -54,7 +55,7 @@ const stepper =
 
   <section class="wrap py-6 md:py-band-lg">
     <offer-cart
-      class="block"
+      class="block min-h-svh"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
       data-locale={locale}
       data-addon-template={copy.addonTemplate}
@@ -171,9 +172,13 @@ const stepper =
             <span>{copy.submitNote}</span>
           </p>
         </div>
+        <div class="flex flex-col gap-3">
+          <span class="text-xs text-muted">{site.footer.contactHeading}</span>
+          <ContactChannels />
+        </div>
         <a
           href={PathBuilder.parts(locale)}
-          class="btn btn-primary w-full sm:w-auto sm:self-start"
+          class="btn btn-secondary w-full sm:w-auto sm:self-start"
         >
           {copy.orderedCta}
           <Icon name="arrowRight" />
