@@ -23,7 +23,7 @@ const price =
 <cta-reveal
   data-revealed="false"
   watch={CONTACT_CTA_SELECTOR}
-  class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur-sm transition-[translate,visibility] duration-250 data-[revealed=false]:invisible data-[revealed=false]:translate-y-full motion-reduce:transition-none lg:hidden"
+  class="fixed inset-x-0 bottom-[var(--cookie-consent-height,0px)] z-40 border-t border-line bg-paper/95 backdrop-blur-sm transition-[translate,visibility] duration-250 data-[revealed=false]:invisible data-[revealed=false]:translate-y-full motion-reduce:transition-none lg:hidden"
 >
   <div class="wrap flex min-h-14 items-center justify-between gap-4 py-1.5">
     <span class="flex min-w-0 flex-col">
@@ -34,16 +34,23 @@ const price =
       <span class="spec font-semibold text-ink">
         {
           price
-            ? page.offers.length > 1
+            ? best.startsFrom
               ? copy.fromPrice.replace('{price}', price)
               : price
             : copy.priceOnRequestHeading
         }
       </span>
     </span>
-    <a href={`#${target}`} class="btn btn-primary shrink-0">
-      {price ? copy.buyButtonLabel : copy.priceOnRequestCta}
-    </a>
+    <part-cta-forward
+      class="shrink-0"
+      data-to={best
+        ? `#${target} [data-buy][data-offer-id="${best.id}"]`
+        : `#${target} parts-list-add a`}
+    >
+      <a href={`#${target}`} class="btn btn-primary">
+        {price ? copy.buyButtonLabel : copy.priceOnRequestCta}
+      </a>
+    </part-cta-forward>
   </div>
 </cta-reveal>
 
@@ -51,4 +58,23 @@ const price =
   import { defineCtaReveal } from '@podbor/site-kit/browser';
 
   defineCtaReveal();
+
+  if (!customElements.get('part-cta-forward')) {
+    customElements.define(
+      'part-cta-forward',
+      class extends HTMLElement {
+        connectedCallback(): void {
+          this.addEventListener('click', (event) => {
+            const to = document.querySelector<HTMLElement>(
+              this.dataset.to ?? '',
+            );
+            if (!to || to.hidden) return;
+            event.preventDefault();
+            to.scrollIntoView({ block: 'center' });
+            to.click();
+          });
+        }
+      },
+    );
+  }
 </script>
