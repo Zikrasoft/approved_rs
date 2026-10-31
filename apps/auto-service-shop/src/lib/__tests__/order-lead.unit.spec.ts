@@ -243,7 +243,7 @@ describe('sendOrderLead', () => {
     let origin: string | undefined;
     const server = createServer((request, response) => {
       origin = request.headers.origin;
-      response.writeHead(302, { location: '/ru/thanks/' }).end();
+      response.writeHead(201).end();
     });
     await new Promise<void>((resolve) => server.listen(0, resolve));
     const { port } = server.address() as AddressInfo;
@@ -257,6 +257,24 @@ describe('sendOrderLead', () => {
     }
 
     expect(origin).toBe(`http://localhost:${port}`);
+  });
+
+  it('takes a redirect for a refusal, as only a 2xx means the Lead is stored', async () => {
+    const server = createServer((_request, response) => {
+      response.writeHead(302, { location: '/ru/thanks/' }).end();
+    });
+    await new Promise<void>((resolve) => server.listen(0, resolve));
+    const { port } = server.address() as AddressInfo;
+    try {
+      await expect(
+        sendOrderLead(
+          `http://localhost:${port}/api/leads`,
+          new URLSearchParams({ contact: '+381601234567' }),
+        ),
+      ).rejects.toThrow('The lead route answered 302');
+    } finally {
+      server.close();
+    }
   });
 });
 

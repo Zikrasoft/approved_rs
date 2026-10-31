@@ -71,7 +71,7 @@ medusaIntegrationTestRunner({
       let leadRoute: Server;
       const leads: LeadPost[] = [];
       const authorizations: (string | undefined)[] = [];
-      let leadRouteStatus = 302;
+      let leadRouteStatus = 201;
 
       beforeAll(async () => {
         leadRoute = createServer((request, response) => {
@@ -146,7 +146,7 @@ medusaIntegrationTestRunner({
 
       beforeEach(() => {
         quote(1542, 12);
-        leadRouteStatus = 302;
+        leadRouteStatus = 201;
         leads.length = 0;
         authorizations.length = 0;
       });
@@ -1305,7 +1305,7 @@ medusaIntegrationTestRunner({
           async () => (await refused()).metadata?.[LEAD_HANDOFF_ERROR],
         );
         leads.length = 0;
-        leadRouteStatus = 302;
+        leadRouteStatus = 201;
 
         await retryOrderLeadsAt(getContainer(), settled());
 

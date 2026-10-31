@@ -190,7 +190,7 @@ export async function sendOrderLead(
     signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
   });
   await response.body?.cancel();
-  if (response.status >= 400) {
+  if (!response.ok) {
     throw new LeadRouteRefusal(response.status);
   }
 }
