@@ -42,6 +42,7 @@ const CANCEL_ALERTED_AT = 'lead_cancel_alerted_at';
 const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
+// TODO: drop 404 together with the /api/leads fallback in sendShopOrderEvent; only that legacy route answers 404 for a missing Lead, and once it is gone a 404 means the route itself is missing.
 const CANCEL_REFUSALS = new Set([404, 409, 410]);
 
 type Metadata = Record<string, unknown> | null | undefined;
@@ -61,6 +62,14 @@ export const orderLeadStatus = (metadata: Metadata) => {
     alerted_at: filled.parse(metadata?.[OWNER_ALERTED_AT]),
   };
 };
+
+const cancelStatus = (metadata: Metadata) => ({
+  lost_at: filled.parse(metadata?.[LOST_AT]),
+  error: filled.parse(metadata?.[LOST_ERROR]),
+  attempts: attemptsAt(metadata, LOST_ATTEMPTS),
+  refused_at: filled.parse(metadata?.[CANCEL_REFUSED_AT]),
+  alerted_at: filled.parse(metadata?.[CANCEL_ALERTED_AT]),
+});
 
 export interface SyncOrder {
   id: string;
@@ -147,11 +156,12 @@ export function createOrderLeadSync({
 
   async function handCancel(id: string): Promise<void> {
     const { metadata, display_id } = await orders.retrieve(id);
+    const lost = cancelStatus(metadata);
     if (
-      !metadata?.[HANDED_OFF_AT] ||
-      metadata[LOST_AT] ||
-      metadata[CANCEL_REFUSED_AT] ||
-      metadata[CANCEL_ALERTED_AT]
+      !orderLeadStatus(metadata).handed_off_at ||
+      lost.lost_at ||
+      lost.refused_at ||
+      lost.alerted_at
     )
       return;
     const undelivered = (reason: string) =>
@@ -160,9 +170,8 @@ export function createOrderLeadSync({
         CANCEL_ALERTED_AT,
         PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
       );
-    const attempts = attemptsAt(metadata, LOST_ATTEMPTS);
-    if (attempts >= MAX_HANDOFF_ATTEMPTS)
-      return undelivered(String(metadata[LOST_ERROR] ?? ''));
+    const { attempts } = lost;
+    if (attempts >= MAX_HANDOFF_ATTEMPTS) return undelivered(lost.error ?? '');
     try {
       await send({ event: 'canceled', order_id: id });
       await orders.patch(id, { [LOST_AT]: now(), [LOST_ERROR]: '' });
@@ -219,12 +228,7 @@ export function createOrderLeadSync({
       new Date(at.getTime() - RETRY_WINDOW_MS),
       new Date(at.getTime() - SUBSCRIBER_GRACE_MS),
     );
-    for (const { id, status, metadata } of recent) {
-      const lead = orderLeadStatus(metadata);
-      if (status === 'canceled' || lead.handed_off_at || lead.alerted_at)
-        continue;
-      await placed(id);
-    }
+    for (const { id } of recent) await placed(id);
     const touched = await orders.updatedSince(
       new Date(at.getTime() - RETRY_WINDOW_MS),
     );
