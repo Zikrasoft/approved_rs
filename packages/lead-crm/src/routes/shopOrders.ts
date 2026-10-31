@@ -5,7 +5,12 @@ import {
   vinNote,
   visitorIdSchema,
 } from '../form.ts';
-import { shopOrderEventSchema, type OrderContact } from '../shopOrdersWire.ts';
+import {
+  LEAD_MISSING,
+  LEAD_WON,
+  shopOrderEventSchema,
+  type OrderContact,
+} from '../shopOrdersWire.ts';
 import { bearerToken, secretMatches } from '../verifySecret.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
@@ -13,8 +18,8 @@ import type { LeadSubmission } from '../schema.ts';
 
 const CANCEL_STATUS: Record<CancelOrderResult, number> = {
   lost: 204,
-  won: 409,
-  missing: 410,
+  won: LEAD_WON,
+  missing: LEAD_MISSING,
 };
 
 export interface ShopOrdersRouteOptions {
