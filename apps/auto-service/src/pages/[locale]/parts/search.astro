@@ -292,7 +292,7 @@ const scopeHidden = {
             />
 
             {(chips.length > 0 || modelName) && (
-              <ul class="flex flex-wrap gap-2 max-lg:-mx-5 max-lg:flex-nowrap max-lg:overflow-x-auto max-lg:px-5 max-lg:[scrollbar-width:none]">
+              <ul class="flex flex-wrap gap-2">
                 {[
                   ...(modelName
                     ? [
@@ -314,7 +314,7 @@ const scopeHidden = {
                         '{label}',
                         chip.label,
                       )}
-                      class="inline-flex min-h-11 items-center gap-2 rounded-pill whitespace-nowrap border border-line bg-paper px-3 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+                      class="inline-flex min-h-11 max-w-full items-center gap-2 rounded-pill border border-line bg-paper px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
                     >
                       {chip.label}
                       <Icon name="close" size={12} class="text-muted" />
