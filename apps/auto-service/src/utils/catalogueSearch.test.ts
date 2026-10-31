@@ -95,6 +95,12 @@ describe('vinDestination', () => {
     ).toBe('/ru/parts/bmw/e83-x3-20d/');
   });
 
+  it('stays on the inquiry for an unresolved VIN known only by its Make', () => {
+    expect(
+      vinDestination({ kind: 'inquiry', place: makePlace }, VIN, 'ru'),
+    ).toBeNull();
+  });
+
   it('opens nothing for an unresolved VIN without a shared place', () => {
     expect(
       vinDestination({ kind: 'inquiry', place: null }, VIN, 'ru'),

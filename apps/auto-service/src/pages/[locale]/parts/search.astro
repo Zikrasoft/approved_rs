@@ -64,16 +64,14 @@ const catalogue = catalogueFromEnv(siteEnv(), {
 });
 const intent = searchIntent(q);
 const vin = intent.kind === 'vin' ? intent.vin : null;
-if (vin && catalogue) {
-  const destination = vinDestination(
-    await catalogue.resolveVin(vin),
-    vin,
-    locale,
-  );
-  if (destination) {
-    return Astro.redirect(destination, 303);
-  }
+const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
+const destination =
+  vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
+if (destination) {
+  return Astro.redirect(destination, 303);
 }
+const vinMake =
+  vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
 const searchable = !vin && (searchableQuery(q) || Boolean(category));
 const found =
   searchable && catalogue
@@ -211,6 +209,20 @@ const scopeHidden = {
           class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
         >
           {content(locale).partsCar.vin.unresolved}
+          {vinMake && (
+            <>
+              {' '}
+              <a
+                href={vinMake.href}
+                class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+              >
+                {content(locale).partsCar.vin.chooseMake.replace(
+                  '{make}',
+                  vinMake.label,
+                )}
+              </a>
+            </>
+          )}
         </p>
       )
     }
@@ -425,7 +437,9 @@ const scopeHidden = {
               placeholder: partsInquiry.vinPlaceholder,
               value: vin ?? undefined,
             }}
-            comment={vin ? '' : `${inquiryTopic}: `}
+            comment={
+              vin ? (vinMake ? `${vinMake.label}: ` : '') : `${inquiryTopic}: `
+            }
             commentLabel={partsInquiry.commentLabel}
             commentPlaceholder={partsInquiry.commentPlaceholder}
             commentNote={partsInquiry.commentNote}

@@ -28,7 +28,9 @@ export const vinDestination = (
   locale: Locale,
 ): string | null => {
   const { place } = outcome;
-  if (!place) return null;
+  if (!place || (outcome.kind === 'inquiry' && place.kind === 'make')) {
+    return null;
+  }
   const { href } = carLink(place, locale);
   return place.kind === 'vehicle' && outcome.kind === 'vehicle'
     ? `${href}${carFactsQuery(outcome.facts, vin)}`
