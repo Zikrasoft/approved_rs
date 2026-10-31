@@ -154,14 +154,23 @@ export function createCatalogue({
 
   const segment = encodeURIComponent;
 
+  const viewCart = (cartId: string): Promise<CartOutcome> =>
+    cartOutcome(
+      send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
+    );
+
+  const lineOutcome = (answer: Promise<Response>, cartId: string) =>
+    cartOutcome(answer, cartId, () => viewCart(cartId));
+
   const cartOutcome = async (
     answer: Promise<Response>,
     cartId: string | null = null,
+    missing: () => Promise<CartOutcome> = async () => ({ kind: 'empty' }),
   ): Promise<CartOutcome> => {
     try {
       const response = await answer;
       if (response.status === 404) {
-        return { kind: 'empty' };
+        return missing();
       }
       if (!response.ok) {
         const refusal = checkoutRefusalSchema.safeParse(
@@ -426,17 +435,14 @@ export function createCatalogue({
       return cartOutcome(send('/store/offer-carts', 'POST', line));
     },
 
-    viewCart: (cartId: string): Promise<CartOutcome> =>
-      cartOutcome(
-        send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
-      ),
+    viewCart,
 
     setQuantity: (
       cartId: string,
       itemId: string,
       quantity: number,
     ): Promise<CartOutcome> =>
-      cartOutcome(
+      lineOutcome(
         send(
           `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}`,
           'POST',
@@ -451,7 +457,7 @@ export function createCatalogue({
       on: boolean,
       kind: LineAddonKind = 'addon',
     ): Promise<CartOutcome> =>
-      cartOutcome(
+      lineOutcome(
         send(
           `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/${kind}`,
           on ? 'POST' : 'DELETE',
@@ -461,11 +467,12 @@ export function createCatalogue({
       ),
 
     removeFromCart: (cartId: string, itemId: string): Promise<CartOutcome> =>
-      cartOutcome(
+      lineOutcome(
         send(
           `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}`,
           'DELETE',
         ),
+        cartId,
       ),
 
     async placeOrder(

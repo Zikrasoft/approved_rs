@@ -28,8 +28,7 @@ const {
 const locale = localeFrom(Astro.url.pathname);
 const control = contactControl({
   channel,
-  onThanks:
-    navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  onThanks: Boolean(navCurrent(Astro.url.pathname, PathBuilder.thanks(locale))),
   region,
   locale,
   service,

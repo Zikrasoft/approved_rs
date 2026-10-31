@@ -10,7 +10,8 @@ unitTemplate: '{price} за шт.'
 increaseLabel: Добавить еще одну
 decreaseLabel: Убрать одну
 toInquiryLabel: Отправить заявкой
-unavailableTag: Сейчас нет в нужном количестве. Уберите позицию или отправьте ее заявкой.
+lowerToTemplate: 'Оставить {count} шт.'
+unavailableTag: Сейчас нет в нужном количестве. Уменьшите количество, уберите позицию или отправьте ее заявкой.
 removeLabel: Убрать из корзины
 totalLabel: Итого
 summaryHeading: Ваш заказ
