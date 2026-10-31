@@ -180,6 +180,10 @@ medusaIntegrationTestRunner({
           'cost_price',
         ],
         [
+          { cost_price: 0.5, stock_quantity: 1, lead_time_days: 0 },
+          'cost_price',
+        ],
+        [
           { cost_price: 10_000_001, stock_quantity: 1, lead_time_days: 0 },
           'cost_price',
         ],
