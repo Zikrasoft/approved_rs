@@ -102,6 +102,16 @@ medusaIntegrationTestRunner({
           expect(response.status).toBe(400);
         });
 
+        it('refuses to list every fitment without a Part or a Vehicle', async () => {
+          const [fitments, requirements] = await Promise.all(
+            ['/admin/fitments', '/admin/requirements'].map((path) =>
+              api.get(path, adminHeaders).catch((error) => error.response),
+            ),
+          );
+
+          expect([fitments.status, requirements.status]).toEqual([400, 400]);
+        });
+
         it('returns a 404 for an unknown Vehicle', async () => {
           const { part } = await createPartAndVehicle('B47-UNKNOWN-VEHICLE');
 

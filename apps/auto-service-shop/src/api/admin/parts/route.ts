@@ -16,6 +16,8 @@ import {
 } from '../../../lib/admin-part';
 import { literalLike } from '../../../lib/like';
 
+const PART_SEARCH_LIMIT = 50;
+
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminSearchPartsType>,
   res: MedusaResponse,
@@ -39,11 +41,11 @@ export async function GET(
         { brand_id: brands.map((brand) => brand.id) },
       ],
     },
-    { select: ['part_id'], take: null },
+    { select: ['part_id'], take: PART_SEARCH_LIMIT },
   );
   const named = await catalog.listParts(
     { name: { $ilike: contains } },
-    { select: ['id'], take: null },
+    { select: ['id'], take: PART_SEARCH_LIMIT },
   );
 
   const partIds = [
@@ -51,7 +53,7 @@ export async function GET(
       ...matches.map((identifier) => identifier.part_id),
       ...named.map((part) => part.id),
     ]),
-  ];
+  ].slice(0, PART_SEARCH_LIMIT);
   const parts = partIds.length
     ? await catalog.listParts(
         { id: partIds },

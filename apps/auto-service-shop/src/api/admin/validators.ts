@@ -27,9 +27,7 @@ export const int4 = z.number().int().min(-INT4).max(INT4);
 
 const name = z.string().trim().min(1).max(MAX_NAME_LENGTH);
 
-export const AdminSearchParts = z.object({
-  q: z.string().trim().min(1),
-});
+export const AdminSearchParts = z.object({ q: name });
 export type AdminSearchPartsType = z.infer<typeof AdminSearchParts>;
 
 const partNumber = z
@@ -129,10 +127,12 @@ export type AdminListPartIdentifiersType = z.infer<
   typeof AdminListPartIdentifiers
 >;
 
-export const AdminListFitments = z.object({
-  vehicle_id: z.string().min(1).optional(),
-  part_id: z.string().min(1).optional(),
-});
+export const AdminListFitments = z
+  .object({
+    vehicle_id: z.string().min(1).optional(),
+    part_id: z.string().min(1).optional(),
+  })
+  .refine(({ vehicle_id, part_id }) => vehicle_id || part_id);
 export type AdminListFitmentsType = z.infer<typeof AdminListFitments>;
 
 const calendarDay = z.iso
@@ -393,7 +393,9 @@ const requirementOwners = {
   vehicle_id: z.string().min(1).optional(),
 };
 
-export const AdminListRequirements = z.object(requirementOwners);
+export const AdminListRequirements = z
+  .object(requirementOwners)
+  .refine((owners) => Object.values(owners).some(Boolean));
 export type AdminListRequirementsType = z.infer<typeof AdminListRequirements>;
 
 export const AdminCreateRequirement = z
