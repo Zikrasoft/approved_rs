@@ -162,8 +162,8 @@ describe('processSection', () => {
     >;
     expect(written.translatedFrom).toBe(hashSource(RU_NAV));
     expect(translationsOf(file).en).toEqual({
-      nav: { home: 't:Главная', cases: 't:Кейсы' },
-      footer: { tagline: 't:Слоган' },
+      nav: { home: 't:Glavnay', cases: 't:Keisy' },
+      footer: { tagline: 't:Slogan' },
     });
     expect(Object.keys(cache[file] as object)).toHaveLength(6);
   });
@@ -198,8 +198,8 @@ describe('processSection', () => {
     };
     expect(await processSection(bare, 'key', cache)).toBe('translated');
     expect(translationsOf(file).en).toEqual({
-      nav: { home: 't:Главная', cases: 't:Кейсы' },
-      footer: { tagline: 't:Слоган' },
+      nav: { home: 't:Glavnay', cases: 't:Keisy' },
+      footer: { tagline: 't:Slogan' },
     });
 
     vi.unstubAllGlobals();
@@ -268,8 +268,8 @@ describe('processSection', () => {
     const { processSection } = translator();
     expect(await processSection(section(file), 'key', {})).toBe('translated');
     expect(translationsOf(file).en).toEqual({
-      nav: { home: 't:Главная', cases: 't:Кейсы' },
-      footer: { tagline: 't:Слоган' },
+      nav: { home: 't:Glavnay', cases: 't:Keisy' },
+      footer: { tagline: 't:Slogan' },
     });
   });
 
@@ -341,7 +341,7 @@ describe('processSection', () => {
     const cache: CacheFile = {};
 
     await expect(processSection(section(file), 'key', cache)).rejects.toThrow(
-      'mixes Latin and Cyrillic',
+      'contains Cyrillic letters',
     );
     expect(Object.values(cache[file] ?? {})).toContain('en');
   });
@@ -452,7 +452,7 @@ describe('processSection', () => {
         cache,
       ),
     ).toBe('translated');
-    expect(translationsOf(file).en!.footer).toEqual({ tagline: 'v2:Слоган' });
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 'v2:Slogan' });
   });
 
   it('serves a committed translation written as a YAML alias', async () => {
@@ -522,7 +522,7 @@ describe('processSection', () => {
     });
     const { processSection } = translator();
     expect(await processSection(section(file), 'key', {})).toBe('translated');
-    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Слоган' });
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Slogan' });
   });
 
   it('restores a wiped translations block from the cache, asking for nothing', async () => {
@@ -545,7 +545,7 @@ describe('processSection', () => {
       'backfilled',
     );
     expect(sentPayloads()).toEqual([]);
-    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Слоган' });
+    expect(translationsOf(file).en!.footer).toEqual({ tagline: 't:Slogan' });
   });
 
   it('is indifferent to the order the ru keys are written in', async () => {

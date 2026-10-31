@@ -37,11 +37,21 @@ export function stubOpenAiFetch(
   );
 }
 
+const CYRILLIC_LETTERS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+const LATIN_LETTERS = 'abvgdeejziiklmnoprstufhccssjyjeuy';
+
+export const latin = (text: string): string =>
+  text.replace(/\p{Script=Cyrillic}/gu, (letter) => {
+    const lower = letter.toLowerCase();
+    const swapped = LATIN_LETTERS.charAt(CYRILLIC_LETTERS.indexOf(lower));
+    return letter === lower ? swapped : swapped.toUpperCase();
+  });
+
 export function stubTranslate(transform: (text: string) => string): void {
   stubOpenAiFetch((content) =>
     Object.fromEntries(
       Object.entries(JSON.parse(content) as Record<string, string>).map(
-        ([path, text]) => [path, transform(text)],
+        ([path, text]) => [path, latin(transform(text))],
       ),
     ),
   );

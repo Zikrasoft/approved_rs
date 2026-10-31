@@ -1,6 +1,6 @@
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { callOpenAiJson } from './openaiChat.ts';
-import { NO_EM_DASH_RULE } from './promptRules.ts';
+import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
 
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
@@ -22,9 +22,10 @@ export function fieldsPrompt(
   return (
     `You translate ${subject} from Russian into ${language} for ${businessDescription}. ` +
     'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write it, ' +
-    'never a literal word-for-word translation. Keep markdown formatting intact. Keep brand names, part numbers, ' +
-    'units and specification codes (such as 5W-30, ACEA C3, VW 504.00) exactly as written. ' +
-    `${NO_EM_DASH_RULE} ` +
+    'never a literal word-for-word translation. Keep markdown formatting intact. Keep brand names, part numbers ' +
+    'and specification codes (such as 5W-30, ACEA C3, VW 504.00) exactly as written, and write units the way ' +
+    'the target language does. ' +
+    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ` +
     'The input is a flat ' +
     'JSON object whose keys are field names and whose values are the strings to translate. Respond with a JSON ' +
     'object having EXACTLY the same keys, with each value translated, never translate the keys themselves.'

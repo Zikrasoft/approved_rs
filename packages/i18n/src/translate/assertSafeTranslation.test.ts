@@ -183,7 +183,7 @@ describe('assertSafeTranslation', () => {
   });
 });
 
-describe('mixed-script words', () => {
+describe('Cyrillic letters', () => {
   it('rejects a Latin word the model finished in Cyrillic', () => {
     expect(() =>
       assertSafeTranslation(
@@ -191,44 +191,23 @@ describe('mixed-script words', () => {
         'sa vazdušnim jastuком',
         'meta',
       ),
-    ).toThrow(/mixes Latin and Cyrillic/);
+    ).toThrow(/"meta" contains Cyrillic letters/);
   });
 
-  it('rejects the reverse splice too', () => {
-    expect(() => assertSafeTranslation('подушка', 'подushка', 'meta')).toThrow(
-      /mixes Latin and Cyrillic/,
-    );
+  it('rejects a unit abbreviation left in Cyrillic', () => {
+    expect(() =>
+      assertSafeTranslation('Диаметр 99 мм', 'Diameter 99 мм', 'parts.x'),
+    ).toThrow(/contains Cyrillic letters/);
   });
 
-  it('gives the same answer when asked twice', () => {
-    const check = () => assertSafeTranslation('подушка', 'подushка', 'meta');
-    expect(check).toThrow(/mixes Latin and Cyrillic/);
-    expect(check).toThrow(/mixes Latin and Cyrillic/);
+  it('rejects a personal name left in Cyrillic', () => {
+    expect(() =>
+      assertSafeTranslation('Михаил, Белград', 'Михаил, Belgrade', 'reviews'),
+    ).toThrow(/contains Cyrillic letters/);
   });
 
   it('accepts a whitespace-only source translated as whitespace', () => {
     expect(() => assertSafeTranslation('   ', '   ', 'x')).not.toThrow();
-  });
-
-  it('names the whole offending word so the field can be found', () => {
-    expect(() =>
-      assertSafeTranslation('подушка', 'vazdušnim jastuком', 'services.x'),
-    ).toThrow(/"jastuком"/);
-  });
-
-  it('exempts only the spliced word the source already had, not the string', () => {
-    expect(() =>
-      assertSafeTranslation('Hondа Accord чинится', 'Hondа Accord radi', 'x'),
-    ).not.toThrow();
-    expect(() =>
-      assertSafeTranslation('Hondа Accord чинится', 'Hondа Accord radи', 'x'),
-    ).toThrow(/"radи"/);
-  });
-
-  it('allows a Cyrillic word standing on its own in a Latin sentence', () => {
-    expect(() =>
-      assertSafeTranslation('Наше слово', 'Naše ваше', 'meta'),
-    ).not.toThrow();
   });
 
   it('allows a fully Latin translation', () => {

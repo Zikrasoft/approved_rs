@@ -419,8 +419,8 @@ Both new apps follow the same shape, and a third should too:
   Russian in another. The job logs `overwriting hand-written <path>` for each
   dropped translation whose own Russian is unchanged — the one whose Russian you
   just edited is replaced without a line in the log, because there is no cache
-  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, a Latin stem on a
-  Cyrillic ending, a blank — is refused with a warning; the cached translation
+  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, any Cyrillic
+  letter, a blank — is refused with a warning; the cached translation
   is served instead, or the string is retranslated if there is none. Adopting
   it would fail the whole-file guard on every subsequent run and wedge the
   pipeline. **Never hand-compute a matching `translatedFrom` yourself to quiet
