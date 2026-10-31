@@ -28,5 +28,10 @@ describe('CommonJS build', () => {
       secretMatches,
     } = require('@podbor/lead-crm/verify-secret');
     expect(secretMatches(bearerToken('Bearer s3cret'), 's3cret')).toBe(true);
+    const wire = require('@podbor/lead-crm/shop-orders-wire');
+    expect(wire.ORDER_OUTCOMES).toEqual(['completed', 'canceled']);
+    expect(
+      wire.shopOrderEventSchema.parse({ event: 'canceled', order_id: 'o_1' }),
+    ).toEqual({ event: 'canceled', order_id: 'o_1' });
   });
 });

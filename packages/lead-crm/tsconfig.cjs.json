@@ -20,6 +20,7 @@
     "src/limits.ts",
     "src/partsOrderCopy.ts",
     "src/phone.ts",
+    "src/shopOrdersWire.ts",
     "src/verifySecret.ts"
   ]
 }

@@ -1,3 +1,4 @@
+import { orderContactSchema } from '@podbor/lead-crm/shop-orders-wire';
 import { describe, expect, it } from 'vitest';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
@@ -220,6 +221,28 @@ describe('checkoutContactSchema', () => {
     expect(
       checkoutContactSchema.parse({ contact: '+381641234567', ...attribution }),
     ).toEqual({ contact: '+381641234567', ...attribution });
+  });
+
+  it.each([
+    { contact: ' +381 64 1234567 ', contact_channel: 'whatsapp' },
+    {
+      contact: '@carlab_rs',
+      contact_channel: 'telegram',
+      name: 'Ivan',
+      vin: ' wba 35bg07-0n074158 ',
+      car: 'BMW 3 F30 320d',
+      comment: 'a\nb',
+      locale: 'sr',
+      source_url: 'https://carlab.rs/ru/parts/cart/',
+      visitor_id: '0f8fad5b-d9cb-469f-a165-70867728950e',
+      ad_source: '{"utm_source":"google"}',
+      meta_ids: '{"fbp":"fb.1.1.1"}',
+    },
+    { contact: '+381641234567', name: 'x'.repeat(MAX_COMMENT_LENGTH) },
+  ])('hands the CRM a contact its order Lead takes as is (%#)', (typed) => {
+    const contact = checkoutContactSchema.safeParse(typed);
+    if (!contact.success) return;
+    expect(orderContactSchema.parse(contact.data)).toEqual(contact.data);
   });
 
   it('drops an attribution field past its limit rather than refusing the order', () => {

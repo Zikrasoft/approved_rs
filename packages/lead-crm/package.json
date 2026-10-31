@@ -55,6 +55,13 @@
       },
       "default": "./src/verifySecret.ts"
     },
+    "./shop-orders-wire": {
+      "require": {
+        "types": "./dist/cjs/shopOrdersWire.d.ts",
+        "default": "./dist/cjs/shopOrdersWire.js"
+      },
+      "default": "./src/shopOrdersWire.ts"
+    },
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",
     "./phone-kit": "./src/phoneKit.ts",

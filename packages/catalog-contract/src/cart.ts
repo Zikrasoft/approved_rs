@@ -1,17 +1,8 @@
 import { z } from 'zod';
-import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
-import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
 import {
-  MAX_COMMENT_LENGTH,
-  MAX_FIELD_LENGTH,
-  MAX_URL_LENGTH,
-} from '@podbor/lead-crm/limits';
-import {
-  isValidContact,
-  plainText,
-  singleLine,
-  storedContact,
-} from '@podbor/lead-crm/phone';
+  orderContactObject,
+  withValidContact,
+} from '@podbor/lead-crm/shop-orders-wire';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { translationsSchema } from './translations.ts';
@@ -107,49 +98,14 @@ export const identifierOffersResponseSchema = z.object({
     .default({}),
 });
 
-const attribution = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max)
-    .optional()
-    .catch(undefined)
-    .transform((value) => value || undefined);
-
-const optionalText = (max: number, clean = singleLine) =>
-  z
-    .string()
-    .transform(clean)
-    .pipe(z.string().max(max))
-    .nullish()
-    .transform((value) => value || undefined);
-
-export const checkoutContactSchema = z
-  .object({
-    contact: z
-      .string()
-      .transform(singleLine)
-      .pipe(z.string().min(1).max(MAX_FIELD_LENGTH)),
-    contact_channel: z
-      .enum(TRACKED_CONTACT_CHANNELS)
-      .optional()
-      .catch(undefined),
-    name: optionalText(MAX_FIELD_LENGTH),
-    vin: optionalText(MAX_FIELD_LENGTH).transform(
+export const checkoutContactSchema = withValidContact(
+  orderContactObject.extend({
+    vin: orderContactObject.shape.vin.transform(
       (value) => vinSchema.safeParse(value).data ?? value,
     ),
-    car: optionalText(MAX_FIELD_LENGTH),
-    comment: optionalText(MAX_COMMENT_LENGTH, plainText),
     locale: z.enum(CATALOG_LOCALES).optional(),
-    source_url: attribution(MAX_URL_LENGTH),
-    visitor_id: attribution(MAX_FIELD_LENGTH),
-    [AD_SOURCE_FIELD]: attribution(MAX_COMMENT_LENGTH),
-    [META_IDS_FIELD]: attribution(MAX_COMMENT_LENGTH),
-  })
-  .refine(({ contact, contact_channel }) =>
-    isValidContact(contact, contact_channel ?? null),
-  )
-  .transform((value) => ({ ...value, contact: storedContact(value.contact) }));
+  }),
+);
 
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];

@@ -29,6 +29,7 @@ export interface LeadsRouteOptions<L extends string> {
   localeCookie: string;
   thanksPath: (locale: L, service?: string) => string;
   missingFieldsMessage: Record<L, string>;
+  // TODO: drop orderCanceled and both shop branches below one release after createShopOrdersRoute ships, once no deployed shop posts orders here.
   orderCanceled?: {
     secret: string | undefined;
     cancel: (orderId: string) => Promise<CancelOrderResult>;

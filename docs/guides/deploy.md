@@ -15,7 +15,7 @@
 | App                 | Domain        | Brand                          | What it deploys                                                                                                             |
 | ------------------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
+| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`                               |
 | `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 
 Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
@@ -349,11 +349,11 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                           |
-| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                              |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                 |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/leads` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
+| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                    |
+| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -367,7 +367,7 @@ everyone. A call that fails stays pending on the Lead and `/api/reminders`
 retries it every day until the shop takes it.
 `SHOP_LEAD_SECRET` is one value set twice, on carlab.rs and in the shop's
 `.env` (`openssl rand -hex 32`): the shop posts every placed Order and every
-cancel to carlab.rs's `/api/leads` with it as a Bearer token, and the route
+cancel to carlab.rs's `/api/shop-orders` with it as a Bearer token, and the route
 refuses any Lead naming an Order without it, so a visitor cannot attach a Lead
 to someone else's Order. The same secret goes the other way for «Сделать кейс»: carlab.rs's
 `/api/admin/work-draft` reads `GET /hooks/carlab-orders/:id/case-summary` from
@@ -891,10 +891,10 @@ number gets its CI value in that script. The non-obvious parts:
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
   There is no nightly run: cart and checkout quote price and stock live, and a
   build bakes the prices current at that moment into the pages' structured data.
-- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached `/api/leads` after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached the storefront after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
 - `ADMIN_HOST` is where staff open the admin (`admin.carlab.rs`): Caddy proxies it to the same Medusa, sends `/` to `/app`, and redirects `api.carlab.rs/app` there. `ADMIN_CORS` and `AUTH_CORS` name that origin; the admin calls the API on its own origin, so `admin.backendUrl` stays unset.
-- `LEAD_ROUTE_URL` is where a placed order goes: the `order.placed` subscriber
-  posts it to carlab.rs's own `/api/leads` as a `parts-order` Lead, which
+- `LEAD_ROUTE_URL` names the storefront a placed order goes to: the `order.placed` subscriber
+  posts it to `/api/shop-orders` on that origin as a `parts-order` Lead, which
   reaches Telegram like every other Lead. Empty, orders are placed but reach
   nobody, and the log says so. A delivered order is stamped
   `lead_handed_off_at`; every 10 minutes `src/jobs/retry-order-leads.ts`
