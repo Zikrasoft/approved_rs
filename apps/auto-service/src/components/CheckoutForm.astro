@@ -7,6 +7,9 @@ import LeadFormHidden from './LeadFormHidden.astro';
 import ContactChannelField from './ContactChannelField.astro';
 import ConsentField from './ConsentField.astro';
 import VinField from './VinField.astro';
+import ContactChannels from './ContactChannels.astro';
+import { WHATSAPP_NUMBER } from '@/utils/constants';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 
@@ -134,7 +137,18 @@ const summaryRow = 'flex items-baseline justify-between gap-4';
           uid={uid}
           error={copy.consentError}
           submitError={copy.submitError}
-        />
+        >
+          <div
+            class="mt-3 flex flex-col gap-2"
+            data-order-message={copy.orderMessage}
+            data-whatsapp={WHATSAPP_NUMBER}
+          >
+            <p class="text-sm leading-relaxed text-ink-2">
+              {copy.submitErrorContacts}
+            </p>
+            <ContactChannels service={VIN_INQUIRY_SERVICE} />
+          </div>
+        </ConsentField>
         <div class="flex flex-col gap-2.5">
           <button
             type="submit"

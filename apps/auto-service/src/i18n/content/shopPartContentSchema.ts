@@ -37,6 +37,9 @@ export const shopPartContentSchema = z
     offersHeading: z.string(),
     moreOffers: z.string(),
     moreOffersCheaper: z.string(),
+    moreOffersSeveral: pluralForms,
+    offerTomorrow: z.string(),
+    offerDays: pluralForms,
     leadTime: z
       .object({
         inStock: z.string(),

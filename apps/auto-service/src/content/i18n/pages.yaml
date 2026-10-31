@@ -239,6 +239,7 @@ translations:
       metaTitle: Stranica nije pronađena | CarLab
       heading: Ova stranica ne postoji
       body: Možda je link zastareo ili je adresa pogrešno uneta. Pogledajte naše usluge ili nam pišite, pomoći ćemo vam.
+      partsBody: Ova stranica ne postoji u katalogu delova. Pronađite deo po kataloškom broju ili VIN-u ili pošaljite upit, a mi ćemo pronaći odgovarajući deo.
       cta: Na početnu
     partsInquiry:
       metaTitle: Izbor auto-delova po VIN-u u Beogradu - CarLab
@@ -388,6 +389,7 @@ translations:
       metaTitle: Page not found | CarLab
       heading: This page doesn't exist
       body: The link may be out of date, or there may be a typo in the address. Browse our services or message us and we'll help.
+      partsBody: This page isn't in our parts catalogue. Search by part number or VIN, or send us a request and we'll find the right part for you.
       cta: Back to home
     partsInquiry:
       metaTitle: Car parts sourcing by VIN in Belgrade - CarLab
@@ -446,4 +448,4 @@ translations:
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and let you know what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: a52976fc58c8e7b2
+translatedFrom: d87b934d2cdc435e
