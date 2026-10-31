@@ -58,7 +58,7 @@ import {
   type CheckoutContactFields,
 } from './order-metadata';
 import { liveOffers, sellingOffers } from './suppliers/live-quote';
-import { storeOffers } from '../modules/supplier/pricing';
+import { storeOffers } from '../modules/supplier';
 import { carFor } from './vin/car-for';
 
 const offerIdOf = (item: CartItem) =>

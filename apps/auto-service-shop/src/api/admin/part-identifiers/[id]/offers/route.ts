@@ -4,8 +4,7 @@ import { withEditors } from '../../../../../lib/editors';
 import { MANUAL_SUPPLIER } from '../../../../../lib/suppliers/manual-offers';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
-import { sellPrice } from '../../../../../modules/supplier/pricing';
+import { sellPrice, SUPPLIER_MODULE } from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
 
 export async function GET(

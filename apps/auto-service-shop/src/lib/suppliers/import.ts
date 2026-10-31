@@ -17,8 +17,7 @@ import type {
   FoundPart,
   PartClassification,
 } from '../../modules/catalog/service';
-import { SUPPLIER_MODULE } from '../../modules/supplier';
-import { inShopCurrency } from '../../modules/supplier/pricing';
+import { inShopCurrency, SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
   type ArticleAnswer,

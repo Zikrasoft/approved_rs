@@ -1,5 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { partPagesResponseSchema } from '@podbor/catalog-contract';
+import {
+  partPagesResponseSchema,
+  type PartOffer,
+} from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
 import { installationPrice } from '../../../lib/installation';
@@ -10,7 +13,6 @@ import type CatalogModuleService from '../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../modules/publish';
 import type PublishModuleService from '../../../modules/publish/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
-import { storeOffers } from '../../../modules/supplier/pricing';
 import { releasedSupplierData } from '../../../modules/supplier/released';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { StoreListPartPagesType } from '../validators';
@@ -112,11 +114,8 @@ export async function GET(
   const identifierIds = identifiers.map(({ id }) => id);
   const shown = pricesShown(req);
   const offers = shown
-    ? await suppliers.listSupplierOffers(
-        { part_identifier_id: identifierIds },
-        { relations: ['supplier'], take: null },
-      )
-    : [];
+    ? await suppliers.storeOffersFor(identifierIds)
+    : new Map<string, PartOffer[]>();
   const supplierData = await releasedSupplierData(suppliers, identifierIds);
 
   const pages = identifiers.map((identifier) => ({
@@ -137,9 +136,7 @@ export async function GET(
           part_id === identifier.part_id && id !== identifier.id,
       )
       .map(picturedBrandNumber),
-    offers: storeOffers(
-      offers.filter((offer) => offer.part_identifier_id === identifier.id),
-    ),
+    offers: offers.get(identifier.id) ?? [],
     supplier_data: supplierData(identifier.id),
   }));
 

@@ -8,7 +8,6 @@ import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
-import { storeOffers } from '../../../modules/supplier/pricing';
 import type SupplierModuleService from '../../../modules/supplier/service';
 import type { AdminListPartIdentifiersType } from '../validators';
 
@@ -36,12 +35,7 @@ export async function GET(
   const page = matching.slice(offset, offset + limit);
 
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
-  const offers = page.length
-    ? await suppliers.listSupplierOffers(
-        { part_identifier_id: page.map(({ id }) => id) },
-        { relations: ['supplier'], take: null },
-      )
-    : [];
+  const offers = await suppliers.storeOffersFor(page.map(({ id }) => id));
 
   res.json({
     part_identifiers: await withEditors(
@@ -63,9 +57,7 @@ export async function GET(
         enriched: row.enriched,
         reasons: row.reasons,
         photos: row.photos,
-        offers: storeOffers(
-          offers.filter((offer) => offer.part_identifier_id === row.id),
-        ).length,
+        offers: offers.get(row.id)?.length ?? 0,
         updated_by: row.updated_by,
         updated_at: row.updated_at.toISOString(),
       })),

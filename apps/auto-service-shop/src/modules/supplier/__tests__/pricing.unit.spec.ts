@@ -1,4 +1,4 @@
-import { sellPrice, storeOffers } from '../pricing';
+import { isSellable, sellPrice, storeOffers } from '../pricing';
 
 describe('sellPrice', () => {
   it('applies the markup percentage and rounds to the nearest unit', () => {
@@ -108,5 +108,19 @@ describe('storeOffers', () => {
         ({ id }) => id,
       ),
     ).toEqual(['paid']);
+  });
+});
+
+describe('isSellable', () => {
+  const row = (cost_price: number, currency = 'RSD') => ({
+    cost_price,
+    currency,
+    supplier: { markup_percentage: 20 },
+  });
+
+  it('sells a priced row in the shop currency only', () => {
+    expect(isSellable(row(1542))).toBe(true);
+    expect(isSellable(row(1542, 'eur'))).toBe(false);
+    expect(isSellable(row(0.1))).toBe(false);
   });
 });

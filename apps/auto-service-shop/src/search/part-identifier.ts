@@ -17,7 +17,7 @@ import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
-import { type PricedOfferRow, storeOffers } from '../modules/supplier/pricing';
+import { type PricedOfferRow, storeOffers } from '../modules/supplier';
 import {
   PART_CHANGED_EVENT,
   PART_IDENTIFIER_INDEX,
