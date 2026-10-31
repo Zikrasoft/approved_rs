@@ -179,6 +179,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
             class={errorClass}
             aria-live="polite"
             data-error-telegram
+            data-bad-handle={lf.errorTelegramHandle}
             hidden
           >
             {lf.errorTelegramFormat}
@@ -266,13 +267,15 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
             class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
           />
           <span class="text-xs leading-relaxed">
-            {lf.consentBefore}<a
-              href={PathBuilder.privacy(locale)}
-              target="_blank"
-              class="underline text-muted">{lf.consentLinkText}</a
-            >
+            {lf.consentBefore}{lf.consentLinkText}
           </span>
         </label>
+        <a
+          href={PathBuilder.privacy(locale)}
+          target="_blank"
+          class="-mt-2 mb-3 ml-7 inline-block py-1 text-xs underline text-muted"
+          >{content(locale).dictionary.footer.privacyLabel}</a
+        >
         <p
           id={errorIds.consent}
           class={`${errorClass} mb-3`}

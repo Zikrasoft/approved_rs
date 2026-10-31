@@ -76,6 +76,7 @@ const { make, model } = hub;
 const { category } = entry;
 const name = carName(model, locale);
 const empty = entry.parts.length === 0;
+const listingAttributes = entry.parts.map(({ part }) => part.attributes);
 const categoryName = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const facets = withFacetCopy(
@@ -88,6 +89,7 @@ const facets = withFacetCopy(
 const filtered = !empty && facets.length > 0;
 const fill = (template: string) =>
   template.replace('{category}', categoryName).replace('{model}', name);
+const SAID_BY_FIT = ['axle'];
 ---
 
 <Shell title={fill(copy.metaTitle)} description={fill(copy.metaDescription)}>
@@ -147,9 +149,21 @@ const fill = (template: string) =>
                       <h3 class="font-semibold text-ink">
                         {translated(part, 'name', locale)}
                       </h3>
-                      {keySpecs(category, part.attributes, locale) && (
+                      {keySpecs(
+                        category,
+                        part.attributes,
+                        locale,
+                        listingAttributes,
+                        SAID_BY_FIT,
+                      ) && (
                         <p class="spec text-xs text-muted">
-                          {keySpecs(category, part.attributes, locale)}
+                          {keySpecs(
+                            category,
+                            part.attributes,
+                            locale,
+                            listingAttributes,
+                            SAID_BY_FIT,
+                          )}
                         </p>
                       )}
                     </div>

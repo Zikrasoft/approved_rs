@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CATEGORY_FIELD_TYPES } from './attributes.ts';
+import { CATEGORY_FIELD_TYPES, attributeValuesSchema } from './attributes.ts';
 import {
   CATALOG_TRANSLATION_LOCALES,
   type CategoryField,
@@ -18,6 +18,7 @@ export const searchResultSchema = brandNumberSchema.extend({
     id: z.string(),
     name: z.string(),
     category: z.object({ slug: z.string(), name: z.string() }).nullable(),
+    attributes: attributeValuesSchema.nullable().default(null).catch(null),
   }),
   offers: z.array(partOfferSchema),
   thumbnail: z.url().nullable(),

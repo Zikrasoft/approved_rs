@@ -11,6 +11,8 @@ export const shopCartContentSchema = z
     emptyHeading: z.string(),
     emptyBody: z.string(),
     emptyCta: z.string(),
+    emptyInquiry: z.string(),
+    emptyInquiryCta: z.string(),
     unitTemplate: z.string(),
     increaseLabel: z.string(),
     decreaseLabel: z.string(),

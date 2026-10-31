@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+@custom-variant card (@media (min-width: 40rem) and (min-height: 31.25rem));
+@custom-variant short (@media (max-height: 31.25rem));
+
 @custom-variant offers-pending {
   @media (scripting: enabled) {
     part-offers:is(:not(:defined), [aria-busy='true']) & {
@@ -458,13 +461,8 @@
   }
   @media (prefers-reduced-motion: reduce) {
     dialog,
-    dialog[open] {
-      translate: 0 0;
-    }
-    @starting-style {
-      dialog[open] {
-        translate: 0 0;
-      }
+    dialog::backdrop {
+      transition: none;
     }
   }
 

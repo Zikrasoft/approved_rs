@@ -1549,6 +1549,65 @@ describe('catalogue.search', () => {
     expect(result?.facets).toEqual(found.facets);
   });
 
+  it('gives each result the key specs of its Category', async () => {
+    const volume = {
+      key: 'volume',
+      type: 'number',
+      unit: 'л',
+      label: 'Объем',
+      translations: null,
+      required: false,
+      facet: false,
+      rank: 0,
+      options: [],
+    };
+    const fetch = vi.fn((url: string) =>
+      url.endsWith('/store/categories')
+        ? respond({
+            categories: [
+              {
+                ...category('oil-filters', 'Масляные фильтры'),
+                fields: [volume],
+              },
+            ],
+          })
+        : respond({
+            ...found,
+            results: [
+              ...found.results,
+              {
+                ...found.results[0],
+                part: {
+                  ...found.results[0].part,
+                  attributes: { volume: 5 },
+                },
+              },
+            ],
+          }),
+    );
+
+    const result = await catalog(fetch).search({
+      category: 'oil-filters',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(result?.results.map(({ specs }) => specs)).toEqual(['', '5 л']);
+  });
+
+  it('asks for no Categories when no result carries attributes', async () => {
+    const fetch = answer(found);
+
+    const result = await catalog(fetch).search({
+      q: 'x',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(result?.results[0].specs).toBe('');
+  });
+
   it('gives no results when the backend answers with an error', async () => {
     expect(
       await catalog(answer({}, false)).search({

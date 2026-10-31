@@ -31,6 +31,7 @@ export const siteContentSchema = z
         menuCloseLabel: z.string(),
         languageLabel: z.string(),
         cta: z.string(),
+        partsCta: z.string(),
         phoneLabel: z.string(),
       })
       .strict(),
@@ -104,6 +105,7 @@ export const siteContentSchema = z
         errorPhone: z.string(),
         errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
+        errorTelegramHandle: z.string(),
         errorConsent: z.string(),
         errorSubmit: z.string(),
       })

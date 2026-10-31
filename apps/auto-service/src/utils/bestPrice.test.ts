@@ -17,8 +17,10 @@ describe('bestPrice', () => {
         { offers: [offer(2400, 3), offer(1850, 2)] },
       ]),
     ).toEqual({
+      id: 'offer_1850',
       price: 1850,
       currency: 'RSD',
+      startsFrom: false,
       inStock: true,
       buyable: true,
       leadDays: 0,
@@ -29,8 +31,10 @@ describe('bestPrice', () => {
     expect(
       bestPrice([{ offers: [offer(1125, 0, 2), offer(1200, 4)] }]),
     ).toEqual({
+      id: 'offer_1200',
       price: 1200,
       currency: 'RSD',
+      startsFrom: false,
       inStock: true,
       buyable: true,
       leadDays: 0,
@@ -47,8 +51,10 @@ describe('bestPrice', () => {
     expect(
       bestPrice([{ offers: [offer(2200, 0, 2), offer(1700, 0, 4)] }]),
     ).toEqual({
+      id: 'offer_1700',
       price: 1700,
       currency: 'RSD',
+      startsFrom: true,
       inStock: false,
       buyable: true,
       leadDays: 4,
@@ -65,6 +71,15 @@ describe('bestPrice', () => {
     expect(
       bestPrice([{ offers: [offer(2200, 0), offer(1700, 0)] }]),
     ).toMatchObject({ price: 1700, inStock: false, buyable: false });
+  });
+
+  it('starts from the shown price only when no offer costs less', () => {
+    expect(
+      bestPrice([{ offers: [offer(1200, 4), offer(1500, 0, 2)] }]),
+    ).toMatchObject({ price: 1200, startsFrom: true });
+    expect(bestPrice([{ offers: [offer(1200, 4)] }])).toMatchObject({
+      startsFrom: false,
+    });
   });
 
   it('has nothing to show for a part priced on request', () => {

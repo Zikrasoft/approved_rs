@@ -11,7 +11,6 @@ import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
 import PartStickyCta from '@/components/PartStickyCta.astro';
-import { contactCta } from '@podbor/site-kit/contact-control';
 import LeadModal from '@/components/LeadModal.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { getCollection } from 'astro:content';
@@ -215,7 +214,6 @@ const thumbFor = (slug: string) => {
     <div
       id="offers"
       class="flex scroll-mt-24 flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1"
-      {...contactCta}
     >
       {
         (replacement || page.superseded) && (
@@ -576,7 +574,11 @@ const thumbFor = (slug: string) => {
     )
   }
 
-  <PartStickyCta slot="sticky" page={page} target="offers" />
+  <PartStickyCta
+    slot="sticky"
+    page={page.priceOnRequest && successor?.offers.length ? successor : page}
+    target="offers"
+  />
   <PartsInquiryModal />
   <LeadModal
     trigger="[data-open-install-modal]"

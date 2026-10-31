@@ -37,11 +37,17 @@ const result = (value: string, normalized: string, slug: string) => ({
   normalized_value: normalized,
   superseded: false,
   brand: { name: 'Mann-Filter', slug: 'mann-filter' },
-  part: { id: `part_${slug}`, name: 'Масляный фильтр', category: null },
+  part: {
+    id: `part_${slug}`,
+    name: 'Масляный фильтр',
+    category: null,
+    attributes: null,
+  },
   offers: [],
   thumbnail: null,
   thumbnail_illustration: null,
   slug,
+  specs: '',
 });
 
 describe('searchIntent', () => {

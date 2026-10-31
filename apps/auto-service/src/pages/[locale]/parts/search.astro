@@ -170,7 +170,11 @@ const emptyMessage = q
   : chips.length > 0
     ? copy.noFilteredResults
     : partsInquiry.category.noParts;
-const inquiryTopic = [modelName, narrowedTo?.name, q]
+const inquiryTopic = [
+  modelName,
+  narrowedTo?.name,
+  numberMissing ? copy.numberComment.replace('{q}', q) : q,
+]
   .filter(Boolean)
   .join(', ');
 const scopeHidden = {
@@ -378,7 +382,7 @@ const scopeHidden = {
                   {copy.numberNotFound.replace('{q}', q)}{' '}
                   <a
                     href="#lead"
-                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
+                    class="font-semibold text-signal-dark underline underline-offset-2 hover:text-ink"
                   >
                     {copy.notFoundLink}
                   </a>
@@ -409,6 +413,7 @@ const scopeHidden = {
                     brand={result.brand.name}
                     value={result.value}
                     name={result.part.name}
+                    specs={result.specs}
                     detail={category ? undefined : result.part.category?.name}
                     superseded={result.superseded}
                     current={currentNumber(result, found.results)}
@@ -485,7 +490,13 @@ const scopeHidden = {
               value: vin ?? undefined,
             }}
             comment={
-              vin ? (vinTopic ? `${vinTopic}: ` : '') : `${inquiryTopic}: `
+              vin
+                ? vinTopic
+                  ? `${vinTopic}: `
+                  : ''
+                : numberMissing
+                  ? inquiryTopic
+                  : `${inquiryTopic}: `
             }
             commentLabel={partsInquiry.commentLabel}
             commentPlaceholder={partsInquiry.commentPlaceholder}

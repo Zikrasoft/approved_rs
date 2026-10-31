@@ -141,11 +141,11 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
     ['lithium', 'Литий-ионный'],
   ]),
   yesNo(START_STOP.field, 'Подходит для Start-Stop', true),
-  select('polarity', 'Полярность', false, false, [
+  select('polarity', 'Полярность', true, false, [
     ['reverse', 'Обратная'],
     ['normal', 'Прямая'],
   ]),
-  select('case-size', 'Типоразмер', false, false, [
+  select('case-size', 'Типоразмер', true, false, [
     ['h5-l2', 'H5/L2'],
     ['h6-l3', 'H6/L3'],
     ['h7-l4', 'H7/L4'],

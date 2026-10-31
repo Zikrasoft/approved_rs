@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { STORAGE_KEY, newConsent } from './consent.ts';
 import {
   CONSENT_EVENT,
+  COOKIE_CONSENT_HEIGHT_VAR,
   defineCookieConsent,
   readConsent,
   saveConsent,
@@ -36,6 +37,24 @@ function pageHeight(px: number): void {
     value: px,
   });
 }
+
+let resized: (() => void) | undefined;
+
+vi.stubGlobal(
+  'ResizeObserver',
+  class {
+    constructor(callback: () => void) {
+      resized = callback;
+    }
+    observe(): void {}
+    disconnect(): void {
+      resized = undefined;
+    }
+  },
+);
+
+const publishedHeight = () =>
+  document.documentElement.style.getPropertyValue(COOKIE_CONSENT_HEIGHT_VAR);
 
 beforeEach(() => {
   localStorage.clear();
@@ -80,6 +99,16 @@ describe('defineCookieConsent', () => {
     );
     scrollTo(window.innerHeight);
     expect(el.hidden).toBe(true);
+  });
+
+  it('publishes its height for the bars it would otherwise cover', () => {
+    const el = mount();
+    Object.defineProperty(el, 'offsetHeight', { value: 56 });
+    resized!();
+    expect(publishedHeight()).toBe('56px');
+    el.remove();
+    expect(publishedHeight()).toBe('');
+    expect(resized).toBeUndefined();
   });
 
   it('stays visible when reconnected after the reveal', () => {

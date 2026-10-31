@@ -36,6 +36,7 @@ export const shopPartContentSchema = z
     leadTime: z
       .object({
         inStock: z.string(),
+        tomorrow: z.string(),
         days: z
           .object({
             one: z.string().optional(),
