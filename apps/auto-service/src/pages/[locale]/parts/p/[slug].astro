@@ -568,7 +568,11 @@ const thumbFor = (slug: string) => {
     )
   }
 
-  <PartStickyCta slot="sticky" page={page} target="offers" />
+  <PartStickyCta
+    slot="sticky"
+    page={page.priceOnRequest && successor?.offers.length ? successor : page}
+    target="offers"
+  />
   <PartsInquiryModal />
   <LeadModal
     trigger="[data-open-install-modal]"

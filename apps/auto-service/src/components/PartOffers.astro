@@ -52,11 +52,7 @@ const priced = page.offers.length > 0 && !closed;
       <h2 class="text-block font-semibold">
         <slot name="heading">{copy.offersHeading}</slot>
       </h2>
-      <ul
-        class="flex flex-col divide-y divide-line"
-        data-offers
-        {...contactCta}
-      >
+      <ul class="flex flex-col divide-y divide-line" data-offers>
         {page.offers.map((offer) => (
           <OfferRow offer={offer} />
         ))}
@@ -64,7 +60,7 @@ const priced = page.offers.length > 0 && !closed;
       <template data-offer>
         <OfferRow />
       </template>
-      <div aria-live="polite">
+      <div aria-live="polite" {...contactCta}>
         <div data-status="added" hidden class={status}>
           <p>{copy.addedNotice}</p>
           <a
