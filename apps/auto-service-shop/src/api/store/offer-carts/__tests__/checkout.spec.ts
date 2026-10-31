@@ -738,6 +738,27 @@ medusaIntegrationTestRunner({
         },
       );
 
+      it('refuses the stock Medusa routes a shop without accounts or returns never uses', async () => {
+        const cart = await cartWith(1);
+
+        const refused = await Promise.all(
+          [
+            api.get(`/store/carts/${cart.id}`, storeHeaders),
+            api.post('/store/returns', {}, storeHeaders),
+            api.get('/store/customers/me', storeHeaders),
+            api.post('/store/customers', {}, storeHeaders),
+            api.post('/auth/customer/emailpass/register', {
+              email: 'spam@example.com',
+              password: 'spam-spam-spam',
+            }),
+          ].map((request) => request.catch((error) => error.response)),
+        );
+
+        expect(refused.map(({ status }) => status)).toEqual([
+          404, 404, 404, 404, 404,
+        ]);
+      });
+
       it('answers 404 for a line removed from an unknown cart', async () => {
         const response = await api
           .delete('/store/offer-carts/cart_DOESNOTEXIST/items/x', storeHeaders)

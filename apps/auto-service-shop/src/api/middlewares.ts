@@ -263,6 +263,12 @@ export default defineMiddlewares({
       method: ['POST' as const, 'DELETE' as const],
       middlewares: [refuseStockCartChange],
     })),
+    ...[
+      '/store/carts/:id',
+      '/store/returns*',
+      '/store/customers*',
+      '/auth/customer/*',
+    ].map((matcher) => ({ matcher, middlewares: [refuseStockCartChange] })),
     {
       matcher: '/store/part-pages',
       method: 'GET',
