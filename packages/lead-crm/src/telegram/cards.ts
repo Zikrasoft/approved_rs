@@ -282,6 +282,13 @@ export function orderConflictText(lead: StoredLead & { orderId: string }) {
   ].join('\n');
 }
 
+export function orderStuckText(lead: StoredLead & { orderId: string }) {
+  return [
+    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
+    `Бот будет пробовать каждый день. Закрой заказ в админке магазина сам или проверь секрет магазина.`,
+  ].join('\n');
+}
+
 export function createFormatter({
   serviceLabel,
   botUsername,

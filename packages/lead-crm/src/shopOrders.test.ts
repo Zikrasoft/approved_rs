@@ -134,6 +134,28 @@ describe('a shop Order decided in the CRM bot', () => {
     });
   });
 
+  it('tells staff once that the shop does not take an outcome, and keeps asking', async () => {
+    const { leadStore, bot } = crm();
+    const lead = await leadStore.insertLead(order);
+    shopAnswers = [401, 401, 401];
+
+    await bot.afterStatusChange((await leadStore.setStatus(lead.id, 'won'))!);
+    await bot.settlePendingOrders();
+    expect(await bot.settlePendingOrders()).toBe(1);
+
+    expect(shopCalls).toHaveLength(3);
+    expect(await leadStore.getLead(lead.id)).toMatchObject({
+      orderStuck: 'won',
+    });
+    const notices = api
+      .callsTo('sendMessage')
+      .filter(({ payload }) => String(payload.text).includes('order_01'));
+    expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
+      1, 3,
+    ]);
+    expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
+  });
+
   it('records a shop holding the other outcome as a conflict, tells staff once and stops asking', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);

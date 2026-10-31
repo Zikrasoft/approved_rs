@@ -21,8 +21,11 @@ function orderUnsettled(lead: StoredLead): lead is ClosedLead {
 }
 
 export interface ShopOrdersOptions {
-  store: Pick<LeadStore, 'readLeads' | 'settleOrder' | 'markOrderConflict'>;
-  notifier: Pick<Notifier, 'sendOrderConflict'>;
+  store: Pick<
+    LeadStore,
+    'readLeads' | 'settleOrder' | 'markOrderConflict' | 'markOrderStuck'
+  >;
+  notifier: Pick<Notifier, 'sendOrderConflict' | 'sendOrderStuck'>;
   shopUrl?: string;
   secret?: string;
 }
@@ -65,7 +68,13 @@ export function createShopOrders({
     await notifier.sendOrderConflict(lead);
   }
 
-  async function settleOrder(lead: StoredLead): Promise<void> {
+  async function reportStuck(lead: ClosedLead): Promise<void> {
+    if (lead.orderStuck === lead.status) return;
+    await store.markOrderStuck(lead.id, lead.status);
+    await notifier.sendOrderStuck(lead);
+  }
+
+  async function settleOrder(lead: StoredLead, report = false): Promise<void> {
     if (!orderUnsettled(lead) || !shopUrl || !secret) return;
     try {
       if ((await tellShop(lead)) === 'conflict') await recordConflict(lead);
@@ -76,12 +85,13 @@ export function createShopOrders({
         leadId: lead.id,
         orderId: lead.orderId,
       });
+      if (report) await reportStuck(lead);
     }
   }
 
   async function settlePendingOrders(): Promise<number> {
     const pending = (await store.readLeads()).filter(orderUnsettled);
-    for (const lead of pending) await settleOrder(lead);
+    for (const lead of pending) await settleOrder(lead, true);
     return (await store.readLeads()).filter(orderUnsettled).length;
   }
 

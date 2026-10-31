@@ -11,6 +11,7 @@ import {
   fieldChangeText,
   noteNoticeText,
   orderConflictText,
+  orderStuckText,
   quarantinedLeadsText,
   statusChangeText,
   type EditField,
@@ -190,6 +191,12 @@ export function createNotifier({
       lead: StoredLead & { orderId: string },
     ): Promise<void> {
       await sendToAll([...ownerIds, ...adminIds], orderConflictText(lead));
+    },
+
+    async sendOrderStuck(
+      lead: StoredLead & { orderId: string },
+    ): Promise<void> {
+      await sendToAll([...ownerIds, ...adminIds], orderStuckText(lead));
     },
 
     async sendStatusChange(
