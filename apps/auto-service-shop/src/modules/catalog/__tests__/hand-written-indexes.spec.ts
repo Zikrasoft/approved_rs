@@ -95,17 +95,50 @@ medusaIntegrationTestRunner({
           /USING hash \(description\)/,
         );
       });
+    });
 
-      it('finds a tombstone-aware Fitment by an index', async () => {
+    describe('The hot lookups', () => {
+      const plan = async (sql: string) => {
         const trx = await pg().transaction();
         await trx.raw('set local enable_seqscan = off');
-        const plan = await trx.raw(
-          `explain select id from fitment where part_id = 'p' and vehicle_id in ('v')`,
-        );
+        const { rows } = await trx.raw(`explain ${sql}`);
         await trx.rollback();
-        expect(JSON.stringify(plan.rows)).toMatch(
+        return JSON.stringify(rows);
+      };
+
+      it.each([
+        [
+          'a tombstone-aware Fitment',
+          `select id from fitment where part_id = 'p' and vehicle_id in ('v')`,
           /Index.*IDX_fitment_(part_vehicle|vehicle)_all/,
-        );
+        ],
+        [
+          'a decoded Vehicle identifier',
+          `select vehicle_id from vehicle_identifier where type = 'bmw-type-code' and value = 'X' and supplier_id is null and deleted_at is null`,
+          /Index.*IDX_vehicle_identifier_type_value_vehicle_id_unique/,
+        ],
+        [
+          'a retired slug',
+          `select id from slug_redirect where kind = 'model' and from_slug = 'x' and scope_id = 'm' and deleted_at is null`,
+          /Index.*IDX_slug_redirect_kind_from_slug_scope_id/,
+        ],
+        [
+          'the redirects of a target',
+          `select id from slug_redirect where target_kind = 'part' and target_id in ('a', 'b') and deleted_at is null`,
+          /Index.*IDX_slug_redirect_target_kind_target_id/,
+        ],
+        [
+          'the unresolved VIN codes',
+          `select make, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make, code`,
+          /Index.*IDX_vin_lookup_make_code/,
+        ],
+        [
+          'the VIN lookups of a Vehicle',
+          `select id from vin_lookup where vehicle_id in ('v') and deleted_at is null`,
+          /Index.*IDX_vin_lookup_vehicle_id/,
+        ],
+      ])('finds %s by an index', async (_, sql, index) => {
+        expect(await plan(sql)).toMatch(index);
       });
     });
 

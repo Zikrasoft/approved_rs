@@ -52,6 +52,52 @@ medusaIntegrationTestRunner({
           );
         });
 
+        it('gives Models of two Makes the same slug and tells them apart by Make', async () => {
+          const modelsOf = await Promise.all(
+            [
+              { slug: 'alpha', name: 'Alpha' },
+              { slug: 'beta', name: 'Beta' },
+            ].map(async (make) => {
+              const [made] = await catalog.createMakes([make]);
+              const series = await catalog.createSeries({
+                make_id: made.id,
+                name: 'Series X',
+              });
+              const chassis = await catalog.createChassis({
+                series_id: series.id,
+                code: 'X1',
+              });
+              const model = await catalog.createVehicleModels({
+                chassis_id: chassis.id,
+                name: 'X1 20d',
+              });
+              const engine = await catalog.createEngines({
+                code: `${make.slug.toUpperCase()}20D`,
+                family: 'X20',
+              });
+              const vehicle = await catalog.createVehicles({
+                model_id: model.id,
+                engine_id: engine.id,
+              });
+              return { make: make.slug, model, vehicle };
+            }),
+          );
+
+          expect(modelsOf.map(({ model }) => model.slug)).toEqual([
+            'series-x-x1-20d',
+            'series-x-x1-20d',
+          ]);
+          for (const { make, model, vehicle } of modelsOf) {
+            const listed = await api.get(
+              `/store/vehicles?make=${make}&model=${model.slug}`,
+              storeHeaders,
+            );
+            expect(
+              listed.data.vehicles.map(({ id }: { id: string }) => id),
+            ).toEqual([vehicle.id]);
+          }
+        });
+
         it('pages through every Vehicle by cursor, one row per Vehicle', async () => {
           for (let index = 0; index < 3; index += 1) {
             const { vehicle } = await createVehicleFixture(catalog, {
