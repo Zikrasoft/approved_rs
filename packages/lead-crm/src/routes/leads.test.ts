@@ -24,11 +24,14 @@ const POST = createLeadsRoute<Locale>({
   defaultLocale: 'ru',
   localeCookie: 'lang',
   thanksPath: (locale) => `/${locale}/thanks/`,
-  missingFieldsMessage: {
-    ru: 'Укажите контакт',
-    en: 'Please enter a contact',
-    sr: 'Unesite kontakt',
-  },
+  refusalCopy: (locale) => ({
+    message: {
+      ru: 'Укажите контакт',
+      en: 'Please enter a contact',
+      sr: 'Unesite kontakt',
+    }[locale],
+    consent: 'Согласен на обработку данных',
+  }),
 });
 
 type Field = string | File;
@@ -85,7 +88,7 @@ describe('createLeadsRoute', () => {
       defaultLocale: 'ru',
       localeCookie: 'lang',
       thanksPath,
-      missingFieldsMessage: { ru: '', en: '', sr: '' },
+      refusalCopy: () => ({ message: '', consent: '' }),
     });
     const ctx = makeCtx(valid({ service: 'vehicle-sourcing' }));
     await route(ctx);
@@ -274,7 +277,7 @@ describe('createLeadsRoute', () => {
     expect(res.status).toBe(400);
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
     const body = await res.text();
-    expect(body).toContain('<p>Укажите контакт</p>');
+    expect(body).toContain('<label>Укажите контакт <input');
     expect(body).not.toMatch(/zod|invalid_type|path/i);
   });
 
@@ -288,7 +291,7 @@ describe('createLeadsRoute', () => {
     const res = await POST(makeCtx({ name: '' }, 'sr'));
     const body = await res.text();
     expect(body).toContain('<html lang="sr">');
-    expect(body).toContain('<p>Unesite kontakt</p>');
+    expect(body).toContain('<label>Unesite kontakt <input');
     expect(body).toContain('name="viewport"');
   });
 
@@ -319,6 +322,38 @@ describe('createLeadsRoute', () => {
     expect(body).not.toContain('name="contact_channel"');
   });
 
+  it('asks for consent again only when it never arrived', async () => {
+    const withConsent = await (
+      await POST(makeCtx({ contact: 'asdf', consent: 'on' }))
+    ).text();
+    const without = await (await POST(makeCtx({ contact: RS_PHONE }))).text();
+
+    expect(withConsent).not.toContain('type="checkbox"');
+    expect(without).toContain(
+      '<label><input type="checkbox" name="consent" value="1" required /> Согласен на обработку данных</label>',
+    );
+  });
+
+  it('accepts the rendered form once the visitor fills it in', async () => {
+    const first = makeCtx({ name: 'Иван', service: 'vin-parts-inquiry' });
+    const page = await (await POST(first)).text();
+    const resent: Record<string, string> = {};
+    for (const [, name, value] of page.matchAll(
+      /<input type="hidden" name="([^"]+)" value="([^"]*)" \/>/g,
+    ))
+      resent[name!] = value!;
+    expect(page).toContain('name="contact" required');
+    expect(page).toContain('name="consent"');
+    resent.contact = RS_PHONE;
+    resent.consent = '1';
+
+    const ctx = makeCtx(resent);
+    await POST(ctx);
+
+    expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+    expect(waitUntil).toHaveBeenCalledOnce();
+  });
+
   it('takes the page from the Referer when a form without JavaScript sent none', async () => {
     const ctx = makeCtx(valid());
     ctx.request.headers.set('referer', 'https://carlab.rs/sr/parts/');
@@ -333,7 +368,9 @@ describe('createLeadsRoute', () => {
 
   it('answers the 400 in the default locale for a prototype-key cookie value', async () => {
     const res = await POST(makeCtx({ name: '' }, 'constructor'));
-    await expect(res.text()).resolves.toContain('<p>Укажите контакт</p>');
+    await expect(res.text()).resolves.toContain(
+      '<label>Укажите контакт <input',
+    );
   });
 
   it('dispatches notifyLead via waitUntil with the parsed form fields', async () => {
@@ -490,7 +527,7 @@ describe('a shop Order cancelled in the shop admin', () => {
     defaultLocale: 'ru',
     localeCookie: 'lang',
     thanksPath: (locale) => `/${locale}/thanks/`,
-    missingFieldsMessage: { ru: 'ru', en: 'en', sr: 'sr' },
+    refusalCopy: (locale) => ({ message: locale, consent: locale }),
     orderCanceled: { secret: 'shop-secret', cancel: cancelOrder },
   });
 

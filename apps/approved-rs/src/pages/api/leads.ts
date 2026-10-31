@@ -5,6 +5,7 @@ import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { notifyLead } from '@/lib/notifyLead';
 import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
@@ -22,5 +23,8 @@ export const POST = createLeadsRoute({
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,
   thanksPath: PathBuilder.thanks,
-  missingFieldsMessage: MISSING_FIELDS_MESSAGE,
+  refusalCopy: (locale) => ({
+    message: MISSING_FIELDS_MESSAGE[locale],
+    consent: `${content(locale).leadForm.consentBefore}${content(locale).leadForm.consentLinkText}`,
+  }),
 });

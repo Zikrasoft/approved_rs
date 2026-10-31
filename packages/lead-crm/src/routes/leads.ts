@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import {
+  CONSENT_FIELD,
+  CONTACT_INPUT_FIELDS,
   ORDER_CANCELED,
   ORDER_ID_FIELD,
   ORDER_OUTCOME_FIELD,
@@ -22,6 +24,11 @@ export interface RouteRequestContext {
   redirect(path: string, status?: number): Response;
 }
 
+export interface RefusalCopy {
+  message: string;
+  consent: string;
+}
+
 export interface LeadsRouteOptions<L extends string> {
   notifyLead: NotifyLead;
   waitUntil: (promise: Promise<unknown>) => void;
@@ -29,7 +36,7 @@ export interface LeadsRouteOptions<L extends string> {
   defaultLocale: L;
   localeCookie: string;
   thanksPath: (locale: L, service?: string) => string;
-  missingFieldsMessage: Record<L, string>;
+  refusalCopy: (locale: L) => RefusalCopy;
   // TODO: drop orderCanceled and both shop branches below one release after createShopOrdersRoute ships, once no deployed shop posts orders here.
   orderCanceled?: {
     secret: string | undefined;
@@ -55,23 +62,21 @@ async function cancelOrder(
   });
 }
 
-const RETYPED_FIELDS = new Set([
-  'contact',
-  'contact_channel',
-  'phone_number',
-  'phone_country',
-  'telegram',
-]);
+const RETYPED_FIELDS = new Set<string>(Object.values(CONTACT_INPUT_FIELDS));
 
 const attribute = (text: string): string =>
   escapeHtml(text).replace(/"/g, '&quot;');
 
 function refusalPage(
   locale: string,
-  message: string,
+  { message, consent }: RefusalCopy,
   form: FormData,
   action: string,
 ): Response {
+  const consentBox = form.get(CONSENT_FIELD)
+    ? ''
+    : `
+      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required /> ${consent}</label>`;
   const kept: string[] = [];
   form.forEach((value, name) => {
     if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {
@@ -89,9 +94,8 @@ function refusalPage(
     <title>${message}</title>
   </head>
   <body>
-    <p>${message}</p>
     <form method="POST" action="${attribute(action)}">
-      <input name="contact" required autocomplete="tel" aria-label="${message}" />
+      <label>${message} <input name="${CONTACT_INPUT_FIELDS.contact}" required autocomplete="tel" /></label>${consentBox}
 ${kept.join('\n')}
       <input type="submit" />
     </form>
@@ -109,7 +113,7 @@ export function createLeadsRoute<L extends string>({
   defaultLocale,
   localeCookie,
   thanksPath,
-  missingFieldsMessage,
+  refusalCopy,
   orderCanceled,
 }: LeadsRouteOptions<L>) {
   return async function POST({
@@ -142,7 +146,7 @@ export function createLeadsRoute<L extends string>({
     if (!submission.success) {
       return refusalPage(
         locale,
-        missingFieldsMessage[locale],
+        refusalCopy(locale),
         form,
         new URL(request.url).pathname,
       );

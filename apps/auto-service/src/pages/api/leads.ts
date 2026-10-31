@@ -5,6 +5,7 @@ import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { notifyLead } from '@/lib/crm';
 import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
@@ -24,7 +25,10 @@ export const POST = createLeadsRoute({
     service === VIN_INQUIRY_SERVICE
       ? PathBuilder.partsThanks(locale)
       : PathBuilder.thanks(locale),
-  missingFieldsMessage: MISSING_FIELDS_MESSAGE,
+  refusalCopy: (locale) => ({
+    message: MISSING_FIELDS_MESSAGE[locale],
+    consent: `${content(locale).site.form.privacyNote} ${content(locale).site.form.privacyLinkText}.`,
+  }),
   orderCanceled: {
     secret: process.env.SHOP_LEAD_SECRET,
     cancel: async (orderId) =>
