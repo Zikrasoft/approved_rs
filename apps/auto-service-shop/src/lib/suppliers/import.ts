@@ -245,8 +245,8 @@ function classificationOf(
   return { category_id: categoryId, attributes };
 }
 
-const descriptionOf = (
-  { descriptions }: Context,
+const descriptionOf = async (
+  { catalog, descriptions }: Context,
   article: Article,
   name: string,
   answer: ArticleAnswer | null,
@@ -256,11 +256,16 @@ const descriptionOf = (
   if (!written) return null;
   const plain = plainDescription(written, name);
   if (!plain) return null;
-  const distinct = [plain, `${name}.\n\n${plain}`].find(
-    (text) => !descriptions.has(text),
-  );
-  if (distinct) descriptions.add(distinct);
-  return distinct ?? null;
+  for (const text of [plain, `${name}.\n\n${plain}`]) {
+    if (descriptions.has(text)) continue;
+    descriptions.add(text);
+    const taken = await catalog.listParts(
+      { description: text },
+      { select: ['id'], take: 1 },
+    );
+    if (!taken.length) return text;
+  }
+  return null;
 };
 
 const refusedAttributes = (error: unknown) =>
@@ -298,7 +303,7 @@ async function createPart(
   const part = {
     name,
     source_name: answer && article.name,
-    description: descriptionOf(context, article, name, answer),
+    description: await descriptionOf(context, article, name, answer),
     identifier: {
       type: 'manufacturer-number' as const,
       brand_id: brandId,
@@ -397,7 +402,12 @@ async function matchArticle(
   const description =
     edited.has('description') || part.description
       ? null
-      : descriptionOf(context, article, name ?? part.name, await answer());
+      : await descriptionOf(
+          context,
+          article,
+          name ?? part.name,
+          await answer(),
+        );
   if (!name && !description) {
     return {
       ...unchanged,
@@ -500,51 +510,6 @@ async function importArticle(
   summary.created += Number(created);
 }
 
-async function flagUnlistedParts(
-  catalog: CatalogModuleService,
-  source: string,
-  listedNumbers: Set<string>,
-  unreadableUrls: Set<string>,
-): Promise<void> {
-  const mayFlag = (sourceUrl: string | null) =>
-    sourceUrl ? !unreadableUrls.has(sourceUrl) : unreadableUrls.size === 0;
-  const parts = await catalog.listParts(
-    { source },
-    { relations: ['identifiers'], take: null },
-  );
-  const now = new Date();
-  const changes = parts.flatMap(
-    ({ id, source_missing_since, source_url, identifiers }) => {
-      const missing = !identifiers.some(({ normalized_value }) =>
-        listedNumbers.has(normalized_value),
-      );
-      return missing === Boolean(source_missing_since) ||
-        (missing && !mayFlag(source_url))
-        ? []
-        : [{ id, source_missing_since: missing ? now : null }];
-    },
-  );
-  if (changes.length) {
-    await catalog.updateParts(changes);
-  }
-}
-
-async function dropUnlistedOffers(
-  suppliers: SupplierModuleService,
-  supplierId: string,
-  listed: Set<string>,
-): Promise<void> {
-  const gone = (
-    await suppliers.listSupplierOffers(
-      { supplier_id: supplierId },
-      { select: ['id', 'supplier_article_id'], take: null },
-    )
-  ).filter(({ supplier_article_id }) => !listed.has(supplier_article_id));
-  if (gone.length) {
-    await suppliers.deleteSupplierOffers(gone.map(({ id }) => id));
-  }
-}
-
 const oneAtATime = () => {
   let last: Promise<unknown> = Promise.resolve();
   return <T>(run: () => Promise<T>): Promise<T> => {
@@ -580,16 +545,6 @@ const sameNumberRuns = (
   }
   return [...runs.values()];
 };
-
-async function knownDescriptions(
-  catalog: CatalogModuleService,
-): Promise<Set<string>> {
-  const parts = await catalog.listParts(
-    {},
-    { select: ['description'], take: null },
-  );
-  return new Set(parts.flatMap(({ description }) => description ?? []));
-}
 
 // TODO: one query per article; batch the identifier and offer lookups per page once real catalogue sizes make an Import slow.
 export async function importSupplier(
@@ -634,7 +589,7 @@ export async function importSupplier(
     vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
     storage: shopStorage(scope),
     summary,
-    descriptions: await knownDescriptions(catalog),
+    descriptions: new Set(),
     oneAtATime: oneAtATime(),
   };
   if (!context.storage) {
@@ -740,13 +695,12 @@ export async function importSupplier(
       `${adapter.name}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
     );
   } else {
-    await dropUnlistedOffers(suppliers, supplier.id, state.listed);
+    await suppliers.dropUnlistedOffers(supplier.id, [...state.listed]);
   }
-  await flagUnlistedParts(
-    catalog,
+  await catalog.flagUnlistedParts(
     adapter.name,
-    state.listedNumbers,
-    unreadableUrls,
+    [...state.listedNumbers],
+    [...unreadableUrls],
   );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;

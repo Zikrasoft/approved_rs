@@ -44,6 +44,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../../lib/admin-errors';
+import { runBoundSql } from '../../lib/bound-sql';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../../lib/slug';
 import { spellingKey } from '../../lib/suppliers/spelling';
 import { MANUAL_SOURCE, WORKSHOP_QUOTE_SOURCE } from './models/provenance';
@@ -221,6 +222,27 @@ const chunksOf = <T>(items: T[], size = DELETE_CHUNK): T[][] =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
   );
+
+const FLAG_UNLISTED_PARTS = `
+  with listed as (
+    select p.id, p.source_url, p.source_missing_since is not null as flagged,
+      not exists (
+        select 1 from part_identifier pi
+        where pi.part_id = p.id and pi.deleted_at is null
+          and pi.normalized_value = any(?::text[])
+      ) as missing
+    from part p where p.source = ? and p.deleted_at is null
+  )
+  update part p
+  set source_missing_since = case when l.missing then now() end,
+    updated_at = now()
+  from listed l
+  where p.id = l.id and l.missing <> l.flagged and (
+    not l.missing or case
+      when l.source_url is null then ?::boolean
+      else not (l.source_url = any(?::text[]))
+    end
+  )`;
 
 const sourceInUse = (source: string, details: Record<string, unknown>) =>
   adminError(
@@ -1491,6 +1513,21 @@ class CatalogModuleService extends CatalogModuleBase {
       { id: partId, replaced_by_id: replacedById, updated_by: updatedBy },
       sharedContext,
     );
+  }
+
+  @InjectTransactionManager()
+  async flagUnlistedParts(
+    source: string,
+    listedNumbers: string[],
+    unreadableUrls: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await runBoundSql(sharedContext, FLAG_UNLISTED_PARTS, [
+      listedNumbers,
+      source,
+      unreadableUrls.length === 0,
+      unreadableUrls,
+    ]);
   }
 
   @InjectManager()

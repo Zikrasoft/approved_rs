@@ -48,6 +48,9 @@ export class Migration20261025010100 extends Migration {
       );
     }
     this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_part_description_hash" ON "part" USING hash ("description");`,
+    );
+    this.addSql(
       `ALTER TABLE "requirement" ALTER COLUMN "min" TYPE numeric, ALTER COLUMN "max" TYPE numeric;`,
     );
     this.addSql(
@@ -74,6 +77,7 @@ export class Migration20261025010100 extends Migration {
       'IDX_series_make_id_name_key_unique',
       'IDX_fitment_part_vehicle_all',
       'IDX_fitment_vehicle_all',
+      'IDX_part_description_hash',
       ...TRIGRAM_COLUMNS.map(([table, column]) => trigramIndex(table, column)),
     ]) {
       this.addSql(`DROP INDEX IF EXISTS "${index}";`);

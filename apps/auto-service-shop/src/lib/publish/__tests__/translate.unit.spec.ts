@@ -55,6 +55,32 @@ afterEach(() => {
 });
 
 describe('translateCatalogue', () => {
+  it('reads the Parts a page at a time', async () => {
+    openAi();
+    const parts = Array.from({ length: 2_001 }, (_, index) =>
+      part(index, null),
+    ).sort((a, b) => a.id.localeCompare(b.id));
+    const pages: number[] = [];
+    const { catalog, updated } = catalogueOf([]);
+    Object.assign(catalog, {
+      listParts: async (
+        filters: { id?: { $gt: string } },
+        { take }: { take: number },
+      ) => {
+        const page = parts
+          .filter(({ id }) => !filters.id || id > filters.id.$gt)
+          .slice(0, take);
+        pages.push(page.length);
+        return page;
+      },
+    });
+
+    await translateCatalogue(catalog, 'key');
+
+    expect(pages).toEqual([2_000, 1]);
+    expect(new Set(updated.map(({ id }) => id)).size).toBe(2_001);
+  });
+
   it('sends long Part descriptions in separate requests', async () => {
     const requests = openAi();
     const long = 'Аккумулятор для запуска двигателя. '.repeat(90);

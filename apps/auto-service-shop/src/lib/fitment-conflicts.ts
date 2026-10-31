@@ -139,6 +139,26 @@ export async function fitmentConflicts(
   );
 }
 
+export async function conflictingVehicles(
+  catalog: CatalogModuleService,
+  partId: string,
+  vehicleIds: string[],
+): Promise<Set<string>> {
+  const part = conflictPartSchema.parse(await catalog.retrievePart(partId));
+  if (!part.category_id || !vehicleIds.length) {
+    return new Set();
+  }
+  const vehicles = await listVehicleResponses(catalog, { id: vehicleIds });
+  return new Set(
+    vehicles
+      .filter(
+        ({ id, requirements }) =>
+          requirementConflicts(part, [], [{ label: id, requirements }]).length,
+      )
+      .map(({ id }) => id),
+  );
+}
+
 export async function refuseConflictingFitment(
   catalog: CatalogModuleService,
   partId: string,

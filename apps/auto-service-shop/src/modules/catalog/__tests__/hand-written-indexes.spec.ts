@@ -90,6 +90,12 @@ medusaIntegrationTestRunner({
         expect(await definition(name)).toMatch(/USING gin .*gin_trgm_ops/);
       });
 
+      it('finds a Part by its whole description', async () => {
+        expect(await definition('IDX_part_description_hash')).toMatch(
+          /USING hash \(description\)/,
+        );
+      });
+
       it('finds a tombstone-aware Fitment by an index', async () => {
         const trx = await pg().transaction();
         await trx.raw('set local enable_seqscan = off');

@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'node:util';
+
 import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
@@ -7,6 +9,7 @@ import {
 } from '@medusajs/framework/utils';
 import type { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
+import { runBoundSql } from '../../lib/bound-sql';
 import { spellingKey } from '../../lib/suppliers/spelling';
 
 import StagedRecord from './models/staged-record';
@@ -73,12 +76,31 @@ class SupplierModuleService extends SupplierModuleBase {
     await this.lockKey(['supplier_offer', key], sharedContext);
     const [existing] = await this.listSupplierOffers(
       key,
-      { select: ['id'], take: 1 },
+      { take: 1 },
       sharedContext,
     );
-    return existing
-      ? this.updateSupplierOffers({ id: existing.id, ...offer }, sharedContext)
-      : this.createSupplierOffers({ ...offer, created_by }, sharedContext);
+    if (!existing) {
+      return this.createSupplierOffers({ ...offer, created_by }, sharedContext);
+    }
+    const unchanged = Object.entries(offer).every(([field, value]) =>
+      isDeepStrictEqual(existing[field as keyof typeof existing], value),
+    );
+    return unchanged
+      ? existing
+      : this.updateSupplierOffers({ id: existing.id, ...offer }, sharedContext);
+  }
+
+  @InjectTransactionManager()
+  async dropUnlistedOffers(
+    supplierId: string,
+    listedArticleIds: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await runBoundSql(
+      sharedContext,
+      'delete from supplier_offer where supplier_id = ? and not (supplier_article_id = any(?::text[]))',
+      [supplierId, listedArticleIds],
+    );
   }
 
   @InjectTransactionManager()
@@ -95,9 +117,10 @@ class SupplierModuleService extends SupplierModuleBase {
     if (!existing) {
       return this.createStagedRecords({ ...key, payload }, sharedContext);
     }
+    const json = JSON.stringify(payload);
     await (sharedContext.transactionManager as SqlEntityManager).execute(
-      'update staged_record set payload = ?, updated_at = now() where id = ?',
-      [JSON.stringify(payload), existing.id],
+      'update staged_record set payload = ?, updated_at = now() where id = ? and payload is distinct from ?::jsonb',
+      [json, existing.id, json],
     );
     return this.retrieveStagedRecord(existing.id, {}, sharedContext);
   }
