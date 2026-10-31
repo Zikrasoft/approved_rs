@@ -1,3 +1,4 @@
+import { logError } from '../logError.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
 import type { StoredLead } from '../schema.ts';
 import type { Digest, OpenDigest, PostedDigest } from '../store.ts';
@@ -44,8 +45,7 @@ export function createNotifier({
     );
     sent.forEach((result, at) => {
       if (result.status === 'rejected')
-        console.error('[telegram] a staff notice was not delivered', {
-          error: result.reason,
+        logError('[telegram] a staff notice was not delivered', result.reason, {
           chatId: ids[at],
         });
     });
@@ -91,8 +91,7 @@ export function createNotifier({
           name: formatter.topicName(lead),
         });
       } catch (err) {
-        console.error('[telegram] editForumTopic failed', {
-          error: err,
+        logError('[telegram] editForumTopic failed', err, {
           topicId: lead.topicId,
         });
       }
@@ -138,8 +137,7 @@ export function createNotifier({
           lead.telegramMessageId,
         );
       } catch (err) {
-        console.error('[telegram] unpinChatMessage failed', {
-          error: err,
+        logError('[telegram] unpinChatMessage failed', err, {
           messageId: lead.telegramMessageId,
         });
       }

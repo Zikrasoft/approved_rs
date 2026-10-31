@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { serviceLabel } from '@podbor/brands';
 import { z } from 'zod';
 import { channelLabel } from './channelLabels.ts';
@@ -449,9 +450,8 @@ export function createLeadStore({
     try {
       await quarantine(entries);
     } catch (error) {
-      console.error('[lead-crm] could not copy the unreadable records', {
+      logError('[lead-crm] could not copy the unreadable records', error, {
         count: entries.length,
-        error,
       });
     }
   }

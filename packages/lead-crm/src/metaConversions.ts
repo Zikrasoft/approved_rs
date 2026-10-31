@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import { z } from 'zod';
 import type { ClaimedMetaLead } from './store.ts';
 
@@ -70,9 +71,8 @@ export function createMetaLeadReporter({
           body: await response.text(),
         });
     } catch (error) {
-      console.error('[meta-capi] could not send the Lead event', {
+      logError('[meta-capi] could not send the Lead event', error, {
         leadId: lead.id,
-        error,
       });
     }
   }

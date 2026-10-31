@@ -104,6 +104,7 @@ export {
 } from './routes/shopOrders.ts';
 
 export { requireEnv } from './requireEnv.ts';
+export { logError } from './logError.ts';
 
 export { secretMatches } from './verifySecret.ts';
 

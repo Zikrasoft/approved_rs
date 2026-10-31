@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIContext } from 'astro';
-import { requireEnv } from '@podbor/lead-crm';
+import { logError, requireEnv } from '@podbor/lead-crm';
 import { secretMatches } from '@/lib/verifySecret';
 import {
   claimDigest,
@@ -31,8 +31,7 @@ async function expireGhosts(now: Date): Promise<number> {
     try {
       await afterStatusChange(lead);
     } catch (err) {
-      console.error('[reminders] failed to refresh an expired ghost card', {
-        error: err,
+      logError('[reminders] failed to refresh an expired ghost card', err, {
         leadId: lead.id,
       });
     }
@@ -54,15 +53,13 @@ async function postDigest(now: Date): Promise<boolean> {
   try {
     posted = await sendDigest(digest);
   } catch (err) {
-    console.error('[reminders] failed to send the digest', { error: err });
+    logError('[reminders] failed to send the digest', err);
     await releaseDigest(now);
     return false;
   }
   if (posted)
     await recordDigestMessage(now, posted).catch((err: unknown) => {
-      console.error('[reminders] failed to remember the digest', {
-        error: err,
-      });
+      logError('[reminders] failed to remember the digest', err);
     });
   for (const lead of digest.due) {
     try {
@@ -71,8 +68,7 @@ async function postDigest(now: Date): Promise<boolean> {
       await sendPostponeReminder(resumed);
       await afterStatusChange(resumed);
     } catch (err) {
-      console.error('[reminders] failed to resume a due postponed lead', {
-        error: err,
+      logError('[reminders] failed to resume a due postponed lead', err, {
         leadId: lead.id,
       });
     }
@@ -95,7 +91,7 @@ export async function GET({ request }: APIContext): Promise<Response> {
   const closedTopics = await closeIdle(now);
   const digestSent = await postDigest(now);
   await settlePendingOrders().catch((error: unknown) => {
-    console.error('[reminders] failed to retry shop Order outcomes', { error });
+    logError('[reminders] failed to retry shop Order outcomes', error);
   });
 
   return new Response(
