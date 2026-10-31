@@ -6,6 +6,7 @@ export const shopCartContentSchema = z
     metaDescription: z.string(),
     heading: z.string(),
     cartLink: z.string(),
+    partsListNote: z.string(),
     loading: z.string(),
     emptyHeading: z.string(),
     emptyBody: z.string(),

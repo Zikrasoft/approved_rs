@@ -6,6 +6,8 @@ import CheckoutForm from '@/components/CheckoutForm.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import PickupDetails from '@/components/PickupDetails.astro';
 import Icon from '@/components/Icon.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
@@ -54,6 +56,21 @@ const stepper =
   />
 
   <section class="wrap py-6 md:py-band-lg">
+    <cart-badge
+      data-parts-list
+      data-reveal-when-filled
+      hidden
+      class={`${notice} max-w-2xl flex-col sm:flex-row sm:items-center sm:justify-between`}
+    >
+      <p>{copy.partsListNote}</p>
+      <a
+        href={PathBuilder.partsInquiry(locale)}
+        {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+        class="btn btn-secondary w-full shrink-0 sm:w-auto"
+      >
+        {copy.notices.movedCta}
+      </a>
+    </cart-badge>
     <offer-cart
       class="block min-h-svh"
       data-locale-tag={BCP47_BY_LOCALE[locale]}
