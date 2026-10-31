@@ -13,6 +13,7 @@ const CASH_AT_PICKUP = 'cash_at_pickup';
 
 const KEYS = {
   fulfillment: 'fulfillment',
+  plannedFingerprint: 'planned_fingerprint',
   handedOffAt: 'lead_handed_off_at',
   handoffError: 'lead_handoff_error',
   handoffAttempts: 'lead_handoff_attempts',
@@ -32,7 +33,13 @@ export const checkoutMetadata = (
   current: Metadata,
   contact: CheckoutContactFields,
   car: string | null,
-): Record<string, unknown> => ({ ...current, ...contact, car });
+  plannedFingerprint: string,
+): Record<string, unknown> => ({
+  ...current,
+  ...contact,
+  car,
+  [KEYS.plannedFingerprint]: plannedFingerprint,
+});
 
 const attemptsSchema = z.coerce.number().int().nonnegative().catch(0);
 
@@ -69,6 +76,7 @@ export function readOrder(metadata: Metadata) {
     cashAtPickup,
     lead,
     cancel: cancelStatus(metadata),
+    plannedFingerprint: filled.parse(metadata?.[KEYS.plannedFingerprint]),
     needsAttention: cashAtPickup && !lead.handed_off_at,
   };
 }

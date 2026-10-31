@@ -48,11 +48,13 @@ describe('readOrder', () => {
         contact_channel: 'phone',
       }),
       'BMW 3 (G20)',
+      'fingerprint',
     );
 
     expect(readOrder(metadata)).toMatchObject({
       contact: { contact: '+381601234567', contact_channel: 'phone' },
       cashAtPickup: true,
+      plannedFingerprint: 'fingerprint',
     });
     expect(metadata.car).toBe('BMW 3 (G20)');
     expect(readOrder(null)).toMatchObject({

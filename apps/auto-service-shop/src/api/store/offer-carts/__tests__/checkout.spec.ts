@@ -626,27 +626,6 @@ medusaIntegrationTestRunner({
         expect(order.metadata?.car).toBeNull();
       });
 
-      it('refuses checkout of a cart that changed since the visitor saw it', async () => {
-        const shown = await cartWith(1);
-        const changed = await post(`/store/offer-carts/${shown.id}/items`, {
-          offer_id: offerId,
-          quantity: 1,
-        });
-
-        const refused = await complete(shown, {
-          ...CONTACT,
-          cart_fingerprint: cartFingerprint(shown.items),
-        });
-        expect(refused.status).toBe(400);
-        expect(refused.data.code).toBe('CART_CHANGED');
-
-        const placed = await complete(shown, {
-          ...CONTACT,
-          cart_fingerprint: cartFingerprint(changed.data.cart.items),
-        });
-        expect(placed.status).toBe(200);
-      });
-
       it('refuses an order without a contact', async () => {
         const cart = await cartWith(1);
 

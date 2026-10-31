@@ -1,8 +1,4 @@
-import type {
-  ILockingModule,
-  Logger,
-  MedusaContainer,
-} from '@medusajs/framework/types';
+import type { Logger, MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import {
   cancelOrderWorkflow,
@@ -17,6 +13,7 @@ import {
 } from '@podbor/lead-crm/shop-orders-wire';
 import { parseEnv } from './env';
 import { errorMessage } from './errors';
+import { type Lock, lockedBy, lockOf } from './lock';
 import {
   alertOwner,
   LeadRouteRefusal,
@@ -27,7 +24,6 @@ import {
 } from './order-lead';
 import { leadStamp, MAX_HANDOFF_ATTEMPTS, readOrder } from './order-metadata';
 
-const LOCK_TIMEOUT_SECONDS = 30;
 const RETRY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000;
 const SUBSCRIBER_GRACE_MS = 2 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
@@ -53,7 +49,7 @@ export interface SyncOrders {
 
 export interface OrderLeadSyncDeps {
   orders: SyncOrders;
-  lock: <T>(key: string, job: () => Promise<T>) => Promise<T>;
+  lock: Lock;
   send: (event: ShopOrderEvent) => Promise<void>;
   alert: (text: string) => Promise<boolean>;
   logger: Pick<Logger, 'info' | 'warn' | 'error'>;
@@ -70,10 +66,7 @@ export function createOrderLeadSync({
   logger,
   adminOrigin,
 }: OrderLeadSyncDeps) {
-  const locked =
-    <A extends unknown[], T>(job: (id: string, ...args: A) => Promise<T>) =>
-    (id: string, ...args: A) =>
-      lock(`order-lead:${id}`, () => job(id, ...args));
+  const locked = lockedBy(lock, 'order-lead');
 
   const now = () => new Date().toISOString();
 
@@ -232,7 +225,6 @@ export function createOrderLeadSync({
 
 export function orderLeadSync(container: MedusaContainer) {
   const orderModule = container.resolve(Modules.ORDER);
-  const locking = container.resolve<ILockingModule>(Modules.LOCKING);
   const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET, ADMIN_CORS } = parseEnv(
     process.env,
   );
@@ -267,8 +259,7 @@ export function orderLeadSync(container: MedusaContainer) {
           { select: ['id', 'status'] },
         ),
     },
-    lock: (key, job) =>
-      locking.execute(key, job, { timeout: LOCK_TIMEOUT_SECONDS }),
+    lock: lockOf(container),
     async send(event) {
       if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET)
         throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
