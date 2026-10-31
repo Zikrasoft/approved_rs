@@ -14,7 +14,7 @@ medusaIntegrationTestRunner({
   moduleName: 'catalog',
   dbName: 'carlab_requirements',
   testSuite: ({ api, getContainer }) => {
-    describe('Requirements and the maintenance kit', () => {
+    describe('Requirements', () => {
       let adminHeaders: { headers: { authorization: string } };
       let storeHeaders: { headers: { 'x-publishable-api-key': string } };
       let catalog: CatalogModuleService;
@@ -23,15 +23,15 @@ medusaIntegrationTestRunner({
         api.post(path, body, adminHeaders).catch((error) => error.response);
       const remove = (path: string): Promise<Response> =>
         api.delete(path, adminHeaders).catch((error) => error.response);
-      const vehicleParts = async (id: string) =>
-        (await api.get(`/store/vehicles/${id}/parts`, storeHeaders)).data;
+      const requirementsOf = async (id: string) =>
+        (await api.get('/store/vehicles', storeHeaders)).data.vehicles.find(
+          (vehicle: Row) => vehicle.id === id,
+        ).requirements as { field_key: string; option_keys: string[] | null }[];
 
       let oil: Row;
-      let filter: Row;
       let fields: Record<string, Row>;
       let b47: Awaited<ReturnType<typeof createVehicleFixture>>;
       let om654: Awaited<ReturnType<typeof createVehicleFixture>>;
-      let goodOil: string;
 
       beforeAll(async () => {
         const container = getContainer();
@@ -58,14 +58,6 @@ medusaIntegrationTestRunner({
             name: 'Моторное масло',
             maintenance_kit: true,
             kit_rank: 2,
-          })
-        ).data.category;
-        filter = (
-          await post('/admin/categories', {
-            slug: 'oil-filter',
-            name: 'Масляный фильтр',
-            maintenance_kit: true,
-            kit_rank: 1,
           })
         ).data.category;
         const base = `/admin/categories/${oil.id}/fields`;
@@ -111,23 +103,6 @@ medusaIntegrationTestRunner({
           });
         }
 
-        goodOil = await catalog.createPartWithIdentifiers({
-          name: 'Масло 5W-30 LL-04 229.51',
-          identifiers: [],
-          category_id: oil.id,
-          attributes: {
-            approvals: ['bmw-ll-04', 'mb-229-51'],
-            viscosity: '5w-30',
-            volume: 5,
-          },
-        });
-        await catalog.createPartWithIdentifiers({
-          name: 'Масло 5W-30 VW',
-          identifiers: [],
-          category_id: oil.id,
-          attributes: { approvals: ['vw-504-00'], viscosity: '5w-30' },
-        });
-
         b47 = await createVehicleFixture(catalog, { typeCode: '8C31' });
         om654 = await createVehicleFixture(catalog, {
           make: { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
@@ -161,31 +136,8 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('matches an oil with approvals {bmw-ll-04, mb-229-51} to a B47 and an OM654 Requirement', async () => {
-        const name = 'Масло 5W-30 LL-04 229.51';
-
-        expect((await vehicleParts(b47.vehicle.id)).matches).toEqual([
-          {
-            category_id: oil.id,
-            quantity: 5,
-            parts: [{ id: goodOil, name, category_id: oil.id }],
-          },
-        ]);
-        expect((await vehicleParts(om654.vehicle.id)).matches).toEqual([
-          {
-            category_id: oil.id,
-            quantity: 1,
-            parts: [{ id: goodOil, name, category_id: oil.id }],
-          },
-        ]);
-      });
-
       it('gives a Vehicle the Requirements of its Engine and Chassis', async () => {
-        const { vehicles } = (await api.get('/store/vehicles', storeHeaders))
-          .data;
-        const requirements = vehicles.find(
-          ({ id }: { id: string }) => id === b47.vehicle.id,
-        ).requirements;
+        const requirements = await requirementsOf(b47.vehicle.id);
 
         expect(requirements).toEqual(
           expect.arrayContaining([
@@ -210,26 +162,6 @@ medusaIntegrationTestRunner({
         expect(requirements).toHaveLength(2);
       });
 
-      it('holds one Part per flagged Category in the kit, with quantities', async () => {
-        const oilFilter = await catalog.createPartWithIdentifiers({
-          name: 'Масляный фильтр B47',
-          identifiers: [],
-          category_id: filter.id,
-        });
-        await catalog.createFitments({
-          part_id: oilFilter,
-          vehicle_id: b47.vehicle.id,
-        });
-
-        expect((await vehicleParts(b47.vehicle.id)).kit).toEqual([
-          { category_id: filter.id, part_id: oilFilter, quantity: 1 },
-          { category_id: oil.id, part_id: goodOil, quantity: 5 },
-        ]);
-        expect((await vehicleParts(om654.vehicle.id)).kit).toEqual([
-          { category_id: oil.id, part_id: goodOil, quantity: 1 },
-        ]);
-      });
-
       it('adds a Vehicle Requirement to its Engine one', async () => {
         const vehicle = await createVehicleFixture(catalog, {
           typeCode: '8C32',
@@ -241,8 +173,17 @@ medusaIntegrationTestRunner({
         });
 
         expect(added.status).toBe(200);
-        expect((await vehicleParts(vehicle.vehicle.id)).matches).toEqual([]);
-        expect((await vehicleParts(b47.vehicle.id)).matches).toHaveLength(1);
+        expect(await requirementsOf(vehicle.vehicle.id)).toContainEqual(
+          expect.objectContaining({
+            field_key: 'viscosity',
+            option_keys: ['0w-20'],
+          }),
+        );
+        expect(
+          (await requirementsOf(b47.vehicle.id)).map(
+            ({ field_key }) => field_key,
+          ),
+        ).not.toContain('viscosity');
       });
 
       it.each([
@@ -342,7 +283,7 @@ medusaIntegrationTestRunner({
         expect(
           (await remove(`/admin/requirements/${listed[0].id}`)).status,
         ).toBe(200);
-        expect((await vehicleParts(om654.vehicle.id)).matches).toEqual([]);
+        expect(await requirementsOf(om654.vehicle.id)).toEqual([]);
       });
 
       it('refuses to delete a field or an option a Requirement uses', async () => {

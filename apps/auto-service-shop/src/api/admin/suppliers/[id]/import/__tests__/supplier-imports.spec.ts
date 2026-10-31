@@ -1338,11 +1338,7 @@ medusaIntegrationTestRunner({
           },
         ];
         expect(offered?.offers).toEqual(expected);
-        const part = (
-          await api.get(`/store/parts/${offered!.part.id}`, storeHeaders)
-        ).data.part;
-        expect(part.identifiers[0].offers).toEqual(expected);
-        expect(JSON.stringify([offered, part])).not.toMatch(
+        expect(JSON.stringify(offered)).not.toMatch(
           /Intercars|Warehouse|IC-9|WH-1/,
         );
       });

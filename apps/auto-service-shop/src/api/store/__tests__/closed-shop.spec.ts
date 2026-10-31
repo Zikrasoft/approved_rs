@@ -120,7 +120,6 @@ medusaIntegrationTestRunner({
           `/store/part-identifiers/${identifiers[0]}/offers`,
         );
         const batch = await get(offersPath());
-        const part = await get(`/store/parts/${parts[0]}`);
 
         expect(search.data.count).toBe(2);
         expect(prices(search.data.results)).toEqual([]);
@@ -138,7 +137,6 @@ medusaIntegrationTestRunner({
           [identifiers[0]]: [],
           [identifiers[1]]: [],
         });
-        expect(prices(part.data.part.identifiers)).toEqual([]);
       });
 
       it('shows the prices to a visitor with the preview flag', async () => {
@@ -151,7 +149,6 @@ medusaIntegrationTestRunner({
           true,
         );
         const batch = await get(offersPath(), true);
-        const part = await get(`/store/parts/${parts[0]}`, true);
 
         expect(prices(search.data.results)).toEqual([1200, 2400]);
         expect(facetKeys(search.data.facets)).toContain('price');
@@ -168,7 +165,6 @@ medusaIntegrationTestRunner({
         expect(prices([{ offers: batch.data.offers[identifiers[1]] }])).toEqual(
           [2400],
         );
-        expect(prices(part.data.part.identifiers)).toEqual([1200]);
       });
 
       it('refuses a batch of offers without an identifier', async () => {

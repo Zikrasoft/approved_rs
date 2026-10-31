@@ -58,7 +58,6 @@ import {
   StoreListPartPages,
   StoreListVehicles,
   StoreSearchParts,
-  StoreVehicleParts,
 } from './store/validators';
 
 export default defineMiddlewares({
@@ -270,11 +269,6 @@ export default defineMiddlewares({
       matcher: '/store/vehicles',
       method: 'GET',
       middlewares: [validateAndTransformQuery(StoreListVehicles, {})],
-    },
-    {
-      matcher: '/store/vehicles/:id/parts',
-      method: 'GET',
-      middlewares: [validateAndTransformQuery(StoreVehicleParts, {})],
     },
     {
       matcher: '/store/search',
