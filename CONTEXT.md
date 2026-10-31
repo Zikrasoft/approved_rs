@@ -78,7 +78,10 @@ creation is within the last hour. A visitor who comes back to a fresh Lead
 continues it — a merged click, a resumed `/start`, a Questionnaire answer, a
 free-text message; once it is stale the next one opens a new Lead, and a
 Questionnaire left on a stale Lead no longer takes answers. Owner activity
-counts so that a conversation the owner is working stays one Lead.
+counts so that a conversation the owner is working stays one Lead. A merge
+never drops a contact: when the visitor sends a different real contact, the
+Lead keeps the first and the new one lands as a dated note signed by the
+visitor («Клиент (WhatsApp): Доп. контакт: …»), a different name likewise.
 
 **Referral** — a Lead a sister brand's Capture bot received from the Approved
 bot's Partners screen. `referredBy: approved` is the only record of it — the

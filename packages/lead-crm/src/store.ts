@@ -18,6 +18,14 @@ import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
 import { LEADS_PATH } from './quarantine.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
+import {
+  datedNote,
+  extraContactNote,
+  isDatedNote,
+  otherNameNote,
+  visitorNote,
+} from './notes.ts';
+import { notPlacedReasonOf, PARTS_ORDER_COPY } from './partsOrderCopy.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -221,6 +229,57 @@ function contactRank(contact: string): number {
 
 export function hasRealContact(contact: string): boolean {
   return contactRank(contact) === 2;
+}
+
+type Identity = Pick<LeadInput, 'name' | 'contact' | 'contactChannel'>;
+
+function whoseIdentity(
+  existing: StoredLead,
+  data: LeadInput,
+  takesOver: boolean,
+): { kept: Identity; displaced: Identity; upgraded: boolean } {
+  const upgraded =
+    takesOver || contactRank(data.contact) > contactRank(existing.contact);
+  return upgraded
+    ? { kept: data, displaced: existing, upgraded }
+    : { kept: existing, displaced: data, upgraded };
+}
+
+function displacedNotes(
+  kept: Identity,
+  displaced: Identity,
+  at: Date,
+): string[] {
+  const signed = (text: string) =>
+    visitorNote(text, displaced.contactChannel, at);
+  return [
+    hasRealContact(displaced.contact) && displaced.contact !== kept.contact
+      ? signed(extraContactNote(displaced.contact))
+      : '',
+    kept.name && displaced.name && displaced.name !== kept.name
+      ? signed(otherNameNote(displaced.name))
+      : '',
+  ].filter(Boolean);
+}
+
+function absorbedFailedCheckout(
+  failed: string | null | undefined,
+  order: string | null | undefined,
+  at: Date,
+): string {
+  const lines = failed?.split('\n') ?? [];
+  const reasons = new Set(
+    lines.map(notPlacedReasonOf).filter((reason) => reason != null),
+  );
+  return [
+    order ?? '',
+    ...[...reasons].map((reason) =>
+      datedNote(PARTS_ORDER_COPY.earlierNotPlaced(reason), at),
+    ),
+    ...lines.filter(isDatedNote),
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function isGhostLead(lead: StoredLead, now: Date): boolean {
@@ -534,27 +593,29 @@ export function createLeadStore({
           return supersede([...leads, inserted], inserted);
         }
         const existing = target.lead;
-        const absorbsFailedCheckout = target.kind === 'failed-checkout';
-
-        const upgradeContact =
-          absorbsFailedCheckout ||
-          contactRank(data.contact) > contactRank(existing.contact);
+        const takesOver =
+          target.kind === 'failed-checkout' && data.orderId != null;
+        const { kept, displaced, upgraded } = whoseIdentity(
+          existing,
+          data,
+          takesOver,
+        );
         const botHandOff =
           (data.telegramId ?? existing.telegramId) != null &&
           data.contactChannel === existing.contactChannel;
         const tried = botHandOff ? '' : triedLabel(data, existing);
         const clickedFirst =
-          upgradeContact &&
+          upgraded &&
           !botHandOff &&
           existing.kind === 'call_click' &&
           existing.contactChannel
             ? channelLabel(existing.contactChannel)
             : null;
+        const at = new Date(now);
         const merged: StoredLead = {
           ...existing,
-          ...(upgradeContact
+          ...(upgraded
             ? {
-                name: data.name || existing.name,
                 contact: data.contact,
                 contactChannel: data.contactChannel ?? existing.contactChannel,
                 service: data.service || existing.service,
@@ -564,6 +625,7 @@ export function createLeadStore({
                 kind: data.kind ?? existing.kind,
               }
             : {}),
+          name: kept.name || displaced.name,
           source_url: existing.source_url ?? data.source_url,
           orderId: existing.orderId ?? data.orderId,
           telegramId: data.telegramId ?? existing.telegramId,
@@ -574,15 +636,20 @@ export function createLeadStore({
           visitorActiveAt:
             data.telegramId == null
               ? existing.visitorActiveAt
-              : new Date(now).toISOString(),
+              : at.toISOString(),
           comment: appendNote(
-            existing.comment,
+            takesOver
+              ? absorbedFailedCheckout(existing.comment, data.comment, at)
+              : existing.comment,
             [
               clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
               tried ? `Также пробовал: ${tried}` : '',
-              ...(data.orderId
-                ? [data.comment ?? '']
-                : newLines(existing.comment, data.comment)),
+              ...(takesOver
+                ? []
+                : data.orderId
+                  ? [data.comment]
+                  : newLines(existing.comment, data.comment)),
+              ...displacedNotes(kept, displaced, at),
             ]
               .filter(Boolean)
               .join('\n'),

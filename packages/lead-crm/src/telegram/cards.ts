@@ -4,7 +4,7 @@ import { shownPage } from '../form.ts';
 import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact, type Digest } from '../store.ts';
-import { businessDay } from '../businessTime.ts';
+import { datedNote } from '../notes.ts';
 import {
   escapeHtml,
   formatDateRu,
@@ -131,11 +131,7 @@ export function reAskEditText(field: EditField | 'note'): string {
 }
 
 export function noteLine(text: string, by: Role, at = new Date()): string {
-  return `${formatDateRu(businessDay(at))} · ${OPERATION_AUTHORS[by]}: ${text}`;
-}
-
-export function extraContactNote(contact: string): string {
-  return `Доп. контакт: ${contact}`;
+  return datedNote(`${OPERATION_AUTHORS[by]}: ${text}`, at);
 }
 
 export function noteNoticeText(
