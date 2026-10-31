@@ -23,7 +23,7 @@ import { PathBuilder } from '@/utils/paths';
 import {
   appendRange,
   chosenFilters,
-  PARTS_QUERY_MAX_LENGTH,
+  partsQuery,
   rangesFromParams,
   withFacetCopy,
 } from '@/utils/partsSearch';
@@ -45,7 +45,7 @@ const copy = content(locale).partsSearch;
 const partsInquiry = content(locale).pages.partsInquiry;
 
 const params = Astro.url.searchParams;
-const q = (params.get('q') ?? '').trim().slice(0, PARTS_QUERY_MAX_LENGTH);
+const q = partsQuery(params.get('q') ?? '');
 const categoryParam = params.get('category') ?? '';
 const category = CATALOG_KEY_PATTERN.test(categoryParam)
   ? categoryParam

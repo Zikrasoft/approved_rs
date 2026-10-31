@@ -6,13 +6,13 @@ import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import { searchIntent, suggestionsFrom } from '@/utils/catalogueSearch';
-import { PARTS_QUERY_MAX_LENGTH } from '@/utils/partsSearch';
+import { partsQuery } from '@/utils/partsSearch';
 import { previewRequested } from '@/utils/shopPreview';
 
 const SUGGESTION_LIMIT = 5;
 
 const querySchema = z.object({
-  q: z.string().trim().max(PARTS_QUERY_MAX_LENGTH).catch(''),
+  q: z.string().transform(partsQuery).catch(''),
   locale: localeFieldSchema,
 });
 
