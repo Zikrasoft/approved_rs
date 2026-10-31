@@ -68,7 +68,7 @@ const reindexCalls: number[] = [];
 const openAiAnswer = (body: {
   messages: { content: string }[];
 }): Record<string, string> => {
-  const dictionary = body.messages[0].content.includes('Serbian')
+  const dictionary = body.messages[0].content.includes('into Serbian')
     ? SERBIAN
     : ENGLISH;
   const russian = JSON.parse(body.messages[1].content) as Record<
