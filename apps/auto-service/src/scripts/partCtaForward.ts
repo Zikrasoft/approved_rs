@@ -1,3 +1,5 @@
+export const PART_ADDED_EVENT = 'part-added';
+
 export function definePartCtaForward(tagName = 'part-cta-forward'): void {
   if (customElements.get(tagName)) return;
   customElements.define(
@@ -22,6 +24,17 @@ export function definePartCtaForward(tagName = 'part-cta-forward'): void {
           },
           { signal: this.#wiring.signal },
         );
+        document.addEventListener(PART_ADDED_EVENT, () => this.toCart(), {
+          signal: this.#wiring.signal,
+        });
+      }
+
+      toCart(): void {
+        const link = this.querySelector('a');
+        if (!link) return;
+        delete this.dataset.to;
+        link.href = this.dataset.cartHref ?? link.href;
+        link.textContent = this.dataset.addedLabel ?? link.textContent;
       }
 
       disconnectedCallback(): void {

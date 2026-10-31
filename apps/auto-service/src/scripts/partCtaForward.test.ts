@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { definePartCtaForward } from './partCtaForward';
+import { definePartCtaForward, PART_ADDED_EVENT } from './partCtaForward';
 
 definePartCtaForward();
 
@@ -9,7 +9,7 @@ const render = (to: string | null, targetHidden = false) => {
     <section id="offers">
       <button data-buy ${targetHidden ? 'hidden' : ''}>buy</button>
     </section>
-    <part-cta-forward ${to === null ? '' : `data-to="${to}"`}>
+    <part-cta-forward data-cart-href="/ru/parts/cart/" data-added-label="Open cart" ${to === null ? '' : `data-to="${to}"`}>
       <a href="#offers">Buy</a>
     </part-cta-forward>`;
   const target = document.querySelector<HTMLElement>('[data-buy]')!;
@@ -44,6 +44,18 @@ describe('<part-cta-forward>', () => {
     ['no target is named', null, false],
   ])('follows the link when %s', (_, to, hidden) => {
     const { click, bought } = render(to, hidden);
+    expect(click().defaultPrevented).toBe(false);
+    expect(bought).not.toHaveBeenCalled();
+  });
+
+  it('turns into a cart link once a part is added', () => {
+    const { click, bought } = render('#offers [data-buy]');
+    document
+      .querySelector('[data-buy]')!
+      .dispatchEvent(new Event(PART_ADDED_EVENT, { bubbles: true }));
+    const link = document.querySelector<HTMLAnchorElement>('a')!;
+    expect(link.getAttribute('href')).toBe('/ru/parts/cart/');
+    expect(link.textContent).toBe('Open cart');
     expect(click().defaultPrevented).toBe(false);
     expect(bought).not.toHaveBeenCalled();
   });
