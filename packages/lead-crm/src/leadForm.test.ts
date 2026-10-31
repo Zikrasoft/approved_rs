@@ -35,7 +35,7 @@ function markup(tag: string, selected = 'whatsapp'): string {
         <option value="RS" data-dial="381" selected>RS</option>
         <option value="DE" data-dial="49">DE</option>
       </select>
-      <input data-phone><p data-error-phone hidden></p>
+      <input data-phone><p data-error-phone data-too-long="Too long" hidden>Incomplete</p>
     </div>
     <input type="checkbox" data-consent><p data-error-consent hidden></p>
     <p data-error-submit hidden></p>
@@ -264,6 +264,25 @@ describe('submit', () => {
     f.consent.checked = true;
     submit(f.form);
     expect(f.error('phone').hidden).toBe(false);
+  });
+
+  it('says a number is too long rather than incomplete, and back again', () => {
+    const f = mount();
+    f.consent.checked = true;
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Too long');
+    f.phone.value = '12';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
+  });
+
+  it('keeps the one phone error where the form has no too-long copy', () => {
+    const f = mount();
+    f.error('phone').removeAttribute('data-too-long');
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
   });
 
   it("clears only the typed field's error", () => {

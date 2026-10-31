@@ -43,10 +43,34 @@ describe('/api/cart', () => {
     expect(backend).not.toHaveBeenCalled();
   });
 
-  it('answers a malformed change with an empty cart, not the inquiry', async () => {
-    expect(
-      await outcome(call(DELETE, { body: { cart_id: 'cart/1' } })),
-    ).toEqual({ kind: 'empty' });
+  it.each([
+    ['DELETE', DELETE, { cart_id: 'cart/1' }],
+    ['PATCH', PATCH, { cart_id: 'cart_1', item_id: 'item_1', quantity: 0 }],
+    ['PATCH', PATCH, { cart_id: 'cart_1', item_id: 'item_1', quantity: 1.5 }],
+    ['PATCH', PATCH, { cart_id: 'cart_1', item_id: 'item_1', quantity: '3' }],
+    ['POST', POST, { cart_id: null, offer_id: 'offer_1', quantity: -1 }],
+    ['PUT', PUT, { cart_id: 'cart_1', item_id: 'item_1' }],
+  ])(
+    'refuses a malformed %s as a bad request, never as a cart gone',
+    async (_, route, body) => {
+      const response = await call(route, { body });
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).not.toEqual({ kind: 'empty' });
+      expect(backend).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses a body that is not JSON as a bad request', async () => {
+    const response = await PATCH({
+      url: new URL('http://localhost/api/cart'),
+      request: new Request('http://localhost/api/cart', {
+        method: 'POST',
+        body: 'nope',
+      }),
+    } as unknown as APIContext);
+
+    expect(response.status).toBe(400);
   });
 
   it('answers more than the shop can hold as the supplier running out', async () => {
@@ -102,15 +126,6 @@ describe('/api/cart', () => {
       'http://shop.test/store/offer-carts/cart_1/items/item_1/installation',
     );
     expect(init.body).toBe('{}');
-  });
-
-  it('answers a malformed add-on change with an empty cart', async () => {
-    expect(
-      await outcome(
-        call(PUT, { body: { cart_id: 'cart_1', item_id: 'item_1' } }),
-      ),
-    ).toEqual({ kind: 'empty' });
-    expect(backend).not.toHaveBeenCalled();
   });
 
   it('adds as many of an offer as a kit needs', async () => {

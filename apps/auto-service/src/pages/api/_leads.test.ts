@@ -136,3 +136,27 @@ describe('a parts order cancelled in the shop admin', () => {
     ]);
   });
 });
+
+describe('the thanks page a lead lands on', () => {
+  const inquiry = (service: string) =>
+    new URLSearchParams({
+      contact: '+381601234567',
+      contact_channel: 'whatsapp',
+      name: '',
+      locale: 'sr',
+      service,
+      consent: '1',
+      source_url: 'https://carlab.rs/sr/parts/',
+      visitor_id: '',
+    });
+
+  it('thanks a parts inquiry on the parts variant', async () => {
+    const response = await post(inquiry('vin-parts-inquiry'));
+    expect(response.headers.get('location')).toBe('/sr/thanks/parts/');
+  });
+
+  it('thanks a service lead on the generic page', async () => {
+    const response = await post(inquiry('diagnostics'));
+    expect(response.headers.get('location')).toBe('/sr/thanks/');
+  });
+});

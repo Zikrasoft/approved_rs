@@ -336,6 +336,7 @@ medusaIntegrationTestRunner({
           available: true,
           in_stock: false,
           lead_time_days: 4,
+          max_quantity: 10,
         });
       });
 

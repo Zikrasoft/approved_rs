@@ -74,6 +74,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
     consent: pick('[data-error-consent]'),
   };
 
+  const phoneErrorText = errors.phone.textContent;
   let channel = channelField.value as TrackedContactChannel;
   const contactField = (): ValidatedField =>
     channel === 'telegram' ? 'telegram' : 'phone';
@@ -190,6 +191,10 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
     const kit = phoneKit();
     const contactValid =
       typed.length > 0 && (!kit || kit.isValidContact(contact.value, channel));
+    errors.phone.textContent =
+      (!contactValid && kit?.tooLong(contact.value)
+        ? errors.phone.dataset.tooLong
+        : null) ?? phoneErrorText;
     mark(field, contactValid);
     mark('consent', consent.checked);
 

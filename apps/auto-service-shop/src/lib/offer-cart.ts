@@ -364,6 +364,7 @@ async function syncOfferCart(
       quantity,
       unit_price: unitPrice,
       available: !!offer && orderCap(offer) >= quantity,
+      max_quantity: offer ? orderCap(offer) : 0,
       ...readiness,
       addon: service
         ? { item_id: added('service')?.id ?? null, ...service }
