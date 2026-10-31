@@ -302,7 +302,10 @@ const thumbFor = (slug: string) => {
           {copy.installCta}
         </button>
         <a
-          href={PathBuilder.partsInquiry(locale)}
+          href={PathBuilder.partsInquiry(
+            locale,
+            `${page.brand.name} ${page.value}`,
+          )}
           class="btn btn-secondary mt-1 hidden w-full noscript:inline-flex! sm:w-auto sm:self-start"
         >
           {copy.installCta}
