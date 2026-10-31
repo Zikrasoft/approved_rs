@@ -39,6 +39,7 @@ import {
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
+import { rateLimit } from '../lib/rate-limit';
 import { refuseClosedShop } from '../lib/shop-gate';
 import { PUBLIC_ROUTE_PREFIXES, refuseUnlistedRoute } from './public-routes';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
@@ -61,6 +62,10 @@ import {
   StoreSearchParts,
 } from './store/validators';
 
+const MINUTE_MS = 60_000;
+const storeWrites = rateLimit({ limit: 120, windowMs: MINUTE_MS });
+const storeSearches = rateLimit({ limit: 600, windowMs: MINUTE_MS });
+
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,
   routes: [
@@ -68,6 +73,21 @@ export default defineMiddlewares({
       matcher: `${prefix}*`,
       middlewares: [refuseUnlistedRoute],
     })),
+    {
+      matcher: '/store/offer-carts*',
+      method: ['POST', 'DELETE'],
+      middlewares: [storeWrites],
+    },
+    {
+      matcher: '/store/vin-lookups',
+      method: 'POST',
+      middlewares: [storeWrites],
+    },
+    {
+      matcher: '/store/search',
+      method: 'GET',
+      middlewares: [storeSearches],
+    },
     {
       matcher: '/store/offer-carts*',
       middlewares: [refuseClosedShop],
