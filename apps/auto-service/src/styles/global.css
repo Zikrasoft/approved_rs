@@ -52,23 +52,23 @@
 
   --color-paper: #ffffff;
   --color-card: #ffffff;
-  --color-shade: #f3f4f6;
-  --color-shade-strong: #e7e9ed;
-  --color-panel: #1e2128;
-  --color-panel-2: #2a2e37;
-  --color-panel-line: #4a505c;
-  --color-panel-line-strong: #6b7280;
-  --color-panel-ink: #a8adb8;
-  --color-ink: #14161a;
-  --color-ink-2: #3b4149;
-  --color-muted: #636875;
-  --color-line: #e3e5e9;
-  --color-line-strong: #d2d6dd;
-  --color-line-field: #c3c7cf;
-  --color-signal: #f4661e;
-  --color-signal-ink: #c94a09;
-  --color-signal-dark: #a93a0f;
-  --color-go: #1a8a52;
+  --color-shade: #f6f6f6;
+  --color-shade-strong: #ececee;
+  --color-panel: #222324;
+  --color-panel-2: #2b2c2e;
+  --color-panel-line: #55555a;
+  --color-panel-line-strong: #797980;
+  --color-panel-ink: #95959d;
+  --color-ink: #222324;
+  --color-ink-2: #4a4a4f;
+  --color-muted: #636369;
+  --color-line: #e5e5e6;
+  --color-line-strong: #cacace;
+  --color-line-field: #919199;
+  --color-signal: #fa6610;
+  --color-signal-ink: #bc4d0c;
+  --color-signal-dark: #9e400a;
+  --color-go: #18814d;
 
   --radius-block: 1.375rem;
   --radius-control: 0.75rem;
@@ -414,7 +414,7 @@
   }
 
   .prose-shop a {
-    color: var(--color-signal);
+    color: var(--color-signal-ink);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
