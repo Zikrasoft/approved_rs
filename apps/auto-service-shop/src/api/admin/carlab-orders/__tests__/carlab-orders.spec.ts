@@ -95,12 +95,15 @@ medusaIntegrationTestRunner({
             )
           ).data.storefront_url;
 
-        expect(await storefront()).toBe('https://carlab.rs');
-        process.env.LEAD_ROUTE_URL = 'http://127.0.0.1:4331/api/leads';
+        const configured = process.env.LEAD_ROUTE_URL;
+        delete process.env.LEAD_ROUTE_URL;
         try {
+          expect(await storefront()).toBe('https://carlab.rs');
+          process.env.LEAD_ROUTE_URL = 'http://127.0.0.1:4331/api/leads';
           expect(await storefront()).toBe('http://127.0.0.1:4331');
         } finally {
-          delete process.env.LEAD_ROUTE_URL;
+          if (configured === undefined) delete process.env.LEAD_ROUTE_URL;
+          else process.env.LEAD_ROUTE_URL = configured;
         }
       });
 
