@@ -4,7 +4,8 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { previewRequested } from '@/utils/shopPreview';
 import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
-import { catalogueIdSchema, type CartOutcome } from '@/utils/catalogue';
+import { catalogueIdSchema } from '@/utils/catalogue';
+import type { CartOutcome } from '@/utils/catalogueWire';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 
 export const MAX_LINE_QUANTITY = 999;
@@ -23,8 +24,8 @@ const quantitySchema = z.object({
 const addonSchema = z.object({
   cart_id: catalogueIdSchema,
   item_id: catalogueIdSchema,
-  addon: z.boolean(),
-  kind: z.enum(ADDON_KINDS).default('service'),
+  on: z.boolean(),
+  kind: z.enum(ADDON_KINDS),
 });
 const removeSchema = z.object({
   cart_id: catalogueIdSchema,
@@ -100,7 +101,7 @@ export const PUT: APIRoute = async ({ request }) => {
           catalogue(request)?.setAddon(
             change.data.cart_id,
             change.data.item_id,
-            change.data.addon,
+            change.data.on,
             change.data.kind,
           )
       : null,

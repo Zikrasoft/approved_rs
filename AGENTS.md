@@ -96,7 +96,8 @@ three sites, and nothing carrying Approved's trust/verification semantics.
 each.** Telegram allows a single webhook URL per bot, so the CRM bot's
 `api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
 `apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
-and their own capture bot's `/api/telegram-capture`. All three write to the same `data/leads.json` on the
+and their own capture bot's `/api/telegram-capture`, and carlab.rs also
+`/api/shop-orders`, where the shop hands over its placed and canceled orders. All three write to the same `data/leads.json` on the
 same Vercel Blob store and are separated by the lead's `brand` field, which the
 app's `createBrandBot({ brand })` stamps on — a visitor can never set it.
 Connect the same Blob store to all three Vercel projects.

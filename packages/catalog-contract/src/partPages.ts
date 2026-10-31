@@ -3,6 +3,7 @@ import { displayEnum } from './displayEnum.ts';
 import { attributeValuesSchema } from './attributes.ts';
 import { imageSchema } from './images.ts';
 import { translationsSchema } from './translations.ts';
+import { partOfferSchema } from './cart-wire.ts';
 
 export const PART_IDENTIFIER_TYPES = [
   'oem',
@@ -28,14 +29,6 @@ export const brandNumberSchema = z.object({
 
 export const picturedBrandNumberSchema = brandNumberSchema.extend({
   images: z.array(imageSchema),
-});
-
-export const partOfferSchema = z.object({
-  id: z.string(),
-  price: z.number(),
-  currency: z.string(),
-  stock_quantity: z.number().int().nonnegative(),
-  lead_time_days: z.number().int().nonnegative(),
 });
 
 export const STAGED_DATA_KINDS = [
@@ -87,7 +80,6 @@ export const partPagesResponseSchema = z.object({
 
 export type BrandNumber = z.infer<typeof brandNumberSchema>;
 export type PicturedBrandNumber = z.infer<typeof picturedBrandNumberSchema>;
-export type PartOffer = z.infer<typeof partOfferSchema>;
 export type StagedDataKind = (typeof STAGED_DATA_KINDS)[number];
 export type SupplierData = z.infer<typeof supplierDataSchema>;
 export type PartPage = z.infer<typeof partPageSchema>;

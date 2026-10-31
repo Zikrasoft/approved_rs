@@ -9,7 +9,6 @@ import {
   placedOrderResponseSchema,
   type CheckoutContact,
   type CheckoutRefusal,
-  type OfferCart,
   type PartOffer,
   categoriesResponseSchema,
   catalogueRedirectsResponseSchema,
@@ -44,6 +43,7 @@ import {
   type MakeHubEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
+import type { CartOutcome, OffersOutcome } from './catalogueWire';
 
 export type { Vehicle, VinFacts };
 
@@ -86,16 +86,7 @@ export type VinOutcome =
     }
   | { kind: 'inquiry'; vin: string; place: CarHit | null };
 
-export type OffersOutcome =
-  { kind: 'offers'; offers: PartOffer[] } | { kind: 'inquiry' };
-
-export type CartOutcome =
-  | { kind: 'cart'; cart: OfferCart }
-  | { kind: 'empty' }
-  | { kind: 'refused'; code: CheckoutRefusal; cartId: string | null }
-  | { kind: 'inquiry' };
-
-export type OrderOutcome =
+export type CheckoutOutcome =
   | { kind: 'order'; order: { id: string; display_id: number } }
   | { kind: 'refused'; code: CheckoutRefusal }
   | { kind: 'empty' }
@@ -481,7 +472,7 @@ export function createCatalogue({
       cartId: string,
       itemId: string,
       on: boolean,
-      kind: AddonKind = 'service',
+      kind: AddonKind,
     ): Promise<CartOutcome> =>
       lineOutcome(
         send(
@@ -505,7 +496,7 @@ export function createCatalogue({
       cartId: string,
       contact: CheckoutContact,
       fingerprint: string,
-    ): Promise<OrderOutcome> {
+    ): Promise<CheckoutOutcome> {
       const complete = () =>
         send(
           `/store/offer-carts/${segment(cartId)}/complete`,

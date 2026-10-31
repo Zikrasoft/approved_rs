@@ -20,7 +20,8 @@ import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
-import { kitPick } from '@/utils/kitPick';
+import { kitPick, kitTotal } from '@/utils/kitPick';
+import { plural } from '@/utils/leadTime';
 
 export async function getStaticPaths() {
   const cars = await carPagesForBuild();
@@ -46,9 +47,10 @@ const copy = content(locale).partsCar.car;
 const shopPart = content(locale).shopPart;
 const { fitment } = content(locale).partsCar;
 const quantity = (count: number) =>
-  (new Intl.PluralRules(BCP47_BY_LOCALE[locale]).select(count) === 'one'
-    ? fitment.quantityOne
-    : fitment.quantity
+  plural(
+    count,
+    { one: fitment.quantityOne, other: fitment.quantity },
+    BCP47_BY_LOCALE[locale],
   ).replace('{count}', count.toLocaleString(BCP47_BY_LOCALE[locale]));
 const variant = vehicleVariant(vehicle, locale);
 const name = `${carName(vehicle.model, locale)}, ${variant}`;
@@ -68,10 +70,12 @@ const blocks = [...byCategory.values()].map((groups) => ({
 
 const kit = car.kit.map((item) => ({ ...item, ...kitPick(item.pages) }));
 const kitBuyable = kit.length > 0 && kit.every(({ offer }) => offer);
-const kitTotal =
+const kitPrice =
   kitBuyable &&
   formatMoney(
-    kit.reduce((sum, { offer, quantity }) => sum + offer!.price * quantity, 0),
+    kitTotal(
+      kit.map(({ offer, quantity }) => ({ price: offer!.price, quantity })),
+    ),
     kit[0].offer!.currency,
     BCP47_BY_LOCALE[locale],
   );
@@ -201,7 +205,7 @@ const specsSummary = [
                   <span>
                     {copy.kitCart}
                     <span class="spec whitespace-nowrap" data-kit-total>
-                      {kitTotal && ` · ${kitTotal}`}
+                      {kitPrice && ` · ${kitPrice}`}
                     </span>
                   </span>
                 </button>
@@ -430,7 +434,7 @@ const specsSummary = [
 <script>
   import { defineCarFacts } from '@/scripts/carFacts';
   import { definePartsListAddAll } from '@/scripts/partsList';
-  import { defineKitCart } from '@/scripts/offerCart';
+  import { defineKitCart } from '@/scripts/kitCart';
 
   defineCarFacts();
   definePartsListAddAll();

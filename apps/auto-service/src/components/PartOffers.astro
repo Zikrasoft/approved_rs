@@ -5,7 +5,6 @@ import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { addonDataset } from '@/utils/categoryAddon';
-import { availabilityCopy } from '@/utils/leadTime';
 import { PathBuilder } from '@/utils/paths';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
@@ -44,7 +43,10 @@ const [best, ...others] = rankOffers(page.offers);
       data-preview={closed ? '' : undefined}
       data-id={page.id}
       data-locale-tag={BCP47_BY_LOCALE[locale]}
-      data-availability={JSON.stringify(availabilityCopy(copy))}
+      data-availability={JSON.stringify({
+        columns: copy.columns,
+        leadTime: copy.leadTime,
+      })}
       data-added-label={copy.addedLabel}
       data-cart-href={PathBuilder.partsCart(locale)}
       data-more-label={copy.moreOffers}

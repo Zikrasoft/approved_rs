@@ -4,7 +4,7 @@ import {
   type CarHit,
   type VinFacts,
 } from '@podbor/catalog-contract';
-import { vinOf, vinText } from '@podbor/catalog-contract/vin';
+import { vinOf, vinText } from '@podbor/lead-crm/vin';
 import type { Locale } from '@/i18n/config';
 import { carName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';

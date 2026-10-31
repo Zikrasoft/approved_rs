@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PartOffer } from '@podbor/catalog-contract';
-import { kitPick } from './kitPick';
+import { kitPick, kitTotal } from './kitPick';
 
 const offer = (
   id: string,
@@ -47,5 +47,16 @@ describe('kitPick', () => {
     const only = page('bmw-old', [], true);
 
     expect(kitPick([only])).toEqual({ page: only, offer: null });
+  });
+});
+
+describe('kitTotal', () => {
+  it('prices every kit line by its quantity', () => {
+    expect(
+      kitTotal([
+        { price: 1850, quantity: 2 },
+        { price: 900, quantity: 1 },
+      ]),
+    ).toBe(4600);
   });
 });

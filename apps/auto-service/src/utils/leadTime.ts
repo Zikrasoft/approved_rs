@@ -13,10 +13,21 @@ export const schemaAvailability = (
       ? 'BackOrder'
       : 'OutOfStock';
 
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>> & {
+  other: string;
+};
+
+export const plural = (
+  count: number,
+  forms: PluralForms,
+  localeTag: string,
+): string =>
+  forms[new Intl.PluralRules(localeTag).select(count)] ?? forms.other;
+
 export type LeadTimeCopy = {
   inStock: string;
   tomorrow?: string;
-  days: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
+  days: PluralForms;
 };
 
 export function formatLeadTime(
@@ -30,60 +41,31 @@ export function formatLeadTime(
   if (days === 1 && copy.tomorrow) {
     return copy.tomorrow;
   }
-  const form = new Intl.PluralRules(localeTag).select(days);
-  return (copy.days[form] ?? copy.days.other).replace('{days}', String(days));
+  return plural(days, copy.days, localeTag).replace('{days}', String(days));
 }
 
 export type AvailabilityCopy = {
-  stock: string;
-  leadTime: string;
-  inStockPickup: string;
-  days: LeadTimeCopy;
-};
-
-export const availabilityCopy = ({
-  columns,
-  leadTime,
-}: {
   columns: { stock: string; leadTime: string; inStockPickup: string };
   leadTime: LeadTimeCopy;
-}): AvailabilityCopy => ({
-  stock: columns.stock,
-  leadTime: columns.leadTime,
-  inStockPickup: columns.inStockPickup,
-  days: leadTime,
-});
+};
 
 export function offerAvailability(
   offer: OfferAvailability,
-  copy: AvailabilityCopy,
+  { columns, leadTime }: AvailabilityCopy,
   localeTag: string,
 ): { stock: string | null; lead: string | null; buyable: boolean } {
   const days =
     offer.lead_time_days > 0
-      ? formatLeadTime(offer.lead_time_days, copy.days, localeTag)
+      ? formatLeadTime(offer.lead_time_days, leadTime, localeTag)
       : null;
   const inStock = offer.stock_quantity > 0;
   return {
     stock: inStock
       ? days
-        ? copy.inStockPickup.replace('{days}', days)
-        : copy.stock
+        ? columns.inStockPickup.replace('{days}', days)
+        : columns.stock
       : null,
-    lead: !inStock && days ? `${copy.leadTime} ${days}` : null,
+    lead: !inStock && days ? `${columns.leadTime} ${days}` : null,
     buyable: isBuyable(offer),
   };
-}
-
-export function availabilityText(
-  { in_stock, lead_time_days }: { in_stock: boolean; lead_time_days: number },
-  copy: AvailabilityCopy,
-  localeTag: string,
-): string | null {
-  const { stock, lead } = offerAvailability(
-    { stock_quantity: Number(in_stock), lead_time_days },
-    copy,
-    localeTag,
-  );
-  return stock ?? lead;
 }

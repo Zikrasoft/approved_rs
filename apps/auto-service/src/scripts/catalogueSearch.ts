@@ -1,4 +1,4 @@
-import { vinOf } from '@podbor/catalog-contract/vin';
+import { vinOf } from '@podbor/lead-crm/vin';
 import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 
 export const SUGGEST_DELAY_MS = 200;

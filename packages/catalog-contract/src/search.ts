@@ -6,7 +6,8 @@ import {
   localizedUnit,
   translated,
 } from './categories.ts';
-import { brandNumberSchema, partOfferSchema } from './partPages.ts';
+import { brandNumberSchema } from './partPages.ts';
+import { partOfferSchema } from './cart-wire.ts';
 import { carHitSchema, vehicleSchema } from './vehicle.ts';
 
 export const CATALOG_LOCALES = ['ru', ...CATALOG_TRANSLATION_LOCALES] as const;

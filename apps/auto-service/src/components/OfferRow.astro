@@ -3,7 +3,7 @@ import Icon from '@/components/Icon.astro';
 import type { PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { availabilityCopy, offerAvailability } from '@/utils/leadTime';
+import { offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { PathBuilder } from '@/utils/paths';
 
@@ -17,7 +17,7 @@ const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const { stock, lead, buyable } = offer
-  ? offerAvailability(offer, availabilityCopy(copy), localeTag)
+  ? offerAvailability(offer, copy, localeTag)
   : { stock: null, lead: null, buyable: false };
 ---
 

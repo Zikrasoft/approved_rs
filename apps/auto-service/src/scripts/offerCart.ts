@@ -1,473 +1,43 @@
-import * as z from 'zod/mini';
 import {
   CART_FINGERPRINT_FIELD,
   cartFingerprint,
   cartTotals,
 } from '@podbor/catalog-contract/fingerprint';
-import {
-  offerCartSchema,
-  type AddonKind,
-  type OfferCart,
-  type OfferCartLine as CartLine,
+import type {
+  AddonKind,
+  OfferCart,
+  OfferCartLine as CartLine,
 } from '@podbor/catalog-contract/cart-wire';
 import {
   CART_NOTICE_PARAM,
   ORDER_NUMBER_PARAM,
   ORDERED_CART_PARAM,
 } from '@/utils/cartNotice';
-import { rankOffers } from '@podbor/catalog-contract/availability';
-import {
-  availabilityText,
-  offerAvailability,
-  type AvailabilityCopy,
-} from '@/utils/leadTime';
+import { cartOutcomeSchema, type CartOutcome } from '@/utils/catalogueWire';
+import { offerAvailability, type AvailabilityCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
-import { vinFrom } from '@/utils/carFacts';
 import {
-  forgetStored,
-  readStoredJson,
-  writeStoredJson,
-  type ValueStorage as CartStorage,
-} from '@podbor/site-kit/stored-value';
-import { CART_CHANGED_EVENT, CART_STORAGE_KEY } from './cartBadge';
-import { PRICES_FILLED_EVENT, shopPreview } from './shopPreview';
+  forgetOrderedCart,
+  listedLine,
+  moveCartToInquiry,
+  orderedNumber,
+  priceChanges,
+  readCart,
+  readReceipt,
+  rememberCart,
+  rememberReceipt,
+  settleCart,
+  unavailableNames,
+  type PriceChange,
+} from './cartStore';
 import {
-  addonLabel,
-  addToPartsList,
-  listedPartFromDataset,
-  listedPartSchema,
-  type ListedPart,
-} from './partsList';
-
-export { CART_STORAGE_KEY };
-
-const storedCartSchema = z.object({
-  id: z.string(),
-  parts: z.array(listedPartSchema),
-  count: z.optional(z.number()),
-  prices: z.optional(z.record(z.string(), z.number())),
-});
-
-export type StoredCart = z.infer<typeof storedCartSchema>;
-
-const offerSchema = z.object({
-  id: z.string(),
-  price: z.number(),
-  currency: z.string(),
-  stock_quantity: z.number(),
-  lead_time_days: z.number(),
-});
-
-type PartOffer = z.infer<typeof offerSchema>;
-
-const inquirySchema = z.object({ kind: z.literal('inquiry') });
-
-const offersOutcomeSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('offers'), offers: z.array(offerSchema) }),
-  inquirySchema,
-]);
-
-const cartOutcomeSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('cart'), cart: offerCartSchema }),
-  z.object({ kind: z.literal('empty') }),
-  z.object({
-    kind: z.literal('refused'),
-    code: z.string(),
-    cartId: z.nullable(z.string()),
-  }),
-  inquirySchema,
-]);
-
-type CartOutcome = z.infer<typeof cartOutcomeSchema>;
-
-const announceCartChange = () => {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event(CART_CHANGED_EVENT));
-  }
-};
-
-export const readCart = (storage?: CartStorage): StoredCart | null =>
-  readStoredJson(CART_STORAGE_KEY, storedCartSchema, null, storage);
-
-function writeCart(stored: StoredCart, storage?: CartStorage): void {
-  if (writeStoredJson(CART_STORAGE_KEY, stored, storage)) announceCartChange();
-}
-
-const listedLine = ({ part, quantity, addon }: CartLine): ListedPart => ({
-  ...part,
-  quantity,
-  ...(addon && {
-    addon: addon.label,
-    ...(addon.translations && { addon_translations: addon.translations }),
-    addon_price: addon.unit_price,
-    with_addon: addon.item_id !== null,
-  }),
-});
-
-export function rememberCart(cart: OfferCart, storage?: CartStorage): void {
-  writeCart(
-    {
-      id: cart.id,
-      parts: cart.items.map(listedLine),
-      count: cart.items.reduce((sum, { quantity }) => sum + quantity, 0),
-      prices: Object.fromEntries(
-        cart.items.map(({ id, unit_price }) => [id, unit_price]),
-      ),
-    },
-    storage,
-  );
-}
-
-function keepCartId(id: string | null, storage?: CartStorage): void {
-  const stored = readCart(storage);
-  if (id && stored?.id !== id) {
-    writeCart({ id, parts: [], count: 0 }, storage);
-  }
-}
-
-export function forgetCart(storage?: CartStorage): void {
-  if (forgetStored(CART_STORAGE_KEY, storage)) announceCartChange();
-}
-
-export function forgetOrderedCart(
-  orderedId: string | null,
-  storage?: CartStorage,
-): void {
-  if (orderedId && readCart(storage)?.id === orderedId) forgetCart(storage);
-}
-
-export const orderedNumber = (
-  notice: string,
-  number: string | null,
-): string | null =>
-  notice === 'ordered' && number && /^\d+$/.test(number) ? number : null;
-
-export const unavailableNames = (cart: OfferCart): string[] =>
-  cart.items.filter(({ available }) => !available).map(({ part }) => part.name);
-
-export function moveCartToInquiry(storage?: CartStorage): void {
-  for (const part of readCart(storage)?.parts ?? []) {
-    addToPartsList(part, storage);
-  }
-  forgetCart(storage);
-}
-
-export type CartState = 'cart' | 'gone' | 'refused' | 'unreachable';
-
-export function settleCart(
-  outcome: CartOutcome | null,
-  storage?: CartStorage,
-): CartState {
-  switch (outcome?.kind) {
-    case 'cart':
-      return 'cart';
-    case 'refused':
-      return 'refused';
-    case 'empty':
-      forgetCart(storage);
-      return 'gone';
-    default:
-      return 'unreachable';
-  }
-}
-
-export type PriceChange = { name: string; before: number; after: number };
-
-export const priceChanges = (
-  seen: StoredCart,
-  cart: OfferCart,
-): PriceChange[] =>
-  cart.items.flatMap(({ id, unit_price, part }) => {
-    const before = seen.prices?.[id];
-    return before !== undefined && before !== unit_price
-      ? [{ name: part.name, before, after: unit_price }]
-      : [];
-  });
-
-export const orderSummary = (cart: OfferCart) => cartTotals(cart.items);
-
-const RECEIPT_KEY = 'carlab_order_receipt';
-
-export function rememberReceipt(
-  cart: OfferCart,
-  storage: CartStorage = sessionStorage,
-): void {
-  writeStoredJson(RECEIPT_KEY, cart, storage);
-}
-
-export function readReceipt(
-  cartId: string | null,
-  storage: CartStorage = sessionStorage,
-): OfferCart | null {
-  const receipt = readStoredJson(RECEIPT_KEY, offerCartSchema, null, storage);
-  return receipt?.id === cartId ? receipt : null;
-}
-
-const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
-const CONTACT_MEMORY_KEY = 'carlab_checkout_contact';
-const REMEMBERED_FIELDS = [
-  '[data-country]',
-  '[data-phone]',
-  '[data-telegram]',
-  '[name="name"]',
-  '[name="vin"]',
-  '[name="comment"]',
-  '[data-consent]',
-] as const;
-
-const fieldIn = (form: HTMLFormElement, selector: string) =>
-  form.querySelector<HTMLInputElement | HTMLSelectElement>(selector);
-
-const fieldValue = (field: HTMLInputElement | HTMLSelectElement | null) =>
-  field instanceof HTMLInputElement && field.type === 'checkbox'
-    ? field.checked
-      ? field.value
-      : ''
-    : (field?.value ?? '');
-
-const checkoutMemorySchema = z.object({
-  values: z.record(z.string(), z.string()),
-  channel: z.string(),
-});
-
-type CheckoutMemory = z.infer<typeof checkoutMemorySchema>;
-
-const readMemory = (storage: CartStorage, key: string): CheckoutMemory | null =>
-  readStoredJson(key, checkoutMemorySchema, null, storage);
-
-const writeMemory = (
-  storage: CartStorage,
-  key: string,
-  memory: CheckoutMemory,
-) => writeStoredJson(key, memory, storage);
-
-export function rememberCheckout(
-  form: HTMLFormElement,
-  storage: CartStorage = sessionStorage,
-): void {
-  writeMemory(storage, CHECKOUT_MEMORY_KEY, {
-    values: Object.fromEntries(
-      REMEMBERED_FIELDS.map((selector) => [
-        selector,
-        fieldValue(fieldIn(form, selector)),
-      ]),
-    ),
-    channel:
-      form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
-      '',
-  });
-}
-
-export function forgetCheckout(
-  session: CartStorage = sessionStorage,
-  local: CartStorage = localStorage,
-): void {
-  forgetStored(CHECKOUT_MEMORY_KEY, session);
-  forgetStored(CONTACT_MEMORY_KEY, local);
-}
-
-export function restoreCheckout(
-  form: HTMLFormElement,
-  session: CartStorage = sessionStorage,
-): void {
-  const memory = readMemory(session, CHECKOUT_MEMORY_KEY);
-  if (!memory) return;
-  if (memory.channel) {
-    form
-      .querySelector<HTMLElement>(`[data-tab="${CSS.escape(memory.channel)}"]`)
-      ?.click();
-  }
-  for (const [selector, value] of Object.entries(memory.values)) {
-    const field = fieldIn(form, selector);
-    if (!field || !value) continue;
-    if (field instanceof HTMLInputElement && field.type === 'checkbox') {
-      field.checked = true;
-    } else {
-      field.value = value;
-    }
-    field.dispatchEvent(new Event('input', { bubbles: true }));
-    const folded = field.closest('details');
-    if (folded) folded.open = true;
-  }
-}
-
-const getJson = async <T>(
-  schema: z.ZodMiniType<T>,
-  url: string,
-  init?: RequestInit,
-): Promise<T | null> => {
-  try {
-    const response = await fetch(url, init);
-    if (!response.ok) return null;
-    const parsed = schema.safeParse(await response.json());
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
-};
-
-const sendJson = (method: string, body: unknown) =>
-  getJson(cartOutcomeSchema, '/api/cart', {
-    method,
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-const fill = (root: ParentNode, selector: string, text: string | null) => {
-  const node = root.querySelector<HTMLElement>(selector);
-  if (!node) return;
-  node.textContent = text ?? '';
-  node.hidden = text === null;
-};
-
-const busy = (button: HTMLElement, on: boolean) => {
-  if (on) {
-    button.setAttribute('aria-busy', 'true');
-    button.setAttribute('aria-disabled', 'true');
-  } else {
-    button.removeAttribute('aria-busy');
-    button.removeAttribute('aria-disabled');
-  }
-};
-
-const isBusy = (button: HTMLElement) =>
-  button.getAttribute('aria-busy') === 'true';
-
-const showOnly = (root: ParentNode, attribute: string, value: string) => {
-  for (const block of root.querySelectorAll<HTMLElement>(`[${attribute}]`)) {
-    block.hidden = block.getAttribute(attribute) !== value;
-  }
-};
-
-const OFFERS_TIMEOUT_MS = 8000;
-
-export function definePartOffers(tagName = 'part-offers'): void {
-  if (customElements.get(tagName)) return;
-  customElements.define(
-    tagName,
-    class extends HTMLElement {
-      connectedCallback(): void {
-        this.addEventListener('click', (event) => {
-          const target = event.target as Element;
-          const buy = target.closest<HTMLButtonElement>('[data-buy]');
-          if (buy) void this.buy(buy);
-          if (target.closest('[data-ask]')) this.addToInquiry();
-        });
-        if (this.dataset.preview !== undefined && !shopPreview()) return;
-        void this.refresh();
-      }
-
-      listedPart(): ListedPart | null {
-        return listedPartFromDataset(this.dataset);
-      }
-
-      addToInquiry(): void {
-        const part = this.listedPart();
-        if (part) addToPartsList(part);
-      }
-
-      async refresh(): Promise<void> {
-        this.setAttribute('aria-busy', 'true');
-        const outcome = await getJson(
-          offersOutcomeSchema,
-          `/api/part-offers?id=${encodeURIComponent(this.dataset.id ?? '')}`,
-          { signal: AbortSignal.timeout(OFFERS_TIMEOUT_MS) },
-        );
-        this.removeAttribute('aria-busy');
-        if (outcome?.kind !== 'offers' || outcome.offers.length === 0) return;
-        const [best, ...others] = rankOffers(outcome.offers);
-        this.querySelector('[data-offers]')?.replaceChildren(this.row(best));
-        this.querySelector('[data-more-offers]')?.replaceChildren(
-          ...others.map((offer) => this.row(offer, true)),
-        );
-        const more = this.querySelector<HTMLElement>('[data-more]');
-        if (more) more.hidden = others.length === 0;
-        fill(
-          this,
-          '[data-more-count]',
-          (this.dataset.moreLabel ?? '').replace(
-            '{count}',
-            String(others.length),
-          ),
-        );
-        if (this.hidden) {
-          this.hidden = false;
-          (this.nextElementSibling as HTMLElement | null)?.setAttribute(
-            'hidden',
-            '',
-          );
-        }
-      }
-
-      row(offer: PartOffer, secondary = false): Node {
-        const { localeTag = 'sr', availability = '' } = this.dataset;
-        const template = this.querySelector<HTMLTemplateElement>(
-          'template[data-offer]',
-        )!;
-        const row = template.content.cloneNode(true) as DocumentFragment;
-        const { stock, lead, buyable } = offerAvailability(
-          offer,
-          JSON.parse(availability) as AvailabilityCopy,
-          localeTag,
-        );
-        fill(
-          row,
-          '[data-price]',
-          formatMoney(offer.price, offer.currency, localeTag),
-        );
-        fill(row, '[data-stock]', stock);
-        fill(row, '[data-lead]', lead);
-        row.querySelector<HTMLElement>('[data-out]')!.hidden = buyable;
-        row.querySelector<HTMLElement>('[data-ask]')!.hidden = buyable;
-        const buy = row.querySelector<HTMLButtonElement>('[data-buy]')!;
-        buy.hidden = !buyable;
-        buy.setAttribute('data-offer-id', offer.id);
-        if (secondary) buy.classList.replace('btn-primary', 'btn-secondary');
-        return row;
-      }
-
-      linkToCart(button: HTMLButtonElement): void {
-        const link = document.createElement('a');
-        link.href = this.dataset.cartHref ?? '';
-        link.className = button.className.replace(
-          'btn-primary',
-          'btn-secondary',
-        );
-        link.append(...button.childNodes);
-        const label = link.querySelector('[data-label]');
-        if (label) label.textContent = this.dataset.addedLabel ?? '';
-        button.replaceWith(link);
-      }
-
-      async buy(button: HTMLButtonElement): Promise<void> {
-        if (isBusy(button)) return;
-        busy(button, true);
-        const outcome = await sendJson('POST', {
-          cart_id: readCart()?.id ?? null,
-          offer_id: button.dataset.offerId,
-        });
-        busy(button, false);
-        if (outcome?.kind === 'cart') {
-          rememberCart(outcome.cart);
-          this.linkToCart(button);
-          showOnly(this, 'data-status', 'added');
-          return;
-        }
-        if (
-          outcome?.kind === 'refused' &&
-          outcome.code === 'OFFER_OUT_OF_STOCK'
-        ) {
-          keepCartId(outcome.cartId);
-          showOnly(this, 'data-status', 'stock-limit');
-          return;
-        }
-        if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
-        this.addToInquiry();
-        showOnly(this, 'data-status', 'inquiry');
-      }
-    },
-  );
-}
+  forgetCheckout,
+  rememberCheckout,
+  restoreCheckout,
+} from './checkoutMemory';
+import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
+import { shopPreview } from './shopPreview';
+import { addonLabel, addToPartsList } from './partsList';
 
 const STEP_SETTLE_MS = 400;
 
@@ -653,22 +223,26 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             return row;
           }),
         );
-        const summary = orderSummary(cart);
+        const summary = cartTotals(cart.items);
         fill(this, '[data-receipt-addons]', money(summary.addons));
-        fill(this, '[data-receipt-total]', money(summary.total));
+        fill(this, '[data-receipt-total]', money(cart.total));
         this.querySelector<HTMLElement>('[data-receipt-addon-row]')!.hidden =
           summary.addons === 0;
         this.querySelector<HTMLElement>('[data-ordered-body]')!.hidden = true;
         this.querySelector<HTMLElement>('[data-receipt]')!.hidden = false;
       }
 
-      readiness(line: CartLine, localeTag: string): string | null {
+      readiness(
+        { in_stock, lead_time_days }: CartLine,
+        localeTag: string,
+      ): string | null {
         try {
-          return availabilityText(
-            line,
+          const { stock, lead } = offerAvailability(
+            { stock_quantity: Number(in_stock), lead_time_days },
             JSON.parse(this.dataset.availability ?? '') as AvailabilityCopy,
             localeTag,
           );
+          return stock ?? lead;
         } catch {
           return null;
         }
@@ -743,11 +317,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
 
       summarize(cart: OfferCart, localeTag: string): void {
         const { countTemplate = '{count}' } = this.dataset;
-        const summary = orderSummary(cart);
+        const summary = cartTotals(cart.items);
         const money = (amount: number) =>
           formatMoney(amount, cart.currency, localeTag);
         for (const node of this.querySelectorAll('[data-total]')) {
-          node.textContent = money(summary.total);
+          node.textContent = money(cart.total);
         }
         fill(
           this,
@@ -978,106 +552,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           void this.change('PUT', {
             cart_id: cart.id,
             item_id: line.id,
-            addon: toggle.checked,
+            on: toggle.checked,
             kind: added.kind,
           });
         });
-      }
-    },
-  );
-}
-
-export function defineKitCart(tagName = 'kit-cart'): void {
-  if (customElements.get(tagName)) return;
-  customElements.define(
-    tagName,
-    class extends HTMLElement {
-      connectedCallback(): void {
-        const button = this.querySelector('button');
-        button?.addEventListener('click', () => {
-          if (isBusy(button)) return;
-          busy(button, true);
-          void this.addKit();
-        });
-        document.addEventListener(PRICES_FILLED_EVENT, () => this.priced());
-      }
-
-      priced(): void {
-        const kit = this.closest<HTMLElement>('parts-list-add-all');
-        const items = [
-          ...(kit?.querySelectorAll<HTMLElement>('[data-kit-part]') ?? []),
-        ];
-        for (const item of items) {
-          const offer =
-            item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset
-              .kitOffer;
-          if (offer) item.dataset.offerId = offer;
-          else delete item.dataset.offerId;
-        }
-        const buyable = items.every((item) => item.dataset.offerId);
-        this.hidden = !buyable;
-        const tags = items.map(
-          (item) =>
-            item.querySelector<HTMLElement>('[data-kit-offer]')?.dataset ?? {},
-        );
-        const total = this.querySelector('[data-kit-total]');
-        if (total && buyable) {
-          total.textContent = ` · ${formatMoney(
-            items.reduce(
-              (sum, item, index) =>
-                sum +
-                Number(tags[index].kitPrice) *
-                  (Number(item.dataset.quantity) || 1),
-              0,
-            ),
-            tags[0]?.kitCurrency ?? 'RSD',
-            this.dataset.localeTag ?? 'sr',
-          )}`;
-        }
-        const ask = kit?.querySelector('[data-add-all]');
-        ask?.classList.toggle('btn-secondary', buyable);
-        ask?.classList.toggle('btn-primary', !buyable);
-      }
-
-      async addKit(): Promise<void> {
-        const kit = this.closest<HTMLElement>('parts-list-add-all');
-        const vin = vinFrom(location.search);
-        let cartId = readCart()?.id ?? null;
-        let moved = false;
-        for (const item of kit?.querySelectorAll<HTMLElement>(
-          '[data-offer-id]:not([hidden])',
-        ) ?? []) {
-          const outcome = await sendJson('POST', {
-            cart_id: cartId,
-            offer_id: item.dataset.offerId,
-            quantity: Number(item.dataset.quantity) || 1,
-          });
-          if (outcome?.kind === 'cart') {
-            rememberCart(outcome.cart);
-            cartId = outcome.cart.id;
-            continue;
-          }
-          const part = listedPartFromDataset(item.dataset, {
-            car: kit?.dataset.car,
-            ...(vin && { vin }),
-          });
-          if (part) addToPartsList(part);
-          moved = true;
-        }
-        const href = this.dataset.cartHref ?? '';
-        if (moved) {
-          location.assign(
-            `${href}?${new URLSearchParams({ [CART_NOTICE_PARAM]: 'moved' })}`,
-          );
-          return;
-        }
-        const added = kit?.querySelector<HTMLElement>('[data-kit-added]');
-        if (!added) {
-          location.assign(href);
-          return;
-        }
-        this.hidden = true;
-        added.hidden = false;
       }
     },
   );

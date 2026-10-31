@@ -2,10 +2,9 @@ import { z } from 'zod';
 import { displayEnum } from './displayEnum.ts';
 import { requirementSchema } from './attributes.ts';
 import { STEERING_SIDES } from './steering.ts';
-import { vinOf } from './vin.ts';
+import { vinOf } from '@podbor/lead-crm/vin';
 
 export { STEERING_SIDES, type SteeringSide } from './steering.ts';
-export { VIN_PATTERN } from './vin.ts';
 
 export const MANUFACTURER_VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',

@@ -3,20 +3,15 @@ import {
   orderContactObject,
   withValidContact,
 } from '@podbor/lead-crm/shop-orders-wire';
-import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
-import { offerCartSchema } from './cart-wire.ts';
-import { vinOf } from './vin.ts';
+import {
+  offerCartSchema,
+  partOfferSchema,
+  CHECKOUT_REFUSALS,
+} from './cart-wire.ts';
+import { vinOf } from '@podbor/lead-crm/vin';
 
 export * from './cart-wire.ts';
-
-export const CHECKOUT_REFUSALS = [
-  'OFFER_PRICE_CHANGED',
-  'OFFER_OUT_OF_STOCK',
-  'OFFER_MISSING',
-  'CONTACT_MISSING',
-  'CART_CHANGED',
-] as const;
 
 export const checkoutRefusalSchema = z.object({
   code: z.enum(CHECKOUT_REFUSALS),
@@ -69,4 +64,3 @@ export const checkoutContactSchema = withValidContact(
 );
 
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
-export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
