@@ -1,4 +1,5 @@
 ---
+import { contactCta } from '@podbor/site-kit/contact-control';
 export const prerender = false;
 
 import {
@@ -218,13 +219,9 @@ const scopeHidden = {
   <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
     {
       !found && (
-        <CatalogueSearch
-          query={q}
-          category={category}
-          large
-          hint={false}
-          class="max-w-3xl"
-        />
+        <div class="max-w-3xl" {...contactCta}>
+          <CatalogueSearch query={q} category={category} large hint={false} />
+        </div>
       )
     }
 
@@ -280,7 +277,7 @@ const scopeHidden = {
           class:list={[
             'grid gap-6',
             facets.length > 0 &&
-              'lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
+              'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
           ]}
         >
           {facets.length > 0 && (
@@ -296,7 +293,9 @@ const scopeHidden = {
           )}
 
           <div class="flex min-w-0 flex-col gap-3">
-            <CatalogueSearch query={q} category={category} />
+            <div {...contactCta}>
+              <CatalogueSearch query={q} category={category} />
+            </div>
             {cars.length > 0 && (
               <section class="flex flex-col gap-2 pt-2">
                 <h2 class="text-base font-semibold text-ink">
@@ -480,7 +479,11 @@ const scopeHidden = {
         unknownScope ||
         numberMissing ||
         found?.results.length === 0) && (
-        <div id="lead" class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6">
+        <div
+          id="lead"
+          class="card flex max-w-2xl flex-col gap-4 p-5 sm:p-6"
+          {...contactCta}
+        >
           <h2 class="text-block font-semibold">{copy.formHeading}</h2>
           <LeadForm
             service={VIN_INQUIRY_SERVICE}

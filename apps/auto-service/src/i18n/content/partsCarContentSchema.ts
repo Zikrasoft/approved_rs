@@ -64,6 +64,7 @@ export const partsCarContentSchema = z
         kitLead: z.string(),
         kitAdd: z.string(),
         kitCart: z.string(),
+        kitAdding: z.string(),
         matchesHeading: z.string(),
         matchesLead: z.string(),
         fuel: labels(ENGINE_FUELS),

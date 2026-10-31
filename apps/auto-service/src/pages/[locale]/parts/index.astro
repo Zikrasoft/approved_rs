@@ -1,4 +1,5 @@
 ---
+import { contactCta } from '@podbor/site-kit/contact-control';
 import { translated, type Category } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -51,7 +52,9 @@ const categories = props.categories.map((category) => ({
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
   >
-    <CatalogueSearch large class="max-w-3xl pt-2" />
+    <div class="max-w-3xl pt-2" {...contactCta}>
+      <CatalogueSearch large />
+    </div>
   </PageHero>
 
   <section class="wrap flex flex-col gap-6 py-band md:py-band-lg">
@@ -160,6 +163,7 @@ const categories = props.categories.map((category) => ({
       <div
         id={PARTS_INQUIRY_ANCHOR}
         class="card flex scroll-mt-24 flex-col gap-4 p-5 sm:p-6"
+        {...contactCta}
       >
         <h2 class="text-block font-semibold">{copy.formHeading}</h2>
         <PartsInquiry />

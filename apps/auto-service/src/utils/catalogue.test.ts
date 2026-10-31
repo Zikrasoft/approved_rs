@@ -1595,6 +1595,59 @@ describe('catalogue.search', () => {
     expect(result?.results.map(({ specs }) => specs)).toEqual(['', '5 л']);
   });
 
+  it('drops a spec every part of the Category shares, even for a lone result', async () => {
+    const field = (key: string, unit: string, rank: number) => ({
+      key,
+      type: 'number',
+      unit,
+      label: key,
+      translations: null,
+      required: false,
+      facet: false,
+      rank,
+      options: [],
+    });
+    const withAttributes = (attributes: Record<string, number>) => ({
+      ...found.results[0],
+      part: { ...found.results[0].part, attributes },
+    });
+    const fetch = vi.fn((url: string) =>
+      url.endsWith('/store/categories')
+        ? respond({
+            categories: [
+              {
+                ...category('oil-filters', 'Масляные фильтры'),
+                fields: [field('voltage', 'В', 0), field('volume', 'л', 1)],
+              },
+            ],
+          })
+        : url.includes('q=')
+          ? respond({
+              ...found,
+              results: [withAttributes({ voltage: 12, volume: 5 })],
+            })
+          : respond({
+              ...found,
+              results: [
+                withAttributes({ voltage: 12, volume: 5 }),
+                withAttributes({ voltage: 12, volume: 4 }),
+              ],
+            }),
+    );
+
+    const result = await catalog(fetch).search({
+      q: 'HU816x',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(result?.results[0].specs).toBe('5 л');
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('category=oil-filters'),
+      expect.anything(),
+    );
+  });
+
   it('asks for no Categories when no result carries attributes', async () => {
     const fetch = answer(found);
 

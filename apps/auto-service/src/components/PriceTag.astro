@@ -5,7 +5,7 @@ import { content } from '@/i18n/content';
 import { bestPrice } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { kitPick } from '@/utils/kitPick';
-import { formatLeadTime } from '@/utils/leadTime';
+import { pickupTime } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import PriceSlot from './PriceSlot.astro';
 
@@ -30,9 +30,9 @@ const onlyPrice = picked || !best?.startsFrom;
 const availability =
   best &&
   (best.inStock
-    ? copy.columns.stock
+    ? copy.leadTime.inStock
     : best.leadDays > 0
-      ? `${copy.columns.leadTimeShort} ${formatLeadTime(best.leadDays, copy.leadTime, localeTag)}`
+      ? pickupTime(best.leadDays, copy.leadTime, localeTag)
       : copy.outOfStock);
 ---
 

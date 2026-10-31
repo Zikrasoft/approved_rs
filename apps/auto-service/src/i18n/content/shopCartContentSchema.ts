@@ -57,6 +57,7 @@ export const shopCartContentSchema = z
         repriced: z.string(),
         offline: z.string(),
         stockLimit: z.string(),
+        orderLimit: z.string(),
         moved: z.string(),
         movedCta: z.string(),
       })
@@ -64,6 +65,7 @@ export const shopCartContentSchema = z
     orderedHeading: z.string(),
     orderedBody: z.string(),
     orderNumberTemplate: z.string(),
+    orderedNext: z.string(),
     orderedCta: z.string(),
     receiptQuantityTemplate: z.string(),
     stickyCta: z.string(),

@@ -6,18 +6,20 @@ import { content } from '@/i18n/content';
 import { offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { PathBuilder } from '@/utils/paths';
+import { contactCta } from '@podbor/site-kit/contact-control';
 
 interface Props {
   offer?: PartOffer;
   secondary?: boolean;
+  inFlow?: boolean;
 }
 
-const { offer, secondary = false } = Astro.props;
+const { offer, secondary = false, inFlow = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const localeTag = BCP47_BY_LOCALE[locale];
 const copy = content(locale).shopPart;
 const { stock, lead, buyable } = offer
-  ? offerAvailability(offer, copy, localeTag)
+  ? offerAvailability(offer, copy.leadTime, localeTag)
   : { stock: null, lead: null, buyable: false };
 ---
 
@@ -53,28 +55,30 @@ const { stock, lead, buyable } = offer
       {lead}
     </span>
   </div>
-  <span
-    class="hidden h-11 w-full animate-pulse rounded-control bg-shade offers-pending:block motion-reduce:animate-none"
-    aria-hidden="true"></span>
-  <button
-    type="button"
-    class:list={[
-      'btn w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
-      secondary ? 'btn-secondary' : 'btn-primary',
-    ]}
-    data-buy
-    data-offer-id={offer?.id}
-    hidden={!buyable}
-  >
-    <span data-label>{copy.buyButtonLabel}</span>
-  </button>
-  <a
-    href={PathBuilder.partsInquiry(locale)}
-    class="btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!"
-    data-ask
-    hidden={buyable}
-  >
-    {copy.askSupplyCta}
-    <Icon name="arrowRight" />
-  </a>
+  <div class="flex w-full flex-col" {...inFlow && contactCta}>
+    <span
+      class="hidden h-11 w-full animate-pulse rounded-control bg-shade offers-pending:block motion-reduce:animate-none"
+      aria-hidden="true"></span>
+    <button
+      type="button"
+      class:list={[
+        'btn w-full offers-pending:hidden! noscript:hidden! aria-busy:cursor-progress aria-busy:opacity-60',
+        secondary ? 'btn-secondary' : 'btn-primary',
+      ]}
+      data-buy
+      data-offer-id={offer?.id}
+      hidden={!buyable}
+    >
+      <span data-label>{copy.buyButtonLabel}</span>
+    </button>
+    <a
+      href={PathBuilder.partsInquiry(locale)}
+      class="btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!"
+      data-ask
+      hidden={buyable}
+    >
+      {copy.askSupplyCta}
+      <Icon name="arrowRight" />
+    </a>
+  </div>
 </li>
