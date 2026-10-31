@@ -5,6 +5,7 @@ import {
   exactPart,
   listingCrumbs,
   missingNumber,
+  nearVin,
   vinDestination,
   searchIntent,
   suggestionsFrom,
@@ -53,6 +54,23 @@ describe('searchIntent', () => {
 
   it('reads anything else as a query', () => {
     expect(searchIntent('HU 816 x')).toEqual({ kind: 'query' });
+  });
+});
+
+describe('nearVin', () => {
+  it('spots a VIN one character short or long', () => {
+    expect(nearVin('WBA35BG070N07415')).toBe(true);
+    expect(nearVin('wba 35bg070n0741588')).toBe(true);
+  });
+
+  it('spots a VIN with a letter a VIN never uses', () => {
+    expect(nearVin('WBA35BG070NO74158')).toBe(true);
+  });
+
+  it('leaves part numbers and words alone', () => {
+    expect(nearVin('HU 816 x')).toBe(false);
+    expect(nearVin('11 42 8 575 211')).toBe(false);
+    expect(nearVin('масляный фильтр bmw')).toBe(false);
   });
 });
 

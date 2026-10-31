@@ -18,6 +18,15 @@ export const searchIntent = (q: string): SearchIntent => {
   return vin.success ? { kind: 'vin', vin: vin.data } : { kind: 'query' };
 };
 
+export const nearVin = (q: string): boolean => {
+  const compact = q.replace(/[\s.-]+/g, '').toUpperCase();
+  return (
+    /^[A-Z0-9]{16,18}$/.test(compact) &&
+    /[A-Z]/.test(compact) &&
+    /\d/.test(compact)
+  );
+};
+
 type ResolvedVin =
   | { kind: 'vehicle'; facts: VinFacts; place: CarHit | null }
   | { kind: 'inquiry'; place: CarHit | null };

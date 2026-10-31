@@ -35,6 +35,7 @@ import {
   exactPart,
   listingCrumbs,
   missingNumber,
+  nearVin,
   searchIntent,
   vinDestination,
 } from '@/utils/catalogueSearch';
@@ -64,6 +65,7 @@ const catalogue = catalogueFromEnv(siteEnv(), {
 });
 const intent = searchIntent(q);
 const vin = intent.kind === 'vin' ? intent.vin : null;
+const vinHint = !vin && nearVin(q);
 const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
 const destination =
   vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
@@ -243,6 +245,17 @@ const scopeHidden = {
               </a>
             </>
           )}
+        </p>
+      )
+    }
+
+    {
+      vinHint && (
+        <p
+          role="status"
+          class="max-w-2xl rounded-control bg-shade p-4 text-sm leading-relaxed text-ink"
+        >
+          {content(locale).partsCar.vin.invalid}
         </p>
       )
     }
