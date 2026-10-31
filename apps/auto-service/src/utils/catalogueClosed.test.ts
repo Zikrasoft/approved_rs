@@ -117,6 +117,8 @@ const backend = () =>
     return respond({ offers: OFFERS });
   });
 
+const PREVIEW_TOKEN = 'preview-token-0123456789abcdef0123';
+
 const closed = (fetch: ReturnType<typeof vi.fn>, preview = false) =>
   createCatalogue({
     backendUrl: BACKEND_URL,
@@ -124,6 +126,7 @@ const closed = (fetch: ReturnType<typeof vi.fn>, preview = false) =>
     fetch: fetch as unknown as typeof globalThis.fetch,
     shopOpen: false,
     preview,
+    previewToken: PREVIEW_TOKEN,
   });
 
 describe('a closed shop', () => {
@@ -177,7 +180,10 @@ describe('a closed shop', () => {
     expect(fetch).toHaveBeenCalledWith(
       `${BACKEND_URL}/store/part-identifiers/pi_bmw/offers`,
       expect.objectContaining({
-        headers: { 'x-publishable-api-key': 'pk_test', 'x-shop-preview': '1' },
+        headers: {
+          'x-publishable-api-key': 'pk_test',
+          'x-shop-preview': PREVIEW_TOKEN,
+        },
       }),
     );
   });
@@ -216,12 +222,16 @@ describe('a closed shop', () => {
       publishableKey: 'pk_test',
       fetch: fetch as unknown as typeof globalThis.fetch,
       shopOpen: true,
+      previewToken: PREVIEW_TOKEN,
     }).categories();
 
     expect(fetch).toHaveBeenCalledWith(
       `${BACKEND_URL}/store/categories`,
       expect.objectContaining({
-        headers: { 'x-publishable-api-key': 'pk_test', 'x-shop-preview': '1' },
+        headers: {
+          'x-publishable-api-key': 'pk_test',
+          'x-shop-preview': PREVIEW_TOKEN,
+        },
       }),
     );
   });

@@ -1,4 +1,7 @@
-import { shopOpenSchema } from '@podbor/catalog-contract/preview';
+import {
+  shopOpenSchema,
+  shopPreviewTokenSchema,
+} from '@podbor/catalog-contract/preview';
 import { z } from 'zod';
 
 import { VIN_DECODER_NAMES } from './vin/decoders';
@@ -108,6 +111,7 @@ const envFields = z.object({
       .optional(),
   ),
   SHOP_OPEN: shopOpenSchema,
+  SHOP_PREVIEW_TOKEN: optionalValue.pipe(shopPreviewTokenSchema.optional()),
 });
 
 type S3Fields = { NODE_ENV: string } & Partial<

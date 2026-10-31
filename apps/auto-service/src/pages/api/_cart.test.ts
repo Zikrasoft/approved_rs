@@ -3,10 +3,12 @@ import type { APIContext } from 'astro';
 import { DELETE, GET, PATCH, POST, PUT } from './cart';
 
 const backend = vi.fn();
+const PREVIEW_TOKEN = 'preview-token-0123456789abcdef0123';
 
 beforeEach(() => {
   vi.stubEnv('MEDUSA_BACKEND_URL', 'http://shop.test');
   vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+  vi.stubEnv('SHOP_PREVIEW_TOKEN', PREVIEW_TOKEN);
   vi.stubGlobal('fetch', backend);
 });
 
@@ -167,14 +169,14 @@ describe('/api/cart', () => {
 
     await call(POST, {
       body: { cart_id: null, offer_id: 'offer_1' },
-      headers: { cookie: 'auto_service_shop_preview=1' },
+      headers: { cookie: `auto_service_shop_preview=${PREVIEW_TOKEN}` },
     });
     await call(POST, { body: { cart_id: null, offer_id: 'offer_1' } });
 
     const sent = backend.mock.calls.map(
       ([, init]) => (init as RequestInit).headers,
     );
-    expect(sent[0]).toMatchObject({ 'x-shop-preview': '1' });
+    expect(sent[0]).toMatchObject({ 'x-shop-preview': PREVIEW_TOKEN });
     expect(sent[1]).not.toHaveProperty('x-shop-preview');
   });
 });

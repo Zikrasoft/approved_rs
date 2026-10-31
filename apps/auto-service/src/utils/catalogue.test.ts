@@ -183,7 +183,7 @@ describe('catalogue.partPages', () => {
     expect(fetch).toHaveBeenCalledWith(
       `${BACKEND_URL}/store/part-pages?offset=0&limit=1000`,
       expect.objectContaining({
-        headers: { 'x-publishable-api-key': 'pk_test', 'x-shop-preview': '1' },
+        headers: { 'x-publishable-api-key': 'pk_test' },
         signal: expect.any(AbortSignal),
       }),
     );

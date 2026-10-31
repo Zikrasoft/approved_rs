@@ -949,34 +949,52 @@ number gets its CI value in that script. The non-obvious parts:
 The parts catalogue is public and indexable, but buying is closed until both
 sides say otherwise. Two variables, one per side:
 
-| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                          | `true`                       |
-| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                    | prices and cart for everyone |
-| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview header, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price filter | anyone may buy               |
+| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                         | `true`                       |
+| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                   | prices and cart for everyone |
+| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price filter | anyone may buy               |
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
-is closed. turbo passes `SHOP_OPEN` through to the `@podbor/auto-service`
-build, so a rebuild (`publish.yml` or a deploy) is what applies a change. An
-open build sends the preview header itself, so it builds with prices even if
-the backend is still closed.
+is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
+`@podbor/auto-service` build, so a rebuild (`publish.yml` or a deploy) is what
+applies a change. An open build sends the preview token itself, so it builds
+with prices even if the backend is still closed.
 
-A closed-beta tester opens any carlab.rs page with `?dev=1`. The browser keeps
-the `auto_service_shop_preview=1` cookie for a year, until a page is opened with
-`?dev=0`. With the flag the visitor sees the shop as it will look open: the
-header and the parts index show the cart; listings, car and model pages, kits
-(with their «в корзину» button), add-on prices and the price filter on static
-pages are filled after load by one `POST /{locale}/parts/prices/` per page,
-which renders the same components with prices; a part page fetches its offers
-live from `/api/part-offers`; search renders prices and the price filter on the
-server; the cart and checkout work. carlab.rs reads the cookie (or `?dev=1` on
-the request itself) and passes `x-shop-preview: 1` to Medusa. Without the flag,
-`/parts/cart/` redirects to the inquiry form and nothing above runs.
+The preview is a secret token, `SHOP_PREVIEW_TOKEN`: the same value in the
+carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
+`/srv/carlab/.env`. It is 32 to 256 letters, digits, `_` or `-`; make one with
+`openssl rand -hex 32`. Both sides refuse a shorter value at start, and while
+it is unset nobody gets the preview, the open build included.
 
-This is a soft gate for a closed beta, not security. Anyone who learns `?dev=1`
-can buy and see prices, and anyone can send `x-shop-preview: 1` to the store
-API. Open the shop by setting `SHOP_OPEN=true` on both sides, restarting the
-backend (`deploy.sh` or `docker compose up -d medusa`) and rebuilding
-carlab.rs.
+A closed-beta tester opens `https://carlab.rs/api/shop-preview?token=<token>`
+once. The route keeps the token in the `auto_service_shop_preview` cookie for a
+year and sends the tester to the parts index; a wrong token gets 403 and no
+cookie, and `/api/shop-preview` with no token forgets it. The token travels in
+that one API request only, never in a page address, so analytics never record
+it. With the cookie the visitor sees the shop as it will look open: the header
+and the parts index show the cart; listings, car and model pages, kits (with
+their «в корзину» button), add-on prices and the price filter on static pages
+are filled after load by one `POST /{locale}/parts/prices/` per page, which
+renders the same components with prices; a part page fetches its offers live
+from `/api/part-offers`; search renders prices and the price filter on the
+server; the cart and checkout work. carlab.rs compares the cookie with its own
+`SHOP_PREVIEW_TOKEN` (timing-safe) and sends Medusa `x-shop-preview: <token>`,
+which Medusa compares with its copy. Without the cookie, `/parts/cart/`
+redirects to the inquiry form and nothing above runs.
+
+Anyone holding the token can buy and see prices, so give it only to testers,
+and rotate it by changing both copies when someone should lose access (testers
+then open the link again). Open the shop by setting `SHOP_OPEN=true` on both
+sides, restarting the backend (`deploy.sh` or `docker compose up -d medusa`)
+and rebuilding carlab.rs.
+
+**Rolling out the token.** The two sides deploy separately, and a side that
+does not know the token yet fails closed: the old shop accepts only `1`, the
+new one only the token, so between the two deploys testers see the closed shop
+and nobody else sees more. Set `SHOP_PREVIEW_TOKEN` in both places first,
+deploy the shop, then redeploy carlab.rs, and send testers the new link. A
+shop rollback to an image without the token closes the preview until the shop
+moves forward again.
 
 ### How it ships
 

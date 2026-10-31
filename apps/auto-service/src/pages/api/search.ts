@@ -4,10 +4,13 @@ import type { APIRoute } from 'astro';
 import { searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  previewRequested,
+} from '@/utils/catalogueEnv';
 import { searchIntent, suggestionsFrom } from '@/utils/catalogueSearch';
 import { partsQuery } from '@/utils/partsSearch';
-import { previewRequested } from '@/utils/shopPreview';
 
 const SUGGESTION_LIMIT = 5;
 

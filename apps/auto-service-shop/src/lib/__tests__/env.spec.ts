@@ -240,6 +240,20 @@ describe('parseEnv', () => {
     ).toThrow('The demo supplier never runs in production');
   });
 
+  it('takes a preview token of at least 32 characters, empty as unset', () => {
+    const token = 'p'.repeat(32);
+
+    expect(
+      parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: token }).SHOP_PREVIEW_TOKEN,
+    ).toBe(token);
+    expect(
+      parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: '' }).SHOP_PREVIEW_TOKEN,
+    ).toBeUndefined();
+    expect(() => parseEnv({ ...VALID_ENV, SHOP_PREVIEW_TOKEN: '1' })).toThrow(
+      /SHOP_PREVIEW_TOKEN/,
+    );
+  });
+
   it('keeps the shop closed in production and open elsewhere unless SHOP_OPEN says', () => {
     const production = PRODUCTION_ENV;
 

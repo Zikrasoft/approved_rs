@@ -3,8 +3,12 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import type { OffersOutcome } from '@/utils/catalogueWire';
-import { catalogueFromEnv, siteEnv, uncachedJson } from '@/utils/catalogueEnv';
-import { previewRequested } from '@/utils/shopPreview';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  uncachedJson,
+  previewRequested,
+} from '@/utils/catalogueEnv';
 
 const INQUIRY: OffersOutcome = { kind: 'inquiry' };
 

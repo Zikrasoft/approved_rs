@@ -35,6 +35,7 @@
         "MEDUSA_BACKEND_URL",
         "MEDUSA_PUBLISHABLE_KEY",
         "SHOP_OPEN",
+        "SHOP_PREVIEW_TOKEN",
         "VERCEL",
         "CATALOGUE_SHRINK_ALLOWED"
       ]

@@ -4,9 +4,12 @@ import type { APIRoute } from 'astro';
 import { CATALOG_KEY_PATTERN, searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
-import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
+import {
+  catalogueFromEnv,
+  siteEnv,
+  previewRequested,
+} from '@/utils/catalogueEnv';
 import { partsQuery, rangesFromParams } from '@/utils/partsSearch';
-import { previewRequested } from '@/utils/shopPreview';
 
 const catalogKey = z.string().regex(CATALOG_KEY_PATTERN).optional();
 

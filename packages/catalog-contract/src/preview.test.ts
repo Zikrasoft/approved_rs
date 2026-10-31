@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { SHOP_PREVIEW_HEADER, shopOpenSchema } from './preview.ts';
+import {
+  SHOP_PREVIEW_HEADER,
+  shopOpenSchema,
+  shopPreviewTokenSchema,
+} from './preview.ts';
 
 describe('SHOP_PREVIEW_HEADER', () => {
   it('is lower-case, as Node hands request headers to the shop', () => {
@@ -18,5 +22,18 @@ describe('shopOpenSchema', () => {
 
   it('refuses any other spelling', () => {
     expect(shopOpenSchema.safeParse('yes').success).toBe(false);
+  });
+});
+
+describe('shopPreviewTokenSchema', () => {
+  it('takes a URL-safe token of at least 32 characters', () => {
+    expect(shopPreviewTokenSchema.safeParse('a'.repeat(32)).success).toBe(true);
+    expect(shopPreviewTokenSchema.safeParse('a'.repeat(31)).success).toBe(
+      false,
+    );
+    expect(shopPreviewTokenSchema.safeParse('1').success).toBe(false);
+    expect(shopPreviewTokenSchema.safeParse(`${'a'.repeat(32)};`).success).toBe(
+      false,
+    );
   });
 });
