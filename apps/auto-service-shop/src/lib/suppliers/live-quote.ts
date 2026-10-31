@@ -78,54 +78,77 @@ async function reindexIdentifiers(
   });
 }
 
-// TODO: in-process, so each server process quotes on its own and a restart forgets every quote; move it to Redis with the server/worker split or once a supplier rate limit needs one shared window (#328).
-const recentQuotes = new Map<string, { at: number; quote: Quote | null }>();
+export type QuoteCache = ReturnType<typeof createQuoteCache>;
 
-const forgetQuotesOlderThan = (cutoff: number) => {
-  for (const [offerId, { at }] of recentQuotes) {
-    if (at < cutoff) recentQuotes.delete(offerId);
-  }
-};
+// TODO: in-process, so each server process quotes on its own and a restart forgets every quote; move it to Redis with the server/worker split or once a supplier rate limit needs one shared window (#328).
+export function createQuoteCache({
+  windowMs,
+  now = Date.now,
+}: {
+  windowMs: number;
+  now?: () => number;
+}) {
+  const recent = new Map<string, { at: number; quote: Quote | null }>();
+  return {
+    recall(offerId: string): { quote: Quote | null } | undefined {
+      const hit = recent.get(offerId);
+      return windowMs > 0 && hit && hit.at >= now() - windowMs
+        ? hit
+        : undefined;
+    },
+    remember(offerId: string, quote: Quote | null): void {
+      const at = now();
+      for (const [id, entry] of recent) {
+        if (entry.at < at - windowMs) recent.delete(id);
+      }
+      recent.set(offerId, { at, quote });
+    },
+  };
+}
+
+let processQuotes: QuoteCache | undefined;
+
+const sharedQuotes = (): QuoteCache =>
+  (processQuotes ??= createQuoteCache({
+    windowMs: parseEnv(process.env).LIVE_QUOTE_CACHE_SECONDS * 1000,
+  }));
 
 async function quotesFor<T extends QuotedOffer>(
   quote: (articleIds: string[]) => Promise<unknown>,
   offers: T[],
-  reuseSince: number | null,
+  cache: QuoteCache,
+  reuseRecent: boolean,
 ): Promise<Map<string, Quote | null>> {
-  const stale = offers.filter(
-    ({ id }) =>
-      reuseSince === null || (recentQuotes.get(id)?.at ?? -1) < reuseSince,
+  const known = new Map(
+    offers.flatMap(({ id }) => {
+      const hit = reuseRecent ? cache.recall(id) : undefined;
+      return hit ? [[id, hit.quote] as const] : [];
+    }),
   );
+  const stale = offers.filter(({ id }) => !known.has(id));
   if (stale.length) {
     const quotes = await liveQuotes(
       quote,
       stale.map(({ supplier_article_id }) => supplier_article_id),
     );
-    const at = Date.now();
     for (const { id, supplier_article_id } of stale) {
-      recentQuotes.set(id, {
-        at,
-        quote: quotes.get(supplier_article_id) ?? null,
-      });
+      const fresh = quotes.get(supplier_article_id) ?? null;
+      cache.remember(id, fresh);
+      known.set(id, fresh);
     }
   }
-  return new Map(
-    offers.map(({ id }) => [id, recentQuotes.get(id)?.quote ?? null]),
-  );
+  return known;
 }
 
 async function requoteOffers<T extends QuotedOffer>(
   scope: MedusaContainer,
   offers: T[],
-  reuseRecent: boolean,
+  { reuseRecent, quotes: cache }: QuoteOptions,
 ): Promise<T[]> {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const adapters = supplierAdapters(scope);
   const live: T[] = [];
   const moved = new Set<string>();
-  const window = parseEnv(process.env).LIVE_QUOTE_CACHE_SECONDS * 1000;
-  const reuseSince = Date.now() - window;
-  forgetQuotesOlderThan(reuseSince);
   for (const name of new Set(offers.map(({ supplier }) => supplier.name))) {
     const own = offers.filter(({ supplier }) => supplier.name === name);
     const adapter = adapters.find((candidate) => candidate.name === name);
@@ -133,11 +156,7 @@ async function requoteOffers<T extends QuotedOffer>(
       live.push(...own);
       continue;
     }
-    const quotes = await quotesFor(
-      adapter.quote,
-      own,
-      reuseRecent && window > 0 ? reuseSince : null,
-    );
+    const quotes = await quotesFor(adapter.quote, own, cache, reuseRecent);
     for (const offer of own) {
       const quote = quotes.get(offer.id);
       if (!quote || !isSellable({ ...quote, supplier: offer.supplier })) {
@@ -155,22 +174,24 @@ async function requoteOffers<T extends QuotedOffer>(
   return live;
 }
 
+type QuoteOptions = { reuseRecent: boolean; quotes: QuoteCache };
+
 export async function liveOffers(
   scope: MedusaContainer,
   filters: { id?: string[]; part_identifier_id?: string },
-  { reuseRecent = false }: { reuseRecent?: boolean } = {},
+  { reuseRecent = false, quotes = sharedQuotes() }: Partial<QuoteOptions> = {},
 ) {
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const offers = await suppliers.listSupplierOffers(filters, {
     relations: ['supplier'],
     take: null,
   });
-  return requoteOffers(scope, offers, reuseRecent);
+  return requoteOffers(scope, offers, { reuseRecent, quotes });
 }
 
 export const sellingOffers = async (
   scope: MedusaContainer,
   filters: { id?: string[]; part_identifier_id?: string },
-  options: { reuseRecent?: boolean } = {},
+  options: Partial<QuoteOptions> = {},
 ): Promise<PartOffer[]> =>
   storeOffers(await liveOffers(scope, filters, options));

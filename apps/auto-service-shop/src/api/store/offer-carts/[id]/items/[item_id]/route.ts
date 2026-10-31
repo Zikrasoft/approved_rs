@@ -1,9 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
-import {
-  removeOfferLine,
-  setOfferQuantity,
-} from '../../../../../../lib/offer-cart';
+import { offerCart } from '../../../../../../lib/offer-cart';
 import type { StoreSetOfferCartItemType } from '../../../../validators';
 
 export async function POST(
@@ -12,8 +9,7 @@ export async function POST(
 ): Promise<void> {
   const { id, item_id } = req.params;
   res.json({
-    cart: await setOfferQuantity(
-      req.scope,
+    cart: await offerCart(req.scope).setOfferQuantity(
       id,
       item_id,
       req.validatedBody.quantity,
@@ -26,5 +22,5 @@ export async function DELETE(
   res: MedusaResponse,
 ): Promise<void> {
   const { id, item_id } = req.params;
-  res.json({ cart: await removeOfferLine(req.scope, id, item_id) });
+  res.json({ cart: await offerCart(req.scope).removeOfferLine(id, item_id) });
 }
