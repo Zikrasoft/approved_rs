@@ -71,6 +71,7 @@ export const shopCartContentSchema = z
     fallbackBody: z.string(),
     fallbackRetry: z.string(),
     fallbackCta: z.string(),
+    noscriptBody: z.string(),
   })
   .strict();
 

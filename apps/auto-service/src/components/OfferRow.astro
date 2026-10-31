@@ -70,9 +70,11 @@ const { stock, lead, buyable } = offer
   </button>
   <a
     href={PathBuilder.partsInquiry(locale)}
-    class="btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!"
+    class:list={[
+      'btn btn-secondary w-full offers-pending:hidden! noscript:inline-flex!',
+      buyable && 'hidden',
+    ]}
     data-ask
-    hidden={buyable}
   >
     {copy.askSupplyCta}
     <Icon name="arrowRight" />

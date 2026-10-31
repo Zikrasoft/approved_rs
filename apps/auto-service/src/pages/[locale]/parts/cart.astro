@@ -74,9 +74,26 @@ const stepper =
       data-preview={shopOpen() ? undefined : ''}
       data-availability={JSON.stringify({ columns, leadTime })}
     >
-      <p data-state="loading" class="text-sm text-muted" role="status">
+      <p
+        data-state="loading"
+        class="text-sm text-muted noscript:hidden!"
+        role="status"
+      >
         {copy.loading}
       </p>
+
+      <div
+        class="card hidden max-w-2xl flex-col gap-3 p-5 noscript:flex! sm:p-6"
+      >
+        <p class="text-sm leading-relaxed text-ink-2">{copy.noscriptBody}</p>
+        <a
+          href={PathBuilder.partsInquiry(locale)}
+          class="btn btn-primary w-full sm:w-auto sm:self-start"
+        >
+          {copy.emptyInquiryCta}
+          <Icon name="arrowRight" />
+        </a>
+      </div>
 
       <div data-state="empty" hidden class={panel} {...contactCta}>
         <h2 class="text-block font-semibold">{copy.emptyHeading}</h2>
