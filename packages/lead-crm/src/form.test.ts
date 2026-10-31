@@ -339,9 +339,15 @@ describe('leadSubmissionSchema', () => {
     );
   });
 
-  it('keeps what was typed in the VIN field when it is not a VIN', () => {
-    const parsed = submit({ name: '', contact: '+381641234567', vin: 'wba35' });
-    expect(parsed.success && parsed.data.comment).toBe('VIN: WBA35');
+  it('keeps what was typed in the VIN field, but never passes it off as a VIN', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'жжж123',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN не распознан: ЖЖЖ123',
+    );
   });
 
   it('carries the shop order the Lead was placed for', () => {

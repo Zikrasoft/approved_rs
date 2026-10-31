@@ -46,8 +46,10 @@ export {
   SERVICE_FIELD,
 } from './fields.ts';
 
-export const vinNote = (vin: string): string =>
-  `VIN: ${vinOf(vin) ?? vin.toUpperCase()}`;
+export const vinNote = (vin: string): string => {
+  const read = vinOf(vin);
+  return read ? `VIN: ${read}` : `VIN не распознан: ${vin.toUpperCase()}`;
+};
 
 export const contactChannelSchema = z.enum(TRACKED_CONTACT_CHANNELS);
 

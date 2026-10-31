@@ -1,3 +1,4 @@
+import { vinText } from '@podbor/lead-crm/vin';
 import { readStored, writeStored } from './storedValue.ts';
 
 type VinStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -37,6 +38,9 @@ export function defineMyGarage(tagName = 'my-garage'): void {
           if (/[\s.-]/.test(input.value)) {
             input.value = input.value.replace(/[\s.-]+/g, '').toUpperCase();
           }
+        });
+        input.addEventListener('blur', () => {
+          input.value = vinText(input.value);
         });
       }
     },
