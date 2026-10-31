@@ -68,24 +68,25 @@ describe('the checkout form', () => {
     expect(field(fresh, '[data-consent]').checked).toBe(true);
   });
 
-  it('offers the contact of the last order on the next checkout', () => {
+  it('keeps no contact once the order is placed, not even one an earlier visit kept', () => {
     const session = memoryStorage();
     const local = memoryStorage();
+    local.setItem(
+      'carlab_checkout_contact',
+      JSON.stringify({ channel: 'whatsapp', values: { '[data-phone]': '1' } }),
+    );
     const sent = checkoutForm();
     field(sent, '[data-phone]').value = '641234567';
     field(sent, '[name="name"]').value = 'Petar';
-    field(sent, '[name="vin"]').value = 'WBA35BG070N074158';
-    field(sent, '[data-consent]').checked = true;
     rememberCheckout(sent, session);
 
     forgetCheckout(session, local);
     const next = checkoutForm();
-    restoreCheckout(next, session, local);
+    restoreCheckout(next, session);
 
-    expect(field(next, '[data-phone]').value).toBe('641234567');
-    expect(field(next, '[name="name"]').value).toBe('Petar');
-    expect(field(next, '[name="vin"]').value).toBe('');
-    expect(field(next, '[data-consent]').checked).toBe(false);
+    expect(field(next, '[data-phone]').value).toBe('');
+    expect(field(next, '[name="name"]').value).toBe('');
+    expect(local.getItem('carlab_checkout_contact')).toBeNull();
   });
 
   it('starts empty when storage is blocked', () => {
@@ -103,7 +104,7 @@ describe('the checkout form', () => {
     const form = checkoutForm();
     rememberCheckout(form, blocked);
     forgetCheckout(blocked, blocked);
-    restoreCheckout(form, blocked, blocked);
+    restoreCheckout(form, blocked);
 
     expect(field(form, '[data-phone]').value).toBe('');
   });

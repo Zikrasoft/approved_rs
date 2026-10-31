@@ -248,14 +248,11 @@ export function readReceipt(
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const CONTACT_MEMORY_KEY = 'carlab_checkout_contact';
-const CONTACT_FIELDS = [
+const REMEMBERED_FIELDS = [
   '[data-country]',
   '[data-phone]',
   '[data-telegram]',
   '[name="name"]',
-] as const;
-const REMEMBERED_FIELDS = [
-  ...CONTACT_FIELDS,
   '[name="vin"]',
   '[name="comment"]',
   '[data-consent]',
@@ -308,29 +305,15 @@ export function forgetCheckout(
   session: CartStorage = sessionStorage,
   local: CartStorage = localStorage,
 ): void {
-  const memory = readMemory(session, CHECKOUT_MEMORY_KEY);
-  if (memory) {
-    writeMemory(local, CONTACT_MEMORY_KEY, {
-      channel: memory.channel,
-      values: Object.fromEntries(
-        CONTACT_FIELDS.map((selector) => [
-          selector,
-          memory.values[selector] ?? '',
-        ]),
-      ),
-    });
-  }
   forgetStored(CHECKOUT_MEMORY_KEY, session);
+  forgetStored(CONTACT_MEMORY_KEY, local);
 }
 
 export function restoreCheckout(
   form: HTMLFormElement,
   session: CartStorage = sessionStorage,
-  local: CartStorage = localStorage,
 ): void {
-  const memory =
-    readMemory(session, CHECKOUT_MEMORY_KEY) ??
-    readMemory(local, CONTACT_MEMORY_KEY);
+  const memory = readMemory(session, CHECKOUT_MEMORY_KEY);
   if (!memory) return;
   if (memory.channel) {
     form
@@ -570,14 +553,24 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         }
         const params = new URLSearchParams(location.search);
         const notice = params.get(CART_NOTICE_PARAM) ?? '';
-        if (notice === 'ordered') {
-          forgetOrderedCart(params.get(ORDERED_CART_PARAM));
+        const orderedId = params.get(ORDERED_CART_PARAM);
+        if (notice === 'ordered') forgetOrderedCart(orderedId);
+        const receipt = notice === 'ordered' ? readReceipt(orderedId) : null;
+        if (receipt) {
           forgetCheckout();
-          this.showOrdered(
-            params.get(ORDER_NUMBER_PARAM),
-            readReceipt(params.get(ORDERED_CART_PARAM)),
-          );
+          this.showOrdered(params.get(ORDER_NUMBER_PARAM), receipt);
           return;
+        }
+        if (notice) {
+          const url = new URL(location.href);
+          for (const param of [
+            CART_NOTICE_PARAM,
+            ORDER_NUMBER_PARAM,
+            ORDERED_CART_PARAM,
+          ]) {
+            url.searchParams.delete(param);
+          }
+          history.replaceState(history.state, '', url);
         }
         const form = this.querySelector('form');
         if (form) {
@@ -646,7 +639,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         showOnly(this, 'data-state', state);
       }
 
-      showOrdered(orderNumber: string | null, receipt: OfferCart | null): void {
+      showOrdered(orderNumber: string | null, receipt: OfferCart): void {
         const { orderedHeading, orderTemplate = '' } = this.dataset;
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
@@ -657,7 +650,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             ? orderTemplate.replace('{number}', orderNumber)
             : null,
         );
-        if (receipt) this.receipt(receipt);
+        this.receipt(receipt);
         this.show('ordered');
       }
 
@@ -936,9 +929,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (decrease) decrease.disabled = shown <= 1;
         const toInquiry = act('[data-to-inquiry]', () => {
           addToPartsList(listedLine(line));
-          return this.change('DELETE', lineBody).then(() =>
-            showOnly(this, 'data-notice', 'moved'),
-          );
+          return this.change('DELETE', lineBody).then(() => {
+            showOnly(this, 'data-notice', 'moved');
+            showOnly(this, 'data-empty-notice', 'moved');
+          });
         });
         if (toInquiry) toInquiry.hidden = line.available;
         const cap = line.max_quantity ?? 0;

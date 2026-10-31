@@ -86,6 +86,20 @@ const stepper =
         >
           {copy.notices.expired}
         </p>
+        <div
+          data-empty-notice="moved"
+          hidden
+          class="flex flex-col gap-3 rounded-control bg-signal/8 p-4"
+        >
+          <p class="text-sm leading-relaxed text-ink">{copy.notices.moved}</p>
+          <a
+            href={PathBuilder.partsInquiry(locale)}
+            class="btn btn-primary w-full sm:w-auto sm:self-start"
+          >
+            {copy.notices.movedCta}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
         <p class="text-sm leading-relaxed text-ink-2">{copy.emptyBody}</p>
         <a
           href={PathBuilder.parts(locale)}
