@@ -119,7 +119,7 @@ describe('<scroll-reveal>', () => {
 
   it('observes once however often it is connected', () => {
     const { host } = mount();
-    host.connectedCallback();
+    (host as unknown as { connectedCallback(): void }).connectedCallback();
     expect(observers).toHaveLength(1);
   });
 

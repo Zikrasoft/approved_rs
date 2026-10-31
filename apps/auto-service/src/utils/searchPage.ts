@@ -27,6 +27,13 @@ export type SearchCatalogue = Pick<
 const catalogKey = (raw: string | null) =>
   raw && CATALOG_KEY_PATTERN.test(raw) ? raw : undefined;
 
+type SearchRedirect = { redirect: string; status: 302 | 303 };
+
+const redirectTo = (redirect: string, status: 302 | 303): SearchRedirect => ({
+  redirect,
+  status,
+});
+
 const lastPageOf = ({ count, limit }: { count: number; limit: number }) =>
   count > 0 ? Math.floor((count - 1) / limit) * limit : 0;
 
@@ -83,7 +90,7 @@ export async function planSearch({
   const destination =
     vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
   if (destination) {
-    return { redirect: destination, status: 303 } as const;
+    return redirectTo(destination, 303);
   }
 
   const searchable = !vin && (searchableQuery(q) || Boolean(category));
@@ -105,26 +112,17 @@ export async function planSearch({
     chosen.length !== requestedFacets.length ||
     ranges.length !== requestedRanges.length
   ) {
-    return {
-      redirect: searchHref(chosen, ranges, offset),
-      status: 302,
-    } as const;
+    return redirectTo(searchHref(chosen, ranges, offset), 302);
   }
   if (found && offset > lastPageOf(found)) {
-    return {
-      redirect: searchHref(chosen, ranges, lastPageOf(found)),
-      status: 302,
-    } as const;
+    return redirectTo(searchHref(chosen, ranges, lastPageOf(found)), 302);
   }
   const exact =
     found && !category && !model && !chosen.length && !ranges.length && !offset
       ? exactPart(q, found.results)
       : null;
   if (exact) {
-    return {
-      redirect: PathBuilder.partNumber(locale, exact),
-      status: 302,
-    } as const;
+    return redirectTo(PathBuilder.partNumber(locale, exact), 302);
   }
 
   const scope =
@@ -156,5 +154,5 @@ export async function planSearch({
       unknownScope,
       searchHref,
     },
-  } as const;
+  };
 }
