@@ -159,7 +159,7 @@ medusaIntegrationTestRunner({
             storeHeaders,
           );
 
-          expect(response.data).toMatchObject({ count: 1 });
+          expect(response.data).toMatchObject({ next: null });
           expect(response.data.vehicles).toEqual([
             expect.objectContaining({ id: vehicle.id }),
           ]);
@@ -171,7 +171,7 @@ medusaIntegrationTestRunner({
             storeHeaders,
           );
 
-          expect(response.data).toMatchObject({ vehicles: [], count: 0 });
+          expect(response.data).toMatchObject({ vehicles: [], next: null });
         });
 
         it('reads every Vehicle past one read batch for the shop itself', async () => {
