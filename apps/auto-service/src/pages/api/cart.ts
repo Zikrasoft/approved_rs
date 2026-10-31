@@ -2,6 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
+import { bodyTooLarge } from '@podbor/lead-crm';
 import { previewRequested } from '@/utils/shopPreview';
 import { ADDON_KINDS } from '@podbor/catalog-contract/cart-wire';
 import { catalogueIdSchema } from '@/utils/catalogue';
@@ -50,7 +51,8 @@ const respond = async (
   return uncachedJson((await outcome()) ?? INQUIRY);
 };
 
-const body = (request: Request) => request.json().catch(() => null);
+const body = (request: Request) =>
+  bodyTooLarge(request) ? null : request.json().catch(() => null);
 
 export const GET: APIRoute = ({ url, request }) => {
   const id = catalogueIdSchema.safeParse(url.searchParams.get('id'));

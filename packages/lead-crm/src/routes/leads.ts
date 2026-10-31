@@ -15,6 +15,7 @@ import {
 } from '../form.ts';
 import { escapeHtml } from '../telegram/markup.ts';
 import { bearerToken, secretMatches } from '../verifySecret.ts';
+import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
 import type { NotifyLead } from '../notifyLead.ts';
 import type { CancelOrderResult } from '../brandBot.ts';
 
@@ -158,6 +159,7 @@ export function createLeadsRoute<L extends string>({
     redirect,
     cookies,
   }: RouteRequestContext): Promise<Response> {
+    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
     const form = await request.formData().catch(() => new FormData());
     const canceled = orderCancelSchema.safeParse({
       [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),

@@ -56,6 +56,21 @@ describe('createShopOrdersRoute', () => {
     },
   );
 
+  it('refuses an oversized body before reading it', async () => {
+    const response = await POST({
+      request: new Request('https://carlab.rs/api/shop-orders', {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer shop-secret',
+          'content-length': '70000',
+        },
+        body: JSON.stringify(placed()),
+      }),
+    });
+    expect(response.status).toBe(413);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it.each(['not json', { event: 'placed', order_id: 'order_1' }])(
     'refuses a body that is not a shop order event (%j)',
     async (body) => {

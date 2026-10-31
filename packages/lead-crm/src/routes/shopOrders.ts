@@ -1,3 +1,4 @@
+import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
 import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import {
   adSourceFieldSchema,
@@ -71,6 +72,7 @@ export function createShopOrdersRoute({
       !secretMatches(bearerToken(request.headers.get('authorization')), secret)
     )
       return new Response(null, { status: 401 });
+    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
     const event = shopOrderEventSchema.safeParse(
       await request.json().catch(() => null),
     );

@@ -168,6 +168,14 @@ describe('POST /api/order', () => {
     expect(notifyLead).not.toHaveBeenCalled();
   });
 
+  it('refuses an oversized body before reading it', async () => {
+    const response = await checkout({}, { 'content-length': '70000' });
+
+    expect(response.status).toBe(413);
+    expect(backend).not.toHaveBeenCalled();
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('answers a body that is not a form with a redirect, not a crash', async () => {
     const response = await submit('{"cart_id":"cart_1"}', {
       'content-type': 'application/json',

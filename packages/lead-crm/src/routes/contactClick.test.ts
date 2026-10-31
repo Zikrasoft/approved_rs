@@ -37,6 +37,18 @@ describe('createContactClickRoute', () => {
     expect(res.status).toBe(204);
   });
 
+  it('refuses an oversized body before reading it', async () => {
+    const response = await POST({
+      request: new Request('http://localhost/api/contact-click', {
+        method: 'POST',
+        headers: { 'content-length': '70000' },
+        body: 'x',
+      }),
+    });
+    expect(response.status).toBe(413);
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
   it('refuses a body that is not a form without storing a click', async () => {
     const response = await POST({
       request: new Request('http://localhost/api/contact-click', {

@@ -8,6 +8,7 @@ import {
   visitorIdSchema,
 } from '../form.ts';
 import type { NotifyLead } from '../notifyLead.ts';
+import { bodyTooLarge, PAYLOAD_TOO_LARGE } from '../bodySize.ts';
 
 const clickedChannelSchema = contactChannelSchema.catch('phone');
 
@@ -38,6 +39,7 @@ export function createContactClickRoute({
   }: {
     request: Request;
   }): Promise<Response> {
+    if (bodyTooLarge(request)) return PAYLOAD_TOO_LARGE();
     const form = await request.formData().catch(() => null);
     if (!form) {
       return new Response(null, { status: 400 });

@@ -105,6 +105,19 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/parts/', 302);
   });
 
+  it('refuses an oversized body before reading it', async () => {
+    const response = await POST({
+      ...makeCtx(valid()),
+      request: new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { 'content-length': '70000' },
+        body: 'x',
+      }),
+    });
+    expect(response.status).toBe(413);
+    expect(waitUntil).not.toHaveBeenCalled();
+  });
+
   it('answers a body that is not a form with the refusal page, not a crash', async () => {
     const ctx = {
       ...makeCtx({}),
