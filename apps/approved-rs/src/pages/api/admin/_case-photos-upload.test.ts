@@ -201,6 +201,24 @@ describe('POST /api/admin/case-photos-upload', () => {
     expect(writeFile).not.toHaveBeenCalled();
   });
 
+  it('refuses an upload past the body cap before reading it', async () => {
+    import.meta.env.PROD = false;
+    const request = new Request(
+      'http://localhost/api/admin/case-photos-upload',
+      {
+        method: 'POST',
+        headers: { 'content-length': String(101 * 1024 * 1024) },
+        body: 'x',
+      },
+    );
+    const res = await POST({
+      request,
+      cookies: { get: () => undefined },
+    } as unknown as APIContext);
+    expect(res.status).toBe(413);
+    expect(request.bodyUsed).toBe(false);
+  });
+
   it('rejects a body that is not a form with 400', async () => {
     import.meta.env.PROD = false;
     const res = await POST({

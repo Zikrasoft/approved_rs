@@ -176,8 +176,8 @@ export function createLeadsRoute<L extends string>({
     cookies,
   }: RouteRequestContext): Promise<Response> {
     const read = await readForm(request);
-    if (read instanceof Response) return read;
-    const form = read ?? new FormData();
+    if ('response' in read) return read.response;
+    const form = read.value ?? new FormData();
     const canceled = orderCancelSchema.safeParse({
       [ORDER_ID_FIELD]: form.get(ORDER_ID_FIELD),
       [ORDER_OUTCOME_FIELD]: form.get(ORDER_OUTCOME_FIELD),

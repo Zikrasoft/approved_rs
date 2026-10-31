@@ -28,15 +28,22 @@ const failing = (): ReadableStream<Uint8Array> =>
     },
   });
 
-const status = (value: unknown) =>
-  value instanceof Response ? value.status : null;
+const status = (read: { response: Response } | { value: unknown }) =>
+  'response' in read ? read.response.status : null;
+
+const value = <T>(read: { response: Response } | { value: T }): T => {
+  if ('response' in read) throw new Error('expected a value');
+  return read.value;
+};
 
 describe('readForm', () => {
   it('reads a form under the cap', async () => {
-    const form = await readForm(
-      post('name=Ana&contact=%2B381', {
-        'content-type': 'application/x-www-form-urlencoded',
-      }),
+    const form = value(
+      await readForm(
+        post('name=Ana&contact=%2B381', {
+          'content-type': 'application/x-www-form-urlencoded',
+        }),
+      ),
     );
     expect(form).toBeInstanceOf(FormData);
     expect((form as FormData).get('contact')).toBe('+381');
@@ -49,7 +56,7 @@ describe('readForm', () => {
       method: 'POST',
       body: sent,
     });
-    expect(((await readForm(request)) as FormData).get('name')).toBe('Ana');
+    expect(value(await readForm(request))?.get('name')).toBe('Ana');
   });
 
   it('refuses a body declared past the cap without reading it', async () => {
@@ -79,7 +86,7 @@ describe('readForm', () => {
     ['a body that breaks off', post(failing())],
     ['a body sent with no content type', post(chunked('a=1'))],
   ])('gives nothing for %s', async (_, request) => {
-    expect(await readForm(request)).toBeNull();
+    expect(await readForm(request)).toEqual({ value: null });
   });
 
   it('reads an empty form from a request with no body', async () => {
@@ -87,14 +94,18 @@ describe('readForm', () => {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
     });
-    expect((await readForm(request)) as FormData).toEqual(new FormData());
+    expect(value(await readForm(request))).toEqual(new FormData());
   });
 });
 
 describe('readJson', () => {
   it('reads JSON under the cap, chunked or not', async () => {
-    expect(await readJson(post('{"cart_id":"c1"}'))).toEqual({ cart_id: 'c1' });
-    expect(await readJson(post(chunked('{"a":', '1}')))).toEqual({ a: 1 });
+    expect(await readJson(post('{"cart_id":"c1"}'))).toEqual({
+      value: { cart_id: 'c1' },
+    });
+    expect(await readJson(post(chunked('{"a":', '1}')))).toEqual({
+      value: { a: 1 },
+    });
   });
 
   it('refuses JSON past the cap', async () => {
@@ -109,6 +120,6 @@ describe('readJson', () => {
     ['malformed JSON', post('{')],
     ['a body that breaks off', post(failing())],
   ])('gives nothing for %s', async (_, request) => {
-    expect(await readJson(request)).toBeNull();
+    expect(await readJson(request)).toEqual({ value: null });
   });
 });
