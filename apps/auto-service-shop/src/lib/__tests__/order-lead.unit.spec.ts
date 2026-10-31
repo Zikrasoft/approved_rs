@@ -89,7 +89,7 @@ describe('orderLeadPayload', () => {
     expect(comment.split('\n').slice(3, 7)).toEqual([
       'Oil × 1: 100 RSD, в наличии',
       'Oil × 1: 100 RSD, в наличии, забрать через 2 дня',
-      'Oil × 1: 100 RSD, забрать через 1 день',
+      'Oil × 1: 100 RSD, забрать завтра',
       'Oil × 1: 100 RSD, забрать через 5 дней',
     ]);
   });
