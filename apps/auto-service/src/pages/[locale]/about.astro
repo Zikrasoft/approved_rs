@@ -40,8 +40,6 @@ const schema = (canonical: string) =>
     url: canonical,
     website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
   });
-
-const link = 'text-signal-ink underline underline-offset-2';
 ---
 
 <Shell
@@ -101,7 +99,7 @@ const link = 'text-signal-ink underline underline-offset-2';
         <h2 class="text-base font-semibold text-ink">{about.ownerHeading}</h2>
         <p class="text-sm leading-relaxed text-muted sm:text-base">
           {about.ownerText}{' '}
-          <a href={PathBuilder.privacy(locale)} class={link}
+          <a href={PathBuilder.privacy(locale)} class="link"
             >{site.footer.privacyLabel}</a
           >.
         </p>
@@ -120,7 +118,7 @@ const link = 'text-signal-ink underline underline-offset-2';
         </address>
         <p class="text-sm leading-relaxed text-muted sm:text-base">
           {about.contactsText}{' '}
-          <a href={PathBuilder.contact(locale)} class={link}
+          <a href={PathBuilder.contact(locale)} class="link"
             >{site.nav.contact}</a
           >.
         </p>
@@ -128,7 +126,7 @@ const link = 'text-signal-ink underline underline-offset-2';
 
       <div class="py-6">
         <p class="text-sm leading-relaxed text-muted sm:text-base">
-          {credit.before}<a href={DEVELOPER.url} class={link}
+          {credit.before}<a href={DEVELOPER.url} class="link"
             >{DEVELOPER.name}</a
           >{credit.after}
         </p>

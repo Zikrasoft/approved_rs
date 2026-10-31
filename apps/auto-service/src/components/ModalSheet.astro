@@ -46,7 +46,7 @@ const site = content(localeFrom(Astro.url.pathname)).site;
           type="button"
           data-modal-close
           aria-label={site.common.closeLabel}
-          class="flex size-11 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink"
+          class="btn-icon rounded-control border border-line hover:border-ink hover:text-ink"
         >
           <Icon name="close" />
         </button>
@@ -61,7 +61,7 @@ const site = content(localeFrom(Astro.url.pathname)).site;
 </carlab-modal>
 
 <script>
-  import { defineModalDialog } from '@podbor/site-kit/browser';
+  import { defineLeadModal } from '@podbor/site-kit/lead-form';
 
-  defineModalDialog('carlab-modal');
+  defineLeadModal('carlab-modal');
 </script>

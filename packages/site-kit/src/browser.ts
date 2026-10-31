@@ -10,6 +10,8 @@ export { METRIKA_MASK_CLASS } from './analytics.ts';
 export { DEVELOPER_CREDIT_ATTRIBUTE } from './funnel.ts';
 export { GOALS, reachGoal, type Goal } from './goals.ts';
 export { defineCtaReveal } from './ctaReveal.ts';
+export { defineCompareSlider } from './compareSlider.ts';
+export { defineScrollReveal } from './scrollReveal.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineTelegramChoice } from './telegramChoice.ts';

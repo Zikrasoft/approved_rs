@@ -46,9 +46,12 @@ const respond = async (
   return uncachedJson((await outcome()) ?? INQUIRY);
 };
 
-const body = async (request: Request) => {
-  const json = await readJson(request);
-  return json instanceof Response ? null : json;
+const withJson = async (
+  request: Request,
+  handle: (json: unknown) => Promise<Response>,
+): Promise<Response> => {
+  const read = await readJson(request);
+  return 'response' in read ? read.response : handle(read.value);
 };
 
 export const GET: APIRoute = ({ url, request }) => {
@@ -57,65 +60,69 @@ export const GET: APIRoute = ({ url, request }) => {
   return respond(() => catalogueFor(request)?.viewCart(id.data));
 };
 
-export const POST: APIRoute = async ({ request }) => {
-  const add = addSchema.safeParse(await body(request));
-  return respond(
-    add.success
-      ? () =>
-          catalogueFor(request)?.addToCart(
-            add.data.cart_id,
-            add.data.offer_id,
-            add.data.quantity,
-          )
-      : null,
-  );
-};
+export const POST: APIRoute = ({ request }) =>
+  withJson(request, async (json) => {
+    const add = addSchema.safeParse(json);
+    return respond(
+      add.success
+        ? () =>
+            catalogueFor(request)?.addToCart(
+              add.data.cart_id,
+              add.data.offer_id,
+              add.data.quantity,
+            )
+        : null,
+    );
+  });
 
-export const PATCH: APIRoute = async ({ request }) => {
-  const change = quantitySchema.safeParse(await body(request));
-  if (change.success && change.data.quantity > MAX_LINE_QUANTITY) {
-    return uncachedJson({
-      kind: 'refused',
-      code: 'OFFER_OUT_OF_STOCK',
-      cartId: change.data.cart_id,
-    } satisfies CartOutcome);
-  }
-  return respond(
-    change.success
-      ? () =>
-          catalogueFor(request)?.setQuantity(
-            change.data.cart_id,
-            change.data.item_id,
-            change.data.quantity,
-          )
-      : null,
-  );
-};
+export const PATCH: APIRoute = ({ request }) =>
+  withJson(request, async (json) => {
+    const change = quantitySchema.safeParse(json);
+    if (change.success && change.data.quantity > MAX_LINE_QUANTITY) {
+      return uncachedJson({
+        kind: 'refused',
+        code: 'OFFER_OUT_OF_STOCK',
+        cartId: change.data.cart_id,
+      } satisfies CartOutcome);
+    }
+    return respond(
+      change.success
+        ? () =>
+            catalogueFor(request)?.setQuantity(
+              change.data.cart_id,
+              change.data.item_id,
+              change.data.quantity,
+            )
+        : null,
+    );
+  });
 
-export const PUT: APIRoute = async ({ request }) => {
-  const change = addonSchema.safeParse(await body(request));
-  return respond(
-    change.success
-      ? () =>
-          catalogueFor(request)?.setAddon(
-            change.data.cart_id,
-            change.data.item_id,
-            change.data.on,
-            change.data.kind,
-          )
-      : null,
-  );
-};
+export const PUT: APIRoute = ({ request }) =>
+  withJson(request, async (json) => {
+    const change = addonSchema.safeParse(json);
+    return respond(
+      change.success
+        ? () =>
+            catalogueFor(request)?.setAddon(
+              change.data.cart_id,
+              change.data.item_id,
+              change.data.on,
+              change.data.kind,
+            )
+        : null,
+    );
+  });
 
-export const DELETE: APIRoute = async ({ request }) => {
-  const remove = removeSchema.safeParse(await body(request));
-  return respond(
-    remove.success
-      ? () =>
-          catalogueFor(request)?.removeFromCart(
-            remove.data.cart_id,
-            remove.data.item_id,
-          )
-      : null,
-  );
-};
+export const DELETE: APIRoute = ({ request }) =>
+  withJson(request, async (json) => {
+    const remove = removeSchema.safeParse(json);
+    return respond(
+      remove.success
+        ? () =>
+            catalogueFor(request)?.removeFromCart(
+              remove.data.cart_id,
+              remove.data.item_id,
+            )
+        : null,
+    );
+  });

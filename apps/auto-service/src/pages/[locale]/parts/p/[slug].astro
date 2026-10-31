@@ -267,7 +267,7 @@ const thumbFor = (slug: string) => {
         works.length > 0 && (
           <a
             href="#works"
-            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink link-quiet"
           >
             {copy.worksHeading}
             <Icon name="chevronRight" size={14} />
@@ -376,7 +376,7 @@ const thumbFor = (slug: string) => {
                     link.href ? (
                       <a
                         href={link.href}
-                        class="font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
+                        class="font-semibold text-ink link-quiet"
                       >
                         {link.label}
                       </a>
@@ -464,7 +464,7 @@ const thumbFor = (slug: string) => {
                     locale,
                     equivalentSlug(equivalent),
                   )}
-                  class="text-ink-2 underline-offset-2 hover:text-signal-ink hover:underline"
+                  class="text-ink-2 link-quiet"
                 >
                   {equivalent.brand.name}{' '}
                   <span class="spec">{equivalent.value}</span>

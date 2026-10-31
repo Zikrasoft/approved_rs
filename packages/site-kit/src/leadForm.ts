@@ -4,6 +4,14 @@ import { getOrCreateVisitorId } from './browser.ts';
 import { detectVisitorCountry, visitorChannel } from './contactPreference.ts';
 import { markFieldValidity } from './fieldValidity.ts';
 
+export {
+  defineLeadModal,
+  DEFAULT_SERVICE_ATTRIBUTE,
+  LEAD_SERVICE_ATTRIBUTE,
+  OPEN_LEAD_MODAL_ATTRIBUTE,
+  PAGE_LEAD_MODAL_ATTRIBUTE,
+} from './leadModal.ts';
+
 export function defineSiteLeadForm(tagName?: string): void {
   defineLeadForm(
     {

@@ -77,13 +77,13 @@ describe('/api/cart', () => {
     },
   );
 
-  it('refuses an oversized body as a bad request before reading it', async () => {
+  it('refuses an oversized body as too large before reading it', async () => {
     const response = await call(POST, {
       body: { cart_id: null, offer_id: 'offer_1' },
       headers: { 'content-length': '70000' },
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(413);
     expect(backend).not.toHaveBeenCalled();
   });
 
@@ -92,7 +92,7 @@ describe('/api/cart', () => {
       body: { cart_id: null, offer_id: 'offer_1', pad: 'x'.repeat(70_000) },
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(413);
     expect(backend).not.toHaveBeenCalled();
   });
 

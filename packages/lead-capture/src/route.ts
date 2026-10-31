@@ -814,7 +814,12 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     )
       return UNAUTHORIZED;
 
-    const update = captureUpdateSchema.safeParse(await readJson(request));
+    const read = await readJson(request);
+    if ('response' in read) {
+      console.warn('[capture] ignoring an update past the size cap');
+      return ACK;
+    }
+    const update = captureUpdateSchema.safeParse(read.value);
     if (!update.success) return ACK;
 
     try {

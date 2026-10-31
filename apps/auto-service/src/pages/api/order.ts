@@ -51,8 +51,8 @@ const consentSchema = z.object({ consent: z.string().min(1) });
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const read = await readForm(request);
-  if (read instanceof Response) return read;
-  const form = Object.fromEntries(read ?? new FormData());
+  if ('response' in read) return read.response;
+  const form = Object.fromEntries(read.value ?? new FormData());
   const locale = localeFieldSchema.parse(form.locale);
   const toCart = (notice: CartNotice, extra: Record<string, string> = {}) =>
     redirect(

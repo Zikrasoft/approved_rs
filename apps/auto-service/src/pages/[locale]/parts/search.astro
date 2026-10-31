@@ -2,11 +2,6 @@
 import { contactCta } from '@podbor/site-kit/contact-control';
 export const prerender = false;
 
-import {
-  CATALOG_KEY_PATTERN,
-  type RangeFilter,
-  searchableQuery,
-} from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
@@ -23,63 +18,43 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFor } from '@/utils/catalogueEnv';
 import { PathBuilder } from '@/utils/paths';
-import {
-  appendRange,
-  chosenFilters,
-  partsQuery,
-  filtersWithinCap,
-  rangesFromParams,
-  withFacetCopy,
-} from '@/utils/partsSearch';
+import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
-import {
-  carLink,
-  exactPart,
-  listingCrumbs,
-  missingNumber,
-  nearVin,
-  searchIntent,
-  vinDestination,
-} from '@/utils/catalogueSearch';
+import { carLink, listingCrumbs, missingNumber } from '@/utils/catalogueSearch';
+import { planSearch } from '@/utils/searchPage';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsSearch;
 const partsInquiry = content(locale).pages.partsInquiry;
 
-const params = Astro.url.searchParams;
-const q = partsQuery(params.get('q') ?? '');
-const categoryParam = params.get('category') ?? '';
-const category = CATALOG_KEY_PATTERN.test(categoryParam)
-  ? categoryParam
-  : undefined;
-const modelParam = params.get('model') ?? '';
-const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
-const makeParam = params.get('make') ?? '';
-const make =
-  model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
-const requestedFacets = params.getAll('facets');
-const requestedRanges = rangesFromParams(params);
-const { facets: chosen, ranges } = filtersWithinCap(
-  requestedFacets,
-  requestedRanges,
-);
-const offset = Math.max(
-  0,
-  Number.parseInt(params.get('offset') ?? '0', 10) || 0,
-);
-
-const catalogue = catalogueFor(Astro.request);
-const intent = searchIntent(q);
-const vin = intent.kind === 'vin' ? intent.vin : null;
-const vinHint = !vin && nearVin(q);
-const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
-const destination =
-  vin && vinOutcome ? vinDestination(vinOutcome, vin, locale) : null;
-if (destination) {
-  return Astro.redirect(destination, 303);
+const plan = await planSearch({
+  params: Astro.url.searchParams,
+  locale,
+  catalogue: catalogueFor(Astro.request),
+});
+if ('redirect' in plan) {
+  return Astro.redirect(plan.redirect, plan.status);
 }
+Astro.response.status = plan.status;
+const {
+  q,
+  category,
+  make,
+  model,
+  chosen,
+  ranges,
+  offset,
+  vin,
+  vinHint,
+  vinOutcome,
+  searchable,
+  found,
+  scope,
+  unknownScope,
+  searchHref,
+} = plan.view;
 const vinMake =
   vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
 const vinCar =
@@ -92,82 +67,12 @@ const vinCar =
         .join(', ')
     : null;
 const vinTopic = vinCar ?? vinMake?.label;
-const searchable = !vin && (searchableQuery(q) || Boolean(category));
-const found =
-  searchable && catalogue
-    ? await catalogue.search({
-        q,
-        category,
-        make,
-        model,
-        locale,
-        facets: chosen,
-        ranges,
-        offset,
-      })
-    : null;
-
-const lastPage =
-  found && found.count > 0
-    ? Math.floor((found.count - 1) / found.limit) * found.limit
-    : 0;
-
-const searchHref = (
-  facets: string[],
-  nextRanges: RangeFilter[],
-  nextOffset = 0,
-  scope = model,
-) => {
-  const next = new URLSearchParams({
-    ...(q ? { q } : {}),
-    ...(category ? { category } : {}),
-    ...(scope ? { ...(make && { make }), model: scope } : {}),
-  });
-  for (const facet of facets) {
-    next.append('facets', facet);
-  }
-  for (const range of nextRanges) {
-    appendRange(next, range);
-  }
-  if (nextOffset) {
-    next.set('offset', String(nextOffset));
-  }
-  return `${PathBuilder.partsSearch(locale)}?${next}`;
-};
-if (
-  chosen.length !== requestedFacets.length ||
-  ranges.length !== requestedRanges.length
-) {
-  return Astro.redirect(searchHref(chosen, ranges, offset), 302);
-}
-if (found && offset > lastPage) {
-  return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
-}
-const exact =
-  found && !category && !model && !chosen.length && !ranges.length && !offset
-    ? exactPart(q, found.results)
-    : null;
-if (exact) {
-  return Astro.redirect(PathBuilder.partNumber(locale, exact), 302);
-}
 const numberMissing =
   found && !category && !offset && found.cars.length === 0
     ? missingNumber(q, found.results)
     : false;
 const looseNumbers = numberMissing && Boolean(found?.results.length);
 const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
-const scope =
-  found ??
-  (catalogue && (category || model)
-    ? await catalogue.listingScope({ category, make, model }, locale)
-    : null);
-const unknownScope =
-  !found &&
-  scope !== null &&
-  Boolean((category && !scope.category) || (model && !scope.model));
-if (unknownScope) {
-  Astro.response.status = 404;
-}
 const narrowedTo = scope?.category;
 const unavailable = searchable && !found && !unknownScope;
 const scopedTo = scope?.model;
@@ -265,10 +170,7 @@ const scopeHidden = {
           {vinMake && (
             <>
               {' '}
-              <a
-                href={vinMake.href}
-                class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-              >
+              <a href={vinMake.href} class="link font-semibold">
                 {content(locale).partsCar.vin.chooseMake.replace(
                   '{make}',
                   vinMake.label,
@@ -387,10 +289,7 @@ const scopeHidden = {
               <>
                 <StatusNote>
                   {copy.numberNotFound.replace('{q}', q)}{' '}
-                  <a
-                    href="#lead"
-                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
-                  >
+                  <a href="#lead" class="link font-semibold">
                     {copy.notFoundLink}
                   </a>
                 </StatusNote>

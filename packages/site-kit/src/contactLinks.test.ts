@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  appendWhatsappLine,
   captureBotLink,
   instagramLink,
   phoneLink,
@@ -19,6 +20,17 @@ describe('contact links', () => {
 
   it('opens a WhatsApp chat with the number', () => {
     expect(whatsappLink('381641234567')).toBe('https://wa.me/381641234567');
+  });
+
+  it('adds a line under the text a WhatsApp chat opens with', () => {
+    expect(
+      appendWhatsappLine(whatsappLink('381641234567', 'Hi'), 'VIN: X1'),
+    ).toBe(
+      `https://wa.me/381641234567?text=${encodeURIComponent('Hi\nVIN: X1')}`,
+    );
+    expect(appendWhatsappLine(whatsappLink('381641234567'), 'VIN: X1')).toBe(
+      whatsappLink('381641234567', 'VIN: X1'),
+    );
   });
 
   it('escapes the plus Viber needs encoded', () => {
