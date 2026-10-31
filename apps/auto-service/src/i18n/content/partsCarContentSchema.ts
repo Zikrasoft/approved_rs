@@ -74,6 +74,7 @@ export const partsCarContentSchema = z
     fitment: z
       .object({
         quantity: z.string(),
+        quantityOne: z.string(),
         axle: labels(FITMENT_AXLES),
         side: labels(FITMENT_SIDES),
         gearbox: labels(GEARBOX_TYPES),
