@@ -1,12 +1,14 @@
 ---
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
+import { contactCta } from '@podbor/site-kit/contact-control';
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = content(locale).pages;
+const { pages, site } = content(locale);
 ---
 
 <Shell
@@ -19,12 +21,41 @@ const pages = content(locale).pages;
   >
     <span class="spec text-5xl font-medium text-line-strong">404</span>
     <h1 class="text-hero">{pages.notFound.heading}</h1>
-    <p class="max-w-xl text-base leading-relaxed text-muted">
+    <p class="max-w-xl text-base leading-relaxed text-muted" data-site-body>
       {pages.notFound.body}
     </p>
-    <a href={PathBuilder.home(locale)} class="btn btn-primary mt-2 w-fit">
+    <div
+      class="flex max-w-3xl flex-col gap-4"
+      data-parts-404
+      hidden
+      {...contactCta}
+    >
+      <p class="max-w-xl text-base leading-relaxed text-muted">
+        {pages.notFound.partsBody}
+      </p>
+      <CatalogueSearch large hint={false} />
+      <a href={PathBuilder.partsInquiry(locale)} class="btn btn-primary w-fit">
+        {site.header.partsCta}
+        <Icon name="arrowRight" />
+      </a>
+    </div>
+    <a
+      href={PathBuilder.home(locale)}
+      class="btn btn-primary mt-2 w-fit"
+      data-home
+    >
       {pages.notFound.cta}
       <Icon name="arrowRight" />
     </a>
   </section>
 </Shell>
+
+<script>
+  if (/^\/[^/]+\/parts\//.test(location.pathname)) {
+    document.querySelector<HTMLElement>('[data-parts-404]')!.hidden = false;
+    document.querySelector<HTMLElement>('[data-site-body]')!.hidden = true;
+    document
+      .querySelector('[data-home]')!
+      .classList.replace('btn-primary', 'btn-secondary');
+  }
+</script>

@@ -94,6 +94,7 @@ export const pagesContentSchema = z
         metaTitle: z.string(),
         heading: z.string(),
         body: z.string(),
+        partsBody: z.string(),
         cta: z.string(),
       })
       .strict(),
