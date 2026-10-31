@@ -1,6 +1,6 @@
 import type { PartOffer } from '@podbor/catalog-contract/cart-wire';
 import { rankOffers } from '@podbor/catalog-contract/availability';
-import { offerAvailability, type AvailabilityCopy } from '@/utils/leadTime';
+import { offerAvailability, type LeadTimeCopy } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
 import { keepCartId, readCart, rememberCart } from './cartStore';
@@ -80,7 +80,7 @@ export function definePartOffers(tagName = 'part-offers'): void {
         const row = template.content.cloneNode(true) as DocumentFragment;
         const { stock, lead, buyable } = offerAvailability(
           offer,
-          JSON.parse(availability) as AvailabilityCopy,
+          JSON.parse(availability) as LeadTimeCopy,
           localeTag,
         );
         fill(

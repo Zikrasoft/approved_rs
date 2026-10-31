@@ -22,11 +22,6 @@ priceOnRequestCta: Заказать
 orderBody: 'Магазин новый, и мы работаем напрямую с лучшими поставщиками, чтобы держать хорошие цены. Скорее всего, эта запчасть есть, но наличие нужно проверить. Оставьте контакт: купим ее для вас или предложим аналог.'
 offersHeading: Цена и наличие
 moreOffers: Другие предложения ({count})
-columns:
-  stock: В наличии
-  leadTime: Забрать
-  leadTimeShort: Забрать
-  inStockPickup: В наличии, забрать {days}
 buyButtonLabel: В корзину
 addedLabel: В корзине
 outOfStock: Нет в наличии
@@ -53,12 +48,18 @@ requirementCarsLabel: 'Подходит по допускам для:'
 kitCarsLabel: 'Входит в комплект ТО для:'
 leadTime:
   inStock: В наличии
-  tomorrow: завтра
+  inStockTomorrow: В наличии, забрать завтра
+  inStockDays:
+    one: 'В наличии, забрать через {days} день'
+    few: 'В наличии, забрать через {days} дня'
+    many: 'В наличии, забрать через {days} дней'
+    other: 'В наличии, забрать через {days} дня'
+  tomorrow: Забрать завтра
   days:
-    one: 'через {days} день'
-    few: 'через {days} дня'
-    many: 'через {days} дней'
-    other: 'через {days} дня'
+    one: 'Забрать через {days} день'
+    few: 'Забрать через {days} дня'
+    many: 'Забрать через {days} дней'
+    other: 'Забрать через {days} дня'
 translatedFrom: 51fe8e1507248588
 translations:
   sr:
@@ -86,11 +87,6 @@ translations:
     orderBody: 'Prodavnica je nova i sarađujemo direktno sa najboljim dobavljačima kako bismo ponudili povoljne cene. Ovaj deo je verovatno dostupan, ali moramo da proverimo stanje. Ostavite kontakt: nabavićemo ga za vas ili ponuditi zamenu.'
     offersHeading: Cena i dostupnost
     moreOffers: Ostale ponude ({count})
-    columns:
-      stock: Na stanju
-      leadTime: Preuzimanje
-      leadTimeShort: Preuzimanje
-      inStockPickup: Na stanju, preuzimanje {days}
     leadTime:
       inStock: Na stanju
       tomorrow: sutra
@@ -148,11 +144,6 @@ translations:
     orderBody: Our shop is new, and we work directly with leading suppliers to keep prices competitive. This part is likely available, but we need to check stock. Leave your contact details and we'll source it for you or suggest an equivalent.
     offersHeading: Price and availability
     moreOffers: More offers ({count})
-    columns:
-      stock: In stock
-      leadTime: Pickup
-      leadTimeShort: Pickup
-      inStockPickup: In stock, pickup {days}
     leadTime:
       inStock: In stock
       tomorrow: tomorrow

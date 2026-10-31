@@ -22,7 +22,7 @@ export const getStaticPaths = localePaths;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).shopCart;
-const { columns, leadTime } = content(locale).shopPart;
+const { leadTime } = content(locale).shopPart;
 const panel = 'card flex max-w-2xl flex-col gap-3 p-5 sm:p-6';
 const notice =
   'card mb-4 flex items-start gap-3 border-transparent bg-shade p-4 text-sm leading-relaxed text-ink';
@@ -72,7 +72,7 @@ const stepper =
       data-lower-template={copy.lowerToTemplate}
       data-inquiry-href={PathBuilder.partsInquiry(locale)}
       data-preview={shopOpen() ? undefined : ''}
-      data-availability={JSON.stringify({ columns, leadTime })}
+      data-availability={JSON.stringify(leadTime)}
     >
       <p data-state="loading" class="text-sm text-muted" role="status">
         {copy.loading}
