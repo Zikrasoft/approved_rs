@@ -46,7 +46,15 @@ export async function seedCashAtPickupCommerceDefaults(
       })
     ).result[0];
 
-  const [existingStore] = await storeModuleService.listStores();
+  const [existingStore] = await storeModuleService.listStores(
+    {},
+    { relations: ['supported_currencies'] },
+  );
+  const shopCurrencies = [{ currency_code: REGION_CURRENCY, is_default: true }];
+  const foreignCurrency = !existingStore?.supported_currencies?.some(
+    ({ currency_code, is_default }) =>
+      currency_code === REGION_CURRENCY && is_default,
+  );
   if (!existingStore) {
     await createStoresWorkflow(container).run({
       input: {
@@ -54,16 +62,15 @@ export async function seedCashAtPickupCommerceDefaults(
           {
             name: STORE_NAME,
             default_sales_channel_id: salesChannel.id,
-            supported_currencies: [
-              { currency_code: REGION_CURRENCY, is_default: true },
-            ],
+            supported_currencies: shopCurrencies,
           },
         ],
       },
     });
   } else if (
     existingStore.default_sales_channel_id !== salesChannel.id ||
-    existingStore.name === MEDUSA_DEFAULT_STORE_NAME
+    existingStore.name === MEDUSA_DEFAULT_STORE_NAME ||
+    foreignCurrency
   ) {
     await updateStoresWorkflow(container).run({
       input: {
@@ -73,6 +80,7 @@ export async function seedCashAtPickupCommerceDefaults(
           ...(existingStore.name === MEDUSA_DEFAULT_STORE_NAME && {
             name: STORE_NAME,
           }),
+          ...(foreignCurrency && { supported_currencies: shopCurrencies }),
         },
       },
     });

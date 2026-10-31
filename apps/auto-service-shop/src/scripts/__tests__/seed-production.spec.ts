@@ -235,6 +235,18 @@ medusaIntegrationTestRunner({
         expect(stores.map(({ name }) => name)).toEqual(['CarLab']);
       });
 
+      it('sells in dinars, not the euro Medusa starts the store with', async () => {
+        const [store] = await getContainer()
+          .resolve(Modules.STORE)
+          .listStores({}, { relations: ['supported_currencies'] });
+        expect(
+          store.supported_currencies?.map(({ currency_code, is_default }) => [
+            currency_code,
+            is_default,
+          ]),
+        ).toEqual([['rsd', true]]);
+      });
+
       it('keeps what a person edited and restores what nobody did', async () => {
         const [brakes] = await catalog.listCategories({ slug: 'brakes' });
         const [suspension] = await catalog.listCategories({
