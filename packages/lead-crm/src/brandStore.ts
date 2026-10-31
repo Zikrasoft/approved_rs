@@ -8,6 +8,7 @@ import {
 import { createLeadStore } from './store.ts';
 import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
 import type { LeadStorage } from './storage/types.ts';
+import { createNotifyLead, type NotifyLeadOptions } from './notifyLead.ts';
 
 type QuarantineNotifier = Awaited<
   ReturnType<QuarantineOptions['getNotifier']>
@@ -18,9 +19,10 @@ export interface BrandStoreOptions {
   storageFor: (path: string) => LeadStorage;
   standaloneServices?: readonly string[];
   getNotifier: () => Promise<{
-    notifier: QuarantineNotifier & {
-      sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
-    };
+    notifier: QuarantineNotifier &
+      NotifyLeadOptions['notifier'] & {
+        sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
+      };
   }>;
 }
 
@@ -47,5 +49,15 @@ export function createBrandStore({
       await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
     },
   });
-  return { leadStore, ledgerStore };
+  const notifyLead = createNotifyLead({
+    store: leadStore,
+    brand,
+    notifier: {
+      sendLeadNotification: async (lead) =>
+        (await getNotifier()).notifier.sendLeadNotification(lead),
+      refreshLeadCard: async (lead) =>
+        (await getNotifier()).notifier.refreshLeadCard(lead),
+    },
+  });
+  return { leadStore, ledgerStore, notifyLead };
 }

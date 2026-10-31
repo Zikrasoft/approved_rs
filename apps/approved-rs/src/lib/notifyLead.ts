@@ -1,6 +1,6 @@
 import { BRANDS, PARTNER_SERVICE } from '@podbor/brands';
 import type { LeadHandOff, NotifyLead } from '@podbor/lead-crm';
-import { notifyLead as notifyOwnLead } from './crmBot';
+import { notifyLead as notifyOwnLead } from './crm';
 
 const HAND_OFF: Record<string, LeadHandOff> = Object.fromEntries(
   Object.entries(PARTNER_SERVICE).map(([key, service]) => [

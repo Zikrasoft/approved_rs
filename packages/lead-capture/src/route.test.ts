@@ -384,7 +384,6 @@ beforeEach(() => {
   storage = storages[LEADS_PATH];
   ({ ensureLeadCard, ensureLeadTopic, touchLeadTopic } = createBrandBot({
     store: leadStore,
-    brand: BRAND,
     serviceLabel: (slug) => slug,
   }));
   POST = route(SECRET);
