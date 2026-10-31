@@ -154,8 +154,7 @@ const businessSchema = localBusinessSchema({
   </head>
   <body
     class:list={[
-      'flex min-h-screen flex-col lg:pb-0',
-      (stickyContact || Astro.slots.has('sticky')) && 'pb-[calc(3.5rem+1px)]',
+      'flex min-h-screen flex-col max-lg:data-sticky-bar:pb-[calc(3.5rem+1px)]',
     ]}
     data-sticky-bar={stickyContact || Astro.slots.has('sticky')
       ? ''

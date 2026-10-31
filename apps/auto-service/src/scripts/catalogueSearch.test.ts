@@ -204,6 +204,17 @@ describe('the catalogue search box', () => {
     );
   });
 
+  it('echoes a look-alike VIN in Latin letters', async () => {
+    backend.mockResolvedValue(
+      Response.json({ vin: true, cars: [], parts: [] }),
+    );
+    const { input, panel } = mount();
+
+    await type(input, 'WВА35ВG070N074158');
+
+    expect(panel.textContent).toContain('WBA35BG070N074158');
+  });
+
   it('hides the panel when nothing is found', async () => {
     backend.mockResolvedValue(
       Response.json({ vin: false, cars: [], parts: [] }),

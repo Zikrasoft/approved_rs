@@ -41,7 +41,7 @@ import {
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
 import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
-import { addonLabel, addToPartsList, partLine } from './partsList';
+import { addonLabel, addToPartsList } from './partsList';
 
 const STEP_SETTLE_MS = 400;
 
@@ -89,7 +89,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (receipt || orderNumber) {
           const contact = checkoutContact();
           forgetCheckout();
-          this.showOrdered(orderNumber, receipt, contact);
+          this.showOrdered(receipt ? orderNumber : null, receipt, contact);
           return;
         }
         if (notice) {
@@ -116,7 +116,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             rememberCheckout(form);
             if (this.cart) rememberReceipt(this.cart);
           });
-          this.watchCheckoutBar(form);
           form.addEventListener('formdata', (event) => {
             rememberCheckout(form);
             if (!this.cart) return;
@@ -161,18 +160,9 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         );
       }
 
-      watchCheckoutBar(form: HTMLFormElement): void {
-        const bar = this.querySelector<HTMLElement>('[data-checkout-bar]');
-        if (!bar) return;
-        new IntersectionObserver(([entry]) => {
-          bar.hidden =
-            entry!.isIntersecting || entry!.boundingClientRect.top < 0;
-          document.body.toggleAttribute('data-sticky-bar', !bar.hidden);
-        }).observe(form);
-      }
-
       show(state: string): void {
         showOnly(this, 'data-state', state);
+        document.body.toggleAttribute('data-sticky-bar', state === 'cart');
       }
 
       showOrdered(
@@ -189,13 +179,19 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
           this.dataset.orderedContact ?? '{}',
         ) as Record<string, string>;
         const contactTemplate = contact && contactTemplates[contact.channel];
-        fill(
-          this,
-          '[data-ordered-contact]',
-          contactTemplate
-            ? contactTemplate.replace('{contact}', contact.contact)
-            : null,
-        );
+        const showContact = (shown: string | null) =>
+          fill(
+            this,
+            '[data-ordered-contact]',
+            shown && contactTemplate
+              ? contactTemplate.replace('{contact}', shown)
+              : null,
+          );
+        if (contact?.channel === 'phone') {
+          void import('@podbor/site-kit/format-phone').then(({ formatPhone }) =>
+            showContact(formatPhone(contact.contact.replace(/\D/g, ''))),
+          );
+        } else showContact(contact?.contact ?? null);
         const heading = document.querySelector('[data-hero-heading]');
         if (heading && orderedHeading) heading.textContent = orderedHeading;
         fill(
@@ -206,7 +202,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         fill(
           this,
           '[data-order-date]',
-          new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
+          receipt &&
+            new Date().toLocaleDateString(localeTag, { dateStyle: 'long' }),
         );
         if (receipt) this.receipt(receipt);
         this.show('ordered');
@@ -232,7 +229,6 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             const row = template.content.cloneNode(true) as DocumentFragment;
             fill(row, '[data-name]', part.name);
             fill(row, '[data-number]', `${part.brand} ${part.number}`);
-            fill(row, '[data-ready]', this.readiness(line, localeTag));
             fill(
               row,
               '[data-quantity]',
@@ -277,6 +273,8 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
       }
 
       render(outcome: CartOutcome | null, notice = '', goneNotice = ''): void {
+        if (outcome?.kind === 'empty' && goneNotice === 'gone')
+          moveCartToInquiry();
         const state = settleCart(outcome);
         if (state === 'gone') {
           this.cart = null;
@@ -329,13 +327,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (!box || !whatsapp) return;
         whatsapp.href = whatsappLink(
           box.dataset.whatsapp ?? '',
-          [
-            box.dataset.orderMessage,
-            ...cart.items
-              .filter(({ available }) => available)
-              .map(listedLine)
-              .map(partLine),
-          ].join('\n'),
+          [box.dataset.orderMessage, orderLines(cart)].join('\n'),
         );
       }
 

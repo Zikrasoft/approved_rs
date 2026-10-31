@@ -39,6 +39,7 @@ export {
   MY_GARAGE_VIN_ATTRIBUTE,
   defineMyGarage,
   rememberVin,
+  storedVin,
 } from './myGarage.ts';
 
 export function getOrCreateVisitorId(): string {

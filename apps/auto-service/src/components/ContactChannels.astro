@@ -13,6 +13,9 @@ interface Props {
   placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero'>;
   tone?: 'card' | 'panel';
   service?: ServiceSlug;
+  lead?: TrackedContactChannel;
+  only?: readonly TrackedContactChannel[];
+  prefill?: string;
 }
 
 const {
@@ -20,6 +23,9 @@ const {
   placement = 'bar',
   tone = 'card',
   service,
+  lead,
+  only,
+  prefill,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -34,7 +40,7 @@ type Variant = {
 const FULL: Variant = {
   channels: ['phone', 'whatsapp', 'viber', 'telegram'],
   list: 'grid gap-2 sm:grid-cols-2',
-  tile: 'min-h-11 gap-3 px-4 py-3',
+  tile: 'min-h-11 gap-3 px-4 py-2.5',
   iconSize: 18,
   label: 'text-sm',
 };
@@ -68,23 +74,28 @@ const CHANNEL = {
 } as const;
 
 const variant = VARIANT[placement];
+const offered = only ?? variant.channels;
+const channels = lead
+  ? [lead, ...offered.filter((channel) => channel !== lead)]
+  : offered;
 const { surface, icon: iconTone } = TONE[tone];
 ---
 
 <ul
   class={`${variant.list} ${className}`}
-  data-contact-order
+  data-contact-order={lead ? undefined : ''}
   {...contactRegion(placement)}
 >
   {
-    variant.channels.map((channel) => (
+    channels.map((channel) => (
       <ContactControl
         channel={channel}
         region="contacts"
         service={service}
+        prefill={prefill}
         listItem
         class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
-        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3"
+        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-2.5"
       >
         <Icon
           name={CHANNEL[channel].icon}

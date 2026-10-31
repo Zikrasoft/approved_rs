@@ -7,8 +7,7 @@ import {
 import { leadTimeCopyFrom, offerAvailability } from '@/utils/leadTime';
 import { formatMoney } from '@/utils/money';
 import { offersOutcomeSchema } from '@/utils/catalogueWire';
-import { keepCartId, readCart, rememberCart } from './cartStore';
-import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
+import { addToCart, busy, fill, getJson, isBusy, showOnly } from './cartUi';
 import { shopPreview } from './shopPreview';
 import {
   addToPartsList,
@@ -137,13 +136,9 @@ export function definePartOffers(tagName = 'part-offers'): void {
       async buy(button: HTMLButtonElement): Promise<void> {
         if (isBusy(button)) return;
         busy(button, true);
-        const outcome = await sendJson('POST', {
-          cart_id: readCart()?.id ?? null,
-          offer_id: button.dataset.offerId,
-        });
+        const outcome = await addToCart({ offer_id: button.dataset.offerId });
         busy(button, false);
         if (outcome?.kind === 'cart') {
-          rememberCart(outcome.cart);
           this.linkToCart(button);
           showOnly(this, 'data-status', 'added');
           return;
@@ -152,12 +147,15 @@ export function definePartOffers(tagName = 'part-offers'): void {
           outcome?.kind === 'refused' &&
           outcome.code === 'OFFER_OUT_OF_STOCK'
         ) {
-          keepCartId(outcome.cartId);
           showOnly(this, 'data-status', 'stock-limit');
           return;
         }
-        if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
         button.hidden = true;
+        const row = button.closest('li');
+        if (row) {
+          fill(row, '[data-stock]', null);
+          fill(row, '[data-lead]', null);
+        }
         button.parentElement
           ?.querySelector('[data-ask]')
           ?.classList.remove('hidden');

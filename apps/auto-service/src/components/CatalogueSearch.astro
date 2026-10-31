@@ -13,6 +13,7 @@ interface Props {
   autofocus?: boolean;
   compact?: boolean;
   onPanel?: boolean;
+  secondary?: boolean;
   class?: string;
 }
 
@@ -24,6 +25,7 @@ const {
   autofocus = false,
   compact = false,
   onPanel = false,
+  secondary = false,
   class: className,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -86,7 +88,11 @@ const copy = content(locale).partsSearch;
             type="submit"
             class:list={[
               'btn shrink-0',
-              onPanel ? 'btn-on-panel' : 'btn-primary',
+              onPanel
+                ? 'btn-on-panel'
+                : secondary
+                  ? 'btn-secondary'
+                  : 'btn-primary',
               large ? 'min-h-14 px-5 sm:px-7' : 'min-h-11 px-4 py-2',
             ]}
           >

@@ -13,7 +13,7 @@ import FitLine from '@/components/FitLine.astro';
 import AddonNote from '@/components/AddonNote.astro';
 import FittedPart from '@/components/FittedPart.astro';
 import PriceTag from '@/components/PriceTag.astro';
-import ThumbRow from '@/components/ThumbRow.astro';
+import LineItem from '@/components/LineItem.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -157,7 +157,7 @@ const specsSummary = [
       {
         kit.length > 0 && (
           <parts-list-add-all
-            class="card flex flex-col gap-4 border-transparent bg-shade p-5 sm:p-6"
+            class="card flex flex-col gap-4 border-transparent bg-shade p-5"
             data-car={name}
           >
             <div class="flex flex-col gap-1">
@@ -166,8 +166,22 @@ const specsSummary = [
             </div>
             <ul class="flex flex-col divide-y divide-line">
               {kit.map((item) => (
-                <li
-                  class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 py-3 first:pt-0"
+                <LineItem
+                  variant="kit"
+                  class="py-3 first:pt-0"
+                  name={translated(item.part, 'name', locale)}
+                  href={PathBuilder.partNumber(locale, item.page.slug)}
+                  number={`${item.page.brand.name} ${item.page.value}`}
+                  eyebrow={
+                    nameRepeatsCategory(
+                      translated(item.part, 'name', locale),
+                      translated(item.category, 'name', locale),
+                    )
+                      ? undefined
+                      : translated(item.category, 'name', locale)
+                  }
+                  quantity={quantity(item.quantity)}
+                  thumb={pagesThumbnail(item.pages)}
                   data-kit-part={item.part.id}
                   data-slug={item.page.slug}
                   data-brand={item.page.brand.name}
@@ -176,39 +190,8 @@ const specsSummary = [
                   data-offer-id={item.offer?.id}
                   data-quantity={item.quantity}
                 >
-                  <div class="min-w-0 grow basis-48">
-                    <ThumbRow thumb={pagesThumbnail(item.pages)} class="gap-1">
-                      {!nameRepeatsCategory(
-                        translated(item.part, 'name', locale),
-                        translated(item.category, 'name', locale),
-                      ) && (
-                        <span class="text-xs text-muted">
-                          {translated(item.category, 'name', locale)}
-                        </span>
-                      )}
-                      <span class="text-sm text-ink">
-                        {translated(item.part, 'name', locale)}
-                      </span>
-                      <a
-                        href={PathBuilder.partNumber(locale, item.page.slug)}
-                        class="self-start text-sm text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-                      >
-                        <span class="font-semibold">
-                          {item.page.brand.name}
-                        </span>{' '}
-                        <span class="spec whitespace-nowrap">
-                          {item.page.value}
-                        </span>
-                      </a>
-                    </ThumbRow>
-                  </div>
-                  <span class="ml-auto flex shrink-0 flex-col items-end gap-1">
-                    <span class="spec text-sm text-ink">
-                      {quantity(item.quantity)}
-                    </span>
-                    <PriceTag pages={item.pages} kit />
-                  </span>
-                </li>
+                  <PriceTag slot="price" pages={item.pages} kit />
+                </LineItem>
               ))}
             </ul>
             <div

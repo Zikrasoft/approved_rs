@@ -3,6 +3,7 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import CartAddonToggle from './CartAddonToggle.astro';
 import Icon from './Icon.astro';
+import LineItem from './LineItem.astro';
 
 const copy = content(localeFrom(Astro.url.pathname)).shopCart;
 const stepper =
@@ -10,24 +11,17 @@ const stepper =
 ---
 
 <template data-line>
-  <li class="group flex flex-col gap-3 py-4 pr-3 pl-5 sm:pl-6">
-    <div class="flex items-start gap-3">
-      <div class="flex min-w-0 flex-1 flex-col gap-1">
-        <a
-          class="leading-snug font-semibold text-ink underline-offset-2 hover:text-signal-ink hover:underline"
-          data-part-link></a>
-        <span class="spec text-sm text-muted" data-number></span>
-        <span class="text-sm text-ink-2" data-ready hidden></span>
-      </div>
-      <button
-        type="button"
-        class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
-        aria-label={copy.removeLabel}
-        data-remove
-      >
-        <Icon name="close" size={16} />
-      </button>
-    </div>
+  <LineItem variant="editable" class="group py-4 pr-3 pl-5 sm:pl-6">
+    <span slot="status" class="text-sm text-ink-2" data-ready hidden></span>
+    <button
+      slot="aside"
+      type="button"
+      class="-my-2 flex size-11 shrink-0 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-signal-ink focus-visible:outline-2 focus-visible:outline-ink aria-busy:opacity-40"
+      aria-label={copy.removeLabel}
+      data-remove
+    >
+      <Icon name="close" size={16} />
+    </button>
     <p
       class="flex items-start gap-2 text-sm leading-relaxed text-danger"
       data-unavailable
@@ -77,5 +71,5 @@ const stepper =
     >
       {copy.toInquiryLabel}
     </button>
-  </li>
+  </LineItem>
 </template>

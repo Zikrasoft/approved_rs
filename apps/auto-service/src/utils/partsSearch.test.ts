@@ -4,6 +4,7 @@ import {
   appendRange,
   chosenFilters,
   facetValueLabel,
+  filtersWithinCap,
   numberBounds,
   partsQuery,
   rangesFromParams,
@@ -183,5 +184,36 @@ describe('withFacetCopy', () => {
       ['Цена', '900'],
       ['Вязкость', '5W-30'],
     ]);
+  });
+});
+
+describe('filtersWithinCap', () => {
+  it('keeps the first eight filtered keys and drops the rest', () => {
+    const facets = Array.from({ length: 9 }, (_, at) => `key-${at}:yes`);
+
+    expect(
+      filtersWithinCap(facets, [{ key: 'price', min: 1, max: null }]),
+    ).toEqual({ facets: facets.slice(0, 8), ranges: [] });
+  });
+
+  it('counts a key once however many values it has', () => {
+    const facets = ['brand:varta', 'brand:bosch', 'polarity:left'];
+
+    expect(filtersWithinCap(facets, [])).toEqual({ facets, ranges: [] });
+  });
+
+  it('drops a value the shop cannot read', () => {
+    expect(filtersWithinCap(['brand:va`rta', 'Brand:x', 'brand:'], [])).toEqual(
+      {
+        facets: [],
+        ranges: [],
+      },
+    );
+  });
+
+  it('keeps at most twenty values', () => {
+    const facets = Array.from({ length: 21 }, (_, at) => `brand:b${at}`);
+
+    expect(filtersWithinCap(facets, []).facets).toHaveLength(20);
   });
 });

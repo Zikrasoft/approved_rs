@@ -18,6 +18,7 @@ import PartRow from '@/components/PartRow.astro';
 import FilterChips from '@/components/FilterChips.astro';
 import StatusNote from '@/components/StatusNote.astro';
 import Pagination from '@/components/Pagination.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFor } from '@/utils/catalogueEnv';
@@ -26,6 +27,7 @@ import {
   appendRange,
   chosenFilters,
   partsQuery,
+  filtersWithinCap,
   rangesFromParams,
   withFacetCopy,
 } from '@/utils/partsSearch';
@@ -57,8 +59,12 @@ const model = CATALOG_KEY_PATTERN.test(modelParam) ? modelParam : undefined;
 const makeParam = params.get('make') ?? '';
 const make =
   model && CATALOG_KEY_PATTERN.test(makeParam) ? makeParam : undefined;
-const chosen = params.getAll('facets');
-const ranges = rangesFromParams(params);
+const requestedFacets = params.getAll('facets');
+const requestedRanges = rangesFromParams(params);
+const { facets: chosen, ranges } = filtersWithinCap(
+  requestedFacets,
+  requestedRanges,
+);
 const offset = Math.max(
   0,
   Number.parseInt(params.get('offset') ?? '0', 10) || 0,
@@ -128,6 +134,12 @@ const searchHref = (
   }
   return `${PathBuilder.partsSearch(locale)}?${next}`;
 };
+if (
+  chosen.length !== requestedFacets.length ||
+  ranges.length !== requestedRanges.length
+) {
+  return Astro.redirect(searchHref(chosen, ranges, offset), 302);
+}
 if (found && offset > lastPage) {
   return Astro.redirect(searchHref(chosen, ranges, lastPage), 302);
 }
@@ -173,6 +185,10 @@ const emptyMessage = q
   : chips.length > 0
     ? copy.noFilteredResults
     : partsInquiry.category.noParts;
+const zeroFound =
+  found?.results.length === 0 && chips.length === 0 && !modelName;
+const deadEnd = Boolean(vin) || unavailable || unknownScope || zeroFound;
+const asked = vin ?? q;
 const inquiryTopic = [
   modelName,
   narrowedTo?.name,
@@ -180,6 +196,19 @@ const inquiryTopic = [
 ]
   .filter(Boolean)
   .join(', ');
+const inquiryCard = {
+  id: 'lead',
+  class: 'max-w-2xl',
+  heading: copy.formHeading,
+  vin: vin ?? undefined,
+  comment: vin
+    ? vinTopic
+      ? `${vinTopic}: `
+      : ''
+    : numberMissing
+      ? inquiryTopic
+      : `${inquiryTopic}: `,
+};
 const scopeHidden = {
   ...(q ? { q } : {}),
   ...(category ? { category } : {}),
@@ -220,9 +249,9 @@ const scopeHidden = {
 
   <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
     {
-      !found && (
+      !found && !deadEnd && (
         <div class="max-w-3xl" {...contactCta}>
-          <CatalogueSearch query={q} category={category} large hint={false} />
+          <CatalogueSearch query={q} category={category} />
         </div>
       )
     }
@@ -261,8 +290,27 @@ const scopeHidden = {
       )
     }
 
+    {zeroFound && <StatusNote>{emptyMessage}</StatusNote>}
+    {unavailable && <StatusNote>{copy.unavailable}</StatusNote>}
+    {unknownScope && <StatusNote>{copy.unknownScope}</StatusNote>}
+
     {
-      found && (
+      deadEnd && (
+        <>
+          <ContactChannels
+            class="max-w-2xl"
+            prefill={asked ? copy.lookingFor.replace('{q}', asked) : undefined}
+          />
+          <VinInquiryCard {...inquiryCard} />
+          <div class="max-w-2xl" {...contactCta}>
+            <CatalogueSearch query={q} category={category} secondary />
+          </div>
+        </>
+      )
+    }
+
+    {
+      found && !zeroFound && (
         <div
           class:list={[
             'grid gap-6',
@@ -288,9 +336,7 @@ const scopeHidden = {
             </div>
             {cars.length > 0 && (
               <section class="flex flex-col gap-2 pt-2">
-                <h2 class="text-base font-semibold text-ink">
-                  {copy.carsGroup}
-                </h2>
+                <h2 class="text-block font-semibold">{copy.carsGroup}</h2>
                 <ul class="flex flex-wrap gap-2">
                   {cars.map((car) => (
                     <li>
@@ -308,9 +354,7 @@ const scopeHidden = {
                     </li>
                   ))}
                 </ul>
-                <h2 class="pt-3 text-base font-semibold text-ink">
-                  {copy.partsGroup}
-                </h2>
+                <h2 class="pt-3 text-block font-semibold">{copy.partsGroup}</h2>
               </section>
             )}
             <ListingBar
@@ -345,20 +389,18 @@ const scopeHidden = {
                   {copy.numberNotFound.replace('{q}', q)}{' '}
                   <a
                     href="#lead"
-                    class="font-semibold text-signal-dark underline underline-offset-2 hover:text-ink"
+                    class="font-semibold text-signal-ink underline underline-offset-2 hover:text-signal-dark"
                   >
                     {copy.notFoundLink}
                   </a>
                 </StatusNote>
-                <h2 class="pt-1 text-base font-semibold text-ink">
+                <h2 class="pt-1 text-block font-semibold">
                   {copy.similarNumbers}
                 </h2>
               </>
             )}
             {found.results.length === 0 ? (
-              <p class="max-w-2xl text-base leading-relaxed break-words text-ink-2">
-                {emptyMessage}
-              </p>
+              <StatusNote>{emptyMessage}</StatusNote>
             ) : (
               <ul class="card divide-y divide-line">
                 {found.results.map((result) => (
@@ -415,42 +457,8 @@ const scopeHidden = {
     }
 
     {
-      unavailable && (
-        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
-          {copy.unavailable}
-        </p>
-      )
-    }
-
-    {
-      unknownScope && (
-        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
-          {copy.unknownScope}
-        </p>
-      )
-    }
-
-    {
-      (vin ||
-        unavailable ||
-        unknownScope ||
-        numberMissing ||
-        found?.results.length === 0) && (
-        <VinInquiryCard
-          id="lead"
-          class="max-w-2xl"
-          heading={copy.formHeading}
-          vin={vin ?? undefined}
-          comment={
-            vin
-              ? vinTopic
-                ? `${vinTopic}: `
-                : ''
-              : numberMissing
-                ? inquiryTopic
-                : `${inquiryTopic}: `
-          }
-        />
+      !deadEnd && (numberMissing || found?.results.length === 0) && (
+        <VinInquiryCard {...inquiryCard} />
       )
     }
   </section>

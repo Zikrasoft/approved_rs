@@ -49,6 +49,7 @@ import {
   type PartPageEntry,
 } from './catalogueSnapshot';
 import type { CartOutcome, OffersOutcome } from './catalogueWire';
+import { latinBrands } from './brandAliases';
 
 export type { Vehicle, VinFacts };
 
@@ -319,7 +320,7 @@ export function createCatalogue({
       limit,
     }: SearchQuery): Promise<SearchOutcome | null> {
       const params = new URLSearchParams({
-        ...(q ? { q } : {}),
+        ...(q ? { q: latinBrands(q) } : {}),
         locale,
         ...(category ? { category } : {}),
         ...(model ? { ...(make && { make }), model } : {}),

@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { capNotice, stepTarget } from './offerCart';
+// @vitest-environment jsdom
+import { describe, expect, it, vi } from 'vitest';
+import { readCart, rememberCart } from './cartStore';
+import { capNotice, defineOfferCart, stepTarget } from './offerCart';
+import { readPartsList } from './partsList';
 
 describe('stepping a line quantity', () => {
   it('clamps a burst of taps past the cap to the cap and says so', () => {
@@ -24,5 +27,79 @@ describe('the notice at a line cap', () => {
 
   it('says the order limit for a part ordered on a lead time', () => {
     expect(capNotice({ lead_time_days: 4 })).toBe('order-limit');
+  });
+});
+
+describe('a cart the shop has swept', () => {
+  it('moves its parts into the inquiry instead of dropping them', async () => {
+    history.replaceState(null, '', '/ru/parts/cart/');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ kind: 'empty' })),
+    );
+    rememberCart({
+      id: 'cart_old',
+      completed: false,
+      currency: 'RSD',
+      total: 1430,
+      items: [
+        {
+          id: 'item_1',
+          offer_id: 'offer_1',
+          quantity: 2,
+          unit_price: 715,
+          available: true,
+          in_stock: true,
+          lead_time_days: 0,
+          max_quantity: null,
+          addon: null,
+          installation: null,
+          part: {
+            slug: 'knecht-ox371d',
+            brand: 'Knecht',
+            number: 'OX 371D',
+            name: 'Масляный фильтр',
+          },
+        },
+      ],
+    });
+    defineOfferCart();
+    document.body.innerHTML = `
+      <offer-cart>
+        <div data-state="empty" hidden><p data-empty-notice="gone" hidden></p></div>
+        <div data-state="loading"></div>
+      </offer-cart>`;
+
+    await vi.waitFor(() =>
+      expect(
+        document.querySelector<HTMLElement>('[data-empty-notice="gone"]')!
+          .hidden,
+      ).toBe(false),
+    );
+    expect(readCart()).toBeNull();
+    expect(
+      readPartsList().map(({ number, quantity }) => [number, quantity]),
+    ).toEqual([['OX 371D', 2]]);
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('the confirmation opened from a link alone', () => {
+  it('says the order is taken without a number or date the tab cannot vouch for', () => {
+    history.replaceState(null, '', '/ru/parts/cart/?notice=ordered&order=999');
+    defineOfferCart();
+    document.body.innerHTML = `
+      <offer-cart data-order-template="Номер заказа: {number}">
+        <div data-state="ordered" hidden>
+          <p data-order-number hidden></p>
+          <p data-order-date></p>
+        </div>
+      </offer-cart>`;
+
+    const shown = (selector: string) =>
+      !document.querySelector<HTMLElement>(selector)!.hidden;
+    expect(shown('[data-state="ordered"]')).toBe(true);
+    expect(shown('[data-order-number]')).toBe(false);
+    expect(shown('[data-order-date]')).toBe(false);
   });
 });
