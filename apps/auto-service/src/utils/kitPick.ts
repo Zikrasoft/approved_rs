@@ -15,3 +15,6 @@ export function kitPick<Page extends KitPage>(
         offer: null,
       };
 }
+
+export const kitTotal = (lines: { price: number; quantity: number }[]) =>
+  lines.reduce((sum, { price, quantity }) => sum + price * quantity, 0);

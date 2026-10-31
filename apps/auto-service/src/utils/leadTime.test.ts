@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  availabilityCopy,
-  availabilityText,
   formatLeadTime,
   offerAvailability,
+  plural,
   schemaAvailability,
 } from './leadTime';
 
@@ -69,52 +68,24 @@ describe('formatLeadTime', () => {
   });
 });
 
-describe('availabilityText', () => {
-  const copy = {
-    stock: 'В наличии',
-    leadTime: 'Забрать',
-    inStockPickup: 'В наличии, забрать {days}',
-    days: {
-      inStock: 'В наличии',
-      tomorrow: 'завтра',
-      days: {
-        one: 'через {days} день',
-        few: 'через {days} дня',
-        other: 'через {days} дней',
-      },
-    },
-  };
+describe('plural', () => {
+  const forms = { one: '{n} деталь', few: '{n} детали', other: '{n} деталей' };
 
-  it('says in stock for stock ready today', () => {
-    expect(
-      availabilityText({ in_stock: true, lead_time_days: 0 }, copy, 'ru-RU'),
-    ).toBe('В наличии');
+  it.each([
+    [1, '{n} деталь'],
+    [3, '{n} детали'],
+    [5, '{n} деталей'],
+  ])('picks the Russian form for %i', (count, form) => {
+    expect(plural(count, forms, 'ru-RU')).toBe(form);
   });
 
-  it('says when stock held elsewhere can be picked up', () => {
-    expect(
-      availabilityText({ in_stock: true, lead_time_days: 2 }, copy, 'ru-RU'),
-    ).toBe('В наличии, забрать через 2 дня');
-    expect(
-      availabilityText({ in_stock: true, lead_time_days: 1 }, copy, 'ru-RU'),
-    ).toBe('В наличии, забрать завтра');
-  });
-
-  it('says when a part without stock can be picked up', () => {
-    expect(
-      availabilityText({ in_stock: false, lead_time_days: 4 }, copy, 'ru-RU'),
-    ).toBe('Забрать через 4 дня');
-  });
-
-  it('says nothing for a part with neither stock nor a pickup time', () => {
-    expect(
-      availabilityText({ in_stock: false, lead_time_days: 0 }, copy, 'ru-RU'),
-    ).toBeNull();
+  it('falls back to the other form when the copy lacks the one asked for', () => {
+    expect(plural(3, { one: 'one', other: 'other' }, 'ru-RU')).toBe('other');
   });
 });
 
 describe('offerAvailability', () => {
-  const copy = availabilityCopy({
+  const copy = {
     columns: {
       stock: 'В наличии',
       leadTime: 'Забрать',
@@ -129,7 +100,7 @@ describe('offerAvailability', () => {
         other: 'через {days} дней',
       },
     },
-  });
+  };
 
   it.each([
     [3, 0, { stock: 'В наличии', lead: null, buyable: true }],

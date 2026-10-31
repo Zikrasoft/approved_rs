@@ -1,7 +1,8 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { catalogueIdSchema, type OffersOutcome } from '@/utils/catalogue';
+import { catalogueIdSchema } from '@/utils/catalogue';
+import type { OffersOutcome } from '@/utils/catalogueWire';
 import { catalogueFromEnv, siteEnv } from '@/utils/catalogueEnv';
 import { previewRequested } from '@/utils/shopPreview';
 

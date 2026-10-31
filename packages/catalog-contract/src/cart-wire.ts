@@ -3,7 +3,25 @@ import * as z from 'zod/mini';
 export const ADDON_KINDS = ['service', 'installation'] as const;
 export type AddonKind = (typeof ADDON_KINDS)[number];
 
-const price = z.int().check(z.nonnegative());
+export const CHECKOUT_REFUSALS = [
+  'OFFER_PRICE_CHANGED',
+  'OFFER_OUT_OF_STOCK',
+  'OFFER_MISSING',
+  'CONTACT_MISSING',
+  'CART_CHANGED',
+] as const;
+export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
+
+const whole = z.int().check(z.nonnegative());
+
+export const partOfferSchema = z.object({
+  id: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  stock_quantity: whole,
+  lead_time_days: whole,
+});
+
 const labels = z.optional(z.record(z.string(), z.string()));
 
 export const listedPartSchema = z.object({
@@ -17,12 +35,12 @@ export const lineAddonSchema = z.object({
   item_id: z.nullable(z.string()),
   label: z.string(),
   translations: z.nullable(z.object({ sr: labels, en: labels })),
-  unit_price: price,
+  unit_price: whole,
 });
 
 export const lineInstallationSchema = z.object({
   item_id: z.nullable(z.string()),
-  unit_price: price,
+  unit_price: whole,
 });
 
 export const offerCartLineSchema = z.object({
@@ -47,6 +65,7 @@ export const offerCartSchema = z.object({
   items: z.array(offerCartLineSchema),
 });
 
+export type PartOffer = z.infer<typeof partOfferSchema>;
 export type ListedPart = z.infer<typeof listedPartSchema>;
 export type LineAddon = z.infer<typeof lineAddonSchema>;
 export type LineInstallation = z.infer<typeof lineInstallationSchema>;

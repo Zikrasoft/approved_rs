@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { forgetCheckout, rememberCheckout, restoreCheckout } from './offerCart';
+import {
+  forgetCheckout,
+  rememberCheckout,
+  restoreCheckout,
+} from './checkoutMemory';
 
 const memoryStorage = () => {
   const items = new Map<string, string>();

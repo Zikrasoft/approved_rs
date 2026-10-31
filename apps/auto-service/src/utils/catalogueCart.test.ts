@@ -205,7 +205,8 @@ describe('a line the shop no longer has', () => {
     ],
     [
       'toggling the add-on of',
-      (c: ReturnType<typeof catalog>) => c.setAddon('cart_1', 'item_9', true),
+      (c: ReturnType<typeof catalog>) =>
+        c.setAddon('cart_1', 'item_9', true, 'service'),
     ],
   ])('keeps the rest of the cart after %s it', async (_, act) => {
     const fetch = lineGone(() => status(200, { cart: CART }));
@@ -233,7 +234,9 @@ describe('catalogue.setAddon', () => {
   ])('adds or takes off the add-on of a line (%s)', async (on, method) => {
     const fetch = answer({ cart: CART });
 
-    expect(await catalog(fetch).setAddon('cart_1', 'item_1', on)).toEqual({
+    expect(
+      await catalog(fetch).setAddon('cart_1', 'item_1', on, 'service'),
+    ).toEqual({
       kind: 'cart',
       cart: CART,
     });

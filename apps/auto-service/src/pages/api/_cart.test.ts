@@ -95,7 +95,8 @@ describe('/api/cart', () => {
       body: {
         cart_id: 'cart_1',
         item_id: 'item_1',
-        addon: true,
+        on: true,
+        kind: 'service',
         unit_price: 1,
       },
     });
@@ -115,7 +116,7 @@ describe('/api/cart', () => {
       body: {
         cart_id: 'cart_1',
         item_id: 'item_1',
-        addon: true,
+        on: true,
         kind: 'installation',
         unit_price: 0,
       },
