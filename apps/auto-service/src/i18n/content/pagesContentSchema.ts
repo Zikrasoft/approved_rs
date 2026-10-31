@@ -54,6 +54,12 @@ export const pagesContentSchema = z
         cta: z.string(),
       })
       .strict(),
+    thanksParts: z
+      .object({
+        body: z.string(),
+        cta: z.string(),
+      })
+      .strict(),
     privacy: z
       .object({
         metaTitle: z.string(),
