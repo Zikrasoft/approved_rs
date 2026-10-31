@@ -41,7 +41,7 @@ import {
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
 import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
-import { addonLabel, addToPartsList, partLine } from './partsList';
+import { addonLabel, addToPartsList } from './partsList';
 
 const STEP_SETTLE_MS = 400;
 
@@ -335,13 +335,7 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         if (!box || !whatsapp) return;
         whatsapp.href = whatsappLink(
           box.dataset.whatsapp ?? '',
-          [
-            box.dataset.orderMessage,
-            ...cart.items
-              .filter(({ available }) => available)
-              .map(listedLine)
-              .map(partLine),
-          ].join('\n'),
+          [box.dataset.orderMessage, orderLines(cart)].join('\n'),
         );
       }
 

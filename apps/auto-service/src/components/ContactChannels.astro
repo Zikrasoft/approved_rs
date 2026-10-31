@@ -13,6 +13,7 @@ interface Props {
   placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero'>;
   tone?: 'card' | 'panel';
   service?: ServiceSlug;
+  lead?: TrackedContactChannel;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   placement = 'bar',
   tone = 'card',
   service,
+  lead,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -68,16 +70,19 @@ const CHANNEL = {
 } as const;
 
 const variant = VARIANT[placement];
+const channels = lead
+  ? [lead, ...variant.channels.filter((channel) => channel !== lead)]
+  : variant.channels;
 const { surface, icon: iconTone } = TONE[tone];
 ---
 
 <ul
   class={`${variant.list} ${className}`}
-  data-contact-order
+  data-contact-order={lead ? undefined : ''}
   {...contactRegion(placement)}
 >
   {
-    variant.channels.map((channel) => (
+    channels.map((channel) => (
       <ContactControl
         channel={channel}
         region="contacts"
