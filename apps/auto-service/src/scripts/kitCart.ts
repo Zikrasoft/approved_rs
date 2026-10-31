@@ -2,8 +2,7 @@ import { CART_NOTICE_PARAM } from '@/utils/cartNotice';
 import { kitTotal } from '@/utils/kitPick';
 import { formatMoney } from '@/utils/money';
 import { vinFrom } from '@/utils/carFacts';
-import { readCart, rememberCart } from './cartStore';
-import { busy, isBusy, sendJson } from './cartUi';
+import { addToCart, busy, isBusy } from './cartUi';
 import { PRICES_FILLED_EVENT } from './shopPreview';
 import { addToPartsList, listedPartFromDataset } from './partsList';
 
@@ -61,21 +60,15 @@ export function defineKitCart(tagName = 'kit-cart'): void {
       async addKit(): Promise<void> {
         const kit = this.closest<HTMLElement>('parts-list-add-all');
         const vin = vinFrom(location.search);
-        let cartId = readCart()?.id ?? null;
         let moved = false;
         for (const item of kit?.querySelectorAll<HTMLElement>(
           '[data-offer-id]:not([hidden])',
         ) ?? []) {
-          const outcome = await sendJson('POST', {
-            cart_id: cartId,
+          const outcome = await addToCart({
             offer_id: item.dataset.offerId,
             quantity: Number(item.dataset.quantity) || 1,
           });
-          if (outcome?.kind === 'cart') {
-            rememberCart(outcome.cart);
-            cartId = outcome.cart.id;
-            continue;
-          }
+          if (outcome?.kind === 'cart') continue;
           const part = listedPartFromDataset(item.dataset, {
             car: kit?.dataset.car,
             ...(vin && { vin }),

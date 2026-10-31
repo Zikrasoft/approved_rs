@@ -1,5 +1,6 @@
 import type { ZodMiniType } from 'zod/mini';
 import { cartOutcomeSchema } from '@/utils/catalogueWire';
+import { keepCartId, readCart, rememberCart } from './cartStore';
 
 export const getJson = async <T>(
   schema: ZodMiniType<T>,
@@ -21,6 +22,22 @@ export const sendJson = (method: string, body: unknown) =>
     method,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
+  });
+
+const CART_LOCK = 'carlab-offer-cart';
+
+const withCartLock = <T>(task: () => Promise<T>): Promise<T> =>
+  navigator.locks ? navigator.locks.request(CART_LOCK, task) : task();
+
+export const addToCart = (line: { offer_id?: string; quantity?: number }) =>
+  withCartLock(async () => {
+    const outcome = await sendJson('POST', {
+      cart_id: readCart()?.id ?? null,
+      ...line,
+    });
+    if (outcome?.kind === 'cart') rememberCart(outcome.cart);
+    if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
+    return outcome;
   });
 
 export const fill = (

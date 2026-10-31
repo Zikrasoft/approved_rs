@@ -88,6 +88,7 @@ describe('<part-offers> when the shop refuses the add', () => {
       <part-offers data-preview data-slug="knecht-ox371d" data-brand="Knecht"
         data-number="OX 371D" data-name="Масляный фильтр">
         <ul data-offers><li>
+          <span data-stock>В наличии</span><span data-lead>Завтра</span>
           <button data-buy data-offer-id="offer_1">В корзину</button>
           <a href="/ru/parts/#parts-inquiry" class="hidden" data-ask>Заказать через менеджера</a>
         </li></ul>
@@ -108,5 +109,11 @@ describe('<part-offers> when the shop refuses the add', () => {
       document.querySelector('[data-ask]')!.classList.contains('hidden'),
     ).toBe(false);
     expect(readPartsList().map((part) => part.number)).toEqual(['OX 371D']);
+    expect(document.querySelector<HTMLElement>('[data-stock]')!.hidden).toBe(
+      true,
+    );
+    expect(document.querySelector<HTMLElement>('[data-lead]')!.hidden).toBe(
+      true,
+    );
   });
 });
