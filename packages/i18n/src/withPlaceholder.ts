@@ -1,3 +1,5 @@
+export const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
+
 export function withPlaceholder(
   text: string,
   key: string,
