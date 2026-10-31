@@ -116,6 +116,10 @@ export interface LeadStoreOptions {
   standaloneServices?: readonly string[];
 }
 
+export const FAILED_CHECKOUTS_PER_HOUR = 3;
+
+const HOUR_MS = 60 * 60 * 1000;
+
 export const LEAD_COUNT_ALERTS: readonly number[] = [5000, 10000];
 
 const promptedAt =
@@ -142,6 +146,13 @@ type MergeTarget =
   | { kind: 'merge'; lead: StoredLead }
   | { kind: 'new' };
 
+function isFailedCheckoutOf(
+  lead: LeadInput,
+  standaloneServices: readonly string[],
+): boolean {
+  return standaloneServices.includes(lead.service) && !lead.orderId;
+}
+
 function mergeTarget(
   data: LeadInput,
   leads: StoredLead[],
@@ -151,7 +162,7 @@ function mergeTarget(
   const isStandalone = (service: string) =>
     standaloneServices.includes(service);
   const isFailedCheckout = (lead: LeadInput) =>
-    isStandalone(lead.service) && !lead.orderId;
+    isFailedCheckoutOf(lead, standaloneServices);
   const ours = leads.filter((l) => l.brand === data.brand);
 
   const placed = data.orderId
@@ -488,6 +499,21 @@ export function createLeadStore({
         return [...leads, inserted];
       });
       return inserted;
+    },
+
+    async failedCheckoutCapped(
+      brand: string,
+      contact: string,
+    ): Promise<boolean> {
+      const since = Date.now() - HOUR_MS;
+      const recent = (await readLeads()).filter(
+        (lead) =>
+          lead.brand === brand &&
+          lead.contact === contact &&
+          isFailedCheckoutOf(lead, standaloneServices) &&
+          Date.parse(lead.createdAt) >= since,
+      );
+      return recent.length >= FAILED_CHECKOUTS_PER_HOUR;
     },
 
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {

@@ -829,6 +829,40 @@ describe('insertOrMergeLead with standalone services', () => {
 
     expect(merged).toBe(true);
   });
+
+  describe('failedCheckoutCapped', () => {
+    let id = 0;
+    const failedAt = (contact: string, ago: number, extra = {}) => ({
+      ...order(contact),
+      id: ++id,
+      status: 'lost',
+      createdAt: new Date(Date.now() - ago).toISOString(),
+      statusChangedAt: new Date().toISOString(),
+      ...extra,
+    });
+    const CONTACT = '+381602222222';
+    const MINUTE = 60 * 1000;
+
+    it('caps a contact once it has three failed checkouts within the hour', async () => {
+      storage.seed([1, 2, 3].map((at) => failedAt(CONTACT, at * MINUTE)));
+      expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(true);
+    });
+
+    it.each([
+      ['an older one', failedAt(CONTACT, 61 * MINUTE)],
+      ['a placed order', failedAt(CONTACT, MINUTE, { orderId: 'order_1' })],
+      ['another contact', failedAt('+381603333333', MINUTE)],
+      ['another brand', failedAt(CONTACT, MINUTE, { brand: 'Other' })],
+      ['another service', failedAt(CONTACT, MINUTE, { service: 'brakes' })],
+    ])('does not count %s', async (_, third) => {
+      storage.seed([
+        failedAt(CONTACT, MINUTE),
+        failedAt(CONTACT, 2 * MINUTE),
+        third,
+      ]);
+      expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(false);
+    });
+  });
 });
 
 describe('isFreshLead', () => {

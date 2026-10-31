@@ -8,8 +8,13 @@ const notifyLead = vi.hoisted(() =>
   vi.fn<NotifyLead>(async () => ({ stored: true, delivered: true })),
 );
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
+const failedCheckoutCapped = vi.hoisted(() => vi.fn(async () => false));
 
-vi.mock('@/lib/crm', () => ({ notifyLead }));
+vi.mock('@/lib/crm', () => ({
+  BRAND: 'CarLab',
+  notifyLead,
+  leadStore: { failedCheckoutCapped },
+}));
 vi.mock('@vercel/functions', () => ({
   waitUntil: (promise: Promise<unknown>) => pending.push(promise),
 }));
@@ -29,6 +34,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
   backend.mockReset();
   notifyLead.mockClear();
+  failedCheckoutCapped.mockClear();
   pending.length = 0;
 });
 
@@ -130,6 +136,27 @@ describe('POST /api/order', () => {
       );
     },
   );
+
+  it('keeps no Lead once the contact hit the hourly cap of failed checkouts', async () => {
+    failedCheckoutCapped.mockResolvedValueOnce(true);
+    answer(404, { type: 'not_found' });
+
+    expect(location(await checkout())).toBe('/ru/parts/cart/?notice=expired');
+    expect(failedCheckoutCapped).toHaveBeenCalledWith(
+      'CarLab',
+      '+381601234567',
+    );
+    expect(notifyLead).not.toHaveBeenCalled();
+  });
+
+  it('keeps the Lead when the cap cannot be read', async () => {
+    failedCheckoutCapped.mockRejectedValueOnce(new Error('blob down'));
+    answer(404, { type: 'not_found' });
+
+    await checkout();
+
+    expect(notifyLead).toHaveBeenCalledOnce();
+  });
 
   it('keeps no Lead for a checkout without a contact or consent', async () => {
     expect(location(await checkout({ contact: '12' }))).toBe(
