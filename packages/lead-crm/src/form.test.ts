@@ -493,8 +493,17 @@ describe('leadSubmissionSchema', () => {
       service: Array.from({ length: 10_000 }, () => 'vehicle-sourcing'),
     });
     expect(parsed.success).toBe(true);
-    expect(parsed.data?.services).toHaveLength(MAX_SERVICES);
+    expect(parsed.data?.services.length).toBeLessThanOrEqual(MAX_SERVICES);
     expect(parsed.data?.service).toBe('vehicle-sourcing');
+  });
+
+  it('stores a service posted twice once', () => {
+    const parsed = submit({
+      name: 'Иван',
+      contact: '+381641234567',
+      service: Array.from({ length: 20 }, () => 'vehicle-sourcing'),
+    });
+    expect(parsed.data?.services).toEqual(['vehicle-sourcing']);
   });
 
   it('keeps the lead but drops a service that is not text at all', () => {

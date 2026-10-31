@@ -388,8 +388,8 @@ describe('createLeadsRoute', () => {
       ),
     );
     const lead = notifyLead.mock.calls.at(-1)![0];
-    expect(lead.services).toHaveLength(MAX_SERVICES);
-    expect(lead.service).toBe('vehicle-sourcing');
+    expect(lead.services).toEqual(['vehicle-sourcing']);
+    expect(lead.services.length).toBeLessThanOrEqual(MAX_SERVICES);
   });
 
   it.each(Object.entries(SERVICE_SLUGS_BY_BRAND))(
