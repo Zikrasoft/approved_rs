@@ -2,44 +2,44 @@
 title: Обслуживание MINI Cooper SD 2.0 B47 в Белграде
 translations:
   en:
-    title: Maintenance of MINI Cooper SD 2.0 B47 in Belgrade
+    title: MINI Cooper SD 2.0 B47 Servicing in Belgrade
     body: |-
-      The MINI Cooper SD with a diesel **2.0 B47 engine producing 170 hp** came to our service center in Belgrade for comprehensive maintenance.
+      A MINI Cooper SD with a **170 hp 2.0 B47 diesel engine** came into our workshop in Belgrade for a comprehensive service.
 
-      We performed the following services:
+      We carried out:
 
-      - engine oil replacement;
-      - all filters replacement;
-      - fuel filter replacement;
-      - oil change in the 8-speed Aisin automatic transmission;
+      - an engine oil change;
+      - replacement of all filters;
+      - a fuel filter replacement;
+      - an oil change for the 8-speed Aisin automatic transmission;
       - computer diagnostics of the engine and electronic systems;
-      - intake system diagnostics.
+      - an intake system inspection.
 
-      The fuel filter on a diesel engine should be replaced no less than once every **20,000 km**: this protects the fuel system and ensures the engine operates smoothly.
+      On a diesel, the fuel filter should be replaced at least every **20,000 km** to protect the fuel system and keep the engine running smoothly.
 
-      During the intake diagnostics, we discovered significant contamination: the swirl flaps were coated with soot and carbon buildup, creating a dense layer. We recommended a cleaning, which the owner accepted, and the intake was thoroughly cleaned.
+      The intake inspection revealed heavy contamination: the swirl flaps were coated in a thick layer of soot and carbon deposits. We recommended cleaning the intake, the owner agreed, and we thoroughly cleaned the entire system.
 
-      The B47 diesel engine in BMW and MINI, along with the Aisin automatic transmission and intake system, thrive on regular maintenance: timely oil and filter changes, and keeping an eye on the intake condition. This way, expensive repairs can be postponed for a long time.
+      Regular maintenance is key to looking after the B47 diesel used in BMW and MINI models, the Aisin automatic transmission and the intake system. Change the oil and filters on schedule and keep an eye on intake deposits to help keep costly repairs at bay.
     car: Mini Cooper SD
   sr:
     title: Servis MINI Cooper SD 2.0 B47 u Beogradu
     body: |-
-      MINI Cooper SD sa dizel motorom **2.0 B47 od 170 k** stigao je u naš servis u Beogradu na kompletnu uslugu.
+      MINI Cooper SD sa dizel motorom **2.0 B47 od 170 KS** stigao je u naš servis u Beogradu na kompletno održavanje.
 
-      Izvršili smo:
+      Uradili smo:
 
       - zamenu motornog ulja;
       - zamenu svih filtera;
-      - zamenu gorivnog filtera;
-      - zamenu ulja u 8-stepenom automatskom menjaču Aisin;
+      - zamenu filtera goriva;
+      - zamenu ulja u osmostepenom automatskom menjaču Aisin;
       - kompjutersku dijagnostiku motora i elektronskih sistema;
-      - dijagnostiku usisnog sistema.
+      - proveru usisnog sistema.
 
-      Gorivni filter kod dizela treba menjati najmanje jednom na **20 000 km**: tako se štiti gorivni sistem, a motor radi stabilno.
+      Filter goriva na dizel motoru treba menjati najmanje jednom na **20.000 km**: time se štiti sistem goriva i obezbeđuje stabilan rad motora.
 
-      Tokom dijagnostike usisa otkrili smo značajno zagađenje: vortex lopatice su bile prekrivene čađom i naslagama, gustim „kaputom“. Ponudili smo vlasniku čišćenje, on je pristao, i usis je potpuno očišćen.
+      Prilikom provere usisa pronašli smo velike naslage prljavštine: vrtložne klapne bile su prekrivene debelim slojem čađi i gareži. Predložili smo vlasniku čišćenje, on je pristao, pa smo temeljno očistili ceo usis.
 
-      Dizel B47 na BMW i MINI, automatski menjač Aisin i usisni sistem vole redovnost: na vreme menjati ulje i filtere, obratiti pažnju na stanje usisa. Tada se skupi popravak odlaže na duže vreme.
+      Dizel motor B47 u vozilima BMW i MINI, automatski menjač Aisin i usisni sistem zahtevaju redovno održavanje: pravovremenu zamenu ulja i filtera, kao i povremenu proveru stanja usisa. Tako se skupe popravke mogu izbeći na duže vreme.
     car: Mini Cooper SD
 car: Mini Cooper SD
 year: 2019

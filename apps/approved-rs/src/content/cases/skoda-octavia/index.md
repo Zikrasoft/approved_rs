@@ -4,51 +4,51 @@ translations:
   en:
     title: Skoda Octavia
     body: |-
-      Roman reached out to us for assistance in finding a car in Serbia. He used to live in Bishkek, and now with his family expanding, he needed a spacious, reliable, and practical vehicle.
+      Roman came to us for help finding a car in Serbia. He previously lived in Bishkek, and with his family set to grow, he needed something spacious, reliable and practical.
 
-      We decided on the **Škoda Octavia** as the primary option.
+      We settled on the **Škoda Octavia** as our main choice.
 
-      We inspected three cars and ultimately found a truly outstanding example: **2.0 TDI, wet DSG DQ381, and mileage of around 150,000 km**.
+      We inspected three cars and eventually found an excellent example: **a 2.0 TDI with a DQ381 wet-clutch DSG transmission and around 150,000 km on the clock**.
 
-      The car's trim is quite basic, but its technical condition is nearly perfect. After selecting the vehicle, we put it on a lift for further inspection. We checked the undercarriage, suspension, shock absorbers, and key components underneath: everything was in excellent condition, with no unpleasant surprises.
+      The car has a fairly basic specification, but it is in near-perfect mechanical condition. Once we had chosen it, we put it on a lift for an additional inspection. We checked the underbody, suspension, shock absorbers and key components underneath. Everything was in excellent condition, with no nasty surprises.
 
-      As a result, Roman got exactly the car he was looking for: without overpaying for extra features, but with excellent technical condition and a good reserve of resources.
+      Roman ended up with exactly the car he was looking for: no premium for high-end equipment, just excellent mechanical condition and plenty of life left in it.
   sr:
     title: Škoda Octavia
     body: |-
-      Roman se obratio nama za pomoć u pronalaženju automobila u Srbiji. Pre je živeo u Biškeku, a sada planira proširenje porodice, pa je bilo potrebno pronaći prostran, pouzdan i praktičan automobil.
+      Roman nam se obratio za pomoć pri pronalaženju automobila u Srbiji. Ranije je živeo u Biškeku, a pošto uskoro očekuje proširenje porodice, bio mu je potreban prostran, pouzdan i praktičan automobil.
 
-      Kao glavni izbor odabrali smo **Škoda Octavia**.
+      Kao glavni izbor izdvojila se **Škoda Octavia**.
 
-      Pogledali smo tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI, mokri robot DSG DQ381 i prešao oko 150 000 km**.
+      Uradili smo proveru auta pre kupovine za tri automobila i na kraju pronašli zaista odličan primerak: **2.0 TDI, DSG DQ381 menjač sa mokrim kvačilima i oko 150.000 km na satu**.
 
-      Opremanje automobila je dovoljno jednostavno, ali je tehničko stanje gotovo savršeno. Nakon što smo izabrali automobil, dodatno smo ga poslali na dijagnostiku. Uradili smo proveru auta pre kupovine, proverili donji deo, suspenziju, amortizere i osnovne elemente ispod: sve je u odličnom stanju, bez neprijatnih iznenađenja.
+      Oprema je prilično osnovna, ali je zato tehničko stanje gotovo idealno. Nakon što smo odabrali automobil, dodatno smo ga proverili na dizalici. Pregledali smo podvozje, vešanje, amortizere i ostale važne sklopove sa donje strane: sve je bilo u odličnom stanju, bez neprijatnih iznenađenja.
 
-      Na kraju, Roman je dobio upravo onaj automobil koji je tražio: bez preplate za bogatu opremu, ali sa odličnim tehničkim stanjem i dobrim zalihama.
+      Roman je na kraju dobio upravo automobil koji je tražio: bez doplate za bogatu opremu, ali u odličnom tehničkom stanju i sa još mnogo kilometara pred sobom.
   es:
     title: Škoda Octavia
     body: |-
-      Román se puso en contacto con nosotros para ayudarle a encontrar un coche en Serbia. Anteriormente vivía en Bishkek, y ahora que está por expandir su familia, necesita un vehículo espacioso, fiable y práctico.
+      Roman acudió a nosotros para que le ayudáramos a encontrar un coche en Serbia. Antes vivía en Biskek y, como su familia va a crecer, necesitaba un coche espacioso, fiable y práctico.
 
-      El principal candidato elegido fue el **Škoda Octavia**.
+      Nos centramos en el **Škoda Octavia** como primera opción.
 
-      Inspeccionamos tres vehículos y al final encontramos una verdadera joya: **2.0 TDI, con transmisión automática DSG DQ381 y un kilometraje de alrededor de 150,000 km**.
+      Inspeccionamos tres coches y al final encontramos una unidad realmente buena: **2.0 TDI, cambio DSG DQ381 de doble embrague en baño de aceite y unos 150 000 km**.
 
-      La equipación de este coche es bastante sencilla, pero su estado técnico es prácticamente perfecto. Después de elegir el vehículo, lo llevamos a un elevador. Revisamos el chasis, la suspensión, los amortiguadores y los componentes principales por debajo: todo estaba en excelente estado, sin sorpresas desagradables.
+      El equipamiento era bastante básico, pero el estado mecánico era prácticamente impecable. Tras elegirlo, también lo subimos al elevador para revisar los bajos, la suspensión, los amortiguadores y los principales componentes de la parte inferior: todo estaba en excelentes condiciones, sin sorpresas desagradables.
 
-      Al final, Román recibió exactamente el coche que buscaba: sin sobrecostos por una equipación lujosa, pero con un excelente estado técnico y un buen margen de uso.
+      Al final, Roman consiguió justo el coche que buscaba: sin pagar de más por un equipamiento muy completo, pero con una mecánica en excelente estado y mucha vida útil por delante.
   de:
     title: Škoda Octavia
     body: |-
-      Roman wandte sich an uns, um Hilfe bei der Fahrzeugauswahl in Serbien zu erhalten. Zuvor lebte er in Bischkek, und da seine Familie nun wachsen wird, benötigte er ein geräumiges, zuverlässiges und praktisches Auto.
+      Roman wandte sich an uns, um in Serbien ein passendes Auto zu finden. Früher lebte er in Bischkek. Da nun Familienzuwachs ansteht, suchte er ein geräumiges, zuverlässiges und alltagstaugliches Fahrzeug.
 
-      Als Hauptoption haben wir die **Škoda Octavia** gewählt.
+      Als Favoriten entschieden wir uns für den **Škoda Octavia**.
 
-      Wir haben drei Fahrzeuge inspiziert und letztendlich ein wirklich hervorragendes Modell gefunden: **2.0 TDI, feuchter DSG DQ381 und eine Laufleistung von etwa 150 000 km**.
+      Wir besichtigten drei Fahrzeuge und fanden schließlich ein wirklich überzeugendes Exemplar: **2.0 TDI, DSG-Doppelkupplungsgetriebe DQ381 mit Nasskupplungen und rund 150.000 km Laufleistung**.
 
-      Die Ausstattung des Fahrzeugs ist recht einfach, jedoch ist der technische Zustand nahezu perfekt. Nach der Auswahl des Fahrzeugs haben wir es zusätzlich auf die Hebebühne gefahren. Wir haben den Unterboden, die Aufhängung, die Stoßdämpfer sowie die wesentlichen Elemente unten überprüft: alles in ausgezeichnetem Zustand, ohne unangenehme Überraschungen.
+      Die Ausstattung ist eher schlicht, dafür ist der technische Zustand nahezu einwandfrei. Nachdem die Wahl auf dieses Fahrzeug gefallen war, nahmen wir es zusätzlich auf der Hebebühne unter die Lupe. Wir prüften den Unterboden, das Fahrwerk, die Stoßdämpfer und die wichtigsten von unten zugänglichen Bauteile. Alles war in hervorragendem Zustand, ohne böse Überraschungen.
 
-      Letztlich erhielt Roman genau das Fahrzeug, das er suchte: ohne Aufpreis für eine reichhaltige Ausstattung, aber mit einem hervorragenden technischen Zustand und einem guten Restwert.
+      So bekam Roman genau das Auto, das er gesucht hatte: ohne Aufpreis für eine üppige Ausstattung, dafür in ausgezeichnetem technischen Zustand und mit guten Voraussetzungen für viele weitere Kilometer.
 car: Skoda Octavia
 year: 2020
 price:

@@ -13,109 +13,109 @@ date: 2026-09-10
 published: true
 translations:
   en:
-    title: BMW X3 for Viktor
+    title: A BMW X3 for Viktor
     body: |-
-      **Car Sourcing in Serbia: How We Were Looking for a BMW 3 Series but Ended Up Buying a BMW X3 with Original Mileage!**\
-      Victor reached out to us with a request to find a BMW 3 Series in Serbia. We discussed his budget, preferences for the car, and usage specifics. During our conversation, we suggested considering a BMW X3 as well, since the budget allowed for it, and the X3's characteristics could make it a more versatile and practical option.\
-      To help Victor compare the cars beyond just photos and listings, we took a drive in the BMW X3. He really liked the car, and we decided to broaden our search.\
-      We found several interesting options for the BMW 3 Series, and Victor independently located and sent us another BMW X3 for inspection. After reviewing several vehicles, we settled on a beautiful gray **BMW X3 with a two-liter diesel engine**.\
-      **Inspection of the BMW Before Purchase in Serbia**\
-      Buying a used BMW requires particularly thorough diagnostics. There are many cars in Serbia with altered odometers, hidden technical issues, and questionable service histories. Therefore, we don't just look at the exterior; we verify whether the mileage is accurate and assess the vehicle's technical condition.\
-      The selected BMW X3 underwent a comprehensive inspection, including diagnostics using the original **BMW ISTA** software.\
-      During the inspection, we paid special attention to:
+      **Car sourcing in Serbia: how a search for a BMW 3 Series led us to a BMW X3 with genuine mileage!**\
+      Viktor contacted us to help him find a BMW 3 Series in Serbia. We discussed his budget, preferences and how he planned to use the car. During our conversation, we suggested considering a BMW X3 as well. It was within budget and could offer a more versatile, practical alternative.\
+      To help Viktor compare the cars beyond photos and listings, we took a BMW X3 for a drive. He really liked it, so we decided to broaden the search.\
+      We shortlisted several promising BMW 3 Series examples, while Viktor found another BMW X3 himself and sent it to us for inspection. After considering several cars, we settled on a handsome grey **BMW X3 with a 2.0-litre diesel engine**.\
+      **Pre-purchase BMW inspection in Serbia**\
+      Buying a used BMW calls for a particularly thorough inspection. There are plenty of cars on the Serbian market with clocked odometers, hidden mechanical issues and questionable service histories. That is why we look beyond appearances, checking whether the mileage can be verified and assessing the car's mechanical condition.\
+      The shortlisted BMW X3 underwent a comprehensive inspection, including diagnostics using genuine **BMW ISTA** software.\
+      During the inspection, we paid particular attention to:
 
       <ul class="icon-check">
-      <li>verifying the actual mileage of the vehicle and comparing data from electronic control units;</li>
-      <li>diagnosing the engine and electronic systems through BMW ISTA;</li>
-      <li>checking the condition of the timing chain;</li>
-      <li>inspecting the EGR system;</li>
-      <li>analyzing error codes, technical parameters, and the condition of key vehicle components;</li>
-      <li>overall evaluation of the technical condition before purchase.</li>
+      <li>verifying the car's actual mileage and cross-checking data from its electronic control units;</li>
+      <li>running engine and electronic system diagnostics with BMW ISTA;</li>
+      <li>checking the timing chain's condition;</li>
+      <li>checking the EGR system;</li>
+      <li>reviewing fault codes, operating parameters and the condition of the car's key components;</li>
+      <li>assessing the car's overall mechanical condition before purchase.</li>
       </ul>
 
-      The inspection results were encouraging. **The mileage was confirmed to be original, with no signs of tampering, the timing chain was in good condition, and the EGR assessment along with checks of other important systems revealed no critical issues.**\
-      We place particular emphasis on inspecting the underside of the vehicle when sourcing cars. Almost all vehicles we consider for purchase are checked on a lift. This allows us to evaluate the condition of the suspension, the underbody, check for oil and fluid leaks, damage, and other defects that cannot be fully seen during a regular inspection.\
-      **The conclusion of our sourcing for Victor: BMW X3, 2.0 diesel, stunning gray color, original mileage, and good technical condition.**\
-      We congratulate Victor on his purchase and wish him enjoyment on every drive!\
-      If you need **car sourcing in Serbia, vehicle inspection before purchase in Belgrade, or assistance with buying a used BMW**, feel free to contact us. We will help you find a worthy vehicle and reduce the risks associated with purchasing a car that may have hidden issues.
+      We were pleased with the results. **The mileage was genuine, with no signs of tampering. The timing chain was in good condition, and checks of the EGR and other key systems revealed no major issues.**\
+      Underbody inspections are another important part of our sourcing process. We put almost every car we consider buying on a lift. This lets us assess the suspension and underbody, check for oil and other fluid leaks, and spot damage or defects that cannot be properly seen during a standard walk-around inspection.\
+      **The result of our search for Viktor: a BMW X3 with a 2.0-litre diesel engine, a lovely grey finish, genuine mileage and sound mechanical condition.**\
+      Congratulations on your purchase, Viktor. We hope you enjoy every drive!\
+      If you need **car sourcing in Serbia, a pre-purchase car inspection in Belgrade or help buying a used BMW**, get in touch. We can help you find a good car and reduce the risk of buying one with hidden problems.
   sr:
     title: BMW X3 za Viktora
     body: |-
-      **Odabir automobila u Srbiji. Kako smo tražili BMW 3 serije, a na kraju kupili BMW X3 sa originalnim pređenim kilometrima!**\
-      Viktor se obratio za pomoć u pronalasku BMW 3 serije u Srbiji. Razgovarali smo o budžetu, željama vezanim za automobil i specifičnostima korišćenja. Tokom razgovora, predložili smo da razmotri i BMW X3, s obzirom na to da je budžet to dozvoljavao, a X3 je mogao postati svestraniji i praktičniji izbor.\
-      Kako bi Viktor mogao da uporedi automobile ne samo na osnovu fotografija i oglasa, provozali smo se u BMW X3. Automobil mu se veoma dopao i odlučeno je da proširimo pretragu.\
-      Pronašli smo nekoliko zanimljivih opcija BMW 3 serije, a Viktor je samostalno našao i poslao nam još jedan BMW X3 na proveru. Nakon razmatranja nekoliko automobila, izbor je pao na prelepi sivi **BMW X3 sa dvolitarskim dizel motorom**.\
-      **Provera BMW-a pre kupovine u Srbiji**\
-      Kupovina polovnog BMW-a zahteva posebnu pažnju prilikom provere. U Srbiji ima dovoljno automobila sa vraćenom kilometražom, skrivenim tehničkim problemima i sumnjivom servisnom istorijom. Zato se ne oslanjamo samo na spoljni izgled: proveravamo da li je pređena kilometraža verodostojna i koliko je automobil tehnički ispravan.\
-      Odabrani BMW X3 je prošao sveobuhvatnu proveru, uključujući dijagnostiku pomoću originalnog softvera **BMW ISTA**.\
-      Tokom provere, posebno smo obratili pažnju na:
+      **Pronalaženje automobila u Srbiji. Kako smo tražili BMW serije 3, a na kraju kupili BMW X3 sa originalnom kilometražom!**\
+      Viktor nam se obratio sa željom da mu pronađemo BMW serije 3 u Srbiji. Razgovarali smo o budžetu, njegovim željama i načinu na koji planira da koristi automobil. Tokom razgovora predložili smo da razmotri i BMW X3, jer je budžet to dozvoljavao, a X3 bi po svojim karakteristikama mogao da bude svestraniji i praktičniji izbor.\
+      Kako bi Viktor mogao da uporedi automobile i uživo, a ne samo na osnovu fotografija i oglasa, provozali smo se u BMW-u X3. Automobil mu se veoma dopao, pa smo odlučili da proširimo pretragu.\
+      Izdvojili smo nekoliko zanimljivih primeraka BMW-a serije 3, a Viktor je i sam pronašao još jedan BMW X3 i poslao nam ga da uradimo proveru auta pre kupovine. Nakon razmatranja nekoliko automobila, izbor je pao na lep sivi **BMW X3 sa dvolitarskim dizel motorom**.\
+      **BMW u Srbiji: provera auta pre kupovine**\
+      Kupovina polovnog BMW-a zahteva posebno detaljnu proveru. U Srbiji ima dosta automobila sa vraćenom kilometražom, skrivenim tehničkim problemima i sumnjivom servisnom istorijom. Zato nam nije dovoljan samo dobar izgled: proveravamo da li je kilometraža verodostojna i u kakvom je automobil zaista tehničkom stanju.\
+      Za odabrani BMW X3 urađena je detaljna provera auta pre kupovine, uključujući dijagnostiku pomoću originalnog softvera **BMW ISTA**.\
+      Tokom provere posebnu pažnju posvetili smo:
 
       <ul class="icon-check">
-      <li>proveru stvarne kilometraže automobila i upoređivanje podataka iz elektronskih blokova;</li>
-      <li>dijagnostiku motora i elektronskih sistema putem BMW ISTA;</li>
-      <li>proveru stanja lanca razvodnog mehanizma;</li>
-      <li>proveru EGR sistema;</li>
-      <li>analizu grešaka, tehničkih parametara i stanja glavnih sklopova automobila;</li>
-      <li>opštu procenu tehničkog stanja pre kupovine.</li>
+      <li>proveri stvarne kilometraže i poređenju podataka iz elektronskih upravljačkih jedinica;</li>
+      <li>dijagnostici motora i elektronskih sistema pomoću softvera BMW ISTA;</li>
+      <li>proveri stanja razvodnog lanca;</li>
+      <li>proveri EGR sistema;</li>
+      <li>analizi grešaka, tehničkih parametara i stanja ključnih sklopova automobila;</li>
+      <li>ukupnoj proceni tehničkog stanja pre kupovine.</li>
       </ul>
 
-      Rezultati provere su nas obradovali. **Kilometri su se pokazali kao originalni, bez znakova prepravke, lanac razvodnog mehanizma je bio u dobrom stanju, a provera EGR i drugih važnih sistema nije pokazala kritične probleme.**\
-      Povrh svega, prilikom odabira vozila, posebno obraćamo pažnju na pregled automobila sa donje strane. Praktično svi automobili koje razmatramo za kupovinu se proveravaju na dizalici. To omogućava procenu stanja vešanja, dna, prisustva curenja ulja i tehničkih tečnosti, oštećenja i drugih nedostataka, koji se ne mogu potpuno uočiti prilikom uobičajenog pregleda.\
-      **Rezultat našeg odabira za Viktora: BMW X3, 2.0 dizel, prelepa siva boja, originalni pređeni kilometri i dobro tehničko stanje.**\
-      Čestitamo Viktoru na kupovini i želimo mu uživanje u svakoj vožnji!\
-      Ako vam je potrebna **pomoć pri odabiru automobila u Srbiji, provera auta pre kupovine u Beogradu ili pomoć s kupovinom polovnog BMW-a**, obratite se. Pomoći ćemo vam da pronađete odgovarajući automobil i smanjite rizike vezane za kupovinu vozila sa skrivenim problemima.
+      Rezultati provere su nas obradovali. **Kilometraža je bila originalna, bez znakova vraćanja, razvodni lanac je bio u dobrom stanju, a provera EGR-a i ostalih važnih sistema nije pokazala ozbiljne probleme.**\
+      Pri pronalaženju automobila posebnu pažnju posvećujemo pregledu odozdo. Gotovo svaki automobil koji razmatramo za kupovinu proveravamo na dizalici. Tako možemo da procenimo stanje oslanjanja i podvozja, kao i da uočimo curenje ulja i drugih tečnosti, oštećenja i nedostatke koji se ne mogu detaljno sagledati pri uobičajenom pregledu.\
+      **Rezultat naše potrage za Viktora: BMW X3, 2.0 dizel, u lepoj sivoj boji, sa originalnom kilometražom i u dobrom tehničkom stanju.**\
+      Čestitamo Viktoru na kupovini i želimo mu da uživa u svakoj vožnji!\
+      Ako vam je potrebno **pronalaženje automobila u Srbiji, provera auta pre kupovine u Beogradu ili pomoć pri kupovini polovnog BMW-a**, javite nam se. Pomoći ćemo vam da pronađete dobar automobil i smanjite rizik od kupovine vozila sa skrivenim problemima.
   es:
-    title: BMW X3 para Viktor
+    title: BMW X3 para Víktor
     body: |-
-      **Selección de autos en Serbia. Cómo buscamos un BMW Serie 3 y terminamos comprando un BMW X3 con kilometraje original!**\
-      Viktor se puso en contacto con nosotros para solicitar la búsqueda de un BMW Serie 3 en Serbia. Hablamos sobre el presupuesto, las preferencias del vehículo y las características de uso. Durante la conversación, también le sugerimos considerar un BMW X3, ya que el presupuesto lo permitía y, por sus características, el X3 podría ser una opción más versátil y práctica.\
-      Para que Viktor pudiera comparar los autos no solo por fotos y anuncios, realizamos una prueba de manejo en el BMW X3. Le gustó mucho el vehículo, así que decidimos ampliar la búsqueda.\
-      Seleccionamos algunas opciones interesantes del BMW Serie 3, mientras que Viktor encontró y nos envió otro BMW X3 para una revisión. Tras evaluar varios autos, nos decidimos por un hermoso **BMW X3 con motor diésel de dos litros**.\
-      **Inspección del BMW antes de la compra en Serbia**\
-      La compra de un BMW usado requiere una atención especial en la evaluación. En Serbia hay una gran cantidad de vehículos con kilometraje alterado, problemas técnicos ocultos y un historial de mantenimiento cuestionable. Por eso, no nos quedamos solo con la apariencia: verificamos si el kilometraje es real y en qué estado se encuentra técnicamente el vehículo.\
-      El BMW X3 seleccionado pasó una revisión exhaustiva, incluida una diagnosis con el software original **BMW ISTA**.\
-      Durante la inspección, nos centramos particularmente en:
+      **Búsqueda de coches en Serbia. ¡Empezamos buscando un BMW Serie 3 y terminamos comprando un BMW X3 con kilometraje real!**\
+      Víktor acudió a nosotros para que le ayudáramos a encontrar un BMW Serie 3 en Serbia. Hablamos del presupuesto, de sus preferencias y del uso que pensaba darle al coche. Durante la conversación le propusimos valorar también el BMW X3, ya que encajaba en su presupuesto y, por sus características, podía ser una opción más versátil y práctica.\
+      Para que Víktor pudiera comparar los coches más allá de las fotos y los anuncios, salimos a probar un BMW X3. Le gustó mucho, así que decidimos ampliar la búsqueda.\
+      Seleccionamos varios BMW Serie 3 interesantes y Víktor encontró por su cuenta otro BMW X3 que nos envió para que lo revisáramos. Tras valorar varios coches, nos decantamos por un atractivo **BMW X3 gris con motor diésel de dos litros**.\
+      **Inspección de un BMW antes de comprarlo en Serbia**\
+      Comprar un BMW de segunda mano requiere una revisión especialmente minuciosa. En Serbia no faltan coches con el cuentakilómetros manipulado, problemas mecánicos ocultos o un historial de mantenimiento poco fiable. Por eso no nos quedamos en la apariencia: comprobamos si el kilometraje es real y en qué estado se encuentra el vehículo.\
+      El BMW X3 elegido pasó una revisión completa, que incluyó un diagnóstico con el software original **BMW ISTA**.\
+      Durante la revisión prestamos especial atención a:
 
       <ul class="icon-check">
-      <li>verificación del kilometraje real del vehículo y comparación de datos de los módulos electrónicos;</li>
-      <li>diagnóstico del motor y sistemas electrónicos a través de BMW ISTA;</li>
-      <li>inspección del estado de la cadena de distribución;</li>
-      <li>verificación del sistema EGR;</li>
-      <li>análisis de errores, parámetros técnicos y estado de los componentes principales del vehículo;</li>
-      <li>evaluación general del estado técnico antes de la compra.</li>
+      <li>comprobar el kilometraje real del vehículo y contrastar los datos de las unidades de control;</li>
+      <li>diagnosticar el motor y los sistemas electrónicos con BMW ISTA;</li>
+      <li>revisar el estado de la cadena de distribución;</li>
+      <li>comprobar el sistema EGR;</li>
+      <li>analizar los códigos de avería, los parámetros de funcionamiento y el estado de los principales componentes del vehículo;</li>
+      <li>evaluar el estado mecánico general antes de la compra.</li>
       </ul>
 
-      Los resultados de la inspección nos alegraron. **El kilometraje resultó ser original, sin signos de manipulación, la cadena de distribución estaba en buen estado y la verificación del sistema EGR y otros sistemas importantes no reveló problemas críticos.**\
-      Prestamos especial atención a la inspección del vehículo por debajo. Prácticamente todos los automóviles que consideramos para la compra son revisados en un elevador. Esto permite evaluar el estado de la suspensión, el chasis, la presencia de fugas de aceite y líquidos técnicos, daños y otros defectos que no se pueden ver adecuadamente en una inspección visual regular.\
-      **El resultado de nuestra búsqueda para Viktor: BMW X3, diésel 2.0, color gris hermoso, kilometraje original y buen estado técnico.**\
-      Felicitamos a Viktor por su compra y le deseamos que disfrute de cada viaje!\
-      Si necesitas **selección de autos en Serbia, inspección de vehículos antes de la compra en Belgrado, o ayuda con la compra de un BMW usado**, no dudes en contactarnos. Te ayudaremos a encontrar un vehículo adecuado y a reducir los riesgos de comprar un auto con problemas ocultos.
+      Los resultados fueron muy positivos. **El kilometraje era real, sin indicios de manipulación, la cadena de distribución estaba en buen estado y la revisión del sistema EGR y de los demás sistemas importantes no reveló problemas graves.**\
+      En nuestro servicio de búsqueda de coches también prestamos especial atención a la inspección de los bajos. Revisamos en un elevador prácticamente todos los vehículos que valoramos para una compra. Así podemos comprobar el estado de la suspensión y de los bajos, detectar fugas de aceite y otros líquidos, daños y otros defectos que no se pueden apreciar bien en una inspección convencional.\
+      **El resultado de nuestra búsqueda para Víktor: un BMW X3 2.0 diésel, en un bonito color gris, con kilometraje real y en buen estado mecánico.**\
+      ¡Enhorabuena por la compra, Víktor! ¡Que disfrutes de cada trayecto!\
+      Si necesitas un **servicio de búsqueda de coches en Serbia, una inspección antes de comprar un coche en Belgrado o ayuda para comprar un BMW de segunda mano**, contacta con nosotros. Te ayudaremos a encontrar un buen coche y a reducir el riesgo de comprar un vehículo con problemas ocultos.
   de:
     title: BMW X3 für Viktor
     body: |-
-      **Autowahl in Serbien. Wie wir nach einem BMW 3er suchten und letztendlich einen BMW X3 mit originalem Kilometerstand kauften!**\
-      Victor wandte sich an uns mit der Anfrage zur Suche nach einem BMW 3er in Serbien. Wir besprachen das Budget, die Wünsche an das Fahrzeug sowie die Nutzungsmöglichkeiten. Während unseres Gesprächs schlugen wir vor, auch den BMW X3 in Betracht zu ziehen, da das Budget dies zuließ und der X3 in seinen Eigenschaften eine vielseitigere und praktischere Option darstellen könnte.\
-      Damit Victor die Fahrzeuge nicht nur anhand von Fotos und Anzeigen vergleichen konnte, fuhren wir mit dem BMW X3. Das Auto gefiel ihm sehr gut, und es wurde beschlossen, die Suche auszuweiten.\
-      Wir fanden einige interessante Optionen für den BMW 3er, während Victor selbst einen weiteren BMW X3 zur Überprüfung fand und uns zuschickte. Nach der Betrachtung mehrerer Fahrzeuge fiel die Entscheidung auf den schönen grauen **BMW X3 mit einem 2,0-Liter-Dieselmotor**.\
-      **Überprüfung des BMW vor dem Kauf in Serbien**\
-      Der Kauf eines gebrauchten BMW erfordert eine besonders sorgfältige Diagnose. In Serbien gibt es genügend Fahrzeuge mit manipuliertem Kilometerstand, versteckten technischen Problemen und fragwürdiger Servicehistorie. Daher bleiben wir nicht nur beim äußeren Erscheinungsbild stehen, sondern überprüfen, ob der Kilometerstand verifiziert werden kann und wie technisch in Ordnung das Fahrzeug ist.\
-      Der ausgewählte BMW X3 durchlief eine umfassende Überprüfung, einschließlich einer Diagnose mit originaler **BMW ISTA**-Software.\
-      Im Rahmen der Inspektion legten wir besonderen Wert auf:
+      **Fahrzeugsuche in Serbien: Wie wir einen BMW 3er suchten und am Ende einen BMW X3 mit nachweisbarer Laufleistung kauften!**\
+      Viktor wandte sich an uns, um einen BMW 3er in Serbien zu finden. Wir besprachen sein Budget, seine Wünsche und den geplanten Einsatz des Fahrzeugs. Dabei schlugen wir vor, auch den BMW X3 in Betracht zu ziehen. Das Budget ließ es zu, und der X3 konnte mit seinen Eigenschaften die vielseitigere und praktischere Wahl sein.\
+      Damit Viktor die Fahrzeuge nicht nur anhand von Fotos und Inseraten vergleichen musste, machten wir eine Probefahrt mit einem BMW X3. Das Auto gefiel ihm sehr gut, und so beschlossen wir, die Suche zu erweitern.\
+      Wir suchten mehrere interessante BMW 3er heraus. Viktor fand selbst noch einen weiteren BMW X3 und schickte ihn uns zur Prüfung. Nachdem wir mehrere Fahrzeuge geprüft hatten, fiel die Wahl auf einen schönen grauen **BMW X3 mit Zweiliter-Dieselmotor**.\
+      **BMW-Gebrauchtwagencheck vor dem Kauf in Serbien**\
+      Beim Kauf eines gebrauchten BMW ist eine besonders gründliche Prüfung wichtig. In Serbien gibt es nicht wenige Fahrzeuge mit manipuliertem Kilometerstand, versteckten technischen Mängeln oder fragwürdiger Wartungshistorie. Deshalb verlassen wir uns nicht auf den äußeren Eindruck: Wir prüfen, ob die Laufleistung nachvollziehbar ist und in welchem technischen Zustand sich das Fahrzeug tatsächlich befindet.\
+      Der ausgewählte BMW X3 wurde umfassend geprüft, einschließlich einer Diagnose mit der originalen BMW-Software **BMW ISTA**.\
+      Besonderes Augenmerk legten wir dabei auf:
 
       <ul class="icon-check">
-      <li>Überprüfung des tatsächlichen Kilometerstands des Fahrzeugs und Abgleich der Daten der elektronischen Steuergeräte;</li>
-      <li>Diagnose des Motors und der elektronischen Systeme über BMW ISTA;</li>
-      <li>Überprüfung des Zustands der Steuerkette;</li>
-      <li>Überprüfung des EGR-Systems;</li>
-      <li>Analyse von Fehlern, technischen Parametern und dem Zustand der Hauptkomponenten des Fahrzeugs;</li>
-      <li>allgemeine Bewertung des technischen Zustands vor dem Kauf.</li>
+      <li>die Überprüfung der tatsächlichen Laufleistung und den Abgleich der Daten aus den Steuergeräten;</li>
+      <li>die Diagnose des Motors und der elektronischen Systeme mit BMW ISTA;</li>
+      <li>die Prüfung des Zustands der Steuerkette;</li>
+      <li>die Prüfung des AGR-Systems;</li>
+      <li>die Auswertung von Fehlerspeichern und technischen Parametern sowie die Prüfung der wichtigsten Fahrzeugkomponenten;</li>
+      <li>die Gesamtbewertung des technischen Zustands vor dem Kauf.</li>
       </ul>
 
-      Die Ergebnisse der Überprüfung erfüllten uns mit Freude. **Der Kilometerstand stellte sich als original heraus, ohne Anzeichen einer Manipulation, die Steuerkette war in gutem Zustand und die Überprüfung des EGR sowie der anderen wichtigen Systeme ergab keine kritischen Probleme.**\
-      Besonderes Augenmerk legen wir bei der Autowahl auf die Unterbesichtigung des Fahrzeugs. Praktisch alle Autos, die wir in Betracht ziehen, überprüfen wir auf der Hebebühne. Dies ermöglicht es, den Zustand der Aufhängung, des Unterbodens, das Vorhandensein von Öl- und anderen Flüssigkeitsaustritten sowie Schäden und andere Mängel zu beurteilen, die bei einer gewöhnlichen Besichtigung nicht vollständig erkannt werden können.\
-      **Das Ergebnis unserer Auswahl für Victor: BMW X3, 2.0 Diesel, schöne graue Farbe, originaler Kilometerstand und guter technischer Zustand.**\
-      Wir gratulieren Victor zum Kauf und wünschen ihm viel Freude bei jeder Fahrt!\
-      Wenn Sie **Autowahl in Serbien, Fahrzeugüberprüfung vor dem Kauf in Belgrad oder Unterstützung beim Kauf eines gebrauchten BMW** benötigen, kontaktieren Sie uns. Wir helfen Ihnen, ein anspruchsvolles Fahrzeug zu finden und die Risiken beim Autokauf mit versteckten Problemen zu minimieren.
+      Die Ergebnisse waren erfreulich. **Die Laufleistung war plausibel und wies keine Anzeichen einer Manipulation auf. Die Steuerkette war in gutem Zustand, und bei der Prüfung des AGR-Systems sowie der übrigen wichtigen Systeme wurden keine gravierenden Probleme festgestellt.**\
+      Bei unserer Fahrzeugsuche legen wir außerdem besonderen Wert auf die Besichtigung von unten. Praktisch alle Fahrzeuge, die für einen Kauf infrage kommen, prüfen wir auf einer Hebebühne. So lassen sich Fahrwerk und Unterboden beurteilen sowie Öl- und Flüssigkeitsverluste, Beschädigungen und andere Mängel erkennen, die bei einer normalen Besichtigung nicht ausreichend sichtbar sind.\
+      **Das Ergebnis unserer Fahrzeugsuche für Viktor: ein BMW X3 mit 2,0-Liter-Dieselmotor, in schönem Grau, mit nachweisbarer Laufleistung und in gutem technischen Zustand.**\
+      Wir gratulieren Viktor zum Kauf und wünschen ihm viel Freude bei jeder Fahrt!\
+      Wenn Sie Unterstützung bei der **Fahrzeugsuche in Serbien, einen Gebrauchtwagencheck vor dem Kauf in Belgrad oder Hilfe beim Kauf eines gebrauchten BMW** benötigen, melden Sie sich bei uns. Wir helfen Ihnen, ein gutes Fahrzeug zu finden und das Risiko versteckter Mängel zu reduzieren.
 translatedFrom: e91f7b3986181ae5
 ---
 **Автоподбор в Сербии. Как мы искали BMW 3 серии, а в итоге купили BMW X3 с оригинальным пробегом!**\

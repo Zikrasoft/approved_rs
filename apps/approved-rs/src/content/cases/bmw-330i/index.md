@@ -17,111 +17,111 @@ translations:
   en:
     title: BMW 330i
     body: |-
-      **Car Sourcing: BMW 330i with 25,000 km - From Bremen to Munich**\
-      Valery from Munich reached out to us with the challenge of finding a BMW 330i featuring a reliable B48 gasoline engine, low mileage, a transparent service history, and excellent technical condition.\
-      We began our search for the vehicle across Germany, reviewing market listings, checking five cars through dealer databases and CarVertical, and then selected the two most promising options for further inspection.\
-      Ultimately, we found the best car in **Bremen**. A gray **BMW 330i** with only **25,000 km**, a complete dealer service history, and in perfect condition.\
-      We conducted a thorough pre-purchase inspection, assessing its technical state, body, usage history, and documentation. After all checks, the car was purchased and delivered from Bremen to **Munich** for its new owner.\
-      Now Valery is enjoying his BMW 330i, and we are pleased to have found exactly the car he wanted.
+      **Sourcing a BMW 330i with 25,000 km: from Bremen to Munich**\
+      Valery from Munich contacted us to find a BMW 330i with the reliable B48 petrol engine, low mileage, a documented service history and excellent mechanical condition.\
+      We searched across Germany, reviewed the available listings and checked five cars through dealer databases and carVertical before shortlisting the two most promising options for inspection.\
+      The best car turned out to be in **Bremen**: a grey **BMW 330i** with just **25,000 km** on the clock, a full dealer service history and in excellent condition.\
+      We carried out a pre-purchase inspection, checking its mechanical condition, bodywork, history and paperwork. Once all checks were complete, we purchased the car and delivered it from Bremen to its new owner in **Munich**.\
+      Valery is now enjoying his BMW 330i, and we're delighted to have found exactly the car he wanted.
 
-      **Professional car sourcing and inspection services throughout Germany.** We operate in Berlin, Munich, Hamburg, Frankfurt, Stuttgart, Düsseldorf, Cologne, Dortmund, Bremen, Hanover, Nuremberg, Leipzig, and other cities across the country.
+      **Professional car sourcing and inspections throughout Germany.** We cover Berlin, Munich, Hamburg, Frankfurt am Main, Stuttgart, Dusseldorf, Cologne, Dortmund, Bremen, Hanover, Nuremberg, Leipzig and other cities across the country.
 
-      What car sourcing includes:
+      Our car sourcing service includes:
 
       <ul class="icon-check">
-      <li>searching and selecting cars in Germany</li>
-      <li>pre-purchase vehicle inspection</li>
+      <li>finding and shortlisting cars in Germany</li>
+      <li>pre-purchase inspections</li>
       <li>engine and transmission diagnostics</li>
-      <li>body checks for accidents and paintwork</li>
-      <li>verification of mileage and CarVertical report</li>
-      <li>purchase assistance</li>
-      <li>vehicle delivery across Germany</li>
+      <li>bodywork checks for accident damage and repainting</li>
+      <li>mileage verification and a carVertical report</li>
+      <li>support throughout the purchase process</li>
+      <li>car delivery within Germany</li>
       </ul>
 
-      We source BMW, Mercedes-Benz, Audi, Volkswagen, Porsche, and vehicles from other brands.
+      We source BMW, Mercedes-Benz, Audi, Volkswagen, Porsche and other makes.
 
-      If you're looking for a used car in Germany and want to buy a truly good example without hidden issues, get in touch: we can help you find, inspect, and purchase a vehicle with a transparent history.
+      If you're looking for a used car in Germany and want a genuinely good example with no hidden issues, get in touch. We'll help you find, inspect and buy a car with a transparent history.
   sr:
     title: BMW 330i
     body: |-
-      **Autopodbor BMW 330i sa pređenih 25 000 km: iz Bremena u Minhen**\
-      Kontaktirao nas je Valerij iz Minhena sa zadatkom da pronađemo BMW 330i sa pouzdanim benzinskim motorom B48, malim pređem, transparentnom istorijom servisiranja i u odličnom tehničkom stanju.\
-      Započeli smo potragu za automobilom širom Nemačke, istražili ponude na tržištu, proveli provere 5 vozila putem dilerskih baza i preko CarVertical, nakon čega smo izdvojili dva najinteresantnija modela za dalji pregled.\
-      Na kraju, najbolji automobil je pronađen u **Bremenu**. Sivi **BMW 330i** sa pređenih samo **25 000 km**, kompletnom dilerskom istorijom servisiranja i odličnim stanjem.\
-      Obavili smo provere auta pre kupovine, procenili tehničko stanje, karoseriju, istoriju korišćenja i dokumentaciju. Nakon svih provera, automobil je otkupljen i dostavljen iz Bremena u **Minhen** novom vlasniku.\
-      Sada Valerij vozi svoj BMW 330i, a mi smo srećni što smo našli baš onaj automobil koji je želeo.
+      **Pronalazak BMW-a 330i sa 25.000 km: iz Bremena u Minhen**\
+      Obratio nam se Valerij iz Minhena sa željom da pronađemo BMW 330i sa pouzdanim benzinskim motorom B48, malom kilometražom, urednom servisnom istorijom i u odličnom tehničkom stanju.\
+      Potragu smo proširili na celu Nemačku, analizirali ponudu i proverili pet automobila u bazama ovlašćenih servisa i putem servisa CarVertical. Zatim smo izdvojili dva najzanimljivija primerka za proveru auta pre kupovine.\
+      Najbolji primerak na kraju smo pronašli u **Bremenu**. Sivi **BMW 330i** sa svega **25.000 km**, kompletnom servisnom istorijom iz ovlašćenih servisa i u odličnom stanju.\
+      Urađena je provera auta pre kupovine, koja je obuhvatila tehničko stanje, karoseriju, istoriju korišćenja i dokumentaciju. Nakon svih provera, automobil je kupljen i isporučen novom vlasniku iz Bremena u **Minhen**.\
+      Valerij sada vozi svoj BMW 330i, a nama je drago što smo pronašli baš onakav automobil kakav je želeo.
 
-      **Profesionalan autopodbor i provera automobila širom Nemačke.** Radimo u Berlinu, Minhenu, Hamburgu, Frankfurtu na Majni, Štutgartu, Diseldorfu, Kelnu, Dortmundu, Bremenu, Hanau, Nurembergu, Lajpcigu i drugim gradovima u zemlji.
+      **Profesionalno pronalaženje automobila i provera auta pre kupovine širom Nemačke.** Radimo u Berlinu, Minhenu, Hamburgu, Frankfurtu na Majni, Štutgartu, Diseldorfu, Kelnu, Dortmundu, Bremenu, Hanoveru, Nirnbergu, Lajpcigu i drugim gradovima širom zemlje.
 
-      Šta uključuje autopodbor:
+      Šta obuhvata naša usluga:
 
       <ul class="icon-check">
-      <li>pretraga i odabir automobila u Nemačkoj</li>
+      <li>pretraga ponude i izbor automobila u Nemačkoj</li>
       <li>provera auta pre kupovine</li>
-      <li> dijagnostika motora i menjača</li>
-      <li>provera karoserije na udes i farbanje</li>
-      <li>provera stvarnog pređene distance i izveštaj CarVertical</li>
-      <li>pratnja prilikom kupovine</li>
-      <li>dostava automobila širom Nemačke</li>
+      <li>dijagnostika motora i menjača</li>
+      <li>provera karoserije radi otkrivanja tragova udesa i naknadnog farbanja</li>
+      <li>provera stvarne kilometraže i CarVertical izveštaj</li>
+      <li>podrška tokom kupovine</li>
+      <li>isporuka automobila širom Nemačke</li>
       </ul>
 
-      Biramo BMW, Mercedes-Benz, Audi, Volkswagen, Porsche i automobile drugih marki.
+      Pronalazimo BMW, Mercedes-Benz, Audi, Volkswagen, Porsche i automobile drugih marki.
 
-      Ako tražite automobil sa pređenim kilomtrima u Nemačkoj i želite da kupite zaista kvalitetan primerak bez skrivenih problema, obratite se: pomoći ćemo vam da pronađete, proverite i kupite automobil sa transparentnom istorijom.
+      Ako tražite polovan automobil u Nemačkoj i želite zaista dobar primerak bez skrivenih problema, javite nam se. Pomoći ćemo vam da pronađete, proverite i kupite automobil sa jasnom i proverljivom istorijom.
   es:
     title: BMW 330i
     body: |-
-      **Selección de coche BMW 330i con 25 000 km de Bremen a Múnich**\
-      Valeriy de Múnich se puso en contacto con nosotros para encontrar un BMW 330i con un motor de gasolina B48 confiable, bajo kilometraje, un historial de mantenimiento transparente y en excelente estado técnico.\
-      Iniciamos la búsqueda del vehículo en toda Alemania, estudiamos las ofertas disponibles en el mercado, revisamos 5 coches a través de bases de datos de concesionarios y CarVertical, y seleccionamos dos opciones interesantes para una inspección más detallada.\
-      Al final, el mejor coche lo encontramos en **Bremen**. Un **BMW 330i** gris con solo **25 000 km**, un historial completo de mantenimiento en concesionario y en excelente estado general.\
-      Realizamos una revisión del vehículo antes de la compra, evaluamos su estado técnico, la carrocería, el historial de uso y la documentación. Tras todas las comprobaciones, el coche fue adquirido y entregado desde Bremen a **Múnich** a su nuevo propietario.\
-      Ahora Valeriy conduce su BMW 330i, y estamos felices de haber encontrado exactamente el coche que él deseaba.
+      **Búsqueda de un BMW 330i con 25 000 km: de Bremen a Múnich**\
+      Valeri, de Múnich, nos contactó para encontrar un BMW 330i con el fiable motor de gasolina B48, pocos kilómetros, un historial de mantenimiento documentado y en excelente estado mecánico.\
+      Empezamos a buscar por toda Alemania, analizamos las ofertas del mercado y comprobamos 5 vehículos en las bases de datos de los concesionarios y a través de CarVertical. Después seleccionamos las dos opciones más interesantes para inspeccionarlas en persona.\
+      Finalmente, encontramos la mejor opción en **Bremen**: un **BMW 330i** gris con solo **25 000 km**, un historial de mantenimiento completo en la red oficial y en excelente estado.\
+      Realizamos una inspección previa a la compra, revisando el estado mecánico, la carrocería, el historial de uso y la documentación. Una vez superadas todas las comprobaciones, compramos el coche y lo trasladamos de Bremen a **Múnich** para entregárselo a su nuevo propietario.\
+      Ahora Valeri disfruta de su BMW 330i y nosotros estamos encantados de haber encontrado justo el coche que quería.
 
-      **Selección de coches y verificación profesional en toda Alemania.** Trabajamos en Berlín, Múnich, Hamburgo, Fráncfort del Meno, Stuttgart, Düsseldorf, Colonia, Dortmund, Bremen, Hannover, Núremberg, Leipzig y otras ciudades del país.
+      **Servicio profesional de búsqueda e inspección de coches en toda Alemania.** Trabajamos en Berlín, Múnich, Hamburgo, Fráncfort del Meno, Stuttgart, Düsseldorf, Colonia, Dortmund, Bremen, Hannover, Núremberg, Leipzig y otras ciudades del país.
 
-      Lo que incluye la selección de coche:
+      Qué incluye nuestro servicio:
 
       <ul class="icon-check">
-      <li>búsqueda y selección de coche en Alemania</li>
-      <li>verificación del coche antes de la compra</li>
-      <li>diagnóstico del motor y la transmisión</li>
-      <li>revisión de la carrocería por accidentes y repintados</li>
-      <li>verificación del kilometraje real y reporte de CarVertical</li>
-      <li>acompañamiento en la compra</li>
-      <li>entrega del coche en toda Alemania</li>
+      <li>búsqueda y selección de coches en Alemania</li>
+      <li>inspección del vehículo antes de la compra</li>
+      <li>diagnóstico del motor y la caja de cambios</li>
+      <li>revisión de la carrocería para detectar daños por accidentes y zonas repintadas</li>
+      <li>comprobación del kilometraje real e informe de CarVertical</li>
+      <li>asesoramiento y gestión durante la compra</li>
+      <li>transporte del vehículo dentro de Alemania</li>
       </ul>
 
-      Seleccionamos BMW, Mercedes-Benz, Audi, Volkswagen, Porsche y coches de otras marcas.
+      Buscamos coches de BMW, Mercedes-Benz, Audi, Volkswagen, Porsche y otras marcas.
 
-      Si estás buscando un coche de segunda mano en Alemania y deseas comprar un buen ejemplar sin problemas ocultos, contáctanos: te ayudaremos a encontrar, comprobar y adquirir un coche con un historial transparente.
+      Si buscas un coche de segunda mano en Alemania y quieres comprar una unidad en buen estado y sin problemas ocultos, contacta con nosotros: te ayudamos a encontrar, revisar y comprar un vehículo con un historial transparente.
   de:
     title: BMW 330i
     body: |-
-      **Autowahl BMW 330i mit 25.000 km: von Bremen nach München**\
-      Valerij aus München bat uns, einen BMW 330i mit einem zuverlässigen Benzinmotor B48, geringem Kilometerstand, transparenter Wartungshistorie und in hervorragendem technischen Zustand zu finden.\
-      Wir begannen die Suche nach dem Fahrzeug in ganz Deutschland, analysierten die Angebote auf dem Markt, überprüften 5 Fahrzeuge über die Händlerdatenbanken und per CarVertical, bevor wir zwei der interessantesten Optionen für eine weitergehende Besichtigung auswählten.\
-      Letztendlich fanden wir das beste Fahrzeug in **Bremen**. Ein grauer **BMW 330i** mit nur **25.000 km**, vollständiger Händlerwartungshistorie und in ausgezeichnetem Zustand.\
-      Wir führten eine Fahrzeugprüfung vor dem Kauf durch, bewerteten den technischen Zustand, die Karosserie, die Nutzungsgeschichte und die Dokumente. Nach all diesen Überprüfungen wurde das Fahrzeug gekauft und aus Bremen zu seinem neuen Besitzer nach **München** geliefert.\
-      Nun fährt Valerij seinen BMW 330i, und wir freuen uns, dass wir genau das Auto gefunden haben, das er wollte.
+      **Fahrzeugsuche: BMW 330i mit 25.000 km, von Bremen nach München**\
+      Valeri aus München wandte sich an uns mit dem Auftrag, einen BMW 330i mit dem zuverlässigen B48-Benzinmotor, geringer Laufleistung, lückenloser Wartungshistorie und in hervorragendem technischen Zustand zu finden.\
+      Wir suchten deutschlandweit nach passenden Fahrzeugen, sichteten die Angebote und überprüften fünf Fahrzeuge anhand von Händlerdatenbanken und über CarVertical. Anschließend wählten wir die zwei vielversprechendsten Kandidaten für eine Besichtigung aus.\
+      Das beste Fahrzeug fanden wir schließlich in **Bremen**: einen grauen **BMW 330i** mit gerade einmal **25.000 km**, lückenloser Wartungshistorie beim Vertragshändler und in hervorragendem Zustand.\
+      Vor dem Kauf prüften wir den technischen Zustand, die Karosserie, die Fahrzeughistorie und die Unterlagen. Nach Abschluss aller Prüfungen wurde das Fahrzeug gekauft und von Bremen zu seinem neuen Besitzer nach **München** geliefert.\
+      Jetzt fährt Valeri seinen BMW 330i, und wir freuen uns, dass wir genau das Auto gefunden haben, das er sich gewünscht hat.
 
-      **Professionelle Fahrzeugwahl und -überprüfung in ganz Deutschland.** Wir sind in Berlin, München, Hamburg, Frankfurt am Main, Stuttgart, Düsseldorf, Köln, Dortmund, Bremen, Hannover, Nürnberg, Leipzig und anderen Städten des Landes tätig.
+      **Professionelle Fahrzeugsuche und Gebrauchtwagenprüfung in ganz Deutschland.** Wir sind in Berlin, München, Hamburg, Frankfurt am Main, Stuttgart, Düsseldorf, Köln, Dortmund, Bremen, Hannover, Nürnberg, Leipzig und weiteren Städten für Sie im Einsatz.
 
-      Was in der Autowahl enthalten ist:
+      Das umfasst unser Service:
 
       <ul class="icon-check">
-      <li>Suche und Auswahl von Fahrzeugen in Deutschland</li>
-      <li>Überprüfung des Fahrzeugs vor dem Kauf</li>
-      <li>Diagnose von Motor und Getriebe</li>
-      <li>Überprüfung der Karosserie auf Unfälle und Lackierungen</li>
-      <li>Überprüfung des tatsächlichen Mileage und CarVertical-Bericht</li>
-      <li>Begleitung des Kaufs</li>
-      <li>Lieferung des Fahrzeugs innerhalb Deutschlands</li>
+      <li>Suche und Auswahl passender Fahrzeuge in Deutschland</li>
+      <li>Fahrzeugprüfung vor dem Kauf</li>
+      <li>Motor- und Getriebediagnose</li>
+      <li>Prüfung der Karosserie auf Unfallschäden und Nachlackierungen</li>
+      <li>Überprüfung des Kilometerstands und CarVertical-Bericht</li>
+      <li>Begleitung beim Kauf</li>
+      <li>Fahrzeuglieferung innerhalb Deutschlands</li>
       </ul>
 
-      Wir wählen BMW, Mercedes-Benz, Audi, Volkswagen, Porsche und Fahrzeuge anderer Marken aus.
+      Wir finden für Sie Fahrzeuge von BMW, Mercedes-Benz, Audi, Volkswagen, Porsche und weiteren Marken.
 
-      Wenn Sie ein gebrauchtes Auto in Deutschland suchen und ein wirklich gutes Exemplar ohne versteckte Probleme kaufen möchten, kontaktieren Sie uns: Wir helfen Ihnen, das richtige Fahrzeug mit transparenter Geschichte zu finden, zu überprüfen und zu erwerben.
+      Sie suchen einen Gebrauchtwagen in Deutschland und möchten ein wirklich gutes Fahrzeug ohne versteckte Mängel kaufen? Kontaktieren Sie uns. Wir helfen Ihnen, ein Fahrzeug mit nachvollziehbarer Historie zu finden, zu prüfen und zu kaufen.
 translatedFrom: 6bf774f3e04da046
 ---
 **Автоподбор BMW 330i с пробегом 25 000 км: из Бремена в Мюнхен**\

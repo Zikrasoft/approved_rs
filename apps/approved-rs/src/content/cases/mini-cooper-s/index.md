@@ -14,43 +14,43 @@ translations:
   en:
     title: Mini Cooper S
     body: |-
-      ## Car Sourcing in Serbia: How We Found the Perfect Mini Cooper S
+      ## Car sourcing in Serbia: finding the perfect Mini Cooper S
 
-      Anastasia came to us with a clear request: **Mini Cooper S**. The family already had a primary vehicle, so this Mini was intended to be a vibrant, fun car for enjoying every drive.
+      Anastasia came to us with a clear brief: a **Mini Cooper S**. Her family already had a main car, so this Mini was all about personality, excitement and enjoying every drive.
 
-      The search proved to be quite challenging. We sifted through numerous offers and conducted pre-purchase inspections on **6–7 vehicles**. Really good **Mini Cooper S** models are hard to find; most show signs of accidents, have been repainted, or have other undesirable issues. We also considered options with imports from Germany, but ultimately, the best car was found in Belgrade.
+      The search proved challenging. We sifted through numerous listings and carried out pre-purchase inspections on **6-7 cars**. Genuinely good **Mini Cooper S** examples are rare: most have accident damage, repainted panels or other unwelcome issues. We also considered importing one from Germany, but in the end, the best car was right here in Belgrade.
 
-      As a result, we discovered a **2023 Mini Cooper S** with only **30,000 km** on the clock, complete history, and a **1-year warranty on the engine and ancillary equipment**. This was exactly the type of vehicle that met the client's expectations.
+      We found a **2023 Mini Cooper S** with just **30,000 km** on the clock, a fully documented history and a **one-year warranty covering the engine and its ancillary components**. It was exactly what our client had been looking for.
   sr:
     title: Mini Cooper S
     body: |-
-      ## Autopodbor u Srbiji: kako smo tražili „onaj pravi” Mini Cooper S
+      ## Potraga za automobilom u Srbiji: kako smo pronašli baš onaj pravi Mini Cooper S
 
-      Anastasija se obratila nama sa jasnim zahtevom: **Mini Cooper S**. U porodici već postoji glavni automobil, tako da je ovaj Mini trebao biti živahna, emotivna mašina za uživanje u svakoj vožnji.
+      Anastasija nam se obratila sa jasnom željom: **Mini Cooper S**. Porodica već ima glavni automobil, pa je ovaj Mini trebalo da bude upečatljiv auto koji budi emocije i pruža uživanje u svakoj vožnji.
 
-      Pretraga nije bila jednostavna. Prošli smo kroz mnogo ponuda, obavili provere pre kupovine **6–7 automobila**. Zaista dobri **Mini Cooper S** se retko nalaze: većina ima tragove sudara, ponovnu farbu ili druge neprijatne detalje. Razmatrali smo i opcije sa uvozom iz Nemačke, ali na kraju je najbolji automobil pronađen u Beogradu.
+      Potraga nije bila jednostavna. Razmotrili smo brojne oglase, a kroz našu uslugu provera auta pre kupovine prošlo je **6–7 automobila**. Zaista dobri primerci modela **Mini Cooper S** retko se nalaze: većina ima tragove udesa, naknadno farbane delove ili druge skrivene nedostatke. Razmatrali smo i uvoz iz Nemačke, ali smo na kraju najbolji automobil pronašli u Beogradu.
 
-      Na kraju je pronađen **Mini Cooper S iz 2023. godine** sa pređenih samo **30 000 km**, kompletnom istorijom i **garancijom od 1 godine na motor i dodatnu opremu**. Baš takav automobil je potpuno ispunjavao očekivanja klijenta.
+      Pronašli smo **Mini Cooper S iz 2023. godine**, sa svega **30.000 km**, kompletnom istorijom i **garancijom od godinu dana na motor i prateće sklopove**. Upravo takav automobil u potpunosti je ispunio očekivanja klijentkinje.
   es:
     title: Mini Cooper S
     body: |-
-      ## Selección de coches en Serbia: cómo encontramos el «Mini Cooper S» perfecto
+      ## Búsqueda de coches en Serbia: cómo encontramos el Mini Cooper S ideal
 
-      Anastasia se puso en contacto con nosotros con una solicitud clara: **Mini Cooper S**. En su familia ya tienen un coche principal, así que este Mini debía ser un automóvil vibrante y emocional, pensado para disfrutar cada viaje.
+      Anastasia acudió a nosotros con una idea clara: quería un **Mini Cooper S**. La familia ya tenía un coche principal, así que este Mini estaba destinado a ser un capricho con carácter, un coche para disfrutar de cada trayecto.
 
-      La búsqueda no fue fácil. Revisamos numerosas ofertas y realizamos inspecciones previas a la compra de **6–7 coches**. Los **Mini Cooper S** verdaderamente buenos son escasos: la mayoría presenta signos de accidentes, pintura secundaria o otros inconvenientes. También consideramos opciones de importación desde Alemania, pero al final, el mejor vehículo se encontró en Belgrado.
+      La búsqueda no fue sencilla. Revisamos numerosos anuncios e hicimos inspecciones precompra de **6 o 7 coches**. Los **Mini Cooper S** en buen estado de verdad escasean: la mayoría presentan señales de accidentes, zonas repintadas u otros detalles poco deseables. También valoramos importar uno de Alemania, pero al final la mejor opción estaba en Belgrado.
 
-      Finalmente, se halló un **Mini Cooper S del año 2023** con solo **30 000 km** de recorrido, un historial completo y **1 año de garantía en el motor y el equipamiento adicional**. Este coche era justo lo que el cliente esperaba.
+      Encontramos un **Mini Cooper S de 2023** con solo **30 000 km**, historial completo y **1 año de garantía para el motor y sus componentes auxiliares**. Era justo el coche que cumplía todas las expectativas de la clienta.
   de:
     title: Mini Cooper S
     body: |-
-      ## Autoauswahl in Serbien: Wie wir den perfekten Mini Cooper S gesucht haben
+      ## Autosuche in Serbien: auf der Suche nach dem perfekten Mini Cooper S
 
-      Anastasia kam mit einer klaren Anfrage zu uns: **Mini Cooper S**. In der Familie gibt es bereits ein Hauptfahrzeug, daher sollte dieser Mini ein auffälliges, emotionales Auto sein, das jede Fahrt zu einem Vergnügen macht.
+      Anastasia kam mit einem klaren Wunsch zu uns: ein **Mini Cooper S**. Da die Familie bereits ein Alltagsauto hat, sollte der Mini vor allem eines bieten: Charakter und Fahrspaß bei jeder Fahrt.
 
-      Die Suche gestaltete sich als schwierig. Wir prüften zahlreiche Angebote und führten eine Vorabinspektion von **6–7 Fahrzeugen** durch. Wirklich gute **Mini Cooper S** sind selten: Die meisten zeigen Unfallspuren, einen zweiten Lack oder andere unerfreuliche Details. Wir haben auch Optionen mit Import aus Deutschland in Betracht gezogen, aber letztendlich fanden wir das beste Fahrzeug in Belgrad.
+      Die Suche war nicht einfach. Wir sichteten zahlreiche Angebote und unterzogen **6–7 Fahrzeuge** einem Gebrauchtwagencheck. Wirklich gute **Mini Cooper S** sind selten: Die meisten weisen Unfallschäden, Nachlackierungen oder andere unschöne Details auf. Auch einen Import aus Deutschland zogen wir in Betracht, doch am Ende stand das beste Fahrzeug in Belgrad.
 
-      Schließlich entdeckten wir einen **Mini Cooper S aus dem Jahr 2023** mit nur **30 000 km Laufleistung**, vollständiger Historie und **1 Jahr Garantie auf Motor und Anbauteile**. Genau so ein Auto entsprach den Erwartungen des Kunden.
+      Gefunden haben wir schließlich einen **Mini Cooper S aus dem Jahr 2023** mit nur **30.000 km**, lückenloser Historie und **1 Jahr Garantie auf Motor und Nebenaggregate**. Dieses Fahrzeug entsprach genau den Vorstellungen der Kundin.
 translatedFrom: a0046342f8df29e1
 ---
 

@@ -4,75 +4,75 @@ translations:
   en:
     title: Volkswagen Touareg
     body: |-
-      **Volkswagen Touareg 2024** from Germany to Serbia: yet another great vehicle successfully sourced, inspected, purchased, cleared through customs, and delivered to our client in Belgrade.
+      **2024 Volkswagen Touareg** from Germany to Serbia: another excellent car successfully sourced, inspected, purchased, cleared through customs and delivered to our client in Belgrade.
 
-      This time, our task was to find and import a 2024 Volkswagen Touareg with a **3.0-liter diesel engine** from Germany. This all-wheel-drive SUV is equally suited for both the streets of Belgrade and a road trip across half of Europe.
+      This time, we were tasked with sourcing and importing a 2024 Volkswagen Touareg from Germany with a **3.0-litre diesel engine**. An all-wheel-drive SUV of this size is equally at home in Belgrade and on a road trip across Europe.
 
-      We located a suitable Volkswagen Touareg at a German dealership for our client. However, finding a nice listing is just the beginning. Before the purchase, we communicated extensively with the dealership manager in Germany, clarifying the vehicle's history, condition, maintenance records, specifications, and all important details.
+      We found a suitable Volkswagen Touareg at a German dealership. But finding an attractive listing is only the start. Before the purchase, we had extensive discussions with the dealership's sales manager, checking the car's history, condition, servicing, specification and every other important detail.
 
-      The next step was to check the car using **CarVertical**. Additionally, we ordered a dealer report on the Volkswagen to gather as much available information about the specific vehicle's history as possible. Only after the preliminary check yielded a good result did we dispatch our specialists directly to the dealer for an on-site inspection of the Volkswagen Touareg in Germany.
+      The next step was a **CarVertical** history check. We also ordered a Volkswagen dealer report to gather as much information as possible about this particular car's history. Only once these initial checks came back with satisfactory results did we send our specialists to the dealership in Germany to inspect the Volkswagen Touareg in person.
 
-      The vehicle was carefully examined and its actual condition was verified. It was only when we were convinced that this Touareg genuinely met our requirements and could be recommended to the client for purchase that our company processed the payment directly to the German dealer.
+      They carried out a thorough inspection to assess the car's actual condition. Only after we were satisfied that this Touareg met our standards and that we could confidently recommend it to our client did our company pay the German dealer directly.
 
-      After the payment, we collected the Volkswagen Touareg from the dealer and arranged for its transport from Germany to Serbia. The car was delivered to **Subotica**, where it underwent the customs clearance process. Once the customs formalities were completed, the vehicle continued its journey to its new owner in Belgrade.
+      Once payment was complete, we collected the Volkswagen Touareg from the dealership and arranged transport from Germany to Serbia. The car was delivered to **Subotica** for customs clearance. With the customs formalities complete, it continued on to its new owner in Belgrade.
 
-      We also fully supported the registration of the vehicle in Serbia, ensuring the client received a ready-to-drive car without having to navigate the complex process of purchasing, transporting, clearing, and registering a vehicle from abroad.
+      We also handled all the paperwork in Serbia, so our client could enjoy a complete, end-to-end service without having to navigate the overseas purchase, transport, customs clearance and registration process themselves.
 
-      The Volkswagen Touareg 2024 is now in Belgrade.
+      The 2024 Volkswagen Touareg is now in Belgrade.
   sr:
     title: Volkswagen Touareg
     body: |-
-      **Volkswagen Touareg 2024** iz Nemačke u Srbiju: još jedan odličan automobil uspešno je pronađen, pregledan, kupljen, rastemoučen i dostavljen našem klijentu u Beograd.
+      **Volkswagen Touareg 2024** iz Nemačke u Srbiju: još jedan odličan automobil uspešno smo pronašli, proverili, kupili, ocarinili i isporučili našem klijentu u Beogradu.
 
-      Ovaj put zadatak je bio pronalaženje i dovoz iz Nemačke Volkswagen Touareg 2024. godina sa **3.0-litarskim dizel motorom**. Puni pogon ovog SUV-a je idealan i za Beograd, kao i za vožnju na autoputu kroz pola Evrope.
+      Ovog puta zadatak je bio da u Nemačkoj pronađemo i uvezemo Volkswagen Touareg iz 2024. godine sa **3,0-litarskim dizel motorom**. SUV ove veličine sa pogonom na sva četiri točka podjednako se dobro snalazi u Beogradu i na dugim putovanjima kroz Evropu.
 
-      Za našeg klijenta pronašli smo odgovarajući Volkswagen Touareg kod nemačkog trgovca. Međutim, nalaziti lepu ponudu može se smatrati samo početkom rada. Pre kupovine dugo smo komunicirali sa menadžerom auto-salona u Nemačkoj, razjašnjavali istoriju automobila, njegovo stanje, servisiranje, opremu i sve važne detalje.
+      Za našeg klijenta pronašli smo odgovarajući Volkswagen Touareg kod nemačkog prodavca. Ali dobar oglas je tek početak posla. Pre kupovine detaljno smo razgovarali sa prodajnim savetnikom u Nemačkoj i proverili istoriju automobila, njegovo stanje, održavanje, opremu i sve druge važne detalje.
 
-      Sledeći korak bila je provera automobila putem **CarVertical**. Pored toga, naručili smo izveštaj prodavca za Volkswagen, kako bismo dobili maksimalne dostupne informacije o istoriji konkretnog vozila. Tek nakon što je preliminarna provera pokazala dobre rezultate, poslali smo stručnjake direktno kod dilera na fizičku provere Volkswagen Touareg na licu mesta u Nemačkoj.
+      Sledeći korak bila je provera auta pre kupovine putem servisa **CarVertical**. Dodatno smo naručili izveštaj iz Volkswagenove ovlašćene mreže kako bismo dobili što više dostupnih informacija o istoriji konkretnog vozila. Tek kada su ove preliminarne provere dale dobre rezultate, poslali smo stručnjake kod prodavca u Nemačku da na licu mesta obave pregled auta pre kupovine.
 
-      Automobil je temeljno pregledan i provereno je njegovo stvarno stanje. I samo kada smo se uverili da ovaj Touareg zaista odgovara našim zahtevima i može se preporučiti klijentu na kupovinu, naša kompanija izvršila je uplatu direktno nemačkom trgovcu.
+      Automobil je detaljno pregledan i utvrđeno je njegovo stvarno stanje. Tek kada smo se uverili da ovaj Touareg zaista ispunjava naše kriterijume i da možemo da ga preporučimo klijentu, naša firma je izvršila uplatu direktno nemačkom prodavcu.
 
-      Nakon uplate, preuzeli smo Volkswagen Touareg od dilera i organizovali transport automobila iz Nemačke u Srbiju. Automobil je dostavljen u **Suboticu**, gde je prošao proceduru rastemoučenja. Nakon završetka carinskog postupka, automobil je otišao do svog novog vlasnika u Beograd.
+      Nakon uplate preuzeli smo Volkswagen Touareg od prodavca i organizovali transport iz Nemačke u Srbiju. Automobil je dopremljen u **Suboticu**, gde je ocarinjen. Po završetku carinskog postupka, krenuo je dalje ka svom novom vlasniku u Beogradu.
 
-      Takođe smo potpuno pratili proces registracije automobila u Srbiji, kako bi klijent dobio već gotov rezultat bez potrebe da samostalno razume sve faze kupovine automobila u inostranstvu, transporta, carinjenja i registracije.
+      Preuzeli smo i kompletno vođenje postupka oko dokumentacije i registracije u Srbiji, kako bi klijent dobio automobil spreman za vožnju, bez potrebe da se sam bavi kupovinom u inostranstvu, transportom, carinjenjem i registracijom.
 
-      Volkswagen Touareg 2024 je već u Beogradu.
+      Volkswagen Touareg 2024 već je u Beogradu.
   es:
     title: Volkswagen Touareg
     body: |-
-      **Volkswagen Touareg 2024** de Alemania a Serbia: otro excelente coche ha sido seleccionado, verificado, comprado, despachado y entregado a nuestro cliente en Belgrado.
+      **Volkswagen Touareg 2024** de Alemania a Serbia: otro gran coche que hemos seleccionado, revisado, comprado, despachado en aduana y entregado con éxito a nuestro cliente en Belgrado.
 
-      Esta vez la tarea fue encontrar y traer de Alemania un Volkswagen Touareg 2024 con **motor diésel de 3.0 litros**. Un SUV de este tamaño es igual de adecuado en Belgrado que en una carretera que cruza media Europa.
+      Esta vez, el encargo consistía en encontrar e importar de Alemania un Volkswagen Touareg de 2024 con **motor diésel de 3,0 litros**. Un SUV de este tamaño y con tracción integral se desenvuelve igual de bien en Belgrado que en un viaje por media Europa.
 
-      Para nuestro cliente encontramos un Volkswagen Touareg adecuado en un concesionario alemán. Sin embargo, encontrar un anuncio atractivo solo es el principio del trabajo. Antes de la compra, mantuvimos una larga conversación con el gerente del concesionario en Alemania, aclarando la historia del vehículo, su estado, mantenimiento, equipamiento y todos los detalles importantes.
+      Encontramos un Volkswagen Touareg que encajaba con lo que buscaba nuestro cliente en un concesionario alemán. Pero encontrar un anuncio atractivo es solo el principio. Antes de la compra, mantuvimos un contacto exhaustivo con el responsable del concesionario en Alemania para conocer el historial del vehículo, su estado, mantenimiento, equipamiento y todos los detalles importantes.
 
-      El siguiente paso fue la verificación del vehículo a través de **CarVertical**. Además, solicitamos un informe del concesionario sobre Volkswagen para obtener la máxima información disponible sobre la historia de ese vehículo en particular. Solo después de que la verificación preliminar mostró buenos resultados, enviamos a nuestros especialistas directamente al concesionario para una inspección física del Volkswagen Touareg en Alemania.
+      El siguiente paso fue consultar el historial del coche en **CarVertical**. Además, solicitamos un informe de la red de concesionarios Volkswagen para obtener toda la información disponible sobre esa unidad. Solo cuando las comprobaciones previas dieron un resultado satisfactorio enviamos a nuestros especialistas al concesionario en Alemania para inspeccionar el Volkswagen Touareg en persona.
 
-      El coche fue minuciosamente inspeccionado y se verificó su estado real. Y solo cuando estuvimos convencidos de que este Touareg cumplía con nuestros requisitos y se podía recomendar al cliente para la compra, nuestra empresa realizó el pago directamente al concesionario alemán.
+      Inspeccionamos el vehículo a fondo para comprobar su estado real. Y solo después de confirmar que este Touareg cumplía nuestros requisitos y que podíamos recomendar su compra al cliente, nuestra empresa realizó el pago directamente al concesionario alemán.
 
-      Después del pago, recogimos el Volkswagen Touareg del concesionario y organizamos su transporte de Alemania a Serbia. El automóvil fue entregado en **Subotica**, donde completó el proceso de despacho aduanero. Tras finalizar la formalidad aduanera, el vehículo siguió su camino hacia su nuevo propietario en Belgrado.
+      Tras el pago, recogimos el Volkswagen Touareg en el concesionario y organizamos su transporte de Alemania a Serbia. El coche llegó a **Subotica**, donde se realizaron los trámites de despacho de aduanas. Una vez finalizados, continuó su viaje hasta su nuevo propietario en Belgrado.
 
-      También acompañamos completamente la formalización del vehículo en Serbia, para que el cliente obtuviera un resultado ya listo sin necesidad de lidiar con todos los pasos de la compra de un vehículo en el extranjero, transporte, despacho aduanero y registro.
+      También nos encargamos de gestionar todos los trámites del vehículo en Serbia, para que el cliente lo recibiera todo resuelto, sin tener que ocuparse por su cuenta de las distintas fases de la compra en el extranjero, el transporte, el despacho de aduanas y la matriculación.
 
-      Volkswagen Touareg 2024 ya está en Belgrado.
+      El Volkswagen Touareg 2024 ya está en Belgrado.
   de:
     title: Volkswagen Touareg
     body: |-
-      **Volkswagen Touareg 2024** aus Deutschland nach Serbien: Ein weiteres großartiges Fahrzeug wurde erfolgreich ausgewählt, geprüft, gekauft, verzollt und unserem Kunden in Belgrad geliefert.
+      **Volkswagen Touareg 2024** aus Deutschland nach Serbien: Wieder haben wir ein erstklassiges Fahrzeug für einen Kunden gefunden, geprüft, gekauft, verzollt und nach Belgrad geliefert.
 
-      Dieses Mal bestand die Aufgabe darin, einen **3,0-Liter-Dieselmotor** Volkswagen Touareg 2024 aus Deutschland zu finden und zu importieren. Ein Allrad-SUV dieser Größe ist sowohl in Belgrad als auch auf den Straßen durch ganz Europa gleichermaßen geeignet.
+      Diesmal lautete der Auftrag, einen Volkswagen Touareg aus dem Jahr 2024 mit **3,0-Liter-Dieselmotor** in Deutschland zu finden und nach Serbien zu importieren. Ein SUV dieser Größe mit Allradantrieb ist in Belgrad ebenso zu Hause wie auf langen Autobahnfahrten quer durch Europa.
 
-      Für unseren Kunden fanden wir einen passenden Volkswagen Touareg bei einem deutschen Händler. Doch die Suche nach einem attraktiven Angebot ist nur der Anfang der Arbeit. Vor dem Kauf haben wir lange mit dem Verkaufsleiter im Autohaus in Deutschland kommuniziert, um die Fahrzeughistorie, den Zustand, die Wartung, die Ausstattung und alle wichtigen Details zu klären.
+      Bei einem deutschen Händler fanden wir einen passenden Volkswagen Touareg für unseren Kunden. Eine vielversprechende Anzeige ist allerdings erst der Anfang. Vor dem Kauf standen wir in engem Austausch mit dem zuständigen Verkaufsberater in Deutschland und klärten die Fahrzeughistorie, den Zustand, die Wartung, die Ausstattung und alle weiteren wichtigen Details.
 
-      Der nächste Schritt war die Überprüfung des Fahrzeugs über **CarVertical**. Darüber hinaus bestellten wir einen Händlerbericht über Volkswagen, um die bestmöglichen Informationen über die Historie des spezifischen Fahrzeugs zu erhalten. Erst nachdem die Vorabprüfung ein positives Ergebnis gezeigt hatte, schickten wir Spezialisten direkt zum Händler, um den Volkswagen Touareg vor Ort in Deutschland physisch zu überprüfen.
+      Als Nächstes prüften wir das Fahrzeug über **CarVertical**. Zusätzlich forderten wir einen Volkswagen-Händlerbericht an, um möglichst umfassende Informationen zur Historie dieses Fahrzeugs zu erhalten. Erst als diese Vorprüfung positiv ausgefallen war, schickten wir unsere Spezialisten zum Händler nach Deutschland, um den Volkswagen Touareg vor Ort zu begutachten.
 
-      Das Fahrzeug wurde sorgfältig inspiziert und sein tatsächlicher Zustand überprüft. Erst nachdem wir sicher waren, dass dieser Touareg unseren Anforderungen wirklich entspricht und wir ihn dem Kunden zum Kauf empfehlen konnten, tätigte unser Unternehmen die Zahlung direkt an den deutschen Händler.
+      Das Fahrzeug wurde gründlich besichtigt und sein tatsächlicher Zustand überprüft. Erst als wir sicher waren, dass dieser Touareg unseren Anforderungen entsprach und wir unserem Kunden den Kauf empfehlen konnten, bezahlte unser Unternehmen das Fahrzeug direkt beim deutschen Händler.
 
-      Nach der Zahlung holten wir den Volkswagen Touareg beim Händler ab und organisierten den Transport des Fahrzeugs von Deutschland nach Serbien. Das Auto wurde nach **Subotica** geliefert, wo die Verzollung erfolgte. Nach Abschluss der Zollabwicklung machte sich das Fahrzeug auf den Weg zu seinem neuen Besitzer in Belgrad.
+      Nach der Zahlung holten wir den Volkswagen Touareg beim Händler ab und organisierten den Transport von Deutschland nach Serbien. Das Fahrzeug wurde nach **Subotica** gebracht und dort verzollt. Nach Abschluss der Zollabfertigung ging es weiter zu seinem neuen Besitzer nach Belgrad.
 
-      Wir haben auch die gesamte Abwicklung des Fahrzeugs in Serbien begleitet, sodass der Kunde ein fertiges Ergebnis erhielt, ohne selbst durch alle Phasen des Autokaufs im Ausland, des Transports, der Zollabwicklung und der Registrierung gehen zu müssen.
+      Auch die gesamte weitere Abwicklung in Serbien bis hin zur Zulassung haben wir begleitet. So erhielt unser Kunde sein fertiges Fahrzeug, ohne sich selbst um die einzelnen Schritte des Auslandskaufs, des Transports, der Verzollung und der Zulassung kümmern zu müssen.
 
-      Der Volkswagen Touareg 2024 ist jetzt in Belgrad.
+      Der Volkswagen Touareg 2024 ist inzwischen in Belgrad angekommen.
 car: Volkswagen Touareg
 year: 2024
 price:

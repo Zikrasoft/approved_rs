@@ -4,151 +4,151 @@ translations:
   en:
     title: Honda Accord
     body: |-
-      ## One-Time Vehicle Inspection Before Purchase in Serbia: Honda Accord 2024
+      ## One-off pre-purchase car inspection in Serbia: 2024 Honda Accord
 
-      Yuri reached out to us for a one-time vehicle inspection before purchasing a car in Serbia. He was interested in a **2024 Honda Accord** with a mileage of around **30,000 kilometers**.
+      Yuri contacted us to arrange a one-off pre-purchase car inspection in Serbia. He was interested in a **2024 Honda Accord** with around **30,000 kilometres** on the clock.
 
-      Before the purchase, we conducted a comprehensive technical and visual inspection to assess the true condition of the Honda Accord and identify any potential issues that might not be apparent during a standard inspection.
+      Before he committed to the purchase, we carried out a comprehensive mechanical and visual inspection to assess the Honda Accord's actual condition and identify potential issues that might not be apparent during a basic viewing.
 
-      As part of the pre-purchase inspection, we performed:
+      Our pre-purchase inspection included:
 
-      - diagnostic checking of all major electronic systems of the vehicle;
-      - review of error codes and stored faults in control units;
-      - engine diagnostics and performance assessment;
-      - inspection of the engine compartment for signs of oil and other fluids;
-      - assessment of the level and condition of operational fluids;
-      - visual inspection of the body and all vehicle components;
-      - measurement of paint thickness to identify repainted or repaired parts;
-      - checking the body for signs of accidents, repairs, and replacement parts;
-      - evaluating the condition of headlights, windows, body gaps, and external elements;
-      - inspection of the suspension and chassis components;
-      - brake system evaluation;
-      - checking the condition of tires and rims;
-      - undercarriage inspection;
-      - checking for corrosion, damage, and signs of wear;
-      - test drive to evaluate the performance of the engine, transmission, suspension, and brakes;
-      - overall technical condition assessment of the vehicle and potential investments needed after purchase.
+      - diagnostic scans of all major electronic systems;
+      - checks for fault codes and stored faults in the control modules;
+      - engine diagnostics and an assessment of how it ran;
+      - inspection of the engine bay for oil and other fluid leaks;
+      - checks of fluid levels and condition;
+      - visual inspection of the bodywork and all vehicle components;
+      - paint thickness measurements to identify repainted or repaired panels;
+      - checks for signs of accident damage, body repairs and replaced parts;
+      - inspection of the headlights, glass, panel gaps and exterior trim;
+      - inspection of the suspension and running gear;
+      - brake system checks;
+      - inspection of the tyres and wheels;
+      - underbody inspection;
+      - checks for corrosion, damage and wear;
+      - a test drive to assess the engine, transmission, suspension and brakes;
+      - an overall assessment of the car's mechanical condition and any work it might need after purchase.
 
-      Particular attention was paid to the consistency between the declared mileage and the actual condition of the vehicle. During the inspection, we also assessed the state of the body, interior, engine, chassis, and other key components of the **Honda Accord**.
+      We paid particular attention to whether the car's condition was consistent with its stated mileage. We also assessed the bodywork, interior, engine, running gear and other major components of the **Honda Accord**.
 
-      As a result of the inspection, Yuri received objective information about the vehicle’s condition, allowing him to make an informed purchasing decision, grounded not just on the seller’s word, but also on professional diagnostic results.
+      Following the inspection, Yuri received an objective assessment of the car's condition, allowing him to make a purchase decision based on professional diagnostic findings rather than the seller's word alone.
 
-      Additionally, during negotiations, we managed to reduce the initial asking price of the vehicle by **700 euros**.
+      We also negotiated **€700** off the original asking price.
 
-      A one-time vehicle inspection before purchase is convenient for those who have found a vehicle in Serbia on their own but want to ensure its technical state and legal transparency before handing over money to the seller.
+      A one-off pre-purchase inspection is ideal for anyone who has found a car in Serbia themselves but wants reassurance about its mechanical condition and legal status before handing over any money.
 
-      If you find a Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota, or any other brand of car in Serbia, do not rush to hand over money to the seller. A professional one-time inspection will help uncover hidden flaws and provide solid grounds for negotiation.
+      If you have found a Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota or any other make in Serbia, don't rush to pay the seller. A professional one-off inspection can uncover hidden issues and give you solid grounds to negotiate the price.
   sr:
     title: Honda Accord
     body: |-
-      ## Provera auta pre kupovine u Srbiji: Honda Accord 2024
+      ## Jednokratna provera auta pre kupovine u Srbiji: Honda Accord 2024
 
-      Obratio nam se Juri sa zahtevom za provere auta pre kupovine u Srbiji. Zanimalo ga je **Honda Accord 2024. godine** sa pređenih **30 000 kilometara**.
+      Jurij nam se obratio sa zahtevom za jednokratnu proveru auta pre kupovine u Srbiji. Zanimala ga je **Honda Accord iz 2024. godine** sa oko **30.000 pređenih kilometara**.
 
-      Pre kupovine automobila, sproveli smo sveobuhvatnu tehničku i vizuelnu provere kako bismo ocenili realno stanje Honda Accord i otkrili moguće nedostatke koji nisu uvek uočljivi pri običnom pregledu.
+      Pre kupovine smo obavili detaljnu tehničku i vizuelnu proveru kako bismo utvrdili stvarno stanje Honde Accord i otkrili eventualne nedostatke koji se ne vide uvek pri uobičajenom pregledu.
 
-      U okviru provere automobila pre kupovine, izvršili smo:
+      Naša provera auta pre kupovine obuhvatila je:
 
       - kompjutersku dijagnostiku svih glavnih elektronskih sistema automobila;
-      - provere grešaka i sačuvanih neispravnosti u upravljačkim blokovima;
+      - proveru grešaka i zabeleženih kvarova u upravljačkim jedinicama;
       - dijagnostiku motora i procenu njegovog rada;
-      - provere motornog prostora na prisustvo tragova ulja i drugih tehničkih tečnosti;
-      - provere nivoa i stanja radnih tečnosti;
-      - vizuelnu provere karoserije i svih elemenata automobila;
-      - merenje debljine lakog sloja radi određivanja farbanih i repariranih elemenata;
-      - provere karoserije na prisustvo tragova saobraćajnih nezgoda, popravki i zamene delova;
-      - provere stanja farova, stakala, razmaka karoserije i spoljašnjih elemenata;
-      - pregleda suspenzije i delova voznog dela;
-      - provere kočionog sistema;
-      - provere stanja guma i felni;
-      - pregleda donjeg dela automobila;
-      - provere na prisustvo korozije, oštećenja i tragova korišćenja;
-      - probne vožnje za procenu rada motora, menjača, suspenzije i kočnica;
-      - procene opšteg tehničkog stanja automobila i mogućih ulaganja posle kupovine.
+      - proveru motornog prostora radi otkrivanja tragova curenja ulja i drugih tečnosti;
+      - proveru nivoa i stanja radnih tečnosti;
+      - vizuelni pregled karoserije i svih delova automobila;
+      - merenje debljine laka radi utvrđivanja koji su delovi naknadno farbani ili popravljani;
+      - proveru karoserije radi otkrivanja tragova udesa, popravki i zamene delova;
+      - proveru stanja farova, stakala, zazora između delova karoserije i spoljašnjih elemenata;
+      - pregled vešanja i elemenata trapa;
+      - proveru kočionog sistema;
+      - proveru stanja guma i felni;
+      - pregled podvozja;
+      - proveru prisustva korozije, oštećenja i tragova korišćenja;
+      - probnu vožnju radi procene rada motora, menjača, vešanja i kočnica;
+      - procenu ukupnog tehničkog stanja automobila i mogućih ulaganja nakon kupovine.
 
-      Posebnu pažnju posvetili smo usklađivanju deklarisanog broja pređenih kilometara sa stvarnim stanjem automobila. Tokom provere takođe je ocenjen i stanje karoserije, enterijera, motora, voznog dela i drugih ključnih sklopova **Honda Accord**.
+      Posebnu pažnju posvetili smo tome da li stanje automobila odgovara navedenoj kilometraži. Procenili smo i stanje karoserije, enterijera, motora, trapa i ostalih ključnih sklopova modela **Honda Accord**.
 
-      Na osnovu rezultata provere, Juri je dobio objektivne informacije o stanju vozila i mogao je doneti odluku o kupovini, oslanjajući se ne samo na reči prodavca već i na rezultate profesionalne dijagnostike.
+      Na osnovu rezultata provere, Jurij je dobio objektivne informacije o stanju automobila i mogao je da donese odluku o kupovini oslanjajući se na nalaze stručne dijagnostike, a ne samo na reči prodavca.
 
-      Pored toga, u toku pregovora uspeli smo da smanjimo početnu cenu automobila za **700 evra**.
+      Pored toga, tokom pregovora uspeli smo da spustimo početnu cenu automobila za **700 evra**.
 
-      Provera auta pre kupovine je pogodna za one koji su sami pronašli automobil u Srbiji, ali žele da se uvere u njegovo tehničko stanje i pravnu transparentnost pre nego što predaju novac prodavcu.
+      Jednokratna provera auta pre kupovine odgovara onima koji su sami pronašli automobil u Srbiji, ali žele da provere njegovo tehničko stanje i uvere se da je pravno sve u redu pre nego što plate prodavcu.
 
-      Ako ste pronašli Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota ili neki drugi automobil u Srbiji, ne žurite da predate novac prodavcu. Profesionalna provera automobila pomoći će da se otkriju skrivene mane i argumentovano nastupi u pregovorima.
+      Ako ste u Srbiji pronašli Hondu, BMW, Mercedes-Benz, Volkswagen, Škodu, Toyotu ili automobil neke druge marke, ne žurite sa plaćanjem. Stručna provera auta pre kupovine može da otkrije skrivene nedostatke i pruži vam konkretne argumente za pregovore o ceni.
   es:
     title: Honda Accord
     body: |-
-      ## Inspección única de vehículo antes de la compra en Serbia: Honda Accord 2024
+      ## Inspección puntual de un coche antes de comprarlo en Serbia: Honda Accord 2024
 
-      Recibimos la solicitud de Yuri para realizar una inspección única de un vehículo antes de la compra en Serbia. Estaba interesado en un **Honda Accord 2024** con un kilometraje de aproximadamente **30 000 kilómetros**.
+      Yuri nos contactó para solicitar una inspección puntual de un coche que quería comprar en Serbia. Le interesaba un **Honda Accord de 2024** con unos **30 000 kilómetros**.
 
-      Antes de la compra, realizamos una revisión técnica y visual exhaustiva para evaluar el estado real del Honda Accord y detectar posibles defectos que no siempre son evidentes en una inspección superficial.
+      Antes de la compra, realizamos una revisión técnica y visual exhaustiva para evaluar el estado real del Honda Accord y detectar posibles defectos que no siempre se aprecian a simple vista.
 
-      Como parte de la inspección previa a la compra, llevamos a cabo:
+      La inspección previa a la compra incluyó:
 
-      - diagnóstico informático de todos los principales sistemas electrónicos del vehículo;
-      - revisión de errores y fallos registrados en las unidades de control;
+      - diagnosis electrónica de los principales sistemas del vehículo;
+      - lectura de códigos de error y averías almacenadas en las unidades de control;
       - diagnóstico del motor y evaluación de su funcionamiento;
-      - revisión del compartimento del motor en busca de rastros de aceite y otros líquidos técnicos;
-      - revisión del nivel y estado de los fluidos;
-      - inspección visual de la carrocería y todos los elementos del vehículo;
-      - medida del grosor de la pintura para identificar elementos pintados y reparados;
-      - verificación de la carrocería en busca de signos de accidentes, reparaciones y cambios de piezas;
-      - inspección del estado de los faros, cristales, espacios de carrocería y elementos exteriores;
-      - revisión de la suspensión y componentes del tren rodante;
+      - inspección del vano motor para detectar rastros de aceite y otros líquidos;
+      - comprobación del nivel y el estado de los líquidos del vehículo;
+      - inspección visual de la carrocería y de todos los elementos del coche;
+      - medición del espesor de la pintura para identificar piezas repintadas o reparadas;
+      - revisión de la carrocería en busca de indicios de accidentes, reparaciones y sustitución de piezas;
+      - comprobación del estado de los faros, los cristales, los ajustes entre paneles de la carrocería y los elementos exteriores;
+      - inspección de la suspensión y los componentes del tren de rodaje;
       - comprobación del sistema de frenos;
-      - inspección del estado de los neumáticos y llantas;
-      - revisión del fondo del vehículo;
-      - revisión en busca de corrosión, daños y signos de uso;
-      - un test drive para evaluar el funcionamiento del motor, la transmisión, la suspensión y los frenos;
-      - evaluación del estado técnico general del vehículo y posibles inversiones después de la compra.
+      - revisión del estado de los neumáticos y las llantas;
+      - inspección de los bajos del vehículo;
+      - búsqueda de corrosión, daños y señales de desgaste por el uso;
+      - prueba de conducción para evaluar el funcionamiento del motor, la caja de cambios, la suspensión y los frenos;
+      - valoración del estado técnico general del vehículo y de los posibles gastos necesarios tras la compra.
 
-      Se prestó especial atención a la correspondencia del kilometraje declarado con el estado real del vehículo. Durante la inspección, también se evaluó el estado de la carrocería, el interior, el motor, el tren rodante y otros componentes clave del **Honda Accord**.
+      Prestamos especial atención a que el kilometraje anunciado fuera coherente con el estado real del vehículo. Durante la inspección también evaluamos la carrocería, el habitáculo, el motor, el tren de rodaje y los demás componentes principales del **Honda Accord**.
 
-      Como resultado de la inspección, Yuri obtuvo información objetiva sobre el estado del vehículo y pudo tomar una decisión de compra basada no solo en las palabras del vendedor, sino también en los resultados de un diagnóstico profesional.
+      Gracias a la inspección, Yuri recibió información objetiva sobre el estado del coche y pudo tomar una decisión de compra basándose no solo en lo que decía el vendedor, sino también en los resultados de un diagnóstico profesional.
 
-      Además, durante las negociaciones conseguimos reducir el precio inicial del vehículo en **700 euros**.
+      Además, durante la negociación conseguimos rebajar el precio inicial del vehículo en **700 euros**.
 
-      La inspección única de vehículos antes de la compra es conveniente para aquellos que han encontrado un automóvil en Serbia por sí mismos, pero desean asegurarse de su estado técnico y transparencia legal antes de entregar el dinero al vendedor.
+      La inspección puntual previa a la compra es una opción práctica para quienes ya han encontrado un coche por su cuenta en Serbia, pero quieren asegurarse de su estado técnico y de que toda la documentación esté en regla antes de entregar el dinero al vendedor.
 
-      Si han encontrado un Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota o un automóvil de otra marca en Serbia, no se apresuren a entregar el dinero al vendedor. Una inspección profesional única ayudará a detectar defectos ocultos y argumentar de manera efectiva durante la negociación.
+      Si has encontrado un Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota o un coche de cualquier otra marca en Serbia, no te apresures a pagar al vendedor. Una inspección profesional puntual te ayudará a detectar defectos ocultos y a negociar el precio con argumentos.
   de:
     title: Honda Accord
     body: |-
-      ## Einzelne Fahrzeuginspektion vor dem Kauf in Serbien: Honda Accord 2024
+      ## Fahrzeugcheck vor dem Kauf in Serbien: Honda Accord Baujahr 2024
 
-      Yuri hat uns um eine Einzelinspektion eines Fahrzeugs vor dem Kauf in Serbien gebeten. Sein Interesse galt einem **Honda Accord 2024** mit einer Laufleistung von etwa **30 000 Kilometern**.
+      Juri wandte sich an uns, um ein Fahrzeug vor dem Kauf in Serbien prüfen zu lassen. Er interessierte sich für einen **Honda Accord Baujahr 2024** mit einer Laufleistung von rund **30.000 Kilometern**.
 
-      Vor dem Kauf des Fahrzeugs haben wir eine umfassende technische und visuelle Prüfung durchgeführt, um den tatsächlichen Zustand des Honda Accord zu bewerten und mögliche Mängel zu identifizieren, die nicht immer bei einer herkömmlichen Besichtigung auffallen.
+      Vor dem Kauf führten wir eine umfassende technische Prüfung und Sichtkontrolle durch, um den tatsächlichen Zustand des Honda Accord zu beurteilen und mögliche Mängel aufzudecken, die bei einer gewöhnlichen Besichtigung nicht immer auffallen.
 
-      Im Rahmen der Inspektionsprüfung vor dem Kauf haben wir Folgendes durchgeführt:
+      Unser Fahrzeugcheck vor dem Kauf umfasste:
 
-      - Computerdiagnose aller wichtigen elektronischen Systeme des Fahrzeugs;
-      - Überprüfung von Fehlern und gespeicherten Störungen in den Steuergeräten;
-      - Motordiagnose und Bewertung seiner Leistung;
-      - Überprüfung des Motorraums auf Ölrückstände und andere technische Flüssigkeiten;
-      - Kontrolle der Füllstände und des Zustands der Betriebsflüssigkeiten;
-      - Visuelle Überprüfung der Karosserie und aller Fahrzeugelemente;
-      - Messung der Lackstärke zur Identifizierung lackierter und reparierter Teile;
-      - Überprüfung der Karosserie auf Spuren von Unfällen, Reparaturen und den Austausch von Teilen;
-      - Überprüfung des Zustands der Scheinwerfer, Fenster, Karosseriefugen und außenliegender Elemente;
-      - Inspektion der Aufhängung und der Fahrwerkselemente;
-      - Überprüfung des Bremssystems;
-      - Überprüfung des Zustands von Reifen und Felgen;
-      - Inspektion des Unterbodens des Fahrzeugs;
-      - Überprüfung auf Korrosion, Beschädigungen und Abnutzungsspuren;
-      - Probefahrt zur Bewertung der Motorleistung, des Getriebes, der Aufhängung und der Bremsen;
-      - Beurteilung des allgemeinen technischen Zustands des Fahrzeugs und möglicher Investitionen nach dem Kauf.
+      - computergestützte Diagnose aller wichtigen elektronischen Fahrzeugsysteme;
+      - Auslesen der Fehlerspeicher in den Steuergeräten;
+      - Motordiagnose und Beurteilung des Motorlaufs;
+      - Kontrolle des Motorraums auf Spuren von Öl und anderen Betriebsflüssigkeiten;
+      - Prüfung von Füllstand und Zustand der Betriebsflüssigkeiten;
+      - Sichtprüfung der Karosserie und sämtlicher Fahrzeugkomponenten;
+      - Messung der Lackschichtdicke, um nachlackierte und reparierte Bauteile zu erkennen;
+      - Prüfung der Karosserie auf Unfallspuren, Reparaturen und ausgetauschte Teile;
+      - Kontrolle der Scheinwerfer, Scheiben, Spaltmaße und äußeren Anbauteile;
+      - Prüfung der Radaufhängung und weiterer Fahrwerkskomponenten;
+      - Prüfung der Bremsanlage;
+      - Kontrolle des Zustands von Reifen und Felgen;
+      - Inspektion des Unterbodens;
+      - Prüfung auf Korrosion, Beschädigungen und Gebrauchsspuren;
+      - Probefahrt zur Beurteilung von Motor, Getriebe, Fahrwerk und Bremsen;
+      - Einschätzung des technischen Gesamtzustands und möglicher Folgekosten nach dem Kauf.
 
-      Besonderes Augenmerk wurde auf die Übereinstimmung der angegebenen Kilometerzahl mit dem tatsächlichen Zustand des Fahrzeugs gelegt. Bei der Inspektion wurde auch der Zustand der Karosserie, des Innenraums, des Motors, des Fahrwerks und anderer zentraler Komponenten des **Honda Accord** bewertet.
+      Besonders genau prüften wir, ob der angegebene Kilometerstand zum tatsächlichen Zustand des Fahrzeugs passte. Dabei beurteilten wir auch den Zustand von Karosserie, Innenraum, Motor, Fahrwerk und weiteren wichtigen Baugruppen des **Honda Accord**.
 
-      Nach der Inspektion erhielt Yuri objektive Informationen über den Zustand des Fahrzeugs und konnte eine Kaufentscheidung treffen, die nicht nur auf den Aussagen des Verkäufers, sondern auch auf den Ergebnissen der professionellen Diagnostik basierte.
+      Nach der Prüfung erhielt Juri eine objektive Einschätzung des Fahrzeugzustands. So konnte er seine Kaufentscheidung nicht nur auf die Aussagen des Verkäufers, sondern auch auf die Ergebnisse einer professionellen Diagnose stützen.
 
-      Darüber hinaus gelang es uns im Verlauf der Verhandlungen, den ursprünglichen Preis des Fahrzeugs um **700 Euro** zu senken.
+      Außerdem konnten wir bei den Verhandlungen den ursprünglichen Kaufpreis um **700 Euro** senken.
 
-      Eine Einzelinspektion des Fahrzeugs vor dem Kauf ist besonders praktisch für diejenigen, die selbst ein Fahrzeug in Serbien gefunden haben, aber sicherstellen möchten, dass es in gutem technischen Zustand ist und rechtlich transparent ist, bevor sie dem Verkäufer Geld übergeben.
+      Ein einmaliger Fahrzeugcheck vor dem Kauf eignet sich für alle, die selbst ein Auto in Serbien gefunden haben, sich aber vor der Zahlung an den Verkäufer über dessen technischen Zustand und die rechtlichen Verhältnisse absichern möchten.
 
-      Wenn Sie in Serbien einen Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota oder ein Auto einer anderen Marke gefunden haben, beeilen Sie sich nicht, dem Verkäufer Geld zu übergeben. Eine professionelle Einzelinspektion hilft, versteckte Mängel aufzudecken und fundierte Verhandlungen zu führen.
+      Wenn Sie in Serbien einen Honda, BMW, Mercedes-Benz, Volkswagen, Škoda, Toyota oder ein Fahrzeug einer anderen Marke gefunden haben, überstürzen Sie die Zahlung an den Verkäufer nicht. Ein professioneller Fahrzeugcheck hilft, versteckte Mängel aufzudecken und mit fundierten Argumenten über den Preis zu verhandeln.
 car: Honda Accord
 year: 2024
 price:

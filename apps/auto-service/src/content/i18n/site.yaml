@@ -85,45 +85,45 @@ translations:
   sr:
     nav:
       services: Usluge
-      parts: Delovi
-      works: Primeri radova
+      parts: Rezervni delovi
+      works: Naši radovi
       process: Kako radimo
       about: O servisu
-      contact: Kontakti
+      contact: Kontakt
     llms:
       keyFacts: Ključne informacije
       other: Ostalo
-      languages: Druge jezike
+      languages: Drugi jezici
     header:
       menuOpenLabel: Meni
       menuCloseLabel: Zatvori meni
       languageLabel: Jezik
-      cta: Zakažite
+      cta: Zakažite termin
       phoneLabel: Pozovite
     footer:
-      tagline: Autoseris u Beogradu. Dijagnostika, popravka, karoserija i farbanje, prodaja delova.
+      tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
       servicesHeading: Usluge
       companyHeading: Servis
-      contactHeading: Kontakti
+      contactHeading: Kontakt
       hoursHeading: Radno vreme
-      hours: Pon–Pet 08:00–18:00 · Sub 09:00–14:00
+      hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt je napravljen u studiju Zikrasoft
+      developerCredit: Sajt je izradio studio Zikrasoft
     common:
       homeLabel: Početna
-      skipToContent: Na sadržaj
-      breadcrumbLabel: Mrvica
-      primaryNavLabel: Primarna navigacija
+      skipToContent: Pređi na sadržaj
+      breadcrumbLabel: Putanja navigacije
+      primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
       closeLabel: Zatvori
       fromPrice: od
-      priceOnRequest: na zahtev
+      priceOnRequest: na upit
       allServices: Sve usluge
-      allWorks: Svi primeri radova
-      emptyWorks: Primeri radova će uskoro biti dostupni. Do tada nas pozovite, ispričaćemo vam šta smo radili na sličnim vozilima.
+      allWorks: Svi naši radovi
+      emptyWorks: Uskoro ćemo objaviti naše radove. U međuvremenu nas pozovite, reći ćemo vam šta smo radili na sličnim automobilima.
       socialHeading: Pratite nas na društvenim mrežama
     channels:
       call: Pozovite
@@ -131,36 +131,36 @@ translations:
       viber: Viber
       telegram: Telegram
     telegramChoice:
-      heading: Kako vam je lakše pisati?
-      bot: Kroz bota
-      botHint: Ispričajte šta je sa autom, menadžer će vam odgovoriti u istom chatu
-      manager: Direktno menadžeru
-      managerHint: Lični chat sa menadžerom na Telegramu
+      heading: Kako želite da nam pišete?
+      bot: Preko bota
+      botHint: Opišite problem sa automobilom, naš saradnik će vam odgovoriti u istom četu
+      manager: Direktno našem saradniku
+      managerHint: Privatni razgovor sa našim saradnikom na Telegramu
     form:
-      heading: Zakažite uslugu
-      subheading: Opišite problem sa automobilom. Javićemo vam se da razjasnimo detalje i kažemo vreme i cenu.
+      heading: Zakažite termin u servisu
+      subheading: Opišite problem sa automobilom. Pozvaćemo vas da razjasnimo detalje i kažemo vam termin i cenu.
       nameLabel: Ime (nije obavezno)
-      namePlaceholder: Kako da vas zovem
+      namePlaceholder: Kako da vam se obraćamo
       contactLabel: Telefon
       contactPlaceholder: +381 11 000 0000
       telegramPlaceholder: '@username ili telefon'
       contactChannelLabel: Kako da vas kontaktiramo
-      channelPhone: Poziv
-      countryLabel: Kod države
-      commentLabel: Auto i šta mu je
-      commentPlaceholder: Marka, model, godina i šta vas muči
+      channelPhone: Telefonski poziv
+      countryLabel: Pozivni broj države
+      commentLabel: Automobil i opis problema
+      commentPlaceholder: Marka, model, godište i problem koji primećujete
       submit: Pošaljite zahtev
-      submitting: Šaljemo...
+      submitting: Šaljemo…
       privacyNote: Slažem se sa
       privacyLinkText: politikom privatnosti
-      modalTitle: Zakažite uslugu
-      errorPhone: Proverite broj, čini se da nije unet potpuno
+      modalTitle: Zakažite termin u servisu
+      errorPhone: Proverite broj telefona, izgleda da nije unet do kraja
       errorTelegram: Unesite @username na Telegramu ili broj telefona
-      errorConsent: Bez saglasnosti ne možemo da pošaljemo zahtev
-      errorSubmit: Prijava nije poslata. Proverite vezu i pokušajte ponovo
+      errorConsent: Bez vaše saglasnosti ne možemo da pošaljemo zahtev
+      errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće.
-      more: Više o tome u
+      more: Više informacija u
       policyLink: politici privatnosti
       accept: Prihvati
       decline: Odbij
@@ -169,9 +169,9 @@ translations:
     nav:
       services: Services
       parts: Parts
-      works: Work examples
+      works: Our work
       process: How we work
-      about: About the service
+      about: About us
       contact: Contact
     llms:
       keyFacts: Key facts
@@ -181,70 +181,70 @@ translations:
       menuOpenLabel: Menu
       menuCloseLabel: Close menu
       languageLabel: Language
-      cta: Book now
-      phoneLabel: Call
+      cta: Book an appointment
+      phoneLabel: Call us
     footer:
-      tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and painting, parts selection.
+      tagline: Independent car service in Belgrade. Diagnostics, repairs, bodywork and respraying, plus help finding the right parts.
       servicesHeading: Services
-      companyHeading: Service
+      companyHeading: Workshop
       contactHeading: Contact
-      hoursHeading: Working hours
+      hoursHeading: Opening hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy policy
-      aboutLabel: About the project
+      aboutLabel: About this project
       rightsSuffix: All rights reserved.
-      developerCredit: Website made by Zikrasoft
+      developerCredit: Website by Zikrasoft
     common:
       homeLabel: Home
       skipToContent: Skip to content
       breadcrumbLabel: Breadcrumbs
       primaryNavLabel: Main navigation
       mobileNavLabel: Mobile menu
-      faqHeading: Frequently Asked Questions
+      faqHeading: Frequently asked questions
       closeLabel: Close
       fromPrice: from
-      priceOnRequest: upon request
+      priceOnRequest: on request
       allServices: All services
-      allWorks: All work examples
-      emptyWorks: Examples of our work coming soon. In the meantime, feel free to call us for details on similar vehicles we have serviced.
-      socialHeading: Follow us on social media
+      allWorks: View all our work
+      emptyWorks: Examples of our work are coming soon. In the meantime, give us a call and we'll tell you about work we've done on similar cars.
+      socialHeading: Follow us
     channels:
-      call: Call
+      call: Call us
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
     telegramChoice:
-      heading: How would you prefer to write?
-      bot: Via the bot
-      botHint: Tell us what's wrong with your car, the manager will respond in the same chat
-      manager: Directly to the manager
-      managerHint: Personal chat with the manager on Telegram
+      heading: How would you like to message us?
+      bot: Via our bot
+      botHint: Tell us what's wrong with your car and a service advisor will reply in the same chat
+      manager: Message a service advisor directly
+      managerHint: A private Telegram chat with a service advisor
     form:
-      heading: Book a service
-      subheading: Tell us about your car. We will call you back to confirm details, pricing, and timing.
+      heading: Book a service appointment
+      subheading: Tell us what's wrong with your car. We'll call you back to discuss the details, arrange a time and give you a price.
       nameLabel: Name (optional)
-      namePlaceholder: How should we address you
-      contactLabel: Phone
+      namePlaceholder: What should we call you?
+      contactLabel: Phone number
       contactPlaceholder: +381 11 000 0000
       telegramPlaceholder: '@username or phone number'
-      contactChannelLabel: How to contact you
-      channelPhone: Call
+      contactChannelLabel: How should we contact you?
+      channelPhone: Phone call
       countryLabel: Country code
-      commentLabel: Car and the issue
-      commentPlaceholder: Make, model, year, and the issue you are experiencing
-      submit: Submit request
-      submitting: Submitting…
-      privacyNote: I agree with
-      privacyLinkText: the privacy policy
-      modalTitle: Book a service
-      errorPhone: Please check the number, it seems it's incomplete
-      errorTelegram: Please provide @username in Telegram or a phone number
-      errorConsent: Without consent, we cannot submit the request
-      errorSubmit: Application not submitted. Please check your connection and try again
+      commentLabel: Your car and the problem
+      commentPlaceholder: Make, model, year and what's wrong
+      submit: Send request
+      submitting: Sending…
+      privacyNote: I agree to the
+      privacyLinkText: privacy policy
+      modalTitle: Book a service appointment
+      errorPhone: Please check your phone number. It looks incomplete
+      errorTelegram: Enter your Telegram @username or phone number
+      errorConsent: Please give your consent before sending your request
+      errorSubmit: Your request wasn't sent. Check your connection and try again
     cookie:
       notice: We use cookies.
-      more: Learn more in
-      policyLink: the privacy policy
+      more: Find out more in our
+      policyLink: privacy policy
       accept: Accept
       decline: Decline
       settings: Cookie settings

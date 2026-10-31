@@ -4,67 +4,67 @@ translations:
   en:
     title: BMW X3 with Russian Plates
     body: |-
-      ### Buying Back Cars with Russian Plates in Serbia and Montenegro
+      ### Buying Cars with Russian Plates in Serbia and Montenegro
 
-      We were approached by a client who needed to **sell his car with Russian plates as quickly as possible**. We offered to buy the car ourselves, arrange its delivery to Russia, and manage the sale.
+      A client contacted us because he needed to **sell his Russian-registered car as quickly as possible**. We offered to buy it directly, arrange transport to Russia and handle its resale there.
 
-      The vehicle in question was a **BMW X3**, which we purchased for **€33,000**.
+      The car was a **BMW X3**, which we bought for **€33,000**.
 
-      At the same time, the client also sought our service for **car sourcing in Serbia**. As a result, he sold his car and immediately selected a new one: a **BMW X4 instead of the BMW X3**. Like every car we source, the X4 underwent a thorough inspection before the purchase.
+      The client also used our **car-sourcing service in Serbia**. This allowed him to sell his car and find a replacement straight away: **a BMW X4 to replace his BMW X3**. Like every car we source, the X4 underwent a pre-purchase inspection.
 
-      It was quite convenient: we quickly bought his car with Russian plates, handled the logistics and sale in Russia, while the client smoothly transitioned to his new BMW X4.
+      It was a straightforward process: we quickly bought his Russian-registered car and took care of transport and resale in Russia, while the client enjoyed a smooth move into his new BMW X4.
 
-      We specialize in **buying back cars with Russian plates in Serbia and Montenegro**, as well as car sourcing and purchasing assistance in Serbia.
+      We **buy cars with Russian plates in Serbia and Montenegro** and offer car sourcing and purchase assistance in Serbia.
 
-      If you need to **urgently sell a car with Russian plates**, reach out to us: we will evaluate the vehicle, offer a buyback option, and organize the next steps.
+      If you need to **sell a Russian-registered car urgently**, get in touch. We will assess your car, make a purchase offer and arrange the next steps.
   sr:
-    title: BMW X3 sa ruskih registarskih oznaka
+    title: BMW X3 sa ruskim tablicama
     body: |-
-      ### Otkup automobila sa RF registracijom u Srbiji i Crnoj Gori
+      ### Otkup automobila sa ruskim tablicama u Srbiji i Crnoj Gori
 
-      Obratio nam se klijent kojem je bilo potrebno **maksimalno brzo da proda automobil sa ruskim registarskim tablicama**. Predložili smo da otkupimo automobil sami, organizujemo njegov transport u Rusiju i dalju prodaju.
+      Obratio nam se klijent koji je želeo da **što pre proda automobil sa ruskim tablicama**. Ponudili smo mu da otkupimo automobil, organizujemo prevoz u Rusiju i tamo ga prodamo.
 
-      Reč je bila o **BMW X3**, koji smo otkupili za **33 000 €**.
+      U pitanju je bio **BMW X3**, koji smo otkupili za **33 000 €**.
 
-      Paralelno, klijent nam se obratio i za uslugu **provere automobila u Srbiji**. Na kraju je prodao svoju staru mašinu i odmah pronašao novu: **BMW X4 umesto BMW X3**. Kao i svaki automobil koji smo preuzeli, X4 je prošao provere pre kupovine.
+      Klijent nam se istovremeno obratio i za uslugu **pronalaženja automobila u Srbiji**. Tako je prodao svoj auto i odmah uz našu pomoć pronašao drugi: **BMW X4 umesto BMW X3**. Kao i kod svakog automobila koji pronalazimo za klijente, i za X4 je obavljena provera auta pre kupovine.
 
-      Sve je bilo praktično: brzo smo otkupili njegov automobil sa RF registarcijom, preuzeli logistiku i prodaju u Rusiji, dok je klijent mirno seo u novi BMW X4.
+      Sve smo rešili na jednom mestu: brzo smo otkupili njegov automobil sa ruskim tablicama, preuzeli logistiku i prodaju u Rusiji, a klijent je bez brige prešao na novi BMW X4.
 
-      Bavimo se **otkupom automobila sa ruskim registarskim tablicama u Srbiji i Crnoj Gori**, kao i auto-podborom i podrškom prilikom kupovine automobila u Srbiji.
+      Bavimo se **otkupom automobila sa ruskim tablicama u Srbiji i Crnoj Gori**, kao i pronalaženjem automobila i pružanjem podrške pri kupovini u Srbiji.
 
-      Ako vam je potrebna **hitna prodaja automobila sa RF registarcijom**, obratite nam se: procenićemo automobil, predložiti otkup i organizovati dalje korake.
+      Ako vam je potrebno da **hitno prodate automobil sa ruskim tablicama**, javite nam se: procenićemo automobil, dati ponudu za otkup i organizovati sve naredne korake.
   es:
     title: BMW X3 con matrícula rusa
     body: |-
       ### Compra de vehículos con matrícula rusa en Serbia y Montenegro
 
-      Recibimos la consulta de un cliente que necesitaba **vender lo más rápido posible un coche con matrícula rusa**. Le propusimos comprar el coche directamente, organizar su transporte a Rusia y su posterior venta.
+      Un cliente acudió a nosotros porque necesitaba **vender su coche con matrícula rusa lo antes posible**. Le propusimos comprárselo directamente y encargarnos de su transporte a Rusia y de su posterior venta.
 
       Se trataba de un **BMW X3**, que compramos por **33 000 €**.
 
-      Al mismo tiempo, el cliente también nos pidió el servicio de **selección de automóviles en Serbia**. Al final, vendió su coche y rápidamente eligió uno nuevo: **un BMW X4 en lugar del BMW X3**. Al igual que cualquier coche que seleccionamos, el X4 pasó una revisión antes de la compra.
+      El cliente también contrató nuestro servicio de **búsqueda y selección de coches en Serbia**. Así, vendió su coche y encontró enseguida el siguiente: **un BMW X4 para sustituir a su BMW X3**. Como todos los vehículos que seleccionamos, el X4 pasó una inspección antes de la compra.
 
-      La situación fue conveniente: compramos rápidamente su coche con matrícula rusa, nos encargamos de la logística y la venta en Rusia, mientras el cliente pudo cambiar sin problemas a su nuevo BMW X4.
+      Todo resultó muy cómodo para el cliente: compramos rápidamente su coche con matrícula rusa, nos encargamos de la logística y de la venta en Rusia, y él pudo pasarse a su nuevo BMW X4 sin preocupaciones.
 
-      Nos dedicamos a **comprar vehículos con matrícula rusa en Serbia y Montenegro**, así como a la selección de automóviles y acompañamiento en la compra de vehículos en Serbia.
+      Nos dedicamos a la **compra de vehículos con matrícula rusa en Serbia y Montenegro**, así como a la búsqueda y selección de coches y al asesoramiento durante el proceso de compra en Serbia.
 
-      Si necesita **vender urgentemente un coche con matrícula rusa**, contáctenos: evaluaremos el vehículo, le ofreceremos una opción de compra y organizaremos los siguientes pasos.
+      Si necesita **vender urgentemente un coche con matrícula rusa**, póngase en contacto con nosotros: valoraremos el vehículo, le haremos una oferta de compra y organizaremos los siguientes pasos.
   de:
-    title: BMW X3 mit russischen Kennzeichen
+    title: BMW X3 mit russischem Kennzeichen
     body: |-
-      ### Ankauf von Fahrzeugen mit russischen Nummernschildern in Serbien und Montenegro
+      ### Ankauf von Fahrzeugen mit russischen Kennzeichen in Serbien und Montenegro
 
-      Ein Kunde kam zu uns, der sein **Auto mit russischen Nummernschildern so schnell wie möglich verkaufen** wollte. Wir boten an, das Fahrzeug selbst zu kaufen, seinen Transport nach Russland zu organisieren und den weiteren Verkauf zu übernehmen.
+      Ein Kunde wandte sich an uns, weil er **sein Auto mit russischem Kennzeichen möglichst schnell verkaufen wollte**. Wir boten ihm an, das Fahrzeug direkt anzukaufen und anschließend den Transport nach Russland sowie den Weiterverkauf zu übernehmen.
 
       Es handelte sich um einen **BMW X3**, den wir für **33.000 €** ankauften.
 
-      Parallel wandte sich der Kunde auch an uns für die **Autosuche in Serbien**. Am Ende verkaufte er sein altes Auto und fand sofort ein neues: **einen BMW X4 anstelle des BMW X3**. Wie bei jedem von uns ausgesuchten Fahrzeug wurde auch das X4 vor dem Kauf überprüft.
+      Parallel beauftragte uns der Kunde mit der **Fahrzeugsuche in Serbien**. So konnte er sein bisheriges Auto verkaufen und direkt ein neues finden: **einen BMW X4 statt des BMW X3**. Wie jedes von uns vermittelte Fahrzeug wurde auch der X4 vor dem Kauf gründlich geprüft.
 
-      Es lief sehr praktisch: Wir kauften sein Auto mit russischen Nummernschildern schnell an, overnahmen die Logistik und den Verkauf in Russland, während der Kunde entspannt in den neuen BMW X4 umsteigen konnte.
+      Für den Kunden war das eine bequeme Lösung: Wir kauften sein Fahrzeug mit russischem Kennzeichen kurzfristig an und kümmerten uns um die Logistik und den Verkauf in Russland. Er konnte entspannt auf seinen neuen BMW X4 umsteigen.
 
-      Wir beschäftigen uns mit dem **Ankauf von Fahrzeugen mit russischen Nummernschildern in Serbien und Montenegro**, sowie mit der Autosuche und der Begleitung von Autokäufen in Serbien.
+      Wir sind auf den **Ankauf von Fahrzeugen mit russischen Kennzeichen in Serbien und Montenegro** spezialisiert. Außerdem unterstützen wir bei der Fahrzeugsuche und begleiten den Autokauf in Serbien.
 
-      Falls Sie **dringend ein Auto mit russischen Nummernschildern verkaufen** müssen, kontaktieren Sie uns: Wir bewerten das Fahrzeug, bieten einen Ankauf an und organisieren die nächsten Schritte.
+      Wenn Sie **Ihr Auto mit russischem Kennzeichen dringend verkaufen möchten**, kontaktieren Sie uns. Wir bewerten Ihr Fahrzeug, machen Ihnen ein Ankaufsangebot und organisieren die weiteren Schritte.
 car: BMW X3
 year: 2018
 price:

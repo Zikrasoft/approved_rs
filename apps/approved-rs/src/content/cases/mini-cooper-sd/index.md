@@ -4,91 +4,91 @@ translations:
   en:
     title: MINI Cooper SD
     body: |-
-      ## Car Buyback in Serbia: Quick and Hassle-Free
+      ## Selling your car in Serbia: quick and hassle-free
 
-      We were approached by Dragan, the owner of a **2017 MINI Cooper SD** with approximately **130,000 km** on the clock. The car was located in **Jagodina**, registered in Belgrade, and had Serbian license plates.
+      Dragan came to us with his **2017 MINI Cooper SD**, which had around **130,000 km** on the clock. The car was located in **Jagodina**, registered in Belgrade and had Serbian plates.
 
-      Dragan wanted to sell the car quickly, without wasting time on ads, calls from potential buyers, and numerous viewings.
+      Dragan wanted to sell his car quickly without spending time listing it, taking calls from potential buyers or arranging multiple viewings.
 
-      We organized the complete car buyback process. We traveled from Belgrade to Jagodina with a trailer, conducted a pre-purchase inspection of the vehicle, finalized the deal, **paid Dragan**, collected the MINI Cooper, and arranged for its transportation back to Belgrade.
+      We handled the entire purchase process. We travelled from Belgrade to Jagodina with a car trailer, inspected the car before buying it, completed the paperwork, **paid Dragan**, collected the MINI Cooper and transported it to Belgrade.
 
       The car was later sold in Belgrade.
 
-      For the owner, this is the simplest way to sell a car: there’s no need to look for a buyer, arrange viewings, negotiate, or handle transportation.
+      For the owner, this is one of the simplest ways to sell a car: there is no need to find a buyer, arrange viewings, negotiate or deal with transport.
 
-      ## Car Buyback in Serbia and Montenegro
+      ## We buy cars in Serbia and Montenegro
 
-      We specialize in **car buybacks in Serbia** and organize transactions regardless of where the vehicle is located.
+      We **buy cars in Serbia**, handling the purchase wherever the vehicle is located.
 
-      We work with cars that have **Serbian and Russian license plates**.
+      We work with cars on **Serbian and Russian plates**.
 
-      We also offer **car buyback services in Montenegro**.
+      We also **buy cars in Montenegro**.
   sr:
     title: MINI Cooper SD
     body: |-
-      ## Otkupljenje automobila u Srbiji: brzo i bez nepotrebnih komplikacija
+      ## Otkup automobila u Srbiji: brzo i bez suvišnih obaveza
 
-      Obratio nam se Dragan, vlasnik **MINI Cooper SD iz 2017. godine** sa pređenih oko **130 000 km**. Automobil se nalazio u gradu **Jagodina**, bio je registrovan u Beogradu i imao srpske registarske broje. 
+      Obratio nam se Dragan, vlasnik automobila **MINI Cooper SD iz 2017. godine** sa oko **130.000 km** na satu. Automobil se nalazio u **Jagodini**, bio je registrovan u Beogradu i imao je srpske tablice.
 
-      Dragan je želeo da brzo proda automobil, ne trošeći vreme na oglašavanje, pozive potencijalnih kupaca i brojne preglede. 
+      Dragan je želeo da brzo proda automobil, bez gubljenja vremena na postavljanje oglasa, pozive potencijalnih kupaca i brojne dolaske radi razgledanja.
 
-      Organizovali smo ceo proces otkupa automobila. Izašli smo iz Beograda u Jagodinu na prikolici, obavili proveru auta pre kupovine, završili transakciju, **isplatili Draganu novac**, preuzeli MINI Cooper i organizovali njegov transport u Beograd.
+      Preuzeli smo ceo postupak otkupa. Iz Beograda smo krenuli u Jagodinu vozilom sa prikolicom za prevoz automobila. Na licu mesta obavljena je provera auta pre kupovine, završena je kupoprodajna dokumentacija i **Draganu je isplaćen novac**. Zatim smo preuzeli MINI Cooper i prevezli ga u Beograd.
 
-      U daljem procesu, automobil je prodat već u Beogradu.
+      Automobil je kasnije prodat u Beogradu.
 
-      Za vlasnika, ovo je najjednostavniji način prodaje automobila: nije potrebno samostalno tražiti kupca, organizovati preglede, pregovarati ili se baviti transportom.
+      Za vlasnika je ovo najjednostavniji način prodaje automobila: nema potrebe da sam traži kupca, zakazuje razgledanja, pregovara ili organizuje prevoz.
 
-      ## Otkupljenje automobila u Srbiji i Crnoj Gori
+      ## Otkup automobila u Srbiji i Crnoj Gori
 
-      Bavimo se **otkupom automobila u Srbiji** i organizujemo transakcije bez obzira na to gde se automobil nalazi. 
+      Bavimo se **otkupom automobila u Srbiji** i organizujemo ceo postupak bez obzira na to gde se automobil nalazi.
 
-      Radimo sa automobilima na **srpskim i ruskim registarskim brojevima**.
+      Otkupljujemo automobile sa **srpskim i ruskim tablicama**.
 
       Takođe vršimo **otkup automobila u Crnoj Gori**.
   es:
     title: MINI Cooper SD
     body: |-
-      ## Compra de automóviles en Serbia: rápida y sin complicaciones
+      ## Compra directa de coches en Serbia: rápida y sin complicaciones
 
-      Nos contactó Dragan, propietario de un **MINI Cooper SD 2017** con un kilometraje de aproximadamente **130,000 km**. El automóvil se encontraba en la ciudad de **Jagodina**, registrado en Belgrado y con matrículas serbias.
+      Dragan acudió a nosotros para vender su **MINI Cooper SD de 2017**, con unos **130 000 km**. El coche se encontraba en **Jagodina**, estaba matriculado en Belgrado y tenía matrícula serbia.
 
-      Dragan quería vender el automóvil rápidamente, sin perder tiempo en publicar anuncios, llamadas de compradores potenciales ni visitas interminables.
+      Dragan quería venderlo cuanto antes, sin perder tiempo publicando anuncios, atendiendo llamadas de posibles compradores ni concertando numerosas visitas.
 
-      Organizamos todo el proceso de compra del automóvil. Salimos de Belgrado hacia Jagodina con remolque, realizamos la inspección del vehículo antes de la compra, formalizamos el trato, **pagamos a Dragan** y recogimos el MINI Cooper para organizar su transporte de regreso a Belgrado.
+      Nos encargamos de todo el proceso de compra. Salimos de Belgrado hacia Jagodina con un remolque, revisamos el coche antes de comprarlo, formalizamos la compraventa, **pagamos a Dragan** y recogimos el MINI Cooper para transportarlo a Belgrado.
 
-      Posteriormente, el automóvil se vendió en Belgrado.
+      Más adelante, el coche se vendió en Belgrado.
 
-      Para el propietario, este es el método más sencillo para vender un automóvil: no necesita buscar compradores por su cuenta, organizar visitas, negociar o encargarse del transporte.
+      Para el propietario, es una forma muy sencilla de vender su coche: no tiene que buscar comprador, organizar visitas, negociar ni ocuparse del transporte.
 
-      ## Compra de automóviles en Serbia y Montenegro
+      ## Compra directa de coches en Serbia y Montenegro
 
-      Nos dedicamos a la **compra de automóviles en Serbia** y organizamos transacciones sin importar dónde se encuentre el vehículo.
+      Nos dedicamos a la **compra directa de coches en Serbia** y gestionamos la operación independientemente de dónde se encuentre el vehículo.
 
-      Trabajamos con automóviles con **matrículas serbias y rusas**.
+      Trabajamos con coches con **matrícula serbia o rusa**.
 
-      También realizamos **compra de automóviles en Montenegro**.
+      También ofrecemos el servicio de **compra directa de coches en Montenegro**.
   de:
     title: MINI Cooper SD
     body: |-
-      ## Autoankauf in Serbien: schnell und ohne viel Aufwand
+      ## Autoankauf in Serbien: schnell und unkompliziert
 
-      Dragan, der Besitzer eines **MINI Cooper SD 2017** mit einer Laufleistung von etwa **130.000 km**, wandte sich an uns. Das Fahrzeug befand sich in der Stadt **Jagodina**, war in Belgrad registriert und hatte serbische Kennzeichen.
+      Dragan wandte sich mit seinem **MINI Cooper SD, Baujahr 2017**, an uns. Das Fahrzeug hatte rund **130.000 km** auf dem Tacho, stand in **Jagodina** und war in Belgrad mit serbischen Kennzeichen zugelassen.
 
-      Dragan wollte das Auto schnell verkaufen, ohne Zeit mit Annoncen, Anrufen von potenziellen Käufern und zahlreichen Besichtigungen zu verschwenden.
+      Dragan wollte sein Auto zügig verkaufen, ohne Zeit mit Inseraten, Anrufen potenzieller Käufer und zahlreichen Besichtigungen zu verbringen.
 
-      Wir organisierten den kompletten Autoankaufsprozess. Wir fuhren von Belgrad nach Jagodina mit einem Anhänger, führten eine Überprüfung des Fahrzeugs vor dem Kauf durch, wickelten den Deal ab, **zahlten Dragan das Geld**, holten den MINI Cooper ab und organisierten den Transport nach Belgrad.
+      Wir übernahmen den gesamten Ankauf. Wir fuhren mit einem Autotransportanhänger von Belgrad nach Jagodina, prüften das Fahrzeug vor dem Kauf, erledigten die Verkaufsformalitäten und **zahlten Dragan den Kaufpreis aus**. Anschließend nahmen wir den MINI Cooper mit und transportierten ihn nach Belgrad.
 
-      Das Auto wurde anschließend in Belgrad weiterverkauft.
+      Später wurde das Fahrzeug in Belgrad weiterverkauft.
 
-      Für den Besitzer ist dies der einfachste Weg, ein Auto zu verkaufen: Es ist nicht nötig, selbst einen Käufer zu suchen, Besichtigungen zu organisieren, Verhandlungen zu führen oder sich um den Transport zu kümmern.
+      Für den Besitzer ist das eine besonders unkomplizierte Möglichkeit, sein Auto zu verkaufen: Er muss weder selbst einen Käufer suchen noch Besichtigungen organisieren, Verhandlungen führen oder sich um den Transport kümmern.
 
-      ## Fahrzeugankauf in Serbien und Montenegro
+      ## Autoankauf in Serbien und Montenegro
 
-      Wir sind spezialisiert auf den **Autoankauf in Serbien** und organisieren Transaktionen unabhängig davon, wo sich das Fahrzeug befindet.
+      Wir sind auf den **Autoankauf in Serbien** spezialisiert und wickeln den Ankauf unabhängig vom Standort des Fahrzeugs ab.
 
-      Wir arbeiten mit Fahrzeugen auf **serbischen und russischen Kennzeichen**.
+      Wir kaufen Fahrzeuge mit **serbischen und russischen Kennzeichen** an.
 
-      Zudem führen wir **Autoankäufe in Montenegro** durch.
+      Außerdem bieten wir den **Autoankauf in Montenegro** an.
 car: Mini Cooper SD
 year: 2017
 price:

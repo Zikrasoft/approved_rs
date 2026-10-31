@@ -16,81 +16,81 @@ translations:
   en:
     title: Range Rover Sport
     body: |-
-      **Almost New Range Rover from Germany to Serbia**
+      **An almost-new Range Rover from Germany to Serbia**
 
-      Our client was looking for more than just a Range Rover; they wanted an almost new vehicle that had no real use, but at a more attractive price than what official dealers offered.
+      Our client wanted more than just a Range Rover. They were looking for an almost-new car that had seen virtually no use, at a better price than an authorised dealer could offer.
 
-      We found the perfect option: the car had been registered in Germany for over six months, but it had practically never been driven. Although it was officially on record, it wasn’t used at all.
+      We found exactly that: a car that had been registered in Germany more than six months earlier but had never actually been used. It was officially registered, but no one had been driving it.
 
-      The price of the vehicle turned out to be slightly lower than the dealership’s, and the payment was arranged in cash.
+      The price was slightly below the dealer price, and we arranged for payment in cash.
 
-      We located the car in Germany, organized the purchase, delivery, and brought the Range Rover from Europe to Serbia. Now the vehicle is with its new owner.
+      We sourced the car in Germany and handled the purchase, transport and import into Serbia. The Range Rover is now with its new owner.
 
-      **Interested in ordering a car from Germany or another European country to Serbia?**
+      **Looking to import a car from Germany or elsewhere in Europe to Serbia?**
 
-      We can assist you with searching, selecting, inspecting, purchasing, and delivering a vehicle that meets your specifications and budget.
+      We can help you find, assess, inspect, buy and transport a car that suits your needs and budget.
 
-      We specialize in importing cars from Germany to Serbia, bringing vehicles in from Europe, sourcing cars in the European market, and arranging delivery to Belgrade and other cities in Serbia.
+      We specialise in importing cars from Germany and elsewhere in Europe to Serbia, sourcing vehicles on the European market and arranging delivery to Belgrade and other Serbian cities.
 
-      We will find and deliver exactly the car you are looking for.
+      We'll find and deliver the car you're looking for.
   sr:
     title: Range Rover Sport
     body: |-
-      **Praktično novi Range Rover iz Nemačke u Srbiju**
+      **Praktično nov Range Rover iz Nemačke u Srbiju**
 
-      Naš klijent je tražio ne samo Range Rover, već praktično нови automobil bez realne eksploatacije, ali po privlačnijoj ceni nego kod ovlašćenog dilera.
+      Naš klijent nije tražio bilo kakav Range Rover, već praktično nov automobil koji nije korišćen, ali po povoljnijoj ceni nego kod ovlašćenog prodavca.
 
-      Pronašli smo upravo takvu opciju: automobil je registrovan u Nemačkoj pre više od šest meseci, ali zapravo nije korišćen, što znači da je formalno već bio na registrovanju, ali niko nije vozio na njemu.
+      Pronašli smo upravo takav primerak: automobil je bio registrovan u Nemačkoj pre više od šest meseci, ali zapravo nije korišćen. Dakle, formalno je već bio registrovan, ali ga niko nije vozio.
 
-      Cena automobila se ispostavila malo niža od dilerske, a uplatu smo organizovali u gotovini.
+      Cena automobila bila je nešto niža nego kod ovlašćenog prodavca, a organizovali smo plaćanje u gotovini.
 
-      Pronašli smo automobil u Nemačkoj, organizovali kupovinu, dostavu i dovoz Range Rover-a iz Evrope u Srbiju. Sada je auto već kod novog vlasnika.
+      Pronašli smo automobil u Nemačkoj i organizovali kupovinu, transport i uvoz ovog Range Rovera iz Evrope u Srbiju. Automobil je sada kod novog vlasnika.
 
-      **Želite da poručite automobil iz Nemačke ili druge evropske zemlje u Srbiju?**
+      **Želite da naručite automobil iz Nemačke ili neke druge evropske zemlje i uvezete ga u Srbiju?**
 
-      Pomoćemo vam sa pretragom, odabirom, provere automobila pre kupovine, kupovinom i dostavom automobila prema vašim zahtevima i budžetu.
+      Pomažemo vam da pronađete i odaberete automobil prema svojim željama i budžetu, uz uslugu provera auta pre kupovine i organizaciju kupovine i transporta.
 
-      Bavimo se uvozom automobila iz Nemačke u Srbiju, dovoženjem automobila iz Evrope, odabirom automobila na evropskom tržištu i organizacijom dostave automobila u Beograd i druge gradove Srbije.
+      Bavimo se uvozom automobila iz Nemačke u Srbiju, dovozom vozila iz Evrope, pronalaženjem odgovarajućih automobila na evropskom tržištu i organizacijom transporta do Beograda i drugih gradova Srbije.
 
-      Pronaći ćemo i dovesti baš onaj automobil koji tražite.
+      Pronaći ćemo i dovesti upravo onaj automobil koji tražite.
   es:
     title: Range Rover Sport
     body: |-
-      **Casi nuevo Range Rover de Alemania a Serbia**
+      **Un Range Rover prácticamente nuevo de Alemania a Serbia**
 
-      Nuestro cliente no buscaba simplemente un Range Rover, sino un automóvil prácticamente nuevo, sin un uso real y a un precio más atractivo que el de un concesionario autorizado.
+      Nuestro cliente no buscaba un Range Rover cualquiera, sino uno prácticamente nuevo, sin apenas uso y a un precio más atractivo que el de un concesionario oficial.
 
-      Encontramos exactamente lo que buscaba: el vehículo estaba registrado en Alemania desde hacía más de seis meses, pero no había tenido un uso real, lo que significa que, aunque formalmente estaba en el registro, nadie había conducido el coche.
+      Encontramos justo lo que buscaba: un vehículo matriculado en Alemania hacía más de seis meses, pero que en realidad no se había utilizado. Es decir, ya estaba matriculado, pero nadie había circulado con él.
 
-      El precio del automóvil resultó ser un poco inferior al del concesionario, y organizamos el pago en efectivo.
+      El precio resultó algo inferior al del concesionario y organizamos el pago en efectivo.
 
-      Encontramos el coche en Alemania, gestionamos la compra, el transporte y la entrega del Range Rover desde Europa a Serbia. Ahora el vehículo ya está con su nuevo propietario.
+      Localizamos el coche en Alemania y nos encargamos de la compra, el transporte y la importación del Range Rover a Serbia. Ahora ya está en manos de su nuevo propietario.
 
-      **¿Quieres encargar un coche de Alemania o de otro país de Europa a Serbia?**
+      **¿Quieres traer un coche de Alemania o de otro país europeo a Serbia?**
 
-      Te ayudamos a buscar, seleccionar, verificar, comprar y entregar el automóvil según tus necesidades y presupuesto.
+      Te ayudamos con la búsqueda, la selección, la inspección, la compra y el transporte de un vehículo que se ajuste a tus necesidades y a tu presupuesto.
 
-      Nos especializamos en la importación de vehículos de Alemania a Serbia, en el traslado de coches desde Europa, en la selección de automóviles en el mercado europeo y en la organización de la entrega de vehículos a Belgrado y otras ciudades de Serbia.
+      Nos dedicamos a la importación de coches de Alemania a Serbia, la búsqueda y selección de vehículos en el mercado europeo y la organización de su transporte a Belgrado y a otras ciudades de Serbia.
 
-      Encontraremos y traeremos exactamente el coche que estás buscando.
+      Encontraremos y traeremos exactamente el coche que buscas.
   de:
     title: Range Rover Sport
     body: |-
-      **Fast neuer Range Rover aus Deutschland nach Serbien**
+      **Ein nahezu neuer Range Rover aus Deutschland für einen Kunden in Serbien**
 
-      Unser Kunde suchte nicht einfach nur einen Range Rover, sondern ein nahezu neues Fahrzeug ohne echte Nutzung, aber zu einem attraktiveren Preis als beim offiziellen Händler.
+      Unser Kunde suchte nicht einfach irgendeinen Range Rover, sondern ein nahezu neues Fahrzeug, das praktisch noch nicht gefahren worden war, und das zu einem günstigeren Preis als beim Vertragshändler.
 
-      Wir fanden genau dieses Modell: Das Auto war vor über sechs Monaten in Deutschland angemeldet, wurde jedoch faktisch nicht genutzt, das heißt, es war formal bereits registriert, aber niemand hatte damit gefahren.
+      Wir haben genau das passende Exemplar gefunden: Das Fahrzeug war in Deutschland bereits seit mehr als sechs Monaten zugelassen, wurde aber praktisch nicht genutzt. Es war also offiziell angemeldet, gefahren wurde es jedoch nicht.
 
-      Der Preis des Fahrzeugs lag etwas unter dem Händlerpreis, und die Zahlung wurde in bar organisiert.
+      Der Preis lag etwas unter dem Händlerpreis. Die Bezahlung haben wir in bar abgewickelt.
 
-      Wir fanden das Auto in Deutschland, organisierten den Kauf, den Transport und den Import des Range Rover aus Europa nach Serbien. Das Auto ist nun bereits beim neuen Besitzer.
+      Wir haben das Fahrzeug in Deutschland gefunden und uns um den Kauf, den Transport und den Import des Range Rover nach Serbien gekümmert. Inzwischen ist das Auto bei seinem neuen Besitzer.
 
-      **Möchten Sie ein Auto aus Deutschland oder einem anderen europäischen Land nach Serbien bestellen?**
+      **Möchten Sie ein Auto aus Deutschland oder einem anderen europäischen Land nach Serbien importieren lassen?**
 
-      Wir helfen Ihnen bei der Suche, Auswahl, Überprüfung, dem Kauf und der Lieferung eines Fahrzeugs, das Ihren Anforderungen und Ihrem Budget entspricht.
+      Wir unterstützen Sie bei der Suche, Auswahl, Prüfung, dem Kauf und der Lieferung eines Fahrzeugs, das zu Ihren Wünschen und Ihrem Budget passt.
 
-      Wir importieren Autos aus Deutschland nach Serbien, bringen Fahrzeuge aus Europa und suchen Autos auf dem europäischen Markt, sowie organisieren den Transport von Fahrzeugen nach Belgrad und in andere Städte Serbiens.
+      Wir importieren Fahrzeuge aus Deutschland und anderen europäischen Ländern nach Serbien, suchen passende Autos auf dem europäischen Markt und organisieren den Transport nach Belgrad und in andere serbische Städte.
 
       Wir finden und liefern genau das Auto, das Sie suchen.
 translatedFrom: ba01d57c654824e7

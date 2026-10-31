@@ -14,35 +14,35 @@ translations:
   en:
     title: Skoda Superb for Anatoly
     body: |-
-      ## Car Sourcing in Serbia: Skoda Superb 2020 for Anatoly
+      ## Car Sourcing in Serbia: A 2020 Skoda Superb for Anatoly
 
-      Our client Anatoly approached us looking for a reliable family car. He was primarily considering **Skoda Superb, Skoda Kodiaq**, and **Volkswagen Passat**.
+      Anatoly came to us looking for a reliable family car. His main options were the **Skoda Superb, Skoda Kodiaq** and **Volkswagen Passat**.
 
-      During the car sourcing process, we inspected four vehicles before purchase and found an almost perfect option: a **2020 Skoda Superb** with only **98,000 km** on the clock. The car had **one owner in Serbia**, a complete service history from an authorized dealer, and was in excellent mechanical and cosmetic condition.
+      As part of the search, we carried out pre-purchase inspections on four cars and found a near-perfect match: a **2020 Skoda Superb** with just **98,000 km** on the clock. The car had **one owner in Serbia**, a full main-dealer service history, and was in excellent mechanical and cosmetic condition.
   sr:
-    title: Skoda Superb za Anatolija
+    title: Škoda Superb za Anatolija
     body: |-
-      ## Autopodbor u Srbiji: Skoda Superb 2020 za Anatolija
+      ## Pronalaženje automobila u Srbiji: Škoda Superb 2020. za Anatolija
 
-      Klijent Anatolij obratio nam se u potrazi za pouzdanim porodičnim automobilom. Kao glavni opcije razmatrani su **Skoda Superb, Skoda Kodiaq** i **Volkswagen Passat**.
+      Klijent Anatolij nam se obratio u potrazi za pouzdanim porodičnim automobilom. Glavni kandidati bili su **Škoda Superb, Škoda Kodiaq** i **Volkswagen Passat**.
 
-      Tokom autopodbora izvršili smo proveru auta pre kupovine četiri vozila i našli gotovo idealnu opciju: **Skoda Superb iz 2020. godine** sa pređenih samo **98 000 km**. Automobil je imao **jednog vlasnika u Srbiji**, potpunu istoriju servisa kod ovlašćenog dilera i odlično tehničko i estetsko stanje.
+      U okviru potrage, naša usluga provera auta pre kupovine obuhvatila je četiri vozila. Pronašli smo gotovo idealan primerak: **Škodu Superb iz 2020. godine** sa samo **98.000 km**. Automobil je imao **jednog vlasnika u Srbiji**, kompletnu servisnu istoriju u ovlašćenom servisu i bio je u odličnom stanju, kako mehanički tako i estetski.
   es:
-    title: Skoda Superb para Anatoliy
+    title: Skoda Superb para Anatoli
     body: |-
-      ## Selección de coches en Serbia: Skoda Superb 2020 para Anatoli
+      ## Búsqueda de coche en Serbia: Skoda Superb de 2020 para Anatoli
 
-      El cliente Anatoli se acercó a nosotros en busca de un automóvil familiar confiable. Como opciones principales consideramos **Skoda Superb, Skoda Kodiaq** y **Volkswagen Passat**.
+      Anatoli acudió a nosotros para encontrar un coche familiar fiable. Sus principales opciones eran el **Skoda Superb, el Skoda Kodiaq** y el **Volkswagen Passat**.
 
-      En el proceso de selección de coches, realizamos una inspección previa a la compra de cuatro vehículos y encontramos una opción prácticamente ideal: **Skoda Superb del año 2020** con tan solo **98 000 km** de recorrido. El vehículo había tenido **un solo propietario en Serbia**, contaba con un historial de servicio completo en el concesionario oficial y se encontraba en excelente estado técnico y estético.
+      Durante la búsqueda, realizamos inspecciones precompra de cuatro vehículos y encontramos una opción prácticamente perfecta: un **Skoda Superb de 2020** con solo **98 000 km**. El coche había tenido **un único propietario en Serbia**, contaba con un historial completo de mantenimiento en el concesionario oficial y estaba en excelente estado, tanto mecánico como estético.
   de:
     title: Skoda Superb für Anatoli
     body: |-
-      ## Fahrzeugbeschaffung in Serbien: Skoda Superb 2020 für Anatoli
+      ## Fahrzeugsuche in Serbien: Skoda Superb von 2020 für Anatoli
 
-      Der Kunde Anatoli wandte sich an uns, um einen zuverlässigen Familienwagen zu finden. Als Hauptoptionen wurden **Skoda Superb, Skoda Kodiaq** und **Volkswagen Passat** in Betracht gezogen.
+      Anatoli wandte sich an uns, weil er ein zuverlässiges Familienauto suchte. In der engeren Auswahl standen **Skoda Superb, Skoda Kodiaq** und **Volkswagen Passat**.
 
-      Im Rahmen der Fahrzeugbeschaffung führten wir eine Überprüfung vor dem Kauf von vier Fahrzeugen durch und fanden schließlich die nahezu ideale Lösung: **Skoda Superb 2020** mit einer Laufleistung von nur **98 000 km**. Das Auto hatte **einen Vorbesitzer in Serbien**, eine vollständige Wartungshistorie bei einem autorisierten Händler und befand sich in einem ausgezeichneten technischen sowie kosmetischen Zustand.
+      Im Rahmen der Fahrzeugsuche haben wir vier Fahrzeuge vor dem Kauf geprüft und ein nahezu perfektes Exemplar gefunden: einen **Skoda Superb, Baujahr 2020**, mit einer Laufleistung von nur **98.000 km**. Das Fahrzeug hatte **einen Vorbesitzer in Serbien**, eine lückenlose Wartungshistorie beim Vertragshändler und war technisch wie optisch in ausgezeichnetem Zustand.
 translatedFrom: eca345cfda3d280d
 ---
 
