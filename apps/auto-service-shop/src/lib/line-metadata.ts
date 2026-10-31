@@ -1,7 +1,7 @@
 import {
   ADDON_KINDS,
   listedPartSchema,
-  normalizePartNumber,
+  partTitle,
   type AddonKind,
   type ListedPart,
 } from '@podbor/catalog-contract';
@@ -79,10 +79,10 @@ export const offerLineMetadata = (
   ...part,
 });
 
-export const offerLineTitle = ({ name, brand, number }: ListedPart) =>
-  normalizePartNumber(name).includes(normalizePartNumber(number))
-    ? name
-    : `${name} (${brand} ${number})`;
+export const offerLineTitle = (part: ListedPart) => {
+  const { name, number } = partTitle(part);
+  return number ? `${name} (${number})` : name;
+};
 
 export const addonLineMetadata = (
   parent: { lineId: string; offerId: string },

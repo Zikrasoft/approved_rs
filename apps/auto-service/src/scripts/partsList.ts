@@ -1,5 +1,6 @@
 import * as z from 'zod/mini';
 import { fitComment } from '@podbor/catalog-contract/comment';
+import { partTitle } from '@podbor/catalog-contract/part-number';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { vinFrom } from '@/utils/carFacts';
 import { formatMoney } from '@/utils/money';
@@ -154,32 +155,14 @@ export function forgetListCar(storage?: ListStorage): void {
   );
 }
 
-const bare = (text: string) =>
-  text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
-
-const nameWithoutNumber = ({
-  brand,
-  number,
-  name,
-}: Pick<ListedPart, 'brand' | 'number' | 'name'>): string => {
-  const words = name.split(/\s+/);
-  const own = bare(`${brand}${number}`);
-  for (let tail = 1; tail < words.length; tail++) {
-    if (bare(words.slice(-tail).join('')) === own)
-      return words
-        .slice(0, -tail)
-        .join(' ')
-        .replace(/[\s,]+$/, '');
-  }
-  return name;
+const listTitle = (part: ListedPart): string => {
+  const { name, number } = partTitle(part);
+  return number ? `${number}, ${name}` : name;
 };
-
-const partTitle = (part: ListedPart): string =>
-  `${part.brand} ${part.number}, ${nameWithoutNumber(part)}`;
 
 export const partLine = (part: ListedPart): string => {
   const { quantity = 1 } = part;
-  return `${partTitle(part)}${quantity > 1 ? ` × ${quantity}` : ''}`;
+  return `${listTitle(part)}${quantity > 1 ? ` × ${quantity}` : ''}`;
 };
 
 const carNote = ({ car, vin }: ListedPart): string =>
@@ -272,13 +255,14 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
             item.querySelector<HTMLAnchorElement>('[data-part-link]');
           const remove = item.querySelector('[data-part-remove]');
           if (link) {
+            const title = partTitle(part);
             const number = document.createElement('span');
             number.className = 'spec font-semibold';
             number.textContent = part.number.replaceAll(' ', '\u00a0');
             link.replaceChildren(
-              `${part.brand} `,
-              number,
-              `, ${nameWithoutNumber(part)}`,
+              ...(title.number
+                ? [`${part.brand} `, number, `, ${title.name}`]
+                : [title.name]),
             );
             link.href = (this.dataset.partHref ?? '').replace(
               '{slug}',
@@ -290,7 +274,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           )) {
             control.setAttribute(
               'aria-label',
-              `${control.getAttribute('aria-label') ?? ''}: ${partTitle(part)}`,
+              `${control.getAttribute('aria-label') ?? ''}: ${listTitle(part)}`,
             );
           }
           remove?.addEventListener('click', () =>

@@ -16,3 +16,41 @@ export const partNumberQuery = (raw: string): string | null => {
     ? number
     : null;
 };
+
+const bare = (text: string) =>
+  text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+
+export interface PartTitle {
+  name: string;
+  number: string | null;
+}
+
+export const partTitle = ({
+  brand,
+  number,
+  name,
+}: {
+  brand: string;
+  number: string;
+  name: string;
+}): PartTitle => {
+  const words = name.split(/\s+/);
+  const tails = [bare(`${brand}${number}`), bare(number)];
+  let rest = name;
+  for (let tail = words.length - 1; tail > 0; tail--) {
+    const head = words.slice(0, -tail).join(' ');
+    if (
+      tails.includes(bare(words.slice(-tail).join(''))) &&
+      bare(head) !== bare(brand)
+    ) {
+      rest = head.replace(/[\s,]+$/, '');
+      break;
+    }
+  }
+  return {
+    name: rest,
+    number: normalizePartNumber(rest).includes(normalizePartNumber(number))
+      ? null
+      : `${brand} ${number}`,
+  };
+};

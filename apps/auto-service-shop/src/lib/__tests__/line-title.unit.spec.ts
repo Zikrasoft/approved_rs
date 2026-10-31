@@ -1,7 +1,7 @@
 import { offerLineTitle } from '../line-metadata';
 
 describe('offerLineTitle', () => {
-  it('keeps a name that already carries the number as it is', () => {
+  it('moves a trailing brand and number into the brackets', () => {
     expect(
       offerLineTitle({
         slug: 'mann-filter-w71266',
@@ -9,7 +9,7 @@ describe('offerLineTitle', () => {
         number: 'W 712/66',
         name: 'Масляный фильтр MANN-FILTER W 712/66',
       }),
-    ).toBe('Масляный фильтр MANN-FILTER W 712/66');
+    ).toBe('Масляный фильтр (MANN-FILTER W 712/66)');
   });
 
   it('adds the brand and number to a bare name', () => {
