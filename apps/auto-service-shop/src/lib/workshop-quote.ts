@@ -12,7 +12,7 @@ import type {
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import { adminError } from '../modules/_shared/admin-error';
 import { shopAi, type CategoryChoice } from './ai';
-import { readUpload, uploadType } from './uploads';
+import { readCapped, uploadType } from './uploads';
 import { vinDecoders } from './vin/chain';
 import { resolveVin } from './vin/resolve';
 
@@ -46,7 +46,7 @@ export async function readQuoteUpload(req: MedusaRequest): Promise<Buffer> {
   if (uploadType(req) !== PDF_TYPE) {
     throw invalidQuote('A Workshop quote is uploaded as a PDF');
   }
-  const body = await readUpload(req, MAX_QUOTE_BYTES, () =>
+  const body = await readCapped(req, MAX_QUOTE_BYTES, () =>
     adminError(
       MedusaError.Types.INVALID_DATA,
       'QUOTE_TOO_LARGE',

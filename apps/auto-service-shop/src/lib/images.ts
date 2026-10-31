@@ -13,7 +13,7 @@ import sharp from 'sharp';
 import { z } from 'zod';
 
 import { adminError } from '../modules/_shared/admin-error';
-import { readUpload, uploadType } from './uploads';
+import { readCapped, uploadType } from './uploads';
 import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
 import type CatalogModuleService from '../modules/catalog/service';
 
@@ -47,7 +47,7 @@ export async function readImageUpload(req: MedusaRequest): Promise<Buffer> {
   if (!IMAGE_TYPES[type]) {
     throw invalidImage(`Unsupported image type ${type || 'none'}`);
   }
-  const body = await readUpload(req, MAX_IMAGE_BYTES, () =>
+  const body = await readCapped(req, MAX_IMAGE_BYTES, () =>
     adminError(
       MedusaError.Types.INVALID_DATA,
       'IMAGE_TOO_LARGE',
