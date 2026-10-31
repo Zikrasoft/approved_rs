@@ -1,12 +1,6 @@
 import { storedVin } from '@podbor/site-kit/browser';
+import { appendWhatsappLine } from '@podbor/site-kit/contact-links';
 import { vinFrom } from '@/utils/carFacts';
-
-const withLine = (href: string, line: string): string => {
-  const url = new URL(href);
-  const text = url.searchParams.get('text');
-  url.search = `?text=${encodeURIComponent(text ? `${text}\n${line}` : line)}`;
-  return url.toString();
-};
 
 export function defineVinPrefill(tagName = 'vin-prefill'): void {
   if (customElements.get(tagName)) return;
@@ -20,7 +14,7 @@ export function defineVinPrefill(tagName = 'vin-prefill'): void {
         for (const link of this.querySelectorAll<HTMLAnchorElement>(
           '[data-contact-channel="whatsapp"]',
         )) {
-          link.href = withLine(link.href, line);
+          link.href = appendWhatsappLine(link.href, line);
         }
       }
     },
