@@ -86,8 +86,15 @@ describe('liveOffers', () => {
   });
 
   describe('for repeated offer views', () => {
-    beforeEach(() => jest.useFakeTimers({ now: Date.parse('2026-11-01') }));
-    afterEach(() => jest.useRealTimers());
+    const window = process.env.LIVE_QUOTE_CACHE_SECONDS;
+    beforeEach(() => {
+      process.env.LIVE_QUOTE_CACHE_SECONDS = '60';
+      jest.useFakeTimers({ now: Date.parse('2026-11-01') });
+    });
+    afterEach(() => {
+      process.env.LIVE_QUOTE_CACHE_SECONDS = window;
+      jest.useRealTimers();
+    });
 
     const quotedTimes = (scope: MedusaContainer) => {
       const [adapter] = scope.resolve<{ quote: jest.Mock }[]>(
