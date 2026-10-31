@@ -10,7 +10,7 @@ import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import type VinLookupModuleService from '../modules/vin-lookup/service';
-import { listedPartOf, readLine } from './line-metadata';
+import { listedPartOf, orderTotal, readLine } from './line-metadata';
 import type { LeadOrder } from './order-lead';
 import { listVehicleResponses } from './store-response';
 
@@ -59,10 +59,7 @@ export async function orderCaseSummary(
     .map(({ metadata, title }) => listedPartOf(metadata, title))
     .filter(({ brand, number }) => brand && number)
     .map(({ brand, number }) => ({ brand, number }));
-  const total = order.items.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
-    0,
-  );
+  const total = orderTotal(order.items);
   return {
     display_id: order.display_id,
     car: await carOf(container, contact.data?.vin),

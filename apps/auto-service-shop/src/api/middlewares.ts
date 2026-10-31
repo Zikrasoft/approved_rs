@@ -38,7 +38,7 @@ import {
 } from './admin/validators';
 import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
-import { refuseClosedShop } from '../lib/offer-cart';
+import { refuseClosedShop } from '../lib/shop-gate';
 import { PUBLIC_ROUTE_PREFIXES, refuseUnlistedRoute } from './public-routes';
 import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import { OrderOutcome } from './hooks/validators';

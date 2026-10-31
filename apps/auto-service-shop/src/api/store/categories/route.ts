@@ -2,7 +2,7 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { categoriesResponseSchema } from '@podbor/catalog-contract';
 
 import { CATEGORY_RELATIONS, withRankedFields } from '../../../lib/categories';
-import { pricesShown } from '../../../lib/offer-cart';
+import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 

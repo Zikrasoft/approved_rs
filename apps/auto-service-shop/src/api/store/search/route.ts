@@ -34,7 +34,7 @@ import {
 import { z } from 'zod';
 
 import { imagesSchema } from '../../../lib/images';
-import { pricesShown } from '../../../lib/offer-cart';
+import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SHOP_CURRENCY, storeOffers } from '../../../modules/supplier/pricing';

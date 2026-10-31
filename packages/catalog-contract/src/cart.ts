@@ -14,8 +14,10 @@ import {
 } from '@podbor/lead-crm/phone';
 import { partOfferSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
-import { translationsSchema } from './translations.ts';
+import { offerCartSchema } from './cart-wire.ts';
 import { vinOf } from './vin.ts';
+
+export * from './cart-wire.ts';
 
 export const CHECKOUT_REFUSALS = [
   'OFFER_PRICE_CHANGED',
@@ -27,47 +29,6 @@ export const CHECKOUT_REFUSALS = [
 
 export const checkoutRefusalSchema = z.object({
   code: z.enum(CHECKOUT_REFUSALS),
-});
-
-export const listedPartSchema = z.object({
-  slug: z.string(),
-  brand: z.string(),
-  number: z.string(),
-  name: z.string(),
-});
-
-export const lineAddonSchema = z.object({
-  item_id: z.string().nullable(),
-  label: z.string(),
-  translations: translationsSchema,
-  unit_price: z.number().int().nonnegative(),
-});
-
-export const lineInstallationSchema = z.object({
-  item_id: z.string().nullable(),
-  unit_price: z.number().int().nonnegative(),
-});
-
-export const offerCartLineSchema = z.object({
-  id: z.string(),
-  offer_id: z.string(),
-  quantity: z.number().int().positive(),
-  unit_price: z.number().nonnegative(),
-  available: z.boolean(),
-  in_stock: z.boolean(),
-  lead_time_days: z.number().int().nonnegative(),
-  max_quantity: z.number().int().nonnegative().nullable().default(null),
-  addon: lineAddonSchema.nullable(),
-  installation: lineInstallationSchema.nullable().default(null),
-  part: listedPartSchema,
-});
-
-export const offerCartSchema = z.object({
-  id: z.string(),
-  completed: z.boolean(),
-  currency: z.string(),
-  total: z.number().nonnegative(),
-  items: z.array(offerCartLineSchema),
 });
 
 export const offerCartResponseSchema = z.object({ cart: offerCartSchema });
@@ -153,8 +114,3 @@ export const checkoutContactSchema = z
 
 export type CheckoutContact = z.input<typeof checkoutContactSchema>;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
-export type ListedPart = z.infer<typeof listedPartSchema>;
-export type LineAddon = z.infer<typeof lineAddonSchema>;
-export type LineInstallation = z.infer<typeof lineInstallationSchema>;
-export type OfferCartLine = z.infer<typeof offerCartLineSchema>;
-export type OfferCart = z.infer<typeof offerCartSchema>;

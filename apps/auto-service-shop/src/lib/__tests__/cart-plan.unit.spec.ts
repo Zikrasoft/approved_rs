@@ -1,10 +1,29 @@
+import type { AddonKind } from '@podbor/catalog-contract';
+
 import {
-  judgeCheckout,
+  checkoutRefusal,
+  planCart,
   type AddonPrices,
-  type JudgedItem,
+  type CartItem,
+  type CartPlan,
   type Quote,
-} from '../checkout-judge';
-import { addonLineMetadata, INSTALLATION } from '../line-metadata';
+} from '../cart-plan';
+import { addonLineMetadata } from '../line-metadata';
+
+const INSTALLATION = 'installation';
+
+const judgeCheckout = (...args: Parameters<typeof planCart>) => {
+  const refusal = checkoutRefusal(planCart(...args));
+  return refusal
+    ? { refusal }
+    : {
+        lines: args[0].map(({ id, quantity, unit_price }) => ({
+          id,
+          quantity,
+          unit_price,
+        })),
+      };
+};
 
 const part = (
   id: string,
@@ -21,7 +40,7 @@ const part = (
 const addon = (
   id: string,
   offerId: string,
-  kind: 'service' | typeof INSTALLATION,
+  kind: AddonKind,
   quantity = 1,
   unit_price = 500,
 ) => ({
@@ -45,11 +64,11 @@ const addons = (entries: Record<string, AddonPrices> = {}) =>
   new Map(Object.entries(entries));
 
 const SERVICE_AND_INSTALLATION: AddonPrices = {
-  service: { unit_price: 500 },
+  service: { label: 'Регистрация', translations: null, unit_price: 500 },
   installation: 1200,
 };
 
-describe('judgeCheckout', () => {
+describe('checkoutRefusal over planCart', () => {
   it('passes a cart at live prices and returns its lines priced live', () => {
     expect(
       judgeCheckout(
@@ -176,7 +195,7 @@ describe('judgeCheckout', () => {
   });
 
   describe('Add-ons', () => {
-    const judge = (lines: JudgedItem[], prices = SERVICE_AND_INSTALLATION) =>
+    const judge = (lines: CartItem[], prices = SERVICE_AND_INSTALLATION) =>
       judgeCheckout(
         [part('l1', 'o1', 2), ...lines],
         quotes({ o1: quote() }),
@@ -207,7 +226,7 @@ describe('judgeCheckout', () => {
       ).toEqual({ refusal: 'OFFER_MISSING' });
       expect(
         judge([addon('a1', 'o1', INSTALLATION, 2, 1200)], {
-          service: { unit_price: 500 },
+          service: SERVICE_AND_INSTALLATION.service,
           installation: null,
         }),
       ).toEqual({ refusal: 'OFFER_MISSING' });
@@ -252,5 +271,140 @@ describe('judgeCheckout', () => {
         ]),
       ).toEqual({ refusal: 'OFFER_PRICE_CHANGED' });
     });
+  });
+});
+
+const applied = (items: CartItem[], { fixes, stamps }: CartPlan) =>
+  items
+    .filter(({ id }) => !fixes.remove.includes(id))
+    .map((item) => ({
+      ...item,
+      ...fixes.update.find(({ itemId }) => itemId === item.id)?.update,
+      metadata:
+        stamps.find(({ itemId }) => itemId === item.id)?.metadata ??
+        item.metadata,
+    }));
+
+describe('planCart', () => {
+  const prices = addons({ o1: SERVICE_AND_INSTALLATION });
+
+  it('shows an offer line with its add-ons and refuses nothing', () => {
+    const plan = planCart(
+      [
+        { ...part('l1', 'o1', 2), title: 'Oil filter' },
+        addon('a1', 'o1', 'service', 2),
+      ],
+      quotes({ o1: quote({ stock_quantity: 2, lead_time_days: 0 }) }),
+      prices,
+    );
+
+    expect(plan.refusal).toBeNull();
+    expect(plan.fixes).toEqual({ remove: [], update: [] });
+    expect(plan.lines).toEqual([
+      {
+        id: 'l1',
+        offer_id: 'o1',
+        quantity: 2,
+        unit_price: 1850,
+        available: true,
+        max_quantity: 2,
+        in_stock: true,
+        lead_time_days: 0,
+        addon: { item_id: 'a1', ...SERVICE_AND_INSTALLATION.service },
+        installation: { item_id: null, unit_price: 1200 },
+        part: { slug: '', brand: '', number: '', name: 'Oil filter' },
+      },
+    ]);
+  });
+
+  it('shows a line whose Offer is gone at its stored price, unavailable', () => {
+    const plan = planCart([part('l1', 'o1', 1, 900)], quotes({}), addons());
+
+    expect(plan.lines[0]).toMatchObject({
+      unit_price: 900,
+      available: false,
+      max_quantity: 0,
+      in_stock: false,
+      lead_time_days: 0,
+      addon: null,
+      installation: null,
+    });
+    expect(plan.fixes).toEqual({ remove: [], update: [] });
+    expect(plan.stamps).toEqual([]);
+    expect(plan.refusal).toBe('OFFER_MISSING');
+  });
+
+  it('reprices a line, follows its add-ons and keeps the last duplicate', () => {
+    const plan = planCart(
+      [
+        part('l1', 'o1', 3, 1800),
+        addon('a1', 'o1', 'service', 3),
+        addon('a2', 'o1', 'service', 1, 400),
+        addon('a3', 'o_gone', 'service', 3),
+      ],
+      quotes({ o1: quote() }),
+      prices,
+    );
+
+    expect(plan.fixes).toEqual({
+      remove: ['a1', 'a3'],
+      update: [
+        { itemId: 'l1', update: { unit_price: 1850 } },
+        { itemId: 'a2', update: { unit_price: 500, quantity: 3 } },
+      ],
+    });
+    expect(plan.lines[0]?.addon?.item_id).toBe('a2');
+    expect(plan.refusal).toBe('OFFER_PRICE_CHANGED');
+  });
+
+  it('stamps how soon a line is ready when the Offer moved', () => {
+    const plan = planCart(
+      [part('l1', 'o1')],
+      quotes({ o1: quote({ stock_quantity: 0, lead_time_days: 4 }) }),
+      addons(),
+    );
+
+    expect(plan.stamps).toEqual([
+      {
+        itemId: 'l1',
+        metadata: expect.objectContaining({
+          offer_id: 'o1',
+          in_stock: false,
+          lead_time_days: 4,
+        }),
+      },
+    ]);
+    expect(checkoutRefusal(plan)).toBeNull();
+  });
+
+  it('refuses checkout on a fix even without a refusal', () => {
+    expect(
+      checkoutRefusal({
+        lines: [],
+        fixes: { remove: ['a1'], update: [] },
+        stamps: [],
+        refusal: null,
+      }),
+    ).toBe('OFFER_PRICE_CHANGED');
+  });
+
+  it('passes checkout for a cart that reads clean once its fixes are applied', () => {
+    const items = [
+      part('l1', 'o1', 2, 1700),
+      addon('a1', 'o1', 'service', 1, 300),
+      addon('a2', 'o1', 'service', 2),
+      addon('a3', 'o1', INSTALLATION, 5, 1),
+      addon('a4', 'o_gone', INSTALLATION, 2, 1200),
+      part('l2', 'o2', 1, 990),
+    ];
+    const live = quotes({ o1: quote(), o2: quote({ unit_price: 1000 }) });
+    const first = planCart(items, live, prices);
+    const again = planCart(applied(items, first), live, prices);
+
+    expect(checkoutRefusal(first)).not.toBeNull();
+    expect(again.fixes).toEqual({ remove: [], update: [] });
+    expect(again.stamps).toEqual([]);
+    expect(again.lines.every(({ available }) => available)).toBe(true);
+    expect(checkoutRefusal(again)).toBeNull();
   });
 });

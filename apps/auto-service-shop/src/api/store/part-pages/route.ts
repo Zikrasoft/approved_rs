@@ -4,7 +4,7 @@ import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
 import { imagesSchema } from '../../../lib/images';
 import { installationPrice } from '../../../lib/installation';
-import { pricesShown } from '../../../lib/offer-cart';
+import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';

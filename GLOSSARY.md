@@ -99,3 +99,11 @@ _Avoid_: Order, quote, price request, «Цена по запросу»
 **Completed order**:
 A shop Order the customer has picked up and paid for. It becomes completed when staff mark its Lead won in the CRM bot; marking the Lead lost cancels the Order, and cancelling the Order marks its Lead lost.
 _Avoid_: fulfilled, closed, done
+
+**Add-on service**:
+A paid service a Category offers next to each of its Parts in the cart, such as registering a battery in the car's control unit. Its price and label are set on the Category; in the cart and on the Order it is a line of its own that follows its Part's quantity. Its kind is `service`, one of `ADDON_KINDS` beside Installation.
+_Avoid_: upsell, extra, option, addon (as the kind's name)
+
+**Installation**:
+CarLab's work of putting a Part into the customer's car, offered in the cart next to the Part it fits, priced per unit and possibly free. The price is the Part's own, else its Category's, and a Part marked as not installable offers none. Like an Add-on service, it is a line of its own that follows its Part's quantity; its kind is `installation`.
+_Avoid_: fitting, mounting, montaža (bare), a Fitment (that is whether a Part fits a Vehicle)

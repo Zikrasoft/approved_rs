@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { partOffersResponseSchema } from '@podbor/catalog-contract';
 
-import { pricesShown } from '../../../../../lib/offer-cart';
+import { pricesShown } from '../../../../../lib/shop-gate';
 import { liveOffers } from '../../../../../lib/suppliers/live-quote';
 import { storeOffers } from '../../../../../modules/supplier/pricing';
 

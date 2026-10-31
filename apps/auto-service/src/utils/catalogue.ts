@@ -2,6 +2,7 @@ import { keySpecs } from './attributeRows';
 import { z } from 'zod';
 import {
   CART_FINGERPRINT_FIELD,
+  type AddonKind,
   checkoutRefusalSchema,
   offerCartResponseSchema,
   partOffersResponseSchema,
@@ -66,8 +67,10 @@ export type SearchOutcome = Omit<SearchResponse, 'results'> & {
   results: (SearchResult & { slug: string; specs: string })[];
 };
 
-export const LINE_ADDON_KINDS = ['addon', 'installation'] as const;
-export type LineAddonKind = (typeof LINE_ADDON_KINDS)[number];
+const ADDON_ROUTES: Record<AddonKind, string> = {
+  service: 'addon',
+  installation: 'installation',
+};
 
 export type IdentifierPrices = {
   offers: Record<string, PartOffer[]>;
@@ -478,11 +481,11 @@ export function createCatalogue({
       cartId: string,
       itemId: string,
       on: boolean,
-      kind: LineAddonKind = 'addon',
+      kind: AddonKind = 'service',
     ): Promise<CartOutcome> =>
       lineOutcome(
         send(
-          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/${kind}`,
+          `/store/offer-carts/${segment(cartId)}/items/${segment(itemId)}/${ADDON_ROUTES[kind]}`,
           on ? 'POST' : 'DELETE',
           on ? {} : undefined,
         ),

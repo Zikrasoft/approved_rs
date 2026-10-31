@@ -1,12 +1,10 @@
 import type {
-  BigNumberValue,
   ICartModuleService,
   ILockingModule,
   MedusaContainer,
 } from '@medusajs/framework/types';
 import {
   ContainerRegistrationKeys,
-  MathBN,
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
@@ -22,61 +20,47 @@ import {
 import {
   CATALOG_TRANSLATION_LOCALES,
   cartFingerprint,
+  cartTotals,
   checkoutContactSchema,
   orderCap,
   partPageSlug,
   translationsSchema,
-  vinSchema,
+  type AddonKind,
   type CheckoutRefusal,
-  type LineAddon,
   type OfferCart,
 } from '@podbor/catalog-contract';
-import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 
-import type { MedusaRequest } from '@medusajs/framework/http';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { sellPrice } from '../modules/supplier/pricing';
-import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import {
-  addonKey,
-  judgeCheckout,
+  checkoutRefusal,
+  planCart,
   priceFor,
-  type JudgedRefusal,
-} from './checkout-judge';
-import { parseEnv } from './env';
+  type AddonPrices,
+  type CartItem,
+  type CartRefusal,
+  type Quote,
+} from './cart-plan';
+import {
+  CASH_AT_PICKUP_METADATA,
+  CASH_AT_PICKUP_PROVIDER_ID,
+} from './commerce-defaults';
 import { installationPrice } from './installation';
 import {
   addonLineMetadata,
-  type AddonKind,
-  INSTALLATION,
-  listedPartOf,
   offerLineMetadata,
   offerLineTitle,
-  readinessMetadata,
   withParentOffers,
   readLine,
 } from './line-metadata';
-import { carLabel } from './order-lead';
 import { liveOffers } from './suppliers/live-quote';
-import { vinDecoders } from './vin/chain';
-import { resolveVin } from './vin/resolve';
+import { carFor } from './vin/car-for';
 
-export { INSTALLATION, type AddonKind };
-
-export const CASH_AT_PICKUP_PROVIDER_ID = 'pp_system_default';
-export const CASH_AT_PICKUP_METADATA = { fulfillment: 'cash_at_pickup' };
-
-export type OfferCartLineItem = {
-  id: string;
-  title?: string;
-  quantity: BigNumberValue;
-  unit_price: BigNumberValue;
-  metadata?: Record<string, unknown> | null;
-};
+type OfferCartLineItem = CartItem;
 
 const offerIdOf = (item: OfferCartLineItem) =>
   readLine(item.metadata).offerId ?? undefined;
@@ -86,7 +70,7 @@ const parentOfferIdOf = (item: OfferCartLineItem) =>
 
 const kindOf = (item: OfferCartLineItem) => readLine(item.metadata).addonKind;
 
-type CategoryAddon = Omit<LineAddon, 'item_id'>;
+type CategoryAddon = NonNullable<AddonPrices['service']>;
 
 type ServiceCategory = {
   service_label: string | null;
@@ -96,7 +80,7 @@ type ServiceCategory = {
 
 const addonLabelTranslations = ({
   translations,
-}: ServiceCategory): LineAddon['translations'] => {
+}: ServiceCategory): CategoryAddon['translations'] => {
   const stored = translationsSchema.parse(translations ?? null);
   const labels = CATALOG_TRANSLATION_LOCALES.flatMap((locale) => {
     const label = stored?.[locale]?.service_label;
@@ -116,15 +100,10 @@ const categoryAddon = (
       }
     : null;
 
-type LineServices = {
-  service: CategoryAddon | null;
-  installation: number | null;
-};
-
 const servicesOf = async (
   scope: MedusaContainer,
   items: OfferCartLineItem[],
-): Promise<Map<string, LineServices>> => {
+): Promise<Map<string, AddonPrices>> => {
   const lines = items.flatMap((item) => {
     const { offerId, partIdentifierId } = readLine(item.metadata);
     return offerId && partIdentifierId
@@ -156,40 +135,6 @@ const servicesOf = async (
   );
 };
 
-export const refuseStockCartChange = (
-  _req: unknown,
-  _res: unknown,
-  next: (error: MedusaError) => void,
-): void =>
-  next(
-    new MedusaError(
-      MedusaError.Types.NOT_FOUND,
-      'Carts change only through /store/offer-carts',
-    ),
-  );
-
-const previewHeaderSchema = z.literal('1');
-
-const shopOpen = (): boolean => parseEnv(process.env).SHOP_OPEN;
-
-export const pricesShown = (req: Pick<MedusaRequest, 'headers'>): boolean =>
-  shopOpen() ||
-  previewHeaderSchema.safeParse(req.headers[SHOP_PREVIEW_HEADER]).success;
-
-export const refuseClosedShop = (
-  req: MedusaRequest,
-  _res: unknown,
-  next: (error?: MedusaError) => void,
-): void =>
-  pricesShown(req)
-    ? next()
-    : next(
-        new MedusaError(
-          MedusaError.Types.FORBIDDEN,
-          'The shop sells only to preview visitors while it is closed',
-        ),
-      );
-
 export const refuse = (code: CheckoutRefusal, message: string): never => {
   throw new MedusaError(MedusaError.Types.INVALID_DATA, message, code);
 };
@@ -207,29 +152,6 @@ const offersOf = async (
 
 const priceOf = (offer: LiveOffer) =>
   sellPrice(offer.cost_price, offer.supplier.markup_percentage);
-
-const stampReadiness = async (
-  scope: MedusaContainer,
-  item: OfferCartLineItem,
-  offer: LiveOffer,
-) => {
-  const readiness = readinessMetadata(
-    offer.stock_quantity > 0,
-    offer.lead_time_days,
-  );
-  const stamped = readLine(item.metadata);
-  if (
-    stamped.inStock !== readiness.in_stock ||
-    stamped.leadTimeDays !== readiness.lead_time_days
-  ) {
-    await scope
-      .resolve<ICartModuleService>(Modules.CART)
-      .updateLineItems(item.id, {
-        metadata: { ...item.metadata, ...readiness },
-      });
-  }
-  return readiness;
-};
 
 async function ensureCashAtPickupPaymentSession(
   container: MedusaContainer,
@@ -269,6 +191,21 @@ const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
   return { ...cart, items: withParentOffers(cart.items ?? []) };
 };
 
+const quotesOf = async (
+  scope: MedusaContainer,
+  items: OfferCartLineItem[],
+): Promise<Map<string, Quote>> =>
+  new Map(
+    [...(await offersOf(scope, items))].map(([id, offer]) => [
+      id,
+      {
+        unit_price: priceOf(offer),
+        stock_quantity: offer.stock_quantity,
+        lead_time_days: offer.lead_time_days,
+      },
+    ]),
+  );
+
 async function syncOfferCart(
   scope: MedusaContainer,
   cartId: string,
@@ -284,119 +221,34 @@ async function syncOfferCart(
       new Date(a.created_at ?? 0).getTime() -
         new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id),
   );
-  const live = await offersOf(scope, items);
-  const services = await servicesOf(scope, items);
-  const addonLines = new Map(
-    items.flatMap((item) =>
-      kindOf(item)
-        ? [[addonKey(parentOfferIdOf(item), kindOf(item)), item]]
-        : [],
-    ),
+  const { lines, fixes, stamps } = planCart(
+    items,
+    await quotesOf(scope, items),
+    await servicesOf(scope, items),
   );
-  const orphans = items.filter((item) => {
-    const kind = kindOf(item);
-    const parent = parentOfferIdOf(item);
-    return (
-      kind &&
-      (!parent ||
-        priceFor(services.get(parent), kind) === null ||
-        addonLines.get(addonKey(parent, kind)) !== item)
-    );
-  });
-  let repriced = changed;
-  if (orphans.length) {
+  if (fixes.remove.length) {
     await deleteLineItemsWorkflow(scope).run({
-      input: { cart_id: cartId, ids: orphans.map(({ id }) => id) },
-    });
-    repriced = true;
-  }
-  const lines: OfferCart['items'] = [];
-  for (const item of items) {
-    const offerId = offerIdOf(item);
-    if (!offerId || kindOf(item)) {
-      continue;
-    }
-    const offer = live.get(offerId);
-    let unitPrice = Number(item.unit_price);
-    if (offer && !MathBN.eq(priceOf(offer), unitPrice)) {
-      unitPrice = priceOf(offer);
-      await updateLineItemInCartWorkflow(scope).run({
-        input: {
-          cart_id: cartId,
-          item_id: item.id,
-          update: { unit_price: unitPrice },
-        },
-      });
-      repriced = true;
-    }
-    const quantity = Number(item.quantity);
-    const readiness = offer
-      ? await stampReadiness(scope, item, offer)
-      : { in_stock: false, lead_time_days: 0 };
-    const lineServices = services.get(offerId);
-    const service = lineServices?.service ?? null;
-    const installation = lineServices?.installation ?? null;
-    const added = (kind: AddonKind) =>
-      priceFor(lineServices, kind) === null
-        ? undefined
-        : addonLines.get(addonKey(offerId, kind));
-    for (const kind of ['service', INSTALLATION] as const) {
-      const addonLine = added(kind);
-      const price = priceFor(lineServices, kind);
-      if (
-        addonLine &&
-        price !== null &&
-        (!MathBN.eq(price, addonLine.unit_price) ||
-          Number(addonLine.quantity) !== quantity)
-      ) {
-        await updateLineItemInCartWorkflow(scope).run({
-          input: {
-            cart_id: cartId,
-            item_id: addonLine.id,
-            update: { unit_price: price, quantity },
-          },
-        });
-        repriced = true;
-      }
-    }
-    lines.push({
-      id: item.id,
-      offer_id: offerId,
-      quantity,
-      unit_price: unitPrice,
-      available: !!offer && orderCap(offer) >= quantity,
-      max_quantity: offer ? orderCap(offer) : 0,
-      ...readiness,
-      addon: service
-        ? { item_id: added('service')?.id ?? null, ...service }
-        : null,
-      installation:
-        installation === null
-          ? null
-          : {
-              item_id: added(INSTALLATION)?.id ?? null,
-              unit_price: installation,
-            },
-      part: listedPartOf(item.metadata, item.title),
+      input: { cart_id: cartId, ids: fixes.remove },
     });
   }
-  if (repriced && items.length) {
+  for (const { itemId, update } of fixes.update) {
+    await updateLineItemInCartWorkflow(scope).run({
+      input: { cart_id: cartId, item_id: itemId, update },
+    });
+  }
+  for (const { itemId, metadata } of stamps) {
+    await scope
+      .resolve<ICartModuleService>(Modules.CART)
+      .updateLineItems(itemId, { metadata });
+  }
+  if ((changed || fixes.remove.length || fixes.update.length) && items.length) {
     await ensureCashAtPickupPaymentSession(scope, cartId);
   }
   return {
     id: cart.id,
     completed: false,
     currency,
-    total: lines.reduce(
-      (sum, line) =>
-        sum +
-        line.unit_price * line.quantity +
-        (line.addon?.item_id ? line.addon.unit_price * line.quantity : 0) +
-        (line.installation?.item_id
-          ? line.installation.unit_price * line.quantity
-          : 0),
-      0,
-    ),
+    total: cartTotals(lines).total,
     items: lines,
   };
 }
@@ -503,7 +355,7 @@ export const addLineAddon = locked(
           items: [
             {
               title:
-                kind === INSTALLATION
+                kind === 'installation'
                   ? PARTS_ORDER_COPY.installation
                   : lineServices!.service!.label,
               quantity: Number(line.quantity),
@@ -667,7 +519,7 @@ export const setOfferQuantity = locked(
   },
 );
 
-const REFUSAL_MESSAGES: Record<JudgedRefusal, string> = {
+const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
   OFFER_MISSING: 'A line in the cart has no offer that can be sold now.',
   OFFER_OUT_OF_STOCK: 'The supplier no longer has enough of a line in stock.',
   OFFER_PRICE_CHANGED:
@@ -683,38 +535,16 @@ export async function refuseCheckout(
   }
   const items = (cart.items ?? []) as OfferCartLineItem[];
   const offerItems = items.filter((item) => !kindOf(item));
-  const live = await offersOf(scope, offerItems);
-  const quotes = new Map(
-    [...live].map(([id, offer]) => [
-      id,
-      {
-        unit_price: priceOf(offer),
-        stock_quantity: offer.stock_quantity,
-        lead_time_days: offer.lead_time_days,
-      },
-    ]),
+  const refusal = checkoutRefusal(
+    planCart(
+      items,
+      await quotesOf(scope, offerItems),
+      await servicesOf(scope, offerItems),
+    ),
   );
-  const verdict = judgeCheckout(
-    items,
-    quotes,
-    await servicesOf(scope, offerItems),
-  );
-  if ('refusal' in verdict) {
-    refuse(verdict.refusal, REFUSAL_MESSAGES[verdict.refusal]);
+  if (refusal) {
+    refuse(refusal, REFUSAL_MESSAGES[refusal]);
   }
-}
-
-async function carFor(
-  scope: MedusaContainer,
-  typed: string | undefined,
-): Promise<string | null> {
-  const vin = vinSchema.safeParse(typed);
-  if (!vin.success) return null;
-  const lookup = await resolveVin(vin.data, vinDecoders(scope), {
-    catalog: scope.resolve(CATALOG_MODULE),
-    vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
-  });
-  return lookup.resolved ? carLabel(lookup.vehicle) : null;
 }
 
 export const checkout = locked(
