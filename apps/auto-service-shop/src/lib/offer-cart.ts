@@ -412,37 +412,48 @@ const openCart = async (scope: MedusaContainer, cartId: string) => {
   return cart;
 };
 
-export async function removeOfferLine(
-  scope: MedusaContainer,
-  cartId: string,
-  itemId: string,
-): Promise<OfferCart> {
-  const cart = await openCart(scope, cartId);
-  const items = cart.items ?? [];
-  const line = items.find((item) => item.id === itemId);
-  if (!line) {
-    throw new MedusaError(
-      MedusaError.Types.NOT_FOUND,
-      `Cart ${cartId} has no line ${itemId}`,
-    );
-  }
-  const offerId = offerIdOf(line);
-  await deleteLineItemsWorkflow(scope).run({
-    input: {
-      cart_id: cartId,
-      ids: [
-        itemId,
-        ...items
-          .filter(
-            (item) =>
-              offerId && kindOf(item) && parentOfferIdOf(item) === offerId,
-          )
-          .map(({ id }) => id),
-      ],
-    },
-  });
-  return syncOfferCart(scope, cartId, true);
-}
+const CART_LOCK_TIMEOUT_SECONDS = 30;
+
+const locked =
+  <Args extends unknown[], T>(
+    job: (scope: MedusaContainer, cartId: string, ...args: Args) => Promise<T>,
+  ) =>
+  (scope: MedusaContainer, cartId: string, ...args: Args): Promise<T> =>
+    scope
+      .resolve<ILockingModule>(Modules.LOCKING)
+      .execute(`offer-cart:${cartId}`, () => job(scope, cartId, ...args), {
+        timeout: CART_LOCK_TIMEOUT_SECONDS,
+      });
+
+export const removeOfferLine = locked(
+  async (scope, cartId, itemId: string): Promise<OfferCart> => {
+    const cart = await openCart(scope, cartId);
+    const items = cart.items ?? [];
+    const line = items.find((item) => item.id === itemId);
+    if (!line) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_FOUND,
+        `Cart ${cartId} has no line ${itemId}`,
+      );
+    }
+    const offerId = offerIdOf(line);
+    await deleteLineItemsWorkflow(scope).run({
+      input: {
+        cart_id: cartId,
+        ids: [
+          itemId,
+          ...items
+            .filter(
+              (item) =>
+                offerId && kindOf(item) && parentOfferIdOf(item) === offerId,
+            )
+            .map(({ id }) => id),
+        ],
+      },
+    });
+    return syncOfferCart(scope, cartId, true);
+  },
+);
 
 const offerLine = async (
   scope: MedusaContainer,
@@ -468,58 +479,62 @@ const offerLine = async (
   };
 };
 
-export async function addLineAddon(
-  scope: MedusaContainer,
-  cartId: string,
-  itemId: string,
-  kind: AddonKind = 'service',
-): Promise<OfferCart> {
-  const { line, addonLines } = await offerLine(scope, cartId, itemId, kind);
-  const offerId = offerIdOf(line)!;
-  const lineServices = (await servicesOf(scope, [line])).get(offerId);
-  const price = priceFor(lineServices, kind);
-  if (price === null) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      `Line ${itemId} has no ${kind} add-on`,
-    );
-  }
-  if (!addonLines.length) {
-    await addToCartWorkflow(scope).run({
-      input: {
-        cart_id: cartId,
-        items: [
-          {
-            title:
-              kind === INSTALLATION
-                ? PARTS_ORDER_COPY.installation
-                : lineServices!.service!.label,
-            quantity: Number(line.quantity),
-            unit_price: price,
-            requires_shipping: false,
-            metadata: addonLineMetadata({ lineId: line.id, offerId }, kind),
-          },
-        ],
-      },
-    });
-  }
-  return syncOfferCart(scope, cartId, true);
-}
+export const addLineAddon = locked(
+  async (
+    scope,
+    cartId,
+    itemId: string,
+    kind: AddonKind = 'service',
+  ): Promise<OfferCart> => {
+    const { line, addonLines } = await offerLine(scope, cartId, itemId, kind);
+    const offerId = offerIdOf(line)!;
+    const lineServices = (await servicesOf(scope, [line])).get(offerId);
+    const price = priceFor(lineServices, kind);
+    if (price === null) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Line ${itemId} has no ${kind} add-on`,
+      );
+    }
+    if (!addonLines.length) {
+      await addToCartWorkflow(scope).run({
+        input: {
+          cart_id: cartId,
+          items: [
+            {
+              title:
+                kind === INSTALLATION
+                  ? PARTS_ORDER_COPY.installation
+                  : lineServices!.service!.label,
+              quantity: Number(line.quantity),
+              unit_price: price,
+              requires_shipping: false,
+              metadata: addonLineMetadata({ lineId: line.id, offerId }, kind),
+            },
+          ],
+        },
+      });
+    }
+    return syncOfferCart(scope, cartId, true);
+  },
+);
 
-export async function removeLineAddon(
-  scope: MedusaContainer,
-  cartId: string,
-  itemId: string,
-  kind: AddonKind = 'service',
-): Promise<OfferCart> {
-  const { addonLines } = await offerLine(scope, cartId, itemId, kind);
-  if (addonLines.length) {
-    await deleteLineItemsWorkflow(scope).run({
-      input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
-    });
-  }
-  return syncOfferCart(scope, cartId, true);
-}
+export const removeLineAddon = locked(
+  async (
+    scope,
+    cartId,
+    itemId: string,
+    kind: AddonKind = 'service',
+  ): Promise<OfferCart> => {
+    const { addonLines } = await offerLine(scope, cartId, itemId, kind);
+    if (addonLines.length) {
+      await deleteLineItemsWorkflow(scope).run({
+        input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
+      });
+    }
+    return syncOfferCart(scope, cartId, true);
+  },
+);
 
 async function sellableOffer(
   scope: MedusaContainer,
@@ -535,8 +550,6 @@ async function sellableOffer(
   }
   return offer;
 }
-
-const ADD_LOCK_TIMEOUT_SECONDS = 30;
 
 async function putOffer(
   scope: MedusaContainer,
@@ -585,21 +598,17 @@ async function putOffer(
   });
 }
 
-export async function addOffer(
-  scope: MedusaContainer,
-  cartId: string,
-  offerId: string,
-  quantity: number,
-): Promise<OfferCart> {
-  return scope.resolve<ILockingModule>(Modules.LOCKING).execute(
-    `offer-cart:${cartId}`,
-    async () => {
-      await putOffer(scope, cartId, offerId, quantity);
-      return syncOfferCart(scope, cartId, true);
-    },
-    { timeout: ADD_LOCK_TIMEOUT_SECONDS },
-  );
-}
+export const addOffer = locked(
+  async (
+    scope,
+    cartId,
+    offerId: string,
+    quantity: number,
+  ): Promise<OfferCart> => {
+    await putOffer(scope, cartId, offerId, quantity);
+    return syncOfferCart(scope, cartId, true);
+  },
+);
 
 export async function createOfferCart(
   scope: MedusaContainer,
@@ -621,36 +630,37 @@ export async function createOfferCart(
   return syncOfferCart(scope, result.id, Boolean(offer_id));
 }
 
-export const readOfferCart = (
-  scope: MedusaContainer,
-  cartId: string,
-): Promise<OfferCart> => syncOfferCart(scope, cartId);
+export const readOfferCart = locked((scope, cartId) =>
+  syncOfferCart(scope, cartId),
+);
 
-export async function setOfferQuantity(
-  scope: MedusaContainer,
-  cartId: string,
-  itemId: string,
-  quantity: number,
-): Promise<OfferCart> {
-  const cart = await retrieveCart(scope, cartId);
-  const line = (cart.items ?? []).find((item) => item.id === itemId);
-  const offerId = line && offerIdOf(line);
-  if (cart.completed_at || !line || !offerId) {
-    throw new MedusaError(
-      MedusaError.Types.NOT_FOUND,
-      `Cart ${cartId} has no line ${itemId}`,
-    );
-  }
-  const offer = await sellableOffer(scope, offerId, quantity);
-  await updateLineItemInCartWorkflow(scope).run({
-    input: {
-      cart_id: cartId,
-      item_id: itemId,
-      update: { quantity, unit_price: priceOf(offer) },
-    },
-  });
-  return syncOfferCart(scope, cartId, true);
-}
+export const setOfferQuantity = locked(
+  async (
+    scope,
+    cartId,
+    itemId: string,
+    quantity: number,
+  ): Promise<OfferCart> => {
+    const cart = await retrieveCart(scope, cartId);
+    const line = (cart.items ?? []).find((item) => item.id === itemId);
+    const offerId = line && offerIdOf(line);
+    if (cart.completed_at || !line || !offerId) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_FOUND,
+        `Cart ${cartId} has no line ${itemId}`,
+      );
+    }
+    const offer = await sellableOffer(scope, offerId, quantity);
+    await updateLineItemInCartWorkflow(scope).run({
+      input: {
+        cart_id: cartId,
+        item_id: itemId,
+        update: { quantity, unit_price: priceOf(offer) },
+      },
+    });
+    return syncOfferCart(scope, cartId, true);
+  },
+);
 
 const REFUSAL_MESSAGES: Record<JudgedRefusal, string> = {
   OFFER_MISSING: 'A line in the cart has no offer that can be sold now.',
@@ -702,40 +712,44 @@ async function carFor(
   return lookup.resolved ? carLabel(lookup.vehicle) : null;
 }
 
-export async function checkout(
-  scope: MedusaContainer,
-  cartId: string,
-  {
-    contact,
-    fingerprint,
-  }: { contact: z.output<typeof checkoutContactSchema>; fingerprint: string },
-): Promise<{ id: string; display_id: number }> {
-  const cart = await retrieveCart(scope, cartId);
-  const current = cartFingerprint(
-    (cart.items ?? []).map((item) => ({
-      id: item.id,
-      quantity: Number(item.quantity),
-      unit_price: Number(item.unit_price),
-    })),
-  );
-  if (fingerprint !== current) {
-    refuse('CART_CHANGED', 'The cart changed since it was shown.');
-  }
-  if (!cart.completed_at) {
-    const car = await carFor(scope, contact.vin);
-    await scope
-      .resolve<ICartModuleService>(Modules.CART)
-      .updateCarts(cartId, { metadata: { ...cart.metadata, ...contact, car } });
-  }
-  const { result } = await completeCartWorkflow(scope).run({
-    input: { id: cartId },
-  });
-  const {
-    data: [order],
-  } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: 'order',
-    filters: { id: result.id },
-    fields: ['id', 'display_id'],
-  });
-  return { id: order.id, display_id: Number(order.display_id) };
-}
+export const checkout = locked(
+  async (
+    scope,
+    cartId,
+    {
+      contact,
+      fingerprint,
+    }: { contact: z.output<typeof checkoutContactSchema>; fingerprint: string },
+  ): Promise<{ id: string; display_id: number }> => {
+    const cart = await retrieveCart(scope, cartId);
+    const current = cartFingerprint(
+      (cart.items ?? []).map((item) => ({
+        id: item.id,
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+      })),
+    );
+    if (fingerprint !== current) {
+      refuse('CART_CHANGED', 'The cart changed since it was shown.');
+    }
+    if (!cart.completed_at) {
+      const car = await carFor(scope, contact.vin);
+      await scope
+        .resolve<ICartModuleService>(Modules.CART)
+        .updateCarts(cartId, {
+          metadata: { ...cart.metadata, ...contact, car },
+        });
+    }
+    const { result } = await completeCartWorkflow(scope).run({
+      input: { id: cartId },
+    });
+    const {
+      data: [order],
+    } = await scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: 'order',
+      filters: { id: result.id },
+      fields: ['id', 'display_id'],
+    });
+    return { id: order.id, display_id: Number(order.display_id) };
+  },
+);

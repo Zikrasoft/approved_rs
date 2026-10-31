@@ -539,6 +539,29 @@ medusaIntegrationTestRunner({
         ).toBe(true);
       });
 
+      it('never orders a line added while the checkout runs', async () => {
+        for (let run = 0; run < 3; run += 1) {
+          const cart = await cartWith(1);
+
+          const [placed] = await Promise.all([
+            complete(cart),
+            post(`/store/offer-carts/${cart.id}/items`, {
+              offer_id: warehouseOfferId,
+              quantity: 1,
+            }),
+          ]);
+
+          if (placed.status === 200) {
+            const order = await getContainer()
+              .resolve(Modules.ORDER)
+              .retrieveOrder(placed.data.order.id, { relations: ['items'] });
+            expect(order.items).toHaveLength(1);
+          } else {
+            expect(placed.data.code).toBe('CART_CHANGED');
+          }
+        }
+      });
+
       it('refuses checkout without the fingerprint of the cart the visitor saw', async () => {
         const cart = await cartWith(1);
 
