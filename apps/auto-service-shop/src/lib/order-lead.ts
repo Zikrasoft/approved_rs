@@ -113,6 +113,7 @@ export class LeadRouteRefusal extends Error {
   }
 }
 
+// TODO: drop the origin header and redirect: 'manual' with the /api/leads fallback below; only that form route needs them, for Astro's origin check and its redirect to /thanks/.
 const post = (url: string | URL, body: BodyInit, secret: string) =>
   fetch(url, {
     method: 'POST',

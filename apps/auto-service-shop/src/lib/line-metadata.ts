@@ -46,6 +46,7 @@ const lineSchema = z
     partIdentifierId: line.part_identifier_id,
     parentOfferId: line.addon_offer_id,
     parentLineId: line.addon_for,
+    // TODO: drop the 'service' fallback once no cart or order line carries an add-on without addon_kind, that is once a migration stamps it on the lines written before it.
     addonKind:
       line.addon_kind ??
       (line.addon_offer_id || line.addon_for ? ('service' as const) : null),
@@ -92,6 +93,7 @@ export const addonLineMetadata = (
   addon_kind: kind,
 });
 
+// TODO: drop once no cart line names its parent by addon_for alone, that is once the carts written before addon_offer_id are completed or deleted.
 export const withParentOffers = <T extends { id: string; metadata?: Metadata }>(
   items: T[],
 ): T[] =>
