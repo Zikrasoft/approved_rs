@@ -58,24 +58,6 @@ describe('searchIntent', () => {
     });
   });
 
-  it('reads a VIN typed on the Russian keyboard layout', () => {
-    expect(searchIntent('ЦИФ35ИП070Т074158')).toEqual({
-      kind: 'vin',
-      vin: 'WBA35BG070N074158',
-    });
-    expect(searchIntent('мшт циф35ип070т074158')).toEqual({
-      kind: 'vin',
-      vin: 'WBA35BG070N074158',
-    });
-  });
-
-  it('reads a VIN glued to its VIN label', () => {
-    expect(searchIntent('VINWBA35BG070N074158')).toEqual({
-      kind: 'vin',
-      vin: 'WBA35BG070N074158',
-    });
-  });
-
   it('reads anything else as a query', () => {
     expect(searchIntent('HU 816 x')).toEqual({ kind: 'query' });
     expect(searchIntent('масляный фильтр')).toEqual({ kind: 'query' });

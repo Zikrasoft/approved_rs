@@ -1,4 +1,4 @@
-import { queryVin } from '@/utils/queryVin';
+import { vinOf } from '@podbor/lead-crm/vin';
 import { GOALS, reachGoal } from '@podbor/site-kit/browser';
 
 export const SUGGEST_DELAY_MS = 200;
@@ -143,7 +143,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
                   {
                     href: `${form.getAttribute('action')}?${new URLSearchParams({ q })}`,
                     label: this.dataset.vinLabel ?? '',
-                    detail: queryVin(q) ?? q,
+                    detail: vinOf(q) ?? q,
                   },
                   'vin',
                   0,
@@ -264,7 +264,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
         });
         form.addEventListener('submit', () => {
           reachGoal(GOALS.search, {
-            kind: queryVin(input.value) ? 'vin' : 'query',
+            kind: vinOf(input.value) ? 'vin' : 'query',
           });
         });
 
