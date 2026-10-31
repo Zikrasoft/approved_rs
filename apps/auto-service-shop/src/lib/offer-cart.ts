@@ -61,15 +61,13 @@ import { liveOffers, sellingOffers } from './suppliers/live-quote';
 import { storeOffers } from '../modules/supplier/pricing';
 import { carFor } from './vin/car-for';
 
-type OfferCartLineItem = CartItem;
-
-const offerIdOf = (item: OfferCartLineItem) =>
+const offerIdOf = (item: CartItem) =>
   readLine(item.metadata).offerId ?? undefined;
 
-const parentOfferIdOf = (item: OfferCartLineItem) =>
+const parentOfferIdOf = (item: CartItem) =>
   readLine(item.metadata).parentOfferId;
 
-const kindOf = (item: OfferCartLineItem) => readLine(item.metadata).addonKind;
+const kindOf = (item: CartItem) => readLine(item.metadata).addonKind;
 
 type CategoryAddon = NonNullable<AddonPrices['service']>;
 
@@ -103,7 +101,7 @@ const categoryAddon = (
 
 const servicesOf = async (
   scope: MedusaContainer,
-  items: OfferCartLineItem[],
+  items: CartItem[],
 ): Promise<Map<string, AddonPrices>> => {
   const lines = items.flatMap((item) => {
     const { offerId, partIdentifierId } = readLine(item.metadata);
@@ -142,7 +140,7 @@ export const refuse = (code: CheckoutRefusal, message: string): never => {
 
 const quotesOf = async (
   scope: MedusaContainer,
-  items: OfferCartLineItem[],
+  items: CartItem[],
 ): Promise<Map<string, Quote>> => {
   const ids = items.map(offerIdOf).filter((id) => id !== undefined);
   const offers = ids.length ? await sellingOffers(scope, { id: ids }) : [];
@@ -187,7 +185,7 @@ const retrieveCart = async (scope: MedusaContainer, cartId: string) => {
   return { ...cart, items: withParentOffers(cart.items ?? []) };
 };
 
-const planOf = async (scope: MedusaContainer, items: OfferCartLineItem[]) => {
+const planOf = async (scope: MedusaContainer, items: CartItem[]) => {
   const offerItems = items.filter((item) => !kindOf(item));
   return planCart(
     items,
@@ -526,7 +524,7 @@ const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
 
 async function judgedPlan(
   scope: MedusaContainer,
-  items: OfferCartLineItem[],
+  items: CartItem[],
 ): Promise<CartPlan> {
   const plan = await planOf(scope, items);
   const refusal = checkoutRefusal(plan);
@@ -550,7 +548,7 @@ export async function refuseCheckout(
     refuse('CONTACT_MISSING', 'The order has no contact.');
   }
   if (judgedCarts.has(cart.id)) return;
-  await judgedPlan(scope, (cart.items ?? []) as OfferCartLineItem[]);
+  await judgedPlan(scope, (cart.items ?? []) as CartItem[]);
 }
 
 export const checkout = locked(

@@ -30,7 +30,7 @@ import { useConfirmed } from '../../lib/confirm';
 import {
   labelledVehicleSchema,
   type TFunction,
-  vehicleLabel,
+  vehicleSpecLabel,
 } from '../../lib/vehicle-label';
 
 const SHOWN_VEHICLES = 100;
@@ -149,7 +149,10 @@ const LinkDrawer = ({
 
   const labelled = (found?.vehicles ?? [])
     .filter(({ model }) => model.chassis.series.make.slug === entry?.make)
-    .map((vehicle) => ({ id: vehicle.id, label: vehicleLabel(t, vehicle) }));
+    .map((vehicle) => ({
+      id: vehicle.id,
+      label: vehicleSpecLabel(t, vehicle),
+    }));
   const matching = [
     ...[...chosen]
       .filter(([id]) => !labelled.some((vehicle) => vehicle.id === id))

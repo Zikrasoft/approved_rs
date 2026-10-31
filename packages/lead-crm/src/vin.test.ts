@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { VIN_PATTERN, vinOf, vinText } from './vin.ts';
+import { VIN_PATTERN, vinOf, vinText, vinWhileTyping } from './vin.ts';
 
 describe('VIN patterns', () => {
   it('accepts seventeen VIN characters and refuses I, O and Q', () => {
@@ -69,5 +69,11 @@ describe('vinOf', () => {
 describe('vinText', () => {
   it('spells typed text the way a VIN is read, whether or not it is one', () => {
     expect(vinText('vin: wва 35вg-07.0n0741')).toBe('WBA35BG070N0741');
+  });
+});
+
+describe('vinWhileTyping', () => {
+  it('drops separators and capitalises, but leaves the prefix and Cyrillic to the blur', () => {
+    expect(vinWhileTyping('vin wва-35')).toBe('VINWВА35');
   });
 });

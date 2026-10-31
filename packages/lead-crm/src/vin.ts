@@ -28,8 +28,11 @@ const latinText = (text: string): string =>
     .replace(/[АВЕКМНОРСТУХ]/g, (letter) => LATIN_LOOKALIKES[letter]!)
     .replace(/^\s*VIN\b\W*/, '');
 
+export const vinWhileTyping = (text: string): string =>
+  text.replace(/[\s.-]+/g, '').toUpperCase();
+
 export const vinText = (text: string): string =>
-  latinText(text).replace(/[\s.-]+/g, '');
+  vinWhileTyping(latinText(text));
 
 export const vinOf = (text: string): string | null => {
   const words = latinText(text)
