@@ -57,7 +57,8 @@ import {
   withParentOffers,
   readLine,
 } from './line-metadata';
-import { sellingOffers } from './suppliers/live-quote';
+import { liveOffers, sellingOffers } from './suppliers/live-quote';
+import { storeOffers } from '../modules/supplier/pricing';
 import { carFor } from './vin/car-for';
 
 type OfferCartLineItem = CartItem;
@@ -385,14 +386,19 @@ async function sellableOffer(
   offerId: string,
   quantity: number,
 ) {
-  const [offer] = await sellingOffers(scope, { id: [offerId] });
-  if (!offer) {
+  const [row] = await liveOffers(scope, { id: [offerId] });
+  const [offer] = row ? storeOffers([row]) : [];
+  if (!row || !offer) {
     return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
   }
   if (orderCap(offer) < quantity) {
     return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
   }
-  return offer;
+  return {
+    ...offer,
+    part_identifier_id: row.part_identifier_id,
+    supplierName: row.supplier.name,
+  };
 }
 
 async function putOffer(
@@ -439,7 +445,7 @@ async function putOffer(
             offer.id,
             identifier.id,
             part,
-            offer.supplier.name,
+            offer.supplierName,
           ),
         },
       ],
