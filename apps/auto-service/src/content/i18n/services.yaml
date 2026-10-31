@@ -232,6 +232,7 @@ translations:
     indexMetaTitle: 'Auto servis u Beogradu: popravke i održavanje | CarLab'
     indexMetaDescription: Dijagnostika, mali servis, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine i delovi po VIN-u. Cene i rokovi.
     indexEyebrow: Usluge
+    partsLink: Pronađite delove za ovu popravku
     indexHeading: Sve što vašem automobilu treba, u jednom servisu
     indexLead: 'Za svaku uslugu postoji posebna stranica: šta obuhvata, koliko traje, koji znaci govore da je vreme za servis i kada vam iskreno kažemo da intervencija nije potrebna.'
     specsPriceLabel: Cena
@@ -461,6 +462,7 @@ translations:
     indexMetaTitle: Car repairs and servicing in Belgrade | CarLab
     indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine and gearbox repairs, accident repairs, pre-purchase checks and VIN parts matching. Costs and times.
     indexEyebrow: Services
+    partsLink: Find parts for this job
     indexHeading: Everything your car needs, under one roof
     indexLead: Each service has its own page explaining what's included, how long it takes, the signs it's time to visit and when we'll honestly tell you no work is needed.
     specsPriceLabel: Price
@@ -686,4 +688,4 @@ translations:
         - You want to compare prices for genuine and aftermarket parts
       honestHeading: What we can't promise
       honest: Not every part is readily available or inexpensive. If a part is rare or needs to be specially ordered, we'll confirm the price and lead time before you buy. If there's no suitable aftermarket alternative, we won't offer you something that won't fit.
-translatedFrom: 38b4a5969fed77ac
+translatedFrom: bb2c8dbe737f3877

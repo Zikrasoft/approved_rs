@@ -61,7 +61,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 51fe8e1507248588
+translatedFrom: d128f27c6c02ce0d
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -88,14 +88,21 @@ translations:
     orderBody: 'Prodavnica je nova i sarađujemo direktno sa najboljim dobavljačima kako bismo ponudili povoljne cene. Ovaj deo je verovatno dostupan, ali moramo da proverimo stanje. Ostavite kontakt: nabavićemo ga za vas ili ponuditi zamenu.'
     offersHeading: Cena i dostupnost
     moreOffers: Ostale ponude ({count})
+    moreOffersCheaper: Ostale ponude ({count}), povoljnije od {price}
     leadTime:
       inStock: Na stanju
-      tomorrow: sutra
+      inStockTomorrow: Na stanju, preuzimanje sutra
+      inStockDays:
+        one: Na stanju, preuzimanje za {days} dan
+        few: Na stanju, preuzimanje za {days} dana
+        many: Na stanju, preuzimanje za {days} dana
+        other: Na stanju, preuzimanje za {days} dana
+      tomorrow: Preuzimanje sutra
       days:
-        one: za {days} dan
-        few: za {days} dana
-        many: za {days} dana
-        other: za {days} dana
+        one: Preuzimanje za {days} dan
+        few: Preuzimanje za {days} dana
+        many: Preuzimanje za {days} dana
+        other: Preuzimanje za {days} dana
     buyButtonLabel: U korpu
     addedLabel: U korpi
     outOfStock: Nema na stanju
@@ -145,14 +152,21 @@ translations:
     orderBody: Our shop is new, and we work directly with leading suppliers to keep prices competitive. This part is likely available, but we need to check stock. Leave your contact details and we'll source it for you or suggest an equivalent.
     offersHeading: Price and availability
     moreOffers: More offers ({count})
+    moreOffersCheaper: Other offers ({count}), from {price}
     leadTime:
       inStock: In stock
-      tomorrow: tomorrow
+      inStockTomorrow: In stock, collect tomorrow
+      inStockDays:
+        one: In stock, collect in {days} day
+        few: In stock, collect in {days} days
+        many: In stock, collect in {days} days
+        other: In stock, collect in {days} days
+      tomorrow: Collect tomorrow
       days:
-        one: in {days} day
-        few: in {days} days
-        many: in {days} days
-        other: in {days} days
+        one: Collect in {days} day
+        few: Collect in {days} days
+        many: Collect in {days} days
+        other: Collect in {days} days
     buyButtonLabel: Add to basket
     addedLabel: In basket
     outOfStock: Out of stock

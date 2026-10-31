@@ -67,7 +67,7 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: 060ead52657eb358
+translatedFrom: 12e67d2cab7d3c0f
 translations:
   sr:
     metaTitle: Korpa, CarLab
@@ -124,11 +124,13 @@ translations:
       repriced: Cena se promenila od vaše poslednje posete. Proverite iznos pre slanja porudžbine.
       offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
       stockLimit: Nema više komada ovog dela na stanju. U korpi je već cela dostupna količina.
+      orderLimit: Dostigli ste maksimalnu količinu za ovaj deo po porudžbini. Ako vam treba više, pišite nam, naručićemo posebno.
       moved: Stavka je prebačena u upit. Pošaljite ga i javićemo vam cenu i rok isporuke.
       movedCta: Otvori upit
     orderedHeading: Porudžbina je primljena
     orderedBody: Naš saradnik će proveriti dostupnost, a zatim vam poslati poruku ili vas pozvati da potvrdi porudžbinu i termin preuzimanja. Plaćanje gotovinom pri preuzimanju.
     orderNumberTemplate: 'Broj porudžbine: {number}'
+    orderedNext: Potvrdićemo dostupnost i vreme preuzimanja, obično u roku od sat vremena tokom radnog vremena.
     orderedCta: Nazad na katalog
     receiptQuantityTemplate: '{count} kom.'
     stickyCta: Nastavi na poručivanje
@@ -136,6 +138,7 @@ translations:
     fallbackBody: Korpa je sačuvana. Pokušajte da je ponovo otvorite za minut ili pošaljite upit za delove, pa ćemo vam javiti cenu i rok isporuke.
     fallbackRetry: Pokušaj ponovo
     fallbackCta: Pošalji upit
+    noscriptBody: Korpa radi samo kada je JavaScript uključen. Pošaljite upit, pa ćemo vam javiti cenu i rok isporuke.
   en:
     metaTitle: Your cart, CarLab
     metaDescription: Parts you've selected from the CarLab catalogue. Pay cash on collection at our workshop in Belgrade.
@@ -191,11 +194,13 @@ translations:
       repriced: A price has changed since your last visit. Check the total before placing your order.
       offline: The shop didn't respond. Your cart hasn't changed. Please try again in a minute.
       stockLimit: There are no more of this part available right now. Your cart already contains all available stock.
+      orderLimit: You've reached the limit for this part in a single order. If you need more, message us and we'll arrange a separate order.
       moved: Item moved to your parts enquiry. Send it and we'll confirm the price and lead time.
       movedCta: Open parts enquiry
     orderedHeading: Order received
     orderedBody: Our team will check availability, then message or call you to confirm your order and collection time. Pay cash on collection.
     orderNumberTemplate: 'Order number: {number}'
+    orderedNext: We'll confirm availability and when you can collect, usually within an hour during business hours.
     orderedCta: Back to catalogue
     receiptQuantityTemplate: 'Qty: {count}'
     stickyCta: Checkout
@@ -203,3 +208,4 @@ translations:
     fallbackBody: Your cart has been saved. Try opening it again in a minute, or send the parts as an enquiry and we'll confirm the price and lead time.
     fallbackRetry: Try again
     fallbackCta: Move to parts enquiry
+    noscriptBody: The cart requires JavaScript. Send us a parts inquiry and we'll get back to you with a price and lead time.
