@@ -102,12 +102,15 @@ describe('orderLeadPayload', () => {
       metadata: { in_stock: true, lead_time_days: 0, supplier },
     });
     const comment = summaryOf(
-      order({ items: [line('Intercars'), line('Autodelovi')] }),
+      order({
+        items: [line('Intercars'), line('Autodelovi'), line('manual')],
+      }),
     );
 
-    expect(comment.split('\n').slice(3, 5)).toEqual([
+    expect(comment.split('\n').slice(3, 6)).toEqual([
       'Pads × 1: 100 RSD, в наличии, Intercars',
       'Pads × 1: 100 RSD, в наличии, Autodelovi',
+      'Pads × 1: 100 RSD, в наличии, ручное предложение',
     ]);
   });
 
