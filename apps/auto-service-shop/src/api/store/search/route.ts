@@ -61,11 +61,13 @@ import {
 import type { StoreSearchPartsType } from '../validators';
 
 const FACETS_FIELD = 'facets';
+const UNIVERSAL_FACETS_FIELD = 'universal_facets';
 const PRICE_FIELD = 'price';
 const MEASURES_FIELD = 'measures';
 const FACET_VALUE_LIMIT = 500;
 const FACET_REQUESTS = [
   { field: FACETS_FIELD, limit: FACET_VALUE_LIMIT },
+  { field: UNIVERSAL_FACETS_FIELD, limit: FACET_VALUE_LIMIT },
   { field: PRICE_FIELD, type: 'stats' as const },
 ];
 
@@ -137,7 +139,9 @@ type KeyFilter = (key: string) => boolean;
 type SearchFacets = Record<string, unknown> | undefined;
 
 const counted = (facets: SearchFacets): Counted => ({
-  values: facetCountsSchema.parse(facets?.[FACETS_FIELD])?.values ?? [],
+  values: [FACETS_FIELD, UNIVERSAL_FACETS_FIELD].flatMap(
+    (field) => facetCountsSchema.parse(facets?.[field])?.values ?? [],
+  ),
   price: priceStatsSchema.parse(facets?.[PRICE_FIELD]),
 });
 
@@ -241,7 +245,9 @@ export async function GET(
   }
   const locale = parsedLocale.data;
   const shown = pricesShown(req);
-  const facetRequests = shown ? FACET_REQUESTS : FACET_REQUESTS.slice(0, 1);
+  const facetRequests = FACET_REQUESTS.filter(
+    ({ field }) => shown || field !== PRICE_FIELD,
+  );
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const [found] = category
@@ -415,7 +421,11 @@ export async function GET(
       ...scope,
       ...[...groups]
         .filter(([key]) => applied(key))
-        .map(([, values]) => ({ [FACETS_FIELD]: { $in: values } })),
+        .map(([key, values]) => ({
+          [isUniversal(key) ? UNIVERSAL_FACETS_FIELD : FACETS_FIELD]: {
+            $in: values,
+          },
+        })),
       ...range.filter(({ key }) => applied(key)).map(rangeSearchFilter),
     ],
   });

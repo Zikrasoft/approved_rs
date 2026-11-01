@@ -136,6 +136,9 @@ const listed = (
   return !retired && !succeeded;
 };
 
+const facetValues = () =>
+  search.keyword().array().facetable().filterable().retrievable(false);
+
 const STANDING = { superseded: 0, unbuyable: 1, buyable: 2 } as const;
 
 const toDocument = (
@@ -168,11 +171,11 @@ const toDocument = (
           ...names('category', row.part.category),
         }
       : {}),
-    facets: [
+    universal_facets: [
       facetFilter(BRAND_FACET, row.brand.slug),
       ...(best?.stock_quantity ? [facetFilter(IN_STOCK_FACET, IN_STOCK)] : []),
-      ...facets(row.part, facetFields),
     ],
+    facets: facets(row.part, facetFields),
     measures: measures(row.part, facetFields),
     price: best?.price,
     cars: [
@@ -363,12 +366,8 @@ export default defineSearchIndex({
     category_sr_latn: text(),
     category_sr_cyrl: text(),
     category_en: text(),
-    facets: search
-      .keyword()
-      .array()
-      .facetable()
-      .filterable()
-      .retrievable(false),
+    universal_facets: facetValues(),
+    facets: facetValues(),
     measures: search
       .object({
         key: search.keyword().filterable(),
