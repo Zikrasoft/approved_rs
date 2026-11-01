@@ -7,11 +7,13 @@ const MY_GARAGE = 'my_garage_vin';
 function land(search: string): void {
   history.replaceState(null, '', `/ru/parts/bmw/x1/m/x1-sdrive18d/${search}`);
   document.body.innerHTML =
-    '<car-facts><p data-vin-matched hidden><span data-template="Подобрали по VIN {vin}"></span></p></car-facts>';
+    '<car-facts><p data-vin-matched hidden><span data-template="Подобрали по VIN {vin}"></span></p><p data-not-your-car>Не ваш автомобиль?</p></car-facts>';
 }
 
 const matched = () =>
   document.querySelector<HTMLElement>('[data-vin-matched]')!;
+const notYourCar = () =>
+  document.querySelector<HTMLElement>('[data-not-your-car]')!;
 
 describe('car-facts and My garage', () => {
   beforeEach(() => {
@@ -30,9 +32,15 @@ describe('car-facts and My garage', () => {
     expect(matched().textContent).toBe('Подобрали по VIN WBA3B1C50GL123456');
   });
 
+  it('drops the closing «not your car» line once the VIN line offers it', () => {
+    land('?vin=WBA3B1C50GL123456');
+    expect(notYourCar().hidden).toBe(true);
+  });
+
   it('keeps the VIN confirmation hidden without a VIN', () => {
     land('');
     expect(matched().hidden).toBe(true);
+    expect(notYourCar().hidden).toBe(false);
   });
 
   it('keeps the stored VIN when the Vehicle page carries none', () => {
