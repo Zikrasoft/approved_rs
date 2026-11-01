@@ -10,11 +10,12 @@ export const storedVin = (storage?: VinStorage): string =>
   readStored(MY_GARAGE_STORAGE_KEY, storage) ?? '';
 
 export function rememberVin(vin: string, storage?: VinStorage): void {
+  const previous = storedVin(storage);
   writeStored(MY_GARAGE_STORAGE_KEY, vin, storage);
   for (const input of document.querySelectorAll<HTMLInputElement>(
     `[${MY_GARAGE_VIN_ATTRIBUTE}]`,
   )) {
-    if (!input.value) input.value = vin;
+    if (!input.value || input.value === previous) input.value = vin;
   }
 }
 
