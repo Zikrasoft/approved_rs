@@ -2,6 +2,7 @@
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import ContactChannels from './ContactChannels.astro';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
   replaced?: string;
   heading?: string;
   class?: string;
+  lead?: TrackedContactChannel;
 }
 
 const copy = content(localeFrom(Astro.url.pathname)).shopPart;
@@ -19,6 +21,7 @@ const {
   replaced,
   heading = copy.askAboutPart,
   class: className,
+  lead,
 } = Astro.props;
 const named = replaced
   ? copy.askAboutReplacedPart
@@ -32,7 +35,7 @@ const named = replaced
   <vin-prefill class="block" data-template={copy.askAboutPartVin}>
     <ContactChannels
       only={['whatsapp', 'telegram']}
-      lead="whatsapp"
+      lead={lead}
       service={VIN_INQUIRY_SERVICE}
       prefill={question.replace('{part}', named)}
       class="grid-cols-2"
