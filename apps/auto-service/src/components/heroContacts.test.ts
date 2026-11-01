@@ -1,26 +1,18 @@
-import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { builtinEnvironments } from 'vitest/environments';
+import { beforeAll, describe, expect, it } from 'vitest';
 import HeroContacts from './HeroContacts.astro';
+import { render } from './renderAstro';
 
 type Pointer = 'fine' | 'coarse';
 
-let jsdom: Awaited<ReturnType<typeof builtinEnvironments.jsdom.setup>>;
+let hero: Element;
 
 beforeAll(async () => {
-  const container = await AstroContainer.create();
-  const html = await container.renderToString(HeroContacts, {
-    request: new Request('https://carlab.rs/ru/'),
-  });
-  jsdom = await builtinEnvironments.jsdom.setup(globalThis, {});
-  document.body.innerHTML = html;
+  hero = await render(HeroContacts, { path: '/ru/' });
 });
-
-afterAll(() => jsdom.teardown(globalThis));
 
 const classes = (element: Element | null) =>
   element ? element.className.split(/\s+/) : [];
-const controls = () => [...document.querySelectorAll<HTMLAnchorElement>('a')];
+const controls = () => [...hero.querySelectorAll<HTMLAnchorElement>('a')];
 const shownOn = (pointer: Pointer) =>
   controls().filter(
     (control) =>

@@ -185,16 +185,19 @@ describe('bindPhoneCountry', () => {
 describe('sizing the select to the picked country', () => {
   const CHAR = 9.5;
   let cap = Infinity;
-  const rect = (width: number) => ({ width }) as DOMRect;
+
+  const layoutWidth = (select: HTMLSelectElement) => {
+    const { width, maxWidth } = select.style;
+    const content = (select.selectedOptions[0]?.text.length ?? 0) * CHAR;
+    const wanted = width && width !== 'auto' ? parseFloat(width) : content;
+    return Math.min(wanted, maxWidth === 'none' ? Infinity : cap);
+  };
 
   beforeEach(() => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
       function (this: HTMLElement) {
-        if (!(this instanceof HTMLSelectElement)) return rect(0);
-        if (this.style.position === 'absolute') {
-          return rect(this.options[0]!.text.length * CHAR);
-        }
-        return rect(Math.min(parseFloat(this.style.width) || 0, cap));
+        const width = this instanceof HTMLSelectElement ? layoutWidth(this) : 0;
+        return { width } as DOMRect;
       },
     );
   });

@@ -136,6 +136,13 @@ describe('partCacheKey', () => {
     );
   });
 
+  it('changes when a listed current number gains its own page', () => {
+    const listed = [{ slug: 'bosch-222' }];
+    expect(keyFor(page, { replacements: listed })).not.toBe(
+      keyFor(page, { others: [part('222')], replacements: listed }),
+    );
+  });
+
   it('changes when a fitted vehicle gains or loses its page', () => {
     expect(keyFor(page)).not.toBe(keyFor(page, { vehicles: [] }));
   });

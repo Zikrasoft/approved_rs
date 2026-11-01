@@ -123,7 +123,7 @@ describe('reserved parts segments', () => {
       new URL('../pages/[locale]/parts/', import.meta.url),
     )
       .map((entry) => entry.replace(/\.astro$/, ''))
-      .filter((entry) => entry !== 'index' && !entry.startsWith('['));
+      .filter((entry) => entry !== 'index' && !/^[_[]/.test(entry));
     expect(sections.length).toBeGreaterThan(0);
     expect(sections.filter((entry) => !reserved.includes(entry))).toEqual([]);
   });
