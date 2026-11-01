@@ -363,12 +363,13 @@ const scopeHidden = {
 
             {found.results.length > 0 && !looseNumbers && (
               <div class="flex flex-col gap-3 pt-2">
-                <InquiryLink topic={inquiryTopic} />
                 <PartAskRow
                   part={inquiryTopic}
                   question={copy.lookingFor.replace('{q}', '{part}')}
-                  heading={null}
+                  heading={copy.askManager}
+                  class="sm:max-w-md"
                 />
+                <InquiryLink topic={inquiryTopic} />
               </div>
             )}
           </div>
