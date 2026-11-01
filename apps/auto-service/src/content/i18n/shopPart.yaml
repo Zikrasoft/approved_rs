@@ -3,6 +3,7 @@ metaDescription: Бренды, аналоги, цены и наличие это
 eyebrow: Запчасть
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
+equivalentsLead: Детали других производителей, которые ставятся вместо этой.
 numberSupersededNotice: Номер {number} больше не используется производителем.
 partReplacedNotice: Производитель заменил запчасть {number} новой.
 previousNumber: Прежний номер
@@ -19,6 +20,7 @@ categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
 priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что запчасть подходит, и найдем лучшую цену.'
 priceOnRequestCta: Узнать цену и срок
+pricedEquivalentLabel: Аналог с ценой
 orderBody: Проверим у поставщиков и пришлем цену и срок, обычно в течение часа.
 offersHeading: Цена и наличие
 moreOffers: 'Еще одно предложение: {offer}'
@@ -28,13 +30,14 @@ moreOffersSeveral:
   few: 'Еще {count} предложения, от {price}'
   many: 'Еще {count} предложений, от {price}'
   other: 'Еще {count} предложения, от {price}'
-offerTomorrow: завтра
+offerTomorrow: забрать завтра
 offerDays:
-  one: 'через {days} день'
-  few: 'через {days} дня'
-  many: 'через {days} дней'
-  other: 'через {days} дня'
+  one: 'забрать через {days} день'
+  few: 'забрать через {days} дня'
+  many: 'забрать через {days} дней'
+  other: 'забрать через {days} дня'
 buyButtonLabel: В корзину
+buyAdding: Добавляем…
 addedLabel: В корзине
 outOfStock: Нет в наличии
 askSupplyCta: Узнать цену и срок

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
+import { CART_STORAGE_KEY } from './cartBadge';
 import { readCart, rememberCart } from './cartStore';
 import { capNotice, defineOfferCart, stepTarget } from './offerCart';
 import { readPartsList } from './partsList';
@@ -150,4 +151,53 @@ describe('the contact on the confirmation', () => {
       );
     },
   );
+});
+
+describe('a cart changed in another tab', () => {
+  const emptyCart = {
+    id: 'cart_shared',
+    completed: false,
+    currency: 'RSD',
+    total: 0,
+    items: [],
+  };
+
+  it.each([
+    [
+      'when the other tab writes the cart',
+      () =>
+        window.dispatchEvent(
+          new StorageEvent('storage', { key: CART_STORAGE_KEY }),
+        ),
+    ],
+    [
+      'when the visitor comes back to this tab',
+      () => document.dispatchEvent(new Event('visibilitychange')),
+    ],
+  ])('is fetched again %s', async (_when, change) => {
+    history.replaceState(null, '', '/ru/parts/cart/');
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ kind: 'cart', cart: emptyCart }))
+      .mockResolvedValueOnce(Response.json({ kind: 'empty' }));
+    vi.stubGlobal('fetch', fetch);
+    rememberCart(emptyCart);
+    defineOfferCart();
+    document.body.innerHTML = `
+      <offer-cart data-locale-tag="ru-RU">
+        <div data-state="cart" hidden><ul data-lines></ul></div>
+        <div data-state="empty" hidden></div>
+        <div data-state="loading"></div>
+      </offer-cart>`;
+    const shown = (state: string) =>
+      !document.querySelector<HTMLElement>(`[data-state="${state}"]`)!.hidden;
+    await vi.waitFor(() => expect(shown('cart')).toBe(true));
+
+    change();
+
+    await vi.waitFor(() => expect(shown('empty')).toBe(true));
+    expect(fetch).toHaveBeenCalledTimes(2);
+    document.body.replaceChildren();
+    vi.unstubAllGlobals();
+  });
 });

@@ -39,6 +39,7 @@ import {
   restoreCheckout,
 } from './checkoutMemory';
 import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
+import { CART_STORAGE_KEY } from './cartBadge';
 import { localeTagOf } from './localeTag';
 import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
@@ -107,6 +108,12 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         window.addEventListener('pageshow', (event) => {
           if (event.persisted) location.reload();
         });
+        window.addEventListener('storage', ({ key }) => {
+          if (key === CART_STORAGE_KEY) this.resync();
+        });
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') this.resync();
+        });
         const form = this.querySelector('form');
         if (form) {
           void customElements
@@ -157,6 +164,23 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             outcome,
             notice,
             notice || (stored.parts.length > 0 ? 'gone' : ''),
+          ),
+        );
+      }
+
+      resync(): void {
+        if (!this.isConnected || !this.cart) return;
+        const stored = readCart();
+        if (!stored) {
+          this.load('');
+          return;
+        }
+        this.queue = this.queue.then(async () =>
+          this.render(
+            await getJson(
+              cartOutcomeSchema,
+              `/api/cart?id=${encodeURIComponent(stored.id)}`,
+            ),
           ),
         );
       }

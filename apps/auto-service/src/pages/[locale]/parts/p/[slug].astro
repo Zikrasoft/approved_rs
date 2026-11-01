@@ -35,7 +35,11 @@ import {
   partPicture,
   partThumbnail,
 } from '@/utils/partImages';
-import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
+import {
+  currentNumbers,
+  partSuccessor,
+  pricedEquivalent,
+} from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
 import {
@@ -151,7 +155,14 @@ const [noticeBefore, noticeAfter] = (
 ).split('{number}');
 const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
-const equivalents = splitNumbers(page.equivalents);
+const replacementSlugs = new Set(replacements.map(({ slug }) => slug));
+const equivalents = splitNumbers(
+  page.equivalents.filter(
+    (equivalent) => !replacementSlugs.has(equivalentSlug(equivalent)),
+  ),
+);
+const listsEquivalents =
+  equivalents.current.length > 0 || equivalents.previous.length > 0;
 const installation = page.part.installation_price;
 const cart = content(locale).shopCart;
 const installPrice =
@@ -264,7 +275,11 @@ const thumbFor = (slug: string) => {
       }
       {
         !(successor && successor.offers.length > 0 && page.priceOnRequest) && (
-          <PartOffers page={page} demoted={Boolean(successor)} />
+          <PartOffers
+            page={page}
+            demoted={Boolean(successor)}
+            alternative={successor ? null : pricedEquivalent(page, bySlug)}
+          />
         )
       }
       {
@@ -431,55 +446,53 @@ const thumbFor = (slug: string) => {
     </div>
   </section>
 
-  <section class="wrap py-band md:py-band-lg">
-    <h2 class="text-section mb-6">{copy.equivalentsHeading}</h2>
-    {
-      page.equivalents.length === 0 && (
-        <p class="max-w-2xl text-muted">{copy.noEquivalents}</p>
-      )
-    }
-    {
-      equivalents.current.length > 0 && (
-        <ul class="card divide-y divide-line">
-          {equivalents.current.map((equivalent) => (
-            <PartRow
-              thumb={thumbFor(equivalentSlug(equivalent))}
-              slug={equivalentSlug(equivalent)}
-              brand={equivalent.brand.name}
-              value={equivalent.value}
-              priced={{
-                id: equivalent.id,
-                offers: bySlug.get(equivalentSlug(equivalent))?.offers ?? [],
-              }}
-            />
-          ))}
-        </ul>
-      )
-    }
-    {
-      equivalents.previous.length > 0 && (
-        <div class="mt-4 flex flex-col gap-1 text-sm">
-          <h3 class="text-muted">{copy.previousNumbersHeading}</h3>
-          <ul class="flex flex-wrap gap-x-4 gap-y-1">
-            {equivalents.previous.map((equivalent) => (
-              <li>
-                <a
-                  href={PathBuilder.partNumber(
-                    locale,
-                    equivalentSlug(equivalent),
-                  )}
-                  class="text-ink-2 link-quiet"
-                >
-                  {equivalent.brand.name}{' '}
-                  <span class="spec">{equivalent.value}</span>
-                </a>
-              </li>
+  {
+    (listsEquivalents || replacements.length === 0) && (
+      <section class="wrap py-band md:py-band-lg">
+        <h2 class="text-section">{copy.equivalentsHeading}</h2>
+        <p class="mt-2 mb-6 max-w-2xl text-muted">
+          {listsEquivalents ? copy.equivalentsLead : copy.noEquivalents}
+        </p>
+        {equivalents.current.length > 0 && (
+          <ul class="card divide-y divide-line">
+            {equivalents.current.map((equivalent) => (
+              <PartRow
+                thumb={thumbFor(equivalentSlug(equivalent))}
+                slug={equivalentSlug(equivalent)}
+                brand={equivalent.brand.name}
+                value={equivalent.value}
+                priced={{
+                  id: equivalent.id,
+                  offers: bySlug.get(equivalentSlug(equivalent))?.offers ?? [],
+                }}
+              />
             ))}
           </ul>
-        </div>
-      )
-    }
-  </section>
+        )}
+        {equivalents.previous.length > 0 && (
+          <div class="mt-4 flex flex-col gap-1 text-sm">
+            <h3 class="text-muted">{copy.previousNumbersHeading}</h3>
+            <ul class="flex flex-wrap gap-x-4 gap-y-1">
+              {equivalents.previous.map((equivalent) => (
+                <li>
+                  <a
+                    href={PathBuilder.partNumber(
+                      locale,
+                      equivalentSlug(equivalent),
+                    )}
+                    class="text-ink-2 link-quiet"
+                  >
+                    {equivalent.brand.name}{' '}
+                    <span class="spec">{equivalent.value}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    )
+  }
 
   {
     works.length > 0 && (

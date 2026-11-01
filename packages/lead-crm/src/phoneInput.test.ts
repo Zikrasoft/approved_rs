@@ -54,6 +54,30 @@ describe('bindPhoneCountry', () => {
     expect(select.value).toBe('RU');
   });
 
+  it('goes back to the country it had once a pasted foreign number is cleared', () => {
+    const { select, input } = mount();
+    const changes: string[] = [];
+    select.addEventListener('change', () => changes.push(select.value));
+
+    type(input, '+79161234567');
+    type(input, '+4915112345678');
+    type(input, '');
+
+    expect(select.value).toBe('RS');
+    expect(changes).toEqual(['RU', 'DE', 'RS']);
+  });
+
+  it('keeps a country the visitor picked by hand when the field is cleared', () => {
+    const { select, input } = mount();
+
+    type(input, '+79161234567');
+    select.value = 'DE';
+    select.dispatchEvent(new Event('change'));
+    type(input, '');
+
+    expect(select.value).toBe('DE');
+  });
+
   it('leaves a national number untouched', () => {
     const { select, input } = mount();
 

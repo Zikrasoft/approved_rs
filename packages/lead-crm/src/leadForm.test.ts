@@ -384,6 +384,7 @@ describe('submit', () => {
     expect(f.label.textContent).toBe('Sending');
     settle(false);
     await vi.waitFor(() => expect(f.error('submit').hidden).toBe(false));
+    expect(document.activeElement).toBe(f.error('submit'));
     expect(f.button.disabled).toBe(false);
     expect(f.button.hasAttribute('aria-busy')).toBe(false);
     expect(f.label.textContent).toBe('Send');
