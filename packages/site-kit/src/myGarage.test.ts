@@ -56,6 +56,20 @@ describe('storedVin / rememberVin', () => {
     expect(typed.value).toBe('WDD2130041A123456');
   });
 
+  it('replaces a field still holding the previous stored VIN, leaving typed ones', () => {
+    const { storage } = memoryStorage({
+      [MY_GARAGE_STORAGE_KEY]: 'WBA35BG070N074159',
+    });
+    const { input } = mount('WBA35BG070N074159');
+    const typed = document.createElement('input');
+    typed.setAttribute('data-vin-input', '');
+    typed.value = 'WDD2130041A123456';
+    document.body.append(typed);
+    rememberVin('WBA35BG070N074158', storage);
+    expect(input.value).toBe('WBA35BG070N074158');
+    expect(typed.value).toBe('WDD2130041A123456');
+  });
+
   it('remembers a VIN and hands it back', () => {
     const { storage } = memoryStorage();
     rememberVin('WBA3B1C50GL123456', storage);

@@ -87,6 +87,18 @@ export const catalogueLinks = (locale: Locale, pages: CataloguePages) => ({
           model.slug,
         )
       : null,
+  modelCategory: (
+    model: VehicleAddress['model'],
+    category: string,
+  ): string | null =>
+    pages.categories.has(placeKey(modelKey(model), category))
+      ? PathBuilder.partsModelCategory(
+          locale,
+          model.chassis.series.make.slug,
+          model.slug,
+          category,
+        )
+      : null,
   vehicle: (vehicle: VehicleAddress): string | null =>
     pages.vehicles.has(vehicleKey(vehicle))
       ? vehiclePath(locale, vehicle)

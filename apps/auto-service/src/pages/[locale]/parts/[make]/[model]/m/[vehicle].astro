@@ -17,15 +17,26 @@ import LineItem from '@/components/LineItem.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { carPagesForBuild } from '@/utils/catalogueEnv';
+import { cataloguePagesForBuild, carPagesForBuild } from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
-import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
+import {
+  catalogueLinks,
+  modelKey,
+  PathBuilder,
+  vehiclePath,
+  withLocales,
+  type CataloguePages,
+} from '@/utils/paths';
 import { kitPick, kitTotal, nameRepeatsCategory } from '@/utils/kitPick';
 import { plural } from '@/utils/leadTime';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 
 export async function getStaticPaths() {
-  const cars = await carPagesForBuild();
+  const [cars, places] = await Promise.all([
+    carPagesForBuild(),
+    cataloguePagesForBuild(),
+  ]);
   return withLocales(
     cars.map((car) => ({
       params: {
@@ -33,13 +44,21 @@ export async function getStaticPaths() {
         model: car.vehicle.model.slug,
         vehicle: car.vehicle.slug ?? car.vehicle.id,
       },
-      props: { car },
-      cacheKey: cacheKey(car),
+      props: { car, places },
+      cacheKey: cacheKey({
+        car,
+        categoryPages: [...places.categories].filter((key) =>
+          key.startsWith(`${modelKey(car.vehicle.model)}/`),
+        ),
+      }),
     })),
   );
 }
 
-const { car } = Astro.props as { car: CarPageEntry };
+const { car, places } = Astro.props as {
+  car: CarPageEntry;
+  places: CataloguePages;
+};
 const { vehicle } = car;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -61,10 +80,13 @@ for (const group of car.groups) {
   const key = group.category?.id ?? '';
   byCategory.set(key, [...(byCategory.get(key) ?? []), group]);
 }
+const links = catalogueLinks(locale, places);
 const blocks = [...byCategory.values()].map((groups) => ({
   name: groups[0].category
     ? translated(groups[0].category, 'name', locale)
     : copy.otherParts,
+  href:
+    groups[0].category && links.modelCategory(model, groups[0].category.slug),
   groups,
 }));
 
@@ -145,7 +167,21 @@ const specsSummary = [
       },
       { href: vehiclePath(locale, vehicle), label: variant },
     ]}
-  />
+  >
+    <p
+      class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-2"
+      data-vin-matched
+      hidden
+    >
+      <span class="inline-flex items-center gap-1.5 font-semibold text-ink">
+        <Icon name="check" size={16} />
+        <span data-template={copy.vinMatched}></span>
+      </span>
+      <a href={PathBuilder.parts(locale)} class="link-underlined">
+        {copy.notYourCarLink}
+      </a>
+    </p>
+  </PageHero>
 
   <car-facts
     class:list={[
@@ -237,6 +273,7 @@ const specsSummary = [
                 href={PathBuilder.partsInquiry(locale)}
                 class="btn btn-after-kit w-full sm:w-auto"
                 data-add-all
+                {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
               >
                 {copy.kitAdd}
                 <Icon name="arrowRight" />
@@ -266,7 +303,21 @@ const specsSummary = [
             blocks.map((block) => (
               <section class="card overflow-hidden">
                 <h3 class="border-b border-line px-5 py-3 font-semibold sm:px-6">
-                  {block.name}
+                  {block.href ? (
+                    <a
+                      href={block.href}
+                      class="flex min-h-6 items-center justify-between gap-3 text-ink link-quiet"
+                    >
+                      {block.name}
+                      <Icon
+                        name="chevronRight"
+                        size={16}
+                        class="shrink-0 text-muted"
+                      />
+                    </a>
+                  ) : (
+                    block.name
+                  )}
                 </h3>
                 <AddonNote
                   category={block.groups[0].category}

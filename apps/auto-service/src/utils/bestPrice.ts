@@ -109,6 +109,13 @@ export function bestPrice(pages: { offers: PartOffer[] }[]): BestPrice | null {
   };
 }
 
+export function bestPage<Page extends { offers: PartOffer[] }>(
+  pages: Page[],
+): Page | undefined {
+  const best = bestPrice(pages);
+  return pages.find(({ offers }) => offers.some(({ id }) => id === best?.id));
+}
+
 export function priceLabel(
   best: Pick<BestPrice, 'price' | 'currency' | 'startsFrom'>,
   copy: { fromPrice: string },

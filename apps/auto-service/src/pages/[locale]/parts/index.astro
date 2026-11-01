@@ -78,6 +78,33 @@ const categories = props.categories.map((category) => ({
     </cart-badge>
 
     {
+      props.makes.length > 0 && (
+        <div class="flex flex-col gap-4">
+          <h2 class="text-section">{hubsCopy.indexHeading}</h2>
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {props.makes.map((make) => (
+              <li>
+                <a
+                  href={PathBuilder.partsMake(locale, make.slug)}
+                  class="card flex min-h-20 items-end p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
+                >
+                  {make.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <a
+            href={PathBuilder.partsMakes(locale)}
+            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink link-quiet"
+          >
+            {hubsCopy.allMakesLink}
+            <Icon name="arrowRight" />
+          </a>
+        </div>
+      )
+    }
+
+    {
       categories.length > 0 && (
         <div class="flex flex-col gap-3">
           <div class="flex flex-col gap-1">
@@ -107,33 +134,6 @@ const categories = props.categories.map((category) => ({
               </a>
             ))}
           </div>
-        </div>
-      )
-    }
-
-    {
-      props.makes.length > 0 && (
-        <div class="flex flex-col gap-4">
-          <h2 class="text-section">{hubsCopy.indexHeading}</h2>
-          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {props.makes.map((make) => (
-              <li>
-                <a
-                  href={PathBuilder.partsMake(locale, make.slug)}
-                  class="card flex min-h-20 items-end p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
-                >
-                  {make.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a
-            href={PathBuilder.partsMakes(locale)}
-            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink link-quiet"
-          >
-            {hubsCopy.allMakesLink}
-            <Icon name="arrowRight" />
-          </a>
         </div>
       )
     }
