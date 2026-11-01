@@ -19,7 +19,11 @@ import LineItem from '@/components/LineItem.astro';
 import { pagesThumbnail } from '@/utils/partImages';
 import { translated } from '@podbor/catalog-contract';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { cataloguePagesForBuild, carPagesForBuild } from '@/utils/catalogueEnv';
+import {
+  cataloguePagesForBuild,
+  carPagesForBuild,
+  shopOpen,
+} from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import {
@@ -281,9 +285,14 @@ const specsSummary = [
                 data-add-all
                 {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
               >
-                {copy.kitAdd}
+                {shopOpen() ? copy.kitAdd : copy.kitAddClosed}
               </a>
             </div>
+            {!shopOpen() && (
+              <p class="text-sm leading-relaxed text-ink-2">
+                {copy.kitNoteClosed}
+              </p>
+            )}
           </parts-list-add-all>
         )
       }
