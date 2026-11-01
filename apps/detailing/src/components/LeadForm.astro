@@ -1,5 +1,5 @@
 ---
-import { CONSENT_FIELD, CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import Icon from './Icon.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
@@ -30,7 +30,6 @@ const uid = `lf-${crypto.randomUUID().slice(0, 8)}`;
 const errorId = {
   telegram: `${uid}-telegram`,
   phone: `${uid}-phone`,
-  consent: `${uid}-consent`,
 };
 const channelLabelId = `${uid}-channel`;
 const panelId = {
@@ -237,40 +236,13 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
 
     <div class="lead-submit">
       <div>
-        <label class="relative flex items-start gap-3 py-1.5">
-          <input
-            type="checkbox"
-            name={CONSENT_FIELD}
-            required
-            value="1"
-            aria-describedby={errorId.consent}
-            class="peer sr-only"
-            data-consent
-            data-field="consent"
-          />
-          <span
-            class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/35 text-void transition-colors duration-400 peer-checked:border-champagne peer-checked:bg-champagne peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+        <p class="py-1.5 text-xs leading-relaxed text-mute">
+          {`${site.form.privacyNote} `}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline underline-offset-4 transition-colors duration-400 hover:text-champagne pointer-coarse:py-2.5"
+            >{site.form.privacyLinkText}</a
           >
-            <Icon name="check" size={10} />
-          </span>
-          <span class="text-xs leading-relaxed text-mute">
-            {`${site.form.privacyNote} ${site.form.privacyLinkText}`}
-          </span>
-        </label>
-        <a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="-mt-1 ml-8 inline-flex min-h-11 items-center text-xs text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
-          >{site.footer.privacyLabel}</a
-        >
-        <p
-          id={errorId.consent}
-          class={errorText}
-          aria-live="polite"
-          data-error-consent
-          hidden
-        >
-          {site.form.errorConsent}
         </p>
         <p class={errorText} role="alert" data-error-submit hidden>
           {site.form.errorSubmit}

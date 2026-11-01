@@ -19,7 +19,7 @@ export const POST = createLeadsRoute({
   localeCookie: LOCALE_COOKIE,
   thanksPath: PathBuilder.thanks,
   refusalCopy: (locale) => {
-    const { form, footer } = content(locale).site;
+    const { form } = content(locale).site;
     return {
       brand: {
         name: SITE_NAME,
@@ -33,11 +33,10 @@ export const POST = createLeadsRoute({
         'missing-contact': form.errorTelegram,
         'invalid-phone': form.errorPhone,
         'invalid-telegram': form.errorTelegramHandle,
-        'missing-consent': form.errorConsent,
       },
-      consent: `${form.privacyNote} ${form.privacyLinkText}`,
       privacy: {
-        label: footer.privacyLabel,
+        note: form.privacyNote,
+        label: form.privacyLinkText,
         href: PathBuilder.privacy(locale),
       },
       submit: form.submit,

@@ -41,11 +41,10 @@ export const POST = createLeadsRoute({
         'missing-contact': MISSING_FIELDS_MESSAGE[locale],
         'invalid-phone': form.errorPhoneInvalid,
         'invalid-telegram': form.errorTelegramHandle,
-        'missing-consent': form.consentError,
       },
-      consent: `${form.consentBefore}${form.consentLinkText}`,
       privacy: {
-        label: content(locale).dictionary.footer.privacyLabel,
+        note: form.consentBefore.trim(),
+        label: form.consentLinkText,
         href: PathBuilder.privacy(locale),
       },
       submit: form.submitLabel,

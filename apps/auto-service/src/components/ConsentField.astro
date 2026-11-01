@@ -1,14 +1,15 @@
 ---
 import { CONSENT_FIELD } from '@podbor/lead-crm/fields';
 import Icon from './Icon.astro';
+import SubmitError from './SubmitError.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   uid: string;
-  error?: string;
-  submitError?: string;
+  error: string;
+  submitError: string;
 }
 
 const { uid, error, submitError } = Astro.props;
@@ -57,10 +58,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
     data-error-consent
     hidden
   >
-    {error ?? site.form.errorConsent}
+    {error}
   </p>
-  <div role="alert" data-error-submit hidden>
-    <p class={errorText}>{submitError ?? site.form.errorSubmit}</p>
-    <slot />
-  </div>
+  <SubmitError text={submitError}><slot /></SubmitError>
 </div>

@@ -100,7 +100,8 @@ const formSchema = z
     errorTelegram: z.string(),
     errorTelegramHandle: z.string(),
     errorPhone: z.string(),
-    errorConsent: z.string(),
+    // TODO: drop once the translate job has pruned errorConsent from the translations.
+    errorConsent: z.string().optional(),
     errorSubmit: z.string(),
     modalTitle: z.string(),
   })

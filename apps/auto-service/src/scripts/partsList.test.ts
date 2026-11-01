@@ -358,6 +358,7 @@ describe('Подобрать on a part page', () => {
           <button type="button" data-modal-close>×</button>
           <parts-inquiry>
             <div data-parts-list-block hidden>
+              <p data-parts-car hidden><b data-parts-car-name></b><span data-parts-car-vin></span></p>
               <ul data-parts-list></ul>
               <template data-parts-item><li><a data-part-link></a><div role="group" aria-label="Количество" data-part-quantity><button type="button" data-decrease></button><span data-quantity></span><button type="button" data-increase></button></div></li></template>
             </div>
@@ -450,6 +451,31 @@ describe('Подобрать on a part page', () => {
       { ...mannOil, car: 'BMW 3 серия F30 320d', vin: 'WBA35BG070N074158' },
     ]);
     expect(formData.get('comment')).toContain('BMW 3 серия F30 320d');
+  });
+
+  it('shows the car and its VIN on the car line, so the closed VIN field needs no opening', () => {
+    localStorage.setItem('my_garage_vin', 'WBA35BG070N074158');
+    localStorage.setItem(
+      'my_garage_car',
+      JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
+    );
+    const { button, dialog } = partPage();
+    button.click();
+
+    const line = dialog.querySelector<HTMLElement>('[data-parts-car]')!;
+    expect(line.hidden).toBe(false);
+    expect(line.textContent).toBe(
+      'BMW 3 серия F30 320d, VIN WBA35BG070N074158',
+    );
+  });
+
+  it('shows a car added without a VIN by its name alone', () => {
+    const { dialog } = partPage();
+    addToPartsList({ ...mannOil, car: 'BMW 3 серия F30 320d' });
+
+    expect(dialog.querySelector('[data-parts-car]')!.textContent).toBe(
+      'BMW 3 серия F30 320d',
+    );
   });
 
   it('leaves the car out once the visitor changed or forgot the VIN', () => {

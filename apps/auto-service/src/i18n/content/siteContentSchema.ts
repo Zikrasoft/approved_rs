@@ -102,12 +102,15 @@ export const siteContentSchema = z
         privacyNote: z.string(),
         privacyLinkText: z.string(),
         privacyOpen: z.string(),
+        privacyNotice: z.string(),
+        moreDetails: z.string(),
         modalTitle: z.string(),
         errorPhone: z.string(),
         errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
         errorTelegramHandle: z.string(),
-        errorConsent: z.string(),
+        // TODO: drop once the translate job has pruned errorConsent from the translations.
+        errorConsent: z.string().optional(),
         errorSubmit: z.string(),
       })
       .strict(),
