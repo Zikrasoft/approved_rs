@@ -78,15 +78,31 @@ export function bindPhoneCountry(
     else requestAnimationFrame(() => fitToSelection(select));
   };
 
-  select.addEventListener('change', () => fitToSelection(select));
+  let chosenBeforePaste: string | null = null;
+  const switchTo = (iso: string): void => {
+    select.value = iso;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  select.addEventListener('change', () => {
+    chosenBeforePaste = null;
+    fitToSelection(select);
+  });
   input.addEventListener('input', () => {
+    if (chosenBeforePaste && input.value.trim() === '') {
+      switchTo(chosenBeforePaste);
+      return;
+    }
     const split = splitDialCode(input.value, countriesOf(select));
     if (!split) return;
-    const picked = select.value !== split.iso;
-    select.value = split.iso;
+    const chosen = chosenBeforePaste ?? select.value;
     input.value = split.rest;
-    if (picked) select.dispatchEvent(new Event('change', { bubbles: true }));
-    else fitToSelection(select);
+    if (select.value === split.iso) {
+      fitToSelection(select);
+      return;
+    }
+    switchTo(split.iso);
+    chosenBeforePaste = chosen;
   });
 
   fitWhenSettled();

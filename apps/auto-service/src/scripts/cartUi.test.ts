@@ -90,6 +90,18 @@ describe('addToCart', () => {
     ]);
   });
 
+  it('lets the add finish when the visitor leaves the page right after the tap', async () => {
+    const fetch = vi.fn(async () => Response.json(cartWith('cart_1', ['x'])));
+    vi.stubGlobal('fetch', fetch);
+
+    await addToCart({ offer_id: 'x' });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/cart',
+      expect.objectContaining({ method: 'POST', keepalive: true }),
+    );
+  });
+
   it('keeps the cart a refusal names', async () => {
     vi.stubGlobal(
       'fetch',
