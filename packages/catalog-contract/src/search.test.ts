@@ -260,6 +260,28 @@ describe('range filters', () => {
     expect(rangeFilter(range)).toBe(text);
   });
 
+  it.each([
+    ['capacity:1e21:', { key: 'capacity', min: 1e9, max: null }],
+    ['capacity:1E+21:', { key: 'capacity', min: 1e9, max: null }],
+    ['capacity::-1e400', { key: 'capacity', min: null, max: -1e9 }],
+    ['capacity:1e-7:0.1234567', { key: 'capacity', min: 0, max: 0.123457 }],
+    ['capacity:95:60', { key: 'capacity', min: 60, max: 95 }],
+  ])('reads the well-formed %j within bounds', (text, range) => {
+    expect(parseRangeFilter(text)).toEqual(range);
+  });
+
+  it.each([
+    [{ key: 'capacity', min: 1e21, max: null }, 'capacity:1000000000:'],
+    [{ key: 'capacity', min: 1e-7, max: 0.1234567 }, 'capacity:0:0.123457'],
+    [{ key: 'capacity', min: null, max: -1e30 }, 'capacity::-1000000000'],
+  ])(
+    'writes %j in plain digits a shop without exponents reads',
+    (range, text) => {
+      expect(rangeFilter(range)).toBe(text);
+      expect(text).toMatch(/^[a-z-]+:(-?\d+(\.\d+)?)?:(-?\d+(\.\d+)?)?$/);
+    },
+  );
+
   it.each(['capacity::', 'capacity:abc:5', 'Capacity:1:2', 'capacity:1'])(
     'refuses %j',
     (text) => {
@@ -454,6 +476,25 @@ describe('usefulFacets', () => {
     expect(usefulFacets([range], 5, [])).toEqual([]);
   });
 
+  it('drops a facet whose every value matches every result', () => {
+    const facets = [facet('approvals', [2, 2]), facet('mixed', [1, 2])];
+
+    expect(usefulFacets(facets, 2, []).map(({ key }) => key)).toEqual([
+      'mixed',
+    ]);
+    expect(usefulFacets(facets, 1, []).map(({ key }) => key)).toEqual([]);
+  });
+
+  it('keeps a price range whose bounds both count every result', () => {
+    const price = {
+      ...facet('price', [3, 3]),
+      key: 'price',
+      type: 'number' as const,
+    };
+
+    expect(usefulFacets([price], 3, [])).toEqual([price]);
+  });
+
   it('keeps a facet with an active selection', () => {
     expect(
       usefulFacets([facet('shared', [5]), facet('zero', [0])], 5, [
@@ -492,6 +533,24 @@ describe('filtersWithinCap', () => {
     const facets = Array.from({ length: 21 }, (_, at) => `brand:b${at}`);
 
     expect(filtersWithinCap(facets, []).facets).toHaveLength(20);
+  });
+
+  it('keeps one copy of a repeated value', () => {
+    expect(
+      filtersWithinCap(['brand:bosch', 'brand:bosch', 'brand:varta'], []),
+    ).toEqual({ facets: ['brand:bosch', 'brand:varta'], ranges: [] });
+  });
+
+  it('keeps twenty distinct values however many repeats come first', () => {
+    const facets = [
+      ...Array.from({ length: 21 }, () => 'brand:bosch'),
+      'brand:varta',
+    ];
+
+    expect(filtersWithinCap(facets, []).facets).toEqual([
+      'brand:bosch',
+      'brand:varta',
+    ]);
   });
 
   it('keeps at most ten ranges', () => {
