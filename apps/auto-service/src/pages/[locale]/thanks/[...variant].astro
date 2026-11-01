@@ -21,7 +21,12 @@ const copy = parts ? { ...pages.thanks, ...pages.thanksParts } : pages.thanks;
 const back = parts ? PathBuilder.parts(locale) : PathBuilder.home(locale);
 ---
 
-<Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
+<Shell
+  title={copy.metaTitle}
+  description={copy.metaDescription}
+  noindex
+  stickyContact={!parts}
+>
   <section
     class="wrap grid gap-8 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
   >

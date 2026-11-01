@@ -21,7 +21,6 @@ interface Props {
 const { pages, name, specs, heading = false, quantity } = Astro.props;
 const open = shopOpen();
 const lead = bestPage(pages);
-const specLine = open ? specs : [specs, quantity].filter(Boolean).join(', ');
 const target = lead ?? splitNumbers(pages).current[0] ?? pages[0];
 const href =
   target && PathBuilder.partNumber(localeFrom(Astro.url.pathname), target.slug);
@@ -49,13 +48,13 @@ const href =
         ) : (
           <a
             href={href}
-            class="text-sm text-ink link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            class="text-sm text-ink link-quiet pointer-coarse:-my-2.5 pointer-coarse:py-2.5"
           >
             {name}
           </a>
         )
       }
-      {specLine && <p class="spec text-xs text-muted">{specLine}</p>}
+      {specs && <p class="spec text-xs text-muted">{specs}</p>}
       <slot />
     </div>
     {

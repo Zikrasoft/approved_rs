@@ -22,14 +22,13 @@ const label = content(localeFrom(Astro.url.pathname)).shopPart
     <PartImage
       frame={['relative', box, className].filter(Boolean).join(' ')}
       icon={22}
-      caption={thumb.illustration ? label : undefined}
       src={thumb.src}
       alt=""
       width="64"
       height="64"
       loading="lazy"
       decoding="async"
-      class={thumb.illustration ? 'opacity-60 grayscale' : undefined}
+      class={thumb.illustration ? 'opacity-80' : undefined}
     >
       {thumb.illustration && <span class="sr-only">{label}</span>}
     </PartImage>

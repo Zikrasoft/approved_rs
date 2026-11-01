@@ -1,5 +1,6 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
+import { shopOpen } from '@/utils/catalogueEnv';
 import type { Thumbnail } from '@/utils/partImages';
 import PartThumb from './PartThumb.astro';
 
@@ -25,6 +26,7 @@ const {
   ...rest
 } = Astro.props;
 const linked = variant !== 'readonly';
+const inlineQuantity = variant === 'kit' && !shopOpen();
 const nameClass = 'leading-snug font-semibold text-ink link-quiet';
 ---
 
@@ -45,7 +47,9 @@ const nameClass = 'leading-snug font-semibold text-ink link-quiet';
             </span>
           )
         }
-        <span class="spec text-sm text-muted" data-number>{number}</span>
+        <span class="spec text-sm text-muted" data-number>
+          {inlineQuantity && quantity ? `${number}, ${quantity}` : number}
+        </span>
         <slot name="status" />
       </div>
     </div>
@@ -57,9 +61,11 @@ const nameClass = 'leading-snug font-semibold text-ink link-quiet';
           <slot name="price">
             <span class="font-semibold text-ink" data-price />
           </slot>
-          <span class="text-xs text-muted" data-quantity>
-            {quantity}
-          </span>
+          {!inlineQuantity && (
+            <span class="text-xs text-muted" data-quantity>
+              {quantity}
+            </span>
+          )}
         </span>
       )
     }

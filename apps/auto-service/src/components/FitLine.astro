@@ -1,6 +1,7 @@
 ---
 import type { Fitment } from '@podbor/catalog-contract';
 import { localeFrom } from '@/i18n/config';
+import { shopOpen } from '@/utils/catalogueEnv';
 import {
   fitConditions,
   fitNote,
@@ -14,7 +15,7 @@ interface Props {
   quantity?: boolean;
 }
 
-const { fit, car, quantity = true } = Astro.props;
+const { fit, car, quantity = shopOpen() } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const details = [fitPosition(fit, locale), ...fitConditions(fit, locale)]
   .filter(Boolean)

@@ -31,7 +31,7 @@ const best = open ? bestPrice([page]) : null;
       ) : open ? (
         copy.priceOnRequestHeading
       ) : (
-        <span class="block max-w-[52vw] truncate">
+        <span class="line-clamp-2 text-sm leading-tight">
           {translated(page.part, 'name', locale)}
         </span>
       )

@@ -76,7 +76,7 @@ partsInquiry:
     eyebrow: Категория запчастей
     metaTitleTemplate: '{name}: запчасти | CarLab'
     partsHeading: Запчасти в каталоге
-    noParts: Подберем любую деталь этой группы под ваш автомобиль. Пришлите VIN или номер, назовем цену и срок.
+    noParts: Пришлите VIN или номер, и мы назовем цену и срок.
     fieldsHeading: На что смотреть при выборе
     pageName: '{name}, страница {page}'
     pagination: Страницы категории
