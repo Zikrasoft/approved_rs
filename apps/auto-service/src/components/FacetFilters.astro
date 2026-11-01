@@ -159,123 +159,127 @@ const legend = (facet: SearchFacet) =>
               </div>
               <div class="flex min-h-0 flex-col divide-y divide-line group-open/dialog:flex-1 group-open/dialog:overflow-y-auto group-open/dialog:overscroll-contain">
                 {groups.map(({ facet, pills, shown, rest, restOpen }) => (
-                  <fieldset class="flex min-w-0 flex-col gap-1 px-5 py-4">
+                  <fieldset class="min-w-0 px-5 py-4">
                     <legend class="float-left mb-1.5 w-full text-sm font-semibold text-ink">
                       {legend(facet)}
                     </legend>
-                    {facet.type === 'number' ? (
-                      <div class="flex items-center gap-2">
-                        {[
-                          {
-                            name: rangeMinName(facet.key),
-                            label: copy.rangeMinLabel,
-                            value: bound(range(facet.key)?.min),
-                            placeholder: hint(
-                              copy.rangeFrom,
-                              '{min}',
-                              numberBounds(facet)?.min,
-                            ),
-                          },
-                          {
-                            name: rangeMaxName(facet.key),
-                            label: copy.rangeMaxLabel,
-                            value: bound(range(facet.key)?.max),
-                            placeholder: hint(
-                              copy.rangeTo,
-                              '{max}',
-                              numberBounds(facet)?.max,
-                            ),
-                          },
-                        ].map((input, index) => (
-                          <>
-                            {index > 0 && (
-                              <span class="text-muted" aria-hidden="true">
-                                –
-                              </span>
-                            )}
-                            <label class="min-w-0 flex-1">
-                              <span class="sr-only">{input.label}</span>
-                              <input
-                                type="number"
-                                inputmode="decimal"
-                                min="0"
-                                step="any"
-                                name={input.name}
-                                value={input.value}
-                                placeholder={input.placeholder}
-                                class="field spec min-h-10 [appearance:textfield] px-3 py-1.5 text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                              />
-                            </label>
-                          </>
-                        ))}
-                      </div>
-                    ) : (
-                      [
-                        { items: shown, tail: false },
-                        ...(rest.length ? [{ items: rest, tail: true }] : []),
-                      ].map(({ items, tail }) => {
-                        const list = (
-                          <div
-                            class:list={[
-                              pills ? 'flex flex-wrap gap-2' : 'flex flex-col',
-                            ]}
-                          >
-                            {items.map((value) =>
-                              pills ? (
-                                <label class="relative inline-flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-ink has-checked:bg-shade-strong has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
-                                  <input
-                                    type="checkbox"
-                                    name="facets"
-                                    value={value.filter}
-                                    checked={value.checked}
-                                    disabled={
-                                      value.count === 0 && !value.checked
-                                    }
-                                    class="sr-only"
-                                  />
-                                  {value.label}
-                                  <span class="spec text-xs text-muted">
-                                    {value.count}
-                                  </span>
-                                </label>
-                              ) : (
-                                <label class="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:text-ink-2">
-                                  <input
-                                    type="checkbox"
-                                    name="facets"
-                                    value={value.filter}
-                                    checked={value.checked}
-                                    disabled={
-                                      value.count === 0 && !value.checked
-                                    }
-                                    class="size-4 shrink-0 accent-signal"
-                                  />
-                                  <span class="min-w-0 flex-1 break-words">
-                                    {value.label}
-                                  </span>
-                                  <span class="spec text-xs text-muted">
-                                    {value.count}
-                                  </span>
-                                </label>
+                    <div class="clear-both flex flex-col gap-1">
+                      {facet.type === 'number' ? (
+                        <div class="flex items-center gap-2">
+                          {[
+                            {
+                              name: rangeMinName(facet.key),
+                              label: copy.rangeMinLabel,
+                              value: bound(range(facet.key)?.min),
+                              placeholder: hint(
+                                copy.rangeFrom,
+                                '{min}',
+                                numberBounds(facet)?.min,
                               ),
-                            )}
-                          </div>
-                        );
-                        return tail ? (
-                          <ShowMore
-                            open={restOpen}
-                            label={copy.showAllValues.replace(
-                              '{count}',
-                              String(shown.length + rest.length),
-                            )}
-                          >
-                            {list}
-                          </ShowMore>
-                        ) : (
-                          list
-                        );
-                      })
-                    )}
+                            },
+                            {
+                              name: rangeMaxName(facet.key),
+                              label: copy.rangeMaxLabel,
+                              value: bound(range(facet.key)?.max),
+                              placeholder: hint(
+                                copy.rangeTo,
+                                '{max}',
+                                numberBounds(facet)?.max,
+                              ),
+                            },
+                          ].map((input, index) => (
+                            <>
+                              {index > 0 && (
+                                <span class="text-muted" aria-hidden="true">
+                                  –
+                                </span>
+                              )}
+                              <label class="min-w-0 flex-1">
+                                <span class="sr-only">{input.label}</span>
+                                <input
+                                  type="number"
+                                  inputmode="decimal"
+                                  min="0"
+                                  step="any"
+                                  name={input.name}
+                                  value={input.value}
+                                  placeholder={input.placeholder}
+                                  class="field spec min-h-10 [appearance:textfield] px-3 py-1.5 text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                />
+                              </label>
+                            </>
+                          ))}
+                        </div>
+                      ) : (
+                        [
+                          { items: shown, tail: false },
+                          ...(rest.length ? [{ items: rest, tail: true }] : []),
+                        ].map(({ items, tail }) => {
+                          const list = (
+                            <div
+                              class:list={[
+                                pills
+                                  ? 'flex flex-wrap gap-2'
+                                  : 'flex flex-col',
+                              ]}
+                            >
+                              {items.map((value) =>
+                                pills ? (
+                                  <label class="relative inline-flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-ink has-checked:bg-shade-strong has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
+                                    <input
+                                      type="checkbox"
+                                      name="facets"
+                                      value={value.filter}
+                                      checked={value.checked}
+                                      disabled={
+                                        value.count === 0 && !value.checked
+                                      }
+                                      class="sr-only"
+                                    />
+                                    {value.label}
+                                    <span class="spec text-xs text-muted">
+                                      {value.count}
+                                    </span>
+                                  </label>
+                                ) : (
+                                  <label class="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:text-ink-2">
+                                    <input
+                                      type="checkbox"
+                                      name="facets"
+                                      value={value.filter}
+                                      checked={value.checked}
+                                      disabled={
+                                        value.count === 0 && !value.checked
+                                      }
+                                      class="size-4 shrink-0 accent-signal"
+                                    />
+                                    <span class="min-w-0 flex-1 break-words">
+                                      {value.label}
+                                    </span>
+                                    <span class="spec text-xs text-muted">
+                                      {value.count}
+                                    </span>
+                                  </label>
+                                ),
+                              )}
+                            </div>
+                          );
+                          return tail ? (
+                            <ShowMore
+                              open={restOpen}
+                              label={copy.showAllValues.replace(
+                                '{count}',
+                                String(shown.length + rest.length),
+                              )}
+                            >
+                              {list}
+                            </ShowMore>
+                          ) : (
+                            list
+                          );
+                        })
+                      )}
+                    </div>
                   </fieldset>
                 ))}
               </div>
