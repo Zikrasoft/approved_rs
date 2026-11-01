@@ -276,7 +276,14 @@ medusaIntegrationTestRunner({
         const response = await search({ facets: 'in-stock:true' });
 
         expect(partIds(response)).toEqual([part.a]);
-        expect(facetKeys(await search({}))).toContain('in-stock');
+      });
+
+      it('counts stock even when attribute values exceed the facet value limit', async () => {
+        const response = await search({});
+
+        expect(
+          response.data.facets.find(({ key }) => key === 'in-stock')?.values,
+        ).toEqual([{ value: 'true', label: 'true', count: 1 }]);
       });
 
       it('ignores stock and price filters and counts no stock while the shop is closed', async () => {
