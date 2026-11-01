@@ -65,6 +65,8 @@ export const partsCarContentSchema = z
         kitHeading: z.string(),
         kitLead: z.string(),
         kitAdd: z.string(),
+        kitAddClosed: z.string(),
+        kitNoteClosed: z.string(),
         kitCart: z.string(),
         kitAdding: z.string(),
         matchesHeading: z.string(),

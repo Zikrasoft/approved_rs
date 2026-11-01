@@ -27,7 +27,7 @@ const singleModel =
 
 {
   fitsByMake.length > 0 && (
-    <div class="flex flex-col gap-3">
+    <div id="fits" class="flex scroll-mt-24 flex-col gap-3">
       <h2 class="text-section">{fitmentCopy.partFitsHeading}</h2>
       <div class="flex flex-col gap-5">
         {fitsByMake.map(({ make, models }) => (

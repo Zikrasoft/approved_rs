@@ -14,6 +14,7 @@ import PartOffers from '@/components/PartOffers.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import PartRow from '@/components/PartRow.astro';
 import PartStickyCta from '@/components/PartStickyCta.astro';
+import PickupLine from '@/components/PickupLine.astro';
 import LeadModal from '@/components/LeadModal.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { getCollection } from 'astro:content';
@@ -28,6 +29,7 @@ import { attributeRows } from '@/utils/attributeRows';
 import {
   cataloguePagesForBuild,
   partPagesForBuild,
+  shopOpen,
 } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import {
@@ -80,6 +82,10 @@ const { page, successor, replacements, bySlug, places } = Astro.props as {
   places: CataloguePages;
 };
 const locale = localeFrom(Astro.url.pathname);
+const open = shopOpen();
+const ordersSuccessor = Boolean(
+  successor && (!open || (successor.offers.length > 0 && page.priceOnRequest)),
+);
 const pageLinks = catalogueLinks(locale, places);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
@@ -180,6 +186,10 @@ const installPrice =
           ),
         };
 const works = sourcingWorks(await getCollection('works'), page);
+const equivalentName = (equivalent: PartPageEntry['equivalents'][number]) => {
+  const entry = bySlug.get(equivalentSlug(equivalent));
+  return entry && translated(entry.part, 'name', locale);
+};
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
   return entry ? partThumbnail(entry, entry.category) : null;
@@ -188,7 +198,7 @@ const thumbFor = (slug: string) => {
 
 <Shell
   title={`${heading}, ${partName} | ${copy.metaTitleSuffix}`}
-  description={copy.metaDescription}
+  description={open ? copy.metaDescription : copy.metaDescriptionClosed}
   noindex={!page.indexable}
   jsonLd={jsonLd}
 >
@@ -217,7 +227,7 @@ const thumbFor = (slug: string) => {
   >
     <div
       id="offers"
-      class="flex scroll-mt-24 flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+      class="flex scroll-mt-24 flex-col gap-4 max-lg:contents lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1"
     >
       {
         (replacement || page.superseded) && (
@@ -274,7 +284,7 @@ const thumbFor = (slug: string) => {
         successor && (
           <PartOffers page={successor} replaced={heading}>
             <Fragment slot="heading">
-              {copy.successorOffersHeading}
+              {open ? copy.successorOffersHeading : copy.successorOrderHeading}
               <span class="mt-1 block text-sm font-normal text-muted">
                 {successor.brand.name}{' '}
                 <span class="spec">{successor.value}</span>
@@ -284,7 +294,7 @@ const thumbFor = (slug: string) => {
         )
       }
       {
-        !(successor && successor.offers.length > 0 && page.priceOnRequest) && (
+        !ordersSuccessor && (
           <PartOffers
             page={page}
             demoted={Boolean(successor)}
@@ -308,7 +318,9 @@ const thumbFor = (slug: string) => {
         pages={[page, ...(successor ? [successor] : [])]}
         installation={{ id: page.id, price: page.part.installation_price }}
       />
-      <div class="card flex flex-col gap-3 border-transparent bg-shade p-5">
+      <div
+        class="card flex flex-col gap-3 border-transparent bg-shade p-5 max-lg:order-3"
+      >
         <h2 class="text-block font-semibold">{copy.installHeading}</h2>
         {
           installPrice && (
@@ -323,6 +335,7 @@ const thumbFor = (slug: string) => {
           )
         }
         <p class="text-sm leading-relaxed text-ink-2">{copy.installBody}</p>
+        {!open && <PickupLine />}
         <button
           type="button"
           data-open-install-modal
@@ -344,52 +357,19 @@ const thumbFor = (slug: string) => {
 
     {
       shown && (
-        <div class="lg:col-start-1 lg:row-start-1">
+        <div class="max-lg:order-1 lg:col-start-1 lg:row-start-1">
           <PartGallery {...shown} />
         </div>
       )
     }
 
-    <div class="flex flex-col gap-8 lg:col-start-1">
+    <div class="flex flex-col gap-8 max-lg:order-2 lg:col-start-1">
       {
         description.length > 0 && (
           <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
             {description.map((paragraph) => (
               <p>{paragraph}</p>
             ))}
-          </div>
-        )
-      }
-      {
-        attributes.length > 0 && (
-          <div class="flex flex-col gap-3">
-            <h2 class="text-section">{copy.attributesHeading}</h2>
-            <dl class="card divide-y divide-line">
-              {attributes.map((row) => (
-                <div class="flex flex-wrap items-baseline justify-between gap-x-4 px-5 py-3 sm:px-6">
-                  <dt class="text-sm text-muted">{row.label}</dt>
-                  <dd class="spec font-semibold text-ink">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        )
-      }
-      {
-        category && (
-          <div class="flex flex-col gap-3">
-            <h2 class="text-section">{translated(category, 'name', locale)}</h2>
-            <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
-              {categoryText.map((paragraph) => (
-                <p>{paragraph}</p>
-              ))}
-            </div>
-            <a
-              href={PathBuilder.partsCategory(locale, category.slug)}
-              class="inline-flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
-            >
-              {copy.categoryLink}
-            </a>
           </div>
         )
       }
@@ -436,6 +416,21 @@ const thumbFor = (slug: string) => {
         )
       }
       {
+        attributes.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.attributesHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {attributes.map((row) => (
+                <div class="flex flex-wrap items-baseline justify-between gap-x-4 px-5 py-3 sm:px-6">
+                  <dt class="text-sm text-muted">{row.label}</dt>
+                  <dd class="spec font-semibold text-ink">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )
+      }
+      {
         applicability.length > 0 && (
           <DisclosureCard>
             <span slot="summary">
@@ -454,6 +449,25 @@ const thumbFor = (slug: string) => {
         )
       }
     </div>
+
+    {
+      category && (
+        <div class="flex flex-col gap-3 max-lg:order-4 lg:col-start-1">
+          <h2 class="text-section">{translated(category, 'name', locale)}</h2>
+          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+            {categoryText.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+          <a
+            href={PathBuilder.partsCategory(locale, category.slug)}
+            class="inline-flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
+          >
+            {copy.categoryLink}
+          </a>
+        </div>
+      )
+    }
   </section>
 
   {
@@ -471,6 +485,7 @@ const thumbFor = (slug: string) => {
                 slug={equivalentSlug(equivalent)}
                 brand={equivalent.brand.name}
                 value={equivalent.value}
+                name={equivalentName(equivalent)}
                 priced={{
                   id: equivalent.id,
                   offers: bySlug.get(equivalentSlug(equivalent))?.offers ?? [],
@@ -515,7 +530,7 @@ const thumbFor = (slug: string) => {
 
   <PartStickyCta
     slot="sticky"
-    page={page.priceOnRequest && successor?.offers.length ? successor : page}
+    page={ordersSuccessor && successor ? successor : page}
     target="offers"
   />
   <PartsInquiryModal />

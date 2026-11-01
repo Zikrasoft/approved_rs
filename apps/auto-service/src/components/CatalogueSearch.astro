@@ -14,6 +14,7 @@ interface Props {
   compact?: boolean;
   onPanel?: boolean;
   secondary?: boolean;
+  submitLabel?: string;
   class?: string;
 }
 
@@ -26,6 +27,7 @@ const {
   compact = false,
   onPanel = false,
   secondary = false,
+  submitLabel,
   class: className,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -97,7 +99,7 @@ const copy = content(locale).partsSearch;
               large ? 'min-h-14 px-5 sm:px-7' : 'min-h-12 px-4 py-2',
             ]}
           >
-            {copy.submitLabel}
+            {submitLabel ?? copy.submitLabel}
           </button>
         )
       }

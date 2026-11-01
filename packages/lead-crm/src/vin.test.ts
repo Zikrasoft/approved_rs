@@ -70,6 +70,19 @@ describe('vinOf', () => {
     expect(vinOf('HU 816 x, OX 404 D')).toBeNull();
   });
 
+  it.each([
+    'castrol edge 5w30 4l',
+    'filter oil bmw x5 e70',
+    'bosch 0986494 oil 12',
+    'oil filter golf 7 tdi',
+    'mann oil filter w712',
+  ])(
+    'refuses the search phrase %s, glued into seventeen characters only by reading O, Q and I as digits',
+    (phrase) => {
+      expect(vinOf(phrase)).toBeNull();
+    },
+  );
+
   it('reads a VIN typed on the Russian keyboard layout', () => {
     expect(vinOf('ЦИФ35ИП070Т074158')).toBe('WBA35BG070N074158');
     expect(vinOf('мшт циф35ип070т074158')).toBe('WBA35BG070N074158');

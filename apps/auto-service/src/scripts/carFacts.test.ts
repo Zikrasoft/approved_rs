@@ -26,6 +26,19 @@ describe('car-facts and My garage', () => {
     expect(localStorage.getItem(MY_GARAGE)).toBe('WBA3B1C50GL123456');
   });
 
+  it('remembers which car the VIN resolved to', () => {
+    land('?vin=WBA3B1C50GL123456');
+    document.body.innerHTML =
+      '<car-facts data-car="BMW X1 E84, sDrive18d"></car-facts>';
+
+    expect(JSON.parse(localStorage.getItem('my_garage_car') ?? 'null')).toEqual(
+      {
+        vin: 'WBA3B1C50GL123456',
+        car: 'BMW X1 E84, sDrive18d',
+      },
+    );
+  });
+
   it('confirms the VIN the page was matched by', () => {
     land('?vin=WBA3B1C50GL123456');
     expect(matched().hidden).toBe(false);

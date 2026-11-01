@@ -1,4 +1,5 @@
 ---
+import { translated } from '@podbor/catalog-contract';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -15,7 +16,8 @@ interface Props {
 const { page, target } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
-const best = shopOpen() ? bestPrice([page]) : null;
+const open = shopOpen();
+const best = open ? bestPrice([page]) : null;
 ---
 
 <BottomActionBar>
@@ -24,9 +26,15 @@ const best = shopOpen() ? bestPrice([page]) : null;
   </Fragment>
   <Fragment slot="value">
     {
-      best
-        ? priceLabel(best, copy, BCP47_BY_LOCALE[locale])
-        : copy.priceOnRequestHeading
+      best ? (
+        priceLabel(best, copy, BCP47_BY_LOCALE[locale])
+      ) : open ? (
+        copy.priceOnRequestHeading
+      ) : (
+        <span class="block max-w-[52vw] truncate">
+          {translated(page.part, 'name', locale)}
+        </span>
+      )
     }
   </Fragment>
   <part-cta-forward

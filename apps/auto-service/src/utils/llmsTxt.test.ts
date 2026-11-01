@@ -77,6 +77,13 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
+  it('lists the hero trust row as key facts', async () => {
+    const body = await generateLlmsTxt('ru');
+    content('ru').home.hero.badges.forEach((fact) =>
+      expect(body).toContain(`- ${fact}\n`),
+    );
+  });
+
   const withBackend = async (
     shopOpen: string,
     locale: 'sr' | 'ru' = 'sr',
