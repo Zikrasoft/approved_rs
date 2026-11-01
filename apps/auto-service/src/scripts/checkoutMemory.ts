@@ -5,15 +5,18 @@ import {
   writeStoredJson,
   type ValueStorage as CartStorage,
 } from '@podbor/site-kit/stored-value';
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const CONTACT_MEMORY_KEY = 'carlab_checkout_contact';
+const CONTACT_SELECTOR = `[name="${CONTACT_INPUT_FIELDS.contact}"]`;
+const CHANNEL_SELECTOR = `[name="${CONTACT_INPUT_FIELDS.channel}"]`;
 const CONTACT_FIELDS = [
   '[data-country]',
   '[data-phone]',
   '[data-telegram]',
   '[name="name"]',
-  '[name="contact"]',
+  CONTACT_SELECTOR,
 ] as const;
 const REMEMBERED_FIELDS = [
   ...CONTACT_FIELDS,
@@ -55,9 +58,7 @@ const formMemory = (
   values: Object.fromEntries(
     fields.map((selector) => [selector, fieldValue(fieldIn(form, selector))]),
   ),
-  channel:
-    form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
-    '',
+  channel: form.querySelector<HTMLInputElement>(CHANNEL_SELECTOR)?.value ?? '',
 });
 
 export function rememberCheckout(
@@ -76,7 +77,7 @@ export function rememberLeadContact(
   storage: CartStorage = sessionStorage,
 ): void {
   const lead = formMemory(form, CONTACT_FIELDS);
-  if (!lead.values['[name="contact"]']) return;
+  if (!lead.values[CONTACT_SELECTOR]) return;
   const earlier = readMemory(storage, CHECKOUT_MEMORY_KEY)?.values;
   writeMemory(storage, CHECKOUT_MEMORY_KEY, {
     values: { ...earlier, ...lead.values },
@@ -88,7 +89,7 @@ export function checkoutContact(
   storage: CartStorage = sessionStorage,
 ): { channel: string; contact: string } | null {
   const memory = readMemory(storage, CHECKOUT_MEMORY_KEY);
-  const contact = memory?.values['[name="contact"]'];
+  const contact = memory?.values[CONTACT_SELECTOR];
   return memory && contact ? { channel: memory.channel, contact } : null;
 }
 
