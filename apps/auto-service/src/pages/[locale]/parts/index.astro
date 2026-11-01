@@ -53,7 +53,7 @@ const categories = props.categories.map((category) => ({
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
   >
     <div class="max-w-3xl pt-2" {...contactCta}>
-      <CatalogueSearch large />
+      <CatalogueSearch large hint={false} />
     </div>
     <p class="max-w-2xl text-sm leading-relaxed text-muted">
       {copy.sourcingNote}
@@ -87,7 +87,7 @@ const categories = props.categories.map((category) => ({
               <li>
                 <a
                   href={PathBuilder.partsMake(locale, make.slug)}
-                  class="card flex min-h-14 items-center justify-between gap-2 p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
+                  class="card flex h-full min-h-14 items-center justify-between gap-2 p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
                 >
                   {make.name}
                   <Icon name="chevronRight" class="shrink-0 text-muted" />

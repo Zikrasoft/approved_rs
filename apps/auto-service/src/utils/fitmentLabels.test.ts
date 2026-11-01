@@ -4,6 +4,7 @@ import {
   fitNote,
   fitPosition,
   fitQuantity,
+  unconditionalFirst,
 } from './fitmentLabels';
 
 const fit = {
@@ -73,5 +74,20 @@ describe('fitNote', () => {
 describe('fitQuantity', () => {
   it('counts the pieces a car needs', () => {
     expect(fitQuantity(fit, 'ru')).toBe('2 шт.');
+  });
+});
+
+describe('unconditionalFirst', () => {
+  it('puts the fitments without a condition before the conditional ones, in order', () => {
+    const fits = [
+      { ...fit, quantity: 1, note: 'Только M Sport' },
+      { ...fit, quantity: 2 },
+      { ...fit, quantity: 3, gearbox: 'automatic' as const },
+      { ...fit, quantity: 4, axle: 'front' as const },
+    ];
+
+    expect(unconditionalFirst(fits).map(({ quantity }) => quantity)).toEqual([
+      2, 4, 1, 3,
+    ]);
   });
 });

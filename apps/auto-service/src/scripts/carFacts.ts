@@ -29,6 +29,9 @@ export function defineCarFacts(tagName = 'car-facts'): void {
       }
 
       connectedCallback(): void {
+        for (const link of document.querySelectorAll('[data-forget-vin]')) {
+          link.addEventListener('click', () => rememberVin(''));
+        }
         const vin = vinFrom(location.search);
         if (vin) {
           rememberVin(vin);

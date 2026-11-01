@@ -116,6 +116,24 @@ describe('the confirmation opened from a link alone', () => {
 
     expect(document.title).toBe('Заказ принят | CarLab');
   });
+
+  it('names the heading and the last crumb after the order', () => {
+    history.replaceState(null, '', '/ru/parts/cart/?notice=ordered&order=8');
+    defineOfferCart();
+    document.body.innerHTML = `
+      <ol><li><a data-hero-crumb>Корзина</a></li></ol>
+      <h1 data-hero-heading>Корзина</h1>
+      <offer-cart data-ordered-heading="Заказ принят">
+        <div data-state="ordered" hidden></div>
+      </offer-cart>`;
+
+    expect(document.querySelector('[data-hero-heading]')!.textContent).toBe(
+      'Заказ принят',
+    );
+    expect(document.querySelector('[data-hero-crumb]')!.textContent).toBe(
+      'Заказ принят',
+    );
+  });
 });
 
 describe('the contact on the confirmation', () => {

@@ -46,7 +46,10 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
       compact ? 'pb-6 md:pb-band' : 'pb-band md:pb-band-lg',
     ]}
   >
-    <nav aria-label={site.common.breadcrumbLabel}>
+    <nav
+      aria-label={site.common.breadcrumbLabel}
+      class:list={[trail.length <= 2 && 'max-sm:hidden']}
+    >
       <ol
         class="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted pointer-coarse:gap-y-0 max-sm:[&>li:last-child]:hidden"
       >
@@ -56,6 +59,7 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
               {i > 0 && <span aria-hidden="true">/</span>}
               <a
                 href={crumb.href}
+                data-hero-crumb={i === trail.length - 1 ? '' : undefined}
                 class="inline-flex items-center transition-colors duration-150 hover:text-signal-ink pointer-coarse:min-h-11"
               >
                 {crumb.label}

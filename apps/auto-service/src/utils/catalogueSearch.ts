@@ -98,11 +98,28 @@ export type PartLink = SearchLink & { detail: string; thumb: string | null };
 
 export type Suggestions = { cars: SearchLink[]; parts: PartLink[] };
 
+export const carLinks = (
+  cars: CarHit[],
+  locale: Locale,
+  allModifications: string,
+): SearchLink[] =>
+  cars.map((car) => {
+    const link = carLink(car, locale);
+    const vehicleListed = cars.some(
+      (other) =>
+        other.kind === 'vehicle' && other.model?.slug === car.model?.slug,
+    );
+    return car.kind === 'model' && vehicleListed
+      ? { ...link, detail: allModifications }
+      : link;
+  });
+
 export const suggestionsFrom = (
   { cars, results }: Pick<SearchOutcome, 'cars' | 'results'>,
   locale: Locale,
+  allModifications: string,
 ): Suggestions => ({
-  cars: cars.map((car) => carLink(car, locale)),
+  cars: carLinks(cars, locale, allModifications),
   parts: results.map((result) => ({
     href: PathBuilder.partNumber(locale, result.slug),
     label: `${result.brand.name} ${result.value}`,

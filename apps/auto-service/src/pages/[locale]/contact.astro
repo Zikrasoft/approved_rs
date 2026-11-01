@@ -1,6 +1,7 @@
 ---
 import BulletList from '@/components/BulletList.astro';
 import { mapPlaceUrl } from '@podbor/site-kit';
+import { contactCta } from '@podbor/site-kit/contact-control';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import LeadForm from '@/components/LeadForm.astro';
@@ -65,7 +66,11 @@ const mapLink = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
     </div>
 
     <div class="flex flex-col gap-4">
-      <div id="lead" class="card flex scroll-mt-24 flex-col gap-4 p-5">
+      <div
+        id="lead"
+        class="card flex scroll-mt-24 flex-col gap-4 p-5"
+        {...contactCta}
+      >
         <div class="flex flex-col gap-1.5">
           <h2 class="text-block font-semibold">{site.form.heading}</h2>
           <p class="text-sm leading-relaxed text-muted">

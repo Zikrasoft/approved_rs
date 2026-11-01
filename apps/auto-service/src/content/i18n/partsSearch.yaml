@@ -44,6 +44,7 @@ numberNotFound: Точного номера «{q}» в каталоге нет, 
 numberComment: Номер {q}
 similarNumbers: Похожие номера
 carsGroup: Автомобили
+allModifications: Все модификации
 partsGroup: Запчасти
 vinOption: Подобрать запчасти по VIN
 suggestFailed: Подсказки не загрузились

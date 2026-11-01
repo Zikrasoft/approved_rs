@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CarHit } from '@podbor/catalog-contract';
 import {
   carLink,
+  carLinks,
   exactPart,
   listingCrumbs,
   missingNumber,
@@ -209,6 +210,44 @@ describe('carLink', () => {
   });
 });
 
+describe('carLinks', () => {
+  it('tells a Model apart from its listed Vehicle of the same name', () => {
+    expect(
+      carLinks(
+        [
+          { kind: 'model', make, model, vehicle: null },
+          { kind: 'vehicle', make, model, vehicle },
+        ],
+        'ru',
+        'Все модификации',
+      ),
+    ).toEqual([
+      {
+        href: '/ru/parts/bmw/e83-x3-20d/',
+        label: 'BMW X3 E83 X3 2.0d',
+        detail: 'Все модификации',
+      },
+      {
+        href: '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/',
+        label: 'BMW X3 E83 X3 2.0d',
+        detail: 'N47D20A, 130 кВт, 2007–2010',
+      },
+    ]);
+  });
+
+  it('leaves a Model alone when none of its Vehicles is listed', () => {
+    expect(
+      carLinks(
+        [{ kind: 'model', make, model, vehicle: null }],
+        'ru',
+        'Все модификации',
+      ),
+    ).toEqual([
+      { href: '/ru/parts/bmw/e83-x3-20d/', label: 'BMW X3 E83 X3 2.0d' },
+    ]);
+  });
+});
+
 describe('suggestionsFrom', () => {
   it('groups cars and part numbers into links', () => {
     expect(
@@ -218,6 +257,7 @@ describe('suggestionsFrom', () => {
           results: [result('HU 816 x', 'HU816X', 'mann-filter-hu816x')],
         },
         'ru',
+        'Все модификации',
       ),
     ).toEqual({
       cars: [{ href: '/ru/parts/bmw/', label: 'BMW' }],
