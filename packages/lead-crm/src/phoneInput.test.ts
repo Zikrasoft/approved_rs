@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   bindPhoneCountry,
   fillCountrySelect,
@@ -183,35 +183,36 @@ describe('bindPhoneCountry', () => {
 });
 
 describe('sizing the select to the picked country', () => {
-  const CHAR = 10;
+  const CHAR = 9.5;
   let cap = Infinity;
+  const rect = (width: number) => ({ width }) as DOMRect;
 
   beforeEach(() => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      get(this: HTMLElement) {
-        if (!(this instanceof HTMLSelectElement)) return 0;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        if (!(this instanceof HTMLSelectElement)) return rect(0);
         if (this.style.position === 'absolute') {
-          return this.options[0]!.text.length * CHAR;
+          return rect(this.options[0]!.text.length * CHAR);
         }
-        return Math.min(parseFloat(this.style.width) || 0, cap);
+        return rect(Math.min(parseFloat(this.style.width) || 0, cap));
       },
-    });
+    );
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(HTMLElement.prototype, 'offsetWidth');
+    vi.restoreAllMocks();
     cap = Infinity;
   });
 
   const serbia =
     '<option value="RS" data-dial="381" selected>RS +381 Serbia</option>';
+  const widthOf = (text: string) => `${Math.ceil(text.length * CHAR)}px`;
 
   it('fits the whole label when there is room for it', () => {
     const { select } = mount(serbia);
     select.dispatchEvent(new Event('change'));
 
-    expect(select.style.width).toBe(`${'RS +381 Serbia'.length * CHAR}px`);
+    expect(select.style.width).toBe(widthOf('RS +381 Serbia'));
   });
 
   it('shows only the flag and the code when the whole label would be cut', () => {
@@ -219,7 +220,7 @@ describe('sizing the select to the picked country', () => {
     const { select } = mount(serbia);
     select.dispatchEvent(new Event('change'));
 
-    expect(select.style.width).toBe(`${'RS +381'.length * CHAR}px`);
+    expect(select.style.width).toBe(widthOf('RS +381'));
   });
 });
 

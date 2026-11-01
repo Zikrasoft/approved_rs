@@ -15,7 +15,7 @@ const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
 ---
 
 <div
-  class="flex min-h-11 items-center justify-between gap-4 max-lg:sticky max-lg:top-[calc(4.5rem+1px)] max-lg:z-20 max-lg:-mx-5 max-lg:border-b max-lg:border-line max-lg:bg-paper/95 max-lg:px-5 max-lg:py-2 max-lg:backdrop-blur"
+  class="flex min-h-11 items-center justify-between gap-4 max-lg:sticky max-lg:top-[calc(4.5rem+1px)] max-lg:z-20 max-lg:-mx-5 max-lg:border-b max-lg:border-line max-lg:bg-paper max-lg:px-5 max-lg:py-2"
 >
   <p class="spec text-sm text-muted" aria-live="polite">
     {count !== null && copy.found.replace('{count}', String(count))}

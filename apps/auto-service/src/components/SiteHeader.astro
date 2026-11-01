@@ -30,6 +30,8 @@ const inLocale = (code: Locale) =>
   `${swapLocale(pathname, code)}${Astro.url.search}`;
 
 const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
+const pageHasSearch =
+  onHome || navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
 const open = shopOpen();
 const basket = open
@@ -100,7 +102,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
       </nav>
 
       {
-        !onHome && (
+        !pageHasSearch && (
           <div class="hidden max-w-72 min-w-0 flex-1 xl:block">
             <CatalogueSearch compact />
           </div>
@@ -144,7 +146,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           aria-label={searchCopy.openSearch}
           class:list={[
             'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
-            !onHome && 'xl:hidden',
+            !pageHasSearch && 'xl:hidden',
           ]}
         >
           <Icon name="search" size={20} />

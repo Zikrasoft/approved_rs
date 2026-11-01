@@ -9,6 +9,7 @@ partReplacedNotice: Производитель заменил запчасть {
 previousNumber: Прежний номер
 previousNumberCurrent: Номер заменен на
 earlierNumbers: 'Ранее:'
+alsoNumbers: 'Также:'
 previousNumbersHeading: Прежние номера
 currentNumberLabel: 'Актуальный номер:'
 currentNumbersLabel: 'Актуальные номера:'

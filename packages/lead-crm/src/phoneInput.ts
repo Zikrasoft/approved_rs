@@ -19,9 +19,9 @@ function textWidth(select: HTMLSelectElement, text: string): number {
   probe.style.cssText =
     'position:absolute;visibility:hidden;pointer-events:none;width:auto;max-width:none;left:-9999px';
   document.body.append(probe);
-  const { offsetWidth } = probe;
+  const { width } = probe.getBoundingClientRect();
   probe.remove();
-  return offsetWidth;
+  return Math.ceil(width);
 }
 
 function fitToSelection(select: HTMLSelectElement): void {
@@ -31,7 +31,7 @@ function fitToSelection(select: HTMLSelectElement): void {
   const whole = textWidth(select, picked.text);
   if (whole === 0) return;
   select.style.width = `${whole}px`;
-  if (select.offsetWidth >= whole) return;
+  if (select.getBoundingClientRect().width >= whole) return;
   const flagAndCode = picked.text.split(' ', 2).join(' ');
   select.style.width = `${textWidth(select, flagAndCode)}px`;
 }

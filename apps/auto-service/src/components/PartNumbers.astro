@@ -21,23 +21,41 @@ const { current, previous } = splitNumbers(
   Astro.props.pages,
   Astro.props.first,
 );
+const [lead, ...others] = current;
 ---
 
 <div class="flex flex-col gap-1">
   {
-    current.length > 0 && (
-      <ul class="flex flex-wrap gap-x-4 gap-y-1 pointer-coarse:gap-y-0">
-        {current.map((page) => (
-          <li>
-            <a
-              href={PathBuilder.partNumber(locale, page.slug)}
-              class="inline-flex items-center gap-x-1 text-sm text-ink link-quiet pointer-coarse:min-h-11"
-            >
-              <span class="font-semibold">{page.brand.name}</span>{' '}
-              <span class="spec whitespace-nowrap">{page.value}</span>
-            </a>
+    lead && (
+      <ul class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <li>
+          <a
+            href={PathBuilder.partNumber(locale, lead.slug)}
+            class="inline-flex items-center gap-x-1 text-sm text-ink link-quiet pointer-coarse:min-h-11"
+          >
+            <span class="font-semibold">{lead.brand.name}</span>{' '}
+            <span class="spec whitespace-nowrap">{lead.value}</span>
+          </a>
+        </li>
+        {others.length > 0 && (
+          <li class="text-xs text-muted pointer-coarse:-mt-2 pointer-coarse:basis-full pointer-fine:contents">
+            <span class="pointer-fine:hidden">{copy.alsoNumbers} </span>
+            {others.map((page, index) => (
+              <>
+                {index > 0 && <span class="pointer-fine:hidden">, </span>}
+                <a
+                  href={PathBuilder.partNumber(locale, page.slug)}
+                  class="link-quiet pointer-fine:inline-flex pointer-fine:items-center pointer-fine:gap-x-1 pointer-fine:text-sm pointer-fine:text-ink"
+                >
+                  <span class="pointer-fine:font-semibold">
+                    {page.brand.name}
+                  </span>{' '}
+                  <span class="spec whitespace-nowrap">{page.value}</span>
+                </a>
+              </>
+            ))}
           </li>
-        ))}
+        )}
       </ul>
     )
   }

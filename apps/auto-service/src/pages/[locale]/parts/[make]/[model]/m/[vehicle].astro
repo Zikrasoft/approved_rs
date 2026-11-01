@@ -314,7 +314,7 @@ const specsSummary = [
                   pages={block.groups.flatMap(({ fitments }) =>
                     fitments.flatMap(({ pages }) => pages),
                   )}
-                  class="mx-5 mt-4 mb-1 sm:mx-6"
+                  class="mx-5 mt-4 mb-1 sm:mx-6 lg:max-w-[calc(var(--container-2xl)+5rem)]"
                 />
                 <ul class="divide-y divide-line">
                   {block.groups.map((group) => (
@@ -382,7 +382,7 @@ const specsSummary = [
                 <AddonNote
                   category={match.category}
                   pages={match.parts.flatMap(({ pages }) => pages)}
-                  class="mx-5 mt-4 mb-1 sm:mx-6"
+                  class="mx-5 mt-4 mb-1 sm:mx-6 lg:max-w-[calc(var(--container-2xl)+5rem)]"
                 />
                 <ul class="divide-y divide-line">
                   {match.parts.map(({ part, pages }) => (
