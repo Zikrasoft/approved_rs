@@ -1,5 +1,5 @@
 ---
-import Icon from './Icon.astro';
+import SheetClose from './SheetClose.astro';
 import {
   TELEGRAM_CHOICE_ATTRIBUTE,
   TELEGRAM_CHOICE_SELECTOR,
@@ -9,7 +9,7 @@ import { content } from '@/i18n/content';
 import { contactControl } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
-const { common, telegramChoice: copy } = content(locale).site;
+const { telegramChoice: copy } = content(locale).site;
 const tile = contactControl({ channel: 'telegram', onThanks: false, locale });
 const managerHref = tile.attrs[TELEGRAM_CHOICE_ATTRIBUTE];
 const options = [
@@ -41,14 +41,7 @@ const options = [
           <h2 id="telegram-choice-heading" class="text-block font-semibold">
             {copy.heading}
           </h2>
-          <button
-            type="button"
-            data-modal-close
-            aria-label={common.closeLabel}
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink sm:h-9 sm:w-9"
-          >
-            <Icon name="close" />
-          </button>
+          <SheetClose />
         </div>
         <ul class="flex flex-col gap-2 p-5 pt-2">
           {options.map(({ attribute, href, title, hint, tone }) => (

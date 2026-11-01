@@ -1,0 +1,24 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const { closeLabel } = content(localeFrom(Astro.url.pathname)).site.common;
+---
+
+<button
+  type="button"
+  data-modal-close
+  aria-label={closeLabel}
+  class:list={[
+    'btn-icon rounded-control border border-line hover:border-ink hover:text-ink',
+    className,
+  ]}
+>
+  <Icon name="close" />
+</button>

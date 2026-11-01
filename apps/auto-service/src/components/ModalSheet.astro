@@ -1,8 +1,6 @@
 ---
 import { MODAL_FOCUS_ATTRIBUTE } from '@podbor/site-kit/browser';
-import Icon from './Icon.astro';
-import { localeFrom } from '@/i18n/config';
-import { content } from '@/i18n/content';
+import SheetClose from './SheetClose.astro';
 
 interface Props {
   trigger: string;
@@ -12,7 +10,6 @@ interface Props {
 }
 
 const { trigger, label, heading, subheading } = Astro.props;
-const site = content(localeFrom(Astro.url.pathname)).site;
 ---
 
 <carlab-modal trigger={trigger}>
@@ -42,14 +39,7 @@ const site = content(localeFrom(Astro.url.pathname)).site;
             )
           }
         </div>
-        <button
-          type="button"
-          data-modal-close
-          aria-label={site.common.closeLabel}
-          class="btn-icon rounded-control border border-line hover:border-ink hover:text-ink"
-        >
-          <Icon name="close" />
-        </button>
+        <SheetClose />
       </div>
       <div
         class="min-h-0 flex-1 overflow-y-auto px-6 [&_.lead-submit]:sticky [&_.lead-submit]:bottom-0 [&_.lead-submit]:border-t [&_.lead-submit]:border-line [&_.lead-submit]:bg-card [&_.lead-submit]:pt-4 [&_.lead-submit]:pb-6 short:[&_.lead-submit]:gap-2 short:[&_.lead-submit]:pb-3"
