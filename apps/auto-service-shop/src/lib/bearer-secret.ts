@@ -12,7 +12,10 @@ import {
 import { parseEnv } from './env';
 
 const requireBearer =
-  (name: 'SHOP_ORDER_OUTCOME_SECRET' | 'SHOP_LEAD_SECRET') =>
+  (
+    name:
+      'SHOP_ORDER_OUTCOME_SECRET' | 'SHOP_LEAD_SECRET' | 'SHOP_EVENTS_SECRET',
+  ) =>
   (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction): void => {
     const accepted = acceptedSecrets(parseEnv(process.env), name);
     if (!secretMatches(bearerToken(req.headers.authorization), accepted)) {
@@ -27,3 +30,5 @@ export const requireOrderOutcomeSecret = requireBearer(
 );
 
 export const requireShopLeadSecret = requireBearer('SHOP_LEAD_SECRET');
+
+export const requireShopEventsSecret = requireBearer('SHOP_EVENTS_SECRET');

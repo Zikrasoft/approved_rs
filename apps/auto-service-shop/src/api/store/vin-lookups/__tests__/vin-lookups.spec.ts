@@ -5,6 +5,10 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { VIN_REFUSAL } from '@podbor/catalog-contract';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import {
+  loggedEvents,
+  watchEvents,
+} from '../../../../../integration-tests/loggedEvents';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
@@ -114,6 +118,66 @@ medusaIntegrationTestRunner({
         expect(
           await vinLookups.listVinLookups({ vin: OWNER_VIN }),
         ).toHaveLength(1);
+      });
+
+      describe('the vin.lookup event', () => {
+        watchEvents();
+
+        it('logs a resolved VIN by its maker prefix and a hash, never in full', async () => {
+          await createVehicleFixture(catalog);
+
+          await lookUp(OWNER_VIN);
+
+          const [logged] = loggedEvents('vin.lookup');
+          expect(logged).toEqual({
+            event: 'vin.lookup',
+            at: expect.any(String),
+            request_id: expect.any(String),
+            outcome: 'resolved',
+            reason: null,
+            make: 'bmw',
+            code: null,
+            wmi: 'WBA',
+            vin: expect.stringMatching(/^[0-9a-f]{12}$/),
+            candidates: 1,
+          });
+          expect(JSON.stringify(loggedEvents())).not.toContain(OWNER_VIN);
+        });
+
+        it('says why a VIN stayed unresolved', async () => {
+          await lookUp('WBA99ZZ070N000002');
+          await lookUp('1HGCM82633A004352');
+
+          expect(
+            loggedEvents('vin.lookup').map(
+              ({ outcome, reason, make, code, wmi, candidates }) => ({
+                outcome,
+                reason,
+                make,
+                code,
+                wmi,
+                candidates,
+              }),
+            ),
+          ).toEqual([
+            {
+              outcome: 'unresolved',
+              reason: 'no_vehicle',
+              make: 'bmw',
+              code: '99ZZ',
+              wmi: 'WBA',
+              candidates: 0,
+            },
+            {
+              outcome: 'unresolved',
+              reason: 'not_decoded',
+              make: null,
+              code: null,
+              wmi: '1HG',
+              candidates: 0,
+            },
+          ]);
+        });
       });
 
       it('names the Vehicle page of the resolved car once it has one', async () => {

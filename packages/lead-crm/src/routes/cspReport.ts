@@ -56,17 +56,30 @@ const reportingBatchSchema = z
 
 const violationsSchema = z.union([legacyReportSchema, reportingBatchSchema]);
 
-export async function cspReportRoute({
-  request,
-}: {
-  request: Request;
-}): Promise<Response> {
-  const read = await readJson(request, CSP_REPORT_MAX_BYTES);
-  if ('response' in read) return read.response;
-  const parsed = violationsSchema.safeParse(read.value);
-  if (!parsed.success) return new Response(null, { status: 400 });
-  for (const { directive, blocked } of parsed.data) {
-    console.info(`[csp] ${keyword.parse(directive)} ${blockedHost(blocked)}`);
-  }
-  return new Response(null, { status: 204 });
+export type CspViolation = { directive: string; blocked: string };
+
+export function createCspReportRoute(
+  onViolation: (violation: CspViolation) => void = () => {},
+) {
+  return async function cspReportRoute({
+    request,
+  }: {
+    request: Request;
+  }): Promise<Response> {
+    const read = await readJson(request, CSP_REPORT_MAX_BYTES);
+    if ('response' in read) return read.response;
+    const parsed = violationsSchema.safeParse(read.value);
+    if (!parsed.success) return new Response(null, { status: 400 });
+    for (const report of parsed.data) {
+      const violation = {
+        directive: keyword.parse(report.directive),
+        blocked: blockedHost(report.blocked),
+      };
+      console.info(`[csp] ${violation.directive} ${violation.blocked}`);
+      onViolation(violation);
+    }
+    return new Response(null, { status: 204 });
+  };
 }
+
+export const cspReportRoute = createCspReportRoute();

@@ -71,6 +71,13 @@
         "default": "./dist/cjs/partNumber.js"
       },
       "default": "./src/partNumber.ts"
+    },
+    "./events": {
+      "require": {
+        "types": "./dist/cjs/events.d.ts",
+        "default": "./dist/cjs/events.js"
+      },
+      "default": "./src/events.ts"
     }
   },
   "scripts": {

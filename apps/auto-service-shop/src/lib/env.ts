@@ -86,6 +86,9 @@ const envFields = z.object({
   STORE_SEARCHES_PER_MINUTE: optionalValue
     .transform((count) => Number(count ?? 600))
     .pipe(z.number().int().positive()),
+  STOREFRONT_EVENTS_PER_MINUTE: optionalValue
+    .transform((count) => Number(count ?? 1200))
+    .pipe(z.number().int().positive()),
   LIVE_QUOTE_CACHE_SECONDS: optionalValue
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
@@ -97,6 +100,8 @@ const envFields = z.object({
   SHOP_CLIENT_SECRET_PREVIOUS: optionalSecret,
   SHOP_ORDER_OUTCOME_SECRET: optionalSecret,
   SHOP_ORDER_OUTCOME_SECRET_PREVIOUS: optionalSecret,
+  SHOP_EVENTS_SECRET: optionalSecret,
+  SHOP_EVENTS_SECRET_PREVIOUS: optionalSecret,
   VIN_DECODERS: z
     .string()
     .default(VIN_DECODER_NAMES.join(','))

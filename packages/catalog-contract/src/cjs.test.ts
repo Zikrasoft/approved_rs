@@ -124,6 +124,18 @@ describe('CommonJS build', () => {
     ).toBe(10);
   });
 
+  it('serves the storefront event schema to require()', () => {
+    const events = require('@podbor/catalog-contract/events');
+    expect(events.STOREFRONT_EVENTS_PATH).toBe('/hooks/storefront-events');
+    expect(
+      events.storefrontEventSchema.safeParse({
+        event: 'storefront.checkout',
+        outcome: 'placed',
+        reason: null,
+      }).success,
+    ).toBe(true);
+  });
+
   it('serves the checkout contact check to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(

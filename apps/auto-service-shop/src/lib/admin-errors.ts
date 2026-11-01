@@ -18,6 +18,8 @@ import {
   type Details,
   type ErrorType,
 } from '../modules/_shared/admin-error';
+import { causeOf, logEvent } from './log-event';
+import { noteFailure, routeOf } from './request-log';
 
 type DetailedError = MedusaError & { details?: Details };
 
@@ -75,9 +77,25 @@ export const keepAdminCodes: MedusaErrorHandlerFunction = (
   next,
 ) => {
   const known = coded(error);
+  const reason =
+    known?.code ??
+    (MedusaError.isMedusaError(error) ? error.type : 'unexpected');
+  noteFailure(req, reason);
   if (!known) {
-    if (getHttpResponseFromError(error).statusCode >= 500) {
+    const status = getHttpResponseFromError(error).statusCode;
+    if (status >= 500) {
       captureException(error);
+      logEvent(
+        'store.error',
+        {
+          outcome: 'failed',
+          reason,
+          route: routeOf(req),
+          status,
+          cause: causeOf(error),
+        },
+        req.requestId ?? null,
+      );
     }
     return medusaErrorHandler(clipMessage(error), req, res, next);
   }

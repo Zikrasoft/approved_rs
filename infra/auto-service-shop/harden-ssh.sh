@@ -4,6 +4,7 @@ set -eu
 DEPLOY_USER=${DEPLOY_USER:-deploy}
 CRAWLER_USER=crawler
 POSTGRES_ADDRESS=10.200.0.10:5432
+GRAFANA_ADDRESS=127.0.0.1:3000
 crawler_key=${1:-}
 
 [ "$(id -u)" = 0 ] || {
@@ -52,6 +53,11 @@ AllowAgentForwarding no
 AllowTcpForwarding no
 AllowUsers $DEPLOY_USER $CRAWLER_USER
 
+Match User $DEPLOY_USER
+  AllowTcpForwarding local
+  PermitOpen $GRAFANA_ADDRESS
+  PermitListen none
+
 Match User $CRAWLER_USER
   AllowTcpForwarding local
   PermitOpen $POSTGRES_ADDRESS
@@ -84,7 +90,7 @@ reports() {
 reports "$DEPLOY_USER" "permitrootlogin no" "passwordauthentication no" \
   "kbdinteractiveauthentication no" "permitemptypasswords no" \
   "authenticationmethods publickey" "allowusers $DEPLOY_USER" "allowusers $CRAWLER_USER" \
-  "allowtcpforwarding no"
+  "allowtcpforwarding local" "permitopen $GRAFANA_ADDRESS" "permitlisten none"
 reports "$CRAWLER_USER" "allowtcpforwarding local" "permitopen $POSTGRES_ADDRESS" \
   "permitlisten none" "permittty no" "forcecommand /bin/false"
 

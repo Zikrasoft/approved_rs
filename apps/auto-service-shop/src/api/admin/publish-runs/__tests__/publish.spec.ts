@@ -6,6 +6,7 @@ import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { importRuns } from '../../../../../integration-tests/importRuns';
+import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
@@ -464,6 +465,44 @@ medusaIntegrationTestRunner({
         expect(run.error).toContain('500');
         expect(run.error).not.toContain('test-dispatch-token');
         expect(reindexCalls).toEqual([]);
+      });
+
+      it('logs every finished run as catalogue.run, with the failed step as its reason', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        const runs = () => loggedEvents('catalogue.run');
+        const logged = async (count: number) => {
+          const deadline = Date.now() + 10_000;
+          while (runs().length < count && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return runs();
+        };
+
+        const succeeded = await publish();
+        network.githubStatus = 500;
+        const failed = await publish();
+
+        expect(await logged(2)).toEqual([
+          expect.objectContaining({
+            outcome: 'succeeded',
+            reason: null,
+            kind: 'publish',
+            run: succeeded.id,
+            supplier: null,
+            cause: null,
+            counts: {},
+          }),
+          expect.objectContaining({
+            outcome: 'failed',
+            reason: 'deploy',
+            kind: 'publish',
+            run: failed.id,
+            cause: expect.stringContaining('500'),
+          }),
+        ]);
+        expect(runs()[0].duration_ms).toBeGreaterThanOrEqual(0);
+        expect(JSON.stringify(runs())).not.toContain('test-dispatch-token');
+        jest.restoreAllMocks();
       });
 
       it('stops before the reindex when the site build fails', async () => {

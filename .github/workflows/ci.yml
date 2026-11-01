@@ -55,6 +55,7 @@ jobs:
 
       - run: sh infra/auto-service-shop/test/scripts.test.sh
       - run: sh infra/auto-service-shop/test/compose.test.sh
+      - run: sh infra/auto-service-shop/test/logs.test.sh
       - run: sh infra/auto-service-shop/test/crawler-role.test.sh
       - run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
@@ -282,6 +283,7 @@ jobs:
         if: steps.guard.outputs.deploy == 'true'
         run: |
           tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh move-static-to-s3.sh \
+            logs-export.sh loki/config.yaml alloy/config.alloy grafana \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'

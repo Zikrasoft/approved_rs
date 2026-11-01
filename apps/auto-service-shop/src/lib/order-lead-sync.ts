@@ -1,5 +1,5 @@
-import type { Logger, MedusaContainer } from '@medusajs/framework/types';
-import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import type { MedusaContainer } from '@medusajs/framework/types';
+import { Modules } from '@medusajs/framework/utils';
 import {
   cancelOrderWorkflow,
   completeOrderWorkflow,
@@ -14,6 +14,7 @@ import {
 import { parseEnv } from './env';
 import { errorMessage } from './errors';
 import { type Lock, lockedBy, lockOf } from './lock';
+import { causeOf, logEvent, type ShopEvents } from './log-event';
 import {
   alertOwner,
   LeadRouteRefusal,
@@ -52,18 +53,42 @@ export interface OrderLeadSyncDeps {
   lock: Lock;
   send: (event: ShopOrderEvent) => Promise<void>;
   alert: (text: string) => Promise<boolean>;
-  logger: Pick<Logger, 'info' | 'warn' | 'error'>;
   adminOrigin: string;
 }
 
 export type CrmSettlement = { settled: OrderOutcome } | { conflict: string };
+
+type Handoff = ShopEvents['order.handoff'];
+type HandoffKind = Handoff['kind'];
+
+const handoffReason = (error: unknown): string => {
+  if (error instanceof LeadRouteRefusal) return `status_${error.status}`;
+  if (error instanceof Error && error.name === 'TimeoutError') return 'timeout';
+  if (error instanceof TypeError) return 'network';
+  return 'error';
+};
+
+const logHandoff = (
+  kind: HandoffKind,
+  order: string,
+  outcome: Handoff['outcome'],
+  {
+    reason = null,
+    cause = null,
+  }: Partial<Pick<Handoff, 'reason' | 'cause'>> = {},
+) => logEvent('order.handoff', { outcome, reason, kind, order, cause });
+
+const logHandoffFailure = (kind: HandoffKind, order: string, error: unknown) =>
+  logHandoff(kind, order, 'failed', {
+    reason: handoffReason(error),
+    cause: causeOf(error),
+  });
 
 export function createOrderLeadSync({
   orders,
   lock,
   send,
   alert,
-  logger,
   adminOrigin,
 }: OrderLeadSyncDeps) {
   const locked = lockedBy(lock, 'order-lead');
@@ -71,16 +96,16 @@ export function createOrderLeadSync({
   const now = () => new Date().toISOString();
 
   async function alertOnce(
+    kind: HandoffKind,
     id: string,
     stamp: (at: string) => Record<string, unknown>,
     text: string,
   ) {
     if (!(await alert(text))) {
-      logger.error(
-        `Order ${id} gave up on the lead pipeline, nobody alerted yet`,
-      );
+      logHandoff(kind, id, 'alert_failed', { reason: 'gave_up' });
       return;
     }
+    logHandoff(kind, id, 'alerted', { reason: 'gave_up' });
     await orders.patch(id, stamp(now()));
   }
 
@@ -108,13 +133,12 @@ export function createOrderLeadSync({
     const { lead } = readOrder(metadata);
     if (status === 'canceled' || lead.handed_off_at || lead.alerted_at) return;
     if (await contactHandedOffThisHour(id, metadata)) {
-      logger.warn(
-        `Order ${id} waits for a later retry: its contact reached the CRM ${SHOP_HANDOFFS_PER_CONTACT_HOUR} times this hour`,
-      );
+      logHandoff('placed', id, 'deferred', { reason: 'contact_hourly_cap' });
       return;
     }
     const undelivered = (reason: string) =>
       alertOnce(
+        'placed',
         id,
         leadStamp.ownerAlerted,
         PARTS_ORDER_COPY.undelivered(display_id ?? id, reason),
@@ -122,11 +146,11 @@ export function createOrderLeadSync({
     if (lead.gave_up) return undelivered(lead.error ?? '');
     try {
       await send(orderLeadPayload(await orders.leadOrder(id), adminOrigin));
-      logger.info(`Order ${id} handed to the lead pipeline`);
+      logHandoff('placed', id, 'delivered');
       await orders.patch(id, leadStamp.handedOff(now()));
     } catch (error) {
       const reason = errorMessage(error);
-      logger.error(`Order ${id} did not reach the lead pipeline: ${reason}`);
+      logHandoffFailure('placed', id, error);
       const recorded = await orders.patch(
         id,
         leadStamp.handOffFailed(reason, lead.attempts + 1),
@@ -147,6 +171,7 @@ export function createOrderLeadSync({
       return;
     const undelivered = (reason: string) =>
       alertOnce(
+        'canceled',
         id,
         leadStamp.cancelAlerted,
         PARTS_ORDER_COPY.cancelUndelivered(display_id ?? id, reason),
@@ -155,19 +180,18 @@ export function createOrderLeadSync({
     if (attempts >= MAX_HANDOFF_ATTEMPTS) return undelivered(lost.error ?? '');
     try {
       await send({ event: 'canceled', order_id: id });
+      logHandoff('canceled', id, 'delivered');
       await orders.patch(id, leadStamp.lost(now()));
     } catch (error) {
       if (error instanceof LeadRouteRefusal && cancelRefused(error.status)) {
-        logger.warn(
-          `Order ${id} is canceled, but the CRM refused it (${error.status}: its Lead is won or deleted)`,
-        );
+        logHandoff('canceled', id, 'refused', {
+          reason: `status_${error.status}`,
+        });
         await orders.patch(id, leadStamp.cancelRefused(now()));
         return;
       }
       const reason = errorMessage(error);
-      logger.error(
-        `Order ${id} cancel did not reach the lead pipeline: ${reason}`,
-      );
+      logHandoffFailure('canceled', id, error);
       await orders.patch(id, leadStamp.lostFailed(reason, attempts + 1));
       if (attempts + 1 >= MAX_HANDOFF_ATTEMPTS) await undelivered(reason);
     }
@@ -198,22 +222,23 @@ export function createOrderLeadSync({
   const placed = locked(handOff);
   const canceled = locked(handCancel);
 
-  const retry = (job: (id: string) => Promise<void>, id: string) =>
-    job(id).catch((error) =>
-      logger.error(`Order ${id} retry failed: ${errorMessage(error)}`),
-    );
+  const retry = (
+    kind: HandoffKind,
+    job: (id: string) => Promise<void>,
+    id: string,
+  ) => job(id).catch((error) => logHandoffFailure(kind, id, error));
 
   async function retryDue(at: Date): Promise<void> {
     const recent = await orders.createdBetween(
       new Date(at.getTime() - RETRY_WINDOW_MS),
       new Date(at.getTime() - SUBSCRIBER_GRACE_MS),
     );
-    for (const { id } of recent) await retry(placed, id);
+    for (const { id } of recent) await retry('placed', placed, id);
     const touched = await orders.updatedSince(
       new Date(at.getTime() - RETRY_WINDOW_MS),
     );
     for (const { id, status } of touched) {
-      if (status === 'canceled') await retry(canceled, id);
+      if (status === 'canceled') await retry('canceled', canceled, id);
     }
   }
 
@@ -268,7 +293,6 @@ export function orderLeadSync(container: MedusaContainer) {
       await sendShopOrderEvent(LEAD_ROUTE_URL, event, SHOP_LEAD_SECRET);
     },
     alert: (text) => alertOwner(text),
-    logger: container.resolve(ContainerRegistrationKeys.LOGGER),
     adminOrigin: ADMIN_CORS.split(',')[0]!,
   });
 }

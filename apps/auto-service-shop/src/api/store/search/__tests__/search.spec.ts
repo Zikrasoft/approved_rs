@@ -2,6 +2,10 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import {
+  loggedEvents,
+  watchEvents,
+} from '../../../../../integration-tests/loggedEvents';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -567,6 +571,100 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(200);
         expect(response.data.results).toEqual([]);
+      });
+
+      describe('the search event', () => {
+        watchEvents();
+
+        it('logs a found number search and its request line under one request id', async () => {
+          const response = await api.get('/store/search?q=HU816X&locale=ru', {
+            headers: {
+              ...storeHeaders.headers,
+              'x-request-id': 'fra1::search-test-1',
+            },
+          });
+
+          expect(response.headers['x-request-id']).toBe('fra1::search-test-1');
+          expect(loggedEvents()).toEqual([
+            expect.objectContaining({
+              event: 'search',
+              request_id: 'fra1::search-test-1',
+              outcome: 'found',
+              intent: 'number',
+              zero: false,
+              query: 'hu816x',
+              category: null,
+              scoped: false,
+            }),
+            expect.objectContaining({
+              event: 'store.request',
+              request_id: 'fra1::search-test-1',
+              route: 'GET /store/search',
+              status: 200,
+              outcome: 'ok',
+            }),
+          ]);
+          expect(loggedEvents()[0].results).toBeGreaterThan(0);
+        });
+
+        it('logs a zero-result text search and a Category listing', async () => {
+          await search({ q: 'nonexistent widget', locale: 'ru' });
+          await search({ category: 'oil-filters', locale: 'ru' });
+
+          expect(
+            loggedEvents('search').map(
+              ({ outcome, intent, zero, query, category }) => ({
+                outcome,
+                intent,
+                zero,
+                query,
+                category,
+              }),
+            ),
+          ).toEqual([
+            {
+              outcome: 'empty',
+              intent: 'text',
+              zero: true,
+              query: 'nonexistent widget',
+              category: null,
+            },
+            {
+              outcome: 'found',
+              intent: 'browse',
+              zero: false,
+              query: null,
+              category: 'oil-filters',
+            },
+          ]);
+        });
+
+        it('logs a VIN typed into search without the VIN', async () => {
+          await search({ q: 'WBA8E9C50GK644327', locale: 'ru' });
+
+          const [searched] = loggedEvents();
+          expect(searched).toMatchObject({
+            event: 'search',
+            intent: 'vin',
+            query: null,
+          });
+          expect(JSON.stringify(loggedEvents())).not.toContain(
+            'WBA8E9C50GK644327',
+          );
+        });
+
+        it('logs a refused search as a refusal with its reason', async () => {
+          await search({ q: 'filter', locale: 'de' });
+
+          expect(loggedEvents()).toEqual([
+            expect.objectContaining({
+              event: 'store.request',
+              outcome: 'refused',
+              reason: 'invalid_data',
+              status: 400,
+            }),
+          ]);
+        });
       });
 
       it('finds nothing for a query of symbols only', async () => {
