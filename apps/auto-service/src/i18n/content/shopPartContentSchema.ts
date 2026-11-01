@@ -52,6 +52,7 @@ export const shopPartContentSchema = z
       })
       .strict(),
     buyButtonLabel: z.string(),
+    buyAdding: z.string(),
     addedLabel: z.string(),
     outOfStock: z.string(),
     askSupplyCta: z.string(),

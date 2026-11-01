@@ -37,6 +37,7 @@ offerDays:
   many: 'забрать через {days} дней'
   other: 'забрать через {days} дня'
 buyButtonLabel: В корзину
+buyAdding: Добавляем…
 addedLabel: В корзине
 outOfStock: Нет в наличии
 askSupplyCta: Узнать цену и срок
