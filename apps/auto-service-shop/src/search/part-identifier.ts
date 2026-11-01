@@ -36,9 +36,12 @@ type NumberRow = {
   part_id: string;
   value: string;
   normalized_value: string;
+  superseded: boolean;
 };
 
-type FacetFieldRow = { key: string; category_id: string };
+type FacetFieldRow = { key: string; category_id: string; type: string };
+
+type ReplacementNumberRow = { id: string; part_id: string };
 
 type OfferRow = PricedOfferRow & { part_identifier_id: string };
 
@@ -56,6 +59,7 @@ type IdentifierRow = {
     translations: Translations;
     attributes: AttributeValues;
     category_id: string | null;
+    replaced_by_id: string | null;
     category: {
       slug: string;
       name: string;
@@ -80,7 +84,7 @@ const names = (
   };
 };
 
-const facets = (
+const valuesOf = (
   { attributes, category_id }: IdentifierRow['part'],
   facetFields: FacetFieldRow[],
 ) =>
@@ -89,25 +93,64 @@ const facets = (
       ({ key, category_id: fieldCategory }) =>
         fieldCategory === category_id && attributes[key] !== undefined,
     )
-    .flatMap(({ key }) =>
-      [attributes[key]].flat().map((value) => facetFilter(key, String(value))),
+    .map(({ key, type }) => ({ key, type, values: [attributes[key]].flat() }));
+
+const facets = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
+  valuesOf(part, facetFields).flatMap(({ key, values }) =>
+    values.map((value) => facetFilter(key, String(value))),
+  );
+
+const measures = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
+  valuesOf(part, facetFields)
+    .filter(({ type }) => type === 'number')
+    .flatMap(({ key, values }) =>
+      values
+        .map(Number)
+        .filter(Number.isFinite)
+        .map((value) => ({ key, value })),
     );
+
+type Catalogue = {
+  siblings: NumberRow[];
+  replacements: ReplacementNumberRow[];
+  published: Set<string>;
+};
+
+const listed = (
+  row: IdentifierRow,
+  { siblings, replacements, published }: Catalogue,
+) => {
+  const retired = replacements.some(
+    ({ id, part_id }) =>
+      part_id === row.part.replaced_by_id && published.has(id),
+  );
+  const succeeded =
+    row.superseded &&
+    siblings.some(
+      ({ id, part_id, superseded }) =>
+        part_id === row.part.id &&
+        id !== row.id &&
+        !superseded &&
+        published.has(id),
+    );
+  return !retired && !succeeded;
+};
 
 const STANDING = { superseded: 0, unbuyable: 1, buyable: 2 } as const;
 
 const toDocument = (
   row: IdentifierRow,
-  siblings: NumberRow[],
+  catalogue: Catalogue,
   facetFields: FacetFieldRow[],
   own: PartOffer[],
-  published: Set<string>,
   fitments: FitmentRow[],
 ) => {
   const [best] = own;
   return {
     id: row.id,
     part_id: row.part.id,
-    published: published.has(row.id),
+    published: catalogue.published.has(row.id),
+    listed: listed(row, catalogue),
     standing: row.superseded
       ? STANDING.superseded
       : own.some(isBuyable)
@@ -115,7 +158,7 @@ const toDocument = (
         : STANDING.unbuyable,
     brand: row.brand.name,
     number: [row.value, row.normalized_value],
-    equivalent_numbers: siblings
+    equivalent_numbers: catalogue.siblings
       .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
       .flatMap(({ value, normalized_value }) => [value, normalized_value]),
     ...names('name', row.part),
@@ -130,6 +173,7 @@ const toDocument = (
       ...(best?.stock_quantity ? [facetFilter(IN_STOCK_FACET, IN_STOCK)] : []),
       ...facets(row.part, facetFields),
     ],
+    measures: measures(row.part, facetFields),
     price: best?.price,
     cars: [
       ...new Set(
@@ -154,6 +198,7 @@ const source = {
     'part.translations',
     'part.attributes',
     'part.category_id',
+    'part.replaced_by_id',
     'part.category.slug',
     'part.category.name',
     'part.category.translations',
@@ -165,21 +210,31 @@ const source = {
     const categoryIds = rows.flatMap(({ part }) =>
       part.category_id ? [part.category_id] : [],
     );
+    const replacedBy = rows.flatMap(({ part }) =>
+      part.replaced_by_id ? [part.replaced_by_id] : [],
+    );
     const [
       { data: siblings },
+      { data: replacements },
       { data: facetFields },
       { data: offers },
-      { data: published },
       { data: fitments },
     ] = await Promise.all([
       container.query.graph({
         entity: 'part_identifier',
-        fields: ['id', 'part_id', 'value', 'normalized_value'],
+        fields: ['id', 'part_id', 'value', 'normalized_value', 'superseded'],
         filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
       }),
+      replacedBy.length
+        ? container.query.graph({
+            entity: 'part_identifier',
+            fields: ['id', 'part_id'],
+            filters: { part_id: [...new Set(replacedBy)] },
+          })
+        : { data: [] },
       container.query.graph({
         entity: 'category_field',
-        fields: ['key', 'category_id'],
+        fields: ['key', 'category_id', 'type'],
         filters: { category_id: [...new Set(categoryIds)], facet: true },
       }),
       container.query.graph({
@@ -196,11 +251,6 @@ const source = {
         filters: { part_identifier_id: rows.map(({ id }) => id) },
       }),
       container.query.graph({
-        entity: 'published_number',
-        fields: ['id'],
-        filters: { id: rows.map(({ id }) => id) },
-      }),
-      container.query.graph({
         entity: 'fitment',
         fields: [
           'part_id',
@@ -211,15 +261,31 @@ const source = {
         filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
       }),
     ]);
+    const { data: published } = await container.query.graph({
+      entity: 'published_number',
+      fields: ['id'],
+      filters: {
+        id: [
+          ...new Set(
+            [...rows, ...siblings, ...replacements].map(
+              ({ id }: { id: string }) => id,
+            ),
+          ),
+        ],
+      },
+    });
     const offersOf = offersByIdentifier(offers as OfferRow[]);
-    const publishedIds = new Set(published.map(({ id }: { id: string }) => id));
+    const catalogue: Catalogue = {
+      siblings: siblings as NumberRow[],
+      replacements: replacements as ReplacementNumberRow[],
+      published: new Set(published.map(({ id }: { id: string }) => id)),
+    };
     return rows.map((row) =>
       toDocument(
         row,
-        siblings as NumberRow[],
+        catalogue,
         facetFields as FacetFieldRow[],
         offersOf.get(row.id) ?? [],
-        publishedIds,
         fitments as FitmentRow[],
       ),
     );
@@ -282,6 +348,7 @@ export default defineSearchIndex({
     id: search.keyword().filterable().retrievable(),
     part_id: search.keyword().filterable().retrievable(false),
     published: search.boolean().filterable().retrievable(false),
+    listed: search.boolean().filterable().retrievable(false),
     standing: search.integer().sortable().retrievable(false),
     category: search.keyword().filterable().retrievable(false),
     cars: search.keyword().array().filterable().retrievable(false),
@@ -300,6 +367,14 @@ export default defineSearchIndex({
       .keyword()
       .array()
       .facetable()
+      .filterable()
+      .retrievable(false),
+    measures: search
+      .object({
+        key: search.keyword().filterable(),
+        value: search.float().filterable(),
+      })
+      .array()
       .filterable()
       .retrievable(false),
     price: search

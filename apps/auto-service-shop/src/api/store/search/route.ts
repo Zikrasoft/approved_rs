@@ -13,11 +13,9 @@ import {
   type CatalogLocale,
   categoryFieldSchema,
   describeFacet,
-  facetFilter,
   imageSchema,
   IN_STOCK,
   IN_STOCK_FACET,
-  inRange,
   partNumberQuery,
   PRICE_FACET,
   type RangeFilter,
@@ -64,6 +62,7 @@ import type { StoreSearchPartsType } from '../validators';
 
 const FACETS_FIELD = 'facets';
 const PRICE_FIELD = 'price';
+const MEASURES_FIELD = 'measures';
 const FACET_VALUE_LIMIT = 500;
 const FACET_REQUESTS = [
   { field: FACETS_FIELD, limit: FACET_VALUE_LIMIT },
@@ -142,12 +141,15 @@ const counted = (facets: SearchFacets): Counted => ({
   price: priceStatsSchema.parse(facets?.[PRICE_FIELD]),
 });
 
-const priceFilter = ({ min, max }: RangeFilter): SearchFilters => ({
-  [PRICE_FIELD]: {
+const rangeSearchFilter = ({ key, min, max }: RangeFilter): SearchFilters => {
+  const bounds = {
     ...(min === null ? {} : { $gte: min }),
     ...(max === null ? {} : { $lte: max }),
-  },
-});
+  };
+  return key === PRICE_FACET
+    ? { [PRICE_FIELD]: bounds }
+    : { [MEASURES_FIELD]: { key, value: bounds } };
+};
 
 const isUniversal = (key: string) =>
   (UNIVERSAL_FACET_KEYS as readonly string[]).includes(key);
@@ -240,9 +242,6 @@ export async function GET(
   const locale = parsedLocale.data;
   const shown = pricesShown(req);
   const facetRequests = shown ? FACET_REQUESTS : FACET_REQUESTS.slice(0, 1);
-  const range = shown
-    ? requestedRanges
-    : requestedRanges.filter(({ key }) => key !== PRICE_FACET);
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   const [found] = category
@@ -322,23 +321,38 @@ export async function GET(
   const filters: SearchFilters = searchableQuery(partQuery)
     ? { q: partQuery.toLowerCase() }
     : {};
-  const fieldKeys = [...facetGroups(requestedFacets).keys()].filter(
-    (key) => !isUniversal(key),
+  const fieldKeys = [
+    ...new Set([
+      ...requestedFacets.map((facet) => splitFacet(facet).key),
+      ...requestedRanges.map(({ key }) => key),
+    ]),
+  ].filter((key) => !isUniversal(key));
+  const knownFields = fieldKeys.length
+    ? await catalog.listCategoryFields(
+        {
+          facet: true,
+          key: fieldKeys,
+          ...(found ? { category_id: found.id } : {}),
+        },
+        { select: ['key', 'type'], take: null },
+      )
+    : [];
+  const knownKeys = new Set(knownFields.map(({ key }) => key));
+  const rangeKeys = new Set([
+    ...(shown ? [PRICE_FACET] : []),
+    ...knownFields
+      .filter(({ type }) => type === 'number')
+      .map(({ key }) => key),
+  ]);
+  const facetKeys = new Set([
+    BRAND_FACET,
+    ...(shown ? [IN_STOCK_FACET] : []),
+    ...knownKeys,
+  ]);
+  const facets = requestedFacets.filter((facet) =>
+    facetKeys.has(splitFacet(facet).key),
   );
-  const knownKeys = new Set(
-    fieldKeys.length
-      ? (
-          await catalog.listCategoryFields(
-            { facet: true, key: fieldKeys },
-            { select: ['key'], take: null },
-          )
-        ).map(({ key }) => key)
-      : [],
-  );
-  const facets = requestedFacets.filter((facet) => {
-    const { key } = splitFacet(facet);
-    return isUniversal(key) || knownKeys.has(key);
-  });
+  const range = requestedRanges.filter(({ key }) => rangeKeys.has(key));
   const groups = facetGroups(facets);
   const scope: SearchFilters[] = [{ published: true }];
   const nothing = () => {
@@ -361,6 +375,9 @@ export async function GET(
   if (!filters.q && !found && !cars.keys.length) {
     nothing();
     return;
+  }
+  if (!filters.q) {
+    scope.push({ listed: true });
   }
   if (!filters.q && cars.keys.length) {
     scope.push({ cars: { $in: cars.keys } });
@@ -392,16 +409,16 @@ export async function GET(
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const priceRange = range.find(({ key }) => key === PRICE_FACET);
-  const filtersFor = (applied: KeyFilter): SearchFilters => {
-    const and = [
+  const filtersFor = (applied: KeyFilter): SearchFilters => ({
+    ...filters,
+    $and: [
       ...scope,
       ...[...groups]
         .filter(([key]) => applied(key))
         .map(([, values]) => ({ [FACETS_FIELD]: { $in: values } })),
-      ...(priceRange && applied(PRICE_FACET) ? [priceFilter(priceRange)] : []),
-    ];
-    return and.length ? { ...filters, $and: and } : filters;
-  };
+      ...range.filter(({ key }) => applied(key)).map(rangeSearchFilter),
+    ],
+  });
   const countFacets = async (applied: KeyFilter): Promise<Counted> => {
     const { search_result } = await query.search({
       entity: PART_IDENTIFIER_INDEX,
@@ -412,34 +429,23 @@ export async function GET(
     });
     return counted(search_result.facets);
   };
-  const fieldRanges = range.filter(({ key }) => key !== PRICE_FACET);
-  const everything =
-    groups.size || fieldRanges.length
-      ? (await countFacets(() => false)).values
-      : [];
-  for (const bounds of fieldRanges) {
-    const known = everything
-      .map(({ value }) => splitFacet(value))
-      .filter(({ key, value }) => key === bounds.key && inRange(value, bounds))
-      .map(({ value }) => facetFilter(bounds.key, value));
-    const picked = groups.get(bounds.key);
-    const within = picked
-      ? picked.filter((facet) => known.includes(facet))
-      : known;
-    groups.set(
-      bounds.key,
-      within.length ? within : [facetFilter(bounds.key, '')],
-    );
-  }
+  const chosenKeys = [
+    ...new Set([
+      ...groups.keys(),
+      ...range.filter(({ key }) => key !== PRICE_FACET).map(({ key }) => key),
+    ]),
+  ];
+  const everything = chosenKeys.length
+    ? (await countFacets(() => false)).values
+    : [];
   const disjunctiveCounts = async (main: Counted): Promise<Counted> => {
-    const chosenKeys = [...groups.keys()];
     const [perKey, withoutPrice] = await Promise.all([
       Promise.all(
         chosenKeys.map((chosen) => countFacets((key) => key !== chosen)),
       ),
       priceRange ? countFacets((key) => key !== PRICE_FACET) : main,
     ]);
-    const values = groups.size
+    const values = chosenKeys.length
       ? everything.map(({ value }) => {
           const at = chosenKeys.indexOf(splitFacet(value).key);
           const source = at === -1 ? main : perKey[at];
@@ -519,13 +525,15 @@ export async function GET(
     searchResponseSchema.parse({
       results,
       facets: usefulFacets(
-        await describeFacets(
-          catalog,
-          await disjunctiveCounts(counted(search_result.facets)),
-          locale,
-          found?.id,
-          facets,
-        ),
+        (
+          await describeFacets(
+            catalog,
+            await disjunctiveCounts(counted(search_result.facets)),
+            locale,
+            found?.id,
+            facets,
+          )
+        ).filter(({ key }) => shown || key !== IN_STOCK_FACET),
         count,
         [
           ...facets.map((facet) => splitFacet(facet).key),

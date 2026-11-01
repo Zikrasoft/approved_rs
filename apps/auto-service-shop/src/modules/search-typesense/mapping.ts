@@ -98,6 +98,9 @@ const compileFieldFilter = (field: string, value: unknown): string => {
   if (keys.length === 1 && keys[0] === '$in' && Array.isArray(operators.$in)) {
     return `${field}:=[${operators.$in.map(quote).join(',')}]`;
   }
+  if (keys.length && !keys.some((key) => key.startsWith('$'))) {
+    return `${field}.{${compileFilters(value as SearchTypes.SearchFilters)}}`;
+  }
   const comparisons: Record<string, string> = { $gte: '>=', $lte: '<=' };
   if (keys.every((key) => key in comparisons)) {
     return keys

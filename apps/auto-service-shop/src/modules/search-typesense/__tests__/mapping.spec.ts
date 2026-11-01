@@ -234,6 +234,14 @@ describe('compileFilters', () => {
     expect(compileFilters({ price: { $gte: 1000 } })).toBe('price:>=1000');
     expect(compileFilters({ price: { $lte: 2500 } })).toBe('price:<=2500');
   });
+
+  it('compiles a filter on one element of an object array', () => {
+    expect(
+      compileFilters({
+        measures: { key: 'capacity', value: { $gte: 70, $lte: 80.5 } },
+      }),
+    ).toBe('measures.{key:=`capacity` && value:>=70 && value:<=80.5}');
+  });
 });
 
 describe('toFacetResults', () => {
