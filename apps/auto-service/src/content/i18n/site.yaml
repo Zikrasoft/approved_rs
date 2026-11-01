@@ -90,7 +90,7 @@ translations:
     nav:
       services: Usluge
       parts: Rezervni delovi
-      works: Naši radovi
+      works: Primeri radova
       process: Kako radimo
       about: O servisu
       contact: Kontakt
@@ -100,10 +100,10 @@ translations:
       languages: Drugi jezici
     header:
       menuOpenLabel: Meni
-      menuCloseLabel: Zatvori meni
+      menuCloseLabel: Zatvorite meni
       languageLabel: Jezik
       cta: Zakažite termin
-      partsCta: Pronađi deo
+      partsCta: Upit
       phoneLabel: Pozovite
     footer:
       tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
@@ -118,17 +118,17 @@ translations:
       developerCredit: Sajt je izradio studio Zikrasoft
     common:
       homeLabel: Početna
-      skipToContent: Pređi na sadržaj
+      skipToContent: Pređite na sadržaj
       breadcrumbLabel: Putanja navigacije
       primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
-      closeLabel: Zatvori
+      closeLabel: Zatvorite
       fromPrice: od
       priceOnRequest: na upit
       allServices: Sve usluge
-      allWorks: Svi naši radovi
-      emptyWorks: Uskoro ćemo objaviti naše radove. U međuvremenu nas pozovite, reći ćemo vam šta smo radili na sličnim automobilima.
+      allWorks: Svi primeri radova
+      emptyWorks: Primeri radova stižu uskoro. U međuvremenu nas pozovite, reći ćemo Vam šta smo radili na sličnim automobilima.
       socialHeading: Pratite nas na društvenim mrežama
     channels:
       call: Pozovite
@@ -138,33 +138,34 @@ translations:
     telegramChoice:
       heading: Kako želite da nam pišete?
       bot: Preko bota
-      botHint: Opišite problem sa automobilom, naš saradnik će vam odgovoriti u istom četu
-      manager: Direktno našem saradniku
-      managerHint: Privatni razgovor sa našim saradnikom na Telegramu
+      botHint: Opišite problem sa automobilom, saradnik će Vam odgovoriti u istom četu
+      manager: Direktno saradniku
+      managerHint: Privatni čet sa saradnikom na Telegramu
     form:
       heading: Zakažite termin u servisu
-      subheading: Opišite problem sa automobilom. Pozvaćemo vas da razjasnimo detalje i kažemo vam termin i cenu.
+      subheading: Opišite problem sa automobilom. Pozvaćemo Vas, proveriti detalje i reći Vam termin i cenu.
       nameLabel: Ime (nije obavezno)
-      namePlaceholder: Kako da vam se obraćamo
+      namePlaceholder: Kako da Vam se obraćamo
       contactLabel: Telefon
       contactPlaceholder: 64 123 4567
-      telegramPlaceholder: '@username ili telefon'
-      contactChannelLabel: Kako da vas kontaktiramo
+      telegramPlaceholder: '@username ili broj telefona'
+      contactChannelLabel: Kako da Vas kontaktiramo
       channelPhone: Telefonski poziv
       countryLabel: Pozivni broj države
       commentLabel: Automobil i opis problema
-      commentPlaceholder: Marka, model, godište i problem koji primećujete
-      submit: Pošaljite zahtev
-      submitting: Šaljemo…
+      commentPlaceholder: Marka, model, godište i opis problema
+      submit: Pošaljite upit
+      submitting: Slanje…
       privacyNote: Slažem se sa
       privacyLinkText: politikom privatnosti
+      privacyOpen: Otvorite
       modalTitle: Zakažite termin u servisu
-      errorPhone: Proverite broj telefona, izgleda da nije unet do kraja
+      errorPhone: Proverite broj telefona, izgleda da nije unet u celosti
       errorPhoneTooLong: Proverite broj telefona, ima previše cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
-      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, brojevi i _'
-      errorConsent: Bez vaše saglasnosti ne možemo da pošaljemo zahtev
-      errorSubmit: Zahtev nije poslat. Proverite vezu i pokušajte ponovo
+      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
+      errorConsent: Bez Vaše saglasnosti ne možemo da pošaljemo upit
+      errorSubmit: Upit nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće
       more: Više informacija u
@@ -189,10 +190,10 @@ translations:
       menuCloseLabel: Close menu
       languageLabel: Language
       cta: Book an appointment
-      partsCta: Find parts
+      partsCta: Enquiry
       phoneLabel: Call us
     footer:
-      tagline: Independent car service in Belgrade. Diagnostics, repairs, bodywork and respraying, plus help finding the right parts.
+      tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and respraying, and help finding the right parts.
       servicesHeading: Services
       companyHeading: Workshop
       contactHeading: Contact
@@ -214,7 +215,7 @@ translations:
       priceOnRequest: on request
       allServices: All services
       allWorks: View all our work
-      emptyWorks: Examples of our work are coming soon. In the meantime, give us a call and we'll tell you about work we've done on similar cars.
+      emptyWorks: Examples of our work are coming soon. In the meantime, give us a call and we'll tell you about jobs we've done on similar cars.
       socialHeading: Follow us
     channels:
       call: Call us
@@ -224,11 +225,11 @@ translations:
     telegramChoice:
       heading: How would you like to message us?
       bot: Via our bot
-      botHint: Tell us what's wrong with your car and a service advisor will reply in the same chat
-      manager: Message a service advisor directly
-      managerHint: A private Telegram chat with a service advisor
+      botHint: Tell us what's wrong with your car and a member of our team will reply in the same chat
+      manager: Message our team directly
+      managerHint: A private Telegram chat with a member of our team
     form:
-      heading: Book a service appointment
+      heading: Book a workshop appointment
       subheading: Tell us what's wrong with your car. We'll call you back to discuss the details, arrange a time and give you a price.
       nameLabel: Name (optional)
       namePlaceholder: What should we call you?
@@ -240,17 +241,18 @@ translations:
       countryLabel: Country code
       commentLabel: Your car and the problem
       commentPlaceholder: Make, model, year and what's wrong
-      submit: Send request
+      submit: Send enquiry
       submitting: Sending…
       privacyNote: I agree to the
       privacyLinkText: privacy policy
-      modalTitle: Book a service appointment
-      errorPhone: Please check your phone number. It looks incomplete
-      errorPhoneTooLong: Check your phone number, it has too many digits.
+      privacyOpen: Open
+      modalTitle: Book a workshop appointment
+      errorPhone: Check your phone number. It looks incomplete
+      errorPhoneTooLong: Check your phone number. It has too many digits
       errorTelegram: Enter your Telegram @username or phone number
       errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
-      errorConsent: Please give your consent before sending your request
-      errorSubmit: Your request wasn't sent. Check your connection and try again
+      errorConsent: We can't send your enquiry without your consent
+      errorSubmit: Your enquiry wasn't sent. Check your connection and try again
     cookie:
       notice: We use cookies
       more: Find out more in our
@@ -258,4 +260,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 4c03e0f91eae364a
+translatedFrom: 322563ef47044662
