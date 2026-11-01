@@ -60,7 +60,7 @@ const availability = told && (told.stock ?? told.lead ?? copy.outOfStock);
       </span>
       <span class="text-xs text-ink-2">{availability}</span>
     </span>
-  ) : (
+  ) : shopOpen() ? (
     <span
       class:list={[
         'text-right text-sm font-semibold whitespace-nowrap text-ink-2',
@@ -69,5 +69,5 @@ const availability = told && (told.stock ?? told.lead ?? copy.outOfStock);
     >
       {copy.priceOnRequestTag}
     </span>
-  )
+  ) : null
 }
