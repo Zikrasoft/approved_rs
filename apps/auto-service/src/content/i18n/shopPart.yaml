@@ -1,8 +1,9 @@
 metaTitleSuffix: CarLab
 metaDescription: Бренды, аналоги, цены и наличие этой запчасти в каталоге CarLab. Самовывоз в сервисе в Белграде.
+metaDescriptionClosed: Оригинальные номера, аналоги и применимость этой запчасти. Подберем по VIN, привезем и установим в сервисе CarLab в Белграде.
 eyebrow: Запчасть
 equivalentsHeading: Аналоги этой запчасти
-noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
+noEquivalents: Подберем замену от другого производителя, напишите нам.
 equivalentsLead: Детали других производителей, которые ставятся вместо этой.
 numberSupersededNotice: Номер {number} больше не используется производителем.
 partReplacedNotice: Производитель заменил запчасть {number} новой.
@@ -14,6 +15,7 @@ previousNumbersHeading: Прежние номера
 currentNumberLabel: 'Актуальный номер:'
 currentNumbersLabel: 'Актуальные номера:'
 successorOffersHeading: Купить актуальную запчасть
+successorOrderHeading: Заказать актуальную запчасть
 attributesHeading: Характеристики
 attributeYes: Да
 attributeNo: Нет
@@ -23,6 +25,12 @@ priceOnRequestBody: 'Запчастей в каталоге слишком мн�
 priceOnRequestCta: Узнать цену и срок
 pricedEquivalentLabel: Аналог с ценой
 orderBody: Проверим у поставщиков и пришлем цену и срок, обычно в течение часа.
+orderHeading: Закажем эту запчасть
+orderBodyClosed: Пришлите VIN или просто оставьте контакт. Проверим, что запчасть подходит вашей машине, и назовем цену и срок.
+fitsLabel: Подходит для
+fitsMore: и еще {count}
+oemLabel: Оригинальный номер
+askInMessenger: Или напишите в мессенджер
 offersHeading: Цена и наличие
 moreOffers: 'Еще одно предложение: {offer}'
 moreOffersCheaper: 'Есть дешевле: {offer}'

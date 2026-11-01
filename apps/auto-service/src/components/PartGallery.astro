@@ -10,7 +10,7 @@ interface Props {
   note?: string;
 }
 
-const MAIN_SIZES = '(min-width: 64rem) 34rem, calc(100vw - 2rem)';
+const MAIN_SIZES = '(min-width: 64rem) 42rem, calc(100vw - 2rem)';
 
 const { images, alt, note } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).shopPart;
@@ -23,7 +23,7 @@ const label = (index: number) =>
 
 {
   main && (
-    <part-gallery class="flex w-full max-w-136 flex-col gap-3">
+    <part-gallery class="flex w-full max-w-136 flex-col gap-3 lg:max-w-none">
       <figure class="flex flex-col gap-2">
         <PartImage
           frame="flex aspect-[4/3] max-h-[35svh] items-center justify-center sm:aspect-square sm:max-h-none overflow-hidden rounded-block bg-shade"
