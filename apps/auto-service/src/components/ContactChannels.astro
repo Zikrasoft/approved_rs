@@ -12,8 +12,12 @@ import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   class?: string;
-  placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero' | 'header'>;
+  placement?: Extract<
+    ContactPlacement,
+    'bar' | 'thanks' | 'hero' | 'header' | 'footer'
+  >;
   tone?: 'card' | 'panel';
+  look?: 'tiles' | 'links';
   service?: ServiceSlug;
   lead?: TrackedContactChannel;
   leadPrimary?: boolean;
@@ -25,6 +29,7 @@ const {
   class: className = '',
   placement = 'bar',
   tone = 'card',
+  look = 'tiles',
   service,
   lead,
   leadPrimary = false,
@@ -59,6 +64,20 @@ const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
     iconSize: 16,
     label: 'text-xs lg:text-[0.8125rem]',
   },
+  footer: {
+    channels: ['whatsapp', 'viber', 'telegram'],
+    list: 'grid grid-cols-3 gap-2 md:flex md:flex-col md:gap-0',
+    tile: 'min-h-11 justify-center gap-2 px-2 md:min-h-9 md:justify-start md:border-0 md:px-0 md:text-ink-2',
+    iconSize: 16,
+    label: 'text-sm',
+  },
+};
+const LINKS: Variant = {
+  channels: ['telegram', 'whatsapp', 'viber'],
+  list: 'flex flex-wrap items-center gap-x-4 gap-y-1',
+  tile: 'link-underlined inline-flex min-h-11 items-center font-semibold text-ink',
+  iconSize: 0,
+  label: '',
 };
 const TONE = {
   card: {
@@ -78,7 +97,8 @@ const CHANNEL = {
   telegram: { icon: 'telegram', label: site.channels.telegram },
 } as const;
 
-const variant = VARIANT[placement];
+const links = look === 'links';
+const variant = links ? LINKS : VARIANT[placement];
 const offered = only ?? variant.channels;
 const channels = lead
   ? [lead, ...offered.filter((channel) => channel !== lead)]
@@ -112,22 +132,32 @@ const columns =
         service={service}
         prefill={prefill}
         listItem
-        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${toneOf(channel).surface}`}
+        class={
+          links
+            ? variant.tile
+            : `group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${toneOf(channel).surface}`
+        }
         plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line-strong bg-card px-4 py-2.5"
       >
-        <Icon
-          name={CHANNEL[channel].icon}
-          size={variant.iconSize}
-          class:list={[
-            'shrink-0 transition-colors duration-150',
-            toneOf(channel) === PRIMARY
-              ? PRIMARY.icon
-              : `group-hover:text-signal group-focus-visible:text-signal ${TONE[tone].icon}`,
-          ]}
-        />
-        <span class:list={['spec whitespace-nowrap', variant.label]}>
-          {CHANNEL[channel].label}
-        </span>
+        {links ? (
+          CHANNEL[channel].label
+        ) : (
+          <Fragment>
+            <Icon
+              name={CHANNEL[channel].icon}
+              size={variant.iconSize}
+              class:list={[
+                'shrink-0 transition-colors duration-150',
+                toneOf(channel) === PRIMARY
+                  ? PRIMARY.icon
+                  : `group-hover:text-signal group-focus-visible:text-signal ${TONE[tone].icon}`,
+              ]}
+            />
+            <span class:list={['spec whitespace-nowrap', variant.label]}>
+              {CHANNEL[channel].label}
+            </span>
+          </Fragment>
+        )}
         <Icon slot="plain" name="phone" size={18} class="shrink-0 text-muted" />
       </ContactControl>
     ))

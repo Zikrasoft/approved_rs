@@ -4,6 +4,8 @@ import ContactChannels from './ContactChannels.astro';
 import SocialLinks from './SocialLinks.astro';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import type { ServiceSlug } from '@/utils/services';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 
 interface Props {
   eyebrow: string;
@@ -13,6 +15,7 @@ interface Props {
   commentPlaceholder?: string;
 }
 const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
 ---
 
 <section id="lead" class="wrap scroll-mt-24 mt-band" {...contactCta}>
@@ -21,7 +24,10 @@ const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
       <span class="eyebrow">{eyebrow}</span>
       <h2 class="text-section">{heading}</h2>
       <p class="max-w-md text-base leading-relaxed text-muted">{body}</p>
-      <ContactChannels class="mt-2" service={service} />
+      <div class="mt-1 flex flex-wrap items-center gap-x-4">
+        <span class="text-sm text-muted">{site.common.writeInstead}</span>
+        <ContactChannels look="links" service={service} />
+      </div>
       <SocialLinks class="mt-2" />
     </div>
     <slot name="form">

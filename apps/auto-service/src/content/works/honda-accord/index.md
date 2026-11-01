@@ -1,5 +1,5 @@
 ---
-title: 'ТО Honda Accord в Белграде: масло и фильтры'
+title: 'ТО Honda Accord: масло и фильтры'
 translations:
   en:
     title: "Honda Accord servicing in Belgrade: oil and filters"

@@ -22,6 +22,17 @@ export const publishedWorks = (works: WorkEntry[]): Work[] =>
     Boolean(work.data.image),
   );
 
+export const featuredWorks = (works: WorkEntry[]): Work[] => {
+  const published = publishedWorks(works);
+  return [
+    ...published.filter((work) => work.data.featured),
+    ...published.filter((work) => !work.data.featured),
+  ];
+};
+
+export const titleNamesCar = (title: string, car: string) =>
+  title.toLowerCase().startsWith(car.toLowerCase());
+
 const sourcedBy = (page: PartPageEntry, { brand, number }: WorkPart) => {
   const wanted = brand.trim().toLowerCase();
   return (

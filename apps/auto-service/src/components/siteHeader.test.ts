@@ -50,7 +50,7 @@ describe('SiteHeader', () => {
     expect(basket(root).querySelector('span[aria-hidden="true"]')).toBeNull();
     expect(basket(root).hasAttribute(PARTS_INQUIRY_OPEN_ATTRIBUTE)).toBe(true);
     expect(
-      root.querySelector('[data-open-lead-modal]')?.textContent?.trim(),
+      root.querySelector('[data-open-lead-modal=""]')?.textContent?.trim(),
     ).toBe(site.header.cta);
   });
 
@@ -75,8 +75,12 @@ describe('SiteHeader', () => {
       setShop(false);
       const root = await header(path);
 
-      expect(root.querySelector('div.xl\\:block catalogue-search')).toBeNull();
-      expect(searchButton(root).classList.contains('xl:hidden')).toBe(false);
+      expect(
+        root.querySelector('div.min-\\[1360px\\]\\:block catalogue-search'),
+      ).toBeNull();
+      expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
+        false,
+      );
     },
   );
 
@@ -84,8 +88,57 @@ describe('SiteHeader', () => {
     setShop(false);
     const root = await header('/ru/parts/');
 
-    expect(root.querySelector('div.xl\\:block')).not.toBeNull();
-    expect(searchButton(root).classList.contains('xl:hidden')).toBe(true);
+    expect(root.querySelector('div.min-\\[1360px\\]\\:block')).not.toBeNull();
+    expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
+      true,
+    );
     expect(searchButton(root).getAttribute('href')).toBe('/ru/parts/');
+  });
+
+  it('links the about page from the primary nav instead of an in-page anchor', async () => {
+    setShop(false);
+    const root = await header('/ru/services/');
+    const labels = [...root.querySelectorAll('nav[aria-label] a')].map(
+      (link) => [link.textContent?.trim(), link.getAttribute('href')],
+    );
+
+    expect(labels).toContainEqual([site.nav.about, '/ru/about/']);
+    expect(labels.map(([, href]) => href)).not.toContain('/ru/#process');
+  });
+
+  it('reveals a mouse callback beside the booking once the page contact block scrolls away', async () => {
+    setShop(false);
+    const reveal = (await header('/ru/services/')).querySelector('cta-reveal')!;
+    const [call, callback, booking] = [...reveal.querySelectorAll('a')];
+
+    expect(call.getAttribute('href')).toBe('tel:+381677210533');
+    expect(call.classList.contains('pointer-fine:hidden!')).toBe(true);
+    expect(call.textContent).not.toContain('+381');
+    expect(callback.getAttribute('data-open-lead-modal')).toBe('phone');
+    expect(callback.textContent?.trim()).toBe(site.header.callback);
+    expect(callback.classList.contains('pointer-coarse:hidden!')).toBe(true);
+    expect(booking.textContent?.trim()).toBe(site.header.cta);
+  });
+
+  it('keeps the callback out of the parts reveal', async () => {
+    setShop(false);
+    const reveal = (await header('/ru/parts/')).querySelector('cta-reveal')!;
+
+    expect(reveal.querySelector('[data-open-lead-modal]')).toBeNull();
+    expect(reveal.querySelector('[href^="tel:"]')).toBeNull();
+  });
+
+  it('puts the address and hours in the mobile menu before the channels', async () => {
+    setShop(false);
+    const menu = (await header('/ru/services/')).querySelector('#site-menu')!;
+    const address = menu.querySelector('a[href^="https://maps.google.com"]')!;
+
+    expect(address.textContent).toContain('Jovana Ćirilova 23a');
+    expect(menu.textContent).toContain(site.hours.week);
+    expect(
+      address.compareDocumentPosition(
+        menu.querySelector('[data-contact-channel]')!,
+      ) & 4,
+    ).toBeTruthy();
   });
 });

@@ -1,5 +1,5 @@
 ---
-title: 'Audi Q7 '
+title: 'Audi Q7 2008: подвеска, тормоза и течь масла'
 car: Audi Q7
 year: 2008
 servicesApplied:

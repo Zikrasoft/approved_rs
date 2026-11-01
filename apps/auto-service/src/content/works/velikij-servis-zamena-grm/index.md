@@ -11,6 +11,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-09-11
 published: true
+featured: true
 translations:
   en:
     title: "Skoda Octavia 2.0 TDI major service: timing belt replacement"

@@ -30,6 +30,7 @@ export const CONTACT_PLACEMENTS = [
   'footer',
   'header',
   'thanks',
+  'visit',
 ] as const;
 
 export type ContactPlacement = (typeof CONTACT_PLACEMENTS)[number];
