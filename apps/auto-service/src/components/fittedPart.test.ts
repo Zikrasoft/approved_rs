@@ -24,7 +24,7 @@ const links = (row: Element) =>
   [...row.querySelectorAll('a')].map((link) => link.getAttribute('href'));
 
 describe('FittedPart', () => {
-  it('folds the quantity into the spec line and shows no price while the shop is closed', async () => {
+  it('shows neither the quantity nor a price while the shop is closed', async () => {
     setShop(false);
     const row = await render(FittedPart, {
       props: {
@@ -35,14 +35,13 @@ describe('FittedPart', () => {
       },
     });
 
-    expect(row.querySelector('p.spec')?.textContent).toBe(
-      'Передняя ось, 4 шт.',
-    );
+    expect(row.querySelector('p.spec')?.textContent).toBe('Передняя ось');
+    expect(row.textContent).not.toContain('4 шт.');
     expect(row.textContent).not.toContain('RSD');
     expect(row.textContent).not.toContain(copy.priceOnRequestTag);
   });
 
-  it('keeps the spec line empty with neither specs nor quantity', async () => {
+  it('keeps the spec line empty without specs', async () => {
     setShop(false);
     const row = await render(FittedPart, {
       props: { pages: [unpriced], name: 'Колодки' },
