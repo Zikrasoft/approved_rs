@@ -8,7 +8,7 @@ import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import {
-  categoriesForBuild,
+  categoryPagesForBuild,
   makeHubsForBuild,
   shopOpen,
 } from '@/utils/catalogueEnv';
@@ -18,7 +18,9 @@ import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
-  const categories = await categoriesForBuild();
+  const categories = (await categoryPagesForBuild()).map(
+    ({ pages, ...category }) => ({ ...category, empty: pages.length === 0 }),
+  );
   const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
     ({ make }) => make,
   );
@@ -33,7 +35,7 @@ const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
 const props = Astro.props as {
-  categories: Category[];
+  categories: (Category & { empty: boolean })[];
   makes: { slug: string; name: string }[];
 };
 const hubsCopy = content(locale).partsCar.hubs;
@@ -41,6 +43,7 @@ const categories = props.categories.map((category) => ({
   slug: category.slug,
   name: translated(category, 'name', locale),
   lead: paragraphs(translated(category, 'text', locale))[0],
+  empty: category.empty,
 }));
 ---
 
@@ -118,7 +121,7 @@ const categories = props.categories.map((category) => ({
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
               <a
-                href={PathBuilder.partsCategory(locale, category.slug)}
+                href={`${PathBuilder.partsCategory(locale, category.slug)}${category.empty ? `#${PARTS_INQUIRY_ANCHOR}` : ''}`}
                 class="card group flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
               >
                 <h3 class="font-semibold text-ink">{category.name}</h3>
@@ -128,7 +131,7 @@ const categories = props.categories.map((category) => ({
                   </p>
                 )}
                 <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
-                  {copy.categoryCta}
+                  {category.empty ? copy.categoryOrderCta : copy.categoryCta}
                   <Icon name="chevronRight" />
                 </span>
               </a>

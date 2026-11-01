@@ -20,7 +20,7 @@ import {
 import { keySpecs } from '@/utils/attributeRows';
 import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
 import { rangeText, withFacetCopy } from '@/utils/partsSearch';
@@ -142,12 +142,12 @@ const fields = category.fields
 
     <div class="flex min-w-0 flex-col gap-10">
       <div class="flex flex-col gap-3">
-        <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
         {
           empty ? (
-            <p class="max-w-2xl text-muted">{copy.noParts}</p>
+            <p class="max-w-2xl text-ink-2">{copy.noParts}</p>
           ) : (
             <>
+              <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
               <ListingBar count={category.pages.length} filters={filtered} />
               <ul class="card divide-y divide-line">
                 {listing.pages.map((page) => (
@@ -215,6 +215,14 @@ const fields = category.fields
       }
     </div>
 
-    {empty && <VinInquiryCard comment={`${name}: `} />}
+    {
+      empty && (
+        <VinInquiryCard
+          id={PARTS_INQUIRY_ANCHOR}
+          class="h-fit scroll-mt-24"
+          comment={`${name}: `}
+        />
+      )
+    }
   </section>
 </Shell>
