@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
-// TODO: jsdom reports zero layout, so fitToSelection's measuring arm is
-// unreachable here — the width it sets is only ever exercised in a browser.
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   bindPhoneCountry,
   fillCountrySelect,
@@ -181,6 +179,47 @@ describe('bindPhoneCountry', () => {
 
     expect(document.querySelectorAll('select')).toHaveLength(1);
     expect(select.isConnected).toBe(true);
+  });
+});
+
+describe('sizing the select to the picked country', () => {
+  const CHAR = 10;
+  let cap = Infinity;
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (!(this instanceof HTMLSelectElement)) return 0;
+        if (this.style.position === 'absolute') {
+          return this.options[0]!.text.length * CHAR;
+        }
+        return Math.min(parseFloat(this.style.width) || 0, cap);
+      },
+    });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, 'offsetWidth');
+    cap = Infinity;
+  });
+
+  const serbia =
+    '<option value="RS" data-dial="381" selected>RS +381 Serbia</option>';
+
+  it('fits the whole label when there is room for it', () => {
+    const { select } = mount(serbia);
+    select.dispatchEvent(new Event('change'));
+
+    expect(select.style.width).toBe(`${'RS +381 Serbia'.length * CHAR}px`);
+  });
+
+  it('shows only the flag and the code when the whole label would be cut', () => {
+    cap = 100;
+    const { select } = mount(serbia);
+    select.dispatchEvent(new Event('change'));
+
+    expect(select.style.width).toBe(`${'RS +381'.length * CHAR}px`);
   });
 });
 
