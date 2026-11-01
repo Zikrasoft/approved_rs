@@ -2,20 +2,17 @@ meta:
   title: 'CarLab | автосервис в Белграде: диагностика, ремонт, кузов'
   description: 'Автосервис в Белграде: компьютерная диагностика, плановое ТО и замена масла, ремонт подвески и тормозов, двигатель и коробка, кузовной ремонт после ДТП.'
 hero:
-  heading: Сначала цена, потом ремонт
-  lead: Считывание ошибок бесплатно, письменная смета до начала работ. Говорим, что нужно делать сейчас, а что спокойно подождет.
-  ctaPrimary: Записаться в сервис
+  heading: Ремонт и запчасти в Белграде
+  ctaPrimary: Записаться на ремонт
   ctaSecondary: Посмотреть услуги
+  partsHeading: Подберем запчасть по VIN
+  partsSubmit: Подобрать
+  partsHint: Назовем цену и срок.
+  partsInquiry: Отправить запрос менеджеру
   badges:
     - Смета до начала работ
+    - Плановое ТО обычно за день
     - Работаем со страховыми
-trust:
-  - value: Письменно
-    label: смета до начала любых работ
-  - value: 1 день
-    label: обычный срок планового ТО
-  - value: бесплатно
-    label: стоимость первичного осмотра
 servicesHead:
   eyebrow: Услуги
   heading: Что мы делаем
@@ -80,19 +77,11 @@ translations:
       description: 'Autoservis u Beogradu: kompjuterska dijagnostika, redovan servis, zamena ulja, popravka trapa, kočnica, motora i menjača, limarski radovi posle udesa.'
     hero:
       heading: Prvo cena, pa popravka
-      lead: Besplatno očitavanje grešaka i pisana ponuda pre početka radova. Kažemo vam šta treba uraditi odmah, a šta može da sačeka.
       ctaPrimary: Zakažite servis
       ctaSecondary: Pogledajte usluge
       badges:
         - Ponuda pre početka radova
         - Sarađujemo sa osiguravajućim kućama
-    trust:
-      - value: Napismeno
-        label: ponuda pre bilo kakvih radova
-      - value: 1 dan
-        label: uobičajeno trajanje redovnog servisa
-      - value: besplatno
-        label: prvi pregled vozila
     servicesHead:
       eyebrow: Usluge
       heading: Šta radimo
@@ -156,19 +145,11 @@ translations:
       description: 'Car service in Belgrade: diagnostics, scheduled servicing, oil changes, suspension and brakes, engine and gearbox repairs, and accident repair.'
     hero:
       heading: Price first, repairs second
-      lead: Free fault code reading and a written estimate before work starts. We explain what needs doing now and what can safely wait.
       ctaPrimary: Book an appointment
       ctaSecondary: View services
       badges:
         - Estimate before work starts
         - We work with insurers
-    trust:
-      - value: In writing
-        label: an estimate before any work starts
-      - value: 1 day
-        label: typical turnaround for scheduled servicing
-      - value: Free
-        label: initial inspection
     servicesHead:
       eyebrow: Services
       heading: What we do

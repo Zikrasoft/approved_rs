@@ -54,10 +54,10 @@ const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
   header: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   hero: {
     channels: ['phone', 'whatsapp', 'viber', 'telegram'],
-    list: 'grid grid-cols-2 gap-2 sm:flex sm:flex-wrap',
-    tile: 'min-h-11 justify-center gap-2 px-3 py-2.5 sm:px-5',
-    iconSize: 14,
-    label: 'text-[0.8125rem]',
+    list: 'grid grid-cols-4 gap-2 lg:flex lg:flex-wrap',
+    tile: 'min-h-13 flex-col justify-center gap-1 px-1 py-2 lg:min-h-11 lg:flex-row lg:gap-2 lg:px-4',
+    iconSize: 16,
+    label: 'text-xs lg:text-[0.8125rem]',
   },
 };
 const TONE = {
@@ -84,8 +84,8 @@ const channels = lead
   ? [lead, ...offered.filter((channel) => channel !== lead)]
   : offered;
 const PRIMARY = {
-  surface: 'border-signal bg-signal text-ink hover:bg-signal-hover',
-  icon: 'text-ink',
+  surface: 'border-signal-ink bg-signal-ink text-white hover:bg-signal-dark',
+  icon: 'text-white',
 };
 const toneOf = (channel: TrackedContactChannel) =>
   leadPrimary && channel === lead ? PRIMARY : TONE[tone];

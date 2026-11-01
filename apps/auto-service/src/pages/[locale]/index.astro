@@ -2,10 +2,11 @@
 import { contactCta } from '@podbor/site-kit/contact-control';
 import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
+import { faqPageSchema, mapPlaceUrl, websiteSchema } from '@podbor/site-kit';
 import { DEVELOPER } from '@podbor/brands';
-import { SITE_NAME, SITE_URL } from '@/utils/constants';
-import heroImage from '@/assets/hero-workshop.jpg';
+import { GARAGE_ADDRESS, SITE_NAME, SITE_URL } from '@/utils/constants';
+import heroWideImage from '@/assets/hero-mechanic-wide.jpg';
+import heroTallImage from '@/assets/hero-mechanic.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
@@ -17,29 +18,37 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { localeFrom } from '@/i18n/config';
 import { publishedWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { SERVICE_SLUGS } from '@/utils/services';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
-const HERO_SIZES =
-  '(min-width: 1280px) 20rem, (min-width: 1024px) 18rem, 100vw';
-const heroPicture = await getImage({
-  src: heroImage,
-  widths: [480, 720, 960],
-  sizes: HERO_SIZES,
+const HERO_MEDIA_SM = '(max-width: 1023px)';
+const HERO_MEDIA_LG = '(min-width: 1024px)';
+const HERO_SIZES_SM = 'calc(100vw - 2.5rem)';
+const HERO_SIZES_LG = '(min-width: 1224px) 532px, calc(46.5vw - 19px)';
+const heroWide = await getImage({
+  src: heroWideImage,
+  widths: [480, 720, 1080, 1440],
+  sizes: HERO_SIZES_SM,
+  format: 'webp',
+});
+const heroTall = await getImage({
+  src: heroTallImage,
+  widths: [560, 800, 1080, 1280],
+  sizes: HERO_SIZES_LG,
   format: 'webp',
 });
 const locale = localeFrom(Astro.url.pathname);
 const home = content(locale).home;
 const site = content(locale).site;
 const pages = content(locale).pages;
-const services = content(locale).services;
 const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = faqPageSchema(home.faq);
@@ -54,107 +63,116 @@ const website = websiteSchema({
   title={home.meta.title}
   description={home.meta.description}
   jsonLd={[faqSchema, website]}
-  preloadImage={{
-    src: heroPicture.src,
-    srcset: heroPicture.srcSet.attribute,
-    sizes: HERO_SIZES,
-  }}
+  preloadImage={[
+    {
+      src: heroWide.src,
+      srcset: heroWide.srcSet.attribute,
+      sizes: HERO_SIZES_SM,
+      media: HERO_MEDIA_SM,
+    },
+    {
+      src: heroTall.src,
+      srcset: heroTall.srcSet.attribute,
+      sizes: HERO_SIZES_LG,
+      media: HERO_MEDIA_LG,
+    },
+  ]}
 >
   <section class="wrap pt-3 sm:pt-5">
     <div
-      class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-[1fr_18rem] xl:grid-cols-[1fr_20rem]"
+      class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
     >
-      <div class="flex flex-col gap-5 p-5 sm:p-8 lg:p-10">
-        <h1 class="text-hero max-w-[16ch]">{home.hero.heading}</h1>
+      <picture class="relative block lg:col-start-2 lg:row-start-1">
+        <source
+          media={HERO_MEDIA_LG}
+          srcset={heroTall.srcSet.attribute}
+          sizes={HERO_SIZES_LG}
+        />
+        <img
+          src={heroWide.src}
+          srcset={heroWide.srcSet.attribute}
+          sizes={HERO_SIZES_SM}
+          width={heroWideImage.width}
+          height={heroWideImage.height}
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="block aspect-[2/1] w-full object-cover sm:aspect-[5/2] lg:absolute lg:inset-0 lg:aspect-auto lg:h-full lg:object-[50%_45%]"
+        />
+      </picture>
 
-        <div class="grid gap-3 md:grid-cols-2" {...contactCta}>
-          <div
-            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
-          >
-            <h2 class="text-block font-semibold">
-              {content(locale).partsSearch.searchHeading}
-            </h2>
-            <CatalogueSearch hint={false} onPanel class="mt-auto" />
-          </div>
-
-          <div
-            class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
-          >
-            <h2 class="text-block font-semibold">{home.hero.ctaPrimary}</h2>
-            <nav
-              aria-label={site.nav.services}
-              class="-mx-4 flex gap-2 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_80%,transparent)] [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
-            >
-              <a
-                href={PathBuilder.services(locale)}
-                class="chip bg-panel-fg text-ink hover:bg-shade"
-              >
-                {site.common.allServices}
-              </a>
-              {
-                SERVICE_SLUGS.map((slug) => (
-                  <a
-                    href={PathBuilder.service(locale, slug)}
-                    class="chip bg-panel-fg/10 text-panel-fg hover:bg-panel-fg/20"
-                  >
-                    {services[slug].name}
-                  </a>
-                ))
-              }
-            </nav>
+      <div
+        class="flex flex-col gap-[1.125rem] p-5 pb-6 sm:p-8 lg:col-start-1 lg:row-start-1 lg:gap-7 lg:px-12 lg:pt-12 lg:pb-10"
+        {...contactCta}
+      >
+        <div class="flex flex-col gap-2 lg:gap-3.5">
+          <h1 class="text-hero max-w-[15ch]">{home.hero.heading}</h1>
+          <p class="text-[0.9375rem] leading-snug lg:text-[1.0625rem]">
             <a
-              href="#lead"
-              data-open-lead-modal
-              class="btn btn-primary mt-auto w-full"
+              href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
+              target="_blank"
+              rel="noopener"
+              class="underline decoration-panel-line underline-offset-2 transition-colors duration-150 hover:decoration-panel-fg"
             >
-              {site.header.cta}
+              {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}
             </a>
-          </div>
+            <span class="block text-panel-ink">{site.footer.hours}</span>
+          </p>
         </div>
 
-        <p class="max-w-xl leading-relaxed text-panel-ink sm:text-lg">
-          {home.hero.lead}
-        </p>
-        <ContactChannels placement="hero" tone="panel" />
-        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+        <div
+          class="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center"
+        >
+          <a
+            href="#lead"
+            data-open-lead-modal
+            class="btn btn-primary min-h-12 w-full lg:w-auto lg:px-7"
+          >
+            {home.hero.ctaPrimary}
+          </a>
+          <ContactChannels placement="hero" tone="panel" />
+        </div>
+
+        <div
+          class="flex flex-col gap-2 border-t border-panel-line/60 pt-5 lg:pt-6"
+        >
+          <h2 class="text-base leading-snug font-semibold tracking-normal">
+            {home.hero.partsHeading}
+          </h2>
+          <CatalogueSearch
+            hint={false}
+            onPanel
+            submitLabel={home.hero.partsSubmit}
+          />
+          <p class="text-sm leading-snug text-panel-ink">
+            {home.hero.partsHint}{' '}
+            <a
+              href={PathBuilder.partsInquiry(locale)}
+              class="inline-flex min-h-11 items-center font-semibold text-panel-fg underline decoration-panel-line underline-offset-2 transition-colors duration-150 hover:decoration-panel-fg sm:min-h-0"
+              {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+            >
+              {home.hero.partsInquiry}
+            </a>
+          </p>
+        </div>
+
+        <ul
+          class="flex flex-wrap gap-x-5 gap-y-1.5 text-[0.8125rem] text-panel-ink"
+        >
           {
-            home.hero.badges.map((badge) => (
-              <li class="flex items-center gap-1.5 text-sm text-panel-ink">
-                <Icon name="check" size={12} class="text-signal" />
-                {badge}
+            home.hero.badges.map((fact) => (
+              <li class="flex items-center gap-1.5">
+                <Icon name="check" size={12} />
+                {fact}
               </li>
             ))
           }
         </ul>
       </div>
-
-      <img
-        src={heroPicture.src}
-        srcset={heroPicture.srcSet.attribute}
-        sizes={HERO_SIZES}
-        width={heroImage.width}
-        height={heroImage.height}
-        alt=""
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-        class="aspect-[16/10] w-full object-cover lg:aspect-auto lg:h-full"
-      />
     </div>
-
-    <ul class="mt-3 grid gap-3 sm:grid-cols-3">
-      {
-        home.trust.map((item) => (
-          <li class="flex flex-col gap-1 rounded-block bg-shade p-5">
-            <span class="spec text-2xl font-extrabold tracking-tight text-ink">
-              {item.value}
-            </span>
-            <span class="text-sm leading-snug text-muted">{item.label}</span>
-          </li>
-        ))
-      }
-    </ul>
   </section>
+  <PartsInquiryModal comment="" />
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
     <SectionHead
