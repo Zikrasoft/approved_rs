@@ -14,6 +14,58 @@ medusaIntegrationTestRunner({
       let catalog: CatalogModuleService;
       const storefrontEnv: string[] = [];
 
+      const runDemo = async () => {
+        const write = fs.writeFileSync;
+        const spy = jest
+          .spyOn(fs, 'writeFileSync')
+          .mockImplementation((path, data, ...rest) => {
+            if (String(path).endsWith('auto-service/.env.local')) {
+              storefrontEnv.push(String(data));
+              return;
+            }
+            write(path, data, ...rest);
+          });
+        const port = process.env.PORT;
+        process.env.PORT = '9123';
+        try {
+          await seedDemo({ container: getContainer(), args: [] } as never);
+        } finally {
+          process.env.PORT = port;
+          spy.mockRestore();
+        }
+      };
+
+      const partOf = async (brandSlug: string, number: string) => {
+        const [brand] = await catalog.listBrands({ slug: brandSlug });
+        const [identifier] = await catalog.listPartIdentifiers(
+          { brand_id: brand.id, normalized_value: number },
+          { relations: ['part'] },
+        );
+        return identifier.part;
+      };
+
+      const fieldOf = async (categorySlug: string, key: string) => {
+        const [category] = await catalog.listCategories({
+          slug: categorySlug,
+        });
+        return catalog.listCategoryFields({ category_id: category.id, key });
+      };
+
+      const attributeValues = async (categorySlug: string, key: string) => {
+        const [category] = await catalog.listCategories({
+          slug: categorySlug,
+        });
+        const parts = await catalog.listParts(
+          { category_id: category.id },
+          { take: null },
+        );
+        return parts
+          .map(({ attributes }) => (attributes as Record<string, unknown>)[key])
+          .filter((value) => value !== undefined)
+          .map(String)
+          .sort();
+      };
+
       beforeAll(async () => {
         const container = getContainer();
         catalog = container.resolve(CATALOG_MODULE);
@@ -46,24 +98,7 @@ medusaIntegrationTestRunner({
           fuel: 'diesel',
         });
 
-        const write = fs.writeFileSync;
-        const spy = jest
-          .spyOn(fs, 'writeFileSync')
-          .mockImplementation((path, data, ...rest) => {
-            if (String(path).endsWith('auto-service/.env.local')) {
-              storefrontEnv.push(String(data));
-              return;
-            }
-            write(path, data, ...rest);
-          });
-        const port = process.env.PORT;
-        process.env.PORT = '9123';
-        try {
-          await seedDemo({ container, args: [] } as never);
-        } finally {
-          process.env.PORT = port;
-          spy.mockRestore();
-        }
+        await runDemo();
       });
 
       it('reuses the crawled Brands and the Engine instead of creating them twice', async () => {
@@ -104,6 +139,93 @@ medusaIntegrationTestRunner({
             key: 'volume',
           }),
         ).toEqual([expect.objectContaining({ type: 'number', facet: true })]);
+      });
+
+      it('sells the two demo oils in different volumes, so the volume filter has a choice', async () => {
+        expect(await attributeValues('engine-oil', 'volume')).toEqual([
+          '4',
+          '5',
+        ]);
+        expect((await partOf('castrol', '15F6E1')).name).toBe(
+          'Моторное масло Castrol EDGE 0W-20 V, 4 л',
+        );
+      });
+
+      it('marks the AGM and EFB demo batteries as Start-Stop and the standard one as not', async () => {
+        expect(await attributeValues('batteries', 'start-stop')).toEqual([
+          'false',
+          'true',
+          'true',
+          'true',
+          'true',
+        ]);
+      });
+
+      it('keeps an oil filter without a gasket, so «Уплотнение» has both answers', async () => {
+        expect(await attributeValues('oil-filters', 'gasket-included')).toEqual(
+          expect.arrayContaining(['false', 'true']),
+        );
+      });
+
+      it('names the febi Brand «Febi» while its slug stays febi', async () => {
+        expect(await catalog.listBrands({ slug: 'febi' })).toEqual([
+          expect.objectContaining({ name: 'Febi' }),
+        ]);
+      });
+
+      it('brings an already seeded demo catalogue up to date and keeps what a person edited', async () => {
+        const [volume] = await fieldOf('engine-oil', 'volume');
+        const [height] = await fieldOf('oil-filters', 'height');
+        await catalog.updateCategoryFields([
+          { id: volume.id, facet: false },
+          { id: height.id, facet: false, updated_by: 'user_1' },
+        ]);
+        const oil = await partOf('castrol', '15F6E1');
+        await catalog.classifyPart(oil.id, {
+          category_id: oil.category_id,
+          attributes: { ...oil.attributes, volume: 5 },
+        });
+        await catalog.updateParts({
+          id: oil.id,
+          name: 'Моторное масло Castrol EDGE 0W-20 V, 5 л',
+        });
+        const battery = await partOf('exide', 'EK700');
+        const withoutStartStop = Object.fromEntries(
+          Object.entries(battery.attributes as object).filter(
+            ([key]) => key !== 'start-stop',
+          ),
+        );
+        await catalog.classifyPart(battery.id, {
+          category_id: battery.category_id,
+          attributes: withoutStartStop,
+        });
+        const pads = await partOf('textar', '2459801');
+        await catalog.classifyPart(pads.id, {
+          category_id: pads.category_id,
+          attributes: { ...pads.attributes, thickness: 18 },
+          updated_by: 'user_1',
+        });
+
+        await runDemo();
+
+        expect(await fieldOf('engine-oil', 'volume')).toEqual([
+          expect.objectContaining({ id: volume.id, facet: true }),
+        ]);
+        expect(await fieldOf('oil-filters', 'height')).toEqual([
+          expect.objectContaining({ id: height.id, facet: false }),
+        ]);
+        expect(await partOf('castrol', '15F6E1')).toEqual(
+          expect.objectContaining({
+            name: 'Моторное масло Castrol EDGE 0W-20 V, 4 л',
+            attributes: expect.objectContaining({ volume: 4 }),
+          }),
+        );
+        expect((await partOf('exide', 'EK700')).attributes).toEqual(
+          expect.objectContaining({ 'start-stop': true }),
+        );
+        expect((await partOf('textar', '2459801')).attributes).toEqual(
+          expect.objectContaining({ thickness: 18 }),
+        );
       });
 
       it('points the storefront at the port the shop listens on', () => {

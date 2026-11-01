@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 
 import type {
   ExecArgs,
@@ -11,10 +12,7 @@ import type {
   MedusaContainer,
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
-import {
-  type CategoryFieldType,
-  normalizePartNumber,
-} from '@podbor/catalog-contract';
+import { normalizePartNumber } from '@podbor/catalog-contract';
 import {
   createApiKeysWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
@@ -26,8 +24,12 @@ import {
   BATTERY_CATEGORY,
   BATTERY_FIELDS,
   CATEGORIES,
+  type FieldDefinition,
+  number,
+  select,
   seedCategoryFields,
   seedProductionCatalogue,
+  yesNo,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -362,6 +364,58 @@ async function seedVehicles(catalog: CatalogModuleService) {
   return { b47, om654, v320d, v320i, v520d, vE220d };
 }
 
+const OIL_FIELDS: FieldDefinition[] = [
+  select('viscosity', 'Вязкость', true, true, [
+    ['0w-20', '0W-20'],
+    ['0w-30', '0W-30'],
+    ['5w-30', '5W-30'],
+    ['5w-40', '5W-40'],
+  ]),
+  {
+    ...select('approvals', 'Допуски', true, false, [
+      ['bmw-ll-04', 'BMW Longlife-04'],
+      ['bmw-ll-17fe', 'BMW Longlife-17 FE+'],
+      ['mb-229-51', 'MB 229.51'],
+      ['mb-229-52', 'MB 229.52'],
+      ['mb-229-71', 'MB 229.71'],
+    ]),
+    type: 'multi-select',
+  },
+  number('volume', 'Объем', 'л', true),
+];
+
+const OIL_FILTER_FIELDS: FieldDefinition[] = [
+  select('filter-type', 'Тип фильтра', true, false, [
+    ['cartridge', 'Сменный элемент'],
+    ['spin-on', 'Навинчиваемый'],
+  ]),
+  number('height', 'Высота', 'мм', true),
+  number('outer-diameter', 'Наружный диаметр', 'мм', true),
+  {
+    key: 'thread',
+    type: 'text',
+    label: 'Резьба',
+    unit: null,
+    facet: true,
+    required: false,
+    options: [],
+  },
+  yesNo('gasket-included', 'Уплотнение в комплекте', true),
+];
+
+const BRAKE_PAD_FIELDS: FieldDefinition[] = [
+  select('axle', 'Ось', true, true, [
+    ['front', 'Передняя'],
+    ['rear', 'Задняя'],
+  ]),
+  number('thickness', 'Толщина', 'мм', true),
+  select('wear-sensor', 'Датчик износа', true, false, [
+    ['included', 'В комплекте'],
+    ['prepared', 'Подготовлены под датчик'],
+    ['none', 'Без датчика'],
+  ]),
+];
+
 async function seedCategories(catalog: CatalogModuleService) {
   const [oil, filters, pads] = await reuse(
     [
@@ -390,81 +444,9 @@ async function seedCategories(catalog: CatalogModuleService) {
     (filter) => catalog.listCategories(filter),
     (data) => catalog.createCategories(data),
   );
-  const [viscosity, approvals, volume, filterType, axle] =
-    await catalog.createCategoryFields([
-      {
-        category_id: oil.id,
-        key: 'viscosity',
-        type: 'single-select',
-        label: 'Вязкость',
-        required: true,
-        facet: true,
-        rank: 0,
-      },
-      {
-        category_id: oil.id,
-        key: 'approvals',
-        type: 'multi-select',
-        label: 'Допуски',
-        facet: true,
-        rank: 1,
-      },
-      {
-        category_id: oil.id,
-        key: 'volume',
-        type: 'number',
-        unit: 'л',
-        label: 'Объем',
-        facet: true,
-        rank: 2,
-      },
-      {
-        category_id: filters.id,
-        key: 'filter-type',
-        type: 'single-select',
-        label: 'Тип фильтра',
-        facet: true,
-      },
-      {
-        category_id: pads.id,
-        key: 'axle',
-        type: 'single-select',
-        label: 'Ось',
-        required: true,
-        facet: true,
-      },
-    ]);
-  const options = (field: { id: string }, entries: [string, string][]) =>
-    entries.map(([key, label], rank) => ({
-      field_id: field.id,
-      key,
-      label,
-      rank,
-    }));
-  await catalog.createCategoryFieldOptions([
-    ...options(viscosity, [
-      ['0w-20', '0W-20'],
-      ['0w-30', '0W-30'],
-      ['5w-30', '5W-30'],
-      ['5w-40', '5W-40'],
-    ]),
-    ...options(approvals, [
-      ['bmw-ll-04', 'BMW Longlife-04'],
-      ['bmw-ll-17fe', 'BMW Longlife-17 FE+'],
-      ['mb-229-51', 'MB 229.51'],
-      ['mb-229-52', 'MB 229.52'],
-      ['mb-229-71', 'MB 229.71'],
-    ]),
-    ...options(filterType, [
-      ['cartridge', 'Сменный элемент'],
-      ['spin-on', 'Навинчиваемый'],
-    ]),
-    ...options(axle, [
-      ['front', 'Передняя'],
-      ['rear', 'Задняя'],
-    ]),
-  ]);
-  return { oil, filters, pads, viscosity, approvals, volume };
+  await seedCategoryFields(catalog, filters.id, OIL_FILTER_FIELDS);
+  await seedCategoryFields(catalog, pads.id, BRAKE_PAD_FIELDS);
+  return seedCategoryFields(catalog, oil.id, OIL_FIELDS);
 }
 
 async function seedParts(
@@ -490,7 +472,7 @@ async function seedParts(
     });
   const b47OilFilter = await part(
     'Масляный фильтр BMW B47/B48',
-    category.filters,
+    category['oil-filters'],
     { 'filter-type': 'cartridge' },
     [
       ['bmw', 'oem', '11 42 8 575 211'],
@@ -506,7 +488,7 @@ async function seedParts(
   await catalog.updatePartIdentifiers({ id: superseded.id, superseded: true });
   const om654OilFilter = await part(
     'Масляный фильтр Mercedes OM654',
-    category.filters,
+    category['oil-filters'],
     { 'filter-type': 'cartridge' },
     [
       ['mercedes-benz', 'oem', 'A 654 180 01 00'],
@@ -515,7 +497,7 @@ async function seedParts(
   );
   const frontPads = await part(
     'Тормозные колодки передние',
-    category.pads,
+    category['brake-pads'],
     { axle: 'front' },
     [
       ['bmw', 'oem', '34 11 6 860 242'],
@@ -524,20 +506,20 @@ async function seedParts(
   );
   const frontSportPads = await part(
     'Тормозные колодки передние, M Sport',
-    category.pads,
+    category['brake-pads'],
     { axle: 'front' },
     [['trw', 'manufacturer-number', 'GDB2033']],
   );
   const oldFrontPads = await part(
     'Тормозные колодки передние, прежнее исполнение',
-    category.pads,
+    category['brake-pads'],
     { axle: 'front' },
     [['ate', 'manufacturer-number', '13.0460-7217.2']],
   );
   await catalog.replacePart(oldFrontPads, frontPads, null);
   const rearPads = await part(
     'Тормозные колодки задние',
-    category.pads,
+    category['brake-pads'],
     { axle: 'rear' },
     [
       ['bmw', 'oem', '34 21 6 873 093'],
@@ -546,7 +528,7 @@ async function seedParts(
   );
   const oil5w30 = await part(
     'Моторное масло Castrol EDGE 5W-30 LL, 5 л',
-    category.oil,
+    category['engine-oil'],
     {
       viscosity: '5w-30',
       approvals: ['bmw-ll-04', 'mb-229-51'],
@@ -555,12 +537,12 @@ async function seedParts(
     [['castrol', 'manufacturer-number', '15669E']],
   );
   await part(
-    'Моторное масло Castrol EDGE 0W-20 V, 5 л',
-    category.oil,
+    'Моторное масло Castrol EDGE 0W-20 V, 4 л',
+    category['engine-oil'],
     {
       viscosity: '0w-20',
       approvals: ['bmw-ll-17fe', 'mb-229-71'],
-      volume: 5,
+      volume: 4,
     },
     [['castrol', 'manufacturer-number', '15F6E1']],
   );
@@ -591,25 +573,23 @@ async function seedParts(
   };
 }
 
-async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
+async function seedCatalogue(
+  catalog: CatalogModuleService,
+  oilField: Ids,
+  logger: Logger,
+) {
   const brand = await reuseBrands(catalog, BRANDS);
   const { b47, om654, v320d, v320i, v520d, vE220d } =
     await seedVehicles(catalog);
-  const { viscosity, approvals, ...made } = await seedCategories(catalog);
   const category: Ids = Object.fromEntries(
     (await catalog.listCategories({}, { take: null })).map((c) => [
       c.slug,
       c.id,
     ]),
   );
-  Object.assign(category, {
-    oil: made.oil.id,
-    filters: made.filters.id,
-    pads: made.pads.id,
-  });
 
   await catalog.createRequirement({
-    field_id: viscosity.id,
+    field_id: oilField.viscosity,
     engine_id: b47.id,
     option_keys: ['5w-30', '0w-30'],
     min: null,
@@ -617,7 +597,7 @@ async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
     quantity: 1,
   });
   await catalog.createRequirement({
-    field_id: approvals.id,
+    field_id: oilField.approvals,
     engine_id: b47.id,
     option_keys: ['bmw-ll-04'],
     min: null,
@@ -625,7 +605,7 @@ async function seedCatalogue(catalog: CatalogModuleService, logger: Logger) {
     quantity: 1,
   });
   await catalog.createRequirement({
-    field_id: approvals.id,
+    field_id: oilField.approvals,
     engine_id: om654.id,
     option_keys: ['mb-229-51', 'mb-229-52'],
     min: null,
@@ -673,7 +653,7 @@ const BATTERIES: {
   name: string;
   brand: string;
   number: string;
-  attributes: Record<string, string | number>;
+  attributes: Record<string, string | number | boolean>;
 }[] = [
   {
     name: 'Аккумулятор Varta Silver Dynamic AGM G14, 80 А·ч',
@@ -683,6 +663,7 @@ const BATTERIES: {
       capacity: 80,
       'cold-cranking': 800,
       technology: 'agm',
+      'start-stop': true,
       polarity: 'reverse',
       'case-size': 'h7-l4',
       length: 315,
@@ -697,6 +678,7 @@ const BATTERIES: {
       capacity: 95,
       'cold-cranking': 850,
       technology: 'agm',
+      'start-stop': true,
       polarity: 'reverse',
       'case-size': 'h8-l5',
       length: 353,
@@ -711,6 +693,7 @@ const BATTERIES: {
       capacity: 70,
       'cold-cranking': 760,
       technology: 'agm',
+      'start-stop': true,
       polarity: 'reverse',
       'case-size': 'h6-l3',
       length: 278,
@@ -725,6 +708,7 @@ const BATTERIES: {
       capacity: 80,
       'cold-cranking': 800,
       technology: 'efb',
+      'start-stop': true,
       polarity: 'reverse',
       'case-size': 'h7-l4',
       length: 315,
@@ -739,6 +723,7 @@ const BATTERIES: {
       capacity: 74,
       'cold-cranking': 680,
       technology: 'standard',
+      'start-stop': false,
       polarity: 'normal',
       'case-size': 'h6-l3',
       length: 278,
@@ -803,24 +788,6 @@ const VARIETY_BRANDS = [
   { slug: 'zimmermann', name: 'Zimmermann' },
 ];
 
-const OIL_FILTER_FIELDS = [
-  ['height', 'number', 'Высота', 'мм'],
-  ['outer-diameter', 'number', 'Наружный диаметр', 'мм'],
-  ['thread', 'text', 'Резьба', null],
-  ['gasket-included', 'boolean', 'Уплотнение в комплекте', null],
-] as const;
-
-const BRAKE_PAD_FIELDS = [
-  ['thickness', 'number', 'Толщина', 'мм'],
-  ['wear-sensor', 'single-select', 'Датчик износа', null],
-] as const;
-
-const WEAR_SENSOR_OPTIONS: [string, string][] = [
-  ['included', 'В комплекте'],
-  ['prepared', 'Подготовлены под датчик'],
-  ['none', 'Без датчика'],
-];
-
 type VarietyPart = {
   name: string;
   brand: string;
@@ -849,14 +816,56 @@ const pads = (axle: string, thickness: number, sensor: string) => ({
   'wear-sensor': sensor,
 });
 
-const EXISTING_ATTRIBUTES: [string, string, Record<string, unknown>][] = [
+type DemoAttributes = [
+  brand: string,
+  number: string,
+  attributes: Record<string, unknown>,
+  name?: string,
+];
+
+const DEMO_ATTRIBUTES: DemoAttributes[] = [
   ['mann-filter', 'HU816X', cartridge(125, 65, true)],
   ['mann-filter', 'HU6020Z', cartridge(154, 64, true)],
   ['ate', '13046027862', pads('front', 20, 'prepared')],
   ['trw', 'GDB2033', pads('front', 20.3, 'prepared')],
   ['ate', '13046072172', pads('front', 19.5, 'none')],
   ['textar', '2459801', pads('rear', 17, 'prepared')],
+  [
+    'castrol',
+    '15F6E1',
+    { volume: 4 },
+    'Моторное масло Castrol EDGE 0W-20 V, 4 л',
+  ],
+  ...BATTERIES.map(({ brand, number, attributes }): DemoAttributes => [
+    brand,
+    number,
+    attributes,
+  ]),
 ];
+
+async function applyDemoAttributes(catalog: CatalogModuleService) {
+  const brand: Ids = Object.fromEntries(
+    (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
+  );
+  for (const [slug, number, attributes, name] of DEMO_ATTRIBUTES) {
+    const [identifier] = await catalog.listPartIdentifiers(
+      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { relations: ['part'] },
+    );
+    const part = identifier?.part;
+    if (!part || part.updated_by) continue;
+    const merged = { ...part.attributes, ...attributes };
+    if (!isDeepStrictEqual(merged, part.attributes)) {
+      await catalog.classifyPart(part.id, {
+        category_id: part.category_id,
+        attributes: merged,
+      });
+    }
+    if (name && name !== part.name) {
+      await catalog.updateParts({ id: part.id, name });
+    }
+  }
+}
 
 const VARIETY_PARTS: { category: string; parts: VarietyPart[] }[] = [
   {
@@ -969,36 +978,6 @@ async function seedFilterVariety(
       c.id,
     ]),
   );
-  const addFields = (
-    categoryId: string,
-    fields: readonly (readonly [
-      string,
-      CategoryFieldType,
-      string,
-      string | null,
-    ])[],
-  ) =>
-    catalog.createCategoryFields(
-      fields.map(([key, type, label, unit], index) => ({
-        category_id: categoryId,
-        key,
-        type,
-        label,
-        unit,
-        facet: true,
-        rank: 10 + index,
-      })),
-    );
-  await addFields(category['oil-filters'], OIL_FILTER_FIELDS);
-  const [, sensor] = await addFields(category['brake-pads'], BRAKE_PAD_FIELDS);
-  await catalog.createCategoryFieldOptions(
-    WEAR_SENSOR_OPTIONS.map(([key, label], rank) => ({
-      field_id: sensor.id,
-      key,
-      label,
-      rank,
-    })),
-  );
   const existing = async (slug: string, number: string) => {
     const [identifier] = await catalog.listPartIdentifiers(
       { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
@@ -1006,15 +985,6 @@ async function seedFilterVariety(
     );
     return identifier;
   };
-  for (const [slug, number, attributes] of EXISTING_ATTRIBUTES) {
-    const identifier = await existing(slug, number);
-    if (identifier) {
-      await catalog.classifyPart(identifier.part_id, {
-        category_id: identifier.part.category_id,
-        attributes: { ...identifier.part.attributes, ...attributes },
-      });
-    }
-  }
   for (const { category: slug, parts } of VARIETY_PARTS) {
     for (const { name, brand: brandSlug, number, attributes } of parts) {
       const imported = await existing(brandSlug, number);
@@ -1109,31 +1079,25 @@ export default async function seedDemo({ container }: ExecArgs) {
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
+  const oilField = await seedCategories(catalog);
   if (
     (await suppliers.listSuppliers({ name: DEMO_SUPPLIERS[0].name })).length
   ) {
     logger.info('Demo catalogue already seeded, skipping.');
   } else {
-    await seedCatalogue(catalog, logger);
+    await seedCatalogue(catalog, oilField, logger);
   }
   if ((await catalog.listBrands({ slug: 'exide' })).length) {
     logger.info('Demo batteries already seeded, skipping.');
   } else {
     await seedBatteries(catalog, logger);
   }
-  const [oilFilters] = await catalog.listCategories({ slug: 'oil-filters' });
-  if (
-    (
-      await catalog.listCategoryFields({
-        category_id: oilFilters.id,
-        key: 'height',
-      })
-    ).length
-  ) {
+  if ((await catalog.listBrands({ slug: 'hengst' })).length) {
     logger.info('Demo filter variety already seeded, skipping.');
   } else {
     await seedFilterVariety(catalog, logger);
   }
+  await applyDemoAttributes(catalog);
   await syncDemoSuppliers(catalog, suppliers);
   await seedDemoImages(container, catalog);
   logger.info('Seeded the demo images.');

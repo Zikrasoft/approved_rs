@@ -68,7 +68,7 @@ export const BATTERY_CATEGORY = {
     'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
 };
 
-type FieldDefinition = {
+export type FieldDefinition = {
   key: string;
   type: CategoryFieldType;
   label: string;
@@ -78,7 +78,7 @@ type FieldDefinition = {
   options: [string, string][];
 };
 
-const number = (
+export const number = (
   key: string,
   label: string,
   unit: string,
@@ -94,7 +94,7 @@ const number = (
   options: [],
 });
 
-const yesNo = (
+export const yesNo = (
   key: string,
   label: string,
   facet: boolean,
@@ -108,7 +108,7 @@ const yesNo = (
   options: [],
 });
 
-const select = (
+export const select = (
   key: string,
   label: string,
   facet: boolean,
@@ -251,7 +251,7 @@ const CRAWLED_CATALOGUES: Record<
     makes: {},
   },
   bilstein: {
-    brands: { febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
+    brands: { Febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
     categories: {},
     makes: MAKE_ALIASES,
   },
