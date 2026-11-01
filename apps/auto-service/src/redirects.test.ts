@@ -6,6 +6,7 @@ import {
 } from '@podbor/site-kit/redirects';
 import { PRIMARY_LOCALE } from './i18n/config';
 import {
+  categoryFirstPageRedirects,
   legacyCategoryRedirects,
   legacyShopRedirects,
 } from './utils/legacyCategories';
@@ -14,6 +15,7 @@ import { PathBuilder } from './utils/paths';
 const redirectFor = createRedirectMatcher([
   ...legacyCategoryRedirects(),
   ...legacyShopRedirects(),
+  ...categoryFirstPageRedirects(),
   ...unprefixedSectionRedirects(PathBuilder, PRIMARY_LOCALE),
 ]);
 
@@ -72,6 +74,15 @@ describe('redirects', () => {
   });
 
   it.each([
+    ['/ru/parts/c/batteries/1/', '/ru/parts/c/batteries/'],
+    ['/sr/parts/c/oil-filters/1', '/sr/parts/c/oil-filters/'],
+  ])('sends the first category page %s to its canonical %s', (path, target) => {
+    expect(redirectFor(path)).toBe(target);
+  });
+
+  it.each([
+    '/ru/parts/c/batteries/2/',
+    '/ru/parts/c/batteries/10/',
     '/',
     '/sr/',
     '/sr/parts/cart/',

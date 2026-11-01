@@ -14,7 +14,9 @@ import { shopOpen } from '@/utils/catalogueEnv';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
+  FACET_COUNT_ATTRIBUTE,
   FILTERS_COUNT_ATTRIBUTE,
+  FILTERS_NONE_ATTRIBUTE,
   FILTERS_SUBMIT_ATTRIBUTE,
 } from '@/scripts/filterSheet';
 import {
@@ -22,6 +24,7 @@ import {
   numberBounds,
   rangeMaxName,
   rangeMinName,
+  RANGE_LIMIT,
 } from '@/utils/partsSearch';
 
 interface Props {
@@ -90,7 +93,9 @@ const hint = (template: string, slot: string, value: number | undefined) =>
 const showLabel =
   count === undefined
     ? copy.applyFilters
-    : copy.showResults.replace('{count}', String(count));
+    : count === 0
+      ? copy.noneFound
+      : copy.showResults.replace('{count}', String(count));
 const legend = (facet: SearchFacet) =>
   facet.unit ? `${facet.label}, ${facet.unit}` : facet.label;
 ---
@@ -200,6 +205,7 @@ const legend = (facet: SearchFacet) =>
                                   type="number"
                                   inputmode="decimal"
                                   min="0"
+                                  max={RANGE_LIMIT}
                                   step="any"
                                   name={input.name}
                                   value={input.value}
@@ -237,7 +243,10 @@ const legend = (facet: SearchFacet) =>
                                       class="sr-only"
                                     />
                                     {value.label}
-                                    <span class="spec text-xs text-muted">
+                                    <span
+                                      class="spec text-xs text-muted"
+                                      {...{ [FACET_COUNT_ATTRIBUTE]: '' }}
+                                    >
                                       {value.count}
                                     </span>
                                   </label>
@@ -256,7 +265,10 @@ const legend = (facet: SearchFacet) =>
                                     <span class="min-w-0 flex-1 break-words">
                                       {value.label}
                                     </span>
-                                    <span class="spec text-xs text-muted">
+                                    <span
+                                      class="spec text-xs text-muted"
+                                      {...{ [FACET_COUNT_ATTRIBUTE]: '' }}
+                                    >
                                       {value.count}
                                     </span>
                                   </label>
@@ -286,10 +298,12 @@ const legend = (facet: SearchFacet) =>
               <div class="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-5 py-3 group-[:defined:not([data-dirty])]/sheet:lg:hidden before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8 before:bg-linear-to-t before:from-card before:to-transparent max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <button
                   type="submit"
-                  class="btn btn-primary flex-1"
+                  class="btn btn-primary flex-1 disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2"
+                  disabled={count === 0}
                   {...{
                     [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters,
                     [FILTERS_COUNT_ATTRIBUTE]: copy.showResults,
+                    [FILTERS_NONE_ATTRIBUTE]: copy.noneFound,
                   }}
                 >
                   {showLabel}

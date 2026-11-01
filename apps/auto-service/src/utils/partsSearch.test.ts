@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { universalFacets } from '@podbor/catalog-contract';
+import {
+  RANGE_FILTER_PATTERN,
+  rangeFilter,
+  universalFacets,
+} from '@podbor/catalog-contract';
 import {
   appendRange,
   chosenFilters,
   facetValueLabel,
   numberBounds,
   partsQuery,
+  RANGE_LIMIT,
   rangesFromParams,
   rangeText,
   withFacetCopy,
@@ -87,6 +92,32 @@ describe('number ranges in the page address', () => {
     ).toEqual([]);
   });
 
+  it('clamps a huge bound and rounds a tiny one, so the shop gets plain decimals', () => {
+    const ranges = rangesFromParams(
+      new URLSearchParams(
+        'min.capacity=1e21&max.length=0.0000001&min.width=1000000000000000000000&min.height=80,1234567',
+      ),
+    );
+
+    expect(ranges).toEqual([
+      { key: 'capacity', min: RANGE_LIMIT, max: null },
+      { key: 'length', min: null, max: 0 },
+      { key: 'width', min: RANGE_LIMIT, max: null },
+      { key: 'height', min: 80.123457, max: null },
+    ]);
+    expect(ranges.map(rangeFilter)).toEqual([
+      'capacity:1000000000:',
+      'length::0',
+      'width:1000000000:',
+      'height:80.123457:',
+    ]);
+    expect(
+      ranges
+        .map(rangeFilter)
+        .every((filter) => RANGE_FILTER_PATTERN.test(filter)),
+    ).toBe(true);
+  });
+
   it('ignores a negative bound, which no part attribute has', () => {
     expect(
       rangesFromParams(new URLSearchParams('min.capacity=-5&max.length=-1')),
@@ -139,17 +170,12 @@ describe('chosenFilters', () => {
       {
         facets: ['viscosity:5w-30'],
         ranges: [range, lost],
-        label: '0w-20',
+        label: 'Вязкость: 0w-20',
       },
       {
         facets: ['viscosity:5w-30', 'viscosity:0w-20'],
         ranges: [lost],
         label: 'Емкость: от 70 до 95 Ah',
-      },
-      {
-        facets: ['viscosity:5w-30', 'viscosity:0w-20'],
-        ranges: [range],
-        label: 'от 1',
       },
     ]);
   });
@@ -157,7 +183,14 @@ describe('chosenFilters', () => {
 
 describe('chosenFilters for a facet the shop does not know', () => {
   it('shows no chip for it', () => {
-    expect(chosenFilters([viscosity], ['bogus:x'], [], copy)).toEqual([]);
+    expect(
+      chosenFilters(
+        [viscosity],
+        ['bogus:x'],
+        [{ key: 'gone', min: 1, max: null }],
+        copy,
+      ),
+    ).toEqual([]);
   });
 });
 

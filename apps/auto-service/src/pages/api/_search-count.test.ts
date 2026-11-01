@@ -41,7 +41,7 @@ describe('/api/search-count', () => {
       'category=batteries&facets=technology%3Aagm&min.capacity=80&locale=sr',
     );
 
-    expect(await response.json()).toEqual({ count: 81 });
+    expect(await response.json()).toEqual({ count: 81, facets: {} });
     expect(backend.mock.calls[0][0]).toBe(
       'http://shop.test/store/search?locale=sr&category=batteries&facets=technology%3Aagm&range=capacity%3A80%3A&limit=1',
     );
@@ -54,10 +54,38 @@ describe('/api/search-count', () => {
       'locale=ru&category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta',
     );
 
-    expect(await response.json()).toEqual({ count: 1 });
+    expect(await response.json()).toEqual({ count: 1, facets: {} });
     expect(backend.mock.calls[0][0]).toBe(
       'http://shop.test/store/search?locale=ru&category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta&limit=1',
     );
+  });
+
+  it('counts each facet value the way the next tick would find it', async () => {
+    backend.mockResolvedValue(
+      Response.json({
+        ...answer,
+        count: 2,
+        facets: [
+          {
+            key: 'brand',
+            type: 'multi-select',
+            label: 'brand',
+            unit: null,
+            values: [
+              { value: 'bosch', label: 'Bosch', count: 1 },
+              { value: 'varta', label: 'Varta', count: 2 },
+            ],
+          },
+        ],
+      }),
+    );
+
+    const response = await ask('locale=ru&category=batteries');
+
+    expect(await response.json()).toEqual({
+      count: 2,
+      facets: { brand: { bosch: 1, varta: 2 } },
+    });
   });
 
   it('counts nothing for a malformed scope without asking the shop', async () => {

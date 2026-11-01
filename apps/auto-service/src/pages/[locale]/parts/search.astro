@@ -61,6 +61,7 @@ const {
   scope,
   unknownScope,
   searchHref,
+  filtersHref,
 } = plan.view;
 const vinMake =
   vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
@@ -246,7 +247,7 @@ const scopeHidden = {
               chosen={chosen}
               ranges={ranges}
               count={found.count}
-              resetHref={searchHref([], [])}
+              resetHref={filtersHref([], [])}
             />
           )}
 
@@ -298,10 +299,10 @@ const scopeHidden = {
                       : []),
                     ...chips.map((chip) => ({
                       label: chip.label,
-                      href: searchHref(chip.facets, chip.ranges),
+                      href: filtersHref(chip.facets, chip.ranges),
                     })),
                   ]}
-                  resetHref={chips.length > 0 ? searchHref([], []) : undefined}
+                  resetHref={chips.length > 0 ? filtersHref([], []) : undefined}
                 />
               )}
 

@@ -3,6 +3,7 @@ import type { SearchFacet } from '@podbor/catalog-contract';
 import { content } from '@/i18n/content';
 import FacetFilters from './FacetFilters.astro';
 import { render } from './renderAstro';
+import { RANGE_LIMIT } from '@/utils/partsSearch';
 
 const copy = content('ru').partsSearch;
 
@@ -194,5 +195,46 @@ describe('the facet filters', () => {
     expect(submit(unknown).getAttribute('data-filters-count')).toBe(
       copy.showResults,
     );
+  });
+
+  it('offers no clickable button for a count of zero, and says why', async () => {
+    const submit = (
+      await filters({ count: 0 })
+    ).querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+    expect(submit.textContent?.trim()).toBe(copy.noneFound);
+    expect(submit.disabled).toBe(true);
+    expect(submit.getAttribute('data-filters-none')).toBe(copy.noneFound);
+  });
+
+  it('marks each value count so the sheet can recount it', async () => {
+    const root = await filters({
+      facets: [facet('brand', [['varta', 3]])],
+    });
+
+    expect(
+      boxes(root, 'brand')[0]
+        .closest('label')
+        ?.querySelector('[data-facet-count]')?.textContent,
+    ).toBe('3');
+  });
+
+  it('bounds a range box to the numbers the search accepts', async () => {
+    const root = await filters({
+      facets: [
+        facet(
+          'capacity',
+          [
+            ['60', 2],
+            ['95', 1],
+          ],
+          { type: 'number' },
+        ),
+      ],
+    });
+    const min = root.querySelector<HTMLInputElement>('[name="min.capacity"]')!;
+
+    expect(min.min).toBe('0');
+    expect(Number(min.max)).toBe(RANGE_LIMIT);
   });
 });

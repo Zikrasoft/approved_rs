@@ -176,6 +176,24 @@ describe('makeHubsFrom', () => {
     expect(outline(makeHubsFrom(syntheticCatalogue(120)))).toMatchSnapshot();
   });
 
+  it('lists no replaced Part on a Model category page, matched by a requirement or fitted', () => {
+    const snapshot = syntheticCatalogue(120);
+    const listed = makeHubsFrom(snapshot).flatMap(({ models }) =>
+      models.flatMap(({ categories }) =>
+        categories.flatMap(({ parts }) => parts.map(({ part }) => part)),
+      ),
+    );
+
+    expect(listed.length).toBeGreaterThan(0);
+    expect(listed.filter((part) => snapshot.retired(part))).toEqual([]);
+    expect(
+      snapshot.cars
+        .flatMap(({ matches }) => matches)
+        .flatMap(({ parts }) => parts)
+        .filter(({ part }) => snapshot.retired(part)),
+    ).toEqual([]);
+  });
+
   it('assembles the hubs once per snapshot across module instances, as the config and the pages load apart', async () => {
     const snapshot = syntheticCatalogue(30);
     const hubs = makeHubsFrom(snapshot);

@@ -154,24 +154,25 @@ export function assembleSnapshot(
     pages: partPages,
   }));
   const matchesFor = (vehicle: Vehicle): CarMatch[] =>
-    requirementMatches(parts, vehicle.requirements).flatMap(
-      ({ category_id, quantity, parts: matched }) => {
-        const category = categoryById.get(category_id);
-        return category
-          ? [
-              {
-                category,
-                quantity,
-                parts: matched.map(({ pages }) => ({
-                  part: pages[0].part,
-                  pages,
-                  fits: [],
-                })),
-              },
-            ]
-          : [];
-      },
-    );
+    requirementMatches(
+      parts.filter((part) => !retired(part)),
+      vehicle.requirements,
+    ).flatMap(({ category_id, quantity, parts: matched }) => {
+      const category = categoryById.get(category_id);
+      return category
+        ? [
+            {
+              category,
+              quantity,
+              parts: matched.map(({ pages }) => ({
+                part: pages[0].part,
+                pages,
+                fits: [],
+              })),
+            },
+          ]
+        : [];
+    });
   const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
   const partsFitting = (vehicles: Vehicle[]) =>
     new Set(

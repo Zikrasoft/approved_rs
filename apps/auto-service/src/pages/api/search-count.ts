@@ -56,5 +56,13 @@ export const GET: APIRoute = async ({ url, request }) => {
     return Response.json({ count: null }, { status: 503 });
   }
   report(intent, 'ok', found.count);
-  return Response.json({ count: found.count });
+  return Response.json({
+    count: found.count,
+    facets: Object.fromEntries(
+      found.facets.map(({ key, values }) => [
+        key,
+        Object.fromEntries(values.map(({ value, count }) => [value, count])),
+      ]),
+    ),
+  });
 };

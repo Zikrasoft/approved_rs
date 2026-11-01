@@ -40,3 +40,13 @@ export const legacyShopRedirects = (): Redirect[] =>
       permanent: true,
     })),
   ]);
+
+export const categoryFirstPageRedirects = (): Redirect[] =>
+  SUPPORTED_LOCALES.flatMap((locale) => {
+    const listing = PathBuilder.partsCategory(locale, ':slug');
+    return [`${listing}1`, `${listing}1/`].map((source) => ({
+      source,
+      destination: listing,
+      permanent: true,
+    }));
+  });

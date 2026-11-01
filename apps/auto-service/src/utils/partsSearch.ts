@@ -1,6 +1,5 @@
 import {
   BRAND_FACET,
-  facetFilter,
   IN_STOCK_FACET,
   PRICE_FACET,
   type RangeFilter,
@@ -9,6 +8,8 @@ import {
 import { singleLine } from '@podbor/lead-crm/phone';
 
 export const PARTS_QUERY_MAX_LENGTH = 100;
+export const RANGE_LIMIT = 1_000_000_000;
+const RANGE_DECIMALS = 1_000_000;
 
 export const partsQuery = (raw: string): string =>
   singleLine(raw).slice(0, PARTS_QUERY_MAX_LENGTH);
@@ -68,7 +69,10 @@ export const rangeMaxName = (key: string): string => `${RANGE_MAX}${key}`;
 const bound = (text: string | null): number | null => {
   const trimmed = text?.trim() ?? '';
   const number = Number(trimmed.replace(',', '.'));
-  return trimmed && Number.isFinite(number) && number >= 0 ? number : null;
+  return trimmed && !Number.isNaN(number) && number >= 0
+    ? Math.round(Math.min(number, RANGE_LIMIT) * RANGE_DECIMALS) /
+        RANGE_DECIMALS
+    : null;
 };
 
 export const rangesFromParams = (params: URLSearchParams): RangeFilter[] => {
@@ -140,34 +144,36 @@ export const chosenFilters = (
   ranges: RangeFilter[],
   copy: FacetCopy & RangeCopy,
   format: (value: number) => string = String,
-): FilterChip[] => [
-  ...chosen
-    .filter((filter) => facets.some(({ key }) => filter.startsWith(`${key}:`)))
-    .map((filter) => {
-      const others = {
-        facets: chosen.filter((item) => item !== filter),
-        ranges,
-      };
-      for (const facet of facets) {
-        const value = facet.values.find(
-          (candidate) => facetFilter(facet.key, candidate.value) === filter,
-        );
-        if (value) {
-          return {
-            ...others,
-            label: `${facet.label}: ${facetValueLabel(facet, value, copy)}`,
-          };
-        }
-      }
-      return { ...others, label: filter.slice(filter.indexOf(':') + 1) };
+): FilterChip[] => {
+  const facetOf = (key: string) => facets.find((facet) => facet.key === key);
+  return [
+    ...chosen.flatMap((filter) => {
+      const split = filter.indexOf(':');
+      const facet = facetOf(filter.slice(0, split));
+      if (!facet) return [];
+      const raw = filter.slice(split + 1);
+      const value = facet.values.find((candidate) => candidate.value === raw);
+      return [
+        {
+          facets: chosen.filter((item) => item !== filter),
+          ranges,
+          label: `${facet.label}: ${
+            value ? facetValueLabel(facet, value, copy) : raw
+          }`,
+        },
+      ];
     }),
-  ...ranges.map((range) => {
-    const facet = facets.find(({ key }) => key === range.key);
-    const text = rangeText(range, facet?.unit ?? null, copy, format);
-    return {
-      facets: chosen,
-      ranges: ranges.filter((item) => item !== range),
-      label: facet ? `${facet.label}: ${text}` : text,
-    };
-  }),
-];
+    ...ranges.flatMap((range) => {
+      const facet = facetOf(range.key);
+      return facet
+        ? [
+            {
+              facets: chosen,
+              ranges: ranges.filter((item) => item !== range),
+              label: `${facet.label}: ${rangeText(range, facet.unit, copy, format)}`,
+            },
+          ]
+        : [];
+    }),
+  ];
+};
