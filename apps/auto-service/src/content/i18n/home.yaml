@@ -4,6 +4,7 @@ meta:
 hero:
   heading: Ремонт и запчасти в Белграде
   ctaPrimary: Записаться на ремонт
+  callback: Перезвоните мне
   ctaSecondary: Посмотреть услуги
   partsHeading: Подберем запчасть по VIN
   partsSubmit: Подобрать
