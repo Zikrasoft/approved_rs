@@ -114,13 +114,11 @@ translations:
       languageLabel: Jezik
       cta: Zakažite termin
       partsCta: Upit
-      phoneLabel: Pozovite
     footer:
       tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
-      hoursHeading: Radno vreme
       hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
@@ -201,13 +199,11 @@ translations:
       languageLabel: Language
       cta: Book an appointment
       partsCta: Enquiry
-      phoneLabel: Call us
     footer:
       tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and respraying, and help finding the right parts.
       servicesHeading: Services
       companyHeading: Workshop
       contactHeading: Contact
-      hoursHeading: Opening hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy policy
       aboutLabel: About this project

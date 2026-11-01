@@ -84,19 +84,6 @@ translations:
       eyebrow: Usluge
       heading: Šta radimo
       body: Od zamene ulja do vraćanja geometrije karoserije posle udesa. Sve na jednom mestu, bez vožnje od servisa do servisa.
-    why:
-      eyebrow: Zašto kod nas
-      heading: Autoservis bez iznenađenja na računu
-      body: Najveći problem sa servisima nije cena, već to što ne znate šta vas čeka. Kod nas znate.
-      points:
-        - title: Ponuda pre radova
-          text: Prvo dijagnostika i pisana ponuda, zatim vaše odobrenje. Tek onda počinjemo sa radom.
-        - title: Vraćamo stare delove
-          text: Sve delove koje skinemo sa vozila vraćamo vam u kutiji. Ako želite, proverite i sami da li je deo zaista bio istrošen.
-        - title: Bez nepotrebnih zamena
-          text: Ako zamena može da sačeka sledeći servis, to ćemo vam i reći, umesto da vas ubeđujemo da je uradite odmah.
-        - title: Vodimo servisnu evidenciju
-          text: Beležimo šta je zamenjeno, na kojoj kilometraži i koji su delovi ugrađeni. Pri sledećoj poseti ne krećemo od nule.
     process:
       eyebrow: Kako radimo
       heading: Četiri koraka bez nerviranja
@@ -152,19 +139,6 @@ translations:
       eyebrow: Services
       heading: What we do
       body: From oil changes to chassis alignment after a collision. All in one place, so you don't have to take your car to three different workshops.
-    why:
-      eyebrow: Why choose us
-      heading: Car repairs without surprise bills
-      body: The biggest problem with garages isn't the price. It's not knowing what to expect. We take that uncertainty away.
-      points:
-        - title: An estimate before we start
-          text: First, diagnostics and a written estimate. Then your approval. Only then do we pick up the tools.
-        - title: We return your old parts
-          text: We give you everything we remove from your car in a box. You can check the wear for yourself if you like.
-        - title: No unnecessary replacements
-          text: If a part can safely last until your next service, we'll tell you rather than sell you a replacement today.
-        - title: We keep a service record
-          text: What we replaced, the mileage and the parts fitted. So we don't start from scratch at your next visit.
     process:
       eyebrow: How we work
       heading: Four stress-free steps
