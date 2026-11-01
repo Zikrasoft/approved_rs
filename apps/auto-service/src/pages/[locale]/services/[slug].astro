@@ -73,10 +73,10 @@ const specs = [
   />
 
   <section class="wrap py-band md:py-band-lg">
-    <dl class="grid gap-3 sm:grid-cols-2">
+    <dl class="card grid grid-cols-2 divide-x divide-line">
       {
         specs.map((spec) => (
-          <div class="card flex flex-col gap-1 p-4">
+          <div class="flex flex-col gap-1 p-4">
             <dt class="text-xs text-muted">{spec.label}</dt>
             <dd class="spec text-base font-semibold text-ink">{spec.value}</dd>
           </div>
@@ -119,7 +119,7 @@ const specs = [
 
   <section class="wrap pb-4">
     <div class="card border-transparent bg-shade p-5">
-      <h2 class="mb-2 text-block font-semibold text-signal-ink">
+      <h2 class="mb-2 text-block font-semibold">
         {service.honestHeading}
       </h2>
       <p class="max-w-3xl text-sm leading-relaxed text-ink-2 sm:text-base">

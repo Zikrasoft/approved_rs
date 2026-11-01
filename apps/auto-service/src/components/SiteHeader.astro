@@ -227,7 +227,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
   <div
     id="site-menu"
     data-menu
-    class="invisible fixed inset-0 z-25 flex group-data-[open]:z-45 flex-col justify-between overflow-y-auto bg-paper/95 px-5 pb-28 pt-24 opacity-0 backdrop-blur-xl transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
+    class="invisible fixed inset-0 z-25 flex group-data-[open]:z-45 flex-col justify-between overflow-y-auto bg-paper px-5 pb-28 pt-24 opacity-0 transition-[opacity,visibility] duration-200 group-data-[open]:visible group-data-[open]:opacity-100 md:hidden"
     inert
   >
     <nav class="flex flex-col" aria-label={site.common.mobileNavLabel}>
@@ -260,7 +260,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
               hreflang={code}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
               class:list={[
-                'spec rounded-pill px-3 py-1 text-xs uppercase tracking-widest',
+                'spec inline-flex items-center rounded-pill px-3 py-1 text-xs uppercase tracking-widest pointer-coarse:min-h-11',
                 code === locale
                   ? 'bg-shade text-ink'
                   : 'text-muted hover:text-ink',
