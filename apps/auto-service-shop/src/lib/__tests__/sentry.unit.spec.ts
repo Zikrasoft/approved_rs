@@ -83,6 +83,8 @@ describe('the error handler', () => {
     keepAdminCodes(
       error as MedusaError,
       {
+        method: 'GET',
+        originalUrl: '/store/search',
         scope: { resolve: () => ({ error: jest.fn(), info: jest.fn() }) },
       } as never,
       respond() as never,

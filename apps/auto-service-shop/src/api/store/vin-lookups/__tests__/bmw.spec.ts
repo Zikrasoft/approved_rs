@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -84,7 +85,10 @@ medusaIntegrationTestRunner({
           { ...options, engineCode: 'B47D20B' },
         );
 
+        const log = jest.spyOn(console, 'log').mockImplementation(() => {});
         const response = await lookUp('WBA3W31070N000001');
+        const [logged] = loggedEvents('vin.lookup');
+        log.mockRestore();
 
         expect(response.data).toEqual({
           resolved: false,
@@ -98,6 +102,12 @@ medusaIntegrationTestRunner({
           ]),
         });
         expect(response.data.vehicle_ids).toHaveLength(2);
+        expect(logged).toMatchObject({
+          outcome: 'unresolved',
+          reason: 'ambiguous',
+          code: '3W31',
+          candidates: 2,
+        });
       });
 
       it('prefers the Vehicle staff linked the type code to over the open-data match', async () => {

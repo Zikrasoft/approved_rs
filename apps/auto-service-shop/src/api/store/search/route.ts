@@ -32,9 +32,15 @@ import {
   vehicleSchema,
   type PartOffer,
 } from '@podbor/catalog-contract';
+import { vinOf } from '@podbor/lead-crm/vin';
 import { z } from 'zod';
 
 import { imagesSchema } from '../../../lib/images';
+import {
+  loggedQuery,
+  logEvent,
+  type SearchIntent,
+} from '../../../lib/log-event';
 import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SHOP_CURRENCY, SUPPLIER_MODULE } from '../../../modules/supplier';
@@ -289,6 +295,29 @@ export async function GET(
       ? await matchCars(req.scope.resolve(Modules.SEARCH), q)
       : { cars: [], keys: [], rest: [] };
   const partQuery = number ?? (cars.keys.length ? cars.rest.join(' ') : q);
+  const intent: SearchIntent = vinOf(q)
+    ? 'vin'
+    : number
+      ? 'number'
+      : cars.keys.length
+        ? 'car'
+        : searchableQuery(q)
+          ? 'text'
+          : 'browse';
+  const logSearch = (results: number) =>
+    logEvent(
+      'search',
+      {
+        outcome: results ? 'found' : 'empty',
+        intent,
+        results,
+        zero: !results,
+        query: loggedQuery(q),
+        category: found?.slug ?? null,
+        scoped: Boolean(vehicleModel || vehicle_id),
+      },
+      req.requestId ?? null,
+    );
   const filters: SearchFilters = searchableQuery(partQuery)
     ? { q: partQuery.toLowerCase() }
     : {};
@@ -311,7 +340,8 @@ export async function GET(
   });
   const groups = facetGroups(facets);
   const scope: SearchFilters[] = [{ published: true }];
-  const nothing = () =>
+  const nothing = () => {
+    logSearch(0);
     res.json(
       searchResponseSchema.parse({
         results: [],
@@ -325,6 +355,7 @@ export async function GET(
         limit,
       }),
     );
+  };
 
   if (!filters.q && !found && !cars.keys.length) {
     nothing();
@@ -468,6 +499,7 @@ export async function GET(
       (search_result.hits.length - hits.length),
   );
 
+  logSearch(count);
   res.json(
     searchResponseSchema.parse({
       results,

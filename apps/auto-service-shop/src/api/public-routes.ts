@@ -46,16 +46,22 @@ export const PUBLIC_ROUTES = [
 const routeMatchers = PUBLIC_ROUTES.map((route) => {
   const [method, path] = route.split(' ');
   const pattern = new RegExp(`^${path!.replace(/:\w+/g, '[^/]+')}/?$`);
-  return (verb: string, url: string) => verb === method && pattern.test(url);
+  return {
+    route,
+    matches: (verb: string, url: string) =>
+      verb === method && pattern.test(url),
+  };
 });
 
-export const isPublicRoute = (method: string, url: string): boolean => {
+export const publicRoute = (method: string, url: string): string | null => {
   const [path = ''] = url.split('?');
   return (
-    method === 'OPTIONS' ||
-    routeMatchers.some((matches) => matches(method, path))
+    routeMatchers.find(({ matches }) => matches(method, path))?.route ?? null
   );
 };
+
+export const isPublicRoute = (method: string, url: string): boolean =>
+  method === 'OPTIONS' || publicRoute(method, url) !== null;
 
 export const refuseUnlistedRoute = (
   req: Pick<MedusaRequest, 'method' | 'originalUrl'>,

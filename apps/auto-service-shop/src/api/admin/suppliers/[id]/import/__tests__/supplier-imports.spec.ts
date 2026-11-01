@@ -15,6 +15,7 @@ import { createFakeShopAi } from '../../../../../../../integration-tests/fakeSho
 import { memoryStorage } from '../../../../../../../integration-tests/fakeStorage';
 import { createFakeSupplier } from '../../../../../../../integration-tests/fakeSupplierAdapter';
 import { importRuns } from '../../../../../../../integration-tests/importRuns';
+import { loggedEvents } from '../../../../../../../integration-tests/loggedEvents';
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
 import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
@@ -295,6 +296,41 @@ medusaIntegrationTestRunner({
             lead_time_days: 1,
           },
         ]);
+      });
+
+      it('logs each import as catalogue.run with its Supplier and report counts', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        intercars.articles.push({
+          article_id: 'IC-1',
+          brand: 'MANN-FILTER',
+          number: 'HU-816 X',
+          name: 'Фильтр масляный MANN',
+          category: 'IC-OIL',
+        });
+
+        await runImport();
+        const deadline = Date.now() + 10_000;
+        while (
+          loggedEvents('catalogue.run').length < 2 &&
+          Date.now() < deadline
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+
+        expect(loggedEvents('catalogue.run')).toEqual([
+          expect.objectContaining({
+            outcome: 'succeeded',
+            kind: 'import',
+            supplier: intercarsId,
+            counts: expect.objectContaining({
+              imported: 1,
+              skipped: 0,
+              failed: 0,
+            }),
+          }),
+          expect.objectContaining({ kind: 'import', supplier: warehouseId }),
+        ]);
+        jest.restoreAllMocks();
       });
 
       it('stores no offer for an article quoted in another currency', async () => {

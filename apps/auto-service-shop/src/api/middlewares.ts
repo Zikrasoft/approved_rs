@@ -3,6 +3,10 @@ import {
   validateAndTransformBody,
   validateAndTransformQuery,
 } from '@medusajs/framework/http';
+import {
+  STOREFRONT_EVENT_MAX_BYTES,
+  STOREFRONT_EVENTS_PATH,
+} from '@podbor/catalog-contract/events';
 
 import {
   AdminAddPartIdentifier,
@@ -41,6 +45,7 @@ import { keepAdminCodes, validateAdminBody } from '../lib/admin-errors';
 import { manualOfferSchema } from '../lib/suppliers/manual-offers';
 import { parseEnv } from '../lib/env';
 import { rateLimit } from '../lib/rate-limit';
+import { observeRequests } from '../lib/request-log';
 import { refuseClosedShop } from '../lib/shop-gate';
 import {
   PUBLIC_ROUTE_PREFIXES,
@@ -51,6 +56,7 @@ import { VEHICLE_REFERENCE_BODIES } from './admin/vehicle-validators';
 import { OrderOutcome } from './hooks/validators';
 import {
   requireOrderOutcomeSecret,
+  requireShopEventsSecret,
   requireShopLeadSecret,
 } from '../lib/bearer-secret';
 import {
@@ -69,9 +75,11 @@ import {
 
 const STORE_BODY_LIMIT = '32kb';
 const MINUTE_MS = 60_000;
-const { STORE_WRITES_PER_MINUTE, STORE_SEARCHES_PER_MINUTE } = parseEnv(
-  process.env,
-);
+const {
+  STORE_WRITES_PER_MINUTE,
+  STORE_SEARCHES_PER_MINUTE,
+  STOREFRONT_EVENTS_PER_MINUTE,
+} = parseEnv(process.env);
 const storeWrites = rateLimit({
   limit: STORE_WRITES_PER_MINUTE,
   windowMs: MINUTE_MS,
@@ -80,13 +88,18 @@ const storeSearches = rateLimit({
   limit: STORE_SEARCHES_PER_MINUTE,
   windowMs: MINUTE_MS,
 });
+const storefrontEvents = rateLimit({
+  limit: STOREFRONT_EVENTS_PER_MINUTE,
+  windowMs: MINUTE_MS,
+});
+const observeRequest = observeRequests();
 
 export default defineMiddlewares({
   errorHandler: keepAdminCodes,
   routes: [
     ...['/store', '/hooks'].map((prefix) => ({
       matcher: `${prefix}*`,
-      middlewares: [refuseMalformedPath],
+      middlewares: [observeRequest, refuseMalformedPath],
     })),
     ...PUBLIC_ROUTE_PREFIXES.map((prefix) => ({
       matcher: `${prefix}*`,
@@ -275,6 +288,12 @@ export default defineMiddlewares({
       matcher: '/hooks/carlab-orders/:id/outcome',
       method: 'POST',
       middlewares: [requireOrderOutcomeSecret, validateAdminBody(OrderOutcome)],
+    },
+    {
+      matcher: STOREFRONT_EVENTS_PATH,
+      method: 'POST',
+      bodyParser: { sizeLimit: STOREFRONT_EVENT_MAX_BYTES },
+      middlewares: [requireShopEventsSecret, storefrontEvents],
     },
     {
       matcher: '/hooks/carlab-orders/:id/case-summary',

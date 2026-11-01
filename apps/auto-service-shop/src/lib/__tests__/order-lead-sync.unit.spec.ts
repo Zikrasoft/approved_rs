@@ -69,7 +69,6 @@ function memorySync(seed: SyncOrder[]) {
       alerts.push(text);
       return fakes.alertDelivers;
     },
-    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     adminOrigin: 'https://admin.carlab.rs',
   });
   const metadataOf = (id: string) => rows.get(id)!.metadata ?? {};
@@ -296,6 +295,178 @@ describe('createOrderLeadSync', () => {
     expect(fakes.sent).toEqual([
       expect.objectContaining({ event: 'placed', order_id: 'order_1' }),
       { event: 'canceled', order_id: 'order_canceled' },
+    ]);
+  });
+});
+
+describe('the order.handoff event', () => {
+  const handoffs = () =>
+    (console.log as jest.Mock).mock.calls
+      .map(([line]) => JSON.parse(line))
+      .filter(({ event }) => event === 'order.handoff')
+      .map(({ outcome, reason, kind, order, cause }) => ({
+        outcome,
+        reason,
+        kind,
+        order,
+        cause,
+      }));
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('logs a delivered order and a delivered cancel, without the contact', async () => {
+    const { sync, fakes } = memorySync([pending()]);
+
+    await sync.placed('order_1');
+    fakes.rows.get('order_1')!.status = 'canceled';
+    await sync.canceled('order_1');
+
+    expect(handoffs()).toEqual([
+      {
+        outcome: 'delivered',
+        reason: null,
+        kind: 'placed',
+        order: 'order_1',
+        cause: null,
+      },
+      {
+        outcome: 'delivered',
+        reason: null,
+        kind: 'canceled',
+        order: 'order_1',
+        cause: null,
+      },
+    ]);
+    expect(JSON.stringify(handoffs())).not.toContain('381601234567');
+  });
+
+  it.each([
+    [
+      new LeadRouteRefusal(502),
+      'status_502',
+      'Error: The lead route answered 502',
+    ],
+    [
+      Object.assign(new Error('aborted'), { name: 'TimeoutError' }),
+      'timeout',
+      'TimeoutError: aborted',
+    ],
+    [new TypeError('fetch failed'), 'network', 'TypeError: fetch failed'],
+    [
+      new Error('LEAD_ROUTE_URL is not set'),
+      'error',
+      'Error: LEAD_ROUTE_URL is not set',
+    ],
+  ])('names why a hand-off failed: %s', async (error, reason, cause) => {
+    const { sync, fakes } = memorySync([pending()]);
+    fakes.answer = () => Promise.reject(error);
+
+    await sync.placed('order_1');
+
+    expect(handoffs()).toEqual([
+      { outcome: 'failed', reason, kind: 'placed', order: 'order_1', cause },
+    ]);
+  });
+
+  it('logs a contact held back past its hourly hand-offs as deferred', async () => {
+    const flood = Array.from(
+      { length: SHOP_HANDOFFS_PER_CONTACT_HOUR + 1 },
+      (_, index) => ({
+        ...pending({ contact: '+381601234567' }),
+        id: `o_${index}`,
+      }),
+    );
+    const { sync } = memorySync(flood);
+
+    for (const { id } of flood) await sync.placed(id);
+
+    expect(handoffs().pop()).toEqual({
+      outcome: 'deferred',
+      reason: 'contact_hourly_cap',
+      kind: 'placed',
+      order: `o_${SHOP_HANDOFFS_PER_CONTACT_HOUR}`,
+      cause: null,
+    });
+  });
+
+  it('logs the alert after giving up, and an alert Telegram refused', async () => {
+    const { sync, fakes } = memorySync([
+      pending({ lead_handoff_attempts: MAX_HANDOFF_ATTEMPTS }),
+    ]);
+    fakes.alertDelivers = false;
+
+    await sync.retryDue(NOW);
+    fakes.alertDelivers = true;
+    await sync.retryDue(NOW);
+
+    expect(handoffs().map(({ outcome, reason }) => [outcome, reason])).toEqual([
+      ['alert_failed', 'gave_up'],
+      ['alerted', 'gave_up'],
+    ]);
+  });
+
+  it('logs a cancel the CRM refused, and a cancel that failed', async () => {
+    const handedOff = {
+      ...pending({ lead_handed_off_at: NOW.toISOString() }),
+      status: 'canceled',
+    };
+    const refused = memorySync([handedOff]);
+    refused.fakes.answer = () => Promise.reject(new LeadRouteRefusal(409));
+    await refused.sync.canceled('order_1');
+    const failed = memorySync([handedOff]);
+    failed.fakes.answer = () => Promise.reject(new LeadRouteRefusal(500));
+    await failed.sync.canceled('order_1');
+
+    expect(
+      handoffs().map(({ outcome, reason, kind }) => [outcome, reason, kind]),
+    ).toEqual([
+      ['refused', 'status_409', 'canceled'],
+      ['failed', 'status_500', 'canceled'],
+    ]);
+  });
+
+  it('logs a retry that threw before it could hand anything off', async () => {
+    const { sync, fakes } = memorySync([
+      { ...pending(), id: 'order_broken' },
+      {
+        ...pending({ lead_handed_off_at: NOW.toISOString() }),
+        id: 'order_gone',
+        status: 'canceled',
+      },
+    ]);
+    fakes.unreadable.add('order_broken');
+    fakes.unreadable.add('order_gone');
+
+    await sync.retryDue(NOW);
+
+    expect(handoffs()).toEqual([
+      {
+        outcome: 'failed',
+        reason: 'error',
+        kind: 'placed',
+        order: 'order_broken',
+        cause: 'Error: database gone',
+      },
+      {
+        outcome: 'failed',
+        reason: 'error',
+        kind: 'placed',
+        order: 'order_gone',
+        cause: 'Error: database gone',
+      },
+      {
+        outcome: 'failed',
+        reason: 'error',
+        kind: 'canceled',
+        order: 'order_gone',
+        cause: 'Error: database gone',
+      },
     ]);
   });
 });

@@ -66,6 +66,28 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '0' })).toThrow();
   });
 
+  it('takes 1200 storefront events a minute unless another limit is set', () => {
+    expect(parseEnv(VALID_ENV).STOREFRONT_EVENTS_PER_MINUTE).toBe(1200);
+    expect(
+      parseEnv({ ...VALID_ENV, STOREFRONT_EVENTS_PER_MINUTE: '5' })
+        .STOREFRONT_EVENTS_PER_MINUTE,
+    ).toBe(5);
+    expect(() =>
+      parseEnv({ ...VALID_ENV, STOREFRONT_EVENTS_PER_MINUTE: '0' }),
+    ).toThrow();
+  });
+
+  it('reads an empty events secret as unset, so no storefront event passes', () => {
+    const env = parseEnv({
+      ...VALID_ENV,
+      SHOP_EVENTS_SECRET: '',
+      SHOP_EVENTS_SECRET_PREVIOUS: 'old',
+    });
+
+    expect(env.SHOP_EVENTS_SECRET).toBeUndefined();
+    expect(env.SHOP_EVENTS_SECRET_PREVIOUS).toBe('old');
+  });
+
   it('reuses a live quote for a minute unless another window is set', () => {
     expect(parseEnv(VALID_ENV).LIVE_QUOTE_CACHE_SECONDS).toBe(60);
     expect(
