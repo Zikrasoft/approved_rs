@@ -216,6 +216,17 @@ describe('the catalogue search box', () => {
     expect(panel.textContent).toContain('WBA35BG070N074158');
   });
 
+  it('echoes the query as typed when the shop reads a VIN the box cannot', async () => {
+    backend.mockResolvedValue(
+      Response.json({ vin: true, cars: [], parts: [] }),
+    );
+    const { input, panel } = mount();
+
+    await type(input, 'wba 35bg');
+
+    expect(options(panel)).toEqual(['Подобрать по VIN wba 35bg']);
+  });
+
   it('offers a manual search when nothing is found', async () => {
     backend.mockResolvedValue(
       Response.json({ vin: false, cars: [], parts: [] }),
@@ -229,6 +240,25 @@ describe('the catalogue search box', () => {
     expect(panel.querySelector('[role="option"]')?.getAttribute('href')).toBe(
       '/ru/parts/search/?q=qq+99',
     );
+  });
+
+  it.each([
+    [{ vin: true, cars: [], parts: [] }, 'WBA35BG070N074158'],
+    [{ vin: false, cars: [], parts: [] }, 'qq 99'],
+    [suggestions, 'x3'],
+  ])('never prints a missing label as text (%#)', async (answer, typed) => {
+    backend.mockResolvedValue(Response.json(answer));
+    const { input, panel } = mount();
+    for (const name of ['carsLabel', 'partsLabel', 'vinLabel', 'noneLabel']) {
+      delete document.querySelector<HTMLElement>('catalogue-search')!.dataset[
+        name
+      ];
+    }
+
+    await type(input, typed);
+
+    expect(panel.hidden).toBe(false);
+    expect(panel.textContent).not.toContain('undefined');
   });
 
   it('marks itself busy while it waits for suggestions', async () => {

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { CART_STORAGE_KEY } from './cartBadge';
+import { CART_STORAGE_KEY, PENDING_CART_ADD_KEY } from './cartBadge';
 import { readCart, rememberCart } from './cartStore';
 import { capNotice, defineOfferCart, stepTarget } from './offerCart';
 import { readPartsList } from './partsList';
@@ -215,6 +215,96 @@ describe('a cart changed in another tab', () => {
 
     await vi.waitFor(() => expect(shown('empty')).toBe(true));
     expect(fetch).toHaveBeenCalledTimes(2);
+    document.body.replaceChildren();
+    vi.unstubAllGlobals();
+  });
+});
+
+const sharedCart = (id: string) => ({
+  id,
+  completed: false,
+  currency: 'RSD',
+  total: 0,
+  items: [],
+});
+
+const mountCart = () => {
+  defineOfferCart();
+  document.body.innerHTML = `
+    <offer-cart data-locale-tag="ru-RU">
+      <div data-state="cart" hidden><ul data-lines></ul></div>
+      <div data-state="empty" hidden><p data-empty-notice="" hidden></p></div>
+      <div data-state="loading" hidden></div>
+    </offer-cart>`;
+  return (state: string) =>
+    !document.querySelector<HTMLElement>(`[data-state="${state}"]`)!.hidden;
+};
+
+describe('a cart page opened while an add is still on its way', () => {
+  it('replays the pending add and shows the cart it created', async () => {
+    history.replaceState(null, '', '/ru/parts/cart/');
+    localStorage.clear();
+    localStorage.setItem(
+      PENDING_CART_ADD_KEY,
+      JSON.stringify({ offer_id: 'offer_1', quantity: 1 }),
+    );
+    const fetch = vi.fn(async (_url: string) =>
+      Response.json({ kind: 'cart', cart: sharedCart('cart_created') }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    const shown = mountCart();
+
+    expect(shown('loading')).toBe(true);
+    await vi.waitFor(() => expect(shown('cart')).toBe(true));
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      '/api/cart',
+      '/api/cart?id=cart_created',
+    ]);
+    expect(readCart()?.id).toBe('cart_created');
+    expect(localStorage.getItem(PENDING_CART_ADD_KEY)).toBeNull();
+    document.body.replaceChildren();
+    vi.unstubAllGlobals();
+  });
+});
+
+describe('a cart dropped in another tab', () => {
+  it('shows the empty cart without asking the shop again', async () => {
+    history.replaceState(null, '', '/ru/parts/cart/');
+    localStorage.clear();
+    const fetch = vi.fn(async () =>
+      Response.json({ kind: 'cart', cart: sharedCart('cart_dropped') }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    rememberCart(sharedCart('cart_dropped'));
+    const shown = mountCart();
+    await vi.waitFor(() => expect(shown('cart')).toBe(true));
+
+    localStorage.removeItem(CART_STORAGE_KEY);
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: CART_STORAGE_KEY }),
+    );
+
+    expect(shown('empty')).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    document.body.replaceChildren();
+    vi.unstubAllGlobals();
+  });
+
+  it('ignores a change before the cart has loaded, and changes to other keys', () => {
+    history.replaceState(null, '', '/ru/parts/cart/');
+    localStorage.clear();
+    rememberCart(sharedCart('cart_slow'));
+    const fetch = vi.fn(() => new Promise<Response>(() => undefined));
+    vi.stubGlobal('fetch', fetch);
+    mountCart();
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: CART_STORAGE_KEY }),
+    );
+    window.dispatchEvent(new StorageEvent('storage', { key: 'other' }));
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    expect(fetch).toHaveBeenCalledTimes(1);
     document.body.replaceChildren();
     vi.unstubAllGlobals();
   });

@@ -23,6 +23,18 @@ describe('getJson', () => {
       method: 'GET',
     });
   });
+
+  it.each([
+    ['the network fails', () => Promise.reject(new Error('offline'))],
+    ['the route fails', async () => new Response(null, { status: 503 })],
+    ['the answer has another shape', async () => Response.json({ kind: 1 })],
+  ])('gives nothing when %s', async (_when, answer) => {
+    vi.stubGlobal('fetch', vi.fn(answer));
+
+    expect(
+      await getJson(z.object({ kind: z.string() }), '/api/cart?id=cart_1'),
+    ).toBeNull();
+  });
 });
 
 const serialLocks = () => {

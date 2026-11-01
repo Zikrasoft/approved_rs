@@ -130,6 +130,19 @@ describe('the contact an order was sent with', () => {
     });
   });
 
+  it('names no channel for a form that has no channel field', () => {
+    const storage = memoryStorage();
+    const sent = checkoutForm();
+    sent.querySelector('[name="contact_channel"]')!.remove();
+    field(sent, '[name="contact"]').value = '+381641234567';
+    rememberCheckout(sent, storage);
+
+    expect(checkoutContact(storage)).toEqual({
+      channel: '',
+      contact: '+381641234567',
+    });
+  });
+
   it('is unknown before anything was sent', () => {
     expect(checkoutContact(memoryStorage())).toBeNull();
   });

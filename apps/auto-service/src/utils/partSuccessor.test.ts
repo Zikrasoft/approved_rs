@@ -307,4 +307,13 @@ describe('pricedEquivalent', () => {
 
     expect(pricedEquivalent(onRequest, index(unpriced))).toBeNull();
   });
+
+  it('skips an equivalent the catalogue has no page for', () => {
+    const priced = entry(number(ate, '13046027862'), { offers: [offer(6600)] });
+    const onRequest = entry(number(bmw, '34116860242'), {
+      equivalents: [number(mann, 'X1'), number(ate, '13046027862')],
+    });
+
+    expect(pricedEquivalent(onRequest, index(priced))).toBe(priced);
+  });
 });

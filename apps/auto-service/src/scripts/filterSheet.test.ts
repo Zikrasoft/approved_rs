@@ -68,6 +68,21 @@ describe('the filter sheet', () => {
     expect(submit.hasAttribute('aria-busy')).toBe(false);
   });
 
+  it('keeps the plain label and asks for no count when the button has no count label', async () => {
+    vi.useFakeTimers();
+    const backend = vi.fn();
+    vi.stubGlobal('fetch', backend);
+    const { form, submit } = sheet();
+    submit.removeAttribute('data-filters-count');
+
+    edit(form, 'max.capacity');
+    await vi.runAllTimersAsync();
+
+    expect(submit.textContent).toBe('Показать');
+    expect(submit.hasAttribute('aria-busy')).toBe(false);
+    expect(backend).not.toHaveBeenCalled();
+  });
+
   it('falls back to the plain label when the count fails', async () => {
     vi.useFakeTimers();
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('down')));
