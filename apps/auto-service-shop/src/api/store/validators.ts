@@ -16,6 +16,8 @@ import {
 
 const recordId = z.string().regex(CATALOGUE_ID_PATTERN);
 
+const MAX_SEARCH_OFFSET = 10_000;
+
 const modelHasMake = ({ make, model }: { make?: string; model?: string }) =>
   !model || Boolean(make);
 
@@ -45,12 +47,7 @@ export const StoreSearchParts = z
           .array(
             z.string().transform((text, ctx) => {
               const range = parseRangeFilter(text);
-              if (
-                !range ||
-                (range.min !== null &&
-                  range.max !== null &&
-                  range.min > range.max)
-              ) {
+              if (!range) {
                 ctx.addIssue({ code: 'custom', message: 'invalid range' });
                 return z.NEVER;
               }
@@ -60,7 +57,12 @@ export const StoreSearchParts = z
           .max(SEARCH_FILTER_CAPS.ranges),
       )
       .default([]),
-    offset: z.coerce.number().int().nonnegative().max(10_000).default(0),
+    offset: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .transform((offset) => Math.min(offset, MAX_SEARCH_OFFSET))
+      .default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),
   })
   .refine(({ q, category }) => q || category, 'q or category is required')

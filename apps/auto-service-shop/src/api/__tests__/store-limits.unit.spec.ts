@@ -6,9 +6,18 @@ import {
 } from '../store/validators';
 
 describe('store search limits', () => {
-  it('refuses an offset past the last reachable page', () => {
+  it('reads an offset past the last reachable page as that page', () => {
     expect(
-      StoreSearchParts.safeParse({ q: 'mann', offset: '99999999999' }).success,
+      StoreSearchParts.parse({ q: 'mann', offset: '99999999999' }).offset,
+    ).toBe(10_000);
+  });
+
+  it('refuses a negative or fractional offset', () => {
+    expect(
+      StoreSearchParts.safeParse({ q: 'mann', offset: '-1' }).success,
+    ).toBe(false);
+    expect(
+      StoreSearchParts.safeParse({ q: 'mann', offset: '1.5' }).success,
     ).toBe(false);
   });
 
