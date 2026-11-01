@@ -69,7 +69,8 @@ const { stock, lead, buyable } = offer
       data-offer-id={offer?.id}
       hidden={!buyable}
     >
-      <span data-label>{copy.buyButtonLabel}</span>
+      <span class="hidden in-aria-busy:inline">{copy.buyAdding}</span>
+      <span class="in-aria-busy:hidden" data-label>{copy.buyButtonLabel}</span>
     </button>
     <a
       href={askHref}

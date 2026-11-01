@@ -216,6 +216,8 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       if (sent) return;
       setBusy(false);
       submitError.hidden = false;
+      submitError.tabIndex = -1;
+      submitError.focus();
     });
   });
 }

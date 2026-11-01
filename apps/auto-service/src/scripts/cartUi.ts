@@ -22,6 +22,7 @@ export const sendJson = (method: string, body: unknown) =>
     method,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
+    keepalive: true,
   });
 
 const CART_LOCK = 'carlab-offer-cart';

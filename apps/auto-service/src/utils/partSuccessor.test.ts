@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { PartPageEntry } from './catalogueSnapshot';
-import { currentNumbers, partSuccessor } from './partSuccessor';
+import {
+  currentNumbers,
+  partSuccessor,
+  pricedEquivalent,
+} from './partSuccessor';
 
 const bmw = { name: 'BMW', slug: 'bmw' };
 const mann = { name: 'Mann-Filter', slug: 'mann-filter' };
@@ -65,6 +69,26 @@ describe('partSuccessor', () => {
     });
 
     expect(partSuccessor(dead, index(current, mannCurrent))).toBe(current);
+  });
+
+  it('sends a superseded number to the current number with the best offer', () => {
+    const offer = (price: number) => ({
+      id: `of_${price}`,
+      price,
+      currency: 'RSD',
+      stock_quantity: 3,
+      lead_time_days: 0,
+    });
+    const dearOwn = entry(number(bmw, '11428575211'), {
+      offers: [offer(1850)],
+    });
+    const cheapMann = entry(number(mann, 'HU816X'), { offers: [offer(1200)] });
+    const dead = entry(number(bmw, '11428507683', true), {
+      superseded: true,
+      equivalents: [number(bmw, '11428575211'), number(mann, 'HU816X')],
+    });
+
+    expect(partSuccessor(dead, index(dearOwn, cheapMann))).toBe(cheapMann);
   });
 
   it('sends a replaced part to its replacement', () => {
@@ -189,5 +213,39 @@ describe('currentNumbers', () => {
       equivalents: [aftermarket(mann, 'HU816X')],
     });
     expect(currentNumbers(live, index())).toEqual([]);
+  });
+});
+
+describe('pricedEquivalent', () => {
+  const ate = { name: 'ATE', slug: 'ate' };
+  const offer = (price: number) => ({
+    id: `of_${price}`,
+    price,
+    currency: 'RSD',
+    stock_quantity: 2,
+    lead_time_days: 0,
+  });
+
+  it('finds the current equivalent with the best offer', () => {
+    const cheap = entry(number(ate, '13046027862'), { offers: [offer(6600)] });
+    const dear = entry(number(mann, 'X1'), { offers: [offer(9000)] });
+    const onRequest = entry(number(bmw, '34116860242'), {
+      equivalents: [
+        number(mann, 'X1'),
+        number(ate, '13046027862'),
+        number(ate, '13040000000', true),
+      ],
+    });
+
+    expect(pricedEquivalent(onRequest, index(dear, cheap))).toBe(cheap);
+  });
+
+  it('has none when no equivalent carries a price', () => {
+    const unpriced = entry(number(ate, '13046027862'));
+    const onRequest = entry(number(bmw, '34116860242'), {
+      equivalents: [number(ate, '13046027862')],
+    });
+
+    expect(pricedEquivalent(onRequest, index(unpriced))).toBeNull();
   });
 });
