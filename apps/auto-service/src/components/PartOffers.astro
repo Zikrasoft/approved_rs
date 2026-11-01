@@ -12,6 +12,7 @@ import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 import PickupLine from './PickupLine.astro';
 import PartAskRow from './PartAskRow.astro';
+import PriceTag from './PriceTag.astro';
 import { formatMoney } from '@/utils/money';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
 
@@ -19,9 +20,10 @@ interface Props {
   page: PartPageEntry;
   demoted?: boolean;
   replaced?: string;
+  alternative?: PartPageEntry | null;
 }
 
-const { page, demoted = false, replaced } = Astro.props;
+const { page, demoted = false, replaced, alternative } = Astro.props;
 const ownHeading = Astro.slots.has('heading');
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
@@ -151,6 +153,26 @@ const askHref = PathBuilder.partsInquiry(locale, named);
         <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
       )}
       <p class="text-sm leading-relaxed text-ink-2">{copy.orderBody}</p>
+      {alternative && (
+        <a
+          href={PathBuilder.partNumber(locale, alternative.slug)}
+          class="group flex min-h-11 items-center gap-3 rounded-control bg-paper px-3 py-2.5 text-ink hover:text-signal-ink"
+        >
+          <span class="flex min-w-0 flex-1 flex-col">
+            <span class="text-xs text-muted">{copy.pricedEquivalentLabel}</span>
+            <span class="text-sm">
+              <span class="font-semibold">{alternative.brand.name}</span>{' '}
+              <span class="spec whitespace-nowrap">{alternative.value}</span>
+            </span>
+          </span>
+          <PriceTag pages={[alternative]} />
+          <Icon
+            name="chevronRight"
+            size={16}
+            class="shrink-0 text-muted group-hover:text-signal-ink"
+          />
+        </a>
+      )}
       <parts-list-add class="mt-1 block" {...part} {...contactCta}>
         <a
           href={askHref}

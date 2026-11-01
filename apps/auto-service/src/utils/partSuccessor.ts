@@ -5,14 +5,23 @@ import type { PartPageEntry } from './catalogueSnapshot';
 const slugOf = (number: BrandNumber) =>
   partPageSlug(number.brand.slug, number.normalized_value);
 
-const pageWithBestOffer = (pages: PartPageEntry[]) => {
+const pricedPage = (pages: PartPageEntry[]) => {
   const offer = bestOffer(pages.flatMap(({ offers }) => offers));
-  return (
-    pages.find(({ offers }) => offer && offers.includes(offer)) ??
-    pages[0] ??
-    null
-  );
+  return pages.find(({ offers }) => offer && offers.includes(offer)) ?? null;
 };
+
+const pageWithBestOffer = (pages: PartPageEntry[]) =>
+  pricedPage(pages) ?? pages[0] ?? null;
+
+export const pricedEquivalent = (
+  page: PartPageEntry,
+  bySlug: Map<string, PartPageEntry>,
+): PartPageEntry | null =>
+  pricedPage(
+    page.equivalents
+      .filter(({ superseded }) => !superseded)
+      .flatMap((number) => bySlug.get(slugOf(number)) ?? []),
+  );
 
 export function partSuccessor(
   page: PartPageEntry,
