@@ -46,9 +46,7 @@ const bmwWorks = publishedWorks(await getCollection('works')).filter((work) =>
   {
     bmwWorks.length > 0 && (
       <section class="wrap pb-band">
-        <h2 class="text-xl font-semibold text-ink sm:text-2xl">
-          {bmw.worksHeading}
-        </h2>
+        <h2 class="text-block font-semibold text-ink">{bmw.worksHeading}</h2>
         <WorkGrid works={bmwWorks.slice(0, 3)} />
       </section>
     )

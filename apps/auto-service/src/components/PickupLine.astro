@@ -13,7 +13,7 @@ const { shopCart, site } = content(localeFrom(Astro.url.pathname));
     href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
     target="_blank"
     rel="noopener"
-    class="self-start font-semibold text-ink link-underlined"
+    class="inline-flex items-center self-start font-semibold text-ink link-underlined pointer-coarse:min-h-11"
   >
     {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}
   </a>

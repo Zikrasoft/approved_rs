@@ -119,9 +119,7 @@ const categories = props.categories.map((category) => ({
                 href={PathBuilder.partsCategory(locale, category.slug)}
                 class="card group flex flex-col gap-2 p-5 transition-colors duration-150 hover:border-ink"
               >
-                <h3 class="text-base font-semibold text-ink">
-                  {category.name}
-                </h3>
+                <h3 class="font-semibold text-ink">{category.name}</h3>
                 {category.lead && (
                   <p class="text-sm leading-relaxed text-ink-2">
                     {category.lead}

@@ -1,0 +1,16 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  href: string;
+  label: string;
+  class?: string;
+}
+
+const { href, label, class: className } = Astro.props;
+---
+
+<a href={href} class:list={['btn btn-secondary w-fit', className]}>
+  {label}
+  <Icon name="arrowRight" />
+</a>

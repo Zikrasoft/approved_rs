@@ -166,7 +166,7 @@
   h3 {
     font-weight: 600;
     letter-spacing: -0.015em;
-    line-height: 1.2;
+    line-height: 1.375;
     text-wrap: balance;
     overflow-wrap: break-word;
     hyphens: auto;
@@ -254,10 +254,6 @@
   @variant hover {
     color: var(--color-signal-ink);
   }
-
-  @variant focus-visible {
-    outline: 2px solid var(--color-ink);
-  }
 }
 
 @layer components {
@@ -272,6 +268,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    border: 1px solid transparent;
     border-radius: var(--radius-control);
     padding: 0.875rem 1.625rem;
     font-size: 0.9375rem;
@@ -304,6 +301,31 @@
 
   .btn:active {
     transform: translateY(1px);
+  }
+
+  .btn[aria-busy='true'] {
+    cursor: progress;
+  }
+
+  .btn[aria-busy='true']::before {
+    content: '';
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 9999px;
+    animation: btn-busy 0.8s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  @keyframes btn-busy {
+    to {
+      transform: rotate(1turn);
+    }
   }
 
   .btn-block {
@@ -353,6 +375,10 @@
     color: var(--color-ink);
     white-space: nowrap;
     transition: background-color 160ms ease-out;
+
+    @media (pointer: coarse) {
+      min-height: 2.75rem;
+    }
   }
 
   .chip-accent {

@@ -19,6 +19,7 @@ import { content } from '@/i18n/content';
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
+const bmw = content(locale).pages.bmw;
 const year = new Date().getFullYear();
 const credit = splitDeveloperCredit(site.footer.developerCredit);
 
@@ -30,7 +31,8 @@ const channels = [
 ] as const;
 const eyebrow = 'spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted';
 const navList = 'flex flex-col gap-1 md:gap-2.5';
-const navLink = 'link-muted py-1.5 md:py-0';
+const navLink =
+  'link-muted flex w-fit items-center py-1.5 md:py-0 pointer-coarse:min-h-11 pointer-coarse:py-0';
 ---
 
 <footer class="mt-20 border-t border-line bg-card print:hidden">
@@ -53,6 +55,9 @@ const navLink = 'link-muted py-1.5 md:py-0';
           </a>
         ))
       }
+      <a href={PathBuilder.bmw(locale)} class={navLink}>
+        {bmw.heading}
+      </a>
     </nav>
 
     <nav class={navList} aria-label={site.footer.companyHeading}>

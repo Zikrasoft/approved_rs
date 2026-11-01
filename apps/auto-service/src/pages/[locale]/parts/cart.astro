@@ -1,5 +1,6 @@
 ---
 import Shell from '@/layouts/Shell.astro';
+import { SITE_NAME } from '@/utils/constants';
 import PageHero from '@/components/PageHero.astro';
 import CartEmpty from '@/components/CartEmpty.astro';
 import CartLineTemplate from '@/components/CartLineTemplate.astro';
@@ -72,6 +73,7 @@ const orderedContact = {
       data-count-template={copy.summaryCountTemplate}
       data-part-href={PathBuilder.partNumber(locale, '{slug}')}
       data-ordered-heading={copy.orderedHeading}
+      data-ordered-title={`${copy.orderedHeading} | ${SITE_NAME}`}
       data-ordered-contact={JSON.stringify(orderedContact)}
       data-order-template={copy.orderNumberTemplate}
       data-quantity-template={copy.receiptQuantityTemplate}

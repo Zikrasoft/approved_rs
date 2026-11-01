@@ -9,7 +9,7 @@ type Props = HTMLAttributes<'div'>;
 const { class: className, ...rest } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).shopCart;
 const step =
-  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
 ---
 
 <div

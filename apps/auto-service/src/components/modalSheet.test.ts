@@ -13,4 +13,11 @@ describe('the modal sheet', () => {
       .map(([path]) => path);
     expect(shells.sort()).toEqual(['./ModalSheet.astro']);
   });
+
+  it('closes every dialog through the one close button', () => {
+    const closers = Object.entries(components)
+      .filter(([, source]) => /<button\s[^>]*data-modal-close/.test(source))
+      .map(([path]) => path);
+    expect(closers).toEqual(['./SheetClose.astro']);
+  });
 });

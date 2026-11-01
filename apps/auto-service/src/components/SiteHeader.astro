@@ -14,6 +14,8 @@ import {
   CONTACT_CTA_SELECTOR,
 } from '@podbor/site-kit/contact-control';
 import ContactControl from './ContactControl.astro';
+import ContactChannels from './ContactChannels.astro';
+import SheetClose from './SheetClose.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
 import SocialLinks from './SocialLinks.astro';
 import { content } from '@/i18n/content';
@@ -68,7 +70,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     >
       <a
         href={PathBuilder.home(locale)}
-        class="shrink-0"
+        class="flex min-h-11 shrink-0 items-center"
         aria-label={site.common.homeLabel}
       >
         <Wordmark onPanel />
@@ -136,9 +138,9 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           <span class="spec text-xs">{site.header.phoneLabel}</span>
         </ContactControl>
 
-        <button
-          type="button"
-          popovertarget="site-search"
+        <a
+          href={PathBuilder.parts(locale)}
+          data-search-open
           aria-label={searchCopy.openSearch}
           class:list={[
             'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
@@ -146,7 +148,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           ]}
         >
           <Icon name="search" size={20} />
-        </button>
+        </a>
 
         <cart-badge
           class="block"
@@ -181,9 +183,9 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
                 {site.header.partsCta}
               </a>
             ) : (
-              <button type="button" data-open-lead-modal class={cta}>
+              <a href="#lead" data-open-lead-modal class={cta}>
                 {site.header.cta}
-              </button>
+              </a>
             )
           }
         </cta-reveal>
@@ -195,7 +197,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           aria-controls="site-menu"
           aria-label={site.header.menuOpenLabel}
           data-close-label={site.header.menuCloseLabel}
-          class="flex h-10 w-10 items-center justify-center rounded-control border border-panel-line-strong text-panel-fg md:hidden"
+          class="flex size-11 items-center justify-center rounded-control border border-panel-line-strong text-panel-fg md:hidden"
         >
           <span class="relative block h-3 w-4" aria-hidden="true">
             <span
@@ -210,24 +212,17 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     </div>
   </header>
 
-  <div
-    id="site-search"
-    popover
-    class="inset-x-0 top-0 bottom-auto m-0 w-full max-w-none overflow-visible border-0 border-b border-line bg-paper p-0 text-ink shadow-lg backdrop:bg-ink/20"
-  >
-    <div class="wrap flex items-start gap-2 py-3">
-      <CatalogueSearch class="min-w-0 flex-1" autofocus />
-      <button
-        type="button"
-        popovertarget="site-search"
-        popovertargetaction="hide"
-        aria-label={searchCopy.closeSearch}
-        class="flex size-11 shrink-0 items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-shade"
-      >
-        <Icon name="close" size={16} />
-      </button>
-    </div>
-  </div>
+  <search-dialog trigger="[data-search-open]">
+    <dialog
+      aria-label={searchCopy.openSearch}
+      class="m-0 mb-auto w-full max-w-none overflow-visible border-0 border-b border-line bg-paper p-0 text-ink shadow-lg backdrop:bg-ink/20"
+    >
+      <div class="wrap flex items-start gap-2 py-3">
+        <CatalogueSearch class="min-w-0 flex-1" autofocus />
+        <SheetClose label={searchCopy.closeSearch} />
+      </div>
+    </dialog>
+  </search-dialog>
 
   <div
     id="site-menu"
@@ -254,10 +249,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     </nav>
 
     <div class="flex flex-col gap-6 pt-6">
-      <ContactControl channel="phone" class="btn btn-secondary w-full">
-        <Icon name="phone" />
-        <span class="spec">{site.header.phoneLabel}</span>
-      </ContactControl>
+      <ContactChannels placement="header" />
       <SocialLinks />
       <carlab-lang class="flex items-center gap-2">
         <span class="text-xs text-muted">{site.header.languageLabel}</span>
@@ -288,6 +280,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     defineCtaReveal,
     defineLocaleChoice,
     defineMenuToggle,
+    defineModalDialog,
   } from '@podbor/site-kit/browser';
 
   import { defineCartBadge } from '@/scripts/cartBadge';
@@ -296,4 +289,5 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
   defineCtaReveal();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
+  defineModalDialog('search-dialog');
 </script>

@@ -195,7 +195,12 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
         receipt: OfferCart | null,
         contact: ReturnType<typeof checkoutContact>,
       ): void {
-        const { orderedHeading, orderTemplate = '' } = this.dataset;
+        const {
+          orderedHeading,
+          orderedTitle,
+          orderTemplate = '',
+        } = this.dataset;
+        if (orderedTitle) document.title = orderedTitle;
         const localeTag = localeTagOf(this);
         const contactTemplates = JSON.parse(
           this.dataset.orderedContact ?? '{}',
