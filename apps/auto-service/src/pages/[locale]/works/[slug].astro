@@ -113,7 +113,6 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
         class="btn btn-primary w-full shrink-0 whitespace-nowrap sm:w-fit"
       >
         {pages.works.doorButtonLabel}
-        <Icon name="arrowRight" />
       </a>
     </aside>
   </div>
@@ -210,7 +209,6 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
                 class="btn btn-secondary w-fit"
               >
                 {services[slug].name}
-                <Icon name="arrowRight" />
               </a>
             </li>
           ))}
@@ -226,7 +224,6 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
           <span class="eyebrow">{pages.works.eyebrow}</span>
           <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
             {site.common.allWorks}
-            <Icon name="arrowRight" />
           </a>
         </div>
         <WorkGrid works={related} />
