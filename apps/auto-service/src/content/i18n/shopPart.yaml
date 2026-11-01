@@ -78,7 +78,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 4afd29bf7082c7be
+translatedFrom: 9802dc8d58e750ae
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -135,6 +135,7 @@ translations:
     addedLabel: U korpi
     outOfStock: Nema na stanju
     askSupplyCta: Saznajte cenu i rok isporuke
+    orderViaManagerCta: Poruči preko prodavca
     askedNotice: Dodato u upit. Proverićemo cenu i rok preuzimanja i javiti vam se.
     stockLimitNotice: Trenutno nema više komada ovog dela, svi dostupni su već u korpi.
     fromPrice: od {price}
@@ -152,6 +153,8 @@ translations:
     askAboutPart: Pitajte za ovaj deo
     askAboutPartMessage: '{part}: da li odgovara mom automobilu?'
     askAboutPartVin: 'VIN: {vin}'
+    askAboutPriceMessage: '{part}: koja je cena i rok isporuke?'
+    askAboutReplacedPart: '{part} (zamena za {replaced})'
     crossReferencesHeading: Brojevi drugih proizvođača
     worksHeading: Već smo pronalazili ovaj deo za klijente
     applicabilityHeading: Odgovara vozilima prema podacima iz kataloga
@@ -213,6 +216,7 @@ translations:
     addedLabel: In basket
     outOfStock: Out of stock
     askSupplyCta: Check price and lead time
+    orderViaManagerCta: Order through our team
     askedNotice: Added to your enquiry. We'll check the price and collection time and get back to you.
     stockLimitNotice: All available stock of this part is already in your basket.
     fromPrice: from {price}
@@ -230,6 +234,8 @@ translations:
     askAboutPart: Ask about this part
     askAboutPartMessage: '{part}: will it fit my car?'
     askAboutPartVin: 'VIN: {vin}'
+    askAboutPriceMessage: "{part}: what's the price and lead time?"
+    askAboutReplacedPart: '{part} (replacement for {replaced})'
     crossReferencesHeading: Other manufacturers' part numbers
     worksHeading: We've sourced this part before
     applicabilityHeading: Vehicle fitment from catalogue data

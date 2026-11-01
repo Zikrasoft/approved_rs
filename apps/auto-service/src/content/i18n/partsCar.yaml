@@ -109,7 +109,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: 1bc476617b08137d
+translatedFrom: 9f44412eb383db94
 translations:
   sr:
     vin:
@@ -262,7 +262,7 @@ translations:
       kitHeading: Service kit
       kitLead: The parts you need for one service, in the right quantities.
       kitAdd: Ask our team to check by VIN
-      kitCart: Add kit to basket
+      kitCart: Add kit to cart
       kitAdding: Adding to basket…
       matchesHeading: Consumables meeting manufacturer specifications
       matchesLead: Oils, bulbs and wiper blades that meet the requirements for this car's engine and body.

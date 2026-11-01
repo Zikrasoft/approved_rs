@@ -72,14 +72,14 @@ installationInCart: Установку можно добавить в корзи
 addonsInCart: Обе услуги можно добавить в корзине.
 freeLabel: Бесплатно
 priceChangeTemplate: '{name}: было {before}, стало {after}'
-translatedFrom: e234dba9c373a9ee
+translatedFrom: 061c68614c466839
 translations:
   sr:
     metaTitle: Korpa, CarLab
     metaDescription: Delovi koje ste izabrali u katalogu CarLab. Plaćanje gotovinom pri preuzimanju u servisu u Beogradu.
     heading: Korpa
     cartLink: Korpa
-    partsListNote: Delovi bez cene su u upitu i neće biti uključeni u ovu porudžbinu. Pošaljite upit zasebno, pa ćemo vam javiti cenu i rok isporuke.
+    partsListNote: Delovi bez navedene cene nalaze se u upitu, odvojeno od korpe. Pošaljite upit, pa ćemo vam javiti cenu i rok isporuke.
     loading: Proveravamo cene i dostupnost
     emptyHeading: Korpa je prazna
     emptyBody: Otvorite stranicu dela u katalogu i kliknite na „U korpu“.
@@ -95,7 +95,7 @@ translations:
     removeLabel: Ukloni iz korpe
     totalLabel: Ukupno
     addonTemplate: 'Dodaj: {service}'
-    addonPickup: Obavljamo pri preuzimanju u servisu CarLab
+    addonPickup: Obavićemo u servisu CarLab kada dođete po porudžbinu
     addonInCart: Uslugu možete dodati u korpi.
     installationLabel: Ugradnja u servisu CarLab
     installationFree: Besplatna ugradnja
@@ -118,17 +118,17 @@ translations:
     submitLabel: Pošalji porudžbinu
     consentError: Bez saglasnosti ne možemo da prihvatimo porudžbinu
     submitError: Porudžbina nije poslata. Proverite vezu i pokušajte ponovo
-    submitErrorContacts: 'Ili pošaljite porudžbinu putem WhatsApp-a, spisak je već u poruci. Možete nas i pozvati ili nam pisati preko druge aplikacije:'
+    submitErrorContacts: 'Ili pošaljite porudžbinu putem WhatsApp-a, spisak je već u poruci. Možete i da nas pozovete ili nam pišete putem druge aplikacije:'
     orderMessage: 'Dobar dan! Želim da poručim:'
     checkoutBlocked: 'Trenutno nije moguće kupiti: {names}. Uklonite stavku ili pošaljite upit za nju da biste mogli da pošaljete porudžbinu.'
     notices:
-      priceChanged: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Dok ste slali porudžbinu, cena se promenila, pa smo ažurirali korpu. Možete i da proverite ukupan iznos i ponovo pošaljete porudžbinu.
-      unavailable: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Jedan od artikala više nije dostupan u traženoj količini. Možete i da ga uklonite i ponovo pošaljete porudžbinu.
-      unreachable: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Porudžbina trenutno nije uspela. Možete i da pokušate ponovo za minut.
+      priceChanged: 'Imamo vaš kontakt i spisak delova: naš saradnik će vam se javiti. Dok ste slali porudžbinu, cena se promenila i ažurirali smo korpu. Proverite ukupan iznos i ponovo pošaljite porudžbinu.'
+      unavailable: 'Imamo vaš kontakt i spisak delova: naš saradnik će vam se javiti. Jedan od artikala više nije dostupan u traženoj količini. Uklonite ga i ponovo pošaljite porudžbinu.'
+      unreachable: 'Imamo vaš kontakt i spisak delova: naš saradnik će vam se javiti. Porudžbina trenutno nije uspešno poslata. Pokušajte ponovo za minut.'
       expired: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Ova korpa više nije važeća i porudžbina nije poslata.
       gone: Ova korpa više nije važeća, pa smo delove iz nje prebacili u upit. Pošaljite upit, a mi ćemo vam javiti cenu i rok nabavke.
       invalid: Kontakt nije prepoznat. Unesite broj telefona ili korisničko ime na Telegramu i ponovo pošaljite porudžbinu.
-      cartChanged: Imamo vaš kontakt i spisak delova, naš saradnik će vam se javiti. Korpa je izmenjena u drugoj kartici pregledača. Možete i da proverite artikle i ukupan iznos i ponovo pošaljete porudžbinu.
+      cartChanged: 'Imamo vaš kontakt i spisak delova: naš saradnik će vam se javiti. Korpa je izmenjena u drugoj kartici pregledača. Proverite artikle i ukupan iznos i ponovo pošaljite porudžbinu.'
       repriced: Cena se promenila od vaše poslednje posete. Proverite iznos pre slanja porudžbine.
       offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
       stockLimit: Nema više komada ovog dela na stanju. U korpi je već cela dostupna količina.
@@ -154,7 +154,7 @@ translations:
     metaDescription: Parts you've selected from the CarLab catalogue. Pay cash on collection at our workshop in Belgrade.
     heading: Your cart
     cartLink: Your cart
-    partsListNote: Parts without a price are in your inquiry and won't be included in this order. Send the inquiry separately and we'll confirm pricing and availability.
+    partsListNote: Parts without a price are in your parts inquiry, separate from your cart. Send the inquiry and we'll confirm the price and lead time.
     loading: Checking prices and availability
     emptyHeading: Your cart is empty
     emptyBody: Open a part in the catalogue and click "Add to cart".
@@ -170,7 +170,7 @@ translations:
     removeLabel: Remove from cart
     totalLabel: Total
     addonTemplate: 'Add: {service}'
-    addonPickup: Done when you collect at the CarLab workshop
+    addonPickup: We'll do this at CarLab when you come to collect your order
     addonInCart: You can add this service in your cart.
     installationLabel: Fitting at the CarLab workshop
     installationFree: Free fitting
@@ -197,13 +197,13 @@ translations:
     orderMessage: "Hi! I'd like to order:"
     checkoutBlocked: 'Currently unavailable to buy: {names}. Remove the item or move it to a parts enquiry to place your order.'
     notices:
-      priceChanged: We have your contact details and parts list, and our team will get in touch. A price changed while you were placing your order, so we've updated your cart. You can also check the total and place your order again.
-      unavailable: We have your contact details and parts list, and our team will get in touch. One item is no longer available in the quantity you need. You can also remove it and place your order again.
-      unreachable: We have your contact details and parts list, and our team will get in touch. Your order couldn't be placed just now. You can also try again in a minute.
+      priceChanged: We have your contact details and parts list. Our team will get in touch. A price changed while you were placing your order, so we've updated your cart. Check the total and place your order again.
+      unavailable: We have your contact details and parts list. Our team will get in touch. One item is no longer available in the quantity you need. Remove it and place your order again.
+      unreachable: We have your contact details and parts list. Our team will get in touch. Your order couldn't be placed just now. Please try again in a minute.
       expired: We have your contact details and parts list, and our team will get in touch. This cart has expired, and the order hasn't been placed.
       gone: This cart has expired, so we've moved the parts to an inquiry. Send the inquiry, and we'll confirm the price and lead time.
       invalid: We couldn't recognise your contact details. Enter a phone number or Telegram username and place your order again.
-      cartChanged: We have your contact details and parts list, and our team will get in touch. Your cart was changed in another tab. You can also check the items and total and place your order again.
+      cartChanged: We have your contact details and parts list. Our team will get in touch. Your cart was changed in another tab. Check the items and total, then place your order again.
       repriced: A price has changed since your last visit. Check the total before placing your order.
       offline: The shop didn't respond. Your cart hasn't changed. Please try again in a minute.
       stockLimit: There are no more of this part available right now. Your cart already contains all available stock.

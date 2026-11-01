@@ -50,7 +50,7 @@ suggestRetry: Повторить
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: 8357f567366ba7e5
+translatedFrom: 47ed0c62deb5b5a0
 translations:
   sr:
     searchHeading: Pronađite deo
@@ -66,6 +66,7 @@ translations:
     emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model automobila, na primer HU 816 x, filter ulja ili BMW X3.
     noResults: Nema rezultata za upit „{q}“. Proverite broj dela ili pošaljite upit, pa će naš tim pronaći odgovarajući deo.
     lookingFor: 'Tražim: {q}'
+    lookingForVin: Pronađite odgovarajuće delove prema VIN broju {vin}
     unavailable: Pretraga trenutno nije dostupna. Pošaljite upit, pa će naš tim pronaći odgovarajući deo.
     unknownScope: Ova kategorija ne postoji u katalogu. Pošaljite upit i naš saradnik će ručno pronaći odgovarajući deo.
     filtersHeading: Filteri
@@ -118,6 +119,7 @@ translations:
     emptyQuery: Enter a VIN, part number, part name, or make and model, for example HU 816 x, oil filter or BMW X3.
     noResults: No results for "{q}". Check the part number or send a parts enquiry, and our team will find the right part for you.
     lookingFor: 'Searching for: {q}'
+    lookingForVin: Find parts by VIN {vin}
     unavailable: Search is currently unavailable. Send a parts enquiry, and our team will find the right part for you.
     unknownScope: This category isn't in our catalogue. Send a parts enquiry and our team will find the right part for you.
     filtersHeading: Filters
