@@ -1,7 +1,13 @@
 import { readdirSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { RESERVED_PARTS_SEGMENTS } from '@podbor/catalog-contract';
-import { PathBuilder, swapLocale, vehiclePath, withLocales } from './paths';
+import {
+  catalogueLinks,
+  PathBuilder,
+  swapLocale,
+  vehiclePath,
+  withLocales,
+} from './paths';
 import { SERVICE_SLUGS } from './services';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 
@@ -134,5 +140,28 @@ describe('reserved parts segments', () => {
     expect(segments.filter((segment) => !reserved.includes(segment))).toEqual(
       [],
     );
+  });
+});
+
+describe('catalogueLinks.modelCategory', () => {
+  const model = {
+    slug: 'f30-320d',
+    chassis: { series: { make: { slug: 'bmw' } } },
+  };
+  const links = catalogueLinks('ru', {
+    makes: new Set(),
+    models: new Set(),
+    categories: new Set(['bmw/f30-320d/brake-pads']),
+    vehicles: new Set(),
+  });
+
+  it('links a category the Model has a page for', () => {
+    expect(links.modelCategory(model, 'brake-pads')).toBe(
+      '/ru/parts/bmw/f30-320d/brake-pads/',
+    );
+  });
+
+  it('gives nothing for a category without a Model page', () => {
+    expect(links.modelCategory(model, 'oil-filters')).toBeNull();
   });
 });
