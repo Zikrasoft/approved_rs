@@ -45,10 +45,9 @@ const capitalised = (params: URLSearchParams) =>
 
 const keyOf = (facet: string) => facet.slice(0, facet.indexOf(':'));
 
-const listedSpelling = (facets: SearchFacet[], filter: string) => {
-  const key = keyOf(filter);
+const listedSpelling = ({ key, values }: SearchFacet, filter: string) => {
   const wanted = filter.slice(key.length + 1).toLowerCase();
-  const [listed] = (facets.find((facet) => facet.key === key)?.values ?? [])
+  const [listed] = values
     .filter(({ value }) => value.toLowerCase() === wanted)
     .sort((a, b) => b.count - a.count);
   return listed ? facetFilter(key, listed.value) : filter;
@@ -59,15 +58,13 @@ const knownFilters = (
   requested: string[],
   ranges: RangeFilter[],
 ) => {
-  const keys = new Set(facets.map(({ key }) => key));
-  const numbers = new Set(
-    facets.filter(({ type }) => type === 'number').map(({ key }) => key),
-  );
+  const byKey = new Map(facets.map((facet) => [facet.key, facet]));
   return filtersWithinCap(
-    requested
-      .filter((facet) => keys.has(keyOf(facet)))
-      .map((facet) => listedSpelling(facets, facet)),
-    ranges.filter(({ key }) => numbers.has(key)),
+    requested.flatMap((filter) => {
+      const facet = byKey.get(keyOf(filter));
+      return facet ? [listedSpelling(facet, filter)] : [];
+    }),
+    ranges.filter(({ key }) => byKey.get(key)?.type === 'number'),
   );
 };
 
