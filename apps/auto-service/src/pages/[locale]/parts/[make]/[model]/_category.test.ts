@@ -82,10 +82,12 @@ const modelCategory = () => {
 };
 
 describe('the Model category page', () => {
-  it('counts the current numbers, the unit the filtered search lists', async () => {
+  it('counts the current numbers and says so, the unit the filtered search lists', async () => {
     const page = await modelCategory();
 
-    expect(page.textContent).toContain(copy.found.replace('{count}', '2'));
+    expect(page.textContent).toContain(
+      copy.foundNumbers.replace('{count}', '2'),
+    );
     expect(
       page
         .querySelector('filter-sheet button[type="submit"]')

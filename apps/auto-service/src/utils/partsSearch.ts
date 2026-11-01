@@ -66,12 +66,15 @@ export const withFacetCopy = (
 export const rangeMinName = (key: string): string => `${RANGE_MIN}${key}`;
 export const rangeMaxName = (key: string): string => `${RANGE_MAX}${key}`;
 
+const PLAIN_DECIMAL = /^\d*[.,]?\d+$/;
+
 const bound = (text: string | null): number | null => {
   const trimmed = text?.trim() ?? '';
-  const number = Number(trimmed.replace(',', '.'));
-  return trimmed && !Number.isNaN(number) && number >= 0
-    ? Math.round(Math.min(number, RANGE_LIMIT) * RANGE_DECIMALS) /
-        RANGE_DECIMALS
+  return PLAIN_DECIMAL.test(trimmed)
+    ? Math.round(
+        Math.min(Number(trimmed.replace(',', '.')), RANGE_LIMIT) *
+          RANGE_DECIMALS,
+      ) / RANGE_DECIMALS
     : null;
 };
 
@@ -87,10 +90,11 @@ export const rangesFromParams = (params: URLSearchParams): RangeFilter[] => {
   return [...keys].flatMap((key) => {
     const low = bound(params.get(rangeMinName(key)));
     const high = bound(params.get(rangeMaxName(key)));
-    if (low === null && high === null) return [];
-    const [min, max] =
+    const [lower, upper] =
       low !== null && high !== null && low > high ? [high, low] : [low, high];
-    return [{ key, min, max }];
+    const min = lower !== null && lower > 0 ? lower : null;
+    const max = upper !== null && upper < RANGE_LIMIT ? upper : null;
+    return min === null && max === null ? [] : [{ key, min, max }];
   });
 };
 
@@ -100,6 +104,20 @@ export const appendRange = (
 ): void => {
   if (min !== null) params.append(rangeMinName(key), String(min));
   if (max !== null) params.append(rangeMaxName(key), String(max));
+};
+
+export const rangesAsWritten = (
+  params: URLSearchParams,
+  ranges: RangeFilter[],
+): boolean => {
+  const applied = new URLSearchParams();
+  for (const range of ranges) appendRange(applied, range);
+  const written = new URLSearchParams(
+    [...params].filter(
+      ([name]) => name.startsWith(RANGE_MIN) || name.startsWith(RANGE_MAX),
+    ),
+  );
+  return String(applied) === String(written);
 };
 
 export const numberBounds = (

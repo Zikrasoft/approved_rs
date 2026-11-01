@@ -139,7 +139,15 @@ const SAID_BY_FIT = ['axle'];
     <div class="flex min-w-0 flex-col gap-8">
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.partsHeading}</h2>
-        {!empty && <ListingBar count={listed.length} filters={filtered} />}
+        {
+          !empty && (
+            <ListingBar
+              count={listed.length}
+              filters={filtered}
+              found={content(locale).partsSearch.foundNumbers}
+            />
+          )
+        }
         <ul class="flex flex-col gap-4">
           {
             entry.parts.map(({ part, pages, fits }) => (

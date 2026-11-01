@@ -1574,6 +1574,43 @@ describe('catalogue.search', () => {
     );
   });
 
+  const stockAndPrice = {
+    q: 'x',
+    locale: 'ru' as const,
+    facets: ['in-stock:true', 'brand:bosch'],
+    ranges: [
+      { key: 'price', min: 100, max: 9999 },
+      { key: 'capacity', min: 70, max: null },
+    ],
+  };
+
+  it('never asks the shop to filter by stock or price while prices are hidden', async () => {
+    const fetch = answer(found);
+
+    await createCatalogue({
+      backendUrl: 'http://shop.test',
+      publishableKey: 'pk_test',
+      fetch: fetch as unknown as typeof globalThis.fetch,
+      shopOpen: false,
+    }).search(stockAndPrice);
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?q=x&locale=ru&facets=brand%3Abosch&range=capacity%3A70%3A',
+      expect.anything(),
+    );
+  });
+
+  it('filters by stock and price once prices show', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search(stockAndPrice);
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?q=x&locale=ru&facets=in-stock%3Atrue&facets=brand%3Abosch&range=price%3A100%3A9999&range=capacity%3A70%3A',
+      expect.anything(),
+    );
+  });
+
   it('asks for a few matches and the cars when suggesting', async () => {
     const car = {
       kind: 'make',

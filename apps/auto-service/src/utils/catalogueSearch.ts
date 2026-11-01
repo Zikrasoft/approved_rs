@@ -181,3 +181,15 @@ export const listingCrumbs = ({
       : { href: PathBuilder.partsSearch(locale), label: searchLabel },
   ];
 };
+
+export const inquiryTopic = ({
+  model,
+  category,
+  query,
+  filters,
+}: {
+  model?: string | null;
+  category?: string | null;
+  query?: string;
+  filters: string[];
+}): string => [model, category, ...filters, query].filter(Boolean).join(', ');

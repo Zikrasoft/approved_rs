@@ -95,18 +95,16 @@ describe('number ranges in the page address', () => {
   it('clamps a huge bound and rounds a tiny one, so the shop gets plain decimals', () => {
     const ranges = rangesFromParams(
       new URLSearchParams(
-        'min.capacity=1e21&max.length=0.0000001&min.width=1000000000000000000000&min.height=80,1234567',
+        'max.length=0.0000001&min.width=1000000000000000000000&min.height=80,1234567',
       ),
     );
 
     expect(ranges).toEqual([
-      { key: 'capacity', min: RANGE_LIMIT, max: null },
       { key: 'length', min: null, max: 0 },
       { key: 'width', min: RANGE_LIMIT, max: null },
       { key: 'height', min: 80.123457, max: null },
     ]);
     expect(ranges.map(rangeFilter)).toEqual([
-      'capacity:1000000000:',
       'length::0',
       'width:1000000000:',
       'height:80.123457:',
@@ -122,6 +120,41 @@ describe('number ranges in the page address', () => {
     expect(
       rangesFromParams(new URLSearchParams('min.capacity=-5&max.length=-1')),
     ).toEqual([]);
+  });
+
+  it('drops a bound that narrows nothing: a floor at zero or a ceiling at the limit', () => {
+    expect(
+      rangesFromParams(
+        new URLSearchParams(
+          'min.capacity=0.0000001&min.length=0&max.width=1000000000&max.height=99999999999&min.voltage=0&max.voltage=14',
+        ),
+      ),
+    ).toEqual([{ key: 'voltage', min: null, max: 14 }]);
+  });
+
+  it.each([
+    '0x50',
+    '0b1010000',
+    '1e3',
+    'Infinity',
+    '1_000',
+    '+80',
+    '80,5,5',
+    '80.',
+  ])('reads only plain decimals, not %s', (text) => {
+    expect(
+      rangesFromParams(new URLSearchParams({ 'min.capacity': text })),
+    ).toEqual([]);
+  });
+
+  it.each([
+    [' 75 ', 75],
+    ['.5', 0.5],
+    ['80,5', 80.5],
+  ])('reads %s as a plain decimal', (text, min) => {
+    expect(
+      rangesFromParams(new URLSearchParams({ 'min.capacity': text })),
+    ).toEqual([{ key: 'capacity', min, max: null }]);
   });
 
   it('writes a range back as the bounds it has', () => {
