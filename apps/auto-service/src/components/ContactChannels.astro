@@ -54,7 +54,7 @@ const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
   header: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   hero: {
     channels: ['phone', 'whatsapp', 'viber', 'telegram'],
-    list: 'grid grid-cols-4 gap-2 lg:flex lg:flex-wrap',
+    list: 'grid auto-cols-fr grid-flow-col gap-2 lg:flex lg:flex-wrap',
     tile: 'min-h-13 flex-col justify-center gap-1 px-1 py-2 lg:min-h-11 lg:flex-row lg:gap-2 lg:px-4',
     iconSize: 16,
     label: 'text-xs lg:text-[0.8125rem]',
