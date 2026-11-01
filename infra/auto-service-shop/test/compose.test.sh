@@ -5,9 +5,9 @@ here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
 trap 'docker rm -f "$net-medusa" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"' EXIT
-printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\n' \
+printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\n' \
   0000000000000000000000000000000000000000 "'\$2a\$14\$hash'" >"$work/.env"
-env -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
+env -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
 
 failures=0
 expect() {
@@ -21,9 +21,25 @@ expect() {
   fi
 }
 
-expect 'only caddy publishes a port' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy"]'
-expect 'the stack is medusa, postgres, typesense and caddy, the crawler runs elsewhere' \
-  '[.services | keys[]] == ["caddy", "medusa", "postgres", "typesense"]'
+expect 'only caddy publishes a port to the world' '[.services | to_entries[] | select(.value.ports) | .key] == ["caddy", "grafana"]'
+expect 'grafana listens on the loopback only, for an ssh tunnel' \
+  '.services.grafana.ports == [{"mode": "ingress", "host_ip": "127.0.0.1", "target": 3000, "published": "3000", "protocol": "tcp"}]'
+expect 'the stack is the shop, its logs and caddy, the crawler runs elsewhere' \
+  '[.services | keys[]] == ["alloy", "caddy", "grafana", "loki", "medusa", "postgres", "typesense"]'
+expect 'loki and alloy sit on the internal logs network only, grafana beside it' \
+  '[.services.loki, .services.alloy, .services.grafana | .networks | keys] == [["logs"], ["logs"], ["console", "logs"]] and .networks.logs.internal == true'
+expect 'alloy reads container logs from disk, read-only, with no docker socket' \
+  '[.services.alloy.volumes[] | select(.type == "bind") | {source, read_only}] | (index({"source": "/var/lib/docker/containers", "read_only": true}) != null) and (map(.source) | index("/var/run/docker.sock") == null)'
+expect 'grafana takes its admin password from .env' \
+  '.services.grafana.environment.GF_SECURITY_ADMIN_PASSWORD == "g" and .services.grafana.environment.GF_AUTH_ANONYMOUS_ENABLED == "false"'
+expect 'grafana provisions its datasource and dashboard read-only' \
+  '[.services.grafana.volumes[] | select(.type == "bind") | [.target, .read_only]] == [["/etc/grafana/provisioning", true], ["/etc/grafana/dashboards", true]]'
+expect 'loki, alloy and grafana keep their data on volumes' \
+  '[.services.loki, .services.alloy, .services.grafana | .volumes[] | select(.type == "volume") | .source] == ["lokidata", "alloydata", "grafanadata"]'
+expect "medusa logs no http lines, which carry the client's address and query" \
+  '.services.medusa.environment.LOG_LEVEL == "info"'
+expect 'every log line carries its compose service for alloy' \
+  '[.services[] | .logging.options.labels] | all(. == "com.docker.compose.service")'
 expect 'postgres and typesense sit on the internal network only' \
   '[.services.postgres, .services.typesense | .networks | keys] == [["data"], ["data"]] and .networks.data.internal == true'
 pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
@@ -44,10 +60,10 @@ expect 'caddy serves the admin on its own host' \
 expect 'caddy gets the admin basic_auth credentials from .env, a bcrypt hash kept literal' \
   '.services.caddy.environment.ADMIN_BASIC_AUTH_USER == "staff" and (.services.caddy.environment.ADMIN_BASIC_AUTH_HASH | test("^[$]{2}2a[$]{2}14[$]{2}hash$"))'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
-expect 'every service has a memory limit, together under 3 GB' \
-  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3072 * 1024 * 1024)'
+expect 'every service has a memory limit, together under 3.5 GB' \
+  '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 3584 * 1024 * 1024)'
 expect 'every image is pinned to an exact tag' \
-  '[.services[] | .image] | all(test(":([0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
+  '[.services[] | .image] | all(test(":(v?[0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 
 caddy_image=$(jq -r .services.caddy.image "$work/config.json")
 hash=$(docker run --rm "$caddy_image" caddy hash-password --plaintext staff-pass)

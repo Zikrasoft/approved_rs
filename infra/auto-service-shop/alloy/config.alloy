@@ -1,0 +1,71 @@
+local.file_match "containers" {
+	path_targets = [{"__path__" = "/var/lib/docker/containers/*/*-json.log"}]
+	sync_period  = "10s"
+}
+
+loki.source.file "containers" {
+	targets    = local.file_match.containers.targets
+	forward_to = [loki.process.medusa.receiver]
+}
+
+loki.process "medusa" {
+	stage.json {
+		expressions = {
+			log     = "log",
+			time    = "time",
+			service = "attrs.\"com.docker.compose.service\"",
+		}
+	}
+
+	stage.labels {
+		values = {service = ""}
+	}
+
+	stage.match {
+		selector = "{service!=\"medusa\"}"
+		action   = "drop"
+	}
+
+	stage.timestamp {
+		source = "time"
+		format = "RFC3339Nano"
+	}
+
+	stage.output {
+		source = "log"
+	}
+
+	stage.json {
+		expressions = {
+			event = "event",
+			level = "level",
+		}
+	}
+
+	stage.drop {
+		source = "level"
+		value  = "http"
+	}
+
+	stage.labels {
+		values = {event = ""}
+	}
+
+	stage.label_drop {
+		values = ["filename"]
+	}
+
+	stage.limit {
+		rate  = 10
+		burst = 2000
+		drop  = true
+	}
+
+	forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+	endpoint {
+		url = "http://loki:3100/loki/api/v1/push"
+	}
+}

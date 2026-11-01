@@ -57,7 +57,9 @@ expect 'crawler has no login shell' test "$(getent passwd crawler | cut -d: -f7)
 expect 'the crawler cannot edit its own keys' test "$(stat -c %U /home/crawler/.ssh/authorized_keys)" = root
 expect 'the crawler key is limited to the postgres address' grep -q '^restrict,port-forwarding,permitopen="10.200.0.10:5432" ssh-ed25519 ' /home/crawler/.ssh/authorized_keys
 
-expect 'deploy keeps forwarding off' reports deploy 'allowtcpforwarding no'
+expect 'deploy forwards local only' reports deploy 'allowtcpforwarding local'
+expect 'deploy may open Grafana only' reports deploy 'permitopen 127.0.0.1:3000'
+expect 'deploy may not listen' reports deploy 'permitlisten none'
 expect 'root keeps forwarding off' reports root 'allowtcpforwarding no'
 expect 'crawler forwards local only' reports crawler 'allowtcpforwarding local'
 expect 'crawler may open postgres only' reports crawler 'permitopen 10.200.0.10:5432'
@@ -72,22 +74,25 @@ ip addr add 10.200.0.10/32 dev lo
 ip addr add 10.200.0.11/32 dev lo
 (while :; do echo postgres | nc -N -l 10.200.0.10 5432; done) >/dev/null 2>&1 &
 (while :; do echo other | nc -N -l 10.200.0.11 5432; done) >/dev/null 2>&1 &
+(while :; do echo grafana | nc -N -l 127.0.0.1 3000; done) >/dev/null 2>&1 &
 /usr/sbin/sshd
 sleep 1
 opts='-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ExitOnForwardFailure=yes -o LogLevel=ERROR'
 through() {
-  key=$1 user=$2 target=$3
+  key=$1 user=$2 target=$3 want=${4:-postgres}
   ssh $opts -i "$key" -N -L "15432:$target" "$user@127.0.0.1" &
   pid=$!
   sleep 1
   got=$(nc -w 2 127.0.0.1 15432 </dev/null)
   kill "$pid" 2>/dev/null
   wait "$pid" 2>/dev/null
-  [ "$got" = postgres ]
+  [ "$got" = "$want" ]
 }
 expect 'the crawler tunnel reaches postgres' through /tmp/crawler crawler 10.200.0.10:5432
 refuse 'the crawler tunnel reaches nothing else' through /tmp/crawler crawler 10.200.0.11:5432
-refuse 'deploy cannot tunnel' through /tmp/deploy deploy 10.200.0.10:5432
+refuse 'deploy cannot tunnel to postgres' through /tmp/deploy deploy 10.200.0.10:5432
+expect 'deploy tunnels to Grafana' through /tmp/deploy deploy 127.0.0.1:3000 grafana
+expect 'deploy cannot forward remote ports' refused ssh $opts -i /tmp/deploy -N -R 2222:127.0.0.1:22 deploy@127.0.0.1
 refuse 'the crawler runs no command' ssh $opts -i /tmp/crawler crawler@127.0.0.1 true
 expect 'the crawler cannot forward remote ports' refused ssh $opts -i /tmp/crawler -N -R 2222:127.0.0.1:22 crawler@127.0.0.1
 expect 'deploy still logs in' ssh $opts -i /tmp/deploy deploy@127.0.0.1 true
