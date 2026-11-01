@@ -68,7 +68,6 @@ const vinCar =
         .filter(Boolean)
         .join(', ')
     : null;
-const vinTopic = vinCar ?? vinMake?.label;
 const numberMissing =
   found && !category && !offset && found.cars.length === 0
     ? missingNumber(q, found.results)
@@ -114,8 +113,8 @@ const inquiryCard = {
   heading: copy.formHeading,
   vin: vin ?? vinTypo ?? undefined,
   comment: vin
-    ? vinTopic
-      ? `${vinTopic}: `
+    ? vinCar
+      ? `${vinCar}: `
       : ''
     : numberMissing
       ? inquiryTopic
