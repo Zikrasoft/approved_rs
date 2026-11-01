@@ -36,8 +36,8 @@ export function partSuccessor(
         Number(b.brand.slug === page.brand.slug) -
         Number(a.brand.slug === page.brand.slug),
     );
-  return (
-    current.map((number) => bySlug.get(slugOf(number))).find(Boolean) ?? null
+  return pageWithBestOffer(
+    current.flatMap((number) => bySlug.get(slugOf(number)) ?? []),
   );
 }
 

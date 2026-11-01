@@ -67,6 +67,26 @@ describe('partSuccessor', () => {
     expect(partSuccessor(dead, index(current, mannCurrent))).toBe(current);
   });
 
+  it('sends a superseded number to the current number with the best offer', () => {
+    const offer = (price: number) => ({
+      id: `of_${price}`,
+      price,
+      currency: 'RSD',
+      stock_quantity: 3,
+      lead_time_days: 0,
+    });
+    const dearOwn = entry(number(bmw, '11428575211'), {
+      offers: [offer(1850)],
+    });
+    const cheapMann = entry(number(mann, 'HU816X'), { offers: [offer(1200)] });
+    const dead = entry(number(bmw, '11428507683', true), {
+      superseded: true,
+      equivalents: [number(bmw, '11428575211'), number(mann, 'HU816X')],
+    });
+
+    expect(partSuccessor(dead, index(dearOwn, cheapMann))).toBe(cheapMann);
+  });
+
   it('sends a replaced part to its replacement', () => {
     const old = entry(number(bmw, '34116860242'), {
       part: {
