@@ -1,6 +1,7 @@
 ---
 import { localeFrom } from '@/i18n/config';
 import { bestPage } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { pagesThumbnail } from '@/utils/partImages';
 import { splitNumbers } from '@/utils/partNumbers';
@@ -18,7 +19,9 @@ interface Props {
 }
 
 const { pages, name, specs, heading = false, quantity } = Astro.props;
+const open = shopOpen();
 const lead = bestPage(pages);
+const specLine = open ? specs : [specs, quantity].filter(Boolean).join(', ');
 const target = lead ?? splitNumbers(pages).current[0] ?? pages[0];
 const href =
   target && PathBuilder.partNumber(localeFrom(Astro.url.pathname), target.slug);
@@ -52,24 +55,24 @@ const href =
           </a>
         )
       }
-      {specs && <p class="spec text-xs text-muted">{specs}</p>}
+      {specLine && <p class="spec text-xs text-muted">{specLine}</p>}
       <slot />
     </div>
-    <div
-      class="flex flex-col items-end max-sm:grid max-sm:grid-cols-[auto_1fr] max-sm:items-baseline"
-    >
-      <PriceTag
-        pages={pages}
-        class="max-sm:contents max-sm:text-left max-sm:[&>:first-child]:col-span-2"
-      />
-      {
-        quantity && (
-          <span class="spec text-xs text-ink-2 max-sm:before:mx-1.5 max-sm:before:content-['·']">
-            {quantity}
-          </span>
-        )
-      }
-    </div>
+    {
+      open && (
+        <div class="flex flex-col items-end max-sm:grid max-sm:grid-cols-[auto_1fr] max-sm:items-baseline">
+          <PriceTag
+            pages={pages}
+            class="max-sm:contents max-sm:text-left max-sm:[&>:first-child]:col-span-2"
+          />
+          {quantity && (
+            <span class="spec text-xs text-ink-2 max-sm:before:mx-1.5 max-sm:before:content-['·']">
+              {quantity}
+            </span>
+          )}
+        </div>
+      )
+    }
   </div>
   <PartNumbers pages={pages} first={lead} />
 </ThumbRow>
