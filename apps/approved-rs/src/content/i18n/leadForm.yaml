@@ -11,7 +11,7 @@ viberTab: Viber
 phoneTab: Телефон
 commentLabel: Марка, модель, бюджет
 commentPlaceholder: BMW 3, 2020–2022, до €25 000…
-consentBefore: 'Согласен с '
+consentBefore: 'Отправляя заявку, вы соглашаетесь с '
 consentLinkText: политикой конфиденциальности
 consentError: Необходимо ваше согласие
 submitLabel: Рассчитать стоимость

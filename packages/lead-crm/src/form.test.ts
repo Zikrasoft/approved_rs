@@ -24,7 +24,7 @@ const VISITOR_ID = '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11';
 
 function submit(fields: Record<string, string | string[]>) {
   const form = new FormData();
-  Object.entries({ consent: 'on', ...fields }).forEach(([key, value]) => {
+  Object.entries(fields).forEach(([key, value]) => {
     if (Array.isArray(value)) value.forEach((item) => form.append(key, item));
     else form.append(key, value);
   });
@@ -416,10 +416,14 @@ describe('leadSubmissionSchema', () => {
     expect(submit({ name: 'Иван' }).success).toBe(false);
   });
 
-  it('rejects a submission that carries no consent', () => {
-    expect(
-      submit({ name: 'Иван', contact: '+381641234567', consent: '' }),
-    ).toMatchObject({ success: false });
+  it('takes a Lead without any consent field, the form only states the policy', () => {
+    expect(submit({ contact: '+381641234567' }).success).toBe(true);
+  });
+
+  it('still takes a Lead from a cached page that posts the old consent box', () => {
+    expect(submit({ contact: '+381641234567', consent: 'on' }).success).toBe(
+      true,
+    );
   });
 
   it('rejects "asdf" as a phone number', () => {
@@ -580,7 +584,6 @@ describe('leadSubmissionSchema', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
-      consent: 'on',
       service: [{ nope: true }],
     });
     expect(parsed.success && parsed.data.services).toEqual([]);
@@ -600,7 +603,6 @@ describe('leadSubmissionSchema', () => {
     const parsed = leadSubmissionSchema.safeParse({
       name: 'Иван',
       contact: '+381641234567',
-      consent: 'on',
     });
     expect(parsed.success).toBe(true);
     expect(parsed.data?.services).toEqual([]);

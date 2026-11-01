@@ -8,6 +8,7 @@ import {
 } from '@podbor/lead-crm/fields';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
+import { content } from '@/i18n/content';
 
 const memory = vi.hoisted(() => {
   const storages = new Map<string, MemoryStorage>();
@@ -145,7 +146,6 @@ describe('the thanks page a lead lands on', () => {
       name: '',
       locale: 'sr',
       service,
-      consent: '1',
       source_url: 'https://carlab.rs/sr/parts/',
       visitor_id: '',
     });
@@ -158,5 +158,21 @@ describe('the thanks page a lead lands on', () => {
   it('thanks a service lead on the generic page', async () => {
     const response = await post(inquiry('diagnostics'));
     expect(response.headers.get('location')).toBe('/sr/thanks/');
+  });
+});
+
+describe('a lead the server cannot take', () => {
+  it('asks for the contact again under the privacy notice, with no box to tick', async () => {
+    const { site } = content('sr');
+    const response = await post(
+      new URLSearchParams({ phone_number: '12', locale: 'sr' }),
+    );
+    const page = await response.text();
+
+    expect(response.status).toBe(400);
+    expect(page).not.toContain('type="checkbox"');
+    expect(page).toContain(
+      `<p>${site.form.privacyNotice} <a href="/sr/privacy/" target="_blank">${site.form.privacyLinkText}</a></p>`,
+    );
   });
 });

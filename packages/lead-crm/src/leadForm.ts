@@ -54,7 +54,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   const telegram = pick<HTMLInputElement>('[data-telegram]');
   const country = pick<HTMLSelectElement>('[data-country]');
   const phone = pick<HTMLInputElement>('[data-phone]');
-  const consent = pick<HTMLInputElement>('[data-consent]');
+  const consent = form.querySelector<HTMLInputElement>('[data-consent]');
   const contact = pick<HTMLInputElement>(
     `input[type="hidden"][name="${CONTACT_INPUT_FIELDS.contact}"]`,
   );
@@ -69,7 +69,7 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   const panels = Array.from(
     form.querySelectorAll<HTMLElement>('[data-panel]:not([data-tab])'),
   );
-  const controls = { telegram, phone, consent };
+  const controls = { telegram, phone, consent: consent! };
   const errors = {
     telegram: pick('[data-error-telegram]'),
     phone: pick('[data-error-phone]'),
@@ -202,10 +202,10 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
         ? errors.telegram.dataset.badHandle
         : null) ?? telegramErrorText;
     mark(field, contactValid);
-    mark('consent', consent.checked);
+    if (consent) mark('consent', consent.checked);
 
-    if (!contactValid || !consent.checked) {
-      (contactValid ? consent : input).focus();
+    if (!contactValid || consent?.checked === false) {
+      (contactValid ? consent! : input).focus();
       return;
     }
 

@@ -2,7 +2,10 @@ import { rememberAdTouch } from './adTouch.ts';
 import { defineAnalytics } from './analytics.ts';
 import type { Goal } from './goals.ts';
 import { defineContactClickTracking } from './contactClick.ts';
-import { applyContactPreference } from './contactPreference.ts';
+import {
+  applyContactPreference,
+  type ContactRanking,
+} from './contactPreference.ts';
 import { defineFunnelTracking } from './funnel.ts';
 import { defineLanguageSuggestion } from './languageSuggestion.ts';
 
@@ -14,6 +17,7 @@ export interface SiteKitConfig {
   googleConversionLabels?: Partial<Record<Goal, string>>;
   privateParams?: readonly string[];
   analytics: boolean;
+  contactRanking?: ContactRanking;
 }
 
 let booted = false;
@@ -26,6 +30,7 @@ export function bootSiteKit({
   googleConversionLabels,
   privateParams,
   analytics,
+  contactRanking,
 }: SiteKitConfig): void {
   if (booted) return;
   booted = true;
@@ -40,7 +45,7 @@ export function bootSiteKit({
     });
   rememberAdTouch();
   defineContactClickTracking();
-  applyContactPreference();
+  applyContactPreference(contactRanking);
   defineLanguageSuggestion();
   defineFunnelTracking();
 }

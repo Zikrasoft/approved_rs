@@ -1,12 +1,12 @@
 ---
 import { contactCta } from '@podbor/site-kit/contact-control';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
-import Icon from './Icon.astro';
 import PickupDetails from './PickupDetails.astro';
 import LeadFormHidden from './LeadFormHidden.astro';
 import ContactChannelField from './ContactChannelField.astro';
 import ConsentField from './ConsentField.astro';
 import VinField from './VinField.astro';
+import MoreDetails from './MoreDetails.astro';
 import ContactChannels from './ContactChannels.astro';
 import { WHATSAPP_NUMBER } from '@/utils/constants';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
@@ -99,32 +99,20 @@ const summaryRow = 'flex items-baseline justify-between gap-4';
         </p>
       </section>
 
-      <details class="group rounded-control border border-line">
-        <summary
-          class="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3.5 text-sm font-semibold text-ink-2 hover:text-ink [&::-webkit-details-marker]:hidden"
-        >
-          <Icon
-            name="plus"
-            size={14}
-            class="shrink-0 transition-transform duration-150 group-open:rotate-45"
-          />
-          {copy.extrasToggle}
-        </summary>
-        <div class="flex flex-col gap-4 border-t border-line p-3.5">
-          <VinField
-            label={inquiry.vinLabel}
-            placeholder={inquiry.vinPlaceholder}
-          />
-          <label class="block">
-            <span class="field-label">{copy.commentLabel}</span>
-            <textarea
-              name="comment"
-              rows={2}
-              placeholder={copy.commentPlaceholder}
-              class="field resize-none"></textarea>
-          </label>
-        </div>
-      </details>
+      <MoreDetails label={copy.extrasToggle}>
+        <VinField
+          label={inquiry.vinLabel}
+          placeholder={inquiry.vinPlaceholder}
+        />
+        <label class="block">
+          <span class="field-label">{copy.commentLabel}</span>
+          <textarea
+            name="comment"
+            rows={2}
+            placeholder={copy.commentPlaceholder}
+            class="field resize-none"></textarea>
+        </label>
+      </MoreDetails>
 
       <div class="flex flex-col gap-4 border-t border-line pt-5">
         <p

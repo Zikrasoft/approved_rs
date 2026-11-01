@@ -47,22 +47,24 @@ it, so they spell it out and each app's `cookieConsentLift.test.ts` counts the
 spellings against the constant). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
 picks with a non-null assertion, so a missing one is a `TypeError`:
 `data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
-`data-consent`, the hidden `contact` and `contact_channel` inputs
-(every contact input and the consent box are named from
-`CONTACT_INPUT_FIELDS` and `CONSENT_FIELD` in `@podbor/lead-crm/fields`,
-never a literal: the no-JS refusal page `createLeadsRoute` renders re-posts
-every other field as hidden and asks for these again, the consent box only
-when it never arrived),
+the hidden `contact` and `contact_channel` inputs
+(every contact input is named from `CONTACT_INPUT_FIELDS` in
+`@podbor/lead-crm/fields`, never a literal: the no-JS refusal page
+`createLeadsRoute` renders re-posts every other field as hidden and asks for
+these again, under the same privacy line the form shows),
 `data-source-url`, `data-visitor-id`, `data-ad-source` (the hidden
 `name={AD_SOURCE_FIELD}` input the Ad visit rides in — the contact-click
 beacon posts the same field), `data-meta-ids` (the hidden
 `name={META_IDS_FIELD}` input for the Meta `fbc`/`fbp`, likewise),
 `data-submit-label` inside the submit
-button, `data-error-telegram` / `data-error-phone` / `data-error-consent` /
-`data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
+button, `data-error-telegram` / `data-error-phone` / `data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
 `aria-selected`, panels carrying `data-panel` alone, and the form's own
 `data-submitting-label` and `data-armed`; the busy submit button carries
-`aria-busy`, which the apps' spinner CSS keys on.
+`aria-busy`, which the apps' spinner CSS keys on. A lead form asks for no
+consent: all three sites state the privacy policy in a passive line above the
+submit, and the leads route takes a Lead with no `CONSENT_FIELD`. A form that
+renders a box (`data-consent` with its `data-error-consent`, only carlab.rs's
+checkout, whose `/api/order` still requires it) gets it checked before submit.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
 `vercel.json`, `vitest.config.ts` and `tsconfig.json`, and its own `.env*`.

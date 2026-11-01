@@ -59,7 +59,7 @@ channels:
 form:
   heading: Записаться в сервис
   subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовем время и цену.
-  nameLabel: Имя (необязательно)
+  nameLabel: Имя
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
   contactPlaceholder: 64 123 4567
@@ -74,12 +74,13 @@ form:
   privacyNote: Согласен с
   privacyLinkText: политикой конфиденциальности
   privacyOpen: Открыть
+  privacyNotice: Отправляя заявку, вы соглашаетесь с
+  moreDetails: Добавить имя или комментарий
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер, кажется, он введен не полностью
   errorPhoneTooLong: Проверьте номер, в нем лишние цифры
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
-  errorConsent: Без согласия мы не сможем отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 cookie:
   notice: Мы используем cookie

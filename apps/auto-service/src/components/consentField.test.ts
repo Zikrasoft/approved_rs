@@ -4,10 +4,17 @@ import { content } from '@/i18n/content';
 import ConsentField from './ConsentField.astro';
 import { render } from './renderAstro';
 
-const site = content('sr').site;
+const { site, shopCart } = content('sr');
 
 const consent = () =>
-  render(ConsentField, { path: '/sr/contact/', props: { uid: 'modal' } });
+  render(ConsentField, {
+    path: '/sr/parts/cart/',
+    props: {
+      uid: 'modal',
+      error: shopCart.consentError,
+      submitError: shopCart.submitError,
+    },
+  });
 
 describe('the consent line', () => {
   it('keeps the whole sentence as label text, so a tap on it ticks the box', async () => {
@@ -49,6 +56,14 @@ describe('the consent line', () => {
     );
     expect(
       root.querySelector('#consent-error-modal')?.textContent?.trim(),
-    ).toBe(site.form.errorConsent);
+    ).toBe(shopCart.consentError);
+  });
+
+  it('keeps the submit error the checkout shows when the order does not go through', async () => {
+    const root = await consent();
+
+    expect(root.querySelector('[data-error-submit]')?.textContent?.trim()).toBe(
+      shopCart.submitError,
+    );
   });
 });

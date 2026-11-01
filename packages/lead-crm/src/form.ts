@@ -159,7 +159,6 @@ const submissionObject = z
     [META_IDS_FIELD]: metaIdsFieldSchema,
     [ORDER_ID_FIELD]: optionalText(MAX_FIELD_LENGTH),
     // TODO: LeadForm.astro posts `city` on every city landing page and it is discarded here.
-    consent: z.string().trim().min(1),
   })
   .refine((value) => isValidContact(value.contact, value.contact_channel), {
     path: ['contact'],
@@ -229,7 +228,7 @@ export const leadSubmissionSchema = z.preprocess(
 export type LeadFormSubmission = z.infer<typeof leadSubmissionSchema>;
 
 export type LeadRefusal =
-  'missing-contact' | 'invalid-phone' | 'invalid-telegram' | 'missing-consent';
+  'missing-contact' | 'invalid-phone' | 'invalid-telegram';
 
 const refusalFieldsSchema = z.preprocess(
   formRecord,
@@ -238,7 +237,6 @@ const refusalFieldsSchema = z.preprocess(
     z.object({
       contact: cappedText(MAX_FIELD_LENGTH).catch(''),
       contact_channel: contactChannelSchema.nullable().catch(null),
-      consent: z.string().trim().catch(''),
     }),
   ),
 );
@@ -247,10 +245,8 @@ export function leadRefusal(form: FormData): {
   reason: LeadRefusal;
   contact: string;
 } {
-  const { contact, contact_channel, consent } = refusalFieldsSchema.parse(form);
+  const { contact, contact_channel } = refusalFieldsSchema.parse(form);
   if (!contact) return { reason: 'missing-contact', contact };
-  if (!consent && isValidContact(contact, contact_channel))
-    return { reason: 'missing-consent', contact };
   return {
     reason:
       contact_channel === 'telegram' && !typedAsPhone(contact)

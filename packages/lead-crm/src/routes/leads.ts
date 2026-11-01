@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import {
-  CONSENT_FIELD,
   CONTACT_INPUT_FIELDS,
   ORDER_CANCELED,
   ORDER_ID_FIELD,
@@ -48,8 +47,7 @@ export interface RefusalBrand {
 export interface RefusalCopy {
   brand: RefusalBrand;
   reasons: Record<LeadRefusal, string>;
-  consent: string;
-  privacy: { label: string; href: string };
+  privacy: { note: string; label: string; href: string };
   submit: string;
   links: { label: string; href: string }[];
 }
@@ -100,9 +98,9 @@ const refusalStyle = (brand: RefusalBrand): string =>
   `body{font:16px/1.5 system-ui,sans-serif;max-width:28rem;margin:0 auto;padding:1.5rem 1rem;background:${brand.background};color:${brand.text}}
 h1{font-size:1.25rem;line-height:1.3;margin:0 0 1.5rem}
 h1 a{text-decoration:none}
-label{display:block;margin:0 0 1rem}
-input:not([type=checkbox]){display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem;color:inherit;background:transparent;border:1px solid;border-radius:12px}
-input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin:0 .5rem 0 0;accent-color:${brand.accent}}
+label,p{display:block;margin:0 0 1rem}
+p{font-size:.875rem}
+input{display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem;color:inherit;background:transparent;border:1px solid;border-radius:12px}
 a{color:inherit}
 button{display:block;width:100%;min-height:44px;font:inherit;font-weight:600;border:0;border-radius:12px;background:${brand.accent};color:${brand.onAccent};cursor:pointer}
 ul{list-style:none;padding:0;margin:1.5rem 0 0;display:grid;gap:.5rem}
@@ -122,11 +120,7 @@ function refusalPage(
     !typedAsPhone(contact)
       ? `name="${CONTACT_INPUT_FIELDS.telegram}"`
       : `name="${CONTACT_INPUT_FIELDS.phoneNumber}" type="tel" inputmode="tel" autocomplete="tel"`;
-  const consentBox = form.get(CONSENT_FIELD)
-    ? ''
-    : `
-      <label><input type="checkbox" name="${CONSENT_FIELD}" value="1" required />${escapeHtml(copy.consent)}</label>
-      <p><a href="${attribute(copy.privacy.href)}" target="_blank">${escapeHtml(copy.privacy.label)}</a></p>`;
+  const privacy = `<p>${escapeHtml(copy.privacy.note)} <a href="${attribute(copy.privacy.href)}" target="_blank">${escapeHtml(copy.privacy.label)}</a></p>`;
   const kept: string[] = [];
   form.forEach((value, name) => {
     if (typeof value === 'string' && !RETYPED_FIELDS.has(name)) {
@@ -153,8 +147,9 @@ function refusalPage(
   <body>
     <h1><a href="${attribute(copy.brand.home)}">${escapeHtml(copy.brand.name)}</a></h1>
     <form method="POST" action="${attribute(action)}">
-      <label>${escapeHtml(message)}<input ${contactInput} value="${attribute(contact)}" required /></label>${consentBox}
+      <label>${escapeHtml(message)}<input ${contactInput} value="${attribute(contact)}" required /></label>
 ${kept.join('\n')}
+      ${privacy}
       <button type="submit">${escapeHtml(copy.submit)}</button>
     </form>
     <ul>
