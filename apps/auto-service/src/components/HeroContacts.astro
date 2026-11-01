@@ -10,11 +10,11 @@ import { PHONE_NUMBER } from '@/utils/constants';
 
 const locale = localeFrom(Astro.url.pathname);
 const { home, site } = content(locale);
-const button = 'btn min-h-12 w-full lg:w-auto lg:px-7';
+const button = 'btn min-h-12 w-full lg:px-5';
 ---
 
 <div
-  class="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center"
+  class="flex flex-col gap-2 lg:grid lg:grid-cols-2"
   {...contactRegion('hero')}
 >
   <ContactControl channel="phone" class={`${button} btn-primary`}>
@@ -40,5 +40,6 @@ const button = 'btn min-h-12 w-full lg:w-auto lg:px-7';
     placement="hero"
     tone="panel"
     only={['whatsapp', 'viber', 'telegram']}
+    class="lg:col-span-2 lg:grid!"
   />
 </div>
