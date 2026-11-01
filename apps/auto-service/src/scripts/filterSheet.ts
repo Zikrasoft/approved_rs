@@ -1,6 +1,44 @@
 export const FILTERS_OPEN_ATTRIBUTE = 'data-filters-open';
 export const FILTERS_SUBMIT_ATTRIBUTE = 'data-filters-submit';
 export const FILTERS_COUNT_ATTRIBUTE = 'data-filters-count';
+export const FILTERS_NONE_ATTRIBUTE = 'data-filters-none';
+export const FACET_COUNT_ATTRIBUTE = 'data-facet-count';
+
+type ValueCounts = Record<string, Record<string, number>>;
+
+const edited = (form: HTMLFormElement) =>
+  [...form.querySelectorAll('input')].some(
+    (input) =>
+      input.checked !== input.defaultChecked ||
+      input.value !== input.defaultValue,
+  );
+
+const markInvalid = (sheet: HTMLElement) => {
+  const invalid = [...sheet.querySelectorAll('input')].filter(
+    (input) => !input.validity.valid,
+  );
+  for (const input of sheet.querySelectorAll('input')) {
+    if (invalid.includes(input)) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  }
+  return invalid.length > 0;
+};
+
+const patchValues = (sheet: HTMLElement, facets: ValueCounts) => {
+  for (const input of sheet.querySelectorAll<HTMLInputElement>(
+    'input[type="checkbox"]',
+  )) {
+    const split = input.value.indexOf(':');
+    const values = facets[input.value.slice(0, split)];
+    if (!values) continue;
+    const count = values[input.value.slice(split + 1)] ?? 0;
+    const label = input
+      .closest('label')
+      ?.querySelector(`[${FACET_COUNT_ATTRIBUTE}]`);
+    if (label) label.textContent = String(count);
+    input.disabled = count === 0 && !input.checked;
+  }
+};
 
 const RECOUNT_DELAY_MS = 300;
 
@@ -28,6 +66,17 @@ export function defineFilterSheet(
         }
         const submit = this.querySelector(`[${FILTERS_SUBMIT_ATTRIBUTE}]`);
         const form = this.closest('form');
+        window.addEventListener(
+          'pageshow',
+          () => {
+            if (!form || (!this.hasAttribute('data-dirty') && !edited(form)))
+              return;
+            form.reset();
+            this.removeAttribute('data-dirty');
+            if (submit) this.#schedule(form, submit);
+          },
+          { signal },
+        );
         this.addEventListener(
           'input',
           () => {
@@ -68,7 +117,9 @@ export function defineFilterSheet(
         this.#recount?.abort();
         clearTimeout(this.#timer);
         submit.textContent = plain;
-        if (!template || !url) return;
+        submit.toggleAttribute('disabled', false);
+        submit.removeAttribute('aria-busy');
+        if (markInvalid(this) || !template || !url) return;
         submit.setAttribute('aria-busy', 'true');
         const recount = new AbortController();
         this.#recount = recount;
@@ -80,13 +131,19 @@ export function defineFilterSheet(
           fetch(`${url}&${params}`, { signal: recount.signal })
             .then((response) => (response.ok ? response.json() : null))
             .catch(() => null)
-            .then((body: { count?: unknown } | null) => {
+            .then((body: { count?: unknown; facets?: ValueCounts } | null) => {
               if (recount.signal.aborted) return;
               submit.removeAttribute('aria-busy');
+              const count = typeof body?.count === 'number' ? body.count : null;
+              const none = submit.getAttribute(FILTERS_NONE_ATTRIBUTE);
               submit.textContent =
-                typeof body?.count === 'number'
-                  ? template.replace('{count}', String(body.count))
-                  : plain;
+                count === null
+                  ? plain
+                  : count === 0 && none
+                    ? none
+                    : template.replace('{count}', String(count));
+              submit.toggleAttribute('disabled', count === 0 && Boolean(none));
+              if (body?.facets) patchValues(this, body.facets);
             });
         }, RECOUNT_DELAY_MS);
       }

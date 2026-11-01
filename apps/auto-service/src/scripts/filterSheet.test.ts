@@ -13,15 +13,28 @@ const sheet = () => {
   form.innerHTML = `
     <input type="hidden" name="category" value="batteries" />
     <filter-sheet data-count-url="/api/search-count?locale=ru">
-      <input name="min.capacity" value="" />
-      <input name="max.capacity" value="80" />
-      <input type="checkbox" name="facets" value="brand:varta" checked />
-      <button data-filters-submit="Показать" data-filters-count="Показать {count}">Показать 202</button>
+      <input type="number" min="0" name="min.capacity" value="" />
+      <input type="number" min="0" name="max.capacity" value="80" />
+      <label><input type="checkbox" name="facets" value="brand:varta" checked /><span data-facet-count>3</span></label>
+      <label><input type="checkbox" name="facets" value="brand:bosch" /><span data-facet-count>2</span></label>
+      <label><input type="checkbox" name="facets" value="polarity:direct" /><span data-facet-count>1</span></label>
+      <button data-filters-submit="Показать" data-filters-count="Показать {count}" data-filters-none="Совпадений нет, измените фильтры">Показать 202</button>
     </filter-sheet>
   `;
   document.body.append(form);
   return { form, submit: form.querySelector('button')! };
 };
+
+const input = (form: HTMLFormElement, name: string, value = '') =>
+  form.querySelector<HTMLInputElement>(
+    `[name="${name}"]${value ? `[value="${value}"]` : ''}`,
+  )!;
+
+const counted = (root: ParentNode, value: string) =>
+  root
+    .querySelector(`[value="${value}"]`)!
+    .closest('label')!
+    .querySelector('[data-facet-count]')!.textContent;
 
 const edit = (form: HTMLFormElement, name: string) =>
   form
@@ -92,6 +105,143 @@ describe('the filter sheet', () => {
     await vi.runAllTimersAsync();
 
     expect(submit.textContent).toBe('Показать');
+    expect(submit.hasAttribute('aria-busy')).toBe(false);
+  });
+
+  it('updates each value count and disables the values that would find nothing', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        Response.json({
+          count: 3,
+          facets: { brand: { varta: 3, bosch: 1 }, polarity: {} },
+        }),
+      ),
+    );
+    const { form } = sheet();
+    input(form, 'facets', 'polarity:direct').checked = false;
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+
+    expect(counted(form, 'brand:bosch')).toBe('1');
+    expect(input(form, 'facets', 'brand:bosch').disabled).toBe(false);
+    expect(counted(form, 'polarity:direct')).toBe('0');
+    expect(input(form, 'facets', 'polarity:direct').disabled).toBe(true);
+  });
+
+  it('keeps a ticked value enabled even when it counts zero, and leaves facets the answer omits alone', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(Response.json({ count: 0, facets: { brand: {} } })),
+    );
+    const { form } = sheet();
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+
+    expect(input(form, 'facets', 'brand:varta').disabled).toBe(false);
+    expect(counted(form, 'brand:varta')).toBe('0');
+    expect(counted(form, 'polarity:direct')).toBe('1');
+    expect(input(form, 'facets', 'polarity:direct').disabled).toBe(false);
+  });
+
+  it('turns a zero count into a disabled button that says nothing matches, and enables it again on the next count', async () => {
+    vi.useFakeTimers();
+    const backend = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ count: 0 }))
+      .mockResolvedValueOnce(Response.json({ count: 4 }));
+    vi.stubGlobal('fetch', backend);
+    const { form, submit } = sheet();
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+    expect(submit.textContent).toBe('Совпадений нет, измените фильтры');
+    expect(submit.disabled).toBe(true);
+
+    edit(form, 'facets');
+    expect(submit.disabled).toBe(false);
+    await vi.runAllTimersAsync();
+    expect(submit.textContent).toBe('Показать 4');
+  });
+
+  it('marks a range bound the form would refuse and counts nothing for it', async () => {
+    vi.useFakeTimers();
+    const backend = vi.fn().mockResolvedValue(Response.json({ count: 5 }));
+    vi.stubGlobal('fetch', backend);
+    const { form, submit } = sheet();
+    const min = input(form, 'min.capacity');
+
+    min.value = '-5';
+    edit(form, 'min.capacity');
+    await vi.runAllTimersAsync();
+
+    expect(min.getAttribute('aria-invalid')).toBe('true');
+    expect(submit.textContent).toBe('Показать');
+    expect(submit.hasAttribute('aria-busy')).toBe(false);
+    expect(backend).not.toHaveBeenCalled();
+
+    min.value = '75';
+    edit(form, 'min.capacity');
+    await vi.runAllTimersAsync();
+
+    expect(min.hasAttribute('aria-invalid')).toBe(false);
+    expect(submit.textContent).toBe('Показать 5');
+  });
+
+  it('puts a form the browser restored on Back to what the URL applied, and recounts it', async () => {
+    vi.useFakeTimers();
+    const backend = vi.fn().mockResolvedValue(Response.json({ count: 202 }));
+    vi.stubGlobal('fetch', backend);
+    const { form, submit } = sheet();
+    input(form, 'facets', 'brand:bosch').checked = true;
+    input(form, 'min.capacity').value = '75';
+
+    window.dispatchEvent(new Event('pageshow'));
+    await vi.runAllTimersAsync();
+
+    expect(input(form, 'facets', 'brand:bosch').checked).toBe(false);
+    expect(input(form, 'min.capacity').value).toBe('');
+    expect(input(form, 'facets', 'brand:varta').checked).toBe(true);
+    expect(form.querySelector('filter-sheet')!.hasAttribute('data-dirty')).toBe(
+      false,
+    );
+    expect(submit.textContent).toBe('Показать 202');
+  });
+
+  it('resets a sheet the visitor had edited when the page comes back from the back-forward cache', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ count: 202 })),
+    );
+    const { form } = sheet();
+    const sheetElement = form.querySelector('filter-sheet')!;
+    input(form, 'facets', 'brand:bosch').checked = true;
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+    expect(sheetElement.hasAttribute('data-dirty')).toBe(true);
+
+    window.dispatchEvent(new Event('pageshow'));
+    await vi.runAllTimersAsync();
+
+    expect(input(form, 'facets', 'brand:bosch').checked).toBe(false);
+    expect(sheetElement.hasAttribute('data-dirty')).toBe(false);
+  });
+
+  it('leaves an untouched sheet alone when the page is shown', () => {
+    const backend = vi.fn();
+    vi.stubGlobal('fetch', backend);
+    const { submit } = sheet();
+
+    window.dispatchEvent(new Event('pageshow'));
+
+    expect(submit.textContent).toBe('Показать 202');
     expect(submit.hasAttribute('aria-busy')).toBe(false);
   });
 });

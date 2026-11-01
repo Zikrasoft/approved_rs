@@ -17,6 +17,7 @@ unknownScope: Подберем запчасть вручную, отправьт
 filtersHeading: Фильтры
 applyFilters: Показать
 showResults: Показать {count}
+noneFound: Совпадений нет, измените фильтры
 showAllValues: Показать все ({count})
 resetFilters: Сбросить
 resetAllFilters: Сбросить все
