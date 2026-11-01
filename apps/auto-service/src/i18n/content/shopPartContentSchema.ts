@@ -23,6 +23,7 @@ export const shopPartContentSchema = z
     previousNumber: z.string(),
     previousNumberCurrent: z.string(),
     earlierNumbers: z.string(),
+    alsoNumbers: z.string(),
     previousNumbersHeading: z.string(),
     currentNumberLabel: z.string(),
     currentNumbersLabel: z.string(),
