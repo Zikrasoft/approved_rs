@@ -92,7 +92,18 @@ describe('planSearch', () => {
     const facets = Array.from({ length: 9 }, (_, i) => `facets=k${i}:v`).join(
       '&',
     );
-    const outcome = await plan(`q=filter&${facets}`);
+    const outcome = await plan(
+      `q=filter&${facets}`,
+      fakeCatalogue({
+        search: async () => ({
+          ...found(1),
+          facets: Array.from({ length: 9 }, (_, i) => ({
+            key: `k${i}`,
+            values: [],
+          })),
+        }),
+      }),
+    );
     expect(outcome).toMatchObject({ status: 302 });
     const url = new URL(
       'redirect' in outcome ? outcome.redirect : '',
@@ -177,7 +188,12 @@ describe('planSearch', () => {
   });
 
   it('lists what a Model category page counted for its ticked filter', async () => {
-    const catalogue = fakeCatalogue();
+    const catalogue = fakeCatalogue({
+      search: vi.fn(async () => ({
+        ...found(1),
+        facets: [{ key: 'brand', values: [] }],
+      })),
+    });
     const outcome = await plan(
       'category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta',
       catalogue,
@@ -219,5 +235,148 @@ describe('planSearch', () => {
       status: 200,
       view: { searchable: true, found: null, unknownScope: false },
     });
+  });
+
+  const facetOf = (key: string, ...values: string[]) => ({
+    key,
+    type: 'multi-select',
+    label: key,
+    unit: null,
+    values: values.map((value) => ({ value, label: value, count: 1 })),
+  });
+
+  const batteries = (count = 5) =>
+    fakeCatalogue({
+      search: vi.fn(async () => ({
+        ...found(count),
+        facets: [
+          facetOf('brand', 'bosch', 'varta'),
+          facetOf('capacity', '60', '80'),
+        ],
+        category: { slug: 'batteries', name: 'Аккумуляторы' },
+      })),
+    });
+
+  it('sends an offset past what the shop pages through to the last page', async () => {
+    const catalogue = fakeCatalogue({ search: vi.fn(async () => found(45)) });
+
+    expect(await plan('category=batteries&offset=20000', catalogue)).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&offset=40',
+      status: 302,
+    });
+    expect(catalogue.search).toHaveBeenCalledWith(
+      expect.objectContaining({ offset: 10_000 }),
+    );
+  });
+
+  it('keeps the deepest page the shop answers for a list that long', async () => {
+    const catalogue = fakeCatalogue({
+      search: vi.fn(async () => found(50_000)),
+    });
+
+    expect(await plan('q=filter&offset=20000', catalogue)).toEqual({
+      redirect: '/ru/parts/search/?q=filter&offset=10000',
+      status: 302,
+    });
+  });
+
+  it('drops a filter on a key the listing has no facet for', async () => {
+    expect(
+      await plan(
+        'category=batteries&facets=foo%3Abar&facets=brand%3Abosch&min.thickness=10&min.capacity=70',
+        batteries(),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=batteries&facets=brand%3Abosch&min.capacity=70',
+      status: 302,
+    });
+  });
+
+  it('keeps unknown filters while the shop cannot say which keys it knows', async () => {
+    const outcome = await plan(
+      'category=batteries&facets=foo%3Abar',
+      fakeCatalogue({ search: async () => null }),
+    );
+
+    expect(outcome).toMatchObject({ view: { chosen: ['foo:bar'] } });
+  });
+
+  it('folds a repeated facet value into one', async () => {
+    expect(
+      await plan(
+        'category=batteries&facets=brand%3Abosch&facets=brand%3Abosch',
+        batteries(),
+      ),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&facets=brand%3Abosch',
+      status: 302,
+    });
+  });
+
+  it('lower-cases a category, make or model typed in capitals', async () => {
+    expect(await plan('category=BATTERIES', batteries())).toEqual({
+      redirect: '/ru/parts/search/?category=batteries',
+      status: 302,
+    });
+    expect(
+      await plan('category=batteries&make=BMW&model=F30-320d', batteries()),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&make=bmw&model=f30-320d',
+      status: 302,
+    });
+  });
+
+  it('sends a Model without a category or query to its hub', async () => {
+    const catalogue = batteries();
+
+    expect(
+      await plan('make=bmw&model=f30-320d&facets=brand%3Abosch', catalogue),
+    ).toEqual({ redirect: '/ru/parts/bmw/f30-320d/', status: 302 });
+    expect(catalogue.search).not.toHaveBeenCalled();
+  });
+
+  it('resets the filters of a category listing back to its page', async () => {
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Abosch',
+      batteries(),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.filtersHref([], [])).toBe('/ru/parts/c/batteries/');
+    expect(outcome.view.filtersHref(['brand:varta'], [])).toBe(
+      '/ru/parts/search/?category=batteries&facets=brand%3Avarta',
+    );
+  });
+
+  it('resets the filters of a Model category listing back to its page when the Model has one', async () => {
+    const search = vi.fn(async () => ({
+      ...found(2),
+      facets: [facetOf('brand', 'bosch', 'varta')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      model,
+      scope_pages: { make: true, model: true },
+    }));
+    const outcome = await plan(
+      'category=batteries&make=bmw&model=e83-x3-20d&facets=brand%3Abosch',
+      fakeCatalogue({ search }),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.filtersHref([], [])).toBe(
+      '/ru/parts/bmw/e83-x3-20d/batteries/',
+    );
+  });
+
+  it('keeps a reset on the search for a text query', async () => {
+    const outcome = await plan(
+      'q=filter&category=batteries&facets=brand%3Abosch',
+      batteries(),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.filtersHref([], [])).toBe(
+      '/ru/parts/search/?q=filter&category=batteries',
+    );
   });
 });
