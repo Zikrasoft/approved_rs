@@ -22,7 +22,7 @@ const priceNote = shopOpen() ? null : content(locale).shopPart.orderBody;
   {copy.notFoundQuestion}{' '}
   <a
     href={PathBuilder.partsInquiry(locale)}
-    class="link font-semibold"
+    class="link inline-flex min-h-11 items-center font-semibold"
     {...topic && { [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
   >
     {copy.notFoundLink}
