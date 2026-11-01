@@ -12,6 +12,7 @@ import Icon from './Icon.astro';
 import OfferRow from './OfferRow.astro';
 import PickupLine from './PickupLine.astro';
 import PartAskRow from './PartAskRow.astro';
+import PartOrderPanel from './PartOrderPanel.astro';
 import PriceTag from './PriceTag.astro';
 import { formatMoney } from '@/utils/money';
 import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
@@ -44,6 +45,11 @@ const named = `${page.brand.name} ${page.value}`;
 const askHref = PathBuilder.partsInquiry(locale, named);
 ---
 
+<script is:inline>
+  setTimeout(() => {
+    document.documentElement.dataset.offersLate = '';
+  }, 4000);
+</script>
 {
   (priced || closed) && (
     <part-offers
@@ -132,13 +138,20 @@ const askHref = PathBuilder.partsInquiry(locale, named);
     </part-offers>
   )
 }
-<script is:inline>
-  setTimeout(() => {
-    document.documentElement.dataset.offersLate = '';
-  }, 4000);
-</script>
 {
-  !priced && (
+  closed &&
+    (ownHeading ? (
+      <PartOrderPanel page={page} part={part} replaced={replaced}>
+        <Fragment slot="heading">
+          <slot name="heading" />
+        </Fragment>
+      </PartOrderPanel>
+    ) : (
+      <PartOrderPanel page={page} part={part} replaced={replaced} />
+    ))
+}
+{
+  !priced && !closed && (
     <div
       class:list={[
         'card flex flex-col gap-3 p-5',

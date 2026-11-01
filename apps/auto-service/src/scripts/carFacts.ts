@@ -1,6 +1,7 @@
 import { positionGroups } from '@podbor/catalog-contract/ambiguity';
 import { rememberVin } from '@podbor/site-kit/browser';
 import { steeringSide, vinFactsFrom, vinFrom } from '@/utils/carFacts';
+import { rememberCar } from './garageCar';
 
 const fitmentRows = (root: Element) =>
   [...root.querySelectorAll<HTMLElement>('[data-fitment]')].map((element) => ({
@@ -35,6 +36,8 @@ export function defineCarFacts(tagName = 'car-facts'): void {
         const vin = vinFrom(location.search);
         if (vin) {
           rememberVin(vin);
+          const { car } = this.dataset;
+          if (car) rememberCar({ vin, car });
           this.confirmVin(vin);
         }
 

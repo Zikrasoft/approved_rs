@@ -3,6 +3,7 @@ import { fitComment } from '@podbor/catalog-contract/comment';
 import { partTitle } from '@podbor/catalog-contract/part-number';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import { vinFrom } from '@/utils/carFacts';
+import { rememberedCar } from './garageCar';
 import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { localeTagOf } from './localeTag';
 import {
@@ -204,7 +205,10 @@ export function definePartsListAdd(tagName = 'parts-list-add'): void {
     class extends HTMLElement {
       connectedCallback(): void {
         this.addEventListener('click', () => {
-          const part = listedPartFromDataset(this.dataset);
+          const part = listedPartFromDataset(
+            this.dataset,
+            rememberedCar() ?? {},
+          );
           if (part) addToPartsList(part);
         });
       }

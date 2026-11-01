@@ -28,3 +28,20 @@ export function fitGroups(fits: Fit[]): MakeFits[] {
     .sort((a, b) => byName(a.make.name, b.make.name))
     .map((group) => ({ ...group, models: group.models.sort(byModelName) }));
 }
+
+const SUMMARY_MODELS = 2;
+
+export function fitSummary(
+  groups: MakeFits[],
+  name: (model: Vehicle['model']) => string,
+): { names: string; more: number } | null {
+  const models = groups.flatMap((group) => group.models);
+  if (models.length === 0) return null;
+  return {
+    names: models
+      .slice(0, SUMMARY_MODELS)
+      .map(({ model }) => name(model))
+      .join(', '),
+    more: Math.max(0, models.length - SUMMARY_MODELS),
+  };
+}
