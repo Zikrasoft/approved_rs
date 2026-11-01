@@ -47,6 +47,19 @@ describe('/api/search-count', () => {
     );
   });
 
+  it('counts within the Model a Model category page filters', async () => {
+    backend.mockResolvedValue(Response.json({ ...answer, count: 1 }));
+
+    const response = await ask(
+      'locale=ru&category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta',
+    );
+
+    expect(await response.json()).toEqual({ count: 1 });
+    expect(backend.mock.calls[0][0]).toBe(
+      'http://shop.test/store/search?locale=ru&category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta&limit=1',
+    );
+  });
+
   it('counts nothing for a malformed scope without asking the shop', async () => {
     const response = await ask('category=..%2Fadmin&locale=ru');
 

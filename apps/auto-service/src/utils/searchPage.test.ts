@@ -176,6 +176,27 @@ describe('planSearch', () => {
     expect(outcome).toMatchObject({ view: { model: undefined } });
   });
 
+  it('lists what a Model category page counted for its ticked filter', async () => {
+    const catalogue = fakeCatalogue();
+    const outcome = await plan(
+      'category=batteries&make=bmw&model=f30-320d&facets=brand%3Avarta',
+      catalogue,
+    );
+
+    expect(catalogue.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category: 'batteries',
+        make: 'bmw',
+        model: 'f30-320d',
+        facets: ['brand:varta'],
+      }),
+    );
+    expect(outcome).toMatchObject({
+      status: 200,
+      view: { make: 'bmw', model: 'f30-320d', found: { count: 1 } },
+    });
+  });
+
   it('builds links that keep the scope and drop a zero offset', async () => {
     const outcome = await plan('q=filter&make=bmw&model=x3');
     if (!('view' in outcome)) throw new Error('expected a view');
