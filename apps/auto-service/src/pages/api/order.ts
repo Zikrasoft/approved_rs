@@ -20,6 +20,7 @@ import {
   type NotPlacedReason,
 } from '@podbor/lead-crm/parts-order-copy';
 import { BRAND, leadStore, notifyLead } from '@/lib/crm';
+import { reportShopEvent, type ShopEvent } from '@/lib/shopEvents';
 import { localeFieldSchema } from '@/i18n/localeField';
 import { catalogueIdSchema } from '@/utils/catalogue';
 import { catalogueFor } from '@/utils/catalogueEnv';
@@ -49,11 +50,18 @@ const orderSchema = z.object({
 
 const consentSchema = z.object({ consent: z.string().min(1) });
 
+type CheckoutOutcome = Extract<
+  ShopEvent,
+  { event: 'storefront.checkout' }
+>['outcome'];
+
 export const POST: APIRoute = async ({ request, redirect }) => {
   const read = await readForm(request);
   if ('response' in read) return read.response;
   const form = Object.fromEntries(read.value ?? new FormData());
   const locale = localeFieldSchema.parse(form.locale);
+  const report = (outcome: CheckoutOutcome, reason: string | null = null) =>
+    reportShopEvent(request, { event: 'storefront.checkout', outcome, reason });
   const toCart = (notice: CartNotice, extra: Record<string, string> = {}) =>
     redirect(
       `${PathBuilder.partsCart(locale)}?${new URLSearchParams({ [CART_NOTICE_PARAM]: notice, ...extra })}`,
@@ -61,10 +69,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     );
 
   if (form[HONEYPOT_FIELD]) {
+    report('honeypot');
     return toCart('ordered');
   }
   const contact = checkoutContactSchema.safeParse({ ...form, locale });
   if (!contact.success || !consentSchema.safeParse(form).success) {
+    report('invalid', contact.success ? 'no_consent' : 'contact');
     return toCart('invalid');
   }
   const order = orderSchema.safeParse(form);
@@ -76,20 +86,31 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       )
     : ({ kind: 'empty' } as const);
   if (outcome?.kind === 'order' && order.success) {
+    report('placed');
     return toCart('ordered', {
       [ORDER_NUMBER_PARAM]: String(outcome.order.display_id),
       [ORDERED_CART_PARAM]: order.data.cart_id,
     });
   }
-  const { notice, reason }: { notice: CartNotice; reason: NotPlacedReason } =
+  const {
+    notice,
+    reason,
+    logged,
+  }: { notice: CartNotice; reason: NotPlacedReason; logged: CheckoutOutcome } =
     outcome?.kind === 'refused'
       ? {
           notice: refusalNotice(outcome.code),
           reason: outcome.code,
+          logged: 'refused',
         }
       : outcome?.kind === 'empty'
-        ? { notice: 'expired', reason: 'expired' }
-        : { notice: 'unreachable', reason: 'unreachable' };
+        ? { notice: 'expired', reason: 'expired', logged: 'expired' }
+        : {
+            notice: 'unreachable',
+            reason: 'unreachable',
+            logged: 'unreachable',
+          };
+  report(logged, outcome?.kind === 'refused' ? outcome.code : null);
   const capped = await leadStore
     .failedCheckoutCapped(BRAND, contact.data.contact)
     .catch(() => false);

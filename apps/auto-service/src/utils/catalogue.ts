@@ -41,6 +41,7 @@ import {
   SHOP_CLIENT_SECRET_HEADER,
   SHOP_PREVIEW_HEADER,
 } from '@podbor/catalog-contract/preview';
+import { REQUEST_ID_HEADER } from '@podbor/catalog-contract/events';
 import {
   assembleSnapshot,
   carPagesFrom,
@@ -110,6 +111,7 @@ export type CatalogueConfig = {
   shopOpen?: boolean;
   preview?: boolean;
   previewToken?: string;
+  requestId?: string;
   client?: { address: string; secret: string };
 };
 
@@ -121,6 +123,7 @@ export function createCatalogue({
   shopOpen = true,
   preview = false,
   previewToken,
+  requestId,
   client,
 }: CatalogueConfig) {
   const pricesHidden = !shopOpen && !preview;
@@ -139,6 +142,7 @@ export function createCatalogue({
         ...((preview || shopOpen) &&
           previewToken && { [SHOP_PREVIEW_HEADER]: previewToken }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
+        ...(requestId && { [REQUEST_ID_HEADER]: requestId }),
         ...(client && {
           [SHOP_CLIENT_HEADER]: client.address,
           [SHOP_CLIENT_SECRET_HEADER]: client.secret,

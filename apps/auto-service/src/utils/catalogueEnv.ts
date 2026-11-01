@@ -3,6 +3,7 @@ import {
   shopOpenSchema,
   shopPreviewTokenSchema,
 } from '@podbor/catalog-contract/preview';
+import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
@@ -104,6 +105,9 @@ export const visitorAddress = (request: Request): string | undefined =>
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
   ).data;
 
+export const requestIdOf = (request: Request): string | undefined =>
+  requestIdSchema.safeParse(request.headers.get('x-vercel-id')).data;
+
 export function catalogueFromEnv(
   env: CatalogueEnv,
   { preview = false, visitor }: { preview?: boolean; visitor?: Request } = {},
@@ -116,6 +120,7 @@ export function catalogueFromEnv(
     ...shop,
     shopOpen: shopOpen(env),
     preview,
+    requestId: visitor && requestIdOf(visitor),
     client:
       address && clientSecret ? { address, secret: clientSecret } : undefined,
   });

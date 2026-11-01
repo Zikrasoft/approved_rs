@@ -1,3 +1,8 @@
 export const prerender = false;
 
-export { cspReportRoute as POST } from '@podbor/lead-crm';
+import { createCspReportRoute } from '@podbor/lead-crm';
+import { reportShopEvent } from '@/lib/shopEvents';
+
+export const POST = createCspReportRoute((violation) =>
+  reportShopEvent(null, { event: 'storefront.csp', ...violation }),
+);

@@ -1359,6 +1359,25 @@ describe('catalogueFromEnv', () => {
       expect(headers.get('x-shop-client-secret')).toBe('secret');
     });
 
+    it("passes Vercel's request id on as the shop's, and only a well-formed one", async () => {
+      const traced = await headersSent(
+        SHOP,
+        new Request('https://carlab.rs/api/cart', {
+          headers: { 'x-vercel-id': 'fra1::iad1::abc-1700000000000' },
+        }),
+      );
+      const malformed = await headersSent(
+        SHOP,
+        new Request('https://carlab.rs/api/cart', {
+          headers: { 'x-vercel-id': 'not a request id' },
+        }),
+      );
+
+      expect(traced.get('x-request-id')).toBe('fra1::iad1::abc-1700000000000');
+      expect(malformed.has('x-request-id')).toBe(false);
+      expect((await headersSent(SHOP)).has('x-request-id')).toBe(false);
+    });
+
     it('names nobody without the secret, without a visitor, or for an address that is none', async () => {
       for (const sent of [
         await headersSent(SHOP, visitor),

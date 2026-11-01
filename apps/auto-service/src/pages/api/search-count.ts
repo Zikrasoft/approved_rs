@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { CATALOG_KEY_PATTERN, searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
+import { searchReporter } from '@/lib/shopEvents';
 import { catalogueFor } from '@/utils/catalogueEnv';
 import { partsQuery, rangesFromParams } from '@/utils/partsSearch';
 
@@ -26,6 +27,9 @@ export const GET: APIRoute = async ({ url, request }) => {
     model: params.get('model') ?? undefined,
     locale: params.get('locale'),
   });
+  const report = searchReporter(request, 'count');
+  const intent =
+    parsed.success && searchableQuery(parsed.data.q) ? 'query' : 'empty';
   const scoped =
     parsed.success &&
     (searchableQuery(parsed.data.q) ||
@@ -33,6 +37,7 @@ export const GET: APIRoute = async ({ url, request }) => {
       parsed.data.model);
   const catalogue = scoped ? catalogueFor(request) : null;
   if (!parsed.success || !catalogue) {
+    report(intent, 'skipped');
     return Response.json({ count: null });
   }
   const { q, category, make, model, locale } = parsed.data;
@@ -46,7 +51,10 @@ export const GET: APIRoute = async ({ url, request }) => {
     ranges: rangesFromParams(params),
     limit: 1,
   });
-  return found
-    ? Response.json({ count: found.count })
-    : Response.json({ count: null }, { status: 503 });
+  if (!found) {
+    report(intent, 'unavailable');
+    return Response.json({ count: null }, { status: 503 });
+  }
+  report(intent, 'ok', found.count);
+  return Response.json({ count: found.count });
 };

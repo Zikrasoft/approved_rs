@@ -1,5 +1,6 @@
 export const prerender = false;
 
+import type { APIRoute } from 'astro';
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { acceptedSecrets } from '@podbor/lead-crm/verify-secret';
@@ -7,13 +8,14 @@ import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { notifyLead } from '@/lib/crm';
+import { reportShopEvent } from '@/lib/shopEvents';
 import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
-export const POST = createLeadsRoute({
+const leadsRoute = createLeadsRoute({
   notifyLead,
   waitUntil,
   isLocale,
@@ -58,3 +60,18 @@ export const POST = createLeadsRoute({
       (await import('@/lib/crmBot')).cancelOrderLead(orderId),
   },
 });
+
+export const POST: APIRoute = async (context) => {
+  const response = await leadsRoute(context);
+  if (response.status >= 400) {
+    reportShopEvent(context.request, {
+      event: 'storefront.lead',
+      source: 'leads',
+      service: null,
+      outcome: 'refused',
+      reason:
+        response.status === 400 ? 'invalid_form' : `status_${response.status}`,
+    });
+  }
+  return response;
+};

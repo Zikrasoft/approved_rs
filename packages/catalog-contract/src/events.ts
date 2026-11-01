@@ -6,10 +6,11 @@ export const STOREFRONT_EVENT_MAX_BYTES = 4096;
 
 export const requestIdSchema = z.string().regex(/^[\w:.-]{1,128}$/);
 
-const code = z
+export const eventCodeSchema = z
   .string()
   .regex(/^[a-z][a-z0-9_.-]{0,63}$/i)
   .refine((value) => !/\d{7}/.test(value), 'looks like a phone number');
+const code = eventCodeSchema;
 const count = z.number().int().nonnegative().max(1e9);
 const host = z.string().regex(/^[a-z0-9.:[\]-]{1,253}$/i);
 
