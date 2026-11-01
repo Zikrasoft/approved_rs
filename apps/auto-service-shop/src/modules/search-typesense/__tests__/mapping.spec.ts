@@ -202,8 +202,29 @@ describe('compileFilters', () => {
     );
   });
 
+  it('compiles $or into a grouped disjunction that binds inside a conjunction', () => {
+    expect(
+      compileFilters({
+        $and: [
+          { published: true },
+          { $or: [{ cars: 'model:bmw/f30' }, { part_id: { $in: ['p1'] } }] },
+        ],
+      }),
+    ).toBe('published:=true && ((cars:=`model:bmw/f30`) || (part_id:=[`p1`]))');
+  });
+
+  it('groups a conjunction inside $or', () => {
+    expect(
+      compileFilters({ $or: [{ $and: [{ a: 1 }, { b: 2 }] }, { c: 3 }] }),
+    ).toBe('((a:=1 && b:=2) || (c:=3))');
+  });
+
+  it('drops an $or one of whose branches matches everything', () => {
+    expect(compileFilters({ $or: [{ a: 1 }, {}], b: 2 })).toBe('b:=2');
+  });
+
   it('throws for an unsupported logical operator', () => {
-    expect(() => compileFilters({ $or: [{ a: 1 }] })).toThrow(/\$or/);
+    expect(() => compileFilters({ $not: { a: 1 } })).toThrow(/\$not/);
   });
 
   it('compiles inclusive bounds into comparisons', () => {

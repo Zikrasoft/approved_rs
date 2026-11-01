@@ -134,7 +134,17 @@ export const compileFilters = (
       continue;
     }
 
-    if (key === '$or' || key === '$not') {
+    if (key === '$or') {
+      const sub = (value as SearchTypes.SearchFilters[]).map((entry) =>
+        compileFilters(entry),
+      );
+      if (sub.every(Boolean)) {
+        clauses.push(`(${sub.map((clause) => `(${clause})`).join(' || ')})`);
+      }
+      continue;
+    }
+
+    if (key === '$not') {
       throw new Error(`search-typesense: unsupported filter operator "${key}"`);
     }
 

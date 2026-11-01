@@ -53,6 +53,7 @@ import {
   pagedCars,
   vehicleKey,
 } from '../../../lib/car-pages';
+import { carFitFilter } from '../../../lib/requirement-fit';
 import { modelBySlug } from '../../../lib/store-response';
 import { type CarMatch, matchCars } from '../../../search/catalogue-car';
 import {
@@ -369,10 +370,24 @@ export async function GET(
   }
   if (vehicle_id) {
     await catalog.retrieveVehicle(vehicle_id, { select: ['id'] });
-    scope.push({ cars: vehicleKey(vehicle_id) });
+    scope.push(
+      await carFitFilter(
+        catalog,
+        vehicleKey(vehicle_id),
+        { id: vehicle_id },
+        found?.id,
+      ),
+    );
   }
-  if (scopeModelKey) {
-    scope.push({ cars: scopeModelKey });
+  if (vehicleModel && scopeModelKey) {
+    scope.push(
+      await carFitFilter(
+        catalog,
+        scopeModelKey,
+        { model_id: vehicleModel.id },
+        found?.id,
+      ),
+    );
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
