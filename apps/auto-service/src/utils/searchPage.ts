@@ -1,7 +1,9 @@
 import {
   CATALOG_KEY_PATTERN,
+  facetFilter,
   filtersWithinCap,
   type RangeFilter,
+  type SearchFacet,
   searchableQuery,
 } from '@podbor/catalog-contract';
 import { vinText } from '@podbor/lead-crm/vin';
@@ -16,7 +18,12 @@ import {
 } from './catalogueSearch';
 import { searchEitherLayout } from './keyboardLayout';
 import { PathBuilder } from './paths';
-import { appendRange, partsQuery, rangesFromParams } from './partsSearch';
+import {
+  appendRange,
+  partsQuery,
+  rangesAsWritten,
+  rangesFromParams,
+} from './partsSearch';
 
 export type SearchCatalogue = Pick<
   ReturnType<typeof createCatalogue>,
@@ -37,6 +44,32 @@ const capitalised = (params: URLSearchParams) =>
   });
 
 const keyOf = (facet: string) => facet.slice(0, facet.indexOf(':'));
+
+const listedSpelling = (facets: SearchFacet[], filter: string) => {
+  const key = keyOf(filter);
+  const wanted = filter.slice(key.length + 1).toLowerCase();
+  const [listed] = (facets.find((facet) => facet.key === key)?.values ?? [])
+    .filter(({ value }) => value.toLowerCase() === wanted)
+    .sort((a, b) => b.count - a.count);
+  return listed ? facetFilter(key, listed.value) : filter;
+};
+
+const knownFilters = (
+  facets: SearchFacet[],
+  requested: string[],
+  ranges: RangeFilter[],
+) => {
+  const keys = new Set(facets.map(({ key }) => key));
+  const numbers = new Set(
+    facets.filter(({ type }) => type === 'number').map(({ key }) => key),
+  );
+  return filtersWithinCap(
+    requested
+      .filter((facet) => keys.has(keyOf(facet)))
+      .map((facet) => listedSpelling(facets, facet)),
+    ranges.filter(({ key }) => numbers.has(key)),
+  );
+};
 
 type SearchRedirect = { redirect: string; status: 302 | 303 };
 
@@ -59,15 +92,14 @@ export async function planSearch({
 }) {
   const typed = partsQuery(params.get('q') ?? '');
   const category = catalogKey(params.get('category'));
+  const misspeltCategory = Boolean(params.get('category')) && !category;
   const requestedModel = catalogKey(params.get('model'));
   const make = requestedModel ? catalogKey(params.get('make')) : undefined;
   const model = make && requestedModel;
+  const strayScope = (params.has('make') || params.has('model')) && !model;
   const requestedFacets = params.getAll('facets');
   const requestedRanges = rangesFromParams(params);
-  const capped = filtersWithinCap(
-    [...new Set(requestedFacets)],
-    requestedRanges,
-  );
+  const capped = filtersWithinCap(requestedFacets, requestedRanges);
   const requestedOffset = Math.max(
     0,
     Number.parseInt(params.get('offset') ?? '0', 10) || 0,
@@ -83,19 +115,24 @@ export async function planSearch({
     return redirectTo(destination, 303);
   }
 
-  if (model && make && !category && !searchableQuery(typed)) {
+  if (
+    model &&
+    make &&
+    !category &&
+    !misspeltCategory &&
+    !searchableQuery(typed)
+  ) {
     return redirectTo(PathBuilder.partsModel(locale, make, model), 302);
   }
 
-  const searchable = !vin && (searchableQuery(typed) || Boolean(category));
+  const searchable =
+    !vin && (searchableQuery(typed) || Boolean(category) || misspeltCategory);
+  const searchScope = { category, make, model, locale };
   const { q, found } = await searchEitherLayout(typed, async (query) =>
-    searchable && catalogue
+    searchable && catalogue && !misspeltCategory
       ? catalogue.search({
+          ...searchScope,
           q: query,
-          category,
-          make,
-          model,
-          locale,
           facets: capped.facets,
           ranges: capped.ranges,
           offset,
@@ -126,19 +163,49 @@ export async function planSearch({
     return `${PathBuilder.partsSearch(locale)}?${next}`;
   };
 
-  const known = found && new Set(found.facets.map(({ key }) => key));
-  const chosen = known
-    ? capped.facets.filter((facet) => known.has(keyOf(facet)))
-    : capped.facets;
-  const ranges = known
-    ? capped.ranges.filter(({ key }) => known.has(key))
-    : capped.ranges;
+  const applied = found
+    ? knownFilters(found.facets, requestedFacets, requestedRanges)
+    : capped;
+  const emptyScope =
+    found?.count === 0 &&
+    (applied.facets.length > 0 || applied.ranges.length > 0) &&
+    (
+      await catalogue?.search({
+        ...searchScope,
+        q,
+        facets: [],
+        ranges: [],
+        limit: 1,
+      })
+    )?.count === 0;
+  const chosen = emptyScope ? [] : applied.facets;
+  const ranges = emptyScope ? [] : applied.ranges;
+  const listing =
+    !q && found?.category
+      ? listingCrumbs({
+          locale,
+          model: found.model,
+          modelName: null,
+          category: found.category,
+          pages: found.scope_pages,
+          searchLabel: '',
+        }).at(-1)?.href
+      : undefined;
+  const filtersHref = (facets: string[], nextRanges: RangeFilter[]) =>
+    listing && !facets.length && !nextRanges.length
+      ? listing
+      : searchHref(facets, nextRanges);
   const page = found ? Math.min(offset, lastPageOf(found)) : offset;
+  if (emptyScope) {
+    return redirectTo(filtersHref([], []), 302);
+  }
   if (
-    chosen.length !== requestedFacets.length ||
-    ranges.length !== requestedRanges.length ||
-    page !== requestedOffset ||
-    capitalised(params)
+    !misspeltCategory &&
+    (JSON.stringify(chosen) !== JSON.stringify(requestedFacets) ||
+      !rangesAsWritten(params, ranges) ||
+      page !== requestedOffset ||
+      strayScope ||
+      capitalised(params))
   ) {
     return redirectTo(searchHref(chosen, ranges, page), 302);
   }
@@ -156,25 +223,10 @@ export async function planSearch({
       ? await catalogue.listingScope({ category, make, model }, locale)
       : null);
   const unknownScope =
-    !found &&
-    scope !== null &&
-    Boolean((category && !scope.category) || (model && !scope.model));
-  const listing =
-    !q && scope?.category
-      ? listingCrumbs({
-          locale,
-          model: scope.model,
-          modelName: null,
-          category: scope.category,
-          pages: scope.scope_pages,
-          searchLabel: '',
-        }).at(-1)?.href
-      : undefined;
-  const filtersHref = (facets: string[], nextRanges: RangeFilter[]) =>
-    listing && !facets.length && !nextRanges.length
-      ? listing
-      : searchHref(facets, nextRanges);
-
+    misspeltCategory ||
+    (!found &&
+      scope !== null &&
+      Boolean((category && !scope.category) || (model && !scope.model)));
   return {
     status: unknownScope ? 404 : 200,
     view: {
