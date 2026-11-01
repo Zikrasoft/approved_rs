@@ -1,10 +1,16 @@
+import { fileURLToPath } from 'node:url';
 import { getViteConfig } from 'astro/config';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
-const astro = getViteConfig({});
+const astro = getViteConfig({}, { configFile: false, logLevel: 'silent' });
 
 export default defineConfig(async (env) =>
   mergeConfig(await astro(env), {
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
     test: {
       environment: 'node',
       include: ['src/**/*.test.ts'],

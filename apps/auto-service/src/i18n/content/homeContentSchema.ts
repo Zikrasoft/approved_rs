@@ -11,6 +11,7 @@ export const homeContentSchema = z
       .object({
         heading: z.string(),
         ctaPrimary: z.string(),
+        callback: z.string(),
         ctaSecondary: z.string(),
         partsHeading: z.string(),
         partsSubmit: z.string(),

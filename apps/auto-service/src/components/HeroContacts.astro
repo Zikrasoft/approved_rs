@@ -1,0 +1,44 @@
+---
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { contactRegion } from '@podbor/site-kit/contact-control';
+import ContactChannels from './ContactChannels.astro';
+import ContactControl from './ContactControl.astro';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PHONE_NUMBER } from '@/utils/constants';
+
+const locale = localeFrom(Astro.url.pathname);
+const { home, site } = content(locale);
+const button = 'btn min-h-12 w-full lg:w-auto lg:px-7';
+---
+
+<div
+  class="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center"
+  {...contactRegion('hero')}
+>
+  <ContactControl channel="phone" class={`${button} btn-primary`}>
+    <Icon name="phone" size={16} class="shrink-0" />
+    {site.channels.call}{' '}
+    <span class="spec whitespace-nowrap">{formatPhone(PHONE_NUMBER)}</span>
+  </ContactControl>
+  <a
+    href="#lead"
+    data-open-lead-modal
+    class={`${button} btn-on-panel pointer-fine:border-signal-ink pointer-fine:bg-signal-ink pointer-fine:text-white pointer-fine:hover:border-signal-dark pointer-fine:hover:bg-signal-dark`}
+  >
+    {home.hero.ctaPrimary}
+  </a>
+  <a
+    href="#lead"
+    data-open-lead-modal="phone"
+    class={`${button} btn-on-panel pointer-coarse:hidden!`}
+  >
+    {home.hero.callback}
+  </a>
+  <ContactChannels
+    placement="hero"
+    tone="panel"
+    only={['whatsapp', 'viber', 'telegram']}
+  />
+</div>
