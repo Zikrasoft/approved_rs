@@ -3,7 +3,7 @@ import {
   toRussianLayout,
 } from '@podbor/lead-crm/keyboard-layout';
 
-const RUSSIAN_WORDS = /^[\sа-яё]+$/i;
+const RUSSIAN_WORDS = /^(?=.*[а-яё])[\s\dа-яё./-]+$/i;
 const LATIN_WORDS = /^[\sa-z[\];',.`]+$/i;
 
 export const otherLayout = (text: string): string | null => {
