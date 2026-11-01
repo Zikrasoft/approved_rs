@@ -2,6 +2,7 @@
 import LeadForm from './LeadForm.astro';
 import ContactChannels from './ContactChannels.astro';
 import SocialLinks from './SocialLinks.astro';
+import { contactCta } from '@podbor/site-kit/contact-control';
 import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 const { eyebrow, heading, body, service, commentPlaceholder } = Astro.props;
 ---
 
-<section id="lead" class="wrap scroll-mt-24 mt-band">
+<section id="lead" class="wrap scroll-mt-24 mt-band" {...contactCta}>
   <div class="card grid gap-8 p-6 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:p-10">
     <div class="flex flex-col gap-4">
       <span class="eyebrow">{eyebrow}</span>
