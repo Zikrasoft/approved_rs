@@ -35,8 +35,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
       <Icon name="check" size={10} />
     </span>
     <span class="text-xs leading-relaxed text-muted">
-      {site.form.privacyNote}
-      <a
+      {site.form.privacyNote}{' '}<a
         href={PathBuilder.privacy(locale)}
         target="_blank"
         class="link-underlined">{site.form.privacyLinkText}</a
