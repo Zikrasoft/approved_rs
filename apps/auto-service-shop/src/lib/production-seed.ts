@@ -152,9 +152,9 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
     ['h8-l5', 'H8/L5'],
     ['h9-l6', 'H9/L6'],
   ]),
-  number('length', 'Длина', 'мм'),
-  number('width', 'Ширина', 'мм'),
-  number('height', 'Высота', 'мм'),
+  number('length', 'Длина', 'мм', true),
+  number('width', 'Ширина', 'мм', true),
+  number('height', 'Высота', 'мм', true),
 ];
 
 const IMAGES = join(process.cwd(), 'assets/categories');

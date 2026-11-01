@@ -415,6 +415,7 @@ async function seedCategories(catalog: CatalogModuleService) {
         type: 'number',
         unit: 'л',
         label: 'Объем',
+        facet: true,
         rank: 2,
       },
       {
