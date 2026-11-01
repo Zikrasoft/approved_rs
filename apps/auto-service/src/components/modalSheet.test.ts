@@ -1,4 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import FacetFilters from './FacetFilters.astro';
+import ModalSheet from './ModalSheet.astro';
+import SiteHeader from './SiteHeader.astro';
+import TelegramChoice from './TelegramChoice.astro';
+import { render } from './renderAstro';
 
 const components = import.meta.glob<string>('./*.astro', {
   query: '?raw',
@@ -14,10 +19,29 @@ describe('the modal sheet', () => {
     expect(shells.sort()).toEqual(['./ModalSheet.astro']);
   });
 
-  it('closes every dialog through the one close button', () => {
-    const closers = Object.entries(components)
-      .filter(([, source]) => /<button\s[^>]*data-modal-close/.test(source))
-      .map(([path]) => path);
-    expect(closers).toEqual(['./SheetClose.astro']);
+  it.each([
+    [
+      'the modal sheet',
+      () =>
+        render(ModalSheet, {
+          props: { trigger: '[data-x]', label: 'Заявка', heading: 'Заявка' },
+        }),
+    ],
+    ['the header search', () => render(SiteHeader)],
+    ['the Telegram choice', () => render(TelegramChoice)],
+    [
+      'the filter sheet',
+      () =>
+        render(FacetFilters, {
+          path: '/ru/parts/search/',
+          props: { action: '/ru/parts/search/', hidden: {}, facets: [] },
+        }),
+    ],
+  ])('gives %s one labelled close button', async (_name, mount) => {
+    const dialog = (await mount()).querySelector('dialog')!;
+    const closers = dialog.querySelectorAll('button[data-modal-close]');
+
+    expect(closers).toHaveLength(1);
+    expect(closers[0].getAttribute('aria-label')).toBeTruthy();
   });
 });
