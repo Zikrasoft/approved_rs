@@ -52,6 +52,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-20
 published: true
+featured: true
 translatedFrom: 6ee72bd789965a85
 ---
 

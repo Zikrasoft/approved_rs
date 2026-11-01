@@ -4,7 +4,6 @@ meta:
 hero:
   heading: Автосервис и запчасти в Белграде
   ctaPrimary: Записаться на ремонт
-  callback: Перезвоните мне
   ctaSecondary: Посмотреть услуги
   partsHeading: Подберем запчасть по VIN
   partsSubmit: Подобрать
@@ -16,45 +15,40 @@ hero:
     - Работаем со страховыми
 servicesHead:
   eyebrow: Услуги
-  heading: Что мы делаем
-  body: От замены масла до восстановления геометрии кузова после удара. Все в одном месте, не нужно возить машину по трем адресам.
-why:
-  eyebrow: Почему к нам
-  heading: Автосервис без сюрприза в счете
-  body: Главная проблема с сервисами не цена, а непредсказуемость. Мы ее убираем.
-  points:
-    - title: Смета до работ
-      text: Сначала диагностика и письменная смета, потом ваше «да», и только потом ключи в работу.
-    - title: Старые детали возвращаем
-      text: Все, что сняли с машины, отдаем в коробке. Если хотите, проверьте, действительно ли деталь была изношена.
-    - title: Не навязываем
-      text: Если можно доехать до следующего ТО, скажем об этом, а не продадим замену сегодня.
-    - title: Пишем в карту
-      text: Что меняли, какой пробег, какие запчасти. На следующем визите не начинаем с нуля.
+  heading: Чем поможем
+  body: Сколько занимает каждая работа. Смету составляем после осмотра, до начала работ.
+problemPrompt:
+  heading: Не знаете, что сломалось?
+  body: Опишите симптомы, подскажем, с чего начать.
+  cta: Описать проблему
+worksHeading: Что сломалось и как починили
 process:
   eyebrow: Как работаем
-  heading: Четыре шага без нервов
-  body: Никаких «оставьте машину, потом позвоним». Вы знаете, что происходит, на каждом этапе.
+  heading: Без сюрпризов в счете
+  body: Вы знаете, что происходит с машиной, на каждом этапе.
   steps:
-    - title: Заявка и запись
-      text: Описываете проблему по телефону или в мессенджере. Подбираем время, чтобы машина не стояла в очереди.
-    - title: Диагностика
-      text: Находим причину, а не симптом. Показываем на машине, что именно не так.
-    - title: Смета и согласование
-      text: Присылаем список работ и запчастей с ценами. Работы начинаются только после вашего подтверждения.
+    - title: Звонок или сообщение
+      text: Расскажите, что с машиной, договоримся о времени.
+    - title: Осмотр и диагностика
+      text: Находим причину, а не симптом, и показываем ее на машине.
+    - title: Смета до работ
+      text: Присылаем список работ и запчастей с ценами. Начинаем только после вашего «да».
     - title: Работа и выдача
-      text: Делаем, проверяем на ходу, отдаем машину со старыми деталями и записью в сервисной карте.
+      text: Проверяем на ходу, отдаем старые детали и запись в сервисной карте.
+  promises:
+    - Не меняем то, чему еще рано
+    - Старые детали отдаем в коробке
 accident:
   eyebrow: После ДТП
   heading: Кузовной ремонт и покраска
-  body: Восстанавливаем геометрию, правим и красим с подбором цвета по коду и по факту выгорания. Работаем со страховыми и помогаем собрать документы.
+  body: Правим геометрию и красим с подбором цвета. Работаем со страховыми и помогаем собрать документы.
   points:
     - Стапель и замер геометрии кузова
-    - Подбор краски по коду и компьютерным спектром
-    - Полировка перехода, чтобы не было видно границы
+    - Подбор краски по коду и спектрофотометром
     - Помощь с документами для страховой
-  cta: Оценить ремонт
-faqEyebrow: FAQ
+  cta: Прислать фото повреждений
+  more: Подробнее о кузовном ремонте
+faqEyebrow: Вопросы
 faq:
   - q: Сколько стоит диагностика?
     a: Первичный осмотр и считывание ошибок бесплатны. Платной становится только углубленная диагностика, когда нужно разбирать узел или ставить машину на стенд; о цене предупреждаем заранее.
@@ -62,14 +56,17 @@ faq:
     a: Можно. В этом случае мы отвечаем только за свою работу, а не за деталь. Это честно и работает в обе стороны.
   - q: Вы работаете со страховыми компаниями?
     a: Да, по кузовному ремонту. Поможем оформить документы и согласовать смету, а если страховая покрывает не все, сразу скажем, сколько останется на вас.
+  # TODO: owner to confirm the usual booking lead time before this answer names one.
   - q: Как быстро можно попасть на ТО?
-    a: Обычно в течение двух-трех рабочих дней, а на замену масла или аккумулятора часто удается взять в тот же день. Позвоните, и мы скажем точно.
+    a: Позвоните или напишите, и мы скажем ближайшее свободное время.
   - q: Машина на иностранных номерах, это проблема?
     a: Нет. Для ремонта документы о регистрации не нужны, приезжайте как есть.
+  - q: На каком языке с вами говорить?
+    a: По-сербски, по-русски или по-английски, как вам удобнее.
 finalCta:
   eyebrow: Записаться
   heading: Расскажите, что с машиной
-  body: Перезвоним в рабочее время, уточним детали и подберем время. Если вопрос срочный, просто позвоните.
+  body: Перезвоним в рабочее время и договоримся о визите.
   cta: Оставить заявку
 translations:
   sr:
@@ -87,19 +84,6 @@ translations:
       eyebrow: Usluge
       heading: Šta radimo
       body: Od zamene ulja do vraćanja geometrije karoserije posle udesa. Sve na jednom mestu, bez vožnje od servisa do servisa.
-    why:
-      eyebrow: Zašto kod nas
-      heading: Autoservis bez iznenađenja na računu
-      body: Najveći problem sa servisima nije cena, već to što ne znate šta vas čeka. Kod nas znate.
-      points:
-        - title: Ponuda pre radova
-          text: Prvo dijagnostika i pisana ponuda, zatim vaše odobrenje. Tek onda počinjemo sa radom.
-        - title: Vraćamo stare delove
-          text: Sve delove koje skinemo sa vozila vraćamo vam u kutiji. Ako želite, proverite i sami da li je deo zaista bio istrošen.
-        - title: Bez nepotrebnih zamena
-          text: Ako zamena može da sačeka sledeći servis, to ćemo vam i reći, umesto da vas ubeđujemo da je uradite odmah.
-        - title: Vodimo servisnu evidenciju
-          text: Beležimo šta je zamenjeno, na kojoj kilometraži i koji su delovi ugrađeni. Pri sledećoj poseti ne krećemo od nule.
     process:
       eyebrow: Kako radimo
       heading: Četiri koraka bez nerviranja
@@ -155,19 +139,6 @@ translations:
       eyebrow: Services
       heading: What we do
       body: From oil changes to chassis alignment after a collision. All in one place, so you don't have to take your car to three different workshops.
-    why:
-      eyebrow: Why choose us
-      heading: Car repairs without surprise bills
-      body: The biggest problem with garages isn't the price. It's not knowing what to expect. We take that uncertainty away.
-      points:
-        - title: An estimate before we start
-          text: First, diagnostics and a written estimate. Then your approval. Only then do we pick up the tools.
-        - title: We return your old parts
-          text: We give you everything we remove from your car in a box. You can check the wear for yourself if you like.
-        - title: No unnecessary replacements
-          text: If a part can safely last until your next service, we'll tell you rather than sell you a replacement today.
-        - title: We keep a service record
-          text: What we replaced, the mileage and the parts fitted. So we don't start from scratch at your next visit.
     process:
       eyebrow: How we work
       heading: Four stress-free steps

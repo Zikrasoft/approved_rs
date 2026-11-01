@@ -30,10 +30,12 @@ const refusalCopy = (locale: string) => ({
     'missing-contact': `${locale}: missing contact`,
     'invalid-phone': `${locale}: invalid phone`,
     'invalid-telegram': `${locale}: invalid telegram`,
-    'missing-consent': `${locale}: missing consent`,
   },
-  consent: 'Согласен на обработку данных',
-  privacy: { label: 'Политика конфиденциальности', href: '/ru/privacy/' },
+  privacy: {
+    note: 'Отправляя заявку, вы соглашаетесь с',
+    label: 'политикой конфиденциальности',
+    href: '/ru/privacy/',
+  },
   submit: 'Отправить',
   links: [
     { label: '+381 60 123 4567', href: 'tel:+381601234567' },
@@ -80,7 +82,6 @@ function makeCtx(
 const valid = (extra: Record<string, Field | Field[]> = {}) => ({
   name: 'Иван',
   contact: RS_PHONE,
-  consent: 'on',
   ...extra,
 });
 
@@ -277,9 +278,7 @@ describe('createLeadsRoute', () => {
   });
 
   it('takes a lead whose name is empty, because only the contact is required', async () => {
-    const res = await POST(
-      makeCtx({ name: '', contact: RS_PHONE, consent: 'on' }),
-    );
+    const res = await POST(makeCtx({ name: '', contact: RS_PHONE }));
     expect(res.status).toBe(302);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ name: '' }),
@@ -288,7 +287,7 @@ describe('createLeadsRoute', () => {
   });
 
   it('takes a lead from a form that has no name field at all', async () => {
-    const res = await POST(makeCtx({ contact: RS_PHONE, consent: 'on' }));
+    const res = await POST(makeCtx({ contact: RS_PHONE }));
     expect(res.status).toBe(302);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ name: '' }),
@@ -301,16 +300,14 @@ describe('createLeadsRoute', () => {
     expect(res.status).toBe(400);
   });
 
-  it('refuses a submission whose consent box never reached the server', async () => {
-    const res = await POST(makeCtx({ name: 'Иван', contact: RS_PHONE }));
-    expect(res.status).toBe(400);
-    expect(notifyLead).not.toHaveBeenCalled();
+  it('takes a Lead that carries no consent, the form only states the policy', async () => {
+    const res = await POST(makeCtx({ contact: RS_PHONE }));
+    expect(res.status).toBe(302);
+    expect(waitUntil).toHaveBeenCalledOnce();
   });
 
   it('returns 400 without leaking the schema when the contact is not a phone', async () => {
-    const res = await POST(
-      makeCtx({ name: 'Иван', contact: 'asdf', consent: 'on' }),
-    );
+    const res = await POST(makeCtx({ name: 'Иван', contact: 'asdf' }));
     expect(res.status).toBe(400);
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
     const body = await res.text();
@@ -339,7 +336,6 @@ describe('createLeadsRoute', () => {
       phone_number: '12',
       contact_channel: 'whatsapp',
       service: 'vin-parts-inquiry',
-      consent: 'on',
     });
     ctx.request.headers.set('referer', 'https://carlab.rs/ru/parts/');
 
@@ -374,46 +370,28 @@ describe('createLeadsRoute', () => {
   });
 
   it.each([
-    [{ contact: RS_PHONE }, 'ru: missing consent'],
-    [
-      { telegram: '@ab', contact_channel: 'telegram', consent: 'on' },
-      'ru: invalid telegram',
-    ],
-    [
-      { contact: '+38160', contact_channel: 'telegram', consent: 'on' },
-      'ru: invalid phone',
-    ],
-    [
-      { contact: RS_PHONE, contact_channel: 'sms', consent: 'on' },
-      'ru: invalid phone',
-    ],
+    [{ telegram: '@ab', contact_channel: 'telegram' }, 'ru: invalid telegram'],
+    [{ contact: '+38160', contact_channel: 'telegram' }, 'ru: invalid phone'],
+    [{ contact: RS_PHONE, contact_channel: 'sms' }, 'ru: invalid phone'],
   ])('names what is wrong with %j', async (fields, message) => {
     const body = await (await POST(makeCtx(fields))).text();
     expect(body).toContain(`<title>${message}</title>`);
   });
 
-  it('echoes a Telegram username and keeps its channel for the retry', async () => {
+  it('echoes a Telegram username too short to take and keeps its channel for the retry', async () => {
     const page = await (
-      await POST(
-        makeCtx({ telegram: 'ivan_petrov', contact_channel: 'telegram' }),
-      )
+      await POST(makeCtx({ telegram: 'iv', contact_channel: 'telegram' }))
     ).text();
-    expect(page).toContain('<input name="telegram" value="@ivan_petrov"');
+    expect(page).toContain('<input name="telegram" value="@iv"');
     expect(page).toContain('name="contact_channel" value="telegram"');
   });
 
-  it('asks for consent again only when it never arrived', async () => {
-    const withConsent = await (
-      await POST(makeCtx({ contact: 'asdf', consent: 'on' }))
-    ).text();
-    const without = await (await POST(makeCtx({ contact: RS_PHONE }))).text();
+  it('states the privacy policy above the retry, with no box to tick', async () => {
+    const page = await (await POST(makeCtx({ contact: 'asdf' }))).text();
 
-    expect(withConsent).not.toContain('type="checkbox"');
-    expect(without).toContain(
-      '<label><input type="checkbox" name="consent" value="1" required />Согласен на обработку данных</label>',
-    );
-    expect(without).toContain(
-      '<a href="/ru/privacy/" target="_blank">Политика конфиденциальности</a>',
+    expect(page).not.toContain('type="checkbox"');
+    expect(page).toContain(
+      '<p>Отправляя заявку, вы соглашаетесь с <a href="/ru/privacy/" target="_blank">политикой конфиденциальности</a></p>',
     );
   });
 
@@ -426,9 +404,7 @@ describe('createLeadsRoute', () => {
     ))
       resent[name!] = value!;
     expect(page).toContain('autocomplete="tel" value="" required');
-    expect(page).toContain('name="consent"');
     resent.phone_number = RS_PHONE;
-    resent.consent = '1';
 
     const ctx = makeCtx(resent);
     await POST(ctx);
@@ -446,7 +422,6 @@ describe('createLeadsRoute', () => {
             phone_number: '12',
             phone_country: 'RS',
             contact_channel: 'whatsapp',
-            consent: 'on',
           }),
         )
       ).text();
@@ -507,7 +482,6 @@ describe('createLeadsRoute', () => {
         comment: 'BMW X5',
         country: 'de',
         city: 'Belgrade',
-        consent: 'on',
         source_url: 'http://localhost/ru/vehicle-buyback/de/',
         visitor_id: '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11',
         ad_source: JSON.stringify({
@@ -569,7 +543,6 @@ describe('createLeadsRoute', () => {
       name: 'Иван',
       contact: ['@ivan', ''],
       contact_channel: 'telegram',
-      consent: 'on',
     });
     await POST(ctx);
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);

@@ -3,11 +3,13 @@ import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import { localeFrom } from '@/i18n/config';
 import LeadFormHidden from './LeadFormHidden.astro';
 import ContactChannelField from './ContactChannelField.astro';
-import ConsentField from './ConsentField.astro';
+import MoreDetails from './MoreDetails.astro';
+import SubmitError from './SubmitError.astro';
 import VinField from './VinField.astro';
 import type { ServiceSlug } from '@/utils/services';
 import { SERVICE_FIELD } from '@podbor/lead-crm';
 import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   service?: ServiceSlug;
@@ -15,29 +17,28 @@ interface Props {
   comment?: string;
   commentLabel?: string;
   commentPlaceholder?: string;
-  commentNote?: string;
-  vin?: { label: string; placeholder: string; note?: string; value?: string };
-  defaultChannel?: 'phone' | 'whatsapp' | 'viber' | 'telegram';
+  more?: string;
+  vin?: { label: string; placeholder: string; value?: string };
   action?: string;
   submitLabel?: string;
   class?: string;
 }
 
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
 const {
   service,
   compact = false,
   comment = '',
   commentLabel,
   commentPlaceholder,
-  commentNote,
+  more = site.form.moreDetails,
   vin,
-  defaultChannel = 'phone',
   action = '/api/leads',
   submitLabel,
   class: className = '',
 } = Astro.props;
-const locale = localeFrom(Astro.url.pathname);
-const site = content(locale).site;
+const topic = comment.trim().replace(/:$/, '');
 
 const uid = crypto.randomUUID().slice(0, 8);
 ---
@@ -48,40 +49,52 @@ const uid = crypto.randomUUID().slice(0, 8);
     action={action}
     data-lead-form
     data-submitting-label={site.form.submitting}
-    class={`${METRIKA_MASK_CLASS} flex flex-col gap-4 ${className}`}
+    class={`${METRIKA_MASK_CLASS} flex flex-col gap-3 ${className}`}
   >
     <LeadFormHidden />
 
-    <ContactChannelField uid={uid} defaultChannel={defaultChannel} />
+    {topic && <p class="text-sm font-semibold text-ink">{topic}</p>}
 
-    {vin && <VinField {...vin} />}
-
-    <label class="block">
-      <span class="field-label">{site.form.nameLabel}</span>
-      <input
-        name="name"
-        type="text"
-        autocomplete="name"
-        placeholder={site.form.namePlaceholder}
-        class="field"
-      />
-    </label>
+    <ContactChannelField uid={uid} defaultChannel="phone" />
 
     {service && <input type="hidden" name={SERVICE_FIELD} value={service} />}
 
-    <label class="block">
-      <span class="field-label">{commentLabel ?? site.form.commentLabel}</span>
-      <textarea
-        name="comment"
-        rows={compact ? 2 : 3}
-        placeholder={commentPlaceholder ?? site.form.commentPlaceholder}
-        class="field resize-none">{comment}</textarea
-      >
-      {commentNote && <p class="mt-1.5 text-xs text-muted">{commentNote}</p>}
-    </label>
+    <MoreDetails label={more} open={Boolean(vin?.value)}>
+      {vin && <VinField {...vin} />}
+
+      <label class="block">
+        <span class="field-label">{site.form.nameLabel}</span>
+        <input
+          name="name"
+          type="text"
+          autocomplete="name"
+          placeholder={site.form.namePlaceholder}
+          class="field"
+        />
+      </label>
+
+      <label class="block">
+        <span class="field-label">{commentLabel ?? site.form.commentLabel}</span
+        >
+        <textarea
+          name="comment"
+          rows={compact ? 2 : 3}
+          placeholder={commentPlaceholder ?? site.form.commentPlaceholder}
+          class="field resize-none">{comment}</textarea
+        >
+      </label>
+    </MoreDetails>
 
     <div class="lead-submit">
-      <ConsentField uid={uid} />
+      <p class="text-xs leading-relaxed text-muted">
+        {`${site.form.privacyNotice} `}<a
+          href={PathBuilder.privacy(locale)}
+          target="_blank"
+          class="link-underlined pointer-coarse:py-2.5"
+          >{site.form.privacyLinkText}</a
+        >
+      </p>
+      <SubmitError text={site.form.errorSubmit} />
 
       <button
         type="submit"

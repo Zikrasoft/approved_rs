@@ -1,5 +1,5 @@
 ---
-import { CONSENT_FIELD, CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import FormField from './FormField.astro';
 import Button from './Button.astro';
@@ -55,7 +55,6 @@ const panelIds = {
 const errorIds = {
   telegram: `contact-error-telegram-${uid}`,
   phone: `contact-error-phone-${uid}`,
-  consent: `consent-error-${uid}`,
 };
 
 const channelTabs = [
@@ -261,34 +260,13 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
       />
 
       <div>
-        <label class="flex items-start gap-3 mb-3 cursor-pointer text-muted">
-          <input
-            type="checkbox"
-            name={CONSENT_FIELD}
-            required
-            aria-describedby={errorIds.consent}
-            data-consent
-            data-field="consent"
-            class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
-          />
-          <span class="text-xs leading-relaxed">
-            {lf.consentBefore}{lf.consentLinkText}
-          </span>
-        </label>
-        <a
-          href={PathBuilder.privacy(locale)}
-          target="_blank"
-          class="-mt-3 mb-1 ml-7 inline-flex min-h-11 items-center text-xs underline text-muted"
-          >{content(locale).dictionary.footer.privacyLabel}</a
-        >
-        <p
-          id={errorIds.consent}
-          class={`${errorClass} mb-3`}
-          aria-live="polite"
-          data-error-consent
-          hidden
-        >
-          {lf.consentError}
+        <p class="mb-3 text-xs leading-relaxed text-muted">
+          {lf.consentBefore}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline underline-offset-2 pointer-coarse:py-2.5"
+            >{lf.consentLinkText}</a
+          >
         </p>
         <p class={`${errorClass} mb-3`} role="alert" data-error-submit hidden>
           {lf.errorSubmit}

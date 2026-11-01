@@ -55,6 +55,7 @@ image: image.jpg
 gallery: []
 date: 2026-06-06
 published: true
+featured: true
 translatedFrom: 9e1e0cacfbc1def4
 ---
 

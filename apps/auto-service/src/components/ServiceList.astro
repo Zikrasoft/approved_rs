@@ -1,0 +1,41 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import { SERVICE_SLUGS } from '@/utils/services';
+import { content } from '@/i18n/content';
+
+const locale = localeFrom(Astro.url.pathname);
+const services = content(locale).services;
+---
+
+<ul
+  class="divide-y divide-line overflow-hidden rounded-block border border-line"
+>
+  {
+    SERVICE_SLUGS.map((slug) => {
+      const service = services[slug];
+      return (
+        <li>
+          <a
+            href={PathBuilder.service(locale, slug)}
+            class="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-5 py-4 transition-colors duration-150 hover:bg-shade sm:px-6 lg:grid-cols-[minmax(0,1fr)_8rem_auto] lg:gap-x-6 lg:py-5"
+          >
+            <span class="flex min-w-0 flex-col gap-1">
+              <span class="font-semibold text-ink">{service.name}</span>
+              <span class="text-sm leading-snug text-muted max-lg:hidden">
+                {service.short}
+              </span>
+            </span>
+            <span class="spec col-start-1 row-start-2 text-sm text-muted lg:col-start-2 lg:row-start-1">
+              {service.duration}
+            </span>
+            <span class="row-span-2 flex size-8 items-center justify-center rounded-pill text-muted transition-colors duration-150 group-hover:bg-paper group-hover:text-ink lg:row-span-1">
+              <Icon name="chevronRight" size={16} />
+            </span>
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>

@@ -18,12 +18,10 @@ const copy = content(localeFrom(Astro.url.pathname)).pages.partsInquiry;
   vin={{
     label: copy.vinLabel,
     placeholder: copy.vinPlaceholder,
-    note: copy.vinNote,
     value: vin,
   }}
   comment={comment}
   commentLabel={copy.commentLabel}
   commentPlaceholder={copy.commentPlaceholder}
-  commentNote={copy.commentNote}
-  defaultChannel="whatsapp"
+  more={copy.moreDetails}
 />

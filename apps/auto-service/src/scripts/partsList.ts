@@ -338,6 +338,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
 
         const carLine = this.querySelector<HTMLElement>('[data-parts-car]');
         const carName = carLine?.querySelector('[data-parts-car-name]');
+        const carVin = carLine?.querySelector('[data-parts-car-vin]');
         const vinInput = form.querySelector<HTMLInputElement>('[name="vin"]');
 
         const render = (): void => {
@@ -346,6 +347,7 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
           block.hidden = parts.length === 0;
           if (carLine && carName) {
             carName.textContent = shared?.car ?? '';
+            carVin!.textContent = shared?.vin ? `, VIN ${shared.vin}` : '';
             carLine.hidden = !shared;
           }
           list.replaceChildren(...parts.map(itemFor));

@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import type { PartPageEntry } from './catalogueSnapshot';
 import {
+  featuredWorks,
   localizedWork,
   publishedWorks,
   sourcedParts,
   sourcingWorks,
+  titleNamesCar,
   workLeadService,
   workPrice,
   type Work,
@@ -128,6 +130,46 @@ describe('publishedWorks', () => {
     const input = [older, newer];
     publishedWorks(input);
     expect(input[0]).toBe(older);
+  });
+});
+
+describe('featuredWorks', () => {
+  const work = (date: string, featured: boolean) =>
+    makeWork({ date: new Date(date), featured });
+
+  it('leads with the featured Works, each group newest first', () => {
+    const plainNew = work('2026-09-01', false);
+    const plainOld = work('2026-01-01', false);
+    const pickedNew = work('2026-06-01', true);
+    const pickedOld = work('2025-06-01', true);
+    expect(featuredWorks([plainOld, pickedOld, plainNew, pickedNew])).toEqual([
+      pickedNew,
+      pickedOld,
+      plainNew,
+      plainOld,
+    ]);
+  });
+
+  it('keeps the rules of the published list', () => {
+    expect(
+      featuredWorks([
+        makeWork({ featured: true, published: false }),
+        makeWork({ featured: true, image: undefined }),
+      ]),
+    ).toEqual([]);
+  });
+});
+
+describe('titleNamesCar', () => {
+  it('is true when the title already opens with the car, in any case', () => {
+    expect(titleNamesCar('BMW X3: масло в двигателе', 'BMW X3')).toBe(true);
+    expect(titleNamesCar('Seat Leon: ГРМ', 'SEAT LEON')).toBe(true);
+  });
+
+  it('is false when the title names the job first', () => {
+    expect(titleNamesCar('Замена масла в DSG на Skoda', 'Skoda Octavia')).toBe(
+      false,
+    );
   });
 });
 

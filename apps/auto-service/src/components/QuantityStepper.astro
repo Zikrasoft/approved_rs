@@ -4,12 +4,11 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import Icon from './Icon.astro';
 
-type Props = HTMLAttributes<'div'>;
+type Props = HTMLAttributes<'div'> & { size?: 'sm' };
 
-const { class: className, ...rest } = Astro.props;
+const { class: className, size, ...rest } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).shopCart;
-const step =
-  'flex size-11 items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60';
+const step = `flex ${size === 'sm' ? 'size-9' : 'size-11'} items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60`;
 ---
 
 <div

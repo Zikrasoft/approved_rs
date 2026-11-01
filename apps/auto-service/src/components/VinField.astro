@@ -4,11 +4,10 @@ import { MY_GARAGE_VIN_ATTRIBUTE } from '@podbor/site-kit/browser';
 interface Props {
   label: string;
   placeholder: string;
-  note?: string;
   value?: string;
 }
 
-const { label, placeholder, note, value } = Astro.props;
+const { label, placeholder, value } = Astro.props;
 ---
 
 <my-garage class="block">
@@ -23,7 +22,6 @@ const { label, placeholder, note, value } = Astro.props;
       class="field"
       {...{ [MY_GARAGE_VIN_ATTRIBUTE]: '' }}
     />
-    {note && <p class="mt-1.5 text-xs text-muted">{note}</p>}
   </label>
 </my-garage>
 

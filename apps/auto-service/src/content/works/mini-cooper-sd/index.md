@@ -1,5 +1,5 @@
 ---
-title: Обслуживание MINI Cooper SD 2.0 B47 в Белграде
+title: Обслуживание MINI Cooper SD 2.0 B47
 translations:
   en:
     title: MINI Cooper SD 2.0 B47 Servicing in Belgrade

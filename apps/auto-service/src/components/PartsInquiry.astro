@@ -24,17 +24,21 @@ const copy = content(locale).pages.partsInquiry;
   data-part-href={PathBuilder.partNumber(locale, '{slug}')}
 >
   <div
-    class="rounded-control border border-line bg-shade px-4 pt-3 pb-1"
+    class="rounded-control border border-line bg-shade px-3 py-1"
     data-parts-list-block
     hidden
   >
-    <p class="field-label">{copy.listHeading}</p>
+    <p class="sr-only">{copy.listHeading}</p>
     <p
-      class="flex items-center justify-between gap-2 border-b border-line text-sm font-semibold text-ink"
+      class="flex items-center justify-between gap-2 border-b border-line text-sm text-ink"
       data-parts-car
       hidden
     >
-      <span data-parts-car-name></span>
+      <span class="min-w-0 py-2 leading-snug [overflow-wrap:anywhere]"
+        ><b class="font-semibold" data-parts-car-name></b><span
+          class="text-muted"
+          data-parts-car-vin></span></span
+      >
       <button
         type="button"
         class="btn-icon -mr-2"
@@ -46,16 +50,14 @@ const copy = content(locale).pages.partsInquiry;
     </p>
     <ul class="divide-y divide-line" data-parts-list></ul>
     <template data-parts-item>
-      <li
-        class="grid grid-cols-[1fr_auto] items-center gap-x-2 pb-1 sm:grid-cols-[1fr_auto_auto] sm:pb-0"
-      >
+      <li class="grid grid-cols-[1fr_auto_auto] items-center gap-x-1 py-1">
         <a
-          class="col-span-2 min-w-0 py-2 text-sm sm:col-span-1 leading-snug text-ink link-quiet [overflow-wrap:anywhere]"
+          class="line-clamp-2 min-w-0 py-1 text-sm leading-snug text-ink link-quiet [overflow-wrap:anywhere]"
           data-part-link></a>
         <QuantityStepper
           role="group"
           aria-label={copy.listQuantityLabel}
-          class="justify-self-start"
+          size="sm"
           data-part-quantity
         />
         <button

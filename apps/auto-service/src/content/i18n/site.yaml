@@ -15,17 +15,16 @@ header:
   languageLabel: Язык
   cta: Записаться
   partsCta: Заявка
-  phoneLabel: Позвонить
+  callback: Перезвоните мне
 footer:
-  tagline: Автосервис в Белграде. Диагностика, ремонт, кузов и покраска, подбор запчастей.
+  tagline: Автосервис и подбор запчастей на Звездаре, Белград.
   servicesHeading: Услуги
   companyHeading: Сервис
   contactHeading: Контакты
-  hoursHeading: Часы работы
   hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
   privacyLabel: Политика конфиденциальности
   rightsSuffix: Все права защищены.
-  aboutLabel: О проекте
+  aboutLabel: О сервисе
   developerCredit: Сайт сделан в студии Zikrasoft
 common:
   homeLabel: Главная
@@ -41,6 +40,17 @@ common:
   allWorks: Все примеры работ
   emptyWorks: Примеры работ скоро появятся. Пока что позвоните, расскажем, что делали на похожих машинах.
   socialHeading: Мы в соцсетях
+  writeInstead: Удобнее написать?
+hours:
+  week: Пн–Пт 08:00–18:00
+  saturday: Сб 09:00–14:00
+visit:
+  heading: Приезжайте на Звездару
+  route: Построить маршрут
+  # TODO: owner to confirm parking and the entrance (gate, landmark) before they join the facts.
+  facts:
+    - Говорим по-сербски, по-русски и по-английски
+    - Оплата наличными или картой
 channels:
   call: Позвонить
   whatsapp: WhatsApp
@@ -49,7 +59,7 @@ channels:
 form:
   heading: Записаться в сервис
   subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовем время и цену.
-  nameLabel: Имя (необязательно)
+  nameLabel: Имя
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
   contactPlaceholder: 64 123 4567
@@ -64,12 +74,13 @@ form:
   privacyNote: Согласен с
   privacyLinkText: политикой конфиденциальности
   privacyOpen: Открыть
+  privacyNotice: Отправляя заявку, вы соглашаетесь с
+  moreDetails: Добавить имя или комментарий
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер, кажется, он введен не полностью
   errorPhoneTooLong: Проверьте номер, в нем лишние цифры
   errorTelegram: Укажите @username в Telegram или номер телефона
   errorTelegramHandle: 'Проверьте @username: от 3 символов, только латиница, цифры и _'
-  errorConsent: Без согласия мы не сможем отправить заявку
   errorSubmit: Заявка не ушла. Проверьте связь и попробуйте еще раз
 cookie:
   notice: Мы используем cookie
@@ -104,13 +115,11 @@ translations:
       languageLabel: Jezik
       cta: Zakažite termin
       partsCta: Upit
-      phoneLabel: Pozovite
     footer:
       tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
-      hoursHeading: Radno vreme
       hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
@@ -191,13 +200,11 @@ translations:
       languageLabel: Language
       cta: Book an appointment
       partsCta: Enquiry
-      phoneLabel: Call us
     footer:
       tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and respraying, and help finding the right parts.
       servicesHeading: Services
       companyHeading: Workshop
       contactHeading: Contact
-      hoursHeading: Opening hours
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy policy
       aboutLabel: About this project

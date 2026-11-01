@@ -36,6 +36,7 @@ const works = defineCollection({
         gallery: z.array(image()).default([]),
         date: z.coerce.date(),
         published: z.boolean().default(true),
+        featured: z.boolean().default(false),
         translatedFrom: z.string().optional(),
       })
       .refine(({ published, image }) => !published || image, {

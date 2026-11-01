@@ -2,6 +2,10 @@ export function mapPlaceUrl(cid: string): string {
   return `https://maps.google.com/?cid=${encodeURIComponent(cid)}`;
 }
 
+export function mapRouteUrl(lat: number, lon: number): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+}
+
 export function mapEmbedSrc(cid: string): string {
   return `https://www.google.com/maps?cid=${encodeURIComponent(cid)}&output=embed`;
 }

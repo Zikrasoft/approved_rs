@@ -3,6 +3,7 @@ import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
 import {
   CONTACT_CTA_SELECTOR,
   contactCta,
+  contactPlacement,
   contactRegion,
   createContactControls,
   TELEGRAM_CHOICE_ATTRIBUTE,
@@ -168,10 +169,22 @@ describe('contactRegion', () => {
     });
     expect(contactRegion('hero')).toHaveProperty('data-contact-cta', '');
     expect(contactRegion('thanks')).toHaveProperty('data-contact-cta', '');
+    expect(contactRegion('visit')).toEqual({
+      'data-contact-placement': 'visit',
+      'data-contact-cta': '',
+    });
     for (const placement of ['floating', 'footer', 'header'] as const)
       expect(contactRegion(placement)).toEqual({
         'data-contact-placement': placement,
       });
+  });
+});
+
+describe('contactPlacement', () => {
+  it('stamps the placement alone, so an in-flow word does not hide the floating CTA', () => {
+    expect(contactPlacement('visit')).toEqual({
+      'data-contact-placement': 'visit',
+    });
   });
 });
 

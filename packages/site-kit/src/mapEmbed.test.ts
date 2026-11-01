@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mapEmbedSrc, mapPlaceUrl, defineLazyMapEmbed } from './mapEmbed.ts';
+import {
+  mapEmbedSrc,
+  mapPlaceUrl,
+  mapRouteUrl,
+  defineLazyMapEmbed,
+} from './mapEmbed.ts';
 
 type FakeEntry = { isIntersecting: boolean };
 type FakeObserverCallback = (
@@ -85,6 +90,14 @@ describe('mapPlaceUrl', () => {
   it('links a Google Business Profile by cid', () => {
     expect(mapPlaceUrl('4988774890072933706')).toBe(
       'https://maps.google.com/?cid=4988774890072933706',
+    );
+  });
+});
+
+describe('mapRouteUrl', () => {
+  it('opens directions to the coordinates', () => {
+    expect(mapRouteUrl(44.8054581, 20.4858424)).toBe(
+      'https://www.google.com/maps/dir/?api=1&destination=44.8054581,20.4858424',
     );
   });
 });

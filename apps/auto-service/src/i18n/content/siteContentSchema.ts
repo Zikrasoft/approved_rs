@@ -32,7 +32,7 @@ export const siteContentSchema = z
         languageLabel: z.string(),
         cta: z.string(),
         partsCta: z.string(),
-        phoneLabel: z.string(),
+        callback: z.string(),
       })
       .strict(),
     footer: z
@@ -41,7 +41,6 @@ export const siteContentSchema = z
         servicesHeading: z.string(),
         companyHeading: z.string(),
         contactHeading: z.string(),
-        hoursHeading: z.string(),
         hours: z.string(),
         privacyLabel: z.string(),
         aboutLabel: z.string(),
@@ -64,6 +63,15 @@ export const siteContentSchema = z
         allWorks: z.string(),
         emptyWorks: z.string(),
         socialHeading: z.string(),
+        writeInstead: z.string(),
+      })
+      .strict(),
+    hours: z.object({ week: z.string(), saturday: z.string() }).strict(),
+    visit: z
+      .object({
+        heading: z.string(),
+        route: z.string(),
+        facts: z.array(z.string()),
       })
       .strict(),
     channels: z
@@ -102,12 +110,15 @@ export const siteContentSchema = z
         privacyNote: z.string(),
         privacyLinkText: z.string(),
         privacyOpen: z.string(),
+        privacyNotice: z.string(),
+        moreDetails: z.string(),
         modalTitle: z.string(),
         errorPhone: z.string(),
         errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
         errorTelegramHandle: z.string(),
-        errorConsent: z.string(),
+        // TODO: drop once the translate job has pruned errorConsent from the translations.
+        errorConsent: z.string().optional(),
         errorSubmit: z.string(),
       })
       .strict(),
