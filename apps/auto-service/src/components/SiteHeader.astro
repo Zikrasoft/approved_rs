@@ -44,6 +44,8 @@ const basket = open
       label: content(locale).pages.partsInquiry.listHeading,
     };
 
+const inquiryEntry = onParts && !open;
+
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
   { href: PathBuilder.parts(locale), label: site.nav.parts, attrs: {} },
@@ -153,15 +155,30 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
         </a>
 
         <cart-badge
-          class="block"
+          class:list={[
+            'block',
+            inquiryEntry && 'max-lg:has-[[data-count][hidden]]:hidden',
+          ]}
           {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
           data-parts-list={open ? undefined : ''}
         >
           <a
             href={basket.href}
-            class="relative flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2"
+            {...open ? {} : { [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+            class:list={[
+              'relative flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
+              inquiryEntry &&
+                'lg:h-10 lg:w-auto lg:gap-2 lg:border lg:border-panel-line-strong lg:px-4',
+            ]}
           >
-            <Icon name="cart" size={20} />
+            <Icon name={open ? 'cart' : 'list'} size={20} />
+            {
+              inquiryEntry && (
+                <span aria-hidden="true" class="hidden text-sm lg:inline">
+                  {site.header.partsCta}
+                </span>
+              )
+            }
             <span class="sr-only">{basket.label}</span>
             <span
               class="spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-panel-fg px-1 text-[0.6875rem] font-semibold text-ink"
@@ -173,7 +190,10 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
         <cta-reveal
           data-revealed="true"
           watch={CONTACT_CTA_SELECTOR}
-          class="flex data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden"
+          class:list={[
+            'flex data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden',
+            inquiryEntry && 'lg:hidden',
+          ]}
         >
           {
             onParts ? (
