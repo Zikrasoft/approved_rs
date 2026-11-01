@@ -81,6 +81,13 @@ describe('planSearch', () => {
     });
   });
 
+  it('keeps a near-VIN as typed, so the inquiry asks about it and no stored car', async () => {
+    expect(await plan('q=wba 35bg070n07415')).toMatchObject({
+      view: { vin: null, vinTypo: 'WBA35BG070N07415' },
+    });
+    expect(await plan('q=filter')).toMatchObject({ view: { vinTypo: null } });
+  });
+
   it('drops filters over the cap with a redirect', async () => {
     const facets = Array.from({ length: 9 }, (_, i) => `facets=k${i}:v`).join(
       '&',

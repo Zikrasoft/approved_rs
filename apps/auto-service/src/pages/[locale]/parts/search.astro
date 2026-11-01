@@ -49,7 +49,7 @@ const {
   ranges,
   offset,
   vin,
-  vinHint,
+  vinTypo,
   vinOutcome,
   searchable,
   found,
@@ -95,7 +95,7 @@ const emptyMessage = q
 const zeroFound =
   found?.results.length === 0 && chips.length === 0 && !modelName;
 const deadEnd = Boolean(vin) || unavailable || unknownScope || zeroFound;
-const DeadEndPrefill = vin ? 'div' : 'vin-prefill';
+const DeadEndPrefill = vin || vinTypo ? 'div' : 'vin-prefill';
 const deadEndPrefill = vin
   ? copy.lookingForVin.replace('{vin}', vin)
   : q
@@ -112,7 +112,7 @@ const inquiryCard = {
   id: 'lead',
   class: 'max-w-2xl',
   heading: copy.formHeading,
-  vin: vin ?? undefined,
+  vin: vin ?? vinTypo ?? undefined,
   comment: vin
     ? vinTopic
       ? `${vinTopic}: `
@@ -189,7 +189,7 @@ const scopeHidden = {
       )
     }
 
-    {vinHint && <StatusNote>{content(locale).partsCar.vin.invalid}</StatusNote>}
+    {vinTypo && <StatusNote>{content(locale).partsCar.vin.invalid}</StatusNote>}
 
     {
       !searchable && !vin && (
