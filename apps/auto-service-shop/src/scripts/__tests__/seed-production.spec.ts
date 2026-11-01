@@ -157,7 +157,7 @@ medusaIntegrationTestRunner({
           'VARTA: VARTA -> VARTA',
           'bilstein group: Blue Print -> Blue Print',
           'bilstein group: SWAG -> SWAG',
-          'bilstein group: febi -> febi',
+          'bilstein group: febi -> Febi',
         ]);
         expect(
           (await catalog.listBrands({}, { take: null }))
@@ -379,7 +379,7 @@ medusaIntegrationTestRunner({
         expect((await catalog.retrieveBrand(swag.id)).name).toBe(
           'SWAG Autoteile',
         );
-        expect((await catalog.retrieveBrand(febi.id)).name).toBe('febi');
+        expect((await catalog.retrieveBrand(febi.id)).name).toBe('Febi');
         expect(
           (await catalog.retrieveBrandSpelling(blueprintSpelling.id)).brand_id,
         ).toBe(febi.id);
