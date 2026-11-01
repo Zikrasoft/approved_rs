@@ -76,7 +76,6 @@
   --color-line-strong: #cacace;
   --color-line-field: #919199;
   --color-signal: #fa6610;
-  --color-signal-hover: #ff8540;
   --color-signal-ink: #bc4d0c;
   --color-signal-dark: #9e400a;
   --color-go: #18814d;
@@ -282,8 +281,8 @@
 
   .btn-primary,
   .btn-after-kit {
-    background-color: var(--color-signal);
-    color: var(--color-ink);
+    background-color: var(--color-signal-ink);
+    color: var(--color-white);
   }
 
   .btn-secondary,
@@ -381,11 +380,6 @@
     }
   }
 
-  .chip-accent {
-    background-color: var(--color-signal);
-    color: var(--color-ink);
-  }
-
   .link-muted {
     font-size: 0.875rem;
     color: var(--color-ink-2);
@@ -395,7 +389,7 @@
   @media (hover: hover) {
     .btn-primary:hover,
     .btn-after-kit:hover {
-      background-color: var(--color-signal-hover);
+      background-color: var(--color-signal-dark);
     }
 
     .btn-secondary:hover,
@@ -411,10 +405,6 @@
 
     .chip:hover {
       background-color: var(--color-shade-strong);
-    }
-
-    .chip-accent:hover {
-      background-color: var(--color-signal-hover);
     }
 
     .link-muted:hover {

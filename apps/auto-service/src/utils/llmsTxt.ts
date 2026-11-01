@@ -33,7 +33,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
     headings: site.llms,
     facts: [
-      ...home.trust.map((fact) => `- ${fact.value} — ${fact.label}`),
+      ...home.hero.badges.map((fact) => `- ${fact}`),
       `- ${pages.contact.addressLabel}: ${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`,
       `- ${pages.contact.mapHeading}: ${mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,

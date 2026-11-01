@@ -10,13 +10,15 @@ export const homeContentSchema = z
     hero: z
       .object({
         heading: z.string(),
-        lead: z.string(),
         ctaPrimary: z.string(),
         ctaSecondary: z.string(),
+        partsHeading: z.string(),
+        partsSubmit: z.string(),
+        partsHint: z.string(),
+        partsInquiry: z.string(),
         badges: z.array(z.string()),
       })
       .strict(),
-    trust: z.array(z.object({ value: z.string(), label: z.string() }).strict()),
     servicesHead: sectionHeadSchema,
     why: sectionHeadSchema.extend({
       points: z.array(

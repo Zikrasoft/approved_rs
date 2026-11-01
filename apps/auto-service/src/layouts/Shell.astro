@@ -33,6 +33,13 @@ import { content } from '@/i18n/content';
 import { navCurrent } from '@podbor/site-kit';
 import { PathBuilder } from '@/utils/paths';
 
+type PreloadImage = {
+  src: string;
+  srcset: string;
+  sizes: string;
+  media?: string;
+};
+
 interface Props {
   title: string;
   description: string;
@@ -41,7 +48,7 @@ interface Props {
   jsonLd?: PageSchema[];
   stickyContact?: boolean;
   service?: ServiceSlug;
-  preloadImage?: { src: string; srcset: string; sizes: string };
+  preloadImage?: PreloadImage | readonly PreloadImage[];
 }
 
 const {
@@ -95,16 +102,19 @@ const businessSchema = localBusinessSchema({
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#222324" />
     {
-      preloadImage && (
-        <link
-          rel="preload"
-          as="image"
-          href={preloadImage.src}
-          imagesrcset={preloadImage.srcset}
-          imagesizes={preloadImage.sizes}
-          fetchpriority="high"
-        />
-      )
+      [preloadImage ?? []]
+        .flat()
+        .map((image) => (
+          <link
+            rel="preload"
+            as="image"
+            href={image.src}
+            imagesrcset={image.srcset}
+            imagesizes={image.sizes}
+            media={image.media}
+            fetchpriority="high"
+          />
+        ))
     }
     <link
       rel="preload"
@@ -162,7 +172,7 @@ const businessSchema = localBusinessSchema({
   >
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-signal focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-signal-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >{site.common.skipToContent}</a
     >
     <SiteHeader />
