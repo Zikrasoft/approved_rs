@@ -242,6 +242,25 @@ describe('the filter sheet', () => {
     expect(live.textContent).toBe('Показать 7');
   });
 
+  it('brings the linked inquiry back into view once the sheet has folded away', () => {
+    const target = document.createElement('div');
+    target.id = 'inquiry';
+    target.scrollIntoView = vi.fn();
+    document.body.append(target);
+    window.location.hash = '#inquiry';
+
+    sheet();
+
+    expect(target.scrollIntoView).toHaveBeenCalled();
+    window.location.hash = '';
+  });
+
+  it('scrolls nowhere when the address names no element', () => {
+    window.location.hash = '#nowhere';
+    expect(() => sheet()).not.toThrow();
+    window.location.hash = '';
+  });
+
   it('closes the sheet when the page comes back from the back-forward cache', () => {
     const { form } = sheet();
     const dialog = form.querySelector('dialog')!;

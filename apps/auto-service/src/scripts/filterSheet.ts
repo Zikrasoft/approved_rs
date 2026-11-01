@@ -79,6 +79,10 @@ export function defineFilterSheet(
         )) {
           trigger.hidden = false;
         }
+        if (location.hash)
+          document
+            .getElementById(location.hash.slice(1))
+            ?.scrollIntoView({ behavior: 'instant' });
         const submit = this.querySelector(`[${FILTERS_SUBMIT_ATTRIBUTE}]`);
         const form = this.closest('form');
         window.addEventListener(
