@@ -74,11 +74,11 @@ const empty = entry.parts.length === 0;
 const listingAttributes = entry.parts.map(({ part }) => part.attributes);
 const categoryName = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const listed = entry.parts.flatMap(({ pages }) =>
+  pages.filter(({ superseded }) => !superseded),
+);
 const facets = withFacetCopy(
-  categoryFacets(
-    { ...category, pages: entry.parts.flatMap(({ pages }) => pages) },
-    locale,
-  ),
+  categoryFacets({ ...category, pages: listed }, locale),
   content(locale).partsSearch,
 );
 const filtered = !empty && facets.length > 0;
@@ -131,6 +131,7 @@ const SAID_BY_FIT = ['axle'];
             model: model.slug,
           }}
           facets={facets}
+          count={listed.length}
         />
       )
     }
@@ -138,7 +139,7 @@ const SAID_BY_FIT = ['axle'];
     <div class="flex min-w-0 flex-col gap-8">
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.partsHeading}</h2>
-        {!empty && <ListingBar count={entry.parts.length} filters={filtered} />}
+        {!empty && <ListingBar count={listed.length} filters={filtered} />}
         <ul class="flex flex-col gap-4">
           {
             entry.parts.map(({ part, pages, fits }) => (
