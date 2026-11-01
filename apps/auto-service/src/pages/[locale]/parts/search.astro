@@ -161,17 +161,17 @@ const scopeHidden = {
         searchLabel: copy.heading,
       }),
     ]}
-  />
-
-  <section class="wrap flex flex-col gap-6 py-6 md:py-band-lg">
+  >
     {
-      !found && !deadEnd && (
-        <div class="max-w-3xl" {...contactCta}>
+      !deadEnd && (
+        <div class="max-w-3xl pt-2" {...contactCta}>
           <CatalogueSearch query={q} category={category} />
         </div>
       )
     }
+  </PageHero>
 
+  <section class="wrap flex flex-col gap-6 py-6 md:py-10">
     {
       vin && (
         <StatusNote>
@@ -250,12 +250,9 @@ const scopeHidden = {
             />
           )}
 
-          <div class="flex min-w-0 flex-col gap-3">
-            <div {...contactCta}>
-              <CatalogueSearch query={q} category={category} />
-            </div>
+          <div class="flex min-w-0 flex-col gap-8 lg:gap-10">
             {cars.length > 0 && (
-              <section class="flex flex-col gap-2 pt-2">
+              <section class="flex flex-col gap-3">
                 <h2 class="text-block font-semibold">{copy.carsGroup}</h2>
                 <ul class="flex flex-wrap gap-2">
                   {cars.map((car) => (
@@ -274,109 +271,115 @@ const scopeHidden = {
                     </li>
                   ))}
                 </ul>
-                <h2 class="pt-3 text-block font-semibold">{copy.partsGroup}</h2>
               </section>
             )}
-            <ListingBar
-              count={looseNumbers ? null : found.count}
-              filters={facets.length > 0}
-              active={chips.length}
-            />
-
-            {(chips.length > 0 || modelName) && (
-              <FilterChips
-                chips={[
-                  ...(modelName
-                    ? [
-                        {
-                          label: modelName,
-                          href: searchHref(chosen, ranges, 0, ''),
-                        },
-                      ]
-                    : []),
-                  ...chips.map((chip) => ({
-                    label: chip.label,
-                    href: searchHref(chip.facets, chip.ranges),
-                  })),
-                ]}
-                resetHref={chips.length > 0 ? searchHref([], []) : undefined}
-              />
-            )}
-
-            {looseNumbers && (
-              <>
-                <StatusNote>
-                  {copy.numberNotFound.replace('{q}', q)}{' '}
-                  <a href="#lead" class="link font-semibold">
-                    {copy.notFoundLink}
-                  </a>
-                </StatusNote>
-                <h2 class="pt-1 text-block font-semibold">
-                  {copy.similarNumbers}
+            <div class="flex flex-col gap-3">
+              {cars.length > 0 && (
+                <h2 class="-mb-3 text-block font-semibold">
+                  {copy.partsGroup}
                 </h2>
-              </>
-            )}
-            {found.results.length === 0 ? (
-              <StatusNote>{emptyMessage}</StatusNote>
-            ) : (
-              <ul class="card divide-y divide-line">
-                {found.results.map((result) => (
-                  <PartRow
-                    thumb={
-                      result.thumbnail
-                        ? {
-                            src: result.thumbnail,
-                            illustration:
-                              result.thumbnail_illustration === true,
-                          }
-                        : null
-                    }
-                    slug={result.slug}
-                    brand={result.brand.name}
-                    value={result.value}
-                    name={result.part.name}
-                    specs={result.specs}
-                    detail={category ? undefined : result.part.category?.name}
-                    superseded={result.superseded}
-                    current={currentNumber(result, found.results)}
-                    priced={result}
-                  />
-                ))}
-              </ul>
-            )}
-
-            {(offset > 0 || offset + found.limit < found.count) && (
-              <Pagination
-                label={copy.pagination}
-                prev={
-                  offset > 0
-                    ? searchHref(
-                        chosen,
-                        ranges,
-                        Math.max(0, offset - found.limit),
-                      )
-                    : null
-                }
-                next={
-                  offset + found.limit < found.count
-                    ? searchHref(chosen, ranges, offset + found.limit)
-                    : null
-                }
+              )}
+              <ListingBar
+                count={looseNumbers ? null : found.count}
+                filters={facets.length > 0}
+                active={chips.length}
               />
-            )}
 
-            {found.results.length > 0 && !looseNumbers && (
-              <div class="flex flex-col gap-3 pt-2">
-                <PartAskRow
-                  part={inquiryTopic}
-                  question={copy.lookingFor.replace('{q}', '{part}')}
-                  heading={copy.askManager}
-                  class="sm:max-w-md"
-                  lead="whatsapp"
+              {(chips.length > 0 || modelName) && (
+                <FilterChips
+                  chips={[
+                    ...(modelName
+                      ? [
+                          {
+                            label: modelName,
+                            href: searchHref(chosen, ranges, 0, ''),
+                          },
+                        ]
+                      : []),
+                    ...chips.map((chip) => ({
+                      label: chip.label,
+                      href: searchHref(chip.facets, chip.ranges),
+                    })),
+                  ]}
+                  resetHref={chips.length > 0 ? searchHref([], []) : undefined}
                 />
-                <InquiryLink topic={inquiryTopic} />
-              </div>
-            )}
+              )}
+
+              {looseNumbers && (
+                <>
+                  <StatusNote>
+                    {copy.numberNotFound.replace('{q}', q)}{' '}
+                    <a href="#lead" class="link font-semibold">
+                      {copy.notFoundLink}
+                    </a>
+                  </StatusNote>
+                  <h2 class="pt-1 text-block font-semibold">
+                    {copy.similarNumbers}
+                  </h2>
+                </>
+              )}
+              {found.results.length === 0 ? (
+                <StatusNote>{emptyMessage}</StatusNote>
+              ) : (
+                <ul class="card divide-y divide-line">
+                  {found.results.map((result) => (
+                    <PartRow
+                      thumb={
+                        result.thumbnail
+                          ? {
+                              src: result.thumbnail,
+                              illustration:
+                                result.thumbnail_illustration === true,
+                            }
+                          : null
+                      }
+                      slug={result.slug}
+                      brand={result.brand.name}
+                      value={result.value}
+                      name={result.part.name}
+                      specs={result.specs}
+                      detail={category ? undefined : result.part.category?.name}
+                      superseded={result.superseded}
+                      current={currentNumber(result, found.results)}
+                      priced={result}
+                    />
+                  ))}
+                </ul>
+              )}
+
+              {(offset > 0 || offset + found.limit < found.count) && (
+                <Pagination
+                  label={copy.pagination}
+                  prev={
+                    offset > 0
+                      ? searchHref(
+                          chosen,
+                          ranges,
+                          Math.max(0, offset - found.limit),
+                        )
+                      : null
+                  }
+                  next={
+                    offset + found.limit < found.count
+                      ? searchHref(chosen, ranges, offset + found.limit)
+                      : null
+                  }
+                />
+              )}
+
+              {found.results.length > 0 && !looseNumbers && (
+                <div class="flex flex-col gap-3 pt-2">
+                  <PartAskRow
+                    part={inquiryTopic}
+                    question={copy.lookingFor.replace('{q}', '{part}')}
+                    heading={copy.askManager}
+                    class="sm:max-w-md"
+                    lead="whatsapp"
+                  />
+                  <InquiryLink topic={inquiryTopic} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )

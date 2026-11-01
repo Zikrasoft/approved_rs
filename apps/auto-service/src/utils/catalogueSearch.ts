@@ -102,17 +102,20 @@ export const carLinks = (
   cars: CarHit[],
   locale: Locale,
   allModifications: string,
-): SearchLink[] =>
-  cars.map((car) => {
-    const link = carLink(car, locale);
-    const vehicleListed = cars.some(
+): SearchLink[] => {
+  const listedVehicles = (car: CarHit) =>
+    cars.filter(
       (other) =>
         other.kind === 'vehicle' && other.model?.slug === car.model?.slug,
-    );
-    return car.kind === 'model' && vehicleListed
-      ? { ...link, detail: allModifications }
-      : link;
+    ).length;
+  return cars.flatMap((car) => {
+    const link = carLink(car, locale);
+    if (car.kind !== 'model') return [link];
+    const listed = listedVehicles(car);
+    if (listed === 1) return [];
+    return [listed > 1 ? { ...link, detail: allModifications } : link];
   });
+};
 
 export const suggestionsFrom = (
   { cars, results }: Pick<SearchOutcome, 'cars' | 'results'>,

@@ -8,24 +8,32 @@ export interface CountrySelectOption {
   name: string;
 }
 
-// ponytail: DOM probe because a select with width:auto sizes to its widest
+// TODO: DOM probe because a select with width:auto sizes to its widest
 // option, not the picked one. Replace with `field-sizing: content` once
 // Firefox ships it.
-function fitToSelection(select: HTMLSelectElement): void {
-  const picked = select.selectedOptions[0];
-  if (!picked) return;
-
+function textWidth(select: HTMLSelectElement, text: string): number {
   const probe = select.cloneNode(false) as HTMLSelectElement;
   const option = document.createElement('option');
-  option.text = picked.text;
+  option.text = text;
   probe.append(option);
   probe.style.cssText =
     'position:absolute;visibility:hidden;pointer-events:none;width:auto;max-width:none;left:-9999px';
   document.body.append(probe);
   const { offsetWidth } = probe;
   probe.remove();
+  return offsetWidth;
+}
 
-  if (offsetWidth > 0) select.style.width = `${offsetWidth}px`;
+function fitToSelection(select: HTMLSelectElement): void {
+  const picked = select.selectedOptions[0];
+  if (!picked) return;
+
+  const whole = textWidth(select, picked.text);
+  if (whole === 0) return;
+  select.style.width = `${whole}px`;
+  if (select.offsetWidth >= whole) return;
+  const flagAndCode = picked.text.split(' ', 2).join(' ');
+  select.style.width = `${textWidth(select, flagAndCode)}px`;
 }
 
 function countriesOf(select: HTMLSelectElement) {

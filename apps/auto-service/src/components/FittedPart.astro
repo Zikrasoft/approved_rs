@@ -27,14 +27,14 @@ const href =
 <ThumbRow
   thumb={pagesThumbnail(pages)}
   href={href}
-  class={heading ? 'gap-2 lg:max-w-2xl' : 'gap-1.5 lg:max-w-2xl'}
+  class={heading ? 'gap-2' : 'gap-1.5 lg:max-w-2xl'}
 >
   <div
     class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-4"
   >
-    {
-      heading ? (
-        <div class="flex min-w-0 flex-col gap-0.5">
+    <div class="flex min-w-0 flex-col gap-0.5">
+      {
+        heading ? (
           <h3 class="font-semibold text-ink">
             <a
               href={href}
@@ -43,22 +43,33 @@ const href =
               {name}
             </a>
           </h3>
-          {specs && <p class="spec text-xs text-muted">{specs}</p>}
-        </div>
-      ) : (
-        <a
-          href={href}
-          class="min-w-0 text-sm text-ink link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
-        >
-          {name}
-        </a>
-      )
-    }
-    <div class="flex flex-col items-end max-sm:items-start">
-      <PriceTag pages={pages} class="max-sm:items-start max-sm:text-left" />
-      {quantity && <span class="spec text-xs text-ink-2">{quantity}</span>}
+        ) : (
+          <a
+            href={href}
+            class="text-sm text-ink link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+          >
+            {name}
+          </a>
+        )
+      }
+      {specs && <p class="spec text-xs text-muted">{specs}</p>}
+      <slot />
+    </div>
+    <div
+      class="flex flex-col items-end max-sm:grid max-sm:grid-cols-[auto_1fr] max-sm:items-baseline"
+    >
+      <PriceTag
+        pages={pages}
+        class="max-sm:contents max-sm:text-left max-sm:[&>:first-child]:col-span-2"
+      />
+      {
+        quantity && (
+          <span class="spec text-xs text-ink-2 max-sm:before:mx-1.5 max-sm:before:content-['·']">
+            {quantity}
+          </span>
+        )
+      }
     </div>
   </div>
   <PartNumbers pages={pages} first={lead} />
-  <slot />
 </ThumbRow>

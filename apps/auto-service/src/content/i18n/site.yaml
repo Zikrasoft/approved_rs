@@ -63,6 +63,7 @@ form:
   submitting: Отправляем…
   privacyNote: Согласен с
   privacyLinkText: политикой конфиденциальности
+  privacyOpen: Открыть
   modalTitle: Записаться в сервис
   errorPhone: Проверьте номер, кажется, он введен не полностью
   errorPhoneTooLong: Проверьте номер, в нем лишние цифры

@@ -101,6 +101,7 @@ export const siteContentSchema = z
         submitting: z.string(),
         privacyNote: z.string(),
         privacyLinkText: z.string(),
+        privacyOpen: z.string(),
         modalTitle: z.string(),
         errorPhone: z.string(),
         errorPhoneTooLong: z.string(),
