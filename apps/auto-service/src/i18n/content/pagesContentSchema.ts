@@ -108,6 +108,7 @@ export const pagesContentSchema = z
         lead: z.string(),
         sourcingNote: z.string(),
         formHeading: z.string(),
+        formNote: z.string(),
         vinLabel: z.string(),
         vinPlaceholder: z.string(),
         vinNote: z.string(),

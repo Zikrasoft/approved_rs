@@ -141,59 +141,56 @@ const fields = category.fields
     }
 
     <div class="flex min-w-0 flex-col gap-10">
-      <div class="flex flex-col gap-3">
-        {
-          empty ? (
-            <p class="max-w-2xl text-ink-2">{copy.noParts}</p>
-          ) : (
-            <>
-              <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
-              <ListingBar count={category.pages.length} filters={filtered} />
-              <ul class="card divide-y divide-line">
-                {listing.pages.map((page) => (
-                  <PartRow
-                    thumb={partThumbnail(page, category)}
-                    slug={page.slug}
-                    brand={page.brand.name}
-                    value={page.value}
-                    name={translated(page.part, 'name', locale)}
-                    specs={keySpecs(
-                      category,
-                      page.part.attributes,
-                      locale,
-                      categoryAttributes,
-                    )}
-                    superseded={page.superseded}
-                    current={partSuccessor(page, bySlug)}
-                    priced={page}
-                  />
-                ))}
-              </ul>
-              {listing.count > 1 && (
-                <Pagination
-                  label={copy.pagination}
-                  prev={prev}
-                  next={next}
-                  numbered={{
-                    current: listing.number,
-                    count: listing.count,
-                    href: pageHref,
-                  }}
+      {
+        !empty && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
+            <ListingBar count={category.pages.length} filters={filtered} />
+            <ul class="card divide-y divide-line">
+              {listing.pages.map((page) => (
+                <PartRow
+                  thumb={partThumbnail(page, category)}
+                  slug={page.slug}
+                  brand={page.brand.name}
+                  value={page.value}
+                  name={translated(page.part, 'name', locale)}
+                  specs={keySpecs(
+                    category,
+                    page.part.attributes,
+                    locale,
+                    categoryAttributes,
+                  )}
+                  superseded={page.superseded}
+                  current={partSuccessor(page, bySlug)}
+                  priced={page}
                 />
-              )}
-              <InquiryLink topic={name} />
-            </>
-          )
-        }
-      </div>
+              ))}
+            </ul>
+            {listing.count > 1 && (
+              <Pagination
+                label={copy.pagination}
+                prev={prev}
+                next={next}
+                numbered={{
+                  current: listing.number,
+                  count: listing.count,
+                  href: pageHref,
+                }}
+              />
+            )}
+            <InquiryLink topic={name} />
+          </div>
+        )
+      }
 
       {
-        firstPage && (lead || body.length > 0) && (
+        firstPage && (lead || body.length > 0 || empty) && (
           <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
             {lead && <p class="sm:hidden">{lead}</p>}
             {body.map((paragraph) => (
               <p>{paragraph}</p>
             ))}
+            {empty && <p>{copy.noParts}</p>}
           </div>
         )
       }
