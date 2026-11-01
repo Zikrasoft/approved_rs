@@ -64,6 +64,19 @@ describe('storefrontEventSchema', () => {
       outcome: 'placed',
       reason: 'call me at +381 60 123',
     },
+    {
+      event: 'storefront.lead',
+      source: 'leads',
+      service: 'x381601234567',
+      outcome: 'stored',
+      reason: null,
+    },
+    {
+      event: 'storefront.cart',
+      action: 'add',
+      outcome: '42',
+      reason: null,
+    },
     { event: 'storefront.csp', directive: 'script-src', blocked: 'a b' },
     {
       event: 'storefront.search',

@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CSP_REPORT_MAX_BYTES, cspReportRoute } from './cspReport.ts';
+import {
+  CSP_REPORT_MAX_BYTES,
+  createCspReportRoute,
+  cspReportRoute,
+} from './cspReport.ts';
 
 const post = (body: string, headers: Record<string, string> = {}) =>
   cspReportRoute({
@@ -87,5 +91,34 @@ describe('the CSP report route', () => {
   it('refuses a body over the cap', async () => {
     const response = await post('x'.repeat(CSP_REPORT_MAX_BYTES + 1));
     expect(response.status).toBe(413);
+  });
+
+  it('hands each logged violation, and nothing more, to the callback', async () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const onViolation = vi.fn();
+    const route = createCspReportRoute(onViolation);
+
+    await route({
+      request: new Request('https://carlab.rs/api/csp-report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/csp-report' },
+        body: JSON.stringify({
+          'csp-report': {
+            'effective-directive': 'script-src-elem',
+            'blocked-uri': 'https://evil.example/x.js?phone=0641112233',
+          },
+        }),
+      }),
+    });
+    await route({
+      request: new Request('https://carlab.rs/api/csp-report', {
+        method: 'POST',
+        body: 'not json',
+      }),
+    });
+
+    expect(onViolation.mock.calls).toEqual([
+      [{ directive: 'script-src-elem', blocked: 'evil.example' }],
+    ]);
   });
 });

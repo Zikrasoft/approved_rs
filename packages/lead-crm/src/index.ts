@@ -109,7 +109,11 @@ export { MAX_BODY_BYTES, readForm, readJson } from './bodySize.ts';
 export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';
-export { cspReportRoute } from './routes/cspReport.ts';
+export {
+  createCspReportRoute,
+  cspReportRoute,
+  type CspViolation,
+} from './routes/cspReport.ts';
 
 export { createMetaLeadReporter } from './metaConversions.ts';
 export type { ReportMetaLead } from './metaConversions.ts';
