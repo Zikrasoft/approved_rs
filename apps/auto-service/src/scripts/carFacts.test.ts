@@ -43,6 +43,21 @@ describe('car-facts and My garage', () => {
     expect(notYourCar().hidden).toBe(false);
   });
 
+  it('forgets the VIN when the visitor says it is not their car', () => {
+    history.replaceState(
+      null,
+      '',
+      '/ru/parts/bmw/x1/m/x1-sdrive18d/?vin=WBA3B1C50GL123456',
+    );
+    document.body.innerHTML =
+      '<a data-forget-vin href="#">Не ваш автомобиль?</a><input data-vin-input value="WBA3B1C50GL123456"><car-facts></car-facts>';
+
+    document.querySelector<HTMLElement>('[data-forget-vin]')!.click();
+
+    expect(localStorage.getItem(MY_GARAGE) ?? '').toBe('');
+    expect(document.querySelector('input')!.value).toBe('');
+  });
+
   it('keeps the stored VIN when the Vehicle page carries none', () => {
     localStorage.setItem(MY_GARAGE, 'WBA3B1C50GL123456');
     land('?steering=left');

@@ -179,7 +179,11 @@ const specsSummary = [
         <Icon name="check" size={16} />
         <span data-template={copy.vinMatched}></span>
       </span>
-      <a href={PathBuilder.parts(locale)} class="link-underlined">
+      <a
+        href={PathBuilder.parts(locale)}
+        class="link-underlined"
+        data-forget-vin
+      >
         {copy.notYourCarLink}
       </a>
     </p>
@@ -418,7 +422,11 @@ const specsSummary = [
       </DisclosureCard>
 
       <p class="text-sm leading-relaxed text-muted" data-not-your-car>
-        <a href={PathBuilder.parts(locale)} class="link-underlined">
+        <a
+          href={PathBuilder.parts(locale)}
+          class="link-underlined"
+          data-forget-vin
+        >
           {copy.notYourCar}
         </a>
       </p>
