@@ -53,7 +53,7 @@ function dismissed(): boolean {
   }
 }
 
-function remember(): void {
+export function silenceLanguageSuggestion(): void {
   try {
     localStorage.setItem(LANGUAGE_SUGGESTION_STORAGE_KEY, '1');
   } catch {
@@ -104,12 +104,12 @@ export function defineLanguageSuggestion(
           (event) => {
             const target = event.target as Element | null;
             if (target?.closest('[data-lang-link]')) {
-              remember();
+              silenceLanguageSuggestion();
               reachGoal(GOALS.langOfferTaken, { from, to });
               return;
             }
             if (!target?.closest('[data-lang-dismiss]')) return;
-            remember();
+            silenceLanguageSuggestion();
             reachGoal(GOALS.langOfferDismissed, { from, to });
             this.hidden = true;
           },

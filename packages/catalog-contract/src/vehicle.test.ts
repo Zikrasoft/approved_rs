@@ -330,7 +330,7 @@ describe('vinSchema', () => {
     expect(vinSchema.safeParse('HU 816 x, OX 404 D').success).toBe(false);
   });
 
-  it.each(['ЖЖЖ123', '12345678901234567', 'WBA35BG07ON074158', ' '])(
+  it.each(['ЖЖЖ123', '12345678901234567', 'WBA35BG07ON07415', ' '])(
     'refuses %j with a message that says what a VIN is, not what was typed',
     (text) => {
       expect(vinSchema.safeParse(text).error?.issues).toEqual([

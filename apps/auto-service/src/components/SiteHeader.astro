@@ -283,9 +283,15 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     defineModalDialog,
   } from '@podbor/site-kit/browser';
 
-  import { defineCartBadge } from '@/scripts/cartBadge';
+  import { readStored } from '@podbor/site-kit/stored-value';
+  import { defineCartBadge, PENDING_CART_ADD_KEY } from '@/scripts/cartBadge';
 
   defineCartBadge();
+  if (readStored(PENDING_CART_ADD_KEY)) {
+    void import('@/scripts/cartUi').then(({ replayPendingAdd }) =>
+      replayPendingAdd(),
+    );
+  }
   defineCtaReveal();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');

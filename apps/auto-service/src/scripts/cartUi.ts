@@ -1,5 +1,12 @@
+import * as z from 'zod/mini';
 import type { ZodMiniType } from 'zod/mini';
+import {
+  forgetStored,
+  readStoredJson,
+  writeStoredJson,
+} from '@podbor/site-kit/stored-value';
 import { cartOutcomeSchema } from '@/utils/catalogueWire';
+import { PENDING_CART_ADD_KEY } from './cartBadge';
 import { keepCartId, readCart, rememberCart } from './cartStore';
 
 export const getJson = async <T>(
@@ -30,15 +37,34 @@ const CART_LOCK = 'carlab-offer-cart';
 const withCartLock = async <T>(task: () => Promise<T>): Promise<T> =>
   navigator.locks ? await navigator.locks.request(CART_LOCK, task) : task();
 
-export const addToCart = (line: { offer_id?: string; quantity?: number }) =>
+const cartLineSchema = z.object({
+  offer_id: z.optional(z.string()),
+  quantity: z.optional(z.number()),
+});
+
+type CartLine = z.infer<typeof cartLineSchema>;
+
+const sendAdd = async (line: CartLine) => {
+  const cartId = readCart()?.id ?? null;
+  if (!cartId) writeStoredJson(PENDING_CART_ADD_KEY, line);
+  const outcome = await sendJson('POST', { cart_id: cartId, ...line });
+  forgetStored(PENDING_CART_ADD_KEY);
+  if (outcome?.kind === 'cart') rememberCart(outcome.cart);
+  if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
+  return outcome;
+};
+
+export const addToCart = (line: CartLine) => withCartLock(() => sendAdd(line));
+
+export const replayPendingAdd = () =>
   withCartLock(async () => {
-    const outcome = await sendJson('POST', {
-      cart_id: readCart()?.id ?? null,
-      ...line,
-    });
-    if (outcome?.kind === 'cart') rememberCart(outcome.cart);
-    if (outcome?.kind === 'refused') keepCartId(outcome.cartId);
-    return outcome;
+    const line = readStoredJson(PENDING_CART_ADD_KEY, cartLineSchema, null);
+    if (!line) return null;
+    if (readCart()) {
+      forgetStored(PENDING_CART_ADD_KEY);
+      return null;
+    }
+    return sendAdd(line);
   });
 
 export const fill = (

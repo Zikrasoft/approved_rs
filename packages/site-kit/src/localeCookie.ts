@@ -1,3 +1,5 @@
+import { silenceLanguageSuggestion } from './languageSuggestion.ts';
+
 export const LOCALE_COOKIE = 'lang';
 export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 export const LOCALE_CHOICE_ATTRIBUTE = 'data-lang-choice';
@@ -17,7 +19,9 @@ export function defineLocaleChoice(tagName = 'locale-choice'): void {
             event.target as HTMLElement | null
           )?.closest<HTMLElement>(`[${LOCALE_CHOICE_ATTRIBUTE}]`)?.dataset
             .langChoice;
-          if (chosen) document.cookie = localeCookieValue(chosen);
+          if (!chosen) return;
+          document.cookie = localeCookieValue(chosen);
+          silenceLanguageSuggestion();
         });
       }
     },

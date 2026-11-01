@@ -4,6 +4,7 @@ import {
   type RangeFilter,
   searchableQuery,
 } from '@podbor/catalog-contract';
+import { vinText } from '@podbor/lead-crm/vin';
 import type { Locale } from '@/i18n/config';
 import type { createCatalogue } from './catalogue';
 import {
@@ -145,7 +146,7 @@ export async function planSearch({
       ranges,
       offset,
       vin,
-      vinHint: !vin && nearVin(typed),
+      vinTypo: !vin && nearVin(typed) ? vinText(typed) : null,
       vinOutcome,
       searchable,
       found,

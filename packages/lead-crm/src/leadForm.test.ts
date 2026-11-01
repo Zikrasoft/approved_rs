@@ -164,6 +164,12 @@ describe('channel tabs', () => {
     expect(f.panel('telegram').hidden).toBe(false);
   });
 
+  it('moves the preferred channel to the front of the picker', () => {
+    const f = mount({ deps: deps({ preferredChannel: () => 'telegram' }) });
+    const tab = f.tab('telegram');
+    expect(tab.parentElement!.firstElementChild).toBe(tab);
+  });
+
   it('keeps the rendered tab when the preference has no tab', () => {
     const f = mount({ deps: deps({ preferredChannel: () => undefined }) });
     expect(f.channel.value).toBe('whatsapp');

@@ -32,7 +32,17 @@ const back = parts ? PathBuilder.parts(locale) : PathBuilder.home(locale);
         {copy.body}
       </p>
       {!parts && <p class="max-w-xl text-sm text-muted">{copy.note}</p>}
-      <BackLink href={back} label={copy.cta} class="mt-2" />
+      <div class="mt-2 flex flex-wrap gap-3">
+        <BackLink href={back} label={copy.cta} />
+        {
+          !parts && (
+            <BackLink
+              href={PathBuilder.parts(locale)}
+              label={pages.thanksParts.cta}
+            />
+          )
+        }
+      </div>
     </div>
 
     <div class="card flex flex-col gap-4 p-5">
