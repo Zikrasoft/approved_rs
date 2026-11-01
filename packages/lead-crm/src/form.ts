@@ -149,7 +149,9 @@ const submissionObject = z
     // TODO: no form posts `car` since the CarLab field was folded into the comment; drop it once pre-deploy cached pages can no longer submit.
     car: optionalText(MAX_FIELD_LENGTH),
     vin: optionalText(MAX_FIELD_LENGTH),
-    comment: optionalText(MAX_COMMENT_LENGTH, plainText),
+    comment: optionalText(MAX_COMMENT_LENGTH, (text) =>
+      plainText(text).replace(/:$/, ''),
+    ),
     country: optionalText(MAX_FIELD_LENGTH),
     source_url: sourceUrlSchema,
     visitor_id: visitorIdSchema,

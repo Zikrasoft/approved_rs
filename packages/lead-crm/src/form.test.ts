@@ -353,6 +353,18 @@ describe('leadSubmissionSchema', () => {
     );
   });
 
+  it('drops the colon a prefilled topic leaves when nothing was typed after it', () => {
+    const parsed = submit({
+      name: '',
+      contact: '+381641234567',
+      vin: 'WBA35BG070N074158',
+      comment: 'BMW: ',
+    });
+    expect(parsed.success && parsed.data.comment).toBe(
+      'VIN: WBA35BG070N074158\nBMW',
+    );
+  });
+
   it('writes a VIN typed in lower case as the upper-case VIN it is', () => {
     const parsed = submit({
       name: '',
