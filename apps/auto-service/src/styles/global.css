@@ -205,7 +205,7 @@
 }
 
 @utility spec {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: proportional-nums;
 }
 
 @utility link {

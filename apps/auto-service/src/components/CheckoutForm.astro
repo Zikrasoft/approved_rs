@@ -40,15 +40,15 @@ const summaryRow = 'flex items-baseline justify-between gap-4';
     <dl class="flex flex-col gap-1.5 text-sm text-ink-2">
       <div class={summaryRow}>
         <dt data-summary-count></dt>
-        <dd class="spec text-ink" data-summary-parts></dd>
+        <dd class="text-ink tabular-nums" data-summary-parts></dd>
       </div>
       <div class={summaryRow} data-summary-addon-row hidden>
         <dt>{copy.summaryAddons}</dt>
-        <dd class="spec text-ink" data-summary-addons></dd>
+        <dd class="text-ink tabular-nums" data-summary-addons></dd>
       </div>
       <div class={`${summaryRow} mt-1 border-t border-line pt-2.5`}>
         <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
-        <dd class="spec text-xl font-semibold text-ink" data-total></dd>
+        <dd class="text-xl font-semibold text-ink tabular-nums" data-total></dd>
       </div>
     </dl>
   </section>

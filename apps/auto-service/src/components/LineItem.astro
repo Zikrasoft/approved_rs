@@ -55,9 +55,9 @@ const nameClass = 'leading-snug font-semibold text-ink link-quiet';
       ) : (
         <span class="flex shrink-0 flex-col items-end gap-0.5 text-right">
           <slot name="price">
-            <span class="spec font-semibold text-ink" data-price />
+            <span class="font-semibold text-ink tabular-nums" data-price />
           </slot>
-          <span class="spec text-xs text-muted" data-quantity>
+          <span class="text-xs text-muted tabular-nums" data-quantity>
             {quantity}
           </span>
         </span>

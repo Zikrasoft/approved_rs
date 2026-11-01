@@ -63,11 +63,14 @@ const copy = content(locale).shopCart;
           hidden
         >
           <dt>{copy.summaryAddons}</dt>
-          <dd class="spec text-ink" data-receipt-addons></dd>
+          <dd class="text-ink tabular-nums" data-receipt-addons></dd>
         </div>
         <div class="flex items-baseline justify-between gap-4">
           <dt class="font-semibold text-ink">{copy.totalLabel}</dt>
-          <dd class="spec text-xl font-semibold text-ink" data-receipt-total>
+          <dd
+            class="text-xl font-semibold text-ink tabular-nums"
+            data-receipt-total
+          >
           </dd>
         </div>
       </dl>
