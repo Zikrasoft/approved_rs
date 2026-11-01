@@ -200,6 +200,11 @@ const businessSchema = localBusinessSchema({
       import { bootSiteKit } from '@podbor/site-kit/browser';
       import { defineSiteLeadForm } from '@podbor/site-kit/lead-form';
       import {
+        LEAD_FORM_RESULT_EVENT,
+        type LeadFormResult,
+      } from '@podbor/lead-crm/submit';
+      import { rememberLeadContact } from '@/scripts/checkoutMemory';
+      import {
         GA_MEASUREMENT_ID,
         GOOGLE_ADS_ID,
         GOOGLE_CONVERSION_LABELS,
@@ -218,6 +223,15 @@ const businessSchema = localBusinessSchema({
         analytics: !import.meta.env.DEV,
       });
       defineSiteLeadForm();
+      document.addEventListener(LEAD_FORM_RESULT_EVENT, (event) => {
+        const { target } = event;
+        if (
+          (event as CustomEvent<LeadFormResult>).detail.ok &&
+          target instanceof HTMLFormElement
+        ) {
+          rememberLeadContact(target);
+        }
+      });
     </script>
   </body>
 </html>

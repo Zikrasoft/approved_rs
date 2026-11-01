@@ -8,15 +8,18 @@ import {
 
 const CHECKOUT_MEMORY_KEY = 'carlab_checkout_form';
 const CONTACT_MEMORY_KEY = 'carlab_checkout_contact';
-const REMEMBERED_FIELDS = [
+const CONTACT_FIELDS = [
   '[data-country]',
   '[data-phone]',
   '[data-telegram]',
   '[name="name"]',
+  '[name="contact"]',
+] as const;
+const REMEMBERED_FIELDS = [
+  ...CONTACT_FIELDS,
   '[name="vin"]',
   '[name="comment"]',
   '[data-consent]',
-  '[name="contact"]',
 ] as const;
 
 const fieldIn = (form: HTMLFormElement, selector: string) =>
@@ -45,20 +48,39 @@ const writeMemory = (
   memory: CheckoutMemory,
 ) => writeStoredJson(key, memory, storage);
 
+const formMemory = (
+  form: HTMLFormElement,
+  fields: readonly string[],
+): CheckoutMemory => ({
+  values: Object.fromEntries(
+    fields.map((selector) => [selector, fieldValue(fieldIn(form, selector))]),
+  ),
+  channel:
+    form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
+    '',
+});
+
 export function rememberCheckout(
   form: HTMLFormElement,
   storage: CartStorage = sessionStorage,
 ): void {
+  writeMemory(
+    storage,
+    CHECKOUT_MEMORY_KEY,
+    formMemory(form, REMEMBERED_FIELDS),
+  );
+}
+
+export function rememberLeadContact(
+  form: HTMLFormElement,
+  storage: CartStorage = sessionStorage,
+): void {
+  const lead = formMemory(form, CONTACT_FIELDS);
+  if (!lead.values['[name="contact"]']) return;
+  const earlier = readMemory(storage, CHECKOUT_MEMORY_KEY)?.values;
   writeMemory(storage, CHECKOUT_MEMORY_KEY, {
-    values: Object.fromEntries(
-      REMEMBERED_FIELDS.map((selector) => [
-        selector,
-        fieldValue(fieldIn(form, selector)),
-      ]),
-    ),
-    channel:
-      form.querySelector<HTMLInputElement>('[name="contact_channel"]')?.value ??
-      '',
+    values: { ...earlier, ...lead.values },
+    channel: lead.channel,
   });
 }
 

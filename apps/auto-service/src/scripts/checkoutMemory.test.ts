@@ -4,6 +4,7 @@ import {
   checkoutContact,
   forgetCheckout,
   rememberCheckout,
+  rememberLeadContact,
   restoreCheckout,
 } from './checkoutMemory';
 
@@ -131,5 +132,78 @@ describe('the contact an order was sent with', () => {
 
   it('is unknown before anything was sent', () => {
     expect(checkoutContact(memoryStorage())).toBeNull();
+  });
+});
+
+describe('the contact a lead form was sent with', () => {
+  const leadForm = (channel: string) => {
+    const form = document.createElement('form');
+    form.innerHTML = `
+      <input type="hidden" name="contact" />
+      <input type="hidden" name="contact_channel" value="${channel}" />
+      <input data-phone />
+      <input data-telegram />
+      <input name="name" />
+      <input type="checkbox" data-consent />
+      <textarea name="comment"></textarea>
+    `;
+    return form;
+  };
+
+  it('fills the checkout with the channel and contact, not the comment or consent', () => {
+    const storage = memoryStorage();
+    const sent = leadForm('phone');
+    field(sent, '[name="contact"]').value = '+381641110098';
+    field(sent, '[data-phone]').value = '641110098';
+    field(sent, '[name="name"]').value = 'Marko';
+    field(sent, '[name="comment"]').value = 'скрипят колодки';
+    field(sent, '[data-consent]').checked = true;
+    rememberLeadContact(sent, storage);
+
+    const checkout = checkoutForm();
+    checkout.insertAdjacentHTML(
+      'beforeend',
+      '<button type="button" data-tab="phone"></button>',
+    );
+    let picked = '';
+    checkout
+      .querySelector('[data-tab="phone"]')!
+      .addEventListener('click', () => (picked = 'phone'));
+    restoreCheckout(checkout, storage);
+
+    expect(picked).toBe('phone');
+    expect(field(checkout, '[data-phone]').value).toBe('641110098');
+    expect(field(checkout, '[name="name"]').value).toBe('Marko');
+    expect(field(checkout, '[name="comment"]').value).toBe('');
+    expect(field(checkout, '[data-consent]').checked).toBe(false);
+  });
+
+  it('keeps what an earlier checkout held beside the new contact', () => {
+    const storage = memoryStorage();
+    const order = checkoutForm();
+    field(order, '[name="vin"]').value = 'WBA35BG070N074158';
+    field(order, '[data-phone]').value = '641234567';
+    rememberCheckout(order, storage);
+
+    const sent = leadForm('telegram');
+    field(sent, '[name="contact"]').value = '@marko';
+    field(sent, '[data-telegram]').value = '@marko';
+    rememberLeadContact(sent, storage);
+
+    expect(checkoutContact(storage)).toEqual({
+      channel: 'telegram',
+      contact: '@marko',
+    });
+    const checkout = checkoutForm();
+    restoreCheckout(checkout, storage);
+    expect(field(checkout, '[name="vin"]').value).toBe('WBA35BG070N074158');
+    expect(field(checkout, '[data-phone]').value).toBe('');
+  });
+
+  it('remembers nothing for a form sent without a contact', () => {
+    const storage = memoryStorage();
+    rememberLeadContact(leadForm('phone'), storage);
+    expect(checkoutContact(storage)).toBeNull();
+    expect(storage.getItem('carlab_checkout_form')).toBeNull();
   });
 });
