@@ -128,6 +128,7 @@ export const pagesContentSchema = z
         categoriesHeading: z.string(),
         categoriesLead: z.string(),
         categoryCta: z.string(),
+        categoryOrderCta: z.string(),
         category: z
           .object({
             eyebrow: z.string(),

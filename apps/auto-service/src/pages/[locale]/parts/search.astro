@@ -203,7 +203,7 @@ const scopeHidden = {
       )
     }
 
-    {zeroFound && <StatusNote>{emptyMessage}</StatusNote>}
+    {zeroFound && !vinTypo && <StatusNote>{emptyMessage}</StatusNote>}
     {unavailable && <StatusNote>{copy.unavailable}</StatusNote>}
     {unknownScope && <StatusNote>{copy.unknownScope}</StatusNote>}
 

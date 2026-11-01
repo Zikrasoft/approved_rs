@@ -9,7 +9,7 @@ const compact = (text: string) => text.replace(/[\s.-]/g, '').toUpperCase();
 type Link = { href: string; label: string; detail?: string };
 type PartLink = Link & { thumb: string | null };
 type Suggestions = { vin: boolean; cars: Link[]; parts: PartLink[] };
-type Group = 'cars' | 'parts' | 'vin';
+type Group = 'cars' | 'parts' | 'vin' | 'none';
 
 const ACTIVE_CLASS = 'bg-shade';
 const THUMB_CLASS =
@@ -137,32 +137,36 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
         };
 
         const show = (q: string, found: Suggestions) => {
+          const searchOption = (group: 'vin' | 'none', label: string) =>
+            option(
+              {
+                href: `${form.getAttribute('action')}?${new URLSearchParams({ q })}`,
+                label,
+                ...(group === 'vin' && { detail: vinOf(q) ?? q }),
+              },
+              group,
+              0,
+            );
+          const listed = [
+            ...(found.cars.length
+              ? [group('cars', this.dataset.carsLabel ?? '', found.cars)]
+              : []),
+            ...(found.parts.length
+              ? [group('parts', this.dataset.partsLabel ?? '', found.parts)]
+              : []),
+          ];
+          const noneLabel = (this.dataset.noneLabel ?? '').replace('{q}', q);
           const groups = found.vin
-            ? [
-                option(
-                  {
-                    href: `${form.getAttribute('action')}?${new URLSearchParams({ q })}`,
-                    label: this.dataset.vinLabel ?? '',
-                    detail: vinOf(q) ?? q,
-                  },
-                  'vin',
-                  0,
-                ),
-              ]
-            : [
-                ...(found.cars.length
-                  ? [group('cars', this.dataset.carsLabel ?? '', found.cars)]
-                  : []),
-                ...(found.parts.length
-                  ? [group('parts', this.dataset.partsLabel ?? '', found.parts)]
-                  : []),
-              ];
+            ? [searchOption('vin', this.dataset.vinLabel ?? '')]
+            : listed.length
+              ? listed
+              : [searchOption('none', noneLabel)];
           panel.setAttribute('role', 'listbox');
           panel.replaceChildren(...groups);
           this.#active = -1;
           input.removeAttribute('aria-activedescendant');
-          panel.hidden = groups.length === 0;
-          input.setAttribute('aria-expanded', String(!panel.hidden));
+          panel.hidden = false;
+          input.setAttribute('aria-expanded', 'true');
         };
 
         const failed = () => {

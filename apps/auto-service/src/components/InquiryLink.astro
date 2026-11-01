@@ -14,18 +14,41 @@ interface Props {
 const { class: className, topic } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).partsSearch;
-const priceNote = shopOpen() ? null : content(locale).shopPart.orderBody;
+const href = PathBuilder.partsInquiry(locale);
+const opensModal = topic ? { [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' } : {};
 ---
 
-<p class:list={['text-sm leading-relaxed text-muted', className]}>
-  {priceNote && <span class="mb-1 block">{priceNote}</span>}
-  {copy.notFoundQuestion}{' '}
-  <a
-    href={PathBuilder.partsInquiry(locale)}
-    class="link inline-flex min-h-11 items-center font-semibold"
-    {...topic && { [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-  >
-    {copy.notFoundLink}
-  </a>
-</p>
+{
+  shopOpen() ? (
+    <p class:list={['text-sm leading-relaxed text-muted', className]}>
+      {copy.notFoundQuestion}{' '}
+      <a
+        href={href}
+        class="link inline-flex min-h-11 items-center font-semibold"
+        {...opensModal}
+      >
+        {copy.notFoundLink}
+      </a>
+    </p>
+  ) : (
+    <div
+      class:list={[
+        'card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6',
+        className,
+      ]}
+    >
+      <div class="flex flex-col gap-1">
+        <p class="text-block font-semibold">{copy.pickHeading}</p>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.pickBody}</p>
+      </div>
+      <a
+        href={href}
+        class="btn btn-secondary w-full shrink-0 sm:w-auto"
+        {...opensModal}
+      >
+        {copy.pickCta}
+      </a>
+    </div>
+  )
+}
 {topic && <PartsInquiryModal comment={`${topic}: `} />}

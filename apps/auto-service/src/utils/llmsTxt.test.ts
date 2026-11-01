@@ -261,15 +261,14 @@ describe('generateLlmsTxt', () => {
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor.\n',
     );
     expect(body).not.toContain('RSD');
-    expect(await generateLlmsTxt('ru')).toContain(
-      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами и характеристиками. Цен на сайте нет',
+    const ru = await generateLlmsTxt('ru');
+    expect(ru).toContain(
+      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами и характеристиками. Запчасти заказывают по заявке',
     );
-    expect(await generateLlmsTxt('ru')).toContain(
-      'Запчасти заказывают только по заявке',
+    expect(ru).toContain(
+      'Менеджер проверит совместимость по VIN, назовет цену и срок',
     );
-    expect(await generateLlmsTxt('ru')).toContain(
-      'Менеджер проверит совместимость по VIN, назовет цену',
-    );
+    expect(ru).not.toMatch(/корзин|наличи/);
   });
 
   it('links the BMW landing page', async () => {
