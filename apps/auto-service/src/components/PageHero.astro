@@ -48,7 +48,7 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
   >
     <nav aria-label={site.common.breadcrumbLabel}>
       <ol
-        class="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted pointer-coarse:gap-y-0"
+        class="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted pointer-coarse:gap-y-0 max-sm:[&>li:last-child]:hidden"
       >
         {
           trail.map((crumb, i) => (
