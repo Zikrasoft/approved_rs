@@ -77,6 +77,13 @@ const found = {
       values: [{ value: 'bmw', label: 'BMW', count: 1 }],
     },
     {
+      key: 'in-stock',
+      type: 'boolean',
+      label: 'in-stock',
+      unit: null,
+      values: [{ value: 'true', label: 'true', count: 1 }],
+    },
+    {
       key: 'price',
       type: 'number',
       label: 'price',
@@ -148,7 +155,7 @@ describe('a closed shop', () => {
     expect(category.installation_price).toBeNull();
   });
 
-  it('searches with no price and no price filter', async () => {
+  it('searches with no price, no price filter and no stock filter', async () => {
     const result = await closed(backend()).search({
       q: 'battery',
       locale: 'ru',

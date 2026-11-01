@@ -17,6 +17,7 @@ import {
   partPageSlug,
   identifierOffersResponseSchema,
   partPagesResponseSchema,
+  IN_STOCK_FACET,
   PRICE_FACET,
   rangeFilter,
   type RangeFilter,
@@ -385,7 +386,9 @@ export function createCatalogue({
         return {
           ...found,
           facets: pricesHidden
-            ? found.facets.filter(({ key }) => key !== PRICE_FACET)
+            ? found.facets.filter(
+                ({ key }) => key !== PRICE_FACET && key !== IN_STOCK_FACET,
+              )
             : found.facets,
           results: found.results.map((result) => ({
             ...unpriced(result),
