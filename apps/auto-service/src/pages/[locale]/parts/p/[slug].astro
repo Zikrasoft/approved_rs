@@ -175,7 +175,7 @@ const thumbFor = (slug: string) => {
 ---
 
 <Shell
-  title={`${heading}, ${partName} - ${copy.metaTitleSuffix}`}
+  title={`${heading}, ${partName} | ${copy.metaTitleSuffix}`}
   description={copy.metaDescription}
   noindex={!page.indexable}
   jsonLd={jsonLd}
@@ -361,7 +361,7 @@ const thumbFor = (slug: string) => {
             </div>
             <a
               href={PathBuilder.partsCategory(locale, category.slug)}
-              class="text-sm font-semibold text-signal-ink hover:underline"
+              class="inline-flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
             >
               {copy.categoryLink}
             </a>

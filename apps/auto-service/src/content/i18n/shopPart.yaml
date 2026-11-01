@@ -1,10 +1,10 @@
 metaTitleSuffix: CarLab
-metaDescription: Бренды, аналоги, цены и наличие этой запчасти в каталоге CarLab. Самовывоз с СТО в Белграде.
+metaDescription: Бренды, аналоги, цены и наличие этой запчасти в каталоге CarLab. Самовывоз в сервисе в Белграде.
 eyebrow: Запчасть
 equivalentsHeading: Аналоги этой запчасти
 noEquivalents: Аналогов в каталоге пока нет. Напишите нам, подберем замену.
 numberSupersededNotice: Номер {number} больше не используется производителем.
-partReplacedNotice: Производитель заменил деталь {number} новой.
+partReplacedNotice: Производитель заменил запчасть {number} новой.
 previousNumber: Прежний номер
 previousNumberCurrent: Номер заменен на
 earlierNumbers: 'Ранее:'
@@ -17,7 +17,7 @@ attributeYes: Да
 attributeNo: Нет
 categoryLink: Все запчасти категории
 priceOnRequestHeading: Цена по запросу
-priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что деталь подходит, и найдем лучшую цену.'
+priceOnRequestBody: 'Запчастей в каталоге слишком много, чтобы держать все цены актуальными. Отправьте заявку: проверим по VIN, что запчасть подходит, и найдем лучшую цену.'
 priceOnRequestCta: Узнать цену и срок
 orderBody: Проверим у поставщиков и пришлем цену и срок, обычно в течение часа.
 offersHeading: Цена и наличие
@@ -45,7 +45,7 @@ fromPrice: от {price}
 priceOnRequestTag: Цена по запросу
 addedNotice: Добавили в корзину. Цену еще раз проверим при оформлении.
 addedCta: Открыть корзину
-inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили деталь в заявку. Мы сообщим цену сами.
+inquiryNotice: Сейчас не можем подтвердить цену и наличие, поэтому добавили запчасть в заявку. Мы сообщим цену сами.
 inquiryCta: Открыть заявку
 photoLabel: Фото {n} из {total}
 categoryIllustration: Иллюстрация категории, не фото этой запчасти
@@ -53,7 +53,7 @@ illustrationLabel: иллюстрация
 installHeading: Установить у нас
 installBody: Поставим эту запчасть в сервисе CarLab в Белграде. Оставьте контакт, и мы предложим удобное время.
 installCta: Записаться на установку
-askAboutPart: Спросить про эту деталь
+askAboutPart: Спросить про эту запчасть
 askAboutPartMessage: '{part}: подойдет на мою машину?'
 askAboutPartVin: 'VIN: {vin}'
 askAboutPriceMessage: '{part}: какая цена и срок?'

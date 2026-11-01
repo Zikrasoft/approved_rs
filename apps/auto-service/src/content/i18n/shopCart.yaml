@@ -1,5 +1,5 @@
-metaTitle: Корзина, CarLab
-metaDescription: Запчасти, которые вы выбрали в каталоге CarLab. Оплата наличными при получении на СТО в Белграде.
+metaTitle: Корзина | CarLab
+metaDescription: Запчасти, которые вы выбрали в каталоге CarLab. Оплата наличными при получении в сервисе в Белграде.
 heading: Корзина
 cartLink: Корзина
 partsListNote: Запчасти без цены лежат в заявке, отдельно от корзины. Отправьте заявку, и мы сообщим цену и срок.
@@ -22,7 +22,7 @@ summaryCountTemplate: 'Запчасти, {count} шт.'
 summaryAddons: Работы при выдаче
 contactStep: Контакт
 pickupStep: Получение
-pickupMethod: Самовывоз с СТО CarLab
+pickupMethod: Самовывоз в сервисе CarLab
 paymentStep: Оплата
 paymentMethod: Наличными при получении
 extrasToggle: Добавить VIN или комментарий

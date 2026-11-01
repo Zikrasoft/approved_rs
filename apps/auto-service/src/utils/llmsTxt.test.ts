@@ -255,7 +255,7 @@ describe('generateLlmsTxt', () => {
     );
     expect(body).not.toContain('RSD');
     expect(await generateLlmsTxt('ru')).toContain(
-      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами и характеристиками. Цен на сайте нет',
+      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами и характеристиками. Цен на сайте нет',
     );
     expect(await generateLlmsTxt('ru')).toContain(
       'Запчасти заказывают только по заявке',
@@ -274,7 +274,7 @@ describe('generateLlmsTxt', () => {
     vi.stubEnv('SHOP_OPEN', 'true');
     const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());
     expect(body).toContain(
-      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера детали своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными на СТО',
+      '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными в сервисе',
     );
   });
 
