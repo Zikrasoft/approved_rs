@@ -331,10 +331,12 @@ export function createCatalogue({
         ...(make && model ? { make, model } : {}),
       });
       for (const facet of facets) {
-        params.append('facets', facet);
+        if (!pricesHidden || !facet.startsWith(`${IN_STOCK_FACET}:`))
+          params.append('facets', facet);
       }
       for (const range of ranges) {
-        params.append('range', rangeFilter(range));
+        if (!pricesHidden || range.key !== PRICE_FACET)
+          params.append('range', rangeFilter(range));
       }
       if (offset) {
         params.set('offset', String(offset));
