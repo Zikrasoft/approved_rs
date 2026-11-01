@@ -233,8 +233,10 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
             showContact(formatPhone(contact.contact.replace(/\D/g, ''))),
           );
         } else showContact(contact?.contact ?? null);
-        const heading = document.querySelector('[data-hero-heading]');
-        if (heading && orderedHeading) heading.textContent = orderedHeading;
+        if (orderedHeading)
+          document
+            .querySelectorAll('[data-hero-heading], [data-hero-crumb]')
+            .forEach((node) => (node.textContent = orderedHeading));
         fill(
           this,
           '[data-order-number]',

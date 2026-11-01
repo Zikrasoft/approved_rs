@@ -14,9 +14,10 @@ interface Props {
   name: string;
   specs?: string | null;
   heading?: boolean;
+  quantity?: string;
 }
 
-const { pages, name, specs, heading = false } = Astro.props;
+const { pages, name, specs, heading = false, quantity } = Astro.props;
 const lead = bestPage(pages);
 const target = lead ?? splitNumbers(pages).current[0] ?? pages[0];
 const href =
@@ -35,19 +36,28 @@ const href =
       heading ? (
         <div class="flex min-w-0 flex-col gap-0.5">
           <h3 class="font-semibold text-ink">
-            <a href={href} class="link-quiet">
+            <a
+              href={href}
+              class="link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            >
               {name}
             </a>
           </h3>
           {specs && <p class="spec text-xs text-muted">{specs}</p>}
         </div>
       ) : (
-        <a href={href} class="min-w-0 text-sm text-ink link-quiet">
+        <a
+          href={href}
+          class="min-w-0 text-sm text-ink link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+        >
           {name}
         </a>
       )
     }
-    <PriceTag pages={pages} class="max-sm:items-start max-sm:text-left" />
+    <div class="flex flex-col items-end max-sm:items-start">
+      <PriceTag pages={pages} class="max-sm:items-start max-sm:text-left" />
+      {quantity && <span class="spec text-xs text-ink-2">{quantity}</span>}
+    </div>
   </div>
   <PartNumbers pages={pages} first={lead} />
   <slot />

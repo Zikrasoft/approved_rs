@@ -22,6 +22,9 @@ const INSTALLATION_SERVICE_BY_CATEGORY = new Map<string, ServiceSlug>([
   ['engine-parts', 'engine-gearbox'],
   ['transmission', 'engine-gearbox'],
   ['body-parts', 'bodywork-painting'],
+  ['maintenance-consumables', 'servicing'],
+  ['oil-filters', 'servicing'],
+  ['engine-oil', 'servicing'],
 ]);
 
 export const partsCategoryFor = (

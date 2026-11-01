@@ -48,6 +48,7 @@ export const partsSearchContentSchema = z
     numberComment: z.string(),
     similarNumbers: z.string(),
     carsGroup: z.string(),
+    allModifications: z.string(),
     partsGroup: z.string(),
     vinOption: z.string(),
     suggestFailed: z.string(),

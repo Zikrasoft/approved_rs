@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { searchableQuery } from '@podbor/catalog-contract';
 import { z } from 'zod';
 import { localeFieldSchema } from '@/i18n/localeField';
+import { content } from '@/i18n/content';
 import { catalogueFor } from '@/utils/catalogueEnv';
 import { searchIntent, suggestionsFrom } from '@/utils/catalogueSearch';
 import { searchEitherLayout } from '@/utils/keyboardLayout';
@@ -39,6 +40,13 @@ export const GET: APIRoute = async ({ url, request }) => {
     }),
   );
   return found
-    ? Response.json({ vin: false, ...suggestionsFrom(found, locale) })
+    ? Response.json({
+        vin: false,
+        ...suggestionsFrom(
+          found,
+          locale,
+          content(locale).partsSearch.allModifications,
+        ),
+      })
     : Response.json(NOTHING, { status: 503 });
 };

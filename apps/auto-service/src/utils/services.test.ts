@@ -34,6 +34,16 @@ describe('partsCategoryFor', () => {
     );
   });
 
+  it('points servicing at the stocked oil filters or engine oil', () => {
+    expect(partsCategoryFor('servicing', categories)).toBe('engine-oil');
+    expect(
+      partsCategoryFor('servicing', [
+        { slug: 'oil-filters', pages: [{}] },
+        ...categories,
+      ]),
+    ).toBe('oil-filters');
+  });
+
   it('points nowhere when no stocked Category maps to the service', () => {
     expect(partsCategoryFor('engine-gearbox', categories)).toBeNull();
   });

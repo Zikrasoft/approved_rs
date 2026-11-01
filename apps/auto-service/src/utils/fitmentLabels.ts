@@ -55,3 +55,17 @@ export const fitNote = (fit: Fit, locale: Locale): string | null =>
         locale,
       )
     : null;
+
+const conditional = (fit: Fit) =>
+  Number(
+    Boolean(
+      fit.note ||
+      fit.steering ||
+      fit.gearbox ||
+      fit.production_from ||
+      fit.production_to,
+    ),
+  );
+
+export const unconditionalFirst = <Entry extends Fit>(fits: Entry[]): Entry[] =>
+  fits.toSorted((a, b) => conditional(a) - conditional(b));
