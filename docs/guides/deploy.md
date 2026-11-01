@@ -370,6 +370,7 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 | `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
 | `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 | `SHOP_CLIENT_SECRET`        | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
+| `SHOP_EVENTS_SECRET`        | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -398,17 +399,26 @@ visitor named in `x-shop-client` instead of Vercel's egress. For one release
 the shop also takes `SHOP_LEAD_SECRET` on that header, so a carlab.rs still
 sending the old secret keeps its per-visitor buckets: set `SHOP_CLIENT_SECRET`
 in the shop first, restart it, then on carlab.rs and redeploy.
+`SHOP_EVENTS_SECRET` is one more value set twice, on carlab.rs and in the shop's
+`.env`: carlab.rs's search, cart, checkout, lead and CSP-report routes post one
+Event per request to `POST /hooks/storefront-events` with it as a Bearer token
+(ADR-0057), through `waitUntil` with a 2-second timeout, so a slow or refusing
+shop never slows or fails the visitor. The secret can do nothing but add a line
+to the log. Unset on carlab.rs, nothing is sent; unset in the shop, the route
+answers 401.
 
 **Rotating either secret without downtime.** Every side that checks a Bearer
 secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
-`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET` and `SHOP_CLIENT_SECRET`,
-carlab.rs checks `SHOP_LEAD_SECRET`; a side only ever sends the current value.
+`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET` and
+`SHOP_EVENTS_SECRET`, carlab.rs checks `SHOP_LEAD_SECRET`; a side only ever
+sends the current value.
 
 1. Make a new value (`openssl rand -hex 32`).
 2. On every side that holds the secret, move the old value to
    `<NAME>_PREVIOUS` and put the new one in `<NAME>`: for
-   `SHOP_LEAD_SECRET` and `SHOP_CLIENT_SECRET` that is carlab.rs (no
-   `_PREVIOUS` for `SHOP_CLIENT_SECRET` there, it only sends) and
+   `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET` and `SHOP_EVENTS_SECRET` that is
+   carlab.rs (no `_PREVIOUS` for `SHOP_CLIENT_SECRET` or `SHOP_EVENTS_SECRET`
+   there, it only sends) and
    `/srv/carlab/.env`, for
    `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
    and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
@@ -749,7 +759,8 @@ is retried once its 10 minute lease runs out.
 
 ### The server
 
-- `/srv/carlab/`: CI places `docker-compose.yml`, `caddy/Caddyfile` and the scripts
+- `/srv/carlab/`: CI places `docker-compose.yml`, `caddy/Caddyfile`, the Loki,
+  Alloy and Grafana configs (`loki/`, `alloy/`, `grafana/`) and the scripts
   there on every deploy; `.env` (mode 600) is written by hand once;
   `.previous-tag` holds the previously shipped sha, for rollback. After a successful
   ship, `deploy.sh` deletes shop images other than the current one and
@@ -770,8 +781,9 @@ is retried once its 10 minute lease runs out.
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
   the reindex at every Publish (ADR-0041), so after a restore search stays empty
   until the next Publish.
-- Only Caddy is published outward: 80, 443, 443/udp. Medusa, Postgres and Typesense
-  have no host ports; Postgres and Typesense sit on an internal network with no
+- Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
+  `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
+  and Alloy have no host ports; Postgres and Typesense sit on an internal network with no
   route to the internet, and the storefront reaches search only through Medusa's
   store routes. Checked by `infra/auto-service-shop/test/compose.test.sh`.
 - IPv6 reaches Caddy directly: the `edge` network is dual-stack (`enable_ipv6`, ULA
@@ -779,8 +791,12 @@ is retried once its 10 minute lease runs out.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 128m, 2944 MB together, under 3 GB (checked
-  by the compose test). The crawler runs on the owner's Mac, so it is not in the budget.
+  postgres 512m, caddy 128m, and for the logs grafana 256m, loki 192m,
+  alloy 160m: 3552 MB together, under 3.5 GB (checked by the compose test),
+  with the 2 GB swap `bootstrap-host.sh` makes behind it. Measured idle in
+  `infra/auto-service-shop/test/logs.test.sh`: grafana about 200 MB, loki and
+  alloy about 100 MB each. If the box swaps, the logs go first: stop them with
+  `docker compose stop grafana alloy loki`, the shop runs without them. The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
@@ -997,6 +1013,16 @@ number gets its CI value in that script. The non-obvious parts:
   See [Closed beta](#closed-beta-the-preview-flag).
 - `SENTRY_DSN` turns on error reporting to Sentry. Empty, the SDK is never
   started and nothing leaves the server. See [Monitoring](#monitoring).
+- `SHOP_EVENTS_SECRET` (and `SHOP_EVENTS_SECRET_PREVIOUS` while it rotates) is
+  the Bearer secret carlab.rs posts its Events with, see
+  [Shop Orders](#shop-orders-adr-0053). `STOREFRONT_EVENTS_PER_MINUTE` (empty
+  means 1200) caps those posts; they all come from Vercel's egress, so it is
+  one bucket for the whole storefront.
+- `GRAFANA_ADMIN_PASSWORD` is Grafana's `admin` password,
+  `openssl rand -hex 32`. Required: compose refuses to start the stack without
+  it, so set it before the first deploy that carries the logs. Grafana keeps
+  the first value in its database, so a change takes, after editing `.env`:
+  `docker compose exec grafana grafana cli admin reset-admin-password "$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' .env)"`.
 - Never print the file. Read a single value with `sed -n 's/^NAME=//p'` into a
   variable, or list names only: `cut -d= -f1 /srv/carlab/.env`.
 
@@ -1304,6 +1330,80 @@ repository.
 Done: `cut -d= -f1 /srv/carlab/.env` lists `SENTRY_DSN`, the medusa log shows
 no Sentry error after the restart, and the next 5xx appears as an issue in the
 project.
+
+### Logs: Events, Loki and Grafana
+
+Why it is built this way: [ADR-0057](../adr/0057-shop-events-are-json-lines-in-loki.md).
+The shop writes one JSON line per **Event** to its stdout, a stable `event` name
+first, then `at`, `request_id`, `outcome`, `reason` and the event's own fields;
+the vocabulary is `apps/auto-service-shop/src/lib/log-event.ts`. carlab.rs
+posts its own Events to the shop (above, `SHOP_EVENTS_SECRET`), which logs them
+the same way under `storefront.*`. No Event holds a phone, a name, a handle, an
+email or an address: the client is a 12-character keyed hash of its network,
+a VIN is its first three characters and a keyed hash. Medusa's own request
+line (morgan, with the client IP and the full URL) is off: compose sets
+`LOG_LEVEL=info` on medusa.
+
+Alloy reads the Docker log files of the stack from
+`/var/lib/docker/containers` (read-only, no Docker socket), keeps the medusa
+service's lines, labels each with its `event`, and pushes them to Loki; it
+drops anything above 10 lines a second (bursts of 2000), so a flood of
+requests cannot fill the disk. Loki keeps 30 days and deletes older chunks
+itself. At that cap the worst case is about 2 GB of compressed chunks; at
+real traffic it is tens of MB. Check with
+`docker system df -v | grep carlab_lokidata`.
+
+**Opening Grafana.** It listens on the server's `127.0.0.1:3000` only, and
+`deploy` may open a tunnel to that one address and nothing else. On a server
+hardened before this, rerun the hardening once (it keeps the crawler's key):
+
+```sh
+scp infra/auto-service-shop/harden-ssh.sh deploy@<server>:/tmp/
+ssh -t deploy@<server> sudo sh /tmp/harden-ssh.sh
+```
+
+Then, from your machine:
+
+```sh
+ssh -N -L 3000:127.0.0.1:3000 deploy@<server>
+```
+
+then open `http://localhost:3000` and sign in as `admin` with
+`GRAFANA_ADMIN_PASSWORD`. The **CarLab shop** dashboard shows errors by cause
+with the latest ones, requests and p95 latency by route, searches by intent,
+the zero-result rate and the top zero-result queries, the unresolved VIN rate
+and codes, and inquiries, checkouts and order hand-offs by outcome. Explore
+takes any LogQL, for example every line of one request:
+`{service="medusa"} |= "<request_id>"`.
+
+Done: the tunnel opens Grafana, the dashboard has data after a search on
+carlab.rs, and `curl -sI http://<server>:3000` from outside times out.
+
+**The weekly export for Claude.** Once a week, on the server:
+
+```sh
+ssh deploy@<server> /srv/carlab/logs-export.sh
+```
+
+It reads the last 7 days of Events from Loki (an argument changes the days:
+`logs-export.sh 14`), only lines with an `event` label, never Medusa's own text,
+and writes `/srv/carlab/exports/carlab-events-<date>.jsonl.gz` (one Event per
+line, oldest first) and `carlab-events-<date>.summary.txt` (counts per event
+and outcome), printing both paths; exports older than eight weeks are deleted.
+Copy them to your machine and hand both files to Claude with a question such
+as "what do people search for and not find, and where do they give up":
+
+```sh
+scp 'deploy@<server>:/srv/carlab/exports/carlab-events-*' .
+```
+
+The files hold no personal data by construction, but they are still your
+business data: keep them out of the repository and public chats.
+
+Checked by `infra/auto-service-shop/test/logs.test.sh`, which brings up Loki,
+Alloy and Grafana from this compose file, feeds them fake medusa lines and
+checks what reaches Loki, the dashboard queries, the export and Grafana's
+provisioning.
 
 ### Checking the stack locally
 

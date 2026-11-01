@@ -603,6 +603,17 @@ markup hooks it depends on (`data-lead-form`, `data-contact-channel`,
 whose visits to exclude before drawing any conclusion is in
 `docs/guides/analytics-exclusions.md`.
 
+## Logs
+
+The shop logs **Events**, one JSON line each, written only through `logEvent`
+in `apps/auto-service-shop/src/lib/log-event.ts`, whose types are the whole
+vocabulary; carlab.rs sends its server-side Events to the shop through
+`reportShopEvent` (`apps/auto-service/src/lib/shopEvents.ts`), on the wire
+schema in `@podbor/catalog-contract/events`. No Event field may hold a phone, a
+name, a handle, an email, an IP or a full VIN: hash a client or a VIN with
+`hashed`/`vinFields`, pass free text through `loggedQuery`. Why, and how the
+lines reach Loki and the weekly export: ADR-0057.
+
 ## Validation
 
 Anything that validates data uses **zod** — no hand-rolled `typeof` guards,
