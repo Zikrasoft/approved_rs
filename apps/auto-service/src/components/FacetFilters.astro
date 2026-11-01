@@ -9,6 +9,7 @@ import {
 import Icon from '@/components/Icon.astro';
 import PriceSlot from './PriceSlot.astro';
 import SheetClose from './SheetClose.astro';
+import ShowMore from './ShowMore.astro';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -221,7 +222,7 @@ const legend = (facet: SearchFacet) =>
                           >
                             {items.map((value) =>
                               pills ? (
-                                <label class="relative inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-ink has-checked:bg-shade-strong has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
+                                <label class="relative inline-flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-paper px-3 text-sm text-ink transition-colors select-none hover:border-ink has-checked:border-ink has-checked:bg-shade-strong has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-line motion-reduce:transition-none">
                                   <input
                                     type="checkbox"
                                     name="facets"
@@ -238,7 +239,7 @@ const legend = (facet: SearchFacet) =>
                                   </span>
                                 </label>
                               ) : (
-                                <label class="flex min-h-9 cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:text-ink-2">
+                                <label class="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:text-ink-2">
                                   <input
                                     type="checkbox"
                                     name="facets"
@@ -261,16 +262,15 @@ const legend = (facet: SearchFacet) =>
                           </div>
                         );
                         return tail ? (
-                          <details class="group/more" open={restOpen}>
-                            <summary class="inline-flex min-h-9 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-signal-ink group-open/more:hidden hover:text-signal-dark [&::-webkit-details-marker]:hidden">
-                              {copy.showAllValues.replace(
-                                '{count}',
-                                String(shown.length + rest.length),
-                              )}
-                              <Icon name="chevronDown" size={12} />
-                            </summary>
+                          <ShowMore
+                            open={restOpen}
+                            label={copy.showAllValues.replace(
+                              '{count}',
+                              String(shown.length + rest.length),
+                            )}
+                          >
                             {list}
-                          </details>
+                          </ShowMore>
                         ) : (
                           list
                         );
@@ -282,7 +282,7 @@ const legend = (facet: SearchFacet) =>
               <div class="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-5 py-3 group-[:defined:not([data-dirty])]/sheet:lg:hidden before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8 before:bg-linear-to-t before:from-card before:to-transparent max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <button
                   type="submit"
-                  class="btn btn-primary flex-1 aria-busy:opacity-60"
+                  class="btn btn-primary flex-1"
                   {...{
                     [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters,
                     [FILTERS_COUNT_ATTRIBUTE]: copy.showResults,

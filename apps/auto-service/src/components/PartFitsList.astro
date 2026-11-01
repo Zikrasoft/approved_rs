@@ -1,7 +1,7 @@
 ---
 import Chevron from './Chevron.astro';
-import Icon from './Icon.astro';
 import FitLine from './FitLine.astro';
+import ShowMore from './ShowMore.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -90,13 +90,14 @@ const singleModel =
                 return index === 0 ? (
                   list
                 ) : (
-                  <details class="group/more">
-                    <summary class="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-signal-ink group-open/more:hidden hover:text-signal-dark [&::-webkit-details-marker]:hidden">
-                      {showAllValues.replace('{count}', String(models.length))}
-                      <Icon name="chevronDown" size={12} />
-                    </summary>
+                  <ShowMore
+                    label={showAllValues.replace(
+                      '{count}',
+                      String(models.length),
+                    )}
+                  >
                     {list}
-                  </details>
+                  </ShowMore>
                 );
               })}
           </section>
