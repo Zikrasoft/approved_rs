@@ -78,16 +78,16 @@ Astro.response.headers.set('cache-control', 'private, no-store');
 Astro.response.headers.set('x-robots-tag', NOINDEX);
 
 const locale = localeFrom(Astro.url.pathname);
+if (Astro.request.method !== 'POST') {
+  return Astro.redirect(PathBuilder.parts(locale), 302);
+}
 const preview = previewRequested(Astro.request);
-const read =
-  Astro.request.method === 'POST'
-    ? await readJson(Astro.request, MAX_PRICES_BYTES)
-    : null;
-if (read && 'response' in read) {
+const read = await readJson(Astro.request, MAX_PRICES_BYTES);
+if ('response' in read) {
   return read.response;
 }
-const body = read && bodySchema.safeParse(read.value);
-if (!body?.success) {
+const body = bodySchema.safeParse(read.value);
+if (!body.success) {
   return new Response(null, { status: 400 });
 }
 const catalogue = preview || shopOpen() ? catalogueFor(Astro.request) : null;
