@@ -205,7 +205,7 @@
 }
 
 @utility spec {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: proportional-nums;
 }
 
 @utility link {
@@ -351,8 +351,8 @@
     color: var(--color-muted);
   }
 
-  .field:focus {
-    border-color: var(--color-signal);
+  .field:focus-visible {
+    outline-offset: 0;
   }
 
   .field[aria-invalid='true'] {

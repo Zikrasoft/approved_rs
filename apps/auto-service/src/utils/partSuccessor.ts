@@ -65,13 +65,17 @@ export function currentNumbers(
     : page.superseded
       ? page.equivalents
       : [];
-  const rank = (number: BrandNumber) =>
-    (number.type === 'oem' ? 0 : 2) +
-    Number(number.brand.slug !== page.brand.slug);
   const unique = new Map(
     candidates
       .filter(({ superseded }) => !superseded)
       .map((number) => [slugOf(number), { ...number, slug: slugOf(number) }]),
   );
+  const offered = pricedPage(
+    [...unique.keys()].flatMap((slug) => bySlug.get(slug) ?? []),
+  );
+  const rank = (number: BrandNumber & { slug: string }) =>
+    (number.slug === offered?.slug ? -4 : 0) +
+    (number.type === 'oem' ? 0 : 2) +
+    Number(number.brand.slug !== page.brand.slug);
   return [...unique.values()].sort((a, b) => rank(a) - rank(b));
 }

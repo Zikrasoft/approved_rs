@@ -24,6 +24,8 @@ export function defineCarFacts(tagName = 'car-facts'): void {
         if (!line || !text) return;
         text.textContent = (text.dataset.template ?? '').replace('{vin}', vin);
         line.hidden = false;
+        const closing = this.querySelector<HTMLElement>('[data-not-your-car]');
+        if (closing) closing.hidden = true;
       }
 
       connectedCallback(): void {

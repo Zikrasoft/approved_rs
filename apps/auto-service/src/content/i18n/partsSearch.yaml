@@ -39,6 +39,7 @@ pagination: Страницы результатов
 formHeading: Заявка на запчасти
 notFoundQuestion: Не нашли нужное?
 notFoundLink: Оставьте заявку, подберем
+askManager: Спросите менеджера, ваш запрос уже в сообщении
 numberNotFound: Точного номера «{q}» в каталоге нет, возможно, вы искали один из похожих ниже.
 numberComment: Номер {q}
 similarNumbers: Похожие номера

@@ -43,6 +43,7 @@ export const partsSearchContentSchema = z
     formHeading: z.string(),
     notFoundQuestion: z.string(),
     notFoundLink: z.string(),
+    askManager: z.string(),
     numberNotFound: z.string(),
     numberComment: z.string(),
     similarNumbers: z.string(),

@@ -55,13 +55,14 @@ const categories = props.categories.map((category) => ({
     <div class="max-w-3xl pt-2" {...contactCta}>
       <CatalogueSearch large />
     </div>
-  </PageHero>
-
-  <section class="wrap flex flex-col gap-6 pt-8 pb-band md:pt-10 md:pb-band-lg">
-    <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+    <p class="max-w-2xl text-sm leading-relaxed text-muted">
       {copy.sourcingNote}
     </p>
+  </PageHero>
 
+  <section
+    class="wrap flex flex-col gap-12 pt-8 pb-band md:gap-16 md:pt-10 md:pb-band-lg"
+  >
     <cart-badge
       class="self-start"
       hidden
@@ -73,22 +74,23 @@ const categories = props.categories.map((category) => ({
         class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink link-quiet"
       >
         {content(locale).shopCart.cartLink}
-        <Icon name="arrowRight" />
+        <Icon name="chevronRight" />
       </a>
     </cart-badge>
 
     {
       props.makes.length > 0 && (
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-3">
           <h2 class="text-section">{hubsCopy.indexHeading}</h2>
           <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {props.makes.map((make) => (
               <li>
                 <a
                   href={PathBuilder.partsMake(locale, make.slug)}
-                  class="card flex min-h-20 items-end p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
+                  class="card flex min-h-14 items-center justify-between gap-2 p-4 text-lg leading-tight font-semibold wrap-anywhere text-ink transition-colors duration-150 hover:border-ink sm:p-5"
                 >
                   {make.name}
+                  <Icon name="chevronRight" class="shrink-0 text-muted" />
                 </a>
               </li>
             ))}
@@ -98,7 +100,7 @@ const categories = props.categories.map((category) => ({
             class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink link-quiet"
           >
             {hubsCopy.allMakesLink}
-            <Icon name="arrowRight" />
+            <Icon name="chevronRight" />
           </a>
         </div>
       )
@@ -127,7 +129,7 @@ const categories = props.categories.map((category) => ({
                 )}
                 <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
                   {copy.categoryCta}
-                  <Icon name="arrowRight" />
+                  <Icon name="chevronRight" />
                 </span>
               </a>
             ))}

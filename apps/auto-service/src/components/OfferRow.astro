@@ -1,5 +1,4 @@
 ---
-import Icon from '@/components/Icon.astro';
 import type { PartOffer } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -81,7 +80,6 @@ const { stock, lead, buyable } = offer
       data-ask
     >
       {buyable ? copy.orderViaManagerCta : copy.askSupplyCta}
-      <Icon name="arrowRight" />
     </a>
   </div>
 </li>
