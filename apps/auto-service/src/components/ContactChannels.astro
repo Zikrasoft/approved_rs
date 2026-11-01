@@ -49,7 +49,7 @@ const FULL: Variant = {
   label: 'text-sm',
 };
 const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
-  bar: FULL,
+  bar: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   thanks: FULL,
   header: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   hero: {

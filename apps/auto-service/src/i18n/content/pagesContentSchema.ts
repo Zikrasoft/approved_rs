@@ -95,6 +95,7 @@ export const pagesContentSchema = z
         heading: z.string(),
         body: z.string(),
         partsBody: z.string(),
+        writeUs: z.string(),
         cta: z.string(),
       })
       .strict(),

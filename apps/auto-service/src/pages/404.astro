@@ -31,9 +31,15 @@ const { pages, shopCart, site } = content(locale);
       <p class="max-w-xl text-base leading-relaxed text-muted">
         {pages.notFound.body}
       </p>
-      <a href={PathBuilder.services(locale)} class="btn btn-primary w-fit">
-        {site.common.allServices}
-      </a>
+      <div class="flex flex-wrap gap-3">
+        <a href={PathBuilder.services(locale)} class="btn btn-primary">
+          {site.common.allServices}
+        </a>
+        <BackLink href={PathBuilder.home(locale)} label={pages.notFound.cta} />
+      </div>
+      <p class="mt-2 text-sm font-semibold text-ink">
+        {pages.notFound.writeUs}
+      </p>
       <ContactChannels class="max-w-xl" />
     </div>
     <div
@@ -46,19 +52,17 @@ const { pages, shopCart, site } = content(locale);
         {pages.notFound.partsBody}
       </p>
       <CatalogueSearch large hint={false} />
-      <a
-        href={PathBuilder.partsInquiry(locale)}
-        class="btn btn-secondary w-fit"
-      >
-        {shopCart.emptyInquiryCta}
-      </a>
+      <div class="flex flex-wrap gap-3">
+        <a href={PathBuilder.partsInquiry(locale)} class="btn btn-secondary">
+          {shopCart.emptyInquiryCta}
+        </a>
+        <BackLink href={PathBuilder.home(locale)} label={pages.notFound.cta} />
+      </div>
+      <p class="mt-2 text-sm font-semibold text-ink">
+        {pages.notFound.writeUs}
+      </p>
       <ContactChannels service={VIN_INQUIRY_SERVICE} class="max-w-xl" />
     </div>
-    <BackLink
-      href={PathBuilder.home(locale)}
-      label={pages.notFound.cta}
-      class="mt-2"
-    />
   </not-found-parts>
 </Shell>
 
