@@ -87,6 +87,7 @@ const IN_FLOW_PLACEMENTS: readonly ContactPlacement[] = [
   'hero',
   'bar',
   'thanks',
+  'visit',
 ];
 
 const CONTACT_CTA_ATTRIBUTE = 'data-contact-cta';

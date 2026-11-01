@@ -82,7 +82,7 @@ itself, so on focus the goal would fire on every opening, duplicating
 | `aria-invalid="true"`    | a field that failed validation | the field name in `form_error`    |
 
 `data-contact-placement` names where on the page the control sits, never which
-component renders it: `hero`, `bar`, `floating`, `footer`, `header`, `thanks` —
+component renders it: `hero`, `bar`, `floating`, `footer`, `header`, `thanks`, `visit` (the «come to us» block with the address and the call) —
 one word can therefore be stamped by several components (`bar` is every full
 contact bar, wherever it is rendered) and `thanks` is a whole page, because that
 page is one region. The closed set is `CONTACT_PLACEMENTS`

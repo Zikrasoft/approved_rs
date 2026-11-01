@@ -27,7 +27,7 @@ export type {
 export type { ContactPlacement } from './goals.ts';
 export { relatedEntries } from './relatedEntries.ts';
 export { paragraphs } from './paragraphs.ts';
-export { mapEmbedSrc, mapPlaceUrl } from './mapEmbed.ts';
+export { mapEmbedSrc, mapPlaceUrl, mapRouteUrl } from './mapEmbed.ts';
 export {
   LOCALE_CHOICE_ATTRIBUTE,
   LOCALE_COOKIE,

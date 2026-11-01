@@ -168,6 +168,10 @@ describe('contactRegion', () => {
     });
     expect(contactRegion('hero')).toHaveProperty('data-contact-cta', '');
     expect(contactRegion('thanks')).toHaveProperty('data-contact-cta', '');
+    expect(contactRegion('visit')).toEqual({
+      'data-contact-placement': 'visit',
+      'data-contact-cta': '',
+    });
     for (const placement of ['floating', 'footer', 'header'] as const)
       expect(contactRegion(placement)).toEqual({
         'data-contact-placement': placement,
