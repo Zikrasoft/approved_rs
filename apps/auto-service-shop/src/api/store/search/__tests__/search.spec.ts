@@ -508,7 +508,7 @@ medusaIntegrationTestRunner({
         expect(outside.data.count).toBe(0);
       });
 
-      it.each(['capacity::', 'capacity:abc:', 'capacity:95:60'])(
+      it.each(['capacity::', 'capacity:abc:'])(
         'refuses the malformed range %j',
         async (range) => {
           const response = await search({

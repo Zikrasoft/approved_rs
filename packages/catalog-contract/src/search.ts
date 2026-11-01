@@ -163,13 +163,23 @@ export const usefulFacets = (
     ({ key, type, values }) =>
       chosenKeys.includes(key) ||
       (values.some(({ count }) => count > 0) &&
-        !(
-          values.length === 1 &&
-          (type === 'number' || values[0].count >= total)
-        )),
+        (type === 'number'
+          ? values.length > 1
+          : values.some(({ count }) => count < total))),
   );
 
-const NUMBER = '-?\\d+(?:\\.\\d+)?';
+const NUMBER = '-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?';
+
+export const RANGE_BOUND_LIMIT = 1e9;
+
+const RANGE_BOUND_DECIMALS = 6;
+
+const rangeBound = (value: number): number =>
+  Number(
+    Math.min(Math.max(value, -RANGE_BOUND_LIMIT), RANGE_BOUND_LIMIT).toFixed(
+      RANGE_BOUND_DECIMALS,
+    ),
+  ) || 0;
 
 export const RANGE_FILTER_PATTERN = new RegExp(
   `^([a-z0-9-]+):(${NUMBER})?:(${NUMBER})?$`,
@@ -181,8 +191,11 @@ export type RangeFilter = {
   max: number | null;
 };
 
+const writtenBound = (value: number | null) =>
+  value === null ? '' : String(rangeBound(value));
+
 export const rangeFilter = ({ key, min, max }: RangeFilter): string =>
-  `${key}:${min ?? ''}:${max ?? ''}`;
+  `${key}:${writtenBound(min)}:${writtenBound(max)}`;
 
 export const parseRangeFilter = (filter: string): RangeFilter | null => {
   const match = RANGE_FILTER_PATTERN.exec(filter);
@@ -190,8 +203,11 @@ export const parseRangeFilter = (filter: string): RangeFilter | null => {
     return null;
   }
   const bound = (text: string | undefined) =>
-    text === undefined ? null : Number(text);
-  return { key: match[1], min: bound(match[2]), max: bound(match[3]) };
+    text === undefined ? null : rangeBound(Number(text));
+  const [min, max] = [bound(match[2]), bound(match[3])];
+  return min !== null && max !== null && min > max
+    ? { key: match[1], min: max, max: min }
+    : { key: match[1], min, max };
 };
 
 export const inRange = (value: string, { min, max }: RangeFilter): boolean => {
@@ -231,7 +247,7 @@ export const filtersWithinCap = (
     return true;
   };
   return {
-    facets: facets
+    facets: [...new Set(facets)]
       .filter((facet) => FACET_FILTER_PATTERN.test(facet))
       .slice(0, SEARCH_FILTER_CAPS.facetValues)
       .filter((facet) => fits(facetKey(facet))),

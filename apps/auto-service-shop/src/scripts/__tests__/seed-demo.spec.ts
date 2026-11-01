@@ -95,6 +95,17 @@ medusaIntegrationTestRunner({
         ).toHaveLength(1);
       });
 
+      it('lets a visitor filter engine oil by volume', async () => {
+        const [oil] = await catalog.listCategories({ slug: 'engine-oil' });
+
+        expect(
+          await catalog.listCategoryFields({
+            category_id: oil.id,
+            key: 'volume',
+          }),
+        ).toEqual([expect.objectContaining({ type: 'number', facet: true })]);
+      });
+
       it('points the storefront at the port the shop listens on', () => {
         expect(storefrontEnv.join('\n')).toContain(
           'MEDUSA_BACKEND_URL=http://localhost:9123',

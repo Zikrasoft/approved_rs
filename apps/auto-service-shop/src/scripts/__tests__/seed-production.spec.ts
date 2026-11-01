@@ -95,9 +95,13 @@ medusaIntegrationTestRunner({
         });
         expect(
           fields
-            .filter(({ key }) => ['polarity', 'case-size'].includes(key))
+            .filter(({ key }) =>
+              ['polarity', 'case-size', 'length', 'width', 'height'].includes(
+                key,
+              ),
+            )
             .map(({ facet }) => facet),
-        ).toEqual([true, true]);
+        ).toEqual([true, true, true, true, true]);
         const technology = fields.find(({ key }) => key === 'technology')!;
         const options = await catalog.listCategoryFieldOptions(
           { field_id: technology.id },
