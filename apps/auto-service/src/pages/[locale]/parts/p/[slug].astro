@@ -6,6 +6,7 @@ import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import AddonNote from '@/components/AddonNote.astro';
+import PriceTag from '@/components/PriceTag.astro';
 import Icon from '@/components/Icon.astro';
 import PartFitsList from '@/components/PartFitsList.astro';
 import PartGallery from '@/components/PartGallery.astro';
@@ -236,24 +237,33 @@ const thumbFor = (slug: string) => {
                     : copy.currentNumberLabel}
                 </p>
                 <ul class="-mx-2 flex flex-col">
-                  {replacements.map((number) => (
-                    <li>
-                      <a
-                        href={PathBuilder.partNumber(locale, number.slug)}
-                        class="group flex min-h-11 items-center justify-between gap-3 rounded-control px-2 text-ink hover:bg-shade hover:text-signal-ink"
-                      >
-                        <span>
-                          {number.brand.name}{' '}
-                          <span class="spec font-semibold">{number.value}</span>
-                        </span>
-                        <Icon
-                          name="chevronRight"
-                          size={16}
-                          class="shrink-0 text-muted group-hover:text-signal-ink"
-                        />
-                      </a>
-                    </li>
-                  ))}
+                  {replacements.map((number) => {
+                    const numberPage = bySlug.get(number.slug);
+                    return (
+                      <li>
+                        <a
+                          href={PathBuilder.partNumber(locale, number.slug)}
+                          class="group flex min-h-11 items-center justify-between gap-3 rounded-control px-2 text-ink hover:bg-shade hover:text-signal-ink"
+                        >
+                          <span>
+                            {number.brand.name}{' '}
+                            <span class="spec font-semibold">
+                              {number.value}
+                            </span>
+                          </span>
+                          {numberPage?.offers.length ? (
+                            <PriceTag pages={[numberPage]} class="shrink-0" />
+                          ) : (
+                            <Icon
+                              name="chevronRight"
+                              size={16}
+                              class="shrink-0 text-muted group-hover:text-signal-ink"
+                            />
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

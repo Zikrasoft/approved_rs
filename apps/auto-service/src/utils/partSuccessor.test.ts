@@ -208,6 +208,34 @@ describe('currentNumbers', () => {
     ]);
   });
 
+  it('leads with the current number that carries the best offer', () => {
+    const offer = {
+      id: 'of_1',
+      price: 1200,
+      currency: 'RSD',
+      stock_quantity: 3,
+      lead_time_days: 0,
+    };
+    const dead = entry(number(bmw, '11428507683', true), {
+      superseded: true,
+      equivalents: [
+        aftermarket(mann, 'HU816X'),
+        aftermarket(mahle, 'OX404D'),
+        number(bmw, '11428575211'),
+      ],
+    });
+    const pages = index(
+      entry(aftermarket(mann, 'HU816X'), { offers: [offer] }),
+      entry(number(bmw, '11428575211')),
+    );
+
+    expect(labels(currentNumbers(dead, pages))).toEqual([
+      'Mann-Filter HU816X',
+      'BMW 11428575211',
+      'Mahle OX404D',
+    ]);
+  });
+
   it('has none for a current number', () => {
     const live = entry(number(bmw, '11428575211'), {
       equivalents: [aftermarket(mann, 'HU816X')],

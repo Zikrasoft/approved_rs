@@ -29,7 +29,11 @@ export const linkedVehicles = (
   vehicles.map((vehicle) => places.vehicles.has(vehicleKey(vehicle)));
 
 export function partCacheKey(
-  props: { page: PartPageEntry; successor: unknown; replacements: unknown },
+  props: {
+    page: PartPageEntry;
+    successor: unknown;
+    replacements: { slug: string }[];
+  },
   {
     bySlug,
     places,
@@ -52,6 +56,7 @@ export function partCacheKey(
       ({ brand, normalized_value }) =>
         bySlug.get(partPageSlug(brand.slug, normalized_value)) ?? null,
     ),
+    current: props.replacements.map(({ slug }) => bySlug.get(slug) ?? null),
     vehicles: linkedVehicles(places, vehicles),
     models: vehicles.map(({ model }) => places.models.has(modelKey(model))),
     works: sourcingWorks(works, page).map(({ id, body, data }) => ({

@@ -53,10 +53,11 @@ const keyFor = (
     others = [] as PartPageEntry[],
     works = [] as Work[],
     vehicles = ['bmw/x5/e70'],
+    replacements = [] as { slug: string }[],
   } = {},
 ) =>
   partCacheKey(
-    { page, successor: null, replacements: [] },
+    { page, successor: null, replacements },
     {
       bySlug: new Map([page, ...others].map((entry) => [entry.slug, entry])),
       places: places(vehicles),
@@ -119,6 +120,18 @@ describe('partCacheKey', () => {
     expect(keyFor(page, { others: [equivalent] })).not.toBe(
       keyFor(page, {
         others: [part('111', { offers: [{ price: 5 }] } as never)],
+      }),
+    );
+  });
+
+  it('changes when a listed current number changes its price', () => {
+    const listed = [{ slug: 'bosch-222' }];
+    expect(
+      keyFor(page, { others: [part('222')], replacements: listed }),
+    ).not.toBe(
+      keyFor(page, {
+        others: [part('222', { offers: [{ price: 5 }] } as never)],
+        replacements: listed,
       }),
     );
   });
