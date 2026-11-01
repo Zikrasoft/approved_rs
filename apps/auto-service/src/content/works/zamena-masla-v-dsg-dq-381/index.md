@@ -10,6 +10,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-09-11
 published: true
+featured: true
 translations:
   en:
     title: DSG DQ381 Oil Change on a Skoda Octavia

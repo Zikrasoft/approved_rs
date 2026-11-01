@@ -1,5 +1,5 @@
 ---
-title: ТО Alfa Romeo Giulia 2021 года в Белграде
+title: ТО Alfa Romeo Giulia 2021 года
 translations:
   en:
     title: 2021 Alfa Romeo Giulia Scheduled Service in Belgrade
