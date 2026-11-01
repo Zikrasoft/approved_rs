@@ -18,9 +18,20 @@ export function defineCarFacts(tagName = 'car-facts'): void {
   customElements.define(
     tagName,
     class extends HTMLElement {
+      confirmVin(vin: string): void {
+        const line = document.querySelector<HTMLElement>('[data-vin-matched]');
+        const text = line?.querySelector<HTMLElement>('[data-template]');
+        if (!line || !text) return;
+        text.textContent = (text.dataset.template ?? '').replace('{vin}', vin);
+        line.hidden = false;
+      }
+
       connectedCallback(): void {
         const vin = vinFrom(location.search);
-        if (vin) rememberVin(vin);
+        if (vin) {
+          rememberVin(vin);
+          this.confirmVin(vin);
+        }
 
         const facts = vinFactsFrom(location.search);
         if (!facts.steering) return;

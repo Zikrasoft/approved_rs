@@ -23,6 +23,7 @@ import type { CarPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, vehiclePath, withLocales } from '@/utils/paths';
 import { kitPick, kitTotal, nameRepeatsCategory } from '@/utils/kitPick';
 import { plural } from '@/utils/leadTime';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 
 export async function getStaticPaths() {
   const cars = await carPagesForBuild();
@@ -145,7 +146,21 @@ const specsSummary = [
       },
       { href: vehiclePath(locale, vehicle), label: variant },
     ]}
-  />
+  >
+    <p
+      class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-2"
+      data-vin-matched
+      hidden
+    >
+      <span class="inline-flex items-center gap-1.5 font-semibold text-ink">
+        <Icon name="check" size={16} />
+        <span data-template={copy.vinMatched}></span>
+      </span>
+      <a href={PathBuilder.parts(locale)} class="link-underlined">
+        {copy.notYourCarLink}
+      </a>
+    </p>
+  </PageHero>
 
   <car-facts
     class:list={[
@@ -237,6 +252,7 @@ const specsSummary = [
                 href={PathBuilder.partsInquiry(locale)}
                 class="btn btn-after-kit w-full sm:w-auto"
                 data-add-all
+                {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
               >
                 {copy.kitAdd}
                 <Icon name="arrowRight" />
