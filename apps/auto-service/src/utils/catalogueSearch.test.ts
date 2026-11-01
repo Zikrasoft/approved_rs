@@ -211,7 +211,27 @@ describe('carLink', () => {
 });
 
 describe('carLinks', () => {
-  it('tells a Model apart from its listed Vehicle of the same name', () => {
+  const second = { ...vehicle, id: 'veh_2', slug: 'n47-110kw', power_kw: 110 };
+
+  it('tells a Model apart from its listed Vehicles of the same name', () => {
+    expect(
+      carLinks(
+        [
+          { kind: 'model', make, model, vehicle: null },
+          { kind: 'vehicle', make, model, vehicle },
+          { kind: 'vehicle', make, model, vehicle: second },
+        ],
+        'ru',
+        'Все модификации',
+      ).map(({ href, detail }) => [href, detail]),
+    ).toEqual([
+      ['/ru/parts/bmw/e83-x3-20d/', 'Все модификации'],
+      ['/ru/parts/bmw/e83-x3-20d/m/n47-130kw/', 'N47D20A, 130 кВт, 2007–2010'],
+      ['/ru/parts/bmw/e83-x3-20d/m/n47-110kw/', 'N47D20A, 110 кВт, 2007–2010'],
+    ]);
+  });
+
+  it('drops a Model whose one listed Vehicle already leads there', () => {
     expect(
       carLinks(
         [
@@ -222,11 +242,6 @@ describe('carLinks', () => {
         'Все модификации',
       ),
     ).toEqual([
-      {
-        href: '/ru/parts/bmw/e83-x3-20d/',
-        label: 'BMW X3 E83 X3 2.0d',
-        detail: 'Все модификации',
-      },
       {
         href: '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/',
         label: 'BMW X3 E83 X3 2.0d',
