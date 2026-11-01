@@ -3,6 +3,7 @@ import {
   hashed,
   loggedQuery,
   logEvent,
+  logStorefrontEvent,
   vinFields,
 } from '../log-event';
 
@@ -72,6 +73,34 @@ describe('logEvent', () => {
     });
 
     expect(lines()[0].request_id).toBeNull();
+  });
+
+  it('logs a storefront event under its own request id, else the shop one', () => {
+    logStorefrontEvent(
+      {
+        event: 'storefront.checkout',
+        request_id: 'fra1::abc',
+        outcome: 'placed',
+        reason: null,
+      },
+      'shop-1',
+    );
+    logStorefrontEvent(
+      {
+        event: 'storefront.csp',
+        request_id: null,
+        directive: 'img-src',
+        blocked: 'x.test',
+      },
+      'shop-2',
+    );
+
+    expect(lines().map(({ event, request_id }) => [event, request_id])).toEqual(
+      [
+        ['storefront.checkout', 'fra1::abc'],
+        ['storefront.csp', 'shop-2'],
+      ],
+    );
   });
 
   it('never lets a logging failure reach the caller', () => {
