@@ -135,7 +135,7 @@ translations:
     addedLabel: U korpi
     outOfStock: Nema na stanju
     askSupplyCta: Saznajte cenu i rok isporuke
-    orderViaManagerCta: Poruči preko prodavca
+    orderViaManagerCta: Poručite preko našeg saradnika
     askedNotice: Dodato u upit. Proverićemo cenu i rok preuzimanja i javiti vam se.
     stockLimitNotice: Trenutno nema više komada ovog dela, svi dostupni su već u korpi.
     fromPrice: od {price}
