@@ -2,8 +2,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 import { z } from '@medusajs/framework/zod';
 
-import { CATALOG_MODULE } from '../../modules/catalog';
-import { MANUAL_SOURCE } from '../../modules/catalog/models/provenance';
+import { CATALOG_MODULE, MANUAL_SOURCE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';

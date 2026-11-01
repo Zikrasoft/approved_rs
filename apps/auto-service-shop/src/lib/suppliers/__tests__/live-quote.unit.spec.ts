@@ -4,7 +4,7 @@ import { Modules } from '@medusajs/framework/utils';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../adapter';
-import { liveOffers, sellingOffers } from '../live-quote';
+import { createQuoteCache, liveOffers, sellingOffers } from '../live-quote';
 
 const stored = {
   id: 'offer_1',
@@ -86,16 +86,6 @@ describe('liveOffers', () => {
   });
 
   describe('for repeated offer views', () => {
-    const window = process.env.LIVE_QUOTE_CACHE_SECONDS;
-    beforeEach(() => {
-      process.env.LIVE_QUOTE_CACHE_SECONDS = '60';
-      jest.useFakeTimers({ now: Date.parse('2026-11-01') });
-    });
-    afterEach(() => {
-      process.env.LIVE_QUOTE_CACHE_SECONDS = window;
-      jest.useRealTimers();
-    });
-
     const quotedTimes = (scope: MedusaContainer) => {
       const [adapter] = scope.resolve<{ quote: jest.Mock }[]>(
         SUPPLIER_ADAPTERS_REGISTRATION,
@@ -113,20 +103,34 @@ describe('liveOffers', () => {
     };
 
     it('asks the supplier once a minute and quotes every cart action afresh', async () => {
+      let clock = Date.parse('2026-11-01');
+      const quotes = createQuoteCache({ windowMs: 60_000, now: () => clock });
       const scope = spiedScope();
       const view = () =>
-        liveOffers(scope, { id: ['offer_1'] }, { reuseRecent: true });
+        liveOffers(scope, { id: ['offer_1'] }, { reuseRecent: true, quotes });
 
       await view();
       await view();
       expect(quotedTimes(scope)).toBe(1);
 
-      await liveOffers(scope, { id: ['offer_1'] });
+      await liveOffers(scope, { id: ['offer_1'] }, { quotes });
       expect(quotedTimes(scope)).toBe(2);
 
-      jest.advanceTimersByTime(61_000);
+      clock += 61_000;
       expect(await view()).toHaveLength(1);
       expect(quotedTimes(scope)).toBe(3);
+    });
+
+    it('reuses nothing when the window is off', async () => {
+      const quotes = createQuoteCache({ windowMs: 0 });
+      const scope = spiedScope();
+      const view = () =>
+        liveOffers(scope, { id: ['offer_1'] }, { reuseRecent: true, quotes });
+
+      await view();
+      await view();
+
+      expect(quotedTimes(scope)).toBe(2);
     });
   });
 });

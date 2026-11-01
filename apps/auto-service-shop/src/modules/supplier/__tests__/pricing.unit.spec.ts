@@ -1,4 +1,10 @@
-import { isSellable, sellPrice, storeOffers } from '../pricing';
+import {
+  isSellable,
+  offersByIdentifier,
+  sellPrice,
+  storeOffer,
+  storeOffers,
+} from '../pricing';
 
 describe('sellPrice', () => {
   it('applies the markup percentage and rounds to the nearest unit', () => {
@@ -122,5 +128,40 @@ describe('isSellable', () => {
     expect(isSellable(row(1542))).toBe(true);
     expect(isSellable(row(1542, 'eur'))).toBe(false);
     expect(isSellable(row(0.1))).toBe(false);
+  });
+});
+
+describe('one priced offer', () => {
+  const row = (part_identifier_id: string, id: string, currency = 'RSD') => ({
+    id,
+    part_identifier_id,
+    cost_price: 1000,
+    currency,
+    stock_quantity: 2,
+    lead_time_days: 1,
+    supplier: { markup_percentage: 10 },
+  });
+
+  it('prices a sellable row and refuses one in another currency', () => {
+    expect(storeOffer(row('pi_1', 'o1'))).toEqual({
+      id: 'o1',
+      price: 1100,
+      currency: 'RSD',
+      stock_quantity: 2,
+      lead_time_days: 1,
+    });
+    expect(storeOffer(row('pi_1', 'o2', 'EUR'))).toBeNull();
+  });
+
+  it('groups the sellable offers by number in one pass', () => {
+    const grouped = offersByIdentifier([
+      row('pi_1', 'o1'),
+      row('pi_2', 'o2'),
+      row('pi_1', 'o3', 'EUR'),
+    ]);
+
+    expect([...grouped.keys()]).toEqual(['pi_1', 'pi_2']);
+    expect(grouped.get('pi_1')?.map(({ id }) => id)).toEqual(['o1']);
+    expect(grouped.get('pi_2')?.map(({ id }) => id)).toEqual(['o2']);
   });
 });

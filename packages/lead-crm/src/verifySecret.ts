@@ -8,6 +8,11 @@ export const bearerToken = (header: string | null | undefined): string =>
 export type AcceptedSecrets =
   string | undefined | readonly (string | undefined)[];
 
+export const acceptedSecrets = <Name extends string>(
+  env: Partial<Record<Name | `${Name}_PREVIOUS`, string>>,
+  name: Name,
+): (string | undefined)[] => [env[name], env[`${name}_PREVIOUS`]];
+
 function matchesOne(received: string, expected: string | undefined): boolean {
   if (!expected) return false;
   const a = Buffer.from(received);

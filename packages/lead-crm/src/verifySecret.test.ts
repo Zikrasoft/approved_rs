@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { bearerToken, secretMatches } from './verifySecret.ts';
+import { acceptedSecrets, bearerToken, secretMatches } from './verifySecret.ts';
 
 describe('bearerToken', () => {
   it.each(['Bearer s3cret', 'bearer s3cret', 'BEARER s3cret'])(
@@ -81,5 +81,16 @@ describe('secretMatches', () => {
     expect(secretMatches('other-secr', accepted)).toBe(false);
     expect(secretMatches('new-secret', ['new-secret', undefined])).toBe(true);
     expect(secretMatches('anything', [undefined, ''])).toBe(false);
+  });
+});
+
+describe('acceptedSecrets', () => {
+  it('names the current secret and its previous one', () => {
+    expect(
+      acceptedSecrets(
+        { SHOP_SECRET: 'new', SHOP_SECRET_PREVIOUS: 'old' },
+        'SHOP_SECRET',
+      ),
+    ).toEqual(['new', 'old']);
   });
 });

@@ -64,11 +64,30 @@ describe('vinOf', () => {
   it('refuses text that only holds a VIN-length run of other words', () => {
     expect(vinOf('HU 816 x, OX 404 D')).toBeNull();
   });
+
+  it('reads a VIN typed on the Russian keyboard layout', () => {
+    expect(vinOf('ЦИФ35ИП070Т074158')).toBe('WBA35BG070N074158');
+    expect(vinOf('мшт циф35ип070т074158')).toBe('WBA35BG070N074158');
+    expect(vinOf('мштциф35ип070т074158')).toBe('WBA35BG070N074158');
+  });
+
+  it('refuses Russian text that maps to no VIN on either layout', () => {
+    expect(vinOf('хлеб и масло, 17 штук')).toBeNull();
+  });
+
+  it('reads a VIN glued to its VIN label', () => {
+    expect(vinOf('VINWBA35BG070N074158')).toBe('WBA35BG070N074158');
+    expect(vinOf('vinwва35вg070n074158')).toBe('WBA35BG070N074158');
+  });
 });
 
 describe('vinText', () => {
   it('spells typed text the way a VIN is read, whether or not it is one', () => {
     expect(vinText('vin: wва 35вg-07.0n0741')).toBe('WBA35BG070N0741');
+  });
+
+  it('spells a VIN typed on the Russian layout as the VIN it is', () => {
+    expect(vinText('циф35ип070т074158')).toBe('WBA35BG070N074158');
   });
 });
 

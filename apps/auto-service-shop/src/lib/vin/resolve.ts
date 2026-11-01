@@ -108,6 +108,7 @@ export const resolveVin = async (
 > => {
   const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
   const vehicle = vehicles.length === 1 ? vehicles[0] : null;
+  const [identifier] = answer?.decode.identifiers ?? [];
   const record = {
     vin,
     decoder: answer?.decoder.name ?? null,
@@ -115,7 +116,8 @@ export const resolveVin = async (
     raw: answer?.decode.raw ?? null,
     facts: answer?.decode.facts ?? {},
     make: answer?.decode.make ?? null,
-    code: answer?.decode.code ?? answer?.decode.identifiers[0]?.value ?? null,
+    code: answer?.decode.code ?? identifier?.value ?? null,
+    code_type: answer?.decode.code ? null : (identifier?.type ?? null),
     vehicle_id: vehicle?.id ?? null,
   };
   if (record.make) {

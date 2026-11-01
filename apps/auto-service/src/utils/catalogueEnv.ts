@@ -30,7 +30,7 @@ const catalogueEnvKeys = [
 ] as const;
 
 export type CatalogueEnv = Partial<
-  Record<(typeof catalogueEnvKeys)[number] | 'SHOP_LEAD_SECRET', string>
+  Record<(typeof catalogueEnvKeys)[number] | 'SHOP_CLIENT_SECRET', string>
 >;
 
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
@@ -41,7 +41,7 @@ const catalogueEnvSchema = z
     MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
     MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
     SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema),
-    SHOP_LEAD_SECRET: unsetWhenEmpty(z.string()),
+    SHOP_CLIENT_SECRET: unsetWhenEmpty(z.string()),
   })
   .transform(
     (
@@ -49,7 +49,7 @@ const catalogueEnvSchema = z
         MEDUSA_BACKEND_URL,
         MEDUSA_PUBLISHABLE_KEY,
         SHOP_PREVIEW_TOKEN,
-        SHOP_LEAD_SECRET,
+        SHOP_CLIENT_SECRET,
       },
       context,
     ) => {
@@ -68,7 +68,7 @@ const catalogueEnvSchema = z
         backendUrl: MEDUSA_BACKEND_URL,
         publishableKey: MEDUSA_PUBLISHABLE_KEY,
         previewToken: SHOP_PREVIEW_TOKEN,
-        clientSecret: SHOP_LEAD_SECRET,
+        clientSecret: SHOP_CLIENT_SECRET,
       };
     },
   );
@@ -138,7 +138,7 @@ export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
   SHOP_PREVIEW_TOKEN: import.meta.env.SHOP_PREVIEW_TOKEN,
-  SHOP_LEAD_SECRET: process.env.SHOP_LEAD_SECRET,
+  SHOP_CLIENT_SECRET: process.env.SHOP_CLIENT_SECRET,
   VERCEL: import.meta.env.VERCEL,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
 });

@@ -41,6 +41,7 @@
       "default": "./src/partsOrderCopy.ts"
     },
     "./ad-text": "./src/adText.ts",
+    "./keyboard-layout": "./src/keyboardLayout.ts",
     "./phone": {
       "require": {
         "types": "./dist/cjs/phone.d.ts",

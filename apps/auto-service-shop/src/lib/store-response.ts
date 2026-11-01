@@ -97,23 +97,22 @@ export const listVehicleResponses = async (
 ): Promise<Vehicle[]> =>
   (await vehicleRows(catalog, filters)).map(toVehicleResponse);
 
-export const modelsBySlug = async (
+export const modelBySlug = async (
   catalog: CatalogModuleService,
+  makeSlug: string,
   slug: string,
-  makeSlug: string | undefined,
   config: Parameters<CatalogModuleService['listVehicleModels']>[1] = {},
 ) => {
-  const makeIds = makeSlug
-    ? (await catalog.listMakes({ slug: makeSlug }, { select: ['id'] })).map(
-        ({ id }) => id,
-      )
-    : null;
-  return makeIds?.length === 0
-    ? []
-    : catalog.listVehicleModels(
-        { slug, ...(makeIds && { make_id: makeIds }) },
-        config,
-      );
+  const [make] = await catalog.listMakes(
+    { slug: makeSlug },
+    { select: ['id'] },
+  );
+  if (!make) return null;
+  const [model] = await catalog.listVehicleModels(
+    { slug, make_id: make.id },
+    config,
+  );
+  return model ?? null;
 };
 
 export const listVehiclePage = async (
@@ -130,15 +129,16 @@ export const listVehiclePage = async (
     limit: number;
   },
 ): Promise<{ vehicles: Vehicle[]; next: string | null }> => {
-  const modelIds = modelSlug
-    ? (await modelsBySlug(catalog, modelSlug, makeSlug)).map(({ id }) => id)
-    : null;
-  if (modelIds?.length === 0) {
+  const model =
+    makeSlug && modelSlug
+      ? await modelBySlug(catalog, makeSlug, modelSlug)
+      : undefined;
+  if (model === null) {
     return { vehicles: [], next: null };
   }
   const rows = await catalog.listVehicles(
     {
-      ...(modelIds && { model_id: modelIds }),
+      ...(model && { model_id: model.id }),
       ...(after && { id: { $gt: after } }),
     },
     { ...VEHICLE_READ, take: limit },

@@ -1,16 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 
-import {
-  addLineAddon,
-  removeLineAddon,
-} from '../../../../../../../lib/offer-cart';
+import { offerCart } from '../../../../../../../lib/offer-cart';
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
   const { id, item_id } = req.params;
-  res.json({ cart: await addLineAddon(req.scope, id, item_id) });
+  res.json({ cart: await offerCart(req.scope).addLineAddon(id, item_id) });
 }
 
 export async function DELETE(
@@ -18,5 +15,5 @@ export async function DELETE(
   res: MedusaResponse,
 ): Promise<void> {
   const { id, item_id } = req.params;
-  res.json({ cart: await removeLineAddon(req.scope, id, item_id) });
+  res.json({ cart: await offerCart(req.scope).removeLineAddon(id, item_id) });
 }

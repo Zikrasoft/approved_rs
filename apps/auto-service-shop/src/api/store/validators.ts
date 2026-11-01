@@ -4,14 +4,22 @@ import {
   CATALOG_KEY_PATTERN,
   CATALOGUE_ID_PATTERN,
   checkoutContactSchema,
+  FACET_FILTER_PATTERN,
+  filteredKeyCount,
   MAX_LINE_QUANTITY,
+  MAX_OFFER_IDS,
+  MAX_PAGE,
   parseRangeFilter,
+  SEARCH_FILTER_CAPS,
   vinSchema,
 } from '@podbor/catalog-contract';
 
 const recordId = z.string().regex(CATALOGUE_ID_PATTERN);
 
-const MAX_FILTERED_KEYS = 8;
+const modelHasMake = ({ make, model }: { make?: string; model?: string }) =>
+  !model || Boolean(make);
+
+const MODEL_NEEDS_MAKE = 'model needs make';
 
 export const StoreSearchParts = z
   .object({
@@ -23,7 +31,11 @@ export const StoreSearchParts = z
     facets: z
       .union([z.string(), z.array(z.string())])
       .transform((value) => [value].flat())
-      .pipe(z.array(z.string().regex(/^[a-z0-9-]+:[^`]+$/)).max(20))
+      .pipe(
+        z
+          .array(z.string().regex(FACET_FILTER_PATTERN))
+          .max(SEARCH_FILTER_CAPS.facetValues),
+      )
       .default([]),
     range: z
       .union([z.string(), z.array(z.string())])
@@ -45,20 +57,18 @@ export const StoreSearchParts = z
               return range;
             }),
           )
-          .max(10),
+          .max(SEARCH_FILTER_CAPS.ranges),
       )
       .default([]),
     offset: z.coerce.number().int().nonnegative().max(10_000).default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),
   })
   .refine(({ q, category }) => q || category, 'q or category is required')
+  .refine(modelHasMake, MODEL_NEEDS_MAKE)
   .refine(
     ({ facets, range }) =>
-      new Set([
-        ...facets.map((facet) => facet.slice(0, facet.indexOf(':'))),
-        ...range.map(({ key }) => key),
-      ]).size <= MAX_FILTERED_KEYS,
-    `at most ${MAX_FILTERED_KEYS} filters`,
+      filteredKeyCount(facets, range) <= SEARCH_FILTER_CAPS.keys,
+    `at most ${SEARCH_FILTER_CAPS.keys} filters`,
   );
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 
@@ -116,7 +126,7 @@ export type StoreCompleteOfferCartType = z.infer<typeof StoreCompleteOfferCart>;
 
 export const StoreListPartPages = z.object({
   after: recordId.optional(),
-  limit: z.coerce.number().int().positive().max(5000).default(1000),
+  limit: z.coerce.number().int().positive().max(MAX_PAGE).default(MAX_PAGE),
 });
 export type StoreListPartPagesType = z.infer<typeof StoreListPartPages>;
 
@@ -124,7 +134,7 @@ export const StoreListOffers = z.object({
   part_identifier_id: z
     .union([z.string(), z.array(z.string())])
     .transform((value) => [value].flat())
-    .pipe(z.array(recordId).min(1).max(200)),
+    .pipe(z.array(recordId).min(1).max(MAX_OFFER_IDS)),
 });
 export type StoreListOffersType = z.infer<typeof StoreListOffers>;
 
@@ -134,5 +144,5 @@ export type StoreListFitmentsType = StoreListPartPagesType;
 export const StoreListVehicles = StoreListPartPages.extend({
   make: z.string().regex(CATALOG_KEY_PATTERN).optional(),
   model: z.string().regex(CATALOG_KEY_PATTERN).optional(),
-});
+}).refine(modelHasMake, MODEL_NEEDS_MAKE);
 export type StoreListVehiclesType = z.infer<typeof StoreListVehicles>;

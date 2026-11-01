@@ -23,10 +23,9 @@ export type {
 export type { PromptKey } from './promptKey.ts';
 export { storedLeadSchema } from './schema.ts';
 
+export { appendNote, hasRealContact } from './leadMerge.ts';
 export {
-  appendNote,
   canPostpone,
-  hasRealContact,
   isFreshLead,
   postponePatch,
   resumePatch,

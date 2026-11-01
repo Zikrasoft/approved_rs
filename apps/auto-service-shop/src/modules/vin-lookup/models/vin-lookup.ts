@@ -10,6 +10,7 @@ const VinLookup = model
     facts: model.json(),
     make: model.text().nullable(),
     code: model.text().nullable(),
+    code_type: model.text().nullable(),
     vehicle_id: model.text().nullable(),
   })
   .indexes([

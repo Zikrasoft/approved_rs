@@ -364,11 +364,12 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                                                                 |
-| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                                                                    |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                                                                       |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401, all shoppers share one store rate-limit bucket |
+| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
+| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                    |
+| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| `SHOP_CLIENT_SECRET`        | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -387,22 +388,28 @@ refuses any Lead naming an Order without it, so a visitor cannot attach a Lead
 to someone else's Order. The same secret goes the other way for «Сделать кейс»: carlab.rs's
 `/api/admin/work-draft` reads `GET /hooks/carlab-orders/:id/case-summary` from
 `MEDUSA_BACKEND_URL` with it, and the shop answers only with the car, the Parts
-and the RSD total of a completed Order. Every catalogue call carlab.rs makes
-for a visitor carries it too, in `x-shop-client-secret`, so the shop's store
-rate limits count the visitor named in `x-shop-client` instead of Vercel's
-egress. The draft Work is then committed with
+and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
+`SHOP_CLIENT_SECRET` is a separate value set twice the same way, on carlab.rs
+and in the shop's `.env`: every catalogue call carlab.rs makes for a visitor
+carries it in `x-shop-client-secret`, so the shop's store rate limits count the
+visitor named in `x-shop-client` instead of Vercel's egress. For one release
+the shop also takes `SHOP_LEAD_SECRET` on that header, so a carlab.rs still
+sending the old secret keeps its per-visitor buckets: set `SHOP_CLIENT_SECRET`
+in the shop first, restart it, then on carlab.rs and redeploy.
 
 **Rotating either secret without downtime.** Every side that checks a Bearer
 secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
-`SHOP_ORDER_OUTCOME_SECRET` and `SHOP_LEAD_SECRET`, carlab.rs checks
-`SHOP_LEAD_SECRET`; a side only ever sends the current value.
+`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET` and `SHOP_CLIENT_SECRET`,
+carlab.rs checks `SHOP_LEAD_SECRET`; a side only ever sends the current value.
 
 1. Make a new value (`openssl rand -hex 32`).
 2. On every side that holds the secret, move the old value to
    `<NAME>_PREVIOUS` and put the new one in `<NAME>`: for
-   `SHOP_LEAD_SECRET` that is carlab.rs and `/srv/carlab/.env`, for
+   `SHOP_LEAD_SECRET` and `SHOP_CLIENT_SECRET` that is carlab.rs (no
+   `_PREVIOUS` for `SHOP_CLIENT_SECRET` there, it only sends) and
+   `/srv/carlab/.env`, for
    `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
    and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
    shop (`docker compose up -d medusa`), in any order: while the sides differ,
@@ -912,8 +919,11 @@ number gets its CI value in that script. The non-obvious parts:
   shared egress, so carlab.rs names the visitor behind each call: its
   server-side catalogue sends the visitor's address (`x-real-ip`, else the
   first `x-forwarded-for` hop) as `x-shop-client` beside
-  `x-shop-client-secret: $SHOP_LEAD_SECRET`, and the shop counts that visitor
-  only when the secret matches `SHOP_LEAD_SECRET` or `SHOP_LEAD_SECRET_PREVIOUS`.
+  `x-shop-client-secret: $SHOP_CLIENT_SECRET`, and the shop counts that visitor
+  only when the secret matches `SHOP_CLIENT_SECRET` or
+  `SHOP_CLIENT_SECRET_PREVIOUS` (or, for one release, `SHOP_LEAD_SECRET`). An
+  IPv6 visitor is counted by its /64, so rotating addresses inside one
+  subscriber network shares one bucket.
   Without the secret on both sides every shopper shares one bucket again. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.

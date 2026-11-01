@@ -4,6 +4,8 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import orderTimeIndexes from '../../../migration-scripts/order-time-indexes';
+
 type SnapshotTable = {
   name: string;
   columns: Record<string, { name: string; type: string; nullable: boolean }>;
@@ -127,8 +129,27 @@ medusaIntegrationTestRunner({
           `select id from vin_lookup where vehicle_id in ('v') and deleted_at is null`,
           /Index.*IDX_vin_lookup_vehicle_id/,
         ],
+        [
+          'whether a VIN code has its Vehicle',
+          `select 1 from vehicle_identifier vi where vi.type = 'bmw-type-code' and vi.value = 'X' and vi.supplier_id is null and vi.deleted_at is null`,
+          /Index.*IDX_vehicle_identifier_type_value_vehicle_id_unique/,
+        ],
       ])('finds %s by an index', async (_, sql, index) => {
         expect(await plan(sql)).toMatch(index);
+      });
+
+      it('finds Orders by when they were placed or last changed, once the migration script ran', async () => {
+        await orderTimeIndexes({ container: getContainer() });
+
+        const { rows } = await pg().raw(
+          `select indexdef from pg_indexes where tablename = 'order' and indexname in ('IDX_order_created_at', 'IDX_order_updated_at') order by indexname`,
+        );
+        expect(
+          rows.map(({ indexdef }: { indexdef: string }) => indexdef),
+        ).toEqual([
+          expect.stringMatching(/\(created_at\) WHERE \(deleted_at IS NULL\)$/),
+          expect.stringMatching(/\(updated_at\) WHERE \(deleted_at IS NULL\)$/),
+        ]);
       });
     });
 
@@ -145,6 +166,15 @@ medusaIntegrationTestRunner({
       it('keeps the Supplier markup an exact decimal', async () => {
         expect(await columnType('supplier', 'markup_percentage')).toBe(
           'numeric(5,2)',
+        );
+      });
+
+      it('checks the Supplier markup on the decimal itself', async () => {
+        const { rows } = await pg().raw(
+          `select pg_get_constraintdef(oid) as definition from pg_constraint where conname = 'supplier_markup_percentage'`,
+        );
+        expect(rows[0]?.definition).toBe(
+          'CHECK ((markup_percentage >= (0)::numeric))',
         );
       });
 

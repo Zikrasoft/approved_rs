@@ -6,44 +6,86 @@ import {
 
 import type CatalogModuleService from '../modules/catalog/service';
 import type { SlugKind } from '../modules/catalog/models/slug-redirect';
+import { chunksOf } from '../modules/_shared/chunks';
 
 type Slugs = Map<string, string>;
 
 const slugsOf = (rows: { id: string; slug: string }[]): Slugs =>
   new Map(rows.map(({ id, slug }) => [id, slug]));
 
+type RedirectRow = Awaited<
+  ReturnType<CatalogModuleService['listSlugRedirects']>
+>[number];
+
+const REDIRECT_PAGE = 1000;
+
+async function allRedirects(
+  catalog: CatalogModuleService,
+): Promise<RedirectRow[]> {
+  const rows: RedirectRow[] = [];
+  for (let after: string | null = null; ;) {
+    const page: RedirectRow[] = await catalog.listSlugRedirects(
+      after ? { id: { $gt: after } } : {},
+      { order: { id: 'ASC' }, take: REDIRECT_PAGE },
+    );
+    rows.push(...page);
+    if (page.length < REDIRECT_PAGE) return rows;
+    after = page[page.length - 1]!.id;
+  }
+}
+
+export const latestPartRedirects = <
+  Row extends { kind: string; from_slug: string },
+>(
+  rows: Row[],
+): Row[] => {
+  const latest = new Map(
+    rows.flatMap((row) =>
+      row.kind === 'part' ? [[row.from_slug, row] as const] : [],
+    ),
+  );
+  return rows.filter(
+    (row) => row.kind !== 'part' || latest.get(row.from_slug) === row,
+  );
+};
+
+const inChunks = async <T>(
+  ids: string[],
+  list: (chunk: string[]) => Promise<T[]>,
+): Promise<T[]> =>
+  (
+    await Promise.all(chunksOf([...new Set(ids)]).map((chunk) => list(chunk)))
+  ).flat();
+
 export async function catalogueRedirects(
   catalog: CatalogModuleService,
 ): Promise<CatalogueRedirect[]> {
-  const rows = await catalog.listSlugRedirects(
-    {},
-    { order: { created_at: 'ASC' }, take: null },
-  );
+  const rows = latestPartRedirects(await allRedirects(catalog));
   const columns = { select: ['id', 'slug'], take: null };
   const targetIds = (kind: SlugKind) =>
     rows.flatMap(({ target_kind, target_id }) =>
       target_kind === kind && target_id ? [target_id] : [],
     );
-  const vehicleIds = targetIds('vehicle');
-  const vehicles = vehicleIds.length
-    ? await catalog.listVehicles(
-        { id: vehicleIds },
-        { select: ['id', 'slug', 'model_id'], take: null },
-      )
-    : [];
-  const modelIds = [
-    ...targetIds('model'),
-    ...rows.flatMap(({ kind, scope_id }) =>
-      kind === 'vehicle' && scope_id ? [scope_id] : [],
+  const vehicles = await inChunks(targetIds('vehicle'), (id) =>
+    catalog.listVehicles(
+      { id },
+      { select: ['id', 'slug', 'model_id'], take: null },
     ),
-    ...vehicles.map(({ model_id }) => model_id),
-  ];
-  const models = modelIds.length
-    ? await catalog.listVehicleModels(
-        { id: modelIds },
+  );
+  const models = await inChunks(
+    [
+      ...targetIds('model'),
+      ...rows.flatMap(({ kind, scope_id }) =>
+        kind === 'vehicle' && scope_id ? [scope_id] : [],
+      ),
+      ...vehicles.map(({ model_id }) => model_id),
+    ],
+    (id) =>
+      catalog.listVehicleModels(
+        { id },
         { select: ['id', 'slug', 'make_id'], take: null },
-      )
-    : [];
+      ),
+  );
   const [makes, categories, brands] = await Promise.all([
     catalog.listMakes({}, columns),
     catalog.listCategories({}, columns),

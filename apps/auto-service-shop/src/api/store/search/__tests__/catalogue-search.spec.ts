@@ -251,17 +251,17 @@ medusaIntegrationTestRunner({
       });
 
       it('says whether the Model a listing is scoped to, and its Make, have a page', async () => {
-        const scoped = async (model: string) =>
+        const scoped = async (model: string, make = 'bmw') =>
           (
             await api.get(
-              `/store/search?${new URLSearchParams({ q: 'щетка', locale: 'ru', model })}`,
+              `/store/search?${new URLSearchParams({ q: 'щетка', locale: 'ru', make, model })}`,
               storeHeaders,
             )
           ).data.scope_pages;
 
         expect(await scoped('g20-320d')).toEqual({ model: true, make: true });
         expect(await scoped('f30-320d')).toEqual({ model: false, make: true });
-        expect(await scoped('b8-a4-20tdi')).toEqual({
+        expect(await scoped('b8-a4-20tdi', 'audi')).toEqual({
           model: false,
           make: false,
         });

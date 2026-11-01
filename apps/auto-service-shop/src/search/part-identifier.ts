@@ -12,12 +12,13 @@ import {
   facetFilter,
   IN_STOCK,
   IN_STOCK_FACET,
+  type PartOffer,
 } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
-import { type PricedOfferRow, storeOffers } from '../modules/supplier';
+import { offersByIdentifier, type PricedOfferRow } from '../modules/supplier';
 import {
   PART_CHANGED_EVENT,
   PART_IDENTIFIER_INDEX,
@@ -98,13 +99,10 @@ const toDocument = (
   row: IdentifierRow,
   siblings: NumberRow[],
   facetFields: FacetFieldRow[],
-  offers: OfferRow[],
+  own: PartOffer[],
   published: Set<string>,
   fitments: FitmentRow[],
 ) => {
-  const own = storeOffers(
-    offers.filter(({ part_identifier_id }) => part_identifier_id === row.id),
-  );
   const [best] = own;
   return {
     id: row.id,
@@ -213,13 +211,15 @@ const source = {
         filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
       }),
     ]);
+    const offersOf = offersByIdentifier(offers as OfferRow[]);
+    const publishedIds = new Set(published.map(({ id }: { id: string }) => id));
     return rows.map((row) =>
       toDocument(
         row,
         siblings as NumberRow[],
         facetFields as FacetFieldRow[],
-        offers as OfferRow[],
-        new Set(published.map(({ id }: { id: string }) => id)),
+        offersOf.get(row.id) ?? [],
+        publishedIds,
         fitments as FitmentRow[],
       ),
     );

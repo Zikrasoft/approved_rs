@@ -132,6 +132,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "code_type": {
+          "name": "code_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "vehicle_id": {
           "name": "vehicle_id",
           "type": "text",

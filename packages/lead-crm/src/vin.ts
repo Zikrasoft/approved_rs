@@ -1,3 +1,5 @@
+import { fromRussianLayout } from './keyboardLayout.ts';
+
 const VIN_LETTERS = 'A-HJ-NPR-Z';
 
 const MAKER_HAS_A_LETTER = `(?=[0-9]{0,2}[${VIN_LETTERS}])`;
@@ -26,19 +28,25 @@ const latinText = (text: string): string =>
   text
     .toUpperCase()
     .replace(/[АВЕКМНОРСТУХ]/g, (letter) => LATIN_LOOKALIKES[letter]!)
-    .replace(/^\s*VIN\b\W*/, '');
+    .replace(/^\s*VIN(?:\b\W*|(?=[A-Z0-9]{17}\s*$))/, '');
 
 export const vinWhileTyping = (text: string): string =>
   text.replace(/[\s.-]+/g, '').toUpperCase();
 
-export const vinText = (text: string): string =>
-  vinWhileTyping(latinText(text));
+const compactLatin = (text: string): string => vinWhileTyping(latinText(text));
 
-export const vinOf = (text: string): string | null => {
+const vinAsTyped = (text: string): string | null => {
   const words = latinText(text)
     .split(/[^A-Z0-9.-]+/)
     .map((word) => word.replace(/[.-]+/g, ''));
   return (
-    [vinText(text), ...words].find((word) => VIN_PATTERN.test(word)) ?? null
+    [compactLatin(text), ...words].find((word) => VIN_PATTERN.test(word)) ??
+    null
   );
 };
+
+export const vinOf = (text: string): string | null =>
+  vinAsTyped(text) ?? vinAsTyped(fromRussianLayout(text));
+
+export const vinText = (text: string): string =>
+  vinOf(text) ?? compactLatin(text);

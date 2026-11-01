@@ -1,11 +1,7 @@
-const RUSSIAN_KEYS = 'йцукенгшщзхъфывапролджэячсмитьбюё';
-const LATIN_KEYS = "qwertyuiop[]asdfghjkl;'zxcvbnm,.`";
-
-const retyped = (text: string, from: string, to: string): string =>
-  [...text.toLowerCase()].map((key) => to[from.indexOf(key)] ?? key).join('');
-
-export const fromRussianLayout = (text: string): string =>
-  retyped(text, RUSSIAN_KEYS, LATIN_KEYS);
+import {
+  fromRussianLayout,
+  toRussianLayout,
+} from '@podbor/lead-crm/keyboard-layout';
 
 const RUSSIAN_WORDS = /^[\sа-яё]+$/i;
 const LATIN_WORDS = /^[\sa-z[\];',.`]+$/i;
@@ -13,7 +9,7 @@ const LATIN_WORDS = /^[\sa-z[\];',.`]+$/i;
 export const otherLayout = (text: string): string | null => {
   if (!/\S/.test(text)) return null;
   if (RUSSIAN_WORDS.test(text)) return fromRussianLayout(text);
-  if (LATIN_WORDS.test(text)) return retyped(text, LATIN_KEYS, RUSSIAN_KEYS);
+  if (LATIN_WORDS.test(text)) return toRussianLayout(text);
   return null;
 };
 

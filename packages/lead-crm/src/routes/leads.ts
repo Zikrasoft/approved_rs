@@ -14,6 +14,7 @@ import {
   type LeadRefusal,
 } from '../form.ts';
 import { escapeHtml } from '../telegram/markup.ts';
+import { typedAsPhone } from '../contactShape.ts';
 import {
   bearerToken,
   secretMatches,
@@ -37,6 +38,7 @@ export interface RouteRequestContext {
 
 export interface RefusalBrand {
   name: string;
+  home: string;
   background: string;
   text: string;
   accent: string;
@@ -88,7 +90,6 @@ async function cancelOrder(
 const RETYPED_FIELDS = new Set<string>([
   CONTACT_INPUT_FIELDS.contact,
   CONTACT_INPUT_FIELDS.phoneNumber,
-  CONTACT_INPUT_FIELDS.phoneCountry,
   CONTACT_INPUT_FIELDS.telegram,
 ]);
 
@@ -98,6 +99,7 @@ const attribute = (text: string): string =>
 const refusalStyle = (brand: RefusalBrand): string =>
   `body{font:16px/1.5 system-ui,sans-serif;max-width:28rem;margin:0 auto;padding:1.5rem 1rem;background:${brand.background};color:${brand.text}}
 h1{font-size:1.25rem;line-height:1.3;margin:0 0 1.5rem}
+h1 a{text-decoration:none}
 label{display:block;margin:0 0 1rem}
 input:not([type=checkbox]){display:block;box-sizing:border-box;width:100%;min-height:44px;margin-top:.5rem;font:inherit;padding:0 .75rem;color:inherit;background:transparent;border:1px solid;border-radius:12px}
 input[type=checkbox]{width:20px;height:20px;vertical-align:middle;margin:0 .5rem 0 0;accent-color:${brand.accent}}
@@ -115,6 +117,11 @@ function refusalPage(
 ): Response {
   const { reason, contact } = leadRefusal(form);
   const message = copy.reasons[reason];
+  const contactInput =
+    form.get(CONTACT_INPUT_FIELDS.channel) === 'telegram' &&
+    !typedAsPhone(contact)
+      ? `name="${CONTACT_INPUT_FIELDS.telegram}"`
+      : `name="${CONTACT_INPUT_FIELDS.phoneNumber}" type="tel" inputmode="tel" autocomplete="tel"`;
   const consentBox = form.get(CONSENT_FIELD)
     ? ''
     : `
@@ -144,9 +151,9 @@ function refusalPage(
     <style>${refusalStyle(copy.brand)}</style>
   </head>
   <body>
-    <h1>${escapeHtml(copy.brand.name)}</h1>
+    <h1><a href="${attribute(copy.brand.home)}">${escapeHtml(copy.brand.name)}</a></h1>
     <form method="POST" action="${attribute(action)}">
-      <label>${escapeHtml(message)}<input name="${CONTACT_INPUT_FIELDS.contact}" value="${attribute(contact)}" required autocomplete="tel" /></label>${consentBox}
+      <label>${escapeHtml(message)}<input ${contactInput} value="${attribute(contact)}" required /></label>${consentBox}
 ${kept.join('\n')}
       <button type="submit">${escapeHtml(copy.submit)}</button>
     </form>

@@ -164,6 +164,11 @@ describe('planSearch', () => {
     expect(outcome).toMatchObject({ view: { make: undefined } });
   });
 
+  it('keeps the model only beside its make', async () => {
+    const outcome = await plan('model=x3&q=filter');
+    expect(outcome).toMatchObject({ view: { model: undefined } });
+  });
+
   it('builds links that keep the scope and drop a zero offset', async () => {
     const outcome = await plan('q=filter&make=bmw&model=x3');
     if (!('view' in outcome)) throw new Error('expected a view');

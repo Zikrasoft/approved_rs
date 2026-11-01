@@ -3,6 +3,7 @@ import type { Context } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError } from '../_shared/admin-error';
+import { chunksOf, ID_CHUNK } from '../_shared/chunks';
 import { MANUAL_SOURCE } from './models/provenance';
 import type CatalogModuleService from './service';
 
@@ -16,14 +17,7 @@ type Row = { id: string };
 
 export type SourceCount = { source: string; rows: number };
 
-const DELETE_CHUNK = 2000;
-
-const CHUNK_COLUMNS = { select: ['id'], take: DELETE_CHUNK };
-
-export const chunksOf = <T>(items: T[], size = DELETE_CHUNK): T[][] =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
-    items.slice(index * size, (index + 1) * size),
-  );
+const CHUNK_COLUMNS = { select: ['id'], take: ID_CHUNK };
 
 const sourceInUse = (source: string, details: Record<string, unknown>) =>
   adminError(

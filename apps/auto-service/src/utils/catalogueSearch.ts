@@ -4,18 +4,17 @@ import {
   type CarHit,
   type VinFacts,
 } from '@podbor/catalog-contract';
-import { vinText } from '@podbor/lead-crm/vin';
+import { vinOf, vinText } from '@podbor/lead-crm/vin';
 import type { Locale } from '@/i18n/config';
 import { carName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';
 import { carFactsQuery } from './carFacts';
 import { PathBuilder, vehiclePath } from './paths';
-import { queryVin } from './queryVin';
 
 export type SearchIntent = { kind: 'vin'; vin: string } | { kind: 'query' };
 
 export const searchIntent = (q: string): SearchIntent => {
-  const vin = queryVin(q);
+  const vin = vinOf(q);
   return vin ? { kind: 'vin', vin } : { kind: 'query' };
 };
 

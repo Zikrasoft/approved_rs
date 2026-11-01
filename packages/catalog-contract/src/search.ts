@@ -204,6 +204,43 @@ export const inRange = (value: string, { min, max }: RangeFilter): boolean => {
   );
 };
 
+export const FACET_FILTER_PATTERN = /^[a-z0-9-]+:[^`]+$/;
+
+export const SEARCH_FILTER_CAPS = { keys: 8, facetValues: 20, ranges: 10 };
+
+export const MAX_OFFER_IDS = 100;
+
+export const MAX_PAGE = 1000;
+
+const facetKey = (facet: string): string => facet.slice(0, facet.indexOf(':'));
+
+export const filteredKeyCount = (
+  facets: string[],
+  ranges: RangeFilter[],
+): number =>
+  new Set([...facets.map(facetKey), ...ranges.map(({ key }) => key)]).size;
+
+export const filtersWithinCap = (
+  facets: string[],
+  ranges: RangeFilter[],
+): { facets: string[]; ranges: RangeFilter[] } => {
+  const keys = new Set<string>();
+  const fits = (key: string) => {
+    if (!keys.has(key) && keys.size >= SEARCH_FILTER_CAPS.keys) return false;
+    keys.add(key);
+    return true;
+  };
+  return {
+    facets: facets
+      .filter((facet) => FACET_FILTER_PATTERN.test(facet))
+      .slice(0, SEARCH_FILTER_CAPS.facetValues)
+      .filter((facet) => fits(facetKey(facet))),
+    ranges: ranges
+      .slice(0, SEARCH_FILTER_CAPS.ranges)
+      .filter(({ key }) => fits(key)),
+  };
+};
+
 export const searchableQuery = (q: string): boolean => /[\p{L}\p{N}]/u.test(q);
 
 export type SearchResult = z.infer<typeof searchResultSchema>;

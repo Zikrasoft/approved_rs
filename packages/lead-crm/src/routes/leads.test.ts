@@ -20,6 +20,7 @@ const waitUntil = vi.fn();
 const refusalCopy = (locale: string) => ({
   brand: {
     name: 'CarLab',
+    home: '/ru/',
     background: '#ffffff',
     text: '#222324',
     accent: '#fa6610',
@@ -346,7 +347,7 @@ describe('createLeadsRoute', () => {
 
     expect(body).toContain('<form method="POST" action="/api/leads">');
     expect(body).toContain(
-      '<label>ru: invalid phone<input name="contact" value="12" required',
+      '<label>ru: invalid phone<input name="phone_number" type="tel" inputmode="tel" autocomplete="tel" value="12" required',
     );
     expect(body).toContain(
       '<input type="hidden" name="name" value="Иван &quot;&lt;b&gt;&quot;" />',
@@ -360,8 +361,8 @@ describe('createLeadsRoute', () => {
     expect(body).toContain(
       '<input type="hidden" name="source_url" value="https://carlab.rs/ru/parts/" />',
     );
-    expect(body).not.toContain('name="phone_number"');
-    expect(body).toContain('<h1>CarLab</h1>');
+    expect(body).not.toContain('name="contact"');
+    expect(body).toContain('<h1><a href="/ru/">CarLab</a></h1>');
     expect(body).toContain('background:#fa6610;color:#222324');
     expect(body).toContain('<button type="submit">Отправить</button>');
     expect(body).toContain(
@@ -397,7 +398,7 @@ describe('createLeadsRoute', () => {
         makeCtx({ telegram: 'ivan_petrov', contact_channel: 'telegram' }),
       )
     ).text();
-    expect(page).toContain('value="@ivan_petrov"');
+    expect(page).toContain('<input name="telegram" value="@ivan_petrov"');
     expect(page).toContain('name="contact_channel" value="telegram"');
   });
 
@@ -424,9 +425,9 @@ describe('createLeadsRoute', () => {
       /<input type="hidden" name="([^"]+)" value="([^"]*)" \/>/g,
     ))
       resent[name!] = value!;
-    expect(page).toContain('name="contact" value="" required');
+    expect(page).toContain('autocomplete="tel" value="" required');
     expect(page).toContain('name="consent"');
-    resent.contact = RS_PHONE;
+    resent.phone_number = RS_PHONE;
     resent.consent = '1';
 
     const ctx = makeCtx(resent);
@@ -435,6 +436,34 @@ describe('createLeadsRoute', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
     expect(waitUntil).toHaveBeenCalledOnce();
   });
+
+  it.each(['641277123', '0641277124'])(
+    'accepts a local number %s typed again on the refusal page in the country the form had',
+    async (local) => {
+      const page = await (
+        await POST(
+          makeCtx({
+            phone_number: '12',
+            phone_country: 'RS',
+            contact_channel: 'whatsapp',
+            consent: 'on',
+          }),
+        )
+      ).text();
+      const resent: Record<string, string> = {};
+      for (const [, name, value] of page.matchAll(
+        /<input type="hidden" name="([^"]+)" value="([^"]*)" \/>/g,
+      ))
+        resent[name!] = value!;
+      resent.phone_number = local;
+
+      const ctx = makeCtx(resent);
+      await POST(ctx);
+
+      expect(resent.phone_country).toBe('RS');
+      expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
+    },
+  );
 
   it.each(['javascript:alert(1)', 'https://evil.example/sr/parts/'])(
     'stores no page for a forged Referer %s',

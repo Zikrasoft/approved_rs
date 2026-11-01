@@ -63,7 +63,7 @@ export const createVehicleFixture = async (
       }),
   );
   const model = await firstOrCreate(
-    catalog.listVehicleModels({ slug: modelSlug }),
+    catalog.listVehicleModels({ slug: modelSlug, chassis_id: chassis.id }),
     () =>
       catalog.createVehicleModels({
         chassis_id: chassis.id,

@@ -247,6 +247,52 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('moves a Series to another Make, keeping each old Model URL answering', async () => {
+        const seatMake = await catalog.createMakes({
+          name: 'Seat Move',
+          slug: 'seat-move',
+        });
+        const leon = await catalog.createSeries({
+          make_id: seatMake.id,
+          name: 'Leon',
+        });
+        const chassis = await catalog.createChassis({
+          series_id: leon.id,
+          code: '5F1',
+        });
+        const seatModel = await catalog.createVehicleModels({
+          chassis_id: chassis.id,
+          slug: 'leon-moved',
+          name: '1.4 TSI',
+        });
+        const cupra = await createVehicleFixture(catalog, {
+          make: { slug: 'cupra-move', name: 'Cupra Move' },
+          modelSlug: 'leon-moved',
+          chassisCode: 'KL1',
+          engineCode: 'DNUA',
+          engineFamily: 'EA888',
+          typeCode: 'KL11',
+        });
+
+        await catalog.updateSeries({ id: leon.id, make_id: cupra.make.id });
+
+        const [moved] = await catalog.listVehicleModels({ id: seatModel.id });
+        expect(moved.make_id).toBe(cupra.make.id);
+        expect(moved.slug).not.toBe('leon-moved');
+        expect(await redirects()).toEqual(
+          expect.arrayContaining([
+            {
+              from: place({ make: 'seat-move', model: 'leon-moved' }),
+              to: place({ make: 'cupra-move', model: moved.slug }),
+            },
+          ]),
+        );
+        const [untouched] = await catalog.listVehicleModels({
+          id: cupra.model.id,
+        });
+        expect(untouched).toMatchObject({ slug: 'leon-moved' });
+      });
+
       it('records who merged a Make on the redirects it leaves', async () => {
         const vw = await createVehicleFixture(catalog, {
           make: { slug: 'vw-actor', name: 'VW Actor' },

@@ -1,5 +1,6 @@
 import {
   CATALOG_KEY_PATTERN,
+  filtersWithinCap,
   type RangeFilter,
   searchableQuery,
 } from '@podbor/catalog-contract';
@@ -13,12 +14,7 @@ import {
 } from './catalogueSearch';
 import { searchEitherLayout } from './keyboardLayout';
 import { PathBuilder } from './paths';
-import {
-  appendRange,
-  filtersWithinCap,
-  partsQuery,
-  rangesFromParams,
-} from './partsSearch';
+import { appendRange, partsQuery, rangesFromParams } from './partsSearch';
 
 export type SearchCatalogue = Pick<
   ReturnType<typeof createCatalogue>,
@@ -49,8 +45,9 @@ export async function planSearch({
 }) {
   const typed = partsQuery(params.get('q') ?? '');
   const category = catalogKey(params.get('category'));
-  const model = catalogKey(params.get('model'));
-  const make = model ? catalogKey(params.get('make')) : undefined;
+  const requestedModel = catalogKey(params.get('model'));
+  const make = requestedModel ? catalogKey(params.get('make')) : undefined;
+  const model = make && requestedModel;
   const requestedFacets = params.getAll('facets');
   const requestedRanges = rangesFromParams(params);
   const { facets: chosen, ranges } = filtersWithinCap(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromRussianLayout, otherLayout } from './keyboardLayout';
+import { otherLayout } from './keyboardLayout';
 
 describe('otherLayout', () => {
   it.each([
@@ -17,10 +17,4 @@ describe('otherLayout', () => {
       expect(otherLayout(typed)).toBeNull();
     },
   );
-});
-
-describe('fromRussianLayout', () => {
-  it('keeps keys it has no counterpart for', () => {
-    expect(fromRussianLayout('ЦИФ35ИП070Т074158')).toBe('wba35bg070n074158');
-  });
 });

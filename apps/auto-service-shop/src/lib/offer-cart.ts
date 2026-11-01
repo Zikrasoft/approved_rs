@@ -58,7 +58,7 @@ import {
   type CheckoutContactFields,
 } from './order-metadata';
 import { liveOffers, sellingOffers } from './suppliers/live-quote';
-import { storeOffers } from '../modules/supplier';
+import { type PricedOfferRow, storeOffer } from '../modules/supplier';
 import { carFor } from './vin/car-for';
 
 const offerIdOf = (item: CartItem) =>
@@ -194,324 +194,7 @@ const planOf = async (scope: MedusaContainer, items: CartItem[]) => {
   );
 };
 
-const applyStamps = async (
-  scope: MedusaContainer,
-  stamps: CartPlan['stamps'],
-) => {
-  for (const { itemId, metadata } of stamps) {
-    await scope
-      .resolve<ICartModuleService>(Modules.CART)
-      .updateLineItems(itemId, { metadata });
-  }
-};
-
-async function syncOfferCart(
-  scope: MedusaContainer,
-  cartId: string,
-  changed = false,
-): Promise<OfferCart> {
-  const cart = await retrieveCart(scope, cartId);
-  const currency = cart.currency_code.toUpperCase();
-  if (cart.completed_at) {
-    return { id: cart.id, completed: true, currency, total: 0, items: [] };
-  }
-  const items = [...(cart.items ?? [])].sort(
-    (a, b) =>
-      new Date(a.created_at ?? 0).getTime() -
-        new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id),
-  );
-  const { lines, fixes, stamps } = await planOf(scope, items);
-  if (fixes.remove.length) {
-    await deleteLineItemsWorkflow(scope).run({
-      input: { cart_id: cartId, ids: fixes.remove.map(({ itemId }) => itemId) },
-    });
-  }
-  for (const { itemId, update } of fixes.update) {
-    await updateLineItemInCartWorkflow(scope).run({
-      input: { cart_id: cartId, item_id: itemId, update },
-    });
-  }
-  await applyStamps(scope, stamps);
-  if ((changed || fixes.remove.length || fixes.update.length) && items.length) {
-    await ensureCashAtPickupPaymentSession(scope, cartId);
-  }
-  return {
-    id: cart.id,
-    completed: false,
-    currency,
-    total: cartTotals(lines).total,
-    items: lines,
-  };
-}
-
-const openCart = async (scope: MedusaContainer, cartId: string) => {
-  const cart = await retrieveCart(scope, cartId);
-  if (cart.completed_at) {
-    throw new MedusaError(
-      MedusaError.Types.NOT_FOUND,
-      `Cart ${cartId} is already an order`,
-    );
-  }
-  return cart;
-};
-
 const CART_LOCK = 'offer-cart';
-
-const locked =
-  <Args extends unknown[], T>(
-    job: (scope: MedusaContainer, cartId: string, ...args: Args) => Promise<T>,
-  ) =>
-  (scope: MedusaContainer, cartId: string, ...args: Args): Promise<T> =>
-    lockedBy(lockOf(scope), CART_LOCK)((id: string) => job(scope, id, ...args))(
-      cartId,
-    );
-
-export const removeOfferLine = locked(
-  async (scope, cartId, itemId: string): Promise<OfferCart> => {
-    const cart = await openCart(scope, cartId);
-    const items = cart.items ?? [];
-    const line = items.find((item) => item.id === itemId);
-    if (!line) {
-      throw new MedusaError(
-        MedusaError.Types.NOT_FOUND,
-        `Cart ${cartId} has no line ${itemId}`,
-      );
-    }
-    const offerId = offerIdOf(line);
-    await deleteLineItemsWorkflow(scope).run({
-      input: {
-        cart_id: cartId,
-        ids: [
-          itemId,
-          ...items
-            .filter(
-              (item) =>
-                offerId && kindOf(item) && parentOfferIdOf(item) === offerId,
-            )
-            .map(({ id }) => id),
-        ],
-      },
-    });
-    return syncOfferCart(scope, cartId, true);
-  },
-);
-
-const offerLine = async (
-  scope: MedusaContainer,
-  cartId: string,
-  itemId: string,
-  kind: AddonKind,
-) => {
-  const cart = await openCart(scope, cartId);
-  const items = cart.items ?? [];
-  const line = items.find((item) => item.id === itemId && offerIdOf(item));
-  if (!line) {
-    throw new MedusaError(
-      MedusaError.Types.NOT_FOUND,
-      `Cart ${cartId} has no line ${itemId}`,
-    );
-  }
-  return {
-    line,
-    addonLines: items.filter(
-      (item) =>
-        kindOf(item) === kind && parentOfferIdOf(item) === offerIdOf(line),
-    ),
-  };
-};
-
-export const addLineAddon = locked(
-  async (
-    scope,
-    cartId,
-    itemId: string,
-    kind: AddonKind = 'service',
-  ): Promise<OfferCart> => {
-    const { line, addonLines } = await offerLine(scope, cartId, itemId, kind);
-    const offerId = offerIdOf(line)!;
-    const lineServices = (await servicesOf(scope, [line])).get(offerId);
-    const price = priceFor(lineServices, kind);
-    if (price === null) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        `Line ${itemId} has no ${kind} add-on`,
-      );
-    }
-    if (!addonLines.length) {
-      await addToCartWorkflow(scope).run({
-        input: {
-          cart_id: cartId,
-          items: [
-            {
-              title:
-                kind === 'installation'
-                  ? PARTS_ORDER_COPY.installation
-                  : lineServices!.service!.label,
-              quantity: Number(line.quantity),
-              unit_price: price,
-              requires_shipping: false,
-              metadata: addonLineMetadata({ lineId: line.id, offerId }, kind),
-            },
-          ],
-        },
-      });
-    }
-    return syncOfferCart(scope, cartId, true);
-  },
-);
-
-export const removeLineAddon = locked(
-  async (
-    scope,
-    cartId,
-    itemId: string,
-    kind: AddonKind = 'service',
-  ): Promise<OfferCart> => {
-    const { addonLines } = await offerLine(scope, cartId, itemId, kind);
-    if (addonLines.length) {
-      await deleteLineItemsWorkflow(scope).run({
-        input: { cart_id: cartId, ids: addonLines.map(({ id }) => id) },
-      });
-    }
-    return syncOfferCart(scope, cartId, true);
-  },
-);
-
-async function sellableOffer(
-  scope: MedusaContainer,
-  offerId: string,
-  quantity: number,
-) {
-  const [row] = await liveOffers(scope, { id: [offerId] });
-  const [offer] = row ? storeOffers([row]) : [];
-  if (!row || !offer) {
-    return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
-  }
-  if (orderCap(offer) < quantity) {
-    return refuse('OFFER_OUT_OF_STOCK', `Only ${orderCap(offer)} can be sold`);
-  }
-  return {
-    ...offer,
-    part_identifier_id: row.part_identifier_id,
-    supplierName: row.supplier.name,
-  };
-}
-
-async function putOffer(
-  scope: MedusaContainer,
-  cartId: string,
-  offerId: string,
-  quantity: number,
-): Promise<void> {
-  const cart = await openCart(scope, cartId);
-  const line = (cart.items ?? []).find((item) => offerIdOf(item) === offerId);
-  const wanted = Number(line?.quantity ?? 0) + quantity;
-  const offer = await sellableOffer(scope, offerId, wanted);
-  if (line) {
-    await updateLineItemInCartWorkflow(scope).run({
-      input: {
-        cart_id: cartId,
-        item_id: line.id,
-        update: { quantity: wanted, unit_price: offer.price },
-      },
-    });
-    return;
-  }
-  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const identifier = await catalog.retrievePartIdentifier(
-    offer.part_identifier_id,
-    { relations: ['part', 'brand'] },
-  );
-  const part = {
-    slug: partPageSlug(identifier.brand.slug, identifier.normalized_value),
-    brand: identifier.brand.name,
-    number: identifier.value,
-    name: identifier.part.name,
-  };
-  await addToCartWorkflow(scope).run({
-    input: {
-      cart_id: cartId,
-      items: [
-        {
-          title: orderLineTitle(part),
-          quantity,
-          unit_price: offer.price,
-          requires_shipping: false,
-          metadata: offerLineMetadata(
-            offer.id,
-            identifier.id,
-            part,
-            offer.supplierName,
-          ),
-        },
-      ],
-    },
-  });
-}
-
-export const addOffer = locked(
-  async (
-    scope,
-    cartId,
-    offerId: string,
-    quantity: number,
-  ): Promise<OfferCart> => {
-    await putOffer(scope, cartId, offerId, quantity);
-    return syncOfferCart(scope, cartId, true);
-  },
-);
-
-export async function createOfferCart(
-  scope: MedusaContainer,
-  {
-    email,
-    offer_id,
-    quantity,
-  }: { email?: string; offer_id?: string; quantity: number },
-): Promise<OfferCart> {
-  if (offer_id) {
-    await sellableOffer(scope, offer_id, quantity);
-  }
-  const { result } = await createCartWorkflow(scope).run({
-    input: { email, metadata: cashAtPickupMetadata() },
-  });
-  if (offer_id) {
-    await putOffer(scope, result.id, offer_id, quantity);
-  }
-  return syncOfferCart(scope, result.id, Boolean(offer_id));
-}
-
-export const readOfferCart = locked((scope, cartId) =>
-  syncOfferCart(scope, cartId),
-);
-
-export const setOfferQuantity = locked(
-  async (
-    scope,
-    cartId,
-    itemId: string,
-    quantity: number,
-  ): Promise<OfferCart> => {
-    const cart = await retrieveCart(scope, cartId);
-    const line = (cart.items ?? []).find((item) => item.id === itemId);
-    const offerId = line && offerIdOf(line);
-    if (cart.completed_at || !line || !offerId) {
-      throw new MedusaError(
-        MedusaError.Types.NOT_FOUND,
-        `Cart ${cartId} has no line ${itemId}`,
-      );
-    }
-    const offer = await sellableOffer(scope, offerId, quantity);
-    await updateLineItemInCartWorkflow(scope).run({
-      input: {
-        cart_id: cartId,
-        item_id: itemId,
-        update: { quantity, unit_price: offer.price },
-      },
-    });
-    return syncOfferCart(scope, cartId, true);
-  },
-);
 
 const REFUSAL_MESSAGES: Record<CartRefusal, string> = {
   OFFER_MISSING: 'A line in the cart has no offer that can be sold now.',
@@ -612,17 +295,313 @@ export function createCheckout({
   return { checkout, refuseCheckout };
 }
 
-export const offerCheckout = (scope: MedusaContainer) =>
-  createCheckout({
+type ShopCartItem = CartItem & { created_at?: Date | string | null };
+
+type ShopCart = CheckoutCart & {
+  id: string;
+  currency_code: string;
+  items: ShopCartItem[];
+};
+
+type NewLine = {
+  title: string;
+  quantity: number;
+  unit_price: number;
+  requires_shipping: false;
+  metadata: Record<string, unknown>;
+};
+
+export type LiveOfferRow = PricedOfferRow & {
+  part_identifier_id: string;
+  supplier: { name: string };
+};
+
+export type LinePart = {
+  identifierId: string;
+  slug: string;
+  brand: string;
+  number: string;
+  name: string;
+};
+
+export interface CartDeps extends CheckoutDeps {
+  cart: (cartId: string) => Promise<ShopCart>;
+  createCart: (email: string | undefined) => Promise<string>;
+  liveOffer: (offerId: string) => Promise<LiveOfferRow | undefined>;
+  services: (items: CartItem[]) => Promise<Map<string, AddonPrices>>;
+  partOf: (identifierId: string) => Promise<LinePart>;
+  addLines: (cartId: string, lines: NewLine[]) => Promise<void>;
+  updateLine: (
+    cartId: string,
+    itemId: string,
+    update: { quantity?: number; unit_price?: number },
+  ) => Promise<void>;
+  deleteLines: (cartId: string, ids: string[]) => Promise<void>;
+  openPayment: (cartId: string) => Promise<void>;
+}
+
+const noLine = (cartId: string, itemId: string) =>
+  new MedusaError(
+    MedusaError.Types.NOT_FOUND,
+    `Cart ${cartId} has no line ${itemId}`,
+  );
+
+const byCreation = (a: ShopCartItem, b: ShopCartItem) =>
+  new Date(a.created_at ?? 0).getTime() -
+    new Date(b.created_at ?? 0).getTime() || a.id.localeCompare(b.id);
+
+export function createCartLines(deps: CartDeps) {
+  const locked = lockedBy(deps.lock, CART_LOCK);
+
+  async function sync(cartId: string, changed = false): Promise<OfferCart> {
+    const cart = await deps.cart(cartId);
+    const currency = cart.currency_code.toUpperCase();
+    if (cart.completed_at) {
+      return { id: cart.id, completed: true, currency, total: 0, items: [] };
+    }
+    const items = [...cart.items].sort(byCreation);
+    const { lines, fixes, stamps } = await deps.plan(items);
+    if (fixes.remove.length) {
+      await deps.deleteLines(
+        cartId,
+        fixes.remove.map(({ itemId }) => itemId),
+      );
+    }
+    for (const { itemId, update } of fixes.update) {
+      await deps.updateLine(cartId, itemId, update);
+    }
+    await deps.stamp(stamps);
+    if (
+      (changed || fixes.remove.length || fixes.update.length) &&
+      items.length
+    ) {
+      await deps.openPayment(cartId);
+    }
+    return {
+      id: cart.id,
+      completed: false,
+      currency,
+      total: cartTotals(lines).total,
+      items: lines,
+    };
+  }
+
+  async function openCart(cartId: string): Promise<ShopCart> {
+    const cart = await deps.cart(cartId);
+    if (cart.completed_at) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_FOUND,
+        `Cart ${cartId} is already an order`,
+      );
+    }
+    return cart;
+  }
+
+  async function offerLine(cartId: string, itemId: string, kind: AddonKind) {
+    const { items } = await openCart(cartId);
+    const line = items.find((item) => item.id === itemId && offerIdOf(item));
+    if (!line) throw noLine(cartId, itemId);
+    return {
+      line,
+      addonLines: items.filter(
+        (item) =>
+          kindOf(item) === kind && parentOfferIdOf(item) === offerIdOf(line),
+      ),
+    };
+  }
+
+  async function sellableOffer(offerId: string, quantity: number) {
+    const row = await deps.liveOffer(offerId);
+    const offer = row && storeOffer(row);
+    if (!row || !offer) {
+      return refuse('OFFER_MISSING', `Offer ${offerId} cannot be sold now`);
+    }
+    if (orderCap(offer) < quantity) {
+      return refuse(
+        'OFFER_OUT_OF_STOCK',
+        `Only ${orderCap(offer)} can be sold`,
+      );
+    }
+    return {
+      ...offer,
+      part_identifier_id: row.part_identifier_id,
+      supplierName: row.supplier.name,
+    };
+  }
+
+  async function putOffer(
+    cartId: string,
+    offerId: string,
+    quantity: number,
+  ): Promise<void> {
+    const { items } = await openCart(cartId);
+    const line = items.find((item) => offerIdOf(item) === offerId);
+    const wanted = Number(line?.quantity ?? 0) + quantity;
+    const offer = await sellableOffer(offerId, wanted);
+    if (line) {
+      await deps.updateLine(cartId, line.id, {
+        quantity: wanted,
+        unit_price: offer.price,
+      });
+      return;
+    }
+    const { identifierId, ...part } = await deps.partOf(
+      offer.part_identifier_id,
+    );
+    await deps.addLines(cartId, [
+      {
+        title: orderLineTitle(part),
+        quantity,
+        unit_price: offer.price,
+        requires_shipping: false,
+        metadata: offerLineMetadata(
+          offer.id,
+          identifierId,
+          part,
+          offer.supplierName,
+        ),
+      },
+    ]);
+  }
+
+  const removeOfferLine = locked(
+    async (cartId, itemId: string): Promise<OfferCart> => {
+      const { items } = await openCart(cartId);
+      const line = items.find((item) => item.id === itemId);
+      if (!line) throw noLine(cartId, itemId);
+      const offerId = offerIdOf(line);
+      await deps.deleteLines(cartId, [
+        itemId,
+        ...items
+          .filter(
+            (item) =>
+              offerId && kindOf(item) && parentOfferIdOf(item) === offerId,
+          )
+          .map(({ id }) => id),
+      ]);
+      return sync(cartId, true);
+    },
+  );
+
+  const addLineAddon = locked(
+    async (
+      cartId,
+      itemId: string,
+      kind: AddonKind = 'service',
+    ): Promise<OfferCart> => {
+      const { line, addonLines } = await offerLine(cartId, itemId, kind);
+      const offerId = offerIdOf(line)!;
+      const lineServices = (await deps.services([line])).get(offerId);
+      const price = priceFor(lineServices, kind);
+      if (price === null) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Line ${itemId} has no ${kind} add-on`,
+        );
+      }
+      if (!addonLines.length) {
+        await deps.addLines(cartId, [
+          {
+            title:
+              kind === 'installation'
+                ? PARTS_ORDER_COPY.installation
+                : lineServices!.service!.label,
+            quantity: Number(line.quantity),
+            unit_price: price,
+            requires_shipping: false,
+            metadata: addonLineMetadata({ lineId: line.id, offerId }, kind),
+          },
+        ]);
+      }
+      return sync(cartId, true);
+    },
+  );
+
+  const removeLineAddon = locked(
+    async (
+      cartId,
+      itemId: string,
+      kind: AddonKind = 'service',
+    ): Promise<OfferCart> => {
+      const { addonLines } = await offerLine(cartId, itemId, kind);
+      if (addonLines.length) {
+        await deps.deleteLines(
+          cartId,
+          addonLines.map(({ id }) => id),
+        );
+      }
+      return sync(cartId, true);
+    },
+  );
+
+  const addOffer = locked(
+    async (cartId, offerId: string, quantity: number): Promise<OfferCart> => {
+      await putOffer(cartId, offerId, quantity);
+      return sync(cartId, true);
+    },
+  );
+
+  const setOfferQuantity = locked(
+    async (cartId, itemId: string, quantity: number): Promise<OfferCart> => {
+      const cart = await deps.cart(cartId);
+      const line = cart.items.find((item) => item.id === itemId);
+      const offerId = line && offerIdOf(line);
+      if (cart.completed_at || !line || !offerId) throw noLine(cartId, itemId);
+      const offer = await sellableOffer(offerId, quantity);
+      await deps.updateLine(cartId, itemId, {
+        quantity,
+        unit_price: offer.price,
+      });
+      return sync(cartId, true);
+    },
+  );
+
+  const readOfferCart = locked((cartId) => sync(cartId));
+
+  async function createOfferCart({
+    email,
+    offer_id,
+    quantity,
+  }: {
+    email?: string;
+    offer_id?: string;
+    quantity: number;
+  }): Promise<OfferCart> {
+    if (offer_id) {
+      await sellableOffer(offer_id, quantity);
+    }
+    const cartId = await deps.createCart(email);
+    if (offer_id) {
+      await putOffer(cartId, offer_id, quantity);
+    }
+    return sync(cartId, Boolean(offer_id));
+  }
+
+  return {
+    createOfferCart,
+    readOfferCart,
+    addOffer,
+    setOfferQuantity,
+    removeOfferLine,
+    addLineAddon,
+    removeLineAddon,
+  };
+}
+
+const offerCartDeps = (scope: MedusaContainer): CartDeps => {
+  const carts = () => scope.resolve<ICartModuleService>(Modules.CART);
+  return {
     lock: lockOf(scope),
     cart: (cartId) => retrieveCart(scope, cartId),
     plan: (items) => planOf(scope, items),
-    stamp: (stamps) => applyStamps(scope, stamps),
+    async stamp(stamps) {
+      for (const { itemId, metadata } of stamps) {
+        await carts().updateLineItems(itemId, { metadata });
+      }
+    },
     carFor: (vin) => carFor(scope, vin),
     async saveMetadata(cartId, metadata) {
-      await scope
-        .resolve<ICartModuleService>(Modules.CART)
-        .updateCarts(cartId, { metadata });
+      await carts().updateCarts(cartId, { metadata });
     },
     async complete(cartId) {
       const { result } = await completeCartWorkflow(scope).run({
@@ -637,4 +616,48 @@ export const offerCheckout = (scope: MedusaContainer) =>
       });
       return { id: order.id, display_id: Number(order.display_id) };
     },
-  });
+    async createCart(email) {
+      const { result } = await createCartWorkflow(scope).run({
+        input: { email, metadata: cashAtPickupMetadata() },
+      });
+      return result.id;
+    },
+    liveOffer: async (offerId) =>
+      (await liveOffers(scope, { id: [offerId] }))[0],
+    services: (items) => servicesOf(scope, items),
+    async partOf(identifierId) {
+      const identifier = await scope
+        .resolve<CatalogModuleService>(CATALOG_MODULE)
+        .retrievePartIdentifier(identifierId, {
+          relations: ['part', 'brand'],
+        });
+      return {
+        identifierId: identifier.id,
+        slug: partPageSlug(identifier.brand.slug, identifier.normalized_value),
+        brand: identifier.brand.name,
+        number: identifier.value,
+        name: identifier.part.name,
+      };
+    },
+    async addLines(cartId, items) {
+      await addToCartWorkflow(scope).run({ input: { cart_id: cartId, items } });
+    },
+    async updateLine(cartId, itemId, update) {
+      await updateLineItemInCartWorkflow(scope).run({
+        input: { cart_id: cartId, item_id: itemId, update },
+      });
+    },
+    async deleteLines(cartId, ids) {
+      await deleteLineItemsWorkflow(scope).run({
+        input: { cart_id: cartId, ids },
+      });
+    },
+    openPayment: (cartId) => ensureCashAtPickupPaymentSession(scope, cartId),
+  };
+};
+
+export const offerCart = (scope: MedusaContainer) =>
+  createCartLines(offerCartDeps(scope));
+
+export const offerCheckout = (scope: MedusaContainer) =>
+  createCheckout(offerCartDeps(scope));

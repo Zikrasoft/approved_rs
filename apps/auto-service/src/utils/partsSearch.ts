@@ -90,30 +90,6 @@ export const rangesFromParams = (params: URLSearchParams): RangeFilter[] => {
   });
 };
 
-const FACET_FILTER = /^[a-z0-9-]+:[^`]+$/;
-const MAX_FILTERED_KEYS = 8;
-const MAX_FACET_VALUES = 20;
-const MAX_RANGES = 10;
-
-export const filtersWithinCap = (
-  facets: string[],
-  ranges: RangeFilter[],
-): { facets: string[]; ranges: RangeFilter[] } => {
-  const keys = new Set<string>();
-  const fits = (key: string) => {
-    if (!keys.has(key) && keys.size >= MAX_FILTERED_KEYS) return false;
-    keys.add(key);
-    return true;
-  };
-  return {
-    facets: facets
-      .filter((facet) => FACET_FILTER.test(facet))
-      .slice(0, MAX_FACET_VALUES)
-      .filter((facet) => fits(facet.slice(0, facet.indexOf(':')))),
-    ranges: ranges.slice(0, MAX_RANGES).filter(({ key }) => fits(key)),
-  };
-};
-
 export const appendRange = (
   params: URLSearchParams,
   { key, min, max }: RangeFilter,

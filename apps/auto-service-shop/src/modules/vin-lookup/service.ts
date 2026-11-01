@@ -18,6 +18,7 @@ type LookupRecord = {
   facts: Record<string, unknown>;
   make: string | null;
   code: string | null;
+  code_type: string | null;
   vehicle_id: string | null;
 };
 
@@ -38,7 +39,8 @@ const UNRESOLVED_CODES = `
     and deleted_at is null
     and not exists (
       select 1 from vehicle_identifier vi
-      where vi.value = l.code and vi.supplier_id is null and vi.deleted_at is null
+      where vi.type = l.code_type and vi.value = l.code
+        and vi.supplier_id is null and vi.deleted_at is null
     )
   group by make, code
   order by count desc, make, code

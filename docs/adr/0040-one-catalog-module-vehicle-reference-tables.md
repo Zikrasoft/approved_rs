@@ -8,7 +8,7 @@ Decided 2026-10-20 with the owner, refining [ADR-0039](0039-own-catalogue-data-s
 
 **Decision:**
 
-- **One Medusa module.** Make, Series, Chassis, Model, Engine, Vehicle, VehicleIdentifier, Category, Part, PartIdentifier and Fitment live in a single `catalog` module, so every relation between them is a real Postgres foreign key. Supplier/SupplierOffer and VinLookup stay outside it.
+- **One Medusa module.** Make, Series, Chassis, Model, Engine, Vehicle, VehicleIdentifier, Category, Part, PartIdentifier and Fitment live in a single `catalog` module, so every relation between them is a real Postgres foreign key. Supplier/SupplierOffer and VinLookup stay outside it. Another module may read the catalog tables in SQL (the publish module's "listed" rule, the unresolved VIN codes), but never writes them.
 - **Staff-maintained reference tables.** Make → Series → Chassis → Model → Vehicle, plus an Engine table holding the full engine code and its family. They replace free-text columns, so a typo cannot split a page or break a bulk attach.
 - **Vehicle** is one manufacturer configuration (BMW type code, Mercedes Baumuster). Its codes are rows in **VehicleIdentifier**, typed per vocabulary (`bmw-type-code`, `mercedes-baumuster`, later `ktype` or a paid decoder's id), unique on (type, value). A new make or source adds rows, not columns.
 - **Fitment criteria** are production dates, gearbox and steering. Steering is back because Mercedes encodes it in the VIN (character 10), not in the Baumuster.

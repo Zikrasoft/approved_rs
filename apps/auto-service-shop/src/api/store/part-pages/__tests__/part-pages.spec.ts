@@ -220,7 +220,7 @@ medusaIntegrationTestRunner({
         ).not.toContain('C30005');
       });
 
-      it.each(['?limit=0', '?limit=5001', '?after=', '?limit=abc'])(
+      it.each(['?limit=0', '?limit=1001', '?after=', '?limit=abc'])(
         'returns a 400 for %s',
         async (query) => {
           expect((await get(query)).status).toBe(400);

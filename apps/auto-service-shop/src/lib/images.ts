@@ -14,7 +14,7 @@ import { z } from 'zod';
 
 import { adminError } from '../modules/_shared/admin-error';
 import { readCapped, uploadType } from './uploads';
-import { MANUAL_SOURCE } from '../modules/catalog/models/provenance';
+import { MANUAL_SOURCE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
