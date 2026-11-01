@@ -67,10 +67,8 @@ export function defineFilterSheet(
         const url = this.dataset.countUrl;
         this.#recount?.abort();
         clearTimeout(this.#timer);
-        if (!template || !url) {
-          submit.textContent = plain;
-          return;
-        }
+        submit.textContent = plain;
+        if (!template || !url) return;
         submit.setAttribute('aria-busy', 'true');
         const recount = new AbortController();
         this.#recount = recount;

@@ -49,14 +49,14 @@ describe('the filter sheet', () => {
     ]);
   });
 
-  it('recounts the results while a filter is edited, keeping the last count meanwhile', async () => {
+  it('recounts the results while a filter is edited, dropping the stale count meanwhile', async () => {
     vi.useFakeTimers();
     const backend = vi.fn().mockResolvedValue(Response.json({ count: 81 }));
     vi.stubGlobal('fetch', backend);
     const { form, submit } = sheet();
 
     edit(form, 'max.capacity');
-    expect(submit.textContent).toBe('Показать 202');
+    expect(submit.textContent).toBe('Показать');
     expect(submit.getAttribute('aria-busy')).toBe('true');
     await vi.runAllTimersAsync();
 
