@@ -222,6 +222,7 @@ const businessSchema = localBusinessSchema({
         YM_COUNTER_ID,
       } from '@/utils/analytics';
       import { ORDERED_CART_PARAM } from '@/utils/cartNotice';
+      import { CONTACT_RANKING } from '@/utils/contactRanking';
 
       bootSiteKit({
         ymCounterId: YM_COUNTER_ID,
@@ -231,8 +232,9 @@ const businessSchema = localBusinessSchema({
         googleConversionLabels: GOOGLE_CONVERSION_LABELS,
         privateParams: [ORDERED_CART_PARAM],
         analytics: !import.meta.env.DEV,
+        contactRanking: CONTACT_RANKING,
       });
-      defineSiteLeadForm();
+      defineSiteLeadForm({ contactRanking: CONTACT_RANKING });
       document.addEventListener(LEAD_FORM_RESULT_EVENT, (event) => {
         const { target } = event;
         if (

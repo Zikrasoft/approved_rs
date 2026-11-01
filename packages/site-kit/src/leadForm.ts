@@ -1,7 +1,11 @@
 import { defineLeadForm } from '@podbor/lead-crm/lead-form';
 import { storedAdTouch, storedMetaIds } from './adTouch.ts';
 import { getOrCreateVisitorId } from './browser.ts';
-import { detectVisitorCountry, visitorChannel } from './contactPreference.ts';
+import {
+  detectVisitorCountry,
+  visitorChannel,
+  type ContactRanking,
+} from './contactPreference.ts';
 import { markFieldValidity } from './fieldValidity.ts';
 
 export {
@@ -12,14 +16,17 @@ export {
   PAGE_LEAD_MODAL_ATTRIBUTE,
 } from './leadModal.ts';
 
-export function defineSiteLeadForm(tagName?: string): void {
+export function defineSiteLeadForm({
+  tagName,
+  contactRanking,
+}: { tagName?: string; contactRanking?: ContactRanking } = {}): void {
   defineLeadForm(
     {
       visitorId: getOrCreateVisitorId,
       adSource: storedAdTouch,
       metaIds: storedMetaIds,
       markFieldValidity,
-      preferredChannel: visitorChannel,
+      preferredChannel: () => visitorChannel(contactRanking),
       visitorCountry: detectVisitorCountry,
     },
     tagName,

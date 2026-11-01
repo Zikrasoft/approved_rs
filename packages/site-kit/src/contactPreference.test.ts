@@ -4,7 +4,13 @@ import {
   detectVisitorCountry,
   preferredContactChannels,
   visitorChannel,
+  type ContactRanking,
 } from './contactPreference.ts';
+
+const PHONE_FIRST: ContactRanking = {
+  byCountry: new Map([['ru', ['telegram', 'phone', 'whatsapp', 'viber']]]),
+  fallback: ['phone', 'whatsapp', 'viber', 'telegram'],
+};
 
 function stubTimeZone(timeZone: string) {
   vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue({
@@ -17,10 +23,10 @@ function render(html: string, lang = 'sr') {
   document.body.innerHTML = html;
 }
 
-async function applyFresh() {
+async function applyFresh(ranking?: ContactRanking) {
   vi.resetModules();
   const { applyContactPreference } = await import('./contactPreference.ts');
-  applyContactPreference();
+  applyContactPreference(ranking);
   return applyContactPreference;
 }
 
@@ -122,8 +128,35 @@ describe('preferredContactChannels', () => {
   });
 });
 
+describe('a brand ranking', () => {
+  it('ranks a listed country by the brand list', () => {
+    expect(preferredContactChannels('ru', 'sr', PHONE_FIRST)[0]).toBe(
+      'telegram',
+    );
+  });
+
+  it('falls back to the brand list for any other or unknown country', () => {
+    expect(preferredContactChannels('rs', 'sr', PHONE_FIRST)[0]).toBe('phone');
+    expect(preferredContactChannels(undefined, 'en', PHONE_FIRST)[0]).toBe(
+      'phone',
+    );
+  });
+
+  it('still puts Telegram first for a Russian locale', () => {
+    expect(preferredContactChannels('rs', 'ru', PHONE_FIRST)[0]).toBe(
+      'telegram',
+    );
+  });
+});
+
 describe('visitorChannel', () => {
   afterEach(() => vi.restoreAllMocks());
+
+  it('heads the brand ranking when one is given', () => {
+    stubTimeZone('Europe/Belgrade');
+    render('');
+    expect(visitorChannel(PHONE_FIRST)).toBe('phone');
+  });
 
   it('is the head of the visitor ranking', () => {
     stubTimeZone('Europe/Belgrade');
@@ -335,6 +368,23 @@ describe('applyContactPreference: reorder groups', () => {
     await applyFresh();
 
     expect(order()).toEqual(['phone']);
+  });
+});
+
+describe('applyContactPreference: a brand ranking', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('orders the groups by the ranking it is given', async () => {
+    stubTimeZone('Europe/Belgrade');
+    render(`
+      <div data-contact-order>
+        <a data-channel="whatsapp"></a>
+        <a data-channel="phone"></a>
+      </div>`);
+
+    await applyFresh(PHONE_FIRST);
+
+    expect(order()).toEqual(['phone', 'whatsapp']);
   });
 });
 
