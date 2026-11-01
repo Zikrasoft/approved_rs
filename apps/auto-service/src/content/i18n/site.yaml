@@ -15,17 +15,16 @@ header:
   languageLabel: Язык
   cta: Записаться
   partsCta: Заявка
-  phoneLabel: Позвонить
+  callback: Перезвоните мне
 footer:
-  tagline: Автосервис в Белграде. Диагностика, ремонт, кузов и покраска, подбор запчастей.
+  tagline: Автосервис и подбор запчастей на Звездаре, Белград.
   servicesHeading: Услуги
   companyHeading: Сервис
   contactHeading: Контакты
-  hoursHeading: Часы работы
   hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
   privacyLabel: Политика конфиденциальности
   rightsSuffix: Все права защищены.
-  aboutLabel: О проекте
+  aboutLabel: О сервисе
   developerCredit: Сайт сделан в студии Zikrasoft
 common:
   homeLabel: Главная
@@ -41,6 +40,17 @@ common:
   allWorks: Все примеры работ
   emptyWorks: Примеры работ скоро появятся. Пока что позвоните, расскажем, что делали на похожих машинах.
   socialHeading: Мы в соцсетях
+  writeInstead: Удобнее написать?
+hours:
+  week: Пн–Пт 08:00–18:00
+  saturday: Сб 09:00–14:00
+visit:
+  heading: Приезжайте на Звездару
+  route: Построить маршрут
+  # TODO: owner to confirm parking and the entrance (gate, landmark) before they join the facts.
+  facts:
+    - Говорим по-сербски, по-русски и по-английски
+    - Оплата наличными или картой
 channels:
   call: Позвонить
   whatsapp: WhatsApp

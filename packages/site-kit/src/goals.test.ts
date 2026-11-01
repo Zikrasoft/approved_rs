@@ -29,6 +29,7 @@ describe('CONTACT_PLACEMENTS', () => {
       'footer',
       'header',
       'thanks',
+      'visit',
     ]);
   });
 

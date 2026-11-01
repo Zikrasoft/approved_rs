@@ -1,5 +1,5 @@
 ---
-title: Малое ТО Mercedes-Benz C-Class W205 в Белграде
+title: Малое ТО Mercedes-Benz C-Class W205
 translations:
   en:
     title: Mercedes-Benz C-Class W205 Interim Service in Belgrade
@@ -44,6 +44,7 @@ image: image.jpg
 gallery: []
 date: 2026-05-05
 published: true
+featured: true
 translatedFrom: f03ea600fbbf7192
 ---
 

@@ -6,6 +6,10 @@ import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import PartPage from './[slug].astro';
 
+vi.mock('astro:content', () => ({
+  getCollection: vi.fn().mockResolvedValue([]),
+}));
+
 const copy = content('ru').shopPart;
 const pickup = content('ru').shopCart.pickupMethod;
 

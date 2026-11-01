@@ -13,7 +13,8 @@ import {
   contactRegion,
   CONTACT_CTA_SELECTOR,
 } from '@podbor/site-kit/contact-control';
-import ContactControl from './ContactControl.astro';
+import CallAction from './CallAction.astro';
+import GarageAddress from './GarageAddress.astro';
 import ContactChannels from './ContactChannels.astro';
 import SheetClose from './SheetClose.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
@@ -50,11 +51,7 @@ const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
   { href: PathBuilder.parts(locale), label: site.nav.parts, attrs: {} },
   { href: PathBuilder.works(locale), label: site.nav.works, attrs: {} },
-  {
-    href: `${PathBuilder.home(locale)}#process`,
-    label: site.nav.process,
-    attrs: {},
-  },
+  { href: PathBuilder.about(locale), label: site.nav.about, attrs: {} },
   { href: PathBuilder.contact(locale), label: site.nav.contact, attrs: {} },
 ].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
 const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
@@ -105,7 +102,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
 
       {
         !pageHasSearch && (
-          <div class="hidden max-w-72 min-w-0 flex-1 xl:block">
+          <div class="hidden max-w-72 min-w-0 flex-1 min-[1360px]:block">
             <CatalogueSearch compact />
           </div>
         )
@@ -134,21 +131,13 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           }
         </carlab-lang>
 
-        <ContactControl
-          channel="phone"
-          class="btn btn-on-panel hidden h-10 py-0 lg:inline-flex"
-        >
-          <Icon name="phone" />
-          <span class="spec text-xs">{site.header.phoneLabel}</span>
-        </ContactControl>
-
         <a
           href={PathBuilder.parts(locale)}
           data-search-open
           aria-label={searchCopy.openSearch}
           class:list={[
             'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
-            !pageHasSearch && 'xl:hidden',
+            !pageHasSearch && 'min-[1360px]:hidden',
           ]}
         >
           <Icon name="search" size={20} />
@@ -194,7 +183,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           data-revealed="true"
           watch={CONTACT_CTA_SELECTOR}
           class:list={[
-            'flex data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden',
+            'flex gap-2 data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden',
             inquiryEntry && 'lg:hidden',
           ]}
         >
@@ -208,9 +197,15 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
                 {site.header.partsCta}
               </a>
             ) : (
-              <a href="#lead" data-open-lead-modal class={cta}>
-                {site.header.cta}
-              </a>
+              <Fragment>
+                <CallAction
+                  class="btn btn-on-panel hidden h-10 px-4 py-0 text-sm lg:inline-flex"
+                  number={false}
+                />
+                <a href="#lead" data-open-lead-modal class={cta}>
+                  {site.header.cta}
+                </a>
+              </Fragment>
             )
           }
         </cta-reveal>
@@ -274,6 +269,11 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
     </nav>
 
     <div class="flex flex-col gap-6 pt-6">
+      <GarageAddress
+        layout="block"
+        tone="card"
+        class="rounded-block bg-shade p-4"
+      />
       <ContactChannels placement="header" />
       <SocialLinks />
       <carlab-lang class="flex items-center gap-2">

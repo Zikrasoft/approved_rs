@@ -14,13 +14,13 @@ const { service } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 
-const cell =
-  'flex min-h-14 flex-col items-center justify-center gap-1 border-r border-line text-ink';
+const cell = 'flex min-h-14 flex-col items-center justify-center gap-1';
+const quiet = `${cell} border-r border-line text-ink`;
 ---
 
 <BottomBar region="floating">
   <div class="grid grid-cols-3 items-stretch pointer-fine:grid-cols-2">
-    <ContactControl channel="phone" class={cell}>
+    <ContactControl channel="phone" class={`${cell} bg-signal-ink text-white`}>
       <Icon name="phone" size={16} />
       <span class="spec text-xs">{site.channels.call}</span>
     </ContactControl>
@@ -30,7 +30,7 @@ const cell =
         channel="telegram"
         service={service}
         data-primary-channel="telegram"
-        class={cell}
+        class={quiet}
       >
         <Icon name="telegram" size={16} />
         <span class="spec text-xs">{site.channels.telegram}</span>
@@ -40,7 +40,7 @@ const cell =
         service={service}
         data-primary-channel="whatsapp"
         hidden
-        class={cell}
+        class={quiet}
       >
         <Icon name="whatsapp" size={16} />
         <span class="spec text-xs">{site.channels.whatsapp}</span>
@@ -50,10 +50,10 @@ const cell =
     <a
       href="#lead"
       data-open-lead-modal
-      class="flex min-h-14 flex-col items-center justify-center gap-1 bg-signal-ink text-white"
+      class={`${cell} text-ink pointer-fine:bg-signal-ink pointer-fine:text-white`}
     >
-      <Icon name="calendar" />
-      <span class="spec text-xs">{site.header.cta}</span>
+      <Icon name="pen" size={16} />
+      <span class="spec text-xs">{site.header.partsCta}</span>
     </a>
   </div>
 </BottomBar>

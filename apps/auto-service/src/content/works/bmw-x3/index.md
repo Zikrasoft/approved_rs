@@ -1,5 +1,5 @@
 ---
-title: 'Обслуживание BMW X3 в Белграде: масло и АКПП'
+title: 'BMW X3: масло в двигателе и АКПП'
 translations:
   en:
     title: "BMW X3 Servicing in Belgrade: Engine Oil and Automatic Transmission Service"
@@ -39,6 +39,7 @@ gallery:
   - gallery/0.jpg
 date: 2026-08-10
 published: true
+featured: true
 translatedFrom: 52c817a5a831a4e4
 ---
 

@@ -70,6 +70,10 @@ export default config({
           label: 'Опубликован',
           defaultValue: true,
         }),
+        featured: fields.checkbox({
+          label: 'Показывать на главной',
+          defaultValue: false,
+        }),
         translatedFrom: fields.ignored(),
       },
     }),

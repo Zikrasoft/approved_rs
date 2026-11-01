@@ -3,11 +3,12 @@ import DisclosureCard from './DisclosureCard.astro';
 
 interface Props {
   items: { q: string; a: string }[];
+  class?: string;
 }
-const { items } = Astro.props;
+const { items, class: className = 'mt-8' } = Astro.props;
 ---
 
-<div class="mt-8 flex flex-col gap-3">
+<div class:list={[className, 'flex flex-col gap-3']}>
   {
     items.map((item) => (
       <DisclosureCard name="faq">

@@ -1,6 +1,6 @@
 import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
-import { mapPlaceUrl } from '@podbor/site-kit';
+import { mapPlaceUrl, mapRouteUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
 import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
 import { SERVICE_SLUGS } from '@/utils/services';
@@ -37,6 +37,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       `- ${pages.contact.addressLabel}: ${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`,
       `- ${pages.contact.mapHeading}: ${mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
+      `- ${site.visit.route}: ${mapRouteUrl(GARAGE_ADDRESS.lat, GARAGE_ADDRESS.lon)}`,
+      ...site.visit.facts.map((fact) => `- ${fact}`),
     ],
     lists: [
       {
