@@ -90,7 +90,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: f5a8b815c239a3b1
+translatedFrom: 9cd6291adc17d50d
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -104,6 +104,7 @@ translations:
     previousNumber: Prethodni broj
     previousNumberCurrent: Broj je zamenjen brojem
     earlierNumbers: 'Ranije:'
+    alsoNumbers: 'Takođe:'
     previousNumbersHeading: Prethodni brojevi
     currentNumberLabel: 'Aktuelni broj:'
     currentNumbersLabel: 'Aktuelni brojevi:'
@@ -188,6 +189,7 @@ translations:
     previousNumber: Previous part number
     previousNumberCurrent: Superseded by
     earlierNumbers: 'Previously:'
+    alsoNumbers: 'Also:'
     previousNumbersHeading: Previous part numbers
     currentNumberLabel: 'Current part number:'
     currentNumbersLabel: 'Current part numbers:'
