@@ -21,7 +21,7 @@ describe('the consent line', () => {
   it('names the policy once on screen, the full name only for screen readers', () => {
     const link = consentField.slice(consentField.indexOf('<a', labelEnd));
     expect(link).toMatch(
-      /^[^]*?\{site\.form\.privacyOpen\}<span class="sr-only">/,
+      /\{site\.form\.privacyOpen\}<span class="sr-only"\s*>\{` \$\{site\.footer\.privacyLabel\}`\}<\/span/,
     );
   });
 });
