@@ -31,9 +31,14 @@ describe('vinOf', () => {
     expect(vinOf('WBA 35BG0-70N.074158')).toBe('WBA35BG070N074158');
   });
 
-  it('refuses a VIN with I, O or Q or of the wrong length', () => {
-    expect(vinOf('WBA8E9G50GNU1234O')).toBeNull();
+  it('refuses a VIN of the wrong length', () => {
     expect(vinOf('WBA8E9G50GNU1234')).toBeNull();
+  });
+
+  it('reads O and Q as 0 and I as 1, which no VIN holds', () => {
+    expect(vinOf('WBA35BGO7ON074158')).toBe('WBA35BG070N074158');
+    expect(vinOf('wba35bgq70n07415i')).toBe('WBA35BG070N074151');
+    expect(vinOf('vin: WBA35BGO7ON074158')).toBe('WBA35BG070N074158');
   });
 
   it('reads Cyrillic look-alike letters typed on a Russian layout as Latin', () => {
@@ -73,6 +78,7 @@ describe('vinOf', () => {
 
   it('refuses Russian text that maps to no VIN on either layout', () => {
     expect(vinOf('хлеб и масло, 17 штук')).toBeNull();
+    expect(vinOf('масляный фильтр bmw')).toBeNull();
   });
 
   it('reads a VIN glued to its VIN label', () => {

@@ -35,18 +35,26 @@ export const vinWhileTyping = (text: string): string =>
 
 const compactLatin = (text: string): string => vinWhileTyping(latinText(text));
 
-const vinAsTyped = (text: string): string | null => {
+const withoutForbiddenLetters = (word: string): string =>
+  word.replace(/[OQ]/g, '0').replace(/I/g, '1');
+
+const vinAsTyped = (
+  text: string,
+  read: (word: string) => string = (word) => word,
+): string | null => {
   const words = latinText(text)
     .split(/[^A-Z0-9.-]+/)
     .map((word) => word.replace(/[.-]+/g, ''));
   return (
-    [compactLatin(text), ...words].find((word) => VIN_PATTERN.test(word)) ??
-    null
+    [compactLatin(text), ...words]
+      .map(read)
+      .find((word) => VIN_PATTERN.test(word)) ?? null
   );
 };
 
 export const vinOf = (text: string): string | null =>
-  vinAsTyped(text) ?? vinAsTyped(fromRussianLayout(text));
+  vinAsTyped(text, withoutForbiddenLetters) ??
+  vinAsTyped(fromRussianLayout(text));
 
 export const vinText = (text: string): string =>
   vinOf(text) ?? compactLatin(text);
