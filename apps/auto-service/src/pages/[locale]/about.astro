@@ -59,7 +59,9 @@ const schema = (canonical: string) =>
   <section class="wrap py-band md:py-band-lg">
     <div class="max-w-3xl divide-y divide-line border-y border-line">
       <div class="flex flex-col gap-5 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.sitemapHeading}</h2>
+        <h2 class="text-block font-semibold text-ink">
+          {about.sitemapHeading}
+        </h2>
         <dl class="grid grid-cols-2 gap-6">
           {
             stats.map((stat) => (
@@ -89,14 +91,16 @@ const schema = (canonical: string) =>
       </div>
 
       <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.contentHeading}</h2>
+        <h2 class="text-block font-semibold text-ink">
+          {about.contentHeading}
+        </h2>
         <p class="text-sm leading-relaxed text-muted sm:text-base">
           {about.contentText}
         </p>
       </div>
 
       <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.ownerHeading}</h2>
+        <h2 class="text-block font-semibold text-ink">{about.ownerHeading}</h2>
         <p class="text-sm leading-relaxed text-muted sm:text-base">
           {about.ownerText}{' '}
           <a href={PathBuilder.privacy(locale)} class="link"
@@ -106,7 +110,7 @@ const schema = (canonical: string) =>
       </div>
 
       <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">
+        <h2 class="text-block font-semibold text-ink">
           {about.contactsHeading}
         </h2>
         <address

@@ -71,7 +71,7 @@ const website = websiteSchema({
           <div
             class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
           >
-            <h2 class="text-block font-bold">
+            <h2 class="text-block font-semibold">
               {content(locale).partsSearch.searchHeading}
             </h2>
             <CatalogueSearch hint={false} onPanel class="mt-auto" />
@@ -80,7 +80,7 @@ const website = websiteSchema({
           <div
             class="flex min-w-0 flex-col gap-3 rounded-control bg-panel-2 p-4 sm:p-5"
           >
-            <h2 class="text-block font-bold">{home.hero.ctaPrimary}</h2>
+            <h2 class="text-block font-semibold">{home.hero.ctaPrimary}</h2>
             <nav
               aria-label={site.nav.services}
               class="-mx-4 flex gap-2 overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_80%,transparent)] [scrollbar-width:none] sm:-mx-5 sm:px-5 [&::-webkit-scrollbar]:hidden"
@@ -102,13 +102,13 @@ const website = websiteSchema({
                 ))
               }
             </nav>
-            <button
-              type="button"
+            <a
+              href="#lead"
               data-open-lead-modal
               class="btn btn-primary mt-auto w-full"
             >
               {site.header.cta}
-            </button>
+            </a>
           </div>
         </div>
 
@@ -185,7 +185,7 @@ const website = websiteSchema({
             <li class="flex gap-3">
               <Icon name="check" size={16} class="mt-1 shrink-0 text-go" />
               <div class="flex flex-col gap-1">
-                <h3 class="text-base font-semibold text-ink">{point.title}</h3>
+                <h3 class="font-semibold text-ink">{point.title}</h3>
                 <p class="text-sm leading-relaxed text-muted">{point.text}</p>
               </div>
             </li>

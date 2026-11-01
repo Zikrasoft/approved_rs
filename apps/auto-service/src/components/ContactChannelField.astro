@@ -17,18 +17,23 @@ const CHANNELS = [
   {
     value: 'phone',
     icon: 'phone',
-    label: site.form.channelPhone,
+    label: site.channels.call,
     panel: 'phone',
   },
-  { value: 'whatsapp', icon: 'whatsapp', label: 'WhatsApp', panel: 'phone' },
-  { value: 'viber', icon: 'viber', label: 'Viber', panel: 'phone' },
-  { value: 'telegram', icon: 'telegram', label: 'Telegram', panel: 'telegram' },
+  {
+    value: 'whatsapp',
+    icon: 'whatsapp',
+    label: site.channels.whatsapp,
+    panel: 'phone',
+  },
+  { value: 'viber', icon: 'viber', label: site.channels.viber, panel: 'phone' },
+  {
+    value: 'telegram',
+    icon: 'telegram',
+    label: site.channels.telegram,
+    panel: 'telegram',
+  },
 ] as const;
-
-const channels = [
-  CHANNELS.find((c) => c.value === defaultChannel)!,
-  ...CHANNELS.filter((c) => c.value !== defaultChannel),
-];
 
 const channelLabelId = `channel-${uid}`;
 const panelId = {
@@ -45,7 +50,7 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
 <input
   type="hidden"
   name={CONTACT_INPUT_FIELDS.channel}
-  value={channels[0].value}
+  value={defaultChannel}
 />
 
 <div>
@@ -59,14 +64,14 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
     aria-labelledby={channelLabelId}
   >
     {
-      channels.map((channel, index) => (
+      CHANNELS.map((channel) => (
         <button
           type="button"
           role="tab"
           class={chip}
           data-tab={channel.value}
           data-panel={channel.panel}
-          aria-selected={index === 0 ? 'true' : 'false'}
+          aria-selected={channel.value === defaultChannel ? 'true' : 'false'}
           aria-controls={panelId[channel.panel]}
         >
           <Icon name={channel.icon} size={14} />

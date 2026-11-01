@@ -47,14 +47,16 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
     ]}
   >
     <nav aria-label={site.common.breadcrumbLabel}>
-      <ol class="flex flex-wrap items-center gap-2 text-xs text-muted">
+      <ol
+        class="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted pointer-coarse:gap-y-0"
+      >
         {
           trail.map((crumb, i) => (
             <li class="flex items-center gap-2">
               {i > 0 && <span aria-hidden="true">/</span>}
               <a
                 href={crumb.href}
-                class="transition-colors duration-150 hover:text-signal-ink"
+                class="inline-flex items-center transition-colors duration-150 hover:text-signal-ink pointer-coarse:min-h-11"
               >
                 {crumb.label}
               </a>
@@ -82,9 +84,9 @@ const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
     {
       actions && (
         <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <button type="button" data-open-lead-modal class="btn btn-primary">
+          <a href="#lead" data-open-lead-modal class="btn btn-primary">
             {site.header.cta}
-          </button>
+          </a>
           <ContactChannels placement="hero" service={service} />
         </div>
       )

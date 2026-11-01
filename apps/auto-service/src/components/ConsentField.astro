@@ -35,15 +35,14 @@ const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
       <Icon name="check" size={10} />
     </span>
     <span class="text-xs leading-relaxed text-muted">
-      {`${site.form.privacyNote} ${site.form.privacyLinkText}.`}
+      {site.form.privacyNote}
+      <a
+        href={PathBuilder.privacy(locale)}
+        target="_blank"
+        class="link-underlined">{site.form.privacyLinkText}</a
+      >.
     </span>
   </label>
-  <a
-    href={PathBuilder.privacy(locale)}
-    target="_blank"
-    class="-mt-1 ml-8 inline-block py-1 text-xs text-muted link-underlined"
-    >{site.footer.privacyLabel}</a
-  >
   <p
     id={`consent-error-${uid}`}
     class={errorText}

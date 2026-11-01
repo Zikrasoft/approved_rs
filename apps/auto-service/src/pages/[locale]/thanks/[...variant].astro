@@ -1,6 +1,6 @@
 ---
 import Shell from '@/layouts/Shell.astro';
-import Icon from '@/components/Icon.astro';
+import BackLink from '@/components/BackLink.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
@@ -32,10 +32,7 @@ const back = parts ? PathBuilder.parts(locale) : PathBuilder.home(locale);
         {copy.body}
       </p>
       {!parts && <p class="max-w-xl text-sm text-muted">{copy.note}</p>}
-      <a href={back} class="btn btn-primary mt-2 w-fit">
-        {copy.cta}
-        <Icon name="arrowRight" />
-      </a>
+      <BackLink href={back} label={copy.cta} class="mt-2" />
     </div>
 
     <div class="card flex flex-col gap-4 p-5">

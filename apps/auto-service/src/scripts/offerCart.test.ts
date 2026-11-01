@@ -103,6 +103,18 @@ describe('the confirmation opened from a link alone', () => {
     expect(shown('[data-order-number]')).toBe(false);
     expect(shown('[data-order-date]')).toBe(false);
   });
+
+  it('names the tab after the order, not the cart', () => {
+    history.replaceState(null, '', '/ru/parts/cart/?notice=ordered&order=7');
+    document.title = 'Корзина | CarLab';
+    defineOfferCart();
+    document.body.innerHTML = `
+      <offer-cart data-ordered-title="Заказ принят | CarLab">
+        <div data-state="ordered" hidden></div>
+      </offer-cart>`;
+
+    expect(document.title).toBe('Заказ принят | CarLab');
+  });
 });
 
 describe('the contact on the confirmation', () => {
