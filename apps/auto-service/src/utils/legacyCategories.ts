@@ -50,3 +50,9 @@ export const categoryFirstPageRedirects = (): Redirect[] =>
       permanent: true,
     }));
   });
+
+export const siteRedirects = (): Redirect[] => [
+  ...legacyCategoryRedirects(),
+  ...legacyShopRedirects(),
+  ...categoryFirstPageRedirects(),
+];

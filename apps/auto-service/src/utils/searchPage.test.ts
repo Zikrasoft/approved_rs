@@ -177,14 +177,38 @@ describe('planSearch', () => {
     });
   });
 
-  it('keeps the make only beside a model', async () => {
-    const outcome = await plan('make=bmw&q=filter');
-    expect(outcome).toMatchObject({ view: { make: undefined } });
+  it.each([
+    ['make=bmw&q=filter', '/ru/parts/search/?q=filter'],
+    ['make=nosuch&q=filter', '/ru/parts/search/?q=filter'],
+    ['model=x3&q=filter', '/ru/parts/search/?q=filter'],
+    ['make=bmw&model=&q=filter', '/ru/parts/search/?q=filter'],
+  ])(
+    'drops a make without its model, or a model without its make: %s',
+    async (query, redirect) => {
+      expect(await plan(query)).toEqual({ redirect, status: 302 });
+    },
+  );
+
+  it.each(['category=а', 'category=фильтры&q=filter', 'category=bad%20slug'])(
+    'answers 404 for a category no catalogue key can spell: %s',
+    async (query) => {
+      const catalogue = fakeCatalogue();
+      expect(await plan(query, catalogue)).toMatchObject({
+        status: 404,
+        view: { unknownScope: true, found: null },
+      });
+      expect(catalogue.search).not.toHaveBeenCalled();
+    },
+  );
+
+  it('answers 404 for a misspelt category even beside a Model', async () => {
+    expect(
+      await plan('category=А&make=bmw&model=f30-320d', fakeCatalogue()),
+    ).toMatchObject({ status: 404 });
   });
 
-  it('keeps the model only beside its make', async () => {
-    const outcome = await plan('model=x3&q=filter');
-    expect(outcome).toMatchObject({ view: { model: undefined } });
+  it('treats an empty category as none', async () => {
+    expect(await plan('category=&q=filter')).toMatchObject({ status: 200 });
   });
 
   it('lists what a Model category page counted for its ticked filter', async () => {
@@ -244,6 +268,10 @@ describe('planSearch', () => {
     unit: null,
     values: values.map((value) => ({ value, label: value, count: 1 })),
   });
+  const numberFacet = (key: string, ...values: string[]) => ({
+    ...facetOf(key, ...values),
+    type: 'number',
+  });
 
   const batteries = (count = 5) =>
     fakeCatalogue({
@@ -251,7 +279,8 @@ describe('planSearch', () => {
         ...found(count),
         facets: [
           facetOf('brand', 'bosch', 'varta'),
-          facetOf('capacity', '60', '80'),
+          numberFacet('capacity', '60', '80'),
+          facetOf('technology', 'agm'),
         ],
         category: { slug: 'batteries', name: 'Аккумуляторы' },
       })),
@@ -378,5 +407,159 @@ describe('planSearch', () => {
     expect(outcome.view.filtersHref([], [])).toBe(
       '/ru/parts/search/?q=filter&category=batteries',
     );
+  });
+
+  it('drops a range on a facet that is not a number', async () => {
+    expect(
+      await plan(
+        'category=batteries&min.brand=10&max.technology=1&min.capacity=70',
+        batteries(),
+      ),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&min.capacity=70',
+      status: 302,
+    });
+  });
+
+  it('drops unknown keys before the cap, so the real filters past it survive', async () => {
+    const junk = Array.from({ length: 8 }, (_, i) => `facets=junk${i}:1`).join(
+      '&',
+    );
+    const ranges = Array.from({ length: 8 }, (_, i) => `min.junk${i}=1`).join(
+      '&',
+    );
+
+    expect(
+      await plan(
+        `category=batteries&${junk}&facets=brand%3Abosch&min.capacity=80`,
+        batteries(),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=batteries&facets=brand%3Abosch&min.capacity=80',
+      status: 302,
+    });
+    expect(
+      await plan(`category=batteries&${ranges}&min.capacity=80`, batteries()),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&min.capacity=80',
+      status: 302,
+    });
+  });
+
+  const withShouted = () =>
+    fakeCatalogue({
+      search: vi.fn(async () => ({
+        ...found(1),
+        facets: [
+          {
+            ...facetOf('brand'),
+            values: [
+              { value: 'bosch', label: 'Bosch', count: 1 },
+              { value: 'BOSCH', label: 'BOSCH', count: 0 },
+            ],
+          },
+          facetOf('thread', 'M20x1.5'),
+        ],
+        category: { slug: 'oil-filters', name: 'Масляные фильтры' },
+      })),
+    });
+
+  it.each([
+    ['facets=brand%3ABOSCH', 'facets=brand%3Abosch'],
+    ['facets=brand%3Abosch&facets=brand%3ABosch', 'facets=brand%3Abosch'],
+    ['facets=thread%3Am20x1.5', 'facets=thread%3AM20x1.5'],
+  ])(
+    'spells a facet value the way the catalogue lists it: %s',
+    async (asked, kept) => {
+      expect(
+        await plan(`category=oil-filters&${asked}`, withShouted()),
+      ).toEqual({
+        redirect: `/ru/parts/search/?category=oil-filters&${kept}`,
+        status: 302,
+      });
+    },
+  );
+
+  it('keeps a facet value the catalogue lists no spelling of', async () => {
+    expect(
+      await plan('category=oil-filters&facets=brand%3Anosuch', withShouted()),
+    ).toMatchObject({ status: 200, view: { chosen: ['brand:nosuch'] } });
+  });
+
+  it.each([
+    ['min.capacity=0.0000001', ''],
+    ['min.capacity=0', ''],
+    ['max.capacity=1000000000', ''],
+    ['min.capacity=0x50', ''],
+    ['min.capacity=80,5', '&min.capacity=80.5'],
+    ['min.capacity=90&max.capacity=70', '&min.capacity=70&max.capacity=90'],
+    ['min.capacity=70&min.capacity=90', '&min.capacity=70'],
+  ])('rewrites the range %s the way it applies', async (asked, kept) => {
+    expect(await plan(`category=batteries&${asked}`, batteries())).toEqual({
+      redirect: `/ru/parts/search/?category=batteries${kept}`,
+      status: 302,
+    });
+  });
+
+  it('keeps a range written the way it applies', async () => {
+    expect(
+      await plan(
+        'category=batteries&min.capacity=70&max.capacity=90',
+        batteries(),
+      ),
+    ).toMatchObject({ status: 200 });
+  });
+
+  it('sends filters on a category with no parts at all back to its page', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) => ({
+      ...found(0, []),
+      facets: facets.length ? [facetOf('brand', 'bosch')] : [],
+      category: { slug: 'body-parts', name: 'Кузов' },
+    }));
+
+    expect(
+      await plan(
+        'category=body-parts&facets=brand%3Abosch',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({ redirect: '/ru/parts/c/body-parts/', status: 302 });
+    expect(search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ facets: [], ranges: [], limit: 1 }),
+    );
+  });
+
+  it('keeps filters that find nothing in a category that has parts', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) => ({
+      ...found(facets.length ? 0 : 5, []),
+      facets: [facetOf('brand', 'bosch')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+    }));
+
+    expect(
+      await plan(
+        'category=batteries&facets=brand%3Abosch',
+        fakeCatalogue({ search }),
+      ),
+    ).toMatchObject({ status: 200, view: { chosen: ['brand:bosch'] } });
+  });
+
+  it('keeps filters that find nothing when the shop cannot say whether the category has parts', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) =>
+      facets.length
+        ? {
+            ...found(0, []),
+            facets: [facetOf('brand', 'bosch')],
+            category: { slug: 'batteries', name: 'Аккумуляторы' },
+          }
+        : null,
+    );
+
+    expect(
+      await plan(
+        'category=batteries&facets=brand%3Abosch',
+        fakeCatalogue({ search }),
+      ),
+    ).toMatchObject({ status: 200 });
   });
 });

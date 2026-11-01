@@ -4,6 +4,7 @@ import {
   carLink,
   carLinks,
   exactPart,
+  inquiryTopic,
   listingCrumbs,
   missingNumber,
   nearVin,
@@ -335,5 +336,27 @@ describe('listingCrumbs', () => {
         searchLabel: 'Поиск запчастей',
       }),
     ).toEqual([{ href: '/ru/parts/search/', label: 'Поиск запчастей' }]);
+  });
+});
+
+describe('inquiryTopic', () => {
+  it('names the Model, the Category and the query', () => {
+    expect(
+      inquiryTopic({
+        model: 'BMW 3 F30',
+        category: 'Аккумуляторы',
+        query: 'varta',
+        filters: [],
+      }),
+    ).toBe('BMW 3 F30, Аккумуляторы, varta');
+  });
+
+  it('carries the chosen filters, so a manual pick starts from them', () => {
+    expect(
+      inquiryTopic({
+        category: 'Аккумуляторы',
+        filters: ['Бренд: Bosch', 'Полярность: Прямая'],
+      }),
+    ).toBe('Аккумуляторы, Бренд: Bosch, Полярность: Прямая');
   });
 });

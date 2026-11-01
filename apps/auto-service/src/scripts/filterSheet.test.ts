@@ -13,12 +13,20 @@ const sheet = () => {
   form.innerHTML = `
     <input type="hidden" name="category" value="batteries" />
     <filter-sheet data-count-url="/api/search-count?locale=ru">
-      <input type="number" min="0" name="min.capacity" value="" />
-      <input type="number" min="0" name="max.capacity" value="80" />
-      <label><input type="checkbox" name="facets" value="brand:varta" checked /><span data-facet-count>3</span></label>
-      <label><input type="checkbox" name="facets" value="brand:bosch" /><span data-facet-count>2</span></label>
-      <label><input type="checkbox" name="facets" value="polarity:direct" /><span data-facet-count>1</span></label>
-      <button data-filters-submit="Показать" data-filters-count="Показать {count}" data-filters-none="Совпадений нет, измените фильтры">Показать 202</button>
+      <dialog></dialog>
+      <span data-filters-live></span>
+      <fieldset data-facet-key="capacity">
+        <input type="number" min="0" name="min.capacity" value="" />
+        <input type="number" min="0" name="max.capacity" value="80" />
+      </fieldset>
+      <fieldset data-facet-key="brand">
+        <label><input type="checkbox" name="facets" value="brand:varta" checked /><span data-facet-count>3</span></label>
+        <label><input type="checkbox" name="facets" value="brand:bosch" /><span data-facet-count>2</span></label>
+      </fieldset>
+      <fieldset data-facet-key="polarity">
+        <label><input type="checkbox" name="facets" value="polarity:direct" /><span data-facet-count>1</span></label>
+      </fieldset>
+      <button data-filters-submit="Показать" data-filters-count="Показать {count}" data-filters-none="Подберем вручную" data-filters-inquiry="/ru/parts/search/#inquiry">Показать 202</button>
     </filter-sheet>
   `;
   document.body.append(form);
@@ -131,14 +139,18 @@ describe('the filter sheet', () => {
     expect(input(form, 'facets', 'polarity:direct').disabled).toBe(true);
   });
 
-  it('keeps a ticked value enabled even when it counts zero, and leaves facets the answer omits alone', async () => {
+  const fieldset = (form: HTMLFormElement, key: string) =>
+    form.querySelector<HTMLFieldSetElement>(`[data-facet-key="${key}"]`)!;
+
+  it('keeps a ticked value enabled even when it counts zero, and hides the facets the answer omits, as the applied page would', async () => {
     vi.useFakeTimers();
-    vi.stubGlobal(
-      'fetch',
-      vi
-        .fn()
-        .mockResolvedValue(Response.json({ count: 0, facets: { brand: {} } })),
-    );
+    const backend = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ count: 0, facets: { brand: {} } }))
+      .mockResolvedValueOnce(
+        Response.json({ count: 3, facets: { brand: {}, polarity: {} } }),
+      );
+    vi.stubGlobal('fetch', backend);
     const { form } = sheet();
 
     edit(form, 'facets');
@@ -146,11 +158,36 @@ describe('the filter sheet', () => {
 
     expect(input(form, 'facets', 'brand:varta').disabled).toBe(false);
     expect(counted(form, 'brand:varta')).toBe('0');
-    expect(counted(form, 'polarity:direct')).toBe('1');
-    expect(input(form, 'facets', 'polarity:direct').disabled).toBe(false);
+    expect(fieldset(form, 'brand').hidden).toBe(false);
+    expect(fieldset(form, 'polarity').hidden).toBe(true);
+    expect(fieldset(form, 'capacity').hidden).toBe(false);
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+    expect(fieldset(form, 'polarity').hidden).toBe(false);
   });
 
-  it('turns a zero count into a disabled button that says nothing matches, and enables it again on the next count', async () => {
+  it('keeps an omitted facet the visitor has a value in', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ count: 2, facets: {} })),
+    );
+    const { form } = sheet();
+    input(form, 'max.capacity').value = '';
+    input(form, 'min.capacity').value = '70';
+    input(form, 'facets', 'brand:varta').checked = false;
+    input(form, 'facets', 'polarity:direct').checked = true;
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+
+    expect(fieldset(form, 'capacity').hidden).toBe(false);
+    expect(fieldset(form, 'polarity').hidden).toBe(false);
+    expect(fieldset(form, 'brand').hidden).toBe(true);
+  });
+
+  it('turns a zero count into a button that sends the chosen filters to the inquiry, and back on the next count', async () => {
     vi.useFakeTimers();
     const backend = vi
       .fn()
@@ -161,13 +198,81 @@ describe('the filter sheet', () => {
 
     edit(form, 'facets');
     await vi.runAllTimersAsync();
-    expect(submit.textContent).toBe('Совпадений нет, измените фильтры');
-    expect(submit.disabled).toBe(true);
+    expect(submit.textContent).toBe('Подберем вручную');
+    expect(submit.disabled).toBe(false);
+    expect(submit.getAttribute('formaction')).toBe('/ru/parts/search/#inquiry');
 
     edit(form, 'facets');
-    expect(submit.disabled).toBe(false);
+    expect(submit.hasAttribute('formaction')).toBe(false);
     await vi.runAllTimersAsync();
     expect(submit.textContent).toBe('Показать 4');
+    expect(submit.hasAttribute('formaction')).toBe(false);
+  });
+
+  it('keeps the plain count for zero when the button has no inquiry wording', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ count: 0 })),
+    );
+    const { form, submit } = sheet();
+    submit.removeAttribute('data-filters-none');
+    submit.removeAttribute('data-filters-inquiry');
+
+    edit(form, 'facets');
+    await vi.runAllTimersAsync();
+
+    expect(submit.textContent).toBe('Показать 0');
+    expect(submit.hasAttribute('formaction')).toBe(false);
+  });
+
+  it('announces the new count politely once it arrives', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ count: 7 })),
+    );
+    const { form } = sheet();
+    const live = form.querySelector('[data-filters-live]')!;
+
+    edit(form, 'facets');
+    expect(live.textContent).toBe('');
+    await vi.runAllTimersAsync();
+
+    expect(live.textContent).toBe('Показать 7');
+  });
+
+  it('brings the linked inquiry back into view once the sheet has folded away', () => {
+    const target = document.createElement('div');
+    target.id = 'inquiry';
+    target.scrollIntoView = vi.fn();
+    document.body.append(target);
+    window.location.hash = '#inquiry';
+
+    sheet();
+
+    expect(target.scrollIntoView).toHaveBeenCalled();
+    window.location.hash = '';
+  });
+
+  it('scrolls nowhere when the address names no element', () => {
+    window.location.hash = '#nowhere';
+    expect(() => sheet()).not.toThrow();
+    window.location.hash = '';
+  });
+
+  it('closes the sheet when the page comes back from the back-forward cache', () => {
+    const { form } = sheet();
+    const dialog = form.querySelector('dialog')!;
+    dialog.close = vi.fn();
+
+    window.dispatchEvent(new Event('pageshow'));
+    expect(dialog.close).not.toHaveBeenCalled();
+
+    window.dispatchEvent(
+      Object.assign(new Event('pageshow'), { persisted: true }),
+    );
+    expect(dialog.close).toHaveBeenCalled();
   });
 
   it('marks a range bound the form would refuse and counts nothing for it', async () => {

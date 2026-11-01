@@ -47,6 +47,18 @@ describe('/api/search-count', () => {
     );
   });
 
+  it('never lets a count probe stock or price while the shop is closed', async () => {
+    backend.mockResolvedValue(Response.json(answer));
+
+    await ask(
+      'locale=ru&category=batteries&facets=in-stock%3Atrue&min.price=99999&max.price=100000',
+    );
+
+    expect(backend.mock.calls[0][0]).toBe(
+      'http://shop.test/store/search?locale=ru&category=batteries&limit=1',
+    );
+  });
+
   it('counts within the Model a Model category page filters', async () => {
     backend.mockResolvedValue(Response.json({ ...answer, count: 1 }));
 
