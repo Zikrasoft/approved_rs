@@ -136,10 +136,9 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   bindPhoneCountry(country, phone);
 
   const preferred = deps.preferredChannel?.();
-  selectTab(
-    tabs.find((tab) => tab.dataset.tab === preferred) ??
-      tabs.find((tab) => tab.dataset.tab === channel)!,
-  );
+  const preferredTab = tabs.find((tab) => tab.dataset.tab === preferred);
+  preferredTab?.parentElement?.prepend(preferredTab);
+  selectTab(preferredTab ?? tabs.find((tab) => tab.dataset.tab === channel)!);
 
   tabs.forEach((tab) =>
     tab.addEventListener('click', (event) => {
