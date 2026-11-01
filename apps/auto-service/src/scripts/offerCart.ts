@@ -38,8 +38,17 @@ import {
   rememberCheckout,
   restoreCheckout,
 } from './checkoutMemory';
-import { busy, fill, getJson, isBusy, sendJson, showOnly } from './cartUi';
-import { CART_STORAGE_KEY } from './cartBadge';
+import {
+  busy,
+  fill,
+  getJson,
+  isBusy,
+  replayPendingAdd,
+  sendJson,
+  showOnly,
+} from './cartUi';
+import { readStored } from '@podbor/site-kit/stored-value';
+import { CART_STORAGE_KEY, PENDING_CART_ADD_KEY } from './cartBadge';
 import { localeTagOf } from './localeTag';
 import { whatsappLink } from '@podbor/site-kit/contact-links';
 import { shopPreview } from './shopPreview';
@@ -150,6 +159,11 @@ export function defineOfferCart(tagName = 'offer-cart'): void {
 
       load(notice: string): void {
         const stored = readCart();
+        if (!stored && readStored(PENDING_CART_ADD_KEY)) {
+          this.show('loading');
+          void replayPendingAdd().then(() => this.load(notice));
+          return;
+        }
         if (!stored) {
           showOnly(this, 'data-empty-notice', notice);
           this.show('empty');

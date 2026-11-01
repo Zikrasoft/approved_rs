@@ -3,6 +3,7 @@ import { readStoredJson } from '@podbor/site-kit/stored-value';
 import { shopPreview } from './shopPreview';
 
 export const CART_STORAGE_KEY = 'carlab_offer_cart';
+export const PENDING_CART_ADD_KEY = 'carlab_pending_cart_add';
 export const CART_CHANGED_EVENT = 'carlab:cart-changed';
 export const PARTS_LIST_STORAGE_KEY = 'carlab_parts_list';
 export const PARTS_LIST_CHANGED_EVENT = 'carlab:parts-list-changed';

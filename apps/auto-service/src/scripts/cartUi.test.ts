@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod/mini';
-import { addToCart, getJson } from './cartUi';
+import { addToCart, getJson, replayPendingAdd } from './cartUi';
 import { readCart } from './cartStore';
 
 afterEach(() => {
@@ -117,5 +117,60 @@ describe('addToCart', () => {
     await addToCart({ offer_id: 'gone' });
 
     expect(readCart()?.id).toBe('cart_kept');
+  });
+});
+
+describe('the first add of a visitor who leaves before it answers', () => {
+  const leaveMidRequest = () =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise<Response>(() => undefined)),
+    );
+
+  it('is replayed on the next page, so the part lands in a cart', async () => {
+    leaveMidRequest();
+    void addToCart({ offer_id: 'first', quantity: 2 });
+    await Promise.resolve();
+
+    const fetch = vi.fn(async (_url: string, _init: RequestInit) =>
+      Response.json(cartWith('cart_new', ['first'])),
+    );
+    vi.stubGlobal('fetch', fetch);
+    await replayPendingAdd();
+
+    expect(JSON.parse(String(fetch.mock.calls[0]![1]!.body))).toEqual({
+      cart_id: null,
+      offer_id: 'first',
+      quantity: 2,
+    });
+    expect(readCart()?.id).toBe('cart_new');
+    expect(await replayPendingAdd()).toBeNull();
+  });
+
+  it('is not replayed once the add answered', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json(cartWith('cart_1', ['x']))),
+    );
+    await addToCart({ offer_id: 'x' });
+    localStorage.removeItem('carlab_offer_cart');
+
+    expect(await replayPendingAdd()).toBeNull();
+  });
+
+  it('is dropped when a cart exists by then, whose id the next add carries', async () => {
+    leaveMidRequest();
+    void addToCart({ offer_id: 'first' });
+    await Promise.resolve();
+    localStorage.setItem(
+      'carlab_offer_cart',
+      JSON.stringify({ id: 'cart_other', parts: [] }),
+    );
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+
+    expect(await replayPendingAdd()).toBeNull();
+    expect(await replayPendingAdd()).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
