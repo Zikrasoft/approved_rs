@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bestPage,
   bestPrice,
   moreOffersLabel,
   offerSummary,
@@ -12,6 +13,18 @@ const offer = (price: number, stock_quantity: number, lead_time_days = 0) => ({
   currency: 'RSD',
   stock_quantity,
   lead_time_days,
+});
+
+describe('bestPage', () => {
+  it('picks the number whose offer sets the shown price', () => {
+    const onRequest = { slug: 'bmw', offers: [] };
+    const priced = { slug: 'ate', offers: [offer(6600, 2)] };
+    expect(bestPage([onRequest, priced])).toBe(priced);
+  });
+
+  it('gives nothing when no number has an offer', () => {
+    expect(bestPage([{ slug: 'bmw', offers: [] }])).toBeUndefined();
+  });
 });
 
 describe('bestPrice', () => {
