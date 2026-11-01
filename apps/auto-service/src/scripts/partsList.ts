@@ -181,6 +181,7 @@ export function inquiryComment({
   more: (count: number) => string;
 }): string {
   const shared = listCar(parts);
+  const repeatsCar = note.trim() === `${shared?.car}:`;
   return fitComment({
     head: [shared?.car ?? ''],
     lines: parts.map((part) => {
@@ -190,7 +191,7 @@ export function inquiryComment({
           : partLine(part);
       return part.addon && part.with_addon ? `${line}\n+ ${part.addon}` : line;
     }),
-    note,
+    note: repeatsCar ? '' : note,
     limit,
     more,
   });

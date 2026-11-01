@@ -218,6 +218,19 @@ describe('inquiryComment', () => {
     );
   });
 
+  it('drops a note that only repeats the prefilled car', () => {
+    expect(
+      inquiryComment({
+        parts: [{ ...mannOil, car: 'BMW 320d F30' }],
+        note: 'BMW 320d F30: ',
+        limit: 2000,
+        more,
+      }),
+    ).toBe(
+      ['BMW 320d F30', 'Mann-Filter HU 816 x, Масляный фильтр'].join('\n'),
+    );
+  });
+
   it('lists a wanted add-on service under its part', () => {
     expect(
       inquiryComment({
