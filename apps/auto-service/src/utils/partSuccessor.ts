@@ -1,5 +1,8 @@
 import { partPageSlug, type BrandNumber } from '@podbor/catalog-contract';
-import { bestOffer } from '@podbor/catalog-contract/availability';
+import {
+  bestOffer,
+  compareOffers,
+} from '@podbor/catalog-contract/availability';
 import type { PartPageEntry } from './catalogueSnapshot';
 
 const slugOf = (number: BrandNumber) =>
@@ -70,12 +73,20 @@ export function currentNumbers(
       .filter(({ superseded }) => !superseded)
       .map((number) => [slugOf(number), { ...number, slug: slugOf(number) }]),
   );
-  const offered = pricedPage(
-    [...unique.keys()].flatMap((slug) => bySlug.get(slug) ?? []),
-  );
+  const best = (number: BrandNumber & { slug: string }) =>
+    bestOffer(bySlug.get(number.slug)?.offers ?? []);
+  const byOffer = (
+    a: BrandNumber & { slug: string },
+    b: BrandNumber & { slug: string },
+  ) => {
+    const [offerA, offerB] = [best(a), best(b)];
+    if (offerA && offerB) return compareOffers(offerA, offerB);
+    return Number(Boolean(offerB)) - Number(Boolean(offerA));
+  };
   const rank = (number: BrandNumber & { slug: string }) =>
-    (number.slug === offered?.slug ? -4 : 0) +
     (number.type === 'oem' ? 0 : 2) +
     Number(number.brand.slug !== page.brand.slug);
-  return [...unique.values()].sort((a, b) => rank(a) - rank(b));
+  return [...unique.values()].sort(
+    (a, b) => byOffer(a, b) || rank(a) - rank(b),
+  );
 }
