@@ -2,7 +2,10 @@ export const FILTERS_OPEN_ATTRIBUTE = 'data-filters-open';
 export const FILTERS_SUBMIT_ATTRIBUTE = 'data-filters-submit';
 export const FILTERS_COUNT_ATTRIBUTE = 'data-filters-count';
 export const FILTERS_NONE_ATTRIBUTE = 'data-filters-none';
+export const FILTERS_INQUIRY_ATTRIBUTE = 'data-filters-inquiry';
+export const FILTERS_LIVE_ATTRIBUTE = 'data-filters-live';
 export const FACET_COUNT_ATTRIBUTE = 'data-facet-count';
+export const FACET_KEY_ATTRIBUTE = 'data-facet-key';
 
 type ValueCounts = Record<string, Record<string, number>>;
 
@@ -24,7 +27,19 @@ const markInvalid = (sheet: HTMLElement) => {
   return invalid.length > 0;
 };
 
+const hasChoice = (fieldset: Element) =>
+  [...fieldset.querySelectorAll('input')].some(
+    (input) => input.checked || (input.type === 'number' && input.value !== ''),
+  );
+
 const patchValues = (sheet: HTMLElement, facets: ValueCounts) => {
+  for (const fieldset of sheet.querySelectorAll<HTMLFieldSetElement>(
+    `[${FACET_KEY_ATTRIBUTE}]`,
+  )) {
+    fieldset.hidden =
+      !(fieldset.getAttribute(FACET_KEY_ATTRIBUTE)! in facets) &&
+      !hasChoice(fieldset);
+  }
   for (const input of sheet.querySelectorAll<HTMLInputElement>(
     'input[type="checkbox"]',
   )) {
@@ -68,7 +83,8 @@ export function defineFilterSheet(
         const form = this.closest('form');
         window.addEventListener(
           'pageshow',
-          () => {
+          (event) => {
+            if (event.persisted) this.querySelector('dialog')?.close();
             if (!form || (!this.hasAttribute('data-dirty') && !edited(form)))
               return;
             form.reset();
@@ -117,8 +133,8 @@ export function defineFilterSheet(
         this.#recount?.abort();
         clearTimeout(this.#timer);
         submit.textContent = plain;
-        submit.toggleAttribute('disabled', false);
         submit.removeAttribute('aria-busy');
+        submit.removeAttribute('formaction');
         if (markInvalid(this) || !template || !url) return;
         submit.setAttribute('aria-busy', 'true');
         const recount = new AbortController();
@@ -136,13 +152,18 @@ export function defineFilterSheet(
               submit.removeAttribute('aria-busy');
               const count = typeof body?.count === 'number' ? body.count : null;
               const none = submit.getAttribute(FILTERS_NONE_ATTRIBUTE);
+              const inquiry = submit.getAttribute(FILTERS_INQUIRY_ATTRIBUTE);
+              const toInquiry = count === 0 && none && inquiry;
               submit.textContent =
                 count === null
                   ? plain
-                  : count === 0 && none
+                  : toInquiry
                     ? none
                     : template.replace('{count}', String(count));
-              submit.toggleAttribute('disabled', count === 0 && Boolean(none));
+              if (toInquiry) submit.setAttribute('formaction', inquiry);
+              else submit.removeAttribute('formaction');
+              const live = this.querySelector(`[${FILTERS_LIVE_ATTRIBUTE}]`);
+              if (live) live.textContent = submit.textContent;
               if (body?.facets) patchValues(this, body.facets);
             });
         }, RECOUNT_DELAY_MS);

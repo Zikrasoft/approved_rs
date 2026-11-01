@@ -197,14 +197,37 @@ describe('the facet filters', () => {
     );
   });
 
-  it('offers no clickable button for a count of zero, and says why', async () => {
+  it('turns a count of zero into a button to the inquiry that carries the filters', async () => {
     const submit = (
       await filters({ count: 0 })
     ).querySelector<HTMLButtonElement>('button[type="submit"]')!;
 
     expect(submit.textContent?.trim()).toBe(copy.noneFound);
-    expect(submit.disabled).toBe(true);
+    expect(submit.disabled).toBe(false);
+    expect(submit.getAttribute('formaction')).toBe('/ru/parts/search/#inquiry');
     expect(submit.getAttribute('data-filters-none')).toBe(copy.noneFound);
+    expect(submit.getAttribute('data-filters-inquiry')).toBe(
+      '/ru/parts/search/#inquiry',
+    );
+  });
+
+  it('sends a counted search to the results, not the inquiry', async () => {
+    const submit = (
+      await filters({ count: 3 })
+    ).querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+    expect(submit.hasAttribute('formaction')).toBe(false);
+  });
+
+  it('names each facet group and keeps a polite region for the live count', async () => {
+    const root = await filters({ facets: [facet('brand', [['varta', 3]])] });
+
+    expect(root.querySelector('fieldset')?.getAttribute('data-facet-key')).toBe(
+      'brand',
+    );
+    expect(
+      root.querySelector('[data-filters-live]')?.getAttribute('aria-live'),
+    ).toBe('polite');
   });
 
   it('marks each value count so the sheet can recount it', async () => {

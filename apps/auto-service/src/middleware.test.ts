@@ -117,4 +117,26 @@ describe('onRequest', () => {
     run(context);
     expect(context.redirect).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['/ru/parts/c/batteries/1/', '/ru/parts/c/batteries/'],
+    ['/sr/parts/c/oil-filters/1', '/sr/parts/c/oil-filters/'],
+    ['/en/parts/brakes/', '/en/parts/c/brakes/'],
+    ['/ru/shop/cart/', '/ru/parts/cart/'],
+  ])(
+    'answers the edge redirect for %s itself, so dev and production agree',
+    (from, to) => {
+      const context = makeContext(`${from}?facets=brand%3Abosch`);
+      run(context);
+      expect(context.redirect).toHaveBeenCalledWith(
+        `${to}?facets=brand%3Abosch`,
+        301,
+      );
+    },
+  );
+
+  it('leaves a later listing page to its route', () => {
+    const context = makeContext('/ru/parts/c/batteries/2/');
+    expect(run(context)).toBe('next');
+  });
 });

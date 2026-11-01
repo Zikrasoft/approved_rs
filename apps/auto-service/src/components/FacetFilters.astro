@@ -15,10 +15,14 @@ import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import {
   FACET_COUNT_ATTRIBUTE,
+  FACET_KEY_ATTRIBUTE,
   FILTERS_COUNT_ATTRIBUTE,
+  FILTERS_INQUIRY_ATTRIBUTE,
+  FILTERS_LIVE_ATTRIBUTE,
   FILTERS_NONE_ATTRIBUTE,
   FILTERS_SUBMIT_ATTRIBUTE,
 } from '@/scripts/filterSheet';
+import { PARTS_INQUIRY_ANCHOR } from '@/utils/paths';
 import {
   facetValueLabel,
   numberBounds,
@@ -96,6 +100,7 @@ const showLabel =
     : count === 0
       ? copy.noneFound
       : copy.showResults.replace('{count}', String(count));
+const inquiry = `${action}#${PARTS_INQUIRY_ANCHOR}`;
 const legend = (facet: SearchFacet) =>
   facet.unit ? `${facet.label}, ${facet.unit}` : facet.label;
 ---
@@ -164,7 +169,10 @@ const legend = (facet: SearchFacet) =>
               </div>
               <div class="flex min-h-0 flex-col divide-y divide-line group-open/dialog:flex-1 group-open/dialog:overflow-y-auto group-open/dialog:overscroll-contain">
                 {groups.map(({ facet, pills, shown, rest, restOpen }) => (
-                  <fieldset class="min-w-0 px-5 py-4">
+                  <fieldset
+                    class="min-w-0 px-5 py-4"
+                    {...{ [FACET_KEY_ATTRIBUTE]: facet.key }}
+                  >
                     <legend class="float-left mb-1.5 w-full text-sm font-semibold text-ink">
                       {legend(facet)}
                     </legend>
@@ -298,16 +306,22 @@ const legend = (facet: SearchFacet) =>
               <div class="sticky bottom-0 flex items-center gap-3 border-t border-line bg-card px-5 py-3 group-[:defined:not([data-dirty])]/sheet:lg:hidden before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-8 before:bg-linear-to-t before:from-card before:to-transparent max-lg:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                 <button
                   type="submit"
-                  class="btn btn-primary flex-1 disabled:cursor-not-allowed disabled:bg-line-strong disabled:text-ink-2"
-                  disabled={count === 0}
+                  class="btn btn-primary flex-1"
+                  formaction={count === 0 ? inquiry : undefined}
                   {...{
                     [FILTERS_SUBMIT_ATTRIBUTE]: copy.applyFilters,
                     [FILTERS_COUNT_ATTRIBUTE]: copy.showResults,
                     [FILTERS_NONE_ATTRIBUTE]: copy.noneFound,
+                    [FILTERS_INQUIRY_ATTRIBUTE]: inquiry,
                   }}
                 >
                   {showLabel}
                 </button>
+                <span
+                  class="sr-only"
+                  aria-live="polite"
+                  {...{ [FILTERS_LIVE_ATTRIBUTE]: '' }}
+                />
                 {reset && (
                   <a
                     href={reset}

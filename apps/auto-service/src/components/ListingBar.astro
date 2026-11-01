@@ -8,17 +8,18 @@ interface Props {
   count: number | null;
   filters: boolean;
   active?: number;
+  found?: string;
 }
 
-const { count, filters, active = 0 } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+const { count, filters, active = 0, found = copy.found } = Astro.props;
 ---
 
 <div
   class="flex min-h-11 items-center justify-between gap-4 max-lg:sticky max-lg:top-[calc(4.5rem+1px)] max-lg:z-20 max-lg:-mx-5 max-lg:border-b max-lg:border-line max-lg:bg-paper max-lg:px-5 max-lg:py-2"
 >
   <p class="spec text-sm text-muted" aria-live="polite">
-    {count !== null && copy.found.replace('{count}', String(count))}
+    {count ? found.replace('{count}', String(count)) : null}
   </p>
   {
     filters && (

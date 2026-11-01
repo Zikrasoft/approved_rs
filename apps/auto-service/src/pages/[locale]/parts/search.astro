@@ -18,13 +18,14 @@ import PartAskRow from '@/components/PartAskRow.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFor } from '@/utils/catalogueEnv';
-import { PathBuilder } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
 import {
   carLink,
   carLinks,
+  inquiryTopic as topicOf,
   listingCrumbs,
   missingNumber,
 } from '@/utils/catalogueSearch';
@@ -106,16 +107,15 @@ const deadEndPrefill = vin
   : q
     ? copy.lookingFor.replace('{q}', q)
     : undefined;
-const inquiryTopic = [
-  modelName,
-  narrowedTo?.name,
-  numberMissing ? copy.numberComment.replace('{q}', q) : q,
-]
-  .filter(Boolean)
-  .join(', ');
+const inquiryTopic = topicOf({
+  model: modelName,
+  category: narrowedTo?.name,
+  query: numberMissing ? copy.numberComment.replace('{q}', q) : q,
+  filters: found?.count === 0 ? chips.map(({ label }) => label) : [],
+});
 const inquiryCard = {
-  id: 'lead',
-  class: 'max-w-2xl',
+  id: PARTS_INQUIRY_ANCHOR,
+  class: 'max-w-2xl scroll-mt-24',
   heading: copy.formHeading,
   vin: vin ?? vinTypo ?? undefined,
   comment: vin
@@ -310,7 +310,10 @@ const scopeHidden = {
                 <>
                   <StatusNote>
                     {copy.numberNotFound.replace('{q}', q)}{' '}
-                    <a href="#lead" class="link font-semibold">
+                    <a
+                      href={`#${PARTS_INQUIRY_ANCHOR}`}
+                      class="link font-semibold"
+                    >
                       {copy.notFoundLink}
                     </a>
                   </StatusNote>
