@@ -22,7 +22,12 @@ import { PathBuilder } from '@/utils/paths';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
-import { carLink, listingCrumbs, missingNumber } from '@/utils/catalogueSearch';
+import {
+  carLink,
+  carLinks,
+  listingCrumbs,
+  missingNumber,
+} from '@/utils/catalogueSearch';
 import { planSearch } from '@/utils/searchPage';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
@@ -74,7 +79,7 @@ const numberMissing =
     ? missingNumber(q, found.results)
     : false;
 const looseNumbers = numberMissing && Boolean(found?.results.length);
-const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
+const cars = found ? carLinks(found.cars, locale, copy.allModifications) : [];
 const narrowedTo = scope?.category;
 const unavailable = searchable && !found && !unknownScope;
 const scopedTo = scope?.model;
