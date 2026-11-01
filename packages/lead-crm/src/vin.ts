@@ -44,11 +44,10 @@ const vinAsTyped = (
 ): string | null => {
   const words = latinText(text)
     .split(/[^A-Z0-9.-]+/)
-    .map((word) => word.replace(/[.-]+/g, ''));
+    .map((word) => read(word.replace(/[.-]+/g, '')));
   return (
-    [compactLatin(text), ...words]
-      .map(read)
-      .find((word) => VIN_PATTERN.test(word)) ?? null
+    [compactLatin(text), ...words].find((word) => VIN_PATTERN.test(word)) ??
+    null
   );
 };
 
