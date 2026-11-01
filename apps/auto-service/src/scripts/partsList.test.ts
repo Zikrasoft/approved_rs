@@ -434,6 +434,36 @@ describe('Подобрать on a part page', () => {
     expect(readPartsList()).toEqual([{ ...mannOil, quantity: 2 }]);
   });
 
+  it('names the car the visitor found by VIN before opening the part', () => {
+    localStorage.setItem('my_garage_vin', 'WBA35BG070N074158');
+    localStorage.setItem(
+      'my_garage_car',
+      JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
+    );
+    const { button, form } = partPage();
+    button.click();
+
+    const formData = new FormData(form);
+    form.dispatchEvent(Object.assign(new Event('formdata'), { formData }));
+
+    expect(readPartsList()).toEqual([
+      { ...mannOil, car: 'BMW 3 серия F30 320d', vin: 'WBA35BG070N074158' },
+    ]);
+    expect(formData.get('comment')).toContain('BMW 3 серия F30 320d');
+  });
+
+  it('leaves the car out once the visitor changed or forgot the VIN', () => {
+    localStorage.setItem('my_garage_vin', 'WBA3B1C50GL123456');
+    localStorage.setItem(
+      'my_garage_car',
+      JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
+    );
+    const { button } = partPage();
+    button.click();
+
+    expect(readPartsList()).toEqual([mannOil]);
+  });
+
   it('sends the listed parts with only a contact and no VIN', () => {
     const { button, form } = partPage();
     button.click();
