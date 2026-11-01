@@ -45,6 +45,7 @@ const mount = () => {
       data-vin-label="Подобрать по VIN"
       data-failed-label="Подсказки не загрузились"
       data-retry-label="Повторить"
+      data-none-label="Найдем «{q}» вручную"
     >
       <form action="/ru/parts/search/" method="GET" role="search">
         <input type="search" name="q" />
@@ -215,15 +216,19 @@ describe('the catalogue search box', () => {
     expect(panel.textContent).toContain('WBA35BG070N074158');
   });
 
-  it('hides the panel when nothing is found', async () => {
+  it('offers a manual search when nothing is found', async () => {
     backend.mockResolvedValue(
       Response.json({ vin: false, cars: [], parts: [] }),
     );
     const { input, panel } = mount();
 
-    await type(input, 'qqqq');
+    await type(input, 'qq 99');
 
-    expect(panel.hidden).toBe(true);
+    expect(panel.hidden).toBe(false);
+    expect(options(panel)).toEqual(['Найдем «qq 99» вручную']);
+    expect(panel.querySelector('[role="option"]')?.getAttribute('href')).toBe(
+      '/ru/parts/search/?q=qq+99',
+    );
   });
 
   it('marks itself busy while it waits for suggestions', async () => {
