@@ -215,6 +215,26 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('answers fifty concurrent filtered Model searches without starving the connection pool', async () => {
+        const startedAt = Date.now();
+        const responses = await Promise.all(
+          Array.from({ length: 50 }, (_, at) =>
+            search({
+              category: 'batteries',
+              ...f30,
+              facets: at % 2 ? 'brand:varta' : 'brand:bosch',
+              range: `capacity:${at}:`,
+              limit: '1',
+            }),
+          ),
+        );
+
+        expect(responses.map(({ status }) => status)).toEqual(
+          Array.from({ length: 50 }, () => 200),
+        );
+        expect(Date.now() - startedAt).toBeLessThan(30_000);
+      });
+
       it('finds nothing for a car with neither Fitments nor Requirements', async () => {
         const [byModel, byVehicle] = await Promise.all([
           search({ category: 'batteries', make: 'bmw', model: 'g20-320d' }),
