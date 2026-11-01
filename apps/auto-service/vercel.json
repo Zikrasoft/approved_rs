@@ -311,6 +311,36 @@
       "permanent": true
     },
     {
+      "source": "/ru/parts/c/:slug/1",
+      "destination": "/ru/parts/c/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/parts/c/:slug/1/",
+      "destination": "/ru/parts/c/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/c/:slug/1",
+      "destination": "/sr/parts/c/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/parts/c/:slug/1/",
+      "destination": "/sr/parts/c/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/c/:slug/1",
+      "destination": "/en/parts/c/:slug/",
+      "permanent": true
+    },
+    {
+      "source": "/en/parts/c/:slug/1/",
+      "destination": "/en/parts/c/:slug/",
+      "permanent": true
+    },
+    {
       "source": "/services/:path*",
       "destination": "/sr/services/:path*",
       "permanent": true
