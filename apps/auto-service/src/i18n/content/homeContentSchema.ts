@@ -11,7 +11,6 @@ export const homeContentSchema = z
       .object({
         heading: z.string(),
         ctaPrimary: z.string(),
-        callback: z.string(),
         ctaSecondary: z.string(),
         partsHeading: z.string(),
         partsSubmit: z.string(),
@@ -21,19 +20,20 @@ export const homeContentSchema = z
       })
       .strict(),
     servicesHead: sectionHeadSchema,
-    why: sectionHeadSchema.extend({
-      points: z.array(
-        z.object({ title: z.string(), text: z.string() }).strict(),
-      ),
-    }),
+    problemPrompt: z
+      .object({ heading: z.string(), body: z.string(), cta: z.string() })
+      .strict(),
+    worksHeading: z.string(),
     process: sectionHeadSchema.extend({
       steps: z.array(
         z.object({ title: z.string(), text: z.string() }).strict(),
       ),
+      promises: z.array(z.string()),
     }),
     accident: sectionHeadSchema.extend({
       points: z.array(z.string()),
       cta: z.string(),
+      more: z.string(),
     }),
     faqEyebrow: z.string(),
     faq: z.array(z.object({ q: z.string(), a: z.string() }).strict()),

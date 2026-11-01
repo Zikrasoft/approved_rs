@@ -1,0 +1,84 @@
+---
+import { mapPlaceUrl } from '@podbor/site-kit';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+
+interface Props {
+  tone: 'panel' | 'card';
+  layout: 'line' | 'block';
+  class?: string;
+}
+
+const { tone, layout, class: className } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
+const TONE = {
+  panel: {
+    soft: 'text-panel-ink',
+    underline: 'decoration-panel-line hover:decoration-panel-fg',
+  },
+  card: {
+    soft: 'text-muted',
+    underline: 'decoration-line-strong hover:decoration-ink',
+  },
+}[tone];
+const { street, district, city, googleMapsCid } = GARAGE_ADDRESS;
+const mapLink = {
+  href: mapPlaceUrl(googleMapsCid),
+  target: '_blank',
+  rel: 'noopener',
+};
+---
+
+{
+  layout === 'line' ? (
+    <p class:list={['leading-snug', className]}>
+      <a
+        {...mapLink}
+        class:list={[
+          'underline underline-offset-2 transition-colors duration-150',
+          TONE.underline,
+        ]}
+      >
+        {street}, {district}
+      </a>
+      <span class:list={['block', TONE.soft]}>{site.footer.hours}</span>
+    </p>
+  ) : (
+    <div class:list={['flex flex-col gap-3', className]}>
+      <a {...mapLink} class="group flex items-start gap-3">
+        <Icon
+          name="pin"
+          size={18}
+          class:list={['mt-0.5 shrink-0', TONE.soft]}
+        />
+        <span class="flex flex-col">
+          <span
+            class:list={[
+              'font-semibold underline underline-offset-4 transition-colors duration-150',
+              TONE.underline,
+            ]}
+          >
+            {street}
+          </span>
+          <span class:list={['text-sm', TONE.soft]}>
+            {district}, {city}
+          </span>
+        </span>
+      </a>
+      <p class="flex items-start gap-3 text-[0.9375rem]">
+        <Icon
+          name="calendar"
+          size={18}
+          class:list={['mt-0.5 shrink-0', TONE.soft]}
+        />
+        <span>
+          {site.hours.week}
+          <br />
+          {site.hours.saturday}
+        </span>
+      </p>
+    </div>
+  )
+}

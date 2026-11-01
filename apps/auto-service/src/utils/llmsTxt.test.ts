@@ -77,6 +77,16 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
+  it('lists the visit facts and the route link as key facts', async () => {
+    const body = await generateLlmsTxt('ru');
+    content('ru').site.visit.facts.forEach((fact) =>
+      expect(body).toContain(`- ${fact}\n`),
+    );
+    expect(body).toContain(
+      '- Построить маршрут: https://www.google.com/maps/dir/?api=1&destination=44.8054581,20.4858424\n',
+    );
+  });
+
   it('lists the hero trust row as key facts', async () => {
     const body = await generateLlmsTxt('ru');
     content('ru').home.hero.badges.forEach((fact) =>
@@ -292,7 +302,7 @@ describe('generateLlmsTxt', () => {
 
   it('links the about page', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '[О проекте](https://carlab.rs/ru/about/)',
+      '[О сервисе](https://carlab.rs/ru/about/)',
     );
   });
 

@@ -1,15 +1,11 @@
 ---
-import { formatPhone } from '@podbor/site-kit/format-phone';
 import { contactRegion } from '@podbor/site-kit/contact-control';
+import CallAction from './CallAction.astro';
 import ContactChannels from './ContactChannels.astro';
-import ContactControl from './ContactControl.astro';
-import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { PHONE_NUMBER } from '@/utils/constants';
 
-const locale = localeFrom(Astro.url.pathname);
-const { home, site } = content(locale);
+const { home } = content(localeFrom(Astro.url.pathname));
 const button = 'btn min-h-12 w-full lg:px-5';
 ---
 
@@ -17,25 +13,18 @@ const button = 'btn min-h-12 w-full lg:px-5';
   class="flex flex-col gap-2 lg:grid lg:grid-cols-2"
   {...contactRegion('hero')}
 >
-  <ContactControl channel="phone" class={`${button} btn-primary`}>
-    <Icon name="phone" size={16} class="shrink-0" />
-    {site.channels.call}{' '}
-    <span class="spec whitespace-nowrap">{formatPhone(PHONE_NUMBER)}</span>
-  </ContactControl>
-  <a
-    href="#lead"
-    data-open-lead-modal
-    class={`${button} btn-on-panel pointer-fine:border-signal-ink pointer-fine:bg-signal-ink pointer-fine:text-white pointer-fine:hover:border-signal-dark pointer-fine:hover:bg-signal-dark`}
+  <CallAction
+    class={`${button} btn-primary`}
+    callbackClass={`${button} btn-on-panel`}
   >
-    {home.hero.ctaPrimary}
-  </a>
-  <a
-    href="#lead"
-    data-open-lead-modal="phone"
-    class={`${button} btn-on-panel pointer-coarse:hidden!`}
-  >
-    {home.hero.callback}
-  </a>
+    <a
+      href="#lead"
+      data-open-lead-modal
+      class={`${button} btn-on-panel pointer-fine:border-signal-ink pointer-fine:bg-signal-ink pointer-fine:text-white pointer-fine:hover:border-signal-dark pointer-fine:hover:bg-signal-dark`}
+    >
+      {home.hero.ctaPrimary}
+    </a>
+  </CallAction>
   <ContactChannels
     placement="hero"
     tone="panel"

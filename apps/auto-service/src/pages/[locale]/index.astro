@@ -1,27 +1,31 @@
 ---
-import { contactCta } from '@podbor/site-kit/contact-control';
-import { getImage } from 'astro:assets';
+import { contactCta, contactPlacement } from '@podbor/site-kit/contact-control';
+import { getImage, Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import { faqPageSchema, mapPlaceUrl, websiteSchema } from '@podbor/site-kit';
+import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
 import { DEVELOPER } from '@podbor/brands';
-import { GARAGE_ADDRESS, SITE_NAME, SITE_URL } from '@/utils/constants';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
 import heroWideImage from '@/assets/hero-mechanic-wide.jpg';
 import heroTallImage from '@/assets/hero-mechanic.jpg';
+import garageBay from '@/content/works/audi-q7/image.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
 import ProcessSteps from '@/components/ProcessSteps.astro';
-import PriceTable from '@/components/PriceTable.astro';
+import ServiceList from '@/components/ServiceList.astro';
+import SplitSection from '@/components/SplitSection.astro';
+import WorksRow from '@/components/WorksRow.astro';
+import VisitPanel from '@/components/VisitPanel.astro';
+import CallAction from '@/components/CallAction.astro';
+import GarageAddress from '@/components/GarageAddress.astro';
 import Faq from '@/components/Faq.astro';
-import LeadForm from '@/components/LeadForm.astro';
-import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import HeroContacts from '@/components/HeroContacts.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { localeFrom } from '@/i18n/config';
-import { publishedWorks } from '@/utils/works';
+import { featuredWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
@@ -49,7 +53,6 @@ const locale = localeFrom(Astro.url.pathname);
 const home = content(locale).home;
 const site = content(locale).site;
 const pages = content(locale).pages;
-const latestWorks = publishedWorks(await getCollection('works')).slice(0, 3);
 
 const faqSchema = faqPageSchema(home.faq);
 const website = websiteSchema({
@@ -108,17 +111,11 @@ const website = websiteSchema({
       >
         <div class="flex flex-col gap-2 lg:gap-3.5">
           <h1 class="text-hero max-w-[15ch]">{home.hero.heading}</h1>
-          <p class="text-[0.9375rem] leading-snug lg:text-[1.0625rem]">
-            <a
-              href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
-              target="_blank"
-              rel="noopener"
-              class="underline decoration-panel-line underline-offset-2 transition-colors duration-150 hover:decoration-panel-fg"
-            >
-              {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}
-            </a>
-            <span class="block text-panel-ink">{site.footer.hours}</span>
-          </p>
+          <GarageAddress
+            layout="line"
+            tone="panel"
+            class="text-[0.9375rem] lg:text-[1.0625rem]"
+          />
         </div>
 
         <HeroContacts />
@@ -164,60 +161,78 @@ const website = websiteSchema({
   <PartsInquiryModal comment="" />
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
-    <SectionHead
-      eyebrow={home.servicesHead.eyebrow}
-      heading={home.servicesHead.heading}
-      body={home.servicesHead.body}
-    />
-    <PriceTable />
-  </section>
-
-  <section class="wrap pb-band lg:hidden" {...contactCta}>
-    <div class="rounded-block bg-shade p-6">
-      <h2 class="text-section mb-5">{site.form.heading}</h2>
-      <LeadForm compact />
-    </div>
-  </section>
-
-  <section class="bg-shade">
-    <div class="wrap py-band md:py-band-lg">
+    <SplitSection>
       <SectionHead
-        eyebrow={home.why.eyebrow}
-        heading={home.why.heading}
-        body={home.why.body}
+        slot="head"
+        eyebrow={home.servicesHead.eyebrow}
+        heading={home.servicesHead.heading}
+        body={home.servicesHead.body}
       />
-      <ul class="mt-8 grid gap-4 sm:grid-cols-2">
-        {
-          home.why.points.map((point) => (
-            <li class="flex gap-3">
-              <Icon name="check" size={16} class="mt-1 shrink-0 text-go" />
-              <div class="flex flex-col gap-1">
-                <h3 class="font-semibold text-ink">{point.title}</h3>
-                <p class="text-sm leading-relaxed text-muted">{point.text}</p>
-              </div>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+      <ServiceList />
+      <div slot="aside" class="flex flex-col gap-2 rounded-block bg-shade p-5">
+        <h3 class="font-semibold text-ink">{home.problemPrompt.heading}</h3>
+        <p class="text-sm leading-relaxed text-muted">
+          {home.problemPrompt.body}
+        </p>
+        <a
+          href="#lead"
+          data-open-lead-modal
+          class="btn btn-secondary mt-2 w-full lg:w-fit"
+        >
+          {home.problemPrompt.cta}
+        </a>
+      </div>
+    </SplitSection>
   </section>
 
-  <section id="process" class="wrap scroll-mt-20 py-band md:py-band-lg">
+  <WorksRow
+    works={featuredWorks(await getCollection('works'))}
+    eyebrow={pages.works.eyebrow}
+    heading={home.worksHeading}
+  />
+
+  <section
+    id="process"
+    class="wrap scroll-mt-20 py-band md:py-band-lg"
+    {...contactPlacement('visit')}
+  >
     <SectionHead
       eyebrow={home.process.eyebrow}
       heading={home.process.heading}
       body={home.process.body}
     />
-    <ProcessSteps steps={home.process.steps} />
+    <ProcessSteps steps={home.process.steps}>
+      <CallAction
+        slot="first"
+        class="link-underlined inline-flex min-h-11 w-fit items-center gap-1.5 font-semibold text-ink"
+        number={false}
+      />
+    </ProcessSteps>
+    <ul
+      class="mt-8 flex flex-col gap-2 border-t border-line pt-5 text-sm text-ink-2 sm:flex-row sm:gap-8"
+    >
+      {
+        home.process.promises.map((promise) => (
+          <li class="flex items-center gap-2">
+            <Icon name="check" size={14} class="shrink-0 text-go" />
+            {promise}
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <section class="wrap pb-band md:pb-band-lg">
-    <div class="card grid gap-6 p-6 lg:p-8">
+    <div
+      class="card grid gap-6 p-6 lg:grid-cols-2 lg:items-center lg:gap-12 lg:p-10"
+    >
       <div class="flex flex-col gap-3">
         <span class="eyebrow">{home.accident.eyebrow}</span>
-        <h2 class="text-section">{home.accident.heading}</h2>
+        <h2 class="text-block">{home.accident.heading}</h2>
         <p class="text-base leading-relaxed text-muted">{home.accident.body}</p>
-        <ul class="flex flex-col gap-1.5 pt-1">
+      </div>
+      <div class="flex flex-col gap-5">
+        <ul class="flex flex-col gap-1.5">
           {
             home.accident.points.map((point) => (
               <li class="flex gap-2 text-sm text-ink-2">
@@ -227,39 +242,50 @@ const website = websiteSchema({
             ))
           }
         </ul>
-        <a
-          href={PathBuilder.service(locale, 'bodywork-painting')}
-          class="btn btn-secondary mt-2 w-fit"
+        <div
+          class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6"
         >
-          {home.accident.cta}
-        </a>
+          <a
+            href="#lead"
+            data-open-lead-modal
+            data-lead-service="bodywork-painting"
+            class="btn btn-secondary w-full sm:w-fit"
+          >
+            {home.accident.cta}
+          </a>
+          <a
+            href={PathBuilder.service(locale, 'bodywork-painting')}
+            class="link-underlined inline-flex min-h-11 items-center text-sm font-semibold text-ink"
+          >
+            {home.accident.more}
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
-  {
-    latestWorks.length > 0 && (
-      <section class="bg-shade">
-        <div class="wrap py-band md:py-band-lg">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <SectionHead
-              eyebrow={pages.works.eyebrow}
-              heading={pages.works.heading}
-            />
-            <a href={PathBuilder.works(locale)} class="btn btn-secondary w-fit">
-              {site.common.allWorks}
-            </a>
-          </div>
-          <WorkGrid works={latestWorks} />
-        </div>
-      </section>
-    )
-  }
+  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg">
+    <Image
+      slot="media"
+      src={garageBay}
+      alt=""
+      widths={[480, 720, 1080, 1280]}
+      sizes="(min-width: 1224px) 572px, (min-width: 1024px) calc(50vw - 20px), calc(100vw - 2.5rem)"
+      loading="lazy"
+      class="block aspect-[2/1] w-full object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full"
+    />
+  </VisitPanel>
 
   <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">
-      <SectionHead eyebrow={home.faqEyebrow} heading={site.common.faqHeading} />
-      <Faq items={home.faq} />
+      <SplitSection>
+        <SectionHead
+          slot="head"
+          eyebrow={home.faqEyebrow}
+          heading={site.common.faqHeading}
+        />
+        <Faq items={home.faq} class="" />
+      </SplitSection>
     </div>
   </section>
 
