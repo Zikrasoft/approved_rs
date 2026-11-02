@@ -57,6 +57,8 @@ export const siteContentSchema = z
         mobileNavLabel: z.string(),
         faqHeading: z.string(),
         closeLabel: z.string(),
+        prevLabel: z.string(),
+        nextLabel: z.string(),
         fromPrice: z.string(),
         priceOnRequest: z.string(),
         allServices: z.string(),

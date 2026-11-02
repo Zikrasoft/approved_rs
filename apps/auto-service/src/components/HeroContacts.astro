@@ -4,8 +4,20 @@ import CallAction from './CallAction.astro';
 import ContactChannels from './ContactChannels.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import type { ServiceSlug } from '@/utils/services';
+
+interface Props {
+  service?: ServiceSlug;
+  bookLabel?: string;
+  bookModal?: boolean;
+}
 
 const { home } = content(localeFrom(Astro.url.pathname));
+const {
+  service,
+  bookLabel = home.hero.ctaPrimary,
+  bookModal = true,
+} = Astro.props;
 const button = 'btn min-h-12 w-full lg:px-5';
 ---
 
@@ -19,15 +31,16 @@ const button = 'btn min-h-12 w-full lg:px-5';
   >
     <a
       href="#lead"
-      data-open-lead-modal
+      data-open-lead-modal={bookModal ? '' : undefined}
       class={`${button} btn-on-panel pointer-fine:border-signal-ink pointer-fine:bg-signal-ink pointer-fine:text-white pointer-fine:hover:border-signal-dark pointer-fine:hover:bg-signal-dark`}
     >
-      {home.hero.ctaPrimary}
+      {bookLabel}
     </a>
   </CallAction>
   <ContactChannels
     placement="hero"
     tone="panel"
+    service={service}
     only={['whatsapp', 'viber', 'telegram']}
     class="lg:col-span-2 lg:grid!"
   />

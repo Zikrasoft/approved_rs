@@ -1,9 +1,13 @@
 ---
+import { mapRouteUrl } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import BackLink from '@/components/BackLink.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import GarageAddress from '@/components/GarageAddress.astro';
+import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
+import { GARAGE_ADDRESS } from '@/utils/constants';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -39,20 +43,25 @@ const back = parts ? PathBuilder.parts(locale) : PathBuilder.home(locale);
       {!parts && <p class="max-w-xl text-sm text-muted">{copy.note}</p>}
       <div class="mt-2 flex flex-wrap gap-3">
         <BackLink href={back} label={copy.cta} />
-        {
-          !parts && (
-            <BackLink
-              href={PathBuilder.parts(locale)}
-              label={pages.thanksParts.cta}
-            />
-          )
-        }
       </div>
     </div>
 
     <div class="card flex flex-col gap-4 self-start p-5">
       <span class="text-xs text-muted">{site.footer.contactHeading}</span>
-      <ContactChannels placement="thanks" />
+      <ContactChannels placement="thanks" numberLabel />
+      <div class="flex flex-col gap-3 border-t border-line pt-4">
+        <span class="text-xs text-muted">{pages.thanks.visitLabel}</span>
+        <GarageAddress layout="block" tone="card" />
+        <a
+          href={mapRouteUrl(GARAGE_ADDRESS.lat, GARAGE_ADDRESS.lon)}
+          target="_blank"
+          rel="noopener"
+          class="link-underlined inline-flex min-h-11 items-center gap-2 self-start font-semibold text-ink"
+        >
+          <Icon name="route" size={16} class="shrink-0" />
+          {site.visit.route}
+        </a>
+      </div>
     </div>
   </section>
 </Shell>

@@ -12,9 +12,15 @@ interface Props {
   heading: string;
   as?: 'h1' | 'h2';
   class?: string;
+  mediaFirst?: boolean;
 }
 
-const { heading, as: Heading = 'h2', class: className } = Astro.props;
+const {
+  heading,
+  as: Heading = 'h2',
+  class: className,
+  mediaFirst = true,
+} = Astro.props;
 const site = content(localeFrom(Astro.url.pathname)).site;
 const hasMedia = Astro.slots.has('media');
 const action = 'btn min-h-12 w-full sm:w-auto sm:px-7';
@@ -58,7 +64,7 @@ const action = 'btn min-h-12 w-full sm:w-auto sm:px-7';
     </div>
     {
       hasMedia && (
-        <div class="relative max-lg:order-first">
+        <div class:list={['relative', mediaFirst && 'max-lg:order-first']}>
           <slot name="media" />
         </div>
       )

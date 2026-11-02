@@ -1,15 +1,13 @@
 ---
 import BulletList from '@/components/BulletList.astro';
-import { mapPlaceUrl } from '@podbor/site-kit';
-import { contactCta } from '@podbor/site-kit/contact-control';
 import Shell from '@/layouts/Shell.astro';
-import PageHero from '@/components/PageHero.astro';
-import LeadForm from '@/components/LeadForm.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import VisitPanel from '@/components/VisitPanel.astro';
+import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import MapEmbed from '@/components/MapEmbed.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { GARAGE_ADDRESS } from '@/utils/constants';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -17,10 +15,11 @@ export function getStaticPaths() {
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const pages = content(locale).pages;
-const site = content(locale).site;
-
-const mapLink = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
+const { pages, site, home } = content(locale);
+const cards = [
+  { heading: pages.contact.mapHeading, items: [pages.contact.mapNote] },
+  { heading: pages.contact.arrivalHeading, items: pages.contact.arrival },
+];
 ---
 
 <Shell
@@ -28,77 +27,44 @@ const mapLink = mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid);
   description={pages.contact.metaDescription}
   stickyContact={false}
 >
-  <PageHero
-    eyebrow={pages.contact.eyebrow}
+  <div class="wrap pt-4 sm:pt-6">
+    <Breadcrumbs
+      crumbs={[{ href: PathBuilder.contact(locale), label: site.nav.contact }]}
+    />
+  </div>
+  <VisitPanel
     heading={pages.contact.heading}
-    lead={pages.contact.lead}
-    crumbs={[{ href: PathBuilder.contact(locale), label: site.nav.contact }]}
-  />
-
-  <section
-    class="wrap grid gap-6 py-band md:py-band-lg lg:grid-cols-[1fr_1.1fr]"
+    as="h1"
+    class="pt-3"
+    mediaFirst={false}
   >
-    <div class="flex flex-col gap-4">
-      <div class="card flex flex-col gap-4 p-5">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs text-muted">{pages.contact.addressLabel}</span>
-          <address class="text-base not-italic leading-relaxed text-ink">
-            {GARAGE_ADDRESS.street}<br />{
-              `${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
-            }
-          </address>
-        </div>
-        <div class="h-px bg-line"></div>
-        <div class="flex flex-col gap-1">
-          <span class="text-xs text-muted">{pages.contact.hoursLabel}</span>
-          <span class="text-base text-ink">{site.footer.hours}</span>
-        </div>
-      </div>
+    <ContactChannels
+      slot="channels"
+      placement="hero"
+      tone="panel"
+      only={['telegram', 'whatsapp', 'viber']}
+    />
+    <MapEmbed
+      slot="media"
+      title={pages.contact.mapHeading}
+      class="h-64 bg-panel-2 lg:absolute lg:inset-0 lg:h-full"
+    />
+  </VisitPanel>
 
-      <ContactChannels />
-
-      <div class="card flex flex-col gap-3 p-5">
-        <h2 class="text-block font-semibold">
-          {pages.contact.arrivalHeading}
-        </h2>
-        <BulletList items={pages.contact.arrival} />
-      </div>
-    </div>
-
-    <div class="flex flex-col gap-4">
-      <div
-        id="lead"
-        class="card flex scroll-mt-24 flex-col gap-4 p-5"
-        {...contactCta}
-      >
-        <div class="flex flex-col gap-1.5">
-          <h2 class="text-block font-semibold">{site.form.heading}</h2>
-          <p class="text-sm leading-relaxed text-muted">
-            {site.form.subheading}
-          </p>
+  <section class="wrap grid gap-4 pt-band md:grid-cols-2 md:pt-band-lg">
+    {
+      cards.map((card) => (
+        <div class="card flex flex-col gap-3 p-5">
+          <h2 class="text-block font-semibold">{card.heading}</h2>
+          <BulletList items={card.items} />
         </div>
-        <LeadForm />
-      </div>
-
-      <div class="card overflow-hidden">
-        <div class="flex flex-col gap-1 p-5">
-          <h2 class="text-block font-semibold">
-            {pages.contact.mapHeading}
-          </h2>
-          <p class="text-sm text-muted">{pages.contact.mapNote}</p>
-        </div>
-        <MapEmbed title={pages.contact.mapHeading} />
-        <a
-          href={mapLink}
-          target="_blank"
-          rel="noopener"
-          class="block p-5 text-sm text-signal-ink transition-colors duration-150 hover:text-ink"
-        >
-          {GARAGE_ADDRESS.street}, {GARAGE_ADDRESS.district}, {
-            GARAGE_ADDRESS.city
-          }
-        </a>
-      </div>
-    </div>
+      ))
+    }
   </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={site.form.heading}
+    body={site.form.subheading}
+  />
 </Shell>

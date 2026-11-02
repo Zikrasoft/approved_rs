@@ -1,8 +1,9 @@
 ---
 interface Props {
   steps: { title: string; text: string }[];
+  titlesOnly?: boolean;
 }
-const { steps } = Astro.props;
+const { steps, titlesOnly = false } = Astro.props;
 ---
 
 <ol class="mt-8 grid gap-6 lg:grid-cols-4 lg:gap-8">
@@ -14,7 +15,9 @@ const { steps } = Astro.props;
         </span>
         <div class="flex flex-col gap-1">
           <h3 class="font-semibold text-ink">{step.title}</h3>
-          <p class="text-sm leading-relaxed text-muted">{step.text}</p>
+          {!titlesOnly && (
+            <p class="text-sm leading-relaxed text-muted">{step.text}</p>
+          )}
           {i === 0 && <slot name="first" />}
         </div>
       </li>

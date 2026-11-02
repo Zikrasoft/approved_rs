@@ -300,9 +300,9 @@ describe('generateLlmsTxt', () => {
     );
   });
 
-  it('links the about page', async () => {
+  it('links the about page with what it tells about the service', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '[О сервисе](https://carlab.rs/ru/about/)',
+      '[О сервисе](https://carlab.rs/ru/about/): Автосервис CarLab на Звездаре в Белграде: кто мы, оборудование, с какими машинами работаем и как нас найти.',
     );
   });
 

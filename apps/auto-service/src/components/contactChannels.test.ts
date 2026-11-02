@@ -38,6 +38,27 @@ describe('ContactChannels as quiet links', () => {
   });
 });
 
+describe('ContactChannels on the thanks page', () => {
+  const call = async (props: Record<string, unknown>) =>
+    tiles(
+      await render(ContactChannels, {
+        path: '/ru/thanks/',
+        props: { placement: 'thanks', ...props },
+      }),
+    ).find((link) => link.dataset.contactChannel === 'phone')!;
+
+  it('labels the call tile with the number when asked to', async () => {
+    const tile = await call({ numberLabel: true });
+
+    expect(tile.getAttribute('href')).toBe('tel:+381677210533');
+    expect(tile.textContent?.trim()).toBe('+381 67 7210533');
+  });
+
+  it('keeps the plain call label otherwise', async () => {
+    expect((await call({})).textContent?.trim()).toBe('Позвонить');
+  });
+});
+
 describe('ContactChannels in the footer', () => {
   it('offers the three messengers as tiles that turn into plain links on a wide screen', async () => {
     const root = await channels({ placement: 'footer' });

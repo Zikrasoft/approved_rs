@@ -4,7 +4,6 @@ import { captureCopySchema } from '@podbor/lead-capture/copy';
 import { homeContentSchema } from './content/homeContentSchema.ts';
 import { servicesContentSchema } from './content/servicesContentSchema.ts';
 import { pagesContentSchema } from './content/pagesContentSchema.ts';
-import { promoBannersContentSchema } from './content/promoBannersContentSchema.ts';
 import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
 import { partsCarContentSchema } from './content/partsCarContentSchema.ts';
@@ -45,13 +44,6 @@ export const SECTIONS = [
     schema: pagesContentSchema,
     promptSubject:
       'copy for the recent-jobs, contact, thank-you, privacy-policy and not-found pages',
-  },
-  {
-    key: 'promoBanners',
-    path: 'src/content/i18n/promoBanners.yaml',
-    schema: promoBannersContentSchema,
-    promptSubject:
-      'short promo banners shown on a car service work write-up, inviting the reader to book the same kind of job at our shop in the Zvezdara district of Belgrade, keep {placeholders} if any and markdown bold spans intact',
   },
   {
     key: 'shopPart',

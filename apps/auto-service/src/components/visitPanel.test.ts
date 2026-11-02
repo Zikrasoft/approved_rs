@@ -69,6 +69,18 @@ describe('VisitPanel', () => {
     );
   });
 
+  it('leads with the photo on a phone unless the page puts the media last', async () => {
+    const media = { media: '<img alt="" src="/bay.jpg">' };
+    const wrapper = async (props = {}) =>
+      (await panel(props, media)).querySelector('img')!.parentElement!
+        .classList;
+
+    expect((await wrapper()).contains('max-lg:order-first')).toBe(true);
+    expect(
+      (await wrapper({ mediaFirst: false })).contains('max-lg:order-first'),
+    ).toBe(false);
+  });
+
   it('renders the channels slot inside the panel', async () => {
     const root = await panel({}, { channels: '<ul id="channels"></ul>' });
 

@@ -9,6 +9,8 @@ import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { content } from '@/i18n/content';
 import { navCurrent } from '@podbor/site-kit';
 import { PathBuilder } from '@/utils/paths';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { PHONE_NUMBER } from '@/utils/constants';
 
 interface Props {
   class?: string;
@@ -23,6 +25,7 @@ interface Props {
   leadPrimary?: boolean;
   only?: readonly TrackedContactChannel[];
   prefill?: string;
+  numberLabel?: boolean;
 }
 
 const {
@@ -35,6 +38,7 @@ const {
   leadPrimary = false,
   only,
   prefill,
+  numberLabel = false,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -91,7 +95,10 @@ const TONE = {
   },
 };
 const CHANNEL = {
-  phone: { icon: 'phone', label: site.channels.call },
+  phone: {
+    icon: 'phone',
+    label: numberLabel ? formatPhone(PHONE_NUMBER) : site.channels.call,
+  },
   whatsapp: { icon: 'whatsapp', label: site.channels.whatsapp },
   viber: { icon: 'viber', label: site.channels.viber },
   telegram: { icon: 'telegram', label: site.channels.telegram },
