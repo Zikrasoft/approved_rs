@@ -35,6 +35,7 @@ interface Props {
   action: string;
   hidden: Record<string, string>;
   facets: SearchFacet[];
+  dormant?: string[];
   count?: number;
   chosen?: string[];
   ranges?: RangeFilter[];
@@ -49,6 +50,7 @@ const {
   action,
   hidden,
   facets,
+  dormant = [],
   count,
   chosen = [],
   ranges = [],
@@ -171,6 +173,7 @@ const legend = (facet: SearchFacet) =>
                 {groups.map(({ facet, pills, shown, rest, restOpen }) => (
                   <fieldset
                     class="min-w-0 px-5 py-4"
+                    hidden={dormant.includes(facet.key)}
                     {...{ [FACET_KEY_ATTRIBUTE]: facet.key }}
                   >
                     <legend class="float-left mb-1.5 w-full text-sm font-semibold text-ink">

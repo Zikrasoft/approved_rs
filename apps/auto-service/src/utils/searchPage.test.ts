@@ -298,6 +298,22 @@ describe('planSearch', () => {
     );
   });
 
+  it.each([
+    ['offset=-1', '/ru/parts/search/?q=filter'],
+    ['offset=0', '/ru/parts/search/?q=filter'],
+    ['offset=abc', '/ru/parts/search/?q=filter'],
+    ['offset=20x', '/ru/parts/search/?q=filter&offset=20'],
+  ])(
+    'drops an offset the search does not apply as written: %s',
+    async (offset, redirect) => {
+      const catalogue = fakeCatalogue({ search: async () => found(45) });
+      expect(await plan(`q=filter&${offset}`, catalogue)).toEqual({
+        redirect,
+        status: 302,
+      });
+    },
+  );
+
   it('keeps the deepest page the shop answers for a list that long', async () => {
     const catalogue = fakeCatalogue({
       search: vi.fn(async () => found(50_000)),
@@ -345,7 +361,7 @@ describe('planSearch', () => {
 
   it('lower-cases a category, make or model typed in capitals', async () => {
     expect(await plan('category=BATTERIES', batteries())).toEqual({
-      redirect: '/ru/parts/search/?category=batteries',
+      redirect: '/ru/parts/c/batteries/',
       status: 302,
     });
     expect(
@@ -481,6 +497,93 @@ describe('planSearch', () => {
     },
   );
 
+  it('spells a value the way the category lists it even when the filters find nothing', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) =>
+      facets.length
+        ? {
+            ...found(0, []),
+            facets: [facetOf('brand', 'febi'), facetOf('thread', 'M14x1.5')],
+          }
+        : {
+            ...found(5),
+            facets: [
+              facetOf('brand', 'febi', 'mann'),
+              facetOf('thread', 'M14x1.5', 'M20x1.5'),
+            ],
+          },
+    );
+
+    expect(
+      await plan(
+        'category=oil-filters&facets=brand%3AFEBI&facets=thread%3Am20X1.5',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=oil-filters&facets=brand%3Afebi&facets=thread%3AM20x1.5',
+      status: 302,
+    });
+  });
+
+  it('keeps the facets the filters narrowed away in the sheet, in the order the listing has them, to come back once unticked', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) =>
+      facets.length
+        ? {
+            ...found(0, []),
+            facets: [facetOf('brand', 'varta'), facetOf('technology', 'agm')],
+          }
+        : {
+            ...found(5),
+            facets: [
+              facetOf('brand', 'varta', 'bosch'),
+              numberFacet('capacity', '60', '80'),
+              facetOf('technology', 'agm', 'efb'),
+            ],
+          },
+    );
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Avarta&facets=technology%3Aagm',
+      fakeCatalogue({ search }),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sheetFacets).toEqual([
+      facetOf('brand', 'varta'),
+      numberFacet('capacity', '60', '80'),
+      facetOf('technology', 'agm'),
+    ]);
+    expect(outcome.view.dormant).toEqual(['capacity']);
+  });
+
+  it('keeps a facet only the filtered answer lists', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) => ({
+      ...found(facets.length ? 1 : 5),
+      facets: facets.length ? [facetOf('brand', 'varta')] : [],
+    }));
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Avarta',
+      fakeCatalogue({ search }),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sheetFacets).toEqual([facetOf('brand', 'varta')]);
+    expect(outcome.view.dormant).toEqual([]);
+  });
+
+  it('asks for no unfiltered listing when nothing is filtered', async () => {
+    const catalogue = batteries();
+    const outcome = await plan('category=batteries', catalogue);
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(catalogue.search).toHaveBeenCalledTimes(1);
+    expect(outcome.view.sheetFacets.map(({ key }) => key)).toEqual([
+      'brand',
+      'capacity',
+      'technology',
+    ]);
+    expect(outcome.view.dormant).toEqual([]);
+  });
+
   it('keeps a facet value the catalogue lists no spelling of', async () => {
     expect(
       await plan('category=oil-filters&facets=brand%3Anosuch', withShouted()),
@@ -488,16 +591,77 @@ describe('planSearch', () => {
   });
 
   it.each([
-    ['min.capacity=0.0000001', ''],
-    ['min.capacity=0', ''],
-    ['max.capacity=1000000000', ''],
-    ['min.capacity=0x50', ''],
-    ['min.capacity=80,5', '&min.capacity=80.5'],
-    ['min.capacity=90&max.capacity=70', '&min.capacity=70&max.capacity=90'],
-    ['min.capacity=70&min.capacity=90', '&min.capacity=70'],
-  ])('rewrites the range %s the way it applies', async (asked, kept) => {
+    ['min.capacity=0.0000001', '/ru/parts/c/batteries/'],
+    ['max.capacity=1000000000', '/ru/parts/c/batteries/'],
+    ['min.capacity=0x50', '/ru/parts/c/batteries/'],
+    [
+      'min.capacity=80,5',
+      '/ru/parts/search/?category=batteries&min.capacity=80.5',
+    ],
+    [
+      'min.capacity=90&max.capacity=70',
+      '/ru/parts/search/?category=batteries&min.capacity=70&max.capacity=90',
+    ],
+    [
+      'min.capacity=70&min.capacity=90',
+      '/ru/parts/search/?category=batteries&min.capacity=70',
+    ],
+  ])('rewrites the range %s the way it applies', async (asked, redirect) => {
     expect(await plan(`category=batteries&${asked}`, batteries())).toEqual({
-      redirect: `/ru/parts/search/?category=batteries${kept}`,
+      redirect,
+      status: 302,
+    });
+  });
+
+  it('sends a range that filters nothing back to the category page', async () => {
+    expect(
+      await plan('category=batteries&min.capacity=0', batteries()),
+    ).toEqual({ redirect: '/ru/parts/c/batteries/', status: 302 });
+  });
+
+  it('sends a Model category range that filters nothing back to its page when the Model has one', async () => {
+    const search = vi.fn(async () => ({
+      ...found(2),
+      facets: [numberFacet('capacity', '60')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      model,
+      scope_pages: { make: true, model: true },
+    }));
+
+    expect(
+      await plan(
+        'category=batteries&make=bmw&model=e83-x3-20d&min.capacity=0',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({ redirect: '/ru/parts/bmw/e83-x3-20d/batteries/', status: 302 });
+  });
+
+  it('keeps the Model on the search when a range that filters nothing has no Model page to return to', async () => {
+    const search = vi.fn(async () => ({
+      ...found(2),
+      facets: [numberFacet('capacity', '60')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      model,
+      scope_pages: { make: true, model: false },
+    }));
+
+    expect(
+      await plan(
+        'category=batteries&make=bmw&model=e83-x3-20d&min.capacity=0',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=batteries&make=bmw&model=e83-x3-20d',
+      status: 302,
+    });
+  });
+
+  it('keeps the page of a category listing on the search', async () => {
+    expect(
+      await plan('category=batteries&min.capacity=0&offset=20', batteries(45)),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&offset=20',
       status: 302,
     });
   });

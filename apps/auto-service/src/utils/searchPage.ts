@@ -57,15 +57,32 @@ const knownFilters = (
   facets: SearchFacet[],
   requested: string[],
   ranges: RangeFilter[],
+  spellings: SearchFacet[],
 ) => {
   const byKey = new Map(facets.map((facet) => [facet.key, facet]));
+  const spellingByKey = new Map(spellings.map((facet) => [facet.key, facet]));
   return filtersWithinCap(
     requested.flatMap((filter) => {
-      const facet = byKey.get(keyOf(filter));
-      return facet ? [listedSpelling(facet, filter)] : [];
+      const key = keyOf(filter);
+      const facet = byKey.get(key);
+      return facet
+        ? [listedSpelling(spellingByKey.get(key) ?? facet, filter)]
+        : [];
     }),
     ranges.filter(({ key }) => byKey.get(key)?.type === 'number'),
   );
+};
+
+const sheetOf = (live: SearchFacet[], scope: SearchFacet[]) => {
+  const liveByKey = new Map(live.map((facet) => [facet.key, facet]));
+  const scopeKeys = new Set(scope.map(({ key }) => key));
+  return {
+    sheetFacets: [
+      ...scope.map((facet) => liveByKey.get(facet.key) ?? facet),
+      ...live.filter(({ key }) => !scopeKeys.has(key)),
+    ],
+    dormant: [...scopeKeys].filter((key) => !liveByKey.has(key)),
+  };
 };
 
 type SearchRedirect = { redirect: string; status: 302 | 303 };
@@ -97,11 +114,10 @@ export async function planSearch({
   const requestedFacets = params.getAll('facets');
   const requestedRanges = rangesFromParams(params);
   const capped = filtersWithinCap(requestedFacets, requestedRanges);
-  const requestedOffset = Math.max(
-    0,
-    Number.parseInt(params.get('offset') ?? '0', 10) || 0,
+  const offset = Math.min(
+    Math.max(0, Number.parseInt(params.get('offset') ?? '0', 10) || 0),
+    SHOP_MAX_OFFSET,
   );
-  const offset = Math.min(requestedOffset, SHOP_MAX_OFFSET);
 
   const intent = searchIntent(typed);
   const vin = intent.kind === 'vin' ? intent.vin : null;
@@ -160,21 +176,28 @@ export async function planSearch({
     return `${PathBuilder.partsSearch(locale)}?${next}`;
   };
 
+  const unfiltered =
+    found && (requestedFacets.length || requestedRanges.length)
+      ? await catalogue?.search({
+          ...searchScope,
+          q,
+          facets: [],
+          ranges: [],
+          limit: 1,
+        })
+      : null;
   const applied = found
-    ? knownFilters(found.facets, requestedFacets, requestedRanges)
+    ? knownFilters(
+        found.facets,
+        requestedFacets,
+        requestedRanges,
+        unfiltered?.facets ?? [],
+      )
     : capped;
   const emptyScope =
     found?.count === 0 &&
-    (applied.facets.length > 0 || applied.ranges.length > 0) &&
-    (
-      await catalogue?.search({
-        ...searchScope,
-        q,
-        facets: [],
-        ranges: [],
-        limit: 1,
-      })
-    )?.count === 0;
+    unfiltered?.count === 0 &&
+    (applied.facets.length > 0 || applied.ranges.length > 0);
   const chosen = emptyScope ? [] : applied.facets;
   const ranges = emptyScope ? [] : applied.ranges;
   const listing =
@@ -192,6 +215,8 @@ export async function planSearch({
     listing && !facets.length && !nextRanges.length
       ? listing
       : searchHref(facets, nextRanges);
+  const listingKeepsModel =
+    !model || Boolean(found?.model && found.scope_pages?.model);
   const page = found ? Math.min(offset, lastPageOf(found)) : offset;
   if (emptyScope) {
     return redirectTo(filtersHref([], []), 302);
@@ -200,11 +225,16 @@ export async function planSearch({
     !misspeltCategory &&
     (JSON.stringify(chosen) !== JSON.stringify(requestedFacets) ||
       !rangesAsWritten(params, ranges) ||
-      page !== requestedOffset ||
+      (params.get('offset') ?? '') !== (page ? String(page) : '') ||
       strayScope ||
       capitalised(params))
   ) {
-    return redirectTo(searchHref(chosen, ranges, page), 302);
+    return redirectTo(
+      page || !listingKeepsModel
+        ? searchHref(chosen, ranges, page)
+        : filtersHref(chosen, ranges),
+      302,
+    );
   }
   const exact =
     found && !category && !model && !chosen.length && !ranges.length && !offset
@@ -241,6 +271,7 @@ export async function planSearch({
       found,
       scope,
       unknownScope,
+      ...sheetOf(found?.facets ?? [], unfiltered?.facets ?? []),
       searchHref,
       filtersHref,
     },

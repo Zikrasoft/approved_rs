@@ -52,6 +52,21 @@ describe('the facet filters', () => {
     ).toBe('/api/search-count?locale=ru');
   });
 
+  it('renders a dormant facet hidden, so a live count can bring it back', async () => {
+    const root = await filters({
+      facets: [
+        facet('brand', [['varta', 3]]),
+        facet('polarity', [['direct', 2]]),
+      ],
+      dormant: ['polarity'],
+    });
+    const fieldset = (key: string) =>
+      root.querySelector<HTMLFieldSetElement>(`[data-facet-key="${key}"]`)!;
+
+    expect(fieldset('brand').hidden).toBe(false);
+    expect(fieldset('polarity').hidden).toBe(true);
+  });
+
   it('shows a few values as pills and a brand facet as a list', async () => {
     const root = await filters({
       facets: [
