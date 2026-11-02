@@ -4,6 +4,10 @@ Instructions for any coding agent working in this repository. Claude Code reads
 this file directly; other agents pick it up through the same
 [AGENTS.md](https://agents.md) convention.
 
+The general rules every change follows, good architecture, SOLID, DRY and
+TDD, are in [CODING_STANDARDS.md](CODING_STANDARDS.md). This file holds the
+repository-specific ones.
+
 ## Monorepo layout
 
 pnpm workspace + Turborepo. Apps live in `apps/*`, shared packages in `packages/*`.
