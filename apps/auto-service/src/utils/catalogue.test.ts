@@ -1678,6 +1678,22 @@ describe('catalogue.search', () => {
     );
   });
 
+  it('asks the shop for the popular order of a listing', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      category: 'oil-filters',
+      locale: 'ru',
+      facets: [],
+      sort: 'popular',
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?locale=ru&category=oil-filters&sort=popular',
+      expect.anything(),
+    );
+  });
+
   it('sends the query, the page locale, the chosen facets and ranges', async () => {
     const fetch = answer(found);
 
