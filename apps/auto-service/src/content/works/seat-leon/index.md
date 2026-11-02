@@ -39,7 +39,7 @@ translations:
 
       Posebnu pažnju zaslužuje **DQ250**. To je šestostepeni menjač sa dvostrukim kvačilom u uljnom kupatilu. Ulje u njemu mora da se menja u propisanim intervalima, jer od toga zavise njegov pouzdan rad i dug vek.
     car: SEAT LEON
-car: SEAT LEON
+car: Seat Leon
 year: 2019
 servicesApplied:
   - diagnostics

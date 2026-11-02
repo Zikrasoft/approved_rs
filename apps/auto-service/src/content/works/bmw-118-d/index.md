@@ -1,6 +1,6 @@
 ---
 title: Комплексное ТО BMW 118d N47 после покупки
-car: BMW 118D
+car: BMW 118d
 year: 2012
 servicesApplied:
   - diagnostics

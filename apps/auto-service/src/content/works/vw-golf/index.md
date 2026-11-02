@@ -1,5 +1,5 @@
 ---
-title: VW Golf
+title: 'VW Golf: клапанная крышка, форсунки и масло в DSG'
 car: VW Golf
 year: 2017
 servicesApplied:
