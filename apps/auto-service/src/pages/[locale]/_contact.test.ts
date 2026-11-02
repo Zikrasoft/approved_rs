@@ -40,12 +40,12 @@ describe('the contacts page', () => {
     ]);
   });
 
-  it('puts the map in the panel with a link that works before it loads', async () => {
+  it('puts the map in the panel over a link that works without it', async () => {
     const map = (await page()).querySelector(
       '[data-contact-placement="visit"] carlab-map',
     )!;
 
-    expect(map.querySelector('a')?.textContent).toContain(
+    expect(map.parentElement?.querySelector('a')?.textContent).toContain(
       pages.contact.openMap,
     );
   });

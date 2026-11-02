@@ -15,12 +15,7 @@ const { street, district, googleMapsCid } = GARAGE_ADDRESS;
 const pages = content(localeFrom(Astro.url.pathname)).pages;
 ---
 
-<carlab-map
-  class:list={['flex', className]}
-  data-src={mapEmbedSrc(googleMapsCid)}
-  data-title={title}
-  data-iframe-class="block h-full w-full border-0"
->
+<div class:list={['relative flex', className]}>
   <a
     href={mapPlaceUrl(googleMapsCid)}
     target="_blank"
@@ -35,7 +30,12 @@ const pages = content(localeFrom(Astro.url.pathname)).pages;
       {pages.contact.openMap}
     </span>
   </a>
-</carlab-map>
+  <carlab-map
+    class="absolute inset-0 empty:pointer-events-none"
+    data-src={mapEmbedSrc(googleMapsCid)}
+    data-title={title}
+    data-iframe-class="block h-full w-full border-0"></carlab-map>
+</div>
 
 <script>
   import { defineLazyMapEmbed } from '@podbor/site-kit/browser';

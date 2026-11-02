@@ -73,3 +73,13 @@ export const partPage = (over: Partial<PartPageEntry> = {}): PartPageEntry => ({
   kitCars: [],
   ...over,
 });
+
+const ORANGE = ['btn-primary', 'text-signal-ink', 'bg-signal-ink', 'bg-signal'];
+
+export const isOrange = (element: Element) =>
+  [...element.classList].some((name) => ORANGE.includes(name));
+
+export const orangeIn = (root: Element) =>
+  [...root.querySelectorAll('*')]
+    .filter(isOrange)
+    .map((element) => element.textContent?.replace(/\s+/g, ' ').trim());

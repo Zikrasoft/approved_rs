@@ -74,7 +74,7 @@ const categories = props.categories.map((category) => ({
     >
       <a
         href={PathBuilder.partsCart(locale)}
-        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-signal-ink link-quiet"
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-ink link-quiet"
       >
         {content(locale).shopCart.cartLink}
         <Icon name="chevronRight" />
@@ -100,7 +100,7 @@ const categories = props.categories.map((category) => ({
           </ul>
           <a
             href={PathBuilder.partsMakes(locale)}
-            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-signal-ink link-quiet"
+            class="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-ink link-quiet"
           >
             {hubsCopy.allMakesLink}
             <Icon name="chevronRight" />
@@ -130,7 +130,7 @@ const categories = props.categories.map((category) => ({
                     {category.lead}
                   </p>
                 )}
-                <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-signal-ink">
+                <span class="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-ink group-hover:text-signal-ink">
                   {category.empty ? copy.categoryOrderCta : copy.categoryCta}
                   <Icon name="chevronRight" />
                 </span>

@@ -1,18 +1,23 @@
 ---
 import { MODAL_FOCUS_ATTRIBUTE } from '@podbor/site-kit/browser';
 import SheetClose from './SheetClose.astro';
+import { CALLBACK_HEADING_ATTRIBUTE } from '@/scripts/callbackHeading';
 
 interface Props {
   trigger: string;
   label: string;
   heading: string;
   subheading?: string;
+  callbackHeading?: string;
 }
 
-const { trigger, label, heading, subheading } = Astro.props;
+const { trigger, label, heading, subheading, callbackHeading } = Astro.props;
 ---
 
-<carlab-modal trigger={trigger}>
+<carlab-modal
+  trigger={trigger}
+  {...callbackHeading && { [CALLBACK_HEADING_ATTRIBUTE]: callbackHeading }}
+>
   <dialog
     aria-label={label}
     class="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden rounded-none border-0 bg-card p-0 text-ink backdrop:bg-ink/50 card:m-auto card:h-fit card:max-h-[calc(100dvh-4rem)] card:w-[min(34rem,calc(100vw-2rem))] card:rounded-block card:border card:border-line"
@@ -52,6 +57,8 @@ const { trigger, label, heading, subheading } = Astro.props;
 
 <script>
   import { defineLeadModal } from '@podbor/site-kit/lead-form';
+  import { defineCallbackHeading } from '@/scripts/callbackHeading';
 
   defineLeadModal('carlab-modal');
+  defineCallbackHeading('carlab-modal');
 </script>

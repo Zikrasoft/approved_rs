@@ -1,8 +1,15 @@
 import { partPageSlug } from '@podbor/catalog-contract';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { offer, partPage, render, setShop } from '@/components/renderAstro';
+import {
+  offer,
+  orangeIn,
+  partPage,
+  render,
+  setShop,
+} from '@/components/renderAstro';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { PathBuilder } from '@/utils/paths';
 import { currentNumbers, partSuccessor } from '@/utils/partSuccessor';
 import PartPage from './[slug].astro';
 
@@ -127,5 +134,93 @@ describe('the part page', () => {
 
     expect(offered).toContain('bosch-0986494524');
     expect(offered).toContain(successor.slug);
+  });
+});
+
+const equivalentsSection = (root: Element) =>
+  [...root.querySelectorAll('section')].find(
+    (section) =>
+      section.querySelector('h2')?.textContent === copy.equivalentsHeading,
+  )!;
+
+const pagesCategory = {
+  id: 'cat_pads',
+  slug: 'brake-pads',
+  name: 'Тормозные колодки',
+  text: 'Колодки.',
+  translations: null,
+  maintenance_kit: false,
+  kit_rank: 0,
+  service_label: null,
+  service_price: null,
+  service_note: null,
+  installation_price: null,
+  image: null,
+  fields: [],
+};
+
+describe('the equivalents of a part', () => {
+  it('asks for an equivalent of this part, quietly, when none are listed', async () => {
+    setShop(false);
+    const section = equivalentsSection(await partPageHtml([partPage()]));
+    const ask = section.querySelector('parts-list-add')!;
+    const button = ask.querySelector('a')!;
+
+    expect(section.textContent).toContain(copy.noEquivalents);
+    expect(ask.getAttribute('data-slug')).toBe('bosch-0986494524');
+    expect(ask.getAttribute('data-number')).toBe('0 986 494 524');
+    expect(ask.hasAttribute('data-contact-cta')).toBe(true);
+    expect(button.textContent?.trim()).toBe(copy.equivalentsCta);
+    expect(button.hasAttribute('data-open-parts-inquiry')).toBe(true);
+    expect(button.getAttribute('href')).toBe(
+      PathBuilder.partsInquiry('ru', 'Bosch 0 986 494 524'),
+    );
+    expect(orangeIn(section)).toEqual([]);
+  });
+
+  it('lists the equivalents without the ask when there are some', async () => {
+    setShop(false);
+    const equivalent = {
+      ...successor,
+      id: 'pi_ate',
+      brand: { name: 'ATE', slug: 'ate' },
+      value: '13.0460',
+      normalized_value: '130460',
+      slug: partPageSlug('ate', '130460'),
+    };
+    const section = equivalentsSection(
+      await partPageHtml([
+        partPage({
+          equivalents: [
+            {
+              id: equivalent.id,
+              type: equivalent.type,
+              value: equivalent.value,
+              normalized_value: equivalent.normalized_value,
+              superseded: false,
+              brand: equivalent.brand,
+              images: [],
+            },
+          ],
+        }),
+        equivalent,
+      ]),
+    );
+
+    expect(section.textContent).toContain(copy.equivalentsLead);
+    expect(section.querySelector('parts-list-add')).toBeNull();
+  });
+});
+
+describe('the category block of a part page', () => {
+  it('links the whole category in ink, not orange', async () => {
+    setShop(false);
+    const root = await partPageHtml([partPage({ category: pagesCategory })]);
+    const link = [...root.querySelectorAll('a')].find(
+      (anchor) => anchor.textContent?.trim() === copy.categoryLink,
+    )!;
+
+    expect(link.getAttribute('href')).toBe('/ru/parts/c/brake-pads/');
+    expect(orangeIn(link.parentElement!)).toEqual([]);
   });
 });

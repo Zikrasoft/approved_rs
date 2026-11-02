@@ -79,6 +79,7 @@ form:
   privacyNotice: Отправляя заявку, вы соглашаетесь с
   moreDetails: Добавить имя или комментарий
   modalTitle: Записаться в сервис
+  callbackTitle: Перезвоним вам
   errorPhone: Проверьте номер, кажется, он введен не полностью
   errorPhoneTooLong: Проверьте номер, в нем лишние цифры
   errorTelegram: Укажите @username в Telegram или номер телефона

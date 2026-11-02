@@ -223,7 +223,7 @@ describe('the parts inquiry modal', () => {
     const note = doc.querySelector('dialog .overflow-y-auto > p')!;
     expect(text(heading)).toBe('Заявка на запчасти');
     expect(text(note)).toBe(
-      'Проверим совместимость и назовем цену и срок туда, где вам удобно.',
+      'Проверим совместимость, назовем цену и срок и свяжемся удобным вам способом.',
     );
   });
 });

@@ -32,6 +32,14 @@ describe('the services index', () => {
     expect(hero.textContent).toContain('Jovana Ćirilova 23a');
   });
 
+  it('keeps the hero buttons button-sized on a wide panel with no photo beside them', async () => {
+    const actions = (await page()).querySelector(
+      'section [data-contact-placement="hero"]',
+    )!;
+
+    expect(actions.classList).toContain('lg:max-w-xl');
+  });
+
   it('lists the services, the Works and the booking, without the process block', async () => {
     const root = await page();
 

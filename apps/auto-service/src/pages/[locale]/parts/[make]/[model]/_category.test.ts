@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Category } from '@podbor/catalog-contract';
 import { content } from '@/i18n/content';
-import { partPage, render, setShop } from '@/components/renderAstro';
+import { isOrange, partPage, render, setShop } from '@/components/renderAstro';
 import type { ModelHubEntry } from '@/utils/catalogueSnapshot';
 import ModelCategoryPage from './[category].astro';
 
@@ -82,6 +82,17 @@ const modelCategory = () => {
 };
 
 describe('the Model category page', () => {
+  it('links the whole category in ink, not orange', async () => {
+    const page = await modelCategory();
+    const link = [...page.querySelectorAll('a')].find(
+      (anchor) =>
+        anchor.textContent?.trim() === content('ru').shopPart.categoryLink,
+    )!;
+
+    expect(link.getAttribute('href')).toBe('/ru/parts/c/oil-filters/');
+    expect(isOrange(link)).toBe(false);
+  });
+
   it('counts the current numbers and says so, the unit the filtered search lists', async () => {
     const page = await modelCategory();
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render, setShop } from '@/components/renderAstro';
+import { isOrange, orangeIn, render, setShop } from '@/components/renderAstro';
 import PartsHub from './index.astro';
 
 const copy = content('ru').pages.partsInquiry;
@@ -54,6 +54,28 @@ describe('the parts hub', () => {
     );
     expect(tile('batteries')?.textContent).toContain(copy.categoryCta);
     expect(tile('batteries')?.textContent).toContain('batteries lead.');
+  });
+
+  it('keeps its links in ink so the inquiry stays the one orange action', async () => {
+    setShop(false);
+    const root = await render(PartsHub, {
+      path: '/ru/parts/',
+      params: { locale: 'ru' },
+      props: {
+        categories: [category('batteries', false), category('wipers', true)],
+        makes: [{ slug: 'bmw', name: 'BMW' }],
+      },
+    });
+    const links = [
+      ...root.querySelectorAll('a.card'),
+      root.querySelector('a[href="/ru/parts/makes/"]')!,
+      root.querySelector('cart-badge a')!,
+    ];
+
+    expect(links.flatMap(orangeIn)).toEqual([]);
+    expect(
+      links.filter(isOrange).map((link) => link.getAttribute('href')),
+    ).toEqual([]);
   });
 
   it('keeps the cart link for preview only while the shop is closed', async () => {

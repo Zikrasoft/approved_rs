@@ -18,6 +18,7 @@ const full = await Promise.all(
     getImage({ src: image, width: Math.min(image.width, LARGEST_WIDTH) }),
   ),
 );
+const single = images.length === 1;
 const label = (i: number) => `${alt}, ${i + 1}`;
 const control =
   'absolute flex size-11 items-center justify-center rounded-pill bg-paper/10 text-white transition-colors duration-150 hover:bg-paper/20';
@@ -25,8 +26,10 @@ const control =
 
 <gallery-lightbox
   class:list={[
-    'block columns-2 gap-3 lg:gap-4',
-    images.length > 2 ? 'lg:columns-3' : 'lg:max-w-3xl',
+    'block gap-3 lg:gap-4',
+    single
+      ? 'max-w-sm'
+      : ['columns-2', images.length > 2 ? 'lg:columns-3' : 'lg:max-w-3xl'],
   ]}
 >
   {
@@ -42,7 +45,11 @@ const control =
           src={image}
           alt={label(i)}
           widths={[360, 540, 720, 1080, LARGEST_WIDTH]}
-          sizes="(min-width: 1024px) 368px, calc(50vw - 1.6rem)"
+          sizes={
+            single
+              ? '(min-width: 640px) 384px, calc(100vw - 2.5rem)'
+              : '(min-width: 1024px) 368px, calc(50vw - 1.6rem)'
+          }
           loading="lazy"
           class="card block h-auto w-full"
         />

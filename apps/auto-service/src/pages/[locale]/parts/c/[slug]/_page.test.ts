@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { partPage, render, setShop } from '@/components/renderAstro';
+import { orangeIn, partPage, render, setShop } from '@/components/renderAstro';
 import type { CategoryCar } from '@/utils/categoryCars';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import CategoryPage from './[...page].astro';
@@ -117,6 +117,11 @@ describe('the car picker on a category page', () => {
     );
   });
 
+  it('leaves the orange to the contact actions, since it only filters', async () => {
+    const doc = await categoryPage([partPage()], cars);
+    expect(orangeIn(doc.querySelector('car-picker')!)).toEqual([]);
+  });
+
   it('is left out when no model has a page in the category', async () => {
     const doc = await categoryPage([partPage()], []);
     expect(doc.querySelector('car-picker')).toBeNull();
@@ -125,5 +130,14 @@ describe('the car picker on a category page', () => {
   it('is left out of an empty category', async () => {
     const doc = await categoryPage([], cars);
     expect(doc.querySelector('car-picker')).toBeNull();
+  });
+});
+
+describe('an empty category', () => {
+  it('ends on the inquiry card without a full band of padding under it', async () => {
+    const doc = await categoryPage([], cars);
+    const section = doc.querySelector('#inquiry')!.parentElement!;
+    expect(section.classList).not.toContain('pb-band');
+    expect(section.classList).not.toContain('md:py-band-lg');
   });
 });

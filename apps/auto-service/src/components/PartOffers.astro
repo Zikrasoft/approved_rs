@@ -1,10 +1,9 @@
 ---
-import { translated } from '@podbor/catalog-contract';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
-import { addonDataset } from '@/utils/categoryAddon';
+import { partDataset } from '@/utils/partDataset';
 import { PathBuilder } from '@/utils/paths';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
@@ -29,13 +28,7 @@ const ownHeading = Astro.slots.has('heading');
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 const status = 'flex flex-col gap-3 text-sm leading-relaxed text-ink-2';
-const part = {
-  'data-slug': page.slug,
-  'data-brand': page.brand.name,
-  'data-number': page.value,
-  'data-name': translated(page.part, 'name', locale),
-  ...addonDataset(page.category),
-};
+const part = partDataset(page, locale);
 const closed = !shopOpen();
 const priced = page.offers.length > 0 && !closed;
 const summary = offerSummary(page.offers);

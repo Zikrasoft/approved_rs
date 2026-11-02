@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render, setShop } from '@/components/renderAstro';
+import { isOrange, render, setShop } from '@/components/renderAstro';
 import SearchPage from './search.astro';
 
 const copy = content('ru').partsSearch;
@@ -96,6 +96,28 @@ describe('the search page for a query whose chosen filters find nothing', () => 
     });
 
     expect(page.textContent).toContain(copy.noResults.replace('{q}', 'bosch'));
+  });
+
+  it('leads the dead end with the orange call and keeps the prefilled WhatsApp second', async () => {
+    const page = await render(SearchPage, {
+      path: '/ru/parts/search/?q=bosch',
+    });
+    const tiles = [
+      ...page.querySelectorAll<HTMLElement>(
+        '[data-contact-placement="bar"] [data-contact-channel]',
+      ),
+    ];
+
+    expect(tiles.map((tile) => tile.dataset.contactChannel)).toEqual([
+      'phone',
+      'whatsapp',
+      'viber',
+      'telegram',
+    ]);
+    expect(
+      tiles.filter(isOrange).map((tile) => tile.dataset.contactChannel),
+    ).toEqual(['phone']);
+    expect(tiles[1].getAttribute('href')).toContain('text=');
   });
 
   it('opens the inquiry with the query ahead of the filters', async () => {

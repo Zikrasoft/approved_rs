@@ -131,11 +131,12 @@ const fields = category.fields
 
   <section
     class:list={[
-      'wrap grid gap-6 pt-6 pb-band md:py-band-lg lg:items-start',
+      'wrap grid gap-6 pt-6 md:pt-band-lg lg:items-start',
       empty
-        ? 'lg:grid-cols-[1.2fr_1fr]'
-        : filtered &&
-          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-10',
+        ? 'pb-6 md:pb-10 lg:grid-cols-[1.2fr_1fr]'
+        : 'pb-band md:pb-band-lg',
+      filtered &&
+        'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-10',
     ]}
   >
     {

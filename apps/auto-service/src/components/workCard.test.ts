@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import cover from '@/assets/hero-mechanic-wide.jpg';
+import tall from '@/assets/hero-mechanic.jpg';
 import type { Work } from '@/utils/works';
 import WorkCard from './WorkCard.astro';
 import { render } from './renderAstro';
@@ -57,7 +58,18 @@ describe('WorkCard', () => {
     const sizes = (root: Element) =>
       root.querySelector('img')?.getAttribute('sizes');
 
-    expect(sizes(await card({ work: work('x'), sizes: '78vw' }))).toBe('78vw');
-    expect(sizes(await card({ work: work('x') }))).toContain('33vw');
+    const portrait = work('x');
+    portrait.data.image = tall;
+
+    expect(sizes(await card({ work: portrait, sizes: '78vw' }))).toBe('78vw');
+    expect(sizes(await card({ work: portrait }))).toContain('33vw');
+  });
+
+  it('asks a wide photo for the extra width its 4:3 crop cuts away', async () => {
+    const sizes = (await card({ work: work('x'), sizes: '78vw' }))
+      .querySelector('img')
+      ?.getAttribute('sizes');
+
+    expect(sizes).toBe('calc(78vw * 1.5)');
   });
 });

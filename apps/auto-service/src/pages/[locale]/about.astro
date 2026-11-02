@@ -79,11 +79,9 @@ const block = 'py-8 first:pt-0 lg:py-10';
             </p>
           </div>
           <div class="flex flex-col gap-5">
-            <ul class="flex flex-wrap gap-2">
-              {makes.map((make) => (
-                <li class="chip">{make}</li>
-              ))}
-            </ul>
+            <p class="text-lg leading-relaxed font-semibold text-ink">
+              {makes.join(', ')}
+            </p>
             <p class="flex flex-wrap gap-x-6 gap-y-1">
               <a
                 href={PathBuilder.bmw(locale)}

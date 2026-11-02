@@ -45,6 +45,22 @@ describe('WorkGallery', () => {
     );
   });
 
+  it('shows a single photo at a readable width instead of half a two-column grid', async () => {
+    const root = await gallery([tall]);
+    const columns = root.querySelector('gallery-lightbox')!.classList;
+
+    expect(columns.contains('columns-2')).toBe(false);
+    expect(columns.contains('max-w-sm')).toBe(true);
+    expect(root.querySelector('img')?.getAttribute('sizes')).toBe(
+      '(min-width: 640px) 384px, calc(100vw - 2.5rem)',
+    );
+    expect(
+      (await gallery([wide, tall]))
+        .querySelector('gallery-lightbox')!
+        .classList.contains('columns-2'),
+    ).toBe(true);
+  });
+
   it('offers previous and next only when there is another photo to show', async () => {
     const arrows = async (images: ImageMetadata[]) =>
       (await gallery(images)).querySelectorAll('[data-prev], [data-next]')
