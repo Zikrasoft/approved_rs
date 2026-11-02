@@ -45,11 +45,12 @@ describe('the about page', () => {
 
   it('names the makes from the Works and links the BMW page and every Work', async () => {
     const root = await page();
-    const makes = [...root.querySelectorAll('li.chip')].map((chip) =>
-      chip.textContent?.trim(),
+    const makes = [...root.querySelectorAll('p')].filter(
+      (line) => line.textContent?.trim() === 'BMW, Seat',
     );
 
-    expect(makes).toEqual(['BMW', 'Seat']);
+    expect(makes).toHaveLength(1);
+    expect(root.querySelector('.chip')).toBeNull();
     expect(root.querySelector('a[href="/ru/bmw/"]')?.textContent?.trim()).toBe(
       pages.bmw.heading,
     );
