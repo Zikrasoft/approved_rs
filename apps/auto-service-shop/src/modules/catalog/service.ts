@@ -44,6 +44,7 @@ import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
 import { runBoundSql } from '../_shared/bound-sql';
 import { chunksOf } from '../_shared/chunks';
+import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { spellingKey } from '../_shared/spelling';
 import {
@@ -1324,20 +1325,24 @@ class CatalogModuleService extends CatalogModuleBase {
     change: (fields: CategoryFieldDefinition[]) => CategoryFieldDefinition[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    const parts = await this.listParts(
-      { category_id: categoryId },
-      { select: ['id', 'attributes'], take: null },
-      sharedContext,
+    const fields = change(
+      await this.categoryDefinition(categoryId, sharedContext),
     );
-    const broken = guardDefinitionChange(
-      change(await this.categoryDefinition(categoryId, sharedContext)),
-      parts,
-    );
-    if (broken.length) {
+    let broken = 0;
+    for await (const parts of keysetPages((after, take) =>
+      this.listParts(
+        { category_id: categoryId, ...(after && { id: { $gt: after } }) },
+        { select: ['id', 'attributes'], order: { id: 'ASC' }, take },
+        sharedContext,
+      ),
+    )) {
+      broken += guardDefinitionChange(fields, parts).length;
+    }
+    if (broken) {
       throw adminError(
         MedusaError.Types.NOT_ALLOWED,
         'DEFINITION_BREAKS_PARTS',
-        `The change would break ${broken.length} parts in this Category`,
+        `The change would break ${broken} parts in this Category`,
       );
     }
   }
