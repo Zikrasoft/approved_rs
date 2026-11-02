@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const pluralForms = z
+export const pluralForms = z
   .object({
     one: z.string().optional(),
     two: z.string().optional(),

@@ -21,6 +21,7 @@ import GarageAddress from '@/components/GarageAddress.astro';
 import Faq from '@/components/Faq.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import HeroContacts from '@/components/HeroContacts.astro';
+import GoogleRating from '@/components/GoogleRating.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
@@ -146,6 +147,9 @@ const website = websiteSchema({
         <ul
           class="flex flex-wrap gap-x-5 gap-y-1.5 text-[0.8125rem] text-panel-ink lg:text-xs"
         >
+          <li class="flex items-center">
+            <GoogleRating tone="panel" />
+          </li>
           {
             home.hero.badges.map((fact) => (
               <li class="flex items-center gap-1.5 lg:gap-1">

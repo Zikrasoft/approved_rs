@@ -3,6 +3,7 @@ import { mapRouteUrl } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import CallAction from './CallAction.astro';
 import GarageAddress from './GarageAddress.astro';
+import GoogleRating from './GoogleRating.astro';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -36,6 +37,7 @@ const action = 'btn min-h-12 w-full sm:w-auto sm:px-7';
     <div class="flex flex-col gap-5 p-5 pb-6 sm:p-8 lg:p-12">
       <Heading class="text-section">{heading}</Heading>
       <GarageAddress layout="block" tone="panel" />
+      <GoogleRating tone="panel" class="text-sm" />
       {
         site.visit.facts.length > 0 && (
           <ul class="flex flex-col gap-1.5 text-sm text-panel-ink">

@@ -1,5 +1,5 @@
 ---
-title: Большой сервис Audi A3 1.5 TFSI в Белграде
+title: Большой сервис Audi A3 1.5 TFSI
 translations:
   en:
     title: Audi A3 1.5 TFSI Major Service in Belgrade
@@ -23,7 +23,7 @@ translations:
 
       Zatim je na red došao menjač. DQ200 je robotizovani menjač sa suvim kvačilima. Zamenili smo ulje u mehaničkom delu i radnu tečnost u mehatronici. Naša preporuka za ovaj menjač je jednostavna: ulje u mehaničkom delu i tečnost u mehatronici menjati najkasnije na svakih **60.000 km**. Uz takav interval održavanja menjač duže traje i ređe zahteva skupe popravke.
     car: AUDI A3
-car: AUDI A3
+car: Audi A3
 year: 2019
 servicesApplied:
   - servicing

@@ -34,6 +34,10 @@ describe('SiteFooter', async () => {
     expect(callback.classList.contains('btn-secondary')).toBe(true);
   });
 
+  it('shows the Google rating beside the tagline', () => {
+    expect(footer.textContent).toContain('5.0 в Google · 14 отзывов');
+  });
+
   it('keeps the footer out of the regions that hide the floating bar', () => {
     expect(footer.querySelector('[data-contact-cta]')).toBeNull();
   });

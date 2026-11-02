@@ -81,6 +81,10 @@ describe('VisitPanel', () => {
     ).toBe(false);
   });
 
+  it('shows the Google rating under the address', async () => {
+    expect((await panel()).textContent).toContain('5.0 в Google · 14 отзывов');
+  });
+
   it('renders the channels slot inside the panel', async () => {
     const root = await panel({}, { channels: '<ul id="channels"></ul>' });
 

@@ -17,6 +17,7 @@ import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { googleRatingLabel } from '@/utils/googleRating';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
@@ -36,6 +37,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       ...home.hero.badges.map((fact) => `- ${fact}`),
       `- ${pages.contact.addressLabel}: ${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`,
       `- ${pages.contact.mapHeading}: ${mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}`,
+      `- ${googleRatingLabel(locale)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
       `- ${site.visit.route}: ${mapRouteUrl(GARAGE_ADDRESS.lat, GARAGE_ADDRESS.lon)}`,
       ...site.visit.facts.map((fact) => `- ${fact}`),

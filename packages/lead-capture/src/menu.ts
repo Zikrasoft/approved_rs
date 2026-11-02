@@ -273,14 +273,14 @@ export function createScreens<L extends string, S extends string>({
 export interface ServiceSpecs {
   name: string;
   short: string;
-  priceFrom: string;
+  priceFrom?: string;
   duration: string;
   includesHeading: string;
   includes: string[];
 }
 
 export interface ServiceSpecsLabels {
-  specsPriceLabel: string;
+  specsPriceLabel?: string;
   specsDurationLabel: string;
 }
 
@@ -294,7 +294,9 @@ export function specsCard(
     lines: [
       service.short,
       '',
-      `${labels.specsPriceLabel}: ${service.priceFrom}`,
+      ...(labels.specsPriceLabel && service.priceFrom
+        ? [`${labels.specsPriceLabel}: ${service.priceFrom}`]
+        : []),
       `${labels.specsDurationLabel}: ${service.duration}`,
       '',
       `${service.includesHeading}:`,

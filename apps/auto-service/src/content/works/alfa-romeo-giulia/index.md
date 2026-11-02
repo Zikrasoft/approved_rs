@@ -36,7 +36,7 @@ translations:
 
       Posebnu pažnju posvetili smo menjaču. Kod automatskih menjača **ZF 8HP** važno je pratiti stanje ulja i kartera i ne odlagati servis: pravovremeno održavanje menjača košta znatno manje od njegove popravke.
     car: ALFA ROMEO GIULIA
-car: ALFA ROMEO GIULIA
+car: Alfa Romeo Giulia
 year: 2021
 servicesApplied:
   - diagnostics

@@ -53,6 +53,13 @@ visit:
   facts:
     - Говорим по-сербски, по-русски и по-английски
     - Оплата наличными или картой
+googleRating:
+  rating: '{rating} в Google'
+  reviews:
+    one: '{count} отзыв'
+    few: '{count} отзыва'
+    many: '{count} отзывов'
+    other: '{count} отзыва'
 channels:
   call: Позвонить
   whatsapp: WhatsApp

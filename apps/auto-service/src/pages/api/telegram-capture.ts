@@ -55,6 +55,10 @@ export const POST = createCaptureWebhookRoute({
   serviceCard: (slug, locale) => {
     const services = content(locale).services;
     const url = new URL(PathBuilder.service(locale, slug), SITE_URL).href;
-    return specsCard(services, services[slug], url);
+    return specsCard(
+      { specsDurationLabel: services.specsDurationLabel },
+      services[slug],
+      url,
+    );
   },
 });
