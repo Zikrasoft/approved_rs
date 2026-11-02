@@ -340,7 +340,7 @@ describe('listingCrumbs', () => {
 });
 
 describe('inquiryTopic', () => {
-  it('names the Model, the Category and the query', () => {
+  it('names the query first, then the Model and the Category', () => {
     expect(
       inquiryTopic({
         model: 'BMW 3 F30',
@@ -348,7 +348,16 @@ describe('inquiryTopic', () => {
         query: 'varta',
         filters: [],
       }),
-    ).toBe('BMW 3 F30, Аккумуляторы, varta');
+    ).toBe('varta, BMW 3 F30, Аккумуляторы');
+  });
+
+  it('puts the query before the chosen filters', () => {
+    expect(
+      inquiryTopic({
+        query: 'bosch',
+        filters: ['Технология: AGM', 'Резьба: M20x1.5'],
+      }),
+    ).toBe('bosch, Технология: AGM, Резьба: M20x1.5');
   });
 
   it('carries the chosen filters, so a manual pick starts from them', () => {

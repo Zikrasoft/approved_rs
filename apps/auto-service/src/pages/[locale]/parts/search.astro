@@ -61,6 +61,8 @@ const {
   found,
   scope,
   unknownScope,
+  sheetFacets,
+  dormant,
   searchHref,
   filtersHref,
 } = plan.view;
@@ -89,15 +91,18 @@ const modelCopy = content(locale).partsCar.hubs.modelCategory;
 const heading = narrowedTo?.name ?? copy.heading;
 const fillModel = (template: string) =>
   template.replace('{category}', heading).replace('{model}', modelName ?? '');
-const facets = found ? withFacetCopy(found.facets, copy) : [];
+const facets = withFacetCopy(sheetFacets, copy);
 const chips = chosenFilters(facets, chosen, ranges, copy, (value) =>
   value.toLocaleString(BCP47_BY_LOCALE[locale]),
 );
-const emptyMessage = q
-  ? copy.noResults.replace('{q}', q)
-  : chips.length > 0
-    ? copy.noFilteredResults
-    : partsInquiry.category.noParts;
+const emptyMessage =
+  chips.length > 0
+    ? q
+      ? copy.noFilteredQueryResults.replace('{q}', q)
+      : copy.noFilteredResults
+    : q
+      ? copy.noResults.replace('{q}', q)
+      : partsInquiry.category.noParts;
 const zeroFound =
   found?.results.length === 0 && chips.length === 0 && !modelName;
 const deadEnd = Boolean(vin) || unavailable || unknownScope || zeroFound;
@@ -244,6 +249,7 @@ const scopeHidden = {
               action={PathBuilder.partsSearch(locale)}
               hidden={scopeHidden}
               facets={facets}
+              dormant={dormant}
               chosen={chosen}
               ranges={ranges}
               count={found.count}

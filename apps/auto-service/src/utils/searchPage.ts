@@ -73,6 +73,18 @@ const knownFilters = (
   );
 };
 
+const sheetOf = (live: SearchFacet[], scope: SearchFacet[]) => {
+  const liveByKey = new Map(live.map((facet) => [facet.key, facet]));
+  const scopeKeys = new Set(scope.map(({ key }) => key));
+  return {
+    sheetFacets: [
+      ...scope.map((facet) => liveByKey.get(facet.key) ?? facet),
+      ...live.filter(({ key }) => !scopeKeys.has(key)),
+    ],
+    dormant: [...scopeKeys].filter((key) => !liveByKey.has(key)),
+  };
+};
+
 type SearchRedirect = { redirect: string; status: 302 | 303 };
 
 const redirectTo = (redirect: string, status: 302 | 303): SearchRedirect => ({
@@ -165,7 +177,7 @@ export async function planSearch({
   };
 
   const unfiltered =
-    found?.count === 0 && (requestedFacets.length || requestedRanges.length)
+    found && (requestedFacets.length || requestedRanges.length)
       ? await catalogue?.search({
           ...searchScope,
           q,
@@ -183,6 +195,7 @@ export async function planSearch({
       )
     : capped;
   const emptyScope =
+    found?.count === 0 &&
     unfiltered?.count === 0 &&
     (applied.facets.length > 0 || applied.ranges.length > 0);
   const chosen = emptyScope ? [] : applied.facets;
@@ -258,6 +271,7 @@ export async function planSearch({
       found,
       scope,
       unknownScope,
+      ...sheetOf(found?.facets ?? [], unfiltered?.facets ?? []),
       searchHref,
       filtersHref,
     },

@@ -525,6 +525,65 @@ describe('planSearch', () => {
     });
   });
 
+  it('keeps the facets the filters narrowed away in the sheet, in the order the listing has them, to come back once unticked', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) =>
+      facets.length
+        ? {
+            ...found(0, []),
+            facets: [facetOf('brand', 'varta'), facetOf('technology', 'agm')],
+          }
+        : {
+            ...found(5),
+            facets: [
+              facetOf('brand', 'varta', 'bosch'),
+              numberFacet('capacity', '60', '80'),
+              facetOf('technology', 'agm', 'efb'),
+            ],
+          },
+    );
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Avarta&facets=technology%3Aagm',
+      fakeCatalogue({ search }),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sheetFacets).toEqual([
+      facetOf('brand', 'varta'),
+      numberFacet('capacity', '60', '80'),
+      facetOf('technology', 'agm'),
+    ]);
+    expect(outcome.view.dormant).toEqual(['capacity']);
+  });
+
+  it('keeps a facet only the filtered answer lists', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) => ({
+      ...found(facets.length ? 1 : 5),
+      facets: facets.length ? [facetOf('brand', 'varta')] : [],
+    }));
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Avarta',
+      fakeCatalogue({ search }),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sheetFacets).toEqual([facetOf('brand', 'varta')]);
+    expect(outcome.view.dormant).toEqual([]);
+  });
+
+  it('asks for no unfiltered listing when nothing is filtered', async () => {
+    const catalogue = batteries();
+    const outcome = await plan('category=batteries', catalogue);
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(catalogue.search).toHaveBeenCalledTimes(1);
+    expect(outcome.view.sheetFacets.map(({ key }) => key)).toEqual([
+      'brand',
+      'capacity',
+      'technology',
+    ]);
+    expect(outcome.view.dormant).toEqual([]);
+  });
+
   it('keeps a facet value the catalogue lists no spelling of', async () => {
     expect(
       await plan('category=oil-filters&facets=brand%3Anosuch', withShouted()),
