@@ -5,6 +5,7 @@ import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import FitLine from '@/components/FitLine.astro';
+import InkLink from '@/components/InkLink.astro';
 import FittedPart from '@/components/FittedPart.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
@@ -196,12 +197,12 @@ const SAID_BY_FIT = ['axle'];
         )
       }
 
-      <a
+      <InkLink
         href={PathBuilder.partsCategory(locale, category.slug)}
-        class="inline-flex items-center self-start text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
+        class="self-start"
       >
         {content(locale).shopPart.categoryLink}
-      </a>
+      </InkLink>
     </div>
 
     {empty && <VinInquiryCard comment={`${name}, ${categoryName}: `} />}

@@ -8,6 +8,7 @@ import PageHero from '@/components/PageHero.astro';
 import AddonNote from '@/components/AddonNote.astro';
 import PriceTag from '@/components/PriceTag.astro';
 import Icon from '@/components/Icon.astro';
+import InkLink from '@/components/InkLink.astro';
 import PartFitsList from '@/components/PartFitsList.astro';
 import PartGallery from '@/components/PartGallery.astro';
 import PartOffers from '@/components/PartOffers.astro';
@@ -52,6 +53,9 @@ import {
   type CataloguePages,
 } from '@/utils/paths';
 import { schemaAvailability } from '@/utils/leadTime';
+import { partDataset } from '@/utils/partDataset';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { contactCta } from '@podbor/site-kit/contact-control';
 
 export async function getStaticPaths() {
   const pages = await partPagesForBuild();
@@ -459,12 +463,12 @@ const thumbFor = (slug: string) => {
               <p>{paragraph}</p>
             ))}
           </div>
-          <a
+          <InkLink
             href={PathBuilder.partsCategory(locale, category.slug)}
-            class="inline-flex items-center text-sm font-semibold text-signal-ink hover:underline pointer-coarse:min-h-11"
+            class="self-start"
           >
             {copy.categoryLink}
-          </a>
+          </InkLink>
         </div>
       )
     }
@@ -474,9 +478,26 @@ const thumbFor = (slug: string) => {
     (listsEquivalents || replacements.length === 0) && (
       <section class="wrap py-band md:py-band-lg">
         <h2 class="text-section">{copy.equivalentsHeading}</h2>
-        <p class="mt-2 mb-6 max-w-2xl text-muted">
+        <p
+          class:list={['mt-2 max-w-2xl text-muted', listsEquivalents && 'mb-6']}
+        >
           {listsEquivalents ? copy.equivalentsLead : copy.noEquivalents}
         </p>
+        {!listsEquivalents && (
+          <parts-list-add
+            class="mt-4 block w-fit max-sm:w-full"
+            {...partDataset(page, locale)}
+            {...contactCta}
+          >
+            <a
+              href={PathBuilder.partsInquiry(locale, heading)}
+              {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+              class="btn btn-secondary w-full"
+            >
+              {copy.equivalentsCta}
+            </a>
+          </parts-list-add>
+        )}
         {equivalents.current.length > 0 && (
           <ul class="card divide-y divide-line">
             {equivalents.current.map((equivalent) => (

@@ -18,6 +18,7 @@ export const shopPartContentSchema = z
     eyebrow: z.string(),
     equivalentsHeading: z.string(),
     noEquivalents: z.string(),
+    equivalentsCta: z.string(),
     equivalentsLead: z.string(),
     numberSupersededNotice: z.string(),
     partReplacedNotice: z.string(),
