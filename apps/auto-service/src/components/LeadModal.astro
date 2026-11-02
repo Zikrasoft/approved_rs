@@ -20,6 +20,7 @@ const form = content(localeFrom(Astro.url.pathname)).site.form;
   label={form.modalTitle}
   heading={form.heading}
   subheading={form.subheading}
+  callbackHeading={form.callbackTitle}
 >
   <LeadForm compact service={service} comment={comment} />
 </ModalSheet>
