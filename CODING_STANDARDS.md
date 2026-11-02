@@ -54,6 +54,10 @@ holds the general ones. Where the two overlap, AGENTS.md wins on specifics.
 
 ## TDD and tests
 
+- **Use the built-in `tdd` skill.** Every feature and every bug fix starts by
+  loading the `tdd` skill (Skill tool, `tdd`) and following its loop. A coding
+  agent that builds or fixes code does this before writing code, and its brief
+  says so.
 - **Red, green, refactor.** Write the failing test first, see it fail for the
   right reason, then write the fix.
 - **Cover every change completely.** Test each new or changed branch, edge case
