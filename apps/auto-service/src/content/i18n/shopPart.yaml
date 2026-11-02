@@ -91,7 +91,7 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 973b614e71fe1b1e
+translatedFrom: d76e119ba6dbf0a4
 translations:
   sr:
     metaTitleSuffix: CarLab
@@ -100,6 +100,7 @@ translations:
     eyebrow: Rezervni deo
     equivalentsHeading: Zamenski delovi
     noEquivalents: Pronaći ćemo zamenski deo drugog proizvođača, pišite nam.
+    equivalentsCta: Pronađite odgovarajuću zamenu
     equivalentsLead: Delovi drugih proizvođača koji mogu da se ugrade umesto ovog.
     numberSupersededNotice: Proizvođač više ne koristi broj {number}.
     partReplacedNotice: Proizvođač je zamenio deo {number} novim.
@@ -193,6 +194,7 @@ translations:
     eyebrow: Car part
     equivalentsHeading: Equivalent parts
     noEquivalents: Contact us and we'll find an equivalent from another manufacturer.
+    equivalentsCta: Find an equivalent
     equivalentsLead: Parts from other manufacturers that can be fitted in place of this one.
     numberSupersededNotice: Part number {number} is no longer used by the manufacturer.
     partReplacedNotice: The manufacturer has replaced part {number} with a new one.

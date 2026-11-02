@@ -52,7 +52,7 @@ translations:
       back: « Nazad
     services:
       button: Usluge
-      text: Ovo su usluge koje nudimo u servisu. Izaberite uslugu da pogledate cenu, rok i šta je uključeno.
+      text: Ovo su usluge koje nudimo u servisu. Izaberite uslugu da vidite koliko traje i šta obuhvata.
     card:
       request: 📝 Pošaljite upit
       site: Više informacija na sajtu
@@ -94,7 +94,7 @@ translations:
       back: « Back
     services:
       button: Services
-      text: Here's what we do at our workshop. Choose a service to see the price, how long it takes and what's included.
+      text: Here's what we do at our workshop. Choose a service to see how long it takes and what's included.
     card:
       request: 📝 Send an enquiry
       site: Read more on our website
@@ -124,4 +124,4 @@ translations:
       shortDescription: 'Car servicing, repairs and diagnostics in Belgrade. Contact our team: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 170cdfa82beb5767
+translatedFrom: 791101465c335094
