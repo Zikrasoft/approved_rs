@@ -124,6 +124,7 @@ medusaIntegrationTestRunner({
           value: 'HU 816 x',
           normalized_value: 'HU816X',
           superseded: false,
+          listed: true,
           brand: { name: 'Mann-Filter', slug: 'mann-filter' },
           images: [],
           part: {
