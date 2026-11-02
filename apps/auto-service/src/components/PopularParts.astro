@@ -1,0 +1,48 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { popularPicks } from '@/utils/demand';
+import { partThumbnail } from '@/utils/partImages';
+import PartRow from './PartRow.astro';
+
+interface Props {
+  pages: PartPageEntry[];
+  car?: string;
+  class?: string;
+}
+
+const { pages, car, class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).partsSearch;
+const picks = popularPicks(pages);
+---
+
+{
+  picks.length > 0 && (
+    <section class:list={['flex flex-col gap-3', className]}>
+      <h2 class="text-section">
+        {car ? copy.popularForCar.replace('{car}', car) : copy.popularHeading}
+      </h2>
+      <ul class="card divide-y divide-line">
+        {picks.map((page) => (
+          <PartRow
+            thumb={partThumbnail(page, page.category)}
+            slug={page.slug}
+            brand={page.brand.name}
+            value={page.value}
+            name={translated(page.part, 'name', locale)}
+            detail={
+              page.category
+                ? translated(page.category, 'name', locale)
+                : undefined
+            }
+            demand={page.demand}
+            priced={page}
+          />
+        ))}
+      </ul>
+    </section>
+  )
+}

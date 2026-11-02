@@ -65,6 +65,7 @@ export const partPage = (over: Partial<PartPageEntry> = {}): PartPageEntry => ({
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
+  demand: null,
   slug: 'bosch-0986494524',
   indexable: true,
   priceOnRequest: false,
