@@ -85,6 +85,38 @@ describe('the home hero contact block on a mouse', () => {
   });
 });
 
+describe('the hero contact block on a service page', () => {
+  const booking = (root: Element, text: string) =>
+    [...root.querySelectorAll('a')].find((control) => label(control) === text);
+
+  it('books the service under its own label and opens the bot for it', async () => {
+    const root = await render(HeroContacts, {
+      path: '/ru/services/servicing/',
+      props: { service: 'servicing', bookLabel: 'Записаться на ТО' },
+    });
+
+    expect(
+      booking(root, 'Записаться на ТО')?.getAttribute('data-open-lead-modal'),
+    ).toBe('');
+    expect(
+      root
+        .querySelector('[data-contact-channel="telegram"]')
+        ?.getAttribute('href'),
+    ).toContain('start=servicing_ru');
+  });
+
+  it('scrolls to the page form instead of opening the modal when told to', async () => {
+    const root = await render(HeroContacts, {
+      path: '/ru/services/vin-parts-inquiry/',
+      props: { bookLabel: 'Отправить запрос', bookModal: false },
+    });
+    const send = booking(root, 'Отправить запрос');
+
+    expect(send?.getAttribute('href')).toBe('#lead');
+    expect(send?.hasAttribute('data-open-lead-modal')).toBe(false);
+  });
+});
+
 describe('the home hero contact block', () => {
   it('keeps every control inside the in-flow contact region', () => {
     expect(

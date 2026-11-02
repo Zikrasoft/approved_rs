@@ -1,18 +1,22 @@
 indexMetaTitle: 'Услуги автосервиса в Белграде: ремонт и ТО | CarLab'
-indexMetaDescription: Диагностика, ТО и замена масла, тормоза и подвеска, двигатель и коробка, кузовной ремонт после ДТП, проверка перед покупкой, подбор запчастей по VIN. Цены и сроки.
-indexEyebrow: Услуги
+indexMetaDescription: Диагностика, ТО и замена масла, тормоза и подвеска, двигатель и коробка, кузовной ремонт после ДТП, проверка перед покупкой, подбор запчастей по VIN. Что входит и сколько занимает.
 indexHeading: Все, что нужно машине, в одном сервисе
-indexLead: 'По каждой услуге есть отдельная страница: что входит, сколько занимает, по каким признакам к нам пора и когда мы честно говорим, что делать не нужно.'
+indexLead: Что входит в каждую работу и сколько она занимает. Цену называем после осмотра, до начала работ.
 specsPriceLabel: Цена
 specsDurationLabel: Срок
 partsLink: Подобрать запчасти для этой работы
+heroHeadingTemplate: '{name} в Белграде'
+processHeading: Как проходит визит
+ctaHeadingTemplate: '{name}: запишем на удобное время'
+partsCtaHeadingTemplate: '{name}: назовем цену и срок'
+ctaBody: Опишите, что с машиной. Перезвоним в рабочее время и назовем время визита.
 diagnostics:
+  cta: Записаться на диагностику
   name: Компьютерная диагностика
   short: Находим, что стоит за кодом ошибки.
   metaTitle: Компьютерная диагностика автомобиля в Белграде | CarLab
   metaDescription: Диагностика двигателя, подвески и электрики в Белграде. Считывание ошибок бесплатно, причину показываем прямо на машине.
-  heroEyebrow: Компьютерная диагностика
-  heroTitle: Код ошибки это симптом, а не диагноз
+  heroTitle: Код ошибки это симптом, а не диагноз. Находим причину и показываем ее на машине.
   heroLead: Сканер скажет, какой датчик ругается. Виноват сам датчик или то, что он измеряет, сканер не покажет, это выясняется уже на машине.
   priceFrom: считывание ошибок бесплатно
   duration: от 40 минут
@@ -41,11 +45,11 @@ diagnostics:
   honestHeading: Что мы не обещаем
   honest: Не каждая неисправность ловится за сорок минут. Плавающие проблемы, которые появляются раз в неделю, иногда требуют повторного визита или оставить машину на день. Мы скажем об этом сразу и не станем менять детали по очереди за ваш счет.
 servicing:
+  cta: Записаться на ТО
   name: Плановое ТО
   short: Масло, фильтры, жидкости и осмотр по регламенту вашего двигателя.
   metaTitle: Плановое ТО и замена масла в Белграде | CarLab
   metaDescription: 'Техническое обслуживание автомобиля в Белграде: масло, фильтры, свечи, тормозная жидкость, антифриз. По регламенту производителя, с записью в сервисную карту.'
-  heroEyebrow: Плановое ТО
   heroTitle: Самая дешевая починка та, которой не случилось
   heroLead: У каждого мотора свой интервал и свой допуск по маслу. Мы смотрим мануал на вашу машину и делаем то, что написано там, а не среднее «раз в десять тысяч».
   priceFrom: от 90 €
@@ -72,11 +76,11 @@ servicing:
   honestHeading: Что мы не делаем
   honest: Не меняем то, чему еще рано. Если фильтр отработал половину ресурса, мы его не тронем и скажем, когда приезжать.
 brakes-suspension:
+  cta: Записаться на ремонт
   name: Тормоза и подвеска
   short: Все, что отвечает за то, остановится машина или нет.
   metaTitle: Ремонт тормозов и подвески в Белграде | CarLab
   metaDescription: 'Тормоза и подвеска в Белграде: колодки, диски, суппорты, рычаги, развал-схождение. Замеры в миллиметрах, смета до работ.'
-  heroEyebrow: Тормоза и подвеска
   heroTitle: Здесь ресурс считают в миллиметрах
   heroLead: 'Мотор можно дотянуть до сервиса. Тормоза нельзя. Поэтому по ходовой мы не округляем и не тянем: если ресурс кончился, говорим прямо.'
   priceFrom: от 120 €
@@ -103,11 +107,11 @@ brakes-suspension:
   honestHeading: О чем предупредим
   honest: Колодки и диски это расходник, который ходит парой. Ставить новые колодки на изношенные диски можно, но ресурс колодок при этом падает, и через полгода вы приедете снова. Мы посчитаем оба варианта и оставим выбор вам.
 engine-gearbox:
+  cta: Записаться на диагностику
   name: Двигатель и коробка
   short: От замены прокладки до ремонта с разбором, с понятной сметой.
   metaTitle: Ремонт двигателя и коробки передач в Белграде | CarLab
   metaDescription: 'Ремонт двигателя и трансмиссии в Белграде: ГРМ, прокладки, сцепление, замена масла в АКПП. Диагностика до разбора, смета до работ.'
-  heroEyebrow: Двигатель и коробка
   heroTitle: «Капиталка» нужна не так часто, как ее называют
   heroLead: 'Прежде чем что-то разбирать, мы проверяем то, что проверяется снаружи: компрессию, давление масла, ошибки, утечки.'
   priceFrom: по результатам диагностики
@@ -134,11 +138,11 @@ engine-gearbox:
   honestHeading: Когда мы отговариваем
   honest: Если стоимость ремонта подходит к стоимости машины, мы это скажем. Иногда правильный совет продать как есть или искать контрактный агрегат, а не вкладывать в ремонт сумму, которую машина никогда не вернет.
 bodywork-painting:
+  cta: Прислать фото повреждений
   name: Кузов и покраска
   short: Восстановление после ДТП, правка геометрии и покраска с подбором цвета.
   metaTitle: Кузовной ремонт и покраска после ДТП в Белграде | CarLab
   metaDescription: 'Кузовной ремонт в Белграде: стапель, замер геометрии, рихтовка, покраска с компьютерным подбором цвета. Работаем со страховыми, помогаем с документами.'
-  heroEyebrow: Кузов и покраска
   heroTitle: Чтобы машина не выглядела «после удара»
   heroLead: Хороший кузовной ремонт не видно ни глазом, ни толщиномером на осмотре перед продажей.
   priceFrom: по результатам осмотра
@@ -165,11 +169,11 @@ bodywork-painting:
   honestHeading: О страховых
   honest: Мы работаем со страховыми и помогаем с документами, но не обещаем, что страховая покроет все. После осмотра мы сразу показываем, что попадает в страховой случай, а что нет, чтобы вы не узнали об этом в конце.
 pre-purchase-inspection:
+  cta: Записаться на проверку
   name: Проверка перед покупкой
   short: Толщиномер, подъемник и сканер до того, как вы отдали деньги.
   metaTitle: Проверка автомобиля перед покупкой в Белграде | CarLab
   metaDescription: 'Техническая проверка перед покупкой в Белграде: толщиномер, подъемник, диагностика ошибок, компрессия. Письменное заключение и торг в вашу пользу.'
-  heroEyebrow: Проверка перед покупкой
   heroTitle: Что покажет толщиномер, продавец не расскажет
   heroLead: Перекрашенные панели, следы сварки, скрученный пробег, утечки снизу. За час на подъемнике это видно, хотя в объявлении об этом не пишут.
   priceFrom: от 60 €
@@ -196,11 +200,11 @@ pre-purchase-inspection:
   honestHeading: Чего проверка не дает
   honest: Мы честно скажем, что видим, но ни один осмотр не ловит все. Скрытый дефект, который не проявляется ни на подъемнике, ни на диагностике, может всплыть позже. Это ограничение метода, а не оговорка мелким шрифтом.
 vin-parts-inquiry:
+  cta: Отправить запрос
   name: Подбор запчастей
   short: Находим запчасти, которые подходят вашей машине, и называем цену до покупки.
   metaTitle: Подбор автозапчастей по VIN в Белграде | CarLab
   metaDescription: 'Подбор запчастей по VIN или номеру шасси в Белграде: оригинал и проверенные аналоги, проверка совместимости, цена до покупки. Самовывоз в сервисе CarLab.'
-  heroEyebrow: Подбор запчастей
   heroTitle: Подберем запчасти, которые точно подойдут вашей машине
   heroLead: Пришлите VIN или номер шасси и напишите, что нужно. Мы проверим совместимость, найдем оригинал и проверенные аналоги и предложим лучшие варианты.
   priceFrom: называем после подбора
@@ -231,7 +235,6 @@ translations:
   sr:
     indexMetaTitle: 'Auto-servis u Beogradu: popravke i održavanje | CarLab'
     indexMetaDescription: Dijagnostika, mali servis, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine i delovi po VIN-u. Cene i rokovi.
-    indexEyebrow: Usluge
     partsLink: Pronađite delove za ovu popravku
     indexHeading: Sve što Vašem automobilu treba, u jednom servisu
     indexLead: 'Svaka usluga ima svoju stranicu: šta obuhvata, koliko traje, koji simptomi znače da je vreme da dođete i kada Vam iskreno kažemo da intervencija nije potrebna.'
@@ -242,7 +245,6 @@ translations:
       short: Otkrivamo šta se krije iza koda greške.
       metaTitle: Kompjuterska dijagnostika u Beogradu | CarLab
       metaDescription: Dijagnostika motora, trapa i auto-elektrike u Beogradu. Očitavanje grešaka je besplatno, a uzrok Vam pokazujemo na samom automobilu.
-      heroEyebrow: Kompjuterska dijagnostika
       heroTitle: Kod greške je simptom, a ne dijagnoza
       heroLead: Dijagnostički uređaj pokazuje koji senzor prijavljuje grešku. Ali da li je problem u senzoru ili u onome što meri, to se utvrđuje proverom na automobilu.
       priceFrom: besplatno očitavanje grešaka
@@ -276,7 +278,6 @@ translations:
       short: Ulje, filteri, tečnosti i pregled prema servisnom planu za Vaš motor.
       metaTitle: Redovan servis i zamena ulja u Beogradu | CarLab
       metaDescription: 'Održavanje automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost i antifriz. Prema planu proizvođača, uz upis u servisnu evidenciju.'
-      heroEyebrow: Redovno održavanje
       heroTitle: Najjeftinija popravka je ona koju izbegnete
       heroLead: Svaki motor ima svoj servisni interval i propisanu specifikaciju ulja. Proveravamo uputstvo za Vaš automobil i radimo po njemu, a ne po univerzalnom pravilu „na deset hiljada“.
       priceFrom: od 90 €
@@ -307,7 +308,6 @@ translations:
       short: Sve od čega zavisi da li će se automobil zaustaviti na vreme.
       metaTitle: Popravka kočnica i trapa u Beogradu | CarLab
       metaDescription: 'Kočnice i trap u Beogradu: pločice, diskovi, kočiona klešta, ramena i reglaža trapa. Merenje u milimetrima, predračun pre početka radova.'
-      heroEyebrow: Kočnice i trap
       heroTitle: Ovde se preostali vek meri u milimetrima
       heroLead: 'Popravka motora ponekad može da sačeka dolazak u servis. Kočnice ne mogu. Zato kod trapa nema zaokruživanja ni odlaganja: kada je deo istrošen, to kažemo otvoreno.'
       priceFrom: od 120 €
@@ -338,7 +338,6 @@ translations:
       short: Od zamene zaptivke do popravke uz rasklapanje, uz jasan predračun.
       metaTitle: Popravka motora i menjača u Beogradu | CarLab
       metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti kaiš i lanac, zaptivke, kvačilo, ulje u automatskom menjaču. Dijagnostika pre rasklapanja, predračun pre radova.'
-      heroEyebrow: Motor i menjač
       heroTitle: Generalna popravka nije potrebna toliko često koliko se predlaže
       heroLead: 'Pre nego što bilo šta rastavimo, proveravamo sve što možemo bez rastavljanja: kompresiju, pritisak ulja, greške i curenja.'
       priceFrom: prema rezultatima dijagnostike
@@ -369,7 +368,6 @@ translations:
       short: Popravka posle udesa, ispravljanje geometrije karoserije i farbanje uz uklapanje nijanse.
       metaTitle: Limarija i farbanje posle udesa u Beogradu | CarLab
       metaDescription: 'Limarija u Beogradu: ravnanje na stolu, merenje geometrije, farbanje uz kompjutersko mešanje boje. Sarađujemo sa osiguranjima i pomažemo oko dokumentacije.'
-      heroEyebrow: Limarija i farbanje
       heroTitle: Da automobil ne izgleda kao da je bio udaren
       heroLead: Dobra limarsko-farbarska popravka ne primećuje se ni golim okom ni meračem debljine laka pri pregledu pre prodaje.
       priceFrom: nakon pregleda
@@ -400,7 +398,6 @@ translations:
       short: Merač debljine laka, dizalica i dijagnostika pre nego što platite automobil.
       metaTitle: Pregled automobila pre kupovine u Beogradu | CarLab
       metaDescription: 'Pregled pre kupovine u Beogradu: merenje debljine laka, dizalica, dijagnostika, kompresija. Pisani izveštaj kao osnov za pregovore o ceni.'
-      heroEyebrow: Pregled pre kupovine
       heroTitle: Ono što pokaže merač laka, prodavac Vam neće reći
       heroLead: Prefarbani delovi, tragovi varenja, vraćena kilometraža, curenja ispod vozila. Za sat vremena na dizalici to se vidi, iako u oglasu ništa od toga ne piše.
       priceFrom: od 60 €
@@ -431,7 +428,6 @@ translations:
       short: Pronalazimo delove koji odgovaraju Vašem automobilu i dajemo cenu pre kupovine.
       metaTitle: Auto-delovi po VIN broju u Beogradu | CarLab
       metaDescription: 'Delovi po VIN broju ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti i cena unapred. Preuzimanje u CarLabu.'
-      heroEyebrow: Pronalaženje rezervnih delova
       heroTitle: Pronaći ćemo delove koji sigurno odgovaraju Vašem automobilu
       heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo koji delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
       priceFrom: cenu dajemo nakon pronalaska dela
@@ -461,7 +457,6 @@ translations:
   en:
     indexMetaTitle: Car servicing and repairs in Belgrade | CarLab
     indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine and gearbox repairs, accident repairs, pre-purchase checks and VIN parts matching. Prices and times.
-    indexEyebrow: Services
     partsLink: Find parts for this job
     indexHeading: Everything your car needs, all in one workshop
     indexLead: Each service has its own page explaining what's included, how long it takes, the signs it's time to visit us, and when we'll honestly tell you no work is needed.
@@ -472,7 +467,6 @@ translations:
       short: We find the cause behind the fault code.
       metaTitle: Car computer diagnostics in Belgrade | CarLab
       metaDescription: Engine, suspension and electrical diagnostics in Belgrade. Free fault code reading, with the cause shown to you on the car.
-      heroEyebrow: Computer diagnostics
       heroTitle: A fault code is a symptom, not a diagnosis
       heroLead: A scanner tells you which sensor is reporting a problem. It can't tell you whether the sensor itself is faulty or something is wrong with what it measures. That takes hands-on checks.
       priceFrom: free fault code reading
@@ -506,7 +500,6 @@ translations:
       short: Oil, filters, fluids and checks to your engine's service schedule.
       metaTitle: Scheduled servicing and oil changes in Belgrade | CarLab
       metaDescription: "Car servicing in Belgrade: oil, filters, spark plugs, brake fluid and coolant. To the manufacturer's schedule, with all work recorded in your service record."
-      heroEyebrow: Scheduled servicing
       heroTitle: The cheapest repair is the one you never need
       heroLead: Every engine has its own service intervals and oil specification. We check the manual for your car and follow it, rather than applying a blanket 'every 10,000 km' rule.
       priceFrom: from €90
@@ -537,7 +530,6 @@ translations:
       short: Everything that determines whether your car stops safely.
       metaTitle: Brake and suspension repairs in Belgrade | CarLab
       metaDescription: 'Brakes and suspension in Belgrade: pads, discs, calipers, suspension arms and wheel alignment. Measurements in millimetres, an estimate before work starts.'
-      heroEyebrow: Brakes and suspension
       heroTitle: Here, service life is measured in millimetres
       heroLead: "You might nurse an engine to the workshop. You can't take that chance with brakes. We don't round off measurements or put off repairs: if a component is worn out, we tell you straight."
       priceFrom: from €120
@@ -568,7 +560,6 @@ translations:
       short: From gasket replacement to strip-down repairs, with a clear estimate.
       metaTitle: Engine and gearbox repairs in Belgrade | CarLab
       metaDescription: 'Engine and gearbox repairs in Belgrade: timing belts and chains, gaskets, clutches and automatic gearbox oil changes. Diagnosis and estimate before work.'
-      heroEyebrow: Engine and gearbox
       heroTitle: A full rebuild is needed less often than you might be told
       heroLead: 'Before taking anything apart, we check what we can from the outside: compression, oil pressure, fault codes and leaks.'
       priceFrom: quoted after diagnostics
@@ -599,7 +590,6 @@ translations:
       short: Accident repairs, chassis alignment and colour-matched respraying.
       metaTitle: Accident repairs and respraying in Belgrade | CarLab
       metaDescription: 'Body repairs in Belgrade: chassis jig, alignment checks, panel repairs and colour-matched respraying. We work with insurers and help with paperwork.'
-      heroEyebrow: Bodywork and respraying
       heroTitle: So your car doesn't look accident-damaged
       heroLead: Good body repairs shouldn't stand out, whether checked by eye or with a paint thickness gauge during a pre-sale inspection.
       priceFrom: quoted after inspection
@@ -630,7 +620,6 @@ translations:
       short: A paint thickness gauge, a lift and a diagnostic scanner, before you hand over your money.
       metaTitle: Pre-purchase car inspection in Belgrade | CarLab
       metaDescription: 'Pre-purchase checks in Belgrade: paint thickness, lift inspection, fault scans and compression tests. Written report to help you negotiate the price.'
-      heroEyebrow: Pre-purchase inspection
       heroTitle: A paint gauge tells you what the seller won't
       heroLead: Resprayed panels, signs of welding, clocked mileage and leaks underneath. An hour on the lift can reveal what the advert leaves out.
       priceFrom: from €60
@@ -661,7 +650,6 @@ translations:
       short: We find parts that fit your car and confirm the price before you buy.
       metaTitle: Car parts sourcing by VIN in Belgrade | CarLab
       metaDescription: Parts sourcing by VIN or chassis number in Belgrade. Genuine and trusted aftermarket parts, fit checked and priced before purchase. Collect at CarLab.
-      heroEyebrow: Parts sourcing
       heroTitle: We'll find the right parts for your car
       heroLead: Send us your VIN or chassis number and tell us what you need. We'll check fitment, find genuine parts and trusted aftermarket alternatives, and suggest the best options.
       priceFrom: quoted once we've found the right parts

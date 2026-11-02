@@ -1,14 +1,19 @@
 ---
 import BulletList from '@/components/BulletList.astro';
 import { getCollection } from 'astro:content';
+import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
-import PageHero from '@/components/PageHero.astro';
+import PanelHero from '@/components/PanelHero.astro';
+import HeroContacts from '@/components/HeroContacts.astro';
+import GarageAddress from '@/components/GarageAddress.astro';
+import ProcessSteps from '@/components/ProcessSteps.astro';
+import WorksRow from '@/components/WorksRow.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import PartsInquiry from '@/components/PartsInquiry.astro';
-import WorkGrid from '@/components/WorkGrid.astro';
 import { localeFrom } from '@/i18n/config';
-import { publishedWorks } from '@/utils/works';
+import { featuredWorks, servicePhoto } from '@/utils/works';
+import { panelPhoto } from '@/utils/panelPhoto';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import {
   partsCategoryFor,
@@ -28,63 +33,70 @@ export function getStaticPaths() {
 
 const { slug } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const services = content(locale).services;
-const site = content(locale).site;
+const { services, site, pages, home } = content(locale);
 const service = services[slug];
-const pages = content(locale).pages;
-const related = publishedWorks(await getCollection('works')).filter((work) =>
+const parts = slug === VIN_INQUIRY_SERVICE;
+const works = await getCollection('works');
+const related = featuredWorks(works).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
+const image = servicePhoto(slug, works);
+const photo = image && (await panelPhoto(image));
 
 const partsCategory = partsCategoryFor(slug, await categoryPagesForBuild());
 const partsHref = partsCategory
   ? PathBuilder.partsCategory(locale, partsCategory)
   : slug === 'servicing' && PathBuilder.parts(locale);
-const schema = servicePageSchema(service);
+const name = (template: string) =>
+  withPlaceholder(template, 'name', service.name);
 const finalCta = {
-  eyebrow: services.indexEyebrow,
-  heading: service.name,
-  body: service.heroLead,
+  eyebrow: home.finalCta.eyebrow,
+  heading: name(
+    parts ? services.partsCtaHeadingTemplate : services.ctaHeadingTemplate,
+  ),
+  body: services.ctaBody,
   service: slug,
 };
-
-const specs = [
-  { label: services.specsPriceLabel, value: service.priceFrom },
-  { label: services.specsDurationLabel, value: service.duration },
-];
+const asideCards = [
+  { heading: service.signsHeading, items: service.signs, marker: 'dot' },
+  {
+    heading: service.includesHeading,
+    items: service.includes,
+    marker: 'check',
+  },
+] satisfies { heading: string; items: string[]; marker: 'dot' | 'check' }[];
 ---
 
 <Shell
   title={service.metaTitle}
   description={service.metaDescription}
-  jsonLd={[schema]}
+  jsonLd={[servicePageSchema(service)]}
   service={slug}
+  preloadImage={photo}
 >
-  <PageHero
-    eyebrow={service.heroEyebrow}
-    heading={service.heroTitle}
+  <PanelHero
+    heading={name(services.heroHeadingTemplate)}
+    hook={service.heroTitle}
     lead={service.heroLead}
-    service={slug}
+    photo={photo}
     crumbs={[
       { href: PathBuilder.services(locale), label: site.nav.services },
       { href: PathBuilder.service(locale, slug), label: service.name },
     ]}
-  />
-
-  <section class="wrap py-band md:py-band-lg">
-    <dl class="card grid grid-cols-2 divide-x divide-line">
-      {
-        specs.map((spec) => (
-          <div class="flex flex-col gap-1 p-4">
-            <dt class="text-xs text-muted">{spec.label}</dt>
-            <dd class="spec text-base font-semibold text-ink">{spec.value}</dd>
-          </div>
-        ))
-      }
+  >
+    <dl class="flex flex-col gap-0.5 border-y border-panel-line/60 py-3.5">
+      <dt class="text-xs text-panel-ink">{services.specsDurationLabel}</dt>
+      <dd class="spec text-lg leading-tight font-semibold">
+        {service.duration}
+      </dd>
     </dl>
-  </section>
+    <HeroContacts service={slug} bookLabel={service.cta} bookModal={!parts} />
+    <GarageAddress layout="line" tone="panel" class="text-sm" />
+  </PanelHero>
 
-  <section class="wrap grid gap-10 pb-12 lg:grid-cols-[1.2fr_1fr]">
+  <section
+    class="wrap grid gap-10 py-band md:py-band-lg lg:grid-cols-[1.2fr_1fr]"
+  >
     <div class="flex flex-col gap-5">
       <h2 class="text-section">{service.bodyHeading}</h2>
       <div class="prose-shop" set:html={safeMarkdown(service.body)} />
@@ -92,7 +104,7 @@ const specs = [
         partsHref && (
           <a
             href={partsHref}
-            class="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-signal-ink hover:underline"
+            class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
           >
             {services.partsLink}
             <Icon name="chevronRight" size={14} />
@@ -101,22 +113,19 @@ const specs = [
       }
     </div>
 
-    <aside class="flex flex-col gap-4">
-      <div class="card flex flex-col gap-3 p-5">
-        <h2 class="text-block font-semibold">
-          {service.includesHeading}
-        </h2>
-        <BulletList items={service.includes} marker="check" />
-      </div>
-
-      <div class="card flex flex-col gap-3 p-5">
-        <h2 class="text-block font-semibold">{service.signsHeading}</h2>
-        <BulletList items={service.signs} />
-      </div>
+    <aside class="flex flex-col gap-4 max-lg:order-first">
+      {
+        asideCards.map((card) => (
+          <div class="card flex flex-col gap-3 p-5">
+            <h2 class="text-block font-semibold">{card.heading}</h2>
+            <BulletList items={card.items} marker={card.marker} />
+          </div>
+        ))
+      }
     </aside>
   </section>
 
-  <section class="wrap pb-4">
+  <section class="wrap">
     <div class="card border-transparent bg-shade p-5">
       <h2 class="mb-2 text-block font-semibold">
         {service.honestHeading}
@@ -127,17 +136,19 @@ const specs = [
     </div>
   </section>
 
-  {
-    related.length > 0 && (
-      <section class="wrap mt-band">
-        <h2 class="text-section">{pages.works.eyebrow}</h2>
-        <WorkGrid works={related.slice(0, 3)} />
-      </section>
-    )
-  }
+  <section class="wrap py-band md:py-band-lg">
+    <h2 class="text-section">{services.processHeading}</h2>
+    <ProcessSteps steps={home.process.steps} titlesOnly />
+  </section>
+
+  <WorksRow
+    works={related}
+    eyebrow={pages.works.eyebrow}
+    heading={service.name}
+  />
 
   {
-    slug === VIN_INQUIRY_SERVICE ? (
+    parts ? (
       <FinalCta {...finalCta}>
         <PartsInquiry slot="form" />
       </FinalCta>

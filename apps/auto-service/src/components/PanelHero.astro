@@ -1,0 +1,69 @@
+---
+import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
+import type { PanelPhoto } from '@/utils/panelPhoto';
+
+interface Props {
+  heading: string;
+  hook?: string;
+  lead?: string;
+  crumbs: Crumb[];
+  photo?: PanelPhoto;
+}
+
+const { heading, hook, lead, crumbs, photo } = Astro.props;
+---
+
+<section class="wrap pt-3 sm:pt-5">
+  <div
+    class:list={[
+      'grid overflow-hidden rounded-block bg-panel text-panel-fg',
+      photo && 'lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]',
+    ]}
+  >
+    {
+      photo && (
+        <picture class="block lg:col-start-2 lg:row-start-1 lg:self-center lg:p-6 lg:pl-0">
+          <img
+            src={photo.src}
+            srcset={photo.srcset}
+            sizes={photo.sizes}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="block aspect-[5/2] w-full object-cover lg:aspect-[4/3] lg:rounded-control"
+          />
+        </picture>
+      )
+    }
+    <div
+      class="flex flex-col gap-4 p-5 pb-6 sm:p-8 lg:col-start-1 lg:row-start-1 lg:gap-6 lg:px-12 lg:py-10"
+    >
+      <div class="max-sm:hidden">
+        <Breadcrumbs crumbs={crumbs} tone="panel" />
+      </div>
+      <div class="flex flex-col gap-2.5">
+        <h1 class="text-hero max-w-[18ch] break-words" data-hero-heading>
+          {heading}
+        </h1>
+        {
+          hook && (
+            <p class="max-w-xl text-base leading-snug text-panel-fg/90 lg:text-lg">
+              {hook}
+            </p>
+          )
+        }
+        {
+          lead && (
+            <p class="max-w-xl text-sm leading-relaxed text-panel-ink max-lg:hidden">
+              {lead}
+            </p>
+          )
+        }
+      </div>
+      <slot />
+    </div>
+  </div>
+</section>

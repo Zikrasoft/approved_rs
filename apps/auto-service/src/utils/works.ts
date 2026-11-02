@@ -3,6 +3,7 @@ import { normalizePartNumber } from '@podbor/catalog-contract';
 import { localizedEntry, publishedByNewest } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { PartPageEntry } from './catalogueSnapshot';
+import type { ServiceSlug } from './services';
 
 type WorkEntry = CollectionEntry<'works'>;
 
@@ -60,7 +61,44 @@ export const workLeadService = ({ data: { servicesApplied } }: Work) =>
     ? PARTS_SOURCING
     : servicesApplied[0];
 
-export const workPrice = (work: Work): number | null =>
-  work.data.servicesApplied.includes(PARTS_SOURCING)
-    ? (work.data.priceRsd ?? null)
-    : null;
+const MAKES = [
+  'Alfa Romeo',
+  'Audi',
+  'BMW',
+  'Honda',
+  'Mercedes-Benz',
+  'MINI',
+  'Peugeot',
+  'Seat',
+  'Skoda',
+  'VW',
+];
+
+export const makeOf = ({ data: { car } }: Work): string | undefined =>
+  MAKES.find((make) => car.toLowerCase().startsWith(make.toLowerCase()));
+
+const groupOf = (make: string) => make.toLowerCase().replaceAll(' ', '-');
+
+export const makeGroup = (work: Work): string | undefined => {
+  const make = makeOf(work);
+  return make && groupOf(make);
+};
+
+export const sharedMakes = (works: Work[]) =>
+  MAKES.filter(
+    (make) => works.filter((work) => makeOf(work) === make).length > 1,
+  ).map((make) => ({ label: make, group: groupOf(make) }));
+
+export const makesOf = (works: Work[]): string[] =>
+  MAKES.filter((make) => works.some((work) => makeOf(work) === make));
+
+const SERVICE_PHOTO_WORK: Partial<Record<ServiceSlug, string>> = {
+  diagnostics: 'bmw-x3',
+  servicing: 'mercedes-benz-c200',
+  'brakes-suspension': 'obsluzhivanie-tormoznoj-sistemy',
+  'engine-gearbox': 'velikij-servis-zamena-grm',
+};
+
+export const servicePhoto = (slug: ServiceSlug, works: WorkEntry[]) =>
+  publishedWorks(works).find((work) => work.id === SERVICE_PHOTO_WORK[slug])
+    ?.data.image;

@@ -3,12 +3,16 @@ import type { PartPageEntry } from './catalogueSnapshot';
 import {
   featuredWorks,
   localizedWork,
+  makeGroup,
+  makeOf,
+  makesOf,
   publishedWorks,
+  servicePhoto,
+  sharedMakes,
   sourcedParts,
   sourcingWorks,
   titleNamesCar,
   workLeadService,
-  workPrice,
   type Work,
 } from './works';
 
@@ -246,23 +250,75 @@ describe('workLeadService', () => {
   });
 });
 
-describe('workPrice', () => {
-  it('shows the RSD price on a Parts sourcing Work', () => {
-    const work = makeWork({
-      servicesApplied: ['vin-parts-inquiry'],
-      priceRsd: 12500,
+describe('makeOf', () => {
+  it('reads the make off the start of the car, whatever its case', () => {
+    expect(makeOf(makeWork({ car: 'SEAT LEON' }))).toBe('Seat');
+    expect(makeOf(makeWork({ car: 'Mercedes-Benz C-Class' }))).toBe(
+      'Mercedes-Benz',
+    );
+    expect(makeOf(makeWork({ car: 'BMW' }))).toBe('BMW');
+  });
+
+  it('leaves a car outside the list without a make', () => {
+    expect(makeOf(makeWork({ car: 'Обслуживание тормозной системы' }))).toBe(
+      undefined,
+    );
+  });
+});
+
+describe('makeGroup', () => {
+  it('keys a make as one space-free token the chip filter can match', () => {
+    expect(makeGroup(makeWork({ car: 'Alfa Romeo Giulia' }))).toBe(
+      'alfa-romeo',
+    );
+    expect(makeGroup(makeWork({ car: 'Обслуживание тормозов' }))).toBe(
+      undefined,
+    );
+  });
+});
+
+describe('the makes of a list of Works', () => {
+  const works = [
+    'Skoda Octavia',
+    'BMW X3',
+    'Alfa Romeo Giulia',
+    'Skoda Fabia',
+    'BMW 118D',
+    'Alfa Romeo 159',
+    'VW Golf',
+  ].map((car) => makeWork({ car }));
+
+  it('offers a chip only for a make two or more Works share, in list order', () => {
+    expect(sharedMakes(works)).toEqual([
+      { label: 'Alfa Romeo', group: 'alfa-romeo' },
+      { label: 'BMW', group: 'bmw' },
+      { label: 'Skoda', group: 'skoda' },
+    ]);
+  });
+
+  it('names every make at least one Work carries', () => {
+    expect(makesOf(works)).toEqual(['Alfa Romeo', 'BMW', 'Skoda', 'VW']);
+  });
+});
+
+describe('servicePhoto', () => {
+  const work = (id: string, src: string) =>
+    ({ ...makeWork({ image: { src } as never }), id }) as Work;
+
+  it('takes the cover of the Work picked for the service', () => {
+    const works = [work('bmw-x3', '/x3.jpg'), work('seat-leon', '/leon.jpg')];
+
+    expect(servicePhoto('diagnostics', works)).toMatchObject({
+      src: '/x3.jpg',
     });
-    expect(workPrice(work)).toBe(12500);
   });
 
-  it('hides the price on any other Work', () => {
-    const work = makeWork({ servicesApplied: ['servicing'], priceRsd: 12500 });
-    expect(workPrice(work)).toBeNull();
-  });
+  it('has no photo for a service without a picked Work or once it is unpublished', () => {
+    const hidden = { ...makeWork({ published: false }), id: 'bmw-x3' } as Work;
 
-  it('has no price when none is set', () => {
-    expect(
-      workPrice(makeWork({ servicesApplied: ['vin-parts-inquiry'] })),
-    ).toBeNull();
+    expect(servicePhoto('bodywork-painting', [work('bmw-x3', '/x3.jpg')])).toBe(
+      undefined,
+    );
+    expect(servicePhoto('diagnostics', [hidden])).toBe(undefined);
   });
 });

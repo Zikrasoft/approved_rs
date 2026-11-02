@@ -23,6 +23,24 @@ describe('ProcessSteps', () => {
     expect(items[0].querySelector('.text-signal-ink')).toBeNull();
   });
 
+  it('explains each step unless the page asks for the titles alone', async () => {
+    const texts = (root: Element) =>
+      [...root.querySelectorAll('ol > li p')].map((p) => p.textContent);
+
+    expect(texts(await process())).toEqual([
+      'Договоримся о времени.',
+      'Находим причину.',
+    ]);
+    expect(
+      texts(
+        await render(ProcessSteps, {
+          path: '/ru/',
+          props: { steps, titlesOnly: true },
+        }),
+      ),
+    ).toEqual([]);
+  });
+
   it('puts the first-step action under the first step only', async () => {
     const items = [
       ...(
