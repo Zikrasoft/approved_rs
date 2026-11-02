@@ -77,6 +77,12 @@ describe('generateLlmsTxt', () => {
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
+  it('states the Google rating as a key fact', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '- 5.0 в Google · 14 отзывов\n',
+    );
+  });
+
   it('lists the visit facts and the route link as key facts', async () => {
     const body = await generateLlmsTxt('ru');
     content('ru').site.visit.facts.forEach((fact) =>

@@ -1,10 +1,9 @@
 ---
 import { mapPlaceUrl } from '@podbor/site-kit';
 import Icon from './Icon.astro';
-import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
-import { content } from '@/i18n/content';
-import { GARAGE_ADDRESS, GOOGLE_RATING } from '@/utils/constants';
-import { plural } from '@/utils/leadTime';
+import { localeFrom } from '@/i18n/config';
+import { GARAGE_ADDRESS } from '@/utils/constants';
+import { googleRatingLabel } from '@/utils/googleRating';
 
 interface Props {
   tone: 'panel' | 'card';
@@ -12,16 +11,7 @@ interface Props {
 }
 
 const { tone, class: className } = Astro.props;
-const locale = localeFrom(Astro.url.pathname);
-const copy = content(locale).site.googleRating;
-const { rating, reviews } = GOOGLE_RATING;
-const label = [
-  copy.rating.replace('{rating}', rating),
-  plural(reviews, copy.reviews, BCP47_BY_LOCALE[locale]).replace(
-    '{count}',
-    String(reviews),
-  ),
-].join(' · ');
+const label = googleRatingLabel(localeFrom(Astro.url.pathname));
 const TONE = {
   panel: 'text-panel-fg decoration-panel-line hover:decoration-panel-fg',
   card: 'text-ink decoration-line-strong hover:decoration-ink',
