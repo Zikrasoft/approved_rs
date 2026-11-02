@@ -57,12 +57,17 @@ const knownFilters = (
   facets: SearchFacet[],
   requested: string[],
   ranges: RangeFilter[],
+  spellings: SearchFacet[],
 ) => {
   const byKey = new Map(facets.map((facet) => [facet.key, facet]));
+  const spellingByKey = new Map(spellings.map((facet) => [facet.key, facet]));
   return filtersWithinCap(
     requested.flatMap((filter) => {
-      const facet = byKey.get(keyOf(filter));
-      return facet ? [listedSpelling(facet, filter)] : [];
+      const key = keyOf(filter);
+      const facet = byKey.get(key);
+      return facet
+        ? [listedSpelling(spellingByKey.get(key) ?? facet, filter)]
+        : [];
     }),
     ranges.filter(({ key }) => byKey.get(key)?.type === 'number'),
   );
@@ -160,21 +165,27 @@ export async function planSearch({
     return `${PathBuilder.partsSearch(locale)}?${next}`;
   };
 
+  const unfiltered =
+    found?.count === 0 && (requestedFacets.length || requestedRanges.length)
+      ? await catalogue?.search({
+          ...searchScope,
+          q,
+          facets: [],
+          ranges: [],
+          limit: 1,
+        })
+      : null;
   const applied = found
-    ? knownFilters(found.facets, requestedFacets, requestedRanges)
+    ? knownFilters(
+        found.facets,
+        requestedFacets,
+        requestedRanges,
+        unfiltered?.facets ?? [],
+      )
     : capped;
   const emptyScope =
-    found?.count === 0 &&
-    (applied.facets.length > 0 || applied.ranges.length > 0) &&
-    (
-      await catalogue?.search({
-        ...searchScope,
-        q,
-        facets: [],
-        ranges: [],
-        limit: 1,
-      })
-    )?.count === 0;
+    unfiltered?.count === 0 &&
+    (applied.facets.length > 0 || applied.ranges.length > 0);
   const chosen = emptyScope ? [] : applied.facets;
   const ranges = emptyScope ? [] : applied.ranges;
   const listing =

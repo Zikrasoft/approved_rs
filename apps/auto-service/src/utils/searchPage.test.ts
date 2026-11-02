@@ -481,6 +481,34 @@ describe('planSearch', () => {
     },
   );
 
+  it('spells a value the way the category lists it even when the filters find nothing', async () => {
+    const search = vi.fn(async ({ facets }: { facets: string[] }) =>
+      facets.length
+        ? {
+            ...found(0, []),
+            facets: [facetOf('brand', 'febi'), facetOf('thread', 'M14x1.5')],
+          }
+        : {
+            ...found(5),
+            facets: [
+              facetOf('brand', 'febi', 'mann'),
+              facetOf('thread', 'M14x1.5', 'M20x1.5'),
+            ],
+          },
+    );
+
+    expect(
+      await plan(
+        'category=oil-filters&facets=brand%3AFEBI&facets=thread%3Am20X1.5',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=oil-filters&facets=brand%3Afebi&facets=thread%3AM20x1.5',
+      status: 302,
+    });
+  });
+
   it('keeps a facet value the catalogue lists no spelling of', async () => {
     expect(
       await plan('category=oil-filters&facets=brand%3Anosuch', withShouted()),
