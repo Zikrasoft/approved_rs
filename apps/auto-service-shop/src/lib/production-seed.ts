@@ -155,7 +155,123 @@ export const BATTERY_FIELDS: FieldDefinition[] = [
   number('length', 'Длина', 'мм', true),
   number('width', 'Ширина', 'мм', true),
   number('height', 'Высота', 'мм', true),
+  select('terminal-type', 'Тип клемм', true, false, [
+    ['standard', 'Стандартные конусные'],
+    ['thin', 'Тонкие (Asia, JIS)'],
+    ['screw', 'Под болт'],
+  ]),
+  select('terminal-layout', 'Расположение клемм', true, false, [
+    ['long-side', 'Вдоль длинной стороны'],
+    ['short-side', 'Вдоль короткой стороны'],
+    ['diagonal', 'По диагонали'],
+  ]),
 ];
+
+const multiSelect = (
+  key: string,
+  label: string,
+  options: [string, string][],
+): FieldDefinition => ({
+  ...select(key, label, true, false, options),
+  type: 'multi-select',
+});
+
+export const OIL_FIELDS: FieldDefinition[] = [
+  select('viscosity', 'Вязкость', true, true, [
+    ['0w-20', '0W-20'],
+    ['0w-30', '0W-30'],
+    ['5w-30', '5W-30'],
+    ['5w-40', '5W-40'],
+    ['10w-40', '10W-40'],
+  ]),
+  multiSelect('approvals', 'Допуски', [
+    ['bmw-ll-04', 'BMW Longlife-04'],
+    ['bmw-ll-17fe', 'BMW Longlife-17 FE+'],
+    ['mb-229-51', 'MB 229.51'],
+    ['mb-229-52', 'MB 229.52'],
+    ['mb-229-71', 'MB 229.71'],
+  ]),
+  number('volume', 'Объем', 'л', true),
+  select('base', 'Основа', true, false, [
+    ['synthetic', 'Синтетическое'],
+    ['semi-synthetic', 'Полусинтетическое'],
+    ['mineral', 'Минеральное'],
+  ]),
+  multiSelect('acea', 'Класс ACEA', [
+    ['a3-b4', 'A3/B4'],
+    ['a5-b5', 'A5/B5'],
+    ['c2', 'C2'],
+    ['c3', 'C3'],
+    ['c5', 'C5'],
+    ['c6', 'C6'],
+  ]),
+  multiSelect('api', 'Класс API', [
+    ['sn', 'SN'],
+    ['sp', 'SP'],
+    ['cf', 'CF'],
+    ['ck-4', 'CK-4'],
+  ]),
+];
+
+export const OIL_FILTER_FIELDS: FieldDefinition[] = [
+  select('filter-type', 'Тип фильтра', true, false, [
+    ['cartridge', 'Сменный элемент'],
+    ['spin-on', 'Навинчиваемый'],
+  ]),
+  number('height', 'Высота', 'мм', true),
+  number('outer-diameter', 'Наружный диаметр', 'мм', true),
+  number('inner-diameter', 'Внутренний диаметр', 'мм', true),
+  {
+    key: 'thread',
+    type: 'text',
+    label: 'Резьба',
+    unit: null,
+    facet: true,
+    required: false,
+    options: [],
+  },
+  yesNo('gasket-included', 'Уплотнение в комплекте', true),
+  yesNo('bypass-valve', 'Перепускной клапан', true),
+];
+
+export const BRAKE_PAD_FIELDS: FieldDefinition[] = [
+  select('axle', 'Ось', true, true, [
+    ['front', 'Передняя'],
+    ['rear', 'Задняя'],
+  ]),
+  number('thickness', 'Толщина', 'мм', true),
+  number('width', 'Ширина', 'мм', true),
+  number('height', 'Высота', 'мм', true),
+  select('brake-system', 'Тормозная система', true, false, [
+    ['ate', 'ATE'],
+    ['bosch', 'Bosch'],
+    ['lucas-trw', 'Lucas/TRW'],
+    ['akebono', 'Akebono'],
+    ['brembo', 'Brembo'],
+    ['sumitomo', 'Sumitomo'],
+  ]),
+  select('wear-sensor', 'Датчик износа', true, false, [
+    ['included', 'В комплекте'],
+    ['prepared', 'Подготовлены под датчик'],
+    ['none', 'Без датчика'],
+  ]),
+];
+
+const optional = (fields: FieldDefinition[]) =>
+  fields.map((field) => ({ ...field, required: false }));
+
+export const CATEGORY_FIELDS: Record<string, FieldDefinition[]> = {
+  [BATTERY_CATEGORY.slug]: BATTERY_FIELDS,
+  'maintenance-consumables': optional([
+    ...OIL_FIELDS,
+    ...OIL_FILTER_FIELDS,
+    number('length', 'Длина', 'мм', true),
+  ]),
+  brakes: optional([
+    ...BRAKE_PAD_FIELDS,
+    number('diameter', 'Диаметр', 'мм', true),
+  ]),
+};
 
 const IMAGES = join(process.cwd(), 'assets/categories');
 
@@ -428,9 +544,8 @@ export async function seedProductionCatalogue(
     const row =
       existing.find(({ slug }) => slug === category.slug) ??
       (await catalog.createCategories(category));
-    if (category === BATTERY_CATEGORY) {
-      await seedCategoryFields(catalog, row.id, BATTERY_FIELDS);
-    }
+    const fields = CATEGORY_FIELDS[category.slug];
+    if (fields) await seedCategoryFields(catalog, row.id, fields);
     if (row.updated_by) continue;
     const photo = photos.find((file) => file.startsWith(`${category.slug}.`));
     if ((row.image || !photo) && matches(row, category)) continue;

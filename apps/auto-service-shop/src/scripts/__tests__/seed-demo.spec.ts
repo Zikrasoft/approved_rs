@@ -144,6 +144,7 @@ medusaIntegrationTestRunner({
       it('sells the two demo oils in different volumes, so the volume filter has a choice', async () => {
         expect(await attributeValues('engine-oil', 'volume')).toEqual([
           '4',
+          '4',
           '5',
         ]);
         expect((await partOf('castrol', '15F6E1')).name).toBe(
@@ -151,8 +152,9 @@ medusaIntegrationTestRunner({
         );
       });
 
-      it('marks the AGM and EFB demo batteries as Start-Stop and the standard one as not', async () => {
+      it('marks the AGM and EFB demo batteries as Start-Stop and the standard ones as not', async () => {
         expect(await attributeValues('batteries', 'start-stop')).toEqual([
+          'false',
           'false',
           'true',
           'true',
@@ -166,6 +168,43 @@ medusaIntegrationTestRunner({
           expect.arrayContaining(['false', 'true']),
         );
       });
+
+      const distinctValues = async (categorySlug: string, key: string) =>
+        [
+          ...new Set(
+            (await attributeValues(categorySlug, key)).flatMap((value) =>
+              value.split(','),
+            ),
+          ),
+        ].sort();
+
+      it.each([
+        ['batteries', 'terminal-type', ['standard', 'thin']],
+        ['batteries', 'terminal-layout', ['long-side', 'short-side']],
+        ['brake-pads', 'brake-system', ['ate', 'bosch', 'lucas-trw']],
+        ['engine-oil', 'base', ['semi-synthetic', 'synthetic']],
+        ['engine-oil', 'acea', ['a3-b4', 'c3', 'c5']],
+        ['engine-oil', 'api', ['cf', 'sn', 'sp']],
+        ['oil-filters', 'bypass-valve', ['false', 'true']],
+      ])(
+        'gives the %s facet %s a choice of values',
+        async (category, key, values) => {
+          expect(await distinctValues(category, key)).toEqual(values);
+        },
+      );
+
+      it.each([
+        ['brake-pads', 'width'],
+        ['brake-pads', 'height'],
+        ['oil-filters', 'inner-diameter'],
+      ])(
+        'spreads the %s range %s over several values',
+        async (category, key) => {
+          expect(
+            (await distinctValues(category, key)).length,
+          ).toBeGreaterThanOrEqual(2);
+        },
+      );
 
       it('names the febi Brand «Febi» while its slug stays febi', async () => {
         expect(await catalog.listBrands({ slug: 'febi' })).toEqual([
@@ -199,6 +238,21 @@ medusaIntegrationTestRunner({
           category_id: battery.category_id,
           attributes: withoutStartStop,
         });
+        const hengst = await partOf('hengst', 'E340HD247');
+        await catalog.classifyPart(hengst.id, {
+          category_id: hengst.category_id,
+          attributes: Object.fromEntries(
+            Object.entries(hengst.attributes as object).filter(
+              ([key]) => key !== 'bypass-valve',
+            ),
+          ),
+        });
+        const brembo = await partOf('brembo', 'P06038');
+        await catalog.classifyPart(brembo.id, {
+          category_id: brembo.category_id,
+          attributes: { ...brembo.attributes, 'brake-system': 'akebono' },
+          updated_by: 'user_1',
+        });
         const pads = await partOf('textar', '2459801');
         await catalog.classifyPart(pads.id, {
           category_id: pads.category_id,
@@ -225,6 +279,12 @@ medusaIntegrationTestRunner({
         );
         expect((await partOf('textar', '2459801')).attributes).toEqual(
           expect.objectContaining({ thickness: 18 }),
+        );
+        expect((await partOf('hengst', 'E340HD247')).attributes).toEqual(
+          expect.objectContaining({ 'bypass-valve': false }),
+        );
+        expect((await partOf('brembo', 'P06038')).attributes).toEqual(
+          expect.objectContaining({ 'brake-system': 'akebono' }),
         );
       });
 
