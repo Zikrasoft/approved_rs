@@ -33,7 +33,7 @@ describe('PageHero actions', () => {
   it('leads with the orange call on a touchscreen', async () => {
     const root = await hero({ service: 'servicing' });
 
-    expect(orangeOn(root, 'coarse')).toEqual(['Позвонить +381 67 7210533']);
+    expect(orangeOn(root, 'coarse')).toEqual(['Позвонить']);
     expect(
       root
         .querySelector('[data-contact-channel="telegram"]')

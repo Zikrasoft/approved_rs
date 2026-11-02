@@ -17,10 +17,10 @@ const backLinks = (root: Element) =>
     );
 
 describe('the thanks page', () => {
-  it('labels the call with the number on a touchscreen', async () => {
+  it('labels the call «Позвонить» on a touchscreen', async () => {
     const call = (await page()).querySelector('main .card a[href^="tel:"]')!;
 
-    expect(call.textContent?.trim()).toBe('+381 67 7210533');
+    expect(call.textContent?.trim()).toBe('Позвонить');
   });
 
   it('says where to come, with the hours and a route', async () => {

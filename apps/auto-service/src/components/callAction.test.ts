@@ -8,24 +8,16 @@ const callAction = (props: Record<string, unknown>, slots = {}) =>
 const links = (root: Element) => [...root.querySelectorAll('a')];
 
 describe('CallAction', () => {
-  it('dials the formatted number on a touchscreen and offers a callback on a mouse', async () => {
+  it('dials on a touchscreen without spelling the number out and offers a callback on a mouse', async () => {
     const [call, callback] = links(await callAction({ class: 'btn' }));
 
     expect(call.getAttribute('href')).toBe('tel:+381677210533');
     expect(call.dataset.contactChannel).toBe('phone');
-    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe(
-      'Позвонить +381 67 7210533',
-    );
+    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe('Позвонить');
     expect(call.classList.contains('pointer-fine:hidden!')).toBe(true);
     expect(callback.getAttribute('data-open-lead-modal')).toBe('phone');
     expect(callback.textContent?.trim()).toBe('Перезвоните мне');
     expect(callback.classList.contains('pointer-coarse:hidden!')).toBe(true);
-  });
-
-  it('drops the number where the cell is too tight for it', async () => {
-    const [call] = links(await callAction({ class: 'btn', number: false }));
-
-    expect(call.textContent?.trim()).toBe('Позвонить');
   });
 
   it('styles both sides alike unless the callback asks for its own look', async () => {

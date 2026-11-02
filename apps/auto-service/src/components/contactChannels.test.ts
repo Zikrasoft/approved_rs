@@ -47,14 +47,7 @@ describe('ContactChannels on the thanks page', () => {
       }),
     ).find((link) => link.dataset.contactChannel === 'phone')!;
 
-  it('labels the call tile with the number when asked to', async () => {
-    const tile = await call({ numberLabel: true });
-
-    expect(tile.getAttribute('href')).toBe('tel:+381677210533');
-    expect(tile.textContent?.trim()).toBe('+381 67 7210533');
-  });
-
-  it('keeps the plain call label otherwise', async () => {
+  it('labels the call tile «Позвонить», never with the number', async () => {
     expect((await call({})).textContent?.trim()).toBe('Позвонить');
   });
 });

@@ -23,13 +23,11 @@ describe('SiteFooter', async () => {
     expect(before(address, firstNav)).toBe(true);
   });
 
-  it('labels the touch call with the number and gives a mouse the callback', () => {
+  it('labels the touch call «Позвонить» and gives a mouse the callback', () => {
     const call = contacts.querySelector('a[href^="tel:"]')!;
     const callback = contacts.querySelector('[data-open-lead-modal="phone"]')!;
 
-    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe(
-      'Позвонить +381 67 7210533',
-    );
+    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe('Позвонить');
     expect(call.classList.contains('btn-secondary')).toBe(true);
     expect(callback.classList.contains('btn-secondary')).toBe(true);
   });

@@ -28,7 +28,7 @@ const channels = (tiles: HTMLElement[]) =>
   tiles.map((tile) => tile.dataset.contactChannel);
 
 describe('the home hero contact block on a touchscreen', () => {
-  it('leads with a full-width tracked call carrying the formatted number', () => {
+  it('leads with a full-width tracked call labelled «Позвонить»', () => {
     const [call] = shownOn('coarse');
     expect(call.getAttribute('href')).toBe('tel:+381677210533');
     expect(call.dataset.contactChannel).toBe('phone');
@@ -37,7 +37,7 @@ describe('the home hero contact block on a touchscreen', () => {
         .closest('[data-contact-placement]')
         ?.getAttribute('data-contact-placement'),
     ).toBe('hero');
-    expect(label(call)).toBe('Позвонить +381 67 7210533');
+    expect(label(call)).toBe('Позвонить');
     expect(classes(call)).toContain('w-full');
   });
 
