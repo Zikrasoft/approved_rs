@@ -174,21 +174,17 @@ translations:
           body: Pišite nam ili pozovite, daćemo Vam okvirnu procenu i dogovoriti termin za dijagnostiku.
         - heading: Želite isti rezultat?
           body: Opišite šta se dešava sa automobilom, a mi ćemo Vam reći od čega bismo krenuli i koliko bi to trajalo.
-      usefulInfoLabel: Korisne informacije
       doorHeading: Sličan problem sa Vašim automobilom?
       doorText: Opišite simptome, predložićemo od čega da krenete.
       doorButtonLabel: Opišite problem
       partsHeading: Odabrani rezervni delovi
-      priceLabel: Cena rezervnih delova za klijenta
       sourcingCta:
         heading: Potrebni su Vam delovi za automobil?
         body: Pošaljite VIN ili kataloški broj dela, pronaći ćemo originalni ili zamenski deo i javiti Vam cenu i rok isporuke.
     contact:
       metaTitle: Kontakt autoservisa CarLab u Beogradu, adresa i telefon
       metaDescription: Adresa, radno vreme i telefon autoservisa CarLab u Beogradu. Zakažite dijagnostiku i popravku telefonom, preko WhatsAppa ili Vibera.
-      eyebrow: Kontakt
       heading: Dođite da zajedno pogledamo automobil
-      lead: Prvi pregled je besplatan i traje petnaestak minuta. To nije dijagnostika, već kratak pregled automobila pri prijemu. Obično je dovoljan da steknemo predstavu o problemu i ceni popravke.
       addressLabel: Adresa
       hoursLabel: Radno vreme
       mapHeading: Kako do nas
@@ -234,16 +230,8 @@ translations:
       metaDescription: Šta možete pronaći na sajtu autoservisa CarLab u Beogradu, odakle su primeri radova, kome sajt pripada i kako da nas kontaktirate.
       heading: Sajt autoservisa CarLab
       lead: 'Ovde ćete pronaći sve o autoservisu CarLab u Beogradu: usluge, izbor rezervnih delova, primere radova, adresu i načine zakazivanja.'
-      sitemapHeading: Šta možete pronaći na sajtu
-      worksCountLabel: Primera radova
-      servicesCountLabel: Usluga u katalogu
-      contentHeading: Odakle potiču materijali
-      contentText: Primeri radova prikazuju stvarne automobile koji su bili u našem servisu. Tekstove pišu saradnici servisa na ruskom, a na srpski i engleski prevode se automatski.
       ownerHeading: Kome pripada sajt
       ownerText: Sajt pripada autoservisu CarLab. Kako postupamo sa podacima posetilaca opisano je u odeljku
-      contactsHeading: Kontakt
-      contactsText: Telefon i aplikacije putem kojih nam možete pisati navedeni su na stranici
-      developerCredit: Sajt je osmislio i izradio studio Zikrasoft.
     notFound:
       metaTitle: Stranica nije pronađena | CarLab
       heading: Ova stranica ne postoji
@@ -325,21 +313,17 @@ translations:
           body: Message us or call for some initial advice and to book a diagnostic check.
         - heading: Want the same result?
           body: Tell us what's wrong with your car and we'll explain where we'd start and how long it will take.
-      usefulInfoLabel: Useful information
       doorHeading: Does this sound like your car?
       doorText: Describe the symptoms and we'll suggest where to start.
       doorButtonLabel: Describe the problem
       partsHeading: Parts we sourced
-      priceLabel: Parts cost to the customer
       sourcingCta:
         heading: Need parts for your car?
         body: Send us your VIN or a part number. We'll find genuine or aftermarket options and confirm the price and delivery time.
     contact:
       metaTitle: 'Contact CarLab in Belgrade: address and phone'
       metaDescription: Find the address, opening hours and phone number for CarLab in Belgrade. Book diagnostics or repairs by phone, WhatsApp or Viber.
-      eyebrow: Contact
       heading: Come by and we'll look over your car together
-      lead: The initial inspection is free and takes about fifteen minutes. It's a quick look over the car when you arrive, not a diagnostic check. It's usually enough to get an idea of what's wrong and what repairs will cost.
       addressLabel: Address
       hoursLabel: Opening hours
       mapHeading: How to find us
@@ -385,16 +369,8 @@ translations:
       metaDescription: What's on the CarLab Belgrade website, where our job examples come from, who owns the site and how to get in touch.
       heading: The CarLab garage website
       lead: 'Everything about CarLab in Belgrade in one place: services, parts sourcing, recent jobs, our address and how to book.'
-      sitemapHeading: What's on the site
-      worksCountLabel: Jobs featured
-      servicesCountLabel: Services listed
-      contentHeading: Where our content comes from
-      contentText: Our job write-ups feature real cars that came into our workshop. Our team writes the content in Russian, and it is automatically translated into Serbian and English.
       ownerHeading: Who owns the website
       ownerText: This website belongs to CarLab. How we handle visitor data is explained in our
-      contactsHeading: Contact
-      contactsText: You'll find our phone number and messaging options on the page
-      developerCredit: Website designed and developed by Zikrasoft.
     notFound:
       metaTitle: Page not found | CarLab
       heading: This page doesn't exist
