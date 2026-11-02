@@ -29,7 +29,7 @@ const { services, home, site, pages } = content(locale);
     hook={services.indexLead}
     crumbs={[{ href: PathBuilder.services(locale), label: site.nav.services }]}
   >
-    <HeroContacts />
+    <HeroContacts class="lg:max-w-xl" />
     <GarageAddress layout="line" tone="panel" class="text-sm" />
   </PanelHero>
 

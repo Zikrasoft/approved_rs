@@ -1,9 +1,7 @@
 ---
-import { localeFrom } from '@/i18n/config';
 import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
-import ContactChannels from './ContactChannels.astro';
+import HeroContacts from './HeroContacts.astro';
 import type { ServiceSlug } from '@/utils/services';
-import { content } from '@/i18n/content';
 
 interface Props {
   eyebrow: string;
@@ -26,7 +24,6 @@ const {
   compact = false,
   desktopLead = false,
 } = Astro.props;
-const site = content(localeFrom(Astro.url.pathname)).site;
 ---
 
 <section class="border-b border-line bg-card">
@@ -55,12 +52,7 @@ const site = content(localeFrom(Astro.url.pathname)).site;
     }
     {
       actions && (
-        <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <a href="#lead" data-open-lead-modal class="btn btn-primary">
-            {site.header.cta}
-          </a>
-          <ContactChannels placement="hero" service={service} />
-        </div>
+        <HeroContacts tone="card" service={service} class="max-w-xl pt-2" />
       )
     }
     <slot />
