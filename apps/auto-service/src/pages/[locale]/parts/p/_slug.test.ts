@@ -199,6 +199,7 @@ describe('the equivalents of a part', () => {
               normalized_value: equivalent.normalized_value,
               superseded: false,
               brand: equivalent.brand,
+              images: [],
             },
           ],
         }),
