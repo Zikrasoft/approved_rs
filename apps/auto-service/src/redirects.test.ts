@@ -6,6 +6,7 @@ import {
 } from '@podbor/site-kit/redirects';
 import { PRIMARY_LOCALE } from './i18n/config';
 import {
+  categoryCaseRedirects,
   categoryFirstPageRedirects,
   legacyCategoryRedirects,
   legacyShopRedirects,
@@ -78,6 +79,54 @@ describe('redirects', () => {
     ['/sr/parts/c/oil-filters/1', '/sr/parts/c/oil-filters/'],
   ])('sends the first category page %s to its canonical %s', (path, target) => {
     expect(redirectFor(path)).toBe(target);
+  });
+
+  const edgeRules = () =>
+    JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
+      .redirects;
+
+  it('ships the first category page redirect without a query of its own, so the edge forwards the visitor query', () => {
+    expect(edgeRules()).toEqual(
+      expect.arrayContaining([
+        {
+          source: '/ru/parts/c/:slug/1/',
+          destination: '/ru/parts/c/:slug/',
+          permanent: true,
+        },
+      ]),
+    );
+  });
+
+  it('ships the category case redirects to the edge', () => {
+    expect(edgeRules()).toEqual(
+      expect.arrayContaining(categoryCaseRedirects()),
+    );
+  });
+
+  const caseMatch = createRedirectMatcher(
+    categoryCaseRedirects().map((rule) => ({ ...rule, destination: '/hit' })),
+  );
+
+  it.each(['/ru/parts/c/BATTERIES/', '/sr/parts/c/Oil-Filters'])(
+    'sends the capitalised category %s through the search, which lower-cases it',
+    (path) => {
+      expect(caseMatch(path)).toBe('/hit');
+    },
+  );
+
+  it.each(['/ru/parts/c/batteries/', '/ru/parts/c/BATTERIES/2/'])(
+    'leaves %s to its route',
+    (path) => {
+      expect(caseMatch(path)).toBeNull();
+    },
+  );
+
+  it('points a capitalised category at the search for it', () => {
+    expect(categoryCaseRedirects()).toContainEqual({
+      source: '/ru/parts/c/:slug([^/]*[A-Z][^/]*)/',
+      destination: '/ru/parts/search/?category=:slug',
+      permanent: true,
+    });
   });
 
   it.each([

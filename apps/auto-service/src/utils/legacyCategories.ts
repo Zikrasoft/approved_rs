@@ -51,6 +51,24 @@ export const categoryFirstPageRedirects = (): Redirect[] =>
     }));
   });
 
+export const categoryCaseRedirects = (): Redirect[] =>
+  SUPPORTED_LOCALES.flatMap((locale) => {
+    const listing = PathBuilder.partsCategory(locale, ':slug([^/]*[A-Z][^/]*)');
+    return [listing.slice(0, -1), listing].map((source) => ({
+      source,
+      destination: `${PathBuilder.partsSearch(locale)}?category=:slug`,
+      permanent: true,
+    }));
+  });
+
+export const lowercasedCategoryPath = (pathname: string): string | null =>
+  pathname !== pathname.toLowerCase() &&
+  SUPPORTED_LOCALES.some((locale) =>
+    pathname.startsWith(PathBuilder.partsCategory(locale, '').slice(0, -1)),
+  )
+    ? pathname.toLowerCase()
+    : null;
+
 export const siteRedirects = (): Redirect[] => [
   ...legacyCategoryRedirects(),
   ...legacyShopRedirects(),

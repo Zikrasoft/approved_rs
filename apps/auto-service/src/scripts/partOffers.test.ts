@@ -4,6 +4,7 @@ import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
 import { definePartOffers } from './partOffers';
 import { readPartsList } from './partsList';
 import { PART_ADDED_EVENT } from './partCtaForward';
+import { PREVIEW_FLAG_COOKIE } from '@/utils/shopPreview';
 
 definePartOffers();
 
@@ -72,6 +73,55 @@ describe('<part-offers> live refresh', () => {
         .querySelector('[data-more-offers] [data-buy]')
         ?.getAttribute('data-offer-id'),
     ).toBe('later');
+  });
+});
+
+describe('<part-offers> on a closed page', () => {
+  const closedShell = () => `
+    <part-offers hidden data-preview data-id="pi_1" data-locale-tag="ru-RU" data-availability='${JSON.stringify(leadTime)}'>
+      <template data-preview-body>
+        <h2>Цена и наличие</h2>
+        <ul data-offers></ul>
+        <details data-more><span data-more-count></span><ul data-more-offers></ul></details>
+        <template data-offer>${row(false)}</template>
+      </template>
+    </part-offers>`;
+
+  afterEach(() => {
+    document.cookie = `${PREVIEW_FLAG_COOKIE}=; max-age=0`;
+  });
+
+  it('stamps the price markup in and fills it for a preview', async () => {
+    document.cookie = `${PREVIEW_FLAG_COOKIE}=1`;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({ kind: 'offers', offers: [offer('now', 1500, 2)] }),
+      ),
+    );
+    document.body.innerHTML = closedShell();
+    const shell = document.querySelector<HTMLElement>('part-offers')!;
+
+    await vi.waitFor(() => expect(shell.hidden).toBe(false));
+
+    expect(shell.querySelector('[data-preview-body]')).toBeNull();
+    expect(shell.textContent).toContain('Цена и наличие');
+    expect(
+      shell
+        .querySelector('[data-offers] [data-buy]')
+        ?.getAttribute('data-offer-id'),
+    ).toBe('now');
+  });
+
+  it('leaves the price markup inert without a preview', () => {
+    const backend = vi.fn();
+    vi.stubGlobal('fetch', backend);
+    document.body.innerHTML = closedShell();
+    const shell = document.querySelector<HTMLElement>('part-offers')!;
+
+    expect(shell.textContent?.trim()).toBe('');
+    expect(shell.querySelector('[data-preview-body]')).not.toBeNull();
+    expect(backend).not.toHaveBeenCalled();
   });
 });
 

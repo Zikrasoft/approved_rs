@@ -10,7 +10,7 @@ heading: Поиск запчастей
 found: 'Найдено: {count}'
 foundNumbers: 'Найдено номеров: {count}'
 emptyQuery: Введите VIN, номер или название запчасти либо марку и модель, например HU 816 x, масляный фильтр или BMW X3.
-noResults: Найдем «{q}» для вас. Напишите нам, запрос уже будет в сообщении WhatsApp.
+noResults: Найдем «{q}» для вас. Позвоните, напишите в WhatsApp, Viber или Telegram или оставьте заявку, назовем цену и срок.
 unavailable: Подберем запчасть вручную, отправьте заявку.
 lookingFor: 'Ищу: {q}'
 lookingForVin: 'Подберите запчасти по VIN {vin}'
@@ -29,6 +29,7 @@ rangeTo: до {max}
 rangeBetween: от {min} до {max}
 removeFilter: 'Убрать фильтр: {label}'
 noFilteredResults: Под эти параметры подберем вручную. Отправьте заявку, фильтры уже в комментарии, назовем цену и срок.
+noFilteredQueryResults: Найдем «{q}» под эти параметры вручную. Отправьте заявку, запрос и фильтры уже в комментарии, назовем цену и срок.
 brandFacet: Бренд
 availabilityFacet: Наличие
 inStockOnly: Только в наличии

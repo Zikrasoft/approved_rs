@@ -32,6 +32,10 @@ export function definePartOffers(tagName = 'part-offers'): void {
           if (target.closest('[data-ask]')) this.addToInquiry();
         });
         if (this.dataset.preview !== undefined && !shopPreview()) return;
+        const body = this.querySelector<HTMLTemplateElement>(
+          ':scope > template[data-preview-body]',
+        );
+        if (body) this.replaceChildren(body.content.cloneNode(true));
         void this.refresh();
       }
 
