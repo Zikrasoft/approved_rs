@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { llmsHeadingsSchema } from '@podbor/i18n';
-import { pluralForms } from './shopPartContentSchema';
+import { pluralForms } from './shopPartContentSchema.ts';
 
 const cookieSchema = z
   .object({
