@@ -264,7 +264,8 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             });
             const { slug } = picked.dataset;
             const { pickEndpoint } = this.dataset;
-            if (slug && pickEndpoint) navigator.sendBeacon(pickEndpoint, slug);
+            if (slug && pickEndpoint)
+              navigator.sendBeacon?.(pickEndpoint, slug);
           }
         });
         this.addEventListener('focusout', (event) => {
