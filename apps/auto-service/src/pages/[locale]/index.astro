@@ -84,9 +84,11 @@ const website = websiteSchema({
 >
   <section class="wrap pt-3 sm:pt-5">
     <div
-      class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+      class="grid rounded-block bg-panel text-panel-fg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
     >
-      <picture class="relative block lg:col-start-2 lg:row-start-1">
+      <picture
+        class="relative block overflow-hidden rounded-t-block lg:col-start-2 lg:row-start-1 lg:rounded-tl-none lg:rounded-r-block"
+      >
         <source
           media={HERO_MEDIA_LG}
           srcset={heroTall.srcSet.attribute}
