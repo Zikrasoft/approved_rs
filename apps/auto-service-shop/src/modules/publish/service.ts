@@ -52,6 +52,16 @@ const LISTED_PART_COUNTS = `
   where f.deleted_at is null
   group by grouping sets ((v.model_id, f.vehicle_id), (v.model_id))`;
 
+const PRUNE_RUNS_BEFORE = `
+  delete from catalogue_run r
+  where r.status <> 'running' and r.created_at < ?
+    and exists (
+      select 1 from catalogue_run newer
+      where newer.kind = r.kind
+        and newer.supplier_id is not distinct from r.supplier_id
+        and newer.created_at > r.created_at
+    )`;
+
 const inServerWorkerMode = () => process.env.MEDUSA_WORKER_MODE === 'server';
 
 class PublishModuleService extends MedusaService({
@@ -105,6 +115,17 @@ class PublishModuleService extends MedusaService({
   ): Promise<ListedPartCount[]> {
     const { rows } = await runBoundSql(sharedContext, LISTED_PART_COUNTS);
     return rows;
+  }
+
+  @InjectManager()
+  async pruneRunsBefore(
+    cutoff: Date,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<number> {
+    const { rowCount } = await runBoundSql(sharedContext, PRUNE_RUNS_BEFORE, [
+      cutoff,
+    ]);
+    return rowCount ?? 0;
   }
 
   async failRunsLeftRunning(): Promise<void> {
