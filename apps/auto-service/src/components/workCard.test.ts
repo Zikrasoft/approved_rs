@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import cover from '@/assets/hero-mechanic-wide.jpg';
-import tall from '@/assets/hero-mechanic.jpg';
+import cover from '@/assets/mechanic-wheel-lift-wide.jpg';
+import tall from '@/assets/mechanic-wheel-lift-tall.jpg';
 import type { Work } from '@/utils/works';
 import WorkCard from './WorkCard.astro';
 import { render } from './renderAstro';

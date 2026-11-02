@@ -77,6 +77,14 @@ export const siteContentSchema = z
         facts: z.array(z.string()),
       })
       .strict(),
+    photos: z
+      .object({
+        heroMechanic: z.string(),
+        workshopBay: z.string(),
+        facade: z.string(),
+        wallSign: z.string(),
+      })
+      .strict(),
     googleRating: z
       .object({ rating: z.string(), reviews: pluralForms })
       .strict(),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import wide from '@/assets/hero-mechanic-wide.jpg';
+import wide from '@/assets/workshop-bay.jpg';
 import { panelPhoto } from '@/utils/panelPhoto';
 import PanelHero from './PanelHero.astro';
 import { render } from './renderAstro';
@@ -40,7 +40,7 @@ describe('PanelHero', () => {
   });
 
   it('stays one column with no photo and splits beside a real one', async () => {
-    const photo = await panelPhoto(wide);
+    const photo = await panelPhoto({ image: wide, alt: 'Цех CarLab' });
     const withPhoto = await hero({ photo });
     const image = withPhoto.querySelector('img')!;
 
@@ -50,6 +50,7 @@ describe('PanelHero', () => {
     expect(image.getAttribute('fetchpriority')).toBe('high');
     expect(image.getAttribute('sizes')).toBe(photo.sizes);
     expect(image.getAttribute('srcset')).toBe(photo.srcset);
+    expect(image.getAttribute('alt')).toBe('Цех CarLab');
   });
 
   it('renders the page facts and actions under the heading', async () => {

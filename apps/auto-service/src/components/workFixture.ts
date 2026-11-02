@@ -1,4 +1,4 @@
-import wide from '@/assets/hero-mechanic-wide.jpg';
+import wide from '@/assets/mechanic-wheel-lift-wide.jpg';
 import type { Work } from '@/utils/works';
 
 type Over = Partial<Work['data']> & { id?: string; body?: string };

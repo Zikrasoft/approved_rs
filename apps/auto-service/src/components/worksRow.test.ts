@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import cover from '@/assets/hero-mechanic-wide.jpg';
+import cover from '@/assets/mechanic-wheel-lift-wide.jpg';
 import type { Work } from '@/utils/works';
 import WorksRow from './WorksRow.astro';
 import { render } from './renderAstro';

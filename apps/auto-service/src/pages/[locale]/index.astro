@@ -5,8 +5,8 @@ import { getCollection } from 'astro:content';
 import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
 import { DEVELOPER } from '@podbor/brands';
 import { SITE_NAME, SITE_URL } from '@/utils/constants';
-import heroWideImage from '@/assets/hero-mechanic-wide.jpg';
-import heroTallImage from '@/assets/hero-mechanic.jpg';
+import heroWideImage from '@/assets/mechanic-wheel-lift-wide.jpg';
+import heroTallImage from '@/assets/mechanic-wheel-lift-tall.jpg';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import SectionHead from '@/components/SectionHead.astro';
@@ -15,7 +15,7 @@ import ServiceList from '@/components/ServiceList.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import WorksRow from '@/components/WorksRow.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import GarageBay from '@/components/GarageBay.astro';
+import GarageFacade from '@/components/GarageFacade.astro';
 import CallAction from '@/components/CallAction.astro';
 import GarageAddress from '@/components/GarageAddress.astro';
 import Faq from '@/components/Faq.astro';
@@ -100,7 +100,7 @@ const website = websiteSchema({
           sizes={HERO_SIZES_SM}
           width={heroWideImage.width}
           height={heroWideImage.height}
-          alt=""
+          alt={site.photos.heroMechanic}
           loading="eager"
           fetchpriority="high"
           decoding="async"
@@ -270,7 +270,7 @@ const website = websiteSchema({
   </section>
 
   <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg">
-    <GarageBay slot="media" />
+    <GarageFacade slot="media" />
   </VisitPanel>
 
   <section class="bg-shade">

@@ -68,4 +68,17 @@ describe('the contacts page', () => {
     ).not.toBeNull();
     expect(root.textContent).not.toContain('пятнадцать');
   });
+
+  it('shows the street entrance above the map, so a visitor knows the place on arrival', async () => {
+    const panel = (await page()).querySelector(
+      '[data-contact-placement="visit"]',
+    )!;
+    const image = panel.querySelector('img')!;
+
+    expect(image.getAttribute('src')).toContain('workshop-facade');
+    expect(image.getAttribute('alt')).toBe(site.photos.facade);
+    expect(
+      image.parentElement?.querySelector('img ~ * carlab-map'),
+    ).not.toBeNull();
+  });
 });

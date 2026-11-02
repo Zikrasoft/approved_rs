@@ -304,21 +304,33 @@ describe('the makes of a list of Works', () => {
 describe('servicePhoto', () => {
   const work = (id: string, src: string) =>
     ({ ...makeWork({ image: { src } as never }), id }) as Work;
+  const workshop = { image: { src: '/bay.jpg' } as never, alt: 'Цех CarLab' };
 
-  it('takes the cover of the Work picked for the service', () => {
+  it('takes the cover of the Work picked for the service, as decoration', () => {
     const works = [work('bmw-x3', '/x3.jpg'), work('seat-leon', '/leon.jpg')];
 
-    expect(servicePhoto('diagnostics', works)).toMatchObject({
-      src: '/x3.jpg',
+    expect(servicePhoto('diagnostics', works, workshop)).toEqual({
+      image: { src: '/x3.jpg' },
+      alt: '',
     });
   });
 
-  it('has no photo for a service without a picked Work or once it is unpublished', () => {
+  it('shows the workshop where no Work cover fits the service', () => {
+    const works = [work('velikij-servis-zamena-grm', '/grm.jpg')];
+
+    expect(servicePhoto('engine-gearbox', works, workshop)).toBe(workshop);
+    expect(servicePhoto('bodywork-painting', [], workshop)).toBe(workshop);
+    expect(servicePhoto('pre-purchase-inspection', [], workshop)).toBe(
+      workshop,
+    );
+  });
+
+  it('has no photo for parts sourcing or once the picked Work is unpublished', () => {
     const hidden = { ...makeWork({ published: false }), id: 'bmw-x3' } as Work;
 
-    expect(servicePhoto('bodywork-painting', [work('bmw-x3', '/x3.jpg')])).toBe(
-      undefined,
-    );
-    expect(servicePhoto('diagnostics', [hidden])).toBe(undefined);
+    expect(
+      servicePhoto('vin-parts-inquiry', [work('bmw-x3', '/x3.jpg')], workshop),
+    ).toBe(undefined);
+    expect(servicePhoto('diagnostics', [hidden], workshop)).toBe(undefined);
   });
 });

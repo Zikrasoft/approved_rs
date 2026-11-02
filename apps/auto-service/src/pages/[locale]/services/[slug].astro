@@ -14,6 +14,7 @@ import PartsInquiry from '@/components/PartsInquiry.astro';
 import { localeFrom } from '@/i18n/config';
 import { featuredWorks, servicePhoto } from '@/utils/works';
 import { panelPhoto } from '@/utils/panelPhoto';
+import workshopBay from '@/assets/workshop-bay.jpg';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import {
   partsCategoryFor,
@@ -40,7 +41,10 @@ const works = await getCollection('works');
 const related = featuredWorks(works).filter((work) =>
   work.data.servicesApplied.includes(slug),
 );
-const image = servicePhoto(slug, works);
+const image = servicePhoto(slug, works, {
+  image: workshopBay,
+  alt: site.photos.workshopBay,
+});
 const photo = image && (await panelPhoto(image));
 
 const partsCategory = partsCategoryFor(slug, await categoryPagesForBuild());
