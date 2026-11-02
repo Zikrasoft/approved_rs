@@ -93,6 +93,19 @@ describe('the Model category page', () => {
     expect(isOrange(link)).toBe(false);
   });
 
+  it('offers the popular order of the Model category on the search beside its own', async () => {
+    const page = await modelCategory();
+
+    expect(
+      [...page.querySelectorAll('nav[aria-label="Порядок"] a')].map((link) =>
+        link.getAttribute('href'),
+      ),
+    ).toEqual([
+      '/ru/parts/bmw/f30-320d/oil-filters/',
+      '/ru/parts/search/?category=oil-filters&make=bmw&model=f30-320d&sort=popular',
+    ]);
+  });
+
   it('counts the current numbers and says so, the unit the filtered search lists', async () => {
     const page = await modelCategory();
 

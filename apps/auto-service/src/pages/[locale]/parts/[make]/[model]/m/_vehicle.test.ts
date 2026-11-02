@@ -4,6 +4,7 @@ import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { offer, partPage, render, setShop } from '@/components/renderAstro';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { carName, vehicleVariant } from '@/utils/carName';
 import { formatMoney } from '@/utils/money';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import VehiclePage from './[vehicle].astro';
@@ -127,5 +128,78 @@ describe('the car page kit block', () => {
     expect(root.querySelector('[data-kit-total]')?.textContent).toContain(
       formatMoney(1200, 'RSD', BCP47_BY_LOCALE.ru),
     );
+  });
+});
+
+describe('demand on the car page', () => {
+  const demanded = (id: string, top: boolean) =>
+    partPage({
+      id,
+      slug: `mann-${id}`,
+      value: id,
+      demand: { score: top ? 9 : 6, popular: true, top },
+      part: { ...partPage().part, id: `part_${id}` },
+    });
+  const withMatches = async (pages: PartPageEntry[]) => {
+    setShop(false);
+    return render(VehiclePage, {
+      path: '/ru/parts/bmw/f30-320d/m/b47d20o0-140kw/',
+      params: {
+        locale: 'ru',
+        make: 'bmw',
+        model: 'f30-320d',
+        vehicle: 'b47d20o0-140kw',
+      },
+      props: {
+        car: {
+          vehicle,
+          groups: [],
+          kit: [],
+          matches: [
+            {
+              category: oilFilters,
+              quantity: 1,
+              parts: pages.map((page) => ({
+                part: page.part,
+                pages: [page],
+                fits: [],
+              })),
+            },
+          ],
+        },
+        places: {
+          makes: new Set<string>(),
+          models: new Set<string>(),
+          categories: new Set<string>(),
+          vehicles: new Set<string>(),
+        },
+      },
+    });
+  };
+  const headings = (root: Element) =>
+    [...root.querySelectorAll('h2')].map((heading) =>
+      heading.textContent?.trim(),
+    );
+
+  it('names the car over what is often ordered for it, and badges its top part', async () => {
+    const root = await withMatches([demanded('a', false), demanded('b', true)]);
+
+    expect(headings(root)).toContain(
+      content('ru').partsSearch.popularForCar.replace(
+        '{car}',
+        `${carName(vehicle.model, 'ru')}, ${vehicleVariant(vehicle, 'ru')}`,
+      ),
+    );
+    expect(root.querySelectorAll('[data-demand-badge]').length).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it('shows no block while only one part fitting the car is popular', async () => {
+    const root = await withMatches([demanded('a', false), partPage()]);
+
+    expect(
+      headings(root).some((heading) => heading?.startsWith('Часто заказывают')),
+    ).toBe(false);
   });
 });

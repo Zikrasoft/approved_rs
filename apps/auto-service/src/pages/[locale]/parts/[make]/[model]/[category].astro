@@ -9,6 +9,8 @@ import InkLink from '@/components/InkLink.astro';
 import FittedPart from '@/components/FittedPart.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
+import ListingSort from '@/components/ListingSort.astro';
+import { popularListingHref } from '@/utils/searchPage';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -146,6 +148,26 @@ const SAID_BY_FIT = ['axle'];
               count={listed.length}
               filters={filtered}
               found={content(locale).partsSearch.foundNumbers}
+            />
+          )
+        }
+        {
+          listed.length > 1 && (
+            <ListingSort
+              current={null}
+              hrefs={{
+                default: PathBuilder.partsModelCategory(
+                  locale,
+                  make.slug,
+                  model.slug,
+                  category.slug,
+                ),
+                popular: popularListingHref(locale, {
+                  category: category.slug,
+                  make: make.slug,
+                  model: model.slug,
+                }),
+              }}
             />
           )
         }

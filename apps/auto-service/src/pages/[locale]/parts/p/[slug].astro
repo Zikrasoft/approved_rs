@@ -511,6 +511,7 @@ const thumbFor = (slug: string) => {
                   id: equivalent.id,
                   offers: bySlug.get(equivalentSlug(equivalent))?.offers ?? [],
                 }}
+                demand={bySlug.get(equivalentSlug(equivalent))?.demand}
               />
             ))}
           </ul>

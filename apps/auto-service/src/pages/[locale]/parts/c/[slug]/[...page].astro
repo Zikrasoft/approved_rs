@@ -9,6 +9,9 @@ import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import CarPicker from '@/components/CarPicker.astro';
 import ListingBar from '@/components/ListingBar.astro';
+import ListingSort from '@/components/ListingSort.astro';
+import PopularParts from '@/components/PopularParts.astro';
+import { popularListingHref } from '@/utils/searchPage';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
@@ -167,11 +170,24 @@ const fields = category.fields
         filtered && 'lg:col-start-2',
       ]}
     >
+      {firstPage && <PopularParts pages={category.pages} />}
+
       {
         !empty && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
             <ListingBar count={category.pages.length} filters={filtered} />
+            {category.pages.length > 1 && (
+              <ListingSort
+                current={null}
+                hrefs={{
+                  default: pageHref(listing.number),
+                  popular: popularListingHref(locale, {
+                    category: category.slug,
+                  }),
+                }}
+              />
+            )}
             <ul class="card divide-y divide-line">
               {listing.pages.map((page) => (
                 <PartRow
@@ -189,6 +205,7 @@ const fields = category.fields
                   superseded={page.superseded}
                   current={partSuccessor(page, bySlug)}
                   priced={page}
+                  demand={page.demand}
                 />
               ))}
             </ul>

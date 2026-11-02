@@ -7,6 +7,7 @@ import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
+import ListingSort from '@/components/ListingSort.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
@@ -65,6 +66,8 @@ const {
   dormant,
   searchHref,
   filtersHref,
+  sort,
+  sortHrefs,
 } = plan.view;
 const vinMake =
   vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
@@ -135,6 +138,7 @@ const scopeHidden = {
   ...(q ? { q } : {}),
   ...(category ? { category } : {}),
   ...(model ? { ...(make && { make }), model } : {}),
+  ...(sort ? { sort } : {}),
 };
 ---
 
@@ -292,6 +296,10 @@ const scopeHidden = {
                 active={chips.length}
               />
 
+              {!q && found.count > 1 && (
+                <ListingSort current={sort} hrefs={sortHrefs} />
+              )}
+
               {(chips.length > 0 || modelName) && (
                 <FilterChips
                   chips={[
@@ -352,6 +360,7 @@ const scopeHidden = {
                       superseded={result.superseded}
                       current={currentNumber(result, found.results)}
                       priced={result}
+                      demand={result.demand}
                     />
                   ))}
                 </ul>

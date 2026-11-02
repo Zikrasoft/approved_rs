@@ -5,6 +5,7 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
+import PopularParts from '@/components/PopularParts.astro';
 import Icon from '@/components/Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -93,6 +94,12 @@ const onlyHref = only && links.vehicle(only);
           </a>
         )
       }
+      <PopularParts
+        pages={hub.categories.flatMap(({ parts }) =>
+          parts.flatMap(({ pages }) => pages),
+        )}
+        car={name}
+      />
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.categoriesHeading}</h2>
         {

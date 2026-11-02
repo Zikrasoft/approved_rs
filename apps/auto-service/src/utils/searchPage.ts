@@ -86,6 +86,12 @@ const sheetOf = (live: SearchFacet[], scope: SearchFacet[]) => {
   };
 };
 
+export const popularListingHref = (
+  locale: Locale,
+  scope: { category: string; make?: string; model?: string },
+) =>
+  `${PathBuilder.partsSearch(locale)}?${new URLSearchParams({ ...scope, sort: 'popular' })}`;
+
 type SearchRedirect = { redirect: string; status: 302 | 303 };
 
 const redirectTo = (redirect: string, status: 302 | 303): SearchRedirect => ({
