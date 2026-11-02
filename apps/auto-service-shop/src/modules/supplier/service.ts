@@ -82,14 +82,26 @@ class SupplierModuleService extends SupplierModuleBase {
       sharedContext,
     );
     if (!existing) {
-      return this.createSupplierOffers({ ...offer, created_by }, sharedContext);
+      return {
+        offer: await this.createSupplierOffers(
+          { ...offer, created_by },
+          sharedContext,
+        ),
+        changed: true,
+      };
     }
     const unchanged = Object.entries(offer).every(([field, value]) =>
       isDeepStrictEqual(existing[field as keyof typeof existing], value),
     );
     return unchanged
-      ? existing
-      : this.updateSupplierOffers({ id: existing.id, ...offer }, sharedContext);
+      ? { offer: existing, changed: false }
+      : {
+          offer: await this.updateSupplierOffers(
+            { id: existing.id, ...offer },
+            sharedContext,
+          ),
+          changed: true,
+        };
   }
 
   @InjectTransactionManager()
@@ -97,12 +109,14 @@ class SupplierModuleService extends SupplierModuleBase {
     supplierId: string,
     listedArticleIds: string[],
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<void> {
-    await runBoundSql(
-      sharedContext,
-      'delete from supplier_offer where supplier_id = ? and not (supplier_article_id = any(?::text[]))',
-      [supplierId, listedArticleIds],
-    );
+  ): Promise<string[]> {
+    const { rows }: { rows: { part_identifier_id: string }[] } =
+      await runBoundSql(
+        sharedContext,
+        'delete from supplier_offer where supplier_id = ? and not (supplier_article_id = any(?::text[])) returning part_identifier_id',
+        [supplierId, listedArticleIds],
+      );
+    return rows.map(({ part_identifier_id }) => part_identifier_id);
   }
 
   @InjectTransactionManager()

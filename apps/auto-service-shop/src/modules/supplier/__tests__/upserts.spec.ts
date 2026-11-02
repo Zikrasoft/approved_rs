@@ -50,8 +50,17 @@ medusaIntegrationTestRunner({
           created_by: 'user_b',
           updated_by: 'user_b',
         });
+        const repeated = await suppliers.upsertSupplierOffer({
+          ...offer('A-1', 150),
+          updated_by: 'user_b',
+        });
 
-        expect(updated.id).toBe(created.id);
+        expect(updated.offer.id).toBe(created.offer.id);
+        expect([created.changed, updated.changed, repeated.changed]).toEqual([
+          true,
+          true,
+          false,
+        ]);
         const rows = await suppliers.listSupplierOffers({
           supplier_article_id: 'A-1',
         });

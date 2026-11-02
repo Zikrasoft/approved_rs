@@ -32,6 +32,8 @@ const Fitment = model
       name: 'fitment_production_ordered',
       expression: 'production_from <= production_to',
     },
-  ]);
+    { name: 'fitment_quantity_positive', expression: 'quantity > 0' },
+  ])
+  .indexes([{ on: ['source'] }]);
 
 export default Fitment;

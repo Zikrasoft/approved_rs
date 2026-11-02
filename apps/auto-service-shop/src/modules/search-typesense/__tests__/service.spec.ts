@@ -83,4 +83,39 @@ describe('the Typesense search provider', () => {
       }),
     ).rejects.toThrow();
   });
+
+  it.each([
+    ['no filters', {}],
+    ['only empty filters', { id: undefined }],
+  ])(
+    'refuses to delete documents with %s and keeps them all',
+    async (_, filters) => {
+      await expect(
+        provider.deleteDocuments({
+          index: index.physical_name,
+          filters,
+        } as unknown as SearchTypes.SearchDeleteDocumentsInput),
+      ).rejects.toMatchObject({ type: 'invalid_argument' });
+
+      expect(ids(await provider.search(query('filter')))).toEqual([
+        'air',
+        'oil',
+      ]);
+    },
+  );
+
+  it('deletes only the documents its filter matches', async () => {
+    await provider.upsertDocuments({
+      index: index.physical_name,
+      definition: index,
+      documents: [{ id: 'cabin', name: 'cabin filter' }],
+    });
+
+    await provider.deleteDocuments({
+      index: index.physical_name,
+      filters: { id: 'cabin' },
+    } as unknown as SearchTypes.SearchDeleteDocumentsInput);
+
+    expect(ids(await provider.search(query('filter')))).toEqual(['air', 'oil']);
+  });
 });

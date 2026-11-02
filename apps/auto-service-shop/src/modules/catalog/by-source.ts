@@ -3,13 +3,17 @@ import type { Context } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError } from '../_shared/admin-error';
-import { chunksOf, ID_CHUNK } from '../_shared/chunks';
+import { runBoundSql } from '../_shared/bound-sql';
+import { ID_CHUNK } from '../_shared/chunks';
 import { MANUAL_SOURCE } from './models/provenance';
 import type CatalogModuleService from './service';
 
-type SourcedRows = {
+export type SourcedRows = {
   entity: string;
-  list: (filters: { source: string }, context: Context) => Promise<Row[]>;
+  list: (
+    filters: { source: string; id: { $gt: string } },
+    context: Context,
+  ) => Promise<Row[]>;
   remove: (ids: string[], context: Context) => Promise<void>;
 };
 
@@ -17,7 +21,11 @@ type Row = { id: string };
 
 export type SourceCount = { source: string; rows: number };
 
-const CHUNK_COLUMNS = { select: ['id'], take: ID_CHUNK };
+const CHUNK_COLUMNS = {
+  select: ['id'],
+  take: ID_CHUNK,
+  order: { id: 'ASC' as const },
+};
 
 const sourceInUse = (source: string, details: Record<string, unknown>) =>
   adminError(
@@ -148,19 +156,18 @@ export async function countRowsBySource(
     .sort((a, b) => a.source.localeCompare(b.source));
 }
 
-export async function deleteRowsBySource(
-  source: string,
-  tables: SourcedRows[],
-  {
-    count,
-    flush,
-    context,
-  }: {
-    count: () => Promise<SourceCount[]>;
-    flush: () => Promise<void>;
-    context: Context;
-  },
-): Promise<number> {
+const SOURCE_REFUSALS = ['DEFINITION_BREAKS_PARTS', 'REQUIREMENT_IN_USE'];
+
+export const refusingSourceUse =
+  (source: string, entity: string) =>
+  (error: unknown): never => {
+    throw MedusaError.isMedusaError(error) &&
+      SOURCE_REFUSALS.includes(String(error.code))
+      ? sourceInUse(source, { blocked: entity })
+      : error;
+  };
+
+export const refuseManualSource = (source: string): void => {
   if (source === MANUAL_SOURCE) {
     throw adminError(
       MedusaError.Types.NOT_ALLOWED,
@@ -168,32 +175,57 @@ export async function deleteRowsBySource(
       'Rows typed in by hand are never deleted by source',
     );
   }
-  const before = await count();
-  let deleted = 0;
-  for (const { entity, list, remove } of tables) {
-    for (;;) {
-      const ids = (await list({ source }, context)).map(({ id }) => id);
-      if (!ids.length) break;
-      await remove(ids, context).catch((error: unknown) => {
-        throw MedusaError.isMedusaError(error) &&
-          error.type === MedusaError.Types.NOT_FOUND
-          ? sourceInUse(source, { blocked: entity })
-          : error;
-      });
-      deleted += ids.length;
+};
+
+const FOREIGN_KEYS = `
+  select c.conrelid::regclass::text as holder, a.attname as column
+  from pg_constraint c
+  join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+  where c.contype = 'f' and c.confrelid = ?::regclass`;
+
+export async function refuseForeignHolders(
+  context: Context,
+  tables: SourcedRows[],
+  entity: string,
+  source: string,
+  ids?: string[],
+): Promise<void> {
+  const sourced = new Set(tables.map((table) => table.entity));
+  const { rows: keys }: { rows: { holder: string; column: string }[] } =
+    await runBoundSql(context, FOREIGN_KEYS, [entity]);
+  const holders = new Map<string, number>();
+  for (const { holder, column } of keys.filter((key) =>
+    sourced.has(key.holder),
+  )) {
+    const { rows }: { rows: { source: string; rows: number }[] } =
+      await runBoundSql(
+        context,
+        `select h.source, count(*)::int as rows
+         from "${holder}" h join "${entity}" t on t.id = h."${column}"
+         where h.source <> ? and h.deleted_at is null and t.deleted_at is null
+         and ${ids ? 't.id = any(?::text[])' : 't.source = ?'}
+         group by h.source`,
+        [source, ids ?? source],
+      );
+    for (const row of rows) {
+      holders.set(row.source, (holders.get(row.source) ?? 0) + row.rows);
     }
   }
-  await flush();
-  const after = await count();
-  const holders = before
-    .filter((count) => count.source !== source)
-    .map(({ source: holder, rows }) => ({
-      source: holder,
-      rows: rows - (after.find((count) => count.source === holder)?.rows ?? 0),
-    }))
-    .filter(({ rows }) => rows > 0);
-  if (holders.length) {
-    throw sourceInUse(source, { holders });
+  if (holders.size) {
+    throw sourceInUse(source, {
+      blocked: entity,
+      holders: [...holders].map(([holder, rows]) => ({ source: holder, rows })),
+    });
   }
-  return deleted;
 }
+
+export const lockSourcedRows = (
+  context: Context,
+  entity: string,
+  ids: string[],
+) =>
+  runBoundSql(
+    context,
+    `select id from "${entity}" where id = any(?::text[]) for update`,
+    [ids],
+  );

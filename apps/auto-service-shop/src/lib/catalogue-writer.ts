@@ -3,6 +3,7 @@ import {
   ContainerRegistrationKeys,
   MedusaError,
 } from '@medusajs/framework/utils';
+import { z } from 'zod';
 
 import { PUBLISH_MODULE } from '../modules/publish';
 import type { CATALOGUE_RUN_KINDS } from '../modules/publish/models/catalogue-run';
@@ -12,8 +13,11 @@ import { errorMessage } from './errors';
 import { logEvent, MAX_CAUSE_LENGTH } from './log-event';
 import { ABANDONED } from '../modules/_shared/run-errors';
 
-export const HEARTBEAT_MS = 30_000;
-export const STALE_HEARTBEAT_MS = 5 * 60_000;
+const WRITER_LOCK = "hashtextextended('catalogue-writer', 0)";
+
+const writerLocks = new Map<string, () => Promise<void>>();
+
+const writerLockSchema = z.object({ locked: z.boolean() });
 
 type RunStart = {
   kind: (typeof CATALOGUE_RUN_KINDS)[number];
@@ -77,39 +81,65 @@ const busy = () =>
     'Another import, publish, deletion, merge or rename is running',
   );
 
-const isStale = (heartbeatAt: Date) =>
-  Date.now() - new Date(heartbeatAt).getTime() >= STALE_HEARTBEAT_MS;
+async function takeWriterLock(
+  scope: MedusaContainer,
+): Promise<(() => Promise<void>) | null> {
+  const pg = scope.resolve(ContainerRegistrationKeys.PG_CONNECTION);
+  const connection: unknown = await pg.client.acquireConnection();
+  const release = async () => {
+    await pg.client.releaseConnection(connection);
+  };
+  const { rows } = await pg
+    .raw(`select pg_try_advisory_lock(${WRITER_LOCK}) as locked`)
+    .connection(connection)
+    .catch(async (error: unknown) => {
+      await release();
+      throw error;
+    });
+  if (!writerLockSchema.parse(rows[0]).locked) {
+    await release();
+    return null;
+  }
+  return async () => {
+    await pg
+      .raw(`select pg_advisory_unlock(${WRITER_LOCK})`)
+      .connection(connection)
+      .finally(release);
+  };
+}
 
 export async function claimCatalogueWriter(
   scope: MedusaContainer,
   start: RunStart,
 ) {
-  const runs = runsOf(scope);
-  const [running] = await runs.listCatalogueRuns(
-    { status: 'running' },
-    { take: 1 },
-  );
-  if (running) {
-    if (!isStale(running.heartbeat_at)) throw busy();
-    await runs.updateCatalogueRuns({
-      id: running.id,
-      status: 'failed',
-      error: ABANDONED,
-      finished_at: new Date(),
-    });
-  }
-  return runs
-    .createCatalogueRuns({
+  const unlock = await takeWriterLock(scope);
+  if (!unlock) throw busy();
+  try {
+    const runs = runsOf(scope);
+    const [abandoned] = await runs.listCatalogueRuns(
+      { status: 'running' },
+      { take: 1 },
+    );
+    if (abandoned) {
+      await runs.updateCatalogueRuns({
+        id: abandoned.id,
+        status: 'failed',
+        error: ABANDONED,
+        finished_at: new Date(),
+      });
+    }
+    const run = await runs.createCatalogueRuns({
       ...start,
       status: 'running',
+      // TODO: nothing reads heartbeat_at since the advisory lock; drop the column in the pre-launch squash.
       heartbeat_at: new Date(),
-    })
-    .catch((error: unknown) => {
-      throw MedusaError.isMedusaError(error) &&
-        error.type === MedusaError.Types.INVALID_DATA
-        ? busy()
-        : error;
     });
+    writerLocks.set(run.id, unlock);
+    return run;
+  } catch (error) {
+    await unlock();
+    throw error;
+  }
 }
 
 export async function holdCatalogueWriter<T>(
@@ -132,18 +162,6 @@ export async function holdCatalogueWriter<T>(
           `Catalogue run ${runId} was not recorded: ${errorMessage(error)}`,
         );
       });
-  const heartbeat = setInterval(() => {
-    runs
-      .updateCatalogueRuns({
-        selector: { id: runId, status: 'running' },
-        data: { heartbeat_at: new Date() },
-      })
-      .catch((error: unknown) => {
-        logger.error(
-          `Catalogue run ${runId} heartbeat failed: ${errorMessage(error)}`,
-        );
-      });
-  }, HEARTBEAT_MS);
   try {
     const result = await work();
     await finish(outcome(result));
@@ -153,7 +171,8 @@ export async function holdCatalogueWriter<T>(
     await finish({ status: 'failed', error: errorMessage(error) });
     throw error;
   } finally {
-    clearInterval(heartbeat);
+    await writerLocks.get(runId)?.();
+    writerLocks.delete(runId);
   }
 }
 

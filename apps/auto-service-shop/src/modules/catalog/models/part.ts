@@ -28,6 +28,10 @@ const Part = model
     replaces: model.hasMany(() => Part, { mappedBy: 'replaced_by' }),
     ...provenance(),
   })
-  .cascades({ delete: ['identifiers', 'fitments'] });
+  .cascades({ delete: ['identifiers', 'fitments'] })
+  .indexes([{ on: ['source'] }])
+  .checks([
+    { name: 'part_installation_price', expression: 'installation_price >= 0' },
+  ]);
 
 export default Part;

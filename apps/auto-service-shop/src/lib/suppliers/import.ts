@@ -319,20 +319,6 @@ async function createPart(
   return { ...written, categorized };
 }
 
-async function fileUnfiled(
-  context: Context,
-  partId: string,
-  classification: PartClassification,
-): Promise<string | null> {
-  if (!classification.category_id) return null;
-  const { categorized } = await filed(
-    classification,
-    (attempt) => context.catalog.classifyPart(partId, attempt),
-    async () => undefined,
-  );
-  return categorized ? classification.category_id : null;
-}
-
 async function matchArticle(
   context: Context,
   article: Article,
@@ -382,15 +368,9 @@ async function matchArticle(
       part.category_id ?? (fileable ? (categoryId ?? null) : null),
     ),
   );
-  const filedCategoryId = fileable
-    ? await fileUnfiled(
-        context,
-        part.id,
-        classificationOf(context, article, categoryId, await answer()),
-      )
+  const classification = fileable
+    ? classificationOf(context, article, categoryId, await answer())
     : undefined;
-  const categorized =
-    filedCategoryId === undefined ? undefined : Boolean(filedCategoryId);
   const renaming =
     edited.has('name') ||
     context.matched.has(hit.id) ||
@@ -407,32 +387,33 @@ async function matchArticle(
           name ?? part.name,
           await answer(),
         );
-  if (!name && !description) {
-    return {
-      ...unchanged,
-      categorized,
-      ...(filedCategoryId && { changedPartId: part.id }),
-    };
+  if (!classification && !name && !description) {
+    return unchanged;
   }
-  await catalog.updateParts({
-    id: part.id,
+  const { changed, categorized } = await catalog.applySourceChange(part.id, {
     ...(name && { name, source_name: article.name }),
     ...(description && { description }),
+    classification,
   });
-  return { ...unchanged, categorized, changedPartId: part.id };
+  return {
+    ...unchanged,
+    categorized,
+    ...(changed && { changedPartId: part.id }),
+  };
 }
 
 async function storeOffer(
   { supplierId, suppliers }: Context,
   identifierId: string,
   quote: Quote,
-): Promise<void> {
-  await suppliers.upsertSupplierOffer({
+): Promise<boolean> {
+  const { changed } = await suppliers.upsertSupplierOffer({
     supplier_id: supplierId,
     supplier_article_id: quote.article_id,
     part_identifier_id: identifierId,
     ...quotedFields(quote),
   });
+  return changed;
 }
 
 async function stagedImages(
@@ -489,7 +470,9 @@ async function importArticle(
     changedPartIds.add(changedPartId);
   }
   if (quote) {
-    await storeOffer(context, identifierId, quote);
+    if (await storeOffer(context, identifierId, quote)) {
+      changedPartIds.add(partId);
+    }
     listed.add(article.article_id);
   }
   await stage(context, identifierId, article);
@@ -694,7 +677,18 @@ export async function importSupplier(
       `${adapter.name}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
     );
   } else {
-    await suppliers.dropUnlistedOffers(supplier.id, [...state.listed]);
+    const dropped = await suppliers.dropUnlistedOffers(supplier.id, [
+      ...state.listed,
+    ]);
+    const droppedFrom = dropped.length
+      ? await catalog.listPartIdentifiers(
+          { id: dropped },
+          { select: ['part_id'], take: null },
+        )
+      : [];
+    for (const { part_id } of droppedFrom) {
+      state.changedPartIds.add(part_id);
+    }
   }
   await catalog.flagUnlistedParts(
     adapter.name,

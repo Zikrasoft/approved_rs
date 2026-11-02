@@ -45,24 +45,7 @@ export async function DELETE(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const { field, option } = await retrieveCategoryFieldOption(
-    catalog,
-    id,
-    field_id,
-    option_id,
-  );
-  await catalog.guardRequirementUse(field_id, option.key);
-  await catalog.guardCategoryDefinition(id, (fields) =>
-    fields.map((definition) =>
-      definition.key === field.key
-        ? {
-            ...definition,
-            options: definition.options.filter(({ key }) => key !== option.key),
-          }
-        : definition,
-    ),
-  );
-
+  await retrieveCategoryFieldOption(catalog, id, field_id, option_id);
   await catalog.deleteCategoryFieldOptions(option_id);
 
   res.json({ id: option_id, object: 'category_field_option', deleted: true });

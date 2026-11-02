@@ -1119,8 +1119,12 @@ moves forward again.
    then deletes all but the newest three pre-deploy dumps;
    runs migrations in a one-off container
    (`medusa db:migrate --execute-safe-links --all-or-nothing` from `/server`), then
-   the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
-   see below); only after both succeed does `MEDUSA_TAG` in `.env` change, with the
+   checks the migrated schema against what the migrations build
+   (`medusa exec ./src/scripts/check-schema.js`, the assertions of
+   `src/lib/schema-check.ts`; it catches a database that ran an older version of a
+   migration file or was restored from an old dump, and names each difference),
+   then the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
+   see below); only after all three succeed does `MEDUSA_TAG` in `.env` change, with the
    old one going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
    `https://api.carlab.rs/health/ready`. It prints stage names and the tag, never a value
    from `.env` (`infra/auto-service-shop/test/scripts.test.sh` plants a canary secret and
@@ -1297,6 +1301,40 @@ orders and `.env.backup` holds the bucket keys.
 Migrations and creating an admin run from the image only
 (`docker compose exec -T medusa node_modules/.bin/medusa …`), never from a
 repository checkout: the image has no ts-node.
+
+### Data lifecycle
+
+Scheduled jobs in the shop (`apps/auto-service-shop/src/jobs`) keep the tables
+that would otherwise grow forever or hold personal data longer than needed:
+
+- **VIN lookups, 90 days** (`scrub-vin-lookups`, nightly). A `vin_lookup` row keeps
+  the full VIN, the decoder's raw answer and the decoded facts for 90 days after
+  the last lookup of that VIN. Then the job clears `vin`, `raw` and `facts` and
+  keeps the WMI (the first three characters of the VIN), the make, the type code,
+  the decoded Vehicle and the row itself, so the unresolved-codes counts stay
+  right. A later lookup of the same VIN is a new row. The carlab.rs privacy page
+  states this retention; change both together. The nightly dumps still hold a
+  scrubbed VIN for up to 30 days (the off-site retention above).
+- **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,
+  Publish, deletion, merge and rename runs older than 90 days are deleted with
+  their `report`, except the newest run of each kind per Supplier, which the
+  admin shows as the last one.
+- **Carts, 14 days** (`delete-stale-carts`, nightly).
+
+The crawl tables (`crawl_run`, `crawl_page`) belong to no Medusa module on
+purpose: only the crawler on the owner's Mac writes them, through raw SQL under
+its own Postgres role (`crawler-role.sh` grants it exactly these two tables), and
+a module would hand them to a service no Medusa code calls. The supplier module's
+hand-written migration creates them, and `src/lib/schema-check.ts` lists their
+columns and indexes, so the deploy-time schema check and the schema spec still
+see them.
+
+`fitment` keeps two indexes the planner never needs: the generator's partial
+`IDX_fitment_part_id` and `IDX_fitment_vehicle_id`, covered by the hand-written
+`IDX_fitment_part_vehicle_all` and `IDX_fitment_vehicle_all`. Dropping them would
+make the drift check regenerate them, so their write cost is accepted. Add no
+further partial index on this table; the one deliberate addition is
+`IDX_fitment_source`, which deleting a source's rows scans.
 
 ### Monitoring
 

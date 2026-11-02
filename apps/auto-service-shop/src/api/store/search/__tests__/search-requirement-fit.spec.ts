@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { everyRequirementFit } from '../../../../lib/requirement-fit';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
@@ -19,6 +20,9 @@ medusaIntegrationTestRunner({
       const part: Record<string, string> = {};
       let f30VehicleId: string;
       let g20VehicleId: string;
+      let g20ChassisId: string;
+      let g21VehicleId: string;
+      let capacityId: string;
 
       const search = (params: Record<string, string>) =>
         api
@@ -122,14 +126,51 @@ medusaIntegrationTestRunner({
 
         const f30Car = await createVehicleFixture(catalog);
         f30VehicleId = f30Car.vehicle.id;
-        g20VehicleId = (
-          await createVehicleFixture(catalog, {
-            typeCode: 'G001',
-            modelSlug: 'g20-320d',
-            chassisCode: 'G20',
-            engineCode: 'B48A20',
-          })
-        ).vehicle.id;
+        const g20Car = await createVehicleFixture(catalog, {
+          typeCode: 'G001',
+          modelSlug: 'g20-320d',
+          chassisCode: 'G20',
+          engineCode: 'B48A20',
+        });
+        g20VehicleId = g20Car.vehicle.id;
+        g20ChassisId = g20Car.chassis.id;
+        const g21Car = await createVehicleFixture(catalog, {
+          typeCode: 'G002',
+          modelSlug: 'g21-318d',
+          modelName: '318d Touring',
+          chassisCode: 'G21',
+          engineCode: 'B47D20B',
+        });
+        g21VehicleId = g21Car.vehicle.id;
+        for (const [code, min] of [
+          ['G22', 90],
+          ['G23', 80],
+        ] as const) {
+          const car = await createVehicleFixture(catalog, {
+            typeCode: `${code}X`,
+            modelSlug: `${code.toLowerCase()}-car`,
+            modelName: `${code} Car`,
+            chassisCode: code,
+            engineCode: `${code}E`,
+          });
+          await catalog.createRequirement({
+            field_id: capacity.id,
+            chassis_id: car.chassis.id,
+            option_keys: null,
+            min,
+            max: null,
+            quantity: 1,
+          });
+        }
+        capacityId = capacity.id;
+        await catalog.createRequirement({
+          field_id: capacity.id,
+          chassis_id: g21Car.chassis.id,
+          option_keys: null,
+          min: 70,
+          max: null,
+          quantity: 1,
+        });
         await catalog.createRequirement({
           field_id: capacity.id,
           chassis_id: f30Car.chassis.id,
@@ -154,9 +195,7 @@ medusaIntegrationTestRunner({
         await getContainer()
           .resolve<PublishModuleService>(PUBLISH_MODULE)
           .publishAll();
-        await getContainer()
-          .resolve(Modules.SEARCH)
-          .reindex({ index: 'part_identifier' });
+        await getContainer().resolve(Modules.SEARCH).reindex();
       });
 
       it('lists the Parts that meet the Model’s Requirements beside its fitted ones', async () => {
@@ -243,6 +282,96 @@ medusaIntegrationTestRunner({
 
         expect(byModel.data.results).toEqual([]);
         expect(byVehicle.data.results).toEqual([]);
+      });
+
+      it('lists every Part of a car whose Parts come only through Requirements', async () => {
+        const response = await search({
+          category: 'batteries',
+          vehicle_id: g21VehicleId,
+        });
+
+        expect(partIds(response)).toEqual(
+          [part.varta, part.bosch, part.exideSmall, part.exideFitted].sort(),
+        );
+      });
+
+      it('gives that car its pages and counts its Requirement matches', async () => {
+        const counts = await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .listedPartCounts(
+            await everyRequirementFit(getContainer().resolve(CATALOG_MODULE)),
+          );
+        const cars = await search({ q: 'g21' });
+        const scoped = await search({
+          q: 'аккумулятор',
+          make: 'bmw',
+          model: 'g21-318d',
+        });
+
+        expect(
+          counts.find(({ vehicle_id }) => vehicle_id === g21VehicleId)?.parts,
+        ).toBe(4);
+        expect(
+          cars.data.cars.map(
+            ({ kind, model }: { kind: string; model: { slug: string } }) =>
+              `${kind}:${model?.slug}`,
+          ),
+        ).toEqual(
+          expect.arrayContaining(['model:g21-318d', 'vehicle:g21-318d']),
+        );
+        expect(scoped.data.scope_pages).toEqual({ model: true, make: true });
+      });
+
+      it('takes a Requirement edit to search on the next reindex, as Publish runs it', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        await catalog.createRequirement({
+          field_id: capacityId,
+          chassis_id: g20ChassisId,
+          option_keys: null,
+          min: 90,
+          max: null,
+          quantity: 1,
+        });
+
+        const before = await search({
+          category: 'batteries',
+          vehicle_id: g20VehicleId,
+        });
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+        const after = await search({
+          category: 'batteries',
+          vehicle_id: g20VehicleId,
+        });
+
+        expect(partIds(before)).toEqual([]);
+        expect(partIds(after)).toEqual([part.bosch]);
+      });
+
+      it('gives a car its pages from two Requirement matches in a Category, never from one', async () => {
+        const carKeys = async (q: string) =>
+          (await search({ q })).data.cars.map(
+            ({ kind, model }: { kind: string; model: { slug: string } }) =>
+              `${kind}:${model?.slug}`,
+          );
+        const scopePages = async (model: string) =>
+          (await search({ q: 'аккумулятор', make: 'bmw', model })).data
+            .scope_pages;
+
+        expect(await carKeys('g22')).toEqual([]);
+        expect(await scopePages('g22-car')).toEqual({
+          model: false,
+          make: true,
+        });
+        expect(await carKeys('g23')).toEqual(
+          expect.arrayContaining(['model:g23-car', 'vehicle:g23-car']),
+        );
+        expect(await scopePages('g23-car')).toEqual({
+          model: true,
+          make: true,
+        });
       });
     });
   },

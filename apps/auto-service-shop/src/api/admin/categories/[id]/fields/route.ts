@@ -18,11 +18,6 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await catalog.retrieveCategory(id);
-  await catalog.guardCategoryDefinition(id, (fields) => [
-    ...fields,
-    { key: body.key, type: body.type, required: body.required, options: [] },
-  ]);
-
   const field = await catalog.createCategoryFields({
     ...body,
     category_id: id,

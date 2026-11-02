@@ -4,6 +4,7 @@ import { createVehicleFixture } from '../../../../integration-tests/vehicleFixtu
 import { CATALOG_MODULE } from '../../catalog';
 import type CatalogModuleService from '../../catalog/service';
 import { PUBLISH_MODULE } from '..';
+import type { PartFit } from '../service';
 import type PublishModuleService from '../service';
 
 medusaIntegrationTestRunner({
@@ -21,10 +22,23 @@ medusaIntegrationTestRunner({
           source: 'test',
         });
 
-      const listedOn = async (vehicleId: string) =>
-        (await publish.listedPartCounts()).find(
+      const listedOn = async (
+        vehicleId: string,
+        requirementFits: PartFit[] = [],
+      ) =>
+        (await publish.listedPartCounts(requirementFits)).find(
           (row) => row.vehicle_id === vehicleId,
         )?.parts ?? 0;
+
+      const listedById = async (ids: string[]) =>
+        Object.fromEntries(
+          (
+            await publish.listPublishedNumbers(
+              { id: ids },
+              { select: ['id', 'listed'] },
+            )
+          ).map(({ id, listed }) => [id, listed]),
+        );
 
       beforeAll(async () => {
         catalog = getContainer().resolve(CATALOG_MODULE);
@@ -89,6 +103,116 @@ medusaIntegrationTestRunner({
 
         expect(bothPublished).toEqual([0, 1]);
         expect(replacementHidden).toEqual([1, 0]);
+      });
+
+      it('writes once, at Publish, which numbers are listed', async () => {
+        const current = await numberedPart('LS 1');
+        const superseded = await catalog.createPartIdentifiers({
+          part_id: current.part_id,
+          type: 'manufacturer-number',
+          brand_id: brandId,
+          value: 'LS 0',
+          normalized_value: 'LS0',
+          superseded: true,
+        });
+        const alone = await numberedPart('LS 2');
+        await catalog.updatePartIdentifiers({
+          id: alone.part_identifier_id,
+          superseded: true,
+        });
+        const replaced = await numberedPart('LS 3');
+        const replacement = await numberedPart('LS 4');
+        await catalog.updateParts({
+          id: replaced.part_id,
+          replaced_by_id: replacement.part_id,
+        });
+        const ids = [
+          current.part_identifier_id,
+          superseded.id,
+          alone.part_identifier_id,
+          replaced.part_identifier_id,
+          replacement.part_identifier_id,
+        ];
+
+        const unpublished = await listedById(ids);
+        await publish.publishAll();
+        const published = await listedById(ids);
+        await publish.unpublish([current.part_identifier_id]);
+        const currentHidden = await listedById(ids);
+
+        expect(unpublished).toEqual({});
+        expect(published).toEqual({
+          [current.part_identifier_id]: true,
+          [superseded.id]: false,
+          [alone.part_identifier_id]: true,
+          [replaced.part_identifier_id]: false,
+          [replacement.part_identifier_id]: true,
+        });
+        expect(currentHidden[superseded.id]).toBe(true);
+      });
+
+      it('counts Requirement matches only from two listed ones in a Category, a fitted Part once', async () => {
+        const car = (
+          await createVehicleFixture(catalog, {
+            typeCode: 'PB03',
+            modelSlug: 'pb-required',
+          })
+        ).vehicle;
+        const lone = (
+          await createVehicleFixture(catalog, {
+            typeCode: 'PB04',
+            modelSlug: 'pb-lone',
+          })
+        ).vehicle;
+        const fitted = await numberedPart('RQ 1');
+        const required = await numberedPart('RQ 2');
+        const retired = await numberedPart('RQ 3');
+        const successor = await numberedPart('RQ 4');
+        const oil = await numberedPart('RQ 5');
+        await catalog.updateParts({
+          id: retired.part_id,
+          replaced_by_id: successor.part_id,
+        });
+        await catalog.createFitments({
+          part_id: fitted.part_id,
+          vehicle_id: car.id,
+        });
+        await publish.publishAll();
+
+        const fit = (
+          vehicle_id: string,
+          { part_id }: { part_id: string },
+          category_id: string,
+        ) => ({ vehicle_id, part_id, category_id });
+        const counts = await publish.listedPartCounts([
+          fit(car.id, fitted, 'batteries'),
+          fit(car.id, required, 'batteries'),
+          fit(car.id, retired, 'batteries'),
+          fit(car.id, oil, 'oils'),
+          fit(lone.id, oil, 'oils'),
+        ]);
+        const placeOf = (model_id: string, vehicle_id: string | null) =>
+          counts.find(
+            (row) => row.model_id === model_id && row.vehicle_id === vehicle_id,
+          );
+
+        expect(await listedOn(car.id)).toBe(1);
+        expect(placeOf(car.model_id, car.id)).toMatchObject({
+          parts: 2,
+          required: 2,
+        });
+        expect(placeOf(car.model_id, null)).toMatchObject({
+          parts: 2,
+          required: 2,
+        });
+        expect(placeOf(lone.model_id, lone.id)).toMatchObject({
+          parts: 0,
+          required: 1,
+        });
+        expect(placeOf(lone.model_id, null)).toMatchObject({
+          parts: 0,
+          required: 1,
+        });
       });
     });
   },

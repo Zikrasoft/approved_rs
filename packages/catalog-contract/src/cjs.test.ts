@@ -33,7 +33,7 @@ describe('CommonJS build', () => {
   it('serves the place page rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);
-    expect(contract.modelHasPage(3)).toBe(true);
+    expect(contract.modelHasPage({ parts: 3, required: 0 })).toBe(true);
   });
 
   it('serves the attributes module to require()', () => {

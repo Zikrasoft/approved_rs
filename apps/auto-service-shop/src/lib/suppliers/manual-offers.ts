@@ -60,7 +60,7 @@ export async function saveManualOffer(
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const identifier = await catalog.retrievePartIdentifier(partIdentifierId);
   const supplierId = await manualSupplierId(suppliers, actorId);
-  const saved = await suppliers.upsertSupplierOffer({
+  const { offer: saved } = await suppliers.upsertSupplierOffer({
     supplier_id: supplierId,
     supplier_article_id: identifier.id,
     part_identifier_id: identifier.id,

@@ -24,6 +24,7 @@ const PartIdentifier = model
       on: ['brand_id', 'normalized_value'],
       unique: true,
     },
+    { on: ['source'] },
   ]);
 
 export default PartIdentifier;
