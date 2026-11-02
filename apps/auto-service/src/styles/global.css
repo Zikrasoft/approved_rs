@@ -507,7 +507,7 @@
     top: 0.18em;
     width: 1.05em;
     height: 1.05em;
-    background-color: var(--color-signal);
+    background-color: var(--color-muted);
     -webkit-mask-image: var(--list-icon);
     mask-image: var(--list-icon);
     -webkit-mask-repeat: no-repeat;
@@ -517,7 +517,7 @@
   }
 
   .prose-shop a {
-    color: var(--color-signal-ink);
+    color: var(--color-ink);
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }

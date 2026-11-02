@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import { content } from '@/i18n/content';
 import SiteFooter from './SiteFooter.astro';
-import { render } from './renderAstro';
+import { orangeIn, render } from './renderAstro';
 
 const site = content('ru').site;
 
@@ -35,6 +36,13 @@ describe('SiteFooter', async () => {
 
   it('keeps the footer out of the regions that hide the floating bar', () => {
     expect(footer.querySelector('[data-contact-cta]')).toBeNull();
+  });
+
+  it('credits the developer quietly, beside the orange call', () => {
+    const credit = footer.querySelector(`[${DEVELOPER_CREDIT_ATTRIBUTE}]`)!;
+
+    expect(credit.textContent).toContain('Zikrasoft');
+    expect(orangeIn(credit)).toEqual([]);
   });
 
   it('sets the two link lists side by side', () => {
