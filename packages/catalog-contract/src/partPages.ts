@@ -50,6 +50,7 @@ export const supplierDataSchema = z.object({
 });
 
 export const partPageSchema = picturedBrandNumberSchema.extend({
+  listed: z.boolean().nullable().default(null),
   part: z.object({
     id: z.string(),
     name: z.string(),

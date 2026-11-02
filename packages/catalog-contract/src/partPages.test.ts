@@ -8,6 +8,7 @@ const page = {
   value: 'HU 816 x',
   normalized_value: 'HU816X',
   superseded: false,
+  listed: true,
   brand: { name: 'Mann-Filter', slug: 'mann-filter' },
   images: [],
   part: {
@@ -168,6 +169,13 @@ describe('partPageSchema', () => {
         lead_time_days: 0,
       },
     ]);
+  });
+
+  it('reads whether the number is listed, null from a shop that does not say', () => {
+    expect(partPageSchema.parse({ ...page, listed: false }).listed).toBe(false);
+    expect(
+      partPageSchema.parse({ ...page, listed: undefined }).listed,
+    ).toBeNull();
   });
 
   it('reads a number type newer than the contract as null', () => {

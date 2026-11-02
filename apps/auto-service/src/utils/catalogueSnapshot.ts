@@ -2,22 +2,23 @@ import {
   enrichmentGaps,
   maintenanceKit,
   makeHasPage,
+  modelCategoryHasPage,
   modelHasPage,
   partPageSlug,
   positionGroups,
   requirementMatches,
+  requirementMatchesCount,
   type Category,
   type CatalogueRedirect,
   type Fitment,
   type PartPage,
+  type PlaceParts,
   type PositionGroup,
   type Vehicle,
   vehicleHasPage,
 } from '@podbor/catalog-contract';
 import { partSuccessor } from './partSuccessor';
 import { modelKey, placeKey, vehicleKey, type CataloguePages } from './paths';
-
-export const MODEL_CATEGORY_MIN_MATCHES = 1;
 
 export type Fit = Fitment & { vehicle: Vehicle };
 
@@ -147,42 +148,37 @@ export function assembleSnapshot(
   }
   const entries = [...bySlug.values()];
   const pagesByPart = groupBy(entries, ({ part }) => part.id);
-  const retired = ({ replaced_by }: PartPage['part']) =>
-    replaced_by !== null && pagesByPart.has(replaced_by.id);
+  const retired = ({ id, replaced_by }: PartPage['part']) => {
+    const partPages = pagesByPart.get(id) ?? [];
+    return partPages.some(({ listed }) => listed !== null)
+      ? !partPages.some(({ listed }) => listed)
+      : replaced_by !== null && pagesByPart.has(replaced_by.id);
+  };
   const parts = [...pagesByPart.values()].map((partPages) => ({
     ...partPages[0].part,
     pages: partPages,
   }));
+  const listedParts = parts.filter((part) => !retired(part));
   const matchesFor = (vehicle: Vehicle): CarMatch[] =>
-    requirementMatches(
-      parts.filter((part) => !retired(part)),
-      vehicle.requirements,
-    ).flatMap(({ category_id, quantity, parts: matched }) => {
-      const category = categoryById.get(category_id);
-      return category
-        ? [
-            {
-              category,
-              quantity,
-              parts: matched.map(({ pages }) => ({
-                part: pages[0].part,
-                pages,
-                fits: [],
-              })),
-            },
-          ]
-        : [];
-    });
-  const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
-  const partsFitting = (vehicles: Vehicle[]) =>
-    new Set(
-      vehicles.flatMap((vehicle) =>
-        (fitsByVehicle.get(vehicle.id) ?? []).flatMap(({ part_id }) => {
-          const partPages = pagesByPart.get(part_id);
-          return partPages && !retired(partPages[0].part) ? [part_id] : [];
-        }),
-      ),
+    requirementMatches(listedParts, vehicle.requirements).flatMap(
+      ({ category_id, quantity, parts: matched }) => {
+        const category = categoryById.get(category_id);
+        return category
+          ? [
+              {
+                category,
+                quantity,
+                parts: matched.map(({ pages }) => ({
+                  part: pages[0].part,
+                  pages,
+                  fits: [],
+                })),
+              },
+            ]
+          : [];
+      },
     );
+  const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
   const cars = allVehicles.map((vehicle): CarPageEntry => {
     const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap((fit) => {
       const partPages = pagesByPart.get(fit.part_id);
@@ -221,6 +217,34 @@ export function assembleSnapshot(
     });
     return { vehicle, groups, matches, kit };
   });
+  const matchesByVehicle = new Map(
+    cars.map(({ vehicle, matches }) => [vehicle.id, matches]),
+  );
+  const fittedParts = (vehicle: Vehicle) =>
+    (fitsByVehicle.get(vehicle.id) ?? []).flatMap(({ part_id }) => {
+      const partPages = pagesByPart.get(part_id);
+      return partPages && !retired(partPages[0].part) ? [part_id] : [];
+    });
+  const placeParts = (vehicles: Vehicle[]): PlaceParts => {
+    const required = new Map<string, Set<string>>();
+    for (const vehicle of vehicles) {
+      for (const match of matchesByVehicle.get(vehicle.id) ?? []) {
+        const matched = required.get(match.category.id) ?? new Set<string>();
+        required.set(match.category.id, matched);
+        match.parts.forEach(({ part }) => matched.add(part.id));
+      }
+    }
+    const counted = [...required.values()].filter(({ size }) =>
+      requirementMatchesCount(size),
+    );
+    return {
+      parts: new Set([
+        ...vehicles.flatMap(fittedParts),
+        ...counted.flatMap((matched) => [...matched]),
+      ]).size,
+      required: Math.max(0, ...[...required.values()].map(({ size }) => size)),
+    };
+  };
   for (const { vehicle, matches, kit } of cars) {
     for (const { pages: partPages } of matches.flatMap(
       (match) => match.parts,
@@ -240,7 +264,7 @@ export function assembleSnapshot(
     pagesByPart,
     retired,
     matchesFor,
-    partsFitting,
+    placeParts,
     cars,
     redirects,
   };
@@ -253,7 +277,9 @@ export function categoryPagesFrom({
   entries,
 }: CatalogueSnapshot): CategoryPageEntry[] {
   const bySlug = new Map(entries.map((page) => [page.slug, page]));
-  const listed = entries.filter((page) => !partSuccessor(page, bySlug));
+  const listed = entries.filter(
+    (page) => page.listed ?? !partSuccessor(page, bySlug),
+  );
   return all.map((category) => ({
     ...category,
     pages: listed.filter((page) => page.category?.id === category.id),
@@ -319,7 +345,7 @@ export const makeHubsFrom = oncePerSnapshot(
     cars,
     pagesByPart,
     retired,
-    partsFitting,
+    placeParts,
   }: CatalogueSnapshot): MakeHubEntry[] {
     const fitted = fittedByModel(
       [...pagesByPart.values()].filter((pages) => !retired(pages[0].part)),
@@ -335,7 +361,7 @@ export const makeHubsFrom = oncePerSnapshot(
           ({ category }) => category.id,
         ),
       }))
-      .filter(({ vehicles }) => modelHasPage(partsFitting(vehicles).size))
+      .filter(({ vehicles }) => modelHasPage(placeParts(vehicles)))
       .map(({ key, vehicles, required }): ModelHubEntry => {
         const { model } = vehicles[0];
         const modelFitted = fitted.get(key);
@@ -344,14 +370,23 @@ export const makeHubsFrom = oncePerSnapshot(
           model,
           vehicles,
           categories: all.flatMap((category) => {
-            const matches = firstOfEachPart([
-              ...(modelFitted?.get(category.id) ?? []),
-              ...(required.get(category.id) ?? []).flatMap(
-                ({ parts }) => parts,
-              ),
-            ]);
-            return matches.length >= MODEL_CATEGORY_MIN_MATCHES
-              ? [{ category, parts: matches }]
+            const categoryFitted = modelFitted?.get(category.id) ?? [];
+            const categoryRequired = firstOfEachPart(
+              (required.get(category.id) ?? []).flatMap(({ parts }) => parts),
+            );
+            return modelCategoryHasPage({
+              fitted: categoryFitted.length,
+              required: categoryRequired.length,
+            })
+              ? [
+                  {
+                    category,
+                    parts: firstOfEachPart([
+                      ...categoryFitted,
+                      ...categoryRequired,
+                    ]),
+                  },
+                ]
               : [];
           }),
         };
@@ -360,8 +395,7 @@ export const makeHubsFrom = oncePerSnapshot(
       .map((makeModels) => ({
         make: makeModels[0].make,
         models: makeModels,
-        parts: partsFitting(makeModels.flatMap(({ vehicles }) => vehicles))
-          .size,
+        parts: placeParts(makeModels.flatMap(({ vehicles }) => vehicles)).parts,
       }))
       .filter(({ models: makeModels }) => makeHasPage(makeModels.length))
       .sort((a, b) => byName(a.make.name, b.make.name));
@@ -370,15 +404,13 @@ export const makeHubsFrom = oncePerSnapshot(
 
 export function carPagesFrom({
   cars,
-  partsFitting,
+  placeParts,
 }: CatalogueSnapshot): CarPageEntry[] {
   const byModel = groupBy(cars, ({ vehicle }) => modelKey(vehicle.model));
   return [...byModel.values()].flatMap((modelCars) => {
-    const modelParts = partsFitting(
-      modelCars.map(({ vehicle }) => vehicle),
-    ).size;
+    const model = placeParts(modelCars.map(({ vehicle }) => vehicle));
     return modelCars.filter(({ vehicle }) =>
-      vehicleHasPage({ parts: partsFitting([vehicle]).size, modelParts }),
+      vehicleHasPage({ vehicle: placeParts([vehicle]), model }),
     );
   });
 }

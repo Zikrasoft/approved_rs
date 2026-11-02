@@ -340,6 +340,24 @@ describe('catalogue categories', () => {
     ]);
   });
 
+  it('lists in a Category the numbers the shop says are listed, whatever their supersession', async () => {
+    const hidden = { ...classified, listed: false };
+    const shown = {
+      ...classified,
+      id: 'pi_mann_old',
+      value: 'HU 816',
+      normalized_value: 'HU816',
+      superseded: true,
+      listed: true,
+      equivalents: [{ ...oilFilterMann, images: [] }],
+    };
+    const [oil] = await catalogueWith(
+      withCategories([hidden, shown]),
+    ).categoryPages();
+
+    expect(oil.pages.map((page) => page.slug)).toEqual(['mann-filter-hu816']);
+  });
+
   it('offers the filter values the Category pages carry, counted per brand-number', async () => {
     const numbered = (normalized_value: string, attributes: object) => ({
       ...classified,
@@ -765,6 +783,37 @@ describe('catalogue.carPages', () => {
     ]);
   });
 
+  it('leaves out a Part the shop says is unlisted, and keeps a replaced one the shop still lists', async () => {
+    const replaced = {
+      ...rearPads,
+      listed: true,
+      part: {
+        ...rearPads.part,
+        replaced_by: {
+          id: 'part_sport',
+          name: 'Колодки передние, M Sport',
+          translations: null,
+          brand_number: { ...sportPads, part: undefined },
+        },
+      },
+    };
+    const [car] = await carPagesFor(
+      [
+        { ...frontPads, listed: false },
+        replaced,
+        { ...sportPads, listed: true },
+      ],
+      [
+        fitment('fit_front', 'part_front', { axle: 'front' }),
+        fitment('fit_rear', 'part_rear', { axle: 'rear' }),
+      ],
+    );
+
+    expect(
+      car.groups.flatMap(({ fitments }) => fitments.map(({ part }) => part.id)),
+    ).toEqual(['part_rear']);
+  });
+
   it('leaves out a replaced Part once its successor is in the catalogue', async () => {
     const replaced = {
       ...frontPads,
@@ -909,6 +958,78 @@ describe('which catalogue places get a page', () => {
     expect(links.vehicle(f30a)).toBe('/sr/parts/bmw/f30-320d/m/veh_f30a-kw/');
     expect(links.vehicle(f30thin)).toBeNull();
     expect(links.vehicle(g20)).toBe('/sr/parts/bmw/g20-320d/m/veh_g20-kw/');
+  });
+
+  const batteries = category('batteries', 'Аккумуляторы');
+  const battery = (number: string, capacity: number) =>
+    brandNumber('varta', number, {
+      id: `part_${number}`,
+      name: 'Аккумулятор',
+      category_id: batteries.id,
+      attributes: { capacity },
+    });
+  const needing = (id: string, model: typeof VEHICLE.model, min: number) => ({
+    ...car(id, model),
+    requirements: [
+      {
+        id: `requirement_${id}`,
+        category_id: batteries.id,
+        field_key: 'capacity',
+        option_keys: null,
+        min,
+        max: null,
+        quantity: 1,
+      },
+    ],
+  });
+
+  it('gives a car its pages from two Requirement matches in a Category, and no page or link from one', async () => {
+    const one = needing('veh_one', modelOf('g22-car'), 90);
+    const two = needing('veh_two', modelOf('g23-car'), 80);
+    const snapshot = await catalogueWith(
+      backend({
+        pages: [battery('A70', 70), battery('A80', 80), battery('A95', 95)],
+        categories: [batteries],
+        vehicles: [one, two],
+      }),
+    ).snapshot();
+    const links = catalogueLinks('sr', cataloguePagesFrom(snapshot));
+    const hubs = makeHubsFrom(snapshot);
+
+    expect(links.model(one.model)).toBeNull();
+    expect(links.vehicle(one)).toBeNull();
+    expect(links.model(two.model)).toBe('/sr/parts/bmw/g23-car/');
+    expect(links.vehicle(two)).toBe('/sr/parts/bmw/g23-car/m/veh_two-kw/');
+    expect(
+      hubs.flatMap(({ models }) =>
+        models.map(({ model, categories }) => [
+          model.slug,
+          categories.map(({ category, parts }) => [
+            category.slug,
+            parts.map(({ part }) => part.id),
+          ]),
+        ]),
+      ),
+    ).toEqual([['g23-car', [['batteries', ['part_A80', 'part_A95']]]]]);
+    expect(hubs[0].parts).toBe(2);
+  });
+
+  it('lists a Model category from one fitted Part, but from Requirement matches only when two match', async () => {
+    const parts = filters('R', 3);
+    const fitted = needing('veh_fitted', modelOf('f31-car'), 90);
+    const hubs = await catalogueWith(
+      backend({
+        pages: [...parts, battery('B95', 95)],
+        categories: [oilFilters, batteries],
+        fitments: fitting(fitted, parts),
+        vehicles: [fitted],
+      }),
+    ).makeHubs();
+
+    expect(
+      hubs[0].models[0].categories.map(({ category }) => category.slug),
+    ).toEqual(['oil-filters']);
+    expect(hubs[0].parts).toBe(3);
   });
 
   it('keeps a Make without a Model page off, and names the rest in display-name order', async () => {
@@ -1897,7 +2018,13 @@ describe('Requirements and the maintenance kit', () => {
     expect(cars('mann-filter-hu816x')).toEqual([[], ['veh_1']]);
   });
 
-  it('builds a Model x Category page for a Requirement match alone', async () => {
+  it('builds a Model x Category page from Requirement matches alone, once two match', async () => {
+    const secondOil = brandNumber('motul', '8100', {
+      id: 'part_motul',
+      name: 'Масло 5W-30 Motul',
+      category_id: engineOil.id,
+      attributes: { approvals: ['bmw-ll-04'] },
+    });
     const fitted = [
       oilFilter,
       ...['HU7020Z', 'HU6004X'].map((number) =>
@@ -1910,7 +2037,7 @@ describe('Requirements and the maintenance kit', () => {
     ];
     const [hub] = await catalogueWith(
       backend({
-        pages: [approvedOil, otherOil, ...fitted],
+        pages: [approvedOil, otherOil, secondOil, ...fitted],
         categories: [filters, engineOil],
         fitments: fitted.map(({ part }) => fitment(`fit_${part.id}`, part.id)),
         vehicles: [b47],
@@ -1931,7 +2058,13 @@ describe('Requirements and the maintenance kit', () => {
           ['mann-filter-hu6004x', 1],
         ],
       ],
-      ['engine-oil', [['liqui-moly-20646', 0]]],
+      [
+        'engine-oil',
+        [
+          ['liqui-moly-20646', 0],
+          ['motul-8100', 0],
+        ],
+      ],
     ]);
   });
 });

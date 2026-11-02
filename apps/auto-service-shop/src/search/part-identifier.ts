@@ -1,3 +1,4 @@
+import { container as appContainer } from '@medusajs/framework';
 import {
   defineSearchIndex,
   graphConsume,
@@ -18,6 +19,9 @@ import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
+import { requirementFits } from '../lib/requirement-fit';
+import { CATALOG_MODULE } from '../modules/catalog';
+import type CatalogModuleService from '../modules/catalog/service';
 import { offersByIdentifier, type PricedOfferRow } from '../modules/supplier';
 import {
   PART_CHANGED_EVENT,
@@ -40,8 +44,6 @@ type NumberRow = {
 };
 
 type FacetFieldRow = { key: string; category_id: string; type: string };
-
-type ReplacementNumberRow = { id: string; part_id: string };
 
 type OfferRow = PricedOfferRow & { part_identifier_id: string };
 
@@ -112,28 +114,7 @@ const measures = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
 
 type Catalogue = {
   siblings: NumberRow[];
-  replacements: ReplacementNumberRow[];
-  published: Set<string>;
-};
-
-const listed = (
-  row: IdentifierRow,
-  { siblings, replacements, published }: Catalogue,
-) => {
-  const retired = replacements.some(
-    ({ id, part_id }) =>
-      part_id === row.part.replaced_by_id && published.has(id),
-  );
-  const succeeded =
-    row.superseded &&
-    siblings.some(
-      ({ id, part_id, superseded }) =>
-        part_id === row.part.id &&
-        id !== row.id &&
-        !superseded &&
-        published.has(id),
-    );
-  return !retired && !succeeded;
+  published: Map<string, boolean>;
 };
 
 const facetValues = () =>
@@ -146,14 +127,14 @@ const toDocument = (
   catalogue: Catalogue,
   facetFields: FacetFieldRow[],
   own: PartOffer[],
-  fitments: FitmentRow[],
+  fitted: CarAddress[],
 ) => {
   const [best] = own;
   return {
     id: row.id,
     part_id: row.part.id,
     published: catalogue.published.has(row.id),
-    listed: listed(row, catalogue),
+    listed: catalogue.published.get(row.id) ?? false,
     standing: row.superseded
       ? STANDING.superseded
       : own.some(isBuyable)
@@ -178,13 +159,7 @@ const toDocument = (
     facets: facets(row.part, facetFields),
     measures: measures(row.part, facetFields),
     price: best?.price,
-    cars: [
-      ...new Set(
-        fitments
-          .filter(({ part_id }) => part_id === row.part.id)
-          .flatMap(({ vehicle }) => fittedCarKeys(vehicle)),
-      ),
-    ],
+    cars: [...new Set(fitted.flatMap(fittedCarKeys))],
   };
 };
 
@@ -213,28 +188,23 @@ const source = {
     const categoryIds = rows.flatMap(({ part }) =>
       part.category_id ? [part.category_id] : [],
     );
-    const replacedBy = rows.flatMap(({ part }) =>
-      part.replaced_by_id ? [part.replaced_by_id] : [],
-    );
+    const parts = [
+      ...new Map(rows.map(({ part }) => [part.id, part])).values(),
+    ];
+    const partIds = parts.map(({ id }) => id);
     const [
       { data: siblings },
-      { data: replacements },
       { data: facetFields },
       { data: offers },
       { data: fitments },
+      { data: published },
+      required,
     ] = await Promise.all([
       container.query.graph({
         entity: 'part_identifier',
         fields: ['id', 'part_id', 'value', 'normalized_value', 'superseded'],
-        filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
+        filters: { part_id: partIds },
       }),
-      replacedBy.length
-        ? container.query.graph({
-            entity: 'part_identifier',
-            fields: ['id', 'part_id'],
-            filters: { part_id: [...new Set(replacedBy)] },
-          })
-        : { data: [] },
       container.query.graph({
         entity: 'category_field',
         fields: ['key', 'category_id', 'type'],
@@ -261,27 +231,29 @@ const source = {
           'vehicle.model.slug',
           'vehicle.model.chassis.series.make.slug',
         ],
-        filters: { part_id: [...new Set(rows.map(({ part }) => part.id))] },
+        filters: { part_id: partIds },
       }),
+      container.query.graph({
+        entity: 'published_number',
+        fields: ['id', 'listed'],
+        filters: { id: rows.map(({ id }) => id) },
+      }),
+      // TODO: every index batch reloads the cars its Categories' Requirements reach; cache them per reindex once a full reindex gets slow
+      requirementFits(
+        appContainer.resolve<CatalogModuleService>(CATALOG_MODULE),
+        parts,
+      ),
     ]);
-    const { data: published } = await container.query.graph({
-      entity: 'published_number',
-      fields: ['id'],
-      filters: {
-        id: [
-          ...new Set(
-            [...rows, ...siblings, ...replacements].map(
-              ({ id }: { id: string }) => id,
-            ),
-          ),
-        ],
-      },
-    });
+    const fitted = [...(fitments as FitmentRow[]), ...required];
     const offersOf = offersByIdentifier(offers as OfferRow[]);
     const catalogue: Catalogue = {
       siblings: siblings as NumberRow[],
-      replacements: replacements as ReplacementNumberRow[],
-      published: new Set(published.map(({ id }: { id: string }) => id)),
+      published: new Map(
+        published.map(({ id, listed }: { id: string; listed: boolean }) => [
+          id,
+          listed,
+        ]),
+      ),
     };
     return rows.map((row) =>
       toDocument(
@@ -289,7 +261,9 @@ const source = {
         catalogue,
         facetFields as FacetFieldRow[],
         offersOf.get(row.id) ?? [],
-        fitments as FitmentRow[],
+        fitted
+          .filter(({ part_id }) => part_id === row.part.id)
+          .map(({ vehicle }) => vehicle),
       ),
     );
   },

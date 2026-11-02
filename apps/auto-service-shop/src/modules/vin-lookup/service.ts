@@ -8,6 +8,7 @@ import {
 } from '@medusajs/framework/utils';
 
 import { runBoundSql } from '../_shared/bound-sql';
+import { UNRESOLVED_VIN_CODES } from '../catalog/cross-module-sql';
 import VinLookup from './models/vin-lookup';
 
 type LookupRecord = {
@@ -30,21 +31,6 @@ export type UnresolvedCode = {
 };
 
 type UnresolvedCodeRow = UnresolvedCode & { total: number };
-
-const UNRESOLVED_CODES = `
-  select make, code, count(*)::int as count, max(updated_at) as last_seen,
-    (count(*) over ())::int as total
-  from vin_lookup l
-  where vehicle_id is null and make is not null and code is not null
-    and deleted_at is null
-    and not exists (
-      select 1 from vehicle_identifier vi
-      where vi.type = l.code_type and vi.value = l.code
-        and vi.supplier_id is null and vi.deleted_at is null
-    )
-  group by make, code
-  order by count desc, make, code
-  offset ? limit ?`;
 
 class VinLookupModuleService extends MedusaService({
   VinLookup,
@@ -75,7 +61,7 @@ class VinLookupModuleService extends MedusaService({
   ): Promise<{ codes: UnresolvedCode[]; count: number }> {
     const { rows }: { rows: UnresolvedCodeRow[] } = await runBoundSql(
       sharedContext,
-      UNRESOLVED_CODES,
+      UNRESOLVED_VIN_CODES,
       [offset, limit],
     );
     return {
