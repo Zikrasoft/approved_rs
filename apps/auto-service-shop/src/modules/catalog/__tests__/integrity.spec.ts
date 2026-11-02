@@ -568,7 +568,10 @@ medusaIntegrationTestRunner({
 
         expect(raced.error).toMatchObject({
           code: 'SOURCE_IN_USE',
-          details: { blocked: 'vehicle' },
+          details: {
+            blocked: 'vehicle',
+            holders: [{ source: 'manual', rows: 1 }],
+          },
         });
         expect(await catalog.listFitments({ part_id: manual })).toHaveLength(1);
       });

@@ -162,8 +162,7 @@ export const refusingSourceUse =
   (source: string, entity: string) =>
   (error: unknown): never => {
     throw MedusaError.isMedusaError(error) &&
-      (error.type === MedusaError.Types.NOT_FOUND ||
-        SOURCE_REFUSALS.includes(String(error.code)))
+      SOURCE_REFUSALS.includes(String(error.code))
       ? sourceInUse(source, { blocked: entity })
       : error;
   };
@@ -194,19 +193,29 @@ export async function refuseForeignHolders(
   const sourced = new Set(tables.map((table) => table.entity));
   const { rows: keys }: { rows: { holder: string; column: string }[] } =
     await runBoundSql(context, FOREIGN_KEYS, [entity]);
+  const holders = new Map<string, number>();
   for (const { holder, column } of keys.filter((key) =>
     sourced.has(key.holder),
   )) {
-    const { rows } = await runBoundSql(
-      context,
-      `select 1 from "${holder}" h join "${entity}" t on t.id = h."${column}"
-       where h.source <> ? and h.deleted_at is null and t.deleted_at is null
-       and ${ids ? 't.id = any(?::text[])' : 't.source = ?'} limit 1`,
-      [source, ids ?? source],
-    );
-    if (rows.length) {
-      throw sourceInUse(source, { blocked: entity });
+    const { rows }: { rows: { source: string; rows: number }[] } =
+      await runBoundSql(
+        context,
+        `select h.source, count(*)::int as rows
+         from "${holder}" h join "${entity}" t on t.id = h."${column}"
+         where h.source <> ? and h.deleted_at is null and t.deleted_at is null
+         and ${ids ? 't.id = any(?::text[])' : 't.source = ?'}
+         group by h.source`,
+        [source, ids ?? source],
+      );
+    for (const row of rows) {
+      holders.set(row.source, (holders.get(row.source) ?? 0) + row.rows);
     }
+  }
+  if (holders.size) {
+    throw sourceInUse(source, {
+      blocked: entity,
+      holders: [...holders].map(([holder, rows]) => ({ source: holder, rows })),
+    });
   }
 }
 
