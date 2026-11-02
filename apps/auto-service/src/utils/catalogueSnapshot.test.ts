@@ -207,16 +207,23 @@ describe('makeHubsFrom', () => {
     );
   });
 
-  it('assembles the hubs of a 30,000-part catalogue in linear time', () => {
-    const snapshot = syntheticCatalogue(30_000, {
-      vehicleCount: 40_000,
-      fitsPerPart: 30,
-    });
-    const started = performance.now();
-    const hubs = makeHubsFrom(snapshot);
-    const seconds = (performance.now() - started) / 1000;
+  it('assembles the hubs in time linear in the catalogue size', () => {
+    const timeFor = (parts: number) => {
+      const snapshot = syntheticCatalogue(parts, {
+        vehicleCount: Math.round((parts * 4) / 3),
+        fitsPerPart: 10,
+      });
+      const runs = [0, 1, 2].map(() => {
+        const started = performance.now();
+        expect(makeHubsFrom(snapshot).length).toBeGreaterThan(0);
+        return performance.now() - started;
+      });
+      return runs.sort((a, b) => a - b)[1];
+    };
+    timeFor(250);
+    const small = timeFor(1_000);
+    const large = timeFor(4_000);
 
-    expect(hubs.length).toBeGreaterThan(0);
-    expect(seconds).toBeLessThan(20);
-  }, 120_000);
+    expect(large / small).toBeLessThan(10);
+  }, 60_000);
 });
