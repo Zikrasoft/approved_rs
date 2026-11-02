@@ -26,7 +26,23 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "wmi": {
+          "name": "wmi",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -145,8 +161,12 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": [],
-          "mappedType": "text"
+          "enumItems": [
+            "bmw-type-code",
+            "mercedes-baumuster",
+            "supplier-vehicle-id"
+          ],
+          "mappedType": "enum"
         },
         "vehicle_id": {
           "name": "vehicle_id",
@@ -261,7 +281,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "vin_lookup_code_type_needs_code",
+          "expression": "code_type is null or code is not null",
+          "definition": "check ((code_type is null or code is not null))"
+        }
+      ],
       "foreignKeys": {},
       "nativeEnums": {}
     }

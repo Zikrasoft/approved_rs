@@ -623,6 +623,12 @@ class CatalogModuleService extends CatalogModuleBase {
         context,
       );
     }
+    if (kind === 'part') {
+      await this.deleteSlugRedirects(
+        { kind, from_slug: retired.map(({ slug }) => slug) },
+        context,
+      );
+    }
     await this.createSlugRedirects(
       retired.map(({ id, slug, ...rest }) => ({
         kind,

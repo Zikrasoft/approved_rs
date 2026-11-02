@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import type { VehicleIdentifierType } from '@podbor/catalog-contract';
 
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../catalog';
@@ -6,7 +7,12 @@ import type CatalogModuleService from '../../catalog/service';
 import { VIN_LOOKUP_MODULE } from '..';
 import type VinLookupModuleService from '../service';
 
-const lookup = (vin: string, make: string, code: string, codeType: string) => ({
+const lookup = (
+  vin: string,
+  make: string,
+  code: string,
+  codeType: VehicleIdentifierType,
+) => ({
   vin,
   decoder: 'test',
   decoder_version: 1,
@@ -41,7 +47,7 @@ medusaIntegrationTestRunner({
         );
 
         expect(await vinLookups.listVinLookups({ vin })).toEqual([
-          expect.objectContaining({ code: 'AB13' }),
+          expect.objectContaining({ code: 'AB13', wmi: 'WBA' }),
         ]);
       });
 

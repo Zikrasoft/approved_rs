@@ -27,6 +27,7 @@ const SlugRedirect = model
   .indexes([
     { on: ['kind', 'from_slug', 'scope_id'] },
     { on: ['target_kind', 'target_id'] },
+    { on: ['kind', 'from_slug'], unique: true, where: { kind: 'part' } },
   ]);
 
 export default SlugRedirect;

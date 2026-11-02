@@ -149,6 +149,51 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('keeps one redirect from a Part page deleted again after a re-import, pointing where the last deletion sent it', async () => {
+        const brand = await catalog.createBrands({
+          name: 'Bosch',
+          slug: 'bosch',
+        });
+        const deletePartIn = async (slug: string) => {
+          const category = await catalog.createCategories({
+            slug,
+            name: slug,
+          });
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Свеча зажигания',
+            category_id: category.id,
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: brand.id,
+                value: 'FR7DC',
+              },
+            ],
+          });
+          expect(
+            (await api.delete(`/admin/parts/${partId}`, adminHeaders)).status,
+          ).toBe(200);
+        };
+
+        await deletePartIn('spark-plugs');
+        await deletePartIn('ignition');
+
+        expect(
+          await catalog.listSlugRedirects({
+            kind: 'part',
+            from_slug: 'bosch-fr7dc',
+          }),
+        ).toHaveLength(1);
+        expect(
+          (await redirects()).filter(({ from }) => from.part === 'bosch-fr7dc'),
+        ).toEqual([
+          {
+            from: place({ part: 'bosch-fr7dc' }),
+            to: place({ category: 'ignition' }),
+          },
+        ]);
+      });
+
       it('merges a duplicate Make into another, moving its Series and redirecting its pages', async () => {
         const vw = await createVehicleFixture(catalog, {
           make: { slug: 'vw', name: 'VW' },

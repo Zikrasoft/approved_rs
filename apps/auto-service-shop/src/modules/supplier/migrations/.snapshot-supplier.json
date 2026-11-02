@@ -200,6 +200,11 @@
           "name": "supplier_markup_percentage",
           "expression": "markup_percentage >= 0",
           "definition": "check ((markup_percentage >= 0))"
+        },
+        {
+          "name": "supplier_released_kinds",
+          "expression": "released_kinds <@ array['cross_references', 'applicability', 'images']::text[]",
+          "definition": "check ((released_kinds <@ array['cross_references', 'applicability', 'images']::text[]))"
         }
       ],
       "foreignKeys": {},

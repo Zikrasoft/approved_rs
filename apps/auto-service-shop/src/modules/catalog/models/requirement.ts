@@ -30,6 +30,13 @@ const Requirement = model
       name: 'requirement_one_target',
       expression: 'num_nonnulls(engine_id, chassis_id, vehicle_id) = 1',
     },
+    { name: 'requirement_quantity_positive', expression: 'quantity > 0' },
+    { name: 'requirement_bounds_ordered', expression: 'min <= max' },
+    {
+      name: 'requirement_options_or_bounds',
+      expression:
+        '(coalesce(cardinality(option_keys), 0) > 0) <> (num_nonnulls(min, max) > 0)',
+    },
   ]);
 
 export default Requirement;

@@ -770,7 +770,18 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "category_service_price",
+          "expression": "service_price >= 0",
+          "definition": "check ((service_price >= 0))"
+        },
+        {
+          "name": "category_installation_price",
+          "expression": "installation_price >= 0",
+          "definition": "check ((installation_price >= 0))"
+        }
+      ],
       "foreignKeys": {},
       "nativeEnums": {}
     },
@@ -2361,6 +2372,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_part_deleted_at\" ON \"part\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_part_source",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_part_source\" ON \"part\" (\"source\") WHERE deleted_at IS NULL"
+        },
+        {
           "keyName": "part_pkey",
           "columnNames": ["id"],
           "composite": false,
@@ -2369,7 +2389,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "part_installation_price",
+          "expression": "installation_price >= 0",
+          "definition": "check ((installation_price >= 0))"
+        }
+      ],
       "foreignKeys": {
         "part_category_id_foreign": {
           "constraintName": "part_category_id_foreign",
@@ -2657,6 +2683,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_part_identifier_brand_id_normalized_value_unique\" ON \"part_identifier\" (\"brand_id\", \"normalized_value\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_part_identifier_source",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_part_identifier_source\" ON \"part_identifier\" (\"source\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "part_identifier_pkey",
@@ -3154,7 +3189,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "chassis_years_ordered",
+          "expression": "year_from <= year_to",
+          "definition": "check ((year_from <= year_to))"
+        }
+      ],
       "foreignKeys": {
         "chassis_series_id_foreign": {
           "constraintName": "chassis_series_id_foreign",
@@ -3421,6 +3462,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_slug_redirect_target_kind_target_id\" ON \"slug_redirect\" (\"target_kind\", \"target_id\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_slug_redirect_kind_from_slug_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_slug_redirect_kind_from_slug_unique\" ON \"slug_redirect\" (\"kind\", \"from_slug\") WHERE kind = 'part' AND deleted_at IS NULL"
         },
         {
           "keyName": "slug_redirect_pkey",
@@ -3982,6 +4032,15 @@
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_vehicle_model_id_slug_unique\" ON \"vehicle\" (\"model_id\", \"slug\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_vehicle_source",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vehicle_source\" ON \"vehicle\" (\"source\") WHERE deleted_at IS NULL"
+        },
+        {
           "keyName": "vehicle_pkey",
           "columnNames": ["id"],
           "composite": false,
@@ -3990,7 +4049,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "vehicle_years_ordered",
+          "expression": "year_from <= year_to",
+          "definition": "check ((year_from <= year_to))"
+        }
+      ],
       "foreignKeys": {
         "vehicle_model_id_foreign": {
           "constraintName": "vehicle_model_id_foreign",
@@ -4232,6 +4297,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_vehicle_identifier_supplier_id_type_value_unique\" ON \"vehicle_identifier\" (\"supplier_id\", \"type\", \"value\") WHERE supplier_id IS NOT NULL AND deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_vehicle_identifier_source",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vehicle_identifier_source\" ON \"vehicle_identifier\" (\"source\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "vehicle_identifier_pkey",
@@ -4561,6 +4635,21 @@
           "name": "requirement_one_target",
           "expression": "num_nonnulls(engine_id, chassis_id, vehicle_id) = 1",
           "definition": "check ((num_nonnulls(engine_id, chassis_id, vehicle_id) = 1))"
+        },
+        {
+          "name": "requirement_quantity_positive",
+          "expression": "quantity > 0",
+          "definition": "check ((quantity > 0))"
+        },
+        {
+          "name": "requirement_bounds_ordered",
+          "expression": "min <= max",
+          "definition": "check ((min <= max))"
+        },
+        {
+          "name": "requirement_options_or_bounds",
+          "expression": "(coalesce(cardinality(option_keys), 0) > 0) <> (num_nonnulls(min, max) > 0)",
+          "definition": "check (((coalesce(cardinality(option_keys), 0) > 0) <> (num_nonnulls(min, max) > 0)))"
         }
       ],
       "foreignKeys": {
@@ -4940,6 +5029,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_fitment_deleted_at\" ON \"fitment\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_fitment_source",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_fitment_source\" ON \"fitment\" (\"source\") WHERE deleted_at IS NULL"
+        },
+        {
           "keyName": "fitment_pkey",
           "columnNames": ["id"],
           "composite": false,
@@ -4953,6 +5051,11 @@
           "name": "fitment_production_ordered",
           "expression": "production_from <= production_to",
           "definition": "check ((production_from <= production_to))"
+        },
+        {
+          "name": "fitment_quantity_positive",
+          "expression": "quantity > 0",
+          "definition": "check ((quantity > 0))"
         }
       ],
       "foreignKeys": {
