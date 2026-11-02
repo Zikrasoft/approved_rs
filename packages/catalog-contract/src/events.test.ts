@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { requestIdSchema, storefrontEventSchema } from './events.ts';
+import {
+  MAX_DEMAND_PARTS,
+  requestIdSchema,
+  storefrontEventSchema,
+} from './events.ts';
 
 describe('storefrontEventSchema', () => {
   it('reads a search event with its request id', () => {
@@ -86,8 +90,34 @@ describe('storefrontEventSchema', () => {
       results: -1,
       duration_ms: 1,
     },
+    { event: 'storefront.demand', signal: 'inquiry', parts: [] },
+    { event: 'storefront.demand', signal: 'view', parts: ['bosch-1'] },
+    { event: 'storefront.demand', signal: 'pick', parts: ['Bosch 1'] },
+    {
+      event: 'storefront.demand',
+      signal: 'inquiry',
+      parts: Array.from(
+        { length: MAX_DEMAND_PARTS + 1 },
+        (_, index) => `bosch-${index}`,
+      ),
+    },
   ])('refuses %j', (event) => {
     expect(storefrontEventSchema.safeParse(event).success).toBe(false);
+  });
+
+  it('takes the part page slugs an inquiry or a pick named', () => {
+    expect(
+      storefrontEventSchema.parse({
+        event: 'storefront.demand',
+        signal: 'inquiry',
+        parts: ['mann-filter-hu816x', 'bosch-0986494524'],
+      }),
+    ).toEqual({
+      event: 'storefront.demand',
+      request_id: null,
+      signal: 'inquiry',
+      parts: ['mann-filter-hu816x', 'bosch-0986494524'],
+    });
   });
 
   it('takes a CSP report as a directive and a host', () => {
