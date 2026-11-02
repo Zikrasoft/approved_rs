@@ -92,6 +92,7 @@ const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
+  demand: null,
   indexable: true,
   priceOnRequest: true,
   category: null,

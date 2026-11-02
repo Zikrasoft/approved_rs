@@ -48,6 +48,7 @@ const result = (value: string, normalized: string, slug: string) => ({
   offers: [],
   thumbnail: null,
   thumbnail_illustration: null,
+  demand: null,
   slug,
   specs: '',
 });

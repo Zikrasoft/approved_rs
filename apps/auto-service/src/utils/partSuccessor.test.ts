@@ -43,6 +43,7 @@ const entry = (
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
+  demand: null,
   indexable: false,
   priceOnRequest: true,
   category: null,
