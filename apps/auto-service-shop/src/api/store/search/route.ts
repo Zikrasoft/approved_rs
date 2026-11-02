@@ -39,6 +39,7 @@ import {
   logEvent,
   type SearchIntent,
 } from '../../../lib/log-event';
+import { demandModule, loadPartDemand } from '../../../lib/part-demand';
 import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SHOP_CURRENCY, SUPPLIER_MODULE } from '../../../modules/supplier';
@@ -234,6 +235,7 @@ export async function GET(
     range: requestedRanges,
     offset,
     limit,
+    sort = null,
   } = req.validatedQuery as StoreSearchPartsType;
   const parsedLocale = z.enum(CATALOG_LOCALES).safeParse(req.locale);
   if (!parsedLocale.success) {
@@ -478,7 +480,9 @@ export async function GET(
     pagination: { skip: offset, take: limit },
     search_options: {
       facets: facetRequests,
-      provider_options: { typesense: searchRanking(locale, cars.keys) },
+      provider_options: {
+        typesense: searchRanking(locale, cars.keys, sort),
+      },
     },
   });
 
@@ -489,6 +493,7 @@ export async function GET(
     shown && hits.length
       ? await suppliers.storeOffersFor(hits.map(({ id }) => id))
       : new Map<string, PartOffer[]>();
+  const demand = await loadPartDemand(req.scope);
   const supplierData = await releasedSupplierData(
     suppliers,
     hits.map(({ id }) => id),
@@ -499,6 +504,7 @@ export async function GET(
       ...brandNumberSchema.parse(hit),
       offers: offers.get(hit.id) ?? [],
       ...thumbnail(hit, supplierData(hit.id).images),
+      demand: demand.get(hit.id) ?? null,
       part: {
         id: hit.part.id,
         name: translated(hit.part, 'name', locale),
@@ -516,6 +522,10 @@ export async function GET(
   );
 
   logSearch(count);
+  const missed = loggedQuery(q);
+  if (!count && missed && !offset && !facets.length && !range.length) {
+    await demandModule(req.scope).recordMissedQuery(missed);
+  }
   res.json(
     searchResponseSchema.parse({
       results,

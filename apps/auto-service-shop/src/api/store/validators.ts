@@ -11,6 +11,7 @@ import {
   MAX_PAGE,
   parseRangeFilter,
   SEARCH_FILTER_CAPS,
+  SEARCH_SORTS,
   vinSchema,
 } from '@podbor/catalog-contract';
 
@@ -64,6 +65,7 @@ export const StoreSearchParts = z
       .transform((offset) => Math.min(offset, MAX_SEARCH_OFFSET))
       .default(0),
     limit: z.coerce.number().int().positive().max(100).default(20),
+    sort: z.enum(SEARCH_SORTS).optional(),
   })
   .refine(({ q, category }) => q || category, 'q or category is required')
   .refine(modelHasMake, MODEL_NEEDS_MAKE)
