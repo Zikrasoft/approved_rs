@@ -226,6 +226,23 @@ describe('a category listed by demand on the search page', () => {
     ).toBe('popular');
   });
 
+  it('offers no popular order for a listing nothing in which is demanded', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          ...listed,
+          results: listed.results.map((item) => ({ ...item, demand: null })),
+        }),
+      ),
+    );
+    const page = await render(SearchPage, {
+      path: '/ru/parts/search/?category=batteries',
+    });
+
+    expect(page.querySelector('nav[aria-label="Порядок"]')).toBeNull();
+  });
+
   it('offers no order for a typed query, where relevance leads', async () => {
     const page = await render(SearchPage, {
       path: '/ru/parts/search/?q=varta',

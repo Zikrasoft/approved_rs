@@ -184,8 +184,11 @@ describe('demand on a category page', () => {
     ]);
   });
 
-  it('offers no order for a single part', async () => {
-    const doc = await categoryPage([partPage()], []);
+  it('offers no popular order while nothing in the category is demanded', async () => {
+    const doc = await categoryPage(
+      [partPage(), partPage({ id: 'pi_ate', slug: 'ate-1' })],
+      [],
+    );
 
     expect(doc.querySelector('nav[aria-label="Порядок"]')).toBeNull();
   });

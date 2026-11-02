@@ -315,18 +315,19 @@ export function createCatalogue({
       return makeHubsFrom(await snapshot());
     },
 
-    async search({
-      q,
-      category,
-      make,
-      model,
-      locale,
-      facets,
-      ranges = [],
-      offset = 0,
-      limit,
-      sort = null,
-    }: SearchQuery): Promise<SearchOutcome | null> {
+    async search(query: SearchQuery): Promise<SearchOutcome | null> {
+      const {
+        q,
+        category,
+        make,
+        model,
+        locale,
+        facets,
+        ranges = [],
+        offset = 0,
+        limit,
+        sort = null,
+      } = query;
       const params = new URLSearchParams({
         ...(q ? { q: latinBrands(q) } : {}),
         locale,
@@ -411,7 +412,7 @@ export function createCatalogue({
           'catalogue search failed',
           error instanceof z.ZodError ? z.prettifyError(error) : String(error),
         );
-        return null;
+        return sort ? this.search({ ...query, sort: null }) : null;
       }
     },
 

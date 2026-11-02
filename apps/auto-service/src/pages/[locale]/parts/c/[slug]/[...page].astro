@@ -12,6 +12,7 @@ import ListingBar from '@/components/ListingBar.astro';
 import ListingSort from '@/components/ListingSort.astro';
 import PopularParts from '@/components/PopularParts.astro';
 import { popularListingHref } from '@/utils/searchPage';
+import { demandOf } from '@/utils/demand';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
@@ -177,7 +178,7 @@ const fields = category.fields
           <div class="flex flex-col gap-3">
             <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
             <ListingBar count={category.pages.length} filters={filtered} />
-            {category.pages.length > 1 && (
+            {demandOf(category.pages) > 0 && (
               <ListingSort
                 current={null}
                 hrefs={{

@@ -47,6 +47,7 @@ const numbers = [
     id: 'pi_mann',
     slug: 'mann-hu816x',
     brand: { name: 'MANN', slug: 'mann' },
+    demand: { score: 3, popular: false, top: false },
   }),
 ];
 

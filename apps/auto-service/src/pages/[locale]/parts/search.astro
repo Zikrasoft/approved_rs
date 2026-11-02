@@ -296,7 +296,7 @@ const scopeHidden = {
                 active={chips.length}
               />
 
-              {!q && found.count > 1 && (
+              {!q && (sort || found.results.some(({ demand }) => demand)) && (
                 <ListingSort current={sort} hrefs={sortHrefs} />
               )}
 

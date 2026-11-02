@@ -11,6 +11,7 @@ import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
 import ListingSort from '@/components/ListingSort.astro';
 import { popularListingHref } from '@/utils/searchPage';
+import { demandOf } from '@/utils/demand';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, vehicleVariant } from '@/utils/carName';
@@ -152,7 +153,7 @@ const SAID_BY_FIT = ['axle'];
           )
         }
         {
-          listed.length > 1 && (
+          demandOf(listed) > 0 && (
             <ListingSort
               current={null}
               hrefs={{
