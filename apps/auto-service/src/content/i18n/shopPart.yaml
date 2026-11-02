@@ -90,14 +90,15 @@ leadTime:
     few: 'Забрать через {days} дня'
     many: 'Забрать через {days} дней'
     other: 'Забрать через {days} дня'
-translatedFrom: 9cd6291adc17d50d
+translatedFrom: 973b614e71fe1b1e
 translations:
   sr:
     metaTitleSuffix: CarLab
     metaDescription: Brendovi, zamenski delovi, cene i dostupnost ovog dela u katalogu CarLaba. Lično preuzimanje u servisu u Beogradu.
+    metaDescriptionClosed: Originalni brojevi, zamenski delovi i kompatibilnost. Pronaći ćemo deo po VIN-u, nabaviti ga i ugraditi u servisu CarLab u Beogradu.
     eyebrow: Rezervni deo
     equivalentsHeading: Zamenski delovi
-    noEquivalents: U katalogu još nema zamenskih delova. Pišite nam, pronaći ćemo odgovarajuću zamenu.
+    noEquivalents: Pronaći ćemo zamenski deo drugog proizvođača, pišite nam.
     equivalentsLead: Delovi drugih proizvođača koji mogu da se ugrade umesto ovog.
     numberSupersededNotice: Proizvođač više ne koristi broj {number}.
     partReplacedNotice: Proizvođač je zamenio deo {number} novim.
@@ -109,6 +110,7 @@ translations:
     currentNumberLabel: 'Aktuelni broj:'
     currentNumbersLabel: 'Aktuelni brojevi:'
     successorOffersHeading: Kupite deo sa aktuelnim brojem
+    successorOrderHeading: Poručite deo koji zamenjuje prethodni
     attributesHeading: Karakteristike
     attributeYes: Da
     attributeNo: Ne
@@ -117,7 +119,13 @@ translations:
     priceOnRequestBody: 'U katalogu ima previše delova da bismo sve cene redovno ažurirali. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
     priceOnRequestCta: Proverite cenu i rok
     pricedEquivalentLabel: Zamenski deo sa cenom
-    orderBody: Proverićemo kod dobavljača i poslati vam cenu i rok, obično u roku od sat vremena.
+    orderBody: 'Pošaljite upit: proverićemo po VIN-u koji deo odgovara i javiti Vam cenu i rok isporuke.'
+    orderHeading: Poručićemo ovaj deo za Vas
+    orderBodyClosed: Pošaljite VIN ili samo ostavite kontakt. Proverićemo da li deo odgovara Vašem automobilu i javiti Vam cenu i rok isporuke.
+    fitsLabel: Odgovara za
+    fitsMore: i još {count}
+    oemLabel: Originalni broj
+    askInMessenger: Ili nam pišite putem aplikacije za poruke
     offersHeading: Cena i dostupnost
     moreOffers: 'Još jedna ponuda: {offer}'
     moreOffersCheaper: 'Ima i jeftinije: {offer}'
@@ -180,9 +188,10 @@ translations:
   en:
     metaTitleSuffix: CarLab
     metaDescription: Brands, equivalents, prices and availability for this part in the CarLab catalogue. Collection from our workshop in Belgrade.
+    metaDescriptionClosed: OE numbers, equivalents and vehicle fitment for this part. We'll check compatibility by VIN, source it and fit it at CarLab in Belgrade.
     eyebrow: Car part
     equivalentsHeading: Equivalent parts
-    noEquivalents: No equivalents in the catalogue yet. Contact us and we'll find an alternative.
+    noEquivalents: Contact us and we'll find an equivalent from another manufacturer.
     equivalentsLead: Parts from other manufacturers that can be fitted in place of this one.
     numberSupersededNotice: Part number {number} is no longer used by the manufacturer.
     partReplacedNotice: The manufacturer has replaced part {number} with a new one.
@@ -194,6 +203,7 @@ translations:
     currentNumberLabel: 'Current part number:'
     currentNumbersLabel: 'Current part numbers:'
     successorOffersHeading: Buy the replacement part
+    successorOrderHeading: Order the replacement part
     attributesHeading: Specifications
     attributeYes: Yes
     attributeNo: No
@@ -202,7 +212,13 @@ translations:
     priceOnRequestBody: "There are too many parts in the catalogue to keep every price up to date. Send an enquiry: we'll check compatibility using your VIN and find the best price."
     priceOnRequestCta: Get a price and lead time
     pricedEquivalentLabel: Equivalent with a listed price
-    orderBody: We'll check with our suppliers and send you a price and lead time, usually within an hour.
+    orderBody: "Send an enquiry: we'll check compatibility by VIN and confirm the price and lead time."
+    orderHeading: We'll order this part for you
+    orderBodyClosed: Send your VIN or just leave your contact details. We'll check that the part fits your car and confirm the price and lead time.
+    fitsLabel: Fits
+    fitsMore: and {count} more
+    oemLabel: OE number
+    askInMessenger: Or message us
     offersHeading: Price and availability
     moreOffers: 'Another offer: {offer}'
     moreOffersCheaper: 'Cheaper option: {offer}'

@@ -13,7 +13,7 @@ date: 2026-10-01
 published: true
 translations:
   sr:
-    title: Peugeot 208 veliki servis
+    title: "Peugeot 208 1.2 PureTech: veliki servis sa zamenom zupčastog kaiša"
     body: |-
       **Peugeot 208 1.2 PureTech. Veliki servis, mali servis i zamena ulja u menjaču u Beogradu**\
       U naš autoservis na Zvezdari stigao je Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenu ulja u menjaču.\
@@ -23,7 +23,7 @@ translations:
       Pored toga, uradili smo mali servis sa zamenom motornog ulja i filtera, kao i kompletnu zamenu ulja u menjaču, za koju smo koristili ulje Valvoline.
     car: Peugeot 208
   en:
-    title: Peugeot 208 veliki servis
+    title: "Peugeot 208 1.2 PureTech: major service and timing belt replacement"
     body: |-
       **Peugeot 208 1.2 PureTech. Major service, routine service and gearbox oil change in Belgrade**\
       This Peugeot 208 with a 1.2 PureTech petrol engine came to our workshop in Zvezdara for comprehensive maintenance. We carried out a major service (veliki servis), a routine service (mali servis) and a gearbox oil change.\
@@ -32,7 +32,7 @@ translations:
       Our workshop has all the specialist tools needed to carry out a major service correctly on Peugeot and Citroën 1.2 PureTech engines. All work follows the correct procedures for setting and locking the valve timing.\
       We also carried out a routine service, replacing the engine oil and filters, and completely changed the gearbox oil using Valvoline oil.
     car: Peugeot 208
-translatedFrom: 522c98675712bea8
+translatedFrom: 9970318876275db7
 ---
 **Peugeot 208 1.2 PureTech. Большое ТО, малое ТО и замена масла в коробке передач в Белграде**\
 К нам в автосервис на Звездаре приехал Peugeot 208 с бензиновым двигателем 1.2 PureTech. Автомобилю требовалось комплексное техническое обслуживание, поэтому мы выполнили большое ТО (veliki servis), малое ТО (mali servis) и замену масла в коробке передач.\

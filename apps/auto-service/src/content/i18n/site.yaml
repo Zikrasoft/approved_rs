@@ -117,14 +117,15 @@ translations:
       languageLabel: Jezik
       cta: Zakažite termin
       partsCta: Upit
+      callback: Pozovite me
     footer:
-      tagline: Auto-servis u Beogradu. Dijagnostika, popravke, limarija i farbanje, izbor rezervnih delova.
+      tagline: Auto-servis i pomoć pri izboru auto-delova na Zvezdari, Beograd.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
       hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
-      aboutLabel: O projektu
+      aboutLabel: O servisu
       rightsSuffix: Sva prava zadržana.
       developerCredit: Sajt je izradio studio Zikrasoft
     common:
@@ -135,12 +136,24 @@ translations:
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
       closeLabel: Zatvorite
+      prevLabel: Prethodna fotografija
+      nextLabel: Sledeća fotografija
       fromPrice: od
       priceOnRequest: na upit
       allServices: Sve usluge
       allWorks: Svi primeri radova
       emptyWorks: Primeri radova stižu uskoro. U međuvremenu nas pozovite, reći ćemo Vam šta smo radili na sličnim automobilima.
       socialHeading: Pratite nas na društvenim mrežama
+      writeInstead: Više Vam odgovara da nam pišete?
+    hours:
+      week: Pon–Pet 08:00–18:00
+      saturday: Sub 09:00–14:00
+    visit:
+      heading: Posetite nas na Zvezdari
+      route: Prikažite rutu
+      facts:
+        - Govorimo srpski, ruski i engleski
+        - Plaćanje gotovinom ili karticom
     channels:
       call: Pozovite
       whatsapp: WhatsApp
@@ -155,7 +168,7 @@ translations:
     form:
       heading: Zakažite termin u servisu
       subheading: Opišite problem sa automobilom. Pozvaćemo Vas, proveriti detalje i reći Vam termin i cenu.
-      nameLabel: Ime (nije obavezno)
+      nameLabel: Ime
       namePlaceholder: Kako da Vam se obraćamo
       contactLabel: Telefon
       contactPlaceholder: 64 123 4567
@@ -170,12 +183,13 @@ translations:
       privacyNote: Slažem se sa
       privacyLinkText: politikom privatnosti
       privacyOpen: Otvorite
+      privacyNotice: Slanjem upita saglasni ste sa
+      moreDetails: Dodajte ime ili komentar
       modalTitle: Zakažite termin u servisu
       errorPhone: Proverite broj telefona, izgleda da nije unet u celosti
       errorPhoneTooLong: Proverite broj telefona, ima previše cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
-      errorConsent: Bez Vaše saglasnosti ne možemo da pošaljemo upit
       errorSubmit: Upit nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće
@@ -202,14 +216,15 @@ translations:
       languageLabel: Language
       cta: Book an appointment
       partsCta: Enquiry
+      callback: Call me back
     footer:
-      tagline: Car service in Belgrade. Diagnostics, repairs, bodywork and respraying, and help finding the right parts.
+      tagline: Car servicing and help finding the right parts in Zvezdara, Belgrade.
       servicesHeading: Services
       companyHeading: Workshop
       contactHeading: Contact
       hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy policy
-      aboutLabel: About this project
+      aboutLabel: About us
       rightsSuffix: All rights reserved.
       developerCredit: Website by Zikrasoft
     common:
@@ -220,12 +235,24 @@ translations:
       mobileNavLabel: Mobile menu
       faqHeading: Frequently asked questions
       closeLabel: Close
+      prevLabel: Previous photo
+      nextLabel: Next photo
       fromPrice: from
       priceOnRequest: on request
       allServices: All services
       allWorks: View all our work
       emptyWorks: Examples of our work are coming soon. In the meantime, give us a call and we'll tell you about jobs we've done on similar cars.
       socialHeading: Follow us
+      writeInstead: Prefer to message us?
+    hours:
+      week: Mon–Fri 08:00–18:00
+      saturday: Sat 09:00–14:00
+    visit:
+      heading: Visit us in Zvezdara
+      route: Get directions
+      facts:
+        - We speak Serbian, Russian and English
+        - Pay by cash or card
     channels:
       call: Call us
       whatsapp: WhatsApp
@@ -240,7 +267,7 @@ translations:
     form:
       heading: Book a workshop appointment
       subheading: Tell us what's wrong with your car. We'll call you back to discuss the details, arrange a time and give you a price.
-      nameLabel: Name (optional)
+      nameLabel: Name
       namePlaceholder: What should we call you?
       contactLabel: Phone number
       contactPlaceholder: 64 123 4567
@@ -255,12 +282,13 @@ translations:
       privacyNote: I agree to the
       privacyLinkText: privacy policy
       privacyOpen: Open
+      privacyNotice: By submitting your enquiry, you agree to our
+      moreDetails: Add your name or a comment
       modalTitle: Book a workshop appointment
       errorPhone: Check your phone number. It looks incomplete
       errorPhoneTooLong: Check your phone number. It has too many digits
       errorTelegram: Enter your Telegram @username or phone number
       errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
-      errorConsent: We can't send your enquiry without your consent
       errorSubmit: Your enquiry wasn't sent. Check your connection and try again
     cookie:
       notice: We use cookies
@@ -269,4 +297,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 322563ef47044662
+translatedFrom: 1ce44769bd39404f

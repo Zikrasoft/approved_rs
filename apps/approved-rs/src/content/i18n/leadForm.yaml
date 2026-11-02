@@ -34,7 +34,7 @@ translations:
     phoneTab: Phone
     commentLabel: Make, model, budget
     commentPlaceholder: BMW 3 Series, 2020–2022, up to €25,000…
-    consentBefore: 'I agree to the '
+    consentBefore: 'By submitting this form, you agree to '
     consentLinkText: privacy policy
     consentError: Your consent is required
     submitLabel: Get a quote
@@ -56,7 +56,7 @@ translations:
     phoneTab: Telefon
     commentLabel: Marka, model, budžet
     commentPlaceholder: BMW 3, 2020–2022, do 25.000 €…
-    consentBefore: 'Slažem se sa '
+    consentBefore: 'Slanjem upita prihvatate '
     consentLinkText: politikom privatnosti
     consentError: Potrebna je vaša saglasnost
     submitLabel: Izračunajte cenu
@@ -78,7 +78,7 @@ translations:
     phoneTab: Teléfono
     commentLabel: Marca, modelo y presupuesto
     commentPlaceholder: BMW Serie 3, 2020–2022, hasta 25 000 €…
-    consentBefore: 'Acepto la '
+    consentBefore: 'Al enviar la solicitud, aceptas '
     consentLinkText: política de privacidad
     consentError: Debes dar tu consentimiento
     submitLabel: Calcular el coste
@@ -100,7 +100,7 @@ translations:
     phoneTab: Telefon
     commentLabel: Marke, Modell, Budget
     commentPlaceholder: BMW 3er, 2020–2022, bis 25.000 €…
-    consentBefore: 'Ich stimme der '
+    consentBefore: 'Mit dem Absenden Ihrer Anfrage stimmen Sie den folgenden Bedingungen zu: '
     consentLinkText: Datenschutzerklärung zu
     consentError: Bitte stimmen Sie der Datenschutzerklärung zu
     submitLabel: Kosten berechnen
@@ -108,4 +108,4 @@ translations:
     errorTelegramHandle: 'Bitte prüfe deinen @username: mindestens 3 Zeichen, nur lateinische Buchstaben, Ziffern und _'
     errorPhoneInvalid: Bitte überprüfen Sie die Telefonnummer
     errorSubmit: Ihre Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
-translatedFrom: a07eddcff3dabc9f
+translatedFrom: 983bfb262245ea82

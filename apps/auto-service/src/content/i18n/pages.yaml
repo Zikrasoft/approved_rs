@@ -185,16 +185,22 @@ translations:
       doorText: Opišite simptome, predložićemo od čega da krenete.
       doorButtonLabel: Opišite problem
       partsHeading: Odabrani rezervni delovi
+      factCar: Automobil
+      factDate: Radovi
+      filterLabel: Marka automobila
+      filterAll: Sve
+      relatedHeading: Slični radovi
       sourcingCta:
         heading: Potrebni su Vam delovi za automobil?
         body: Pošaljite VIN ili kataloški broj dela, pronaći ćemo originalni ili zamenski deo i javiti Vam cenu i rok isporuke.
     contact:
       metaTitle: Kontakt autoservisa CarLab u Beogradu, adresa i telefon
       metaDescription: Adresa, radno vreme i telefon autoservisa CarLab u Beogradu. Zakažite dijagnostiku i popravku telefonom, preko WhatsAppa ili Vibera.
-      heading: Dođite da zajedno pogledamo automobil
+      heading: CarLab na Zvezdari
       addressLabel: Adresa
       hoursLabel: Radno vreme
       mapHeading: Kako do nas
+      openMap: Otvorite u Google Maps
       mapNote: Pratite lokaciju označenu na mapi, navigacija Vas vodi do nas. Obezbeđen je parking za klijente.
       arrivalHeading: Šta da ponesete
       arrival:
@@ -206,11 +212,12 @@ translations:
       metaDescription: Hvala na upitu. Javićemo Vam se tokom radnog vremena i dogovoriti termin dolaska.
       eyebrow: Gotovo
       heading: Primili smo Vaš upit
-      body: Javićemo Vam se tokom radnog vremena, obično u roku od sat vremena, na način koji ste izabrali. Ako automobil nije u voznom stanju, javite nam porukom, pomoći ćemo Vam oko šlep službe.
+      visitLabel: Očekujemo vas
+      body: Javićemo vam se tokom radnog vremena na način koji ste izabrali. Ako automobil nije u voznom stanju, javite nam porukom, pomoći ćemo vam oko šlep službe.
       note: Ako Vas ne dobijemo telefonom, poslaćemo Vam poruku.
       cta: Vratite se na početnu
     thanksParts:
-      body: Proverićemo dostupnost i cenu i odgovoriti putem izabrane aplikacije za poruke ili Vas pozvati, obično u roku od sat vremena tokom radnog vremena.
+      body: Pronaći ćemo odgovarajući deo, javiti cenu i rok isporuke i odgovoriti na način koji ste izabrali.
       cta: Pogledajte rezervne delove
     privacy:
       metaTitle: Politika privatnosti | CarLab
@@ -233,10 +240,21 @@ translations:
       contactTitle: Pitanja o podacima
       contactBefore: Pozovite nas ili nam pišite, kontakt podatke ćete pronaći na stranici
     about:
-      metaTitle: O sajtu carlab.rs, sajtu autoservisa CarLab
-      metaDescription: Šta možete pronaći na sajtu autoservisa CarLab u Beogradu, odakle su primeri radova, kome sajt pripada i kako da nas kontaktirate.
-      heading: Sajt autoservisa CarLab
-      lead: 'Ovde ćete pronaći sve o autoservisu CarLab u Beogradu: usluge, izbor rezervnih delova, primere radova, adresu i načine zakazivanja.'
+      metaTitle: O CarLabu, auto-servisu na Zvezdari u Beogradu
+      metaDescription: 'Auto-servis CarLab na Zvezdari u Beogradu: ko smo, koju opremu koristimo, koje automobile servisiramo i kako da nas pronađete.'
+      heading: O CarLabu
+      lead: 'Auto-servis na Zvezdari: dijagnostika, popravke, limarija i izbor rezervnih delova. Govorimo srpski, ruski i engleski.'
+      teamHeading: Ko smo
+      team: []
+      equipmentHeading: Oprema
+      equipment:
+        - Fabrička BMW dijagnostika ISTA/ISTA+
+        - Sto za izvlačenje karoserije i merenje geometrije po kontrolnim tačkama
+        - Određivanje nijanse boje prema kodu i spektrofotometrom
+        - Komora za farbanje sa kontrolom temperature
+        - Dizalica, osciloskop i oprema za merenje kompresije
+      makesHeading: Koje automobile servisiramo
+      makesLead: Marke automobila iz naših primera radova.
       ownerHeading: Kome pripada sajt
       ownerText: Sajt pripada autoservisu CarLab. Kako postupamo sa podacima posetilaca opisano je u odeljku
     notFound:
@@ -244,29 +262,29 @@ translations:
       heading: Ova stranica ne postoji
       body: Možda je link zastareo ili je adresa pogrešno uneta. Pogledajte naše usluge ili nam pišite, pomoći ćemo Vam.
       partsBody: Ova stranica ne postoji u katalogu rezervnih delova. Potražite deo po kataloškom broju ili VIN-u ili pošaljite upit, pa ćemo ga mi pronaći.
-      writeUs: Ili nam pišite
+      writeUs: Ili nas kontaktirajte
       cta: Vratite se na početnu
     partsInquiry:
       metaTitle: Izbor auto-delova po VIN-u u Beogradu | CarLab
       metaDescription: Pošaljite VIN ili broj šasije, pronaći ćemo odgovarajuće delove za Vaš automobil i javiti Vam se. Lično preuzimanje u servisu u Beogradu.
       eyebrow: Izbor rezervnih delova
       heading: Pronaći ćemo prave delove za Vaš automobil
-      lead: 'Unesite VIN, kataloški broj ili naziv dela: prikazaćemo cenu i dostupnost. Ako nema rezultata, saradnik će lično pronaći odgovarajući deo.'
+      lead: Unesite VIN, kataloški broj ili naziv dela. Pronaći ćemo odgovarajući deo i javiti vam cenu i rok isporuke.
       sourcingNote: Pronalazimo originalne delove i proverene zamenske delove, a porudžbinu možete preuzeti u našem servisu u Beogradu.
       formHeading: Upit za rezervne delove
-      vinLabel: VIN ili broj šasije (nije obavezno)
+      formNote: Proverićemo da li deo odgovara vašem vozilu i javiti cenu i rok isporuke putem kanala koji vam odgovara.
+      vinLabel: VIN ili broj šasije
       vinPlaceholder: Unesite VIN ili broj šasije
-      vinNote: Potreban je da proverimo da li delovi odgovaraju Vašem automobilu.
-      commentLabel: Još nešto? (nije obavezno)
+      commentLabel: Komentar
       commentPlaceholder: Na primer, zadnje kočione pločice
-      commentNote: Ne morate znati tačan naziv dela. Kontaktiraćemo Vas i zajedno utvrditi šta Vam je potrebno.
+      moreDetails: Dodajte VIN ili komentar
       listHeading: Delovi u upitu
       listRemoveLabel: Uklonite iz upita
       listQuantityLabel: Količina
       listCarRemoveLabel: Ne povezujte upit sa ovim automobilom
       listMoreTemplate: 'Broj stavki koje nisu stale: {count}'
       llmsCatalogue: 'Katalog rezervnih delova CarLab: svaki kataloški broj ima svoju stranicu sa zamenskim delovima, cenom i dostupnošću. Delove sa istaknutom cenom dodajte u korpu i poručite uz lično preuzimanje i plaćanje gotovinom u servisu. Dovoljno je da ostavite kontakt. Cenu ponovo proveravamo pri poručivanju, a dostupnost i termin preuzimanja saradnik potvrđuje nakon porudžbine. Ako cena nije navedena, sastavite spisak delova i pošaljite ga kao jedan upit.'
-      llmsCatalogueClosed: 'Katalog rezervnih delova CarLab: svaki kataloški broj ima svoju stranicu sa zamenskim delovima i specifikacijama. Cene nisu prikazane na sajtu jer je delova previše da bismo sve cene redovno ažurirali. Delovi se poručuju isključivo slanjem upita: dodajte potrebne delove u korpu i pošaljite upit uz kontakt podatke (VIN nije obavezan). Saradnik će proveriti da li delovi odgovaraju vozilu prema VIN-u, saopštiti cenu i dogovoriti kupovinu. Delove možete preuzeti u servisu u Beogradu.'
+      llmsCatalogueClosed: 'Katalog rezervnih delova CarLab: svaki kataloški broj ima svoju stranicu sa zamenskim delovima i specifikacijama. Delovi se naručuju putem upita: dodajte potrebne delove na spisak i pošaljite ga uz kontakt podatke (VIN nije obavezan). Saradnik će proveriti kompatibilnost prema VIN-u i javiti cenu i rok isporuke. Delove možete preuzeti u servisu u Beogradu.'
       stepsHeading: Kako funkcioniše
       steps:
         - heading: Pošaljite VIN ili broj šasije
@@ -276,16 +294,24 @@ translations:
         - heading: Kontaktiramo Vas
           body: Pozvaćemo Vas ili poslati poruku i predložiti najbolje opcije.
       categoriesHeading: Koje delove možemo da pronađemo
-      categoriesLead: Ovo su neke od kategorija delova koje nudimo. Niste pronašli potrebnu kategoriju? Svakako nam pišite, pronaći ćemo i te delove.
+      categoriesLead: Okvirni spisak kategorija koje imamo u ponudi. Potrebna vam je druga kategorija? Pišite nam, pronaći ćemo i te delove.
       categoryCta: Pogledajte delove
+      categoryOrderCta: Pošaljite upit za izbor delova
       category:
         eyebrow: Kategorija rezervnih delova
         metaTitleTemplate: '{name}: rezervni delovi | CarLab'
         partsHeading: Delovi u katalogu
-        noParts: U ovoj kategoriji još nema delova u katalogu. Pošaljite VIN i pronaći ćemo odgovarajući deo.
+        noParts: Pošaljite VIN ili kataloški broj dela, a mi ćemo vam javiti cenu i rok isporuke.
         fieldsHeading: Na šta obratiti pažnju pri izboru
         pageName: '{name}, stranica {page}'
         pagination: Stranice kategorije
+        car:
+          heading: Za moj automobil
+          make: Marka
+          makePlaceholder: Sve marke
+          model: Model
+          modelPlaceholder: Izaberite model
+          submit: Prikažite delove
     bmw:
       metaTitle: Popravka i održavanje BMW vozila u Beogradu | CarLab
       metaDescription: Dijagnostika i popravka BMW vozila uz originalnu ISTA opremu. Znamo tipične kvarove prema motoru i godištu, ne nagađamo odakle da počnemo.
@@ -296,7 +322,7 @@ translations:
       trust:
         - 'Dijagnostika uz ISTA/ISTA+: vidimo isto što i ovlašćeni servis, bez njihovih visokih cena'
         - Znamo tipične kvarove prema motoru i godištu, ne nagađamo odakle da počnemo
-        - 'Originalni i kvalitetni zamenski delovi: otvoreno kažemo šta imamo na stanju'
+        - 'Originalni ili proveren zamenski deo: objasnićemo razlike i navesti cenu svakog'
         - 'Kodiranje i adaptacije nakon popravke: bez upozorenja na instrument tabli'
       worksHeading: Šta smo već radili na BMW vozilima
       ctaEyebrow: BMW
@@ -324,16 +350,22 @@ translations:
       doorText: Describe the symptoms and we'll suggest where to start.
       doorButtonLabel: Describe the problem
       partsHeading: Parts we sourced
+      factCar: Car
+      factDate: Work carried out
+      filterLabel: Car make
+      filterAll: All
+      relatedHeading: Similar jobs
       sourcingCta:
         heading: Need parts for your car?
         body: Send us your VIN or a part number. We'll find genuine or aftermarket options and confirm the price and delivery time.
     contact:
       metaTitle: 'Contact CarLab in Belgrade: address and phone'
       metaDescription: Find the address, opening hours and phone number for CarLab in Belgrade. Book diagnostics or repairs by phone, WhatsApp or Viber.
-      heading: Come by and we'll look over your car together
+      heading: CarLab in Zvezdara
       addressLabel: Address
       hoursLabel: Opening hours
       mapHeading: How to find us
+      openMap: Open in Google Maps
       mapNote: Use the pin on the map. Your sat nav will take you right to us. Customer parking is available.
       arrivalHeading: What to bring
       arrival:
@@ -345,11 +377,12 @@ translations:
       metaDescription: Thanks for your enquiry. We'll get in touch during opening hours to arrange your visit.
       eyebrow: All done
       heading: We've received your enquiry
-      body: We'll contact you using your preferred method during opening hours, usually within an hour. If your car can't be driven, send us a message and we'll advise on recovery.
+      visitLabel: We look forward to seeing you
+      body: We'll get back to you during opening hours using your preferred contact method. If your car isn't driveable, message us and we'll advise you on recovery.
       note: If we can't reach you by phone, we'll send you a message.
       cta: Back to home
     thanksParts:
-      body: We'll check availability and pricing, then reply via your chosen messaging app or call you back, usually within an hour during opening hours.
+      body: We'll find the right part, confirm the price and lead time, and get back to you using your preferred contact method.
       cta: Browse parts
     privacy:
       metaTitle: Privacy policy | CarLab
@@ -372,10 +405,21 @@ translations:
       contactTitle: Questions about your data
       contactBefore: Call or message us. You'll find our contact details on the page
     about:
-      metaTitle: About carlab.rs, the CarLab garage website
-      metaDescription: What's on the CarLab Belgrade website, where our job examples come from, who owns the site and how to get in touch.
-      heading: The CarLab garage website
-      lead: 'Everything about CarLab in Belgrade in one place: services, parts sourcing, recent jobs, our address and how to book.'
+      metaTitle: About CarLab, car service in Zvezdara, Belgrade
+      metaDescription: Meet CarLab, an independent car service in Zvezdara, Belgrade. Learn about our equipment, the cars we work on and how to find us.
+      heading: About CarLab
+      lead: An independent car service in Zvezdara offering diagnostics, repairs, bodywork and parts sourcing. We speak Serbian, Russian and English.
+      teamHeading: Who we are
+      team: []
+      equipmentHeading: Our equipment
+      equipment:
+        - BMW dealer-level diagnostics with ISTA/ISTA+
+        - Body alignment jig and chassis measurement using reference points
+        - Paint colour matching by code and spectrophotometer
+        - Temperature-controlled spray booth
+        - Vehicle lift, oscilloscope and compression testing equipment
+      makesHeading: Cars we work on
+      makesLead: Makes featured in our recent jobs.
       ownerHeading: Who owns the website
       ownerText: This website belongs to CarLab. How we handle visitor data is explained in our
     notFound:
@@ -383,29 +427,29 @@ translations:
       heading: This page doesn't exist
       body: The link may be out of date, or there may be a typo in the address. Browse our services or message us and we'll help.
       partsBody: This page isn't in our parts catalogue. Search by part number or VIN, or send an enquiry and we'll find the right part for you.
-      writeUs: Or message us
+      writeUs: Or get in touch
       cta: Back to home
     partsInquiry:
       metaTitle: Find car parts by VIN in Belgrade | CarLab
       metaDescription: Send us your VIN or chassis number. We'll find the right parts for your car and get in touch. Collect from our workshop in Belgrade.
       eyebrow: Parts sourcing
       heading: We'll find the right parts for your car
-      lead: Enter a VIN, part number or part name to see prices and availability. If nothing comes up, a member of our team will find it for you.
+      lead: Enter your VIN, part number or part name. We'll find the right fit and confirm the price and lead time.
       sourcingNote: We source genuine parts and trusted aftermarket alternatives. Collect your order from our workshop in Belgrade.
       formHeading: Parts enquiry
-      vinLabel: VIN or chassis number (optional)
+      formNote: We'll check compatibility and send you the price and lead time using your preferred contact method.
+      vinLabel: VIN or chassis number
       vinPlaceholder: Enter VIN or chassis number
-      vinNote: This helps us check that the parts fit your car.
-      commentLabel: Anything else? (optional)
+      commentLabel: Comment
       commentPlaceholder: For example, rear brake pads
-      commentNote: You don't need to know the exact part name. We'll get in touch and work out what you need together.
+      moreDetails: Add a VIN or comment
       listHeading: Parts in your enquiry
       listRemoveLabel: Remove from enquiry
       listQuantityLabel: Quantity
       listCarRemoveLabel: Unlink this car from the enquiry
       listMoreTemplate: "Items that didn't fit: {count}"
       llmsCatalogue: 'CarLab parts catalogue: each part number has its own page with alternatives, pricing and availability. Parts with a listed price can be added to the cart and ordered for collection and cash payment at the workshop, with just your contact details. We recheck prices at checkout, and a member of our team confirms availability and collection time after you order. If no price is listed, put together a list of parts and send them in a single enquiry.'
-      llmsCatalogueClosed: 'CarLab parts catalogue: each part number has its own page with alternatives and specifications. Prices are not listed online because there are too many parts to keep every price up to date. Parts can only be ordered by enquiry: add the parts you need to the cart and submit it with your contact details (VIN optional). A member of our team will check compatibility using your VIN, quote a price and arrange your purchase. Parts can be collected from our workshop in Belgrade.'
+      llmsCatalogueClosed: 'CarLab parts catalogue: each part number has its own page with alternatives and specifications. Parts are ordered by enquiry: add the parts you need to a list and submit it with your contact details (VIN optional). Our team will check compatibility using your VIN and confirm the price and lead time. Collection is available from our workshop in Belgrade.'
       stepsHeading: How it works
       steps:
         - heading: Send your VIN or chassis number
@@ -415,16 +459,24 @@ translations:
         - heading: We get in touch
           body: We'll call or message you with the best options.
       categoriesHeading: Parts we can source
-      categoriesLead: Here's an overview of the parts we work with. Can't find the category you need? Get in touch anyway, and we'll find those parts too.
+      categoriesLead: Here are some of the parts categories we cover. Need something else? Get in touch and we'll help you find it.
       categoryCta: Browse parts
+      categoryOrderCta: Ask us to find a part
       category:
         eyebrow: Parts category
         metaTitleTemplate: '{name}: parts | CarLab'
         partsHeading: Parts in the catalogue
-        noParts: There are no parts listed in this category yet. Send us your VIN and we'll find the right part.
+        noParts: Send us your VIN or part number and we'll confirm the price and lead time.
         fieldsHeading: What to check when choosing parts
         pageName: '{name}, page {page}'
         pagination: Category pages
+        car:
+          heading: For my car
+          make: Make
+          makePlaceholder: Any make
+          model: Model
+          modelPlaceholder: Select a model
+          submit: Show parts
     bmw:
       metaTitle: BMW repairs and servicing in Belgrade | CarLab
       metaDescription: BMW diagnostics and repairs using genuine ISTA equipment. We know common faults by engine and model year, so we know where to start.
@@ -435,11 +487,11 @@ translations:
       trust:
         - 'ISTA/ISTA+ diagnostics: we see what the dealer sees, without the dealer markup'
         - We know common faults by engine and model year, so we know where to start
-        - "Genuine and quality aftermarket parts: we're upfront about what's in stock"
+        - "Genuine parts or trusted alternatives: we'll explain the differences and give you the price of each."
         - 'Coding and adaptations after repairs: no dashboard warnings'
       worksHeading: BMW jobs we've completed
       ctaEyebrow: BMW
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and tell you what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: 3af863352edfee0e
+translatedFrom: 0d680a801c45856a

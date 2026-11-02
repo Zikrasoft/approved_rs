@@ -2,7 +2,7 @@
 title: ТО Alfa Romeo Giulia 2021 года
 translations:
   en:
-    title: 2021 Alfa Romeo Giulia Scheduled Service in Belgrade
+    title: 2021 Alfa Romeo Giulia servicing
     body: |-
       This 2021 Alfa Romeo Giulia came to our workshop in Belgrade for a scheduled service. We went beyond a simple oil change, checking all the routine service items and servicing the automatic transmission as well.
 
@@ -20,7 +20,7 @@ translations:
     car: ALFA ROMEO GIULIA
 
   sr:
-    title: Redovan servis za Alfa Romeo Giulia 2021. godište u Beogradu
+    title: Redovan servis Alfa Romeo Giulia iz 2021. godine
     body: |-
       Alfa Romeo Giulia 2021. godište stigla je kod nas u Beograd na redovan servis. Nismo se zadržali samo na zameni ulja: proverili smo sav potrošni materijal i ujedno servisirali automatski menjač.
 
@@ -46,7 +46,7 @@ image: image.jpg
 gallery: []
 date: 2026-07-21
 published: true
-translatedFrom: e41efc1e5009eba0
+translatedFrom: fa6d9633173e21c2
 ---
 
 Alfa Romeo Giulia 2021 года приехала к нам в Белграде на плановое ТО. Одной заменой масла решили не ограничиваться: прошли по всем расходникам и заодно обслужили автоматическую коробку.
