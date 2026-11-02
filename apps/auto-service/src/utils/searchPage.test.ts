@@ -298,6 +298,22 @@ describe('planSearch', () => {
     );
   });
 
+  it.each([
+    ['offset=-1', '/ru/parts/search/?q=filter'],
+    ['offset=0', '/ru/parts/search/?q=filter'],
+    ['offset=abc', '/ru/parts/search/?q=filter'],
+    ['offset=20x', '/ru/parts/search/?q=filter&offset=20'],
+  ])(
+    'drops an offset the search does not apply as written: %s',
+    async (offset, redirect) => {
+      const catalogue = fakeCatalogue({ search: async () => found(45) });
+      expect(await plan(`q=filter&${offset}`, catalogue)).toEqual({
+        redirect,
+        status: 302,
+      });
+    },
+  );
+
   it('keeps the deepest page the shop answers for a list that long', async () => {
     const catalogue = fakeCatalogue({
       search: vi.fn(async () => found(50_000)),
@@ -345,7 +361,7 @@ describe('planSearch', () => {
 
   it('lower-cases a category, make or model typed in capitals', async () => {
     expect(await plan('category=BATTERIES', batteries())).toEqual({
-      redirect: '/ru/parts/search/?category=batteries',
+      redirect: '/ru/parts/c/batteries/',
       status: 302,
     });
     expect(
@@ -516,16 +532,77 @@ describe('planSearch', () => {
   });
 
   it.each([
-    ['min.capacity=0.0000001', ''],
-    ['min.capacity=0', ''],
-    ['max.capacity=1000000000', ''],
-    ['min.capacity=0x50', ''],
-    ['min.capacity=80,5', '&min.capacity=80.5'],
-    ['min.capacity=90&max.capacity=70', '&min.capacity=70&max.capacity=90'],
-    ['min.capacity=70&min.capacity=90', '&min.capacity=70'],
-  ])('rewrites the range %s the way it applies', async (asked, kept) => {
+    ['min.capacity=0.0000001', '/ru/parts/c/batteries/'],
+    ['max.capacity=1000000000', '/ru/parts/c/batteries/'],
+    ['min.capacity=0x50', '/ru/parts/c/batteries/'],
+    [
+      'min.capacity=80,5',
+      '/ru/parts/search/?category=batteries&min.capacity=80.5',
+    ],
+    [
+      'min.capacity=90&max.capacity=70',
+      '/ru/parts/search/?category=batteries&min.capacity=70&max.capacity=90',
+    ],
+    [
+      'min.capacity=70&min.capacity=90',
+      '/ru/parts/search/?category=batteries&min.capacity=70',
+    ],
+  ])('rewrites the range %s the way it applies', async (asked, redirect) => {
     expect(await plan(`category=batteries&${asked}`, batteries())).toEqual({
-      redirect: `/ru/parts/search/?category=batteries${kept}`,
+      redirect,
+      status: 302,
+    });
+  });
+
+  it('sends a range that filters nothing back to the category page', async () => {
+    expect(
+      await plan('category=batteries&min.capacity=0', batteries()),
+    ).toEqual({ redirect: '/ru/parts/c/batteries/', status: 302 });
+  });
+
+  it('sends a Model category range that filters nothing back to its page when the Model has one', async () => {
+    const search = vi.fn(async () => ({
+      ...found(2),
+      facets: [numberFacet('capacity', '60')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      model,
+      scope_pages: { make: true, model: true },
+    }));
+
+    expect(
+      await plan(
+        'category=batteries&make=bmw&model=e83-x3-20d&min.capacity=0',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({ redirect: '/ru/parts/bmw/e83-x3-20d/batteries/', status: 302 });
+  });
+
+  it('keeps the Model on the search when a range that filters nothing has no Model page to return to', async () => {
+    const search = vi.fn(async () => ({
+      ...found(2),
+      facets: [numberFacet('capacity', '60')],
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      model,
+      scope_pages: { make: true, model: false },
+    }));
+
+    expect(
+      await plan(
+        'category=batteries&make=bmw&model=e83-x3-20d&min.capacity=0',
+        fakeCatalogue({ search }),
+      ),
+    ).toEqual({
+      redirect:
+        '/ru/parts/search/?category=batteries&make=bmw&model=e83-x3-20d',
+      status: 302,
+    });
+  });
+
+  it('keeps the page of a category listing on the search', async () => {
+    expect(
+      await plan('category=batteries&min.capacity=0&offset=20', batteries(45)),
+    ).toEqual({
+      redirect: '/ru/parts/search/?category=batteries&offset=20',
       status: 302,
     });
   });

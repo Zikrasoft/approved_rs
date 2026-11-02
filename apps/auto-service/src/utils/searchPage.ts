@@ -102,11 +102,10 @@ export async function planSearch({
   const requestedFacets = params.getAll('facets');
   const requestedRanges = rangesFromParams(params);
   const capped = filtersWithinCap(requestedFacets, requestedRanges);
-  const requestedOffset = Math.max(
-    0,
-    Number.parseInt(params.get('offset') ?? '0', 10) || 0,
+  const offset = Math.min(
+    Math.max(0, Number.parseInt(params.get('offset') ?? '0', 10) || 0),
+    SHOP_MAX_OFFSET,
   );
-  const offset = Math.min(requestedOffset, SHOP_MAX_OFFSET);
 
   const intent = searchIntent(typed);
   const vin = intent.kind === 'vin' ? intent.vin : null;
@@ -203,6 +202,8 @@ export async function planSearch({
     listing && !facets.length && !nextRanges.length
       ? listing
       : searchHref(facets, nextRanges);
+  const listingKeepsModel =
+    !model || Boolean(found?.model && found.scope_pages?.model);
   const page = found ? Math.min(offset, lastPageOf(found)) : offset;
   if (emptyScope) {
     return redirectTo(filtersHref([], []), 302);
@@ -211,11 +212,16 @@ export async function planSearch({
     !misspeltCategory &&
     (JSON.stringify(chosen) !== JSON.stringify(requestedFacets) ||
       !rangesAsWritten(params, ranges) ||
-      page !== requestedOffset ||
+      (params.get('offset') ?? '') !== (page ? String(page) : '') ||
       strayScope ||
       capitalised(params))
   ) {
-    return redirectTo(searchHref(chosen, ranges, page), 302);
+    return redirectTo(
+      page || !listingKeepsModel
+        ? searchHref(chosen, ranges, page)
+        : filtersHref(chosen, ranges),
+      302,
+    );
   }
   const exact =
     found && !category && !model && !chosen.length && !ranges.length && !offset
