@@ -8,6 +8,8 @@ import ServiceList from '@/components/ServiceList.astro';
 import WorksRow from '@/components/WorksRow.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { featuredWorks } from '@/utils/works';
+import { panelPhoto } from '@/utils/panelPhoto';
+import workshopBay from '@/assets/workshop-bay.jpg';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
@@ -18,18 +20,24 @@ export function getStaticPaths() {
 
 const locale = localeFrom(Astro.url.pathname);
 const { services, home, site, pages } = content(locale);
+const photo = await panelPhoto({
+  image: workshopBay,
+  alt: site.photos.workshopBay,
+});
 ---
 
 <Shell
   title={services.indexMetaTitle}
   description={services.indexMetaDescription}
+  preloadImage={photo}
 >
   <PanelHero
     heading={services.indexHeading}
     hook={services.indexLead}
+    photo={photo}
     crumbs={[{ href: PathBuilder.services(locale), label: site.nav.services }]}
   >
-    <HeroContacts class="lg:max-w-xl" />
+    <HeroContacts />
     <GarageAddress layout="line" tone="panel" class="text-sm" />
   </PanelHero>
 
