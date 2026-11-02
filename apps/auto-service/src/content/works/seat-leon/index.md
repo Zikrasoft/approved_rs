@@ -19,7 +19,7 @@ translations:
       For Seat, Volkswagen, Škoda and Audi vehicles, a major service is a key maintenance milestone. Replacing the timing belt, water pump, fluids and service items on time helps prevent much more expensive problems down the line.
 
       A separate note on the **DQ250**: this is a six-speed dual-clutch transmission with wet clutches. Its transmission oil needs to be changed at the specified intervals, as regular oil changes are essential to keeping it reliable.
-    car: SEAT LEON
+    car: Seat Leon
   sr:
     title: "Veliki servis za Seat Leon: zupčasti kaiš, vodena pumpa i DSG DQ250"
     body: |-
@@ -38,7 +38,7 @@ translations:
       Za vozila marki Seat, Volkswagen, Škoda i Audi veliki servis je jedan od najvažnijih koraka u održavanju. Pravovremena zamena zupčastog kaiša, vodene pumpe, radnih tečnosti i potrošnih delova sprečava znatno skuplje kvarove kasnije.
 
       Posebnu pažnju zaslužuje **DQ250**. To je šestostepeni menjač sa dvostrukim kvačilom u uljnom kupatilu. Ulje u njemu mora da se menja u propisanim intervalima, jer od toga zavise njegov pouzdan rad i dug vek.
-    car: SEAT LEON
+    car: Seat Leon
 car: Seat Leon
 year: 2019
 servicesApplied:
@@ -53,7 +53,7 @@ gallery:
 date: 2026-08-20
 published: true
 featured: true
-translatedFrom: 6ee72bd789965a85
+translatedFrom: 2964e27d5aad9ad2
 ---
 
 Seat Leon с пробегом **190 000 км** приехал в наш русский автосервис в Белграде на большое плановое обслуживание, оно же большой сервис.

@@ -24,7 +24,7 @@ translations:
       2. **Podmazivanje klapne za regulaciju protivpritiska izduvnih gasova u sklopu EGR sistema.** Servisirali smo klapnu smeštenu u izduvnoj cevi, koja učestvuje u regulaciji protivpritiska izduvnih gasova i radu sistema za recirkulaciju izduvnih gasova (EGR) kod BMW dizel motora. Vremenom se u mehanizmu mogu nakupiti nečistoće, zbog čega može da zapinje i ne radi pravilno. Obavili smo potrebno podmazivanje mehanizma klapne.
       3. **Zamena nosača motora.** Zamenili smo dotrajali nosač motora na BMW-u 116d. Nosači drže motor na mestu i smanjuju prenos vibracija na karoseriju. Njihovo habanje može izazvati pojačane vibracije, neprijatnost u kabini i dodatno opterećenje drugih delova.
       4. **Utvrđeno je da je potrebna zamena prigušivača torzionih vibracija.** Tokom servisa utvrdili smo i da će biti potrebno zameniti prigušivač torzionih vibracija radilice. Ovaj deo ublažava vibracije i obezbeđuje stabilan rad remenskog pogona pomoćnih agregata. Zamenu dotrajalog prigušivača ne treba odlagati, jer njegovo otkazivanje može dovesti do dodatnih kvarova i skupih popravki.
-    car: BMW 116D
+    car: BMW 116d
   en:
     title: "BMW 116d: coolant, engine mount and EGR valve"
     body: |-
@@ -38,8 +38,8 @@ translations:
       2. **Lubrication of the exhaust backpressure valve for the EGR system.** We serviced the backpressure valve fitted in the exhaust pipe. This valve helps regulate exhaust backpressure and supports the operation of the exhaust gas recirculation (EGR) system on BMW diesel engines. Over time, the mechanism can become dirty, start to stick and stop working correctly. We lubricated the valve mechanism as required.
       3. **Engine mount replacement.** We replaced a worn engine mount on the BMW 116d. Engine mounts secure the engine and reduce the vibrations transmitted to the body. Worn mounts can cause excessive vibration, reduced cabin comfort and additional stress on other components.
       4. **Crankshaft vibration damper replacement required.** During the service, we also found that the crankshaft torsional vibration damper would need replacing. This component helps absorb torsional vibrations and keeps the auxiliary belt drive running smoothly. Replacing a worn damper should not be put off, as its failure can cause further damage and costly repairs.
-    car: BMW 116D
-translatedFrom: f0e8817941da20ba
+    car: BMW 116d
+translatedFrom: 1f3baa78a27a10dd
 ---
 **BMW 116d в нашем автосервисе в Белграде.**
 

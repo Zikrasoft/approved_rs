@@ -28,7 +28,7 @@ translations:
       At 380,000 km, not everything can be sorted in a single visit. We will get the car back into shape in stages: a thorough inspection, a list of priorities, then work on the engine, braking system, suspension and drivetrain as needed. This is exactly the approach we recommend after buying a used car.
 
       Our technicians know the N47 diesel well. With proper maintenance, this mileage does not mean the engine is at the end of its life, but identified faults need to be addressed promptly and service intervals must be respected.
-    car: BMW 118D
+    car: BMW 118d
   sr:
     title: Sveobuhvatan servis BMW-a 118d N47 nakon kupovine
     body: |-
@@ -43,8 +43,8 @@ translations:
       Na 380 000 km ne može sve da se reši jednim dolaskom u servis. Automobil ćemo dovoditi u red postepeno: prvo detaljna dijagnostika i određivanje prioriteta, a zatim radovi na motoru, kočionom sistemu, vešanju i pogonskom sklopu, prema utvrđenom redosledu. Upravo takav pristup preporučujemo nakon kupovine polovnog automobila.
 
       Naši majstori dobro poznaju dizel motore N47. Uz pravilno održavanje, ova kilometraža ne mora da znači da je motor pri kraju radnog veka, ali otklanjanje uočenih problema i redovni servisi ne smeju da se odlažu.
-    car: BMW 118D
-translatedFrom: e44c540b7ec1a3dc
+    car: BMW 118d
+translatedFrom: 9a9086da6f257a77
 ---
 
 BMW 118d с дизелем N47 и пробегом около **380 000 км** приехала в наш автосервис в Белграде. Машину привезли из Дании, владелец купил ее недавно и начал с комплексного обслуживания и устранения того, что уже вылезло. После покупки это правильный порядок действий.

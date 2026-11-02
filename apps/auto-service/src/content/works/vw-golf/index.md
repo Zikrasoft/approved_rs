@@ -14,7 +14,7 @@ date: 2026-09-15
 published: true
 translations:
   sr:
-    title: VW Golf
+    title: "VW Golf: poklopac ventila, dizne i ulje u DSG menjaču"
     body: |-
       Volkswagen Golf iz 2017. godine sa 7-stepenim menjačem sa dvostrukim kvačilom **DSG DQ381** stigao je u naš autoservis u Beogradu na detaljno održavanje i otklanjanje nekoliko kvarova.
 
@@ -31,7 +31,7 @@ translations:
       Sa kočionih klešta uklonili smo prljavštinu i koroziju. Kada pokretni delovi zapeknu, dolazi do neravnomernog habanja pločica, pregrevanja diskova i neobičnih zvukova pri kočenju.
     car: VW Golf
   en:
-    title: VW Golf
+    title: "VW Golf: valve cover, injectors and DSG fluid"
     body: |-
       A 2017 Volkswagen Golf with a 7-speed **DSG DQ381** dual-clutch transmission came to our workshop in Belgrade for comprehensive servicing and repairs to several faults.
 
@@ -47,7 +47,7 @@ translations:
 
       We also cleaned dirt and corrosion from the brake calipers. When moving parts seize, they can cause uneven brake pad wear, overheated discs and unusual noises during braking.
     car: VW Golf
-translatedFrom: c183a1f6496fb0da
+translatedFrom: 55fc8ff6d2c1f60f
 ---
 Volkswagen Golf 2017 года с 7-ступенчатой роботизированной коробкой передач **DSG DQ381** приехал в наш автосервис в Белграде на комплексное техническое обслуживание и устранение нескольких неисправностей.
 

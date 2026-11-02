@@ -3,7 +3,7 @@ title: Замена тормозных дисков и колодок
 car: Обслуживание тормозной системы
 translations:
   en:
-    title: Brake Disc and Pad Replacement in Belgrade
+    title: Brake Disc and Pad Replacement
     body: |-
       A car came into our workshop in Belgrade with a complaint of **vibration under braking**: whenever the driver pressed the brake pedal, the car would shake.
 
@@ -26,7 +26,7 @@ translations:
       A brake disc can look perfectly fine and still be warped. This kind of distortion is not something you can spot by eye. So if you notice the steering wheel shaking, the brake pedal pulsing or the car vibrating under braking, it is best not to put off having it checked.
     car: Brake System Servicing
   sr:
-    title: Zamena kočionih diskova i pločica u Beogradu
+    title: Zamena kočionih diskova i pločica
     body: |-
       U naš autoservis u Beogradu stigao je automobil zbog **vibracija pri kočenju**: kada vozač pritisne papučicu kočnice, automobil počne da se trese.
 
@@ -56,7 +56,7 @@ gallery: []
 date: 2026-06-06
 published: true
 featured: true
-translatedFrom: 9e1e0cacfbc1def4
+translatedFrom: 3c87134af113543e
 ---
 
 В наш автосервис в Белграде приехала машина с жалобой на **вибрацию при торможении**: водитель нажимает педаль, и автомобиль начинает трясти.
