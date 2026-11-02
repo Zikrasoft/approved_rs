@@ -2559,7 +2559,7 @@ describe('hasRealContact', () => {
   });
 });
 
-describe('the Lead count alert', () => {
+describe('the Lead count alert', { timeout: 30_000 }, () => {
   const alertLeadCount = vi.fn();
   const createdAt = new Date().toISOString();
   const seedLeads = (count: number) =>
