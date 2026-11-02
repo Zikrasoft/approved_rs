@@ -4110,6 +4110,7 @@
           "enumItems": [
             "bmw-type-code",
             "mercedes-baumuster",
+            "vag-model-code",
             "supplier-vehicle-id"
           ],
           "mappedType": "enum"

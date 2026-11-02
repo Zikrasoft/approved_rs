@@ -982,7 +982,25 @@ number gets its CI value in that script. The non-obvious parts:
   `TELEGRAM_GROUP_ID`, the same names and values as the CRM bot's on Vercel.
   Both are optional; unset, the failure is only logged.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
-  are tried. An unknown name stops the server at startup.
+  are tried. An unknown name stops the server at startup. Each decoder works
+  offline, from the VIN and data committed under
+  `apps/auto-service-shop/src/lib/vin`:
+  - `bmw-type-code`: BMW (WMI `WBA`, `WBS`, `WBX`, `WBY`, `5UX`), the type
+    code in characters 4 to 7, matched through the BimmerArchive type-key
+    table `bimmerarchive-type-keys.json` (ADR-0051).
+  - `mercedes-baumuster`: Mercedes-Benz, the Baumuster in characters 4 to 9,
+    matched to crawled Model names that list it (ADR-0050).
+  - `vag-model-code`: Volkswagen, Audi, Skoda, SEAT and Cupra, the model code
+    in characters 7 and 8, read through `vag-model-codes.json`. Each row names
+    the generation, its type designations, its years and the public sources
+    it comes from (Wikibooks, Wikipedia, manufacturer documents, public VIN
+    records). A VIN matches the crawled Vehicles of its make whose Chassis
+    code starts with one of those types and whose years hold the model year
+    in character 10.
+
+  A code a decoder reads but cannot match lands on the admin Unresolved VINs
+  screen with what the open data says about it.
+
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
 - `FILE_URL` is the public base URL of the public bucket, stored into every image

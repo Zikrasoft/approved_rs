@@ -322,7 +322,8 @@
       },
       "type": {
         "bmw-type-code": "BMW type code (VIN 4-7)",
-        "mercedes-baumuster": "Mercedes Baumuster"
+        "mercedes-baumuster": "Mercedes Baumuster",
+        "vag-model-code": "VAG model code (VIN 7-8)"
       }
     },
     "confirmTitle": "Delete «{{name}}»?",
@@ -382,7 +383,12 @@
     },
     "makes": {
       "bmw": "BMW",
-      "mercedes-benz": "Mercedes-Benz"
+      "mercedes-benz": "Mercedes-Benz",
+      "volkswagen": "Volkswagen",
+      "audi": "Audi",
+      "skoda": "Skoda",
+      "seat": "SEAT",
+      "cupra": "Cupra"
     },
     "dismiss": "Dismiss code",
     "confirmDismissTitle": "Dismiss code {{code}}?",

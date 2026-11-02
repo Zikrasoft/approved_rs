@@ -10,6 +10,7 @@ export { STEERING_SIDES, type SteeringSide } from './steering.ts';
 export const MANUFACTURER_VEHICLE_IDENTIFIER_TYPES = [
   'bmw-type-code',
   'mercedes-baumuster',
+  'vag-model-code',
 ] as const;
 export const SUPPLIER_VEHICLE_ID = 'supplier-vehicle-id';
 export const VEHICLE_IDENTIFIER_TYPES = [

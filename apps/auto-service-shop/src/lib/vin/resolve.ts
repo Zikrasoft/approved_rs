@@ -10,6 +10,7 @@ import { listVehicleResponses } from '../store-response';
 import { vehiclesDescribedByTypeKey } from './bmw-type-key';
 import { modelsListingBaumuster } from './crawled-baumuster';
 import type { VinDecode, VinDecoder } from './decoder';
+import { vehiclesOfVagModelCode } from './vag-model-match';
 
 type Answer = { decoder: VinDecoder; decode: VinDecode };
 
@@ -22,6 +23,7 @@ type CrawledMatch = (
   catalog: CatalogModuleService,
   make: string,
   value: string,
+  vin: string,
 ) => Promise<Vehicle[]>;
 
 const identifiedVehicles = async (
@@ -59,22 +61,25 @@ const vehiclesListingBaumuster: CrawledMatch = async (
 const CRAWLED_MATCHES: Partial<Record<VehicleIdentifierType, CrawledMatch>> = {
   'mercedes-baumuster': vehiclesListingBaumuster,
   'bmw-type-code': vehiclesDescribedByTypeKey,
+  'vag-model-code': vehiclesOfVagModelCode,
 };
 
 const crawledVehicles = async (
   catalog: CatalogModuleService,
   { make, identifiers: [identifier] }: VinDecode,
+  vin: string,
 ): Promise<Vehicle[]> => {
   const match = identifier && CRAWLED_MATCHES[identifier.type];
-  return match ? match(catalog, make, identifier.value) : [];
+  return match ? match(catalog, make, identifier.value, vin) : [];
 };
 
 const vehiclesFor = async (
   catalog: CatalogModuleService,
   decode: VinDecode,
+  vin: string,
 ): Promise<Vehicle[]> => {
   const identified = await identifiedVehicles(catalog, decode.identifiers);
-  return identified.length ? identified : crawledVehicles(catalog, decode);
+  return identified.length ? identified : crawledVehicles(catalog, decode, vin);
 };
 
 const decodeThroughChain = async (
@@ -87,7 +92,7 @@ const decodeThroughChain = async (
     const decode = await decoder.decode(vin);
     if (!decode) continue;
     first ??= { decoder, decode };
-    const vehicles = await vehiclesFor(catalog, decode);
+    const vehicles = await vehiclesFor(catalog, decode, vin);
     if (vehicles.length) return { answer: { decoder, decode }, vehicles };
   }
   return { answer: first, vehicles: [] };
