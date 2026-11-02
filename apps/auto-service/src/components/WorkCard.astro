@@ -4,6 +4,7 @@ import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { localizedWork, titleNamesCar, type Work } from '@/utils/works';
 import { isServiceSlug } from '@/utils/services';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { content } from '@/i18n/content';
 
 interface Props {
@@ -35,7 +36,7 @@ const applied = (tags ? work.data.servicesApplied : [])
     src={work.data.image}
     alt={title}
     widths={[360, 560, 760, 1080]}
-    sizes={sizes}
+    sizes={coverSizes(sizes, coverScale(work.data.image, 4 / 3))}
     quality={68}
     loading={eager ? 'eager' : 'lazy'}
     class="aspect-[4/3] w-full object-cover object-[50%_40%]"
