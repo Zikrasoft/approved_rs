@@ -65,7 +65,7 @@ suggestNone: 'Найдем «{q}» вручную: отправить запро
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: 895c133efb2fde46
+translatedFrom: 16574c1f83d98a2b
 translations:
   sr:
     searchHeading: Pronađite deo
@@ -122,6 +122,12 @@ translations:
     carsGroup: Automobili
     allModifications: Sve verzije
     partsGroup: Auto-delovi
+    sortLabel: Sortiranje
+    sortDefault: Podrazumevano
+    sortPopular: Najpopularnije
+    popularHeading: Često se naručuje
+    popularForCar: Često se naručuje za {car}
+    popularBadge: Čest izbor
     vinOption: Pronađite delove po VIN-u
     suggestFailed: Predlozi nisu učitani
     suggestRetry: Pokušajte ponovo
@@ -184,6 +190,12 @@ translations:
     carsGroup: Vehicles
     allModifications: All variants
     partsGroup: Parts
+    sortLabel: Sort by
+    sortDefault: Default
+    sortPopular: Most popular
+    popularHeading: Frequently ordered
+    popularForCar: Frequently ordered for {car}
+    popularBadge: Popular choice
     vinOption: Find parts by VIN
     suggestFailed: Couldn't load suggestions
     suggestRetry: Try again
