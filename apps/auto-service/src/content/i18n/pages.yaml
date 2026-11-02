@@ -79,6 +79,13 @@ partsInquiry:
     fieldsHeading: На что смотреть при выборе
     pageName: '{name}, страница {page}'
     pagination: Страницы категории
+    car:
+      heading: Для моего авто
+      make: Марка
+      makePlaceholder: Любая марка
+      model: Модель
+      modelPlaceholder: Выберите модель
+      submit: Показать запчасти
 thanks:
   metaTitle: Заявка принята | CarLab
   metaDescription: Спасибо за заявку. Свяжемся в рабочее время и согласуем время визита.

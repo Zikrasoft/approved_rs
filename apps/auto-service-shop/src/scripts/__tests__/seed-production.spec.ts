@@ -79,6 +79,8 @@ medusaIntegrationTestRunner({
           'length',
           'width',
           'height',
+          'terminal-type',
+          'terminal-layout',
         ]);
         expect(fields[0]).toMatchObject({
           type: 'number',
@@ -113,6 +115,131 @@ medusaIntegrationTestRunner({
           ['agm', 'AGM'],
           ['lithium', 'Литий-ионный'],
         ]);
+      });
+
+      it('gives the battery terminals a type and a layout to filter by, apart from polarity', async () => {
+        const [batteries] = await catalog.listCategories({ slug: 'batteries' });
+        const fields = await catalog.listCategoryFields(
+          {
+            category_id: batteries.id,
+            key: ['terminal-type', 'terminal-layout'],
+          },
+          { relations: ['options'], order: { rank: 'ASC' } },
+        );
+        expect(
+          fields.map(({ key, type, facet, options }) => ({
+            key,
+            type,
+            facet,
+            options: options.map((option) => option.key).sort(),
+          })),
+        ).toEqual([
+          {
+            key: 'terminal-type',
+            type: 'single-select',
+            facet: true,
+            options: ['screw', 'standard', 'thin'],
+          },
+          {
+            key: 'terminal-layout',
+            type: 'single-select',
+            facet: true,
+            options: ['diagonal', 'long-side', 'short-side'],
+          },
+        ]);
+      });
+
+      const fieldsOf = async (slug: string) => {
+        const [category] = await catalog.listCategories({ slug });
+        return catalog.listCategoryFields(
+          { category_id: category.id },
+          { relations: ['options'], order: { rank: 'ASC' }, take: null },
+        );
+      };
+
+      it('gives scheduled maintenance the engine oil and oil filter fields, every one optional and filterable', async () => {
+        const fields = await fieldsOf('maintenance-consumables');
+        expect(fields.map(({ key }) => key)).toEqual([
+          'viscosity',
+          'approvals',
+          'volume',
+          'base',
+          'acea',
+          'api',
+          'filter-type',
+          'height',
+          'outer-diameter',
+          'inner-diameter',
+          'thread',
+          'gasket-included',
+          'bypass-valve',
+          'length',
+        ]);
+        expect(fields.every(({ facet, required }) => facet && !required)).toBe(
+          true,
+        );
+        const field = (key: string) => fields.find((f) => f.key === key)!;
+        expect(
+          field('base').options.map(({ key, label }) => [key, label]),
+        ).toEqual(
+          expect.arrayContaining([
+            ['synthetic', 'Синтетическое'],
+            ['semi-synthetic', 'Полусинтетическое'],
+            ['mineral', 'Минеральное'],
+          ]),
+        );
+        expect([field('acea').type, field('api').type]).toEqual([
+          'multi-select',
+          'multi-select',
+        ]);
+        expect(field('bypass-valve')).toMatchObject({
+          type: 'boolean',
+          label: 'Перепускной клапан',
+        });
+        expect(field('inner-diameter')).toMatchObject({
+          type: 'number',
+          unit: 'мм',
+        });
+      });
+
+      it('gives the brake system the pad sizes, the brake system make and a disc diameter, every one optional', async () => {
+        const fields = await fieldsOf('brakes');
+        expect(fields.map(({ key }) => key)).toEqual([
+          'axle',
+          'thickness',
+          'width',
+          'height',
+          'brake-system',
+          'wear-sensor',
+          'diameter',
+        ]);
+        expect(fields.every(({ facet, required }) => facet && !required)).toBe(
+          true,
+        );
+        expect(
+          fields
+            .find(({ key }) => key === 'brake-system')!
+            .options.map(({ label }) => label),
+        ).toEqual([
+          'ATE',
+          'Bosch',
+          'Lucas/TRW',
+          'Akebono',
+          'Brembo',
+          'Sumitomo',
+        ]);
+      });
+
+      it('leaves the categories it has no fields for with Brand alone', async () => {
+        for (const slug of [
+          'suspension',
+          'engine-parts',
+          'electrics',
+          'transmission',
+          'body-parts',
+        ]) {
+          expect(await fieldsOf(slug)).toEqual([]);
+        }
       });
 
       it('seeds no Parts or offers', async () => {
@@ -315,6 +442,24 @@ medusaIntegrationTestRunner({
         expect(
           (await catalog.retrieveCategory(batteries.id)).service_price,
         ).toBe(3000);
+      });
+
+      it('keeps an edited maintenance field and restores an untouched one', async () => {
+        const fields = await fieldsOf('maintenance-consumables');
+        const field = (key: string) => fields.find((f) => f.key === key)!;
+        await catalog.updateCategoryFields([
+          { id: field('acea').id, facet: false, updated_by: 'user_1' },
+          { id: field('bypass-valve').id, label: 'Клапан' },
+        ]);
+
+        await run();
+
+        expect(
+          (await catalog.retrieveCategoryField(field('acea').id)).facet,
+        ).toBe(false);
+        expect(
+          (await catalog.retrieveCategoryField(field('bypass-valve').id)).label,
+        ).toBe('Перепускной клапан');
       });
 
       it('keeps a crawled Supplier, Brand, spelling, mapping or Make a person edited and restores the rest', async () => {

@@ -7,10 +7,12 @@ import Pagination from '@/components/Pagination.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
+import CarPicker from '@/components/CarPicker.astro';
 import ListingBar from '@/components/ListingBar.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { categoryCars, type CategoryCar } from '@/utils/categoryCars';
 import { cacheKey } from '@/utils/cacheKey';
 import {
   categoryListings,
@@ -27,23 +29,30 @@ import { rangeText, withFacetCopy } from '@/utils/partsSearch';
 
 export async function getStaticPaths() {
   const categories = await categoryPagesForBuild();
+  const hubs = await makeHubsForBuild();
   return withLocales(
-    categories.flatMap((category) =>
-      categoryListings(category).map((listing) => ({
+    categories.flatMap((category) => {
+      const cars = categoryCars(hubs, category.slug);
+      return categoryListings(category).map((listing) => ({
         params: {
           slug: category.slug,
           page: listing.number > 1 ? String(listing.number) : undefined,
         },
-        props: { category, listing },
-        cacheKey: cacheKey({ category, listing }),
-      })),
-    ),
+        props: { category, listing, cars },
+        cacheKey: cacheKey({ category, listing, cars }),
+      }));
+    }),
   );
 }
 
-const { category, listing } = Astro.props as {
+const {
+  category,
+  listing,
+  cars = [],
+} = Astro.props as {
   category: CategoryPageEntry;
   listing: CategoryListing;
+  cars?: CategoryCar[];
 };
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -126,9 +135,19 @@ const fields = category.fields
       empty
         ? 'lg:grid-cols-[1.2fr_1fr]'
         : filtered &&
-          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
+          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-10',
     ]}
   >
+    {
+      !empty && cars.length > 0 && (
+        <CarPicker
+          category={category.slug}
+          cars={cars}
+          class={filtered ? 'max-lg:mb-4 lg:col-start-2' : undefined}
+        />
+      )
+    }
+
     {
       filtered && (
         <FacetFilters
@@ -136,11 +155,17 @@ const fields = category.fields
           hidden={{ category: category.slug }}
           facets={facets}
           count={category.pages.length}
+          class="lg:col-start-1 lg:row-span-2 lg:row-start-1"
         />
       )
     }
 
-    <div class="flex min-w-0 flex-col gap-10">
+    <div
+      class:list={[
+        'flex min-w-0 flex-col gap-10',
+        filtered && 'lg:col-start-2',
+      ]}
+    >
       {
         !empty && (
           <div class="flex flex-col gap-3">

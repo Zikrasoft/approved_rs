@@ -23,13 +23,12 @@ import { parseEnv } from '../lib/env';
 import {
   BATTERY_CATEGORY,
   BATTERY_FIELDS,
+  BRAKE_PAD_FIELDS,
   CATEGORIES,
-  type FieldDefinition,
-  number,
-  select,
+  OIL_FIELDS,
+  OIL_FILTER_FIELDS,
   seedCategoryFields,
   seedProductionCatalogue,
-  yesNo,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -364,58 +363,6 @@ async function seedVehicles(catalog: CatalogModuleService) {
   return { b47, om654, v320d, v320i, v520d, vE220d };
 }
 
-const OIL_FIELDS: FieldDefinition[] = [
-  select('viscosity', 'Вязкость', true, true, [
-    ['0w-20', '0W-20'],
-    ['0w-30', '0W-30'],
-    ['5w-30', '5W-30'],
-    ['5w-40', '5W-40'],
-  ]),
-  {
-    ...select('approvals', 'Допуски', true, false, [
-      ['bmw-ll-04', 'BMW Longlife-04'],
-      ['bmw-ll-17fe', 'BMW Longlife-17 FE+'],
-      ['mb-229-51', 'MB 229.51'],
-      ['mb-229-52', 'MB 229.52'],
-      ['mb-229-71', 'MB 229.71'],
-    ]),
-    type: 'multi-select',
-  },
-  number('volume', 'Объем', 'л', true),
-];
-
-const OIL_FILTER_FIELDS: FieldDefinition[] = [
-  select('filter-type', 'Тип фильтра', true, false, [
-    ['cartridge', 'Сменный элемент'],
-    ['spin-on', 'Навинчиваемый'],
-  ]),
-  number('height', 'Высота', 'мм', true),
-  number('outer-diameter', 'Наружный диаметр', 'мм', true),
-  {
-    key: 'thread',
-    type: 'text',
-    label: 'Резьба',
-    unit: null,
-    facet: true,
-    required: false,
-    options: [],
-  },
-  yesNo('gasket-included', 'Уплотнение в комплекте', true),
-];
-
-const BRAKE_PAD_FIELDS: FieldDefinition[] = [
-  select('axle', 'Ось', true, true, [
-    ['front', 'Передняя'],
-    ['rear', 'Задняя'],
-  ]),
-  number('thickness', 'Толщина', 'мм', true),
-  select('wear-sensor', 'Датчик износа', true, false, [
-    ['included', 'В комплекте'],
-    ['prepared', 'Подготовлены под датчик'],
-    ['none', 'Без датчика'],
-  ]),
-];
-
 async function seedCategories(catalog: CatalogModuleService) {
   const [oil, filters, pads] = await reuse(
     [
@@ -649,6 +596,11 @@ async function seedCatalogue(
   logger.info('Seeded the demo catalogue and vehicles.');
 }
 
+const euroTerminals = {
+  'terminal-type': 'standard',
+  'terminal-layout': 'long-side',
+};
+
 const BATTERIES: {
   name: string;
   brand: string;
@@ -668,6 +620,7 @@ const BATTERIES: {
       'case-size': 'h7-l4',
       length: 315,
       height: 190,
+      ...euroTerminals,
     },
   },
   {
@@ -683,6 +636,7 @@ const BATTERIES: {
       'case-size': 'h8-l5',
       length: 353,
       height: 190,
+      ...euroTerminals,
     },
   },
   {
@@ -698,6 +652,7 @@ const BATTERIES: {
       'case-size': 'h6-l3',
       length: 278,
       height: 190,
+      ...euroTerminals,
     },
   },
   {
@@ -713,6 +668,7 @@ const BATTERIES: {
       'case-size': 'h7-l4',
       length: 315,
       height: 190,
+      ...euroTerminals,
     },
   },
   {
@@ -728,6 +684,7 @@ const BATTERIES: {
       'case-size': 'h6-l3',
       length: 278,
       height: 175,
+      ...euroTerminals,
     },
   },
 ];
@@ -792,55 +749,61 @@ type VarietyPart = {
   name: string;
   brand: string;
   number: string;
-  attributes: Record<string, string | number | boolean>;
+  attributes: Record<string, unknown>;
 };
 
-const cartridge = (height: number, diameter: number, gasket: boolean) => ({
+const cartridge = (
+  height: number,
+  diameter: number,
+  gasket: boolean,
+  inner: number,
+) => ({
   'filter-type': 'cartridge',
   height,
   'outer-diameter': diameter,
+  'inner-diameter': inner,
   'gasket-included': gasket,
+  'bypass-valve': false,
 });
 
-const spinOn = (height: number, diameter: number, thread: string) => ({
+const spinOn = (
+  height: number,
+  diameter: number,
+  thread: string,
+  inner: number,
+) => ({
   'filter-type': 'spin-on',
   height,
   'outer-diameter': diameter,
+  'inner-diameter': inner,
   thread,
   'gasket-included': true,
+  'bypass-valve': true,
 });
 
-const pads = (axle: string, thickness: number, sensor: string) => ({
+const pads = (
+  axle: string,
+  thickness: number,
+  sensor: string,
+  [width, height]: [number, number],
+  system: string,
+) => ({
   axle,
   thickness,
+  width,
+  height,
+  'brake-system': system,
   'wear-sensor': sensor,
 });
+
+const F30_FRONT: [number, number] = [155.1, 68.4];
+const F30_REAR: [number, number] = [123.1, 52.9];
 
 type DemoAttributes = [
   brand: string,
   number: string,
   attributes: Record<string, unknown>,
   name?: string,
-];
-
-const DEMO_ATTRIBUTES: DemoAttributes[] = [
-  ['mann-filter', 'HU816X', cartridge(125, 65, true)],
-  ['mann-filter', 'HU6020Z', cartridge(154, 64, true)],
-  ['ate', '13046027862', pads('front', 20, 'prepared')],
-  ['trw', 'GDB2033', pads('front', 20.3, 'prepared')],
-  ['ate', '13046072172', pads('front', 19.5, 'none')],
-  ['textar', '2459801', pads('rear', 17, 'prepared')],
-  [
-    'castrol',
-    '15F6E1',
-    { volume: 4 },
-    'Моторное масло Castrol EDGE 0W-20 V, 4 л',
-  ],
-  ...BATTERIES.map(({ brand, number, attributes }): DemoAttributes => [
-    brand,
-    number,
-    attributes,
-  ]),
 ];
 
 async function applyDemoAttributes(catalog: CatalogModuleService) {
@@ -875,49 +838,49 @@ const VARIETY_PARTS: { category: string; parts: VarietyPart[] }[] = [
         name: 'Масляный фильтр Mann-Filter W 712/75',
         brand: 'mann-filter',
         number: 'W 712/75',
-        attributes: spinOn(79, 76, 'M20x1.5'),
+        attributes: spinOn(79, 76, 'M20x1.5', 62),
       },
       {
         name: 'Масляный фильтр Mann-Filter W 610/3',
         brand: 'mann-filter',
         number: 'W 610/3',
-        attributes: spinOn(66, 76, '3/4-16 UNF'),
+        attributes: spinOn(66, 76, '3/4-16 UNF', 62),
       },
       {
         name: 'Масляный фильтр Mahle OC 90',
         brand: 'mahle',
         number: 'OC 90',
-        attributes: spinOn(79, 76, '3/4-16 UNF'),
+        attributes: spinOn(79, 76, '3/4-16 UNF', 63),
       },
       {
         name: 'Масляный фильтр Bosch F 026 407 236',
         brand: 'bosch',
         number: 'F 026 407 236',
-        attributes: spinOn(86, 76, 'M20x1.5'),
+        attributes: spinOn(86, 76, 'M20x1.5', 62),
       },
       {
         name: 'Масляный фильтр Hengst H90W24',
         brand: 'hengst',
         number: 'H90W24',
-        attributes: spinOn(96, 76, 'M20x1.5'),
+        attributes: spinOn(96, 76, 'M20x1.5', 71),
       },
       {
         name: 'Масляный фильтр Hengst E340H D247',
         brand: 'hengst',
         number: 'E340H D247',
-        attributes: cartridge(141, 71, true),
+        attributes: cartridge(141, 71, true, 31),
       },
       {
         name: 'Масляный фильтр Knecht OX 371D',
         brand: 'knecht',
         number: 'OX 371D',
-        attributes: cartridge(115, 64, true),
+        attributes: cartridge(115, 64, true, 25),
       },
       {
         name: 'Масляный фильтр Febi 27150',
         brand: 'febi',
         number: '27150',
-        attributes: cartridge(103, 65, false),
+        attributes: cartridge(103, 65, false, 25),
       },
     ],
   },
@@ -928,45 +891,114 @@ const VARIETY_PARTS: { category: string; parts: VarietyPart[] }[] = [
         name: 'Тормозные колодки передние Brembo P 06 038',
         brand: 'brembo',
         number: 'P 06 038',
-        attributes: pads('front', 20.3, 'prepared'),
+        attributes: pads('front', 20.3, 'prepared', F30_FRONT, 'ate'),
       },
       {
         name: 'Тормозные колодки передние Zimmermann 23921.200.1',
         brand: 'zimmermann',
         number: '23921.200.1',
-        attributes: pads('front', 20, 'prepared'),
+        attributes: pads('front', 20, 'prepared', F30_FRONT, 'ate'),
       },
       {
         name: 'Тормозные колодки передние Textar 2412201',
         brand: 'textar',
         number: '2412201',
-        attributes: pads('front', 19.8, 'included'),
+        attributes: pads('front', 19.8, 'included', [156.4, 68.4], 'bosch'),
       },
       {
         name: 'Тормозные колодки задние TRW GDB1919',
         brand: 'trw',
         number: 'GDB1919',
-        attributes: pads('rear', 17.5, 'prepared'),
+        attributes: pads('rear', 17.5, 'prepared', F30_REAR, 'lucas-trw'),
       },
       {
         name: 'Тормозные колодки задние ATE 13.0460-7230.2',
         brand: 'ate',
         number: '13.0460-7230.2',
-        attributes: pads('rear', 17.2, 'included'),
+        attributes: pads('rear', 17.2, 'included', F30_REAR, 'ate'),
       },
       {
         name: 'Тормозные колодки задние Brembo P 06 087',
         brand: 'brembo',
         number: 'P 06 087',
-        attributes: pads('rear', 16.8, 'none'),
+        attributes: pads('rear', 16.8, 'none', [116.4, 52.9], 'bosch'),
+      },
+    ],
+  },
+  {
+    category: 'engine-oil',
+    parts: [
+      {
+        name: 'Моторное масло Castrol MAGNATEC 10W-40 A3/B4, 4 л',
+        brand: 'castrol',
+        number: '15CA24',
+        attributes: {
+          viscosity: '10w-40',
+          volume: 4,
+          base: 'semi-synthetic',
+          acea: ['a3-b4'],
+          api: ['sn', 'cf'],
+        },
+      },
+    ],
+  },
+  {
+    category: 'batteries',
+    parts: [
+      {
+        name: 'Аккумулятор Bosch S4 024 Asia, 45 А·ч',
+        brand: 'bosch',
+        number: '0 092 S40 240',
+        attributes: {
+          capacity: 45,
+          'cold-cranking': 330,
+          voltage: 12,
+          technology: 'standard',
+          'start-stop': false,
+          polarity: 'reverse',
+          length: 238,
+          width: 129,
+          height: 227,
+          'terminal-type': 'thin',
+          'terminal-layout': 'short-side',
+        },
       },
     ],
   },
 ];
 
+const DEMO_ATTRIBUTES: DemoAttributes[] = [
+  ['mann-filter', 'HU816X', cartridge(125, 65, true, 25)],
+  ['mann-filter', 'HU6020Z', cartridge(154, 64, true, 31)],
+  ['ate', '13046027862', pads('front', 20, 'prepared', F30_FRONT, 'ate')],
+  ['trw', 'GDB2033', pads('front', 20.3, 'prepared', F30_FRONT, 'lucas-trw')],
+  ['ate', '13046072172', pads('front', 19.5, 'none', [155.1, 64], 'ate')],
+  ['textar', '2459801', pads('rear', 17, 'prepared', F30_REAR, 'ate')],
+  ['castrol', '15669E', { base: 'synthetic', acea: ['c3'], api: ['sn'] }],
+  [
+    'castrol',
+    '15F6E1',
+    { volume: 4, base: 'synthetic', acea: ['c5'], api: ['sp'] },
+    'Моторное масло Castrol EDGE 0W-20 V, 4 л',
+  ],
+  ...BATTERIES.map(({ brand, number, attributes }): DemoAttributes => [
+    brand,
+    number,
+    attributes,
+  ]),
+  ...VARIETY_PARTS.flatMap(({ parts }) =>
+    parts.map(({ brand, number, attributes }): DemoAttributes => [
+      brand,
+      number,
+      attributes,
+    ]),
+  ),
+];
+
 async function seedFilterVariety(
   catalog: CatalogModuleService,
   logger: Logger,
+  classifyImported: boolean,
 ) {
   await reuseBrands(catalog, VARIETY_BRANDS);
   const brand: Ids = Object.fromEntries(
@@ -989,10 +1021,12 @@ async function seedFilterVariety(
     for (const { name, brand: brandSlug, number, attributes } of parts) {
       const imported = await existing(brandSlug, number);
       if (imported) {
-        await catalog.classifyPart(imported.part_id, {
-          category_id: category[slug],
-          attributes,
-        });
+        if (classifyImported) {
+          await catalog.classifyPart(imported.part_id, {
+            category_id: category[slug],
+            attributes,
+          });
+        }
         continue;
       }
       await catalog.createPartWithIdentifiers({
@@ -1009,7 +1043,7 @@ async function seedFilterVariety(
       });
     }
   }
-  logger.info('Seeded the demo oil filter and brake pad variety.');
+  logger.info('Seeded the demo part variety.');
 }
 
 async function syncDemoSuppliers(
@@ -1092,11 +1126,11 @@ export default async function seedDemo({ container }: ExecArgs) {
   } else {
     await seedBatteries(catalog, logger);
   }
-  if ((await catalog.listBrands({ slug: 'hengst' })).length) {
-    logger.info('Demo filter variety already seeded, skipping.');
-  } else {
-    await seedFilterVariety(catalog, logger);
-  }
+  await seedFilterVariety(
+    catalog,
+    logger,
+    !(await catalog.listBrands({ slug: 'hengst' })).length,
+  );
   await applyDemoAttributes(catalog);
   await syncDemoSuppliers(catalog, suppliers);
   await seedDemoImages(container, catalog);

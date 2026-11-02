@@ -141,6 +141,16 @@ export const pagesContentSchema = z
             fieldsHeading: z.string(),
             pageName: z.string().includes('{name}').includes('{page}'),
             pagination: z.string(),
+            car: z
+              .object({
+                heading: z.string(),
+                make: z.string(),
+                makePlaceholder: z.string(),
+                model: z.string(),
+                modelPlaceholder: z.string(),
+                submit: z.string(),
+              })
+              .strict(),
           })
           .strict(),
       })

@@ -1,0 +1,71 @@
+---
+import SelectField from './SelectField.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { modelName } from '@/utils/carName';
+import type { CategoryCar } from '@/utils/categoryCars';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  category: string;
+  cars: CategoryCar[];
+  class?: string;
+}
+
+const { category, cars, class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).pages.partsInquiry.category.car;
+---
+
+<car-picker
+  class:list={['card block p-4 sm:p-5', className]}
+  data-href={PathBuilder.partsModelCategory(
+    locale,
+    '{make}',
+    '{model}',
+    category,
+  )}
+>
+  <form
+    method="GET"
+    action={PathBuilder.partsSearch(locale)}
+    class="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_auto] xl:items-end"
+  >
+    <h2 class="text-block font-semibold text-ink sm:col-span-2 xl:col-span-3">
+      {copy.heading}
+    </h2>
+    <input type="hidden" name="category" value={category} />
+    <SelectField
+      name="make"
+      label={copy.make}
+      placeholder={copy.makePlaceholder}
+    >
+      {cars.map(({ make }) => <option value={make.slug}>{make.name}</option>)}
+    </SelectField>
+    <SelectField
+      name="model"
+      label={copy.model}
+      placeholder={copy.modelPlaceholder}
+      required
+    >
+      {
+        cars.map(({ make, models }) => (
+          <optgroup label={make.name} data-make={make.slug}>
+            {models.map((model) => (
+              <option value={model.slug}>{modelName(model, locale)}</option>
+            ))}
+          </optgroup>
+        ))
+      }
+    </SelectField>
+    <button type="submit" class="btn btn-primary sm:col-span-2 xl:col-span-1">
+      {copy.submit}
+    </button>
+  </form>
+</car-picker>
+
+<script>
+  import { defineCarPicker } from '@/scripts/carPicker';
+
+  defineCarPicker();
+</script>
