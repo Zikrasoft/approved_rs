@@ -9,19 +9,14 @@ import { inShopCurrency } from '../modules/supplier';
 import type { LeadOrder } from './order-lead';
 import { readPlacedOrder } from './placed-order';
 import { vehicleForVin } from './vin/car-for';
+import { vinModelYears } from './vin/model-year';
 
-const VIN_YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789';
-const VIN_YEAR_CYCLES = [1980, 2010, 2040];
-
-const modelYear = (vin: string, { year_from, year_to }: Vehicle) => {
-  const code = VIN_YEAR_CODES.indexOf(vin.charAt(9));
-  if (code < 0 || year_from === null) return null;
-  return (
-    VIN_YEAR_CYCLES.map((cycle) => cycle + code).find(
-      (year) => year >= year_from && year <= (year_to ?? year),
-    ) ?? null
-  );
-};
+const modelYear = (vin: string, { year_from, year_to }: Vehicle) =>
+  year_from === null
+    ? null
+    : (vinModelYears(vin).find(
+        (year) => year >= year_from && year <= (year_to ?? year),
+      ) ?? null);
 
 async function carOf(
   container: MedusaContainer,
