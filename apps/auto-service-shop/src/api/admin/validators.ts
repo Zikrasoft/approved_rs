@@ -14,6 +14,7 @@ import {
   vinSchema,
 } from '@podbor/catalog-contract';
 
+import { DEMAND_REPORT_DAYS } from '../../modules/demand/ranking';
 import { MAX_LINKED_VEHICLES } from '../../lib/vin/linkable';
 import { PART_IDENTIFIER_TYPES } from '../../modules/catalog/models/part-identifier';
 
@@ -112,6 +113,14 @@ export const AdminListUnresolvedVinCodes = z.object({
 export type AdminListUnresolvedVinCodesType = z.infer<
   typeof AdminListUnresolvedVinCodes
 >;
+
+export const AdminDemandReport = z.object({
+  days: z.coerce
+    .number()
+    .refine((days) => (DEMAND_REPORT_DAYS as readonly number[]).includes(days))
+    .default(30),
+});
+export type AdminDemandReportType = z.infer<typeof AdminDemandReport>;
 
 export const AdminListPartIdentifiers = z.object({
   enriched: z

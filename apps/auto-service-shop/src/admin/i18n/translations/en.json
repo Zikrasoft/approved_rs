@@ -11,7 +11,8 @@
     "categories": "Categories",
     "partAttributes": "Part attributes",
     "requirements": "Requirements",
-    "workshopQuotes": "Workshop quotes"
+    "workshopQuotes": "Workshop quotes",
+    "demand": "Demand"
   },
   "fitments": {
     "heading": "Fitment curation",
@@ -1055,5 +1056,28 @@
     "hint": "Lower-case Latin letters, digits and hyphens. An address used before cannot be taken again.",
     "save": "Rename",
     "renamed": "Address changed to {{slug}}. The site updates after the next publish."
+  },
+  "demand": {
+    "heading": "Demand",
+    "lead": "What visitors ask for and order on the site. An order weighs {{orders}}, an inquiry {{inquiries}}, a pick in the search suggestions {{picks}}. Empty queries show what people search for and do not find: the first candidates for the catalogue.",
+    "period": "Period",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "parts": "Parts",
+    "categories": "Categories",
+    "cars": "Cars",
+    "missedQueries": "Queries without results",
+    "empty": "No data for this period.",
+    "columns": {
+      "part": "Part",
+      "category": "Category",
+      "orders": "Orders",
+      "inquiries": "Inquiries",
+      "picks": "Search picks",
+      "score": "Weight",
+      "car": "Car",
+      "query": "Query",
+      "searches": "Searches"
+    }
   }
 }

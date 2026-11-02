@@ -2,6 +2,7 @@ import type { PartDemand } from '@podbor/catalog-contract';
 
 export const DEMAND_WEIGHTS = { orders: 5, inquiries: 3, picks: 1 } as const;
 export const DEMAND_WINDOW_DAYS = 30;
+export const DEMAND_REPORT_DAYS = [7, DEMAND_WINDOW_DAYS, 90] as const;
 export const POPULAR_MIN_SIGNALS = 2;
 export const TOP_IN_CATEGORY = 3;
 
