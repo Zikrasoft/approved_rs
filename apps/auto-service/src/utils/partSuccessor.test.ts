@@ -28,6 +28,7 @@ const entry = (
   overrides: Partial<PartPageEntry> = {},
 ): PartPageEntry => ({
   ...numbered,
+  listed: null,
   slug: `${numbered.brand.slug}-${numbered.normalized_value.toLowerCase()}`,
   part: {
     id: 'part_1',

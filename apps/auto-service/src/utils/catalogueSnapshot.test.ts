@@ -117,6 +117,7 @@ function syntheticCatalogue(
         value: number,
         normalized_value: number,
         superseded: false,
+        listed: null,
         brand: { name: brand, slug: brand },
         images: [],
         part,

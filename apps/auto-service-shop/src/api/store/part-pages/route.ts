@@ -81,6 +81,7 @@ export async function GET(
     .resolve<PublishModuleService>(PUBLISH_MODULE)
     .publishedPage({ after, limit });
   const pageIds = published.map(({ id }) => id);
+  const listedById = new Map(published.map(({ id, listed }) => [id, listed]));
   const identifiers = pageIds.length
     ? await catalog.listPartIdentifiers(
         { id: pageIds },
@@ -120,6 +121,7 @@ export async function GET(
 
   const pages = identifiers.map((identifier) => ({
     ...picturedBrandNumber(identifier),
+    listed: listedById.get(identifier.id),
     part: {
       id: identifier.part.id,
       name: identifier.part.name,

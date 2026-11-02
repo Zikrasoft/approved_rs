@@ -9,6 +9,7 @@ import {
   type CarKind,
   makeHasPage,
   modelHasPage,
+  type PlaceParts,
   vehicleHasPage,
 } from '@podbor/catalog-contract';
 
@@ -19,7 +20,10 @@ import {
   readCarHit,
   vehicleKey,
 } from '../lib/car-pages';
+import { everyRequirementFit } from '../lib/requirement-fit';
 import { serbianScripts } from '../lib/serbian';
+import { CATALOG_MODULE } from '../modules/catalog';
+import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
 import type { ListedPartCount } from '../modules/publish/service';
@@ -57,9 +61,11 @@ type VehicleRow = {
 };
 
 export type PartCounts = {
-  vehicles: Map<string, number>;
-  models: Map<string, number>;
+  vehicles: Map<string, PlaceParts>;
+  models: Map<string, PlaceParts>;
 };
+
+const NO_PARTS: PlaceParts = { parts: 0, required: 0 };
 
 export const searchTokens = (text: string): string[] =>
   text
@@ -126,7 +132,7 @@ const groupBy = (
 
 export function carsWithPages(vehicles: VehicleRow[], counts: PartCounts) {
   const modelParts = ([row]: VehicleRow[]) =>
-    counts.models.get(modelOf(row)) ?? 0;
+    counts.models.get(modelOf(row)) ?? NO_PARTS;
   const models = groupBy(vehicles, modelOf).filter((rows) =>
     modelHasPage(modelParts(rows)),
   );
@@ -138,8 +144,8 @@ export function carsWithPages(vehicles: VehicleRow[], counts: PartCounts) {
     vehicles: models.flatMap((rows) =>
       rows.filter((row) =>
         vehicleHasPage({
-          parts: counts.vehicles.get(row.id) ?? 0,
-          modelParts: modelParts(rows),
+          vehicle: counts.vehicles.get(row.id) ?? NO_PARTS,
+          model: modelParts(rows),
         }),
       ),
     ),
@@ -258,9 +264,9 @@ const VEHICLE_FIELDS = [
 
 function partCountsOf(rows: ListedPartCount[]): PartCounts {
   const counts: PartCounts = { vehicles: new Map(), models: new Map() };
-  for (const { model_id, vehicle_id, parts } of rows) {
-    if (vehicle_id) counts.vehicles.set(vehicle_id, parts);
-    else counts.models.set(model_id, parts);
+  for (const { model_id, vehicle_id, parts, required } of rows) {
+    if (vehicle_id) counts.vehicles.set(vehicle_id, { parts, required });
+    else counts.models.set(model_id, { parts, required });
   }
   return counts;
 }
@@ -274,9 +280,12 @@ async function* seed({
   }
   const [{ data: vehicles }, counts] = await Promise.all([
     query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    container
-      .resolve<PublishModuleService>(PUBLISH_MODULE)
-      .listedPartCounts()
+    everyRequirementFit(container.resolve<CatalogModuleService>(CATALOG_MODULE))
+      .then((fits) =>
+        container
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .listedPartCounts(fits),
+      )
       .then(partCountsOf),
   ]);
   const documents = carDocuments(vehicles as VehicleRow[], counts);

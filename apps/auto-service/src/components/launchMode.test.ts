@@ -75,6 +75,7 @@ const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
   value: 'HU 816 x',
   normalized_value: 'HU816X',
   superseded: false,
+  listed: null,
   brand: { name: 'MANN-FILTER', slug: 'mann-filter' },
   images: [],
   slug: 'mann-filter-hu816x',

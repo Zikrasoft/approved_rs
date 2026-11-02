@@ -1773,10 +1773,6 @@ exports[`makeHubsFrom > groups Parts by Model and Category, fitted before requir
             "part_19:mann-filter-hu19:fit_19_14 part_60:mann-filter-hu60:fit_60_18+fit_60_19",
           ],
           [
-            "category-2",
-            "part_63:mann-filter-hu63+bosch-f63:",
-          ],
-          [
             "category-3",
             "part_10:mann-filter-hu10:fit_10_9 part_100:mann-filter-hu100:fit_100_14",
           ],
@@ -4193,10 +4189,6 @@ exports[`makeHubsFrom > groups Parts by Model and Category, fitted before requir
           [
             "category-0",
             "part_69:mann-filter-hu69:fit_69_19",
-          ],
-          [
-            "category-1",
-            "part_113:mann-filter-hu113:",
           ],
           [
             "category-3",

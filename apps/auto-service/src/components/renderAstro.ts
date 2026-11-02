@@ -49,6 +49,7 @@ export const partPage = (over: Partial<PartPageEntry> = {}): PartPageEntry => ({
   value: '0 986 494 524',
   normalized_value: '0986494524',
   superseded: false,
+  listed: null,
   brand: { name: 'Bosch', slug: 'bosch' },
   images: [],
   part: {
