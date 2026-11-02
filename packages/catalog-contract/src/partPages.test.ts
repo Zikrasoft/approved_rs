@@ -24,6 +24,7 @@ const page = {
   equivalents: [],
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
+  demand: null,
 };
 
 describe('partPageSchema', () => {
@@ -175,6 +176,17 @@ describe('partPageSchema', () => {
     expect(partPageSchema.parse({ ...page, listed: false }).listed).toBe(false);
     expect(
       partPageSchema.parse({ ...page, listed: undefined }).listed,
+    ).toBeNull();
+  });
+
+  it('reads the Demand of a number, null from a shop that does not say or says it unreadably', () => {
+    const demand = { score: 13, popular: true, top: false };
+    expect(partPageSchema.parse({ ...page, demand }).demand).toEqual(demand);
+    expect(
+      partPageSchema.parse({ ...page, demand: undefined }).demand,
+    ).toBeNull();
+    expect(
+      partPageSchema.parse({ ...page, demand: { score: -1 } }).demand,
     ).toBeNull();
   });
 

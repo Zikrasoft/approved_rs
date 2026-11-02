@@ -425,6 +425,69 @@ describe('planSearch', () => {
     );
   });
 
+  it('lists a category by demand, keeping the sort on filters, pages and the reset', async () => {
+    const catalogue = batteries(45);
+    const outcome = await plan(
+      'category=batteries&sort=popular&facets=brand%3Abosch',
+      catalogue,
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(catalogue.search).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'batteries', sort: 'popular' }),
+    );
+    expect(outcome.view.sort).toBe('popular');
+    expect(outcome.view.searchHref(['brand:bosch'], [], 20)).toBe(
+      '/ru/parts/search/?category=batteries&sort=popular&facets=brand%3Abosch&offset=20',
+    );
+    expect(outcome.view.filtersHref([], [])).toBe(
+      '/ru/parts/search/?category=batteries&sort=popular',
+    );
+  });
+
+  it('links each order from the first page, the default one back to the category page', async () => {
+    const outcome = await plan(
+      'category=batteries&sort=popular&offset=20',
+      batteries(45),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sortHrefs).toEqual({
+      default: '/ru/parts/c/batteries/',
+      popular: '/ru/parts/search/?category=batteries&sort=popular',
+    });
+  });
+
+  it('keeps a filtered default order on the search', async () => {
+    const outcome = await plan(
+      'category=batteries&facets=brand%3Abosch',
+      batteries(),
+    );
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.sort).toBeNull();
+    expect(outcome.view.sortHrefs).toEqual({
+      default: '/ru/parts/search/?category=batteries&facets=brand%3Abosch',
+      popular:
+        '/ru/parts/search/?category=batteries&sort=popular&facets=brand%3Abosch',
+    });
+  });
+
+  it.each([
+    ['an order it does not know', 'category=batteries&sort=price'],
+    [
+      'an order beside a typed query',
+      'q=filter&category=batteries&sort=popular',
+    ],
+  ])('drops %s with a redirect', async (_, query) => {
+    const outcome = await plan(query, batteries());
+
+    expect(outcome).toEqual({
+      redirect: expect.not.stringContaining('sort='),
+      status: 302,
+    });
+  });
+
   it('drops a range on a facet that is not a number', async () => {
     expect(
       await plan(

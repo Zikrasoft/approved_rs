@@ -141,3 +141,55 @@ describe('an empty category', () => {
     expect(section.classList).not.toContain('md:py-band-lg');
   });
 });
+
+describe('demand on a category page', () => {
+  const demanded = (id: string, score: number, top: boolean) =>
+    partPage({
+      id,
+      slug: `bosch-${id}`,
+      value: id,
+      demand: { score, popular: true, top },
+      part: { ...partPage().part, id: `part_${id}` },
+    });
+  const headings = (doc: Element) =>
+    [...doc.querySelectorAll('h2')].map((heading) => text(heading));
+
+  it('shows what is often ordered in the category and badges its top parts', async () => {
+    const doc = await categoryPage(
+      [demanded('a', 6, false), demanded('b', 9, true)],
+      [],
+    );
+
+    expect(headings(doc)).toContain('Часто заказывают');
+    expect(doc.querySelectorAll('[data-demand-badge]').length).toBeGreaterThan(
+      0,
+    );
+  });
+
+  it('shows no block for a single popular part', async () => {
+    const doc = await categoryPage([demanded('a', 6, false), partPage()], []);
+
+    expect(headings(doc)).not.toContain('Часто заказывают');
+  });
+
+  it('offers the popular order on the search beside its own', async () => {
+    const doc = await categoryPage([partPage(), demanded('a', 6, false)], []);
+    const orders = [...doc.querySelectorAll('nav[aria-label="Порядок"] a')].map(
+      (link) => [link.getAttribute('href'), link.getAttribute('aria-current')],
+    );
+
+    expect(orders).toEqual([
+      ['/ru/parts/c/batteries/', 'page'],
+      ['/ru/parts/search/?category=batteries&sort=popular', null],
+    ]);
+  });
+
+  it('offers no popular order while nothing in the category is demanded', async () => {
+    const doc = await categoryPage(
+      [partPage(), partPage({ id: 'pi_ate', slug: 'ate-1' })],
+      [],
+    );
+
+    expect(doc.querySelector('nav[aria-label="Порядок"]')).toBeNull();
+  });
+});

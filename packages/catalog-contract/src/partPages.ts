@@ -49,6 +49,17 @@ export const supplierDataSchema = z.object({
   images: z.array(z.url()),
 });
 
+export const partDemandSchema = z.object({
+  score: z.number().int().nonnegative(),
+  popular: z.boolean(),
+  top: z.boolean(),
+});
+
+export const demandField = partDemandSchema
+  .nullable()
+  .default(null)
+  .catch(null);
+
 export const partPageSchema = picturedBrandNumberSchema.extend({
   listed: z.boolean().nullable().default(null),
   part: z.object({
@@ -71,6 +82,7 @@ export const partPageSchema = picturedBrandNumberSchema.extend({
   equivalents: z.array(picturedBrandNumberSchema),
   offers: z.array(partOfferSchema),
   supplier_data: supplierDataSchema,
+  demand: demandField,
 });
 
 export const partPagesResponseSchema = z.object({
@@ -82,5 +94,6 @@ export type BrandNumber = z.infer<typeof brandNumberSchema>;
 export type PicturedBrandNumber = z.infer<typeof picturedBrandNumberSchema>;
 export type StagedDataKind = (typeof STAGED_DATA_KINDS)[number];
 export type SupplierData = z.infer<typeof supplierDataSchema>;
+export type PartDemand = z.infer<typeof partDemandSchema>;
 export type PartPage = z.infer<typeof partPageSchema>;
 export type PartPagesResponse = z.infer<typeof partPagesResponseSchema>;

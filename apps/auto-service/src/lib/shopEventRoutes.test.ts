@@ -84,6 +84,7 @@ beforeAll(async () => {
     import('@/pages/api/order'),
     import('@/pages/api/leads'),
     import('@/pages/api/csp-report'),
+    import('@/pages/api/part-pick'),
   ]);
 }, 60_000);
 
@@ -452,4 +453,36 @@ describe('/api/csp-report', () => {
       },
     ]);
   });
+});
+
+describe('/api/part-pick', () => {
+  const pick = async (body: string) =>
+    (await import('@/pages/api/part-pick')).POST(
+      context('https://carlab.rs/api/part-pick', {
+        method: 'POST',
+        body,
+        headers: { 'content-type': 'text/plain;charset=UTF-8' },
+      }),
+    );
+
+  it('reports the part a visitor picked from the suggestions, under the Vercel id', async () => {
+    expect((await pick('mann-filter-hu816x')).status).toBe(204);
+
+    expect(await events()).toEqual([
+      {
+        event: 'storefront.demand',
+        request_id: VERCEL_ID,
+        signal: 'pick',
+        parts: ['mann-filter-hu816x'],
+      },
+    ]);
+  });
+
+  it.each(['', 'Mann Filter', 'x'.repeat(200), '+381 60 1234567'])(
+    'passes nothing on for %j',
+    async (body) => {
+      expect((await pick(body)).status).toBe(204);
+      expect(await events()).toEqual([]);
+    },
+  );
 });

@@ -2,6 +2,7 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { z } from 'zod';
 
 import catalogSnapshot from '../modules/catalog/migrations/.snapshot-catalog.json';
+import demandSnapshot from '../modules/demand/migrations/.snapshot-demand.json';
 import publishSnapshot from '../modules/publish/migrations/.snapshot-publish.json';
 import supplierSnapshot from '../modules/supplier/migrations/.snapshot-supplier.json';
 import vinLookupSnapshot from '../modules/vin-lookup/migrations/.snapshot-vin-lookup.json';
@@ -26,6 +27,7 @@ export const SNAPSHOT_TABLES: SchemaTable[] = [
   supplierSnapshot,
   publishSnapshot,
   vinLookupSnapshot,
+  demandSnapshot,
 ].flatMap((snapshot) => snapshotSchema.parse(snapshot).tables);
 
 const column = (name: string, type: string, nullable = false) => ({

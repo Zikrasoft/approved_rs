@@ -1,0 +1,35 @@
+---
+import type { SearchSort } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  current: SearchSort | null;
+  hrefs: { default: string; popular: string };
+}
+
+const { current, hrefs } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+const orders = [
+  { label: copy.sortDefault, href: hrefs.default, on: current === null },
+  { label: copy.sortPopular, href: hrefs.popular, on: current === 'popular' },
+];
+---
+
+<nav aria-label={copy.sortLabel} class="flex">
+  <ul class="inline-flex gap-1 rounded-pill border border-line p-1">
+    {
+      orders.map(({ label, href, on }) => (
+        <li>
+          <a
+            href={href}
+            aria-current={on ? 'page' : undefined}
+            class="inline-flex min-h-9 items-center rounded-pill px-3 text-sm text-ink-2 transition-colors duration-150 hover:text-ink aria-[current=page]:bg-shade aria-[current=page]:font-semibold aria-[current=page]:text-ink pointer-coarse:min-h-11 motion-reduce:transition-none"
+          >
+            {label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

@@ -48,6 +48,7 @@ const result = (value: string, normalized: string, slug: string) => ({
   offers: [],
   thumbnail: null,
   thumbnail_illustration: null,
+  demand: null,
   slug,
   specs: '',
 });
@@ -283,6 +284,7 @@ describe('suggestionsFrom', () => {
           label: 'Mann-Filter HU 816 x',
           detail: 'Масляный фильтр',
           thumb: null,
+          slug: 'mann-filter-hu816x',
         },
       ],
     });

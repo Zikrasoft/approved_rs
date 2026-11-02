@@ -6,7 +6,7 @@ import {
   localizedUnit,
   translated,
 } from './categories.ts';
-import { brandNumberSchema } from './partPages.ts';
+import { brandNumberSchema, demandField } from './partPages.ts';
 import { partOfferSchema } from './cart-wire.ts';
 import { carHitSchema, vehicleSchema } from './vehicle.ts';
 
@@ -24,7 +24,12 @@ export const searchResultSchema = brandNumberSchema.extend({
   offers: z.array(partOfferSchema),
   thumbnail: z.url().nullable(),
   thumbnail_illustration: z.boolean().nullable().default(null),
+  demand: demandField,
 });
+
+export const SEARCH_SORTS = ['popular'] as const;
+
+export type SearchSort = (typeof SEARCH_SORTS)[number];
 
 const readableCars = z
   .array(z.unknown())

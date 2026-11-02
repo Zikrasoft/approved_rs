@@ -17,6 +17,7 @@ import {
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
 import { PARTS_LIST_CHANGED_EVENT, PARTS_LIST_STORAGE_KEY } from './cartBadge';
+import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 export const PARTS_INQUIRY_OPEN_ATTRIBUTE = 'data-open-parts-inquiry';
 
@@ -372,6 +373,9 @@ export function definePartsInquiry(tagName = 'parts-inquiry'): void {
         form.addEventListener('formdata', (event) => {
           const parts = readPartsList();
           if (parts.length === 0) return;
+          for (const { slug } of parts) {
+            event.formData.append(DEMAND_PARTS_FIELD, slug);
+          }
           event.formData.set(
             'comment',
             inquiryComment({

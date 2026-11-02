@@ -4,7 +4,7 @@ set -eu
 cd "$(dirname -- "$0")/../../apps/auto-service-shop"
 
 pnpm exec medusa db:migrate --skip-links --skip-search --skip-scripts
-pnpm exec medusa db:generate catalog supplier publish vin_lookup
+pnpm exec medusa db:generate catalog supplier publish vin_lookup demand
 
 drift=$(git status --porcelain -- 'src/modules/*/migrations/*')
 if [ -n "$drift" ]; then

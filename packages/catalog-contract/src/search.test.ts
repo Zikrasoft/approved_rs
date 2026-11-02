@@ -45,6 +45,7 @@ const response = {
       ],
       thumbnail: 'https://api.carlab.rs/static/parts/a-160.webp',
       thumbnail_illustration: false,
+      demand: null,
     },
   ],
   facets: [
@@ -82,6 +83,18 @@ const bmwX3 = {
 describe('searchResponseSchema', () => {
   it('accepts a list of brand-numbers with their facets', () => {
     expect(searchResponseSchema.parse(response)).toEqual(response);
+  });
+
+  it('reads the Demand of a result, null from a shop that predates it', () => {
+    const [result] = response.results;
+    const demand = { score: 5, popular: false, top: false };
+    const read = (sent: unknown) =>
+      searchResponseSchema.parse({
+        ...response,
+        results: [{ ...result, demand: sent }],
+      }).results[0].demand;
+    expect(read(demand)).toEqual(demand);
+    expect(read(undefined)).toBeNull();
   });
 
   it('names the Category a listing was narrowed to', () => {

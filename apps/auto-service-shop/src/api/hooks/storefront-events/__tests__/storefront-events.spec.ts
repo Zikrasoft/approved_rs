@@ -8,6 +8,10 @@ import {
   loggedEvents,
   watchEvents,
 } from '../../../../../integration-tests/loggedEvents';
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
+import { DEMAND_MODULE } from '../../../../modules/demand';
+import type DemandModuleService from '../../../../modules/demand/service';
 
 const CURRENT = 'events-secret-current-0123456789abcdef';
 const PREVIOUS = 'events-secret-previous-0123456789abcdef';
@@ -24,9 +28,47 @@ const CHECKOUT = {
 };
 
 medusaIntegrationTestRunner({
-  testSuite: ({ api }) => {
+  testSuite: ({ api, getContainer }) => {
     describe('POST /hooks/storefront-events', () => {
       watchEvents();
+
+      let identifiers: Record<string, string>;
+
+      beforeAll(async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const [mann, mannFilter] = await catalog.createBrands([
+          { name: 'Mann', slug: 'mann' },
+          { name: 'Mann-Filter', slug: 'mann-filter' },
+        ]);
+        await catalog.createPartWithIdentifiers({
+          name: 'Oil filter',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: mannFilter.id,
+              value: 'HU 816 x',
+            },
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'FILTER-HU 816 x',
+            },
+          ],
+        });
+        identifiers = Object.fromEntries(
+          (await catalog.listPartIdentifiers({}, { relations: ['brand'] })).map(
+            ({ id, brand }) => [brand.slug, id],
+          ),
+        );
+      });
+
+      const demandOf = async (id: string) =>
+        (
+          await getContainer()
+            .resolve<DemandModuleService>(DEMAND_MODULE)
+            .countsSince(new Date(Date.now() - 86_400_000))
+        ).find((counted) => counted.id === id);
 
       const post = (body: unknown, secret: string | null = CURRENT) =>
         api
@@ -64,6 +106,76 @@ medusaIntegrationTestRunner({
           route: 'POST /hooks/storefront-events',
           status: 204,
         });
+      });
+
+      it('counts the numbers an inquiry named, logging how many and never which', async () => {
+        const response = await post({
+          event: 'storefront.demand',
+          request_id: 'fra1::inquiry-1',
+          signal: 'inquiry',
+          parts: [
+            'mann-filter-hu816x',
+            'mann-filter-hu816x',
+            'bosch-0986494524',
+          ],
+        });
+
+        expect(response.status).toBe(204);
+        expect(await demandOf(identifiers['mann-filter'])).toMatchObject({
+          inquiries: 1,
+        });
+        expect(await demandOf(identifiers.mann)).toBeUndefined();
+        expect(loggedEvents('storefront.demand')).toEqual([
+          {
+            event: 'storefront.demand',
+            at: expect.any(String),
+            request_id: 'fra1::inquiry-1',
+            signal: 'inquiry',
+            parts: 2,
+            matched: 1,
+          },
+        ]);
+        expect(JSON.stringify(loggedEvents())).not.toContain('hu816x');
+      });
+
+      it('reads the Brand from the slug before its number, which never holds a dash', async () => {
+        await post({
+          event: 'storefront.demand',
+          signal: 'pick',
+          parts: ['mann-filterhu816x'],
+        });
+
+        expect(await demandOf(identifiers.mann)).toMatchObject({ picks: 1 });
+      });
+
+      it('counts nothing for numbers the catalogue does not hold', async () => {
+        const response = await post({
+          event: 'storefront.demand',
+          signal: 'inquiry',
+          parts: ['nobrand-123456'],
+        });
+
+        expect(response.status).toBe(204);
+        expect(loggedEvents('storefront.demand')).toEqual([
+          expect.objectContaining({ parts: 1, matched: 0 }),
+        ]);
+      });
+
+      it('counts a redelivered event once, by its request id', async () => {
+        const pick = {
+          event: 'storefront.demand',
+          request_id: 'fra1::pick-1',
+          signal: 'pick',
+          parts: ['mann-filter-hu816x'],
+        };
+        const before = (await demandOf(identifiers['mann-filter']))?.picks ?? 0;
+
+        await post(pick);
+        await post(pick);
+
+        expect((await demandOf(identifiers['mann-filter']))?.picks).toBe(
+          before + 1,
+        );
       });
 
       it('takes the previous secret while one rotates, and nothing else', async () => {

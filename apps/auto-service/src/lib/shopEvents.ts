@@ -2,11 +2,14 @@ import { waitUntil } from '@vercel/functions';
 import {
   eventCodeSchema,
   STOREFRONT_EVENTS_PATH,
+  storefrontEventSchema,
   type StorefrontEventInput,
 } from '@podbor/catalog-contract/events';
+import { HONEYPOT_FIELD } from '@podbor/lead-crm/fields';
 import type { NotifyLead } from '@podbor/lead-crm';
 import { z } from 'zod';
 import { requestIdOf } from '@/utils/catalogueEnv';
+import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 export const SHOP_EVENT_TIMEOUT_MS = 2000;
 
@@ -117,3 +120,26 @@ export const reportedNotifyLead =
     });
     return result;
   };
+
+export const reportDemand = (
+  request: Request,
+  signal: 'inquiry' | 'pick',
+  slugs: unknown[],
+  report = reportShopEvent,
+): void => {
+  const event = {
+    event: 'storefront.demand' as const,
+    signal,
+    parts: [...new Set(slugs.map(String))],
+  };
+  if (storefrontEventSchema.safeParse(event).success) report(request, event);
+};
+
+export const reportInquiryDemand = (
+  request: Request,
+  form: FormData,
+  report = reportShopEvent,
+): void => {
+  if (form.get(HONEYPOT_FIELD)) return;
+  reportDemand(request, 'inquiry', form.getAll(DEMAND_PARTS_FIELD), report);
+};

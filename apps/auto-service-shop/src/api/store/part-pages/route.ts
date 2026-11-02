@@ -6,6 +6,7 @@ import {
 
 import { imagesSchema } from '../../../lib/images';
 import { installationPrice } from '../../../lib/installation';
+import { loadPartDemand } from '../../../lib/part-demand';
 import { pricesShown } from '../../../lib/shop-gate';
 import { nextCursor } from '../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../modules/catalog';
@@ -118,6 +119,7 @@ export async function GET(
     ? await suppliers.storeOffersFor(identifierIds)
     : new Map<string, PartOffer[]>();
   const supplierData = await releasedSupplierData(suppliers, identifierIds);
+  const demand = await loadPartDemand(req.scope);
 
   const pages = identifiers.map((identifier) => ({
     ...picturedBrandNumber(identifier),
@@ -140,6 +142,7 @@ export async function GET(
       .map(picturedBrandNumber),
     offers: offers.get(identifier.id) ?? [],
     supplier_data: supplierData(identifier.id),
+    demand: demand.get(identifier.id) ?? null,
   }));
 
   res.json(

@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
+import { HONEYPOT_FIELD } from '@podbor/lead-crm/fields';
 import {
   createShopEvents,
   reportedNotifyLead,
+  reportInquiryDemand,
   SHOP_EVENT_TIMEOUT_MS,
 } from './shopEvents';
+import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 const ENV = {
   MEDUSA_BACKEND_URL: 'https://api.carlab.test',
@@ -158,6 +161,57 @@ describe('reportedNotifyLead', () => {
       const [[, event]] = report.mock.calls;
       expect(event).toMatchObject({ source: 'contact-click', service: null });
       expect(JSON.stringify(event)).not.toMatch(/381601234567|Petar/);
+    },
+  );
+});
+
+describe('reportInquiryDemand', () => {
+  const request = new Request('http://localhost/api/leads', { method: 'POST' });
+  const form = (fields: [string, string][]) => {
+    const data = new FormData();
+    for (const [name, value] of fields) data.append(name, value);
+    return data;
+  };
+
+  it('reports the part page slugs an inquiry named, once each, and nothing else of the form', () => {
+    const report = vi.fn();
+
+    reportInquiryDemand(
+      request,
+      form([
+        [DEMAND_PARTS_FIELD, 'mann-filter-hu816x'],
+        [DEMAND_PARTS_FIELD, 'bosch-0986494524'],
+        [DEMAND_PARTS_FIELD, 'mann-filter-hu816x'],
+        ['contact', '+381601234567'],
+      ]),
+      report,
+    );
+
+    expect(report).toHaveBeenCalledWith(request, {
+      event: 'storefront.demand',
+      signal: 'inquiry',
+      parts: ['mann-filter-hu816x', 'bosch-0986494524'],
+    });
+  });
+
+  it.each([
+    ['names no part', []],
+    [
+      'tripped the honeypot',
+      [
+        [DEMAND_PARTS_FIELD, 'bosch-1'],
+        [HONEYPOT_FIELD, 'https://spam.example'],
+      ],
+    ],
+    ['names something that is not a slug', [[DEMAND_PARTS_FIELD, 'Bosch 1']]],
+  ] as [string, [string, string][]][])(
+    'reports nothing for a form that %s',
+    (_, fields) => {
+      const report = vi.fn();
+
+      reportInquiryDemand(request, form(fields), report);
+
+      expect(report).not.toHaveBeenCalled();
     },
   );
 });

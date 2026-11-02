@@ -284,6 +284,14 @@ Admin edits and Imports are saved at once but reach the site only on the next
 Publish; there is no scheduled run.
 _Avoid_: deploy, sync, nightly import
 
+**Demand**: how much visitors want a Brand-number over the last 30 days,
+counted from inquiries that name it, orders placed with it and picks of it in
+the search suggestions (weighted 3, 5 and 1). A Brand-number is popular from 2
+orders and inquiries on, and tops its Category among its 3 most demanded
+popular ones. Feeds the «Популярные» sort, the «Часто заказывают» block and the
+«Часто берут» badge (ADR-0060).
+_Avoid_: popularity, views, hits
+
 **Import**: one run that reads a single Supplier's catalogue into Parts,
 Brand-numbers, Offers and Fitments, started from that Supplier's button and
 finished in the background with a report of what it made and skipped. Only one

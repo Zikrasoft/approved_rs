@@ -1,0 +1,24 @@
+---
+import type { PartDemand } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { isTopDemand } from '@/utils/demand';
+
+interface Props {
+  pages: { demand: PartDemand | null }[];
+}
+
+const { pages } = Astro.props;
+const label = content(localeFrom(Astro.url.pathname)).partsSearch.popularBadge;
+---
+
+{
+  isTopDemand(pages) && (
+    <span
+      class="w-fit rounded-pill border border-line px-2 py-0.5 text-xs text-ink-2"
+      data-demand-badge
+    >
+      {label}
+    </span>
+  )
+}

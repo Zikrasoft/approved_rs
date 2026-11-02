@@ -8,7 +8,7 @@ import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { notifyLead } from '@/lib/crm';
-import { reportShopEvent } from '@/lib/shopEvents';
+import { reportInquiryDemand, reportShopEvent } from '@/lib/shopEvents';
 import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
@@ -61,7 +61,14 @@ const leadsRoute = createLeadsRoute({
 });
 
 export const POST: APIRoute = async (context) => {
+  const form = await context.request
+    .clone()
+    .formData()
+    .catch(() => null);
   const response = await leadsRoute(context);
+  if (response.status === 302 && form) {
+    reportInquiryDemand(context.request, form);
+  }
   if (response.status >= 400) {
     reportShopEvent(context.request, {
       event: 'storefront.lead',

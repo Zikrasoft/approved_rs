@@ -1320,6 +1320,11 @@ that would otherwise grow forever or hold personal data longer than needed:
   their `report`, except the newest run of each kind per Supplier, which the
   admin shows as the last one.
 - **Carts, 14 days** (`delete-stale-carts`, nightly).
+- **Part Demand, 120 days** (`refresh-part-demand`, nightly). Deletes
+  `part_demand_day`, `missed_query` and `demand_receipt` rows older than 120
+  days, then reindexes every number with demand in the last 31 days so the
+  «Популярные» sort follows the sliding 30-day score (ADR-0060). The rows hold
+  identifiers, counts and redacted queries, nothing personal.
 
 The crawl tables (`crawl_run`, `crawl_page`) belong to no Medusa module on
 purpose: only the crawler on the owner's Mac writes them, through raw SQL under

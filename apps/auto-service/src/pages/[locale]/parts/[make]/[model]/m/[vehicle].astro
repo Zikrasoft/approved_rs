@@ -14,6 +14,7 @@ import CardSectionHead from '@/components/CardSectionHead.astro';
 import { unconditionalFirst } from '@/utils/fitmentLabels';
 import AddonNote from '@/components/AddonNote.astro';
 import FittedPart from '@/components/FittedPart.astro';
+import PopularParts from '@/components/PopularParts.astro';
 import PriceTag from '@/components/PriceTag.astro';
 import LineItem from '@/components/LineItem.astro';
 import { pagesThumbnail } from '@/utils/partImages';
@@ -110,6 +111,13 @@ const kitPrice =
 
 const empty =
   kit.length === 0 && blocks.length === 0 && car.matches.length === 0;
+const carPages = [
+  ...car.kit.flatMap(({ pages }) => pages),
+  ...car.groups.flatMap(({ fitments }) =>
+    fitments.flatMap(({ pages }) => pages),
+  ),
+  ...car.matches.flatMap(({ parts }) => parts.flatMap(({ pages }) => pages)),
+];
 
 const years =
   vehicle.year_from &&
@@ -298,6 +306,8 @@ const specsSummary = [
           </parts-list-add-all>
         )
       }
+
+      <PopularParts pages={carPages} car={name} />
 
       <div class="flex flex-col gap-4">
         <h2 class="text-section">{copy.partsHeading}</h2>

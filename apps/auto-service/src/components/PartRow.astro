@@ -1,10 +1,11 @@
 ---
-import type { PartOffer } from '@podbor/catalog-contract';
+import type { PartDemand, PartOffer } from '@podbor/catalog-contract';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
 import Icon from './Icon.astro';
 import type { Thumbnail } from '@/utils/partImages';
+import DemandBadge from './DemandBadge.astro';
 import PartThumb from './PartThumb.astro';
 import PriceTag from './PriceTag.astro';
 
@@ -19,6 +20,7 @@ interface Props {
   superseded?: boolean;
   current?: { slug: string; brand: { name: string }; value: string } | null;
   priced?: { id: string; offers: PartOffer[] };
+  demand?: PartDemand | null;
 }
 
 const {
@@ -32,6 +34,7 @@ const {
   superseded,
   current,
   priced,
+  demand = null,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
@@ -55,6 +58,7 @@ const copy = content(locale).shopPart;
       {name && <span class="text-sm text-ink-2">{name}</span>}
       {specs && <span class="spec text-xs text-muted">{specs}</span>}
       {detail && <span class="text-xs text-muted">{detail}</span>}
+      <DemandBadge pages={[{ demand }]} />
       {
         superseded && (
           <span class="text-xs text-muted">

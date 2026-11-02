@@ -159,3 +159,95 @@ describe('the search page for filters that narrowed facets away', () => {
     expect(fieldset('polarity')?.hidden).toBe(true);
   });
 });
+
+describe('a category listed by demand on the search page', () => {
+  const result = (value: string, top: boolean) => ({
+    id: `pi_${value}`,
+    type: 'manufacturer-number',
+    value,
+    normalized_value: value,
+    superseded: false,
+    brand: { name: 'Varta', slug: 'varta' },
+    part: {
+      id: `part_${value}`,
+      name: 'Аккумулятор',
+      category: { slug: 'batteries', name: 'Аккумуляторы' },
+      attributes: null,
+    },
+    offers: [],
+    thumbnail: null,
+    demand: { score: top ? 9 : 3, popular: top, top },
+  });
+  const listed = {
+    ...answer(2),
+    results: [result('E11', true), result('E12', false)],
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json(listed)),
+    );
+  });
+
+  const popularPage = () =>
+    render(SearchPage, {
+      path: '/ru/parts/search/?category=batteries&sort=popular',
+    });
+
+  it('asks the shop for the popular order and marks it current', async () => {
+    const page = await popularPage();
+
+    expect(vi.mocked(fetch).mock.calls[0][0]).toContain('sort=popular');
+    expect(
+      [...page.querySelectorAll('nav[aria-label="Порядок"] a')].map((link) => [
+        link.getAttribute('href'),
+        link.getAttribute('aria-current'),
+      ]),
+    ).toEqual([
+      ['/ru/parts/c/batteries/', null],
+      ['/ru/parts/search/?category=batteries&sort=popular', 'page'],
+    ]);
+  });
+
+  it('badges the top part of the category', async () => {
+    const page = await popularPage();
+
+    expect(page.querySelectorAll('[data-demand-badge]')).toHaveLength(1);
+  });
+
+  it('keeps the order when filters are applied', async () => {
+    const page = await popularPage();
+
+    expect(
+      page
+        .querySelector('form input[type="hidden"][name="sort"]')
+        ?.getAttribute('value'),
+    ).toBe('popular');
+  });
+
+  it('offers no popular order for a listing nothing in which is demanded', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          ...listed,
+          results: listed.results.map((item) => ({ ...item, demand: null })),
+        }),
+      ),
+    );
+    const page = await render(SearchPage, {
+      path: '/ru/parts/search/?category=batteries',
+    });
+
+    expect(page.querySelector('nav[aria-label="Порядок"]')).toBeNull();
+  });
+
+  it('offers no order for a typed query, where relevance leads', async () => {
+    const page = await render(SearchPage, {
+      path: '/ru/parts/search/?q=varta',
+    });
+
+    expect(page.querySelector('nav[aria-label="Порядок"]')).toBeNull();
+  });
+});

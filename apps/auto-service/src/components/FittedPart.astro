@@ -6,6 +6,7 @@ import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { pagesThumbnail } from '@/utils/partImages';
 import { splitNumbers } from '@/utils/partNumbers';
 import { PathBuilder } from '@/utils/paths';
+import DemandBadge from './DemandBadge.astro';
 import PartNumbers from './PartNumbers.astro';
 import PriceTag from './PriceTag.astro';
 import ThumbRow from './ThumbRow.astro';
@@ -55,6 +56,7 @@ const href =
         )
       }
       {specs && <p class="spec text-xs text-muted">{specs}</p>}
+      <DemandBadge pages={pages} />
       <slot />
     </div>
     {

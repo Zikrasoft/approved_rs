@@ -14,11 +14,13 @@ import {
   IN_STOCK,
   IN_STOCK_FACET,
   type PartOffer,
+  type SearchSort,
 } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
+import { loadPartDemand } from '../lib/part-demand';
 import { requirementFits } from '../lib/requirement-fit';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -128,6 +130,7 @@ const toDocument = (
   facetFields: FacetFieldRow[],
   own: PartOffer[],
   fitted: CarAddress[],
+  demand: number,
 ) => {
   const [best] = own;
   return {
@@ -160,6 +163,7 @@ const toDocument = (
     measures: measures(row.part, facetFields),
     price: best?.price,
     cars: [...new Set(fitted.flatMap(fittedCarKeys))],
+    demand,
   };
 };
 
@@ -199,6 +203,7 @@ const source = {
       { data: fitments },
       { data: published },
       required,
+      demand,
     ] = await Promise.all([
       container.query.graph({
         entity: 'part_identifier',
@@ -243,6 +248,7 @@ const source = {
         appContainer.resolve<CatalogModuleService>(CATALOG_MODULE),
         parts,
       ),
+      loadPartDemand(appContainer),
     ]);
     const fitted = [...(fitments as FitmentRow[]), ...required];
     const offersOf = offersByIdentifier(offers as OfferRow[]);
@@ -264,6 +270,7 @@ const source = {
         fitted
           .filter(({ part_id }) => part_id === row.part.id)
           .map(({ vehicle }) => vehicle),
+        demand.get(row.id)?.score ?? 0,
       ),
     );
   },
@@ -283,9 +290,12 @@ const fittingFirst = (cars: string[]) =>
     ? [`_eval(cars:=[${cars.map((car) => `\`${car}\``).join(',')}]):desc`]
     : [];
 
+const TYPESENSE_SORT_FIELDS = 3;
+
 export const searchRanking = (
   locale: CatalogLocale,
   fitting: string[] = [],
+  sort: SearchSort | null = null,
 ) => {
   const own = localeFields(locale);
   const fields: [string, number, number][] = [
@@ -312,9 +322,12 @@ export const searchRanking = (
     text_match_type: 'max_weight',
     sort_by: [
       ...fittingFirst(fitting),
+      ...(sort === 'popular' ? ['demand:desc'] : []),
       '_text_match:desc',
       'standing:desc',
-    ].join(','),
+    ]
+      .slice(0, TYPESENSE_SORT_FIELDS)
+      .join(','),
   };
 };
 
@@ -327,6 +340,7 @@ export default defineSearchIndex({
     published: search.boolean().filterable().retrievable(false),
     listed: search.boolean().filterable().retrievable(false),
     standing: search.integer().sortable().retrievable(false),
+    demand: search.integer().sortable().retrievable(false),
     category: search.keyword().filterable().retrievable(false),
     cars: search.keyword().array().filterable().retrievable(false),
     brand: text(),

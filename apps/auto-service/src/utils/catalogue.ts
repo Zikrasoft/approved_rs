@@ -30,6 +30,7 @@ import {
   type Category,
   type SearchResponse,
   type SearchResult,
+  type SearchSort,
   type Vehicle,
   type VinFacts,
   CATALOGUE_ID_PATTERN,
@@ -68,6 +69,7 @@ export type SearchQuery = {
   locale: CatalogLocale;
   facets: string[];
   ranges?: RangeFilter[];
+  sort?: SearchSort | null;
   offset?: number;
   limit?: number;
 };
@@ -313,22 +315,25 @@ export function createCatalogue({
       return makeHubsFrom(await snapshot());
     },
 
-    async search({
-      q,
-      category,
-      make,
-      model,
-      locale,
-      facets,
-      ranges = [],
-      offset = 0,
-      limit,
-    }: SearchQuery): Promise<SearchOutcome | null> {
+    async search(query: SearchQuery): Promise<SearchOutcome | null> {
+      const {
+        q,
+        category,
+        make,
+        model,
+        locale,
+        facets,
+        ranges = [],
+        offset = 0,
+        limit,
+        sort = null,
+      } = query;
       const params = new URLSearchParams({
         ...(q ? { q: latinBrands(q) } : {}),
         locale,
         ...(category ? { category } : {}),
         ...(make && model ? { make, model } : {}),
+        ...(sort ? { sort } : {}),
       });
       for (const facet of facets) {
         if (!pricesHidden || !facet.startsWith(`${IN_STOCK_FACET}:`))
@@ -407,7 +412,7 @@ export function createCatalogue({
           'catalogue search failed',
           error instanceof z.ZodError ? z.prettifyError(error) : String(error),
         );
-        return null;
+        return sort ? this.search({ ...query, sort: null }) : null;
       }
     },
 

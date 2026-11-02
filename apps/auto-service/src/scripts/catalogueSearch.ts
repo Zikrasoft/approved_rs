@@ -7,7 +7,7 @@ const MIN_QUERY_LENGTH = 2;
 const compact = (text: string) => text.replace(/[\s.-]/g, '').toUpperCase();
 
 type Link = { href: string; label: string; detail?: string };
-type PartLink = Link & { thumb: string | null };
+type PartLink = Link & { thumb: string | null; slug: string };
 type Suggestions = { vin: boolean; cars: Link[]; parts: PartLink[] };
 type Group = 'cars' | 'parts' | 'vin' | 'none';
 
@@ -74,6 +74,7 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
           anchor.dataset.group = group;
           anchor.className =
             'flex min-h-11 items-center gap-3 rounded-control px-3 py-2 text-sm text-ink transition-colors hover:bg-shade motion-reduce:transition-none';
+          if ('slug' in link) anchor.dataset.slug = link.slug;
           if ('thumb' in link) {
             const blank = () => {
               const box = document.createElement('span');
@@ -261,6 +262,10 @@ export function defineCatalogueSearch(tagName = 'catalogue-search'): void {
             reachGoal(GOALS.searchSuggestionPick, {
               group: picked.dataset.group,
             });
+            const { slug } = picked.dataset;
+            const { pickEndpoint } = this.dataset;
+            if (slug && pickEndpoint)
+              navigator.sendBeacon?.(pickEndpoint, slug);
           }
         });
         this.addEventListener('focusout', (event) => {

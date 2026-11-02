@@ -6,6 +6,9 @@ import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
+import PopularParts from '@/components/PopularParts.astro';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { byDemand, demandOf, popularPicks } from '@/utils/demand';
 import { localeFrom } from '@/i18n/config';
 import {
   categoryPagesForBuild,
@@ -18,15 +21,19 @@ import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
-  const categories = (await categoryPagesForBuild()).map(
-    ({ pages, ...category }) => ({ ...category, empty: pages.length === 0 }),
-  );
+  const listed = await categoryPagesForBuild();
+  const categories = listed.map(({ pages, ...category }) => ({
+    ...category,
+    empty: pages.length === 0,
+    demand: demandOf(pages),
+  }));
+  const popular = popularPicks(listed.flatMap(({ pages }) => pages));
   const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
     ({ make }) => make,
   );
   return localePaths().map((path) => ({
     ...path,
-    props: { categories, makes },
+    props: { categories, makes, popular },
   }));
 }
 
@@ -35,16 +42,19 @@ const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
 const props = Astro.props as {
-  categories: (Category & { empty: boolean })[];
+  categories: (Category & { empty: boolean; demand: number })[];
   makes: { slug: string; name: string }[];
+  popular: PartPageEntry[];
 };
 const hubsCopy = content(locale).partsCar.hubs;
-const categories = props.categories.map((category) => ({
-  slug: category.slug,
-  name: translated(category, 'name', locale),
-  lead: paragraphs(translated(category, 'text', locale))[0],
-  empty: category.empty,
-}));
+const categories = byDemand(props.categories, ({ demand }) => demand).map(
+  (category) => ({
+    slug: category.slug,
+    name: translated(category, 'name', locale),
+    lead: paragraphs(translated(category, 'text', locale))[0],
+    empty: category.empty,
+  }),
+);
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
@@ -108,6 +118,8 @@ const categories = props.categories.map((category) => ({
         </div>
       )
     }
+
+    <PopularParts pages={props.popular} />
 
     {
       categories.length > 0 && (

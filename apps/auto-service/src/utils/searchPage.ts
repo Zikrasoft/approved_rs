@@ -4,6 +4,7 @@ import {
   filtersWithinCap,
   type RangeFilter,
   type SearchFacet,
+  type SearchSort,
   searchableQuery,
 } from '@podbor/catalog-contract';
 import { vinText } from '@podbor/lead-crm/vin';
@@ -85,6 +86,12 @@ const sheetOf = (live: SearchFacet[], scope: SearchFacet[]) => {
   };
 };
 
+export const popularListingHref = (
+  locale: Locale,
+  scope: { category: string; make?: string; model?: string },
+) =>
+  `${PathBuilder.partsSearch(locale)}?${new URLSearchParams({ ...scope, sort: 'popular' })}`;
+
 type SearchRedirect = { redirect: string; status: 302 | 303 };
 
 const redirectTo = (redirect: string, status: 302 | 303): SearchRedirect => ({
@@ -119,6 +126,9 @@ export async function planSearch({
     SHOP_MAX_OFFSET,
   );
 
+  const sort: SearchSort | null =
+    params.get('sort') === 'popular' && !typed ? 'popular' : null;
+
   const intent = searchIntent(typed);
   const vin = intent.kind === 'vin' ? intent.vin : null;
   const vinOutcome = vin && catalogue ? await catalogue.resolveVin(vin) : null;
@@ -149,6 +159,7 @@ export async function planSearch({
           facets: capped.facets,
           ranges: capped.ranges,
           offset,
+          sort,
         })
       : null,
   );
@@ -158,11 +169,13 @@ export async function planSearch({
     nextRanges: RangeFilter[],
     nextOffset = 0,
     scope = model,
+    nextSort = sort,
   ) => {
     const next = new URLSearchParams({
       ...(q ? { q } : {}),
       ...(category ? { category } : {}),
       ...(scope ? { ...(make && { make }), model: scope } : {}),
+      ...(nextSort ? { sort: nextSort } : {}),
     });
     for (const facet of facets) {
       next.append('facets', facet);
@@ -211,10 +224,14 @@ export async function planSearch({
           searchLabel: '',
         }).at(-1)?.href
       : undefined;
-  const filtersHref = (facets: string[], nextRanges: RangeFilter[]) =>
-    listing && !facets.length && !nextRanges.length
+  const filtersHref = (
+    facets: string[],
+    nextRanges: RangeFilter[],
+    nextSort = sort,
+  ) =>
+    listing && !nextSort && !facets.length && !nextRanges.length
       ? listing
-      : searchHref(facets, nextRanges);
+      : searchHref(facets, nextRanges, 0, model, nextSort);
   const listingKeepsModel =
     !model || Boolean(found?.model && found.scope_pages?.model);
   const page = found ? Math.min(offset, lastPageOf(found)) : offset;
@@ -226,6 +243,7 @@ export async function planSearch({
     (JSON.stringify(chosen) !== JSON.stringify(requestedFacets) ||
       !rangesAsWritten(params, ranges) ||
       (params.get('offset') ?? '') !== (page ? String(page) : '') ||
+      (params.get('sort') ?? '') !== (sort ?? '') ||
       strayScope ||
       capitalised(params))
   ) {
@@ -272,6 +290,11 @@ export async function planSearch({
       scope,
       unknownScope,
       ...sheetOf(found?.facets ?? [], unfiltered?.facets ?? []),
+      sort,
+      sortHrefs: {
+        default: filtersHref(chosen, ranges, null),
+        popular: searchHref(chosen, ranges, 0, model, 'popular'),
+      },
       searchHref,
       filtersHref,
     },

@@ -6,6 +6,8 @@ import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { DEMAND_MODULE } from '../../../../modules/demand';
+import type DemandModuleService from '../../../../modules/demand/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
@@ -167,6 +169,7 @@ medusaIntegrationTestRunner({
             applicability: [],
             images: [],
           },
+          demand: null,
         });
         const cabin = response.data.pages.find(
           (page: { normalized_value: string }) =>
@@ -179,6 +182,21 @@ medusaIntegrationTestRunner({
           attributes: {},
         });
         expect(cabin.offers).toEqual([]);
+      });
+
+      it('carries the Demand of a number that was asked for', async () => {
+        const [mannOil] = await getContainer()
+          .resolve<CatalogModuleService>(CATALOG_MODULE)
+          .listPartIdentifiers({ normalized_value: 'HU816X' });
+        await getContainer()
+          .resolve<DemandModuleService>(DEMAND_MODULE)
+          .record({ signal: 'inquiry', identifierIds: [mannOil.id] });
+
+        const page = (await get()).data.pages.find(
+          ({ id }: { id: string }) => id === mannOil.id,
+        );
+
+        expect(page.demand).toEqual({ score: 3, popular: false, top: false });
       });
 
       it('pages through the list', async () => {

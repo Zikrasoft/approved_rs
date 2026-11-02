@@ -52,6 +52,12 @@ similarNumbers: Похожие номера
 carsGroup: Автомобили
 allModifications: Все модификации
 partsGroup: Запчасти
+sortLabel: Порядок
+sortDefault: По умолчанию
+sortPopular: Популярные
+popularHeading: Часто заказывают
+popularForCar: Часто заказывают для {car}
+popularBadge: Часто берут
 vinOption: Подобрать запчасти по VIN
 suggestFailed: Подсказки не загрузились
 suggestRetry: Повторить

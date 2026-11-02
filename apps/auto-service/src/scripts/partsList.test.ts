@@ -17,6 +17,7 @@ import {
   setPartAddon,
 } from './partsList';
 import { PARTS_LIST_STORAGE_KEY } from './cartBadge';
+import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 const memoryStorage = (initial: Record<string, string> = {}) => {
   const items = new Map(Object.entries(initial));
@@ -430,6 +431,7 @@ describe('Подобрать on a part page', () => {
     expect(formData.get('comment')).toBe(
       'Mann-Filter HU 816 x, Масляный фильтр × 3',
     );
+    expect(formData.getAll(DEMAND_PARTS_FIELD)).toEqual(['mann-filter-hu816x']);
 
     press('[data-decrease]');
     expect(readPartsList()).toEqual([{ ...mannOil, quantity: 2 }]);

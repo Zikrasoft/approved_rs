@@ -1678,6 +1678,43 @@ describe('catalogue.search', () => {
     );
   });
 
+  it('asks the shop for the popular order of a listing', async () => {
+    const fetch = answer(found);
+
+    await catalog(fetch).search({
+      category: 'oil-filters',
+      locale: 'ru',
+      facets: [],
+      sort: 'popular',
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/search?locale=ru&category=oil-filters&sort=popular',
+      expect.anything(),
+    );
+  });
+
+  it('lists in the default order from a shop that does not know the popular one yet', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetch = vi.fn((url: string) =>
+      respond(url.includes('sort=') ? {} : found, !url.includes('sort=')),
+    );
+
+    const listed = await catalog(fetch).search({
+      category: 'oil-filters',
+      locale: 'ru',
+      facets: [],
+      sort: 'popular',
+    });
+
+    expect(listed?.count).toBe(found.count);
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://shop.test/store/search?locale=ru&category=oil-filters',
+      expect.anything(),
+    );
+    error.mockRestore();
+  });
+
   it('sends the query, the page locale, the chosen facets and ranges', async () => {
     const fetch = answer(found);
 

@@ -12,6 +12,12 @@ export const eventCodeSchema = z
   .refine((value) => !/\d{7}/.test(value), 'looks like a phone number');
 const code = eventCodeSchema;
 const count = z.number().int().nonnegative().max(1e9);
+export const MAX_DEMAND_PARTS = 50;
+export const DEMAND_SIGNALS = ['inquiry', 'pick'] as const;
+const partSlug = z
+  .string()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  .max(128);
 const host = z.string().regex(/^[a-z0-9.:[\]-]{1,253}$/i);
 
 const event = <Name extends string, Shape extends z.ZodRawShape>(
@@ -55,6 +61,10 @@ export const storefrontEventSchema = z.discriminatedUnion('event', [
     reason: code.nullable(),
   }),
   event('storefront.csp', { directive: code, blocked: host }),
+  event('storefront.demand', {
+    signal: z.enum(DEMAND_SIGNALS),
+    parts: z.array(partSlug).min(1).max(MAX_DEMAND_PARTS),
+  }),
 ]);
 
 export type StorefrontEvent = z.infer<typeof storefrontEventSchema>;

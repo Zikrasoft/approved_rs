@@ -64,6 +64,9 @@ export default defineConfig({
       resolve: './src/modules/publish',
     },
     {
+      resolve: './src/modules/demand',
+    },
+    {
       resolve: '@medusajs/medusa/file',
       options: {
         providers: [fileProvider],
