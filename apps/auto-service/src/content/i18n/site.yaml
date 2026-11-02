@@ -162,6 +162,13 @@ translations:
       facts:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
+    googleRating:
+      rating: '{rating} na Google-u'
+      reviews:
+        one: '{count} recenzija'
+        few: '{count} recenzije'
+        many: '{count} recenzija'
+        other: '{count} recenzije'
     channels:
       call: Pozovite
       whatsapp: WhatsApp
@@ -194,6 +201,7 @@ translations:
       privacyNotice: Slanjem upita saglasni ste sa
       moreDetails: Dodajte ime ili komentar
       modalTitle: Zakažite termin u servisu
+      callbackTitle: Pozvaćemo Vas
       errorPhone: Proverite broj telefona, izgleda da nije unet u celosti
       errorPhoneTooLong: Proverite broj telefona, ima previše cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
@@ -261,6 +269,13 @@ translations:
       facts:
         - We speak Serbian, Russian and English
         - Pay by cash or card
+    googleRating:
+      rating: '{rating} on Google'
+      reviews:
+        one: '{count} review'
+        few: '{count} reviews'
+        many: '{count} reviews'
+        other: '{count} reviews'
     channels:
       call: Call us
       whatsapp: WhatsApp
@@ -293,6 +308,7 @@ translations:
       privacyNotice: By submitting your enquiry, you agree to our
       moreDetails: Add your name or a comment
       modalTitle: Book a workshop appointment
+      callbackTitle: We'll call you back
       errorPhone: Check your phone number. It looks incomplete
       errorPhoneTooLong: Check your phone number. It has too many digits
       errorTelegram: Enter your Telegram @username or phone number
@@ -305,4 +321,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 1ce44769bd39404f
+translatedFrom: 4c1e130318d2d0b3

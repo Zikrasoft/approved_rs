@@ -272,7 +272,7 @@ translations:
       lead: Unesite VIN, kataloški broj ili naziv dela. Pronaći ćemo odgovarajući deo i javiti vam cenu i rok isporuke.
       sourcingNote: Pronalazimo originalne delove i proverene zamenske delove, a porudžbinu možete preuzeti u našem servisu u Beogradu.
       formHeading: Upit za rezervne delove
-      formNote: Proverićemo da li deo odgovara vašem vozilu i javiti cenu i rok isporuke putem kanala koji vam odgovara.
+      formNote: Proverićemo da li deo odgovara vašem vozilu, dati vam cenu i rok isporuke i javiti vam se na način koji vam odgovara.
       vinLabel: VIN ili broj šasije
       vinPlaceholder: Unesite VIN ili broj šasije
       commentLabel: Komentar
@@ -437,7 +437,7 @@ translations:
       lead: Enter your VIN, part number or part name. We'll find the right fit and confirm the price and lead time.
       sourcingNote: We source genuine parts and trusted aftermarket alternatives. Collect your order from our workshop in Belgrade.
       formHeading: Parts enquiry
-      formNote: We'll check compatibility and send you the price and lead time using your preferred contact method.
+      formNote: We'll check compatibility, confirm the price and lead time, and get back to you using your preferred contact method.
       vinLabel: VIN or chassis number
       vinPlaceholder: Enter VIN or chassis number
       commentLabel: Comment
@@ -494,4 +494,4 @@ translations:
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and tell you what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: 0d680a801c45856a
+translatedFrom: cd944869a9e3c94e
