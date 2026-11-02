@@ -4,7 +4,12 @@ import * as z from 'zod/mini';
 
 const GARAGE_CAR_KEY = 'my_garage_car';
 
-const garageCarSchema = z.object({ vin: z.string(), car: z.string() });
+const garageCarSchema = z.object({
+  vin: z.string(),
+  car: z.string(),
+  make: z.optional(z.string()),
+  model: z.optional(z.string()),
+});
 
 export type GarageCar = z.infer<typeof garageCarSchema>;
 

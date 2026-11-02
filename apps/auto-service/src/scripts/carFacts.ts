@@ -36,8 +36,8 @@ export function defineCarFacts(tagName = 'car-facts'): void {
         const vin = vinFrom(location.search);
         if (vin) {
           rememberVin(vin);
-          const { car } = this.dataset;
-          if (car) rememberCar({ vin, car });
+          const { car, make, model } = this.dataset;
+          if (car) rememberCar({ vin, car, make, model });
           this.confirmVin(vin);
         }
 
