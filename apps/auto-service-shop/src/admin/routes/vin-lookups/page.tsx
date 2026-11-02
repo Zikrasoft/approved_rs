@@ -14,7 +14,6 @@ import {
 } from '@medusajs/ui';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { STEERING_SIDES, VEHICLE_DRIVES } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import {
@@ -29,32 +28,19 @@ import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 import {
   labelledVehicleSchema,
-  type TFunction,
+  openDataLine,
+  openDataReferenceSchema,
   vehicleSpecLabel,
 } from '../../lib/vehicle-label';
 
 const SHOWN_VEHICLES = 100;
-
-const referenceSchema = z.object({
-  chassis: z.string(),
-  model: z.string(),
-  body: z.string().nullable(),
-  engine: z.string().nullable(),
-  power_kw: z.number().nullable(),
-  drivetrain: z.enum(VEHICLE_DRIVES).nullable(),
-  steering: z.enum(STEERING_SIDES),
-  from: z.string().nullable(),
-  to: z.string().nullable(),
-});
-
-type Reference = z.infer<typeof referenceSchema>;
 
 const unresolvedCodeSchema = z.object({
   make: z.string(),
   code: z.string(),
   count: z.number(),
   last_seen: z.string(),
-  reference: referenceSchema.nullable(),
+  reference: openDataReferenceSchema.nullable(),
 });
 
 type UnresolvedCode = z.infer<typeof unresolvedCodeSchema>;
@@ -91,26 +77,6 @@ const vehiclesSchema = z.object({
 });
 
 const linkedSchema = z.object({ linked: z.number() });
-
-const referenceYears = (t: TFunction, { from, to }: Reference) => {
-  if (from && to) return t('vehicleLabel.between', { from, to });
-  if (from) return t('vehicleLabel.since', { from });
-  return to ? t('vehicleLabel.until', { to }) : null;
-};
-
-const referenceLine = (t: TFunction, reference: Reference) =>
-  [
-    [reference.chassis, reference.model, reference.body]
-      .filter(Boolean)
-      .join(' '),
-    reference.engine,
-    reference.power_kw && t('vehicleLabel.kw', { kw: reference.power_kw }),
-    reference.drivetrain && t(`vehicles.values.drive.${reference.drivetrain}`),
-    t(`vehicleLabel.steering.${reference.steering}`),
-    referenceYears(t, reference),
-  ]
-    .filter(Boolean)
-    .join(', ');
 
 const LinkDrawer = ({
   entry,
@@ -210,7 +176,7 @@ const LinkDrawer = ({
             <Drawer.Description className="txt-small text-ui-fg-subtle">
               {entry?.reference
                 ? t('vinLookups.link.openData', {
-                    facts: referenceLine(t, entry.reference),
+                    facts: openDataLine(t, entry.reference),
                   })
                 : t('vinLookups.link.noOpenData')}
             </Drawer.Description>
@@ -379,7 +345,7 @@ const VinLookupsPage = () => {
                     </Table.Cell>
                     <Table.Cell className="max-w-[18rem] whitespace-normal break-words">
                       {entry.reference ? (
-                        referenceLine(t, entry.reference)
+                        openDataLine(t, entry.reference)
                       ) : (
                         <span className="text-ui-fg-muted">
                           {t('vinLookups.notInOpenData')}

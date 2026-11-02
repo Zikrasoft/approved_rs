@@ -11,3 +11,4 @@ apps/*/src/content/**/*.md
 apps/*/public/
 
 apps/auto-service-shop/src/lib/vin/bimmerarchive-type-keys.json
+apps/auto-service-shop/src/lib/vin/vag-model-codes.json
