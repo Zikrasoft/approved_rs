@@ -11,7 +11,12 @@ type StorefrontEvents = {
   [E in StorefrontEvent as E['event']]: Omit<E, 'event' | 'request_id'>;
 };
 
-export type ShopEvents = StorefrontEvents & {
+export type ShopEvents = Omit<StorefrontEvents, 'storefront.demand'> & {
+  'storefront.demand': {
+    signal: StorefrontEvents['storefront.demand']['signal'];
+    parts: number;
+    matched: number;
+  };
   'store.request': {
     outcome: 'ok' | 'refused' | 'failed';
     reason: string | null;
@@ -93,7 +98,11 @@ export function logEvent<Name extends EventName>(
 }
 
 export const logStorefrontEvent = (
-  { event, request_id, ...fields }: StorefrontEvent,
+  {
+    event,
+    request_id,
+    ...fields
+  }: Exclude<StorefrontEvent, { event: 'storefront.demand' }>,
   fallbackId: string | null,
 ): void =>
   logEvent(event, fields as ShopEvents[typeof event], request_id ?? fallbackId);
