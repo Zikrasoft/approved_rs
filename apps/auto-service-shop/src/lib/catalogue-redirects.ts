@@ -34,21 +34,6 @@ async function allRedirects(
   }
 }
 
-export const latestPartRedirects = <
-  Row extends { kind: string; from_slug: string },
->(
-  rows: Row[],
-): Row[] => {
-  const latest = new Map(
-    rows.flatMap((row) =>
-      row.kind === 'part' ? [[row.from_slug, row] as const] : [],
-    ),
-  );
-  return rows.filter(
-    (row) => row.kind !== 'part' || latest.get(row.from_slug) === row,
-  );
-};
-
 const inChunks = async <T>(
   ids: string[],
   list: (chunk: string[]) => Promise<T[]>,
@@ -60,7 +45,7 @@ const inChunks = async <T>(
 export async function catalogueRedirects(
   catalog: CatalogModuleService,
 ): Promise<CatalogueRedirect[]> {
-  const rows = latestPartRedirects(await allRedirects(catalog));
+  const rows = await allRedirects(catalog);
   const columns = { select: ['id', 'slug'], take: null };
   const targetIds = (kind: SlugKind) =>
     rows.flatMap(({ target_kind, target_id }) =>

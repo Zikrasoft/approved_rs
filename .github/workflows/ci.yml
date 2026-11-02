@@ -38,6 +38,8 @@ jobs:
         run: |
           docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres createdb -U postgres migration_drift
           DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/migration_drift sh .github/scripts/shop-migration-drift.sh
+      - run: sh .github/scripts/shop-migrations-frozen.sh
+      - run: sh .github/scripts/shop-migrations-frozen.test.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
 

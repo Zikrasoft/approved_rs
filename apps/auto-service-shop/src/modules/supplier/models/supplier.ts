@@ -1,4 +1,5 @@
 import { model } from '@medusajs/framework/utils';
+import { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
 import StagedRecord from './staged-record';
 import SupplierCategory from './supplier-category';
@@ -26,6 +27,10 @@ const Supplier = model
     {
       name: 'supplier_markup_percentage',
       expression: 'markup_percentage >= 0',
+    },
+    {
+      name: 'supplier_released_kinds',
+      expression: `released_kinds <@ array[${STAGED_DATA_KINDS.map((kind) => `'${kind}'`).join(', ')}]::text[]`,
     },
   ]);
 

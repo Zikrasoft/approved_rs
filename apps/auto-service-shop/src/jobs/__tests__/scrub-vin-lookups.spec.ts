@@ -1,0 +1,106 @@
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+
+import { VIN_LOOKUP_MODULE } from '../../modules/vin-lookup';
+import type VinLookupModuleService from '../../modules/vin-lookup/service';
+import scrubVinLookups, {
+  scrubVinLookupsAt,
+  VIN_KEPT_FOR_DAYS,
+} from '../scrub-vin-lookups';
+
+const DAY_MS = 86_400_000;
+
+const lookup = (vin: string) => ({
+  vin,
+  decoder: 'test',
+  decoder_version: 1,
+  raw: { decoded: vin },
+  facts: { model_year: 2018 },
+  make: 'bmw',
+  code: 'AB12',
+  code_type: 'bmw-type-code' as const,
+  vehicle_id: 'vehicle_1',
+});
+
+medusaIntegrationTestRunner({
+  moduleName: 'scrub-vin-lookups',
+  dbName: 'medusa-scrub-vin-lookups-integration',
+  testSuite: ({ getContainer }) => {
+    describe('the VIN retention sweep', () => {
+      let vinLookups: VinLookupModuleService;
+      const backdate = (vin: string, days: number) =>
+        getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('vin_lookup')
+          .where({ vin })
+          .update({ updated_at: new Date(Date.now() - days * DAY_MS) });
+
+      beforeAll(() => {
+        vinLookups = getContainer().resolve(VIN_LOOKUP_MODULE);
+      });
+
+      it('forgets the VIN and the raw decode once the lookup is older than the retention, keeping what counts codes', async () => {
+        await vinLookups.saveLookup(lookup('WBAAB12070N000001'));
+        await backdate('WBAAB12070N000001', VIN_KEPT_FOR_DAYS + 1);
+        const [old] = await vinLookups.listVinLookups({
+          vin: 'WBAAB12070N000001',
+        });
+
+        expect(await scrubVinLookupsAt(getContainer(), new Date())).toBe(1);
+
+        expect(await vinLookups.retrieveVinLookup(old.id)).toMatchObject({
+          vin: null,
+          wmi: 'WBA',
+          raw: null,
+          facts: {},
+          make: 'bmw',
+          code: 'AB12',
+          code_type: 'bmw-type-code',
+          vehicle_id: 'vehicle_1',
+          decoder: 'test',
+        });
+      });
+
+      it('keeps a lookup younger than the retention and scrubs nothing twice', async () => {
+        await vinLookups.saveLookup(lookup('WBAAB12070N000002'));
+        await backdate('WBAAB12070N000002', VIN_KEPT_FOR_DAYS - 1);
+
+        await scrubVinLookups(getContainer());
+
+        expect(
+          await vinLookups.listVinLookups({ vin: 'WBAAB12070N000002' }),
+        ).toEqual([
+          expect.objectContaining({
+            wmi: 'WBA',
+            raw: { decoded: 'WBAAB12070N000002' },
+          }),
+        ]);
+        expect(await scrubVinLookupsAt(getContainer(), new Date())).toBe(0);
+      });
+
+      it('scrubs a lookup that was deleted too', async () => {
+        await vinLookups.saveLookup(lookup('WBAAB12070N000003'));
+        const [row] = await vinLookups.listVinLookups({
+          vin: 'WBAAB12070N000003',
+        });
+        await vinLookups.softDeleteVinLookups(row.id);
+        await backdate('WBAAB12070N000003', VIN_KEPT_FOR_DAYS + 1);
+
+        expect(await scrubVinLookupsAt(getContainer(), new Date())).toBe(1);
+      });
+
+      it('saves a later lookup of a scrubbed VIN as a new row beside the counted one', async () => {
+        await vinLookups.saveLookup(lookup('WBAAB12070N000004'));
+        await backdate('WBAAB12070N000004', VIN_KEPT_FOR_DAYS + 1);
+        await scrubVinLookupsAt(getContainer(), new Date());
+
+        await vinLookups.saveLookup(lookup('WBAAB12070N000004'));
+
+        const rows = await vinLookups.listVinLookups({ code: 'AB12' });
+        expect(rows.map(({ vin }) => vin).sort()).toEqual([
+          'WBAAB12070N000004',
+          null,
+        ]);
+      });
+    });
+  },
+});

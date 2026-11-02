@@ -6,6 +6,7 @@ import {
   MedusaContext,
   MedusaService,
 } from '@medusajs/framework/utils';
+import type { VehicleIdentifierType } from '@podbor/catalog-contract';
 
 import { runBoundSql } from '../_shared/bound-sql';
 import VinLookup from './models/vin-lookup';
@@ -18,7 +19,7 @@ type LookupRecord = {
   facts: Record<string, unknown>;
   make: string | null;
   code: string | null;
-  code_type: string | null;
+  code_type: VehicleIdentifierType | null;
   vehicle_id: string | null;
 };
 
@@ -46,6 +47,11 @@ const UNRESOLVED_CODES = `
   order by count desc, make, code
   offset ? limit ?`;
 
+const SCRUB_BEFORE = `
+  update vin_lookup
+  set wmi = coalesce(wmi, left(vin, 3)), vin = null, raw = null, facts = '{}'::jsonb
+  where vin is not null and updated_at < ?`;
+
 class VinLookupModuleService extends MedusaService({
   VinLookup,
 }) {
@@ -63,9 +69,21 @@ class VinLookupModuleService extends MedusaService({
       { select: ['id'] },
       sharedContext,
     );
+    const row = { ...record, wmi: record.vin.slice(0, 3) };
     await (existing
-      ? this.updateVinLookups({ id: existing.id, ...record }, sharedContext)
-      : this.createVinLookups(record, sharedContext));
+      ? this.updateVinLookups({ id: existing.id, ...row }, sharedContext)
+      : this.createVinLookups(row, sharedContext));
+  }
+
+  @InjectManager()
+  async scrubLookupsBefore(
+    cutoff: Date,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<number> {
+    const { rowCount } = await runBoundSql(sharedContext, SCRUB_BEFORE, [
+      cutoff,
+    ]);
+    return rowCount ?? 0;
   }
 
   @InjectManager()

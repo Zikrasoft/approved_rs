@@ -19,6 +19,9 @@ const Chassis = model
     ...provenance(),
   })
   .indexes([{ on: ['series_id', 'code'], unique: true }])
+  .checks([
+    { name: 'chassis_years_ordered', expression: 'year_from <= year_to' },
+  ])
   .cascades({ delete: ['requirements'] });
 
 export default Chassis;

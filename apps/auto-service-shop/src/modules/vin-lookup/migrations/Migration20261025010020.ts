@@ -6,7 +6,7 @@ export class Migration20261025010020 extends Migration {
       `alter table if exists "vin_lookup" drop constraint if exists "vin_lookup_vin_unique";`,
     );
     this.addSql(
-      `create table if not exists "vin_lookup" ("id" text not null, "vin" text not null, "decoder" text null, "decoder_version" integer null, "raw" jsonb null, "facts" jsonb not null, "make" text null, "code" text null, "vehicle_id" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vin_lookup_pkey" primary key ("id"));`,
+      `create table if not exists "vin_lookup" ("id" text not null, "vin" text null, "wmi" text null, "decoder" text null, "decoder_version" integer null, "raw" jsonb null, "facts" jsonb not null, "make" text null, "code" text null, "code_type" text check ("code_type" in ('bmw-type-code', 'mercedes-baumuster', 'supplier-vehicle-id')) null, "vehicle_id" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "vin_lookup_pkey" primary key ("id"), constraint vin_lookup_code_type_needs_code check (code_type is null or code is not null));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_deleted_at" ON "vin_lookup" ("deleted_at") WHERE deleted_at IS NULL;`,

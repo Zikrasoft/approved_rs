@@ -18,6 +18,7 @@ if [ "$1" = run ]; then
 fi
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
+*check-schema*) exit "${SCHEMA_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
 *ON_ERROR_STOP*) exit "${ROLE_EXIT:-0}" ;;
 *pg_dump*)
@@ -118,11 +119,12 @@ has() {
 
 stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
-expect 'pull, migrate, seed, up, reload and health run in order on the new tag' logged \
+expect 'pull, migrate, check the schema, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa" \
   "docker[$NEW] compose up -d --wait postgres" \
   "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
+  "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/check-schema.js" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
@@ -179,6 +181,16 @@ unset MIGRATE_EXIT
 expect 'a failed migration leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
 refuse 'a failed migration restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 expect 'a failed migration releases the lock' test ! -d "$work/host/.deploy.lock"
+
+stage
+SCHEMA_EXIT=1
+export SCHEMA_EXIT
+refuse 'a schema the migrations did not build fails the deploy' run deploy.sh "$NEW"
+unset SCHEMA_EXIT
+expect 'a failed schema check leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed schema check seeds nothing' grep -q 'seed-production' "$LOG"
+refuse 'a failed schema check restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
+expect 'a failed schema check releases the lock' test ! -d "$work/host/.deploy.lock"
 
 stage
 SEED_EXIT=1

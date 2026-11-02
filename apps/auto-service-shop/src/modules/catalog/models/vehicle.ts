@@ -27,7 +27,10 @@ const Vehicle = model
     requirements: model.hasMany(() => Requirement, { mappedBy: 'vehicle' }),
     ...provenance(),
   })
-  .indexes([{ on: ['model_id', 'slug'], unique: true }])
+  .indexes([{ on: ['model_id', 'slug'], unique: true }, { on: ['source'] }])
+  .checks([
+    { name: 'vehicle_years_ordered', expression: 'year_from <= year_to' },
+  ])
   .cascades({ delete: ['identifiers', 'fitments', 'requirements'] });
 
 export default Vehicle;

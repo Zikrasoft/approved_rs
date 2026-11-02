@@ -24,6 +24,7 @@ const VehicleIdentifier = model
       unique: true,
       where: { supplier_id: { $ne: null } },
     },
+    { on: ['source'] },
   ]);
 
 export default VehicleIdentifier;

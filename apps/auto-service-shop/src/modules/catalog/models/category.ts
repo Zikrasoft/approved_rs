@@ -23,6 +23,13 @@ const Category = model
     parts: model.hasMany(() => Part, { mappedBy: 'category' }),
     ...provenance(),
   })
-  .cascades({ delete: ['fields'] });
+  .cascades({ delete: ['fields'] })
+  .checks([
+    { name: 'category_service_price', expression: 'service_price >= 0' },
+    {
+      name: 'category_installation_price',
+      expression: 'installation_price >= 0',
+    },
+  ]);
 
 export default Category;

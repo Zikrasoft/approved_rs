@@ -51,6 +51,10 @@ echo "==> Migrations"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
 
+echo "==> Schema check"
+docker compose run --rm -T medusa \
+  node_modules/.bin/medusa exec ./src/scripts/check-schema.js
+
 echo "==> Production seed"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa exec ./src/scripts/seed-production.js

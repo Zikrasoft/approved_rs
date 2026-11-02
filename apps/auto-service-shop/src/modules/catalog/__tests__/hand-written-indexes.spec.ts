@@ -4,42 +4,18 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { schemaProblems, SNAPSHOT_TABLES } from '../../../lib/schema-check';
 import orderTimeIndexes from '../../../migration-scripts/order-time-indexes';
+import checkSchema from '../../../scripts/check-schema';
 
-type SnapshotTable = {
-  name: string;
-  columns: Record<string, { name: string; type: string; nullable: boolean }>;
-  indexes: { keyName: string }[];
-  checks: { name: string }[];
-  foreignKeys: Record<string, { constraintName: string }>;
-};
-
-const snapshotTables = (): SnapshotTable[] =>
+const snapshotTableNames = (): string[] =>
   globSync('*/migrations/.snapshot-*.json', {
     cwd: path.resolve(__dirname, '../..'),
-  }).flatMap(
-    (file) =>
-      JSON.parse(readFileSync(path.resolve(__dirname, '../..', file), 'utf8'))
-        .tables as SnapshotTable[],
+  }).flatMap((file) =>
+    JSON.parse(
+      readFileSync(path.resolve(__dirname, '../..', file), 'utf8'),
+    ).tables.map(({ name }: { name: string }) => name),
   );
-
-const UDT_OF: Record<string, string> = {
-  integer: 'int4',
-  real: 'float4',
-  boolean: 'bool',
-  'text[]': '_text',
-};
-
-const HAND_WRITTEN_TYPES: Record<string, string> = {
-  'supplier.markup_percentage': 'numeric',
-  'fitment.production_from': 'date',
-  'fitment.production_to': 'date',
-  'requirement.min': 'numeric',
-  'requirement.max': 'numeric',
-};
-
-const columnSignature = (type: string, nullable: boolean) =>
-  `${type} ${nullable ? 'null' : 'not null'}`;
 
 medusaIntegrationTestRunner({
   moduleName: 'hand_written_indexes',
@@ -47,61 +23,15 @@ medusaIntegrationTestRunner({
     const pg = (): Knex =>
       getContainer().resolve(ContainerRegistrationKeys.PG_CONNECTION);
 
-    describe('The catalog indexes the generator cannot express', () => {
-      const definition = async (name: string): Promise<string> => {
-        const { rows } = await pg().raw(
-          'select indexdef from pg_indexes where indexname = ?',
-          [name],
-        );
-        return rows[0]?.indexdef ?? '';
-      };
-
-      it.each([
-        'IDX_fitment_identity_unique',
-        'IDX_requirement_owner_field_unique',
-      ])('keeps %s unique across NULL columns', async (name) => {
-        expect(await definition(name)).toMatch(
-          /^CREATE UNIQUE INDEX .* NULLS NOT DISTINCT WHERE \(deleted_at IS NULL\)$/,
-        );
-      });
-
-      it.each([
-        'IDX_brand_name_key_unique',
-        'IDX_make_name_key_unique',
-        'IDX_category_name_key_unique',
-        'IDX_series_make_id_name_key_unique',
-      ])('keeps %s on the NFKC-normalised name', async (name) => {
-        expect(await definition(name)).toMatch(
-          /^CREATE UNIQUE INDEX .*upper\(regexp_replace\(btrim\(NORMALIZE\(name, NFKC\)\)/,
-        );
-      });
-
-      it.each(['IDX_fitment_part_vehicle_all', 'IDX_fitment_vehicle_all'])(
-        'keeps %s over tombstoned Fitments too',
-        async (name) => {
-          expect(await definition(name)).toMatch(/^CREATE INDEX .*btree/);
-          expect(await definition(name)).not.toContain('WHERE');
-        },
-      );
-
-      it.each([
-        'IDX_vehicle_model_name_trigram',
-        'IDX_part_name_trigram',
-        'IDX_part_identifier_normalized_value_trigram',
-      ])('keeps %s for substring search', async (name) => {
-        expect(await definition(name)).toMatch(/USING gin .*gin_trgm_ops/);
-      });
-
-      it('finds a Part by its whole description', async () => {
-        expect(await definition('IDX_part_description_hash')).toMatch(
-          /USING hash \(description\)/,
-        );
-      });
-    });
-
     describe('The hot lookups', () => {
       const plan = async (sql: string) => {
         const trx = await pg().transaction();
+        await trx.raw('set local session_replication_role = replica');
+        await trx.raw(
+          `insert into vehicle_identifier (id, type, value, vehicle_id, source)
+           select 'vi' || g, 'bmw-type-code', 'V' || g, 'v', 'feed' from generate_series(1, 1000) g`,
+        );
+        await trx.raw('analyze vehicle_identifier');
         await trx.raw('set local enable_seqscan = off');
         const { rows } = await trx.raw(`explain ${sql}`);
         await trx.rollback();
@@ -137,161 +67,285 @@ medusaIntegrationTestRunner({
       ])('finds %s by an index', async (_, sql, index) => {
         expect(await plan(sql)).toMatch(index);
       });
-
-      it('finds Orders by when they were placed or last changed, once the migration script ran', async () => {
-        await orderTimeIndexes({ container: getContainer() });
-
-        const { rows } = await pg().raw(
-          `select indexdef from pg_indexes where tablename = 'order' and indexname in ('IDX_order_created_at', 'IDX_order_updated_at') order by indexname`,
-        );
-        expect(
-          rows.map(({ indexdef }: { indexdef: string }) => indexdef),
-        ).toEqual([
-          expect.stringMatching(/\(created_at\) WHERE \(deleted_at IS NULL\)$/),
-          expect.stringMatching(/\(updated_at\) WHERE \(deleted_at IS NULL\)$/),
-        ]);
-      });
-    });
-
-    describe('The column types the generator cannot express', () => {
-      const columnType = async (table: string, column: string) => {
-        const { rows } = await pg().raw(
-          `select format_type(atttypid, atttypmod) as type from pg_attribute
-           where attrelid = ?::regclass and attname = ? and not attisdropped`,
-          [table, column],
-        );
-        return rows[0]?.type ?? null;
-      };
-
-      it('keeps the Supplier markup an exact decimal', async () => {
-        expect(await columnType('supplier', 'markup_percentage')).toBe(
-          'numeric(5,2)',
-        );
-      });
-
-      it('checks the Supplier markup on the decimal itself', async () => {
-        const { rows } = await pg().raw(
-          `select pg_get_constraintdef(oid) as definition from pg_constraint where conname = 'supplier_markup_percentage'`,
-        );
-        expect(rows[0]?.definition).toBe(
-          'CHECK ((markup_percentage >= (0)::numeric))',
-        );
-      });
-
-      it.each(['production_from', 'production_to'])(
-        'keeps the Fitment %s a calendar date',
-        async (column) => {
-          expect(await columnType('fitment', column)).toBe('date');
-        },
-      );
-
-      it.each(['min', 'max'])(
-        'keeps the Requirement %s an exact decimal',
-        async (column) => {
-          expect(await columnType('requirement', column)).toBe('numeric');
-        },
-      );
-
-      it('keeps no page body in the crawl table', async () => {
-        expect(await columnType('crawl_page', 'body')).toBeNull();
-      });
     });
 
     describe('The migrated schema', () => {
-      const tables = snapshotTables();
-      const namesOf = (rows: Record<string, string>[], column: string) =>
-        rows.map((row) => row[column]);
+      const problemsAfter = async (...statements: string[]) => {
+        const trx = await pg().transaction();
+        try {
+          for (const statement of statements) await trx.raw(statement);
+          return await schemaProblems(trx);
+        } finally {
+          await trx.rollback();
+        }
+      };
 
-      it('reads every module snapshot', () => {
-        expect(tables.map(({ name }) => name)).toEqual(
-          expect.arrayContaining([
-            'fitment',
-            'supplier',
-            'catalogue_run',
-            'vin_lookup',
-          ]),
+      beforeEach(async () => {
+        await orderTimeIndexes({ container: getContainer() });
+      });
+
+      it('checks every module snapshot', () => {
+        expect(SNAPSHOT_TABLES.map(({ name }) => name).sort()).toEqual(
+          snapshotTableNames().sort(),
         );
       });
 
-      it.each(tables.map((table) => [table.name, table] as const))(
-        'builds %s exactly as its snapshot says',
-        async (name, table) => {
-          const { rows: columns } = await pg().raw(
-            `select column_name, udt_name, is_nullable from information_schema.columns
-             where table_schema = 'public' and table_name = ?`,
-            [name],
-          );
-          const { rows: indexes } = await pg().raw(
-            `select indexname from pg_indexes where schemaname = 'public' and tablename = ?`,
-            [name],
-          );
-          const { rows: constraints } = await pg().raw(
-            'select conname from pg_constraint where conrelid = ?::regclass',
-            [name],
-          );
+      it('finds nothing wrong with a freshly migrated database', async () => {
+        expect(await schemaProblems(pg())).toEqual([]);
+      });
 
-          expect(
-            Object.fromEntries(
-              columns.map((column: Record<string, string>) => [
-                column.column_name,
-                columnSignature(column.udt_name, column.is_nullable === 'YES'),
-              ]),
-            ),
-          ).toEqual(
-            Object.fromEntries(
-              Object.values(table.columns).map((column) => [
-                column.name,
-                columnSignature(
-                  HAND_WRITTEN_TYPES[`${name}.${column.name}`] ??
-                    UDT_OF[column.type] ??
-                    column.type,
-                  column.nullable,
-                ),
-              ]),
-            ),
-          );
-          expect(namesOf(indexes, 'indexname')).toEqual(
-            expect.arrayContaining(table.indexes.map(({ keyName }) => keyName)),
-          );
-          expect(namesOf(constraints, 'conname')).toEqual(
-            expect.arrayContaining([
-              ...table.checks.map((check) => check.name),
-              ...Object.values(table.foreignKeys).map(
-                (key) => key.constraintName,
-              ),
-            ]),
-          );
-        },
-      );
+      it('lets a deploy through a database the migrations built', async () => {
+        await expect(
+          checkSchema({ container: getContainer(), args: [] }),
+        ).resolves.toBeUndefined();
+      });
+
+      it('stops a deploy on a database the migrations did not build, naming each problem', async () => {
+        await pg().raw('drop index "IDX_part_description_hash"');
+
+        await expect(
+          checkSchema({ container: getContainer(), args: [] }),
+        ).rejects.toThrow(
+          'The database schema is not what the migrations build:\nIDX_part_description_hash is missing',
+        );
+      });
+
+      it.each([
+        [
+          'a missing hand-written column type',
+          ['alter table fitment drop column production_to'],
+          'fitment.production_to: expected date, found nothing',
+        ],
+        [
+          'a missing generated index',
+          ['drop index "IDX_fitment_source"'],
+          'fitment: index IDX_fitment_source is missing',
+        ],
+        [
+          'a missing generated check',
+          ['alter table fitment drop constraint fitment_quantity_positive'],
+          'fitment: constraint fitment_quantity_positive is missing',
+        ],
+        [
+          'a missing column',
+          ['alter table vin_lookup drop column wmi'],
+          'vin_lookup.wmi: expected text null, found nothing',
+        ],
+        [
+          'a column the migrations do not create',
+          ['alter table crawl_page add column body text'],
+          'crawl_page.body: column not in the migrations',
+        ],
+        [
+          'a missing table',
+          ['drop table crawl_run'],
+          'crawl_run: table is missing',
+        ],
+        [
+          'a column left at the generated type',
+          ['alter table requirement alter column min type real'],
+          'requirement.min: expected numeric, found real',
+        ],
+        [
+          'a missing hand-written index',
+          ['drop index "IDX_part_description_hash"'],
+          'IDX_part_description_hash is missing',
+        ],
+        [
+          'a hand-written index built the generated way',
+          [
+            'drop index "IDX_fitment_vehicle_all"',
+            'create index "IDX_fitment_vehicle_all" on fitment (vehicle_id) where deleted_at is null',
+          ],
+          expect.stringMatching(
+            /^IDX_fitment_vehicle_all is defined as .*WHERE/,
+          ),
+        ],
+        [
+          'a foreign key left at the generated action',
+          [
+            'alter table part drop constraint part_category_id_foreign, add constraint part_category_id_foreign foreign key (category_id) references category (id) on delete set null',
+          ],
+          expect.stringMatching(
+            /^part_category_id_foreign is defined as .*SET NULL/,
+          ),
+        ],
+        [
+          'an order index the migration script did not build',
+          ['drop index "IDX_order_created_at"'],
+          'IDX_order_created_at is missing',
+        ],
+      ])('reports %s', async (_, statements, problem) => {
+        expect(await problemsAfter(...statements)).toContainEqual(problem);
+      });
     });
 
     describe('The checks on catalog rows', () => {
-      const checks = async (table: string) => {
-        const { rows } = await pg().raw(
-          `select pg_get_constraintdef(oid) as definition from pg_constraint
-           where conrelid = ?::regclass and contype = 'c'`,
-          [table],
-        );
-        return rows.map((row: { definition: string }) => row.definition);
+      const refusal = async (table: string, row: Record<string, unknown>) => {
+        const trx = await pg().transaction();
+        try {
+          await trx.raw('set local session_replication_role = replica');
+          await trx(table).insert(row);
+          return null;
+        } catch (error) {
+          return (error as { constraint?: string }).constraint;
+        } finally {
+          await trx.rollback();
+        }
       };
-
-      it('gives a Requirement exactly one target', async () => {
-        expect(await checks('requirement')).toContain(
-          'CHECK ((num_nonnulls(engine_id, chassis_id, vehicle_id) = 1))',
-        );
+      const requirement = (row: Record<string, unknown>) => ({
+        id: 'r',
+        field_id: 'f',
+        vehicle_id: 'v',
+        ...row,
       });
 
-      it('refuses to delete a Category a Part still uses', async () => {
-        const { rows } = await pg().raw(
-          `select confdeltype from pg_constraint where conname = 'part_category_id_foreign'`,
-        );
-        expect(rows).toEqual([{ confdeltype: 'r' }]);
+      it.each([
+        [
+          'fitment',
+          { id: 'f', part_id: 'p', vehicle_id: 'v', quantity: 0 },
+          'fitment_quantity_positive',
+        ],
+        [
+          'fitment',
+          {
+            id: 'f',
+            part_id: 'p',
+            vehicle_id: 'v',
+            production_from: '2020-02-01',
+            production_to: '2020-01-01',
+          },
+          'fitment_production_ordered',
+        ],
+        [
+          'requirement',
+          requirement({ min: 1, quantity: 0 }),
+          'requirement_quantity_positive',
+        ],
+        [
+          'requirement',
+          requirement({ min: 5, max: 1 }),
+          'requirement_bounds_ordered',
+        ],
+        [
+          'requirement',
+          requirement({ option_keys: ['a'], min: 1 }),
+          'requirement_options_or_bounds',
+        ],
+        ['requirement', requirement({}), 'requirement_options_or_bounds'],
+        [
+          'requirement',
+          requirement({ option_keys: [], max: 1, vehicle_id: null }),
+          'requirement_one_target',
+        ],
+        [
+          'vehicle',
+          {
+            id: 'v',
+            slug: 'v',
+            model_id: 'm',
+            engine_id: 'e',
+            year_from: 2010,
+            year_to: 2009,
+          },
+          'vehicle_years_ordered',
+        ],
+        [
+          'chassis',
+          {
+            id: 'c',
+            code: 'c',
+            series_id: 's',
+            year_from: 2010,
+            year_to: 2009,
+          },
+          'chassis_years_ordered',
+        ],
+        [
+          'category',
+          { id: 'c', slug: 'c', name: 'c', service_price: -1 },
+          'category_service_price',
+        ],
+        [
+          'category',
+          { id: 'c', slug: 'c', name: 'c', installation_price: -1 },
+          'category_installation_price',
+        ],
+        [
+          'part',
+          { id: 'p', name: 'p', installation_price: -1 },
+          'part_installation_price',
+        ],
+        [
+          'supplier',
+          {
+            id: 's',
+            name: 's',
+            markup_percentage: 10,
+            released_kinds: ['prices'],
+          },
+          'supplier_released_kinds',
+        ],
+        [
+          'supplier',
+          { id: 's', name: 's', markup_percentage: -1 },
+          'supplier_markup_percentage',
+        ],
+        [
+          'vin_lookup',
+          { id: 'l', facts: {}, code_type: 'bmw-type-code' },
+          'vin_lookup_code_type_needs_code',
+        ],
+        [
+          'vin_lookup',
+          { id: 'l', facts: {}, code: 'X', code_type: 'bogus' },
+          'vin_lookup_code_type_check',
+        ],
+      ])('refuses a %s row breaking %#', async (table, row, constraint) => {
+        expect(await refusal(table, row)).toBe(constraint);
       });
 
-      it('keeps a Fitment production range in order', async () => {
-        expect(await checks('fitment')).toContain(
-          'CHECK ((production_from <= production_to))',
-        );
+      it.each([
+        ['fitment', { id: 'f', part_id: 'p', vehicle_id: 'v', quantity: 2 }],
+        ['requirement', requirement({ option_keys: ['a'] })],
+        ['requirement', requirement({ option_keys: [], min: 1, max: 1 })],
+        [
+          'vehicle',
+          {
+            id: 'v',
+            slug: 'v',
+            model_id: 'm',
+            engine_id: 'e',
+            year_from: 2010,
+          },
+        ],
+        [
+          'supplier',
+          {
+            id: 's',
+            name: 's',
+            markup_percentage: 0,
+            released_kinds: ['images'],
+          },
+        ],
+        ['vin_lookup', { id: 'l', facts: {}, code: 'X', code_type: null }],
+      ])('accepts a valid %s row', async (table, row) => {
+        expect(await refusal(table, row)).toBeNull();
+      });
+
+      it('refuses a second redirect from the same Part slug', async () => {
+        const redirect = {
+          kind: 'part',
+          from_id: 'pi',
+          from_slug: 'oil-filter-123',
+        };
+        await pg()('slug_redirect').insert({ id: 'sr1', ...redirect });
+        await expect(
+          pg()('slug_redirect').insert({ id: 'sr2', ...redirect }),
+        ).rejects.toMatchObject({
+          constraint: 'IDX_slug_redirect_kind_from_slug_unique',
+        });
+        await pg()('slug_redirect').where({ id: 'sr1' }).delete();
       });
     });
   },
