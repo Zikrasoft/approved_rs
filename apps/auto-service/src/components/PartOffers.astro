@@ -70,71 +70,79 @@ const askHref = PathBuilder.partsInquiry(locale, named);
       })}
       {...part}
     >
-      <h2 class="text-block font-semibold">
-        <slot name="heading">{copy.offersHeading}</slot>
-      </h2>
-      <ul class="flex flex-col" data-offers>
-        {best && <OfferRow offer={best} inFlow askHref={askHref} />}
-      </ul>
-      <div aria-live="polite">
-        <div data-status="added" hidden class={status}>
-          <p>{copy.addedNotice}</p>
-          <a
-            href={PathBuilder.partsCart(locale)}
-            class="btn btn-primary btn-block"
-          >
-            {copy.addedCta}
-          </a>
-        </div>
-        <p data-status="stock-limit" hidden class={status}>
-          {copy.stockLimitNotice}
-        </p>
-        <p data-status="inquiry" hidden class={status}>
-          <span>
-            {copy.inquiryNotice}{' '}
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              class="link font-semibold"
-            >
-              {copy.inquiryCta}
-            </a>
-          </span>
-        </p>
-      </div>
-      <PickupLine />
-      <PartAskRow
-        part={named}
-        question={copy.askAboutPartMessage}
-        replaced={replaced}
-      />
-      <details class="group/more" data-more hidden={others.length === 0}>
-        <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
-          <span data-more-count>
-            {moreOffersLabel(
-              summary,
-              copy,
-              (offer) => formatMoney(offer.price, offer.currency, localeTag),
-              localeTag,
-            )}
-          </span>
-          <Icon
-            name="chevronDown"
-            size={16}
-            class="transition-transform duration-150 group-open/more:rotate-180 motion-reduce:transition-none"
-          />
-        </summary>
-        <ul
-          class="mt-2 flex flex-col divide-y divide-line border-t border-line pt-4"
-          data-more-offers
-        >
-          {others.map((offer) => (
-            <OfferRow offer={offer} secondary askHref={askHref} />
-          ))}
-        </ul>
-      </details>
-      <template data-offer>
-        <OfferRow askHref={askHref} />
-      </template>
+      {(() => {
+        const body = (
+          <>
+            <h2 class="text-block font-semibold">
+              <slot name="heading">{copy.offersHeading}</slot>
+            </h2>
+            <ul class="flex flex-col" data-offers>
+              {best && <OfferRow offer={best} inFlow askHref={askHref} />}
+            </ul>
+            <div aria-live="polite">
+              <div data-status="added" hidden class={status}>
+                <p>{copy.addedNotice}</p>
+                <a
+                  href={PathBuilder.partsCart(locale)}
+                  class="btn btn-primary btn-block"
+                >
+                  {copy.addedCta}
+                </a>
+              </div>
+              <p data-status="stock-limit" hidden class={status}>
+                {copy.stockLimitNotice}
+              </p>
+              <p data-status="inquiry" hidden class={status}>
+                <span>
+                  {copy.inquiryNotice}{' '}
+                  <a
+                    href={PathBuilder.partsInquiry(locale)}
+                    class="link font-semibold"
+                  >
+                    {copy.inquiryCta}
+                  </a>
+                </span>
+              </p>
+            </div>
+            <PickupLine />
+            <PartAskRow
+              part={named}
+              question={copy.askAboutPartMessage}
+              replaced={replaced}
+            />
+            <details class="group/more" data-more hidden={others.length === 0}>
+              <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                <span data-more-count>
+                  {moreOffersLabel(
+                    summary,
+                    copy,
+                    (offer) =>
+                      formatMoney(offer.price, offer.currency, localeTag),
+                    localeTag,
+                  )}
+                </span>
+                <Icon
+                  name="chevronDown"
+                  size={16}
+                  class="transition-transform duration-150 group-open/more:rotate-180 motion-reduce:transition-none"
+                />
+              </summary>
+              <ul
+                class="mt-2 flex flex-col divide-y divide-line border-t border-line pt-4"
+                data-more-offers
+              >
+                {others.map((offer) => (
+                  <OfferRow offer={offer} secondary askHref={askHref} />
+                ))}
+              </ul>
+            </details>
+            <template data-offer>
+              <OfferRow askHref={askHref} />
+            </template>
+          </>
+        );
+        return closed ? <template data-preview-body>{body}</template> : body;
+      })()}
     </part-offers>
   )
 }

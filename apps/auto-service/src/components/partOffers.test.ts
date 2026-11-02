@@ -100,6 +100,22 @@ describe('PartOffers', () => {
     expect(root.textContent).not.toContain(copy.priceOnRequestHeading);
   });
 
+  it('keeps the price and stock markup out of a closed page, inert until a preview asks for it', async () => {
+    setShop(false);
+    const root = await render(PartOffers, {
+      props: { page: partPage({ offers: [offer(1500, 0)] }) },
+    });
+    const shell = root.querySelector('part-offers')!;
+    const body = shell.querySelector<HTMLTemplateElement>(
+      ':scope > template[data-preview-body]',
+    );
+
+    expect(root.textContent).not.toContain(copy.offersHeading);
+    expect(root.textContent).not.toContain(copy.outOfStock);
+    expect(shell.children).toHaveLength(1);
+    expect(body?.content.textContent).toContain(copy.offersHeading);
+  });
+
   it('keeps the page heading on the order panel while the shop is closed', async () => {
     setShop(false);
     const root = await render(PartOffers, {
@@ -107,9 +123,7 @@ describe('PartOffers', () => {
       slots: { heading: 'Своя шапка' },
     });
 
-    expect(root.querySelectorAll('h2')[1]?.textContent?.trim()).toBe(
-      'Своя шапка',
-    );
+    expect(root.querySelector('h2')?.textContent?.trim()).toBe('Своя шапка');
   });
 
   it('shows the offers of a priced part once the shop is open', async () => {
