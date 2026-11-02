@@ -223,7 +223,7 @@ translations:
       metaTitle: Politika privatnosti | CarLab
       metaDescription: Koje podatke prikuplja sajt autoservisa CarLab, zašto su nam potrebni i koliko dugo ih čuvamo.
       heading: Politika privatnosti
-      lastUpdated: Ažurirano 12. oktobra 2026.
+      lastUpdated: Ažurirano 2. novembra 2026.
       sections:
         - title: Koje podatke prikupljamo
           text: Samo podatke koje sami unesete u obrazac (ime, telefon, opis problema i podatke o vozilu), kao i adresu stranice sa koje je upit poslat i anonimni identifikator pregledača. Identifikator je nasumičan, čuva se u Vašem pregledaču i služi da isti upit ne bude evidentiran tri puta.
@@ -232,7 +232,7 @@ translations:
         - title: Gde čuvamo podatke
           text: U šifrovanom skladištu našeg hosting provajdera i u zatvorenom poslovnom četu servisa. Pristup imaju samo zaposleni.
         - title: Koliko dugo čuvamo podatke
-          text: Do tri godine od poslednje posete, jer servisna istorija pomaže pri sledećoj popravci. Na Vaš zahtev izbrisaćemo ih i ranije.
+          text: Do tri godine od poslednje posete, jer servisna istorija pomaže pri sledećoj popravci. Na Vaš upit podatke ćemo obrisati i ranije. VIN koji unosite u pretragu delova i sve podatke o vozilu dobijene na osnovu njega čuvamo 90 dana od poslednje pretrage. Nakon toga brišemo VIN i podatke dobijene njegovim dekodiranjem, a zadržavamo samo oznaku proizvođača (prva tri znaka VIN-a), marku i model vozila.
         - title: Kolačići
           text: Sajt postavlja tehnički kolačić za izabrani jezik, analitičke kolačiće (Google Analytics i Yandex Metrica) i reklamni kolačić (Meta piksel). Analitika i piksel se pokreću pri prvom učitavanju stranice. Možete ih odbiti u baneru na dnu ekrana, nakon čega se neće pokretati od sledećeg učitavanja. Yandex Metrica snima sesije (pomeranje kursora, skrolovanje i klikove). Obrazac za upit smo isključili iz snimanja, pa se njegov sadržaj ne beleži. Piksel obaveštava kompaniju Meta da ste pregledali stranicu, poslali upit, pisali nam ili napravili porudžbinu. Tako vidimo koji oglasi na Facebooku i Instagramu dovode klijente. Sadržaj obrasca se ne prosleđuje pikselu. Ako nakon posete sajtu nastavite u našem Telegram botu i tamo ostavite upit, naš server će kompaniji Meta proslediti samo informaciju da je upit poslat, bez njegovog sadržaja i Vaših kontakt podataka. Korpa i anonimni identifikator čuvaju se u lokalnoj memoriji pregledača (localStorage) i ne šalju se automatski na naš server.
         - title: Vaša prava
@@ -388,7 +388,7 @@ translations:
       metaTitle: Privacy policy | CarLab
       metaDescription: What data the CarLab website collects, why we collect it and how long we keep it.
       heading: Privacy policy
-      lastUpdated: Updated 12 October 2026
+      lastUpdated: Updated 2 November 2026
       sections:
         - title: What data we collect
           text: Only the information you enter in the form (your name, phone number, description of the problem and vehicle details), along with the address of the page you sent the enquiry from and an anonymous browser identifier. This identifier is randomly generated and stored in your browser. It helps prevent the same enquiry from creating three separate records.
@@ -397,7 +397,7 @@ translations:
         - title: Where we store it
           text: In encrypted storage provided by our hosting provider and in the workshop's private team chat. Only staff have access.
         - title: How long we keep it
-          text: For up to three years after your last visit, as the service history helps with future repairs. We'll delete it sooner if you ask.
+          text: We keep your records for up to three years after your last visit, as your service history helps with future repairs. We will delete them sooner on request. We store the VIN you enter in the parts search and the full vehicle details decoded from it for 90 days after your last search. After that, the VIN and decoded details are deleted. We retain only the manufacturer identifier (the first three characters of the VIN), the make and the model.
         - title: Cookies
           text: The website sets a functional cookie to remember your chosen language, analytics cookies (Google Analytics and Yandex Metrica) and an advertising cookie (Meta pixel). Analytics and the pixel start when you first load a page. You can opt out using the banner at the bottom of the screen, and they will stop running from the next page load. Yandex Metrica records sessions (cursor movements, scrolling and clicks). We have excluded the enquiry form from these recordings, so its contents are not captured. The pixel tells Meta when you view a page, submit an enquiry, message us or place an order. This helps us see which Facebook and Instagram ads bring in customers. The contents of the form are not shared with it. If you continue to our Telegram bot after visiting the website and submit an enquiry there, our server will tell Meta only that an enquiry was submitted, without its contents or your contact details. Your cart and anonymous identifier are stored in your browser's localStorage and are not sent to our server on their own.
         - title: Your rights
@@ -494,4 +494,4 @@ translations:
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and tell you what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: cd944869a9e3c94e
+translatedFrom: 6e26db7d67f6a20b
