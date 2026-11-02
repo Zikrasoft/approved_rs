@@ -135,6 +135,16 @@ describe('onRequest', () => {
     },
   );
 
+  it.each([
+    ['/ru/parts/c/BATTERIES/', '/ru/parts/c/batteries/'],
+    ['/sr/parts/c/Oil-Filters', '/sr/parts/c/oil-filters'],
+    ['/en/parts/c/Batteries/2/', '/en/parts/c/batteries/2/'],
+  ])('lower-cases the category in %s', (from, to) => {
+    const context = makeContext(`${from}?utm_source=x`);
+    run(context);
+    expect(context.redirect).toHaveBeenCalledWith(`${to}?utm_source=x`, 301);
+  });
+
   it('leaves a later listing page to its route', () => {
     const context = makeContext('/ru/parts/c/batteries/2/');
     expect(run(context)).toBe('next');

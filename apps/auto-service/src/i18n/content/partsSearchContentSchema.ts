@@ -33,6 +33,7 @@ export const partsSearchContentSchema = z
     rangeBetween: z.string(),
     removeFilter: z.string(),
     noFilteredResults: z.string(),
+    noFilteredQueryResults: z.string(),
     brandFacet: z.string(),
     availabilityFacet: z.string(),
     inStockOnly: z.string(),

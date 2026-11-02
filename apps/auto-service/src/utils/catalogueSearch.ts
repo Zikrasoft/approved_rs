@@ -192,4 +192,4 @@ export const inquiryTopic = ({
   category?: string | null;
   query?: string;
   filters: string[];
-}): string => [model, category, ...filters, query].filter(Boolean).join(', ');
+}): string => [query, model, category, ...filters].filter(Boolean).join(', ');
