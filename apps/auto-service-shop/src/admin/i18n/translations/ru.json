@@ -334,7 +334,8 @@
       },
       "type": {
         "bmw-type-code": "Код типа BMW (VIN 4-7)",
-        "mercedes-baumuster": "Код Baumuster Mercedes"
+        "mercedes-baumuster": "Код Baumuster Mercedes",
+        "vag-model-code": "Код модели VAG (VIN 7-8)"
       }
     },
     "confirmTitle": "Удалить «{{name}}»?",
@@ -400,7 +401,12 @@
     },
     "makes": {
       "bmw": "BMW",
-      "mercedes-benz": "Mercedes-Benz"
+      "mercedes-benz": "Mercedes-Benz",
+      "volkswagen": "Volkswagen",
+      "audi": "Audi",
+      "skoda": "Skoda",
+      "seat": "SEAT",
+      "cupra": "Cupra"
     },
     "dismiss": "Скрыть код",
     "confirmDismissTitle": "Скрыть код {{code}}?",

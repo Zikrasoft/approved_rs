@@ -129,6 +129,7 @@ medusaIntegrationTestRunner({
       it.each([
         ['a BMW type code of five characters', 'bmw-type-code', '35BGX'],
         ['a Baumuster with letters', 'mercedes-baumuster', '213O04'],
+        ['a VAG model code of three characters', 'vag-model-code', '5G1'],
       ])('names the value for %s', async (_, type, value) => {
         const { vehicle } = await createVehicleFixture(catalog, {
           typeCode: 'FMT1',
@@ -144,6 +145,23 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({
           code: 'INVALID_FIELD',
           field: 'value',
+        });
+      });
+
+      it('stores a VAG model code from VIN characters 7 and 8', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'VAG1',
+        });
+
+        const response = await post('/admin/vehicle-identifiers', {
+          vehicle_id: vehicle.id,
+          type: 'vag-model-code',
+          value: 'au',
+        });
+
+        expect(response.data.vehicle_identifier).toMatchObject({
+          type: 'vag-model-code',
+          value: 'AU',
         });
       });
 

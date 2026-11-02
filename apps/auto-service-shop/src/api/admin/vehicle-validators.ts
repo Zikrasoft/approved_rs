@@ -30,6 +30,7 @@ export const IDENTIFIER_FORMATS: Record<
 > = {
   'bmw-type-code': /^[A-Z0-9]{4}$/,
   'mercedes-baumuster': /^\d{6}$/,
+  'vag-model-code': /^[A-Z0-9]{2}$/,
 };
 
 type Years = { year_from?: number | null; year_to?: number | null };
