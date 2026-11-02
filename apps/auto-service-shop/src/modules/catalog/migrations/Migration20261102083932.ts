@@ -1,6 +1,6 @@
 import { Migration } from '@medusajs/framework/mikro-orm/migrations';
 
-export class Migration20261102080131 extends Migration {
+export class Migration20261102083932 extends Migration {
   override async up(): Promise<void> {
     this.addSql(
       `alter table if exists "vehicle_identifier" drop constraint if exists "vehicle_identifier_type_check";`,
