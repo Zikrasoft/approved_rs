@@ -2,7 +2,7 @@
 title: Малое ТО Mercedes-Benz C-Class W205
 translations:
   en:
-    title: Mercedes-Benz C-Class W205 Interim Service in Belgrade
+    title: Mercedes-Benz C-Class W205 Minor Service
     body: |-
       This Mercedes-Benz C-Class W205 came to our workshop in Belgrade for an interim service.
 
@@ -19,7 +19,7 @@ translations:
     car: Mercedes-Benz C-Class
 
   sr:
-    title: Mali servis za Mercedes-Benz C-Class W205 u Beogradu
+    title: Mali servis za Mercedes-Benz C-Class W205
     body: |-
       Mercedes-Benz C-Class W205 stigao je u naš auto-servis u Beogradu na mali servis.
 
@@ -45,7 +45,7 @@ gallery: []
 date: 2026-05-05
 published: true
 featured: true
-translatedFrom: f03ea600fbbf7192
+translatedFrom: b358e54ac6b2ad19
 ---
 
 Mercedes-Benz C-Class W205 приехал в наш автосервис в Белграде на малое ТО.

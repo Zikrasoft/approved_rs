@@ -161,12 +161,11 @@ translations:
       commentPlaceholder: Marka, model, godište i šta želite da uradimo
       submit: Pošaljite upit
       submitting: Šaljemo…
-      privacyNote: Prihvatam
+      privacyNote: Slanjem upita prihvatate
       privacyLinkText: politiku privatnosti
       errorTelegram: Unesite Telegram @username ili broj telefona
       errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
       errorPhone: Unesite ispravan broj telefona
-      errorConsent: Označite saglasnost da biste poslali upit
       errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
       modalTitle: Pošaljite upit
     cookie:
@@ -250,12 +249,11 @@ translations:
       commentPlaceholder: Make, model, year and what you'd like done
       submit: Send enquiry
       submitting: Sending…
-      privacyNote: I accept the
+      privacyNote: By submitting this form, you agree to our
       privacyLinkText: privacy policy
       errorTelegram: Enter your Telegram @username or phone number
       errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
       errorPhone: Enter a valid phone number
-      errorConsent: Please tick the consent box to send your enquiry
       errorSubmit: Your enquiry couldn't be sent. Check your connection and try again
       modalTitle: Send an enquiry
     cookie:
@@ -265,4 +263,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie settings
-translatedFrom: e0b8334188816f15
+translatedFrom: 806bcaec3ff9e87d

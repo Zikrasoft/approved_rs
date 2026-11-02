@@ -2,7 +2,7 @@
 title: Обслуживание MINI Cooper SD 2.0 B47
 translations:
   en:
-    title: MINI Cooper SD 2.0 B47 Servicing in Belgrade
+    title: MINI Cooper SD 2.0 B47 Service
     body: |-
       A MINI Cooper SD with a **170 hp 2.0 B47 diesel engine** came into our workshop in Belgrade for a comprehensive service.
 
@@ -22,7 +22,7 @@ translations:
       Regular maintenance is key to looking after the B47 diesel used in BMW and MINI models, the Aisin automatic transmission and the intake system. Change the oil and filters on schedule and keep an eye on intake deposits to help keep costly repairs at bay.
     car: Mini Cooper SD
   sr:
-    title: Servis MINI Cooper SD 2.0 B47 u Beogradu
+    title: Servis MINI Cooper SD 2.0 B47
     body: |-
       MINI Cooper SD sa dizel motorom **2.0 B47 od 170 KS** stigao je u naš servis u Beogradu na kompletno održavanje.
 
@@ -54,7 +54,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-11
 published: true
-translatedFrom: 894cbeba10131522
+translatedFrom: 406684902c39172c
 ---
 
 MINI Cooper SD с дизелем **2.0 B47 на 170 л.с.** приехал в наш автосервис в Белграде на комплексное обслуживание.

@@ -13,7 +13,7 @@ date: 2026-09-15
 published: true
 translations:
   sr:
-    title: "Audi Q7 "
+    title: "Audi Q7 2008: popravka vešanja, kočnica i curenja ulja"
     body: |-
       **Audi Q7 2008. godište. Obimni radovi u našem auto-servisu u Beogradu, Srbija.**
 
@@ -33,7 +33,7 @@ translations:
       Audi Q7 prve generacije zahteva stručno održavanje, naročito kada je reč o starijim primercima sa velikom kilometražom. Važno je utvrditi zašto je došlo do kvara i otkloniti uzrok, a ne samo ugraditi novi deo.
     car: Audi Q7
   en:
-    title: "Audi Q7 "
+    title: "2008 Audi Q7: suspension, brakes and an oil leak"
     body: |-
       **2008 Audi Q7. Extensive repairs at our workshop in Belgrade, Serbia.**
 
@@ -52,7 +52,7 @@ translations:
 
       The first-generation Audi Q7 needs expert maintenance, especially as these cars get older and cover higher mileages. The key is to identify and fix the underlying cause of a fault, rather than simply fit a new part.
     car: Audi Q7
-translatedFrom: 87889b7a4d9708c2
+translatedFrom: cf6306aa53a2d870
 ---
 **Audi Q7 2008 года. Большой список работ в нашем автосервисе в Белграде, Сербия.**
 

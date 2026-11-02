@@ -234,18 +234,24 @@ vin-parts-inquiry:
 translations:
   sr:
     indexMetaTitle: 'Auto-servis u Beogradu: popravke i održavanje | CarLab'
-    indexMetaDescription: Dijagnostika, mali servis, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine i delovi po VIN-u. Cene i rokovi.
+    indexMetaDescription: Dijagnostika, servis i zamena ulja, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine, delovi po VIN-u. Šta obuhvataju radovi i koliko traju.
     partsLink: Pronađite delove za ovu popravku
+    heroHeadingTemplate: '{name} u Beogradu'
+    processHeading: Kako izgleda poseta servisu
+    ctaHeadingTemplate: '{name}: zakazaćemo termin koji Vam odgovara'
+    partsCtaHeadingTemplate: '{name}: javićemo Vam cenu i rok isporuke'
+    ctaBody: Opišite problem sa automobilom. Pozvaćemo Vas tokom radnog vremena i dogovoriti termin dolaska.
     indexHeading: Sve što Vašem automobilu treba, u jednom servisu
-    indexLead: 'Svaka usluga ima svoju stranicu: šta obuhvata, koliko traje, koji simptomi znače da je vreme da dođete i kada Vam iskreno kažemo da intervencija nije potrebna.'
+    indexLead: Šta obuhvata svaka usluga i koliko traje. Cenu saopštavamo nakon pregleda, pre početka radova.
     specsPriceLabel: Cena
     specsDurationLabel: Trajanje
     diagnostics:
+      cta: Zakažite dijagnostiku
       name: Kompjuterska dijagnostika
       short: Otkrivamo šta se krije iza koda greške.
       metaTitle: Kompjuterska dijagnostika u Beogradu | CarLab
       metaDescription: Dijagnostika motora, trapa i auto-elektrike u Beogradu. Očitavanje grešaka je besplatno, a uzrok Vam pokazujemo na samom automobilu.
-      heroTitle: Kod greške je simptom, a ne dijagnoza
+      heroTitle: Kod greške je simptom, a ne dijagnoza. Pronalazimo uzrok i pokazujemo Vam ga na automobilu.
       heroLead: Dijagnostički uređaj pokazuje koji senzor prijavljuje grešku. Ali da li je problem u senzoru ili u onome što meri, to se utvrđuje proverom na automobilu.
       priceFrom: besplatno očitavanje grešaka
       duration: od 40 minuta
@@ -274,6 +280,7 @@ translations:
       honestHeading: Šta ne obećavamo
       honest: Ne može se svaki kvar otkriti za četrdeset minuta. Povremeni problemi koji se javljaju jednom nedeljno nekad zahtevaju ponovni dolazak ili da automobil ostane kod nas jedan dan. To ćemo Vam odmah reći i nećemo redom menjati delove o Vašem trošku.
     servicing:
+      cta: Zakažite servis
       name: Redovno održavanje
       short: Ulje, filteri, tečnosti i pregled prema servisnom planu za Vaš motor.
       metaTitle: Redovan servis i zamena ulja u Beogradu | CarLab
@@ -304,6 +311,7 @@ translations:
       honestHeading: Šta ne radimo
       honest: Ne menjamo ono za šta još nije vreme. Ako je filter tek na polovini svog radnog veka, nećemo ga menjati, već ćemo Vam reći kada da dođete.
     brakes-suspension:
+      cta: Zakažite popravku
       name: Kočnice i trap
       short: Sve od čega zavisi da li će se automobil zaustaviti na vreme.
       metaTitle: Popravka kočnica i trapa u Beogradu | CarLab
@@ -334,6 +342,7 @@ translations:
       honestHeading: Na šta ćemo Vam skrenuti pažnju
       honest: Pločice i diskovi su potrošni delovi koji rade zajedno. Nove pločice mogu da se ugrade na istrošene diskove ako su diskovi još u dozvoljenim granicama, ali će pločice trajati kraće i možda ćete ponovo doći već za pola godine. Izračunaćemo cenu obe varijante, a izbor prepustiti Vama.
     engine-gearbox:
+      cta: Zakažite dijagnostiku
       name: Motor i menjač
       short: Od zamene zaptivke do popravke uz rasklapanje, uz jasan predračun.
       metaTitle: Popravka motora i menjača u Beogradu | CarLab
@@ -364,6 +373,7 @@ translations:
       honestHeading: Kada savetujemo da odustanete od popravke
       honest: Ako se cena popravke približava vrednosti automobila, to ćemo Vam reći. Ponekad je bolji savet da automobil prodate u postojećem stanju ili potražite polovan motor ili menjač, umesto da uložite novac koji pri prodaji nikada nećete povratiti.
     bodywork-painting:
+      cta: Pošaljite fotografije oštećenja
       name: Limarija i farbanje
       short: Popravka posle udesa, ispravljanje geometrije karoserije i farbanje uz uklapanje nijanse.
       metaTitle: Limarija i farbanje posle udesa u Beogradu | CarLab
@@ -394,6 +404,7 @@ translations:
       honestHeading: O osiguranju
       honest: Sarađujemo sa osiguravajućim kućama i pomažemo oko dokumentacije, ali ne obećavamo da će osiguranje pokriti sve. Odmah nakon pregleda objašnjavamo koja oštećenja pokriva osiguranje, a koja ne, da to ne biste saznali tek na kraju.
     pre-purchase-inspection:
+      cta: Zakažite pregled
       name: Pregled pre kupovine
       short: Merač debljine laka, dizalica i dijagnostika pre nego što platite automobil.
       metaTitle: Pregled automobila pre kupovine u Beogradu | CarLab
@@ -424,6 +435,7 @@ translations:
       honestHeading: Šta pregled ne može da garantuje
       honest: Iskreno ćemo Vam reći šta smo uočili, ali nijedan pregled ne otkriva sve. Skriveni kvar koji se ne pokazuje ni na dizalici ni na dijagnostici može se pojaviti kasnije. To je ograničenje samog pregleda, a ne ograda napisana sitnim slovima.
     vin-parts-inquiry:
+      cta: Pošaljite upit
       name: Pronalaženje rezervnih delova
       short: Pronalazimo delove koji odgovaraju Vašem automobilu i dajemo cenu pre kupovine.
       metaTitle: Auto-delovi po VIN broju u Beogradu | CarLab
@@ -431,7 +443,7 @@ translations:
       heroTitle: Pronaći ćemo delove koji sigurno odgovaraju Vašem automobilu
       heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo koji delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
       priceFrom: cenu dajemo nakon pronalaska dela
-      duration: zavisi od dostupnosti kod dobavljača
+      duration: saopštićemo Vam uz cenu
       bodyHeading: Kako pronalazimo odgovarajuće delove
       body: |
         Na osnovu VIN broja utvrđujemo tačnu specifikaciju vozila: motor, menjač, godište i tržište za koje je proizvedeno. Od toga zavisi koji deo odgovara, čak i kada je model isti.
@@ -450,24 +462,30 @@ translations:
       signs:
         - Ne znate tačan naziv ili broj dela
         - Brinete da ćete kupiti deo koji ne odgovara Vašem vozilu
-        - Deo koji Vam je potreban nije u katalogu na sajtu
+        - Potreban Vam je redak deo ili deo koji se više ne proizvodi
         - Želite da uporedite cene originalnih i zamenskih delova
-      honestHeading: Šta ne obećavamo
-      honest: Ne može se svaki deo naći odmah i po niskoj ceni. Ako je deo redak ili se nabavlja po porudžbini, pre kupovine ćemo Vam jasno reći cenu i rok nabavke. Ako nema odgovarajućeg zamenskog dela, nećemo Vam nuditi nešto što ne odgovara Vašem vozilu.
+      honestHeading: Kako dajemo ponudu
+      honest: Cenu i rok isporuke saopštavamo pre plaćanja. Ako je deo redak i nabavlja se po porudžbini, odmah ćemo Vam reći koliko se čeka i ponuditi proverenu zamenu, ako postoji.
   en:
     indexMetaTitle: Car servicing and repairs in Belgrade | CarLab
-    indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine and gearbox repairs, accident repairs, pre-purchase checks and VIN parts matching. Prices and times.
+    indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine, gearbox, accident repairs, pre-purchase checks and VIN parts matching. Scope and times.
     partsLink: Find parts for this job
+    heroHeadingTemplate: '{name} in Belgrade'
+    processHeading: What to expect at your visit
+    ctaHeadingTemplate: '{name}: book a time that suits you'
+    partsCtaHeadingTemplate: '{name}: get a price and lead time'
+    ctaBody: Tell us what's wrong with your car. We'll call you back during working hours to arrange a visit.
     indexHeading: Everything your car needs, all in one workshop
-    indexLead: Each service has its own page explaining what's included, how long it takes, the signs it's time to visit us, and when we'll honestly tell you no work is needed.
+    indexLead: Find out what each job includes and how long it takes. We quote after inspecting the car, before starting any work.
     specsPriceLabel: Price
     specsDurationLabel: Time needed
     diagnostics:
+      cta: Book a diagnostic check
       name: Computer diagnostics
       short: We find the cause behind the fault code.
       metaTitle: Car computer diagnostics in Belgrade | CarLab
       metaDescription: Engine, suspension and electrical diagnostics in Belgrade. Free fault code reading, with the cause shown to you on the car.
-      heroTitle: A fault code is a symptom, not a diagnosis
+      heroTitle: A fault code is a symptom, not a diagnosis. We find the cause and show you the problem on your car.
       heroLead: A scanner tells you which sensor is reporting a problem. It can't tell you whether the sensor itself is faulty or something is wrong with what it measures. That takes hands-on checks.
       priceFrom: free fault code reading
       duration: from 40 minutes
@@ -496,6 +514,7 @@ translations:
       honestHeading: What we can't promise
       honest: Not every fault can be found in forty minutes. Intermittent problems that appear once a week may need another visit or a full day in the workshop. We'll tell you upfront, and we won't replace parts one after another at your expense.
     servicing:
+      cta: Book a service
       name: Scheduled servicing
       short: Oil, filters, fluids and checks to your engine's service schedule.
       metaTitle: Scheduled servicing and oil changes in Belgrade | CarLab
@@ -526,6 +545,7 @@ translations:
       honestHeading: What we don't do
       honest: We don't replace things before they're due. If a filter is only halfway through its service life, we'll leave it alone and tell you when to come back.
     brakes-suspension:
+      cta: Book a repair
       name: Brakes and suspension
       short: Everything that determines whether your car stops safely.
       metaTitle: Brake and suspension repairs in Belgrade | CarLab
@@ -556,6 +576,7 @@ translations:
       honestHeading: What we'll explain upfront
       honest: Pads and discs are wear items that work together. New pads can be fitted to worn discs, but they won't last as long, and you could be back in six months. We'll price both options and leave the choice to you.
     engine-gearbox:
+      cta: Book a diagnostic check
       name: Engine and gearbox
       short: From gasket replacement to strip-down repairs, with a clear estimate.
       metaTitle: Engine and gearbox repairs in Belgrade | CarLab
@@ -586,6 +607,7 @@ translations:
       honestHeading: When we advise against repairs
       honest: If the repair cost is close to the car's value, we'll tell you. Sometimes the best advice is to sell it as it is or look for a used replacement engine or gearbox, rather than spend money on repairs that you'll never recover.
     bodywork-painting:
+      cta: Send photos of the damage
       name: Bodywork and respraying
       short: Accident repairs, chassis alignment and colour-matched respraying.
       metaTitle: Accident repairs and respraying in Belgrade | CarLab
@@ -616,6 +638,7 @@ translations:
       honestHeading: About insurance
       honest: We work with insurers and help with the paperwork, but we can't promise your insurer will cover everything. After the inspection, we explain which damage falls within the claim and which doesn't, so there are no surprises at the end.
     pre-purchase-inspection:
+      cta: Book a pre-purchase inspection
       name: Pre-purchase inspection
       short: A paint thickness gauge, a lift and a diagnostic scanner, before you hand over your money.
       metaTitle: Pre-purchase car inspection in Belgrade | CarLab
@@ -646,6 +669,7 @@ translations:
       honestHeading: What an inspection can't guarantee
       honest: We'll be honest about what we find, but no inspection catches everything. A hidden fault that doesn't show up on the lift or during diagnostics may appear later. That's a limitation of the inspection, not a disclaimer buried in the small print.
     vin-parts-inquiry:
+      cta: Send an enquiry
       name: Parts sourcing
       short: We find parts that fit your car and confirm the price before you buy.
       metaTitle: Car parts sourcing by VIN in Belgrade | CarLab
@@ -653,7 +677,7 @@ translations:
       heroTitle: We'll find the right parts for your car
       heroLead: Send us your VIN or chassis number and tell us what you need. We'll check fitment, find genuine parts and trusted aftermarket alternatives, and suggest the best options.
       priceFrom: quoted once we've found the right parts
-      duration: depends on supplier stock
+      duration: confirmed with the price
       bodyHeading: How we find the right parts
       body: |
         We use the VIN to identify your car's exact specification: engine, gearbox, year and intended market. These details determine which part fits, even on cars of the same model.
@@ -672,8 +696,8 @@ translations:
       signs:
         - You don't know the exact part name or number
         - You're worried about buying a part that won't fit
-        - The part you need isn't in our online catalogue
+        - You need a rare or discontinued part
         - You want to compare prices for genuine parts and aftermarket alternatives
-      honestHeading: What we can't promise
-      honest: Not every part is easy to find or cheap to source. If a part is rare or needs to be ordered in, we'll give you an honest price and lead time before you buy. If there's no suitable alternative, we won't offer you something that won't fit.
-translatedFrom: 7a5fa7d0e4b835b0
+      honestHeading: How we quote
+      honest: We confirm the price and lead time before you pay. If a rare part needs to be specially ordered, we'll tell you how long it will take and suggest a trusted alternative if one is available.
+translatedFrom: ddd44cfed8b3f7f8

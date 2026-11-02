@@ -2,7 +2,7 @@
 title: 'ТО Honda Accord: масло и фильтры'
 translations:
   en:
-    title: "Honda Accord servicing in Belgrade: oil and filters"
+    title: "Honda Accord Service: Oil and Filter Change"
     body: |-
       This petrol-powered Honda Accord came into our workshop in Belgrade for a scheduled service.
 
@@ -17,7 +17,7 @@ translations:
       Along with changing the oil, a service is a good opportunity to check the filters, spark plugs, coolant, brake fluid and other service items.
     car: Honda Accord
   sr:
-    title: "Mali servis za Hondu Accord u Beogradu: ulje i filteri"
+    title: "Mali servis za Honda Accord: zamena ulja i filtera"
     body: |-
       Honda Accord sa benzinskim motorom stigla je u naš autoservis u Beogradu na redovno održavanje.
 
@@ -41,7 +41,7 @@ image: image.jpg
 gallery: []
 date: 2026-04-15
 published: true
-translatedFrom: 9e03c6d5758f885f
+translatedFrom: fcdb8b65699eec95
 ---
 
 Honda Accord с бензиновым двигателем приехала в наш автосервис в Белграде на плановое техническое обслуживание.

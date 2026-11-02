@@ -12,7 +12,7 @@ date: 2026-09-20
 published: true
 translations:
   sr:
-    title: BMW 116D
+    title: "BMW 116d: antifriz, nosač motora i EGR klapna"
     body: |-
       **BMW 116d u našem auto-servisu u Beogradu.**
 
@@ -26,7 +26,7 @@ translations:
       4. **Utvrđeno je da je potrebna zamena prigušivača torzionih vibracija.** Tokom servisa utvrdili smo i da će biti potrebno zameniti prigušivač torzionih vibracija radilice. Ovaj deo ublažava vibracije i obezbeđuje stabilan rad remenskog pogona pomoćnih agregata. Zamenu dotrajalog prigušivača ne treba odlagati, jer njegovo otkazivanje može dovesti do dodatnih kvarova i skupih popravki.
     car: BMW 116D
   en:
-    title: BMW 116D
+    title: "BMW 116d: coolant, engine mount and EGR valve"
     body: |-
       **BMW 116d at our workshop in Belgrade.**
 
@@ -39,7 +39,7 @@ translations:
       3. **Engine mount replacement.** We replaced a worn engine mount on the BMW 116d. Engine mounts secure the engine and reduce the vibrations transmitted to the body. Worn mounts can cause excessive vibration, reduced cabin comfort and additional stress on other components.
       4. **Crankshaft vibration damper replacement required.** During the service, we also found that the crankshaft torsional vibration damper would need replacing. This component helps absorb torsional vibrations and keeps the auxiliary belt drive running smoothly. Replacing a worn damper should not be put off, as its failure can cause further damage and costly repairs.
     car: BMW 116D
-translatedFrom: a89556b2931093e2
+translatedFrom: f0e8817941da20ba
 ---
 **BMW 116d в нашем автосервисе в Белграде.**
 

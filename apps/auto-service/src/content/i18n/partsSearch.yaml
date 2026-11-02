@@ -59,7 +59,7 @@ suggestNone: 'Найдем «{q}» вручную: отправить запро
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: b0e0f9b9bd4ee956
+translatedFrom: 895c133efb2fde46
 translations:
   sr:
     searchHeading: Pronađite deo
@@ -72,15 +72,17 @@ translations:
     eyebrow: Katalog auto-delova
     heading: Pretraga auto-delova
     found: 'Pronađeno: {count}'
+    foundNumbers: 'Pronađeno brojeva delova: {count}'
     emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model automobila, na primer HU 816 x, filter ulja ili BMW X3.
-    noResults: Nema rezultata za „{q}“. Pišite nam, saradnik će pronaći odgovarajući deo za Vas. Vaša pretraga će već biti uneta u WhatsApp poruku.
+    noResults: Pronaći ćemo „{q}“ za vas. Pozovite nas, pišite nam putem WhatsApp, Viber ili Telegram aplikacije ili pošaljite upit, javićemo vam cenu i rok isporuke.
     lookingFor: 'Tražim: {q}'
     lookingForVin: Pronađite delove po VIN-u {vin}
-    unavailable: Pretraga trenutno ne radi. Pošaljite upit i saradnik će pronaći odgovarajući deo za Vas.
-    unknownScope: Ova kategorija ne postoji u katalogu. Pošaljite upit i saradnik će pronaći odgovarajući deo za Vas.
+    unavailable: Lično ćemo potražiti odgovarajući deo, pošaljite upit.
+    unknownScope: Lično ćemo potražiti odgovarajući deo, pošaljite upit.
     filtersHeading: Filteri
     applyFilters: Prikažite
     showResults: Prikažite {count}
+    noneFound: Lično ćemo potražiti deo prema ovim kriterijumima
     showAllValues: Prikažite sve ({count})
     resetFilters: Poništite
     resetAllFilters: Poništite sve
@@ -90,7 +92,8 @@ translations:
     rangeTo: do {max}
     rangeBetween: od {min} do {max}
     removeFilter: 'Uklonite filter: {label}'
-    noFilteredResults: U ovoj kategoriji nema delova sa izabranim karakteristikama. Uklonite neke filtere ili pošaljite upit i saradnik će pronaći odgovarajući deo za Vas.
+    noFilteredResults: Lično ćemo potražiti deo prema ovim kriterijumima. Pošaljite upit, filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
+    noFilteredQueryResults: Lično ćemo potražiti „{q}“ prema ovim kriterijumima. Pošaljite upit, pretraga i filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
     brandFacet: Brend
     availabilityFacet: Dostupnost
     inStockOnly: Samo na stanju
@@ -103,8 +106,11 @@ translations:
     formHeading: Upit za auto-delove
     notFoundQuestion: Niste pronašli ono što Vam treba?
     notFoundLink: Pošaljite upit, pronaći ćemo deo
+    pickHeading: Pronaći ćemo deo koji tačno odgovara vašem vozilu
+    pickBody: Pošaljite VIN ili broj dela. Proverićemo da li deo odgovara vašem vozilu i javiti vam cenu i rok isporuke.
+    pickCta: Zatražite pomoć pri izboru dela
     askManager: Pitajte saradnika, Vaša pretraga je već uneta u poruku
-    numberNotFound: U katalogu nema tačnog broja „{q}“. Možda ste tražili neki od sličnih brojeva ispod.
+    numberNotFound: Možda ste tražili neki od sličnih brojeva delova navedenih ispod. Ako vam treba baš „{q}“, pronaći ćemo ga.
     numberComment: Broj {q}
     similarNumbers: Slični brojevi
     carsGroup: Automobili
@@ -113,6 +119,7 @@ translations:
     vinOption: Pronađite delove po VIN-u
     suggestFailed: Predlozi nisu učitani
     suggestRetry: Pokušajte ponovo
+    suggestNone: 'Lično ćemo potražiti „{q}“: pošaljite upit'
     openSearch: Pretraga kataloga
     closeSearch: Zatvorite pretragu
     llmsSearch: 'Jedna pretraga za ceo katalog: VIN, broj dela u bilo kom formatu, naziv, marka, model, oznaka karoserije ili motora, kao i njihove kombinacije, na primer „filter ulja bmw x3“. Upit se prosleđuje kroz parametar q: {example}'
@@ -127,15 +134,17 @@ translations:
     eyebrow: Parts catalogue
     heading: Parts search
     found: 'Found: {count}'
+    foundNumbers: 'Part numbers found: {count}'
     emptyQuery: Enter a VIN, part number, part name or vehicle make and model, for example HU 816 x, oil filter or BMW X3.
-    noResults: No results for "{q}". Message us and our team will find the right part for you. Your search will be included in the WhatsApp message.
+    noResults: We'll find "{q}" for you. Call us, message us on WhatsApp, Viber or Telegram, or send an enquiry. We'll confirm the price and lead time.
     lookingFor: 'Looking for: {q}'
     lookingForVin: Please find parts for VIN {vin}
-    unavailable: Search is currently unavailable. Send an enquiry and our team will find the right part for you.
-    unknownScope: This catalogue section doesn't exist. Send an enquiry and our team will find the right part for you.
+    unavailable: We'll find the right part for you. Send an enquiry.
+    unknownScope: We'll find the right part for you. Send an enquiry.
     filtersHeading: Filters
     applyFilters: Show results
     showResults: Show {count}
+    noneFound: We'll find a part that matches these filters
     showAllValues: Show all ({count})
     resetFilters: Reset
     resetAllFilters: Reset all
@@ -145,7 +154,8 @@ translations:
     rangeTo: up to {max}
     rangeBetween: from {min} to {max}
     removeFilter: 'Remove filter: {label}'
-    noFilteredResults: No parts in this category match these filters. Remove some filters or send an enquiry and our team will find the right part for you.
+    noFilteredResults: We'll find a part that matches these filters. Send an enquiry, the filters are already in the comments. We'll confirm the price and lead time.
+    noFilteredQueryResults: We'll find "{q}" to match these filters. Send an enquiry, your search and filters are already in the comments. We'll confirm the price and lead time.
     brandFacet: Brand
     availabilityFacet: Availability
     inStockOnly: In stock only
@@ -158,8 +168,11 @@ translations:
     formHeading: Parts enquiry
     notFoundQuestion: Can't find what you need?
     notFoundLink: Send an enquiry and we'll find it
+    pickHeading: We'll find the right part for your car
+    pickBody: Send us your VIN or part number. We'll check compatibility and confirm the price and lead time.
+    pickCta: Request a parts search
     askManager: Ask our team, your search is already included in the message
-    numberNotFound: The exact part number "{q}" isn't in the catalogue. You may be looking for one of the similar numbers below.
+    numberNotFound: You may have been looking for one of the similar part numbers below. If you need "{q}" specifically, we'll find it.
     numberComment: Part number {q}
     similarNumbers: Similar part numbers
     carsGroup: Vehicles
@@ -168,6 +181,7 @@ translations:
     vinOption: Find parts by VIN
     suggestFailed: Couldn't load suggestions
     suggestRetry: Try again
+    suggestNone: 'We''ll find "{q}" for you: send an enquiry'
     openSearch: Search the catalogue
     closeSearch: Close search
     llmsSearch: 'Search the entire catalogue by VIN, part number in any format, part name, make, model, chassis code or engine code. You can also combine these, for example "oil filter bmw x3". Pass the search query in the q parameter: {example}'
