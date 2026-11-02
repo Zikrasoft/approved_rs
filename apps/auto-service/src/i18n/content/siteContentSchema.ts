@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { llmsHeadingsSchema } from '@podbor/i18n';
+import { pluralForms } from './shopPartContentSchema';
 
 const cookieSchema = z
   .object({
@@ -75,6 +76,9 @@ export const siteContentSchema = z
         route: z.string(),
         facts: z.array(z.string()),
       })
+      .strict(),
+    googleRating: z
+      .object({ rating: z.string(), reviews: pluralForms })
       .strict(),
     channels: z
       .object({

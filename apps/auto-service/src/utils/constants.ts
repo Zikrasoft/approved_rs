@@ -23,6 +23,13 @@ export const SITE_LEGAL_NAME = BRAND.legalName;
 
 export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
+// TODO: refresh by hand from the Google Maps card of GARAGE_ADDRESS.googleMapsCid; nothing updates these numbers.
+export const GOOGLE_RATING = {
+  rating: '5.0',
+  reviews: 14,
+  checkedOn: '2026-11-02',
+};
+
 export const OPENING_HOURS = [
   {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],

@@ -1,0 +1,43 @@
+---
+import { mapPlaceUrl } from '@podbor/site-kit';
+import Icon from './Icon.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { GARAGE_ADDRESS, GOOGLE_RATING } from '@/utils/constants';
+import { plural } from '@/utils/leadTime';
+
+interface Props {
+  tone: 'panel' | 'card';
+  class?: string;
+}
+
+const { tone, class: className } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).site.googleRating;
+const { rating, reviews } = GOOGLE_RATING;
+const label = [
+  copy.rating.replace('{rating}', rating),
+  plural(reviews, copy.reviews, BCP47_BY_LOCALE[locale]).replace(
+    '{count}',
+    String(reviews),
+  ),
+].join(' · ');
+const TONE = {
+  panel: 'text-panel-fg decoration-panel-line hover:decoration-panel-fg',
+  card: 'text-ink decoration-line-strong hover:decoration-ink',
+}[tone];
+---
+
+<a
+  href={mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}
+  target="_blank"
+  rel="noopener"
+  class:list={[
+    'inline-flex w-fit items-center gap-1.5 underline underline-offset-2 transition-colors duration-150 pointer-coarse:min-h-11',
+    TONE,
+    className,
+  ]}
+>
+  <Icon name="star" size={13} class="shrink-0 fill-current text-signal" />
+  {label}
+</a>
