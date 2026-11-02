@@ -17,7 +17,7 @@ translations:
       - changed the fluid in the ZF 8HP automatic transmission.
 
       We paid particular attention to the transmission. On **ZF 8HP** automatics, it is important to monitor the condition of the fluid and sump pan and keep up with servicing. Timely maintenance costs far less than a transmission repair.
-    car: ALFA ROMEO GIULIA
+    car: Alfa Romeo Giulia
 
   sr:
     title: Redovan servis Alfa Romeo Giulia iz 2021. godine
@@ -35,7 +35,7 @@ translations:
       - zamenili ulje u automatskom menjaču ZF 8HP.
 
       Posebnu pažnju posvetili smo menjaču. Kod automatskih menjača **ZF 8HP** važno je pratiti stanje ulja i kartera i ne odlagati servis: pravovremeno održavanje menjača košta znatno manje od njegove popravke.
-    car: ALFA ROMEO GIULIA
+    car: Alfa Romeo Giulia
 car: Alfa Romeo Giulia
 year: 2021
 servicesApplied:
@@ -46,7 +46,7 @@ image: image.jpg
 gallery: []
 date: 2026-07-21
 published: true
-translatedFrom: fa6d9633173e21c2
+translatedFrom: 9be6b91f7ddca853
 ---
 
 Alfa Romeo Giulia 2021 года приехала к нам в Белграде на плановое ТО. Одной заменой масла решили не ограничиваться: прошли по всем расходникам и заодно обслужили автоматическую коробку.

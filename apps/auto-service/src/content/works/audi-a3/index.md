@@ -2,7 +2,7 @@
 title: Большой сервис Audi A3 1.5 TFSI
 translations:
   en:
-    title: Audi A3 1.5 TFSI Major Service in Belgrade
+    title: Audi A3 1.5 TFSI Major Service
     body: |-
       This Audi A3 with a **150 hp 1.5 TFSI petrol engine** and a DQ200 dual-clutch gearbox came to our Russian-speaking garage in Belgrade for a major service. We replaced the timing belt.
 
@@ -11,9 +11,9 @@ translations:
       At the same time, we carried out a minor service, replacing the engine oil and all the required filters.
 
       Next was the gearbox. The DQ200 is a dry-clutch dual-clutch transmission. We changed the oil in the mechanical section and the hydraulic fluid in the mechatronic unit. Our recommendation for this gearbox is simple: change both fluids at least every **60,000 km**. Keeping to this interval helps the transmission last longer and reduces the likelihood of expensive repairs.
-    car: AUDI A3
+    car: Audi A3
   sr:
-    title: Veliki servis za Audi A3 1.5 TFSI u Beogradu
+    title: Veliki servis za Audi A3 1.5 TFSI
     body: |-
       Audi A3 sa benzinskim motorom **1.5 TFSI od 150 KS** i robotizovanim menjačem DQ200 stigao je u naš ruski auto-servis u Beogradu na veliki servis. Zamenili smo zupčasti kaiš.
 
@@ -22,7 +22,7 @@ translations:
       Usput smo uradili i mali servis: zamenili smo motorno ulje i sve potrebne filtere.
 
       Zatim je na red došao menjač. DQ200 je robotizovani menjač sa suvim kvačilima. Zamenili smo ulje u mehaničkom delu i radnu tečnost u mehatronici. Naša preporuka za ovaj menjač je jednostavna: ulje u mehaničkom delu i tečnost u mehatronici menjati najkasnije na svakih **60.000 km**. Uz takav interval održavanja menjač duže traje i ređe zahteva skupe popravke.
-    car: AUDI A3
+    car: Audi A3
 car: Audi A3
 year: 2019
 servicesApplied:
@@ -34,7 +34,7 @@ gallery:
   - gallery/1.jpg
 date: 2026-08-27
 published: true
-translatedFrom: 54f24ee573cb747f
+translatedFrom: c75c4b82fbdb771d
 ---
 
 Audi A3 с бензиновым **1.5 TFSI на 150 л.с.** и роботизированной коробкой DQ200 приехала в наш русский автосервис в Белграде на большой сервис. Заменили зубчатый ремень ГРМ.
