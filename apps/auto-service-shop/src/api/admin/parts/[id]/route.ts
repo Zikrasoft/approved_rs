@@ -15,56 +15,9 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { id } = req.params;
-  const {
-    name,
-    description,
-    replaced_by_id,
-    category_id,
-    attributes,
-    installation_price,
-    no_installation,
-  } = req.validatedBody;
-  const { updated_by } = updatedBy(req);
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const current = await catalog.retrievePart(id);
-  if (
-    name !== undefined ||
-    description !== undefined ||
-    installation_price !== undefined ||
-    no_installation !== undefined ||
-    category_id !== undefined
-  ) {
-    await catalog.updateParts({
-      id,
-      ...(name !== undefined && { name }),
-      ...(description !== undefined && { description }),
-      ...(installation_price !== undefined && { installation_price }),
-      ...(no_installation !== undefined && { no_installation }),
-      edited_fields: [
-        ...new Set([
-          ...current.edited_fields,
-          ...(name === undefined ? [] : ['name']),
-          ...(description === undefined ? [] : ['description']),
-          ...(category_id === undefined ? [] : ['category_id']),
-        ]),
-      ],
-      updated_by,
-    });
-  }
-  if (category_id !== undefined || attributes !== undefined) {
-    const nextCategoryId =
-      category_id === undefined ? current.category_id : category_id;
-    const categoryChanged = nextCategoryId !== current.category_id;
-    await catalog.classifyPart(id, {
-      category_id: nextCategoryId,
-      attributes: attributes ?? (categoryChanged ? {} : current.attributes),
-      updated_by,
-    });
-  }
-  if (replaced_by_id !== undefined) {
-    await catalog.replacePart(id, replaced_by_id, updated_by);
-  }
+  await catalog.editPart(id, req.validatedBody, updatedBy(req).updated_by);
 
   const part = await catalog.retrievePart(id);
   res.json({

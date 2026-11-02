@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import { enrichmentGaps } from '@podbor/catalog-contract';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
@@ -28,6 +29,8 @@ medusaIntegrationTestRunner({
       let catalog: CatalogModuleService;
       let oilId: string;
       let fittedPartId: string;
+      let vehicleId: string;
+      let mannId: string;
 
       const list = async (query = ''): Promise<Listing> =>
         (await api.get(`/admin/part-identifiers${query}`, adminHeaders)).data;
@@ -71,6 +74,8 @@ medusaIntegrationTestRunner({
           { key: 'bmw-ll-04', label: 'BMW LL-04' },
         );
         const b47 = await createVehicleFixture(catalog, { typeCode: '8C31' });
+        vehicleId = b47.vehicle.id;
+        mannId = mann.id;
         await post('/admin/requirements', {
           field_id: approvals.id,
           engine_id: b47.engine.id,
@@ -240,6 +245,55 @@ medusaIntegrationTestRunner({
         expect(rest.part_identifiers).toHaveLength(5);
         expect(first.count).toBe(8);
         expect(new Set([...values(first), ...values(rest)]).size).toBe(8);
+      });
+
+      it('judges every brand-number exactly as enrichmentGaps does', async () => {
+        const bare = (name: string, value: string) =>
+          catalog.createPartWithIdentifiers({
+            name,
+            identifiers: [
+              { type: 'manufacturer-number', brand_id: mannId, value },
+            ],
+          });
+        const blank = await bare('Пробелы вместо описания', 'BLANK-1');
+        await catalog.updateParts({ id: blank, description: ' \n\t ' });
+        const unfitted = await bare('Снятая машина', 'TOMB-1');
+        const [tombstone] = await catalog.createFitments([
+          { part_id: unfitted, vehicle_id: vehicleId },
+        ]);
+        await catalog.softDeleteFitments([tombstone.id]);
+
+        const listing = await list('?limit=200');
+        const identifiers = await catalog.listPartIdentifiers(
+          {},
+          { relations: ['part'], take: null },
+        );
+        const expected = await Promise.all(
+          identifiers.map(async ({ value, part, part_id }) => ({
+            value,
+            reasons: enrichmentGaps({
+              description: part.description,
+              attributes: part.attributes as Record<string, never>,
+              fitments: (await catalog.listFitments({ part_id })).length,
+              equivalents:
+                (await catalog.listPartIdentifiers({ part_id })).length - 1,
+            }),
+          })),
+        );
+
+        expect(
+          listing.part_identifiers
+            .map(({ value, reasons }) => ({ value, reasons }))
+            .sort((a, b) => a.value.localeCompare(b.value)),
+        ).toEqual(expected.sort((a, b) => a.value.localeCompare(b.value)));
+        expect(
+          listing.part_identifiers.filter(({ value }) =>
+            ['BLANK-1', 'TOMB-1'].includes(value),
+          ),
+        ).toEqual([
+          expect.objectContaining({ enriched: false }),
+          expect.objectContaining({ enriched: false }),
+        ]);
       });
 
       it('refuses an unknown enriched value with a 400', async () => {

@@ -48,7 +48,10 @@ import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { spellingKey } from '../_shared/spelling';
 import {
   countRowsBySource,
-  deleteRowsBySource,
+  lockSourcedRows,
+  refuseForeignHolders,
+  refuseManualSource,
+  refusingSourceUse,
   type SourceCount,
   sourcedRowsOf,
 } from './by-source';
@@ -90,6 +93,97 @@ export type NewPartIdentifier = {
 export type PartClassification = {
   category_id: string | null;
   attributes: Record<string, unknown>;
+};
+
+export type PartEdit = {
+  name?: string;
+  description?: string | null;
+  installation_price?: number | null;
+  no_installation?: boolean;
+  category_id?: string | null;
+  attributes?: Record<string, unknown>;
+  replaced_by_id?: string | null;
+};
+
+export type SourceChange = {
+  name?: string;
+  source_name?: string | null;
+  description?: string;
+  classification?: PartClassification;
+};
+
+export type AppliedSourceChange = {
+  changed: boolean;
+  categorized?: boolean;
+};
+
+const STAFF_OWNED_FIELDS = ['name', 'description', 'category_id'] as const;
+
+const definedOf = <Row extends object>(row: Row): Partial<Row> =>
+  Object.fromEntries(
+    Object.entries(row).filter(([, value]) => value !== undefined),
+  ) as Partial<Row>;
+
+type DefinitionChange = (
+  fields: CategoryFieldDefinition[],
+) => CategoryFieldDefinition[];
+
+type NewCategoryField = {
+  category_id: string;
+  key: string;
+  type: CategoryFieldDefinition['type'];
+  required?: boolean;
+} & Record<string, unknown>;
+
+type CategoryFieldUpdate = {
+  id: string;
+  type?: CategoryFieldDefinition['type'];
+  required?: boolean;
+} & Record<string, unknown>;
+
+type DefinitionRemoval = {
+  category_id: string;
+  field_id: string;
+  field: string;
+  option: string | null;
+};
+
+const fieldRemoval = (field: {
+  id: string;
+  key: string;
+  category_id: string;
+}): DefinitionRemoval => ({
+  category_id: field.category_id,
+  field_id: field.id,
+  field: field.key,
+  option: null,
+});
+
+const optionRemoval = (option: {
+  key: string;
+  field_id: string;
+  field: { key: string; category_id: string };
+}): DefinitionRemoval => ({
+  category_id: option.field.category_id,
+  field_id: option.field_id,
+  field: option.field.key,
+  option: option.key,
+});
+
+const changesPerCategory = <Row extends { category_id: string }>(
+  rows: Row[],
+  change: (
+    row: Row,
+  ) => (field: CategoryFieldDefinition) => CategoryFieldDefinition[],
+): Map<string, DefinitionChange> => {
+  const changes = new Map<string, DefinitionChange>();
+  for (const row of rows) {
+    const previous = changes.get(row.category_id) ?? ((fields) => fields);
+    changes.set(row.category_id, (fields) =>
+      previous(fields).flatMap(change(row)),
+    );
+  }
+  return changes;
 };
 
 export type FitmentConditions = {
@@ -230,6 +324,25 @@ const FLAG_UNLISTED_PARTS = `
       else not (l.source_url = any(?::text[]))
     end
   )`;
+
+const LOCK_SOURCED_VEHICLES = `
+  select id from vehicle
+  where id = any(?::text[]) and source = ? and deleted_at is null
+  for update`;
+
+const UNHELD_VEHICLES = `
+  select v.id from vehicle v
+  where v.id = any(?::text[]) and v.source = ? and v.deleted_at is null
+    and not exists (select 1 from fitment f where f.vehicle_id = v.id)
+    and not exists (
+      select 1 from requirement r
+      where r.vehicle_id = v.id and r.deleted_at is null
+    )
+    and not exists (
+      select 1 from vehicle_identifier i
+      where i.vehicle_id = v.id and i.supplier_id is null
+        and i.deleted_at is null
+    )`;
 
 const CatalogModuleBase = MedusaService({
   Brand,
@@ -808,7 +921,7 @@ class CatalogModuleService extends CatalogModuleBase {
         source_name,
         source_url,
         category_id,
-        attributes: await this.validatePartAttributes(
+        attributes: await this.classifiedAttributes(
           category_id,
           attributes,
           sharedContext,
@@ -960,12 +1073,13 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   private async lockRow(
-    table: 'part' | 'vehicle_model',
+    table: 'part' | 'vehicle_model' | 'category',
     id: string,
     sharedContext: Context,
+    mode: 'update' | 'share' = 'update',
   ): Promise<void> {
     await (sharedContext.transactionManager as SqlEntityManager).execute(
-      `select id from "${table}" where id = ? for update`,
+      `select id from "${table}" where id = ? for ${mode}`,
       [id],
     );
   }
@@ -1139,6 +1253,26 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectTransactionManager()
+  async deleteOrphanVehicles(
+    ids: string[],
+    source: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await runBoundSql(sharedContext, LOCK_SOURCED_VEHICLES, [ids, source]);
+    const { rows }: { rows: { id: string }[] } = await runBoundSql(
+      sharedContext,
+      UNHELD_VEHICLES,
+      [ids, source],
+    );
+    if (rows.length) {
+      await this.deleteVehicles(
+        rows.map(({ id }) => id),
+        sharedContext,
+      );
+    }
+  }
+
+  @InjectTransactionManager()
   async flagUnlistedParts(
     source: string,
     listedNumbers: string[],
@@ -1204,13 +1338,24 @@ class CatalogModuleService extends CatalogModuleBase {
     return result.values;
   }
 
+  private async classifiedAttributes(
+    categoryId: string | null,
+    attributes: unknown,
+    sharedContext: Context,
+  ): Promise<AttributeValues> {
+    if (categoryId) {
+      await this.lockRow('category', categoryId, sharedContext, 'share');
+    }
+    return this.validatePartAttributes(categoryId, attributes, sharedContext);
+  }
+
   @InjectTransactionManager()
   async classifyPart(
     partId: string,
     { category_id, attributes, ...provenance }: PartClassification & Provenance,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    const values = await this.validatePartAttributes(
+    const values = await this.classifiedAttributes(
       category_id,
       attributes,
       sharedContext,
@@ -1222,6 +1367,108 @@ class CatalogModuleService extends CatalogModuleBase {
     await (sharedContext.transactionManager as SqlEntityManager).execute(
       'update "part" set "attributes" = ? where "id" = ?',
       [JSON.stringify(values), partId],
+    );
+  }
+
+  @InjectTransactionManager()
+  async editPart(
+    id: string,
+    { category_id, attributes, replaced_by_id, ...columns }: PartEdit,
+    updatedBy: string | null,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await this.lockRow('part', id, sharedContext);
+    const current = await this.retrievePart(
+      id,
+      { select: ['category_id', 'attributes', 'edited_fields'] },
+      sharedContext,
+    );
+    const edit = { ...columns, category_id };
+    await this.updateParts(
+      {
+        id,
+        ...definedOf(columns),
+        edited_fields: [
+          ...new Set([
+            ...current.edited_fields,
+            ...STAFF_OWNED_FIELDS.filter((field) => edit[field] !== undefined),
+          ]),
+        ],
+        updated_by: updatedBy,
+      },
+      sharedContext,
+    );
+    if (category_id !== undefined || attributes !== undefined) {
+      const next =
+        category_id === undefined ? current.category_id : category_id;
+      await this.classifyPart(
+        id,
+        {
+          category_id: next,
+          attributes:
+            attributes ??
+            (next === current.category_id ? current.attributes : {}),
+          updated_by: updatedBy,
+        },
+        sharedContext,
+      );
+    }
+    if (replaced_by_id !== undefined) {
+      await this.replacePart(id, replaced_by_id, updatedBy, sharedContext);
+    }
+  }
+
+  @InjectTransactionManager()
+  async applySourceChange(
+    id: string,
+    { classification, ...change }: SourceChange,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<AppliedSourceChange> {
+    await this.lockRow('part', id, sharedContext);
+    const part = await this.retrievePart(
+      id,
+      { select: ['category_id', 'description', 'edited_fields'] },
+      sharedContext,
+    );
+    const owned = new Set(part.edited_fields);
+    const columns = {
+      ...(change.name !== undefined &&
+        !owned.has('name') && {
+          name: change.name,
+          source_name: change.source_name ?? null,
+        }),
+      ...(change.description !== undefined &&
+        !owned.has('description') &&
+        !part.description && { description: change.description }),
+    };
+    const categorized =
+      classification && !part.category_id && !owned.has('category_id')
+        ? await this.fileFromSource(id, classification, sharedContext)
+        : undefined;
+    const renamed = Object.keys(columns).length > 0;
+    if (renamed) {
+      await this.updateParts({ id, ...columns }, sharedContext);
+    }
+    return { changed: renamed || categorized === true, categorized };
+  }
+
+  private async fileFromSource(
+    id: string,
+    classification: PartClassification,
+    sharedContext: Context,
+  ): Promise<boolean> {
+    if (!classification.category_id) return false;
+    return this.classifyPart(id, classification, sharedContext).then(
+      () => true,
+      (error: unknown) => {
+        if (
+          MedusaError.isMedusaError(error) &&
+          error.code === 'INVALID_ATTRIBUTES'
+        ) {
+          return false;
+        }
+        throw error;
+      },
     );
   }
 
@@ -1263,31 +1510,6 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectManager()
-  async guardRequirementUse(
-    fieldId: string,
-    optionKey: string | null,
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<void> {
-    const used = (
-      await this.listRequirements(
-        { field_id: fieldId },
-        { select: ['id', 'option_keys'], take: null },
-        sharedContext,
-      )
-    ).filter(
-      ({ option_keys }) =>
-        optionKey === null || option_keys?.includes(optionKey),
-    );
-    if (used.length) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'REQUIREMENT_IN_USE',
-        `${used.length} Requirements use it`,
-      );
-    }
-  }
-
-  @InjectManager()
   async identifierStatusRows(
     filters: IdentifierStatusFilters,
     @MedusaContext() sharedContext: Context = {},
@@ -1312,41 +1534,295 @@ class CatalogModuleService extends CatalogModuleBase {
     );
   }
 
-  @InjectTransactionManager()
+  @InjectManager()
   async deleteRowsBySource(
     source: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
-    return deleteRowsBySource(source, sourcedRowsOf(this), {
-      count: () => this.countRowsBySource(sharedContext),
-      flush: () => this.flush(sharedContext),
-      context: sharedContext,
-    });
+    refuseManualSource(source);
+    const tables = sourcedRowsOf(this);
+    await this.transaction(async (context) => {
+      for (const { entity } of tables) {
+        await refuseForeignHolders(context, tables, entity, source);
+      }
+      await this.refuseDefinitionLoss(source, context);
+    }, sharedContext);
+    let deleted = 0;
+    for (const { entity, list, remove } of tables) {
+      for (let after = ''; ;) {
+        const ids = await this.transaction(async (context) => {
+          const chunk = (
+            await list({ source, id: { $gt: after } }, context)
+          ).map(({ id }) => id);
+          if (chunk.length) {
+            await lockSourcedRows(context, entity, chunk);
+            await refuseForeignHolders(context, tables, entity, source, chunk);
+            await remove(chunk, context).catch(
+              refusingSourceUse(source, entity),
+            );
+          }
+          return chunk;
+        }, sharedContext);
+        if (!ids.length) break;
+        deleted += ids.length;
+        after = ids[ids.length - 1];
+      }
+    }
+    return deleted;
   }
 
-  @InjectManager()
-  async guardCategoryDefinition(
-    categoryId: string,
-    change: (fields: CategoryFieldDefinition[]) => CategoryFieldDefinition[],
-    @MedusaContext() sharedContext: Context = {},
+  private async refuseDefinitionLoss(
+    source: string,
+    context: Context,
   ): Promise<void> {
-    const parts = await this.listParts(
-      { category_id: categoryId },
-      { select: ['id', 'attributes'], take: null },
-      sharedContext,
+    const fields = await this.listCategoryFields(
+      { source },
+      { select: ['id', 'key', 'category_id'], take: null },
+      context,
     );
-    const broken = guardDefinitionChange(
-      change(await this.categoryDefinition(categoryId, sharedContext)),
-      parts,
+    const options = await this.listCategoryFieldOptions(
+      { source },
+      { relations: ['field'], take: null },
+      context,
     );
-    if (broken.length) {
-      throw adminError(
-        MedusaError.Types.NOT_ALLOWED,
-        'DEFINITION_BREAKS_PARTS',
-        `The change would break ${broken.length} parts in this Category`,
+    const losses: [string, DefinitionRemoval[]][] = [
+      ['category_field', fields.map(fieldRemoval)],
+      ['category_field_option', options.map(optionRemoval)],
+    ];
+    for (const [entity, removals] of losses) {
+      await this.refuseRemovals(removals, context, source).catch(
+        refusingSourceUse(source, entity),
       );
     }
   }
+
+  private async refuseRemovals(
+    removals: DefinitionRemoval[],
+    sharedContext: Context,
+    exceptSource?: string,
+  ): Promise<void> {
+    await this.refuseRequirementUse(removals, sharedContext, exceptSource);
+    await this.refuseBrokenParts(
+      changesPerCategory(
+        removals,
+        ({ field, option }) =>
+          (definition) =>
+            definition.key !== field
+              ? [definition]
+              : option === null
+                ? []
+                : [
+                    {
+                      ...definition,
+                      options: definition.options.filter(
+                        ({ key }) => key !== option,
+                      ),
+                    },
+                  ],
+      ),
+      sharedContext,
+      exceptSource,
+    );
+  }
+
+  private async refuseRequirementUse(
+    uses: { field_id: string; option: string | null }[],
+    sharedContext: Context,
+    exceptSource?: string,
+  ): Promise<void> {
+    if (!uses.length) return;
+    const requirements = await this.listRequirements(
+      {
+        field_id: [...new Set(uses.map(({ field_id }) => field_id))],
+        ...(exceptSource && { source: { $ne: exceptSource } }),
+      },
+      { select: ['id', 'field_id', 'option_keys'], take: null },
+      sharedContext,
+    );
+    const used = requirements.filter((requirement) =>
+      uses.some(
+        ({ field_id, option }) =>
+          requirement.field_id === field_id &&
+          (option === null || requirement.option_keys?.includes(option)),
+      ),
+    );
+    if (used.length) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'REQUIREMENT_IN_USE',
+        `${used.length} Requirements use it`,
+      );
+    }
+  }
+
+  private async refuseBrokenParts(
+    changes: Map<string, DefinitionChange>,
+    sharedContext: Context,
+    exceptSource?: string,
+  ): Promise<void> {
+    for (const categoryId of [...changes.keys()].sort()) {
+      await this.lockRow('category', categoryId, sharedContext);
+      const parts = await this.listParts(
+        {
+          category_id: categoryId,
+          ...(exceptSource && { source: { $ne: exceptSource } }),
+        },
+        { select: ['id', 'attributes'], take: null },
+        sharedContext,
+      );
+      const broken = guardDefinitionChange(
+        changes.get(categoryId)!(
+          await this.categoryDefinition(categoryId, sharedContext),
+        ),
+        parts,
+      );
+      if (broken.length) {
+        throw adminError(
+          MedusaError.Types.NOT_ALLOWED,
+          'DEFINITION_BREAKS_PARTS',
+          `The change would break ${broken.length} parts in this Category`,
+        );
+      }
+    }
+  }
+
+  @InjectTransactionManager()
+  private async createGuardedFields(
+    data: NewCategoryField | NewCategoryField[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<unknown> {
+    const changes = new Map<string, DefinitionChange>();
+    for (const row of [data].flat()) {
+      const previous = changes.get(row.category_id) ?? ((fields) => fields);
+      changes.set(row.category_id, (fields) => [
+        ...previous(fields),
+        {
+          key: row.key,
+          type: row.type,
+          required: row.required ?? false,
+          options: [],
+        },
+      ]);
+    }
+    await this.refuseBrokenParts(changes, sharedContext);
+    return CatalogModuleBase.prototype.createCategoryFields.call(
+      this,
+      data,
+      sharedContext,
+    );
+  }
+
+  @InjectTransactionManager()
+  private async updateGuardedFields(
+    data: CategoryFieldUpdate | CategoryFieldUpdate[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<unknown> {
+    const rows = [data].flat();
+    const stored = await this.listCategoryFields(
+      { id: rows.map(({ id }) => id) },
+      { select: ['id', 'key', 'type', 'category_id'], take: null },
+      sharedContext,
+    );
+    const updates = stored.map((field) => ({
+      ...field,
+      update: rows.find(({ id }) => id === field.id)!,
+    }));
+    await this.refuseRequirementUse(
+      updates
+        .filter(({ type, update }) => update.type && update.type !== type)
+        .map(({ id }) => ({ field_id: id, option: null })),
+      sharedContext,
+    );
+    await this.refuseBrokenParts(
+      changesPerCategory(updates, ({ key, update }) => (definition) => [
+        definition.key === key
+          ? {
+              ...definition,
+              type: update.type ?? definition.type,
+              required: update.required ?? definition.required,
+            }
+          : definition,
+      ]),
+      sharedContext,
+    );
+    return CatalogModuleBase.prototype.updateCategoryFields.call(
+      this,
+      data,
+      sharedContext,
+    );
+  }
+
+  @InjectTransactionManager()
+  private async deleteGuardedFields(
+    ids: string | string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const fields = await this.listCategoryFields(
+      { id: [ids].flat() },
+      { select: ['id', 'key', 'category_id'], take: null },
+      sharedContext,
+    );
+    await this.refuseRemovals(fields.map(fieldRemoval), sharedContext);
+    await CatalogModuleBase.prototype.deleteCategoryFields.call(
+      this,
+      ids,
+      sharedContext,
+    );
+  }
+
+  @InjectTransactionManager()
+  private async deleteGuardedOptions(
+    ids: string | string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const options = await this.listCategoryFieldOptions(
+      { id: [ids].flat() },
+      { relations: ['field'], take: null },
+      sharedContext,
+    );
+    await this.refuseRemovals(options.map(optionRemoval), sharedContext);
+    await CatalogModuleBase.prototype.deleteCategoryFieldOptions.call(
+      this,
+      ids,
+      sharedContext,
+    );
+  }
+
+  override createCategoryFields = ((
+    data: NewCategoryField | NewCategoryField[],
+    context?: Context,
+  ) =>
+    this.createGuardedFields(
+      data,
+      context,
+    )) as unknown as CatalogModuleBase['createCategoryFields'];
+
+  override updateCategoryFields = ((
+    data: CategoryFieldUpdate | CategoryFieldUpdate[],
+    context?: Context,
+  ) =>
+    this.updateGuardedFields(
+      data,
+      context,
+    )) as unknown as CatalogModuleBase['updateCategoryFields'];
+
+  override deleteCategoryFields = ((
+    ids: string | string[],
+    context?: Context,
+  ) =>
+    this.deleteGuardedFields(
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteCategoryFields'];
+
+  override deleteCategoryFieldOptions = ((
+    ids: string | string[],
+    context?: Context,
+  ) =>
+    this.deleteGuardedOptions(
+      ids,
+      context,
+    )) as CatalogModuleBase['deleteCategoryFieldOptions'];
 }
 
 export default CatalogModuleService;

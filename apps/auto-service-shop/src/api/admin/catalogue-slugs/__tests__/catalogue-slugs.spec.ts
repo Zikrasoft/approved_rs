@@ -4,10 +4,12 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import {
+  claimCatalogueWriter,
+  holdCatalogueWriter,
+} from '../../../../lib/catalogue-writer';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
-import { PUBLISH_MODULE } from '../../../../modules/publish';
-import type PublishModuleService from '../../../../modules/publish/service';
 
 const place = (fields: Record<string, string>) => ({
   brand: null,
@@ -384,12 +386,8 @@ medusaIntegrationTestRunner({
           name: 'Volkswagen Busy',
           slug: 'volkswagen-busy',
         });
-        const runs: PublishModuleService =
-          getContainer().resolve(PUBLISH_MODULE);
-        const running = await runs.createCatalogueRuns({
+        const running = await claimCatalogueWriter(getContainer(), {
           kind: 'import',
-          status: 'running',
-          heartbeat_at: new Date(),
           created_by: null,
         });
 
@@ -403,11 +401,7 @@ medusaIntegrationTestRunner({
             .catch(({ response }) => response),
           await rename('make', vw.make.id, 'vw-busier'),
         ];
-        await runs.updateCatalogueRuns({
-          id: running.id,
-          status: 'failed',
-          finished_at: new Date(),
-        });
+        await holdCatalogueWriter(getContainer(), running.id, async () => 0);
 
         expect(refused.map(({ status, data }) => [status, data.code])).toEqual(
           Array(2).fill([409, 'CATALOGUE_BUSY']),

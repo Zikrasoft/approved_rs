@@ -2,7 +2,6 @@ import type {
   AuthenticatedMedusaRequest,
   MedusaResponse,
 } from '@medusajs/framework/http';
-import { enrichmentGaps } from '@podbor/catalog-contract';
 
 import { withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
@@ -16,23 +15,14 @@ export async function GET(
   res: MedusaResponse,
 ): Promise<void> {
   const filters = req.validatedQuery as AdminListPartIdentifiersType;
-  const { enriched, offset, limit } = filters;
 
-  const rows = await req.scope
+  const {
+    rows: page,
+    count,
+    counts,
+  } = await req.scope
     .resolve<CatalogModuleService>(CATALOG_MODULE)
     .identifierStatusRows(filters);
-  // TODO: every matching brand-number is loaded and judged per request; persist the status once the catalogue passes ~100k brand-numbers.
-  const judged = rows.map((row) => {
-    const reasons = enrichmentGaps({
-      ...row,
-      attributes: row.attributes ?? {},
-    });
-    return { ...row, reasons, enriched: reasons.length === 0 };
-  });
-  const matching = judged.filter(
-    (row) => enriched === undefined || row.enriched === enriched,
-  );
-  const page = matching.slice(offset, offset + limit);
 
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const offers = await suppliers.storeOffersFor(page.map(({ id }) => id));
@@ -54,20 +44,17 @@ export async function GET(
           row.category_id && row.category_name
             ? { id: row.category_id, name: row.category_name }
             : null,
-        enriched: row.enriched,
-        reasons: row.reasons,
+        enriched: !row.bare_number,
+        reasons: row.bare_number ? ['bare_number'] : [],
         photos: row.photos,
         offers: offers.get(row.id)?.length ?? 0,
         updated_by: row.updated_by,
         updated_at: row.updated_at.toISOString(),
       })),
     ),
-    count: matching.length,
-    counts: {
-      enriched: judged.filter((row) => row.enriched).length,
-      not_enriched: judged.filter((row) => !row.enriched).length,
-    },
-    offset,
-    limit,
+    count,
+    counts,
+    offset: filters.offset,
+    limit: filters.limit,
   });
 }

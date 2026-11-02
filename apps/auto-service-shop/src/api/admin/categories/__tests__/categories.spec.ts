@@ -237,6 +237,32 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('saves nothing of an edit whose attributes break the definition', async () => {
+        const { category } = await createOilCategory();
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Untouched oil',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: brandId, value: 'UNCL-2' },
+          ],
+        });
+
+        const refused = await post(`/admin/parts/${partId}`, {
+          name: 'Renamed oil',
+          description: 'Never saved',
+          category_id: category.id,
+          attributes: { viscosity: 'nope' },
+        });
+
+        expect(refused.status).toBe(400);
+        expect(refused.data).toMatchObject({ code: 'INVALID_ATTRIBUTES' });
+        expect(await catalog.retrievePart(partId)).toMatchObject({
+          name: 'Untouched oil',
+          description: null,
+          category_id: null,
+          edited_fields: [],
+        });
+      });
+
       it('keeps attributes while the Category stays and clears them only when it changes', async () => {
         const { category } = await createOilCategory();
         const part = (

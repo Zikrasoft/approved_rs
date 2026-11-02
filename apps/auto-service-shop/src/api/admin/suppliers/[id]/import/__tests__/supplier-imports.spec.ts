@@ -19,6 +19,7 @@ import { loggedEvents } from '../../../../../../../integration-tests/loggedEvent
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
 import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
+import { PART_CHANGED_EVENT } from '../../../../../../search/part-changed-event';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
 import type { ImportSummary } from '../../../../../../lib/suppliers/import';
@@ -1394,6 +1395,48 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
+      it('refreshes search for a Part whose offer an import changes or drops, and only then', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-20', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        await runImport();
+        const partId = (await page('HU816X'))!.part.id;
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+        const emit = jest.spyOn(
+          getContainer().resolve(Modules.EVENT_BUS),
+          'emit',
+        );
+        const refreshed = () => {
+          const parts = emit.mock.calls
+            .flatMap(([messages]) => [messages].flat())
+            .filter(({ name }) => name === PART_CHANGED_EVENT)
+            .map(({ data }) => (data as { part_id: string }).part_id);
+          emit.mockClear();
+          return parts;
+        };
+
+        await runImport();
+        const unchanged = refreshed();
+        intercars.quotes.set('IC-20', {
+          ...intercars.quotes.get('IC-20')!,
+          cost_price: 2000,
+        });
+        await runImport();
+        const repriced = refreshed();
+        intercars.articles.length = 0;
+        await runImport();
+        const dropped = refreshed();
+        emit.mockRestore();
+
+        expect(unchanged).not.toContain(partId);
+        expect(repriced).toContain(partId);
+        expect(dropped).toContain(partId);
+      });
+
       it('keeps the offer of an unlisted article while a page is unreadable and drops it on the next clean run', async () => {
         offerHu816x(
           intercars,
@@ -1818,30 +1861,23 @@ medusaIntegrationTestRunner({
           ).toEqual(Array(4).fill([409, 'CATALOGUE_BUSY']));
         });
 
-        it('abandons a run only once its heartbeat goes stale', async () => {
+        it('abandons a run whose writer is gone', async () => {
           const runs: PublishModuleService =
             getContainer().resolve(PUBLISH_MODULE);
-          const longAgo = new Date(Date.now() - 60 * 60 * 1000);
-          const silent = await runs.createCatalogueRuns({
+          const left = await runs.createCatalogueRuns({
             kind: 'import',
             supplier_id: warehouseId,
             status: 'running',
             heartbeat_at: new Date(),
           });
 
-          const whileAlive = await imports.start(warehouseId);
-          await runs.updateCatalogueRuns({
-            id: silent.id,
-            heartbeat_at: longAgo,
-          });
-          const afterSilence = await imports.start(warehouseId);
+          const started = await imports.start(warehouseId);
           await imports.finished(warehouseId);
 
-          expect(whileAlive.status).toBe(409);
-          expect(afterSilence.status).toBe(202);
+          expect(started.status).toBe(202);
           expect(
             (await imports.history(warehouseId)).find(
-              ({ id }: { id: string }) => id === silent.id,
+              ({ id }: { id: string }) => id === left.id,
             ),
           ).toMatchObject({ status: 'failed', error: 'Abandoned' });
         });

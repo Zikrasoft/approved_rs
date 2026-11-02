@@ -1,5 +1,9 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
+import {
+  claimCatalogueWriter,
+  holdCatalogueWriter,
+} from '../../lib/catalogue-writer';
 import { PUBLISH_MODULE } from '../../modules/publish';
 import type PublishModuleService from '../../modules/publish/service';
 import importLocal from '../import-local';
@@ -15,12 +19,8 @@ medusaIntegrationTestRunner({
         importLocal({ container: getContainer(), args: [] } as never);
 
       it('refuses while another catalogue writer runs', async () => {
-        const runs: PublishModuleService =
-          getContainer().resolve(PUBLISH_MODULE);
-        const running = await runs.createCatalogueRuns({
+        const running = await claimCatalogueWriter(getContainer(), {
           kind: 'import',
-          status: 'running',
-          heartbeat_at: new Date(),
           created_by: null,
         });
         try {
@@ -29,11 +29,7 @@ medusaIntegrationTestRunner({
             code: 'CATALOGUE_BUSY',
           });
         } finally {
-          await runs.updateCatalogueRuns({
-            id: running.id,
-            status: 'failed',
-            finished_at: new Date(),
-          });
+          await holdCatalogueWriter(getContainer(), running.id, async () => 0);
         }
       });
 
