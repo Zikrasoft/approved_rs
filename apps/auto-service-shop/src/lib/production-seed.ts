@@ -2,7 +2,11 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
-import type { MedusaContainer } from '@medusajs/framework/types';
+import type { Logger, MedusaContainer } from '@medusajs/framework/types';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from '@medusajs/framework/utils';
 import {
   type CategoryFieldType,
   STAGED_DATA_KINDS,
@@ -18,6 +22,7 @@ import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { seedCashAtPickupCommerceDefaults } from './commerce-defaults';
 import { CRAWLED_SITES } from './crawler/sites';
+import { errorMessage } from './errors';
 import { storeImage } from './images';
 
 export const CATEGORIES = [
@@ -299,10 +304,17 @@ async function upsert<Row extends Seeded>(
   return row;
 }
 
+const DEFINITION_REFUSALS = ['DEFINITION_BREAKS_PARTS', 'REQUIREMENT_IN_USE'];
+
+const refusedDefinition = (error: unknown) =>
+  MedusaError.isMedusaError(error) &&
+  DEFINITION_REFUSALS.includes(String(error.code));
+
 export async function seedCategoryFields(
   catalog: CatalogModuleService,
   categoryId: string,
   definitions: FieldDefinition[],
+  logger?: Pick<Logger, 'warn'>,
 ): Promise<Record<string, string>> {
   const existing = await catalog.listCategoryFields(
     { category_id: categoryId },
@@ -311,13 +323,21 @@ export async function seedCategoryFields(
   const ids: Record<string, string> = {};
   for (const [rank, { options, ...definition }] of definitions.entries()) {
     const wanted = { ...definition, rank };
+    const stored = existing.find(({ key }) => key === definition.key);
     const field = await upsert(
-      existing.find(({ key }) => key === definition.key),
+      stored,
       wanted,
       () =>
         catalog.createCategoryFields({ ...wanted, category_id: categoryId }),
       (update) => catalog.updateCategoryFields(update),
-    );
+    ).catch((error: unknown) => {
+      if (!logger || !refusedDefinition(error)) throw error;
+      logger.warn(
+        `Category ${categoryId} keeps field ${definition.key} as stored: ${errorMessage(error)}. Migrate its Parts first.`,
+      );
+      return stored;
+    });
+    if (!field) continue;
     ids[field.key] = field.id;
     const existingOptions = await catalog.listCategoryFieldOptions(
       { field_id: field.id },
@@ -534,6 +554,7 @@ export async function seedProductionCatalogue(
   await seedCashAtPickupCommerceDefaults(container);
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const categories = [...CATEGORIES, BATTERY_CATEGORY];
   const existing = await catalog.listCategories(
     { slug: categories.map(({ slug }) => slug) },
@@ -545,7 +566,7 @@ export async function seedProductionCatalogue(
       existing.find(({ slug }) => slug === category.slug) ??
       (await catalog.createCategories(category));
     const fields = CATEGORY_FIELDS[category.slug];
-    if (fields) await seedCategoryFields(catalog, row.id, fields);
+    if (fields) await seedCategoryFields(catalog, row.id, fields, logger);
     if (row.updated_by) continue;
     const photo = photos.find((file) => file.startsWith(`${category.slug}.`));
     if ((row.image || !photo) && matches(row, category)) continue;

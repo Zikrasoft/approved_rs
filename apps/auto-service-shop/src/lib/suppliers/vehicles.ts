@@ -299,31 +299,10 @@ async function dropUnlisted(
   ).filter(({ vehicle_id }) => !listed.has(vehicle_id));
   if (!unlisted.length) return;
   await catalog.deleteFitments(unlisted.map(({ id }) => id));
-  const vehicleIds = unlisted.map(({ vehicle_id }) => vehicle_id);
-  const byVehicle = { vehicle_id: vehicleIds };
-  const columns = { select: ['vehicle_id'], take: null };
-  const held = new Set(
-    [
-      ...(await catalog.listFitments(byVehicle, {
-        ...columns,
-        withDeleted: true,
-      })),
-      ...(await catalog.listRequirements(byVehicle, columns)),
-      ...(await catalog.listVehicleIdentifiers(
-        { ...byVehicle, supplier_id: null },
-        columns,
-      )),
-    ].map(({ vehicle_id }) => vehicle_id),
+  await catalog.deleteOrphanVehicles(
+    unlisted.map(({ vehicle_id }) => vehicle_id),
+    source,
   );
-  const orphans = (
-    await catalog.listVehicles(
-      { id: vehicleIds, source },
-      { select: ['id'], take: null },
-    )
-  ).filter(({ id }) => !held.has(id));
-  if (orphans.length) {
-    await catalog.deleteVehicles(orphans.map(({ id }) => id));
-  }
 }
 
 export async function fitVehicles(
