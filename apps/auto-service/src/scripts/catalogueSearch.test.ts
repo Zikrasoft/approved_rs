@@ -12,6 +12,7 @@ const suggestions = {
       label: 'Mann-Filter HU 816 x',
       detail: 'Масляный фильтр',
       thumb: null,
+      slug: 'mann-filter-hu816x',
     },
   ],
 };
@@ -39,6 +40,7 @@ const mount = () => {
   document.body.innerHTML = `
     <catalogue-search
       data-endpoint="/api/search"
+      data-pick-endpoint="/api/part-pick"
       data-locale="ru"
       data-cars-label="Автомобили"
       data-parts-label="Запчасти"
@@ -135,6 +137,24 @@ describe('the catalogue search box', () => {
     expect(trackGoal).toHaveBeenCalledWith(GOALS.searchSuggestionPick, {
       group: 'parts',
     });
+  });
+
+  it('counts a picked part as demand, without holding up the way to its page', async () => {
+    const beacon = vi.fn(() => true);
+    vi.stubGlobal('navigator', { ...navigator, sendBeacon: beacon });
+    const { input, panel } = mount();
+    await type(input, 'bmw x3');
+    const [car, part] =
+      panel.querySelectorAll<HTMLAnchorElement>('[role="option"]');
+    for (const option of [car, part]) {
+      option.addEventListener('click', (event) => event.preventDefault());
+    }
+
+    car.click();
+    expect(beacon).not.toHaveBeenCalled();
+    part.click();
+
+    expect(beacon).toHaveBeenCalledWith('/api/part-pick', 'mann-filter-hu816x');
   });
 
   it('leaves Enter to the form when no suggestion is chosen', async () => {

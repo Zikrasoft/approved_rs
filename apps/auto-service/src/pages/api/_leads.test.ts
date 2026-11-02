@@ -9,6 +9,7 @@ import {
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
 import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
 import { content } from '@/i18n/content';
+import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 const memory = vi.hoisted(() => {
   const storages = new Map<string, MemoryStorage>();
@@ -36,6 +37,13 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 );
 vi.mock('@vercel/functions', () => ({
   waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+}));
+
+const demand = vi.hoisted(() => ({ inquiries: [] as FormData[] }));
+vi.mock('@/lib/shopEvents', async (original) => ({
+  ...(await original<typeof import('@/lib/shopEvents')>()),
+  reportInquiryDemand: (_: Request, form: FormData) =>
+    demand.inquiries.push(form),
 }));
 
 import { POST } from './leads';
@@ -82,6 +90,7 @@ const post = (body: URLSearchParams, headers: Record<string, string> = {}) =>
 beforeEach(() => {
   api.reset();
   pending.length = 0;
+  demand.inquiries.length = 0;
 });
 
 describe('a placed parts order posted to /api/leads', () => {
@@ -153,6 +162,42 @@ describe('the thanks page a lead lands on', () => {
   it('thanks a parts inquiry on the parts variant', async () => {
     const response = await post(inquiry('vin-parts-inquiry'));
     expect(response.headers.get('location')).toBe('/sr/thanks/parts/');
+  });
+
+  it('counts the parts an accepted inquiry named as demand', async () => {
+    const form = inquiry('vin-parts-inquiry');
+    form.append(DEMAND_PARTS_FIELD, 'mann-filter-hu816x');
+
+    await post(form);
+
+    expect(
+      demand.inquiries.map((sent) => sent.getAll(DEMAND_PARTS_FIELD)),
+    ).toEqual([['mann-filter-hu816x']]);
+  });
+
+  it('counts no demand for an inquiry it refuses', async () => {
+    const form = inquiry('vin-parts-inquiry');
+    form.set('contact', '12');
+    form.set('contact_channel', 'phone');
+    form.append(DEMAND_PARTS_FIELD, 'mann-filter-hu816x');
+
+    expect((await post(form)).status).toBe(400);
+    expect(demand.inquiries).toEqual([]);
+  });
+
+  it('counts no demand for a body that is not a form', async () => {
+    await POST({
+      request: new Request('http://localhost/api/leads', {
+        method: 'POST',
+        headers: { origin: 'http://localhost', 'content-type': 'text/plain' },
+        body: 'demand_parts=bosch-1',
+      }),
+      redirect: (path: string, status = 302) =>
+        new Response(null, { status, headers: { location: path } }),
+      cookies: { get: () => undefined },
+    } as unknown as Parameters<typeof POST>[0]);
+
+    expect(demand.inquiries).toEqual([]);
   });
 
   it('thanks a service lead on the generic page', async () => {

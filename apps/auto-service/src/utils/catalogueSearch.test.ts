@@ -283,6 +283,7 @@ describe('suggestionsFrom', () => {
           label: 'Mann-Filter HU 816 x',
           detail: 'Масляный фильтр',
           thumb: null,
+          slug: 'mann-filter-hu816x',
         },
       ],
     });

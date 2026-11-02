@@ -94,7 +94,11 @@ export const carLink = (
   };
 };
 
-export type PartLink = SearchLink & { detail: string; thumb: string | null };
+export type PartLink = SearchLink & {
+  detail: string;
+  thumb: string | null;
+  slug: string;
+};
 
 export type Suggestions = { cars: SearchLink[]; parts: PartLink[] };
 
@@ -128,6 +132,7 @@ export const suggestionsFrom = (
     label: `${result.brand.name} ${result.value}`,
     detail: result.part.name,
     thumb: result.thumbnail,
+    slug: result.slug,
   })),
 });
 

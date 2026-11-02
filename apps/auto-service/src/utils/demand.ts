@@ -1,5 +1,6 @@
 import type { PartDemand } from '@podbor/catalog-contract';
 
+export const DEMAND_PARTS_FIELD = 'demand_parts';
 export const POPULAR_BLOCK_MIN = 2;
 export const POPULAR_BLOCK_SIZE = 6;
 
