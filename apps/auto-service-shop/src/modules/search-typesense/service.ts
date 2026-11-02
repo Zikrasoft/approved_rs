@@ -1,4 +1,7 @@
-import { AbstractSearchProviderService } from '@medusajs/framework/utils';
+import {
+  AbstractSearchProviderService,
+  MedusaError,
+} from '@medusajs/framework/utils';
 import type { Logger, SearchTypes } from '@medusajs/framework/types';
 import { Client } from 'typesense';
 import type { DocumentSchema } from 'typesense/lib/Typesense/Documents';
@@ -150,11 +153,17 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
     filters,
   }: SearchTypes.SearchDeleteDocumentsInput): Promise<SearchTypes.SearchTask> {
     const filterBy = compileFilters(filters);
+    if (!filterBy) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_ARGUMENT,
+        'Deleting Typesense documents requires filters; clear the index instead',
+      );
+    }
 
     await this.client
       .collections(index)
       .documents()
-      .delete(filterBy ? { filter_by: filterBy } : { truncate: true });
+      .delete({ filter_by: filterBy });
 
     return { index, status: 'succeeded' };
   }
