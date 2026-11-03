@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import facadeImage from '@/assets/workshop-facade.jpg';
 import { content } from '@/i18n/content';
+import { visitPhoto } from '@/utils/panelPhoto';
 import VisitPanel from './VisitPanel.astro';
 import { render } from './renderAstro';
 
 const site = content('ru').site;
+const facade = { image: facadeImage, alt: site.photos.facade };
 const panel = (props: Record<string, unknown> = {}, slots = {}) =>
   render(VisitPanel, {
     path: '/ru/',
@@ -56,28 +59,45 @@ describe('VisitPanel', () => {
     expect(route.classList.contains('btn-on-panel')).toBe(true);
   });
 
-  it('splits into two columns only when it has a photo', async () => {
-    const grid = (root: Element) => root.querySelector('section > div')!;
-    const withPhoto = await panel({}, { media: '<img alt="" src="/bay.jpg">' });
+  it('fills the right column with the garage entrance, edge to edge', async () => {
+    const grid = (await panel()).querySelector('section > div')!;
+    const picture = grid.querySelector(':scope > picture')!;
+    const image = picture.querySelector('img')!;
 
-    expect(grid(await panel()).classList.contains('lg:grid-cols-2')).toBe(
-      false,
+    expect([...grid.classList]).toEqual(
+      expect.arrayContaining(['lg:grid-cols-2', 'overflow-hidden']),
     );
-    expect(grid(withPhoto).classList.contains('lg:grid-cols-2')).toBe(true);
-    expect(withPhoto.querySelector('img')?.getAttribute('src')).toBe(
-      '/bay.jpg',
+    expect(picture.classList.contains('lg:col-start-2')).toBe(true);
+    expect(image.classList.contains('lg:h-full')).toBe(true);
+    expect(image.getAttribute('src')).toContain('workshop-facade');
+    expect(image.getAttribute('alt')).toBe(site.photos.facade);
+    expect(image.getAttribute('loading')).toBe('lazy');
+    expect(image.getAttribute('sizes')).toBe((await visitPhoto(facade)).sizes);
+  });
+
+  it('lays the one map under the photo and the address, across the whole panel', async () => {
+    const grid = (await panel()).querySelector('section > div')!;
+    const maps = grid.querySelectorAll('carlab-map');
+    const box = maps[0]!.parentElement!;
+
+    expect(maps).toHaveLength(1);
+    expect(box.parentElement).toBe(grid);
+    expect(box.classList.contains('lg:col-span-2')).toBe(true);
+    expect(
+      grid.querySelector(':scope > picture ~ div carlab-map'),
+    ).not.toBeNull();
+    expect(maps[0]!.getAttribute('data-title')).toBe(
+      content('ru').pages.contact.mapHeading,
     );
   });
 
-  it('leads with the photo on a phone unless the page puts the media last', async () => {
-    const media = { media: '<img alt="" src="/bay.jpg">' };
-    const wrapper = async (props = {}) =>
-      (await panel(props, media)).querySelector('img')!.parentElement!
-        .classList;
+  it('leads with the photo on a phone unless the page puts it after the address', async () => {
+    const picture = async (props = {}) =>
+      (await panel(props)).querySelector('picture')!.classList;
 
-    expect((await wrapper()).contains('max-lg:order-first')).toBe(true);
+    expect((await picture()).contains('max-lg:order-first')).toBe(true);
     expect(
-      (await wrapper({ mediaFirst: false })).contains('max-lg:order-first'),
+      (await picture({ mediaFirst: false })).contains('max-lg:order-first'),
     ).toBe(false);
   });
 

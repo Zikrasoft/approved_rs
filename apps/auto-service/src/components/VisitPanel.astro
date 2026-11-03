@@ -5,9 +5,13 @@ import CallAction from './CallAction.astro';
 import GarageAddress from './GarageAddress.astro';
 import GoogleRating from './GoogleRating.astro';
 import Icon from './Icon.astro';
+import MapEmbed from './MapEmbed.astro';
+import PanelPicture from './PanelPicture.astro';
+import facade from '@/assets/workshop-facade.jpg';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { GARAGE_ADDRESS } from '@/utils/constants';
+import { visitPhoto } from '@/utils/panelPhoto';
 
 interface Props {
   heading: string;
@@ -22,17 +26,14 @@ const {
   class: className,
   mediaFirst = true,
 } = Astro.props;
-const site = content(localeFrom(Astro.url.pathname)).site;
-const hasMedia = Astro.slots.has('media');
+const { site, pages } = content(localeFrom(Astro.url.pathname));
+const photo = await visitPhoto({ image: facade, alt: site.photos.facade });
 const action = 'btn min-h-12 w-full sm:w-auto sm:px-7';
 ---
 
 <section class:list={['wrap', className]} {...contactRegion('visit')}>
   <div
-    class:list={[
-      'grid overflow-hidden rounded-block bg-panel text-panel-fg',
-      hasMedia && 'lg:grid-cols-2',
-    ]}
+    class="grid overflow-hidden rounded-block bg-panel text-panel-fg lg:grid-cols-2"
   >
     <div class="flex flex-col gap-5 p-5 pb-6 sm:p-8 lg:p-12">
       <Heading class="text-section">{heading}</Heading>
@@ -64,12 +65,13 @@ const action = 'btn min-h-12 w-full sm:w-auto sm:px-7';
       </div>
       <slot name="channels" />
     </div>
-    {
-      hasMedia && (
-        <div class:list={['relative', mediaFirst && 'max-lg:order-first']}>
-          <slot name="media" />
-        </div>
-      )
-    }
+    <PanelPicture
+      photo={photo}
+      class={mediaFirst ? 'max-lg:order-first' : undefined}
+    />
+    <MapEmbed
+      title={pages.contact.mapHeading}
+      class="h-64 border-t border-panel-line/60 bg-panel-2 sm:h-80 lg:col-span-2"
+    />
   </div>
 </section>

@@ -73,6 +73,10 @@ describe('the about page', () => {
         .querySelector('[data-contact-placement="visit"] img')
         ?.getAttribute('alt'),
     ).toBe(site.photos.facade);
+    expect(root.querySelectorAll('carlab-map')).toHaveLength(1);
+    expect(
+      root.querySelector('[data-contact-placement="visit"] carlab-map'),
+    ).not.toBeNull();
   });
 
   it('offers no call or booking above the facts', async () => {
@@ -96,13 +100,29 @@ describe('the about page', () => {
     ).toBe(photo.getAttribute('srcset'));
   });
 
-  it('shows the CarLab sign on the workshop wall at no more than 320 css px', async () => {
-    const sign = [...(await page()).querySelectorAll('img')].find((image) =>
+  it('shows the CarLab sign on the workshop wall as a wide band between the equipment and the makes', async () => {
+    const root = await page();
+    const sign = [...root.querySelectorAll('img')].find((image) =>
       image.getAttribute('src')?.includes('workshop-wall-sign'),
     )!;
+    const following = (a: Node, b: Node) =>
+      a.compareDocumentPosition(b) & a.DOCUMENT_POSITION_FOLLOWING;
+    const [equipment, makes] = [about.equipmentHeading, about.makesHeading].map(
+      (heading) =>
+        [...root.querySelectorAll('h2')].find(
+          (h) => h.textContent?.trim() === heading,
+        )!,
+    );
 
     expect(sign.getAttribute('alt')).toBe(site.photos.wallSign);
-    expect(sign.getAttribute('sizes')).toBe('20rem');
-    expect(sign.className).toContain('max-w-80');
+    expect(sign.closest('.grid')).toBeNull();
+    expect([...sign.classList]).toEqual(
+      expect.arrayContaining(['w-full', 'object-cover', 'aspect-[2/1]']),
+    );
+    expect(sign.getAttribute('sizes')).toBe(
+      '(min-width: 1224px) calc(1144px * 1.07), calc(calc(100vw - 2.5rem) * 1.07)',
+    );
+    expect(following(equipment, sign)).toBeTruthy();
+    expect(following(sign, makes)).toBeTruthy();
   });
 });

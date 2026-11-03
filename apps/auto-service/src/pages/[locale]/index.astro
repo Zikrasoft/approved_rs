@@ -15,7 +15,7 @@ import ServiceList from '@/components/ServiceList.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import WorksRow from '@/components/WorksRow.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import GarageFacade from '@/components/GarageFacade.astro';
+import PanelPicture from '@/components/PanelPicture.astro';
 import CallAction from '@/components/CallAction.astro';
 import GarageAddress from '@/components/GarageAddress.astro';
 import Faq from '@/components/Faq.astro';
@@ -86,27 +86,24 @@ const website = websiteSchema({
     <div
       class="grid rounded-block bg-panel text-panel-fg lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
     >
-      <picture
-        class="relative block overflow-hidden rounded-t-block lg:col-start-2 lg:row-start-1 lg:rounded-tl-none lg:rounded-r-block"
-      >
-        <source
-          media={HERO_MEDIA_LG}
-          srcset={heroTall.srcSet.attribute}
-          sizes={HERO_SIZES_LG}
-        />
-        <img
-          src={heroWide.src}
-          srcset={heroWide.srcSet.attribute}
-          sizes={HERO_SIZES_SM}
-          width={heroWideImage.width}
-          height={heroWideImage.height}
-          alt={site.photos.heroMechanic}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          class="block aspect-[2/1] w-full object-cover sm:aspect-[5/2] lg:absolute lg:inset-0 lg:aspect-auto lg:h-full lg:object-[50%_45%]"
-        />
-      </picture>
+      <PanelPicture
+        photo={{
+          src: heroWide.src,
+          srcset: heroWide.srcSet.attribute,
+          sizes: HERO_SIZES_SM,
+          width: heroWideImage.width,
+          height: heroWideImage.height,
+          alt: site.photos.heroMechanic,
+        }}
+        lg={{
+          media: HERO_MEDIA_LG,
+          srcset: heroTall.srcSet.attribute,
+          sizes: HERO_SIZES_LG,
+        }}
+        priority
+        class="rounded-t-block lg:rounded-tl-none lg:rounded-r-block"
+        imgClass="lg:object-[50%_45%]"
+      />
 
       <div
         class="flex flex-col gap-[1.125rem] p-5 pb-6 sm:p-8 lg:col-start-1 lg:row-start-1 lg:gap-7 lg:px-12 lg:pt-12 lg:pb-10"
@@ -269,9 +266,7 @@ const website = websiteSchema({
     </div>
   </section>
 
-  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg">
-    <GarageFacade slot="media" />
-  </VisitPanel>
+  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg" />
 
   <section class="bg-shade">
     <div class="wrap py-band md:py-band-lg">

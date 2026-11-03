@@ -54,7 +54,7 @@ visit:
     - Говорим по-сербски, по-русски и по-английски
     - Оплата наличными или картой
 photos:
-  # TODO: owner to supply higher-quality originals of the facade and wall-sign photos; at 1280 px they cap their slots (GarageFacade, the about page sign) at 640 css px.
+  # TODO: owner to supply higher-quality originals of the facade and wall-sign photos; at 1280 px they are upscaled in the visit panel photo and the about page band.
   heroMechanic: Мастер CarLab меняет колесо на подъемнике
   workshopBay: 'Цех CarLab: два подъемника и автомобиль в ремонте'
   facade: Въезд в автосервис CarLab на Звездаре, вывеска AUTO SERVIS CARLAB.RS
