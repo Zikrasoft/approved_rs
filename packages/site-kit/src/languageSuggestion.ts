@@ -1,18 +1,42 @@
 import { GOALS, reachGoal } from './goals.ts';
+import { LOCALE_CHOICE_ATTRIBUTE } from './localeCookie.ts';
 
 export const LANGUAGE_SUGGESTION_STORAGE_KEY = 'language-suggestion-dismissed';
 
+export const LANGUAGE_SUGGESTED_ATTRIBUTE = 'data-lang-suggested';
+
 export interface LanguageLabels {
+  prompt: string;
   switchTo: string;
   dismiss: string;
 }
 
 export const LANGUAGE_LABELS: Record<string, LanguageLabels> = {
-  ru: { switchTo: 'Показать на русском', dismiss: 'Закрыть' },
-  en: { switchTo: 'View in English', dismiss: 'Dismiss' },
-  sr: { switchTo: 'Prikaži na srpskom', dismiss: 'Zatvori' },
-  es: { switchTo: 'Ver en español', dismiss: 'Cerrar' },
-  de: { switchTo: 'Auf Deutsch anzeigen', dismiss: 'Schließen' },
+  ru: {
+    prompt: 'Эта страница есть на русском',
+    switchTo: 'Русский',
+    dismiss: 'Закрыть',
+  },
+  en: {
+    prompt: 'This page is available in English',
+    switchTo: 'English',
+    dismiss: 'Dismiss',
+  },
+  sr: {
+    prompt: 'Ova stranica postoji i na srpskom',
+    switchTo: 'Srpski',
+    dismiss: 'Zatvori',
+  },
+  es: {
+    prompt: 'Esta página está disponible en español',
+    switchTo: 'Español',
+    dismiss: 'Cerrar',
+  },
+  de: {
+    prompt: 'Diese Seite gibt es auch auf Deutsch',
+    switchTo: 'Deutsch',
+    dismiss: 'Schließen',
+  },
 };
 
 const subtag = (tag: string): string => tag.toLowerCase().split('-')[0]!;
@@ -76,8 +100,9 @@ export function defineLanguageSuggestion(
         const { signal } = this.controller;
 
         const link = this.querySelector<HTMLAnchorElement>('[data-lang-link]');
+        const prompt = this.querySelector<HTMLElement>('[data-lang-prompt]');
         const close = this.querySelector<HTMLElement>('[data-lang-dismiss]');
-        if (!link || dismissed()) return;
+        if (!link || !prompt || dismissed()) return;
 
         const alternates = pageAlternates(this.ownerDocument);
         const offer = preferredAlternate(
@@ -92,12 +117,43 @@ export function defineLanguageSuggestion(
         link.hreflang = offer;
         link.lang = offer;
         link.textContent = labels.switchTo;
+        prompt.textContent = labels.prompt;
+        prompt.lang = offer;
+        this.setAttribute('aria-label', labels.prompt);
         close?.setAttribute('aria-label', labels.dismiss);
         this.hidden = false;
 
         const from = subtag(this.ownerDocument.documentElement.lang);
         const to = subtag(offer);
+        const suggested = [
+          ...this.ownerDocument.querySelectorAll(
+            `[${LOCALE_CHOICE_ATTRIBUTE}]`,
+          ),
+        ].filter(
+          (option) =>
+            subtag(option.getAttribute(LOCALE_CHOICE_ATTRIBUTE)!) === to,
+        );
+        suggested.forEach((option) =>
+          option.setAttribute(LANGUAGE_SUGGESTED_ATTRIBUTE, ''),
+        );
         reachGoal(GOALS.langOfferShown, { from, to });
+
+        const dismiss = () => {
+          silenceLanguageSuggestion();
+          reachGoal(GOALS.langOfferDismissed, { from, to });
+          suggested.forEach((option) =>
+            option.removeAttribute(LANGUAGE_SUGGESTED_ATTRIBUTE),
+          );
+          this.hidden = true;
+        };
+
+        this.addEventListener(
+          'keydown',
+          (event) => {
+            if (event.key === 'Escape') dismiss();
+          },
+          { signal },
+        );
 
         this.addEventListener(
           'click',
@@ -108,10 +164,7 @@ export function defineLanguageSuggestion(
               reachGoal(GOALS.langOfferTaken, { from, to });
               return;
             }
-            if (!target?.closest('[data-lang-dismiss]')) return;
-            silenceLanguageSuggestion();
-            reachGoal(GOALS.langOfferDismissed, { from, to });
-            this.hidden = true;
+            if (target?.closest('[data-lang-dismiss]')) dismiss();
           },
           { signal },
         );

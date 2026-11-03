@@ -15,6 +15,7 @@ import ContactChannels from './ContactChannels.astro';
 import SheetClose from './SheetClose.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
 import SocialLinks from './SocialLinks.astro';
+import LanguageSuggestion from './LanguageSuggestion.astro';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
@@ -63,7 +64,7 @@ const links = [
     class="sticky top-0 z-30 border-b border-panel-line bg-panel text-panel-fg group-data-[open]:z-50 short:not-group-data-[open]:static print:hidden"
   >
     <div
-      class="wrap flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
+      class="wrap relative flex h-[4.5rem] items-center justify-between gap-2 sm:gap-4"
     >
       <a
         href={PathBuilder.home(locale)}
@@ -104,28 +105,33 @@ const links = [
         )
       }
 
-      <div class="flex items-center gap-1 sm:gap-2">
-        <carlab-lang class="hidden items-center gap-1 lg:flex">
-          {
-            SUPPORTED_LOCALES.map((code) => (
-              <a
-                href={inLocale(code)}
-                hreflang={code}
-                {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
-                title={LOCALE_NAME[code]}
-                aria-current={code === locale ? 'true' : undefined}
-                class:list={[
-                  'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150',
-                  code === locale
-                    ? 'bg-panel-2 text-panel-fg'
-                    : 'text-panel-ink hover:text-panel-fg',
-                ]}
-              >
-                {code}
-              </a>
-            ))
-          }
-        </carlab-lang>
+      <div class="flex items-center gap-1 self-stretch sm:gap-2">
+        <div
+          class="contents lg:relative lg:flex lg:items-center lg:self-stretch"
+        >
+          <carlab-lang class="hidden items-center gap-1 lg:flex">
+            {
+              SUPPORTED_LOCALES.map((code) => (
+                <a
+                  href={inLocale(code)}
+                  hreflang={code}
+                  {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
+                  title={LOCALE_NAME[code]}
+                  aria-current={code === locale ? 'true' : undefined}
+                  class:list={[
+                    'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150 data-lang-suggested:text-panel-fg data-lang-suggested:ring-1 data-lang-suggested:ring-signal',
+                    code === locale
+                      ? 'bg-panel-2 text-panel-fg'
+                      : 'text-panel-ink hover:text-panel-fg',
+                  ]}
+                >
+                  {code}
+                </a>
+              ))
+            }
+          </carlab-lang>
+          <LanguageSuggestion />
+        </div>
 
         <a
           href={PathBuilder.parts(locale)}

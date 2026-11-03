@@ -12,6 +12,7 @@ import SiteLogo from './SiteLogo.astro';
 import Button from './Button.astro';
 import LeadFormModal from './LeadFormModal.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import LanguageSuggestion from './LanguageSuggestion.astro';
 import HeaderDesktopNav from './HeaderDesktopNav.astro';
 import HeaderMobileMenu from './HeaderMobileMenu.astro';
 import { getNavItems, type ServiceSlug } from '@/utils/labels';
@@ -29,9 +30,6 @@ const casesCurrent = navCurrent(
   PathBuilder.sectionRoot(locale, 'cases'),
 );
 
-// Keyed by the exact slug union from labels.ts (not a loose Record<string,...>)
-// — a slug added to getNavItems() without a matching icon here is now a
-// compile error, not a silently-missing icon at runtime.
 const SERVICE_ICONS: Record<ServiceSlug, typeof Search> = {
   'vehicle-sourcing': Search,
   'vehicle-import': Globe,
@@ -58,7 +56,7 @@ const navItems = getNavItems(locale).map((item) => ({
     class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]"
   >
     <div
-      class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
+      class="relative max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
     >
       <SiteLogo />
 
@@ -69,14 +67,16 @@ const navItems = getNavItems(locale).map((item) => ({
         casesCurrent={casesCurrent}
       />
 
-      <div class="flex items-center gap-1.5 shrink-0">
-        <!-- Language switcher: desktop only — mobile gets its own row inside
-           HeaderMobileMenu -->
-        <div class="hidden xl:block">
-          <LanguageSwitcher />
+      <div class="flex items-center gap-1.5 shrink-0 self-stretch">
+        <div
+          class="contents xl:relative xl:flex xl:items-center xl:self-stretch"
+        >
+          <div class="hidden xl:block">
+            <LanguageSwitcher />
+          </div>
+          <LanguageSuggestion />
         </div>
 
-        <!-- CTA: always visible -->
         <Button
           href={PathBuilder.contacts(locale)}
           {...leadModalTrigger()}

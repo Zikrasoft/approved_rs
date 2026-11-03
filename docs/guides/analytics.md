@@ -52,7 +52,7 @@ Variants go into parameters, not into new names.
 | `lead_modal_open`                                                | opened the form in the modal                   | `tab`, `service`                                  |
 | `telegram_choice`                                                | picked bot or manager after a Telegram tap     | `option`: `bot`, `manager`                        |
 | `brand_link_click`                                               | left for a partner site (approved.rs only)     | `brand`: `details`, `carlab`                      |
-| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice banner                     | `from`, `to`                                      |
+| `lang_offer_shown` / `lang_offer_taken` / `lang_offer_dismissed` | the language-choice popover                    | `from`, `to`                                      |
 | `case_view`                                                      | opened a Case study                            | `depth`: Case studies opened this visit           |
 | `search`                                                         | sent the catalogue search box (carlab.rs only) | `kind`: `vin`, `query`                            |
 | `search_suggestion_pick`                                         | opened a search suggestion (carlab.rs only)    | `group`: `cars`, `parts`, `vin`                   |

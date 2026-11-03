@@ -15,7 +15,6 @@ import LeadModal from '@/components/LeadModal.astro';
 import TelegramChoice from '@/components/TelegramChoice.astro';
 import StickyContactBar from '@/components/StickyContactBar.astro';
 import CookieConsent from '@/components/CookieConsent.astro';
-import LanguageSuggestion from '@/components/LanguageSuggestion.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
 import { NOINDEX } from '@podbor/site-kit';
 import { pageHead } from '@/utils/pageHead';
@@ -177,7 +176,6 @@ const businessSchema = localBusinessSchema({
       >{site.common.skipToContent}</a
     >
     <SiteHeader />
-    <LanguageSuggestion />
     <main id="main" class="flex-1">
       <slot />
     </main>

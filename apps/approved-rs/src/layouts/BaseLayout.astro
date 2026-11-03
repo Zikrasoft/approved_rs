@@ -126,25 +126,6 @@ const navCtaFontUrl = locale === 'ru' ? navCtaCyrillicUrl : navCtaLatinUrl;
   <body>
     <IconSprite />
     <Header />
-    <language-suggestion hidden class="relative z-40 block h-0">
-      <div class="absolute inset-x-0 top-0 bg-text text-bg shadow-lg">
-        <div
-          class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2 sm:px-6"
-        >
-          <a
-            data-lang-link
-            href="#"
-            class="rounded-sm bg-accent-strong px-3.5 py-2 text-sm font-semibold text-on-accent no-underline transition-colors hover:bg-accent-hover"
-          ></a>
-          <button
-            type="button"
-            data-lang-dismiss
-            class="-my-1 ml-auto flex size-11 shrink-0 items-center justify-center rounded-sm text-xl leading-none opacity-55 transition-opacity hover:opacity-100"
-            >&times;</button
-          >
-        </div>
-      </div>
-    </language-suggestion>
     <main>
       <slot />
     </main>

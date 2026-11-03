@@ -1,6 +1,7 @@
 ---
 import Cta from './Cta.astro';
 import Wordmark from './Wordmark.astro';
+import LanguageSuggestion from './LanguageSuggestion.astro';
 import { localeFrom, SUPPORTED_LOCALES, LOCALE_NAME } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, swapLocale } from '@/utils/paths';
@@ -27,7 +28,7 @@ const links = [
   <header class="pointer-events-none fixed inset-x-0 top-0 z-30">
     <div class="wrap pointer-events-auto pt-5 sm:pt-7">
       <div
-        class="flex items-center justify-between gap-4 rounded-full border border-line bg-void/70 py-2.5 pl-5 pr-2.5 backdrop-blur-2xl"
+        class="relative flex items-center justify-between gap-4 rounded-full border border-line bg-void/70 py-2.5 pl-5 pr-2.5 backdrop-blur-2xl"
       >
         <a
           href={PathBuilder.home(locale)}
@@ -66,27 +67,32 @@ const links = [
         </nav>
 
         <div class="flex items-center gap-2">
-          <details-lang class="hidden items-center gap-1 sm:flex">
-            {
-              SUPPORTED_LOCALES.map((code) => (
-                <a
-                  href={swapLocale(pathname, code)}
-                  hreflang={code}
-                  {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
-                  aria-current={code === locale ? 'true' : undefined}
-                  title={LOCALE_NAME[code]}
-                  class:list={[
-                    'rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-widest transition-colors duration-400',
-                    code === locale
-                      ? 'bg-white/10 text-chalk'
-                      : 'text-mute-2 hover:text-chalk',
-                  ]}
-                >
-                  {code}
-                </a>
-              ))
-            }
-          </details-lang>
+          <div
+            class="contents sm:relative sm:flex sm:items-center sm:self-stretch"
+          >
+            <details-lang class="hidden items-center gap-1 sm:flex">
+              {
+                SUPPORTED_LOCALES.map((code) => (
+                  <a
+                    href={swapLocale(pathname, code)}
+                    hreflang={code}
+                    {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
+                    aria-current={code === locale ? 'true' : undefined}
+                    title={LOCALE_NAME[code]}
+                    class:list={[
+                      'rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-widest transition-colors duration-400 data-lang-suggested:text-chalk data-lang-suggested:ring-1 data-lang-suggested:ring-champagne',
+                      code === locale
+                        ? 'bg-white/10 text-chalk'
+                        : 'text-mute-2 hover:text-chalk',
+                    ]}
+                  >
+                    {code}
+                  </a>
+                ))
+              }
+            </details-lang>
+            <LanguageSuggestion />
+          </div>
           <span class="hidden sm:block">
             <Cta label={site.header.cta} openModal />
           </span>
@@ -110,24 +116,6 @@ const links = [
           </button>
         </div>
       </div>
-
-      <language-suggestion hidden>
-        <div
-          class="mt-2 flex items-center gap-3 rounded-full border border-line bg-chalk py-1.5 pl-1.5 pr-2 text-void"
-        >
-          <a
-            data-lang-link
-            href="#"
-            class="rounded-full bg-void px-4 py-2 text-sm font-semibold text-chalk no-underline transition-opacity hover:opacity-90"
-          ></a>
-          <button
-            type="button"
-            data-lang-dismiss
-            class="-my-1.5 ml-auto flex size-11 shrink-0 items-center justify-center rounded-full text-lg leading-none opacity-55 transition-opacity hover:opacity-100"
-            >&times;</button
-          >
-        </div>
-      </language-suggestion>
     </div>
   </header>
 

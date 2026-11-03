@@ -26,7 +26,7 @@ const pathname = Astro.url.pathname;
               href={swapLocale(pathname, locale)}
               {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
               class:list={[
-                'dropdown-option lang-chip group justify-center gap-2 px-3 py-2 rounded-sm text-sm',
+                'dropdown-option lang-chip group justify-center gap-2 px-3 py-2 rounded-sm text-sm data-lang-suggested:ring-1 data-lang-suggested:ring-accent',
                 { 'dropdown-option-active': active },
               ]}
             >
@@ -56,7 +56,7 @@ const pathname = Astro.url.pathname;
                 href={swapLocale(pathname, locale)}
                 {...{ [LOCALE_CHOICE_ATTRIBUTE]: locale }}
                 class:list={[
-                  'dropdown-option group gap-2.5 px-3 py-2 rounded-sm text-sm',
+                  'dropdown-option group gap-2.5 px-3 py-2 rounded-sm text-sm data-lang-suggested:ring-1 data-lang-suggested:ring-accent',
                   { 'dropdown-option-active': active },
                 ]}
               >
@@ -77,10 +77,6 @@ const pathname = Astro.url.pathname;
     display: contents;
   }
 
-  /* Inline variant only: .dropdown-option is transparent until hover/active,
-     which is fine inside a popover (the trigger already announced "this is
-     a menu") but not on its own in a flat row — without a border each
-     locale reads as plain flag+code text, not a pressable choice. */
   .lang-chip {
     border: 1px solid var(--color-border);
   }
