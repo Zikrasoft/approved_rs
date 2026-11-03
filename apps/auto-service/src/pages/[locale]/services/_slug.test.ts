@@ -62,7 +62,7 @@ describe('a service page', () => {
     expect(photo.getAttribute('src')).toContain('workshop-bay');
     expect(photo.getAttribute('alt')).toBe(site.photos.workshopBay);
     expect(photo.getAttribute('sizes')).toBe(
-      '(min-width: 1224px) calc(508px * 1.33), (min-width: 1024px) calc(calc(46.5vw - 43px) * 1.33), calc(100vw - 2.5rem)',
+      '(min-width: 1224px) calc(532px * 2.37), (min-width: 1024px) calc(calc(46.5vw - 19px) * 2.37), calc(100vw - 2.5rem)',
     );
   });
 

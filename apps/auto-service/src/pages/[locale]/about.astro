@@ -8,9 +8,9 @@ import PanelHero from '@/components/PanelHero.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import GarageFacade from '@/components/GarageFacade.astro';
 import workshopBay from '@/assets/workshop-bay.jpg';
 import wallSign from '@/assets/workshop-wall-sign.jpg';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { panelPhoto } from '@/utils/panelPhoto';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -34,6 +34,10 @@ const schema = (canonical: string) =>
     website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
   });
 const block = 'py-8 first:pt-0 lg:py-10';
+const signSizes = coverSizes(
+  '(min-width: 1224px) 1144px, calc(100vw - 2.5rem)',
+  coverScale(wallSign, 3),
+);
 const photo = await panelPhoto({
   image: workshopBay,
   alt: site.photos.workshopBay,
@@ -72,19 +76,20 @@ const photo = await panelPhoto({
     }
 
     <SplitSection class={block}>
-      <div slot="head" class="flex flex-col gap-5">
-        <h2 class="text-section">{about.equipmentHeading}</h2>
-        <Image
-          src={wallSign}
-          alt={site.photos.wallSign}
-          widths={[320, 640, 960]}
-          sizes="20rem"
-          loading="lazy"
-          class="block w-full max-w-80 rounded-control"
-        />
-      </div>
+      <h2 slot="head" class="text-section">{about.equipmentHeading}</h2>
       <BulletList items={about.equipment} marker="check" />
     </SplitSection>
+
+    <div class={block}>
+      <Image
+        src={wallSign}
+        alt={site.photos.wallSign}
+        widths={[640, 960, 1280]}
+        sizes={signSizes}
+        loading="lazy"
+        class="block aspect-[2/1] w-full rounded-block object-cover sm:aspect-[3/1]"
+      />
+    </div>
 
     {
       makes.length > 0 && (
@@ -129,7 +134,5 @@ const photo = await panelPhoto({
     </SplitSection>
   </div>
 
-  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg">
-    <GarageFacade slot="media" />
-  </VisitPanel>
+  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg" />
 </Shell>

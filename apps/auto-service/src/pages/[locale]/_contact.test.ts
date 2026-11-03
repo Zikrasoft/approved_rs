@@ -69,16 +69,17 @@ describe('the contacts page', () => {
     expect(root.textContent).not.toContain('пятнадцать');
   });
 
-  it('shows the street entrance above the map, so a visitor knows the place on arrival', async () => {
-    const panel = (await page()).querySelector(
-      '[data-contact-placement="visit"]',
-    )!;
-    const image = panel.querySelector('img')!;
+  it('shows the street entrance above the one map on the page, so a visitor knows the place on arrival', async () => {
+    const root = await page();
+    const image = root.querySelector('[data-contact-placement="visit"] img')!;
 
     expect(image.getAttribute('src')).toContain('workshop-facade');
     expect(image.getAttribute('alt')).toBe(site.photos.facade);
+    expect(root.querySelectorAll('carlab-map')).toHaveLength(1);
     expect(
-      image.parentElement?.querySelector('img ~ * carlab-map'),
+      root.querySelector(
+        '[data-contact-placement="visit"] picture ~ * carlab-map',
+      ),
     ).not.toBeNull();
   });
 });

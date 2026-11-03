@@ -47,10 +47,29 @@ describe('PanelHero', () => {
     expect((await hero()).querySelector('img')).toBeNull();
     expect(grid(await hero()).className).not.toContain('lg:grid-cols');
     expect(grid(withPhoto).className).toContain('lg:grid-cols');
+    expect(grid(withPhoto).classList.contains('lg:min-h-[28rem]')).toBe(true);
+    expect(grid(await hero()).className).not.toContain('lg:min-h');
+    expect(
+      withPhoto.querySelector('h1')!.closest('.lg\\:justify-center'),
+    ).not.toBeNull();
     expect(image.getAttribute('fetchpriority')).toBe('high');
     expect(image.getAttribute('sizes')).toBe(photo.sizes);
     expect(image.getAttribute('srcset')).toBe(photo.srcset);
     expect(image.getAttribute('alt')).toBe('Цех CarLab');
+  });
+
+  it('lets the photo fill the right column edge to edge, clipped by the panel rounding', async () => {
+    const photo = await panelPhoto({ image: wide, alt: 'Цех CarLab' });
+    const panel = grid(await hero({ photo }));
+    const picture = panel.querySelector(':scope > picture')!;
+
+    expect([...panel.classList]).toEqual(
+      expect.arrayContaining(['overflow-hidden', 'rounded-block']),
+    );
+    expect(picture.classList.contains('lg:col-start-2')).toBe(true);
+    expect(picture.querySelector('img')!.classList.contains('lg:h-full')).toBe(
+      true,
+    );
   });
 
   it('renders the page facts and actions under the heading', async () => {

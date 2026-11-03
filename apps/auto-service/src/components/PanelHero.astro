@@ -1,5 +1,6 @@
 ---
 import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
+import PanelPicture from './PanelPicture.astro';
 import type { PanelPhoto } from '@/utils/panelPhoto';
 
 interface Props {
@@ -17,29 +18,12 @@ const { heading, hook, lead, crumbs, photo } = Astro.props;
   <div
     class:list={[
       'grid overflow-hidden rounded-block bg-panel text-panel-fg',
-      photo && 'lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]',
+      photo && 'lg:min-h-[28rem] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]',
     ]}
   >
-    {
-      photo && (
-        <picture class="block lg:col-start-2 lg:row-start-1 lg:self-center lg:p-6 lg:pl-0">
-          <img
-            src={photo.src}
-            srcset={photo.srcset}
-            sizes={photo.sizes}
-            width={photo.width}
-            height={photo.height}
-            alt={photo.alt}
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-            class="block aspect-[5/2] w-full object-cover lg:aspect-[4/3] lg:rounded-control"
-          />
-        </picture>
-      )
-    }
+    {photo && <PanelPicture photo={photo} priority />}
     <div
-      class="flex flex-col gap-4 p-5 pb-6 sm:p-8 lg:col-start-1 lg:row-start-1 lg:gap-6 lg:px-12 lg:py-10"
+      class="flex flex-col gap-4 p-5 pb-6 sm:p-8 lg:col-start-1 lg:row-start-1 lg:justify-center lg:gap-6 lg:px-12 lg:py-10"
     >
       <div class="max-sm:hidden">
         <Breadcrumbs crumbs={crumbs} tone="panel" />

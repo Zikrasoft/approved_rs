@@ -47,12 +47,15 @@ describe('the home page', () => {
     ]);
   });
 
-  it('shows the street entrance in the visit panel', async () => {
-    const image = (await page()).querySelector(
-      '[data-contact-placement="visit"] img',
-    )!;
+  it('shows the street entrance and the one map in the visit panel', async () => {
+    const root = await page();
+    const image = root.querySelector('[data-contact-placement="visit"] img')!;
 
     expect(image.getAttribute('src')).toContain('workshop-facade');
     expect(image.getAttribute('alt')).toBe(site.photos.facade);
+    expect(root.querySelectorAll('carlab-map')).toHaveLength(1);
+    expect(
+      root.querySelector('[data-contact-placement="visit"] carlab-map'),
+    ).not.toBeNull();
   });
 });

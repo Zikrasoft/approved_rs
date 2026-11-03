@@ -1,0 +1,37 @@
+---
+import type { PanelPhoto } from '@/utils/panelPhoto';
+
+interface Props {
+  photo: PanelPhoto;
+  lg?: { media: string; srcset: string; sizes: string };
+  priority?: boolean;
+  class?: string;
+  imgClass?: string;
+}
+
+const { photo, lg, priority = false, class: className, imgClass } = Astro.props;
+---
+
+<picture
+  class:list={[
+    'relative block overflow-hidden lg:col-start-2 lg:row-start-1',
+    className,
+  ]}
+>
+  {lg && <source media={lg.media} srcset={lg.srcset} sizes={lg.sizes} />}
+  <img
+    src={photo.src}
+    srcset={photo.srcset}
+    sizes={photo.sizes}
+    width={photo.width}
+    height={photo.height}
+    alt={photo.alt}
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : undefined}
+    decoding="async"
+    class:list={[
+      'block aspect-[2/1] w-full object-cover sm:aspect-[5/2] lg:absolute lg:inset-0 lg:aspect-auto lg:h-full',
+      imgClass,
+    ]}
+  />
+</picture>
