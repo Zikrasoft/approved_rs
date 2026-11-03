@@ -168,6 +168,11 @@ translations:
       facts:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
+    photos:
+      heroMechanic: Majstor u CarLabu menja točak na automobilu na dizalici
+      workshopBay: 'Radionica u CarLabu: dve dizalice i automobil na popravci'
+      facade: Ulaz u auto-servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
+      wallSign: Logotip CarLab na zidu radionice
     googleRating:
       rating: '{rating} na Google-u'
       reviews:
@@ -275,6 +280,11 @@ translations:
       facts:
         - We speak Serbian, Russian and English
         - Pay by cash or card
+    photos:
+      heroMechanic: A CarLab mechanic changing a wheel on a car lift
+      workshopBay: The CarLab workshop with two car lifts and a car being repaired
+      facade: Entrance to the CarLab workshop in Zvezdara, with the AUTO SERVIS CARLAB.RS sign
+      wallSign: CarLab logo on the workshop wall
     googleRating:
       rating: '{rating} on Google'
       reviews:
@@ -327,4 +337,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 4c1e130318d2d0b3
+translatedFrom: 10f55b10109c35f7
