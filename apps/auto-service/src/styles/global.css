@@ -2,6 +2,7 @@
 
 @custom-variant card (@media (min-width: 40rem) and (min-height: 31.25rem));
 @custom-variant short (@media (max-height: 31.25rem));
+@custom-variant scripted (@media (scripting: enabled));
 
 @custom-variant offers-pending {
   @media (scripting: enabled) {
