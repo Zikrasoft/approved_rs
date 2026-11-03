@@ -46,3 +46,7 @@ coverage/
 # Local, never committed: identifiers of real people (see docs/guides/analytics-exclusions.md)
 .local*/
 test-results
+
+infra/auto-service-shop/terraform/.terraform/
+infra/auto-service-shop/terraform/*.tfstate*
+infra/auto-service-shop/terraform/rendered/

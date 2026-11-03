@@ -87,7 +87,8 @@ has never shipped and section 3 is a first ship.
 
 Do this **before** the merge: the merge ships the shop as soon as the four VPS
 secrets exist (deploy.md § The first ship: a checklist, step 7). Steps 1 to 6
-below are that checklist's steps 1 to 6.
+below are that checklist's steps 1 to 6. The Lightsail, S3 and backup items are
+one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 
 - [ ] Lightsail instance: Ubuntu 24.04, $24 bundle, dual-stack, own key pair;
       static IP attached; IPv4 and IPv6 firewalls allow 22/tcp, 80/tcp,

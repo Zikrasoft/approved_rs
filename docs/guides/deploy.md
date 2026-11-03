@@ -1539,6 +1539,8 @@ Check with `curl -k https://localhost:8443/health/ready`.
 > section: every step happens outside the repository (AWS console, DNS at the
 > registrar, GitHub Secrets).
 
+Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terraform/README.md`.
+
 1. **Lightsail.** Create the instance in the shop's region: Linux/Unix, OS only,
    Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB SSD), dual-stack (IPv4 +
    IPv6), with your own ssh key pair uploaded rather than Lightsail's default one.
