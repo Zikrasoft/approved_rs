@@ -1,23 +1,23 @@
 <language-suggestion
   hidden
   role="region"
-  class="absolute top-full right-5 z-10 mt-2 w-[min(19rem,calc(100vw-2.5rem))] rounded-control border border-panel-line bg-panel-2 p-4 pt-3 pr-1.5 text-panel-fg shadow-xl shadow-ink/25 transition-[opacity,translate] duration-200 group-data-[open]:hidden motion-safe:starting:-translate-y-1 motion-safe:starting:opacity-0 lg:right-auto lg:left-1/2 lg:-translate-x-1/2 print:hidden"
+  class="absolute top-full right-5 z-10 mt-2 w-max max-w-[calc(100vw-2.5rem)] rounded-control border border-panel-line bg-panel-2 py-1.5 pr-1 pl-3 text-panel-fg shadow-xl shadow-ink/25 transition-[opacity,translate] duration-200 group-data-[open]:hidden motion-safe:starting:-translate-y-1 motion-safe:starting:opacity-0 lg:right-auto lg:left-1/2 lg:-translate-x-1/2 print:hidden"
 >
   <span
     aria-hidden="true"
     class="absolute -top-[7px] right-[1.125rem] size-3 rotate-45 border-t border-l border-panel-line bg-panel-2 md:max-lg:hidden lg:right-auto lg:left-1/2 lg:-translate-x-1/2"
   ></span>
-  <div class="flex items-start gap-1">
-    <p data-lang-prompt class="flex-1 pt-2 text-sm font-medium text-pretty"></p>
+  <div class="flex items-center gap-2">
+    <p data-lang-prompt class="text-sm text-pretty text-panel-fg/90"></p>
+    <a
+      data-lang-link
+      href="#"
+      class="btn btn-on-panel h-9 shrink-0 px-3 py-0 text-sm no-underline"></a>
     <button
       type="button"
       data-lang-dismiss
-      class="btn-icon -mt-1 rounded-control text-xl leading-none text-panel-ink hover:text-panel-fg"
+      class="btn-icon shrink-0 rounded-control text-xl leading-none text-panel-ink hover:text-panel-fg"
       >&times;</button
     >
   </div>
-  <a
-    data-lang-link
-    href="#"
-    class="btn btn-primary mt-2 px-4 py-2.5 text-sm no-underline"></a>
 </language-suggestion>

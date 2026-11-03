@@ -16,6 +16,14 @@ describe('LanguageSuggestion', () => {
     expect(host.querySelector('[data-lang-dismiss]')).not.toBeNull();
   });
 
+  it('offers the switch as a quiet button, leaving the orange to the page', async () => {
+    const root = await render(LanguageSuggestion, { path: '/ru/' });
+    const link = root.querySelector('[data-lang-link]')!;
+
+    expect(link.classList).toContain('btn-on-panel');
+    expect(link.classList).not.toContain('btn-primary');
+  });
+
   it('sits in the header beside the language pills', async () => {
     const root = await render(SiteHeader, { path: '/ru/' });
     const pills = root.querySelector('header carlab-lang')!;
