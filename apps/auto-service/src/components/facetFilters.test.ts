@@ -52,6 +52,19 @@ describe('the facet filters', () => {
     ).toBe('/api/search-count?locale=ru');
   });
 
+  it('drops the no-script disclosure card from the first paint when scripts run, not once the sheet upgrades', async () => {
+    const root = await filters({ facets: [facet('brand', [['Bosch', 3]])] });
+    const details = root.querySelector('filter-sheet > details')!;
+
+    expect(details.querySelector('summary')!.classList).toContain(
+      'scripted:hidden',
+    );
+    expect(details.querySelector('dialog')!.classList).toContain(
+      'max-lg:scripted:not-open:hidden',
+    );
+    expect(details.outerHTML).not.toContain('[:defined]/sheet');
+  });
+
   it('renders a dormant facet hidden, so a live count can bring it back', async () => {
     const root = await filters({
       facets: [

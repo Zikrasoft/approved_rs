@@ -84,6 +84,25 @@ describe('defineCtaReveal', () => {
     expect(host.dataset.revealed).toBe('true');
   });
 
+  it('keeps its box while concealed and takes its controls out of reach', () => {
+    const host = mount('.cta');
+    const cta = document.querySelector('.cta')!;
+
+    expect(host.hasAttribute('inert')).toBe(true);
+    expect(host.hidden).toBe(false);
+
+    report([[cta, false]]);
+    expect(host.hasAttribute('inert')).toBe(false);
+
+    report([[cta, true]]);
+    expect(host.hasAttribute('inert')).toBe(true);
+    expect(host.hidden).toBe(false);
+  });
+
+  it('leaves its controls reachable when revealed without observing', () => {
+    expect(mount('.missing').hasAttribute('inert')).toBe(false);
+  });
+
   it('observes every element the selector matches', () => {
     mount('.cta', '<a class="cta">a</a><a class="cta">b</a>');
     expect(observers.at(-1)!.observed).toHaveLength(2);
