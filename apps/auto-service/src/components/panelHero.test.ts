@@ -47,6 +47,11 @@ describe('PanelHero', () => {
     expect((await hero()).querySelector('img')).toBeNull();
     expect(grid(await hero()).className).not.toContain('lg:grid-cols');
     expect(grid(withPhoto).className).toContain('lg:grid-cols');
+    expect(grid(withPhoto).classList.contains('lg:min-h-[28rem]')).toBe(true);
+    expect(grid(await hero()).className).not.toContain('lg:min-h');
+    expect(
+      withPhoto.querySelector('h1')!.closest('.lg\\:justify-center'),
+    ).not.toBeNull();
     expect(image.getAttribute('fetchpriority')).toBe('high');
     expect(image.getAttribute('sizes')).toBe(photo.sizes);
     expect(image.getAttribute('srcset')).toBe(photo.srcset);
