@@ -6,10 +6,6 @@ output "ipv4" {
   value = local.ipv4
 }
 
-output "ipv6" {
-  value = aws_lightsail_instance.shop.ipv6_addresses[0]
-}
-
 output "ssh_ubuntu" {
   value = "ssh ubuntu@${local.ipv4}"
 }

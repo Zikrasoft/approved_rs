@@ -8,14 +8,8 @@ resource "aws_lightsail_instance" "shop" {
   availability_zone = "${var.region}a"
   blueprint_id      = "ubuntu_24_04"
   bundle_id         = "medium_3_0"
-  ip_address_type   = "dualstack"
+  ip_address_type   = "ipv4"
   key_pair_name     = aws_lightsail_key_pair.owner.name
-
-  add_on {
-    type          = "AutoSnapshot"
-    snapshot_time = "02:00"
-    status        = "Enabled"
-  }
 }
 
 resource "aws_lightsail_static_ip" "shop" {
@@ -42,11 +36,10 @@ resource "aws_lightsail_instance_public_ports" "shop" {
   dynamic "port_info" {
     for_each = local.public_ports
     content {
-      protocol   = port_info.value.protocol
-      from_port  = port_info.value.port
-      to_port    = port_info.value.port
-      cidrs      = ["0.0.0.0/0"]
-      ipv6_cidrs = ["::/0"]
+      protocol  = port_info.value.protocol
+      from_port = port_info.value.port
+      to_port   = port_info.value.port
+      cidrs     = ["0.0.0.0/0"]
     }
   }
 }

@@ -7,9 +7,9 @@ and [Backup and restore](../../../docs/guides/deploy.md#backup-and-restore) spec
 
 | What                      | Where          | Details                                                                                                                                                |
 | ------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lightsail instance        | `eu-central-1` | `carlab-shop`, Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB), dual-stack, your own ssh key, automatic snapshots at 02:00 UTC                  |
+| Lightsail instance        | `eu-central-1` | `carlab-shop`, Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB), IPv4 only, your own ssh key, no automatic snapshots                             |
 | Static IP                 | `eu-central-1` | attached to the instance                                                                                                                               |
-| Firewall                  | `eu-central-1` | 22/tcp, 80/tcp, 443/tcp, 443/udp, on the IPv4 and the IPv6 list                                                                                        |
+| Firewall                  | `eu-central-1` | 22/tcp, 80/tcp, 443/tcp, 443/udp, IPv4                                                                                                                 |
 | Public bucket             | `eu-central-1` | ACLs off, `s3:GetObject` for everyone, versioned, noncurrent versions expire after 30 days                                                             |
 | Private bucket            | `eu-central-1` | ACLs off, all public access blocked, not versioned                                                                                                     |
 | IAM user `carlab-shop`    | global         | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:ListBucket` on the two shop buckets; its key goes to `/srv/carlab/.env`                         |
@@ -64,7 +64,7 @@ terraform apply
 terraform output
 ```
 
-`terraform output` prints the static IPv4, the IPv6, the ssh commands, the bucket
+`terraform output` prints the static IPv4, the ssh commands, the bucket
 names, the regions and the endpoints; the keys show as `<sensitive>`. To write
 them into env files without printing them:
 
@@ -94,8 +94,7 @@ from step 2:
 - **Bootstrap** (step 2): `bootstrap-host.sh` as `ubuntu`, then `harden-ssh.sh`
   through `sudo` from a kept-open `deploy` session.
 - **DNS** (step 3): at the .rs registrar, A records for `api.carlab.rs` and
-  `admin.carlab.rs` at `terraform output ipv4`, AAAA records at
-  `terraform output ipv6`.
+  `admin.carlab.rs` at `terraform output ipv4`.
 - **`.env`** (steps 4, 5 and 6): every other value of `/srv/carlab/.env`, plus
   the lines from `render-env.sh`; `.env.backup` from `backup.env`.
 - **CI secrets** (step 7), then the first deploy and everything after it.

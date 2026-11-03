@@ -638,7 +638,7 @@ to do with them:
 
 `apps/auto-service-shop` is not on Vercel. It is docker compose on a single AWS Lightsail
 instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
-transfer, $24 a month), in the same region as the shop's S3 buckets, all
+transfer, $24 a month, IPv4 only), in the same region as the shop's S3 buckets, all
 described in `infra/auto-service-shop/`:
 
 | File                                     | What it is                                                                                                                                                                                       |
@@ -776,8 +776,9 @@ is retried once its 10 minute lease runs out.
   neither `deploy.sh` nor `backup.sh` is running (`pgrep -f "deploy.sh|backup.sh"`),
   remove it with `rmdir /srv/carlab/.deploy.lock`. This is a copy on the same disk;
   off the server there are the dumps in the backup bucket (see
-  [Backup and restore](#backup-and-restore)) and Lightsail's automatic snapshots of
-  the whole instance, switched on when it is created.
+  [Backup and restore](#backup-and-restore)). Lightsail's automatic snapshots are
+  off to save cost: a lost instance is rebuilt with Terraform, `bootstrap-host.sh`
+  and `restore.sh`.
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
   the reindex at every Publish (ADR-0041), so after a restore search stays empty
   until the next Publish.
@@ -1542,16 +1543,13 @@ Check with `curl -k https://localhost:8443/health/ready`.
 Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terraform/README.md`.
 
 1. **Lightsail.** Create the instance in the shop's region: Linux/Unix, OS only,
-   Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB SSD), dual-stack (IPv4 +
-   IPv6), with your own ssh key pair uploaded rather than Lightsail's default one.
-   Then:
+   Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB SSD), IPv4 only, with
+   your own ssh key pair uploaded rather than Lightsail's default one. Then:
    - Networking: create a static IP and attach it to the instance.
-   - Networking, both the IPv4 and the IPv6 firewall: keep SSH 22/tcp and HTTP
-     80/tcp, add HTTPS 443/tcp and a custom rule for 443/udp (HTTP/3).
-   - Snapshots: turn on automatic snapshots.
+   - Networking, the IPv4 firewall: keep SSH 22/tcp and HTTP 80/tcp, add HTTPS
+     443/tcp and a custom rule for 443/udp (HTTP/3).
 
-   Done: the instance shows the static IPv4, an IPv6 address, the four firewall
-   rules on both lists and automatic snapshots on.
+   Done: the instance shows the static IPv4 and the four firewall rules.
 
 2. **Bootstrap.** Log in as `ubuntu` with your key, upload
    `infra/auto-service-shop/bootstrap-host.sh` and `infra/auto-service-shop/harden-ssh.sh`, and
@@ -1563,10 +1561,8 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    for now).
    Done: `ssh deploy@<IPv4>` lets you in by key; `ssh ubuntu@<IPv4>` and
    `ssh root@<IPv4>` refuse.
-3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the static IPv4,
-   AAAA records at the instance's IPv6. If IPv6 does not work at the host or on the
-   network, remove the AAAA records.
-   Done: `dig +short` and `dig +short AAAA` return them for both names.
+3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the static IPv4.
+   Done: `dig +short` returns it for both names.
 4. **`.env` on the server.** Copy `infra/auto-service-shop/production.env.example` to
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,
    the admin's basic_auth hash as in [`.env`](#env)), then

@@ -90,9 +90,9 @@ secrets exist (deploy.md § The first ship: a checklist, step 7). Steps 1 to 6
 below are that checklist's steps 1 to 6. The Lightsail, S3 and backup items are
 one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 
-- [ ] Lightsail instance: Ubuntu 24.04, $24 bundle, dual-stack, own key pair;
-      static IP attached; IPv4 and IPv6 firewalls allow 22/tcp, 80/tcp,
-      443/tcp, 443/udp; automatic snapshots on (§ The first ship, step 1;
+- [ ] Lightsail instance: Ubuntu 24.04, $24 bundle (4 GB), IPv4 only, own key
+      pair; static IP attached; the firewall allows 22/tcp, 80/tcp, 443/tcp,
+      443/udp; no automatic snapshots (§ The first ship, step 1;
       deploy.md § Easy to miss).
 - [ ] Bootstrap: `sudo sh bootstrap-host.sh` as `ubuntu`, then from a kept-open
       `deploy` session `sudo sh harden-ssh.sh [crawler.pub]`. Done when
@@ -102,8 +102,8 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
       with an older copy, rerun it once (deploy.md § Logs: Events, Loki and Grafana).
 - [ ] Check Docker's apt key fingerprint by hand:
       `gpg --show-keys /etc/apt/keyrings/docker.asc` (deploy.md § Easy to miss).
-- [ ] DNS: A `api.carlab.rs` and `admin.carlab.rs` at the static IPv4, AAAA at
-      the IPv6; `dig +short` / `dig +short AAAA` return them (§ The first ship, step 3).
+- [ ] DNS: A `api.carlab.rs` and `admin.carlab.rs` at the static IPv4; `dig +short`
+      returns it (§ The first ship, step 3).
       Caddy then issues TLS for both hosts itself (`caddy/Caddyfile`).
 - [ ] S3: public and private shop buckets, the shop's IAM user, the crawler's
       IAM user (private bucket only), versioning and lifecycle on the public
