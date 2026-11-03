@@ -3,11 +3,15 @@ import { getCollection } from 'astro:content';
 import { DEVELOPER } from '@podbor/brands';
 import { aboutPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
-import PageHero from '@/components/PageHero.astro';
+import { Image } from 'astro:assets';
+import PanelHero from '@/components/PanelHero.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import GarageBay from '@/components/GarageBay.astro';
+import GarageFacade from '@/components/GarageFacade.astro';
+import workshopBay from '@/assets/workshop-bay.jpg';
+import wallSign from '@/assets/workshop-wall-sign.jpg';
+import { panelPhoto } from '@/utils/panelPhoto';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
@@ -30,19 +34,22 @@ const schema = (canonical: string) =>
     website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
   });
 const block = 'py-8 first:pt-0 lg:py-10';
+const photo = await panelPhoto({
+  image: workshopBay,
+  alt: site.photos.workshopBay,
+});
 ---
 
 <Shell
   title={about.metaTitle}
   description={about.metaDescription}
   jsonLd={[schema]}
+  preloadImage={photo}
 >
-  <PageHero
-    eyebrow={site.footer.aboutLabel}
+  <PanelHero
     heading={about.heading}
-    lead={about.lead}
-    actions={false}
-    compact
+    hook={about.lead}
+    photo={photo}
     crumbs={[
       { href: PathBuilder.about(locale), label: site.footer.aboutLabel },
     ]}
@@ -65,7 +72,17 @@ const block = 'py-8 first:pt-0 lg:py-10';
     }
 
     <SplitSection class={block}>
-      <h2 slot="head" class="text-section">{about.equipmentHeading}</h2>
+      <div slot="head" class="flex flex-col gap-5">
+        <h2 class="text-section">{about.equipmentHeading}</h2>
+        <Image
+          src={wallSign}
+          alt={site.photos.wallSign}
+          widths={[320, 640, 960]}
+          sizes="20rem"
+          loading="lazy"
+          class="block w-full max-w-80 rounded-control"
+        />
+      </div>
       <BulletList items={about.equipment} marker="check" />
     </SplitSection>
 
@@ -113,6 +130,6 @@ const block = 'py-8 first:pt-0 lg:py-10';
   </div>
 
   <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg">
-    <GarageBay slot="media" />
+    <GarageFacade slot="media" />
   </VisitPanel>
 </Shell>

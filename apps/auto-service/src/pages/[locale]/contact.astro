@@ -3,6 +3,7 @@ import BulletList from '@/components/BulletList.astro';
 import Shell from '@/layouts/Shell.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
+import GarageFacade from '@/components/GarageFacade.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import MapEmbed from '@/components/MapEmbed.astro';
@@ -44,11 +45,12 @@ const cards = [
       tone="panel"
       only={['telegram', 'whatsapp', 'viber']}
     />
-    <MapEmbed
-      slot="media"
-      title={pages.contact.mapHeading}
-      class="h-64 bg-panel-2 lg:absolute lg:inset-0 lg:h-full"
-    />
+    <GarageFacade slot="media" class="sm:max-lg:pb-8">
+      <MapEmbed
+        title={pages.contact.mapHeading}
+        class="h-64 bg-panel-2 sm:rounded-control lg:h-auto lg:min-h-64 lg:flex-1"
+      />
+    </GarageFacade>
   </VisitPanel>
 
   <section class="wrap grid gap-4 pt-band md:grid-cols-2 md:pt-band-lg">

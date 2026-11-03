@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+import facade from '@/assets/workshop-facade.jpg';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const { photos } = content(localeFrom(Astro.url.pathname)).site;
+---
+
+<div
+  class:list={[
+    'flex flex-col sm:gap-4 sm:px-8 sm:pt-8 lg:h-full lg:justify-center lg:p-6 lg:pl-0',
+    className,
+  ]}
+>
+  <Image
+    src={facade}
+    alt={photos.facade}
+    widths={[480, 720, 1080, 1280]}
+    sizes="(min-width: 1224px) 548px, (min-width: 1024px) calc(50vw - 44px), (min-width: 704px) 640px, (min-width: 640px) calc(100vw - 6.5rem), calc(100vw - 2.5rem)"
+    loading="lazy"
+    class="block aspect-[2/1] w-full object-cover sm:aspect-video sm:max-w-[40rem] sm:rounded-control"
+  />
+  <slot />
+</div>

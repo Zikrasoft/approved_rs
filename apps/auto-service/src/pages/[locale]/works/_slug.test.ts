@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import { describe, expect, it, vi } from 'vitest';
-import tall from '@/assets/hero-mechanic.jpg';
+import tall from '@/assets/mechanic-wheel-lift-tall.jpg';
 import { content } from '@/i18n/content';
 import { render } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';

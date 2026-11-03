@@ -69,8 +69,10 @@ describe('the about page', () => {
       root.querySelector('[data-contact-placement="visit"] h2')?.textContent,
     ).toBe(site.visit.heading);
     expect(
-      root.querySelector('[data-contact-placement="visit"] img'),
-    ).not.toBeNull();
+      root
+        .querySelector('[data-contact-placement="visit"] img')
+        ?.getAttribute('alt'),
+    ).toBe(site.photos.facade);
   });
 
   it('offers no call or booking above the facts', async () => {
@@ -79,5 +81,28 @@ describe('the about page', () => {
     expect(
       hero.querySelector('[data-open-lead-modal], a[href^="tel:"]'),
     ).toBeNull();
+  });
+
+  it('opens on the workshop bay and preloads it', async () => {
+    const root = await page();
+    const photo = root.querySelector('section img[fetchpriority="high"]')!;
+
+    expect(photo.getAttribute('src')).toContain('workshop-bay');
+    expect(photo.getAttribute('alt')).toBe(site.photos.workshopBay);
+    expect(
+      root
+        .querySelector('link[rel="preload"][as="image"]')
+        ?.getAttribute('imagesrcset'),
+    ).toBe(photo.getAttribute('srcset'));
+  });
+
+  it('shows the CarLab sign on the workshop wall at no more than 320 css px', async () => {
+    const sign = [...(await page()).querySelectorAll('img')].find((image) =>
+      image.getAttribute('src')?.includes('workshop-wall-sign'),
+    )!;
+
+    expect(sign.getAttribute('alt')).toBe(site.photos.wallSign);
+    expect(sign.getAttribute('sizes')).toBe('20rem');
+    expect(sign.className).toContain('max-w-80');
   });
 });

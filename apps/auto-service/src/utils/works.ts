@@ -1,3 +1,4 @@
+import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import { normalizePartNumber } from '@podbor/catalog-contract';
 import { localizedEntry, publishedByNewest } from '@podbor/i18n';
@@ -92,13 +93,30 @@ export const sharedMakes = (works: Work[]) =>
 export const makesOf = (works: Work[]): string[] =>
   MAKES.filter((make) => works.some((work) => makeOf(work) === make));
 
-const SERVICE_PHOTO_WORK: Partial<Record<ServiceSlug, string>> = {
+const WORKSHOP = 'workshop';
+
+const SERVICE_PHOTO: Partial<Record<ServiceSlug, string>> = {
   diagnostics: 'bmw-x3',
   servicing: 'mercedes-benz-c200',
   'brakes-suspension': 'obsluzhivanie-tormoznoj-sistemy',
-  'engine-gearbox': 'velikij-servis-zamena-grm',
+  'engine-gearbox': WORKSHOP,
+  'bodywork-painting': WORKSHOP,
+  'pre-purchase-inspection': WORKSHOP,
 };
 
-export const servicePhoto = (slug: ServiceSlug, works: WorkEntry[]) =>
-  publishedWorks(works).find((work) => work.id === SERVICE_PHOTO_WORK[slug])
-    ?.data.image;
+export interface Photo {
+  image: ImageMetadata;
+  alt: string;
+}
+
+export const servicePhoto = (
+  slug: ServiceSlug,
+  works: WorkEntry[],
+  workshop: Photo,
+): Photo | undefined => {
+  const source = SERVICE_PHOTO[slug];
+  if (source === WORKSHOP) return workshop;
+  const image = publishedWorks(works).find((work) => work.id === source)?.data
+    .image;
+  return image && { image, alt: '' };
+};

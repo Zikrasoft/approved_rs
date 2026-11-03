@@ -8,7 +8,7 @@ vi.mock('astro:content', () => ({
   getCollection: vi.fn().mockResolvedValue([work()]),
 }));
 
-const { services } = content('ru');
+const { services, site } = content('ru');
 const page = () =>
   render(ServicesIndex as never, {
     path: '/ru/services/',
@@ -16,7 +16,7 @@ const page = () =>
   });
 
 describe('the services index', () => {
-  it('opens on the graphite panel without a photo, with the call and the address', async () => {
+  it('opens on the graphite panel with the call and the address', async () => {
     const root = await page();
     const hero = root.querySelector('section')!;
 
@@ -27,17 +27,21 @@ describe('the services index', () => {
       services.indexLead,
     );
     expect(hero.querySelector('.bg-panel')).not.toBeNull();
-    expect(hero.querySelector('img')).toBeNull();
     expect(hero.querySelector('a[href^="tel:"]')).not.toBeNull();
     expect(hero.textContent).toContain('Jovana Ćirilova 23a');
   });
 
-  it('keeps the hero buttons button-sized on a wide panel with no photo beside them', async () => {
-    const actions = (await page()).querySelector(
-      'section [data-contact-placement="hero"]',
-    )!;
+  it('shows the workshop bay beside the hero and preloads it', async () => {
+    const root = await page();
+    const photo = root.querySelector('section img[fetchpriority="high"]')!;
 
-    expect(actions.classList).toContain('lg:max-w-xl');
+    expect(photo.getAttribute('src')).toContain('workshop-bay');
+    expect(photo.getAttribute('alt')).toBe(site.photos.workshopBay);
+    expect(
+      root
+        .querySelector('link[rel="preload"][as="image"]')
+        ?.getAttribute('imagesrcset'),
+    ).toBe(photo.getAttribute('srcset'));
   });
 
   it('lists the services, the Works and the booking, without the process block', async () => {

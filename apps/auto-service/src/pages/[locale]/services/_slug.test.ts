@@ -13,7 +13,7 @@ vi.mock('astro:content', () => ({
     ]),
 }));
 
-const { services, home } = content('ru');
+const { services, home, site } = content('ru');
 const page = (slug: string) =>
   render(ServicePage, {
     path: `/ru/services/${slug}/`,
@@ -48,14 +48,26 @@ describe('a service page', () => {
     const photo = root.querySelector('section img[fetchpriority="high"]')!;
     const preload = root.querySelector('link[rel="preload"][as="image"]');
 
-    expect(photo.getAttribute('src')).toContain('hero-mechanic-wide');
+    expect(photo.getAttribute('src')).toContain('mechanic-wheel-lift-wide');
+    expect(photo.getAttribute('alt')).toBe('');
     expect(preload?.getAttribute('imagesrcset')).toBe(
       photo.getAttribute('srcset'),
     );
   });
 
+  it('shows the CarLab workshop, described, where no Work cover fits', async () => {
+    const root = await page('engine-gearbox');
+    const photo = root.querySelector('section img[fetchpriority="high"]')!;
+
+    expect(photo.getAttribute('src')).toContain('workshop-bay');
+    expect(photo.getAttribute('alt')).toBe(site.photos.workshopBay);
+    expect(photo.getAttribute('sizes')).toBe(
+      '(min-width: 1224px) calc(508px * 1.33), (min-width: 1024px) calc(calc(46.5vw - 43px) * 1.33), calc(100vw - 2.5rem)',
+    );
+  });
+
   it('collapses the hero to one column for a service with no real photo', async () => {
-    const root = await page('bodywork-painting');
+    const root = await page('vin-parts-inquiry');
 
     expect(root.querySelector('section img[fetchpriority="high"]')).toBeNull();
     expect(root.querySelector('link[rel="preload"][as="image"]')).toBeNull();
