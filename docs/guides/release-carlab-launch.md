@@ -108,7 +108,8 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 - [ ] S3: public and private shop buckets, the shop's IAM user, the crawler's
       IAM user (private bucket only), versioning and lifecycle on the public
       bucket (deploy.md § Files on S3; § The first ship, step 5).
-- [ ] Backup bucket in another region, its own IAM user,
+- [ ] Backup bucket (same region for now: the AWS organization allows only
+      `eu-north-1`, deploy.md § The first ship, step 6), its own IAM user,
       `/srv/carlab/.env.backup` from `backup.env.example`, mode 600
       (deploy.md § Backup and restore; § The first ship, step 6).
 - [ ] `/srv/carlab/.env` from `infra/auto-service-shop/production.env.example`,

@@ -5,7 +5,7 @@ variable "aws_profile" {
 
 variable "region" {
   type    = string
-  default = "eu-central-1"
+  default = "eu-north-1"
 }
 
 variable "backup_region" {

@@ -5,17 +5,17 @@ One `terraform apply` creates what
 steps 1, 5 and 6 describe, exactly as [Files on S3](../../../docs/guides/deploy.md#files-on-s3)
 and [Backup and restore](../../../docs/guides/deploy.md#backup-and-restore) specify:
 
-| What                      | Where          | Details                                                                                                                                                |
-| ------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lightsail instance        | `eu-central-1` | `carlab-shop`, Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB), IPv4 only, your own ssh key, no automatic snapshots                             |
-| Static IP                 | `eu-central-1` | attached to the instance                                                                                                                               |
-| Firewall                  | `eu-central-1` | 22/tcp, 80/tcp, 443/tcp, 443/udp, IPv4                                                                                                                 |
-| Public bucket             | `eu-central-1` | ACLs off, `s3:GetObject` for everyone, versioned, noncurrent versions expire after 30 days                                                             |
-| Private bucket            | `eu-central-1` | ACLs off, all public access blocked, not versioned                                                                                                     |
-| IAM user `carlab-shop`    | global         | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:ListBucket` on the two shop buckets; its key goes to `/srv/carlab/.env`                         |
-| IAM user `carlab-crawler` | global         | `s3:PutObject`, `s3:GetObject` on `crawl/*` of the private bucket, `s3:ListBucket` under that prefix; its key goes only to the Mac's `.env.crawler`    |
-| Backup bucket             | `eu-north-1`   | ACLs off, all public access blocked; `backup.sh` deletes copies older than 30 days itself                                                              |
-| IAM user `carlab-backup`  | global         | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:AbortMultipartUpload`, `s3:ListBucket` on the backup bucket only; its key goes to `.env.backup` |
+| What                      | Where        | Details                                                                                                                                                |
+| ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lightsail instance        | `eu-north-1` | `carlab-shop`, Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB), IPv4 only, your own ssh key, no automatic snapshots                             |
+| Static IP                 | `eu-north-1` | attached to the instance                                                                                                                               |
+| Firewall                  | `eu-north-1` | 22/tcp, 80/tcp, 443/tcp, 443/udp, IPv4                                                                                                                 |
+| Public bucket             | `eu-north-1` | ACLs off, `s3:GetObject` for everyone, versioned, noncurrent versions expire after 30 days                                                             |
+| Private bucket            | `eu-north-1` | ACLs off, all public access blocked, not versioned                                                                                                     |
+| IAM user `carlab-shop`    | global       | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:ListBucket` on the two shop buckets; its key goes to `/srv/carlab/.env`                         |
+| IAM user `carlab-crawler` | global       | `s3:PutObject`, `s3:GetObject` on `crawl/*` of the private bucket, `s3:ListBucket` under that prefix; its key goes only to the Mac's `.env.crawler`    |
+| Backup bucket             | `eu-north-1` | ACLs off, all public access blocked; `backup.sh` deletes copies older than 30 days itself                                                              |
+| IAM user `carlab-backup`  | global       | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:AbortMultipartUpload`, `s3:ListBucket` on the backup bucket only; its key goes to `.env.backup` |
 
 ## State holds the keys
 
@@ -38,7 +38,7 @@ it means Terraform no longer knows what it created. Back it up somewhere private
 
    ```bash
    aws configure --profile carlab
-   # Default region name: eu-central-1, output format: json
+   # Default region name: eu-north-1, output format: json
    aws sts get-caller-identity --profile carlab
    ```
 

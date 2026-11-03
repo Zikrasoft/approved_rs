@@ -1576,7 +1576,10 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    Done: `cut -d= -f1 /srv/carlab/.env | grep '^S3_'` lists the five required names.
 6. **Backup bucket.** Create a private AWS S3 bucket in another region than the
    instance (or at Backblaze B2 or Cloudflare R2) and an IAM user whose key is
-   limited to that bucket, separate from the shop's.
+   limited to that bucket, separate from the shop's. The carlab AWS account's
+   organization allows only `eu-north-1`, so for now the backup bucket sits in
+   the instance's region: it survives a lost server, not a regional outage.
+   `backup_region` in the Terraform moves it once a second region or B2/R2 is set up.
    Copy `infra/auto-service-shop/backup.env.example` to `/srv/carlab/.env.backup`, fill
    it in, `chmod 600` it.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env.backup'` prints `600`.
