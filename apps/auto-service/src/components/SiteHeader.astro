@@ -9,11 +9,7 @@ import {
 } from '@/i18n/config';
 import { PathBuilder, swapLocale } from '@/utils/paths';
 import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
-import {
-  contactRegion,
-  CONTACT_CTA_SELECTOR,
-} from '@podbor/site-kit/contact-control';
-import CallAction from './CallAction.astro';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 import GarageAddress from './GarageAddress.astro';
 import ContactChannels from './ContactChannels.astro';
 import SheetClose from './SheetClose.astro';
@@ -55,7 +51,6 @@ const links = [
   { href: PathBuilder.about(locale), label: site.nav.about, attrs: {} },
   { href: PathBuilder.contact(locale), label: site.nav.contact, attrs: {} },
 ].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
-const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
 ---
 
 <carlab-menu
@@ -194,34 +189,6 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
           }
         </script>
 
-        <cta-reveal
-          data-revealed="true"
-          watch={CONTACT_CTA_SELECTOR}
-          class:list={[
-            'flex gap-2 transition-[opacity,visibility] duration-200 max-md:order-first data-[revealed=false]:invisible data-[revealed=false]:opacity-0 motion-reduce:transition-none max-lg:in-data-sticky-bar:hidden',
-            inquiryEntry && 'lg:hidden',
-          ]}
-        >
-          {
-            onParts ? (
-              <a
-                href={PathBuilder.partsInquiry(locale)}
-                {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-                class={cta}
-              >
-                {site.header.partsCta}
-              </a>
-            ) : (
-              <Fragment>
-                <CallAction class="btn btn-on-panel hidden h-10 px-4 py-0 text-sm lg:inline-flex" />
-                <a href="#lead" data-open-lead-modal class={cta}>
-                  {site.header.cta}
-                </a>
-              </Fragment>
-            )
-          }
-        </cta-reveal>
-
         <button
           type="button"
           data-menu-button
@@ -314,7 +281,6 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
 
 <script>
   import {
-    defineCtaReveal,
     defineLocaleChoice,
     defineMenuToggle,
     defineModalDialog,
@@ -329,7 +295,6 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
       replayPendingAdd(),
     );
   }
-  defineCtaReveal();
   defineLocaleChoice('carlab-lang');
   defineMenuToggle('carlab-menu');
   defineModalDialog('search-dialog');

@@ -51,9 +51,6 @@ describe('SiteHeader', () => {
     expect(badge?.hasAttribute('data-reveal-when-filled')).toBe(true);
     expect(basket(root).querySelector('span[aria-hidden="true"]')).toBeNull();
     expect(basket(root).hasAttribute(PARTS_INQUIRY_OPEN_ATTRIBUTE)).toBe(true);
-    expect(
-      root.querySelector('[data-open-lead-modal=""]')?.textContent?.trim(),
-    ).toBe(site.header.cta);
   });
 
   it('links the cart once the shop is open', async () => {
@@ -108,39 +105,18 @@ describe('SiteHeader', () => {
     expect(labels.map(([, href]) => href)).not.toContain('/ru/#process');
   });
 
-  it('reveals a mouse callback beside the booking once the page contact block scrolls away', async () => {
-    setShop(false);
-    const reveal = (await header('/ru/services/')).querySelector('cta-reveal')!;
-    const [call, callback, booking] = [...reveal.querySelectorAll('a')];
-
-    expect(call.getAttribute('href')).toBe('tel:+381677210533');
-    expect(call.classList.contains('pointer-fine:hidden!')).toBe(true);
-    expect(call.textContent).not.toContain('+381');
-    expect(callback.getAttribute('data-open-lead-modal')).toBe('phone');
-    expect(callback.textContent?.trim()).toBe(site.header.callback);
-    expect(callback.classList.contains('pointer-coarse:hidden!')).toBe(true);
-    expect(booking.textContent?.trim()).toBe(site.header.cta);
-  });
-
-  it.each(['/ru/services/', '/ru/parts/'])(
-    'conceals the header CTA on %s without giving up its slot',
+  it.each(['/ru/', '/ru/services/', '/ru/parts/'])(
+    'leaves booking, callback and call buttons out of the header bar on %s',
     async (path) => {
       setShop(false);
-      const reveal = (await header(path)).querySelector('cta-reveal')!;
+      const bar = (await header(path)).querySelector('header')!;
 
-      expect(reveal.classList).toContain('data-[revealed=false]:invisible');
-      expect(reveal.classList).toContain('data-[revealed=false]:opacity-0');
-      expect(reveal.classList).not.toContain('data-[revealed=false]:hidden');
+      expect(bar.querySelector('cta-reveal')).toBeNull();
+      expect(bar.querySelector('[data-open-lead-modal]')).toBeNull();
+      expect(bar.querySelector('a[href^="tel:"]')).toBeNull();
+      expect(bar.textContent).not.toContain(site.header.cta);
     },
   );
-
-  it('keeps the callback out of the parts reveal', async () => {
-    setShop(false);
-    const reveal = (await header('/ru/parts/')).querySelector('cta-reveal')!;
-
-    expect(reveal.querySelector('[data-open-lead-modal]')).toBeNull();
-    expect(reveal.querySelector('[href^="tel:"]')).toBeNull();
-  });
 
   it('puts the address and hours in the mobile menu before the channels', async () => {
     setShop(false);
