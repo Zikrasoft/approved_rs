@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { JSDOM } from 'jsdom';
 import { content } from '@/i18n/content';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { CART_STORAGE_KEY, PARTS_LIST_STORAGE_KEY } from '@/scripts/cartBadge';
 import SiteHeader from './SiteHeader.astro';
 import { render, setShop } from './renderAstro';
 
@@ -120,6 +122,18 @@ describe('SiteHeader', () => {
     expect(booking.textContent?.trim()).toBe(site.header.cta);
   });
 
+  it.each(['/ru/services/', '/ru/parts/'])(
+    'conceals the header CTA on %s without giving up its slot',
+    async (path) => {
+      setShop(false);
+      const reveal = (await header(path)).querySelector('cta-reveal')!;
+
+      expect(reveal.classList).toContain('data-[revealed=false]:invisible');
+      expect(reveal.classList).toContain('data-[revealed=false]:opacity-0');
+      expect(reveal.classList).not.toContain('data-[revealed=false]:hidden');
+    },
+  );
+
   it('keeps the callback out of the parts reveal', async () => {
     setShop(false);
     const reveal = (await header('/ru/parts/')).querySelector('cta-reveal')!;
@@ -140,5 +154,63 @@ describe('SiteHeader', () => {
         menu.querySelector('[data-contact-channel]')!,
       ) & 4,
     ).toBeTruthy();
+  });
+
+  describe('before any module script runs', () => {
+    const parse = async (path: string, stored?: [string, string]) => {
+      const html = (await header(path)).innerHTML;
+      return new JSDOM(html, {
+        url: 'https://carlab.rs/',
+        runScripts: 'dangerously',
+        beforeParse: (window) => {
+          if (stored) window.localStorage.setItem(...stored);
+        },
+      }).window.document.querySelector<HTMLElement>('cart-badge')!;
+    };
+
+    it('shows the inquiry list icon off the parts pages once it holds a part', async () => {
+      setShop(false);
+      const badge = await parse('/ru/services/', [
+        PARTS_LIST_STORAGE_KEY,
+        JSON.stringify([{ slug: 'febi-37511' }]),
+      ]);
+
+      expect(badge.hidden).toBe(false);
+    });
+
+    it('shows the cart icon once the open shop cart holds a line', async () => {
+      setShop(true);
+      const badge = await parse('/ru/services/', [
+        CART_STORAGE_KEY,
+        JSON.stringify({ count: 2 }),
+      ]);
+
+      expect(badge.hidden).toBe(false);
+    });
+
+    it.each([
+      ['nothing is stored', undefined],
+      ['the list is empty', [PARTS_LIST_STORAGE_KEY, '[]']],
+      ['the stored list is unreadable', [PARTS_LIST_STORAGE_KEY, '{oops']],
+    ] as const)('keeps the icon hidden when %s', async (_, stored) => {
+      setShop(false);
+      const badge = await parse(
+        '/ru/services/',
+        stored as [string, string] | undefined,
+      );
+
+      expect(badge.hidden).toBe(true);
+    });
+
+    it('never hides the always-present parts page entry', async () => {
+      setShop(false);
+      const badge = await parse('/ru/parts/');
+
+      expect(badge.hidden).toBe(false);
+      expect([...badge.classList].join(' ')).not.toMatch(/:hidden/);
+      expect(badge.querySelector('[data-count]')!.classList).not.toContain(
+        'lg:static',
+      );
+    });
   });
 });

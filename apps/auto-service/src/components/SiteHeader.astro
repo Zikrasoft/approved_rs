@@ -22,6 +22,7 @@ import SocialLinks from './SocialLinks.astro';
 import { content } from '@/i18n/content';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { CART_STORAGE_KEY, PARTS_LIST_STORAGE_KEY } from '@/scripts/cartBadge';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -144,10 +145,7 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
         </a>
 
         <cart-badge
-          class:list={[
-            'block',
-            inquiryEntry && 'max-lg:has-[[data-count][hidden]]:hidden',
-          ]}
+          class="block"
           {...onParts ? {} : { hidden: '', 'data-reveal-when-filled': '' }}
           data-parts-list={open ? undefined : ''}
         >
@@ -172,18 +170,35 @@ const cta = 'btn btn-primary h-10 py-0 max-sm:px-4 max-[359px]:hidden!';
             <span
               class:list={[
                 'spec absolute top-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-pill bg-panel-fg px-1 text-[0.6875rem] font-semibold text-ink',
-                inquiryEntry && 'lg:static',
+                inquiryEntry && 'lg:-top-2 lg:-right-2',
               ]}
               data-count
               hidden></span>
           </a>
         </cart-badge>
+        <script
+          is:inline
+          define:vars={{
+            storageKey: open ? CART_STORAGE_KEY : PARTS_LIST_STORAGE_KEY,
+          }}
+        >
+          const badge = document.currentScript.previousElementSibling;
+          if (badge.hasAttribute('data-reveal-when-filled')) {
+            try {
+              const stored = JSON.parse(localStorage.getItem(storageKey));
+              const count = Array.isArray(stored)
+                ? stored.length
+                : stored?.count;
+              badge.hidden = !(count > 0);
+            } catch {}
+          }
+        </script>
 
         <cta-reveal
           data-revealed="true"
           watch={CONTACT_CTA_SELECTOR}
           class:list={[
-            'flex gap-2 data-[revealed=false]:hidden max-lg:in-data-sticky-bar:hidden',
+            'flex gap-2 transition-[opacity,visibility] duration-200 max-md:order-first data-[revealed=false]:invisible data-[revealed=false]:opacity-0 motion-reduce:transition-none max-lg:in-data-sticky-bar:hidden',
             inquiryEntry && 'lg:hidden',
           ]}
         >
