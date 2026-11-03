@@ -468,6 +468,7 @@ pnpm lint             # eslint . (root, covers all workspaces)
 pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
+node --experimental-strip-types scripts/layout-shift-pass.ts <base-url> <path>...   # local only: CLS per page (load + scroll down/up) on two desktops and a phone, fails over 0.01
 ```
 
 Scoped to one app — either `--filter` from the root, or run inside the app dir:
