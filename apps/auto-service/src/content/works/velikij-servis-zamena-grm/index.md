@@ -33,7 +33,7 @@ translations:
   sr:
     title: "Veliki servis Skoda Octavia 2.0 TDI: zamena zupčastog kaiša"
     body: |-
-      U našem autoservisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. Ovaj obim radova u Srbiji se naziva *veliki servis*.
+      U našem auto servisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. Ovaj obim radova u Srbiji se naziva *veliki servis*.
 
       Ovaj dizel motor ima zupčasti kaiš koji se mora menjati u propisanim intervalima. Ako se zamena kaiša ili drugih delova razvodnog mehanizma preskoči, može doći do ozbiljnog oštećenja motora i skupe popravke.
 

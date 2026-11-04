@@ -22,7 +22,7 @@ translations:
   sr:
     title: Veliki servis za Peugeot 308 1.5 BlueHDi 2024
     body: |-
-      Peugeot 308 iz 2024. godine sa dizel motorom **1.5 BlueHDi** stigao je u naš ruski auto-servis u Beogradu na veliki servis. Uradili smo kompletan servis:
+      Peugeot 308 iz 2024. godine sa dizel motorom **1.5 BlueHDi** stigao je u naš ruski auto servis u Beogradu na veliki servis. Uradili smo kompletan servis:
 
       - zamenu zupčastog kaiša;
       - zamenu vodene pumpe;

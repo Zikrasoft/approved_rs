@@ -78,8 +78,8 @@ translations:
       button: 🌐 Jezik
       text: Izaberite jezik na kom vam najviše odgovara da komunicirate.
     profile:
-      description: 'Auto-servis u Beogradu. Kliknite na „Start“, opišite problem i saradnik će odgovoriti ovde. Radije biste bez bota? Pišite saradniku direktno: {manager}'
-      shortDescription: 'Auto-servis u Beogradu: dijagnostika, popravke, održavanje. Saradnik: {manager}'
+      description: 'Auto servis u Beogradu. Kliknite na „Start“, opišite problem i saradnik će odgovoriti ovde. Radije biste bez bota? Pišite saradniku direktno: {manager}'
+      shortDescription: 'Auto servis u Beogradu: dijagnostika, popravke, održavanje. Saradnik: {manager}'
       menuCommand: Glavni meni
       langCommand: Promenite jezik
   en:

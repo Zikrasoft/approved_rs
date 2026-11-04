@@ -14,7 +14,7 @@ translations:
   sr:
     title: "BMW 116d: antifriz, nosač motora i EGR klapna"
     body: |-
-      **BMW 116d u našem auto-servisu u Beogradu.**
+      **BMW 116d u našem auto servisu u Beogradu.**
 
       Ovog puta kod nas je stigao BMW 116d kome su bili potrebni kompletno održavanje i otklanjanje nekoliko kvarova. Kod BMW-a je važno poznavati specifičnosti motora i pažljivo pregledati svaki detalj: ne menjamo samo delove, već tražimo i uzrok njihovog otkazivanja.
 

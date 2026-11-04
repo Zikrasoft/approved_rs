@@ -19,7 +19,7 @@ translations:
   sr:
     title: "Mali servis za Honda Accord: zamena ulja i filtera"
     body: |-
-      Honda Accord sa benzinskim motorom stigla je u naš autoservis u Beogradu na redovno održavanje.
+      Honda Accord sa benzinskim motorom stigla je u naš auto servis u Beogradu na redovno održavanje.
 
       Zamenili smo motorno ulje i osnovne filtere: filter vazduha, ulja i kabine. Ugradili smo i nove svećice. Od njih zavisi koliko mirno benzinski motor radi, kako pali i koliko goriva troši.
 

@@ -16,10 +16,10 @@ translations:
     title: "Peugeot 208 1.2 PureTech: veliki servis sa zamenom zupčastog kaiša"
     body: |-
       **Peugeot 208 1.2 PureTech. Veliki servis, mali servis i zamena ulja u menjaču u Beogradu**\
-      U naš autoservis na Zvezdari stigao je Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenu ulja u menjaču.\
+      U naš auto servis na Zvezdari stigao je Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenu ulja u menjaču.\
       U okviru velikog servisa zamenili smo zupčasti kaiš i prateće delove, kao i vodenu pumpu. Na motoru 1.2 PureTech vodenu pumpu ne pokreće zupčasti kaiš, ali preporučujemo da se i ona zameni prilikom velikog servisa. Ako odlučite da zadržite staru pumpu, svakako preporučujemo da zamenite makar zaseban mali kaiš koji je pokreće.\
       Posebnu pažnju treba obratiti na intervale zamene zupčastog kaiša kod motora 1.2 PureTech. Uzimajući u obzir ažurirane preporuke i specifičnosti ovih motora, preporučujemo veliki servis na svakih 60 000 km, pre nego što se pojave problemi sa kaišem. Tačan interval održavanja treba proveriti za konkretnu verziju motora.\
-      Naš autoservis poseduje sav potreban specijalni alat za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Sve radove izvodimo uz poštovanje propisanog postupka uzupčenja i blokiranja razvoda.\
+      Naš auto servis poseduje sav potreban specijalni alat za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Sve radove izvodimo uz poštovanje propisanog postupka uzupčenja i blokiranja razvoda.\
       Pored toga, uradili smo mali servis sa zamenom motornog ulja i filtera, kao i kompletnu zamenu ulja u menjaču, za koju smo koristili ulje Valvoline.
     car: Peugeot 208
   en:

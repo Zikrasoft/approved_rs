@@ -73,10 +73,10 @@ translations:
     label: VIN, broj ili naziv dela, ili automobil
     placeholder: VIN ili broj dela
     submitLabel: Pronađite
-    metaTitle: Pretraga auto-delova | CarLab
+    metaTitle: Pretraga auto delova | CarLab
     metaDescription: Pronađite deo po VIN-u, kataloškom broju proizvođača, nazivu ili automobilu u katalogu CarLaba.
-    eyebrow: Katalog auto-delova
-    heading: Pretraga auto-delova
+    eyebrow: Katalog auto delova
+    heading: Pretraga auto delova
     found: 'Pronađeno: {count}'
     foundNumbers: 'Pronađeno brojeva delova: {count}'
     emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model automobila, na primer HU 816 x, filter ulja ili BMW X3.
@@ -109,7 +109,7 @@ translations:
     previous: Prethodna
     next: Sledeća
     pagination: Stranice rezultata
-    formHeading: Upit za auto-delove
+    formHeading: Upit za auto delove
     notFoundQuestion: Niste pronašli ono što Vam treba?
     notFoundLink: Pošaljite upit, pronaći ćemo deo
     pickHeading: Pronaći ćemo deo koji tačno odgovara vašem vozilu
@@ -121,7 +121,7 @@ translations:
     similarNumbers: Slični brojevi
     carsGroup: Automobili
     allModifications: Sve verzije
-    partsGroup: Auto-delovi
+    partsGroup: Auto delovi
     sortLabel: Sortiranje
     sortDefault: Podrazumevano
     sortPopular: Najpopularnije

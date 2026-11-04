@@ -14,7 +14,10 @@ export const LOCALE_GUIDANCE: Partial<Record<TranslatableLocale, string>> = {
     '"Nastavite", never "Pošalji", "Proveri", "Dodaj", "Nastavi". The person at CarLab the visitor deals ' +
     'with (менеджер, консультант, продавец, наша команда) is always "saradnik". "Заявка" is "upit", never ' +
     '"zahtev". "(необязательно)" is "(nije obavezno)", never "opciono". Decline the brand inside a ' +
-    'sentence: "u CarLabu", "iz CarLaba"; a title keeps " | CarLab" as it is.',
+    'sentence: "u CarLabu", "iz CarLaba"; a title keeps " | CarLab" as it is. ' +
+    '"Автосервис" is "auto servis" and "автозапчасти" is "auto delovi", two words as on the CarLab ' +
+    'sign, declined normally ("u auto servisu", "auto delova"), never "auto-servis", "autoservis" ' +
+    'or "auto-delovi".',
   en:
     'Write interface labels and headings the way an English shop would, in sentence case: ' +
     '"Подходит для автомобилей" is "Fits these cars", never "Fits for Vehicles". ' +

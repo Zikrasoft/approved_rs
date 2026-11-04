@@ -21,7 +21,7 @@ translations:
   sr:
     title: Mali servis za Mercedes-Benz C-Class W205
     body: |-
-      Mercedes-Benz C-Class W205 stigao je u naš auto-servis u Beogradu na mali servis.
+      Mercedes-Benz C-Class W205 stigao je u naš auto servis u Beogradu na mali servis.
 
       Uradili smo:
 

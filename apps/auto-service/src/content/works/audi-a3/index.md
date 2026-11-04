@@ -15,7 +15,7 @@ translations:
   sr:
     title: Veliki servis za Audi A3 1.5 TFSI
     body: |-
-      Audi A3 sa benzinskim motorom **1.5 TFSI od 150 KS** i robotizovanim menjačem DQ200 stigao je u naš ruski auto-servis u Beogradu na veliki servis. Zamenili smo zupčasti kaiš.
+      Audi A3 sa benzinskim motorom **1.5 TFSI od 150 KS** i robotizovanim menjačem DQ200 stigao je u naš ruski auto servis u Beogradu na veliki servis. Zamenili smo zupčasti kaiš.
 
       Na osnovu dijagnostike zamenili smo i električnu pumpu rashladnog sistema. To je zaseban sklop i njena zamena nije povezana sa velikim servisom ni sa zupčastim kaišem. Dijagnostika je pokazala da je kapacitet pumpe opao i da više ne obezbeđuje odgovarajući protok rashladne tečnosti, pa nismo čekali da to počne da utiče na radnu temperaturu motora. Nakon radova sipali smo nov antifriz.
 

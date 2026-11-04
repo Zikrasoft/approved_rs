@@ -16,7 +16,7 @@ translations:
   sr:
     title: "VW Golf: poklopac ventila, dizne i ulje u DSG menjaču"
     body: |-
-      Volkswagen Golf iz 2017. godine sa 7-stepenim menjačem sa dvostrukim kvačilom **DSG DQ381** stigao je u naš autoservis u Beogradu na detaljno održavanje i otklanjanje nekoliko kvarova.
+      Volkswagen Golf iz 2017. godine sa 7-stepenim menjačem sa dvostrukim kvačilom **DSG DQ381** stigao je u naš auto servis u Beogradu na detaljno održavanje i otklanjanje nekoliko kvarova.
 
       Tokom servisa zamenili smo poklopac ventila zbog curenja ulja, zamenili zaptivke dizni, uradili mali servis motora, zamenili ulje i filter u DSG menjaču i očistili kočiona klešta.
 

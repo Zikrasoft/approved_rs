@@ -71,10 +71,10 @@ finalCta:
 translations:
   sr:
     meta:
-      title: 'CarLab | Autoservis u Beogradu: dijagnostika, popravke'
-      description: 'Autoservis u Beogradu: kompjuterska dijagnostika, redovan servis, zamena ulja, popravka trapa, kočnica, motora i menjača, limarski radovi posle udesa.'
+      title: 'CarLab | Auto servis u Beogradu: dijagnostika, popravke'
+      description: 'Auto servis u Beogradu: kompjuterska dijagnostika, redovan servis, zamena ulja, popravka trapa, kočnica, motora i menjača, limarski radovi posle udesa.'
     hero:
-      heading: Auto-servis i auto-delovi u Beogradu
+      heading: Auto servis i auto delovi u Beogradu
       ctaPrimary: Zakažite popravku
       ctaSecondary: Pogledajte usluge
       partsHeading: Pronaći ćemo deo po broju šasije
