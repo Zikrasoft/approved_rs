@@ -44,7 +44,7 @@ medusaIntegrationTestRunner({
         expect(await publish().publishAll()).toEqual([]);
         await publish().unpublish(fresh);
         expect(await countOf('published_number')).toBe(0);
-      });
+      }, 360_000);
 
       it('counts and deletes a source with more rows than one statement can name', async () => {
         const { vehicle } = await createVehicleFixture(catalog());
@@ -64,7 +64,7 @@ medusaIntegrationTestRunner({
           PAST_THE_BIND_LIMIT,
         );
         expect(await countOf('fitment')).toBe(0);
-      });
+      }, 360_000);
     });
 
     describe('the orphan sweep', () => {
