@@ -127,8 +127,20 @@ jobs:
           ref: ${{ needs.translate.outputs.sha }}
           fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
-      - uses: ./.github/actions/setup-auto-service-shop-env
-      - run: pnpm test
+      - id: retest
+        env:
+          TRANSLATED: ${{ needs.translate.outputs.sha }}
+        run: |
+          if [ "$TRANSLATED" = "$GITHUB_SHA" ]; then
+            echo "Nothing was translated: check already tested $GITHUB_SHA."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.retest.outputs.needed == 'true'
+        uses: ./.github/actions/setup-auto-service-shop-env
+      - if: steps.retest.outputs.needed == 'true'
+        run: pnpm exec turbo run test --filter="...[$GITHUB_SHA]"
 
       - id: scope
         if: github.ref == 'refs/heads/main'

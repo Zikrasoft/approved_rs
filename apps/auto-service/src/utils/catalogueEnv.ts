@@ -41,7 +41,7 @@ const catalogueEnvSchema = z
   .object({
     MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
     MEDUSA_PUBLISHABLE_KEY: unsetWhenEmpty(z.string()),
-    SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema),
+    SHOP_PREVIEW_TOKEN: unsetWhenEmpty(shopPreviewTokenSchema).catch(undefined),
     SHOP_CLIENT_SECRET: unsetWhenEmpty(z.string()),
   })
   .transform(
@@ -142,7 +142,7 @@ export const siteEnv = (): CatalogueEnv => ({
   MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
   MEDUSA_PUBLISHABLE_KEY: import.meta.env.MEDUSA_PUBLISHABLE_KEY,
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
-  SHOP_PREVIEW_TOKEN: import.meta.env.SHOP_PREVIEW_TOKEN,
+  SHOP_PREVIEW_TOKEN: process.env.SHOP_PREVIEW_TOKEN,
   SHOP_CLIENT_SECRET: process.env.SHOP_CLIENT_SECRET,
   VERCEL: import.meta.env.VERCEL,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
