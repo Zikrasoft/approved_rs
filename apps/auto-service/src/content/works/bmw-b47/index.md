@@ -14,7 +14,7 @@ translations:
   sr:
     title: Sistem hlađenja i vrtložne klapne na BMW-u
     body: |-
-      BMW je stigao u naš ruski auto-servis u Beogradu radi održavanja sistema hlađenja i preventivnih radova na motoru.
+      BMW je stigao u naš ruski auto servis u Beogradu radi održavanja sistema hlađenja i preventivnih radova na motoru.
 
       Uradili smo delimičnu zamenu rashladne tečnosti. Kod motora **B47** za delimičnu zamenu obično je potrebno **5–7 litara**. Ovog puta sipali smo zelenu rashladnu tečnost Valvoline HT-12.
 

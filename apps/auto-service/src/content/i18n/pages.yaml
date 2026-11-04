@@ -166,11 +166,11 @@ bmw:
 translations:
   sr:
     works:
-      metaTitle: Primeri radova autoservisa u Beogradu | CarLab
-      metaDescription: Šta smo otkrili na dijagnostici, šta smo uradili i koliko je trajalo. Stvarni primeri radova iz autoservisa CarLab u Beogradu.
+      metaTitle: Primeri radova auto servisa u Beogradu | CarLab
+      metaDescription: Šta smo otkrili na dijagnostici, šta smo uradili i koliko je trajalo. Stvarni primeri radova iz auto servisa CarLab u Beogradu.
       eyebrow: Primeri radova
       heading: Šta smo radili i kakav je bio rezultat
-      lead: 'Konkretni primeri iz našeg autoservisa u Beogradu: zbog čega je automobil dovezen, šta smo otkrili na dijagnostici, šta smo uradili i koliko je trajalo.'
+      lead: 'Konkretni primeri iz našeg auto servisa u Beogradu: zbog čega je automobil dovezen, šta smo otkrili na dijagnostici, šta smo uradili i koliko je trajalo.'
       detailMetaSuffix: CarLab
       detailCtaHeading: Imate sličan problem?
       detailCtaBody: Opišite simptome, a mi ćemo Vam reći šta bi mogao biti uzrok i koliko košta dijagnostika.
@@ -194,8 +194,8 @@ translations:
         heading: Potrebni su Vam delovi za automobil?
         body: Pošaljite VIN ili kataloški broj dela, pronaći ćemo originalni ili zamenski deo i javiti Vam cenu i rok isporuke.
     contact:
-      metaTitle: Kontakt autoservisa CarLab u Beogradu, adresa i telefon
-      metaDescription: Adresa, radno vreme i telefon autoservisa CarLab u Beogradu. Zakažite dijagnostiku i popravku telefonom, preko WhatsAppa ili Vibera.
+      metaTitle: Kontakt auto servisa CarLab u Beogradu, adresa i telefon
+      metaDescription: Adresa, radno vreme i telefon auto servisa CarLab u Beogradu. Zakažite dijagnostiku i popravku telefonom, preko WhatsAppa ili Vibera.
       heading: CarLab na Zvezdari
       addressLabel: Adresa
       hoursLabel: Radno vreme
@@ -221,7 +221,7 @@ translations:
       cta: Pogledajte rezervne delove
     privacy:
       metaTitle: Politika privatnosti | CarLab
-      metaDescription: Koje podatke prikuplja sajt autoservisa CarLab, zašto su nam potrebni i koliko dugo ih čuvamo.
+      metaDescription: Koje podatke prikuplja sajt auto servisa CarLab, zašto su nam potrebni i koliko dugo ih čuvamo.
       heading: Politika privatnosti
       lastUpdated: Ažurirano 2. novembra 2026.
       sections:
@@ -240,10 +240,10 @@ translations:
       contactTitle: Pitanja o podacima
       contactBefore: Pozovite nas ili nam pišite, kontakt podatke ćete pronaći na stranici
     about:
-      metaTitle: O CarLabu, auto-servisu na Zvezdari u Beogradu
-      metaDescription: 'Auto-servis CarLab na Zvezdari u Beogradu: ko smo, koju opremu koristimo, koje automobile servisiramo i kako da nas pronađete.'
+      metaTitle: O CarLabu, auto servisu na Zvezdari u Beogradu
+      metaDescription: 'Auto servis CarLab na Zvezdari u Beogradu: ko smo, koju opremu koristimo, koje automobile servisiramo i kako da nas pronađete.'
       heading: O CarLabu
-      lead: 'Auto-servis na Zvezdari: dijagnostika, popravke, limarija i izbor rezervnih delova. Govorimo srpski, ruski i engleski.'
+      lead: 'Auto servis na Zvezdari: dijagnostika, popravke, limarija i izbor rezervnih delova. Govorimo srpski, ruski i engleski.'
       teamHeading: Ko smo
       team: []
       equipmentHeading: Oprema
@@ -256,7 +256,7 @@ translations:
       makesHeading: Koje automobile servisiramo
       makesLead: Marke automobila iz naših primera radova.
       ownerHeading: Kome pripada sajt
-      ownerText: Sajt pripada autoservisu CarLab. Kako postupamo sa podacima posetilaca opisano je u odeljku
+      ownerText: Sajt pripada auto servisu CarLab. Kako postupamo sa podacima posetilaca opisano je u odeljku
     notFound:
       metaTitle: Stranica nije pronađena | CarLab
       heading: Ova stranica ne postoji
@@ -265,7 +265,7 @@ translations:
       writeUs: Ili nas kontaktirajte
       cta: Vratite se na početnu
     partsInquiry:
-      metaTitle: Izbor auto-delova po VIN-u u Beogradu | CarLab
+      metaTitle: Izbor auto delova po VIN-u u Beogradu | CarLab
       metaDescription: Pošaljite VIN ili broj šasije, pronaći ćemo odgovarajuće delove za Vaš automobil i javiti Vam se. Lično preuzimanje u servisu u Beogradu.
       eyebrow: Izbor rezervnih delova
       heading: Pronaći ćemo prave delove za Vaš automobil

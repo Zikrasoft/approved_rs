@@ -23,7 +23,7 @@ translations:
   sr:
     title: "Veliki servis za Seat Leon: zupčasti kaiš, vodena pumpa i DSG DQ250"
     body: |-
-      Seat Leon sa **190 000 km** na satu stigao je u naš ruski auto-servis u Beogradu na redovno održavanje, odnosno veliki servis.
+      Seat Leon sa **190 000 km** na satu stigao je u naš ruski auto servis u Beogradu na redovno održavanje, odnosno veliki servis.
 
       Na ovoj kilometraži najbolje je odjednom servisirati sve ključne sklopove, pa smo uradili:
 

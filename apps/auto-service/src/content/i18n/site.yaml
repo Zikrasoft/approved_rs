@@ -133,7 +133,7 @@ translations:
       partsCta: Upit
       callback: Pozovite me
     footer:
-      tagline: Auto-servis i pomoć pri izboru auto-delova na Zvezdari, Beograd.
+      tagline: Auto servis i pomoć pri izboru auto delova na Zvezdari, Beograd.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
@@ -171,7 +171,7 @@ translations:
     photos:
       heroMechanic: Majstor u CarLabu menja točak na automobilu na dizalici
       workshopBay: 'Radionica u CarLabu: dve dizalice i automobil na popravci'
-      facade: Ulaz u auto-servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
+      facade: Ulaz u auto servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
       wallSign: Logotip CarLab na zidu radionice
     googleRating:
       rating: '{rating} na Google-u'

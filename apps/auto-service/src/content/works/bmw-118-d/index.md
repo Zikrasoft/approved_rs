@@ -32,7 +32,7 @@ translations:
   sr:
     title: Sveobuhvatan servis BMW-a 118d N47 nakon kupovine
     body: |-
-      BMW 118d sa dizel motorom N47 i oko **380 000 km** na satu stigao je u naš autoservis u Beogradu. Automobil je uvezen iz Danske, a vlasnik ga je nedavno kupio i odlučio da prvo uradi detaljan servis i otkloni već uočene probleme. To je pravi pristup nakon kupovine polovnog automobila.
+      BMW 118d sa dizel motorom N47 i oko **380 000 km** na satu stigao je u naš auto servis u Beogradu. Automobil je uvezen iz Danske, a vlasnik ga je nedavno kupio i odlučio da prvo uradi detaljan servis i otkloni već uočene probleme. To je pravi pristup nakon kupovine polovnog automobila.
 
       Počeli smo kompletnim malim servisom: zamenili smo motorno ulje i sve filtere (ulja, vazduha, kabine i goriva). Kod motora N47 filter goriva zaslužuje posebnu pažnju: od stanja sistema za gorivo direktno zavise ravnomeran rad motora i vek trajanja komponenti tog sistema.
 

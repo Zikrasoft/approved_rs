@@ -233,7 +233,7 @@ vin-parts-inquiry:
   honest: Цену и срок называем до оплаты. Если деталь редкая и идет под заказ, сразу скажем, сколько ждать, и предложим проверенный аналог, если он есть.
 translations:
   sr:
-    indexMetaTitle: 'Auto-servis u Beogradu: popravke i održavanje | CarLab'
+    indexMetaTitle: 'Auto servis u Beogradu: popravke i održavanje | CarLab'
     indexMetaDescription: Dijagnostika, servis i zamena ulja, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine, delovi po VIN-u. Šta obuhvataju radovi i koliko traju.
     partsLink: Pronađite delove za ovu popravku
     heroHeadingTemplate: '{name} u Beogradu'
@@ -438,7 +438,7 @@ translations:
       cta: Pošaljite upit
       name: Pronalaženje rezervnih delova
       short: Pronalazimo delove koji odgovaraju Vašem automobilu i dajemo cenu pre kupovine.
-      metaTitle: Auto-delovi po VIN broju u Beogradu | CarLab
+      metaTitle: Auto delovi po VIN broju u Beogradu | CarLab
       metaDescription: 'Delovi po VIN broju ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti i cena unapred. Preuzimanje u CarLabu.'
       heroTitle: Pronaći ćemo delove koji sigurno odgovaraju Vašem automobilu
       heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo koji delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.

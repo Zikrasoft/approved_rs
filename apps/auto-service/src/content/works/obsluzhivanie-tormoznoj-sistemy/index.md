@@ -28,7 +28,7 @@ translations:
   sr:
     title: Zamena kočionih diskova i pločica
     body: |-
-      U naš autoservis u Beogradu stigao je automobil zbog **vibracija pri kočenju**: kada vozač pritisne papučicu kočnice, automobil počne da se trese.
+      U naš auto servis u Beogradu stigao je automobil zbog **vibracija pri kočenju**: kada vozač pritisne papučicu kočnice, automobil počne da se trese.
 
       Počeli smo od provere balansa točkova. To je najčešći uzrok ovakvih vibracija i najlakše ga je isključiti. Balans je bio u redu, pa smo nastavili sa proverom kočionog sistema.
 
