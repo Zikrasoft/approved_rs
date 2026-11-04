@@ -1,0 +1,109 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image, getImage } from 'astro:assets';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  images: ImageMetadata[];
+  alt: string;
+}
+
+const LARGEST_WIDTH = 1280;
+const { images, alt } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
+const full = await Promise.all(
+  images.map((image) =>
+    getImage({ src: image, width: Math.min(image.width, LARGEST_WIDTH) }),
+  ),
+);
+const single = images.length === 1;
+const label = (i: number) => `${alt}, ${i + 1}`;
+const control =
+  'absolute flex size-11 items-center justify-center rounded-pill bg-paper/10 text-white transition-colors duration-150 hover:bg-paper/20';
+---
+
+<gallery-lightbox
+  class:list={[
+    'block gap-3 lg:gap-4',
+    single
+      ? 'max-w-sm'
+      : ['columns-2', images.length > 2 ? 'lg:columns-3' : 'lg:max-w-3xl'],
+  ]}
+>
+  {
+    images.map((image, i) => (
+      <button
+        type="button"
+        data-lightbox-item
+        data-src={full[i].src}
+        data-alt={label(i)}
+        class="mb-3 block w-full cursor-zoom-in break-inside-avoid lg:mb-4"
+      >
+        <Image
+          src={image}
+          alt={label(i)}
+          widths={[360, 540, 720, 1080, LARGEST_WIDTH]}
+          sizes={
+            single
+              ? '(min-width: 640px) 384px, calc(100vw - 2.5rem)'
+              : '(min-width: 1024px) 368px, calc(50vw - 1.6rem)'
+          }
+          loading="lazy"
+          class="card block h-auto w-full"
+        />
+      </button>
+    ))
+  }
+  <carlab-dialog class="contents">
+    <dialog
+      class="m-0 h-full max-h-none w-full max-w-none bg-ink/95 p-0 backdrop:bg-ink/95"
+    >
+      <div class="relative flex h-full items-center justify-center p-4 sm:p-10">
+        <img
+          data-lightbox-image
+          alt=""
+          class="max-h-full max-w-full rounded-control object-contain"
+        />
+        <button
+          type="button"
+          data-modal-close
+          aria-label={site.common.closeLabel}
+          class={`${control} top-4 right-4`}
+        >
+          <Icon name="close" size={16} />
+        </button>
+        {
+          images.length > 1 && (
+            <Fragment>
+              <button
+                type="button"
+                data-prev
+                aria-label={site.common.prevLabel}
+                class={`${control} top-1/2 left-4 -translate-y-1/2`}
+              >
+                <Icon name="chevronLeft" size={16} />
+              </button>
+              <button
+                type="button"
+                data-next
+                aria-label={site.common.nextLabel}
+                class={`${control} top-1/2 right-4 -translate-y-1/2`}
+              >
+                <Icon name="chevronRight" size={16} />
+              </button>
+            </Fragment>
+          )
+        }
+      </div>
+    </dialog>
+  </carlab-dialog>
+</gallery-lightbox>
+
+<script>
+  import { defineLightbox, defineModalDialog } from '@podbor/site-kit/browser';
+
+  defineModalDialog('carlab-dialog');
+  defineLightbox();
+</script>

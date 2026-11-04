@@ -18,92 +18,108 @@ translations:
   en:
     title: BMW X1
     body: |-
-      **Sourcing and Delivery of a BMW X1 from Germany to Serbia Turnkey**
+      **BMW X1 sourced in Germany and delivered to Serbia, with everything taken care of**
 
-      The client requested assistance in finding a car in Germany and bringing it to Serbia: without personal trips, negotiations with German sellers, or dealing with the paperwork. We sourced a **BMW X1**, inspected it prior to purchase, and completed the transaction, including registration in Serbia.
+      Our client wanted us to find a car in Germany and bring it to Serbia, without having to travel, negotiate with German sellers or deal with paperwork. We sourced a **BMW X1**, inspected it before purchase and handled the entire process through to Serbian registration.
 
-      Before purchasing, a specialist personally visits the vehicle rather than relying on photos from listings. The inspection covers over 100 parameters: body, paintwork, interior, engine, transmission, suspension, electronics, computer diagnostics, service history, and mileage compliance.
+      Before purchase, our specialist inspects the car in person rather than relying on listing photos. The inspection covers more than 100 points, including the bodywork, paintwork, interior, engine, transmission, suspension, electronics and diagnostic scan results. We also review the service history and check that it supports the recorded mileage.
 
-      The price of the car in Germany (Brutto) was **€39,860**. Taking into account the buyback, inspection, delivery, documentation processing, and all related expenses, the final turnkey price for the BMW X1 in Serbia came to **€46,000**. This is the real 
+      The car's price in Germany (including VAT) was **€39,860**. Including the purchase, inspection, delivery, paperwork and all associated costs, the total price for the BMW X1 in Serbia, ready to drive, was **€46,000**. That is the true all-in cost, not the price shown in the German listing, and it is the figure worth calculating upfront.
+
+      We paid the seller through our own European company, then collected the car and prepared it for transport. Once it arrived in Serbia, we handled customs clearance and registered the BMW X1. The client received a car ready to drive on Serbian plates.
+
+      What's included:
+
+      <ul class="icon-check">
+      <li>Car sourcing in Germany</li>
+      <li>Negotiations with the seller</li>
+      <li>In-person inspection covering 100+ points</li>
+      <li>Purchase through our own European company</li>
+      <li>Delivery to Serbia</li>
+      <li>Customs clearance</li>
+      <li>Vehicle registration</li>
+      </ul>
+
+      Whether you already have a specific car in Germany in mind or would like us to find one that meets your requirements, send us the model, year and budget. We'll take care of the rest.
   sr:
     title: BMW X1
     body: |-
-      **Odabir i dostava BMW X1 iz Nemačke u Srbiju po principu 'ključ u ruke'**
+      **Pronalaženje i dovoz BMW X1 iz Nemačke u Srbiju po sistemu ključ u ruke**
 
-      Klijent je zamolio da nađemo automobil u Nemačkoj i dovezemo ga u Srbiju: bez ličnih putovanja, pregovora sa nemačkim prodavcima i bavljanja dokumentacijom. Pronašli smo **BMW X1**, izvršili proveru auta pre kupovine i završili transakciju do registracije na srpske registarske tablice.
+      Klijent je želeo da mu pronađemo automobil u Nemačkoj i dovezemo ga u Srbiju, bez ličnih odlazaka, pregovora sa nemačkim prodavcima i bavljenja dokumentacijom. Pronašli smo **BMW X1**, obavili proveru auta pre kupovine i završili ceo postupak sve do registracije u Srbiji.
 
-      Pre kupovine, specijalista lično dolazi do automobila, a ne radi na osnovu fotografija iz oglasa. Provera pokriva više od 100 parametara: karoseriju, farbu, enterijer, motor, menjač, suspenziju, elektroniku, računalnu dijagnostiku, servisnu istoriju i usklađenost sa pređenim kilometrima.
+      Provera auta pre kupovine podrazumeva da naš stručnjak lično ode da pregleda vozilo, umesto da se oslanja na fotografije iz oglasa. Provera obuhvata više od 100 stavki: karoseriju, stanje laka, enterijer, motor, menjač, trap, elektroniku i kompjutersku dijagnostiku, kao i servisnu istoriju i usklađenost stanja vozila sa navedenom kilometražom.
 
-      Cena automobila u Nemačkoj (Brutto) iznosila je **39 860 €**. Uzimajući u obzir otkup, proveru, dostavu, obradu dokumenata i sve prateće troškove, konačna cena BMW X1 u Srbiji po principu 'ključ u ruke' iznosi: **46 000 €**. Ovo je prava cena "ključ u ruke", a ne ona koja je navedena u nemačkom oglasu, i nju treba smatrati unapred.
+      Cena automobila u Nemačkoj (bruto) iznosila je **39 860 €**. Sa kupovinom, proverom, dovozom, sređivanjem dokumentacije i svim pratećim troškovima, konačna cena za BMW X1 u Srbiji po sistemu ključ u ruke iznosila je **46 000 €**. To je stvarna cena „ključ u ruke“, a ne ona iz nemačkog oglasa, i upravo taj ukupan iznos treba izračunati unapred.
 
-      Plaćanje prodavcu je provedeno preko naše sopstvene evropske kompanije, nakon čega smo preuzeli automobil i pripremili ga za slanje. Nakon dolaska u Srbiju, automobil je prošao carinsku obradu, a mi smo registrovali BMW X1: klijent je dobio spreman automobil sa srpskim registarskim tablicama.
+      Plaćanje prodavcu obavljeno je preko naše sopstvene firme u EU, nakon čega smo preuzeli automobil i pripremili ga za transport. Po dolasku u Srbiju obavili smo carinjenje i registrovali BMW X1. Klijent je dobio automobil spreman za vožnju, sa srpskim tablicama.
 
-      Šta uključuje usluga:
+      Šta usluga obuhvata:
 
       <ul class="icon-check">
-      <li>odabir automobila u Nemačkoj</li>
-      <li>pregovori sa prodavcem</li>
-      <li>lični pregled i provera po 100+ parametara</li>
-      <li>otkup preko sopstvene evropske kompanije</li>
-      <li>dostava u Srbiju</li>
-      <li>carinska obrada</li>
-      <li>registracija</li>
+      <li>pronalaženje automobila u Nemačkoj</li>
+      <li>pregovore sa prodavcem</li>
+      <li>proveru auta pre kupovine na licu mesta, po više od 100 stavki</li>
+      <li>kupovinu preko naše sopstvene firme u EU</li>
+      <li>dovoz u Srbiju</li>
+      <li>carinjenje</li>
+      <li>registraciju vozila</li>
       </ul>
 
-      Ako imate konkretan automobil iz Nemačke na umu ili želite da nađemo opciju prema vašem zahtevu, pošaljite nam model, godine i budžet: dalje sve preuzimamo na sebe.
+      Ako ste već našli konkretan automobil u Nemačkoj ili želite da pronađemo vozilo prema vašim zahtevima, pošaljite nam model, godište i budžet. Sve ostalo preuzimamo mi.
   es:
     title: BMW X1
     body: |-
-      **Selección y entrega de un BMW X1 desde Alemania a Serbia llave en mano**
+      **Búsqueda y entrega de un BMW X1 de Alemania a Serbia, llave en mano**
 
-      Un cliente nos solicitó encontrar un automóvil en Alemania y traerlo a Serbia: sin viajes personales, negociaciones con vendedores alemanes ni complicaciones con la documentación. Seleccionamos un **BMW X1**, lo inspeccionamos antes de la compra y llevamos la transacción hasta la matriculación en Serbia.
+      El cliente nos pidió que encontráramos un coche en Alemania y lo lleváramos a Serbia, sin tener que viajar, negociar con vendedores alemanes ni ocuparse del papeleo. Seleccionamos un **BMW X1**, lo inspeccionamos antes de la compra y nos encargamos de todo hasta dejarlo matriculado en Serbia.
 
-      Antes de la compra, nuestros especialistas visitan el vehículo en persona, en lugar de basarse en fotografías del anuncio. La inspección abarca más de 100 parámetros: carrocería, pintura, interior, motor, transmisión, suspensión, electrónica y diagnóstico computarizado, historial de servicio y concordancia con el kilometraje.
+      Antes de comprar, un especialista se desplaza para inspeccionar el coche en persona, en lugar de basarse en las fotos del anuncio. La revisión abarca más de 100 puntos: carrocería, pintura, interior, motor, caja de cambios, suspensión, electrónica y diagnosis por ordenador, además del historial de mantenimiento y la coherencia del kilometraje.
 
-      El precio del automóvil en Alemania (Brutto) era de **39 860 €**. Teniendo en cuenta la compra, la inspección, la entrega, la documentación y todos los gastos asociados, el precio final del BMW X1 en Serbia llave en mano es de **46 000 €**. Este es el verdadero precio "llave en mano", y no el que se indica en el anuncio alemán, por lo que es el que realmente hay que considerar de antemano.
+      El precio del vehículo en Alemania (Brutto, con IVA incluido) era de **39 860 €**. Sumando la compra, la inspección, el transporte, la tramitación de la documentación y todos los gastos asociados, el precio final del BMW X1 en Serbia, llave en mano, fue de **46 000 €**. Ese es el coste real de tener el coche listo para circular, no el que aparece en el anuncio alemán, y es el que conviene calcular de antemano.
 
-      El pago al vendedor se realizó a través de nuestra propia empresa europea, tras lo cual recogimos el vehículo y lo preparamos para el envío. A su llegada a Serbia, el automóvil pasó por la aduana, y registramos el BMW X1: el cliente recibió el vehículo listo con matrículas serbias.
+      El pago al vendedor se realizó a través de nuestra propia empresa europea. Después recogimos el vehículo y lo preparamos para el transporte. A su llegada a Serbia, completamos el despacho de aduanas y matriculamos el BMW X1. El cliente recibió el coche listo para circular, con matrícula serbia.
 
-      Lo que incluye el servicio:
+      Qué incluye el servicio:
 
       <ul class="icon-check">
-      <li>selección del vehículo en Alemania</li>
-      <li>negociaciones con el vendedor</li>
-      <li>inspección personal y verificación de más de 100 parámetros</li>
+      <li>búsqueda y selección del vehículo en Alemania</li>
+      <li>negociación con el vendedor</li>
+      <li>inspección presencial y revisión de más de 100 puntos</li>
       <li>compra a través de nuestra propia empresa europea</li>
-      <li>entrega a Serbia</li>
-      <li>trámites aduaneros</li>
-      <li>registro del vehículo</li>
+      <li>transporte a Serbia</li>
+      <li>despacho de aduanas</li>
+      <li>matriculación</li>
       </ul>
 
-      Si tiene un automóvil específico en mente que desea adquirir de Alemania, o si quiere que encontremos una opción que se ajuste a su solicitud, envíenos el modelo, año y presupuesto: nosotros nos encargaremos del resto.
+      Si ya tienes en mente un coche concreto en Alemania o quieres que busquemos uno que se ajuste a tus necesidades, envíanos el modelo, el año y tu presupuesto. Del resto nos encargamos nosotros.
   de:
     title: BMW X1
     body: |-
-      **Auswahl und Lieferung eines BMW X1 aus Deutschland nach Serbien – schlüsselfertig**
+      **BMW X1 aus Deutschland: Fahrzeugsuche und Lieferung nach Serbien als Komplettservice**
 
-      Der Kunde hatte den Wunsch, ein Fahrzeug in Deutschland zu finden und es nach Serbien zu bringen: ohne persönliche Reisen, Verhandlungen mit deutschen Verkäufern und den Aufwand mit den Dokumenten. Wir haben einen **BMW X1** ausgewählt, ihn vor dem Kauf geprüft und den Deal bis zur Zulassung auf serbische Nummern abgeschlossen.
+      Unser Kunde wollte ein Fahrzeug in Deutschland kaufen und nach Serbien bringen lassen, ohne selbst hinzureisen, mit deutschen Verkäufern zu verhandeln oder sich um die Unterlagen zu kümmern. Wir haben einen passenden **BMW X1** gefunden, ihn vor dem Kauf geprüft und die gesamte Abwicklung bis zur Zulassung in Serbien übernommen.
 
-      Vor dem Kauf kommt unser Spezialist persönlich zum Fahrzeug und arbeitet nicht nur mit Fotos aus dem Inserat. Die Überprüfung umfasst über 100 Kriterien: Karosserie, Lackierung, Innenraum, Motor, Getriebe, Federung, Elektronik und computergestützte Diagnosen, die Servicehistorie und die Übereinstimmung mit dem Kilometerstand.
+      Vor dem Kauf besichtigt ein Spezialist das Fahrzeug persönlich vor Ort, statt es nur anhand der Inseratsfotos zu beurteilen. Die Prüfung umfasst mehr als 100 Punkte: Karosserie, Lack, Innenraum, Motor, Getriebe, Fahrwerk und Elektronik einschließlich Computerdiagnose. Auch die Wartungshistorie und die Plausibilität des Kilometerstands werden geprüft.
 
-      Der Kaufpreis des Fahrzeugs in Deutschland (Brutto) betrug **39 860 €**. Unter Berücksichtigung des Kaufs, der Prüfung, der Lieferung, der Dokumentation und aller Nebenkosten ergibt sich ein Endpreis für den BMW X1 in Serbien schlüsselfertig: **46 000 €**. Dies ist der tatsächliche „schlüsselfertige“ Preis, nicht der, der im deutschen Inserat angegeben ist, und genau diesen Preis sollte man vorher einplanen.
+      Der Bruttopreis des Fahrzeugs in Deutschland betrug **39.860 €**. Einschließlich Kaufabwicklung, Prüfung, Transport, Formalitäten und sämtlicher Nebenkosten lag der Gesamtpreis für den BMW X1, fertig zugelassen in Serbien, bei **46.000 €**. Das ist der tatsächliche Komplettpreis, nicht der Preis im deutschen Inserat. Genau mit diesem Gesamtbetrag sollte man von Anfang an kalkulieren.
 
-      Die Zahlung an den Verkäufer erfolgte über unser eigenes europäisches Unternehmen, danach haben wir das Fahrzeug abgeholt und für den Versand vorbereitet. Nach der Ankunft in Serbien wurde das Fahrzeug verzollt und wir haben den BMW X1 zugelassen: der Kunde erhielt ein fertig in Serbien zugelassenes Fahrzeug.
+      Die Zahlung an den Verkäufer erfolgte über unser eigenes europäisches Unternehmen. Anschließend haben wir das Fahrzeug abgeholt und für den Transport vorbereitet. Nach der Ankunft in Serbien haben wir die Zollabfertigung und die Zulassung des BMW X1 übernommen. Der Kunde erhielt sein Fahrzeug fahrbereit mit serbischen Kennzeichen.
 
-      Im Service enthalten:
+      Unsere Leistungen im Überblick:
 
       <ul class="icon-check">
-      <li>Fahrzeugauswahl in Deutschland</li>
+      <li>Fahrzeugsuche in Deutschland</li>
       <li>Verhandlungen mit dem Verkäufer</li>
-      <li>persönliche Besichtigung und Überprüfung nach über 100 Kriterien</li>
-      <li>Aufkauf über unser eigenes europäisches Unternehmen</li>
-      <li>Lieferung nach Serbien</li>
-      <li>Zollabwicklung</li>
-      <li>Zulassung</li>
+      <li>Persönliche Besichtigung und Prüfung anhand von über 100 Prüfpunkten</li>
+      <li>Kaufabwicklung über unser eigenes europäisches Unternehmen</li>
+      <li>Transport nach Serbien</li>
+      <li>Zollabfertigung</li>
+      <li>Zulassung in Serbien</li>
       </ul>
 
-      Wenn Sie ein bestimmtes Fahrzeug aus Deutschland im Auge haben oder möchten, dass wir eine Option für Ihre Anfrage auswählen, senden Sie uns bitte das Modell, das Baujahr und das Budget: den Rest übernehmen wir.
-translatedFrom: e4d6fc556033fd8d
+      Sie haben bereits ein bestimmtes Fahrzeug in Deutschland im Blick oder möchten, dass wir ein passendes Angebot für Sie finden? Schicken Sie uns das gewünschte Modell, Baujahr und Budget. Den Rest übernehmen wir.
+translatedFrom: 848b915912d6b30d
 ---
 **Подбор и доставка BMW X1 из Германии в Сербию под ключ**
 
@@ -111,9 +127,9 @@ translatedFrom: e4d6fc556033fd8d
 
 Перед покупкой специалист лично приезжает к машине, а не работает по фотографиям из объявления. Проверка охватывает больше 100 параметров: кузов, лакокрасочное покрытие, салон, двигатель, коробку передач, подвеску, электронику и компьютерную диагностику, сервисную историю и соответствие пробегу.
 
-Цена автомобиля в Германии (Brutto) составляла **39 860 €**. С учётом выкупа, проверки, доставки, оформления документов и всех сопутствующих расходов итоговая цена BMW X1 в Сербии под ключ: **46 000 €**. Это и есть реальная цена "под ключ", а не та, что указана в немецком объявлении, и именно её стоит считать заранее.
+Цена автомобиля в Германии (Brutto) составляла **39 860 €**. С учетом выкупа, проверки, доставки, оформления документов и всех сопутствующих расходов итоговая цена BMW X1 в Сербии под ключ: **46 000 €**. Это и есть реальная цена "под ключ", а не та, что указана в немецком объявлении, и именно ее стоит считать заранее.
 
-Оплата продавцу прошла через нашу собственную европейскую компанию, после чего мы забрали автомобиль и подготовили его к отправке. После прибытия в Сербию машина прошла таможенное оформление, и мы поставили BMW X1 на учёт: клиент получил готовый автомобиль на сербских номерах.
+Оплата продавцу прошла через нашу собственную европейскую компанию, после чего мы забрали автомобиль и подготовили его к отправке. После прибытия в Сербию машина прошла таможенное оформление, и мы поставили BMW X1 на учет: клиент получил готовый автомобиль на сербских номерах.
 
 Что входит в услугу:
 
@@ -124,7 +140,7 @@ translatedFrom: e4d6fc556033fd8d
 <li>выкуп через собственную европейскую компанию</li>
 <li>доставка в Сербию</li>
 <li>таможенное оформление</li>
-<li>постановка на учёт</li>
+<li>постановка на учет</li>
 </ul>
 
-Если у вас есть конкретный автомобиль из Германии на примете или вы хотите, чтобы мы подобрали вариант под ваш запрос, пришлите модель, год и бюджет: дальше всё берём на себя.
+Если у вас есть конкретный автомобиль из Германии на примете или вы хотите, чтобы мы подобрали вариант под ваш запрос, пришлите модель, год и бюджет: дальше все берем на себя.

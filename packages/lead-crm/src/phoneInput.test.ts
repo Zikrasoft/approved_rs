@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
-// TODO: jsdom reports zero layout, so fitToSelection's measuring arm is
-// unreachable here — the width it sets is only ever exercised in a browser.
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   bindPhoneCountry,
   fillCountrySelect,
@@ -52,6 +50,30 @@ describe('bindPhoneCountry', () => {
     type(input, '+79161234567');
 
     expect(select.value).toBe('RU');
+  });
+
+  it('goes back to the country it had once a pasted foreign number is cleared', () => {
+    const { select, input } = mount();
+    const changes: string[] = [];
+    select.addEventListener('change', () => changes.push(select.value));
+
+    type(input, '+79161234567');
+    type(input, '+4915112345678');
+    type(input, '');
+
+    expect(select.value).toBe('RS');
+    expect(changes).toEqual(['RU', 'DE', 'RS']);
+  });
+
+  it('keeps a country the visitor picked by hand when the field is cleared', () => {
+    const { select, input } = mount();
+
+    type(input, '+79161234567');
+    select.value = 'DE';
+    select.dispatchEvent(new Event('change'));
+    type(input, '');
+
+    expect(select.value).toBe('DE');
   });
 
   it('leaves a national number untouched', () => {
@@ -157,6 +179,51 @@ describe('bindPhoneCountry', () => {
 
     expect(document.querySelectorAll('select')).toHaveLength(1);
     expect(select.isConnected).toBe(true);
+  });
+});
+
+describe('sizing the select to the picked country', () => {
+  const CHAR = 9.5;
+  let cap = Infinity;
+
+  const layoutWidth = (select: HTMLSelectElement) => {
+    const { width, maxWidth } = select.style;
+    const content = (select.selectedOptions[0]?.text.length ?? 0) * CHAR;
+    const wanted = width && width !== 'auto' ? parseFloat(width) : content;
+    return Math.min(wanted, maxWidth === 'none' ? Infinity : cap);
+  };
+
+  beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        const width = this instanceof HTMLSelectElement ? layoutWidth(this) : 0;
+        return { width } as DOMRect;
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cap = Infinity;
+  });
+
+  const serbia =
+    '<option value="RS" data-dial="381" selected>RS +381 Serbia</option>';
+  const widthOf = (text: string) => `${Math.ceil(text.length * CHAR)}px`;
+
+  it('fits the whole label when there is room for it', () => {
+    const { select } = mount(serbia);
+    select.dispatchEvent(new Event('change'));
+
+    expect(select.style.width).toBe(widthOf('RS +381 Serbia'));
+  });
+
+  it('shows only the flag and the code when the whole label would be cut', () => {
+    cap = 100;
+    const { select } = mount(serbia);
+    select.dispatchEvent(new Event('change'));
+
+    expect(select.style.width).toBe(widthOf('RS +381'));
   });
 });
 

@@ -18,7 +18,7 @@ export const SERVICE_LABELS_RU = {
   'bodywork-painting': 'Кузов и покраска',
   'pre-purchase-inspection': 'Проверка перед покупкой',
   'parts-order': 'Заказ из магазина',
-  'vin-parts-inquiry': 'Подбор запчастей по VIN',
+  'vin-parts-inquiry': 'Подбор запчастей',
 
   'paint-protection-film': 'Защитная плёнка (PPF)',
   'colour-change-wrap': 'Смена цвета плёнкой',
@@ -48,6 +48,7 @@ export const SERVICE_SLUGS_BY_BRAND = {
     'engine-gearbox',
     'bodywork-painting',
     'pre-purchase-inspection',
+    'vin-parts-inquiry',
   ],
   details: [
     'paint-protection-film',
@@ -69,6 +70,8 @@ export function isBrandServiceSlug<K extends BrandKey>(
 ): value is BrandServiceSlug<K> {
   return (SERVICE_SLUGS_BY_BRAND[brand] as readonly string[]).includes(value);
 }
+
+export const PARTS_ORDER_SERVICE = 'parts-order' satisfies LabelledService;
 
 export const PARTNER_SERVICE = {
   carlab: 'partner-carlab',

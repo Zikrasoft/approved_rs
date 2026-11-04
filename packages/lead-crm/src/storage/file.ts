@@ -5,6 +5,7 @@ import {
   mkdir,
   readFile,
   rename,
+  stat,
   unlink,
   writeFile,
 } from 'node:fs/promises';
@@ -25,6 +26,8 @@ export interface FileStorageOptions {
   path: string;
   dir: string;
 }
+
+const STALE_LOCK_MS = 10_000;
 
 const versionOf = (text: string): string =>
   createHash('sha1').update(text).digest('hex');
@@ -49,6 +52,7 @@ export function createFileStorage({
   dir,
 }: FileStorageOptions): LeadStorage {
   const file = join(dir, path);
+  const lockFile = `${file}.lock`;
 
   async function read(): Promise<StorageSnapshot> {
     try {
@@ -63,27 +67,50 @@ export function createFileStorage({
   return {
     read,
 
-    exists: () => fileExists(file),
-
     async write(leads: unknown, version: string | undefined): Promise<void> {
       await mkdir(dirname(file), { recursive: true });
-      const staging = `${file}.${randomUUID()}.tmp`;
-      if (version === undefined) {
-        await writeFile(staging, JSON.stringify(leads));
-        try {
-          await link(staging, file);
-        } catch (error) {
-          throw isExisting(error) ? new StorageConflictError() : error;
-        } finally {
-          await unlink(staging);
-        }
-        return;
+      await lock();
+      try {
+        await replace(leads, version);
+      } finally {
+        await unlink(lockFile);
       }
-      if (version !== (await read()).version) throw new StorageConflictError();
-      await writeFile(staging, JSON.stringify(leads));
-      await rename(staging, file);
     },
   };
+
+  async function lock(): Promise<void> {
+    try {
+      await writeFile(lockFile, '', { flag: 'wx' });
+    } catch (error) {
+      if (!isExisting(error)) throw error;
+      const held = await stat(lockFile).catch(() => undefined);
+      if (held && Date.now() - held.mtimeMs > STALE_LOCK_MS) {
+        await unlink(lockFile);
+      }
+      throw new StorageConflictError();
+    }
+  }
+
+  async function replace(
+    leads: unknown,
+    version: string | undefined,
+  ): Promise<void> {
+    const staging = `${file}.${randomUUID()}.tmp`;
+    if (version === undefined) {
+      await writeFile(staging, JSON.stringify(leads));
+      try {
+        await link(staging, file);
+      } catch (error) {
+        throw isExisting(error) ? new StorageConflictError() : error;
+      } finally {
+        await unlink(staging);
+      }
+      return;
+    }
+    if (version !== (await read()).version) throw new StorageConflictError();
+    await writeFile(staging, JSON.stringify(leads));
+    await rename(staging, file);
+  }
 }
 
 export function createFileOrderMarkers({ dir }: { dir: string }): OrderMarkers {

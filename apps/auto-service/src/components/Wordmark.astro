@@ -1,10 +1,17 @@
 ---
 interface Props {
   class?: string;
+  onPanel?: boolean;
 }
-const { class: className = '' } = Astro.props;
+const { class: className = '', onPanel = false } = Astro.props;
 ---
 
-<span class={`text-xl font-extrabold tracking-[-0.04em] text-ink ${className}`}>
+<span
+  class:list={[
+    'text-xl font-extrabold tracking-[-0.04em]',
+    onPanel ? 'text-panel-fg' : 'text-ink',
+    className,
+  ]}
+>
   Car<span class="text-signal">Lab</span>
 </span>

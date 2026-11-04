@@ -42,7 +42,7 @@ const escapeLabel = (label: string): string => label.replace(/[[\]]/g, '\\$&');
 
 export const llmsLink = (label: string, url: string, note?: string): string => {
   const link = `- [${escapeLabel(label)}](${url})`;
-  return note ? `${link} — ${note}` : link;
+  return note ? `${link}: ${note}` : link;
 };
 
 const entryLine = ({ label, href, note }: LlmsEntry): string =>

@@ -1,0 +1,58 @@
+---
+import { translated } from '@podbor/catalog-contract';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { bestPrice, priceLabel } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { PathBuilder } from '@/utils/paths';
+import BottomActionBar from './BottomActionBar.astro';
+
+interface Props {
+  page: PartPageEntry;
+  target: string;
+}
+
+const { page, target } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const open = shopOpen();
+const best = open ? bestPrice([page]) : null;
+---
+
+<BottomActionBar>
+  <Fragment slot="caption">
+    {page.brand.name}{' '}<span class="spec">{page.value}</span>
+  </Fragment>
+  <Fragment slot="value">
+    {
+      best ? (
+        priceLabel(best, copy, BCP47_BY_LOCALE[locale])
+      ) : open ? (
+        copy.priceOnRequestHeading
+      ) : (
+        <span class="line-clamp-2 text-sm leading-tight">
+          {translated(page.part, 'name', locale)}
+        </span>
+      )
+    }
+  </Fragment>
+  <part-cta-forward
+    class="shrink-0"
+    data-cart-href={PathBuilder.partsCart(locale)}
+    data-added-label={copy.addedCta}
+    data-to={best
+      ? `#${target} [data-buy][data-offer-id="${best.id}"]`
+      : `#${target} parts-list-add a`}
+  >
+    <a href={`#${target}`} class="btn btn-primary">
+      {best ? copy.buyButtonLabel : copy.priceOnRequestCta}
+    </a>
+  </part-cta-forward>
+</BottomActionBar>
+
+<script>
+  import { definePartCtaForward } from '@/scripts/partCtaForward';
+
+  definePartCtaForward();
+</script>

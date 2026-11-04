@@ -9,7 +9,13 @@ const redirectFor = createRedirectMatcher(REDIRECTS);
 
 const isUnlocalized = createUnlocalizedMatcher({
   exact: ['/llms.txt', '/404', '/404/'],
-  prefixes: ['/api/', '/keystatic', '/_image', '/admin/case-photos'],
+  prefixes: [
+    '/api/',
+    '/keystatic',
+    '/_image',
+    '/.well-known/',
+    '/admin/case-photos',
+  ],
 });
 
 export const onRequest = defineMiddleware((context, next) => {

@@ -13,101 +13,101 @@ date: 2026-01-11
 published: true
 translations:
   en:
-    title: BMW X5 with Distinct Features
+    title: A BMW X5 with a Few Caveats
     body: |-
-      # Sourcing a Vehicle in Germany for a Client from Latvia: Is It Worth Buying a Repaired Car?
+      # Sourcing a car in Germany for a client from Latvia. Is a repaired car worth buying?
 
-      This time we conducted a vehicle inspection in Germany for a client from **Latvia**. This case illustrates why you shouldn't draw conclusions solely based on the damage history.
+      This time, we inspected a car in Germany for a client from **Latvia**. This case is a good example of why a car's damage history alone should not determine whether you buy it.
 
-      During the preliminary check against the dealer's history, we uncovered a significant amount of repair work, primarily related to the **suspension**. From the nature of the repairs, it was evident that the car likely sustained a serious impact with an obstacle, possibly a pole or a curb.
+      Our initial review of the dealer records revealed extensive repairs, mainly involving the **suspension**. The nature of the repairs suggested that the car had hit an obstacle hard, possibly a post or a curb.
 
-      We promptly informed the client about all the findings. Given the attractive price, he nonetheless requested a complete inspection of the vehicle.
+      We immediately shared everything we had found with the client. Given the attractive price, he still wanted us to carry out a full inspection.
 
-      The inspection revealed that the repair work was carried out by an **official dealer**, and the quality of the repairs was good. The car has its unique characteristics that must be considered when purchasing, but the mere notation of it being repaired doesn't provide a clear answer.
+      The inspection confirmed that the repairs had been carried out by an **authorized dealer**, and the workmanship was good. The car still had some issues to factor into a purchase decision, but a record of previous repairs is not, in itself, a reason to rule it out.
 
-      If the repair is done well, the damage history is transparent, the technical condition matches the description, and the price accounts for the past damages, then this vehicle can be a sensible choice. Sometimes, for the sake of price, it’s worth making a compromise, but the buyer needs to fully understand what they are agreeing to, what risks they are taking on, and why the car is cheaper than its counterparts.
+      If the repairs have been done properly, the damage history is transparent, the mechanical condition is as described, and the price reflects the previous damage, a car like this can be a sensible choice. Sometimes a lower price justifies a compromise, but the buyer needs to understand exactly what they are agreeing to, what risks they are taking, and why the car costs less than comparable examples.
 
-      Our goal in vehicle sourcing is not to impose our opinion on the client, but to provide them with an honest and comprehensive picture of the car's condition: we do not present a repaired vehicle as perfect, but we also do not dismiss any options with a damage history solely because of that notation. What matters are the nature of the damages, the quality of the repairs, the current technical state, and the price.
+      Our role when sourcing a car is not to impose our opinion on the client, but to provide an honest, complete picture of its condition. We do not present a repaired car as flawless, but we do not reject every car with a damage history simply because that record exists. What matters is the nature of the damage, the quality of the repairs, the car's current mechanical condition, and the price.
 
-      This is why professional vehicle sourcing in Germany starts with checking the history and dealer reports, and only then proceeds to a detailed inspection that reveals the true condition of the car and the possible risks. A good vehicle doesn’t have to have a perfect history, but its condition, past, and price should be clear to the buyer before they make a decision.
+      That is why professional car sourcing in Germany starts with a review of the vehicle's history and dealer records, followed by a detailed inspection to establish its actual condition and identify potential risks. A good car does not necessarily need a spotless history, but the buyer should understand its condition, its past, and its price before making a decision.
 
-      We specialize in sourcing and conducting independent inspections of vehicles in Germany for clients from Latvia, Serbia, and other European countries: we help assess the car's condition, identify hidden problems, and make an informed decision before buying.
+      We source cars and provide independent vehicle inspections in Germany for clients from Latvia, Serbia, and other European countries. We help assess a car's condition, uncover hidden problems, and make an informed decision before buying.
   sr:
-    title: BMW X5 sa posebnim karakteristikama
+    title: BMW X5 sa specifičnom istorijom
     body: |-
-      # Odabir automobila u Nemačkoj za klijenta iz **Latvije**. Da li kupiti obnovljen automobil?
+      # Pronalaženje automobila u Nemačkoj za klijenta iz Letonije. Da li vredi kupiti automobil koji je popravljan posle oštećenja?
 
-      Ovaj put smo vršili proveru automobila u Nemačkoj za klijenta iz **Latvije**. Ovaj slučaj dobro pokazuje zašto ne treba donositi zaključke samo na osnovu istorije oštećenja.
+      Ovog puta radili smo proveru auta pre kupovine u Nemačkoj za klijenta iz **Letonije**. Ovaj slučaj dobro pokazuje zašto ne treba donositi zaključke samo na osnovu istorije oštećenja.
 
-      Već na osnovu preliminarne provere prema istoriji dilera, otkriveni su značajni restorativni radovi, uglavnom vezani za **suspendovanje**. Po karakteru popravke, deluje da je automobil doživeo ozbiljan udarac u prepreku, verovatno stub ili trotoar.
+      Već tokom preliminarne provere evidencije ovlašćenog servisa otkrili smo obimne popravke, uglavnom na **ogibljenju**. Sudeći po vrsti popravki, automobil je verovatno pretrpeo snažan udarac u prepreku, možda u stub ili ivičnjak.
 
-      Odmah smo obavestili klijenta o svim pronađenim okolnostima. Uzimajući u obzir privlačnu cenu, on je ipak tražio da se uradi kompletna provera automobila.
+      Odmah smo obavestili klijenta o svemu što smo pronašli. Zbog privlačne cene ipak je želeo da uradimo kompletnu proveru auta pre kupovine.
 
-      Proverom je utvrđeno da su restorativni radovi obavljeni od strane **ovlašćenog dilera**, a kvalitet popravke bio je dobar. Automobil ima svoje karakteristike koje treba uzeti u obzir prilikom kupovine, ali sama oznaka o obnovi ne odlučuje ništa.
+      Proverom smo utvrdili da je popravke obavio **ovlašćeni servis** i da su kvalitetno izvedene. Automobil je i dalje imao određene specifičnosti koje treba uzeti u obzir pri kupovini, ali sam podatak da je ranije popravljan nije dovoljan za konačnu odluku.
 
-      Ako je popravka izvršena kvalitetno, istorija oštećenja je transparentna, tehničko stanje odgovara onome što je navedeno, a cena uzima u obzir prethodna oštećenja, takav automobil može biti razumnog izbora. Ponekad, zbog cene, vredi napraviti kompromis, ali kupac mora jasno shvatiti na šta se slaže, koje rizike preuzima i zašto je automobil jeftiniji od sličnih.
+      Ako su popravke kvalitetno urađene, istorija oštećenja poznata, tehničko stanje odgovara navedenom, a cena odražava prethodna oštećenja, takav automobil može biti razuman izbor. Ponekad vredi napraviti kompromis zbog cene, ali kupac mora tačno da zna na šta pristaje, koje rizike preuzima i zašto je automobil jeftiniji od sličnih primeraka.
 
-      Naša misija u odabiru automobila nije da namećemo svoje mišljenje klijentu, već da mu pružimo poštenu i potpunu sliku stanja automobila: ne predstavljamo obnovljen automobil kao idealan, ali ni ne odbacujemo svaki model sa istorijom oštećenja samo zbog te beleške. Sve zavisi od karaktera oštećenja, kvaliteta obnove, trenutnog tehničkog stanja i cene.
+      Naš zadatak pri pronalaženju automobila nije da klijentu namećemo svoje mišljenje, već da mu pružimo iskrenu i potpunu sliku stanja vozila. Automobil koji je popravljan ne predstavljamo kao besprekoran, ali ni ne odbacujemo svaki primerak sa istorijom oštećenja samo zbog tog podatka. Presudni su vrsta oštećenja, kvalitet popravke, trenutno tehničko stanje i cena.
 
-      Zbog toga profesionalni odabir automobila u Nemačkoj počinje proverom istorije i izveštaja iz salona, a potom sledi detaljna provera koja pokazuje stvarno stanje automobila i moguće rizike. Dobrom automobilu nije obavezno da ima idealnu istoriju, ali njegovo stanje, prošlost i cena moraju biti jasni kupcu pre donošenja odluke.
+      Upravo zato profesionalno pronalaženje automobila u Nemačkoj počinje proverom istorije i izveštaja ovlašćenog servisa. Tek potom sledi detaljna provera auta pre kupovine, koja otkriva stvarno stanje vozila i moguće rizike. Dobar automobil ne mora da ima besprekornu istoriju, ali kupcu pre donošenja odluke moraju biti jasni njegovo stanje, prošlost i razlog za traženu cenu.
 
-      Bavimo se odabirom i nezavisnom proverom automobila u Nemačkoj za klijente iz Latvije, Srbije i drugih evropskih zemalja: pomažemo u oceni stanja automobila, pronalaženju skrivenih problema i donošenju promišljene odluke pre kupovine.
+      Bavimo se pronalaženjem automobila i nezavisnom proverom auta pre kupovine u Nemačkoj za klijente iz Letonije, Srbije i drugih evropskih zemalja. Pomažemo im da procene stanje vozila, otkriju skrivene probleme i donesu promišljenu odluku o kupovini.
   es:
-    title: BMW X5 con características especiales
+    title: Un BMW X5 con sus particularidades
     body: |-
-      # Selección de un vehículo en Alemania para un cliente de Letonia. ¿Vale la pena comprar un coche restaurado?
+      # Búsqueda de coche en Alemania para un cliente de Letonia. ¿Merece la pena comprar un coche reparado tras un accidente?
 
-      En esta ocasión, revisamos un vehículo en Alemania para un cliente de **Letonia**. Este caso muestra claramente por qué no se deben sacar conclusiones únicamente basándose en el historial de daños.
+      En esta ocasión inspeccionamos un coche en Alemania para un cliente de **Letonia**. Este caso demuestra por qué no conviene sacar conclusiones basándose únicamente en el historial de daños.
 
-      Ya en la etapa de verificación preliminar a través del historial del concesionario, descubrimos una gran cantidad de trabajos de restauración, principalmente relacionados con la **suspensión**. Por la naturaleza de la reparación, el coche probablemente sufrió un fuerte impacto contra un obstáculo, posiblemente una columna o un borde.
+      Ya en la revisión preliminar del historial del concesionario detectamos numerosas reparaciones, relacionadas principalmente con la **suspensión**. Por el tipo de intervención, el coche probablemente había sufrido un fuerte impacto contra un obstáculo, quizá un poste o un bordillo.
 
-      Informamos de inmediato al cliente sobre todas las circunstancias encontradas. Teniendo en cuenta el precio atractivo, aún así pidió realizar una inspección completa del vehículo.
+      Informamos al cliente de inmediato de todo lo que habíamos encontrado. Aun así, dado lo atractivo del precio, nos pidió que realizáramos una inspección completa.
 
-      La verificación mostró que los trabajos de restauración fueron realizados por un **concesionario oficial**, y la calidad de la reparación resultó ser buena. El vehículo conservaba ciertas características que deben tenerse en cuenta al momento de la compra, pero la simple mención de la restauración no es un factor determinante por sí misma.
+      La inspección confirmó que las reparaciones las había realizado un **concesionario oficial** y que el trabajo estaba bien hecho. El coche seguía teniendo ciertas particularidades que había que tener en cuenta antes de comprarlo, pero el simple hecho de que consten reparaciones en su historial no basta para descartarlo.
 
-      Si la reparación se ha realizado de manera adecuada, el historial de daños es claro, el estado técnico corresponde a lo declarado, y el precio tiene en cuenta los daños pasados, tal vehículo puede ser una elección razonable. A veces, por el precio, vale la pena comprometerse, pero el comprador debe entender con claridad a qué está accediendo, qué riesgos asume y por qué el coche es más barato en comparación con otros similares.
+      Si la reparación está bien hecha, el historial de daños es transparente, el estado mecánico coincide con lo anunciado y el precio refleja los daños anteriores, un coche así puede ser una opción razonable. A veces merece la pena aceptar ciertas concesiones a cambio de un precio más bajo, pero el comprador debe tener claro qué está aceptando, qué riesgos asume y por qué ese coche cuesta menos que otros similares.
 
-      Nuestra tarea al seleccionar un vehículo no es imponer nuestra opinión al cliente, sino ofrecerle una imagen honesta y completa del estado del coche: no presentamos un vehículo restaurado como ideal, pero tampoco descartamos ninguna opción con historial de daños solo por registrarse. Lo que importa es la naturaleza de los daños, la calidad de la restauración, el estado técnico actual y el precio.
+      Nuestro trabajo al buscar un coche no consiste en imponer nuestra opinión al cliente, sino en ofrecerle una visión honesta y completa de su estado. No presentamos un coche reparado tras un accidente como si fuera impecable, pero tampoco descartamos cualquier vehículo con antecedentes de daños solo porque figuren en su historial. Lo que importa es el tipo de daños, la calidad de la reparación, el estado mecánico actual y el precio.
 
-      Es por eso que la selección profesional de un vehículo en Alemania comienza con la verificación del historial y los informes de los concesionarios, y solo luego se realiza una inspección detallada que revela el estado real del coche y los posibles riesgos. Un buen vehículo no necesita tener un historial perfecto, pero su estado, pasado y precio deben ser claros para el comprador antes de tomar una decisión.
+      Por eso, un servicio profesional de búsqueda de coches en Alemania empieza por revisar el historial y los informes del concesionario. Después se realiza una inspección detallada para conocer el estado real del vehículo y los posibles riesgos. Un buen coche no tiene por qué tener un historial perfecto, pero el comprador debe conocer su estado, su pasado y el motivo de su precio antes de tomar una decisión.
 
-      Nos dedicamos a la selección y verificación independiente de vehículos en Alemania para clientes de Letonia, Serbia y otros países de Europa: ayudamos a evaluar el estado del vehículo, encontrar problemas ocultos y tomar una decisión reflexionada antes de la compra.
+      Nos dedicamos a la búsqueda e inspección independiente de coches en Alemania para clientes de Letonia, Serbia y otros países europeos. Les ayudamos a evaluar el estado del vehículo, detectar problemas ocultos y tomar una decisión informada antes de comprar.
   de:
     title: BMW X5 mit Besonderheiten
     body: |-
-      # Autosuche in Deutschland für einen Kunden aus **Lettland**. Soll man ein wiederhergestelltes Auto kaufen?
+      # Fahrzeugsuche in Deutschland für einen Kunden aus Lettland. Lohnt sich der Kauf eines instand gesetzten Autos?
 
-      Dieses Mal haben wir ein Fahrzeug in Deutschland für einen Kunden aus **Lettland** überprüft. Dieser Fall zeigt gut, warum man nicht nur aufgrund der Schadenshistorie Schlüsse ziehen sollte.
+      Dieses Mal haben wir in Deutschland ein Fahrzeug für einen Kunden aus **Lettland** geprüft. Der Fall zeigt gut, warum man ein Auto nicht allein anhand seiner Schadenhistorie beurteilen sollte.
 
-      Bereits in der ersten Untersuchung anhand der Händlerhistorie entdeckten wir einen erheblichen Umfang an Reparaturarbeiten, hauptsächlich im Zusammenhang mit der **Aufhängung**. Aufgrund der Art der Reparatur hat das Fahrzeug wahrscheinlich einen heftigen Aufprall auf ein Hindernis erlitten, möglicherweise einen Laternenpfahl oder einen Bordstein.
+      Schon bei der Vorabprüfung der Händlerhistorie stießen wir auf umfangreiche Instandsetzungsarbeiten, vor allem am **Fahrwerk**. Die Art der Reparaturen deutete darauf hin, dass das Fahrzeug vermutlich heftig gegen ein Hindernis geprallt war, möglicherweise einen Pfosten oder eine Bordsteinkante.
 
-      Wir haben den Kunden sofort über alle gefundenen Umstände informiert. Angesichts des attraktiven Preises bat er dennoch um eine vollständige Überprüfung des Fahrzeugs.
+      Wir haben den Kunden sofort über alle Erkenntnisse informiert. Angesichts des attraktiven Preises bat er uns dennoch, das Fahrzeug vollständig zu prüfen.
 
-      Die Überprüfung ergab, dass die Reparaturarbeiten von einem **offiziellen Händler** durchgeführt wurden und die Reparaturqualität gut war. Das Fahrzeug hat seine eigenen Besonderheiten, die beim Kauf berücksichtigt werden müssen, aber die Einstufung als wiederhergestellt allein sagt nichts aus.
+      Die Prüfung ergab, dass die Instandsetzung von einem **Vertragshändler** durchgeführt worden war. Die Reparaturqualität war gut. Das Fahrzeug hatte weiterhin einige Besonderheiten, die beim Kauf berücksichtigt werden mussten. Ein Eintrag über einen instand gesetzten Schaden allein ist aber noch kein Ausschlusskriterium.
 
-      Wenn die Reparatur qualitativ hochwertig durchgeführt wurde, die Schadenshistorie transparent ist, der technische Zustand dem angegebenen entspricht und der Preis die früheren Schäden berücksichtigt, kann ein solches Fahrzeug eine vernünftige Wahl sein. Manchmal lohnt es sich, wegen des Preises Kompromisse einzugehen, aber der Käufer muss genau verstehen, worauf er sich einlässt, welche Risiken er übernimmt und warum das Auto günstiger ist als die Alternativen.
+      Wenn die Reparatur fachgerecht ausgeführt wurde, die Schadenhistorie nachvollziehbar ist, der technische Zustand den Angaben entspricht und frühere Schäden im Preis berücksichtigt sind, kann ein solches Fahrzeug eine vernünftige Wahl sein. Manchmal lohnt es sich, für einen günstigeren Preis Kompromisse einzugehen. Der Käufer muss jedoch genau wissen, worauf er sich einlässt, welche Risiken er übernimmt und warum das Auto günstiger ist als vergleichbare Fahrzeuge.
 
-      Unsere Aufgabe bei der Autosuche ist es nicht, dem Kunden unsere Meinung aufzuzwingen, sondern ihm ein ehrliches und komplettes Bild des Zustands des Fahrzeugs zu vermitteln: Wir verkaufen ein wiederhergestelltes Auto nicht als ideal, aber wir schließen auch keine Option mit einer Schadenshistorie nur aufgrund dieses Eintrags aus. Entscheidend sind die Art der Schäden, die Qualität der Wiederherstellung, der aktuelle technische Zustand und der Preis.
+      Unsere Aufgabe bei der Fahrzeugsuche ist es nicht, dem Kunden unsere Meinung aufzudrängen, sondern ihm ein ehrliches und vollständiges Bild vom Zustand des Autos zu vermitteln. Wir stellen ein instand gesetztes Fahrzeug nicht als makellos dar, schließen aber auch nicht jedes Auto mit Schadenhistorie allein wegen eines entsprechenden Eintrags aus. Entscheidend sind die Art der Schäden, die Qualität der Instandsetzung, der aktuelle technische Zustand und der Preis.
 
-      Daher beginnt eine professionelle Autosuche in Deutschland mit der Überprüfung der Historie und der Händlerberichte, gefolgt von einer detaillierten Inspektion, die den tatsächlichen Zustand des Fahrzeugs und mögliche Risiken aufzeigt. Ein gutes Auto muss nicht unbedingt eine perfekte Geschichte haben, aber sein Zustand, seine Vergangenheit und der Preis müssen dem Käufer vor der Entscheidungsfindung klar sein.
+      Deshalb beginnt eine professionelle Fahrzeugsuche in Deutschland mit der Prüfung der Fahrzeughistorie und der Händlerunterlagen. Erst danach folgt eine eingehende Besichtigung, die den tatsächlichen Zustand des Autos und mögliche Risiken aufzeigt. Ein gutes Auto muss keine makellose Historie haben. Sein Zustand, seine Vergangenheit und sein Preis müssen für den Käufer aber nachvollziehbar sein, bevor er eine Entscheidung trifft.
 
-      Wir beschäftigen uns mit der Autosuche und der unabhängigen Überprüfung von Fahrzeugen in Deutschland für Kunden aus Lettland, Serbien und anderen europäischen Ländern: Wir helfen dabei, den Zustand des Fahrzeugs zu bewerten, versteckte Probleme zu finden und eine fundierte Entscheidung vor dem Kauf zu treffen.
-translatedFrom: 21baeff3de9295ed
+      Wir übernehmen die Fahrzeugsuche und unabhängige Fahrzeugprüfung in Deutschland für Kunden aus Lettland, Serbien und anderen europäischen Ländern. Wir helfen dabei, den Zustand eines Autos einzuschätzen, versteckte Mängel aufzudecken und vor dem Kauf eine fundierte Entscheidung zu treffen.
+translatedFrom: 2210bd53130429d7
 ---
 # Подбор автомобиля в Германии для клиента из Латвии. Стоит ли покупать восстановленный автомобиль?
 
 На этот раз мы проверяли автомобиль в Германии для клиента из **Латвии**. Этот случай хорошо показывает, почему не стоит делать выводы только по истории повреждений.
 
-Уже на этапе предварительной проверки по дилерской истории мы обнаружили большой объём восстановительных работ, в основном связанных с **подвеской**. По характеру ремонта автомобиль, вероятно, получил серьёзный удар о препятствие, возможно, столб или бордюр.
+Уже на этапе предварительной проверки по дилерской истории мы обнаружили большой объем восстановительных работ, в основном связанных с **подвеской**. По характеру ремонта автомобиль, вероятно, получил серьезный удар о препятствие, возможно, столб или бордюр.
 
-Мы сразу сообщили клиенту обо всех найденных обстоятельствах. С учётом привлекательной цены он всё равно попросил провести полный осмотр автомобиля.
+Мы сразу сообщили клиенту обо всех найденных обстоятельствах. С учетом привлекательной цены он все равно попросил провести полный осмотр автомобиля.
 
 Проверка показала, что восстановительные работы выполнял **официальный дилер**, и качество ремонта оказалось хорошим. У автомобиля остались свои особенности, которые нужно учитывать при покупке, но сама по себе отметка о восстановлении ничего не решает.
 
-Если ремонт сделан качественно, история повреждений прозрачна, техническое состояние соответствует заявленному, а цена учитывает прошлые повреждения, такой автомобиль может быть разумным выбором. Иногда ради цены стоит пойти на компромисс, но покупатель должен точно понимать, на что он соглашается, какие риски берёт на себя и почему машина дешевле аналогов.
+Если ремонт сделан качественно, история повреждений прозрачна, техническое состояние соответствует заявленному, а цена учитывает прошлые повреждения, такой автомобиль может быть разумным выбором. Иногда ради цены стоит пойти на компромисс, но покупатель должен точно понимать, на что он соглашается, какие риски берет на себя и почему машина дешевле аналогов.
 
-Наша задача в подборе автомобиля не навязывать клиенту своё мнение, а дать ему честную и полную картину состояния машины: мы не выдаём восстановленный автомобиль за идеальный, но и не отбрасываем любой вариант с историей повреждений только из-за этой записи. Всё решает характер повреждений, качество восстановления, текущее техническое состояние и цена.
+Наша задача в подборе автомобиля не навязывать клиенту свое мнение, а дать ему честную и полную картину состояния машины: мы не выдаем восстановленный автомобиль за идеальный, но и не отбрасываем любой вариант с историей повреждений только из-за этой записи. Все решает характер повреждений, качество восстановления, текущее техническое состояние и цена.
 
-Именно поэтому профессиональный подбор автомобиля в Германии начинается с проверки истории и дилерских отчётов, а уже затем идёт детальный осмотр, который показывает реальное состояние машины и возможные риски. Хорошему автомобилю не обязательно иметь идеальную историю, но его состояние, прошлое и цена должны быть понятны покупателю до принятия решения.
+Именно поэтому профессиональный подбор автомобиля в Германии начинается с проверки истории и дилерских отчетов, а уже затем идет детальный осмотр, который показывает реальное состояние машины и возможные риски. Хорошему автомобилю не обязательно иметь идеальную историю, но его состояние, прошлое и цена должны быть понятны покупателю до принятия решения.
 
 Мы занимаемся подбором и независимой проверкой автомобилей в Германии для клиентов из Латвии, Сербии и других стран Европы: помогаем оценить состояние автомобиля, найти скрытые проблемы и принять взвешенное решение перед покупкой.

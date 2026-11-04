@@ -40,6 +40,26 @@ export default config({
             value,
           })),
         }),
+        parts: fields.array(
+          fields.object({
+            brand: fields.text({
+              label: 'Бренд',
+              validation: { isRequired: true },
+            }),
+            number: fields.text({
+              label: 'Номер',
+              validation: { isRequired: true },
+            }),
+          }),
+          {
+            label: 'Подобранные запчасти',
+            itemLabel: (props) =>
+              `${props.fields.brand.value} ${props.fields.number.value}`,
+          },
+        ),
+        priceRsd: fields.integer({
+          label: 'Цена для клиента, RSD (только для подбора запчастей)',
+        }),
         image: photo(),
         gallery: fields.array(photo(), {
           label: 'Больше фото',
@@ -49,6 +69,10 @@ export default config({
         published: fields.checkbox({
           label: 'Опубликован',
           defaultValue: true,
+        }),
+        featured: fields.checkbox({
+          label: 'Показывать на главной',
+          defaultValue: false,
         }),
         translatedFrom: fields.ignored(),
       },

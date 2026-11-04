@@ -5,7 +5,8 @@ import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
 import { START_COMMAND } from '@podbor/site-kit/contact-links';
-import { secretMatches } from '@/lib/verifySecret';
+import { logError, readJson, requireEnv } from '@podbor/lead-crm';
+import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import {
   afterStatusChange,
   answerCallback,
@@ -83,8 +84,6 @@ import {
   type PromptKey,
   type StoredLead,
 } from '@/lib/store';
-
-const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 const PHONE_REGION = 'RS';
 
@@ -178,10 +177,7 @@ async function withErrorAck(
   try {
     await action();
   } catch (err) {
-    console.error('[telegram-webhook] callback handler failed', {
-      error: err,
-      ...logCtx,
-    });
+    logError('[telegram-webhook] callback handler failed', err, logCtx);
     const text =
       err instanceof LedgerUnreadableError
         ? LEDGER_COPY.unavailable
@@ -377,8 +373,7 @@ async function startTopic(ctx: Ctx, id: number): Promise<void> {
     lead.topicId != null
       ? lead
       : await ensureLeadTopic(lead).catch((error: unknown) => {
-          console.error('[telegram-webhook] could not open the topic', {
-            error,
+          logError('[telegram-webhook] could not open the topic', error, {
             leadId: id,
           });
           return lead;
@@ -804,7 +799,7 @@ bot.on('callback_query', async (ctx, next) => {
   const crm = callbackCtx(ctx.callbackQuery);
   if (!crm) {
     await ctx.answerCallbackQuery().catch((error: unknown) => {
-      console.error('[telegram-webhook] could not answer the tap', { error });
+      logError('[telegram-webhook] could not answer the tap', error);
     });
     return;
   }
@@ -829,9 +824,8 @@ async function deliverToVisitor(
     await client.api.copyMessage(lead.telegramId, chatId, messageId);
     return true;
   } catch (err) {
-    console.error('[telegram-webhook] topic message not delivered', {
+    logError('[telegram-webhook] topic message not delivered', err, {
       id: lead.id,
-      error: err,
     });
     return false;
   }
@@ -917,15 +911,18 @@ export async function POST({ request }: APIContext): Promise<Response> {
   if (
     !secretMatches(
       request.headers.get('x-telegram-bot-api-secret-token'),
-      WEBHOOK_SECRET,
+      requireEnv('TELEGRAM_WEBHOOK_SECRET'),
     )
   ) {
     return new Response(null, { status: 401 });
   }
 
-  const parsed = updateSchema.safeParse(
-    await request.json().catch(() => undefined),
-  );
+  const read = await readJson(request);
+  if ('response' in read) {
+    console.warn('[telegram-webhook] ignoring an update past the size cap');
+    return ACK;
+  }
+  const parsed = updateSchema.safeParse(read.value);
   if (!parsed.success) {
     console.warn('[telegram-webhook] ignoring unparseable update', {
       issues: parsed.error.issues,
@@ -936,9 +933,7 @@ export async function POST({ request }: APIContext): Promise<Response> {
   try {
     await bot.handleUpdate(parsed.data);
   } catch (err) {
-    console.error('[telegram-webhook] unhandled error processing update', {
-      error: err,
-    });
+    logError('[telegram-webhook] unhandled error processing update', err);
   }
 
   return ACK;

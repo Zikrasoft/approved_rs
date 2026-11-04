@@ -4,6 +4,7 @@ import {
   createBrandStore,
   createTelegramClient,
   LEADS_PATH,
+  MAX_BODY_BYTES,
   type LeadInput,
   type LeadStore,
   type StoredLead,
@@ -384,7 +385,6 @@ beforeEach(() => {
   storage = storages[LEADS_PATH];
   ({ ensureLeadCard, ensureLeadTopic, touchLeadTopic } = createBrandBot({
     store: leadStore,
-    brand: BRAND,
     serviceLabel: (slug) => slug,
   }));
   POST = route(SECRET);
@@ -439,6 +439,19 @@ describe('updates that are not a visitor pressing Start', () => {
     const res = await POST(makeCtx('not json'));
     expect(res.status).toBe(200);
     expect(stored()).toHaveLength(0);
+  });
+
+  it('acknowledges a body past the size cap so Telegram stops retrying it, and says so', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const res = await POST(
+      makeCtx({ ...startUpdate('ru'), padding: 'a'.repeat(MAX_BODY_BYTES) }),
+    );
+    expect(res.status).toBe(200);
+    expect(stored()).toHaveLength(0);
+    expect(warn).toHaveBeenCalledWith(
+      '[capture] ignoring an update past the size cap',
+    );
+    warn.mockRestore();
   });
 
   it('acknowledges a body that is not an update object', async () => {

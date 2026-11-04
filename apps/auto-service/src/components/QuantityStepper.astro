@@ -1,0 +1,40 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import Icon from './Icon.astro';
+
+type Props = HTMLAttributes<'div'> & { size?: 'sm' };
+
+const { class: className, size, ...rest } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).shopCart;
+const step = `flex ${size === 'sm' ? 'size-9' : 'size-11'} items-center justify-center text-ink-2 transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 aria-busy:cursor-progress aria-busy:opacity-60`;
+---
+
+<div
+  class:list={[
+    'flex shrink-0 items-center rounded-control border border-line-field',
+    className,
+  ]}
+  {...rest}
+>
+  <button
+    type="button"
+    class={step}
+    aria-label={copy.decreaseLabel}
+    data-decrease
+  >
+    <Icon name="minus" />
+  </button>
+  <span
+    class="spec min-w-8 text-center text-sm font-semibold text-ink"
+    data-quantity></span>
+  <button
+    type="button"
+    class={step}
+    aria-label={copy.increaseLabel}
+    data-increase
+  >
+    <Icon name="plus" />
+  </button>
+</div>

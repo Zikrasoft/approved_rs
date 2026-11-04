@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#30343b"/>
+      <stop offset="1" stop-color="#16181c"/>
+    </linearGradient>
+    <linearGradient id="side" x1="0" x2="1">
+      <stop offset="0" stop-color="#1b1d21"/>
+      <stop offset="1" stop-color="#0e0f12"/>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5a606a"/>
+      <stop offset="1" stop-color="#3a3f47"/>
+    </linearGradient>
+    <linearGradient id="label" x1="0" x2="1">
+      <stop offset="0" stop-color="#c9d4e2"/>
+      <stop offset=".4" stop-color="#eef2f7"/>
+      <stop offset="1" stop-color="#b4c0cf"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="410" cy="625" rx="300" ry="34" fill="#1d2430" opacity=".3" filter="url(#soft)"/>
+  <path d="M130 300 h440 l100 -60 h-440 z" fill="url(#lid)"/>
+  <path d="M570 300 l100 -60 v320 l-100 60 z" fill="url(#side)"/>
+  <rect x="130" y="300" width="440" height="320" fill="url(#front)"/>
+  <g>
+    <path d="M220 262 h50 v-24 h-50 z" fill="#9b1c1c"/>
+    <ellipse cx="245" cy="238" rx="25" ry="9" fill="#c43838"/>
+    <path d="M520 262 h50 v-24 h-50 z" fill="#3b3f46"/>
+    <ellipse cx="545" cy="238" rx="25" ry="9" fill="#6c727b"/>
+  </g>
+  <rect x="160" y="360" width="380" height="200" rx="10" fill="url(#label)"/>
+  <rect x="160" y="360" width="380" height="14" fill="#2f5fa0"/>
+  <text x="350" y="450" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="52" fill="#16263b">{{brand}}</text>
+  <text x="350" y="500" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#3d4a5a">{{label}}</text>
+  <text x="350" y="536" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="22" fill="#2f5fa0">12V</text>
+</svg>

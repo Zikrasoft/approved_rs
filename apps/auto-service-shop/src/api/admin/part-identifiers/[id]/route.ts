@@ -1,0 +1,39 @@
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
+
+import { CATALOG_MODULE } from '../../../../modules/catalog';
+import type CatalogModuleService from '../../../../modules/catalog/service';
+import type { AdminUpdatePartIdentifierType } from '../../validators';
+import { updatedBy } from '../../../../lib/editors';
+import { deletePartIdentifierWorkflow } from '../../../../workflows/delete-catalog-rows';
+
+export async function POST(
+  req: AuthenticatedMedusaRequest<AdminUpdatePartIdentifierType>,
+  res: MedusaResponse,
+): Promise<void> {
+  const { id } = req.params;
+  const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+
+  await catalog.retrievePartIdentifier(id);
+  const { superseded, updated_by } = await catalog.updatePartIdentifiers({
+    id,
+    superseded: req.validatedBody.superseded,
+    ...updatedBy(req),
+  });
+
+  res.json({ part_identifier: { id, superseded, updated_by } });
+}
+
+export async function DELETE(
+  req: MedusaRequest,
+  res: MedusaResponse,
+): Promise<void> {
+  const { id } = req.params;
+
+  await deletePartIdentifierWorkflow(req.scope).run({ input: { id } });
+
+  res.json({ id, object: 'part_identifier', deleted: true });
+}

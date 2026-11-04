@@ -1,0 +1,19 @@
+---
+import Chevron from './Chevron.astro';
+
+interface Props {
+  name?: string;
+}
+
+const { name } = Astro.props;
+---
+
+<details name={name} class="card group p-5">
+  <summary
+    class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-ink marker:hidden [&::-webkit-details-marker]:hidden"
+  >
+    <slot name="summary" />
+    <Chevron />
+  </summary>
+  <slot />
+</details>

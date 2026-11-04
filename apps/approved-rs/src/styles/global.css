@@ -817,16 +817,15 @@ h4 {
   );
 }
 
-/* ─── Dropdown (src/components/Dropdown.astro) ──────────────
-   Global, not scoped in the component: .dropdown-option below styles
-   <slot> content that the *consumer* provides (LanguageSwitcher.astro,
-   Header.astro's services menu), and Astro's scoped-style attribute is
-   never applied to slotted children — only global CSS can reach them. */
+.dropdown {
+  anchor-scope: --dropdown;
+}
 .dropdown-trigger {
+  anchor-name: --dropdown;
   transition: color 0.2s;
 }
 .dropdown-trigger:hover,
-.dropdown-trigger[aria-expanded='true'],
+.dropdown:has(:popover-open) .dropdown-trigger,
 .dropdown-trigger-active {
   color: var(--color-text) !important;
 }
@@ -834,40 +833,59 @@ h4 {
 .dropdown-chevron {
   transition: transform 0.25s var(--ease-spring);
 }
-.dropdown-trigger[aria-expanded='true'] .dropdown-chevron {
+.dropdown:has(:popover-open) .dropdown-chevron {
   transform: rotate(180deg);
 }
 
 .dropdown-menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  z-index: 20;
+  position: fixed;
+  position-anchor: --dropdown;
+  inset: auto;
+  top: calc(anchor(bottom) + 0.5rem);
   padding: 0.35rem;
   margin: 0;
   list-style: none;
+  color: inherit;
   border-radius: var(--radius-sm, 0.375rem);
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface);
   box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.25);
   opacity: 0;
   transform: translateY(-4px) scale(0.97);
-  pointer-events: none;
   transition:
     opacity 0.2s var(--ease-spring),
-    transform 0.2s var(--ease-spring);
+    transform 0.2s var(--ease-spring),
+    overlay 0.2s allow-discrete,
+    display 0.2s allow-discrete;
 }
 .dropdown-menu[data-align='right'] {
-  right: 0;
+  right: anchor(right);
   transform-origin: top right;
 }
 .dropdown-menu[data-align='left'] {
-  left: 0;
+  left: anchor(left);
   transform-origin: top left;
 }
-.dropdown.dropdown-open .dropdown-menu {
+.dropdown-menu:popover-open {
   opacity: 1;
   transform: translateY(0) scale(1);
-  pointer-events: auto;
+}
+@starting-style {
+  .dropdown-menu:popover-open {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+@supports not (anchor-name: --dropdown) {
+  .dropdown-menu {
+    top: 4.5rem;
+  }
+  .dropdown-menu[data-align='right'] {
+    right: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  }
+  .dropdown-menu[data-align='left'] {
+    left: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  }
 }
 
 .dropdown-option {
@@ -938,13 +956,8 @@ h4 {
   }
   @media (prefers-reduced-motion: reduce) {
     dialog,
-    dialog[open] {
-      translate: 0 0;
-    }
-    @starting-style {
-      dialog[open] {
-        translate: 0 0;
-      }
+    dialog::backdrop {
+      transition: none;
     }
   }
 

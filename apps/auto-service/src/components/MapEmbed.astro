@@ -1,20 +1,41 @@
 ---
-import { mapEmbedSrc } from '@podbor/site-kit';
+import { mapEmbedSrc, mapPlaceUrl } from '@podbor/site-kit';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
 import { GARAGE_ADDRESS } from '@/utils/constants';
 
 interface Props {
   title: string;
+  class?: string;
 }
 
-const { title } = Astro.props;
-const src = mapEmbedSrc(GARAGE_ADDRESS.googleMapsCid);
+const { title, class: className } = Astro.props;
+const { street, district, googleMapsCid } = GARAGE_ADDRESS;
+const pages = content(localeFrom(Astro.url.pathname)).pages;
 ---
 
-<carlab-map
-  class="block h-64 w-full bg-shade"
-  data-src={src}
-  data-title={title}
-  data-iframe-class="block h-full w-full border-0"></carlab-map>
+<div class:list={['relative flex', className]}>
+  <a
+    href={mapPlaceUrl(googleMapsCid)}
+    target="_blank"
+    rel="noopener"
+    class="m-auto flex flex-col items-center gap-2 p-6 text-center"
+  >
+    <Icon name="pin" size={28} class="text-panel-ink" />
+    <span class="text-sm text-panel-ink">{street}, {district}</span>
+    <span
+      class="font-semibold underline decoration-panel-line underline-offset-4"
+    >
+      {pages.contact.openMap}
+    </span>
+  </a>
+  <carlab-map
+    class="absolute inset-0 empty:pointer-events-none"
+    data-src={mapEmbedSrc(googleMapsCid)}
+    data-title={title}
+    data-iframe-class="block h-full w-full border-0"></carlab-map>
+</div>
 
 <script>
   import { defineLazyMapEmbed } from '@podbor/site-kit/browser';

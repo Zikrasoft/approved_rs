@@ -4,7 +4,7 @@ import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 
 export const isUnlocalized = createUnlocalizedMatcher({
   exact: ['/robots.txt', '/llms.txt', '/404', '/404/'],
-  prefixes: ['/api/', '/keystatic', '/_image'],
+  prefixes: ['/api/', '/keystatic', '/_image', '/.well-known/'],
 });
 
 export const onRequest = defineMiddleware((context, next) => {

@@ -1,4 +1,5 @@
 ---
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import FormField from './FormField.astro';
 import Button from './Button.astro';
@@ -54,7 +55,6 @@ const panelIds = {
 const errorIds = {
   telegram: `contact-error-telegram-${uid}`,
   phone: `contact-error-phone-${uid}`,
-  consent: `consent-error-${uid}`,
 };
 
 const channelTabs = [
@@ -166,6 +166,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
         <div id={panelIds.telegram} data-panel="telegram" role="tabpanel">
           <input
             type="text"
+            name={CONTACT_INPUT_FIELDS.telegram}
             data-telegram
             data-field="telegram"
             autocomplete="username"
@@ -178,6 +179,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
             class={errorClass}
             aria-live="polite"
             data-error-telegram
+            data-bad-handle={lf.errorTelegramHandle}
             hidden
           >
             {lf.errorTelegramFormat}
@@ -188,9 +190,10 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
           <div class="flex gap-2">
             <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
               <select
+                name={CONTACT_INPUT_FIELDS.phoneCountry}
                 data-country
                 data-display-locale={displayLocale}
-                class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden text-ellipsis`}
+                class={`${fieldClass} max-w-full pl-2 pr-6 appearance-none cursor-pointer overflow-hidden`}
               >
                 {
                   countryOptions.map((c) => (
@@ -212,7 +215,7 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
             </div>
             <input
               type="tel"
-              name="phone_number"
+              name={CONTACT_INPUT_FIELDS.phoneNumber}
               autocomplete="tel"
               data-phone
               data-field="phone"
@@ -233,8 +236,12 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
           </p>
         </div>
 
-        <input type="hidden" name="contact" />
-        <input type="hidden" name="contact_channel" value="telegram" />
+        <input type="hidden" name={CONTACT_INPUT_FIELDS.contact} />
+        <input
+          type="hidden"
+          name={CONTACT_INPUT_FIELDS.channel}
+          value="telegram"
+        />
       </div>
 
       <FormField
@@ -253,32 +260,13 @@ const errorClass = 'mt-[0.3rem] font-sans text-[0.72rem] text-[#dc2626]';
       />
 
       <div>
-        <label class="flex items-start gap-3 mb-3 cursor-pointer text-muted">
-          <input
-            type="checkbox"
-            name="consent"
-            required
-            aria-describedby={errorIds.consent}
-            data-consent
-            data-field="consent"
-            class="mt-0.5 shrink-0 w-4 h-4 cursor-pointer accent-accent"
-          />
-          <span class="text-xs leading-relaxed">
-            {lf.consentBefore}<a
-              href={PathBuilder.privacy(locale)}
-              target="_blank"
-              class="underline text-muted">{lf.consentLinkText}</a
-            >
-          </span>
-        </label>
-        <p
-          id={errorIds.consent}
-          class={`${errorClass} mb-3`}
-          aria-live="polite"
-          data-error-consent
-          hidden
-        >
-          {lf.consentError}
+        <p class="mb-3 text-xs leading-relaxed text-muted">
+          {lf.consentBefore}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline underline-offset-2 pointer-coarse:py-2.5"
+            >{lf.consentLinkText}</a
+          >
         </p>
         <p class={`${errorClass} mb-3`} role="alert" data-error-submit hidden>
           {lf.errorSubmit}

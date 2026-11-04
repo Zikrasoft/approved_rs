@@ -1,0 +1,27 @@
+---
+import type { Thumbnail } from '@/utils/partImages';
+import PartThumb from './PartThumb.astro';
+
+interface Props {
+  thumb: Thumbnail | null;
+  class?: string;
+  href?: string;
+}
+
+const { thumb, class: className, href } = Astro.props;
+---
+
+<div class="flex items-start gap-3 sm:gap-4">
+  {
+    href ? (
+      <a href={href} tabindex="-1" aria-hidden="true" class="shrink-0">
+        <PartThumb thumb={thumb} />
+      </a>
+    ) : (
+      <PartThumb thumb={thumb} />
+    )
+  }
+  <div class:list={['flex min-w-0 flex-1 flex-col', className ?? 'gap-1.5']}>
+    <slot />
+  </div>
+</div>

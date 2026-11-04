@@ -1,4 +1,4 @@
-import { CARLAB, WORKSHOP_ADDRESS } from '@podbor/brands';
+import { CARLAB, WORKSHOP_ADDRESS, socialLinks } from '@podbor/brands';
 import { telegramBotLink } from '@podbor/site-kit/contact-links';
 import {
   createPublicEnvSchema,
@@ -23,6 +23,13 @@ export const SITE_LEGAL_NAME = BRAND.legalName;
 
 export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
+// TODO: refresh by hand from the Google Maps card of GARAGE_ADDRESS.googleMapsCid; nothing updates these numbers.
+export const GOOGLE_RATING = {
+  rating: '5.0',
+  reviews: 14,
+  checkedOn: '2026-11-02',
+};
+
 export const OPENING_HOURS = [
   {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
@@ -38,7 +45,12 @@ export const VIBER_NUMBER = env.PUBLIC_VIBER_NUMBER;
 export const TG_MANAGER = env.PUBLIC_TG_MANAGER;
 export const TELEGRAM_BOT_URL = telegramBotLink(BRAND.captureBot);
 
-export const SOCIAL_SAME_AS = [TELEGRAM_BOT_URL];
+export const SOCIAL_LINKS = socialLinks(BRAND.social);
+
+export const SOCIAL_SAME_AS = [
+  TELEGRAM_BOT_URL,
+  ...SOCIAL_LINKS.map((link) => link.url),
+];
 
 export const COOKIE_POLICY_VERSION = '2026-10-23';
 

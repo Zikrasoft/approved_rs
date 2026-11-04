@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded
 ---
 
 # No vehicle dictionary until a product type with required fitment ships

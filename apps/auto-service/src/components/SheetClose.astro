@@ -1,0 +1,29 @@
+---
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  class?: string;
+  label?: string;
+  onPanel?: boolean;
+}
+
+const { class: className, label, onPanel = false } = Astro.props;
+const { closeLabel } = content(localeFrom(Astro.url.pathname)).site.common;
+---
+
+<button
+  type="button"
+  data-modal-close
+  aria-label={label ?? closeLabel}
+  class:list={[
+    'btn-icon rounded-control border',
+    onPanel
+      ? 'border-panel-line-strong text-panel-fg hover:border-panel-ink'
+      : 'border-line hover:border-ink hover:text-ink',
+    className,
+  ]}
+>
+  <Icon name="close" />
+</button>

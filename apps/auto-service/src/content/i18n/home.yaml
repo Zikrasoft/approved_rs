@@ -1,241 +1,212 @@
 meta:
-  title: 'CarLab — автосервис в Белграде: диагностика, ремонт, кузов'
+  title: 'CarLab | автосервис в Белграде: диагностика, ремонт, кузов'
   description: 'Автосервис в Белграде: компьютерная диагностика, плановое ТО и замена масла, ремонт подвески и тормозов, двигатель и коробка, кузовной ремонт после ДТП.'
 hero:
-  heading: Сначала цена, потом ремонт
-  lead: Считывание ошибок бесплатно, письменная смета до начала работ. Говорим, что нужно делать сейчас, а что спокойно подождёт.
-  ctaPrimary: Записаться в сервис
+  heading: Автосервис и запчасти в Белграде
+  ctaPrimary: Записаться на ремонт
   ctaSecondary: Посмотреть услуги
+  partsHeading: Подберем запчасть по VIN
+  partsSubmit: Подобрать
+  partsHint: Назовем цену и срок.
+  partsInquiry: Отправить запрос менеджеру
   badges:
     - Смета до начала работ
+    - Плановое ТО обычно за день
     - Работаем со страховыми
-trust:
-  - value: Письменно
-    label: смета до начала любых работ
-  - value: 1 день
-    label: обычный срок планового ТО
-  - value: бесплатно
-    label: стоимость первичного осмотра
 servicesHead:
   eyebrow: Услуги
-  heading: Что мы делаем
-  body: От замены масла до восстановления геометрии кузова после удара. Всё в одном месте — не нужно возить машину по трём адресам.
-why:
-  eyebrow: Почему к нам
-  heading: Автосервис без сюрприза в счёте
-  body: Главная проблема с сервисами — не цена, а непредсказуемость. Мы её убираем.
-  points:
-    - title: Смета до работ
-      text: Сначала диагностика и письменная смета, потом ваше «да», и только потом ключи в работу.
-    - title: Старые детали возвращаем
-      text: Всё, что сняли с машины, отдаём в коробке. Хотите — проверяйте, действительно ли деталь была изношена.
-    - title: Не навязываем
-      text: Если можно доехать до следующего ТО — скажем об этом, а не продадим замену сегодня.
-    - title: Пишем в карту
-      text: Что меняли, какой пробег, какие запчасти. На следующем визите не начинаем с нуля.
+  heading: Чем поможем
+  body: Сколько занимает каждая работа. Смету составляем после осмотра, до начала работ.
+problemPrompt:
+  heading: Не знаете, что сломалось?
+  body: Опишите симптомы, подскажем, с чего начать.
+  cta: Описать проблему
+worksHeading: Что сломалось и как починили
 process:
   eyebrow: Как работаем
-  heading: Четыре шага без нервов
-  body: Никаких «оставьте машину, потом позвоним». Вы знаете, что происходит, на каждом этапе.
+  heading: Без сюрпризов в счете
+  body: Вы знаете, что происходит с машиной, на каждом этапе.
   steps:
-    - title: Заявка и запись
-      text: Описываете проблему по телефону или в мессенджере. Подбираем время, чтобы машина не стояла в очереди.
-    - title: Диагностика
-      text: Находим причину, а не симптом. Показываем на машине, что именно не так.
-    - title: Смета и согласование
-      text: Присылаем список работ и запчастей с ценами. Работы начинаются только после вашего подтверждения.
+    - title: Звонок или сообщение
+      text: Расскажите, что с машиной, договоримся о времени.
+    - title: Осмотр и диагностика
+      text: Находим причину, а не симптом, и показываем ее на машине.
+    - title: Смета до работ
+      text: Присылаем список работ и запчастей с ценами. Начинаем только после вашего «да».
     - title: Работа и выдача
-      text: Делаем, проверяем на ходу, отдаём машину со старыми деталями и записью в сервисной карте.
-shopTeaser:
-  eyebrow: Запчасти
-  heading: Аккумуляторы в наличии, с установкой за 20 минут
-  body: Подбираем по марке, модели и году — не по «примерно такой же». Ставим на месте, старый забираем на утилизацию.
-  cta: Подобрать аккумулятор
+      text: Проверяем на ходу, отдаем старые детали и запись в сервисной карте.
+  promises:
+    - Не меняем то, чему еще рано
+    - Старые детали отдаем в коробке
 accident:
   eyebrow: После ДТП
   heading: Кузовной ремонт и покраска
-  body: Восстанавливаем геометрию, правим и красим с подбором цвета по коду и по факту выгорания. Работаем со страховыми — помогаем собрать документы.
+  body: Правим геометрию и красим с подбором цвета. Работаем со страховыми и помогаем собрать документы.
   points:
     - Стапель и замер геометрии кузова
-    - Подбор краски по коду и компьютерным спектром
-    - Полировка перехода, чтобы не было видно границы
+    - Подбор краски по коду и спектрофотометром
     - Помощь с документами для страховой
-  cta: Оценить ремонт
+  cta: Прислать фото повреждений
+  more: Подробнее о кузовном ремонте
+faqEyebrow: Вопросы
 faq:
   - q: Сколько стоит диагностика?
-    a: Первичный осмотр и считывание ошибок — бесплатно. Платной становится только углублённая диагностика, когда нужно разбирать узел или ставить машину на стенд; о цене предупреждаем заранее.
+    a: Первичный осмотр и считывание ошибок бесплатны. Платной становится только углубленная диагностика, когда нужно разбирать узел или ставить машину на стенд; о цене предупреждаем заранее.
   - q: Можно приехать со своими запчастями?
-    a: Можно. В этом случае мы отвечаем только за свою работу, а не за деталь — это честно и работает в обе стороны.
+    a: Можно. В этом случае мы отвечаем только за свою работу, а не за деталь. Это честно и работает в обе стороны.
   - q: Вы работаете со страховыми компаниями?
-    a: Да, по кузовному ремонту. Поможем оформить документы и согласовать смету, а если страховая покрывает не всё — сразу скажем, сколько останется на вас.
+    a: Да, по кузовному ремонту. Поможем оформить документы и согласовать смету, а если страховая покрывает не все, сразу скажем, сколько останется на вас.
+  # TODO: owner to confirm the usual booking lead time before this answer names one.
   - q: Как быстро можно попасть на ТО?
-    a: Обычно в течение двух-трёх рабочих дней, а на замену масла или аккумулятора часто удаётся взять в тот же день. Позвоните — скажем точно.
-  - q: Машина на иностранных номерах — это проблема?
+    a: Позвоните или напишите, и мы скажем ближайшее свободное время.
+  - q: Машина на иностранных номерах, это проблема?
     a: Нет. Для ремонта документы о регистрации не нужны, приезжайте как есть.
+  - q: На каком языке с вами говорить?
+    a: По-сербски, по-русски или по-английски, как вам удобнее.
 finalCta:
   eyebrow: Записаться
   heading: Расскажите, что с машиной
-  body: Перезвоним в рабочее время, уточним детали и подберём время. Если вопрос срочный — просто позвоните.
+  body: Перезвоним в рабочее время и договоримся о визите.
   cta: Оставить заявку
 translations:
   sr:
     meta:
-      title: 'CarLab — autoservis u Beogradu: dijagnostika, popravka, karoserija'
-      description: 'Autoservis u Beogradu: kompjuterska dijagnostika, planirano održavanje i zamena ulja, popravka suspenzije i kočnica, motor i menjač, karoserijski popravak posle udesa.'
+      title: 'CarLab | Autoservis u Beogradu: dijagnostika, popravke'
+      description: 'Autoservis u Beogradu: kompjuterska dijagnostika, redovan servis, zamena ulja, popravka trapa, kočnica, motora i menjača, limarski radovi posle udesa.'
     hero:
-      heading: Prvo cena, potom popravka
-      lead: Besplatno očitavanje grešaka, pisana procena pre početka radova. Govorimo šta treba učiniti odmah, a šta može sačekati.
-      ctaPrimary: Zakazati servis
-      ctaSecondary: Pogledati usluge
+      heading: Auto-servis i auto-delovi u Beogradu
+      ctaPrimary: Zakažite popravku
+      ctaSecondary: Pogledajte usluge
+      partsHeading: Pronaći ćemo deo po broju šasije
+      partsSubmit: Pronađite deo
+      partsHint: Javićemo Vam cenu i rok isporuke.
+      partsInquiry: Pošaljite upit saradniku
       badges:
-        - Procena pre radova
-        - Radimo sa osiguravajućim društvima
-    trust:
-      - value: Pismena
-        label: procena pre svih radova
-      - value: 1 dan
-        label: uobičajeni rok za planirano održavanje
-      - value: besplatno
-        label: cena prvog pregleda
+        - Ponuda pre početka radova
+        - Redovan servis obično završavamo za jedan dan
+        - Sarađujemo sa osiguravajućim kućama
     servicesHead:
       eyebrow: Usluge
-      heading: Šta radimo
-      body: Od zamene ulja do obnavljanja geometrije karoserije posle udarca. Sve na jednom mestu — nema potrebe da vozite auto na tri adrese.
-    why:
-      eyebrow: Zašto kod nas
-      heading: Autoservis bez iznenađenja u računu
-      body: Glavni problem sa servisima — nije cena, već nepredvidivost. Mi to eliminišemo.
-      points:
-        - title: Procena pre radova
-          text: Prvo dijagnostika i pisana procena, zatim vaše 'da', i tek onda ključevi u rad.
-        - title: Vraćamo stare delove
-          text: Sve što skinemo sa automobila, vraćamo u kutiji. Ako želite — proverite da li je deo zaista bio istrošen.
-        - title: Ne namećemo
-          text: Ako se može sačekati do sledećeg održavanja — reći ćemo to, a ne prodavati zamenu danas.
-        - title: Pišemo u karton
-          text: Šta se menjalo, koja kilometraža, koji delovi. Prilikom sledeće posete ne počinjemo iz početka.
+      heading: Kako možemo da Vam pomognemo
+      body: Pogledajte koliko traje koja vrsta radova. Predračun pripremamo nakon pregleda, pre početka radova.
+    problemPrompt:
+      heading: Ne znate šta je u kvaru?
+      body: Opišite simptome, a mi ćemo Vas posavetovati odakle da krenete.
+      cta: Opišite problem
+    worksHeading: Šta je bilo u kvaru i kako smo ga otklonili
     process:
       eyebrow: Kako radimo
-      heading: Četiri koraka bez stresa
-      body: Nema 'ostavite auto, pa ćemo se čuti'. Znate šta se dešava na svakom koraku.
+      heading: Bez iznenađenja na računu
+      body: U svakom trenutku znate šta se dešava sa Vašim automobilom.
       steps:
-        - title: Prijava i zakazivanje
-          text: Opisujete problem telefonom ili putem mesindžera. Biramo vreme, kako auto ne bi čekao u redu.
-        - title: Dijagnostika
-          text: Nalazimo uzrok, a ne simptom. Pokazujemo na automobilu šta nije u redu.
-        - title: Procena i dogovor
-          text: Šaljemo listu radova i delova sa cenama. Radovi počinju tek nakon vašeg odobrenja.
-        - title: Rad i predaja
-          text: Radimo, proveravamo u vožnji, predajemo auto sa starim delovima i zapisom u servisnoj karti.
-    shopTeaser:
-      eyebrow: Delovi
-      heading: Akumulatori na skladištu, sa ugradnjom za 20 minuta
-      body: Biramo po marki, modelu i godini — ne po 'približno sličnom'. Postavljamo na licu mesta, stari uzimamo na reciklažu.
-      cta: Odabrati akumulator
+        - title: Poziv ili poruka
+          text: Recite nam šta se dešava sa automobilom i dogovorićemo termin.
+        - title: Pregled i dijagnostika
+          text: Pronalazimo uzrok, ne samo simptom, i pokazujemo Vam ga na automobilu.
+        - title: Ponuda pre radova
+          text: Šaljemo Vam spisak radova i delova sa cenama. Počinjemo tek kada odobrite.
+        - title: Popravka i preuzimanje
+          text: Proveravamo automobil u probnoj vožnji, vraćamo Vam stare delove i evidentiramo radove u servisnom kartonu.
+      promises:
+        - Ne menjamo delove pre nego što je potrebno
+        - Stare delove Vam vraćamo u kutiji
     accident:
       eyebrow: Posle udesa
-      heading: Karoserijski popravak i farbanje
-      body: Obnavljamo geometriju, ispravljamo i farbamo birajući boju po kodu i po činjenici o izbleđenju. Radimo sa osiguravajućim društvima — pomažemo u prikupljanju dokumenata.
+      heading: Limarski radovi i farbanje
+      body: Vraćamo karoseriju u fabričku geometriju i lakiramo uz precizno usklađivanje boje. Sarađujemo sa osiguravajućim kućama i pomažemo Vam da prikupite dokumentaciju.
       points:
-        - Stapel i merenje geometrije karoserije
-        - Biranje boje po kodu i računarom
-        - Poliranje prelaza, da se granice ne vide
-        - Pomoć sa dokumentima za osiguranje
-      cta: Proceni popravku
+        - Izvlačenje na stolu i merenje geometrije karoserije
+        - Određivanje nijanse po kodu boje i spektrofotometrom
+        - Pomoć oko dokumentacije za osiguranje
+      cta: Pošaljite fotografije oštećenja
+      more: Saznajte više o limarsko-farbarskim radovima
+    faqEyebrow: Pitanja
     faq:
       - q: Koliko košta dijagnostika?
-        a: Prvi pregled i čitanje grešaka — besplatno. Plaćena je samo dublja dijagnostika, kada je potrebno rastavljanje sklopova ili postavljanje automobila na sto; o ceni vas unapred obaveštavamo.
-      - q: Mogu li doći sa svojim delovima?
-        a: Može. U tom slučaju mi smo odgovorni samo za naš rad, a ne za deo - to je pošteno i funkcioniše u oba pravca.
-      - q: Da li radite sa osiguravajućim društvima?
-        a: Da, za karoserijske popravke. Pomoći ćemo da se dokumenti pripreme i procena odobri, a ako osiguranje ne pokriva sve — odmah ćemo reći koliko će ostati na vama.
-      - q: Koliko brzo mogu doći na održavanje?
-        a: Obično u roku od dva do tri radna dana, a za zamenu ulja ili akumulatora često možemo primiti istog dana. Pozovite — reći ćemo tačno.
-      - q: Auto na stranim tablicama — da li je to problem?
-        a: Nije. Za popravku dokumenta o registraciji nisu potrebni, dođite kako jeste.
+        a: Prvi pregled i očitavanje grešaka su besplatni. Naplaćuje se samo detaljna dijagnostika koja zahteva rasklapanje sklopa ili ispitivanje na testnom stolu. O ceni vas obaveštavamo unapred.
+      - q: Mogu li da donesem svoje delove?
+        a: Možete. U tom slučaju odgovaramo samo za svoj rad, ne i za doneti deo. Tako je pošteno za obe strane.
+      - q: Da li sarađujete sa osiguravajućim kućama?
+        a: Da, za limarske i farbarske radove. Pomoći ćemo vam oko dokumentacije i usaglašavanja procene troškova. Ako osiguranje ne pokriva sve, odmah ćemo vam reći koliko ostaje da platite.
+      - q: Koliko brzo mogu da zakažem redovan servis?
+        a: Pozovite nas ili nam pišite i reći ćemo Vam koji je prvi slobodan termin.
+      - q: Da li su strane registarske tablice problem?
+        a: Ne. Za popravku nije potrebna saobraćajna dozvola, slobodno dođite.
+      - q: Na kom jeziku možemo da razgovaramo?
+        a: Na srpskom, ruskom ili engleskom, kako Vama najviše odgovara.
     finalCta:
-      eyebrow: Zakazati
-      heading: Recite nam šta je sa autom
-      body: Pozvaćemo vas u radno vreme, razjasnićemo detalje i odabrati vreme. Ako je pitanje hitno — jednostavno pozovite.
-      cta: Ostaviti prijavu
+      eyebrow: Zakažite termin
+      heading: Recite nam šta nije u redu sa vozilom
+      body: Pozvaćemo Vas tokom radnog vremena da dogovorimo termin dolaska.
+      cta: Pošaljite upit
   en:
     meta:
-      title: 'CarLab — car service in Belgrade: diagnostics, repair, body'
-      description: 'Car service in Belgrade: computer diagnostics, scheduled maintenance and oil change, suspension and brake repair, engine and gearbox work, accident repair.'
+      title: CarLab | Car servicing, repairs and bodywork in Belgrade
+      description: 'Car service in Belgrade: diagnostics, scheduled servicing, oil changes, suspension and brakes, engine and gearbox repairs, and accident repair.'
     hero:
-      heading: First the price, then the repair
-      lead: Free error diagnostics, a written estimate before any work begins. We’ll explain what needs immediate attention and what can wait.
-      ctaPrimary: Schedule a service appointment
-      ctaSecondary: View our services
+      heading: Car servicing and parts in Belgrade
+      ctaPrimary: Book a repair
+      ctaSecondary: View services
+      partsHeading: Find the right part by VIN
+      partsSubmit: Find a part
+      partsHint: We'll confirm the price and lead time.
+      partsInquiry: Send an enquiry to our team
       badges:
-        - Estimate before work
-        - We work with insurance
-    trust:
-      - value: Written
-        label: estimate before any work begins
-      - value: 1 day
-        label: standard time for scheduled maintenance
-      - value: free
-        label: cost of initial inspection
+        - Estimate before work starts
+        - Routine servicing usually done in a day
+        - We work with insurers
     servicesHead:
       eyebrow: Services
-      heading: What we do
-      body: From oil changes to restoring body geometry after an accident. Everything in one place — no need to drive your car to three different locations.
-    why:
-      eyebrow: Why choose us
-      heading: A service without surprise costs
-      body: The main issue with garages isn't the price, but unpredictability. We eliminate that.
-      points:
-        - title: Estimate before work
-          text: First diagnostics and a written estimate, then your 'yes', and only then do we start work.
-        - title: We return the old parts
-          text: Everything we remove from the car is given back in a box. If you want, check whether the part was really worn out.
-        - title: No pressure
-          text: If it’s okay to wait until the next maintenance — we’ll let you know, rather than pushing for a replacement today.
-        - title: We document everything
-          text: What was changed, the mileage, which parts were used. Your next visit won’t start from scratch.
+      heading: How we can help
+      body: See how long each job takes. We inspect your car and prepare an estimate before any work begins.
+    problemPrompt:
+      heading: Not sure what's wrong?
+      body: Describe the symptoms and we'll suggest where to start.
+      cta: Describe the problem
+    worksHeading: What went wrong and how we fixed it
     process:
       eyebrow: How we work
-      heading: Four easy steps
-      body: No 'leave your car, we'll call you later'. You'll know what's happening at every stage.
+      heading: No surprises on your bill
+      body: You'll know what's happening with your car at every stage.
       steps:
-        - title: Request and appointment
-          text: Describe the issue over the phone or via messenger. We schedule a time so your car isn’t left waiting.
-        - title: Diagnostics
-          text: We find the root cause, not just the symptom. We show you what’s wrong with the car.
-        - title: Estimate and approval
-          text: We send a list of work and parts with prices. Work starts only after your approval.
-        - title: Work and handover
-          text: We perform the work, check on the move, return your car with the old parts and a service record.
-    shopTeaser:
-      eyebrow: Parts
-      heading: Batteries in stock, installed in 20 minutes
-      body: We match by make, model, and year — not by 'something similar'. We install it on-site and take the old one for recycling.
-      cta: Find a battery
+        - title: Call or message us
+          text: Tell us what's wrong with your car and we'll arrange a time.
+        - title: Inspection and diagnostics
+          text: We find the cause, not just the symptom, and show you the problem on your car.
+        - title: An estimate before we start
+          text: We send you an itemised estimate for labour and parts. We only start once you approve it.
+        - title: Repairs and collection
+          text: We road-test your car, return the old parts and update your service record.
+      promises:
+        - We don't replace parts before they need it
+        - We return your old parts in a box
     accident:
       eyebrow: After an accident
-      heading: Body repair and painting
-      body: We restore geometry, straighten and paint, matching the color by code and actual burn-off. We work with insurance — we help with documentation.
+      heading: Body repairs and respraying
+      body: We straighten bodywork and respray with colour-matched paint. We work with insurers and help you put together the paperwork.
       points:
-        - Frame and body geometry measurement
-        - Color matching by code and computer spectrum
-        - Polishing the transition to make the boundary invisible
-        - Assistance with insurance documents
-      cta: Get a repair estimate
+        - Chassis jig and alignment measurement
+        - Paint matching by colour code and spectrophotometer
+        - Help with insurance paperwork
+      cta: Send photos of the damage
+      more: More about body repairs
+    faqEyebrow: Questions
     faq:
-      - q: How much does diagnostics cost?
-        a: Initial inspection and error reading are free. Only in-depth diagnostics, requiring disassembly or a stand, incurs a cost; we inform you of the price in advance.
+      - q: How much do diagnostics cost?
+        a: The initial inspection and fault code reading are free. We only charge for in-depth diagnostics that require dismantling a component or using a test rig. We'll confirm the price beforehand.
       - q: Can I bring my own parts?
-        a: Yes, you can. In this case, we take responsibility only for our work, not the part—it's fair and works both ways.
+        a: Yes. In that case, we guarantee our workmanship, but not the part itself. That keeps things fair for both sides.
       - q: Do you work with insurance companies?
-        a: Yes, for body repair. We help prepare documents and agree on estimates, and if the insurance does not cover everything — we’ll let you know how much you’ll need to pay out of pocket.
-      - q: How quickly can I get a maintenance appointment?
-        a: Usually within two to three business days, and for an oil change or battery replacement, we often accommodate you the same day. Call us — we’ll tell you exactly.
-      - q: Is having a foreign-registered car a problem?
-        a: No. Registration documents are not needed for repairs, just come as you are.
+        a: Yes, for body repairs. We'll help with the paperwork and getting the estimate approved. If your insurer doesn't cover the full cost, we'll tell you upfront how much you'll need to pay.
+      - q: How soon can I book a service?
+        a: Call or message us and we'll let you know our next available appointment.
+      - q: Is it a problem if my car has foreign plates?
+        a: Not at all. You don't need registration documents for repairs. Just bring your car in.
+      - q: What languages do you speak?
+        a: Serbian, Russian or English, whichever you prefer.
     finalCta:
-      eyebrow: Sign up
-      heading: Tell us about your car
-      body: We’ll call you back during business hours to clarify details and schedule a time. If it’s urgent — just give us a call.
-      cta: Submit a request
-translatedFrom: 2ceafb860b996b11
+      eyebrow: Book an appointment
+      heading: Tell us what's wrong with your car
+      body: We'll call you back during opening hours to arrange your visit.
+      cta: Send an enquiry
+translatedFrom: ef7c3d3d0506f153

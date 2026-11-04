@@ -1,0 +1,35 @@
+User-agent: *
+Crawl-delay: 5
+
+Disallow: /api/
+Disallow: /service-vue/
+Disallow: /pfb/
+Disallow: /vue/
+
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/ar/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/bg/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/cs/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/da/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/de/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/el/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/en/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/en-US/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/es/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/fi/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/fr/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/hr/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/hu/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/it/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/lv/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/nl/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/no/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/pl/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/pt/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/pt-BR/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/ro/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/ru/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/sr/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/sv/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/tr/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/uk/sitemap-index.xml
+Sitemap: https://partsfinder.bilsteingroup.com/sitemaps/zh/sitemap-index.xml

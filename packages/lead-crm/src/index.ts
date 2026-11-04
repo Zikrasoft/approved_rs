@@ -23,10 +23,9 @@ export type {
 export type { PromptKey } from './promptKey.ts';
 export { storedLeadSchema } from './schema.ts';
 
+export { appendNote, hasRealContact } from './leadMerge.ts';
 export {
-  appendNote,
   canPostpone,
-  hasRealContact,
   isFreshLead,
   postponePatch,
   resumePatch,
@@ -58,7 +57,6 @@ export {
   EDIT_COPY,
   EDIT_FIELD_LABELS,
   noteLine,
-  extraContactNote,
   reAskEditText,
   REPLY_COPY,
   LEAD_ACTION_COPY,
@@ -80,6 +78,7 @@ export {
 } from './telegram/ledger.ts';
 export { buildStats } from './telegram/stats.ts';
 export { escapeHtml, formatDateRu, formatMoney } from './telegram/markup.ts';
+export { extraContactNote } from './notes.ts';
 export type { Btn, Keyboard, Role } from './telegram/markup.ts';
 
 export type {
@@ -98,12 +97,23 @@ export {
 } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
+export {
+  createShopOrdersRoute,
+  orderLeadSubmission,
+} from './routes/shopOrders.ts';
 
 export { requireEnv } from './requireEnv.ts';
+export { logError } from './logError.ts';
+export { MAX_BODY_BYTES, readForm, readJson } from './bodySize.ts';
 
 export { secretMatches } from './verifySecret.ts';
 
 export { createContactClickRoute } from './routes/contactClick.ts';
+export {
+  createCspReportRoute,
+  cspReportRoute,
+  type CspViolation,
+} from './routes/cspReport.ts';
 
 export { createMetaLeadReporter } from './metaConversions.ts';
 export type { ReportMetaLead } from './metaConversions.ts';

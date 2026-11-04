@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <radialGradient id="plate" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#e6e9ee"/>
+      <stop offset=".6" stop-color="#a9b0ba"/>
+      <stop offset="1" stop-color="#6b737e"/>
+    </radialGradient>
+    <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+      <stop offset=".86" stop-color="#2a4f78"/>
+      <stop offset="1" stop-color="#132a44"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <circle cx="412" cy="418" r="255" fill="#1d2430" opacity=".25" filter="url(#soft)"/>
+  <circle cx="400" cy="400" r="255" fill="url(#rim)"/>
+  <circle cx="400" cy="400" r="222" fill="url(#plate)"/>
+  <circle cx="400" cy="400" r="196" fill="none" stroke="#2b2f36" stroke-width="22"/>
+  <circle cx="400" cy="400" r="196" fill="none" stroke="#4a4f57" stroke-width="6"/>
+  <g fill="#444b55">
+    <circle cx="400" cy="262" r="20"/><circle cx="519" cy="331" r="20"/><circle cx="519" cy="469" r="20"/><circle cx="400" cy="538" r="20"/><circle cx="281" cy="469" r="20"/><circle cx="281" cy="331" r="20"/>
+  </g>
+  <circle cx="400" cy="400" r="70" fill="#5a616b"/>
+  <circle cx="400" cy="400" r="48" fill="#1a1e24"/>
+  <g stroke="#2d3239" stroke-width="3" opacity=".7">
+    <path d="M352 400 h96"/><path d="M400 352 v96"/>
+  </g>
+  <text x="400" y="742" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="34" fill="#5d6773">{{brand}} {{label}}</text>
+</svg>

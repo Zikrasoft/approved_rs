@@ -7,19 +7,34 @@ import type { ContactPlacement } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { content } from '@/i18n/content';
+import { navCurrent } from '@podbor/site-kit';
+import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   class?: string;
-  placement?: Extract<ContactPlacement, 'bar' | 'thanks' | 'hero'>;
+  placement?: Extract<
+    ContactPlacement,
+    'bar' | 'thanks' | 'hero' | 'header' | 'footer'
+  >;
   tone?: 'card' | 'panel';
+  look?: 'tiles' | 'links';
   service?: ServiceSlug;
+  lead?: TrackedContactChannel;
+  leadPrimary?: boolean;
+  only?: readonly TrackedContactChannel[];
+  prefill?: string;
 }
 
 const {
   class: className = '',
   placement = 'bar',
   tone = 'card',
+  look = 'tiles',
   service,
+  lead,
+  leadPrimary = false,
+  only,
+  prefill,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -34,66 +49,118 @@ type Variant = {
 const FULL: Variant = {
   channels: ['phone', 'whatsapp', 'viber', 'telegram'],
   list: 'grid gap-2 sm:grid-cols-2',
-  tile: 'min-h-11 gap-3 px-4 py-3',
+  tile: 'min-h-11 gap-3 px-4 py-2.5',
   iconSize: 18,
   label: 'text-sm',
 };
 const VARIANT: Record<NonNullable<Props['placement']>, Variant> = {
-  bar: FULL,
+  bar: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   thanks: FULL,
+  header: { ...FULL, list: 'grid grid-cols-2 gap-2' },
   hero: {
     channels: ['phone', 'whatsapp', 'viber', 'telegram'],
-    list: 'grid grid-cols-4 gap-1 pointer-fine:grid-cols-3 sm:flex sm:flex-wrap',
-    tile: 'min-h-11 justify-center gap-1 px-1.5 py-2.5 sm:gap-2 sm:px-5',
-    iconSize: 14,
-    label: 'text-xs sm:text-[0.8125rem]',
+    list: 'grid auto-cols-fr grid-flow-col gap-2 lg:flex lg:flex-wrap',
+    tile: 'min-h-13 flex-col justify-center gap-1 px-1 py-2 lg:min-h-11 lg:flex-row lg:gap-2 lg:px-4',
+    iconSize: 16,
+    label: 'text-xs lg:text-[0.8125rem]',
   },
+  footer: {
+    channels: ['whatsapp', 'viber', 'telegram'],
+    list: 'grid grid-cols-3 gap-2 md:flex md:flex-col md:gap-0',
+    tile: 'min-h-11 justify-center gap-2 px-2 md:min-h-9 md:justify-start md:border-0 md:px-0 md:text-ink-2',
+    iconSize: 16,
+    label: 'text-sm',
+  },
+};
+const LINKS: Variant = {
+  channels: ['telegram', 'whatsapp', 'viber'],
+  list: 'flex flex-wrap items-center gap-x-4 gap-y-1',
+  tile: 'link-underlined inline-flex min-h-11 items-center font-semibold text-ink',
+  iconSize: 0,
+  label: '',
 };
 const TONE = {
   card: {
-    surface: 'border-line bg-card text-ink hover:border-ink',
+    surface: 'border-line-strong bg-card text-ink hover:border-ink',
     icon: 'text-muted',
   },
   panel: {
     surface:
-      'border-panel-line text-white hover:border-panel-line-strong hover:bg-panel-2',
+      'border-panel-line-strong text-panel-fg hover:border-panel-ink hover:bg-panel-2',
     icon: 'text-panel-ink',
   },
 };
 const CHANNEL = {
-  phone: { icon: 'phone', label: site.channels.call },
+  phone: {
+    icon: 'phone',
+    label: site.channels.call,
+  },
   whatsapp: { icon: 'whatsapp', label: site.channels.whatsapp },
   viber: { icon: 'viber', label: site.channels.viber },
   telegram: { icon: 'telegram', label: site.channels.telegram },
 } as const;
 
-const variant = VARIANT[placement];
-const { surface, icon: iconTone } = TONE[tone];
+const links = look === 'links';
+const variant = links ? LINKS : VARIANT[placement];
+const offered = only ?? variant.channels;
+const channels = lead
+  ? [lead, ...offered.filter((channel) => channel !== lead)]
+  : offered;
+const PRIMARY = {
+  surface: 'border-signal-ink bg-signal-ink text-white hover:bg-signal-dark',
+  icon: 'text-white',
+};
+const toneOf = (channel: TrackedContactChannel) =>
+  leadPrimary && channel === lead ? PRIMARY : TONE[tone];
+const onThanks = Boolean(
+  navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)),
+);
+const onMouse = channels.filter(
+  (channel) => onThanks || channel !== 'phone',
+).length;
+const columns =
+  placement !== 'hero' && onMouse === 3 ? 'pointer-fine:sm:grid-cols-3' : '';
 ---
 
 <ul
-  class={`${variant.list} ${className}`}
-  data-contact-order
+  class={`${variant.list} ${columns} ${className}`}
+  data-contact-order={lead ? undefined : ''}
   {...contactRegion(placement)}
 >
   {
-    variant.channels.map((channel) => (
+    channels.map((channel) => (
       <ContactControl
         channel={channel}
         region="contacts"
         service={service}
+        prefill={prefill}
         listItem
-        class={`group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${surface}`}
-        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line bg-card px-4 py-3"
+        class={
+          links
+            ? variant.tile
+            : `group flex items-center rounded-control border transition-colors duration-150 ${variant.tile} ${toneOf(channel).surface}`
+        }
+        plainClass="flex min-h-11 items-center gap-3 rounded-control border border-line-strong bg-card px-4 py-2.5"
       >
-        <Icon
-          name={CHANNEL[channel].icon}
-          size={variant.iconSize}
-          class={`shrink-0 transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal ${iconTone}`}
-        />
-        <span class:list={['spec whitespace-nowrap', variant.label]}>
-          {CHANNEL[channel].label}
-        </span>
+        {links ? (
+          CHANNEL[channel].label
+        ) : (
+          <Fragment>
+            <Icon
+              name={CHANNEL[channel].icon}
+              size={variant.iconSize}
+              class:list={[
+                'shrink-0 transition-colors duration-150',
+                toneOf(channel) === PRIMARY
+                  ? PRIMARY.icon
+                  : `group-hover:text-signal group-focus-visible:text-signal ${TONE[tone].icon}`,
+              ]}
+            />
+            <span class:list={['spec whitespace-nowrap', variant.label]}>
+              {CHANNEL[channel].label}
+            </span>
+          </Fragment>
+        )}
         <Icon slot="plain" name="phone" size={18} class="shrink-0 text-muted" />
       </ContactControl>
     ))

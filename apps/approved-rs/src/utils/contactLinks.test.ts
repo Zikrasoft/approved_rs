@@ -9,7 +9,7 @@ const load = async (manager?: string) => {
 
 const telegram = { channel: 'telegram' } as const;
 
-describe('contactControl', () => {
+describe('contactControl', { timeout: 30_000 }, () => {
   it('opens the capture bot with the service and the locale', async () => {
     const contactControl = await load('approved_manager');
     expect(

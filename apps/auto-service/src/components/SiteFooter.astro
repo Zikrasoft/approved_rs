@@ -1,117 +1,100 @@
 ---
-import Icon from './Icon.astro';
 import Wordmark from './Wordmark.astro';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { BRAND, GARAGE_ADDRESS, SITE_NAME } from '@/utils/constants';
+import { BRAND, SITE_NAME } from '@/utils/constants';
 import {
   DEVELOPER,
   developerCreditUrl,
   splitDeveloperCredit,
 } from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
-import ContactControl from './ContactControl.astro';
+import CallAction from './CallAction.astro';
+import ContactChannels from './ContactChannels.astro';
+import GarageAddress from './GarageAddress.astro';
+import GoogleRating from './GoogleRating.astro';
+import SocialLinks from './SocialLinks.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import { content } from '@/i18n/content';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
+const bmw = content(locale).pages.bmw;
 const year = new Date().getFullYear();
 const credit = splitDeveloperCredit(site.footer.developerCredit);
 
-const channels = [
-  { icon: 'phone', label: site.channels.call, track: 'phone' },
-  { icon: 'whatsapp', label: site.channels.whatsapp, track: 'whatsapp' },
-  { icon: 'viber', label: site.channels.viber, track: 'viber' },
-  { icon: 'telegram', label: site.channels.telegram, track: 'telegram' },
-] as const;
+const eyebrow = 'spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted';
+const navList = 'flex flex-col gap-1 md:gap-2.5';
+const navLink =
+  'link-muted flex w-fit items-center py-1.5 md:py-0 pointer-coarse:min-h-11 pointer-coarse:py-0';
 ---
 
-<footer class="mt-20 border-t border-line bg-card">
-  <div class="wrap grid gap-10 py-band md:grid-cols-4">
-    <div class="flex flex-col gap-4">
+<footer class="mt-20 border-t border-line bg-card print:hidden">
+  <div
+    class="wrap grid gap-8 py-band md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] md:gap-10"
+  >
+    <div class="flex flex-col gap-3 md:order-1">
       <Wordmark />
       <p class="max-w-xs text-sm leading-relaxed text-muted">
         {site.footer.tagline}
       </p>
+      <GoogleRating tone="card" class="text-sm" />
     </div>
 
-    <nav class="flex flex-col gap-2.5" aria-label={site.footer.servicesHeading}>
-      <span
-        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
-      >
-        {site.footer.servicesHeading}
-      </span>
-      {
-        SERVICE_SLUGS.map((slug) => (
-          <a href={PathBuilder.service(locale, slug)} class="link-muted">
-            {services[slug].name}
-          </a>
-        ))
-      }
-    </nav>
+    <div class="flex flex-col gap-4 md:order-4" {...contactRegion('footer')}>
+      <span class={eyebrow}>{site.footer.contactHeading}</span>
+      <GarageAddress layout="block" tone="card" />
+      <CallAction class="btn btn-secondary min-h-12 w-full" />
+      <ContactChannels placement="footer" />
+      <SocialLinks class="mt-2" />
+    </div>
 
-    <nav class="flex flex-col gap-2.5" aria-label={site.footer.companyHeading}>
-      <span
-        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
+    <div class="grid grid-cols-2 gap-6 border-t border-line pt-6 md:contents">
+      <nav
+        class={`${navList} md:order-2`}
+        aria-label={site.footer.servicesHeading}
       >
-        {site.footer.companyHeading}
-      </span>
-      <a href={PathBuilder.works(locale)} class="link-muted">{site.nav.works}</a
-      >
-      <a href={PathBuilder.parts(locale)} class="link-muted">{site.nav.parts}</a
-      >
-      <a href={PathBuilder.contact(locale)} class="link-muted"
-        >{site.nav.contact}</a
-      >
-      <a href={PathBuilder.about(locale)} class="link-muted"
-        >{site.footer.aboutLabel}</a
-      >
-      <a href={PathBuilder.privacy(locale)} class="link-muted"
-        >{site.footer.privacyLabel}</a
-      >
-      <button
-        type="button"
-        data-cookie-settings
-        class="link-muted w-fit text-left">{site.cookie.settings}</button
-      >
-    </nav>
-
-    <div class="flex flex-col gap-2.5">
-      <span
-        class="spec text-[0.6875rem] uppercase tracking-[0.16em] text-muted"
-      >
-        {site.footer.contactHeading}
-      </span>
-      <ul class="flex flex-col" data-contact-order {...contactRegion('footer')}>
+        <span class={eyebrow}>
+          {site.footer.servicesHeading}
+        </span>
         {
-          channels.map((channel) => (
-            <ContactControl
-              channel={channel.track}
-              listItem
-              class="link-muted group flex min-h-11 items-center gap-2.5"
-            >
-              <Icon
-                name={channel.icon}
-                size={16}
-                class="shrink-0 text-muted transition-colors duration-150 group-hover:text-signal group-focus-visible:text-signal"
-              />
-              <span class="spec">{channel.label}</span>
-            </ContactControl>
+          SERVICE_SLUGS.map((slug) => (
+            <a href={PathBuilder.service(locale, slug)} class={navLink}>
+              {services[slug].name}
+            </a>
           ))
         }
-      </ul>
-      <address class="mt-1.5 text-sm not-italic leading-relaxed text-muted">
-        {GARAGE_ADDRESS.street}<br />{
-          `${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
-        }
-      </address>
-      <p class="text-sm leading-relaxed text-muted">
-        <span class="block text-xs text-ink-2">{site.footer.hoursHeading}</span>
-        {site.footer.hours}
-      </p>
+        <a href={PathBuilder.bmw(locale)} class={navLink}>
+          {bmw.heading}
+        </a>
+      </nav>
+
+      <nav
+        class={`${navList} md:order-3`}
+        aria-label={site.footer.companyHeading}
+      >
+        <span class={eyebrow}>
+          {site.footer.companyHeading}
+        </span>
+        <a href={PathBuilder.works(locale)} class={navLink}>{site.nav.works}</a>
+        <a href={PathBuilder.parts(locale)} class={navLink}>{site.nav.parts}</a>
+        <a href={PathBuilder.contact(locale)} class={navLink}
+          >{site.nav.contact}</a
+        >
+        <a href={PathBuilder.about(locale)} class={navLink}
+          >{site.footer.aboutLabel}</a
+        >
+        <a href={PathBuilder.privacy(locale)} class={navLink}
+          >{site.footer.privacyLabel}</a
+        >
+        <button
+          type="button"
+          data-cookie-settings
+          class={`${navLink} w-fit text-left`}>{site.cookie.settings}</button
+        >
+      </nav>
     </div>
   </div>
 
@@ -125,11 +108,11 @@ const channels = [
         target="_blank"
         rel="nofollow noopener"
         {...{ [DEVELOPER_CREDIT_ATTRIBUTE]: '' }}
-        class="group w-fit py-1 text-xs no-underline text-muted"
+        class="group w-fit py-1 text-xs no-underline text-muted pointer-coarse:py-3.5"
       >
         {credit.before}
         <span
-          class="font-medium text-signal-ink group-hover:underline group-focus-visible:underline"
+          class="font-medium text-ink-2 group-hover:underline group-focus-visible:underline"
           >{DEVELOPER.name}</span
         >
         {credit.after}

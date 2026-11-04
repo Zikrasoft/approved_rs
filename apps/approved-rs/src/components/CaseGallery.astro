@@ -21,7 +21,7 @@ const closeLabel = t.common.closeLabel;
 
 {
   images.length > 0 && (
-    <div class="case-gallery py-10 border-t border-default">
+    <gallery-lightbox class="case-gallery block py-10 border-t border-default">
       <p class="text-xs tracking-widest uppercase mb-6 font-medium text-accent">
         {gallery.morePhotos}
       </p>
@@ -35,6 +35,7 @@ const closeLabel = t.common.closeLabel;
                 'gallery-item group relative block overflow-hidden rounded-sm border border-default aspect-square',
                 { hidden: i >= VISIBLE },
               ]}
+              data-lightbox-item
               data-src={img.src}
               data-alt={alt}
               aria-label={gallery.openAriaTemplate(i, images.length)}
@@ -82,7 +83,7 @@ const closeLabel = t.common.closeLabel;
           >
             <ChevronLeft size={20} />
           </button>
-          <img data-dialog-img alt="" />
+          <img data-lightbox-image alt="" />
           <button
             type="button"
             data-next
@@ -93,7 +94,7 @@ const closeLabel = t.common.closeLabel;
           </button>
         </dialog>
       </approved-modal>
-    </div>
+    </gallery-lightbox>
   )
 }
 
@@ -162,9 +163,10 @@ const closeLabel = t.common.closeLabel;
 </style>
 
 <script>
-  import { defineModalDialog } from '@podbor/site-kit/browser';
+  import { defineLightbox, defineModalDialog } from '@podbor/site-kit/browser';
 
   defineModalDialog('approved-modal');
+  defineLightbox();
 
   document.querySelectorAll<HTMLElement>('.case-gallery').forEach((root) => {
     root.querySelector('[data-more]')?.addEventListener('click', (e) => {
@@ -173,41 +175,5 @@ const closeLabel = t.common.closeLabel;
         .forEach((el) => el.classList.remove('hidden'));
       (e.currentTarget as HTMLElement).remove();
     });
-
-    const dialog = root.querySelector('dialog') as HTMLDialogElement | null;
-    const dialogImg = root.querySelector(
-      '[data-dialog-img]',
-    ) as HTMLImageElement | null;
-    const items = Array.from(
-      root.querySelectorAll('.gallery-item'),
-    ) as HTMLButtonElement[];
-
-    if (dialog && dialogImg && items.length > 0) {
-      let current = 0;
-
-      const show = (i: number) => {
-        current = (i + items.length) % items.length;
-        const btn = items[current];
-        dialogImg.src = btn.dataset.src ?? '';
-        dialogImg.alt = btn.dataset.alt ?? '';
-      };
-
-      items.forEach((btn, i) =>
-        btn.addEventListener('click', () => {
-          show(i);
-          dialog.showModal();
-        }),
-      );
-      dialog
-        .querySelector('[data-prev]')
-        ?.addEventListener('click', () => show(current - 1));
-      dialog
-        .querySelector('[data-next]')
-        ?.addEventListener('click', () => show(current + 1));
-      dialog.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') show(current + 1);
-        if (e.key === 'ArrowLeft') show(current - 1);
-      });
-    }
   });
 </script>

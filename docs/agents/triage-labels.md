@@ -16,4 +16,4 @@ Edit the right-hand column to match whatever vocabulary you actually use.
 
 ## Site labels
 
-Every issue also carries one or more site labels naming the sites it touches: `approved.rs`, `carlab.rs`, `details.rs`. Work in a shared `packages/*` module that every site consumes gets all three. `carlab.rs` covers `apps/medusa` and `infra/medusa` too.
+Every issue also carries one or more site labels naming the sites it touches: `approved.rs`, `carlab.rs`, `details.rs`. Work in a shared `packages/*` module that every site consumes gets all three.

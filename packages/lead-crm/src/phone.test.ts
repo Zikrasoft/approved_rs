@@ -9,6 +9,7 @@ import {
   isValidContact,
   DIAL_CODE_OWNER,
   PHONE_COUNTRIES,
+  typedContact,
   typedPhone,
 } from './phone.ts';
 
@@ -97,5 +98,29 @@ describe('composeE164', () => {
 
   it('prefixes the selected dial code for a plain national number', () => {
     expect(composeE164('60 123 4567', '381')).toBe('+381601234567');
+  });
+});
+
+describe('typedContact', () => {
+  it('takes the phone over a stray Telegram value on a phone channel', () => {
+    expect(
+      typedContact({
+        channel: 'whatsapp',
+        phone: '060 123 4567',
+        country: 'RS',
+        telegram: '@ivan_p',
+      }),
+    ).toBe('+381601234567');
+  });
+
+  it('hands back what was typed when it is no phone at all', () => {
+    expect(
+      typedContact({
+        channel: 'phone',
+        phone: 'abc',
+        country: undefined,
+        telegram: '',
+      }),
+    ).toBe('abc');
   });
 });

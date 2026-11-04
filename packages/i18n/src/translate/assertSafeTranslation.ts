@@ -1,15 +1,8 @@
+import { placeholderDiff } from '../withPlaceholder.ts';
+
 const HTML_TAG = /<[a-zA-Z/!]/;
-const WORD = /\p{L}+/gu;
-const LATIN = /\p{Script=Latin}/u;
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 const TAG_NAME = /<\/?([a-zA-Z][a-zA-Z0-9]*)/g;
-const PLACEHOLDER = /\{[a-zA-Z][a-zA-Z0-9]*\}/g;
-
-function mixedScriptWords(text: string): string[] {
-  return (text.match(WORD) ?? []).filter(
-    (word) => LATIN.test(word) && CYRILLIC.test(word),
-  );
-}
 
 function tagNamesOf(text: string): Set<string> {
   return new Set(
@@ -52,29 +45,20 @@ export function assertSafeTranslation(
         `translated response for "${path}" contains raw HTML-looking content the source didn't have: ${translated}`,
       );
     }
-    const dropped = [...new Set(source.match(PLACEHOLDER) ?? [])].filter(
-      (token) => !translated.includes(token),
-    );
+    const { dropped, invented } = placeholderDiff(source, translated);
     if (dropped.length > 0) {
       throw new Error(
         `translated response for "${path}" dropped placeholder tokens (${dropped.join(' ')}): ${translated}`,
       );
     }
-    const invented = [...new Set(translated.match(PLACEHOLDER) ?? [])].filter(
-      (token) => !source.includes(token),
-    );
     if (invented.length > 0) {
       throw new Error(
         `translated response for "${path}" invented placeholder tokens (${invented.join(' ')}): ${translated}`,
       );
     }
-    const mixedInSource = new Set(mixedScriptWords(source));
-    const newlyMixed = mixedScriptWords(translated).find(
-      (word) => !mixedInSource.has(word),
-    );
-    if (newlyMixed !== undefined) {
+    if (CYRILLIC.test(translated)) {
       throw new Error(
-        `translated response for "${path}" mixes Latin and Cyrillic inside one word ("${newlyMixed}"): ${translated}`,
+        `translated response for "${path}" contains Cyrillic letters: ${translated}`,
       );
     }
     const introduced = introducedTags(source, translated);

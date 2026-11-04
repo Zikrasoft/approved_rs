@@ -110,6 +110,32 @@ describe('defineMenuToggle', () => {
     expect(document.documentElement.style.overflow).toBe('');
   });
 
+  it('keeps focus inside an open full-screen menu by making the rest of the page inert', () => {
+    const { button } = mount();
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<main><a href="/">x</a></main><div data-held inert></div>',
+    );
+    const main = document.querySelector('main')!;
+    const held = document.querySelector('[data-held]')!;
+    const host = button.closest('[data-desktop-media]')!;
+
+    button.click();
+    expect(main.hasAttribute('inert')).toBe(true);
+    expect(host.hasAttribute('inert')).toBe(false);
+
+    button.click();
+    expect(main.hasAttribute('inert')).toBe(false);
+    expect(held.hasAttribute('inert')).toBe(true);
+  });
+
+  it('leaves the rest of the page alone for a menu that does not lock the page', () => {
+    const { button } = mount(`data-desktop-media="${DESKTOP}"`);
+    document.body.insertAdjacentHTML('beforeend', '<main></main>');
+    button.click();
+    expect(document.querySelector('main')!.hasAttribute('inert')).toBe(false);
+  });
+
   it('falls back to the open label when no close label is given', () => {
     const tagName = `menu-toggle-${++tagSeed}`;
     defineMenuToggle(tagName);

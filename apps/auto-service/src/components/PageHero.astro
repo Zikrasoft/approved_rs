@@ -1,67 +1,60 @@
 ---
-import { breadcrumbListSchema, jsonLdText } from '@podbor/site-kit';
-import { SITE_URL } from '@/utils/constants';
-import { localeFrom } from '@/i18n/config';
-import { PathBuilder } from '@/utils/paths';
-import ContactChannels from './ContactChannels.astro';
+import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
+import HeroContacts from './HeroContacts.astro';
 import type { ServiceSlug } from '@/utils/services';
-import { content } from '@/i18n/content';
 
 interface Props {
   eyebrow: string;
   heading: string;
   lead?: string;
-  crumbs?: { href: string; label: string }[];
+  crumbs?: Crumb[];
   service?: ServiceSlug;
+  actions?: boolean;
+  compact?: boolean;
+  desktopLead?: boolean;
 }
 
-const { eyebrow, heading, lead, crumbs = [], service } = Astro.props;
-const locale = localeFrom(Astro.url.pathname);
-const site = content(locale).site;
-const trail = [
-  { href: PathBuilder.home(locale), label: site.common.homeLabel },
-  ...crumbs,
-];
-const breadcrumbSchema = breadcrumbListSchema(SITE_URL, trail);
+const {
+  eyebrow,
+  heading,
+  lead,
+  crumbs = [],
+  service,
+  actions = true,
+  compact = false,
+  desktopLead = false,
+} = Astro.props;
 ---
 
-<script type="application/ld+json" set:html={jsonLdText(breadcrumbSchema)} />
-
 <section class="border-b border-line bg-card">
-  <div class="wrap flex flex-col gap-4 py-band md:py-band-lg">
-    <nav aria-label={site.common.breadcrumbLabel}>
-      <ol class="flex flex-wrap items-center gap-2 text-xs text-muted">
-        {
-          trail.map((crumb, i) => (
-            <li class="flex items-center gap-2">
-              {i > 0 && <span aria-hidden="true">/</span>}
-              <a
-                href={crumb.href}
-                class="transition-colors duration-150 hover:text-signal-ink"
-              >
-                {crumb.label}
-              </a>
-            </li>
-          ))
-        }
-      </ol>
-    </nav>
-    <span class="eyebrow">{eyebrow}</span>
-    <h1 class="text-hero max-w-3xl">{heading}</h1>
+  <div
+    class:list={[
+      'wrap flex flex-col gap-4 pt-6 md:pt-band',
+      compact ? 'pb-6 md:pb-band' : 'pb-band md:pb-band-lg',
+    ]}
+  >
+    <Breadcrumbs crumbs={crumbs} />
+    {!compact && <span class="eyebrow">{eyebrow}</span>}
+    <h1 class="text-hero max-w-3xl break-words" data-hero-heading>
+      {heading}
+    </h1>
     {
       lead && (
-        <p class="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+        <p
+          class:list={[
+            'max-w-2xl text-base leading-relaxed text-muted sm:text-lg',
+            desktopLead && 'max-sm:hidden',
+          ]}
+        >
           {lead}
         </p>
       )
     }
-    <div
-      class="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center"
-    >
-      <button type="button" data-open-lead-modal class="btn btn-primary">
-        {site.header.cta}
-      </button>
-      <ContactChannels placement="hero" service={service} />
-    </div>
+    {
+      actions && (
+        <HeroContacts tone="card" service={service} class="max-w-xl pt-2" />
+      )
+    }
+    <slot />
   </div>
 </section>

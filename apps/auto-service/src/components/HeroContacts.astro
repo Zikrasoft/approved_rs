@@ -1,0 +1,49 @@
+---
+import { contactRegion } from '@podbor/site-kit/contact-control';
+import CallAction from './CallAction.astro';
+import ContactChannels from './ContactChannels.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { ServiceSlug } from '@/utils/services';
+
+interface Props {
+  service?: ServiceSlug;
+  bookLabel?: string;
+  bookModal?: boolean;
+  tone?: 'panel' | 'card';
+  class?: string;
+}
+
+const { home } = content(localeFrom(Astro.url.pathname));
+const {
+  service,
+  bookLabel = home.hero.ctaPrimary,
+  bookModal = true,
+  tone = 'panel',
+  class: className,
+} = Astro.props;
+const button = 'btn min-h-12 w-full lg:px-5';
+const quiet = `${button} ${tone === 'panel' ? 'btn-on-panel' : 'btn-secondary'}`;
+---
+
+<div
+  class:list={['flex flex-col gap-2 lg:grid lg:grid-cols-2', className]}
+  {...contactRegion('hero')}
+>
+  <CallAction class={`${button} btn-primary`} callbackClass={quiet}>
+    <a
+      href="#lead"
+      data-open-lead-modal={bookModal ? '' : undefined}
+      class={`${quiet} pointer-fine:border-signal-ink pointer-fine:bg-signal-ink pointer-fine:text-white pointer-fine:hover:border-signal-dark pointer-fine:hover:bg-signal-dark`}
+    >
+      {bookLabel}
+    </a>
+  </CallAction>
+  <ContactChannels
+    placement="hero"
+    tone={tone}
+    service={service}
+    only={['whatsapp', 'viber', 'telegram']}
+    class="lg:col-span-2 lg:grid!"
+  />
+</div>

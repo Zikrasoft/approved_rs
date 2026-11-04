@@ -1,38 +1,31 @@
 ---
 import { getCollection } from 'astro:content';
-import { DEVELOPER, splitDeveloperCredit } from '@podbor/brands';
+import { DEVELOPER } from '@podbor/brands';
 import { aboutPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
-import PageHero from '@/components/PageHero.astro';
+import { Image } from 'astro:assets';
+import PanelHero from '@/components/PanelHero.astro';
+import SplitSection from '@/components/SplitSection.astro';
+import BulletList from '@/components/BulletList.astro';
+import VisitPanel from '@/components/VisitPanel.astro';
+import workshopBay from '@/assets/workshop-bay.jpg';
+import wallSign from '@/assets/workshop-wall-sign.jpg';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
+import { panelPhoto } from '@/utils/panelPhoto';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, localePaths } from '@/utils/paths';
-import { SERVICE_SLUGS } from '@/utils/services';
-import { publishedWorks } from '@/utils/works';
-import { GARAGE_ADDRESS, SITE_NAME, SITE_URL } from '@/utils/constants';
+import { makesOf, publishedWorks } from '@/utils/works';
+import { SITE_NAME, SITE_URL } from '@/utils/constants';
 
 export function getStaticPaths() {
   return localePaths();
 }
 
 const locale = localeFrom(Astro.url.pathname);
-const about = content(locale).pages.about;
-const site = content(locale).site;
-const works = publishedWorks(await getCollection('works'));
-const credit = splitDeveloperCredit(about.developerCredit);
-
-const stats = [
-  { value: works.length, label: about.worksCountLabel },
-  { value: SERVICE_SLUGS.length, label: about.servicesCountLabel },
-];
-
-const sections = [
-  { href: PathBuilder.services(locale), label: site.nav.services },
-  { href: PathBuilder.parts(locale), label: site.nav.parts },
-  { href: PathBuilder.works(locale), label: site.nav.works },
-  { href: PathBuilder.contact(locale), label: site.nav.contact },
-  { href: PathBuilder.privacy(locale), label: site.footer.privacyLabel },
-];
+const { pages, site } = content(locale);
+const about = pages.about;
+const makes = makesOf(publishedWorks(await getCollection('works')));
 
 const schema = (canonical: string) =>
   aboutPageSchema({
@@ -40,99 +33,106 @@ const schema = (canonical: string) =>
     url: canonical,
     website: { name: SITE_NAME, url: SITE_URL, creator: DEVELOPER },
   });
-
-const link = 'text-signal-ink underline underline-offset-2';
+const block = 'py-8 first:pt-0 lg:py-10';
+const signSizes = coverSizes(
+  '(min-width: 1224px) 1144px, calc(100vw - 2.5rem)',
+  coverScale(wallSign, 3),
+);
+const photo = await panelPhoto({
+  image: workshopBay,
+  alt: site.photos.workshopBay,
+});
 ---
 
 <Shell
   title={about.metaTitle}
   description={about.metaDescription}
   jsonLd={[schema]}
+  preloadImage={photo}
 >
-  <PageHero
-    eyebrow={site.footer.aboutLabel}
+  <PanelHero
     heading={about.heading}
-    lead={about.lead}
+    hook={about.lead}
+    photo={photo}
     crumbs={[
       { href: PathBuilder.about(locale), label: site.footer.aboutLabel },
     ]}
   />
 
-  <section class="wrap py-band md:py-band-lg">
-    <div class="max-w-3xl divide-y divide-line border-y border-line">
-      <div class="flex flex-col gap-5 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.sitemapHeading}</h2>
-        <dl class="grid grid-cols-2 gap-6">
-          {
-            stats.map((stat) => (
-              <div class="flex flex-col-reverse gap-1">
-                <dt class="text-sm text-muted">{stat.label}</dt>
-                <dd class="text-4xl font-medium tracking-tight text-signal-ink sm:text-5xl">
-                  {stat.value}
-                </dd>
-              </div>
-            ))
-          }
-        </dl>
-        <ul class="flex flex-col">
-          {
-            sections.map((section) => (
-              <li>
-                <a
-                  href={section.href}
-                  class="flex min-h-11 items-center text-sm text-ink transition-colors duration-150 hover:text-signal-ink sm:text-base"
-                >
-                  {section.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
+  <div class="wrap divide-y divide-line py-band md:py-band-lg">
+    {
+      about.team.length > 0 && (
+        <SplitSection class={block}>
+          <h2 slot="head" class="text-section">
+            {about.teamHeading}
+          </h2>
+          <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
+            {about.team.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        </SplitSection>
+      )
+    }
 
-      <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.contentHeading}</h2>
-        <p class="text-sm leading-relaxed text-muted sm:text-base">
-          {about.contentText}
-        </p>
-      </div>
+    <SplitSection class={block}>
+      <h2 slot="head" class="text-section">{about.equipmentHeading}</h2>
+      <BulletList items={about.equipment} marker="check" />
+    </SplitSection>
 
-      <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">{about.ownerHeading}</h2>
-        <p class="text-sm leading-relaxed text-muted sm:text-base">
-          {about.ownerText}{' '}
-          <a href={PathBuilder.privacy(locale)} class={link}
-            >{site.footer.privacyLabel}</a
-          >.
-        </p>
-      </div>
-
-      <div class="flex flex-col gap-2 py-6">
-        <h2 class="text-base font-semibold text-ink">
-          {about.contactsHeading}
-        </h2>
-        <address
-          class="text-sm not-italic leading-relaxed text-muted sm:text-base"
-        >
-          {
-            `${GARAGE_ADDRESS.street}, ${GARAGE_ADDRESS.district}, ${GARAGE_ADDRESS.city}`
-          }
-        </address>
-        <p class="text-sm leading-relaxed text-muted sm:text-base">
-          {about.contactsText}{' '}
-          <a href={PathBuilder.contact(locale)} class={link}
-            >{site.nav.contact}</a
-          >.
-        </p>
-      </div>
-
-      <div class="py-6">
-        <p class="text-sm leading-relaxed text-muted sm:text-base">
-          {credit.before}<a href={DEVELOPER.url} class={link}
-            >{DEVELOPER.name}</a
-          >{credit.after}
-        </p>
-      </div>
+    <div class={block}>
+      <Image
+        src={wallSign}
+        alt={site.photos.wallSign}
+        widths={[640, 960, 1280]}
+        sizes={signSizes}
+        loading="lazy"
+        class="block aspect-[2/1] w-full rounded-block object-cover sm:aspect-[3/1]"
+      />
     </div>
-  </section>
+
+    {
+      makes.length > 0 && (
+        <SplitSection class={block}>
+          <div slot="head" class="flex flex-col gap-3">
+            <h2 class="text-section">{about.makesHeading}</h2>
+            <p class="text-base leading-relaxed text-muted">
+              {about.makesLead}
+            </p>
+          </div>
+          <div class="flex flex-col gap-5">
+            <p class="text-lg leading-relaxed font-semibold text-ink">
+              {makes.join(', ')}
+            </p>
+            <p class="flex flex-wrap gap-x-6 gap-y-1">
+              <a
+                href={PathBuilder.bmw(locale)}
+                class="link-underlined inline-flex min-h-11 items-center font-semibold text-ink"
+              >
+                {pages.bmw.heading}
+              </a>
+              <a
+                href={PathBuilder.works(locale)}
+                class="link-underlined inline-flex min-h-11 items-center font-semibold text-ink"
+              >
+                {site.common.allWorks}
+              </a>
+            </p>
+          </div>
+        </SplitSection>
+      )
+    }
+
+    <SplitSection class={block}>
+      <h2 slot="head" class="text-section">{about.ownerHeading}</h2>
+      <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+        {about.ownerText}{' '}
+        <a href={PathBuilder.privacy(locale)} class="link-underlined">
+          {site.footer.privacyLabel}
+        </a>.
+      </p>
+    </SplitSection>
+  </div>
+
+  <VisitPanel heading={site.visit.heading} class="pb-band md:pb-band-lg" />
 </Shell>

@@ -1,0 +1,132 @@
+---
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
+import Icon from './Icon.astro';
+import PhoneInput from './PhoneInput.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  uid: string;
+  defaultChannel: 'phone' | 'whatsapp' | 'viber' | 'telegram';
+}
+
+const { uid, defaultChannel } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
+
+const CHANNELS = [
+  {
+    value: 'phone',
+    icon: 'phone',
+    label: site.form.channelPhone,
+    panel: 'phone',
+  },
+  {
+    value: 'whatsapp',
+    icon: 'whatsapp',
+    label: site.channels.whatsapp,
+    panel: 'phone',
+  },
+  { value: 'viber', icon: 'viber', label: site.channels.viber, panel: 'phone' },
+  {
+    value: 'telegram',
+    icon: 'telegram',
+    label: site.channels.telegram,
+    panel: 'telegram',
+  },
+] as const;
+
+const channelLabelId = `channel-${uid}`;
+const panelId = {
+  telegram: `panel-telegram-${uid}`,
+  phone: `panel-phone-${uid}`,
+};
+
+const chip =
+  'flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control border border-line-field bg-card px-3 text-center text-[0.8125rem] font-medium leading-tight text-ink-2 transition-colors duration-150 hover:border-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper';
+const errorText = 'mt-1.5 text-xs leading-relaxed text-danger';
+---
+
+<input type="hidden" name={CONTACT_INPUT_FIELDS.contact} />
+<input
+  type="hidden"
+  name={CONTACT_INPUT_FIELDS.channel}
+  value={defaultChannel}
+/>
+
+<div class="@container">
+  <p id={channelLabelId} class="field-label">
+    {site.form.contactChannelLabel}
+  </p>
+
+  <div
+    class="grid grid-cols-2 gap-2 @[28rem]:grid-cols-4"
+    role="tablist"
+    aria-labelledby={channelLabelId}
+  >
+    {
+      CHANNELS.map((channel) => (
+        <button
+          type="button"
+          role="tab"
+          class={chip}
+          data-tab={channel.value}
+          data-panel={channel.panel}
+          aria-selected={channel.value === defaultChannel ? 'true' : 'false'}
+          aria-controls={panelId[channel.panel]}
+        >
+          <Icon name={channel.icon} size={14} class="shrink-0" />
+          {channel.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div
+    id={panelId.telegram}
+    class="mt-2"
+    role="tabpanel"
+    data-panel="telegram"
+    hidden
+  >
+    <label class="block">
+      <span class="sr-only">{site.channels.telegram}</span>
+      <input
+        type="text"
+        autocomplete="username"
+        placeholder={site.form.telegramPlaceholder}
+        aria-describedby={`telegram-error-${uid}`}
+        class="field"
+        name={CONTACT_INPUT_FIELDS.telegram}
+        data-telegram
+        data-field="telegram"
+      />
+    </label>
+    <p
+      id={`telegram-error-${uid}`}
+      class={errorText}
+      aria-live="polite"
+      data-error-telegram
+      data-bad-handle={site.form.errorTelegramHandle}
+      hidden
+    >
+      {site.form.errorTelegram}
+    </p>
+  </div>
+
+  <div id={panelId.phone} class="mt-2" role="tabpanel" data-panel="phone">
+    <PhoneInput
+      name={CONTACT_INPUT_FIELDS.phoneNumber}
+      errorId={`phone-error-${uid}`}
+    />
+    <p
+      id={`phone-error-${uid}`}
+      class={errorText}
+      aria-live="polite"
+      data-error-phone
+      data-too-long={site.form.errorPhoneTooLong}
+      hidden
+    >
+      {site.form.errorPhone}
+    </p>
+  </div>
+</div>

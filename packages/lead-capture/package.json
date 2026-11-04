@@ -18,7 +18,7 @@
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "grammy": "1.46.0",
-    "zod": "4.5.4"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "3.2.6",

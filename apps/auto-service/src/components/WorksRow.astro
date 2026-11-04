@@ -1,0 +1,53 @@
+---
+import SectionHead from './SectionHead.astro';
+import WorkCard from './WorkCard.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import type { Work } from '@/utils/works';
+
+interface Props {
+  works: Work[];
+  eyebrow: string;
+  heading: string;
+}
+
+const { works, eyebrow, heading } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const allWorks = PathBuilder.works(locale);
+---
+
+{
+  works.length > 0 && (
+    <section class="bg-shade">
+      <div class="wrap py-band md:py-band-lg">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <SectionHead eyebrow={eyebrow} heading={heading} />
+          <a href={allWorks} class="btn btn-secondary w-fit max-sm:hidden">
+            {site.common.allWorks}
+          </a>
+        </div>
+        <ul class="-mx-5 mt-8 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0">
+          {works.slice(0, 6).map((work, i) => (
+            <li
+              class:list={[
+                'w-[78%] shrink-0 snap-start sm:w-[46%] lg:w-auto',
+                i > 2 && 'lg:hidden',
+              ]}
+            >
+              <WorkCard
+                work={work}
+                tags={false}
+                sizes="(min-width: 1224px) 368px, (min-width: 1024px) calc(33vw - 1.5rem), (min-width: 640px) 46vw, 78vw"
+              />
+            </li>
+          ))}
+        </ul>
+        <a href={allWorks} class="btn btn-secondary mt-5 w-full sm:hidden">
+          {site.common.allWorks}
+        </a>
+      </div>
+    </section>
+  )
+}

@@ -10,7 +10,7 @@ const storageFor = (path: string): LeadStorage => {
   return createVercelBlobStorage({ path });
 };
 
-export const { leadStore } = createBrandStore({
+export const { leadStore, notifyLead } = createBrandStore({
   brand: BRAND,
   storageFor,
   getNotifier: () => import('./crmBot'),

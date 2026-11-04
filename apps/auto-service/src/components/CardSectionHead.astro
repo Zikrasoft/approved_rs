@@ -1,0 +1,30 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  href?: string | null;
+}
+
+const { href } = Astro.props;
+---
+
+<h3
+  class:list={[
+    'border-b border-line px-5 font-semibold sm:px-6',
+    href ? 'py-1' : 'py-3',
+  ]}
+>
+  {
+    href ? (
+      <a
+        href={href}
+        class="flex min-h-10 items-center justify-between gap-3 text-ink link-quiet pointer-coarse:min-h-11"
+      >
+        <slot />
+        <Icon name="chevronRight" size={16} class="shrink-0 text-muted" />
+      </a>
+    ) : (
+      <slot />
+    )
+  }
+</h3>

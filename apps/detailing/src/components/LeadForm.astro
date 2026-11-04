@@ -1,4 +1,5 @@
 ---
+import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import Icon from './Icon.astro';
 import { localeFrom, BCP47_BY_LOCALE } from '@/i18n/config';
@@ -29,7 +30,6 @@ const uid = `lf-${crypto.randomUUID().slice(0, 8)}`;
 const errorId = {
   telegram: `${uid}-telegram`,
   phone: `${uid}-phone`,
-  consent: `${uid}-consent`,
 };
 const channelLabelId = `${uid}-channel`;
 const panelId = {
@@ -91,8 +91,12 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
     <input type="hidden" name="visitor_id" data-visitor-id />
     <input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
     <input type="hidden" name={META_IDS_FIELD} data-meta-ids />
-    <input type="hidden" name="contact" />
-    <input type="hidden" name="contact_channel" value={channels[0].value} />
+    <input type="hidden" name={CONTACT_INPUT_FIELDS.contact} />
+    <input
+      type="hidden"
+      name={CONTACT_INPUT_FIELDS.channel}
+      value={channels[0].value}
+    />
 
     <div>
       <p id={channelLabelId} class={label}>{site.form.contactChannelLabel}</p>
@@ -135,6 +139,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             placeholder={site.form.telegramPlaceholder}
             aria-describedby={errorId.telegram}
             class={field}
+            name={CONTACT_INPUT_FIELDS.telegram}
             data-telegram
             data-field="telegram"
           />
@@ -144,6 +149,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
           class={errorText}
           aria-live="polite"
           data-error-telegram
+          data-bad-handle={site.form.errorTelegramHandle}
           hidden
         >
           {site.form.errorTelegram}
@@ -155,7 +161,8 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
           <div class="relative min-w-0 max-w-[min(14rem,45%)] shrink-0">
             <select
               aria-label={site.form.countryLabel}
-              class={`${field} max-w-full appearance-none overflow-hidden text-ellipsis px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
+              class={`${field} max-w-full appearance-none overflow-hidden px-3 pr-8 [&>option]:bg-ink [&>option]:text-chalk`}
+              name={CONTACT_INPUT_FIELDS.phoneCountry}
               data-country
               data-display-locale={displayLocale}
             >
@@ -182,7 +189,7 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
             <span class="sr-only">{site.form.contactLabel}</span>
             <input
               type="tel"
-              name="phone_number"
+              name={CONTACT_INPUT_FIELDS.phoneNumber}
               inputmode="tel"
               autocomplete="tel-national"
               placeholder={site.form.contactPlaceholder}
@@ -229,40 +236,13 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
 
     <div class="lead-submit">
       <div>
-        <label class="flex items-start gap-3 py-1.5">
-          <input
-            type="checkbox"
-            name="consent"
-            required
-            value="1"
-            aria-describedby={errorId.consent}
-            class="peer sr-only"
-            data-consent
-            data-field="consent"
-          />
-          <span
-            class="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/35 text-void transition-colors duration-400 peer-checked:border-champagne peer-checked:bg-champagne peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-champagne [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100"
+        <p class="py-1.5 text-xs leading-relaxed text-mute">
+          {`${site.form.privacyNote} `}<a
+            href={PathBuilder.privacy(locale)}
+            target="_blank"
+            class="underline underline-offset-4 transition-colors duration-400 hover:text-champagne pointer-coarse:py-2.5"
+            >{site.form.privacyLinkText}</a
           >
-            <Icon name="check" size={10} />
-          </span>
-          <span class="text-xs leading-relaxed text-mute">
-            {site.form.privacyNote}{' '}
-            <a
-              href={PathBuilder.privacy(locale)}
-              target="_blank"
-              class="text-mute underline underline-offset-4 transition-colors duration-400 hover:text-champagne"
-              >{site.form.privacyLinkText}</a
-            >
-          </span>
-        </label>
-        <p
-          id={errorId.consent}
-          class={errorText}
-          aria-live="polite"
-          data-error-consent
-          hidden
-        >
-          {site.form.errorConsent}
         </p>
         <p class={errorText} role="alert" data-error-submit hidden>
           {site.form.errorSubmit}
@@ -271,15 +251,9 @@ const errorText = 'mt-2 text-xs leading-relaxed text-[#e0876c]';
 
       <button
         type="submit"
-        class="group/btn inline-flex items-center justify-center gap-3 rounded-full bg-chalk py-3.5 pl-6 pr-2.5 text-sm font-semibold text-void transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98] disabled:opacity-60"
+        class="inline-flex items-center justify-center rounded-full bg-chalk px-6 py-3.5 text-sm font-semibold text-void transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-champagne active:scale-[0.98] disabled:opacity-60"
       >
         <span data-submit-label>{site.form.submit}</span>
-        <span
-          class="flex h-8 w-8 items-center justify-center rounded-full bg-void/10 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-px"
-          aria-hidden="true"
-        >
-          <Icon name="arrow" />
-        </span>
       </button>
     </div>
   </form>

@@ -6,6 +6,15 @@ const withText = (url: string, message?: string): string =>
 export const whatsappLink = (number: string, message?: string): string =>
   withText(`https://wa.me/${number}`, message);
 
+export const appendWhatsappLine = (href: string, line: string): string => {
+  const url = new URL(href);
+  const text = url.searchParams.get('text');
+  return withText(
+    `${url.origin}${url.pathname}`,
+    text ? `${text}\n${line}` : line,
+  );
+};
+
 export const viberLink = (number: string): string =>
   `viber://chat?number=%2B${number}`;
 

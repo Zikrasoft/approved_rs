@@ -1,0 +1,59 @@
+(common) {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+}
+
+{$API_HOST} {
+	import common
+
+	request_body {
+		max_size 1MB
+	}
+
+	redir /app https://{$ADMIN_HOST}/app
+	redir /app/* https://{$ADMIN_HOST}{uri}
+
+	@unexposed path /admin /admin/* /auth/user /auth/user/* /hooks/payment /hooks/payment/*
+	handle @unexposed {
+		respond 404
+	}
+
+	handle {
+		reverse_proxy medusa:9000 {
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+}
+
+{$ADMIN_HOST} {
+	import common
+
+	request_body {
+		max_size 25MB
+	}
+
+	redir / /app
+
+	@guarded {
+		not {
+			path /auth/session /admin/invites/accept /auth/user/emailpass/update
+			header Authorization "Bearer *"
+		}
+	}
+	basic_auth @guarded {
+		{$ADMIN_BASIC_AUTH_USER} {$ADMIN_BASIC_AUTH_HASH}
+	}
+
+	handle {
+		reverse_proxy medusa:9000 {
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+}

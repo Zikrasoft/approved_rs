@@ -1,0 +1,269 @@
+---
+import { localizedUnit, translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import CarPicker from '@/components/CarPicker.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import ListingSort from '@/components/ListingSort.astro';
+import PopularParts from '@/components/PopularParts.astro';
+import { popularListingHref } from '@/utils/searchPage';
+import { demandOf } from '@/utils/demand';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import { categoryCars, type CategoryCar } from '@/utils/categoryCars';
+import { cacheKey } from '@/utils/cacheKey';
+import {
+  categoryListings,
+  type CategoryListing,
+  type CategoryPageEntry,
+} from '@/utils/catalogueSnapshot';
+import { keySpecs } from '@/utils/attributeRows';
+import { categoryFacets } from '@/utils/categoryFacets';
+import { paragraphs } from '@podbor/site-kit';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
+import { partThumbnail } from '@/utils/partImages';
+import { partSuccessor } from '@/utils/partSuccessor';
+import { rangeText, withFacetCopy } from '@/utils/partsSearch';
+
+export async function getStaticPaths() {
+  const categories = await categoryPagesForBuild();
+  const hubs = await makeHubsForBuild();
+  return withLocales(
+    categories.flatMap((category) => {
+      const cars = categoryCars(hubs, category.slug);
+      return categoryListings(category).map((listing) => ({
+        params: {
+          slug: category.slug,
+          page: listing.number > 1 ? String(listing.number) : undefined,
+        },
+        props: { category, listing, cars },
+        cacheKey: cacheKey({ category, listing, cars }),
+      }));
+    }),
+  );
+}
+
+const {
+  category,
+  listing,
+  cars = [],
+} = Astro.props as {
+  category: CategoryPageEntry;
+  listing: CategoryListing;
+  cars?: CategoryCar[];
+};
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const inquiry = content(locale).pages.partsInquiry;
+const copy = inquiry.category;
+const name = translated(category, 'name', locale);
+const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const empty = category.pages.length === 0;
+const categoryAttributes = category.pages.map(({ part }) => part.attributes);
+const firstPage = listing.number === 1;
+const pageHref = (number: number) =>
+  PathBuilder.partsCategory(locale, category.slug, number);
+const prev = listing.number > 1 ? pageHref(listing.number - 1) : null;
+const next =
+  listing.number < listing.count ? pageHref(listing.number + 1) : null;
+const pageTitle =
+  listing.number > 1
+    ? copy.pageName
+        .replace('{name}', name)
+        .replace('{page}', String(listing.number))
+    : name;
+const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
+const searchCopy = content(locale).partsSearch;
+const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
+const filtered = !empty && facets.length > 0;
+const fields = category.fields
+  .map((field) => {
+    const numbers = category.pages
+      .flatMap(({ part }) => [part.attributes[field.key] ?? []].flat())
+      .map(Number)
+      .filter(Number.isFinite);
+    return {
+      key: field.key,
+      label: [
+        translated(field, 'label', locale),
+        localizedUnit(field.unit, locale),
+      ]
+        .filter(Boolean)
+        .join(', '),
+      values:
+        field.type === 'number'
+          ? numbers.length
+            ? rangeText(
+                { min: Math.min(...numbers), max: Math.max(...numbers) },
+                null,
+                searchCopy,
+                (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
+              )
+            : ''
+          : field.options
+              .map((option) => translated(option, 'label', locale))
+              .join(', '),
+    };
+  })
+  .filter(({ values }) => values);
+---
+
+<Shell
+  title={copy.metaTitleTemplate.replace('{name}', pageTitle)}
+  description={lead ?? inquiry.metaDescription}
+>
+  {prev && <link slot="head" rel="prev" href={prev} />}
+  {next && <link slot="head" rel="next" href={next} />}
+  <PageHero
+    actions={false}
+    compact
+    desktopLead
+    eyebrow={copy.eyebrow}
+    heading={pageTitle}
+    lead={firstPage ? lead : undefined}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: pageHref(1), label: name },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 pt-6 md:pt-band-lg lg:items-start',
+      empty
+        ? 'pb-6 md:pb-10 lg:grid-cols-[1.2fr_1fr]'
+        : 'pb-band md:pb-band-lg',
+      filtered &&
+        'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-10',
+    ]}
+  >
+    {
+      !empty && cars.length > 0 && (
+        <CarPicker
+          category={category.slug}
+          cars={cars}
+          class={filtered ? 'max-lg:mb-4 lg:col-start-2' : undefined}
+        />
+      )
+    }
+
+    {
+      filtered && (
+        <FacetFilters
+          action={PathBuilder.partsSearch(locale)}
+          hidden={{ category: category.slug }}
+          facets={facets}
+          count={category.pages.length}
+          class="lg:col-start-1 lg:row-span-2 lg:row-start-1"
+        />
+      )
+    }
+
+    <div
+      class:list={[
+        'flex min-w-0 flex-col gap-10',
+        filtered && 'lg:col-start-2',
+      ]}
+    >
+      {firstPage && <PopularParts pages={category.pages} />}
+
+      {
+        !empty && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
+            <ListingBar count={category.pages.length} filters={filtered} />
+            {demandOf(category.pages) > 0 && (
+              <ListingSort
+                current={null}
+                hrefs={{
+                  default: pageHref(listing.number),
+                  popular: popularListingHref(locale, {
+                    category: category.slug,
+                  }),
+                }}
+              />
+            )}
+            <ul class="card divide-y divide-line">
+              {listing.pages.map((page) => (
+                <PartRow
+                  thumb={partThumbnail(page, category)}
+                  slug={page.slug}
+                  brand={page.brand.name}
+                  value={page.value}
+                  name={translated(page.part, 'name', locale)}
+                  specs={keySpecs(
+                    category,
+                    page.part.attributes,
+                    locale,
+                    categoryAttributes,
+                  )}
+                  superseded={page.superseded}
+                  current={partSuccessor(page, bySlug)}
+                  priced={page}
+                  demand={page.demand}
+                />
+              ))}
+            </ul>
+            {listing.count > 1 && (
+              <Pagination
+                label={copy.pagination}
+                prev={prev}
+                next={next}
+                numbered={{
+                  current: listing.number,
+                  count: listing.count,
+                  href: pageHref,
+                }}
+              />
+            )}
+            <InquiryLink topic={name} />
+          </div>
+        )
+      }
+
+      {
+        firstPage && (lead || body.length > 0 || empty) && (
+          <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
+            {lead && <p class="sm:hidden">{lead}</p>}
+            {body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+            {empty && <p>{copy.noParts}</p>}
+          </div>
+        )
+      }
+
+      {
+        firstPage && fields.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.fieldsHeading}</h2>
+            <dl class="card divide-y divide-line">
+              {fields.map((field) => (
+                <div class="flex flex-col gap-1 px-5 py-4 sm:px-6">
+                  <dt class="font-semibold text-ink">{field.label}</dt>
+                  <dd class="spec text-sm text-muted">{field.values}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      empty && (
+        <VinInquiryCard
+          id={PARTS_INQUIRY_ANCHOR}
+          class="h-fit scroll-mt-24"
+          comment={`${name}: `}
+        />
+      )
+    }
+  </section>
+</Shell>

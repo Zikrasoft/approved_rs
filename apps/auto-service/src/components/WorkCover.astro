@@ -1,0 +1,92 @@
+---
+import { Image } from 'astro:assets';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { isServiceSlug } from '@/utils/services';
+import { localizedWork, type Work } from '@/utils/works';
+
+interface Props {
+  work: Work;
+}
+
+const { work } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { pages, site, services } = content(locale);
+const { title, car } = localizedWork(work, locale);
+const { image, year, date, servicesApplied } = work.data;
+const portrait = image.height > image.width;
+const cover = portrait
+  ? {
+      widths: [360, 540, 720],
+      sizes: '(min-width: 1024px) 416px, calc(100vw - 2.5rem)',
+      class: 'aspect-[4/5] max-h-[70svh] object-cover object-[50%_45%]',
+    }
+  : {
+      widths: [560, 760, 1080, 1280],
+      sizes: '(min-width: 1224px) 1144px, calc(100vw - 2.5rem)',
+      class: 'h-auto',
+    };
+const applied = servicesApplied.filter(isServiceSlug);
+const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
+  year: 'numeric',
+  month: 'long',
+}).format(date);
+const fact = 'flex flex-col gap-0.5 border-t border-line pt-3';
+---
+
+<section class="wrap pt-6 pb-band md:pt-8">
+  <div
+    class:list={[
+      'grid gap-6',
+      portrait && 'lg:grid-cols-[26rem_minmax(0,1fr)] lg:items-start lg:gap-12',
+    ]}
+  >
+    <Image
+      src={image}
+      alt={title}
+      widths={cover.widths}
+      sizes={cover.sizes}
+      loading="eager"
+      fetchpriority="high"
+      class:list={['card block w-full', cover.class]}
+    />
+    <div class="flex flex-col gap-8">
+      <dl
+        class:list={[
+          'grid grid-cols-2 content-start gap-4',
+          !portrait && 'sm:grid-cols-3',
+        ]}
+      >
+        <div class={fact}>
+          <dt class="text-xs text-muted">{pages.works.factCar}</dt>
+          <dd class="text-base text-ink">{year ? `${car}, ${year}` : car}</dd>
+        </div>
+        <div class={fact}>
+          <dt class="text-xs text-muted">{pages.works.factDate}</dt>
+          <dd class="text-base text-ink">{dateLabel}</dd>
+        </div>
+        {
+          applied.length > 0 && (
+            <div
+              class:list={[fact, 'col-span-2', !portrait && 'sm:col-span-1']}
+            >
+              <dt class="text-xs text-muted">{site.nav.services}</dt>
+              <dd class="flex flex-wrap gap-x-3 gap-y-1">
+                {applied.map((slug) => (
+                  <a
+                    href={PathBuilder.service(locale, slug)}
+                    class="link-underlined text-base text-ink"
+                  >
+                    {services[slug].name}
+                  </a>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+      <slot />
+    </div>
+  </div>
+</section>

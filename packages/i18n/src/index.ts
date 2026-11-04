@@ -17,6 +17,9 @@ export {
 } from './localizedEntry.ts';
 export type { LocalizableEntry, LocalizedEntry } from './localizedEntry.ts';
 
+export { renderAiCatalog } from './aiCatalog.ts';
+export type { AiCatalogInput } from './aiCatalog.ts';
+
 export {
   llmsHeadingsSchema,
   llmsLanguageLinks,

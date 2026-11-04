@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { llmsHeadingsSchema } from '@podbor/i18n';
+import { pluralForms } from './shopPartContentSchema.ts';
 
 const cookieSchema = z
   .object({
@@ -31,7 +32,8 @@ export const siteContentSchema = z
         menuCloseLabel: z.string(),
         languageLabel: z.string(),
         cta: z.string(),
-        phoneLabel: z.string(),
+        partsCta: z.string(),
+        callback: z.string(),
       })
       .strict(),
     footer: z
@@ -40,7 +42,6 @@ export const siteContentSchema = z
         servicesHeading: z.string(),
         companyHeading: z.string(),
         contactHeading: z.string(),
-        hoursHeading: z.string(),
         hours: z.string(),
         privacyLabel: z.string(),
         aboutLabel: z.string(),
@@ -57,13 +58,35 @@ export const siteContentSchema = z
         mobileNavLabel: z.string(),
         faqHeading: z.string(),
         closeLabel: z.string(),
+        prevLabel: z.string(),
+        nextLabel: z.string(),
         fromPrice: z.string(),
         priceOnRequest: z.string(),
         allServices: z.string(),
-        backToShop: z.string(),
         allWorks: z.string(),
         emptyWorks: z.string(),
+        socialHeading: z.string(),
+        writeInstead: z.string(),
       })
+      .strict(),
+    hours: z.object({ week: z.string(), saturday: z.string() }).strict(),
+    visit: z
+      .object({
+        heading: z.string(),
+        route: z.string(),
+        facts: z.array(z.string()),
+      })
+      .strict(),
+    photos: z
+      .object({
+        heroMechanic: z.string(),
+        workshopBay: z.string(),
+        facade: z.string(),
+        wallSign: z.string(),
+      })
+      .strict(),
+    googleRating: z
+      .object({ rating: z.string(), reviews: pluralForms })
       .strict(),
     channels: z
       .object({
@@ -100,10 +123,17 @@ export const siteContentSchema = z
         submitting: z.string(),
         privacyNote: z.string(),
         privacyLinkText: z.string(),
+        privacyOpen: z.string(),
+        privacyNotice: z.string(),
+        moreDetails: z.string(),
         modalTitle: z.string(),
+        callbackTitle: z.string(),
         errorPhone: z.string(),
+        errorPhoneTooLong: z.string(),
         errorTelegram: z.string(),
-        errorConsent: z.string(),
+        errorTelegramHandle: z.string(),
+        // TODO: drop once the translate job has pruned errorConsent from the translations.
+        errorConsent: z.string().optional(),
         errorSubmit: z.string(),
       })
       .strict(),

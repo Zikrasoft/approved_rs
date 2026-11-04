@@ -74,6 +74,16 @@ describe('defineModalDialog', () => {
     expect(overflow()).toBe('hidden');
   });
 
+  it('moves focus to the marked element on open', () => {
+    mount(
+      '<dialog><button data-modal-close>x</button><h2 tabindex="-1" data-modal-focus>Title</h2></dialog>',
+    );
+    openIt();
+    expect(document.activeElement).toBe(
+      document.querySelector('[data-modal-focus]'),
+    );
+  });
+
   it('announces which trigger opened it', () => {
     const { host } = mount('<dialog><p>Form</p></dialog>');
     let seen: HTMLElement | undefined;

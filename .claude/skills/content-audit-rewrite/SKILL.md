@@ -200,6 +200,13 @@ in this repo:
   "премиальный" as filler rather than as a fact about the service tier)
 - sales register instead of plain description
 - one-line closers that restate the paragraph above
+- the em dash (—) as a stylistic crutch: no em dash anywhere in Russian
+  copy. Use a comma, a colon, a period or a plain hyphen, whichever reads
+  naturally in context
+- Ё/ё: never in authored copy, write Е/е
+
+`.github/scripts/russian-copy-hygiene.ts` fails the `check` job on an em dash
+or Ё in Russian source copy, so these two are not a matter of judgement.
 
 Keep every fact, number, price, car spec and proper noun exactly as written.
 Humanizing changes wording, never facts. If a claim looks wrong, raise it instead

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="hex" x1="0" x2="1">
+      <stop offset="0" stop-color="#8b6a2c"/>
+      <stop offset=".35" stop-color="#e2c27a"/>
+      <stop offset="1" stop-color="#7a5a20"/>
+    </linearGradient>
+    <linearGradient id="plug" x1="0" x2="1">
+      <stop offset="0" stop-color="#1c1f24"/>
+      <stop offset=".4" stop-color="#454b54"/>
+      <stop offset="1" stop-color="#16181c"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="640" rx="150" ry="26" fill="#1d2430" opacity=".28" filter="url(#soft)"/>
+  <rect x="330" y="150" width="140" height="180" rx="16" fill="url(#plug)"/>
+  <rect x="352" y="170" width="96" height="40" rx="6" fill="#0d0f12"/>
+  <path d="M290 330 h220 l-10 90 h-200 z" fill="url(#hex)"/>
+  <path d="M345 420 h110 v150 h-110 z" fill="url(#hex)"/>
+  <g stroke="#6a4c18" stroke-width="5" opacity=".7">
+    <path d="M345 450 h110"/><path d="M345 480 h110"/><path d="M345 510 h110"/><path d="M345 540 h110"/>
+  </g>
+  <rect x="380" y="570" width="40" height="40" rx="6" fill="#8b6a2c"/>
+  <text x="400" y="700" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="40" fill="#3c4450">{{brand}}</text>
+  <text x="400" y="740" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#6b7480">{{label}}</text>
+</svg>

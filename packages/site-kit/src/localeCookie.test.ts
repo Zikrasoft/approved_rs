@@ -6,11 +6,13 @@ import {
   defineLocaleChoice,
   localeCookieValue,
 } from './localeCookie.ts';
+import { LANGUAGE_SUGGESTION_STORAGE_KEY } from './languageSuggestion.ts';
 
 const MARKUP_SELECTOR = '[data-lang-choice]';
 
 let registry: Map<string, new () => { connectedCallback(): void }>;
 let doc: { cookie: string };
+let stored: Map<string, string>;
 
 beforeEach(() => {
   registry = new Map();
@@ -30,6 +32,11 @@ beforeEach(() => {
       void registry.set(name, ctor),
   });
   vi.stubGlobal('document', doc);
+  stored = new Map();
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => stored.get(key) ?? null,
+    setItem: (key: string, value: string) => void stored.set(key, value),
+  });
 });
 
 afterEach(() => {
@@ -104,6 +111,18 @@ describe('defineLocaleChoice', () => {
     const element = mount();
     element.listeners.get('click')!({ target: clickTarget('sr') });
     expect(doc.cookie).toBe(localeCookieValue('sr'));
+  });
+
+  it('silences the language suggestion, since the visitor chose a language', () => {
+    const element = mount();
+    element.listeners.get('click')!({ target: clickTarget('ru') });
+    expect(stored.get(LANGUAGE_SUGGESTION_STORAGE_KEY)).toBe('1');
+  });
+
+  it('leaves the suggestion alone on a click outside any language control', () => {
+    const element = mount();
+    element.listeners.get('click')!({ target: { closest: () => null } });
+    expect(stored.size).toBe(0);
   });
 
   it('looks the control up by the attribute the markup actually carries', () => {

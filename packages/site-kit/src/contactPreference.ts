@@ -51,6 +51,16 @@ const CHANNELS_BY_COUNTRY = new Map<string, readonly TrackedContactChannel[]>([
   ['kz', TELEGRAM_FIRST],
 ]);
 
+export interface ContactRanking {
+  byCountry: ReadonlyMap<string, readonly TrackedContactChannel[]>;
+  fallback: readonly TrackedContactChannel[];
+}
+
+const DEFAULT_RANKING: ContactRanking = {
+  byCountry: CHANNELS_BY_COUNTRY,
+  fallback: TELEGRAM_FIRST,
+};
+
 export function detectVisitorCountry(): string | undefined {
   try {
     return TIMEZONE_COUNTRY.get(
@@ -64,23 +74,26 @@ export function detectVisitorCountry(): string | undefined {
 export function preferredContactChannels(
   countryCode: string | undefined,
   locale?: string,
+  { byCountry, fallback }: ContactRanking = DEFAULT_RANKING,
 ): readonly TrackedContactChannel[] {
   if (locale?.toLowerCase().split('-')[0] === 'ru') return TELEGRAM_FIRST;
-  return (
-    (countryCode && CHANNELS_BY_COUNTRY.get(countryCode.toLowerCase())) ||
-    TELEGRAM_FIRST
-  );
+  return (countryCode && byCountry.get(countryCode.toLowerCase())) || fallback;
 }
 
-function visitorChannels(): readonly TrackedContactChannel[] {
+function visitorChannels(
+  ranking?: ContactRanking,
+): readonly TrackedContactChannel[] {
   return preferredContactChannels(
     detectVisitorCountry(),
     document.documentElement.lang,
+    ranking,
   );
 }
 
-export function visitorChannel(): TrackedContactChannel {
-  return visitorChannels()[0];
+export function visitorChannel(
+  ranking?: ContactRanking,
+): TrackedContactChannel {
+  return visitorChannels(ranking)[0];
 }
 
 function rankedIn<T>(
@@ -128,14 +141,14 @@ function promoteAheadOfRunnerUp(
 
 let armed = false;
 
-export function applyContactPreference(): void {
+export function applyContactPreference(ranking?: ContactRanking): void {
   if (armed) return;
   armed = true;
-  const ranking = visitorChannels();
+  const channels = visitorChannels(ranking);
   document
     .querySelectorAll<HTMLElement>('[data-primary-contact]')
-    .forEach((group) => showOne(group, ranking));
+    .forEach((group) => showOne(group, channels));
   document
     .querySelectorAll<HTMLElement>('[data-contact-order]')
-    .forEach((group) => promoteAheadOfRunnerUp(group, ranking));
+    .forEach((group) => promoteAheadOfRunnerUp(group, channels));
 }

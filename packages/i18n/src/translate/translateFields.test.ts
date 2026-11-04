@@ -1,5 +1,6 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { fieldsPrompt, translateFields } from './translateFields.ts';
+import { NO_CYRILLIC_RULE } from './promptRules.ts';
 import {
   stubOpenAiResponse,
   stubTranslate,
@@ -25,12 +26,12 @@ describe('translateFields', () => {
     const result = await translateFields(OPTIONS);
     expect(result).toEqual({
       sr: {
-        title: 'T: Аккумулятор Varta',
-        description: 'T: Для **японских** машин',
+        title: 'T: Akkumulytor Varta',
+        description: 'T: Dly **yponskih** masin',
       },
       en: {
-        title: 'T: Аккумулятор Varta',
-        description: 'T: Для **японских** машин',
+        title: 'T: Akkumulytor Varta',
+        description: 'T: Dly **yponskih** masin',
       },
     });
     expect(systemPrompts().sort()).toEqual(
@@ -126,5 +127,6 @@ describe('fieldsPrompt', () => {
     expect(prompt).toContain('from Russian into English for CarLab');
     expect(prompt).toContain('5W-30');
     expect(prompt).toContain('EXACTLY the same keys');
+    expect(prompt).toContain(NO_CYRILLIC_RULE);
   });
 });

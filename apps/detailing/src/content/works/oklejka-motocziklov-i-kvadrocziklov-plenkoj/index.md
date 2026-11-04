@@ -1,33 +1,33 @@
 ---
-title: Мотоциклы и квадроциклы — оклейка плёнкой
+title: Мотоциклы и квадроциклы, оклейка пленкой
 car: Мотоциклы и квадроциклы
 translations:
   en:
-    title: Motorcycles and ATVs - Wrapping Film
+    title: Motorcycle and ATV Wraps
     body: |-
-      We wrap motorcycles, ATVs, and other vehicles in transparent film to protect the paint or in colored film for a different look.
+      We wrap motorcycles, ATVs and other vehicles in clear film to protect the paintwork, or coloured film for a fresh look.
 
-      The transparent protective film preserves the original paint finish and protects the most vulnerable parts from scratches, minor damages, and dirt.
+      Clear paint protection film preserves the original paintwork, shielding the most vulnerable parts from scratches, minor damage and dirt.
 
-      The colored film does the same while also changing the appearance of the vehicle. You can choose a new color, an interesting texture, or create a custom design, and when you want a change, you can simply rewrap it. Even every year.
+      Coloured film offers the same protection while changing the look of your vehicle. Choose a new colour, an interesting texture or a custom design. When you feel like a change, you can have it rewrapped, even every year.
 
-      You can bring your vehicle to us. If that's inconvenient, we also have **our own transportation and trailer**: we can come to pick up your motorcycle or ATV, complete the work, and arrange a convenient return option.
+      You can bring your vehicle to us yourself. If that's not convenient, we have **our own transport and trailer**: we'll collect your motorcycle or ATV, carry out the work and arrange a convenient way to get it back to you.
 
-      We work throughout Belgrade and the rest of Serbia.
+      We serve Belgrade and the rest of Serbia.
     car: Motorcycles and ATVs
   sr:
-    title: Motocikli i kvadricikli - oblaganje folijom
+    title: Motocikli i kvadovi, oblepljivanje folijom
     body: |-
-      Oblažemo motocikle, kvadricikle i drugu tehniku - prozirnom folijom radi očuvanja laka ili obojenom, ako je potreban drugačiji izgled.
+      Oblažemo motocikle, kvadove i druga vozila providnom folijom za zaštitu laka ili folijom u boji kada želite drugačiji izgled.
 
-      Prozirna zaštitna folija štiti originalnu lak-površinu i pokriva najosetljivije delove od ogrebotina, manjih oštećenja i prljavštine.
+      Providna zaštitna folija čuva originalnu boju i lak i štiti najizloženije delove od ogrebotina, sitnih oštećenja i prljavštine.
 
-      Obojena folija radi isto, a pritom menja i izgled tehnike. Možete birati novu boju, zanimljivu teksturu ili napraviti individualni dizajn, a kada poželite promenu - jednostavno je prekrijete ponovo. Čak svake godine.
+      Folija u boji pruža istu zaštitu, a uz to menja izgled vozila. Možete izabrati novu boju, zanimljivu teksturu ili osmisliti potpuno personalizovan dizajn, a kada poželite promenu, zameniti foliju. Čak i svake godine.
 
-      Tehniku možete doneti sami. Ako to nije zgodno - imamo **vlastiti prevoz i prikolicu**: doći ćemo, pokupiti motocikl ili kvadricikl, obaviti posao i dogovoriti se oko povratka.
+      Vozilo možete dovesti sami. Ako vam to ne odgovara, imamo **sopstveno vozilo i prikolicu**: dolazimo po vaš motocikl ili kvad, obavljamo posao i dogovaramo način vraćanja koji vam najviše odgovara.
 
-      Radimo i u Beogradu, i u ostatku Srbije.
-    car: Motocikli i kvadricikli
+      Radimo na teritoriji Beograda i širom Srbije.
+    car: Motocikli i kvadovi
 year: 2026
 servicesApplied:
   - paint-protection-film
@@ -36,15 +36,15 @@ image: image.jpg
 gallery: []
 date: 2026-08-10
 published: true
-translatedFrom: 4255214f2509c10f
+translatedFrom: af89137f883dcb61
 ---
 
-Оклеиваем мотоциклы, квадроциклы и другую технику — прозрачной плёнкой ради сохранности лака или цветной, если нужен другой вид.
+Оклеиваем мотоциклы, квадроциклы и другую технику: прозрачной пленкой ради сохранности лака или цветной, если нужен другой вид.
 
-Прозрачная защитная плёнка сохраняет оригинальное лакокрасочное покрытие и закрывает самые уязвимые элементы от царапин, мелких повреждений и грязи.
+Прозрачная защитная пленка сохраняет оригинальное лакокрасочное покрытие и закрывает самые уязвимые элементы от царапин, мелких повреждений и грязи.
 
-Цветная делает то же самое и заодно меняет внешний вид техники. Можно взять новый цвет, интересную фактуру или собрать индивидуальное оформление, а когда захочется перемен — переклеить. Хоть каждый год.
+Цветная делает то же самое и заодно меняет внешний вид техники. Можно взять новый цвет, интересную фактуру или собрать индивидуальное оформление, а когда захочется перемен, переклеить. Хоть каждый год.
 
-Привезти технику можно самим. Если неудобно — у нас есть **собственный транспорт и прицеп**: приедем, заберём мотоцикл или квадроцикл, сделаем работу и договоримся об удобном варианте возврата.
+Привезти технику можно самим. Если неудобно, у нас есть **собственный транспорт и прицеп**: приедем, заберем мотоцикл или квадроцикл, сделаем работу и договоримся об удобном варианте возврата.
 
 Работаем и по Белграду, и по остальной Сербии.

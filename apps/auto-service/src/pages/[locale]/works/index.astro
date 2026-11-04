@@ -6,7 +6,7 @@ import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { publishedWorks } from '@/utils/works';
+import { featuredWorks, sharedMakes } from '@/utils/works';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -16,7 +16,9 @@ export function getStaticPaths() {
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
-const works = publishedWorks(await getCollection('works'));
+const works = featuredWorks(await getCollection('works'));
+const makes = sharedMakes(works);
+const CHIP = 'chip shrink-0 aria-pressed:bg-ink aria-pressed:text-white';
 ---
 
 <Shell title={pages.works.metaTitle} description={pages.works.lead}>
@@ -24,15 +26,46 @@ const works = publishedWorks(await getCollection('works'));
     eyebrow={pages.works.eyebrow}
     heading={pages.works.heading}
     lead={pages.works.lead}
+    compact
+    desktopLead
     crumbs={[{ href: PathBuilder.works(locale), label: site.nav.works }]}
   />
 
-  <section class="wrap py-band md:py-band-lg">
+  <section class="wrap pt-6 pb-band md:py-band-lg">
     {
       works.length === 0 ? (
         <p class="card p-6 text-base text-muted">{site.common.emptyWorks}</p>
       ) : (
-        <WorkGrid works={works} eager={3} class="mt-0" />
+        <chip-filter class="block">
+          {makes.length > 0 && (
+            <div
+              role="group"
+              aria-label={pages.works.filterLabel}
+              class="-mx-5 mb-6 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0"
+            >
+              <button
+                type="button"
+                data-filter-chip
+                aria-pressed="true"
+                class={CHIP}
+              >
+                {pages.works.filterAll}
+              </button>
+              {makes.map((make) => (
+                <button
+                  type="button"
+                  data-filter-chip
+                  data-group={make.group}
+                  aria-pressed="false"
+                  class={CHIP}
+                >
+                  {make.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <WorkGrid works={works} eager={3} class="mt-0" />
+        </chip-filter>
       )
     }
   </section>
@@ -43,3 +76,9 @@ const works = publishedWorks(await getCollection('works'));
     body={pages.works.detailCtaBody}
   />
 </Shell>
+
+<script>
+  import { defineChipFilter } from '@podbor/site-kit/browser';
+
+  defineChipFilter();
+</script>

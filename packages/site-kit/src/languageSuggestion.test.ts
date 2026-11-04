@@ -15,7 +15,10 @@ const ALTERNATES = `
   <link rel="alternate" hreflang="x-default" href="https://approved.rs/ru/contacts/" />`;
 
 const BAR = `
+  <a data-lang-choice="ru" href="/ru/">ru</a>
+  <a data-lang-choice="en" href="/en/">en</a>
   <language-suggestion hidden>
+    <p data-lang-prompt></p>
     <a data-lang-link href="#"></a>
     <button type="button" data-lang-dismiss>×</button>
   </language-suggestion>`;
@@ -106,8 +109,58 @@ describe('<language-suggestion>', () => {
 
     expect(bar().hidden).toBe(false);
     expect(link().href).toBe('https://approved.rs/ru/contacts/');
-    expect(link().textContent).toBe('Показать на русском');
+    expect(link().textContent).toBe('Русский');
     expect(link().lang).toBe('ru');
+  });
+
+  it('says in the offered language that the page exists in it', () => {
+    render('sr', ['ru-RU']);
+    const prompt = document.querySelector('[data-lang-prompt]')!;
+
+    expect(prompt.textContent).toBe('Эта страница есть на русском');
+    expect(prompt.getAttribute('lang')).toBe('ru');
+    expect(bar().getAttribute('aria-label')).toBe(
+      'Эта страница есть на русском',
+    );
+  });
+
+  it('marks the switcher option it suggests, and only that one', () => {
+    render('sr', ['ru-RU']);
+    const marked = [
+      ...document.querySelectorAll('[data-lang-choice][data-lang-suggested]'),
+    ].map((option) => option.getAttribute('data-lang-choice'));
+
+    expect(marked).toEqual(['ru']);
+  });
+
+  it('unmarks the suggested option once dismissed', () => {
+    render('sr', ['ru-RU']);
+    document.querySelector<HTMLElement>('[data-lang-dismiss]')!.click();
+
+    expect(document.querySelector('[data-lang-suggested]')).toBeNull();
+  });
+
+  it('closes on Escape and remembers it like a dismissal', () => {
+    render('sr', ['ru-RU']);
+    link().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+
+    expect(bar().hidden).toBe(true);
+    expect(localStorage.getItem(LANGUAGE_SUGGESTION_STORAGE_KEY)).toBe('1');
+    expect(window.trackGoal).toHaveBeenCalledWith(GOALS.langOfferDismissed, {
+      from: 'sr',
+      to: 'ru',
+    });
+  });
+
+  it('ignores other keys', () => {
+    render('sr', ['ru-RU']);
+    link().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+    );
+
+    expect(bar().hidden).toBe(false);
   });
 
   it('labels the offer in the language it leads to, not the page language', () => {
@@ -118,7 +171,7 @@ describe('<language-suggestion>', () => {
         '<link rel="alternate" hreflang="de" href="https://approved.rs/de/contacts/" />',
     );
 
-    expect(link().textContent).toBe('Auf Deutsch anzeigen');
+    expect(link().textContent).toBe('Deutsch');
   });
 
   it('stays hidden for a visitor already on their language', () => {
@@ -179,6 +232,15 @@ describe('<language-suggestion>', () => {
     document.head.innerHTML = ALTERNATES;
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['ru']);
     document.body.innerHTML = `<language-suggestion hidden></language-suggestion>`;
+
+    expect(bar().hidden).toBe(true);
+  });
+
+  it('does nothing in markup that carries no prompt', () => {
+    document.documentElement.lang = 'sr';
+    document.head.innerHTML = ALTERNATES;
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['ru']);
+    document.body.innerHTML = `<language-suggestion hidden><a data-lang-link href="#"></a></language-suggestion>`;
 
     expect(bar().hidden).toBe(true);
   });

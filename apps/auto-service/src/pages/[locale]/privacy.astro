@@ -3,7 +3,6 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
-import { shopBuilt } from '@/utils/shopStatus';
 import { content } from '@/i18n/content';
 
 export function getStaticPaths() {
@@ -13,10 +12,7 @@ export function getStaticPaths() {
 const locale = localeFrom(Astro.url.pathname);
 const pages = content(locale).pages;
 const site = content(locale).site;
-const sections = [
-  ...pages.privacy.sections,
-  ...(shopBuilt() ? pages.privacy.shopSections : []),
-];
+const sections = pages.privacy.sections;
 ---
 
 <Shell
@@ -37,7 +33,7 @@ const sections = [
       {
         sections.map((section) => (
           <div class="flex flex-col gap-2 py-6">
-            <h2 class="text-base font-semibold text-ink">{section.title}</h2>
+            <h2 class="text-block font-semibold text-ink">{section.title}</h2>
             <p class="text-sm leading-relaxed text-muted sm:text-base">
               {section.text}
             </p>
@@ -47,15 +43,12 @@ const sections = [
     </div>
 
     <div class="mt-8 flex max-w-3xl flex-col gap-2">
-      <h2 class="text-base font-semibold text-ink">
+      <h2 class="text-block font-semibold text-ink">
         {pages.privacy.contactTitle}
       </h2>
       <p class="text-sm leading-relaxed text-muted">
         {pages.privacy.contactBefore}{' '}
-        <a
-          href={PathBuilder.contact(locale)}
-          class="text-signal-ink underline underline-offset-2"
-          >{site.nav.contact}</a
+        <a href={PathBuilder.contact(locale)} class="link">{site.nav.contact}</a
         >.
       </p>
     </div>

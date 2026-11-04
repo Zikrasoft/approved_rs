@@ -4,17 +4,6 @@ const privacySectionSchema = z
   .object({ title: z.string(), text: z.string() })
   .strict();
 
-const partsCategorySchema = z
-  .object({
-    name: z.string(),
-    metaTitle: z.string(),
-    metaDescription: z.string(),
-    lead: z.string(),
-    itemsHeading: z.string(),
-    items: z.array(z.string()).min(1),
-  })
-  .strict();
-
 export const pagesContentSchema = z
   .object({
     works: z
@@ -30,22 +19,27 @@ export const pagesContentSchema = z
         detailCtaVariants: z
           .array(z.object({ heading: z.string(), body: z.string() }))
           .min(1),
-        usefulInfoLabel: z.string(),
         doorHeading: z.string(),
         doorText: z.string(),
         doorButtonLabel: z.string(),
+        partsHeading: z.string(),
+        factCar: z.string(),
+        factDate: z.string(),
+        filterLabel: z.string(),
+        filterAll: z.string(),
+        relatedHeading: z.string(),
+        sourcingCta: z.object({ heading: z.string(), body: z.string() }),
       })
       .strict(),
     contact: z
       .object({
         metaTitle: z.string(),
         metaDescription: z.string(),
-        eyebrow: z.string(),
         heading: z.string(),
-        lead: z.string(),
         addressLabel: z.string(),
         hoursLabel: z.string(),
         mapHeading: z.string(),
+        openMap: z.string(),
         mapNote: z.string(),
         arrivalHeading: z.string(),
         arrival: z.array(z.string()),
@@ -57,8 +51,15 @@ export const pagesContentSchema = z
         metaDescription: z.string(),
         eyebrow: z.string(),
         heading: z.string(),
+        visitLabel: z.string(),
         body: z.string(),
         note: z.string(),
+        cta: z.string(),
+      })
+      .strict(),
+    thanksParts: z
+      .object({
+        body: z.string(),
         cta: z.string(),
       })
       .strict(),
@@ -69,7 +70,6 @@ export const pagesContentSchema = z
         heading: z.string(),
         lastUpdated: z.string(),
         sections: z.array(privacySectionSchema),
-        shopSections: z.array(privacySectionSchema),
         contactTitle: z.string(),
         contactBefore: z.string(),
       })
@@ -80,16 +80,14 @@ export const pagesContentSchema = z
         metaDescription: z.string(),
         heading: z.string(),
         lead: z.string(),
-        sitemapHeading: z.string(),
-        worksCountLabel: z.string(),
-        servicesCountLabel: z.string(),
-        contentHeading: z.string(),
-        contentText: z.string(),
+        teamHeading: z.string(),
+        team: z.array(z.string()),
+        equipmentHeading: z.string(),
+        equipment: z.array(z.string()),
+        makesHeading: z.string(),
+        makesLead: z.string(),
         ownerHeading: z.string(),
         ownerText: z.string(),
-        contactsHeading: z.string(),
-        contactsText: z.string(),
-        developerCredit: z.string(),
       })
       .strict(),
     notFound: z
@@ -97,6 +95,8 @@ export const pagesContentSchema = z
         metaTitle: z.string(),
         heading: z.string(),
         body: z.string(),
+        partsBody: z.string(),
+        writeUs: z.string(),
         cta: z.string(),
       })
       .strict(),
@@ -109,11 +109,22 @@ export const pagesContentSchema = z
         lead: z.string(),
         sourcingNote: z.string(),
         formHeading: z.string(),
+        formNote: z.string(),
         vinLabel: z.string(),
         vinPlaceholder: z.string(),
+        // TODO: drop vinNote and commentNote once the translate job has pruned them from the translations.
+        vinNote: z.string().optional(),
         commentLabel: z.string(),
         commentPlaceholder: z.string(),
-        commentNote: z.string(),
+        commentNote: z.string().optional(),
+        moreDetails: z.string(),
+        listHeading: z.string(),
+        listRemoveLabel: z.string(),
+        listQuantityLabel: z.string(),
+        listCarRemoveLabel: z.string(),
+        listMoreTemplate: z.string(),
+        llmsCatalogue: z.string(),
+        llmsCatalogueClosed: z.string(),
         stepsHeading: z.string(),
         steps: z
           .array(z.object({ heading: z.string(), body: z.string() }))
@@ -121,15 +132,26 @@ export const pagesContentSchema = z
         categoriesHeading: z.string(),
         categoriesLead: z.string(),
         categoryCta: z.string(),
-        categories: z
+        categoryOrderCta: z.string(),
+        category: z
           .object({
-            'maintenance-consumables': partsCategorySchema,
-            brakes: partsCategorySchema,
-            suspension: partsCategorySchema,
-            'engine-parts': partsCategorySchema,
-            electrics: partsCategorySchema,
-            transmission: partsCategorySchema,
-            'body-parts': partsCategorySchema,
+            eyebrow: z.string(),
+            metaTitleTemplate: z.string().includes('{name}'),
+            partsHeading: z.string(),
+            noParts: z.string(),
+            fieldsHeading: z.string(),
+            pageName: z.string().includes('{name}').includes('{page}'),
+            pagination: z.string(),
+            car: z
+              .object({
+                heading: z.string(),
+                make: z.string(),
+                makePlaceholder: z.string(),
+                model: z.string(),
+                modelPlaceholder: z.string(),
+                submit: z.string(),
+              })
+              .strict(),
           })
           .strict(),
       })

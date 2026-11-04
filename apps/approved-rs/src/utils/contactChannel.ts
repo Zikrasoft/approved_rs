@@ -1,12 +1,16 @@
 export { detectVisitorCountry } from '@podbor/site-kit/contact-preference';
 
-export const DATA_LEAD_SERVICE = 'data-lead-service';
-export const DATA_DEFAULT_SERVICE = 'data-default-service';
-export const DATA_OPEN_LEAD_MODAL = 'data-open-lead-modal';
-export const DATA_PAGE_LEAD_MODAL = 'data-page-lead-modal';
+import { OPEN_LEAD_MODAL_ATTRIBUTE } from '@podbor/site-kit/lead-form';
+
+export {
+  DEFAULT_SERVICE_ATTRIBUTE as DATA_DEFAULT_SERVICE,
+  LEAD_SERVICE_ATTRIBUTE as DATA_LEAD_SERVICE,
+  OPEN_LEAD_MODAL_ATTRIBUTE as DATA_OPEN_LEAD_MODAL,
+  PAGE_LEAD_MODAL_ATTRIBUTE as DATA_PAGE_LEAD_MODAL,
+} from '@podbor/site-kit/lead-form';
 
 export function leadModalTrigger(channel: string | true = true) {
-  return { [DATA_OPEN_LEAD_MODAL]: channel };
+  return { [OPEN_LEAD_MODAL_ATTRIBUTE]: channel };
 }
 
 export function callbackTrigger() {

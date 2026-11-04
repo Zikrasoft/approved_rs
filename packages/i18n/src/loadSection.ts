@@ -2,6 +2,7 @@ import { parse as parseYaml } from 'yaml';
 import type { ZodObject, z } from 'zod';
 import { isPlainObject } from './isPlainObject.ts';
 import { SOURCE_LOCALE } from './locales.ts';
+import { placeholderDiff } from './withPlaceholder.ts';
 
 function mergeOverSource(source: unknown, translation: unknown): unknown {
   if (!isPlainObject(source) || !isPlainObject(translation)) return translation;
@@ -11,6 +12,44 @@ function mergeOverSource(source: unknown, translation: unknown): unknown {
     merged.set(key, mergeOverSource(merged.get(key), value));
   }
   return Object.fromEntries(merged);
+}
+
+const samePlaceholders = (source: string, translated: string): boolean => {
+  const { dropped, invented } = placeholderDiff(source, translated);
+  return !dropped.length && !invented.length;
+};
+
+function keepSourcePlaceholders(
+  source: unknown,
+  translated: unknown,
+  path: string,
+  mismatched: string[],
+): unknown {
+  if (typeof translated === 'string') {
+    if (typeof source !== 'string' || samePlaceholders(source, translated)) {
+      return translated;
+    }
+    mismatched.push(path);
+    return source;
+  }
+  const children = (source as Record<string, unknown> | undefined) ?? {};
+  if (Array.isArray(translated)) {
+    return translated.map((item, i) =>
+      keepSourcePlaceholders(children[i], item, `${path}[${i}]`, mismatched),
+    );
+  }
+  if (!isPlainObject(translated)) return translated;
+  return Object.fromEntries(
+    Object.entries(translated).map(([key, value]) => [
+      key,
+      keepSourcePlaceholders(
+        children[key],
+        value,
+        path ? `${path}.${key}` : key,
+        mismatched,
+      ),
+    ]),
+  );
 }
 
 const issueLocation = (issue: z.core.$ZodIssue): string =>
@@ -47,7 +86,17 @@ export function createSectionLoader<L extends string>() {
           );
         }
         if (result.success) {
-          translations.set(locale, result.data as T);
+          const mismatched: string[] = [];
+          translations.set(
+            locale,
+            keepSourcePlaceholders(source, result.data, '', mismatched) as T,
+          );
+          if (mismatched.length > 0) {
+            console.warn(
+              `[i18n] ${locale}: placeholders differ from ${SOURCE_LOCALE}, serving ${SOURCE_LOCALE} for`,
+              mismatched.join(', '),
+            );
+          }
         } else {
           console.warn(
             `[i18n] ${locale}: dropped, falling back to ${SOURCE_LOCALE} —`,

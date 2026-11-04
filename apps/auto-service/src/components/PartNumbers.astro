@@ -1,0 +1,81 @@
+---
+import type { BrandNumber } from '@podbor/catalog-contract';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder } from '@/utils/paths';
+import { splitNumbers } from '@/utils/partNumbers';
+
+type Numbered = Pick<BrandNumber, 'type' | 'superseded' | 'value'> & {
+  slug: string;
+  brand: { name: string };
+};
+
+interface Props {
+  pages: Numbered[];
+  first?: Numbered;
+}
+
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const { current, previous } = splitNumbers(
+  Astro.props.pages,
+  Astro.props.first,
+);
+const [lead, ...others] = current;
+---
+
+<div class="flex flex-col gap-1">
+  {
+    lead && (
+      <ul class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <li>
+          <a
+            href={PathBuilder.partNumber(locale, lead.slug)}
+            class="inline-flex items-center gap-x-1 text-sm text-ink link-quiet pointer-coarse:min-h-11"
+          >
+            <span class="font-semibold">{lead.brand.name}</span>{' '}
+            <span class="spec whitespace-nowrap">{lead.value}</span>
+          </a>
+        </li>
+        {others.length > 0 && (
+          <li class="text-xs text-muted pointer-coarse:-mt-2 pointer-coarse:basis-full pointer-fine:contents">
+            <span class="pointer-fine:hidden">{copy.alsoNumbers} </span>
+            {others.map((page, index) => (
+              <>
+                {index > 0 && <span class="pointer-fine:hidden">, </span>}
+                <a
+                  href={PathBuilder.partNumber(locale, page.slug)}
+                  class="link-quiet pointer-fine:inline-flex pointer-fine:items-center pointer-fine:gap-x-1 pointer-fine:text-sm pointer-fine:text-ink"
+                >
+                  <span class="pointer-fine:font-semibold">
+                    {page.brand.name}
+                  </span>{' '}
+                  <span class="spec whitespace-nowrap">{page.value}</span>
+                </a>
+              </>
+            ))}
+          </li>
+        )}
+      </ul>
+    )
+  }
+  {
+    previous.length > 0 && (
+      <p class="text-xs text-muted">
+        {copy.earlierNumbers}{' '}
+        {previous.map((page, index) => (
+          <>
+            {index > 0 && ', '}
+            <a
+              href={PathBuilder.partNumber(locale, page.slug)}
+              class="link-quiet"
+            >
+              {page.brand.name}{' '}
+              <span class="spec whitespace-nowrap">{page.value}</span>
+            </a>
+          </>
+        ))}
+      </p>
+    )
+  }
+</div>

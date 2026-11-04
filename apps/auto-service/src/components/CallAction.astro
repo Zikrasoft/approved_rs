@@ -1,0 +1,27 @@
+---
+import ContactControl from './ContactControl.astro';
+import Icon from './Icon.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+
+interface Props {
+  class: string;
+  callbackClass?: string;
+}
+
+const { class: className, callbackClass = className } = Astro.props;
+const site = content(localeFrom(Astro.url.pathname)).site;
+---
+
+<ContactControl channel="phone" class={className}>
+  <Icon name="phone" size={16} class="shrink-0" />
+  {site.channels.call}
+</ContactControl>
+<slot />
+<a
+  href="#lead"
+  data-open-lead-modal="phone"
+  class:list={[callbackClass, 'pointer-coarse:hidden!']}
+>
+  {site.header.callback}
+</a>

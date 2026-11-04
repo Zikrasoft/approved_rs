@@ -1,0 +1,6 @@
+export const MAX_FIELD_LENGTH = 200;
+export const MAX_COMMENT_LENGTH = 2000;
+export const MAX_URL_LENGTH = 500;
+
+export const FAILED_CHECKOUTS_PER_CONTACT_HOUR = 3;
+export const SHOP_HANDOFFS_PER_CONTACT_HOUR = 3;

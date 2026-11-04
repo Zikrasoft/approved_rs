@@ -84,7 +84,7 @@ describe('productSchema', () => {
     description: 'Battery',
     price: 100,
     currency: 'RSD',
-    inStock: true,
+    availability: 'InStock' as const,
     condition: 'NewCondition',
     url: 'https://x.test/p',
   };
@@ -104,7 +104,9 @@ describe('productSchema', () => {
   });
 
   it('says out of stock and leaves out a missing image and brand', () => {
-    expect(jsonLdText(productSchema({ ...product, inStock: false }))).toBe(
+    expect(
+      jsonLdText(productSchema({ ...product, availability: 'OutOfStock' })),
+    ).toBe(
       '{"@context":"https://schema.org","@type":"Product","name":"Bosch S4","description":"Battery","offers":{"@type":"Offer","price":100,"priceCurrency":"RSD","availability":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition","url":"https://x.test/p"}}',
     );
   });

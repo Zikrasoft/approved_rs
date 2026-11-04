@@ -265,6 +265,15 @@ describe('POST /api/telegram-webhook', () => {
     ledgerStorage().seed({ operations: [], prompts: [] });
   });
 
+  it('fails loudly when TELEGRAM_WEBHOOK_SECRET is unset rather than refusing every update', async () => {
+    vi.stubEnv('TELEGRAM_WEBHOOK_SECRET', '');
+
+    await expect(POST(makeCtx({}))).rejects.toThrow(
+      'TELEGRAM_WEBHOOK_SECRET is not set',
+    );
+    vi.unstubAllEnvs();
+  });
+
   it('rejects a request without the secret token header', async () => {
     const res = await POST(makeCtx({}, {}));
     expect(res.status).toBe(401);
@@ -282,6 +291,19 @@ describe('POST /api/telegram-webhook', () => {
     const res = await POST(makeCtx('not json'));
     expect(res.status).toBe(200);
     expect(api.calls).toEqual([]);
+  });
+
+  it('acks a body past the size cap without handling it, and says so', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const res = await POST(
+      makeCtx({ update_id: 1, padding: 'a'.repeat(70_000) }),
+    );
+    expect(res.status).toBe(200);
+    expect(api.calls).toEqual([]);
+    expect(warn).toHaveBeenCalledWith(
+      '[telegram-webhook] ignoring an update past the size cap',
+    );
+    warn.mockRestore();
   });
 
   it.each([

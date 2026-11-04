@@ -9,6 +9,7 @@ import {
 } from './translateLeaves.ts';
 import { DEFAULT_TRANSLATE_MODEL } from './openaiChat.ts';
 import {
+  latin,
   sentPayloads,
   stubOpenAiFetch,
   stubOpenAiResponse,
@@ -73,16 +74,16 @@ describe('collectLeaves', () => {
 
   it('does not let a literal bracket in a key collide with an array index', () => {
     const leaves = collectLeaves({
-      'a[0]': { b: 'ЛИТЕРАЛ' },
-      a: [{ b: 'МАССИВ' }],
+      'a[0]': { b: 'LITERAL' },
+      a: [{ b: 'MASSIV' }],
     });
     expect(new Set(leaves.map((leaf) => leaf.path)).size).toBe(2);
     expect(
       assemble(
-        { 'a[0]': { b: 'ЛИТЕРАЛ' }, a: [{ b: 'МАССИВ' }] },
+        { 'a[0]': { b: 'LITERAL' }, a: [{ b: 'MASSIV' }] },
         new Map(leaves.map((leaf) => [leaf.path, leaf.text.toUpperCase()])),
       ),
-    ).toEqual({ 'a[0]': { b: 'ЛИТЕРАЛ' }, a: [{ b: 'МАССИВ' }] });
+    ).toEqual({ 'a[0]': { b: 'LITERAL' }, a: [{ b: 'MASSIV' }] });
   });
 
   it('does not read a string as a translated map of numeric keys', () => {
@@ -237,7 +238,7 @@ describe('translateLeaves', () => {
   const base = {
     systemPrompt: PROMPT,
     apiKey: 'k',
-    model: 'gpt-4o-mini',
+    model: 'gpt-6.1-sol',
     neverTranslated: false,
   };
 
@@ -254,8 +255,8 @@ describe('translateLeaves', () => {
       translationsAreCurrent: true,
     });
     expect(result.value).toEqual({
-      nav: { services: 'УСЛУГИ' },
-      lead: 'ОСТАВЬТЕ ЗАЯВКУ',
+      nav: { services: 'USLUGI' },
+      lead: 'OSTAVJTE ZAYVKU',
     });
     expect(result.requests).toBe(1);
     expect(Object.keys(block)).toHaveLength(2);
@@ -293,8 +294,8 @@ describe('translateLeaves', () => {
     });
     expect(second.requests).toBe(0);
     expect(second.value).toEqual({
-      nav: { services: 'УСЛУГИ' },
-      lead: 'ОСТАВЬТЕ ЗАЯВКУ',
+      nav: { services: 'USLUGI' },
+      lead: 'OSTAVJTE ZAYVKU',
     });
   });
 
@@ -341,7 +342,7 @@ describe('translateLeaves', () => {
       translationsAreCurrent: true,
     });
     expect(result.requests).toBe(0);
-    expect(result.value).toEqual({ list: ['ДВА', 'РАЗ'] });
+    expect(result.value).toEqual({ list: ['DVA', 'RAZ'] });
   });
 
   it('regenerates everything when the prompt changes', async () => {
@@ -449,7 +450,7 @@ describe('translateLeaves', () => {
       block,
       translationsAreCurrent: true,
     });
-    const handEdited = { nav: { services: 'Usluge' }, lead: 'ОСТАВЬТЕ ЗАЯВКУ' };
+    const handEdited = { nav: { services: 'Usluge' }, lead: 'OSTAVJTE ZAYVKU' };
     vi.unstubAllGlobals();
     stubTranslate((text) => text.toUpperCase());
     const adopted = await translateLeaves({
@@ -484,14 +485,14 @@ describe('translateLeaves', () => {
       translationsAreCurrent: false,
     });
     expect(result.requests).toBe(1);
-    expect(result.value).toEqual({ lead: 'НОВЫЙ ТЕКСТ' });
+    expect(result.value).toEqual({ lead: 'NOVYI TEKST' });
   });
 
   it('refuses a hand-edit that drops a placeholder, rather than wedging on it', async () => {
     stubOpenAiFetch((content) =>
       Object.fromEntries(
         Object.entries(JSON.parse(content) as Record<string, string>).map(
-          ([path, text]) => [path, `sr ${text}`],
+          ([path, text]) => [path, latin(`sr ${text}`)],
         ),
       ),
     );
@@ -528,12 +529,12 @@ describe('translateLeaves', () => {
     const result = await translateLeaves({
       ...base,
       source: { steps: ['Оценка', 'Осмотр'] },
-      existing: { steps: ['ОСМОТР', 'ОЦЕНКА'] },
+      existing: { steps: ['OSMOTR', 'OCENKA'] },
       block,
       translationsAreCurrent: false,
     });
     expect(result.requests).toBe(0);
-    expect(result.value).toEqual({ steps: ['ОЦЕНКА', 'ОСМОТР'] });
+    expect(result.value).toEqual({ steps: ['OCENKA', 'OSMOTR'] });
   });
 
   it('does not reattach translations by position when somebody edits the list', async () => {
@@ -547,7 +548,7 @@ describe('translateLeaves', () => {
       block,
       translationsAreCurrent: true,
     });
-    expect(result.value).toEqual({ steps: ['ОСМОТР', 'ОЦЕНКА', 'ВЫДАЧА'] });
+    expect(result.value).toEqual({ steps: ['OSMOTR', 'OCENKA', 'VYDACA'] });
     expect(Object.values(block)).not.toContain('OCENA');
   });
 
@@ -593,7 +594,7 @@ describe('translateLeaves', () => {
       translationsAreCurrent: true,
     });
     expect(result.requests).toBe(1);
-    expect(result.value).toEqual({ lead: 'ОСТАВЬТЕ ЗАЯВКУ' });
+    expect(result.value).toEqual({ lead: 'OSTAVJTE ZAYVKU' });
     expect(Object.values(block)).not.toContain('   ');
   });
 
@@ -608,7 +609,7 @@ describe('translateLeaves', () => {
       translationsAreCurrent: true,
     });
     expect(sentPayloads()).toEqual([{ filled: 'Текст' }]);
-    expect(result.value).toEqual({ filled: 'ТЕКСТ', blank: '   ' });
+    expect(result.value).toEqual({ filled: 'TEKST', blank: '   ' });
   });
 
   it('reports every key it used, so the caller can prune the rest', async () => {
@@ -681,6 +682,55 @@ describe('translateLeaves', () => {
     expect(result.value).toEqual({ nav: { services: 'ok' }, lead: 'ok' });
   });
 
+  it('retranslates a hand-written value left in Cyrillic', async () => {
+    stubTranslate((text) => `sr ${text}`);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const block = {};
+    const result = await translateLeaves({
+      ...base,
+      source: { author: 'Михаил' },
+      existing: { author: 'Михаил' },
+      neverTranslated: true,
+      block,
+      translationsAreCurrent: true,
+    });
+    expect(result.requests).toBe(1);
+    expect(result.value).toEqual({ author: 'sr Mihail' });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('ignoring hand-written author'),
+    );
+    warn.mockRestore();
+  });
+
+  it('retranslates a cached value left in Cyrillic', async () => {
+    stubTranslate((text) => `sr ${text}`);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const block = {};
+    await translateLeaves({
+      ...base,
+      source: { size: '99 мм' },
+      existing: undefined,
+      block,
+      translationsAreCurrent: true,
+    });
+    const key = Object.keys(block)[0] as string;
+    (block as Record<string, string>)[key] = '99 мм';
+
+    const result = await translateLeaves({
+      ...base,
+      source: { size: '99 мм' },
+      existing: undefined,
+      block,
+      translationsAreCurrent: true,
+    });
+    expect(result.requests).toBe(1);
+    expect(result.value).toEqual({ size: 'sr 99 mm' });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('discarding cached size'),
+    );
+    warn.mockRestore();
+  });
+
   it('gives up loudly after three garbled attempts, caching nothing', async () => {
     stubOpenAiResponse({ 'nav.services': 'Uslугi', lead: 'x' });
     const block = {};
@@ -692,7 +742,7 @@ describe('translateLeaves', () => {
         block,
         translationsAreCurrent: true,
       }),
-    ).rejects.toThrow('mixes Latin and Cyrillic');
+    ).rejects.toThrow('contains Cyrillic letters');
     expect(block).toEqual({});
   });
   it('regenerates instead of adopting when only the prompt changed', async () => {
@@ -718,8 +768,8 @@ describe('translateLeaves', () => {
     });
     expect(result.requests).toBe(1);
     expect(result.value).toEqual({
-      nav: { services: 'sr Услуги' },
-      lead: 'sr Оставьте заявку',
+      nav: { services: 'sr Uslugi' },
+      lead: 'sr Ostavjte zayvku',
     });
   });
 
@@ -740,7 +790,7 @@ describe('translateLeaves', () => {
     const result = await translateLeaves({
       ...base,
       source: SOURCE,
-      existing: { nav: { services: 'Usluge' }, lead: 'ОСТАВЬТЕ ЗАЯВКУ' },
+      existing: { nav: { services: 'Usluge' }, lead: 'OSTAVJTE ZAYVKU' },
       block,
       translationsAreCurrent: false,
     });
@@ -792,8 +842,8 @@ describe('translateLeaves', () => {
     });
     expect(sentPayloads()).toEqual([{ 'hero.cta': 'Что входит' }]);
     expect(result.value).toEqual({
-      hero: { cta: 'ЧТО ВХОДИТ' },
-      plans: { cta: 'ЧТО ВХОДИТ' },
+      hero: { cta: 'CTO VHODIT' },
+      plans: { cta: 'CTO VHODIT' },
     });
     expect(Object.keys(block)).toHaveLength(1);
   });
@@ -822,7 +872,7 @@ describe('translateLeaves', () => {
       translationsAreCurrent: true,
     });
     expect(result.requests).toBe(1);
-    expect(result.value).toEqual({ lead: 'ОСТАВЬТЕ ЗАЯВКУ' });
+    expect(result.value).toEqual({ lead: 'OSTAVJTE ZAYVKU' });
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('discarding cached lead'),
     );
@@ -856,7 +906,7 @@ describe('translateLeaves', () => {
         block,
         translationsAreCurrent: true,
       }),
-    ).rejects.toThrow('mixes Latin and Cyrillic');
+    ).rejects.toThrow('contains Cyrillic letters');
     expect(block).toEqual({});
     warn.mockRestore();
   });

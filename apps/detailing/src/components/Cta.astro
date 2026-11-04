@@ -16,8 +16,7 @@ const {
   class: className = '',
 } = Astro.props;
 
-const base =
-  'cta group relative inline-flex items-center gap-3 rounded-full pl-6 pr-2 py-2 text-sm font-semibold tracking-tight transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]';
+const base = `cta group relative inline-flex items-center gap-3 rounded-full text-sm font-semibold tracking-tight transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] ${href ? 'pl-6 pr-2 py-2' : 'px-6 py-3.5'}`;
 const skin =
   variant === 'solid'
     ? 'bg-chalk text-void hover:bg-champagne'
@@ -37,10 +36,14 @@ const Tag = href ? 'a' : 'button';
   data-open-lead-modal={openModal ? '' : undefined}
 >
   <span>{label}</span>
-  <span
-    class={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105 ${knob}`}
-    aria-hidden="true"
-  >
-    <Icon name="arrow" />
-  </span>
+  {
+    href && (
+      <span
+        class={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105 ${knob}`}
+        aria-hidden="true"
+      >
+        <Icon name="arrow" />
+      </span>
+    )
+  }
 </Tag>

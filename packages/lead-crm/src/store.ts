@@ -1,6 +1,6 @@
+import { logError } from './logError.ts';
 import { z } from 'zod';
-import { channelLabel } from './channelLabels.ts';
-import { isPhoneContact, isTelegramIdContact } from './contactShape.ts';
+import { isPhoneContact } from './contactShape.ts';
 import { inWorkStatus, isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
@@ -14,8 +14,15 @@ import type { PromptKey } from './promptKey.ts';
 import type { StoredLeadSchema } from './schema.ts';
 import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
 import { retryOnConflict } from './storage/retry.ts';
+import { FAILED_CHECKOUTS_PER_CONTACT_HOUR } from './limits.ts';
 import { LEADS_PATH } from './quarantine.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
+import {
+  appendNote,
+  hasRealContact,
+  isPlaceholderContact,
+  mergedLead,
+} from './leadMerge.ts';
 
 export const VISITOR_MERGE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -110,8 +117,13 @@ export interface LeadStoreOptions {
   storage: LeadStorage;
   schema: StoredLeadSchema;
   quarantine?: (entries: unknown[]) => Promise<void>;
-  beforeWrite?: () => Promise<void>;
+  alertLeadCount?: (count: number) => Promise<void>;
+  standaloneServices?: readonly string[];
 }
+
+const HOUR_MS = 60 * 60 * 1000;
+
+export const LEAD_COUNT_ALERTS: readonly number[] = [5000, 10000];
 
 const promptedAt =
   ({ chatId, messageId }: PromptKey) =>
@@ -119,16 +131,73 @@ const promptedAt =
     lead.pendingPrompt?.chatId === chatId &&
     lead.pendingPrompt?.messageId === messageId;
 
-export function isPlaceholderContact(contact: string): boolean {
-  return contact === '' || contact === '—';
-}
-
 export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 
 export const TOPIC_IDLE_MS = DAY_MS;
 
 function untouched(lead: StoredLead): boolean {
   return lead.status === 'new' && lead.lastActivityAt == null;
+}
+
+type MergeTarget =
+  | { kind: 'same-order'; lead: StoredLead }
+  | { kind: 'failed-checkout'; lead: StoredLead }
+  | { kind: 'merge'; lead: StoredLead }
+  | { kind: 'new' };
+
+function isFailedCheckoutOf(
+  lead: LeadInput,
+  standaloneServices: readonly string[],
+): boolean {
+  return standaloneServices.includes(lead.service) && !lead.orderId;
+}
+
+function mergeTarget(
+  data: LeadInput,
+  leads: StoredLead[],
+  now: number,
+  standaloneServices: readonly string[],
+): MergeTarget {
+  const isStandalone = (service: string) =>
+    standaloneServices.includes(service);
+  const isFailedCheckout = (lead: LeadInput) =>
+    isFailedCheckoutOf(lead, standaloneServices);
+  const ours = leads.filter((l) => l.brand === data.brand);
+
+  const placed = data.orderId
+    ? ours.find((l) => l.orderId === data.orderId)
+    : undefined;
+  if (placed) return { kind: 'same-order', lead: placed };
+
+  const failed = isStandalone(data.service)
+    ? ours
+        .filter(
+          (l) =>
+            isFailedCheckout(l) &&
+            !isClosed(l) &&
+            isFreshLead(l, now) &&
+            ((data.visitorId != null && l.visitorId === data.visitorId) ||
+              (hasRealContact(data.contact) && l.contact === data.contact)),
+        )
+        .at(-1)
+    : undefined;
+  if (failed) return { kind: 'failed-checkout', lead: failed };
+
+  const apart = (l: StoredLead) =>
+    [data.service, l.service].some(isStandalone) &&
+    !isPlaceholderContact(data.contact) &&
+    !isPlaceholderContact(l.contact);
+  const visited = data.visitorId
+    ? ours.find(
+        (l) =>
+          l.visitorId === data.visitorId &&
+          untouched(l) &&
+          isFreshLead(l, now) &&
+          (data.telegramId == null || isPlaceholderContact(l.contact)) &&
+          !apart(l),
+      )
+    : undefined;
+  return visited ? { kind: 'merge', lead: visited } : { kind: 'new' };
 }
 
 function isIdleTopic(lead: StoredLead, now: Date): boolean {
@@ -142,15 +211,6 @@ function isIdleTopic(lead: StoredLead, now: Date): boolean {
 
 function pickedServices(services: string[]) {
   return { service: services[0] ?? '', services };
-}
-
-function contactRank(contact: string): number {
-  if (isPlaceholderContact(contact)) return 0;
-  return isTelegramIdContact(contact) ? 1 : 2;
-}
-
-export function hasRealContact(contact: string): boolean {
-  return contactRank(contact) === 2;
 }
 
 function isGhostLead(lead: StoredLead, now: Date): boolean {
@@ -184,24 +244,6 @@ function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
       ? { ...l, capturePrompt: null }
       : l,
   );
-}
-
-const MAX_STORED_COMMENT_LENGTH = 4000;
-
-function triedLabel(data: LeadInput): string {
-  if (data.services?.length) return data.services.join(', ');
-  if (data.service) return data.service;
-  return data.kind === 'call_click' && data.contactChannel
-    ? channelLabel(data.contactChannel)
-    : '';
-}
-
-export function appendNote(
-  comment: string | null | undefined,
-  note: string,
-): string {
-  const next = comment ? `${comment}\n${note}` : note;
-  return next.slice(-MAX_STORED_COMMENT_LENGTH);
 }
 
 export function canPostpone(lead: StoredLead): boolean {
@@ -259,7 +301,8 @@ export function createLeadStore({
   storage,
   schema,
   quarantine,
-  beforeWrite,
+  alertLeadCount,
+  standaloneServices = [],
 }: LeadStoreOptions) {
   function newStoredLead(data: LeadInput, id: number): StoredLead {
     const now = new Date().toISOString();
@@ -314,7 +357,6 @@ export function createLeadStore({
       };
       if (JSON.stringify(next) === JSON.stringify(current))
         return { next, unreadable };
-      await beforeWrite?.();
       await storage.write(
         [...next.leads, ...next.digests, ...unreadable],
         version,
@@ -383,9 +425,19 @@ export function createLeadStore({
     try {
       await quarantine(entries);
     } catch (error) {
-      console.error('[lead-crm] could not copy the unreadable records', {
+      logError('[lead-crm] could not copy the unreadable records', error, {
         count: entries.length,
-        error,
+      });
+    }
+  }
+
+  async function alertOnThreshold(count: number): Promise<void> {
+    if (!alertLeadCount || !LEAD_COUNT_ALERTS.includes(count)) return;
+    try {
+      await alertLeadCount(count);
+    } catch (error) {
+      logError('[lead-crm] could not send the Lead count alert', error, {
+        count,
       });
     }
   }
@@ -409,79 +461,48 @@ export function createLeadStore({
       return inserted;
     },
 
+    async failedCheckoutCapped(
+      brand: string,
+      contact: string,
+    ): Promise<boolean> {
+      const since = Date.now() - HOUR_MS;
+      const recent = (await readLeads()).filter(
+        (lead) =>
+          lead.brand === brand &&
+          lead.contact === contact &&
+          isFailedCheckoutOf(lead, standaloneServices) &&
+          Date.parse(lead.createdAt) >= since,
+      );
+      return recent.length >= FAILED_CHECKOUTS_PER_CONTACT_HOUR;
+    },
+
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
       let outcome!: MergeOutcome;
+      let count = 0;
       await updateLeads((leads, idFloor) => {
+        count = 0;
         const now = Date.now();
-        const existing = data.visitorId
-          ? leads.find(
-              (l) =>
-                l.visitorId === data.visitorId &&
-                l.brand === data.brand &&
-                untouched(l) &&
-                isFreshLead(l, now) &&
-                (data.telegramId == null || isPlaceholderContact(l.contact)),
-            )
-          : undefined;
-
-        if (!existing) {
+        const target = mergeTarget(data, leads, now, standaloneServices);
+        if (target.kind === 'same-order') {
+          outcome = { lead: target.lead, merged: true, before: target.lead };
+          return leads;
+        }
+        if (target.kind === 'new') {
           const inserted = newStoredLead(data, nextId(leads, idFloor));
           outcome = { lead: inserted, merged: false, before: null };
+          count = leads.length + 1;
           return supersede([...leads, inserted], inserted);
         }
-
-        const upgradeContact =
-          contactRank(data.contact) > contactRank(existing.contact);
-        const botHandOff =
-          (data.telegramId ?? existing.telegramId) != null &&
-          data.contactChannel === existing.contactChannel;
-        const tried = botHandOff ? '' : triedLabel(data);
-        const clickedFirst =
-          upgradeContact &&
-          !botHandOff &&
-          existing.kind === 'call_click' &&
-          existing.contactChannel
-            ? channelLabel(existing.contactChannel)
-            : null;
-        const merged: StoredLead = {
-          ...existing,
-          ...(upgradeContact
-            ? {
-                name: data.name || existing.name,
-                contact: data.contact,
-                contactChannel: data.contactChannel ?? existing.contactChannel,
-                service: data.service || existing.service,
-                services: data.services?.length
-                  ? data.services
-                  : existing.services,
-                kind: data.kind ?? existing.kind,
-              }
-            : {}),
-          source_url: existing.source_url ?? data.source_url,
-          telegramId: data.telegramId ?? existing.telegramId,
-          referredBy: data.referredBy ?? existing.referredBy,
-          adSource: existing.adSource ?? data.adSource ?? null,
-          metaIds: existing.metaIds ?? data.metaIds ?? null,
-          capturePrompt: data.capturePrompt ?? existing.capturePrompt,
-          visitorActiveAt:
-            data.telegramId == null
-              ? existing.visitorActiveAt
-              : new Date(now).toISOString(),
-          comment: appendNote(
-            existing.comment,
-            [
-              clickedFirst ? `Сначала кликнул: ${clickedFirst}` : '',
-              tried ? `Также пробовал: ${tried}` : '',
-              data.comment?.trim(),
-            ]
-              .filter(Boolean)
-              .join('\n'),
-          ),
-        };
+        const existing = target.lead;
+        const merged = mergedLead(existing, data, {
+          takesOver: target.kind === 'failed-checkout' && data.orderId != null,
+          at: new Date(now),
+        });
         outcome = { lead: merged, merged: true, before: existing };
         const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
         return data.telegramId == null ? replaced : supersede(replaced, merged);
       });
+      await alertOnThreshold(count);
       return outcome;
     },
 
@@ -540,6 +561,52 @@ export function createLeadStore({
           ...l,
           ...(l.status === 'postponed' ? resumePatch(l) : {}),
           ...statusPatch(status),
+        }),
+      );
+    },
+
+    settleOrder(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderSettled: status,
+      }));
+    },
+
+    markOrderConflict(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderConflict: status,
+      }));
+    },
+
+    markOrderStuck(
+      id: number,
+      status: 'won' | 'lost',
+    ): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, status, (l) => ({
+        ...l,
+        orderStuck: status,
+      }));
+    },
+
+    loseOrderLead(orderId: string): Promise<StoredLead | undefined> {
+      return updateMatching(
+        (l) => l.orderId === orderId && l.status !== 'won',
+        (l) => ({
+          ...l,
+          ...(l.status === 'lost'
+            ? {}
+            : {
+                ...(l.status === 'postponed' ? resumePatch(l) : {}),
+                ...statusPatch('lost'),
+              }),
+          orderSettled: 'lost',
         }),
       );
     },

@@ -1,5 +1,6 @@
 import type { CountryCode } from 'libphonenumber-js/min';
 import type { TrackedContactChannel } from './contactChannel.ts';
+import { typedAsPhone } from './contactShape.ts';
 import {
   bindPhoneCountry,
   fillCountrySelect,
@@ -12,6 +13,7 @@ import {
   showContactValue,
 } from './phoneKit.ts';
 import { submitLeadForm } from './submitLeadForm.ts';
+import { CONTACT_INPUT_FIELDS } from './fields.ts';
 
 export interface LeadFormDeps {
   visitorId: () => string;
@@ -52,12 +54,12 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   const telegram = pick<HTMLInputElement>('[data-telegram]');
   const country = pick<HTMLSelectElement>('[data-country]');
   const phone = pick<HTMLInputElement>('[data-phone]');
-  const consent = pick<HTMLInputElement>('[data-consent]');
+  const consent = form.querySelector<HTMLInputElement>('[data-consent]');
   const contact = pick<HTMLInputElement>(
-    'input[type="hidden"][name="contact"]',
+    `input[type="hidden"][name="${CONTACT_INPUT_FIELDS.contact}"]`,
   );
   const channelField = pick<HTMLInputElement>(
-    'input[type="hidden"][name="contact_channel"]',
+    `input[type="hidden"][name="${CONTACT_INPUT_FIELDS.channel}"]`,
   );
   const button = pick<HTMLButtonElement>('button[type="submit"]');
   const submitLabel = pick('[data-submit-label]');
@@ -67,13 +69,15 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   const panels = Array.from(
     form.querySelectorAll<HTMLElement>('[data-panel]:not([data-tab])'),
   );
-  const controls = { telegram, phone, consent };
+  const controls = { telegram, phone, consent: consent! };
   const errors = {
     telegram: pick('[data-error-telegram]'),
     phone: pick('[data-error-phone]'),
     consent: pick('[data-error-consent]'),
   };
 
+  const phoneErrorText = errors.phone.textContent;
+  const telegramErrorText = errors.telegram.textContent;
   let channel = channelField.value as TrackedContactChannel;
   const contactField = (): ValidatedField =>
     channel === 'telegram' ? 'telegram' : 'phone';
@@ -132,10 +136,9 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
   bindPhoneCountry(country, phone);
 
   const preferred = deps.preferredChannel?.();
-  selectTab(
-    tabs.find((tab) => tab.dataset.tab === preferred) ??
-      tabs.find((tab) => tab.dataset.tab === channel)!,
-  );
+  const preferredTab = tabs.find((tab) => tab.dataset.tab === preferred);
+  preferredTab?.parentElement?.prepend(preferredTab);
+  selectTab(preferredTab ?? tabs.find((tab) => tab.dataset.tab === channel)!);
 
   tabs.forEach((tab) =>
     tab.addEventListener('click', (event) => {
@@ -190,11 +193,19 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
     const kit = phoneKit();
     const contactValid =
       typed.length > 0 && (!kit || kit.isValidContact(contact.value, channel));
+    errors.phone.textContent =
+      (!contactValid && kit?.tooLong(contact.value)
+        ? errors.phone.dataset.tooLong
+        : null) ?? phoneErrorText;
+    errors.telegram.textContent =
+      (typed && !typedAsPhone(typed)
+        ? errors.telegram.dataset.badHandle
+        : null) ?? telegramErrorText;
     mark(field, contactValid);
-    mark('consent', consent.checked);
+    if (consent) mark('consent', consent.checked);
 
-    if (!contactValid || !consent.checked) {
-      (contactValid ? consent : input).focus();
+    if (!contactValid || consent?.checked === false) {
+      (contactValid ? consent! : input).focus();
       return;
     }
 
@@ -204,6 +215,8 @@ function arm(form: HTMLFormElement, deps: LeadFormDeps): void {
       if (sent) return;
       setBusy(false);
       submitError.hidden = false;
+      submitError.tabIndex = -1;
+      submitError.focus();
     });
   });
 }

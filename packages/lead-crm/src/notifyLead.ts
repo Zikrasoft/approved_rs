@@ -1,3 +1,4 @@
+import { logError } from './logError.ts';
 import {
   isClosed,
   type LeadInput,
@@ -29,8 +30,7 @@ export function createEnsureLeadCard({
           messageId,
         });
     } catch (err) {
-      console.error('[lead-crm] failed to persist the group card id', {
-        error: err,
+      logError('[lead-crm] failed to persist the group card id', err, {
         leadId: lead.id,
         messageId,
       });
@@ -67,8 +67,7 @@ export function createEnsureLeadTopic({
 
   async function dropDuplicate(lead: StoredLead, topicId: number) {
     await notifier.deleteLeadTopic(topicId).catch((error: unknown) => {
-      console.error('[lead-crm] could not delete a duplicate topic', {
-        error,
+      logError('[lead-crm] could not delete a duplicate topic', error, {
         leadId: lead.id,
         topicId,
       });
@@ -102,8 +101,7 @@ export function createTouchLeadTopic({
       try {
         await notifier.reopenLeadTopic(lead);
       } catch (error) {
-        console.error('[lead-crm] could not reopen the topic', {
-          error,
+        logError('[lead-crm] could not reopen the topic', error, {
           leadId: lead.id,
         });
         return lead;
@@ -124,8 +122,7 @@ export function createCloseLeadTopic({
       await store.closeTopic(lead.id);
       return true;
     } catch (error) {
-      console.error('[lead-crm] could not close the topic', {
-        error,
+      logError('[lead-crm] could not close the topic', error, {
         leadId: lead.id,
       });
       return false;
@@ -147,6 +144,7 @@ interface AfterStatusChangeOptions {
     'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
   dropFromDigest: (leadId: number) => Promise<void>;
+  settleOrder: (lead: StoredLead) => Promise<void>;
 }
 
 export function createDropFromDigest({
@@ -162,10 +160,7 @@ export function createDropFromDigest({
     try {
       await notifier.editDigest(left);
     } catch (error) {
-      console.error('[lead-crm] could not redraw the digest', {
-        error,
-        leadId,
-      });
+      logError('[lead-crm] could not redraw the digest', error, { leadId });
     }
   };
 }
@@ -176,12 +171,12 @@ export function createAfterStatusChange({
   closeLeadTopic,
   notifier,
   dropFromDigest,
+  settleOrder,
 }: AfterStatusChangeOptions) {
   async function refreshTopic(lead: StoredLead): Promise<StoredLead> {
     if (lead.topicId == null) return lead;
     return ensureLeadTopic(lead).catch((error: unknown) => {
-      console.error('[lead-crm] could not refresh the topic summary', {
-        error,
+      logError('[lead-crm] could not refresh the topic summary', error, {
         leadId: lead.id,
       });
       return lead;
@@ -193,6 +188,7 @@ export function createAfterStatusChange({
     { surface, author }: StatusChangeOptions = {},
   ): Promise<void> {
     await ensureLeadCard(lead);
+    await settleOrder(lead);
     const current = await refreshTopic(lead);
     if (isClosed(lead)) {
       await notifier.unpinLeadCard(lead);
@@ -252,18 +248,20 @@ export function createNotifyLead({
     try {
       ({ lead, merged } = await store.insertOrMergeLead(data));
     } catch (err) {
-      console.error(
+      logError(
         `${logPrefix} store insertLead failed, notifying without CRM tracking`,
-        { error: err, ...leadTrace(data) },
+        err,
+        { ...leadTrace(data) },
       );
       stored = false;
       try {
         lead = store.newStoredLead(data, Date.now());
       } catch (fallbackErr) {
-        console.error(`${logPrefix} lead failed validation, cannot notify`, {
-          error: fallbackErr,
-          ...leadTrace(data),
-        });
+        logError(
+          `${logPrefix} lead failed validation, cannot notify`,
+          fallbackErr,
+          { ...leadTrace(data) },
+        );
         return { stored, delivered: false };
       }
     }
@@ -275,8 +273,7 @@ export function createNotifyLead({
       try {
         await notifier.refreshLeadCard(lead);
       } catch (err) {
-        console.error(`${logPrefix} failed to refresh the merged lead's card`, {
-          error: err,
+        logError(`${logPrefix} failed to refresh the merged lead's card`, err, {
           leadId: lead.id,
         });
       }
@@ -290,16 +287,14 @@ export function createNotifyLead({
       try {
         await store.setTelegramMessage(lead.id, chatId, messageId);
       } catch (err) {
-        console.error(`${logPrefix} failed to persist telegram message id`, {
-          error: err,
+        logError(`${logPrefix} failed to persist telegram message id`, err, {
           leadId: lead.id,
         });
       }
       console.log(`${logPrefix} notifyLead finished`);
       return { stored, delivered: true };
     } catch (err) {
-      console.error(`${logPrefix} Telegram notification failed`, {
-        error: err,
+      logError(`${logPrefix} Telegram notification failed`, err, {
         leadId: lead.id,
         ...leadTrace(lead),
       });

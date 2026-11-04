@@ -2,20 +2,28 @@
 import { Image } from 'astro:assets';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-import { localizedWork, type Work } from '@/utils/works';
+import { localizedWork, titleNamesCar, type Work } from '@/utils/works';
 import { isServiceSlug } from '@/utils/services';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { content } from '@/i18n/content';
 
 interface Props {
   work: Work;
   eager?: boolean;
+  tags?: boolean;
+  sizes?: string;
 }
 
-const { work, eager = false } = Astro.props;
+const {
+  work,
+  eager = false,
+  tags = true,
+  sizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)',
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const { title, car } = localizedWork(work, locale);
 const services = content(locale).services;
-const applied = work.data.servicesApplied
+const applied = (tags ? work.data.servicesApplied : [])
   .filter(isServiceSlug)
   .map((slug) => services[slug].name);
 ---
@@ -28,21 +36,25 @@ const applied = work.data.servicesApplied
     src={work.data.image}
     alt={title}
     widths={[360, 560, 760, 1080]}
-    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)"
+    sizes={coverSizes(sizes, coverScale(work.data.image, 4 / 3))}
     quality={68}
     loading={eager ? 'eager' : 'lazy'}
-    class="aspect-[4/3] w-full object-cover"
+    class="aspect-[4/3] w-full object-cover object-[50%_40%]"
   />
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">
-    <h3 class="text-base font-semibold leading-snug text-ink">{title}</h3>
-    <span class="spec text-xs text-muted">
-      {car}{work.data.year ? ` · ${work.data.year}` : ''}
-    </span>
+    <h3 class="font-semibold text-ink">{title}</h3>
+    {
+      !titleNamesCar(title, car) && (
+        <span class="spec text-xs text-muted">
+          {`${car}${work.data.year ? ` · ${work.data.year}` : ''}`}
+        </span>
+      )
+    }
     {
       applied.length > 0 && (
         <ul class="mt-auto flex flex-wrap gap-1.5 pt-2">
           {applied.map((name) => (
-            <li class="spec rounded-full border border-line px-2.5 py-0.5 text-[0.6875rem] text-muted">
+            <li class="spec rounded-pill border border-line px-2.5 py-0.5 text-[0.6875rem] text-muted">
               {name}
             </li>
           ))}

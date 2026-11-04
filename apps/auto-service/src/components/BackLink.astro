@@ -1,0 +1,13 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  class?: string;
+}
+
+const { href, label, class: className } = Astro.props;
+---
+
+<a href={href} class:list={['btn btn-secondary w-fit', className]}>
+  {label}
+</a>

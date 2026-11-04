@@ -1,46 +1,45 @@
+import { z } from 'zod';
 import countriesData from '@/data/countries.json';
 import citiesData from '@/data/cities.json';
 
-interface CountryNames {
-  name: string;
-  nameGenitive: string;
-  nameLocative: string;
-  nameAccusative: string;
-}
-interface CountryNamesEn {
-  name: string;
-}
-interface CityNames {
-  name: string;
-  nameLocative: string;
-}
-interface CityNamesEn {
-  name: string;
-}
+const countryNamesSchema = z.object({
+  name: z.string(),
+  nameGenitive: z.string(),
+  nameLocative: z.string(),
+  nameAccusative: z.string(),
+});
+const cityNamesSchema = z.object({
+  name: z.string(),
+  nameLocative: z.string(),
+});
+const englishNameSchema = z.object({ name: z.string() });
 
-export interface Country {
-  code: string;
-  ru: CountryNames;
-  en: CountryNamesEn;
-  sr: CountryNames;
-  es: CountryNamesEn;
-  de: CountryNamesEn;
-  active: boolean;
-}
+const countrySchema = z.object({
+  code: z.string(),
+  ru: countryNamesSchema,
+  en: englishNameSchema,
+  sr: countryNamesSchema,
+  es: englishNameSchema,
+  de: englishNameSchema,
+  active: z.boolean(),
+});
 
-export interface City {
-  slug: string;
-  ru: CityNames;
-  en: CityNamesEn;
-  sr: CityNames;
-  es: CityNamesEn;
-  de: CityNamesEn;
-  country: string;
-  active: boolean;
-}
+const citySchema = z.object({
+  slug: z.string(),
+  ru: cityNamesSchema,
+  en: englishNameSchema,
+  sr: cityNamesSchema,
+  es: englishNameSchema,
+  de: englishNameSchema,
+  country: z.string(),
+  active: z.boolean(),
+});
 
-const countries = countriesData as Country[];
-const cities = citiesData as City[];
+export type Country = z.infer<typeof countrySchema>;
+export type City = z.infer<typeof citySchema>;
+
+const countries = z.array(countrySchema).parse(countriesData);
+const cities = z.array(citySchema).parse(citiesData);
 
 export const getActiveCountries = (): Country[] =>
   countries.filter((c) => c.active);

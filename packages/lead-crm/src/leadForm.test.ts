@@ -14,7 +14,7 @@ let tags = 0;
 
 const CHANNELS = ['whatsapp', 'viber', 'telegram', 'phone'] as const;
 
-function markup(tag: string, selected = 'whatsapp'): string {
+function markup(tag: string, selected = 'whatsapp', consent = false): string {
   const tabs = CHANNELS.map(
     (channel) =>
       `<button type="button" data-tab="${channel}" data-panel="${channel === 'telegram' ? 'telegram' : 'phone'}" aria-selected="${channel === selected}">${channel}</button>`,
@@ -29,15 +29,15 @@ function markup(tag: string, selected = 'whatsapp'): string {
     <input type="hidden" name="contact">
     <input type="hidden" name="contact_channel" value="${selected}">
     <div role="tablist">${tabs}</div>
-    <div data-panel="telegram"><input data-telegram><p data-error-telegram hidden></p></div>
+    <div data-panel="telegram"><input data-telegram><p data-error-telegram data-bad-handle="Bad handle" hidden>Empty</p></div>
     <div data-panel="phone">
       <select data-country data-display-locale="en">
         <option value="RS" data-dial="381" selected>RS</option>
         <option value="DE" data-dial="49">DE</option>
       </select>
-      <input data-phone><p data-error-phone hidden></p>
+      <input data-phone><p data-error-phone data-too-long="Too long" hidden>Incomplete</p>
     </div>
-    <input type="checkbox" data-consent><p data-error-consent hidden></p>
+    ${consent ? '<input type="checkbox" data-consent><p data-error-consent hidden></p>' : ''}
     <p data-error-submit hidden></p>
     <button type="submit"><span data-submit-label>Send</span></button>
   </form>
@@ -57,10 +57,12 @@ function deps(overrides: Partial<LeadFormDeps> = {}): LeadFormDeps {
   };
 }
 
-function mount(options: { deps?: LeadFormDeps; selected?: string } = {}) {
+function mount(
+  options: { deps?: LeadFormDeps; selected?: string; consent?: boolean } = {},
+) {
   const tag = `lead-form-${++tags}`;
   defineLeadForm(options.deps ?? deps(), tag);
-  document.body.innerHTML = markup(tag, options.selected);
+  document.body.innerHTML = markup(tag, options.selected, options.consent);
   const form = document.querySelector('form')!;
   const q = <T extends Element = HTMLElement>(selector: string) =>
     form.querySelector<T>(selector)!;
@@ -72,7 +74,6 @@ function mount(options: { deps?: LeadFormDeps; selected?: string } = {}) {
     telegram: q<HTMLInputElement>('[data-telegram]'),
     phone: q<HTMLInputElement>('[data-phone]'),
     country: q<HTMLSelectElement>('[data-country]'),
-    consent: q<HTMLInputElement>('[data-consent]'),
     contact: q<HTMLInputElement>('[name="contact"]'),
     channel: q<HTMLInputElement>('[name="contact_channel"]'),
     visitor: q<HTMLInputElement>('[data-visitor-id]'),
@@ -116,7 +117,6 @@ describe('defineLeadForm', () => {
     const f = mount();
     document.body.append(document.querySelector(f.tag)!);
     f.phone.value = '601234567';
-    f.consent.checked = true;
     submit(f.form);
     expect(submitLeadForm).toHaveBeenCalledTimes(1);
   });
@@ -162,6 +162,12 @@ describe('channel tabs', () => {
     const f = mount({ deps: deps({ preferredChannel: () => 'telegram' }) });
     expect(f.channel.value).toBe('telegram');
     expect(f.panel('telegram').hidden).toBe(false);
+  });
+
+  it('moves the preferred channel to the front of the picker', () => {
+    const f = mount({ deps: deps({ preferredChannel: () => 'telegram' }) });
+    const tab = f.tab('telegram');
+    expect(tab.parentElement!.firstElementChild).toBe(tab);
   });
 
   it('keeps the rendered tab when the preference has no tab', () => {
@@ -239,48 +245,61 @@ describe('fields', () => {
 });
 
 describe('submit', () => {
-  it('flags an empty contact before consent and focuses it', () => {
+  it('flags an empty contact and focuses it', () => {
     const f = mount();
     submit(f.form);
     expect(f.error('phone').hidden).toBe(false);
-    expect(f.error('consent').hidden).toBe(false);
     expect(f.phone.getAttribute('aria-invalid')).toBe('true');
-    expect(f.consent.getAttribute('aria-invalid')).toBe('true');
     expect(document.activeElement).toBe(f.phone);
     expect(submitLeadForm).not.toHaveBeenCalled();
   });
 
-  it('focuses consent when only consent is missing', () => {
+  it('sends a valid contact with nothing to tick, the form only states the policy', () => {
+    submitLeadForm.mockReturnValue(new Promise(() => {}));
     const f = mount();
     f.phone.value = '601234567';
     submit(f.form);
     expect(f.error('phone').hidden).toBe(true);
-    expect(document.activeElement).toBe(f.consent);
+    expect(submitLeadForm).toHaveBeenCalledWith(f.form);
   });
 
   it('rejects a number the kit cannot validate', () => {
     const f = mount();
     f.phone.value = '12';
-    f.consent.checked = true;
     submit(f.form);
     expect(f.error('phone').hidden).toBe(false);
   });
 
-  it("clears only the typed field's error", () => {
+  it('says a number is too long rather than incomplete, and back again', () => {
+    const f = mount();
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Too long');
+    f.phone.value = '12';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
+  });
+
+  it('keeps the one phone error where the form has no too-long copy', () => {
+    const f = mount();
+    f.error('phone').removeAttribute('data-too-long');
+    f.phone.value = '64123456789012345678';
+    submit(f.form);
+    expect(f.error('phone').textContent).toBe('Incomplete');
+  });
+
+  it("clears the typed field's error", () => {
     const f = mount();
     submit(f.form);
     type(f.phone, '6');
     expect(f.error('phone').hidden).toBe(true);
     expect(f.phone.hasAttribute('aria-invalid')).toBe(false);
-    expect(f.error('consent').hidden).toBe(false);
-    expect(f.consent.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('hides the submit error on any input', async () => {
     submitLeadForm.mockResolvedValue(false);
     const f = mount();
     f.phone.value = '601234567';
-    f.consent.checked = true;
     submit(f.form);
     await vi.waitFor(() => expect(f.error('submit').hidden).toBe(false));
     f.form.dispatchEvent(new Event('input'));
@@ -291,7 +310,6 @@ describe('submit', () => {
     submitLeadForm.mockReturnValue(new Promise(() => {}));
     const f = mount();
     f.phone.value = '601234567';
-    f.consent.checked = true;
     submit(f.form);
     f.phone.value = '';
     submit(f.form);
@@ -309,7 +327,6 @@ describe('submit', () => {
     submitLeadForm.mockResolvedValue(true);
     const f = mount({ selected: channel });
     (channel === 'telegram' ? f.telegram : f.phone).value = typed;
-    f.consent.checked = true;
     submit(f.form);
     expect(f.contact.value).toBe(contact);
     expect(f.channel.value).toBe(channel);
@@ -327,10 +344,30 @@ describe('submit', () => {
   it('flags a Telegram handle that is not one', () => {
     const f = mount({ selected: 'telegram' });
     f.telegram.value = 'x';
-    f.consent.checked = true;
     submit(f.form);
     expect(f.error('telegram').hidden).toBe(false);
     expect(document.activeElement).toBe(f.telegram);
+  });
+
+  it('says a typed handle is malformed rather than missing, and back again', () => {
+    const f = mount({ selected: 'telegram' });
+    f.telegram.value = '@qa';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Bad handle');
+    f.telegram.value = '';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
+    f.telegram.value = '+38160';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
+  });
+
+  it('keeps the one Telegram error where the form has no malformed-handle copy', () => {
+    const f = mount({ selected: 'telegram' });
+    f.error('telegram').removeAttribute('data-bad-handle');
+    f.telegram.value = '@qa';
+    submit(f.form);
+    expect(f.error('telegram').textContent).toBe('Empty');
   });
 
   it('restores the button and shows the submit error when sending fails', async () => {
@@ -338,11 +375,11 @@ describe('submit', () => {
     submitLeadForm.mockReturnValue(new Promise((r) => (settle = r)));
     const f = mount();
     f.phone.value = '601234567';
-    f.consent.checked = true;
     submit(f.form);
     expect(f.label.textContent).toBe('Sending');
     settle(false);
     await vi.waitFor(() => expect(f.error('submit').hidden).toBe(false));
+    expect(document.activeElement).toBe(f.error('submit'));
     expect(f.button.disabled).toBe(false);
     expect(f.button.hasAttribute('aria-busy')).toBe(false);
     expect(f.label.textContent).toBe('Send');
@@ -358,10 +395,46 @@ describe('submit', () => {
     const f = mount();
     delete f.form.dataset.submittingLabel;
     f.phone.value = '601234567';
-    f.consent.checked = true;
     submit(f.form);
     expect(f.button.disabled).toBe(true);
     expect(f.label.textContent).toBe('Send');
+  });
+});
+
+describe('a form that asks for consent, like the checkout', () => {
+  const consentOf = (form: HTMLFormElement) =>
+    form.querySelector<HTMLInputElement>('[data-consent]')!;
+  const consentError = (form: HTMLFormElement) =>
+    form.querySelector<HTMLElement>('[data-error-consent]')!;
+
+  it('flags an empty contact and an unticked box, focusing the contact', () => {
+    const f = mount({ consent: true });
+    submit(f.form);
+    expect(consentError(f.form).hidden).toBe(false);
+    expect(consentOf(f.form).getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(f.phone);
+    expect(submitLeadForm).not.toHaveBeenCalled();
+  });
+
+  it('focuses the box when only consent is missing', () => {
+    const f = mount({ consent: true });
+    f.phone.value = '601234567';
+    submit(f.form);
+    expect(document.activeElement).toBe(consentOf(f.form));
+    expect(submitLeadForm).not.toHaveBeenCalled();
+  });
+
+  it('clears the box error once it is ticked, and sends', () => {
+    submitLeadForm.mockReturnValue(new Promise(() => {}));
+    const f = mount({ consent: true });
+    f.phone.value = '601234567';
+    submit(f.form);
+    const box = consentOf(f.form);
+    box.checked = true;
+    box.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(consentError(f.form).hidden).toBe(true);
+    submit(f.form);
+    expect(submitLeadForm).toHaveBeenCalledWith(f.form);
   });
 });
 
@@ -375,7 +448,6 @@ describe('before the phone kit loads', () => {
     const form = document.querySelector('form')!;
     form.requestSubmit = vi.fn(() => submit(form));
     form.querySelector<HTMLInputElement>('[data-phone]')!.value = '60';
-    form.querySelector<HTMLInputElement>('[data-consent]')!.checked = true;
     const button = form.querySelector<HTMLButtonElement>(
       'button[type="submit"]',
     )!;

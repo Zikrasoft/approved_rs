@@ -1,0 +1,3328 @@
+[
+  {
+    "make": "volkswagen",
+    "code": "13",
+    "model": "Scirocco",
+    "generation": "Scirocco III",
+    "types": ["13", "137", "138"],
+    "from": 2008,
+    "to": 2017,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2015-volkswagen-scirocco-r-wvwzzz13zgv008366-4AjXzXn/",
+      "https://www.classic.com/veh/2012-volkswagen-scirocco-r-wvwzzz13zcv027094-pJPxaGn/",
+      "https://www.nettiauto.com/en/volkswagen/scirocco/16070920",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Scirocco_III",
+      "https://en.wikipedia.org/wiki/Volkswagen_Scirocco",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007584/vw/scirocco_3_137_138_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "16",
+    "model": "Jetta",
+    "generation": "Jetta VI",
+    "types": ["16", "162", "163", "AV3", "AV2"],
+    "from": 2010,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/jetta/15572086",
+      "https://www.nettiauto.com/en/volkswagen/jetta/16065029",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ16ZFM618476",
+      "https://de.wikipedia.org/wiki/VW_Jetta_VI",
+      "https://en.wikipedia.org/wiki/Volkswagen_Jetta_(A6)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009118/vw/jetta_4_162_163_av3_av2_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "16",
+    "model": "Beetle",
+    "generation": "Beetle (A5)",
+    "types": ["16", "5C", "5C1", "5C2", "5C7", "5C8"],
+    "from": 2011,
+    "to": 2019,
+    "market": "eu",
+    "sources": [
+      "https://plc.auction/auction/lot/volkswagen-beetle-2013-wvwzzz16zdm-12-32339010",
+      "https://plc.auction/auction/lot/volkswagen-beetle-2014-wvwzzz16zem-12-37879584",
+      "https://www.nettiauto.com/en/volkswagen/beetle/16011308",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Beetle",
+      "https://en.wikipedia.org/wiki/Volkswagen_Beetle_(A5)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009710/vw/beetle_5c1_5c2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010735/vw/beetle_cabrio_5c7_5c8_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1C",
+    "model": "New Beetle",
+    "generation": "New Beetle",
+    "types": ["1C"],
+    "from": 1998,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_New_Beetle"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1F",
+    "model": "Eos",
+    "generation": "Eos",
+    "types": ["1F", "1F7", "1F8"],
+    "from": 2006,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/eos/16033563",
+      "https://www.nettiauto.com/en/volkswagen/eos/16075568",
+      "https://carfax.world/car/wvwzzz1fz7v039613",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Eos",
+      "https://en.wikipedia.org/wiki/Volkswagen_Eos",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005457/vw/eos_1f7_1f8_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1F",
+    "model": "Eos",
+    "generation": "Eos",
+    "types": ["1F"],
+    "from": 2007,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1H",
+    "model": "Golf",
+    "generation": "Golf III",
+    "types": ["1H", "1H1", "1H5"],
+    "from": 1991,
+    "to": 1998,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/1994-volkswagen-golf-gti-16v-wvwzzz1hzrw118889-WLm5ejp/",
+      "https://www.classic.com/veh/1996-volkswagen-golf-gti-16v-wvwzzz1hzvw096754-pEyDBJp/",
+      "https://www.nettiauto.com/en/volkswagen/golf/15997707",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000000505/vw/golf_3_1h1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000000510/vw/golf_3_variant_1h5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1H",
+    "model": "Golf",
+    "generation": "Golf III",
+    "types": ["1H"],
+    "from": 1993,
+    "to": 1999,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1J",
+    "model": "Golf",
+    "generation": "Golf IV",
+    "types": ["1J", "1J1", "1J5"],
+    "from": 1997,
+    "to": 2006,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2004-volkswagen-golf-r32-wvwzzz1jz4d023641-WYAMJvW/",
+      "https://www.classic.com/veh/2003-volkswagen-golf-mk4-r32-wvwzzz1jz4d008275-nBwxKNW/",
+      "https://www.nettiauto.com/en/volkswagen/golf/16080337",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk4",
+      "https://de.wikipedia.org/wiki/VW_Golf_IV",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001994/vw/golf_4_1j1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001995/vw/golf_4_variant_1j5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1J",
+    "model": "Bora",
+    "generation": "Bora",
+    "types": ["1J", "1J2", "1J6"],
+    "from": 1998,
+    "to": 2005,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/bora/16077341",
+      "https://www.nettiauto.com/en/volkswagen/bora/16060830",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Bora",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003884/vw/bora_1j2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004125/vw/bora_variant_1j6_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1J",
+    "model": "Golf",
+    "generation": "Golf IV",
+    "types": ["1J"],
+    "from": 1999,
+    "to": 2006,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Golf",
+    "generation": "Golf V",
+    "types": ["1K", "1K1", "1K5"],
+    "from": 2003,
+    "to": 2009,
+    "market": "eu",
+    "sources": [
+      "https://hideautovin.com/en/vehicle/7826923/volkswagen--golf/WVWZZZ1KZ6W044444",
+      "https://www.nettiauto.com/en/volkswagen/golf/16045943",
+      "https://www.nettiauto.com/en/volkswagen/golf/16077079",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk5",
+      "https://de.wikipedia.org/wiki/VW_Golf_V",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004991/vw/golf_5_1k1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006245/vw/golf_5_variant_1k5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Golf Plus",
+    "generation": "Golf Plus",
+    "types": ["1K", "5M", "5M1", "521"],
+    "from": 2004,
+    "to": 2014,
+    "market": "eu",
+    "sources": [
+      "https://www.elektroda.pl/rtvforum/topic3983151.html",
+      "https://yauto.cz/vin/WVWZZZ1KZ9W906152/",
+      "https://www.nettiauto.com/en/volkswagen/golf-plus/16075551",
+      "https://de.wikipedia.org/wiki/VW_Golf_Plus",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Plus",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005379/vw/golf_plus_5m1_521_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Jetta",
+    "generation": "Jetta V",
+    "types": ["1K", "1K2"],
+    "from": 2005,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/jetta/15882805",
+      "https://www.nettiauto.com/en/volkswagen/jetta/16064797",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Jetta_(A5)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005423/vw/jetta_3_1k2_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Jetta",
+    "generation": "Jetta V",
+    "types": ["1K"],
+    "from": 2005,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Golf",
+    "generation": "Golf V",
+    "types": ["1K"],
+    "from": 2006,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1K",
+    "model": "Golf",
+    "generation": "Golf VI",
+    "types": ["1K", "5K", "5K1", "AJ5", "517"],
+    "from": 2008,
+    "to": 2013,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvwzzz1kzaw397413-zdzurn-2025-04-18/",
+      "https://www.elektroda.pl/rtvforum/topic4115858.html",
+      "https://www.nettiauto.com/en/volkswagen/golf/16027527",
+      "https://www.nettiauto.com/en/volkswagen/golf/15907421",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk6",
+      "https://de.wikipedia.org/wiki/VW_Golf_VI",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007873/vw/golf_6_5k1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008442/vw/golf_6_variant_aj5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009158/vw/golf_6_cabrio_517_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1T",
+    "model": "Touran",
+    "generation": "Touran I",
+    "types": ["1T", "1T1", "1T2", "1T3"],
+    "from": 2002,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/WVGZZZ1TZ6W139223",
+      "https://www.nettiauto.com/en/volkswagen/touran/15987750",
+      "https://www.nettiauto.com/en/volkswagen/touran/16076365",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Touran_I",
+      "https://en.wikipedia.org/wiki/Volkswagen_Touran",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004954/vw/touran_1_1t1_1t2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010449/vw/touran_1_fl_1t3_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1T",
+    "model": "Touran",
+    "generation": "Touran II",
+    "types": ["1T", "5T", "5T1"],
+    "from": 2015,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/touran/15952939",
+      "https://www.nettiauto.com/en/volkswagen/touran/15853837",
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZ1TZHW090431",
+      "https://carsbat.com/es/detail/wvgzzz1tzjw072380-l1k8tc/",
+      "https://de.wikipedia.org/wiki/VW_Touran_II",
+      "https://en.wikipedia.org/wiki/Volkswagen_Touran",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014158/vw/touran_2_5t1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1Y",
+    "model": "New Beetle Cabriolet",
+    "generation": "New Beetle",
+    "types": ["1Y", "9C1", "1C1", "1Y7"],
+    "from": 2003,
+    "to": 2011,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/new-beetle/15631226",
+      "https://www.nettiauto.com/en/volkswagen/new-beetle/16035422",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_New_Beetle",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003402/vw/new_beetle_9c1_1c1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004957/vw/new_beetle_cabrio_1y7_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "1Y",
+    "model": "New Beetle Cabriolet",
+    "generation": "New Beetle",
+    "types": ["1Y"],
+    "from": 2003,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "2E",
+    "model": "Crafter",
+    "generation": "Crafter I",
+    "types": ["2E", "2F"],
+    "from": 2006,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZ2EZC6032320",
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZ2EZG6002928",
+      "https://www.freevindecoder.eu/WV1ZZZ2EZB6015542",
+      "https://www.nettiauto.com/en/volkswagen/crafter/16010798",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Crafter",
+      "https://en.wikipedia.org/wiki/Volkswagen_Crafter"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "2F",
+    "model": "Crafter",
+    "generation": "Crafter I",
+    "types": ["2F", "2E"],
+    "from": 2006,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/crafter/15292298",
+      "https://www.nettiauto.com/en/volkswagen/crafter/15304679",
+      "https://www.nettiauto.com/en/volkswagen/crafter/15711351",
+      "https://en.wikipedia.org/wiki/Volkswagen_Crafter"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "2H",
+    "model": "Amarok",
+    "generation": "Amarok I",
+    "types": ["2H", "2HA", "2HB", "S1B", "S6B", "S7A", "S7B", "AGD"],
+    "from": 2010,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZ2HZEH004005",
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZ2HZFA011801",
+      "https://www.freevindecoder.eu/WV1ZZZ2HZDH021772",
+      "https://www.nettiauto.com/en/volkswagen/amarok/15947084",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Amarok_I",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008636/vw/amarok_2ha_2hb_s1b_s6b_s7a_s7b_agd_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "2K",
+    "model": "Caddy",
+    "generation": "Caddy III",
+    "types": ["2K", "2KA", "2KH", "2CA", "2CH", "2KB", "2KJ", "2CB", "2CJ"],
+    "from": 2003,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/WV2ZZZ2KZEX101596",
+      "https://myfreevin.com/vin/WV2ZZZ2KZBX260292/",
+      "https://www.nettiauto.com/en/volkswagen/caddy/15575313",
+      "https://uokik.gov.pl/download/15199",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Caddy_(Typ_2K)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005083/vw/caddy_3_kasten_2ka_2kh_2ca_2ch_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005084/vw/caddy_3_van_2kb_2kj_2cb_2cj_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "2K",
+    "model": "Caddy",
+    "generation": "Caddy IV",
+    "types": ["2K", "SA", "SAB", "SAJ", "SAA", "SAH"],
+    "from": 2015,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZ2KZHX080002",
+      "https://www.vindecoderz.com/EN/check-lookup/WV2ZZZ2KZKR005619",
+      "https://www.nettiauto.com/en/volkswagen/caddy/16078856",
+      "https://www.nettiauto.com/en/volkswagen/caddy/15916089",
+      "https://de.wikipedia.org/wiki/VW_Caddy_(Typ_2K)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014302/vw/caddy_4_van_sab_saj_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014303/vw/caddy_4_kasten_saa_sah_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036197/vw/caddy_4_alltrack_van_sab_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3B",
+    "model": "Passat",
+    "generation": "Passat B5",
+    "types": ["3B", "3B2", "3B5", "3B3", "3B6"],
+    "from": 1996,
+    "to": 2005,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2003-volkswagen-passat-w8-wvwzzz3bz3p000063-p07NExW/",
+      "https://www.nettiauto.com/en/volkswagen/passat/16080990",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ3BZ5E097823",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Passat_B5",
+      "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B5)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001568/vw/passat_b5_3b2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001907/vw/passat_b5_variant_3b5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004736/vw/passat_b5_5_3b3_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3B",
+    "model": "Passat",
+    "generation": "Passat B5",
+    "types": ["3B"],
+    "from": 1998,
+    "to": 2005,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat",
+    "generation": "Passat B6",
+    "types": ["3C", "3C2", "3C5"],
+    "from": 2005,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/passat/16029722",
+      "https://www.nettiauto.com/en/volkswagen/passat/16081272",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ3CZ9E104596",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Passat_B6",
+      "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B6)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005398/vw/passat_b6_3c2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005427/vw/passat_b6_variant_3c5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat",
+    "generation": "Passat B6",
+    "types": ["3C"],
+    "from": 2006,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat CC",
+    "generation": "Passat CC / CC",
+    "types": ["3C", "35", "357", "358"],
+    "from": 2008,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/passat-cc/16048215",
+      "https://www.nettiauto.com/en/volkswagen/cc/12412820",
+      "https://carsbat.com/en/detail/wvwzzz3czge513818-sfclnx/",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_CC",
+      "https://en.wikipedia.org/wiki/Volkswagen_CC",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007375/vw/passat_b6_cc_357_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010200/vw/cc_358_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat CC",
+    "generation": "Passat CC / CC",
+    "types": ["3C", "35"],
+    "from": 2009,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat",
+    "generation": "Passat B7",
+    "types": ["3C", "362", "365"],
+    "from": 2010,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/passat/16048565",
+      "https://www.nettiauto.com/en/volkswagen/passat/15938234",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ3CZDE091051",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Passat_B7",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009003/vw/passat_b7_362_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009004/vw/passat_b7_variant_365_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011084/vw/passat_b7_alltrack_365_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3C",
+    "model": "Passat",
+    "generation": "Passat B8",
+    "types": ["3C", "3G", "3G2", "CB2", "3G5", "CB5"],
+    "from": 2014,
+    "to": 2023,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/passat/15810622",
+      "https://www.nettiauto.com/en/volkswagen/passat/16071283",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ3CZLE032447",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Passat_B8",
+      "https://en.wikipedia.org/wiki/Volkswagen_Passat_(B8)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000012917/vw/passat_b8_3g2_cb2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000012918/vw/passat_b8_variant_3g5_cb5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014622/vw/passat_b8_alltrack_3g5_cb5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3D",
+    "model": "Phaeton",
+    "generation": "Phaeton",
+    "types": ["3D", "3D1", "3D2", "3D3", "3D4", "3D6", "3D7", "3D8", "3D9"],
+    "from": 2001,
+    "to": 2016,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ3DZC8009871",
+      "https://www.freevindecoder.eu/WVWZZZ3DZC8001429",
+      "https://www.nettiauto.com/en/volkswagen/phaeton/15996506",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Phaeton",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004876/vw/phaeton_3d1_3d2_3d3_3d4_3d6_3d7_3d8_3d9_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3D",
+    "model": "Phaeton",
+    "generation": "Phaeton",
+    "types": ["3D"],
+    "from": 2004,
+    "to": 2006,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "3H",
+    "model": "Arteon",
+    "generation": "Arteon",
+    "types": ["3H", "3H7", "3H8", "3H9"],
+    "from": 2017,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/arteon/15754549",
+      "https://www.nettiauto.com/en/volkswagen/arteon/16075721",
+      "https://myfreevin.com/vin/WVWZZZ3HZJE503178/",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Arteon",
+      "https://en.wikipedia.org/wiki/Volkswagen_Arteon",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037842/vw/arteon_3h7_3h8_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041006/vw/arteon_shooting_brake_3h9_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "5N",
+    "model": "Tiguan",
+    "generation": "Tiguan I",
+    "types": ["5N"],
+    "from": 2007,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/tiguan/15759400",
+      "https://www.nettiauto.com/en/volkswagen/tiguan/16073318",
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZ5NZFW505597",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Tiguan_I",
+      "https://en.wikipedia.org/wiki/Volkswagen_Tiguan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006397/vw/tiguan_1_5n_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "5N",
+    "model": "Tiguan",
+    "generation": "Tiguan I",
+    "types": ["5N"],
+    "from": 2009,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "5N",
+    "model": "Tiguan",
+    "generation": "Tiguan II",
+    "types": ["5N", "AD", "AX", "BW", "BJ", "AD1", "AX1", "BW2", "BJ2"],
+    "from": 2016,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/tiguan/15592289",
+      "https://www.nettiauto.com/en/volkswagen/tiguan/16016120",
+      "https://www.nettiauto.com/en/volkswagen/tiguan/15571309",
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZ5NZJM131395",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Tiguan_II",
+      "https://en.wikipedia.org/wiki/Volkswagen_Tiguan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036223/vw/tiguan_2_ad1_ax1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038132/vw/tiguan_allspace_bw2_bj2_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "6R",
+    "model": "Polo",
+    "generation": "Polo V",
+    "types": ["6R", "6C", "6R1", "6C1"],
+    "from": 2009,
+    "to": 2017,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ6RZGU044972",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ6RZBY245737",
+      "https://www.nettiauto.com/en/volkswagen/polo/16080992",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Polo_V",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008025/vw/polo_5_6r1_6c1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "70",
+    "model": "Transporter",
+    "generation": "T4",
+    "types": [
+      "70",
+      "7D",
+      "70B",
+      "70C",
+      "7DB",
+      "7DK",
+      "70J",
+      "70K",
+      "7DC",
+      "7DJ",
+      "70A",
+      "70H",
+      "7DA",
+      "7DH",
+      "70E",
+      "70L",
+      "70M",
+      "7DE",
+      "7DL"
+    ],
+    "from": 1990,
+    "to": 2003,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2001-volkswagen-transporter-camper-t4-tdi-wv2zzz70z2h033989-nKzVwD4/",
+      "https://www.classic.com/veh/1998-volkswagen-t4-transporter-syncro-tdi-5-speed-wv2zzz70zxh066126-WvD9bB4/",
+      "https://www.nettiauto.com/en/volkswagen/transporter/16077373",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_T4",
+      "https://en.wikipedia.org/wiki/Volkswagen_Transporter_(T4)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000000463/vw/t4_multivan_70b_70c_7db_7dk_70j_70k_7dc_7dj_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001631/vw/t4_kasten_70a_70h_7da_7dh_70j_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001632/vw/t4_fahrgestell_70e_70l_70m_7de_7dl_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "70",
+    "model": "Eurovan",
+    "generation": "T4",
+    "types": ["70", "7D"],
+    "from": 1993,
+    "to": 2003,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7H",
+    "model": "Transporter",
+    "generation": "T5",
+    "types": [
+      "7H",
+      "7E",
+      "7HM",
+      "7HN",
+      "7HF",
+      "7EF",
+      "7EM",
+      "7EN",
+      "7JD",
+      "7JE",
+      "7JL",
+      "7JY",
+      "7JZ",
+      "7FD",
+      "7HA",
+      "7HH",
+      "7EA",
+      "7EH",
+      "7HB",
+      "7HJ",
+      "7EB",
+      "7EJ",
+      "7EC",
+      "7EG",
+      "7HC"
+    ],
+    "from": 2003,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://myfreevin.com/vin/WV2ZZZ7HZBH035362/",
+      "https://autoua.com.ua/vin/WV2ZZZ7HZDH010107?lang=en",
+      "https://www.nettiauto.com/en/volkswagen/transporter/15983216",
+      "https://www.nettiauto.com/en/volkswagen/multivan/16037581",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_T5/T6",
+      "https://en.wikipedia.org/wiki/Volkswagen_Transporter_(T5)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004988/vw/t5_multivan_7hm_7hn_7hf_7ef_7em_7en_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005003/vw/t5_fahrgestell_7jd_7je_7jl_7jy_7jz_7fd_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005004/vw/t5_kasten_7ha_7hh_7ea_7eh_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7H",
+    "model": "Transporter",
+    "generation": "T6",
+    "types": [
+      "7H",
+      "SG",
+      "SH",
+      "SGF",
+      "SGM",
+      "SGN",
+      "SHM",
+      "SHN",
+      "SGB",
+      "SGJ",
+      "SHB",
+      "SHJ",
+      "SGA",
+      "SGH",
+      "SHA",
+      "SHH",
+      "SFD",
+      "SFE",
+      "SFL",
+      "SFZ",
+      "SJD",
+      "SGC",
+      "SGG",
+      "SHC"
+    ],
+    "from": 2015,
+    "to": 2019,
+    "market": "eu",
+    "sources": [
+      "https://autoua.com.ua/vin/WV2ZZZ7HZJH013007?lang=en",
+      "https://autoua.com.ua/vin/WV2ZZZ7HZHH016903?lang=en",
+      "https://www.vindecoderz.com/EN/check-lookup/WV2ZZZ7HZJH108417",
+      "https://de.wikipedia.org/wiki/VW_T5/T6",
+      "https://en.wikipedia.org/wiki/Volkswagen_Transporter_(T6)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014349/vw/t6_multivan_sgf_sgm_sgn_shm_shn_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014350/vw/t6_bus_caravelle_sgb_sgj_shb_shj_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014351/vw/t6_kasten_sga_sgh_sha_shh_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7H",
+    "model": "Transporter",
+    "generation": "T6.1",
+    "types": [
+      "7H",
+      "SG",
+      "SH",
+      "SGF",
+      "SGM",
+      "SGN",
+      "SHM",
+      "SHN",
+      "SGB",
+      "SGJ",
+      "SHB",
+      "SHJ",
+      "SGA",
+      "SGH",
+      "SHA",
+      "SHH",
+      "SFD",
+      "SFE",
+      "SFL",
+      "SFZ",
+      "SJD",
+      "SGC",
+      "SGG",
+      "SHC"
+    ],
+    "from": 2019,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2021-volkswagen-transporter-t61-abt-wv1zzz7hzmh048-pGV5ebW/",
+      "https://www.classic.com/veh/2021-volkswagen-transporter-t61-highline-wv1zzz7hzmh098025-n1D5Gw4/",
+      "https://www.nettiauto.com/en/volkswagen/transporter/16003971",
+      "https://www.nettiauto.com/en/volkswagen/multivan/15847100",
+      "https://en.wikipedia.org/wiki/Volkswagen_Transporter_(T6)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014349/vw/t6_multivan_sgf_sgm_sgn_shm_shn_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014350/vw/t6_bus_caravelle_sgb_sgj_shb_shj_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014351/vw/t6_kasten_sga_sgh_sha_shh_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7L",
+    "model": "Touareg",
+    "generation": "Touareg I",
+    "types": ["7L", "7LA", "7L6", "7L7"],
+    "from": 2002,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://www.hagerty.com/valuation-tools/past-sales/2007-volkswagen-touareg/WVGZZZ7LZ7D011517/7b941f4c-56b1-4b1f-98f0-1f18be7006ac",
+      "https://www.classic.com/veh/2008-volkswagen-touareg-r50-wvgzzz7lz8d044801-pgo2x1p/",
+      "https://www.nettiauto.com/en/volkswagen/touareg/16038117",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Touareg_I",
+      "https://en.wikipedia.org/wiki/Volkswagen_Touareg",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004920/vw/touareg_1_7la_7l6_7l7_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7L",
+    "model": "Touareg",
+    "generation": "Touareg I",
+    "types": ["7L"],
+    "from": 2004,
+    "to": 2009,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7M",
+    "model": "Sharan",
+    "generation": "Sharan I",
+    "types": ["7M"],
+    "from": 1995,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ7MZ5V007857",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ7MZVV042096",
+      "http://motodetektyw.blogspot.com/2016/03/volkswagen-sharan-wvwzzz7mz6v017928.html",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Sharan"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7N",
+    "model": "Sharan",
+    "generation": "Sharan II",
+    "types": ["7N", "7N1", "7N2"],
+    "from": 2010,
+    "to": 2022,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvwzzz7nzlv006425-z7qun9/",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ7NZKV015664",
+      "https://www.nettiauto.com/en/volkswagen/sharan/15907217",
+      "https://en.wikipedia.org/wiki/Volkswagen_Sharan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008630/vw/sharan_7n1_7n2_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "7P",
+    "model": "Touareg",
+    "generation": "Touareg II",
+    "types": ["7P", "7P5", "7P6"],
+    "from": 2010,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvgzzz7pzgd008306-l1e437/",
+      "https://www.nettiauto.com/en/volkswagen/touareg/15932864",
+      "https://www.nettiauto.com/en/volkswagen/touareg/15921718",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Touareg_II",
+      "https://en.wikipedia.org/wiki/Volkswagen_Touareg",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008607/vw/touareg_2_7p5_7p6_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "9C",
+    "model": "New Beetle",
+    "generation": "New Beetle",
+    "types": ["9C", "9C1", "1C1", "1Y7"],
+    "from": 1997,
+    "to": 2011,
+    "market": "eu",
+    "sources": [
+      "https://www.hagerty.com/valuation-tools/past-sales/2001-volkswagen-new_beetle/WVWZZZ9CZ1M750027/45ed29c5-594d-4528-bafe-391f26b82af4",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZ9CZ2M616592",
+      "https://www.nettiauto.com/en/volkswagen/new-beetle/15948496",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_New_Beetle",
+      "https://en.wikipedia.org/wiki/Volkswagen_New_Beetle",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003402/vw/new_beetle_9c1_1c1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004957/vw/new_beetle_cabrio_1y7_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "9M",
+    "model": "Jetta",
+    "generation": "Jetta IV",
+    "types": ["9M", "1J"],
+    "from": 1999,
+    "to": 2005,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "9N",
+    "model": "Polo",
+    "generation": "Polo IV",
+    "types": ["9N", "9A"],
+    "from": 2001,
+    "to": 2009,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvwzzz9nz9y174749-vgokwc/",
+      "https://www.nettiauto.com/en/volkswagen/polo/16063640",
+      "https://www.nettiauto.com/en/volkswagen/polo/16066328",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Polo_IV",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004804/vw/polo_4_9n_9a_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "A1",
+    "model": "T-Roc",
+    "generation": "T-Roc I",
+    "types": ["A1", "D1", "AC"],
+    "from": 2017,
+    "to": 2025,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvgzzza1zpv522669-5hbllx/",
+      "https://carsbat.com/en/detail/wvgzzza1zkv175740-syegfz/",
+      "https://www.nettiauto.com/en/volkswagen/t-roc/15787046",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_T-Roc"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "A3",
+    "model": "Passat",
+    "generation": "Passat NMS",
+    "types": ["A3"],
+    "from": 2012,
+    "to": 2022,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "A9",
+    "model": "Touareg",
+    "generation": "Touareg I",
+    "types": ["A9", "7L"],
+    "from": 2010,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AA",
+    "model": "up!",
+    "generation": "up!",
+    "types": ["AA", "121", "122", "BL1", "BL2", "BL3", "123"],
+    "from": 2011,
+    "to": 2023,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2018-volkswagen-up-gti-wvwzzzaazjd197708-4ybA9Kn/",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZAAZCD024821",
+      "https://www.nettiauto.com/en/volkswagen/up/16077029",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Up",
+      "https://en.wikipedia.org/wiki/Volkswagen_Up",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009734/vw/up_121_122_bl1_bl2_bl3_123_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AG",
+    "model": "New Beetle",
+    "generation": "New Beetle",
+    "types": ["AG", "1C"],
+    "from": 2010,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AH",
+    "model": "Eos",
+    "generation": "Eos",
+    "types": ["AH", "1F"],
+    "from": 2010,
+    "to": 2016,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AJ",
+    "model": "Golf",
+    "generation": "Golf VI",
+    "types": ["AJ", "5K"],
+    "from": 2010,
+    "to": 2014,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AJ",
+    "model": "Jetta",
+    "generation": "Jetta V SportWagen",
+    "types": ["AJ", "1K"],
+    "from": 2010,
+    "to": 2014,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AJ",
+    "model": "Jetta",
+    "generation": "Jetta VI",
+    "types": ["AJ", "16"],
+    "from": 2011,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AL",
+    "model": "New Beetle Cabriolet",
+    "generation": "New Beetle",
+    "types": ["AL", "1Y"],
+    "from": 2010,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AN",
+    "model": "Passat",
+    "generation": "Passat B6",
+    "types": ["AN", "3C"],
+    "from": 2010,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AN",
+    "model": "Passat CC",
+    "generation": "Passat CC / CC",
+    "types": ["AN", "3C"],
+    "from": 2010,
+    "to": 2017,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AN",
+    "model": "Arteon",
+    "generation": "Arteon",
+    "types": ["AN", "3H"],
+    "from": 2019,
+    "to": 2023,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AT",
+    "model": "Beetle",
+    "generation": "Beetle (A5)",
+    "types": ["AT", "5C"],
+    "from": 2012,
+    "to": 2019,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AU",
+    "model": "Golf",
+    "generation": "Golf VII",
+    "types": ["AU", "5G1", "BQ1", "BE1", "BE2", "BA5", "BV5"],
+    "from": 2012,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvwzzzauzjp560202-afsyj2/",
+      "https://www.nettiauto.com/en/volkswagen/golf/15560366",
+      "https://www.classic.com/veh/2018-volkswagen-golf-r-wolfsburg-edition-wvwzzzauz-n3P0NDW/",
+      "https://de.wikipedia.org/wiki/VW_Golf_VII",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk7",
+      "https://stat.vin/cars/WVWZZZAUZGP570263",
+      "https://carsbat.com/en/detail/wvwzzzauzep507037-ifo3bg/",
+      "https://www.nettiauto.com/en/volkswagen/golf/16073183",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010585/vw/golf_7_5g1_bq1_be1_be2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011221/vw/golf_7_variant_ba5_bv5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000013608/vw/golf_7_alltrack_ba5_bv5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AU",
+    "model": "Golf Sportsvan",
+    "generation": "Golf Sportsvan",
+    "types": ["AU", "AM1", "AN1"],
+    "from": 2014,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/golf-sportsvan/15980029",
+      "https://www.nettiauto.com/en/volkswagen/golf-sportsvan/16052033",
+      "https://www.finn.no/mobility/item/461611827",
+      "https://de.wikipedia.org/wiki/VW_Golf_Sportsvan",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Sportsvan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011878/vw/golf_sportsvan_am1_an1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AU",
+    "model": "Golf",
+    "generation": "Golf VII",
+    "types": ["AU"],
+    "from": 2015,
+    "to": 2021,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AW",
+    "model": "Polo",
+    "generation": "Polo VI",
+    "types": ["AW", "BZ", "AW1", "BZ1", "AE1"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wvwzzzawzpu058882-c1vjwe/",
+      "https://carsbat.com/en/detail/wvwzzzawzku063231-oaxzld/",
+      "https://www.nettiauto.com/en/volkswagen/polo/16016403",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Polo_Mk6",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038138/vw/polo_6_aw1_bz1_ae1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AX",
+    "model": "Tiguan",
+    "generation": "Tiguan I",
+    "types": ["AX", "5N"],
+    "from": 2010,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "AX",
+    "model": "Tiguan",
+    "generation": "Tiguan II",
+    "types": ["AX", "BW"],
+    "from": 2018,
+    "to": 2024,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "B2",
+    "model": "Taos",
+    "generation": "Taos",
+    "types": ["B2", "CL"],
+    "from": 2022,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "BP",
+    "model": "Touareg",
+    "generation": "Touareg II",
+    "types": ["BP", "7P"],
+    "from": 2011,
+    "to": 2017,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "BU",
+    "model": "Jetta",
+    "generation": "Jetta VII",
+    "types": ["BU"],
+    "from": 2019,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "C1",
+    "model": "T-Cross",
+    "generation": "T-Cross",
+    "types": ["C1"],
+    "from": 2018,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZC1ZLY129813",
+      "https://plc.auction/auction/lot/volkswagen-t-cross-2023-wvgzzzc1zpy093428-33-20e6ee1461dd4af59b59696a5369f1bd",
+      "https://www.nettiauto.com/en/volkswagen/t-cross/15726552",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_T-Cross",
+      "https://en.wikipedia.org/wiki/Volkswagen_T-Cross"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CA",
+    "model": "Atlas",
+    "generation": "Atlas I / Atlas Cross Sport",
+    "types": ["CA"],
+    "from": 2018,
+    "to": 2026,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CD",
+    "model": "Golf",
+    "generation": "Golf VIII",
+    "types": ["CD", "CG", "CD1", "DA1", "CG5", "DB5"],
+    "from": 2019,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://stat.vin/cars/WVWZZZCDZNW111112",
+      "https://www.nettiauto.com/en/volkswagen/golf/15731723",
+      "https://www.nettiauto.com/en/volkswagen/golf/15914213",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk8",
+      "https://de.wikipedia.org/wiki/VW_Golf_VIII",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040179/vw/golf_8_cd1_da1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041185/vw/golf_8_variant_cg5_db5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041767/vw/golf_8_alltrack_cg5_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CD",
+    "model": "Golf",
+    "generation": "Golf VIII",
+    "types": ["CD"],
+    "from": 2022,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CR",
+    "model": "Touareg",
+    "generation": "Touareg III",
+    "types": ["CR", "CR7", "RC8"],
+    "from": 2018,
+    "to": 2026,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZCRZLD018697",
+      "https://www.vindecoderz.com/EN/check-lookup/WVGZZZCRZMD024929",
+      "https://www.nettiauto.com/en/volkswagen/touareg/15859309",
+      "https://de.wikipedia.org/wiki/VW_Touareg_III",
+      "https://en.wikipedia.org/wiki/Volkswagen_Touareg",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038671/vw/touareg_3_cr7_rc8_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CS",
+    "model": "Taigo",
+    "generation": "Taigo",
+    "types": ["CS", "CS1"],
+    "from": 2021,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://louda.skoda-auto.cz/ojete-vozy/volkswagen-taigo/wvgzzzcszny043126/336771",
+      "https://www.nettiauto.com/en/volkswagen/taigo/15672472",
+      "https://www.nettiauto.com/en/volkswagen/taigo/15623805",
+      "https://de.wikipedia.org/wiki/VW_Taigo",
+      "https://en.wikipedia.org/wiki/Volkswagen_Taigo",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000042141/vw/taigo_cs1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "CT",
+    "model": "Tiguan",
+    "generation": "Tiguan III",
+    "types": ["CT", "CT1"],
+    "from": 2024,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/tiguan/16002652",
+      "https://www.nettiauto.com/en/volkswagen/tiguan/15934552",
+      "https://en.wikipedia.org/wiki/Volkswagen_Tiguan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000045054/vw/tiguan_3_ct1_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "DH",
+    "model": "Atlas",
+    "generation": "Atlas II",
+    "types": ["DH"],
+    "from": 2027,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "E1",
+    "model": "ID.3",
+    "generation": "ID.3",
+    "types": ["E1", "E11", "E12", "E13"],
+    "from": 2019,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://stat.vin/cars/WVWZZZE1ZMP084399",
+      "https://www.vindecoderz.com/EN/check-lookup/WVWZZZE1ZLP008824",
+      "https://www.nettiauto.com/en/volkswagen/id-3/15916749",
+      "https://de.wikipedia.org/wiki/VW_ID.3",
+      "https://en.wikipedia.org/wiki/Volkswagen_ID.3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041044/vw/id_3_e11_e12_e13_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "E2",
+    "model": "ID.4",
+    "generation": "ID.4",
+    "types": ["E2", "E21", "E81"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://autoistorija.lt/en/car-history-check-by-vin/WVGZZZE2ZPE025775",
+      "https://vininfo.ee/en/car-history-check-by-vin/WVGZZZE2ZMP046177",
+      "https://www.nettiauto.com/en/volkswagen/id-4/15814366",
+      "https://de.wikipedia.org/wiki/VW_ID.4",
+      "https://en.wikipedia.org/wiki/Volkswagen_ID.4",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041351/vw/id_4_e21_e81_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "E2",
+    "model": "ID.4",
+    "generation": "ID.4",
+    "types": ["E2"],
+    "from": 2021,
+    "to": 2022,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "E8",
+    "model": "ID.4",
+    "generation": "ID.4",
+    "types": ["E8", "E2"],
+    "from": 2023,
+    "to": 2026,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "EB",
+    "model": "ID. Buzz",
+    "generation": "ID. Buzz",
+    "types": ["EB"],
+    "from": 2025,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "RM",
+    "model": "Tiguan",
+    "generation": "Tiguan III",
+    "types": ["RM"],
+    "from": 2025,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Volkswagen/VIN_Codes"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "SK",
+    "model": "Caddy",
+    "generation": "Caddy V",
+    "types": ["SK", "SB", "SBB", "SBJ", "SBA", "SBH"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/caddy/16069742",
+      "https://www.nettiauto.com/en/volkswagen/caddy/14556169",
+      "https://www.nettiauto.com/en/volkswagen/caddy/15356910",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Caddy_(Typ_SB)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041499/vw/caddy_5_van_sbb_sbj_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041500/vw/caddy_5_kasten_sba_sbh_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000042705/vw/caddy_5_california_sbb_sbj_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "ST",
+    "model": "Multivan",
+    "generation": "Multivan T7",
+    "types": ["ST", "STM", "STN"],
+    "from": 2021,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/multivan/15524405",
+      "https://www.nettiauto.com/en/volkswagen/multivan/16030461",
+      "https://www.nettiauto.com/en/volkswagen/multivan/15585540",
+      "https://en.wikipedia.org/wiki/Volkswagen_Multivan_(T7)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000042517/vw/t7_multivan_stm_stn_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "SY",
+    "model": "Crafter",
+    "generation": "Crafter II",
+    "types": ["SY", "SZ", "SX", "SYI", "SYJ"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/2021-volkswagen-crafter-wv1zzzsyzm9016335-p6jlb7p/",
+      "https://www.vindecoderz.com/EN/check-lookup/WV1ZZZSYZJ9020107",
+      "https://www.nettiauto.com/en/volkswagen/crafter/15370550",
+      "https://www.clubvw.org.au/vwreference/vwvin",
+      "https://de.wikipedia.org/wiki/VW_Crafter",
+      "https://en.wikipedia.org/wiki/Volkswagen_Crafter",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037200/vw/crafter_kasten_sy_sx_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037201/vw/crafter_fahrgestell_sz_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037480/vw/crafter_bus_syi_syj_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "SZ",
+    "model": "Crafter",
+    "generation": "Crafter II",
+    "types": ["SZ", "SY", "SX", "SYI", "SYJ"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/crafter/15184098",
+      "https://www.nettiauto.com/en/volkswagen/crafter/16028719",
+      "https://de.wikipedia.org/wiki/VW_Crafter",
+      "https://en.wikipedia.org/wiki/Volkswagen_Crafter",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037200/vw/crafter_kasten_sy_sx_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037201/vw/crafter_fahrgestell_sz_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037480/vw/crafter_bus_syi_syj_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "T1",
+    "model": "Amarok",
+    "generation": "Amarok II",
+    "types": ["T1", "T1A", "T1B"],
+    "from": 2022,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/amarok/15384815",
+      "https://www.nettiauto.com/en/volkswagen/amarok/15481007",
+      "https://www.nettiauto.com/en/volkswagen/amarok/15818375",
+      "https://en.wikipedia.org/wiki/Volkswagen_Amarok",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000044048/vw/amarok_t1a_t1b_"
+    ]
+  },
+  {
+    "make": "volkswagen",
+    "code": "TV",
+    "model": "Transporter",
+    "generation": "T7 (Ford Transit Custom based)",
+    "types": ["TV"],
+    "from": null,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.nettiauto.com/en/volkswagen/transporter/16044520",
+      "https://www.nettiauto.com/en/volkswagen/caravelle/15851987",
+      "https://www.nettiauto.com/en/volkswagen/caravelle/15921562"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4B",
+    "model": "A6",
+    "generation": "A6 C5",
+    "types": ["4B", "4B2", "4B4", "4B5", "4B6", "4BH"],
+    "from": 1997,
+    "to": 2005,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/41379-audi-a6-c5-vin-wauzzz4b04n042431",
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/39168-audi-a6-c5-wauzzz4bzwn007641",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A6",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001891/audi/a6_c5_4b2_4b4_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003395/audi/a6_c5_avant_4b5_4b6_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004632/audi/allroad_c5_4bh_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4E",
+    "model": "A8",
+    "generation": "A8 D3",
+    "types": ["4E", "4E2", "4E8"],
+    "from": 2002,
+    "to": 2010,
+    "market": "all",
+    "sources": [
+      "https://www.classic.com/veh/2008-audi-s8-wauzzz4e08n006528-pe90abp/",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ4E8AN004841",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A8",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004935/audi/a8_d3_4e2_4e8_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4F",
+    "model": "A6",
+    "generation": "A6 C6",
+    "types": ["4F", "4F2", "4F5", "4FH"],
+    "from": 2004,
+    "to": 2011,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ4F07N064761",
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/56047-audi-a6-c6-vin-wauzzz4f58n077846",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A6",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005110/audi/a6_c6_4f2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005381/audi/a6_c6_avant_4f5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005546/audi/a6_allroad_c6_4fh_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4G",
+    "model": "A6",
+    "generation": "A6 C7",
+    "types": ["4G", "4G2", "4GC", "4G5", "4GD", "4GH", "4GJ"],
+    "from": 2010,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/56428-audi-a6-c7-avant-wauzzz4g3en149910",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ4G1EN172845",
+      "https://en.wikipedia.org/wiki/Audi_A6",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009154/audi/a6_c7_4g2_4gc_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009627/audi/a6_c7_avant_4g5_4gd_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010161/audi/a6_allroad_c7_4gh_4gj_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4G",
+    "model": "A7",
+    "generation": "A7 C7",
+    "types": ["4G", "4GA", "4GF"],
+    "from": 2010,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://www.imcdb.org/v001792192.html",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ4G7HN015874",
+      "https://en.wikipedia.org/wiki/Audi_A7",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008986/audi/a7_sportback_4ga_4gf_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4H",
+    "model": "A8",
+    "generation": "A8 D4",
+    "types": ["4H", "4H2", "4H8", "4HC", "4HL"],
+    "from": 2009,
+    "to": 2017,
+    "market": "eu",
+    "sources": [
+      "https://historiasamochodu.info/wauzzz4h6cn006794-2011-audi-a8-b2b10ed6/",
+      "https://vf.vin/en/car/dkbjz-audi-a8-2013-wauzzz4h4dn022882.html",
+      "https://en.wikipedia.org/wiki/Audi_A8",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008627/audi/a8_d4_4h2_4h8_4hc_4hl_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4L",
+    "model": "Q7",
+    "generation": "Q7 4L",
+    "types": ["4L", "4LB"],
+    "from": 2005,
+    "to": 2015,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/35744-audi-q7-3-0-tdi-vin-wauzzz4l89d016388",
+      "https://www.classic.com/veh/2010-audi-q7-60-v12-tdi-wuazzz4l1ad012970-4ZMroJp/",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q7",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005461/audi/q7_4lb_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "4M",
+    "model": "Q7",
+    "generation": "Q7 4M",
+    "types": ["4M", "4MB", "4MG", "4MQ"],
+    "from": 2015,
+    "to": 2026,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ4M1HD046727",
+      "https://www.carvertical.com/vin/WAUZZZ4M3KD005040",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikipedia.org/wiki/Audi_Q7",
+      "https://de.wikipedia.org/wiki/Audi_Q7_4M",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014159/audi/q7_4mb_4mg_4mq_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8D",
+    "model": "A4",
+    "generation": "A4 B5",
+    "types": ["8D", "8D2", "8D5"],
+    "from": 1994,
+    "to": 2001,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/46482-audi-a4-b5-1-8t-vin-wauzzz8dzva266720",
+      "https://www.bezwypadkowy.net/forum/54-uwaga-na-to-auto/32985-audi-a4-b5-1-9-116-km-2000-nr-vin-wauzzz8dzya183331-korekta",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A4",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000000253/audi/a4_b5_8d2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003485/audi/a4_b5_avant_8d5_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8E",
+    "model": "A4",
+    "generation": "A4 B6/B7",
+    "types": ["8E", "8H", "8E2", "8E5", "8EC", "8ED"],
+    "from": 2000,
+    "to": 2009,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/43832-audi-a4-b6-1-9-tdi-vin-wauzzz8e84a193934",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8E88A129379",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A4",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004731/audi/a4_b6_8e2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004797/audi/a4_b6_avant_8e5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005376/audi/a4_b7_8ec_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8H",
+    "model": "A4",
+    "generation": "A4 B6/B7 Cabriolet",
+    "types": ["8H", "8H7", "8HE"],
+    "from": 2003,
+    "to": 2009,
+    "market": "all",
+    "sources": [
+      "https://carsbat.com/en/detail/wauzzz8h37k017754-xjtsjj/",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A4",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004840/audi/a4_b6_cabrio_8h7_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041689/audi/a4_b7_cabrio_8he_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8J",
+    "model": "TT",
+    "generation": "TT 8J",
+    "types": ["8J", "8J3", "8J9"],
+    "from": 2006,
+    "to": 2014,
+    "market": "all",
+    "sources": [
+      "https://www.hagerty.com/valuation-tools/past-sales/2007-audi-tt/TRUZZZ8J081013938/ea51db1d-1dce-41d1-8292-a4d9f660281c",
+      "http://vin-decoder.com/TRUZZZ8J691003996",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_TT",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005544/audi/tt_8j3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005608/audi/tt_roadster_8j9_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8K",
+    "model": "A4",
+    "generation": "A4 B8",
+    "types": ["8K", "8K2", "8K5", "8KH"],
+    "from": 2008,
+    "to": 2016,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/52849-audi-a4-b8-vin-wauzzz8k4bn007284",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8K8BA084344",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A4",
+      "https://de.wikipedia.org/wiki/Audi_A4_B8",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006418/audi/a4_b8_8k2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006988/audi/a4_b8_avant_8k5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008031/audi/a4_allroad_b8_8kh_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8L",
+    "model": "A3",
+    "generation": "A3 8L",
+    "types": ["8L", "8L1"],
+    "from": 1996,
+    "to": 2003,
+    "market": "eu",
+    "sources": [
+      "https://www.classic.com/veh/1999-audi-s3-wauzzz8lzya054815-pEQx9Dp/",
+      "https://vincheck.com.ua/car_info/wauzzz8lzya017846",
+      "https://en.wikipedia.org/wiki/Audi_A3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001557/audi/a3_8l1_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8N",
+    "model": "TT",
+    "generation": "TT 8N",
+    "types": ["8N", "8N3", "8N9"],
+    "from": 1998,
+    "to": 2006,
+    "market": "all",
+    "sources": [
+      "https://www.classic.com/veh/2000-audi-tt-roadster-truzzz8nzy1078991-n8mVN0W/",
+      "https://www.classic.com/veh/2000-audi-tt-18t-quattro-truzzz8nzy1069782-4DdAxw4/",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_TT",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003851/audi/tt_8n3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004089/audi/tt_roadster_8n9_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8P",
+    "model": "A3",
+    "generation": "A3 8P",
+    "types": ["8P", "8P1", "8PA", "8P7"],
+    "from": 2003,
+    "to": 2013,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8P8BA051792",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8P08A075996",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004955/audi/a3_8p1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005143/audi/a3_sportback_8pa_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006724/audi/a3_cabrio_8p7_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8R",
+    "model": "Q5",
+    "generation": "Q5 8R",
+    "types": ["8R", "8RB"],
+    "from": 2008,
+    "to": 2017,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/58840-audi-q5-vin-wauzzz8r8ba093168",
+      "https://www.forum-audi.com/img/members/5/WAUZZZ8R8GA095123-Audi-Q5-2016---VinDecoderz.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q5",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007534/audi/q5_8rb_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8T",
+    "model": "A5",
+    "generation": "A5 8T",
+    "types": ["8T", "8T3", "8TA"],
+    "from": 2007,
+    "to": 2016,
+    "market": "all",
+    "sources": [
+      "https://www.bezwypadkowy.net/forum/58-ocena-auta/48843-audi-a5-vin-wauzzz8t1aa046509",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8T8DA024169",
+      "https://vinpublic.com/products/2015-audi-a5-wauzzz8t5fa017974-vin-wauzzz8t5fa017974-lotid-117226",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A5",
+      "https://de.wikipedia.org/wiki/Audi_A5_8T",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006243/audi/a5_8t3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008159/audi/a5_sportback_8ta_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8U",
+    "model": "Q3",
+    "generation": "Q3 8U",
+    "types": ["8U", "8UB", "8UG"],
+    "from": 2011,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://myfreevin.com/vin/WAUZZZ8U5DR090690/",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8U0DR059380",
+      "https://en.wikipedia.org/wiki/Audi_Q3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009731/audi/q3_8ub_8ug_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8V",
+    "model": "A3",
+    "generation": "A3 8V",
+    "types": ["8V", "8V1", "8VK", "8VA", "8VF", "8VS", "8VM", "8V7", "8VE"],
+    "from": 2012,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8V$J1008984",
+      "https://vf.vin/en/car/dvyte-audi-a3_sportback_diesel_-_2017-2018-wauzzz8v6ja098557.html",
+      "https://de.wikipedia.org/wiki/Audi_A3_8V",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010253/audi/a3_8v1_8vk_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010459/audi/a3_sportback_8va_8vf_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011282/audi/a3_limousine_8vs_8vm_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "8X",
+    "model": "A1",
+    "generation": "A1 8X",
+    "types": ["8X", "8X1", "8XK", "8XA", "8XF"],
+    "from": 2010,
+    "to": 2018,
+    "market": "eu",
+    "sources": [
+      "https://stat.vin/cars/WAUZZZ8X1BB060442",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZ8X8GB063622",
+      "https://vf.vin/en/car/dcxem-audi-a1-2012-wauzzz8x0cb063723.html",
+      "https://en.wikipedia.org/wiki/Audi_A1",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008604/audi/a1_8x1_8xk_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009730/audi/a1_sportback_8xa_8xf_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F1",
+    "model": "Q8",
+    "generation": "Q8",
+    "types": ["4MN", "4MT"],
+    "from": 2018,
+    "to": null,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZF13LD000229",
+      "https://www.classic.com/veh/2022-audi-rsq8-wuazzzf17nd020217-WNBMxkW/",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q8",
+      "https://de.wikipedia.org/wiki/Audi_Q8",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038836/audi/q8_4mn_4mt_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F2",
+    "model": "A6",
+    "generation": "A6 C8",
+    "types": ["4A", "4K", "4A2", "4A5", "4AH"],
+    "from": 2018,
+    "to": 2025,
+    "market": "all",
+    "sources": [
+      "https://myfreevin.com/vin/WAUZZZF29KN084171/",
+      "https://www.bmw-borishof.ru/used/66ab896ac59b36284e94c3ec/",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A6",
+      "https://de.wikipedia.org/wiki/Audi_A6_C8",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038843/audi/a6_c8_4a2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038844/audi/a6_c8_avant_4a5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000039591/audi/a6_allroad_c8_4ah_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F2",
+    "model": "A7",
+    "generation": "A7 C8",
+    "types": ["4K", "4KA"],
+    "from": 2018,
+    "to": null,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZF22KN006797",
+      "https://carsbat.io/detail/wauzzzf24ln018905-oqfwct/",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A7",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038471/audi/a7_sportback_4ka_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F3",
+    "model": "Q3",
+    "generation": "Q3 F3",
+    "types": ["F3", "F3B", "F3N"],
+    "from": 2018,
+    "to": 2025,
+    "market": "all",
+    "sources": [
+      "https://carsbat.com/en/detail/wauzzzf32m1117417-kgngni/",
+      "https://perfect2car.com/vin-db-WAUZZZF31L1022264-info",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q3",
+      "https://de.wikipedia.org/wiki/Audi_Q3_F3",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038997/audi/q3_f3b_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040155/audi/q3_sportback_f3n_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F4",
+    "model": "A4",
+    "generation": "A4 B9",
+    "types": ["8W", "8W2", "8WC", "8W5", "8WD", "8WH", "8WJ"],
+    "from": 2015,
+    "to": 2025,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZF46HA007808",
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZF47KM006523",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A4",
+      "https://de.wikipedia.org/wiki/Audi_A4_B9",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014695/audi/a4_b9_8w2_8wc_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014696/audi/a4_b9_avant_8w5_8wd_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036378/audi/a4_allroad_b9_8wh_8wj_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F5",
+    "model": "A5",
+    "generation": "A5 F5",
+    "types": ["F5", "F53", "F5P", "F5A", "F5F", "F57", "F5E"],
+    "from": 2016,
+    "to": 2024,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/WAUZZZF50MA020833",
+      "https://vf.vin/en/car/dvwor-audi-a5-2019-wauzzzf55ka043697.html",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A5",
+      "https://de.wikipedia.org/wiki/Audi_A5_F5",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036928/audi/a5_f53_f5p_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037116/audi/a5_sportback_f5a_f5f_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037293/audi/a5_cabrio_f57_f5e_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F7",
+    "model": "Q7",
+    "generation": "Q7 4M",
+    "types": ["4M"],
+    "from": 2017,
+    "to": null,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "F8",
+    "model": "A8",
+    "generation": "A8 D5",
+    "types": ["4N", "4N2", "4N8", "4NC", "4NL", "4NX"],
+    "from": 2017,
+    "to": 2026,
+    "market": "all",
+    "sources": [
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_A8",
+      "https://de.wikipedia.org/wiki/Audi_A8_D5",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038219/audi/a8_d5_4n2_4n8_4nc_4nl_4nx_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FA",
+    "model": "A8",
+    "generation": "A8 D3",
+    "types": ["4E"],
+    "from": 2010,
+    "to": 2010,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FB",
+    "model": "A6",
+    "generation": "A6 C6",
+    "types": ["4F"],
+    "from": 2010,
+    "to": 2011,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FC",
+    "model": "A6",
+    "generation": "A6 C7",
+    "types": ["4G"],
+    "from": 2012,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FC",
+    "model": "A7",
+    "generation": "A7 C7",
+    "types": ["4G"],
+    "from": 2012,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FD",
+    "model": "A8",
+    "generation": "A8 D4",
+    "types": ["4H"],
+    "from": 2011,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FE",
+    "model": "Q7",
+    "generation": "Q7 4L",
+    "types": ["4L"],
+    "from": 2010,
+    "to": 2015,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FF",
+    "model": "A3",
+    "generation": "A3 8V",
+    "types": ["8V"],
+    "from": 2015,
+    "to": 2020,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FH",
+    "model": "A5",
+    "generation": "A5 8F Cabriolet",
+    "types": ["8F"],
+    "from": 2010,
+    "to": 2017,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://de.wikipedia.org/wiki/Audi_A5_8T"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FK",
+    "model": "TT",
+    "generation": "TT 8J",
+    "types": ["8J"],
+    "from": 2010,
+    "to": 2015,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FL",
+    "model": "A4",
+    "generation": "A4 B8",
+    "types": ["8K"],
+    "from": 2010,
+    "to": 2016,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FM",
+    "model": "A3",
+    "generation": "A3 8P",
+    "types": ["8P"],
+    "from": 2010,
+    "to": 2013,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FP",
+    "model": "Q5",
+    "generation": "Q5 8R",
+    "types": ["8R"],
+    "from": 2010,
+    "to": 2017,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FR",
+    "model": "A5",
+    "generation": "A5 8T",
+    "types": ["8T"],
+    "from": 2010,
+    "to": 2017,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FS",
+    "model": "Q3",
+    "generation": "Q3 8U",
+    "types": ["8U"],
+    "from": 2015,
+    "to": 2018,
+    "market": "na",
+    "sources": [
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FV",
+    "model": "TT",
+    "generation": "TT FV/8S",
+    "types": ["FV", "8S", "FV3", "FVP", "FV9", "FVR"],
+    "from": 2014,
+    "to": 2023,
+    "market": "all",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TRUZZZFV9J1012010",
+      "https://dot.report/vin/TRUZZZFV9K1008850",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_TT",
+      "https://de.wikipedia.org/wiki/Audi_TT_FV",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000012912/audi/tt_fv3_fvp_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000013274/audi/tt_roadster_fv9_fvr_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FW",
+    "model": "e-tron GT",
+    "generation": "e-tron GT",
+    "types": ["F8"],
+    "from": 2020,
+    "to": null,
+    "market": "all",
+    "sources": [
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_e-tron_GT"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FY",
+    "model": "Q5",
+    "generation": "Q5 FY",
+    "types": ["FY", "FYB", "FYG", "FYT"],
+    "from": 2016,
+    "to": 2025,
+    "market": "all",
+    "sources": [
+      "https://carsbat.com/de/detail/wauzzzfy8l2044316-ggolvx/",
+      "https://carsbat.io/detail/wauzzzfy3m2061963-y6ws3f/",
+      "https://vf.vin/en/car/fpcex-audi-q5-2018-wauzzzfy0j2175494.html",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q5",
+      "https://de.wikipedia.org/wiki/Audi_Q5_FY",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037161/audi/q5_fyb_fyg_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041715/audi/q5_sportback_fyt_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "FZ",
+    "model": "Q4 e-tron",
+    "generation": "Q4 e-tron",
+    "types": ["F4"],
+    "from": 2021,
+    "to": null,
+    "market": "all",
+    "sources": [
+      "https://vininfo.ee/soiduki-ajaloo-kontroll-vin-koodi-jargi/WAUZZZFZ6NP017405",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q4_e-tron"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "GA",
+    "model": "Q2",
+    "generation": "Q2 GA",
+    "types": ["GA", "GAB", "GAG"],
+    "from": 2016,
+    "to": 2026,
+    "market": "eu",
+    "sources": [
+      "https://stat.vin/cars/WAUZZZGA7MA008979",
+      "https://vininfo.ee/en/car-history-check-by-vin/WAUZZZGA2JA082242",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikipedia.org/wiki/Audi_Q2",
+      "https://de.wikipedia.org/wiki/Audi_Q2",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036543/audi/q2_gab_gag_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "GB",
+    "model": "A1",
+    "generation": "A1 GB",
+    "types": ["GB", "GBA", "GBH"],
+    "from": 2018,
+    "to": 2026,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/wauzzzgb0lr024532-lcai7s/",
+      "https://carsbat.com/en/detail/wauzzzgb3lr053779-aciaev/",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikipedia.org/wiki/Audi_A1",
+      "https://de.wikipedia.org/wiki/Audi_A1_GB",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038933/audi/a1_sportback_gba_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040147/audi/a1_city_carver_gbh_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000043038/audi/a1_allstreet_gbh_"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "GE",
+    "model": "e-tron",
+    "generation": "e-tron GE",
+    "types": ["GE"],
+    "from": 2018,
+    "to": 2025,
+    "market": "all",
+    "sources": [
+      "https://carsbat.com/en/detail/wauzzzge3lb015505-vc2cda/",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://en.wikipedia.org/wiki/Audi_Q8_e-tron"
+    ]
+  },
+  {
+    "make": "audi",
+    "code": "GY",
+    "model": "A3",
+    "generation": "A3 8Y",
+    "types": ["8Y", "8YA", "8YF", "8YS", "8YM", "8YJ"],
+    "from": 2020,
+    "to": null,
+    "market": "all",
+    "sources": [
+      "https://autoua.com.ua/vin/wauzzzgy9ma092171?lang=en",
+      "https://media.audi.com/is/content/audi/country/jp/ja/accessory_service/info_top/specific_maintenance_vehicles/assets/Audi_specific_maintenance_vehicles_202305.pdf",
+      "https://en.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/Audi/VIN_Codes",
+      "https://de.wikipedia.org/wiki/Audi_A3_8Y",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040531/audi/a3_sportback_8ya_8yf_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040796/audi/a3_limousine_8ys_8ym_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000045351/audi/a3_allstreet_8yj_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "1U",
+    "model": "Octavia",
+    "generation": "Octavia I",
+    "types": ["1U", "1U2", "1U5"],
+    "from": 1996,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBCG01U822538737",
+      "https://www.freevindecoder.eu/TMBZZZ1U3X2182021",
+      "https://db.vin/en/brand/skoda/octavia/2013",
+      "https://de.wikipedia.org/wiki/\u0160koda_Octavia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001904/skoda/octavia_1_1u2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003560/skoda/octavia_1_combi_1u5_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "1Z",
+    "model": "Octavia",
+    "generation": "Octavia II",
+    "types": ["1Z", "1Z3", "1Z5"],
+    "from": 2004,
+    "to": 2013,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJS21Z998013903",
+      "https://www.bezwypadkowy.net/forum/119-ocena-auta/43788-skoda-octavia-ii-2008-vin-tmbds21zx88027854",
+      "https://uokik.gov.pl/download/11167",
+      "https://de.wikipedia.org/wiki/\u0160koda_Octavia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005120/skoda/octavia_2_1z3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005162/skoda/octavia_2_combi_1z5_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "3T",
+    "model": "Superb",
+    "generation": "Superb II",
+    "types": ["3T", "3T4", "3T5"],
+    "from": 2008,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJE73T9E9006581",
+      "https://stat.vin/cars/TMBJH73T2B9034810",
+      "https://uokik.gov.pl/download/11167",
+      "https://en.wikipedia.org/wiki/\u0160koda_Superb",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007588/skoda/superb_2_3t4_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008495/skoda/superb_2_combi_3t5_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "3U",
+    "model": "Superb",
+    "generation": "Superb I",
+    "types": ["3U", "3U4"],
+    "from": 2001,
+    "to": 2008,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/TMBDR63U279008891",
+      "https://www.freevindecoder.eu/TMBDR23U469117876",
+      "https://db.vin/en/brand/skoda/superb/2025",
+      "https://en.wikipedia.org/wiki/\u0160koda_Superb",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004837/skoda/superb_1_3u4_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "5J",
+    "model": "Roomster",
+    "generation": "Roomster",
+    "types": ["5J", "5J7"],
+    "from": 2006,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://vf.vin/en/car/d5fry-skoda-roomster-2012-tmbnj25j1c7024397.html",
+      "https://carsbat.com/en/detail/tmbnj25j1c7026201-xsjurn/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Roomster",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005507/skoda/roomster_5j7_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006412/skoda/roomster_praktik_5j_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "5J",
+    "model": "Fabia",
+    "generation": "Fabia II",
+    "types": ["5J", "542", "545"],
+    "from": 2007,
+    "to": 2014,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/tmbaa25j893180189-zov1ud/",
+      "https://carsbat.com/en/detail/tmbjh25j4c3130926-dazrs9/",
+      "https://db.vin/en/brand/skoda/fabia/2023",
+      "https://en.wikipedia.org/wiki/\u0160koda_Fabia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006363/skoda/fabia_2_542_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006395/skoda/fabia_2_combi_545_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000044365/skoda/fabia_2_praktik_545_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "5L",
+    "model": "Yeti",
+    "generation": "Yeti",
+    "types": ["5L"],
+    "from": 2009,
+    "to": 2017,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJF65L6D6027005",
+      "https://vf.vin/en/car/dc3t2-skoda-yeti-2011-tmbjf75l9b6046716.html",
+      "https://uokik.gov.pl/download/11167",
+      "https://en.wikipedia.org/wiki/\u0160koda_Yeti",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008486/skoda/yeti_5l_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "6Y",
+    "model": "Fabia",
+    "generation": "Fabia I",
+    "types": ["6Y", "6Y2", "6Y5", "6Y3"],
+    "from": 1999,
+    "to": 2009,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBDB16Y827287144",
+      "https://www.freevindecoder.eu/TMBHC26Y474072163",
+      "https://en.wikipedia.org/wiki/\u0160koda_Fabia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004383/skoda/fabia_1_6y2_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004727/skoda/fabia_1_combi_6y5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004777/skoda/fabia_1_stufenheck_6y3_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "AA",
+    "model": "Citigo",
+    "generation": "Citigo",
+    "types": ["AA", "NF1"],
+    "from": 2011,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBZZZAAZHD616382",
+      "https://vf.vin/en/car/dztg3-skoda-citigo-2018-tmbzzzaazjd628968.html",
+      "https://en.wikipedia.org/wiki/Volkswagen_Up",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010126/skoda/citigo_nf1_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NE",
+    "model": "Octavia",
+    "generation": "Octavia III",
+    "types": ["5E", "NE", "5E3", "NL3", "NR3", "5E5", "5E6"],
+    "from": 2012,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/TMBJG7NE3G0039740",
+      "https://www.carvertical.com/vin/TMBJG7NE9L0134782",
+      "https://carsbat.com/en/detail/tmbjc7ne6j0257352-9rfrci/",
+      "https://db.vin/en/brand/skoda/octavia/2013",
+      "https://de.wikipedia.org/wiki/\u0160koda_Octavia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011195/skoda/octavia_3_5e3_nl3_nr3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011196/skoda/octavia_3_combi_5e5_5e6_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NH",
+    "model": "Rapid",
+    "generation": "Rapid",
+    "types": ["NH", "NH3", "NK3", "NK6", "NH1"],
+    "from": 2012,
+    "to": 2019,
+    "market": "eu",
+    "sources": [
+      "https://www.carvertical.com/vin/TMBEA6NH7G4515343",
+      "https://www.vindecoderz.com/EN/check-lookup/TMBAT6NH8H4024841",
+      "https://vf.vin/en/car/dynu5-skoda-rapid-2016-tmbee6nh3g4544018.html",
+      "https://en.wikipedia.org/wiki/\u0160koda_Rapid_(2012)",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010587/skoda/rapid_nh3_nk3_nk6_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011519/skoda/rapid_spaceback_nh1_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NJ",
+    "model": "Fabia",
+    "generation": "Fabia III",
+    "types": ["NJ", "NJ3", "NJ5"],
+    "from": 2014,
+    "to": 2022,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJP6NJ1KZ088625",
+      "https://www.autobaza.pl/turnstile_verify/vin/TMBJM6NJ9HZ031283",
+      "https://carsbat.com/en/detail/tmbjp6nj8nz024702-yyaqgk/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Fabia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000013331/skoda/fabia_3_nj3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000013332/skoda/fabia_3_combi_nj5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000044366/skoda/fabia_3_praktik_nj5_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NP",
+    "model": "Superb",
+    "generation": "Superb III",
+    "types": ["3V", "NP", "3V3", "3V5"],
+    "from": 2015,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJB7NP2J7593656",
+      "https://www.carvertical.com/vin/TMBCE9NP4H7546845",
+      "https://carsbat.com/en/detail/tmban7np2l7032772-of6sze-2025-04-03/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Superb",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014018/skoda/superb_3_3v3_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000014382/skoda/superb_3_combi_3v5_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NS",
+    "model": "Kodiaq",
+    "generation": "Kodiaq I",
+    "types": ["NS", "NV", "NS7", "NV7", "NS6"],
+    "from": 2016,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBLK7NS4J8036898",
+      "https://carsbat.com/en/detail/tmble7ns6n8029920-igecn2/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Kodiaq",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037164/skoda/kodiaq_1_ns7_nv7_ns6_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NU",
+    "model": "Karoq",
+    "generation": "Karoq",
+    "types": ["NU", "NU7", "ND7"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBJP7NU2K2020729",
+      "https://carsbat.com/en/detail/tmbjr7nu1l5031862-6pwkqo/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Karoq",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038149/skoda/karoq_nu7_nd7_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NW",
+    "model": "Kamiq",
+    "generation": "Kamiq",
+    "types": ["NW", "NW4"],
+    "from": 2019,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/TMBGH6NW7M3072177",
+      "https://vf.vin/en/car/fps32-skoda-kamiq-2020-tmbgr7nw2l3064750.html",
+      "https://en.wikipedia.org/wiki/\u0160koda_Kamiq",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000039796/skoda/kamiq_nw4_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NW",
+    "model": "Scala",
+    "generation": "Scala",
+    "types": ["NW", "NW1"],
+    "from": 2019,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://vf.vin/en/car/dnqgd-skoda-scala-2019-tmber7nw3k3011741.html",
+      "https://carsbat.com/en/detail/tmbeg6nw2l3101528-iekfk5/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Scala",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000039378/skoda/scala_nw1_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NX",
+    "model": "Octavia",
+    "generation": "Octavia IV",
+    "types": ["NX", "NX5", "PV5", "NX3", "NN3", "PV3"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.skoda-storyboard.com/en/skoda-world/what-can-vin-codes-tell-you/",
+      "https://db.vin/en/brand/skoda/octavia/2013",
+      "https://de.wikipedia.org/wiki/\u0160koda_Octavia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040412/skoda/octavia_4_combi_nx5_pv5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040538/skoda/octavia_4_nx3_nn3_pv3_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NY",
+    "model": "Enyaq",
+    "generation": "Enyaq",
+    "types": ["NY"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.carvertical.com/vin/TMBJB7NY7MF028225",
+      "https://carsbat.com/en/detail/tmble7ny8nf017641-nwkkbf/",
+      "https://en.wikipedia.org/wiki/\u0160koda_Enyaq"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NY",
+    "model": "Elroq",
+    "generation": "Elroq",
+    "types": ["NY"],
+    "from": 2025,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/TMBNC7NY9SF097980",
+      "https://db.vin/en/brand/skoda/elroq",
+      "https://de.wikipedia.org/wiki/\u0160koda_Elroq"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "NZ",
+    "model": "Superb",
+    "generation": "Superb IV",
+    "types": ["3Y", "NZ", "NZ5", "NZ3"],
+    "from": 2023,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/TMBJH8NZ9SC055938",
+      "https://www.freevindecoder.eu/TMBLR0NZ9TC054846",
+      "https://db.vin/en/brand/skoda/superb/2025",
+      "https://en.wikipedia.org/wiki/\u0160koda_Superb",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000045010/skoda/superb_4_combi_nz5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000045132/skoda/superb_4_nz3_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "PJ",
+    "model": "Fabia",
+    "generation": "Fabia IV",
+    "types": ["PJ", "PJ3"],
+    "from": 2021,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://db.vin/en/vin/TMBFP6PJ2R4024491-skoda-fabia-2024",
+      "https://db.vin/en/brand/skoda/fabia/2023",
+      "https://en.wikipedia.org/wiki/\u0160koda_Fabia",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000042133/skoda/fabia_4_pj3_"
+    ]
+  },
+  {
+    "make": "skoda",
+    "code": "PS",
+    "model": "Kodiaq",
+    "generation": "Kodiaq II",
+    "types": ["PS", "PS7"],
+    "from": 2024,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/TMBLN7PS8ST076856",
+      "https://db.vin/en/brand/skoda/kodiaq/2025",
+      "https://en.wikipedia.org/wiki/\u0160koda_Kodiaq",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000045125/skoda/kodiaq_2_ps7_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "1M",
+    "model": "Toledo",
+    "generation": "Toledo II",
+    "types": ["1M"],
+    "from": 1998,
+    "to": 2004,
+    "market": "eu",
+    "sources": [
+      "https://carq.pl/pojazd/VSSZZZ1MZ3R122416_Seat_Toledo",
+      "https://www.bezwypadkowy.net/forum/111-ocena-auta/23996-seat-toledo-vin-vsszzz1mzyb036693",
+      "https://en.wikipedia.org/wiki/SEAT_Toledo",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000003899/seat/toledo_2_1m_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "1M",
+    "model": "Leon",
+    "generation": "Leon I",
+    "types": ["1M", "1M1"],
+    "from": 1999,
+    "to": 2006,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzz1mz4r046248-pbcpsr/",
+      "https://autoistorija.lt/en/car-history-check-by-vin/VSSZZZ1MZ4R021503",
+      "https://en.wikipedia.org/wiki/SEAT_Le\u00f3n",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004350/seat/leon_1_1m1_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "1P",
+    "model": "Leon",
+    "generation": "Leon II",
+    "types": ["1P", "1P1"],
+    "from": 2005,
+    "to": 2012,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/VSSZZZ1PZ8R086221",
+      "https://carsbat.com/en/detail/vsszzz1pz9r037001-8qutb6/",
+      "https://en.wikipedia.org/wiki/SEAT_Le\u00f3n",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005431/seat/leon_2_1p1_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "5F",
+    "model": "Leon",
+    "generation": "Leon III",
+    "types": ["5F", "5F1", "5F5", "5F8"],
+    "from": 2012,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "https://www.carvertical.com/vin/VSSZZZ5FZFR010339",
+      "https://www.autobaza.pl/darmowe-sprawdzenie-vin/VSSZZZ5FZKR004459",
+      "https://vf.vin/en/car/eddxt-seat-leon5f1092012gt-2020-vsszzz5fzlr010638.html",
+      "https://en.wikipedia.org/wiki/SEAT_Le\u00f3n",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010734/seat/leon_3_5f1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011279/seat/leon_3_sc_5f5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000011484/seat/leon_3_st_5f8_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "5F",
+    "model": "Ateca",
+    "generation": "Ateca",
+    "types": ["KH", "5F", "KH7", "KHP"],
+    "from": 2016,
+    "to": 2026,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzz5fzm6539357-baktjz-2025-04-02/",
+      "https://vf.vin/en/car/dygrj-seat-ateca_3916-2018-vsszzz5fzj6529689.html",
+      "https://en.wikipedia.org/wiki/SEAT_Ateca",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000036512/seat/ateca_kh7_khp_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "5P",
+    "model": "Altea",
+    "generation": "Altea",
+    "types": ["5P", "5P1", "5P5", "5P8"],
+    "from": 2004,
+    "to": 2015,
+    "market": "eu",
+    "sources": [
+      "https://autoistorija.lt/en/car-history-check-by-vin/VSSZZZ5PZ7R008411",
+      "https://vf.vin/en/car/dp0me-seat-altea-2012-vsszzz5pzcr032160.html",
+      "https://en.wikipedia.org/wiki/SEAT_Altea",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005111/seat/altea_5p1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000006236/seat/altea_xl_5p5_5p8_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "5P",
+    "model": "Toledo",
+    "generation": "Toledo III",
+    "types": ["5P", "5P2"],
+    "from": 2004,
+    "to": 2009,
+    "market": "eu",
+    "sources": [
+      "https://www.autobidmaster.com/en/carfinder-online-auto-auctions/lot/34613815/COPART_2005_SEAT_TOLEDO_STY/",
+      "https://vinchecker.eu/?vin=VSSZZZ5PZBR000001",
+      "https://en.wikipedia.org/wiki/SEAT_Toledo",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000005378/seat/toledo_3_5p2_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "6J",
+    "model": "Ibiza",
+    "generation": "Ibiza IV",
+    "types": ["6J", "6J5", "6P1", "6J1", "6P5", "6J8", "6P8"],
+    "from": 2008,
+    "to": 2017,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/VSSZZZ6JZGR022132",
+      "https://www.autobaza.pl/darmowe-sprawdzenie-vin/VSSZZZ6JZFR020729",
+      "https://en.wikipedia.org/wiki/SEAT_Ibiza",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007540/seat/ibiza_4_6j5_6p1_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000007567/seat/ibiza_4_sc_6j1_6p5_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000008609/seat/ibiza_4_st_6j8_6p8_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "6L",
+    "model": "Ibiza",
+    "generation": "Ibiza III",
+    "types": ["6L", "6L1"],
+    "from": 2002,
+    "to": 2008,
+    "market": "eu",
+    "sources": [
+      "https://www.vindecoderz.com/EN/check-lookup/vsszzz6lz8r120825",
+      "https://stat.vin/cars/VSSZZZ6LZ7R190877",
+      "https://en.wikipedia.org/wiki/SEAT_Ibiza",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000004870/seat/ibiza_3_6l1_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "7M",
+    "model": "Alhambra",
+    "generation": "Alhambra I",
+    "types": ["7M", "7V8", "7V9"],
+    "from": 1996,
+    "to": 2010,
+    "market": "eu",
+    "sources": [
+      "https://yauto.cz/vin/VSSZZZ7MZ1V509714/",
+      "https://www.vindecoderz.com/EN/check-lookup/VSSZZZ7MZ5V505673",
+      "https://en.wikipedia.org/wiki/SEAT_Alhambra",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000001564/seat/alhambra_1_7v8_7v9_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "7N",
+    "model": "Alhambra",
+    "generation": "Alhambra II",
+    "types": ["7N", "710", "711"],
+    "from": 2010,
+    "to": 2020,
+    "market": "eu",
+    "sources": [
+      "http://vin-decoder.pl/VSSZZZ7NZCV515376",
+      "https://vf.vin/en/car/cp5ik-seat-alhambra-2017-vsszzz7nzhv724416.html",
+      "https://en.wikipedia.org/wiki/SEAT_Alhambra",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000009009/seat/alhambra_2_710_711_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "AA",
+    "model": "Mii",
+    "generation": "Mii",
+    "types": ["AA", "KF1", "KE1"],
+    "from": 2011,
+    "to": 2021,
+    "market": "eu",
+    "sources": [
+      "https://www.vinapi.net/decoded-vin/VSSZZZAAZDD329746/772",
+      "https://www.allcars-eu.de/en/fahrzeuge/detailansicht/fahrzeug/vsszzzaazdd303427/seat-mii-1-0-reference/allcars-eu-gmbh/",
+      "https://en.wikipedia.org/wiki/Volkswagen_Up",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010094/seat/mii_kf1_ke1_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "KJ",
+    "model": "Arona",
+    "generation": "Arona",
+    "types": ["KJ", "KJ7", "KJP"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzkjzmr029752-7nrpt7/",
+      "https://vf.vin/en/car/cmj13-seat-arona-2020-vsszzzkjzlr112501.html",
+      "https://en.wikipedia.org/wiki/SEAT_Arona",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000038144/seat/arona_kj7_kjp_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "KJ",
+    "model": "Ibiza",
+    "generation": "Ibiza V",
+    "types": ["6F", "KJ", "KJ1", "KJG"],
+    "from": 2017,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzkjzkr129298-li32gv/",
+      "https://vf.vin/en/car/daxkw-seat-ibiza-2019-vsszzzkjzkr197303.html",
+      "https://en.wikipedia.org/wiki/SEAT_Ibiza",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000037916/seat/ibiza_5_kj1_kjg_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "KL",
+    "model": "Leon",
+    "generation": "Leon IV",
+    "types": ["KL", "KL1", "KLG", "KL8", "KLD"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzklznr007429-u6mdtb/",
+      "https://yauto.cz/vin/VSSZZZKLZNR054495/",
+      "https://en.wikipedia.org/wiki/SEAT_Le\u00f3n",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040534/seat/leon_4_kl1_klg_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000040535/seat/leon_4_st_kl8_kld_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "KN",
+    "model": "Tarraco",
+    "generation": "Tarraco",
+    "types": ["KN", "KN2"],
+    "from": 2018,
+    "to": 2024,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzknzlw019116-ye5dud/",
+      "https://autoistorija.lt/en/car-history-check-by-vin/VSSZZZKNZKW024461",
+      "https://en.wikipedia.org/wiki/SEAT_Tarraco",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000039208/seat/tarraco_kn2_"
+    ]
+  },
+  {
+    "make": "seat",
+    "code": "NH",
+    "model": "Toledo",
+    "generation": "Toledo IV",
+    "types": ["KG", "NH", "KG3"],
+    "from": 2012,
+    "to": 2019,
+    "market": "eu",
+    "sources": [
+      "https://vf.vin/en/car/c4qoi-seat-toledo-2015-vsszzznhzg1016945.html",
+      "https://www.vinrush.com/en/decode-check/VSSZZZNHZG1021141/5ea7f",
+      "https://ka.by/vin/VSSZZZNHZG1013250",
+      "https://en.wikipedia.org/wiki/SEAT_Toledo",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000010880/seat/toledo_4_kg3_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "5F",
+    "model": "Ateca",
+    "generation": "Ateca (Cupra)",
+    "types": ["KH", "5F", "KH7", "KHP", "KBP"],
+    "from": 2018,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://ucars.pro/vin/VSSZZZ5FZM6560608",
+      "https://db.vin/en/brand/cupra/ateca",
+      "https://en.wikipedia.org/wiki/SEAT_Ateca",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000039032/cupra/ateca_kh7_khp_kbp_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "K1",
+    "model": "Born",
+    "generation": "Born",
+    "types": ["K1", "K11", "K1G"],
+    "from": 2021,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzk1znp019470-ibkkio/",
+      "https://vf.vin/en/car/5oamu-cupra-born_21_bev-2023-vsszzzk1xpp018562.html",
+      "https://db.vin/en/brand/cupra/born/2021",
+      "https://en.wikipedia.org/wiki/Cupra_Born",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000042143/cupra/born_k11_k1g_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "KL",
+    "model": "Leon",
+    "generation": "Leon (Cupra)",
+    "types": ["KL", "KL1", "KU1", "KUG", "KL8", "KU8", "KUD"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.io/detail/vsszzzklznr017423-8qqt1e-2025-04-14/",
+      "https://carsbat.com/en/detail/vsszzzkl9rr000286-qmlqzk/",
+      "https://db.vin/en/brand/cupra/leon",
+      "https://en.wikipedia.org/wiki/SEAT_Le\u00f3n",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041359/cupra/leon_kl1_ku1_kug_",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041360/cupra/leon_sportstourer_kl8_ku8_kud_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "KM",
+    "model": "Formentor",
+    "generation": "Formentor",
+    "types": ["KM", "KM7", "KMP"],
+    "from": 2020,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://carsbat.com/en/detail/vsszzzkmznr009340-dv06fu/",
+      "https://carsbat.com/en/detail/vsszzzkmznr071349-rcs05b-2025-04-03/",
+      "https://db.vin/en/brand/cupra",
+      "https://en.wikipedia.org/wiki/Cupra_Formentor",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000041283/cupra/formentor_km7_kmp_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "KP",
+    "model": "Terramar",
+    "generation": "Terramar",
+    "types": ["KP", "KP1"],
+    "from": 2024,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://www.freevindecoder.eu/VSSZZZKP7S1003498",
+      "https://db.vin/en/brand/cupra/terramar",
+      "https://en.wikipedia.org/wiki/Cupra_Terramar",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000090066/cupra/terramar_kp1_"
+    ]
+  },
+  {
+    "make": "cupra",
+    "code": "KR",
+    "model": "Tavascan",
+    "generation": "Tavascan",
+    "types": ["KR", "KR1"],
+    "from": 2023,
+    "to": null,
+    "market": "eu",
+    "sources": [
+      "https://db.vin/en/vin/VSSZZZKR3SA011986-cupra-tavascan-2025",
+      "https://db.vin/en/brand/cupra/tavascan",
+      "https://en.wikipedia.org/wiki/Cupra_Tavascan",
+      "https://www.meyermotoren.de/en/fahrzeuge/2000044880/cupra/tavascan_kr1_"
+    ]
+  }
+]

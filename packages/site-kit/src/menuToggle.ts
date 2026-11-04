@@ -12,6 +12,7 @@ export function defineMenuToggle(tagName = 'menu-toggle'): void {
     class extends HTMLElement {
       private controller?: AbortController;
       private applyOpen?: (next: boolean) => void;
+      private outside: Element[] = [];
 
       setMenuOpen(next: boolean): void {
         this.applyOpen?.(next);
@@ -41,8 +42,13 @@ export function defineMenuToggle(tagName = 'menu-toggle'): void {
           button.setAttribute('aria-label', next ? closeLabel : openLabel);
           menu?.toggleAttribute('inert', !next);
           if (!locksScroll) return;
-          if (next) lockScroll();
-          else unlockScroll();
+          if (next) {
+            lockScroll();
+            this.holdOutside();
+          } else {
+            unlockScroll();
+            this.releaseOutside();
+          }
         };
 
         button.addEventListener(
@@ -78,6 +84,18 @@ export function defineMenuToggle(tagName = 'menu-toggle'): void {
           },
           { signal },
         );
+      }
+
+      holdOutside(): void {
+        this.outside = [...this.ownerDocument.body.children].filter(
+          (child) => !child.contains(this) && !child.hasAttribute('inert'),
+        );
+        for (const child of this.outside) child.toggleAttribute('inert', true);
+      }
+
+      releaseOutside(): void {
+        for (const child of this.outside) child.removeAttribute('inert');
+        this.outside = [];
       }
 
       disconnectedCallback(): void {

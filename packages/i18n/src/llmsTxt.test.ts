@@ -19,9 +19,9 @@ describe('llmsLink', () => {
     );
   });
 
-  it('appends a note after an em dash when one is given', () => {
+  it('appends a note after a colon, as the llms.txt format writes it', () => {
     expect(llmsLink('Cases', 'https://x.rs/cases/', '12 of them')).toBe(
-      '- [Cases](https://x.rs/cases/) — 12 of them',
+      '- [Cases](https://x.rs/cases/): 12 of them',
     );
   });
 });
@@ -116,7 +116,7 @@ describe('renderBrandLlmsTxt', () => {
         '## Services',
         '',
         '- [All services](https://x.rs/sr/services/)',
-        '- [PPF](https://x.rs/sr/services/ppf/) — Film',
+        '- [PPF](https://x.rs/sr/services/ppf/): Film',
         '',
         '## Works',
         '',

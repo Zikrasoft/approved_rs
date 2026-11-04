@@ -1,0 +1,74 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { shopOpen } from '@/utils/catalogueEnv';
+import type { Thumbnail } from '@/utils/partImages';
+import PartThumb from './PartThumb.astro';
+
+interface Props extends HTMLAttributes<'li'> {
+  variant: 'editable' | 'readonly' | 'kit';
+  name?: string;
+  href?: string;
+  number?: string;
+  eyebrow?: string;
+  quantity?: string;
+  thumb?: Thumbnail | null;
+}
+
+const {
+  variant,
+  name,
+  href,
+  number,
+  eyebrow,
+  quantity,
+  thumb = null,
+  class: className,
+  ...rest
+} = Astro.props;
+const linked = variant !== 'readonly';
+const inlineQuantity = variant === 'kit' && !shopOpen();
+const nameClass = 'leading-snug font-semibold text-ink link-quiet';
+---
+
+<li class:list={['flex flex-col gap-3', className]} {...rest}>
+  <div class="flex items-start justify-between gap-4">
+    <div class="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+      {variant === 'kit' && <PartThumb thumb={thumb} />}
+      <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+        {eyebrow && <span class="text-xs text-muted">{eyebrow}</span>}
+        {
+          linked ? (
+            <a href={href} class={nameClass} data-part-link>
+              {name}
+            </a>
+          ) : (
+            <span class="leading-snug font-semibold text-ink" data-name>
+              {name}
+            </span>
+          )
+        }
+        <span class="spec text-sm text-muted" data-number>
+          {inlineQuantity && quantity ? `${number}, ${quantity}` : number}
+        </span>
+        <slot name="status" />
+      </div>
+    </div>
+    {
+      variant === 'editable' ? (
+        <slot name="aside" />
+      ) : (
+        <span class="flex shrink-0 flex-col items-end gap-0.5 text-right">
+          <slot name="price">
+            <span class="font-semibold text-ink" data-price />
+          </slot>
+          {!inlineQuantity && (
+            <span class="text-xs text-muted" data-quantity>
+              {quantity}
+            </span>
+          )}
+        </span>
+      )
+    }
+  </div>
+  <slot />
+</li>

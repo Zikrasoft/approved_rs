@@ -1,0 +1,419 @@
+---
+import { contactCta } from '@podbor/site-kit/contact-control';
+export const prerender = false;
+
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
+import FacetFilters from '@/components/FacetFilters.astro';
+import ListingBar from '@/components/ListingBar.astro';
+import ListingSort from '@/components/ListingSort.astro';
+import CatalogueSearch from '@/components/CatalogueSearch.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PartRow from '@/components/PartRow.astro';
+import FilterChips from '@/components/FilterChips.astro';
+import StatusNote from '@/components/StatusNote.astro';
+import Pagination from '@/components/Pagination.astro';
+import ContactChannels from '@/components/ContactChannels.astro';
+import PartAskRow from '@/components/PartAskRow.astro';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { catalogueFor } from '@/utils/catalogueEnv';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
+import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
+import { currentNumber } from '@/utils/partNumbers';
+import { carName, vehicleVariant } from '@/utils/carName';
+import {
+  carLink,
+  carLinks,
+  inquiryTopic as topicOf,
+  listingCrumbs,
+  missingNumber,
+} from '@/utils/catalogueSearch';
+import { planSearch } from '@/utils/searchPage';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsSearch;
+const partsInquiry = content(locale).pages.partsInquiry;
+
+const plan = await planSearch({
+  params: Astro.url.searchParams,
+  locale,
+  catalogue: catalogueFor(Astro.request),
+});
+if ('redirect' in plan) {
+  return Astro.redirect(plan.redirect, plan.status);
+}
+Astro.response.status = plan.status;
+const {
+  q,
+  category,
+  make,
+  model,
+  chosen,
+  ranges,
+  offset,
+  vin,
+  vinTypo,
+  vinOutcome,
+  searchable,
+  found,
+  scope,
+  unknownScope,
+  sheetFacets,
+  dormant,
+  searchHref,
+  filtersHref,
+  sort,
+  sortHrefs,
+} = plan.view;
+const vinMake =
+  vinOutcome?.place?.kind === 'make' ? carLink(vinOutcome.place, locale) : null;
+const vinCar =
+  vinOutcome?.kind === 'vehicle'
+    ? [
+        carName(vinOutcome.vehicle.model, locale),
+        vehicleVariant(vinOutcome.vehicle, locale),
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : null;
+const numberMissing =
+  found && !category && !offset && found.cars.length === 0
+    ? missingNumber(q, found.results)
+    : false;
+const looseNumbers = numberMissing && Boolean(found?.results.length);
+const cars = found ? carLinks(found.cars, locale, copy.allModifications) : [];
+const narrowedTo = scope?.category;
+const unavailable = searchable && !found && !unknownScope;
+const scopedTo = scope?.model;
+const modelName = scopedTo && carName(scopedTo, locale);
+const modelCopy = content(locale).partsCar.hubs.modelCategory;
+const heading = narrowedTo?.name ?? copy.heading;
+const fillModel = (template: string) =>
+  template.replace('{category}', heading).replace('{model}', modelName ?? '');
+const facets = withFacetCopy(sheetFacets, copy);
+const chips = chosenFilters(facets, chosen, ranges, copy, (value) =>
+  value.toLocaleString(BCP47_BY_LOCALE[locale]),
+);
+const emptyMessage =
+  chips.length > 0
+    ? q
+      ? copy.noFilteredQueryResults.replace('{q}', q)
+      : copy.noFilteredResults
+    : q
+      ? copy.noResults.replace('{q}', q)
+      : partsInquiry.category.noParts;
+const zeroFound =
+  found?.results.length === 0 && chips.length === 0 && !modelName;
+const deadEnd = Boolean(vin) || unavailable || unknownScope || zeroFound;
+const DeadEndPrefill = vin || vinTypo ? 'div' : 'vin-prefill';
+const deadEndPrefill = vin
+  ? copy.lookingForVin.replace('{vin}', vin)
+  : q
+    ? copy.lookingFor.replace('{q}', q)
+    : undefined;
+const inquiryTopic = topicOf({
+  model: modelName,
+  category: narrowedTo?.name,
+  query: numberMissing ? copy.numberComment.replace('{q}', q) : q,
+  filters: found?.count === 0 ? chips.map(({ label }) => label) : [],
+});
+const inquiryCard = {
+  id: PARTS_INQUIRY_ANCHOR,
+  class: 'max-w-2xl scroll-mt-36 lg:scroll-mt-24',
+  heading: copy.formHeading,
+  vin: vin ?? vinTypo ?? undefined,
+  comment: vin
+    ? vinCar
+      ? `${vinCar}: `
+      : ''
+    : numberMissing
+      ? inquiryTopic
+      : `${inquiryTopic}: `,
+};
+const scopeHidden = {
+  ...(q ? { q } : {}),
+  ...(category ? { category } : {}),
+  ...(model ? { ...(make && { make }), model } : {}),
+  ...(sort ? { sort } : {}),
+};
+---
+
+<Shell
+  title={modelName
+    ? fillModel(modelCopy.metaTitle)
+    : narrowedTo
+      ? partsInquiry.category.metaTitleTemplate.replace('{name}', heading)
+      : copy.metaTitle}
+  description={copy.metaDescription}
+  noindex
+>
+  <PageHero
+    actions={false}
+    eyebrow={modelName
+      ? fillModel(modelCopy.eyebrow)
+      : narrowedTo
+        ? partsInquiry.category.eyebrow
+        : copy.eyebrow}
+    heading={heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      ...listingCrumbs({
+        locale,
+        model: scopedTo ?? null,
+        modelName: modelName ?? null,
+        category: narrowedTo ?? null,
+        pages: scope?.scope_pages ?? null,
+        searchLabel: copy.heading,
+      }),
+    ]}
+  >
+    {
+      !deadEnd && (
+        <div class="max-w-3xl pt-2" {...contactCta}>
+          <CatalogueSearch query={q} category={category} />
+        </div>
+      )
+    }
+  </PageHero>
+
+  <section class="wrap flex flex-col gap-6 py-6 md:py-10">
+    {
+      vin && (
+        <StatusNote>
+          {vinCar
+            ? content(locale).partsCar.vin.recognised.replace('{car}', vinCar)
+            : content(locale).partsCar.vin.unresolved}
+          {vinMake && (
+            <>
+              {' '}
+              <a href={vinMake.href} class="link font-semibold">
+                {content(locale).partsCar.vin.chooseMake.replace(
+                  '{make}',
+                  vinMake.label,
+                )}
+              </a>
+            </>
+          )}
+        </StatusNote>
+      )
+    }
+
+    {vinTypo && <StatusNote>{content(locale).partsCar.vin.invalid}</StatusNote>}
+
+    {
+      !searchable && !vin && (
+        <p class="max-w-2xl text-base leading-relaxed text-ink-2">
+          {copy.emptyQuery}
+        </p>
+      )
+    }
+
+    {zeroFound && !vinTypo && <StatusNote>{emptyMessage}</StatusNote>}
+    {unavailable && <StatusNote>{copy.unavailable}</StatusNote>}
+    {unknownScope && <StatusNote>{copy.unknownScope}</StatusNote>}
+
+    {
+      deadEnd && (
+        <>
+          <DeadEndPrefill
+            class="block max-w-2xl"
+            data-template={content(locale).shopPart.askAboutPartVin}
+          >
+            <ContactChannels
+              lead="phone"
+              leadPrimary
+              service={VIN_INQUIRY_SERVICE}
+              prefill={deadEndPrefill}
+            />
+          </DeadEndPrefill>
+          <div class="max-w-2xl" {...contactCta}>
+            <CatalogueSearch query={q} category={category} secondary />
+          </div>
+          <VinInquiryCard {...inquiryCard} />
+        </>
+      )
+    }
+
+    {
+      found && !zeroFound && (
+        <div
+          class:list={[
+            'grid gap-6',
+            facets.length > 0 &&
+              'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
+          ]}
+        >
+          {facets.length > 0 && (
+            <FacetFilters
+              action={PathBuilder.partsSearch(locale)}
+              hidden={scopeHidden}
+              facets={facets}
+              dormant={dormant}
+              chosen={chosen}
+              ranges={ranges}
+              count={found.count}
+              resetHref={filtersHref([], [])}
+            />
+          )}
+
+          <div class="flex min-w-0 flex-col gap-8 lg:gap-10">
+            {cars.length > 0 && (
+              <section class="flex flex-col gap-3">
+                <h2 class="text-block font-semibold">{copy.carsGroup}</h2>
+                <ul class="flex flex-wrap gap-2">
+                  {cars.map((car) => (
+                    <li>
+                      <a
+                        href={car.href}
+                        class="flex min-h-11 flex-col justify-center rounded-control border border-line bg-paper px-4 py-2 transition-colors duration-150 hover:border-ink motion-reduce:transition-none"
+                      >
+                        <span class="line-clamp-3 text-sm font-semibold wrap-anywhere text-ink">
+                          {car.label}
+                        </span>
+                        {car.detail && (
+                          <span class="text-xs text-muted">{car.detail}</span>
+                        )}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            <div class="flex flex-col gap-3">
+              {cars.length > 0 && (
+                <h2 class="-mb-3 text-block font-semibold">
+                  {copy.partsGroup}
+                </h2>
+              )}
+              <ListingBar
+                count={looseNumbers ? null : found.count}
+                filters={facets.length > 0}
+                active={chips.length}
+              />
+
+              {!q && (sort || found.results.some(({ demand }) => demand)) && (
+                <ListingSort current={sort} hrefs={sortHrefs} />
+              )}
+
+              {(chips.length > 0 || modelName) && (
+                <FilterChips
+                  chips={[
+                    ...(modelName
+                      ? [
+                          {
+                            label: modelName,
+                            href: searchHref(chosen, ranges, 0, ''),
+                          },
+                        ]
+                      : []),
+                    ...chips.map((chip) => ({
+                      label: chip.label,
+                      href: filtersHref(chip.facets, chip.ranges),
+                    })),
+                  ]}
+                  resetHref={chips.length > 0 ? filtersHref([], []) : undefined}
+                />
+              )}
+
+              {looseNumbers && (
+                <>
+                  <StatusNote>
+                    {copy.numberNotFound.replace('{q}', q)}{' '}
+                    <a
+                      href={`#${PARTS_INQUIRY_ANCHOR}`}
+                      class="link font-semibold"
+                    >
+                      {copy.notFoundLink}
+                    </a>
+                  </StatusNote>
+                  <h2 class="pt-1 text-block font-semibold">
+                    {copy.similarNumbers}
+                  </h2>
+                </>
+              )}
+              {found.results.length === 0 ? (
+                <StatusNote>{emptyMessage}</StatusNote>
+              ) : (
+                <ul class="card divide-y divide-line">
+                  {found.results.map((result) => (
+                    <PartRow
+                      thumb={
+                        result.thumbnail
+                          ? {
+                              src: result.thumbnail,
+                              illustration:
+                                result.thumbnail_illustration === true,
+                            }
+                          : null
+                      }
+                      slug={result.slug}
+                      brand={result.brand.name}
+                      value={result.value}
+                      name={result.part.name}
+                      specs={result.specs}
+                      detail={category ? undefined : result.part.category?.name}
+                      superseded={result.superseded}
+                      current={currentNumber(result, found.results)}
+                      priced={result}
+                      demand={result.demand}
+                    />
+                  ))}
+                </ul>
+              )}
+
+              {(offset > 0 || offset + found.limit < found.count) && (
+                <Pagination
+                  label={copy.pagination}
+                  prev={
+                    offset > 0
+                      ? searchHref(
+                          chosen,
+                          ranges,
+                          Math.max(0, offset - found.limit),
+                        )
+                      : null
+                  }
+                  next={
+                    offset + found.limit < found.count
+                      ? searchHref(chosen, ranges, offset + found.limit)
+                      : null
+                  }
+                />
+              )}
+
+              {found.results.length > 0 && !looseNumbers && (
+                <div class="flex flex-col gap-3 pt-2">
+                  <PartAskRow
+                    part={inquiryTopic}
+                    question={copy.lookingFor.replace('{q}', '{part}')}
+                    heading={copy.askManager}
+                    class="sm:max-w-md"
+                    lead="whatsapp"
+                  />
+                  <InquiryLink topic={inquiryTopic} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    {
+      !deadEnd && (numberMissing || found?.results.length === 0) && (
+        <VinInquiryCard {...inquiryCard} />
+      )
+    }
+  </section>
+</Shell>
+
+<script>
+  import { defineVinPrefill } from '@/scripts/vinPrefill';
+
+  defineVinPrefill();
+</script>

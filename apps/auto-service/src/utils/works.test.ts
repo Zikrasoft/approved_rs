@@ -1,5 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import { localizedWork, publishedWorks, type Work } from './works';
+import type { PartPageEntry } from './catalogueSnapshot';
+import {
+  featuredWorks,
+  localizedWork,
+  makeGroup,
+  makeOf,
+  makesOf,
+  publishedWorks,
+  servicePhoto,
+  sharedMakes,
+  sourcedParts,
+  sourcingWorks,
+  titleNamesCar,
+  workLeadService,
+  type Work,
+} from './works';
 
 function makeWork(
   overrides: Partial<Work['data']> = {},
@@ -12,6 +27,8 @@ function makeWork(
       title: 'BMW X5 — замена сцепления',
       car: 'BMW X5',
       servicesApplied: [],
+      parts: [],
+      image: { src: '/image.jpg' },
       gallery: [],
       date: new Date('2026-01-01'),
       published: true,
@@ -101,6 +118,10 @@ describe('publishedWorks', () => {
     expect(publishedWorks(works)).toHaveLength(1);
   });
 
+  it('never lists a Work without a photo', () => {
+    expect(publishedWorks([makeWork({ image: undefined })])).toEqual([]);
+  });
+
   it('sorts newest first', () => {
     const older = makeWork({ date: new Date('2025-01-01') });
     const newer = makeWork({ date: new Date('2026-06-01') });
@@ -113,5 +134,203 @@ describe('publishedWorks', () => {
     const input = [older, newer];
     publishedWorks(input);
     expect(input[0]).toBe(older);
+  });
+});
+
+describe('featuredWorks', () => {
+  const work = (date: string, featured: boolean) =>
+    makeWork({ date: new Date(date), featured });
+
+  it('leads with the featured Works, each group newest first', () => {
+    const plainNew = work('2026-09-01', false);
+    const plainOld = work('2026-01-01', false);
+    const pickedNew = work('2026-06-01', true);
+    const pickedOld = work('2025-06-01', true);
+    expect(featuredWorks([plainOld, pickedOld, plainNew, pickedNew])).toEqual([
+      pickedNew,
+      pickedOld,
+      plainNew,
+      plainOld,
+    ]);
+  });
+
+  it('keeps the rules of the published list', () => {
+    expect(
+      featuredWorks([
+        makeWork({ featured: true, published: false }),
+        makeWork({ featured: true, image: undefined }),
+      ]),
+    ).toEqual([]);
+  });
+});
+
+describe('titleNamesCar', () => {
+  it('is true when the title already opens with the car, in any case', () => {
+    expect(titleNamesCar('BMW X3: масло в двигателе', 'BMW X3')).toBe(true);
+    expect(titleNamesCar('Seat Leon: ГРМ', 'SEAT LEON')).toBe(true);
+  });
+
+  it('is false when the title names the job first', () => {
+    expect(titleNamesCar('Замена масла в DSG на Skoda', 'Skoda Octavia')).toBe(
+      false,
+    );
+  });
+});
+
+const partPage = (brand: string, value: string, normalized: string) =>
+  ({
+    slug: `${brand.toLowerCase()}-${normalized.toLowerCase()}`,
+    value,
+    normalized_value: normalized,
+    brand: { name: brand, slug: brand.toLowerCase() },
+  }) as unknown as PartPageEntry;
+
+describe('sourcedParts', () => {
+  const pages = [partPage('MANN-FILTER', 'HU 816 x', 'HU816X')];
+
+  it('links a Part that has a Part page, matching brand and number loosely', () => {
+    const work = makeWork({
+      parts: [{ brand: 'Mann-Filter', number: 'hu-816 x' }],
+    });
+    expect(sourcedParts(work, pages)).toEqual([
+      { brand: 'Mann-Filter', number: 'hu-816 x', slug: 'mann-filter-hu816x' },
+    ]);
+  });
+
+  it('shows a Part without a page as brand and number only', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: '0 986 4' }] });
+    expect(sourcedParts(work, pages)).toEqual([
+      { brand: 'Bosch', number: '0 986 4', slug: null },
+    ]);
+  });
+
+  it('does not link the same number under another brand', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
+    expect(sourcedParts(work, pages)[0].slug).toBeNull();
+  });
+
+  it('renders every Part as text when the catalogue is missing', () => {
+    const work = makeWork({ parts: [{ brand: 'Bosch', number: '1' }] });
+    expect(sourcedParts(work, [])).toEqual([
+      { brand: 'Bosch', number: '1', slug: null },
+    ]);
+  });
+});
+
+describe('sourcingWorks', () => {
+  it('lists the published Works that sourced a Part page', () => {
+    const page = partPage('MANN-FILTER', 'HU 816 x', 'HU816X');
+    const sourced = makeWork({
+      parts: [{ brand: 'mann-filter', number: 'HU816X' }],
+    });
+    const hidden = makeWork({
+      published: false,
+      parts: [{ brand: 'mann-filter', number: 'HU816X' }],
+    });
+    const other = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
+    expect(sourcingWorks([other, hidden, sourced], page)).toEqual([sourced]);
+  });
+});
+
+describe('workLeadService', () => {
+  it('posts Parts sourcing wherever it sits in servicesApplied', () => {
+    const work = makeWork({
+      servicesApplied: ['servicing', 'vin-parts-inquiry'],
+    });
+    expect(workLeadService(work)).toBe('vin-parts-inquiry');
+  });
+
+  it('posts the first applied service on any other Work', () => {
+    const work = makeWork({ servicesApplied: ['diagnostics', 'servicing'] });
+    expect(workLeadService(work)).toBe('diagnostics');
+  });
+
+  it('posts no service when none is applied', () => {
+    expect(workLeadService(makeWork())).toBeUndefined();
+  });
+});
+
+describe('makeOf', () => {
+  it('reads the make off the start of the car, whatever its case', () => {
+    expect(makeOf(makeWork({ car: 'SEAT LEON' }))).toBe('Seat');
+    expect(makeOf(makeWork({ car: 'Mercedes-Benz C-Class' }))).toBe(
+      'Mercedes-Benz',
+    );
+    expect(makeOf(makeWork({ car: 'BMW' }))).toBe('BMW');
+  });
+
+  it('leaves a car outside the list without a make', () => {
+    expect(makeOf(makeWork({ car: 'Обслуживание тормозной системы' }))).toBe(
+      undefined,
+    );
+  });
+});
+
+describe('makeGroup', () => {
+  it('keys a make as one space-free token the chip filter can match', () => {
+    expect(makeGroup(makeWork({ car: 'Alfa Romeo Giulia' }))).toBe(
+      'alfa-romeo',
+    );
+    expect(makeGroup(makeWork({ car: 'Обслуживание тормозов' }))).toBe(
+      undefined,
+    );
+  });
+});
+
+describe('the makes of a list of Works', () => {
+  const works = [
+    'Skoda Octavia',
+    'BMW X3',
+    'Alfa Romeo Giulia',
+    'Skoda Fabia',
+    'BMW 118D',
+    'Alfa Romeo 159',
+    'VW Golf',
+  ].map((car) => makeWork({ car }));
+
+  it('offers a chip only for a make two or more Works share, in list order', () => {
+    expect(sharedMakes(works)).toEqual([
+      { label: 'Alfa Romeo', group: 'alfa-romeo' },
+      { label: 'BMW', group: 'bmw' },
+      { label: 'Skoda', group: 'skoda' },
+    ]);
+  });
+
+  it('names every make at least one Work carries', () => {
+    expect(makesOf(works)).toEqual(['Alfa Romeo', 'BMW', 'Skoda', 'VW']);
+  });
+});
+
+describe('servicePhoto', () => {
+  const work = (id: string, src: string) =>
+    ({ ...makeWork({ image: { src } as never }), id }) as Work;
+  const workshop = { image: { src: '/bay.jpg' } as never, alt: 'Цех CarLab' };
+
+  it('takes the cover of the Work picked for the service, as decoration', () => {
+    const works = [work('bmw-x3', '/x3.jpg'), work('seat-leon', '/leon.jpg')];
+
+    expect(servicePhoto('diagnostics', works, workshop)).toEqual({
+      image: { src: '/x3.jpg' },
+      alt: '',
+    });
+  });
+
+  it('shows the workshop where no Work cover fits the service', () => {
+    const works = [work('velikij-servis-zamena-grm', '/grm.jpg')];
+
+    expect(servicePhoto('engine-gearbox', works, workshop)).toBe(workshop);
+    expect(servicePhoto('bodywork-painting', [], workshop)).toBe(workshop);
+    expect(servicePhoto('pre-purchase-inspection', [], workshop)).toBe(
+      workshop,
+    );
+  });
+
+  it('has no photo for parts sourcing or once the picked Work is unpublished', () => {
+    const hidden = { ...makeWork({ published: false }), id: 'bmw-x3' } as Work;
+
+    expect(
+      servicePhoto('vin-parts-inquiry', [work('bmw-x3', '/x3.jpg')], workshop),
+    ).toBe(undefined);
+    expect(servicePhoto('diagnostics', [hidden], workshop)).toBe(undefined);
   });
 });

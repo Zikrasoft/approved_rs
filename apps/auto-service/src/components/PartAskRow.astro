@@ -1,0 +1,50 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
+import ContactChannels from './ContactChannels.astro';
+
+interface Props {
+  part: string;
+  question: string;
+  replaced?: string;
+  heading?: string;
+  class?: string;
+  lead?: TrackedContactChannel;
+}
+
+const copy = content(localeFrom(Astro.url.pathname)).shopPart;
+const {
+  part,
+  question,
+  replaced,
+  heading = copy.askAboutPart,
+  class: className,
+  lead,
+} = Astro.props;
+const named = replaced
+  ? copy.askAboutReplacedPart
+      .replace('{replaced}', replaced)
+      .replace('{part}', part)
+  : part;
+---
+
+<div class:list={['flex flex-col gap-2 border-t border-line pt-4', className]}>
+  <p class="text-sm font-semibold text-ink">{heading}</p>
+  <vin-prefill class="block" data-template={copy.askAboutPartVin}>
+    <ContactChannels
+      only={['whatsapp', 'telegram']}
+      lead={lead}
+      service={VIN_INQUIRY_SERVICE}
+      prefill={question.replace('{part}', named)}
+      class="grid-cols-2"
+    />
+  </vin-prefill>
+</div>
+
+<script>
+  import { defineVinPrefill } from '@/scripts/vinPrefill';
+
+  defineVinPrefill();
+</script>

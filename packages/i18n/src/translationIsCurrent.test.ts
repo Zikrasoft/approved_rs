@@ -42,6 +42,10 @@ describe('translationIsCurrent', () => {
     expect(translationIsCurrent(text, navSchema)).toBe(false);
   });
 
+  it('is false for a file that is not a map of fields', () => {
+    expect(translationIsCurrent('- a list\n', navSchema)).toBe(false);
+  });
+
   it('ignores keys outside the section fields', () => {
     const text = withHash({ ...RU_NAV, extra: 'ignored' }, hashSource(RU_NAV));
     expect(translationIsCurrent(text, navSchema)).toBe(true);

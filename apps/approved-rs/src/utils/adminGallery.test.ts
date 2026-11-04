@@ -1,17 +1,42 @@
 import { describe, it, expect } from 'vitest';
 import {
-  isValidSlug,
+  galleryTargetSchema,
+  casePhotosPageSchema,
   sanitizeFilename,
   dedupeFilename,
   appendGalleryEntries,
 } from './adminGallery';
 
-describe('isValidSlug', () => {
+describe('galleryTargetSchema', () => {
+  const slugPasses = (slug: string) =>
+    galleryTargetSchema.safeParse({ dir: 'src/content/cases', slug }).success;
+
   it('accepts lowercase-digit-dash slugs, rejects anything with a path separator or unsafe char', () => {
-    expect(isValidSlug('bmw-320')).toBe(true);
-    expect(isValidSlug('../etc')).toBe(false);
-    expect(isValidSlug('bmw/320')).toBe(false);
-    expect(isValidSlug('BMW-320')).toBe(false);
+    expect(slugPasses('bmw-320')).toBe(true);
+    expect(slugPasses('../etc')).toBe(false);
+    expect(slugPasses('bmw/320')).toBe(false);
+    expect(slugPasses('BMW-320')).toBe(false);
+  });
+
+  it('accepts only a known case collection dir', () => {
+    expect(
+      galleryTargetSchema.safeParse({ dir: 'src/content', slug: 'bmw' })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('casePhotosPageSchema', () => {
+  it('reads a photo count and the one known error, dropping anything else', () => {
+    expect(
+      casePhotosPageSchema.parse({ ok: '3', error: 'no-files', slug: 'bmw' }),
+    ).toEqual({ dir: '', slug: 'bmw', ok: 3, error: 'no-files' });
+    expect(casePhotosPageSchema.parse({ ok: '<b>', error: 'other' })).toEqual({
+      dir: '',
+      slug: '',
+      ok: undefined,
+      error: undefined,
+    });
   });
 });
 

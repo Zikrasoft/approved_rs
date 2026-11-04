@@ -3,8 +3,12 @@ export const prerender = false;
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
+import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { notifyLead } from '@/lib/notifyLead';
 import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 
 const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
@@ -22,5 +26,32 @@ export const POST = createLeadsRoute({
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,
   thanksPath: PathBuilder.thanks,
-  missingFieldsMessage: MISSING_FIELDS_MESSAGE,
+  refusalCopy: (locale) => {
+    const form = content(locale).leadForm;
+    return {
+      brand: {
+        name: SITE_NAME,
+        home: PathBuilder.home(locale),
+        background: '#0a0b0c',
+        text: '#f5f3ef',
+        accent: '#ef6247',
+        onAccent: '#ffffff',
+      },
+      reasons: {
+        'missing-contact': MISSING_FIELDS_MESSAGE[locale],
+        'invalid-phone': form.errorPhoneInvalid,
+        'invalid-telegram': form.errorTelegramHandle,
+      },
+      privacy: {
+        note: form.consentBefore.trim(),
+        label: form.consentLinkText,
+        href: PathBuilder.privacy(locale),
+      },
+      submit: form.submitLabel,
+      links: [
+        { label: formatPhone(PHONE_NUMBER), href: phoneLink(PHONE_NUMBER) },
+        { label: 'WhatsApp', href: whatsappLink(WHATSAPP_NUMBER) },
+      ],
+    };
+  },
 });

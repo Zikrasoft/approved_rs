@@ -143,7 +143,8 @@ describe('the CarLab capture bot', () => {
       .callsTo('sendMessage', '1002:test-capture-bot-token')
       .at(-1)?.payload as { text: string; reply_markup: unknown };
     expect(reply.text).toContain(services.diagnostics.short);
-    expect(reply.text).toContain(services.diagnostics.priceFrom);
+    expect(reply.text).not.toContain(services.diagnostics.priceFrom);
+    expect(reply.text).not.toContain(services.specsPriceLabel);
     expect(reply.reply_markup).toEqual({
       inline_keyboard: [
         [
@@ -234,7 +235,7 @@ describe('the CarLab Questionnaire', () => {
     await press('request:ru:diagnostics');
 
     const picker = lastReply().reply_markup.inline_keyboard;
-    expect(picker).toHaveLength(6 + 1);
+    expect(picker).toHaveLength(7 + 1);
     expect(picker[0]).toEqual([
       expect.objectContaining({
         text: expect.stringMatching(/^✅ /),

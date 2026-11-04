@@ -3,7 +3,6 @@ import type { LeadStorage } from './types.ts';
 
 export const deferStorage = (opened: Promise<LeadStorage>): LeadStorage => ({
   read: async () => (await opened).read(),
-  exists: async () => (await opened).exists(),
   write: async (leads, version) => (await opened).write(leads, version),
 });
 

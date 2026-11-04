@@ -1,10 +1,12 @@
 ---
-status: accepted
+status: superseded in part by ADR-0045 and ADR-0053
 ---
 
 # Medusa owns orders; the bot hears of them through a signed webhook to carlab.rs
 
 In `main` since PR #34.
+
+**Superseded in part.** Medusa still owns orders, and the CRM and bot still live in one place. The signed hook is gone: the shop posts a bearer-authenticated JSON event (`@podbor/lead-crm/shop-orders-wire`) to carlab.rs's `/api/shop-orders`, the event bus is in memory, and a shop job retries the handoff instead of the bus ([ADR-0045](0045-offer-cart-closed-beta-order-lead.md)). Cancelling and completing an Order sync both ways ([ADR-0053](0053-the-crm-bot-decides-whether-a-shop-order-is-completed.md)). The `shop-orders/` Blob marker described below still keeps a re-sent order from becoming a second Lead.
 
 Medusa is the source of truth for orders. On `order.placed` a subscriber POSTs an HMAC-SHA256-signed payload (`t=…,v1=hmac(t.body)`, 300 s window, secret ≥ 32 chars, exact signed bytes sent) to `apps/auto-service/src/pages/api/shop-order.ts`, which verifies the raw body, parses it with `orderHookSchema`, and posts a card to the same Telegram chat through `notifyLead`. The lead CRM and bot stay in one place.
 

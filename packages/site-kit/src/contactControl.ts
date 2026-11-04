@@ -24,6 +24,7 @@ export type ContactControlRequest = {
   region?: 'contacts';
   locale: string;
   service?: string;
+  prefill?: string;
 };
 
 export type ContactControl = {
@@ -48,6 +49,7 @@ export const createContactControls =
     region,
     locale,
     service,
+    prefill,
   }: ContactControlRequest): ContactControl => {
     const channelAttr = { 'data-contact-channel': channel };
     if (channel === 'phone')
@@ -73,7 +75,10 @@ export const createContactControls =
     }
     const href =
       channel === 'whatsapp'
-        ? whatsappLink(brand.whatsapp, brand.prefill?.(locale, service))
+        ? whatsappLink(
+            brand.whatsapp,
+            prefill ?? brand.prefill?.(locale, service),
+          )
         : viberLink(brand.viber);
     return { href, attrs, pointer };
   };
@@ -82,6 +87,7 @@ const IN_FLOW_PLACEMENTS: readonly ContactPlacement[] = [
   'hero',
   'bar',
   'thanks',
+  'visit',
 ];
 
 const CONTACT_CTA_ATTRIBUTE = 'data-contact-cta';
@@ -90,7 +96,11 @@ export const CONTACT_CTA_SELECTOR = `[${CONTACT_CTA_ATTRIBUTE}]`;
 
 export const contactCta = { [CONTACT_CTA_ATTRIBUTE]: '' };
 
-export const contactRegion = (placement: ContactPlacement) => ({
+export const contactPlacement = (placement: ContactPlacement) => ({
   [CONTACT_PLACEMENT_ATTRIBUTE]: placement,
+});
+
+export const contactRegion = (placement: ContactPlacement) => ({
+  ...contactPlacement(placement),
   ...(IN_FLOW_PLACEMENTS.includes(placement) && contactCta),
 });

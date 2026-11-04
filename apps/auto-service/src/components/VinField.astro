@@ -1,0 +1,32 @@
+---
+import { MY_GARAGE_VIN_ATTRIBUTE } from '@podbor/site-kit/browser';
+
+interface Props {
+  label: string;
+  placeholder: string;
+  value?: string;
+}
+
+const { label, placeholder, value } = Astro.props;
+---
+
+<my-garage class="block">
+  <label class="block">
+    <span class="field-label">{label}</span>
+    <input
+      name="vin"
+      type="text"
+      autocomplete="off"
+      placeholder={placeholder}
+      value={value}
+      class="field"
+      {...{ [MY_GARAGE_VIN_ATTRIBUTE]: '' }}
+    />
+  </label>
+</my-garage>
+
+<script>
+  import { defineMyGarage } from '@podbor/site-kit/browser';
+
+  defineMyGarage();
+</script>

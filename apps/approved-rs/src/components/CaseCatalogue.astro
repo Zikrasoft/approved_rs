@@ -1,4 +1,5 @@
 ---
+import PageSection from './PageSection.astro';
 import type { CollectionEntry } from 'astro:content';
 import Button from './Button.astro';
 import CaseCard from './CaseCard.astro';
@@ -24,66 +25,64 @@ const chips = getActiveCountries().filter((c) => present.has(c.code));
 const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 ---
 
-<section class="border-b border-default">
-  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-    <SectionHeading title={content.heading} />
-    <p class="text-base max-w-xl mt-4 mb-8 leading-relaxed text-muted">
-      {content.subtext}
-    </p>
+<PageSection>
+  <SectionHeading title={content.heading} />
+  <p class="text-base max-w-xl mt-4 mb-8 leading-relaxed text-muted">
+    {content.subtext}
+  </p>
 
-    <chip-filter data-cap={CAP} class="block">
-      <div class="flex flex-wrap gap-2 mb-8">
-        <button
-          type="button"
-          data-filter-chip
-          data-group="*"
-          aria-pressed="true"
-          class="chip">{content.allCountriesLabel}</button
-        >
-        {
-          chips.map((country) => (
-            <button
-              type="button"
-              data-filter-chip
-              data-group={country.code}
-              aria-pressed="false"
-              class="chip"
-            >
-              {country[locale].name}
-            </button>
-          ))
-        }
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {
-          cases.map((c, index) => (
-            <div
-              data-filter-item
-              data-group={c.data.country}
-              hidden={index >= CAP}
-            >
-              <CaseCard {...toCaseItem(c, locale)} />
-            </div>
-          ))
-        }
-      </div>
-
+  <chip-filter data-cap={CAP} class="block">
+    <div class="flex flex-wrap gap-2 mb-8">
       <button
         type="button"
-        data-filter-more
-        data-template={content.moreLabel}
-        hidden
-        class="chip mt-6 w-full py-3"></button>
-    </chip-filter>
-
-    <div class="mt-10 flex justify-center">
-      <Button href={viewAllHref} variant="secondary" class="px-7 py-3">
-        {viewAllLabel}
-      </Button>
+        data-filter-chip
+        data-group="*"
+        aria-pressed="true"
+        class="chip">{content.allCountriesLabel}</button
+      >
+      {
+        chips.map((country) => (
+          <button
+            type="button"
+            data-filter-chip
+            data-group={country.code}
+            aria-pressed="false"
+            class="chip"
+          >
+            {country[locale].name}
+          </button>
+        ))
+      }
     </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {
+        cases.map((c, index) => (
+          <div
+            data-filter-item
+            data-group={c.data.country}
+            hidden={index >= CAP}
+          >
+            <CaseCard {...toCaseItem(c, locale)} />
+          </div>
+        ))
+      }
+    </div>
+
+    <button
+      type="button"
+      data-filter-more
+      data-template={content.moreLabel}
+      hidden
+      class="chip mt-6 w-full py-3"></button>
+  </chip-filter>
+
+  <div class="mt-10 flex justify-center">
+    <Button href={viewAllHref} variant="secondary" class="px-7 py-3">
+      {viewAllLabel}
+    </Button>
   </div>
-</section>
+</PageSection>
 
 <script>
   import { defineChipFilter } from '@podbor/site-kit/browser';

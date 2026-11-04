@@ -25,7 +25,7 @@ const onThanks =
   watch={CONTACT_CTA_SELECTOR}
   {...contactRegion('floating')}
 >
-  <div class="floating-panel" role="menu" data-panel hidden>
+  <div class="floating-panel" role="menu" id="floating-contact-panel" popover>
     <ContactControl
       channel="telegram"
       role="menuitem"
@@ -76,13 +76,12 @@ const onThanks =
   <button
     type="button"
     class="floating-toggle"
-    data-toggle
+    popovertarget="floating-contact-panel"
     aria-haspopup="true"
-    aria-expanded="false"
     aria-label={cc.ctaButtonLabel}
   >
     <span data-icon-open><MessageCircle size={22} /></span>
-    <span data-icon-close hidden><X size={22} /></span>
+    <span data-icon-close><X size={22} /></span>
   </button>
 </cta-reveal>
 
@@ -90,7 +89,7 @@ const onThanks =
   .floating-contact {
     position: fixed;
     right: 1rem;
-    bottom: 1.25rem;
+    bottom: calc(1.25rem + var(--cookie-consent-height, 0px));
     z-index: var(--z-sticky);
     transition:
       opacity 0.25s,
@@ -141,21 +140,34 @@ const onThanks =
     outline-offset: 2px;
   }
 
+  .floating-contact:has(:popover-open) [data-icon-open],
+  .floating-contact:not(:has(:popover-open)) [data-icon-close] {
+    display: none;
+  }
+
   .floating-panel {
-    position: absolute;
-    right: 0;
-    bottom: calc(100% + 0.75rem);
-    display: flex;
+    position: fixed;
+    inset: auto;
+    right: 1rem;
+    bottom: calc(5.25rem + var(--cookie-consent-height, 0px));
+    margin: 0;
+    padding: 0;
     flex-direction: column;
     width: 13rem;
     border: 1px solid var(--color-border);
     border-radius: 2px;
     overflow: hidden;
+    color: inherit;
     background-color: var(--color-surface);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
   }
-  .floating-panel[hidden] {
-    display: none;
+  .floating-panel:popover-open {
+    display: flex;
+  }
+  @media (min-width: 640px) {
+    .floating-panel {
+      right: 1.5rem;
+    }
   }
 
   .floating-cell {
@@ -195,31 +207,12 @@ const onThanks =
 
   defineCtaReveal();
 
-  function initFloatingContact() {
-    const root = document.querySelector<HTMLElement>('[data-floating-contact]');
-    if (!root) return;
-    const toggle = root.querySelector<HTMLButtonElement>('[data-toggle]')!;
-    const panel = root.querySelector<HTMLElement>('[data-panel]')!;
-    const iconOpen = toggle.querySelector('[data-icon-open]')!;
-    const iconClose = toggle.querySelector('[data-icon-close]')!;
-
-    function setOpen(open: boolean) {
-      panel.hidden = !open;
-      toggle.setAttribute('aria-expanded', String(open));
-      iconOpen.toggleAttribute('hidden', open);
-      iconClose.toggleAttribute('hidden', !open);
-    }
-
-    toggle.addEventListener('click', () => setOpen(panel.hidden));
-    document.addEventListener('click', (e) => {
-      if (!panel.hidden && !root.contains(e.target as Node)) setOpen(false);
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) setOpen(false);
-    });
-    panel.querySelectorAll('.floating-cell').forEach((cell) => {
-      cell.addEventListener('click', () => setOpen(false));
-    });
-  }
-  initFloatingContact();
+  const panel = document.querySelector<HTMLElement>('#floating-contact-panel');
+  panel?.addEventListener('click', (event) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest('.floating-cell')
+    )
+      panel.hidePopover();
+  });
 </script>

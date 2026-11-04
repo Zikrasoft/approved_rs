@@ -49,7 +49,7 @@ export function defineContactClickTracking(
               element.href = url.href;
             }
           }
-          if (channel === 'telegram' && start == null) return;
+          if (!visitorId || (channel === 'telegram' && start == null)) return;
           const body = new FormData();
           body.set('channel', channel);
           body.set('source_url', location.href);

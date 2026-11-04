@@ -12,6 +12,7 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
   channel: TrackedContactChannel;
   region?: 'contacts';
   service?: ServiceSlug;
+  prefill?: string;
   plainClass?: string;
   listItem?: boolean;
 }
@@ -20,6 +21,7 @@ const {
   channel,
   region,
   service,
+  prefill,
   plainClass,
   listItem = false,
   class: className,
@@ -28,11 +30,11 @@ const {
 const locale = localeFrom(Astro.url.pathname);
 const control = contactControl({
   channel,
-  onThanks:
-    navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  onThanks: Boolean(navCurrent(Astro.url.pathname, PathBuilder.thanks(locale))),
   region,
   locale,
   service,
+  prefill,
 });
 const coarseOnly = control.pointer === 'coarse-only';
 const Item = listItem ? 'li' : Fragment;

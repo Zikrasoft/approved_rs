@@ -1,5 +1,6 @@
 ---
 import CaseCard from './CaseCard.astro';
+import PageSection from './PageSection.astro';
 import SectionHeading from './SectionHeading.astro';
 import type { CaseCardProps } from './CaseCard.astro';
 import { localeFrom } from '@/i18n/config';
@@ -28,47 +29,36 @@ const viewAllLabel = getI18n(locale).common.viewAllCasesLabel;
 
 {
   items.length > 0 && (
-    <section
-      class:list={[
-        topBorder ? 'border-t' : 'border-b',
-        'border-default',
-        className,
-      ]}
-    >
-      <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-        <div
-          class:list={[
-            'mb-10',
-            viewAllHref && 'flex items-end justify-between',
-          ]}
-        >
-          <div>
-            <SectionHeading title={heading} size={headingSize} />
-          </div>
-          {viewAllHref && (
-            <a
-              href={viewAllHref}
-              class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent"
-            >
-              {viewAllLabel}{' '}
-              <span class="arrow transition-transform duration-200">→</span>
-            </a>
-          )}
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {items.map((item) => (
-            <CaseCard {...item} />
-          ))}
+    <PageSection border={topBorder ? 'top' : 'bottom'} class={className}>
+      <div
+        class:list={['mb-10', viewAllHref && 'flex items-end justify-between']}
+      >
+        <div>
+          <SectionHeading title={heading} size={headingSize} />
         </div>
         {viewAllHref && (
-          <div class="mt-8 sm:hidden">
-            <a href={viewAllHref} class="text-sm font-medium text-accent">
-              {viewAllLabel} →
-            </a>
-          </div>
+          <a
+            href={viewAllHref}
+            class="cases-more hidden sm:flex items-center gap-1 text-sm font-medium no-underline text-accent"
+          >
+            {viewAllLabel}{' '}
+            <span class="arrow transition-transform duration-200">→</span>
+          </a>
         )}
       </div>
-    </section>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {items.map((item) => (
+          <CaseCard {...item} />
+        ))}
+      </div>
+      {viewAllHref && (
+        <div class="mt-8 sm:hidden">
+          <a href={viewAllHref} class="text-sm font-medium text-accent">
+            {viewAllLabel} →
+          </a>
+        </div>
+      )}
+    </PageSection>
   )
 }
 

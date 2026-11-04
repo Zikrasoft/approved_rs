@@ -1,0 +1,100 @@
+---
+import { partPageSlug } from '@podbor/catalog-contract';
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { carName } from '@/utils/carName';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { fitGroups, fitSummary } from '@/utils/fitGroups';
+import { PathBuilder } from '@/utils/paths';
+import Icon from './Icon.astro';
+import PartAskRow from './PartAskRow.astro';
+
+interface Props {
+  page: PartPageEntry;
+  part: Record<string, string | undefined>;
+  replaced?: string;
+}
+
+const { page, part, replaced } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const named = `${page.brand.name} ${page.value}`;
+const fits = fitSummary(fitGroups(page.fits), (model) =>
+  carName(model, locale),
+);
+const oem =
+  page.type === 'oem'
+    ? null
+    : page.equivalents.find(
+        ({ type, superseded }) => type === 'oem' && !superseded,
+      );
+const headingId = `order-${page.slug}`;
+---
+
+<section
+  class="card flex flex-col gap-4 border-transparent bg-shade p-5 sm:p-6"
+  aria-labelledby={headingId}
+>
+  <h2 id={headingId} class="text-block font-semibold">
+    <slot name="heading">{copy.orderHeading}</slot>
+  </h2>
+  {
+    (fits || oem) && (
+      <dl class="flex flex-col gap-3 text-sm">
+        {fits && (
+          <div class="flex items-start gap-2">
+            <Icon name="check" size={16} class="mt-0.5 shrink-0 text-go" />
+            <div class="flex min-w-0 flex-col">
+              <dt class="text-muted">{copy.fitsLabel}</dt>
+              <dd class="font-semibold text-ink">
+                {fits.names}
+                {fits.more > 0 && (
+                  <a
+                    href="#fits"
+                    class="ml-1 font-normal whitespace-nowrap text-ink-2 link-underlined"
+                  >
+                    {copy.fitsMore.replace('{count}', String(fits.more))}
+                  </a>
+                )}
+              </dd>
+            </div>
+          </div>
+        )}
+        {oem && (
+          <div class="flex items-baseline justify-between gap-3 border-t border-line pt-3">
+            <dt class="text-muted">{copy.oemLabel}</dt>
+            <dd class="text-right">
+              <a
+                href={PathBuilder.partNumber(
+                  locale,
+                  partPageSlug(oem.brand.slug, oem.normalized_value),
+                )}
+                class="spec font-semibold text-ink link-quiet"
+              >
+                {oem.brand.name} {oem.value}
+              </a>
+            </dd>
+          </div>
+        )}
+      </dl>
+    )
+  }
+  <parts-list-add class="block" {...part} {...contactCta}>
+    <a
+      href={PathBuilder.partsInquiry(locale, named)}
+      {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+      class="btn btn-primary w-full"
+    >
+      {copy.priceOnRequestCta}
+    </a>
+  </parts-list-add>
+  <p class="text-sm leading-relaxed text-ink-2">{copy.orderBodyClosed}</p>
+  <PartAskRow
+    part={named}
+    question={copy.askAboutPriceMessage}
+    replaced={replaced}
+    heading={copy.askInMessenger}
+  />
+</section>

@@ -1,0 +1,210 @@
+---
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { partDataset } from '@/utils/partDataset';
+import { PathBuilder } from '@/utils/paths';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { contactCta } from '@podbor/site-kit/contact-control';
+import Icon from './Icon.astro';
+import OfferRow from './OfferRow.astro';
+import PickupLine from './PickupLine.astro';
+import PartAskRow from './PartAskRow.astro';
+import PartOrderPanel from './PartOrderPanel.astro';
+import PriceTag from './PriceTag.astro';
+import { formatMoney } from '@/utils/money';
+import { moreOffersLabel, offerSummary } from '@/utils/bestPrice';
+
+interface Props {
+  page: PartPageEntry;
+  demoted?: boolean;
+  replaced?: string;
+  alternative?: PartPageEntry | null;
+}
+
+const { page, demoted = false, replaced, alternative } = Astro.props;
+const ownHeading = Astro.slots.has('heading');
+const locale = localeFrom(Astro.url.pathname);
+const copy = content(locale).shopPart;
+const status = 'flex flex-col gap-3 text-sm leading-relaxed text-ink-2';
+const part = partDataset(page, locale);
+const closed = !shopOpen();
+const priced = page.offers.length > 0 && !closed;
+const summary = offerSummary(page.offers);
+const { best, others } = summary;
+const localeTag = BCP47_BY_LOCALE[locale];
+const named = `${page.brand.name} ${page.value}`;
+const askHref = PathBuilder.partsInquiry(locale, named);
+---
+
+<script is:inline>
+  setTimeout(() => {
+    document.documentElement.dataset.offersLate = '';
+  }, 4000);
+</script>
+{
+  (priced || closed) && (
+    <part-offers
+      class="card flex flex-col gap-4 border-transparent bg-shade p-5"
+      {...(priced ? {} : { hidden: '' })}
+      data-preview={closed ? '' : undefined}
+      data-id={page.id}
+      data-locale-tag={localeTag}
+      data-availability={JSON.stringify(copy.leadTime)}
+      data-added-label={copy.addedLabel}
+      data-cart-href={PathBuilder.partsCart(locale)}
+      data-more-copy={JSON.stringify({
+        moreOffers: copy.moreOffers,
+        moreOffersCheaper: copy.moreOffersCheaper,
+        moreOffersSeveral: copy.moreOffersSeveral,
+        offerTomorrow: copy.offerTomorrow,
+        offerDays: copy.offerDays,
+      })}
+      {...part}
+    >
+      {(() => {
+        const body = (
+          <>
+            <h2 class="text-block font-semibold">
+              <slot name="heading">{copy.offersHeading}</slot>
+            </h2>
+            <ul class="flex flex-col" data-offers>
+              {best && <OfferRow offer={best} inFlow askHref={askHref} />}
+            </ul>
+            <div aria-live="polite">
+              <div data-status="added" hidden class={status}>
+                <p>{copy.addedNotice}</p>
+                <a
+                  href={PathBuilder.partsCart(locale)}
+                  class="btn btn-primary btn-block"
+                >
+                  {copy.addedCta}
+                </a>
+              </div>
+              <p data-status="stock-limit" hidden class={status}>
+                {copy.stockLimitNotice}
+              </p>
+              <p data-status="inquiry" hidden class={status}>
+                <span>
+                  {copy.inquiryNotice}{' '}
+                  <a
+                    href={PathBuilder.partsInquiry(locale)}
+                    class="link font-semibold"
+                  >
+                    {copy.inquiryCta}
+                  </a>
+                </span>
+              </p>
+            </div>
+            <PickupLine />
+            <PartAskRow
+              part={named}
+              question={copy.askAboutPartMessage}
+              replaced={replaced}
+            />
+            <details class="group/more" data-more hidden={others.length === 0}>
+              <summary class="inline-flex min-h-11 list-none items-center gap-1.5 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                <span data-more-count>
+                  {moreOffersLabel(
+                    summary,
+                    copy,
+                    (offer) =>
+                      formatMoney(offer.price, offer.currency, localeTag),
+                    localeTag,
+                  )}
+                </span>
+                <Icon
+                  name="chevronDown"
+                  size={16}
+                  class="transition-transform duration-150 group-open/more:rotate-180 motion-reduce:transition-none"
+                />
+              </summary>
+              <ul
+                class="mt-2 flex flex-col divide-y divide-line border-t border-line pt-4"
+                data-more-offers
+              >
+                {others.map((offer) => (
+                  <OfferRow offer={offer} secondary askHref={askHref} />
+                ))}
+              </ul>
+            </details>
+            <template data-offer>
+              <OfferRow askHref={askHref} />
+            </template>
+          </>
+        );
+        return closed ? <template data-preview-body>{body}</template> : body;
+      })()}
+    </part-offers>
+  )
+}
+{
+  closed &&
+    (ownHeading ? (
+      <PartOrderPanel page={page} part={part} replaced={replaced}>
+        <Fragment slot="heading">
+          <slot name="heading" />
+        </Fragment>
+      </PartOrderPanel>
+    ) : (
+      <PartOrderPanel page={page} part={part} replaced={replaced} />
+    ))
+}
+{
+  !priced && !closed && (
+    <div
+      class:list={[
+        'card flex flex-col gap-3 p-5',
+        !demoted && 'border-transparent bg-shade',
+      ]}
+    >
+      <h2 class="text-block font-semibold">
+        <slot name="heading">{copy.priceOnRequestHeading}</slot>
+      </h2>
+      {ownHeading && (
+        <p class="font-semibold text-ink">{copy.priceOnRequestHeading}</p>
+      )}
+      <p class="text-sm leading-relaxed text-ink-2">{copy.orderBody}</p>
+      {alternative && (
+        <a
+          href={PathBuilder.partNumber(locale, alternative.slug)}
+          class="group flex min-h-11 items-center gap-3 rounded-control bg-paper px-3 py-2.5 text-ink hover:text-signal-ink"
+        >
+          <span class="flex min-w-0 flex-1 flex-col">
+            <span class="text-xs text-muted">{copy.pricedEquivalentLabel}</span>
+            <span class="text-sm">
+              <span class="font-semibold">{alternative.brand.name}</span>{' '}
+              <span class="spec whitespace-nowrap">{alternative.value}</span>
+            </span>
+          </span>
+          <PriceTag pages={[alternative]} />
+          <Icon
+            name="chevronRight"
+            size={16}
+            class="shrink-0 text-muted group-hover:text-signal-ink"
+          />
+        </a>
+      )}
+      <parts-list-add class="mt-1 block" {...part} {...contactCta}>
+        <a
+          href={askHref}
+          {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+          class:list={['btn w-full', demoted ? 'btn-secondary' : 'btn-primary']}
+        >
+          {copy.priceOnRequestCta}
+        </a>
+      </parts-list-add>
+      {!demoted && (
+        <>
+          <PickupLine />
+          <PartAskRow
+            part={named}
+            question={copy.askAboutPriceMessage}
+            replaced={replaced}
+          />
+        </>
+      )}
+    </div>
+  )
+}

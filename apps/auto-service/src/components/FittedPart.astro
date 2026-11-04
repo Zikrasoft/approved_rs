@@ -1,0 +1,79 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { bestPage } from '@/utils/bestPrice';
+import { shopOpen } from '@/utils/catalogueEnv';
+import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { pagesThumbnail } from '@/utils/partImages';
+import { splitNumbers } from '@/utils/partNumbers';
+import { PathBuilder } from '@/utils/paths';
+import DemandBadge from './DemandBadge.astro';
+import PartNumbers from './PartNumbers.astro';
+import PriceTag from './PriceTag.astro';
+import ThumbRow from './ThumbRow.astro';
+
+interface Props {
+  pages: PartPageEntry[];
+  name: string;
+  specs?: string | null;
+  heading?: boolean;
+  quantity?: string;
+}
+
+const { pages, name, specs, heading = false, quantity } = Astro.props;
+const open = shopOpen();
+const lead = bestPage(pages);
+const target = lead ?? splitNumbers(pages).current[0] ?? pages[0];
+const href =
+  target && PathBuilder.partNumber(localeFrom(Astro.url.pathname), target.slug);
+---
+
+<ThumbRow
+  thumb={pagesThumbnail(pages)}
+  href={href}
+  class={heading ? 'gap-2' : 'gap-1.5 lg:max-w-2xl'}
+>
+  <div
+    class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-4"
+  >
+    <div class="flex min-w-0 flex-col gap-0.5">
+      {
+        heading ? (
+          <h3 class="font-semibold text-ink">
+            <a
+              href={href}
+              class="link-quiet pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
+            >
+              {name}
+            </a>
+          </h3>
+        ) : (
+          <a
+            href={href}
+            class="text-sm text-ink link-quiet pointer-coarse:-my-2.5 pointer-coarse:py-2.5"
+          >
+            {name}
+          </a>
+        )
+      }
+      {specs && <p class="spec text-xs text-muted">{specs}</p>}
+      <DemandBadge pages={pages} />
+      <slot />
+    </div>
+    {
+      open && (
+        <div class="flex flex-col items-end max-sm:grid max-sm:grid-cols-[auto_1fr] max-sm:items-baseline">
+          <PriceTag
+            pages={pages}
+            class="max-sm:contents max-sm:text-left max-sm:[&>:first-child]:col-span-2"
+          />
+          {quantity && (
+            <span class="spec text-xs text-ink-2 max-sm:before:mx-1.5 max-sm:before:content-['·']">
+              {quantity}
+            </span>
+          )}
+        </div>
+      )
+    }
+  </div>
+  <PartNumbers pages={pages} first={lead} />
+</ThumbRow>

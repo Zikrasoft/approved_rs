@@ -1,0 +1,23 @@
+---
+import { localeFrom } from '@/i18n/config';
+import {
+  AD_SOURCE_FIELD,
+  HONEYPOT_FIELD,
+  META_IDS_FIELD,
+} from '@podbor/lead-crm';
+
+const locale = localeFrom(Astro.url.pathname);
+---
+
+<input type="hidden" name="locale" value={locale} />
+<div class="hidden" aria-hidden="true">
+  <label>
+    {HONEYPOT_FIELD}
+    <input type="text" name={HONEYPOT_FIELD} tabindex="-1" autocomplete="off" />
+  </label>
+</div>
+
+<input type="hidden" name="source_url" data-source-url />
+<input type="hidden" name="visitor_id" data-visitor-id />
+<input type="hidden" name={AD_SOURCE_FIELD} data-ad-source />
+<input type="hidden" name={META_IDS_FIELD} data-meta-ids />

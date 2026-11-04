@@ -75,6 +75,7 @@ const channelsSchema = z
     viber: z.string(),
     telegram: z.string(),
     instagram: z.string(),
+    social: z.string(),
   })
   .strict();
 
@@ -97,8 +98,10 @@ const formSchema = z
     privacyNote: z.string(),
     privacyLinkText: z.string(),
     errorTelegram: z.string(),
+    errorTelegramHandle: z.string(),
     errorPhone: z.string(),
-    errorConsent: z.string(),
+    // TODO: drop once the translate job has pruned errorConsent from the translations.
+    errorConsent: z.string().optional(),
     errorSubmit: z.string(),
     modalTitle: z.string(),
   })

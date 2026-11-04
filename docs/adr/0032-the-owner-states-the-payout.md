@@ -34,3 +34,11 @@ Spec #241. Money tied to Leads — a Payout per card, the settled lock, the mont
 **Operations live in their own blob, `data/ledger.json`, not in the Lead file**, so money history survives Lead cleanup and a Lead schema change cannot quarantine it. It uses the same storage interface and compare-and-swap retry as the Lead store.
 
 This supersedes the paragraphs above on Payouts per Lead, the admin-only Settlement and the settled lock. The carry-over of money owed under the old income × rate model becomes one opening Payout when the ledger blob is first created.
+
+## Amendment 2026-10-30: the carry-over is retired
+
+Issue #239. The owner confirmed that `data/ledger.json` exists in the production Blob store, so the one opening Payout, `Перенос со старой системы`, has been written there.
+
+**The carry-over code goes with no replacement: `legacyIncomes.ts` (`legacyOwed`, the 10% fallback rate), the ledger's `opening` option, `ensureOpened`, the Lead store's `beforeWrite` hook, and `exists()` on `LeadStorage`, whose only caller it was.** Keeping the bootstrap for a fresh deployment buys nothing: a fresh `data/leads.json` holds no income fields, so it would open with no Payout anyway, and a ledger that does not exist already reads as a zero Balance and is created by its first operation. Keeping it would instead do harm in the one case it could still fire: if the production ledger blob were ever lost, it would rebuild a Balance from whatever old fields the Lead file still holds, partial and stale, rather than leaving the loss visible.
+
+**Stored Leads stay readable.** The production `data/leads.json` may still hold the old money fields on Leads no write has touched. The stored Lead schema is not `.strict()`, so those fields are stripped on read and dropped on the next write, and no Lead lands in `data/leads-unreadable.json` for them; `storedLeadHistory.test.ts` keeps every historical shape, money included, as its fixture. The field-change author `'operator'` was only ever an argument to a notification formatter, never stored, so there is no stored value to map to `'owner'`.

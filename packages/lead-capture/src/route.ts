@@ -9,6 +9,8 @@ import {
   isHandleContact,
   isPhoneContact,
   isTelegramIdContact,
+  logError,
+  readJson,
   secretMatches,
   isFreshLead,
   managerHandoffText,
@@ -289,15 +291,13 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
   ): Promise<StoredLead> {
     const latest = updated ?? lead;
     const withTopic = await ensureLeadTopic(latest).catch((error: unknown) => {
-      console.error('[capture] could not update the topic', {
-        error,
+      logError('[capture] could not update the topic', error, {
         leadId: lead.id,
       });
       return latest;
     });
     await ensureLeadCard(withTopic).catch((error: unknown) => {
-      console.error('[capture] could not update the card', {
-        error,
+      logError('[capture] could not update the card', error, {
         leadId: lead.id,
       });
     });
@@ -315,8 +315,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
       if (withTopic.topicId == null) return;
       await post(withTopic.topicId);
     } catch (error) {
-      console.error('[capture] could not post to the topic', {
-        error,
+      logError('[capture] could not post to the topic', error, {
         leadId: lead.id,
       });
     }
@@ -795,7 +794,7 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
 
   bot.chatType('private').on('callback_query:data', async (ctx) => {
     await ctx.answerCallbackQuery().catch((error: unknown) => {
-      console.error('[capture] could not answer the tap', { error });
+      logError('[capture] could not answer the tap', error);
     });
     const tap = captureTapSchema.safeParse(ctx.callbackQuery);
     if (!tap.success) return;
@@ -815,20 +814,18 @@ export function createCaptureWebhookRoute<L extends string, S extends string>({
     )
       return UNAUTHORIZED;
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
+    const read = await readJson(request);
+    if ('response' in read) {
+      console.warn('[capture] ignoring an update past the size cap');
       return ACK;
     }
-
-    const update = captureUpdateSchema.safeParse(body);
+    const update = captureUpdateSchema.safeParse(read.value);
     if (!update.success) return ACK;
 
     try {
       await bot.handleUpdate(update.data);
     } catch (error) {
-      console.error('[capture] could not handle the update', { error });
+      logError('[capture] could not handle the update', error);
     }
     return ACK;
   };

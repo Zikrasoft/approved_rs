@@ -1,5 +1,18 @@
 export type BrandKey = 'approved' | 'carlab' | 'details';
 
+const SOCIAL_NETWORK_NAMES = {
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+} as const;
+
+export type SocialNetwork = keyof typeof SOCIAL_NETWORK_NAMES;
+
+const SOCIAL_NETWORKS = Object.keys(SOCIAL_NETWORK_NAMES) as SocialNetwork[];
+
+export type SocialAccounts = Partial<Record<SocialNetwork, string>>;
+
 export interface Brand {
   key: BrandKey;
   domain: string;
@@ -7,6 +20,7 @@ export interface Brand {
   name: string;
   legalName: string;
   captureBot: string;
+  social: SocialAccounts;
 }
 
 export const APPROVED = {
@@ -16,6 +30,7 @@ export const APPROVED = {
   name: 'Approved.rs',
   legalName: 'Approved.rs',
   captureBot: 'ApprovedRsBot',
+  social: {},
 } as const satisfies Brand;
 
 export const CARLAB = {
@@ -25,6 +40,7 @@ export const CARLAB = {
   name: 'CarLab',
   legalName: 'CarLab auto service',
   captureBot: 'CarLabRsBot',
+  social: {},
 } as const satisfies Brand;
 
 export const DETAILS = {
@@ -34,6 +50,7 @@ export const DETAILS = {
   name: 'Details',
   legalName: 'Details',
   captureBot: 'DetailsRsBot',
+  social: {},
 } as const satisfies Brand;
 
 export const DEVELOPER = {
@@ -49,6 +66,15 @@ export function developerCreditUrl(brand: Pick<Brand, 'domain'>): string {
     utm_campaign: 'footer_credit',
   }).toString();
   return url.href;
+}
+
+export function socialLinks(
+  accounts: SocialAccounts,
+): { network: SocialNetwork; name: string; url: string }[] {
+  return SOCIAL_NETWORKS.flatMap((network) => {
+    const url = accounts[network]?.trim();
+    return url ? [{ network, name: SOCIAL_NETWORK_NAMES[network], url }] : [];
+  });
 }
 
 export function splitDeveloperCredit(label: string): {

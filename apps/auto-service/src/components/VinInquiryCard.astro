@@ -1,0 +1,41 @@
+---
+import { contactCta } from '@podbor/site-kit/contact-control';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import PartsInquiry from './PartsInquiry.astro';
+import VinInquiryForm from './VinInquiryForm.astro';
+
+interface Props {
+  heading?: string;
+  comment?: string;
+  vin?: string;
+  list?: boolean;
+  id?: string;
+  class?: string;
+}
+
+const {
+  heading = content(localeFrom(Astro.url.pathname)).pages.partsInquiry
+    .formHeading,
+  comment,
+  vin,
+  list = false,
+  id,
+  class: className = 'h-fit',
+} = Astro.props;
+---
+
+<div
+  id={id}
+  class={`card flex flex-col gap-4 p-5 ${className}`}
+  {...contactCta}
+>
+  <h2 class="text-block font-semibold">{heading}</h2>
+  {
+    list ? (
+      <PartsInquiry comment={comment} />
+    ) : (
+      <VinInquiryForm comment={comment} vin={vin} />
+    )
+  }
+</div>

@@ -51,6 +51,13 @@ describe('bootSiteKit', () => {
     });
   });
 
+  it('hands the brand contact ranking to the contact preference', async () => {
+    const { applyContactPreference } = await import('./contactPreference.ts');
+    const contactRanking = { byCountry: new Map(), fallback: [] };
+    (await boot())({ analytics: false, contactRanking });
+    expect(applyContactPreference).toHaveBeenCalledWith(contactRanking);
+  });
+
   it('makes a second boot a no-op', async () => {
     const bootSiteKit = await boot();
     bootSiteKit({ gaMeasurementId: 'G-42', analytics: true });

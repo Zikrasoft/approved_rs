@@ -17,9 +17,11 @@ export const leadFormContentSchema = z
     commentPlaceholder: z.string(),
     consentBefore: z.string(),
     consentLinkText: z.string(),
+    // TODO: no form shows consentError since the passive privacy line; drop it from the ru source, this schema and its translations together.
     consentError: z.string(),
     submitLabel: z.string(),
     errorTelegramFormat: z.string(),
+    errorTelegramHandle: z.string(),
     errorPhoneInvalid: z.string(),
     errorSubmit: z.string(),
   })

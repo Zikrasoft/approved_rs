@@ -1,0 +1,28 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  kind: 'tag' | 'addon' | 'facets';
+  fields: Record<string, string | undefined>;
+  fresh?: boolean;
+}
+
+const { kind, fields, fresh = false } = Astro.props;
+---
+
+<price-slot
+  class="contents"
+  data-kind={kind}
+  data-fresh={fresh ? '' : undefined}
+  data-src={PathBuilder.partsPrices(localeFrom(Astro.url.pathname))}
+  data-fields={JSON.stringify(fields)}
+>
+  <slot />
+</price-slot>
+
+<script>
+  import { definePriceSlots } from '@/scripts/priceSlots';
+
+  definePriceSlots();
+</script>

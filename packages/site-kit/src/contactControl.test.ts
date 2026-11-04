@@ -3,6 +3,7 @@ import { TRACKED_CONTACT_CHANNELS } from '@podbor/lead-crm/contact-channel';
 import {
   CONTACT_CTA_SELECTOR,
   contactCta,
+  contactPlacement,
   contactRegion,
   createContactControls,
   TELEGRAM_CHOICE_ATTRIBUTE,
@@ -111,6 +112,18 @@ describe('createContactControls', () => {
     );
   });
 
+  it('lets a call site name its own WhatsApp message over the brand one', () => {
+    const request = {
+      channel: 'whatsapp',
+      onThanks: false,
+      locale: 'en',
+      prefill: 'Ищу: HU 816 x',
+    } as const;
+    const ownMessage = `https://wa.me/381601111111?text=${encodeURIComponent('Ищу: HU 816 x')}`;
+    expect(full(request).href).toBe(ownMessage);
+    expect(bare(request).href).toBe(ownMessage);
+  });
+
   it('marks the phone coarse-only and every messenger any-pointer', () => {
     for (const channel of TRACKED_CONTACT_CHANNELS)
       expect(bare({ channel, onThanks: false, locale: 'ru' }).pointer).toBe(
@@ -156,10 +169,22 @@ describe('contactRegion', () => {
     });
     expect(contactRegion('hero')).toHaveProperty('data-contact-cta', '');
     expect(contactRegion('thanks')).toHaveProperty('data-contact-cta', '');
+    expect(contactRegion('visit')).toEqual({
+      'data-contact-placement': 'visit',
+      'data-contact-cta': '',
+    });
     for (const placement of ['floating', 'footer', 'header'] as const)
       expect(contactRegion(placement)).toEqual({
         'data-contact-placement': placement,
       });
+  });
+});
+
+describe('contactPlacement', () => {
+  it('stamps the placement alone, so an in-flow word does not hide the floating CTA', () => {
+    expect(contactPlacement('visit')).toEqual({
+      'data-contact-placement': 'visit',
+    });
   });
 });
 

@@ -1,0 +1,202 @@
+---
+import Shell from '@/layouts/Shell.astro';
+import { SITE_NAME } from '@/utils/constants';
+import PageHero from '@/components/PageHero.astro';
+import CartEmpty from '@/components/CartEmpty.astro';
+import CartLineTemplate from '@/components/CartLineTemplate.astro';
+import CartOrdered from '@/components/CartOrdered.astro';
+import CheckoutForm from '@/components/CheckoutForm.astro';
+import Icon from '@/components/Icon.astro';
+import BottomActionBar from '@/components/BottomActionBar.astro';
+import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { localePaths, PathBuilder } from '@/utils/paths';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).shopCart;
+const { leadTime } = content(locale).shopPart;
+const panel = 'card flex max-w-2xl flex-col gap-3 p-5';
+const notice =
+  'card mb-4 flex items-start gap-3 border-transparent bg-shade p-4 text-sm leading-relaxed text-ink';
+const notices = [
+  { key: 'price-changed', text: copy.notices.priceChanged },
+  { key: 'unavailable', text: copy.notices.unavailable },
+  { key: 'cart-changed', text: copy.notices.cartChanged },
+  { key: 'repriced', text: copy.notices.repriced },
+  { key: 'stock-limit', text: copy.notices.stockLimit },
+  { key: 'order-limit', text: copy.notices.orderLimit },
+  { key: 'unreachable', text: copy.notices.unreachable },
+  { key: 'offline', text: copy.notices.offline },
+  { key: 'expired', text: copy.notices.expired },
+  { key: 'gone', text: copy.notices.gone },
+  { key: 'invalid', text: copy.notices.invalid },
+];
+const orderedContact = {
+  phone: copy.orderedCall,
+  ...Object.fromEntries(
+    (['whatsapp', 'viber', 'telegram'] as const).map((channel) => [
+      channel,
+      copy.orderedContact.replace('{channel}', site.channels[channel]),
+    ]),
+  ),
+};
+---
+
+<Shell title={copy.metaTitle} description={copy.metaDescription} noindex>
+  <PageHero
+    actions={false}
+    eyebrow={site.nav.parts}
+    heading={copy.heading}
+    compact
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsCart(locale), label: copy.heading },
+    ]}
+  />
+
+  <section class="group/cart wrap py-6 md:py-band-lg">
+    <offer-cart
+      class="block min-h-svh"
+      data-locale-tag={BCP47_BY_LOCALE[locale]}
+      data-locale={locale}
+      data-addon-template={copy.addonTemplate}
+      data-installation-label={copy.installationLabel}
+      data-installation-free={copy.installationFree}
+      data-free-label={copy.freeLabel}
+      data-unit-template={copy.unitTemplate}
+      data-count-template={copy.summaryCountTemplate}
+      data-part-href={PathBuilder.partNumber(locale, '{slug}')}
+      data-ordered-heading={copy.orderedHeading}
+      data-ordered-title={`${copy.orderedHeading} | ${SITE_NAME}`}
+      data-ordered-contact={JSON.stringify(orderedContact)}
+      data-order-template={copy.orderNumberTemplate}
+      data-quantity-template={copy.receiptQuantityTemplate}
+      data-blocked-template={copy.checkoutBlocked}
+      data-lower-template={copy.lowerToTemplate}
+      data-inquiry-href={PathBuilder.partsInquiry(locale)}
+      data-preview={shopOpen() ? undefined : ''}
+      data-availability={JSON.stringify(leadTime)}
+    >
+      <p
+        data-state="loading"
+        class="text-sm text-muted noscript:hidden!"
+        role="status"
+      >
+        {copy.loading}
+      </p>
+
+      <div
+        class="card hidden max-w-2xl flex-col gap-3 p-5 noscript:flex! sm:p-6"
+      >
+        <p class="text-sm leading-relaxed text-ink-2">{copy.noscriptBody}</p>
+        <a
+          href={PathBuilder.partsInquiry(locale)}
+          class="btn btn-primary btn-block"
+        >
+          {copy.emptyInquiryCta}
+        </a>
+      </div>
+
+      <CartEmpty class={panel} />
+
+      <CartOrdered class={`${panel} gap-5`} />
+
+      <div data-state="fallback" hidden class={panel}>
+        <h2 class="text-block font-semibold">{copy.fallbackHeading}</h2>
+        <p class="text-sm leading-relaxed text-ink-2">{copy.fallbackBody}</p>
+        <div class="mt-1 flex flex-col gap-3 sm:flex-row">
+          <button type="button" class="btn btn-primary" data-retry>
+            {copy.fallbackRetry}
+          </button>
+          <button type="button" class="btn btn-secondary" data-send-inquiry>
+            {copy.fallbackCta}
+          </button>
+        </div>
+      </div>
+
+      <div
+        data-state="cart"
+        hidden
+        class="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-start"
+      >
+        <div class="flex flex-col">
+          <div aria-live="polite">
+            {
+              notices.map(({ key, text }) => (
+                <p data-notice={key} hidden class={notice}>
+                  <Icon
+                    name="warning"
+                    size={16}
+                    class="mt-0.5 shrink-0 text-ink"
+                  />
+                  <span>{text}</span>
+                </p>
+              ))
+            }
+            <p data-notice="moved" hidden class={notice}>
+              <Icon name="warning" size={16} class="mt-0.5 shrink-0 text-ink" />
+              <span>
+                {copy.notices.moved}{' '}
+                <a
+                  href={PathBuilder.partsInquiry(locale)}
+                  {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+                  class="link font-semibold"
+                >
+                  {copy.notices.movedCta}
+                </a>
+              </span>
+            </p>
+            <ul
+              data-price-changes
+              data-template={copy.priceChangeTemplate}
+              hidden
+              class="-mt-2 mb-4 flex flex-col gap-1 border-l-4 border-l-signal/40 pl-4 text-sm leading-relaxed text-ink"
+            >
+            </ul>
+          </div>
+
+          <ul class="card divide-y divide-line" data-lines></ul>
+          <CartLineTemplate />
+        </div>
+
+        <CheckoutForm />
+
+        <BottomActionBar>
+          <Fragment slot="caption">{copy.totalLabel}</Fragment>
+          <span slot="value" data-total></span>
+          <a href="#checkout" class="btn btn-primary">
+            {copy.stickyCta}
+          </a>
+        </BottomActionBar>
+      </div>
+    </offer-cart>
+    <cart-badge
+      data-parts-list
+      data-reveal-when-filled
+      hidden
+      class={`${notice} mt-6 mb-0 max-w-2xl flex-col group-has-[[data-state=empty]:not([hidden])_[data-inquiry-notice]:not([hidden])]/cart:hidden sm:flex-row sm:items-center sm:justify-between`}
+    >
+      <p>{copy.partsListNote}</p>
+      <a
+        href={PathBuilder.partsInquiry(locale)}
+        {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+        class="btn btn-primary w-full shrink-0 sm:w-auto"
+      >
+        {copy.notices.movedCta}
+      </a>
+    </cart-badge>
+  </section>
+  <PartsInquiryModal />
+</Shell>
+
+<script>
+  import { defineOfferCart } from '@/scripts/offerCart';
+
+  defineOfferCart();
+</script>

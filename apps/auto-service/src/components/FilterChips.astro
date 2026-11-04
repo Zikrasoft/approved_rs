@@ -1,0 +1,42 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import Icon from './Icon.astro';
+
+interface Props {
+  chips: { label: string; href: string }[];
+  resetHref?: string;
+}
+
+const { chips, resetHref } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+---
+
+<ul class="flex flex-wrap gap-2">
+  {
+    chips.map((chip) => (
+      <li class="shrink-0">
+        <a
+          href={chip.href}
+          aria-label={copy.removeFilter.replace('{label}', chip.label)}
+          class="inline-flex min-h-11 max-w-full items-center gap-2 rounded-pill border border-line bg-paper px-3 py-1.5 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+        >
+          {chip.label}
+          <Icon name="close" size={12} class="text-muted" />
+        </a>
+      </li>
+    ))
+  }
+  {
+    resetHref && (
+      <li class="shrink-0">
+        <a
+          href={resetHref}
+          class="inline-flex min-h-11 items-center px-2 text-sm font-semibold whitespace-nowrap link"
+        >
+          {copy.resetAllFilters}
+        </a>
+      </li>
+    )
+  }
+</ul>

@@ -17,6 +17,8 @@ export const GOALS = {
   beginCheckout: 'begin_checkout',
   purchase: 'purchase',
   caseView: 'case_view',
+  search: 'search',
+  searchSuggestionPick: 'search_suggestion_pick',
 } as const;
 
 export type Goal = (typeof GOALS)[keyof typeof GOALS];
@@ -28,6 +30,7 @@ export const CONTACT_PLACEMENTS = [
   'footer',
   'header',
   'thanks',
+  'visit',
 ] as const;
 
 export type ContactPlacement = (typeof CONTACT_PLACEMENTS)[number];

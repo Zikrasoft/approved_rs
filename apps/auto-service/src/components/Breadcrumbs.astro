@@ -1,0 +1,60 @@
+---
+import { breadcrumbListSchema, jsonLdText } from '@podbor/site-kit';
+import { SITE_URL } from '@/utils/constants';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import { content } from '@/i18n/content';
+
+export type Crumb = { href: string; label: string };
+
+interface Props {
+  crumbs: Crumb[];
+  tone?: 'card' | 'panel';
+}
+
+const { crumbs, tone = 'card' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const trail = [
+  { href: PathBuilder.home(locale), label: site.common.homeLabel },
+  ...crumbs,
+];
+const TONE = {
+  card: { list: 'text-muted', link: 'hover:text-signal-ink' },
+  panel: { list: 'text-panel-ink', link: 'hover:text-panel-fg' },
+}[tone];
+---
+
+<script
+  type="application/ld+json"
+  set:html={jsonLdText(breadcrumbListSchema(SITE_URL, trail))}
+/>
+<nav
+  aria-label={site.common.breadcrumbLabel}
+  class:list={[trail.length <= 2 && 'max-sm:hidden']}
+>
+  <ol
+    class:list={[
+      'flex flex-wrap items-center gap-x-2 gap-y-2 text-xs pointer-coarse:gap-y-0 max-sm:[&>li:last-child]:hidden',
+      TONE.list,
+    ]}
+  >
+    {
+      trail.map((crumb, i) => (
+        <li class="flex items-center gap-2">
+          {i > 0 && <span aria-hidden="true">/</span>}
+          <a
+            href={crumb.href}
+            data-hero-crumb={i === trail.length - 1 ? '' : undefined}
+            class:list={[
+              'inline-flex items-center transition-colors duration-150 pointer-coarse:min-h-11',
+              TONE.link,
+            ]}
+          >
+            {crumb.label}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>

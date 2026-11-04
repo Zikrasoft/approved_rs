@@ -8,24 +8,32 @@ export interface CountrySelectOption {
   name: string;
 }
 
-// ponytail: DOM probe because a select with width:auto sizes to its widest
+// TODO: DOM probe because a select with width:auto sizes to its widest
 // option, not the picked one. Replace with `field-sizing: content` once
 // Firefox ships it.
-function fitToSelection(select: HTMLSelectElement): void {
-  const picked = select.selectedOptions[0];
-  if (!picked) return;
-
+function textWidth(select: HTMLSelectElement, text: string): number {
   const probe = select.cloneNode(false) as HTMLSelectElement;
   const option = document.createElement('option');
-  option.text = picked.text;
+  option.text = text;
   probe.append(option);
   probe.style.cssText =
     'position:absolute;visibility:hidden;pointer-events:none;width:auto;max-width:none;left:-9999px';
   document.body.append(probe);
-  const { offsetWidth } = probe;
+  const { width } = probe.getBoundingClientRect();
   probe.remove();
+  return Math.ceil(width);
+}
 
-  if (offsetWidth > 0) select.style.width = `${offsetWidth}px`;
+function fitToSelection(select: HTMLSelectElement): void {
+  const picked = select.selectedOptions[0];
+  if (!picked) return;
+
+  const whole = textWidth(select, picked.text);
+  if (whole === 0) return;
+  select.style.width = `${whole}px`;
+  if (select.getBoundingClientRect().width >= whole) return;
+  const flagAndCode = picked.text.split(' ', 2).join(' ');
+  select.style.width = `${textWidth(select, flagAndCode)}px`;
 }
 
 function countriesOf(select: HTMLSelectElement) {
@@ -78,15 +86,31 @@ export function bindPhoneCountry(
     else requestAnimationFrame(() => fitToSelection(select));
   };
 
-  select.addEventListener('change', () => fitToSelection(select));
+  let chosenBeforePaste: string | null = null;
+  const switchTo = (iso: string): void => {
+    select.value = iso;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  select.addEventListener('change', () => {
+    chosenBeforePaste = null;
+    fitToSelection(select);
+  });
   input.addEventListener('input', () => {
+    if (chosenBeforePaste && input.value.trim() === '') {
+      switchTo(chosenBeforePaste);
+      return;
+    }
     const split = splitDialCode(input.value, countriesOf(select));
     if (!split) return;
-    const picked = select.value !== split.iso;
-    select.value = split.iso;
+    const chosen = chosenBeforePaste ?? select.value;
     input.value = split.rest;
-    if (picked) select.dispatchEvent(new Event('change', { bubbles: true }));
-    else fitToSelection(select);
+    if (select.value === split.iso) {
+      fitToSelection(select);
+      return;
+    }
+    switchTo(split.iso);
+    chosenBeforePaste = chosen;
   });
 
   fitWhenSettled();

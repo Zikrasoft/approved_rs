@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#fbfbfc"/>
+      <stop offset="1" stop-color="#e4e7ec"/>
+    </radialGradient>
+    <linearGradient id="tube" x1="0" x2="1">
+      <stop offset="0" stop-color="#1f4c80"/>
+      <stop offset=".35" stop-color="#4f86c4"/>
+      <stop offset="1" stop-color="#173a63"/>
+    </linearGradient>
+    <linearGradient id="rod" x1="0" x2="1">
+      <stop offset="0" stop-color="#8d949e"/>
+      <stop offset=".4" stop-color="#f1f3f6"/>
+      <stop offset="1" stop-color="#7b828c"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="700" rx="120" ry="20" fill="#1d2430" opacity=".25" filter="url(#soft)"/>
+  <circle cx="400" cy="110" r="38" fill="none" stroke="#4a515b" stroke-width="22"/>
+  <rect x="386" y="140" width="28" height="200" fill="url(#rod)"/>
+  <rect x="345" y="330" width="110" height="330" rx="18" fill="url(#tube)"/>
+  <rect x="330" y="320" width="140" height="26" rx="8" fill="#2d3239"/>
+  <circle cx="400" cy="680" r="34" fill="none" stroke="#4a515b" stroke-width="20"/>
+  <text x="520" y="470" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="38" fill="#3c4450">{{brand}}</text>
+  <text x="520" y="510" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#6b7480">{{label}}</text>
+</svg>

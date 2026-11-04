@@ -19,15 +19,4 @@ describe('readPublicEnv', () => {
       readPublicEnv({ ...VALID, PUBLIC_PHONE_NUMBER: undefined }),
     ).toThrow(/PUBLIC_PHONE_NUMBER/);
   });
-
-  it('leaves the Instagram handle undefined until it is set', () => {
-    expect(readPublicEnv(VALID).PUBLIC_INSTAGRAM).toBeUndefined();
-    expect(
-      readPublicEnv({ ...VALID, PUBLIC_INSTAGRAM: 'details.rs' })
-        .PUBLIC_INSTAGRAM,
-    ).toBe('details.rs');
-    expect(() => readPublicEnv({ ...VALID, PUBLIC_INSTAGRAM: '' })).toThrow(
-      /PUBLIC_INSTAGRAM/,
-    );
-  });
 });

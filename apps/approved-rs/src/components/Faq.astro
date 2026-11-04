@@ -1,4 +1,5 @@
 ---
+import PageSection from './PageSection.astro';
 import { faqPageSchema, jsonLdText } from '@podbor/site-kit';
 import { ChevronDown } from '@lucide/astro';
 import SectionHeading from './SectionHeading.astro';
@@ -18,24 +19,22 @@ const schema = faqPageSchema(items);
 
 <script type="application/ld+json" set:html={jsonLdText(schema)} />
 
-<section class="border-t border-default">
-  <div class="max-w-6xl mx-auto px-6 py-band md:py-band-lg">
-    <SectionHeading title={heading} size="lg" class="mb-8" />
-    <div class="space-y-3 max-w-3xl">
-      {
-        items.map((item) => (
-          <details class="faq-item group rounded-sm border bg-surface border-default">
-            <summary class="flex items-center justify-between gap-4 p-4 cursor-pointer list-none text-sm font-medium text-primary">
-              {item.q}
-              <ChevronDown size={16} class="faq-chevron shrink-0 text-muted" />
-            </summary>
-            <p class="px-4 pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
-          </details>
-        ))
-      }
-    </div>
+<PageSection border="top">
+  <SectionHeading title={heading} size="lg" class="mb-8" />
+  <div class="space-y-3 max-w-3xl">
+    {
+      items.map((item) => (
+        <details class="faq-item group rounded-sm border bg-surface border-default">
+          <summary class="flex items-center justify-between gap-4 p-4 cursor-pointer list-none text-sm font-medium text-primary">
+            {item.q}
+            <ChevronDown size={16} class="faq-chevron shrink-0 text-muted" />
+          </summary>
+          <p class="px-4 pb-4 text-sm leading-relaxed text-muted">{item.a}</p>
+        </details>
+      ))
+    }
   </div>
-</section>
+</PageSection>
 
 <style>
   .faq-item summary::-webkit-details-marker {

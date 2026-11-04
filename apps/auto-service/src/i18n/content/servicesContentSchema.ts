@@ -2,11 +2,11 @@ import { z } from 'zod';
 
 const serviceSchema = z
   .object({
+    cta: z.string(),
     name: z.string(),
     short: z.string(),
     metaTitle: z.string(),
     metaDescription: z.string(),
-    heroEyebrow: z.string(),
     heroTitle: z.string(),
     heroLead: z.string(),
     priceFrom: z.string(),
@@ -26,7 +26,12 @@ export const servicesContentSchema = z
   .object({
     indexMetaTitle: z.string(),
     indexMetaDescription: z.string(),
-    indexEyebrow: z.string(),
+    partsLink: z.string(),
+    heroHeadingTemplate: z.string(),
+    processHeading: z.string(),
+    ctaHeadingTemplate: z.string(),
+    partsCtaHeadingTemplate: z.string(),
+    ctaBody: z.string(),
     indexHeading: z.string(),
     indexLead: z.string(),
     specsPriceLabel: z.string(),
@@ -37,6 +42,7 @@ export const servicesContentSchema = z
     'engine-gearbox': serviceSchema,
     'bodywork-painting': serviceSchema,
     'pre-purchase-inspection': serviceSchema,
+    'vin-parts-inquiry': serviceSchema,
   })
   .strict();
 

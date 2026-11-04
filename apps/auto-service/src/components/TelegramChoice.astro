@@ -1,5 +1,6 @@
 ---
-import Icon from './Icon.astro';
+import { MODAL_FOCUS_ATTRIBUTE } from '@podbor/site-kit/browser';
+import SheetClose from './SheetClose.astro';
 import {
   TELEGRAM_CHOICE_ATTRIBUTE,
   TELEGRAM_CHOICE_SELECTOR,
@@ -9,7 +10,7 @@ import { content } from '@/i18n/content';
 import { contactControl } from '@/utils/contactLinks';
 
 const locale = localeFrom(Astro.url.pathname);
-const { common, telegramChoice: copy } = content(locale).site;
+const { telegramChoice: copy } = content(locale).site;
 const tile = contactControl({ channel: 'telegram', onThanks: false, locale });
 const managerHref = tile.attrs[TELEGRAM_CHOICE_ATTRIBUTE];
 const options = [
@@ -18,7 +19,7 @@ const options = [
     href: tile.href,
     title: copy.bot,
     hint: copy.botHint,
-    tone: 'border-signal/40 bg-signal/5',
+    tone: 'border-transparent bg-shade',
   },
   {
     attribute: 'data-telegram-choice-manager',
@@ -38,17 +39,15 @@ const options = [
         class="m-0 mt-auto w-full max-w-none rounded-t-block border-0 border-t border-line bg-card p-0 pb-[env(safe-area-inset-bottom)] text-ink backdrop:bg-ink/50 sm:m-auto sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-block sm:border"
       >
         <div class="flex items-start justify-between gap-4 p-5 pb-3">
-          <h2 id="telegram-choice-heading" class="text-block font-semibold">
+          <h2
+            id="telegram-choice-heading"
+            {...{ [MODAL_FOCUS_ATTRIBUTE]: '' }}
+            tabindex="-1"
+            class="flex min-h-11 items-center text-block font-semibold focus:outline-none"
+          >
             {copy.heading}
           </h2>
-          <button
-            type="button"
-            data-modal-close
-            aria-label={common.closeLabel}
-            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-muted transition-colors duration-150 hover:border-ink hover:text-ink sm:h-9 sm:w-9"
-          >
-            <Icon name="close" />
-          </button>
+          <SheetClose />
         </div>
         <ul class="flex flex-col gap-2 p-5 pt-2">
           {options.map(({ attribute, href, title, hint, tone }) => (
@@ -61,7 +60,7 @@ const options = [
                 data-modal-close
                 class:list={[
                   tone,
-                  'flex min-h-11 flex-col gap-1 rounded-field border px-4 py-3 transition-colors duration-150 hover:border-ink focus-visible:border-ink',
+                  'flex min-h-11 flex-col gap-1 rounded-control border px-4 py-3 transition-colors duration-150 hover:border-ink focus-visible:border-ink',
                 ]}
               >
                 <span class="font-medium">{title}</span>

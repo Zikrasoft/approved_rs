@@ -2,7 +2,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseDocument } from 'yaml';
 import type { ZodObject } from 'zod';
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
-import { getOrCreateTranslationsMap } from './getOrCreateTranslationsMap.ts';
+import { openAiKeySchema } from './openaiChat.ts';
+import {
+  getOrCreateTranslationsMap,
+  translatedDocSchema,
+} from './getOrCreateTranslationsMap.ts';
 import {
   blockIsEmpty,
   DEFAULT_CACHE_PATH,
@@ -13,7 +17,7 @@ import {
   type CacheFile,
 } from './leafCache.ts';
 import { hashSource, type SectionData } from './hashSource.ts';
-import { NO_EM_DASH_RULE } from './promptRules.ts';
+import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
 import { translateLeaves } from './translateLeaves.ts';
 import { errorMessage } from './errorMessage.ts';
 
@@ -35,24 +39,36 @@ export interface SectionTranslatorOptions<L extends string> {
   languageName: Record<L, string>;
   businessDescription: string;
   localeGuidance?: Partial<Record<L, string>>;
+  placeholderRule?: string;
   model?: string;
   cachePath?: string;
 }
+
+export const PLACEHOLDER_RULE =
+  'If a string contains a placeholder token like {siteName} in curly braces, copy it into the ' +
+  'translation exactly as written, character for character, never translate, remove, or move it. ';
+
+export const STRICT_PLACEHOLDER_RULE =
+  'A curly-brace token already present in the Russian source, such as {count} or {days}, is a ' +
+  'placeholder: copy it into the translation exactly as written, character for character, never ' +
+  'translate, remove, or move it. Never introduce a curly-brace token that is not already in the ' +
+  'source: a literal brand or site name is plain text, not a placeholder, and must stay exactly as ' +
+  'written. ';
 
 export function buildSectionPrompt(
   promptSubject: string,
   languageName: string,
   businessDescription: string,
   guidance = '',
+  placeholderRule = PLACEHOLDER_RULE,
 ): string {
   return (
     `You translate ${promptSubject} from Russian into ${languageName} ` +
     `for ${businessDescription}. ` +
     'Translate the MEANING naturally and idiomatically, the way a native speaker would actually write ' +
-    'it, never a literal word-for-word translation. Keep any markdown formatting intact. If a string ' +
-    'contains a placeholder token like {siteName} in curly braces, copy it into the translation exactly ' +
-    'as written, character for character, never translate, remove, or move it. Copy personal names ' +
-    'exactly as written too, keeping their original script, never transliterate or localise them. ' +
+    'it, never a literal word-for-word translation. Keep any markdown formatting intact. ' +
+    placeholderRule +
+    'Copy personal names already in Latin script exactly as written, never localise them. ' +
     'Search-engine snippets have a hard budget: metaTitle and title at most 60 characters, ' +
     'metaDescription and description at most 160, counted on what you output. German and Spanish ' +
     'run longer than the Russian, so drop a detail rather than going over, but never drop a ' +
@@ -61,7 +77,7 @@ export function buildSectionPrompt(
     'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
     'Spanish, never baterija, Batterie or pila on their own. The same holds for the rest ' +
     'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
-    `${NO_EM_DASH_RULE} ` +
+    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ` +
     'The input is a flat JSON object whose keys are field paths and whose values are the strings to ' +
     'translate. Respond with a JSON object having EXACTLY the same keys, with each value translated. ' +
     'A key like meta.metaTitle or steps[2].title tells you what the string is for, never translate ' +
@@ -75,6 +91,7 @@ export function createSectionTranslator<L extends string>({
   languageName,
   businessDescription,
   localeGuidance = {},
+  placeholderRule,
   model,
   cachePath = DEFAULT_CACHE_PATH,
 }: SectionTranslatorOptions<L>) {
@@ -88,16 +105,15 @@ export function createSectionTranslator<L extends string>({
     const doc = parseDocument(readFileSync(section.path, 'utf-8'));
     const translationsNode = getOrCreateTranslationsMap(doc, section.path);
 
-    const plain = doc.toJS() as SectionData;
+    const plain = translatedDocSchema.parse(doc.toJS());
     const rawSource: SectionData = {};
     for (const field of section.fields ?? section.schema.keyof().options) {
       if (plain[field] !== undefined) rawSource[field] = plain[field];
     }
     const source = section.schema.parse(rawSource) as SectionData;
     const currentHash = hashSource(source);
-    const storedHash = doc.get('translatedFrom') as string | undefined;
-
-    const committed = plain.translations as Record<string, unknown>;
+    const storedHash = plain.translatedFrom;
+    const committed = plain.translations;
 
     const translationsAreCurrent = storedHash === currentHash;
 
@@ -122,6 +138,7 @@ export function createSectionTranslator<L extends string>({
           names.get(locale) as string,
           businessDescription,
           localeGuidance[locale],
+          placeholderRule,
         ),
         apiKey,
         model,
@@ -158,11 +175,12 @@ export function createSectionTranslator<L extends string>({
   }
 
   async function run(sections: readonly Section[]): Promise<number> {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const key = openAiKeySchema.safeParse(process.env.OPENAI_API_KEY);
+    if (!key.success) {
       console.error('Missing env var: OPENAI_API_KEY');
       return 1;
     }
+    const apiKey = key.data;
 
     let cache: CacheFile;
     try {

@@ -3,15 +3,13 @@ export const prerender = false;
 import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
-import { notifyLead } from '@/lib/crmBot';
-import { PRIMARY_LOCALE, isLocale, type Locale } from '@/i18n/config';
+import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { notifyLead } from '@/lib/crm';
+import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PHONE_NUMBER, SITE_NAME, WHATSAPP_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
-
-const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
-  ru: 'Укажите контакт',
-  sr: 'Unesite kontakt',
-  en: 'Enter a contact',
-};
 
 export const POST = createLeadsRoute({
   notifyLead,
@@ -20,5 +18,32 @@ export const POST = createLeadsRoute({
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,
   thanksPath: PathBuilder.thanks,
-  missingFieldsMessage: MISSING_FIELDS_MESSAGE,
+  refusalCopy: (locale) => {
+    const { form } = content(locale).site;
+    return {
+      brand: {
+        name: SITE_NAME,
+        home: PathBuilder.home(locale),
+        background: '#060608',
+        text: '#f2f0ec',
+        accent: '#f2f0ec',
+        onAccent: '#060608',
+      },
+      reasons: {
+        'missing-contact': form.errorTelegram,
+        'invalid-phone': form.errorPhone,
+        'invalid-telegram': form.errorTelegramHandle,
+      },
+      privacy: {
+        note: form.privacyNote,
+        label: form.privacyLinkText,
+        href: PathBuilder.privacy(locale),
+      },
+      submit: form.submit,
+      links: [
+        { label: formatPhone(PHONE_NUMBER), href: phoneLink(PHONE_NUMBER) },
+        { label: 'WhatsApp', href: whatsappLink(WHATSAPP_NUMBER) },
+      ],
+    };
+  },
 });
