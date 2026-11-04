@@ -8,6 +8,7 @@ export const SHOP_CLIENT_SECRET_HEADER = 'x-shop-client-secret';
 
 export const shopPreviewTokenSchema = z
   .string()
+  .trim()
   .regex(
     /^[\w-]{32,256}$/,
     'a preview token is 32 to 256 letters, digits, _ or -',

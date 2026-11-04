@@ -36,4 +36,14 @@ describe('shopPreviewTokenSchema', () => {
       false,
     );
   });
+
+  it('drops whitespace a pasted env value carries at its edges', () => {
+    const token = '5f57' + 'a'.repeat(60);
+
+    expect(shopPreviewTokenSchema.parse(`${token}\n`)).toBe(token);
+    expect(shopPreviewTokenSchema.parse(` ${token} `)).toBe(token);
+    expect(
+      shopPreviewTokenSchema.safeParse(`${token.slice(0, 32)} x`).success,
+    ).toBe(false);
+  });
 });
