@@ -115,9 +115,12 @@ scripts run, the commit with the translations goes into the same branch, and
 everything downstream checks out exactly the SHA it left behind
 (`needs.translate.outputs.sha`). If there was nothing to translate, that SHA is the
 pushed commit itself. This makes it physically impossible for content to reach
-production untranslated. `verify` re-runs the tests on that SHA: `translate` pushes
-as `GITHUB_TOKEN`, and such a push starts no new run — otherwise nobody would check
-the translated tree.
+production untranslated. `verify` tests what the translation commit changed on
+that SHA (`turbo run test --filter="...[<pushed SHA>]"`, so only the apps whose
+content moved and whatever `git pull --rebase` brought in): `translate` pushes as
+`GITHUB_TOKEN`, and such a push starts no new run — otherwise nobody would check
+the translated tree. When nothing was translated the SHA is the pushed one, which
+`check` already tested, and `verify` runs no tests at all.
 
 ### Not everything gets deployed
 
