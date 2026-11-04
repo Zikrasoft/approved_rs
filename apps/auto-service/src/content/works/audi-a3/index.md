@@ -2,26 +2,26 @@
 title: Большой сервис Audi A3 1.5 TFSI
 translations:
   en:
-    title: Audi A3 1.5 TFSI Major Service
+    title: Audi A3 1.5 TFSI major service
     body: |-
-      This Audi A3 with a **150 hp 1.5 TFSI petrol engine** and a DQ200 dual-clutch gearbox came to our Russian-speaking garage in Belgrade for a major service. We replaced the timing belt.
+      This Audi A3 with a **150 hp 1.5 TFSI petrol engine** and DQ200 dual-clutch gearbox came to our Russian-speaking garage in Belgrade for a major service. We replaced the timing belt.
 
-      Our diagnostics also identified a problem with the electric coolant pump, so we replaced that too. This is a separate component, and its replacement is unrelated to the major service or the timing belt. Testing showed that the pump's output had dropped and it was no longer circulating coolant properly. Rather than wait for this to affect engine temperature, we dealt with it straight away. We refilled the system with fresh coolant after the work.
+      Following diagnostics, we also replaced the electric coolant pump. This is a separate component, and replacing it is not part of the major service or timing belt job. Our checks showed that the pump was losing performance and no longer circulating coolant properly, so we acted before it could affect engine temperature. We refilled the system with fresh coolant after the work.
 
-      At the same time, we carried out a minor service, replacing the engine oil and all the required filters.
+      We also carried out a minor service, replacing the engine oil and all the necessary filters.
 
-      Next was the gearbox. The DQ200 is a dry-clutch dual-clutch transmission. We changed the oil in the mechanical section and the hydraulic fluid in the mechatronic unit. Our recommendation for this gearbox is simple: change both fluids at least every **60,000 km**. Keeping to this interval helps the transmission last longer and reduces the likelihood of expensive repairs.
+      Next up was the gearbox. The DQ200 is a dry-clutch dual-clutch transmission. We changed the oil in the mechanical section and the hydraulic fluid in the mechatronic unit. Our recommendation for this gearbox is simple: change both fluids at least every **60,000 km**. Sticking to this interval helps the gearbox last longer and reduces the risk of expensive repairs.
     car: Audi A3
   sr:
     title: Veliki servis za Audi A3 1.5 TFSI
     body: |-
       Audi A3 sa benzinskim motorom **1.5 TFSI od 150 KS** i robotizovanim menjačem DQ200 stigao je u naš ruski auto servis u Beogradu na veliki servis. Zamenili smo zupčasti kaiš.
 
-      Na osnovu dijagnostike zamenili smo i električnu pumpu rashladnog sistema. To je zaseban sklop i njena zamena nije povezana sa velikim servisom ni sa zupčastim kaišem. Dijagnostika je pokazala da je kapacitet pumpe opao i da više ne obezbeđuje odgovarajući protok rashladne tečnosti, pa nismo čekali da to počne da utiče na radnu temperaturu motora. Nakon radova sipali smo nov antifriz.
+      Na osnovu dijagnostike zamenili smo i električnu pumpu rashladnog sistema. To je zaseban sklop i njena zamena nije povezana sa velikim servisom niti sa zupčastim kaišem. Dijagnostika je pokazala da je pumpi opao učinak i da više ne obezbeđuje potreban protok rashladne tečnosti, pa nismo čekali da to počne da utiče na radnu temperaturu motora. Nakon radova sipali smo nov antifriz.
 
-      Usput smo uradili i mali servis: zamenili smo motorno ulje i sve potrebne filtere.
+      Ujedno smo uradili i mali servis: zamenili smo motorno ulje i sve potrebne filtere.
 
-      Zatim je na red došao menjač. DQ200 je robotizovani menjač sa suvim kvačilima. Zamenili smo ulje u mehaničkom delu i radnu tečnost u mehatronici. Naša preporuka za ovaj menjač je jednostavna: ulje u mehaničkom delu i tečnost u mehatronici menjati najkasnije na svakih **60.000 km**. Uz takav interval održavanja menjač duže traje i ređe zahteva skupe popravke.
+      Zatim je na red došao menjač. DQ200 je robotizovani menjač sa suvim kvačilima. Zamenili smo ulje u mehaničkom delu i radnu tečnost u mehatronici. Za ovaj menjač naša preporuka je jednostavna: ulje u mehaničkom delu i tečnost u mehatronici treba menjati najkasnije na svakih **60.000 km**. Uz takav interval održavanja menjač duže traje i ređe zahteva skupe popravke.
     car: Audi A3
 car: Audi A3
 year: 2019

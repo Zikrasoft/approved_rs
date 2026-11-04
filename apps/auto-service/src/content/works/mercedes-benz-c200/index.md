@@ -2,20 +2,20 @@
 title: Малое ТО Mercedes-Benz C-Class W205
 translations:
   en:
-    title: Mercedes-Benz C-Class W205 Minor Service
+    title: Mercedes-Benz C-Class W205 minor service
     body: |-
-      This Mercedes-Benz C-Class W205 came to our workshop in Belgrade for an interim service.
+      This Mercedes-Benz C-Class W205 came to our workshop in Belgrade for a minor service.
 
-      Work carried out:
+      We carried out:
 
-      - engine oil change;
-      - oil filter replacement;
-      - engine air filter replacement;
-      - cabin filter replacement;
-      - replacement of all brake pads;
-      - brake system inspection and servicing.
+      - an engine oil change;
+      - an oil filter replacement;
+      - an engine air filter replacement;
+      - a cabin filter replacement;
+      - replacement of the front and rear brake pads;
+      - a brake system inspection and service.
 
-      A closer look at the brakes. Brake pads are a key safety component and need regular checks. Whenever we replace the pads, we also inspect the **discs, calipers and guide pins**: if any of these are seized or worn, the car may brake unevenly.
+      A closer look at the brakes. Brake pads are critical to safety and need regular checks. Whenever we replace the pads, we also check the **discs, calipers and slide pins**. If any of these are seized or worn, the brakes can apply unevenly.
     car: Mercedes-Benz C-Class
 
   sr:
@@ -32,7 +32,7 @@ translations:
       - zamenu svih kočionih pločica;
       - servis i proveru kočionog sistema.
 
-      Posebnu pažnju posvetili smo kočnicama. Kočione pločice su jedan od ključnih elemenata bezbednosti i treba ih redovno kontrolisati. Pri zameni pločica uvek proveravamo i **diskove, kočiona klešta i vođice**: ako je nešto od toga zapeklo ili istrošeno, automobil neće ravnomerno kočiti.
+      Posebnu pažnju posvetili smo kočnicama. Kočione pločice su jedan od ključnih elemenata bezbednosti i njihovo stanje treba redovno proveravati. Prilikom zamene pločica uvek proveravamo i **diskove, kočiona klešta i vođice**: ako je neki od ovih delova zapekao ili istrošen, automobil neće ravnomerno kočiti.
     car: Mercedes-Benz C-Class
 car: Mercedes-Benz C-Class
 year: 2018

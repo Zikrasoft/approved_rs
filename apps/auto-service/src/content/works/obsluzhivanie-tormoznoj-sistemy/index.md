@@ -3,15 +3,15 @@ title: Замена тормозных дисков и колодок
 car: Обслуживание тормозной системы
 translations:
   en:
-    title: Brake Disc and Pad Replacement
+    title: Brake disc and pad replacement
     body: |-
-      A car came into our workshop in Belgrade with a complaint of **vibration under braking**: whenever the driver pressed the brake pedal, the car would shake.
+      A car came into our workshop in Belgrade with **vibration under braking**: whenever the driver pressed the brake pedal, the car would start shaking.
 
       We started by checking the wheel balance. Wheel imbalance is a common cause of vibration and one of the easiest to rule out. The balance was fine, so we moved on to the braking system.
 
-      At first glance, the discs and pads looked fine, with no obvious signs of heavy wear. A closer inspection revealed that **the left brake disc was warped**. This was causing the vibration.
+      At first glance, the discs and pads looked fine, with no obvious signs of excessive wear. A closer inspection revealed that **the left brake disc was warped**. This was what was causing the vibration.
 
-      We showed the customer the problem and got approval for the repair. Here is what we did:
+      We showed the customer the problem and got approval for the repairs. Here is what we did:
 
       - inspected the braking system;
       - checked and balanced the wheels;
@@ -19,22 +19,22 @@ translations:
       - replaced the brake discs;
       - replaced the brake pads;
       - rechecked the wheel balance;
-      - carried out a road test after the repair.
+      - carried out a road test after the repairs.
 
-      The vibration under braking was completely gone. After the final checks, we returned the car to its owner.
+      The vibration under braking was completely gone. After the final checks, we handed the car back to its owner.
 
-      A brake disc can look perfectly fine and still be warped. This kind of distortion is not something you can spot by eye. So if you notice the steering wheel shaking, the brake pedal pulsing or the car vibrating under braking, it is best not to put off having it checked.
-    car: Brake System Servicing
+      A brake disc can look perfectly normal and still be warped. You cannot always spot this kind of distortion by eye. So if you notice the steering wheel shaking, the brake pedal pulsing or the car vibrating when you brake, it is best not to put off having it checked.
+    car: Brake system servicing
   sr:
     title: Zamena kočionih diskova i pločica
     body: |-
-      U naš auto servis u Beogradu stigao je automobil zbog **vibracija pri kočenju**: kada vozač pritisne papučicu kočnice, automobil počne da se trese.
+      U naš auto servis u Beogradu stigao je automobil zbog **vibracija pri kočenju**: kada vozač pritisne papučicu kočnice, automobil počinje da se trese.
 
-      Počeli smo od provere balansa točkova. To je najčešći uzrok ovakvih vibracija i najlakše ga je isključiti. Balans je bio u redu, pa smo nastavili sa proverom kočionog sistema.
+      Počeli smo od provere balansa točkova. Neizbalansirani točkovi su najčešći uzrok ovakvih vibracija i to je najlakše prvo isključiti. Balans je bio u redu, pa smo nastavili sa proverom kočionog sistema.
 
-      Na prvi pogled, diskovi i pločice bili su u dobrom stanju, bez očiglednih znakova veće istrošenosti. Detaljnom proverom utvrdili smo da je **levi kočioni disk deformisan**. Upravo on je izazivao vibracije.
+      Na prvi pogled diskovi i pločice bili su u dobrom stanju, bez očiglednih znakova većeg habanja. Detaljnom proverom utvrdili smo da je **levi kočioni disk deformisan**. Upravo je on izazivao vibracije.
 
-      Pokazali smo problem klijentu i dogovorili popravku. Šta smo uradili:
+      Pokazali smo vlasniku u čemu je problem i dogovorili popravku. Šta smo uradili:
 
       - dijagnostiku kočionog sistema;
       - proveru i balansiranje točkova;
@@ -44,9 +44,9 @@ translations:
       - ponovnu proveru balansa točkova;
       - probnu vožnju nakon popravke.
 
-      Vibracije pri kočenju su nakon toga potpuno nestale. Automobil smo proverili i predali vlasniku.
+      Nakon toga vibracije pri kočenju potpuno su nestale. Automobil smo proverili i predali vlasniku.
 
-      Disk može da izgleda sasvim normalno, a da ipak bude kriv, jer se takva deformacija ne može uočiti golim okom. Zato, ako primetite podrhtavanje volana, papučice kočnice ili karoserije pri kočenju, nemojte odlagati dijagnostiku.
+      Disk može da izgleda sasvim dobro, a da ipak bude iskrivljen. Takva deformacija ne može da se uoči golim okom. Zato, ako primetite podrhtavanje volana, vibracije papučice ili karoserije pri kočenju, nemojte odlagati dijagnostiku.
     car: Održavanje kočionog sistema
 year: 2022
 servicesApplied:

@@ -68,27 +68,27 @@ llmsSearch: 'Один поиск по всему каталогу: VIN, номе
 translatedFrom: 16574c1f83d98a2b
 translations:
   sr:
-    searchHeading: Pronađite deo
+    searchHeading: Pronađite auto deo
     searchLead: Unesite VIN, broj dela u bilo kom formatu, naziv dela ili marku i model automobila.
-    label: VIN, broj ili naziv dela, ili automobil
+    label: VIN, broj ili naziv dela ili automobil
     placeholder: VIN ili broj dela
     submitLabel: Pronađite
     metaTitle: Pretraga auto delova | CarLab
-    metaDescription: Pronađite deo po VIN-u, kataloškom broju proizvođača, nazivu ili automobilu u katalogu CarLaba.
+    metaDescription: Pronađite auto deo po VIN-u, kataloškom broju proizvođača, nazivu ili automobilu u katalogu CarLab.
     eyebrow: Katalog auto delova
     heading: Pretraga auto delova
     found: 'Pronađeno: {count}'
-    foundNumbers: 'Pronađeno brojeva delova: {count}'
-    emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model automobila, na primer HU 816 x, filter ulja ili BMW X3.
-    noResults: Pronaći ćemo „{q}“ za vas. Pozovite nas, pišite nam putem WhatsApp, Viber ili Telegram aplikacije ili pošaljite upit, javićemo vam cenu i rok isporuke.
+    foundNumbers: 'Pronađeni brojevi: {count}'
+    emptyQuery: Unesite VIN, broj ili naziv dela ili marku i model, na primer HU 816 x, filter ulja ili BMW X3.
+    noResults: Pronaći ćemo „{q}” za vas. Pozovite nas, pišite putem WhatsApp-a, Vibera ili Telegrama ili pošaljite upit. Javićemo vam cenu i rok isporuke.
     lookingFor: 'Tražim: {q}'
-    lookingForVin: Pronađite delove po VIN-u {vin}
-    unavailable: Lično ćemo potražiti odgovarajući deo, pošaljite upit.
-    unknownScope: Lično ćemo potražiti odgovarajući deo, pošaljite upit.
+    lookingForVin: Pronađite delove prema VIN-u {vin}
+    unavailable: Lično ćemo pronaći odgovarajući deo. Pošaljite upit.
+    unknownScope: Lično ćemo pronaći odgovarajući deo. Pošaljite upit.
     filtersHeading: Filteri
     applyFilters: Prikažite
     showResults: Prikažite {count}
-    noneFound: Lično ćemo potražiti deo prema ovim kriterijumima
+    noneFound: Lično ćemo pronaći deo prema ovim kriterijumima
     showAllValues: Prikažite sve ({count})
     resetFilters: Poništite
     resetAllFilters: Poništite sve
@@ -98,8 +98,8 @@ translations:
     rangeTo: do {max}
     rangeBetween: od {min} do {max}
     removeFilter: 'Uklonite filter: {label}'
-    noFilteredResults: Lično ćemo potražiti deo prema ovim kriterijumima. Pošaljite upit, filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
-    noFilteredQueryResults: Lično ćemo potražiti „{q}“ prema ovim kriterijumima. Pošaljite upit, pretraga i filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
+    noFilteredResults: Lično ćemo pronaći deo prema ovim kriterijumima. Pošaljite upit, filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
+    noFilteredQueryResults: Lično ćemo pronaći „{q}” prema ovim kriterijumima. Pošaljite upit, pretraga i filteri su već u komentaru. Javićemo vam cenu i rok isporuke.
     brandFacet: Brend
     availabilityFacet: Dostupnost
     inStockOnly: Samo na stanju
@@ -110,31 +110,31 @@ translations:
     next: Sledeća
     pagination: Stranice rezultata
     formHeading: Upit za auto delove
-    notFoundQuestion: Niste pronašli ono što Vam treba?
-    notFoundLink: Pošaljite upit, pronaći ćemo deo
-    pickHeading: Pronaći ćemo deo koji tačno odgovara vašem vozilu
-    pickBody: Pošaljite VIN ili broj dela. Proverićemo da li deo odgovara vašem vozilu i javiti vam cenu i rok isporuke.
-    pickCta: Zatražite pomoć pri izboru dela
-    askManager: Pitajte saradnika, Vaša pretraga je već uneta u poruku
-    numberNotFound: Možda ste tražili neki od sličnih brojeva delova navedenih ispod. Ako vam treba baš „{q}“, pronaći ćemo ga.
+    notFoundQuestion: Niste pronašli ono što vam treba?
+    notFoundLink: Pošaljite upit, pronaći ćemo odgovarajući deo
+    pickHeading: Pronaći ćemo deo koji tačno odgovara vašem automobilu
+    pickBody: Pošaljite VIN ili broj dela. Proverićemo da li deo odgovara i javiti vam cenu i rok isporuke.
+    pickCta: Zatražite pomoć pri izboru
+    askManager: Pitajte saradnika, vaša pretraga je već uneta u poruku
+    numberNotFound: Možda ste tražili neki od sličnih brojeva ispod. Ako vam treba baš „{q}”, pronaći ćemo ga.
     numberComment: Broj {q}
     similarNumbers: Slični brojevi
     carsGroup: Automobili
     allModifications: Sve verzije
     partsGroup: Auto delovi
-    sortLabel: Sortiranje
+    sortLabel: Redosled
     sortDefault: Podrazumevano
-    sortPopular: Najpopularnije
+    sortPopular: Popularno
     popularHeading: Često se naručuje
     popularForCar: Često se naručuje za {car}
     popularBadge: Čest izbor
-    vinOption: Pronađite delove po VIN-u
+    vinOption: Pronađite delove prema VIN-u
     suggestFailed: Predlozi nisu učitani
     suggestRetry: Pokušajte ponovo
-    suggestNone: 'Lično ćemo potražiti „{q}“: pošaljite upit'
+    suggestNone: 'Lično ćemo pronaći „{q}”: pošaljite upit'
     openSearch: Pretraga kataloga
     closeSearch: Zatvorite pretragu
-    llmsSearch: 'Jedna pretraga za ceo katalog: VIN, broj dela u bilo kom formatu, naziv, marka, model, oznaka karoserije ili motora, kao i njihove kombinacije, na primer „filter ulja bmw x3“. Upit se prosleđuje kroz parametar q: {example}'
+    llmsSearch: 'Jedna pretraga za ceo katalog: VIN, broj dela u bilo kom formatu, naziv, marka, model, oznaka karoserije ili motora, kao i njihove kombinacije, na primer „filter ulja bmw x3”. Upit se prosleđuje kroz parametar q: {example}'
   en:
     searchHeading: Find a part
     searchLead: Enter a VIN, part number in any format, part name, or vehicle make and model.

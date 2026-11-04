@@ -16,36 +16,36 @@ translations:
   sr:
     title: "VW Golf: poklopac ventila, dizne i ulje u DSG menjaču"
     body: |-
-      Volkswagen Golf iz 2017. godine sa 7-stepenim menjačem sa dvostrukim kvačilom **DSG DQ381** stigao je u naš auto servis u Beogradu na detaljno održavanje i otklanjanje nekoliko kvarova.
+      Volkswagen Golf iz 2017. godine sa sedmostepenim menjačem sa dvostrukim kvačilom **DSG DQ381** stigao je u naš auto servis u Beogradu na detaljan servis i otklanjanje nekoliko kvarova.
 
       Tokom servisa zamenili smo poklopac ventila zbog curenja ulja, zamenili zaptivke dizni, uradili mali servis motora, zamenili ulje i filter u DSG menjaču i očistili kočiona klešta.
 
-      Posebnu pažnju posvetili smo menjaču DSG DQ381. To je savremen 7-stepeni menjač sa dvostrukim kvačilom, kod kojeg je važno redovno menjati ulje i filter. Ulje vremenom gubi svoja svojstva, a u njemu se nakupljaju čestice nastale habanjem, što utiče na rad mehatronike, hidrauličnog sistema i kvačila. Redovna zamena ulja omogućava glatko menjanje brzina i smanjuje rizik od skupih popravki DSG menjača.
+      Posebnu pažnju posvetili smo menjaču DSG DQ381. Reč je o savremenom sedmostepenom menjaču sa dvostrukim kvačilom, kod kojeg je važno na vreme menjati ulje i filter. Ulje vremenom gubi svojstva, a u njemu se nakupljaju čestice nastale habanjem, što utiče na rad mehatronike, hidrauličkog sistema i kvačila. Redovna zamena ulja doprinosi glatkom menjanju brzina i smanjuje rizik od skupih popravki DSG menjača.
 
-      U menjač smo sipali **MOTUL** ulje odgovarajuće specifikacije, a i za motor smo koristili MOTUL. Kvalitet motornog i menjačkog ulja direktno utiče na vek trajanja automobila.
+      U menjač smo sipali ulje **MOTUL** odgovarajuće specifikacije, a i za motor smo koristili MOTUL. Kvalitet motornog i menjačkog ulja direktno utiče na vek trajanja automobila.
 
-      U okviru malog servisa zamenili smo motorno ulje i potrebne filtere. Kod Volkswagenovih turbo motora pravovremena zamena ulja posebno je važna: ulje podmazuje delove, odvodi toplotu i štiti turbinu od prevremenog habanja.
+      U okviru malog servisa zamenili smo motorno ulje i potrebne filtere. Kod Volkswagenovih motora sa turbopunjačem pravovremena zamena ulja posebno je važna: ulje podmazuje delove, odvodi toplotu i štiti turbinu od prevremenog habanja.
 
-      Poklopac ventila zamenili smo jer je stari počeo da propušta ulje. Takva curenja vremenom postaju sve izraženija i dovode do prljanja motora. Ujedno smo zamenili i zaptivke dizni, jer je dobro zaptivanje spojeva važno za bezbedan rad sistema za gorivo.
+      Poklopac ventila zamenili smo jer je stari počeo da propušta ulje. Takvo curenje se vremenom pojačava i dovodi do prljanja motora. Ujedno smo zamenili i zaptivke dizni, jer je dobro zaptivanje spojeva važno za bezbedan rad sistema za gorivo.
 
-      Sa kočionih klešta uklonili smo prljavštinu i koroziju. Kada pokretni delovi zapeknu, dolazi do neravnomernog habanja pločica, pregrevanja diskova i neobičnih zvukova pri kočenju.
+      Sa kočionih klešta očistili smo prljavštinu i koroziju. Zapekli pokretni delovi dovode do neravnomernog trošenja pločica, pregrevanja diskova i pojave neobičnih zvukova pri kočenju.
     car: VW Golf
   en:
-    title: "VW Golf: valve cover, injectors and DSG fluid"
+    title: "VW Golf: valve cover, injector seals and DSG oil change"
     body: |-
-      A 2017 Volkswagen Golf with a 7-speed **DSG DQ381** dual-clutch transmission came to our workshop in Belgrade for comprehensive servicing and repairs to several faults.
+      This 2017 Volkswagen Golf with a 7-speed **DSG DQ381** dual-clutch gearbox came to our workshop in Belgrade for a comprehensive service and repairs to several faults.
 
-      We replaced the valve cover to fix an oil leak, renewed the fuel injector seals, carried out an interim engine service, changed the DSG transmission oil and filter, and cleaned the brake calipers.
+      We replaced the leaking valve cover, renewed the fuel injector seals, carried out an interim engine service, changed the DSG oil and filter, and cleaned the brake calipers.
 
-      We paid particular attention to the DSG DQ381 gearbox. This modern 7-speed dual-clutch transmission needs timely oil and filter changes. Over time, the oil degrades and wear particles accumulate, affecting the operation of the mechatronic unit, hydraulic system and clutches. Regular oil changes help maintain smooth gear shifts and reduce the risk of expensive DSG repairs.
+      We paid particular attention to the DSG DQ381 gearbox. This modern 7-speed dual-clutch transmission needs regular oil and filter changes. Over time, the oil degrades and wear particles build up, affecting the mechatronics, hydraulic system and clutches. Regular oil changes help maintain smooth gear shifts and reduce the risk of costly DSG repairs.
 
-      We filled the gearbox with **MOTUL** transmission oil meeting the required specification and used MOTUL oil for the engine as well. The quality of both engine and transmission oil directly affects the vehicle's service life.
+      We filled the gearbox with **MOTUL** transmission oil meeting the correct specification and used MOTUL engine oil as well. The quality of both engine and transmission oil has a direct impact on the vehicle's service life.
 
-      As part of the interim service, we changed the engine oil and the required filters. Timely oil changes are especially important for Volkswagen turbocharged engines: the oil lubricates components, carries heat away and protects the turbocharger from premature wear.
+      As part of the interim service, we changed the engine oil and the required filters. Timely oil changes are especially important for turbocharged Volkswagen engines: the oil lubricates moving parts, carries heat away and protects the turbocharger from premature wear.
 
-      We replaced the valve cover because the old one was leaking oil. These leaks tend to worsen over time, leaving oil and grime on the engine. We also renewed the fuel injector seals, as leak-free connections are essential for safe fuel system operation.
+      The valve cover was replaced because it had started leaking oil. These leaks tend to worsen over time, leaving the engine coated in oil and dirt. We also renewed the fuel injector seals, as leak-free connections are essential for safe fuel system operation.
 
-      We also cleaned dirt and corrosion from the brake calipers. When moving parts seize, they can cause uneven brake pad wear, overheated discs and unusual noises during braking.
+      We also cleaned dirt and corrosion from the brake calipers. When moving components seize, they can cause uneven brake pad wear, overheating brake discs and unusual noises when braking.
     car: VW Golf
 translatedFrom: 55fc8ff6d2c1f60f
 ---

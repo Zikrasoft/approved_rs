@@ -71,8 +71,8 @@ finalCta:
 translations:
   sr:
     meta:
-      title: 'CarLab | Auto servis u Beogradu: dijagnostika, popravke'
-      description: 'Auto servis u Beogradu: kompjuterska dijagnostika, redovan servis, zamena ulja, popravka trapa, kočnica, motora i menjača, limarski radovi posle udesa.'
+      title: 'CarLab | Auto servis u Beogradu: dijagnostika i popravke'
+      description: 'Auto servis u Beogradu: kompjuterska dijagnostika, redovan servis i zamena ulja, popravka trapa, kočnica, motora i menjača, limarija posle udesa.'
     hero:
       heading: Auto servis i auto delovi u Beogradu
       ctaPrimary: Zakažite popravku
@@ -82,18 +82,18 @@ translations:
       partsHint: Javićemo Vam cenu i rok isporuke.
       partsInquiry: Pošaljite upit saradniku
       badges:
-        - Ponuda pre početka radova
-        - Redovan servis obično završavamo za jedan dan
+        - Predračun pre početka radova
+        - Redovan servis obično za jedan dan
         - Sarađujemo sa osiguravajućim kućama
     servicesHead:
       eyebrow: Usluge
       heading: Kako možemo da Vam pomognemo
-      body: Pogledajte koliko traje koja vrsta radova. Predračun pripremamo nakon pregleda, pre početka radova.
+      body: Pogledajte koliko traje svaka usluga. Predračun pripremamo nakon pregleda, pre početka radova.
     problemPrompt:
       heading: Ne znate šta je u kvaru?
-      body: Opišite simptome, a mi ćemo Vas posavetovati odakle da krenete.
+      body: Opišite simptome, predložićemo odakle da počnemo.
       cta: Opišite problem
-    worksHeading: Šta je bilo u kvaru i kako smo ga otklonili
+    worksHeading: Šta je bilo u kvaru i kako smo popravili
     process:
       eyebrow: Kako radimo
       heading: Bez iznenađenja na računu
@@ -102,42 +102,42 @@ translations:
         - title: Poziv ili poruka
           text: Recite nam šta se dešava sa automobilom i dogovorićemo termin.
         - title: Pregled i dijagnostika
-          text: Pronalazimo uzrok, ne samo simptom, i pokazujemo Vam ga na automobilu.
-        - title: Ponuda pre radova
+          text: Pronalazimo uzrok, a ne samo simptom, i pokazujemo Vam ga na automobilu.
+        - title: Predračun pre početka radova
           text: Šaljemo Vam spisak radova i delova sa cenama. Počinjemo tek kada odobrite.
         - title: Popravka i preuzimanje
-          text: Proveravamo automobil u probnoj vožnji, vraćamo Vam stare delove i evidentiramo radove u servisnom kartonu.
+          text: Proveravamo automobil u vožnji, vraćamo stare delove i upisujemo radove u servisnu evidenciju.
       promises:
-        - Ne menjamo delove pre nego što je potrebno
-        - Stare delove Vam vraćamo u kutiji
+        - Ne menjamo delove kojima još nije vreme za zamenu
+        - Stare delove vraćamo u kutiji
     accident:
       eyebrow: Posle udesa
-      heading: Limarski radovi i farbanje
-      body: Vraćamo karoseriju u fabričku geometriju i lakiramo uz precizno usklađivanje boje. Sarađujemo sa osiguravajućim kućama i pomažemo Vam da prikupite dokumentaciju.
+      heading: Limarija i farbanje
+      body: Ispravljamo geometriju karoserije i farbamo uz precizno usklađivanje boje. Sarađujemo sa osiguravajućim kućama i pomažemo Vam da prikupite dokumentaciju.
       points:
-        - Izvlačenje na stolu i merenje geometrije karoserije
+        - Rad na stolu za izvlačenje i merenje geometrije karoserije
         - Određivanje nijanse po kodu boje i spektrofotometrom
         - Pomoć oko dokumentacije za osiguranje
       cta: Pošaljite fotografije oštećenja
-      more: Saznajte više o limarsko-farbarskim radovima
+      more: Saznajte više o limarskim radovima
     faqEyebrow: Pitanja
     faq:
       - q: Koliko košta dijagnostika?
-        a: Prvi pregled i očitavanje grešaka su besplatni. Naplaćuje se samo detaljna dijagnostika koja zahteva rasklapanje sklopa ili ispitivanje na testnom stolu. O ceni vas obaveštavamo unapred.
+        a: Početni pregled i očitavanje grešaka su besplatni. Naplaćujemo samo detaljnu dijagnostiku kada je potrebno rasklopiti sklop ili postaviti automobil na ispitni uređaj. Cenu Vam saopštavamo unapred.
       - q: Mogu li da donesem svoje delove?
-        a: Možete. U tom slučaju odgovaramo samo za svoj rad, ne i za doneti deo. Tako je pošteno za obe strane.
+        a: Možete. U tom slučaju odgovaramo samo za svoj rad, ne i za ugrađeni deo. Tako su odgovornosti jasne za obe strane.
       - q: Da li sarađujete sa osiguravajućim kućama?
-        a: Da, za limarske i farbarske radove. Pomoći ćemo vam oko dokumentacije i usaglašavanja procene troškova. Ako osiguranje ne pokriva sve, odmah ćemo vam reći koliko ostaje da platite.
+        a: Da, za limarske radove i farbanje. Pomoći ćemo Vam da pripremite dokumentaciju i usaglasite predračun sa osiguranjem. Ako osiguranje ne pokriva sve troškove, odmah ćemo Vam reći koliko treba da doplatite.
       - q: Koliko brzo mogu da zakažem redovan servis?
-        a: Pozovite nas ili nam pišite i reći ćemo Vam koji je prvi slobodan termin.
-      - q: Da li su strane registarske tablice problem?
-        a: Ne. Za popravku nije potrebna saobraćajna dozvola, slobodno dođite.
+        a: Pozovite nas ili nam pišite i reći ćemo Vam prvi slobodan termin.
+      - q: Da li su strane tablice problem?
+        a: Nisu. Za popravku nije potrebna saobraćajna dozvola, slobodno dođite.
       - q: Na kom jeziku možemo da razgovaramo?
-        a: Na srpskom, ruskom ili engleskom, kako Vama najviše odgovara.
+        a: Na srpskom, ruskom ili engleskom, kako Vam više odgovara.
     finalCta:
       eyebrow: Zakažite termin
-      heading: Recite nam šta nije u redu sa vozilom
-      body: Pozvaćemo Vas tokom radnog vremena da dogovorimo termin dolaska.
+      heading: Recite nam šta se dešava sa automobilom
+      body: Pozvaćemo Vas u toku radnog vremena i dogovoriti termin dolaska.
       cta: Pošaljite upit
   en:
     meta:

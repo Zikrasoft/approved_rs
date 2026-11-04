@@ -116,7 +116,7 @@ translations:
   sr:
     nav:
       services: Usluge
-      parts: Rezervni delovi
+      parts: Auto delovi
       works: Primeri radova
       process: Kako radimo
       about: O servisu
@@ -133,7 +133,7 @@ translations:
       partsCta: Upit
       callback: Pozovite me
     footer:
-      tagline: Auto servis i pomoć pri izboru auto delova na Zvezdari, Beograd.
+      tagline: Auto servis i izbor auto delova na Zvezdari, Beograd.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
@@ -156,15 +156,15 @@ translations:
       priceOnRequest: na upit
       allServices: Sve usluge
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova stižu uskoro. U međuvremenu nas pozovite, reći ćemo Vam šta smo radili na sličnim automobilima.
+      emptyWorks: Primeri radova stižu uskoro. U međuvremenu nas pozovite, ispričaćemo vam šta smo radili na sličnim automobilima.
       socialHeading: Pratite nas na društvenim mrežama
-      writeInstead: Više Vam odgovara da nam pišete?
+      writeInstead: Više vam odgovara poruka?
     hours:
-      week: Pon–Pet 08:00–18:00
+      week: Pon–pet 08:00–18:00
       saturday: Sub 09:00–14:00
     visit:
       heading: Posetite nas na Zvezdari
-      route: Prikažite rutu
+      route: Pronađite put do nas
       facts:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
@@ -188,36 +188,36 @@ translations:
     telegramChoice:
       heading: Kako želite da nam pišete?
       bot: Preko bota
-      botHint: Opišite problem sa automobilom, saradnik će Vam odgovoriti u istom četu
+      botHint: Opišite problem sa automobilom, saradnik će vam odgovoriti u istom razgovoru
       manager: Direktno saradniku
-      managerHint: Privatni čet sa saradnikom na Telegramu
+      managerHint: Privatni razgovor sa saradnikom na Telegramu
     form:
       heading: Zakažite termin u servisu
-      subheading: Opišite problem sa automobilom. Pozvaćemo Vas, proveriti detalje i reći Vam termin i cenu.
+      subheading: Opišite problem sa automobilom. Pozvaćemo vas da razjasnimo detalje i predložimo termin i cenu.
       nameLabel: Ime
-      namePlaceholder: Kako da Vam se obraćamo
+      namePlaceholder: Kako da vam se obraćamo
       contactLabel: Telefon
       contactPlaceholder: 64 123 4567
       telegramPlaceholder: '@username ili broj telefona'
-      contactChannelLabel: Kako da Vas kontaktiramo
+      contactChannelLabel: Kako da vas kontaktiramo
       channelPhone: Telefonski poziv
-      countryLabel: Pozivni broj države
+      countryLabel: Pozivni broj zemlje
       commentLabel: Automobil i opis problema
-      commentPlaceholder: Marka, model, godište i opis problema
+      commentPlaceholder: Marka, model, godište i problem koji ste primetili
       submit: Pošaljite upit
-      submitting: Slanje…
-      privacyNote: Slažem se sa
-      privacyLinkText: politikom privatnosti
+      submitting: Šaljemo…
+      privacyNote: Prihvatam
+      privacyLinkText: politiku privatnosti
       privacyOpen: Otvorite
-      privacyNotice: Slanjem upita saglasni ste sa
+      privacyNotice: Slanjem upita prihvatate
       moreDetails: Dodajte ime ili komentar
       modalTitle: Zakažite termin u servisu
-      callbackTitle: Pozvaćemo Vas
+      callbackTitle: Pozvaćemo vas
       errorPhone: Proverite broj telefona, izgleda da nije unet u celosti
       errorPhoneTooLong: Proverite broj telefona, ima previše cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
       errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
-      errorSubmit: Upit nije poslat. Proverite vezu i pokušajte ponovo
+      errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće
       more: Više informacija u

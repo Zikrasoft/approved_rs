@@ -17,20 +17,20 @@ translations:
     body: |-
       **Peugeot 208 1.2 PureTech. Veliki servis, mali servis i zamena ulja u menjaču u Beogradu**\
       U naš auto servis na Zvezdari stigao je Peugeot 208 sa benzinskim motorom 1.2 PureTech. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenu ulja u menjaču.\
-      U okviru velikog servisa zamenili smo zupčasti kaiš i prateće delove, kao i vodenu pumpu. Na motoru 1.2 PureTech vodenu pumpu ne pokreće zupčasti kaiš, ali preporučujemo da se i ona zameni prilikom velikog servisa. Ako odlučite da zadržite staru pumpu, svakako preporučujemo da zamenite makar zaseban mali kaiš koji je pokreće.\
+      U okviru velikog servisa zamenili smo zupčasti kaiš sa pratećim delovima, kao i vodenu pumpu. Kod motora 1.2 PureTech vodenu pumpu ne pokreće zupčasti kaiš, ali preporučujemo da se i ona zameni prilikom velikog servisa. Ako odlučite da zadržite staru pumpu, svakako preporučujemo da zamenite barem zaseban mali kaiš koji je pokreće.\
       Posebnu pažnju treba obratiti na intervale zamene zupčastog kaiša kod motora 1.2 PureTech. Uzimajući u obzir ažurirane preporuke i specifičnosti ovih motora, preporučujemo veliki servis na svakih 60 000 km, pre nego što se pojave problemi sa kaišem. Tačan interval održavanja treba proveriti za konkretnu verziju motora.\
-      Naš auto servis poseduje sav potreban specijalni alat za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Sve radove izvodimo uz poštovanje propisanog postupka uzupčenja i blokiranja razvoda.\
+      Naš auto servis poseduje sav potreban specijalni alat za pravilno obavljanje velikog servisa na motorima Peugeot i Citroën 1.2 PureTech. Sve radove izvodimo uz poštovanje propisane procedure montaže, uz pravilno podešavanje faze motora i upotrebu odgovarajućih alata za blokadu.\
       Pored toga, uradili smo mali servis sa zamenom motornog ulja i filtera, kao i kompletnu zamenu ulja u menjaču, za koju smo koristili ulje Valvoline.
     car: Peugeot 208
   en:
     title: "Peugeot 208 1.2 PureTech: major service and timing belt replacement"
     body: |-
       **Peugeot 208 1.2 PureTech. Major service, routine service and gearbox oil change in Belgrade**\
-      This Peugeot 208 with a 1.2 PureTech petrol engine came to our workshop in Zvezdara for comprehensive maintenance. We carried out a major service (veliki servis), a routine service (mali servis) and a gearbox oil change.\
-      As part of the major service, we replaced the timing belt and associated components, along with the water pump. On the 1.2 PureTech engine, the water pump is not driven by the timing belt, but we recommend replacing it during a major service. If you choose to keep the existing pump, we strongly recommend replacing at least the separate small belt that drives it.\
-      Timing belt replacement intervals deserve particular attention on 1.2 PureTech engines. Taking updated recommendations and the characteristics of these engines into account, we recommend a major service every 60,000 km rather than waiting for belt problems to develop. The exact maintenance schedule must be checked for the specific engine variant.\
+      A Peugeot 208 with a 1.2 PureTech petrol engine came into our workshop in Zvezdara for comprehensive maintenance. We carried out a major service (veliki servis), a routine service (mali servis) and a gearbox oil change.\
+      As part of the major service, we replaced the timing belt and associated components, along with the water pump. On the 1.2 PureTech engine, the water pump is not driven by the timing belt, but we recommend replacing it during a major service. If you choose to keep the existing pump, we strongly recommend replacing at least the small, separate belt that drives it.\
+      Timing belt replacement intervals need particular attention on 1.2 PureTech engines. Taking updated recommendations and the characteristics of these engines into account, we recommend a major service every 60,000 km rather than waiting for belt problems to develop. The exact maintenance schedule should be checked for the specific engine variant.\
       Our workshop has all the specialist tools needed to carry out a major service correctly on Peugeot and Citroën 1.2 PureTech engines. All work follows the correct procedures for setting and locking the valve timing.\
-      We also carried out a routine service, replacing the engine oil and filters, and completely changed the gearbox oil using Valvoline oil.
+      We also carried out a routine service, replacing the engine oil and filters, and a complete gearbox oil change using Valvoline oil.
     car: Peugeot 208
 translatedFrom: 9970318876275db7
 ---

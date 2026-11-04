@@ -16,11 +16,11 @@ translations:
   en:
     title: "Skoda Octavia 2.0 TDI major service: timing belt replacement"
     body: |-
-      We carried out a major service on a **Skoda Octavia 2.0 TDI** at our workshop in Belgrade. In Serbia, this service is known as *veliki servis*.
+      We carried out a major service on a **Skoda Octavia 2.0 TDI** at our workshop in Belgrade. In Serbia, this service is known as a *veliki servis*.
 
-      This diesel engine uses a timing belt, which needs to be replaced at the specified intervals. Failing to replace the belt or other timing system components on time can lead to serious engine damage and costly repairs.
+      This diesel engine uses a timing belt, which needs to be replaced at the specified intervals. Missing a scheduled replacement of the belt or other timing components can lead to serious engine damage and costly repairs.
 
-      We fitted a complete **Continental** timing belt kit, replacing all of the following in one visit:
+      We fitted a complete **Continental** timing belt kit, replacing everything in one go:
 
       <ul class="icon-check">
       <li>timing belt</li>
@@ -28,24 +28,24 @@ translations:
       <li>water pump</li>
       </ul>
 
-      This service is often needed after buying a used car when there is no reliable record of when the timing belt, water pump and pulleys were last replaced.
+      This service is most often needed after buying a used car when there is no reliable record of when the belt, water pump and pulleys were last replaced.
     car: Skoda Octavia
   sr:
-    title: "Veliki servis Skoda Octavia 2.0 TDI: zamena zupčastog kaiša"
+    title: "Veliki servis Skoda Octavia 2.0 TDI: zamena zupčastog remena"
     body: |-
-      U našem auto servisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. Ovaj obim radova u Srbiji se naziva *veliki servis*.
+      U našem auto servisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. U Srbiji se ovaj obim radova naziva *veliki servis*.
 
-      Ovaj dizel motor ima zupčasti kaiš koji se mora menjati u propisanim intervalima. Ako se zamena kaiša ili drugih delova razvodnog mehanizma preskoči, može doći do ozbiljnog oštećenja motora i skupe popravke.
+      Ovaj dizel motor ima zupčasti remen, koji se mora menjati u propisanim intervalima. Ako se preskoči zamena remena ili drugih delova razvodnog mehanizma, može doći do ozbiljnog kvara motora i skupe popravke.
 
-      Ugradili smo komplet **Continental** i u okviru istog servisa zamenili:
+      Ugradili smo komplet **Continental** i sve zamenili u jednom dolasku:
 
       <ul class="icon-check">
-      <li>zupčasti kaiš</li>
-      <li>španer</li>
-      <li>vodenu pumpu</li>
+      <li>zupčasti remen</li>
+      <li>zatezač</li>
+      <li>pumpu za vodu</li>
       </ul>
 
-      Ovakav servis najčešće je potreban nakon kupovine polovnog automobila, kada nema pouzdanih podataka o tome kada su prethodno menjani kaiš, pumpa i roleri.
+      Ovakav servis najčešće je potreban nakon kupovine polovnog automobila, kada nema pouzdanih podataka o prethodnoj zameni remena, pumpe za vodu i rolera.
     car: Skoda Octavia
 translatedFrom: e8442372f6e62da7
 ---

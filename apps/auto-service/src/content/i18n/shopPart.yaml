@@ -95,42 +95,42 @@ translatedFrom: d76e119ba6dbf0a4
 translations:
   sr:
     metaTitleSuffix: CarLab
-    metaDescription: Brendovi, zamenski delovi, cene i dostupnost ovog dela u katalogu CarLaba. Lično preuzimanje u servisu u Beogradu.
-    metaDescriptionClosed: Originalni brojevi, zamenski delovi i kompatibilnost. Pronaći ćemo deo po VIN-u, nabaviti ga i ugraditi u servisu CarLab u Beogradu.
-    eyebrow: Rezervni deo
+    metaDescription: Brendovi, zamenski delovi, cene i dostupnost ovog dela u katalogu CarLaba. Lično preuzimanje u auto servisu u Beogradu.
+    metaDescriptionClosed: Originalni brojevi, zamenski delovi i kompatibilnost. Proverićemo po VIN-u, nabaviti i ugraditi deo u auto servisu CarLab u Beogradu.
+    eyebrow: Auto deo
     equivalentsHeading: Zamenski delovi
-    noEquivalents: Pronaći ćemo zamenski deo drugog proizvođača, pišite nam.
-    equivalentsCta: Pronađite odgovarajuću zamenu
-    equivalentsLead: Delovi drugih proizvođača koji mogu da se ugrade umesto ovog.
+    noEquivalents: Pronaći ćemo odgovarajući deo drugog proizvođača. Pišite nam.
+    equivalentsCta: Pronađite zamenski deo
+    equivalentsLead: Delovi drugih proizvođača koji mogu da zamene ovaj deo.
     numberSupersededNotice: Proizvođač više ne koristi broj {number}.
-    partReplacedNotice: Proizvođač je zamenio deo {number} novim.
+    partReplacedNotice: Proizvođač je deo {number} zamenio novim.
     previousNumber: Prethodni broj
-    previousNumberCurrent: Broj je zamenjen brojem
+    previousNumberCurrent: Novi broj
     earlierNumbers: 'Ranije:'
     alsoNumbers: 'Takođe:'
     previousNumbersHeading: Prethodni brojevi
-    currentNumberLabel: 'Aktuelni broj:'
-    currentNumbersLabel: 'Aktuelni brojevi:'
-    successorOffersHeading: Kupite deo sa aktuelnim brojem
-    successorOrderHeading: Poručite deo koji zamenjuje prethodni
+    currentNumberLabel: 'Važeći broj:'
+    currentNumbersLabel: 'Važeći brojevi:'
+    successorOffersHeading: Kupite deo koji ga zamenjuje
+    successorOrderHeading: Poručite deo koji ga zamenjuje
     attributesHeading: Karakteristike
     attributeYes: Da
     attributeNo: Ne
     categoryLink: Svi delovi iz kategorije
     priceOnRequestHeading: Cena na upit
-    priceOnRequestBody: 'U katalogu ima previše delova da bismo sve cene redovno ažurirali. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
-    priceOnRequestCta: Proverite cenu i rok
+    priceOnRequestBody: 'U katalogu ima previše delova da bismo sve cene stalno ažurirali. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
+    priceOnRequestCta: Proverite cenu i rok isporuke
     pricedEquivalentLabel: Zamenski deo sa cenom
-    orderBody: 'Pošaljite upit: proverićemo po VIN-u koji deo odgovara i javiti Vam cenu i rok isporuke.'
-    orderHeading: Poručićemo ovaj deo za Vas
-    orderBodyClosed: Pošaljite VIN ili samo ostavite kontakt. Proverićemo da li deo odgovara Vašem automobilu i javiti Vam cenu i rok isporuke.
+    orderBody: 'Pošaljite upit: proverićemo po VIN-u koji deo odgovara i javiti vam cenu i rok isporuke.'
+    orderHeading: Nabavićemo ovaj deo
+    orderBodyClosed: Pošaljite VIN ili samo ostavite kontakt. Proverićemo da li deo odgovara vašem vozilu i javiti vam cenu i rok isporuke.
     fitsLabel: Odgovara za
     fitsMore: i još {count}
     oemLabel: Originalni broj
     askInMessenger: Ili nam pišite putem aplikacije za poruke
     offersHeading: Cena i dostupnost
     moreOffers: 'Još jedna ponuda: {offer}'
-    moreOffersCheaper: 'Ima i jeftinije: {offer}'
+    moreOffersCheaper: 'Dostupno jeftinije: {offer}'
     moreOffersSeveral:
       one: Još {count} ponuda, od {price}
       few: Još {count} ponude, od {price}
@@ -160,33 +160,33 @@ translations:
     buyAdding: Dodajemo…
     addedLabel: U korpi
     outOfStock: Nema na stanju
-    askSupplyCta: Proverite cenu i rok
+    askSupplyCta: Proverite cenu i rok isporuke
     orderViaManagerCta: Poručite preko saradnika
-    askedNotice: Dodali smo deo u upit. Proverićemo cenu i kada možete da ga preuzmete, pa ćemo vam se javiti.
-    stockLimitNotice: Trenutno nema više komada ovog dela, svi dostupni su već u korpi.
+    askedNotice: Dodali smo deo u upit. Proverićemo cenu i kada možete da ga preuzmete, pa ćemo vam javiti.
+    stockLimitNotice: Trenutno nema više komada ovog dela. Svi dostupni komadi su već u korpi.
     fromPrice: od {price}
     priceOnRequestTag: Cena na upit
-    addedNotice: Dodali smo deo u korpu. Cenu ćemo još jednom proveriti prilikom poručivanja.
+    addedNotice: Dodali smo deo u korpu. Cenu ćemo ponovo proveriti prilikom poručivanja.
     addedCta: Otvorite korpu
     inquiryNotice: Trenutno ne možemo da potvrdimo cenu i dostupnost, pa smo deo dodali u upit. Javićemo vam cenu.
     inquiryCta: Otvorite upit
     photoLabel: Fotografija {n} od {total}
     categoryIllustration: Ilustracija kategorije, nije fotografija ovog dela
     illustrationLabel: ilustracija
-    installHeading: Ugradnja kod nas
-    installBody: Ugradićemo ovaj deo u CarLabu u Beogradu. Ostavite kontakt i predložićemo vam termin koji vam odgovara.
+    installHeading: Ugradite kod nas
+    installBody: Ugradićemo ovaj deo u auto servisu CarLab u Beogradu. Ostavite kontakt i predložićemo vam termin koji vam odgovara.
     installCta: Zakažite ugradnju
     askAboutPart: Pitajte za ovaj deo
-    askAboutPartMessage: '{part}: da li odgovara mom automobilu?'
+    askAboutPartMessage: '{part}: da li odgovara mom vozilu?'
     askAboutPartVin: 'VIN: {vin}'
     askAboutPriceMessage: '{part}: koja je cena i rok isporuke?'
     askAboutReplacedPart: '{part} (zamena za {replaced})'
     crossReferencesHeading: Brojevi drugih proizvođača
-    worksHeading: Već smo pronalazili ovaj deo za naše klijente
+    worksHeading: Već smo pronalazili ovaj deo za naša vozila
     applicabilityHeading: Odgovarajuća vozila prema katalogu
-    supplierDataNote: Podaci iz kataloga. Pre poručivanja proverićemo po VIN-u da li deo odgovara.
-    requirementCarsLabel: 'Ispunjava propisane specifikacije za:'
-    kitCarsLabel: 'Deo je servisnog kompleta za:'
+    supplierDataNote: Podaci iz kataloga. Pre poručivanja proverićemo kompatibilnost po VIN-u.
+    requirementCarsLabel: 'Prema specifikacijama odgovara za:'
+    kitCarsLabel: 'U kompletu za servis za:'
   en:
     metaTitleSuffix: CarLab
     metaDescription: Brands, equivalents, prices and availability for this part in the CarLab catalogue. Collection from our workshop in Belgrade.

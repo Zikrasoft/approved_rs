@@ -234,14 +234,14 @@ vin-parts-inquiry:
 translations:
   sr:
     indexMetaTitle: 'Auto servis u Beogradu: popravke i održavanje | CarLab'
-    indexMetaDescription: Dijagnostika, servis i zamena ulja, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine, delovi po VIN-u. Šta obuhvataju radovi i koliko traju.
-    partsLink: Pronađite delove za ovu popravku
+    indexMetaDescription: Dijagnostika, mali servis, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine i delovi po VIN-u. Obim radova i trajanje.
+    partsLink: Pronađite auto delove za ove radove
     heroHeadingTemplate: '{name} u Beogradu'
     processHeading: Kako izgleda poseta servisu
-    ctaHeadingTemplate: '{name}: zakazaćemo termin koji Vam odgovara'
-    partsCtaHeadingTemplate: '{name}: javićemo Vam cenu i rok isporuke'
+    ctaHeadingTemplate: '{name}: zakažite termin koji Vam odgovara'
+    partsCtaHeadingTemplate: '{name}: saznajte cenu i rok'
     ctaBody: Opišite problem sa automobilom. Pozvaćemo Vas tokom radnog vremena i dogovoriti termin dolaska.
-    indexHeading: Sve što Vašem automobilu treba, u jednom servisu
+    indexHeading: Sve što je automobilu potrebno, u jednom servisu
     indexLead: Šta obuhvata svaka usluga i koliko traje. Cenu saopštavamo nakon pregleda, pre početka radova.
     specsPriceLabel: Cena
     specsDurationLabel: Trajanje
@@ -250,222 +250,222 @@ translations:
       name: Kompjuterska dijagnostika
       short: Otkrivamo šta se krije iza koda greške.
       metaTitle: Kompjuterska dijagnostika u Beogradu | CarLab
-      metaDescription: Dijagnostika motora, trapa i auto-elektrike u Beogradu. Očitavanje grešaka je besplatno, a uzrok Vam pokazujemo na samom automobilu.
-      heroTitle: Kod greške je simptom, a ne dijagnoza. Pronalazimo uzrok i pokazujemo Vam ga na automobilu.
-      heroLead: Dijagnostički uređaj pokazuje koji senzor prijavljuje grešku. Ali da li je problem u senzoru ili u onome što meri, to se utvrđuje proverom na automobilu.
+      metaDescription: Dijagnostika motora, trapa i elektrike u Beogradu. Besplatno očitavanje grešaka, a uzrok Vam pokazujemo direktno na automobilu.
+      heroTitle: Kod greške je simptom, a ne dijagnoza. Pronalazimo uzrok i pokazujemo ga na automobilu.
+      heroLead: Dijagnostički uređaj pokazuje koji senzor prijavljuje grešku. Da li je neispravan sam senzor ili ono što meri, utvrđuje se proverom na automobilu.
       priceFrom: besplatno očitavanje grešaka
       duration: od 40 minuta
       bodyHeading: Šta radimo tokom dijagnostike
       body: |
-        Prvo razgovaramo: kada je problem počeo, u kojim uslovima se javlja i šta je pre toga menjano. Već tada možemo da suzimo uzrok: lupanje samo na hladnom motoru i stalno lupanje upućuju na različite sklopove.
+        Prvo razgovaramo: kada je problem počeo, u kojim uslovima se javlja i šta je pre toga menjano. Neki uzroci se prepoznaju već tada: lupanje samo dok je motor hladan i stalno lupanje ukazuju na različite sklopove.
 
-        Zatim dijagnostičkim uređajem proveravamo sve upravljačke jedinice: često greška u ABS-u ili modulu komfora objašnjava problem koji vozač primećuje. Sledi provera na automobilu: dizalica, zazori, pregled pod opterećenjem, a po potrebi i merenje pritiska i provera osciloskopom.
+        Zatim dijagnostičkim uređajem proveravamo sve upravljačke jedinice: greška u ABS-u ili modulu komfora često objašnjava problem koji vozač primećuje. Sledi provera na automobilu: pregled na dizalici, provera zazora i ponašanja pod opterećenjem, a po potrebi merenje pritiska i provera osciloskopom.
 
-        Na kraju Vam pokazujemo uzrok na automobilu i objašnjavamo ga jednostavnim rečima. Ako je potrebna popravka, odmah pravimo predračun.
+        Na kraju pokazujemo uzrok na automobilu i objašnjavamo jednostavnim rečima. Ako je potrebna popravka, odmah pripremamo predračun.
 
-        Koliko košta: očitavanje grešaka je besplatno. Dijagnostiku naplaćujemo samo ako je potrebno rasklapanje sklopa ili ispitivanje na testnom stolu. Cenu saopštavamo pre početka radova, a ne na kraju.
-      includesHeading: Šta je uključeno
+        Koliko košta: očitavanje grešaka je besplatno. Dijagnostiku naplaćujemo samo kada je potrebno rasklapanje sklopa ili ispitivanje na stendu. Cenu saopštavamo pre početka radova, a ne na kraju.
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Razgovor o simptomima i istoriji održavanja
         - Očitavanje grešaka iz svih elektronskih upravljačkih jedinica
         - Pregled na dizalici, provera zazora i curenja
-        - Probna vožnja sa stručnim licem ako se problem javlja u vožnji
+        - Probna vožnja sa inženjerom ako se problem javlja u vožnji
         - Usmeno objašnjenje nalaza i pisani predračun za popravku
-      signsHeading: Kada je vreme da dođete
+      signsHeading: Kada je vreme da nas posetite
       signs:
-        - Svetli lampica motora ili druga lampica na instrument-tabli
+        - Svetli lampica motora ili druga lampica na instrument tabli
         - Automobil trza, motor radi neravnomerno ili teško pali
-        - Potrošnja je porasla bez očiglednog razloga
-        - Pojavio se nov zvuk i ne znate odakle dolazi
+        - Potrošnja je porasla bez jasnog razloga
+        - Pojavio se nov zvuk, a ne znate odakle dolazi
       honestHeading: Šta ne obećavamo
-      honest: Ne može se svaki kvar otkriti za četrdeset minuta. Povremeni problemi koji se javljaju jednom nedeljno nekad zahtevaju ponovni dolazak ili da automobil ostane kod nas jedan dan. To ćemo Vam odmah reći i nećemo redom menjati delove o Vašem trošku.
+      honest: Ne može se svaki kvar otkriti za četrdeset minuta. Povremeni problemi koji se javljaju jednom nedeljno ponekad zahtevaju ponovni dolazak ili da automobil ostane u servisu jedan dan. To ćemo Vam odmah reći i nećemo redom menjati delove o Vašem trošku.
     servicing:
-      cta: Zakažite servis
-      name: Redovno održavanje
+      cta: Zakažite redovan servis
+      name: Redovan servis
       short: Ulje, filteri, tečnosti i pregled prema servisnom planu za Vaš motor.
       metaTitle: Redovan servis i zamena ulja u Beogradu | CarLab
-      metaDescription: 'Održavanje automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost i antifriz. Prema planu proizvođača, uz upis u servisnu evidenciju.'
-      heroTitle: Najjeftinija popravka je ona koju izbegnete
-      heroLead: Svaki motor ima svoj servisni interval i propisanu specifikaciju ulja. Proveravamo uputstvo za Vaš automobil i radimo po njemu, a ne po univerzalnom pravilu „na deset hiljada“.
+      metaDescription: 'Održavanje automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost i antifriz. Prema planu proizvođača, uz evidenciju u servisnom kartonu.'
+      heroTitle: Najjeftinija popravka je ona koju ste izbegli
+      heroLead: Svaki motor ima svoj servisni interval i propisanu specifikaciju ulja. Proveravamo uputstvo za Vaš automobil i radimo prema njemu, a ne po univerzalnom pravilu „na deset hiljada“.
       priceFrom: od 90 €
       duration: 2–4 sata
       bodyHeading: Kako određujemo servisni interval za Vaš automobil
       body: |
-        Intervali zamene mogu se višestruko razlikovati od motora do motora, a beogradski uslovi vožnje (gužve, prašina i letnje temperature blizu četrdeset stepeni) gotovo uvek spadaju u otežane uslove eksploatacije, za koje važe kraći intervali. Na osnovu toga određujemo šta je Vašem automobilu zaista potrebno na trenutnoj kilometraži.
+        Intervali zamene mogu se višestruko razlikovati od motora do motora, a uslovi u Beogradu (gužve, prašina, letnje temperature blizu četrdeset stepeni) gotovo uvek spadaju u otežane uslove vožnje, za koje su propisani kraći intervali. Prema tome procenjujemo šta je Vašem automobilu zaista potrebno na trenutnoj kilometraži.
 
-        Usput proveravamo i ono čega se vozači obično sete prekasno: stanje zupčastog kaiša ili lanca, sadržaj vlage u kočionoj tečnosti, tačku mržnjenja antifriza i preostalu debljinu pločica i diskova u milimetrima.
-      includesHeading: Šta je uključeno
+        Usput proveravamo i ono čega se vozači često sete prekasno: stanje zupčastog kaiša ili lanca, sadržaj vlage u kočionoj tečnosti, tačku smrzavanja antifriza i debljinu pločica i diskova u milimetrima.
+      includesHeading: Šta je obuhvaćeno
       includes:
-        - Ulje i filter ulja prema specifikaciji proizvođača Vašeg vozila
+        - Ulje i filter ulja koji odgovaraju specifikacijama proizvođača
         - Filter vazduha, filter kabine i svećice prema servisnom planu
         - Provera sadržaja vlage u kočionoj tečnosti
-        - Provera antifriza i njegove tačke mržnjenja
+        - Provera antifriza i njegove tačke smrzavanja
         - Merenje preostale debljine pločica i diskova u milimetrima
-        - Upis svih radova i kilometraže u servisnu evidenciju
-      signsHeading: Kada je vreme da dođete
+        - Evidentiranje svih radova i kilometraže u servisnom kartonu
+      signsHeading: Kada je vreme da nas posetite
       signs:
         - Dostigli ste propisanu kilometražu ili je prošla godina od prethodnog servisa
-        - Upravo ste kupili automobil bez istorije održavanja
-        - Predstoji Vam duže putovanje
-        - Upalila se lampica za servisni interval
+        - Tek ste kupili automobil, a nemate istoriju održavanja
+        - Predstoji Vam duži put
+        - Upalila se lampica za servis
       honestHeading: Šta ne radimo
-      honest: Ne menjamo ono za šta još nije vreme. Ako je filter tek na polovini svog radnog veka, nećemo ga menjati, već ćemo Vam reći kada da dođete.
+      honest: Ne menjamo delove pre vremena. Ako je filter tek na polovini svog radnog veka, nećemo ga menjati, već ćemo Vam reći kada da dođete.
     brakes-suspension:
       cta: Zakažite popravku
       name: Kočnice i trap
-      short: Sve od čega zavisi da li će se automobil zaustaviti na vreme.
+      short: Sve od čega zavisi da li će se automobil zaustaviti.
       metaTitle: Popravka kočnica i trapa u Beogradu | CarLab
-      metaDescription: 'Kočnice i trap u Beogradu: pločice, diskovi, kočiona klešta, ramena i reglaža trapa. Merenje u milimetrima, predračun pre početka radova.'
+      metaDescription: 'Kočnice i trap u Beogradu: pločice, diskovi, kočiona klešta, ramena i reglaža trapa. Merenja u milimetrima, predračun pre početka radova.'
       heroTitle: Ovde se preostali vek meri u milimetrima
-      heroLead: 'Popravka motora ponekad može da sačeka dolazak u servis. Kočnice ne mogu. Zato kod trapa nema zaokruživanja ni odlaganja: kada je deo istrošen, to kažemo otvoreno.'
+      heroLead: 'Sa problemom na motoru ponekad možete stići do servisa. Sa neispravnim kočnicama ne smete rizikovati. Zato kod trapa ne zaokružujemo mere i ne odlažemo zamenu: ako je deo dotrajao, to kažemo otvoreno.'
       priceFrom: od 120 €
       duration: od 3 sata
       bodyHeading: Kako radimo
       body: |
-        Počinjemo merenjem: debljina diskova i pločica u milimetrima, bočno bacanje diskova, stanje creva i kočionih klešta. Na trapu proveravamo zazore na dizalici i vibracionom stolu, a zatim pregledamo manžetne i nosače.
+        Počinjemo merenjima: debljina diskova i pločica u milimetrima, bočno bacanje diskova, stanje kočionih creva i klešta. Na trapu proveravamo zazore na dizalici i vibracionom stendu, pregledamo zaštitne manžetne i nosače.
 
         Posle popravke trapa uvek radimo reglažu: čak i zamena jednog ramena menja geometriju, a loša geometrija može da potroši komplet guma za jednu sezonu.
-      includesHeading: Šta je uključeno
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Merenje diskova i pločica uz beleženje rezultata
-        - Zamena pločica, diskova i creva, remont ili zamena kočionih klešta
-        - Odzračivanje kočnica i zamena kočione tečnosti
-        - Amortizeri, opruge, ramena, silent blokovi, nosači i ležajevi
-        - Reglaža trapa posle svake intervencije na vešanju
+        - Zamena pločica, diskova i creva, popravka ili zamena kočionih klešta
+        - Odzračivanje kočionog sistema i zamena kočione tečnosti
+        - Amortizeri, opruge, ramena, silen blokovi, nosači i ležajevi
+        - Reglaža trapa posle svakog zahvata na vešanju
         - Kontrolna probna vožnja pre preuzimanja
-      signsHeading: Kada je vreme da dođete
+      signsHeading: Kada je vreme da nas posetite
       signs:
-        - Škripanje, pištanje ili struganje pri kočenju
-        - Pedala kočnice je postala meka ili propada
+        - Škripanje, cviljenje ili struganje pri kočenju
+        - Pedala kočnice je mekana ili propada
         - Automobil vuče u stranu pri kočenju
-        - Lupanje na neravninama, neprecizan volan i neravnomerno trošenje guma
-      honestHeading: Na šta ćemo Vam skrenuti pažnju
-      honest: Pločice i diskovi su potrošni delovi koji rade zajedno. Nove pločice mogu da se ugrade na istrošene diskove ako su diskovi još u dozvoljenim granicama, ali će pločice trajati kraće i možda ćete ponovo doći već za pola godine. Izračunaćemo cenu obe varijante, a izbor prepustiti Vama.
+        - Lupanje na neravninama, neprecizan volan, neravnomerno trošenje guma
+      honestHeading: Na šta ćemo Vas upozoriti
+      honest: Pločice i diskovi su potrošni delovi koji rade zajedno. Mogu se staviti nove pločice na istrošene diskove, ali će se tada brže potrošiti i za pola godine ćete ponovo doći. Izračunaćemo cenu obe varijante, a izbor prepustiti Vama.
     engine-gearbox:
       cta: Zakažite dijagnostiku
       name: Motor i menjač
-      short: Od zamene zaptivke do popravke uz rasklapanje, uz jasan predračun.
+      short: Od zamene dihtunga do popravke uz rastavljanje, uz jasan predračun.
       metaTitle: Popravka motora i menjača u Beogradu | CarLab
-      metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti kaiš i lanac, zaptivke, kvačilo, ulje u automatskom menjaču. Dijagnostika pre rasklapanja, predračun pre radova.'
-      heroTitle: Generalna popravka nije potrebna toliko često koliko se predlaže
-      heroLead: 'Pre nego što bilo šta rastavimo, proveravamo sve što možemo bez rastavljanja: kompresiju, pritisak ulja, greške i curenja.'
+      metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti kaiš, dihtunzi, kvačilo, zamena ulja u automatskom menjaču. Dijagnostika pre rastavljanja, predračun pre radova.'
+      heroTitle: Generalna popravka je potrebna ređe nego što se priča
+      heroLead: 'Pre nego što bilo šta rastavimo, proveravamo sve što se može proveriti spolja: kompresiju, pritisak ulja, greške i curenja.'
       priceFrom: prema rezultatima dijagnostike
       duration: od 1 dana
       bodyHeading: Kako radimo
       body: |
-        Prvo proveravamo kompresiju po cilindrima, pritisak ulja, stanje svećica, greške u upravljačkim jedinicama i curenja pod pritiskom. Tek zatim odlučujemo da li motor treba otvarati.
+        Prvo merimo kompresiju po cilindrima i pritisak ulja, proveravamo stanje svećica, očitavamo greške iz upravljačkih jedinica i ispitujemo curenja pod pritiskom. Tek onda odlučujemo da li motor treba otvarati.
 
-        Kod menjača proveravamo stanje ulja i način menjanja brzina: kod automatskih menjača veliki deo „kvarova” rešava se pravilnim servisiranjem, a ne zamenom celog menjača. Ako je popravka ipak potrebna, dobijate predračun sa odvojeno iskazanim radom i delovima pre nego što bilo šta demontiramo.
-      includesHeading: Šta je uključeno
+        Kod menjača proveravamo stanje ulja i način menjanja brzina: kod automatskih menjača veliki deo „kvarova” rešava se pravilnim održavanjem, a ne zamenom celog sklopa. Ako je popravka ipak potrebna, dobijate predračun sa odvojeno prikazanim radom i delovima pre nego što bilo šta demontiramo.
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Merenje kompresije i pritiska ulja
-        - Provera curenja pod pritiskom i uvlačenja falš vazduha
+        - Provera curenja pod pritiskom i traženje mesta uvlačenja falš vazduha
         - Zamena zupčastog kaiša ili lanca, rolera i vodene pumpe
         - Dihtunzi, semerinzi i gumice ventila
-        - Kvačilo, zamajac, zamena ulja u manuelnim i automatskim menjačima
+        - Kvačilo, zamajac i zamena ulja u manuelnom i automatskom menjaču
         - Detaljan predračun pre početka rastavljanja
-      signsHeading: Kada je vreme da dođete
+      signsHeading: Kada je vreme da nas posetite
       signs:
         - Motor troši ulje između zamena
         - Lupanje, vibracije ili gubitak snage
-        - Trzanje i kašnjenje pri promeni brzina
+        - Trzaji i kašnjenje pri promeni brzina
         - Dim iz auspuha koji se ranije nije pojavljivao
-      honestHeading: Kada savetujemo da odustanete od popravke
-      honest: Ako se cena popravke približava vrednosti automobila, to ćemo Vam reći. Ponekad je bolji savet da automobil prodate u postojećem stanju ili potražite polovan motor ili menjač, umesto da uložite novac koji pri prodaji nikada nećete povratiti.
+      honestHeading: Kada savetujemo da odustanete
+      honest: Ako se cena popravke približi vrednosti automobila, reći ćemo Vam to. Ponekad je bolje prodati automobil u zatečenom stanju ili potražiti polovan motor ili menjač iz uvoza nego uložiti u popravku novac koji nikada nećete povratiti.
     bodywork-painting:
       cta: Pošaljite fotografije oštećenja
       name: Limarija i farbanje
-      short: Popravka posle udesa, ispravljanje geometrije karoserije i farbanje uz uklapanje nijanse.
+      short: Popravka posle udesa, ispravljanje geometrije karoserije i farbanje uz uklapanje boje.
       metaTitle: Limarija i farbanje posle udesa u Beogradu | CarLab
-      metaDescription: 'Limarija u Beogradu: ravnanje na stolu, merenje geometrije, farbanje uz kompjutersko mešanje boje. Sarađujemo sa osiguranjima i pomažemo oko dokumentacije.'
-      heroTitle: Da automobil ne izgleda kao da je bio udaren
-      heroLead: Dobra limarsko-farbarska popravka ne primećuje se ni golim okom ni meračem debljine laka pri pregledu pre prodaje.
+      metaDescription: 'Limarija u Beogradu: izvlačenje na stolu, merenje geometrije, ispravljanje i farbanje uz računarsko uklapanje boje. Saradnja sa osiguranjem i pomoć oko dokumentacije.'
+      heroTitle: Da se na automobilu ne vide tragovi udesa
+      heroLead: Kvalitetna limarska popravka ne primećuje se ni golim okom ni meračem debljine laka pri pregledu pre prodaje.
       priceFrom: nakon pregleda
       duration: od 3 dana
       bodyHeading: Šta obuhvata popravka
       body: |
-        Prvo merimo geometriju karoserije: posle udara može doći do pomeranja i tamo gde sve izgleda neoštećeno. Upravo ta pomeranja kasnije izazivaju neravnomerno trošenje guma i zanošenje automobila u stranu. Po potrebi vozilo postavljamo na sto za ravnanje i izvlačimo karoseriju prema kontrolnim tačkama.
+        Prvo merimo geometriju karoserije: posle udarca pomeranja mogu postojati i tamo gde sve deluje neoštećeno, a upravo ona kasnije izazivaju neravnomerno trošenje guma i zanošenje automobila. Po potrebi postavljamo vozilo na sto za izvlačenje i vraćamo karoseriju u mere prema kontrolnim tačkama.
 
-        Nijansu određujemo na dva načina: prema šifri boje iz dokumentacije i spektrofotometrom prema stvarnoj boji vozila, jer posle pet godina na suncu fabrička boja više nije ista kao prvog dana. Prelaz poliramo tako da se granica ne vidi ni na suncu ni pod lampom.
-      includesHeading: Šta je uključeno
+        Boju proveravamo na dva načina: prema šifri iz dokumentacije i spektrofotometrom na samom vozilu, jer posle pet godina na suncu fabrička boja više ne odgovara potpuno originalnoj nijansi. Prelaz poliramo tako da se granica ne vidi ni na suncu ni pod lampom.
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Merenje geometrije karoserije prema kontrolnim tačkama
-        - Ravnanje i izvlačenje karoserije na stolu
+        - Izvlačenje na stolu kod pomerene geometrije
         - Ispravljanje limarije i zamena oštećenih delova
-        - Određivanje nijanse prema šifri boje i spektrofotometrom
+        - Uklapanje boje prema šifri i spektrofotometrom
         - Farbanje u komori uz kontrolu temperature
-        - Poliranje prelaza i montaža uz proveru zazora
-      signsHeading: Kada je vreme da dođete
+        - Poliranje prelaza i sklapanje uz proveru zazora
+      signsHeading: Kada je vreme da nas posetite
       signs:
         - Automobil je učestvovao u udesu, čak i ako oštećenja deluju mala
         - Neujednačeni zazori između delova karoserije
         - Automobil vuče u stranu, gume se troše po jednoj ivici
-        - Želite da sredite karoseriju pre prodaje
+        - Potrebno je srediti karoseriju pre prodaje
       honestHeading: O osiguranju
-      honest: Sarađujemo sa osiguravajućim kućama i pomažemo oko dokumentacije, ali ne obećavamo da će osiguranje pokriti sve. Odmah nakon pregleda objašnjavamo koja oštećenja pokriva osiguranje, a koja ne, da to ne biste saznali tek na kraju.
+      honest: Sarađujemo sa osiguravajućim kućama i pomažemo oko dokumentacije, ali ne obećavamo da će osiguranje pokriti sve. Posle pregleda odmah pokazujemo šta je obuhvaćeno osiguranjem, a šta nije, da to ne biste saznali tek na kraju.
     pre-purchase-inspection:
       cta: Zakažite pregled
       name: Pregled pre kupovine
-      short: Merač debljine laka, dizalica i dijagnostika pre nego što platite automobil.
+      short: Merač debljine laka, dizalica i dijagnostika pre nego što date novac.
       metaTitle: Pregled automobila pre kupovine u Beogradu | CarLab
-      metaDescription: 'Pregled pre kupovine u Beogradu: merenje debljine laka, dizalica, dijagnostika, kompresija. Pisani izveštaj kao osnov za pregovore o ceni.'
-      heroTitle: Ono što pokaže merač laka, prodavac Vam neće reći
-      heroLead: Prefarbani delovi, tragovi varenja, vraćena kilometraža, curenja ispod vozila. Za sat vremena na dizalici to se vidi, iako u oglasu ništa od toga ne piše.
+      metaDescription: 'Pregled pre kupovine u Beogradu: merač debljine laka, dizalica, dijagnostika grešaka i kompresija. Pisani izveštaj kao osnov za pregovore o ceni.'
+      heroTitle: Što merač debljine laka pokaže, prodavac neće reći
+      heroLead: Prefarbani delovi, tragovi varenja, vraćena kilometraža, curenja ispod vozila. Za sat vremena na dizalici to se vidi, iako u oglasu ne piše.
       priceFrom: od 60 €
       duration: oko 1 sat
       bodyHeading: Šta proveravamo
       body: |
-        Meračem debljine laka proveravamo sve panele karoserije: prefarbane delove, git, tragove varenja i ujednačenost zazora. Zatim sledi pregled na dizalici: trap, curenja, stanje izduvnog sistema i zaštite podvozja, tragovi udaraca odozdo.
+        Meračem debljine laka proveravamo sve panele karoserije: tražimo prefarbane delove, git, tragove varenja i proveravamo zazore. Zatim automobil ide na dizalicu: pregledamo trap, curenja, stanje izduvnog sistema i zaštite podvozja, kao i tragove udaraca odozdo.
 
-        Elektronika: očitavanje grešaka iz svih upravljačkih jedinica, uz proveru tragova vraćanja kilometraže i brisanja grešaka. Na motoru proveravamo kompresiju i curenja. Na kraju dobijate pisani izveštaj sa spiskom uočenih nedostataka i procenom troškova popravke, koji Vam može poslužiti za pregovore o ceni.
-      includesHeading: Šta je uključeno
+        Elektronika: očitavamo greške iz svih upravljačkih jedinica i tražimo tragove vraćanja kilometraže i brisanja grešaka. Na motoru proveravamo kompresiju i curenja. Na kraju dobijate pisani izveštaj sa spiskom uočenih nedostataka i procenom troškova popravke, koji Vam može poslužiti za pregovore o ceni.
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Merenje debljine laka na svim panelima karoserije
         - Pregled na dizalici, provera curenja i tragova udaraca
         - Očitavanje grešaka iz svih elektronskih upravljačkih jedinica
         - Merenje kompresije po cilindrima
-        - Provera znakova vraćanja kilometraže
+        - Provera tragova vraćanja kilometraže
         - Pisani izveštaj sa procenom troškova otklanjanja nedostataka
       signsHeading: Kada je pregled potreban
       signs:
-        - Kupujete polovan automobil od privatnog prodavca
-        - Prodavac Vas požuruje da donesete odluku
+        - Kupujete automobil od privatnog prodavca
+        - Prodavac Vas požuruje da odlučite
         - Automobil je iz uvoza, a istorija nije poznata
         - Cena je sumnjivo niža od tržišne
       honestHeading: Šta pregled ne može da garantuje
-      honest: Iskreno ćemo Vam reći šta smo uočili, ali nijedan pregled ne otkriva sve. Skriveni kvar koji se ne pokazuje ni na dizalici ni na dijagnostici može se pojaviti kasnije. To je ograničenje samog pregleda, a ne ograda napisana sitnim slovima.
+      honest: Iskreno ćemo Vam reći šta vidimo, ali nijedan pregled ne otkriva sve. Skriveni kvar koji se ne pokazuje ni na dizalici ni na dijagnostici može se pojaviti kasnije. To je ograničenje samog pregleda, a ne ograda napisana sitnim slovima.
     vin-parts-inquiry:
       cta: Pošaljite upit
-      name: Pronalaženje rezervnih delova
-      short: Pronalazimo delove koji odgovaraju Vašem automobilu i dajemo cenu pre kupovine.
+      name: Izbor auto delova
+      short: Pronalazimo delove koji odgovaraju Vašem automobilu i saopštavamo cenu pre kupovine.
       metaTitle: Auto delovi po VIN broju u Beogradu | CarLab
-      metaDescription: 'Delovi po VIN broju ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti i cena unapred. Preuzimanje u CarLabu.'
-      heroTitle: Pronaći ćemo delove koji sigurno odgovaraju Vašem automobilu
-      heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo koji delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
-      priceFrom: cenu dajemo nakon pronalaska dela
-      duration: saopštićemo Vam uz cenu
-      bodyHeading: Kako pronalazimo odgovarajuće delove
+      metaDescription: 'Izbor delova po VIN broju ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti, cena pre kupovine. Preuzimanje u CarLabu.'
+      heroTitle: Pronaći ćemo delove koji tačno odgovaraju Vašem automobilu
+      heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo da li delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
+      priceFrom: cenu saopštavamo nakon izbora delova
+      duration: rok saopštavamo zajedno sa cenom
+      bodyHeading: Kako biramo delove
       body: |
         Na osnovu VIN broja utvrđujemo tačnu specifikaciju vozila: motor, menjač, godište i tržište za koje je proizvedeno. Od toga zavisi koji deo odgovara, čak i kada je model isti.
 
-        Zatim tražimo kataloški broj proizvođača i proverene zamenske delove, upoređujemo cene i rokove isporuke kod dobavljača i nudimo Vam nekoliko opcija. Vi birate, mi poručujemo, a delove možete preuzeti u našem servisu u Beogradu.
+        Zatim pronalazimo originalni kataloški broj dela i proverene zamenske delove, upoređujemo cene i rokove isporuke kod dobavljača i nudimo vam nekoliko opcija. Vi birate, mi naručujemo, a delove možete preuzeti u našem auto servisu u Beogradu.
 
-        Ako je potrebna i ugradnja, i to možete obaviti kod nas: provereno je da deo odgovara Vašem vozilu, a majstor zna šta ugrađuje.
-      includesHeading: Šta je uključeno
+        Ako vam je potrebna i ugradnja, i to možete obaviti kod nas: već smo proverili da deo odgovara vašem vozilu, a majstor zna šta ugrađuje.
+      includesHeading: Šta je obuhvaćeno
       includes:
         - Provera kompatibilnosti prema VIN broju ili broju šasije
-        - Pronalaženje originalnog broja dela
+        - Pronalaženje originalnog kataloškog broja dela
         - Izbor proverenih zamenskih delova u različitim cenovnim rangovima
-        - Cena i rok nabavke pre bilo kakvog plaćanja
-        - Lično preuzimanje u servisu u Beogradu
+        - Cena i rok isporuke pre bilo kakvog plaćanja
+        - Lično preuzimanje u auto servisu u Beogradu
       signsHeading: Kada je pregled potreban
       signs:
-        - Ne znate tačan naziv ili broj dela
-        - Brinete da ćete kupiti deo koji ne odgovara Vašem vozilu
-        - Potreban Vam je redak deo ili deo koji se više ne proizvodi
+        - Ne znate tačan naziv ili kataloški broj dela
+        - Brinete da ćete kupiti deo koji ne odgovara
+        - Potreban vam je redak deo ili deo koji se više ne proizvodi
         - Želite da uporedite cene originalnih i zamenskih delova
-      honestHeading: Kako dajemo ponudu
-      honest: Cenu i rok isporuke saopštavamo pre plaćanja. Ako je deo redak i nabavlja se po porudžbini, odmah ćemo Vam reći koliko se čeka i ponuditi proverenu zamenu, ako postoji.
+      honestHeading: Kako vas obaveštavamo o ceni
+      honest: Cenu i rok isporuke saopštavamo pre plaćanja. Ako je deo redak i nabavlja se po porudžbini, odmah ćemo vam reći koliko se čeka i ponuditi provereni zamenski deo, ako postoji.
   en:
     indexMetaTitle: Car servicing and repairs in Belgrade | CarLab
     indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine, gearbox, accident repairs, pre-purchase checks and VIN parts matching. Scope and times.
