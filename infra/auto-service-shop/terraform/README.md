@@ -42,7 +42,7 @@ it means Terraform no longer knows what it created. Back it up somewhere private
    aws sts get-caller-identity --profile carlab
    ```
 
-4. An ssh key on this Mac. The default is `~/.ssh/id_ed25519.pub`; another one is
+4. An ssh key on this Mac. The default is `~/.ssh/id_rsa.pub`; another one is
    `-var public_key_path=...`.
 
 ## Create it
