@@ -1430,6 +1430,24 @@ describe('catalogueFromEnv', () => {
     ).not.toBeNull();
   });
 
+  it.each([
+    ['without a backend', {}],
+    [
+      'with a backend',
+      {
+        MEDUSA_BACKEND_URL: 'http://shop.test',
+        MEDUSA_PUBLISHABLE_KEY: 'pk_test',
+      },
+    ],
+  ])(
+    'leaves out a preview token it cannot read %s instead of failing the build',
+    (_, shop) => {
+      expect(() =>
+        catalogueFromEnv({ ...shop, SHOP_PREVIEW_TOKEN: 'not a token' }),
+      ).not.toThrow();
+    },
+  );
+
   it('reads an empty backend URL as no backend', () => {
     expect(
       catalogueFromEnv({ MEDUSA_BACKEND_URL: '', MEDUSA_PUBLISHABLE_KEY: '' }),
