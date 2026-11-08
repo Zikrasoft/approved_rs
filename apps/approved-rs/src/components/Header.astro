@@ -15,15 +15,20 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 import LanguageSuggestion from './LanguageSuggestion.astro';
 import HeaderDesktopNav from './HeaderDesktopNav.astro';
 import HeaderMobileMenu from './HeaderMobileMenu.astro';
+import ContactControl from './ContactControl.astro';
+import ContactIcon from './ContactIcon.astro';
 import { getNavItems, type ServiceSlug } from '@/utils/labels';
 import { navCurrent } from '@podbor/site-kit';
 import { getI18n } from '@/i18n/getI18n';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { leadModalTrigger } from '@/utils/contactChannel';
+import { servicesView } from '@/i18n/content/services';
+import { contactRegion } from '@podbor/site-kit/contact-control';
 
 const locale = localeFrom(Astro.url.pathname);
 const t = getI18n(locale);
+const callLabel = servicesView(locale).caseChrome.callButtonLabel;
 const casesHref = PathBuilder.casesVehicleSourcing(locale);
 const casesCurrent = navCurrent(
   Astro.url.pathname,
@@ -56,7 +61,7 @@ const navItems = getNavItems(locale).map((item) => ({
     class="sticky top-0 z-50 border-b bg-header-glass border-default backdrop-blur-[16px]"
   >
     <div
-      class="relative max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
+      class="relative max-w-6xl xl:max-w-[90rem] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 xl:gap-4"
     >
       <SiteLogo />
 
@@ -77,6 +82,18 @@ const navItems = getNavItems(locale).map((item) => ({
           <LanguageSuggestion />
         </div>
 
+        <div class="contents" {...contactRegion('header')}>
+          <ContactControl
+            channel="phone"
+            showNumber
+            aria-label={callLabel}
+            class="flex items-center justify-center size-9 pointer-coarse:min-h-11 rounded-sm border border-border-strong text-secondary no-underline"
+            plainClass="flex items-center px-1.5 text-sm font-medium text-secondary"
+          >
+            <ContactIcon channel="phone" size={16} />
+          </ContactControl>
+        </div>
+
         <Button
           href={PathBuilder.contacts(locale)}
           {...leadModalTrigger()}
@@ -84,10 +101,10 @@ const navItems = getNavItems(locale).map((item) => ({
           class="h-9 px-3 xl:px-4 py-2"
         >
           <Send size={13} />
-          <span class="hidden min-[360px]:inline xl:hidden">
+          <span class="hidden min-[360px]:inline min-[1440px]:hidden">
             {t.header.ctaShort}
           </span>
-          <span class="hidden xl:inline">{t.header.ctaLong}</span>
+          <span class="hidden min-[1440px]:inline">{t.header.ctaLong}</span>
         </Button>
 
         <button

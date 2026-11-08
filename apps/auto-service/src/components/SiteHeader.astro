@@ -12,6 +12,7 @@ import { navCurrent, LOCALE_CHOICE_ATTRIBUTE } from '@podbor/site-kit';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 import GarageAddress from './GarageAddress.astro';
 import ContactChannels from './ContactChannels.astro';
+import ContactControl from './ContactControl.astro';
 import SheetClose from './SheetClose.astro';
 import CatalogueSearch from './CatalogueSearch.astro';
 import SocialLinks from './SocialLinks.astro';
@@ -132,6 +133,16 @@ const links = [
           </carlab-lang>
           <LanguageSuggestion />
         </div>
+
+        <ContactControl
+          channel="phone"
+          showNumber
+          aria-label={site.channels.call}
+          class="flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2"
+          plainClass="flex items-center px-2 text-panel-fg"
+        >
+          <Icon name="phone" size={20} />
+        </ContactControl>
 
         <a
           href={PathBuilder.parts(locale)}

@@ -1,6 +1,7 @@
 import { DEVELOPER } from '@podbor/brands';
 import { llmsLanguageLinks, llmsLink, renderLlmsTxt } from '@podbor/i18n';
-import { SITE_URL, SITE_NAME } from '@/utils/constants';
+import { SITE_URL, SITE_NAME, PHONE_NUMBER } from '@/utils/constants';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { SERVICES } from '@/utils/labels';
 import { getI18n } from '@/i18n/getI18n';
 import { getActiveCountries, getCitiesForCountry } from '@/utils/geo';
@@ -62,6 +63,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           `- ${h.statClients.value} ${h.statClients.label}, ${countries.length} ${h.statCountries.label}, ${h.statYears.value} ${h.statYears.label}.`,
           ...(paymentFaq ? [`- ${paymentFaq.a}`] : []),
           `- ${h.ctaSubtext}`,
+          `- ${sc.caseChrome.callButtonLabel}: ${formatPhone(PHONE_NUMBER)}`,
         ],
       },
       {

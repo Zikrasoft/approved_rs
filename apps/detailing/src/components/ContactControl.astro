@@ -11,15 +11,26 @@ import type { ServiceSlug } from '@/utils/services';
 interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
   channel: TrackedContactChannel;
   region?: 'contacts';
+  showNumber?: boolean;
+  plainClass?: string;
   service?: ServiceSlug;
 }
 
-const { channel, region, service, class: className, ...rest } = Astro.props;
+const {
+  channel,
+  region,
+  showNumber,
+  plainClass,
+  service,
+  class: className,
+  ...rest
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const control = contactControl({
   channel,
   onThanks:
     navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  showNumber,
   region,
   locale,
   service,
@@ -37,7 +48,7 @@ const coarseOnly = control.pointer === 'coarse-only';
 </a>
 {
   control.plainNumber && (
-    <span class:list={[className, 'pointer-coarse:hidden!']}>
+    <span class:list={[plainClass ?? className, 'pointer-coarse:hidden!']}>
       <slot name="plain" />
       <span class="whitespace-nowrap">{formatPhone(control.plainNumber)}</span>
     </span>

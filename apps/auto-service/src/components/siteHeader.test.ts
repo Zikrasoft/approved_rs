@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { content } from '@/i18n/content';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { PHONE_NUMBER } from '@/utils/constants';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { CART_STORAGE_KEY, PARTS_LIST_STORAGE_KEY } from '@/scripts/cartBadge';
 import SiteHeader from './SiteHeader.astro';
@@ -106,17 +108,29 @@ describe('SiteHeader', () => {
   });
 
   it.each(['/ru/', '/ru/services/', '/ru/parts/'])(
-    'leaves booking, callback and call buttons out of the header bar on %s',
+    'leaves booking and callback buttons out of the header bar on %s',
     async (path) => {
       setShop(false);
       const bar = (await header(path)).querySelector('header')!;
 
       expect(bar.querySelector('cta-reveal')).toBeNull();
       expect(bar.querySelector('[data-open-lead-modal]')).toBeNull();
-      expect(bar.querySelector('a[href^="tel:"]')).toBeNull();
       expect(bar.textContent).not.toContain(site.header.cta);
     },
   );
+
+  it('offers a touchscreen the call icon and a mouse the digits, under the header placement', async () => {
+    setShop(false);
+    const root = await header('/ru/services/');
+    const call = root.querySelector('header a[href^="tel:"]')!;
+    const digits = call.nextElementSibling!;
+
+    expect(call.getAttribute('aria-label')).toBe(site.channels.call);
+    expect(call.classList.contains('pointer-fine:hidden!')).toBe(true);
+    expect(digits.textContent).toContain(formatPhone(PHONE_NUMBER));
+    expect(digits.classList.contains('pointer-coarse:hidden!')).toBe(true);
+    expect(call.closest('[data-contact-placement="header"]')).not.toBeNull();
+  });
 
   it('puts the address and hours in the mobile menu before the channels', async () => {
     setShop(false);

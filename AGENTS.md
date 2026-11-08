@@ -304,9 +304,12 @@ Both new apps follow the same shape, and a third should too:
   options still open Telegram.
 - **A `tel:` control only exists where a dialer does**, on all three sites.
   `createContactControls` in `@podbor/site-kit/contact-control` encodes the
-  contract — the phone is `coarse-only`, the plain-number twin exists only on
+  contract — the phone is `coarse-only`, the plain-number twin exists on
   `/thanks/` in the contacts block (`region: 'contacts'`, which the floating
-  widget never passes), the human Telegram only on `/thanks/` — and the
+  widget never passes) and wherever the call site passes `showNumber`, which
+  names the control rather than the page: the header and the footer of all three
+  sites, so a mouse can always read the number, the human Telegram only on
+  `/thanks/` — and the
   placement says only where a click is recorded. Each app's
   `src/components/ContactControl.astro` is the only place that turns it into
   `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for

@@ -3,19 +3,28 @@ import ContactControl from './ContactControl.astro';
 import Icon from './Icon.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { PHONE_NUMBER } from '@/utils/constants';
 
 interface Props {
   class: string;
   callbackClass?: string;
+  showNumber?: boolean;
 }
 
-const { class: className, callbackClass = className } = Astro.props;
+const { class: className, callbackClass = className, showNumber } = Astro.props;
 const site = content(localeFrom(Astro.url.pathname)).site;
 ---
 
-<ContactControl channel="phone" class={className}>
+<ContactControl
+  channel="phone"
+  class={className}
+  {showNumber}
+  plainClass="flex min-h-11 items-center gap-2 text-ink"
+>
   <Icon name="phone" size={16} class="shrink-0" />
-  {site.channels.call}
+  {showNumber ? formatPhone(PHONE_NUMBER) : site.channels.call}
+  {showNumber && <Icon slot="plain" name="phone" size={16} class="shrink-0" />}
 </ContactControl>
 <slot />
 <a

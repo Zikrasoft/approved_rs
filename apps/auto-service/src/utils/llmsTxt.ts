@@ -2,7 +2,13 @@ import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl, mapRouteUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
-import { SITE_URL, SITE_NAME, GARAGE_ADDRESS } from '@/utils/constants';
+import {
+  SITE_URL,
+  SITE_NAME,
+  GARAGE_ADDRESS,
+  PHONE_NUMBER,
+} from '@/utils/constants';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
 import {
@@ -39,6 +45,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       `- ${pages.contact.mapHeading}: ${mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid)}`,
       `- ${googleRatingLabel(locale)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
+      `- ${site.channels.call}: ${formatPhone(PHONE_NUMBER)}`,
       `- ${site.visit.route}: ${mapRouteUrl(GARAGE_ADDRESS.lat, GARAGE_ADDRESS.lon)}`,
       ...site.visit.facts.map((fact) => `- ${fact}`),
     ],

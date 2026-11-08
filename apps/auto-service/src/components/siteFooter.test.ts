@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import { content } from '@/i18n/content';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import { PHONE_NUMBER } from '@/utils/constants';
 import SiteFooter from './SiteFooter.astro';
 import { orangeIn, render } from './renderAstro';
 
@@ -23,11 +25,17 @@ describe('SiteFooter', async () => {
     expect(before(address, firstNav)).toBe(true);
   });
 
-  it('labels the touch call «Позвонить» and gives a mouse the callback', () => {
+  it('shows the digits on a tappable call, as text to a mouse, and keeps the callback', () => {
+    const number = formatPhone(PHONE_NUMBER);
     const call = contacts.querySelector('a[href^="tel:"]')!;
+    const plain = call.nextElementSibling!;
     const callback = contacts.querySelector('[data-open-lead-modal="phone"]')!;
 
-    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe('Позвонить');
+    expect(call.textContent?.replace(/\s+/g, ' ').trim()).toBe(number);
+    expect(call.classList.contains('pointer-fine:hidden!')).toBe(true);
+    expect(plain.tagName).toBe('SPAN');
+    expect(plain.textContent).toContain(number);
+    expect(plain.classList.contains('pointer-coarse:hidden!')).toBe(true);
     expect(call.classList.contains('btn-secondary')).toBe(true);
     expect(callback.classList.contains('btn-secondary')).toBe(true);
   });

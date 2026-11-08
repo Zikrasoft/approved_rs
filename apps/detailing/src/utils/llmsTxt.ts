@@ -2,7 +2,13 @@ import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl } from '@podbor/site-kit';
 import { renderBrandLlmsTxt } from '@podbor/i18n';
-import { SITE_URL, SITE_NAME, STUDIO_ADDRESS } from '@/utils/constants';
+import {
+  SITE_URL,
+  SITE_NAME,
+  STUDIO_ADDRESS,
+  PHONE_NUMBER,
+} from '@/utils/constants';
+import { formatPhone } from '@podbor/site-kit/format-phone';
 import { SERVICE_SLUGS } from '@/utils/services';
 import { localizedWork, publishedWorks } from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
@@ -26,6 +32,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
       `- ${pages.contact.addressLabel}: ${STUDIO_ADDRESS.street}, ${STUDIO_ADDRESS.district}, ${STUDIO_ADDRESS.city}`,
       `- ${pages.contact.mapHeading}: ${mapPlaceUrl(STUDIO_ADDRESS.googleMapsCid)}`,
       `- ${pages.contact.hoursLabel}: ${site.footer.hours}`,
+      `- ${site.channels.call}: ${formatPhone(PHONE_NUMBER)}`,
     ],
     lists: [
       {

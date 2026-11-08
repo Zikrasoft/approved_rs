@@ -21,6 +21,7 @@ export type ContactControlRequest = {
   channel: TrackedContactChannel;
   onThanks: boolean;
   manager?: boolean;
+  showNumber?: boolean;
   region?: 'contacts';
   locale: string;
   service?: string;
@@ -46,6 +47,7 @@ export const createContactControls =
     channel,
     onThanks,
     manager,
+    showNumber,
     region,
     locale,
     service,
@@ -57,7 +59,9 @@ export const createContactControls =
         href: phoneLink(brand.phone),
         attrs: channelAttr,
         pointer: 'coarse-only',
-        ...(onThanks && region === 'contacts' && { plainNumber: brand.phone }),
+        ...((showNumber || (onThanks && region === 'contacts')) && {
+          plainNumber: brand.phone,
+        }),
       };
 
     const attrs = { ...channelAttr, ...MESSENGER_ATTRS };
