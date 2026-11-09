@@ -674,7 +674,8 @@ sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) load
 its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
 stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
 failed with its reason in the admin; five such pages in a row pause the crawl, as do
-an unreachable robots.txt or sitemap and five server errors in a row. Pressing the
+an unreachable robots.txt or sitemap, five server errors in a row and five
+crashes of the worker in a row. Pressing the
 button again resumes. It crawls one site at a time: a crawl started while another
 runs waits as queued, and starts once the running one is done or paused; staff
 can pause the running one on its Pause button to let a queued one go first.

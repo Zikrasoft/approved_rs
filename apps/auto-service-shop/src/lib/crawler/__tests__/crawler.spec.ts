@@ -8,11 +8,12 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../integration-tests/adminAuth';
 import { memoryBucket } from '../../../../integration-tests/fakeStorage';
 import { crawledSupplierAdapter } from '../adapter';
-import { crawlSite } from '../crawl';
+import { crawlOrPause, crawlSite } from '../crawl';
 import type { Fetched, Fetcher, FetchMode } from '../fetcher';
 import type { CrawledSite } from '../site';
 import { mannFilter } from '../sites/mann-filter';
 import { crawlStore, type CrawlStore } from '../store';
+import type { Bucket } from '../../storage';
 
 type Responder = () => Fetched;
 
@@ -142,6 +143,85 @@ medusaIntegrationTestRunner({
       const [progress] = await store.progress([site.name]);
       return progress;
     };
+
+    describe('crawlOrPause', () => {
+      const failingBucket: Bucket = {
+        put: async () => {
+          throw new Error('S3 is down');
+        },
+        get: async () => null,
+        has: async () => false,
+      };
+
+      it('pauses the crawl once the worker has crashed five times in a row', async () => {
+        const site = testSite('crashing');
+        const web = fakeWeb({
+          'https://crashing.test/robots.txt': ok(''),
+          'https://crashing.test/sitemap.xml': ok(
+            urlset('https://crashing.test/p/1'),
+          ),
+          'https://crashing.test/p/1': ok('one'),
+        });
+        const broken = crawlStore(
+          getContainer().resolve(ContainerRegistrationKeys.PG_CONNECTION),
+          failingBucket,
+        );
+        const crashes = new Map<string, number>();
+        const attempt = () =>
+          crawlOrPause(
+            site,
+            {
+              store: broken,
+              openFetcher: web.openFetcher,
+              clock: web.clock,
+              random: () => 0,
+            },
+            crashes,
+          );
+        await broken.start(site.name, new Date(web.clock.now()));
+        await broken.next([site.name], new Date(web.clock.now()));
+
+        for (let crash = 1; crash < 5; crash++) {
+          await expect(attempt()).rejects.toThrow('S3 is down');
+          expect((await broken.run(site.name))?.status).toBe('running');
+        }
+        await expect(attempt()).rejects.toThrow('S3 is down');
+
+        expect(await broken.run(site.name)).toMatchObject({
+          status: 'paused',
+          paused_reason: 'worker_error',
+        });
+        expect(crashes.has(site.name)).toBe(false);
+      });
+
+      it('forgets earlier crashes once a crawl finishes', async () => {
+        const site = testSite('recovering');
+        const web = fakeWeb({
+          'https://recovering.test/robots.txt': ok(''),
+          'https://recovering.test/sitemap.xml': ok(
+            urlset('https://recovering.test/p/1'),
+          ),
+          'https://recovering.test/p/1': ok('one'),
+        });
+        const crashes = new Map([[site.name, 4]]);
+        await store.start(site.name, new Date(web.clock.now()));
+        await store.next([site.name], new Date(web.clock.now()));
+
+        await crawlOrPause(
+          site,
+          {
+            store,
+            openFetcher: web.openFetcher,
+            clock: web.clock,
+            random: () => 0,
+          },
+          crashes,
+        );
+
+        expect(crashes.has(site.name)).toBe(false);
+        expect((await store.run(site.name))?.status).toBe('done');
+      });
+    });
 
     describe('crawlSite', () => {
       it('reads robots.txt first and keeps the Crawl-delay between requests', async () => {
@@ -478,6 +558,37 @@ medusaIntegrationTestRunner({
 
         const progress = await crawl(site, web);
 
+        expect(progress.pages).toMatchObject({ done: 1 });
+      });
+
+      it('reads each sitemap once when sitemaps list each other', async () => {
+        const site = testSite('circular');
+        const index = (...urls: string[]) =>
+          `<sitemapindex>${urls
+            .map((url) => `<sitemap><loc>${url}</loc></sitemap>`)
+            .join('')}</sitemapindex>`;
+        const web = fakeWeb({
+          'https://circular.test/robots.txt': ok(''),
+          'https://circular.test/sitemap.xml': ok(
+            index('https://circular.test/a.xml'),
+          ),
+          'https://circular.test/a.xml': ok(
+            index(
+              'https://circular.test/sitemap.xml',
+              'https://circular.test/b.xml',
+            ),
+          ),
+          'https://circular.test/b.xml': ok(
+            urlset('https://circular.test/p/1'),
+          ),
+          'https://circular.test/p/1': ok('one'),
+        });
+
+        const progress = await crawl(site, web);
+
+        expect(web.fetched('https://circular.test/sitemap.xml')).toHaveLength(
+          1,
+        );
         expect(progress.pages).toMatchObject({ done: 1 });
       });
 

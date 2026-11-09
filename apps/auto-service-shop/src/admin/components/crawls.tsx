@@ -25,6 +25,7 @@ const crawlSchema = z.object({
       'sitemap_unavailable',
       'blocked',
       'server_errors',
+      'worker_error',
       'staff',
     ])
     .nullable(),

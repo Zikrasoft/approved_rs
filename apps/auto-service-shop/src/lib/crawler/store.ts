@@ -9,6 +9,7 @@ export const PAUSE_REASONS = [
   'sitemap_unavailable',
   'blocked',
   'server_errors',
+  'worker_error',
   'staff',
 ] as const;
 
@@ -137,7 +138,7 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     );
   },
 
-  async countStored(site: string): Promise<boolean> {
+  async spendPageLimit(site: string): Promise<boolean> {
     const { rows } = await pg.raw(
       `update crawl_run set pages_left = pages_left - 1
        where site = ? and pages_left is not null
