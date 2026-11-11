@@ -21,7 +21,7 @@ footer:
   servicesHeading: Услуги
   companyHeading: Сервис
   contactHeading: Контакты
-  hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
+  hours: Пн–Пт 09:00–18:00 · Сб 09:00–14:00
   privacyLabel: Политика конфиденциальности
   rightsSuffix: Все права защищены.
   aboutLabel: О сервисе
@@ -44,7 +44,7 @@ common:
   socialHeading: Мы в соцсетях
   writeInstead: Удобнее написать?
 hours:
-  week: Пн–Пт 08:00–18:00
+  week: Пн–Пт 09:00–18:00
   saturday: Сб 09:00–14:00
 visit:
   heading: Приезжайте на Звездару

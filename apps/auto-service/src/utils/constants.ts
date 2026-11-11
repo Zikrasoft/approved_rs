@@ -33,7 +33,7 @@ export const GOOGLE_RATING = {
 export const OPENING_HOURS = [
   {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    opens: '08:00',
+    opens: '09:00',
     closes: '18:00',
   },
   { days: ['Saturday'], opens: '09:00', closes: '14:00' },
