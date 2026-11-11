@@ -37,6 +37,20 @@ _Avoid_: Group, Hauptgruppe (that is BMW's own catalogue structure, which this s
 A vehicle manufacturer whose cars or vans the shop covers (BMW, Mercedes-Benz); truck, bus and machine makers are not Makes (see [ADR-0052](docs/adr/0052-crawled-vehicles-are-cars-and-vans-under-one-make-table.md)). Its VINs are recognised by their first three characters. Kept as one canonical name with each source's spellings as aliases (`VW` and `VOLKSWAGEN (VW)` are both Volkswagen, `SKODA` is Škoda).
 _Avoid_: Brand (that word is taken by a PartIdentifier's brand)
 
+**Make page**:
+The workshop's page for one Make, written for someone looking for a service on that make: what CarLab does on its cars, the overview Article, frequent questions, the Works, and below them the Articles, about its cars, and, once the catalogue holds Parts for it, a block of Parts high on the page that leads to the Parts make hub. A Make has one when at least one source has material for it: a Work, an Article or a published Part. It is keyed by the Make's catalogue slug, so every source meets on it.
+_Avoid_: Make hub (that is the Parts make hub), brand page
+
+**Parts make hub**:
+The catalogue's own page for one Make: the entry to its Models and Categories, where a search for a part starts. The Make page links to it and it links back.
+_Avoid_: Make page
+
+**Make link**:
+The tie of a Work or an Article to one Make, chosen from the catalogue's Makes on the entry itself. The catalogue stays the only place a Make or Model is created. A tie to a Model is not read from the car name, because Model names follow the manufacturer's codes and not the way a car is described.
+
+**Article**:
+A blog text staff write, with images, in Russian and translated like every other site text. It may be about one Make, and then the Make page lists it and it links back. One Article can be marked as a Make's overview: it then heads the Make page and is not a blog page of its own.
+
 **Series**:
 A make's model line as customers name it (BMW 3 Series, Mercedes C-Class), spanning several generations.
 _Avoid_: Range, family
