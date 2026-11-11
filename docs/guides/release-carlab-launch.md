@@ -38,7 +38,7 @@ User-visible changes (commit subjects on `carlab-shop`):
 
 - [ ] GitHub admin on `Zikrasoft/approved_rs` (secrets, Actions, tags).
 - [ ] Vercel access to the three projects (approved.rs, carlab.rs, details.rs).
-- [ ] AWS: Lightsail and S3/IAM administrator (deploy.md § The first ship: a checklist).
+- [ ] AWS: S3/IAM administrator; DigitalOcean: an API token with write scope (deploy.md § The first ship: a checklist).
 - [ ] DNS at the `carlab.rs` registrar (same, step 3).
 - [ ] An OpenAI key for the shop, a fine-grained GitHub token for
       `PUBLISH_DISPATCH_TOKEN` (deploy.md § `.env`).
@@ -52,13 +52,24 @@ State found while writing this (2026-11-02): no `AUTO_SERVICE_SHOP_VPS_*`
 repository secret and no `deployed/auto-service-shop` tag exist, so the shop
 has never shipped and section 3 is a first ship.
 
+State on 2026-11-09: PR #444 merged `carlab-shop` into `main`. `gh secret list`
+shows `AUTO_SERVICE_SHOP_VPS_SSH_KEY` and `AUTO_SERVICE_SHOP_VPS_USER` but not
+`AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` or `AUTO_SERVICE_SHOP_VPS_HOST`, and
+`git ls-remote` shows no `deployed/auto-service-shop` tag, so the shop has still
+never shipped. A local `infra/auto-service-shop/terraform/terraform.tfstate`
+exists; whether `terraform apply` created the infrastructure has not been
+checked (`terraform state list` prints names only, never the keys in the state).
+
 ## 2. Pre-flight on `carlab-shop`
 
-- [ ] CI is green on the branch head. On 2026-11-02 the last five runs failed in
-      `check` (`@podbor/lead-crm#test`, `src/store.test.ts` "the Lead count
-      alert" timed out at 5000 ms), so `translate` has not run on the newest
-      commits. Fix or rerun until `check`, `translate` and `verify` pass
-      (deploy.md § Job order).
+- [ ] CI is green on the branch head. `main` was green on 2026-11-04 (the run for
+      `73d1691c`), so the lead-crm timeout of 2026-11-02 is gone. The last red run,
+      on `feat/phone-always-visible` (2026-11-08), failed only in `check`, in
+      `src/lib/publish/__tests__/large-catalogue.spec.ts` ("Exceeded timeout of
+      360000 ms", the shard with the 70 000-row publish test). That spec also runs
+      on the push to `main` that ships the shop, so rerun it and find out whether it
+      is slow or flaky before the merge. Fix or rerun until `check`, `translate`
+      and `verify` pass (deploy.md § Job order).
 - [ ] `translate` committed its "Auto-translate content" commit after the last
       Russian change (deploy.md § Content auto-translation). The carlab en/sr
       guidance in `apps/auto-service/src/i18n/translateConfig.ts` changed
@@ -87,22 +98,22 @@ has never shipped and section 3 is a first ship.
 
 Do this **before** the merge: the merge ships the shop as soon as the four VPS
 secrets exist (deploy.md § The first ship: a checklist, step 7). Steps 1 to 6
-below are that checklist's steps 1 to 6. The Lightsail, S3 and backup items are
+below are that checklist's steps 1 to 6. The Droplet, S3 and backup items are
 one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 
-- [ ] Lightsail instance: Ubuntu 24.04, $24 bundle (4 GB), IPv4 only, own key
-      pair; static IP attached; the firewall allows 22/tcp, 80/tcp, 443/tcp,
-      443/udp; no automatic snapshots (§ The first ship, step 1;
+- [ ] Droplet in `fra1`: Ubuntu 24.04, `s-2vcpu-4gb` ($24, 4 GB), own ssh key;
+      reserved IP assigned; the cloud firewall allows inbound 22/tcp, 80/tcp,
+      443/tcp, 443/udp; no paid backups (§ The first ship, step 1;
       deploy.md § Easy to miss).
-- [ ] Bootstrap: `sudo sh bootstrap-host.sh` as `ubuntu`, then from a kept-open
+- [ ] Bootstrap: `sh bootstrap-host.sh` as `root`, then from a kept-open
       `deploy` session `sudo sh harden-ssh.sh [crawler.pub]`. Done when
-      `ssh deploy@<IPv4>` works and `ubuntu`/`root` are refused (§ The first
+      `ssh deploy@<IPv4>` works and `root` is refused (§ The first
       ship, step 2). The current `harden-ssh.sh` already writes the
       `Match User deploy` block for the Grafana tunnel; on a server hardened
       with an older copy, rerun it once (deploy.md § Logs: Events, Loki and Grafana).
 - [ ] Check Docker's apt key fingerprint by hand:
       `gpg --show-keys /etc/apt/keyrings/docker.asc` (deploy.md § Easy to miss).
-- [ ] DNS: A `api.carlab.rs` and `admin.carlab.rs` at the static IPv4; `dig +short`
+- [ ] DNS: A `api.carlab.rs` and `admin.carlab.rs` at the reserved IPv4; `dig +short`
       returns it (§ The first ship, step 3).
       Caddy then issues TLS for both hosts itself (`caddy/Caddyfile`).
 - [ ] S3: public and private shop buckets, the shop's IAM user, the crawler's
@@ -154,7 +165,7 @@ Settings → Secrets and variables → Actions, **repository** secrets (deploy.m
       fingerprint verified separately (§ The first ship, step 7).
 - [ ] Add `AUTO_SERVICE_SHOP_VPS_USER` (`deploy`), `AUTO_SERVICE_SHOP_VPS_SSH_KEY`,
       `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS`, then `AUTO_SERVICE_SHOP_VPS_HOST`
-      (the static IPv4) **last** (§ The first ship, step 7).
+      (the reserved IPv4) **last** (§ The first ship, step 7).
 - [ ] Settings → Actions → General → Workflow permissions: Read and write; no
       tag protection rule covers `deployed/*` (deploy.md § Job permissions).
 
@@ -246,9 +257,32 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
       set is left alone (deploy.md § How it ships, production seed).
 - [ ] carlab.rs Vercel: `MEDUSA_BACKEND_URL=https://api.carlab.rs`,
       `MEDUSA_PUBLISHABLE_KEY` = that key (§ The first ship, step 11).
-- [ ] Supplier catalogue: crawl from the Suppliers screen with the worker on
-      the Mac, then each Supplier's Import button; Import is separate from
-      Publish (deploy.md § The shop backend; ADR-0048).
+- [ ] Crawler on the Mac, once: `pnpm exec playwright install chromium` in
+      `apps/auto-service-shop`, `.env.crawler` from `.env.crawler.example`
+      (values copied without printing them), the tunnel key, and
+      `sudo sh /tmp/harden-ssh.sh /tmp/carlab-crawler.pub` on the server
+      (deploy.md § The crawler on the owner's Mac).
+- [ ] Start the tunnel, leave it open:
+      `ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>`.
+      In a second terminal start the worker:
+      `pnpm --filter @podbor/auto-service-shop crawler`. deploy.md prefixes it with
+      `caffeinate -i`; the owner's Mac is set never to sleep, so leave it off
+      (deploy.md § The crawler on the owner's Mac).
+- [ ] Per Supplier, in this order: a **test run** from the Suppliers screen (the
+      number next to the button, for example 20 pages, picked at random across the
+      sitemap) and check the stored pages; then the full crawl, **one site at a
+      time**; then that Supplier's Import button. Import is separate from Publish,
+      runs in the background and calls OpenAI (paid), so start the next Supplier
+      only after the report of the last one is read (deploy.md § The shop backend;
+      ADR-0048).
+- [ ] A crawl that shows paused: the reason is on the Suppliers screen. A crawl
+      paused as `worker_error` means the worker crashed five times in a row; read
+      its log on the Mac, fix the cause, then press the button to resume (deploy.md
+      § The shop backend). A stopped worker, a sleeping Mac or a dropped tunnel
+      leaves the crawl `running` and it resumes by itself when the worker is back.
+- [ ] `CRAWLER_FROM` stays unset until the owner names a mailbox the crawler's
+      operators read (`TODO:` in `src/lib/crawler/worker.ts`); until then no `From`
+      header is sent.
 - [ ] Press **Publish** in the admin top bar. It calls OpenAI on the shop's
       `OPENAI_API_KEY` (paid), dispatches `publish.yml`, which rebuilds
       carlab.rs from `deployed/auto-service`, and reindexes search after the run
@@ -433,3 +467,35 @@ Content, from `TODO:` markers in `apps/auto-service`:
       has `car: Обслуживание тормозной системы`, a service, not a car.
 - [ ] Larger photo originals: raised in this session; not tracked in the
       repository.
+
+## 14. Catalogue build size and time
+
+carlab.rs is static: every Part has a page in each of its three locales (ru, sr,
+en), plus Model, Vehicle, Model x Category, Category and Make pages. The catalogue
+is read from the shop in pages, and `experimental.incrementalBuild` copies a page
+whose data did not change from the cache (ADR-0055). The catalogue's real size is
+not recorded anywhere in the repository; measure it before trusting a number.
+
+- [ ] After the first full Import, count the Parts and the part pages
+      (`https://carlab.rs/catalogue-build.json` after the first Publish, deploy.md
+      § How it ships, step 5). The estimate is Parts x 3 plus the hubs.
+- [ ] First Publish: note the wall-clock time of the `rebuild-carlab` job in
+      `publish.yml`, the page count and the size of the `astro-carlab-*` cache
+      (`gh cache list`). This run has an empty cache and is the slowest.
+- [ ] Second Publish after a small change: its log shows `(restored)` pages and
+      the time drops (ADR-0055; issue #380).
+- [ ] The admin's Publish chain stops waiting after 90 minutes and then does not
+      reindex search (deploy.md § `.env`). The workflow itself keeps running, so a
+      build near that limit needs a manual reindex or a longer limit.
+- [ ] Not verified, check before the catalogue is large: GitHub Actions' cache
+      size limit per repository against the size of `node_modules/.astro`, and
+      whether Vercel accepts a `vercel deploy --prebuilt --archive=tgz` with
+      100 000 or more output files (the limits page documents 15 000 files for
+      source uploads of CLI deployments and says nothing for prebuilt output;
+      https://vercel.com/docs/limits).
+- [ ] If the build is too slow, the options in rising cost: publish only part of
+      the Parts (the `listed` flag already exists on published numbers,
+      `src/modules/catalog/cross-module-sql.ts`; how it affects the build has not
+      been checked); build Part pages in fewer locales; raise the 90 minute wait;
+      render the long tail on request instead of at build time. The last one
+      reverses ADR-0020, which declined ISR as paid, so it needs an owner decision.
