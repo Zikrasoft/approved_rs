@@ -18,6 +18,18 @@ process.env.STORE_WRITES_PER_MINUTE ??= '100000';
 process.env.STORE_SEARCHES_PER_MINUTE ??= '100000';
 process.env.SHOP_PREVIEW_TOKEN ??= 'jest-only-shop-preview-token-0123456789';
 
+for (const name of [
+  'FILE_URL',
+  'S3_ENDPOINT',
+  'S3_REGION',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+  'S3_PUBLIC_BUCKET',
+  'S3_PRIVATE_BUCKET',
+]) {
+  process.env[name] ??= '';
+}
+
 process.env.TYPESENSE_HOST ??= 'localhost';
 process.env.TYPESENSE_PORT ??= '58108';
 process.env.TYPESENSE_PROTOCOL ??= 'http';
