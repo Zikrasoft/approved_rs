@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import wide from '@/assets/workshop-bay.jpg';
+import wide from '@/assets/workshop-bay-open-hood.jpg';
 import { panelPhoto } from '@/utils/panelPhoto';
 import PanelHero from './PanelHero.astro';
 import { render } from './renderAstro';

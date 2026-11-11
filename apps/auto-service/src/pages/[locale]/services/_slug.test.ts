@@ -48,7 +48,9 @@ describe('a service page', () => {
     const photo = root.querySelector('section img[fetchpriority="high"]')!;
     const preload = root.querySelector('link[rel="preload"][as="image"]');
 
-    expect(photo.getAttribute('src')).toContain('mechanic-wheel-lift-wide');
+    expect(photo.getAttribute('src')).toContain(
+      'mechanic-engine-teardown-wide',
+    );
     expect(photo.getAttribute('alt')).toBe('');
     expect(preload?.getAttribute('imagesrcset')).toBe(
       photo.getAttribute('srcset'),
@@ -62,7 +64,7 @@ describe('a service page', () => {
     expect(photo.getAttribute('src')).toContain('workshop-bay');
     expect(photo.getAttribute('alt')).toBe(site.photos.workshopBay);
     expect(photo.getAttribute('sizes')).toBe(
-      '(min-width: 1224px) calc(532px * 2.37), (min-width: 1024px) calc(calc(46.5vw - 19px) * 2.37), calc(100vw - 2.5rem)',
+      '(min-width: 1224px) calc(532px * 1.21), (min-width: 1024px) calc(calc(46.5vw - 19px) * 1.21), calc(100vw - 2.5rem)',
     );
   });
 

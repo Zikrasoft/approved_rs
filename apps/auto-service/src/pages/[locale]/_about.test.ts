@@ -120,7 +120,7 @@ describe('the about page', () => {
       expect.arrayContaining(['w-full', 'object-cover', 'aspect-[2/1]']),
     );
     expect(sign.getAttribute('sizes')).toBe(
-      '(min-width: 1224px) calc(1144px * 1.07), calc(calc(100vw - 2.5rem) * 1.07)',
+      '(min-width: 1224px) 1144px, calc(100vw - 2.5rem)',
     );
     expect(following(equipment, sign)).toBeTruthy();
     expect(following(sign, makes)).toBeTruthy();

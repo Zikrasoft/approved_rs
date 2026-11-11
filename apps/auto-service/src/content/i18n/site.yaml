@@ -54,11 +54,11 @@ visit:
     - Говорим по-сербски, по-русски и по-английски
     - Оплата наличными или картой
 photos:
-  # TODO: owner to supply higher-quality originals of the facade and wall-sign photos; at 1280 px they are upscaled in the visit panel photo and the about page band.
-  heroMechanic: Мастер CarLab меняет колесо на подъемнике
-  workshopBay: 'Цех CarLab: два подъемника и автомобиль в ремонте'
+  # TODO: owner to supply a higher-quality original of the facade photo; at 1280 px it is upscaled in the visit panel.
+  heroMechanic: Мастер CarLab ремонтирует двигатель, снятый с автомобиля на подъемнике
+  workshopBay: Автомобиль с открытым капотом в цехе CarLab между стойками подъемника
   facade: Въезд в автосервис CarLab на Звездаре, вывеска AUTO SERVIS CARLAB.RS
-  wallSign: Логотип CarLab на стене цеха
+  wallSign: Логотип CarLab на стене цеха и мастер у автомобиля с открытым капотом
 googleRating:
   rating: '{rating} в Google'
   reviews:

@@ -31,11 +31,15 @@ describe('the home page', () => {
       ...root.querySelectorAll('link[rel="preload"][as="image"]'),
     ];
 
-    expect(image.getAttribute('src')).toContain('mechanic-wheel-lift-wide');
+    expect(image.getAttribute('src')).toContain(
+      'mechanic-engine-teardown-wide',
+    );
     expect(image.getAttribute('alt')).toBe(site.photos.heroMechanic);
     expect(image.getAttribute('sizes')).toBe('calc(100vw - 2.5rem)');
     expect(tall.getAttribute('media')).toBe('(min-width: 1024px)');
-    expect(tall.getAttribute('srcset')).toContain('mechanic-wheel-lift-tall');
+    expect(tall.getAttribute('srcset')).toContain(
+      'mechanic-engine-teardown-tall',
+    );
     expect(
       preloads.map((link) => [
         link.getAttribute('media'),
