@@ -8,6 +8,11 @@ variable "region" {
   default = "eu-north-1"
 }
 
+variable "do_region" {
+  type    = string
+  default = "fra1"
+}
+
 variable "backup_region" {
   type    = string
   default = "eu-north-1"

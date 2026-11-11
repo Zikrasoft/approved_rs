@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.71.0"
     }
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "2.106.0"
+    }
   }
 }
 
@@ -19,3 +23,5 @@ provider "aws" {
   profile = var.aws_profile
   region  = var.backup_region
 }
+
+provider "digitalocean" {}

@@ -2,6 +2,7 @@ const { MetadataStorage } = require('@medusajs/framework/mikro-orm/core');
 
 MetadataStorage.clear();
 
+process.env.PORT ??= '9219';
 process.env.DB_HOST ??= 'localhost';
 process.env.DB_PORT ??= '55432';
 process.env.DB_USERNAME ??= 'postgres';

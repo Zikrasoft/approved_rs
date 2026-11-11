@@ -1,13 +1,13 @@
 locals {
-  ipv4 = aws_lightsail_static_ip.shop.ip_address
+  ipv4 = digitalocean_reserved_ip.shop.ip_address
 }
 
 output "ipv4" {
   value = local.ipv4
 }
 
-output "ssh_ubuntu" {
-  value = "ssh ubuntu@${local.ipv4}"
+output "ssh_root" {
+  value = "ssh root@${local.ipv4}"
 }
 
 output "ssh_deploy" {
