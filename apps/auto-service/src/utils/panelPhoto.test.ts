@@ -1,14 +1,14 @@
 import type { ImageMetadata } from 'astro';
 import { describe, expect, it } from 'vitest';
-import tall from '@/assets/mechanic-wheel-lift-tall.jpg';
-import wide from '@/assets/workshop-bay.jpg';
+import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
+import wide from '@/assets/mechanic-engine-teardown-wide.jpg';
 import cover from '@/assets/workshop-facade.jpg';
 import { panelPhoto, visitPhoto } from './panelPhoto';
 
 describe('panelPhoto', () => {
   it('asks a wide photo for the width a 3:4 full-height hero column crops away, not the phone banner', async () => {
     expect((await panelPhoto({ image: wide, alt: '' })).sizes).toBe(
-      '(min-width: 1224px) calc(532px * 2.37), (min-width: 1024px) calc(calc(46.5vw - 19px) * 2.37), calc(100vw - 2.5rem)',
+      '(min-width: 1224px) calc(532px * 2.67), (min-width: 1024px) calc(calc(46.5vw - 19px) * 2.67), calc(100vw - 2.5rem)',
     );
   });
 

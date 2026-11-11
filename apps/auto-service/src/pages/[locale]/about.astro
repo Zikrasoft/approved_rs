@@ -8,7 +8,7 @@ import PanelHero from '@/components/PanelHero.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import workshopBay from '@/assets/workshop-bay.jpg';
+import workshopBay from '@/assets/workshop-bay-open-hood.jpg';
 import wallSign from '@/assets/workshop-wall-sign.jpg';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { panelPhoto } from '@/utils/panelPhoto';
@@ -84,10 +84,10 @@ const photo = await panelPhoto({
       <Image
         src={wallSign}
         alt={site.photos.wallSign}
-        widths={[640, 960, 1280]}
+        widths={[640, 960, 1280, 1920, 2400]}
         sizes={signSizes}
         loading="lazy"
-        class="block aspect-[2/1] w-full rounded-block object-cover sm:aspect-[3/1]"
+        class="block aspect-[2/1] w-full rounded-block object-cover object-right sm:aspect-[3/1] sm:object-center"
       />
     </div>
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import tall from '@/assets/mechanic-wheel-lift-tall.jpg';
+import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import WorkCover from './WorkCover.astro';
 import { render } from './renderAstro';
 import { work } from './workFixture';
