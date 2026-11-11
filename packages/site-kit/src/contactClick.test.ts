@@ -199,6 +199,34 @@ describe('defineContactClickTracking', () => {
     expect(sent).toHaveLength(1);
   });
 
+  it('records a phone control that is not a link, such as a copy-number button', () => {
+    document.body.innerHTML = `
+      <div data-contact-placement="header">
+        <button type="button" data-contact-channel="phone"><span>+381 60</span></button>
+      </div>
+    `;
+    track();
+    document.querySelector('span')!.click();
+    expect(sent).toHaveLength(1);
+    expect(sent[0]![1].get('channel')).toBe('phone');
+    expect(window.trackGoal).toHaveBeenCalledWith('contact_click', {
+      channel: 'phone',
+      placement: 'header',
+    });
+  });
+
+  it('counts a tap on a control nested in another once, for the innermost', () => {
+    document.body.innerHTML = `
+      <div data-contact-channel="viber">
+        <button type="button" data-contact-channel="phone">Copy</button>
+      </div>
+    `;
+    track();
+    document.querySelector('button')!.click();
+    expect(sent).toHaveLength(1);
+    expect(sent[0]![1].get('channel')).toBe('phone');
+  });
+
   it('arms once however many times it is called', () => {
     track();
     track();

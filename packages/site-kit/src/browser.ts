@@ -15,6 +15,12 @@ export { defineScrollReveal } from './scrollReveal.ts';
 export { defineLazyMapEmbed } from './mapEmbed.ts';
 export { defineLocaleChoice } from './localeCookie.ts';
 export { defineTelegramChoice } from './telegramChoice.ts';
+export {
+  COPY_PHONE_DIGITS_ATTRIBUTE,
+  COPY_PHONE_NUMBER_ATTRIBUTE,
+  COPY_PHONE_STATUS_ATTRIBUTE,
+  defineCopyPhone,
+} from './copyPhone.ts';
 export { defineMenuToggle, type MenuToggleElement } from './menuToggle.ts';
 export { defineChipFilter } from './chipFilter.ts';
 export { defineLightbox } from './lightbox.ts';

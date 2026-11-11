@@ -112,6 +112,9 @@ telegramChoice:
   botHint: Расскажите, что с машиной, менеджер ответит в том же чате
   manager: Менеджеру напрямую
   managerHint: Личный чат с менеджером в Telegram
+copyPhone:
+  label: Скопировать номер
+  copied: Скопировано
 translations:
   sr:
     nav:

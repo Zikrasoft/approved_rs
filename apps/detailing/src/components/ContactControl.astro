@@ -2,11 +2,11 @@
 import type { HTMLAttributes } from 'astro/types';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { navCurrent } from '@podbor/site-kit';
-import { formatPhone } from '@podbor/site-kit/format-phone';
 import { localeFrom } from '@/i18n/config';
 import { contactControl } from '@/utils/contactLinks';
 import { PathBuilder } from '@/utils/paths';
 import type { ServiceSlug } from '@/utils/services';
+import PhoneNumber from './PhoneNumber.astro';
 
 interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
   channel: TrackedContactChannel;
@@ -50,7 +50,7 @@ const coarseOnly = control.pointer === 'coarse-only';
   control.plainNumber && (
     <span class:list={[plainClass ?? className, 'pointer-coarse:hidden!']}>
       <slot name="plain" />
-      <span class="whitespace-nowrap">{formatPhone(control.plainNumber)}</span>
+      <PhoneNumber copy {...control.attrs} />
     </span>
   )
 }

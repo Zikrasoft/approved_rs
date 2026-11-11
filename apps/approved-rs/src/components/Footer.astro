@@ -6,13 +6,8 @@ import { getI18n } from '@/i18n/getI18n';
 import { localeFrom } from '@/i18n/config';
 import { servicesView } from '@/i18n/content/services';
 import ContactControl from './ContactControl.astro';
-import {
-  BRAND,
-  PHONE_NUMBER,
-  SITE_NAME,
-  THREADS_CHANNEL,
-} from '@/utils/constants';
-import { formatPhone } from '@podbor/site-kit/format-phone';
+import PhoneNumber from './PhoneNumber.astro';
+import { BRAND, SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
 import {
   DEVELOPER,
   developerCreditUrl,
@@ -50,7 +45,7 @@ const coverageLine = getActiveCountries()
             class="inline-flex basis-full items-center gap-2 py-1.5 text-sm font-medium no-underline text-secondary"
           >
             <ContactIcon channel="phone" size={14} />
-            {formatPhone(PHONE_NUMBER)}
+            <PhoneNumber />
             <ContactIcon slot="plain" channel="phone" size={14} />
           </ContactControl>
           <div data-primary-contact class="contents">
