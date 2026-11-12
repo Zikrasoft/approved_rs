@@ -1,6 +1,8 @@
+import type { Context } from '@medusajs/framework/types';
 import { SUPPLIER_VEHICLE_ID } from '@podbor/catalog-contract';
 
 import type CatalogModuleService from '../../modules/catalog/service';
+import type { Provenance } from '../../modules/catalog/service';
 import { canonicalChassisCode } from '../chassis-code';
 import { conflictingVehicles } from '../fitment-conflicts';
 import type { VehicleFacts } from './adapter';
@@ -8,6 +10,8 @@ import { carMakeName } from './makes';
 import { codeKey, nameKey, variantKey } from '../../modules/_shared/keys';
 
 type Years = { year_from: number | null; year_to: number | null };
+
+type Power = { power_kw: number | null };
 
 type Candidate = Years & {
   id: string;
@@ -51,10 +55,10 @@ const overlaps = (a: Years, b: Years) =>
   (a.year_from ?? -Infinity) <= (b.year_to ?? Infinity) &&
   (b.year_from ?? -Infinity) <= (a.year_to ?? Infinity);
 
-const samePower = (vehicle: { power_kw: number | null }, facts: VehicleFacts) =>
+const samePower = (vehicle: Power, car: Power) =>
   vehicle.power_kw === null ||
-  facts.power_kw === null ||
-  vehicle.power_kw === facts.power_kw;
+  car.power_kw === null ||
+  vehicle.power_kw === car.power_kw;
 
 const sameCar =
   (facts: VehicleFacts, makeId: string) =>
@@ -206,29 +210,39 @@ async function modelOf(
   );
 }
 
+export async function engineLessVehicle(
+  catalog: CatalogModuleService,
+  car: Years & Power & Provenance & { model_id: string },
+  context?: Context,
+): Promise<string> {
+  const known = (
+    await catalog.listVehicles(
+      { model_id: car.model_id, engine_id: null },
+      { take: null },
+      context,
+    )
+  ).find((vehicle) => samePower(vehicle, car) && overlaps(vehicle, car));
+  if (known) return known.id;
+  const vehicle = await catalog.createVehicles(
+    { ...car, engine_id: null },
+    context,
+  );
+  return vehicle.id;
+}
+
 async function engineLessVehicleOf(
   matcher: VehicleMatcher,
   facts: VehicleFacts,
   make: Make,
 ): Promise<string> {
-  const { catalog, source } = matcher;
   const model = await modelOf(matcher, facts, make);
-  const known = (
-    await catalog.listVehicles(
-      { model_id: model.id, engine_id: null },
-      { take: null },
-    )
-  ).find((vehicle) => samePower(vehicle, facts) && overlaps(vehicle, facts));
-  if (known) return known.id;
-  const vehicle = await catalog.createVehicles({
+  return engineLessVehicle(matcher.catalog, {
     model_id: model.id,
-    engine_id: null,
     power_kw: facts.power_kw,
     year_from: facts.year_from,
     year_to: facts.year_to,
-    source,
+    source: matcher.source,
   });
-  return vehicle.id;
 }
 
 async function vehicleOf(

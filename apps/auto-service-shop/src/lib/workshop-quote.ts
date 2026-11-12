@@ -13,6 +13,7 @@ import { nameKey } from '../modules/_shared/keys';
 import { shopAi, type CategoryChoice } from './ai';
 import { type QuoteDraftLine, quoteLineResolver } from './quote-line';
 import { listVehicleResponses } from './store-response';
+import { engineLessVehicle } from './suppliers/vehicles';
 import { readCapped, uploadType } from './uploads';
 import { generationOf, type VinGeneration } from './vin/car-for';
 import { vinDecoders } from './vin/chain';
@@ -158,13 +159,66 @@ async function quoteCategory(
   return fields.some(({ required }) => required) ? null : categoryId;
 }
 
+type PickedVehicle = {
+  id: string;
+  model_id: string;
+  year_from: number | null;
+  year_to: number | null;
+};
+
+const isYear = (year: number | null): year is number => year !== null;
+
+const yearsSpanning = (vehicles: PickedVehicle[]) => {
+  const from = vehicles.map(({ year_from }) => year_from);
+  const to = vehicles.map(({ year_to }) => year_to);
+  return {
+    year_from: from.every(isYear) ? Math.min(...from) : null,
+    year_to: to.every(isYear) ? Math.max(...to) : null,
+  };
+};
+
+async function generationVehicles(
+  catalog: CatalogModuleService,
+  picked: PickedVehicle[],
+  provenance: Provenance,
+  context: Context,
+): Promise<string[]> {
+  const byModel = new Map<string, PickedVehicle[]>();
+  for (const vehicle of picked) {
+    byModel.set(vehicle.model_id, [
+      ...(byModel.get(vehicle.model_id) ?? []),
+      vehicle,
+    ]);
+  }
+  const ids: string[] = [];
+  for (const [modelId, vehicles] of byModel) {
+    ids.push(
+      await engineLessVehicle(
+        catalog,
+        {
+          model_id: modelId,
+          power_kw: null,
+          ...yearsSpanning(vehicles),
+          ...provenance,
+          source: WORKSHOP_QUOTE_SOURCE,
+        },
+        context,
+      ),
+    );
+  }
+  return ids;
+}
+
 const createFromWorkshopQuote = (
   catalog: CatalogModuleService,
   lines: WorkshopQuoteLine[],
-  vehicleIds: string[],
+  { picked, generation }: { picked: PickedVehicle[]; generation: boolean },
   provenance: Provenance,
-): Promise<WorkshopQuoteResult> =>
+): Promise<WorkshopQuoteResult & { vehicle_ids: string[] }> =>
   catalog.transaction(async (context) => {
+    const vehicleIds = generation
+      ? await generationVehicles(catalog, picked, provenance, context)
+      : picked.map(({ id }) => id);
     const brands = await catalog.listBrands(
       {},
       { relations: ['spellings'], take: null },
@@ -209,28 +263,47 @@ const createFromWorkshopQuote = (
       }
       result.lines.push({ part_id: partId, reused: !newPart });
     }
-    return result;
+    return { ...result, vehicle_ids: vehicleIds };
   });
 
 export type ConfirmedQuote = WorkshopQuoteResult & { vehicles: Vehicle[] };
 
 export async function confirmQuote(
   scope: MedusaContainer,
-  { vehicle_ids, lines }: { vehicle_ids: string[]; lines: WorkshopQuoteLine[] },
+  {
+    vehicle_ids,
+    generation,
+    lines,
+  }: {
+    vehicle_ids: string[];
+    generation: boolean;
+    lines: WorkshopQuoteLine[];
+  },
   editor: { created_by: string; updated_by: string },
 ): Promise<ConfirmedQuote> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const ids = [...new Set(vehicle_ids)];
-  const vehicles = ids.length
-    ? await listVehicleResponses(catalog, { id: ids })
+  const picked = ids.length
+    ? await catalog.listVehicles(
+        { id: ids },
+        { select: ['id', 'model_id', 'year_from', 'year_to'], take: null },
+      )
     : [];
-  if (vehicles.length !== ids.length) {
+  if (picked.length !== ids.length) {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,
       'A Vehicle picked for the Workshop quote does not exist',
     );
   }
-  const created = await createFromWorkshopQuote(catalog, lines, ids, editor);
+  const { vehicle_ids: fitted, ...created } = await createFromWorkshopQuote(
+    catalog,
+    lines,
+    { picked, generation },
+    editor,
+  );
+  const vehicles = fitted.length
+    ? await listVehicleResponses(catalog, { id: fitted })
+    : [];
   return { vehicles, ...created };
 }
 

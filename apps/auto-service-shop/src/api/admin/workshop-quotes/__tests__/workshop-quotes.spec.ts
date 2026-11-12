@@ -570,7 +570,67 @@ medusaIntegrationTestRunner({
         expect(await catalog.listFitments()).toEqual([]);
       });
 
-      it('fits every Vehicle of a generation staff picked', async () => {
+      it('fits a whole generation on its engine-less Vehicle', async () => {
+        const { vehicle: first, model } = await createVehicleFixture(catalog);
+        const { vehicle: second } = await createVehicleFixture(catalog, {
+          engineCode: 'N47D20C',
+          engineFamily: 'N47',
+          powerKw: 135,
+          years: [2012, 2016],
+        });
+
+        const response = await confirm({
+          vehicle_ids: [first.id, second.id],
+          generation: true,
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(200);
+        const [generation] = await catalog.listVehicles({
+          model_id: model.id,
+          engine_id: null,
+        });
+        expect(generation).toMatchObject({
+          power_kw: null,
+          year_from: 2012,
+          year_to: 2019,
+          source: 'workshop-quote',
+        });
+        expect(response.data.confirmed).toMatchObject({
+          vehicles: [{ id: generation!.id, engine: null }],
+          fitments: 1,
+        });
+        expect(
+          (await catalog.listFitments()).map(({ vehicle_id }) => vehicle_id),
+        ).toEqual([generation!.id]);
+      });
+
+      it('fits a whole generation on the engine-less Vehicle it already has', async () => {
+        const { vehicle, model } = await createVehicleFixture(catalog);
+        const known = await catalog.createVehicles({
+          model_id: model.id,
+          engine_id: null,
+          power_kw: null,
+          year_from: 2014,
+          year_to: 2018,
+        });
+
+        const response = await confirm({
+          vehicle_ids: [vehicle.id],
+          generation: true,
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(200);
+        expect(
+          await catalog.listVehicles({ model_id: model.id, engine_id: null }),
+        ).toHaveLength(1);
+        expect(
+          (await catalog.listFitments()).map(({ vehicle_id }) => vehicle_id),
+        ).toEqual([known.id]);
+      });
+
+      it('fits every Vehicle staff picked', async () => {
         const { vehicle: first } = await createVehicleFixture(catalog);
         const { vehicle: second } = await createVehicleFixture(catalog, {
           engineCode: 'N47D20C',

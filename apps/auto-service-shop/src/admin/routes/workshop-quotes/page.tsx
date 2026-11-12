@@ -295,6 +295,7 @@ const WorkshopQuotesPage = () => {
       method: 'POST',
       body: JSON.stringify({
         vehicle_ids: vehicleIdsOf(draft, active.fitment),
+        generation: active.fitment === WHOLE_GENERATION,
         lines: included.map((line) => ({
           name: line.name.trim(),
           number: line.number.trim(),

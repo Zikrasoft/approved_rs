@@ -445,6 +445,7 @@ export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
 
 export const AdminConfirmWorkshopQuote = z.strictObject({
   vehicle_ids: z.array(z.string().min(1)).max(MAX_LIST_LENGTH),
+  generation: z.boolean().default(false),
   lines: z
     .array(
       z.strictObject({
