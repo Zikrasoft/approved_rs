@@ -186,6 +186,7 @@
     "importWithoutPrice": "Without a whole-dinar price, added with no offer: {{count}}.",
     "importWithoutEngineCode": "Applicability rows without an engine code, fitted to the model generation: {{count}}.",
     "importRejected": "Skipped as numbers staff deleted from the catalogue: {{count}}.",
+    "importWithoutNumber": "Skipped as numbers with no Latin letter or digit: {{count}}.",
     "importWithoutCategory": "Added without a Category: {{count}}.",
     "importWithoutCategoryLink": "Open in Parts",
     "importMissingFields": "Not filed, a required field is missing: {{articles}}. Fill it under Parts.",
@@ -312,13 +313,20 @@
         "convertible": "Convertible",
         "gran-coupe": "Gran Coupe",
         "suv": "SUV",
-        "van": "Van"
+        "crossover": "Crossover",
+        "minivan": "MPV",
+        "van": "Van",
+        "pickup": "Pickup"
       },
       "fuel": {
         "petrol": "Petrol",
         "diesel": "Diesel",
         "hybrid": "Hybrid",
-        "electric": "Electric"
+        "mild-hybrid": "Mild hybrid",
+        "plug-in-hybrid": "Plug-in hybrid",
+        "electric": "Electric",
+        "lpg": "LPG",
+        "cng": "CNG"
       },
       "drive": {
         "rwd": "Rear",

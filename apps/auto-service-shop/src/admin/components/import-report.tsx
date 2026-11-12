@@ -26,6 +26,7 @@ const importSummarySchema = z.object({
     no_make: count,
     not_in_scope: z.number(),
     rejected: count,
+    no_number: count,
   }),
   without_engine_code: count,
   unmapped_categories: z
@@ -98,6 +99,8 @@ const useSummaryLines = () => {
         t('suppliers.importWithoutPrice', { count: skipped.currency }),
       skipped.rejected > 0 &&
         t('suppliers.importRejected', { count: skipped.rejected }),
+      skipped.no_number > 0 &&
+        t('suppliers.importWithoutNumber', { count: skipped.no_number }),
       summary.without_engine_code > 0 &&
         t('suppliers.importWithoutEngineCode', {
           count: summary.without_engine_code,

@@ -194,6 +194,7 @@
     "importWithoutPrice": "Без цены в целых динарах, добавлено без предложения: {{count}}.",
     "importWithoutEngineCode": "Строк применимости без кода двигателя, подобраны к поколению модели: {{count}}.",
     "importRejected": "Пропущено номеров, удаленных из каталога сотрудниками: {{count}}.",
+    "importWithoutNumber": "Пропущено товаров без латинских букв и цифр в номере: {{count}}.",
     "importWithoutCategory": "Добавлены без категории: {{count}}.",
     "importWithoutCategoryLink": "Открыть в «Запчастях»",
     "importMissingFields": "Не разложены по категориям, нет обязательного поля: {{articles}}. Заполните его в разделе «Запчасти».",
@@ -324,13 +325,20 @@
         "convertible": "Кабриолет",
         "gran-coupe": "Gran Coupe",
         "suv": "Внедорожник",
-        "van": "Минивэн"
+        "crossover": "Кроссовер",
+        "minivan": "Минивэн",
+        "van": "Фургон",
+        "pickup": "Пикап"
       },
       "fuel": {
         "petrol": "Бензин",
         "diesel": "Дизель",
         "hybrid": "Гибрид",
-        "electric": "Электричество"
+        "mild-hybrid": "Мягкий гибрид",
+        "plug-in-hybrid": "Подключаемый гибрид",
+        "electric": "Электричество",
+        "lpg": "Газ (пропан)",
+        "cng": "Газ (метан)"
       },
       "drive": {
         "rwd": "Задний",

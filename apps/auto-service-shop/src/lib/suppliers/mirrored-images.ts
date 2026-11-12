@@ -6,7 +6,7 @@ import type { LookupFunction } from 'node:net';
 import type { Logger, MedusaContainer } from '@medusajs/framework/types';
 
 import { errorMessage } from '../errors';
-import { IMAGE_TYPES, MAX_IMAGE_BYTES } from '../images';
+import { IMAGE_TYPES, MAX_IMAGE_BYTES, publicFileKey } from '../images';
 import { publicLookup, refusePrivateHost } from '../private-address';
 import type { ShopStorage } from '../storage';
 import { readCapped } from '../uploads';
@@ -73,10 +73,11 @@ export async function mirroredImage(
   source: string,
   logger: Logger,
 ): Promise<string | null> {
-  if (source.startsWith(storage.publicUrl(''))) return source;
+  const own = publicFileKey(source);
+  if (own) return own;
   const pointer = `supplier-images/by-source/${sha256(source)}`;
   const known = await storage.images.get(pointer);
-  if (known) return storage.publicUrl(known.toString());
+  if (known) return known.toString();
   try {
     const { body, contentType } = await download(source, imageLookup(scope));
     const key = `supplier-images/${sha256(body)}`;
@@ -89,7 +90,7 @@ export async function mirroredImage(
     await storage.images.put(pointer, Buffer.from(key), {
       contentType: 'text/plain',
     });
-    return storage.publicUrl(key);
+    return key;
   } catch (error) {
     logger.warn(
       `Supplier image ${source} not copied, staged without it: ${errorMessage(error)}`,

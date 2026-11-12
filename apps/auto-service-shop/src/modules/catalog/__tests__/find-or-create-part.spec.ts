@@ -72,6 +72,12 @@ medusaIntegrationTestRunner({
         ).toHaveLength(1);
       });
 
+      it('refuses a number that keeps no Latin letter or digit', async () => {
+        await expect(
+          catalog.findOrCreatePart(part('—/—')),
+        ).rejects.toMatchObject({ code: 'INVALID_FIELD' });
+      });
+
       it('refuses a number staff deleted with its Part, however it is spelled', async () => {
         const { part_id } = await catalog.findOrCreatePart(part('W 719/30'));
 

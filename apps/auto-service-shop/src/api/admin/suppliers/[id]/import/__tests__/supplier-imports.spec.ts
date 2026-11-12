@@ -19,6 +19,7 @@ import { loggedEvents } from '../../../../../../../integration-tests/loggedEvent
 import { createVehicleFixture } from '../../../../../../../integration-tests/vehicleFixture';
 import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { SHOP_AI_REGISTRATION } from '../../../../../../lib/ai';
+import { parseEnv } from '../../../../../../lib/env';
 import { PART_CHANGED_EVENT } from '../../../../../../search/part-changed-event';
 import { SHOP_STORAGE_REGISTRATION } from '../../../../../../lib/storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../../../lib/suppliers/adapter';
@@ -490,6 +491,7 @@ medusaIntegrationTestRunner({
             no_make: 0,
             not_in_scope: 0,
             rejected: 0,
+            no_number: 0,
           },
           without_engine_code: 0,
           unmapped_categories: [],
@@ -554,6 +556,7 @@ medusaIntegrationTestRunner({
             no_make: 0,
             not_in_scope: 2,
             rejected: 0,
+            no_number: 0,
           },
           without_engine_code: 0,
           unmapped_categories: [],
@@ -563,6 +566,35 @@ medusaIntegrationTestRunner({
           failed: [],
         });
         expect(await page('W6103')).toBeDefined();
+      });
+
+      it('skips an article whose number keeps no Latin letter or digit, and counts it', async () => {
+        intercars.articles.push(
+          {
+            article_id: 'IC-40',
+            brand: 'MANN-FILTER',
+            number: '—/—',
+            name: 'Фильтр без номера',
+            category: 'IC-OIL',
+          },
+          {
+            article_id: 'IC-41',
+            brand: 'MANN-FILTER',
+            number: 'W 610/4',
+            name: 'Фильтр W610/4',
+            category: 'IC-OIL',
+          },
+        );
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          created: 1,
+          skipped: 1,
+          skipped_by_reason: { no_number: 1 },
+          failed: [],
+        });
+        expect(await page('W6104')).toBeDefined();
       });
 
       it('names a Part after the first of its Supplier pages in catalogue order, the same on every import', async () => {
@@ -1313,12 +1345,13 @@ medusaIntegrationTestRunner({
           const [[key, stored]] = [...storage.images.objects].filter(
             ([, object]) => object.metadata['source-url'] === source,
           );
-          const copy = `https://files.carlab.test/${key}`;
           expect(stored.body.toString()).toBe('jpeg-bytes');
           expect(stored.contentType).toBe('image/jpeg');
-          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([copy]);
+          expect((await page('HU7020Z'))?.supplier_data.images).toEqual([
+            `${parseEnv(process.env).FILE_URL}/${key}`,
+          ]);
           expect(await stagedImages()).toEqual([
-            { items: [copy], sources: { [copy]: source } },
+            { items: [key], sources: { [key]: source } },
           ]);
         });
 
@@ -1343,7 +1376,7 @@ medusaIntegrationTestRunner({
           const copyOf = (body: string) =>
             [...storage.images.objects]
               .filter(([, object]) => object.body.toString() === body)
-              .map(([key]) => `https://files.carlab.test/${key}`);
+              .map(([key]) => `${parseEnv(process.env).FILE_URL}/${key}`);
           expect(first).toEqual([
             ...copyOf('front-bytes'),
             ...copyOf('box-bytes'),

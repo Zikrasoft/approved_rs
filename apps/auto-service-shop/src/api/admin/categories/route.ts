@@ -6,7 +6,7 @@ import type {
 import {
   CATEGORY_RELATIONS,
   guardCategoryService,
-  withRankedFields,
+  shownCategory,
 } from '../../../lib/categories';
 import { createdBy, withEditors } from '../../../lib/editors';
 import { CATALOG_MODULE } from '../../../modules/catalog';
@@ -25,7 +25,7 @@ export async function GET(
   );
 
   res.json({
-    categories: await withEditors(req.scope, categories.map(withRankedFields)),
+    categories: await withEditors(req.scope, categories.map(shownCategory)),
   });
 }
 

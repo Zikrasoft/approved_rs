@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { categoriesResponseSchema } from '@podbor/catalog-contract';
 
-import { CATEGORY_RELATIONS, withRankedFields } from '../../../lib/categories';
+import { CATEGORY_RELATIONS, shownCategory } from '../../../lib/categories';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import type CatalogModuleService from '../../../modules/catalog/service';
 
@@ -18,7 +18,7 @@ export async function GET(
 
   res.json(
     categoriesResponseSchema.parse({
-      categories: categories.map(withRankedFields),
+      categories: categories.map(shownCategory),
     }),
   );
 }

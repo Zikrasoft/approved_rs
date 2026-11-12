@@ -1,4 +1,16 @@
-import { codeKey, nameKey, variantKey } from '../keys';
+import { codeKey, nameKey, partNumberKey, variantKey } from '../keys';
+
+describe('partNumberKey', () => {
+  it('keys a number the way the storefront does', () => {
+    expect(partNumberKey('w 712/75')).toBe('W71275');
+  });
+
+  it('refuses a number with no Latin letter or digit', () => {
+    expect(() => partNumberKey('—/—')).toThrow(
+      expect.objectContaining({ code: 'INVALID_FIELD' }),
+    );
+  });
+});
 
 describe('nameKey', () => {
   it.each([

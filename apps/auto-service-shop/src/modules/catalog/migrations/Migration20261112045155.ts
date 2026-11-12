@@ -47,6 +47,9 @@ export class Migration20261112045155 extends Migration {
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_chassis_series_id_code_key_unique" ON "chassis" ("series_id", ${codeKey}) WHERE deleted_at IS NULL;`,
     );
     this.addSql(
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_slug_redirect_kind_scope_id_from_slug_unique" ON "slug_redirect" ("kind", "scope_id", "from_slug") NULLS NOT DISTINCT WHERE kind <> 'part' AND deleted_at IS NULL;`,
+    );
+    this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_fitment_part_vehicle_all" ON "fitment" ("part_id", "vehicle_id");`,
     );
     this.addSql(
@@ -94,6 +97,7 @@ export class Migration20261112045155 extends Migration {
       'IDX_make_name_key_unique',
       'IDX_category_name_key_unique',
       'IDX_series_make_id_name_key_unique',
+      'IDX_slug_redirect_kind_scope_id_from_slug_unique',
       'IDX_fitment_part_vehicle_all',
       'IDX_fitment_vehicle_all',
       'IDX_part_description_hash',

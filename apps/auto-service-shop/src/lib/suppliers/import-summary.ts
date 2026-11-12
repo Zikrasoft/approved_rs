@@ -7,6 +7,7 @@ const ARTICLE_SKIPS = [
   'unreadable',
   'not_in_scope',
   'rejected',
+  'no_number',
 ] as const;
 
 const ROW_SKIPS = ['currency', 'no_make'] as const;

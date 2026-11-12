@@ -18,13 +18,12 @@ export const memoryBucket = () => {
   return { bucket, objects };
 };
 
-export const memoryStorage = (publicUrl = 'https://files.carlab.test') => {
+export const memoryStorage = () => {
   const pages = memoryBucket();
   const images = memoryBucket();
   const storage: ShopStorage = {
     pages: pages.bucket,
     images: images.bucket,
-    publicUrl: (key) => `${publicUrl}/${key}`,
   };
   return { storage, pages, images };
 };

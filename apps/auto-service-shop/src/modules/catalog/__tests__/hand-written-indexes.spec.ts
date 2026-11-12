@@ -148,6 +148,16 @@ medusaIntegrationTestRunner({
           'requirement.min: expected numeric, found real',
         ],
         [
+          'a retired-slug index left unique over nulls',
+          [
+            'drop index "IDX_slug_redirect_kind_scope_id_from_slug_unique"',
+            `create unique index "IDX_slug_redirect_kind_scope_id_from_slug_unique" on slug_redirect (kind, scope_id, from_slug) where kind <> 'part' and deleted_at is null`,
+          ],
+          expect.stringMatching(
+            /^IDX_slug_redirect_kind_scope_id_from_slug_unique is defined as/,
+          ),
+        ],
+        [
           'a missing hand-written index',
           ['drop index "IDX_part_description_hash"'],
           'IDX_part_description_hash is missing',
@@ -307,6 +317,23 @@ medusaIntegrationTestRunner({
           { id: 'l', facts: {}, code: 'X', code_type: 'bogus' },
           'vin_lookup_code_type_check',
         ],
+        [
+          'part_identifier',
+          {
+            id: 'pi',
+            type: 'oem',
+            value: 'w 712',
+            normalized_value: 'W 712',
+            brand_id: 'b',
+            part_id: 'p',
+          },
+          'part_identifier_normalized_value_key',
+        ],
+        [
+          'rejected_number',
+          { id: 'r', brand_id: 'b', normalized_value: '' },
+          'rejected_number_normalized_value_key',
+        ],
       ])('refuses a %s row breaking %#', async (table, row, constraint) => {
         expect(await refusal(table, row)).toBe(constraint);
       });
@@ -387,6 +414,19 @@ medusaIntegrationTestRunner({
         brand_id: 'b',
         normalized_value: 'W71295',
       });
+      const retired = (
+        id: string,
+        kind: string,
+        scope_id: string | null,
+        deleted_at: string | null = null,
+      ) => ({
+        id,
+        kind,
+        from_id: `${id}-row`,
+        from_slug: 'oil-filters',
+        scope_id,
+        deleted_at,
+      });
       const spelling = (id: string, value: string, value_key: string) => ({
         id,
         supplier_id: 's',
@@ -411,6 +451,20 @@ medusaIntegrationTestRunner({
           'IDX_chassis_series_id_code_key_unique',
         ],
         [
+          'a Category slug retired twice',
+          'slug_redirect',
+          retired('sr1', 'category', null),
+          retired('sr2', 'category', null),
+          'IDX_slug_redirect_kind_scope_id_from_slug_unique',
+        ],
+        [
+          'a Model slug retired twice under one Make',
+          'slug_redirect',
+          retired('sr1', 'model', 'make_1'),
+          retired('sr2', 'model', 'make_1'),
+          'IDX_slug_redirect_kind_scope_id_from_slug_unique',
+        ],
+        [
           'a number already rejected for the Brand',
           'rejected_number',
           rejected('r1'),
@@ -427,6 +481,18 @@ medusaIntegrationTestRunner({
           'chassis',
           chassis('c1', 'E90', 's1'),
           chassis('c2', 'E90', 's2'),
+        ],
+        [
+          'one Model slug retired under two Makes',
+          'slug_redirect',
+          retired('sr1', 'model', 'make_1'),
+          retired('sr2', 'model', 'make_2'),
+        ],
+        [
+          'a slug retired again after its redirect was deleted',
+          'slug_redirect',
+          retired('sr1', 'category', null, '2026-01-01'),
+          retired('sr2', 'category', null),
         ],
         [
           'a Brand spelling key taken by the value check alone',

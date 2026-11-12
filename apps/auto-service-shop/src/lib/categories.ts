@@ -2,27 +2,33 @@ import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError, alreadyExists } from '../modules/_shared/admin-error';
 import type CatalogModuleService from '../modules/catalog/service';
+import { adminImage, storedImageSchema } from './images';
 
 export const CATEGORY_RELATIONS = ['fields', 'fields.options'];
 
 const byRank = <Row extends { rank: number; key: string }>(rows: Row[]) =>
   [...rows].sort((a, b) => a.rank - b.rank || a.key.localeCompare(b.key));
 
-export const withRankedFields = <
+export const shownCategory = <
   Row extends {
+    image: unknown;
     fields: ({ rank: number; key: string } & {
       options: { rank: number; key: string }[];
     })[];
   },
 >(
   category: Row,
-): Row => ({
-  ...category,
-  fields: byRank(category.fields).map((field) => ({
-    ...field,
-    options: byRank(field.options),
-  })),
-});
+) => {
+  const image = storedImageSchema.nullable().parse(category.image);
+  return {
+    ...category,
+    image: image && adminImage(image),
+    fields: byRank(category.fields).map((field) => ({
+      ...field,
+      options: byRank(field.options),
+    })),
+  };
+};
 
 export async function retrieveCategoryField(
   catalog: CatalogModuleService,

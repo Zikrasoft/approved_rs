@@ -243,6 +243,15 @@ medusaIntegrationTestRunner({
               identifiers: [{ type: 'oem', brand_id: 'brand_x', value: ' - ' }],
             },
           ],
+          [
+            'a number with no Latin letter or digit',
+            {
+              name: 'Part',
+              identifiers: [
+                { type: 'oem', brand_id: 'brand_x', value: 'фильтр+' },
+              ],
+            },
+          ],
         ])('returns a 400 for %s', async (_, body) => {
           const response = await api
             .post('/admin/parts', body, adminHeaders)
@@ -516,6 +525,11 @@ medusaIntegrationTestRunner({
           [
             'an empty number',
             { type: 'oem', brand_id: 'brand', value: ' - ' },
+            'INVALID_FIELD',
+          ],
+          [
+            'a number of symbols',
+            { type: 'oem', brand_id: 'brand', value: '+#/' },
             'INVALID_FIELD',
           ],
           [

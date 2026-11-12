@@ -728,6 +728,37 @@ medusaIntegrationTestRunner({
           await suppliers.listSupplierCategories({ supplier_id: varta.id }),
         ).toEqual([]);
       });
+
+      it('finds a Category again after staff renamed its slug, and keeps its supplier mappings on it', async () => {
+        const [transmission] = await catalog.listCategories({
+          slug: 'transmission',
+        });
+        const mappedBefore = await suppliers.listSupplierCategories(
+          { category_id: transmission.id },
+          { take: null },
+        );
+        await catalog.renameSlug('category', transmission.id, 'gearbox', {
+          created_by: 'user_1',
+          updated_by: 'user_1',
+        });
+
+        await run();
+
+        expect(
+          (await catalog.listCategories({}, { take: null })).filter(
+            ({ name }) => name.startsWith('Трансмиссия'),
+          ),
+        ).toEqual([
+          expect.objectContaining({ id: transmission.id, slug: 'gearbox' }),
+        ]);
+        expect(mappedBefore.length).toBeGreaterThan(0);
+        expect(
+          await suppliers.listSupplierCategories(
+            { category_id: transmission.id },
+            { take: null },
+          ),
+        ).toHaveLength(mappedBefore.length);
+      });
     });
   },
 });

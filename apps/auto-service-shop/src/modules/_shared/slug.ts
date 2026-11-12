@@ -1,8 +1,18 @@
+const UNDECOMPOSED: Record<string, string> = {
+  đ: 'dj',
+  ß: 'ss',
+  ł: 'l',
+  ø: 'o',
+  æ: 'ae',
+  œ: 'oe',
+};
+
 export const slugOf = (name: string) =>
   name
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/gu, '')
     .toLowerCase()
+    .replace(/[đßłøæœ]/gu, (letter) => UNDECOMPOSED[letter])
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 

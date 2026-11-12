@@ -1437,7 +1437,16 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["petrol", "diesel", "hybrid", "electric"],
+          "enumItems": [
+            "petrol",
+            "diesel",
+            "hybrid",
+            "mild-hybrid",
+            "plug-in-hybrid",
+            "electric",
+            "lpg",
+            "cng"
+          ],
           "mappedType": "enum"
         },
         "displacement_cc": {
@@ -2680,7 +2689,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "part_identifier_normalized_value_key",
+          "expression": "normalized_value SIMILAR TO '[A-Z0-9]+'",
+          "definition": "check ((normalized_value SIMILAR TO '[A-Z0-9]+'))"
+        }
+      ],
       "foreignKeys": {
         "part_identifier_brand_id_foreign": {
           "constraintName": "part_identifier_brand_id_foreign",
@@ -2879,7 +2894,13 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "rejected_number_normalized_value_key",
+          "expression": "normalized_value SIMILAR TO '[A-Z0-9]+'",
+          "definition": "check ((normalized_value SIMILAR TO '[A-Z0-9]+'))"
+        }
+      ],
       "foreignKeys": {},
       "nativeEnums": {}
     },
@@ -3160,7 +3181,10 @@
             "convertible",
             "gran-coupe",
             "suv",
-            "van"
+            "crossover",
+            "minivan",
+            "van",
+            "pickup"
           ],
           "mappedType": "enum"
         },
