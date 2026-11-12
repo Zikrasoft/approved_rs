@@ -40,11 +40,16 @@ const descriptionOf = ($: CheerioAPI) => {
 
 const PLACEHOLDER = /^Pseudo Article\b/u;
 
-const AGM_LINES = /\b(?:RED|YELLOW) TOP\b/u;
+const LINE_TECHNOLOGIES: [line: RegExp, technology: string][] = [
+  [/\bSLI\b/iu, 'SLI'],
+  [/\bEFB\b/iu, 'EFB'],
+  [/\bAGM\b|\b(?:RED|YELLOW) TOP\b/iu, 'AGM'],
+  [/\bLI-?ION\b/iu, 'Li-ion'],
+  [/\b(?:BLUE|SILVER|BLACK) DYNAMIC\b|\bPROMOTIVE\b|\bFRESHPACK\b/iu, 'SLI'],
+];
 
 const technologyOf = (name: string) =>
-  name.match(/\b(?:SLI|EFB|AGM)\b/u)?.[0] ??
-  (AGM_LINES.test(name) ? 'AGM' : undefined);
+  LINE_TECHNOLOGIES.find(([line]) => line.test(name))?.[1];
 
 export const parseVartaProduct = (html: string): SupplierArticle | null => {
   const $ = load(html);

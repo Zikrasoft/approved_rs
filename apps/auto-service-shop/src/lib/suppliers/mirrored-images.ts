@@ -4,6 +4,7 @@ import { get as httpsGet } from 'node:https';
 import type { LookupFunction } from 'node:net';
 
 import type { Logger, MedusaContainer } from '@medusajs/framework/types';
+import { CARLAB } from '@podbor/brands';
 
 import { errorMessage } from '../errors';
 import { IMAGE_TYPES, MAX_IMAGE_BYTES, publicFileKey } from '../images';
@@ -14,6 +15,11 @@ import { readCapped } from '../uploads';
 export const IMAGE_LOOKUP_REGISTRATION = 'supplierImageLookup';
 
 const FETCH_TIMEOUT_MS = 30_000;
+const RETRY_FAILED_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+const REQUEST_HEADERS = {
+  'user-agent': `Mozilla/5.0 (compatible; ${CARLAB.name}Shop/1.0; +${CARLAB.url})`,
+  accept: 'image/webp,image/png,image/jpeg;q=0.9,*/*;q=0.5',
+};
 
 const imageLookup = (scope: MedusaContainer): LookupFunction =>
   scope.hasRegistration(IMAGE_LOOKUP_REGISTRATION)
@@ -37,7 +43,11 @@ async function request(
   return new Promise((resolve, reject) =>
     get(
       url,
-      { lookup, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
+      {
+        lookup,
+        headers: REQUEST_HEADERS,
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      },
       resolve,
     ).on('error', reject),
   );
@@ -78,6 +88,9 @@ export async function mirroredImage(
   const pointer = `supplier-images/by-source/${sha256(source)}`;
   const known = await storage.images.get(pointer);
   if (known) return known.toString();
+  const failure = `supplier-images/failed/${sha256(source)}`;
+  const failedAt = Number((await storage.pages.get(failure))?.toString());
+  if (Date.now() - failedAt <= RETRY_FAILED_AFTER_MS) return null;
   try {
     const { body, contentType } = await download(source, imageLookup(scope));
     const key = `supplier-images/${sha256(body)}`;
@@ -95,6 +108,9 @@ export async function mirroredImage(
     logger.warn(
       `Supplier image ${source} not copied, staged without it: ${errorMessage(error)}`,
     );
+    await storage.pages.put(failure, Buffer.from(String(Date.now())), {
+      contentType: 'text/plain',
+    });
     return null;
   }
 }

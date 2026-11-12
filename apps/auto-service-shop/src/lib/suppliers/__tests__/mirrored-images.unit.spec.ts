@@ -23,10 +23,16 @@ describe('mirroredImage', () => {
   let server: Server;
   let origin: string;
   const fetched: string[] = [];
+  const userAgents: (string | undefined)[] = [];
 
   beforeAll(async () => {
     server = createServer((request, response) => {
       fetched.push(request.url!);
+      userAgents.push(request.headers['user-agent']);
+      if (request.url!.startsWith('/missing')) {
+        response.writeHead(403).end();
+        return;
+      }
       const type = request.url === '/a.svg' ? 'image/svg+xml' : 'image/png';
       response.writeHead(200, { 'content-type': `${type}; charset=binary` });
       response.end('<svg onload="alert(1)"/>');
@@ -84,5 +90,33 @@ describe('mirroredImage', () => {
       ),
     ).toBe('demo-supplier/ic-1001.webp');
     expect(images.objects.size).toBe(0);
+  });
+
+  it('asks for an image as a named client, as CDNs refuse a request without a user agent', async () => {
+    const { storage } = memoryStorage();
+
+    await mirroredImage(scope, storage, `${origin}/ua.png`, logger);
+
+    expect(userAgents[userAgents.length - 1]).toMatch(/carlab\.rs/u);
+  });
+
+  it('remembers a source it could not copy and asks for it again only a week later', async () => {
+    const { storage } = memoryStorage();
+    const source = `${origin}/missing-a.png`;
+    const now = Date.now();
+    const at = jest.spyOn(Date, 'now');
+
+    try {
+      at.mockReturnValue(now);
+      expect(await mirroredImage(scope, storage, source, logger)).toBeNull();
+      at.mockReturnValue(now + 6 * 24 * 3600 * 1000);
+      expect(await mirroredImage(scope, storage, source, logger)).toBeNull();
+      at.mockReturnValue(now + 7 * 24 * 3600 * 1000 + 1);
+      expect(await mirroredImage(scope, storage, source, logger)).toBeNull();
+    } finally {
+      at.mockRestore();
+    }
+
+    expect(fetched.filter((url) => url === '/missing-a.png')).toHaveLength(2);
   });
 });

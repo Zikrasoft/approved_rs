@@ -960,11 +960,14 @@ number gets its CI value in that script. The non-obvious parts:
   the shortest expiry you are willing to rotate, and revoke it at
   Settings → Developer settings at the first sign the server is compromised.
 - `OPENAI_API_KEY` also answers a Supplier Import's one question per new
-  article (Russian name, Category, attributes, description), on
+  article (Russian name, attributes, description; the Category comes from the
+  supplier category mapping, never from AI), on
   `gpt-6-luna`, the one model the shop asks. Answers are cached in the
   private bucket under `ai-answers/`, keyed by prompt, model and article, so a
   rerun or a rebuilt database asks nothing twice; changing the model or the
-  prompt asks again. An answer that fails validation twice is cached as a
+  prompt asks again. The prompt carries only the article's own Category, so
+  editing another Category asks nothing again. A re-import refreshes the
+  attributes of a Part it filed, unless staff edited them. An answer that fails validation twice is cached as a
   failure too and listed in the Import report, so a rerun does not pay for it
   again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
   how many articles are asked at once; vehicle fitting still runs one article
@@ -1258,7 +1261,12 @@ instead of mapping it (a mapping with no Category; the seed excludes MANN-FILTER
 `Hydraulics`, `Compressed Air-Oil Separation` and `EDM Filter` and FILTRON's
 `Hidraulika`). An import skips every article of an unmapped or excluded
 category and its report counts them, unmapped ones by code; a Supplier with no
-mapping at all is still filed by AI.
+mapping at all imports nothing. Each seeded mapping also names its part type
+(«Салонный фильтр», «Тормозные колодки», ...), and a crawled Part is named
+«type brand number» from it, so one type reads the same across suppliers; a
+battery is named from its attributes, and a mapping without a type leaves the
+name to AI. A crawled image that could not be copied is counted in the
+report and asked for again only after a week.
 
 It seeds no Parts or offers: the manual supplier is created on the first
 hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which

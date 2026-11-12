@@ -28,7 +28,7 @@ export type ImportSummary = {
   skipped_by_reason: Record<SkipReason, number>;
   without_engine_code: number;
   unmapped_categories: { code: string; count: number }[];
-  needs_category: string[];
+  images_failed: number;
   missing_fields: { number: string; category: string; fields: string[] }[];
   unanswered: Problem[];
   failed: Problem[];
@@ -46,7 +46,7 @@ export const importTally = (supplier: string) => {
     ) as Record<SkipReason, number>,
     without_engine_code: 0,
     unmapped_categories: [],
-    needs_category: [],
+    images_failed: 0,
     missing_fields: [],
     unanswered: [],
     failed: [],

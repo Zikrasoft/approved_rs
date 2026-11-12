@@ -362,30 +362,39 @@ export async function seedCategoryFields(
   return ids;
 }
 
+type PartType = [slug: string, type: string | null];
+
 type CrawledCatalogue = {
   brands: Record<string, string[]>;
-  categories: Record<string, string>;
+  categories: Record<string, PartType>;
   excluded: string[];
   makes: Record<string, string>;
 };
 
 const MAINTENANCE_SLUG = 'maintenance-consumables';
 
+const OIL_FILTER: PartType = [MAINTENANCE_SLUG, 'Масляный фильтр'];
+const AIR_FILTER: PartType = [MAINTENANCE_SLUG, 'Воздушный фильтр'];
+const FUEL_FILTER: PartType = [MAINTENANCE_SLUG, 'Топливный фильтр'];
+const CABIN_FILTER: PartType = [MAINTENANCE_SLUG, 'Салонный фильтр'];
+const SECONDARY_ELEMENT: PartType = [MAINTENANCE_SLUG, null];
+const TRANSMISSION_FILTER: PartType = ['transmission', 'Фильтр АКПП'];
+
 const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
   'mann-filter': {
     brands: { 'MANN-FILTER': ['MANN-FILTER'] },
     categories: {
-      'Oil Filter': MAINTENANCE_SLUG,
-      'Air Filter': MAINTENANCE_SLUG,
-      'Fuel Filter | For diesel': MAINTENANCE_SLUG,
-      'Fuel Filter | For gasoline': MAINTENANCE_SLUG,
-      'Fuel Filter | Water Separator': MAINTENANCE_SLUG,
-      'Cabin Air Filter | Particulate': MAINTENANCE_SLUG,
-      'Cabin Air Filter | Activated carbon': MAINTENANCE_SLUG,
-      'Cabin Air Filter | Biofunctional': MAINTENANCE_SLUG,
-      'Secondary Element': MAINTENANCE_SLUG,
-      Ventilator: 'engine-parts',
-      'Hydraulic Transmission Filter': 'transmission',
+      'Oil Filter': OIL_FILTER,
+      'Air Filter': AIR_FILTER,
+      'Fuel Filter | For diesel': FUEL_FILTER,
+      'Fuel Filter | For gasoline': FUEL_FILTER,
+      'Fuel Filter | Water Separator': FUEL_FILTER,
+      'Cabin Air Filter | Particulate': CABIN_FILTER,
+      'Cabin Air Filter | Activated carbon': CABIN_FILTER,
+      'Cabin Air Filter | Biofunctional': CABIN_FILTER,
+      'Secondary Element': SECONDARY_ELEMENT,
+      Ventilator: ['engine-parts', null],
+      'Hydraulic Transmission Filter': TRANSMISSION_FILTER,
     },
     excluded: ['Hydraulics', 'Compressed Air-Oil Separation', 'EDM Filter'],
     makes: MAKE_ALIASES,
@@ -393,48 +402,54 @@ const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
   filtron: {
     brands: { FILTRON: ['FILTRON'] },
     categories: {
-      'Filter vazduha': MAINTENANCE_SLUG,
-      'Filter goriva': MAINTENANCE_SLUG,
-      'Filter kabine': MAINTENANCE_SLUG,
-      'Filter ulja': MAINTENANCE_SLUG,
-      'Sekundarni element': MAINTENANCE_SLUG,
-      Sušač: 'brakes',
-      'Filter hidrauličnog prenosa': 'transmission',
+      'Filter vazduha': AIR_FILTER,
+      'Filter goriva': FUEL_FILTER,
+      'Filter kabine': CABIN_FILTER,
+      'Filter ulja': OIL_FILTER,
+      'Sekundarni element': SECONDARY_ELEMENT,
+      Sušač: ['brakes', null],
+      'Filter hidrauličnog prenosa': TRANSMISSION_FILTER,
     },
     excluded: ['Hidraulika'],
     makes: MAKE_ALIASES,
   },
   varta: {
     brands: { VARTA: ['VARTA'] },
-    categories: { battery: BATTERY_CATEGORY.slug },
+    categories: { battery: [BATTERY_CATEGORY.slug, 'Аккумулятор'] },
     excluded: [],
     makes: {},
   },
   bilstein: {
     brands: { Febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
     categories: {
-      'kočioni disk': 'brakes',
-      'Set kočione obloge': 'brakes',
-      'kočiona čeljust': 'brakes',
-      'kočiono crevo': 'brakes',
-      'doboš kočnice': 'brakes',
-      'sajla ručne kočnice': 'brakes',
-      amortizer: 'suspension',
-      rame: 'suspension',
-      'nosač ramena': 'suspension',
-      'nosač stabilizatora': 'suspension',
-      'aksijalni zglob': 'suspension',
-      'uljni filter': MAINTENANCE_SLUG,
-      'vazdušni filter': MAINTENANCE_SLUG,
-      'filter goriva': MAINTENANCE_SLUG,
-      'filter kabine': MAINTENANCE_SLUG,
-      'kanalni kaiš': 'engine-parts',
-      'garnitura zupčastih kaiševa': 'engine-parts',
+      'kočioni disk': ['brakes', 'Тормозной диск'],
+      'Set kočione obloge': ['brakes', 'Тормозные колодки'],
+      'kočiona čeljust': ['brakes', 'Тормозной суппорт'],
+      'kočiono crevo': ['brakes', 'Тормозной шланг'],
+      'doboš kočnice': ['brakes', 'Тормозной барабан'],
+      'sajla ručne kočnice': ['brakes', 'Трос стояночного тормоза'],
+      amortizer: ['suspension', 'Амортизатор'],
+      rame: ['suspension', 'Рычаг подвески'],
+      'nosač ramena': ['suspension', 'Сайлентблок рычага'],
+      'nosač stabilizatora': ['suspension', 'Втулка стабилизатора'],
+      'aksijalni zglob': ['suspension', 'Рулевая тяга'],
+      'uljni filter': OIL_FILTER,
+      'vazdušni filter': AIR_FILTER,
+      'filter goriva': FUEL_FILTER,
+      'filter kabine': CABIN_FILTER,
+      'kanalni kaiš': ['engine-parts', 'Поликлиновой ремень'],
+      'garnitura zupčastih kaiševa': ['engine-parts', 'Комплект ремня ГРМ'],
     },
     excluded: [],
     makes: MAKE_ALIASES,
   },
 };
+
+export const crawledPartType = (supplierKey: string, code: string) =>
+  Object.entries(
+    Object.entries(CRAWLED_CATALOGUES).find(([key]) => key === supplierKey)?.[1]
+      .categories ?? {},
+  ).find(([mapped]) => nameKey(mapped) === nameKey(code))?.[1][1] ?? null;
 
 export const GLOBAL_BRAND_ALIASES: Record<string, string[]> = {
   Bosch: ['Robert Bosch'],
@@ -621,7 +636,7 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
     const categoryOf = await seededCategoryBySlug(catalog);
     const wanted: [string, string | null][] = [
       ...Object.entries(categories).map(
-        ([code, slug]): [string, string | null] => [
+        ([code, [slug]]): [string, string | null] => [
           code,
           categoryOf(slug)?.id ?? null,
         ],

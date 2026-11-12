@@ -1,7 +1,7 @@
 import type { AttributeValues } from '@podbor/catalog-contract';
 
 import type {
-  ArticleInput,
+  ArticleFacts,
   CategoryChoice,
   QuoteReading,
   ShopAi,
@@ -13,10 +13,9 @@ export type FakeShopAi = {
   quotesRead: { pdf: Buffer; categories: CategoryChoice[]; brands: string[] }[];
   model: string;
   name: string | null;
-  category: string | null;
   attributes: AttributeValues;
   description: string | null;
-  articlesAsked: { article: ArticleInput; categories: CategoryChoice[] }[];
+  articlesAsked: { article: ArticleFacts; category: CategoryChoice | null }[];
   failure: Error | null;
   questions: number;
   delayMs: number;
@@ -30,7 +29,6 @@ export const createFakeShopAi = (): FakeShopAi => {
     quotesRead: [],
     model: 'fake',
     name: null,
-    category: null,
     attributes: {},
     description: null,
     articlesAsked: [],
@@ -44,11 +42,10 @@ export const createFakeShopAi = (): FakeShopAi => {
         fake.quotesRead.push({ pdf, categories, brands });
         return fake.reading;
       },
-      articleQuestion: (article, categories) => ({
+      articleQuestion: (article, category) => ({
         model: fake.model,
-        system: JSON.stringify(categories),
+        system: JSON.stringify(category),
         user: JSON.stringify(article),
-        categoryIds: categories.map(({ id }) => id),
       }),
       answerArticle: async ({ system, user }) => {
         fake.questions += 1;
@@ -59,14 +56,13 @@ export const createFakeShopAi = (): FakeShopAi => {
             await new Promise((resolve) => setTimeout(resolve, fake.delayMs));
           }
           if (fake.failure) throw fake.failure;
-          const article = JSON.parse(user) as ArticleInput;
+          const article = JSON.parse(user) as ArticleFacts;
           fake.articlesAsked.push({
             article,
-            categories: JSON.parse(system) as CategoryChoice[],
+            category: JSON.parse(system) as CategoryChoice | null,
           });
           return {
             name: fake.name ?? article.name,
-            category_id: fake.category,
             attributes: fake.attributes,
             description: fake.description,
           };

@@ -36,6 +36,7 @@ medusaIntegrationTestRunner({
     describe('a supplier import into the production categories', () => {
       let catalog: CatalogModuleService;
       let maintenanceId: string;
+      let run: () => Promise<unknown>;
 
       beforeAll(async () => {
         const container = getContainer();
@@ -75,7 +76,6 @@ medusaIntegrationTestRunner({
             'Bajpas ventil': 'da',
           },
         });
-        shopAi.category = maintenanceId;
         shopAi.attributes = {
           'filter-type': 'spin-on',
           'inner-diameter': 62,
@@ -89,13 +89,22 @@ medusaIntegrationTestRunner({
           'admin@production-fields-import.local',
           'supersecret',
         );
-        await importRuns(api, adminHeaders).run(intercars.id);
+        run = () => importRuns(api, adminHeaders).run(intercars.id);
+        await run();
       });
 
-      it('shows the AI the new fields of the category with their options', () => {
-        const [{ categories }] = shopAi.articlesAsked;
-        const fields =
-          categories.find(({ id }) => id === maintenanceId)?.fields ?? [];
+      const filter = async () => {
+        const [identifier] = await catalog.listPartIdentifiers(
+          { normalized_value: 'W71275' },
+          { relations: ['part'] },
+        );
+        return identifier.part;
+      };
+
+      it('shows the AI only the mapped category, with its new fields and their options', () => {
+        const [{ category }] = shopAi.articlesAsked;
+        expect(category?.id).toBe(maintenanceId);
+        const fields = category?.fields ?? [];
         expect(fields.map(({ key }) => key)).toEqual(
           expect.arrayContaining([
             'base',
@@ -126,6 +135,44 @@ medusaIntegrationTestRunner({
             base: 'synthetic',
             api: ['sn', 'cf'],
           },
+        });
+      });
+
+      it('refreshes the attributes of a filed Part when its source specs change', async () => {
+        supplier.articles[0].specs = {
+          ...supplier.articles[0].specs,
+          'Unutrašnji prečnik': '64 mm',
+        };
+        shopAi.attributes = { ...shopAi.attributes, 'inner-diameter': 64 };
+
+        await run();
+
+        expect((await filter()).attributes).toMatchObject({
+          'inner-diameter': 64,
+        });
+      });
+
+      it('keeps attributes staff edited by hand', async () => {
+        await catalog.editPart(
+          (await filter()).id,
+          {
+            attributes: {
+              ...(await filter()).attributes,
+              'inner-diameter': 70,
+            },
+          },
+          'user_staff',
+        );
+        supplier.articles[0].specs = {
+          ...supplier.articles[0].specs,
+          'Unutrašnji prečnik': '66 mm',
+        };
+        shopAi.attributes = { ...shopAi.attributes, 'inner-diameter': 66 };
+
+        await run();
+
+        expect((await filter()).attributes).toMatchObject({
+          'inner-diameter': 70,
         });
       });
     });

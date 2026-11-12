@@ -191,6 +191,9 @@ medusaIntegrationTestRunner({
           { supplier_id: ic.id, code: 'IC-ENGINE-OIL', category_id: strict.id },
           { supplier_id: wh.id, code: 'filters', category_id: oilFilters.id },
           { supplier_id: ic.id, code: 'IC-HYDRAULICS', category_id: null },
+          { supplier_id: pf.id, code: 'Filteri', category_id: oilFilters.id },
+          { supplier_id: pf.id, code: 'Motorna ulja', category_id: strict.id },
+          { supplier_id: pf.id, code: 'battery', category_id: batteries.id },
         ]);
         await catalog.createPartWithIdentifiers({
           name: 'Oil filter',
@@ -215,7 +218,6 @@ medusaIntegrationTestRunner({
         }
         Object.assign(shopAi, {
           name: null,
-          category: null,
           attributes: {},
           description: null,
           articlesAsked: [],
@@ -423,7 +425,6 @@ medusaIntegrationTestRunner({
         expect((await page('OIL5W30'))?.part.category_id).toBeNull();
         expect(response.data.imports[0]).toMatchObject({
           supplier: 'Intercars',
-          needs_category: ['OIL 5W30'],
           missing_fields: [
             {
               number: 'OIL 5W30',
@@ -473,7 +474,6 @@ medusaIntegrationTestRunner({
             category: 'IC-OIL',
           },
         );
-        shopAi.category = oilFiltersId;
 
         const response = await runImport();
 
@@ -495,8 +495,8 @@ medusaIntegrationTestRunner({
           },
           without_engine_code: 0,
           unmapped_categories: [],
-          needs_category: [],
           missing_fields: [],
+          images_failed: 0,
           unanswered: [],
           failed: [],
         };
@@ -560,8 +560,8 @@ medusaIntegrationTestRunner({
           },
           without_engine_code: 0,
           unmapped_categories: [],
-          needs_category: [],
           missing_fields: [],
+          images_failed: 0,
           unanswered: [],
           failed: [],
         });
@@ -627,7 +627,7 @@ medusaIntegrationTestRunner({
         );
       });
 
-      it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
+      it('fills a Part from a Supplier that quotes nothing with the attributes of its mapped Category and a description, and no Offer', async () => {
         partsfinder.articles.push({
           article_id: 'IC-20',
           brand: 'MANN-FILTER',
@@ -638,7 +638,6 @@ medusaIntegrationTestRunner({
           specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
           applicability: ['BMW G20 320i'],
         });
-        shopAi.category = engineOilId;
         shopAi.attributes = { viscosity: '0W-20' };
         shopAi.description = 'Синтетическое моторное масло 0W-20.';
 
@@ -646,7 +645,7 @@ medusaIntegrationTestRunner({
 
         expect(response.data.imports[2]).toMatchObject({
           created: 1,
-          needs_category: [],
+          missing_fields: [],
         });
         expect(await page('OIL0W20')).toMatchObject({
           part: {
@@ -666,31 +665,22 @@ medusaIntegrationTestRunner({
               description: 'Potpuno sintetičko motorno ulje 0W-20.',
               specs: { Viskozitet: '0W-20', Zapremina: '5 l' },
               fits: [],
-              category_id: null,
             },
-            categories: expect.arrayContaining([
-              {
-                id: engineOilId,
-                name: 'Моторное масло',
-                text: '',
-                fields: [
-                  {
-                    key: 'viscosity',
-                    label: 'Вязкость',
-                    type: 'text',
-                    unit: null,
-                    required: true,
-                    options: [],
-                  },
-                ],
-              },
-              {
-                id: oilFiltersId,
-                name: 'Масляные фильтры',
-                text: '',
-                fields: [],
-              },
-            ]),
+            category: {
+              id: engineOilId,
+              name: 'Моторное масло',
+              text: '',
+              fields: [
+                {
+                  key: 'viscosity',
+                  label: 'Вязкость',
+                  type: 'text',
+                  unit: null,
+                  required: true,
+                  options: [],
+                },
+              ],
+            },
           },
         ]);
       });
@@ -705,7 +695,6 @@ medusaIntegrationTestRunner({
           description: 'Filter ulja.',
         });
         shopAi.name = 'Масляный фильтр MANN-FILTER W 1000';
-        shopAi.category = oilFiltersId;
         shopAi.description = 'Масляный фильтр.';
         await runImport();
         const made = (await page('W1000'))!.part;
@@ -723,25 +712,7 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('files an article only under a Category from the list', async () => {
-        partsfinder.articles.push({
-          article_id: 'IC-31',
-          brand: 'MANN-FILTER',
-          number: 'W 1100',
-          name: 'Filter ulja W 1100',
-          category: 'Filteri',
-        });
-        shopAi.category = 'cat_invented';
-
-        const response = await runImport();
-
-        expect(response.data.imports[2]).toMatchObject({
-          needs_category: ['W 1100'],
-        });
-        expect((await page('W1100'))?.part.category_id).toBeNull();
-      });
-
-      it('keeps the mapped Category over AI and drops the attributes AI mapped for another Category', async () => {
+      it('drops the attributes that are not fields of the mapped Category', async () => {
         intercars.articles.push({
           article_id: 'IC-21',
           brand: 'MANN-FILTER',
@@ -750,7 +721,6 @@ medusaIntegrationTestRunner({
           category: 'IC-OIL',
           specs: { Visina: '120 mm' },
         });
-        shopAi.category = engineOilId;
         shopAi.attributes = { height: 120 };
 
         await runImport();
@@ -761,12 +731,12 @@ medusaIntegrationTestRunner({
         });
         expect(shopAi.articlesAsked).toEqual([
           expect.objectContaining({
-            article: expect.objectContaining({ category_id: oilFiltersId }),
+            category: expect.objectContaining({ id: oilFiltersId }),
           }),
         ]);
       });
 
-      it('still creates the Part, unclassified and undescribed, when AI fails', async () => {
+      it('still creates the Part under its mapped Category, undescribed, when AI fails', async () => {
         partsfinder.articles.push({
           article_id: 'IC-24',
           brand: 'MANN-FILTER',
@@ -781,52 +751,60 @@ medusaIntegrationTestRunner({
 
         expect(response.data.imports[2]).toMatchObject({
           created: 1,
-          needs_category: ['W 970'],
           unanswered: [{ number: 'W 970', reason: 'OpenAI is down' }],
         });
         expect((await page('W970'))?.part).toMatchObject({
-          category_id: null,
+          category_id: oilFiltersId,
           description: null,
         });
       });
 
-      it('files a Part it left without a Category once a later import classifies it', async () => {
+      it('files a Part it left without a Category once a later import fills its required fields', async () => {
         partsfinder.articles.push({
           article_id: 'IC-26',
           brand: 'MANN-FILTER',
-          number: 'W 990',
-          name: 'Фильтр W990',
-          category: 'Filteri',
-          specs: { Visina: '80 mm' },
+          number: 'OIL 5W40',
+          name: 'Масло 5W-40',
+          category: 'Motorna ulja',
+          specs: { Viskozitet: '5W-40' },
         });
         shopAi.failure = new Error('OpenAI is down');
         await runImport();
         shopAi.failure = null;
-        shopAi.category = oilFiltersId;
+        shopAi.attributes = { viscosity: '5W-40' };
 
         const response = await runImport();
 
-        expect(response.data.imports[2]).toMatchObject({ needs_category: [] });
-        expect((await page('W990'))?.part.category_id).toBe(oilFiltersId);
+        expect(response.data.imports[2]).toMatchObject({ missing_fields: [] });
+        expect((await page('OIL5W40'))?.part).toMatchObject({
+          category_id: engineOilId,
+          attributes: { viscosity: '5W-40' },
+        });
       });
 
-      it('names a Part a later import still cannot file in the summary', async () => {
+      it('names a Part a later import still cannot file and the fields it misses', async () => {
         partsfinder.articles.push({
           article_id: 'IC-27',
           brand: 'MANN-FILTER',
           number: 'OIL 0W20',
           name: 'Масло моторное 0W-20',
-          category: 'Filteri',
+          category: 'Motorna ulja',
+          specs: { Zapremina: '5 l' },
         });
         shopAi.failure = new Error('OpenAI is down');
         await runImport();
         shopAi.failure = null;
-        shopAi.category = engineOilId;
 
         const response = await runImport();
 
         expect(response.data.imports[2]).toMatchObject({
-          needs_category: ['OIL 0W20'],
+          missing_fields: [
+            {
+              number: 'OIL 0W20',
+              category: 'Моторное масло',
+              fields: ['Вязкость'],
+            },
+          ],
         });
         expect((await page('OIL0W20'))?.part.category_id).toBeNull();
       });
@@ -903,10 +881,8 @@ medusaIntegrationTestRunner({
         });
         expect(shopAi.articlesAsked).toEqual([
           expect.objectContaining({
-            article: expect.objectContaining({
-              name: 'Фильтр W980 новый',
-              category_id: null,
-            }),
+            article: expect.objectContaining({ name: 'Фильтр W980 новый' }),
+            category: null,
           }),
         ]);
       });
@@ -920,7 +896,6 @@ medusaIntegrationTestRunner({
           category: 'battery',
           specs: { Amperi: '60 Ah', 'Veličina kućišta': 'H4 / L1' },
         });
-        shopAi.category = batteriesId;
         shopAi.attributes = {
           capacity: 60,
           technology: 'agm',
@@ -931,7 +906,6 @@ medusaIntegrationTestRunner({
         const response = await runImport();
 
         expect(response.data.imports[2]).toMatchObject({
-          needs_category: [],
           missing_fields: [],
         });
         expect((await page('BAT560'))?.part).toMatchObject({
@@ -950,7 +924,6 @@ medusaIntegrationTestRunner({
           specs: { Amperi: '74 Ah' },
         });
         shopAi.name = 'Аккумулятор 12 В 74 Ач';
-        shopAi.category = batteriesId;
         shopAi.attributes = { capacity: 74, technology: 'standard' };
 
         await runImport();
@@ -978,13 +951,11 @@ medusaIntegrationTestRunner({
           category: 'battery',
           specs: { Amperi: '50 Ah', Tehnologija: 'Li-ion' },
         });
-        shopAi.category = batteriesId;
         shopAi.attributes = { capacity: 50, technology: 'lithium' };
 
         const response = await runImport();
 
         expect(response.data.imports[2]).toMatchObject({
-          needs_category: [],
           missing_fields: [],
         });
         expect((await page('850150000'))?.part).toMatchObject({
@@ -1006,13 +977,11 @@ medusaIntegrationTestRunner({
           category: 'battery',
           specs: { Amperi: '19 Ah' },
         });
-        shopAi.category = batteriesId;
         shopAi.attributes = { capacity: 19, technology: 'gel' };
 
         const response = await runImport();
 
         expect(response.data.imports[2]).toMatchObject({
-          needs_category: ['BAT 519'],
           missing_fields: [
             {
               number: 'BAT 519',
@@ -1384,14 +1353,17 @@ medusaIntegrationTestRunner({
           expect((await page('HU7020Z'))?.supplier_data.images).toEqual(first);
         });
 
-        it('stages nothing for an image it cannot fetch, and tries again on the next import', async () => {
+        it('stages nothing for an image it cannot fetch, counts it, and does not ask for it again on the next import', async () => {
           const source = brandImage('/missing.jpg');
           intercars.articles.push(articleWithImages([source]));
 
-          await runImport();
-          await runImport();
+          const first = await runImport();
+          const second = await runImport();
 
-          expect(served).toEqual(['/missing.jpg', '/missing.jpg']);
+          expect(served).toEqual(['/missing.jpg']);
+          expect(
+            [first, second].map(({ data }) => data.imports[0].images_failed),
+          ).toEqual([1, 1]);
           expect((await page('HU7020Z'))?.supplier_data.images).toEqual([]);
         });
 
