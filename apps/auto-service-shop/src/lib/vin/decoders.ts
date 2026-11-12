@@ -2,11 +2,13 @@ import { bmwTypeCodeDecoder } from './bmw-type-code';
 import type { VinDecoder } from './decoder';
 import { mercedesBaumusterDecoder } from './mercedes-baumuster';
 import { vagModelCodeDecoder } from './vag-model-code';
+import { wmiMakeDecoder } from './wmi-make';
 
 export const VIN_DECODERS_BY_NAME = {
   'bmw-type-code': bmwTypeCodeDecoder,
   'mercedes-baumuster': mercedesBaumusterDecoder,
   'vag-model-code': vagModelCodeDecoder,
+  'wmi-make': wmiMakeDecoder,
 } as const satisfies Record<string, VinDecoder>;
 
 export type VinDecoderName = keyof typeof VIN_DECODERS_BY_NAME;
