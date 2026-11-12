@@ -246,6 +246,18 @@ opens the in-bot manager screen instead. On approved.rs the footer's «Напи�
 менеджеру» and the Telegram tile on `/thanks/` link to it too; unset, they open
 the capture bot.
 
+### Google rating (carlab.rs, build time only)
+
+`GOOGLE_PLACES_API_KEY` and `GOOGLE_PLACE_ID` let the carlab.rs build read the
+workshop's rating and review count from Places API (New) (`rating`,
+`userRatingCount`). The key is a secret: restrict it to the Places API (New).
+The Place ID comes from Google's Place ID Finder for the workshop's Maps card.
+The build pulls them through `vercel pull`, so they live in the carlab.rs
+Vercel project only. Unset, or when the API fails or answers something
+malformed, the build logs a warning and shows `GOOGLE_RATING` from
+`src/utils/constants.ts`, so update that by hand now and then. The number
+refreshes only when carlab.rs deploys.
+
 ### Analytics — no environment variables
 
 The GA4 measurement ids and the Meta Pixel id are baked into each

@@ -41,7 +41,7 @@ describe('SiteFooter', async () => {
   });
 
   it('shows the Google rating beside the tagline', () => {
-    expect(footer.textContent).toContain('5.0 в Google · 14 отзывов');
+    expect(footer.textContent).toContain('5.0 в Google · 18 отзывов');
   });
 
   it('keeps the footer out of the regions that hide the floating bar', () => {
