@@ -249,6 +249,19 @@ describe('parseEnv', () => {
     ).toEqual(['demo']);
   });
 
+  it('reads the staff visitor ids as a list and refuses one that is not a visitor id', () => {
+    expect(parseEnv(VALID_ENV).STAFF_VISITOR_IDS).toEqual([]);
+    expect(
+      parseEnv({
+        ...VALID_ENV,
+        STAFF_VISITOR_IDS: ' 0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b , ',
+      }).STAFF_VISITOR_IDS,
+    ).toEqual(['0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b']);
+    expect(() =>
+      parseEnv({ ...VALID_ENV, STAFF_VISITOR_IDS: '_ga.123' }),
+    ).toThrow();
+  });
+
   it('refuses an unknown supplier adapter', () => {
     expect(() =>
       parseEnv({ ...VALID_ENV, SUPPLIER_ADAPTERS: 'demo,intercars' }),

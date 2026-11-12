@@ -104,6 +104,11 @@ const envFields = z.object({
     .default(VIN_DECODER_NAMES.join(','))
     .transform(nameList)
     .pipe(z.array(z.enum(VIN_DECODER_NAMES)).min(1)),
+  STAFF_VISITOR_IDS: z
+    .string()
+    .default('')
+    .transform(nameList)
+    .pipe(z.array(z.uuid())),
   SUPPLIER_ADAPTERS: z
     .string()
     .default('')

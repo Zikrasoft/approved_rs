@@ -63,10 +63,15 @@ async function quoteVehicle(
   vin: string | null,
 ): Promise<Vehicle | null> {
   if (!vin) return null;
-  const lookup = await resolveVin(vin, vinDecoders(scope), {
-    catalog: scope.resolve(CATALOG_MODULE),
-    vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
-  });
+  const lookup = await resolveVin(
+    vin,
+    vinDecoders(scope),
+    {
+      catalog: scope.resolve(CATALOG_MODULE),
+      vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
+    },
+    { source: 'workshop-quote' },
+  );
   return lookup.resolved ? lookup.vehicle : null;
 }
 

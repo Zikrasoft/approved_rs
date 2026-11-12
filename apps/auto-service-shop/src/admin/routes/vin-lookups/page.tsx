@@ -8,6 +8,7 @@ import {
   Heading,
   Input,
   Label,
+  Switch,
   Table,
   Text,
   toast,
@@ -26,6 +27,7 @@ import { ScrollArea } from '../../components/scroll-area';
 import { acknowledged, adminFetch, useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import { sourceLine } from '../../lib/vin-sources';
 import {
   labelledVehicleSchema,
   openDataLine,
@@ -38,7 +40,12 @@ const SHOWN_VEHICLES = 100;
 const unresolvedCodeSchema = z.object({
   make: z.string(),
   code: z.string(),
-  count: z.number(),
+  customers: z.number(),
+  sources: z.object({
+    storefront: z.number(),
+    'workshop-quote': z.number(),
+    admin: z.number(),
+  }),
   last_seen: z.string(),
   reference: openDataReferenceSchema.nullable(),
 });
@@ -257,12 +264,14 @@ const VinLookupsPage = () => {
   const [count, setCount] = useState(0);
   const [pageIndex, setPageIndex] = useState(0);
   const [linking, setLinking] = useState<UnresolvedCode | null>(null);
+  const [all, setAll] = useState(false);
 
   const load = () =>
     adminFetch(
       `/admin/vin-lookups/unresolved?${new URLSearchParams({
         offset: String(pageIndex * PAGE_SIZE),
         limit: String(PAGE_SIZE),
+        ...(all && { all: 'true' }),
       })}`,
       codesSchema,
     ).then((data) => {
@@ -277,7 +286,7 @@ const VinLookupsPage = () => {
 
   useEffect(() => {
     load();
-  }, [pageIndex]);
+  }, [pageIndex, all]);
 
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
@@ -304,6 +313,16 @@ const VinLookupsPage = () => {
     <Container className="flex flex-col gap-y-4">
       <Heading level="h1">{t('vinLookups.heading')}</Heading>
       <Text className="text-ui-fg-subtle">{t('vinLookups.lead')}</Text>
+      <Label className="flex items-center gap-x-2">
+        <Switch
+          checked={all}
+          onCheckedChange={(checked) => {
+            setPageIndex(0);
+            setAll(checked);
+          }}
+        />
+        {t('vinLookups.showAll')}
+      </Label>
       {codes === null ? (
         <ListLoading />
       ) : codes.length === 0 ? (
@@ -324,7 +343,10 @@ const VinLookupsPage = () => {
                     {t('vinLookups.columns.openData')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
-                    {t('vinLookups.columns.count')}
+                    {t('vinLookups.columns.customers')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.sources')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
                     {t('vinLookups.columns.lastSeen')}
@@ -353,7 +375,10 @@ const VinLookupsPage = () => {
                       )}
                     </Table.Cell>
                     <Table.Cell className="tabular-nums">
-                      {entry.count.toLocaleString(i18n.language)}
+                      {entry.customers.toLocaleString(i18n.language)}
+                    </Table.Cell>
+                    <Table.Cell className="whitespace-nowrap tabular-nums">
+                      {sourceLine(t, entry.sources)}
                     </Table.Cell>
                     <Table.Cell className="tabular-nums">
                       {new Date(entry.last_seen).toLocaleDateString(

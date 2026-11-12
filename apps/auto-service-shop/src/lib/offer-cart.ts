@@ -599,7 +599,12 @@ const offerCartDeps = (scope: MedusaContainer): CartDeps => {
         await carts().updateLineItems(itemId, { metadata });
       }
     },
-    carFor: (vin) => carFor(scope, vin),
+    carFor: (vin) =>
+      carFor(scope, vin, {
+        source: 'storefront',
+        bot: null,
+        visitor_id: null,
+      }),
     async saveMetadata(cartId, metadata) {
       await carts().updateCarts(cartId, { metadata });
     },

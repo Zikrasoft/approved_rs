@@ -10,6 +10,7 @@ import { listVehicleResponses } from '../store-response';
 import { vehiclesDescribedByTypeKey } from './bmw-type-key';
 import { modelsListingBaumuster } from './crawled-baumuster';
 import type { VinDecode, VinDecoder } from './decoder';
+import type { LookupOrigin } from './sources';
 import { vehiclesOfVagModelCode } from './vag-model-match';
 
 type Answer = { decoder: VinDecoder; decode: VinDecode };
@@ -107,6 +108,7 @@ export const resolveVin = async (
   vin: string,
   decoders: VinDecoder[],
   { catalog, vinLookups }: Services,
+  origin: LookupOrigin,
 ): Promise<
   | Omit<Extract<VinLookupResponse, { resolved: true }>, 'place'>
   | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
@@ -126,7 +128,7 @@ export const resolveVin = async (
     vehicle_id: vehicle?.id ?? null,
   };
   if (record.make) {
-    await vinLookups.saveLookup(record);
+    await vinLookups.saveLookup(record, origin);
   }
 
   return vehicle

@@ -344,6 +344,79 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('records a storefront lookup with what the site knows of its visitor', async () => {
+        const vin = 'WBA5M11070N000040';
+
+        await api.post(
+          '/store/vin-lookups',
+          {
+            vin,
+            bot: true,
+            visitor_id: '1c9b5a6f-7d2e-4f3a-8b4c-8d9e0f1a2b3c',
+          },
+          storeHeaders,
+        );
+        await api.post(
+          '/store/vin-lookups',
+          { vin, visitor_id: 'not-an-id' },
+          storeHeaders,
+        );
+
+        const [{ id }] = await vinLookups.listVinLookups({ vin });
+        const hits = await vinLookups.listVinLookupHits(
+          { vin_lookup_id: id },
+          { order: { created_at: 'ASC' } },
+        );
+        expect(
+          hits.map(({ source, bot, visitor_id }) => ({
+            source,
+            bot,
+            visitor_id,
+          })),
+        ).toEqual([
+          {
+            source: 'storefront',
+            bot: true,
+            visitor_id: '1c9b5a6f-7d2e-4f3a-8b4c-8d9e0f1a2b3c',
+          },
+          { source: 'storefront', bot: null, visitor_id: null },
+        ]);
+      });
+
+      it('lists only codes real customers searched unless staff ask for all', async () => {
+        const staff = '0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b';
+        process.env.STAFF_VISITOR_IDS = staff;
+        await api.post(
+          '/store/vin-lookups',
+          { vin: 'WBA6N22070N000041', visitor_id: staff },
+          storeHeaders,
+        );
+        await api.post(
+          '/store/vin-lookups',
+          { vin: 'WBA6N23070N000042', bot: true },
+          storeHeaders,
+        );
+
+        const codesOf = async (query: string) =>
+          (
+            await api.get(`/admin/vin-lookups/unresolved${query}`, adminHeaders)
+          ).data.codes.map(({ code }: { code: string }) => code);
+
+        try {
+          expect(await codesOf('')).not.toEqual(
+            expect.arrayContaining(['6N22']),
+          );
+          expect(await codesOf('')).not.toEqual(
+            expect.arrayContaining(['6N23']),
+          );
+          expect(await codesOf('?all=true')).toEqual(
+            expect.arrayContaining(['6N22', '6N23']),
+          );
+        } finally {
+          delete process.env.STAFF_VISITOR_IDS;
+        }
+      });
+
       it('pages the unresolved codes and counts them all', async () => {
         await lookUp('WBA44CC070N000013');
         await lookUp('WBA45CD070N000014');
@@ -388,6 +461,8 @@ medusaIntegrationTestRunner({
           make: 'bmw',
           code: '3K11',
           count: 1,
+          customers: 1,
+          sources: { storefront: 1, 'workshop-quote': 0, admin: 0 },
           last_seen: expect.any(String),
           reference: {
             code: '3K11',
