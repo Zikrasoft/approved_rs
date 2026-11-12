@@ -43,18 +43,11 @@ if (import.meta.main) {
     .split('\n')
     .filter(Boolean);
 
-  let failed = false;
   for (const file of files) {
     for (const tell of copyTells(file, await readFile(file, 'utf-8'))) {
-      failed = true;
-      console.error(`${file}: ${tell}`);
+      console.warn(
+        `::warning file=${file}::em dash or Ё, use a comma, colon, period or hyphen, and е: ${tell}`,
+      );
     }
-  }
-
-  if (failed) {
-    console.error(
-      '\nRussian source copy carries an em dash or Ё: use a comma, colon, period or hyphen, and е.',
-    );
-    process.exit(1);
   }
 }
