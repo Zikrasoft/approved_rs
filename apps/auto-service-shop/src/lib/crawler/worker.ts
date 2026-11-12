@@ -2,7 +2,7 @@ import { ModulesSdkUtils } from '@medusajs/framework/utils';
 
 import { parseCrawlerEnv } from '../env';
 import { s3PagesBucket } from '../storage';
-import { type Clock, crawlSite } from './crawl';
+import { type Clock, crawlOrPause } from './crawl';
 import { crawleeFetcher } from './fetcher';
 import { CRAWLED_SITES } from './sites';
 import { crawlStore } from './store';
@@ -34,6 +34,7 @@ async function main(): Promise<void> {
     });
   await beat();
   setInterval(beat, POLL_MS);
+  const crashes = new Map<string, number>();
   console.log('Crawler waiting for a crawl started in the admin');
   for (;;) {
     const name = await store.next(names, new Date(clock.now()));
@@ -44,12 +45,16 @@ async function main(): Promise<void> {
     }
     console.log(`Crawling ${site.name}`);
     try {
-      await crawlSite(site, {
-        store,
-        openFetcher: crawleeFetcher,
-        clock,
-        from: env.CRAWLER_FROM,
-      });
+      await crawlOrPause(
+        site,
+        {
+          store,
+          openFetcher: crawleeFetcher,
+          clock,
+          from: env.CRAWLER_FROM,
+        },
+        crashes,
+      );
       const run = await store.run(site.name);
       console.log(
         `Crawl of ${site.name} ${run?.status ?? 'stopped'}${run?.paused_reason ? `: ${run.paused_reason}` : ''}`,

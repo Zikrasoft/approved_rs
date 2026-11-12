@@ -16,7 +16,7 @@ card:
 contacts:
   button: Контакты
   text: Мы в Белграде, ждем вас в сервисе.
-  hours: Пн–Пт 08:00–18:00 · Сб 09:00–14:00
+  hours: Пн–Пт 09:00–18:00 · Сб 09:00–14:00
 manager:
   button: 👤 Написать менеджеру
   text: Напишите ваш вопрос одним сообщением, менеджер ответит здесь же.
@@ -59,7 +59,7 @@ translations:
     contacts:
       button: Kontakt
       text: Nalazimo se u Beogradu, očekujemo Vas u auto servisu.
-      hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
+      hours: Pon–Pet 09:00–18:00 · Sub 09:00–14:00
     manager:
       button: 👤 Pišite saradniku
       text: Napišite svoje pitanje u jednoj poruci, saradnik će Vam odgovoriti ovde.
@@ -101,7 +101,7 @@ translations:
     contacts:
       button: Contact us
       text: We're in Belgrade. We'd be happy to see you at our workshop.
-      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
+      hours: Mon–Fri 09:00–18:00 · Sat 09:00–14:00
     manager:
       button: 👤 Message our team
       text: Send your question in a single message, and our team will reply right here.
@@ -124,4 +124,4 @@ translations:
       shortDescription: 'Car servicing, repairs and diagnostics in Belgrade. Contact our team: {manager}'
       menuCommand: Main menu
       langCommand: Change language
-translatedFrom: 791101465c335094
+translatedFrom: 248a5027562cd493

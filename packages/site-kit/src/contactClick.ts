@@ -30,7 +30,11 @@ export function defineContactClickTracking(
     .forEach((element) => {
       element.addEventListener(
         'click',
-        () => {
+        (event) => {
+          const tapped = (event.target as Element).closest(
+            `[${CHANNEL_ATTRIBUTE}]`,
+          );
+          if (tapped !== element) return;
           const channel = element.dataset.contactChannel;
           if (!isTrackedContactChannel(channel)) return;
           const placement = element.closest<HTMLElement>(

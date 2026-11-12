@@ -144,6 +144,15 @@ describe('createContactControls', () => {
           );
   });
 
+  it('carries the plain number on any page when the control asks to show it, for the phone alone', () => {
+    for (const onThanks of [true, false])
+      for (const channel of TRACKED_CONTACT_CHANNELS)
+        expect(
+          bare({ channel, showNumber: true, onThanks, locale: 'ru' })
+            .plainNumber,
+        ).toBe(channel === 'phone' ? '381601234567' : undefined);
+  });
+
   it('stamps the channel, and opens every messenger in a new tab', () => {
     expect(
       bare({

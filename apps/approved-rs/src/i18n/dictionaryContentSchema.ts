@@ -58,6 +58,7 @@ export const dictionaryContentSchema = z
         aboutLabel: z.string(),
       })
       .strict(),
+    copyPhone: z.object({ label: z.string(), copied: z.string() }).strict(),
     telegramChoice: z
       .object({
         heading: z.string(),

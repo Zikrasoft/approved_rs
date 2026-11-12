@@ -8,8 +8,10 @@ import PanelHero from '@/components/PanelHero.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
-import workshopBay from '@/assets/workshop-bay.jpg';
+import workshopBay from '@/assets/workshop-bay-open-hood.jpg';
 import wallSign from '@/assets/workshop-wall-sign.jpg';
+import loungeSofas from '@/assets/client-lounge-sofas.jpg';
+import loungeCoffee from '@/assets/client-lounge-coffee.jpg';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { panelPhoto } from '@/utils/panelPhoto';
 import { localeFrom } from '@/i18n/config';
@@ -38,6 +40,12 @@ const signSizes = coverSizes(
   '(min-width: 1224px) 1144px, calc(100vw - 2.5rem)',
   coverScale(wallSign, 3),
 );
+const lounge = [
+  { image: loungeSofas, alt: site.photos.loungeSofas },
+  { image: loungeCoffee, alt: site.photos.loungeCoffee },
+];
+const loungeSizes =
+  '(min-width: 1224px) 378px, (min-width: 1024px) calc(50vw - 214px), calc(50vw - 26px)';
 const photo = await panelPhoto({
   image: workshopBay,
   alt: site.photos.workshopBay,
@@ -84,10 +92,10 @@ const photo = await panelPhoto({
       <Image
         src={wallSign}
         alt={site.photos.wallSign}
-        widths={[640, 960, 1280]}
+        widths={[640, 960, 1280, 1920, 2400]}
         sizes={signSizes}
         loading="lazy"
-        class="block aspect-[2/1] w-full rounded-block object-cover sm:aspect-[3/1]"
+        class="block aspect-[2/1] w-full rounded-block object-cover object-right sm:aspect-[3/1] sm:object-center"
       />
     </div>
 
@@ -122,6 +130,27 @@ const photo = await panelPhoto({
         </SplitSection>
       )
     }
+
+    <SplitSection class={block}>
+      <div slot="head" class="flex flex-col gap-3">
+        <h2 class="text-section">{about.loungeHeading}</h2>
+        <p class="text-base leading-relaxed text-ink-2">{about.loungeText}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        {
+          lounge.map(({ image, alt }) => (
+            <Image
+              src={image}
+              alt={alt}
+              widths={[320, 480, 720, 960, 1440]}
+              sizes={coverSizes(loungeSizes, coverScale(image, 4 / 5))}
+              loading="lazy"
+              class="block aspect-[4/5] w-full rounded-block object-cover"
+            />
+          ))
+        }
+      </div>
+    </SplitSection>
 
     <SplitSection class={block}>
       <h2 slot="head" class="text-section">{about.ownerHeading}</h2>

@@ -1,4 +1,4 @@
-# The shop's AWS infrastructure
+# The shop's infrastructure: a DigitalOcean Droplet and AWS storage
 
 One `terraform apply` creates what
 [deploy.md § The first ship: a checklist](../../../docs/guides/deploy.md#the-first-ship-a-checklist)
@@ -7,9 +7,9 @@ and [Backup and restore](../../../docs/guides/deploy.md#backup-and-restore) spec
 
 | What                      | Where        | Details                                                                                                                                                |
 | ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Lightsail instance        | `eu-north-1` | `carlab-shop`, Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB), IPv4 only, your own ssh key, no automatic snapshots                             |
-| Static IP                 | `eu-north-1` | attached to the instance                                                                                                                               |
-| Firewall                  | `eu-north-1` | 22/tcp, 80/tcp, 443/tcp, 443/udp, IPv4                                                                                                                 |
+| Droplet                   | `fra1`       | `carlab-shop`, Ubuntu 24.04 LTS, Basic `s-2vcpu-4gb` ($24: 4 GB, 2 vCPU, 80 GB), IPv4 only, your own ssh key, no paid backups                          |
+| Reserved IP               | `fra1`       | assigned to the Droplet                                                                                                                                |
+| Cloud firewall            | `fra1`       | inbound 22/tcp, 80/tcp, 443/tcp, 443/udp; all outbound                                                                                                 |
 | Public bucket             | `eu-north-1` | ACLs off, `s3:GetObject` for everyone, versioned, noncurrent versions expire after 30 days                                                             |
 | Private bucket            | `eu-north-1` | ACLs off, all public access blocked, not versioned                                                                                                     |
 | IAM user `carlab-shop`    | global       | `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject`, `s3:ListBucket` on the two shop buckets; its key goes to `/srv/carlab/.env`                         |
@@ -42,7 +42,15 @@ it means Terraform no longer knows what it created. Back it up somewhere private
    aws sts get-caller-identity --profile carlab
    ```
 
-4. An ssh key on this Mac. The default is `~/.ssh/id_rsa.pub`; another one is
+4. A DigitalOcean API token for Terraform: control panel → API → Generate New
+   Token, write scope. Terraform reads it from `DIGITALOCEAN_TOKEN`; type it in
+   without echo so it stays out of the shell history:
+
+   ```bash
+   read -rs 'DIGITALOCEAN_TOKEN?DigitalOcean token: ' && export DIGITALOCEAN_TOKEN
+   ```
+
+5. An ssh key on this Mac. The default is `~/.ssh/id_rsa.pub`; another one is
    `-var public_key_path=...`.
 
 ## Create it
@@ -64,7 +72,7 @@ terraform apply
 terraform output
 ```
 
-`terraform output` prints the static IPv4, the ssh commands, the bucket
+`terraform output` prints the reserved IPv4, the ssh commands, the bucket
 names, the regions and the endpoints; the keys show as `<sensitive>`. To write
 them into env files without printing them:
 
@@ -91,7 +99,7 @@ the values are on the server and the Mac.
 Follow [deploy.md § The first ship: a checklist](../../../docs/guides/deploy.md#the-first-ship-a-checklist)
 from step 2:
 
-- **Bootstrap** (step 2): `bootstrap-host.sh` as `ubuntu`, then `harden-ssh.sh`
+- **Bootstrap** (step 2): `bootstrap-host.sh` as `root`, then `harden-ssh.sh`
   through `sudo` from a kept-open `deploy` session.
 - **DNS** (step 3): at the .rs registrar, A records for `api.carlab.rs` and
   `admin.carlab.rs` at `terraform output ipv4`.

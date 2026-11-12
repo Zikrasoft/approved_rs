@@ -20,13 +20,13 @@ const { navItems, casesHref, casesLabel, casesCurrent } = Astro.props;
 ---
 
 <nav
-  class="hidden xl:flex items-center gap-1 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0"
+  class="hidden xl:flex items-center gap-0 min-[1440px]:gap-1 text-sm font-sans font-normal header-nav flex-1 justify-center min-w-0"
 >
   {
     navItems.map((item) => (
       <a
         href={item.href}
-        class="flex items-center px-1.5 py-1.5 rounded-sm text-muted whitespace-nowrap"
+        class="flex items-center px-1 min-[1440px]:px-1.5 py-1.5 rounded-sm text-muted whitespace-nowrap"
         aria-current={item.current}
       >
         {item.label}
@@ -36,7 +36,7 @@ const { navItems, casesHref, casesLabel, casesCurrent } = Astro.props;
 
   <a
     href={casesHref}
-    class="px-1.5 py-1.5 text-muted whitespace-nowrap"
+    class="px-1 min-[1440px]:px-1.5 py-1.5 text-muted whitespace-nowrap"
     aria-current={casesCurrent}>{casesLabel}</a
   >
 </nav>

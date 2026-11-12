@@ -246,6 +246,18 @@ opens the in-bot manager screen instead. On approved.rs the footer's «Напи�
 менеджеру» and the Telegram tile on `/thanks/` link to it too; unset, they open
 the capture bot.
 
+### Google rating (carlab.rs, build time only)
+
+`GOOGLE_PLACES_API_KEY` and `GOOGLE_PLACE_ID` let the carlab.rs build read the
+workshop's rating and review count from Places API (New) (`rating`,
+`userRatingCount`). The key is a secret: restrict it to the Places API (New).
+The Place ID comes from Google's Place ID Finder for the workshop's Maps card.
+The build pulls them through `vercel pull`, so they live in the carlab.rs
+Vercel project only. Unset, or when the API fails or answers something
+malformed, the build logs a warning and shows `GOOGLE_RATING` from
+`src/utils/constants.ts`, so update that by hand now and then. The number
+refreshes only when carlab.rs deploys.
+
 ### Analytics — no environment variables
 
 The GA4 measurement ids and the Meta Pixel id are baked into each
@@ -565,7 +577,7 @@ Settings → Secrets and variables → Actions:
 | `VERCEL_PROJECT_ID`                 | the approved.rs deploy                         | Project Settings → General of that project                     |
 | `VERCEL_PROJECT_ID_AUTO_SERVICE`    | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
 | `VERCEL_PROJECT_ID_DETAILING`       | the details.rs deploy                          | the same, on the details.rs project                            |
-| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's static IPv4)     | Lightsail console → Networking                                 |
+| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's reserved IPv4)   | `terraform output ipv4`                                        |
 | `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
 | `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
 | `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
@@ -639,10 +651,11 @@ to do with them:
 
 ## The shop backend: Medusa on a VPS (`api.carlab.rs`)
 
-`apps/auto-service-shop` is not on Vercel. It is docker compose on a single AWS Lightsail
-instance (Linux/Unix, Ubuntu 24.04, the 4 GB bundle: 2 vCPU, 80 GB SSD, 4 TB
-transfer, $24 a month, IPv4 only), in the same region as the shop's S3 buckets, all
-described in `infra/auto-service-shop/`:
+`apps/auto-service-shop` is not on Vercel. It is docker compose on a single DigitalOcean
+Droplet in Frankfurt (`fra1`, Ubuntu 24.04, Basic `s-2vcpu-4gb`: 2 vCPU, 4 GB,
+80 GB SSD, 4 TB transfer, $24 a month, IPv4 only). The S3 buckets and IAM users
+stay on AWS in `eu-north-1`: AWS would not enable a 4 GB Lightsail plan for the
+account. All of it is described in `infra/auto-service-shop/`:
 
 | File                                     | What it is                                                                                                                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -674,7 +687,8 @@ sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) load
 its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
 stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
 failed with its reason in the admin; five such pages in a row pause the crawl, as do
-an unreachable robots.txt or sitemap and five server errors in a row. Pressing the
+an unreachable robots.txt or sitemap, five server errors in a row and five
+crashes of the worker in a row. Pressing the
 button again resumes. It crawls one site at a time: a crawl started while another
 runs waits as queued, and starts once the running one is done or paused; staff
 can pause the running one on its Pause button to let a queued one go first.
@@ -722,7 +736,7 @@ key included, keeps `AllowTcpForwarding no`. Checked by
 `infra/auto-service-shop/test/harden-ssh.test.sh`.
 
 Once, on the Mac, make a key for the tunnel and copy its public half, with the
-script, to the Lightsail server. The private key never leaves the Mac:
+script, to the shop server. The private key never leaves the Mac:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/carlab-crawler -C carlab-crawler
@@ -779,7 +793,7 @@ is retried once its 10 minute lease runs out.
   neither `deploy.sh` nor `backup.sh` is running (`pgrep -f "deploy.sh|backup.sh"`),
   remove it with `rmdir /srv/carlab/.deploy.lock`. This is a copy on the same disk;
   off the server there are the dumps in the backup bucket (see
-  [Backup and restore](#backup-and-restore)). Lightsail's automatic snapshots are
+  [Backup and restore](#backup-and-restore)). The Droplet's paid backups are
   off to save cost: a lost instance is rebuilt with Terraform, `bootstrap-host.sh`
   and `restore.sh`.
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
@@ -831,7 +845,7 @@ the file>`, with the source URL in the object's `source-url` metadata, and a
 Bucket setup: keep Object Ownership on "Bucket owner enforced" (ACLs off; the file
 provider runs with `acl: false`), and make the public bucket readable with a
 bucket policy granting `s3:GetObject` on `arn:aws:s3:::<public bucket>/*` to
-everyone; the private bucket stays fully blocked. Lightsail has no instance role
+everyone; the private bucket stays fully blocked. The Droplet is outside AWS and has no instance role
 for S3, so the shop gets an IAM user of its own with `s3:PutObject`,
 `s3:GetObject`, `s3:DeleteObject` and `s3:ListBucket` on those two buckets only.
 The nightly backup covers Postgres only, so the public bucket is versioned: an
@@ -1009,7 +1023,7 @@ number gets its CI value in that script. The non-obvious parts:
   `NODE_ENV=production` an empty one stops the server at startup.
 - `FILE_URL` is the public base URL of the public bucket, stored into every image
   URL at upload time: `https://<bucket>.s3.<region>.amazonaws.com` now, a
-  CloudFront or Lightsail CDN address later (only new uploads pick a change up;
+  CloudFront address later (only new uploads pick a change up;
   stored URLs need the same rewrite `move-static-to-s3.sh` does). Without it
   production stops at startup.
 - `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET` and
@@ -1494,17 +1508,18 @@ Check with `curl -k https://localhost:8443/health/ready`.
   by `deploy`.
 - **Only Caddy exposes a port.** `ports:` in docker compose bypasses ufw: the rule
   filters traffic on the host, not what Docker forwards itself through iptables.
-  Never add `ports:` to another service in the compose stack. Lightsail's own
-  firewall sits in front of the instance and does filter it, so it must allow
-  exactly 22/tcp, 80/tcp, 443/tcp and 443/udp, on the IPv4 and the IPv6 firewall
-  alike (they are two separate lists in the Networking tab).
-- **Use the static IP everywhere.** A Lightsail instance without a static IP gets a
-  new public IPv4 on every stop and start. Attach one before writing DNS records or
-  `AUTO_SERVICE_SHOP_VPS_HOST`; it is free while attached and billed once detached.
-- **The browser SSH console stops working after hardening.** Lightsail's
-  "Connect using SSH" logs in as `ubuntu`, and `harden-ssh.sh` allows only `deploy`
-  and `crawler`. Keep a working `deploy` key; if it is lost, recover through a
-  snapshot rather than the console.
+  Never add `ports:` to another service in the compose stack. The DigitalOcean
+  cloud firewall `carlab-shop` (Terraform) sits in front of the Droplet and does
+  filter it: inbound exactly 22/tcp, 80/tcp, 443/tcp and 443/udp. Its outbound
+  rules must stay open, or apt, GHCR, S3 and Let's Encrypt stop working.
+- **Use the reserved IP everywhere.** A rebuilt Droplet gets a new public IPv4;
+  the reserved IP moves to it. Write it, not the Droplet's own address, into DNS
+  and `AUTO_SERVICE_SHOP_VPS_HOST`. It is free while assigned and billed once
+  unassigned.
+- **SSH as root stops working after hardening.** The Droplet's first login is
+  `root`, and `harden-ssh.sh` allows only `deploy` and `crawler`. Keep a working
+  `deploy` key; if it is lost, use the Recovery Console in the DigitalOcean
+  control panel.
 - **Docker's apt key is not verified by fingerprint.** `bootstrap-host.sh` does not
   pin the fingerprint of Docker's GPG key. After bootstrapping, check it by hand
   with `gpg --show-keys /etc/apt/keyrings/docker.asc` against the fingerprint
@@ -1516,7 +1531,7 @@ Check with `curl -k https://localhost:8443/health/ready`.
   one address. `deploy-shop` opens 4 ssh connections per run (the stack files, the
   GHCR login, `deploy.sh`, the logout): there is headroom, but do not add ssh calls
   to that job carelessly.
-- **The backup cron runs in the host's timezone**, UTC on Lightsail's Ubuntu image
+- **The backup cron runs in the host's timezone**, UTC on DigitalOcean's Ubuntu image
   (check with `timedatectl`).
   `/var/log/carlab-backup.log` grows without bound; add a logrotate snippet by hand:
   ```
@@ -1545,26 +1560,23 @@ Check with `curl -k https://localhost:8443/health/ready`.
 
 Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terraform/README.md`.
 
-1. **Lightsail.** Create the instance in the shop's region: Linux/Unix, OS only,
-   Ubuntu 24.04 LTS, the $24 bundle (4 GB, 2 vCPU, 80 GB SSD), IPv4 only, with
-   your own ssh key pair uploaded rather than Lightsail's default one. Then:
-   - Networking: create a static IP and attach it to the instance.
-   - Networking, the IPv4 firewall: keep SSH 22/tcp and HTTP 80/tcp, add HTTPS
-     443/tcp and a custom rule for 443/udp (HTTP/3).
+1. **Droplet.** In `fra1`: Ubuntu 24.04 LTS, Basic `s-2vcpu-4gb` ($24: 4 GB,
+   2 vCPU, 80 GB SSD), your own ssh key, no paid backups; a reserved IP assigned
+   to it; the cloud firewall `carlab-shop` allowing inbound 22/tcp, 80/tcp,
+   443/tcp and 443/udp (HTTP/3) and all outbound.
 
-   Done: the instance shows the static IPv4 and the four firewall rules.
+   Done: the Droplet shows the reserved IPv4 and the firewall with four inbound rules.
 
-2. **Bootstrap.** Log in as `ubuntu` with your key, upload
+2. **Bootstrap.** Log in as `root` with your key, upload
    `infra/auto-service-shop/bootstrap-host.sh` and `infra/auto-service-shop/harden-ssh.sh`, and
-   run `sudo sh bootstrap-host.sh`: it gives `deploy` the keys of the user who ran
-   `sudo`. Open a separate session, `ssh deploy@<IPv4>`, and **keep it open** until
+   run `sh bootstrap-host.sh`: it gives `deploy` root's keys (or, run through
+   `sudo`, the keys of the user who ran it). Open a separate session, `ssh deploy@<IPv4>`, and **keep it open** until
    key-based login has been re-verified after hardening. From it, run
    `harden-ssh.sh` **through `sudo`** (with the crawler's public key, see
    [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac), or without it
    for now).
-   Done: `ssh deploy@<IPv4>` lets you in by key; `ssh ubuntu@<IPv4>` and
-   `ssh root@<IPv4>` refuse.
-3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the static IPv4.
+   Done: `ssh deploy@<IPv4>` lets you in by key; `ssh root@<IPv4>` refuses.
+3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the reserved IPv4.
    Done: `dig +short` returns it for both names.
 4. **`.env` on the server.** Copy `infra/auto-service-shop/production.env.example` to
    `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,

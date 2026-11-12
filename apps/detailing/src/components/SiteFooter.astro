@@ -14,6 +14,7 @@ import {
 } from '@podbor/brands';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import ContactControl from './ContactControl.astro';
+import PhoneNumber from './PhoneNumber.astro';
 import { contactRegion } from '@podbor/site-kit/contact-control';
 
 const locale = localeFrom(Astro.url.pathname);
@@ -96,10 +97,13 @@ const messengers = [
         </span>
         <ContactControl
           channel="phone"
+          showNumber
           class="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk transition-colors duration-400 hover:text-champagne"
+          plainClass="inline-flex min-h-11 items-center gap-2.5 text-sm text-chalk"
         >
           <Icon name="phone" size={16} class="shrink-0" />
-          {site.channels.call}
+          <PhoneNumber />
+          <Icon slot="plain" name="phone" size={16} class="shrink-0" />
         </ContactControl>
         <ul class="-ml-3.5 flex flex-wrap items-center" data-contact-order>
           {

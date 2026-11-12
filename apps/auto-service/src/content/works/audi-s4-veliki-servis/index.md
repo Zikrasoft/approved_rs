@@ -1,5 +1,5 @@
 ---
-title: Audi S4 Veliki Servis
+title: 'Audi S4 3.0 TFSI: замена цепей ГРМ и обслуживание S tronic'
 car: Audi S4
 year: 2012
 servicesApplied:
@@ -13,52 +13,60 @@ gallery:
 date: 2026-11-05
 published: true
 featured: true
+translations:
+  sr:
+    title: "Audi S4 3.0 TFSI: zamena razvodnih lanaca i servis S tronic menjača"
+    body: |-
+      U **CarLab** je stigao **Audi S4 iz 2012. godine** sa benzinskim motorom **3.0 TFSI**. Uradili smo **veliki servis**, zamenili sva četiri razvodna lanca i servisirali menjač sa dvostrukim kvačilom **S tronic** (DSG).
+
+      Šta smo uradili:
+
+      - Zamenili sva četiri razvodna lanca sa pripadajućim kompletima lančanog razvoda.
+      - Zamenili zaptivke motora.
+      - Proverili dostupne sklopove motora.
+      - Servisirali S tronic menjač.
+      - Proverili rad vozila nakon popravke.
+
+      Na motoru **3.0 TFSI** lančani razvod nalazi se sa strane menjača, pa zamena lanaca zahteva dosta vremena. Lanci se vremenom istežu, a zatezači i vođice se habaju. Simptomi su: **metalni zvuk pri hladnom startu**, greške u sinhronizaciji bregastih vratila, neravnomeran rad motora i upozorenja na instrument tabli.
+
+      Pošto je motor već bio rasklopljen, zamenili smo i zaptivke kako bismo otklonili moguća mesta curenja ulja. Ovaj posao zahteva poseban alat i **precizno podešavanje faze razvoda**.
+
+      S tronic menjač servisirali smo uz upotrebu tečnosti prema specifikaciji proizvođača. Redovno održavanje omogućava glatko menjanje brzina i smanjuje habanje menjača. Radove na motoru i menjaču obavili smo u okviru jedne posete.
+    car: Audi S4
+  en:
+    title: "Audi S4 3.0 TFSI: timing chain replacement and S tronic service"
+    body: |-
+      This **2012 Audi S4** came to **CarLab** with a **3.0 TFSI** petrol engine. We carried out a major service (**veliki servis**), replacing all four timing chains, and serviced the **S tronic** dual-clutch gearbox (DSG).
+
+      Work carried out:
+
+      - Replaced all four timing chains and the associated timing chain kits.
+      - Replaced engine gaskets and seals.
+      - Inspected the accessible engine components.
+      - Serviced the S tronic gearbox.
+      - Checked the car's operation after the repairs.
+
+      On the **3.0 TFSI**, the timing chains are at the gearbox end of the engine, making replacement a time-consuming job. Over time, the chains stretch and the tensioners and guides wear. Symptoms include **a metallic rattle on cold starts**, camshaft timing fault codes, rough running and dashboard warnings.
+
+      With the engine already apart, we also replaced gaskets and seals to address potential oil leaks. This work requires specialist tools and **precise valve timing adjustment**.
+
+      We serviced the S tronic gearbox using fluids that meet the manufacturer's specifications. Regular servicing helps maintain smooth gear changes and reduces gearbox wear. Both the engine work and gearbox service were completed in a single visit.
+    car: Audi S4
+translatedFrom: 7b2f7135414fde9e
 ---
-# Замена цепей ГРМ Audi S4 3.0 TFSI и обслуживание DSG в Белграде | CarLab
 
-В автосервисе **CarLab в Белграде** выполнили комплексное техническое обслуживание Audi S4 с бензиновым двигателем 3.0 TFSI. Автомобиль прошёл большой сервис, который в Сербии называют **veliki servis**, с полной заменой всех четырёх цепей ГРМ, многочисленных прокладок и уплотнений двигателя. Дополнительно было проведено техническое обслуживание роботизированной коробки передач DSG (S tronic).
+К нам в **CarLab** приехал **Audi S4 2012 года** с бензиновым двигателем **3.0 TFSI**. Сделали большое ТО (**veliki servis**) с заменой всех четырех цепей ГРМ и обслужили роботизированную коробку **S tronic** (DSG).
 
-### Какие работы выполнили на Audi S4 3.0 TFSI
+Что сделали:
 
-В рамках комплексного обслуживания автомобиля были проведены следующие работы:
+- Заменили все четыре цепи ГРМ вместе с комплектами цепного привода.
+- Заменили прокладки и уплотнения двигателя.
+- Проверили доступные узлы двигателя.
+- Обслужили коробку S tronic.
+- Проверили работу автомобиля после ремонта.
 
-- Полная замена всех четырёх цепей ГРМ.
-- Замена четырёх комплектов цепного привода газораспределительного механизма.
-- Замена многочисленных прокладок и уплотнений двигателя.
-- Проверка состояния доступных узлов и компонентов двигателя.
-- Техническое обслуживание роботизированной коробки передач DSG.
-- Проверка работы автомобиля после завершения ремонта.
+На **3.0 TFSI** цепной привод ГРМ стоит со стороны коробки передач, поэтому замена цепей занимает много времени. Со временем цепи растягиваются, а натяжители и направляющие изнашиваются. Признаки: **металлический шум на холодном пуске**, ошибки синхронизации распредвалов, неровная работа мотора, предупреждения на приборной панели.
 
-### Замена цепей ГРМ Audi 3.0 TFSI
+Раз двигатель все равно разобран, заменили и прокладки с уплотнениями, чтобы закрыть возможные источники утечек масла. Такая работа требует специального инструмента и **точной установки фаз газораспределения**.
 
-Бензиновый двигатель Audi 3.0 TFSI отличается высокой производительностью и сложной конструкцией. Одной из его особенностей является расположение цепного привода ГРМ со стороны коробки передач, что делает процедуру замены достаточно трудоёмкой.
-
-Со временем цепи ГРМ могут растягиваться, а натяжители и направляющие изнашиваться. Признаками возможных неисправностей являются металлический шум при запуске холодного двигателя, ошибки синхронизации распределительных валов, нестабильная работа мотора и появление предупреждений на приборной панели.
-
-На данном Audi S4 специалисты CarLab выполнили полную замену всех четырёх цепей ГРМ и сопутствующих компонентов. Одновременно были заменены многочисленные прокладки и уплотнения, что позволяет комплексно обслужить двигатель и устранить возможные источники утечек масла.
-
-В Сербии подобные работы по замене комплекта ГРМ часто называют **veliki servis**. Для двигателей Audi 3.0 TFSI такой ремонт требует опыта, специального инструмента и точного соблюдения технологии установки фаз газораспределения.
-
-### Обслуживание коробки передач DSG (S tronic)
-
-Помимо ремонта двигателя, на Audi S4 было выполнено техническое обслуживание роботизированной коробки передач DSG, известной в автомобилях Audi под названием S tronic.
-
-Такие трансмиссии требуют своевременного обслуживания с использованием технических жидкостей, соответствующих спецификациям производителя. Регулярное обслуживание помогает сохранить плавность переключения передач, стабильную работу трансмиссии и снизить риск преждевременного износа её компонентов.
-
-Комплексный подход позволяет за одно посещение автосервиса выполнить важные работы как по двигателю, так и по коробке передач.
-
-### Ремонт Audi и veliki servis в Белграде
-
-**CarLab** это автосервис в Белграде, Сербия, специализирующийся на диагностике, техническом обслуживании и ремонте автомобилей различных марок, включая Audi, Volkswagen, Škoda и SEAT.
-
-Мы выполняем замену цепей и ремней ГРМ, veliki servis, ремонт бензиновых и дизельных двигателей, обслуживание автоматических и роботизированных коробок передач, а также другие виды технического обслуживания автомобилей.
-
-Наш автосервис удобно расположен для автовладельцев из Белграда, Панчево, Борчи, Крнячи, Овчи, Земуна, Нови-Београда, Старчево и других населённых пунктов Сербии.
-
-Если вам необходима **замена цепи ГРМ Audi в Белграде, veliki servis, обслуживание Audi 3.0 TFSI, диагностика DSG или ремонт автомобиля в Сербии**, обращайтесь в CarLab.
-
-**Автосервис CarLab**
-
-Адрес: Jovana Ćirilova 23A, Beograd, Srbija.
-
-Профессиональное техническое обслуживание и ремонт автомобилей в Белграде. От плановой замены масла до сложных работ с двигателем и трансмиссией.
+Коробку S tronic обслужили жидкостями по спецификации производителя. Своевременное обслуживание сохраняет плавность переключений и снижает износ коробки. Двигатель и коробку сделали за один визит.

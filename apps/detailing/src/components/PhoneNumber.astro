@@ -1,0 +1,56 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { formatPhone } from '@podbor/site-kit/format-phone';
+import {
+  COPY_PHONE_DIGITS_ATTRIBUTE,
+  COPY_PHONE_NUMBER_ATTRIBUTE,
+  COPY_PHONE_STATUS_ATTRIBUTE,
+} from '@podbor/site-kit/browser';
+import { content } from '@/i18n/content';
+import { localeFrom } from '@/i18n/config';
+import { PHONE_NUMBER } from '@/utils/constants';
+
+interface Props extends Omit<HTMLAttributes<'button'>, 'type' | 'class'> {
+  copy?: boolean;
+}
+
+const { copy, ...tracking } = Astro.props;
+const digits = formatPhone(PHONE_NUMBER);
+const { copyPhone } = content(localeFrom(Astro.url.pathname)).site;
+---
+
+{
+  copy ? (
+    <copy-phone
+      class="group relative inline-flex"
+      {...{ [COPY_PHONE_NUMBER_ATTRIBUTE]: `+${PHONE_NUMBER}` }}
+    >
+      <button
+        {...tracking}
+        type="button"
+        class="cursor-copy whitespace-nowrap decoration-champagne-dim decoration-1 underline-offset-[5px] transition-colors duration-400 hover:text-champagne hover:underline"
+      >
+        <span class="sr-only">{copyPhone.label}</span>{' '}
+        <span
+          class="select-text motion-safe:transition-opacity motion-safe:duration-400 group-has-[[aria-live]:not(:empty)]:opacity-0"
+          {...{ [COPY_PHONE_DIGITS_ATTRIBUTE]: '' }}
+        >
+          {digits}
+        </span>
+      </button>
+      <span
+        aria-live="polite"
+        class="pointer-events-none absolute inset-0 flex items-center whitespace-nowrap text-champagne underline decoration-champagne-dim decoration-1 underline-offset-[5px] empty:invisible empty:opacity-0 motion-safe:transition-opacity motion-safe:duration-400"
+        {...{ [COPY_PHONE_STATUS_ATTRIBUTE]: copyPhone.copied }}
+      />
+    </copy-phone>
+  ) : (
+    <span class="whitespace-nowrap">{digits}</span>
+  )
+}
+
+<script>
+  import { defineCopyPhone } from '@podbor/site-kit/browser';
+
+  defineCopyPhone();
+</script>

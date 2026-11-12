@@ -40,7 +40,12 @@ depth on case and work pages), `data-contact-channel` /
 selector hides behind — stamp it with `contactRegion`, `contactCta` and
 `CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
 literal), `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
-`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal) and
+`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal),
+`data-copy-number` / `data-copy-digits` / `data-copy-status` (the number
+`defineCopyPhone` copies, the digits it selects when the clipboard fails, the
+live region it fills with the copied wording; `COPY_PHONE_*_ATTRIBUTE` from
+`@podbor/site-kit/browser`, never a literal, stamped only by each app's
+`PhoneNumber.astro`) and
 `METRIKA_MASK_CLASS` (on every form that takes a contact, keeping its fields out
 of Webvisor recordings as the privacy copy promises; from
 `@podbor/site-kit/browser`, never a literal) and `--cookie-consent-height`
@@ -304,10 +309,18 @@ Both new apps follow the same shape, and a third should too:
   options still open Telegram.
 - **A `tel:` control only exists where a dialer does**, on all three sites.
   `createContactControls` in `@podbor/site-kit/contact-control` encodes the
-  contract — the phone is `coarse-only`, the plain-number twin exists only on
+  contract — the phone is `coarse-only`, the plain-number twin exists on
   `/thanks/` in the contacts block (`region: 'contacts'`, which the floating
-  widget never passes), the human Telegram only on `/thanks/` — and the
-  placement says only where a click is recorded. Each app's
+  widget never passes) and wherever the call site passes `showNumber`, which
+  names the control rather than the page: the header and the footer of all three
+  sites, so a mouse can always read the number, the human Telegram only on
+  `/thanks/` — and the
+  placement says only where a click is recorded. The plain-number twin is a
+  copy-number button (each app's `PhoneNumber.astro` with `copy`, the only
+  markup in an app that renders the digits) carrying the same
+  `data-contact-channel="phone"`, so a mouse click on it fires `contact_click`
+  and stores a click Lead exactly like a `tel:` tap; tracking counts only the
+  innermost tracked control, so one click is one Lead. Each app's
   `src/components/ContactControl.astro` is the only place that turns it into
   `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for
   `onThanks`. Read those two instead of re-deciding a pointer rule at a call

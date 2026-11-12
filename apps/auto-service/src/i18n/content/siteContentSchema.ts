@@ -83,6 +83,8 @@ export const siteContentSchema = z
         workshopBay: z.string(),
         facade: z.string(),
         wallSign: z.string(),
+        loungeSofas: z.string(),
+        loungeCoffee: z.string(),
       })
       .strict(),
     googleRating: z
@@ -96,6 +98,7 @@ export const siteContentSchema = z
         telegram: z.string(),
       })
       .strict(),
+    copyPhone: z.object({ label: z.string(), copied: z.string() }).strict(),
     telegramChoice: z
       .object({
         heading: z.string(),

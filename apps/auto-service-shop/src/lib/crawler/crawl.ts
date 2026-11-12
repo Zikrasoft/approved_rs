@@ -21,6 +21,7 @@ const MAX_ATTEMPTS = 5;
 const MAX_SERVER_ERRORS = 5;
 const MAX_BLOCKED_PAGES = 5;
 const MAX_GAP_MS = 60 * 1000;
+const MAX_CONSECUTIVE_CRASHES = 5;
 
 export type Clock = {
   now: () => number;
@@ -66,6 +67,26 @@ export async function crawlSite(
     await crawlWith(site, { store, clock, from, random, http, pages });
   } finally {
     await Promise.all([...new Set([http, pages])].map((one) => one.close()));
+  }
+}
+
+export async function crawlOrPause(
+  site: CrawledSite,
+  deps: CrawlDeps,
+  crashes: Map<string, number>,
+): Promise<void> {
+  try {
+    await crawlSite(site, deps);
+    crashes.delete(site.name);
+  } catch (error) {
+    const count = (crashes.get(site.name) ?? 0) + 1;
+    if (count < MAX_CONSECUTIVE_CRASHES) {
+      crashes.set(site.name, count);
+    } else {
+      crashes.delete(site.name);
+      await deps.store.pause(site.name, 'worker_error');
+    }
+    throw error;
   }
 }
 
@@ -142,7 +163,10 @@ async function crawlWith(
   const sitemapPages = async (
     url: string,
     found: string[],
+    seen: Set<string>,
   ): Promise<PauseReason | null> => {
+    if (seen.has(url)) return null;
+    seen.add(url);
     const stale = await freshRobots();
     if (stale) return stale;
     if (!allowed(url)) return null;
@@ -154,7 +178,7 @@ async function crawlWith(
     const links = sitemapLinks(xmlOf(fetched.body), site.sitemapPage);
     found.push(...links.pages);
     for (const child of links.sitemaps) {
-      const reason = await sitemapPages(child, found);
+      const reason = await sitemapPages(child, found, seen);
       if (reason) return reason;
     }
     return null;
@@ -162,8 +186,9 @@ async function crawlWith(
 
   const seed = async (): Promise<PauseReason | null> => {
     const found: string[] = [];
+    const seen = new Set<string>();
     for (const sitemap of site.sitemaps) {
-      const reason = await sitemapPages(sitemap, found);
+      const reason = await sitemapPages(sitemap, found, seen);
       if (reason) return reason;
     }
     await store.seed(site.name, [...new Set(found.filter(site.isPage))], at());
@@ -241,7 +266,7 @@ async function crawlWith(
         etag: fetched.headers.etag ?? null,
         last_modified: fetched.headers['last-modified'] ?? null,
       });
-      if (await store.countStored(site.name)) return 'idle';
+      if (await store.spendPageLimit(site.name)) return 'idle';
     } else if (status === 404 || status === 410) {
       await store.update(site.name, page.url, { status: 'gone', ...settled });
     } else {

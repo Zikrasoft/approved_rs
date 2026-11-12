@@ -86,6 +86,8 @@ export const pagesContentSchema = z
         equipment: z.array(z.string()),
         makesHeading: z.string(),
         makesLead: z.string(),
+        loungeHeading: z.string(),
+        loungeText: z.string(),
         ownerHeading: z.string(),
         ownerText: z.string(),
       })

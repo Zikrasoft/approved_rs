@@ -33,6 +33,12 @@ const { content } = await import('@/i18n/content');
 const { GARAGE_ADDRESS } = await import('./constants');
 
 describe('generateLlmsTxt', () => {
+  it('states the phone number', async () => {
+    const { PHONE_NUMBER } = await import('@/utils/constants');
+    const { formatPhone } = await import('@podbor/site-kit/format-phone');
+    expect(await generateLlmsTxt('ru')).toContain(formatPhone(PHONE_NUMBER));
+  });
+
   it('lists every service for every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
       const body = await generateLlmsTxt(locale);
@@ -79,7 +85,7 @@ describe('generateLlmsTxt', () => {
 
   it('states the Google rating as a key fact', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '- 5.0 в Google · 14 отзывов\n',
+      '- 5.0 в Google · 18 отзывов\n',
     );
   });
 

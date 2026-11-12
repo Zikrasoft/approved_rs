@@ -1045,6 +1045,7 @@
       "robots_unavailable": "The site's robots.txt did not open, which the rules read as no crawling. Resume later.",
       "sitemap_unavailable": "The sitemap did not load. Resume later.",
       "server_errors": "The site answered with a server error five times in a row. Resume later.",
+      "worker_error": "The crawler crashed five times in a row. Check its log on the Mac, then resume.",
       "staff": "Paused by staff. Resume it to put it back in line."
     }
   },

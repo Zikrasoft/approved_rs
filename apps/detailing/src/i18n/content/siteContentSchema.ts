@@ -127,6 +127,7 @@ export const siteContentSchema = z
     common: commonSchema,
     channels: channelsSchema,
     telegramChoice: telegramChoiceSchema,
+    copyPhone: z.object({ label: z.string(), copied: z.string() }).strict(),
     form: formSchema,
     cookie: cookieSchema,
   })

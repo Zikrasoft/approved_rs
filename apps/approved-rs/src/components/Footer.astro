@@ -6,6 +6,7 @@ import { getI18n } from '@/i18n/getI18n';
 import { localeFrom } from '@/i18n/config';
 import { servicesView } from '@/i18n/content/services';
 import ContactControl from './ContactControl.astro';
+import PhoneNumber from './PhoneNumber.astro';
 import { BRAND, SITE_NAME, THREADS_CHANNEL } from '@/utils/constants';
 import {
   DEVELOPER,
@@ -38,6 +39,15 @@ const coverageLine = getActiveCountries()
           {t.footer.tagline}
         </p>
         <div class="flex flex-wrap gap-2" {...contactRegion('footer')}>
+          <ContactControl
+            channel="phone"
+            showNumber
+            class="inline-flex basis-full items-center gap-2 py-1.5 text-sm font-medium no-underline text-secondary"
+          >
+            <ContactIcon channel="phone" size={14} />
+            <PhoneNumber />
+            <ContactIcon slot="plain" channel="phone" size={14} />
+          </ContactControl>
           <div data-primary-contact class="contents">
             <ContactControl
               data-primary-channel="telegram"

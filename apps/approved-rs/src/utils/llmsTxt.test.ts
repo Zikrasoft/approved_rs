@@ -8,6 +8,12 @@ const { generateLlmsTxt } = await import('./llmsTxt');
 const { SUPPORTED_LOCALES } = await import('@/i18n/config');
 
 describe('generateLlmsTxt', () => {
+  it('states the phone number', async () => {
+    const { PHONE_NUMBER } = await import('@/utils/constants');
+    const { formatPhone } = await import('@podbor/site-kit/format-phone');
+    expect(await generateLlmsTxt('ru')).toContain(formatPhone(PHONE_NUMBER));
+  });
+
   it('includes the hub and all 5 vehicle-import spokes for every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
       const body = await generateLlmsTxt(locale);

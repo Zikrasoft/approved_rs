@@ -86,6 +86,9 @@ telegramChoice:
   botHint: Расскажите, что с машиной, менеджер ответит в том же чате
   manager: Менеджеру напрямую
   managerHint: Личный чат с менеджером в Telegram
+copyPhone:
+  label: Скопировать номер телефона
+  copied: Скопировано
 translations:
   sr:
     nav:
@@ -146,6 +149,9 @@ translations:
       botHint: Opišite šta je potrebno vašem automobilu, naš saradnik će odgovoriti u istom razgovoru
       manager: Direktno našem saradniku
       managerHint: Privatan razgovor sa našim saradnikom na Telegramu
+    copyPhone:
+      label: Kopiraj broj telefona
+      copied: Kopirano
     form:
       heading: Zakažite konsultaciju
       subheading: Pogledaćemo automobil, iskreno vam reći šta mu je zaista potrebno i dati tačnu cenu.
@@ -234,6 +240,9 @@ translations:
       botHint: Tell us about your car and a team member will reply in the same chat
       manager: Message our team directly
       managerHint: A private Telegram chat with a member of our team
+    copyPhone:
+      label: Copy phone number
+      copied: Copied
     form:
       heading: Book a consultation
       subheading: We'll inspect your car, give you an honest assessment of what it really needs and provide an exact quote.
@@ -263,4 +272,4 @@ translations:
       accept: Accept
       decline: Decline
       settings: Cookie settings
-translatedFrom: 806bcaec3ff9e87d
+translatedFrom: bde3188d36d95483

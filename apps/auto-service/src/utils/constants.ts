@@ -23,17 +23,16 @@ export const SITE_LEGAL_NAME = BRAND.legalName;
 
 export const GARAGE_ADDRESS = WORKSHOP_ADDRESS;
 
-// TODO: refresh by hand from the Google Maps card of GARAGE_ADDRESS.googleMapsCid; nothing updates these numbers.
+// TODO: refresh by hand from the Google Maps card until GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID are set on the carlab.rs Vercel project.
 export const GOOGLE_RATING = {
   rating: '5.0',
-  reviews: 14,
-  checkedOn: '2026-11-02',
+  reviews: 18,
 };
 
 export const OPENING_HOURS = [
   {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    opens: '08:00',
+    opens: '09:00',
     closes: '18:00',
   },
   { days: ['Saturday'], opens: '09:00', closes: '14:00' },

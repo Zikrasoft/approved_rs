@@ -1,12 +1,11 @@
 ---
 import { contactCta } from '@podbor/site-kit/contact-control';
-import { formatPhone } from '@podbor/site-kit/format-phone';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { PHONE_NUMBER } from '@/utils/constants';
 import { PathBuilder } from '@/utils/paths';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 import ContactChannels from './ContactChannels.astro';
+import PhoneNumber from './PhoneNumber.astro';
 import Icon from './Icon.astro';
 import LineItem from './LineItem.astro';
 import PickupDetails from './PickupDetails.astro';
@@ -90,7 +89,7 @@ const copy = content(locale).shopCart;
     <span class="text-xs text-muted">{site.footer.contactHeading}</span>
     <ContactChannels service={VIN_INQUIRY_SERVICE} class="print:hidden" />
     <p class="spec hidden text-base font-semibold text-ink print:block">
-      {formatPhone(PHONE_NUMBER)}
+      <PhoneNumber />
     </p>
   </div>
   <a

@@ -2,24 +2,35 @@
 import type { HTMLAttributes } from 'astro/types';
 import type { TrackedContactChannel } from '@podbor/lead-crm/contact-channel';
 import { navCurrent } from '@podbor/site-kit';
-import { formatPhone } from '@podbor/site-kit/format-phone';
 import { localeFrom } from '@/i18n/config';
 import { contactControl } from '@/utils/contactLinks';
 import { PathBuilder } from '@/utils/paths';
 import type { ServiceSlug } from '@/utils/services';
+import PhoneNumber from './PhoneNumber.astro';
 
 interface Props extends Omit<HTMLAttributes<'a'>, 'href'> {
   channel: TrackedContactChannel;
   region?: 'contacts';
+  showNumber?: boolean;
+  plainClass?: string;
   service?: ServiceSlug;
 }
 
-const { channel, region, service, class: className, ...rest } = Astro.props;
+const {
+  channel,
+  region,
+  showNumber,
+  plainClass,
+  service,
+  class: className,
+  ...rest
+} = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const control = contactControl({
   channel,
   onThanks:
     navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page',
+  showNumber,
   region,
   locale,
   service,
@@ -37,9 +48,9 @@ const coarseOnly = control.pointer === 'coarse-only';
 </a>
 {
   control.plainNumber && (
-    <span class:list={[className, 'pointer-coarse:hidden!']}>
+    <span class:list={[plainClass ?? className, 'pointer-coarse:hidden!']}>
       <slot name="plain" />
-      <span class="whitespace-nowrap">{formatPhone(control.plainNumber)}</span>
+      <PhoneNumber copy {...control.attrs} />
     </span>
   )
 }
