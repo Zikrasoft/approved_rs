@@ -1544,6 +1544,17 @@ describe('catalogueFromEnv', () => {
       return new Headers(fetch.mock.calls[0]?.[1]?.headers);
     };
 
+    let vinUrlSent = () => '';
+    const vinBodySent = async (request?: Request) => {
+      const fetch = vi.fn((_url: string, _init?: RequestInit) =>
+        respond({ resolved: false, make: null, code: null }),
+      );
+      vi.stubGlobal('fetch', fetch);
+      await catalogueFromEnv(SHOP, { visitor: request })?.resolveVin(VIN);
+      vinUrlSent = () => String(fetch.mock.calls[0]?.[0]);
+      return JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
+    };
+
     it('names the visitor to the shop, vouched for with the shop secret', async () => {
       const headers = await headersSent(
         { ...SHOP, SHOP_CLIENT_SECRET: 'secret' },
@@ -1573,31 +1584,45 @@ describe('catalogueFromEnv', () => {
       expect((await headersSent(SHOP)).has('x-request-id')).toBe(false);
     });
 
-    it('tells the shop whether a VIN lookup came from a bot, and not who the visitor is', async () => {
-      const bodySent = async (request?: Request) => {
-        const fetch = vi.fn((_url: string, _init?: RequestInit) =>
-          respond({ resolved: false, make: null, code: null }),
-        );
-        vi.stubGlobal('fetch', fetch);
-        await catalogueFromEnv(SHOP, { visitor: request })?.resolveVin(VIN);
-        return JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
-      };
+    it('tells the shop whether a VIN lookup came from a bot', async () => {
       const browsing = (agent: string) =>
         new Request('https://carlab.rs/sr/parts/search/', {
           headers: { 'user-agent': agent },
         });
 
       expect(
-        await bodySent(
+        await vinBodySent(
           browsing(
             'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
           ),
         ),
-      ).toEqual({ vin: VIN, bot: false });
+      ).toEqual({ vin: VIN, bot: false, visitor_id: null });
       expect(
-        await bodySent(browsing('Mozilla/5.0 (compatible; Googlebot/2.1)')),
-      ).toEqual({ vin: VIN, bot: true });
-      expect(await bodySent()).toEqual({ vin: VIN, bot: null });
+        await vinBodySent(browsing('Mozilla/5.0 (compatible; Googlebot/2.1)')),
+      ).toEqual({ vin: VIN, bot: true, visitor_id: null });
+      expect(await vinBodySent()).toEqual({
+        vin: VIN,
+        bot: null,
+        visitor_id: null,
+      });
+    });
+
+    it('hands the shop the visitor id cookie with a VIN lookup, in the body only', async () => {
+      const visitorId = '0f8fad5b-d9cb-469f-a165-70867728950e';
+      const withCookie = (cookie: string) =>
+        new Request('https://carlab.rs/sr/parts/search/', {
+          headers: { cookie },
+        });
+
+      expect(
+        (await vinBodySent(withCookie(`lang=sr; visitor_id=${visitorId}`)))
+          .visitor_id,
+      ).toBe(visitorId);
+      expect(
+        (await vinBodySent(withCookie('visitor_id=not-a-uuid'))).visitor_id,
+      ).toBeNull();
+      expect((await vinBodySent(withCookie('lang=sr'))).visitor_id).toBeNull();
+      expect(vinUrlSent()).not.toContain(visitorId);
     });
 
     it('names nobody without the secret, without a visitor, or for an address that is none', async () => {
@@ -1643,7 +1668,7 @@ describe('catalogue.resolveVin', () => {
       'http://shop.test/store/vin-lookups',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ vin: VIN, bot: null }),
+        body: JSON.stringify({ vin: VIN, bot: null, visitor_id: null }),
       }),
     );
   });
