@@ -1,6 +1,7 @@
 import { Badge, Container, Select, Text } from '@medusajs/ui';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
 import { adminFetch } from '../lib/admin-fetch';
@@ -8,18 +9,27 @@ import { importedSoFar } from '../lib/import-run';
 import { knownError } from '../lib/run-errors';
 import { ListEmpty, ListHeader, ListLoading } from './list';
 
+const count = z.number().default(0);
+
 const importSummarySchema = z.object({
   supplier: z.string(),
-  imported: z.number(),
   created: z.number(),
+  updated: count,
+  unchanged: count,
   skipped: z.number(),
   skipped_by_reason: z.object({
     brand: z.number(),
+    unmapped: count,
+    excluded: count,
     currency: z.number(),
     unreadable: z.number(),
     no_engine_code: z.number(),
+    no_make: count,
     not_in_scope: z.number(),
   }),
+  unmapped_categories: z
+    .array(z.object({ code: z.string(), count: z.number() }))
+    .default([]),
   needs_category: z.array(z.string()),
   missing_fields: z
     .array(
@@ -70,6 +80,15 @@ const useSummaryLines = () => {
       }),
       skipped.brand > 0 &&
         t('suppliers.importSkipped', { count: skipped.brand }),
+      skipped.unmapped > 0 &&
+        t('suppliers.importUnmapped', {
+          count: skipped.unmapped,
+          categories: summary.unmapped_categories
+            .map(({ code, count }) => `${code}: ${count}`)
+            .join(', '),
+        }),
+      skipped.excluded > 0 &&
+        t('suppliers.importExcluded', { count: skipped.excluded }),
       skipped.unreadable > 0 &&
         t('suppliers.importUnreadable', { count: skipped.unreadable }),
       skipped.not_in_scope > 0 &&
@@ -80,9 +99,11 @@ const useSummaryLines = () => {
         t('suppliers.importWithoutEngineCode', {
           count: skipped.no_engine_code,
         }),
+      skipped.no_make > 0 &&
+        t('suppliers.importWithoutMake', { count: skipped.no_make }),
       summary.needs_category.length > 0 &&
         t('suppliers.importWithoutCategory', {
-          numbers: summary.needs_category.join(', '),
+          count: summary.needs_category.length,
         }),
       summary.missing_fields.length > 0 &&
         t('suppliers.importMissingFields', {
@@ -137,6 +158,14 @@ export const ImportRunReport = ({ run }: { run: ImportRun }) => {
           {line}
         </Text>
       ))}
+      {run.status !== 'running' && run.report?.needs_category.length ? (
+        <Link
+          to="/parts?category=none"
+          className="txt-small text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+        >
+          {t('suppliers.importWithoutCategoryLink')}
+        </Link>
+      ) : null}
     </div>
   );
 };

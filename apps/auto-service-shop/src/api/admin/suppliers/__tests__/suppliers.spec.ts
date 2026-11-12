@@ -88,8 +88,29 @@ medusaIntegrationTestRunner({
         ).toEqual([]);
       });
 
+      it('excludes a supplier category with a mapping to no Category', async () => {
+        const created = await call(
+          'post',
+          `/admin/suppliers/${supplierId}/categories`,
+          { code: 'Hydraulics', category_id: null },
+        );
+        expect(created.status).toBe(200);
+
+        expect(
+          (await call('get', `/admin/suppliers/${supplierId}/categories`)).data
+            .categories,
+        ).toEqual([
+          expect.objectContaining({ code: 'Hydraulics', category_id: null }),
+        ]);
+        await call(
+          'delete',
+          `/admin/suppliers/${supplierId}/categories/${created.data.category.id}`,
+        );
+      });
+
       it.each([
         ['an empty code', { code: '', category_id: 'cat_1' }],
+        ['no category key', { code: 'IC-AIR' }],
         ['an unknown key', { code: 'IC-AIR', category_id: 'cat_1', x: 1 }],
       ])('returns a 400 for a category mapping with %s', async (_, body) => {
         expect(

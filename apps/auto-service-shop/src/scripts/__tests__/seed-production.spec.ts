@@ -300,7 +300,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('maps the VARTA battery category to «Аккумуляторы» and the MANN-FILTER families to their Categories', async () => {
+      it('maps the VARTA battery category to «Аккумуляторы», the MANN-FILTER families to their Categories and excludes the industrial ones', async () => {
         const [varta] = await suppliers.listSuppliers({ name: 'VARTA' });
         const [mann] = await suppliers.listSuppliers({ name: 'MANN-FILTER' });
         const [batteries] = await catalog.listCategories({ slug: 'batteries' });
@@ -379,6 +379,16 @@ medusaIntegrationTestRunner({
               code: 'Hydraulic Transmission Filter',
               category_id: transmission.id,
             },
+            ...[
+              'Hydraulics',
+              'Compressed Air-Oil Separation',
+              'EDM Filter',
+            ].map((code) => ({
+              supplier_id: mann.id,
+              code,
+              category_id: null,
+            })),
+            { supplier_id: filtron.id, code: 'Hidraulika', category_id: null },
           ].sort((a, b) => key(a).localeCompare(key(b))),
         );
       });

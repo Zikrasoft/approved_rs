@@ -682,7 +682,10 @@ whole sitemap), reads the site's sitemap, and fetches one page at a time, at
 least 2 seconds apart (more if robots.txt
 asks, and Retry-After is waited out). Postgres keeps the queue (`crawl_run`,
 `crawl_page`, with the object key in `crawl_page.body_key`); the gzipped HTML goes
-to the private S3 bucket. Requests go through Crawlee with browser-like headers and rotating
+to the private S3 bucket. A page the site's own parser reads as out of scope
+(a MANN+HUMMEL spare part, a febi page outside the families we sell, a VARTA
+placeholder) is marked `out_of_scope` with no copy in S3 and is fetched again
+only once its last fetch is 30 days old. Requests go through Crawlee with browser-like headers and rotating
 sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) loads
 its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
 stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
@@ -1199,7 +1202,12 @@ its name, then its slug, then the seeded spelling that points at it, so a staff
 rename of either does not seed a duplicate. Deleting a spelling or a mapping in
 the admin is a soft delete, and the seed reads a deleted row as the staff's
 decision and leaves it deleted. Every other site category is still mapped by
-hand on the Supplier's categories screen.
+hand on the Supplier's categories screen, where «Исключить» excludes a category
+instead of mapping it (a mapping with no Category; the seed excludes MANN-FILTER's
+`Hydraulics`, `Compressed Air-Oil Separation` and `EDM Filter` and FILTRON's
+`Hidraulika`). An import skips every article of an unmapped or excluded
+category and its report counts them, unmapped ones by code; a Supplier with no
+mapping at all (bilstein group) is filed by AI instead.
 
 It seeds no Parts or offers: the manual supplier is created on the first
 hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
@@ -1349,8 +1357,10 @@ purpose: only the crawler on the owner's Mac writes them, through raw SQL under
 its own Postgres role (`crawler-role.sh` grants it exactly these two tables), and
 a module would hand them to a service no Medusa code calls. The supplier module's
 hand-written migration creates them, and `src/lib/schema-check.ts` lists their
-columns and indexes, so the deploy-time schema check and the schema spec still
-see them.
+columns and indexes, and checks the `crawl_page_status` and `crawl_page_error`
+CHECKs against `PAGE_STATUSES` and `FAILURE_REASONS` in
+`src/lib/crawler/store.ts`, so the deploy-time schema check and the schema spec
+still see them.
 
 `fitment` keeps two indexes the planner never needs: the generator's partial
 `IDX_fitment_part_id` and `IDX_fitment_vehicle_id`, covered by the hand-written

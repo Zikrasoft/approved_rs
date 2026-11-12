@@ -344,7 +344,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('fits no construction, agricultural, truck or bus maker and makes no Make of it', async () => {
+      it('fits no construction, agricultural, truck or bus maker, makes no Make of it and counts the rows', async () => {
         mann.articles.push({
           article_id: 'WK9406',
           brand: 'MANN-FILTER',
@@ -359,8 +359,9 @@ medusaIntegrationTestRunner({
           ],
         });
 
-        await runImport('MANN-FILTER');
+        const summary = await runImport('MANN-FILTER');
 
+        expect(summary.skipped_by_reason.no_make).toBe(4);
         expect(await fitmentsOf('WK 940/6')).toEqual([]);
         expect(
           await catalog.listMakes({
@@ -797,7 +798,10 @@ medusaIntegrationTestRunner({
         const summary = await runImport('MANN-FILTER');
 
         expect(await fitmentsOf('K 1477')).toEqual([]);
-        expect(summary.skipped_by_reason.no_engine_code).toBe(1);
+        expect(summary.skipped_by_reason).toMatchObject({
+          no_engine_code: 1,
+          no_make: 0,
+        });
         expect(await catalog.listMakes({ slug: 'ford' })).toEqual([]);
       });
 

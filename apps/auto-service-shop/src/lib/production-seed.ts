@@ -364,6 +364,7 @@ export async function seedCategoryFields(
 type CrawledCatalogue = {
   brands: Record<string, string[]>;
   categories: Record<string, string>;
+  excluded: string[];
   makes: Record<string, string>;
 };
 
@@ -388,6 +389,7 @@ const CRAWLED_CATALOGUES: Record<
       Ventilator: 'engine-parts',
       'Hydraulic Transmission Filter': 'transmission',
     },
+    excluded: ['Hydraulics', 'Compressed Air-Oil Separation', 'EDM Filter'],
     makes: MAKE_ALIASES,
   },
   filtron: {
@@ -398,19 +400,22 @@ const CRAWLED_CATALOGUES: Record<
       'Filter kabine': MAINTENANCE_SLUG,
       'Filter ulja': MAINTENANCE_SLUG,
       'Sekundarni element': MAINTENANCE_SLUG,
-      'Sušač': 'brakes',
+      Sušač: 'brakes',
       'Filter hidrauličnog prenosa': 'transmission',
     },
+    excluded: ['Hidraulika'],
     makes: MAKE_ALIASES,
   },
   varta: {
     brands: { VARTA: ['VARTA'] },
     categories: { battery: BATTERY_CATEGORY.slug },
+    excluded: [],
     makes: {},
   },
   bilstein: {
     brands: { Febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
     categories: {},
+    excluded: [],
     makes: MAKE_ALIASES,
   },
 };
@@ -495,7 +500,8 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
   for (const site of CRAWLED_SITES) {
     if (site.key === 'demo') continue;
-    const { brands, categories, makes } = CRAWLED_CATALOGUES[site.key];
+    const { brands, categories, excluded, makes } =
+      CRAWLED_CATALOGUES[site.key];
     const { id: supplier_id } = await seedCrawledSupplier(suppliers, site.name);
 
     const seededBrandSpellings = await catalog.listBrandSpellings(
@@ -553,16 +559,30 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
       { supplier_id },
       WITH_DELETED,
     );
-    for (const [code, slug] of Object.entries(categories)) {
-      const [category] = await catalog.listCategories({ slug });
+    const categoryIds = Object.fromEntries(
+      (
+        await catalog.listCategories(
+          { slug: Object.values(categories) },
+          { take: null },
+        )
+      ).map(({ id, slug }) => [slug, id]),
+    );
+    const wanted: [string, string | null][] = [
+      ...Object.entries(categories).map(([code, slug]): [string, string] => [
+        code,
+        categoryIds[slug],
+      ]),
+      ...excluded.map((code): [string, null] => [code, null]),
+    ];
+    for (const [code, category_id] of wanted) {
       await upsert(
         liveFirst(mapped, ({ code_key }) => code_key === spellingKey(code)),
-        { category_id: category.id },
+        { category_id },
         () =>
           suppliers.createSupplierCategories({
             supplier_id,
             code,
-            category_id: category.id,
+            category_id,
           }),
         (update) => suppliers.updateSupplierCategories(update),
       );

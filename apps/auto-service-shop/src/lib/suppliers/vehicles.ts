@@ -309,16 +309,21 @@ export async function fitVehicles(
   matcher: VehicleMatcher,
   partId: string,
   facts: VehicleFacts[],
-): Promise<void> {
+): Promise<{ noMake: number }> {
   const { catalog, source } = matcher;
   const notes = new Map<string, string | null>();
+  let noMake = 0;
   for (const row of facts) {
     for (const id of await vehiclesOf(matcher, row)) {
       if (!notes.has(id)) notes.set(id, row.notes.join('; ') || null);
     }
+    const unknownMake =
+      row.engine_codes.length > 0 &&
+      matcher.makes.get(spellingKey(row.make)) === null;
+    if (unknownMake) noMake += 1;
   }
   await dropUnlisted(matcher, partId, new Set(notes.keys()));
-  if (!notes.size) return;
+  if (!notes.size) return { noMake };
   const fitted = new Set(
     (
       await catalog.listFitments(
@@ -337,4 +342,5 @@ export async function fitVehicles(
       fitting.map((fitment) => ({ ...fitment, part_id: partId, source })),
     );
   }
+  return { noMake };
 }

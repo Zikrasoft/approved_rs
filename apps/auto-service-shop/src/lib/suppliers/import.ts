@@ -17,7 +17,7 @@ import type {
   FoundPart,
   PartClassification,
 } from '../../modules/catalog/service';
-import { inShopCurrency, SUPPLIER_MODULE } from '../../modules/supplier';
+import { SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
   type ArticleAnswer,
@@ -31,9 +31,10 @@ import { cachedArticleAnswer } from '../ai/cache';
 import { plainDescription } from '../ai/description';
 import {
   cataloguePageSchema,
+  parsedQuotes,
   type SupplierAdapter,
   supplierAdapters,
-  supplierQuoteSchema,
+  type supplierQuoteSchema,
 } from './adapter';
 import { parseEnv } from '../env';
 import { START_STOP } from '../production-seed';
@@ -44,33 +45,23 @@ import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
 import { spellingKey } from '../../modules/_shared/spelling';
+import { categoryScope } from './category-scope';
+import {
+  type ImportSummary,
+  importTally,
+  type ImportTally,
+} from './import-summary';
 import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
 
-export type ImportSummary = {
-  supplier: string;
-  imported: number;
-  created: number;
-  skipped: number;
-  skipped_by_reason: {
-    brand: number;
-    currency: number;
-    unreadable: number;
-    no_engine_code: number;
-    not_in_scope: number;
-  };
-  needs_category: string[];
-  missing_fields: { number: string; category: string; fields: string[] }[];
-  unanswered: { number: string; reason: string }[];
-  failed: { number: string; reason: string }[];
-};
+export type { ImportSummary };
 
 type ImportState = {
-  summary: ImportSummary;
+  tally: ImportTally;
   listed: Set<string>;
-  listedNumbers: Set<string>;
+  listedBrandNumbers: Set<string>;
   changedPartIds: Set<string>;
 };
 
@@ -496,7 +487,7 @@ async function stage(
 
 async function importArticle(
   context: Context,
-  { summary, listed, changedPartIds }: ImportState,
+  { tally, listed, changedPartIds }: ImportState,
   article: Article,
   brandId: string,
   categoryId: string | undefined,
@@ -508,8 +499,11 @@ async function importArticle(
   if (changedPartId) {
     changedPartIds.add(changedPartId);
   }
+  const offerChanged = quote
+    ? await storeOffer(context, identifierId, quote)
+    : false;
   if (quote) {
-    if (await storeOffer(context, identifierId, quote)) {
+    if (offerChanged) {
       changedPartIds.add(partId);
     }
     listed.add(article.article_id);
@@ -517,18 +511,26 @@ async function importArticle(
   await stage(context, identifierId, article);
   if (article.vehicles) {
     const vehicles = article.vehicles;
-    await context.oneAtATime(() =>
+    const { noMake } = await context.oneAtATime(() =>
       fitVehicles(context.vehicles, partId, vehicles),
     );
-    summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
-      ({ engine_codes }) => !engine_codes.length,
-    ).length;
+    tally.skip('no_make', noMake);
+    tally.skip(
+      'no_engine_code',
+      article.vehicles.filter(({ engine_codes }) => !engine_codes.length)
+        .length,
+    );
   }
   if (categorized === false) {
-    summary.needs_category.push(article.number);
+    tally.summary.needs_category.push(article.number);
   }
-  summary.imported += Number(!created);
-  summary.created += Number(created);
+  tally.imported(
+    created
+      ? 'created'
+      : changedPartId || offerChanged
+        ? 'updated'
+        : 'unchanged',
+  );
 }
 
 const oneAtATime = () => {
@@ -555,6 +557,9 @@ async function eachAtOnce<T>(
   );
 }
 
+const listedKey = (brandId: string, { number }: Article) =>
+  `${brandId} ${normalizePartNumber(number)}`;
+
 const sameNumberRuns = (
   articles: Article[],
   brandOf: (article: Article) => string | undefined,
@@ -580,23 +585,8 @@ export async function importSupplier(
   if (!supplier) {
     throw new Error(`No Supplier is named ${adapter.name}`);
   }
-  const summary: ImportSummary = {
-    supplier: adapter.name,
-    imported: 0,
-    created: 0,
-    skipped: 0,
-    skipped_by_reason: {
-      brand: 0,
-      currency: 0,
-      unreadable: 0,
-      no_engine_code: 0,
-      not_in_scope: 0,
-    },
-    needs_category: [],
-    missing_fields: [],
-    unanswered: [],
-    failed: [],
-  };
+  const tally = importTally(adapter.name);
+  const { summary } = tally;
   const context: Context = {
     scope,
     adapter,
@@ -618,13 +608,11 @@ export async function importSupplier(
       `${adapter.name}: S3 is not configured, so AI answers are not cached and every article is asked again`,
     );
   }
-  const categoryOf = new Map(
-    (
-      await suppliers.listSupplierCategories(
-        { supplier_id: supplier.id },
-        { take: null },
-      )
-    ).map(({ code_key, category_id }) => [code_key, category_id]),
+  const scopeOf = categoryScope(
+    await suppliers.listSupplierCategories(
+      { supplier_id: supplier.id },
+      { select: ['code', 'category_id'], take: null },
+    ),
   );
   const brandOf = new Map(
     (
@@ -636,13 +624,22 @@ export async function importSupplier(
   );
   const brandOfArticle = (article: Article) =>
     brandOf.get(spellingKey(article.brand));
-  const categoryOfArticle = (article: Article) =>
-    categoryOf.get(spellingKey(article.category));
+  const categoryOfArticle = (article: Article) => {
+    const decision = scopeOf(article.category);
+    return 'categoryId' in decision ? decision.categoryId : undefined;
+  };
   const state: ImportState = {
-    summary,
+    tally,
     listed: new Set(),
-    listedNumbers: new Set(),
+    listedBrandNumbers: new Set(),
     changedPartIds: new Set(),
+  };
+  const inScope = (article: Article) => {
+    const decision = scopeOf(article.category);
+    if (!('skipped' in decision)) return true;
+    if (decision.skipped === 'unmapped') tally.unmapped(article.category);
+    else tally.skip('excluded');
+    return false;
   };
   const unreadableUrls = new Set<string>();
 
@@ -654,28 +651,27 @@ export async function importSupplier(
         `${adapter.name}: skipped unreadable ${url}: ${reason}`,
       );
     }
-    summary.skipped += page.unreadable.length;
-    summary.skipped_by_reason.unreadable += page.unreadable.length;
-    summary.skipped += page.not_in_scope;
-    summary.skipped_by_reason.not_in_scope += page.not_in_scope;
-    for (const { number } of page.articles) {
-      state.listedNumbers.add(normalizePartNumber(number));
+    tally.skip('unreadable', page.unreadable.length);
+    tally.skip('not_in_scope', page.not_in_scope);
+    const branded = page.articles.filter(brandOfArticle);
+    for (const article of branded) {
+      state.listedBrandNumbers.add(
+        listedKey(brandOfArticle(article)!, article),
+      );
     }
-    const wanted = page.articles.filter(brandOfArticle);
-    const unbranded = page.articles.length - wanted.length;
-    summary.skipped += unbranded;
-    summary.skipped_by_reason.brand += unbranded;
-    const quoted = wanted.length
-      ? z
-          .array(supplierQuoteSchema)
-          .parse(
-            await adapter.quote(wanted.map(({ article_id }) => article_id)),
-          )
-      : [];
-    const quotes = new Map(
-      quoted.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
-    );
-    summary.skipped_by_reason.currency += quoted.length - quotes.size;
+    tally.skip('brand', page.articles.length - branded.length);
+    const wanted = branded.filter(inScope);
+    const { quotes: quoted, refused } = wanted.length
+      ? parsedQuotes(
+          z
+            .array(z.unknown())
+            .parse(
+              await adapter.quote(wanted.map(({ article_id }) => article_id)),
+            ),
+        )
+      : { quotes: [], refused: 0 };
+    const quotes = new Map(quoted.map((quote) => [quote.article_id, quote]));
+    tally.skip('currency', refused);
     const importOne = async (article: Article) => {
       try {
         await importArticle(
@@ -731,7 +727,7 @@ export async function importSupplier(
   }
   await catalog.flagUnlistedParts(
     adapter.name,
-    [...state.listedNumbers],
+    [...state.listedBrandNumbers],
     [...unreadableUrls],
   );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
