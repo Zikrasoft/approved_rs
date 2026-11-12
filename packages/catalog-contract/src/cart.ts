@@ -8,13 +8,19 @@ import {
   offerCartSchema,
   partOfferSchema,
   CHECKOUT_REFUSALS,
+  type CheckoutRefusal,
 } from './cart-wire.ts';
 import { vinOf } from '@podbor/lead-crm/vin';
 
 export * from './cart-wire.ts';
 
+export const GENERIC_CHECKOUT_REFUSAL: CheckoutRefusal = 'CHECKOUT_REFUSED';
+
 export const checkoutRefusalSchema = z.object({
-  code: z.enum(CHECKOUT_REFUSALS),
+  code: z.string().transform((code) => {
+    const known = z.enum(CHECKOUT_REFUSALS).safeParse(code);
+    return known.success ? known.data : GENERIC_CHECKOUT_REFUSAL;
+  }),
 });
 
 export const offerCartResponseSchema = z.object({ cart: offerCartSchema });

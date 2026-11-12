@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { CATEGORY_FIELD_TYPES, attributeValuesSchema } from './attributes.ts';
+import {
+  CATEGORY_FIELD_TYPES,
+  attributeValuesSchema,
+  ofKnownFieldTypes,
+} from './attributes.ts';
 import {
   CATALOG_TRANSLATION_LOCALES,
   type CategoryField,
@@ -53,7 +57,7 @@ export const searchFacetSchema = z.object({
 
 export const searchResponseSchema = z.object({
   results: z.array(searchResultSchema),
-  facets: z.array(searchFacetSchema),
+  facets: ofKnownFieldTypes(searchFacetSchema),
   category: z.object({ slug: z.string(), name: z.string() }).nullable(),
   model: vehicleSchema.shape.model.nullable().default(null),
   cars: readableCars,

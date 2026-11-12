@@ -4,6 +4,7 @@ import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
   checkoutContactSchema,
   checkoutRefusalSchema,
+  GENERIC_CHECKOUT_REFUSAL,
   offerCartResponseSchema,
   identifierOffersResponseSchema,
   partOffersResponseSchema,
@@ -93,9 +94,20 @@ describe('checkout answers', () => {
     expect(checkoutRefusalSchema.parse({ code: 'OFFER_OUT_OF_STOCK' })).toEqual(
       { code: 'OFFER_OUT_OF_STOCK' },
     );
-    expect(checkoutRefusalSchema.safeParse({ code: 'OTHER' }).success).toBe(
+  });
+
+  it('reads a refusal code newer than the contract as a generic refusal', () => {
+    expect(checkoutRefusalSchema.parse({ code: 'OTHER' })).toEqual({
+      code: GENERIC_CHECKOUT_REFUSAL,
+    });
+    expect(GENERIC_CHECKOUT_REFUSAL).toBe('CHECKOUT_REFUSED');
+  });
+
+  it('takes an answer without a refusal code for no refusal at all', () => {
+    expect(checkoutRefusalSchema.safeParse({ message: 'boom' }).success).toBe(
       false,
     );
+    expect(checkoutRefusalSchema.safeParse({ code: 7 }).success).toBe(false);
   });
 
   it('reads a placed order and live offers', () => {

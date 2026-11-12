@@ -37,7 +37,7 @@ export type AddonPrices = {
 
 export type CartRefusal = Exclude<
   CheckoutRefusal,
-  'CONTACT_MISSING' | 'CART_CHANGED'
+  'CONTACT_MISSING' | 'CART_CHANGED' | 'CHECKOUT_REFUSED'
 >;
 
 export type CartPlan = {
