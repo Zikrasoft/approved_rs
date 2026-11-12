@@ -381,9 +381,9 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 | Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
 | --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                    |
+| `SHOP_API_URL`              | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
 | `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| `SHOP_LEAD_SECRET`          | ✅ secret   | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 | `SHOP_CLIENT_SECRET`        | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
 | `SHOP_EVENTS_SECRET`        | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
@@ -407,6 +407,14 @@ to someone else's Order. The same secret goes the other way for «Сделать
 and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
+The CRM bot uses `SHOP_API_URL` and `SHOP_LEAD_SECRET` to read
+`GET /hooks/visitors/:visitor_id/vin-lookups`, the last three VIN searches of a
+Lead's visitor, and lists them as «🔎 Искал» lines on the group card (sent by
+carlab.rs) and on the DM detail (built by approved.rs's webhook). Either side
+without both variables shows the card without them; a shop that does not answer
+within three seconds does too. The visitor id reaches the shop because
+`bootSiteKit` mirrors it into the first-party `visitor_id` cookie, which the
+server-rendered VIN search reads and sends in the `/store/vin-lookups` body.
 `SHOP_CLIENT_SECRET` is a separate value set twice the same way, on carlab.rs
 and in the shop's `.env`: every catalogue call carlab.rs makes for a visitor
 carries it in `x-shop-client-secret`, so the shop's store rate limits count the
@@ -1034,12 +1042,13 @@ number gets its CI value in that script. The non-obvious parts:
   whose visitor id is not in `STAFF_VISITOR_IDS`.
 
 - `STAFF_VISITOR_IDS` is the comma-separated list of our own carlab.rs visitor
-  ids (the `visitor_id` key in the browser's localStorage on carlab.rs, a UUID),
+  ids (the `visitor_id` key in the browser's localStorage, or the `visitor_id`
+  cookie, on carlab.rs, a UUID),
   not the GA4/Metrika client ids of `analytics-exclusions.md`. Optional; an
   entry that is not a UUID stops the server at startup. Read when the
   Unresolved VINs screen loads, so a change reclassifies past lookups too.
-  carlab.rs does not send a visitor id with a VIN search yet, so until it does
-  the list matches nothing.
+  The screen shows the first eight characters of each customer visitor id per
+  code, to find the Lead whose «ID посетителя» starts with them.
 
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
