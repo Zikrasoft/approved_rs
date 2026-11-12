@@ -16,6 +16,10 @@ import {
   type Keyboard,
   type Role,
 } from './markup.ts';
+import {
+  VISITOR_VIN_LOOKUPS_SHOWN,
+  type VisitorVinLookup,
+} from '../visitorSearchesWire.ts';
 import { digestMessage, renderDigest } from './digest.ts';
 import { OPERATION_AUTHORS } from './ledger.ts';
 import { buildHelp } from './menu.ts';
@@ -263,6 +267,21 @@ function adHashtag(lead: StoredLead, separator: string): string {
   return lead.adSource ? `${separator}${AD_HASHTAG}` : '';
 }
 
+function searchLine({
+  make,
+  model,
+  vin_last4,
+  vehicle,
+}: VisitorVinLookup): string {
+  const car = vehicle ?? [make, model].filter(Boolean).join(' ');
+  const vin = vin_last4 && `VIN …${vin_last4}`;
+  return `🔎 Искал: ${escapeHtml([car, vin].filter(Boolean).join(', '))}`;
+}
+
+function searchLines(searches: VisitorVinLookup[]): string[] {
+  return searches.slice(0, VISITOR_VIN_LOOKUPS_SHOWN).map(searchLine);
+}
+
 function remindLine(lead: StoredLead): string {
   return lead.status === 'postponed' && lead.remindAt
     ? `\n⏰ Напомнить: ${formatDateRu(lead.remindAt)}`
@@ -325,6 +344,7 @@ export function createFormatter({
   function formatLeadText(
     lead: StoredLead,
     showContact: (contact: string) => string = escapeHtml,
+    searches: VisitorVinLookup[] = [],
   ): string {
     const channel = lead.contactChannel
       ? ` (${escapeHtml(channelLabel(lead.contactChannel))})`
@@ -346,6 +366,7 @@ export function createFormatter({
     if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
     const page = lead.source_url && shownPage(lead.source_url);
     if (page) lines.push(`Страница: ${escapeHtml(page)}`);
+    lines.push(...searchLines(searches));
     if (lead.visitorId)
       lines.push(`ID посетителя: ${escapeHtml(lead.visitorId.slice(0, 100))}`);
     lines.push(``, `#заявка${adHashtag(lead, ' ')}`);
@@ -378,8 +399,11 @@ export function createFormatter({
       return formatLeadText(lead, linkedContact);
     },
 
-    formatTeaser(lead: StoredLead): string {
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${adHashtag(lead, '\n')}`;
+    formatTeaser(lead: StoredLead, searches: VisitorVinLookup[] = []): string {
+      const searched = searchLines(searches)
+        .map((line) => `\n${line}`)
+        .join('');
+      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${searched}${adHashtag(lead, '\n')}`;
     },
 
     postponeReminderText(lead: StoredLead): string {
@@ -429,6 +453,7 @@ export function createFormatter({
     buildLeadDetail(
       lead: StoredLead,
       role: Role,
+      searches: VisitorVinLookup[] = [],
     ): { text: string; reply_markup: Keyboard } {
       const deleteRow: Btn[][] =
         role === 'admin'
@@ -443,7 +468,7 @@ export function createFormatter({
       ];
 
       return {
-        text: formatLeadText(lead),
+        text: formatLeadText(lead, escapeHtml, searches),
         reply_markup: { inline_keyboard: rows },
       };
     },
