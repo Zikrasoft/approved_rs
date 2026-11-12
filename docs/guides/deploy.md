@@ -1009,7 +1009,7 @@ number gets its CI value in that script. The non-obvious parts:
   - `mercedes-baumuster`: Mercedes-Benz, the Baumuster in characters 4 to 9,
     matched to crawled Model names that list it (ADR-0050).
   - `vag-model-code`: Volkswagen, Audi, Skoda, SEAT and Cupra, the model code
-    in characters 7 and 8, read through `vag-model-codes.json`. Each row names
+    in characters 7 and 8, read through `vag-model-code-rows.json`. Each row names
     the generation, its type designations, its years and the public sources
     it comes from (Wikibooks, Wikipedia, manufacturer documents, public VIN
     records). A VIN matches the crawled Vehicles of its make whose Chassis

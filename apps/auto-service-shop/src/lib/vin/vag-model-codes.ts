@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import rows from './vag-model-codes.json';
+import rows from './vag-model-code-rows.json';
 
 const VAG_MAKES = ['volkswagen', 'audi', 'skoda', 'seat', 'cupra'] as const;
 

@@ -1,4 +1,4 @@
-import rows from '../vag-model-codes.json';
+import rows from '../vag-model-code-rows.json';
 import {
   vagMakesOf,
   vagModelCodeSchema,
