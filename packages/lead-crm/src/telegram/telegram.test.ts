@@ -1761,7 +1761,7 @@ describe('the VIN searches of the visitor behind a Lead', () => {
 
   it('fetches them for the card the group gets', async () => {
     await searching.sendLeadNotification(lead);
-    expect(visitorSearches).toHaveBeenCalledWith(VISITOR);
+    expect(visitorSearches).toHaveBeenCalledWith(lead);
     expect(sentText()).toContain(LINES[0]);
   });
 

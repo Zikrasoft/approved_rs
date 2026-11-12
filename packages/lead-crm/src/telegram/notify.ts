@@ -40,11 +40,7 @@ export function createNotifier({
   visitorSearches = noVisitorSearches,
 }: NotifierOptions) {
   async function leadDetail(lead: StoredLead, role: Role) {
-    return formatter.buildLeadDetail(
-      lead,
-      role,
-      await visitorSearches(lead.visitorId),
-    );
+    return formatter.buildLeadDetail(lead, role, await visitorSearches(lead));
   }
 
   async function sendToAll(
@@ -77,7 +73,7 @@ export function createNotifier({
     ): Promise<{ chatId: number; messageId: number }> {
       const sent = await client.api.sendMessage(
         groupId,
-        formatter.formatTeaser(lead, await visitorSearches(lead.visitorId)),
+        formatter.formatTeaser(lead, await visitorSearches(lead)),
         {
           parse_mode: 'HTML',
           reply_markup: formatter.deepLinkKeyboard(lead),
@@ -164,7 +160,7 @@ export function createNotifier({
         await client.safeEditMessage(
           lead.telegramChatId,
           lead.telegramMessageId,
-          formatter.formatTeaser(lead, await visitorSearches(lead.visitorId)),
+          formatter.formatTeaser(lead, await visitorSearches(lead)),
           formatter.deepLinkKeyboard(lead),
         );
       } catch (err) {

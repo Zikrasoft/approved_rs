@@ -1,5 +1,7 @@
+import { CARLAB } from '@podbor/brands';
 import { visitorIdSchema } from './form.ts';
 import { logError } from './logError.ts';
+import type { StoredLead } from './schema.ts';
 import {
   visitorVinLookupsPath,
   visitorVinLookupsResponseSchema,
@@ -9,7 +11,7 @@ import {
 const SHOP_TIMEOUT_MS = 3_000;
 
 export type VisitorSearches = (
-  visitorId: string | null | undefined,
+  lead: Pick<StoredLead, 'brand' | 'visitorId'>,
 ) => Promise<VisitorVinLookup[]>;
 
 export const noVisitorSearches: VisitorSearches = async () => [];
@@ -22,9 +24,9 @@ export function createVisitorSearches({
   secret?: string;
 }): VisitorSearches {
   if (!shopUrl || !secret) return noVisitorSearches;
-  return async (visitorId) => {
+  return async ({ brand, visitorId }) => {
     const visitor = visitorIdSchema.parse(visitorId ?? null);
-    if (!visitor) return [];
+    if (brand !== CARLAB.name || !visitor) return [];
     try {
       const response = await fetch(
         new URL(visitorVinLookupsPath(visitor), shopUrl),

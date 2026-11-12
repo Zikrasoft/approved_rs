@@ -7,7 +7,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
 import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
-const SHOP_LEAD_SECRET = 'shop-lead-secret';
+const SHOP_VISITOR_SEARCHES_SECRET = 'visitor-searches-secret';
 const VISITOR = '1c9b5a6f-7d2e-4f3a-8b4c-8d9e0f1a2b3c';
 const STRANGER = '0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b';
 
@@ -38,7 +38,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     describe('the VIN lookups of one visitor', () => {
       const siteHeaders = {
-        headers: { authorization: `Bearer ${SHOP_LEAD_SECRET}` },
+        headers: { authorization: `Bearer ${SHOP_VISITOR_SEARCHES_SECRET}` },
       };
 
       const lookupsOf = (
@@ -50,7 +50,8 @@ medusaIntegrationTestRunner({
           .catch((error) => error.response);
 
       beforeAll(async () => {
-        process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
+        process.env.SHOP_VISITOR_SEARCHES_SECRET = SHOP_VISITOR_SEARCHES_SECRET;
+        process.env.SHOP_LEAD_SECRET = 'shop-lead-secret';
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
         const vinLookups: VinLookupModuleService =
@@ -73,6 +74,7 @@ medusaIntegrationTestRunner({
       });
 
       afterAll(() => {
+        delete process.env.SHOP_VISITOR_SEARCHES_SECRET;
         delete process.env.SHOP_LEAD_SECRET;
       });
 
@@ -146,6 +148,7 @@ medusaIntegrationTestRunner({
       it.each([
         ['no secret', {}],
         ['a wrong secret', { authorization: 'Bearer wrong' }],
+        ['the shop lead secret', { authorization: 'Bearer shop-lead-secret' }],
       ])('refuses a request carrying %s', async (_name, headers) => {
         const response = await lookupsOf(VISITOR, { headers });
 

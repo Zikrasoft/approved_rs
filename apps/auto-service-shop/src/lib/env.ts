@@ -101,6 +101,8 @@ const envFields = z.object({
   SHOP_ORDER_OUTCOME_SECRET_PREVIOUS: optionalSecret,
   SHOP_EVENTS_SECRET: optionalSecret,
   SHOP_EVENTS_SECRET_PREVIOUS: optionalSecret,
+  SHOP_VISITOR_SEARCHES_SECRET: optionalSecret,
+  SHOP_VISITOR_SEARCHES_SECRET_PREVIOUS: optionalSecret,
   VIN_DECODERS: z
     .string()
     .default(VIN_DECODER_NAMES.join(','))

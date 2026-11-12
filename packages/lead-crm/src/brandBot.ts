@@ -44,7 +44,7 @@ const BotEnvSchema = z.object({
   TELEGRAM_ADMIN_ID: ids('TELEGRAM_ADMIN_ID'),
   SHOP_API_URL: optional.pipe(z.url().optional()),
   SHOP_ORDER_OUTCOME_SECRET: optional,
-  SHOP_LEAD_SECRET: optional,
+  SHOP_VISITOR_SEARCHES_SECRET: optional,
 });
 
 function readBotEnv() {
@@ -82,7 +82,7 @@ export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
     adminIds,
     visitorSearches: createVisitorSearches({
       shopUrl: env.SHOP_API_URL,
-      secret: env.SHOP_LEAD_SECRET,
+      secret: env.SHOP_VISITOR_SEARCHES_SECRET,
     }),
   });
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });

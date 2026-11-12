@@ -59,6 +59,7 @@ import {
   requireOrderOutcomeSecret,
   requireShopEventsSecret,
   requireShopLeadSecret,
+  requireVisitorSearchesSecret,
 } from '../lib/bearer-secret';
 import {
   StoreAddLineAddon,
@@ -309,7 +310,7 @@ export default defineMiddlewares({
     {
       matcher: '/hooks/visitors/:visitor_id/vin-lookups',
       method: 'GET',
-      middlewares: [requireShopLeadSecret],
+      middlewares: [requireVisitorSearchesSecret],
     },
     {
       matcher: '/admin/workshop-quotes',

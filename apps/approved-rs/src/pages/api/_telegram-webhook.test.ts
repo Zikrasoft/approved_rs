@@ -13,7 +13,7 @@ const memory = vi.hoisted(() => {
   process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB =
     '1003:test-carlab-capture-token';
   process.env.SHOP_API_URL = 'https://shop.test';
-  process.env.SHOP_LEAD_SECRET = 'test-shop-lead-secret';
+  process.env.SHOP_VISITOR_SEARCHES_SECRET = 'test-visitor-searches-secret';
   const storages = new Map<string, MemoryStorage>();
   return {
     storages,
@@ -1677,12 +1677,18 @@ describe('POST /api/telegram-webhook', () => {
       ]);
     });
 
-    it("/start lead_<id> lists the VIN searches of the Lead's visitor", async () => {
-      seed(makeLead({ visitorId: VISITOR }));
+    it("/start lead_<id> lists the VIN searches of a CarLab Lead's visitor", async () => {
+      seed(makeLead({ brand: 'CarLab', visitorId: VISITOR }));
       await message('/start lead_5', OWNER_ID);
       expect(textsTo(OWNER_ID)[0]).toContain(
         '🔎 Искал: BMW 116d E81, VIN …1234',
       );
+    });
+
+    it('/start lead_<id> never asks the shop about an Approved.rs Lead', async () => {
+      seed(makeLead({ visitorId: VISITOR }));
+      await message('/start lead_5', OWNER_ID);
+      expect(textsTo(OWNER_ID)[0]).not.toContain('🔎 Искал');
     });
 
     it('/start lead_<id> for an unknown lead falls back to the menu', async () => {
