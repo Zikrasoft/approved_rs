@@ -17,10 +17,6 @@ concurrency:
 env:
   SHOP_IMAGE: ghcr.io/zikrasoft/podbor-auto-service-shop
   ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12
-  COMPOSE_PROJECT_NAME: podbor-ci
-  SHOP_TEST_DB_PORT: 55532
-  SHOP_TEST_TYPESENSE_PORT: 58208
-  SHOP_TEST_PORT: 9319
 
 jobs:
   check:
@@ -41,7 +37,7 @@ jobs:
       - name: Shop migrations match the models
         run: |
           docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
-          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:$SHOP_TEST_DB_PORT/migration_drift sh .github/scripts/shop-migration-drift.sh
+          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
       - run: sh .github/scripts/shop-migrations-frozen.sh
       - run: sh .github/scripts/shop-migrations-frozen.test.sh
       - run: sh .github/scripts/pinned-deps.sh
@@ -231,17 +227,17 @@ jobs:
           sh .github/scripts/shop-ci-env.sh >"$RUNNER_TEMP/shop.env"
           docker run --rm --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA" \
             node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
-          docker rm -f shop-ci >/dev/null 2>&1 || true
-          docker run -d --name shop-ci --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA"
+          docker rm -f "${COMPOSE_PROJECT_NAME:-podbor}-shop" >/dev/null 2>&1 || true
+          docker run -d --name "${COMPOSE_PROJECT_NAME:-podbor}-shop" --network host --env-file "$RUNNER_TEMP/shop.env" "$SHOP_IMAGE:$SHA"
           for _ in $(seq 60); do
-            status=$(docker inspect --format '{{.State.Health.Status}}' shop-ci)
+            status=$(docker inspect --format '{{.State.Health.Status}}' "${COMPOSE_PROJECT_NAME:-podbor}-shop")
             case "$status" in
               healthy | unhealthy) break ;;
             esac
-            [ "$(docker inspect --format '{{.State.Running}}' shop-ci)" = true ] || break
+            [ "$(docker inspect --format '{{.State.Running}}' "${COMPOSE_PROJECT_NAME:-podbor}-shop")" = true ] || break
             sleep 3
           done
-          docker logs shop-ci 2>&1 | tail -40
+          docker logs "${COMPOSE_PROJECT_NAME:-podbor}-shop" 2>&1 | tail -40
           [ "$status" = healthy ]
 
       - name: Push
@@ -268,7 +264,7 @@ jobs:
       - name: Clean up
         if: always()
         run: |
-          docker rm -f shop-ci >/dev/null 2>&1 || true
+          docker rm -f "${COMPOSE_PROJECT_NAME:-podbor}-shop" >/dev/null 2>&1 || true
           docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
 
   deploy-shop:
