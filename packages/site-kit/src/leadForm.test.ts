@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineLeadForm } from '@podbor/lead-crm/lead-form';
 import { storedAdTouch, storedMetaIds } from './adTouch.ts';
-import { getOrCreateVisitorId } from './browser.ts';
+import { getOrCreateVisitorId } from './visitorId.ts';
 import {
   detectVisitorCountry,
   visitorChannel,

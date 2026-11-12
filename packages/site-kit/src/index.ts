@@ -35,7 +35,7 @@ export {
   localeCookieValue,
 } from './localeCookie.ts';
 export { isActiveNavPath, navCurrent, swapLocalePath } from './navPath.ts';
-export { readOrCreateVisitorId } from './visitorId.ts';
+export { VISITOR_ID_COOKIE } from './visitorId.ts';
 export { createUnlocalizedMatcher } from './unlocalizedPath.ts';
 export {
   STORAGE_KEY as CONSENT_STORAGE_KEY,
@@ -43,6 +43,5 @@ export {
   newConsent,
 } from './consent.ts';
 export type { Consent } from './consent.ts';
-export type { VisitorIdEnvironment } from './visitorId.ts';
 export type { Crumb } from './breadcrumbSchema.ts';
 export type { UnlocalizedPaths } from './unlocalizedPath.ts';

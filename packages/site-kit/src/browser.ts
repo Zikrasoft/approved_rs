@@ -1,4 +1,3 @@
-import { readOrCreateVisitorId } from './visitorId.ts';
 export { bootSiteKit, type SiteKitConfig } from './boot.ts';
 export {
   defineBrowsingDepth,
@@ -42,21 +41,10 @@ export {
   STORAGE_KEY as CONSENT_STORAGE_KEY,
   analyticsDeclined,
 } from './consent.ts';
-export { VISITOR_ID_STORAGE_KEY } from './visitorId.ts';
+export { VISITOR_ID_STORAGE_KEY, getOrCreateVisitorId } from './visitorId.ts';
 export {
   MY_GARAGE_VIN_ATTRIBUTE,
   defineMyGarage,
   rememberVin,
   storedVin,
 } from './myGarage.ts';
-
-export function getOrCreateVisitorId(): string {
-  try {
-    return readOrCreateVisitorId({
-      storage: localStorage,
-      randomId: () => crypto.randomUUID(),
-    });
-  } catch {
-    return '';
-  }
-}

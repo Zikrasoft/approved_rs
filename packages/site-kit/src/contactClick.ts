@@ -3,13 +3,7 @@ import { AD_SOURCE_FIELD, META_IDS_FIELD } from '@podbor/lead-crm/fields';
 import { storedAdTouch, storedMetaIds } from './adTouch.ts';
 import { CONTACT_PLACEMENT_ATTRIBUTE, GOALS, reachGoal } from './goals.ts';
 import { stampStartVisitor } from './contactLinks.ts';
-import { readOrCreateVisitorId } from './visitorId.ts';
-
-const browserVisitorId = (): string =>
-  readOrCreateVisitorId({
-    storage: localStorage,
-    randomId: () => crypto.randomUUID(),
-  });
+import { getOrCreateVisitorId } from './visitorId.ts';
 
 const CHANNEL_ATTRIBUTE = 'data-contact-channel';
 const CONTACT_CLICK_ENDPOINT = '/api/contact-click';
@@ -41,7 +35,7 @@ export function defineContactClickTracking(
             `[${CONTACT_PLACEMENT_ATTRIBUTE}]`,
           )?.dataset.contactPlacement;
           reachGoal(GOALS.contactClick, { channel, placement });
-          const visitorId = browserVisitorId();
+          const visitorId = getOrCreateVisitorId();
           let start: string | null = null;
           if (element instanceof HTMLAnchorElement) {
             const url = new URL(element.href);

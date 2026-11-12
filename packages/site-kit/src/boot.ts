@@ -8,6 +8,7 @@ import {
 } from './contactPreference.ts';
 import { defineFunnelTracking } from './funnel.ts';
 import { defineLanguageSuggestion } from './languageSuggestion.ts';
+import { getOrCreateVisitorId } from './visitorId.ts';
 
 export interface SiteKitConfig {
   ymCounterId?: number;
@@ -43,6 +44,7 @@ export function bootSiteKit({
       googleConversionLabels,
       privateParams,
     });
+  getOrCreateVisitorId();
   rememberAdTouch();
   defineContactClickTracking();
   applyContactPreference(contactRanking);

@@ -15,6 +15,9 @@ vi.mock('./languageSuggestion.ts', () => ({
   defineLanguageSuggestion: record('languageSuggestion'),
 }));
 vi.mock('./funnel.ts', () => ({ defineFunnelTracking: record('funnel') }));
+vi.mock('./visitorId.ts', () => ({
+  getOrCreateVisitorId: record('visitorId'),
+}));
 
 const boot = async () => (await import('./boot.ts')).bootSiteKit;
 
@@ -36,6 +39,7 @@ describe('bootSiteKit', () => {
     });
     expect(calls).toEqual([
       'analytics',
+      'visitorId',
       'adTouch',
       'contactClick',
       'contactPreference',
@@ -62,7 +66,7 @@ describe('bootSiteKit', () => {
     const bootSiteKit = await boot();
     bootSiteKit({ gaMeasurementId: 'G-42', analytics: true });
     bootSiteKit({ gaMeasurementId: 'G-42', analytics: true });
-    expect(calls).toHaveLength(6);
+    expect(calls).toHaveLength(7);
   });
 
   it('skips the counter when analytics is off', async () => {
@@ -72,6 +76,6 @@ describe('bootSiteKit', () => {
       analytics: false,
     });
     expect(calls).not.toContain('analytics');
-    expect(calls).toHaveLength(5);
+    expect(calls).toHaveLength(6);
   });
 });
