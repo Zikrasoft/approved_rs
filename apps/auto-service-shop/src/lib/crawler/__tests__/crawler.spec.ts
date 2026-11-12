@@ -623,6 +623,40 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it("hands the parser each page's first sitemap image title as its category hint, and nothing for a page without one", async () => {
+        const site: CrawledSite = {
+          ...testSite('hinted'),
+          parse: (html, categoryHint) => ({
+            article_id: html,
+            brand: 'Brand',
+            number: html,
+            name: html,
+            category: categoryHint ?? 'no hint',
+          }),
+        };
+        const web = fakeWeb({
+          'https://hinted.test/robots.txt': ok(''),
+          'https://hinted.test/sitemap.xml': ok(
+            `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"><url><loc>https://hinted.test/p/1</loc><image:image><image:title>rame</image:title></image:image><image:image><image:title>rame sa zglobom</image:title></image:image></url><url><loc>https://hinted.test/p/2</loc></url></urlset>`,
+          ),
+          'https://hinted.test/p/1': ok('one'),
+          'https://hinted.test/p/2': ok('two'),
+        });
+
+        await crawl(site, web);
+        const { articles } = await crawledSupplierAdapter(
+          site,
+          store,
+        ).listCatalogue(null);
+
+        expect(
+          articles.map(({ number, category }) => [number, category]),
+        ).toEqual([
+          ['one', 'rame'],
+          ['two', 'no hint'],
+        ]);
+      });
+
       it('ends a test run once it has stored the pages it was asked for', async () => {
         const site = testSite('sample');
         const pages = [1, 2, 3, 4].map((n) => `https://sample.test/p/${n}`);

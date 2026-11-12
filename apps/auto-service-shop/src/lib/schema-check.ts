@@ -70,6 +70,7 @@ const CRAWL_TABLES: SchemaTable[] = [
     [
       column('site', 'text'),
       column('url', 'text'),
+      column('category_hint', 'text', true),
       column('status', 'text'),
       column('attempts', 'integer'),
       column('next_attempt_at', 'timestamptz'),

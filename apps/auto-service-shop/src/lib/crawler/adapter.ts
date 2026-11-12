@@ -23,10 +23,13 @@ export const crawledSupplierAdapter = (
     const articles: SupplierArticle[] = [];
     const unreadable: UnreadablePage[] = [];
     let notInScope = 0;
-    for (const { url, body } of snapshots) {
+    for (const { url, category_hint, body } of snapshots) {
       try {
         if (!body) throw new Error('The stored page is missing from S3');
-        const article = site.parse(gunzipSync(body).toString('utf8'));
+        const article = site.parse(
+          gunzipSync(body).toString('utf8'),
+          category_hint,
+        );
         if (!article) {
           notInScope += 1;
           continue;

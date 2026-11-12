@@ -155,20 +155,28 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     return rows[0]?.pages_left === 0;
   },
 
-  async seed(site: string, urls: string[], now: Date): Promise<void> {
+  async seed(
+    site: string,
+    urls: string[],
+    now: Date,
+    categoryHints: ReadonlyMap<string, string> = new Map(),
+  ): Promise<void> {
     await pg.transaction(async (trx) => {
       for (let start = 0; start < urls.length; start += SEED_BATCH) {
+        const batch = urls.slice(start, start + SEED_BATCH);
         await trx.raw(
-          `insert into crawl_page (site, url, next_attempt_at)
-           select ?, url, ? from unnest(?::text[]) as url
+          `insert into crawl_page (site, url, category_hint, next_attempt_at)
+           select ?, url, nullif(category_hint, ''), ? from unnest(?::text[], ?::text[]) as seeded (url, category_hint)
            on conflict (site, url) do update set
-             status = 'queued', attempts = 0, next_attempt_at = excluded.next_attempt_at, error = null
+             status = 'queued', attempts = 0, next_attempt_at = excluded.next_attempt_at, error = null,
+             category_hint = excluded.category_hint
            where crawl_page.status <> 'out_of_scope'
              or crawl_page.fetched_at < ?::timestamptz - make_interval(days => ?)`,
           [
             site,
             now,
-            urls.slice(start, start + SEED_BATCH),
+            batch,
+            batch.map((url) => categoryHints.get(url) ?? ''),
             now,
             OUT_OF_SCOPE_RECHECK_DAYS,
           ],
@@ -285,17 +293,24 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     site: string,
     after: string | null,
     limit: number,
-  ): Promise<{ url: string; body: Buffer | null }[]> {
-    const rows: { url: string; body_key: string }[] = await pg('crawl_page')
-      .select('url', 'body_key')
+  ): Promise<
+    { url: string; category_hint: string | null; body: Buffer | null }[]
+  > {
+    const rows: {
+      url: string;
+      category_hint: string | null;
+      body_key: string;
+    }[] = await pg('crawl_page')
+      .select('url', 'category_hint', 'body_key')
       .where({ site, status: 'done' })
       .whereNotNull('body_key')
       .andWhere('url', '>', after ?? '')
       .orderBy('url')
       .limit(limit);
     return Promise.all(
-      rows.map(async ({ url, body_key }) => ({
+      rows.map(async ({ url, category_hint, body_key }) => ({
         url,
+        category_hint,
         body: await pagesBucket(pages).get(body_key),
       })),
     );

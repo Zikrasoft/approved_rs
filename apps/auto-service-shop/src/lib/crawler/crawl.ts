@@ -171,6 +171,7 @@ async function crawlWith(
   const sitemapPages = async (
     url: string,
     found: string[],
+    hints: Map<string, string>,
     seen: Set<string>,
   ): Promise<PauseReason | null> => {
     if (seen.has(url)) return null;
@@ -185,8 +186,9 @@ async function crawlWith(
     }
     const links = sitemapLinks(xmlOf(fetched.body), site.sitemapPage);
     found.push(...links.pages);
+    for (const [page, hint] of links.hints) hints.set(page, hint);
     for (const child of links.sitemaps) {
-      const reason = await sitemapPages(child, found, seen);
+      const reason = await sitemapPages(child, found, hints, seen);
       if (reason) return reason;
     }
     return null;
@@ -194,12 +196,18 @@ async function crawlWith(
 
   const seed = async (): Promise<PauseReason | null> => {
     const found: string[] = [];
+    const hints = new Map<string, string>();
     const seen = new Set<string>();
     for (const sitemap of site.sitemaps) {
-      const reason = await sitemapPages(sitemap, found, seen);
+      const reason = await sitemapPages(sitemap, found, hints, seen);
       if (reason) return reason;
     }
-    await store.seed(site.name, [...new Set(found.filter(site.isPage))], at());
+    await store.seed(
+      site.name,
+      [...new Set(found.filter(site.isPage))],
+      at(),
+      hints,
+    );
     return null;
   };
 
