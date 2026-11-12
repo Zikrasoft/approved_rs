@@ -217,11 +217,12 @@ describe('parseEnv', () => {
     );
   });
 
-  it('chains the BMW, Mercedes and VAG decoders by default', () => {
+  it('chains the BMW, Mercedes, VAG and WMI decoders by default', () => {
     expect(parseEnv(VALID_ENV).VIN_DECODERS).toEqual([
       'bmw-type-code',
       'mercedes-baumuster',
       'vag-model-code',
+      'wmi-make',
     ]);
   });
 
