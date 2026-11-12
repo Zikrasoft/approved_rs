@@ -143,7 +143,7 @@ translations:
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
-      hours: Pon–pet 08:00–18:00 · Sub 09:00–14:00
+      hours: Pon–pet 09:00–18:00 · Sub 09:00–14:00
       privacyLabel: Politika privatnosti
       aboutLabel: O servisu
       rightsSuffix: Sva prava zadržana.
@@ -166,7 +166,7 @@ translations:
       socialHeading: Pratite nas na društvenim mrežama
       writeInstead: Više vam odgovara poruka?
     hours:
-      week: Pon–pet 08:00–18:00
+      week: Pon–pet 09:00–18:00
       saturday: Sub 09:00–14:00
     visit:
       heading: Posetite nas na Zvezdari
@@ -175,10 +175,10 @@ translations:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
     photos:
-      heroMechanic: Majstor u CarLabu menja točak na automobilu na dizalici
-      workshopBay: 'Radionica u CarLabu: dve dizalice i automobil na popravci'
+      heroMechanic: Mehaničar u CarLabu popravlja motor izvađen iz automobila na dizalici
+      workshopBay: Automobil sa otvorenom haubom u radionici CarLaba između stubova dizalice
       facade: Ulaz u auto servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
-      wallSign: Logotip CarLab na zidu radionice
+      wallSign: Logo CarLab na zidu radionice i mehaničar pored automobila sa otvorenom haubom
     googleRating:
       rating: '{rating} na Google-u'
       reviews:
@@ -191,6 +191,9 @@ translations:
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
+    copyPhone:
+      label: Kopirajte broj
+      copied: Kopirano
     telegramChoice:
       heading: Kako želite da nam pišete?
       bot: Preko bota
@@ -255,7 +258,7 @@ translations:
       servicesHeading: Services
       companyHeading: Workshop
       contactHeading: Contact
-      hours: Mon–Fri 08:00–18:00 · Sat 09:00–14:00
+      hours: Mon–Fri 09:00–18:00 · Sat 09:00–14:00
       privacyLabel: Privacy policy
       aboutLabel: About us
       rightsSuffix: All rights reserved.
@@ -278,7 +281,7 @@ translations:
       socialHeading: Follow us
       writeInstead: Prefer to message us?
     hours:
-      week: Mon–Fri 08:00–18:00
+      week: Mon–Fri 09:00–18:00
       saturday: Sat 09:00–14:00
     visit:
       heading: Visit us in Zvezdara
@@ -287,10 +290,10 @@ translations:
         - We speak Serbian, Russian and English
         - Pay by cash or card
     photos:
-      heroMechanic: A CarLab mechanic changing a wheel on a car lift
-      workshopBay: The CarLab workshop with two car lifts and a car being repaired
+      heroMechanic: A CarLab mechanic repairs an engine removed from a car on a lift
+      workshopBay: A car with its bonnet open between the lift posts in the CarLab workshop
       facade: Entrance to the CarLab workshop in Zvezdara, with the AUTO SERVIS CARLAB.RS sign
-      wallSign: CarLab logo on the workshop wall
+      wallSign: The CarLab logo on the workshop wall and a mechanic beside a car with its bonnet open
     googleRating:
       rating: '{rating} on Google'
       reviews:
@@ -303,6 +306,9 @@ translations:
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
+    copyPhone:
+      label: Copy number
+      copied: Copied
     telegramChoice:
       heading: How would you like to message us?
       bot: Via our bot
@@ -343,4 +349,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 10f55b10109c35f7
+translatedFrom: 9a1635337b8933ae

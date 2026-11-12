@@ -16,6 +16,32 @@ gallery:
 date: 2026-11-10
 published: true
 featured: false
+translations:
+  sr:
+    title: "Kia Sportage 1.7: veliki servis, kvačilo i kočnice"
+    body: |-
+      **Kia Sportage iz 2019. godine** sa motorom **1.7** stigao je kod nas na više servisnih zahvata:
+
+      - Zamenili smo **kvačilo** i proverili rad menjača.
+      - Zamenili smo **kočione diskove** i **pločice** i proverili kočioni sistem.
+      - Zamenili smo **ulje u robotizovanom menjaču**.
+      - Uradili smo **veliki servis**, uz zamenu seta zupčastog kaiša i potrošnih delova.
+
+      Korejske automobile, Hyundai i Kia, servisiramo kao i evropske i japanske: od redovnog održavanja do popravke motora, menjača, vešanja i kočnica.
+    car: Kia Sportage
+  en:
+    title: "Kia Sportage 1.7: major service, clutch and brakes"
+    body: |-
+      This **2019 Kia Sportage** with a **1.7-litre engine** came in for a range of work:
+
+      - Replaced the **clutch** and checked the transmission.
+      - Replaced the **brake discs** and **pads**, and checked the braking system.
+      - Changed the **automated gearbox oil**.
+      - Carried out a major service (**veliki servis**), replacing the timing kit and routine service items.
+
+      We service Korean cars, including Hyundai and Kia, just as we do European and Japanese cars: from routine servicing to engine, gearbox, suspension and brake repairs.
+    car: Kia Sportage
+translatedFrom: cb72552e3fa94629
 ---
 
 **Kia Sportage 2019 года** с двигателем **1.7** приехал к нам на комплекс работ:
