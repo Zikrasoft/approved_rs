@@ -52,8 +52,8 @@ medusaIntegrationTestRunner({
         ],
         [
           'the unresolved VIN codes',
-          `select make, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make, code`,
-          /Index.*IDX_vin_lookup_make_code/,
+          `select make_key, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make_key, code`,
+          /Index.*IDX_vin_lookup_make_key_code/,
         ],
         [
           'the VIN lookups of a Vehicle',
@@ -281,6 +281,7 @@ medusaIntegrationTestRunner({
           'supplier',
           {
             id: 's',
+            key: 'varta',
             name: 's',
             markup_percentage: 10,
             released_kinds: ['prices'],
@@ -289,8 +290,13 @@ medusaIntegrationTestRunner({
         ],
         [
           'supplier',
-          { id: 's', name: 's', markup_percentage: -1 },
+          { id: 's', key: 'varta', name: 's', markup_percentage: -1 },
           'supplier_markup_percentage',
+        ],
+        [
+          'supplier',
+          { id: 's', key: 'Varta', name: 's', markup_percentage: 0 },
+          'supplier_key_check',
         ],
         [
           'vin_lookup',
@@ -329,6 +335,7 @@ medusaIntegrationTestRunner({
           'supplier',
           {
             id: 's',
+            key: 'varta',
             name: 's',
             markup_percentage: 0,
             released_kinds: ['images'],

@@ -18,8 +18,8 @@ import type CatalogModuleService from '../../../../../../modules/catalog/service
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
-const mann = createFakeSupplier('MANN-FILTER');
-const bilstein = createFakeSupplier('bilstein group');
+const mann = createFakeSupplier('mann-filter');
+const bilstein = createFakeSupplier('bilstein');
 const shopAi = createFakeShopAi();
 
 type VehicleFacts = NonNullable<SupplierArticle['vehicles']>[number];
@@ -69,8 +69,8 @@ medusaIntegrationTestRunner({
           'supersecret',
         );
         const created = await suppliers.createSuppliers([
-          { name: 'MANN-FILTER', markup_percentage: 0 },
-          { name: 'bilstein group', markup_percentage: 0 },
+          { key: 'mann-filter', name: 'MANN-FILTER', markup_percentage: 0 },
+          { key: 'bilstein', name: 'bilstein group', markup_percentage: 0 },
         ]);
         for (const { id, name } of created) supplierIds[name] = id;
         const [mannBrand, febi] = await catalog.createBrands([
@@ -137,10 +137,10 @@ medusaIntegrationTestRunner({
 
         const [fitment] = await fitmentsOf('HU 816 x');
         expect(fitment).toMatchObject({
-          source: 'MANN-FILTER',
+          source: 'mann-filter',
           note: null,
           vehicle: {
-            source: 'MANN-FILTER',
+            source: 'mann-filter',
             power_kw: 160,
             year_from: 2008,
             year_to: 2013,
@@ -150,19 +150,19 @@ medusaIntegrationTestRunner({
               family: 'N52',
               fuel: null,
               displacement_cc: 2996,
-              source: 'MANN-FILTER',
+              source: 'mann-filter',
             },
             model: {
               name: '125i (E82/E88)',
-              source: 'MANN-FILTER',
+              source: 'mann-filter',
               chassis: {
                 code: 'E82/E88',
                 body_style: null,
-                source: 'MANN-FILTER',
+                source: 'mann-filter',
                 series: {
                   name: '1',
-                  source: 'MANN-FILTER',
-                  make: { slug: 'bmw', name: 'BMW', source: 'MANN-FILTER' },
+                  source: 'mann-filter',
+                  make: { slug: 'bmw', name: 'BMW', source: 'mann-filter' },
                 },
               },
             },

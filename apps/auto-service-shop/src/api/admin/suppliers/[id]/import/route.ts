@@ -26,7 +26,7 @@ export async function POST(
     );
   }
   const adapter = supplierAdapters(req.scope).find(
-    ({ name }) => name === supplier.name,
+    ({ key }) => key === supplier.key,
   );
   if (!adapter) {
     throw new MedusaError(

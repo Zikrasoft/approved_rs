@@ -1060,14 +1060,15 @@ async function syncDemoSuppliers(
     (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
   );
   for (const {
+    key,
     name,
     markup_percentage,
     categories,
     spellings,
   } of DEMO_SUPPLIERS) {
-    const [found] = await suppliers.listSuppliers({ name });
     const supplier =
-      found ?? (await suppliers.createSuppliers({ name, markup_percentage }));
+      (await suppliers.supplierByKey(key)) ??
+      (await suppliers.createSuppliers({ key, name, markup_percentage }));
     const mapped = new Set(
       (
         await suppliers.listSupplierCategories(
@@ -1114,9 +1115,7 @@ export default async function seedDemo({ container }: ExecArgs) {
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
   const oilField = await seedCategories(catalog);
-  if (
-    (await suppliers.listSuppliers({ name: DEMO_SUPPLIERS[0].name })).length
-  ) {
+  if (await suppliers.supplierByKey(DEMO_SUPPLIERS[0].key)) {
     logger.info('Demo catalogue already seeded, skipping.');
   } else {
     await seedCatalogue(catalog, oilField, logger);

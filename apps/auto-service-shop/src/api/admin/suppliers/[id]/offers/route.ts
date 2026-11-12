@@ -19,7 +19,7 @@ export async function DELETE(
 ): Promise<void> {
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const supplier = await suppliers.retrieveSupplier(req.params.id);
-  if (supplier.name === MANUAL_SUPPLIER) {
+  if (supplier.key === MANUAL_SUPPLIER) {
     throw adminError(
       MedusaError.Types.NOT_ALLOWED,
       'MANUAL_SOURCE',

@@ -31,6 +31,7 @@ medusaIntegrationTestRunner({
         );
 
         const supplier = await supplierService.createSuppliers({
+          key: 'varta',
           name: 'Admin-test supplier',
           markup_percentage: 10,
         });
@@ -175,6 +176,7 @@ medusaIntegrationTestRunner({
         expect(listed.data.suppliers).toEqual([
           expect.objectContaining({
             id: supplierId,
+            key: 'varta',
             name: 'Admin-test supplier',
             markup_percentage: 10,
             released_kinds: ['cross_references', 'applicability'],
@@ -205,6 +207,24 @@ medusaIntegrationTestRunner({
 
         const supplier = await supplierService.retrieveSupplier(supplierId);
         expect(supplier.markup_percentage).toBe(50);
+      });
+
+      it('renames a supplier for staff and keeps its key', async () => {
+        const response = await api.post(
+          `/admin/suppliers/${supplierId}`,
+          { name: 'Varta Clarios' },
+          adminHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.supplier).toMatchObject({
+          key: 'varta',
+          name: 'Varta Clarios',
+        });
+        const blank = await api
+          .post(`/admin/suppliers/${supplierId}`, { name: ' ' }, adminHeaders)
+          .catch(({ response }) => response);
+        expect(blank.status).toBe(400);
       });
 
       it('keeps a decimal markup as typed', async () => {
@@ -355,8 +375,8 @@ medusaIntegrationTestRunner({
           part_id: partId,
         });
         const [leaving, staying] = await supplierService.createSuppliers([
-          { name: 'Leaving supplier', markup_percentage: 10 },
-          { name: 'Staying supplier', markup_percentage: 10 },
+          { key: 'bilstein', name: 'Leaving supplier', markup_percentage: 10 },
+          { key: 'filtron', name: 'Staying supplier', markup_percentage: 10 },
         ]);
         for (const supplier of [leaving, leaving, staying]) {
           await supplierService.createSupplierOffers({
@@ -400,6 +420,7 @@ medusaIntegrationTestRunner({
 
       it('refuses to take the manual supplier offers off in bulk', async () => {
         const manual = await supplierService.createSuppliers({
+          key: 'manual',
           name: 'manual',
           markup_percentage: 20,
           import_enabled: false,

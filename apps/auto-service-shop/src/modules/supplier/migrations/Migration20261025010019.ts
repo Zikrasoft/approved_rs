@@ -15,13 +15,13 @@ export class Migration20261025010019 extends Migration {
       `alter table if exists "staged_record" drop constraint if exists "staged_record_supplier_id_part_identifier_id_kind_unique";`,
     );
     this.addSql(
-      `alter table if exists "supplier" drop constraint if exists "supplier_name_unique";`,
+      `alter table if exists "supplier" drop constraint if exists "supplier_key_unique";`,
     );
     this.addSql(
-      `create table if not exists "supplier" ("id" text not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"), constraint supplier_markup_percentage check (markup_percentage >= 0), constraint supplier_released_kinds check (released_kinds <@ array['cross_references', 'applicability', 'images']::text[]));`,
+      `create table if not exists "supplier" ("id" text not null, "key" text check ("key" in ('mann-filter', 'varta', 'bilstein', 'filtron', 'demo-intercars', 'demo-autodelovi', 'manual')) not null, "name" text not null, "markup_percentage" real not null, "released_kinds" text[] not null default '{}', "import_enabled" boolean not null default true, "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "supplier_pkey" primary key ("id"), constraint supplier_markup_percentage check (markup_percentage >= 0), constraint supplier_released_kinds check (released_kinds <@ array['cross_references', 'applicability', 'images']::text[]));`,
     );
     this.addSql(
-      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_supplier_name_unique" ON "supplier" ("name") WHERE deleted_at IS NULL;`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_supplier_key_unique" ON "supplier" ("key") WHERE deleted_at IS NULL;`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_supplier_deleted_at" ON "supplier" ("deleted_at") WHERE deleted_at IS NULL;`,

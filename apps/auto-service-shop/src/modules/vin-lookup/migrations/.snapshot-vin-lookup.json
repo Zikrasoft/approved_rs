@@ -116,8 +116,8 @@
           "enumItems": [],
           "mappedType": "json"
         },
-        "make": {
-          "name": "make",
+        "make_key": {
+          "name": "make_key",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -265,13 +265,13 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vin_lookup_vehicle_id\" ON \"vin_lookup\" (\"vehicle_id\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_vin_lookup_make_code",
+          "keyName": "IDX_vin_lookup_make_key_code",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vin_lookup_make_code\" ON \"vin_lookup\" (\"make\", \"code\") WHERE vehicle_id IS NULL AND deleted_at IS NULL"
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vin_lookup_make_key_code\" ON \"vin_lookup\" (\"make_key\", \"code\") WHERE vehicle_id IS NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "vin_lookup_pkey",

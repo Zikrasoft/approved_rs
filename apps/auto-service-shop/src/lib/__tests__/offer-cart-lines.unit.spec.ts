@@ -11,7 +11,7 @@ const OFFER: LiveOfferRow = {
   cost_price: 1000,
   stock_quantity: 3,
   lead_time_days: 0,
-  supplier: { name: 'Intercars', markup_percentage: 10 },
+  supplier: { key: 'demo-intercars', markup_percentage: 10 },
 };
 
 const emptyPlan = (items: CartItem[]): CartPlan => ({

@@ -74,6 +74,7 @@ medusaIntegrationTestRunner({
         const vinLookups: VinLookupModuleService =
           getContainer().resolve(VIN_LOOKUP_MODULE);
         const supplier = await suppliers.createSuppliers({
+          key: 'filtron',
           name: 'Orphaned',
           markup_percentage: 10,
         });

@@ -27,7 +27,7 @@ export type QuotedOffer = {
   cost_price: number;
   stock_quantity: number;
   lead_time_days: number;
-  supplier: { name: string; markup_percentage: number };
+  supplier: { key: string; markup_percentage: number };
 };
 
 export const quotedFields = (quote: Quote) => ({
@@ -147,9 +147,9 @@ async function requoteOffers<T extends QuotedOffer>(
   const adapters = supplierAdapters(scope);
   const live: T[] = [];
   const moved = new Set<string>();
-  for (const name of new Set(offers.map(({ supplier }) => supplier.name))) {
-    const own = offers.filter(({ supplier }) => supplier.name === name);
-    const adapter = adapters.find((candidate) => candidate.name === name);
+  for (const key of new Set(offers.map(({ supplier }) => supplier.key))) {
+    const own = offers.filter(({ supplier }) => supplier.key === key);
+    const adapter = adapters.find((candidate) => candidate.key === key);
     if (!adapter) {
       live.push(...own);
       continue;

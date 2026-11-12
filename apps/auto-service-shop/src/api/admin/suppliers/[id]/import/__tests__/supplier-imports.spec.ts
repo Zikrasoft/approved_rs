@@ -33,9 +33,9 @@ import { INTERRUPTED_BY_RESTART } from '../../../../../../modules/_shared/run-er
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
-const intercars = createFakeSupplier('Intercars');
-const warehouse = createFakeSupplier('Warehouse');
-const partsfinder = createFakeSupplier('Partsfinder');
+const intercars = createFakeSupplier('demo-intercars');
+const warehouse = createFakeSupplier('demo-autodelovi');
+const partsfinder = createFakeSupplier('mann-filter');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
 const BRAND_IMAGES_HOST = 'images.brand.test';
@@ -109,9 +109,9 @@ medusaIntegrationTestRunner({
         storeHeaders = { headers: { 'x-publishable-api-key': key.token } };
 
         const [ic, wh, pf] = await suppliers.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
-          { name: 'Warehouse', markup_percentage: 10 },
-          { name: 'Partsfinder', markup_percentage: 0 },
+          { key: 'demo-intercars', name: 'Intercars', markup_percentage: 20 },
+          { key: 'demo-autodelovi', name: 'Warehouse', markup_percentage: 10 },
+          { key: 'mann-filter', name: 'Partsfinder', markup_percentage: 0 },
         ]);
         intercarsId = ic.id;
         warehouseId = wh.id;
@@ -379,7 +379,7 @@ medusaIntegrationTestRunner({
           offers: [],
         });
         const [part] = await catalog.listParts({ id: created!.part.id });
-        expect(part.source).toBe('Intercars');
+        expect(part.source).toBe('demo-intercars');
       });
 
       it('keeps a Part it creates out of search until a publish deploys its page', async () => {
@@ -1701,7 +1701,7 @@ medusaIntegrationTestRunner({
           );
         const removeSource = () =>
           api
-            .delete('/admin/catalogue-sources/Intercars', adminHeaders)
+            .delete('/admin/catalogue-sources/demo-intercars', adminHeaders)
             .catch((error) => error.response);
         offerHu816x(
           intercars,
@@ -1737,7 +1737,7 @@ medusaIntegrationTestRunner({
           adminHeaders,
         );
         const before = await sources();
-        expect(before.Intercars).toBeGreaterThanOrEqual(2);
+        expect(before['demo-intercars']).toBeGreaterThanOrEqual(2);
 
         const refused = await removeSource();
 
@@ -1756,12 +1756,12 @@ medusaIntegrationTestRunner({
 
         expect(removed.status).toBe(200);
         expect(removed.data).toEqual({
-          source: 'Intercars',
-          deleted: before.Intercars,
+          source: 'demo-intercars',
+          deleted: before['demo-intercars'],
           import_disabled: true,
         });
         const after = await sources();
-        expect(after.Intercars).toBeUndefined();
+        expect(after['demo-intercars']).toBeUndefined();
         expect(after.manual).toBe(before.manual - 1);
         expect(await catalog.listParts({ id: imported.id })).toEqual([]);
         expect(
@@ -1870,6 +1870,7 @@ medusaIntegrationTestRunner({
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         const orphan = await suppliers.createSuppliers({
+          key: 'filtron',
           name: 'Orphan',
           markup_percentage: 0,
         });
@@ -1905,7 +1906,7 @@ medusaIntegrationTestRunner({
         const pushFilters = (fake: typeof intercars, numbers: string[]) => {
           for (const number of numbers) {
             fake.articles.push({
-              article_id: `${fake.adapter.name}-${number}`,
+              article_id: `${fake.adapter.key}-${number}`,
               brand: fake === intercars ? 'MANN-FILTER' : 'Mann',
               number,
               name: `Фильтр ${number}`,
@@ -2126,7 +2127,7 @@ medusaIntegrationTestRunner({
           expect(
             warned.filter((message) => message.includes('not cached')),
           ).toEqual([
-            'Intercars: S3 is not configured, so AI answers are not cached and every article is asked again',
+            'demo-intercars: S3 is not configured, so AI answers are not cached and every article is asked again',
           ]);
         });
 

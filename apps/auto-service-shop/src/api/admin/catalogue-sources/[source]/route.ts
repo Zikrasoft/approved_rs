@@ -47,7 +47,7 @@ async function deleteSource(req: AuthenticatedMedusaRequest, source: string) {
       partIds: identifiers.map(({ part_id }) => part_id),
     });
   }
-  const [supplier] = await suppliers.listSuppliers({ name: source });
+  const supplier = await suppliers.supplierByKey(source);
   if (supplier?.import_enabled) {
     await suppliers.updateSuppliers({
       id: supplier.id,

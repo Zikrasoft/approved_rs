@@ -558,10 +558,13 @@ medusaIntegrationTestRunner({
             relations: ['identifiers'],
           });
           const [identifier] = part.identifiers;
-          const supplier = await supplierService.createSuppliers({
-            name: `Supplier ${value}`,
-            markup_percentage: 10,
-          });
+          const supplier =
+            (await supplierService.supplierByKey('varta')) ??
+            (await supplierService.createSuppliers({
+              key: 'varta',
+              name: 'Varta',
+              markup_percentage: 10,
+            }));
           const offer = await supplierService.createSupplierOffers({
             part_identifier_id: identifier.id,
             supplier_id: supplier.id,

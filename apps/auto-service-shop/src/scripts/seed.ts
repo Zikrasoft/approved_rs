@@ -9,8 +9,16 @@ import type SupplierModuleService from '../modules/supplier/service';
 const BMW = { name: 'BMW', slug: 'bmw' };
 const MANN_FILTER = { name: 'Mann-Filter', slug: 'mann-filter' };
 
-const INTERCARS = { name: 'Intercars', markup_percentage: 20 };
-const CARLAB_WAREHOUSE = { name: 'CarLab warehouse', markup_percentage: 15 };
+const INTERCARS = {
+  key: 'demo-intercars' as const,
+  name: 'Intercars',
+  markup_percentage: 20,
+};
+const CARLAB_WAREHOUSE = {
+  key: 'manual' as const,
+  name: 'CarLab warehouse',
+  markup_percentage: 15,
+};
 
 async function seedB47OilFilterPart(
   catalog: CatalogModuleService,

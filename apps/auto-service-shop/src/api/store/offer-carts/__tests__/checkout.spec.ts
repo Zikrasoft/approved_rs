@@ -24,7 +24,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
-const intercars = createFakeSupplier('Intercars');
+const intercars = createFakeSupplier('demo-intercars');
 const ARTICLE = 'IC-11428575211';
 
 const quote = (cost_price: number, quantity: number, lead_time_days = 0) =>
@@ -81,13 +81,11 @@ medusaIntegrationTestRunner({
             const { contact, summary, ...event } = JSON.parse(body);
             leads.push({ ...event, ...contact, comment: summary });
             authorizations.push(request.headers.authorization);
-            response
-              .writeHead(leadRouteStatus, { location: '/sr/thanks/' })
-              .end();
+            response.writeHead(leadRouteStatus).end();
           });
         });
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
-        process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
+        process.env.STOREFRONT_ORIGIN = `http://localhost:${(leadRoute.address() as AddressInfo).port}`;
         process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
 
         const container = getContainer();
@@ -120,8 +118,12 @@ medusaIntegrationTestRunner({
         });
         identifierId = identifier.id;
         const [supplier, warehouse] = await suppliers.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
-          { name: 'CarLab warehouse', markup_percentage: 10 },
+          { key: 'demo-intercars', name: 'Intercars', markup_percentage: 20 },
+          {
+            key: 'demo-autodelovi',
+            name: 'CarLab warehouse',
+            markup_percentage: 10,
+          },
         ]);
         const [offer, own] = await suppliers.createSupplierOffers([
           {
@@ -162,7 +164,7 @@ medusaIntegrationTestRunner({
       };
 
       afterAll(async () => {
-        delete process.env.LEAD_ROUTE_URL;
+        delete process.env.STOREFRONT_ORIGIN;
         delete process.env.SHOP_LEAD_SECRET;
         await new Promise((resolve) => leadRoute.close(resolve));
       });
@@ -872,7 +874,7 @@ medusaIntegrationTestRunner({
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, Intercars',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, demo-intercars',
             'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
@@ -891,7 +893,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, demo-intercars',
         );
       });
 
@@ -907,7 +909,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, demo-intercars',
         );
       });
 
@@ -972,6 +974,7 @@ medusaIntegrationTestRunner({
             normalized_value: normalizePartNumber('580 901 080'),
           });
           const shop = await suppliers.createSuppliers({
+            key: 'varta',
             name: 'Battery shop',
             markup_percentage: 0,
           });
@@ -1183,7 +1186,7 @@ medusaIntegrationTestRunner({
             ),
           );
           expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
-            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, Battery shop',
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, varta',
             `+ ${SERVICE}: 2\u00a0500 RSD`,
             'Итого: 12\u00a0500 RSD',
           ]);

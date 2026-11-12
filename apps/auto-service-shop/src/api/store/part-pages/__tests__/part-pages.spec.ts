@@ -90,6 +90,7 @@ medusaIntegrationTestRunner({
           normalized_value: 'HU816X',
         });
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });

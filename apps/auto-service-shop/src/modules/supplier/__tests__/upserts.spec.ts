@@ -33,6 +33,7 @@ medusaIntegrationTestRunner({
         suppliers = getContainer().resolve(SUPPLIER_MODULE);
         supplierId = (
           await suppliers.createSuppliers({
+            key: 'mann-filter',
             name: 'Upserts',
             markup_percentage: 10,
           })
@@ -126,6 +127,44 @@ medusaIntegrationTestRunner({
         expect(
           await suppliers.listStagedRecords({ kind: 'images' }),
         ).toHaveLength(1);
+      });
+
+      it('finds a Supplier by its key whatever its display name says', async () => {
+        const varta = await suppliers.createSuppliers({
+          key: 'varta',
+          name: 'VARTA Clarios',
+          markup_percentage: 0,
+        });
+        await suppliers.updateSuppliers({ id: varta.id, name: 'Varta' });
+
+        expect(await suppliers.supplierByKey('varta')).toMatchObject({
+          id: varta.id,
+          name: 'Varta',
+        });
+        expect(await suppliers.supplierByKey('filtron')).toBeNull();
+      });
+
+      it('refuses a second Supplier under one key and a key no adapter reads', async () => {
+        await suppliers.createSuppliers({
+          key: 'bilstein',
+          name: 'Bilstein',
+          markup_percentage: 0,
+        });
+
+        await expect(
+          suppliers.createSuppliers({
+            key: 'bilstein',
+            name: 'Bilstein again',
+            markup_percentage: 0,
+          }),
+        ).rejects.toThrow();
+        await expect(
+          suppliers.createSuppliers({
+            key: 'intercars' as 'varta',
+            name: 'Intercars',
+            markup_percentage: 0,
+          }),
+        ).rejects.toThrow();
       });
     });
   },

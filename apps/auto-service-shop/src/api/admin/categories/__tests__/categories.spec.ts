@@ -564,6 +564,7 @@ medusaIntegrationTestRunner({
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         const supplier = await suppliers.createSuppliers({
+          key: 'varta',
           name: 'Category mapper',
           markup_percentage: 0,
         });

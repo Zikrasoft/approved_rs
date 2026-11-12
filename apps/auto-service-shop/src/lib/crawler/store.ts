@@ -91,7 +91,7 @@ const tally = <Key extends string>(
   ) as Record<Key, number>;
 
 const pageKey = (site: string, url: string) =>
-  `crawl/${encodeURIComponent(site)}/${createHash('sha256').update(url).digest('hex')}.html.gz`;
+  `crawl/${site}/${createHash('sha256').update(url).digest('hex')}.html.gz`;
 
 const pagesBucket = (pages: Bucket | null): Bucket => {
   if (!pages) throw new Error('Crawled pages need the S3 storage (S3_* env)');

@@ -90,7 +90,7 @@ medusaIntegrationTestRunner({
         await vinLookups.createVinLookups({
           vin: VIN,
           facts: {},
-          make: 'bmw',
+          make_key: 'BMW',
           code: 'CASE1',
           vehicle_id: vehicle.id,
         });

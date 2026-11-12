@@ -165,6 +165,7 @@ medusaIntegrationTestRunner({
         await catalog.replacePart(part.e, part.f, null);
 
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 0,
         });

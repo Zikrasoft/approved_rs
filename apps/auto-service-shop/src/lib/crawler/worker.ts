@@ -27,9 +27,9 @@ async function main(): Promise<void> {
     }),
     env.S3 && s3PagesBucket(env.S3),
   );
-  const names = CRAWLED_SITES.map(({ name }) => name);
+  const keys = CRAWLED_SITES.map(({ key }) => key);
   const beat = () =>
-    store.beat(names, new Date(clock.now())).catch((error: unknown) => {
+    store.beat(keys, new Date(clock.now())).catch((error: unknown) => {
       console.error('Crawler heartbeat failed', error);
     });
   await beat();
@@ -37,13 +37,13 @@ async function main(): Promise<void> {
   const crashes = new Map<string, number>();
   console.log('Crawler waiting for a crawl started in the admin');
   for (;;) {
-    const name = await store.next(names, new Date(clock.now()));
-    const site = CRAWLED_SITES.find((one) => one.name === name);
+    const key = await store.next(keys, new Date(clock.now()));
+    const site = CRAWLED_SITES.find((one) => one.key === key);
     if (!site) {
       await clock.sleep(POLL_MS);
       continue;
     }
-    console.log(`Crawling ${site.name}`);
+    console.log(`Crawling ${site.key}`);
     try {
       await crawlOrPause(
         site,
@@ -55,12 +55,12 @@ async function main(): Promise<void> {
         },
         crashes,
       );
-      const run = await store.run(site.name);
+      const run = await store.run(site.key);
       console.log(
-        `Crawl of ${site.name} ${run?.status ?? 'stopped'}${run?.paused_reason ? `: ${run.paused_reason}` : ''}`,
+        `Crawl of ${site.key} ${run?.status ?? 'stopped'}${run?.paused_reason ? `: ${run.paused_reason}` : ''}`,
       );
     } catch (error) {
-      console.error(`Crawl of ${site.name} failed`, error);
+      console.error(`Crawl of ${site.key} failed`, error);
       await clock.sleep(POLL_MS);
     }
   }

@@ -12,7 +12,7 @@ import {
   STAGED_DATA_KINDS,
 } from '@podbor/catalog-contract';
 
-import type { SupplierAdapterName } from './env';
+import type { CrawledSupplierKey } from '../modules/supplier/keys';
 import { slugOf } from '../modules/_shared/slug';
 import { MAKE_ALIASES } from './suppliers/makes';
 import { nameKey } from '../modules/_shared/keys';
@@ -21,6 +21,7 @@ import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { seedCashAtPickupCommerceDefaults } from './commerce-defaults';
+import type { CrawledSite } from './crawler/site';
 import { CRAWLED_SITES } from './crawler/sites';
 import { errorMessage } from './errors';
 import { storeImage } from './images';
@@ -370,10 +371,7 @@ type CrawledCatalogue = {
 
 const MAINTENANCE_SLUG = 'maintenance-consumables';
 
-const CRAWLED_CATALOGUES: Record<
-  Exclude<SupplierAdapterName, 'demo'>,
-  CrawledCatalogue
-> = {
+const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
   'mann-filter': {
     brands: { 'MANN-FILTER': ['MANN-FILTER'] },
     categories: {
@@ -474,14 +472,15 @@ const CRAWLED_SUPPLIER = { released_kinds: [...STAGED_DATA_KINDS] };
 
 async function seedCrawledSupplier(
   suppliers: SupplierModuleService,
-  name: string,
+  { key, name }: CrawledSite,
 ) {
-  const [row] = await suppliers.listSuppliers({ name });
+  const row = (await suppliers.supplierByKey(key)) ?? undefined;
   return upsert(
     row,
     CRAWLED_SUPPLIER,
     () =>
       suppliers.createSuppliers({
+        key,
         name,
         markup_percentage: 0,
         ...CRAWLED_SUPPLIER,
@@ -547,10 +546,9 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
   for (const site of CRAWLED_SITES) {
-    if (site.key === 'demo') continue;
     const { brands, categories, excluded, makes } =
       CRAWLED_CATALOGUES[site.key];
-    const { id: supplier_id } = await seedCrawledSupplier(suppliers, site.name);
+    const { id: supplier_id } = await seedCrawledSupplier(suppliers, site);
 
     const seededBrandSpellings = await catalog.listBrandSpellings(
       { supplier_id },

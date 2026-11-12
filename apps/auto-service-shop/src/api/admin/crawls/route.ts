@@ -14,7 +14,7 @@ export async function GET(
   const store = crawlStore(
     req.scope.resolve(ContainerRegistrationKeys.PG_CONNECTION),
   );
-  const progress = await store.progress(sites.map(({ name }) => name));
+  const progress = await store.progress(sites.map(({ key }) => key));
   const seenAt = await store.workerSeenAt();
   const waiting = progress.some(
     ({ run }) => run?.status === 'queued' || run?.status === 'running',

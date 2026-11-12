@@ -140,6 +140,7 @@ medusaIntegrationTestRunner({
           part_id: fittedPartId,
         });
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Inter Cars',
           markup_percentage: 10,
         });
