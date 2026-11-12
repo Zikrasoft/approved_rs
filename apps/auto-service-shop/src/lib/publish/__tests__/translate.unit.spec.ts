@@ -27,7 +27,7 @@ const openAi = () => {
       model: string;
       messages: { content: string }[];
     };
-    expect(body.model).toBe('gpt-6.1-terra');
+    expect(body.model).toBe('gpt-6-luna');
     const fields = JSON.parse(body.messages[1].content) as Record<
       string,
       string

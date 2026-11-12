@@ -65,10 +65,7 @@ describe('OpenAI shop AI', () => {
       lines: [{ ...line, price: 1500, unit_price: 1500 }],
     });
 
-    const reading = await openAiShopAi('test-key', 'gpt-4o-mini').readQuote(
-      PDF,
-      CATEGORIES,
-    );
+    const reading = await openAiShopAi('test-key').readQuote(PDF, CATEGORIES);
 
     expect(reading).toEqual({
       vin: 'WBA35BG070N074158',
@@ -89,7 +86,7 @@ describe('OpenAI shop AI', () => {
     });
 
     await expect(
-      openAiShopAi('test-key', 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
+      openAiShopAi('test-key').readQuote(PDF, CATEGORIES),
     ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
   });
 
@@ -97,7 +94,7 @@ describe('OpenAI shop AI', () => {
     globalThis.fetch = replying('ponuda');
 
     await expect(
-      openAiShopAi('test-key', 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
+      openAiShopAi('test-key').readQuote(PDF, CATEGORIES),
     ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
   });
 
@@ -125,7 +122,7 @@ describe('OpenAI shop AI', () => {
     description: answer.description,
   };
 
-  const shopAi = () => openAiShopAi('test-key', 'gpt-4o-mini');
+  const shopAi = () => openAiShopAi('test-key');
 
   const answerOf = (ai = shopAi(), categories = CATEGORIES) =>
     ai.answerArticle(ai.articleQuestion(article, categories));
@@ -136,20 +133,18 @@ describe('OpenAI shop AI', () => {
         .body,
     ) as { model: string; temperature: number };
 
-  it('answers an article in one call on the configured model, with the most likely answer', async () => {
+  it('answers an article in one call on the one model, with the most likely answer', async () => {
     globalThis.fetch = answering(reply);
 
     await expect(answerOf()).resolves.toEqual(answer);
-    await answerOf(openAiShopAi('test-key', 'gpt-4.1-mini'));
 
-    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(sentBody(globalThis.fetch)).toMatchObject({
-      model: 'gpt-4o-mini',
+      model: 'gpt-6-luna',
       temperature: 0,
     });
-    expect(sentBody(globalThis.fetch, 1).model).toBe('gpt-4.1-mini');
     expect(shopAi().articleQuestion(article, CATEGORIES).model).toBe(
-      'gpt-4o-mini',
+      'gpt-6-luna',
     );
   });
 
@@ -378,9 +373,9 @@ describe('OpenAI shop AI', () => {
   it('asks nothing without a key', async () => {
     globalThis.fetch = answering(reply);
 
-    await expect(
-      answerOf(openAiShopAi(undefined, 'gpt-4o-mini')),
-    ).rejects.toMatchObject({ code: 'AI_NOT_CONFIGURED' });
+    await expect(answerOf(openAiShopAi(undefined))).rejects.toMatchObject({
+      code: 'AI_NOT_CONFIGURED',
+    });
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
@@ -388,7 +383,7 @@ describe('OpenAI shop AI', () => {
     globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
 
     await expect(
-      openAiShopAi(undefined, 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
+      openAiShopAi(undefined).readQuote(PDF, CATEGORIES),
     ).rejects.toMatchObject({ code: 'AI_NOT_CONFIGURED' });
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });

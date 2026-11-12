@@ -13,5 +13,5 @@ export const shopAi = (scope: MedusaContainer): ShopAi =>
 
 const openAiFromEnv = () => {
   const env = parseEnv(process.env);
-  return openAiShopAi(env.OPENAI_API_KEY, env.OPENAI_IMPORT_MODEL);
+  return openAiShopAi(env.OPENAI_API_KEY);
 };

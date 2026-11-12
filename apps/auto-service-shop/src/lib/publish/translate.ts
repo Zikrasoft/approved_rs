@@ -4,6 +4,7 @@ import { CATALOG_TRANSLATION_LOCALES } from '@podbor/catalog-contract';
 import { sha256Hex, translateFields } from '@podbor/i18n/translate/core';
 import { z } from 'zod';
 
+import { OPENAI_MODEL } from '../openai-model';
 import type CatalogModuleService from '../../modules/catalog/service';
 
 export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
@@ -14,8 +15,6 @@ const LANGUAGE_NAME: Record<TargetLocale, string> = {
 };
 
 const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
-
-const CATALOG_TRANSLATE_MODEL = 'gpt-6.1-terra';
 
 const ROWS_PER_REQUEST = 50;
 const ROWS_PER_PAGE = 2_000;
@@ -294,7 +293,7 @@ async function translateLocale(
       businessDescription: BUSINESS_DESCRIPTION,
       subject: entity.subject,
       apiKey: apiKey ?? '',
-      model: CATALOG_TRANSLATE_MODEL,
+      model: OPENAI_MODEL,
     });
     await entity.update(
       catalog,

@@ -74,9 +74,6 @@ const envFields = z.object({
   TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
   TYPESENSE_API_KEY: optionalSecret,
   OPENAI_API_KEY: optionalSecret,
-  OPENAI_IMPORT_MODEL: optionalValue.transform(
-    (model) => model ?? 'gpt-4o-mini',
-  ),
   IMPORT_CONCURRENCY: optionalValue
     .transform((articles) => Number(articles ?? 4))
     .pipe(z.number().int().positive()),

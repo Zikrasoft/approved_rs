@@ -14,9 +14,9 @@ import {
   type ShopAi,
 } from './contract';
 import { capitalized } from './description';
+import { OPENAI_MODEL } from '../openai-model';
 import partsGlossary from './parts-glossary.json';
 
-const QUOTE_MODEL = 'gpt-4o';
 const TIMEOUT_MS = 120_000;
 const MAX_RETRIES = 1;
 
@@ -250,14 +250,11 @@ const askOnce = async <T>({
 const inHouseStyle = (text: string) =>
   text.replaceAll('ё', 'е').replaceAll('Ё', 'Е').replaceAll('—', '-');
 
-export const openAiShopAi = (
-  apiKey: string | undefined,
-  articleModel: string,
-): ShopAi => ({
+export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
   readQuote: (pdf, categories) =>
     ask({
       apiKey,
-      model: QUOTE_MODEL,
+      model: OPENAI_MODEL,
       system: quotePrompt(categories),
       user: [
         {
@@ -273,7 +270,7 @@ export const openAiShopAi = (
       what: 'The Workshop quote',
     }),
   articleQuestion: ({ category_id, ...article }, categories) => ({
-    model: articleModel,
+    model: OPENAI_MODEL,
     system: articlePrompt(categories),
     user: JSON.stringify({
       ...article,

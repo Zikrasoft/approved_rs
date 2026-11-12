@@ -938,7 +938,7 @@ number gets its CI value in that script. The non-obvious parts:
   Settings → Developer settings at the first sign the server is compromised.
 - `OPENAI_API_KEY` also answers a Supplier Import's one question per new
   article (Russian name, Category, attributes, description), on
-  `OPENAI_IMPORT_MODEL` (empty means `gpt-4o-mini`). Answers are cached in the
+  `gpt-6-luna`, the one model the shop asks. Answers are cached in the
   private bucket under `ai-answers/`, keyed by prompt, model and article, so a
   rerun or a rebuilt database asks nothing twice; changing the model or the
   prompt asks again. An answer that fails validation twice is cached as a
