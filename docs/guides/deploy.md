@@ -1023,7 +1023,19 @@ number gets its CI value in that script. The non-obvious parts:
     page; it matches no Vehicle.
 
   A code a decoder reads but cannot match lands on the admin Unresolved VINs
-  screen with what the open data says about it.
+  screen with what the open data says about it, and with where each lookup
+  came from: the carlab.rs search, a Workshop quote, or another admin path.
+  By default the screen lists only codes a real customer searched: a carlab.rs
+  lookup whose visitor carlab.rs did not take for a bot by its user agent and
+  whose visitor id is not in `STAFF_VISITOR_IDS`.
+
+- `STAFF_VISITOR_IDS` is the comma-separated list of our own carlab.rs visitor
+  ids (the `visitor_id` key in the browser's localStorage on carlab.rs, a UUID),
+  not the GA4/Metrika client ids of `analytics-exclusions.md`. Optional; an
+  entry that is not a UUID stops the server at startup. Read when the
+  Unresolved VINs screen loads, so a change reclassifies past lookups too.
+  carlab.rs does not send a visitor id with a VIN search yet, so until it does
+  the list matches nothing.
 
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
@@ -1341,7 +1353,9 @@ that would otherwise grow forever or hold personal data longer than needed:
   the last lookup of that VIN. Then the job clears `vin`, `raw` and `facts` and
   keeps the WMI (the first three characters of the VIN), the make, the type code,
   the decoded Vehicle and the row itself, so the unresolved-codes counts stay
-  right. A later lookup of the same VIN is a new row. The carlab.rs privacy page
+  right. A later lookup of the same VIN is a new row. Each lookup is a
+  `vin_lookup_hit` row (source, bot flag, visitor id); its visitor id is
+  cleared 90 days after that lookup, its source and bot flag stay. The carlab.rs privacy page
   states this retention; change both together. The nightly dumps still hold a
   scrubbed VIN for up to 30 days (the off-site retention above).
 - **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,

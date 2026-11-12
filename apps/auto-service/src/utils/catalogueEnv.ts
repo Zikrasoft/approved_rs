@@ -9,6 +9,7 @@ import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import type { CataloguePages } from './paths';
+import { isBotAgent } from './botAgent';
 import { PREVIEW_COOKIE } from './shopPreview';
 import {
   carPagesFrom,
@@ -121,6 +122,7 @@ export function catalogueFromEnv(
     shopOpen: shopOpen(env),
     preview,
     requestId: visitor && requestIdOf(visitor),
+    bot: visitor && isBotAgent(visitor.headers.get('user-agent')),
     client:
       address && clientSecret ? { address, secret: clientSecret } : undefined,
   });

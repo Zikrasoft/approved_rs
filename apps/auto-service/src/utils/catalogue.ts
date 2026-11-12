@@ -114,6 +114,7 @@ export type CatalogueConfig = {
   preview?: boolean;
   previewToken?: string;
   requestId?: string;
+  bot?: boolean;
   client?: { address: string; secret: string };
 };
 
@@ -126,6 +127,7 @@ export function createCatalogue({
   preview = false,
   previewToken,
   requestId,
+  bot,
   client,
 }: CatalogueConfig) {
   const pricesHidden = !shopOpen && !preview;
@@ -565,7 +567,7 @@ export function createCatalogue({
     async resolveVin(vin: string): Promise<VinOutcome> {
       try {
         const lookup = vinLookupResponseSchema.parse(
-          await request('/store/vin-lookups', { vin }),
+          await request('/store/vin-lookups', { vin, bot: bot ?? null }),
         );
         return lookup.resolved
           ? {

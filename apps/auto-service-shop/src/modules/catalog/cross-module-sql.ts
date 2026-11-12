@@ -74,18 +74,31 @@ export const LISTED_PART_COUNTS = `
   group by p.model_id`;
 
 export const UNRESOLVED_VIN_CODES = `
-  select make, code, count(*)::int as count, max(updated_at) as last_seen,
+  with hits as (
+    select l.make, l.code, h.source, h.created_at,
+      h.source = 'storefront' and h.bot is not true
+        and (h.visitor_id is null or h.visitor_id <> all(?::text[])) as customer
+    from vin_lookup l
+    join vin_lookup_hit h on h.vin_lookup_id = l.id and h.deleted_at is null
+    where l.vehicle_id is null and l.make is not null and l.code is not null
+      and l.deleted_at is null
+      and not exists (
+        select 1 from vehicle_identifier vi
+        where vi.type = l.code_type and vi.value = l.code
+          and vi.supplier_id is null and vi.deleted_at is null
+      )
+  )
+  select make, code, count(*)::int as count,
+    (count(*) filter (where customer))::int as customers,
+    (count(*) filter (where source = 'storefront'))::int as storefront,
+    (count(*) filter (where source = 'workshop-quote'))::int as workshop_quote,
+    (count(*) filter (where source = 'admin'))::int as admin,
+    max(created_at) as last_seen,
     (count(*) over ())::int as total
-  from vin_lookup l
-  where vehicle_id is null and make is not null and code is not null
-    and deleted_at is null
-    and not exists (
-      select 1 from vehicle_identifier vi
-      where vi.type = l.code_type and vi.value = l.code
-        and vi.supplier_id is null and vi.deleted_at is null
-    )
+  from hits
   group by make, code
-  order by count desc, make, code
+  having ?::boolean or bool_or(customer)
+  order by customers desc, count desc, make, code
   offset ? limit ?`;
 
 const missingIdentifier = (column: string) =>

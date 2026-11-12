@@ -9,6 +9,8 @@ import scrubVinLookups, {
 } from '../scrub-vin-lookups';
 
 const DAY_MS = 86_400_000;
+const VISITOR = '1c9b5a6f-7d2e-4f3a-8b4c-8d9e0f1a2b3c';
+const SITE = { source: 'storefront', bot: false, visitor_id: VISITOR } as const;
 
 const lookup = (vin: string) => ({
   vin,
@@ -39,7 +41,7 @@ medusaIntegrationTestRunner({
       });
 
       it('forgets the VIN and the raw decode once the lookup is older than the retention, keeping what counts codes', async () => {
-        await vinLookups.saveLookup(lookup('WBAAB12070N000001'));
+        await vinLookups.saveLookup(lookup('WBAAB12070N000001'), SITE);
         await backdate('WBAAB12070N000001', VIN_KEPT_FOR_DAYS + 1);
         const [old] = await vinLookups.listVinLookups({
           vin: 'WBAAB12070N000001',
@@ -60,8 +62,29 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('forgets the visitor of an old lookup with its VIN, keeping its source', async () => {
+        await vinLookups.saveLookup(lookup('WBAAB12070N000005'), SITE);
+        const [row] = await vinLookups.listVinLookups({
+          vin: 'WBAAB12070N000005',
+        });
+        await getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('vin_lookup_hit')
+          .where({ vin_lookup_id: row.id })
+          .update({
+            created_at: new Date(Date.now() - (VIN_KEPT_FOR_DAYS + 1) * DAY_MS),
+          });
+
+        await scrubVinLookupsAt(getContainer(), new Date());
+
+        expect(
+          await vinLookups.listVinLookupHits({ vin_lookup_id: row.id }),
+        ).toEqual([
+          expect.objectContaining({ source: 'storefront', visitor_id: null }),
+        ]);
+      });
+
       it('keeps a lookup younger than the retention and scrubs nothing twice', async () => {
-        await vinLookups.saveLookup(lookup('WBAAB12070N000002'));
+        await vinLookups.saveLookup(lookup('WBAAB12070N000002'), SITE);
         await backdate('WBAAB12070N000002', VIN_KEPT_FOR_DAYS - 1);
 
         await scrubVinLookups(getContainer());
@@ -78,7 +101,7 @@ medusaIntegrationTestRunner({
       });
 
       it('scrubs a lookup that was deleted too', async () => {
-        await vinLookups.saveLookup(lookup('WBAAB12070N000003'));
+        await vinLookups.saveLookup(lookup('WBAAB12070N000003'), SITE);
         const [row] = await vinLookups.listVinLookups({
           vin: 'WBAAB12070N000003',
         });
@@ -89,11 +112,11 @@ medusaIntegrationTestRunner({
       });
 
       it('saves a later lookup of a scrubbed VIN as a new row beside the counted one', async () => {
-        await vinLookups.saveLookup(lookup('WBAAB12070N000004'));
+        await vinLookups.saveLookup(lookup('WBAAB12070N000004'), SITE);
         await backdate('WBAAB12070N000004', VIN_KEPT_FOR_DAYS + 1);
         await scrubVinLookupsAt(getContainer(), new Date());
 
-        await vinLookups.saveLookup(lookup('WBAAB12070N000004'));
+        await vinLookups.saveLookup(lookup('WBAAB12070N000004'), SITE);
 
         const rows = await vinLookups.listVinLookups({ code: 'AB12' });
         expect(rows.map(({ vin }) => vin).sort()).toEqual([

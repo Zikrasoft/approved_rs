@@ -107,6 +107,10 @@ export type AdminUpdatePartIdentifierType = z.infer<
 >;
 
 export const AdminListUnresolvedVinCodes = z.object({
+  all: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   offset: z.coerce.number().int().nonnegative().default(0),
   limit: z.coerce.number().int().positive().max(200).default(50),
 });

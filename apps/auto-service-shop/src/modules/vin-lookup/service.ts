@@ -8,9 +8,11 @@ import {
 } from '@medusajs/framework/utils';
 import type { VehicleIdentifierType } from '@podbor/catalog-contract';
 
+import type { LookupOrigin, SourceCounts } from '../../lib/vin/sources';
 import { runBoundSql } from '../_shared/bound-sql';
 import { UNRESOLVED_VIN_CODES } from '../catalog/cross-module-sql';
 import VinLookup from './models/vin-lookup';
+import VinLookupHit from './models/vin-lookup-hit';
 
 type LookupRecord = {
   vin: string;
@@ -28,22 +30,35 @@ export type UnresolvedCode = {
   make: string;
   code: string;
   count: number;
+  customers: number;
+  sources: SourceCounts;
   last_seen: Date;
 };
 
-type UnresolvedCodeRow = UnresolvedCode & { total: number };
+type UnresolvedCodeRow = Omit<UnresolvedCode, 'sources'> & {
+  storefront: number;
+  workshop_quote: number;
+  admin: number;
+  total: number;
+};
 
 const SCRUB_BEFORE = `
   update vin_lookup
   set wmi = coalesce(wmi, left(vin, 3)), vin = null, raw = null, facts = '{}'::jsonb
   where vin is not null and updated_at < ?`;
 
+const FORGET_VISITORS_BEFORE = `
+  update vin_lookup_hit set visitor_id = null
+  where visitor_id is not null and created_at < ?`;
+
 class VinLookupModuleService extends MedusaService({
   VinLookup,
+  VinLookupHit,
 }) {
   @InjectTransactionManager()
   async saveLookup(
     record: LookupRecord,
+    origin: LookupOrigin,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     await (sharedContext.transactionManager as SqlEntityManager).execute(
@@ -56,9 +71,13 @@ class VinLookupModuleService extends MedusaService({
       sharedContext,
     );
     const row = { ...record, wmi: record.vin.slice(0, 3) };
-    await (existing
+    const { id } = await (existing
       ? this.updateVinLookups({ id: existing.id, ...row }, sharedContext)
       : this.createVinLookups(row, sharedContext));
+    await this.createVinLookupHits(
+      { ...origin, vin_lookup_id: id },
+      sharedContext,
+    );
   }
 
   @InjectManager()
@@ -66,6 +85,7 @@ class VinLookupModuleService extends MedusaService({
     cutoff: Date,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
+    await runBoundSql(sharedContext, FORGET_VISITORS_BEFORE, [cutoff]);
     const { rowCount } = await runBoundSql(sharedContext, SCRUB_BEFORE, [
       cutoff,
     ]);
@@ -74,21 +94,44 @@ class VinLookupModuleService extends MedusaService({
 
   @InjectManager()
   async unresolvedCodes(
-    { offset, limit }: { offset: number; limit: number },
+    {
+      offset,
+      limit,
+      all,
+      staffVisitorIds,
+    }: {
+      offset: number;
+      limit: number;
+      all: boolean;
+      staffVisitorIds: string[];
+    },
     @MedusaContext() sharedContext: Context = {},
   ): Promise<{ codes: UnresolvedCode[]; count: number }> {
     const { rows }: { rows: UnresolvedCodeRow[] } = await runBoundSql(
       sharedContext,
       UNRESOLVED_VIN_CODES,
-      [offset, limit],
+      [staffVisitorIds, all, offset, limit],
     );
     return {
-      codes: rows.map(({ make, code, count, last_seen }) => ({
-        make,
-        code,
-        count,
-        last_seen,
-      })),
+      codes: rows.map(
+        ({
+          make,
+          code,
+          count,
+          customers,
+          storefront,
+          workshop_quote,
+          admin,
+          last_seen,
+        }) => ({
+          make,
+          code,
+          count,
+          customers,
+          sources: { storefront, 'workshop-quote': workshop_quote, admin },
+          last_seen,
+        }),
+      ),
       count: rows[0]?.total ?? 0,
     };
   }

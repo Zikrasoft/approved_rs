@@ -362,14 +362,21 @@
   },
   "vinLookups": {
     "heading": "Unresolved VINs",
-    "lead": "Codes from VINs customers searched for that the catalogue could not narrow to one Vehicle, most frequent first. Link a BMW type code to the Vehicles it stands for, and the next customer with that VIN lands on them.",
+    "lead": "Codes from VINs that the catalogue could not narrow to one Vehicle. Codes real site customers searched for most come first, leaving out staff, workshop quotes and bots. Link a BMW type code to the Vehicles it stands for, and the next customer with that VIN lands on them.",
     "empty": "Every VIN customers searched for was resolved.",
     "notInOpenData": "Not in the open data",
+    "showAll": "Show codes only staff, workshop quotes and bots searched for",
+    "sources": {
+      "storefront": "Site {{count}}",
+      "workshop-quote": "Quotes {{count}}",
+      "admin": "Admin {{count}}"
+    },
     "columns": {
       "make": "Make",
       "code": "Code",
       "openData": "Open data says",
-      "count": "Lookups",
+      "customers": "Customers",
+      "sources": "From",
       "lastSeen": "Last searched"
     },
     "link": {

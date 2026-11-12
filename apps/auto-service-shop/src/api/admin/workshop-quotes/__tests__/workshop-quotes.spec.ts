@@ -9,6 +9,8 @@ import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
 import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
+import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
 const OWNER_VIN = 'WBA35BG070N074158';
 const UNKNOWN_VIN = 'WBA99ZZ070N000001';
@@ -155,6 +157,15 @@ medusaIntegrationTestRunner({
           vin: UNKNOWN_VIN,
           vehicle: null,
         });
+        const vinLookups: VinLookupModuleService =
+          getContainer().resolve(VIN_LOOKUP_MODULE);
+        const [lookup] = await vinLookups.listVinLookups({ vin: UNKNOWN_VIN });
+        const hits = await vinLookups.listVinLookupHits({
+          vin_lookup_id: lookup.id,
+        });
+        expect(new Set(hits.map(({ source }) => source))).toEqual(
+          new Set(['workshop-quote']),
+        );
       });
 
       it('keeps a quote without a readable VIN', async () => {
