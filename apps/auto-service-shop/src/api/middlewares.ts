@@ -307,6 +307,11 @@ export default defineMiddlewares({
       middlewares: [requireShopLeadSecret],
     },
     {
+      matcher: '/hooks/visitors/:visitor_id/vin-lookups',
+      method: 'GET',
+      middlewares: [requireShopLeadSecret],
+    },
+    {
       matcher: '/admin/workshop-quotes',
       method: 'POST',
       middlewares: [validateAdminBody(AdminConfirmWorkshopQuote)],

@@ -31,6 +31,7 @@ export type UnresolvedCode = {
   code: string;
   count: number;
   customers: number;
+  visitors: string[];
   sources: SourceCounts;
   last_seen: Date;
 };
@@ -50,6 +51,26 @@ const SCRUB_BEFORE = `
 const FORGET_VISITORS_BEFORE = `
   update vin_lookup_hit set visitor_id = null
   where visitor_id is not null and created_at < ?`;
+
+export type VisitorLookup = {
+  vin: string | null;
+  make: string | null;
+  code: string | null;
+  vehicle_id: string | null;
+  at: Date;
+};
+
+// TODO: vin_lookup_hit has no index on visitor_id, so this scans every hit; add one when the table grows past a quick scan
+const VISITOR_LOOKUPS = `
+  select vin, make, code, vehicle_id, at from (
+    select distinct on (l.id) l.vin, l.make, l.code, l.vehicle_id, h.created_at as at
+    from vin_lookup_hit h
+    join vin_lookup l on l.id = h.vin_lookup_id and l.deleted_at is null
+    where h.visitor_id = ? and h.deleted_at is null
+    order by l.id, h.created_at desc
+  ) latest
+  order by at desc
+  limit ?`;
 
 class VinLookupModuleService extends MedusaService({
   VinLookup,
@@ -93,6 +114,20 @@ class VinLookupModuleService extends MedusaService({
   }
 
   @InjectManager()
+  async visitorLookups(
+    visitorId: string,
+    limit: number,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<VisitorLookup[]> {
+    const { rows }: { rows: VisitorLookup[] } = await runBoundSql(
+      sharedContext,
+      VISITOR_LOOKUPS,
+      [visitorId, limit],
+    );
+    return rows;
+  }
+
+  @InjectManager()
   async unresolvedCodes(
     {
       offset,
@@ -119,6 +154,7 @@ class VinLookupModuleService extends MedusaService({
           code,
           count,
           customers,
+          visitors,
           storefront,
           workshop_quote,
           admin,
@@ -128,6 +164,7 @@ class VinLookupModuleService extends MedusaService({
           code,
           count,
           customers,
+          visitors,
           sources: { storefront, 'workshop-quote': workshop_quote, admin },
           last_seen,
         }),
