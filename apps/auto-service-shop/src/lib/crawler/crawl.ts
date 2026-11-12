@@ -51,6 +51,14 @@ const retryAfterMs = (
 
 const succeeded = ({ status }: Response) => status >= 200 && status < 300;
 
+const outOfScope = (site: CrawledSite, body: Buffer) => {
+  try {
+    return site.parse(body.toString('utf8')) === null;
+  } catch {
+    return false;
+  }
+};
+
 const xmlOf = (bytes: Buffer) =>
   bytes[0] === 0x1f && bytes[1] === 0x8b ? gunzipSync(bytes) : bytes;
 
@@ -258,6 +266,14 @@ async function crawlWith(
     const settled = { http_status: status, fetched_at: at(), error: null };
     if (status === 304) {
       await store.update(site.name, page.url, { status: 'done', ...settled });
+    } else if (succeeded(fetched) && outOfScope(site, fetched.body)) {
+      await store.update(site.name, page.url, {
+        status: 'out_of_scope',
+        ...settled,
+        body: null,
+        etag: null,
+        last_modified: null,
+      });
     } else if (succeeded(fetched)) {
       await store.update(site.name, page.url, {
         status: 'done',
