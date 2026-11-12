@@ -63,8 +63,10 @@ type Supplier = z.infer<typeof supplierSchema>;
 const mappingSchema = editedBySchema.extend({
   id: z.string(),
   code: z.string(),
-  category_id: z.string(),
+  category_id: z.string().nullable(),
 });
+
+const EXCLUDED = 'excluded';
 
 type Mapping = z.infer<typeof mappingSchema>;
 
@@ -301,15 +303,20 @@ const SuppliersPage = () => {
       acknowledged,
       {
         method: 'POST',
-        body: JSON.stringify({ code, category_id: categoryId }),
+        body: JSON.stringify({
+          code,
+          category_id: categoryId === EXCLUDED ? null : categoryId,
+        }),
       },
     );
     if (created) {
       toast.success(
-        t('suppliers.mappings.added', {
-          code: code.trim(),
-          category: categoryName(categoryId),
-        }),
+        categoryId === EXCLUDED
+          ? t('suppliers.mappings.addedExcluded', { code: code.trim() })
+          : t('suppliers.mappings.added', {
+              code: code.trim(),
+              category: categoryName(categoryId),
+            }),
       );
       setCode('');
       setCategoryId('');
@@ -376,8 +383,10 @@ const SuppliersPage = () => {
   const sourceName = (source: string) =>
     t(`sources.names.${source}`, { defaultValue: source });
 
-  const categoryName = (id: string) =>
-    categories.find((category) => category.id === id)?.name ?? id;
+  const categoryName = (id: string | null) =>
+    id === null
+      ? t('suppliers.mappings.excluded')
+      : (categories.find((category) => category.id === id)?.name ?? id);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -646,6 +655,9 @@ const SuppliersPage = () => {
                     />
                   </Select.Trigger>
                   <Select.Content>
+                    <Select.Item value={EXCLUDED}>
+                      {t('suppliers.mappings.exclude')}
+                    </Select.Item>
                     {categories.map((category) => (
                       <Select.Item key={category.id} value={category.id}>
                         {category.name}

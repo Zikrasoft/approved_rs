@@ -4,7 +4,11 @@ import { withEditors } from '../../../../../lib/editors';
 import { MANUAL_SUPPLIER } from '../../../../../lib/suppliers/manual-offers';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
-import { sellPrice, SUPPLIER_MODULE } from '../../../../../modules/supplier';
+import {
+  sellPrice,
+  SHOP_CURRENCY,
+  SUPPLIER_MODULE,
+} from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
 
 export async function GET(
@@ -29,7 +33,7 @@ export async function GET(
         cost_price: offer.cost_price,
         price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
         markup_percentage: offer.supplier.markup_percentage,
-        currency: offer.currency,
+        currency: SHOP_CURRENCY,
         stock_quantity: offer.stock_quantity,
         lead_time_days: offer.lead_time_days,
         updated_at: new Date(offer.updated_at).toISOString(),

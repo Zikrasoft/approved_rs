@@ -19,6 +19,7 @@ type Responder = () => Fetched;
 
 const START = Date.parse('2026-10-25T00:00:00Z');
 const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 const BLOCKED_ATTEMPTS = 4;
 
 const ok =
@@ -98,7 +99,13 @@ const testSite = (
   floorMs,
   ...(fetchMode && { fetchMode }),
   isPage: (url) => url.includes('/p/'),
-  parse: () => null,
+  parse: (html) => ({
+    article_id: html,
+    brand: 'Brand',
+    number: '1',
+    name: html,
+    category: 'Category',
+  }),
 });
 
 const NO_FAILURES = {
@@ -257,6 +264,7 @@ medusaIntegrationTestRunner({
         expect(progress.pages).toEqual({
           queued: 0,
           done: 2,
+          out_of_scope: 0,
           failed: 0,
           gone: 0,
         });
@@ -664,6 +672,43 @@ medusaIntegrationTestRunner({
         expect(another).not.toEqual(sample);
       });
 
+      it('keeps no body of a page that will never import and fetches it again only once a month', async () => {
+        const site: CrawledSite = {
+          ...testSite('scoped'),
+          parse: (html) =>
+            html === 'spare part' ? null : testSite('scoped').parse(html),
+        };
+        const part = 'https://scoped.test/p/part';
+        const spare = 'https://scoped.test/p/spare';
+        const web = fakeWeb({
+          'https://scoped.test/robots.txt': ok(''),
+          'https://scoped.test/sitemap.xml': ok(urlset(part, spare)),
+          [part]: ok('part'),
+          [spare]: ok('spare part', { etag: '"spare"' }),
+        });
+
+        const first = await crawl(site, web);
+
+        expect(first.pages).toMatchObject({ done: 1, out_of_scope: 1 });
+        const row = await getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('crawl_page')
+          .where({ site: site.name, url: spare })
+          .first('body_key', 'etag');
+        expect(row).toEqual({ body_key: null, etag: null });
+        expect(
+          (await store.snapshots(site.name, null, 10)).map(({ url }) => url),
+        ).toEqual([part]);
+
+        await crawl(site, web);
+        expect(web.fetched(part)).toHaveLength(2);
+        expect(web.fetched(spare)).toHaveLength(1);
+
+        web.clock.time += 31 * DAY;
+        const later = await crawl(site, web);
+        expect(web.fetched(spare)).toHaveLength(2);
+        expect(later.pages).toMatchObject({ done: 1, out_of_scope: 1 });
+      });
+
       it('re-reads robots.txt once a day during a long run', async () => {
         const site = testSite('daily', 13 * HOUR);
         const web = fakeWeb({
@@ -854,7 +899,7 @@ medusaIntegrationTestRunner({
             paused_reason: null,
             started_at: null,
             finished_at: null,
-            pages: { queued: 0, done: 0, failed: 0, gone: 0 },
+            pages: { queued: 0, done: 0, out_of_scope: 0, failed: 0, gone: 0 },
             failures: NO_FAILURES,
           },
         ]);

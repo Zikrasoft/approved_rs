@@ -294,7 +294,7 @@ export type AdminStartCrawlType = z.infer<typeof AdminStartCrawl>;
 
 export const AdminCreateSupplierCategory = z.strictObject({
   code: name,
-  category_id: z.string().min(1),
+  category_id: z.string().min(1).nullable(),
 });
 export type AdminCreateSupplierCategoryType = z.infer<
   typeof AdminCreateSupplierCategory

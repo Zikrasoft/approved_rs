@@ -6,6 +6,7 @@ import demandSnapshot from '../modules/demand/migrations/.snapshot-demand.json';
 import publishSnapshot from '../modules/publish/migrations/.snapshot-publish.json';
 import supplierSnapshot from '../modules/supplier/migrations/.snapshot-supplier.json';
 import vinLookupSnapshot from '../modules/vin-lookup/migrations/.snapshot-vin-lookup.json';
+import { FAILURE_REASONS, PAGE_STATUSES } from './crawler/store';
 
 const tableSchema = z.object({
   name: z.string(),
@@ -126,7 +127,14 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
     /\(site, next_attempt_at\) WHERE \(status = 'queued'::text\)$/,
 };
 
+const oneOf = (column: string, values: readonly string[]) =>
+  new RegExp(
+    `^CHECK \\(\\(${column} = ANY \\(ARRAY\\[${values.map((value) => `'${value}'::text`).join(', ')}\\]\\)\\)\\)$`,
+  );
+
 export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
+  crawl_page_status: oneOf('status', PAGE_STATUSES),
+  crawl_page_error: oneOf('error', FAILURE_REASONS),
   supplier_markup_percentage:
     /^CHECK \(\(markup_percentage >= \(0\)::numeric\)\)$/,
   part_category_id_foreign: / ON DELETE RESTRICT$/,

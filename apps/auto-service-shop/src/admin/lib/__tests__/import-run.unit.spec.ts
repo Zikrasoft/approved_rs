@@ -24,8 +24,8 @@ describe('importRunning', () => {
 });
 
 describe('importedSoFar', () => {
-  it('counts the imported and created articles of the progress report', () => {
-    expect(importedSoFar({ imported: 7, created: 3 })).toBe(10);
+  it('counts the created, updated and unchanged articles of the progress report', () => {
+    expect(importedSoFar({ created: 3, updated: 5, unchanged: 2 })).toBe(10);
   });
 
   it('is zero before the first page is reported', () => {

@@ -3,5 +3,5 @@ export const importRunning = (
 ) => suppliers.some(({ latest_import }) => latest_import?.status === 'running');
 
 export const importedSoFar = (
-  report: { imported: number; created: number } | null,
-) => (report ? report.imported + report.created : 0);
+  report: { created: number; updated: number; unchanged: number } | null,
+) => (report ? report.created + report.updated + report.unchanged : 0);

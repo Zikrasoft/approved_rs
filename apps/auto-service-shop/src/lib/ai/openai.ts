@@ -131,7 +131,7 @@ ${glossaryLines}
 
 "category" is the number of the one category below the part belongs to, exactly as listed. When the input's "category" is not null, return it unchanged.
 - Judge by what the part is, read from its name, description and specs, and by each category's name and the description in brackets after it.
-- Every filter (oil, air, cabin, fuel, hydraulic, transmission or particle filter) and every other part replaced at scheduled service (spark and glow plugs, wiper blades, service fluids) belongs to the category for scheduled maintenance and consumables.
+- Every oil, air, cabin, fuel or particle filter of a car and every other part replaced at scheduled service (spark and glow plugs, wiper blades, service fluids) belongs to the category for scheduled maintenance and consumables.
 - Every starter battery, of any technology and for any vehicle, belongs to the battery category.
 - A control arm or wishbone, a ball joint, a tie rod or its end, a stabiliser link or bushing, a bump stop, a spring, a shock absorber, a strut mount and their bushings and bearings belong to the suspension or steering category, never to a body, frame or engine category.
 - Brake discs, drums, pads, shoes, calipers, cylinders, hoses, cables and wear sensors belong to the brake category.

@@ -1,0 +1,19 @@
+import { spellingKey } from '../../modules/_shared/spelling';
+
+export type CategoryMapping = { code: string; category_id: string | null };
+
+export type CategoryDecision =
+  { categoryId: string | undefined } | { skipped: 'unmapped' | 'excluded' };
+
+export const categoryScope = (mappings: CategoryMapping[]) => {
+  const mapped = new Map(
+    mappings.map(({ code, category_id }) => [spellingKey(code), category_id]),
+  );
+  return (category: string): CategoryDecision => {
+    if (!mapped.size) return { categoryId: undefined };
+    const key = spellingKey(category);
+    if (!mapped.has(key)) return { skipped: 'unmapped' };
+    const categoryId = mapped.get(key);
+    return categoryId ? { categoryId } : { skipped: 'excluded' };
+  };
+};

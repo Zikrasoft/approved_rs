@@ -8,7 +8,6 @@ const SupplierOffer = model
     supplier: model.belongsTo(() => Supplier, { mappedBy: 'offers' }),
     supplier_article_id: model.text(),
     cost_price: model.number(),
-    currency: model.text().default('RSD'),
     stock_quantity: model.number(),
     stock_by_location: model.json().default({}),
     lead_time_days: model.number(),
@@ -21,10 +20,6 @@ const SupplierOffer = model
     { name: 'supplier_offer_cost_price', expression: 'cost_price >= 0' },
     { name: 'supplier_offer_stock', expression: 'stock_quantity >= 0' },
     { name: 'supplier_offer_lead_time', expression: 'lead_time_days >= 0' },
-    {
-      name: 'supplier_offer_currency',
-      expression: "currency similar to '[A-Z]{3}'",
-    },
   ]);
 
 export default SupplierOffer;

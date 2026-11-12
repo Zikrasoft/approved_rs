@@ -311,7 +311,7 @@ const FLAG_UNLISTED_PARTS = `
       not exists (
         select 1 from part_identifier pi
         where pi.part_id = p.id and pi.deleted_at is null
-          and pi.normalized_value = any(?::text[])
+          and pi.brand_id || ' ' || pi.normalized_value = any(?::text[])
       ) as missing
     from part p where p.source = ? and p.deleted_at is null
   )
@@ -1276,12 +1276,12 @@ class CatalogModuleService extends CatalogModuleBase {
   @InjectTransactionManager()
   async flagUnlistedParts(
     source: string,
-    listedNumbers: string[],
+    listedBrandNumbers: string[],
     unreadableUrls: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     await runBoundSql(sharedContext, FLAG_UNLISTED_PARTS, [
-      listedNumbers,
+      listedBrandNumbers,
       source,
       unreadableUrls.length === 0,
       unreadableUrls,

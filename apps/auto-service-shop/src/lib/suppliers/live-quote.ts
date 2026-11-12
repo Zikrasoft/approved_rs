@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import {
-  inShopCurrency,
   isSellable,
   storeOffers,
   SUPPLIER_MODULE,
@@ -13,7 +12,11 @@ import type { PartOffer } from '@podbor/catalog-contract';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { parseEnv } from '../env';
 import { emitIndexChanges } from '../index-changes';
-import { supplierAdapters, supplierQuoteSchema } from './adapter';
+import {
+  parsedQuotes,
+  supplierAdapters,
+  type supplierQuoteSchema,
+} from './adapter';
 
 type Quote = z.output<typeof supplierQuoteSchema>;
 
@@ -22,7 +25,6 @@ export type QuotedOffer = {
   supplier_article_id: string;
   part_identifier_id: string;
   cost_price: number;
-  currency: string;
   stock_quantity: number;
   lead_time_days: number;
   supplier: { name: string; markup_percentage: number };
@@ -30,7 +32,6 @@ export type QuotedOffer = {
 
 export const quotedFields = (quote: Quote) => ({
   cost_price: quote.cost_price,
-  currency: quote.currency,
   stock_quantity: quote.stock.reduce((sum, { quantity }) => sum + quantity, 0),
   stock_by_location: Object.fromEntries(
     quote.stock.map(({ location, quantity }) => [location, quantity]),
@@ -43,12 +44,10 @@ async function liveQuotes(
   articleIds: string[],
 ): Promise<Map<string, Quote>> {
   try {
-    const quotes = z
-      .array(supplierQuoteSchema)
-      .parse(await quoteOf(articleIds));
-    return new Map(
-      quotes.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
+    const { quotes } = parsedQuotes(
+      z.array(z.unknown()).parse(await quoteOf(articleIds)),
     );
+    return new Map(quotes.map((quote) => [quote.article_id, quote]));
   } catch {
     return new Map();
   }
@@ -56,7 +55,6 @@ async function liveQuotes(
 
 const SELLING_FIELDS = [
   'cost_price',
-  'currency',
   'stock_quantity',
   'lead_time_days',
 ] as const;

@@ -35,6 +35,7 @@ import type SupplierModuleService from '../../../../../../modules/supplier/servi
 
 const intercars = createFakeSupplier('Intercars');
 const warehouse = createFakeSupplier('Warehouse');
+const partsfinder = createFakeSupplier('Partsfinder');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
 const BRAND_IMAGES_HOST = 'images.brand.test';
@@ -66,7 +67,7 @@ medusaIntegrationTestRunner({
     beforeServerStart: async (container) => {
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
-        asValue([intercars.adapter, warehouse.adapter]),
+        asValue([intercars.adapter, warehouse.adapter, partsfinder.adapter]),
       );
       container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
       container.register(SHOP_STORAGE_REGISTRATION, asValue(storage.storage));
@@ -80,6 +81,7 @@ medusaIntegrationTestRunner({
       let catalog: CatalogModuleService;
       let intercarsId: string;
       let warehouseId: string;
+      let partsfinderId: string;
       let imports: ReturnType<typeof importRuns>;
       let oilFiltersId: string;
       let engineOilId: string;
@@ -106,12 +108,14 @@ medusaIntegrationTestRunner({
         });
         storeHeaders = { headers: { 'x-publishable-api-key': key.token } };
 
-        const [ic, wh] = await suppliers.createSuppliers([
+        const [ic, wh, pf] = await suppliers.createSuppliers([
           { name: 'Intercars', markup_percentage: 20 },
           { name: 'Warehouse', markup_percentage: 10 },
+          { name: 'Partsfinder', markup_percentage: 0 },
         ]);
         intercarsId = ic.id;
         warehouseId = wh.id;
+        partsfinderId = pf.id;
         imports = importRuns(api, adminHeaders);
         const [mann] = await catalog.createBrands([
           { name: 'Mann-Filter', slug: 'mann-filter' },
@@ -120,6 +124,7 @@ medusaIntegrationTestRunner({
         await catalog.createBrandSpellings([
           { brand_id: mann.id, supplier_id: ic.id, value: 'MANN-FILTER' },
           { brand_id: mann.id, supplier_id: wh.id, value: 'Mann' },
+          { brand_id: mann.id, supplier_id: pf.id, value: 'MANN-FILTER' },
         ]);
         const oilFilters = await catalog.createCategories({
           slug: 'oil-filters',
@@ -184,6 +189,7 @@ medusaIntegrationTestRunner({
           { supplier_id: ic.id, code: 'IC-OIL', category_id: oilFilters.id },
           { supplier_id: ic.id, code: 'IC-ENGINE-OIL', category_id: strict.id },
           { supplier_id: wh.id, code: 'filters', category_id: oilFilters.id },
+          { supplier_id: ic.id, code: 'IC-HYDRAULICS', category_id: null },
         ]);
         await catalog.createPartWithIdentifiers({
           name: 'Oil filter',
@@ -198,7 +204,7 @@ medusaIntegrationTestRunner({
       });
 
       beforeEach(() => {
-        for (const fake of [intercars, warehouse]) {
+        for (const fake of [intercars, warehouse, partsfinder]) {
           fake.articles.length = 0;
           fake.unreadable.length = 0;
           fake.notInScope = 0;
@@ -222,7 +228,7 @@ medusaIntegrationTestRunner({
 
       const runImport = async () => {
         const reports: ImportSummary[] = [];
-        for (const supplierId of [intercarsId, warehouseId]) {
+        for (const supplierId of [intercarsId, warehouseId, partsfinderId]) {
           const started = await imports.start(supplierId);
           if (started.status === 202) {
             reports.push((await imports.finished(supplierId)).report);
@@ -312,7 +318,7 @@ medusaIntegrationTestRunner({
         await runImport();
         const deadline = Date.now() + 10_000;
         while (
-          loggedEvents('catalogue.run').length < 2 &&
+          loggedEvents('catalogue.run').length < 3 &&
           Date.now() < deadline
         ) {
           await new Promise((resolve) => setTimeout(resolve, 50));
@@ -324,12 +330,13 @@ medusaIntegrationTestRunner({
             kind: 'import',
             supplier: intercarsId,
             counts: expect.objectContaining({
-              imported: 1,
+              unchanged: 1,
               skipped: 0,
               failed: 0,
             }),
           }),
           expect.objectContaining({ kind: 'import', supplier: warehouseId }),
+          expect.objectContaining({ kind: 'import', supplier: partsfinderId }),
         ]);
         jest.restoreAllMocks();
       });
@@ -426,7 +433,8 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('skips an article of an unlisted Brand and leaves an article AI cannot classify without a Category', async () => {
+      it('skips an article of an unlisted Brand, an unmapped or an excluded supplier category, and counts each', async () => {
+        intercars.pageSize = 10;
         intercars.articles.push(
           {
             article_id: 'IC-4',
@@ -436,6 +444,27 @@ medusaIntegrationTestRunner({
             category: 'IC-TYRES',
           },
           {
+            article_id: 'IC-4B',
+            brand: 'MANN-FILTER',
+            number: 'C 30 006',
+            name: 'Фильтр воздушный',
+            category: 'ic-tyres',
+          },
+          {
+            article_id: 'IC-4C',
+            brand: 'MANN-FILTER',
+            number: 'C 30 007',
+            name: 'Фильтр гидравлики',
+            category: 'IC-HYDRAULICS',
+          },
+          {
+            article_id: 'IC-4D',
+            brand: 'MANN-FILTER',
+            number: 'C 30 008',
+            name: 'Колесо',
+            category: 'IC-WHEELS',
+          },
+          {
             article_id: 'IC-5',
             brand: 'BOSCH',
             number: 'F 026 407 157',
@@ -443,47 +472,54 @@ medusaIntegrationTestRunner({
             category: 'IC-OIL',
           },
         );
+        shopAi.category = oilFiltersId;
 
         const response = await runImport();
 
+        const empty = {
+          created: 0,
+          updated: 0,
+          unchanged: 0,
+          skipped: 0,
+          skipped_by_reason: {
+            brand: 0,
+            unmapped: 0,
+            excluded: 0,
+            currency: 0,
+            unreadable: 0,
+            no_engine_code: 0,
+            no_make: 0,
+            not_in_scope: 0,
+          },
+          unmapped_categories: [],
+          needs_category: [],
+          missing_fields: [],
+          unanswered: [],
+          failed: [],
+        };
         expect(response.data.imports).toEqual([
           {
+            ...empty,
             supplier: 'Intercars',
-            imported: 0,
-            created: 1,
-            skipped: 1,
+            skipped: 5,
             skipped_by_reason: {
+              ...empty.skipped_by_reason,
               brand: 1,
-              currency: 0,
-              unreadable: 0,
-              no_engine_code: 0,
-              not_in_scope: 0,
+              unmapped: 3,
+              excluded: 1,
             },
-            needs_category: ['C 30 005'],
-            missing_fields: [],
-            unanswered: [],
-            failed: [],
+            unmapped_categories: [
+              { code: 'IC-TYRES', count: 2 },
+              { code: 'IC-WHEELS', count: 1 },
+            ],
           },
-          {
-            supplier: 'Warehouse',
-            imported: 0,
-            created: 0,
-            skipped: 0,
-            skipped_by_reason: {
-              brand: 0,
-              currency: 0,
-              unreadable: 0,
-              no_engine_code: 0,
-              not_in_scope: 0,
-            },
-            needs_category: [],
-            missing_fields: [],
-            unanswered: [],
-            failed: [],
-          },
+          { ...empty, supplier: 'Warehouse' },
+          { ...empty, supplier: 'Partsfinder' },
         ]);
-        expect((await page('C30005'))?.part.category_id).toBeNull();
-        expect(await page('F026407157')).toBeUndefined();
+        expect(shopAi.articlesAsked).toEqual([]);
+        for (const number of ['C30005', 'C30007', 'C30008', 'F026407157']) {
+          expect(await page(number)).toBeUndefined();
+        }
       });
 
       it('imports the rest of the catalogue past a page the Supplier could not read, and counts it and the pages out of scope as skipped', async () => {
@@ -504,16 +540,21 @@ medusaIntegrationTestRunner({
 
         expect(response.data.imports[0]).toEqual({
           supplier: 'Intercars',
-          imported: 0,
           created: 1,
+          updated: 0,
+          unchanged: 0,
           skipped: 3,
           skipped_by_reason: {
             brand: 0,
+            unmapped: 0,
+            excluded: 0,
             currency: 0,
             unreadable: 1,
             no_engine_code: 0,
+            no_make: 0,
             not_in_scope: 2,
           },
+          unmapped_categories: [],
           needs_category: [],
           missing_fields: [],
           unanswered: [],
@@ -553,7 +594,7 @@ medusaIntegrationTestRunner({
       });
 
       it('fills a Part from a Supplier that quotes nothing with an AI Category, attributes and a description, and no Offer', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-20',
           brand: 'MANN-FILTER',
           number: 'OIL 0W20',
@@ -569,7 +610,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           created: 1,
           needs_category: [],
         });
@@ -621,7 +662,7 @@ medusaIntegrationTestRunner({
       });
 
       it('asks the AI once for an article and answers it from the cache when the Part is made again', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-30',
           brand: 'MANN-FILTER',
           number: 'W 1000',
@@ -649,7 +690,7 @@ medusaIntegrationTestRunner({
       });
 
       it('files an article only under a Category from the list', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-31',
           brand: 'MANN-FILTER',
           number: 'W 1100',
@@ -660,7 +701,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           needs_category: ['W 1100'],
         });
         expect((await page('W1100'))?.part.category_id).toBeNull();
@@ -692,7 +733,7 @@ medusaIntegrationTestRunner({
       });
 
       it('still creates the Part, unclassified and undescribed, when AI fails', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-24',
           brand: 'MANN-FILTER',
           number: 'W 970',
@@ -704,7 +745,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           created: 1,
           needs_category: ['W 970'],
           unanswered: [{ number: 'W 970', reason: 'OpenAI is down' }],
@@ -716,7 +757,7 @@ medusaIntegrationTestRunner({
       });
 
       it('files a Part it left without a Category once a later import classifies it', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-26',
           brand: 'MANN-FILTER',
           number: 'W 990',
@@ -731,12 +772,12 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({ needs_category: [] });
+        expect(response.data.imports[2]).toMatchObject({ needs_category: [] });
         expect((await page('W990'))?.part.category_id).toBe(oilFiltersId);
       });
 
       it('names a Part a later import still cannot file in the summary', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-27',
           brand: 'MANN-FILTER',
           number: 'OIL 0W20',
@@ -750,7 +791,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           needs_category: ['OIL 0W20'],
         });
         expect((await page('OIL0W20'))?.part.category_id).toBeNull();
@@ -837,7 +878,7 @@ medusaIntegrationTestRunner({
       });
 
       it('files a battery with the attributes that fit its Category and drops only the ones that do not', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-BAT-1',
           brand: 'MANN-FILTER',
           number: 'BAT 560',
@@ -855,7 +896,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           needs_category: [],
           missing_fields: [],
         });
@@ -866,7 +907,7 @@ medusaIntegrationTestRunner({
       });
 
       it('names a Part with its brand and number when the AI leaves them out', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-BAT-3',
           brand: 'MANN-FILTER',
           number: 'BAT 574',
@@ -892,10 +933,10 @@ medusaIntegrationTestRunner({
         ]);
         await catalog.createBrandSpellings({
           brand_id: varta.id,
-          supplier_id: intercarsId,
+          supplier_id: partsfinderId,
           value: 'VARTA',
         });
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-BAT-LI',
           brand: 'VARTA',
           number: '850150000',
@@ -908,7 +949,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           needs_category: [],
           missing_fields: [],
         });
@@ -923,7 +964,7 @@ medusaIntegrationTestRunner({
       });
 
       it('leaves a battery whose answer misses a required field unfiled and names the field', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-BAT-2',
           brand: 'MANN-FILTER',
           number: 'BAT 519',
@@ -936,7 +977,7 @@ medusaIntegrationTestRunner({
 
         const response = await runImport();
 
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           needs_category: ['BAT 519'],
           missing_fields: [
             {
@@ -1020,7 +1061,7 @@ medusaIntegrationTestRunner({
       });
 
       it('reports an article the AI cannot answer and does not ask about it again', async () => {
-        intercars.articles.push({
+        partsfinder.articles.push({
           article_id: 'IC-MIX',
           brand: 'MANN-FILTER',
           number: 'MIX 1',
@@ -1038,7 +1079,7 @@ medusaIntegrationTestRunner({
         const response = await runImport();
 
         expect(shopAi.questions).toBe(1);
-        expect(response.data.imports[0]).toMatchObject({
+        expect(response.data.imports[2]).toMatchObject({
           unanswered: [
             { number: 'MIX 1', reason: expect.stringContaining('Кrај') },
           ],
@@ -1395,6 +1436,98 @@ medusaIntegrationTestRunner({
         expect((await page('HU816X'))?.offers).toEqual([]);
       });
 
+      it('counts an article as created, updated or unchanged, never a rematch as imported', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-COUNT', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        intercars.articles.push({
+          article_id: 'IC-COUNT-2',
+          brand: 'MANN-FILTER',
+          number: 'W 1234',
+          name: 'Фильтр W 1234',
+          category: 'IC-OIL',
+        });
+        const counts = async () => {
+          const [report] = (await runImport()).data.imports;
+          return {
+            created: report.created,
+            updated: report.updated,
+            unchanged: report.unchanged,
+          };
+        };
+
+        expect(await counts()).toEqual({
+          created: 1,
+          updated: 1,
+          unchanged: 0,
+        });
+        expect(await counts()).toEqual({
+          created: 0,
+          updated: 0,
+          unchanged: 2,
+        });
+        intercars.quotes.set('IC-COUNT', {
+          ...intercars.quotes.get('IC-COUNT')!,
+          cost_price: 1100,
+        });
+        expect(await counts()).toEqual({
+          created: 0,
+          updated: 1,
+          unchanged: 1,
+        });
+      });
+
+      it('stores no offer for a price that is not a whole number of dinars', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-CENTS', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 999.5, quantity: 1, lead_time_days: 0 },
+        );
+
+        const response = await runImport();
+
+        expect(response.data.imports[0]).toMatchObject({
+          skipped_by_reason: { currency: 1 },
+        });
+        expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
+      it('flags a Part whose number its source still lists only under another Brand', async () => {
+        const [hengst] = await catalog.createBrands([
+          { name: 'Hengst', slug: 'hengst' },
+        ]);
+        await catalog.createBrandSpellings({
+          brand_id: hengst.id,
+          supplier_id: intercarsId,
+          value: 'HENGST',
+        });
+        const twin = (brand: string) => ({
+          article_id: `IC-TWIN-${brand}`,
+          brand,
+          number: 'E 340 H',
+          name: `Фильтр ${brand} E 340 H`,
+          category: 'IC-OIL',
+          source_url: `https://intercars.test/p/${brand}-e340h`,
+        });
+        intercars.articles.push(twin('MANN-FILTER'), twin('HENGST'));
+        await runImport();
+        intercars.articles.splice(1, 1);
+
+        await runImport();
+
+        const flagged = (
+          await api.get(
+            '/admin/part-identifiers?source_missing=true&q=E340H',
+            adminHeaders,
+          )
+        ).data.part_identifiers.map(
+          ({ part }: { part: { name: string } }) => part.name,
+        );
+        expect(flagged).toEqual(['Фильтр HENGST E 340 H']);
+      });
+
       it('refreshes search for a Part whose offer an import changes or drops, and only then', async () => {
         offerHu816x(
           intercars,
@@ -1654,7 +1787,7 @@ medusaIntegrationTestRunner({
           next.data.imports.map(
             ({ supplier }: { supplier: string }) => supplier,
           ),
-        ).toEqual(['Warehouse']);
+        ).toEqual(['Warehouse', 'Partsfinder']);
         expect(await page('W1130')).toBeUndefined();
       });
 
@@ -1722,7 +1855,7 @@ medusaIntegrationTestRunner({
           skipped.data.imports.map(
             ({ supplier }: { supplier: string }) => supplier,
           ),
-        ).toEqual(['Warehouse']);
+        ).toEqual(['Warehouse', 'Partsfinder']);
         expect(switched.data.supplier.import_enabled).toBe(true);
         expect(imported.data.imports[0]).toMatchObject({
           supplier: 'Intercars',
@@ -1833,8 +1966,8 @@ medusaIntegrationTestRunner({
             second,
             first,
           ]);
-          expect(first.report).toMatchObject({ created: 1, imported: 0 });
-          expect(second.report).toMatchObject({ created: 0, imported: 1 });
+          expect(first.report).toMatchObject({ created: 1, unchanged: 0 });
+          expect(second.report).toMatchObject({ created: 0, unchanged: 1 });
         });
 
         it('refuses a second Import, a Publish and a bulk deletion while an Import runs', async () => {
