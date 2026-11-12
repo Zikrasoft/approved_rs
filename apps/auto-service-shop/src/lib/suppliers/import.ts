@@ -37,6 +37,7 @@ import {
 } from './adapter';
 import { parseEnv } from '../env';
 import { START_STOP } from '../production-seed';
+import { batteryName, isBattery } from './part-name';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
@@ -215,6 +216,19 @@ const withBrandAndNumber = (name: string, { brand, number }: Article) =>
     ? name
     : `${name} ${brand} ${number}`;
 
+const nameOf = (
+  { categories }: Context,
+  article: Article,
+  aiName: string,
+  categoryId: string | null | undefined,
+  attributes: AttributeValues,
+) => {
+  const fields = categories.find(({ id }) => id === categoryId)?.fields ?? [];
+  return isBattery(fields)
+    ? batteryName(attributes, article.brand, article.number)
+    : withBrandAndNumber(aiName, article);
+};
+
 function classificationOf(
   { categories, summary }: Context,
   article: Article,
@@ -298,7 +312,15 @@ async function createPart(
     mappedCategoryId,
     answer,
   );
-  const name = answer ? withBrandAndNumber(answer.name, article) : article.name;
+  const name = answer
+    ? nameOf(
+        context,
+        article,
+        answer.name,
+        classification.category_id,
+        classification.attributes ?? {},
+      )
+    : article.name;
   const part = {
     name,
     source_name: answer && article.name,
@@ -377,7 +399,15 @@ async function matchArticle(
     part.source_name === article.name
       ? null
       : await answer();
-  const name = renaming && withBrandAndNumber(renaming.name, article);
+  const name =
+    renaming &&
+    nameOf(
+      context,
+      article,
+      renaming.name,
+      classification?.category_id ?? part.category_id,
+      classification?.attributes ?? part.attributes ?? {},
+    );
   const description =
     edited.has('description') || part.description
       ? null
