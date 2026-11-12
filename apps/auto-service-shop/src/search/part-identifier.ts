@@ -23,7 +23,7 @@ import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
 import { loadPartDemand } from '../lib/part-demand';
 import { requirementFits } from '../lib/requirement-fit';
-import { partNumberKey } from '../modules/_shared/keys';
+import { partNumberKey } from '../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import {

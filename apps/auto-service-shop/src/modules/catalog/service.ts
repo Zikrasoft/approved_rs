@@ -48,7 +48,8 @@ import { runBoundSql } from '../_shared/bound-sql';
 import { chunksOf } from '../_shared/chunks';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
-import { nameKey, partNumberKey } from '../_shared/keys';
+import { nameKey } from '../_shared/keys';
+import { partNumberKey } from '../_shared/part-number-key';
 import {
   countRowsBySource,
   lockSourcedRows,

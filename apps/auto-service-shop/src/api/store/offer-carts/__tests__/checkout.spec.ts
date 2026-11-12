@@ -12,7 +12,7 @@ import { createVehicleFixture } from '../../../../../integration-tests/vehicleFi
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { PUBLIC_ROUTES } from '../../../public-routes';
-import { partNumberKey } from '../../../../modules/_shared/keys';
+import { partNumberKey } from '../../../../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import retryOrderLeads, {
   retryOrderLeadsAt,

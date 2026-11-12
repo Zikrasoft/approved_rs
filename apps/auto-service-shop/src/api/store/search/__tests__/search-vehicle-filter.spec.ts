@@ -3,7 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { partNumberKey } from '../../../../modules/_shared/keys';
+import { partNumberKey } from '../../../../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';

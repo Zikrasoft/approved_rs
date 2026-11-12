@@ -30,7 +30,7 @@ import {
   seedProductionCatalogue,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
-import { partNumberKey } from '../modules/_shared/keys';
+import { partNumberKey } from '../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import type { NewPart } from '../modules/catalog/service';

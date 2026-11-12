@@ -251,7 +251,7 @@ describe('vehiclesResponseSchema', () => {
 
   it('reads a vehicle from a shop that has not shipped its slug, fuel and body style', () => {
     const { slug: _slug, ...unslugged } = vehicle;
-    const { fuel: _fuel, ...engine } = vehicle.engine;
+    const { fuel: _fuel, ...engine } = vehicle.engine!;
     const { body_style: _body, ...chassis } = vehicle.model.chassis;
 
     const parsed = vehiclesResponseSchema.parse({

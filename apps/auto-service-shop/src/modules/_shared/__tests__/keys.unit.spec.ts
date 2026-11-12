@@ -1,4 +1,16 @@
-import { codeKey, nameKey, partNumberKey, variantKey } from '../keys';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { codeKey, nameKey, variantKey } from '../keys';
+import { partNumberKey } from '../part-number-key';
+
+describe('keys', () => {
+  it('stays importable by the admin bundle, so it pulls in no server framework', () => {
+    expect(readFileSync(join(__dirname, '..', 'keys.ts'), 'utf8')).not.toMatch(
+      /@medusajs\/framework/u,
+    );
+  });
+});
 
 describe('partNumberKey', () => {
   it('keys a number the way the storefront does', () => {

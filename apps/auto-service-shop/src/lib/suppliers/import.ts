@@ -43,11 +43,8 @@ import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
-import {
-  nameKey,
-  normalizePartNumber,
-  partNumberKey,
-} from '../../modules/_shared/keys';
+import { nameKey, normalizePartNumber } from '../../modules/_shared/keys';
+import { partNumberKey } from '../../modules/_shared/part-number-key';
 import { categoryScope } from './category-scope';
 import {
   type ImportSummary,
