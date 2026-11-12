@@ -1,7 +1,11 @@
 import { MedusaError } from '@medusajs/framework/utils';
 import { CARLAB } from '@podbor/brands';
 import { CATALOG_TRANSLATION_LOCALES } from '@podbor/catalog-contract';
-import { sha256Hex, translateFields } from '@podbor/i18n/translate/core';
+import {
+  SERBIAN_CAR_TRADE_GUIDANCE,
+  sha256Hex,
+  translateFields,
+} from '@podbor/i18n/translate/core';
 import { z } from 'zod';
 
 import { OPENAI_MODEL } from '../openai-model';
@@ -12,6 +16,11 @@ export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
 const LANGUAGE_NAME: Record<TargetLocale, string> = {
   sr: 'Serbian (Latin script)',
   en: 'English',
+};
+
+const LOCALE_GUIDANCE: Partial<Record<TargetLocale, string>> = {
+  sr: SERBIAN_CAR_TRADE_GUIDANCE,
+  en: '"Подходит, в том числе, для" is "Fits vehicles including", never "Fits, among others,".',
 };
 
 const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
@@ -292,6 +301,7 @@ async function translateLocale(
       languageName: LANGUAGE_NAME,
       businessDescription: BUSINESS_DESCRIPTION,
       subject: entity.subject,
+      localeGuidance: LOCALE_GUIDANCE,
       apiKey: apiKey ?? '',
       model: OPENAI_MODEL,
     });

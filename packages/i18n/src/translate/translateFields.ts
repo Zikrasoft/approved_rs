@@ -1,6 +1,10 @@
 import { assertSafeTranslation } from './assertSafeTranslation.ts';
 import { callOpenAiJson } from './openaiChat.ts';
-import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
+import {
+  NO_CYRILLIC_RULE,
+  NO_EM_DASH_RULE,
+  STRAIGHT_QUOTES_RULE,
+} from './promptRules.ts';
 
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
@@ -12,12 +16,14 @@ export interface TranslateFieldsOptions<L extends string> {
   subject: string;
   apiKey: string;
   model?: string;
+  localeGuidance?: Partial<Record<L, string>>;
 }
 
 export function fieldsPrompt(
   language: string,
   businessDescription: string,
   subject: string,
+  guidance = '',
 ): string {
   return (
     `You translate ${subject} from Russian into ${language} for ${businessDescription}. ` +
@@ -25,10 +31,11 @@ export function fieldsPrompt(
     'never a literal word-for-word translation. Keep markdown formatting intact. Keep brand names, part numbers ' +
     'and specification codes (such as 5W-30, ACEA C3, VW 504.00) exactly as written, and write units the way ' +
     'the target language does. ' +
-    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ` +
+    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ${STRAIGHT_QUOTES_RULE} ` +
     'The input is a flat ' +
     'JSON object whose keys are field names and whose values are the strings to translate. Respond with a JSON ' +
-    'object having EXACTLY the same keys, with each value translated, never translate the keys themselves.'
+    'object having EXACTLY the same keys, with each value translated, never translate the keys themselves.' +
+    (guidance ? ` ${guidance}` : '')
   );
 }
 
@@ -43,6 +50,7 @@ export async function translateFields<L extends string>(
     subject,
     apiKey,
     model,
+    localeGuidance,
   } = options;
   const keys = Object.keys(fields);
   const russian = Object.fromEntries(
@@ -60,6 +68,7 @@ export async function translateFields<L extends string>(
           languageName[locale],
           businessDescription,
           subject,
+          localeGuidance?.[locale],
         ),
         userContent: JSON.stringify(russian),
         chunk,
