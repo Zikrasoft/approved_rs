@@ -75,7 +75,7 @@ export const LISTED_PART_COUNTS = `
 
 export const UNRESOLVED_VIN_CODES = `
   with hits as (
-    select l.make, l.code, h.source, h.created_at,
+    select l.make, l.code, h.source, h.created_at, h.visitor_id,
       h.source = 'storefront' and h.bot is not true
         and (h.visitor_id is null or h.visitor_id <> all(?::text[])) as customer
     from vin_lookup l
@@ -90,6 +90,8 @@ export const UNRESOLVED_VIN_CODES = `
   )
   select make, code, count(*)::int as count,
     (count(*) filter (where customer))::int as customers,
+    coalesce(array_agg(distinct left(visitor_id, 8))
+      filter (where customer and visitor_id is not null), '{}') as visitors,
     (count(*) filter (where source = 'storefront'))::int as storefront,
     (count(*) filter (where source = 'workshop-quote'))::int as workshop_quote,
     (count(*) filter (where source = 'admin'))::int as admin,

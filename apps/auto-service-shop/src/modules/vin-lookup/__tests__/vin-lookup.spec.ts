@@ -127,6 +127,7 @@ medusaIntegrationTestRunner({
           code: 'EF56',
           count: 6,
           customers: 2,
+          visitors: [CUSTOMER_VISITOR.slice(0, 8)],
           sources: { storefront: 4, 'workshop-quote': 1, admin: 1 },
           last_seen: expect.any(Date),
         });

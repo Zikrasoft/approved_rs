@@ -41,6 +41,7 @@ const unresolvedCodeSchema = z.object({
   make: z.string(),
   code: z.string(),
   customers: z.number(),
+  visitors: z.array(z.string()).default([]),
   sources: z.object({
     storefront: z.number(),
     'workshop-quote': z.number(),
@@ -346,6 +347,9 @@ const VinLookupsPage = () => {
                     {t('vinLookups.columns.customers')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
+                    {t('vinLookups.columns.visitors')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
                     {t('vinLookups.columns.sources')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
@@ -376,6 +380,9 @@ const VinLookupsPage = () => {
                     </Table.Cell>
                     <Table.Cell className="tabular-nums">
                       {entry.customers.toLocaleString(i18n.language)}
+                    </Table.Cell>
+                    <Table.Cell className="max-w-[12rem] whitespace-normal break-words font-mono txt-compact-small">
+                      {entry.visitors.join(' ') || '—'}
                     </Table.Cell>
                     <Table.Cell className="whitespace-nowrap tabular-nums">
                       {sourceLine(t, entry.sources)}

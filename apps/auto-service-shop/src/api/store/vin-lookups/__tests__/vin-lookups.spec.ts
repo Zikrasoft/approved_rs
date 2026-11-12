@@ -447,7 +447,14 @@ medusaIntegrationTestRunner({
 
       it('says when an unresolved code was last searched and what the open data calls it', async () => {
         const before = Date.now();
-        await lookUp('WBA3K11070N000020');
+        await api.post(
+          '/store/vin-lookups',
+          {
+            vin: 'WBA3K11070N000020',
+            visitor_id: '5a6b7c8d-1e2f-4a3b-8c4d-5e6f7a8b9c0d',
+          },
+          storeHeaders,
+        );
         await lookUp('WBA22BB070N000021');
 
         const { codes } = (
@@ -462,6 +469,7 @@ medusaIntegrationTestRunner({
           code: '3K11',
           count: 1,
           customers: 1,
+          visitors: ['5a6b7c8d'],
           sources: { storefront: 1, 'workshop-quote': 0, admin: 0 },
           last_seen: expect.any(String),
           reference: {
